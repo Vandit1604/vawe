@@ -31,8 +31,8 @@ make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero 
      layer, never by editing captured glyphs.
 4. **Hand-write HTML only for connective tissue**: the hook, the CTA, number counters. Preview every
    hand fragment before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png`.
-5. **Verify:** `make beats D=<file> VS=<brand>` (fidelity vs source) → render → `make audit` →
-   `make motion` → `make ledger`. See `CLAUDE.md` for the full loop.
+5. **Verify:** `make beats D=<file> VS=<brand>` (fidelity vs source) → render → `make check GATE=audit` →
+   `make check GATE=motion` → `make ledger`. See `CLAUDE.md` for the full loop.
 
 ## References
 - Primitive vocabulary: **`engine-doctrine/PRIMITIVES.md`**  ·  Motion rules: **`engine-doctrine/MOTION-CRAFT.md`**

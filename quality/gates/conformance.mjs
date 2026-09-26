@@ -4,7 +4,7 @@
 //   node quality/gates/conformance.mjs enums      only the vocabulary sweep
 //   node quality/gates/conformance.mjs props      only the prop-effect sweep
 //   node quality/gates/conformance.mjs paths      only the cross-path sweep
-//   make conformance
+//   make check GATE=conformance
 //
 // WHY THIS EXISTS. Nine framework bugs were found by hand while authoring (engine-doctrine/MISTAKES.md #19-27)
 // and eight of them share one signature: the engine ACCEPTS an input and then silently ignores or

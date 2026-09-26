@@ -14,7 +14,7 @@
 // frame. Same discipline, same reason. Anything genuinely stateful (physics, particles, fluid) does
 // not belong here at all - it belongs in the offline sim baker, which emits a PNG sequence.
 //
-// Verified by `make probe` (DOM signature across render orders) and `make canvas-purity`, which
+// Verified by `make check GATE=probe` (DOM signature across render orders) and `make check GATE=canvas-purity`, which
 // hashes REAL PIXELS because a canvas's contents are invisible to a DOM signature.
 // three.js is the GLOBAL window.THREE, loaded by boot's awaited readiness phase, NOT a static
 // import. This is the same shape as lottie-web (core/layers/lottie.js) and it is not stylistic: a

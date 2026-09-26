@@ -10,7 +10,7 @@ group: look
 These are the tells that read as generated rather than designed, because they are what a model reaches
 for with no direction: gradient-filled headline text, a cyan-to-purple gradient, an identical-weight
 card grid, everything centered with equal visual weight, Inter or Space Grotesk as the face, and pure
-`#000`/`#fff` unless the brief actually says black. `make designspec-check` catches the deterministic
+`#000`/`#fff` unless the brief actually says black. `make check GATE=designspec-check` catches the deterministic
 ones. The escape valve is real: if the content genuinely calls for one of these, say so in
 `authoring._why` rather than reaching for it by reflex.
 

@@ -303,7 +303,7 @@ if (isMain) {
     if (res.fm.beats) console.log(`  the chosen thread paces this at ~${res.fm.beats} beats (${res.fm.pace}s each)`);
     console.log(`\n${res.gate}`);
     console.log(res.gateOk ? '' : `  ↑ the gate's blockers are yours to fill; the brief locked the frontmatter, not the copy.`);
-    console.log(`\n  next: make intent SB=${shown(res.dest)} D=<scene.json>   → then make plan-check`);
+    console.log(`\n  next: make intent SB=${shown(res.dest)} D=<scene.json>   → then make check GATE=plan-check`);
     console.log(`        then make concept SB=${shown(res.dest)} N=3. Three directions, rendered, so the LOOK is picked from pictures`);
   } else if (argv.includes('--ask')) {
     const payload = ask({ name: flag('--name'), url: flag('--url'), slug: flag('--slug') });

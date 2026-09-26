@@ -37,8 +37,8 @@
 // verified licence under a commercial product film is a Content ID claim waiting to land, so it warns
 // loudly and names the file. See engine-doctrine/CRAFT/SOUND.md §Licensing.
 //
-//   node quality/gates/audio-check.mjs <scene.json> [--strict]   ·   make audio-check D=<file>
-//   node quality/gates/audio-check.mjs --all                     ·   make audio-check
+//   node quality/gates/audio-check.mjs <scene.json> [--strict]   ·   make check GATE=audio-check D=<file>
+//   node quality/gates/audio-check.mjs --all                     ·   make check GATE=audio-check
 // WARN by default; --strict blocks. The library census (--all) never blocks.
 import fs from 'node:fs';
 import path from 'node:path';

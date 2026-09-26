@@ -31,7 +31,7 @@ editor: the JSON *is* the video, and the same input always produces byte-identic
 
 - **Deterministic.** `renderFrame(n)` is a pure function of the frame number, same JSON, same bytes,
   any render order. That's what lets frames shard across parallel browser tabs, and what makes every
-  video reproducible and diff-able. Guarded by `make probe`.
+  video reproducible and diff-able. Guarded by `make check GATE=probe`.
 - **Agent-native.** Built to be authored by an AI agent from a schema + a taste system, not clicked
   together in a UI. One open canvas (`scene`) of composable primitives, **no templates**.
 - **Taste built in.** A 100-block component registry, per-brand memory, composition + micro-typography
@@ -132,7 +132,7 @@ system that fights that:
 
 `renderFrame(n)` is pure in `n`: no wall-clock, no un-seeded randomness (a virtual clock coerces
 `Date`/`rAF`/`Math.random` to frame-time). The same JSON renders byte-identical frames regardless of
-order: verified by `make probe` (renders sampled frames in scrambled order and diffs the DOM).
+order: verified by `make check GATE=probe` (renders sampled frames in scrambled order and diffs the DOM).
 
 ## Architecture
 
@@ -226,12 +226,12 @@ make direct D=<file> [WRITE=1]          motion director: pick cuts/stings per tr
 make brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
 
 # gates
-make validate [D=…]                     schema + no-em-dash + build-time sugar checks
-make critique D=…                       value gate (hollow/scattered/mis-centre beats)
-make designspec-check D=…                           anti-slop detector (brand-face aware)
-make audit [M=…]                        overlap / clipped text / safe-zone / WCAG contrast
+make check GATE=validate [D=…]                     schema + no-em-dash + build-time sugar checks
+make check GATE=critique D=…                       value gate (hollow/scattered/mis-centre beats)
+make check GATE=designspec-check D=…                           anti-slop detector (brand-face aware)
+make check GATE=audit [M=…]                        overlap / clipped text / safe-zone / WCAG contrast
 make judge D=… VS=<brand>               THE VISION GATE: rubric + house-style, agent scores the frames
-make probe [M=…]                        render-order purity (determinism)
+make check GATE=probe [M=…]                        render-order purity (determinism)
 
 # author
 make beats D=… VS=<brand>               first/mid/last of every beat beside the source

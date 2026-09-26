@@ -97,7 +97,7 @@ copy a structure wholesale (the ledger flags it). Build in the [`README.md`](REA
 
 Hand-writing any HTML fragment (a hook, a CTA)? Load `taste-skill` + `impeccable` first, then
 `make preview HTML=<frag> THEME=<brand>` before you trust it. That is the gate that reads a FRAGMENT,
-in a real browser with real computed styles. `make designspec-check D=<file>` is a SCENE gate and takes
+in a real browser with real computed styles. `make check GATE=designspec-check D=<file>` is a SCENE gate and takes
 a scene JSON, not raw HTML; pointing it at a fragment measures nothing.
 
 ## Step 4: The mandatory ladder (this is what stops effect-soup)
@@ -161,7 +161,7 @@ sheet-less render; `make ship` also runs `seam-check` and the contact sheets).
 ```bash
 make video D=films/scene/passwords.json             # → out/passwords.mp4  (+ author-check + audit)
 make judge D=films/scene/passwords.json             # preps /tmp/judge/sheet.png + rubric
-make why   D=films/scene/passwords.json             # what the last few dev/check/ship/judge runs actually did
+make check GATE=why   D=films/scene/passwords.json             # what the last few dev/check/ship/judge runs actually did
 ```
 
 `make judge` is the required post-render step the static ladder structurally cannot be: read

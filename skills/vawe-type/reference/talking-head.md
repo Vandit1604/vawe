@@ -30,7 +30,7 @@ beat**, the slowest of any type, because the voice track, not a device, sets the
   in attention taken away from the voice (`register: 'quiet'` in `type-spines.mjs`).
 - **VO + word-timed captions.** A real film needs `audio.vo` + `audio.voWords` (a `[{w,t}]` sidecar),
   then `make vo-captions D=<file> WRITE=1` builds karaoke-timed `captions[]` from it. `engine-doctrine/CRAFT/CAPTIONS.md`.
-- **`make pace-from-vo`.** Once a real VO track exists, `make pace-from-vo VO=<file>.words.json`
+- **`make check GATE=pace-from-vo`.** Once a real VO track exists, `make check GATE=pace-from-vo VO=<file>.words.json`
   proposes beat timings that land reveals ON the voice instead of guessing durations by ear.
 - **A face-safe layout.** Keep the safe centre of the frame free for a presenter shot; do not stack
   type or UI over where a face would sit. On a phone destination, also mind the platform chrome

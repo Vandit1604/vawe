@@ -14,7 +14,7 @@ confirm: "is the palette eyedropped from one dominant source, not invented?"
 - Eyedrop the palette from the real brand (`make palette`), never invent. Decide light-first vs
   dark-first by LOOKING at the hero, build from one accent held to 10% (60-30-10), and hit ~7:1
   contrast on headline type.
-- Enforced by `make audit` (contrast fails hard) and `make designspec-check` (`off-colour`,
+- Enforced by `make check GATE=audit` (contrast fails hard) and `make check GATE=designspec-check` (`off-colour`,
   `dead-token`, `contrast-unmeasurable`).
 - Checkable action: is the palette eyedropped from one dominant source, not invented?
 
@@ -49,7 +49,7 @@ Two more of theirs, and both are rules we did not have:
   built for a white site is [`../MISTAKES.md`](../MISTAKES.md) #1, and two beats of dark text on a dark
   backdrop shipped for their whole runtime because a token name lied about its theme family (#387).
 - **Declare the palette up front. Don't invent colours per element.** Our version is stronger and already
-  written: colours come only from the brand, and `make designspec-check` locks them.
+  written: colours come only from the brand, and `make check GATE=designspec-check` locks them.
 
 ## 1. Decide dominance FIRST, by looking, never by a field
 A white site gets a **light-first** video; a dark site gets **dark-first**. Decide by looking at the hero
@@ -81,7 +81,7 @@ and the accent appears once.
 ## 5. Contrast, overshoot for big video type
 WCAG floors: **4.5:1** body · **3:1** large text (≥24px, or ≥18.7px bold) · **3:1** non-text/UI. AAA = **7:1**.
 - **Aim ~7:1 for headlines.** Motion, grain, compression, and busy/photographic backgrounds all erode *effective*
-  contrast, so AA is not enough for display type. `make audit` hard-fails the unreadable and flags weak headlines.
+  contrast, so AA is not enough for display type. `make check GATE=audit` hard-fails the unreadable and flags weak headlines.
 - **Emphasis (`<b>`) on an accent-coloured background** must not be the accent (blue-on-blue vanishes), the engine
   auto-falls-back to the layer colour; override with `emColor` if needed (see [../MISTAKES.md](../MISTAKES.md) #9).
 

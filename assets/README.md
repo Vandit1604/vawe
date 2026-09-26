@@ -8,6 +8,6 @@ here. Not meant for hand editing; regenerate a baked asset by re-running its gen
 
 The one doc: `assets/README-LICENCE.md`, which sources are redistributable and which are not (the
 Resource Boy gradient and ransom packs must never leave this machine). No gate checks this folder
-directly; `make asset-check D=<file>` checks that a film's asset references resolve.
+directly; `make check GATE=asset-check D=<file>` checks that a film's asset references resolve.
 
 Look first: `assets/README-LICENCE.md`, then the subfolder matching what you need.

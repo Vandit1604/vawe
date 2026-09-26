@@ -231,7 +231,7 @@ const storyboardPath = () => {
 // ---- the CHAT sidebar's own child process and conversation -------------------------------------
 let chatJob = null;        // the running `claude -p` child, or null
 let chatSessionId = null;  // the CLI's own session_id, so the next prompt --resumes it
-const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make validate:*)';
+const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make check GATE=validate:*)';
 // An overlap test on [aStart,aEnd) x [bStart,bEnd), used to find what a mentioned layer's window
 // touches: the camera moves and transitions running while it is on screen.
 const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd - 1e-9 && bStart < aEnd - 1e-9;
@@ -1012,7 +1012,7 @@ if (!process.env.NOOPEN) {
 try {
   const floor = directionFloorFindings(dataArg);
   if (floor.length) {
-    console.log(`  direction floor (\`make direction-floor D=${path.relative(repoRoot, dataArg)}\` for the full report):`);
+    console.log(`  direction floor (\`make check GATE=direction-floor D=${path.relative(repoRoot, dataArg)}\` for the full report):`);
     for (const l of floor) console.log(`    ${l}`);
     console.log('');
   }

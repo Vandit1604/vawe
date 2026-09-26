@@ -74,7 +74,7 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
     });
   }
   title = title ?? message; body = body ?? desc;
-  // 26/TYPE.body, not 22/14: `make audit` fails any text under 14.04px as unreadable, so the glyph
+  // 26/TYPE.body, not 22/14: `make check GATE=audit` fails any text under 14.04px as unreadable, so the glyph
   // that says WHAT happened was the one part of the alert nobody could read. The dot grows to fit it.
   const dot = icon
     ? `<div style="width:26px;height:26px;border-radius:${R.pill}px;background:${accent};flex:none;`
@@ -138,9 +138,9 @@ export function phoneFrame({ x, y, w = 300, h = 620, children = [], status = tru
   // because those pixels are off. A theme that repainted either would be depicting a different object.
   const screen = [box({ w: Math.round(w * 0.39), h: Math.round(w * 0.087), radius: R.pill, bg: '#0A0A0A' })];
   // The status glyphs are `--text-2`, never `--dim`: `--dim` is the de-emphasised CHROME role and
-  // measures 2.6:1 on higgsfield, which `make audit` fails HARD. Quiet is a colour; unread is a bug.
+  // measures 2.6:1 on higgsfield, which `make check GATE=audit` fails HARD. Quiet is a colour; unread is a bug.
   // THE STATUS TYPE IS PROPORTIONAL UNTIL IT STOPS BEING READABLE, then it floors. At the catalog's
-  // own w:230 the clock came out 10px and the indicator 9px, and `make audit` fails anything under
+  // own w:230 the clock came out 10px and the indicator 9px, and `make check GATE=audit` fails anything under
   // 14.04px as unreadable, so did the DEFAULT w:300, at 13.5px. Below about w:380 a phone prop
   // cannot be both proportional and legible, and legible wins: a status bar nobody can read is not
   // depicting a phone in use, it is depicting a smudge.
@@ -224,7 +224,7 @@ export function checklist({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}
     : `<span style="display:inline-flex;width:28px;height:28px;flex:none;border-radius:${R.chip}px;`
       + `background:${T.card};border:2px solid ${T.hair}"></span>`;
   // A completed row is `--text-2`, not `--dim`. Struck-through-quiet is a look; unreadable is a HARD
-  // `make audit` failure, and `--dim` measures 2.6:1 on higgsfield.
+  // `make check GATE=audit` failure, and `--dim` measures 2.6:1 on higgsfield.
   const row = (it) => `<div data-part style="display:flex;align-items:center;gap:${SPACE.sm}px">` + chip(it.done)
     + `<span style="font:500 ${TYPE.base}px var(--font-sans);color:${it.done ? T.sub : T.ink}">${it.text}</span></div>`;
   const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.sm}px;padding:${SPACE.lg}px;`
@@ -359,7 +359,7 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
   // across-then-down; `parts` staggers in document order and has no per-element delay override, so a
   // column-major reveal is the honest shape here rather than a hand-computed one it cannot express.
   // A column heading is a WORD ("In review"), so it is sans. It was mono, which is the library's
-  // standing inversion, and `--dim`, which `make audit` fails HARD on a dark theme.
+  // standing inversion, and `--dim`, which `make check GATE=audit` fails HARD on a dark theme.
   // HAIRLINE, NO SHADOW. A card sitting inside a board already has a boundary; giving it a drop
   // shadow as well is two pieces of chrome saying the same thing, and the register spends one.
   const col = (c) => `<div style="display:flex;flex-direction:column;gap:${SPACE.xs}px;width:${colW}px;flex:none">`
@@ -407,7 +407,7 @@ export function toast({ x, y, w = 420, title, message = '', body: _body = '', ac
   // dark-on-light and flips to light-on-dark, never merging into the ground on either.
   return [{ type: 'group', x, y, w, layout: 'row', items: 'center', gap: SPACE.sm, pad: SPACE.md,
     bg: T.ink, radius: R.card, elevation: E.card, start, duration: dur, anim: 'rise', enterDur: 0.4, exitDur: 0.3, children: [
-      // 26/TYPE.body, not 22/14: `make audit` fails anything under 14.04px.
+      // 26/TYPE.body, not 22/14: `make check GATE=audit` fails anything under 14.04px.
       // This card is inverted (`--text` is the ground, `--bg` is the type), so `onInk` would pull the
       // dot toward `--text`, the background here, at 1.8:1. Holding the fill at 45% of the status
       // colour over the plate colour keeps `--bg` on it reading as well as `--bg` on the plate does.

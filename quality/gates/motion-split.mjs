@@ -1,7 +1,7 @@
 // quality/gates/motion-split.mjs: how much of a film's motion is the GROUND, and how much is the FILM.
 //
 //   node quality/gates/motion-split.mjs films/scene/x.json
-//   make motion-split D=films/scene/x.json
+//   make check GATE=motion-split D=films/scene/x.json
 //
 // WHY. `./bin/vawe` prints one motion figure and it is a property of the FRAME, so a moving backdrop
 // flatters it exactly as much as moving content does. Measured on a real recreation: 2% still and 1.25

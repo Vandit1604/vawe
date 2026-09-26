@@ -13,7 +13,7 @@ codes: no-bg-motion, off-radius, off-shadow, ruled-grid, static-bg
   [LAYOUT](LAYOUT.md)). Pick ONE of the 8 visual styles as the register, do not mix.
 - Build a reusable surface as HTML FIRST: author the fragment (prefer a `blocks/sleek.mjs` factory),
   preview it standalone (`make preview HTML=<file> THEME=<brand>`), gate it clean
-  (`make designspec-check D=<file>`), only then drop it into the scene.
+  (`make check GATE=designspec-check D=<file>`), only then drop it into the scene.
 - Lock the one-page design spec (colours, typography, rounded, borders, shadows, spacing, motion,
   components) before authoring a bespoke surface; every block/fragment obeys it.
 - Enforced by `[gated: quality/gates/designspec-check.mjs]` (codes: `off-radius`, `off-shadow`,
@@ -56,8 +56,8 @@ tweaked blind inside a 2000-frame render. The loop:
    HTML fragment for true connective tissue (a hook, a CTA). Hand-writing? Load [`taste-skill`] +
    [`impeccable`] first (Anti-Default Discipline), then this guide's design spec.
 2. **Preview it standalone**: `make preview HTML=<file> THEME=<brand>` → `/tmp/preview.png`. Read the shot.
-3. **Gate the craft**: `make impeccable D=<file>` is the anti-slop detector on the raw fragment, no LLM
-   (`skills/impeccable/scripts/detect.mjs`). `make designspec-check D=<file>` is a different gate and
+3. **Gate the craft**: `make check GATE=impeccable D=<file>` is the anti-slop detector on the raw fragment, no LLM
+   (`skills/impeccable/scripts/detect.mjs`). `make check GATE=designspec-check D=<file>` is a different gate and
    locks a different thing, the theme: an off-palette colour, a font outside the theme's roles, and the
    optional radius and shadow lock (`off-colour`, `off-font`, `off-radius`, `off-shadow`, `ruled-grid`,
    `dead-token`). Run both, and both must be clean.
@@ -94,7 +94,7 @@ a spec nobody re-reads is a spec that was decoration.
 5. **Depth**: shadow usage matches the declared level. Flat means none.
 6. **The negative list**: verify none of the things the spec said it would NOT do are present.
 
-`make designspec-check D=<file>` automates points 1 and 2 against the theme lock. Points 3 to 6 are yours.
+`make check GATE=designspec-check D=<file>` automates points 1 and 2 against the theme lock. Points 3 to 6 are yours.
 
 ### The 8 visual styles (mood-first picker)
 

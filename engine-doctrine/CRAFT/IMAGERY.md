@@ -13,7 +13,7 @@ confirm: "where did each image come from, and what treatment earned it its place
 - Prefer the lightest real visual: captured real UI (`make capture`) first, a raw stock photo last.
   Treat every image (edge-fade, `ken`, clip-to-shape, scrim, grade) so it feels intentional, and
   fetch logos through `make assets` (or `curl -f`), never a bare `curl -o`.
-- Enforced by the beats fidelity gate (untreated/off-brand images fail it) and `make audit`
+- Enforced by the beats fidelity gate (untreated/off-brand images fail it) and `make check GATE=audit`
   (flags tiny logos below ~5% of frame height).
 - Checkable action: where did each image come from, and what treatment earned it its place?
 
@@ -86,7 +86,7 @@ only when the image genuinely needs it. An over-graded image is as off as a raw 
 - **Mono by default;** colour only for authentic brand logos. Keep a light variant (`#f3f3f0`) for dark bgs and a
   `-dark` variant (`#0e0e0d`) for light bgs. A mono logo the same value as the bg is invisible (see [../MISTAKES.md](../MISTAKES.md) #7).
 - **Size on the spacing scale** and optically balance (a circle looks smaller than a square of the same box); a
-  logo reads at ~7% of frame height, never below ~5% (`make audit` flags tiny images).
+  logo reads at ~7% of frame height, never below ~5% (`make check GATE=audit` flags tiny images).
 
 ## 5. Generated imagery (kie.ai)
 `make gen-image Q="…" NAME=<name>` → a normal `image` layer; `make gen-video`/`gen-clip` → a deterministic `clip`

@@ -59,7 +59,7 @@ of the roster.
 | **reveal** | how each beat enters and exits, never the settled frame | `/tmp/reveal/<name>.png` from `make reveal D=<file>` | per beat: `{beat, enter, exit, paired: yes/no, flaw, fix}` |
 | **fidelity** | recreations only: how close each beat is to its source | render frames + the source frames, side by side | per beat: `{beat, score 0-10, gaps: [...]}` |
 | **copy** | on-screen writing only | the strings from the scene JSON, in beat order | per line: `{beat, line, tell, rewrite}` |
-| **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
+| **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make check GATE=seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
 | **ab** | which of two cuts is better, and does the graphic explain anything | *not built.* `make ab`, `ab-record` and `AB-JUDGE.md` were removed (`cc2dfc2`, 2026-08-05). Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | n/a |
 <!-- doc-refs-allow: make ab · the row above exists to record that this critic was planned and never built -->
 

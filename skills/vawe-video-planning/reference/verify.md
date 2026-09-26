@@ -10,7 +10,7 @@ This runs the `check` -> `ship` -> `judge` -> `ledger` phases of the one spine i
 `author-check`, `video`, `beats`, `reveal` and `ledger` below are the steps those phases run, not a
 separate ladder.
 
-`make validate` -> `make video` -> `make motion --data <file>` -> `make audit M=<fmt>` (text AND
+`make check GATE=validate` -> `make video` -> `make check GATE=motion --data <file>` -> `make check GATE=audit M=<fmt>` (text AND
 image contrast) -> **`make beats D=<file> VS=<brand>`** (fidelity gate, stacks each beat beside its
 source section; wrong dominance, off colours, untasteful imagery all show here, mandatory) ->
 **`make ledger D=<file>`** (cross-video sameness vs every shipped design, SAME fails; fix by changing

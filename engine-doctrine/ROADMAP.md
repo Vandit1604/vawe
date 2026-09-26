@@ -32,7 +32,7 @@ shard across parallel tabs and render out of order, so an effect that cannot be 
 at frame `n` will silently produce different output per run. Where a family needs simulation, it
 gets a **closed-form or seeded-deterministic** implementation, or it does not ship.
 
-This is not a purity fetish. It is what `make probe` checks, and it is the property the whole
+This is not a purity fetish. It is what `make check GATE=probe` checks, and it is the property the whole
 product is sold on.
 
 **Known violation (found 2026-07-17, half fixed, narrowed).** Re-renders of an UNCHANGED scene can
@@ -75,10 +75,10 @@ fixing a layout. It now measures the ink for layers that paint no box of their o
 
 | piece | status | proof |
 |---|---|---|
-| Per-aspect gate, `make audit ASPECT=…` | **SHIPS** | `Makefile:302` passes `--aspect` through to `quality/audit.mjs`, mirroring `bin/vawe`. It also reports a scene that fails to boot instead of dying on an uncaught `TypeError`, which is how four unloadable scenes stayed invisible. |
+| Per-aspect gate, `make check GATE=audit ASPECT=…` | **SHIPS** | `Makefile:302` passes `--aspect` through to `quality/audit.mjs`, mirroring `bin/vawe`. It also reports a scene that fails to boot instead of dying on an uncaught `TypeError`, which is how four unloadable scenes stayed invisible. |
 | One safe area, keyed on destination | **SHIPS** | `safeArea()` at `core/layout/safe.js:121`, throwing on an unknown destination at `:123`. There used to be four disagreeing safe zones, because "safe" was three ideas at once: a margin, a platform's chrome, and an anchor. One function answers all of it, and placement and checking share it, so `pin:"bottom"` cannot fail. |
 | Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate/validate.mjs:207-213`; `aspects` is in the shared prop list at `films/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
-| A scene composed for all five ratios | **SHIPS** | `films/scene/aspects-demo.json`, which passes `make audit ASPECT=all`. |
+| A scene composed for all five ratios | **SHIPS** | `films/scene/aspects-demo.json`, which passes `make check GATE=audit ASPECT=all`. |
 | Layout that RESOLVES rather than gets computed | **PART** | The refusal half ships: a centring keyword with nothing to centre is a VALIDATE error (`core/validate/validate.mjs` `layoutErrors`), on both axes, in one place, imported by `quality/audit.mjs`. The **measure** half, `center` sizing itself from the rendered layer, is **NOT BUILT**. It moves every centred layer, so it stays deliberate. |
 | The y-axis version of the same trap | **PART** | Checked, except on text and count, where `size*1.2` is the estimate and enough scenes have tuned around it that changing it would move shipped content. That carve-out is pinned in `make gate-test`. |
 | **Library-wide adoption** | **NOT BUILT** | Counted on this branch over the 170 JSON files in `films/scene/`: `"aspects"` appears in **1** scene (`aspects-demo.json`), `"col"` in **0**, `"pin"` in **14**. The relative-coordinate system is one demo and fourteen pins. Everything else is hand-placed absolute pixels tuned to a 1920x1080 canvas. |
@@ -131,7 +131,7 @@ works. That is the piece **Matrix Decode** was waiting on. `PAINT_FX` = 5 (`core
 `matrix` · `starfield` · `aurora` · `meteor` · `waves`. The contract each keeps: no accumulation, no
 `Math.random`/`Date`, and CLOSED-FORM motion (a particle's position is f(lt), never "last position
 plus velocity"), which is exactly the line between this tier and the sims in Tier 5. Guarded by
-`make canvas-purity`, which hashes real pixels because `make probe` compares a DOM signature and
+`make check GATE=canvas-purity`, which hashes real pixels because `make check GATE=probe` compares a DOM signature and
 structurally cannot see inside a canvas. A new generative effect is now one `PAINT_FX` entry.
 
 | named effect | status | proof |
@@ -183,7 +183,7 @@ through it.
 | **B** · image sources (an `image` layer's `<img>`) | **SHIPS** | The same function, falling through to the `<img>` at `core/resample/index.js:40`. Spec `{ fx, amount, speed, seed }` on the layer, `amount` optionally `[from, to]` so the effect animates across the layer's own window. |
 | **C** · an arbitrary DOM subtree | **SHIPS** | **This page said "still NOT built, and deliberately so". It is built.** A built subtree is baked to a texture once at boot through `core/raster/raster.js` (`buildInlinedCss`, `domToCanvas`), awaited by `core/engine/boot.js`, and the design is stated at `core/resample/index.js:14-26`. The validator's refusal narrowed exactly as planned: `UNSAMPLABLE` is now only `['raymarch','three','globe','video']` (`core/raster/index.js`), the four types whose pixels live in a canvas or a video bitmap outside the DOM. **The cost, said plainly:** the bake is ONE INSTANT taken from the built DOM before any frame draws, so a `count` that ticks is frozen at it. The motion comes from the pass, not the source. That is a hero device on a settled beat, not a wrapper around a moving one. |
 | **D** · two-scene shader transitions | **SHIPS** | `core/timeline/seams.js`, `SEAM_FX` = 14 (`:32`): fade · dissolve · slide · push · uncover · wipe · crossWarp · whipPan · sdfIris · dispersion · lens · flashWhite · cinematicZoom · portal. The stage either side of a boundary is rasterised once at build into `u_from`/`u_to`, and a two-sampler shader keyed on `u_progress` blends. No WebGL, or a blank raster, degrades to a plain cross-fade. Author API: top-level `seams: [{ t, fx, dur, dir?, seed?, intensity? }]`. This was "the one thing the two reference engines have that we do not". |
-| **Full-frame feedback** · sampling the COMPOSITED frame | **NOT BUILT, excluded** | The composite is one frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it. `resample` never samples its own previous output; guarded by `make probe` and `make canvas-purity`. |
+| **Full-frame feedback** · sampling the COMPOSITED frame | **NOT BUILT, excluded** | The composite is one frame behind and Go-side, so reading it makes `renderFrame(n)` depend on which frames ran before it. `resample` never samples its own previous output; guarded by `make check GATE=probe` and `make check GATE=canvas-purity`. |
 
 **On `vfx-js`, kept because the measurement is still the answer.** It is MIT, zero-dependency, and
 does exactly Seam C. Two measured facts ruled it out as a runtime dependency, neither about quality:

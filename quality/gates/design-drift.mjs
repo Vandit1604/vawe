@@ -1,6 +1,6 @@
 // quality/gates/design-drift.mjs: EVERY FRAME OF ONE FILM AGREES ON ITS VALUES.
 //
-//   node quality/gates/design-drift.mjs films/scene/<film>.json   ·   make design-drift D=<film>
+//   node quality/gates/design-drift.mjs films/scene/<film>.json   ·   make check GATE=design-drift D=<film>
 //
 // A film with `<film>.design.md` (harness/lib/design-spec.mjs) has declared the values its frames may
 // use, on top of the stage kit's own generated ones (harness/lib/stagekit.mjs buildKit). This gate
@@ -174,7 +174,7 @@ export function runDesignDrift(filmJsonPath, gf) {
 const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   const file = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!file || !fs.existsSync(file)) { console.error('usage: node quality/gates/design-drift.mjs <film.json>  |  make design-drift D=<file>'); process.exit(2); }
+  if (!file || !fs.existsSync(file)) { console.error('usage: node quality/gates/design-drift.mjs <film.json>  |  make check GATE=design-drift D=<file>'); process.exit(2); }
   const spec = readDesignSpec(file);
   if (!spec) { console.log(`\n  design-drift · no ${file.replace(/\.json$/, '.design.md')}, skipped (frame-check's scale-drift stays the check for this film)\n`); process.exit(0); }
   const gf = gateFindings();

@@ -7,7 +7,7 @@
 // and returns [] outright when `document` is undefined (plain node has none). A direct unit test would
 // therefore either fake a DOM (the "hand-rolled CSS grammar drifts from the real one" mistake this
 // check exists to avoid) or test nothing. So this launches the real engine in a real Chromium page,
-// the same way `make snap-all` caught the reported bug live in the library (films/scene/one-word.json
+// the same way `make check GATE=snap-all` caught the reported bug live in the library (films/scene/one-word.json
 // and films/scene/vawe-oblique.json both shipped a bare `"color": "accent"`/`"text"` and rendered
 // silently wrong until this check existed).
 //

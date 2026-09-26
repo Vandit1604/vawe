@@ -54,7 +54,7 @@ gates enforces each rule: everything else is judgment the ledger can't save you 
 
 ## Layering, life and handoffs
 
-<!-- doc-refs-allow: make choreo · being built now by another agent from the choreography plan, not yet a Makefile target -->
+<!-- doc-refs-allow: make check GATE=choreo · being built now by another agent from the choreography plan, not yet a Makefile target -->
 
 Rules 3, 4 and 6 above say a beat has one hero motion and everything else supports it. This section
 says how a motion designer actually reaches that state, in After Effects and here: not by adding
@@ -104,8 +104,8 @@ the Speed dials table); the row below is the placeholder for what replaces them.
 
 | what to measure | UI number (a name, not a threshold) | measured on the reference |
 |---|---|---|
-| offset between concurrent motions in one beat | Material: 20ms (https://m1.material.io/motion/choreography.html) | `<measured on example-madera by make choreo>` |
-| exit duration vs entrance duration | 72Technologies: close is faster than open, "roughly a 2:3 ratio... the single highest-leverage rule in the whole system" (https://www.72technologies.com/blog/motion-ratios-ui-feel-cheap) | `<measured on example-madera by make choreo>` |
+| offset between concurrent motions in one beat | Material: 20ms (https://m1.material.io/motion/choreography.html) | `<measured on example-madera by make check GATE=choreo>` |
+| exit duration vs entrance duration | 72Technologies: close is faster than open, "roughly a 2:3 ratio... the single highest-leverage rule in the whole system" (https://www.72technologies.com/blog/motion-ratios-ui-feel-cheap) | `<measured on example-madera by make check GATE=choreo>` |
 
 ### Element life: enter, hold, exit
 
@@ -115,7 +115,7 @@ point here is that the exit is its own designed move, never an afterthought left
 
 An element that is simply not there in the next frame, with no exit keyed and no `becomes`, is not
 "finished", it is dropped, and that is a finding, not a style. The measuring work in progress
-(`make choreo`, see below) will name this at the plan level; until it lands, treat a vanished element
+(`make check GATE=choreo`, see below) will name this at the plan level; until it lands, treat a vanished element
 as a question to ask before shipping, not an assumption to make.
 
 **`becomes` already expresses the one handoff this engine names for a continuous object.** An incoming
@@ -187,7 +187,7 @@ move travelling through), never a seam mechanism, however close the seam's name 
 
 ### What checks this
 
-- **`make choreo`** (in progress, built by another agent as this section was written): measures kinds of
+- **`make check GATE=choreo`** (in progress, built by another agent as this section was written): measures kinds of
   motion at once, element lives, and handoffs against `example-madera`, extending `motion-floor.mjs` and
   the scene timing reader. Not yet runnable; this doc names the doctrine ahead of the gate on purpose.
 - **`quality/gates/motion-floor.mjs`**: local motion holes over time, and the `ambient-padding` finding
@@ -320,7 +320,7 @@ not an arrival, and grading a film's running order for evenness would be wrong.
 
 ### Two element-level checks that watch the render
 
-`make motion` adds two findings that read the rendered frames rather than the JSON, both WARN:
+`make check GATE=motion` adds two findings that read the rendered frames rather than the JSON, both WARN:
 
 - **`xi:degenerate`**. An element laid out for every frame of its life that never once has both a
   width and a height. It animates with no box.

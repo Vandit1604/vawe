@@ -1499,7 +1499,7 @@
     },
     "size": {
      "type": "number",
-     "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
+     "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make check GATE=audit` still catch true overflow/clipping.",
      "min": 18,
      "max": 560
     },
@@ -2807,11 +2807,11 @@
   },
   "audio": {
    "type": "object",
-   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio/select.js. The CUES are synthesized and carry no licence (core/audio/kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See engine-doctrine/CRAFT/SOUND.md.",
+   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make check GATE=audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio/select.js. The CUES are synthesized and carry no licence (core/audio/kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See engine-doctrine/CRAFT/SOUND.md.",
    "fields": {
     "music": {
      "type": "string",
-     "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense \u2192 assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make validate` resolves it against assets/music/ and the scene dir and warns if it will not."
+     "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense \u2192 assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make check GATE=validate` resolves it against assets/music/ and the scene dir and warns if it will not."
     },
     "auto": {
      "type": "boolean",
@@ -2852,7 +2852,7 @@
     },
     "vo": {
      "type": "string",
-     "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make validate` (the mixer would silently drop it)."
+     "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make check GATE=validate` (the mixer would silently drop it)."
     },
     "voWords": {
      "type": "string",
@@ -3019,11 +3019,11 @@
     },
     "silent": {
      "type": "boolean",
-     "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
+     "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make check GATE=audio-check` says so."
     },
     "_why": {
      "type": "string",
-     "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
+     "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make check GATE=audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
     },
     "tactile": {
      "type": "boolean|object",

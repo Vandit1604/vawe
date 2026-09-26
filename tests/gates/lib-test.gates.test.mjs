@@ -906,7 +906,7 @@ test('lib-test: gates', async () => {
 
 
 // ---- quality/gates/scene-timing.mjs choreography: lives, beat motion, handoffs ---------------------
-// Known-answer SCENES, one per claim `make choreo` makes. Minimal on purpose: each fixture isolates
+// Known-answer SCENES, one per claim `make check GATE=choreo` makes. Minimal on purpose: each fixture isolates
 // the one condition its name tests, so a failure here points at the one rule that broke rather than
 // requiring a real film to be re-read to find it.
 {

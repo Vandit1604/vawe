@@ -431,7 +431,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
 
 // ---- wave 1 effects: filters · glow presets · caption styles ----
 // Each family's pure surface, held to the contract its consumers rely on. The DOM halves (SVG def
-// injection, the caption runtime) are covered by make probe + the rendered reel, not here.
+// injection, the caption runtime) are covered by make check GATE=probe + the rendered reel, not here.
 {
   // colour-grade presets (core/looks/filters.js)
   ok('filter: raw CSS passes through', resolveFilter('blur(4px) saturate(1.2)').filter === 'blur(4px) saturate(1.2)');

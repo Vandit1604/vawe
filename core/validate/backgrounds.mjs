@@ -36,7 +36,7 @@ function junctionBindingErrors(cfg, bgList, out) {
 // SPECTACLE, checked here because boot REFUSES it and this file did not. `resolveSpectacle` throws on
 // an unknown device, on a `spectacle.of` that names no layer id, and on a sting already sitting on the
 // moment. Every one of those is knowable from the JSON alone, so every one of them belongs in the
-// validator, and none of them was: a scene naming a subject that does not exist passed `make validate`
+// validator, and none of them was: a scene naming a subject that does not exist passed `make check GATE=validate`
 // clean and then died at boot with a stack trace and no file name. Found by writing one.
 //
 // CLONED for the same reason as the binder above: resolveSpectacle attenuates amplitude dials and

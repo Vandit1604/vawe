@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
 const VO = process.env.VO || process.argv[2];
-if (!VO || !fs.existsSync(VO)) { console.error('usage: make pace-from-vo VO=<file>.words.json [BEATS=<n>]'); process.exit(2); }
+if (!VO || !fs.existsSync(VO)) { console.error('usage: make check GATE=pace-from-vo VO=<file>.words.json [BEATS=<n>]'); process.exit(2); }
 const words = JSON.parse(fs.readFileSync(VO, 'utf8'));
 if (!Array.isArray(words) || !words.length || words[0].t == null) { console.error(`✗ ${VO} is not a voWords sidecar ([{w,t}]).`); process.exit(1); }
 

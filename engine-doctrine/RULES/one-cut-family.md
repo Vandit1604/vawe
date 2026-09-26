@@ -1,7 +1,7 @@
 ---
 name: one-cut-family
 when: choosing the cut between two beats
-holds: warns (make direct / make critique, cut-families; 3+ families fails, TASTE=1 blocks)
+holds: warns (make direct / make check GATE=critique, cut-families; 3+ families fails, TASTE=1 blocks)
 answers: "why a film keeps one transition family and earns only 2-3 accents by meaning"
 group: story
 ---
@@ -10,7 +10,7 @@ group: story
 A film that mixes wipes, dissolves, whip pans, and hard cuts with no reason reads as indecisive. Pick
 one family (a hard cut is a valid family) and use it for most seams; reserve 2-3 accent transitions for
 seams that carry real meaning, a tone flip, a time jump, and be able to say which meaning each one
-serves. `make direct`/`make critique` fail at 3 or more families in one film.
+serves. `make direct`/`make check GATE=critique` fail at 3 or more families in one film.
 
 | parameter | value |
 |---|---|

@@ -11,7 +11,7 @@ codes: duration, cut-missed, ground-false-confidence, ground-truth-frame, ground
 
 - Run `make study VIDEO=refs/ref.mp4 NAME=ref` first, then the 5-step pipeline (map beats, measure
   motion, catalog motifs, map to primitives, author + verify) before copying any look.
-- A study is not done when the table is filled. It is done when `make study-check NAME=<name>` says
+- A study is not done when the table is filled. It is done when `make check GATE=study-check NAME=<name>` says
   COMPLETE: every unique frame is on a page in `refs/<name>/pages/`, every line of `refs/<name>/pages.md`
   is filled (not `<fill`), and every shot's `onScreen`/`moves`/`trigger` in `grammar/<name>.json` is
   written. The film-prompt step reads `grammar/<name>.json`'s `coverage.ledger` and refuses an
@@ -91,7 +91,7 @@ video starts ahead.
    UNIQUE frame in the film (held/duplicate frames collapsed and mapped to the frame that stands for
    them, `refs/<name>/pages.json`), in order, stamped with its real timestamp and frame number, in cells
    sized to read UI text. `refs/<name>/pages.md` is the ledger: one line per page, and the study is
-   INCOMPLETE (`make study-check NAME=<name>`) until every line says what happens, not `<fill`. Fill it
+   INCOMPLETE (`make check GATE=study-check NAME=<name>`) until every line says what happens, not `<fill`. Fill it
    from the PAGES, not from the event sheet: the sheet samples delta peaks only, and a build, an overlap
    or a held caret between two peaks is exactly what a peaks-only read has always missed.
 
@@ -153,7 +153,7 @@ video starts ahead.
 4. **Map to our primitives** (table at the bottom). If a motif has no primitive, that is a framework
    finding, log it (engine-doctrine/MISTAKES.md), don't fake it.
 5. **Author → verify → write it down.** Build it, then `make measure VIDEO=out/ours.mp4 EXPECT=<preset>`
-   to confirm the render matches the reference's motion. `make beats`/`make audit`/`make judge` for the
+   to confirm the render matches the reference's motion. `make beats`/`make check GATE=audit`/`make judge` for the
    rest. Then write what you measured as a recipe candidate in `grammar/_<name>.recipes.json`
    ([`recipes/README.md`](../../recipes/README.md)), so the next film reuses the measurement instead of
    re-eyeballing the reference.
@@ -180,7 +180,7 @@ These are what a good reference does that our defaults do NOT. Reach for them on
    Reaching for it is a choice most authors don't make, not a limit; push the `camera` in on the beat
    too if the word still needs to fill more of the frame.)*
 4. **Asymmetry, never dead-center.** Hero words sit low-left or offset, not centered. Dead-center is the
-   AI-slop tell (`make designspec-check` flags it). Left-align (`align:"left"`, `x` low) the type beats; reserve
+   AI-slop tell (`make check GATE=designspec-check` flags it). Left-align (`align:"left"`, `x` low) the type beats; reserve
    centering for a deliberate brand lockup.
 5. **Dolly enter AND exit. The word "breathes" through scale.** The premium version: a word enters
    OVERSIZED + motion-blurred and scales DOWN to settle (a dolly-in, not a scale-up-from-small, note the

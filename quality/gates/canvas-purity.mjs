@@ -1,9 +1,9 @@
 // canvas-purity.mjs: do the CANVAS PIXELS depend only on n?
 //
 //   node quality/gates/canvas-purity.mjs <format> [data.json]
-//   make canvas-purity
+//   make check GATE=canvas-purity
 //
-// `make probe` compares a DOM SIGNATURE, so it can only see attributes and computed styles. The two
+// `make check GATE=probe` compares a DOM SIGNATURE, so it can only see attributes and computed styles. The two
 // layer types that draw pixels (`shader` (WebGL) and `paint` (Canvas 2D)) put their entire output
 // somewhere the DOM signature cannot reach. probe reported the paint demo clean while 2 of 6 frames
 // rendered different PIXELS depending on render order: an off-window layer never cleared its canvas,

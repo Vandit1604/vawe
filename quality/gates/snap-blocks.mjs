@@ -21,7 +21,7 @@
 //
 //   node quality/gates/snap-blocks.mjs --save   # write baselines → quality/baselines/snap/blocks/<name>.json
 //   node quality/gates/snap-blocks.mjs          # diff current vs baselines
-//   make snap-blocks [SAVE=1] [BLOCK=<name>]
+//   make check GATE=snap-blocks [SAVE=1] [BLOCK=<name>]
 //
 // A FRESH CLONE HAS NO FULL BASELINES (quality/baselines/snap/ is gitignored) but is NOT blind any
 // more: `--save` also writes each entry's sha256 into quality/baselines/snap/digest.json under a
@@ -141,7 +141,7 @@ for (const entry of entries) {
     if (!was) nobaseline.push(entry.name);
     else if (was.font !== NOW_FONT.hash) staleFontDigest.push(entry.name);
     else if (was.sig === sigHash) identical.push(entry.name);
-    else changed.push({ name: entry.name, diffs: [`signature ${was.sig} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make snap-blocks SAVE=1\` on a tree with the module to see it.)`] });
+    else changed.push({ name: entry.name, diffs: [`signature ${was.sig} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make check GATE=snap-blocks SAVE=1\` on a tree with the module to see it.)`] });
     continue;
   }
   let base;
@@ -159,7 +159,7 @@ for (const q of nondeterministic) f.fail('non-deterministic', `${q.name}: non-de
 for (const e of errored) f.fail('block-error', e);
 if (!SAVE) {
   for (const c of changed) f.fail('block-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 10).join(' · ')}${c.diffs.length > 10 ? ` … +${c.diffs.length - 10} more` : ''}`, { at: c.name });
-  for (const n of nobaseline) f.note('no-baseline', `${n}: no baseline to diff against, run \`make snap-blocks SAVE=1\``, { at: n });
+  for (const n of nobaseline) f.note('no-baseline', `${n}: no baseline to diff against, run \`make check GATE=snap-blocks SAVE=1\``, { at: n });
   for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make fonts\` to match it or re-save from a checkout in that state`, { at: n });
   if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) f.fail('nothing-compared', `all ${nobaseline.length + staleFontDigest.length} block(s) lack a comparable baseline, this gate checked NOTHING`);
 }
@@ -174,7 +174,7 @@ if (SAVE) {
 }
 console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}   ✗ non-deterministic: ${nondeterministic.length}   ⚠ errored: ${errored.length}   ○ no-baseline: ${nobaseline.length}   ~ stale-font: ${staleFontDigest.length}`);
 if (nobaseline.length) {
-  console.log(`\n○ NO BASELINE (nothing to diff against, run \`make snap-blocks SAVE=1\`):`);
+  console.log(`\n○ NO BASELINE (nothing to diff against, run \`make check GATE=snap-blocks SAVE=1\`):`);
   for (const n of nobaseline) console.log(`  ${n}`);
 }
 if (staleFontDigest.length) {
@@ -195,7 +195,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) {
   const n = nobaseline.length + staleFontDigest.length;
   console.error(`\n✗ nothing to compare: all ${n} block(s) lack a comparable baseline, so this gate checked NOTHING.`);
-  console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make snap-blocks SAVE=1` to record');
+  console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make check GATE=snap-blocks SAVE=1` to record');
   console.error('  the baselines for THIS tree first, then re-run to diff against them.');
   process.exit(1);
 }

@@ -7,7 +7,7 @@
 // seams.js imports from this file and nothing else changed about what a seam bakes.
 //
 // CHOICE: in-browser SVG <foreignObject> serialisation, over a Go screenshot pre-pass.
-//   • self-contained in the page: no Go/JS coordination, so `make probe`/`make snap`/`make
+//   • self-contained in the page: no Go/JS coordination, so `make check GATE=probe`/`make check GATE=snap`/`make
 //     canvas-purity` on existing scenes are untouched (a scene that bakes nothing never calls here).
 //   • the bake is one-shot at build; the result is a static canvas, so renderFrame(n) stays pure in n.
 // The two <foreignObject> gotchas are both handled here: (1) external stylesheets and CSS custom

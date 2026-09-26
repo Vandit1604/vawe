@@ -5,7 +5,7 @@
 // one of the theme's roles. That is the "looks off but I can't say why" failure, one stray colour, a
 // random face, caught before it ships, the same way the direction floor catches flat motion.
 //
-//   node quality/gates/designspec-check.mjs <scene.json> [--strict]   ·   make designspec-check D=<file>
+//   node quality/gates/designspec-check.mjs <scene.json> [--strict]   ·   make check GATE=designspec-check D=<file>
 // WARN by default (coaching); --strict blocks. What's allowed: any `var(--token)` / color-mix of one;
 // near-NEUTRAL tints (white/black/grey scrims: legitimate glass/vignette); a raw colour within tolerance
 // of a palette colour (it IS a palette colour, just hardcoded). Flagged: a CHROMATIC colour far from every

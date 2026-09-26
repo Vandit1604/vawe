@@ -78,7 +78,7 @@ flyOutRight · popOut · zoomOut · blurOut · dropOut · collapseOut · spinOut
 ## Advanced GSAP plugins: `motionPath` · `physics` · `splitText`
 
 The formerly-paid GSAP bonus plugins (free since 3.13), each loaded ONLY when its field appears. All
-deterministic (seeked per frame; proven by `make probe` + `make canvas-purity`).
+deterministic (seeked per frame; proven by `make check GATE=probe` + `make check GATE=canvas-purity`).
 
 - **`motion-path`**, fly a layer along an SVG curve. `{ "anim": "none", "motionPath": { "path": "M0,0 C120,-160 380,-160 500,0", "autoRotate": true, "dur": 3.0 } }` · _gsap, path_
 - **`physics-scatter`**: explode a word outward (velocity/gravity/friction). On a `split` layer each letter gets an index-based angle spread. `{ "split": "char", "anim": "none", "physics": { "velocity": 520, "angle": -90, "gravity": 700, "spread": 26, "dur": 2.4 } }` · _gsap, physics, text_

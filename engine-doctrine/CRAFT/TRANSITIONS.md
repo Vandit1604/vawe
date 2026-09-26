@@ -14,7 +14,7 @@ confirm: "does each cut serve the relationship between its two beats, chosen by 
 - Choose each seam by the relationship and feeling between its two beats (Murch's Rule of Six:
   emotion 51%), never by habit. Default to a hard cut; earn ONE primary transition for ~60-70% of
   cuts plus 1-2 bolder accents reserved for the payoff.
-- Enforced by `make direct` (`cut-families`: 3+ families fails) and `make critique`
+- Enforced by `make direct` (`cut-families`: 3+ families fails) and `make check GATE=critique`
   (`crossfade-mud`, `cut-velocity`, `dead-final-frame`, `no-transition`, `flat-seams`).
 - Checkable action: does each cut serve the relationship between its two beats, chosen by theory
   not habit?
@@ -86,7 +86,7 @@ The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) res
 This lowers to the raw `cuts`/`stings`/`seams` fields at load, so everything above (easing, direction,
 the decision procedure) applies unchanged. `transitions` is now the ONLY authored form: the raw fields
 are the INTERNAL shape it lowers to, and a scene that still authors `cuts`/`stings`/`seams` directly is
-refused at `make validate` with a pointer to `harness/author/migrate-junctions.mjs`, which converts an
+refused at `make check GATE=validate` with a pointer to `harness/author/migrate-junctions.mjs`, which converts an
 old scene automatically. An `fx` that names nothing, or a layer-only anim used as a boundary (`pop`), is
 rejected at validate with the catalog, never silently coerced.
 
@@ -381,7 +381,7 @@ Same grammar, applied to elements not shots:
 
 ---
 
-## What the gate enforces (`make direct` + `make critique`)
+## What the gate enforces (`make direct` + `make check GATE=critique`)
 
 Doctrine carries the taste; the gates backstop the source-decidable subset:
 
@@ -390,7 +390,7 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
   same cardinal `dir` (both `left`, both `down`, …) read as a stutter, one push in one direction
   repeated. `make direct` warns (`seam-axis-repeat`) and names the two timestamps; switch the axis
   (x to y) or flip the direction the way `example-madera` does.
-- **the frame must not go empty across a joint**: `make seam-check` reads the rendered mp4 at every
+- **the frame must not go empty across a joint**: `make check GATE=seam-check` reads the rendered mp4 at every
   boundary for a luminance dip, and now measures how long content takes to reappear once it dips
   (`seam-flash`, MISTAKES #144). A one-frame dip is a flash; several frames of measured emptiness is
   the outgoing beat leaving before the incoming one arrives, named with both beats and the fix. It also
@@ -402,8 +402,8 @@ Doctrine carries the taste; the gates backstop the source-decidable subset:
   and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made
   operational: straight cuts are the meat, the seam is the one seasoning reserved for the hero.
 - **no transition-dip**: the stage never goes empty between beats; the transition IS the exit
-  (`make critique`, rule `transition-dip`).
-- **no typing/reveal cut off**: a time-based reveal completes before its seam (`make critique`,
+  (`make check GATE=critique`, rule `transition-dip`).
+- **no typing/reveal cut off**: a time-based reveal completes before its seam (`make check GATE=critique`,
   `typing-cutoff`, MISTAKES #122).
 - **restraint**: a primary used on ~all cuts (monotone) or accents with no earned reason are judgment
   calls the planning skill and `make judge` review; the vision judge scores whether each seam reads.
@@ -463,7 +463,7 @@ found.
 `films/scene/scene.js:550` sets `data-track` to `L.track ?? idx`). Two layers on the same track tie,
 and the tie breaks by their order in `layers[]`: the one written later draws on top.
 A full-bleed layer above must not start mid-move and hide it before it plays, or it reads as a hard cut
-nobody authored. `quality/gates/covered-move.mjs` (`make covered-move D=<file>`) reports
+nobody authored. `quality/gates/covered-move.mjs` (`make check GATE=covered-move D=<file>`) reports
 this, always report-only: it cannot tell a deliberate cover from an accident, only name the collision
 and its fix (start the coverer after the move ends, or move the mover to a higher track).
 

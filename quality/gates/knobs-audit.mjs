@@ -1,5 +1,5 @@
 // quality/gates/knobs-audit.mjs, ONE job: the manifest DRIFT GUARD.
-//   make knobs-audit  → every knob core/knobs.js advertises must actually change the render, or the
+//   make check GATE=knobs-audit  → every knob core/knobs.js advertises must actually change the render, or the
 //                       manifest is lying to authors.
 //
 // WHAT MOVED OUT, AND WHY. This file also carried a DEAD-KNOB CHECK: a knob set on a preset that
@@ -7,7 +7,7 @@
 // That is the same bug class as an unknown layer PROP. A value accepted and then read by nobody,
 // which core/layers/vocabulary.js has refused at boot for a long time, so grading the two differently
 // was an accident of where the code happened to live. It is now `knobErrors()` in core/validate.mjs,
-// which runs at `make validate` AND inside boot() before a frame renders. A scene path handed to this
+// which runs at `make check GATE=validate` AND inside boot() before a frame renders. A scene path handed to this
 // script is accepted and says so rather than being silently ignored.
 //
 // The half that stays cannot move: it proves a claim about the CODE, not about one scene, by probing
@@ -114,7 +114,7 @@ if (isMain) {
 
   // A scene path used to select the dead-knob check. That check is core/validate.mjs's now, so say so
   // rather than accept an argument and do nothing with it.
-  if (process.argv[2]) console.log(`\n(the per-scene dead-knob check moved to core/validate.mjs, \`make validate D=${process.argv[2]}\`)`);
+  if (process.argv[2]) console.log(`\n(the per-scene dead-knob check moved to core/validate.mjs, \`make check GATE=validate D=${process.argv[2]}\`)`);
   f.emit();
   process.exit(0);
 }

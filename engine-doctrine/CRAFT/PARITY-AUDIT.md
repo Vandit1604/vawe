@@ -547,7 +547,7 @@ Judged on a strip at 1.0 / 3.5 / 6.0 / 8.5s, not one still, with high-contrast s
 readable; the field visibly reorganises across the strip and no adjacent pair reads as fast. Objectively,
 mean per-frame luma delta at t=6s went from **0.027 to 0.094** (0 to 255 scale).
 
-`make snap` was NOT cited: it compares the DOM and not pixels (`engine-doctrine/MISTAKES.md` #532), so for a shader
+`make check GATE=snap` was NOT cited: it compares the DOM and not pixels (`engine-doctrine/MISTAKES.md` #532), so for a shader
 it reports nothing whatever the coefficients say. One committed film names `flow`, `site-backdrop.json`,
 and it sets `speed: 0.22`, so its net rate becomes 1.1x its old one and it is visually unchanged. That
 scene is also the proof of the diagnosis: the dial worked, so the author corrected the default at the

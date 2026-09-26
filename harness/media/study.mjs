@@ -483,7 +483,7 @@ fs.writeFileSync(path.join(dir, 'pages.json'), JSON.stringify({
 fs.writeFileSync(path.join(dir, 'pages.md'),
   `# Pages · ${NAME}\n\n`
   + `One line per page. The study is INCOMPLETE until every line says what happens on that page, not\n`
-  + `\`<fill\`. \`make study-check NAME=${NAME}\` names exactly which pages are still unfilled.\n\n`
+  + `\`<fill\`. \`make check GATE=study-check NAME=${NAME}\` names exactly which pages are still unfilled.\n\n`
   + pagesMeta.map((pg) => `page ${String(pg.page).padStart(3, '0')} (${pg.t0}-${pg.t1}s): <fill: what happens on this page>`).join('\n')
   + '\n');
 
@@ -588,7 +588,7 @@ Sheet: \`${rel(sheet)}\`
 ${note}
 ${shots.length} ${detected ? 'shots' : 'shot'} · median ${study.measured.medianShot}s · ${study.measured.cutsPerMinute} per minute.
 Coverage: ${study.coverage.frames} frames decoded, ${study.coverage.unique} unique, ${study.coverage.pages} page(s) → \`${rel(pagesDir)}/\`.
-Fill \`${rel(path.join(dir, 'pages.md'))}\` (one line per page) before this study counts as complete: \`make study-check NAME=${NAME}\`.
+Fill \`${rel(path.join(dir, 'pages.md'))}\` (one line per page) before this study counts as complete: \`make check GATE=study-check NAME=${NAME}\`.
 
 > You are not copying this film's look. You are extracting its GRAMMAR: how long a shot holds, what
 > makes the next one arrive, what carries across. Throw away its UI, its copy and its colours. Never
@@ -722,5 +722,5 @@ for (const s of shots) {
 console.log(`\n  median shot ${study.measured.medianShot}s · ${study.measured.cutsPerMinute}/min${hasAudio ? '' : ' · NO audio track: the sound column is empty by fact, not by omission'}`);
 const g = writeGrammar(study, shots);
 console.log(`  grammar → ${rel(g.file)}  (${g.filled}/${g.total} shots carry an authored reading; it is COMMITTED and outlives refs/)`);
-console.log(`  pages → ${rel(pagesDir)}/  (fill ${rel(path.join(dir, 'pages.md'))}, then \`make study-check NAME=${NAME}\`)`);
+console.log(`  pages → ${rel(pagesDir)}/  (fill ${rel(path.join(dir, 'pages.md'))}, then \`make check GATE=study-check NAME=${NAME}\`)`);
 console.log(`  Read ${rel(sheet)}, fill the four authored columns in ${rel(dir)}/study.md, then storyboard and write recipe candidates.`);

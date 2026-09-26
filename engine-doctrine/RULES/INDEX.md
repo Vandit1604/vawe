@@ -40,8 +40,8 @@ design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Re
 | [`first-arrival`](first-arrival.md) | a layer's first entrance in a beat | eye |
 | [`anticipate-default`](anticipate-default.md) | a directional entrance after the film's opening wave | built: `core/engine/produce.js` |
 | [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make direct` |
-| [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make audit` |
-| [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make audit` |
+| [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make check GATE=audit` |
+| [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make check GATE=audit` |
 | [`state-the-canvas`](state-the-canvas.md) | starting any scene | warns: `core/validate/validate.mjs` |
 | [`svg-inline`](svg-inline.md) | writing an svg layer or a src path | eye |
 | [`no-css-clock`](no-css-clock.md) | hand-writing an html layer | built: `core/layers/html.js` |
@@ -53,6 +53,6 @@ design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Re
 | [`logo-prominence`](logo-prominence.md) | placing a brand mark | eye |
 | [`paired-directional-exit`](paired-directional-exit.md) | choosing anim/out for a sliding layer | eye |
 | [`readable-hold`](readable-hold.md) | a clip, card, or line of text holds still | reports: `make direct`, read gate |
-| [`no-jolt`](no-jolt.md) | a layer or the camera changes speed between frames | reports: `make speed`, author-check jolt step |
+| [`no-jolt`](no-jolt.md) | a layer or the camera changes speed between frames | reports: `make check GATE=speed`, author-check jolt step |
 | [`blur-out-dense`](blur-out-dense.md) | exiting a face, card, or dense grid | eye |
-| [`caption-safe-strip`](caption-safe-strip.md) | shipping to a phone feed | gated: `make audit` |
+| [`caption-safe-strip`](caption-safe-strip.md) | shipping to a phone feed | gated: `make check GATE=audit` |

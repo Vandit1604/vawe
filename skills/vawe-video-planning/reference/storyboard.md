@@ -49,7 +49,7 @@ vocabulary in `engine-doctrine/PRIMITIVES.md`; the JSON is the video.
 ([`recipes/README.md`](../../../recipes/README.md) is the live mechanism): `make arsenal Q="…"`
 finds a recipe measured off a real film, or a kinetic reveal / count-up / cascade / camera move
 directly. Each bakes in real motion so good motion is the default. Authoring plain `rise`+`fade`
-from scratch is the #1 failure and `make direction-floor` (opt-in: `TASTE=1 make author-check`)
+from scratch is the #1 failure and `make check GATE=direction-floor` (opt-in: `TASTE=1 make author-check`)
 fails it as a `plain-slideshow`. Reach for a real device per beat, then fill brand content.
 
 ## Choreography rules (anti-monotony)

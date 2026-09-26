@@ -36,7 +36,7 @@ boundary: see `core/layers/html.js`). So a bespoke chart, tree, or diagram is a 
   "html": "<svg viewBox='0 0 200 120' width='480'><rect x='10' y='70' width='30' height='40' fill='var(--accent)' rx='2'/>…<polyline points='25,60 70,30 115,12 160,45' fill='none' stroke='#111' stroke-width='3'/></svg>" }
 ```
 
-That renders a real dataviz (bespoke bars + a trend line) and passes `make probe` (pure in n). Combine it with:
+That renders a real dataviz (bespoke bars + a trend line) and passes `make check GATE=probe` (pure in n). Combine it with:
 - the `svg` layer for a mark that **draws on** or **shape-morphs** (`draw` / `morph`),
 - `cameraMove` (`diveIn`/`panFollow`/`slowPush`) to push through or pan across the bespoke frame,
 - a `paint`/`aurora` field or `beam` for living motion behind/around it,
@@ -94,7 +94,7 @@ input can name a comp and fill labels but cannot inject script (the inline-`<scr
 layer defends). To ADD a comp, write a builder in `core/compositions/index.js` that: (1) builds the beat's
 static DOM into `el` (any `props` string as `textContent`/attr, never innerHTML); (2) authors PAUSED tweens
 via `ctx.gsap` with `delay` offset by `ctx.start` and `immediateRender:true`, no `Date.now`/`Math.random`.
-`seekAll` drives it → pure in n (`make probe` proves it). Rules learned the hard way (MISTAKES #154): every
+`seekAll` drives it → pure in n (`make check GATE=probe` proves it). Rules learned the hard way (MISTAKES #154): every
 tween is a `fromTo` (never `gsap.to(...immediateRender:false)`. It sticks the end value on backward seek);
 a travelling element uses ONE keyframed `fromTo`; never tween between two `var()` colour strings.
 

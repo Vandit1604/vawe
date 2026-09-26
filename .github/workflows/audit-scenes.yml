@@ -1,6 +1,6 @@
 name: layout audit (whole library, weekly)
 
-# `make audit` grades the one scene an author has open, so it only ever catches NEW defects. Two scenes
+# `make check GATE=audit` grades the one scene an author has open, so it only ever catches NEW defects. Two scenes
 # shipped dark-on-dark and stayed that way because nothing asked them again (engine-doctrine/MISTAKES.md #387).
 # This is the sweep that asks them again. Weekly, not nightly: it is minutes rather than seconds, and a
 # contrast defect that has been on disk for a month is not urgent enough to pay for daily.
@@ -38,8 +38,8 @@ jobs:
 
       - run: npm ci
 
-      - name: make audit-all
-        run: make audit-all
+      - name: make check GATE=audit-all
+        run: make check GATE=audit-all
 
       - name: annotated overlays
         # The overlays are worth keeping even when the sweep passed, because the next run's diff is

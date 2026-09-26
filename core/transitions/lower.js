@@ -40,7 +40,7 @@ export function boundaryMechanism(fx, mech) {
 }
 
 // A non-hex sting `color` used to become NaN then black with no error (engine-doctrine/MISTAKES.md
-// #476); this refuses it here so `make validate` names it instead. Keep in step with core/filters.js
+// #476); this refuses it here so `make check GATE=validate` names it instead. Keep in step with core/filters.js
 // `glowRGB`, the one owner of resolving a theme token to a literal rgb.
 const STING_TOKEN = /^var\(\s*--(accent|ink)\b/;
 

@@ -26,8 +26,8 @@ data.json ──► cmd/render (Go) ──► chromedp: N headless Chrome tabs
 ```
 
 The **load-bearing invariant**: `renderFrame(n)` is pure in `n` (byte-identical regardless of order),
-which is what makes the sharded capture correct. Guarded per-scene by `make probe` (render-order DOM
-purity) + `make canvas-purity` (shader/canvas pixels), and across the WHOLE library by `make snap-all`
+which is what makes the sharded capture correct. Guarded per-scene by `make check GATE=probe` (render-order DOM
+purity) + `make check GATE=canvas-purity` (shader/canvas pixels), and across the WHOLE library by `make check GATE=snap-all`
 (every shipped scene: quarantines any order-dependent scene + diffs a DOM signature vs a saved baseline).
 
 ## Frame pipeline (the ORDER is the contract)
@@ -91,7 +91,7 @@ chaining is refused by name in `core/tracks/follow.js` rather than left to arith
 **The ceiling of the check, stated so nobody trusts it further than it goes.** `lib-test` proves the
 call order and the accumulator set from the source text. It cannot prove a track read a fresh value
 rather than a stale one: that is a runtime property of one scene at one t, and the things that do see
-it are `make probe`, `make canvas-purity` and `make snap-all`.
+it are `make check GATE=probe`, `make check GATE=canvas-purity` and `make check GATE=snap-all`.
 
 ## The seven subsystems, and who owns what
 
@@ -160,7 +160,7 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `core/timeline/clips.js` | declarative composition | `clipStyleAt(el,t)` reads `data-start/-duration/-track/-anim/-out` and RETURNS the complete style at t (writes nothing), so the engine can be asked what a layer looks like at a time it is not drawing; `driveClips(clips,t)` is that, performed, over the frozen set `collectClips(root)` took at build. `registerTimeline`/`seekAll(t)` = seekable **animation-adapter interface** that drives paused WAAPI + `gsap.globalTimeline` per frame. |
 | `core/engine/preload.js` | awaited readiness phase (extracted from `boot`) | one async pass per asset kind BEFORE the virtual clock: images, spectrum, three, canvasFx, components, clips, ransom sprites, **GSAP** (`preloadGsap`: loads on demand for `gsap`/`morph`/`fx`/`fxOut`/`motionPath`/`physics`/`splitText`, stops the ticker, registers effects+plugins), lottie. Whatever it puts on `window.__*` is a static table by render time, so `renderFrame(n)` stays pure. |
 | `core/engine/gsap-effects.js` + `core/motion/morph.js` | GSAP as an INTERNAL tween engine | `gsap-effects.js` = a NAMED effect library (`registerGsapEffects`): entrances/text/loops referenced from JSON by `fx`, exits by `fxOut` (`GSAP_FX`/`EXIT_FX`/`FX_DUR` exports). `morph.js` = TextMorph (letters migrate A→B). GSAP 3.13 is an npm dependency copied into `assets/vendor/gsap.min.js` by `scripts/vendor-gsap.mjs` (never committed, license); the MotionPath/Physics2D/SplitText bonus plugin files stay vendored directly. Scenes can't bring JS, so GSAP is engine-internal, seeked per frame → pure. |
-| `core/timeline/seams.js` · `core/stings/index.js` · `core/cuts/index.js` | beat-to-beat transitions | `seams.js` = two-scene GPU blends (`SEAM_FX`, incl. `portal`); `stings.js` = single-scene shader FX (`SHADER_FX`); `cuts.js` = hard-cut timing. All shader-based → guarded by `make canvas-purity`. |
+| `core/timeline/seams.js` · `core/stings/index.js` · `core/cuts/index.js` | beat-to-beat transitions | `seams.js` = two-scene GPU blends (`SEAM_FX`, incl. `portal`); `stings.js` = single-scene shader FX (`SHADER_FX`); `cuts.js` = hard-cut timing. All shader-based → guarded by `make check GATE=canvas-purity`. |
 | `core/transitions/` | the unified transition surface | `catalog.js` (was `core/transitions/catalog.js`) = THE TRANSITION DATABASE, one entry per transition across `anim`/`cut`/`sting`/`seam`, derived from the four registries above so it can't drift; `lower.js` (was `core/transitions/lower.js`) lowers an author's one `transitions:[]` field to the correct raw mechanism (`lowerScene`), and is imported by `films/scene/scene.js` (the render page) directly, with NO dependency on `core/engine/expand.js`; `energy.js` = the shared speed-vs-drama dial; `units.js`/`units-house.js` = the GPU-blend seam primitives seams.js reads. Root shims (`core/transitions/catalog.js`, `core/transitions/lower.js`, `core/transitions/energy.js`) keep old import paths working (W9). |
 | `core/engine/expand.js` | build-time sugar, resolved server-side at LOAD time | `expandScene(data)`: expands every `{type:"block"}`/`{type:"comp"}` layer into the real layers its factory/comp definition produces, recursively, then bakes `cameraMove`; a `{type:"beat"}` layer is refused (`expandBeat` throws: blueprints are retired, compose from `recipes/` instead); `loadScene(data)` = `lowerScene(expandScene(data))`, the one loader every Node gate and script calls to read a scene off disk. Pure data→data, no `fs`, but deliberately NOT imported by `films/scene/scene.js`: it depends on ~186 block/beat factories the render page's file server default-denies by design (`renderer/internal/scene/scene.go` `served`, a security boundary for MCP/stranger scenes), and one of them imports `d3-geo` by bare specifier with no import map on that page. For `./bin/vawe`, the identical expansion runs a level down instead, server-side in Go: `renderer/internal/render/expand.go` shells out to `harness/author/expand-blocks.mjs` (this module's thin CLI wrapper) BEFORE the browser ever fetches the JSON, gated on an actual sugar hit so a non-sugar scene pays nothing extra. So a scene using this vocabulary renders directly either way, no `.expanded.json` twin, but the expansion happens in two different places depending on which render path is asking. |
 | `core/audio/`, `core/resample/`, `core/canvas/`, `core/beats/` | W9 packaging | Root singletons that shared a name prefix or a single owner grouped into sized packages, each with an `index.js` barrel: `audio/` (bridges·cues·kit·select·tactile), `resample/` (`index.js` the layer-resample wiring, `effects.js` the GL registry, `raster.js` the DOM→canvas serialiser), `canvas/` (`effects.js` Canvas-2D passes, `kind.js`), `beats/` (`index.js` the beat-grid binder, `detect.js` the pulse detector). A handful of single-consumer files moved INTO the package that alone imports them: `fx/ancestor-kills.js`, `layers/{frame-settle,path-morph}.js`, `tracks/spectrum.js`, `backgrounds/gradient-recipes.js`, `surfaces/{paint-fx,raymarch-fx,shaders-ambient,three-fx,three-scenes,globe-dots}.js`. Every moved file keeps a one-line root shim (`export * from './pkg/file.js'`) so no external import broke. |
@@ -175,20 +175,20 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `films/scene/schema.json` | field schema | the authoring vocabulary; `make check GATE=schema-check` asserts the engine reads nothing undefined. |
 | `films/<name>/sample.json` + siblings | data JSONs | `sample.json` is the reference; topics are siblings. |
 | `films/scene/` | generic data-driven format | layered composition from `data.layers[]` (text/image/block/… + timing + `anim`/`out` + kinetic `split`/`preset` + GSAP `fx`/`fxOut`/`gsap`/`morph`/`motionPath`/`physics`/`splitText` + `circle`/`ransom`) + `cuts`/`seams`/`stings` + `data.captions[]`. No per-topic code, the JSON is the video. |
-| `core/validate/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll`/`fxErrors`/`lintData` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make validate`. Browser-safe (boot imports it). |
+| `core/validate/validate.mjs` | data + theme validator | `validateData`/`validateTheme`/`validateAll`/`fxErrors`/`lintData` against `schema.json`; runs in `boot()` pre-first-frame (fail fast) + `make check GATE=validate`. Browser-safe (boot imports it). |
 | `renderer/cmd/render` (Go) | CLI entry | `--data/--module/--out`, `--all`, `--list`, `--workers`, `--alpha` (transparent VP9 `.webm` overlay). |
 | `renderer/internal/scene` (Go) | frame capture | parallel tabs; relies on purity. |
 | `renderer/internal/encode` (Go) | ffmpeg wrapper | H.264 + grain; `Mux` adds audio. |
 | `renderer/internal/audio` (Go) | PCM mixer | music loop + named sfx at cue times + **VO ducking** + sting + limiter. |
 | `renderer/internal/queue` (Go) | concurrency runner | foundation for batch (wired to `--all`). |
-| `scripts/` | authoring tools + gates | `harness/author/` (preview/storyboards/captions), `harness/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `quality/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
+| `scripts/` | authoring tools + gates | `harness/author/` (preview/storyboards/captions), `harness/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `quality/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make check GATE=snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
 | `harness/media/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for fully produced output (sound, vocals, generated imagery). No consumers yet; do not delete as "dead code". |
 | `.githooks/pre-push` | pre-push gate | runs `make check GATE=schema-check` + `make lib-test`; install with `make install-hooks`. |
 
 ## Contracts (don't break these)
 
 - **Purity:** `renderFrame(n)` pure in `n`; primitives + scene logic must be closed-form, no state.
-  `make probe`.
+  `make check GATE=probe`.
 - **Animated props:** `transform`/`opacity`/`clip-path`/`filter` only. No per-frame layout props.
 - **`data-layer="critical"`:** marks the elements the safe-zone + layout audit check. Mark new
   hero text/cards/values.
@@ -203,14 +203,14 @@ make list                 # formats + where schema/sample live
 make video D=…            # render one JSON → out/<name>.mp4
 make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look D=… / frame D=… N=…   # storyboard / one frame
-make validate [D=…]       # data + theme against schema.json (boot runs it too)
+make check GATE=validate [D=…]       # data + theme against schema.json (boot runs it too)
 make census               # every named population in films/scene, and the question each answers
 make test                 # the whole test suite: tests/**/*.test.mjs + renderer's go test
 make check GATE=lint-test            # regression asserts for validate's lint/fx/ease/block rules (instant)
-make audit [M=…]          # overlap/overflow/safe-zone/spacing  → /tmp/audit/<fmt>.png
-make probe [M=…] [D=…]    # render-order purity, one scene (protects sharded render)
-make snap-all [SAVE=1]    # WHOLE-LIBRARY: determinism screen + regression diff over every scene
-make verify               # render integrity + safe-zone + contact sheets (heavy)
+make check GATE=audit [M=…]          # overlap/overflow/safe-zone/spacing  → /tmp/audit/<fmt>.png
+make check GATE=probe [M=…] [D=…]    # render-order purity, one scene (protects sharded render)
+make check GATE=snap-all [SAVE=1]    # WHOLE-LIBRARY: determinism screen + regression diff over every scene
+make check GATE=verify               # render integrity + safe-zone + contact sheets (heavy)
 make review               # fast snapshot: lib-test + audit + master sheet (/tmp/review.png)
 ```
 
@@ -223,8 +223,8 @@ there is no CI-only command, because a second path is how the two drift apart.
 |---|---|---|---|
 | `gates.yml` | push to main · PR | `make lib-test` + `make check GATE=schema-check\|craft-coverage\|arsenal-check` (0.4s of gate) | 1 min |
 | `scene-check.yml` | push · PR, only when `films/scene/**.json` changed | `make author-check D=<file>` on each changed scene (1.6s each) | 2 min |
-| `audit-scenes.yml` | Monday 06:17 UTC · manual | `make audit-all` (1m46s over 34 scenes) | 3 min |
-| `snap-scenes.yml` | manual only | `make fonts` then `make snap-all SAVE=1` (16s) | 2 min |
+| `audit-scenes.yml` | Monday 06:17 UTC · manual | `make check GATE=audit-all` (1m46s over 34 scenes) | 3 min |
+| `snap-scenes.yml` | manual only | `make fonts` then `make check GATE=snap-all SAVE=1` (16s) | 2 min |
 
 The repo is private, so the free allowance is 2,000 Linux minutes a month. Measured against this
 repo's own rate, 467 commits in the last 30 days and 173 of them touching `films/scene`, the

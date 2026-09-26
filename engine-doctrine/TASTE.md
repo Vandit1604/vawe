@@ -286,7 +286,7 @@ separate ladder (not chained: you must look):
 make studio   D=<file>              # LIVE scrubbable preview + TIMELINE (bars, ramps, cuts, dead-air bands)
 make beats    D=<file> VS=<brand>   # eyeball first/mid/last of every beat, stacked beside the source
 make reveal   D=<file>              # the ENTER + settled + EXIT arc per beat (how it animates IN)
-make audit                          # overlap / clipped text / safe-zone / WCAG contrast
+make check GATE=audit                          # overlap / clipped text / safe-zone / WCAG contrast
 make ledger   D=<file>              # cross-video sameness, fails if it repeats a shipped design
 make judge    D=<file> VS=<brand>   # THE GATE THAT SEES, vision rubric on the near-final cut (JUDGE.md)
 ```
@@ -391,4 +391,4 @@ The enforcement lives in `skills/{taste-skill, impeccable}`, dials + a 41-rule d
 The doctrine, in one breath: **asymmetry over centered · scale contrast (one huge hero + tiny
 caption) · a committed non-generic face (the real brand font) · real assets over emoji · colour only
 from the brand · patterns as seasoning, never wallpaper · no em-dashes on screen.** CRAFT tells you
-what to do; `make designspec-check` checks you did it; this doc tells you the loop that ties it together.
+what to do; `make check GATE=designspec-check` checks you did it; this doc tells you the loop that ties it together.

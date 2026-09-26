@@ -243,7 +243,7 @@ function make2dFallback(canvas, w, h) {
 // ---- stage rasterisation (the DOM-as-texture bake) -----------------------------------------------
 // CHOICE: in-browser SVG <foreignObject> serialisation, compositing the 2D background canvas UNDER the
 // DOM layers. Reasons this path (option (a)) over a Go screenshot pre-pass (option (b)):
-//   • self-contained in the page: no Go/JS coordination, so `make probe`/`make snap`/`make
+//   • self-contained in the page: no Go/JS coordination, so `make check GATE=probe`/`make check GATE=snap`/`make
 //     canvas-purity` on existing scenes are untouched (a scene with no `seams` never bakes).
 //   • the bake is one-shot at build; the textures are static, so renderFrame(n) stays pure in n.
 // The two <foreignObject> gotchas are both handled here: (1) external stylesheets and CSS custom

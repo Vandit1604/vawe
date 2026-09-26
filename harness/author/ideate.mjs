@@ -382,7 +382,7 @@ function runFromRef(ref, clipArg, { ask: askFlag, answersPath } = {}) {
     process.exit(1);
   }
   if (grammar.coverage && grammar.coverage.ledger && grammar.coverage.ledger !== 'complete') {
-    console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make study-check NAME=${ref}`);
+    console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make check GATE=study-check NAME=${ref}`);
     process.exit(1);
   }
   if (askFlag) { console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref })), null, 2)); return; }

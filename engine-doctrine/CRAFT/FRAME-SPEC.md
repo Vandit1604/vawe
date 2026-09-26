@@ -14,13 +14,13 @@ group: look
 - Weight each on-screen cue into the back ~50% of its beat (build 0-30% / breathe 30-70% / resolve
   70-100%); never dump everything in the first 30% (slideshow) or fake life with independent drift
   during a hold (screensaver).
-- After rendering, QA the SEAMS not the centres: `make seam-check D=<file>` pulls the frames
+- After rendering, QA the SEAMS not the centres: `make check GATE=seam-check D=<file>` pulls the frames
   straddling every transition and flags a luminance flash or a bad morph.
 - Enforced by `[gated: quality/gates/author-check.mjs#front-loaded]` (+ `motion-monotony`, same gate)
-  for the reveal-model floor; `[ref: make seam-check]` for the seam QA; the two locked artifacts
+  for the reveal-model floor; `[ref: make check GATE=seam-check]` for the seam QA; the two locked artifacts
   themselves are `[eye]`, checked by sign-off before authoring.
 - Confirm: is every on-screen cue weighted into the back half of its beat, and did you run
-  `make seam-check` after rendering?
+  `make check GATE=seam-check` after rendering?
 
 A great video is not authored frame-first. Two artifacts are locked first and every frame then *obeys
 them line by line*: a **design-system spec** (our `frame.md`) and a **scene-by-scene storyboard** (our
@@ -98,12 +98,12 @@ preset ("no two beats move alike"). Reach past both.
 ## Part 5: QA the SEAMS, not the centers
 
 The highest-value render bugs (a black flash, a morph that reads as a collision) hide inside the transition
-overlap, where every center-sampling gate steps over them. After rendering, run **`make seam-check D=<file>`**:
+overlap, where every center-sampling gate steps over them. After rendering, run **`make check GATE=seam-check D=<file>`**:
 it pulls the frames straddling every transition out of the mp4 and flags a luminance flash, and writes
 `/tmp/seams/<name>.png` for the eye. Sample the seams, always.
 
 ---
 
 **The loop:** lock Part 1 + Part 2 (get sign-off) → author the JSON obeying the spec →
-`make author-check` (floor now checks front-load + monotony) → render → `make seam-check` + `make judge`.
+`make author-check` (floor now checks front-load + monotony) → render → `make check GATE=seam-check` + `make judge`.
 Full authoring narrative: [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md). Bespoke frames: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md).

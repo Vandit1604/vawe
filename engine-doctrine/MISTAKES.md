@@ -108,7 +108,7 @@ the schema now carries the exact enum from the registry and states that unknown 
 holds: quality/gates/conformance.mjs, quality/gates/schema-drift.mjs
 
 ## 22. Fonts substituted silently ,  twice ,  because the load list was hand-maintained
-(1) the load set is now DERIVED from the `@font-face` rules in the CSS (`core/engine/fonts.js`), so vendoring is the only step; (2) `make font-audit` fails the build on any family that is not vendored +...
+(1) the load set is now DERIVED from the `@font-face` rules in the CSS (`core/engine/fonts.js`), so vendoring is the only step; (2) `make check GATE=font-audit` fails the build on any family that is not vendored +...
 holds: none
 
 ## 23. Auto sound-design ignored the `cuts` array (so a scored film was silent at every cut)
@@ -132,7 +132,7 @@ holds: quality/gates/gate-mutation.mjs
 holds: none
 
 ## 28. `tracking` was applied and then overwritten one statement later
-the guard now honours both names. Found by: `make conformance` (phase 2) ,  not by reading the code, which looks correct at both sites. ---.
+the guard now honours both names. Found by: `make check GATE=conformance` (phase 2) ,  not by reading the code, which looks correct at both sites. ---.
 holds: quality/gates/lib-test.mjs
 
 ## 29. The `cuts` array renders NOTHING (the engine's largest silent-ignore)
@@ -178,7 +178,7 @@ holds: none
 What: entrances and exits felt slightly wrong in a way that is hard to point at. Root cause: `core/timeline/clips.js` composed opacity as `clamp01(enterT) * exitMul` ,  two linear ramps ,  while the...
 holds: quality/gates/scene-snap.mjs
 
-## 39. `make snap` reported IDENTICAL after every fade curve in the engine changed
+## 39. `make check GATE=snap` reported IDENTICAL after every fade curve in the engine changed
 frames are now derived from where the motion IS ,  mid-entrance and mid-exit of every layer, read from the same `data-*` attributes `driveClips` uses, plus cut windows and stings, plus the even...
 holds: none
 
@@ -210,11 +210,11 @@ holds: quality/gates/sim-audit.mjs
 `sceneDims(cfg, key?)` in `core/layout/safe.js` ,  dimensions and the safe area are the same question asked twice, so they live together.
 holds: quality/gates/lib-test.mjs
 
-## 47. `make motion D=...` audited a different file and said nothing
+## 47. `make check GATE=motion D=...` audited a different file and said nothing
 the target forwards `D` to `--data`, and the report line names the data file it read. Rule: same class as #19 and #28 ,  input accepted and silently ignored.
 holds: quality/gates/motion-audit.mjs
 
-## 48. `make validate` with no arguments validated one file out of sixty
+## 48. `make check GATE=validate` with no arguments validated one file out of sixty
 no arguments now means every scene that declares a `module` (which naturally excludes planning artifacts like `*.intent.json`) plus every `themes/*.json` checked directly. What it found on the...
 holds: none
 
@@ -278,8 +278,8 @@ holds: none
 renamed to `aspects`. Caught in one run because the prop was declared in the schema before being used; had it gone undeclared, the overrides would have been silently ignored at render. Rule:...
 holds: none
 
-## 64. `make probe` cannot see inside a canvas
-both layer types clear when off-window. New gate `make canvas-purity` hashes the actual pixels, pinned in gate-test by reverting the clear. Rule: the sixth time this session (#39, #41, #45, #48, #56).
+## 64. `make check GATE=probe` cannot see inside a canvas
+both layer types clear when off-window. New gate `make check GATE=canvas-purity` hashes the actual pixels, pinned in gate-test by reverting the clear. Rule: the sixth time this session (#39, #41, #45, #48, #56).
 holds: quality/gates/canvas-purity.mjs
 
 ## 65. `make check GATE=coverage` reported 15 layer types as 14/14
@@ -327,7 +327,7 @@ Status: real defect, evidenced, NOT fixed.
 holds: none
 
 ## 76. I diagnosed a flake twice from truncated output
-What: `make conformance` failed twice inside a chain of `make` targets.
+What: `make check GATE=conformance` failed twice inside a chain of `make` targets.
 holds: none
 
 ## 77. The doc, the manifest and the engine each said something different about `unit`
@@ -511,7 +511,7 @@ apply loudness at the MUX via ffmpeg `loudnorm=I=<target>:TP=-1.5:LRA=11` (encod
 holds: none
 
 ## 122. a typed line cut off mid-type because its beat was too short
-(authoring) raised the speed to 48/s and the duration to 1.6s so it finishes at ~0.8s and holds before the cut. (framework) `make critique` now has a `typing-cutoff` rule: it flags any typing...
+(authoring) raised the speed to 48/s and the duration to 1.6s so it finishes at ~0.8s and holds before the cut. (framework) `make check GATE=critique` now has a `typing-cutoff` rule: it flags any typing...
 holds: none
 
 ## 123. beat transitions dipped to an EMPTY stage (jump-cut with a dip)
@@ -535,7 +535,7 @@ Captured the habits + the study pipeline (measure → catalog motifs → map to 
 holds: none
 
 ## 128. the camera zoom "shook" / wasn't smooth: cameraAt eased EVERY segment, zeroing velocity at each keyframe
-`cameraAt` now honours a per-keyframe `ease` (mirroring `motionAt`), default `easeInOutCubic` so every existing camera is byte-identical (`make probe` confirms).
+`cameraAt` now honours a per-keyframe `ease` (mirroring `motionAt`), default `easeInOutCubic` so every existing camera is byte-identical (`make check GATE=probe` confirms).
 holds: none
 
 ## 129. seams rendered DEAD SILENT under `audio.auto`: sound design derived cuts + stings but never seams
@@ -590,7 +590,7 @@ holds: none
 `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md` ,  the one front-to-back narrative, chaining the arsenal in use-order (manufacture the four things → lock sheet → JSON in layering order → `make author-check`...
 holds: none
 
-## 142. `make inspect` silently passed when no `.intent.json` sidecar existed
+## 142. `make check GATE=inspect` silently passed when no `.intent.json` sidecar existed
 Within `make author-check`, a missing sidecar is surfaced as a visible WARN ("this scene declares no per-beat value contract"), and `--strict`/`STRICT=1` treats it as a failure.
 holds: none
 
@@ -1038,7 +1038,7 @@ What. `playhead.json` declares its continuous object as one vertical bar: a text
 holds: none
 
 ## 253. `layer-props` was inverted: 1482 false alarms and ~66 real misses, because it looked for reads instead of asking for them (a fourth #229/#232/#242, and the same shape as #214/#216/#217)
-`make layer-props` reported 1482 props "accepted and dropped" ,  the failure CLAUDE.md names as the most expensive in this repo.
+`make check GATE=layer-props` reported 1482 props "accepted and dropped" ,  the failure CLAUDE.md names as the most expensive in this repo.
 holds: none
 
 ## 254. `make reveal` reported a contact sheet it had not written, and stamped a receipt for it
@@ -1394,7 +1394,7 @@ holds: none
 holds: quality/gates/arsenal-check.mjs
 
 ## 336. Two films authored as improvements, both slower than the one they replaced
-`quality/gates/pace-check.mjs`, in the TASTE half of `author-check` and runnable as `make pace-check` (no argument prints a census over the library).
+`quality/gates/pace-check.mjs`, in the TASTE half of `author-check` and runnable as `make check GATE=pace-check` (no argument prints a census over the library).
 holds: quality/gates/author-check.mjs, quality/gates/pace-check.mjs
 
 ## 337. A gate that names the exact drift, and is only a warning
@@ -1602,7 +1602,7 @@ The first film built on per-beat backdrops (#385) rendered three beats over pape
 holds: quality/gates/audit-scenes.mjs, quality/gates/plan-vs-render.mjs
 
 ## 388. A check that only grades the file you have open
-`make audit` is a good check. It samples the bg canvas under a text element's own ink box, computes WCAG against it, and names the layer.
+`make check GATE=audit` is a good check. It samples the bg canvas under a text element's own ink box, computes WCAG against it, and names the layer.
 holds: quality/gates/lib-test.mjs
 
 ## 389. The colour wave settled to invisible, one level under #373
@@ -1610,7 +1610,7 @@ holds: quality/gates/lib-test.mjs
 holds: none
 
 ## 390. The contrast gate graded frames 0.067s into their entrance
-`make audit-all` (#388) reported 33 scenes with hard contrast failures.
+`make check GATE=audit-all` (#388) reported 33 scenes with hard contrast failures.
 holds: quality/gates/lib-test.mjs
 
 ## 391. A worktree fan-out over films silently throws the work away
@@ -1681,7 +1681,7 @@ holds: none
 #394 fixed eight readers of the unified `transitions` surface one at a time, and that is the bug. `beat-check`, `critique`, `direction-floor`, `pace-check`, `beats`, `reveal`, `motion-director`...
 holds: quality/gates/plan-vs-render.mjs, quality/gates/scene-timing.mjs, quality/gates/seams.mjs
 
-## 408. SEVEN more consumers still do not lower `transitions`, and one is `make seam-check`
+## 408. SEVEN more consumers still do not lower `transitions`, and one is `make check GATE=seam-check`
 #407 closed the ninth consumer. The grep it was required to run before closing found seven more, which is the point of that rule and the reason #394's "eight consumers, fixed" was wrong. The sharp...
 holds: quality/gates/coverage.mjs, quality/gates/seams.mjs, quality/gates/similarity.mjs
 
@@ -1698,7 +1698,7 @@ holds: none
 holds: none
 
 ## 412. The seam gate printed a pass it had never earned, and the ledger scan was dead
-Five more consumers of the unified `transitions` surface, found by the grep #407 was required to run. `make seam-check` on `brew-launch-act1` sampled SEVEN boundaries and not one was a cut. All...
+Five more consumers of the unified `transitions` surface, found by the grep #407 was required to run. `make check GATE=seam-check` on `brew-launch-act1` sampled SEVEN boundaries and not one was a cut. All...
 holds: none
 
 ## 413. Nothing stopped a headline landing on the caption
@@ -1893,7 +1893,7 @@ The imports. And the probe that proves it: expanding a scene that declares `came
 holds: none
 
 ## 460. the determinism net could not see a single block, and nobody noticed for the whole library
-`quality/gates/snap-blocks.mjs` + `make snap-blocks [SAVE=1] [BLOCK=<name>]`.
+`quality/gates/snap-blocks.mjs` + `make check GATE=snap-blocks [SAVE=1] [BLOCK=<name>]`.
 holds: none
 
 ## 461. `pad` on an unpainted layer was accepted and discarded
@@ -2105,7 +2105,7 @@ holds: none
 holds: none
 
 ## 513. the validator passed a scene the engine refuses at boot, and studio hid the reason
-What. A scene declaring `spectacle` with an `of` naming no layer passed `make validate` clean, then died at boot.
+What. A scene declaring `spectacle` with an `of` naming no layer passed `make check GATE=validate` clean, then died at boot.
 holds: none
 
 ## 514. RETRACTED, and the retraction is the lesson
@@ -2269,7 +2269,7 @@ What. The terminal panel in the shader film crept: measured off the rendered fra
 holds: none
 
 ## 554. a cut's `cx`/`cy` were per cent in the engine and 0-1 in the schema, so the only legal values were the wrong ones
-the schema entry now says per cent, `max: 100`, and names `core/cuts/index.js` as the owner, so the two spellings agree. → Gate: `make validate` / `core/validate/validate.mjs`, which now permits what the engine...
+the schema entry now says per cent, `max: 100`, and names `core/cuts/index.js` as the owner, so the two spellings agree. → Gate: `make check GATE=validate` / `core/validate/validate.mjs`, which now permits what the engine...
 holds: none
 
 ## 555. `sceneUnits` held EVERY layer of a beat alive through the cut, so a long beat rendered its whole history at once
@@ -2342,7 +2342,7 @@ holds: quality/gates/designspec-check.mjs (dead-token, inside author-check)
 
 ## 572. a group's children fell back to the 0.26s default exit, so every dissolve over a group-built beat crossed an empty field
 `addGroupChild` in core/layers/util.js computed a child's clock from the parent but never passed the parent's `exitDur` down, so a child with none of its own faded out over the last quarter second of its window, exactly at the beat boundary; a hard cut hid it, a dissolve found nothing to cross. A child now inherits the group's `exitDur` when it states none, and blueprint layers hold to the beat end.
-holds: core/layers/util.js (childExitDur), blueprints/kit.mjs (exitDur 0 by default), make seam-check
+holds: core/layers/util.js (childExitDur), blueprints/kit.mjs (exitDur 0 by default), make check GATE=seam-check
 
 ## 573. a migration script read the file the same change deleted, so it could run exactly once
 legacy-fold.mjs folded the legacy manifest into scene waivers and the manifest was deleted in the same commit; on any machine whose gitignored library was not folded yet the script crashed on ENOENT. A one-shot script that owns its input reads it from the last commit that carried it (`git show <sha>:<path>`) when the file is gone.
@@ -2486,7 +2486,7 @@ holds: engine-doctrine/CRAFT/SUBAGENT-BUDGET.md, engine-doctrine/CRAFT/SUBAGENTS
 
 
 ## 608. a persistent object does not create motion, it only makes motion possible
-The object path was built to fix films that read as slideshows, proved by three throwaway films differing only in structure. A, the old way: two beats, a fragment each, torn down and rebuilt at the cut. B: the same two beats sharing one fragment, so the DOM survives, one layer with `acrossBeats`. C: B plus a keyed object chain across the cut. `make motion-floor` on all three, same theme, same copy, same 6 seconds: A is 9 of 10 windows dead, B is 9 of 10 dead, C is 10 of 10 dead with a LOWER peak than either. The structural change is real (the old assembler drew the object as `type: rect, fill: var(--accent)` on the identical storyboard) but it moved the motion floor by nothing. What the floor measures is the RATE of localised change, and all three films key one reveal per three-second beat, so each holds still for two and a half seconds no matter who owns the DOM.
+The object path was built to fix films that read as slideshows, proved by three throwaway films differing only in structure. A, the old way: two beats, a fragment each, torn down and rebuilt at the cut. B: the same two beats sharing one fragment, so the DOM survives, one layer with `acrossBeats`. C: B plus a keyed object chain across the cut. `make check GATE=motion-floor` on all three, same theme, same copy, same 6 seconds: A is 9 of 10 windows dead, B is 9 of 10 dead, C is 10 of 10 dead with a LOWER peak than either. The structural change is real (the old assembler drew the object as `type: rect, fill: var(--accent)` on the identical storyboard) but it moved the motion floor by nothing. What the floor measures is the RATE of localised change, and all three films key one reveal per three-second beat, so each holds still for two and a half seconds no matter who owns the DOM.
 C measured worst, and the reason given was wrong: its slow 900x420 to 760x360 drift was called "spread and gentle, the definition of the ambient motion the gate refuses to count". It is not: a size-only key on a solid object changes a thin ring at its edge, which pairProfile's share metric reads as LOCAL, the opposite classification. Rebuilt to the same description by harness/dev/motion-lab.mjs, the C variant measures BETTER than B, not worse, and a variant with real translation better still; the two runs cannot be reconciled, so the C number is fixture-dependent. What survives is the half that reproduces: A and B measure the same, so structure alone buys nothing. Two different problems were being treated as one: the PATH (can a thing survive a cut and be drawn as itself) and the DENSITY (how many overlapping keyed events per second). This work fixed the first; the second is the motion decider's, and no amount of the first substitutes for it.
 holds: harness/author/assemble.mjs, quality/gates/motion-floor.mjs
 
@@ -2554,7 +2554,7 @@ against a MOVING typed line rather than a still box.
 The fix is one property, not a new subsystem: a travel station can now name `caret:"#<typing layer id>"`
 and it expands into the push-in-then-pan pair itself, timed off the layer's own `start`/`typing`
 cps/text length (`core/engine/produce.js` `resolveCaretStations`), so retiming the text retimes the
-camera instead of leaving a stale hand-keyed number behind. `make critique` now names both halves
+camera instead of leaving a stale hand-keyed number behind. `make check GATE=critique` now names both halves
 report-only: `fake-typing` for the word-fade/glyph fragment, `typing-camera-still` for a typed line the
 camera never leans into.
 holds: core/engine/produce.js, quality/gates/critique.mjs, engine-doctrine/CRAFT/KEYED-MOTION.md
@@ -2636,14 +2636,14 @@ holds: core/layers/group-parts.test.mjs
 
 ## 624. An `image` layer's relative src rendered nothing, and nothing said so
 `{"src": "assets/vawe-flow-2/tile-grid.jpg"}` on an image layer rendered an empty box in the mp4. The
-file existed at the repo root; `make asset-check` and the render both passed. The scene page is served
+file existed at the repo root; `make check GATE=asset-check` and the render both passed. The scene page is served
 from `/films/scene/`, so the bare path resolved to `/films/scene/assets/...` in the browser and
 404'd, the exact trap `core/layers/video.js` already names in its own comment. `core/engine/src-url.js`
 (`srcUrl`) already fixed this for video; the image layer never called it. It builds its `<img>` through
 `icon()` (`core/motion/motion.js`), which wrote the raw `src` straight into the tag.
 The fix: `icon()` now resolves its image src through `srcUrl` too, so image, video and any HTML built
 through `icon()` share the one resolver instead of video carrying a fix nothing else got. `make
-asset-check` also notes (does not fail on) a relative src that does resolve to a real file, naming the
+check GATE=asset-check` also notes (does not fail on) a relative src that does resolve to a real file, naming the
 served-root form an author could write directly.
 holds: core/motion/motion.js, core/engine/src-url.js, quality/gates/asset-check.mjs
 
@@ -2751,7 +2751,7 @@ The film itself was fixed by overlapping the two acts: the timeline layer no lon
 holds: none
 
 ## 632. `spectacle.at` was the one point-in-time key tempo did not scale, and nothing noticed until something compared it
-`core/timeline/spectacle.js` gained a check that the named mechanism is really present at `at`, which meant comparing `at` against layer windows for the first time. Those windows are scaled by `tempo`; `at` was not. So on the one film that carries a tempo, the same check ran on two clocks: `make validate` and the contact-sheet path read AUTHORED windows (11.08s-12.75s) while the render page read VIEWER windows (13.03s-15.00s), and NO value of `at` satisfied both. Setting it to 13.04 passed the page and failed the sheets; setting it to 11.09 did the reverse.
+`core/timeline/spectacle.js` gained a check that the named mechanism is really present at `at`, which meant comparing `at` against layer windows for the first time. Those windows are scaled by `tempo`; `at` was not. So on the one film that carries a tempo, the same check ran on two clocks: `make check GATE=validate` and the contact-sheet path read AUTHORED windows (11.08s-12.75s) while the render page read VIEWER windows (13.03s-15.00s), and NO value of `at` satisfied both. Setting it to 13.04 passed the page and failed the sheets; setting it to 11.09 did the reverse.
 Two wrong turns before the right one, both worth recording. First I assumed `at` was on the viewer clock and taught `core/validate/validate.mjs` to expand the scene before checking. That imported `core/engine/expand.js` into a module the RENDER PAGE loads, and expand.js pulls in `blocks/` and `recipes/`, neither of which is under the render server's allowed roots, so the module never loaded, boot never finished, and every render died on a 30s puppeteer timeout with no message. Second I swapped that for `resolveTempo` (no imports, browser-safe) and made the validator agree with the page, which simply moved the disagreement to the third caller.
 The fix is one line in the one owner: `spectacle.at` joins the scaling table in `core/engine/tempo.js`, beside `audio.cues[].t`. The class is exactly #629 again, one file and one week apart: a point-in-time key that something else compares against scaled times must be scaled with them, and the bug stays invisible until the first consumer actually does the comparison. Before adding a check that compares a field to a time, grep `tempo.js` for that field.
 holds: core/engine/tempo.test.mjs

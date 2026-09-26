@@ -152,7 +152,7 @@ Top-level scene keys that change what the camera DOES rather than where it goes.
 
 ## Destinations (platform safe area)  `[canvas]`
 
-`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition: `core/layout/safe.js`.
+`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make check GATE=audit` measures every layer against this box. One definition: `core/layout/safe.js`.
 
 The tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.
 
@@ -367,7 +367,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 ## three.js scenes (real geometry)  `[layer]`
 
-`{ "type":"three", "three":"<name>" }`. A scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/surfaces/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.
+`{ "type":"three", "three":"<name>" }`. A scene graph: meshes, materials, lights, a camera. For what a distance field structurally cannot express: a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/surfaces/three-fx.js`), and `make check GATE=canvas-purity` hashes the real pixels to prove it.
 
 | name | what / when |
 |---|---|

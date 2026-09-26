@@ -1453,7 +1453,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   ok('theme.look: scale values must be numbers', lookErrors({ scale: { hook: '90px' } })
     .some((m) => /look\.scale\.hook must be a number/.test(m)));
 
-  // every theme pack this repo ships must itself be clean: the same live registries `make validate`
+  // every theme pack this repo ships must itself be clean: the same live registries `make check GATE=validate`
   // uses, so this is the real contract, not a mocked one.
   const { BG_NAMES: liveBg } = await import('../../core/backgrounds/index.js');
   const { TRANSITIONS: liveTransitions } = await import('../../core/transitions/catalog.js');

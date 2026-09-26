@@ -334,8 +334,8 @@ const CODE_EXCLUDE = new Map([
   // from feature-audit.mjs's craft-framed sibling (never-adopted, preset-monotony), which IS routed.
   ['unexercised', 'coverage.mjs: no scene in the library exercises this vocabulary, so a regression there goes unnoticed; a test-corpus gap'],
   ['unexercised-prop', 'coverage.mjs: no scene sets a schema-declared prop, same test-corpus-gap framing'],
-  ['audit-errored', 'audit-scenes.mjs: `make audit` crashed on a scene, a tooling failure'],
-  ['audit-hard', 'audit-scenes.mjs: a rollup of a scene\'s underlying `make audit` findings, which carry their own codes'],
+  ['audit-errored', 'audit-scenes.mjs: `make check GATE=audit` crashed on a scene, a tooling failure'],
+  ['audit-hard', 'audit-scenes.mjs: a rollup of a scene\'s underlying `make check GATE=audit` findings, which carry their own codes'],
   ['judge-usage', 'judge.mjs: CLI called with no argument, a usage error'],
 ]);
 

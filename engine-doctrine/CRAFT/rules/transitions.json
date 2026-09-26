@@ -27,7 +27,7 @@
   "check": "cut-families",
   "adapt": null,
   "brief": "one cut family per film; \u22653 families = FAIL (make direct)",
-  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#what-the-gate-enforces-make-direct-make-critique"
+  "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#what-the-gate-enforces-make-direct-make-check-gatecritique"
  },
  {
   "id": "transitions.crossfade-mud",

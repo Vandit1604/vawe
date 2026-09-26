@@ -14,7 +14,7 @@ confirm: "which face was chosen for its personality, and does the size scale hol
 - Run `make brandspec URL=…` (or `make fonts-discover` with no site) BEFORE picking a face or a
   weight; never guess. Pick 1-3 faces with roles (primary/secondary/accent), pair for contrast not
   conflict, and size hero type to fill 60-80% of frame width, not a web-sized box.
-- Enforced by `make audit` (`off-font`, `weak-headline`) and `make designspec-check`
+- Enforced by `make check GATE=audit` (`off-font`, `weak-headline`) and `make check GATE=designspec-check`
   (overused-face detection).
 - Checkable action: which face was chosen for its personality, and does the size scale hold across
   beats?
@@ -111,7 +111,7 @@ used. Don't.** Those three are the default on every AI landing page, so they rea
 reaching for the theme you saw most recently is recall, not a decision. Neither is a choice you made about
 this brand. Reflecting a real site? The face is already decided and `make brandspec` has told you what it
 is. Nothing to reflect? Pick from the table above by the SIGNAL you want, name the signal out loud, and
-commit. (This is also an `impeccable` rule, `make designspec-check` flags overused faces.)
+commit. (This is also an `impeccable` rule, `make check GATE=designspec-check` flags overused faces.)
 
 ## 2. Pair with contrast, not conflict
 - **Two faces max; one is often enough.** Differ *clearly* by class or weight (serif + sans, or black + regular),

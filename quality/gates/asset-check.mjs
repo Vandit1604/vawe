@@ -4,7 +4,7 @@
 // vo/music/spectrum, any assets|formats path) and confirms the file exists, so you fetch what's missing
 // BEFORE authoring around it. Remote http(s)/data: refs are noted, not failed (can't check offline).
 //
-//   node quality/gates/asset-check.mjs <scene.json> [--strict]   ·   make asset-check D=<file>
+//   node quality/gates/asset-check.mjs <scene.json> [--strict]   ·   make check GATE=asset-check D=<file>
 // WARN by default (with the command to get each asset); --strict blocks.
 //
 // DO NOT DELETE THIS AS REDUNDANT. `preloadImages` in core/boot.js now THROWS on a repo-local image

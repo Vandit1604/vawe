@@ -283,7 +283,7 @@ export function createRenderer(ctx) {
     // already computes internally, made readable BY NAME instead of a second private computation
     // drifting from the first. Optional per type; most expose nothing. Pure in (L, t, scene): no DOM
     // read, no state kept between frames, so it is safe to resolve before any layer's own frame() runs
-    // and to re-run out of order (make probe samples frames out of order for exactly this reason).
+    // and to re-run out of order (make check GATE=probe samples frames out of order for exactly this reason).
     expose(L, t, scene) { const m = pick(L); return m.expose ? m.expose(L, t, scene) : null; },
   };
 }

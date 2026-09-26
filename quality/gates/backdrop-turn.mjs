@@ -26,7 +26,7 @@
 //
 //   node quality/gates/backdrop-turn.mjs <scene.json>    (exits 1 if backdrop-never-turns fires)
 //   node quality/gates/backdrop-turn.mjs                 (census: every films/scene/*.json, exits 0)
-//   make backdrop-turn [D=scene.json]
+//   make check GATE=backdrop-turn [D=scene.json]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
