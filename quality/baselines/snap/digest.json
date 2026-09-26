@@ -715,15 +715,15 @@
    "font": "db51b5ddc8c7"
   },
   "gauge": {
-   "sig": "e84118d11db645b7",
+   "sig": "2c48f777e40b79c2",
    "font": "db51b5ddc8c7"
   },
   "gauge.full": {
-   "sig": "81ab88416823e7e5",
+   "sig": "02e2120911c97f72",
    "font": "db51b5ddc8c7"
   },
   "gauge.warn": {
-   "sig": "bf44e7b89647c636",
+   "sig": "131729dfab02259f",
    "font": "db51b5ddc8c7"
   },
   "glassCard": {
