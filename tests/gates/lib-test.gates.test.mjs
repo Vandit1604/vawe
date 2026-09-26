@@ -810,6 +810,70 @@ test('lib-test: gates', async () => {
   }
 }
 
+// UNIT: harness/lib/judge-self-record.mjs. A subagent launched via the Agent tool for a fresh judge
+// (engine-doctrine/JUDGE.md: "the PASS is not the author's to self-record") can inherit the SAME
+// CLAUDE_CODE_SESSION_ID as the agent that rendered the cut, since env vars propagate to a spawned
+// child by default. Session alone used to be the whole self-record test, so that inherited session
+// refused the one PASS the guard exists to allow. `agent` (CLAUDE_PID) tells them apart: a subagent
+// runs as its own process, so its PID differs even when the session does not.
+// tests/fixtures/motion-absolute-time.fixture.json's own bug (bug 1) motivated reading a real repro log
+// before fixing; this fix's own repro is quality/runs (sting-raw.log): "judge.mjs refuses to record" a
+// PASS from a fresh judge subagent sharing the authoring session.
+{
+  const { appendRun, runsPathFor } = await import('../../harness/lib/runlog.mjs');
+  const { selfRecordCheck } = await import('../../harness/lib/judge-self-record.mjs');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'judge-self-record-'));
+  const film = path.join(tmpDir, '_judge-self-record.json');
+  const cwd = process.cwd();
+  process.chdir(tmpDir);
+  const priorSession = process.env.CLAUDE_CODE_SESSION_ID;
+  const priorAgent = process.env.CLAUDE_PID;
+  try {
+    // The authoring agent renders: session S, agent (PID) A.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'A';
+    appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
+
+    // THE BUG: a fresh judge subagent, same session S (inherited), but its OWN process B, used to be
+    // refused on session equality alone. It must now be accepted.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'B';
+    let r = selfRecordCheck(film);
+    ok('judge-self-record: a different agent (PID) in the SAME session is not self-recorded',
+      r.selfRecorded === false);
+
+    // THE GUARD STILL WORKS: the exact same agent (same session, same PID) trying to pass its own
+    // render is still refused.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'A';
+    r = selfRecordCheck(film);
+    ok('judge-self-record: the SAME agent in the same session is refused as self-recorded',
+      r.selfRecorded === true);
+
+    // A different session entirely (an unrelated run) is never self-recorded, regardless of PID.
+    process.env.CLAUDE_CODE_SESSION_ID = 'T';
+    process.env.CLAUDE_PID = 'A';
+    r = selfRecordCheck(film);
+    ok('judge-self-record: a different session is not self-recorded',
+      r.selfRecorded === false);
+
+    // NO WEAKENING: outside Claude Code (no CLAUDE_PID on either side) the guard still falls back to
+    // session alone, exactly as it always did.
+    delete process.env.CLAUDE_PID;
+    fs.rmSync(runsPathFor(film));
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
+    r = selfRecordCheck(film);
+    ok('judge-self-record: with no agent id on either side, session equality alone still refuses',
+      r.selfRecorded === true);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    if (priorSession === undefined) delete process.env.CLAUDE_CODE_SESSION_ID; else process.env.CLAUDE_CODE_SESSION_ID = priorSession;
+    if (priorAgent === undefined) delete process.env.CLAUDE_PID; else process.env.CLAUDE_PID = priorAgent;
+  }
+}
+
 // UNIT: harness/lib/timings.mjs formats a fixture run log into a wall-clock table, and computes the
 // per-command median from a small set of synthetic runs (odd and even counts, both exercised).
 {
