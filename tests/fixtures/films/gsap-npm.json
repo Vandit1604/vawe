@@ -1,0 +1,26 @@
+{
+ "$schema": "../../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "tempo": 0.5,
+ "duration": 3,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "card",
+   "type": "rect",
+   "x": 700,
+   "y": 400,
+   "w": 400,
+   "h": 240,
+   "bg": "#202020",
+   "radius": 12,
+   "start": 0,
+   "duration": 3,
+   "anim": "none",
+   "fx": "dropIn"
+  }
+ ]
+}
