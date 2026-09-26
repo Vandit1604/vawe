@@ -6,7 +6,7 @@ import { STAGE_ORDER } from '../../quality/gates/stage.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SKILLS_DIR = path.join(ROOT, 'skills');
 
-function frontmatterField(text, key) {
+export function frontmatterField(text, key) {
   const m = /^---\n([\s\S]*?)\n---/.exec(text);
   if (!m) return null;
   const line = new RegExp(`^${key}\\s*:\\s*(.+)$`, 'm').exec(m[1]);

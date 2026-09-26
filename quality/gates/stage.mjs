@@ -37,6 +37,7 @@ import { score, toks, coverageIn, CONFIDENT } from '../../harness/author/arsenal
 // demand. See harness/author/discovery.mjs for the full accounting.
 import { GROUPS, usedNames, pasteLine, ambiguousNames, tokenGroupsOf, bestWindowMatch } from '../../harness/author/discovery.mjs';
 import { skillsForStage } from '../../harness/lib/skill-stages.mjs';
+import { sceneFeatures, filmType, craftDocsFor } from '../../harness/lib/craft-route.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -101,6 +102,14 @@ const runGate = (script, file) => {
   catch { return false; }
 };
 
+/** The 1-3 CRAFT docs to read for THIS film right now: harness/lib/craft-route.mjs owns the ranking,
+ * this only gathers what it needs (the brief text, the storyboard text, the scene, the film's type). */
+function craftDocsForFilm(scene, sbSrc, briefPath) {
+  const briefSrc = fs.existsSync(briefPath) ? fs.readFileSync(briefPath, 'utf8') : '';
+  const type = filmType(`${briefSrc}\n${sbSrc}`);
+  return craftDocsFor({ type, features: sceneFeatures(scene) });
+}
+
 // The stages, in order. Each names the ONE command that moves the film out of it. `done` is asked in
 // order and the FIRST stage that is not done is where the film is: a film cannot be at `build` while
 // its plan is unapproved, and expressing that as an ordered list rather than a set of flags is what
@@ -161,6 +170,7 @@ export function stageOf(arg) {
   // (harness/lib/skill-stages.mjs), never a second hand-kept table.
   return { ...p, stage: at.id, why: at.why, next: at.next, order: S.map((s) => s.id),
     skills: skillsForStage(at.id),
+    craftDocs: craftDocsForFilm(scene, sbSrc, p.brief),
     approved: approved || null, fragments: [...new Set(fragments)], missingFrags, layers, sbExists, sceneExists };
 }
 
@@ -370,6 +380,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`\n  why: ${st.why}`);
   console.log(`  do:  ${st.next}`);
   if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}`);
+  if (st.craftDocs.length) console.log(`  read: ${st.craftDocs.join(', ')}`);
   console.log('');
   if (look) {
     console.log(`  LOOK (frames now, not after render):`);
