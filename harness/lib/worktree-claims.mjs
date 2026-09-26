@@ -1,24 +1,3 @@
-// harness/lib/worktree-claims.mjs: a worktree's own claim of what it owns, so a second worktree can
-// be told about it instead of finding out by collision.
-//
-// THE GAP THIS CLOSES (see engine-doctrine/CRAFT/SUBAGENTS.md and harness/author/critics.mjs's
-// DECIDERS table). A decider already carries an exclusive write scope, checked by construction because
-// only one decider runs against one field. An AD-HOC worktree carries no such thing: the scope lives
-// only in the brief's prose, in whichever agent's context happened to read it. Two agents nearly
-// collided today in harness/media/ and engine-doctrine/RESEARCH/, and were saved only because the
-// briefs happened to name opposite files. This makes the same idea machine-readable for that case,
-// without inventing a second scope language: a claim is the same glob prose a brief already carries,
-// just written down where the NEXT worktree can read it before it starts.
-//
-// STORAGE: .vawe-data/worktree-claims.json. `.vawe-data` is the one directory `worktree.sh` already
-// symlinks into every worktree back to the main checkout's copy (see worktree.sh's "shared, read-only"
-// block), so every worktree and the main checkout read and write the SAME file with no new plumbing.
-//
-// A claim is a hint, not a lock: `worktree.sh rm` clears it, but a worktree deleted by hand (`git
-// worktree remove` run directly) leaves a stale entry. addClaim() prunes any claim whose worktree no
-// longer appears in `git worktree list` before comparing scopes, so a dead entry never causes a false
-// warning; it can still under-warn for one call if a worktree vanished and was pruned by something
-// else in the same instant, which is fine, this is a warning, not a lock (see overlap()'s own note).
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -55,16 +34,8 @@ export function readClaims() {
   return claims;
 }
 
-// A glob's fixed prefix: everything before its first wildcard. `harness/dev/**` -> `harness/dev/`,
-// `engine-doctrine/CRAFT/SUBAGENTS.md` -> itself (no wildcard). Deliberately this crude: this module's
-// whole point is NOT inventing a real glob-intersection algorithm for a warning that is advisory
-// either way, and a prefix relationship is the same read a person gives two briefs' "you touch X"
-// lines by eye.
 function stem(glob) {
   const i = glob.search(/[*?[]/);
-  // NOT trimmed of a trailing slash: that slash is what stops "harness/dev/" from matching a sibling
-  // directory that merely shares its name as a prefix (a hypothetical "harness/devtools/..."). Trimming
-  // it was tried and broke exactly that case (worktree-claims.test.mjs).
   return i < 0 ? glob : glob.slice(0, i);
 }
 

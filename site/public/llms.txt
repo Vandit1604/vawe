@@ -5,7 +5,7 @@
 - [Home](https://vawe.dev/): Motion graphics without a motion designer. Vawe renders video from a text file, so you or an AI agent can write a film the way you write anything else, and re-render it the day the numbers change.
 - [features](https://vawe.dev/features): The decisions the engine makes for you: a clock that refuses wall time, a motion director that picks every cut, and a gate ladder that rejects correct-but-generic output.
 - [showcase](https://vawe.dev/showcase): Finished films rendered by Vawe, each one a JSON file you can open in the editor. Six launch films and one scene cropped to three canvases.
-- [arsenal](https://vawe.dev/arsenal): Everything the Vawe engine is made of: 901 blocks and effects, searchable, each with the JSON that uses it and 524 of them playing in the real engine.
+- [arsenal](https://vawe.dev/arsenal): Everything the Vawe engine is made of: 873 blocks and effects, searchable, each with the JSON that uses it and 496 of them playing in the real engine.
 - [arsenal/type](https://vawe.dev/arsenal/type): The engine's typographic vocabulary as specimens: kinetic presets, per-layer text mechanics and typographic beats, each playing in the real engine with the JSON that produces it.
 - [playground](https://vawe.dev/playground): Turn the dials on the engine's generators in your browser. The same pure functions the renderer calls, with their real option schemas.
 - [editor](https://vawe.dev/editor): Edit a scene JSON and watch it render live. The real engine, running in your browser.

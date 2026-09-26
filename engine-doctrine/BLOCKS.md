@@ -93,11 +93,10 @@ Auto-generated from `blocks/catalog.mjs`, run `make blocks-docs` after editing t
 them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
-_188 entries across 100 families._
+_159 entries across 82 families._
 
 | Block | For |
 |---|---|
-| `card` | a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom |
 | `codeBlock` | a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot |
 | `codeBlock.light` | code card, light surface |
 | `codeBlock.py` | code card, python |
@@ -129,13 +128,8 @@ _188 entries across 100 families._
 | `colorCycle` | one word that changes colour again and again, repainted through a rainbow of hues in a fixed order |
 | `splitFlapBoard` | an airport or train station split-flap departure board where each letter flips through the alphabet to land on a word |
 | `splitFlapBoard.small` | the board at caption size, no header rail |
-| `stripeCard` | a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button |
 | `barChart` | a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side |
 | `barChart.green` | bars in success green |
-| `diff` | a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review |
-| `diff.config` | a settings or yaml file changing: removed lines in red above the new ones in green |
-| `quote` | a big pull quote with the person's name credited underneath, for a testimonial or a line to remember |
-| `quote.customer` | a testimonial pulled big, with the person and their company credited underneath |
 | `notification` | a light system alert card that slides in from the edge, a status dot, a heading and a message, arrives and leaves like a phone banner. |
 | `notification.warn` | toast, amber accent |
 | `notification.error` | toast, error |
@@ -157,13 +151,9 @@ _188 entries across 100 families._
 | `donutChart.two` | two-segment ring |
 | `stackedBar` | a stacked bar chart: multiple series piled in one bar per category to show a total and its parts |
 | `stackedBar.three` | three-series stack |
-| `card.pricing` | a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button |
-| `card.pricing.free` | pricing, free tier |
-| `card.pricing.team` | pricing, team tier |
 | `card.stat` | a boxed metric: a label, a number counting up, a chip saying how much it went up |
 | `card.stat.down` | KPI card, negative delta |
 | `card.stat.plain` | KPI card, no delta |
-| `card.profile` | a person's photo beside their name, with their job title under it |
 | `fileTree` | a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar |
 | `logLines` | a console log feed: timestamped lines stream in fast, colour-coded by info, warning and error level |
 | `logLines.light` | log stream on a light surface |
@@ -189,7 +179,6 @@ _188 entries across 100 families._
 | `kanban.two` | two-column board |
 | `chatBubble` | a text message thread, chat bubbles left and right like iMessage or WhatsApp |
 | `chatBubble.support` | support thread |
-| `tweetCard` | a tweet or X post card: avatar, handle, body text, like and reply counts |
 | `avatarStack` | overlapping circular profile pictures in a row with a +N overflow count |
 | `avatarStack.large` | the same overlapping profile pictures at a bigger size, for a hero or a title card |
 | `toast` | a dark snackbar with a status dot, a message, and an optional action link, the popup that says something just happened. |
@@ -198,22 +187,12 @@ _188 entries across 100 families._
 | `toast.stack` | snackbars that stack and expire |
 | `reactionBar` | emoji reaction pills with counts, like the reactions under a Slack or Discord message |
 | `reactionBar.love` | reactions (love set) |
-| `logoWall` | a grid of company wordmarks or logo images, for a social proof or partner strip. |
-| `logoWall.four` | four logos, 2 cols |
-| `badge` | a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta). |
-| `badge.version` | a small chip showing which release is running, like a v2.1.0 shield in a README |
-| `badge.warn` | an amber chip that flags something needing attention, a caution token |
-| `badge.info` | a blue chip carrying a neutral fact, no alarm attached |
-| `badge.beta` | beta status badge |
 | `gauge` | a speedometer-style dial: a semicircular meter needle showing one value against a max |
 | `gauge.warn` | gauge, low (amber) |
 | `gauge.full` | gauge, complete (green) |
 | `progressRing` | a circular progress ring with the percent complete written in its centre |
 | `progressRing.done` | ring, 100% (green) |
 | `progressRing.low` | ring, low (amber) |
-| `banner` | a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge. |
-| `banner.info` | banner, info (blurple) |
-| `banner.warn` | banner, warning (amber) |
 | `spinner` | a small looping loading spinner animation for a busy or working state |
 | `spinner.small` | small looping Lottie |
 | `lowerThird.cleanBar` | a name plate low in the frame: the speaker's name over their job title, on a hairline plate |
@@ -233,9 +212,6 @@ _188 entries across 100 families._
 | `followCard` | a social profile follow card: name over @handle next to a follow button pill |
 | `searchEngine.home` | a search engine home page: a wordmark over a rounded search box, the query typing itself in |
 | `searchEngine.results` | the search results page: a ranked list of links, with a cursor clicking one |
-| `feedRow` | one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text. |
-| `listRow` | a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row. |
-| `settingsRow` | a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text. |
 | `profileHeader` | the top of an account screen: avatar over a name and @handle, with a small row of stat counts below. |
 | `onboardCard` | one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button. |
 | `emptyState` | a zero state panel with dashed border: an icon, a line saying what is missing, and a button that fills it. |
@@ -250,11 +226,7 @@ _188 entries across 100 families._
 | `screenSwap.slide` | screen change that reads as travel · enters right, leaves left |
 | `socialProof` | an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof |
 | `installCard` | an app store listing row: icon, star rating that sweeps in, and an Install button |
-| `glassCard` | a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency |
-| `meshPanel` | a soft blurry gradient background made of overlapping colour blobs, calm and branded |
-| `spotlightCard` | a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room |
 | `borderBeamCard` | a glass card with a bright line of light chasing around its border, like a loading ring on the edge |
-| `grainOverlay` | a layer of film grain or noise texture over the whole frame, so it looks shot on film instead of flat digital |
 | `bento` | an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid |
 | `camcorderHud` | a camcorder or viewfinder overlay: corner brackets, a blinking REC dot, a running timecode, battery and zoom readout |
 | `scanGate` | an autofocus targeting reticle: a scan line sweeps the frame and brackets snap shut and lock onto the subject |
@@ -283,7 +255,6 @@ _188 entries across 100 families._
 | `parallaxZoom` | a grid of cards where the centre card zooms to fill the whole frame while the rest slide outward and fade |
 | `parallaxUnzoom` | the reverse of a zoom-in: one card fills the frame first, then shrinks back into a grid of cards around it |
 | `morphText` | a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence |
-| `redditPost` | a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count |
 | `uiReveal3d` | rows of a UI folding upright out of the floor in 3D perspective, one after another |
 <!-- BLOCKS:END -->
 

@@ -13,8 +13,8 @@
 // re-evaluated on every seeked frame, which is what makes frame 412 independent of frame 411.
 import {
   TOKENS, HAIR, r2, seriesAt,
-  R, TYPE, SPACE, E, cardChrome, tint, TINT, SHADOW_CARD,
-  capCss, labelCss, numCss, needData, onInk,
+  R, TYPE, SPACE, SHADOW_CARD,
+  capCss, labelCss, numCss, needData,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a name-to-category table in sync by hand.
@@ -233,69 +233,6 @@ export function morphText({ x, y, w = 900, words = [], size = TYPE.display, hold
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
-// 4 · redditPost. A link-aggregator post: the vote column, the subreddit line, the title, the body,
-// and the comment count. Native layers, not html, because every part of it is a row of type in a card
-// and that is what `group` is for.
-//
-// THE VOTE COLUMN IS THE WHOLE POINT of the shape and it is why this is not a tweet card with
-// different words: the score sits to the LEFT of the title, vertically between its two arrows, and
-// that column is what makes a reader recognise the surface before reading a single word. The score is
-// `num`'s job (mono, tabular) because it is a figure; everything else is sans.
-// HTML-FIRST. Design Read: the same shape `tweetCard` (blocks/social.mjs) had before its own
-// conversion, mirrored here: one `html` card, `cardChrome` as layer props, the vote rail + title/body/
-// meta column as one markup string. The measured-contrast colour logic (`onInk`, the lit/quiet arrow
-// distinction) is untouched, only moved from JSON layers into inline styles.
-const REDDIT_VOTES = { up: 1, down: -1, none: 0 };
-
-// the vote rail: arrow, score, arrow, on its own tinted ground so it reads as a control and not as
-// three loose glyphs beside the headline. THE LIT ARROW IS THE TONE PUSHED TOWARD `--text`, never the
-// raw token. A bare `--accent` on the rail's own accent tint measured 2.7:1 on `linear` and `make
-// audit` failed it HARD. `onInk` is the one owner of that mix; see kit.mjs for why it is not
-// `onColor`. THE QUIET ARROW IS `--text-2`, NOT `--dim`, for the same reason: it does not clear
-// 4.5:1 on a tinted ground (measured 4.4:1 on this very rail), where `--dim` fails HARD. The arrow is
-// the SAME size as the score beside it: `make audit` fails text under 14.04px, so a glyph shrunk to
-// look secondary is the part nobody can read.
-function redditVoteRail({ votes, lit, railW }) {
-  const quietInk = onInk(T.sub);
-  const arrow = (glyph, on, tone) => `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${on ? onInk(tone) : quietInk}">${glyph}</span>`;
-  return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;`
-    + `gap:${SPACE.tight}px;width:${railW}px;border-radius:${R.chip}px;background:${tint(T.accent, TINT.track)};`
-    + `padding:${SPACE.xs}px 0">` + arrow('▲', lit === 1, T.accent)
-    + `<span style="font:700 ${TYPE.body}px var(--font-num);color:${T.ink}">${votes}</span>`
-    + arrow('▼', lit === -1, T.down) + '</div>';
-}
-
-function redditBodyCol({ sub, author, age, title, body, comments, bodyW }) {
-  const meta = (t) => `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${t}</span>`;
-  const metaRow = [sub && meta('r/' + sub), author && meta('·'), author && meta('u/' + author),
-    age && meta('·'), age && meta(age)].filter(Boolean).join('');
-  return `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">`
-    + (metaRow ? `<div style="display:flex;align-items:center;gap:${SPACE.snug}px">${metaRow}</div>` : '')
-    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink};letter-spacing:-0.01em;width:${bodyW}px">${title}</span>`
-    + (body ? `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub};width:${bodyW}px">${body}</span>` : '')
-    + `<div style="display:flex;align-items:center;gap:${SPACE.sm}px">`
-    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${T.sub}">${comments} comments</span>`
-    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${T.sub}">share</span></div></div>`;
-}
-
-export function redditPost({ x, y, w = 620, sub = '', author = '', age = '', title = '', body = '',
-  votes = 0, comments = 0, voted = 'up', start = 0, dur = 4 } = {}) {
-  needData('title', title, 'redditPost');
-  if (!(voted in REDDIT_VOTES)) {
-    throw new Error(`block "redditPost": unknown voted "${voted}". One of: ${Object.keys(REDDIT_VOTES).join(', ')}. `
-      + `It lights one arrow to show the reader's own vote; "none" leaves both quiet.`);
-  }
-  const railW = 64, bodyW = w - railW - 3 * SPACE.md;
-  const rail = redditVoteRail({ votes, lit: REDDIT_VOTES[voted], railW });
-  const col = redditBodyCol({ sub, author, age, title, body, comments, bodyW });
-  const html = `<div style="display:flex;align-items:stretch;gap:${SPACE.md}px;padding:${SPACE.md}px;`
-    + `box-sizing:border-box;width:${w}px">` + rail + col + '</div>';
-
-  return [{ type: 'html', x, y, w, html, ...cardChrome({ radius: R.soft, elevation: E.card }),
-    start, duration: dur, enterDur: 0.45, exitDur: 0.35 }];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────────────────────────
 // 5 · uiReveal3d, UI ROWS FOLDING UP OUT OF DEPTH. A stack of product rows lying flat and away from
 // the camera, each hinging up to face the viewer in turn. The perspective is on each row's OWN
 // transform rather than on the parent, so nothing depends on a stacking context surviving the engine's
@@ -377,19 +314,6 @@ export const VFX_SCHEMAS = {
     // the metaball strength: 0 is a plain crossfade, 1 is the fusing edge, above that it smears
     goo: { kind: 'num', min: 0, max: 2, def: 1 },
     color: { kind: 'color', def: 'var(--text)' },
-  },
-
-  redditPost: {
-    w: { kind: 'int', min: 320, max: 1200, def: 620 },
-    sub: { kind: 'str', max: 24, def: '' },
-    author: { kind: 'str', max: 24, def: '' },
-    age: { kind: 'str', max: 16, def: '' },
-    title: { kind: 'str', max: 140, def: '' },
-    body: { kind: 'str', max: 240, def: '' },
-    votes: { kind: 'num', min: -1e9, max: 1e9, def: 0 },
-    comments: { kind: 'num', min: 0, max: 1e9, def: 0 },
-    // which arrow is lit: the reader's own vote
-    voted: { kind: 'enum', of: ['up', 'down', 'none'], def: 'up' },
   },
 
   uiReveal3d: {
