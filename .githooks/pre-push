@@ -98,14 +98,6 @@
 # under a tenth of a second. Neither is in gates.yml, matching the rest of this maintenance tier
 # (skill-reach, rung, provenance): pre-push and CI do not mirror past the fast job gates.yml itself
 # names, and these belong with their siblings.
-#
-# bench-fast is here for the same reason: two deterministic ratchets on the speed of authoring a video
-# (how many words load before an agent writes its first layer, how many commands stand between a brief
-# and the first draft render), read straight off CLAUDE.md, AGENTS.md, skills/*/SKILL.md and the
-# Makefile itself. Pure file reads, well under a second. Its own draft-render speed (harness/dev/bench.mjs
-# render / `make bench`) stays OUT of this list on purpose: it needs bin/vawe built and a real Chrome
-# render, and wall-clock render time is noisy machine to machine, the exact case CLAUDE.md says to
-# report rather than gate.
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
@@ -132,10 +124,19 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
 done
 
 echo "▶ pre-push: framework gates (schema-check + test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + word-action + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length + bench-fast) …"
-if ! make schema-check test craft-coverage coverage doc-refs skill-reach arsenal-check word-action discovery generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung provenance sfx-check audit-test glyphs-audit sim-audit docker-context judge-census inert-check skill-check rule-length bench-fast; then
-  echo "✗ pre-push blocked: framework check failed. Fix it, or push with --no-verify to override." >&2
+if ! make test audit-test bench-fast; then
+  echo "✗ pre-push blocked: framework check (test) failed. Fix it, or push with --no-verify to override." >&2
   exit 1
 fi
+for g in schema-check craft-coverage coverage doc-refs skill-reach arsenal-check word-action discovery \
+         generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung \
+         provenance sfx-check glyphs-audit sim-audit docker-context judge-census inert-check skill-check \
+         rule-length; do
+  if ! make check GATE="$g"; then
+    echo "✗ pre-push blocked: framework check ($g) failed. Fix it, or push with --no-verify to override." >&2
+    exit 1
+  fi
+done
 echo "✓ pre-push: framework healthy"
 
 # ci-status is informational only, never a gate: it reports the LAST CI run (this push has no run yet)

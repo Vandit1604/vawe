@@ -146,7 +146,7 @@ test('lib-test: gates', async () => {
 // the finding, in the tone of the fix. There is no such target; the bake is `make audio`. So following
 // a gate's own advice failed with "No rule to make target `sfx`", which is worse than no advice: it
 // teaches the reader that the gates do not know their own repo, and the next real instruction gets
-// ignored too. `make doc-refs` already checks this for DOCS, and found 111 stale paths when it landed.
+// ignored too. `make check GATE=doc-refs` already checks this for DOCS, and found 111 stale paths when it landed.
 // Nothing checked the strings the gates themselves print.
 {
   const mk = fs.readFileSync(path.join(repoRoot, 'Makefile'), 'utf8');

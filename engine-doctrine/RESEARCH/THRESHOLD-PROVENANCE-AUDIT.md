@@ -9,7 +9,7 @@ group: process
 Task 3 of `.claude/plans/rules-from-sources.plan.md`. A sweep of `quality/gates/*.mjs` and
 `harness/lib/*.mjs` for numeric constants that decide a verdict, each recorded against the plan's four
 legitimate source categories or `NONE`. **This audit does not fix anything.** Wiring the refusal is
-Task 4 (`quality/gates/threshold-provenance.mjs`, `make provenance`); fixing the constants below is a
+Task 4 (`quality/gates/threshold-provenance.mjs`, `make check GATE=provenance`); fixing the constants below is a
 separate, later job.
 
 ## The four legitimate categories, restated

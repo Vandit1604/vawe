@@ -203,13 +203,13 @@ The profile is the coordination; `vawe_reflect` is the colour precision.
 
 ## Pick by seeing
 
-The eight names above are prose; **`make preset-sheets`** renders each one as a real ~6s clip (a
+The eight names above are prose; **`make arsenal PRESETS=1`** renders each one as a real ~6s clip (a
 headline, a support line, a hard cut in the profile's own family, one count on the profile's own
 easing, one accent chip) to `site/public/blocklib/presets/<name>/{showcase.mp4, sheet.png}`, plus an
 `index.json` with a one-line "pick when" per preset (its `blurb` above). `linear` and `stripe` play in
 their real, already-committed theme; the other six play in a minimal `themes/presets/<name>.json`
 written for this pass, since no existing theme is a real preset for them. Re-render one after tuning it:
-`make preset-sheets ONLY=<name>`. Picking a profile by its rendered look, not its adjective, is the same
+`make arsenal PRESETS=1 ONLY=<name>`. Picking a profile by its rendered look, not its adjective, is the same
 discipline `make study` gives a reference film's motion (recipes/README.md).
 
 ---

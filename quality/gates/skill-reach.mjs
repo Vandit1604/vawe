@@ -1,9 +1,9 @@
 // quality/gates/skill-reach.mjs: is every skills/*/SKILL.md actually ROUTED to, by something an
 // agent reads before it would need it?
 //
-//   node quality/gates/skill-reach.mjs      ·   make skill-reach
+//   node quality/gates/skill-reach.mjs      ·   make check GATE=skill-reach
 //
-// WHY THIS EXISTS. `make doc-refs` checks that a doc link resolves; `make discovery` checks that a
+// WHY THIS EXISTS. `make check GATE=doc-refs` checks that a doc link resolves; `make check GATE=discovery` checks that a
 // registry entry can be found through the search corpus. Neither checked whether a SKILL could be
 // found at all. `vawe-review-loop` carried the judge loop's stopping rule (STOP-done ·
 // STOP-converged · STOP-hand-it-back) and nothing pointed at it: not AGENTS.md's skill router table,
@@ -16,7 +16,7 @@
 // `skills/vawe-docs/SKILL.md` do NOT count: both are GENERATED, mechanically listing every skill
 // under `CRAFT_ALSO` in `doc-map.mjs` regardless of whether an agent is ever told to open it, so a
 // skill would show up there even freshly written and unrouted. Counting them would make this gate
-// unable to ever fail, which is the same silent gap `make discovery` closed for registries that only
+// unable to ever fail, which is the same silent gap `make check GATE=discovery` closed for registries that only
 // the catalogue, never the search corpus, could see.
 //
 // Pure: reads files, no render, no network.

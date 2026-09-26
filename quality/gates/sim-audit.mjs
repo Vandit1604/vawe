@@ -1,7 +1,7 @@
 // quality/gates/sim-audit.mjs: is the offline tier still deterministic, and is what shipped
 // actually what the sim says?
 //
-//   node quality/gates/sim-audit.mjs        (make sim-audit)
+//   node quality/gates/sim-audit.mjs        (make check GATE=sim-audit)
 //
 // Tier B moves non-determinism from render time to BAKE time. That only helps if the bake itself is
 // reproducible and if the frames on disk are the frames the current sim produces. Three ways it

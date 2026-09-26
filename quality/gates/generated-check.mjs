@@ -7,8 +7,8 @@
 // capability that no longer existed and `make arsenal` correctly could not find it. It surfaced only
 // because a NEW gate happened to compare the two indexes. Nothing was checking the file itself.
 //
-// The repo already had this idea twice: `make craft-coverage` fails when the doc index is stale, and
-// `make scenes-json` fails when the site's copy of a scene has drifted. Each was written after its own
+// The repo already had this idea twice: `make check GATE=craft-coverage` fails when the doc index is stale, and
+// `make check GATE=scenes-json` fails when the site's copy of a scene has drifted. Each was written after its own
 // incident, each covers one artefact, and a third artefact simply had nobody. So this is the general
 // form: run every generator, then ask git whether anything moved. A generator is the definition of
 // what the file should contain, so "regenerate and diff" cannot go out of date the way a hand-written

@@ -1,7 +1,7 @@
 // quality/gates/skill-check.mjs: does every skills/*/SKILL.md match Anthropic's published
 // skill-authoring contract, the one an agent's own discovery pass depends on?
 //
-//   node quality/gates/skill-check.mjs      ·   make skill-check
+//   node quality/gates/skill-check.mjs      ·   make check GATE=skill-check
 //
 // WHY THIS EXISTS. `skill-reach.mjs` checks that something POINTS at a skill; `skill-stages.mjs`
 // (via `stage.mjs`) checks that a `stage:` line is readable at all. Neither checked whether the

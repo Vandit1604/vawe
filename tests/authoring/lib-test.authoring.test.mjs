@@ -970,7 +970,7 @@ test('lib-test: authoring', async () => {
 }
 
 
-// ---- `make schema AT=` (harness/author/schema-at.mjs) --------------------------------------------
+// ---- `make arsenal AT=` (harness/author/schema-at.mjs) --------------------------------------------
 //
 // The tool that answers "what may I write HERE" from films/scene/schema.json. Every assert below is
 // about the ANSWER being read out of the schema, never about a list this test or that tool keeps: the

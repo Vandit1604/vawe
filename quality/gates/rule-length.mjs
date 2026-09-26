@@ -1,7 +1,7 @@
 // quality/gates/rule-length.mjs · how many rules, across the agent-facing surface, run over the
 // convention length, and does that count only fall?
 //
-//   node quality/gates/rule-length.mjs            ·   make rule-length
+//   node quality/gates/rule-length.mjs            ·   make check GATE=rule-length
 //   node quality/gates/rule-length.mjs --list     ·   every over-length rule found
 //   node quality/gates/rule-length.mjs --stamp    ·   record today's count as the new ceiling
 //

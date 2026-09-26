@@ -14,6 +14,6 @@ an agent without the Skill mechanism) reads the doc named in `AGENTS.md`'s skill
 Read by: Claude Code, on demand, matched against the request.
 
 The one doc: `AGENTS.md`'s skill-router table. Which DOC settles a question is `make docs Q="…"` (the generated doc map
-as a skill). Checked by: `make skill-reach` (is every `SKILL.md` actually routed to from somewhere).
+as a skill). Checked by: `make check GATE=skill-reach` (is every `SKILL.md` actually routed to from somewhere).
 
 Look first: `AGENTS.md`'s skill-router table to find the right skill by task, not this folder directly.

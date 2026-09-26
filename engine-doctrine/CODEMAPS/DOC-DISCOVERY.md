@@ -56,7 +56,7 @@ those leaves the ones that hurt:
 Two failures found while building, both of the same kind:
 
 1. `engine-doctrine/JUDGE.md` linked `CRAFT/AB-JUDGE.md`, a file that no longer exists. The existing
-   `make craft-coverage` could not see it, because it only checked links *inside* `engine-doctrine/CRAFT/`.
+   `make check GATE=craft-coverage` could not see it, because it only checked links *inside* `engine-doctrine/CRAFT/`.
    Read at the time as a file that had never been written; git says otherwise. It shipped in `05a5123`
    and was removed in `cc2dfc2` with five other engine-only tools. A dangling link says nothing about
    which of the two happened, and guessing wrote a false history into two docs.
@@ -279,7 +279,7 @@ and never edited:
 | `make docs Q="…"` | any agent or person, on demand | 0 tokens until asked (was a ~9,500-token skill body) |
 | the table inside `engine-doctrine/CRAFT/README.md` | the craft index that already existed | zero |
 
-`quality/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make craft-coverage`
+`quality/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make check GATE=craft-coverage`
 fails if any is stale, if an indexed doc has no frontmatter, if a markdown link anywhere in the
 indexed set does not resolve, or if a doc is not linked from the map.
 
@@ -318,5 +318,5 @@ paid on every session by every agent whether or not the task touches videos at a
   frontmatter moves into the docs, and the gate fails if a PENDING doc turns out to already have it.
 - Two generated docs (`engine-doctrine/EFFECTS.md`, `engine-doctrine/vawe-rules.md`) hold their line in the gate rather than
   in the file, because a regenerate would erase frontmatter. Those two lines can drift.
-- `make craft-coverage` now runs in `.githooks/pre-push`. That closes the "nobody remembered to type
+- `make check GATE=craft-coverage` now runs in `.githooks/pre-push`. That closes the "nobody remembered to type
   it" hole for anyone who ran `make install-hooks`. It does not close it for anyone who did not.

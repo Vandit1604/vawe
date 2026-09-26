@@ -149,7 +149,7 @@ ${families.lines.join('\n')}
 
 **Discovery, not memorisation:** \`make arsenal Q="a page scrolling under a static tilt"\` searches all
 ${total} named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
-description and returns the exact key to write. \`make schema AT="layers[].motion[]"\` answers the other
+description and returns the exact key to write. \`make arsenal AT="layers[].motion[]"\` answers the other
 half: what fields are legal to write at one JSON path, read live off \`films/scene/schema.json\`.
 
 ## The hard rules
@@ -179,7 +179,7 @@ make judge D=films/scene/x.json   # the one step that SEES: composition and fide
 
 - \`make arsenal Q="<what you mean, in plain english>"\` searches all ${total} named things at once and
   prints the JSON key that means it.
-- \`make schema AT="<json path>"\` answers what is legal to write at that path, with every field's type.
+- \`make arsenal AT="<json path>"\` answers what is legal to write at that path, with every field's type.
 - \`make list\` shows the scene module's schema and a sample scene end to end.
 `;
 }

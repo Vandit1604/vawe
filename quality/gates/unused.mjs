@@ -1,6 +1,6 @@
 // quality/gates/unused.mjs, which registered effects has no shipped scene ever named?
 //
-//   node quality/gates/unused.mjs        ·        make unused
+//   node quality/gates/unused.mjs        ·        make check GATE=unused
 //
 // THIS IS A REPORT, NOT A RULE. It always exits 0. Its output is a list of candidates for a person to
 // judge, and the count is deliberately NOT a target.

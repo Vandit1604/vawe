@@ -12,7 +12,7 @@ now three lines: the title, the one-sentence lesson, and what holds it today (a 
 or "none" if it is still just a sentence someone has to remember).
 
 The full write-up for any entry, root cause and all, still exists: it is git history as of
-77993ff0799dcc41efd2f948204e95531a15ed9f. Read one with `make mistakes N=<n> FULL=1`. A citation elsewhere in the repo
+77993ff0799dcc41efd2f948204e95531a15ed9f. Read one with `make arsenal MISTAKES=1 N=<n> FULL=1`. A citation elsewhere in the repo
 (`engine-doctrine/MISTAKES.md #N`) still resolves here by number; nothing renumbers.
 
 New incidents: add a rule or a gate message first. Only add a line here if nothing else can hold
@@ -72,8 +72,8 @@ holds: none
 What happened: a `cursor` `path` ending on the Accept button rendered ~(60,240) px off ,  the click fired in empty space. Root cause: scene.html defaults every layer to `x:60,y:240`; the cursor...
 holds: none
 
-## 14. Silent authoring bugs the schema couldn't catch → `lintData` (make lint-test)
-Three bugs shipped in renders and passed every gate; each is now a `validate` warning (fail with `--strict`), pinned by `make lint-test`: - missing `duration` → a layer renders for the WHOLE video...
+## 14. Silent authoring bugs the schema couldn't catch → `lintData` (make check GATE=lint-test)
+Three bugs shipped in renders and passed every gate; each is now a `validate` warning (fail with `--strict`), pinned by `make check GATE=lint-test`: - missing `duration` → a layer renders for the WHOLE video...
 holds: none
 
 ## 15. Authored from imagination + hand-math instead of the real asset + the composition tools (argus)
@@ -147,7 +147,7 @@ deleted the generated cues, restored the recorded Mixkit sfx library, and added 
 holds: none
 
 ## 31. A hand-typed enum in the schema rejected a valid new value within minutes
-`make schema-check` now asserts the schema's anim enum EQUALS `ANIM_NAMES` from `core/timeline/clips.js`, and fails loudly with both sets printed when they diverge. Rule: if a gate or a schema restates a...
+`make check GATE=schema-check` now asserts the schema's anim enum EQUALS `ANIM_NAMES` from `core/timeline/clips.js`, and fails loudly with both sets printed when they diverge. Rule: if a gate or a schema restates a...
 holds: none
 
 ## 32. Beat matching: build the edit ON the music, do not drag cuts onto it
@@ -159,7 +159,7 @@ The image legibility floor guarded on `b.height > 1`, so the ONE case it existed
 holds: none
 
 ## 34. Coverage ,  conformance proves it works, this asks if anything uses it
-`make coverage` reports which vocabulary no authored scene exercises.
+`make check GATE=coverage` reports which vocabulary no authored scene exercises.
 holds: none
 
 ## 35. Descenders were sliced off every `riseClip` word (shipped, in every scene using it)
@@ -170,7 +170,7 @@ holds: none
 the audit now receives the cut windows and skips positional checks inside them, mirroring `scene.html`'s own filter (`none` excluded, `dur` split evenly around `t`).
 holds: none
 
-## 37. `make coverage-reel` ,  renders whatever nothing else renders
+## 37. `make check GATE=coverage-reel` ,  renders whatever nothing else renders
 Conformance proves a value changes the frame; coverage says nothing USES it.
 holds: none
 
@@ -271,7 +271,7 @@ holds: quality/gates/blocks-audit.mjs, quality/gates/layer-props.mjs
 holds: none
 
 ## 62. The schema was narrower than the engine
-`string|boolean`, which the validator's union types already support. Rule: `make schema-check` proves every engine prop is DECLARED.
+`string|boolean`, which the validator's union types already support. Rule: `make check GATE=schema-check` proves every engine prop is DECLARED.
 holds: none
 
 ## 63. `at` was already taken
@@ -282,7 +282,7 @@ holds: none
 both layer types clear when off-window. New gate `make canvas-purity` hashes the actual pixels, pinned in gate-test by reverting the clear. Rule: the sixth time this session (#39, #41, #45, #48, #56).
 holds: quality/gates/canvas-purity.mjs
 
-## 65. `make coverage` reported 15 layer types as 14/14
+## 65. `make check GATE=coverage` reported 15 layer types as 14/14
 `core/layers/index.js` exports `LAYER_TYPES` from the registry; coverage imports it.
 holds: none
 
@@ -291,7 +291,7 @@ the sidecar reports each band's ABSOLUTE `peak` alongside the normalised frames,
 holds: none
 
 ## 67. Block factories were exempt from the rules the videos obey
-`make blocks-audit` ,  invented figures, brand defaults, superlatives, dead props, and prop-surface divergence across a family.
+`make check GATE=blocks-audit` ,  invented figures, brand defaults, superlatives, dead props, and prop-surface divergence across a family.
 holds: quality/gates/blocks-audit.mjs
 
 ## 68. The gate audited the factories and missed the manifest
@@ -383,7 +383,7 @@ Editing `core/surfaces/paint.js` for resample changed the off-window line that `
 holds: quality/gates/gate-mutation.mjs
 
 ## 90. The roadmap decayed again, in the exact way its own closing warning describes
-`make docs-drift`, registered in the mutation harness (37/37).
+`make check GATE=docs-drift`, registered in the mutation harness (37/37).
 holds: none
 
 ## 91. The distinctness check decided its own answer, and the fix for it nearly did too
@@ -391,7 +391,7 @@ Keep frameSig's exact hash and redact its input instead.
 holds: quality/gates/gate-mutation.mjs
 
 ## 92. The dataflow half of dead-branch, and the rule I had to cut
-#82 shipped `make dead-branch` catching one shape ,  `cond ?
+#82 shipped `make check GATE=dead-branch` catching one shape ,  `cond ?
 holds: none
 
 ## 93. `opacity` on a layer did nothing, in two shipped scenes, for months
@@ -411,11 +411,11 @@ derive from the registry, exempt by name.
 holds: quality/gates/sim-audit.mjs
 
 ## 97. The docs decayed identically, one file over from the gate watching them
-generalized to `make docs-drift`, covering ROADMAP prose claims and PRIMITIVES heading counts.
+generalized to `make check GATE=docs-drift`, covering ROADMAP prose claims and PRIMITIVES heading counts.
 holds: none
 
 ## 98. A group child was legal at depth 2 and illegal at depth 1
-the child enum is the full layer registry, and `make schema-check` now derives it from `core/layers/index.js` so it cannot drift again.
+the child enum is the full layer registry, and `make check GATE=schema-check` now derives it from `core/layers/index.js` so it cannot drift again.
 holds: none
 
 ## 99. A nested `layout:'free'` group did not position its own children
@@ -435,7 +435,7 @@ Mine, during the same session. I wanted the pre-change count for `make gate-test
 holds: none
 
 ## 103. The build context is the working tree, so .gitignore does not protect it
-`make docker-context` walks the tree applying `.dockerignore` the way BuildKit does and fails over a 40MB budget, naming the biggest contributors.
+`make check GATE=docker-context` walks the tree applying `.dockerignore` the way BuildKit does and fails over a 40MB budget, naming the biggest contributors.
 holds: none
 
 ## 104. I discarded a correct diagnosis because of evidence that never contradicted it
@@ -479,7 +479,7 @@ Both found while running the ladder on one film; neither is fixed in the gate th
 holds: none
 
 ## 114. The site quoted nine capability numbers, and the registry had moved past all of them
-`quality/gates/site-counts.mjs` (`make site-counts`) reads the registries, scans the site copy for both shapes counts appear in (`148 blocks`, `Kinetic presets (25)`), and fails with file:line,...
+`quality/gates/site-counts.mjs` (`make check GATE=site-counts`) reads the registries, scans the site copy for both shapes counts appear in (`148 blocks`, `Kinetic presets (25)`), and fails with file:line,...
 holds: none
 
 ## 115. Every "glow" in the engine was a drop-shadow, which glows the wrong channel
@@ -1078,7 +1078,7 @@ The comparison is now against the DECLARATIONS, which `core/surfaces/paint-fx.js
 holds: none
 
 ## 263. `transition` was documented, read, and declared by nothing
-`core/transitions/lower.js` exports `PROPS = { transition: {} }` beside the read, and `core/layers/vocabulary.js` merges it into the shared half. Which gate catches it. `make schema-check` ,...
+`core/transitions/lower.js` exports `PROPS = { transition: {} }` beside the read, and `core/layers/vocabulary.js` merges it into the shared half. Which gate catches it. `make check GATE=schema-check` ,...
 holds: none
 
 ## 264. an unknown prop on a layer was accepted and then ignored, at render time
@@ -1090,7 +1090,7 @@ One union, `SHARED_PROPS` in `core/layers/vocabulary.js`.
 holds: none
 
 ## 266. the docs named commands and files the repo did not have, and two gates that would have said so were red and ignored
-`quality/gates/doc-refs.mjs` (`make doc-refs`), wired into `make review`.
+`quality/gates/doc-refs.mjs` (`make check GATE=doc-refs`), wired into `make review`.
 holds: none
 
 ## 267. the gates measured the box the author asked for, not the ink the frame carries (a fifth #214)
@@ -1188,7 +1188,7 @@ Recorded so nobody reads a wide bound as a considered one: - `statBig.to` / `sta
 holds: none
 
 ## 289. the deploy failed on a directory `.dockerignore` excluded, and nothing local could see it
-`quality/gates/docker-context-check.mjs` (`make docker-check`, in `make review`; moved out of scripts/site/ so gate-census and doc-refs can see it too): read the Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context...
+`quality/gates/docker-context-check.mjs` (`make check GATE=docker-check`, in `make review`; moved out of scripts/site/ so gate-census and doc-refs can see it too): read the Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context...
 holds: none
 
 ## A. A fidelity metric that samples only the lit half
@@ -1375,7 +1375,7 @@ At boot, resolve every `@font-face` src the active theme's roles depend on and f
 holds: quality/gates/asset-check.mjs
 
 ## Waivers for `doc-refs`
-`make doc-refs` checks that every command and path a doc names exists.
+`make check GATE=doc-refs` checks that every command and path a doc names exists.
 
 ## 332. The two tools that FIT a seed have never once run
 Wrote the module. The field is a stack of CSS gradients composited source-over, and source-over is `src*a + dst*(1-a)`, so every alpha comes from geometry and the painted colour at any point is a...
@@ -1570,7 +1570,7 @@ B2, and the smallest change of the run with the clearest reason.
 holds: quality/gates/author-check.mjs
 
 ## 380. Sixteen looks declared a colour that never rendered, and the test for it asked the wrong question
-Chasing the `make unused` census, which names itself a test backlog: three never-used effects had turned out to be BROKEN the moment anything exercised them, so the never-named vocabulary is...
+Chasing the `make check GATE=unused` census, which names itself a test backlog: three never-used effects had turned out to be BROKEN the moment anything exercised them, so the never-named vocabulary is...
 holds: quality/gates/beat-check.mjs, quality/gates/critique.mjs, quality/gates/direction-floor.mjs, quality/gates/lib-test.mjs, quality/gates/pace-check.mjs
 
 ## 381. A warning printed once, from one of eight workers, into a log nobody reads
@@ -2313,7 +2313,7 @@ holds: quality/gates/lib-test.mjs
 holds: quality/gates/lib-test.mjs, quality/gates/schema-drift.mjs
 
 ## 565. the dead-prop audit could only judge props somebody had already written, so a declared dial waited for an author to find it
-`quality/gates/prop-probe.mjs`, blocking in `.githooks/pre-push` (`make prop-probe`).
+`quality/gates/prop-probe.mjs`, blocking in `.githooks/pre-push` (`make check GATE=prop-probe`).
 holds: quality/gates/prop-probe.mjs
 
 ## 566. every seam shifted its text to the top of the frame, because the bake dropped a linked stylesheet
@@ -2434,7 +2434,7 @@ The kit is pasted as `buildKit().block`, which wraps the CSS in `STAGEKIT:start`
 holds: layout.kit-markers-required
 
 ## 595. the authoring order was written, printed, and still run backwards, so it stopped being written and became a refusal
-Three rules were broken in one session by an author who could quote all three: the decider roster (#591), the ui-skills route, and the file a rule named by filename (#593). Every one sat at `[eye]`, which `make rung` defines as "nothing but the sentence: you have to remember", and `make critics DECIDERS=1` had already printed `! no storyboard ... Step 1 is not optional` to a reader who worked around it. The first fix attempted was another paragraph of doctrine, which is the same mechanism that had already failed and would have been a ninth sentence to not follow. What replaced it: `quality/gates/stage.mjs` derives which of eight stages a film is in FROM ITS ARTIFACTS (a stored state file would be free to disagree with the repo); `harness/live/stage-gate.mjs` answers `PreToolUse` with `permissionDecision: "deny"` on the three writes that skip a stage, which is evaluated before any permission-mode check and so holds under bypass; and `harness/live/stage-say.mjs` re-states the open stage at every `UserPromptSubmit`, because reasoning quality falls as a session lengthens and a rule read once at session start is a rule that fails late in the work, which is when it matters. Approval is the one piece of state nothing can derive, so it is a line only the user's `/vawe-approve` writes and the gate denies to everyone else. Three denials only, one per mistake actually made, and no flag to skip them: a flag on this would be the thing it prevents.
+Three rules were broken in one session by an author who could quote all three: the decider roster (#591), the ui-skills route, and the file a rule named by filename (#593). Every one sat at `[eye]`, which `make check GATE=rung` defines as "nothing but the sentence: you have to remember", and `make critics DECIDERS=1` had already printed `! no storyboard ... Step 1 is not optional` to a reader who worked around it. The first fix attempted was another paragraph of doctrine, which is the same mechanism that had already failed and would have been a ninth sentence to not follow. What replaced it: `quality/gates/stage.mjs` derives which of eight stages a film is in FROM ITS ARTIFACTS (a stored state file would be free to disagree with the repo); `harness/live/stage-gate.mjs` answers `PreToolUse` with `permissionDecision: "deny"` on the three writes that skip a stage, which is evaluated before any permission-mode check and so holds under bypass; and `harness/live/stage-say.mjs` re-states the open stage at every `UserPromptSubmit`, because reasoning quality falls as a session lengthens and a rule read once at session start is a rule that fails late in the work, which is when it matters. Approval is the one piece of state nothing can derive, so it is a line only the user's `/vawe-approve` writes and the gate denies to everyone else. Three denials only, one per mistake actually made, and no flag to skip them: a flag on this would be the thing it prevents.
 holds: quality/gates/stage.mjs, harness/live/stage-gate.mjs, harness/live/stage-say.mjs, harness/author/approve.mjs, .claude/settings.json
 
 ## 596. the storyboard planned the story and never planned the picture, so the wrong object passed every gate

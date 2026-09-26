@@ -12,7 +12,7 @@ group: reference
   effect/preset family (cuts, stings, seams, kinetic type, shaders, looks, modifiers), the responsive
   one-source-to-every-aspect model, and the motion-math exports.
 - It is the vocabulary reference. Check it before inventing a primitive or guessing a field name; then
-  confirm live with `make schema AT='<path>'` (what is legal at a JSON path) or `make arsenal Q="…"`
+  confirm live with `make arsenal AT='<path>'` (what is legal at a JSON path) or `make arsenal Q="…"`
   (search all named things by plain-English meaning).
 
 No templates. These are the words; you write the sentences. Counts are exact (from code, July 2026).
@@ -656,7 +656,7 @@ moving; refused by name for an unknown `id`. Drag: `carry: [{from, to, id}]`, al
 clock, bound at boot (`core/engine/produce.js`) onto the dragged layer's own `follow`, windowed to
 `[from, to]`; refused for an unknown `id` or one already following something else.
 Schema: `films/scene/schema.json`. **Ask it what is legal at a path rather than reading it:**
-`make schema AT='layers[].motion[]'` prints every field there with its type, its written label and,
+`make arsenal AT='layers[].motion[]'` prints every field there with its type, its written label and,
 where the field takes a named vocabulary, which registry owns it. No `AT` prints the top-level shape.
 
 **Layout by containment: `group` is the DEFAULT for anything with a spatial relationship.** A group is
@@ -696,12 +696,12 @@ logos and dense real UI. So the default for any hero surface is **capture, then 
 
 Then the gates: `make validate` (schema + no-emdash) → `make probe` (purity) → `make audit`
 (overlap/safe-zone/text+image WCAG contrast) → `make motion` (holds/settles/monotonic/typing) →
-`make similar`/`make ledger` (cross-video sameness) → `make feature-audit` (are you reaching for the
+`make similar`/`make ledger` (cross-video sameness) → `make check GATE=feature-audit` (are you reaching for the
 best primitive, or defaulting?) → eyeball hook, payoff, CTA.
 
 ## Prefer the better primitive (don't default)
 
-`make feature-audit` exists because the framework's vocabulary keeps outrunning what videos reach for.
+`make check GATE=feature-audit` exists because the framework's vocabulary keeps outrunning what videos reach for.
 When two primitives can do the job, prefer the one on the right:
 
 | Instead of… | Reach for… | Why |
@@ -712,7 +712,7 @@ When two primitives can do the job, prefer the one on the right:
 | `preset: 'up'` on every entrance | **vary it** across the 31 presets (`decode`/`tilt`/`riseClip`/`highlight`…) | the "all text rises" tell; monotony is flagged |
 | a still `image` layer | add **`ken`** (Ken Burns) | dead stills read as slop; a slow push gives life |
 
-Rule of thumb: if `make feature-audit` says a primitive is *never adopted*, that's usually a gap in the
+Rule of thumb: if `make check GATE=feature-audit` says a primitive is *never adopted*, that's usually a gap in the
 video, not the framework. It's a WARN, not a blocker, but treat a flag as "prove you chose, not defaulted."
 
 ## The no-template doctrine
@@ -942,7 +942,7 @@ and `make spectrum` (band energy baked to a table the render reads by row).
 
 ```bash
 make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
-make sim-audit                              # seeded? bake fresh against its source? sequence intact?
+make check GATE=sim-audit                              # seeded? bake fresh against its source? sequence intact?
 ```
 
 ```json
@@ -956,7 +956,7 @@ frame count: `clip` derives its index from `t`, `manifest.fps` and `speed`. Fram
 holds.
 
 Determinism moved to bake time, it did not disappear. A sim draws every random number from
-`generators/sim/sims/lib/rng.mjs`, seeded by its exported `seed`; `make sim-audit` fails any sim that reaches for
+`generators/sim/sims/lib/rng.mjs`, seeded by its exported `seed`; `make check GATE=sim-audit` fails any sim that reaches for
 `Math.random` or the wall clock, any bake whose sim has been edited since (the frames would silently
 keep playing the previous version of the effect), and any sequence with a hole in it. Full contract:
 `generators/sim/sims/README.md`. Shipped: `ember-burst` · `ink-bloom` · `shatter`.

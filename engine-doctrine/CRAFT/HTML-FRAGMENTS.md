@@ -178,7 +178,7 @@ each piece.
 ### 3. A `motion` track, for the layer as one object
 
 Seven keys beat one preset name. The two films this repo argues from carry hand-keyed tracks on 6 of 8
-and 4 of 35 layers; the library median is 0. `make track SHAPE=pan|blast|drift|enter|exit` emits one
+and 4 of 35 layers; the library median is 0. `make arsenal SHAPE=pan|blast|drift|enter|exit` emits one
 from a shape measured off a real film.
 
 ### 4. `vars`, for a number your own CSS reads

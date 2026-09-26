@@ -276,7 +276,7 @@ test('lib-test: timeline', async () => {
     try { velocityAt(kf, 0.5, 0); return false; } catch (e) { return /positive lookback/.test(e.message); }
   })());
 
-  // ---- `make track SHAPE=exit` must not brake in the middle of a departure -----------------------
+  // ---- `make arsenal SHAPE=exit` must not brake in the middle of a departure -----------------------
   //
   // A named easing is a function of ONE segment's own progress, so it ends that segment fast and
   // starts the next one at rest: an interior key is a dead stop by construction (the SMOOTH section of
@@ -299,7 +299,7 @@ test('lib-test: timeline', async () => {
     { t: 0.55, y: -260, opacity: 0, ease: 'easeInCubic' }]) < 60);
   ok('`exit` still LEAVES: it is faster at the frame edge than anywhere earlier',
      Math.abs(velocityAt(exitKeys, 0.55, 1 / 30).vy) > exitFloor(exitKeys) * 2);
-  ok('every track `make track` emits is legal: no key carries two authored curves',
+  ok('every track `make arsenal SHAPE=` emits is legal: no key carries two authored curves',
      Object.keys(TRACK_SHAPES).every((n) => keyHandleErrors(TRACK_SHAPES[n]({}), n).length === 0));
 
   // SQUASH: the perpendicular axis is the RECIPROCAL, which is the difference between a squash and a zoom.

@@ -1,6 +1,6 @@
 // quality/gates/silent-fallback.mjs: is any named vocabulary still resolved with a silent default?
 //
-//   node quality/gates/silent-fallback.mjs        ·        make silent-check
+//   node quality/gates/silent-fallback.mjs        ·        make check GATE=silent-check
 //
 // WHY THIS IS A CHECK AND NOT FRAMEWORK. `core/registry/registry.js` removes the ability to BUILD a registry with
 // a fallback: `pick()` takes no such parameter. What it cannot do is stop somebody writing a fresh plain
