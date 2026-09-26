@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { serveRepo, launchPage, waitForEngine, bootPathFor, REPO_ROOT } from '../lib/render-harness.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 import { sourceTime } from '../../core/layers/video.js';
@@ -22,18 +21,6 @@ const ids = idArg.split(',').map((s) => s.trim()).filter(Boolean);
 if (!Number.isFinite(viewerT)) { console.error(`--t "${tArg}" is not a number`); process.exit(1); }
 
 const abs = path.resolve(file);
-const raw = fs.readFileSync(abs, 'utf8');
-const data = JSON.parse(raw);
-const rel = path.relative(REPO_ROOT, abs);
-const module = data.module;
-if (!module) { console.error(`${file}: no "module" field`); process.exit(1); }
-
-const tempo = typeof data.tempo === 'number' ? data.tempo : 1;
-const pageT = viewerT * tempo;
-
-const cloneForExpand = structuredClone(data);
-delete cloneForExpand.tempo;
-const expanded = expandScene(cloneForExpand);
 
 function findLayer(id, layers) {
   for (const L of layers || []) {
@@ -86,6 +73,27 @@ function inspectLayer(id) {
   });
 
   const video = el.querySelector('video');
+
+  // fontWeight: the split-unit spans (core/type/type.js's `.ku`) carry the live wght() value on a
+  // char/word layer; a plain (unsplit) layer carries it on itself. Averaged across units so one frame
+  // answers "how heavy right now" without a caller having to know which shape the layer took.
+  const kus = [...el.querySelectorAll('.ku')];
+  const weightOf = (e) => parseFloat(getComputedStyle(e).fontWeight) || null;
+  const weights = (kus.length ? kus : [el]).map(weightOf).filter((w) => w != null);
+  const fontWeight = weights.length ? weights.reduce((a, b) => a + b, 0) / weights.length : null;
+
+  // drawRatio: core/layers/svg.js's `draw` writes stroke-dasharray = "total total" and animates
+  // stroke-dashoffset from `total` (hidden) to 0 (fully drawn); 1 - offset/total is that progress as a
+  // plain 0..1 fraction, the same number `draw.dur`/`draw.weight` describe in the scene JSON.
+  const drawPath = el.querySelector('path, line, polyline, circle, rect, ellipse');
+  let drawRatio = null;
+  if (drawPath) {
+    const pcs = getComputedStyle(drawPath);
+    const total = parseFloat((pcs.strokeDasharray || '').split(',')[0]);
+    if (pcs.strokeDasharray === 'none') drawRatio = 1;
+    else if (total > 0) drawRatio = Math.max(0, Math.min(1, 1 - (parseFloat(pcs.strokeDashoffset) || 0) / total));
+  }
+
   return {
     dataStart: Number(el.dataset.start ?? 0),
     dataDuration: el.dataset.duration != null ? Number(el.dataset.duration) : null,
@@ -95,6 +103,8 @@ function inspectLayer(id) {
     display: cs.display, visibility: cs.visibility,
     rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
     videoCurrentTime: video ? video.currentTime : null,
+    textContent: el.textContent ? el.textContent.trim() : null,
+    fontWeight, drawRatio,
     covers,
   };
 }
@@ -115,49 +125,75 @@ function buildRow(id, authoredLayer, dom, pageT) {
   return row;
 }
 
-async function main() {
-  const [vw, vh] = sceneDims(data);
+/**
+ * probeMany(filmPath, requests, { tempo }) -> [{ viewerT, pageT, frame, fps, camera, samples }, ...]
+ * One page boot for N samples, so a caller measuring several (t, id-set) points on the same film
+ * (harness/dev/conform.mjs, sampling many claim windows) pays puppeteer's ~seconds-per-launch cost
+ * once instead of once per point. `requests` is `[{ t, ids }, ...]`, viewer seconds and the same id
+ * list shape the CLI below takes. The CLI is now a one-request call through this same function, so the
+ * two never drift: a field added here is a field the CLI prints too.
+ */
+export async function probeMany(filmPath, requests, { tempo: tempoOverride } = {}) {
+  const abs = path.resolve(filmPath);
+  const rawText = fs.readFileSync(abs, 'utf8');
+  const sceneData = JSON.parse(rawText);
+  const relFile = path.relative(REPO_ROOT, abs);
+  const mod = sceneData.module;
+  if (!mod) throw new Error(`${filmPath}: no "module" field`);
+  const tempo = tempoOverride ?? (typeof sceneData.tempo === 'number' ? sceneData.tempo : 1);
+
+  const cloneForExpand = structuredClone(sceneData);
+  delete cloneForExpand.tempo;
+  const expandedScene = expandScene(cloneForExpand);
+
+  const [vw, vh] = sceneDims(sceneData);
   const { server, port } = await serveRepo({});
   const { browser, page } = await launchPage({ width: vw, height: vh });
-  const report = { viewerT, tempo, pageT, module, samples: {} };
+  const results = [];
   try {
-    const bootRel = bootPathFor(REPO_ROOT, raw, data, rel);
-    await page.goto(`http://127.0.0.1:${port}/films/${module}/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
+    const bootRel = bootPathFor(REPO_ROOT, rawText, expandedScene, relFile);
+    await page.goto(`http://127.0.0.1:${port}/films/${mod}/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
     const err = await waitForEngine(page, { throwOnTimeout: false });
     if (err) throw new Error(`scene did not load: ${err}`);
     const meta = await page.evaluate(() => window.__engine.meta);
-    report.fps = meta.fps;
-    // `meta.beatSync` carries bindBeats' own resolved-times line (core/beats/index.js describeBind),
-    // produced at boot but never read past this point until now: the render process cannot hear the
-    // page's console.log (engine-doctrine/MISTAKES.md #477), so this was the one line an author had no
-    // way to see outside a real render.
-    if (meta.beatSync) report.beatSync = meta.beatSync;
-    if (pageT > meta.duration + 1e-6) {
-      console.error(`--t ${viewerT}s (page time ${pageT.toFixed(3)}s) is past this film's authored duration (${meta.duration.toFixed(3)}s)`);
-      process.exit(1);
-    }
-    const frame = Math.min(meta.totalFrames - 1, Math.max(0, Math.round(pageT * meta.fps)));
-    report.frame = frame;
-    await page.evaluate((n) => window.__engine.renderFrame(n), frame);
-    await page.evaluate(() => (window.__frameSettle ? window.__frameSettle() : true));
 
-    report.camera = await page.evaluate(() => {
-      const cam = document.getElementById('cam');
-      if (!cam) return null;
-      const cs = getComputedStyle(cam);
-      return { styleTransform: cam.style.transform || 'none', computedTransform: cs.transform, perspective: cs.perspective };
-    });
-
-    for (const id of ids) {
-      const authoredLayer = findLayer(id, expanded.layers);
-      const dom = await page.evaluate(inspectLayer, id);
-      report.samples[id] = buildRow(id, authoredLayer, dom, pageT);
+    for (const { t: viewerT, ids: reqIds } of requests) {
+      const pageT = viewerT * tempo;
+      const report = { viewerT, tempo, pageT, module: mod, fps: meta.fps, samples: {} };
+      if (meta.beatSync) report.beatSync = meta.beatSync;
+      if (pageT > meta.duration + 1e-6) {
+        report.error = `--t ${viewerT}s (page time ${pageT.toFixed(3)}s) is past this film's authored duration (${meta.duration.toFixed(3)}s)`;
+        results.push(report);
+        continue;
+      }
+      const frame = Math.min(meta.totalFrames - 1, Math.max(0, Math.round(pageT * meta.fps)));
+      report.frame = frame;
+      await page.evaluate((n) => window.__engine.renderFrame(n), frame);
+      await page.evaluate(() => (window.__frameSettle ? window.__frameSettle() : true));
+      report.camera = await page.evaluate(() => {
+        const cam = document.getElementById('cam');
+        if (!cam) return null;
+        const cs = getComputedStyle(cam);
+        return { styleTransform: cam.style.transform || 'none', computedTransform: cs.transform, perspective: cs.perspective };
+      });
+      for (const id of reqIds) {
+        const authoredLayer = findLayer(id, expandedScene.layers);
+        const dom = await page.evaluate(inspectLayer, id);
+        report.samples[id] = buildRow(id, authoredLayer, dom, pageT);
+      }
+      results.push(report);
     }
   } finally {
     await browser.close();
     server.close();
   }
-  return report;
+  return results;
+}
+
+async function main() {
+  const [r] = await probeMany(abs, [{ t: viewerT, ids }]);
+  if (r.error) { console.error(r.error); process.exit(1); }
+  return r;
 }
 
 function printText(r) {
