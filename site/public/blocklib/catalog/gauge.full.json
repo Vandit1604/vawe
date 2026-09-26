@@ -30,13 +30,18 @@
     "props": [
       "x",
       "y",
+      "h",
       "w",
       "value",
       "max",
       "label",
       "color",
       "start",
-      "dur"
+      "dur",
+      "bare",
+      "needle",
+      "ticks",
+      "glow"
     ]
   },
   "files": [
