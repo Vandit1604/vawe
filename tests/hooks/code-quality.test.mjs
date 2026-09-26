@@ -34,6 +34,8 @@ const run = () => {
 
 let restoreBaseline;
 test.before(() => {
+  // harness/live/test/ holds no tracked file of its own, so git never carries it into a fresh clone.
+  fs.mkdirSync(path.dirname(ABS), { recursive: true });
   restoreBaseline = fs.readFileSync(BASELINE, 'utf8');
 });
 test.after(() => {
