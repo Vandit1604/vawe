@@ -1,10 +1,10 @@
 ---
-name: vawe-type-explainer
-description: "Playbook for an explainer video in this engine: held pace, real counted figures, payoff last, no product or site needed. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches explainer, or the request explains a topic/article/data with invented visuals."
-stage: plan
+when: "authoring an explainer video with no product or site to capture"
+answers: "the explainer type's spine, motion to reach for, rules, assets and worked example"
+group: skill
 ---
 
-# vawe-type-explainer: the explainer playbook
+# The explainer playbook
 
 No product, no site: the taste anchor is a NAMED reference (a style word, or a manufactured profile),
 never "clean modern SaaS". The whole film has to earn attention on the strength of the facts and the

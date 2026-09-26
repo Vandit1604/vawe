@@ -1,10 +1,10 @@
 ---
-name: vawe-type-sting
-description: "Playbook for a motion-graphic sting/bumper in this engine: one move, the mark, four to eight seconds. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches motion-graphic, or the request is a short unnarrated logo reveal, stat hit, or moving title."
-stage: plan
+when: "authoring a motion-graphic sting or bumper"
+answers: "the sting type's spine, motion to reach for, rules, assets and worked example"
+group: skill
 ---
 
-# vawe-type-sting: the motion-graphic sting playbook
+# The sting playbook: one move, the mark
 
 The shortest type and the least forgiving: at 4-8s there is no room for a second idea. A sting that
 tries to do two things does neither. Judge every addition against "does this serve the ONE move".

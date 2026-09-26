@@ -133,7 +133,7 @@ function main() {
   // rotation, using engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md.
   if (matched.type) {
     console.log('');
-    console.log(`Type skill: skills/vawe-type-${matched.type}/SKILL.md`);
+    console.log(`Type skill: skills/vawe-type/SKILL.md (skills/vawe-type/reference/${matched.type}.md)`);
   }
 }
 

@@ -2,6 +2,7 @@
 name: vawe-name-the-effect
 description: "Identifies, names, and builds an effect from a reference image or clip that cannot be constructed by eye, then adds it to the arsenal so the next author inherits the name instead of a guess. Use whenever a reference arrives with 'make this' and the instinct is to approximate it."
 stage: design
+effort: medium
 ---
 
 # Name the effect before you build it
@@ -112,3 +113,11 @@ You have just built an effect the arsenal does not have. **Contribute it back.**
 against the upstream repo with the effect's name, its recipe, and the preset or look you wrote. An
 effect that lives in one fork is an effect every other author rebuilds from a picture, which is the
 exact failure this whole skill exists to end.
+
+## Gotchas
+
+- A named GSAP fx/exit typo degraded silently instead of erroring; validate a new name against the
+  real registry exports before shipping it. `engine-doctrine/MISTAKES.md #137`.
+- The generated arsenal map (`engine-doctrine/EFFECTS.md`) is only as complete as the registries it
+  reads; a newly added effect that isn't wired into a registry is invisible to search, not merely
+  hard to find. `engine-doctrine/MISTAKES.md #357`.

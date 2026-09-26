@@ -637,7 +637,7 @@ test('lib-test: authoring', async () => {
     ["subtitles at the bottom of the screen", "captions"],
     // The SKILL family. A skill answers "what should I load before I start", which nothing ranked
     // until skills joined the corpus; it was findable only through AGENTS.md's hand-kept router table.
-    ["matching a reference film's exact look", "vawe-type-recreation"],
+    ["matching a reference film's exact look", "vawe-type"],
     ["several series stacked in one bar", "stackedBar"],
     ["a folder and file sidebar like an editor", "fileTree"],
     ["a list of git commits with authors", "commitRow"],

@@ -17,7 +17,7 @@ craft:
     color: "themes/mercury.json untouched: var(--accent) for the mark, var(--text) for the wordmark, var(--dim) for the descriptor, all on a literal true-black bg per BLACK MEANS #000000"
     density: "three layers, one subject: the mark is the picture, the wordmark and descriptor are the only text"
     direction: "restraint is the device everywhere except the one snap: one hand-keyed scale/rotation track on one layer carries the whole film's motion"
-    film-structure: "none held across a cut, because there is no cut: under 8s the no-continuous-object floor does not fire (skills/vawe-type-sting/SKILL.md)"
+    film-structure: "none held across a cut, because there is no cut: under 8s the no-continuous-object floor does not fire (skills/vawe-type/reference/sting.md)"
     layout: "centered on the canvas, mark above, wordmark and descriptor stacked below on the same axis: the eye moves down once and stops"
     motion-craft: "a hand-keyed motion track carries anticipation (coil at 0.82 scale, hold, snap to 1.06 on easeOutBack, settle to 1.0 on easeOutCubic, all inside 0.68s) ahead of the mark's own draw-on completing at 1.2s, then a barely-there 1.0-to-1.03 breathe on easeInOutSine through the hold. Not a named preset: AUTHOR THE MOTION"
     keyed-motion: "the anticipation-then-settle track is the one hand-keyed motion in the film; the coil-to-snap segment is dense enough (0.2s) that a curve, not a linear chain, is the right call because it is a physical spring, not a mechanical drag"

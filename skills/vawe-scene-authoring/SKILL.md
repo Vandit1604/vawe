@@ -3,6 +3,7 @@ name: vawe-scene-authoring
 description: How to author a Vawe scene (the shared films/scene/scene.html shell) and its data JSON (films/scene/<topic>.json): the renderFrame(n) purity contract, design tokens, motion primitives, the image system, and the QA loop. Use when creating or editing scene HTML/CSS, adding animations, integrating images, or fixing spacing.
 codes: canvas-order-dependent, purity-forward-mismatch, purity-render-order
 stage: assemble
+effort: medium
 ---
 
 # Authoring Vawe scenes
@@ -168,3 +169,15 @@ If the audit flags overlap/overflow, fix with the spacing tokens and re-run. Mar
 `data-layer="critical"` so the audit can see it.
 
 See `engine-doctrine/CODEMAPS/ARCHITECTURE.md` for the full system map.
+
+## Gotchas
+
+- `scene.html` defaults every layer to `x:60,y:240`; a `cursor` `path` computed without accounting
+  for that base offset clicks empty space next to the real target. `engine-doctrine/MISTAKES.md #13`.
+- A nested `layout:'free'` group does not position its own children the way a top-level free group
+  does; the nested one needs its own `position:relative`. `engine-doctrine/MISTAKES.md #99`.
+- A figure (chart, diagram) animated at the layer level instead of via `parts` reads flatter than a
+  reference pipeline; choreograph every child piece by piece, not the whole block at once.
+  `engine-doctrine/MISTAKES.md #153`.
+- A blur left behind by an exit can stick to frames rendered later unless the layer's resting values
+  are written before the active animation applies. `engine-doctrine/MISTAKES.md #41`.

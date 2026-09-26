@@ -13,7 +13,7 @@ craft:
     color: "themes/mercury.json untouched: var(--accent) for the mark, var(--text) for the wordmark, var(--dim) for the descriptor, all on a literal true-black bg per BLACK MEANS #000000"
     density: "three layers, one subject: the mark is the picture, the wordmark and descriptor are the only text"
     direction: "restraint is the whole device: one hand-keyed scale track on one layer, nothing else moves independently"
-    film-structure: "none held across a cut, because there is no cut: a sting under 8s needs no continuous-object waiver (`no-continuous-object`'s floor does not fire under 8s, skills/vawe-type-sting/SKILL.md)"
+    film-structure: "none held across a cut, because there is no cut: a sting under 8s needs no continuous-object waiver (`no-continuous-object`'s floor does not fire under 8s, skills/vawe-type/reference/sting.md)"
     layout: "centered on the canvas, mark above, wordmark and descriptor stacked below it on the same axis: the eye moves down once and stops"
     motion-craft: "draw-on (1.3s) doubles as the entrance; a hand-keyed scale track (0.7 to 1.0 on easeOutExpo, matching the theme's own easing, then a barely-there 1.03 breathe on easeInOutSine) is the authored motion, not a named preset"
     keyed-motion: "the mark's scale track is the one hand-keyed motion in the film, per AUTHOR THE MOTION. DO NOT NAME IT"
@@ -26,7 +26,7 @@ craft:
 ---
 
 <!-- quality/runs/evals/briefs/sting.json: the thinnest of the six eval briefs (engine-doctrine/EVALS.md), and the
-     worked example skills/vawe-type-sting/SKILL.md points to. One beat, on purpose. -->
+     worked example skills/vawe-type/reference/sting.md points to. One beat, on purpose. -->
 
 ## Beat 1: the move (0s-6s)
 - type: sting

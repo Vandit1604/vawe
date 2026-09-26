@@ -32,26 +32,27 @@ already owns the doctrine.
 
 | Priority | Request | Route file | Type skill |
 |---|---|---|---|
-| 1 | Recreate a specific reference film or website's exact look, with no product of ours to sell | [`routes/recreation.md`](routes/recreation.md) | `vawe-type-recreation` |
-| 2 | Market or showcase a real product, company, or site from a URL or site-specific brief | [`routes/launch-video.md`](routes/launch-video.md) | `vawe-type-launch` |
-| 3 | Explain a topic, article, or data with invented visuals and no product/site capture | [`routes/explainer.md`](routes/explainer.md) | `vawe-type-explainer` |
-| 4 | A short, explicitly unnarrated, motion-first unit, typically under 10s (sting, stat hit, moving title) | [`routes/motion-graphic.md`](routes/motion-graphic.md) | `vawe-type-sting` |
-| 5 | Prove one mechanism, effect, or blueprint works; not a shippable film | [`routes/demo.md`](routes/demo.md) | `vawe-type-demo` |
+| 1 | Recreate a specific reference film or website's exact look, with no product of ours to sell | [`routes/recreation.md`](routes/recreation.md) | `vawe-type` (`reference/recreation.md`) |
+| 2 | Market or showcase a real product, company, or site from a URL or site-specific brief | [`routes/launch-video.md`](routes/launch-video.md) | `vawe-type` (`reference/launch.md`) |
+| 3 | Explain a topic, article, or data with invented visuals and no product/site capture | [`routes/explainer.md`](routes/explainer.md) | `vawe-type` (`reference/explainer.md`) |
+| 4 | A short, explicitly unnarrated, motion-first unit, typically under 10s (sting, stat hit, moving title) | [`routes/motion-graphic.md`](routes/motion-graphic.md) | `vawe-type` (`reference/sting.md`) |
+| 5 | Prove one mechanism, effect, or blueprint works; not a shippable film | [`routes/demo.md`](routes/demo.md) | `vawe-type` (`reference/demo.md`) |
 
 Before finalizing the route, read the matched file's Trigger line. If the request does not satisfy it,
 keep going down the table instead of forcing the match. Each row's type skill is a PLAYBOOK (the spine,
-the blueprints to reach for, the rules that matter most, a worked example): load it after the route file,
-before writing JSON. A sixth type, `vawe-type-talking-head`, is not in this priority table (a narrated
-presenter video is not one of the five deliverables above); reach it directly on request wording
-("narrated", "voiceover", "presenter", "talking head").
+the blueprints to reach for, the rules that matter most, a worked example), kept as one page under
+`vawe-type/reference/`: load it after the route file, before writing JSON. A sixth type,
+`reference/talking-head.md`, is not in this priority table (a narrated presenter video is not one of
+the five deliverables above); reach it directly on request wording ("narrated", "voiceover",
+"presenter", "talking head").
 
-**The route picks the deliverable; the DURATION picks the shape.** Every type skill above now states
+**The route picks the deliverable; the DURATION picks the shape.** Every type's reference page states
 which shape it takes at which length, right under its own `## The spine` heading: under
 `CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s) most types are ONE CONTINUOUS ACTION
 (`skills/vawe-continuous-action/SKILL.md`), not the multi-beat spine the route file's Output section
-describes for a longer film. `talking-head` and `recreation` are the two exceptions and say so in their
-own skill. Each type's `SKILL.md` names its beat spine and its continuous-action threshold, so the
-storyboard is written to the right shape by reading the skill, not from memory.
+describes for a longer film. `talking-head` and `recreation` are the two exceptions and say so on their
+own page. Each `vawe-type/reference/<type>.md` names its beat spine and its continuous-action
+threshold, so the storyboard is written to the right shape by reading the page, not from memory.
 
 ## Resolve common ambiguities
 

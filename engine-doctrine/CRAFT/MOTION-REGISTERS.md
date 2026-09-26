@@ -66,8 +66,8 @@ comparing a title sequence to a settings dialog and marking the title sequence o
 
 | Register | Motion is | Restraint rule | Named examples |
 |---|---|---|---|
-| UI-adjacent / quiet explainer | a cost the viewer pays for legibility | one loud moment, everything else quiet; NN/g and Apple HIG apply directly | `vawe-type-explainer`, `vawe-type-talking-head` |
-| Kinetic typography / hype / launch promo / continuous title | the content itself | sustained motion across the whole runtime is correct; a still beat is the cost | `vawe-type-launch`, `vawe-type-sting`, `higgsfield-recreation`, `brew-launch-act1` |
+| UI-adjacent / quiet explainer | a cost the viewer pays for legibility | one loud moment, everything else quiet; NN/g and Apple HIG apply directly | `vawe-type` (`reference/explainer.md`, `reference/talking-head.md`) |
+| Kinetic typography / hype / launch promo / continuous title | the content itself | sustained motion across the whole runtime is correct; a still beat is the cost | `vawe-type` (`reference/launch.md`, `reference/sting.md`), `higgsfield-recreation`, `brew-launch-act1` |
 
 **This does not repeal `effect-soup`, `monotone-timing` or the rest of `make direct`.** Those gates
 measure whether motion VARIES (different eases, different durations, different directions), and
