@@ -280,13 +280,15 @@ all: build ## [ship] every format via the render queue
 # preview.mjs's raw usage blob, naming neither the mistake nor the fix. D omitted previews the module's
 # sample.json (a deliberate default, not an error); D pointing at a file that does not exist is loud;
 # M set here (the old, wrong habit) is now loud too instead of being silently ignored.
-look: ## [dev] storyboard (key frames) for visual review, of the film at D. T=<s>|BEAT=<n>: one still, no full sheet.
+look: ## [dev] storyboard (key frames) for visual review, of the film at D. T=<s>|BEAT=<n>: one still, no full sheet. LOOKS=1: one styleframe per beat at its hold, for the look review before any motion work.
 	@test -z "$(M)" || { echo "make look takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make look D=$(M)"; exit 1; }
 	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing films/scene/sample.json"
 ifneq ($(strip $(T)),)
 	node harness/author/preview.mjs scene $$(node -e "console.log(Math.round($(T)*30))") $(if $(D),--data $(D))
 else ifneq ($(strip $(BEAT)),)
 	node harness/author/preview.mjs scene b$(BEAT) $(if $(D),--data $(D))
+else ifneq ($(strip $(LOOKS)),)
+	node harness/author/preview.mjs scene looks $(if $(D),--data $(D))
 else
 	node harness/author/preview.mjs scene "" $(if $(D),--data $(D))
 endif
@@ -464,8 +466,8 @@ e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site
 
 # no-judge, compare, expand, house-style, direct, scrub: `make dev-tool X=<name>`.
 
-judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
-	@node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,)
+judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>] [STRUCT=1] [RUNS=A,B] [VERDICT_JSON=<f> RUN=<id>] [COMPARE="a.json b.json"])
+	@$(if $(COMPARE),node quality/gates/judge.mjs --compare $(COMPARE),node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,) $(if $(filter 1,$(STRUCT)),--struct) $(if $(RUNS),--runs $(RUNS)) $(if $(VERDICT_JSON),--verdict-json $(VERDICT_JSON) --run $(RUN)))
 
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
 # renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only
