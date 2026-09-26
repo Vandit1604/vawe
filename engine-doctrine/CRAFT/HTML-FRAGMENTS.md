@@ -48,7 +48,7 @@ time. The three attempts, in the order they failed: `filter` through `css` (refu
 layer orbiting the word (the wrong idea entirely). The signal is not subtle: **if you are hunting for
 the prop that does the thing CSS already does, stop and write the CSS.**
 
-The layer vocabulary is 24 layer types and ~197 props, and it is worth having. Reach for a layer TYPE when it
+The layer vocabulary (`ls core/layers/` for the types, `make arsenal Q="layer props"` for the props) is worth having. Reach for a layer TYPE when it
 does something you would otherwise hand-roll: `text` measures and fits and carries the theme's ink,
 `count` counts, `component` captures a real product surface, `group` scopes a box AND a clock.
 
@@ -288,7 +288,7 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 `node harness/author/stagekit.mjs <film.json>` (`make stagekit D=<film>`) prints one `<style>` block
 every scene fragment in a per-scene fan-out pastes VERBATIM (`node ... --check` asserts byte identity,
 `engine-doctrine/CRAFT/PER-SCENE-FANOUT.md`). It is generated from the FILM's theme, so it is not one fixed
-stylesheet: 31 themes get 31 different kits, never one kit in 31 colours. Every number in it traces back
+stylesheet: every theme in `themes/` (`ls themes/*.json | wc -l`) gets its own kit, never one kit reused across colours. Every number in it traces back
 to `resolveLook` (`core/registry/theme-contract.js`), never a literal the kit author picked:
 
 - **Type scale**: `.kit-hook/.kit-headline/.kit-body/.kit-caption` (unchanged from before) plus

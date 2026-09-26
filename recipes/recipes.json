@@ -323,11 +323,19 @@
       },
       "autoRotate": {
         "default": false,
-        "note": "true turns the layer to face the path's own tangent as it travels"
+        "note": "true turns the layer to face the path's own tangent as it travels (AE's auto-orient); a number is that same auto-orient plus a rotation offset in degrees, so an artwork drawn nose-up can still track a sideways path"
       },
       "curviness": {
         "default": 1,
         "note": "GSAP's smoothing of the control points between path keys; 1 is untouched"
+      },
+      "from": {
+        "default": 0,
+        "note": "0-1: which fraction of the path the run starts at (GSAP's `start`), for flying only a stretch of a longer curve"
+      },
+      "to": {
+        "default": 1,
+        "note": "0-1: which fraction of the path the run ends at (GSAP's `end`)"
       }
     }
   },

@@ -167,4 +167,11 @@ fs.writeFileSync(path.join(runDir, 'report.md'), md);
 console.log(`\n==== e2e: ${overallPass ? 'PASS' : 'FAIL'} · ${results.filter((r) => r.pass).length}/${results.length} checks ====`);
 for (const r of results) if (!r.pass) console.log(`  ✗ ${r.name}`);
 console.log(`report: quality/runs/e2e/${nowStamp}/report.json (also quality/runs/e2e/latest.json)`);
+
+// Advice, not a gate (engine-doctrine "safeguards adapt, not block"): the site-test above runs the
+// site's own predev, which re-vendors site/public/blocklib, and a generator run here can leave a
+// tracked file behind it did not have to. Never changes e2e's own exit code.
+console.log('');
+run('node', ['harness/dev/clean-state.mjs']).stdout.split('\n').filter(Boolean).forEach((l) => console.log(l));
+
 process.exit(overallPass ? 0 : 1);

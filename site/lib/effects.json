@@ -1,7 +1,7 @@
 {
-  "total": 728,
-  "previewed": 341,
-  "families": 62,
+  "total": 733,
+  "previewed": 345,
+  "families": 63,
   "tags": [
     [
       "asset",
@@ -45,7 +45,7 @@
     ],
     [
       "layer",
-      42
+      43
     ],
     [
       "motion key",
@@ -61,7 +61,7 @@
     ],
     [
       "per-layer",
-      92
+      96
     ],
     [
       "per-layer/scene",
@@ -1691,7 +1691,7 @@
         {
           "name": "svg",
           "stem": "layer-types--svg",
-          "desc": "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin)",
+          "desc": "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot",
           "scene": null,
           "noPreview": null
         },
@@ -1781,7 +1781,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 12,
+      "count": 13,
       "undescribed": 0,
       "entries": [
         {
@@ -1845,6 +1845,13 @@
           "stem": "three-js-scenes-real-geometry--magnetic",
           "desc": "field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them",
           "scene": "/assets/effects/three-js-scenes-real-geometry--magnetic.json",
+          "noPreview": null
+        },
+        {
+          "name": "object",
+          "stem": "three-js-scenes-real-geometry--object",
+          "desc": "a premium composed object · a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--object.json",
           "noPreview": null
         },
         {
@@ -2568,6 +2575,40 @@
       ]
     },
     {
+      "id": "drivers-expressions-as-data",
+      "title": "Drivers (expressions as data)",
+      "tag": "per-layer",
+      "intro": "The `drive` field on a layer · AFTER EFFECTS EXPRESSIONS, written as data instead of code, resolved fresh every frame so a seek and a forward render always agree. `wiggle` is a seeded jitter on one property, `link` is the pick-whip (this property copies another layer's own animated value, with an optional delay), and `loop` repeats this layer's own keyframes past a point instead of holding on the last one. `{ \"drive\": { \"wiggle\": { \"prop\": \"rot\", \"freq\": 1.5, \"amp\": 2 } } }`",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 3,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "link",
+          "stem": "drivers-expressions-as-data--link",
+          "desc": "the PICK-WHIP · this property copies another layer's own animated value every frame, `mul`/`add` rescale it and `delay` (in seconds, 0.1 is a normal follow-through lag) shifts when it arrives",
+          "scene": "/assets/effects/drivers-expressions-as-data--link.json",
+          "noPreview": null
+        },
+        {
+          "name": "loop",
+          "stem": "drivers-expressions-as-data--loop",
+          "desc": "LOOP OUT · past `to` seconds this layer's own keyframes repeat forever, `cycle` restarts at `from` (0 by default), `pingpong` bounces between them, `continue` just holds the last key the way an unlooped track already does",
+          "scene": "/assets/effects/drivers-expressions-as-data--loop.json",
+          "noPreview": null
+        },
+        {
+          "name": "wiggle",
+          "stem": "drivers-expressions-as-data--wiggle",
+          "desc": "an AFTER EFFECTS EXPRESSION as data · deterministic seeded jitter on one property (x/y in px, rot in deg), default 2Hz at 10 units, reseed to decorrelate two layers so they never wobble in lockstep",
+          "scene": "/assets/effects/drivers-expressions-as-data--wiggle.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "effector-drives",
       "title": "Effector drives",
       "tag": "per-layer",
@@ -2982,7 +3023,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.",
-      "count": 14,
+      "count": 15,
       "undescribed": 0,
       "entries": [
         {
@@ -3016,7 +3057,7 @@
         {
           "name": "matte",
           "stem": "per-layer-modifiers--matte",
-          "desc": "a LUMA MATTE · another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box",
+          "desc": "a TRACK MATTE · another layer's luma or alpha becomes this layer's own alpha, white shows and black hides, and `-inverted` flips that. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box",
           "scene": null,
           "noPreview": null
         },
@@ -3045,6 +3086,13 @@
           "name": "progress",
           "stem": "per-layer-modifiers--progress",
           "desc": "hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "repeat",
+          "stem": "per-layer-modifiers--repeat",
+          "desc": "AE's Repeater · stamp the layer's own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy's own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time",
           "scene": null,
           "noPreview": null
         },

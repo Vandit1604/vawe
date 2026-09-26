@@ -465,10 +465,20 @@ boot((data, fps, theme, canvas) => {
       }
     }
     // MOTION PATH (MotionPathPlugin): fly the layer along an SVG path. Closed-form position → pure in n.
+    // `path`/`d`/`points` are the same value under GSAP's own three spellings (a "M..." string or an
+    // array of {x,y} points it beziers itself via `curviness`), never three fields to keep in sync.
+    // `autoOrient` is the AE name for GSAP's `autoRotate`; `orientOffset` (deg) is GSAP's own offset
+    // form of that SAME field (`autoRotate: <number>`, verified in assets/vendor/MotionPathPlugin.min.js:
+    // `this.rOffset=parseFloat(s)||0`), so this never becomes a second way to rotate. `from`/`to`
+    // (0-1) are GSAP's `start`/`end`, trimming which stretch of the path the tween's own eased
+    // progress crosses: the "progress keys" this path system already had, under GSAP's names.
     if (L.motionPath && window.gsap && window.MotionPathPlugin) {
       const mp = L.motionPath;
+      const autoRotate = mp.autoOrient != null ? (mp.autoOrient ? (mp.orientOffset ?? true) : false)
+        : (mp.orientOffset != null ? mp.orientOffset : (mp.autoRotate ?? false));
       window.gsap.to(el, {
-        motionPath: { path: mp.path, align: mp.align, alignOrigin: mp.alignOrigin, autoRotate: mp.autoRotate ?? false, curviness: mp.curviness },
+        motionPath: { path: mp.path ?? mp.d ?? mp.points, align: mp.align, alignOrigin: mp.alignOrigin,
+          autoRotate, curviness: mp.curviness, start: mp.from, end: mp.to },
         duration: mp.dur ?? (L.duration ?? 2), ease: gsapEase(mp.ease, 'power1.inOut', `layer ${L.type} motionPath`),
         delay: (L.start ?? 0) + (mp.delay || 0), immediateRender: true });
     }
