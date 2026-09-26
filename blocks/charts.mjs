@@ -230,32 +230,82 @@ export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '
     ].filter(Boolean) }];
 }
 
-// gauge: a semicircular meter (value / max) in a card.
-export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4, look = null } = {}) {
-  const pct = Math.max(0, Math.min(1, value / max)); const semi = Math.PI * 42;
-  const arc = 'M8 52 A42 42 0 0 1 92 52';
-  // The arc SWEEPS to its reading instead of the whole card sliding in. `--p` is driven by the engine
-  // over the layer's window (0 → pct), and the dash length is computed from it in CSS, so the motion
-  // is the thing the block is FOR, which is what makes the registry browsable: you see what a gauge
-  // does, not that a card can rise. Deterministic: --p is a pure function of t.
-  // THE TRACK IS A TINT OF THE READING, not `--line`. It used to be painted with the theme's BORDER
-  // colour, so the unfilled half of a meter was the same ink as a divider and read as chrome rather
-  // than as the rest of the scale, and on a dark theme it vanished into the card entirely.
-  const svg = (inner) => `<svg viewBox="0 0 100 60" width="${inner}" style="display:block;margin:0 auto 4px">`
-    + `<path d="${arc}" fill="none" stroke="${tint(color, TINT.track)}" style="${strokeCss(STROKE.arc)};${trackDashCss()}"/>`
-    + `<path d="${arc}" fill="none" stroke="${color}" style="${strokeCss(STROKE.arc)}"`
-    + ` stroke-dasharray="calc(${semi.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${semi.toFixed(2)}"/></svg>`;
+// GAUGE_ARC: the semicircular path both gauge modes draw, at the same radius (42) and pivot (50,52)
+// the needle rotates around and the ticks radiate from, so all three always agree on one geometry.
+const GAUGE_ARC = 'M8 52 A42 42 0 0 1 92 52';
+const GAUGE_SEMI = Math.PI * 42;
+const GAUGE_PIVOT = { x: 50, y: 52 };
+
+// gaugeTicks(n, color): n evenly spaced radial marks under the arc, 180°(left) through 0°(right) over
+// the top, same pivot the arc and needle share. A static decoration (never driven by --p): a tick
+// marks a SCALE position, not the reading.
+function gaugeTicks(n, color) {
+  if (!n) return '';
+  const { x: cx, y: cy } = GAUGE_PIVOT, rIn = 33, rOut = 40;
+  let out = '';
+  for (let i = 0; i < n; i++) {
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const a = Math.PI * (1 - t);
+    const x1 = cx + rIn * Math.cos(a), y1 = cy - rIn * Math.sin(a);
+    const x2 = cx + rOut * Math.cos(a), y2 = cy - rOut * Math.sin(a);
+    out += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" `
+      + `stroke="${tint(color, 40)}" stroke-width="1.5" stroke-linecap="round"/>`;
+  }
+  return out;
+}
+
+// gaugeNeedle(pct, color): a pointer from the pivot, rotated LIVE off the same --p the arc's own
+// dasharray reads (rotate(calc(...)) with a px transform-origin at the pivot, in the SVG's own
+// viewBox units). Rest pose points straight up; -90deg (pct 0) swings it to the arc's left end,
+// +90deg (pct 1) to its right end, so it always agrees with wherever the arc has swept to.
+function gaugeNeedle(pct, color) {
+  const { x, y } = GAUGE_PIVOT;
+  return `<line x1="${x}" y1="${y}" x2="${x}" y2="${y - 38}" stroke="${color}" stroke-width="2.5" `
+    + `stroke-linecap="round" style="transform-origin:${x}px ${y}px;`
+    + `transform:rotate(calc(-90deg + var(--p, ${pct.toFixed(4)}) * 180deg))"/>`
+    + `<circle cx="${x}" cy="${y}" r="3.5" fill="${color}"/>`;
+}
+
+// `h`/`style` are BARE-only: card mode passes neither, so its <svg> tag stays byte-identical to
+// before this addition (width only, height derived from the viewBox aspect, the original margin).
+function gaugeSvg({ w, h, pct, color, needle, ticks, glow, style = 'display:block;margin:0 auto 4px' }) {
+  const glowFilter = glow ? ` filter="drop-shadow(0 0 ${Math.max(4, Math.round(w * 0.02))}px ${color})"` : '';
+  return `<svg viewBox="0 0 100 60" width="${w}"${h ? ` height="${h}"` : ''} style="${style}">`
+    + (ticks ? gaugeTicks(ticks, color) : '')
+    + `<path d="${GAUGE_ARC}" fill="none" stroke="${tint(color, TINT.track)}" stroke-width="${STROKE.arc}" stroke-linecap="round"/>`
+    + `<path d="${GAUGE_ARC}" fill="none" stroke="${color}" stroke-width="${STROKE.arc}" stroke-linecap="round"${glowFilter}`
+    + ` stroke-dasharray="calc(${GAUGE_SEMI.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${GAUGE_SEMI.toFixed(2)}"/>`
+    + (needle ? gaugeNeedle(pct, color) : '') + '</svg>';
+}
+
+// gauge: a semicircular meter (value / max). Card by default (a fixed small arc, boxed chrome, the
+// shape every other data block in this file uses); `bare: true` drops the card and scales the arc to
+// whatever `w`/`h` the caller gives it instead, the shape a film uses in place of a hand-drawn svg
+// dial (engine-doctrine/MISTAKES.md: a capability an author could not reach, so they built a private
+// copy of it). `needle`/`ticks`/`glow` are additions either mode can carry; `look` composes the
+// reading against the arc in card mode only (bare mode has no card to compose against).
+export function gauge({ x, y, w = 300, h, value = 0, max = 100, label = '', color = TOKENS.accent,
+  start = 0, dur = 4, bare = false, needle = false, ticks = 0, glow = false, look = null } = {}) {
+  const pct = Math.max(0, Math.min(1, value / max));
+  const reading = `${value}${max === 100 ? '%' : ''}`;
+  if (bare) {
+    const H = h || Math.round(w * 0.6);
+    const html = `<div style="width:${w}px">${gaugeSvg({ w, h: H, pct, color, needle, ticks, glow, style: 'display:block' })}`
+      + `<div style="${numCss({ size: Math.round(H * 0.22) })};text-align:center;margin-top:${-Math.round(H * 0.14)}px">${reading}</div>`
+      + (label ? `<div style="${capCss()};text-align:center;margin-top:${SPACE.snug}px">${label}</div>` : '') + '</div>';
+    return [{ type: 'html', x, y, w, h: H, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
+  }
   // COMPOSITION: `look.surface` decides where the reading sits against the arc, not just the card's
   // frame around it. No look at all skips this entirely: number then caption, both below the arc,
   // centred, byte-identical to before.
   const cl = composeLook(look);
-  const numHtml = `<div style="${numCss({ size: Math.round(TYPE.head * (cl ? cl.numScale : 1)) })};margin-top:-2px">${value}${max === 100 ? '%' : ''}</div>`;
+  const numHtml = `<div style="${numCss({ size: Math.round(TYPE.head * (cl ? cl.numScale : 1)) })};margin-top:-2px">${reading}</div>`;
   const labelHtml = label ? `<div style="${capCss({ size: cl && cl.emphasis === 'oversized' ? TYPE.fine : TYPE.body })};margin-top:${SPACE.snug}px">${label}</div>` : '';
-  const reading = !cl || cl.labelPos === 'below' ? numHtml + labelHtml
+  const readingBlock = !cl || cl.labelPos === 'below' ? numHtml + labelHtml
     : cl.labelPos === 'above' ? labelHtml + numHtml
     : `<div style="display:flex;align-items:baseline;justify-content:center;gap:${SPACE.xs}px">${numHtml}${labelHtml}</div>`; // inline
   const html = htmlCard({ w, pad: CHART_PAD, align: cl && cl.align === 'left' ? 'left' : 'center', look,
-    body: (inner) => svg(inner) + reading });
+    body: (inner) => gaugeSvg({ w: inner, pct, color, needle, ticks, glow }) + readingBlock });
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
 
@@ -369,12 +419,22 @@ export const CHART_SCHEMAS = {
 
   gauge: {
     w: { kind: 'int', min: 120, max: 1080, def: 300 },
+    // BARE only: card mode derives its own height from `w` (the fixed small arc every other data
+    // block in this file uses); `h` only reaches the svg once `bare` says there is no card to size,
+    // and left undefined it derives from `w` there too (`Math.round(w * 0.6)`).
+    h: { kind: 'int', min: 60, max: 1080 },
     value: { kind: 'num', min: -1e9, max: 1e9, def: 0 },
     // `max` is the divisor. Zero would make the reading Infinity, which clamps to a full arc and
     // says nothing, so the floor is above zero.
     max: { kind: 'num', min: 0.001, max: 1e9, def: 100 },
     label: { kind: 'str', max: 60, def: '' },
     color: { kind: 'color', def: 'var(--accent)' },
+    // No card, no chrome: the arc/needle/ticks scale to `w`/`h` directly, for a film that wants a
+    // full-frame dial rather than a small card-scale reading.
+    bare: { kind: 'bool', def: false },
+    needle: { kind: 'bool', def: false },
+    ticks: { kind: 'int', min: 0, max: 24, def: 0 },
+    glow: { kind: 'bool', def: false },
   },
 
   progressRing: {

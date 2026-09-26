@@ -12,6 +12,7 @@ import { isLightBg, parseColor } from '../color/engine.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
 import { frameOf } from '../layout/safe.js';
 import { resolveGroupClock } from '../timeline/group-clock.js';
+import { defineRegistry } from '../registry/registry.js';
 
 // REFUSE A VALUE THE BROWSER WOULD DROP, at every named style write, not only the `css` catch-all
 // (applyCss below already does this for `L.css`; this is the same check, same mechanism, extended to
@@ -115,6 +116,29 @@ export const PROPS = {
   // tracks run on this cycle instead of the group's outer start/duration.
   clock: {},
 };
+
+// SURFACE_REGISTRY: `glass`, the universal per-layer decoration above, named nowhere `make arsenal
+// Q="…"` reads. A film agent building a recreation needing a frosted panel had no way to be told
+// `glass` exists short of reading this file: it is not a layer type, a bg preset or a named `filter`
+// look, so it sat in none of the vocabularies arsenal already scanned. engine-doctrine/MISTAKES.md #364.
+const SURFACE_ENTRIES = { glass: true };
+const SURFACE_AKA = {
+  glass: ['glass panels', 'frosted glass', 'glassmorphism', 'frosted panel', 'backdrop blur panel'],
+};
+export const SURFACE_REGISTRY = defineRegistry('surface look', SURFACE_ENTRIES, {
+  slot: 'layers[]',
+  aka: SURFACE_AKA,
+  blurbs: {
+    glass: 'backdrop-filter blur and saturate on the layer itself, a frosted pane; `glass: "refract"` bends the picture through it instead of blurring, for real glass',
+  },
+  catalog: {
+    title: 'Universal surface decoration', tag: 'layer', intro: 'A `glass` prop any layer can carry '
+      + '(core/layers/util.js), independent of its type: a frosted backdrop-filter pane, or a true '
+      + 'refraction when named `"refract"`.',
+    usage: () => ({ layers: [{ glass: true }] }),
+    noPreview: 'a per-layer decoration, not its own scene: render a layer carrying it to see it',
+  },
+});
 
 // crtSpec(o) -> { filter, background }. Pure, and exported so the arithmetic is testable without a
 // DOM, the same reason core/layers/glow.js exports presetSpec.

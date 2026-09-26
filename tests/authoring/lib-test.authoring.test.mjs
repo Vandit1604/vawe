@@ -551,6 +551,14 @@ test('lib-test: authoring', async () => {
     ['the backdrops a brand turns through, fixed once in its theme', 'backdrop'],
     // look.surface: a named shape bundle a theme repaints every card's radius/border/shadow with.
     ['a card with hard square corners and a thick ink border', 'brutalist'],
+    // `finish` (core/engine/finish.js) and the layer `glass` prop were unfindable by anyone who did
+    // not already know their names: neither is a layer type, a bg preset or a named `filter` look, so
+    // both sat outside every vocabulary arsenal scanned. A film agent built a whole recreation without
+    // either. FINISH_REGISTRY / SURFACE_REGISTRY close that.
+    ['a cinematic look over the whole film', 'grade'],
+    ['bloom', 'bloom'],
+    ['film grain', 'grain'],
+    ['glass panels', 'glass'],
   ];
   for (const [q, want] of PRESENT) {
     ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);
