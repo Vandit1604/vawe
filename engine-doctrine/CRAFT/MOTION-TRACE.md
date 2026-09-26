@@ -6,13 +6,13 @@ group: crosscutting
 
 # Motion trace
 
-An agent cannot watch a video. It reads frames. `make motion` already renders every frame headless
+An agent cannot watch a video. It reads frames. `make check GATE=motion` already renders every frame headless
 and builds a per-element time series to run nine checks against, then throws the series away.
-`make motion-trace` keeps it: it is the same capture, reported as a per-layer motion signal instead
+`make check GATE=motion-trace` keeps it: it is the same capture, reported as a per-layer motion signal instead
 of a pass/fail.
 
 ```
-make motion-trace M=scene D=films/scene/<file>.json [STRIDE=N] [JSON=1]
+make check GATE=motion-trace M=scene D=films/scene/<file>.json [STRIDE=N] [JSON=1]
 node quality/gates/motion-audit.mjs scene --data films/scene/<file>.json --trace [--stride N] [--json]
 ```
 
@@ -26,7 +26,7 @@ requirement to be tracked):
 
 - **spans**: when it was `moving` vs `held`, in seconds. A step counts as moving if its centre moved
   more than 0.3px, its opacity changed more than 0.005, its area changed more than 1%, or its text or
-  a descendant transform changed. The same threshold `make motion`'s frozen-span check (vi) already
+  a descendant transform changed. The same threshold `make check GATE=motion`'s frozen-span check (vi) already
   uses, so a trace and a finding never disagree about what "held" means.
 - **peak velocity**: the fastest position change, in px/s, and when it happens.
 - **peak area change**: the largest relative bounding-box area change in one sampled step, and when.
@@ -82,20 +82,20 @@ film with no candidates said nothing wrong, and a film with one is not required 
 - **Whether the motion is any GOOD.** No pass/fail, ever (like `motion-split`, this is an
   instrument): a peak in the middle of a film that should build to its payoff is a real problem
   `engine-doctrine/CRAFT/DIRECTION.md` names, and this file will not flag it. Read the shape, judge it yourself.
-- **The video, faithfully.** This samples the same browser preview `make motion` and `make studio`
+- **The video, faithfully.** This samples the same browser preview `make check GATE=motion` and `make studio`
   render from (`scene.html`), not the encoded mp4. A `drawOn` stroke on `post-trailhead` measured as a
   single-frame snap (1px to 0px in one sampled step) rather than a smooth seven-second interpolation:
   worth knowing if you are trying to verify a claimed gradual draw specifically, since the preview
   path may not be the same interpolation the real render produces.
 
-## When to reach for it instead of `make studio` or `make motion-split`
+## When to reach for it instead of `make studio` or `make check GATE=motion-split`
 
 - **`make studio`**: a human with an eye. Use it to judge whether a move looks right; it has a
   scrubber and drag-to-key editing, both human affordances an agent cannot use.
-- **`make motion-split`**: one number per film, ground vs layers, plus one whole-film energy curve.
+- **`make check GATE=motion-split`**: one number per film, ground vs layers, plus one whole-film energy curve.
   Use it to ask "how much of this film's motion is its content, and does the film build toward its
   payoff." It cannot tell you which LAYER did what.
-- **`make motion-trace`**: per layer, not per film. Use it to check one beat: did this layer actually
+- **`make check GATE=motion-trace`**: per layer, not per film. Use it to check one beat: did this layer actually
   move when the storyboard says it should, does its peak land where the beat lands, is a claimed
   wind-up actually a pulse or is it noise. This is the instrument that answers "prove it," not
   "how does the whole film feel."

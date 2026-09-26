@@ -1,4 +1,4 @@
-//   make capture URL=https://site.com SEL=".pricing-card" NAME=acme LABEL=pricing
+//   make media X=capture URL=https://site.com SEL=".pricing-card" NAME=acme LABEL=pricing
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';

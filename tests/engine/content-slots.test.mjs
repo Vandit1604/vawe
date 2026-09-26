@@ -3,7 +3,7 @@
 // CSS custom property over TIME, a different job; a fragment slot is a whole HTML file, not a value).
 // `content` is the smallest one: a flat {key: value} map, `{{key}}` inside a layer's own
 // `text`/`html`/`src` (any nesting depth) resolved once at build (core/engine/expand.js
-// resolveContentSlots), with a named error for an unknown key, both at build and at `make validate`
+// resolveContentSlots), with a named error for an unknown key, both at build and at `make check GATE=validate`
 // (core/validate/content.mjs contentSlotErrors, the same scan, read-only).
 //   node --test tests/engine/content-slots.test.mjs
 import test from 'node:test';

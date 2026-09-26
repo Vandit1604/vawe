@@ -140,12 +140,12 @@ jobs:
   # THE FONT-STATE TRAP, AND WHY IT DOES NOT BITE HERE. A snap baseline is only valid inside one font
   # state (quality/gates/snap-signature.mjs fontState()), and it used to hash every file it found under
   # assets/fonts/ (plus assets/fonts/local/, paid per-developer faces no runner ever has). Neither
-  # directory is reproducible: a dev worktree collects leftover faces `make fonts` never fetched, so even
-  # two laptops running the identical `make fonts` disagreed. A runner therefore computed a font-state
+  # directory is reproducible: a dev worktree collects leftover faces `make gen X=fonts` never fetched, so even
+  # two laptops running the identical `make gen X=fonts` disagreed. A runner therefore computed a font-state
   # hash nothing could match, and the committed digest read as stale-font on every scene: a clean clone
   # that "compared nothing" and never noticed, because it still got *a* hash, just never the right one.
   # Fixed at the root: fontState() now hashes the LOCKED FACE LIST (harness/media/fonts.lock.json), never
-  # a directory listing, so `make fonts` reproduces the exact same hash on any machine. No tracked theme
+  # a directory listing, so `make gen X=fonts` reproduces the exact same hash on any machine. No tracked theme
   # needs an unlocked face today; if one starts to, it is named in quality/baselines/e2e-known-broken.json
   # like any other scene a clean clone cannot render, not pretended away.
   e2e:
@@ -172,7 +172,7 @@ jobs:
         working-directory: site
 
       - name: fetch the locked faces
-        run: make fonts
+        run: make gen X=fonts
 
       - run: make e2e
 

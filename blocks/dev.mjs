@@ -53,7 +53,7 @@ export const CODE_THEMES = {
 // that same fixed literal via onColor, not a separately-guessed literal that can drift from it.
 // The card's own caption is a FILENAME or a language, so mono is right; `--dim` was not. On the
 // untinted light card it is `--text-2`, the muted TEXT role, which clears 4.5:1 on every theme
-// where `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD. A CODE_THEMES palette
+// where `--dim` measures 2.6:1 on higgsfield and fails `make check GATE=audit` HARD. A CODE_THEMES palette
 // brings its own measured label colour and keeps it.
 function codeBlockTheme(theme, dark) {
   const P = theme ? CODE_THEMES[theme] : null;
@@ -147,7 +147,7 @@ export function loadingBar({ x, y, w = 420, h = 6, start = 0, fillDur = 1.5,
   // A progress label is a WORD ("Uploading assets"), so it is sans. Mono here was the library's
   // standing inversion: mono carries numbers, sans carries words.
   // TYPE.base, not TYPE.body: this is a TOP-LEVEL layer, and the scene schema's `size` minimum is 18,
-  // one above TYPE.body's 17. The 14.04px `make audit` floor is the CHILD floor; a layer the scene
+  // one above TYPE.body's 17. The 14.04px `make check GATE=audit` floor is the CHILD floor; a layer the scene
   // places directly has a stricter one, so TYPE.base is the smallest legal step out here.
   if (label) out.push(text({ text: label, x, y: y + 18, size: TYPE.base, color: T.sub, start, duration: fillDur + 1.2 }));
   // right-aligned by LAYOUT, not by guessing the string's width: `x + w - 70` was a guess at "✓ done"
@@ -176,7 +176,7 @@ function deployFrozenStep({ x, y, i, rowGap, label, active, stepCount, t }) {
 // than one layer that changes, because a layer's text is fixed at build time and the frame loop is
 // not allowed to step from a previous frame. A QUEUED step is `--text-2`, not `--dim`. A pipeline
 // that has not started yet still has to be readable (the whole point of showing the queue) and
-// `--dim` measures 2.6:1 on higgsfield, which `make audit` fails HARD.
+// `--dim` measures 2.6:1 on higgsfield, which `make check GATE=audit` fails HARD.
 // The label dims until its step is reached, then it is the row the eye is on. A step name is a WORD
 // ("Building"), so both copies are sans. Mono was the standing inversion, and the two copies must
 // stay metrically identical or the row shifts as its step lights.
@@ -302,7 +302,7 @@ export function logLines({ x, y, w = 620, lines = [], dark = true, start = 0, du
 export function commitRow({ x, y, w = 620, commits = [], start = 0, dur = 4 } = {}) {
   // HISTORY LANDS COMMIT BY COMMIT: `parts`, one `data-part` per row. A hash IS a figure, so it keeps
   // mono. The byline under it is a NAME and a phrase ("Ada Lovelace · 2h ago"), which is words, so it
-  // is sans, off `--dim` (`make audit` fails it HARD at 2.6:1 on higgsfield).
+  // is sans, off `--dim` (`make check GATE=audit` fails it HARD at 2.6:1 on higgsfield).
   const rows = commits.map((c, i) => `<div data-part style="display:flex;align-items:center;gap:${SPACE.sm}px;`
     + `padding:${SPACE.md}px ${SPACE.lg}px${i > 0 ? `;border-top:${HAIR}` : ''}">`
     + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${onInk(T.accent)}">${c.hash}</span>`

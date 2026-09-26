@@ -1,5 +1,5 @@
 // generators/media/gradients.mjs: DEPRECATED. bake a gradient-background pack into a render-ready library.
-//   make gradients [SRC=~/Downloads/…zip] [W=1920] [N=0]
+//   make gen X=gradients [SRC=~/Downloads/…zip] [W=1920] [N=0]
 //
 // DEPRECATED (Approach B, kept as a local-only fallback). The shippable path is the `gradient`
 // background preset (core/backgrounds.js, gradientFill + core/gradient-recipes.js): agent-controlled,
@@ -27,7 +27,7 @@ const SRC = (process.env.SRC || '').replace(/^~/, os.homedir());
 
 if (!SRC || !fs.existsSync(SRC)) {
   console.error('gradients: point SRC at a pack (a .zip or an already-extracted folder)');
-  console.error('  make gradients SRC=~/Downloads/Resource-Boy-Gradient-Backgrounds-Vol-02.zip');
+  console.error('  make gen X=gradients SRC=~/Downloads/Resource-Boy-Gradient-Backgrounds-Vol-02.zip');
   process.exit(1);
 }
 

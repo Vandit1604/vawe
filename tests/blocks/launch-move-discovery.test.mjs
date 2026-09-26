@@ -2,7 +2,7 @@
 // launch-move devices (3D-tilt, cursor demo, masked reveal, camera push-in) must resolve
 // CONFIDENTLY to the mechanism that already does it (engine-doctrine/CRAFT/ROUTING.md,
 // no invented second way to say the same thing). "cut on the beat" is covered by
-// `make beatsync` (a workflow tool, not a searchable primitive) so it is not in this fixture.
+// `make media X=beatsync` (a workflow tool, not a searchable primitive) so it is not in this fixture.
 //
 //   node tests/blocks/launch-move-discovery.test.mjs
 import test from 'node:test';

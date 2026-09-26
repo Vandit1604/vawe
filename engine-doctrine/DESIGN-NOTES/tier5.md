@@ -8,7 +8,7 @@ group: engine
 
 These are not "hard", they are **unsolved for this engine**: shipping them naively breaks the one
 invariant the product is built on: `renderFrame(n)` is **pure in n** (same input, same bytes, any
-order, so frames can shard across tabs/machines). `make probe` is the judge. This note is the required
+order, so frames can shard across tabs/machines). `make check GATE=probe` is the judge. This note is the required
 gate before any Tier 5 line of code (ROADMAP: "Everything in Tier 5 gets a design note first").
 
 The test each idea must pass: **can frame 412 be computed without first computing frames 0..411, using

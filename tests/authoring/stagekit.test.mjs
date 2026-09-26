@@ -50,7 +50,7 @@ assert.equal(extractKitBlock('<div>nothing</div>'), null);
 console.log('✓ stagekit.test.mjs: kit-identity check passes identical blocks, catches drift, catches a missing block');
 
 // every text role the kit writes is readable in a moving frame: a theme whose caption scale sits under the
-// floor (vawe's is 24) still gets a kit that passes make screen's smallest-text check
+// floor (vawe's is 24) still gets a kit that passes make dev-tool X=screen's smallest-text check
 {
   const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
   const vawe = JSON.parse(fs.readFileSync(path.join(root, 'themes/vawe.json'), 'utf8'));

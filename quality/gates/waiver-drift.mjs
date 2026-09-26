@@ -26,7 +26,7 @@
 // entry still works everywhere it always did; this file and author-check.mjs now also say, every time
 // one is active, how many live findings it is hiding, so a film-wide excuse cannot hide its own size.
 //
-//   node quality/gates/waiver-drift.mjs [<scene.json>]     ·   make waivers [D=<file>]
+//   node quality/gates/waiver-drift.mjs [<scene.json>]     ·   make dev-tool X=waivers [D=<file>]
 //   node quality/gates/waiver-drift.mjs --suggest <scene.json>   the instance-scoped entries that
 //     would excuse exactly today's findings under each bare waiver this film carries, for migrating
 //     off a film-wide excuse without rewriting the film. Never rewrites the file itself.
@@ -280,7 +280,7 @@ for (const [c, films] of drifted) {
 //
 // AGENTS.md: "a waiver with no `_why` blocks." author-check.mjs enforces that, correctly, on the ONE
 // film it is handed. Nothing else in this repo ever re-checks a waiver once it ships: films/scene/ is
-// gitignored (.gitignore:61), pre-push never touches it, and `make lib-test` is pure unit tests on the
+// gitignored (.gitignore:61), pre-push never touches it, and `make test` is pure unit tests on the
 // motion primitives. So a waiver added without immediately re-running author-check on that film stays
 // reasonless forever, invisible to everything except this census. This is the count that matters.
 if (reasonless.length) {

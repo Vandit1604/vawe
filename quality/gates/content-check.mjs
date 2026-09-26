@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/content-check.mjs: is a film's CONTENT as rich as the reference it studied, per ACT?
 //
-//   make content-check D=films/scene/<film>.json REF=<ref>
+//   make check GATE=content-check D=films/scene/<film>.json REF=<ref>
 //   node quality/gates/content-check.mjs <film.json> --ref <ref> [--pairs 1:1,2:2] [--strict]
 //
 // WHY PER ACT, NEVER A GLOBAL BAR. Measured with harness/media/content.mjs (engine-doctrine/CRAFT plan,
@@ -119,7 +119,7 @@ if (isMain) {
   const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
   const filmArg = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--ref' && argv[argv.indexOf(a) - 1] !== '--pairs') || process.env.D;
-  if (!filmArg) die('usage: make content-check D=films/scene/<film>.json REF=<ref>');
+  if (!filmArg) die('usage: make check GATE=content-check D=films/scene/<film>.json REF=<ref>');
   const refName = flag('--ref', 'REF');
   if (!refName) die('REF=<name> is required: which grammar/<name>.json to compare against.');
   const strict = argv.includes('--strict') || process.env.STRICT === '1';
@@ -179,8 +179,8 @@ if (isMain) {
     if (placeholder)
       gf.warn('placeholder-surface', `act ${fi} (${act.label}) reads as a flat mock: fill ${ours.fill} (>= `
         + `${PLACEHOLDER.FILL_MIN}), band ${ours.band}, photo ${ours.photo} (< ${PLACEHOLDER.PHOTO_MAX}), `
-        + `detail ${ours.detail} (< ${PLACEHOLDER.DETAIL_MAX}). Design the screen: make screen `
-        + '(engine-doctrine/CRAFT/SCREENS.md) or capture a real one: make capture / make sections.', { at: `act ${fi}` });
+        + `detail ${ours.detail} (< ${PLACEHOLDER.DETAIL_MAX}). Design the screen: make dev-tool X=screen `
+        + '(engine-doctrine/CRAFT/SCREENS.md) or capture a real one: make media X=capture / make sections.', { at: `act ${fi}` });
   }
   gf.emit();
   process.exit(strict && (anyUnder || anyPlaceholder) ? 1 : 0);

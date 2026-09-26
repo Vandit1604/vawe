@@ -2,8 +2,8 @@
 
 > The persisted **Design Read** for argus. The planning skill reads this FIRST so taste isn't
 > re-derived each video and every render stays on-brand. The measured block is auto-filled from
-> `themes/argus.json` (regenerate with `make house-style NAME=argus`); the judgment
-> lines below are yours to sharpen from the site study (`make sections`/`make lookbook`).
+> `themes/argus.json` (regenerate with `make dev-tool X=house-style NAME=argus`); the judgment
+> lines below are yours to sharpen from the site study (`make sections`/`make study-tool X=lookbook`).
 
 ## Measured facts
 <!-- MEASURED:START (auto-filled from themes/argus.json, safe to regenerate) -->

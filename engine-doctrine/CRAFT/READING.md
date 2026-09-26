@@ -113,7 +113,7 @@ Each was firing on the library and each was checked by eye before it was written
 
 - Whether the words are worth reading. That is `copy-check`, `make judge` and your eyes.
 - Text inside an `html` layer, a `component` or a capture.
-- Contrast, size against the canvas, or whether the type is legible at all. That is `make audit`.
+- Contrast, size against the canvas, or whether the type is legible at all. That is `make check GATE=audit`.
 - Motion DURING the hold. The still-hold inference is honoured by measuring the settled window, but a
   layer that drifts through its own hold is not flagged: a slow `ken` drift is fine and a fast one is
   not, and no source publishes the line between them.

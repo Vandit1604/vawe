@@ -21,7 +21,7 @@
 // scene moves on, and the only fact that sees that is the scene's own bytes.
 //
 // The mechanism is the repo's existing one, not a new one: harness/lib/receipt.mjs hashes a subject
-// plus the html fragments it names, and `make beats` already uses it to prove somebody LOOKED at a
+// plus the html fragments it names, and `make dev-tool X=beats` already uses it to prove somebody LOOKED at a
 // sheet. Here the same hash proves a film was rendered from the scene that is on disk today.
 //
 // WHAT THIS CANNOT DO, said plainly. It proves a film matches its source and carries a track that is
@@ -142,7 +142,7 @@ if (write) {
     const was = prior[k];
     if (!was || was.label !== v.label) console.error(`    ${k}  says ${was ? was.label : 'nothing'}, the mp4 runs ${v.label}`);
   }
-  console.error(`  Fix: make films-json WRITE=1`);
+  console.error(`  Fix: make site X=films-json WRITE=1`);
 } else if (!findings.length) {
   console.log(`✓ ${Object.keys(rows).length} film(s) match their source, and every promised track carries sound`);
 }

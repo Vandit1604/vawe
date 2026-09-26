@@ -9,7 +9,7 @@ group: look
 ## AGENT SUMMARY
 
 - Default entrances to `easeOutQuint` (the engine's own `DEFAULT_MOTION.easing`); never `ease-in` on an entrance. `exitRatio` is now derived per theme (`exitRatioFromMotion`) so exits move faster than their entrance by default.
-- `[eye]`: no gate enforces this page. `make claims` tracks the `linear`-easing split it names.
+- `[eye]`: no gate enforces this page. `make study-tool X=claims` tracks the `linear`-easing split it names.
 - Checkable action: does this entrance ease out on a strong curve, and does its exit move faster than its arrival?
 
 Sources, all read 2026-08-29: [animations.dev](https://animations.dev) and
@@ -97,7 +97,7 @@ a separate meaning dispatched on the value's shape. `grammar/_gaps.json` records
 **`linear` is 26% of our keyed easings** (317 of 1,216). Part of that is correct and deliberate:
 `harness/author/track.mjs` emits linear interiors for a measured shape, and `core/timeline/sequence.js`
 interpolates a sub-0.14s segment linearly anyway. The rest is unexamined, and their rule is that
-linear is for constant motion only. `make claims` tracks the split.
+linear is for constant motion only. `make study-tool X=claims` tracks the split.
 
 ## The one line worth remembering
 

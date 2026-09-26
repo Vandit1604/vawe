@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// harness/author/eject-block.mjs: `make add BLOCK=<name> D=<film>` runs a block factory ONCE and writes
+// harness/author/eject-block.mjs: `make dev-tool X=add BLOCK=<name> D=<film>` runs a block factory ONCE and writes
 // its output straight into the film's own `layers[]`, in place of the `{type:"block"}` sugar layer, so
 // the film owns and can restyle every property the factory returned. This is the escape hatch out of
 // the shared factory: a film that wants a look no theme's `look.surface` covers stops asking the block
@@ -67,7 +67,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const block = process.env.BLOCK;
   const id = process.env.ID || null;
   if (!film || !block) {
-    console.error('usage: make add BLOCK=<name> D=<film.json> [ID=<layer id>]');
+    console.error('usage: make dev-tool X=add BLOCK=<name> D=<film.json> [ID=<layer id>]');
     process.exit(1);
   }
   const n = ejectBlock(film, block, id);

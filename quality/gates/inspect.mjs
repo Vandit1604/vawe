@@ -17,7 +17,7 @@
 //   RECORDED ONLY (printed, never checked): `spine`, `object`, `becomes`. inspect reads the live DOM at
 //     ONE timestamp. `becomes` is a claim about TWO moments and about IDENTITY, that the dot at 4.4s is
 //     the same thing as the spinner at 4.6s. Nothing here can see that, and no check below pretends to.
-//     They print so a failure names what was supposed to be happening, and so `make inspect` reads as a
+//     They print so a failure names what was supposed to be happening, and so `make check GATE=inspect` reads as a
 //     director's checklist. A human (or the judge gate) verifies the transformation; this file does not.
 //   Do not add a check for `becomes` that tests, say, "a layer exists in both beats" and call it
 //     verified. That is silent substitution wearing a tick, the exact bug class this repo hates most.

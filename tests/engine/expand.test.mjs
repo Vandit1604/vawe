@@ -34,7 +34,7 @@ function sceneWithCamera(aspect) {
   assert.notEqual(land16.y, land9.y);
 }
 
-// No aspectKey (every existing Node caller: loadScene, `make expand`) keeps today's default, the scene's
+// No aspectKey (every existing Node caller: loadScene, `make dev-tool X=expand`) keeps today's default, the scene's
 // own declared aspect, so nothing that omits the key changes behaviour.
 {
   const baked = expandScene(sceneWithCamera('9:16'));

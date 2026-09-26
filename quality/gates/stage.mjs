@@ -146,24 +146,24 @@ export function stageOf(arg) {
         : 'the storyboard passes its own gate, but nothing has judged it as a PLAN yet: one through-line, beats that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that varies. An exit code cannot answer any of those.',
       next: !sbExists ? `write ${path.relative(ROOT, p.sb)} from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md   (have a reference? make ideate REF=<ref> first; an idea with no reference? make ideate ASK=1 NAME=${p.name} IDEA="..." for the question batches, engine-doctrine/CRAFT/IDEATE.md)`
         : !structurallyOk ? `make storyboard-check SB=${path.relative(ROOT, p.sb)}`
-        : `make plan-judge D=${p.base}.json   (findings only; the owner reads the draft render and redirects)` },
+        : `make dev-tool X=plan-judge D=${p.base}.json   (findings only; the owner reads the draft render and redirects)` },
     { id: 'design', done: sbExists && missingFrags.length === 0 && gatePasses('quality/gates/frame-check.mjs', p.scene),
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
         : 'the fragments exist and do not match what their beats planned: run frame-check and read it.',
-      next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make frame-check D=${p.base}.json` },
+      next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make check GATE=frame-check D=${p.base}.json` },
     { id: 'assemble', done: layers > 0,
       why: 'the frames pass and the scene JSON has no layers, so there is no film yet.',
       next: `make assemble D=${p.base}.json` },
     { id: 'direct', done: layers > 0 && (Array.isArray(scene.transitions) ? scene.transitions.length : 0) > 0,
       why: 'the layers exist and no cut does. Motion first, then transitions: a content-aware cut reads the velocity at the joint.',
-      next: `make critics D=${p.base}.json DECIDERS=1   (motion, then transition, then sound, in that order)` },
+      next: `make dev-tool X=critics D=${p.base}.json DECIDERS=1   (motion, then transition, then sound, in that order)` },
     { id: 'render', done: fs.existsSync(p.mp4),
       why: 'the film is written and has never been rendered.',
       next: `make ship D=${p.base}.json` },
     { id: 'judge', done: false,
       why: 'rendered. The eye is the only step that SEES, and it is not optional.',
-      next: `make judge D=${p.base}.json, then make ledger D=${p.base}.json` },
+      next: `make judge D=${p.base}.json, then make dev-tool X=ledger D=${p.base}.json` },
   ];
   const at = S.find((s) => !s.done) || S[S.length - 1];
   // The skill(s) claiming this stage, read off skills/*/SKILL.md's own `stage:` frontmatter
@@ -310,11 +310,11 @@ export function lookBlock(film) {
   // screen/preview want the bare name either way.
   const theme = rawTheme ? String(rawTheme).replace(/^themes\//, '').replace(/\.json$/, '') : null;
   const reference = fm.field('reference');
-  const screens = fragments.map((f) => `make screen F=${f}`
+  const screens = fragments.map((f) => `make dev-tool X=screen F=${f}`
     + (reference ? ` REF=${reference} ACT=<n>` : '') + (theme ? ` THEME=${theme}` : ''));
   const dev = `make dev D=${p.base}.json`;
   const sheets = { beats: path.join(scratchBase(), 'beats', `${p.name}.png`), reveal: path.join(scratchBase(), 'reveal', `${p.name}.png`) };
-  const contentCheck = reference ? `make content-check D=${p.base}.json REF=${reference}` : null;
+  const contentCheck = reference ? `make check GATE=content-check D=${p.base}.json REF=${reference}` : null;
   const addReference = reference ? null
     : `no reference named. Studied one already? add \`reference: "<name>"\` to ${path.relative(ROOT, p.sb)}'s `
       + `frontmatter, matching grammar/<name>.json. Not studied yet: make study VIDEO=<clip> NAME=<name>, then add the field.`;

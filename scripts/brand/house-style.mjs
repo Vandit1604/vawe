@@ -5,7 +5,7 @@
 //
 // Usage: node scripts/brand/house-style.mjs <brand>            (theme = themes/<brand>.json)
 //        node scripts/brand/house-style.mjs <brand> <theme>    (explicit theme name)
-//        make house-style NAME=<brand> [THEME=<theme>]
+//        make dev-tool X=house-style NAME=<brand> [THEME=<theme>]
 import fs from 'node:fs';
 import path from 'node:path';
 import { expandThemeFile } from '../../harness/lib/theme-load.mjs';
@@ -49,8 +49,8 @@ const body = `# House style: ${brand}
 
 > The persisted **Design Read** for ${brand}. The planning skill reads this FIRST so taste isn't
 > re-derived each video and every render stays on-brand. The measured block is auto-filled from
-> \`themes/${themeName}.json\` (regenerate with \`make house-style NAME=${brand}\`); the judgment
-> lines below are yours to sharpen from the site study (\`make sections\`/\`make lookbook\`).
+> \`themes/${themeName}.json\` (regenerate with \`make dev-tool X=house-style NAME=${brand}\`); the judgment
+> lines below are yours to sharpen from the site study (\`make sections\`/\`make study-tool X=lookbook\`).
 
 ## Measured facts
 ${measured}

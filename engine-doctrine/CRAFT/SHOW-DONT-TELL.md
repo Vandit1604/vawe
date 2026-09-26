@@ -59,10 +59,10 @@ and each wants a specific one. If a line is none of these, it is fine as type.
 | **a proportion or a share** ("83% of them") | a ring, an arc, a stacked bar, a filled grid of units | the missing 17% is visible in a ring and invisible in a numeral |
 | **a change over time** ("down from 40s to 2s") | a line, a sparkline, a before/after pair held side by side | the shape of the fall is the argument; the two endpoints are not |
 | **a relationship or a flow** ("it routes through three checks") | a diagram, a step flow with the track travelling, a map, nodes and connectors that draw on | order and dependency have no typographic form |
-| **a real thing that exists** (the product, the page, the person, the place) | the real surface: `make capture` on the live UI, a photo, a screenshot clipped to a card | the thing itself always beats a description of the thing |
+| **a real thing that exists** (the product, the page, the person, the place) | the real surface: `make media X=capture` on the live UI, a photo, a screenshot clipped to a card | the thing itself always beats a description of the thing |
 
 **A real captured surface outranks a chart you drew.** If the claim is about the product, show the
-product. `make capture` on the live component is the highest source in [IMAGERY.md](IMAGERY.md)'s
+product. `make media X=capture` on the live component is the highest source in [IMAGERY.md](IMAGERY.md)'s
 ladder for a reason: real gradients, real copy, real logos, no fabrication.
 
 **If nothing in a beat is any of the five, ask whether the beat has a point.** A beat that names a
@@ -116,12 +116,12 @@ and defended. It is not an answer to "I could not think of one".
 
 ## 5. Where to get the graphic
 
-- **Blocks** (`engine-doctrine/BLOCKS.md`, `make catalog`): `barChart` · `lineChart` · `donutChart` · `gauge` ·
+- **Blocks** (`engine-doctrine/BLOCKS.md`, `make site X=catalog`): `barChart` · `lineChart` · `donutChart` · `gauge` ·
   `progressRing` · `kpiRow` · `stepFlow` · `table` · `comparison`. Fastest route from a number to a
   shape. Note that a block is build-time sugar: `{"type":"block","block":"lineChart"}` becomes real
-  layers at load, no separate step; run `make expand D=<file>` (prints to stdout) when you want to see
+  layers at load, no separate step; run `make dev-tool X=expand D=<file>` (prints to stdout) when you want to see
   what the film actually draws.
-- **Captured UI**: `make capture` on the live product, previewed standalone with `make preview`.
+- **Captured UI**: `make media X=capture` on the live product, previewed standalone with `make preview`.
 - **Recipes** (`make arsenal Q="…"`): count-ups, cascades, camera moves already measured off a real film.
 - **Bespoke SVG**: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) for a diagram no block covers, including
   draw-on and morph.

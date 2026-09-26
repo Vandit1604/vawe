@@ -443,7 +443,7 @@ function register(vendored) {
     added.push(`@font-face { font-family: '${v.family}'; font-weight: ${weight}; font-display: block; src: url('/assets/fonts/${v.file}') format('woff2'); }`);
   }
   if (added.length) {
-    if (!css.includes(MARK)) css += `\n${MARK}\n/* the woff2 files are gitignored; assets/fonts/invented.json lets `+'`make fonts`'+` re-fetch them. */\n`;
+    if (!css.includes(MARK)) css += `\n${MARK}\n/* the woff2 files are gitignored; assets/fonts/invented.json lets `+'`make gen X=fonts`'+` re-fetch them. */\n`;
     css = css.trimEnd() + '\n' + added.join('\n') + '\n';
     fs.writeFileSync(TOKENS, css);
   }
@@ -556,7 +556,7 @@ ${shots.map(({ c, png }, i) => `<section style="margin-bottom:34px">
   <div style="color:#6f6f6f;font:13px ui-monospace,monospace;margin-bottom:10px">${esc(c.stance.dominance)}-first · texture: ${esc(c.texture)} · bg preset ${esc(c.stance.bgPreset)} · text ${c.contrast.text}:1 · accent ${c.contrast.accent}:1</div>
   <img src="file://${png}" style="width:100%;max-width:1180px;border-radius:12px;display:block">
 </section>`).join('')}
-<div style="color:#6f6f6f;font:13px ui-monospace,monospace">pick one:  make invent-look SB=${esc(path.relative(ROOT, file))} SEED=${seed} PICK=&lt;n&gt; NAME=&lt;theme&gt;</div>
+<div style="color:#6f6f6f;font:13px ui-monospace,monospace">pick one:  make dev-tool X=invent-look SB=${esc(path.relative(ROOT, file))} SEED=${seed} PICK=&lt;n&gt; NAME=&lt;theme&gt;</div>
 </body>`);
 
 const sheetPng = path.join(OUT, `${slugName}-sheet.png`);
@@ -580,4 +580,4 @@ if (collisions.length) {
   console.log(`  14px chip gate: no collisions (closest pair ΔE ${Math.min(...candidates.flatMap((a, i) => candidates.slice(i + 1).map((b) => chipDistance(a, b)))).toFixed(1)}, min ${CHIP_MIN})`);
 }
 console.log(`  none of these right? Re-run with another --seed. Six options that could suit any subject would be a menu, not proposals.`);
-console.log(`  write one:  make invent-look SB=${path.relative(ROOT, file)} SEED=${seed} PICK=<n> NAME=<theme>`);
+console.log(`  write one:  make dev-tool X=invent-look SB=${path.relative(ROOT, file)} SEED=${seed} PICK=<n> NAME=<theme>`);

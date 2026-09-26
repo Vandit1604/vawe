@@ -24,7 +24,7 @@ export function shaderAt(L, at) {
 
 // The ambient draw call resolves a name to a uniform index and RETURNS on a miss, so `shader:"aurara"`
 // has always produced an empty canvas that passes every gate. `validate` refuses the scene instead
-// (`make validate` already rejects it, and the renderer being the lenient one is the wrong way round.
+// (`make check GATE=validate` already rejects it, and the renderer being the lenient one is the wrong way round.
 // Core/layers/index.js makes the same argument about an unknown layer type).
 export function validate(L) {
   AMBIENT_REGISTRY.pick(L.shader || 'flow');   // throws, and diagnoses a wrong-slot name

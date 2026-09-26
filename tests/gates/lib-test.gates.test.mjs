@@ -141,7 +141,7 @@ const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error(
 test('lib-test: gates', async () => {
 // ---- a gate's own FIX INSTRUCTION must be a command that runs ----
 // `quality/gates/audio-check.mjs` told an author to run `make sfx` in two places and printed it inside
-// the finding, in the tone of the fix. There is no such target; the bake is `make audio`. So following
+// the finding, in the tone of the fix. There is no such target; the bake is `make gen X=audio`. So following
 // a gate's own advice failed with "No rule to make target `sfx`", which is worse than no advice: it
 // teaches the reader that the gates do not know their own repo, and the next real instruction gets
 // ignored too. `make check GATE=doc-refs` already checks this for DOCS, and found 111 stale paths when it landed.
@@ -537,7 +537,7 @@ test('lib-test: gates', async () => {
 }
 
 
-// ---- make transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
+// ---- make study-tool X=transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
 {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-transitions-'));
   const sbPath = path.join(tmp, 'x.storyboard.md');
@@ -568,17 +568,17 @@ test('lib-test: gates', async () => {
   ].join('\n'));
   fs.writeFileSync(jsonPath, '{"module":"scene"}');
   const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/transitions-catalog.mjs'), jsonPath], { encoding: 'utf8', cwd: repoRoot });
-  ok('make transitions D=: exits 0 on a fixture storyboard', r.status === 0);
-  ok('make transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
-  ok('make transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
+  ok('make study-tool X=transitions D=: exits 0 on a fixture storyboard', r.status === 0);
+  ok('make study-tool X=transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
+  ok('make study-tool X=transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
   // (b) no transition_why: never guess a candidate from the beat's name ("grain gradient" -> "grain").
   const candidateLines = r.stdout.split('\n').filter((l) => l.trim().startsWith('candidates'));
-  ok('make transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
+  ok('make study-tool X=transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
     candidateLines.some((l) => l.includes('state the relationship first (transition_why)'))
     && !candidateLines.some((l) => l.includes('grain')));
   // (c) the relationships list + doc anchor print exactly once, not once per boundary (3 boundaries here).
   const relLines = (r.stdout.match(/^  relationships: /gm) || []).length;
-  ok('make transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
+  ok('make study-tool X=transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
   fs.rmSync(tmp, { recursive: true, force: true });
 }
 
@@ -840,7 +840,7 @@ test('lib-test: gates', async () => {
 
 
 // ---- quality/gates/scene-timing.mjs choreography: lives, beat motion, handoffs ---------------------
-// Known-answer SCENES, one per claim `make choreo` makes. Minimal on purpose: each fixture isolates
+// Known-answer SCENES, one per claim `make check GATE=choreo` makes. Minimal on purpose: each fixture isolates
 // the one condition its name tests, so a failure here points at the one rule that broke rather than
 // requiring a real film to be re-read to find it.
 {

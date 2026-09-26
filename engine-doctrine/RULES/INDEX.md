@@ -26,7 +26,7 @@ below.
    film names in a waiver what else holds it together.
 
 Read `<film>.design.md` before you write a size, radius, shadow or colour: it is the film's own resolved
-design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Reference its
+design, laid over the theme's numbers (`make dev-tool X=design-spec D=<film>` seeds it). Reference its
 `--kit-<group>-<name>` token instead of a literal; to use a new value, add it there first.
 
 ## The rules
@@ -36,23 +36,23 @@ design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Re
 | [`motion-offsets`](motion-offsets.md) | writing a motion[] keyframe track | eye |
 | [`ease-direction`](ease-direction.md) | choosing an ease for an entrance, exit, or move | eye |
 | [`handover-glide`](handover-glide.md) | one layer becomes another | built: `scene.js`, `junctions.js` default 0.9s |
-| [`stagger-total`](stagger-total.md) | a group arrives with a stagger | warns: `make direct` |
+| [`stagger-total`](stagger-total.md) | a group arrives with a stagger | warns: `make dev-tool X=direct` |
 | [`first-arrival`](first-arrival.md) | a layer's first entrance in a beat | eye |
 | [`anticipate-default`](anticipate-default.md) | a directional entrance after the film's opening wave | built: `core/engine/produce.js` |
-| [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make direct` |
-| [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make audit` |
-| [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make audit` |
+| [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make dev-tool X=direct` |
+| [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make check GATE=audit` |
+| [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make check GATE=audit` |
 | [`state-the-canvas`](state-the-canvas.md) | starting any scene | warns: `core/validate/validate.mjs` |
 | [`svg-inline`](svg-inline.md) | writing an svg layer or a src path | eye |
 | [`no-css-clock`](no-css-clock.md) | hand-writing an html layer | built: `core/layers/html.js` |
-| [`one-cut-family`](one-cut-family.md) | choosing the cut between two beats | warns: `make direct` |
+| [`one-cut-family`](one-cut-family.md) | choosing the cut between two beats | warns: `make dev-tool X=direct` |
 | [`world-turns`](world-turns.md) | authoring bg | gated: `backdrop-turn.mjs`, BLOCKS |
 | [`continuous-object`](continuous-object.md) | deciding what holds the film across cuts | gated: `direction-floor.mjs`, BLOCKS |
 | [`banned-defaults`](banned-defaults.md) | choosing type, colour, or layout | gated: `designspec-check.mjs` |
 | [`payoff-last`](payoff-last.md) | ordering beats and the hook | eye |
 | [`logo-prominence`](logo-prominence.md) | placing a brand mark | eye |
 | [`paired-directional-exit`](paired-directional-exit.md) | choosing anim/out for a sliding layer | eye |
-| [`readable-hold`](readable-hold.md) | a clip, card, or line of text holds still | reports: `make direct`, read gate |
-| [`no-jolt`](no-jolt.md) | a layer or the camera changes speed between frames | reports: `make speed`, author-check jolt step |
+| [`readable-hold`](readable-hold.md) | a clip, card, or line of text holds still | reports: `make dev-tool X=direct`, read gate |
+| [`no-jolt`](no-jolt.md) | a layer or the camera changes speed between frames | reports: `make check GATE=speed`, author-check jolt step |
 | [`blur-out-dense`](blur-out-dense.md) | exiting a face, card, or dense grid | eye |
-| [`caption-safe-strip`](caption-safe-strip.md) | shipping to a phone feed | gated: `make audit` |
+| [`caption-safe-strip`](caption-safe-strip.md) | shipping to a phone feed | gated: `make check GATE=audit` |

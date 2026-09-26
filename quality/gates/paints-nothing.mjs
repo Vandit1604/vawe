@@ -2,7 +2,7 @@
 //
 // A terminal card was hand-authored as an `html` layer: a CSS mask-image on an auto-height wrapper whose
 // children were all absolutely positioned. That masks EVERYTHING to nothing, the card rendered as a
-// blank white box, and it shipped past every gate that exists: `make audit` measures overlap, safe zones
+// blank white box, and it shipped past every gate that exists: `make check GATE=audit` measures overlap, safe zones
 // and contrast, never whether a layer painted anything at all.
 //
 // THE TECHNIQUE IS NOT NEW. It is copied from scripts/site/type-specimens.mjs:427-446, whose own comment
@@ -38,7 +38,7 @@
 //
 //   node quality/gates/paints-nothing.mjs <scene.json> [--strict]
 //   node quality/gates/paints-nothing.mjs                 (census: every films/scene/*.json)
-//   make paints-nothing [D=scene.json] [STRICT=1]
+//   make check GATE=paints-nothing [D=scene.json] [STRICT=1]
 import fs from 'node:fs';
 import path from 'node:path';
 import cp from 'node:child_process';

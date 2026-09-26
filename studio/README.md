@@ -35,9 +35,9 @@ each row means (`cueWhy` in `studio.js`) is reconstructed from the timeline mode
 holds (layers, including group children, transitions, camera, typing) and can only mislabel a row,
 never change what plays. Clicking a row's time seeks the playhead and switches to `make`, so the
 frame a sound lands on is on screen while you audition it. Choosing an alternative (one of the 28
-cues `make audio` bakes) writes an `audio.cues[]` entry through `/api/apply`, same as every other
+cues `make gen X=audio` bakes) writes an `audio.cues[]` entry through `/api/apply`, same as every other
 write in this file, so undo still works; a cue whose `.wav` is not baked says so in the row with the
-`make audio` command that fixes it, rather than failing silently.
+`make gen X=audio` command that fixes it, rather than failing silently.
 
 ## Layout
 

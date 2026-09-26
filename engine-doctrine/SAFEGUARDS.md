@@ -43,7 +43,7 @@ that makes them correct.
 
 Owner decision: HyperFrames and Remotion ship with no authoring quality gates at all; a gate on the
 author's path is DX friction unless it stops something that literally cannot render. So every finding
-on that path (`make author-check`, `make check D=`, `make ship`, `make stage`/`make next`, the
+on that path (`make dev-tool X=author-check`, `make check D=`, `make ship`, `make stage`/`make next`, the
 `stage-gate`/`craft-live` hooks) is advisory by default: it prints in full and exits 0. Only two things
 still stop the run: **validate** (schema, vocabulary, em-dashes) and **determinism** (`renderFrame`
 purity). Everything this page calls "stays hard" above those two is a construction bug the engine would

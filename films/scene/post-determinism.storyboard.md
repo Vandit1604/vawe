@@ -22,8 +22,8 @@ craft:
     typography: "vawe theme's own mono for eyebrows/code, sans for headlines; no swapped face"
 ---
 
-<!-- Hand-authored via the per-scene fan-out chain: make stagekit, this storyboard's contract,
-     make scenes (briefs), fragments written + previewed, make assemble. -->
+<!-- Hand-authored via the per-scene fan-out chain: make dev-tool X=stagekit, this storyboard's contract,
+     make dev-tool X=scenes (briefs), fragments written + previewed, make assemble. -->
 
 ## Beat 1: The question (0s-5.5s)
 - type: hook

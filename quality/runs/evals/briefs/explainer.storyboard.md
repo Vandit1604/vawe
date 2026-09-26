@@ -39,7 +39,7 @@ not: "no product, no CTA, no logo, no gradient hero, no centered text, no Inter,
     - the render capture shards across worker tabs, each computing its assigned frames from time alone:
       internal/render/render.go `o.Workers`, `Capture(..., o.Workers, ...)`.
   No specific worker COUNT is claimed on screen (Makefile invocations vary: 4 in `make dev`, 2 in
-  `make animatic`, 1 required for this render since a sibling agent shares the machine), so beat 5 shows
+  `make dev-tool X=animatic`, 1 required for this render since a sibling agent shares the machine), so beat 5 shows
   three illustrative tracks and states the mechanism, never a specific number of workers.
 -->
 

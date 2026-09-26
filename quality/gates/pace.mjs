@@ -1,4 +1,4 @@
-// quality/gates/pace.mjs: `make pace D=<film> TEMPO=<n>`. Prints the duration and pace-check numbers
+// quality/gates/pace.mjs: `make check GATE=pace D=<film> TEMPO=<n>`. Prints the duration and pace-check numbers
 // a scene would render at, with `tempo` overridden to TEMPO for this print only. Writes nothing to
 // disk: it is the "what would this feel like" preview for core/engine/tempo.js, run before committing
 // to a tempo value.

@@ -1,7 +1,7 @@
 // font-audit.mjs: fail the build if any text renders in a font we did not intend.
 //
 //   node quality/gates/font-audit.mjs scene films/scene/tpot-launch.json
-//   make fonts D=films/scene/tpot-launch.json
+//   make gen X=fonts D=films/scene/tpot-launch.json
 //
 // Writes a deterministic sidecar next to the render: out/<name>.fonts.json.
 // Deliberately records only the VERDICT per family, never the probe widths, which are

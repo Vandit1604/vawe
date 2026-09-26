@@ -222,7 +222,7 @@ const storyboardPath = () => {
 // ---- the CHAT sidebar's own child process and conversation -------------------------------------
 let chatJob = null;        // the running `claude -p` child, or null
 let chatSessionId = null;  // the CLI's own session_id, so the next prompt --resumes it
-const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make validate:*)';
+const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make check GATE=validate:*)';
 // An overlap test on [aStart,aEnd) x [bStart,bEnd), used to find what a mentioned layer's window
 // touches: the camera moves and transitions running while it is on screen.
 const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd - 1e-9 && bStart < aEnd - 1e-9;
@@ -274,7 +274,7 @@ const timeContext = (prompt) => {
       active.length ? `active layers ${active.join(', ')}.` : 'no layer is active.',
       cam ? `camera leg ${cam.move || 'move'} ${cam.start}-${(cam.start + cam.dur).toFixed(2)}s.` : '',
       near ? `nearest transition ${near.fx || near.mech || 'transition'} at ${near.at}s.` : '',
-      `To see this exact frame run: make frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
+      `To see this exact frame run: make dev-tool X=frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
     ].filter(Boolean).join(' ');
   });
   return blocks.join(' ');

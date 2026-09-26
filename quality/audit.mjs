@@ -10,7 +10,7 @@
 //   • buried: >40% of a ≥60px headline sits under an opaque layer  (HARD fail)
 //   • tight: sibling boxes closer than MIN_GAP px    (warn)
 // Writes an annotated screenshot of the worst frame per format to /tmp/audit/<format>.png.
-//   node quality/audit.mjs [format ...]      (default: all)   ·   make audit
+//   node quality/audit.mjs [format ...]      (default: all)   ·   make check GATE=audit
 //
 // --aspect 16:9,9:16,1:1,4:5 (or `all`) audits the SAME canvas list the renderer would ship, mirroring
 // `bin/vawe --aspect a,b,c`. This exists because a scene renders "fine" at every aspect and can be wrong
@@ -1291,7 +1291,7 @@ for (const aspectKey of askedAspects) {
   await page.goto(`http://127.0.0.1:${port}/films/${m}/scene.html?data=/${bootSample}&fps=30${q}`, { waitUntil: 'load' });
   await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout: 30000 });
   // A scene that refuses to boot is the loudest possible failure: reading __engine.meta
-  // unconditionally used to throw here, killing the whole `make audit` sweep on one broken scene.
+  // unconditionally used to throw here, killing the whole `make check GATE=audit` sweep on one broken scene.
   const engErr = await page.evaluate(() => window.__engineError && String(window.__engineError));
   if (engErr || !(await page.evaluate(() => !!(window.__engine && window.__engine.meta)))) {
     rows.push({ m: `${isData ? `${m} · ${path.basename(sample)}` : m}  [${aspectKey || `${vw}x${vh}`}]`,

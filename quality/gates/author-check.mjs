@@ -64,7 +64,7 @@
 // how many live findings that hides, so a waiver written for one beat cannot silently cover a new one.
 //
 // Usage: node quality/gates/author-check.mjs <scene.json> [--strict] [--taste] [--vs <brand>]
-//        make author-check D=<file> [STRICT=1] [TASTE=1] [VS=<brand>]
+//        make dev-tool X=author-check D=<file> [STRICT=1] [TASTE=1] [VS=<brand>]
 // TASTE=1 no longer decides WHETHER the style gates run. They always run. It decides whether their
 // findings BLOCK, which is the only decision that was ever really behind that flag.
 import fs from 'node:fs';
@@ -285,7 +285,7 @@ const allowRaw = (scene.authoring && Array.isArray(scene.authoring.allow)) ? sce
 }
 const vs = vsArg || (typeof scene.theme === 'string' ? scene.theme : null);
 
-// Blocks, beats and comps are BUILD-TIME sugar, and used to need a separate `make expand` pass before
+// Blocks, beats and comps are BUILD-TIME sugar, and used to need a separate `make dev-tool X=expand` pass before
 // any gate could read them: `validate` rejected an un-expanded scene outright, and every gate that
 // walked layers saw `{type:"block"}` as one opaque thing rather than the chart it becomes, so a scene
 // written with the repo's own vocabulary could not pass its own mandatory ladder. core/engine/expand.js now
@@ -356,7 +356,7 @@ const openStep = (name, label, { slow } = {}) => {
   if (slow) process.stdout.write(`  this one is slow: it launches a browser, about 1.4s. Everything above cost milliseconds.\n`);
 };
 
-// The code → doc map, read once from the frontmatter `make doc-index` already gates. Built lazily and
+// The code → doc map, read once from the frontmatter `make site X=doc-index` already gates. Built lazily and
 // cached: a run touches it up to 19 times, and a doc-map failure must not take the ladder down with it,
 // so a broken map costs the pointers and nothing else.
 let DOCS = null;
@@ -395,7 +395,7 @@ const runGate = (name, label, script, args, opts = {}) => {
   // line; the reasoning behind it is a page somebody already wrote and nobody opens. Measured before
   // this line existed: 10 of 64 gates cited a doc, and 12 of 33 CRAFT docs were reachable only by
   // browsing an index. Routing here rather than in each gate means all of them gain it at once, and it
-  // reads the SAME `codes:` frontmatter `make doc-index` already validates, so there is one owner.
+  // reads the SAME `codes:` frontmatter `make site X=doc-index` already validates, so there is one owner.
   // Warnings are included: `continuity` fired as a warning on the film that prompted all of this.
   const warnCodes = live.filter((f) => f.severity === 'warn').map((f) => f.code);
   printDocs([...blockCodes, ...warnCodes]);
@@ -458,7 +458,7 @@ const record = (name, { code, blockCodes, blockRecords = blockCodes.map((c) => (
 // THAT REASONING IS ABOUT SEVERITY, AND IT WAS APPLIED TO EXISTENCE. Skipping the step does not protect
 // an author from a rule fitted to the wrong library; it protects the rule from ever being read. So the
 // steps run and print, always, and `taste` now decides one thing only: whether their findings block.
-//   TASTE=1 make author-check D=<file>      · or `--taste`
+//   TASTE=1 make dev-tool X=author-check D=<file>      · or `--taste`
 // Measured on this library the day the flag changed meaning: with teeth, 116 of 141 scenes fail. That is
 // the number that keeps this a report rather than a wall. engine-doctrine/TASTE.md carries what would have to change.
 const styleGate = (name, label, script, args, opts) =>
@@ -467,7 +467,7 @@ const styleGate = (name, label, script, args, opts) =>
 // 1. validate, correctness, never waivable.
 // 0. preflight. The one step that is not about the JSON in front of you: it asks whether the nine
 //    decisions in engine-doctrine/CRAFT/README.md were put in front of somebody for THIS version. It cannot grade
-//    the answers and does not pretend to, the same way `make beats` proves a sheet was looked at and
+//    the answers and does not pretend to, the same way `make dev-tool X=beats` proves a sheet was looked at and
 //    not that the beats are good. Ratcheted like the rest, so the library warns and new work complies.
 record('preflight', runGate('preflight', 'preflight (the decisions before the JSON)', 'quality/gates/preflight.mjs', [], { subject: file }), { waivable: true, tier: 'reports' });
 record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/validate/validate.mjs', []), { waivable: false });
@@ -609,7 +609,7 @@ styleGate('copy', 'copy gate (on-screen writing)', 'quality/gates/copy-check.mjs
 styleGate('read', 'read gate (can a viewer read it in time)', 'quality/gates/read-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // SOUND. Is the silence a decision, or an omission?
 //
-// WHY IT WAS NOT HERE. It was written, it worked, and nothing ran it. `make audio-check` existed and
+// WHY IT WAS NOT HERE. It was written, it worked, and nothing ran it. `make check GATE=audio-check` existed and
 // no step of this ladder called it, so the one gate that asks about a whole structural register was
 // reachable only by a person who already knew to ask. That is the same shape as a field written and
 // never read, which is the failure this repo logs more than any other.
@@ -641,11 +641,11 @@ if (sbPath) {
   openStep('treatment', 'treatment (why this film looks like this)');
   if (!t.exists) {
     console.log(`  ~ no treatment for ${path.basename(sbPath)}. The argument for this direction, and against`);
-    console.log(`    the ones you turned down, is not written anywhere. \`make treatment SB=${sbPath}\``);
+    console.log(`    the ones you turned down, is not written anywhere. \`make dev-tool X=treatment SB=${sbPath}\``);
     console.log(`  → 1 finding: no treatment written.`);
   } else if (t.stale) {
     console.log(`  ~ the treatment is STALE: ${path.basename(sbPath)} has changed since ${t.rel} was written.`);
-    console.log(`    Re-run \`make treatment SB=${sbPath}\`: it refreshes the measured block and leaves your prose.`);
+    console.log(`    Re-run \`make dev-tool X=treatment SB=${sbPath}\`: it refreshes the measured block and leaves your prose.`);
     console.log(`  → 1 finding: the rationale describes an older plan.`);
   } else {
     console.log(`  ✓ treatment current (${t.receipt.treatment || 'recorded'}).`);
@@ -678,7 +678,7 @@ if (hasSidecar) {
     `      inspect then verifies the render delivers it. Add ${path.basename(sidecar)} to make value checkable.\n` +
     // NAME THE COMMAND. A gate that says what is missing and not how to produce it sends the reader
     // back to a prose file to look it up, which is the round trip this ladder exists to remove.
-    `      Generate one from the plan: make intent SB=<storyboard.md> D=${target}\n` +
+    `      Generate one from the plan: make dev-tool X=intent SB=<storyboard.md> D=${target}\n` +
     `  → 1 finding: no value contract to verify.\n`);
   if (strict) results.push({ name: 'inspect', tier: 'blocks', failed: true, waived: false, reported: false, unwaived: ['no-intent-sidecar'], blockCodes: [] });
   // AND RUN plan vs render ANYWAY. Skipping it here meant the film with no plan was the one film never
@@ -733,7 +733,7 @@ const noisy = results.filter((r) => !r.failed && !r.waived && !r.reported && !r.
 if (reported.length) {
   console.log(`\n  ~ ${reported.length} step(s) found something and did not stop you: ${reported.map((r) => r.name).join(', ')}.`);
   console.log(`      These are house-style findings. They are real and they are printed in full above.`);
-  console.log(`      Give them teeth:  TASTE=1 make author-check D=${file}`);
+  console.log(`      Give them teeth:  TASTE=1 make dev-tool X=author-check D=${file}`);
   console.log(`      Why they report rather than block: engine-doctrine/TASTE.md · "One process, two severities".`);
 } else if (!taste && !noisy.length) {
   console.log(`\n  ✓ the house-style steps found nothing either. Nothing above is being held back from you.`);

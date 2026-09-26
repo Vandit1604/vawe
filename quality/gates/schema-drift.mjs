@@ -4,7 +4,7 @@
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
 //   node quality/gates/schema-drift.mjs            (make check GATE=schema-check), exits 1 on drift
-//   node quality/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part,
+//   node quality/gates/schema-drift.mjs --write    (make check GATE=schema-check WRITE=1) regenerate EVERY derived part,
 //                                                  layerProps AND the registry-owned enums, then
 //                                                  re-run with no flag to verify. A write that would
 //                                                  DROP a prop name is refused; --force overrides.
@@ -75,7 +75,7 @@ const schema = JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
 //
 // Two halves, kept apart because they are different facts. `byType` is what ONE primitive reads and
 // nothing else does; `shared` is what every layer carries whatever its type. Names only: the guards
-// (`preset` needs `split`) stay live in the declarations, where `make layer-props` reads them, because
+// (`preset` needs `split`) stay live in the declarations, where `make check GATE=layer-props` reads them, because
 // a guard is a question about one layer's other props and a static vocabulary cannot answer it.
 const vocabulary = {
   _generated: 'node quality/gates/schema-drift.mjs --write - do not hand-edit',

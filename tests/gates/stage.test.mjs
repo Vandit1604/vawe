@@ -34,7 +34,7 @@ after(() => { for (const f of written) { try { fs.unlinkSync(f); } catch { /* al
 
 // `plan.done` (quality/gates/stage.mjs) needs a fresh plan-judge receipt, not a passing
 // storyboard-check alone (every stage past `plan` used to be reachable by structure alone). A fixture
-// that means to sit past `plan` marks itself judged the same way `make plan-judge` really does.
+// that means to sit past `plan` marks itself judged the same way `make dev-tool X=plan-judge` really does.
 function markPlanJudged(sbRel) {
   writeReceipt('plan-judge', abs(sbRel));
   written.push(receiptPath('plan-judge', abs(sbRel)));
@@ -150,7 +150,7 @@ test('stage 5, direct: layers exist, no transition does', () => {
   passingStoryboard('stagetest-direct', { layers: true });
   const st = stageOf('stagetest-direct');
   assert.equal(st.stage, 'direct');
-  assert.match(st.next, /make critics/);
+  assert.match(st.next, /make dev-tool X=critics/);
 });
 
 test('stage 6, render: layers and a transition exist, never rendered', () => {
@@ -196,7 +196,7 @@ test('next: strips a trailing parenthetical note off the runnable command', () =
 });
 
 test('next: keeps only the first half of a ", then" chain, never the second command', () => {
-  assert.equal(firstCommand('make judge D=x.json, then make ledger D=x.json'), 'make judge D=x.json');
+  assert.equal(firstCommand('make judge D=x.json, then make dev-tool X=ledger D=x.json'), 'make judge D=x.json');
 });
 
 test('next: a compound "run this, then do this by hand" line also keeps only the runnable half', () => {

@@ -4,7 +4,7 @@
 // data travels with the file in credits.json, so published videos stay claim-proof.
 //
 //   node scripts/brand/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]
-//   make photos Q="server room" NAME=acme
+//   make media X=photos Q="server room" NAME=acme
 //
 // Output: assets/brands/<brand>/photos/<slug>-<i>.jpg + credits.json (license + author + url).
 // Taste rule (enforced by the caller, documented here): photos go in CLIPPED frames with a ken

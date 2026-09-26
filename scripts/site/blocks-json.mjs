@@ -1,5 +1,5 @@
 // scripts/site/blocks-json.mjs: derive site/lib/blocks.json from the registry manifest.
-// Run via `make blocks-json` (or `make blocks-sync`). Deterministic; no network.
+// Run via `make site X=blocks-json` (or `make site X=blocks-sync`). Deterministic; no network.
 //
 // WHY THIS EXISTS: site/lib/blocks.json used to be a hand-kept copy of blocks/catalog.mjs, and the
 // things that read the grid read it from two different sources:
@@ -39,12 +39,12 @@ const grid = CATALOG.filter((e) => !e.overlay)
   });
 
 const body = JSON.stringify(grid, null, 2) + '\n';
-// `--check` (make blocks-json CHECK=1) reports the drift this file was written to remove, rather than
+// `--check` (make site X=blocks-json CHECK=1) reports the drift this file was written to remove, rather than
 // silently repairing it on a run somebody happened to make. site/lib/blocks.json is committed and only
-// `make blocks-sync` rewrites it, so a new catalog row left the site's grid a row short until then.
+// `make site X=blocks-sync` rewrites it, so a new catalog row left the site's grid a row short until then.
 if (process.argv.includes('--check')) {
   const have = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
-  if (have !== body) { console.error(`site/lib/blocks.json is STALE (it disagrees with blocks/catalog.mjs), run \`make blocks-json\``); process.exit(1); }
+  if (have !== body) { console.error(`site/lib/blocks.json is STALE (it disagrees with blocks/catalog.mjs), run \`make site X=blocks-json\``); process.exit(1); }
   console.log(`site/lib/blocks.json: up to date (${grid.length} entries)`);
   process.exit(0);
 }
@@ -57,4 +57,4 @@ const gone = prev.filter((p) => !grid.some((b) => b.name === p.name)).map((p) =>
 console.log(`blocks-json: ${grid.length} entries → site/lib/blocks.json`
   + (added.length ? `\n  + ${added.join(', ')}` : '')
   + (gone.length ? `\n  - ${gone.join(', ')}` : ''));
-if (added.length || gone.length) console.log('  grid changed → run `make blocks-scenes` so the site has a scene + poster for it');
+if (added.length || gone.length) console.log('  grid changed → run `make site X=blocks-scenes` so the site has a scene + poster for it');

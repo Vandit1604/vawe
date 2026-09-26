@@ -105,7 +105,7 @@ const htmlLayer = (o) => ({ type: 'html', anim: 'fade', enterDur: 0.3, exitDur: 
 // no text, no caret and no error. Found by cropping a frame, not by any gate. The catalog's demo
 // content does NOT rescue it: `blocks/index.mjs` merges a catalog row's `props` only for a NAMESPACED
 // name, so `{"type":"block","block":"codeTyping"}` reaches the raw factory with nothing in it while
-// `make catalog` and the site render the same name WITH the props and look perfect.
+// `make site X=catalog` and the site render the same name WITH the props and look perfect.
 //
 // So the refusal goes here, at the factory, where the emptiness is knowable. Silence is never the third
 // option (CLAUDE.md); an author who forgot the content gets told which prop, not a black bar.

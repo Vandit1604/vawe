@@ -16,7 +16,7 @@ Read by: `make build`/`make ship`, and anyone changing frame capture, encode set
 server's allowlist.
 
 The one doc: `AGENTS.md`'s "Changing the ENGINE, not a film?" section and
-`engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Checked by: `go build -C renderer`, then `make probe` after
+`engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Checked by: `go build -C renderer`, then `make check GATE=probe` after
 any change touching what a frame renders.
 
 Look first: `renderer/cmd/render/main.go` for the entry point, `renderer/internal/scene/scene.go` for

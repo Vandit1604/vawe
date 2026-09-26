@@ -35,7 +35,7 @@ itself, e.g. the "Interface Sounds" pack:
 > Support us by crediting Kenney or www.kenney.nl (this is not mandatory)
 
 CC0 places the work in the public domain: redistribution is explicitly permitted. This is why
-`make sfx-pack` (this repo's shippable default sample pack) fetches from Kenney and only Kenney. The
+`make gen X=sfx-pack` (this repo's shippable default sample pack) fetches from Kenney and only Kenney. The
 pack's own zip is downloaded straight from `https://kenney.nl/media/pages/assets/<slug>/.../<slug>.zip`,
 no scraping, no key.
 
@@ -48,7 +48,7 @@ here for a future fetcher, filtered to CC0 only, nothing else.
 
 **soundeffect-lab.info**, the owner's preferred manual source: commercial use is free and no credit
 is required, but the site's agreement (https://soundeffect-lab.info/agreement/) states redistribution
-is prohibited ("再配布禁止"). This repo does not scrape or bulk-fetch this site; `make sfx-local
+is prohibited ("再配布禁止"). This repo does not scrape or bulk-fetch this site; `make gen X=sfx-local
 DIR=<path>` maps files YOU already downloaded by hand onto the engine's cue names, via the data file
 `harness/media/sfx-local-map.json`. Nothing is ever committed from this path.
 
@@ -79,11 +79,11 @@ project." A bundled tool is exactly the "sound effect library" the clause forbid
 
 | Source | Commercial use | Attribution | Redistribution | Verdict |
 |---|---|---|---|---|
-| **Mixkit** (stock music) | Yes | Not required | **Prohibited** unless "substantially altered" | LOCAL ONLY (already how `make music`/`make music-pack` treat it) |
+| **Mixkit** (stock music) | Yes | Not required | **Prohibited** unless "substantially altered" | LOCAL ONLY (already how `make gen X=music`/`make gen X=music-pack` treat it) |
 | **Pixabay** (music) | Yes, with limits | Not required | **Prohibited** as a standalone file | LOCAL ONLY |
 
 **Mixkit music**: same user-terms clause as the sound effects row above; `harness/media/music.mjs`
-(`make music`, `make music-pack`) already fetches into the gitignored `assets/music/` and records
+(`make gen X=music`, `make gen X=music-pack`) already fetches into the gitignored `assets/music/` and records
 `licenceVerified: false` per track, which this document now confirms should read `true` against the
 "unaltered redistribution prohibited" clause, but the practical answer does not change: never commit
 the file.
@@ -132,10 +132,10 @@ same three-question check; until then this line stands as the placeholder.**
 
 ## What this means for this repo
 
-- `make sfx-pack` (Kenney, CC0) is the only automated fetcher this repo runs that lands a file which
+- `make gen X=sfx-pack` (Kenney, CC0) is the only automated fetcher this repo runs that lands a file which
   could legally be committed, and it still writes into the gitignored `assets/sfx/`, matching every
   other asset-fetcher's behaviour: nothing downloaded is ever put in git.
-- `make music`, `make music-pack`, `make photos`, and any future footage fetcher pull from LOCAL ONLY
+- `make gen X=music`, `make gen X=music-pack`, `make media X=photos`, and any future footage fetcher pull from LOCAL ONLY
   sources; the gitignore is the enforcement, not a licence technicality.
 - A LOCAL ONLY source is still a fine choice for the film you are making right now. The distinction
   only matters for what may sit inside this git repository as a redistributable asset pack.

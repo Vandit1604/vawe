@@ -136,7 +136,7 @@ export function auditFonts(root) {
 // every frame rendered in a substitute with nothing said. That is how Geist, Anybody and Manrope each
 // shipped wrong, and how a fresh worktree rendered its whole library in a fallback serif.
 //
-// The audit that could have caught it existed the whole time and was OPT-IN (`make font-audit`), which
+// The audit that could have caught it existed the whole time and was OPT-IN (`make check GATE=font-audit`), which
 // is a gate for a value we could refuse at the write site. This refuses it there instead: the four
 // families a theme names are author-supplied, they are known before the first frame, and a wrong one
 // invalidates every frame that follows.
@@ -149,9 +149,9 @@ export function assertFamilies(families, where = 'theme') {
   const bad = rows.filter((r) => r.verdict !== 'OK');
   if (bad.length) {
     const why = {
-      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}), run \`make fonts\``,
+      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}), run \`make gen X=fonts\``,
       FALLBACK: (r) => (r.registered
-        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved, run \`make fonts\``
+        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved, run \`make gen X=fonts\``
         : 'no @font-face declares it: add one to core/tokens.css, or name a family that has one'),
       'SYSTEM-LUCK': () => 'it paints only because this machine happens to have it installed, and no '
         + '@font-face declares it: every other machine renders a substitute',

@@ -44,7 +44,7 @@
 // enough to trust with more. Waive an instance with the one mechanism every gate here uses:
 //   {"authoring":{"allow":["silent-motion@9.60s"],"_why":{"silent-motion@9.60s":"…"}}}
 //
-//   node quality/gates/motion-sound-check.mjs films/scene/<film>.json     ·     make motion-sound-check D=<file>
+//   node quality/gates/motion-sound-check.mjs films/scene/<film>.json     ·     make check GATE=motion-sound-check D=<file>
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';

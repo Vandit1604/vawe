@@ -1,6 +1,6 @@
 // harness/lib/scene-check-new-findings.mjs: author-check, but CI fails on NEW findings only.
 //
-// .github/workflows/scene-check.yml ran `make author-check` on every touched scene and blocked the
+// .github/workflows/scene-check.yml ran `make dev-tool X=author-check` on every touched scene and blocked the
 // push the moment ANY blocking finding fired, including one the scene already shipped with. A one-word
 // path fix on an already-failing film then failed CI for a defect the touching commit did not cause.
 // That is not a gate on the change, it is a gate on the film's whole history landing on whoever edits

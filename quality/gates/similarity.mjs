@@ -4,7 +4,7 @@
 //
 //   node quality/gates/similarity.mjs a.json b.json [...]   # score the given files pairwise
 //   node quality/gates/similarity.mjs                       # scan all authored data JSONs
-//   make similar [D="a.json b.json"]
+//   make check GATE=similar [D="a.json b.json"]
 //
 // Fingerprint = motion vocabulary (cuts/stings/anims/presets/bgs) + beat-structure skeleton +
 // layout signature (where text sits, at what scale). Cross-brand pairs FAIL above 0.75,
@@ -20,7 +20,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 
 // ---------- fingerprint ----------
 export function fingerprint(input) {
-  // Lowered HERE rather than at each caller, so `make ledger` (quality/gates/ledger.mjs imports this)
+  // Lowered HERE rather than at each caller, so `make dev-tool X=ledger` (quality/gates/ledger.mjs imports this)
   // inherits it. A film that declares its boundaries as `transitions` fingerprinted with no stings at
   // all, so two films could share a sting vocabulary and the ledger would score them as further apart
   // than they are (engine-doctrine/MISTAKES.md #408). Cloned: loadScene mutates and deletes what it is handed,
@@ -95,7 +95,7 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
   }
   const f = gateFindings();
   // A `.template.json` holds mustache placeholders, so it is not JSON and never was a video. One of
-  // them threw out of the scan and killed the WHOLE library audit, which is why `make similar` with no
+  // them threw out of the scan and killed the WHOLE library audit, which is why `make check GATE=similar` with no
   // arguments reported nothing at all. Name the skip; an explicitly listed file still throws.
   const fps = [];
   for (const ff of files) {

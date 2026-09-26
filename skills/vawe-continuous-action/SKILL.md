@@ -1,6 +1,6 @@
 ---
 name: vawe-continuous-action
-description: "Turns a one-line brief into a shootable plan for a short film built as one continuous action: the device to pick, from `engine-doctrine/CRAFT/FILM-STRUCTURE.md`'s ~18 devices, when the film has a single subject and a single process. Load once this device is picked, for a launch/promo/teaser under ~15s; emits a storyboard that `make storyboard-check` and `make intent` consume."
+description: "Turns a one-line brief into a shootable plan for a short film built as one continuous action: the device to pick, from `engine-doctrine/CRAFT/FILM-STRUCTURE.md`'s ~18 devices, when the film has a single subject and a single process. Load once this device is picked, for a launch/promo/teaser under ~15s; emits a storyboard that `make storyboard-check` and `make dev-tool X=intent` consume."
 stage: plan
 effort: medium
 ---
@@ -73,7 +73,7 @@ be literal and obvious to work, which is how a film ends up as a rectangle that 
   reference shot for shot.
 - [`vawe-effects`](../vawe-effects/SKILL.md) and [`vawe-camera`](../vawe-camera/SKILL.md) pick the
   mechanism per state change.
-- After rendering: `make seam-check`, then `make judge`, then the critics in
+- After rendering: `make check GATE=seam-check`, then `make judge`, then the critics in
   [`SUBAGENTS.md`](../../engine-doctrine/CRAFT/SUBAGENTS.md).
 
 ## Gotchas

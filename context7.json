@@ -40,6 +40,6 @@
     "Prefer a camera move and a boundary treatment over a stack of layers that appear and disappear. A film with neither reads as a slideshow.",
     "camera: hold is a real declaration meaning the camera is locked off. It is not an alias of driftHold, which breathes.",
     "Sound is derived, not hand-placed: audio.tactile reads the timeline you already wrote and a cue is derived at every cut and seam. Pin a hand-placed cue to an event rather than to a clock.",
-    "Run make author-check D=<file> before shipping a scene, then make judge after rendering. The judge is the only step that sees the output."
+    "Run make dev-tool X=author-check D=<file> before shipping a scene, then make judge after rendering. The judge is the only step that sees the output."
   ]
 }

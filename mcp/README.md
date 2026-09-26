@@ -9,7 +9,7 @@ group: engine
 Vawe as a product: the caller's own model writes a scene, this renders it.
 
 ```bash
-make watermark                                   # once: bake the draft sheet
+make media X=watermark                                   # once: bake the draft sheet
 make build                                       # once: bin/vawe
 node mcp/smoke.mjs                               # prove it works end to end
 claude mcp add vawe -- node $PWD/mcp/server.mjs  # wire into Claude Code

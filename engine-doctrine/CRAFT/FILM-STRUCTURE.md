@@ -12,7 +12,7 @@ confirm: "what holds this film across its cuts?"
 ## AGENT SUMMARY
 
 - Name what holds the film across each cut: a spatial device (transforming object, match cut via `matches`, camera travel), a verbal/aural one (unfinished sentence, sound bridge, bookend), a temporal one (metric/rhythmic cutting, music-led), or a conceptual one (motif, escalation, intellectual montage). Pick from Part 1, land on at least two threads (Part 4, Q6).
-- Enforced by `[gated]` codes `continuity`, `no-continuous-object`, `no-continuous-object-inferred` (always run by `make author-check`; `TASTE=1` decides only whether findings block; the gate sees only the transforming-object device, so waive with a named `_why` when another device carries the film).
+- Enforced by `[gated]` codes `continuity`, `no-continuous-object`, `no-continuous-object-inferred` (always run by `make dev-tool X=author-check`; `TASTE=1` decides only whether findings block; the gate sees only the transforming-object device, so waive with a named `_why` when another device carries the film).
 - Checkable action: what holds this film across its cuts?
 
 This library has one answer to that question. One object survives every cut and changes there.

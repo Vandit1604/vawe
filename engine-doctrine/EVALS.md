@@ -1,6 +1,6 @@
 ---
 when: a doctrine or engine change touches motion, transitions, backgrounds, type or layout
-answers: what `make evals` checks (liveness, not looks) · why there is no aesthetic score · how to run a before/after compare
+answers: what `make gen X=evals` checks (liveness, not looks) · why there is no aesthetic score · how to run a before/after compare
 group: process
 ---
 
@@ -8,11 +8,11 @@ group: process
 
 ## AGENT SUMMARY
 
-- `make evals` renders a fixed set of small brief scenes (`quality/runs/evals/briefs/*.json`) into a
+- `make gen X=evals` renders a fixed set of small brief scenes (`quality/runs/evals/briefs/*.json`) into a
   timestamped run under `quality/runs/evals/runs/`, with a contact sheet per brief and one combined sheet.
 - The only thing it asserts by machine is **liveness**: every brief produced an mp4 of the duration and
   dimensions the scene declared. It never scores a film's quality. A human compares the sheets.
-- `make evals-compare BEFORE=<run-dir> [AFTER=<run-dir>]` stacks the before/after sheet per brief and
+- `make gen X=evals-compare BEFORE=<run-dir> [AFTER=<run-dir>]` stacks the before/after sheet per brief and
   writes `compare.html` with both mp4s side by side, and opens it.
 - **Rule**: a change that touches motion, transitions, backgrounds, type or layout ships with a
   before/after compare linked in the commit or PR body.
@@ -63,13 +63,13 @@ a seventh deliberately widens what the harness watches; do not grow them into fu
 ## Running it
 
 ```bash
-make evals                                        # render all 6, assert liveness, print the run dir
-make evals-compare BEFORE=quality/runs/evals/baseline    # against the committed baseline, fresh AFTER run
-make evals-compare BEFORE=<run-a> AFTER=<run-b>    # two specific runs
+make gen X=evals                                        # render all 6, assert liveness, print the run dir
+make gen X=evals-compare BEFORE=quality/runs/evals/baseline    # against the committed baseline, fresh AFTER run
+make gen X=evals-compare BEFORE=<run-a> AFTER=<run-b>    # two specific runs
 node harness/dev/evals.mjs --save-baseline         # render + commit sheets/manifest as the new baseline
 ```
 
-The renderer refuses a path under `quality/runs/`: to render one brief by hand (not through `make evals`),
+The renderer refuses a path under `quality/runs/`: to render one brief by hand (not through `make gen X=evals`),
 copy it to `films/scene/_eval-<name>.json`, render/gate that copy, then delete it.
 
 `quality/runs/evals/runs/` is gitignored (mp4s, scratch). `quality/runs/evals/baseline/` is committed, sheets and

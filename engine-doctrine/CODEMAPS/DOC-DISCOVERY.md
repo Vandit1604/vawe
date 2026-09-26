@@ -275,11 +275,11 @@ and never edited:
 
 | View | For | Cost when unused |
 |---|---|---|
-| `engine-doctrine/INDEX.md` | humans, subagents, `make docs` | zero: a file on disk |
-| `make docs Q="…"` | any agent or person, on demand | 0 tokens until asked (was a ~9,500-token skill body) |
+| `engine-doctrine/INDEX.md` | humans, subagents, `make site X=docs` | zero: a file on disk |
+| `make site X=docs Q="…"` | any agent or person, on demand | 0 tokens until asked (was a ~9,500-token skill body) |
 | the table inside `engine-doctrine/CRAFT/README.md` | the craft index that already existed | zero |
 
-`quality/gates/doc-map.mjs` builds all three. `make doc-index` writes them; `make check GATE=craft-coverage`
+`quality/gates/doc-map.mjs` builds all three. `make site X=doc-index` writes them; `make check GATE=craft-coverage`
 fails if any is stale, if an indexed doc has no frontmatter, if a markdown link anywhere in the
 indexed set does not resolve, or if a doc is not linked from the map.
 

@@ -15,19 +15,19 @@ if (!film || !fs.existsSync(film)) { console.error('usage: node harness/author/s
 
 const scene = JSON.parse(fs.readFileSync(film, 'utf8'));
 const sbPath = storyboardPathFor(film);
-if (!fs.existsSync(sbPath)) { console.error(`scenes: no storyboard at ${sbPath} (write it from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, fill it, then \`make contract D=${film}\`)`); process.exit(1); }
+if (!fs.existsSync(sbPath)) { console.error(`scenes: no storyboard at ${sbPath} (write it from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md, fill it, then \`make dev-tool X=contract D=${film}\`)`); process.exit(1); }
 const sb = parseStoryboard(fs.readFileSync(sbPath, 'utf8'));
 const { beats } = timeline(sb);
 
 const errs = chainErrors(beats);
 if (errs.length) {
-  console.error(`scenes: the continuous-object contract does not chain. Fix the storyboard first (\`make contract D=${film}\`):`);
+  console.error(`scenes: the continuous-object contract does not chain. Fix the storyboard first (\`make dev-tool X=contract D=${film}\`):`);
   for (const e of errs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 const mErrs = motionErrors(beats);
 if (mErrs.length) {
-  console.error(`scenes: the motion plan does not parse. Fix the storyboard first (\`make contract D=${film}\`):`);
+  console.error(`scenes: the motion plan does not parse. Fix the storyboard first (\`make dev-tool X=contract D=${film}\`):`);
   for (const e of mErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }

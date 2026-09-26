@@ -258,7 +258,7 @@ Two things follow, and neither is engine code:
    cost a line and is the highest-value edit in this document.
 2. **The handle vocabulary is named but not demonstrated.** `hang`, `fling`, `overshoot`, `easyEase` and
    `linear` all carry good blurbs in `core/motion/motion.js:226`. No shipped film shows what one looks like.
-   A `make catalog` card per handle, or one demo scene, would do more than any new feature here.
+   A `make site X=catalog` card per handle, or one demo scene, would do more than any new feature here.
 
 **The Separate Dimensions finding, which is the sharpest thing this pass turned up.** In After Effects,
 Position is ONE property with a spatial motion path, and a designer who wants X and Y on different
