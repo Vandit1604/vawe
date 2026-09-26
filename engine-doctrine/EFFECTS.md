@@ -347,7 +347,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
 | `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
 | `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
-| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot |
 | `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink |
 | `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
 | `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
@@ -644,6 +644,7 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | `occlude` | hide this layer where another one covers it, put something BEHIND something else without reordering the stack |
 | `plane` | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax |
 | `progress` | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
+| `repeat` | AE's Repeater: stamp the layer's own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy's own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time |
 | `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
 | `squash` | SQUASH AND STRETCH read off the layer's own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash |
 | `tilt` | turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding |

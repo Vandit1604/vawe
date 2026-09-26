@@ -44,6 +44,7 @@ import * as tPrimitive from './primitive.js';
 import * as tResample from './resample.js';
 import * as tBorderTrail from './border-trail.js';
 import * as tCircle from './circle.js';
+import * as tTrim from './trim.js';
 import * as tEffector from './effector.js';
 import * as tVars from './vars.js';
 import * as tReact from './react.js';
@@ -58,8 +59,8 @@ import * as tDrive from './drive.js';
 import * as tModifiers from './modifiers.js';
 
 const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimitive, resample: tResample,
-  borderTrail: tBorderTrail, circle: tCircle, effector: tEffector, vars: tVars, react: tReact, box: tBox,
-  follow: tFollow, motion: tMotion, drive: tDrive, idle: tIdle, modifiers: tModifiers };
+  borderTrail: tBorderTrail, circle: tCircle, trim: tTrim, effector: tEffector, vars: tVars, react: tReact,
+  box: tBox, follow: tFollow, motion: tMotion, drive: tDrive, idle: tIdle, modifiers: tModifiers };
 
 // Exported so a gate can DERIVE the pipeline instead of restating it, the contract LAYER_TYPES and
 // FX_TYPES already have. A hand-typed copy of this list is how `make check GATE=coverage` reported 14/14 while a
@@ -92,6 +93,7 @@ export const SLOTS = Object.freeze([
   'resample',   // re-sample the layer through a fragment shader. AFTER its own canvas drew this frame
   'orbit',      // the borderTrail arc's rotation
   'spin',       // circular text: rotate the whole ring
+  'trim',       // AE trim paths: the revealed start/end/offset segment of an SVG path/stroke
   'effector',   // a falloff from a travelling point, spent on the layer's own children
   'vars',       // animated custom properties the layer's own CSS reads
   'react',      // audio-driven modulation from the baked spectrum

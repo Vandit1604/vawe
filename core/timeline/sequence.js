@@ -103,7 +103,12 @@ export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['ro
   // declared depth still has one (zero). Not a second `plane`/`tilt`: those are static per-layer
   // modifiers resolved once at build into a different CSS longhand (core/fx/plane.js, core/fx/tilt.js),
   // so keying depth and giving a static one cannot collide.
-  z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0] };
+  z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0],
+  // AE Trim Paths, keyed: fractions of an SVG path (core/tracks/trim.js). Identity null, like
+  // `radius`/`ox`/`oy`: a segment omitted from one endpoint of a motion key means "not keyed here",
+  // and the track falls back to the layer's own static `trim.start`/`.end`/`.offset` (or 0/1/0)
+  // rather than reading a number this keyframe never wrote.
+  trimStart: ['trimStart', null], trimEnd: ['trimEnd', null], trimOffset: ['trimOffset', null] };
 
 // ARRIVAL_EASE_PROPS/IDENTITY: the visual props whose motion this checks for an unfinished stop
 // (engine-doctrine/CRAFT/MOTION-CRAFT.md owns the speed/motion vocabulary this feeds). Not `opacity`: a move
