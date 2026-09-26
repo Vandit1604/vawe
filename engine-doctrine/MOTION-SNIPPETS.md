@@ -170,7 +170,7 @@ must state a relationship (time/place/this-becomes-that).
 ## Sound: silence is the default; a beat is opt-in
 
 - **`auto-sfx`**, derive a crisp cue per cut/seam/sting (whoosh/press). `{ "audio": { "auto": true } }` · _sound_
-- **`real-beat`**: opt a real royalty-free loop in (run `make music-pack` first).
+- **`real-beat`**: opt a real royalty-free loop in (run `make gen X=music-pack` first).
   `{ "audio": { "music": "assets/music/lofi.wav", "musicGain": 0.42, "musicFade": { "in": 0.9, "out": 1.8 } } }` · _sound_
 - **`cut-to-beat`**: snap every cut/seam onto the loop's grid. `make beatsync D=<file> MUSIC=assets/music/lofi.wav WRITE=1` · _sound, transition_
 - **`silence`**: the premium default; no bed, SFX carry it. Omit `audio.music` (or `{ "audio": { "auto": true } }`). · _sound, calm_

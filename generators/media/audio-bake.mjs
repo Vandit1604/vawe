@@ -2,7 +2,7 @@
 //
 //   node generators/media/audio-bake.mjs            bake cues + the default beds
 //   node generators/media/audio-bake.mjs --list     print the cue table
-//   make audio
+//   make gen X=audio
 //
 // Synthesis lives in core/audio-kit.mjs. This file is the CATALOGUE: which cues exist, which
 // engine role each fills, and which music beds ship. Deterministic, same input, same bytes, so
@@ -32,7 +32,7 @@ fs.mkdirSync(SFX, { recursive: true }); fs.mkdirSync(MUSIC, { recursive: true })
 // EXPORTED so quality/gates/sfx-audit.mjs can ask what this bake actually writes. It diffed the
 // baked .wav files against core/audio/kit.mjs's CUES and called the 15 aliases below orphans, which
 // is a false positive: they are deliberate redirects for scenes that already name a retired cue, and
-// `make audio` writes a file for every one of them on every run. The bake's own name set is the only
+// `make gen X=audio` writes a file for every one of them on every run. The bake's own name set is the only
 // honest answer to "should this file exist".
 export const ROLES = {
   // auto sound-design roles the scene builder emits
@@ -65,7 +65,7 @@ let n = 0, total = 0, kept = 0;
 for (const [role, cue] of Object.entries(ROLES)) {
   const spec = CUES[cue];
   if (!spec) { console.error(`✗ role "${role}" points at unknown cue "${cue}"`); process.exit(1); }
-  // `make audio` and `make sfx` write the SAME directory, so baking used to silently replace every
+  // `make gen X=audio` and `make sfx` write the SAME directory, so baking used to silently replace every
   // recorded sample with a synthesized one. Additive by default; --force to re-bake everything.
   if (!FORCE && fs.existsSync(path.join(SFX, `${role}.wav`))) { kept++; continue; }
   // seed from the ROLE name so each file is stable and independent of table order
@@ -98,7 +98,7 @@ const BEDS = {
   // tense: countdown / reveal formats, a heartbeat under the pad.
   tense:   { loop: 8, root: 110, chord: [1, 1.2, 1.5], gain: 0.05, air: 0.018, tremolo: 0.25, pulse: 0.5, pulseGain: 0.18 },
 };
-// PROVENANCE FOLLOWS THE FILE, not the name. `make music` and this script both write into
+// PROVENANCE FOLLOWS THE FILE, not the name. `make gen X=music` and this script both write into
 // assets/music/ and only one of them recorded where a bed came from, so baking `calm` over a
 // downloaded `calm` left credits.json describing a track that was no longer on disk, a licence
 // record for the wrong file, which is worse than none (engine-doctrine/MISTAKES.md #246).
@@ -118,9 +118,9 @@ for (const [name, opts] of Object.entries(BEDS)) {
 }
 fs.writeFileSync(CREDITS, JSON.stringify(credits, null, 1) + '\n');
 // NOTE: no assets/music.wav default is written. The synth beds read as a drone, so silence is the
-// default (internal/audio/audio.go) and the real-loop pack (`make music-pack`) is the opt-in bed.
+// default (internal/audio/audio.go) and the real-loop pack (`make gen X=music-pack`) is the opt-in bed.
 // These synth beds stay available for anyone who names one explicitly, but nothing auto-selects them.
 
 console.log(`✓ baked ${n} file(s), ${total.toFixed(1)}s of audio @ ${SR}Hz. Synthesized, deterministic, no licence`);
 console.log(`  sfx   → assets/sfx/     (${n} written, ${kept} kept, --force to re-bake)`);
-console.log(`  music → assets/music/   (${Object.keys(BEDS).join(', ')}). Synth beds, opt-in only (real loops: make music-pack)`);
+console.log(`  music → assets/music/   (${Object.keys(BEDS).join(', ')}). Synth beds, opt-in only (real loops: make gen X=music-pack)`);

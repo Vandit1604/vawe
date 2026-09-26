@@ -211,7 +211,7 @@ make check GATE=audit [M=…]          # overlap/overflow/safe-zone/spacing  →
 make check GATE=probe [M=…] [D=…]    # render-order purity, one scene (protects sharded render)
 make check GATE=snap-all [SAVE=1]    # WHOLE-LIBRARY: determinism screen + regression diff over every scene
 make check GATE=verify               # render integrity + safe-zone + contact sheets (heavy)
-make review               # fast snapshot: lib-test + audit + master sheet (/tmp/review.png)
+make gen X=review               # fast snapshot: lib-test + audit + master sheet (/tmp/review.png)
 ```
 
 ## What runs where (CI)
@@ -224,7 +224,7 @@ there is no CI-only command, because a second path is how the two drift apart.
 | `gates.yml` | push to main · PR | `make lib-test` + `make check GATE=schema-check\|craft-coverage\|arsenal-check` (0.4s of gate) | 1 min |
 | `scene-check.yml` | push · PR, only when `films/scene/**.json` changed | `make author-check D=<file>` on each changed scene (1.6s each) | 2 min |
 | `audit-scenes.yml` | Monday 06:17 UTC · manual | `make check GATE=audit-all` (1m46s over 34 scenes) | 3 min |
-| `snap-scenes.yml` | manual only | `make fonts` then `make check GATE=snap-all SAVE=1` (16s) | 2 min |
+| `snap-scenes.yml` | manual only | `make gen X=fonts` then `make check GATE=snap-all SAVE=1` (16s) | 2 min |
 
 The repo is private, so the free allowance is 2,000 Linux minutes a month. Measured against this
 repo's own rate, 467 commits in the last 30 days and 173 of them touching `films/scene`, the

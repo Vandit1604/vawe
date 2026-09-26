@@ -156,7 +156,7 @@ export function ransomGlyph(seed, i, { accent, faces = RANSOM_FACES, swatches, t
   };
 }
 
-// SPRITE MODE: the real thing. When a cut-out letter pack has been baked (`make ransom-sprites`),
+// SPRITE MODE: the real thing. When a cut-out letter pack has been baked (`make gen X=ransom-sprites`),
 // each glyph is a photograph of actual torn paper instead of a webfont glyph on a coloured box. That
 // is the whole difference in look: real fibre, real ink, and a tear no clip-path polygon imitates.
 // Sizing is in `em` so one `size` on the layer drives the line, and the WIDTH comes from the sprite's
@@ -165,7 +165,7 @@ function paintSprite(img, glyph, g, sprites) {
   const key = glyph.toUpperCase();
   const variants = sprites.manifest[key];
   if (!variants || !variants.length) {
-    throw new Error(`ransom sprites: no cutout for "${glyph}" in assets/ransom/manifest.json, add one to assets/ransom-src/${key}/ and re-run \`make ransom-sprites\``);
+    throw new Error(`ransom sprites: no cutout for "${glyph}" in assets/ransom/manifest.json, add one to assets/ransom-src/${key}/ and re-run \`make gen X=ransom-sprites\``);
   }
   const v = variants[Math.min(variants.length - 1, Math.floor(g.pick * variants.length))];
   img.src = sprites.base + v.file;
@@ -211,7 +211,7 @@ export function ransomStyle(units, { seed = '', accent, faces = RANSOM_FACES, sw
   // Fail loud if a ransom face is not registered. A silent fallback would make every letter the body
   // font, which is exactly the effect's opposite. Skipped only where there is no DOM (Node gates).
   const pack = sprites ? (window.__ransomSprites || null) : null;
-  if (sprites && !pack) throw new Error('ransom: sprites:true but no sprite set loaded, run `make ransom-sprites` (see assets/ransom-src/)');
+  if (sprites && !pack) throw new Error('ransom: sprites:true but no sprite set loaded, run `make gen X=ransom-sprites` (see assets/ransom-src/)');
   if (!sprites && typeof document !== 'undefined') {
     const reg = registeredFamilies();
     const missing = [...new Set(faces.map((f) => f.family))].filter((f) => !reg.has(f));

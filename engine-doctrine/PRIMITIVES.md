@@ -927,7 +927,7 @@ karaoke timing; without it, windows distribute across the line proportional to w
 `make captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
 never opacity: the styled plate keeps every state above WCAG 4.5:1.
 
-## Baked simulation (`generators/sim/sims/` · `make sim`): the stateful tier, run offline
+## Baked simulation (`generators/sim/sims/` · `make gen X=sim`): the stateful tier, run offline
 
 `renderFrame(n)` is a pure function of `n`: eight workers, arbitrary order, byte-identical output.
 A simulation is the exact opposite (frame 412 exists only because 411 ran first) so nothing
@@ -941,7 +941,7 @@ the renderer keeps exactly one contract. Same shape as `canvasFx` (an image pass
 and `make spectrum` (band energy baked to a table the render reads by row).
 
 ```bash
-make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
+make gen X=sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
 make check GATE=sim-audit                              # seeded? bake fresh against its source? sequence intact?
 ```
 

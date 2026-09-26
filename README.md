@@ -69,7 +69,7 @@ machines.
 **From source**: needs Go 1.26+, Node 18+, ffmpeg, and a Chrome or Chromium.
 
 ```bash
-make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
+make build                              # → bin/vawe  (also runs `make gen X=fonts` to fetch the free faces)
 ./bin/vawe films/scene/sample.json    # → out/sample.mp4
 make video D=films/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)
 ```

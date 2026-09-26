@@ -7,7 +7,7 @@
 //
 //   node scripts/brand/theme-remix.mjs --preset editorial --brand acme --bg "#0d0f13" --accent "#e0922f"
 //   node scripts/brand/theme-remix.mjs --preset technical --brand acme   (reads assets/brands/acme tokens)
-//   make theme-remix PRESET=editorial BRAND=acme BG=#0d0f13 ACCENT=#e0922f
+//   make gen X=theme-remix PRESET=editorial BRAND=acme BG=#0d0f13 ACCENT=#e0922f
 //
 // Deterministic (no model, no randomness): same inputs → identical theme. Self-validates against the theme
 // contract and exits 1 on a broken mapping, exactly like build-frame.mjs.

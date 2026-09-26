@@ -7,7 +7,7 @@
 //
 // The synthesized beds (calm/warm/tense) are NO LONGER auto-selected, stacked oscillators read as a
 // drone/buzz, so nothing here points at them. A music mood now maps to a REAL royalty-free loop from
-// the curated pack (`make music-pack` → assets/music/{lofi,chill,beat}.wav; provenance in
+// the curated pack (`make gen X=music-pack` → assets/music/{lofi,chill,beat}.wav; provenance in
 // credits.json). Silence stays the engine default (internal/audio/audio.go), so an unmapped/absent
 // profile (and every "space IS the score" profile below) renders silent. If the pack hasn't been
 // fetched the mixer simply finds no file and plays silence: a real loop is always an opt-in asset.

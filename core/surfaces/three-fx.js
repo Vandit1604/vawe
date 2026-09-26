@@ -175,7 +175,7 @@ function studio(renderer, scene, colors) {
 // characters of the real `lines`. So the silhouette is the actual code's shape, indentation,
 // declining line lengths, a blank line, which is what makes an abstract stack of bars read as code
 // without needing a mono typeface nobody has generated. (`extrudeText` needs a real font and throws
-// without one; `make glyphs` ships Anybody and Fraunces, neither of which is a code face.)
+// without one; `make gen X=glyphs` ships Anybody and Fraunces, neither of which is a code face.)
 //
 // ONE BUILDER, THREE SCENES. `codeExtrude`, `codeDissolve` and `codeAssemble` differ only in what
 // they do with this layout, and that is the whole reason it is a function: three copies of "where
@@ -520,7 +520,7 @@ const SCENES = {
   // THE GLOBE. Land as points, a great-circle route, and a marker flying it.
   //
   // Every dot is a real coordinate: core/globe-dots.js is baked from Natural Earth by
-  // `make globe-dots`, so the continents are SAMPLED rather than drawn, and a texture is deliberately
+  // `make gen X=globe-dots`, so the continents are SAMPLED rather than drawn, and a texture is deliberately
   // not used. That is not only taste. A photographic earth would make the film that carries this
   // prettier and its claim ("computed, not drawn") false.
   //
@@ -755,11 +755,11 @@ const SCENES = {
   },
 
   // Extruded 3D type from the REAL brand font. The typeface JSON is generated from the repo's own
-  // woff2 by `make glyphs`; substituting a generic face would be the silent-font-substitution failure
+  // woff2 by `make gen X=glyphs`; substituting a generic face would be the silent-font-substitution failure
   // this repo has already logged once, so a missing font is a LOUD error rather than a fallback.
   extrudeText(L, colors) {
     const data = (typeof window !== 'undefined' && window.__typefaces) ? window.__typefaces[L.font] : null;
-    if (!data) throw new Error(`three extrudeText: no typeface loaded for "${L.font}", run \`make glyphs\` to generate assets/fonts/3d/${L.font}.typeface.json. Refusing to substitute a different face.`);
+    if (!data) throw new Error(`three extrudeText: no typeface loaded for "${L.font}", run \`make gen X=glyphs\` to generate assets/fonts/3d/${L.font}.typeface.json. Refusing to substitute a different face.`);
     const font = new (T().Font)(data);
     const grp = new (T().Group)();
     const shapes = font.generateShapes(String(L.text ?? ''), L.size ?? 1);

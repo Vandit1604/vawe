@@ -1,7 +1,7 @@
 // quality/gates/review.mjs: one-command system health snapshot. Runs the fast checks and tiles the
 // per-format layout overlays into a single sheet you can scan. The heavier render-integrity check
 // (make check GATE=verify) and purity guard (make check GATE=probe) stay separate; this is the routine "are we good?".
-//   node quality/gates/review.mjs        (make review)
+//   node quality/gates/review.mjs        (make gen X=review)
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';

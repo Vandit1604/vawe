@@ -143,7 +143,7 @@ holds: none
 The first conformance run reported 13 inert props; 10 were the harness's fault, not the engine's: `opacity`/`scale`/`rotate` are CAMERA-KEYFRAME props (schema:858-871, `core/timeline/sequence.js:26`),...
 
 ## 30. Synthesized cues sounded like buzzing; music now comes from real recordings
-deleted the generated cues, restored the recorded Mixkit sfx library, and added `make music` to fetch a real soundtrack.
+deleted the generated cues, restored the recorded Mixkit sfx library, and added `make gen X=music` to fetch a real soundtrack.
 holds: none
 
 ## 31. A hand-typed enum in the schema rejected a valid new value within minutes
@@ -1090,7 +1090,7 @@ One union, `SHARED_PROPS` in `core/layers/vocabulary.js`.
 holds: none
 
 ## 266. the docs named commands and files the repo did not have, and two gates that would have said so were red and ignored
-`quality/gates/doc-refs.mjs` (`make check GATE=doc-refs`), wired into `make review`.
+`quality/gates/doc-refs.mjs` (`make check GATE=doc-refs`), wired into `make gen X=review`.
 holds: none
 
 ## 267. the gates measured the box the author asked for, not the ink the frame carries (a fifth #214)
@@ -1188,7 +1188,7 @@ Recorded so nobody reads a wide bound as a considered one: - `statBig.to` / `sta
 holds: none
 
 ## 289. the deploy failed on a directory `.dockerignore` excluded, and nothing local could see it
-`quality/gates/docker-context-check.mjs` (`make check GATE=docker-check`, in `make review`; moved out of scripts/site/ so gate-census and doc-refs can see it too): read the Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context...
+`quality/gates/docker-context-check.mjs` (`make check GATE=docker-check`, in `make gen X=review`; moved out of scripts/site/ so gate-census and doc-refs can see it too): read the Dockerfile's COPY lines, apply `.dockerignore`, and fail on anything the build asks for that the context...
 holds: none
 
 ## A. A fidelity metric that samples only the lit half
@@ -1426,7 +1426,7 @@ One parser in `core/motion/motion.js`, accepting the union and anchored at both 
 holds: none
 
 ## 344. A git worktree silently removes the thing that proves a change is safe
-Any worktree agent whose brief includes verification must first run `make fonts` and copy `quality/baselines/snap/` from the main tree, and the merge must be re-verified in the main tree regardless ,  three...
+Any worktree agent whose brief includes verification must first run `make gen X=fonts` and copy `quality/baselines/snap/` from the main tree, and the merge must be re-verified in the main tree regardless ,  three...
 holds: none
 
 ## 345. Stripping tags eight times with three answers, and the two common answers were both wrong
@@ -1758,7 +1758,7 @@ Four caption-native styles, each satisfying the doctrine rather than being exemp
 holds: none
 
 ## 427. The pixel-regression gate had been blind for an unknown number of sessions
-`make fonts` first, which verified 16 faces and downloaded none: the extra files are drift from `fonts-discover` runs, not a missing set.
+`make gen X=fonts` first, which verified 16 faces and downloaded none: the extra files are drift from `fonts-discover` runs, not a missing set.
 holds: none
 
 ## 428. The CSS-animation ban is not required for determinism, and the engine already proves it

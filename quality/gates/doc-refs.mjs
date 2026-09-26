@@ -87,7 +87,7 @@ function makeTargets() {
  *      author is already unsure. Moving the scripts into `harness/author|brand|gates|media|site/`
  *      left 111 of these naming a path that had not existed since the move.
  *   2. A QUOTED path handed to a child process: `spawnSync('node', ['harness/lib-test.mjs'])`.
- *      `quality/gates/review.mjs` had two, so `make review` had been failing two of its three checks on
+ *      `quality/gates/review.mjs` had two, so `make gen X=review` had been failing two of its three checks on
  *      ERR_MODULE_NOT_FOUND. That is the worst version of this defect, because a health command that
  *      reports a failure looks like it is working. Nobody reads a red check twice.
  */
