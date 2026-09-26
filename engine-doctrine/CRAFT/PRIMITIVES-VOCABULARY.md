@@ -63,7 +63,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `bottom` | bottom-centre, bottom edge middle | x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred |
 | `bottom-left` | bottom left corner, lower left corner | x/y lands at 0% across the box and 100% down it: the bottom-left corner |
 | `bottom-right` | bottom right corner, lower right corner | x/y lands at 100% across the box and 100% down it: the bottom-right corner |
-| `center` | dead centre of the box, centre point, middle of the box | x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
+| `center` | dead centre of the box, centre point, middle of the box, a layer's x and y as its centre point instead of the top-left corner | x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
 | `left` | left-centre, middle left | x/y lands at 0% across the box and 50% down it: the left edge, vertically centred |
 | `right` | right-centre, middle right | x/y lands at 100% across the box and 50% down it: the right edge, vertically centred |
 | `top` | top-centre, top edge middle | x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred |
