@@ -6,7 +6,7 @@ draws on, the wordmark clears upward at the cut, the tagline stays clear of the 
 past 1s.
 
 copy: wordHeavy = 'vawe'
-weight: wordHeavy 300->800 in 2.4-4.9
+weight: wordHeavy 300->800 in 1.4-2.8
 draw: strokeWave full by 3.4
 exit: wordHeavy up by 4.9
 overlap: tagline !x strokeWave
