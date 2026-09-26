@@ -53,6 +53,12 @@ COPY core ./core
 COPY blocks ./blocks
 COPY themes ./themes
 COPY assets/vendor ./assets/vendor
+# gsap.min.js is never committed (license, see assets/vendor/README.md); vendor it here the same way
+# `npm install` does locally: install just the runtime deps, let postinstall (scripts/vendor-gsap.mjs)
+# write it into the folder already copied above, then drop node_modules, nothing else here needs it.
+COPY package.json package-lock.json ./
+COPY scripts/vendor-gsap.mjs ./scripts/vendor-gsap.mjs
+RUN npm ci --omit=dev && rm -rf node_modules
 COPY harness/author/expand-blocks.mjs ./harness/author/expand-blocks.mjs
 COPY generators/media/fonts.mjs ./generators/media/fonts.mjs
 COPY films/scene/scene.html films/scene/scene.js films/scene/props.js \
