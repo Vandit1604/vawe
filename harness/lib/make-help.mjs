@@ -1,14 +1,3 @@
-// make-help.mjs: `make list` and `make help` read straight from the Makefile itself, so this can
-// never drift from the real target list the way a hand-kept catalog would (this repo has already
-// paid for that mistake more than once - see engine-doctrine/MISTAKES.md on generated artefacts nobody re-ran).
-//
-// W11: 207 targets, no way to see which of ten PHASES a target belongs to, and seven separate
-// discovery commands for one question ("what can I search for"). This is the phase half: every real
-// target line in the Makefile carries a `## [phase] one-line help` comment (the convention this file
-// reads), and `make list` prints them grouped instead of the Go binary's `--list` (moved to `make
-// formats`). `make lib-test` imports `untagged()` below so a new target with no phase fails the build,
-// the way `checkBlurb` refuses an entry with no blurb: the ratchet holds at the write site, not a gate
-// that runs later and only promises to notice.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,17 +18,11 @@ export const PHASES = [
 ];
 const PHASE_NAMES = new Set(PHASES.map(([p]) => p));
 
-// `make help`: the fast path only, brief to rendered film, the stage table's own order (AGENTS.md
-// "THE EIGHT STAGES"). `make list` still prints all 200+; this is the twelve an agent needs before it
-// has to go read anything else.
 export const FAST_PATH = [
   'stage', 'next', 'quiz', 'ideate', 'studio', 'preview', 'dev',
   'probe-frame', 'check', 'ship', 'judge', 'arsenal', 'regen',
 ];
 
-// A real target line: `name:` (not `name:=`) at column 0, not a recipe line (tab-indented) and not
-// `.PHONY`. Matches the same shape the W11 tagging pass wrote, so this is the read side of one
-// convention rather than a second, looser parser that could disagree with it.
 const TARGET_RE = /^([A-Za-z][A-Za-z0-9_.-]*)\s*:(?!=)(.*)$/;
 const TAG_RE = /##\s*\[(\w+)\]\s*(.*)$/;
 
@@ -60,8 +43,6 @@ export function collectTargets(makefilePath = path.join(repoRoot, 'Makefile')) {
   return targets;
 }
 
-// Every phase named on a target must be one of the ten declared above: a typo'd phase is as silent a
-// failure as no phase at all, and would otherwise just print under its own heading forever.
 export function untagged(targets = collectTargets()) {
   return targets.filter((t) => !t.phase || !PHASE_NAMES.has(t.phase));
 }
@@ -97,8 +78,6 @@ export function printGrouped(targets = collectTargets()) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (process.argv.includes('--check')) {
-    // The phase-coverage half of `make lib-test` (W11): a target with no phase, or a phase not in
-    // the declared ten, fails the build instead of quietly missing from `make list` forever.
     const bad = untagged();
     if (bad.length) {
       console.error(`✗ ${bad.length} Makefile target(s) with no valid ## [phase] tag: ${bad.map((t) => t.name).join(', ')}`);

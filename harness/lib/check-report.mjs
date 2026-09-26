@@ -1,17 +1,3 @@
-// harness/lib/check-report.mjs: the body of `make check D=<film>`.
-//
-// FIX 2 + FIX 8 (docs: .claude/plans/pre-render-improvement.plan.md). `make check` used to run only
-// author-check, so the page audit (overflow, safe, contrast, buried, tiny/clipped text) never fired
-// until `make ship` had already paid for a render, and drift in a generated file (schema enums, the
-// catalogue, doc counts) was invisible until something else happened to notice. Neither needs the mp4
-// or a write: this runs both, read-only, then prints ONE summary instead of three separate verdicts an
-// author has to reconcile by hand.
-//
-// Shape: author-check -> page audit -> generated-check -> ground arc -> motion floor (pre-render) ->
-// ONE summary (fixed / needs a decision / next command). The summary names each finding (code and its
-// own detail), never "see above": an agent reading only the summary must know what to change. Adapted
-// safeguard lines ("adapted <code>: ...") are collected as fixed. `make ship`'s own author-check and
-// audit invocations are untouched; this only adds an earlier, report-only run of the same commands.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -26,7 +12,6 @@ const vs = process.env.VS || null;
 const decisions = [];
 const fixed = [];
 
-// ---- 1. author-check (iterate mode: reports everything, blocks nothing here) --------------------
 console.log('▶ author-check');
 const acArgs = [...(film ? [film] : []), ...(taste ? ['--taste'] : []), ...(vs ? ['--vs', vs] : [])];
 spawnSync('node', [path.join(ROOT, 'harness/lib/run-author-check.mjs'), ...acArgs], {
@@ -35,14 +20,11 @@ spawnSync('node', [path.join(ROOT, 'harness/lib/run-author-check.mjs'), ...acArg
 if (film) {
   const runs = readRuns(film);
   const last = runs[runs.length - 1];
-  // Fix 1 put the true answer on each check's own record: `blocked` (would stop `make ship`) vs
-  // `report` (fired, does not). Reading it back here means this summary cannot drift from that fix.
   for (const c of (last && last.checks) || []) {
     if (c.blocked) decisions.push(`author-check: ${c.name} BLOCKS (${(c.codes || []).join(', ')})`);
   }
 }
 
-// ---- 2. page audit (no render needed; quality/audit.mjs loads the scene directly) ----------------
 let auditStatus = 0;
 if (film && fs.existsSync(path.resolve(ROOT, film))) {
   console.log('\n▶ page audit (pre-render)');
@@ -53,8 +35,6 @@ if (film && fs.existsSync(path.resolve(ROOT, film))) {
   auditStatus = r.status ?? 0;
   const lines = String(r.stdout || '').split('\n');
   for (const l of lines) { const a = /^\s*(adapted [a-z-]+:.*)$/.exec(l); if (a) fixed.push(a[1].slice(0, 180)); }
-  // --aspect all repeats one finding per canvas, so each distinct code+detail is listed once with the
-  // aspects it fired on, read from the result header line above it ("[16:9]").
   const byKey = new Map(); let aspect = '';
   for (const l of lines) {
     const h = /\[(\d+:\d+)\]/.exec(l); if (/^\S/.test(l) && h) { aspect = h[1]; continue; }
@@ -72,13 +52,10 @@ if (film && fs.existsSync(path.resolve(ROOT, film))) {
   console.log('\n▶ page audit: skipped, no D=<film> given');
 }
 
-// ---- 3. generated-check (READ-ONLY: schema enums, catalogue, doc counts, rules-build) -------------
 console.log('\n▶ generated-check (read-only; `make regen` writes)');
 const gc = spawnSync('node', [path.join(ROOT, 'quality/gates/generated-check.mjs')], { stdio: 'inherit', cwd: ROOT });
 if ((gc.status ?? 0) !== 0) decisions.push('generated-check: at least one generated file has drifted. `make regen`' + (film ? ` D=${film}` : '') + ' writes them.');
 
-// ---- 4. ground arc and 5. motion floor, both sampled from renderFrame (no mp4 needed) -------------
-// Each gate prints its findings as JSON; the summary names each one with its own fix text.
 const jsonGate = (label, args) => {
   console.log(`\n▶ ${label}`);
   const r = spawnSync('node', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 << 20 });
@@ -98,7 +75,6 @@ if (film && fs.existsSync(path.resolve(ROOT, film))) {
   jsonGate('motion floor (pre-render)', [path.join(ROOT, 'quality/gates/motion-floor.mjs'), film, '--pre', '--json']);
 }
 
-// ---- ONE summary -----------------------------------------------------------------------------------
 console.log(`\n════════ check summary${film ? ` · ${path.basename(film)}` : ''} ════════`);
 console.log(`  fixed automatically: ${fixed.length ? fixed.join('; ') : 'none (make check only reports; make regen writes generated files)'}`);
 if (decisions.length) {

@@ -1,20 +1,9 @@
-// harness/lib/frame-sampler.mjs: ONE reusable pre-render sampler.
-//
-// WHY THIS EXISTS. ground-arc.mjs and motion-floor.mjs's `--pre` mode both need the same thing: load
-// a scene the way quality/audit.mjs does (a static server, a puppeteer page, wait for the engine),
-// seek it to a set of times with the pure `renderFrame(n)`, and read a picture back, WITHOUT ever
-// encoding out/<film>.mp4. render-harness.mjs already owns the server/page/boot half of that; this
-// file adds only the part neither gate should reinvent: walk a time axis and hand back one frame per
-// tick. Building a second engine loader here would be exactly the drift ENGINE-CHANGES.md warns about.
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
 import { serveRepo, launchPage, waitForEngine, bootPathFor, REPO_ROOT } from './render-harness.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 
-// A PNG decoder: same shape as quality/audit.mjs's own (this repo ships no image library, and that
-// file is owned by someone else, so this is the second correct copy rather than an edit to theirs).
-// Chromium emits 8-bit non-interlaced PNG; anything else throws rather than guesses.
 function readChunks(buf) {
   let pos = 8, w = 0, h = 0, depth = 0, ctype = 0, interlace = 0, palette = null;
   const idat = [];
@@ -31,7 +20,6 @@ function readChunks(buf) {
   return { w, h, depth, ctype, interlace, palette, idat };
 }
 
-// One Paeth/Sub/Up/Average byte, unfiltered against its left/above/above-left neighbours.
 function unfilterByte(ft, v, a, b, c) {
   if (ft === 1) return (v + a) & 255;
   if (ft === 2) return (v + b) & 255;
@@ -119,9 +107,6 @@ export async function sampleScene(scenePath, { rate = 0.25, times, aspect, measu
   const raw = fs.readFileSync(abs, 'utf8');
   const cfg = JSON.parse(raw);
   const rel = path.relative(REPO_ROOT, abs);
-  // AGENTS.md: exactly one module, `scene`; the engine shell that boots it always sits at
-  // films/scene/scene.html, whatever directory the scene JSON itself is served from (a real film
-  // under films/scene/, or a test fixture elsewhere in the repo).
   const m = 'scene';
   const [vw, vh] = sceneDims(cfg, aspect);
 
