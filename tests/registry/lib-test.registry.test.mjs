@@ -623,8 +623,11 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
     } catch { return false; }   // a registry with no catalog reaching the sort throws, and that is a fail
   })());
   ok('registry: catalogued() is ordered by tag then title, not by definition order', (() => {
-    const k = (r) => `${r.catalog.tag} ${r.catalog.title}`;
-    return catalogued().every((r, i, a) => i === 0 || k(a[i - 1]) <= k(r));
+    // localeCompare, not a raw < : it must agree with catalogued()'s own sort (registry.js), which
+    // sorts case-insensitively (`three.js` before `Universal`); a raw comparison here put uppercase
+    // ahead of every lowercase letter and flagged a correctly-sorted lowercase title as out of order.
+    const k = (r) => `${r.catalog.tag} ${r.catalog.title}`;
+    return catalogued().every((r, i, a) => i === 0 || k(a[i - 1]).localeCompare(k(r)) <= 0);
   })());
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 9);
