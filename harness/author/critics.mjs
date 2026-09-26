@@ -247,6 +247,19 @@ function findCitedStudy(sbText) {
   return null;
 }
 
+// Issara Willenskomer's 12 UX-in-Motion principles (medium.com/ux-in-motion, "Creating Usability
+// with Motion"), asked as a naming exercise rather than scored directly: an unnamed principle a beat
+// obviously needs folds into the existing motion-variety code, not a new one.
+function uxMotionChecklistLines() {
+  return [
+    'UX-in-Motion checklist (Issara Willenskomer, 12 principles: easing, offset & delay, parenting, '
+      + 'transformation, value change, masking, overlay, cloning, obscuration, parallax, dimensionality, '
+      + 'dolly & zoom): name which ones this plan uses and where, beat by beat. A beat that obviously '
+      + 'changes a value or masks a reveal but names no principle is a motion-variety gap (code: motion-variety).',
+    '',
+  ];
+}
+
 // Works from the storyboard alone: a plan-stage film may have no scene.json yet (scaffold not run)
 // or one with no fragments (design not started), and this must judge it anyway.
 export function buildPlanJudgeBrief(arg) {
@@ -294,6 +307,7 @@ export function buildPlanJudgeBrief(arg) {
       + 'generative: light, particles, a shader), or only a colour, a number or an adjective that could '
       + 'be written without looking at the reference? (code: field-craft)',
     '',
+    ...uxMotionChecklistLines(),
     ...(study ? [
       `Reference study for the clip this storyboard cites (${study.source}). OPEN THESE FIRST: `
         + `field-craft cannot be answered from the text below, only from what these show.`,
