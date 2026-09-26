@@ -1025,6 +1025,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `liquidBackground` | a churning liquid surface, a rippling 3D plane, a wavy specular background | a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells |
 | `litPlane` | a lit UI screenshot in 3D, a captured screen rising with a tilt, a shadowed product screen | a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `motionBlur` (true, or a 0..1 strength, the same word every layer uses) opts it into a shutter-accumulated smear on the fast rise |
 | `magnetic` | magnetic field lines, field lines between poles, charges sliding along arcs | field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them |
+| `object` | a glass or metal 3D object, a glass shield or extruded badge, a refracting glass sphere you orbit | a premium composed object: a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses |
 | `pointCloud` | a cloud of points, particle point cloud, thousands of lit dots | a GPU point cloud: thousands of lit points posed absolutely from t |
 | `shatter` | breaking into pieces, a slab shattering, shards flying outward | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
 | `uiParallax` | UI layers at depth, parallax screens, stacked flat panels in 3D | flat UI planes stacked at depth, the camera moving past them so the layers separate |
@@ -1053,5 +1054,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_724 primitives across 63 registries, 724 meeting the word-action contract today.
+_725 primitives across 63 registries, 725 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
