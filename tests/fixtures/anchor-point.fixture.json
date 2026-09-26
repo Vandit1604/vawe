@@ -1,0 +1,37 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "tempo": 0.5,
+ "duration": 6,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "corner",
+   "type": "rect",
+   "x": 960,
+   "y": 540,
+   "w": 200,
+   "h": 100,
+   "bg": "#101010",
+   "start": 0,
+   "duration": 6,
+   "anim": "none"
+  },
+  {
+   "id": "centred",
+   "type": "rect",
+   "x": 960,
+   "y": 540,
+   "w": 200,
+   "h": 100,
+   "anchorPoint": "center",
+   "bg": "#ff5500",
+   "start": 0,
+   "duration": 6,
+   "anim": "none"
+  }
+ ]
+}
