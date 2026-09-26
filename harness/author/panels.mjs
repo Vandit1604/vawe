@@ -1,35 +1,3 @@
-// harness/author/panels.mjs: the storyboard stop, as a picture.
-//
-// engine-doctrine/CRAFT/REVIEW-STOPS.md states the rule: "a stop is a picture, not a report." The storyboard
-// stop was the one with no picture. A storyboard here is prose, so a reviewer was asked to approve a
-// film from `picture:` and `onscreen:` written in English, and prose hides the two things that decide
-// whether a plan is any good: how much of the frame is used, and how the beats compare to each other.
-// `onefilm` was approved as text and later rejected on its beats sheet for a dead opening. That
-// rejection was decidable before a line of JSON existed.
-//
-// So: one rough still per beat, tiled into a sheet, rendered from the markdown alone.
-//
-// WHAT MAKES THIS DIFFERENT FROM `make animatic`, which also draws grey boxes. The animatic is a CLOCK
-// check. It synthesizes a scratch read and asks whether each beat has room for its own words. This is
-// a COMPOSITION check, and it asks where things sit and how big they are. The animatic draws every
-// beat's slot the same size, so a `wide` and a `close` look identical in it. Here `shot:` drives the
-// subject box, which is the one field that turns a storyboard into blocking.
-//
-// DELIBERATELY GREY. No theme, no accent, no real assets. Nobody may mistake a panel for a finished
-// frame; palette and type are judged later, at `make styleframes`. A panel is blocking, not drawing.
-//
-// WHAT `style:` AND `layout:` DO HERE. They are the two slots the beat formula has (Element · Motion ·
-// Layout · Style · Timing) and this repo had nowhere to spend. `layout:` is DRAWN: a coarse region
-// inside the frame, and the subject box is sized or centred against it, so a plan that says "the UI
-// fills the lower two thirds" no longer draws a medium box dead centre. `style:` is NOT drawable here
-// and must not pretend to be, because a panel is grey on purpose and the look is judged at
-// `make styleframes`. It is carried as WORDS on the panel and listed beat by beat under the report,
-// where the thing a reviewer needs is the comparison: five beats declaring one treatment is a film
-// shot at one volume, and that is only visible with the five lines side by side.
-//
-//   node harness/author/panels.mjs <STORYBOARD.md> [--out /tmp/panels]
-//   node harness/author/panels.mjs --self-test        # the region/area arithmetic, asserted
-//   make panels SB=films/scene/<name>.storyboard.md
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
@@ -48,12 +16,6 @@ if (!SELFTEST && (!SB || !fs.existsSync(SB))) {
   process.exit(2);
 }
 
-// ── the shot vocabulary → how much of the frame the subject occupies ───────────────────────────────
-// This is the whole reason the file exists. The template already glosses its own terms in exactly these
-// terms, "wide (establishing, the frame is mostly empty)", "medium (the object arrives and owns the
-// middle third)", so the box is sized to what the words already mean rather than to a new convention.
-// A `shot:` value is often a sentence ("medium, the caret dead centre with the frame deliberately empty
-// around it"), so the keyword is found inside it and the rest is kept and shown as written.
 const SHOTS = [
   [/\b(macro|extreme[\s-]?close(?:[\s-]?up)?|ecu)\b/i, 'extreme close', 0.94, 0.90],
   [/\b(close(?:[\s-]?up)?|cu)\b/i, 'close', 0.78, 0.72],
@@ -70,12 +32,6 @@ const readShot = (raw) => {
   return { kind: 'medium', sx: DEFAULT_SHOT[2], sy: DEFAULT_SHOT[3], note: raw.trim(), why: 'unknown' };
 };
 
-// ── where the subject sits, when the plan says ─────────────────────────────────────────────────────
-// `shot:` sizes the box; nothing in the contract positions it. Centring every box by default would be a
-// convention masquerading as a finding: a reviewer would read "the bottom third is empty" off a panel
-// whose bottom third is empty because this file put it there. So placement words are read out of the
-// prose when they are there, and a panel that has none SAYS it has none. An unread placement is a fact
-// about the storyboard, and it is the one a reviewer must know before trusting the blocking.
 const PLACE = [
   [/\b(?:on the |the )?left(?:\s+(?:half|third|side|two[\s-]?thirds))?\b/i, 'left'],
   [/\b(?:on the |the )?right(?:\s+(?:half|third|side|two[\s-]?thirds))?\b/i, 'right'],
@@ -83,8 +39,6 @@ const PLACE = [
   [/\b(?:upper|top)\s+(?:half|third|two[\s-]?thirds|edge)\b/i, 'top'],
   [/\b(?:dead )?cent(?:re|er)(?:d|red)?\b/i, 'centre'],
 ];
-// The FIRST placement word wins. In "a caret blinking on the left, the right half empty" both halves
-// are named and only one holds the subject; the one named first is it.
 const readPlace = (...sources) => {
   for (const src of sources) {
     if (!src) continue;
@@ -101,23 +55,11 @@ const readPlace = (...sources) => {
   }
   return { where: 'centre', axis: 'none', stated: false };
 };
-// What the panel says about its own placement, because the half it did not read is the half a reviewer
-// would otherwise mistake for a decision. `onefilm` states a left/right split on every beat and states
-// nothing vertical, so the empty bottom of its panels is this file talking, not the plan.
 const placeLabel = (p) => p.axis === 'none' ? 'placement not stated · centred here by default'
   : p.axis === 'both' ? 'centred, as the plan states'
   : p.axis === 'horizontal' ? `placed ${p.where} · nothing vertical stated`
   : `placed ${p.where} · nothing horizontal stated`;
 
-// ── `layout:` → a coarse region of the frame ───────────────────────────────────────────────────────
-// The contract asks for a region and a frame share, never coordinates, because that is the level a
-// reviewer can approve. So this reads exactly that much and refuses to invent the rest.
-//
-// AREA IS WIDTH TIMES HEIGHT. Nothing else. Mis-measuring a picture's size is what killed the
-// `visual-vocabulary` gate: its helper squared a layer that declared one axis, so a 590x18 rule scored
-// as 590x590 and a hairline was credited with a tenth of the frame. The rule here is therefore that a
-// share on ONE axis stays on that axis and produces NO area at all, and the panel says which axis was
-// stated. `--self-test` asserts both halves against that same hairline.
 const R = (name, x, y, w, h) => ({ name, x, y, w, h, area: w * h });
 const REGIONS = [
   [/\b(?:lower|bottom)\s+two[\s-]?thirds\b/i, R('lower two thirds', 0, 1 / 3, 1, 2 / 3)],
@@ -136,28 +78,15 @@ const REGIONS = [
   [/\b(?:upper|top)\s+third\b/i, R('upper third', 0, 0, 1, 1 / 3)],
   [/\bleft\s+third\b/i, R('left third', 0, 0, 1 / 3, 1)],
   [/\bright\s+third\b/i, R('right third', 2 / 3, 0, 1 / 3, 1)],
-  // A "middle third" holding type is the horizontal band, not a column. Named here rather than guessed
-  // per storyboard, so every panel reads it the same way and the label says which third it drew.
   [/\b(?:middle|centre|center)\s+third\b/i, R('middle third', 0, 1 / 3, 1, 1 / 3)],
 ];
-// Full-bleed is a fallback, never a winner. It describes the ground reaching the edges, so a narrower
-// region named in the same line is the one the subject actually sits in ("full-bleed, type filling the
-// middle third"). Taking full-bleed first would draw the whole frame and say nothing.
 const FULL = [/\bfull[\s-]?bleed\b|\bfull[\s-]?frame\b|\bedge[\s-]to[\s-]edge\b|\bwhole frame\b/i, R('full frame', 0, 0, 1, 1)];
-// A clause that says a region is EMPTY is a statement about what is not there. "lower half deliberately
-// empty" must not tint the lower half as the subject's region, so those clauses are dropped before any
-// region or placement word is read out of the line.
 const NEGATED = /\bempt(?:y|ied)\b|\bnothing\b|\bno one\b|\bbare\b|\bclear of\b|\bfree of\b/i;
 const clausesOf = (raw) => String(raw || '').split(/[,;·]| and (?=[a-z])/).map((s) => s.trim()).filter((s) => s && !NEGATED.test(s));
-// The subject OWNS the region, or merely sits inside it. "the UI fills the lower two thirds" sizes the
-// box to the region; "the claim sits top-left" keeps the size `shot:` gave it and only moves it.
 const FILLS = /\bfills?\b|\bfilling\b|\bowns?\b|\bspans?\b|\bcovers?\b|\bacross\b|\bfull[\s-]?bleed\b/i;
 
-// A percentage on ONE axis is a width or a height, and it is never an area. See the note above.
 const readShare = (text) => {
   const axis = /(\d+(?:\.\d+)?)\s*%\s*(?:of\s+(?:the\s+)?)?(?:frame\s+)?(width|height)\b/i.exec(text);
-  // Match the axis word WHOLE. Testing it for the letter h is how "width" also set the height, which is
-  // the one-axis-becomes-two failure this whole section exists to avoid.
   if (axis) {
     const isW = axis[2].toLowerCase() === 'width';
     return { w: isW ? +axis[1] / 100 : null, h: isW ? null : +axis[1] / 100, area: null, said: `${axis[1]}% of ${axis[2].toLowerCase()}` };
@@ -178,33 +107,23 @@ const readLayout = (raw) => {
   if (!best && FULL[0].test(text)) best = { region: FULL[1], at: 0 };
   return { raw: raw ? raw.trim() : '', stated: !!raw, text, region: best ? best.region : null,
     fills: !!best && FILLS.test(text), share: readShare(text),
-    // A line can say WHERE without saying HOW MUCH ("mark centre, wordmark under it"). That is half an
-    // answer, not no answer, and the two deserve different words in the report.
     placed: readPlace(text).stated };
 };
 
-// What the panel says it read out of `layout:`. An unread line is the fact a reviewer most needs, so it
-// is said out loud rather than left to look like a decision this file made.
 const pct = (v) => `${Math.round(v * 100)}%`;
 const layoutLabel = (lay) => {
   if (!lay.stated) return 'layout not stated';
   const bits = [];
-  // Kept short on purpose. This label sits in a narrow column beside `camera:`, and a portrait panel
-  // wraps anything longer into the line below it.
   if (lay.region) bits.push(`region: ${lay.region.name} · ${pct(lay.region.area)}${lay.fills ? ' · filled' : ' · subject inside'}`);
   if (lay.share.said) bits.push(lay.share.area != null ? lay.share.said : `${lay.share.said} only`);
   return bits.length ? bits.join(' · ') : 'no region read from the layout line';
 };
 
-// The share of the frame a drawn box really takes: width times height, each as a fraction. The one
-// piece of arithmetic this file must not get wrong.
 const shareOf = (w, h, fw, fh) => (w / fw) * (h / fh);
 
 if (SELFTEST) {
   const ok = [];
   const is = (name, got, want) => { const pass = Math.abs(got - want) < 1e-3; ok.push([pass, name, got, want]); };
-  // The hairline that killed `visual-vocabulary`: a 590x18 rule in a 1920x1080 frame is half a percent
-  // of it, not the 16.8% a squared width would claim.
   is('hairline 590x18 share', shareOf(590, 18, 1920, 1080), 0.00512);
   ok.push([shareOf(590, 18, 1920, 1080) < 0.01, 'hairline is under 1% of the frame', shareOf(590, 18, 1920, 1080), '<0.01']);
   ok.push([Math.abs(shareOf(590, 18, 1920, 1080) - (590 * 590) / (1920 * 1080)) > 0.1, 'hairline is NOT the squared width', 'w*h', 'not w*w']);
@@ -248,19 +167,11 @@ const INK = '#111111', GREY = '#bdbdbd', SLOT = '#e8e8e8', MUTED = '#7a7a7a', FA
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/–/g, ',')   // an en dash between clauses reads as a comma at panel scale;
 const clip = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
 
-// The drawn frame, inset so the panel can carry a slate above it and a caption below without either
-// eating picture space. The inset keeps the film's real ratio: a panel whose frame is not the shape of
-// the film would lie about every placement inside it.
-// The frame gives up a little height when the plan states `layout:` or `style:`, because those lines
-// go UNDER it and a portrait panel has only about a sixth of its height down there, most of it already
-// spent by `becomes:`. Scaling the frame keeps the film's ratio exactly (the height is derived from the
-// width), and a storyboard that states neither field is drawn at the size it always was.
 const FRAME_SCALE = beats.some((b) => b.layout || b.style) ? 0.66 : 0.72;
 const FRAME_W = Math.round(W * FRAME_SCALE), FRAME_H = Math.round(FRAME_W * H / W);
 const FRAME_X = Math.round((W - FRAME_W) / 2), FRAME_Y = Math.round(H * 0.115);
 const PAD = Math.round(FRAME_W * 0.045);
 
-// rough line count for a block of text at a size, so the copy stack advances like real copy does
 const linesOf = (text, size, box) => Math.max(1, Math.ceil(text.length * size * 0.5 / box));
 
 const layers = [];
@@ -277,9 +188,6 @@ for (const b of beats) {
   layers.push({ type: 'text', text: esc(`${b.i + 1} · ${b.name}`), x: Math.round(W * 0.04), y: Math.round(H * 0.035),
     w: Math.round(W * 0.55), size: Math.round(H * 0.030), weight: 700, color: INK, align: 'left', ...hold });
   layers.push({ type: 'text',
-    // The shot's own share of the frame is printed next to its name. Without it, a panel whose box was
-    // sized by `layout:` cannot be compared against the shot the same plan declared, and the override
-    // reads as agreement.
     text: esc(`${start.toFixed(1)}s to ${(start + dur).toFixed(1)}s · ${dur.toFixed(1)}s · ${shot.kind.toUpperCase()}${shot.why === 'missing' ? ' (assumed)' : ` ${pct(shot.sx * shot.sy)}`}${b.type ? ' · ' + b.type : ''}`),
     x: Math.round(W * 0.41), y: Math.round(H * 0.038), w: Math.round(W * 0.55), size: Math.round(H * 0.024),
     weight: 500, color: shot.why === 'missing' ? RED : MUTED, align: 'right', ...hold });
@@ -291,10 +199,6 @@ for (const b of beats) {
   layers.push({ type: 'rect', x: FRAME_X, y: FRAME_Y, w: FRAME_W, h: FRAME_H, radius: 2,
     bg: '#fcfcfc', border: `2px solid ${GREY}`, ...hold });
 
-  // ── the region the layout names, drawn under everything it contains ──────────────────────────────
-  // Tinted, dotted and labelled, so a reviewer sees the part of the frame the beat committed to and
-  // the part it left alone. Skipped when the subject FILLS the region, because then the region and the
-  // subject box are the same rectangle and drawing both twice says nothing.
   const lay = readLayout(b.layout);
   const reg = lay.region;
   if (reg && !lay.fills) {
@@ -303,18 +207,8 @@ for (const b of beats) {
       bg: '#f4f4f4', border: `2px dotted ${FAINT}`, ...hold });
   }
 
-  // ── the subject, at the size the shot says, in the region the layout names ───────────────────────
-  // Precedence, and each step is a field being more specific than the one under it: a region the
-  // subject FILLS sizes the box outright, a stated per-axis share sizes that axis only, and `shot:`
-  // sizes whatever is left. A share on one axis never touches the other, so nothing here can turn a
-  // width into an area.
   const bw = Math.round(FRAME_W * (reg && lay.fills ? reg.w : lay.share.w ?? shot.sx));
   const bh = Math.round(FRAME_H * (reg && lay.fills ? reg.h : lay.share.h ?? shot.sy));
-  // `placement` FIRST, because a field whose entire job is to say where things go should outrank a
-  // placement word that happens to appear in a prose description. It was not read at all until now: a
-  // storyboard stating "HUD top-left" on every beat still drew seven centred boxes and labelled them
-  // "placement not stated", which is a declaration accepted and ignored. `layout:` joins it at the
-  // front, because a region is the same declaration written coarser.
   const place = readPlace(lay.text, b.placement, b.picture, b.shot);
   const EDGE = 0.06;
   let bx = FRAME_X + Math.round((FRAME_W - bw) / 2), by = FRAME_Y + Math.round((FRAME_H - bh) / 2);
@@ -322,9 +216,6 @@ for (const b of beats) {
   if (place.where === 'right') bx = FRAME_X + FRAME_W - bw - Math.round(FRAME_W * EDGE);
   if (place.where === 'top') by = FRAME_Y + Math.round(FRAME_H * EDGE);
   if (place.where === 'bottom') by = FRAME_Y + FRAME_H - bh - Math.round(FRAME_H * EDGE);
-  // A region wins the position outright: it is the coarser, more deliberate statement. The box is
-  // centred in it and NEVER resized to fit, so a `shot:` too big for its region overflows on the panel
-  // and is reported. That disagreement is a finding about the plan, not a thing to quietly correct.
   if (reg) {
     bx = FRAME_X + Math.round(FRAME_W * (reg.x + reg.w / 2)) - Math.round(bw / 2);
     by = FRAME_Y + Math.round(FRAME_H * (reg.y + reg.h / 2)) - Math.round(bh / 2);
@@ -337,9 +228,6 @@ for (const b of beats) {
   layers.push({ type: 'text', text: esc(clip(capt, 230)), x: bx + 18, y: by + 16, w: bw - 36,
     size: Math.round(H * 0.020), weight: 400, color: hasPic ? MUTED : RED, align: 'left', ...hold });
 
-  // ── the on-screen copy, at plausible scale, over the picture the way copy really sits ────────────
-  // First line large because a first line is large. The point is not the wording, it is the MASS: a
-  // beat holding two seconds and one character is a hole, and prose never reads as one.
   let cy = FRAME_Y + Math.round(FRAME_H * 0.06);
   const copyBox = FRAME_W - PAD * 2;
   b.onscreen.slice(0, 4).forEach((line, j) => {
@@ -356,8 +244,6 @@ for (const b of beats) {
   layers.push({ type: 'text', text: esc(clip(`camera: ${b.camera || 'not named'}`, 50)),
     x: FRAME_X, y: underY, w: Math.round(FRAME_W * 0.52), size: Math.round(H * 0.021),
     weight: 500, color: b.camera ? MUTED : FAINT, align: 'left', ...hold });
-  // The region label replaces the placement one when a region was read, because it is the same
-  // question answered better: a named region says where AND how much.
   const readLayoutHere = !!reg || !!lay.share.said;
   layers.push({ type: 'text', text: esc(clip(readLayoutHere ? layoutLabel(lay) : placeLabel(place), 90)),
     x: FRAME_X + Math.round(FRAME_W * 0.54), y: underY, w: Math.round(FRAME_W * 0.46),
@@ -367,18 +253,6 @@ for (const b of beats) {
   layers.push({ type: 'text', text: becomesTxt,
     x: FRAME_X, y: becomesY, w: FRAME_W, size: becomesSize,
     weight: 400, color: b.becomes ? INK : RED, align: 'left', ...hold });
-  // `layout:` and `style:` in the author's own words, under the drawing they produced. The region label
-  // above is this file's READING of the layout line; the line itself belongs on the panel so a reviewer
-  // can see when the reading is thinner than the plan. Style is WORDS here and nothing else: a grey
-  // panel cannot show a treatment, and one that tried would be judging the look at the one stop that
-  // deliberately refuses to.
-  // Held aside rather than pushed, because the scene has a layer ceiling and a 13-beat storyboard sits
-  // three layers under it. What gets spent on these lines is decided once, after every beat is known.
-  //
-  // Stacked from where `becomes:` actually ENDS, never at a fixed offset. A portrait panel wraps that
-  // line to three, so a fixed offset would print the layout over the top of it, and a line under a line
-  // is the one thing a blocking sheet must not be. A line that will not fit below the canvas is not
-  // drawn at all and is named in the report instead of half-appearing off the bottom edge.
   const EX_X = Math.round(W * 0.04), EX_W = Math.round(W * 0.92), EX_SIZE = Math.round(H * 0.019);
   const stackTop = becomesY + Math.round(becomesSize * 1.16 * linesOf(becomesTxt, becomesSize, FRAME_W)) + Math.round(H * 0.008);
   const stack = (spec) => {
@@ -402,8 +276,6 @@ for (const b of beats) {
   }
 
   rows.push({ b, shot, place, lay, hasPic, start, dur,
-    // The share of the frame this box really covers: its width times its height. Not the shot's nominal
-    // size, because a region or a stated axis may have changed it.
     fill: shareOf(bw, bh, FRAME_W, FRAME_H),
     shotFill: shot.sx * shot.sy,
     sizedBy: reg && lay.fills ? 'the region' : lay.share.said ? 'the stated share' : 'shot',
@@ -411,11 +283,6 @@ for (const b of beats) {
     words: onScreenText(b.onscreen.join(' ')).split(/\s+/).filter(Boolean).length });
 }
 
-// ── spend what is left of the layer budget on the layout and style lines ───────────────────────────
-// `films/scene/schema.json` caps a scene at 120 layers, and the longest storyboard here already
-// builds 117. So these lines are fitted to the room that is left: both, or one line carrying both, or
-// neither and a loud line in the report saying where they went. A panel silently missing a field it was
-// asked to show is the failure this whole join exists to end.
 const LAYER_CAP = 120;
 const spend = (key) => extras.reduce((n, e) => n + e[key].length, 0);
 let extrasMode = 'full';
@@ -429,11 +296,6 @@ const scene = {
   aspect: ASPECT,
   duration: total,
   authoringNote: `PANELS of ${path.basename(SB)}: blocking only. Grey by design; judge WHERE things sit and HOW BIG they are, never the look.`,
-  // WAIVE ONLY CODES A GATE STILL EMITS, AND KEY THE REASON BY CODE. This block used to carry
-  // 'no-visual-vocabulary', which `waiver-drift.mjs:49-53` classifies as RETIRED, so every generated
-  // panel scene self-inflicted a DEAD WAIVER finding on the census the repo reads as evidence. Its
-  // `_why` was also keyed 'panels' rather than per-code, which is not the shape `author-check.mjs:74-80`
-  // requires, so these scenes would have failed the always-on half on their own waivers.
   authoring: (() => {
     const allow = ['dead-air', 'ends-on-nothing', 'plain-slideshow', 'no-continuous-object',
       'no-continuous-object-inferred', 'static-bg', 'overlap', 'contrast', 'safe'];
@@ -443,9 +305,6 @@ const scene = {
   layers,
   bg: [{ t: 0, preset: 'plain', from: 0, to: total }],
 };
-// The scene has to live inside the repo: the render server serves core/, themes/, films/, assets/
-// and .vawe-data/ only, so a scene written to /tmp boots to a 404. The pictures still go to /tmp; this
-// is scratch, gitignored, and overwritten every run.
 const SCENE_JSON = path.join('.vawe-data', 'scenes', `panels-${NAME}.json`);
 fs.mkdirSync(path.dirname(SCENE_JSON), { recursive: true });
 fs.writeFileSync(SCENE_JSON, JSON.stringify(scene, null, 2) + '\n');
@@ -461,8 +320,6 @@ for (const r of rows) {
 await page.close();
 
 const { tw, th } = tileBox(W >= H);
-// No tile label: the panel already carries its own slate, and drawing the beat name twice puts an
-// opaque box over the shot line the slate is there to show.
 const tiles = shots.map((f, i) => frameTile(f, 0, path.join(OUTDIR, `.tile-${i}.png`), { tw, th }));
 const SHEET = path.join(path.dirname(OUTDIR), `${NAME}.png`);
 tileGrid(tiles, { cols: Math.min(3, tiles.length), tw, th, out: SHEET });
@@ -483,9 +340,6 @@ for (const r of rows) {
     + `${r.words} word(s)${r.hasPic ? '' : '   NO PICTURE'}`);
 }
 
-// STYLE, BEAT BY BEAT, AS A COLUMN OF ITS OWN. The value of the field is the comparison: it exists so
-// that treatment is decided per beat instead of once for the whole film, and five lines stacked is the
-// only view in which "these are all the same" is obvious. Nothing grades the prose, and nothing should.
 console.log('\n  style, beat by beat. They should not all read alike:');
 for (const r of rows) {
   console.log(`  ${(r.b.i + 1 + '. ' + r.b.name).slice(0, 28).padEnd(30)}${r.b.style ? clip(r.b.style, 84) : 'not stated'}`);
@@ -514,9 +368,6 @@ if (noLay.length) console.log(`  ~ ${noLay.length} beat(s) state no \`layout:\`,
 if (unreadLay.length) console.log(`  ~ ${unreadLay.length} beat(s) state a \`layout:\` this reader found no region in: ${unreadLay.join(', ')}. Name a coarse region (a half, a third, a quarter) or a share of the frame, never coordinates.`);
 if (noShare.length) console.log(`  ~ ${noShare.length} beat(s) say WHERE the subject sits and not HOW MUCH of the frame it takes: ${noShare.join(', ')}. Their box is the size \`shot:\` gave it, so the mass on those panels is not your decision.`);
 for (const r of overflow) console.log(`  ~ ${r.b.name}: the shot fills ${pct(r.fill)} of the frame and \`layout:\` gives it ${pct(r.lay.region.area)}. The box on the panel overflows its own region, so one of the two lines is wrong.`);
-// A NAMED shot that `layout:` then resized is a decision overruled, and it must be said. Silent
-// substitution is the failure this repo has been bitten by most; a panel that quietly drew a third of
-// the frame where the plan said "extreme wide" would read as the plan agreeing with itself.
 for (const r of rows.filter((x) => x.sizedBy !== 'shot' && x.shot.why === 'named' && Math.abs(x.fill - x.shotFill) > 0.08)) {
   console.log(`  ~ ${r.b.name}: \`shot:\` says ${r.shot.kind} (${pct(r.shotFill)} of the frame) and \`layout:\` says ${pct(r.fill)}. The panel drew ${r.sizedBy}, because it is the more specific line. Settle the two.`);
 }

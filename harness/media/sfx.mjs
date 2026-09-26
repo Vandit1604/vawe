@@ -1,21 +1,4 @@
-// RETIRED: the sound library is SYNTHESIZED now (`make audio`, core/audio-kit.mjs). This fetcher is
-// kept only as a record of where the old recorded samples came from; it is wired to no make target.
-// It asked Mixkit for "the Nth ranked result in category X" and saved whatever came back, which is how
 // assets/sfx/click.wav ended up being 19.6 SECONDS of audio and stacking into a drone (MISTAKES #51).
-// Generating from math instead means: no licence, no network, byte-identical on every machine, and a
-// cue whose shape is a parameter you can reason about rather than a download you have to trust.
-// Fetch a curated, reusable sound-effects library into the gitignored assets/sfx/.
-// The Go audio mixer (internal/audio/audio.go) already places named cues at times derived
-// deterministically from a scene's cuts (-> whoosh) and stings (-> reveal); drop these WAVs in
-// and every non-silent scene gets scored automatically. No binary is committed (same policy as
-// fonts). Source: Mixkit Free License (free for commercial use, no attribution, no API key).
-//
-//   node harness/media/sfx.mjs           download any missing sounds
-//   node harness/media/sfx.mjs --force   redownload everything
-//
-// Each entry maps an ENGINE CUE NAME to a Mixkit category + which ranked result to take. Mixkit
-// orders categories by popularity, so a low index is a well-regarded sound. Chosen ids are pinned
-// to assets/sfx/credits.json so re-fetches are reproducible.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,7 +9,6 @@ const CREDITS = path.join(DEST, 'credits.json');
 const FORCE = process.argv.includes('--force');
 const UA = { 'User-Agent': 'Mozilla/5.0 (vawe sfx fetcher)' };
 
-// engine cue name -> { cat: Mixkit category slug, idx: which ranked result (0 = top) }
 const SFX = [
   ['whoosh',  'whoosh',     0],   // cuts (auto sound-design)
   ['reveal',  'transition', 0],   // stings (auto sound-design)
@@ -56,8 +38,6 @@ async function grab(name, cat, idx, pinned) {
   const dest = path.join(DEST, `${name}.wav`);
   if (!FORCE && fs.existsSync(dest) && fs.statSync(dest).size > 0) return { name, status: 'skip', id: pinned };
   try {
-    // candidate ids: the pinned one first, then the category's ranked list from idx onward
-    // (some Mixkit assets 403 at the predictable URL, fall through to the next good one).
     const ranked = await idsFor(cat);
     const cands = [pinned, ...ranked.slice(idx)].filter(Boolean);
     for (const id of cands) {

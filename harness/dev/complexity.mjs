@@ -1,18 +1,3 @@
-// harness/dev/complexity.mjs, where is this codebase hard to change?
-//
-//   node harness/dev/complexity.mjs                 # the worst 30 functions
-//   node harness/dev/complexity.mjs --all           # every function over the threshold
-//   node harness/dev/complexity.mjs --json          # machine-readable
-//   node harness/dev/complexity.mjs core/layers     # limit to a subtree
-//
-// Cyclomatic complexity counts the branches through a function: decision points plus one. It is the
-// minimum number of tests needed to touch every path, so it measures the SIZE OF THE JOB, not whether
-// the code reads well. A 30-case switch scores 31 and is easy to follow; a 4-branch function with bad
-// names scores 4 and is awful. Treat a high score as a question ("why does this branch so much?"),
-// never as a verdict.
-//
-// It parses with the TypeScript compiler already installed under site/node_modules, so there is no new
-// dependency and no regex guessing about what a brace means.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -43,8 +28,6 @@ const walk = (dir) => {
 };
 for (const r of SCAN) walk(path.join(ROOT, r));
 
-// Every construct below is a place control can take a different route. `else` is deliberately absent:
-// it is the path that already exists, so counting it would double every if.
 const BRANCH = new Set([
   ts.SyntaxKind.IfStatement, ts.SyntaxKind.CaseClause, ts.SyntaxKind.ForStatement,
   ts.SyntaxKind.ForInStatement, ts.SyntaxKind.ForOfStatement, ts.SyntaxKind.WhileStatement,
@@ -73,9 +56,6 @@ for (const file of files) {
   try { sf = ts.createSourceFile(file, fs.readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true); }
   catch { continue; }
 
-  // A nested function is its own unit and is measured on its own, so its branches are NOT charged to
-  // the parent. Charging them twice makes any file that uses a callback look catastrophic and hides
-  // the function that is genuinely tangled.
   const measure = (fn) => {
     let c = 1, depth = 0, maxDepth = 0;
     const visit = (n, d) => {

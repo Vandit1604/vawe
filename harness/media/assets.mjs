@@ -1,9 +1,3 @@
-// harness/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a
-// name but no real image: country → flag (flagcdn, public domain), brand → logo (simple-icons, free),
-// else → a generated topic card (scripts/cards.mjs). Rewrites the icon paths in place.
-//   node harness/media/assets.mjs films/scene/video.json            (dry run, prints the plan)
-//   node harness/media/assets.mjs films/scene/video.json --write    (fetch/generate + save JSON)
-//   flags:  --no-fetch (skip network, cards only) · --replace-emoji (also replace emoji icons)
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,19 +13,9 @@ const isImg = (v) => typeof v === 'string' && (/\.(svg|png|jpe?g|webp|gif)$/i.te
 const fmtDir = path.dirname(path.resolve(dataPath));            // films/<fmt>
 const cardsDir = path.join(fmtDir, 'assets', 'cards');         // per-format generated cards
 
-// common country → ISO2 (flagcdn). Extend as needed; unknown names fall through to a card.
 const COUNTRY = { 'united states': 'us', usa: 'us', america: 'us', 'united kingdom': 'gb', uk: 'gb', britain: 'gb', china: 'cn', india: 'in', japan: 'jp', germany: 'de', france: 'fr', italy: 'it', spain: 'es', russia: 'ru', brazil: 'br', canada: 'ca', australia: 'au', mexico: 'mx', indonesia: 'id', 'south korea': 'kr', korea: 'kr', turkey: 'tr', 'saudi arabia': 'sa', iran: 'ir', egypt: 'eg', nigeria: 'ng', ethiopia: 'et', pakistan: 'pk', bangladesh: 'bd', vietnam: 'vn', philippines: 'ph', greenland: 'gl', antarctica: 'aq', 'congo': 'cd', netherlands: 'nl', sweden: 'se', norway: 'no', poland: 'pl', argentina: 'ar', 'south africa': 'za', thailand: 'th', ukraine: 'ua', switzerland: 'ch', ireland: 'ie', portugal: 'pt', greece: 'gr', israel: 'il', uae: 'ae', singapore: 'sg', 'new zealand': 'nz' };
 
-// collect "slots": (object holding the icon, the name string, the icon field key)
-// BLOCKS THAT CANNOT HOLD A PICTURE. This walk collects any object carrying a `name` and calls it a
-// subject that wants an icon, which is right for a layer and wrong for a sound: an audio cue has a
-// `name` too, so a film that took CLAUDE.md 2a2 seriously and gave itself sound got a plan to draw
-// `whisper`, `press` and `droplet` as image cards, and `error` and `success` deduped against each
 // other seven times (engine-doctrine/MISTAKES.md #328). The better the film, the louder the false plan.
-//
-// A cue name resolves against assets/sfx/ and never against assets/cards/, so these subtrees are not
-// this tool's business at all. Named rather than inferred: guessing which blocks are visual from
-// their shape is what produced the bug.
 const NOT_VISUAL = new Set(['audio', 'captions', 'vo', 'voiceover', 'authoring']);
 
 function slots(o, acc = []) {
@@ -44,12 +28,6 @@ function slots(o, acc = []) {
   return acc;
 }
 
-// A DRY RUN MUST NOT WRITE. It still fetches, because the plan's accuracy depends on knowing whether
-// the icon actually exists upstream: "logo" and "card" are different rows and the caller is choosing
-// between them. What it must not do is put the file on disk.
-//
-// It used to. The word "PLAN (dry run)" was printed AFTER two write paths had already run, so every
-// `make video` downloaded icons and generated cards into films/scene/assets/, and a clean checkout
 // grew seven SVGs nobody asked for (engine-doctrine/MISTAKES.md #329). Only the final JSON edit was ever gated.
 async function tryFetch(url, dest) {
   if (NOFETCH) return false;

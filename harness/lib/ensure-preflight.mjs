@@ -1,10 +1,3 @@
-// ensure-preflight.mjs: the hidden prerequisite `make check`/`make ship` used to leave to memory.
-//
-// W11's audit named this directly: preflight is the nine decisions that belong BEFORE the JSON, and
-// it only ever ran if an author remembered to type it as its own step first. So `make check` and
-// `make ship` call this before the ladder now; it is silent when the receipt is fresh (the common
-// case, once preflight has actually run) and runs `make preflight` for you otherwise, the same way
-// `make dev` already writes contact sheets for you instead of leaving that a separate command.
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';

@@ -1,17 +1,3 @@
-// filmstrip.mjs, SEE a whole video efficiently: extract frames and pack them into a few dense,
-// timestamped contact sheets so the entire piece fits in a small token budget (vs. reading 2000+ raw
-// frames one by one, which is ~millions of tokens and mostly duplicate hold frames).
-//
-//   make filmstrip VIDEO=twitter.mp4                 # whole video, 2 fps, ~8-wide sheets
-//   make filmstrip VIDEO=ref.mp4 FPS=4 COLS=10       # denser (catches faster beats)
-//   make filmstrip VIDEO=ref.mp4 DEDUP=1             # drop near-identical holds (scene-change keyframes)
-//   make filmstrip VIDEO=ref.mp4 FROM=6 TO=9 FPS=12  # a window at high fps (enter/exit detail)
-//
-// Two sampling modes:
-//   • uniform (default): every 1/FPS s, full, even coverage of the whole timeline.
-//   • DEDUP=1: only frames where the picture CHANGES (ffmpeg scene score) + one per ~1s so long holds
-//     still show, fewer tiles, each meaningful (the whole story in the fewest images).
-// Each tile is timestamp-labelled. Prints how many sheets + a rough token estimate so the cost is known.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -36,7 +22,6 @@ const out = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_
 fs.rmSync(out, { recursive: true, force: true }); fs.mkdirSync(out, { recursive: true });
 const frames = path.join(out, 'f'); fs.mkdirSync(frames, { recursive: true });
 
-// select filter: dedup = scene-change OR ~1/s heartbeat; uniform = fixed fps.
 const clip = FROM != null && TO != null ? ['-ss', String(FROM), '-t', String(+TO - +FROM)] : [];
 const label = FROM != null ? `%{eif\\:${FROM}+t\\:f\\:2}s` : `%{pts\\:hms}`;
 const vf = DEDUP
@@ -48,7 +33,6 @@ if (ex.status !== 0) { console.error('ffmpeg failed:', (ex.stderr || '').toStrin
 const files = fs.readdirSync(frames).filter((f) => f.endsWith('.png')).sort();
 if (!files.length) { console.error('no frames extracted'); process.exit(1); }
 
-// tile into sheets of PER_SHEET, COLS wide
 const sheets = [];
 for (let i = 0; i < files.length; i += PER_SHEET) {
   const batch = files.slice(i, i + PER_SHEET);

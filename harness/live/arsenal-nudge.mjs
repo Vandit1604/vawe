@@ -1,30 +1,9 @@
 #!/usr/bin/env node
-// harness/live/arsenal-nudge.mjs - push toward `make arsenal` BEFORE a device gets hand-built.
-//
-// WHY. A real failure: an agent hand-built fake typing (word fades plus a static "|" caret) while the
-// arsenal already held `text` typing+caret, the `terminal` block, and `codeTyping`. Nothing asked it
-// to search first. `make arsenal Q="..."` already answers this; the gap was that nobody ran it.
-//
-// TWO ROLES, ONE FILE.
-//   PostToolUse/Bash: an arsenal search just ran. Log it (silently) so the second role can tell a
-//   fresh search from a stale one.
-//   PostToolUse/Edit|Write on a scene file OR a `core/` engine file: look at what THIS edit added. If
-//   it reads like a hand-built device (a CSS/HTML tell, a storyboard mechanism, or a newly named
-//   `core/` capability) with no recent matching search, name the search to run and the top few things
-//   it would find. Never blocks (exit 2 only carries the message, same contract as
-//   beat-surfacer.mjs/craft-live.mjs).
-//
-// THE ENGINE-PRIMITIVE GAP THIS CLOSED. A radial blur was nearly rebuilt from scratch on top of
-// `zoomBlur`, which already did it (core/resample/effects.js). The scene-file scan above never saw
-// this: it only watches `films/scene/`. The `core/` branch below is the same nudge, narrowed to a
-// NEWLY NAMED capability (a quoted registry entry or an `export function`/`export const`), never a
-// body edit to code that already exists, so touching an existing effect stays silent.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-// Overridable so the test suite can run against a scratch dir instead of the real runtime state.
 const DATA_DIR = process.env.ARSENAL_NUDGE_DATA_DIR || path.join(ROOT, '.vawe-data');
 const LOG = path.join(DATA_DIR, 'arsenal-log.jsonl');
 const STATE = path.join(DATA_DIR, 'arsenal-nudge-state.json');
@@ -32,21 +11,12 @@ const STATE = path.join(DATA_DIR, 'arsenal-nudge-state.json');
 const SEARCH_WINDOW_MS = 20 * 60 * 1000;
 const RATE_LIMIT_MS = 10 * 60 * 1000;
 
-// Hand-built device tells: the raw HTML/CSS an author reaches for INSTEAD of a registry name.
 const TELLS = ['caret', 'cursor', 'typing', 'glow', 'gradient', 'blur', 'ring', 'chip', 'progress',
   'spinner', 'marquee', 'ticker', 'parallax', 'tilt', 'counter', 'chart'];
 const TELL_RE = new RegExp(`\\b(${TELLS.join('|')})\\b`, 'gi');
 const FIELD_RE = /"(?:type|preset|anim|block)"\s*:\s*"([\w-]+)"/g;
 const STOPWORDS = new Set(['with', 'that', 'this', 'from', 'into', 'over', 'onto', 'then', 'while']);
 
-// A cursor's OWN vocabulary (`snapTo`/`clicks`/`styleAt`, aimed at a target layer id, recipes.json
-// "hover-click") already covers "arrive on a control and click it". The generic tell scan above
-// never catches an author who hand-types that arrival as pixel coordinates instead: `"type":
-// "cursor"` is itself a legitimate field value, so the word "cursor" gets cancelled as already-used
-// (see deviceWordsIn below) and a raw `"x": 820, "y": 400` reads as ordinary composition, not a
-// device tell. This is a second, NARROW check for exactly that one measured gap (3,831 hand-typed
-// `x` values across the library, zero uses of `snapTo`), not a second nudge mechanism: it shares the
-// same log, state and message shape as the generic path in handleEdit.
 const CURSOR_PATH_RE = /"type"\s*:\s*"cursor"[\s\S]{0,400}?"path"\s*:\s*\[\s*\{\s*"t"\s*:[\s\S]{0,80}?"x"\s*:\s*-?\d/;
 function handTypedCursorPath(text) {
   return CURSOR_PATH_RE.test(text)
@@ -96,22 +66,14 @@ function deviceWordsIn(rel, text) {
     return { words: [...words], used };
   }
 
-  // JSON layer type/preset/anim/block names: worth searching on too (an author who typed `"type":
-  // "text"` plus hand-rolled caret CSS still benefits from being told `codeTyping` exists), but they
-  // are also the "already used" signal, so they never themselves cause a nudge if a tell overlaps them.
   for (const m of text.matchAll(TELL_RE)) words.add(m[1].toLowerCase());
 
-  // Drop any tell that's already covered by a structured field the same edit wrote (e.g. `"type":
-  // "codeTyping"` covers the tell "typing").
   for (const w of [...words]) {
     if ([...used].some((u) => u.includes(w) || w.includes(u))) words.delete(w);
   }
   return { words: [...words], used };
 }
 
-// `core/` capability names: a quoted registry entry ('radialBlur') or an export declaration
-// (export function radialBlur). camelCase-split so a compound name still matches a bare TELL word
-// ("radialBlur" -> "radial", "blur"); a name with no tell word (clampCenter) never fires.
 const CORE_QUOTED_RE = /['"]([A-Za-z][A-Za-z0-9]*)['"]/g;
 const CORE_EXPORT_RE = /^export\s+(?:function|const|class)\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm;
 
@@ -147,9 +109,6 @@ function recentSearchOverlaps(words) {
  * nudge that already tells an author what to search for also hands them the doctrine directly, rather
  * than a second message an author has to go run `make arsenal` again to see. */
 function topNames(query) {
-  // 4s is a UX ceiling for the real keystroke hook; ARSENAL_NUDGE_TIMEOUT_MS overrides it for a
-  // resource-contended environment (many parallel test processes) where the subprocess itself is
-  // slow to schedule, not slow to answer.
   const timeout = Number(process.env.ARSENAL_NUDGE_TIMEOUT_MS) || 4000;
   const r = spawnSync('node', [path.join(ROOT, 'harness/author/arsenal.mjs'), query, '--json', '--n', '3'],
     { cwd: ROOT, encoding: 'utf8', timeout });
@@ -160,8 +119,6 @@ function topNames(query) {
   } catch { return []; }
 }
 
-// A CATALOGUE VIEW IS NOT A SEARCH FOR ANYTHING. These flags print a whole vocabulary, a census or a
-// sheet; none of them is evidence that the author asked about the thing they are now hand-building.
 const CATALOGUE_VIEW = /--(census|new|at|presets|theme|mistakes|shape|for)\b/;
 
 /**
@@ -178,8 +135,6 @@ export function queryOf(cmd) {
   const m = /Q="([^"]*)"/.exec(cmd) || /arsenal\.mjs\s+"([^"]*)"/.exec(cmd);
   if (m) return m[1].trim() || null;
   if (CATALOGUE_VIEW.test(cmd)) return null;
-  // The unquoted form the CLI also accepts (`arsenal.mjs cursor caret --n 3`). Same rule arsenal's own
-  // main() uses: drop every `--flag`, drop the value a value-taking flag consumes, keep the words.
   const after = /arsenal\.mjs\s+([^|;&>]*)/.exec(cmd);
   if (!after) return null;
   const args = after[1].trim().split(/\s+/).filter(Boolean);
@@ -211,11 +166,6 @@ function handleEdit(file, addedText) {
   const last = state[rel] || 0;
   if (Date.now() - last < RATE_LIMIT_MS) return;           // one nudge per file per 10 minutes
 
-  // A new engine primitive: same failure shape (radial blur nearly rebuilt on top of zoomBlur), a
-  // different vocabulary. `core/` names a capability as a quoted registry entry (`RESAMPLE_FX`'s
-  // `'zoomBlur'`) or an `export function`/`export const` declaration, never a CSS/HTML tell, so this
-  // is its own narrow scan: only a NEWLY NAMED capability whose name reads as a device tell, never a
-  // body edit to one that already exists (nothing quoted or exported: silent).
   if (isCore) {
     const words = coreDeviceWordsIn(addedText);
     if (!words.length) return;
@@ -229,7 +179,6 @@ function handleEdit(file, addedText) {
     process.exit(2);
   }
 
-  // Narrow cursor-path check first: fires before the generic scan below would cancel it out.
   if (isJson && handTypedCursorPath(addedText) && !recentSearchOverlaps(['cursor', 'snapto', 'hover-click'])) {
     const query = 'cursor target click';
     const names = topNames(query);
