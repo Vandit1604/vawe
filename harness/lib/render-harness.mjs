@@ -68,7 +68,13 @@ export async function waitForEngine(page, { timeout = 60000, throwOnTimeout = tr
   return await page.evaluate(() => (window.__engineError ? String(window.__engineError) : null));
 }
 
-const SUGAR_RE = /"type"\s*:\s*"(block|beat|comp)"/;
+// A `content` map ({{key}} placeholders in layer text/html/src) is sugar the browser boot page
+// cannot resolve either: `films/scene/scene.js` only lowers transitions, it never calls
+// `expandScene`/`resolveContentSlots` (that is an author-time step, core/engine/expand.js). Without
+// this, a plain film using only `content` (no block/beat/comp) fell through bootPathFor's "no sugar,
+// serve the raw file" branch and rendered its literal `{{key}}` text, in every tool that boots a
+// scene through this file (make dev, conform, audit, verify).
+const SUGAR_RE = /"type"\s*:\s*"(block|beat|comp)"|"content"\s*:/;
 
 /**
  * bootPathFor(root, rawText, expandedScene, relFile) -> the repo-relative path to `?data=` for THIS
