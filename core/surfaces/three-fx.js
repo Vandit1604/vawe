@@ -168,6 +168,40 @@ function environment(renderer, scene, colors) {
   for (const m of mats) m.dispose();
 }
 
+// GLASS wants a DIFFERENT room than metal/matte do, per-MATERIAL (`mesh.material.envMap`), not swapped
+// into `scene.environment` for everyone: `environment()`'s room is a flat mid-grey lit mostly by one
+// wide, bright ceiling panel, tuned so a highly reflective metal body never goes near-black
+// (MeshStandardMaterial's own comment above). Transmission reads that same wide-soft light from every
+// angle at once, so a smooth convex shape shows almost no facet contrast, no dark side, and a milky
+// near-uniform brightness across its whole surface: exactly the "plastic, not glass" symptom. Real
+// glass needs the opposite room: mostly DARK, so the body's transmission and clearcoat reflection have
+// somewhere to go black, one TIGHT bright patch for a sharp specular hit, and a SMALL saturated patch
+// off to one side so the grazing-angle fresnel edge picks up a colour instead of staying colourless.
+function glassEnvironment(renderer, colors) {
+  const t = T();
+  const room = new (t.Scene)();
+  const box = new (t.BoxGeometry)();
+  const mats = [];
+  const panel = (c, pos, scl) => {
+    const m = new (t.MeshBasicMaterial)({ color: hex(c, '#050607'), side: t.BackSide });
+    mats.push(m);
+    const mesh = new (t.Mesh)(box, m);
+    mesh.position.set(pos[0], pos[1], pos[2]);
+    mesh.scale.set(scl[0], scl[1], scl[2]);
+    room.add(mesh);
+  };
+  panel(colors?.[3] || colors?.[2] || '#0b0d10', [0, 0, 0], [20, 20, 20]);      // near-black room
+  panel('#ffffff', [0, 9.2, 1], [4, 0.2, 4]);                                  // a TIGHT hot softbox: a sharp hit, not a wash
+  panel(colors?.[0] || '#8fdcc8', [7, 0.5, -2], [0.2, 7, 7]);                  // the teal rim, one side only
+  panel(colors?.[1] || colors?.[3] || '#0c3f3c', [0, -9.2, 0], [16, 0.2, 16]); // a dark floor bounce, faintly toned
+  const pmrem = new (t.PMREMGenerator)(renderer);
+  const tex = pmrem.fromScene(room, 0.03).texture;
+  pmrem.dispose();
+  box.dispose();
+  for (const m of mats) m.dispose();
+  return tex;
+}
+
 function studio(renderer, scene, colors) {
   const ambient = new (T().AmbientLight)(0xffffff, 0.55); scene.add(ambient);
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
@@ -551,17 +585,28 @@ function geometryFor(g) {
 // its own header) is what a transmissive or metal surface reflects; nothing extra to wire here.
 // One builder per preset, dispatched off a table (the same shape as SVG_CMD above) rather than an
 // if-chain, so no single function carries every preset's own complexity.
+// `color` on a TRANSMISSIVE MeshPhysicalMaterial is not a highlight tint, three multiplies the
+// transmitted light by it directly, so a saturated `color` (the old default: the theme accent, same
+// as metal/matte's) paints every ray that passes through solid, and the body reads as opaque tinted
+// plastic no matter how high `transmission` is set. Real tinted glass gets its colour from the light's
+// own JOURNEY through the body instead: `attenuationColor` + `attenuationDistance` (Beer-Lambert
+// absorption over distance), which is why glass keeps `color` itself near white and tints there.
+const GLASS_WHITE = '#ffffff';
 const OBJECT_MATERIAL_BUILDERS = {
-  glass: (t, tint, m) => new t.MeshPhysicalMaterial({ color: tint, metalness: 0,
+  glass: (t, tint, m) => new t.MeshPhysicalMaterial({ color: hex(m.color, GLASS_WHITE), metalness: 0,
     roughness: m.roughness ?? 0.05, transmission: m.transmission ?? 1, thickness: m.thickness ?? 0.6,
-    ior: m.ior ?? 1.5, clearcoat: m.clearcoat ?? 1, clearcoatRoughness: 0.08, envMapIntensity: m.envMapIntensity ?? 1.2 }),
-  frostedGlass: (t, tint, m) => new t.MeshPhysicalMaterial({ color: tint, metalness: 0,
+    ior: m.ior ?? 1.5, clearcoat: m.clearcoat ?? 0.4, clearcoatRoughness: 0.08, envMapIntensity: m.envMapIntensity ?? 0.85,
+    attenuationColor: hex(m.attenuationColor, `#${tint.getHexString()}`), attenuationDistance: m.attenuationDistance ?? 1.1,
+    specularIntensity: m.specularIntensity ?? 1 }),
+  frostedGlass: (t, tint, m) => new t.MeshPhysicalMaterial({ color: hex(m.color, GLASS_WHITE), metalness: 0,
     roughness: m.roughness ?? 0.45, transmission: m.transmission ?? 0.9, thickness: m.thickness ?? 0.6,
-    ior: m.ior ?? 1.45, envMapIntensity: m.envMapIntensity ?? 1 }),
+    ior: m.ior ?? 1.45, envMapIntensity: m.envMapIntensity ?? 1,
+    attenuationColor: hex(m.attenuationColor, `#${tint.getHexString()}`), attenuationDistance: m.attenuationDistance ?? 0.9 }),
   metal: (t, tint, m) => new t.MeshStandardMaterial({ color: tint, metalness: m.metalness ?? 0.9, roughness: m.roughness ?? 0.3 }),
   matte: (t, tint, m) => new t.MeshStandardMaterial({ color: tint, metalness: 0, roughness: m.roughness ?? 0.85 }),
 };
 const OBJECT_MATERIAL_PRESETS = Object.keys(OBJECT_MATERIAL_BUILDERS);
+const GLASS_PRESETS = ['glass', 'frostedGlass'];
 function materialFor(m, colors) {
   m = m || {};
   const preset = m.preset ?? 'matte';
@@ -1165,9 +1210,40 @@ const SCENES = {
   // matte, env.image optionally replaces the studio room. Both the object's own pose and the camera's
   // orbit are keyed through motionAt, the identical sampler `L.motion` reads on every other layer type,
   // so `objectMotion`/`cameraMotion` use the same {t, x, y, z, rotX, rotY, rot, scale} keys and eases.
-  object(L, colors) {
+  object(L, colors, renderer, threeScene) {
     const grp = new (T().Group)();
-    const mesh = new (T().Mesh)(geometryFor(L.geometry), materialFor(L.material, colors));
+    const material = materialFor(L.material, colors);
+    const mesh = new (T().Mesh)(geometryFor(L.geometry), material);
+    // GLASS/frostedGlass get their OWN room (glassEnvironment above), assigned per-material rather
+    // than swapped into `scene.environment`: every other preset in this same scene (a matte ground, a
+    // metal accent) still wants `studio()`'s wide, bright room, and a shared `scene.environment` can
+    // only be one room at a time.
+    if (GLASS_PRESETS.includes(L.material?.preset) && renderer) {
+      material.envMap = glassEnvironment(renderer, colors);
+      material.needsUpdate = true;
+      // TRANSMISSION NEEDS SOMETHING TO SEE THROUGH TO. `transmission` samples the render BEHIND the
+      // object, and this scene's canvas is transparent (composited over the film's own HTML bg), so
+      // with nothing opaque back there the sampled "behind" is empty and the glass reads as a flat,
+      // near-uniform wash rather than something you can see through (measured: dropping transmission
+      // to 0.15 on the same rig shows the studio's own light/dark gradient just fine, so the rig is not
+      // the problem, the empty backdrop is). A plain unlit backdrop, added to the SCENE and not to
+      // `grp` (so it never spins with `objectMotion`), gives it real content to bend.
+      //
+      // OPAQUE, AND SMALL, ON PURPOSE. `transmission`'s own internal "what's behind" prepass renders
+      // opaque scene content only, so a `transparent: true` plane (tried first) is invisible to it,
+      // right back to the flat wash. Opaque solves that, but an opaque plane sized to fill the whole
+      // frustum paints every corner solid, which canvas-purity and this scene's own test hold every
+      // three layer to leaving transparent (a glass object composites over whatever else is in the
+      // frame, it does not own the frame). So: small enough to sit fully behind the object at every
+      // pose this scene keys, nothing more, real transparency everywhere outside that island.
+      if (threeScene && !threeScene.__glassBackdrop) {
+        const bg = new (T().Mesh)(new (T().PlaneGeometry)(7, 7),
+          new (T().MeshBasicMaterial)({ map: glassBackdrop(colors) }));
+        bg.position.z = -7.5;
+        threeScene.add(bg);
+        threeScene.__glassBackdrop = bg;
+      }
+    }
     // THE OFF ANGLE IT ARRIVES AT, the same idea deviceShowcase's YAW0/PITCH0 names: a flat extruded
     // face presented dead-on to the camera shows almost no fresnel edge or bevel highlight (transmission
     // near the normal is close to 100% straight-through, which is physically correct and reads as a
@@ -1215,6 +1291,28 @@ function shadowBlob() {
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 128, 128);
   return new (T().CanvasTexture)(c);
+}
+
+// glassBackdrop(colors): a dark scene with a soft teal light field, the real content a glass object's
+// `transmission` bends (see the note above `object()`'s glass branch). A radial gradient, not a flat
+// colour: transmission at grazing angles (the fresnel edge, low `ior` mismatch) shows almost none of it
+// and the object's own specular/env carries the read there, but dead centre a flat backdrop would
+// leave the body reading like a coloured window rather than a lit scene, so the field itself falls off
+// toward black the way a single soft key light would.
+function glassBackdrop(colors) {
+  const c = typeof document !== 'undefined' ? document.createElement('canvas') : null;
+  if (!c) return null;
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(58, 44, 2, 64, 64, 24);
+  g.addColorStop(0, colors?.[0] || '#8fdcc8');
+  g.addColorStop(0.45, colors?.[1] || colors?.[3] || '#0c3f3c');
+  g.addColorStop(1, '#000000');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  const tex = new (T().CanvasTexture)(c);
+  tex.colorSpace = T().SRGBColorSpace;
+  return tex;
 }
 
 // warmBackdrop(colors): the soft studio-floor gradient the reference clip sits its subject on, painted
@@ -1287,7 +1385,7 @@ export function createThreeLayer(w, h, L, colors) {
 
   const make = SCENES[L.three];
   if (!make) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);
-  const built = make(L, colors);
+  const built = make(L, colors, renderer, scene);
   scene.add(built.obj);
 
   // GROUNDING IS OPT-IN, per scene. `studio()`'s lights and room IBL are tuned for a METAL body
