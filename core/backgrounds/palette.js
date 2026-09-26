@@ -18,14 +18,16 @@ export const PAL = PAL_PLINTH; // back-compat
 
 // bgPaletteFrom(palette): build the background palette OUT OF the theme's own palette.
 //
-// WHY THIS EXISTS. The presets are palette-driven so that one colours-pack reskins every background,
-// and most themes in this repo hand-author a `bg` block to supply it. A theme that does not falls
-// through to `PAL_PLINTH` (one specific brand's blue), including `default`, the theme an author gets
-// when they declare nothing. Reaching for the defaults gave you another brand's colours (engine-doctrine/MISTAKES.md #352).
+// WHY THIS EXISTS. The presets are palette-driven so that one colours-pack reskins every background.
+// A theme with no readable palette (bg/text/accent missing) falls through to `PAL_PLINTH` (one
+// specific brand's blue). Reaching for that default gave you another brand's colours
+// (engine-doctrine/MISTAKES.md #352).
 //
-// Derived, not hand-written, because themes/default.json's own note says "Copy this file to start a
-// new brand kit". A second palette that must be kept in sync with the first is a palette that drifts.
-// A theme may still declare `bg` explicitly and it wins; this is only the floor.
+// THE ONLY SOURCE, not a floor under a hand-authored override any more: every shipped theme used to
+// carry its own `bg` block (a 15-key palette duplicating what this function already derives from
+// `tokens`/`roles`), which `core/theme/roles.js` now refuses outright (RETIRED_FIELDS). One owner of
+// this fact, derived from the palette every theme already carries, not a second one an author keeps
+// in sync by hand.
 const _rgb = (hex) => parseColor(hex) || [0, 0, 0];
 const _hex = ([r, g, b]) => '#' + [r, g, b].map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
 const _mix = (a, b, t) => { const x = _rgb(a), y = _rgb(b); return _hex(x.map((v, i) => v + (y[i] - v) * t)); };

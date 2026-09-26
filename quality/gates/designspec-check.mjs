@@ -24,7 +24,7 @@ import { population, LIBRARY, SCENE_DIR } from '../../harness/lib/census.mjs';
 import { RULES, runRules } from '../../harness/lib/designspec-rules.mjs';
 import { parseColorRGB, parseColor as parseColorEngine, colorAlpha } from '../../core/color/engine.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
@@ -111,7 +111,7 @@ if (typeof data.theme === 'string') {
   catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} is not valid JSON: ${e.message}`); process.exit(2); }
   // a theme on disk is a token file now (core/theme/tokens.js, core/theme/roles.js): expand it to the
   // palette/type/gradient shape this gate (and the rules it reads colours from) already know how to read.
-  try { theme = isTokenFile(raw) ? expandTheme(raw, { parseColor: parseColorEngine, colorAlpha }) : raw; }
+  try { theme = expandTheme(raw, { parseColor: parseColorEngine, colorAlpha }); }
   catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} failed to resolve: ${e.message}`); process.exit(2); }
 } else {
   theme = data.theme || {};
@@ -191,13 +191,10 @@ const KNOWN_VARS = (() => {
   } catch { /* ditto */ }
   return set;
 })();
-// ...plus the ones this scene defines for itself. `theme.vars` is a documented raw passthrough
-// (core/boot.js: `for (const [k, v] of Object.entries(theme.vars)) set(k, v)`), and it is where the vawe
-// theme defines --em, --paper, --muted, --border and --accent-soft. Reading only an INLINE theme object
-// missed all of them, because `data.theme` is normally the theme's NAME; the resolved theme file is what
-// has to be asked. Getting this wrong turns the lock into noise on five tokens that are perfectly real.
+// ...plus the ones this scene defines for itself. `theme.vars`, a free-form CSS custom-prop
+// passthrough, is retired (core/theme/roles.js RETIRED_FIELDS): every var a theme can set now comes
+// from a literal `set('--x', ...)` in core/engine/boot.js, already covered by the regex sweep above.
 const sceneVars = new Set();
-for (const k of Object.keys((theme && theme.vars) || {})) sceneVars.add(k);
 for (const l of flat) for (const k of Object.keys((l && l.vars) || {})) sceneVars.add(k);
 // `--t` and `--p` are written per frame by the html layer and background, not by the theme.
 for (const k of ['--t', '--p']) sceneVars.add(k);

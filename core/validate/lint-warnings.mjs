@@ -5,6 +5,7 @@ import { isObj } from './util.mjs';
 import { onScreenText, glyphText } from '../type/on-screen-text.js';
 import { mergePan } from '../timeline/pan-resolve.mjs';
 import { motionAt } from '../timeline/sequence.js';
+import { cameraTiltLeakErrors } from './camera.mjs';
 
 // The label the window, count and collision rules report a layer with. Three of the rules below share
 // it, so it is declared once here rather than inside each.
@@ -360,5 +361,6 @@ export function lintData(data) {
     ...sceneCollisionWarns(data),
     ...noAspectWarns(data),
     ...staggerTotalWarns(data),
+    ...cameraTiltLeakErrors(data),
   ];
 }

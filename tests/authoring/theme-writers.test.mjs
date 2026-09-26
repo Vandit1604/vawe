@@ -49,14 +49,14 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
       line: 'rgba(120,130,150,0.10)', lineStrong: 'rgba(120,130,150,0.22)',
       text: '#eef0f4', text2: '#a9aebb', dim: '#767c8a', ink: '#eef0f4',
       accent: '#e0922f', accentDim: 'rgba(224,146,47,0.16)', accentGlow: 'rgba(224,146,47,0.45)',
-      up: '#e0922f', down: '#d94f4f',
+      up: '#e0922f', down: '#d94f4f', onLight: '#eef0f4', onDark: '#0b0d12',
     },
     gradient: ['#0b0d12', '#11141b', '#171b24'],
     type: { sans: 'Hanken Grotesk', serif: 'Fraunces', mono: 'JetBrains Mono', num: 'JetBrains Mono' },
     motion: { easing: 'easeOutQuint', bounce: 0.05, settle: 0.6, enter: 40, durationScale: 1, stagger: 0.04 },
-    bg: { accent: '224,146,47', tint: '90,95,105', dark: ['#0b0d12', '#05060a'] },
-    bgDefault: { preset: 'deep' },
-    vars: { '--ink': '#eef0f4', '--paper': '#0b0d12', '--muted': '#a9aebb', '--em': '#e0922f' },
+    // `bg`/`vars` are retired (core/theme/roles.js RETIRED_FIELDS): buildTheme() no longer writes
+    // them, `onLight`/`onDark` fold into `palette` instead, and `bgDefault` moves under `look`.
+    look: { bgDefault: { preset: 'deep' } },
     invented: { tool: 'harness/author/invent-look.mjs', seed: 1, resolvedSeed: 7, subjectFingerprint: 123 },
   };
   const { next, ok, err } = migrateOne(invented);

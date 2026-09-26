@@ -696,6 +696,7 @@ test('lib-test: authoring', async () => {
     // MOVE SHAPES (core/motion/shapes.js). An author reaches these through `move: <shape>:<band>`,
     // so the plain question is about the FEELING of the travel, never the shape's name.
     ["a scroll that surges then gives up, the way a hand scrolls", "pan"], ["make a group of layers loop forever", "forever"],
+    ["this card's x position should copy another card's x position, like an after effects pick whip", "link"],
   ];
   {
     const top3 = (q, want) => { const qt = arsenalToks(q);
@@ -761,6 +762,8 @@ test('lib-test: authoring', async () => {
     ['drain the colour to grey', 'desaturate'],                                                           // adjustment
     ['a moving crimson and amber fire mesh gradient that drifts', 'ember'],                               // gradient recipe
     ['put content in the safe content column at any aspect ratio', 'stage'],                              // placement
+    ['make a layer jitter randomly forever, a seeded after effects wiggle expression', 'wiggle'],          // driver
+    ['make a layer’s x and y its centre point instead of its top-left corner', 'center'],             // anchor point
   ];
   {
     const inTop3 = (q, want) => { const qt = arsenalToks(q);

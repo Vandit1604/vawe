@@ -1,7 +1,7 @@
 {
-  "total": 728,
-  "previewed": 341,
-  "families": 62,
+  "total": 744,
+  "previewed": 345,
+  "families": 64,
   "tags": [
     [
       "asset",
@@ -45,7 +45,11 @@
     ],
     [
       "layer",
-      42
+      43
+    ],
+    [
+      "layout",
+      9
     ],
     [
       "motion key",
@@ -61,7 +65,7 @@
     ],
     [
       "per-layer",
-      92
+      96
     ],
     [
       "per-layer/scene",
@@ -97,7 +101,7 @@
     ],
     [
       "theme",
-      6
+      8
     ],
     [
       "timing",
@@ -1691,7 +1695,7 @@
         {
           "name": "svg",
           "stem": "layer-types--svg",
-          "desc": "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin)",
+          "desc": "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot",
           "scene": null,
           "noPreview": null
         },
@@ -1781,7 +1785,7 @@
       "mode": "table",
       "note": null,
       "noPreview": null,
-      "count": 12,
+      "count": 13,
       "undescribed": 0,
       "entries": [
         {
@@ -1848,6 +1852,13 @@
           "noPreview": null
         },
         {
+          "name": "object",
+          "stem": "three-js-scenes-real-geometry--object",
+          "desc": "a premium composed object · a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses",
+          "scene": "/assets/effects/three-js-scenes-real-geometry--object.json",
+          "noPreview": null
+        },
+        {
           "name": "pointCloud",
           "stem": "three-js-scenes-real-geometry--pointcloud",
           "desc": "a GPU point cloud · thousands of lit points posed absolutely from t",
@@ -1866,6 +1877,82 @@
           "stem": "three-js-scenes-real-geometry--uiparallax",
           "desc": "flat UI planes stacked at depth, the camera moving past them so the layers separate",
           "scene": "/assets/effects/three-js-scenes-real-geometry--uiparallax.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "anchor-points",
+      "title": "Anchor points",
+      "tag": "layout",
+      "intro": "`\"anchorPoint\": \"<name>\"` on a layer · which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "an anchor point is where a coordinate lands, not a look: see it on any layer with `w`/`h` set and `anchorPoint: \"center\"`.",
+      "count": 9,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bottom",
+          "stem": "anchor-points--bottom",
+          "desc": "x/y lands at 50% across the box and 100% down it · the bottom edge, horizontally centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-left",
+          "stem": "anchor-points--bottom-left",
+          "desc": "x/y lands at 0% across the box and 100% down it · the bottom-left corner",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-right",
+          "stem": "anchor-points--bottom-right",
+          "desc": "x/y lands at 100% across the box and 100% down it · the bottom-right corner",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "center",
+          "stem": "anchor-points--center",
+          "desc": "x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "left",
+          "stem": "anchor-points--left",
+          "desc": "x/y lands at 0% across the box and 50% down it · the left edge, vertically centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "right",
+          "stem": "anchor-points--right",
+          "desc": "x/y lands at 100% across the box and 50% down it · the right edge, vertically centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top",
+          "stem": "anchor-points--top",
+          "desc": "x/y lands at 50% across the box and 0% down it · the top edge, horizontally centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-left",
+          "stem": "anchor-points--top-left",
+          "desc": "the default (0% across, 0% down the box) · x/y is the top-left corner, unchanged from before this field existed",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-right",
+          "stem": "anchor-points--top-right",
+          "desc": "x/y lands at 100% across the box and 0% down it · the top-right corner",
+          "scene": null,
           "noPreview": null
         }
       ]
@@ -2568,6 +2655,40 @@
       ]
     },
     {
+      "id": "drivers-expressions-as-data",
+      "title": "Drivers (expressions as data)",
+      "tag": "per-layer",
+      "intro": "The `drive` field on a layer · AFTER EFFECTS EXPRESSIONS, written as data instead of code, resolved fresh every frame so a seek and a forward render always agree. `wiggle` is a seeded jitter on one property, `link` is the pick-whip (this property copies another layer's own animated value, with an optional delay), and `loop` repeats this layer's own keyframes past a point instead of holding on the last one. `{ \"drive\": { \"wiggle\": { \"prop\": \"rot\", \"freq\": 1.5, \"amp\": 2 } } }`",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 3,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "link",
+          "stem": "drivers-expressions-as-data--link",
+          "desc": "the PICK-WHIP · this property copies another layer's own animated value every frame, `mul`/`add` rescale it and `delay` (in seconds, 0.1 is a normal follow-through lag) shifts when it arrives",
+          "scene": "/assets/effects/drivers-expressions-as-data--link.json",
+          "noPreview": null
+        },
+        {
+          "name": "loop",
+          "stem": "drivers-expressions-as-data--loop",
+          "desc": "LOOP OUT · past `to` seconds this layer's own keyframes repeat forever, `cycle` restarts at `from` (0 by default), `pingpong` bounces between them, `continue` just holds the last key the way an unlooped track already does",
+          "scene": "/assets/effects/drivers-expressions-as-data--loop.json",
+          "noPreview": null
+        },
+        {
+          "name": "wiggle",
+          "stem": "drivers-expressions-as-data--wiggle",
+          "desc": "an AFTER EFFECTS EXPRESSION as data · deterministic seeded jitter on one property (x/y in px, rot in deg), default 2Hz at 10 units, reseed to decorrelate two layers so they never wobble in lockstep",
+          "scene": "/assets/effects/drivers-expressions-as-data--wiggle.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "effector-drives",
       "title": "Effector drives",
       "tag": "per-layer",
@@ -2982,7 +3103,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.",
-      "count": 14,
+      "count": 15,
       "undescribed": 0,
       "entries": [
         {
@@ -3016,7 +3137,7 @@
         {
           "name": "matte",
           "stem": "per-layer-modifiers--matte",
-          "desc": "a LUMA MATTE · another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box",
+          "desc": "a TRACK MATTE · another layer's luma or alpha becomes this layer's own alpha, white shows and black hides, and `-inverted` flips that. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box",
           "scene": null,
           "noPreview": null
         },
@@ -3045,6 +3166,13 @@
           "name": "progress",
           "stem": "per-layer-modifiers--progress",
           "desc": "hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "repeat",
+          "stem": "per-layer-modifiers--repeat",
+          "desc": "AE's Repeater · stamp the layer's own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy's own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time",
           "scene": null,
           "noPreview": null
         },
@@ -4484,17 +4612,31 @@
       "id": "theme-look-keys",
       "title": "Theme look keys",
       "tag": "theme",
-      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the six keys it accepts.",
+      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the eight keys it accepts.",
       "mode": "table",
       "note": null,
       "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
-      "count": 6,
+      "count": 8,
       "undescribed": 0,
       "entries": [
         {
           "name": "backdrop",
           "stem": "theme-look-keys--backdrop",
           "desc": "ordered bg preset names the brand turns through, one window per beat · planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bgDefault",
+          "stem": "theme-look-keys--bgdefault",
+          "desc": "a bg preset spec (or an array of 2+, a rotation) the theme paints when a beat opts in with `bg:[{\"use\":\"theme\"}]`; the one look key actually read at render time",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bgPalette",
+          "stem": "theme-look-keys--bgpalette",
+          "desc": "the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme's own palette when absent",
           "scene": null,
           "noPreview": null
         },

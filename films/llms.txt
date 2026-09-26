@@ -51,7 +51,7 @@ cannot go stale). Everything else in the vocabulary below is a dial ON one of th
 - `rect`: a plain box, panel, card or pill. it carries no text: put that on a higher track WHEN: a plain box, panel, divider or accent bar with no text of its own.
 - `glow`: soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) WHEN: a light source or a soft halo is the point of the layer, not a decoration on top of one.
 - `beam`: a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe WHEN: light travelling a border or sweeping a box; the traced-outline look no CSS animation can seek.
-- `svg`: a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) WHEN: a vector mark (a logo, an icon path) that should draw itself on or morph, not just fade in.
+- `svg`: a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot WHEN: a vector mark (a logo, an icon path) that should draw itself on or morph, not just fade in.
 - `cursor`: a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`) WHEN: the beat IS a product demo; this is the one primitive built to drive a click-through.
 - `clip`: a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders WHEN: footage came in as a frame sequence (PNG/WebP), not a video file, and must stay seek-exact.
 - `html`: raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock WHEN: the surface does not exist yet and CSS genuinely expresses it faster than composing primitives; see engine-doctrine/CRAFT/HTML-FRAGMENTS.md before hand-writing one.
@@ -72,8 +72,8 @@ Full props per type: `films/scene/schema.json`. What each type is FOR, in prose:
 
 ## The vocabulary: effect families
 
-Do not try to memorise all 926 named things the engine can do; reach for them by family, then
-search within the family. Each of these 58 families is a dial you put ON a layer, a cut,
+Do not try to memorise all 942 named things the engine can do; reach for them by family, then
+search within the family. Each of these 60 families is a dial you put ON a layer, a cut,
 the camera, or the scene:
 
 - **Drawn icons** (16, `asset`): `svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists.
@@ -95,7 +95,8 @@ the camera, or the scene:
 - **Lightfield shadow directions** (11, `generator`): Which way "away" is: the bearing the light falls off along.
 - **Glow presets** (7, `glow layer`): `preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text.
 - **Raymarched surfaces** (6, `layer`): `{ "type":"raymarch", "raymarch":"<name>" }`.
-- **three.js scenes (real geometry)** (12, `layer`): `{ "type":"three", "three":"<name>" }`.
+- **three.js scenes (real geometry)** (13, `layer`): `{ "type":"three", "three":"<name>" }`.
+- **Anchor points** (9, `layout`): `"anchorPoint": "<name>"` on a layer: which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner.
 - **Interpolation modes (not easings)** (1, `motion key`): On a `motion` key's `ease`, but NOT a curve.
 - **Keyframe handles (the graph editor)** (5, `motion key`): On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles.
 - **Particles presets** (3, `particles layer`): `preset` on a `particles` layer picks the emitter: `{ "type":"particles", "preset":"confetti" }`.
@@ -106,13 +107,14 @@ the camera, or the scene:
 - **Blend modes** (17, `per-layer`): `mixBlend`: how a layer composites with what is already painted beneath it.
 - **Cursor styles** (4, `per-layer`): What shape a `cursor` layer draws (`"style": "hand"`), and how it can change mid-move (`styleAt`).
 - **Depths (parallax planes)** (4, `per-layer`): `{ "depth": "back" }` on any layer.
+- **Drivers (expressions as data)** (3, `per-layer`): The `drive` field on a layer: AFTER EFFECTS EXPRESSIONS, written as data instead of code, resolved fresh every frame so a seek and a forward render always agree.
 - **Effector drives** (6, `per-layer`): What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence.
 - **Effector falloffs** (4, `per-layer`): A FALLOFF FROM A TRAVELLING POINT, driving the layer's own children.
 - **Enter / exit anims** (19, `per-layer`): `anim` (enter) + `out` (exit) on any layer.
 - **Move shapes (measured keyframe tracks)** (5, `per-layer`): A storyboard's `move: <shape>:<band>` (harness/lib/contract.mjs, scope LAYER: a sustained track on the beat's own layer, never a one-shot entrance), or a hand-keyed `motion` built directly: `node harness/author/track.mjs pan --dur 1.25 --to -600`.
 - **Part entrances** (9, `per-layer`): THE BRIDGE between hand-written markup and the engine's clock.
 - **Path curves (SVG "d" generators)** (4, `per-layer`): A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: flies the beat's own layer along the curve, MotionPathPlugin), or `modifiers: [{ alongPath: { curve } }]` (core/fx/along-path.js) to set a line of type on it instead of moving a whole layer.
-- **Per-layer modifiers** (14, `per-layer`): `"modifiers"` on a layer, applied in array order after every motion track.
+- **Per-layer modifiers** (15, `per-layer`): `"modifiers"` on a layer, applied in array order after every motion track.
 - **Idles (ambient hold motion)** (3, `per-layer/scene`): `idle` on a layer, or scene-level `idle` for the whole cast.
 - **GSAP named effects** (30, `per-layer/text`): `fx` on a layer, pair with `anim:"none"` so GSAP owns the transform.
 - **Placement** (20, `pin`): `"pin": "<name>"` on a layer or a caption.
@@ -125,7 +127,7 @@ the camera, or the scene:
 - **Scramble charsets (`chars`)** (7, `text`): What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "presetOpts": { "chars":"numbers", "rate":48, "revealDelay":0.25 } }`.
 - **Font-variation axes** (4, `text track`): A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`.
 - **Stagger order (`from`)** (6, `text/parts`): The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`.
-- **Theme look keys** (6, `theme`): A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md).
+- **Theme look keys** (8, `theme`): A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md).
 - **Easings** (46, `timing`): `ease` on a motion key, a count, a camera leg.
 - **Group clock loop shapes** (2, `timing`): The `loop` field of a group's `clock`.
 - **Time remaps (the layer's own clock)** (4, `timing`): `timeRemap` on a layer.
@@ -136,7 +138,7 @@ the camera, or the scene:
 - **Transition relationships** (9, `transition`): Name the RELATIONSHIP between two beats first, then pick from its candidates, per engine-doctrine/CRAFT/TRANSITIONS.md's decision procedure.
 
 **Discovery, not memorisation:** `make arsenal Q="a page scrolling under a static tilt"` searches all
-926 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
+942 named things (layer types, every family above, recipes, blocks, sound cues) by plain-English
 description and returns the exact key to write. `make arsenal AT="layers[].motion[]"` answers the other
 half: what fields are legal to write at one JSON path, read live off `films/scene/schema.json`.
 
@@ -165,7 +167,7 @@ make judge D=films/scene/x.json   # the one step that SEES: composition and fide
 
 ## Discovery
 
-- `make arsenal Q="<what you mean, in plain english>"` searches all 926 named things at once and
+- `make arsenal Q="<what you mean, in plain english>"` searches all 942 named things at once and
   prints the JSON key that means it.
 - `make arsenal AT="<json path>"` answers what is legal to write at that path, with every field's type.
 - `make list` shows the scene module's schema and a sample scene end to end.

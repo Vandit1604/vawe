@@ -14,7 +14,7 @@
 import {
   TOKENS, HAIR, r2, seriesAt,
   R, TYPE, SPACE, SHADOW_CARD,
-  capCss, labelCss, numCss, needData,
+  capCss, labelCss, numCss, needData, needShape,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a name-to-category table in sync by hand.
@@ -246,6 +246,7 @@ export function morphText({ x, y, w = 900, words = [], size = TYPE.display, hold
 export function uiReveal3d({ x, y, w = 680, items = [], rowH = 76, gap = SPACE.xs, tilt = 72,
   depth = 260, stagger = 0.55, start = 0, dur = 4.5 } = {}) {
   needData('items', items, 'uiReveal3d');
+  needShape('uiReveal3d', 'items', items, ['label']);
   const n = items.length;
   // The window each row occupies inside 0..1. At `stagger` 0 every row lands together; at 1 they are
   // strictly sequential with no overlap.

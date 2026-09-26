@@ -57,6 +57,7 @@ const EXCLUDE = [
   ['site/', 'a Next app with its own design system, entered through site/CLAUDE.md, not through film doctrine'],
   ['node_modules/', 'dependencies'],
   ['.venv-tools/', 'dependencies'],
+  ['tests/fixtures/', 'test fixtures, not repo doctrine'],
 ];
 const EXCLUDE_SUFFIX = [
   ['.storyboard.md', 'a per-video artifact, not guidance'],

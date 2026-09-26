@@ -89,10 +89,17 @@ export function isPlaceholderSurface(c) {
 
 // ── acts: storyboard beats first, the film's own recipe joints otherwise, never invented ────────────
 
-function actsFromStoryboard(src) {
+export function actsFromStoryboard(src) {
   return parseStoryboard(src).beats
     .filter((b) => typeof b.start === 'number' && typeof b.end === 'number' && b.end > b.start)
     .map((b) => ({ start: b.start, end: b.end, label: b.name }));
+}
+
+/** findStoryboard(filmPath, slug, root): the one place that guesses where a film's storyboard sidecar
+ *  lives, so content-check and match (harness/media/match.mjs) can't drift on the two candidate paths. */
+export function findStoryboard(filmPath, slug, root) {
+  return [filmPath.replace(/\.json$/, '.storyboard.md'), path.join(root, 'films/scene', `${slug}.storyboard.md`)]
+    .find((f) => fs.existsSync(f)) || null;
 }
 
 function actsFromRecipes(sceneFile) {
@@ -132,8 +139,7 @@ if (isMain) {
     die(`grammar/${refName}.json has no content on ${missingRefContent.length} shot(s). Re-run `
       + `\`node harness/media/study.mjs <clip> ${refName} --content-only\` first.`);
 
-  const sbPath = [filmPath.replace(/\.json$/, '.storyboard.md'), path.join(ROOT, 'films/scene', `${slug}.storyboard.md`)]
-    .find((f) => fs.existsSync(f));
+  const sbPath = findStoryboard(filmPath, slug, ROOT);
   let acts = sbPath ? actsFromStoryboard(fs.readFileSync(sbPath, 'utf8')) : null;
   let actsSource = sbPath ? `storyboard beats (${sbPath.replace(ROOT + '/', '')})` : null;
   if (!acts && fs.existsSync(filmPath)) { acts = actsFromRecipes(filmPath); actsSource = acts ? 'the film\'s own recipes[] joints' : null; }

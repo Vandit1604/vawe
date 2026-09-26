@@ -12,7 +12,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import puppeteer from 'puppeteer';
 import { serveRepo } from '../../harness/lib/render-harness.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -25,7 +25,7 @@ let bg = '#0a0a0c';
 const themePath = path.join(ROOT, 'themes', themeName + '.json');
 if (fs.existsSync(themePath)) {
   const raw = JSON.parse(fs.readFileSync(themePath, 'utf8'));
-  bg = (isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw).palette.bg; // no per-brand theme yet: keep the default bg
+  bg = expandTheme(raw, { parseColor, colorAlpha }).palette.bg; // no per-brand theme yet: keep the default bg
 }
 
 const dir = path.join(ROOT, 'assets/brands', brand, 'components');

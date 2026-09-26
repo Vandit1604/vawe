@@ -51,9 +51,13 @@ catch (e) { console.error(`✗ ${file} is not valid JSON: ${e.message}`); proces
 if (check) {
   const r = readReceipt(STAGE, abs);
   if (r.exists && !r.stale) { console.log(`  ✓ preflight ran for this version (${r.rel}).`); process.exit(0); }
+  // The CONSEQUENCE used to live only in the console.log lines below, never in the finding's own
+  // `summary`, so a consumer that reads the JSON record (author-check, this gate's own --json, any
+  // future tool) saw a bare fact ("never been through the chain") with no reason to act on it. Stated
+  // here instead, once, so it travels with the record.
   const why = r.stale
-    ? `the scene has CHANGED since the preflight was run. The decisions were made against an older cut of this film.`
-    : `this scene has never been through the decision chain.`;
+    ? `the scene has CHANGED since the preflight was run: the decisions on record were made against an older cut of this film, so a beat, an effect or a colour choice may no longer answer what is actually on screen now. Re-run \`make preflight D=${file}\`.`
+    : `this scene has never been through the decision chain: nothing here proves the nine decisions in engine-doctrine/CRAFT/README.md (beats, anchor, per-beat effect, type/colour/layout, density, restraint, sound) were made before this JSON existed, which is how a film ends up composed of whatever the author happened to remember. Run \`make preflight D=${file}\`.`;
   const F = gateFindings({ scene: file, indent: '  ' });
   F.fail('no-preflight', why, { fix: `make preflight D=${file}`, doc: 'engine-doctrine/CRAFT/README.md' });
   F.emit();

@@ -10,6 +10,7 @@
    "align",
    "align2",
    "anchor",
+   "anchorPoint",
    "angle",
    "anim",
    "anticipate",
@@ -45,6 +46,7 @@
    "dir",
    "direction",
    "dist",
+   "drive",
    "duration",
    "dx",
    "dy",
@@ -129,6 +131,7 @@
    "timeWarp",
    "track",
    "tracking",
+   "trim",
    "type",
    "typing",
    "vars",
@@ -388,6 +391,7 @@
     "bodyColor",
     "breakAt",
     "breakDur",
+    "cameraMotion",
     "colors",
     "count",
     "dawnWidth",
@@ -397,13 +401,17 @@
     "dolly",
     "drawDur",
     "drawStart",
+    "env",
     "font",
     "fov",
+    "geometry",
     "h",
     "lines",
+    "material",
     "metalness",
     "morphSpeed",
     "motionBlur",
+    "objectMotion",
     "origin",
     "pitch",
     "planes",
@@ -481,6 +489,7 @@
    ],
    "adjust": [
     "amount",
+    "blend",
     "filter",
     "kind"
    ]
@@ -1047,6 +1056,10 @@
     }
    }
   },
+  "content": {
+   "type": "object",
+   "label": "A flat {key: value} map. `{{key}}` inside any layer's `text`/`html`/`src` (at any nesting depth) is replaced by `content[key]` at build (core/engine/expand.js resolveContentSlots), so swapping copy or an asset path for a new customer/language/version is one map edited once. An unknown `{{key}}` is refused by name, both at `make validate` and at build."
+  },
   "cameraMove": {
    "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom | followCursor | followLayer. `followCursor` is the one move that is DERIVED rather than typed: give it `\"cursor\": \"<layer id>\"` and it reads that cursor layer's own `path` and `clicks`, pushes toward each press, arrives just before it, holds, then releases, so the pointer stays the single owner of where the camera goes. `followLayer` tracks a layer's live box by id (`\"id\": \"<layer>\"`) instead of a fixed point, and resolves onto `cameraFollow`, not `camera`. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves/index.js is the source of truth, and lib-test asserts the two agree. CAMERA BY ELEMENT: a diveIn, or any travel station, may name `\"target\": \"#<layer id>\"` instead of hand-typing `tx`/`ty`(/`to`): bakeCameraMove (core/engine/produce.js) resolves it once off the layer's own authored box (needs numeric x/y and a declared w/h or size), computes the largest scale that keeps the box plus an optional `margin` (fraction of the frame, default 0.06) inside the canvas, and prints the resolved numbers. Raw `tx`/`ty` on the same spec win and the target is dropped. `{\"move\":\"diveIn\",\"target\":\"#cta\",\"margin\":0.1}`.  A single leg may also declare `\"beats\": [\"<id>\", ...]` naming every `beats[]` id (below) it spans, when the move continues across a beat seam; core/engine/produce.js reports (never blocks) a move whose resolved window runs outside the beats it declares."
   },
@@ -1422,6 +1435,21 @@
      "type": "number|string",
      "label": "Height: px number or \"50%\" of canvas"
     },
+    "anchorPoint": {
+     "type": "string",
+     "label": "Which point of THIS LAYER'S OWN box x/y names. Default (absent) is the box's top-left corner, unchanged. \"center\" makes x/y the box's centre; needs a numeric w for a centre/right x, and a numeric h (or a text layer's `size`, estimated) for a centre/bottom y.",
+     "enum": [
+      "top-left",
+      "top",
+      "top-right",
+      "left",
+      "center",
+      "right",
+      "bottom-left",
+      "bottom",
+      "bottom-right"
+     ]
+    },
     "pin": {
      "type": "string",
      "label": "Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds power point",
@@ -1720,6 +1748,10 @@
      "type": "object",
      "label": "text layer TextMorph: letters migrate `text`->word { to, dur, ease } (needs w+align:center, GSAP). svg layer shape-morph: one path melts into another { to, dur, spin, points, closed }."
     },
+    "trim": {
+     "type": "object",
+     "label": "AE Trim Paths on any SVG path/stroke element: { start, end, offset }, each a fraction 0..1 of the path's real length (getTotalLength()). `start`/`end` pick the revealed segment; `offset` slides that segment around the path, wrapping on a closed loop, without changing its length. Each of the three is independently KEYFRAMABLE by naming `trimStart`/`trimEnd`/`trimOffset` in this layer's own `motion` array, composing with x/y/rot and riding the same per-segment ease (core/tracks/trim.js). Targets `el.__svgPath` (the svg layer's own path) or the first path-like SVG geometry found inside the layer."
+    },
     "fx": {
      "type": "string|object|array",
      "label": "Named GSAP effect(s) from core/engine/gsap-effects.js: zoomBlur | {name,dur,ease} | [blurIn,float]. Entrances (zoomBlur/elasticIn/blurIn/spinIn/flipInX/bounceIn/clipUp/maskReveal/revealUp/expandIn/tiltIn/driftIn/glitchIn/foldIn), per-letter text (charFold/charTilt/charBlurCascade/charOvershoot, on split layers), loops (float/pulse/breathe/wobble). Pair with anim:none. There is no `fxOut`: the named GSAP exit family measured zero users and was deleted whole (engine-doctrine/MISTAKES.md #364); use `out` for an exit."
@@ -1757,7 +1789,7 @@
       },
       "matte": {
        "type": "string|object",
-       "label": "A LUMA MATTE: another layer's brightness becomes this layer's alpha, white showing and black hiding. \"sweepId\", or { from: \"sweepId\", mode: \"luminance\" | \"alpha\" }. The general case of the whole wipe family, and the matte MOVES: it is placed and sized from the source layer's live box, so a source with a motion track drags its shape across this layer. The source must PAINT AN IMAGE, because a CSS mask takes an image and a browser cannot read one live element's pixels as another's alpha: an `image` or `svg` layer's file, or a `rect` / `html` layer whose `bg` is a gradient. A paint / shader / three layer draws into a canvas and is refused by name. Needs an `id` on this layer, and refuses alongside `mask` / `progressiveBlur`, which write the same property."
+       "label": "A TRACK MATTE: another layer's luma or alpha becomes this layer's own alpha, white showing and black hiding. \"sweepId\", or { layer: \"sweepId\", mode: \"luma\" | \"luma-inverted\" | \"alpha\" | \"alpha-inverted\" }. `from` is accepted as a synonym of `layer`. `-inverted` flips which side shows (After Effects' Invert box), built from a second full-frame opaque mask XORed against the first (`mask-composite: exclude`), never a private inversion path. The general case of the whole wipe family, and the matte MOVES: it is placed and sized from the source layer's live box, so a source with a motion track drags its shape across this layer; animate the matte layer's own motion track and the reveal animates too. The source must PAINT AN IMAGE, because a CSS mask takes an image and a browser cannot read one live element's pixels as another's alpha: an `image` or `svg` layer's file, or a `rect` / `html` layer whose `bg` is a gradient. A paint / shader / three layer draws into a canvas and is refused by name. The matte layer itself stays out of the shot the ordinary way, `opacity: 0` on it; nothing here reads its rendered pixels. Needs an `id` on this layer, and refuses alongside `mask` / `progressiveBlur`, which write the same property."
       },
       "lag": {
        "type": "string|object",
@@ -1802,12 +1834,16 @@
       "wordSlot": {
        "type": "array|object",
        "label": "One word of this layer's sentence swaps for the next while NOTHING after it reflows: { words: [\"docs\", \"dashboards\"], every: 1.1, swap: 0.26, chip: true, loop: false, at: \"{}\", delay: 0, rise: 0.42 }. The layer's own text carries the placeholder (\"Ship {} in seconds\"). Every candidate sits in the SAME grid cell, so the slot is auto-sized by layout to the WIDEST of them from the first frame, with no measurement and no font metric. `chip: true` gives it the accent plate with `--on-accent` ink, which is where the brand colour belongs. Refused with `split`, which would drive the same spans from a second clock, and refused with fewer than two words."
+      },
+      "repeat": {
+       "type": "object",
+       "label": "AE's Repeater: stamp this layer's OWN content { copies, offset: { x, y, rot, scale, opacity }, stagger, from }. `copies` (1..64) deep-clones the layer's built content into that many sibling cells. Each copy's transform ACCUMULATES from `offset` by its signed step `k` (translate x*k/y*k, rotate rot*k, scale compounding as scale^|k|, never scale*k); `offset.opacity` is AE's Start/End opacity, lerped across the ABSOLUTE copy index so the far end of the pattern fades regardless of `from`. `from` picks which copy is the unmoved origin: \"start\" (default, k=i), \"end\" (the last copy, k=i-(copies-1)), \"center\" (the middle copy, fans out both ways). `stagger` (seconds, default 0) delays each copy's own fade-in entrance, composing with whatever the LAYER's own `motion` is already doing, since every cell inherits the layer element's transform as its parent."
       }
      }
     },
     "motionPath": {
      "type": "object",
-     "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
+     "label": "Fly ANY layer along a path, and turn it to face the way it travels (GSAP MotionPathPlugin, AE's motion path + auto-orient): { path:'M0,0 C...' (or `d`, or `points`: an array of {x,y}, beziered by `curviness`), align, autoOrient: true|false, orientOffset (deg, an offset added while auto-orienting), curviness, from, to (0-1, which stretch of the path this tween crosses), dur, ease, delay }. `autoRotate` (GSAP's own name) still works underneath. Deterministic (closed-form position per frame)."
     },
     "physics": {
      "type": "object",
@@ -1876,6 +1912,10 @@
      "type": "string",
      "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/\u2026 core/looks/index.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
     },
+    "blend": {
+     "type": "string",
+     "label": "mix-blend-mode for a RAW `filter` on an adjust layer, e.g. \"screen\" for a bloom pass built from a blurred brightness copy. A named `kind` (bloom/blur/desaturate/\u2026) already carries its own blend by default; state this only when writing `filter` directly with no `kind` to hang it on. core/layers/adjust.js."
+    },
     "mask": {
      "type": "string",
      "label": "CSS mask-image"
@@ -1911,6 +1951,10 @@
     "follow": {
      "type": "object",
      "label": "Pin this layer to another layer's LIVE box, every frame: { id, edge, gap, dx, dy, from, to }. `anchor` places against the canvas and `becomes` hands one pose to another, and both resolve ONCE at build against numbers; neither can keep a label under a card that is moving, because the card's position after its motion track is only known at t. edge is center (default) \u00b7 above \u00b7 below \u00b7 left \u00b7 right, and `gap` is the space outside that edge. Centres are matched, not corners. `from`/`to` (seconds, optional) window the pin to that span of the film's clock; outside it this is a no-op. The pin lands BEFORE this layer's own motion track, so the follower may still have choreography of its own and it plays about the pinned position. This layer needs an `id` (it is placed by its own measured size). Following a layer that is itself following a third pins you to the middle one's UNPINNED position."
+    },
+    "drive": {
+     "type": "object",
+     "label": "AFTER EFFECTS EXPRESSIONS, as data, resolved fresh every frame. { wiggle, link, loop }. `wiggle`: { prop: x|y|rot, freq (Hz), amp (px or deg), seed, octaves } is deterministic seeded jitter. `link`: { from: \"<layerId>.<prop>\", mul, add, delay } is the pick-whip, this property copies another layer's own animated value, delayed (seconds) for follow-through; a link cycle is refused by name. `loop`: { mode: cycle|pingpong|continue, from, to } repeats this layer's OWN keyframes past `to` seconds instead of holding on the last one. `wiggle`/`link` take one spec or an array. `make arsenal Q=\"wiggle expression\"` lists them."
     },
     "style": {
      "type": "string",
@@ -2206,9 +2250,12 @@
        "type": "number",
        "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
       },
+      "trimStart": { "type": "number", "label": "AE Trim Paths `start` (fraction 0..1 of the path) at this key. Both endpoints of a segment must state it, or neither does (see `ox`); falls back to the layer's static `trim.start` otherwise." },
+      "trimEnd": { "type": "number", "label": "AE Trim Paths `end` (fraction 0..1 of the path) at this key. Same both-endpoints rule as `trimStart`." },
+      "trimOffset": { "type": "number", "label": "AE Trim Paths `offset`: slides the revealed start/end segment around the path (wrapping on a closed loop) without changing its length. Same both-endpoints rule as `trimStart`." },
       "ease": {
-       "type": "string",
-       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff). ONE curve for the whole segment INTO this key. To draw the curve yourself, per side, use `easeOut` on the key before and `easeIn` here."
+       "type": "string|object",
+       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff), ONE curve for the whole segment INTO this key; or a per-PROPERTY map (Separate Dimensions) so x and y on the same keys travel different curves, e.g. { \"x\": \"linear\", \"y\": \"easeOutCubic\" }. A map entry may also be { \"easeIn\": handle, \"easeOut\": handle } for that ONE property, symmetric with the whole-segment `easeOut`/`easeIn` below. A property the map omits still uses the segment's own curve. To draw the whole segment yourself, per side, use `easeOut` on the key before and `easeIn` here."
       },
       "easeOut": {
        "label": "THE HANDLE LEAVING THIS KEY, a graph-editor control point for the segment that STARTS here. A handle NAME from the keyframe-handle registry (see `make arsenal`), or { \"influence\": 0-100, \"speed\": a number }. `influence` is how far along the segment the handle reaches, as a PER CENT of its duration. `speed` is how fast the value is moving AT this key, as a MULTIPLE of the segment's own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out. A multiple and not px/sec, so ONE handle pair is correct for x, scale and rot at once and a property that does not change is not a division by zero. The far side of the segment is `easeIn` on the next key; a side that says nothing is the straight line. REFUSED beside `ease` on the same segment or `ease: \"through\"` on the same key: two answers to one question."
@@ -2570,7 +2617,8 @@
       "codeExtrude",
       "codeDissolve",
       "codeAssemble",
-      "litPlane"
+      "litPlane",
+      "object"
      ]
     },
     "lines": {
@@ -2605,6 +2653,73 @@
     },
     "rise": {
      "label": "three litPlane: how far below its resting place the plane starts before it rises into frame"
+    },
+    "geometry": {
+     "type": "object",
+     "label": "three object: what to build. {kind: sphere|box|torus|svgExtrude|textExtrude, ...}. sphere/box/torus take radius/w/h/d/tube; svgExtrude takes an SVG path `d` string (M/L/H/V/C/Q/Z only) plus scale/depth/bevelSize/bevelThickness/bevelSegments; textExtrude takes text/font (a typeface from `make glyphs`) plus the same bevel dials",
+     "fields": {
+      "kind": { "type": "string", "label": "Which geometry builder", "enum": ["sphere", "box", "torus", "svgExtrude", "textExtrude"] },
+      "path": { "type": "string", "label": "svgExtrude: an SVG path `d` string, M/L/H/V/C/Q/Z commands only" },
+      "text": { "type": "string", "label": "textExtrude: the string to extrude" },
+      "font": { "type": "string", "label": "textExtrude: typeface name from `make glyphs`" },
+      "radius": { "type": "number", "label": "sphere/torus: radius in world units (default 1)" },
+      "tube": { "type": "number", "label": "torus: tube radius (default 0.35)" },
+      "w": { "type": "number", "label": "box: width (default 1.4)" },
+      "h": { "type": "number", "label": "box: height (default 1.4)" },
+      "d": { "type": "number", "label": "box: depth (default 1.4)" },
+      "scale": { "type": "number", "label": "svgExtrude: SVG-units-to-world-units scale (default 0.01)" },
+      "depth": { "type": "number", "label": "svgExtrude/textExtrude: extrusion depth in world units" },
+      "bevelSize": { "type": "number", "label": "svgExtrude/textExtrude: bevel size in world units" },
+      "bevelThickness": { "type": "number", "label": "svgExtrude/textExtrude: bevel thickness in world units" },
+      "bevelSegments": { "type": "number", "label": "svgExtrude/textExtrude: bevel roundness (segment count)" },
+      "curveSegments": { "type": "number", "label": "svgExtrude/textExtrude: curve smoothness (segment count)" }
+     }
+    },
+    "material": {
+     "type": "object",
+     "label": "three object: the surface. {preset: glass|frostedGlass|metal|matte, color, ...}. glass/frostedGlass are MeshPhysicalMaterial (transmission, thickness, ior, roughness, clearcoat); metal/matte are MeshStandardMaterial (metalness, roughness)",
+     "fields": {
+      "preset": { "type": "string", "label": "Which material builder", "enum": ["glass", "frostedGlass", "metal", "matte"] },
+      "color": { "label": "Base tint (hex string). Defaults to the theme accent" },
+      "roughness": { "type": "number", "label": "0 (mirror) to 1 (fully diffuse)" },
+      "metalness": { "type": "number", "label": "metal preset: 0 (dielectric) to 1 (fully metallic), default 0.9" },
+      "transmission": { "type": "number", "label": "glass/frostedGlass: 0 (opaque) to 1 (fully see-through), default 1 / 0.9" },
+      "thickness": { "type": "number", "label": "glass/frostedGlass: refraction thickness in world units, default 0.6" },
+      "ior": { "type": "number", "label": "glass/frostedGlass: index of refraction, default 1.5 (real glass is 1.45-1.55)" },
+      "clearcoat": { "type": "number", "label": "glass: a second, always-glossy coat layered over the surface, default 1" },
+      "envMapIntensity": { "type": "number", "label": "How strongly the room's reflections show, default 1-1.2" }
+     }
+    },
+    "env": {
+     "type": "object",
+     "label": "three object: the reflection/refraction environment. Omitted, the procedural studio room every three scene already renders under; {image: src} replaces it with a real equirectangular capture (an already-tone-mapped jpg/png, not a raw .hdr)",
+     "fields": {
+      "image": { "type": "string", "label": "An equirectangular (2:1) image src, preloaded like any other image the scene references" }
+     }
+    },
+    "objectMotion": {
+     "type": "array",
+     "label": "three object: keys the OBJECT's own position/rotation/scale through motionAt, the SAME sampler and eases `motion` uses on any layer. {t, x, y, z, rotX, rotY, rot, scale}; x/y/z in world units (x/y scaled from px by 0.01), rotX/rotY/rot in degrees",
+     "item": {
+      "t": { "type": "number", "label": "Seconds from the layer's start" },
+      "x": { "type": "number", "label": "Horizontal offset (px-like units, scaled to world space)" },
+      "y": { "type": "number", "label": "Vertical offset (px-like units, scaled to world space)" },
+      "z": { "type": "number", "label": "Depth offset, world units" },
+      "rotX": { "type": "number", "label": "Pitch, degrees" },
+      "rotY": { "type": "number", "label": "Yaw, degrees" },
+      "rot": { "type": "number", "label": "Roll, degrees" },
+      "scale": { "type": "number", "label": "Uniform scale multiplier" }
+     }
+    },
+    "cameraMotion": {
+     "type": "array",
+     "label": "three object: orbits the SCENE'S camera around the object through the same motionAt sampler. rotY is azimuth (degrees), rotX is elevation (degrees), z adds to `dolly` for a push/pull",
+     "item": {
+      "t": { "type": "number", "label": "Seconds from the layer's start" },
+      "rotY": { "type": "number", "label": "Orbit azimuth, degrees" },
+      "rotX": { "type": "number", "label": "Orbit elevation, degrees" },
+      "z": { "type": "number", "label": "Added to `dolly` for this key, world units" }
+     }
     },
     "swing": {
      "label": "three uiParallax: gentle yaw amplitude"

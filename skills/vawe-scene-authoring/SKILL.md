@@ -8,9 +8,14 @@ effort: medium
 
 # Authoring Vawe scenes
 
-One self-describing JSON → one rendered Short (1080×1920, 60fps final, 30fps `--draft`). Scenes are vanilla HTML/CSS/JS;
-a Go renderer (chromedp + ffmpeg) seeks to each frame and screenshots. **You almost never edit the
-Go renderer.** You write data JSON (most common) or the shared `films/scene/scene.html`.
+One self-describing JSON → one rendered Short (1080×1920, 60fps final, 30fps `--draft`). Scenes are
+vanilla HTML/CSS/JS; a Go renderer (chromedp + ffmpeg) seeks to each frame and screenshots. **You
+almost never edit the Go renderer.** You write data JSON (most common) or the shared
+`films/scene/scene.html`.
+
+A scene is two layers that must never blur together: **the HTML is the settled frame** (what a beat
+looks like, holding still), and **the JSON is the motion** (`parts`, `motion`, `vars`, on top of that
+HTML, never CSS `transition`/`animation`). Get the settled frame right first; add motion second.
 
 ## Rules, loaded before you write a layer
 
@@ -20,155 +25,40 @@ turns, something continuous crosses every cut). Then load only the rule files th
 writing needs, from the table there: one numeric rule per file, a right-JSON recipe and a wrong-JSON
 anti-pattern. This is where the specific numbers live (durations, sizes, offsets); do not guess one.
 
-Read `<film>.design.md` before you write a size, radius, shadow or colour: it is the film's own resolved
-design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Reference its
-`--kit-<group>-<name>` token instead of a literal; to use a new value, add it there first.
+Read `<film>.design.md` before you write a size, radius, shadow or colour: it is the film's own
+resolved design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Reference its
+`--kit-<group>-<name>` token instead of a literal.
 
 ## The one hard rule: `renderFrame(n)` is PURE in `n`
 
-The scene exposes `window.__engine = { meta, renderFrame(n) }`. `renderFrame(n)` must produce
-**byte-identical DOM for a given `n`, regardless of call order**, the renderer shards frames across
-parallel Chrome tabs. So:
+`renderFrame(n)` must produce byte-identical DOM for a given `n`, regardless of call order: the
+renderer shards frames across parallel Chrome tabs. Derive everything from `n`, animate only
+`transform`/`opacity`/`clip-path`/`filter`, and run `make probe M=<format>` after any scene-logic
+change. Full contract, code sample, layout scaffold and the theme's no-fallback rule:
+**read `reference/purity-and-layout.md` before touching `renderFrame` or a CSS var.**
 
-- Derive **everything** from `n` (and the data). No accumulation across frames, no `Date.now()`,
-  no `Math.random()`, no reading previous DOM state.
-- Set every animated property explicitly each frame. CSS `transition`/`animation` are globally killed.
-- Animate **only** compositor-friendly props: `transform`, `opacity`, `clip-path`, `filter`. Never
-  per-frame `width/height/top/left/margin` (layout thrash + impure).
-- Guard it: `make check GATE=probe M=<format>` asserts purity. Run it after any scene-logic change.
+## The five things that go wrong most
 
-```js
-import { boot } from '/core/engine/boot.js';
-import { interpolate, easeOutCubic } from '/core/motion/motion.js';
-boot((data, fps) => {
-  const duration = /* seconds */, total = Math.round(duration * fps);
-  function renderFrame(n) {
-    const t = n / fps;                       // seconds: your clock
-    el.style.opacity = interpolate(t, [0, 0.5], [0, 1], { easing: easeOutCubic }).toFixed(3);
-  }
-  return { fps, duration, stings, sfx, segments, renderFrame };
-});
-```
+1. **Impure `renderFrame`.** Something depends on call order or wall-clock time, not just `n`; breaks
+   sharded/seeked rendering. Read `reference/purity-and-layout.md`.
+2. **A hardcoded colour fallback** (`var(--x, #fff)`) instead of a theme token. The theme is
+   guaranteed complete; a fallback masks a real missing-key bug. Same reference file.
+3. **A figure animated as one block instead of by `parts`.** Reads flat, not produced.
+   `engine-doctrine/MISTAKES.md #153`; primitives in `reference/motion-primitives.md`.
+4. **Cards/logos with no real asset**, or emoji reached for before `make assets` ran.
+   `reference/html-and-images.md`.
+5. **Declaring "done" unrendered.** The audit and eyeball pass catch overlap, overflow and safe-zone
+   breaks that no amount of reading the JSON will show you. `reference/qa-loop.md`.
 
-## Layout scaffold
+## Where to look next
 
-Every scene shares: `.stage` (graphite + grid + vignette) → `.act-hook/.act-body/.act-cta` (phase
-visibility via `stage.className = 'stage phase-' + phase`) → `.safe` (the safe column). Use the
-**safe zone**: content must stay inside `var(--safe-*)`. Mark important text/cards
-`data-layer="critical"` so the layout audit checks them.
-
-```html
-<link rel="stylesheet" href="/core/tokens.css" />   <!-- plumbing only: fonts + geometry + reset -->
-<div class="stage">…</div>
-```
-
-## The theme owns the look: no fallbacks, no default look
-
-`core/tokens.css` is PLUMBING: font registration, frame geometry (`--vw/--vh/--safe-*`), the
-determinism reset, `.stage`/`.num`/`.icon-img`/debug overlay. It contains zero colors, font choices,
-scales or shadows. Every look var (`--font-*`, `--bg`, `--text/-2`, `--dim`, `--ink`, `--surface/-2`,
-`--line/-strong`, `--accent/-dim/-glow`, `--up`/`--down`, `--g0..2`) is written by `applyTheme()` from
-the video's theme, and `core/registry/theme-contract.js` requires the theme to be COMPLETE, a missing key
-fails at `make check GATE=validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
-scene: if the var is a look value it comes from the theme (guaranteed), and a hardcoded fallback is
-exactly the "wrong-look video renders anyway" bug the contract exists to prevent. Data JSONs must
-declare `"theme"` (name or inline object).
-
-Spacing/size rhythm lives in the video JSON (explicit px per layer) and the layout audit, a label
-and its value are a *unit* (~12px apart); separate groups get 32px+.
-
-## Beat the AI slop when hand-writing HTML (hooks, CTAs, cards)
-
-Hand-authored HTML is where generic output creeps in. **Load `taste-skill` first** (Design Read + the
-three dials + Anti-Default Discipline), then `impeccable` for craft, both vendored in `skills/`.
-Non-negotiable moves:
-- **Asymmetry over centered.** Default to an off-center anchor (hard-left, or a 2/3 split), not
-  `align:center` on everything. Centered-everything is the #1 AI tell.
-- **Scale contrast.** One oversized hero (a word, a number) paired with tiny understated text, a rhythm
-  of extremes, not one safe size step.
-- **A committed non-generic face.** Reflecting a real brand → its captured font. Anything else → never
-  Inter or Space Grotesk (the slop faces); reach for Instrument Serif (editorial), a captured face, or one
-  you register via `make study-tool X=brandspec` + `make study-tool X=palette`.
-- **One bespoke visual device, not card soup.** Avoid the equal rounded-card grid and the rounded-icon-
-  tile-above-a-heading. Invent one signature motif per video.
-- **Layout by containment: group-first.** Anything with a spatial relationship (a label+value, a logo
-  row, a card grid, a checkout card's contents) goes in a `group` (flex/grid box; children flow by `gap`,
-  and children can be **nested groups**), never two absolute `x/y` layers you space by eye (that's what
-  collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the
-  flex-not-pixels rule; it's why the fix for "the % is too close to the label" is a group, not new coords.
-- **Gate it:** `make check GATE=designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
-  clear its flags before you render. Full routing: `AGENTS.md`.
-
-## Animation: pure primitives in `core/motion/motion.js` (no GSAP)
-
-GSAP gives no render-speed benefit here (we seek-and-screenshot, not real-time playback), and risks
-the purity contract. Use these closed-form, pure-in-`n` helpers instead:
-
-- `interpolate(t, inRange, outRange, { easing, clamp })`: the workhorse. Replaces
-  `ease(clamp01((t-s)/d))`. Multi-stop: `interpolate(t, [0,1,4], [0,100,400])`.
-- `spring(t, { bounce, settle })`: natural pops; `springSettle(opts)` tells you when it settles
-  (size your holds with it). `t` is seconds since the pop started.
-- `track(n, fps, beats)`: given `[{name, dur}]`, returns `{ name, t01, localT }` for the active beat.
-  Use it instead of hand-rolling `ENTER/GUESS/REVEAL` window math.
-- transitions → `{opacity, transform}`: `rise(t)`, `fade(t)`, `pop(t)`, `slide(t,dir)`; apply with
-  `applyT(el, rise(t))`.
-- easings: `easeOutCubic/Quart/Expo/Back`, `easeInOutCubic`, `easeInCubic`, `easeOutElastic`, `punch`.
-
-**Standard beat structure:** hook → enter (rise/pop in) → hold/guess → reveal (pop + count-up) →
-hold → exit. Count-ups: `setVal(el, value * interpolate(t,[r0,r1],[0,1],{easing:easeOutQuart}))`.
-`films/scene/scene.html` is the reference. Test primitives with `make test`.
-
-## Images & visuals: real first, emoji last
-
-Order of preference (CLAUDE.md): **real licensed image → generated card → emoji**. Never embed
-copyrighted media (posters/stills/album art) in a published video.
-
-- **Auto-source:** `make assets D=films/<fmt>/<topic>.json`, fills missing icons: country→flag
-  (flagcdn, PD), brand→logo (simple-icons, free), else a generated topic card. Dry-run by default;
-  `WRITE=1` to apply.
-- **Topic cards (any subject):** `node harness/media/cards.mjs "Quantum Computing" --sub "…"` → a designed
-  SVG (deterministic per-title palette, grain, vignette, frame). Use when no clean image exists.
-- **`icon(value, fallback)`** turns an image path into `<img class="icon-img">`, else renders the
-  fallback (emoji/monogram). Always pass a monogram fallback: `icon(c.icon, name[0].toUpperCase())`.
-- Chips/badges/cards come from `chipBox` on any layer (bg/pad/radius/border/elevation in the JSON).
-  There is no shared treatment stylesheet (visuals.css was removed with the template formats).
-
-## Editing real footage: `edits[]`, a cut list
-
-Cutting real clips together as `video` layers works today (`in`/`out`/`rate`/`audio`, one layer per
-cut, `start` computed by hand). `edits[]` is the sugar: a top-level list, lowered at expand time
-(`core/engine/expand.js`) into ordinary `video` layers chained by `"<id>.end"`, so nobody does the
-arithmetic.
-
-```json
-"edits": [
-  { "id": "a", "src": "/assets/clips/interview.mp4", "in": 4.0, "out": 9.5, "audio": true },
-  { "id": "b", "src": "/assets/clips/broll.mp4", "in": 12.0, "out": 15.0 }
-]
-```
-
-`a` starts at 0 with `duration = 5.5`; `b` gets `start: "a.end"` for free. `id` must be unique and
-`src` required, both refused by name if missing. `out<=in` is refused by `core/layers/video.js`
-itself, not repeated here. **This is not `cuts[]`**: that key is the internal, lowered output of
-`transitions[]` and the validator refuses it written directly (see `AGENTS.md`'s built-in rules).
-Author a transition at a cut boundary the normal way, `transitions[]` at `"<id>.end"`; it still owns
-every boundary between edits.
-
-## QA loop, run before declaring a scene done
-
-| command | checks |
+| Task | Read |
 |---|---|
-| `make check GATE=probe M=<fmt>` | render-order **purity** (must pass, protects sharded rendering) |
-| `make check GATE=audit [M=<fmt>]` | **overlap / overflow / safe-zone / tight-spacing** on `[data-layer=critical]`; overlays → `/tmp/audit/<fmt>.png` |
-| `make look D=<file>` / `make frame D=<file> N=<n>` | storyboard / one frame to eyeball |
-| `make check GATE=verify` | render integrity (dims/fps/codec/audio) + safe-zone + contact sheets |
-| `make gen X=review` | fast snapshot: lib-test + audit + a master overlay sheet (`/tmp/review.png`) |
-
-**Always eyeball frames** (storyboard or `/tmp/review.png`), don't claim "looks good" unrendered.
-If the audit flags overlap/overflow, fix with the spacing tokens and re-run. Mark new key text
-`data-layer="critical"` so the audit can see it.
-
-See `engine-doctrine/CODEMAPS/ARCHITECTURE.md` for the full system map.
+| `renderFrame` purity, the layout scaffold, theme tokens | `reference/purity-and-layout.md` |
+| Animation primitives (`interpolate`, `spring`, `track`, easings) | `reference/motion-primitives.md` |
+| Hand-writing HTML without AI slop, images, `edits[]` cut lists | `reference/html-and-images.md` |
+| The QA commands to run before calling a scene done | `reference/qa-loop.md` |
+| Translating a GSAP idea into vawe's JSON | `engine-doctrine/CRAFT/FROM-GSAP.md` |
 
 ## Gotchas
 

@@ -208,9 +208,19 @@
   "three-js-scenes-real-geometry--liquidbackground": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"liquidBackground\"\n}",
   "three-js-scenes-real-geometry--litplane": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"litPlane\"\n}",
   "three-js-scenes-real-geometry--magnetic": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"magnetic\"\n}",
+  "three-js-scenes-real-geometry--object": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"object\"\n}",
   "three-js-scenes-real-geometry--pointcloud": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"pointCloud\"\n}",
   "three-js-scenes-real-geometry--shatter": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"shatter\"\n}",
   "three-js-scenes-real-geometry--uiparallax": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"uiParallax\"\n}",
+  "anchor-points--bottom": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"bottom\"\n}",
+  "anchor-points--bottom-left": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"bottom-left\"\n}",
+  "anchor-points--bottom-right": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"bottom-right\"\n}",
+  "anchor-points--center": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"center\"\n}",
+  "anchor-points--left": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"left\"\n}",
+  "anchor-points--right": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"right\"\n}",
+  "anchor-points--top": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"top\"\n}",
+  "anchor-points--top-left": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"top-left\"\n}",
+  "anchor-points--top-right": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"top-right\"\n}",
   "interpolation-modes-not-easings--through": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"none\",\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": -300\n    },\n    {\n      \"t\": 0.8,\n      \"x\": 0,\n      \"ease\": \"through\"\n    },\n    {\n      \"t\": 1.6,\n      \"x\": 300,\n      \"ease\": \"through\"\n    }\n  ]\n}",
   "keyframe-handles-the-graph-editor--easyease": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"none\",\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": -300,\n      \"easeOut\": \"easyEase\"\n    },\n    {\n      \"t\": 0.9,\n      \"x\": 300,\n      \"easeIn\": \"easyEase\"\n    }\n  ]\n}",
   "keyframe-handles-the-graph-editor--fling": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"none\",\n  \"motion\": [\n    {\n      \"t\": 0,\n      \"x\": -300,\n      \"easeOut\": \"fling\"\n    },\n    {\n      \"t\": 0.9,\n      \"x\": 300,\n      \"easeIn\": \"fling\"\n    }\n  ]\n}",
@@ -304,6 +314,9 @@
   "depths-parallax-planes--far": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"depth\": \"far\"\n}",
   "depths-parallax-planes--front": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"depth\": \"front\"\n}",
   "depths-parallax-planes--near": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"depth\": \"near\"\n}",
+  "drivers-expressions-as-data--link": "{\n  \"drive\": {\n    \"link\": {\n      \"from\": \"card-a.x\",\n      \"delay\": 0.1\n    }\n  }\n}",
+  "drivers-expressions-as-data--loop": "{\n  \"drive\": {\n    \"loop\": {\n      \"mode\": \"cycle\",\n      \"to\": 1.4\n    }\n  }\n}",
+  "drivers-expressions-as-data--wiggle": "{\n  \"drive\": {\n    \"wiggle\": {\n      \"prop\": \"rot\",\n      \"freq\": 1.5,\n      \"amp\": 2\n    }\n  }\n}",
   "effector-drives--opacity": "{\n  \"type\": \"html\",\n  \"html\": \"<div data-clone>…</div>×64\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"effector\": {\n    \"select\": \"[data-clone]\",\n    \"drives\": {\n      \"opacity\": 0.6\n    },\n    \"radius\": 320,\n    \"sticky\": 1,\n    \"path\": [\n      {\n        \"t\": 0,\n        \"x\": -220,\n        \"y\": 300\n      },\n      {\n        \"t\": 2.2,\n        \"x\": 1820,\n        \"y\": 300\n      }\n    ]\n  }\n}",
   "effector-drives--push": "{\n  \"type\": \"html\",\n  \"html\": \"<div data-clone>…</div>×64\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"effector\": {\n    \"select\": \"[data-clone]\",\n    \"drives\": {\n      \"push\": 0.6\n    },\n    \"radius\": 320,\n    \"sticky\": 1,\n    \"path\": [\n      {\n        \"t\": 0,\n        \"x\": -220,\n        \"y\": 300\n      },\n      {\n        \"t\": 2.2,\n        \"x\": 1820,\n        \"y\": 300\n      }\n    ]\n  }\n}",
   "effector-drives--rotate": "{\n  \"type\": \"html\",\n  \"html\": \"<div data-clone>…</div>×64\",\n  \"x\": 160,\n  \"y\": 140,\n  \"w\": 1600,\n  \"effector\": {\n    \"select\": \"[data-clone]\",\n    \"drives\": {\n      \"rotate\": 0.6\n    },\n    \"radius\": 320,\n    \"sticky\": 1,\n    \"path\": [\n      {\n        \"t\": 0,\n        \"x\": -220,\n        \"y\": 300\n      },\n      {\n        \"t\": 2.2,\n        \"x\": 1820,\n        \"y\": 300\n      }\n    ]\n  }\n}",
@@ -368,6 +381,7 @@
   "per-layer-modifiers--occlude": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"occlude\": true\n    }\n  ]\n}",
   "per-layer-modifiers--plane": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"plane\": true\n    }\n  ]\n}",
   "per-layer-modifiers--progress": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"progress\": true\n    }\n  ]\n}",
+  "per-layer-modifiers--repeat": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"repeat\": true\n    }\n  ]\n}",
   "per-layer-modifiers--shadow": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"shadow\": true\n    }\n  ]\n}",
   "per-layer-modifiers--squash": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"squash\": true\n    }\n  ]\n}",
   "per-layer-modifiers--tilt": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"anim\": \"rise\",\n  \"modifiers\": [\n    {\n      \"tilt\": true\n    }\n  ]\n}",
@@ -554,6 +568,20 @@
     "theme": {
       "look": {
         "backdrop": "…"
+      }
+    }
+  },
+  "theme-look-keys--bgdefault": {
+    "theme": {
+      "look": {
+        "bgDefault": "…"
+      }
+    }
+  },
+  "theme-look-keys--bgpalette": {
+    "theme": {
+      "look": {
+        "bgPalette": "…"
       }
     }
   },

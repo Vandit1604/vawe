@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer';
 import { serveRepo } from '../lib/render-harness.mjs';
 import { extractKitBlock } from '../lib/stagekit.mjs';
 import { fragPage, FULLBLEED_RE, INSET_RE } from '../lib/frag-page.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 import { sanitizeHtml, scopeStyles } from '../../core/type/sanitize-html.js';
 import { findFilmLayerBox } from '../lib/film-layer-box.mjs';
@@ -32,7 +32,7 @@ if (!fs.existsSync(themeFile)) {
   process.exit(1);
 }
 const rawTheme = JSON.parse(fs.readFileSync(themeFile, 'utf8'));
-const theme = isTokenFile(rawTheme) ? expandTheme(rawTheme, { parseColor, colorAlpha }) : rawTheme;
+const theme = expandTheme(rawTheme, { parseColor, colorAlpha });
 const bg = flag('--bg', null) || theme.palette.bg;
 
 let raw = fs.readFileSync(src, 'utf8');

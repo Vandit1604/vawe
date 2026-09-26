@@ -4,7 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { themeErrors } from '../../core/registry/theme-contract.js';
 import { bgBlock, mix, contrast, relLum, parseHex } from '../lib/theme-bg.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 import { migrateOne } from './migrate-themes.mjs';
 
@@ -227,7 +227,7 @@ function buildPalette(stance, hue) {
     accentGlow: rgba(accent, 0.45),
     up: accent,
     down,
-    _lineHex: lineHex, // dropped before writing; bgBlock needs a solid line colour, palette.line is rgba
+    _lineHex: lineHex, // dropped before writing; buildTheme needs a solid line colour, palette.line is rgba
   };
 }
 
@@ -331,7 +331,7 @@ for (const first of chosen) {
 const bannedLineages = new Set();
 for (const f of fs.readdirSync(path.join(ROOT, 'themes')).filter((n) => n.endsWith('.json'))) {
   const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
-  let t; try { t = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw; } catch { continue; }
+  let t; try { t = expandTheme(raw, { parseColor, colorAlpha }); } catch { continue; }
   for (const v of Object.values(t.type || {})) if (typeof v === 'string' && v.trim()) bannedLineages.add(lineage(v));
 }
 for (const b of ['Inter', 'Poppins', 'Playfair Display', 'Syne', 'Space Grotesk', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Nunito', 'Oswald']) bannedLineages.add(lineage(b));
@@ -373,7 +373,10 @@ function buildTheme(c, name) {
   return {
     name,
     note: `INVENTED (not selected) by harness/author/invent-look.mjs from ${path.relative(ROOT, file)}, seed ${seed}. Stance "${c.stance.key}": ${c.sentence}. Texture: ${c.texture}.`,
-    palette: P,
+    // `onLight`/`onDark` are the ON_INK override for the opposite-polarity ink (core/registry/
+    // theme-contract.js): the retired `theme.vars['--on-light'/'--on-dark']` free-form CSS vars,
+    // now real palette keys the ON_INK loop in core/engine/boot.js already knows how to write.
+    palette: { ...P, line: lineHex, onLight: light ? P.text : P.bg, onDark: light ? P.bg : P.text },
     gradient,
     type: {
       sans: c.type.body.family,
@@ -382,13 +385,10 @@ function buildTheme(c, name) {
       num: c.type.mono.family,
     },
     motion: c.stance.motion,
-    bg: bgBlock({ ...P, line: lineHex }, light),
-    bgDefault: { preset: c.stance.bgPreset },
-    vars: {
-      '--ink': P.text, '--paper': P.bg, '--muted': P.text2, '--em': P.accent,
-      '--on-light': light ? P.text : P.bg, '--on-dark': light ? P.bg : P.text,
-      '--border': lineHex, '--accent-soft': P.accentDim,
-    },
+    // `bg`/`vars` are not written any more (core/backgrounds/palette.js `bgPaletteFrom(palette)`
+    // derives the bg-preset palette; `palette.onLight`/`onDark` above replace the `vars` bag).
+    // `bgDefault` moved under `look`, a look key beside `backdrop`/`cuts`/etc.
+    look: { bgDefault: { preset: c.stance.bgPreset } },
     invented: {
       tool: 'harness/author/invent-look.mjs',
       storyboard: path.relative(ROOT, file),

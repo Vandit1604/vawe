@@ -9,67 +9,6 @@
     "durationScale": 0.9,
     "stagger": 0.04
   },
-  "bg": {
-    "accent": "184,255,60",
-    "tint": "95,114,104",
-    "tint2": "184,255,60",
-    "dotLight": "184,255,60",
-    "paperBase": [
-      "#0b1013",
-      "#040607"
-    ],
-    "softBase": [
-      "#0d1418",
-      "#06080a"
-    ],
-    "accentBase": [
-      "#7fae2a",
-      "#3d5a12"
-    ],
-    "inkBase": [
-      "#06080a",
-      "#040607"
-    ],
-    "border": "rgba(184,255,60,0.20)",
-    "dark": [
-      "#0b1013",
-      "#040607"
-    ],
-    "darkMesh": [
-      "#0d1a14",
-      "#040607"
-    ],
-    "deep": [
-      "#080c0e",
-      "#030405"
-    ],
-    "light": [
-      "#0d1418",
-      "#06080a"
-    ],
-    "ink": [
-      "#06080a",
-      "#040607"
-    ],
-    "paper": "#06080a"
-  },
-  "vars": {
-    "--ink": "#e6f2ec",
-    "--paper": "#06080a",
-    "--surface": "#0d1418",
-    "--muted": "#8ba296",
-    "--dim": "#5f7268",
-    "--em": "#b8ff3c",
-    "--raw": "#ff6a3d",
-    "--on-light": "#06080a",
-    "--on-dark": "#e6f2ec",
-    "--border": "rgba(184,255,60,0.20)",
-    "--accent-soft": "rgba(184,255,60,0.13)"
-  },
-  "bgDefault": {
-    "preset": "deep",
-    "value": "dark"
-  },
   "tokens": {
     "color": {
       "bg": {
@@ -202,5 +141,55 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": {
+      "preset": "deep",
+      "value": "dark"
+    },
+    "bgPalette": {
+      "accent": "184,255,60",
+      "tint": "95,114,104",
+      "tint2": "184,255,60",
+      "dotLight": "184,255,60",
+      "paperBase": [
+        "#0b1013",
+        "#040607"
+      ],
+      "softBase": [
+        "#0d1418",
+        "#06080a"
+      ],
+      "accentBase": [
+        "#7fae2a",
+        "#3d5a12"
+      ],
+      "inkBase": [
+        "#06080a",
+        "#040607"
+      ],
+      "border": "rgba(184,255,60,0.20)",
+      "dark": [
+        "#0b1013",
+        "#040607"
+      ],
+      "darkMesh": [
+        "#0d1a14",
+        "#040607"
+      ],
+      "deep": [
+        "#080c0e",
+        "#030405"
+      ],
+      "light": [
+        "#0d1418",
+        "#06080a"
+      ],
+      "ink": [
+        "#06080a",
+        "#040607"
+      ],
+      "paper": "#06080a"
+    }
   }
 }

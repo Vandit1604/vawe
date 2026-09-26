@@ -1,5 +1,5 @@
 ---
-when: adding, changing, or looking up one of the ~120 gates a scene or the repo itself is checked
+when: adding, changing, or looking up one of the gates (`ls quality/gates/*.mjs | wc -l`) a scene or the repo itself is checked
   against
 answers: "what quality/ is: every gate script (gates/), its fixtures (fixtures/), ratchet baselines (baselines/), and recorded runs (runs/), plus the audit entry point"
 group: engine
@@ -7,7 +7,7 @@ group: engine
 
 # quality/
 
-`gates/` holds every checker (~120 scripts) run by a `make <target>`: validators, ratchets, the judge
+`gates/` holds every checker (`ls quality/gates/*.mjs | wc -l` for the count) run by a `make <target>`: validators, ratchets, the judge
 loop's supporting checks, doc-honesty gates like `doc-refs.mjs` and `craft-coverage.mjs`. `fixtures/`
 are small inputs the gates test against. `baselines/` are ratchet files a gate compares today's count
 to, so a metric can only get better, never silently worse. `runs/` holds recorded gate output.

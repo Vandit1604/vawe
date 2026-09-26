@@ -14,6 +14,7 @@ import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
 import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
+import { resolveFinishLayers, bakeDepthOfField } from './finish.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -22,7 +23,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
 import { loadBeatGrid } from '../beats/index.js';
-import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
+import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn, resolveAnchorPoint } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from '../type/ransom.js';
@@ -53,7 +54,7 @@ const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return 
 // this file is imported by node, so a gate can read the declaration without knowing where boot lives.
 export const PROPS = {
   pin: {}, col: {}, cols: { when: 'col' }, gutter: { when: 'col' },
-  aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {},
+  aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {}, anchorPoint: {},
 };
 
 // keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:
@@ -128,6 +129,25 @@ function applyLayerCol(L, safe, inset) {
   L.w = Math.round((c2 - c1 + 1) * colW + (c2 - c1) * g);
 }
 
+// ANCHOR POINT: baked in here, once, so x/y is a plain left/top edge by the time anything downstream
+// (scene.js buildLayer, the audit, probe-frame) reads it. `fx`/`fy` are 0 for the default "top-left"
+// (identity: this whole function is then a no-op).
+function applyAnchorPoint(L, hEst) {
+  if (L.anchorPoint == null) return;
+  const [fx, fy] = resolveAnchorPoint(L.anchorPoint);
+  const id = L.id ? ` "${L.id}"` : '';
+  if (fx && typeof L.w !== 'number')
+    throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric w to find where its `
+      + `centre/right edge falls; declare w, or use an anchorPoint that keeps the left edge `
+      + `("top-left"/"left"/"bottom-left").`);
+  if (fy && !(typeof L.h === 'number' || hEst))
+    throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric h (or, for text, a `
+      + `\`size\` to estimate one from) to find where its centre/bottom edge falls; declare h, or use `
+      + `an anchorPoint that keeps the top edge ("top-left"/"top"/"top-right").`);
+  if (L.x != null && fx) L.x = Math.round(L.x - fx * L.w);
+  if (L.y != null && fy) L.y = Math.round(L.y - fy * (typeof L.h === 'number' ? L.h : hEst));
+}
+
 function resolveLayerCoords(data, W, H, safe, inset, PIN) {
   for (const L of flattenLayers(data.layers)) {
     applyLayerPin(L, PIN, W, safe);
@@ -140,6 +160,7 @@ function resolveLayerCoords(data, W, H, safe, inset, PIN) {
     const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
     if (L.x != null) L.x = resolveCoord(L.x, W, w, safe.x0, safe.x1);
     if (L.y != null) L.y = resolveCoord(L.y, H, h, safe.y0, safe.y1, hEst);
+    applyAnchorPoint(L, hEst);
   }
 }
 
@@ -277,7 +298,7 @@ export async function fetchThemeFile(spec) {
 
 export async function resolveTheme(spec) {
   const raw = await fetchThemeFile(spec);
-  return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+  return expandTheme(raw, { parseColor, colorAlpha });
 }
 
 // resolveThemeTokenValues(spec): the SAME token-file fetch resolveTheme does, but returning the raw
@@ -310,7 +331,7 @@ export function applyTheme(theme, target = document.documentElement) {
   const root = target.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
-  set('--bg', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
+  set('--bg', P.bg); set('--paper', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
   set('--card', P.card || deriveCard(P)); // raised card surface (blocks use var(--card))
   set('--line', P.line); set('--line-strong', P.lineStrong);
   set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim); set('--ink', P.ink);
@@ -353,8 +374,6 @@ export function applyTheme(theme, target = document.documentElement) {
   set('--font-num', `'${T.num}'`);
   set('--font-serif', `'${T.serif}'`);
   set('--font-mono', `'${T.mono}'`);
-  // raw passthrough: theme.vars = { "--anything": "value" } for scene-local custom props.
-  if (isObj(theme.vars)) for (const [k, v] of Object.entries(theme.vars)) set(k, v);
 }
 
 // ---------- virtual clock: determinism is COERCED, not just required ----------
@@ -530,11 +549,13 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   Object.assign(data, resolveTokenRefs(data, tokenValues));
   const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
   bakeTextSizeRoles(data, look);
+  resolveFinishLayers(data, width, height); // `finish` sugar → real layers, before they get baked like any other
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
   produceBaseline(data, theme, frame, look);
   if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
   bakeDepth(data);
   bakeFocus(data);
+  bakeDepthOfField(data); // `finish.dof` + the camera's own focus keyframes → a blur, per layer `plane` z
   assertKeyHandles(data.camera, 'camera');
   bakeTimeRemaps(data);
   checkNoSurvivingDepth(data);

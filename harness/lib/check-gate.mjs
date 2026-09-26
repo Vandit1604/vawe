@@ -30,6 +30,7 @@ export const GATES = {
   'choreo': () => ['quality/gates/choreo.mjs', ...words('D'), ...valFlag('REF', '--ref'), ...json()],
   'blocks-audit': () => ['quality/gates/blocks-audit.mjs', ...json()],
   'code-quality': () => ['quality/gates/code-quality.mjs', ...(env.TOP ? ['--top'] : []), ...write(), ...json()],
+  'consequence-lint': () => ['quality/gates/consequence-lint.mjs', ...write(), ...list(), ...json()],
   'coverage': () => ['quality/gates/coverage.mjs', ...json()],
   'craft-coverage': () => ['quality/gates/craft-coverage.mjs', ...json()],
   'dead-branch': () => ['quality/gates/dead-branch.mjs', ...json()],

@@ -103,7 +103,7 @@ function buildRow(id, authoredLayer, dom, pageT) {
   // `parts` here is the EXPANDED value (core/engine/expand.js already ran, above): an `html` layer
   // authored with data-part-* attributes and no `parts` array shows its lowered spec here, same as a
   // hand-written one would, so the lowering is checkable without opening devtools.
-  const row = { id, authored: authoredLayer ? { type: authoredLayer.type, start: authoredLayer.start ?? 0, duration: authoredLayer.duration ?? null, parts: authoredLayer.parts ?? null } : null, dom };
+  const row = { id, authored: authoredLayer ? { type: authoredLayer.type, start: authoredLayer.start ?? 0, duration: authoredLayer.duration ?? null, parts: authoredLayer.parts ?? null, x: authoredLayer.x ?? null, y: authoredLayer.y ?? null, anchorPoint: authoredLayer.anchorPoint ?? 'top-left' } : null, dom };
   if (!authoredLayer) row.warning = 'no layer with this id in the scene JSON (checked top-level and every group child)';
   if (!dom) row.warning = (row.warning ? row.warning + '; ' : '') + 'no [data-id] element in the DOM at this frame (did the scene ever build this layer?)';
   if (dom && authoredLayer) {
@@ -167,7 +167,8 @@ function printText(r) {
   for (const [id, row] of Object.entries(r.samples)) {
     console.log(`\n-- ${id} --`);
     if (row.warning) console.log(`  WARNING: ${row.warning}`);
-    if (row.authored) console.log(`  authored: type=${row.authored.type} start=${row.authored.start} duration=${row.authored.duration}`);
+    if (row.authored) console.log(`  authored: type=${row.authored.type} start=${row.authored.start} duration=${row.authored.duration} `
+      + `x=${row.authored.x} y=${row.authored.y} anchorPoint=${row.authored.anchorPoint} (x/y names that point on the box, not always its left/top edge)`);
     if (row.authored?.parts) console.log(`  parts (resolved): ${JSON.stringify(row.authored.parts)}`);
     const d = row.dom;
     if (!d) continue;

@@ -6,27 +6,34 @@ import { isObj, typeOf, nearest } from './util.mjs';
 // call sites, which is what pushed that switch over the complexity ceiling for one extra layer type.
 const isSugarType = (t) => t === 'block' || t === 'beat' || t === 'comp';
 
+// Every message here ends the same way, because every one of them has the same consequence: a schema
+// error is never a warning. validateData feeds boot.js, which throws before the first frame, and the
+// same errors[] feeds `make validate`'s exit code. So the fact worth stating once, in every message
+// rather than trusted to context, is what happens next: the render refuses to start until this line
+// is fixed. (engine-doctrine/MISTAKES.md: a schema error with no stated consequence read as advice.)
+const REFUSES = 'the render refuses to start until this is fixed';
+
 function checkNumberField(spec, val, at, errors) {
-  if (Number.isNaN(val)) errors.push(`${at} must be a number (got NaN)`);
-  if (spec.min != null && val < spec.min) errors.push(`${at} must be ≥ ${spec.min} (got ${val})`);
-  if (spec.max != null && val > spec.max) errors.push(`${at} must be ≤ ${spec.max} (got ${val})`);
+  if (Number.isNaN(val)) errors.push(`${at} must be a number, not NaN: ${REFUSES}. Check the arithmetic that produced this value.`);
+  if (spec.min != null && val < spec.min) errors.push(`${at} is ${val}, below the minimum ${spec.min}: ${REFUSES}. Raise it to ${spec.min} or more.`);
+  if (spec.max != null && val > spec.max) errors.push(`${at} is ${val}, above the maximum ${spec.max}: ${REFUSES}. Lower it to ${spec.max} or less.`);
 }
 
 function checkStringField(spec, val, at, errors) {
-  if (spec.minLength != null && val.length < spec.minLength) errors.push(`${at} must be ≥ ${spec.minLength} chars`);
+  if (spec.minLength != null && val.length < spec.minLength) errors.push(`${at} is ${val.length} char(s), short of the ${spec.minLength} required: ${REFUSES}. Lengthen the string to at least ${spec.minLength} char(s).`);
   if (spec.enum && !spec.enum.includes(val)) {
     // `block`/`beat`/`comp` are BUILD-TIME sugar, not layer types: core/engine/expand.js resolves them at
     // load, before any real primitive is checked against this enum, so a scene that names one is
     // correct as authored, never an unknown-enum finding.
     if (!(at.endsWith('.type') && isSugarType(val)))
-      errors.push(`${at} "${val}" is not valid.${nearest(val, spec.enum)} One of: ${spec.enum.join(', ')}`);
+      errors.push(`${at} "${val}" is not valid: ${REFUSES}.${nearest(val, spec.enum)} Use one of: ${spec.enum.join(', ')}`);
   }
-  if (spec.pattern && !new RegExp(spec.pattern).test(val)) errors.push(`${at} must match /${spec.pattern}/ (got "${val}")`);
+  if (spec.pattern && !new RegExp(spec.pattern).test(val)) errors.push(`${at} "${val}" does not match the required shape /${spec.pattern}/: ${REFUSES}. Rewrite the value to match that pattern.`);
 }
 
 function checkArrayField(spec, val, at, errors) {
-  if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} needs ≥ ${spec.minItems} item(s) (got ${val.length})${spec.hint ? `, ${spec.hint}` : ''}`);
-  if (spec.maxItems != null && val.length > spec.maxItems) errors.push(`${at} allows ≤ ${spec.maxItems} item(s) (got ${val.length})`);
+  if (spec.minItems != null && val.length < spec.minItems) errors.push(`${at} has ${val.length} item(s), short of the ${spec.minItems} required: ${REFUSES}${spec.hint ? `, ${spec.hint}` : ''}. Add ${spec.minItems - val.length} more item(s).`);
+  if (spec.maxItems != null && val.length > spec.maxItems) errors.push(`${at} has ${val.length} item(s), over the ${spec.maxItems} allowed: ${REFUSES}. Remove ${val.length - spec.maxItems} item(s).`);
   // A block/beat/comp layer carries the BLOCK's/BEAT's props (a pointer's `to:{x,y}`, a kpiRow's
   // `items:[…]`), NOT the base layer schema, blocks-audit owns those. The unknown-prop pass already
   // exempts them; this TYPE pass must too, or a valid block prop (`to` object vs the layer's `to`
@@ -55,12 +62,14 @@ function walk(fields, obj, path, errors) {
     const val = obj?.[key];
     const at = `${path}${key}`;
     if (val == null) {
-      if (spec.required) errors.push(`${at} is required${spec.hint ? `, ${spec.hint}` : ''}`);
+      // A schema entry's own `hint` already carries the fix (what a good answer looks like, e.g. bg's),
+      // so the generic "add this key" instruction is only useful when there is no hint to fall back on.
+      if (spec.required) errors.push(`${at} is required: ${REFUSES}${spec.hint ? `, ${spec.hint}` : `. Add \`${key}\` to this object.`}`);
       continue;
     }
     // `type` may be a union like "number|string" (relative coords: 40 or "50%"). Any member matches.
     if (spec.type && !spec.type.split('|').includes(typeOf(val))) {
-      errors.push(`${at} must be a ${spec.type} (got ${typeOf(val)})`);
+      errors.push(`${at} must be a ${spec.type}, got a ${typeOf(val)} (${JSON.stringify(val)}): ${REFUSES}. Change the value's type to ${spec.type}.`);
       continue; // type wrong → skip deeper checks
     }
     checkField(spec, val, at, errors);

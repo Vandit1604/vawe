@@ -52,7 +52,6 @@ const WAIVED = new Map(Object.entries({
   LANES: 'the order of the studio timeline lanes (core/layers/kinds.js). Display order, not a capability.',
   ICON: 'the lane icon SVG strings (core/layers/kinds.js). Chrome for the studio and the site, not a capability.',
   UNITS: 'the transition LIBRARY behind the seam runner (core/transitions/units.js): one GLSL unit per seam fx. A scene names a seam by its fx name (fade/wipe/whipPan…), and SEAM_REGISTRY in core/timeline/seams.js catalogues every one of those with its blurb. UNITS is the backing data the registry derives from, not a fifth thing to choose',
-  CORE_UNITS: 'the 14 original seam units, concatenated into UNITS (core/transitions/units.js). Backing data, catalogued through SEAM_REGISTRY like the rest',
   HOUSE_UNITS: 'the hand-written vawe house-set seam units (core/transitions/units-house.js), concatenated into UNITS and catalogued through SEAM_REGISTRY. Backing data, not a separate vocabulary',
   CAPABILITIES: 'the measured table of which ANCESTOR style silently disables which DESCENDANT capability (core/ancestor-kills.js). A scene names a capability by writing `glass`/`mixBlend`/`plane`, all of which ARE catalogued; this is the interaction table behind the refusal, not a fifth thing to choose',
   IDENT: 'the identity style set a cut resets to (core/cuts.js). A reset, not an effect: the CUT vocabulary it belongs to is catalogued in full',
@@ -82,7 +81,6 @@ const WAIVED = new Map(Object.entries({
     + 'names a knob, never a route',
   LOOP_FX: 'the loop half of GSAP_FX, which IS catalogued. A subset named so a gate can tell an entrance from something that never settles',
   ONESHOT_FX: 'the other half of the same split',
-  LOOK_BLURBS: 'the descriptions OF the looks, rendered in the catalogue beside each look. The words, not a vocabulary of their own',
   PASSES: 'the pass library behind the composite looks (core/looks/presets.js): the GLSL/canvas passes a LOOK is built from. An author names a LOOK (catalogued as Composite looks), never a raw pass. Backing data, not a vocabulary',
   PASS_READS: 'the map of which pass reads which knob (core/looks/presets.js), the wiring under the looks. A scene names a knob or a look, never this table',
   UNIFORM_FAMILIES: 'shader uniform grouping for the playground panel',
@@ -105,11 +103,7 @@ const WAIVED = new Map(Object.entries({
   // and the playground starting point. A scene names the dials (PATTERNS/SHAPES/ANCHORS/…, which ARE
   // catalogued) and pastes the markup the generator emits; it never writes `preset: "colonnade"`.
   PRESETS: 'fitted option bundles for the lightfield generator (core/lightfield/presets.js), used by the CLI and as the playground start state. Its user-facing dials ARE catalogued under "Lightfield dials"',
-  COMPOSITIONS: 'the implementations behind COMPOSITION_NAMES, which IS catalogued',
-  CAP_STYLES: 'the implementations behind CAP_STYLE_NAMES, which IS catalogued',
-  DESTINATIONS: 'the safe-area table behind DESTINATION_NAMES, which IS catalogued',
   CAMERA_MOVES: 'the move implementations behind CAMERA_MOVE_NAMES, which IS catalogued',
-  LOOKS: 'the look implementations behind LOOK_NAMES, which IS catalogued',
   // A scene never names a caption SKIN: it sets `captionMode`/`captionStyle` and the skin follows from
   // that plus the destination. CAPTION_SKINS is the geometry table captionBand() measures against, so
   // there is nothing here for an author to choose. It reached main uncatalogued, which is why the gate

@@ -106,13 +106,19 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # dev-range below instead, which skips the sheets and content-check: those read the WHOLE film and
 # would either crash on a partial mp4 or report a false gap against a clip that was never meant to
 # hold the other acts.
-dev: build ## [dev] THE ITERATION LOOP. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice, not the whole film.
+# DRAFT=1 (or NEW=<name>, which implies D=films/scene/<name>.json): a film with no scene.json yet
+# gets one written from its brief (or a one-line title from its own name) before the render below runs.
+# No storyboard required. This is the one-command path to a first preview (AGENTS.md "no sign-off
+# step"); a real plan still goes through the seven stages when there is one to go through.
+dev: build ## [dev] THE ITERATION LOOP. DRAFT=1|NEW=<name>: bootstrap a first scene, no plan needed. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice.
+	$(eval D := $(if $(strip $(NEW)),films/scene/$(NEW).json,$(D)))
 ifneq ($(strip $(GROUP)),)
 	@g=$$(node harness/dev/group-only.mjs "$(D)" "$(GROUP)") && $(MAKE) --no-print-directory dev D=$$g WORKERS=$(WORKERS) NOSHEETS=1
 else
 ifneq ($(strip $(BEAT)$(JOIN)$(FROM)$(TO)),)
 	@$(MAKE) --no-print-directory dev-range D=$(D) BEAT=$(BEAT) JOIN=$(JOIN) FROM=$(FROM) TO=$(TO) WORKERS=$(WORKERS)
 else
+	@test -z "$(strip $(DRAFT)$(NEW))" || node harness/author/draft-init.mjs $(D)
 	@echo "▶ [dev] the iteration loop, no gates, no audit"
 	@t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
 	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'; \
@@ -392,15 +398,27 @@ sections: ## [study] capture a website's real sections into assets/brands/<brand
 # make kit URL=https://site.com NAME=brand: ONE command for `sections` + `palette` + a fetched favicon,
 # written to assets/brands/<brand>/kit.json. Runs the same steps you'd otherwise chain by hand; author
 # themes/<brand>.json from the manifest, then confirm with `make beats VS=<brand>`.
-kit: ## [study] sections + palette + favicon in one command → assets/brands/<brand>/kit.json
-	node scripts/brand/kit.mjs $(URL) $(NAME)
+# INIT=1 additionally runs `make doctor` first and writes films/scene/<brand>.brief.md, so a fresh film
+# goes from nothing to "answer the quiz next" in one command (AGENTS.md stage 1: brief).
+kit: ## [study] sections + palette + favicon in one command → assets/brands/<brand>/kit.json (INIT=1: also doctor + brief skeleton)
+	node scripts/brand/kit.mjs $(URL) $(NAME) $(if $(INIT),--init)
 
 # make study VIDEO=refs/ref.mp4 [NAME=… THRESH=0.3]: the film-side twin of `make sections`. Reads a
 # REFERENCE video: shot boundaries (ffmpeg scene score), a contact sheet (in/mid/out per shot) and a
 # study.md whose four judgement columns you fill by eye. Writes refs/<name>/ (gitignored: study the
 # grammar, never ship the frames). engine-doctrine/CRAFT/REFERENCE-STUDY.md
-study: ## [study] the film-side twin of `make sections`. STRIPS=<n> adds a contiguous motion strip for the n busiest shots.
-	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS))
+#
+# make study REF=<reference.mp4> D=<film.json> MATCH=1: instead measures a RECREATION against the
+# reference it was built to match, beat by beat (storyboard beats, or scene cuts detected in the
+# reference). Writes out/match/<film>/: a dense strip per beat (reference row over render row), a
+# difference overlay, a mean SSIM, and a match.md ranking beats worst-to-best. STEP=<seconds> sets the
+# sample rate (default 0.1). engine-doctrine/CRAFT/RECREATION.md
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> instead scores a recreation against its reference, beat by beat.
+	@if [ -n "$(MATCH)" ]; then \
+	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
+	else \
+	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
+	fi
 
 # make preview HTML=path/frag.html [THEME=linear] [BG=#hex] [W=1400] [SERVE=1], render a single
 # hand-written fragment (or a captured component JSON) STANDALONE on the theme bg → /tmp/preview.png.

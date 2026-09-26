@@ -403,7 +403,7 @@ if (chain.length) {
   };
 }
 
-const rotation = Array.isArray(theme && theme.bgDefault) ? theme.bgDefault : null;
+const rotation = Array.isArray(look.bgDefault) ? look.bgDefault : null;
 const backdrop = (look.backdrop && look.backdrop.length) ? look.backdrop : ['soft', 'accent'];
 const bg = rotation
   ? [{ use: 'theme' }]

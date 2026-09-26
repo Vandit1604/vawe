@@ -1,0 +1,13 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "tempo": 0.5,
+ "duration": 6,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  { "type": "block", "block": "gauge", "x": 700, "y": 400, "value": 60, "start": 1, "duration": 4 }
+ ]
+}
