@@ -1803,7 +1803,7 @@
     },
     "motionPath": {
      "type": "object",
-     "label": "Fly the layer along an SVG path (GSAP MotionPathPlugin): { path:'M0,0 C...', align, autoRotate, curviness, dur, ease }. Deterministic (closed-form position per frame)."
+     "label": "Fly ANY layer along a path, and turn it to face the way it travels (GSAP MotionPathPlugin, AE's motion path + auto-orient): { path:'M0,0 C...' (or `d`, or `points`: an array of {x,y}, beziered by `curviness`), align, autoOrient: true|false, orientOffset (deg, an offset added while auto-orienting), curviness, from, to (0-1, which stretch of the path this tween crosses), dur, ease, delay }. `autoRotate` (GSAP's own name) still works underneath. Deterministic (closed-form position per frame)."
     },
     "physics": {
      "type": "object",
