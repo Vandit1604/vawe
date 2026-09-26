@@ -562,6 +562,20 @@
       }
     }
   },
+  "theme-look-keys--bgdefault": {
+    "theme": {
+      "look": {
+        "bgDefault": "…"
+      }
+    }
+  },
+  "theme-look-keys--bgpalette": {
+    "theme": {
+      "look": {
+        "bgPalette": "…"
+      }
+    }
+  },
   "theme-look-keys--cuts": {
     "theme": {
       "look": {

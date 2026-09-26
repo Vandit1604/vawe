@@ -924,11 +924,13 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 ## Theme look keys  `[theme]`
 
-A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the six keys it accepts.
+A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the eight keys it accepts.
 
 | name | what / when |
 |---|---|
 | `backdrop` | ordered bg preset names the brand turns through, one window per beat: planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159) |
+| `bgDefault` | a bg preset spec (or an array of 2+, a rotation) the theme paints when a beat opts in with `bg:[{"use":"theme"}]`; the one look key actually read at render time |
+| `bgPalette` | the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme's own palette when absent |
 | `cuts` | the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat |
 | `field` | grain and vignette numbers layered over the backdrop, both 0..1 strengths |
 | `layout` | the anchor band (left/center/right) and margin every beat composes against |
@@ -1204,4 +1206,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_733 effects across 63 families. Regenerate: `make effects`._
+_735 effects across 63 families. Regenerate: `make effects`._

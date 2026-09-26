@@ -1,5 +1,5 @@
 {
-  "total": 733,
+  "total": 735,
   "previewed": 345,
   "families": 63,
   "tags": [
@@ -97,7 +97,7 @@
     ],
     [
       "theme",
-      6
+      8
     ],
     [
       "timing",
@@ -4532,17 +4532,31 @@
       "id": "theme-look-keys",
       "title": "Theme look keys",
       "tag": "theme",
-      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the six keys it accepts.",
+      "intro": "A theme (`themes/<name>.json`) may carry a `look` block · the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the eight keys it accepts.",
       "mode": "table",
       "note": null,
       "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
-      "count": 6,
+      "count": 8,
       "undescribed": 0,
       "entries": [
         {
           "name": "backdrop",
           "stem": "theme-look-keys--backdrop",
           "desc": "ordered bg preset names the brand turns through, one window per beat · planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159)",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bgDefault",
+          "stem": "theme-look-keys--bgdefault",
+          "desc": "a bg preset spec (or an array of 2+, a rotation) the theme paints when a beat opts in with `bg:[{\"use\":\"theme\"}]`; the one look key actually read at render time",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bgPalette",
+          "stem": "theme-look-keys--bgpalette",
+          "desc": "the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme's own palette when absent",
           "scene": null,
           "noPreview": null
         },
