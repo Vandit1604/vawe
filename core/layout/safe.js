@@ -340,6 +340,28 @@ export function resolveAnchorPoint(name) {
   return p;
 }
 
+export const ANCHOR_POINT_REGISTRY = defineRegistry('anchor point', ANCHOR_POINTS, {
+  slot: 'anchorPoint',
+  blurbs: {
+    'top-left': 'the default: x/y is the box\'s top-left corner, unchanged from before this field existed',
+    top: 'x/y is the top-centre of the box: y sits on the top edge, x on its horizontal middle',
+    'top-right': 'x/y is the box\'s top-right corner',
+    left: 'x/y is the left-centre of the box: x sits on the left edge, y on its vertical middle',
+    center: 'x/y is the box\'s exact centre, needs a numeric w and h (or, for text, a `size`) to compute',
+    right: 'x/y is the right-centre of the box',
+    'bottom-left': 'x/y is the box\'s bottom-left corner',
+    bottom: 'x/y is the bottom-centre of the box',
+    'bottom-right': 'x/y is the box\'s bottom-right corner',
+  },
+  catalog: {
+    title: 'Anchor points',
+    tag: 'layout',
+    intro: '`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER\'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.',
+    usage: (n, { j }) => j({ x: 960, y: 540, w: 200, h: 100, anchorPoint: n }),
+    noPreview: 'an anchor point is where a coordinate lands, not a look: see it on any layer with `w`/`h` set and `anchorPoint: "center"`.',
+  },
+});
+
 // ── THE CAPTION BAND ────────────────────────────────────────────────────────────────────────────
 // A burnt-in caption owns real estate, and nothing stopped a headline landing on it. The band belongs
 // HERE, next to safeArea, for the reason the header gives: where a caption sits is a property of the
