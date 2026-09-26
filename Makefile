@@ -672,6 +672,12 @@ brandspec: ## [study] READ the site's real CSS + computed styles (don't guess): 
 sections: ## [study] capture a website's real sections into assets/brands/<brand>
 	node scripts/brand/sections.mjs $(URL) $(NAME) $(if $(VIEWPORT),--viewport $(VIEWPORT))
 
+# make kit URL=https://site.com NAME=brand: ONE command for `sections` + `palette` + a fetched favicon,
+# written to assets/brands/<brand>/kit.json. Runs the same steps you'd otherwise chain by hand; author
+# themes/<brand>.json from the manifest, then confirm with `make beats VS=<brand>`.
+kit: ## [study] sections + palette + favicon in one command → assets/brands/<brand>/kit.json
+	node scripts/brand/kit.mjs $(URL) $(NAME)
+
 # make study VIDEO=refs/ref.mp4 [NAME=… THRESH=0.3]: the film-side twin of `make sections`. Reads a
 # REFERENCE video: shot boundaries (ffmpeg scene score), a contact sheet (in/mid/out per shot) and a
 # study.md whose four judgement columns you fill by eye. Writes refs/<name>/ (gitignored: study the
