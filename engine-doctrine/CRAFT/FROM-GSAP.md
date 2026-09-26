@@ -1,6 +1,6 @@
 ---
 when: "you know GSAP and want the vawe JSON that does the same thing"
-answers: "15 side-by-side pairs, a GSAP tween/timeline/stagger/ease/motionPath/wiggle/loop next to the vawe field or JSON that does the same job, and why the shape differs (renderFrame(n) has no wall clock and no callbacks)"
+answers: "17 side-by-side pairs, a GSAP tween/timeline/stagger/ease/motionPath/wiggle/loop/trim/matte next to the vawe field or JSON that does the same job, and why the shape differs (renderFrame(n) has no wall clock and no callbacks)"
 group: reference
 ---
 
@@ -34,7 +34,10 @@ const { name, t01 } = track(n, fps, [{ name: 'a', dur: 1.2 }, { name: 'b', dur: 
 ```
 GSAP's timeline plays tweens in order and tracks where playback is. `track()` (`core/motion/motion.js`)
 takes a frame and a beat list and returns which beat is active and its local progress, purely from
-`n`. There is no "current position" to advance; every frame re-derives it.
+`n`. There is no "current position" to advance; every frame re-derives it. A `group` layer's own
+`clock` (`{ duration, rate, loop: n | forever | pingpong, hold }`, `core/timeline/group-clock.js`) is
+the closer GSAP-timeline analog when the whole sub-sequence itself must repeat: it gives its children
+a local timeline scoped to the group's window, the way a nested GSAP timeline with `repeat` does.
 
 ## 3. Stagger across a group
 
@@ -53,26 +56,36 @@ Same idea, same number. `stagger` here is a per-unit offset the engine's own `an
 gsap.to(el, { x: 100, ease: "power2.out" });
 ```
 ```json
-{ "parts": [{ "select": ".x", "anim": "fadeUp", "ease": "power2.out" }] }
+{ "parts": [{ "select": ".x", "anim": "fadeUp", "ease": "power2.out" }] },
+{ "motion": [{ "t": 0, "x": 0 }, { "t": 1, "x": 100, "ease": "power2.out" }] }
 ```
-GSAP-driven fields (`parts[].ease`, `morph.ease`, `fx.ease`, `splitText.ease`, `motionPath.ease`) take
-a real GSAP ease name unchanged. Every other field (`motion`, `camera`, `timeRemap`) is driven by the
-engine's own interpolator and takes an `EASINGS` name instead (`easeOutCubic`, `easeOutElastic`,
-`punch`...). Naming a GSAP ease in an engine-driven field, or vice versa, is the single most-repeated
-mistake in this repo's log (`engine-doctrine/MISTAKES.md #355`); `core/validate/easing.mjs` refuses it
-by name at `make validate`, not at render.
+Two vocabularies, one spelling now works on both. GSAP-driven fields (`parts[].ease`, `morph.ease`,
+`fx.ease`, `splitText.ease`, `motionPath.ease`) hand a GSAP ease name straight to `gsap.fromTo`,
+unchanged. Fields the engine's own interpolator drives (`motion[].ease`, `camera`, `timeRemap`) used
+to take only an `EASINGS` name (`easeOutCubic`, `easeOutElastic`, `punch`...) and refuse a GSAP
+spelling; naming one in the other's field was the single most-repeated mistake in this repo's log
+(`engine-doctrine/MISTAKES.md #447`). `resolveGsapAlias` (`core/motion/motion.js`) closed that gap:
+an engine-driven field now resolves a recognised GSAP spelling (`power2.out`, `back.out(1.7)`,
+`elastic.out(1, 0.3)`...) to its equivalent engine curve, so the vocabulary an author already knows
+from GSAP works either place. Only the families with no engine equivalent (`steps`, `rough`, `slow`)
+still need the GSAP-owned field; `core/validate/easing.mjs` names that at `make validate`, not at render.
+`motion[].ease` also takes a per-property map instead of one name (Separate Dimensions), `{ "x":
+"linear", "y": "easeOutCubic" }`, for when x and y on the same pair of keys should travel different
+curves; a property the map omits still rides the segment's own curve.
 
 ## 5. Fly an object along a curve
 
 ```js
-gsap.to(".comet", { motionPath: { path: "#curve", autoRotate: true }, duration: 3 });
+gsap.to(".comet", { motionPath: { path: "#curve", autoRotate: true, start: 0.1, end: 0.9 }, duration: 3 });
 ```
 ```json
-{ "modifiers": [{ "motionPath": { "path": "M0,0 C120,-160 380,-160 500,0", "autoRotate": true, "dur": 3.0 } }] }
+{ "motionPath": { "path": "M0,0 C120,-160 380,-160 500,0", "autoOrient": true, "from": 0.1, "to": 0.9, "dur": 3.0 } }
 ```
 GSAP's `MotionPathPlugin` is loaded here directly, unchanged, and the plugin is loaded only when a
-scene actually uses `motionPath` (`core/engine/preload.js`). `autoRotate` behaves exactly as it does
-in GSAP: the layer's heading tracks the curve's own tangent.
+scene actually uses `motionPath` (`core/engine/preload.js`). `autoRotate` (GSAP's own name) still
+works, and `autoOrient` is the same dial under After Effects' name: either spelling turns the layer's
+heading to track the curve's own tangent. `from`/`to` (0-1) trim which stretch of the path this tween
+crosses, the motion-path equivalent of `start`/`end` above.
 
 ## 6. An instant set, no animation
 
@@ -88,26 +101,36 @@ el.style.opacity = '0.4'; // written directly inside renderFrame(n), no easing c
 ## 7. Infinite repeat / yoyo
 
 ```js
-gsap.to(el, { scale: 1.02, repeat: -1, yoyo: true, duration: 4.6 });
+gsap.to(el, { y: -80, repeat: -1, yoyo: true, duration: 1 });
 ```
 ```json
-{ "idle": "breathe" }
+{ "motion": [{ "t": 0, "y": 0 }, { "t": 1, "y": -80 }],
+  "drive": { "loop": { "mode": "pingpong", "from": 0, "to": 1 } } }
 ```
-GSAP repeats a tween forever by re-running it. Vawe has no loop to re-run: `idle: "breathe"`
-(`core/engine/idle.js`) is a closed-form `sin()` of the layer's own local time, so frame 4000 and frame
-40 both come from the same formula, never from "how many times has this played."
+GSAP repeats a tween forever by re-running it. Vawe has no loop to re-run: `drive.loop`
+(`core/tracks/drive.js`) is a CLOCK decision, not a driven property, that repeats this layer's own
+keyframes past `to` seconds instead of holding on the last one. `mode: "pingpong"` is `yoyo: true`
+(alternates direction each pass); `mode: "cycle"` is a plain `repeat`, restarting at `from` every time.
+Either way, frame 4000 and frame 40 both come from the same closed-form remap of `n`, never from "how
+many times has this played." For ambient motion with no keyframes to repeat, `idle: "breathe"`
+(`core/engine/idle.js`) is the same idea for a held frame: a closed-form `sin()` of the layer's own
+local time.
 
 ## 8. A `wiggle()`-style ambient jitter
 
 ```js
-// AE/GSAP-adjacent: wiggle(2, 20) on position
+// AE expression, the usual reason to reach for a wiggle in a GSAP/AE-adjacent workflow:
+// wiggle(2, 20) on rotation, 2 wiggles per second, +/-20deg
 ```
 ```json
-{ "idle": { "name": "drift", "amp": 14, "period": 9 } }
+{ "drive": { "wiggle": { "prop": "rot", "freq": 1.5, "amp": 2 } } }
 ```
 `wiggle()` is pseudo-random per-frame noise; a renderer that seeks out of order cannot use anything
-seeded by "the last frame", so `drift` (`core/engine/idle.js`) is a sum of two incommensurate sine
-waves instead. It looks unrepeating over a beat's length and is 100% reproducible from `n` alone.
+seeded by "the last frame", so `drive.wiggle` (`core/tracks/drive.js`) sums octaves of a seeded,
+deterministic noise function instead: the same frame always samples the same value, on any worker, in
+any order. `drive` also owns `link` (`{ from: "otherId.prop", mul, add, delay }`), the pick-whip: one
+property copies another layer's own animated value, delayed for follow-through. `wiggle` and `link`
+compose in the same `drive` object and can run on the same layer at once.
 
 ## 9. Scroll-scrubbed animation
 
@@ -195,6 +218,35 @@ const phase = hashId(L.id); // core/engine/idle.js: phase hashed from layer iden
 workers rendering the same frame, must disagree. Wherever Vawe wants motion that looks unsynchronised
 across a cast of layers, it hashes a phase from something stable (the layer's own `id`) instead of
 drawing one, so the "randomness" is fixed forever once written.
+
+## 16. Draw-on strokes (Trim Paths)
+
+```js
+gsap.registerPlugin(DrawSVGPlugin);
+gsap.fromTo("#check", { drawSVG: "0%" }, { drawSVG: "0% 100%", duration: 0.6 });
+```
+```json
+{ "trim": { "start": 0.1, "end": 0.6 } }
+```
+GSAP needs a paid plugin (`DrawSVGPlugin`) to reveal a stroke by length. `trim` (AE's own Trim Paths,
+`core/tracks/trim.js`) is built in: `start`/`end`/`offset` are fractions 0-1 of the path's real length
+(`getTotalLength()`), and each is independently keyframable by naming `trimStart`/`trimEnd`/
+`trimOffset` in the layer's own `motion` array, composing with x/y/rot on the same keys.
+
+## 17. A track matte (luma/alpha wipe)
+
+```js
+gsap.set(".wipe", { mixBlendMode: "luminosity" }); // and a hand-built mask-image / SVG mask hack
+```
+```json
+{ "modifiers": [{ "matte": { "layer": "wipeId", "mode": "luma" } }] }
+```
+GSAP has no first-class track matte: reproducing After Effects' luma/alpha matte means a hand-rolled
+CSS mask or an SVG `<mask>` wired up outside GSAP entirely. Vawe's `matte` modifier (`core/fx`) takes
+another layer's id directly: that layer's luma or alpha becomes THIS layer's own alpha, white showing
+and black hiding, and `-inverted` variants flip which side shows. The matte source must paint an image
+(an `image`/`svg` layer, or a `rect`/`html` layer with a gradient `bg`) and needs its own `id`; it
+moves with its own motion track, so animating the source animates the reveal.
 
 ## See also
 
