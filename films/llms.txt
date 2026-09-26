@@ -55,7 +55,7 @@ cannot go stale). Everything else in the vocabulary below is a dial ON one of th
 - `cursor`: a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`) WHEN: the beat IS a product demo; this is the one primitive built to drive a click-through.
 - `clip`: a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders WHEN: footage came in as a frame sequence (PNG/WebP), not a video file, and must stay seek-exact.
 - `html`: raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock WHEN: the surface does not exist yet and CSS genuinely expresses it faster than composing primitives; see engine-doctrine/CRAFT/HTML-FRAGMENTS.md before hand-writing one.
-- `component`: a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` WHEN: a real product surface was captured (`make capture`); always prefer this over `html` when the surface actually exists.
+- `component`: a REAL captured UI block (`make media X=capture`), or one named part of a captured scene, scaled to fit `w` WHEN: a real product surface was captured (`make media X=capture`); always prefer this over `html` when the surface actually exists.
 - `board`: a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip WHEN: the beat is "here is our roadmap/backlog" from pure data, no captured asset needed.
 - `doc`: a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height WHEN: the beat is "here is a file/diff/README" from pure data, no captured asset needed.
 - `shader`: a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look WHEN: the whole frame is a generative backdrop; it cannot sample what is beneath it.
@@ -158,7 +158,7 @@ half: what fields are legal to write at one JSON path, read live off `films/scen
 ## The loop
 
 ```
-make pitch                          # ask the four questions: subject, data, payoff, audience/feeling
+make dev-tool X=pitch                          # ask the four questions: subject, data, payoff, audience/feeling
                                      # write films/scene/x.storyboard.md from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md
 make dev D=films/scene/x.json     # THE iteration loop: build, draft-render, look. No gates.
 make ship D=films/scene/x.json    # the real ladder: author-check -> render -> audit -> seams
