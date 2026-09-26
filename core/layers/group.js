@@ -8,7 +8,11 @@ import { propsOf } from '../registry/props.js';
 export function build(kit, el, L, { children } = L) {
   kit.layoutGroup(el, L);
   kit.chipBox(el, L);
-  for (const C of children || []) kit.addGroupChild(el, C, L);
+  // `clock`: this group's own local timeline (core/timeline/group-clock.js), one cycle looped inside
+  // this group's outer [start, start+duration] window. No `clock` = today's plain containment,
+  // unchanged (resolveGroupWindow returns the outer window straight through).
+  const root = kit.resolveGroupWindow(L, L.start ?? 0, L.duration ?? 0, L.exitDur, null);
+  for (const C of children || []) kit.addGroupChild(el, C, root);
 }
 
 export const PROPS = propsOf(build);
