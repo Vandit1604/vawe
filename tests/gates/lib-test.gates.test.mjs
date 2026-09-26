@@ -381,6 +381,29 @@ test('lib-test: gates', async () => {
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// ---- scene-units-exit-suppressed: an authored exit that the beat wrapper silently owns instead ------
+//
+// `sceneUnits: true` forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
+// cut (films/scene/scene.js setLayerTiming), so an authored `out` on that layer never plays and nothing
+// used to say so. tests/fixtures/scene-units-exit-suppressed.fixture.json: two beats, sceneUnits on, the
+// first beat's layer authors `out:"blur"` and is current when its beat cuts.
+{
+  const fixture = path.join(repoRoot, 'tests/fixtures/scene-units-exit-suppressed.fixture.json');
+  const gate = path.join(repoRoot, 'quality/gates/beat-check.mjs');
+  const res = spawnSync('node', [gate, fixture, '--json'], { encoding: 'utf8', cwd: repoRoot });
+  let recs = null;
+  try { recs = JSON.parse(res.stdout); } catch { recs = null; }
+  ok('scene-units-exit-suppressed: fires on a beat-wrapped layer with an authored exit',
+    Array.isArray(recs) && recs.some((r) => r.code === 'scene-units-exit-suppressed' && r.severity === 'warn'));
+  const finding = recs && recs.find((r) => r.code === 'scene-units-exit-suppressed');
+  ok('scene-units-exit-suppressed: names the affected layer and its authored `out`',
+    finding && /"beat one"/.test(finding.summary) && /out:"blur"/.test(finding.summary));
+
+  // The layer past the cut (`beatB`) never carries this finding: it has no authored `out` at all.
+  ok('scene-units-exit-suppressed: does not fire on a layer with no authored exit',
+    !/beatB|beat two/.test(finding.summary));
+}
+
 
 // ---- the sound gate: silence has to be a decision, and the decision has to be READABLE ---------
 //

@@ -368,6 +368,13 @@ against the same 0.4s this gate calls the line where a held frame stops reading 
 answers as above: write `duration` to say what you meant, or mark the layer `"acrossBeats": true` to keep
 the authored window (it then fades out on its own instead of sliding with the beat). It **warns**.
 
+## scene-units-exit-suppressed (always on, in `make check GATE=beat-check`)
+
+The same wrapping also forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
+cut instead (`films/scene/scene.js` `setLayerTiming`), so an authored `out` on that layer silently never
+plays; `make check GATE=beat-check` names every layer this happens to, and `"acrossBeats": true` is the
+same way out. It **warns**.
+
 ## Provenance
 
 **Do not re-add:** a claim that straight-ahead action, solid drawing, squash-and-stretch or arcs have no
