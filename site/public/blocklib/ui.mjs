@@ -2,7 +2,7 @@
 // (props → array of scene-layer JSON), deterministic, sharing the kit vocabulary. Re-exported by index.mjs.
 import {
   TOKENS, HAIR, r2, text, box, onColor, onInk,
-  R, TYPE, SPACE, E, cardChrome, toneColor,
+  R, RCSS, TYPE, SPACE, E, cardChrome, toneColor,
   stackWindows, TONE_NAMES,
   tint, TINT, SHADOW_CARD, labelCss, numCss, needShape,
 } from './kit.mjs';
@@ -84,8 +84,8 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
   const html = `<div style="display:flex;align-items:flex-start;gap:${SPACE.sm}px;padding:${SPACE.md}px;`
     + `box-sizing:border-box;width:${w}px">` + dot
     + `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px;align-items:flex-start;flex:1;min-width:0">`
-    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink}">${title}</span>`
-    + (body ? `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${body}</span>` : '')
+    + `<span style="${labelCss({ size: TYPE.lead, color: T.ink, weightFallback: 700 })}">${title}</span>`
+    + (body ? `<span style="${labelCss({ size: TYPE.body, color: T.sub, weightFallback: 400 })}">${body}</span>` : '')
     + '</div></div>';
   // a notification ARRIVES FROM THE EDGE and leaves the way it came, the short, correct entrance for a
   // chip. Nothing inside it should perform; it is one small statement, so no `parts` here.
@@ -182,12 +182,12 @@ function tabBarHtml({ items, tabW, rowH, innerW, withIcons, w, PAD, GAP, from, t
     + `background:${T.surface};border-radius:${R.tight}px">`
     // the lit pill, and the active-styled row clipped to it
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
-    + `border-radius:${R.chip}px;background:${T.card};box-shadow:${SHADOW_CARD};`
+    + `border-radius:${RCSS('chip')};background:${T.card};box-shadow:${SHADOW_CARD};`
     + `transform:translateX(${pos})"></div>`
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${innerW}px;height:${rowH}px;">`
     + row(false) + '</div>'
     + `<div style="position:absolute;left:${PAD}px;top:${PAD}px;width:${tabW}px;height:${rowH}px;`
-    + `overflow:hidden;border-radius:${R.chip}px;transform:translateX(${pos})">`
+    + `overflow:hidden;border-radius:${RCSS('chip')};transform:translateX(${pos})">`
     + `<div style="position:absolute;left:0;top:0;transform:translateX(calc(-1 * ${pos}))">${row(true)}</div>`
     + '</div></div>';
 }
@@ -366,7 +366,7 @@ export function kanban({ x, y, w = 720, columns = [], start = 0, dur = 4 } = {})
   const col = (c) => `<div style="display:flex;flex-direction:column;gap:${SPACE.xs}px;width:${colW}px;flex:none">`
     + `<span data-part style="font:600 ${TYPE.body}px var(--font-sans);color:${T.sub}">${c.title}</span>`
     + c.cards.map((card) => `<span data-part style="font:500 ${TYPE.body}px var(--font-sans);color:${T.ink};`
-      + `background:${T.card};border-radius:${R.card}px;border:${HAIR};padding:${SPACE.sm}px ${SPACE.md}px">${card}</span>`).join('')
+      + `background:${T.card};border-radius:${RCSS('card')};border:${HAIR};padding:${SPACE.sm}px ${SPACE.md}px">${card}</span>`).join('')
     + '</div>';
   const html = `<div style="display:flex;align-items:flex-start;gap:${SPACE.md}px;width:${w}px">`
     + columns.map(col).join('') + '</div>';

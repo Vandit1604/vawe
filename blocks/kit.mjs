@@ -8,6 +8,15 @@
 // color-mix() for tints, so the same block reskins to any brand theme, still deterministic since the
 // strings are static. The Stripe hexes stay literal: `codeBlock`'s dark theme is a deliberate
 // "reflect Stripe" look, not a generic surface.
+//
+// SHAPE is now theme-aware too, the same way: `cardChrome`/`htmlCard` (below) emit `var(--v-radius,
+// 14px)` in place of a bare `14`, so a theme (or scene) that sets `look.surface` (core/theme/
+// surface-looks.js) repaints radius/border/shadow/blur on every card with zero edits here, and one
+// left unset renders the exact literal it always has. `look` is the ONE param name to reach for that:
+// passed to cardChrome/htmlCard it resolves a named surface look (`"glass"`, `"brutalist"`, …) or a
+// literal override object for THIS card alone, scoped by an inline `style="--v-radius:…"` on its own
+// wrapper rather than a global var, so one block can look different from its siblings on purpose.
+import { resolveSurfaceLook, surfaceCssVars, cssVar as surfaceCssVar } from '../core/theme/surface-looks.js';
 export const TOKENS = {
   // `--warn` is written for every theme by core/boot.js, defaulted rather than required, so no brand
   // has to hold an opinion about amber.
@@ -44,9 +53,13 @@ export const SERIES = ['var(--accent)',
   'color-mix(in srgb, var(--accent) 8%, var(--text-2))'];
 export const seriesAt = (i) => SERIES[i % SERIES.length];
 
-export const HAIR = `1px solid ${T.hair}`;
+// Each of the three parts is its own surface token (`--v-border-w`/`-style`/`-color`), so a look can
+// thicken a border, dash it or recolour it without touching the other two. Unset, all three fall back
+// to exactly `1px solid var(--line)`, the literal this was before surface looks existed.
+export const HAIR = `${surfaceCssVar('borderW', 1)} ${surfaceCssVar('borderStyle', 'solid')} ${surfaceCssVar('borderColor', T.hair)}`;
 // The heavier rule. `--line-strong` is written for every theme (core/boot.js:219, the theme contract
-// requires `lineStrong`), naming plumbing that already exists.
+// requires `lineStrong`), naming plumbing that already exists. Not surface-token-aware: a strong
+// hairline divider is a colour decision (theme.palette.lineStrong), never a shape a "look" repaints.
 export const HAIR_STRONG = '1px solid var(--line-strong)';
 
 // ── ELEVATION, NAMED ─────────────────────────────────────────────────────────────────────────────
@@ -125,6 +138,13 @@ export const TYPE_STEPS = Object.values(TYPE);
 export const R = { none: 0, micro: 4, chip: 8, tight: 12, card: 14, soft: 16, round: 24, pill: 100 };
 export const R_STEPS = Object.values(R);
 
+// RCSS(step): the ambient radius var for a raw HTML template literal that builds its own card chrome
+// instead of going through `htmlCard`, e.g. `border-radius:${RCSS('card')}`. Every step reads the SAME
+// `--v-radius` token (a look repaints the whole card language at once, never one corner alone); this
+// only supplies the right fallback number for the step asked for, so "no look set" still renders
+// `step`'s own literal exactly as before.
+export const RCSS = (step = 'card') => surfaceCssVar('radius', R[step]);
+
 // needData(prop, value, block): a block whose subject is missing refuses instead of rendering a shell.
 // A bare block name does not inherit the catalog's demo props (only a namespaced one does,
 // MISTAKES.md #449), so an author writing {"type":"block","block":"barChart"} would otherwise get an
@@ -161,11 +181,23 @@ export const needShape = (block, what, items, fields) => {
 // cardChrome: the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
 // one of those was a chance for the set to drift, and it did. Timing stays at the call site because
 // entrance duration is a per-block motion decision, not chrome.
-export function cardChrome({ radius = R.card, elevation = 1, border = HAIR, bg = T.card, anim = 'rise' } = {}) {
+//
+// `look` (a surface-look name, or a literal token-override object, `core/theme/surface-looks.js`)
+// repaints THIS card alone: it resolves to concrete numbers rather than an ambient CSS var, because a
+// native layer has no wrapper element of its own to scope a custom property on the way `htmlCard`
+// below can. Omitted, radius/border stay the AMBIENT `var(--v-radius, …)`/`var(--v-border-…, …)` a
+// theme or scene's `look.surface` can still repaint for every card at once. `elevation`'s fixed shadow
+// tiers (core/layers/util.js) are not part of a surface look: a native layer has no slot for an
+// arbitrary shadow string, only `bg`/`border`/`radius`/`anim` are asked to carry a card's SHAPE here.
+export function cardChrome({ radius = R.card, elevation = 1, border = HAIR, bg = T.card, anim = 'rise', look = null } = {}) {
+  const resolved = resolveSurfaceLook(look);
+  const chrome = resolved
+    ? { radius: resolved.radius, border: `${resolved.borderW}px ${resolved.borderStyle} ${resolved.borderColor}` }
+    : { radius: typeof radius === 'number' ? surfaceCssVar('radius', radius) : radius, border };
   // `elevation: 0` means NO shadow, and the schema's minimum is 1, so a flat card omits the key
   // rather than emitting a value the validator rejects. Asking for flat is legitimate (an empty-state
   // surface is meant to read as unfilled); a block that silently emits an unrenderable layer is not.
-  return { bg, radius, border, ...(elevation ? { elevation } : {}), anim };
+  return { bg, ...chrome, ...(elevation ? { elevation } : {}), anim };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -220,12 +252,25 @@ export const stackWindows = ({ n = 0, start = 0, dur = 4, step = 0.9, life = 2.2
 // wrappers were wrong against their own padding (`w - 48` on padding 22, `w - 44` on padding 24).
 // `body` receives the real inner width so a caller cannot restate it either.
 const CARD_LABEL_H = 31;   // the heading row: one TYPE.body cap line (17 * 1.2 ≈ 21) + its 10px margin
-export function htmlCard({ w, pad = 22, label: caption = '', align = '', body = () => '' } = {}) {
-  const inner = Math.max(0, w - 2 * pad);
+// `look` (a surface-look name, or a literal token-override object): unlike `cardChrome`, `htmlCard`
+// owns its own wrapper `<div>`, so a per-block override can be SCOPED there as inline custom
+// properties (`style="--v-radius:0px;…"`) instead of resolving to literals: this card alone repaints,
+// its siblings keep reading the ambient (theme/scene) value. `pad` stays a real number either way (it
+// feeds `inner`, the width the caller lays SVG/canvas content into, computed HERE at author time, never
+// a live CSS value the browser could rescale without knowing to redraw what was measured against it):
+// an explicit `pad` wins, otherwise a `look`'s own `pad` (scaled by its `density`) sets it, otherwise
+// the literal 22 this always defaulted to.
+export function htmlCard({ w, pad = null, label: caption = '', align = '', body = () => '', look = null } = {}) {
+  const resolved = resolveSurfaceLook(look);
+  const resolvedPad = pad ?? (resolved ? Math.round(resolved.pad * resolved.density) : 22);
+  const inner = Math.max(0, w - 2 * resolvedPad);
+  const scoped = resolved
+    ? Object.entries(surfaceCssVars(resolved)).map(([k, v]) => `${k}:${v}`).join(';') + ';'
+    : '';
   // The card matches a native `elevation: 1` layer: hairline, R.card, one soft step of depth. It had
   // no shadow at all, so html charts sat flat beside native stat cards on the same stage.
-  return `<div style="background:${T.card};border:${HAIR};border-radius:${R.card}px;padding:${pad}px;`
-    + `box-sizing:border-box;width:${w}px;box-shadow:${SHADOW_CARD}${align ? `;text-align:${align}` : ''}">`
+  return `<div style="${scoped}background:${surfaceCssVar('bg', T.card)};border:${HAIR};border-radius:${surfaceCssVar('radius', R.card)};padding:${resolvedPad}px;`
+    + `box-sizing:border-box;width:${w}px;box-shadow:${SHADOW_CARD};backdrop-filter:${surfaceCssVar('blur', 0)}${align ? `;text-align:${align}` : ''}">`
     + (caption ? `<div style="${capCss()};margin-bottom:10px">${caption}</div>` : '')
     + body(inner) + '</div>';
 }
@@ -275,11 +320,28 @@ export const DATA_CAP = 6;
 // which is why a donut read as a thick toy ring beside a hairline-thin trend line in the same film.
 export const STROKE = { line: 2.4, arc: 9 };
 
+// strokeCss(px): the ambient stroke treatment every SVG mark reads instead of a bare stroke-width and
+// a hardcoded round cap. `px` (STROKE.line/STROKE.arc/DATA_CAP at the call site) is scaled by
+// `--v-stroke-scale` (a look's own multiplier: brutalist draws thicker, editorial hairline-thin), and
+// the cap comes from `--v-stroke-cap` (round/square/butt), so a look changes the MARK, not just the
+// frame around it. Unset, this renders `stroke-width:9px;stroke-linecap:round` exactly as before.
+export const strokeCss = (px) => `stroke-width:calc(${px} * ${surfaceCssVar('strokeScale', 1)});stroke-linecap:${surfaceCssVar('strokeCap', 'round')}`;
+// trackDashCss(): a look may turn a filled track/rule into a dashed one (editorial's fine hairline
+// dash, print's halftone-like dotted screen) with one var; unset, `stroke-dasharray:none` is a no-op.
+export const trackDashCss = () => `stroke-dasharray:${surfaceCssVar('trackDash', 'none')}`;
+// areaFillCss(fallbackPaint): the paint a filled area/track reads. `fallbackPaint` is the block's own
+// per-instance default (lineChart's gradient url, a gauge track's tint), so a look that sets
+// `areaFill` (brutalist: a flat solid block; editorial/print: 'none', no wash at all) repaints the
+// FILL STYLE itself, not only the frame holding it, and a look that leaves it unset changes nothing.
+export const areaFillCss = (fallbackPaint) => `fill:${surfaceCssVar('areaFill', fallbackPaint)}`;
+
 // SHADOW_CARD. ONE step of elevation, matching what `elevation: 1` stacks in core/layers/util.js:216
 // for a native layer. html cards had NO shadow at all, so an html chart and a native stat card sat at
 // visibly different depths on the same stage. Drop shadow only: the inset ring the engine adds needs
 // to know light-from-dark, and CSS in a fragment cannot.
-export const SHADOW_CARD = '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)';
+// The ambient `--v-shadow` surface token, same idiom as HAIR above: unset, every consumer renders this
+// exact two-shadow literal; a `look.surface` repaints all of them (a look may set `shadow: 'none'`).
+export const SHADOW_CARD = surfaceCssVar('shadow', '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)');
 
 // THE THREE TEXT ROLES INSIDE A DATA SURFACE, as CSS `font:` shorthands so an html block and a native
 // `text` layer cannot drift apart on them. Mono carries numbers, sans carries words.
@@ -289,12 +351,27 @@ export const SHADOW_CARD = '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.0
 // TYPE.body (17) is the floor, not TYPE.fine (14): `make audit` fails text under 14.04px as unreadable.
 // The muted colour is `--text-2`, not `--dim`: `--dim` is the chrome role and measures 2.6:1 against
 // the card on higgsfield (a hard audit failure); `--text-2` clears 4.5:1 on every theme.
-export const capCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 600 } = {}) =>
-  `font:${weight} ${size}px var(--font-mono);color:${color};letter-spacing:0.02em`;
-export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 500 } = {}) =>
-  `font:${weight} ${size}px var(--font-sans);color:${color}`;
-export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = 700 } = {}) =>
-  `font:${weight} ${size}px var(--font-num);color:${color};letter-spacing:-0.01em;font-variant-numeric:tabular-nums`;
+// `weight` stays an explicit param a caller can still pass to mean it outright (tabBar's active/
+// inactive contrast, ui.mjs's bold digit): passing a number wins, no ambient var involved, exactly as
+// before. Left at its default (`null`), the ambient `--v-label-*`/`--v-num-*` tokens carry the weight
+// instead, along with font/case/tracking/variant a caller never had a way to set at all: a look's own
+// choice, or exactly today's literal (600/mono/0.02em/normal) when no look is set. `font-family` is
+// the one JS default that differs by role (capCss: mono, labelCss: sans, numCss: the theme's num
+// face), so the three roles still read as three different faces on a theme with no `look.surface`.
+export const capCss = ({ size = TYPE.body, color = TOKENS.sub, weight = null } = {}) =>
+  `font:${weight ?? surfaceCssVar('labelWeight', 600)} ${size}px ${surfaceCssVar('labelFont', 'var(--font-mono)')};`
+  + `color:${color};letter-spacing:${surfaceCssVar('labelTracking', '0.02em')};`
+  + `text-transform:${surfaceCssVar('labelCase', 'none')};font-variant:${surfaceCssVar('labelVariant', 'normal')}`;
+// `weightFallback` is the JS-only weight a caller wants when NO look is set (labelCss is reused for
+// both a quiet legend name at 500 and a bold headline at 700); a look's own `labelWeight` still wins
+// over it the moment one is set, same as every other ambient token here.
+export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = null, weightFallback = 500 } = {}) =>
+  `font:${weight ?? surfaceCssVar('labelWeight', weightFallback)} ${size}px ${surfaceCssVar('labelFont', 'var(--font-sans)')};`
+  + `color:${color};letter-spacing:${surfaceCssVar('labelTracking', '0em')};`
+  + `text-transform:${surfaceCssVar('labelCase', 'none')};font-variant:${surfaceCssVar('labelVariant', 'normal')}`;
+export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = null } = {}) =>
+  `font:${weight ?? surfaceCssVar('numWeight', 700)} ${size}px ${surfaceCssVar('numFont', 'var(--font-num)')};`
+  + `color:${color};letter-spacing:-0.01em;font-variant-numeric:tabular-nums`;
 
 // deltaChip. The verdict on a reading: a tinted pill carrying an arrow and a figure, in the tone's
 // own colour. It is a PAIR with the value it sits under and must never outweigh it, so it is one

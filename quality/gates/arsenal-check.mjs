@@ -95,6 +95,9 @@ const WAIVED = new Map(Object.entries({
   LOOK_MARK_KEYS: 'the fixed shape of `theme.look.marks`. Same argument as LOOK_SCALE_KEYS',
   LOOK_CUT_SLOTS: 'the fixed shape of `theme.look.cuts` (default/accent). Same argument as LOOK_SCALE_KEYS',
   LOOK_FIELD_KEYS: 'the fixed shape of `theme.look.field` (grain/vignette). Same argument as LOOK_SCALE_KEYS',
+  SURFACE_TOKEN_KEYS: 'the fixed shape of one `look.surface` bundle (radius/borderW/.../density). `look.surface` itself is catalogued as a value of the "Theme look keys" surface entry, and the surface LOOKS (glass/soft/...) are their own catalogued registry; this is the nine fields inside one bundle, not a fifth vocabulary',
+  KIT_DEFAULTS: 'the literal fallback bundle every surface token already renders as with no look set (blocks/kit.mjs R.card/HAIR/SHADOW_CARD, named once). Not a pickable look: SURFACE_LOOK_NAMES is the catalogued vocabulary',
+  CSS_VAR_NAMES: 'the internal token-name -> `--v-*` CSS custom property map, plumbing between core/theme/surface-looks.js and blocks/kit.mjs, never authored directly',
   // FOUND BY A COLLISION, not by a new export. `named()` is a bare word match over the catalogue
   // source, and the catalogue used to import `PRESETS` from core/type/type.js for the kinetic-preset
   // section, so core/lightfield/PRESETS was silently credited with a different file's import line.

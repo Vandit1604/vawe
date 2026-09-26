@@ -178,6 +178,7 @@
         "#0a1017"
       ],
       "paper": "#ffffff"
-    }
+    },
+    "surface": "outlined"
   }
 }
