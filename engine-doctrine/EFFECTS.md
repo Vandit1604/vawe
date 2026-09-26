@@ -228,6 +228,20 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 | `snappy` | easeOutQuart: lands fast and settles crisply, quicker off the mark than cubic and it never overshoots its target |
 | `spring` | easeOutSpring: a damped-spring overshoot that settles, physical life for something landing: a badge, a chip, a number |
 
+## Scene finish keys  `[finish]`
+
+data.finish is the ONE dial for the cinematic grade a premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.
+
+| name | what / when |
+|---|---|
+| `aberration` | a chromatic split in px over the whole frame, the lens-fringing finish |
+| `bloom` | blurs the frame 16px, lifts brightness 9% and screens the halo back over the sharp original |
+| `dof` | a blur baked from the camera's own keyframed focus against each layer's plane z, no new authoring vocabulary needed |
+| `grade` | a named colour grade (core/looks/filters.js) laid over the whole frame |
+| `grain` | a strength override on the existing bg grain toggle, applied to every window that already carries one |
+| `light` | a large soft key light dropped in as an html layer (core/lightfield), the premium launch-film source |
+| `vignette` | a full-frame vignette rect, amount 0..1 plus an optional colour |
+
 ## Generators (the playground)  `[generator]`
 
 Parametric field generators with declared option schemas, turnable at /playground and usable as a `bg` or a layer. `make list` for their dials.
@@ -384,6 +398,14 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `pointCloud` | a GPU point cloud: thousands of lit points posed absolutely from t |
 | `shatter` | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
 | `uiParallax` | flat UI planes stacked at depth, the camera moving past them so the layers separate |
+
+## Universal surface decoration  `[layer]`
+
+A `glass` prop any layer can carry (core/layers/util.js), independent of its type: a frosted backdrop-filter pane, or a true refraction when named `"refract"`.
+
+| name | what / when |
+|---|---|
+| `glass` | backdrop-filter blur and saturate on the layer itself, a frosted pane; `glass: "refract"` bends the picture through it instead of blurring, for real glass |
 
 ## Anchor points  `[layout]`
 
@@ -1222,4 +1244,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_744 effects across 64 families. Regenerate: `make effects`._
+_752 effects across 66 families. Regenerate: `make effects`._

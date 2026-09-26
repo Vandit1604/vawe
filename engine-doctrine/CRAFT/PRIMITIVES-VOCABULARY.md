@@ -481,6 +481,18 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `tritone` | three color grade, three tone, risograph grade | duotone with a third stop in the middle, which is what stops the midtones going muddy |
 | `vignette` | darkened corners, lens falloff, edge darkening | NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges |
 
+## finish key  `[finish]`
+
+| name | words | action |
+|---|---|---|
+| `aberration` | chromatic aberration, lens fringing, colour split, rgb split | a chromatic split in px over the whole frame, the lens-fringing finish |
+| `bloom` | glow, highlight bloom, blown out highlights, halo | blurs the frame 16px, lifts brightness 9% and screens the halo back over the sharp original |
+| `dof` | depth of field, focus rack, background blur, bokeh | a blur baked from the camera's own keyframed focus against each layer's plane z, no new authoring vocabulary needed |
+| `grade` | colour grade, cinematic grade, film look, cinematic look | a named colour grade (core/looks/filters.js) laid over the whole frame |
+| `grain` | film grain, texture noise, analog grain, grainy texture | a strength override on the existing bg grain toggle, applied to every window that already carries one |
+| `light` | large soft light, ambient key light, soft light source, premium launch glow | a large soft key light dropped in as an html layer (core/lightfield), the premium launch-film source |
+| `vignette` | dark corners, darkened edges, frame edge falloff | a full-frame vignette rect, amount 0..1 plus an optional colour |
+
 ## font-variation axis  `[axis]`
 
 | name | words | action |
@@ -1024,6 +1036,12 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `whipPan` | whip pan streaks, camera whip, motion smear pan | horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff. |
 | `wipe` | directional wipe, band wipe, sweep wipe | a directional band sweeping across the frame. The plainest geometric transition, and it always reads. |
 
+## surface look  `[layers[]]`
+
+| name | words | action |
+|---|---|---|
+| `glass` | glass panels, frosted glass, glassmorphism, frosted panel, backdrop blur panel | backdrop-filter blur and saturate on the layer itself, a frosted pane; `glass: "refract"` bends the picture through it instead of blurring, for real glass |
+
 ## theme look key  `[theme.look]`
 
 | name | words | action |
@@ -1079,5 +1097,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_740 primitives across 65 registries, 740 meeting the word-action contract today.
+_748 primitives across 67 registries, 748 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
