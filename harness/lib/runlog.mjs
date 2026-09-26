@@ -23,10 +23,15 @@ export function appendRun(film, record = {}) {
   const line = {
     at: new Date().toISOString(),
     cmd: record.cmd || 'unknown',
-    // The one signal the judge's self-recorded-PASS refusal reads (quality/gates/judge.mjs): which
-    // Claude Code session made this run. Auto-captured, never passed by a caller, so it cannot be
-    // spoofed by a call site forgetting to set it. Null outside Claude Code (a human's own shell).
+    // Two of the signals the judge's self-recorded-PASS refusal reads (quality/gates/judge.mjs): which
+    // Claude Code session made this run, and which AGENT PROCESS within it. Auto-captured, never passed
+    // by a caller, so neither can be spoofed by a call site forgetting to set it. Both null outside
+    // Claude Code (a human's own shell).
+    //
+    // `agent` tells a fresh judge from its author: an Agent-tool subagent shares BOTH the session id and
+    // CLAUDE_PID with its parent (measured 2026-09-27), so the judge brief sets VAWE_AGENT=<name>.
     session: process.env.CLAUDE_CODE_SESSION_ID || null,
+    agent: agentId(),
     git,
     dirty,
     checks: record.checks || [],
@@ -52,4 +57,9 @@ export function readRuns(film) {
   return fs.readFileSync(p, 'utf8').split('\n').filter(Boolean)
     .map((l) => { try { return JSON.parse(l); } catch { return null; } })
     .filter(Boolean);
+}
+
+// agentId(): VAWE_AGENT when the brief set one (a fresh judge), else the Claude process id.
+export function agentId() {
+  return process.env.VAWE_AGENT || process.env.CLAUDE_PID || null;
 }

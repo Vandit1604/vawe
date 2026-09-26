@@ -381,6 +381,29 @@ test('lib-test: gates', async () => {
   fs.rmSync(dir, { recursive: true, force: true });
 }
 
+// ---- scene-units-exit-suppressed: an authored exit that the beat wrapper silently owns instead ------
+//
+// `sceneUnits: true` forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
+// cut (films/scene/scene.js setLayerTiming), so an authored `out` on that layer never plays and nothing
+// used to say so. tests/fixtures/scene-units-exit-suppressed.fixture.json: two beats, sceneUnits on, the
+// first beat's layer authors `out:"blur"` and is current when its beat cuts.
+{
+  const fixture = path.join(repoRoot, 'tests/fixtures/scene-units-exit-suppressed.fixture.json');
+  const gate = path.join(repoRoot, 'quality/gates/beat-check.mjs');
+  const res = spawnSync('node', [gate, fixture, '--json'], { encoding: 'utf8', cwd: repoRoot });
+  let recs = null;
+  try { recs = JSON.parse(res.stdout); } catch { recs = null; }
+  ok('scene-units-exit-suppressed: fires on a beat-wrapped layer with an authored exit',
+    Array.isArray(recs) && recs.some((r) => r.code === 'scene-units-exit-suppressed' && r.severity === 'warn'));
+  const finding = recs && recs.find((r) => r.code === 'scene-units-exit-suppressed');
+  ok('scene-units-exit-suppressed: names the affected layer and its authored `out`',
+    finding && /"beat one"/.test(finding.summary) && /out:"blur"/.test(finding.summary));
+
+  // The layer past the cut (`beatB`) never carries this finding: it has no authored `out` at all.
+  ok('scene-units-exit-suppressed: does not fire on a layer with no authored exit',
+    !/beatB|beat two/.test(finding.summary));
+}
+
 
 // ---- the sound gate: silence has to be a decision, and the decision has to be READABLE ---------
 //
@@ -784,6 +807,72 @@ test('lib-test: gates', async () => {
   } finally {
     process.chdir(cwd);
     fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// UNIT: harness/lib/judge-self-record.mjs. A subagent launched via the Agent tool for a fresh judge
+// (engine-doctrine/JUDGE.md: "the PASS is not the author's to self-record") can inherit the SAME
+// CLAUDE_CODE_SESSION_ID as the agent that rendered the cut, since env vars propagate to a spawned
+// child by default. Session alone used to be the whole self-record test, so that inherited session
+// refused the one PASS the guard exists to allow. A subagent also shares CLAUDE_PID, so the judge brief
+// sets VAWE_AGENT, which runlog.mjs agentId() prefers.
+// tests/fixtures/motion-absolute-time.fixture.json's own bug (bug 1) motivated reading a real repro log
+// before fixing; this fix's own repro is quality/runs (sting-raw.log): "judge.mjs refuses to record" a
+// PASS from a fresh judge subagent sharing the authoring session.
+{
+  const { appendRun, runsPathFor } = await import('../../harness/lib/runlog.mjs');
+  const { selfRecordCheck } = await import('../../harness/lib/judge-self-record.mjs');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'judge-self-record-'));
+  const film = path.join(tmpDir, '_judge-self-record.json');
+  const cwd = process.cwd();
+  process.chdir(tmpDir);
+  const priorSession = process.env.CLAUDE_CODE_SESSION_ID;
+  const priorAgent = process.env.CLAUDE_PID;
+  const priorTag = process.env.VAWE_AGENT;
+  try {
+    // The authoring agent renders: session S, agent (PID) A.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'A';
+    appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
+
+    // THE BUG: a fresh judge subagent, same session S and same PID A, tagged VAWE_AGENT=B, is accepted.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.VAWE_AGENT = 'B';
+    let r = selfRecordCheck(film);
+    ok('judge-self-record: a VAWE_AGENT-tagged judge in the SAME session and process is not self-recorded',
+      r.selfRecorded === false);
+    delete process.env.VAWE_AGENT;
+
+    // THE GUARD STILL WORKS: the exact same agent (same session, same PID) trying to pass its own
+    // render is still refused.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'A';
+    r = selfRecordCheck(film);
+    ok('judge-self-record: the SAME agent in the same session is refused as self-recorded',
+      r.selfRecorded === true);
+
+    // A different session entirely (an unrelated run) is never self-recorded, regardless of PID.
+    process.env.CLAUDE_CODE_SESSION_ID = 'T';
+    process.env.CLAUDE_PID = 'A';
+    r = selfRecordCheck(film);
+    ok('judge-self-record: a different session is not self-recorded',
+      r.selfRecorded === false);
+
+    // NO WEAKENING: outside Claude Code (no CLAUDE_PID on either side) the guard still falls back to
+    // session alone, exactly as it always did.
+    delete process.env.CLAUDE_PID;
+    fs.rmSync(runsPathFor(film));
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
+    r = selfRecordCheck(film);
+    ok('judge-self-record: with no agent id on either side, session equality alone still refuses',
+      r.selfRecorded === true);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    if (priorSession === undefined) delete process.env.CLAUDE_CODE_SESSION_ID; else process.env.CLAUDE_CODE_SESSION_ID = priorSession;
+    if (priorAgent === undefined) delete process.env.CLAUDE_PID; else process.env.CLAUDE_PID = priorAgent;
+    if (priorTag === undefined) delete process.env.VAWE_AGENT; else process.env.VAWE_AGENT = priorTag;
   }
 }
 

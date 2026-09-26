@@ -145,7 +145,8 @@ a measured bias, not a lapse, and it is why hinge-v1 (a slideshow) was recorded 
 made it. The `--verdict PASS` that gates `ledger-add` must be corroborated by a SEPARATE critic: hand
 `/tmp/judge/<name>/sheet.png` and the rubric to a fresh subagent that did not author the film (the
 fidelity and beat critics in [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md)) and record PASS only when that
-independent eye agrees. This costs nothing but one dispatch and it removes the one bias no rubric can.
+independent eye agrees. The judge records with `VAWE_AGENT=<its-name>` set: a subagent shares the
+author's session and process id, so the tag is the only thing that tells them apart. This costs nothing but one dispatch and it removes the one bias no rubric can.
 
 For the harder question, whether an edit HELPED, you need a blind A/B judge: two cuts, paired
 beat by beat, arms hidden, three judges. **No such judge exists today.** `make ab`, `make ab-record` and
