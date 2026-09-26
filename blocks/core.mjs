@@ -1,11 +1,10 @@
 // blocks/core.mjs: the plain cards and statements (card · quote · stripeCard · kpiRow · comparison ·
 // pricingCard · captions · colorCycle), the big variant families (lowerThird · searchEngine) and the
-// COMPOSITION containers (splitScreen · screenSwap) that hold another block.
+// composition containers (splitScreen · screenSwap) that hold another block.
 //
-// Extracted from blocks/index.mjs so index.mjs owns nothing but assembly. A module cannot discover
-// itself, and index.mjs now discovers its siblings, so the factories that used to live inside it had
-// to become a sibling too. Same contract as every other family: a PURE function props → an ARRAY of
-// scene layers, absolute-positioned on the 1920x1080 stage, deterministic.
+// Extracted from blocks/index.mjs so that file owns nothing but assembly. Same contract as every other
+// family: a pure function props → an array of scene layers, absolute-positioned on the 1920x1080
+// stage, deterministic.
 
 // The shared vocabulary: tokens, layer primitives, card chrome, the radius scale, tone colours and
 // the one avatar implementation, lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
@@ -29,9 +28,8 @@ const T = TOKENS;
 // stages its own repeating children. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
 // card. One product surface: hairline + a single step of elevation, content, a footer row.
-// The tinted inner panel it used to draw is gone by DEFAULT (`tint` now matches the card fill), because
-// a panel inside a panel is two surfaces saying one thing, the 2021 SaaS tile. `tint` still paints
-// when a caller passes a real one, so the prop keeps its meaning; only the default moved.
+// No tinted inner panel by default (`tint` matches the card fill): a panel inside a panel is two
+// surfaces saying one thing. `tint` still paints when a caller passes a real one.
 export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc, pills = [],
   cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
   // Neutral chips, not accent pills. A tag is metadata; spending the brand colour on a row of them
@@ -57,17 +55,14 @@ export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// colorCycle. One word rendered in a SEQUENCE of hues so it visibly cycles colour (proof of "any
-// colour" WITHOUT reintroducing colour everywhere). Deterministic: fixed palette, fixed timing.
+// colorCycle. One word rendered in a sequence of hues so it visibly cycles colour (proof of "any
+// colour" without reintroducing colour everywhere). Deterministic: fixed palette, fixed timing.
 //
-// The DEFAULT six sit in one luminance band (relative L ≈ 0.13..0.22), which buys two things at once.
-// They clear 3:1 against white AND against near-black, so the one block in this file that cannot read
-// the theme still lands on all 38; and holding luminance constant leaves HUE as the only thing that
-// changes, which is what the block is for. The previous six ranged from a 2.1:1 amber to a dark
-// indigo, so on a white ground a third of the cycle was unreadable and the rest flickered in weight.
-// Each step is its own top-level layer with its own start/duration window (a hue tenanting one slice
-// of the timeline), so this is N independently-timed layers rather than one card with repeating
-// children: `html` per step, not one fragment with `parts`.
+// The default six sit in one luminance band (relative L ≈ 0.13..0.22): they clear 3:1 against white
+// and near-black alike, so the one block in this file that cannot read the theme still lands on all
+// 38, and holding luminance constant leaves hue as the only thing that changes.
+// Each step is its own top-level layer with its own start/duration window, so this is N
+// independently-timed layers, `html` per step, rather than one card with `parts`.
 export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
   colors = ['#7F6FE8', '#0C9455', '#B47305', '#E04392', '#2B7FEE', '#D65B26'],
   start = 0, dur = 4, each = 0.5 } = {}) {
@@ -257,10 +252,9 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
 // WAVE 5 families, brand & motion. Arcs/rings use html+SVG; spinner wraps the lottie runtime.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// lowerThird. The name/role identifier broadcast has used for sixty years: who is speaking, while
-// they speak. ONE component, twelve chromes, because what differs between a BILD front page and a
-// Vercel keynote caption is not the layout (name over role, lower left) but the material around it.
-// `variant` picks the material; everything else is shared.
+// lowerThird. The name/role identifier: who is speaking, while they speak. One component, twelve
+// chromes, since what differs between one broadcast style and another is the material, not the layout
+// (name over role, lower left). `variant` picks the material; everything else is shared.
 //
 // The spine every variant honours:
 //   name: the identifier (a person, a product, a place). Always the dominant element.
@@ -428,11 +422,9 @@ const SEARCH_BAR_H = 60, SEARCH_PAD = 22, SEARCH_ICON = 24;
 const searchTextX = (bx) => bx + SEARCH_PAD + SEARCH_ICON + 16;   // clears the magnifier
 const searchTextW = (bw) => bw - (SEARCH_PAD + SEARCH_ICON + 16) - (SEARCH_PAD + SEARCH_ICON + 12);
 
-// THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in whatever face
-// the theme happens to ship is a lookalike, not the brand, the authoring rules call this out directly
-// ("recreating a brand asset from memory is off-brand by definition"). `word` (per-letter colours)
-// and `brand` (plain text) remain for marks you do not have a file for. `logotype` applies the WCAG
-// 1.4.3 contrast exemption; centring is the engine's job, never arithmetic.
+// THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in the theme's own
+// face is a lookalike, not the brand. `word` (per-letter colours) and `brand` (plain text) remain for
+// marks with no file. `logotype` applies the WCAG 1.4.3 contrast exemption; centring is the engine's.
 function searchMark(cy, h, { x, w, brand, word, logo, logoW, logoH, markAlign, start, dur }) {
   const common = { start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3, logotype: true };
   if (logo) {
@@ -534,31 +526,23 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 6, COMPOSITION. Blocks whose content is OTHER BLOCKS.
+// WAVE 6, COMPOSITION. Blocks whose content is other blocks.
 //
-// Everything above places itself and draws itself. Nothing above places anything ELSE, so every
-// "split" archetype in every scene was two blocks at two hand-chosen x coordinates, and the rule
-// keeping them aligned lived in the author's head and in arithmetic they re-did per beat. Layout
-// discipline that is not in the engine is not discipline; it is a habit, and habits drift silently.
+// A side is a block descriptor: `{ block: 'listRow', props: { … } }`, the same `{type:"block"}` shape
+// a scene already writes. The container computes the pane box and injects `x`/`y`/`w`/`start`/`dur`;
+// the pane's own props decide everything else.
 //
-// A SIDE IS A BLOCK DESCRIPTOR: `{ block: 'listRow', props: { … } }`, the same `{type:"block"}` shape
-// a scene already writes, so a container costs an author no new vocabulary. The container computes
-// the pane box and injects `x`/`y`/`w`/`start`/`dur`; the pane's own props decide everything else.
-//
-// IT INJECTS `w` AND NOT `h`, deliberately. Most factories in this library size themselves off their
-// content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence.
-// The exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
-// (the divider, the inset), never handed to a pane that may not understand it.
+// It injects `w` and not `h`, deliberately: most factories size themselves off their content and
+// accept no `h`, and a prop a factory does not destructure is dropped in silence. `h` is used for the
+// container's own geometry (the divider, the inset), never handed to a pane that may not understand it.
 const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...side.props, ...at }) : []);
 
 // splitScreen: two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
 // and `pip` insets the second pane into a corner of the first instead of sitting beside it.
 //
-// `split` is the FRACTION of the long axis the first pane gets, so a 60/40 is `split: 0.6` and not two
-// widths a caller has to keep summing to the whole. `lead` staggers the second pane behind the first:
-// two panes landing on the same frame read as one slab arriving, which is the thing a split is not.
-// PICTURE-IN-PICTURE: the second pane is a small inset over the first, and it arrives LAST because
-// it is the aside, not the subject.
+// `split` is the fraction of the long axis the first pane gets, so a 60/40 is `split: 0.6`. `lead`
+// staggers the second pane behind the first, since two panes landing on the same frame read as one
+// slab arriving. In picture-in-picture the second pane arrives last, since it is the aside, not the subject.
 function splitScreenPip({ x, y, w, h, left, right, pipScale, pipInset, pipCorner, start, dur, second }) {
   const iw = Math.round(w * pipScale);
   const right2 = pipCorner.endsWith('right');
@@ -596,18 +580,13 @@ export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', s
   return splitScreenSideBySide({ x, y, w, h, orient, split, gap, left, right, divider, start, dur, second });
 }
 
-// screenSwap: screen A becomes screen B (becomes C…) in one place. The single most common motion in
-// a product demo, and the registry could not make it: `phoneFrame` held content and nothing changed
-// the content, so a demo could show one screen per beat and never the move between two.
+// screenSwap: screen A becomes screen B (becomes C…) in one place, the single most common motion in a
+// product demo. Every screen shares one box: a swap is two screens at the same coordinates with
+// handed-over windows.
 //
-// EVERY SCREEN SHARES ONE BOX. That is the whole point. A swap is two screens at the SAME coordinates
-// with handed-over windows, and hand-authoring it means writing the same x/y twice and the handover
-// arithmetic once per pair, which is where it goes wrong.
-//
-// `transition` defaults to `wipe` because a wipe is a CLIP: the outgoing screen is uncovered in place
+// `transition` defaults to `wipe` because a wipe is a clip: the outgoing screen is uncovered in place
 // and never travels outside its own box, so a swap inside a device frame does not slide across the
-// bezel. `slide` is offered for a swap that is meant to read as travel, and it pairs its directions
-// (enter from the right, leave to the left) rather than entering and retreating.
+// bezel. `slide` reads as travel instead, pairing its directions (enter from the right, leave to the left).
 const SWAP = {
   wipe: { anim: 'wipe', out: 'wipe-left' },
   slide: { anim: 'slide-right', out: 'slide-left' },
