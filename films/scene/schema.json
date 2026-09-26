@@ -388,6 +388,7 @@
     "bodyColor",
     "breakAt",
     "breakDur",
+    "cameraMotion",
     "colors",
     "count",
     "dawnWidth",
@@ -397,13 +398,17 @@
     "dolly",
     "drawDur",
     "drawStart",
+    "env",
     "font",
     "fov",
+    "geometry",
     "h",
     "lines",
+    "material",
     "metalness",
     "morphSpeed",
     "motionBlur",
+    "objectMotion",
     "origin",
     "pitch",
     "planes",
@@ -2570,7 +2575,8 @@
       "codeExtrude",
       "codeDissolve",
       "codeAssemble",
-      "litPlane"
+      "litPlane",
+      "object"
      ]
     },
     "lines": {
@@ -2605,6 +2611,73 @@
     },
     "rise": {
      "label": "three litPlane: how far below its resting place the plane starts before it rises into frame"
+    },
+    "geometry": {
+     "type": "object",
+     "label": "three object: what to build. {kind: sphere|box|torus|svgExtrude|textExtrude, ...}. sphere/box/torus take radius/w/h/d/tube; svgExtrude takes an SVG path `d` string (M/L/H/V/C/Q/Z only) plus scale/depth/bevelSize/bevelThickness/bevelSegments; textExtrude takes text/font (a typeface from `make glyphs`) plus the same bevel dials",
+     "fields": {
+      "kind": { "type": "string", "label": "Which geometry builder", "enum": ["sphere", "box", "torus", "svgExtrude", "textExtrude"] },
+      "path": { "type": "string", "label": "svgExtrude: an SVG path `d` string, M/L/H/V/C/Q/Z commands only" },
+      "text": { "type": "string", "label": "textExtrude: the string to extrude" },
+      "font": { "type": "string", "label": "textExtrude: typeface name from `make glyphs`" },
+      "radius": { "type": "number", "label": "sphere/torus: radius in world units (default 1)" },
+      "tube": { "type": "number", "label": "torus: tube radius (default 0.35)" },
+      "w": { "type": "number", "label": "box: width (default 1.4)" },
+      "h": { "type": "number", "label": "box: height (default 1.4)" },
+      "d": { "type": "number", "label": "box: depth (default 1.4)" },
+      "scale": { "type": "number", "label": "svgExtrude: SVG-units-to-world-units scale (default 0.01)" },
+      "depth": { "type": "number", "label": "svgExtrude/textExtrude: extrusion depth in world units" },
+      "bevelSize": { "type": "number", "label": "svgExtrude/textExtrude: bevel size in world units" },
+      "bevelThickness": { "type": "number", "label": "svgExtrude/textExtrude: bevel thickness in world units" },
+      "bevelSegments": { "type": "number", "label": "svgExtrude/textExtrude: bevel roundness (segment count)" },
+      "curveSegments": { "type": "number", "label": "svgExtrude/textExtrude: curve smoothness (segment count)" }
+     }
+    },
+    "material": {
+     "type": "object",
+     "label": "three object: the surface. {preset: glass|frostedGlass|metal|matte, color, ...}. glass/frostedGlass are MeshPhysicalMaterial (transmission, thickness, ior, roughness, clearcoat); metal/matte are MeshStandardMaterial (metalness, roughness)",
+     "fields": {
+      "preset": { "type": "string", "label": "Which material builder", "enum": ["glass", "frostedGlass", "metal", "matte"] },
+      "color": { "label": "Base tint (hex string). Defaults to the theme accent" },
+      "roughness": { "type": "number", "label": "0 (mirror) to 1 (fully diffuse)" },
+      "metalness": { "type": "number", "label": "metal preset: 0 (dielectric) to 1 (fully metallic), default 0.9" },
+      "transmission": { "type": "number", "label": "glass/frostedGlass: 0 (opaque) to 1 (fully see-through), default 1 / 0.9" },
+      "thickness": { "type": "number", "label": "glass/frostedGlass: refraction thickness in world units, default 0.6" },
+      "ior": { "type": "number", "label": "glass/frostedGlass: index of refraction, default 1.5 (real glass is 1.45-1.55)" },
+      "clearcoat": { "type": "number", "label": "glass: a second, always-glossy coat layered over the surface, default 1" },
+      "envMapIntensity": { "type": "number", "label": "How strongly the room's reflections show, default 1-1.2" }
+     }
+    },
+    "env": {
+     "type": "object",
+     "label": "three object: the reflection/refraction environment. Omitted, the procedural studio room every three scene already renders under; {image: src} replaces it with a real equirectangular capture (an already-tone-mapped jpg/png, not a raw .hdr)",
+     "fields": {
+      "image": { "type": "string", "label": "An equirectangular (2:1) image src, preloaded like any other image the scene references" }
+     }
+    },
+    "objectMotion": {
+     "type": "array",
+     "label": "three object: keys the OBJECT's own position/rotation/scale through motionAt, the SAME sampler and eases `motion` uses on any layer. {t, x, y, z, rotX, rotY, rot, scale}; x/y/z in world units (x/y scaled from px by 0.01), rotX/rotY/rot in degrees",
+     "item": {
+      "t": { "type": "number", "label": "Seconds from the layer's start" },
+      "x": { "type": "number", "label": "Horizontal offset (px-like units, scaled to world space)" },
+      "y": { "type": "number", "label": "Vertical offset (px-like units, scaled to world space)" },
+      "z": { "type": "number", "label": "Depth offset, world units" },
+      "rotX": { "type": "number", "label": "Pitch, degrees" },
+      "rotY": { "type": "number", "label": "Yaw, degrees" },
+      "rot": { "type": "number", "label": "Roll, degrees" },
+      "scale": { "type": "number", "label": "Uniform scale multiplier" }
+     }
+    },
+    "cameraMotion": {
+     "type": "array",
+     "label": "three object: orbits the SCENE'S camera around the object through the same motionAt sampler. rotY is azimuth (degrees), rotX is elevation (degrees), z adds to `dolly` for a push/pull",
+     "item": {
+      "t": { "type": "number", "label": "Seconds from the layer's start" },
+      "rotY": { "type": "number", "label": "Orbit azimuth, degrees" },
+      "rotX": { "type": "number", "label": "Orbit elevation, degrees" },
+      "z": { "type": "number", "label": "Added to `dolly` for this key, world units" }
+     }
     },
     "swing": {
      "label": "three uiParallax: gentle yaw amplitude"

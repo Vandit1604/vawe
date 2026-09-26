@@ -380,6 +380,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `liquidBackground` | a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells |
 | `litPlane` | a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `motionBlur` (true, or a 0..1 strength, the same word every layer uses) opts it into a shutter-accumulated smear on the fast rise |
 | `magnetic` | field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them |
+| `object` | a premium composed object: a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses |
 | `pointCloud` | a GPU point cloud: thousands of lit points posed absolutely from t |
 | `shatter` | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
 | `uiParallax` | flat UI planes stacked at depth, the camera moving past them so the layers separate |
@@ -1192,4 +1193,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_728 effects across 62 families. Regenerate: `make effects`._
+_729 effects across 62 families. Regenerate: `make effects`._
