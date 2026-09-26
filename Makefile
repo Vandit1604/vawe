@@ -181,13 +181,19 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # dev-range below instead, which skips the sheets and content-check: those read the WHOLE film and
 # would either crash on a partial mp4 or report a false gap against a clip that was never meant to
 # hold the other acts.
-dev: build ## [dev] THE ITERATION LOOP. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice, not the whole film.
+# DRAFT=1 (or NEW=<name>, which implies D=films/scene/<name>.json): a film with no scene.json yet
+# gets one written from its brief (or a one-line title from its own name) before the render below runs.
+# No storyboard required. This is the one-command path to a first preview (AGENTS.md "no sign-off
+# step"); a real plan still goes through the seven stages when there is one to go through.
+dev: build ## [dev] THE ITERATION LOOP. DRAFT=1|NEW=<name>: bootstrap a first scene, no plan needed. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice.
+	$(eval D := $(if $(strip $(NEW)),films/scene/$(NEW).json,$(D)))
 ifneq ($(strip $(GROUP)),)
 	@g=$$(node harness/dev/group-only.mjs "$(D)" "$(GROUP)") && $(MAKE) --no-print-directory dev D=$$g WORKERS=$(WORKERS) NOSHEETS=1
 else
 ifneq ($(strip $(BEAT)$(JOIN)$(FROM)$(TO)),)
 	@$(MAKE) --no-print-directory dev-range D=$(D) BEAT=$(BEAT) JOIN=$(JOIN) FROM=$(FROM) TO=$(TO) WORKERS=$(WORKERS)
 else
+	@test -z "$(strip $(DRAFT)$(NEW))" || node harness/author/draft-init.mjs $(D)
 	@echo "▶ [dev] the iteration loop, no gates, no audit"
 	@t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
 	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'; \
