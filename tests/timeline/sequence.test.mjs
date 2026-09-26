@@ -231,4 +231,30 @@ console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an u
     'a per-property map beside a top-level handle is layered, not a double-shaped segment');
 }
 
-console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone; per-property `ease` (Separate Dimensions) lets x and y travel different curves on the same keys');
+// A motion key's `t` is LOCAL seconds from the layer's own start, never the scene's absolute clock.
+// Writing the first key at exactly the layer's own `start` (the classic mix-up with camera/cut times,
+// which ARE absolute) used to render nothing: `poseAt` holds key 0 for every local time <= its `t`, so
+// with `start` seconds of slack read in as key 0 the layer sat frozen almost its whole life and only
+// reached the later key in the last instant before it ended (tests/fixtures/motion-absolute-time.fixture.json,
+// the vawe-sting bug this refusal exists for).
+{
+  const layers = [{ id: 'mover', start: 2.4, duration: 2.6,
+    motion: [{ t: 2.4, x: 0 }, { t: 5.0, x: 800, ease: 'linear' }] }];
+  assert.throws(() => resolveKeyedProps(layers), /LOCAL seconds from the layer's OWN start/,
+    'a motion track whose first key equals the layer\'s own `start` is refused as absolute-time misuse');
+}
+// A legitimate local hold-then-move (first key > 0 but not equal to `start`) is untouched.
+{
+  const layers = [{ id: 'ok', start: 2.4, duration: 2.6,
+    motion: [{ t: 0.5, x: 0 }, { t: 2.6, x: 800, ease: 'linear' }] }];
+  assert.doesNotThrow(() => resolveKeyedProps(layers),
+    'a first key that merely happens to be nonzero, and is not the layer\'s own `start`, is legitimate');
+}
+// A layer with no `start` (defaults to 0) never trips this: `t` and `start` coinciding at 0 is the
+// ordinary, most common authoring shape, not the bug.
+{
+  const layers = [{ id: 'ok2', motion: [{ t: 0, x: 0 }, { t: 2, x: 800 }] }];
+  assert.doesNotThrow(() => resolveKeyedProps(layers), 'a layer with no `start` is unaffected');
+}
+
+console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone; per-property `ease` (Separate Dimensions) lets x and y travel different curves on the same keys; a motion track authored in absolute scene time (first key == the layer\'s own `start`) is refused instead of silently freezing');

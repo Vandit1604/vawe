@@ -155,12 +155,32 @@ function adaptDurationForMotion(L, who) {
   L.duration = last;
 }
 
+// assertLocalKeyTimes(L, who): a motion key's `t` is SECONDS FROM THE LAYER'S OWN START (motionAt's
+// doc comment), never the scene's absolute clock the way a camera key or a cut time is. Writing the
+// first key at exactly the layer's own `start` is the one unambiguous fingerprint of that mix-up: a
+// legitimate local delay could coincidentally equal any small number, but coinciding with THIS layer's
+// own absolute start is not a coincidence a real author would hit on purpose. The bug this catches
+// renders nothing: `poseAt` holds key 0 for every local time <= key 0's `t`, so with `start` seconds of
+// slack read as key 0, the layer sits frozen for nearly its whole life and only reaches later keys in
+// the last instant before it ends, which reads as "the motion track never fired".
+function assertLocalKeyTimes(L, who) {
+  if (!(L.start > 0)) return;
+  if (Math.abs(L.motion[0].t - L.start) < 1e-6)
+    throw new Error(`layer "${who}" motion starts at t=${L.motion[0].t}, exactly this layer's own `
+      + `\`start\` (${L.start}). A motion key's \`t\` is LOCAL seconds from the layer's OWN start (0 `
+      + `means "the moment this layer begins"), never the scene's absolute clock a camera move or a cut `
+      + `uses. Written this way, the track holds its first key for almost the whole layer and only plays `
+      + `in the last instant before it ends, which looks like it never fired. Subtract ${L.start} from `
+      + `every key's \`t\` (the first key is usually 0).`);
+}
+
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
     if (!Array.isArray(L.motion) || !L.motion.length) return;
     const who = L.id || L.type || '?';
     // Two authored curves on one segment, refused with the layer in hand rather than a second pass.
     assertKeyHandles(L.motion, `layer "${who}"`);
+    assertLocalKeyTimes(L, who);
     adaptArrivalEase(L.motion, who);
     adaptDurationForMotion(L, who);
     // A key carrying a property nothing interpolates is accepted then ignored: `origin` reads as a
