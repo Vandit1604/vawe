@@ -1,3 +1,9 @@
+---
+when: "picking the one object a continuous-action storyboard spins on, before writing any JSON"
+answers: "the object-naming table and rules, and the seven anti-slop tests to run against the beat table"
+group: skill
+---
+
 # Name the object, then run the anti-slop checks
 
 ## Name the object, then write its state at each beat

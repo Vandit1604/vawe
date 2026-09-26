@@ -1,3 +1,9 @@
+---
+when: "deciding what to fix first in a review round, or whether to run this loop at all"
+answers: "the fix-priority order, when a one-line tweak does not need the full loop, and the loop's honest limits"
+group: skill
+---
+
 # What to fix first, when to skip the loop, and its honest limits
 
 ## What to fix first

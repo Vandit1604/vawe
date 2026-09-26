@@ -1,3 +1,9 @@
+---
+when: "about to declare a scene done"
+answers: "the exact QA commands to run, and what each one checks"
+group: skill
+---
+
 # QA loop, run before declaring a scene done
 
 | command | checks |

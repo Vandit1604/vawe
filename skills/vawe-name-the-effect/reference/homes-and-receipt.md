@@ -1,3 +1,9 @@
+---
+when: "an effect is right and needs a permanent home in the arsenal"
+answers: "the two homes an effect can live in, the two rules that decide which, and what a fork contributes back"
+group: skill
+---
+
 # Where an effect goes, and the receipt
 
 **An effect built inside one film is an effect the next author will rebuild by guessing.** So when the

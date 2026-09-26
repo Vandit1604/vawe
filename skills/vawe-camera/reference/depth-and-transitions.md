@@ -1,3 +1,9 @@
+---
+when: "using travel to replace cuts, or adding real depth/parallax to a camera move"
+answers: "the station-journey-as-transition pattern with its two reference films, and the measured depth-vs-displacement table"
+group: skill
+---
+
 # The camera as the transition, and depth parallax
 
 ## The camera as the transition (what you asked the cuts to do, done with the lens)

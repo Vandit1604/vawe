@@ -1,3 +1,9 @@
+---
+when: "turning a plain-words description of a look into a searchable name"
+answers: "the thermal-blur measured failure in full, and a starter table of look-to-name vocabulary"
+group: skill
+---
+
 # The vocabulary, and the thermal blur story in full
 
 ## Why guessing feels like progress, so you can watch for it

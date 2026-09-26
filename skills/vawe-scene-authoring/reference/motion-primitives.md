@@ -1,3 +1,9 @@
+---
+when: "hand-rolling motion in renderFrame outside the parts/morph/fx/motionPath GSAP vocabulary"
+answers: "the interpolator API (interpolate, spring, track), the transition helpers, and the easing name list"
+group: skill
+---
+
 # Animation: pure primitives in `core/motion/motion.js` (no GSAP for scene logic)
 
 GSAP gives no render-speed benefit here (we seek-and-screenshot, not real-time playback), and risks
