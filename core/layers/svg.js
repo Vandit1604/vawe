@@ -24,6 +24,7 @@
 import { interpolate, easeOutCubic, resolveEasing } from '../motion/motion.js';
 import { resamplePath, bestRotation, rotatePoints, morphD } from './path-morph.js';
 import { mergeProps, propsOf } from '../registry/props.js';
+import { glowRadii } from './util.js';
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -104,6 +105,15 @@ export function build(kit, el, L, { w, h, viewBox, d, fill: fillIn, stroke: stro
   svg.appendChild(p);
   el.appendChild(svg);
   el.__svgPath = p;
+
+  // GLOW, wired to the shape's own alpha (a filter drop-shadow hugs the stroke/fill silhouette), not
+  // to `el`'s box: `el`'s own `filter` is `decorate()`'s (mask/look/fade), written after this build
+  // runs, so writing there would either be clobbered by it or clobber it right back. The `<svg>` child
+  // is nobody else's, so the two compose for free instead of racing.
+  if (L.glow) {
+    const { near, far, color } = glowRadii(L);
+    svg.style.filter = `drop-shadow(0 0 ${near}px ${color}) drop-shadow(0 0 ${far}px ${color})`;
+  }
 
   if (morph && morph.to) applyMorph(el, svg, p, morph);
 }

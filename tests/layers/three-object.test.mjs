@@ -70,3 +70,41 @@ test('three object: renders clean, transparent, moves under objectMotion, and is
     await closeServer();
   }
 });
+
+// Bug: glass rendered flat and near-uniform (milky opaque plastic), because `transmission` had no
+// opaque content behind the object to sample and see through, so every pixel converged on roughly the
+// same env-reflection brightness. Real glass has CONTRAST: a bright specular hit near the light, a
+// dark fresnel edge away from it, and the backdrop bleeding through visibly different from either. A
+// DOM signature cannot see any of this (it is inside a canvas), so this reads real pixels off the
+// sphere (canvas 1 in the fixture, geometrically simplest to sample by angle from its centre).
+test('glass sphere: real contrast across the surface, not a flat wash', async () => {
+  const { port, close: closeServer } = await serveRepo({ root: ROOT });
+  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  try {
+    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=${DATA}&fps=${FPS}`, { waitUntil: 'load' });
+    const err = await waitForEngine(page);
+    assert.equal(err, null, `scene must build clean, got: ${err}`);
+    await page.evaluate((n) => window.__engine.renderFrame(n), 45);
+
+    const samples = await page.evaluate(() => {
+      const cv = [...document.querySelectorAll('canvas[data-surface="three"]')][1];
+      const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+      const ctx = c.getContext('2d'); ctx.drawImage(cv, 0, 0);
+      const w = cv.width, h = cv.height, cx = w / 2, cy = h / 2, r = Math.min(w, h) * 0.32;
+      const lum = (x, y) => { const [rr, gg, bb] = ctx.getImageData(x, y, 1, 1).data; return 0.2126 * rr + 0.7152 * gg + 0.0722 * bb; };
+      // top-left (toward the studio key light) vs bottom-right (away from it): two points well inside
+      // the sphere's own silhouette, at the same radius from centre, on opposite corners.
+      return {
+        towardLight: lum(Math.round(cx - r * 0.6), Math.round(cy - r * 0.6)),
+        awayFromLight: lum(Math.round(cx + r * 0.6), Math.round(cy + r * 0.6)),
+      };
+    });
+
+    assert.ok(samples.towardLight - samples.awayFromLight > 15,
+      `a glass sphere must read brighter toward the key light than away from it (real facet/fresnel `
+      + `contrast, not a flat wash): got ${JSON.stringify(samples)}`);
+  } finally {
+    await closePage();
+    await closeServer();
+  }
+});
