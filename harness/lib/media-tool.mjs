@@ -24,6 +24,7 @@ export const TOOLS = {
   'gen-image': () => ['harness/media/kie.mjs', 'image', env.Q || '', '--out', `assets/gen/${env.NAME}.png`, ...(env.ASPECT ? ['--aspect', env.ASPECT] : [])],
   'photos': () => ['scripts/brand/photos.mjs', env.Q || '', env.NAME, ...(env.N ? ['--n', env.N] : [])],
   'scrub': () => ['harness/author/scrub.mjs', env.F],
+  'sheet': () => ['scripts/brand/design-sheet.mjs', env.NAME, ...(env.THEME ? ['--theme', env.THEME] : []), ...(env.SERVE ? ['--serve'] : [])],
   'spectrum': () => ['harness/media/spectrum.mjs', env.MUSIC, ...(env.FPS ? ['--fps', env.FPS] : [])],
   'transition-preview': () => ['harness/author/transition-preview.mjs'],
   'tts': () => ['harness/media/tts.mjs', ...(env.SCRIPT ? ['--script', env.SCRIPT] : []), ...(env.TEXT ? ['--text', env.TEXT] : []), '--out', env.OUT, ...(env.VOICE ? ['--voice', env.VOICE] : [])],
