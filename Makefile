@@ -1491,8 +1491,8 @@ house-style: ## [preflight] scaffold/refresh a brand's persisted Design Read (NA
 direct: ## [dev] direction gate + motion director, suggest cuts/stings (D=<file> [WRITE=1])
 	node harness/author/motion-director.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
 
-judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>])
-	@node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,)
+judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>] [STRUCT=1] [RUNS=A,B] [VERDICT_JSON=<f> RUN=<id>] [COMPARE="a.json b.json"])
+	@$(if $(COMPARE),node quality/gates/judge.mjs --compare $(COMPARE),node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,) $(if $(filter 1,$(STRUCT)),--struct) $(if $(RUNS),--runs $(RUNS)) $(if $(VERDICT_JSON),--verdict-json $(VERDICT_JSON) --run $(RUN)))
 
 inspect: ## [check] verify a scene against its .intent.json sidecar (D=<file>)
 	@node quality/gates/inspect.mjs $(D) $(if $(JSON),--json,)
