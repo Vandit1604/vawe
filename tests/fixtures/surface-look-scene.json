@@ -1,0 +1,8 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "look": { "surface": "brutalist" },
+  "layers": [
+    { "type": "html", "x": 100, "y": 100, "w": 300, "html": "<div>fixture</div>", "start": 0, "duration": 4 }
+  ]
+}

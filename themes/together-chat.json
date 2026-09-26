@@ -34,7 +34,8 @@
     },
     "bgDefault": {
       "preset": "plain"
-    }
+    },
+    "surface": "soft"
   },
   "tokens": {
     "color": {

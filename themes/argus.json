@@ -211,6 +211,7 @@
         "#05060a"
       ],
       "paper": "#ffffff"
-    }
+    },
+    "surface": "outlined"
   }
 }

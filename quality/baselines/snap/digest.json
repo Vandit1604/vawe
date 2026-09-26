@@ -475,11 +475,11 @@
    "font": "db51b5ddc8c7"
   },
   "barChart": {
-   "sig": "52c3889142a83fc7",
+   "sig": "661fd5e9107685cd",
    "font": "db51b5ddc8c7"
   },
   "barChart.green": {
-   "sig": "431730039675cabf",
+   "sig": "7440bb54c47e682b",
    "font": "db51b5ddc8c7"
   },
   "bento": {
@@ -535,35 +535,35 @@
    "font": "db51b5ddc8c7"
   },
   "card.stat": {
-   "sig": "08ab73d9a9bbd991",
+   "sig": "f3be37d84b771e07",
    "font": "db51b5ddc8c7"
   },
   "card.stat.down": {
-   "sig": "22aecd7e8e707526",
+   "sig": "1ba6e2ea6efc8cfd",
    "font": "db51b5ddc8c7"
   },
   "card.stat.plain": {
-   "sig": "390665caa989e754",
+   "sig": "4aa911d2c310b05c",
    "font": "db51b5ddc8c7"
   },
   "chatBubble": {
-   "sig": "0df64a8122e44d99",
+   "sig": "ed37003ed364228b",
    "font": "db51b5ddc8c7"
   },
   "chatBubble.support": {
-   "sig": "de24a01fb3bc9372",
+   "sig": "c47b1da095ac19c0",
    "font": "db51b5ddc8c7"
   },
   "checklist": {
-   "sig": "c487a72ee9594296",
+   "sig": "fbbb9af4a5dc2d23",
    "font": "db51b5ddc8c7"
   },
   "checklist.done": {
-   "sig": "c12f5fd469199864",
+   "sig": "a40fdb9b3d0de083",
    "font": "db51b5ddc8c7"
   },
   "checklist.todo": {
-   "sig": "bcb5fdd64a96a803",
+   "sig": "3be0112b64d7544e",
    "font": "db51b5ddc8c7"
   },
   "codeBlock": {
@@ -587,7 +587,7 @@
    "font": "db51b5ddc8c7"
   },
   "codeBlock.frost": {
-   "sig": "0fd20b15ef3ed87a",
+   "sig": "0ad451790b68a8fa",
    "font": "db51b5ddc8c7"
   },
   "codeBlock.ink": {
@@ -595,11 +595,11 @@
    "font": "db51b5ddc8c7"
   },
   "codeBlock.light": {
-   "sig": "d9d91fe7661a7a06",
+   "sig": "a606ece48e985a6f",
    "font": "db51b5ddc8c7"
   },
   "codeBlock.linen": {
-   "sig": "7e50ced446e70a0e",
+   "sig": "6638edc815f39c53",
    "font": "db51b5ddc8c7"
   },
   "codeBlock.midnight": {
@@ -615,7 +615,7 @@
    "font": "db51b5ddc8c7"
   },
   "codeBlock.paper": {
-   "sig": "0cddbedfeadbd200",
+   "sig": "8806106c95e80fb2",
    "font": "db51b5ddc8c7"
   },
   "codeBlock.py": {
@@ -627,27 +627,27 @@
    "font": "db51b5ddc8c7"
   },
   "codeDiff": {
-   "sig": "cc4b0faf4f7cb347",
+   "sig": "d4c5fd427c6e2c8d",
    "font": "db51b5ddc8c7"
   },
   "codeFlight": {
-   "sig": "e1fd20edd3b4cf17",
+   "sig": "9796b8a5afd97972",
    "font": "db51b5ddc8c7"
   },
   "codeHighlight": {
-   "sig": "48538eaa40f13fe4",
+   "sig": "b53830d813cb72f4",
    "font": "db51b5ddc8c7"
   },
   "codeMorph": {
-   "sig": "ec0000412adbf534",
+   "sig": "01224a874b37c734",
    "font": "db51b5ddc8c7"
   },
   "codeScroll": {
-   "sig": "ce323067fe88bed8",
+   "sig": "9162c04fdbfe6c12",
    "font": "db51b5ddc8c7"
   },
   "codeTyping": {
-   "sig": "aa12817f5184089a",
+   "sig": "1806353ff5bc8aab",
    "font": "db51b5ddc8c7"
   },
   "colorCycle": {
@@ -655,23 +655,23 @@
    "font": "db51b5ddc8c7"
   },
   "commitRow": {
-   "sig": "8cbc3d485912e2e6",
+   "sig": "a9f54738b05d31fe",
    "font": "db51b5ddc8c7"
   },
   "comparison": {
-   "sig": "ef8b438bae7aeb13",
+   "sig": "8c0555675ca3b66e",
    "font": "db51b5ddc8c7"
   },
   "comparison.beforeAfter": {
-   "sig": "e1d944f142ffc6f3",
+   "sig": "75d84195ff407cde",
    "font": "db51b5ddc8c7"
   },
   "comparison.screens": {
-   "sig": "82eadbd06739c465",
+   "sig": "585d8b4abb23cfd8",
    "font": "db51b5ddc8c7"
   },
   "deploySuccess": {
-   "sig": "3e554b9735abbad2",
+   "sig": "bf02afd6ccf77afc",
    "font": "db51b5ddc8c7"
   },
   "diff": {
@@ -683,15 +683,15 @@
    "font": "db51b5ddc8c7"
   },
   "donutChart": {
-   "sig": "66b6852c12929b39",
+   "sig": "e5d6649d2ab49bf7",
    "font": "db51b5ddc8c7"
   },
   "donutChart.two": {
-   "sig": "374ec62350ec528e",
+   "sig": "e7f18cf8b738f387",
    "font": "db51b5ddc8c7"
   },
   "emptyState": {
-   "sig": "947f59d5a027db5d",
+   "sig": "474a9bb27e1ec857",
    "font": "db51b5ddc8c7"
   },
   "feedRow": {
@@ -699,31 +699,31 @@
    "font": "db51b5ddc8c7"
   },
   "fileTree": {
-   "sig": "9302200be83e9141",
+   "sig": "3f0a9d0d01d43019",
    "font": "db51b5ddc8c7"
   },
   "flowchart": {
-   "sig": "3730ba479902cc89",
+   "sig": "7a27c36baf13deee",
    "font": "db51b5ddc8c7"
   },
   "flowchart.vertical": {
-   "sig": "a7c91a6cf7019221",
+   "sig": "cee9c4b6a46cb374",
    "font": "db51b5ddc8c7"
   },
   "followCard": {
-   "sig": "5d53475a13fc0f18",
+   "sig": "cfbe0fcfbc24b510",
    "font": "db51b5ddc8c7"
   },
   "gauge": {
-   "sig": "3eadf735e701d8b4",
+   "sig": "e84118d11db645b7",
    "font": "db51b5ddc8c7"
   },
   "gauge.full": {
-   "sig": "9a15c7bad081bd34",
+   "sig": "81ab88416823e7e5",
    "font": "db51b5ddc8c7"
   },
   "gauge.warn": {
-   "sig": "f80a64ffd2b39523",
+   "sig": "bf44e7b89647c636",
    "font": "db51b5ddc8c7"
   },
   "glassCard": {
@@ -759,15 +759,15 @@
    "font": "db51b5ddc8c7"
   },
   "installCard": {
-   "sig": "d93af918d529c3df",
+   "sig": "65d9090f14cf1b93",
    "font": "db51b5ddc8c7"
   },
   "kanban": {
-   "sig": "b6ca38370c6a6fba",
+   "sig": "150b3da49274f416",
    "font": "db51b5ddc8c7"
   },
   "kanban.two": {
-   "sig": "465d56957a4ebd0b",
+   "sig": "4c1380b8d334578f",
    "font": "db51b5ddc8c7"
   },
   "keyboard": {
@@ -791,15 +791,15 @@
    "font": "db51b5ddc8c7"
   },
   "lineChart": {
-   "sig": "5a00c5620b32372e",
+   "sig": "404c725bbd680a5a",
    "font": "db51b5ddc8c7"
   },
   "lineChart.area": {
-   "sig": "c00b60d02aa482fc",
+   "sig": "57984d450768641f",
    "font": "db51b5ddc8c7"
   },
   "lineChart.down": {
-   "sig": "feb9c1d8c651adfd",
+   "sig": "fae911407710163b",
    "font": "db51b5ddc8c7"
   },
   "listRow": {
@@ -819,7 +819,7 @@
    "font": "db51b5ddc8c7"
   },
   "logLines.light": {
-   "sig": "82fa5641e9c3d52b",
+   "sig": "8711712a5ac39d36",
    "font": "db51b5ddc8c7"
   },
   "logoWall": {
@@ -843,7 +843,7 @@
    "font": "db51b5ddc8c7"
   },
   "lowerThird.cleanBar": {
-   "sig": "67eda5aaa4aa3ffd",
+   "sig": "dc3045be05cf049e",
    "font": "db51b5ddc8c7"
   },
   "lowerThird.colourBlock": {
@@ -875,7 +875,7 @@
    "font": "db51b5ddc8c7"
   },
   "lowerThird.stackBars": {
-   "sig": "9beaf4b31aed3d0e",
+   "sig": "d1f2216d32eb8f96",
    "font": "db51b5ddc8c7"
   },
   "meshPanel": {
@@ -887,39 +887,39 @@
    "font": "db51b5ddc8c7"
   },
   "nodeGraph": {
-   "sig": "02f3c8dd52a1c6fa",
+   "sig": "b0bcde0619fad004",
    "font": "db51b5ddc8c7"
   },
   "notification": {
-   "sig": "6aa605475d168d86",
+   "sig": "a2c5d9699360b733",
    "font": "db51b5ddc8c7"
   },
   "notification.error": {
-   "sig": "1823286c3fe01917",
+   "sig": "958b5628d611bb3f",
    "font": "db51b5ddc8c7"
   },
   "notification.stack": {
-   "sig": "5818743ac46fba78",
+   "sig": "1442e4a58b766482",
    "font": "db51b5ddc8c7"
   },
   "notification.warn": {
-   "sig": "b39a0022a3f04a50",
+   "sig": "f7981af07f927711",
    "font": "db51b5ddc8c7"
   },
   "nowPlaying": {
-   "sig": "1f0f98d9e8a83d59",
+   "sig": "c5af59eebccee4ce",
    "font": "db51b5ddc8c7"
   },
   "onboardCard": {
-   "sig": "6fe3ad207fa65011",
+   "sig": "79098b61c78ce10c",
    "font": "db51b5ddc8c7"
   },
   "parallaxUnzoom": {
-   "sig": "61f404c4ca96fb7f",
+   "sig": "30387203cd3ce7ca",
    "font": "db51b5ddc8c7"
   },
   "parallaxZoom": {
-   "sig": "a27259d3f6ffc497",
+   "sig": "d5f9ea4c49136560",
    "font": "db51b5ddc8c7"
   },
   "phoneFrame": {
@@ -939,19 +939,19 @@
    "font": "db51b5ddc8c7"
   },
   "profileHeader": {
-   "sig": "05aa35bb8a5a3c5a",
+   "sig": "50278707ec6e9bf7",
    "font": "db51b5ddc8c7"
   },
   "progressRing": {
-   "sig": "9b500c58bf4d7060",
+   "sig": "306a25f979749e77",
    "font": "db51b5ddc8c7"
   },
   "progressRing.done": {
-   "sig": "affc6a48d09bb262",
+   "sig": "28803bccccafbc36",
    "font": "db51b5ddc8c7"
   },
   "progressRing.low": {
-   "sig": "37447b2767a67eb1",
+   "sig": "b92ed6f4db4b4c7c",
    "font": "db51b5ddc8c7"
   },
   "quote": {
@@ -963,11 +963,11 @@
    "font": "db51b5ddc8c7"
   },
   "reactionBar": {
-   "sig": "77a6af3263393cfc",
+   "sig": "399ecc05cf6f4710",
    "font": "db51b5ddc8c7"
   },
   "reactionBar.love": {
-   "sig": "881d1ce45e4edfaf",
+   "sig": "497a49119fce0147",
    "font": "db51b5ddc8c7"
   },
   "redditPost": {
@@ -975,23 +975,23 @@
    "font": "db51b5ddc8c7"
   },
   "scanGate": {
-   "sig": "9de4c161300f7121",
+   "sig": "7c1962f6f8b40cc0",
    "font": "db51b5ddc8c7"
   },
   "screenSwap": {
-   "sig": "1c66422ff92cde5c",
+   "sig": "1f411e478245a298",
    "font": "db51b5ddc8c7"
   },
   "screenSwap.slide": {
-   "sig": "9687eda89094a761",
+   "sig": "b3c7de696ba1fecb",
    "font": "db51b5ddc8c7"
   },
   "searchEngine.home": {
-   "sig": "f17be83ca4bc8b71",
+   "sig": "143e692a4dc9fc59",
    "font": "db51b5ddc8c7"
   },
   "searchEngine.results": {
-   "sig": "beddeb0f2974f1b6",
+   "sig": "46f2db7271e1bfff",
    "font": "db51b5ddc8c7"
   },
   "settingsRow": {
@@ -1019,11 +1019,11 @@
    "font": "db51b5ddc8c7"
   },
   "splitScreen": {
-   "sig": "1991d07ff97e27e4",
+   "sig": "df35b3ec3556bfe4",
    "font": "db51b5ddc8c7"
   },
   "splitScreen.pip": {
-   "sig": "12b6832750a54c3d",
+   "sig": "8b6d4de8645ce1c6",
    "font": "db51b5ddc8c7"
   },
   "spotlightCard": {
@@ -1031,11 +1031,11 @@
    "font": "db51b5ddc8c7"
   },
   "stackedBar": {
-   "sig": "7e296cf54bb8aa69",
+   "sig": "a796617c9e67766b",
    "font": "db51b5ddc8c7"
   },
   "stackedBar.three": {
-   "sig": "34707e1f153e0db5",
+   "sig": "ea5df816d9196b14",
    "font": "db51b5ddc8c7"
   },
   "statBig": {
@@ -1051,19 +1051,19 @@
    "font": "db51b5ddc8c7"
   },
   "stepFlow": {
-   "sig": "84004ec3b08edbf6",
+   "sig": "829cf7985588d7f5",
    "font": "db51b5ddc8c7"
   },
   "stepFlow.build": {
-   "sig": "9c37ddf312f7a8b5",
+   "sig": "982f9ee56c69b70d",
    "font": "db51b5ddc8c7"
   },
   "stepFlow.done": {
-   "sig": "f198207abe976290",
+   "sig": "f25ee330aa53dc5e",
    "font": "db51b5ddc8c7"
   },
   "stepFlow.start": {
-   "sig": "7eed40e066b72821",
+   "sig": "f86cfc96cda179db",
    "font": "db51b5ddc8c7"
   },
   "stripeCard": {
@@ -1071,27 +1071,27 @@
    "font": "db51b5ddc8c7"
   },
   "tabBar": {
-   "sig": "354e4bc0fbd87b63",
+   "sig": "831d9e1b3bd56eac",
    "font": "db51b5ddc8c7"
   },
   "tabBar.four": {
-   "sig": "ece516e7547120f9",
+   "sig": "fd421625841d3196",
    "font": "db51b5ddc8c7"
   },
   "tabBar.icons": {
-   "sig": "d798f00d0239fdb0",
+   "sig": "2c0765632319f6c9",
    "font": "db51b5ddc8c7"
   },
   "tabBar.switch": {
-   "sig": "073b2f95ee1666d6",
+   "sig": "456867eab3bb23bc",
    "font": "db51b5ddc8c7"
   },
   "table": {
-   "sig": "6abeb09b799a1442",
+   "sig": "9885e133e8cb828e",
    "font": "db51b5ddc8c7"
   },
   "table.pricing": {
-   "sig": "7cac17c37a2976cf",
+   "sig": "ed34a2209480ce63",
    "font": "db51b5ddc8c7"
   },
   "tapRipple": {
@@ -1099,27 +1099,27 @@
    "font": "db51b5ddc8c7"
   },
   "terminal": {
-   "sig": "dc5b7856adacb11a",
+   "sig": "214764b9b70dbe53",
    "font": "db51b5ddc8c7"
   },
   "terminal.build": {
-   "sig": "2e007231d534c914",
+   "sig": "74f5c6ddfb68469b",
    "font": "db51b5ddc8c7"
   },
   "terminal.git": {
-   "sig": "fb2683e3de70caf3",
+   "sig": "de141edfc2e5a95c",
    "font": "db51b5ddc8c7"
   },
   "terminal.install": {
-   "sig": "6871d4bd391690b6",
+   "sig": "d74d7042f18cfa8b",
    "font": "db51b5ddc8c7"
   },
   "terminalHtml": {
-   "sig": "85ec03ee333ec689",
+   "sig": "eca3b51dc2e39356",
    "font": "db51b5ddc8c7"
   },
   "terminalPro": {
-   "sig": "cff2df2f78eb8a48",
+   "sig": "c9b5dc49ab83fef2",
    "font": "db51b5ddc8c7"
   },
   "textCursor": {
@@ -1131,11 +1131,11 @@
    "font": "db51b5ddc8c7"
   },
   "timeline": {
-   "sig": "f533839c16437ea6",
+   "sig": "849cfa5b1d98c0eb",
    "font": "db51b5ddc8c7"
   },
   "timeline.release": {
-   "sig": "8317f31a4ec3842c",
+   "sig": "10ef590efe9eab74",
    "font": "db51b5ddc8c7"
   },
   "toast": {
@@ -1159,31 +1159,31 @@
    "font": "db51b5ddc8c7"
   },
   "uiReveal3d": {
-   "sig": "c33444f669d06ba8",
+   "sig": "4074da9017188809",
    "font": "db51b5ddc8c7"
   },
   "usMap": {
-   "sig": "fb97525058413339",
+   "sig": "eec0f474108b5933",
    "font": "db51b5ddc8c7"
   },
   "usMapBubble": {
-   "sig": "ab2fa6cf4b92ee7d",
+   "sig": "568fac6029633c4a",
    "font": "db51b5ddc8c7"
   },
   "usMapFlow": {
-   "sig": "85e2256458aa6623",
+   "sig": "9f94a29722704ee9",
    "font": "db51b5ddc8c7"
   },
   "usMapHex": {
-   "sig": "2551d171fdd6e8ff",
+   "sig": "d461daf4740b3241",
    "font": "db51b5ddc8c7"
   },
   "videoLowerThird": {
-   "sig": "527fdb8d4606de81",
+   "sig": "5746fe26387cbf35",
    "font": "db51b5ddc8c7"
   },
   "worldMap": {
-   "sig": "6334d14e8b025d25",
+   "sig": "0612d08ad27cabad",
    "font": "db51b5ddc8c7"
   }
  }
