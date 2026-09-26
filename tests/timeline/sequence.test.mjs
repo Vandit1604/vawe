@@ -4,7 +4,7 @@
 // object stands in for an element's authored data.
 //   node tests/timeline/sequence.test.mjs
 import assert from 'node:assert/strict';
-import { motionAt, resolveKeyedProps, velocityAt, KEYFRAME_PROPS } from '../../core/timeline/sequence.js';
+import { motionAt, resolveKeyedProps, velocityAt, KEYFRAME_PROPS, keyHandleErrors } from '../../core/timeline/sequence.js';
 
 // `radius` is a real pose output, not a second unnamed key: the boot-time refusal for stray keyframe
 // props (sequence.js:163) reads KEYFRAME_PROPS, so this is the one place adding it to POSE has to show.
@@ -165,4 +165,70 @@ console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an u
   assert.equal(layers[0].duration, 3, 'stretching twice lands on the same duration, not a second stretch');
 }
 
-console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone');
+// ---- SEPARATE DIMENSIONS: `ease` as a per-property map, x and y on the same keys travel curves ----
+// Before this, `segmentAt` drew ONE progress `p` per segment and every property rode it (motion.js's
+// own stated gap). `ease: {x: "linear", y: "easeOutCubic"}` gives each property its own curve on the
+// same pair of keys, which is what makes a straight line and an arc different shapes.
+{
+  const layers = [{ id: 'arc', motion: [{ t: 0, x: 0, y: 0 },
+    { t: 1, x: 400, y: 120, ease: { x: 'linear', y: 'easeOutCubic' } }] }];
+  resolveKeyedProps(layers);
+  const [L] = layers;
+  const mid = motionAt(L.motion, 0.5);
+  assert.equal(mid.dx, 200, 'x on `linear` is exactly halfway at t=0.5, unaffected by y\'s curve');
+  assert.ok(mid.dy > 60, `y on easeOutCubic is PAST halfway of its own 0-120 span at t=0.5, got ${mid.dy}`);
+  // The endpoints hold regardless of which curve got there, same contract as a whole-segment ease.
+  assert.equal(motionAt(L.motion, 0).dx, 0);
+  assert.equal(motionAt(L.motion, 1).dx, 400);
+  assert.equal(motionAt(L.motion, 1).dy, 120);
+}
+
+// A property the map does not mention still uses the segment's ordinary curve (a top-level `ease`,
+// or the default), exactly as if the map were not there at all.
+{
+  const layers = [{ id: 'arc-partial', motion: [{ t: 0, x: 0, scale: 1 },
+    { t: 1, x: 400, scale: 2, ease: { x: 'linear' } }] }];
+  resolveKeyedProps(layers);
+  const [L] = layers;
+  assert.equal(motionAt(L.motion, 0.5).dx, 200, 'the mapped property (x) is linear');
+  const s = motionAt(L.motion, 0.5).scale;
+  assert.ok(s > 1 && s < 2, `the unmapped property (scale) still eases with the segment default, got ${s}`);
+}
+
+// A per-property HANDLE ({easeIn/easeOut}), the form the task names: y arrives at a dead stop
+// (influence 80, speed 0) while x carries no override and keeps the segment's own curve.
+{
+  const layers = [{ id: 'arc-handle', motion: [{ t: 0, x: 0, y: 0 },
+    { t: 1, x: 400, y: 120, ease: { y: { easeIn: { influence: 80, speed: 0 } } } }] }];
+  resolveKeyedProps(layers);
+  const [L] = layers;
+  assert.equal(motionAt(L.motion, 1).dy, 120, 'a per-property handle still lands exactly on the authored value');
+  assert.equal(motionAt(L.motion, 0).dy, 0);
+}
+
+// keyHandleErrors: the per-property twin of the whole-key checks, one property at a time.
+{
+  const bad = { motion: [{ t: 0 }, { t: 1, x: 1, ease: { x: 'not-a-real-easing' } }] };
+  const [msg] = keyHandleErrors(bad.motion, 'layer "bad-name"');
+  assert.match(msg, /unknown easing/, 'an unknown per-property easing name is refused');
+}
+{
+  const bad = { motion: [{ t: 0 }, { t: 1, x: 1, ease: { notAProp: 'linear' } }] };
+  const [msg] = keyHandleErrors(bad.motion, 'layer "bad-prop"');
+  assert.match(msg, /nothing interpolates/, 'a per-property ease naming a property with no pose slot is refused');
+}
+{
+  const bad = { motion: [{ t: 0 }, { t: 1, x: 1, ease: { x: { spin: 3 } } }] };
+  const [msg] = keyHandleErrors(bad.motion, 'layer "stray"');
+  assert.match(msg, /does not take/, 'a per-property handle carrying an unknown field is refused');
+}
+// A top-level whole-segment handle beside a per-property MAP is not a conflict: the map overrides
+// only the properties it names, and the handle still shapes everything else, so this must be clean.
+{
+  const clean = { motion: [{ t: 0 }, { t: 1, x: 1, y: 1, easeIn: { influence: 50, speed: 0 },
+    ease: { x: 'linear' } }] };
+  assert.deepEqual(keyHandleErrors(clean.motion, 'layer "layered"'), [],
+    'a per-property map beside a top-level handle is layered, not a double-shaped segment');
+}
+
+console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone; per-property `ease` (Separate Dimensions) lets x and y travel different curves on the same keys');
