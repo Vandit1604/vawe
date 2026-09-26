@@ -122,28 +122,15 @@ export function stageOf(arg) {
   // placeholder layer `make scaffold` wrote; that generator is gone and no film on disk carries the tag.
   const layers = scene && Array.isArray(scene.layers) ? scene.layers.length : 0;
 
-  // THE PLAN JUDGE MAY BE REQUIRED TO HAVE RUN, NEVER TO HAVE PASSED. `exists && !stale` is "the eye
-  // looked at THIS version of the storyboard"; it says nothing about what it found, because findings
-  // never gate a stage (harness/lib/receipt.mjs's hash already refuses a stale read on its own: a
-  // receipt whose subject moved reads `stale: true`, never a false PASS over an outdated plan).
-  //
-  // AN EXISTING `approved:` LINE ALSO SATISFIES IT. The judge exists to inform the owner's signature,
-  // not to be imposed after it: `approved:` is a fact only a human writes (harness/live/stage-gate.mjs
-  // refuses it from an agent), so a plan a person already signed off has already cleared a higher bar
-  // than this gate asks for. Without this, every already-approved film in the library reads backwards
-  // (measured: 4 films at assemble/direct/render, none of them at plan judgement, regress to PLAN the
-  // day this ships) the moment this gate exists, which is the exact failure `design before approval`
-  // (474981ba) measured and refused to reintroduce: "every approved film stays approved." A film still
-  // waiting for its first signature is not exempted: this only reads an `approved:` already on disk.
+  // The plan judge is optional since approval went (2026-09-26): the draft render is where the plan gets judged.
   const planJudge = sbExists ? readReceipt('plan-judge', p.sb) : { exists: false, stale: false };
-  const planJudgeRan = !!approved || (planJudge.exists && !planJudge.stale);
   const structurallyOk = sbExists && gatePasses('quality/gates/storyboard-check.mjs', p.sb);
 
   const S = [
     { id: 'brief', done: fs.existsSync(p.brief) || sbExists,
       why: 'nobody has asked what this film is about. A brief is five lines and any of them missing changes the film.',
       next: `make quiz NAME=${p.name} URL=<the product site>   (no site? engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md, and write ${path.relative(ROOT, p.brief)} by hand)` },
-    { id: 'plan', done: structurallyOk && planJudgeRan,
+    { id: 'plan', done: structurallyOk,
       why: !sbExists ? 'there is no storyboard. Every role that writes into the film transcribes it, so a gap here becomes an invention further down.'
         : !structurallyOk ? 'the storyboard exists and does not pass its own gate yet.'
         : planJudge.exists && planJudge.stale ? `the plan judge's last verdict is stale: ${path.relative(ROOT, p.sb)} changed since it ran.`

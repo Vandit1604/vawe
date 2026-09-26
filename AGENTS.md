@@ -20,7 +20,7 @@ is in and the one next command; `make next D=<film>` runs that step.
 | # | stage | the command |
 |---|---|---|
 | 1 | brief | `make quiz NAME= URL=` |
-| 2 | plan | `make ideate` → write the storyboard → `make storyboard-check` → `make plan-judge` |
+| 2 | plan | `make ideate` → write the storyboard → `make storyboard-check` |
 | 3 | design | `make preview` → `make design-spec` → `make studio D=` |
 | 4 | assemble | `make assemble D=` writes the scene JSON |
 | 5 | direct | `make critics D= DECIDERS=1` |
@@ -69,7 +69,7 @@ fixing "looks AI": `taste-skill`, then `impeccable`.
 already owns (a unit, a clock, an order, a property, an exit), never a private code path with its own
 timing or colour ramp. If one half has no owner, add the owner, not the effect. A new primitive ships
 with its words too: 2+ `aka` phrases and a `blurb` naming its real default, enforced by
-`make word-action`. Five rules govern any change to `core/`, `internal/`, a gate, or the capture path:
+`make check GATE=word-action`. Five rules govern any change to `core/`, `internal/`, a gate, or the capture path:
 `engine-doctrine/CRAFT/ENGINE-CHANGES.md`.
 
 ## Testing: end to end first  `[ref: make e2e]`
