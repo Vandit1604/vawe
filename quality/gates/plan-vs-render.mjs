@@ -227,7 +227,7 @@ if (sb && sb.threads) {
       + `This checks the device EXISTS, never that it is the one causing the change threads: describes. `
       + `If this is a deliberate change of direction, waive it here with a reason `
       + `({"authoring":{"allow":["thread-not-built"],"_why":{"thread-not-built":"..."}}}) `
-      + `and copy that reason into \`threads:\` by hand so the plan a person approved still describes the film they get.`);
+      + `and copy that reason into \`threads:\` by hand so the plan still describes the film they get.`);
   }
 }
 

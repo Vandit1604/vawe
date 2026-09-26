@@ -25,9 +25,8 @@ const base = path.join(ROOT, FILMS_DIR, NAME);
 const film = `${base}.json`;
 const sb = `${base}.storyboard.md`;
 
-// Approval is a human act stage-gate.mjs refuses to let a Write/Edit tool call sign, but this string is
-// written by node:test's own fs.writeFileSync at run time, never through that tool, so it is not the
-// thing that gate exists to stop: it stands in for a plan a person already signed off in a real film.
+// `approved:` is no longer required by any stage; it is kept here only so a film that still carries the
+// field from before the approval stage was removed keeps parsing the same way (backward compatibility).
 const SB = `---
 message: "test film"
 audience: "ci"

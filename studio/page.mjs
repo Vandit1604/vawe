@@ -18,7 +18,7 @@ const SHELL = fs.readFileSync(path.join(DIR, 'ui/shell.html'), 'utf8');
 
 // The dynamic bits: the tab title, the iframe src that names the scene, and which of the four states
 // (plan/make/ship/sound) the shell opens on. `state` is chosen by the server (paneForStage in
-// server.mjs, off /api/stage's own verdict) so a film at plan/approval opens on Plan rather than always
+// server.mjs, off /api/stage's own verdict) so a film at plan opens on Plan rather than always
 // on Make; studio.js reads it back off `document.body.dataset.state` at boot, never re-deriving it.
 export const studioPage = ({ fmt, dataUrl, title, state = 'make' }) => SHELL
   .replace('{{TITLE}}', title)
