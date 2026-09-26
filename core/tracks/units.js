@@ -14,11 +14,14 @@ export const slot = 'split';
 // `ransom` beside it, because scene.js implies a char split for a ransom layer and the reveal then runs
 // on those units. `circle` implies a split too and is deliberately NOT here: it lays the units out on a
 // ring and this track yields to it, so a preset on a circle layer is inert for the opposite reason.
+// `axis: { wght: [300, 900] }` rides the SAME per-unit clock as `preset`/`stagger` (unitProgress in
+// core/type/type.js), so a variable-font axis ramps alongside whatever preset is entering rather than
+// needing a preset of its own: `axis` and `preset: "blur"` compose on one split layer for free.
 const SPLIT = ['split', 'ransom'];
 export const PROPS = {
   preset: { when: SPLIT }, stagger: { when: SPLIT }, each: { when: SPLIT }, loop: { when: SPLIT },
   dist: { when: SPLIT }, speed: { when: SPLIT }, phaseStep: { when: SPLIT }, presetOpts: { when: SPLIT },
-  smoothness: { when: SPLIT }, exit: { when: SPLIT },
+  smoothness: { when: SPLIT }, exit: { when: SPLIT }, axis: { when: SPLIT },
   circle: {}, fx: {}, ransom: {},
 };
 
@@ -45,7 +48,7 @@ export function frame(kit, el, L, units, t, f, start, end) {
     ? { each: kit.M.stagger, ...L.stagger }
     : (L.stagger ?? defaultStaggerStep(L.ransom ? 0.08 : kit.M.stagger, units.length));
   const each = L.each ?? 0.5;
-  animateUnits(units, local, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger, each, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, ...L.presetOpts });
+  animateUnits(units, local, { preset: L.preset || (L.ransom ? 'fall' : 'up'), stagger, each, smoothness: L.smoothness, loop: L.loop, dist: L.dist, speed: L.speed, phaseStep: L.phaseStep, axis: L.axis, ...L.presetOpts });
   exitFrame(kit, L, units, local, each, stagger);
 }
 

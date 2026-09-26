@@ -47,7 +47,7 @@
 // captions[].start is in tempo.js's table too, but no caption ever carries that field (the real shape
 // is `{t0,t1}`, schema-checked); it is a dead key in that table, not a live one, so nothing to resolve.
 
-function eachLayerDeep(ls, fn) {
+export function eachLayerDeep(ls, fn) {
   for (const L of ls || []) {
     if (!L || typeof L !== 'object') continue;
     fn(L);
