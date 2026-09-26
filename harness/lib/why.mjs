@@ -1,9 +1,3 @@
-// harness/lib/why.mjs: `make why D=<film> [N=5]`. Prints the last N runs logged for a film
-// (harness/lib/runlog.mjs) as a short table, then the diff between the last two: what newly fired,
-// what stopped firing. This is the answer to "when a render is bad, re-derive what the harness did by
-// hand": read the log instead.
-//
-// Usage: node harness/lib/why.mjs <film> [N]
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readRuns } from './runlog.mjs';

@@ -1,19 +1,3 @@
-// harness/lib/waivers.mjs: ONE waiver stays one excuse mechanism (author-check.mjs "THE ONE EXCUSE
-// MECHANISM"), but a bare code excuses that code for the WHOLE FILM, forever. Measured: a new 1.0:1
-// contrast defect on a new beat rode through as "(waived)" under an old excuse written for a different
-// beat. This module is the one place that decides whether an `authoring.allow` entry covers a finding,
-// so author-check.mjs and waiver-drift.mjs (the only two files that get to make that decision) agree.
-//
-// SYNTAX, backward compatible. An entry is a bare code ("dead-air", as today) or an instance-scoped one
-// ("dead-air@beat:3"). The instance half is never invented here: it is exactly what the finding's own
-// `at` field already says (harness/lib/findings.mjs), so a waiver can only ever be as specific as the
-// gate that raised the finding already is. A gate that never sets `at` on a code can only be waived
-// bare, and that is not a gap in this module, it is a fact about that gate stated honestly.
-//
-// MATCHING. A bare entry excuses every finding of its code, whatever instance fired (unchanged
-// behaviour: no existing film's waivers stop working). A scoped entry excuses only the finding whose
-// `at` stringifies to exactly its instance half. `_why` keys the SAME entry string, bare or scoped, so
-// "dead-air@beat:3" needs `_why["dead-air@beat:3"]`, never `_why["dead-air"]`.
 
 /** Split one `authoring.allow` entry into { code, instance }. `instance` is null for a bare entry. */
 export function splitWaiver(entry) {
@@ -34,11 +18,6 @@ export function isWaivedBy(allow, code, at) {
   return (allow || []).some((e) => waiverCovers(e, code, at));
 }
 
-// THE ONE BAR FOR "HAS A REASON". AGENTS.md: "a waiver with no `_why` blocks." author-check.mjs enforces
-// this on the one film it is given; waiver-drift.mjs is the only thing that ever looks at the WHOLE
-// library, and used to check `_why` with its own ad hoc console-only logic that skipped a waiver
-// entirely once it was unique to one film (see waiver-drift.mjs's per-scene loop). Two places testing
-// "is this a real reason" is how they drift apart; this is the one predicate both call now.
 export const MIN_REASON_LEN = 12;
 
 /** Does `why[entry]` (the `authoring._why` map, keyed by the raw allow entry) hold a real reason? */

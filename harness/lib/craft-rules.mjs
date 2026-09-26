@@ -1,15 +1,3 @@
-// harness/lib/craft-rules.mjs: ONE schema for a craft rule, loaded from engine-doctrine/CRAFT/rules/<category>.json,
-// so the harness can print the right rule at the right stage instead of an author re-reading AGENTS.md.
-//
-// Four mechanisms said this before with no shared shape (engine-doctrine/RULES per-rule records, doc frontmatter
-// codes/confirm, safeguards.mjs adapts, critics.mjs hand-typed prose). This is the fifth, and the last:
-// everything above either migrates into a record here or stays prose a record here points at.
-//
-// A record never carries prose. It carries an id, where it fires, what checks it (or null, meaning
-// nothing but an eye catches it), and a `brief` that QUOTES the doc rather than restating it, so the
-// quote goes stale the moment the doc's own wording moves and the loader can catch that (see
-// `sectionText`/`validateRule`'s freshness check below). JUST-IN-TIME: a printed line names the doc,
-// never inlines its paragraph, so an agent opens the real page only when the one-liner is not enough.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,9 +7,6 @@ import { codesEmitted } from './finding-codes.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// The feature-key vocabulary IS whatever computeFeatures actually produces, never a copy of it: a
-// second list drifts the day a feature is renamed. Called with no scene/storyboard, computeFeatures is
-// pure enough to hand back its full key set with every value false/NaN-derived.
 export const FEATURE_KEYS = Object.keys(computeFeatures({}, null));
 
 const EM_DASH = String.fromCharCode(0x2014);
@@ -180,10 +165,6 @@ export function briefLine(rec) {
   return `rule ${rec.id}: ${rec.brief} (${rec.doc})`;
 }
 
-// STAGE_CATEGORY_ORDER: the order AGENTS.md already names for a stage's own categories (direct: motion,
-// transitions, sound in that order under "Direction"; design: layout, imagery, typography, colour,
-// content; plan: direction, content). `rulesFor`'s grouped mode (below) reads it so a hook can print
-// motion before transitions without hand-sorting every call site the same way.
 export const STAGE_CATEGORY_ORDER = {
   direct: ['motion', 'transitions', 'sound'],
   design: ['layout', 'imagery', 'typography', 'colour', 'content'],
@@ -267,8 +248,6 @@ export function rulesFor({
   withReceipt = false,
 } = {}) {
   const all = loadCraftRules({ root });
-  // Stage/category candidates BEFORE the feature filter, so a feature mismatch can be named as a drop
-  // reason instead of silently vanishing the way it did when this function only ever returned survivors.
   const candidates = all.filter((r) => r.stage === stage && (!categories || categories.includes(r.category)));
   const dropped = [];
   const matched = [];
