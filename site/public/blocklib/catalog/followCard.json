@@ -7,6 +7,10 @@
   "tags": [
     "followCard"
   ],
+  "dimensions": {
+    "width": 404,
+    "height": 121
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,6 +7,10 @@
   "tags": [
     "usMap"
   ],
+  "dimensions": {
+    "width": 864,
+    "height": 582
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

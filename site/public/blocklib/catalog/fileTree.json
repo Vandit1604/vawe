@@ -7,6 +7,10 @@
   "tags": [
     "fileTree"
   ],
+  "dimensions": {
+    "width": 404,
+    "height": 314
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

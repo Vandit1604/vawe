@@ -7,6 +7,10 @@
   "tags": [
     "bento"
   ],
+  "dimensions": {
+    "width": 804,
+    "height": 464
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

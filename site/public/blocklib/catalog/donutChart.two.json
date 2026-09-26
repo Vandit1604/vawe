@@ -7,6 +7,10 @@
   "tags": [
     "donutChart"
   ],
+  "dimensions": {
+    "width": 364,
+    "height": 462
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

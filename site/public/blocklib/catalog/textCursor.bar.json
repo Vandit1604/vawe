@@ -7,6 +7,10 @@
   "tags": [
     "textCursor"
   ],
+  "dimensions": {
+    "width": 944,
+    "height": 191
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

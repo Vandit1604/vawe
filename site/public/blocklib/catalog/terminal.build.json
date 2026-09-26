@@ -7,6 +7,10 @@
   "tags": [
     "terminal"
   ],
+  "dimensions": {
+    "width": 604,
+    "height": 175
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

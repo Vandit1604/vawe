@@ -7,6 +7,10 @@
   "tags": [
     "splitFlapBoard"
   ],
+  "dimensions": {
+    "width": 535,
+    "height": 194
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
