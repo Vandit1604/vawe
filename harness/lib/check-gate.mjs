@@ -1,10 +1,3 @@
-// harness/lib/check-gate.mjs: the body of `make check GATE=<name>`.
-//
-// 99 quality/gates/*.mjs scripts had their own one-line Makefile target, each a straight passthrough
-// of $(D)/$(JSON)/etc to one script: a command surface an agent has to scan past to find the twelve
-// it actually needs. This is the table those targets encoded, moved off the Makefile and into data,
-// so `make check GATE=<name>` is the one door and `make list` still names every gate by its old name
-// for anyone who wants to see what GATE= accepts.
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -16,8 +9,7 @@ const stamp = () => (env.STAMP ? ['--stamp'] : []);
 const write = () => (env.WRITE ? ['--write'] : []);
 const list = () => (env.LIST ? ['--list'] : []);
 
-// name -> the script + args it used to be a Makefile one-liner for. Keep this alphabetical; it is the
-// only place this list is kept, so it is also the whole answer to "what can GATE= be".
+// name -> the script + args; keep alphabetical, this is the only place the list is kept.
 export const GATES = {
   'arsenal-check': () => ['quality/gates/arsenal-check.mjs', ...json()],
   'blocks-audit': () => ['quality/gates/blocks-audit.mjs', ...json()],

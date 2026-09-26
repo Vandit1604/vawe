@@ -1,16 +1,9 @@
-// harness/dev/gate-census-report.mjs: read quality/baselines/gate-census.json and print the table +
-// the delete-candidate list. Kept separate from gate-census.mjs (which does the (slow) measuring) so
-// the analysis can be re-run for free.
 import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = process.cwd();
 const data = JSON.parse(fs.readFileSync(path.join(ROOT, 'quality/baselines/gate-census.json'), 'utf8'));
 
-// "fired" = ever produced a finding OR ever exited non-zero. A gate that blocks but never wrote to
-// VAWE_FINDINGS_OUT (author-check aggregates 22 subprocess steps and does not itself re-emit their
-// records to the parent's findings file) would otherwise look silent while it was actually the
-// loudest check in the census. Blocked counts as fired; it is strictly the more conservative reading.
 const rows = data.results
   .filter((r) => r.kind === 'film' || r.kind === 'repo')
   .map((r) => ({ ...r, everFired: r.filmsFired > 0 || r.filmsBlocked > 0 }))

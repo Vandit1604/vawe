@@ -21,70 +21,6 @@
       ]
     },
     {
-      "name": "badge",
-      "type": "vawe:block",
-      "description": "a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta).",
-      "tags": [
-        "badge"
-      ]
-    },
-    {
-      "name": "badge.beta",
-      "type": "vawe:block",
-      "description": "beta status badge",
-      "tags": [
-        "badge"
-      ]
-    },
-    {
-      "name": "badge.info",
-      "type": "vawe:block",
-      "description": "a blue chip carrying a neutral fact, no alarm attached",
-      "tags": [
-        "badge"
-      ]
-    },
-    {
-      "name": "badge.version",
-      "type": "vawe:block",
-      "description": "a small chip showing which release is running, like a v2.1.0 shield in a README",
-      "tags": [
-        "badge"
-      ]
-    },
-    {
-      "name": "badge.warn",
-      "type": "vawe:block",
-      "description": "an amber chip that flags something needing attention, a caution token",
-      "tags": [
-        "badge"
-      ]
-    },
-    {
-      "name": "banner",
-      "type": "vawe:block",
-      "description": "a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge.",
-      "tags": [
-        "banner"
-      ]
-    },
-    {
-      "name": "banner.info",
-      "type": "vawe:block",
-      "description": "banner, info (blurple)",
-      "tags": [
-        "banner"
-      ]
-    },
-    {
-      "name": "banner.warn",
-      "type": "vawe:block",
-      "description": "banner, warning (amber)",
-      "tags": [
-        "banner"
-      ]
-    },
-    {
       "name": "barChart",
       "type": "vawe:block",
       "description": "a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side",
@@ -164,46 +100,6 @@
       "tags": [
         "captions",
         "overlay"
-      ]
-    },
-    {
-      "name": "card",
-      "type": "vawe:block",
-      "description": "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
-      "tags": [
-        "card"
-      ]
-    },
-    {
-      "name": "card.pricing",
-      "type": "vawe:block",
-      "description": "a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button",
-      "tags": [
-        "pricingCard"
-      ]
-    },
-    {
-      "name": "card.pricing.free",
-      "type": "vawe:block",
-      "description": "pricing, free tier",
-      "tags": [
-        "pricingCard"
-      ]
-    },
-    {
-      "name": "card.pricing.team",
-      "type": "vawe:block",
-      "description": "pricing, team tier",
-      "tags": [
-        "pricingCard"
-      ]
-    },
-    {
-      "name": "card.profile",
-      "type": "vawe:block",
-      "description": "a person's photo beside their name, with their job title under it",
-      "tags": [
-        "profileCard"
       ]
     },
     {
@@ -487,22 +383,6 @@
       ]
     },
     {
-      "name": "diff",
-      "type": "vawe:block",
-      "description": "a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review",
-      "tags": [
-        "diff"
-      ]
-    },
-    {
-      "name": "diff.config",
-      "type": "vawe:block",
-      "description": "a settings or yaml file changing: removed lines in red above the new ones in green",
-      "tags": [
-        "diff"
-      ]
-    },
-    {
       "name": "donutChart",
       "type": "vawe:block",
       "description": "a pie chart drawn as a ring: coloured segments of a whole plus a legend of labels",
@@ -524,14 +404,6 @@
       "description": "a zero state panel with dashed border: an icon, a line saying what is missing, and a button that fills it.",
       "tags": [
         "emptyState"
-      ]
-    },
-    {
-      "name": "feedRow",
-      "type": "vawe:block",
-      "description": "one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text.",
-      "tags": [
-        "feedRow"
       ]
     },
     {
@@ -591,14 +463,6 @@
       ]
     },
     {
-      "name": "glassCard",
-      "type": "vawe:block",
-      "description": "a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency",
-      "tags": [
-        "glassCard"
-      ]
-    },
-    {
       "name": "glassControls",
       "type": "vawe:block",
       "description": "a frosted media player bar: scrubber, play and transport buttons, a volume or level meter",
@@ -644,15 +508,6 @@
       "description": "a cluster of frosted iOS-style widgets: one big showcase panel plus small stat tiles and chips",
       "tags": [
         "glassWidgets"
-      ]
-    },
-    {
-      "name": "grainOverlay",
-      "type": "vawe:block",
-      "description": "a layer of film grain or noise texture over the whole frame, so it looks shot on film instead of flat digital",
-      "tags": [
-        "grainOverlay",
-        "overlay"
       ]
     },
     {
@@ -744,14 +599,6 @@
       ]
     },
     {
-      "name": "listRow",
-      "type": "vawe:block",
-      "description": "a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row.",
-      "tags": [
-        "listRow"
-      ]
-    },
-    {
       "name": "loadingBar",
       "type": "vawe:block",
       "description": "a progress bar: a track fills left to right to a set percent and finishes with a green done checkmark",
@@ -781,22 +628,6 @@
       "description": "log stream on a light surface",
       "tags": [
         "logLines"
-      ]
-    },
-    {
-      "name": "logoWall",
-      "type": "vawe:block",
-      "description": "a grid of company wordmarks or logo images, for a social proof or partner strip.",
-      "tags": [
-        "logoWall"
-      ]
-    },
-    {
-      "name": "logoWall.four",
-      "type": "vawe:block",
-      "description": "four logos, 2 cols",
-      "tags": [
-        "logoWall"
       ]
     },
     {
@@ -893,14 +724,6 @@
       "description": "plate over a short accent bar · reads as a mark",
       "tags": [
         "lowerThird"
-      ]
-    },
-    {
-      "name": "meshPanel",
-      "type": "vawe:block",
-      "description": "a soft blurry gradient background made of overlapping colour blobs, calm and branded",
-      "tags": [
-        "meshPanel"
       ]
     },
     {
@@ -1048,22 +871,6 @@
       ]
     },
     {
-      "name": "quote",
-      "type": "vawe:block",
-      "description": "a big pull quote with the person's name credited underneath, for a testimonial or a line to remember",
-      "tags": [
-        "quote"
-      ]
-    },
-    {
-      "name": "quote.customer",
-      "type": "vawe:block",
-      "description": "a testimonial pulled big, with the person and their company credited underneath",
-      "tags": [
-        "quote"
-      ]
-    },
-    {
       "name": "reactionBar",
       "type": "vawe:block",
       "description": "emoji reaction pills with counts, like the reactions under a Slack or Discord message",
@@ -1077,14 +884,6 @@
       "description": "reactions (love set)",
       "tags": [
         "reactionBar"
-      ]
-    },
-    {
-      "name": "redditPost",
-      "type": "vawe:block",
-      "description": "a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count",
-      "tags": [
-        "redditPost"
       ]
     },
     {
@@ -1125,14 +924,6 @@
       "description": "the search results page: a ranked list of links, with a cursor clicking one",
       "tags": [
         "searchEngine"
-      ]
-    },
-    {
-      "name": "settingsRow",
-      "type": "vawe:block",
-      "description": "a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text.",
-      "tags": [
-        "settingsRow"
       ]
     },
     {
@@ -1189,14 +980,6 @@
       "description": "picture-in-picture · an aside inset over the subject",
       "tags": [
         "splitScreen"
-      ]
-    },
-    {
-      "name": "spotlightCard",
-      "type": "vawe:block",
-      "description": "a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room",
-      "tags": [
-        "spotlightCard"
       ]
     },
     {
@@ -1269,14 +1052,6 @@
       "description": "steps, at start",
       "tags": [
         "stepFlow"
-      ]
-    },
-    {
-      "name": "stripeCard",
-      "type": "vawe:block",
-      "description": "a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button",
-      "tags": [
-        "stripeCard"
       ]
     },
     {
@@ -1445,14 +1220,6 @@
       "description": "snackbars that stack and expire",
       "tags": [
         "toast"
-      ]
-    },
-    {
-      "name": "tweetCard",
-      "type": "vawe:block",
-      "description": "a tweet or X post card: avatar, handle, body text, like and reply counts",
-      "tags": [
-        "tweetCard"
       ]
     },
     {

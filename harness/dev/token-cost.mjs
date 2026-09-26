@@ -1,24 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/token-cost.mjs: what did agent sessions on this repo actually cost, by billing type.
-//
-//   node harness/dev/token-cost.mjs                    # every session on record
-//   node harness/dev/token-cost.mjs --since 2026-09-01  # only requests logged after that date
-//   node harness/dev/token-cost.mjs --session 31437b80  # one main session (and its subagents) by id prefix
-//   node harness/dev/token-cost.mjs --limit 20          # the 20 most-recently-touched main sessions
-//   node harness/dev/token-cost.mjs --json              # machine-readable report
-//   node harness/dev/token-cost.mjs --self-test         # dedupe + billing math, no real transcripts
-//
-// WHY THIS EXISTS. A throwaway parser answered "what does a session cost" once, by hand, then had to
-// skip its three biggest files (463MB-1.38GB) because it read each one whole into memory before
-// touching a byte of it. Those three hold almost all of the subagent transcripts and tool output on
-// this repo, so the number it produced was a number for the sessions that happened to be small. This
-// reads every file line by line (readline over a stream), so a 1.38GB transcript costs the same RAM as
-// a 1KB one, and the baseline covers what actually ran, not what fit in memory.
-//
-// ONE MESSAGE, MANY LINES. The transcript logs one JSONL line per content block, so a single API
-// response with a thinking block, a tool call and a text reply is three lines sharing one message id,
-// each carrying the FULL usage for that response. Summing them would count every response 2-4x; this
-// keeps the first line seen per message id per file and throws the rest away unread.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -26,8 +6,6 @@ import readline from 'node:readline';
 import { execFileSync } from 'node:child_process';
 import assert from 'node:assert/strict';
 
-// Prices per million tokens, owner-supplied 2026-09-25, verify against the provider's pricing page
-// before trusting this for anything but a relative before/after comparison.
 const PRICING = {
   opus: { input: 15, output: 75, cache_write: 18.75, cache_read: 1.50 },
   sonnet: { input: 3, output: 15, cache_write: 3.75, cache_read: 0.30 },
@@ -64,9 +42,6 @@ function p90(xs) {
   return s[Math.min(s.length - 1, Math.floor(0.9 * (s.length - 1)))];
 }
 
-// A tool_result's content is a raw string on most calls, or a list of content blocks (text, image,
-// ...) when a tool returns structured output; either way this is an approximate char count, not a
-// token count, used only to compare tools' result sizes against each other.
 function resultChars(content) {
   if (typeof content === 'string') return content.length;
   if (Array.isArray(content)) {
@@ -85,9 +60,6 @@ function attachmentChars(att) {
   return JSON.stringify(c).length;
 }
 
-// The repo path this project's transcripts are filed under, encoded the way Claude Code names
-// ~/.claude/projects/<encoded> directories: every "/" and "." becomes "-". Read off git rather than
-// hardcoded, so a worktree or a clone at a different path still finds its own history.
 function repoEncodedPrefix() {
   try {
     const commonDir = execFileSync('git', ['rev-parse', '--git-common-dir'], { encoding: 'utf8' }).trim();
@@ -106,9 +78,6 @@ function findProjectDirs(claudeProjectsDir, prefix) {
     .map((e) => path.join(claudeProjectsDir, e.name));
 }
 
-// One row per main session: its own .jsonl plus every subagents/agent-*.jsonl filed under the same
-// directory name. A subagent has no independent identity worth reporting on its own; it is billed
-// under the main session that spawned it.
 function findSessionGroups(projectDirs) {
   const groups = [];
   for (const dir of projectDirs) {
@@ -136,8 +105,6 @@ function newSessionAgg(sessionId, source) {
   return { sessionId, source, requests: 0, costTotal: 0, cacheRead: 0, cacheCreation: 0, input: 0, firstPrefix: null };
 }
 
-// Streams one transcript file and folds it into the shared report accumulators. Never holds the file
-// in memory: one line in, one line's effect on the totals, then the line is garbage.
 function processFile(filePath, sessionId, source, sinceIso, report) {
   return new Promise((resolve, reject) => {
     const seenMessageIds = new Set();
@@ -363,21 +330,14 @@ function renderText(report) {
   return lines.join('\n');
 }
 
-// --- self-test: proves the dedupe-by-message-id and the billing math against a hand-computed
-// fixture, without touching real transcripts. No fixture file: the JSONL is small enough to inline,
-// and inlining it is what keeps this test readable next to the numbers it checks.
 async function selfTest() {
   const lines = [
-    // message A: two content-block lines sharing one id, sonnet, same usage on both (must count once)
     JSON.stringify({ type: 'assistant', timestamp: '2026-09-01T00:00:00Z', message: { id: 'msg_A', model: 'claude-sonnet-5', content: [{ type: 'text', text: 'hi' }], usage: { input_tokens: 100, cache_creation_input_tokens: 1000, cache_read_input_tokens: 0, output_tokens: 50 } } }),
     JSON.stringify({ type: 'assistant', timestamp: '2026-09-01T00:00:01Z', message: { id: 'msg_A', model: 'claude-sonnet-5', content: [], usage: { input_tokens: 100, cache_creation_input_tokens: 1000, cache_read_input_tokens: 0, output_tokens: 50 } } }),
-    // message B: opus, carries a tool_use
     JSON.stringify({ type: 'assistant', timestamp: '2026-09-01T00:00:02Z', message: { id: 'msg_B', model: 'claude-opus-5', content: [{ type: 'tool_use', id: 't1', name: 'Bash' }], usage: { input_tokens: 5, cache_creation_input_tokens: 200, cache_read_input_tokens: 800, output_tokens: 20 } } }),
     JSON.stringify({ type: 'user', timestamp: '2026-09-01T00:00:03Z', message: { content: [{ type: 'tool_result', tool_use_id: 't1', content: 'hello result', is_error: false }] } }),
     JSON.stringify({ type: 'attachment', timestamp: '2026-09-01T00:00:04Z', attachment: { hookName: 'SessionStart:startup', content: 'hook text here' } }),
-    // message C: sonnet, not the first request, cache write over the 3000-token threshold
     JSON.stringify({ type: 'assistant', timestamp: '2026-09-01T00:00:05Z', message: { id: 'msg_C', model: 'claude-sonnet-5', content: [], usage: { input_tokens: 1, cache_creation_input_tokens: 5000, cache_read_input_tokens: 0, output_tokens: 10 } } }),
-    // message D: an unpriced model, reported separately, excluded from totalCost
     JSON.stringify({ type: 'assistant', timestamp: '2026-09-01T00:00:06Z', message: { id: 'msg_D', model: 'claude-mystery-1', content: [], usage: { input_tokens: 7, cache_creation_input_tokens: 0, cache_read_input_tokens: 0, output_tokens: 3 } } }),
   ];
   const fixturePath = path.join(os.tmpdir(), `token-cost-selftest-${process.pid}.jsonl`);

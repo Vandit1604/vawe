@@ -1,11 +1,10 @@
 // blocks/core.mjs: the plain cards and statements (card · quote · stripeCard · kpiRow · comparison ·
 // pricingCard · captions · colorCycle), the big variant families (lowerThird · searchEngine) and the
-// COMPOSITION containers (splitScreen · screenSwap) that hold another block.
+// composition containers (splitScreen · screenSwap) that hold another block.
 //
-// Extracted from blocks/index.mjs so index.mjs owns nothing but assembly. A module cannot discover
-// itself, and index.mjs now discovers its siblings, so the factories that used to live inside it had
-// to become a sibling too. Same contract as every other family: a PURE function props → an ARRAY of
-// scene layers, absolute-positioned on the 1920x1080 stage, deterministic.
+// Extracted from blocks/index.mjs so that file owns nothing but assembly. Same contract as every other
+// family: a pure function props → an array of scene layers, absolute-positioned on the 1920x1080
+// stage, deterministic.
 
 // The shared vocabulary: tokens, layer primitives, card chrome, the radius scale, tone colours and
 // the one avatar implementation, lives in blocks/kit.mjs. It is PURE (props → plain objects) and it
@@ -13,7 +12,7 @@
 import {
   TOKENS, HAIR, r2, text, rect, box,
   R, E, SPACE, TYPE, cardChrome,
-  stagger, needData, blockFactory,
+  stagger, blockFactory,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that ships
@@ -28,46 +27,15 @@ const T = TOKENS;
 // restrained, either the layer's own envelope `anim` for a single-unit card or `parts` where a family
 // stages its own repeating children. engine-doctrine/CRAFT/HTML-FRAGMENTS.md.
 
-// card. One product surface: hairline + a single step of elevation, content, a footer row.
-// The tinted inner panel it used to draw is gone by DEFAULT (`tint` now matches the card fill), because
-// a panel inside a panel is two surfaces saying one thing, the 2021 SaaS tile. `tint` still paints
-// when a caller passes a real one, so the prop keeps its meaning; only the default moved.
-export function card({ x, y, w = 740, h = 336, tint = 'var(--card)', title, desc, pills = [],
-  cta = 'Explore', start = 0, dur = 4, anim = 'rise', enterDur = 0.5 } = {}) {
-  // Neutral chips, not accent pills. A tag is metadata; spending the brand colour on a row of them
-  // leaves nothing louder for the thing that matters. Same size/pad/radius as kit.mjs's `pill`.
-  const pillsHtml = pills.length ? `<div style="display:flex;flex-wrap:wrap;gap:${SPACE.xs}px;align-items:center">`
-    + pills.map((p) => `<span style="display:inline-flex;align-items:center;font:500 ${TYPE.body}px var(--font-sans);`
-      + `color:${T.sub};background:${T.surface};border-radius:${R.pill}px;padding:6px 16px">${p}</span>`).join('') + '</div>' : '';
-  const html = `<div style="display:flex;flex-direction:column;width:${w}px;height:${h}px;box-sizing:border-box">`
-    + `<div style="flex:1;min-height:0;background:${tint};border-radius:${R.chip}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.sm}px">`
-    + `<span style="font:700 ${TYPE.head}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">${title}</span>`
-    + (desc ? `<span style="font:400 ${TYPE.base}px var(--font-sans);color:${T.sub}">${desc}</span>` : '')
-    + pillsHtml + '</div>'
-    // The footer sits BELOW a rule rather than floating under the content: it is a different kind of
-    // row (an action, not a fact), and the hairline is what says so.
-    + (cta ? `<div style="height:1px;background:${T.hair}"></div>`
-      + `<div style="display:flex;justify-content:space-between;align-items:center;padding:${SPACE.sm}px ${SPACE.lg}px">`
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${T.sub}">${cta}</span>`
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${T.accent}">→</span></div>` : '')
-    + '</div>';
-  return [{ type: 'html', x, y, w, h, html, ...cardChrome({ radius: R.card, elevation: E.card, anim }),
-    start, duration: dur, enterDur, exitDur: 0.35 }];
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// colorCycle. One word rendered in a SEQUENCE of hues so it visibly cycles colour (proof of "any
-// colour" WITHOUT reintroducing colour everywhere). Deterministic: fixed palette, fixed timing.
+// colorCycle. One word rendered in a sequence of hues so it visibly cycles colour (proof of "any
+// colour" without reintroducing colour everywhere). Deterministic: fixed palette, fixed timing.
 //
-// The DEFAULT six sit in one luminance band (relative L ≈ 0.13..0.22), which buys two things at once.
-// They clear 3:1 against white AND against near-black, so the one block in this file that cannot read
-// the theme still lands on all 38; and holding luminance constant leaves HUE as the only thing that
-// changes, which is what the block is for. The previous six ranged from a 2.1:1 amber to a dark
-// indigo, so on a white ground a third of the cycle was unreadable and the rest flickered in weight.
-// Each step is its own top-level layer with its own start/duration window (a hue tenanting one slice
-// of the timeline), so this is N independently-timed layers rather than one card with repeating
-// children: `html` per step, not one fragment with `parts`.
+// The default six sit in one luminance band (relative L ≈ 0.13..0.22): they clear 3:1 against white
+// and near-black alike, so the one block in this file that cannot read the theme still lands on all
+// 38, and holding luminance constant leaves hue as the only thing that changes.
+// Each step is its own top-level layer with its own start/duration window, so this is N
+// independently-timed layers, `html` per step, rather than one card with `parts`.
 export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
   colors = ['#7F6FE8', '#0C9455', '#B47305', '#E04392', '#2B7FEE', '#D65B26'],
   start = 0, dur = 4, each = 0.5 } = {}) {
@@ -83,50 +51,6 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// stripeCard. A recognizably-"Stripe" payments card: amount + mini bar chart + blurple Pay button.
-// Uses Stripe's real product hexes. The "reads a site → rebuilds its look" payoff.
-// `amount` is a prop because it is the only figure on the card and it reaches every caller. It was
-// baked, so every video that used this block published the same invented number (MISTAKES #67).
-// LEFT NATIVE, not a candidate after all: quality/gates/lib-test.mjs asserts the bar chart's total
-// width off `card.children[2].children` directly ("the bar chart spans the card's content box"), and
-// this pass is not permitted to touch quality/gates/**. A native `group` of `box()` bars is the form
-// that invariant can still be read off.
-export function stripeCard({ x, y, w = 380, amount = '', start = 0, dur = 4 } = {}) {
-  const bars = [38, 52, 44, 66, 58, 80, 72];
-  // THE CHART SPANS THE CARD. The bars were a fixed 26px, so the only part of this card that reads as
-  // Stripe stopped 62px short of the Pay button beneath it at the catalog's own w:340 (7 x 26 + 6 x 8
-  // = 230 of a 292px content box) and 102px short at the default w:380. A dashboard's volume chart is
-  // measured against the panel it sits in; one that ends two thirds of the way across is a sparkline
-  // someone left in a wide box. Derived from `w`, it fills at every width.
-  const barW = r2(Math.max(8, (w - 2 * 24 - 6 * 8) / 7));
-  return [{
-    type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: 16, pad: 24,
-    bg: T.card, radius: 12, elevation: 2, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: [
-      text({ text: 'Net volume', size: 18, color: T.stripeGrey, font: 'mono' }),
-      text({ text: (amount || ''), size: 44, weight: 700, color: T.stripeNavy, ls: '-0.02em' }),
-      { type: 'group', layout: 'row', items: 'flex-end', gap: 8, h: 70, children:
-        bars.map((b) => box({ w: barW, h: b, radius: 4, bg: T.blurple })) },
-      { type: 'group', bg: T.blurple, radius: 4, pad: '12px 0', layout: 'row', justify: 'center',
-        children: [text({ text: (amount ? `Pay ${amount}` : 'Pay'), size: 18, weight: 600, color: '#fff' })] },
-    ],
-  }];
-}
-
-// quote: a pull quote with attribution. The one place big italic-ish restraint reads as premium.
-export function quote({ x, y, w = 900, text: q, author, start = 0, dur = 4 } = {}) {
-  // Without this the template literal below stringified `undefined` and printed the WORD
-  // "undefined" in quotation marks, at display size, in the finished film. An empty block is bad;
-  // one that renders a JavaScript artefact as its headline is worse.
-  needData('text', q, 'quote');
-  // The attribution is a label, so it is set like every other label in this file: mono, tracked, quiet.
-  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.md}px;width:${w}px">`
-    + `<span style="font:600 ${TYPE.display}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">“${q}”</span>`
-    + (author ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub};letter-spacing:0.04em">${author}</span>` : '')
-    + '</div>';
-  return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
-}
-
 // kpiRow: a row of stat cells (value + label). Scale contrast without a card grid.
 // THE FIGURES COUNT UP, cell by cell across the row. An item that gives a numeric `to` becomes a
 // native `count` layer and runs (no html counter exists, so this path stays native by construction);
@@ -210,37 +134,6 @@ export function captions({ lines = [], x = 460, y = 980, size = 30, start = 0 } 
 // WAVE 1 families, charts + card variants. Charts that need curves/arcs use ONE `html`+SVG layer
 // (crisp, deterministic, animates as a unit); bar-family stays native boxes for per-bar life.
 
-// pricingCard: plan · price · feature ticks · CTA. highlight = the featured plan (accent border + CTA).
-// `price` defaults to nothing. A DEFAULT price is a figure published by every caller who forgets to
-// set one, which is the same defect as deploySuccess's baked "Ready in 1.2s".
-export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = '/mo', features = [], cta = 'Start free', highlight = false, start = 0, dur = 4 } = {}) {
-  // The tick was `--up`. Green there means nothing directional: a feature is INCLUDED, not up, and
-  // spending the success colour on a static list is the stoplight-palette bug in miniature.
-  const featuresHtml = features.map((f) => `<div style="display:flex;align-items:center;gap:${SPACE.xs}px">`
-    + `<span style="font:700 ${TYPE.body}px var(--font-sans);color:${T.accent}">✓</span>`
-    + `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${f}</span></div>`).join('');
-  // T.onAccent, not '#fff'. This CTA is filled with the accent, and on higgsfield's acid lime white
-  // measured 1.16:1, shipped, unreadable. The theme computes a readable ink for its own accent
-  // (core/boot.js); the block asks for it rather than assuming.
-  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.md}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;width:${w}px">`
-    // The plan name reads as an eyebrow, not a heading: the price is the heading. Held at TYPE.base
-    // and 600 so it stays WCAG "large text" and the accent spelling keeps its 3:1 allowance.
-    + `<span style="font:600 ${TYPE.base}px var(--font-mono);color:${highlight ? T.accentInk : T.dim};`
-    + `letter-spacing:0.1em">${String(plan).toUpperCase()}</span>`
-    + `<div style="display:flex;align-items:flex-end;gap:${SPACE.tight}px">`
-    + `<span style="font:700 ${TYPE.display}px var(--font-sans);color:${T.ink};letter-spacing:-0.03em">${price}</span>`
-    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.dim}">${period}</span></div>`
-    + `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.xs}px">${featuresHtml}</div>`
-    + `<div style="background:${highlight ? T.accent : T.surface};border-radius:${R.chip}px;padding:${SPACE.sm}px 0;`
-    + `display:flex;justify-content:center">`
-    + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${highlight ? T.onAccent : T.ink}">${cta}</span></div>`
-    + '</div>';
-  return [{ type: 'html', x, y, w, html,
-    bg: T.card, radius: R.card, border: highlight ? `1.5px solid ${T.accent}` : HAIR, elevation: highlight ? E.card : E.flat,
-    start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35 }];
-}
-
 // ═════════════════════════════════════════════════════════════════════════════
 // WAVE 2 families, dev blocks + device/UI chrome.
 
@@ -257,10 +150,9 @@ export function pricingCard({ x, y, w = 360, plan = 'Pro', price = '', period = 
 // WAVE 5 families, brand & motion. Arcs/rings use html+SVG; spinner wraps the lottie runtime.
 
 // ─────────────────────────────────────────────────────────────────────────────
-// lowerThird. The name/role identifier broadcast has used for sixty years: who is speaking, while
-// they speak. ONE component, twelve chromes, because what differs between a BILD front page and a
-// Vercel keynote caption is not the layout (name over role, lower left) but the material around it.
-// `variant` picks the material; everything else is shared.
+// lowerThird. The name/role identifier: who is speaking, while they speak. One component, twelve
+// chromes, since what differs between one broadcast style and another is the material, not the layout
+// (name over role, lower left). `variant` picks the material; everything else is shared.
 //
 // The spine every variant honours:
 //   name: the identifier (a person, a product, a place). Always the dominant element.
@@ -428,11 +320,9 @@ const SEARCH_BAR_H = 60, SEARCH_PAD = 22, SEARCH_ICON = 24;
 const searchTextX = (bx) => bx + SEARCH_PAD + SEARCH_ICON + 16;   // clears the magnifier
 const searchTextW = (bw) => bw - (SEARCH_PAD + SEARCH_ICON + 16) - (SEARCH_PAD + SEARCH_ICON + 12);
 
-// THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in whatever face
-// the theme happens to ship is a lookalike, not the brand, the authoring rules call this out directly
-// ("recreating a brand asset from memory is off-brand by definition"). `word` (per-letter colours)
-// and `brand` (plain text) remain for marks you do not have a file for. `logotype` applies the WCAG
-// 1.4.3 contrast exemption; centring is the engine's job, never arithmetic.
+// THE MARK. `logo` (a real SVG) is the preferred form and wins: a wordmark re-typed in the theme's own
+// face is a lookalike, not the brand. `word` (per-letter colours) and `brand` (plain text) remain for
+// marks with no file. `logotype` applies the WCAG 1.4.3 contrast exemption; centring is the engine's.
 function searchMark(cy, h, { x, w, brand, word, logo, logoW, logoH, markAlign, start, dur }) {
   const common = { start, duration: dur, anim: 'lift', enterDur: 0.55, exitDur: 0.3, logotype: true };
   if (logo) {
@@ -534,31 +424,23 @@ export function searchEngine({ x = 0, y = 0, w = 900, variant = 'home',
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// WAVE 6, COMPOSITION. Blocks whose content is OTHER BLOCKS.
+// WAVE 6, COMPOSITION. Blocks whose content is other blocks.
 //
-// Everything above places itself and draws itself. Nothing above places anything ELSE, so every
-// "split" archetype in every scene was two blocks at two hand-chosen x coordinates, and the rule
-// keeping them aligned lived in the author's head and in arithmetic they re-did per beat. Layout
-// discipline that is not in the engine is not discipline; it is a habit, and habits drift silently.
+// A side is a block descriptor: `{ block: 'listRow', props: { … } }`, the same `{type:"block"}` shape
+// a scene already writes. The container computes the pane box and injects `x`/`y`/`w`/`start`/`dur`;
+// the pane's own props decide everything else.
 //
-// A SIDE IS A BLOCK DESCRIPTOR: `{ block: 'listRow', props: { … } }`, the same `{type:"block"}` shape
-// a scene already writes, so a container costs an author no new vocabulary. The container computes
-// the pane box and injects `x`/`y`/`w`/`start`/`dur`; the pane's own props decide everything else.
-//
-// IT INJECTS `w` AND NOT `h`, deliberately. Most factories in this library size themselves off their
-// content and accept no `h` at all, and a prop a factory does not destructure is dropped in silence.
-// The exact failure this repo has logged repeatedly. `h` is used for the container's own geometry
-// (the divider, the inset), never handed to a pane that may not understand it.
+// It injects `w` and not `h`, deliberately: most factories size themselves off their content and
+// accept no `h`, and a prop a factory does not destructure is dropped in silence. `h` is used for the
+// container's own geometry (the divider, the inset), never handed to a pane that may not understand it.
 const pane = (side, at) => (side ? blockFactory(side && side.block, 'splitScreen')({ ...side.props, ...at }) : []);
 
 // splitScreen: two panes, one geometry. `orient:'row'` splits left|right, `'column'` splits top/bottom,
 // and `pip` insets the second pane into a corner of the first instead of sitting beside it.
 //
-// `split` is the FRACTION of the long axis the first pane gets, so a 60/40 is `split: 0.6` and not two
-// widths a caller has to keep summing to the whole. `lead` staggers the second pane behind the first:
-// two panes landing on the same frame read as one slab arriving, which is the thing a split is not.
-// PICTURE-IN-PICTURE: the second pane is a small inset over the first, and it arrives LAST because
-// it is the aside, not the subject.
+// `split` is the fraction of the long axis the first pane gets, so a 60/40 is `split: 0.6`. `lead`
+// staggers the second pane behind the first, since two panes landing on the same frame read as one
+// slab arriving. In picture-in-picture the second pane arrives last, since it is the aside, not the subject.
 function splitScreenPip({ x, y, w, h, left, right, pipScale, pipInset, pipCorner, start, dur, second }) {
   const iw = Math.round(w * pipScale);
   const right2 = pipCorner.endsWith('right');
@@ -596,18 +478,13 @@ export function splitScreen({ x = 0, y = 0, w = 1200, h = 560, orient = 'row', s
   return splitScreenSideBySide({ x, y, w, h, orient, split, gap, left, right, divider, start, dur, second });
 }
 
-// screenSwap: screen A becomes screen B (becomes C…) in one place. The single most common motion in
-// a product demo, and the registry could not make it: `phoneFrame` held content and nothing changed
-// the content, so a demo could show one screen per beat and never the move between two.
+// screenSwap: screen A becomes screen B (becomes C…) in one place, the single most common motion in a
+// product demo. Every screen shares one box: a swap is two screens at the same coordinates with
+// handed-over windows.
 //
-// EVERY SCREEN SHARES ONE BOX. That is the whole point. A swap is two screens at the SAME coordinates
-// with handed-over windows, and hand-authoring it means writing the same x/y twice and the handover
-// arithmetic once per pair, which is where it goes wrong.
-//
-// `transition` defaults to `wipe` because a wipe is a CLIP: the outgoing screen is uncovered in place
+// `transition` defaults to `wipe` because a wipe is a clip: the outgoing screen is uncovered in place
 // and never travels outside its own box, so a swap inside a device frame does not slide across the
-// bezel. `slide` is offered for a swap that is meant to read as travel, and it pairs its directions
-// (enter from the right, leave to the left) rather than entering and retreating.
+// bezel. `slide` reads as travel instead, pairing its directions (enter from the right, leave to the left).
 const SWAP = {
   wipe: { anim: 'wipe', out: 'wipe-left' },
   slide: { anim: 'slide-right', out: 'slide-left' },
@@ -639,21 +516,6 @@ export function screenSwap({ x = 0, y = 0, w = 320, screens = [], hold = 1.6, ov
 // x · y · start · dur are excluded from every table on purpose. They are placement and timing the
 // SCENE supplies, never content an author dials.
 export const CORE_SCHEMAS = {
-  card: {
-    w: { kind: 'int', min: 160, max: 1920, def: 740 },
-    h: { kind: 'int', min: 120, max: 1080, def: 336 },
-    // The content region's fill. Defaults to the CARD's own fill, so the card reads as one surface;
-    // pass a real tint to get a panel back.
-    tint: { kind: 'color', def: 'var(--card)' },
-    title: { kind: 'str', max: 60 },
-    desc: { kind: 'str', max: 160 },
-    pills: { kind: 'list', of: { kind: 'str', max: 24 }, def: [] },
-    // Empty draws no footer row at all.
-    cta: { kind: 'str', max: 24, def: 'Explore' },
-    anim: { kind: 'str', max: 24, def: 'rise' },
-    enterDur: { kind: 'num', min: 0, max: 4, def: 0.5 },
-  },
-
   colorCycle: {
     word: { kind: 'str', max: 40, def: 'colour' },
     size: { kind: 'int', min: 18, max: 400, def: 78 },
@@ -662,19 +524,6 @@ export const CORE_SCHEMAS = {
     // Seconds per hue. The block emits one layer per step across `dur`, so a very small `each` is a
     // very large layer count for one word.
     each: { kind: 'num', min: 0.05, max: 5, def: 0.5 },
-  },
-
-  stripeCard: {
-    w: { kind: 'int', min: 200, max: 1080, def: 380 },
-    // The only figure on the card, and empty by default: it was baked once and every caller
-    // published the same invented number.
-    amount: { kind: 'str', max: 20, def: '' },
-  },
-
-  quote: {
-    w: { kind: 'int', min: 200, max: 1920, def: 900 },
-    text: { kind: 'str', max: 240 },
-    author: { kind: 'str', max: 60 },
   },
 
   kpiRow: {
@@ -711,18 +560,6 @@ export const CORE_SCHEMAS = {
       dur: { kind: 'num', min: 0.2, max: 30 },
     } }, def: [] },
     size: { kind: 'int', min: 18, max: 120, def: 30 },
-  },
-
-  pricingCard: {
-    w: { kind: 'int', min: 200, max: 1080, def: 360 },
-    plan: { kind: 'str', max: 24, def: 'Pro' },
-    // Empty by default: a default price is a figure published by every caller who forgets to set one.
-    price: { kind: 'str', max: 16, def: '' },
-    period: { kind: 'str', max: 12, def: '/mo' },
-    features: { kind: 'list', of: { kind: 'str', max: 60 }, def: [] },
-    cta: { kind: 'str', max: 24, def: 'Start free' },
-    // The featured plan: accent border, accent CTA, one step more elevation.
-    highlight: { kind: 'bool', def: false },
   },
 
   lowerThird: {

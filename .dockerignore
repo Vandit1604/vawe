@@ -10,9 +10,10 @@
 # that stops with "not found" instead of one that quietly grows.
 #
 #   Dockerfile      (the site + docs apps): themes core films/scene assets/{icons,vendor,brands,plinth}
-#                   scripts site (site/docker-start.sh included) docs-site
+#                   scripts site (site/docker-start.sh included) docs-site package-lock.json (gsap)
 #   Dockerfile.cli  (the renderer): go.mod go.sum cmd internal cli core blocks
 #                   themes assets/vendor harness/author/expand-blocks.mjs films/scene NOTICE
+#                   package-lock.json (gsap)
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `make check GATE=docker-check` builds
 # the context and prints what is in it.
@@ -54,6 +55,9 @@
 # nobody thought to un-ignore is simply absent, which is how the first attempt at this shipped a
 # build that died on "Module not found: Can't resolve '../../package.json'".
 !package.json
+# The root lockfile: both images run `npm ci --omit=dev` at /src|/engine so gsap's postinstall
+# (scripts/vendor-gsap.mjs) can vendor assets/vendor/gsap.min.js, never committed (license).
+!package-lock.json
 **/node_modules
 **/.next
 **/.source
