@@ -12,7 +12,7 @@ import "../../arsenal.css";
 // effects route already ships; reused as-is rather than redrawn for a second hub shape.
 import "../../effects/effects.css";
 
-/* /arsenal/category/[id] — the index layer the 185 blocks never had.
+/* /arsenal/category/[id] — the index layer the blocks never had.
  *
  * blocks.json gives every block a `family` (97 groups, 57 of them holding exactly one block: a hub
  * there would be a leaf page with extra words, the scaled-content shape Google's spam policy warns
