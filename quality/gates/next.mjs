@@ -12,11 +12,6 @@
 // one instruction). Chaining here would make the same mistake in code: run the first command, stop, and
 // let the NEXT invocation re-derive from disk. A step that did not really land then does not silently
 // advance past.
-//
-// APPROVAL IS REFUSED, NOT RUN. It is the one stage whose next act is the user's signature
-// (`/vawe-approve`), and harness/live/stage-gate.mjs already refuses to let an agent write that line.
-// Letting `make next` run "the thing that gets the user to approve" would make the irreducible human
-// step into a thing an agent performs by proxy. There is no flag past this, same as that gate.
 import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { stageOf, ROOT } from './stage.mjs';
@@ -43,14 +38,6 @@ function main() {
   if (!arg) { console.error('usage: make next D=films/scene/<film>.json'); process.exit(2); }
 
   const st = stageOf(arg);
-  if (st.stage === 'approval') {
-    console.error(`\n  ${st.name} is at APPROVAL: the plan's sign-off, and only the user can give it.`);
-    console.error('  Nothing here runs `/vawe-approve` on the user\'s behalf.');
-    console.error(`\n  do:  make studio D=${st.base}.json   (press 1 for the plan)`);
-    console.error(`  then ask the user to run:  /vawe-approve ${st.name}\n`);
-    process.exit(1);
-  }
-
   const cmd = firstCommand(st.next);
   console.log(`\n  ${st.name} is at ${st.stage.toUpperCase()}. Running:\n  ${cmd}\n`);
   if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}\n`);

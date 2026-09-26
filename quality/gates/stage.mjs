@@ -11,8 +11,9 @@
 //
 // STATE IS DERIVED FROM ARTIFACTS, NEVER STORED. A state file drifts from the repo the moment someone
 // deletes a fragment by hand, and then it is a confident liar. A storyboard that exists cannot lie
-// about existing. The one thing not derivable is APPROVAL, which is a human act, so it is a line a
-// human writes (`/vawe-approve`) and that harness/live/stage-gate.mjs refuses to let an agent write.
+// about existing. There is no approval stage: draft renders (`make dev`, `make ship --draft`) are where
+// the owner looks and redirects, the same as HyperFrames or Remotion. A film may still carry an
+// `approved:` line written before this changed; it is read for backward compatibility and never required.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -41,7 +42,7 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 // Same order stageOf() builds S in. A second copy, not a derived one, because ranking the roster needs
 // the order BEFORE any single film's stageOf() has run.
-export const STAGE_ORDER = ['brief', 'plan', 'design', 'approval', 'assemble', 'direct', 'render', 'judge'];
+export const STAGE_ORDER = ['brief', 'plan', 'design', 'assemble', 'direct', 'render', 'judge'];
 
 /** Every path a film owns, resolved the same way author-check and studio resolve them. */
 export function filePaths(arg) {
@@ -155,11 +156,8 @@ export function stageOf(arg) {
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
         : 'the fragments exist and do not match what their beats planned: run frame-check and read it.',
       next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make frame-check D=${p.base}.json` },
-    { id: 'approval', done: !!approved,
-      why: 'the frames pass and nobody has signed the plan off. Nothing is rendered until the plan is LOCKED and the user signs off.',
-      next: `make studio D=${p.base}.json, then share http://127.0.0.1:8799/studio (it opens on the plan, drawn from the real frames) so anyone can see it, then the USER runs /vawe-approve ${p.name}` },
     { id: 'assemble', done: layers > 0,
-      why: 'the frames are approved and the scene JSON has no layers, so there is no film yet.',
+      why: 'the frames pass and the scene JSON has no layers, so there is no film yet.',
       next: `make assemble D=${p.base}.json` },
     { id: 'direct', done: layers > 0 && (Array.isArray(scene.transitions) ? scene.transitions.length : 0) > 0,
       why: 'the layers exist and no cut does. Motion first, then transitions: a content-aware cut reads the velocity at the joint.',

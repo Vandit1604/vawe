@@ -303,9 +303,8 @@ function findCitedStudy(sbText) {
 // is the drift this repo fights hardest.
 //
 // UNLIKE the storyboard DECIDER, this brief never asks for a write. It is a CRITIC in
-// SUBAGENTS.md's own sense: it reports findings against a closed code set (harness/lib/plan-judge-codes.mjs)
-// and the main thread/owner still signs off at approval (AGENTS.md stage 4). A PASS is never
-// self-recorded, so this brief never offers one to return.
+// SUBAGENTS.md's own sense: it reports findings against a closed code set (harness/lib/plan-judge-codes.mjs).
+// A PASS is never self-recorded, so this brief never offers one to return.
 //
 // Works from the storyboard ALONE: a plan-stage film may have no scene.json yet (scaffold not run) or
 // one with no fragments (design not started), and this must judge it anyway, before either exists.
@@ -337,7 +336,7 @@ export function buildPlanJudgeBrief(arg) {
   const lines = [
     `You are the plan judge for ${path.relative(repoRoot, p.sb)}.`,
     `You REPORT findings only. You do not write into the storyboard or the scene, and you never `
-      + `record PASS: the owner still signs the plan off, at approval (AGENTS.md stage 4, /vawe-approve).`,
+      + `record PASS: the owner reads the draft render and redirects.`,
     `You exist because ${decider.why}.`,
     `This judges craft, not structure. quality/gates/storyboard-check.mjs already owns structure `
       + `(fields present, holds inside the genre band, no placeholder copy) and keeps it; the questions `
@@ -475,8 +474,8 @@ function main() {
     console.log(`  ✓ plan-judge verdict recorded: ${findings.length} finding(s), ordered by Murch's Rule of Six `
       + `(emotion > story > rhythm > eye-trace > plane/continuity) · `
       + `${path.relative(repoRoot, receiptPath('plan-judge', p.sb))}`);
-    console.log(`  Findings only. This does not approve the film; the owner still signs off at approval `
-      + `(make studio D=${p.base}.json, then /vawe-approve).`);
+    console.log(`  Findings only. This does not pass or fail the film; the owner reads the draft render `
+      + `(make dev D=${p.base}.json) and redirects.`);
     return;
   }
 

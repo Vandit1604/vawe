@@ -37,7 +37,7 @@ import { expandTheme, isTokenFile } from '../core/theme/roles.js';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
 // A film at `plan` (AGENTS.md stage 2) has a storyboard and no scene.json yet: no scene JSON is
-// written before approval, but the storyboard is what the Plan pane needs, so a film named by its
+// written before assemble, but the storyboard is what the Plan pane needs, so a film named by its
 // future scene.json path (not yet on disk) still opens on the plan instead of refusing outright. Every other
 // route already tolerates a missing/unparsable dataArg (`THEME_NAME`, `storyboardPath()`, and the
 // engine's own boot() all fail readable rather than throw raw), so this only widens the ONE hard gate.
@@ -208,10 +208,10 @@ const directionFloorFindings = (file) => {
 const PANES = ['plan', 'make', 'ship', 'sound'];
 // Reuses stageOf's own verdict (quality/gates/stage.mjs), the ONE place stage order lives: this only
 // maps that verdict to a pane, it never re-derives what stage the film is in. A film with no scene yet
-// (brief..approval) has nothing to scrub, so it opens where the approval workflow lives; a film with
+// (brief..design) has nothing to scrub, so it opens on the plan pane; a film with
 // layers but nothing shipped opens on Make; a rendered or judged film opens on Ship.
 const paneForStage = (stage) => {
-  if (['brief', 'plan', 'design', 'approval'].includes(stage)) return 'plan';
+  if (['brief', 'plan', 'design'].includes(stage)) return 'plan';
   if (['assemble', 'direct'].includes(stage)) return 'make';
   return 'ship';
 };
@@ -492,7 +492,7 @@ async function buildPlanFrames() {
   // differently (prose, then a copyable code chip), and a regex pulled out of prose is how that pairing
   // would drift the moment either side's wording changed.
   const allMissing = (missing, cmd) => (planFrames = { key, frames: beats.map(() => ({ missing, cmd })) });
-  if (!sceneExists) return allMissing('no scene.json yet: expected before approval, the storyboard is the plan.');
+  if (!sceneExists) return allMissing('no scene.json yet: expected before assemble, the storyboard is the plan.');
   const d = JSON.parse(fs.readFileSync(dataArg, 'utf8'));
   if (!(Array.isArray(d.layers) && d.layers.length)) return allMissing('no scene layers yet.', `make assemble D=${rel}`);
   const dur = Number(d.duration) || 0;
@@ -652,15 +652,13 @@ const studioRoutes = (req, res) => {
     return true;
   }
 
-  // ---- FEEDBACK FROM THE APPROVAL PANE: written into the ONE plan file, never a second store --------
+  // ---- FEEDBACK FROM THE PLAN PANE: written into the ONE plan file, never a second store --------
   // "in plan mode itself i should be able to give feedback in studio so i can do changes there only"
   // (the owner's own words). The storyboard stays the source of truth: this appends a `- feedback:`
   // line into the beat's own block (or, with no beat index, near the top of the frontmatter for a
   // film-level note), the same `- key: value` shape every other field on a beat already uses, so the
-  // next author (or agent) reads it the same way they read `why:` or `mechanism:`. It NEVER touches
-  // `approved:`: that line is the user's own signature, written only by `/vawe-approve`
-  // (harness/live/stage-gate.mjs refuses it from anywhere else), and this handler cannot write it
-  // because it only ever appends a `feedback:` line, nothing else.
+  // next author (or agent) reads it the same way they read `why:` or `mechanism:`. It only ever
+  // appends a `feedback:` line, so a comment cannot smuggle a raw frontmatter line onto the plan.
   if (req.method === 'POST' && url === '/api/plan/feedback') {
     let raw = '';
     req.on('data', (c) => { raw += c; if (raw.length > 1e5) req.destroy(); });
@@ -670,9 +668,6 @@ const studioRoutes = (req, res) => {
       try { const q = JSON.parse(raw || '{}'); textIn = String(q.text || '').trim(); beat = Number.isInteger(q.beat) ? q.beat : null; }
       catch (e) { return reply({ ok: false, error: 'bad request: ' + e.message }, 400); }
       if (!textIn) return reply({ ok: false, error: 'empty feedback' }, 400);
-      // A comment is a person's words about the film; it is never a vector for the one write this repo
-      // refuses everywhere else. No text can smuggle a fake `approved:` line onto the plan through here.
-      if (/^\s*approved\s*:/im.test(textIn)) return reply({ ok: false, error: 'feedback cannot write "approved:"; only /vawe-approve can sign the plan' }, 400);
       const sbPath = storyboardPath();
       if (!sbPath) return reply({ ok: false, error: 'no storyboard for this scene' }, 404);
       try {
@@ -881,7 +876,7 @@ const studioRoutes = (req, res) => {
       // seam-snap exits 1 when it FINDS a flash and still writes its sheet, which is the run you most
       // want to look at. So the sheet decides, not the exit code.
       if (fs.existsSync(png)) return send();
-      // A pre-assemble film (AGENTS.md stages brief..approval) has no `layers` yet on purpose; the
+      // A pre-assemble film (AGENTS.md stages brief..design) has no `layers` yet on purpose; the
       // engine refusing to boot it is expected, not a defect worth an engine stack trace up front.
       // `stageOf` (quality/gates/stage.mjs, the same reader `make stage` prints from) says so plainly.
       let preface = '';
@@ -964,7 +959,7 @@ server.on('error', oops);
 async function preflight() {
   const base = `http://127.0.0.1:${PORT}`;
   // Read once: `stageOf` already knows whether this film is pre-assemble (AGENTS.md stages
-  // brief..approval, `layers` empty on purpose), so the scene check below can tell "nothing to show
+  // brief..design, `layers` empty on purpose), so the scene check below can tell "nothing to show
   // yet, and that is correct" from "this is broken" instead of folding both into one green light.
   let preAssemble = false, stageLine = '';
   try {
@@ -1042,7 +1037,7 @@ async function preflight() {
   // "safe to share" is a claim that whoever opens this link sees the real film, not an explanation of
   // its absence. A NOTE means some pane cannot show real content yet (a pre-assemble film has no scene
   // to sheet or scrub), which is a true and honest thing to say, but it is not the same claim as "safe
-  // to share" and must never be printed as one (pin-recreation, approval stage: the acceptance test
+  // to share" and must never be printed as one (pin-recreation: the acceptance test
   // this preflight has to pass).
   if (failed.length) {
     console.log(`  ⚠ studio preflight: ${results.length - failed.length - notes.length}/${results.length} ok, fix before sharing this link`);
@@ -1063,10 +1058,10 @@ console.log(`    timeline below: drag it to seek · hazard bands are dead air (b
 console.log(`    drag the divider to trade preview height for timeline height (it sticks)`);
 console.log(`    Ctrl-C to stop.\n`);
 
-// OPEN IT. The studio is where a plan is SHOWN before a person signs it off (AGENTS.md stage 3), and
+// OPEN IT. The studio is where a plan is SHOWN so the owner can look and redirect, and
 // where sound is now chosen by ear. Printing a URL makes that step depend on somebody noticing a line
 // of terminal output, which is the same "a correct thing nobody ran" shape this repo keeps paying for:
-// an approval was asked for as a wall of text, and the frames the person was signing off went unseen.
+// a plan was asked to be reviewed as a wall of text, and the frames the person needed to see went unseen.
 // So the browser opens itself. NOOPEN=1 for a headless box or a CI run, where there is nothing to open.
 if (!process.env.NOOPEN) {
   const url = `http://127.0.0.1:${PORT}/studio`;

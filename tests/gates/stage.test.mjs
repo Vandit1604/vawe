@@ -1,8 +1,8 @@
 // node --test tests/gates/stage.test.mjs
 //
-// Every one of the eight stages, derived by stageOf() from fixture films this file builds and removes
+// Every one of the seven stages, derived by stageOf() from fixture films this file builds and removes
 // itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film,
-// vawe-oblique, as its "unapproved" fixture, and it broke the day that film was approved (the state it
+// vawe-oblique, as a fixture, and it broke the day that film's own state moved on (the state it
 // needed to test stopped existing). The fix there, and the rule here, is the same: never borrow a real
 // film's CURRENT state as a fixture, because a real film's state is the one thing this repo promises
 // will keep changing.
@@ -12,7 +12,6 @@
 // and `after()` deletes every one of them whether a test passed or not.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import assert from 'node:assert';
@@ -33,10 +32,9 @@ const written = [];
 function write(rel, content) { fs.writeFileSync(abs(rel), content); written.push(abs(rel)); }
 after(() => { for (const f of written) { try { fs.unlinkSync(f); } catch { /* already gone */ } } });
 
-// `plan.done` (quality/gates/stage.mjs) now needs a fresh plan-judge receipt OR an `approved:` line,
-// not a passing storyboard-check alone (474981ba, "design before approval": every stage past `plan`
-// used to be reachable by structure alone). A fixture that means to sit past `plan` without also
-// exercising approval marks itself judged the same way `make plan-judge` really does.
+// `plan.done` (quality/gates/stage.mjs) needs a fresh plan-judge receipt, not a passing
+// storyboard-check alone (every stage past `plan` used to be reachable by structure alone). A fixture
+// that means to sit past `plan` marks itself judged the same way `make plan-judge` really does.
 function markPlanJudged(sbRel) {
   writeReceipt('plan-judge', abs(sbRel));
   written.push(receiptPath('plan-judge', abs(sbRel)));
@@ -45,13 +43,12 @@ function markPlanJudged(sbRel) {
 // A storyboard that passes storyboard-check AND frame-check with zero errors (warnings are fine), so a
 // stage past `plan` can be reached without spinning up the puppeteer half of frame-check: that half
 // only runs when a beat declares `weight:`, which this fixture never does.
-function passingStoryboard(name, { approved = false, layers = false } = {}) {
+function passingStoryboard(name, { layers = false } = {}) {
   const frag1 = `_${name}.hook.html`, frag2 = `_${name}.proof.html`;
   write(frag1, '<div></div>\n');
   write(frag2, '<div></div>\n');
   write(`${name}.storyboard.md`, [
-    approved ? '---' : '---',
-    ...(approved ? ['approved: "2026-09-09"'] : []),
+    '---',
     'message: "A fixture film, so the derivation has a plan to grade."',
     'audience: "the test runner"',
     'threads: "one object, carried"',
@@ -142,30 +139,22 @@ test('stage 3, design: the storyboard passes its gate and a beat names a fragmen
   assert.match(st.next, /stagekit\.mjs/);
 });
 
-test('stage 4, approval: frames match the plan and nobody has signed it', () => {
-  passingStoryboard('stagetest-approval');
-  const st = stageOf('stagetest-approval');
-  assert.equal(st.stage, 'approval');
-  assert.equal(st.approved, null);
-  assert.match(st.next, /\/vawe-approve/);
-});
-
-test('stage 5, assemble: approved, frames match the plan, the scene JSON has no layers', () => {
-  passingStoryboard('stagetest-assemble', { approved: true, layers: false });
+test('stage 4, assemble: frames match the plan, the scene JSON has no layers', () => {
+  passingStoryboard('stagetest-assemble', { layers: false });
   const st = stageOf('stagetest-assemble');
   assert.equal(st.stage, 'assemble');
   assert.match(st.next, /make assemble/);
 });
 
-test('stage 6, direct: layers exist, no transition does', () => {
-  passingStoryboard('stagetest-direct', { approved: true, layers: true });
+test('stage 5, direct: layers exist, no transition does', () => {
+  passingStoryboard('stagetest-direct', { layers: true });
   const st = stageOf('stagetest-direct');
   assert.equal(st.stage, 'direct');
   assert.match(st.next, /make critics/);
 });
 
-test('stage 7, render: layers and a transition exist, never rendered', () => {
-  passingStoryboard('stagetest-render', { approved: true, layers: true });
+test('stage 6, render: layers and a transition exist, never rendered', () => {
+  passingStoryboard('stagetest-render', { layers: true });
   const jsonPath = `stagetest-render.json`;
   write(jsonPath, JSON.stringify({
     module: 'scene', layers: [{ type: 'text' }], transitions: [{ at: 2, kind: 'cut' }],
@@ -175,8 +164,8 @@ test('stage 7, render: layers and a transition exist, never rendered', () => {
   assert.match(st.next, /make ship/);
 });
 
-test('stage 8, judge: rendered, and judge is never marked done on its own', () => {
-  passingStoryboard('stagetest-judge', { approved: true, layers: true });
+test('stage 7, judge: rendered, and judge is never marked done on its own', () => {
+  passingStoryboard('stagetest-judge', { layers: true });
   write('stagetest-judge.json', JSON.stringify({
     module: 'scene', layers: [{ type: 'text' }], transitions: [{ at: 2, kind: 'cut' }],
   }, null, 1) + '\n');
@@ -192,16 +181,16 @@ test('stage 8, judge: rendered, and judge is never marked done on its own', () =
   }
 });
 
-test('the order is always the same eight stages, regardless of where a film sits', () => {
+test('the order is always the same seven stages, regardless of where a film sits', () => {
   const st = stageOf('stagetest-nothing-here-at-all');
-  assert.deepEqual(st.order, ['brief', 'plan', 'design', 'approval', 'assemble', 'direct', 'render', 'judge']);
+  assert.deepEqual(st.order, ['brief', 'plan', 'design', 'assemble', 'direct', 'render', 'judge']);
 });
 
-// ---- make next: it runs ONE command, and refuses entirely at approval ----
+// ---- make next: it runs ONE command, straight off stage.mjs's own verdict ----
 
 test('next: strips a trailing parenthetical note off the runnable command', () => {
   assert.equal(
-    firstCommand('make studio D=x.json   (press 1 for the plan, then the USER runs /vawe-approve x)'),
+    firstCommand('make studio D=x.json   (press 1 for the plan)'),
     'make studio D=x.json',
   );
 });
@@ -221,14 +210,3 @@ test('next: a plain command with neither separator passes through unchanged', ()
   assert.equal(firstCommand('make ship D=x.json'), 'make ship D=x.json');
 });
 
-test('next: refuses to run anything at the approval stage, and runs nothing else instead', () => {
-  passingStoryboard('stagetest-next-refuses');
-  assert.equal(stageOf('stagetest-next-refuses').stage, 'approval');
-  const r = spawnSync('node', [path.join(ROOT, 'quality/gates/next.mjs'), 'stagetest-next-refuses'],
-    { cwd: ROOT, encoding: 'utf8' });
-  assert.notEqual(r.status, 0, 'a refusal is a failing exit, not a silent success');
-  assert.match(r.stderr, /only the user can give it/);
-  assert.match(r.stderr, /\/vawe-approve stagetest-next-refuses/);
-  // no /vawe-approve/, and nothing else, was ever run: this stage was never approved by the test.
-  assert.equal(fs.readFileSync(abs('stagetest-next-refuses.storyboard.md'), 'utf8').includes('approved:'), false);
-});

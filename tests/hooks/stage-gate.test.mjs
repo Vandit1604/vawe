@@ -1,6 +1,6 @@
 // node --test tests/hooks/stage-gate.test.mjs
 //
-// The three denials, and the writes that must stay allowed, through the real hook exactly as Claude
+// The denial, and the writes that must stay allowed, through the real hook exactly as Claude
 // Code's PreToolUse feeds it, against a fixture film under tests/fixtures/films/ (never films/scene/,
 // which is real film content this suite must not depend on). The allows matter as much as the
 // denials: a gate that blocks legitimate work gets switched off, and then it enforces nothing.
@@ -28,10 +28,10 @@ function run(rel, content = '') {
   return { denied: d.permissionDecision === 'deny', reason: d.permissionDecisionReason || '' };
 }
 
-// THE FIXTURE IS BUILT, NOT BORROWED. These cases need a film whose plan passes and which nobody has
-// signed, and that is a state a real film LEAVES the moment the user approves it: leaning on
-// vawe-oblique broke all three the day it was signed. So the fixture is written under
-// tests/fixtures/films/ (VAWE_FILMS_DIR points the hook there for this run) and removed again afterwards.
+// THE FIXTURE IS BUILT, NOT BORROWED. These cases need a stable film whose plan and fragments exist, and
+// a real film's storyboard can be re-planned at any time: leaning on vawe-oblique broke a case the day
+// it was rewritten. So the fixture is written under tests/fixtures/films/ (VAWE_FILMS_DIR points the
+// hook there for this run) and removed again afterwards.
 const SB = `${FILMS_DIR}/stage-gate-fixture.storyboard.md`;
 const FILM = `${FILMS_DIR}/stage-gate-fixture.json`;
 const FRAG = `${FILMS_DIR}/_stage-gate-fixture.hook.html`;
@@ -46,7 +46,7 @@ const FIXTURES = [SB, FILM, FRAG, FRAG2];
 before(() => {
   fs.writeFileSync(abs(SB), [
     '---',
-    'message: "A fixture film, so the denials have an unapproved plan to deny against."',
+    'message: "A fixture film, so the denials have a plan to deny against."',
     'audience: "the test runner"',
     'threads: "one object, carried"',
     '---',
@@ -66,26 +66,16 @@ before(() => {
 });
 after(() => { for (const f of FIXTURES) { try { fs.unlinkSync(abs(f)); } catch { /* already gone */ } } });
 
-test('the fixture film is unapproved, or these cases prove nothing', () => {
+test('the fixture film exists, or these cases prove nothing', () => {
   assert.ok(fs.existsSync(abs(SB)));
-  assert.doesNotMatch(fs.readFileSync(abs(SB), 'utf8'), /^approved\s*:/m);
 });
 
-test('an agent may not sign off a plan', () => {
-  const r = run(SB, '---\napproved: 2026-09-09\nmessage: "x"\n---');
-  assert.ok(r.denied);
-  assert.match(r.reason, /\/vawe-approve/);
-});
-
-test('a storyboard is otherwise always writable, since it is the way out of every other denial', () => {
+test('a storyboard is always writable, since it is the way out of every other denial', () => {
   assert.equal(run(SB, '---\nmessage: "a new plan"\n---').denied, false);
 });
 
-test('layers may not be written into an unapproved film', () => {
-  const r = run(FILM, JSON.stringify({ module: 'scene', layers: [{ type: 'text' }] }));
-  assert.ok(r.denied);
-  assert.match(r.reason, /not approved/);
-  // the empty shell stays writable: it is not the film, it is the file the film will go in
+test('layers may be written into a film with a plan behind it', () => {
+  assert.equal(run(FILM, JSON.stringify({ module: 'scene', layers: [{ type: 'text' }] })).denied, false);
   assert.equal(run(FILM, JSON.stringify({ module: 'scene', layers: [] })).denied, false);
 });
 
@@ -98,7 +88,7 @@ test('both fragment naming conventions resolve to the right film', () => {
   // `_film.part.html` and `_film-part.html` both live in this repo. Splitting on a separator picks the
   // wrong film on one of them, which is why the hook looks the owner up instead of parsing it. Both
   // conventions are exercised against the built fixture (FRAG dot, FRAG2 dash), not a borrowed real
-  // film: a real film's storyboard can be re-planned or unapproved at any time, and the fixture is
+  // film: a real film's storyboard can be re-planned at any time, and the fixture is
   // built for exactly this reason (see the comment above `SB`).
   assert.equal(run(FRAG, '<div></div>').denied, false);
   assert.equal(run(FRAG2, '<div></div>').denied, false);
