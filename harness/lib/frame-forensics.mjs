@@ -40,6 +40,16 @@ export function probeTotalFrames(mp4) {
   return parseInt(String(r.stdout).trim(), 10) || 0;
 }
 
+/** probeSize(video): {width,height,duration} read off the container, never assumed. */
+export function probeSize(video) {
+  const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
+    'stream=width,height', '-show_entries', 'format=duration', '-of', 'default=noprint_wrappers=1', video],
+    { encoding: 'utf8' });
+  const fields = Object.fromEntries(String(r.stdout).trim().split('\n').filter(Boolean)
+    .map((l) => l.split('=')).map(([k, v]) => [k, v]));
+  return { width: +fields.width || 0, height: +fields.height || 0, duration: +fields.duration || 0 };
+}
+
 function meanPixel(mp4, frameIdx, box, extraVf = '') {
   const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf',
     `select=eq(n\\,${frameIdx}),crop=${box.w}:${box.h}:${box.x}:${box.y}${extraVf},scale=1:1`,

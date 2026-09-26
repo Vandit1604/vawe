@@ -700,8 +700,18 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # REFERENCE video: shot boundaries (ffmpeg scene score), a contact sheet (in/mid/out per shot) and a
 # study.md whose four judgement columns you fill by eye. Writes refs/<name>/ (gitignored: study the
 # grammar, never ship the frames). engine-doctrine/CRAFT/REFERENCE-STUDY.md
-study: ## [study] the film-side twin of `make sections`. STRIPS=<n> adds a contiguous motion strip for the n busiest shots.
-	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS))
+#
+# make study REF=<reference.mp4> D=<film.json> MATCH=1: instead measures a RECREATION against the
+# reference it was built to match, beat by beat (storyboard beats, or scene cuts detected in the
+# reference). Writes out/match/<film>/: a dense strip per beat (reference row over render row), a
+# difference overlay, a mean SSIM, and a match.md ranking beats worst-to-best. STEP=<seconds> sets the
+# sample rate (default 0.1). engine-doctrine/CRAFT/RECREATION.md
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> instead scores a recreation against its reference, beat by beat.
+	@if [ -n "$(MATCH)" ]; then \
+	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
+	else \
+	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
+	fi
 
 # make ingest SRC=footage.mp4 [NAME=…]: turn a SOURCE video into something an agent can edit from.
 # Probes it, reuses study.mjs's own shot-boundary detectors (cuts, seams, pans, crossfades) and
