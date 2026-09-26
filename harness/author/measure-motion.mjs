@@ -1,20 +1,3 @@
-// measure-motion.mjs: MEASURE a transition's real motion from a video, and name it in OUR vocabulary.
-//
-// Eyeballing frames tells you "a slide with some easing". This measures it: per-frame it tracks the
-// moving element (centroid / bounding box / area / luminance) and fits the normalised progress curve
-// against the engine's OWN easing library (core/motion.js EASINGS + core/cuts.js TIMINGS), reporting the
-// nearest preset + its residual. So it answers two questions with numbers, not vibes:
-//   • reference video  → "what transition is this, and which of OUR presets reproduces it?"
-//   • OUR render       → "did the transition I authored actually come out as the curve I asked for?"
-//
-// Dependency-free on purpose: ffmpeg (already required) extracts raw grey frames; the tracking + curve
-// fit are plain JS against the same easing functions the renderer uses. No OpenCV/numpy. It tracks a
-// single element over a flat-ish background (the common case for a title/card beat); multi-element
-// optical-flow (affine) is a documented future upgrade (needs OpenCV). See engine-doctrine/CRAFT/MEASURE.md.
-//
-//   make measure VIDEO=twitter.mp4 FROM=47.4 TO=48.7          # what is the "Send" transition?
-//   make measure VIDEO=out/brew.mp4 FROM=9.7 TO=10.3 EXPECT=snappy   # did my cut render as snappy?
-//   node harness/author/measure-motion.mjs <video> <from_s> <to_s> [expectPreset]
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -33,18 +16,14 @@ if (!VIDEO || !isFinite(FROM) || !isFinite(TO) || TO <= FROM) {
 const tmp = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp', 'measure');
 fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
 
-// ---- probe source dimensions + fps ----
 const probe = (args) => spawnSync('ffprobe', ['-v', 'error', ...args], { encoding: 'utf8' }).stdout.trim();
 const dims = probe(['-select_streams', 'v:0', '-show_entries', 'stream=width,height,r_frame_rate', '-of', 'csv=p=0', VIDEO]).split(',');
 const SRCW = +dims[0], SRCH = +dims[1];
 const fr = (dims[2] || '30/1').split('/'); const FPS = +fr[0] / (+fr[1] || 1);
 if (!SRCW || !SRCH) { console.error(`✗ could not probe ${VIDEO}`); process.exit(1); }
 
-// downscale to width 320 for speed; grey rawvideo so tracking is one byte/pixel.
 const W = 320, H = Math.round((320 * SRCH) / SRCW / 2) * 2;
 const raw = path.join(tmp, 'frames.gray');
-// accurate seek (-ss AFTER -i) so frame timing is exact, fast seek would start at a keyframe and
-// corrupt the curve. -vsync 0 keeps every real frame (VFR sync would silently drop duplicates).
 const ff = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', VIDEO, '-ss', String(FROM), '-t', String(TO - FROM),
   '-vsync', '0', '-vf', `scale=${W}:${H}`, '-pix_fmt', 'gray', '-f', 'rawvideo', raw]);
 if (ff.status !== 0) { console.error('✗ ffmpeg extract failed:', (ff.stderr || '').toString().slice(0, 300)); process.exit(1); }
@@ -53,9 +32,6 @@ const frameSize = W * H;
 const N = Math.floor(bytes.length / frameSize);
 if (N < 3) { console.error(`✗ only ${N} frames in [${FROM}, ${TO}]. Widen the window`); process.exit(1); }
 
-// ---- per-frame tracking: centroid / bbox / area / mean-luma of the FOREGROUND ----
-// foreground = pixels whose luma differs from the background by > delta. bg = median of the 4 corners
-// (robust to either dark-on-light or light-on-dark, so no polarity flag needed).
 const DELTA = +(process.env.THRESH ?? 38);
 const series = { cx: [], cy: [], w: [], h: [], area: [], luma: [] };
 for (let f = 0; f < N; f++) {
@@ -77,20 +53,16 @@ for (let f = 0; f < N; f++) {
   series.luma.push(lsum / frameSize);
 }
 
-// ---- pick the dominant channel: the one that travels the most (normalised range) ----
 const stat = (a) => { const mn = Math.min(...a), mx = Math.max(...a); return { mn, mx, range: mx - mn }; };
 const CH = { cx: 'centroid-x (slide/whip →)', cy: 'centroid-y (slide/whip ↕)', area: 'area (scale/zoom)', luma: 'mean-luma (dissolve/flash/opacity)' };
 const candidates = ['cx', 'cy', 'area', 'luma'].map((k) => {
   const s = stat(series[k]); const denom = k === 'luma' ? 255 : k === 'area' ? frameSize : (k === 'cx' ? W : H);
-  // a rigid channel (cx/cy) that travels < ~2% of the frame is tracking noise, not a slide, a word
-  // that blurs/types in place jitters the centroid a few px. Deprioritise it so a real channel wins.
   const noise = (k === 'cx' || k === 'cy') && s.range < W * 0.02;
   return { k, ...s, norm: noise ? s.range / denom * 0.01 : s.range / denom };
 }).sort((a, b) => b.norm - a.norm);
 const dom = candidates[0];
 const rawSeries = series[dom.k];
 
-// ---- trim to the active motion window: drop leading/trailing frames where nothing moves ----
 const vel = rawSeries.map((v, i) => (i === 0 ? 0 : Math.abs(v - rawSeries[i - 1])));
 const moveThresh = (dom.mx - dom.mn) * 0.02;
 let a = 0, b = N - 1;
@@ -99,7 +71,6 @@ while (b > a + 1 && vel[b] < moveThresh) b--;
 const active = rawSeries.slice(a, b + 1);
 const durS = (b - a) / FPS;
 
-// ---- normalise progress 0→1 over the active window (start→final), then fit each preset ----
 const y0 = active[0], yF = active[active.length - 1];
 const span = yF - y0 || 1e-6;
 const yNorm = active.map((v) => (v - y0) / span);
@@ -114,16 +85,13 @@ const ranked = Object.keys(ALL).map((name) => ({ name, rms: rms(name) })).sort((
 const best = ranked[0];
 const overshoot = Math.max(...yNorm) > 1.03 ? +(Math.max(...yNorm)).toFixed(2) : null;
 
-// ---- a small ASCII sparkline of the measured curve vs the best-fit preset ----
 const spark = (vals) => { const g = '▁▂▃▄▅▆▇█'; return vals.map((v) => g[Math.max(0, Math.min(7, Math.round(v * 7)))]).join(''); };
 const bestCurve = Array.from({ length: M }, (_, i) => ALL[best.name](i / (M - 1)));
 
-// ---- filmstrip for the eyeball cross-check ----
 const strip = path.join(tmp, 'strip.png');
 spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', VIDEO, '-ss', String(FROM), '-t', String(TO - FROM),
   '-vf', `fps=12,scale=220:-1,tile=8x2:margin=3:padding=3`, '-frames:v', '1', strip]);
 
-// ---- report ----
 console.log(`\n  MOTION MEASUREMENT · ${VIDEO} · [${FROM}s → ${TO}s] · ${FPS.toFixed(0)}fps · ${N} frames\n`);
 console.log(`  dominant channel : ${dom.k}, ${CH[dom.k]}`);
 console.log(`  active window    : frames ${a}–${b}  →  measured duration ${durS.toFixed(2)}s (${b - a} frames)`);
@@ -143,7 +111,6 @@ if (EXPECT) {
 }
 console.log(`\n  filmstrip: ${strip}   ·   what this CAN'T see: masks vs clip-path, blend modes, true 3D depth, shader distortion (engine-doctrine/CRAFT/MEASURE.md).\n`);
 
-// machine-readable sidecar for downstream use / self-verification gates
 const out = { video: VIDEO, from: FROM, to: TO, fps: FPS, frames: N, dominant: dom.k, durationS: +durS.toFixed(3),
   delta: { from: +y0.toFixed(2), to: +yF.toFixed(2), span: +span.toFixed(2) }, overshoot,
   best: best.name, residual: +best.rms.toFixed(4), rankedTop: ranked.slice(0, 5).map((r) => ({ name: r.name, rms: +r.rms.toFixed(4) })),

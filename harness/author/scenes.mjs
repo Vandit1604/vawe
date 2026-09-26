@@ -1,12 +1,3 @@
-// scenes.mjs: `make scenes D=<film>`: THE FAN-OUT. PRINTS one agent brief per scene: the kit block,
-// that scene's contract, its exact copy, the anti-slop rules, and the one verify command. It launches
-// NOTHING: engine-doctrine/CRAFT/SUBAGENT-BUDGET.md is the reason (fewer, larger agents; a fan-out's cost is a
-// deliberate human choice, never a default). The owner reads the briefs and decides whether to spend
-// the tokens a real fan-out costs.
-//
-// Refuses to print anything if the storyboard's continuous-object contract does not chain
-// (harness/lib/contract.mjs), because a broken contract handed to three parallel agents is three
-// disagreeing instructions, not three that will assemble into one film.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -70,10 +61,6 @@ beats.forEach((b, i) => {
   console.log(`Kit:   paste ${path.relative(ROOT, kitPath)}'s block verbatim at the top (regenerate: node harness/author/stagekit.mjs ${film})`);
   console.log(`Copy (exact words, do not paraphrase): ${b.onscreen.length ? b.onscreen.map((l) => JSON.stringify(l)).join(' / ') : '(none stated: REPLACE the storyboard\'s onscreen: line first)'}`);
   if (b.object_in || b.object_out) {
-    // WHAT THE OBJECT DOES, not only that it exists. `make assemble` draws the object itself; what the
-    // fragment author needs is what NOT to draw there (its own copy of the object) and what its pose is
-    // doing across the beat, because a size/rotation/opacity change is exactly the kind of thing an
-    // agent invents its own version of if nobody tells it one is already coming.
     const edgeIn = parseEdge(b.object_in), edgeOut = parseEdge(b.object_out);
     console.log(`Continuous object arrives at: ${b.object_in || '(unset)'}   leaves at: ${b.object_out || '(unset)'}`);
     if (edgeIn && edgeOut && !edgeIn.error && !edgeOut.error) {
@@ -86,9 +73,6 @@ beats.forEach((b, i) => {
     }
     console.log(`  (the object itself is drawn by \`make assemble\`, not by this fragment: the fragment is everything ELSE in the beat)`);
   }
-  // THE MOTION PLAN, read BEFORE the markup is written, not discovered after: `make assemble` wires
-  // each entry's <selector> into a `parts[].select`, so an element the fragment never gives that
-  // selector to (a class, or a `data-part` attribute) is a plan the assembled film cannot reach.
   const motion = parseMotion(b.motion);
   if (motion.length) {
     console.log('MUST BE ADDRESSABLE (give each of these elements the exact selector below, e.g. a `data-part` attribute or a class):');

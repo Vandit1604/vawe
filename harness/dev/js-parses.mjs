@@ -1,15 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/js-parses.mjs: every browser-served .js file PARSES.
-//
-// WHY. The studio's 1,466-line UI was one exported template string until today. Splitting it into a
-// real file left four backslash sequences escaped for the string literal: `/\\s+\\(/` meant `\s+\(`
-// inside a template and is a SyntaxError as source. studio/ui/studio.js:143 threw at parse, so the
-// whole file never ran and not one button in the studio had a handler.
-//
-// Nothing caught it. The merge was verified by curling the routes and reading HTTP 200, and a 200 says
-// the bytes were served, never that they run. Serving is not parsing. This is the two-line difference.
-//
-//   node harness/dev/js-parses.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';

@@ -1,17 +1,5 @@
-// showcase-build.mjs: emits the six capability clips the site's showcase rows play.
-//
-//   node harness/author/showcase-build.mjs        # → films/scene/showcase-*.json
-//
-// THE RULE EVERY CLIP OBEYS: the capability performs itself. No clip carries an eyebrow naming what
-// it is ("kinetic typography", "shader stings"), and no clip labels its effects ("fade", "whip",
-// "flash"). A word in a box proves nothing, and six clips sharing one skeleton is exactly what the
-// ledger flags. Each clip is a hook and a payoff, with the artifact as the argument.
-//
-// Theme is `vawe`: the real brand read off site/app/globals.css, white field, one cobalt accent.
 import fs from 'node:fs';
 import { BLOCKS } from '../../blocks/index.mjs';
-// Generators write authored scenes, and an authored scene carries transitions[] only (the validator
-// refuses cuts/stings/seams); the same converter the migration uses runs at the write site.
 import { migrateOne } from './migrate-junctions.mjs';
 
 const T = 'vawe';
@@ -21,10 +9,8 @@ const write = (name, scene) => {
 };
 const txt = (o) => ({ type: 'text', ...o });
 const base = (duration) => ({ module: 'scene', aspect: '16:9', theme: T, duration, audio: { silent: true } });
-// one centred full-bleed word, composed identically every time so only the MOTION differs
 const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'center', size: 190, weight: 700, color: 'var(--text)', ...o });
 
-/* ── 1. TYPE ── the word performs its own definition: content and proof are the same object. ──── */
 {
   const L = [
     hero('stagger', { split: 'char', preset: 'up', stagger: 0.085, each: 0.42, start: 0.25, duration: 1.95, anim: 'none', exitDur: 0.22 }),
@@ -35,7 +21,6 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
   write('showcase-type', { ...base(8.4), layers: L, cuts: [{ t: 2.3, style: 'punch' }, { t: 4.4, style: 'punch' }, { t: 6.45, style: 'riseBlur' }] });
 }
 
-/* ── 2. CUTS ── it must actually CUT. The old clip had cuts:0 and drew labels reading "fade". ─── */
 {
   const card = (label, value, start, dur) => [
     { type: 'rect', x: 460, y: 300, w: 1000, h: 420, bg: 'var(--surface)', border: '1px solid var(--line-strong)', radius: 16, elevation: 1, start, duration: dur, anim: 'none', exitDur: 0.01 },
@@ -57,7 +42,6 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
   ] });
 }
 
-/* ── 3. STINGS ── a sting is punctuation: it lands ON the reveal, and is never named. ─────────── */
 {
   const L = [
     txt({ text: 'Every claim needs', x: 210, y: 360, w: 1500, align: 'center', size: 78, weight: 500, color: 'var(--text-2)', split: 'word', preset: 'up', stagger: 0.08, each: 0.5, start: 0.3, duration: 3.2, anim: 'none', exitDur: 0.25 }),
@@ -90,7 +74,6 @@ const hero = (text, o = {}) => txt({ text, x: 210, y: 400, w: 1500, align: 'cent
     stings: [{ t: 5.28, fx: 'flash', colors: ['#2563eb'], intensity: 0.4 }] });
 }
 
-/* ── 5. UI ── the click has a consequence, and the payoff reframes everything you just watched. ── */
 {
   const fx = 400, fy = 190, fw = 1120, fh = 600;
   const L = [
