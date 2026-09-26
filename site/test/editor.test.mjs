@@ -154,7 +154,7 @@ test("a broken scene shows the engine's own refusal, not a blank stage", async (
   assert.match(text, /bg is required/, "the engine's own words never reached the page");
   // The message names two faults on two lines. It was being collapsed into one paragraph and then
   // cut off, so the newline is the assertion.
-  assert.match(text, /layers needs/);
+  assert.match(text, /layers has 0 item\(s\)/);
   assert.ok(text.includes("\n"), "the refusal's own line breaks were collapsed");
   await page.close();
 });
