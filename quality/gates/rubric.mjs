@@ -2,7 +2,7 @@
 //
 // Two rubrics, deliberately different.
 //
-// `craftRubric` grades ONE film against a house style: all 7 dimensions, including brand and asset
+// `craftRubric` grades ONE film against a house style: all 11 dimensions, including brand and asset
 // fidelity, because conformity to a named brand is the point when there is a brand to conform to.
 //
 // `abRubric` grades one film AGAINST ANOTHER, and drops dimensions 4 and 5 unless a brand is named.
@@ -42,6 +42,26 @@ const DIMENSIONS = [
   + '   planned beat change carried across the join (a crossfade, a colour that follows the content), or\n'
   + '   does it flash cold from one still to the next with nothing bridging it? A carried change PASSES\n'
   + '   even when it happens more than once; an unbridged flash FAILS regardless of how brief it is.',
+  // The three below are named dimensions from VBench++ (arxiv.org/abs/2411.13503), a benchmark built
+  // to score generated video the way this rubric scores a frame: named axes, not a vibe. A key-frame
+  // sheet cannot show motion directly, so each asks what the ADJACENT frames imply, and CANNOT TELL
+  // (below) is the honest answer when the sheet does not carry enough to say.
+  '**Motion smoothness** (VBench++): between adjacent key frames, does a moving element\'s path look like\n'
+  + '   one continuous move (consistent direction, plausible in-between position), or does it jump/teleport?',
+  '**Temporal flicker** (VBench++): does anything that should be STATIC between adjacent frames (a\n'
+  + '   background, an unrelated layer) change colour, brightness or position when nothing in the film says\n'
+  + '   it should?',
+  '**Aesthetic quality** (VBench++): independent of brand or composition rules, does the frame look\n'
+  + '   professionally graded (colour, light, depth) rather than flat and undesigned?',
+];
+
+// Binary checks, not 1-5 scored: each is a yes/no fact about the pixels, not a craft judgement.
+const CHECKS = [
+  '**Edge clipping**: at every frame the sheet shows AT REST (not mid-transition), is any text or\n'
+  + '   essential graphic cut off by the frame edge? Name the frame and which edge.',
+  '**Blank frame at transition**: at every transition/cut boundary the sheet shows, is there a frame that\n'
+  + '   reads as empty/black/white when it should be carrying content (a drop frame, an unrendered gap)?\n'
+  + '   Name the transition.',
 ];
 
 const numbered = (list) => list.map((d, i) => `${i + 1}. ${d}`).join('\n');
@@ -75,13 +95,22 @@ your job is to catch what the static gates can't SEE. Do NOT rationalize a flaw 
 ${houseStyleFor(brand)}
 
 ${measuredSection(findings)}
-## Craft rubric: score each frame 1-5 per dimension, name the issue + the fix
+## Craft rubric: for EACH dimension, write the evidence FIRST, then the score
+For every dimension below, on every frame: name what you actually SEE (a timestamp/beat, the exact
+element, the exact defect) before you write the 1-5 score. A score with no evidence line above it is
+not a finding, it is a guess wearing one. "beat 3 (1.8s), hierarchy: the CTA and the stat both sit at
+the same size and weight, neither wins → 2/5" is the shape; a bare "hierarchy: 4" is not acceptable.
 ${numbered(DIMENSIONS)}
 
+## Checks: yes/no, with the evidence that answers it
+${numbered(CHECKS)}
+
 ## Return this verdict (structured)
+- **Per frame, per dimension:** evidence first (timestamp/beat + what you see), then the score.
 - **Per frame:** \`beat N, <worst dimension>: <the issue> → <the fix>\` (only frames with a real problem).
 - **Worst frame overall** + why.
-- **Verdict:** \`PASS\` only if every frame clears every dimension. Otherwise \`FIX\` + the prioritized list.
+- **Verdict:** \`PASS\` only if every frame clears every dimension and both checks. Otherwise \`FIX\` + the
+  prioritized list.
 Rule: if your eye catches it, it's a FIX. "Renders fine" is not PASS.
 
 ## You may say you cannot tell, and you must when it is true
