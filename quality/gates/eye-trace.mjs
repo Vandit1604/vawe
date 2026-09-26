@@ -70,7 +70,7 @@ import { safeArea } from '../../core/layout/safe.js';
 import { motionAt } from '../../core/timeline/sequence.js';
 import { bgPreset, bgPaletteFrom } from '../../core/backgrounds/index.js';
 import { parseColorRGB, parseColor, colorAlpha } from '../../core/color/engine.js';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { gateFindings, emitJson } from '../../harness/lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -315,7 +315,7 @@ function loadTheme(d) {
   if (d.theme && typeof d.theme === 'object') return d.theme;
   try {
     const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', `${d.theme}.json`), 'utf8'));
-    return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+    return expandTheme(raw, { parseColor, colorAlpha });
   } catch { return {}; }
 }
 
