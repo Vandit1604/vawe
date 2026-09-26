@@ -305,10 +305,12 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 
 | name | words | action |
 |---|---|---|
+| `expressive` | emphasis pace, bigger moment, occasional-motion tier | 0.4s, Carbon's emphasis tier for an occasional bigger moment: slower than `productive` on purpose, so the one that matters reads as the one that matters. |
 | `fast` | quick, brief, snappy pace | 0.18s, under a fifth of a second. A payoff snapping into place, a value ticking over. |
 | `instant` | snap, no visible motion, immediate | 0.08s, about a twelfth of a second. Barely perceptible as motion: a state flip that must not feel animated. |
 | `luxurious` | lingering, held, extended hold | 1.2s, over a second. The pace of a hero moment, and monotonous if more than one beat uses it. |
 | `medium` | default speed, normal pace, moderate | 0.3s, BASE_ENTER, the engine's own default entrance. About a third of a second, reach past it on purpose. |
+| `productive` | utilitarian pace, small UI move, frequent-motion tier | 0.22s, Carbon's utilitarian tier for small, frequent UI-adjacent moves: quick enough that the motion never costs the viewer attention. |
 | `slow` | deliberate, unhurried, takes its time | 0.6s, a little over half a second. A thesis line taking its time, a deliberate reveal. |
 
 ## easing  `[ease]`
@@ -346,17 +348,21 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `easeOutQuart` | snappy landing, crisp arrival, fast settle | lands fast and settles crisply, snappier than cubic and it never passes its target. Good on an element arriving |
 | `easeOutQuint` | very sharp arrival, nearly instant landing, extreme ease out | covers nearly all the distance at once then creeps the last of it, a very sharp arrival |
 | `easeOutSine` | gentlest landing, soft fade to stop, quiet arrival | the softest landing there is, closer to speed fading away than to stopping |
+| `emphasized` | hero curve, material emphasis, draw the eye | MD3's hero curve, cubic-bezier(0.05,0.7,0.1,1): the decelerate half of its two-part emphasis pair, for the one moment that should draw the eye |
+| `enter` | decelerate curve, material entrance, arriving from off-frame | MD3's decelerate curve, cubic-bezier(0,0,0,1): the entrance half of this engine's own decelerate/accelerate rule, spelled by intent |
+| `exit` | accelerate curve, material exit, leaving the frame | MD3's accelerate curve, cubic-bezier(0.3,0,1,1): the exit half of the same rule, picked when a layer is leaving rather than arriving |
 | `hold` | stepped hold, jump-cut value, parks then jumps | does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it |
 | `linear` | constant speed, no easing, mechanical motion | no acceleration at all, constant speed start to finish. Right for a loop or a marquee, wrong for anything a viewer watches arrive |
 | `ramp` | slow fast slow, symmetric speed ramp, gathers then tails off | mild and symmetric: gathers pace, crosses the middle at full speed, tails off |
 | `rush` | leaves in a hurry, holds back then rushes, late acceleration | holds back for most of the span then covers the distance late. The exit curve: it leaves in a hurry |
 | `settle` | immediate move then ease, quick then stops dead, default entrance settle | most of the move happens immediately, then it eases the remainder and stops dead |
 | `snap` | near-instant landing, fast with a hair of overshoot, default layer snap | covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement |
-| `spring` | physical landing, passes and falls back, spring physics | passes the mark by a little and falls back, a physical landing with some give in it |
-| `spring-bouncy` | playful spring bounce, visible spring wobble, bouncy spring landing | visibly passes the mark and swings back, the playful one. One per film at most |
-| `spring-stiff` | firm no-wobble settle, early motion then settle, tight spring travel | most of the journey early, then a firm settle with no wobble at all |
-| `springEase` | damped spring settle, nearly-arrived creep, flat spring curve | spring shaped but damped flat: nearly arrived at once, then creeping the last fraction |
-| `springStiff` | no-overshoot spring, tight firm settle, stiff spring landing | tight and quick with no visible pass beyond the mark, for something that must not look playful |
+| `spring` | physical landing, passes and falls back, spring physics | damping ratio 0.65 (35% bounce): enough give to pass the mark and fall back, settling in under a second |
+| `spring-bouncy` | playful spring bounce, visible spring wobble, bouncy spring landing | damping ratio 0.45 (55% bounce), the least stiff spring here: swings past the mark and takes over a second to settle. The playful one |
+| `spring-stiff` | firm no-wobble settle, early motion then settle, tight spring travel | damping ratio 0.88 (12% bounce): high stiffness, almost no give, and the fastest settle of the springs here at about half a second |
+| `springEase` | damped spring settle, nearly-arrived creep, flat spring curve | damping fraction 1 (critically damped) at a 0.5s response: nearly arrived by a third of a second, then creeping the last fraction |
+| `springStiff` | no-overshoot spring, tight firm settle, stiff spring landing | critically damped, damping ratio 1: all stiffness and no give, so it never passes the mark, settling about as fast as `spring` |
+| `standard` | default MD3 curve, material motion, most transitions | MD3's default curve, cubic-bezier(0.2,0,0,1): the everyday transition when nothing argues for enter, exit or emphasis |
 
 ## effector drive  `[effector.drives{}]`
 
@@ -412,7 +418,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 
 | name | words | action |
 |---|---|---|
-| `bouncy` | spring bounce, springy landing, visible bounce | a spring that gives a visible bounce on landing before it settles. Playful, and loud: one per film at most. |
+| `bouncy` | spring bounce, springy landing, visible bounce | a spring with heavy give and low stiffness, damping ratio 0.45 (55% bounce): swings past the mark before it settles, over a second to rest. Playful, and loud: one per film at most. |
 | `elastic` | rubber band, wobble, repeated overshoot | overshoots repeatedly with a decaying wobble. The loudest option here and rarely the right one. |
 | `gentle` | ambient drift, shallow ease, unhurried background motion | slow at both ends, but shallower than smooth. Ambient drift, backgrounds, anything not asking for attention. |
 | `heavy` | weighty, massive, slow to start and stop, ponderous | slow at both ends and slow in the middle: reads as mass. Big panels and full-frame moves. |
@@ -422,7 +428,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `smooth` | glide, gliding, ease in and out, flowing motion | eases in and eases out, slow at both ends. The safe choice for anything travelling a long way across frame. |
 | `snappy` | springy, crisp, punchy | quick and decisive: moves off fast and slows down hard at the end. The default for a UI element landing. |
 | `soft` | settle in, gentle landing, no overshoot, cushioned stop | arrives and settles, with the overshoot damped out. Use where a hard stop would read as a collision. |
-| `stiff` | tight spring, barely any give, crisp spring | a spring with almost no give: fast, tight, barely any overshoot. Springs that must not look playful. |
+| `stiff` | tight spring, barely any give, crisp spring | a spring with high stiffness and almost no give, damping ratio 0.88 (12% bounce): settles in about half a second with barely a wobble. Springs that must not look playful. |
 
 ## field motion  `[motion.kind]`
 
@@ -1031,5 +1037,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_712 primitives across 61 registries, 712 meeting the word-action contract today.
+_718 primitives across 61 registries, 718 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

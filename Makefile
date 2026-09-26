@@ -9,12 +9,18 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar claims study-verify recreate ref motion-split studio core-node-boundary waiver-ratchet ingest
+.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar claims study-verify recreate ref motion-split studio core-node-boundary waiver-ratchet ingest doctor
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
 fonts: ## [engine] download the free, openly-licensed faces into the gitignored assets/fonts/ (no font binary is
 	node generators/media/fonts.mjs
+
+# make doctor: is the checkout ready to render? Today: is gsap vendored (assets/vendor/gsap.min.js,
+# gitignored, written by the root "postinstall" script). Prints the fix command rather than failing
+# silent-substitution style; add more self-heal checks here as they show up.
+doctor: ## [engine] is the checkout ready to render (gsap vendored, and anything else self-heals need); prints the fix
+	node scripts/vendor-gsap.mjs --check
 
 # make fonts-discover SEED=7 [COUNT=12] [CATEGORY=serif|sans-serif|display|monospace|handwriting] [JSON=1]:
 # sample the live Google Fonts catalogue by popularity band and by recency, minus every family already

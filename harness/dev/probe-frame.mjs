@@ -124,6 +124,11 @@ async function main() {
     if (err) throw new Error(`scene did not load: ${err}`);
     const meta = await page.evaluate(() => window.__engine.meta);
     report.fps = meta.fps;
+    // `meta.beatSync` carries bindBeats' own resolved-times line (core/beats/index.js describeBind),
+    // produced at boot but never read past this point until now: the render process cannot hear the
+    // page's console.log (engine-doctrine/MISTAKES.md #477), so this was the one line an author had no
+    // way to see outside a real render.
+    if (meta.beatSync) report.beatSync = meta.beatSync;
     if (pageT > meta.duration + 1e-6) {
       console.error(`--t ${viewerT}s (page time ${pageT.toFixed(3)}s) is past this film's authored duration (${meta.duration.toFixed(3)}s)`);
       process.exit(1);
@@ -154,6 +159,7 @@ async function main() {
 
 function printText(r) {
   console.log(`viewer T=${r.viewerT}s  tempo=${r.tempo}  page T=${r.pageT.toFixed(3)}s (authored clock)  frame ${r.frame} @ ${r.fps}fps`);
+  if (r.beatSync) console.log(r.beatSync);
   if (r.camera) console.log(`camera: style="${r.camera.styleTransform}"  computed="${r.camera.computedTransform}"`);
   for (const [id, row] of Object.entries(r.samples)) {
     console.log(`\n-- ${id} --`);

@@ -33,17 +33,19 @@ Vetted, static-CSS card treatments that read premium under the determinism reset
 only STATIC CSS. Anything that MOVES comes from a Phase-2 engine effect** (a `beam` layer, an `aurora` paint
 behind glass), never a frozen CSS `@keyframes`. Drop via `{ "type":"block", "block":"<name>", ... }`, which expands at load, no separate step.
 
+`glassCard`, `meshPanel`, `spotlightCard` and `grainOverlay` were cut: each was only a static styled
+`div` behind kit chrome, no mechanism beyond markup an authoring script can write inline. Write the
+frosted panel, mesh gradient, spotlight wash, or grain texture directly as an `html` layer's own
+markup instead (their CSS is in `engine-doctrine/MISTAKES.md`'s git history if you want the starting
+point).
+
 | Block | What it is | Give it |
 |---|---|---|
-| `glassCard` | frosted glass: BLURS whatever moves behind it, hairline edge, top sheen | a living background (aurora/mesh/paint) to blur |
-| `meshPanel` | a soft mesh-gradient surface (stacked accent blobs) | a calm branded surface behind a hero line |
-| `spotlightCard` | a dark card with a soft spotlight washing from a corner (`from`) | one hero line the light points at |
 | `borderBeamCard` | a glass card with a light TRAVELLING its border (the animated `beam`) | the one sleek surface that moves |
-| `grainOverlay` | fine film grain over the frame (feTurbulence, screen-blended) | any flat gradient that needs to read as "shot" |
-| `bento` | an asymmetric bento grid: one hero cell + supporting cells | scale contrast, not a uniform card grid |
+| `bento` | an asymmetric bento grid: one hero cell + supporting cells (glass/mesh/spotlight cell looks, inlined as `sleek.mjs` locals) | scale contrast, not a uniform card grid |
 
-Glass needs something behind it: put an `aurora` paint or a `meshPanel` under a `glassCard` or the blur has
-nothing to work on. `make catalog` renders the whole registry; browse it before hand-rolling a surface.
+Glass needs something behind it: put an `aurora` paint under a frosted panel or the blur has nothing to
+work on. `make catalog` renders the whole registry; browse it before hand-rolling a surface.
 
 ## Build the HTML FIRST (the default loop)
 

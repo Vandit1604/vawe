@@ -1,0 +1,94 @@
+{
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "fps": 30,
+  "duration": 2,
+  "bg": [
+    {
+      "preset": "dark"
+    }
+  ],
+  "audio": {
+    "silent": true,
+    "_why": "a gate fixture proving vocabulary resolution, not a film"
+  },
+  "authoring": {
+    "allow": [
+      "dead-air",
+      "plain-slideshow",
+      "no-continuous-object",
+      "static-bg",
+      "no-storyboard",
+      "no-authored-motion"
+    ],
+    "_why": {
+      "dead-air": "a gate fixture: it exists to probe renderFrame purity, not to be watched",
+      "plain-slideshow": "one held frame, no beats to vary",
+      "no-continuous-object": "no object logic is under test here",
+      "static-bg": "the background is not part of what this fixture proves",
+      "no-storyboard": "a gate fixture, not a film: engine-doctrine/CRAFT/MOTION-REGISTERS.md #2 names the MD3 numbers this proves",
+      "no-authored-motion": "the motion track IS the thing under test"
+    }
+  },
+  "layers": [
+    {
+      "type": "rect",
+      "id": "gsap-power",
+      "x": 200,
+      "y": 200,
+      "w": 120,
+      "h": 120,
+      "fill": "#5865f2",
+      "anim": "none",
+      "out": "none",
+      "motion": [
+        { "t": 0, "x": 200, "ease": "power2.inOut" },
+        { "t": 1.2, "x": 900 }
+      ]
+    },
+    {
+      "type": "rect",
+      "id": "gsap-back-overshoot",
+      "x": 200,
+      "y": 400,
+      "w": 120,
+      "h": 120,
+      "fill": "#57f287",
+      "anim": "none",
+      "out": "none",
+      "motion": [
+        { "t": 0, "scale": 0.4, "ease": "back.out(1.7)" },
+        { "t": 1, "scale": 1 }
+      ]
+    },
+    {
+      "type": "rect",
+      "id": "md3-intent",
+      "x": 200,
+      "y": 600,
+      "w": 120,
+      "h": 120,
+      "fill": "#eb459e",
+      "anim": "none",
+      "out": "none",
+      "motion": [
+        { "t": 0, "x": 200, "ease": "enter" },
+        { "t": 0.8, "x": 900, "ease": "exit" }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "gsap-stagger",
+      "text": "GSAP",
+      "x": 960,
+      "y": 800,
+      "w": 800,
+      "h": 120,
+      "split": "char",
+      "preset": "up",
+      "each": 0.5,
+      "stagger": { "amount": 0.6, "from": "start" }
+    }
+  ]
+}

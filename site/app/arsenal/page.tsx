@@ -23,7 +23,7 @@ const FAMILIES = (effects as { list: { id: string; title: string; count: number 
   .sort((a, b) => a.title.localeCompare(b.title));
 
 // The block twin of FAMILIES above: 13 real groups (blocks.json's own `category` field), against
-// 97 block families where 57 hold exactly one block, too thin to browse. `id` matches the slug
+// block families where most hold exactly one block, too thin to browse. `id` matches the slug
 // site/app/arsenal/category/[id]/page.tsx derives from the same field, so this link can never point
 // at a hub that does not exist.
 const CATEGORIES = (() => {
@@ -108,7 +108,7 @@ export default function ArsenalPage() {
           </section>
 
           {/* THE CATEGORY INDEX, the block twin of the family index above and built for the same
-            * reason: 185 blocks each had a leaf page and no layer above them, reachable only by
+            * reason: every block had a leaf page and no layer above them, reachable only by
             * already knowing one member. Same markup, same CSS classes, so the two lists read as
             * one pattern rather than two. */}
           <section className="ar-fams" aria-labelledby="cats-h">
