@@ -334,7 +334,7 @@ test('lib-test: lints', async () => {
     // A GATE THAT DOES NOT EXIST. The tag reads exactly as authoritative as a true one, which is why
     // this has to be mechanical: nobody re-checks a path in a heading they have read fifty times.
     fs.writeFileSync(claude, savedClaude.replace(
-      '`[gated: quality/gates/author-check.mjs#no-storyboard]`',
+      '`[gated: quality/gates/author-check.mjs]`',
       '`[gated: quality/gates/no-such-gate.mjs]`'));
     const ghost = run();
     ok('rungs: a tag naming a gate that does not exist is REFUSED', ghost.code === 1);
@@ -345,7 +345,7 @@ test('lib-test: lints', async () => {
     // real prose about silence, emitting no finding code at all. It emits them now (see the sound-gate
     // block below), which is what let the SILENCE section leave [eye].
     fs.writeFileSync(claude, savedClaude.replace(
-      '`[gated: quality/gates/author-check.mjs#no-storyboard]`',
+      '`[gated: quality/gates/author-check.mjs]`',
       '`[gated: quality/gates/author-check.mjs#no-such-code]`'));
     const wrongCode = run();
     ok('rungs: a gate named for a code it never emits is REFUSED', wrongCode.code === 1);
@@ -354,11 +354,11 @@ test('lib-test: lints', async () => {
     // AN UNTAGGED SECTION. [eye] is the honest default and costs one word, so the only reason a section
     // of CLAUDE.md carries no rung is that nobody asked the question.
     fs.writeFileSync(claude, savedClaude.replace(
-      '## Changing the ENGINE, not a film?  `[live: harness/live/craft-live.mjs]`',
-      '## Changing the ENGINE, not a film?'));
+      '## Changing the engine, not a film?  `[live: harness/live/craft-live.mjs]`',
+      '## Changing the engine, not a film?'));
     const bare = run();
     ok('rungs: an untagged section of CLAUDE.md is REFUSED', bare.code === 1);
-    ok('rungs: and it is named, so the fix is one word', /untagged: Changing the ENGINE, not a film\?/.test(bare.out));
+    ok('rungs: and it is named, so the fix is one word', /untagged: Changing the engine, not a film\?/.test(bare.out));
 
     // THE [live] RUNG'S OCCUPANT. craft-live.mjs's structural fragment checks (kit-intact,
     // storyboard-order) have their own dedicated coverage in tests/hooks/craft-live-fragment.test.mjs
@@ -366,7 +366,7 @@ test('lib-test: lints', async () => {
     // wired to the rung the doc claims, same as the rungs assertions above it.
     ok('craft-live: the [live] hook file still exists', fs.existsSync(path.join(repoRoot, 'harness/live/craft-live.mjs')));
 
-    fs.writeFileSync(claude, savedClaude);
+    fs.writeFileSync(claude, savedClaude + '\n## Probe  `[eye]`\n');
     fs.writeFileSync(ratchet, JSON.stringify({ eye: 0 }));
     const worse = run();
     ok('rungs: a RISE in the [eye] count is refused', worse.code === 1);
@@ -374,6 +374,7 @@ test('lib-test: lints', async () => {
     ok('rungs: and it names both the ablation that motivates it and --stamp',
       /PROMPT-EVAL\.md/.test(worse.out) && /--stamp/.test(worse.out));
 
+    fs.writeFileSync(claude, savedClaude);
     fs.writeFileSync(ratchet, JSON.stringify({ eye: 9999 }));
     ok('rungs: a FALL is reported, not silently accepted', /fewer \[eye\]/.test(run().out));
 
