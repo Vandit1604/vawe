@@ -1,0 +1,20 @@
+{
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 1,
+ "bg": [{ "preset": "plain", "from": 0, "to": 1 }],
+ "layers": [
+  {
+   "id": "dot",
+   "type": "rect",
+   "x": 0, "y": 0, "w": 40, "h": 40, "radius": 20, "bg": "var(--accent)",
+   "start": 0, "duration": 1,
+   "motion": [
+    { "t": 0, "x": 0, "y": 0 },
+    { "t": 1, "x": 800, "y": 400, "ease": { "x": "linear", "y": "easeOutCubic" } }
+   ]
+  }
+ ],
+ "audio": { "silent": true }
+}

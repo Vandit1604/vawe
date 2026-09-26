@@ -2203,8 +2203,8 @@
        "label": "Z-order at this key. Depth over TIME: key it across a neighbour's track and the layer passes behind that neighbour and out again, which is how a ribbon orbits the thing it circles. Rounded to an integer when applied. Defaults to the layer's own `track`, or its index."
       },
       "ease": {
-       "type": "string",
-       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff). ONE curve for the whole segment INTO this key. To draw the curve yourself, per side, use `easeOut` on the key before and `easeIn` here."
+       "type": "string|object",
+       "label": "Easing name (incl. spring, spring-bouncy, spring-stiff), ONE curve for the whole segment INTO this key; or a per-PROPERTY map (Separate Dimensions) so x and y on the same keys travel different curves, e.g. { \"x\": \"linear\", \"y\": \"easeOutCubic\" }. A map entry may also be { \"easeIn\": handle, \"easeOut\": handle } for that ONE property, symmetric with the whole-segment `easeOut`/`easeIn` below. A property the map omits still uses the segment's own curve. To draw the whole segment yourself, per side, use `easeOut` on the key before and `easeIn` here."
       },
       "easeOut": {
        "label": "THE HANDLE LEAVING THIS KEY, a graph-editor control point for the segment that STARTS here. A handle NAME from the keyframe-handle registry (see `make arsenal`), or { \"influence\": 0-100, \"speed\": a number }. `influence` is how far along the segment the handle reaches, as a PER CENT of its duration. `speed` is how fast the value is moving AT this key, as a MULTIPLE of the segment's own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out. A multiple and not px/sec, so ONE handle pair is correct for x, scale and rot at once and a property that does not change is not a division by zero. The far side of the segment is `easeIn` on the next key; a side that says nothing is the straight line. REFUSED beside `ease` on the same segment or `ease: \"through\"` on the same key: two answers to one question."
