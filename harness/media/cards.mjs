@@ -1,15 +1,9 @@
-// harness/media/cards.mjs: parametric, copyright-safe topic cards (designed SVGs) for ANY topic.
-// A deterministic palette derived from the title gives each card a distinct, on-brand look:
-// dark→mid gradient + soft grain + vignette + accent frame + balanced wrapped title.
-// Use as a library (import { card, slugify }) or a CLI:
-//   node harness/media/cards.mjs "Quantum Computing" --sub "the next frontier" --out assets/cards/qc.svg
 import fs from 'node:fs';
 import path from 'node:path';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 export const slugify = (s) => String(s).toLowerCase().normalize('NFKD').replace(/[^\w\s-]/g, '').trim().replace(/[\s_]+/g, '-').slice(0, 48) || 'card';
 
-// deterministic hash → hue, so the same title always yields the same palette
 const hueOf = (s) => { let h = 2166136261 >>> 0; const t = String(s); for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h % 360; };
 function hsl(h, s, l) {
   s /= 100; l /= 100; const k = (n) => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
@@ -17,13 +11,11 @@ function hsl(h, s, l) {
   const hex = (x) => Math.round(255 * x).toString(16).padStart(2, '0');
   return '#' + hex(f(0)) + hex(f(8)) + hex(f(4));
 }
-// a rich dark→mid gradient + a bright accent, harmonised off one hue
 export function palette(title) {
   const h = hueOf(title);
   return { c1: hsl(h, 58, 11), c2: hsl((h + 22) % 360, 62, 30), accent: hsl((h + 44) % 360, 88, 68) };
 }
 
-// crude width-aware line wrap (system sans, ~0.56 avg glyph width)
 function wrap(title, maxWidth, size) {
   const words = String(title).trim().split(/\s+/), lines = []; let line = '';
   const fits = (s) => s.length * size * 0.56 <= maxWidth;
@@ -35,7 +27,6 @@ function wrap(title, maxWidth, size) {
   return lines.slice(0, 3);
 }
 
-// card({ title, subtitle?, accent?, c1?, c2?, w?, h? }) → SVG string
 export function card({ title = '', subtitle = '', accent, c1, c2, w = 600, h = 600 } = {}) {
   const pal = palette(title);
   c1 = c1 || pal.c1; c2 = c2 || pal.c2; accent = accent || pal.accent;
@@ -65,7 +56,6 @@ export function card({ title = '', subtitle = '', accent, c1, c2, w = 600, h = 6
 </svg>`;
 }
 
-// CLI
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const title = args.find((a) => !a.startsWith('--')) || 'Untitled';
