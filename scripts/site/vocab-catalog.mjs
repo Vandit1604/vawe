@@ -109,10 +109,10 @@ out.push('---');
 out.push('when: "you know the FEELING you want and not the engine name for it"');
 out.push('answers: "the plain words the engine resolves in a real slot: feel to an easing, duration to seconds, a shot description to a camera move"');
 out.push('group: crosscutting');
-  // `low-vocab` is direction-floor's code for a film that reaches for none of these words, and
-  // craft-coverage routes a code to the doc that settles it. Emitted here because a regeneration that
-  // dropped it silently unrouted the code.
-  out.push('codes: low-vocab');
+  // `low-vocab` used to be direction-floor's code for a film that reaches for none of these words; that
+  // gate was a TASTE gate and was retired (engine-doctrine/SAFEGUARDS.md), so no gate emits the code
+  // any more and this doc settles nothing craft-coverage needs to route.
+  out.push('codes: []');
 out.push('---');
 out.push('');
 out.push('# VOCABULARY: plain words the engine accepts');
