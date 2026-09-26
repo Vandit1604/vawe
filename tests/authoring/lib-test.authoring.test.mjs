@@ -610,6 +610,7 @@ test('lib-test: authoring', async () => {
     ["a transition that shows time passing", "time"],
     ["should the film have sound", "sound.default-not-silence"],
     ["a terminal window", "terminal"],
+    ["text goes from condensed to expanded", "wdth"],
     ["a fake browser window around a screenshot", "browserFrame"],
     ["a progress bar filling up", "loadingBar"],
     ["a phone shaped frame to put a screenshot in", "phoneFrame"],
