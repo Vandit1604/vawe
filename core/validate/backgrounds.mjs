@@ -5,6 +5,7 @@ import { junctionTable, marksOf, bindWindowsToJunctions } from '../timeline/junc
 import { resolveSpectacle } from '../timeline/spectacle.js';
 import { lowerScene } from '../transitions/lower.js';
 import { bgPreset, bgOverErrors, bgOptKeys, BG_NAMES, FX_PARAMS } from '../backgrounds/index.js';
+import { gradientShapeErrors } from '../backgrounds/fx.js';
 import { timeCssUsed } from '../type/sanitize-html.js';
 
 // The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
@@ -74,7 +75,8 @@ function composedWindowErrors(b, at, out) {
     out.push(`${at}.fx must be an array of {type, ...} painters, the same vocabulary a preset compiles to.`);
   (Array.isArray(b.fx) ? b.fx : []).forEach((f, fi) => {
     if (!isObj(f) || !f.type) { out.push(`${at}.fx[${fi}] needs a \`type\`: one of ${Object.keys(FX_PARAMS).join(', ')}.`); return; }
-    if (!(f.type in FX_PARAMS)) out.push(`${at}.fx[${fi}] type "${f.type}" is not a known painter.${nearest(f.type, Object.keys(FX_PARAMS))}`);
+    if (!(f.type in FX_PARAMS)) { out.push(`${at}.fx[${fi}] type "${f.type}" is not a known painter.${nearest(f.type, Object.keys(FX_PARAMS))}`); return; }
+    if (f.type === 'gradientFill') out.push(...gradientShapeErrors(f, `${at}.fx[${fi}]`));
   });
   if (b.opts != null)
     out.push(`${at} sets \`opts\` on a composed (\`base\`/\`fx\`) backdrop, \`opts\` retunes a named PRESET's fx. Composing directly, just write the values on each \`fx\` entry.`);
@@ -93,8 +95,10 @@ function composedWindowErrors(b, at, out) {
 // already recorded the error for anything else.
 function presetOptsErrors(b, at, out) {
   const bgKnown = BG_NAMES.includes(b.preset || 'paper');
-  if (isObj(b.opts) && b.use == null && bgKnown)
+  if (isObj(b.opts) && b.use == null && bgKnown) {
     out.push(...bgOverErrors(bgPreset(b.preset || 'paper', b.value), b.opts, at));
+    out.push(...gradientShapeErrors(b.opts, `${at}.opts`));
+  }
   // ...AND THE SAME KEY ONE LEVEL UP. #157 made an unknown key INSIDE `opts` throw. Nothing checked
   // a real fx parameter written OUTSIDE it: `{"preset":"gradientWash","intensity":0.3}` is read by
   // films/scene/scene.js:146 as `applyBgOver(spec, b.opts)` with `b.opts` undefined, so the whole

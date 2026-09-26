@@ -56,6 +56,20 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `vhs` | VHS tape effect, retro tape distortion, analog tape look | tape: scanlines, magenta/cyan chroma snow, dropout streaks and a soft tracking band creeping up. an OVERLAY, place it ABOVE content |
 | `voronoi` | cellular noise, worley noise, cell pattern with lit borders | cellular (Worley) noise: seeded cells drifting on their own loops, each one flat-tinted, with a lit line along every shared border |
 
+## anchor point  `[anchorPoint]`
+
+| name | words | action |
+|---|---|---|
+| `bottom` | _missing_ | x/y is the bottom-centre of the box |
+| `bottom-left` | _missing_ | x/y is the box's bottom-left corner |
+| `bottom-right` | _missing_ | x/y is the box's bottom-right corner |
+| `center` | _missing_ | x/y is the box's exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
+| `left` | _missing_ | x/y is the left-centre of the box: x sits on the left edge, y on its vertical middle |
+| `right` | _missing_ | x/y is the right-centre of the box |
+| `top` | _missing_ | x/y is the top-centre of the box: y sits on the top edge, x on its horizontal middle |
+| `top-left` | _missing_ | the default: x/y is the box's top-left corner, unchanged from before this field existed |
+| `top-right` | _missing_ | x/y is the box's top-right corner |
+
 ## anim  `[anim]`
 
 | name | words | action |
@@ -1063,5 +1077,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_729 primitives across 64 registries, 729 meeting the word-action contract today.
+_738 primitives across 65 registries, 729 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
