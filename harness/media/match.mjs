@@ -4,6 +4,12 @@
 // dense frame-by-frame strip (reference row over render row), a difference overlay and a mean SSIM,
 // per beat, ranked worst-to-best in match.md. `make study REF=<video> D=<film.json> MATCH=1`.
 //
+// `LIGHT=1` adds one more column: a per-beat light-map ΔE (harness/lib/light-map.mjs), the LOW-
+// FREQUENCY brightness and colour a beat reads at a glance, which SSIM and the colour ΔE below both
+// miss (a mostly-black render against a reference that reads several times brighter can still score
+// fine on structure and on one averaged colour). A beat that scores badly there is a candidate for
+// `harness/media/light-fit.mjs`, which fits a replacement background off the same light map.
+//
 // BEATS, NEVER INVENTED (same reasoning as content-check.mjs): the film's own storyboard beats if
 // `<film>.storyboard.md` exists, else scene cuts detected IN THE REFERENCE (ffmpeg select=gt(scene,0.3),
 // shot-detect.mjs's own detectCuts: the same detector `make study` uses). Both timelines are assumed to
@@ -17,6 +23,7 @@ import { scratch } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
 import { sampleFrames, tileGrid, blendDiff, ssimOf, gradeable, meanColorOf, labDeltaE } from '../../quality/gates/tile.mjs';
 import { actsFromStoryboard, findStoryboard } from '../../quality/gates/content-check.mjs';
+import { lightMap, lightMapDistance } from '../lib/light-map.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -31,6 +38,7 @@ if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<film.json> MATC
 if (!fs.existsSync(REF)) die(`no such reference video: ${REF}`);
 
 const STEP = Number(flag('--step', 'STEP', 0.1));   // dense strip: one sample every 0.1s, per the spec
+const LIGHT = !!flag('--light', 'LIGHT', null);   // add each beat's light-map ΔE (harness/lib/light-map.mjs)
 
 requireTool('ffmpeg');
 requireTool('ffprobe');
@@ -110,8 +118,19 @@ for (const [i, b] of beats.entries()) {
   const parts = [meanSsim, colorSim].filter((v) => v != null);
   const combined = parts.length ? parts.reduce((a, v) => a + v, 0) / parts.length : null;
 
+  // The light map: the LOW-FREQUENCY brightness/colour of one representative frame (the beat's
+  // midpoint, off the same full-size tiles SSIM already used), not the beat's fine structure. A
+  // recreation that is mostly black against a reference that reads 4-8x brighter can still score fine
+  // on SSIM (both agree on shape) and even on the mean-colour ΔE above (one average can hide a bright
+  // corner against a dark rest); this is the check neither of those is built to make.
+  let lightDist = null;
+  if (LIGHT) {
+    const mid = Math.floor((pairs - 1) / 2);
+    lightDist = lightMapDistance(lightMap(refTiles[mid]), lightMap(renderTiles[mid]));
+  }
+
   results.push({ i: i + 1, label: b.label, start: b.start, end: b.end, samples: pairs,
-    ssim: meanSsim, deltaE: meanDeltaE, combined, strip: stripPath, diff: diffPath });
+    ssim: meanSsim, deltaE: meanDeltaE, combined, light: lightDist, strip: stripPath, diff: diffPath });
 }
 fs.rmSync(framesDir, { recursive: true, force: true });
 
@@ -121,13 +140,20 @@ const fmt = (v, d = 4) => (v != null ? v.toFixed(d) : 'n/a');
 const lines = [
   `# match: ${slug} vs ${path.basename(REF)}`, '',
   `beats: ${beats.length} (${beatsSource}) · reference: ${REF} · render: ${rel(mp4)} · size ${W}x${H} · step ${STEP}s`, '',
-  '| beat | window | samples | mean SSIM | colour ΔE | combined | strip | diff |',
-  '|---|---|---|---|---|---|---|---|',
+  `| beat | window | samples | mean SSIM | colour ΔE | combined${LIGHT ? ' | light ΔE' : ''} | strip | diff |`,
+  `|---|---|---|---|---|---|${LIGHT ? '---|' : ''}---|---|`,
   ...ranked.map((r) => `| ${r.i} (${r.label}) | ${r.start.toFixed(1)}-${r.end.toFixed(1)}s | ${r.samples} `
-    + `| ${fmt(r.ssim)} | ${fmt(r.deltaE, 1)} | ${fmt(r.combined)} | ${r.strip ? rel(r.strip) : 'n/a'} | ${r.diff ? rel(r.diff) : 'n/a'} |`),
+    + `| ${fmt(r.ssim)} | ${fmt(r.deltaE, 1)} | ${fmt(r.combined)}${LIGHT ? ` | ${fmt(r.light, 1)}` : ''} `
+    + `| ${r.strip ? rel(r.strip) : 'n/a'} | ${r.diff ? rel(r.diff) : 'n/a'} |`),
   '',
   '_ranked worst-to-best by the combined score: mean SSIM (structure) averaged with a colour similarity',
   'derived from mean Lab ΔE (colour/light, so a dark frame can no longer coast on SSIM alone)._',
+  ...(LIGHT ? ['',
+    '_light ΔE (harness/lib/light-map.mjs): mean Lab distance between a 16x9 low-frequency light map of',
+    'the reference and of the render, one representative frame per beat. Catches what the two scores',
+    'above cannot: a render that is mostly black against a reference that reads several times brighter',
+    'can still score well on structure and on a single averaged colour. `harness/media/light-fit.mjs`',
+    'fits a replacement background for a beat that scores badly here._'] : []),
 ];
 const mdPath = path.join(OUT_DIR, 'match.md');
 fs.writeFileSync(mdPath, `${lines.join('\n')}\n`);
@@ -136,5 +162,5 @@ console.log(`\n  MATCH · ${slug} vs ${path.basename(REF)}\n`);
 console.log(`  beats: ${beats.length} (${beatsSource})`);
 for (const r of ranked)
   console.log(`  beat ${r.i} (${r.label}, ${r.start.toFixed(1)}-${r.end.toFixed(1)}s): ssim ${fmt(r.ssim)} · `
-    + `ΔE ${fmt(r.deltaE, 1)} · combined ${fmt(r.combined)}`);
+    + `ΔE ${fmt(r.deltaE, 1)} · combined ${fmt(r.combined)}${LIGHT ? ` · light ΔE ${fmt(r.light, 1)}` : ''}`);
 console.log(`\n  ✓ wrote ${rel(mdPath)}`);
