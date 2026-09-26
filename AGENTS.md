@@ -40,9 +40,11 @@ against its reference beat by beat: `make study REF= D= MATCH=1 [LIGHT=1]`.
 `make help` prints the ~12-command fast path; `make list` prints all 39 targets, grouped by phase,
 never stale. Six route to sub-tools by name (X=<name>): `gen`, `site`, `study-tool`, `dev-tool`,
 `media`, `check GATE=<name>`. `make arsenal Q="…"` searches every effect and block before you
-hand-build one (`harness/live/arsenal-nudge.mjs` nudges this at save). Eject a block into its own
-literal layers: `make dev-tool X=add BLOCK= D=`. Tune one layer's motion live: `make tune D= ID=`.
-One page with the frame grid, verify and judge together: `node harness/author/review-server.mjs D=`.
+hand-build one (`harness/live/arsenal-nudge.mjs` nudges this at save).
+
+Eject a block into its own literal layers: `make dev-tool X=add BLOCK= D=`. Tune one layer's motion
+live: `make tune D= ID=`. One page with the frame grid, verify and judge together:
+`node harness/author/review-server.mjs D=`.
 
 Claude Code loads a skill on demand; `make stage`/`make next` name the one the open stage wants and
 print a `read:` line naming its CRAFT doc, for everyone else. Load `vawe-scene-authoring` before
