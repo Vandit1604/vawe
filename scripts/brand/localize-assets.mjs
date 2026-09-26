@@ -178,9 +178,8 @@ function extensionFor(buf, contentType) {
   return null;
 }
 
-// exported so any other caller that needs a verified (magic-byte-checked, never zero-byte) fetch of a
-// site's own media reuses this instead of a second bare-fetch implementation (`make kit` uses it for
-// the logo and favicon; see IMAGERY.md "never a bare curl").
+// exported: the one verified (magic-byte-checked, never zero-byte) fetch, reused wherever a caller
+// needs a site's own media instead of a second bare-fetch implementation.
 export async function download(url, referer) {
   const res = await fetch(url, {
     redirect: 'follow',
