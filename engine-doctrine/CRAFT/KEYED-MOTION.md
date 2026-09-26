@@ -34,6 +34,16 @@ reference and cannot work out why yours drifts while the original snaps.
 | motion blur on fast movers | applies itself above `AUTO_BLUR_FLOOR` (16px/frame) at a gentle `AUTO_SHUTTER` of 0.16. The exemplar author's own hand-picked value. `motionBlur: false` opts out; a number overrides the shutter. |
 | exits faster than entrances | `theme.motion.exitRatio` scales the default exit. Any theme that leaves it unset now gets `exitRatioFromMotion(durationScale)` instead of the old silent `1`; an explicit value, e.g. `themes/higgsfield.json` at `0.45`, still wins. Numbers: engine-doctrine/RULES/ease-direction.md. |
 
+**Grading whether an AUTHORED exit/entrance actually honours the rule above was `quality/gates/choreo.mjs`'s
+`exitEmphasis`/`entranceEmphasis`, a TASTE gate, RETIRED (`engine-doctrine/SAFEGUARDS.md`).** Its
+thresholds, kept as doctrine: an exit reads as emphasised when it is at most `0.6x` (`FAILURE=0.6`) its own
+entrance's duration, OR its ease accelerates (`easeIn*`/`rush`, never `easeInOutX`, which decelerates
+first), OR its measured end speed exceeds its start speed. An entrance reads as settled when its measured
+end speed is lower than its start speed (it decelerates INTO place), graded only when there is a real
+start speed to decelerate from. `0.6` is not a single published number: NN/g and other UI-motion guides
+give a 50%-75% exit:entrance range with no consensus figure; 0.6 sits inside it
+(`engine-doctrine/RESEARCH/TIMING-SOURCES.md` part 6).
+
 **Two more are one line away:** `panWith` (below) and the `typedHook` / `morphButton` blueprints.
 
 **The rest cannot be defaults and pretending otherwise would be dishonest.** Traced timings come from

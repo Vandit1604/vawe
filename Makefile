@@ -9,7 +9,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar claims study-verify recreate ref motion-split studio core-node-boundary waiver-ratchet ingest doctor
+.PHONY: edge-check frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar claims study-verify recreate ref motion-split studio core-node-boundary waiver-ratchet ingest doctor
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -781,35 +781,14 @@ waiver-ratchet: ## [check] the waived-rule debt per code, a number that may only
 # THIS film, plus the arsenal ranked against what the film says it is, then a receipt. It records only
 # with --record: a bare run would otherwise certify the whole library by accident (it did, once, for
 # all 134).
-motion-floor: ## [check] DOES THE FILM EVER STOP: local (content) motion per 0.5s window, ambient reported apart and never counted (D=<film>, needs a render)
-	@node quality/gates/motion-floor.mjs $(D) $(if $(JSON),--json,)
-
-ground-arc: ## [check] does the ground flip white/dark on purpose: pre-render luma sampling, each flip named against its beats and the bg/join schedule that should carry it (D=<film>)
-	@node quality/gates/ground-arc.mjs $(D) $(if $(JSON),--json,)
-
 edge-check: ## [check] does a full-bleed layer stop covering the frame while on screen: pre-render DOM hit-test on the four borders, cause named (camera scale, layer scale, tilt, radius), report only (D=<film>)
 	@node quality/gates/edge-check.mjs $(D) $(if $(JSON),--json,)
-
-# make choreo D=<film.json> [REF=<ref-clip-name>]: per beat, the kinds of motion live at once (scene
-# side from scene-timing, frame side from motion-floor's region reader when a render exists), which
-# elements enter/hold/exit, unplanned exits named by layer id, handoffs found and missing, and REF's
-# own frame-side numbers beside ours. Report only, exit 0.
-choreo: ## [check] HOW THIS FILM CHOREOGRAPHS MOTION: kinds per beat, element lives, handoffs (D=<film>, REF=<ref clip name>)
-	@node quality/gates/choreo.mjs $(D) $(if $(REF),--ref $(REF)) $(if $(JSON),--json,)
 
 # make speed D=<film> [LAYER=<id>]: a READOUT, not a gate. Start/peak/end speed for every motion
 # segment, camera leg and transition, sampled off the engine's own resolved values at the film's fps
 # (motionAt/velocityAt/cameraAt/cameraVelocityAt), plus the ease or handles driving each one.
 speed: ## [check] speed readout: start/peak/end px-per-s (scale/s for zoom) per motion segment, camera leg, transition (D=<film>, LAYER=<id>)
 	@node quality/gates/speed.mjs $(D)
-
-# make motion-lab D=<storyboard.md> VARIANTS=<variants.json>: does a motion change actually raise the
-# local-motion floor, or is it a feeling. Assembles, renders and motion-floors the base storyboard plus
-# every named variant (each one a mutation of the beats' `motion:` lines) THE SAME WAY, one table:
-# moves/beat, dead windows, local median, local peak. `make motion-lab --self-test` (no D=) instead
-# reproduces engine-doctrine/MISTAKES.md #608's A/B/C structural experiment end to end.
-motion-lab: ## [dev] does a motion change raise the local-motion floor: one table over a base + named variants (D=<storyboard.md> VARIANTS=<variants.json>, or SELFTEST=1)
-	@node harness/dev/motion-lab.mjs $(if $(filter 1,$(SELFTEST)),--self-test,$(D) --variants $(VARIANTS)) $(if $(KEEP),--keep,)
 
 frame-check: ## [check] THE PLAN vs THE FRAMES: archetype rotation, one measurable peak, and every size on the kit ramp (D=<film>)
 	@node quality/gates/frame-check.mjs $(D) $(if $(JSON),--json,)
@@ -1266,15 +1245,8 @@ clean: ## [maintenance] remove the built binary and rendered mp4s
 author-check: ## [ship] the whole authoring ladder, every step every time (D=<file> [STRICT=1] [TASTE=1=block on style] [VS=<brand>])
 	node quality/gates/author-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(filter 1,$(TASTE)),--taste) $(if $(VS),--vs $(VS))
 
-# Runs inside author-check every time. Here on its own when you want only this finding.
-direction-floor: ## [check] ambition floor, fail a plain slideshow (too little motion) (D=<file> [STRICT=1])
-	node quality/gates/direction-floor.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
-
 beat-check: ## [check] timeline gate: dead air, empty last frame, empty cut window, dead backdrop (D=<file> [STRICT=1])
 	node quality/gates/beat-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
-
-backdrop-turn: ## [check] REPORTS: does the backdrop change tone anywhere, or hold one preset the whole film (D=scene.json, bare=census)
-	node quality/gates/backdrop-turn.mjs $(D)
 
 # make impeccable D="a.html b.html": the bundled impeccable anti-slop detector on raw HTML fragments
 # (local, no network, token-efficient). the RENDERED-scene twin of this was retired (engine-doctrine/MISTAKES.md #340);
@@ -1344,13 +1316,7 @@ effect-posters: ## [engine] regenerate the /showcase/effects poster stills (site
 globe-dots: ## [engine] re-bake core/globe-dots.js from Natural Earth (SPACING=2.2)
 	node generators/media/globe-dots.mjs $(if $(SPACING),--spacing $(SPACING))
 
-# make pace-check [D=scene.json]: events per second, and the longest stretch where nothing arrives or
-# leaves. No D prints a census across the committed library.
-.PHONY: pace-check
-pace-check: ## [check] events per second, and the longest dead stretch (D=<file>)
-	node quality/gates/pace-check.mjs $(D)
-
-# make pace D=scene.json [TEMPO=0.85]: prints the resulting duration and pace-check numbers with
+# make pace D=scene.json [TEMPO=0.85]: prints the resulting duration and pace numbers with
 # `tempo` overridden to TEMPO, writing nothing. The preview for core/engine/tempo.js.
 .PHONY: pace
 pace: ## [check] preview a scene's duration/pace at a given TEMPO, writes nothing (D=<file> [TEMPO=n])
