@@ -34,7 +34,7 @@
     "category": "motion",
     "stage": "direct",
     "applies": "always",
-    "check": "exit-not-emphasised",
+    "check": null,
     "adapt": null,
     "brief": "An exit also runs faster than its entrance, derived from the theme's pace (`exitRatioFromMotion`, table below), for emphasis.",
     "doc": "engine-doctrine/RULES/ease-direction.md"
@@ -124,7 +124,7 @@
     "category": "motion",
     "stage": "direct",
     "applies": "hasHtml",
-    "check": "static-figure",
+    "check": null,
     "adapt": null,
     "brief": "Animate its children piece by piece with parts (bars grow, then the line draws, then the dots pop), never as one block.",
     "doc": "engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md"

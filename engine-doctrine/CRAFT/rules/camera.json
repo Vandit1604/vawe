@@ -34,7 +34,7 @@
     "category": "camera",
     "stage": "direct",
     "applies": "always",
-    "check": "no-camera",
+    "check": null,
     "adapt": null,
     "brief": "Every film moves the camera at least once: a slowPush or a diveIn is the smallest way to keep the frame alive",
     "doc": "engine-doctrine/CRAFT/KEYED-MOTION.md#5c-the-camera-does-not-sit-still"
@@ -44,9 +44,9 @@
     "category": "camera",
     "stage": "direct",
     "applies": "always",
-    "check": "camera-coverage-floor",
+    "check": null,
     "adapt": null,
-    "brief": "make choreo warns camera-coverage-floor when the resolved legs cover under 40% of a film over 6s long",
+    "brief": "a retired gate used to warn camera-coverage-floor when the resolved legs covered under 40% of a film over 6s long",
     "doc": "engine-doctrine/CRAFT/KEYED-MOTION.md#5c-the-camera-does-not-sit-still"
   },
   {

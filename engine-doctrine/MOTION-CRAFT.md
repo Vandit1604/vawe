@@ -2,7 +2,7 @@
 when: picking a preset, a cut or a sting and you need the mechanics behind it
 answers: "the stored rules of good motion: timing, physics, the gates that enforce each one"
 group: process
-codes: enter-and-retreat, front-loaded, linear-motion, monotone-timing, motion-monotony, profile, shared-start, stagger-total, tempo-flat, uneven-cascade, median-below-reference, sweep-static, dead-window, floor-below-reference, ambient-padding
+codes: enter-and-retreat, linear-motion, monotone-timing, profile, shared-start, stagger-total, tempo-flat, uneven-cascade, sweep-static
 applies-when: always
 confirm: "is the motion hand-keyed with real physics, not a named preset firing once?"
 ---
@@ -187,15 +187,12 @@ move travelling through), never a seam mechanism, however close the seam's name 
 
 ### What checks this
 
-- **`make choreo`** (in progress, built by another agent as this section was written): measures kinds of
-  motion at once, element lives, and handoffs against `example-madera`, extending `motion-floor.mjs` and
-  the scene timing reader. Not yet runnable; this doc names the doctrine ahead of the gate on purpose.
-- **`quality/gates/motion-floor.mjs`**: local motion holes over time, and the `ambient-padding` finding
-  above.
 - **`harness/author/motion-director.mjs`**: `enter-and-retreat`, `linear-motion`, `monotone-timing`
   (see the AGENT SUMMARY and codes list at the top of this file).
-- **`quality/gates/eye-trace.mjs`**: where the eye lands at a cut, Murch's rule already cited in
-  [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md).
+- **`choreo.mjs`, `motion-floor.mjs`, `eye-trace.mjs`**: measured kinds of motion at once, element lives,
+  handoffs, local motion holes over time, and where the eye lands at a cut (Murch's rule, cited in
+  [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md)). All three were TASTE gates and are RETIRED
+  (`engine-doctrine/SAFEGUARDS.md`); a human/agent judge applies this doctrine by eye now.
 
 ## Speed dials: the numbers, in one place
 
@@ -576,7 +573,7 @@ dissolve. It prints a report; `WRITE=1` applies the picks → `<file>.directed.j
 
 ## Does the film ever stop (the motion floor, RETIRED gate, live doctrine)
 
-`quality/gates/motion-floor.mjs` and its companion `jolt-check.mjs` were TASTE gates (measuring HOW a
+`motion-floor.mjs` and its companion `jolt-check.mjs` were TASTE gates (measuring HOW a
 film moves, not whether it was broken: `engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE") and were
 deleted rather than kept report-only. The measurement they made is real and worth judging a film against
 by eye, so it stays here as doctrine.

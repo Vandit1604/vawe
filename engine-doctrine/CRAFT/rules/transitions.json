@@ -4,7 +4,7 @@
   "category": "transitions",
   "stage": "direct",
   "applies": "always",
-  "check": "no-transition",
+  "check": null,
   "adapt": null,
   "brief": "Default to a hard cut; earn ONE primary transition for ~60-70% of cuts plus 1-2 bolder accents reserved for the payoff",
   "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#agent-summary"
@@ -54,7 +54,7 @@
   "category": "transitions",
   "stage": "direct",
   "applies": "hasBoundaries",
-  "check": "flat-seams",
+  "check": null,
   "adapt": null,
   "brief": "make direct warns (flat-seams) when a film has two or more boundaries and every one rides a gentle curve with no speed ramp anywhere",
   "doc": "engine-doctrine/CRAFT/TRANSITIONS.md#speed-is-the-anti-repetition-lever"

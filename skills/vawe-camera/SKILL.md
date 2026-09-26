@@ -1,7 +1,7 @@
 ---
 name: vawe-camera
 description: "Camera moves for a vawe scene: slowPush, diveIn, travel, truck, panFollow, workspaceZoomOut, orbit, multiPhase, plus depth parallax via the plane modifier. Load while authoring a scene JSON when a beat should move the viewer through space, or when the camera itself should be the transition."
-codes: no-camera
+codes: []
 stage: direct
 effort: low
 ---
@@ -25,16 +25,17 @@ generator emits interior `ease:"linear"` automatically for a velocity-continuous
 **Legs must chain back to back over the film, not just at the start.** A recipe's own camera leg (e.g.
 `window-dolly`) JOINS whatever hand-authored `cameraMove` legs the film already has; it does not
 replace covering the rest of the film. A film with legs only in its opening seconds holds still (at the
-last leg's pose) for everything after. `make choreo` warns (`camera-coverage-floor`) when the resolved
-legs cover under 40% of a film over 6s long.
+last leg's pose) for everything after. A retired gate used to warn (`camera-coverage-floor`) when the
+resolved legs covered under 40% of a film over 6s long; watch for it by eye now.
 
 **A move HOLDS its end pose, forever, until another move changes it.** `cameraAt` holds the last
 keyframe past its own window; nothing resets the camera at a cut, a recipe seam, or the film's own end.
 A `diveIn` to `to:1.6` at 1s-2.6s is still at scale 1.6 at 10s if nothing says otherwise. To return to
 the normal frame, author the return as its own leg: `{"move":"slowPush","to":1}` (or any move ending
 `to:1` with no `tx`/`ty`), or, off a `window-dolly` recipe, a later one naming `zoomTo:1`.
-`make storyboard-check` and `make choreo` both warn (never block) when a later beat plans the
-normal/full-frame camera while an earlier push is still open.
+`make storyboard-check` warns (never blocks) when a later beat plans the normal/full-frame camera while
+an earlier push is still open. (A retired `choreo` gate used to warn on this too; it was a TASTE gate,
+`engine-doctrine/SAFEGUARDS.md`.)
 
 ## Where to look next
 

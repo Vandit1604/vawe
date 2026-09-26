@@ -2,7 +2,7 @@
 when: it "reads amateur" though every layer renders fine
 answers: "the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it"
 group: crosscutting
-codes: pace, pace-not-chosen, pace-not-kept, pacing, archetype-repeat, feature-poverty, library-top5-only, no-peak, sparse-beats, uniform-cadence, preset-monotony, never-adopted, similarity-same, similarity-close, eye-missing, eye-unresolved, eye-device-untargeted, eye-competing-focal-points, ground-flash
+codes: pace-not-chosen, pace-not-kept, pacing, archetype-repeat, no-peak, preset-monotony, never-adopted, similarity-same, similarity-close, eye-missing, eye-unresolved, eye-device-untargeted, eye-competing-focal-points
 applies-when: always
 confirm: "where is the restraint, and what does the spectacle beat earn against it?"
 ---
@@ -37,9 +37,9 @@ Every rule is tagged:
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
 > `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
-> undirected; the **ambition floor** (`make direction-floor`) is the floor, too plain, a slideshow, and
-> its hardest checks (`no-continuous-object` among them) block on every `make author-check` run, not only
-> under `TASTE=1`. A directed video sits between them.
+> undirected; the **ambition floor** (a retired gate, doctrine below) was the floor, too plain, a
+> slideshow, and its hardest checks (`no-continuous-object` among them) used to block on every
+> `make author-check` run, not only under `TASTE=1`. A directed video sits between them.
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
@@ -100,10 +100,11 @@ The plan has to say where each device points, or the device is a guess wearing a
   destination is wallpaper; a colour flash that walks in reading order to the key word is direction. The
   test is the same one §3 already applies to a layer's motion: say out loud what the colour is FOR, in
   one clause. "It walks the eye to launch film" passes. "It's on-brand" does not.
-- **Measured, not asserted.** `quality/gates/eye-trace.mjs` scores where the eye actually is at a cut
-  (Murch's Rule of Six, §2 above, the 7% eye-trace term); `make choreo` reports, per beat, where the
-  measured primary motion region ends against what the plan's `eye:` line said would be there. Neither
-  one invents a number: both read the frame or the render, never a guess.
+- **Measured, not asserted, when a human/agent judge does the measuring.** Where the eye actually is at a
+  cut (Murch's Rule of Six, §2 above, the 7% eye-trace term) and where the measured primary motion region
+  ends against what the plan's `eye:` line said would be there were both gate-scored once
+  (`eye-trace.mjs`, `choreo.mjs`); both were TASTE gates and are retired (`engine-doctrine/SAFEGUARDS.md`).
+  Read the frame or the render, never guess.
 
 Storyboard grammar: a film names its whole journey once, `attention:` in the frontmatter (one sentence:
 the path the eye travels across the film); a beat names its own leg, `eye: <where it starts> -> <what
@@ -122,8 +123,8 @@ variety below; footage and the audio bed keep their own native rate regardless o
 - **The Rule of Six**. A cut serves, in priority: **emotion (51%) · story (23%) · rhythm (10%) ·
   eye-trace (7%) · screen plane (5%) · spatial continuity (4%)**. Emotion dominates; spatial logic is
   nearly worthless. → Cut/transition to serve the feeling and the beat first. When a move and the
-  meaning fight, keep the meaning. `[eye]` The 7% item is now MEASURED, and only reported, see
-  [`EYE-TRACE.md`](EYE-TRACE.md) and `node quality/gates/eye-trace.mjs <scene.json>`.
+  meaning fight, keep the meaning. `[eye]` The 7% item was MEASURED, report-only, by a since-retired
+  gate; see [`EYE-TRACE.md`](EYE-TRACE.md) for the doctrine a judge now applies by hand.
 - **Cut on motion / the blink**: the eye accepts a cut on a movement or a natural attention-blink. →
   Change beats on an action (a word lands, a count finishes), never in a dead hold. `[eye]`
 - **Rhythm variety**: uniform beat lengths deaden. → Alternate short punchy beats (0.8-1.5s) with
@@ -283,7 +284,7 @@ its median: the aim is to catch a film that is asleep, not to make every film mo
 fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
 verdict and exits 0.
 
-## The ambition floor: neither soup nor slideshow (`quality/gates/direction-floor.mjs`, RETIRED)
+## The ambition floor: neither soup nor slideshow (`direction-floor.mjs`, RETIRED)
 
 **RETIRED 2026-09, not demoted.** `direction-floor.mjs` was a TASTE gate under the OBJECTIVE/TASTE split
 (`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a film moves, never whether it was
@@ -324,10 +325,13 @@ product film, a process shown end to end, or a demo where the UI is the subject.
 anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
 
 What it measures: one content layer that both spans a cut and CHANGES across it. Pose either side of the
-boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing. A
-layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
+boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing.
+
+A layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
 failure out of something it cannot see. A layer the engine confines to its own beat is not a candidate at
-all (see `beats-wrapped-as-units` below). **Used to block when the gate ran; no gate runs it now.**
+all (see `beats-wrapped-as-units` below).
+
+**Used to block when the gate ran; no gate runs it now.**
 
 `no-continuous-object-inferred` was the same test where the author declared no cuts at all. An island
 boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and the

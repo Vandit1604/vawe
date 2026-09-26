@@ -2,17 +2,18 @@
 when: a cut moves the subject across the frame
 answers: "where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports"
 group: look
-codes: eye-trace, camera-aimed-at-nothing
+codes: camera-aimed-at-nothing
 ---
 
 # Eye-trace: where the viewer is looking when you cut
 
-**`quality/gates/eye-trace.mjs` is RETIRED, not demoted.** It was a TASTE gate under the OBJECTIVE/TASTE
+**`eye-trace.mjs` is RETIRED, not demoted.** It was a TASTE gate under the OBJECTIVE/TASTE
 split (`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a cut reads to the eye, never
-whether a film was broken, so it was deleted rather than kept report-only. Everything below is the doctrine
-it measured, for a human or an agent judge to hold a cut to by eye now. `camera-aimed-at-nothing`
-(`quality/gates/beat-check.mjs`, a live OBJECTIVE check) is unaffected: it fires when the camera has
-travelled off content that is still alive, a different, still-enforced fact.
+whether a film was broken, so it was deleted rather than kept report-only.
+
+Everything below is the doctrine it measured, for a human or an agent judge to hold a cut to by eye now.
+`camera-aimed-at-nothing` (`quality/gates/beat-check.mjs`, a live OBJECTIVE check) is unaffected: it fires
+when the camera has travelled off content that is still alive, a different, still-enforced fact.
 
 ## AGENT SUMMARY
 
@@ -27,10 +28,13 @@ the bottom**: a cut that serves the story is allowed to cost the eye a journey. 
 It prints a number and stops nobody. A gate that blocked on the 7% item would make it the one thing a
 film cannot spend, which inverts the ranking it came from.
 
-```bash
-node quality/gates/eye-trace.mjs films/scene/<topic>.json     # one film
-node quality/gates/eye-trace.mjs --selftest                     # the scorer's own fixtures
-node quality/gates/eye-trace.mjs --census [--worst]             # the whole library
+The commands below no longer run (the gate is deleted); read them as the shape the retired tool took,
+not as something to type:
+
+```
+node <the retired gate> films/scene/<topic>.json     # one film
+node <the retired gate> --selftest                     # the scorer's own fixtures
+node <the retired gate> --census [--worst]             # the whole library
 ```
 
 ## The rule, in one sentence
