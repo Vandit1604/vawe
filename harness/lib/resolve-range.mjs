@@ -1,12 +1,3 @@
-// harness/lib/resolve-range.mjs: turn `make dev BEAT=<n|name>` or `JOIN=<n>` into a film-time
-// (post-tempo) --from/--to window for the renderer's --from/--to flags.
-//
-// The storyboard's beat times are AUTHORED time: whatever a human wrote in the heading or `duration:`
-// field, before `tempo` (core/engine/tempo.js) stretches or compresses the film. The renderer only
-// understands final film time, because that is the clock scene.Capture's meta.Duration is in (tempo
-// resolves at expand, before the browser ever sees the scene: internal/render/render.go's
-// expandSugar). So this file does the one thing tempo.js does to a `start`/`duration` field, scaling by
-// 1/tempo and snapping to the frame grid, and nothing else: it is a reader, not a second tempo engine.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -44,7 +35,6 @@ function findBeat(beats, ref) {
   return hit;
 }
 
-// clampRange: pad a resolved instant into a window, clamped to [0, film duration].
 function clampRange(center0, center1, pad, duration) {
   const from = Math.max(0, center0 - pad);
   const to = Math.min(duration, center1 + pad);

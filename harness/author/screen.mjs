@@ -1,14 +1,3 @@
-// screen.mjs: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [THEME=] [INVENT=1] [REF=<ref> ACT=<n>] [W=1920 H=1080]`
-//
-// ONE command for the design route of a product screen (engine-doctrine/CRAFT/SCREENS.md, owner ruling in
-// .claude/plans/content-richness.plan.md Update 1: "use a ui design harness to build beautiful mocks,
-// not plain by default"). The owner: "why two? not single one". If F does not exist, KIND writes the
-// starting fragment first (folded in from the old `screen-new` target, now gone); then it always
-// renders, detects and measures. If F exists and KIND is given, refuses rather than overwrite an
-// authored screen.
-//
-//   node harness/author/screen.mjs films/scene/vawe-flow-editor.html --theme vawe --ref example-madera --act 1
-//   node harness/author/screen.mjs films/scene/new-screen.html --kind grid --theme vawe   # writes it first
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -22,18 +11,10 @@ import { expandThemeFile } from '../lib/theme-load.mjs';
 import { adaptFinding } from '../lib/safeguards.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-// exported so ideate-ask.mjs can offer these as the real "designed screen" routes, never a second
-// hardcoded copy of this list.
+// exported so ideate-ask.mjs can offer these as the real designed-screen routes, never a second hardcoded copy of this list.
 export const KINDS = ['editor', 'grid', 'dashboard', 'chat', 'card'];
 
-// ---------------------------------------------------------------------------
-// WRITE: a video-ready starting fragment (folded in from the old screen-new.mjs, no make target of its
-// own any more, called only from here when F does not exist yet). Theme tokens only, display-size
-// type, a layout that fills most of the frame, real image slots marked so they cannot render unfilled.
-// ---------------------------------------------------------------------------
 const BODIES = {
-  // an agent chat/editor: the typed prompt IS the product, so it is the one focal element, large,
-  // vertically centred, with a quiet chrome dock below it (never a full toolbar mock, that is decoration).
   editor: () => `<div class="kit-root kit-ground-ink" style="position:absolute;inset:0">
   <div class="kit-stage" style="display:flex;flex-direction:column;justify-content:center;gap:var(--kit-space-5)">
     <p class="kit-eyebrow" style="color:var(--dim)">PROMPT</p>
@@ -44,9 +25,6 @@ const BODIES = {
     </div>
   </div>
 </div>`,
-  // a product results grid: photos, not swatches. One tile leads, the rest follow, asymmetric per
-  // AGENTS.md's "asymmetry and scale contrast are defaults". Kept WELL inside the margin: a grid that
-  // touches the frame edge is exactly the clipping bug `make screen` now catches.
   grid: () => `<div class="kit-root" style="position:absolute;inset:0">
   <div class="kit-stage" style="display:grid;grid-template-rows:auto 1fr;gap:var(--kit-space-4);padding:var(--kit-space-4) 0">
     <p class="kit-body">Your films</p>
@@ -95,11 +73,6 @@ function writeStartingFragment(fragPath, kind, themeName, invent) {
   let themeFile = path.join(ROOT, 'themes', `${themeName}.json`);
   if (!fs.existsSync(themeFile)) {
     if (!invent) throw new Error(`no theme "${themeName}", themes/${themeName}.json does not exist. Pass THEME=<real name>, or INVENT=1 to seed a new one.`);
-    // Owner ruling (content-richness.plan.md, Update 1): a prompt with no brand and no reference means
-    // INVENT a beautiful theme, through impeccable's own palette seed, never a default grey. palette.mjs
-    // prints a seed colour + mood in prose, deliberately: composing the other five roles is a judgement
-    // call against the brief, not a mechanical fill (its own header comment). So this prints the seed
-    // and stops, rather than fabricating a full theme from a hue nobody chose.
     const name = path.basename(fragPath, path.extname(fragPath));
     const invented = path.join(ROOT, 'themes', `${name}-invented.json`);
     const r = spawnSync('node', [path.join(ROOT, 'skills/impeccable/scripts/palette.mjs'), '--from', name], { encoding: 'utf8' });
@@ -119,11 +92,6 @@ function writeStartingFragment(fragPath, kind, themeName, invent) {
   return true;
 }
 
-// A source-only stand-in for `maskedByDesign`/`clipsByDesign` (quality/audit.mjs:220,648): no DOM
-// here, only the fragment's own markup, so "is this element a screenshot/mock-UI wrapper" is answered
-// by the same two markers those checks already use: the `hs-img-wrap` class (an image-backed capture,
-// audit.mjs:711 walks `.hs-img-wrap > img`) and `data-ink="off"` (audit.mjs:183, "in the DOM on purpose
-// and never on screen"). Returns the [start,end) ranges of every such element's outer markup.
 function wrapperRanges(html) {
   const ranges = [];
   const openRe = /<([a-zA-Z][a-zA-Z0-9-]*)\b([^>]*)>/g;
@@ -151,10 +119,7 @@ function wrapperRanges(html) {
 }
 const inWrapper = (ranges, idx) => ranges.some(([a, b]) => idx >= a && idx < b);
 
-// ---------------------------------------------------------------------------
-// VIDEO-READINESS (source-only): what a fragment's own markup can prove, without a render. Exported
-// and pure so it is unit-testable on a string (quality/gates/screen-readiness.test.mjs).
-// ---------------------------------------------------------------------------
+// readiness(source): source-only, no render; pure and exported so it's unit-testable on a string (quality/gates/screen-readiness.test.mjs).
 export function readiness(source) {
   const kit = extractKitBlock(source);
   const own = kit ? source.replace(kit, '') : source;
@@ -170,9 +135,6 @@ export function readiness(source) {
   const inlineRe = /font-size:\s*(\d+)px/g;
   while ((m = inlineRe.exec(own))) sizes.push({ px: parseInt(m[1], 10), at: m.index });
 
-  // MIN_VIDEO_TEXT_PX only floors text the VIEWER reads as the kit's own type. A captured screenshot
-  // or a hand-marked decorative block carries type it never wrote (a real product's UI, a caption
-  // nobody sees): the registry, not this file, decides whether that skip is warranted.
   const adaptedLines = [];
   const kept = sizes.filter((s) => {
     if (s.px >= MIN_VIDEO_TEXT_PX) return true;
@@ -199,19 +161,13 @@ export function readiness(source) {
   return { smallest, elementCount, tokenUses, rawColorUses, images, hasRealImage: images.some((i) => i.ok), adaptedLines };
 }
 
-// The smallest text the browser actually laid out. The source parse above cannot see the cascade: a
-// `font:` shorthand, or an inline size overriding a kit class, reads wrong there and right here.
+// smallestRendered: the smallest text the browser actually laid out; the source parse can't see cascade overrides like a `font:` shorthand or an inline size beating a kit class.
 export function smallestRendered(boxes) {
   const px = (boxes || []).map((b) => b.fontPx).filter((n) => Number.isFinite(n) && n > 0);
   return px.length ? Math.min(...px) : null;
 }
 
-// ---------------------------------------------------------------------------
-// CLIPPING (rendered): a static parse cannot see a percentage width, a grid track, or an object-fit
-// crop resolve; only the LAID-OUT page can. Every element's real bounding box, from
-// preview-fragment.mjs's `--boxes-out`, against the 1920x1080 frame and the safe margin
-// (core/layout/safe.js MARGIN, 0.06 of the short edge).
-// ---------------------------------------------------------------------------
+// clipping(): rendered-only (a static parse can't see a % width, a grid track, or an object-fit crop); boxes come from preview-fragment.mjs's `--boxes-out`, checked against the 1920x1080 frame and core/layout/safe.js MARGIN (0.06 of the short edge).
 export function clipping(boxes, w = 1920, h = 1080) {
   const margin = Math.round(Math.min(w, h) * MARGIN);
   const safe = { x0: margin, y0: margin, x1: w - margin, y1: h - margin };
@@ -266,11 +222,6 @@ function main() {
 
   console.log(`\n▶ make screen  ${path.relative(ROOT, frag)}  (theme ${theme})\n`);
 
-  // (a) render standalone, at film size, through the EXISTING preview path. Never a second renderer:
-  // `make preview`'s own script (harness/author/preview-fragment.mjs) already serves the repo, applies
-  // the real theme, screenshots 1920x1080, and (with --boxes-out) dumps the laid-out element boxes the
-  // clipping check below needs. `--no-detect` here because step (b) runs impeccable's own CLI detector
-  // directly on the source; running the browser engine too would print the same family of finding twice.
   const png = `/tmp/screen-${path.basename(frag, path.extname(frag))}.png`;
   const boxesFile = `/tmp/screen-${path.basename(frag, path.extname(frag))}.boxes.json`;
   const raw = fs.readFileSync(frag, 'utf8');
@@ -295,8 +246,6 @@ function main() {
     }
   }
 
-  // (b) impeccable's bundled detector, over the fragment's SOURCE. Its own CLI entry point
-  // (skills/impeccable/scripts/detect.mjs), the static-HTML engine: no browser needed.
   console.log('\n· impeccable v3.5.0 (vendored third-party, Apache 2.0) ·');
   const det = spawnSync('node', [path.join(ROOT, 'skills/impeccable/scripts/detect.mjs'), '--json', frag], { encoding: 'utf8', cwd: ROOT });
   if (det.status !== 0 && !det.stdout) {
@@ -308,8 +257,6 @@ function main() {
     else for (const f of findings) console.log(`  [${f.antipattern}] ${String(f.snippet || '').slice(0, 100)}\n    → ${f.description}`);
   }
 
-  // (c) content measurement, harness/media/content.mjs's own contract: decode the PNG the same way
-  // measureVideo decodes an mp4 frame, so a fragment and a reference read on the SAME instrument.
   function measurePng(file, W = 480, H = 270) {
     const r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-frames:v', '1',
       '-vf', `scale=${W}:${H}:flags=area`, '-pix_fmt', 'rgb24', '-f', 'rawvideo', '-'], { maxBuffer: W * H * 3 + 1024 });
@@ -365,7 +312,6 @@ function main() {
     console.log(`\n  ⚠ REF=${ref} given with no ACT=<n>, skipping the comparison.`);
   }
 
-  // (d) VIDEO-READINESS (source) + CLIPPING (rendered)
   const r = readiness(raw);
   console.log(`\n· video readiness ·`);
   const rs = boxes ? smallestRendered(boxes) : null;
@@ -391,12 +337,7 @@ function main() {
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
 
-// clipAgainstBox(boxes, box) -> the same shape of finding as clipping(), but against an arbitrary
-// {x,y,w,h} rather than the canvas + its safe margin. A LAYER's box has no margin of its own: whatever
-// margin placed the box against the canvas already happened in resolveCoords, so a fragment's job is
-// just to fit the box it was given. Used to check a fragment at its REAL assembled layer box (build
-// fix 7: make screen/make preview used to check only the full 1920x1080 canvas, so a fragment could
-// pass standalone and still clip once the film placed it in a smaller box).
+// clipAgainstBox(boxes, box): same finding shape as clipping() but against an arbitrary {x,y,w,h}, not the canvas margin (build fix 7: `make screen`/`make preview` used to check only the full canvas, so a fragment could pass standalone and clip once placed in a smaller box).
 export function clipAgainstBox(boxes, box) {
   const x0 = box.x, y0 = box.y, x1 = box.x + box.w, y1 = box.y + box.h;
   const findings = [];

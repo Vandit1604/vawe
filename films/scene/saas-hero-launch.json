@@ -364,34 +364,48 @@
       "critical": true
     },
     {
-      "type": "block",
-      "block": "logoWall",
+      "type": "group",
       "x": 150,
       "y": 520,
       "w": 1620,
-      "cols": 3,
-      "logos": [
+      "layout": "column",
+      "items": "stretch",
+      "gap": 12,
+      "anim": "rise",
+      "enterDur": 0.5,
+      "exitDur": 0.35,
+      "children": [
         {
-          "text": "Northwind"
+          "type": "group",
+          "layout": "row",
+          "gap": 12,
+          "items": "stretch",
+          "children": [
+            { "type": "group", "grow": 1, "bg": "var(--card)", "radius": 14, "border": "1px solid var(--line)", "pad": "24px 0", "layout": "row", "justify": "center", "items": "center",
+              "children": [{ "type": "text", "text": "Northwind", "size": 24, "weight": 700, "color": "var(--text-2)", "ls": "-0.02em" }] },
+            { "type": "group", "grow": 1, "bg": "var(--card)", "radius": 14, "border": "1px solid var(--line)", "pad": "24px 0", "layout": "row", "justify": "center", "items": "center",
+              "children": [{ "type": "text", "text": "Kite Studio", "size": 24, "weight": 700, "color": "var(--text-2)", "ls": "-0.02em" }] },
+            { "type": "group", "grow": 1, "bg": "var(--card)", "radius": 14, "border": "1px solid var(--line)", "pad": "24px 0", "layout": "row", "justify": "center", "items": "center",
+              "children": [{ "type": "text", "text": "Fieldwork", "size": 24, "weight": 700, "color": "var(--text-2)", "ls": "-0.02em" }] }
+          ]
         },
         {
-          "text": "Kite Studio"
-        },
-        {
-          "text": "Fieldwork"
-        },
-        {
-          "text": "Atlas Type"
-        },
-        {
-          "text": "Orbit Labs"
-        },
-        {
-          "text": "Rowan & Co"
+          "type": "group",
+          "layout": "row",
+          "gap": 12,
+          "items": "stretch",
+          "children": [
+            { "type": "group", "grow": 1, "bg": "var(--card)", "radius": 14, "border": "1px solid var(--line)", "pad": "24px 0", "layout": "row", "justify": "center", "items": "center",
+              "children": [{ "type": "text", "text": "Atlas Type", "size": 24, "weight": 700, "color": "var(--text-2)", "ls": "-0.02em" }] },
+            { "type": "group", "grow": 1, "bg": "var(--card)", "radius": 14, "border": "1px solid var(--line)", "pad": "24px 0", "layout": "row", "justify": "center", "items": "center",
+              "children": [{ "type": "text", "text": "Orbit Labs", "size": 24, "weight": 700, "color": "var(--text-2)", "ls": "-0.02em" }] },
+            { "type": "group", "grow": 1, "bg": "var(--card)", "radius": 14, "border": "1px solid var(--line)", "pad": "24px 0", "layout": "row", "justify": "center", "items": "center",
+              "children": [{ "type": "text", "text": "Rowan & Co", "size": 24, "weight": 700, "color": "var(--text-2)", "ls": "-0.02em" }] }
+          ]
         }
       ],
       "start": 8.5,
-      "dur": 4.65
+      "duration": 4.65
     },
     {
       "type": "text",

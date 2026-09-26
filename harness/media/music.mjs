@@ -1,19 +1,3 @@
-// music.mjs: fetch a real soundtrack for a launch video, and record where it came from.
-//
-//   node harness/media/music.mjs ambient 0 calm      genre, rank, local name
-//   node harness/media/music.mjs --id 738 calm       a specific Mixkit track id
-//   make music GENRE=ambient N=0 NAME=calm
-//
-// LICENSING, read this before shipping a video publicly. Tracks come from Mixkit's free stock music
-// under the "Mixkit Stock Music Free License", which is a DIFFERENT licence from the Sound Effects
-// Free License this repo already uses for assets/sfx. That music licence is rendered client-side on
-// mixkit.co/license and could not be read programmatically here, so it has NOT been verified by this
-// tool. What this script does instead is make the provenance impossible to lose:
-//   • every download is recorded in assets/music/credits.json with its source and licence page
-//   • assets/music/ is gitignored, so the repo never REDISTRIBUTES a track, the main licence risk
-//   • the track is fetched on demand, exactly like fonts and sfx
-// Confirm the licence yourself before publishing commercially, or drop in your own file at the same
-// path. Nothing downstream cares where the wav came from.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -26,10 +10,6 @@ fs.mkdirSync(DEST, { recursive: true });
 const UA = { 'User-Agent': 'Mozilla/5.0 (vawe music fetcher)' };
 const LICENCE = 'https://mixkit.co/license/#musicFree';
 
-// The curated pack: the real beat-driven loops the engine ships as the DEFAULT sound (replacing the
-// synthesized drone the `warm`/`calm`/`tense` beds used to auto-select). `make music-pack` fetches
-// all of them; core/audio-select.js maps the music profiles onto these files. Each row is a fixed
-// (genre-slug, rank) so the same track downloads every time. Page order is Mixkit's own ranking.
 const PACK = [
   { name: 'lofi',  genre: 'lo-fi-beats', rank: 0 }, // calm, jazzy, the premium mid-energy bed
   { name: 'chill', genre: 'chillout',    rank: 0 }, // brighter, bouncier, sunny/major-key moods
@@ -49,7 +29,6 @@ async function idsForGenre(g) {
   return [...new Set(ids)]; // page order = Mixkit's own ranking
 }
 
-// fetchTrack: download one track (by genre+rank or explicit id) → 44.1k mono WAV + a credits row.
 async function fetchTrack({ genre, rank = 0, id = null, name }) {
   let trackId = id;
   if (!trackId) {
@@ -65,7 +44,6 @@ async function fetchTrack({ genre, rank = 0, id = null, name }) {
   if (buf.length < 20000) throw new Error(`track ${trackId} came back too small (${buf.length}b), not audio`);
   fs.writeFileSync(mp3, buf);
 
-  // The Go mixer reads WAV. Decode to 44.1k mono so beat detection and mixing share one representation.
   execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', mp3, '-ac', '1', '-ar', '44100', wav]);
   const dur = +execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wav]).toString().trim();
 

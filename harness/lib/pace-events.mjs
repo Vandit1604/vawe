@@ -1,7 +1,4 @@
-// harness/lib/pace-events.mjs: the one place that decides what an EVENT is (a layer arriving or
-// leaving, or a cut) and the longest gap between events. quality/gates/pace-check.mjs (the graded
-// floor/hold-cap gate) and quality/gates/pace.mjs (the tempo-preview instrument, no pass/fail) used to
-// each keep their own verbatim copy of this walk; pulled out here so there is exactly one.
+// The one place that decides what an EVENT is (a layer arriving or leaving, or a cut) and the longest gap between events; quality/gates/pace-check.mjs and quality/gates/pace.mjs both read this rather than each walking it themselves.
 export function measureEvents(d) {
   if (!d.layers || !d.duration) return null;
   const ev = new Set();
@@ -14,13 +11,9 @@ export function measureEvents(d) {
   for (const c of d.cuts || []) ev.add(c.t);
   for (const s of d.stings || []) ev.add(s.t);
   const t = [...ev].filter((x) => x >= 0 && x <= d.duration).sort((a, b) => a - b);
-  // The longest stretch where nothing enters or leaves, INCLUDING the head and the tail: a film that
-  // opens on four seconds of held frame is slow in exactly the way this is looking for.
   let hold = t.length ? t[0] : d.duration, at = 0;
   for (let i = 1; i < t.length; i++) if (t[i] - t[i - 1] > hold) { hold = t[i] - t[i - 1]; at = t[i - 1]; }
   if (t.length && d.duration - t[t.length - 1] > hold) { hold = d.duration - t[t.length - 1]; at = t[t.length - 1]; }
-  // A film SAYS something. A backdrop or a determinism fixture has no copy and is meant to be still, so
-  // it is measured and reported and never failed.
   const copy = JSON.stringify(d.layers).match(/"text"\s*:/g)?.length ?? 0;
   return { dur: d.duration, eps: t.length / d.duration, events: t.length, hold, at, copy, allow: d.authoring?.allow || [] };
 }

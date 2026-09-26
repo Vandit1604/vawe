@@ -1,20 +1,4 @@
-// harness/lib/safeguards.mjs: the shared mechanism behind "safeguards should be documented but the
-// harness should understand things and tweak" (.claude/plans/adaptive-safeguards.plan.md).
-//
-// A guard keeps its measurement and its documented intent; only the VERDICT changes. Before a finding
-// fails a film, this registry asks whether the film's own context already explains it, and if so
-// clamps, tolerates, reclassifies or skips it instead of failing, always naming what it did and why in
-// one printable line. A code with no entry here passes through unchanged: this file only ever SOFTENS
-// a verdict an entry explicitly owns, never invents a new failure.
-//
-// engine-doctrine/SAFEGUARDS.md is the index (code, file:line, intent, doc, adaptive behaviour). This file is the
-// mechanism; the doc is the map.
 
-// Registry, keyed by finding `kind` (the same string every gate already reports under). Each entry:
-//   intent: one line, copied from the guard's own comment: what the guard is FOR.
-//   doc: the doc that owns that intent.
-//   applies(finding, ctx): does this finding carry the facts this entry needs to judge it?
-//   adapt(finding, ctx): called only when applies() is true; returns the verdict.
 const REGISTRY = {
   overflow: {
     intent: 'text clipped (scrollW/H > clientW/H) is a HARD fail: content the viewer cannot read.',
@@ -69,9 +53,6 @@ const REGISTRY = {
     doc: 'engine-doctrine/CRAFT/DIRECTION.md',
     applies: (f, ctx) => typeof (ctx && ctx.durationSec) === 'number',
     adapt: (f, ctx) => {
-      // No external source on a minimum runtime for "expects a feature count"; already the least risky
-      // Group A constant, since `adapt` below returns 'skip' (never a hard fail) under this floor, so
-      // it already behaves as a report rather than a bar. engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6.
       const SHORT_FILM_FLOOR_SEC = 12;
       if (ctx.durationSec < SHORT_FILM_FLOOR_SEC) {
         return { verdict: 'skip', value: ctx.durationSec,
@@ -131,10 +112,7 @@ const REGISTRY = {
   },
 };
 
-// adaptFinding(finding, ctx) -> finding, unchanged for a code with no entry or one that does not
-// apply, or the same finding carrying `.adapted = { verdict, value, line }` when a registry entry
-// judged it. ctx = { scene, storyboard beats, layer, element facts } as the film supplies them; entries
-// read only the ctx keys they need.
+// adaptFinding(finding, ctx) -> finding, unchanged for a code with no entry or one that does not apply, or the same finding carrying `.adapted = { verdict, value, line }` when a registry entry judged it; ctx = { scene, storyboard beats, layer, element facts } as the film supplies them.
 export function adaptFinding(finding, ctx = {}) {
   const entry = REGISTRY[finding.kind];
   if (!entry || !entry.applies(finding, ctx)) return finding;

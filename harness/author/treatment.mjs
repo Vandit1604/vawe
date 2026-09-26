@@ -1,22 +1,3 @@
-// harness/author/treatment.mjs: WHY THIS FILM LOOKS LIKE THIS, written down while the answer is known.
-//
-// Stage 4 of the studio pipeline, and the one this repo had no version of. Rationale existed at two
-// scales and neither was the film: `assets/brands/<brand>/house-style.md` is the BRAND's read, and a
-// scene's `authoring._why` justifies a gate waiver. Nothing recorded the argument for the film itself.
-//
-// WHY IT HAS TO BE WRITTEN NOW. A treatment's real content is not what was chosen, it is what was
-// TURNED DOWN and on what grounds. That information exists for exactly one moment, while the concept
-// set is still on the table, and is gone a week later, when all anybody remembers is the film they
-// made. harness/author/concept.mjs records the rejected directions with their arguments into a receipt
-// for precisely this reason, and this stage reads it back.
-//
-// THE SPLIT, mirroring scripts/brand/house-style.mjs because it works: a MEASURED block that is
-// regenerated from the storyboard, the theme and the concept receipt, and JUDGMENT slots that a tool
-// has no business filling. Regenerating never touches what you wrote. What a machine can count, it
-// counts; what needs an opinion is marked `<…>` and left alone.
-//
-//   node harness/author/treatment.mjs <STORYBOARD.md> [--theme <name>]
-//   make treatment SB=<storyboard.md>
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseStoryboard } from './storyboard-parse.mjs';
@@ -50,8 +31,6 @@ for (const p of [`themes/${themeName}.json`, `directions/${themeName}.json`]) {
 const C = theme?.colors || theme?.base || {};
 const F = theme?.fonts || theme?.type || {};
 
-// Pictures vs claims: the show-don't-tell question, asked of the PLAN rather than the render, where it
-// is still free to answer. A beat naming no picture is a beat currently planned as pure type.
 const noPicture = sb.beats.filter((b) => !strip(b.picture)).length;
 
 const measured = [
@@ -99,9 +78,6 @@ ${rejected ? `## What was turned down\n\n${rejected}\n` : ''}
 <the failure mode to steer away from: the generic version of this film. See engine-doctrine/CRAFT/TASTE-RULES.md.>
 `;
 
-// ── regenerate without destroying prose ────────────────────────────────────────────────────────────
-// Only the MEASURED block is replaced on a rerun. A tool that overwrites what a human wrote is one they
-// run once and then avoid, which is how a rationale document goes stale and starts lying.
 let written = 'created';
 if (fs.existsSync(OUT)) {
   const src = fs.readFileSync(OUT, 'utf8');

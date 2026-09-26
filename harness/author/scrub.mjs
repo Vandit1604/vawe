@@ -1,8 +1,3 @@
-// harness/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one
-// contact sheet, so the author (or agent) sees the WHOLE film at a glance and can spot dead/weak
-// beats without scrubbing a timeline. This automates what would otherwise be a manual timeline scrub.
-//
-// Usage: node harness/author/scrub.mjs <mp4> [--n 24] [--cols 6] [--out /tmp/scrub.png]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';

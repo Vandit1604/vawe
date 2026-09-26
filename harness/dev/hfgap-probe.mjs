@@ -1,12 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/hfgap-probe.mjs: writes films/scene/_probe-hfgap.json.
-//
-// It BAKES the blocks/vfx.mjs factories to concrete layers rather than emitting `{"type":"block"}`
-// sugar, because vfx.mjs is not wired into blocks/index.mjs yet (a registry refactor owns that file).
-// `make expand` resolves a block name through index.mjs, so the sugar would not resolve; baking here
-// stages exactly the layers a wired-up expansion would produce.
-//
-//   node harness/dev/hfgap-probe.mjs [theme]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,7 +18,6 @@ const dark = lum(palette.bg) < 0.5;
 
 const CODE = ['export function serve(req) {', '  const t = route(req.url);', '  if (!t) return notFound(req);', '  return t.handle(req);', '}'];
 
-// One beat per subject, 3s each, so a contact sheet has one clean frame for every block.
 const BEATS = [
   () => VFX.textCursor({ x: 220, y: 470, w: 1480, body: 'Ship it', size: 150, cursor: 'block' }),
   () => VFX.parallaxZoom({ x: 360, y: 160, w: 1200, h: 760, title: 'One card takes the frame',
@@ -51,8 +42,6 @@ const SPAN = 3;
 const layers = [];
 BEATS.forEach((make, i) => {
   const start = i * SPAN;
-  // The beat's span wins over the factory's own default `dur`, so one block cannot bleed into the next
-  // beat's frame and be read as that block's output.
   for (const L of make()) layers.push({ ...L, start: start + (L.start ?? 0), duration: SPAN });
 });
 const duration = BEATS.length * SPAN;
@@ -60,9 +49,6 @@ const duration = BEATS.length * SPAN;
 const scene = {
   module: 'scene', theme, aspect: '16:9', duration,
   audio: { silent: true, _why: 'a block probe, not a film: the subject is what each block draws, and a bed would only add a thing to check' },
-  // THE BACKDROP FOLLOWS THE THEME'S OWN DOMINANCE, read off its palette rather than fixed. `plain`
-  // paints `bg.paperBase`, and themes/linear.json declares a WHITE paper while its text is #f7f8f8,
-  // so a fixed `plain` puts white type on white paper for every layer in the probe, not just mine.
   bg: [{ preset: dark ? 'dark' : 'paper', from: 0, to: duration }],
   layers,
 };

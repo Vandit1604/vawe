@@ -1,26 +1,4 @@
-// harness/dev/candidates.mjs: SIX VERSIONS OF YOUR OWN FRAME, so a choice can be pointed at.
-//
-//   node harness/dev/candidates.mjs films/scene/plinth-ad.json --at 7.7 --axis bg --n 6
-//
-// WHY. Search needs a word, and the person who most needs help is the one who can see what they want
-// and cannot name it. `make arsenal` answers a question; this one asks it. It takes the film you are
-// already looking at, substitutes one axis six ways, renders a short clip of EACH, and prints JSON.
-// The panel that shows the strip is somebody else's file; this owns the picking and the rendering.
-//
-// THREE THINGS IT REFUSES TO DO, and each is a rule this repo has paid for:
-//   · A SWATCH IS NOT AN ANSWER. The site already ships 242 generic effect previews. `metallic` on a
-//     stock card tells you nothing about `metallic` behind YOUR terminal at 7.7s, so every candidate is
-//     the real scene with one key changed and nothing else.
-//   · A STILL HIDES SPEED, SCALE AND DIRECTION. A backdrop was once "matched" on one frame and was, in
 //     motion, twice too fast with folds half the size (engine-doctrine/MISTAKES.md #155). So each candidate is a
-//     ~2s clip centred on `--at`, never an image.
-//   · IT NEVER OFFERS SOMETHING THAT WILL NOT WORK. Every patched scene is graded by `bgErrors`
-//     (core/validate.mjs), the same function `make validate` runs, and by `checkCuts`
-//     (core/ancestor-kills.js). A candidate the engine would refuse, or whose `opts` the new preset has
-//     no knob for, is dropped or carries the reason.
-//
-// NOTHING IS WRITTEN TO THE SCENE. This proposes; the panel applies. The patched copies live under
-// out/candidates/ and the scene on disk is never opened for writing.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -39,11 +17,6 @@ import { serveRepo, launchPage, waitForEngine } from '../lib/render-harness.mjs'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// ---------------------------------------------------------------------------------------------------
-// THE PURE HALF: what gets picked, and what a choice becomes. Exported and asserted by
-// quality/gates/lib-test.mjs, because these are the two things the panel depends on and neither needs
-// a browser to be wrong.
-// ---------------------------------------------------------------------------------------------------
 
 /**
  * look(name, value, palette) → the VISIBLE facts about a bg preset under one film's palette: how light
@@ -62,8 +35,6 @@ export function look(name, value, palette) {
   const light = (value === 'dark' || value === 'ink') ? false : (base == null ? false : isLightBg(base));
   const fx = (spec.fx || []).map((f) => f.type).filter((t) => t !== 'grain');
   return { spec, tone: light ? 'light' : 'dark', moves: fx.length > 0,
-    // The FAMILY is what makes two options visibly DIFFERENT rather than two settings of one look:
-    // `dark` and `deep` are both a plain radial and differ by a shade. Six of those is one option.
     family: fx.length ? fx.sort().join('+') : 'flat' };
 }
 
@@ -119,11 +90,7 @@ export function pickForVariety(pool, n) {
   return picked;
 }
 
-// ---- the CLI ---------------------------------------------------------------------------------------
-// Guarded, because the picking above is a library now: lib-test imports it, and an unguarded CLI
-// would exit(2) the moment it was imported with no scene file.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  // ---- args -----------------------------------------------------------------------------------------
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf('--' + n); return i < 0 ? d : argv[i + 1]; };
   const die = (msg) => { console.error(`candidates: ${msg}`); process.exit(2); };
@@ -131,9 +98,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const USAGE = `usage: node harness/dev/candidates.mjs <scene.json> --at <seconds> [--axis bg] [--n 6]
                                        [--dur 2] [--scale 0.35] [--fps 30] [--outdir out/candidates]`;
 
-  // The positional is the first argument that is neither a flag nor a flag's VALUE. Filtering on
-  // indexOf would find the first occurrence of a repeated word and test it against the wrong neighbour,
-  // which is the bug arsenal.mjs records fixing in its own argument parsing.
   const VALUE_FLAGS = new Set(['at', 'axis', 'n', 'dur', 'scale', 'outdir', 'fps']);
   const positional = argv.filter((a, i) => {
     if (a.startsWith('--')) return false;
@@ -183,10 +147,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       + `Point --at at a window that names a \`preset\`.`);
   const current = win.preset || 'paper';
 
-  // ---- what a preset actually LOOKS like, measured rather than guessed --------------------------------
-  // The theme's palette decides every base colour, so light-versus-dark is a property of THIS film and
-  // not of the preset name. One line, mirroring films/scene/scene.js:255, which is the only other place
-  // a bg palette is resolved: the theme's own `bg` block wins, else it is derived from the palette.
   const themeName = typeof scene.theme === 'string' ? scene.theme : null;
   let theme = null;
   if (themeName) {
@@ -202,11 +162,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   const lookOf = (name) => look(name, win.value, PAL);
 
-  // ---- how much of this library already uses each preset ---------------------------------------------
-  // Counted off `bg[].preset` rather than by searching the JSON text, which is what arsenal.mjs does for
-  // every vocabulary at once. That coarse rule is right for a name like `thermalBlur` and wrong here:
-  // `dark`, `deep`, `plain` and `soft` all appear in colour tokens and layer props, so a substring count
-  // would report a preset as popular on the strength of a word that has nothing to do with it.
   function presetUsage() {
     const dir = path.join(repoRoot, 'films/scene');
     const counts = new Map(BG_NAMES.map((n) => [n, 0]));
@@ -226,19 +181,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   function refusals(patched) {
     const out = [];
     for (const m of bgErrors(patched)) if (m.startsWith(`bg[${winIdx}]`) || m.startsWith('bg:')) out.push(m);
-    // The bg axis writes no ancestor style, so this finds nothing today. It is here because the seam is
-    // the point: a second axis (a cut, a group, a filter) writes exactly the styles this table is about,
-    // and the check must already be in the path when it arrives rather than remembered by that author.
     try { checkCuts({ cuts: patched.cuts || [], layers: patched.layers || [], sceneUnits: patched.sceneUnits }); }
     catch (e) { out.push(e.message); }
     return out;
   }
 
-  // ---- rank, then pick for VARIETY --------------------------------------------------------------------
-  // Relevance is the arsenal's own idf-weighted coverage, asked against what the FILM says it is: the
-  // same three fields `make preflight` aims the arsenal with. A film that says nothing about itself gets
-  // 0 everywhere, and then variety decides the whole strip, which is the honest answer rather than a
-  // ranking dressed up as one.
   const feel = [scene.note, scene.spectacle && scene.spectacle.of, scene.title, scene.description]
     .filter((s) => typeof s === 'string').join(' ').trim();
 
@@ -264,12 +211,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const dropOpts = win.opts != null && bgOverErrors(L.spec, win.opts).length > 0;
     if (dropOpts) warnings.push(`this window's \`opts\` (${Object.keys(win.opts).join(', ')}) are knobs of `
       + `"${current}", not of "${name}" (which takes ${bgOptKeys(L.spec).join(', ') || 'none'}), so the patch removes them.`);
-    // WHITE ON WHITE, WHICH NO VALIDATOR SEES. The engine flips the default ink per backdrop window
-    // (`inkAt` in films/scene/scene.js:315): a LIGHT window gets `var(--ink)`, a dark one gets a
-    // light token chosen by construction. So the dark case cannot fail and the light case can, on any
-    // theme whose `ink` is itself light. plinth is one: its ink is #f5f5f2, so a light backdrop paints
-    // near-white type on a near-white field, and every gate passes it. Warned rather than dropped,
-    // because a layer that names its own `color` is unaffected.
     if (L.tone === 'light' && inkIsLight)
       warnings.push(`this backdrop is LIGHT, and a light window makes the engine default text to \`var(--ink)\`, `
         + `which theme "${themeName || 'default'}" sets to ${themeInk}, itself light. Any layer that does not name `
@@ -285,7 +226,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   const picked = pickForVariety(pool, N);
 
-  // ---- render one short clip of the real scene per candidate ------------------------------------------
   const [VW, VH] = sceneDims(scene);
   const W = Math.round(VW * SCALE), H = Math.round(VH * SCALE);
   const fps = Number(flag('fps', scene.fps || 30)) || 30;
@@ -299,12 +239,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   fs.mkdirSync(runDir, { recursive: true });
 
   const { server, port, close: closeServer } = await serveRepo();
-  // ONE TAB, MEASURED. Six candidates render in ~11.5s serially, comfortably inside the budget, and
-  // parallel tabs were tried and abandoned: Chrome throttles a tab that is not the visible one, and even
-  // with the three anti-backgrounding flags internal/scene/scene.go:224-226 passes, two of six candidates
-  // timed out at 90s while the other four took under two seconds each. A candidate that silently misses
-  // the strip is worse than a strip that takes four seconds longer.
-  // ponytail: serial capture. Revisit only if a longer --dur or a bigger --n pushes this past ~20s.
   const { browser, page, close: closeBrowser } = await launchPage({ width: VW, height: VH, scale: SCALE });
 
   const started = Date.now();
@@ -318,14 +252,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
     await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=${encodeURIComponent(dataUrl)}&fps=${fps}`,
       { waitUntil: 'load' });
-    // Recorded, never thrown. One candidate that will not boot is one candidate missing from the strip,
-    // with the reason attached; it is not a reason to abandon the other five.
     const err = await waitForEngine(page, { timeout: 60000, throwOnTimeout: false });
     if (err) return { ...cand, clip: null, error: `the scene failed to boot with "${cand.name}": ${err}` };
 
     for (let n = f0; n < f1; n++) {
       await page.evaluate((k) => window.__engine.renderFrame(k), n);
-      // jpeg, not png: these are thumbnails, and png encoding is the largest cost per frame here.
       await page.screenshot({ path: path.join(frames, `${String(n - f0).padStart(4, '0')}.jpg`),
         type: 'jpeg', quality: 82, clip: { x: 0, y: 0, width: VW, height: VH } });
     }
@@ -344,7 +275,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
 
   await closeBrowser(); closeServer();
 
-  // ---- the contract ------------------------------------------------------------------------------------
   console.log(JSON.stringify({
     scene: path.relative(repoRoot, scenePath),
     axis,

@@ -1,29 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/sync-worktree.mjs: keep a worktree's untracked films/themes/assets caught up with the
-// main checkout, without ever clobbering a local edit.
-//
-// THE BUG THIS CLOSES. `.worktreeinclude` files are copied into a worktree once, at
-// `harness/dev/worktree.sh add` time. Nothing re-copies them afterward, and nothing notices when the
-// main checkout moves on: a film's cue times change in main, the worktree's copy sits there
-// unchanged, and every gate and render in that worktree reads it as if it were current. Measured cost:
-// three wrong renders of vawe-flow-2 (cue 2.9435/4.6629 instead of 3.8935/5.3129), because a stale copy
-// is byte-identical to a correct one until something diffs it.
-//
-// TWO MODES.
-//   apply (default)   full pass: copy anything missing, refresh anything unchanged since the last
-//                      sync, leave a local edit alone, and REFUSE (loud, nonzero exit) anything that
-//                      changed on both sides since the last sync rather than guess which one wins.
-//                      Used by `worktree.sh add` to populate a fresh worktree, and safe to re-run by
-//                      hand any time later.
-//   --verify <path>    read-only: is this ONE path safe to render right now? Used by
-//                      `render-lock.sh` before every render. Never writes anything, so a render can
-//                      never be blamed for mutating the tree it was asked to read.
-//
-// THE ONLY GROUND TRUTH FOR "NEWER": `.vawe-data/worktree-sync.json`, one sha256 per path, written
-// the moment this script last copied that path in. A file whose on-disk hash still matches that
-// recorded hash has not been touched locally since; anything else is either an in-progress edit (main
-// hash still matches the record: leave it) or a real conflict (neither side matches the record: refuse
-// and say so, per the "never overwrite a newer local file" rule this task is built around).
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -47,7 +22,6 @@ function gitWorktreeList(cwd) {
   } catch (e) {
     die(`could not list worktrees from ${cwd}: ${e.message}`);
   }
-  // First stanza is always the main (non-linked) checkout, per git's own definition.
   const first = out.split('\n\n')[0];
   const line = first.split('\n').find((l) => l.startsWith('worktree '));
   return line.slice('worktree '.length);
@@ -60,9 +34,6 @@ function hash(p) {
   catch { return null; }
 }
 
-// Recursively list files under a matched path. `.worktreeinclude` patterns like `assets/brands/**`
-// expand (one level, no bash globstar) to per-brand directories; each is copied whole, so each is
-// synced whole, file by file, rather than as one opaque directory hash.
 function listFiles(p) {
   let st;
   try { st = fs.statSync(p); } catch { return []; }
@@ -73,9 +44,6 @@ function listFiles(p) {
   return out;
 }
 
-// Expand a `.worktreeinclude` pattern the same way `worktree.sh` does: a real shell glob against the
-// main checkout, so the two copy paths can never disagree about what a pattern matches. Not a second
-// glob implementation, the same one, called from the other language.
 function expand(pattern, base) {
   let out;
   try {
@@ -103,7 +71,6 @@ if (path.resolve(MAIN) === WT) {
 }
 
 if (verifyPath) {
-  // READ-ONLY. One path, three questions: does it exist here, is it stale, is it a genuine conflict.
   const rel = path.isAbsolute(verifyPath) ? path.relative(WT, verifyPath) : verifyPath;
   const dst = path.join(WT, rel);
   const src = path.join(MAIN, rel);
@@ -111,8 +78,6 @@ if (verifyPath) {
   const srcHash = hash(src);
 
   if (dstHash === null && srcHash === null) {
-    // Not a sync problem: this path does not exist anywhere. Let the renderer's own
-    // file-not-found error say so; this script has nothing to add.
     process.exit(0);
   }
   if (dstHash === null) {
@@ -120,7 +85,6 @@ if (verifyPath) {
       + `  node harness/dev/sync-worktree.mjs ${WT}`);
   }
   if (srcHash === null) {
-    // Authored fresh in this worktree, main never had it. Nothing to compare against, safe.
     process.exit(0);
   }
   if (dstHash === srcHash) process.exit(0); // in sync
@@ -133,7 +97,6 @@ if (verifyPath) {
       + `  node harness/dev/sync-worktree.mjs ${WT}`);
   }
   if (srcHash === lastSynced) {
-    // Only this worktree changed since the last sync: a local edit in progress. Render it.
     process.exit(0);
   }
   die(`${rel}: CONFLICT. Both the main checkout and this worktree changed since the last sync,\n`
@@ -141,16 +104,6 @@ if (verifyPath) {
     + `  node harness/dev/sync-worktree.mjs ${WT}`);
 }
 
-// IS "MAIN" STILL WHERE THE LIBRARY LIVES? Everything a worktree copies is GITIGNORED, so git's own
-// definition of the main checkout (the first `worktree list` stanza, resolved above) says nothing
-// about which checkout actually holds the films. The two can drift apart, and on this machine they
-// did: the main checkout sat detached on a 220-commit-old HEAD holding 58 scenes while the working
-// checkout held 197, so every new worktree was synced a third of the library and every gate run
-// inside one reported a confident green over a population it could not see.
-//
-// census.mjs already refuses a sweep whose ANCHOR holds more than it does. This is the same check in
-// the other direction and at the other end: a linked worktree holding MORE than main proves main is
-// not the source any more. Counting only, no hashing, and only the patterns actually copied.
 function linkedWorktrees() {
   let out;
   try { out = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd: MAIN, encoding: 'utf8' }); }
@@ -162,12 +115,6 @@ function linkedWorktrees() {
     .filter((d) => d !== path.resolve(MAIN));
 }
 
-// SCRATCH DOES NOT COUNT. A `_`-prefixed file is this repo's existing convention for a probe or a
-// fixture that belongs to whoever made it (census.mjs's `unused` already drops them for the same
-// reason), so it is authored IN a worktree and never comes from main. Counting them made this guard
-// refuse a legitimate sync the day after it shipped: five `_shader-*.json` probes in one worktree put
-// it at 202 against main's 197, and an agent was told to go fix a main checkout that was not broken.
-// A guard that cries wolf gets bypassed, which would put back the exact blindness it exists to catch.
 const countable = (dir, pat) =>
   expand(pat, dir).reduce((n, m) => n + listFiles(path.join(dir, m))
     .filter((f) => !path.basename(f).startsWith('_')).length, 0);
@@ -189,7 +136,6 @@ function refuseIfMainIsNotTheSource(patterns) {
   }
 }
 
-// APPLY MODE: full pass, writes files and the manifest.
 const patterns = loadInclude();
 refuseIfMainIsNotTheSource(patterns);
 const manifest = loadManifest();
