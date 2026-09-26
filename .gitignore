@@ -202,9 +202,11 @@ films/scene/*.beatsync.json
 build/
 
 # reference films: third-party marketing videos downloaded for LOCAL STUDY ONLY (measure timings,
-# easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel — a
+# easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel: a
 # recreation reproduces INTENT with our own assets (engine-doctrine/CRAFT/RECREATION.md).
-refs/
+# Root-anchored: quality/refs/ (quality/refs/LOOP.md) is a different, tracked directory and gets its
+# own narrower rule below, not this one.
+/refs/
 # grammar/ is NOT ignored, and the pair is the point. `refs/` holds other people's films; `grammar/`
 # holds what we measured and concluded about them: shot lengths, luma, motion, one accent hex, and the
 # sentences a person wrote about what causes what. No frame, no crop, no copy, no mark. The pixels stay
@@ -214,6 +216,14 @@ assets/cutouts/
 
 # agent worktrees (harness/dev/worktree.sh)
 .claude/worktrees/
+
+# quality/refs/<name>/ (quality/refs/LOOP.md): the reference video and every generated artifact under
+# a reference's own directory are local-only, reproduced from source.url or the fixture recipe. Only
+# beats.md, source.url, queue.md and ledger.jsonl (the record of what was measured) are tracked.
+quality/refs/*/source.mp4
+quality/refs/*/study/
+quality/refs/*/drafts/
+quality/refs/*/grid/
 
 # npm pack output — a build artifact, never committed
 *.tgz
