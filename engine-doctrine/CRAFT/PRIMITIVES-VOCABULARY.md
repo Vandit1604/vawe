@@ -453,6 +453,15 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `tritone` | three color grade, three tone, risograph grade | duotone with a third stop in the middle, which is what stops the midtones going muddy |
 | `vignette` | darkened corners, lens falloff, edge darkening | NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges |
 
+## font-variation axis  `[axis]`
+
+| name | words | action |
+|---|---|---|
+| `ital` | italic axis, italic switch, roman to italic, variable italic | the italic axis, 0 or 1: some variable faces expose the roman/italic swap as an axis instead of a second font file |
+| `slnt` | slant axis, oblique angle, lean italic, variable slant | the slant axis, an upright face leaning to an italic ANGLE in degrees (usually -15 to 0) rather than swapping to a separate italic file |
+| `wdth` | width axis, condensed to expanded, font stretch, variable width | the width axis, condensed to expanded: none of the 31 faces this engine vendors keep it post-subsetting (core/tokens.css), so animating it is a validated no-op today |
+| `wght` | weight axis, font weight ramp, thin to bold, variable weight | the weight axis, 100 to 900 on every variable face this engine vendors: thin to black in one continuous ramp instead of jumping between static cuts |
+
 ## generator  `[generator]`
 
 | name | words | action |
@@ -1031,5 +1040,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_712 primitives across 61 registries, 712 meeting the word-action contract today.
+_716 primitives across 62 registries, 716 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

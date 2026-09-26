@@ -199,6 +199,62 @@ function namedThemeErrors(data, fs, path, readJSON, root) {
   return errors;
 }
 
+// FONT AXES, READ OFF THE @font-face RULES THAT ALREADY GOVERN WHAT RENDERS (core/tokens.css), never a
+// second hand-kept table: `font-weight: 100 900;` (a RANGE) is a real wght axis, `font-weight: 400;` (one
+// number) is a static instance with none. A family with two static `font-weight` rules (Space Grotesk
+// 500 + 700) still has no axis: only a range ever proves one. Cached per process; tokens.css does not
+// change mid-run.
+let _fontAxesCache = null;
+function fontAxesOf(fs, path, root) {
+  if (_fontAxesCache) return _fontAxesCache;
+  const map = new Map();
+  let css = '';
+  try { css = fs.readFileSync(path.join(root, 'core/tokens.css'), 'utf8'); } catch { return (_fontAxesCache = map); }
+  for (const m of css.matchAll(/@font-face\s*\{([^}]*)\}/g)) {
+    const fam = /font-family:\s*'([^']+)'/.exec(m[1]);
+    if (!fam) continue;
+    const entry = map.get(fam[1].toLowerCase()) || {};
+    const wght = /font-weight:\s*([\d.]+)(?:\s+([\d.]+))?/.exec(m[1]);
+    if (wght) entry.wght = wght[2] ? [Number(wght[1]), Number(wght[2])] : (entry.wght || false);
+    map.set(fam[1].toLowerCase(), entry);
+  }
+  return (_fontAxesCache = map);
+}
+
+// AXIS ON A STATIC FONT IS A WARNING, NOT A REFUSAL (owner rule: safeguards adapt, not block). It never
+// breaks a render, `axisStyle` still writes the plain `fontWeight` fallback, it just degrades a
+// continuous ramp to the nearest static cut, silently, which is this repo's most-logged font bug shape
+// (core/kinetic/presets.js). Only fires when BOTH the theme and the family's axes are known; an
+// unresolved theme role or an unvendored family says nothing, per the same rule.
+function axisFontWarnings(data, fs, path, readJSON, root) {
+  const warns = [];
+  if (typeof data.theme !== 'string') return warns;
+  let theme;
+  try { theme = readJSON(path.join(root, 'themes', data.theme + '.json')); } catch { return warns; }
+  const roleFamily = (role) => theme?.tokens?.font?.[role]?.$value || null;
+  const axes = fontAxesOf(fs, path, root);
+  const visit = (L, at) => {
+    if (!isObj(L)) return;
+    const role = L.font === 'serif' || L.font === 'mono' || L.font === 'num' ? L.font : 'sans';
+    const check = (axis, where) => {
+      if (!isObj(axis)) return;
+      const fam = roleFamily(role);
+      if (!fam) return;
+      const known = axes.get(fam.toLowerCase());
+      if (!known) return;
+      for (const tag of Object.keys(axis)) {
+        if (known[tag] === false) warns.push(`${where}.axis.${tag} animates the '${tag}' axis on "${fam}", `
+          + `a STATIC font instance for that axis (core/tokens.css): the variation channel is silently `
+          + `ignored, only the plain fallback (for wght) will show, and the ramp degrades to the nearest cut.`);
+      }
+    };
+    check(L.axis, at);
+    (Array.isArray(L.children) ? L.children : []).forEach((C, j) => visit(C, `${at}.children[${j}]`));
+  };
+  (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
+  return warns;
+}
+
 function musicWarning(m, resolves, root, path, fs) {
   // music: a bed name or path must resolve or the bed drops to silence. A warning, not a failure: a
   // scene can name a bed baked on another machine. `music:"auto"` is resolved at authoring time
@@ -333,7 +389,7 @@ async function validateOneFile(file, ctx) {
   const audio = await audioBlockErrors(data, schema, file, root, path, fs);
   errors.push(...audio.errors);
   const warns = [...lintData(data), ...audio.warns, ...htmlFileWarns, ...sceneUnitWarnings(data),
-    ...seamMotionFreezeWarnings(data), ...dirWarnings(data)];
+    ...seamMotionFreezeWarnings(data), ...dirWarnings(data), ...axisFontWarnings(data, fs, path, readJSON, root)];
   return { mod, errors, warns };
 }
 
