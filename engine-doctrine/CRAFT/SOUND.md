@@ -2,6 +2,7 @@
 when: the film has no sound, or you are about to ship it mute
 answers: "sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · how to write a sound bridge (audio.bridges) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands"
 group: crosscutting
+routes: music-bed
 codes: silent-by-omission, silence-without-a-reason, audio-block-produces-nothing, cues-have-no-sound, cue-missing, bed-unresolved, bed-missing, bed-provenance-unknown, bed-licence-unverified, bed-muted, sfx-shape
 ---
 
