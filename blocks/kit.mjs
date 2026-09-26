@@ -6,8 +6,8 @@
 
 // Theme-aware tokens: blocks emit CSS vars (resolved at render from :root, set by applyTheme) and
 // color-mix() for tints, so the same block reskins to any brand theme, still deterministic since the
-// strings are static. The Stripe hexes stay literal because stripeCard is a deliberate "reflect
-// Stripe" demo, not a generic surface.
+// strings are static. The Stripe hexes stay literal: `codeBlock`'s dark theme is a deliberate
+// "reflect Stripe" look, not a generic surface.
 export const TOKENS = {
   // `--warn` is written for every theme by core/boot.js, defaulted rather than required, so no brand
   // has to hold an opinion about amber.
