@@ -7,6 +7,10 @@
   "tags": [
     "chatBubble"
   ],
+  "dimensions": {
+    "width": 504,
+    "height": 220
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,6 +7,10 @@
   "tags": [
     "flowchart"
   ],
+  "dimensions": {
+    "width": 1598,
+    "height": 432
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

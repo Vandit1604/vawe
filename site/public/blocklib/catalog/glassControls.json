@@ -7,6 +7,10 @@
   "tags": [
     "glassControls"
   ],
+  "dimensions": {
+    "width": 804,
+    "height": 280
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

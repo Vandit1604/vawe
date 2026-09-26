@@ -7,6 +7,10 @@
   "tags": [
     "onboardCard"
   ],
+  "dimensions": {
+    "width": 504,
+    "height": 267
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

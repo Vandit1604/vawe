@@ -308,8 +308,6 @@
    "layout": "column",
    "items": "stretch",
    "gap": 12,
-   "start": 8.5,
-   "duration": 4.65,
    "anim": "rise",
    "enterDur": 0.5,
    "exitDur": 0.35,
@@ -333,9 +331,9 @@
        "children": [
         {
          "type": "text",
-         "weight": 700,
          "text": "Northwind",
          "size": 24,
+         "weight": 700,
          "color": "var(--text-2)",
          "ls": "-0.02em"
         }
@@ -354,9 +352,9 @@
        "children": [
         {
          "type": "text",
-         "weight": 700,
          "text": "Kite Studio",
          "size": 24,
+         "weight": 700,
          "color": "var(--text-2)",
          "ls": "-0.02em"
         }
@@ -375,9 +373,9 @@
        "children": [
         {
          "type": "text",
-         "weight": 700,
          "text": "Fieldwork",
          "size": 24,
+         "weight": 700,
          "color": "var(--text-2)",
          "ls": "-0.02em"
         }
@@ -404,9 +402,9 @@
        "children": [
         {
          "type": "text",
-         "weight": 700,
          "text": "Atlas Type",
          "size": 24,
+         "weight": 700,
          "color": "var(--text-2)",
          "ls": "-0.02em"
         }
@@ -425,9 +423,9 @@
        "children": [
         {
          "type": "text",
-         "weight": 700,
          "text": "Orbit Labs",
          "size": 24,
+         "weight": 700,
          "color": "var(--text-2)",
          "ls": "-0.02em"
         }
@@ -446,9 +444,9 @@
        "children": [
         {
          "type": "text",
-         "weight": 700,
          "text": "Rowan & Co",
          "size": 24,
+         "weight": 700,
          "color": "var(--text-2)",
          "ls": "-0.02em"
         }
@@ -456,7 +454,9 @@
       }
      ]
     }
-   ]
+   ],
+   "start": 8.5,
+   "duration": 4.65
   },
   {
    "type": "text",

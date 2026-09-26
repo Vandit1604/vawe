@@ -7,6 +7,10 @@
   "tags": [
     "comparison"
   ],
+  "dimensions": {
+    "width": 604,
+    "height": 148
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
