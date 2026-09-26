@@ -1,16 +1,3 @@
-// capture-scene.mjs: capture an ANIMATED site section as PARTS, so the engine can re-stage the
-// animation with its own pure primitives. Sites animate scenes (a chat card floating over a live
-// board, cards popping in, a message typing); one frozen capture can't express that. This tool
-// captures the section plus each named part (computed styles inlined, same proven approach as
-// capture-component.mjs) and records every part's rect RELATIVE to the section, then prints
-// ready-to-paste scene layer stubs. The author gives each part a window/cut/anim; typing is
-// re-created by overlaying our own `type`-preset text layer on the captured input box.
-//
-//   node harness/author/capture-scene.mjs <url> "<sectionSel>" <brand> <label> --parts "sel1,sel2,…" [--viewport WxH]
-//   make capture-scene URL=… SEL="section" NAME=brand LABEL=intake PARTS="sel1,sel2"
-//
-// Output: assets/brands/<brand>/scenes/<label>.json  { w, h, parts: [{name, html, x, y, w, h, z}] }
-// Use in scene: { "type": "component", "src": "/assets/brands/<brand>/scenes/<label>.json", "part": "p1", ... }
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';
@@ -114,10 +101,6 @@ const dir = path.join(ROOT, 'assets/brands', brand, 'scenes');
 fs.mkdirSync(dir, { recursive: true });
 const out = path.join(dir, label + '.json');
 
-// LOCALIZE every remote asset, exactly as capture-component.mjs does. A part's html is absolutized
-// against the live site too, so without this a captured scene depends on someone else's CDN at render
-// time. This call site was the identical bug next door: the component capture localized and the scene
-// capture never did, and nothing said so.
 const capture = { url, sectionSel, w: result.w, h: result.h, parts: result.parts };
 const { localized, failures } = await localizeCapture(capture, { ...mediaTargetFor(out, ROOT), referer: url });
 if (failures.length && !argv.includes('--allow-remote')) {
@@ -131,7 +114,6 @@ if (localized) console.log(`  ✓ localized ${localized} asset(s) → media/ (re
 for (const f of failures) console.warn(`  ⚠ still remote (${f.reason}): ${f.url}`);
 console.log(`✓ scene "${label}" → ${path.relative(ROOT, out)}  (${result.w}×${result.h}, ${result.parts.length} part(s), ${(fs.statSync(out).size / 1024).toFixed(0)}kb)`);
 
-// ready-to-paste scene stubs, scaled into 1920-wide frame space (author adds windows/cuts)
 const scale = Math.min(1680 / result.w, 900 / result.h);
 const ox = Math.round((1920 - result.w * scale) / 2), oy = Math.round((1080 - result.h * scale) / 2);
 console.log('  layer stubs (assign start/duration/anim per part, background parts first, fade/dim them; foreground gets elevation):');

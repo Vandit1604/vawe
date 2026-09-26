@@ -1,9 +1,3 @@
-// capture-motion.mjs: WATCH a real element animate and emit a motion track our engine can replay.
-// It samples the element's transform + opacity every frame as it reveals (scroll-triggered by default,
-// or on-load), decomposes the CSS matrix into translate/scale/rotate, normalises to REST at the end
-// (a motion track composes on top of the layer's final position), and reduces to keyframes. Same
-// "measure, don't guess" idea as brandspec. Reproduce the site's actual move, not an invented one.
-//
 //   node harness/author/capture-motion.mjs https://example.com/home 'main section:nth-of-type(3)'   [--onload] [--dur 2.5]
 import puppeteer from 'puppeteer';
 
@@ -15,7 +9,6 @@ const dur = Number((rest[rest.indexOf('--dur') + 1]) || 2.5);
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
 const page = await browser.newPage();
 await page.setViewport({ width: 1512, height: 900, deviceScaleFactor: 1 });
-// install the recorder BEFORE the page's own scripts, so on-load animations aren't missed
 await page.evaluateOnNewDocument((sel, durMs, onload) => {
   window.__rec = { samples: [], sel, durMs, running: false };
   const decompose = (tf) => {
@@ -51,16 +44,13 @@ await browser.close();
 
 const s = (rec && rec.samples) || [];
 if (s.length < 3) { console.error(`captured only ${s.length} samples. The element may not animate on ${onload ? 'load' : 'scroll'}; try the other mode or a child selector.`); process.exit(1); }
-// normalise to REST (final settled sample) so the track is an entrance offset ending at 0/1
 const fin = s[s.length - 1];
 const norm = s.map((k) => ({ t: +(k.t / 1000).toFixed(3), x: +(k.x - fin.x).toFixed(1), y: +(k.y - fin.y).toFixed(1), scale: +(k.scale / (fin.scale || 1)).toFixed(3), rot: +(k.rot - fin.rot).toFixed(1), opacity: +(k.opacity).toFixed(2), blur: k.blur }));
-// trim leading identical frames (before the anim starts) and find when it settles
 const moved = (k) => Math.abs(k.x) > 1 || Math.abs(k.y) > 1 || Math.abs(k.scale - 1) > 0.01 || Math.abs(k.rot) > 0.5 || k.opacity < 0.98;
 let start = norm.findIndex(moved); if (start < 0) start = 0;
 let end = norm.length - 1; while (end > start && !moved(norm[end - 1])) end--;
 const win = norm.slice(Math.max(0, start - 1), end + 1);
 const t0 = win[0].t; const dr = (win[win.length - 1].t - t0) || 0.6;
-// reduce to ~6 keyframes evenly across the move
 const K = 6, kf = [];
 for (let i = 0; i < K; i++) { const src = win[Math.round(i * (win.length - 1) / (K - 1))]; kf.push({ t: +((src.t - t0)).toFixed(2), x: src.x, y: src.y, scale: src.scale, rot: src.rot, opacity: src.opacity }); }
 kf[kf.length - 1] = { t: kf[kf.length - 1].t, x: 0, y: 0, scale: 1, rot: 0, opacity: 1 }; // snap to exact rest

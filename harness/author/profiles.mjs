@@ -1,26 +1,8 @@
-// harness/author/profiles.mjs: THE REFERENCE PROFILES, as data.
-//
-// engine-doctrine/CRAFT/SELECTION.md Part 2 says why they exist: "An adjective is vague; a brand is a spec." Name
-// the one reference a video should feel like and every family is chosen at once, coherently. A scene
-// opts in with a top-level `"profile": "apple"`.
-//
-// It lives in its own file because it had exactly ONE reader. The table sat inside
-// harness/author/motion-director.mjs and was consumed on the next line, so nothing else in the repo
-// could ask what a profile means, not the quiz that needs to offer them, not `vawe_capabilities`, not a
-// catalog. A shared vocabulary with a single private reader is a table, not a vocabulary.
-//
-// THE DOC IS THE SOURCE FOR TASTE; this file is the machine-readable subset. SELECTION.md describes each
-// profile as `{ face · pace · easing · cut family · sting policy · look policy · accent }` and the code
-// carried only four of those seven. The rest are transcribed here, from that doc, so a consumer can
-// reason about pace and accent without re-reading prose. Where the two ever disagree the doc wins and
-// this file is the bug.
 export const PROFILES = {
   linear: {
     cuts: ['none', 'blur'], stings: [], bounceOk: false, restraint: 'high',
     banCuts: ['whip', 'wipe', 'spin', 'cube', 'roll'], face: 'mono',
     pace: 'fast, snappy', easing: 'easeOutQuart', dominance: 'dark', accent: 'one cool (cobalt/indigo)',
-    // `crt`/`matrixDecode` here are AMBIENT FIELDS (core/shaders-ambient.js), not composite looks.
-    // SELECTION.md says "backdrop" and means it. `crt` happens to exist in both registries.
     look: 'none, or one crt/matrixDecode backdrop at low intensity',
     blurb: 'technical, dark, restrained. Dev tools. Restraint IS the personality',
     antiBlurb: 'dense terminal readouts and hard cuts, with almost no effects',
@@ -84,9 +66,4 @@ export const PROFILES = {
   },
 };
 
-// `banCuts` holds CUT STYLES (core/cuts.js PRESENTATIONS); `banMotion` holds per-layer entrance names.
-// An `anim` (core/clips.js) or a kinetic `preset` (core/type.js). They were one list, and the checker
-// only ever compared it against a cut, so a24's ban on `pop` (an anim) and vercel's ban on `bounce` (a
-// preset) could not fire: two profile rules that read as enforced and never ran once. Two lists, because
-// the two vocabularies are disjoint and a single list cannot say which one it means.
 export const PROFILE_NAMES = Object.keys(PROFILES);

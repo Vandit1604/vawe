@@ -1,16 +1,3 @@
-// harness/author/tune-server.mjs: LIVE, PER-LAYER motion tuning. Same iframe-of-scene.html technique
-// as studio/server.mjs, scoped to one (or a few) layer ids: controls are generated straight off that
-// layer's own `motion` keys and `vars` channels, and every control re-seeks the SAME frame instantly
-// by mutating window.__engine.data (core/engine/boot.js exposes it for exactly this) and calling
-// renderFrame(n) again. No server round trip for a live tweak.
-//
-//   make tune D=films/scene/<file>.json ID=<layer id>[,<id>...] [PORT=8801]
-//
-// Two buttons write to disk-adjacent things: "copy JSON patch" reads current values back off the
-// page (client-only, no server call) and "write to file" posts to /api/apply below, which patches the
-// scene TEXT (harness/author/patch-motion.mjs, same format-preserving writer studio uses) and always
-// answers with a real diff; the client only writes when the diff came back from a second, confirmed
-// call. DEV TOOLING ONLY: never touches the renderer or the determinism contract.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -34,8 +21,6 @@ const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.
 const fmt = (JSON.parse(fs.readFileSync(dataArg, 'utf8')).module) || 'scene';
 const PORT = Number(process.env.PORT) || 8801;
 
-// The layers this session tunes, resolved once at boot and re-read on every /api/layers poll so an
-// external edit (another agent, a gate autofix) is reflected without restarting the server.
 function readLayers() {
   const src = fs.readFileSync(dataArg, 'utf8');
   const data = JSON.parse(src);
@@ -69,9 +54,6 @@ const withBody = (req, res, run) => {
   }));
 };
 
-// One PATCH op set applied to a fresh read of the file: `motion` goes through patchMotion (the
-// keyframe-aware writer, reuses each unchanged key's own formatting); the scalar `vars*` fields go
-// through applyOps' generic path-op writer, the same one studio's candidate/accept flow uses.
 function patched({ layer, motion, vars, varsDur, varsDelay, varsEase }) {
   let src = fs.readFileSync(dataArg, 'utf8');
   if (motion !== undefined) src = patchMotion(src, layer, motion);
@@ -104,8 +86,6 @@ const tuneRoutes = (req, res) => {
     try { reply({ ok: true, eases: EASE_NAMES, ...readLayers() }); } catch (e) { reply({ ok: false, error: String(e.message) }, 400); }
     return true;
   }
-  // { layer, motion?, vars?, varsDur?, varsDelay?, varsEase?, write }. Always returns a diff; only
-  // touches disk when `write` is true, so the client can show the diff and ask before it commits.
   if (req.method === 'POST' && url === '/api/apply') {
     withBody(req, res, (body, reply) => {
       let q;

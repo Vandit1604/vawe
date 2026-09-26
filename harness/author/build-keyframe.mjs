@@ -1,19 +1,9 @@
-// Builds films/scene/keyframe.json: a film about keyed motion that IS keyed motion.
-// The timeline strip and the shape's motion track are generated from ONE list of keys, so the diamonds
-// you see landing are literally the keys the shape is moving through. If they ever disagree the film is
-// lying, and generating both from one source is the only way to be sure they cannot.
 import fs from 'node:fs';
 
-// t = seconds from the shape's start · x,y = where it goes · the path is a hand, not a curve
-// The film's claim is "these keys ARE this motion", so the shape must ride directly above its own
-// track: a key's x on the strip and the shape's x are the SAME number, derived from one mapping. The
-// first cut had the shape crossing the top of the frame while its diamonds landed at the bottom, which
-// looks related in time and is unrelated in space. The picture was not saying what the words said.
 const STRIP = { x: 170, y: 726, w: 1580, h: 210 };
 const SPAN = 2.1, PAD = 26;
 const px = (t) => +(PAD + (STRIP.w - PAD * 2) * (t / SPAN)).toFixed(1);
 
-// t = seconds from the shape's start · y = how high it rides · x comes from the track, never by hand
 const WOBBLE = [
   [0.00, 0], [0.62, -34], [0.69, -58], [0.75, -66], [0.82, -44], [0.88, 12], [0.95, 72],
   [1.02, 128], [1.09, 168], [1.16, 190], [1.23, 176], [1.30, 132], [1.37, 74],
@@ -23,7 +13,6 @@ const KEYS = WOBBLE.map(([t, y, ease]) => ({ t, x: +(px(t) - px(0)).toFixed(1), 
 
 const SHAPE_START = 1.25;                 // when the shape appears
 
-// the strip: a ruler, a playhead riding the scene clock, and a diamond per key that pops as it is passed
 const strip = () => {
   const W = STRIP.w, H = STRIP.h, pad = PAD;
   const out = [`<svg viewBox="0 0 ${W} ${H}" width="${W}" xmlns="http://www.w3.org/2000/svg">`];
@@ -35,7 +24,6 @@ const strip = () => {
   }
   out.push(`<rect x="${pad}" y="${H - 55}" width="${W - pad * 2}" height="6" rx="3" fill="var(--accent-dim)"/>`);
   out.push(`<text x="${pad}" y="${H - 14}" font-family="var(--font-mono)" font-size="20" fill="var(--dim)">motion track</text>`);
-  // one diamond per key, popping at the instant the shape passes through it
   for (const k of KEYS) {
     const at = +(SHAPE_START + k.t).toFixed(3);
     const cx = px(k.t), cy = H - 52;
@@ -43,7 +31,6 @@ const strip = () => {
       + `transform:scale(clamp(0,(var(--t,0) - ${at}) * 14,1));opacity:clamp(0,(var(--t,0) - ${at}) * 14,1)">`
       + `<rect x="${cx - 11}" y="${cy - 11}" width="22" height="22" rx="3" fill="var(--accent)" transform="rotate(45 ${cx} ${cy})"/></g>`);
   }
-  // a hairline riding the playhead, joining the shape above to the key it is dropping below
   const p0 = px(0), p1 = px(SPAN);
   out.push(`<rect width="2" height="${H - 20}" y="10" fill="var(--text)" style="opacity:clamp(0,(var(--t,0) - ${SHAPE_START}) * 8,1);`
     + `x:calc(${p0}px + ${p1 - p0}px * clamp(0,(var(--t,0) - ${SHAPE_START}) / ${SPAN},1))"/>`);
