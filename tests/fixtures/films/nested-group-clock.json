@@ -6,6 +6,7 @@
  "bg": [{ "preset": "plain", "from": 0, "to": 3 }],
  "layers": [
   {
+   "id": "loopgroup",
    "type": "group",
    "x": 0, "y": 0, "w": 1920, "h": 1080, "layout": "free",
    "start": 0, "duration": 3,
