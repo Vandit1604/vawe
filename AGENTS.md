@@ -79,3 +79,10 @@ Never write unit tests after the code. Write down every way a system can fail, t
 scene, the browser engine, the whole authoring ladder) and leaves one artefact,
 `quality/runs/e2e/<timestamp>/report.md`. A known-broken tracked scene is excused by name in
 `quality/baselines/e2e-known-broken.json`, never by loosening what counts as a pass.
+
+## Comments  `[eye]`
+
+Keep a comment only when it holds a fact the code cannot show: an exported function's contract
+(units, ranges, side effects), a source or measured number (`make check GATE=provenance` reads these),
+an outside quirk (Chrome, ffmpeg, a timeout), or a guard that looks safe to delete, with its
+`MISTAKES #`. Never history, never a restatement of the next line. A stale comment is a bug.
