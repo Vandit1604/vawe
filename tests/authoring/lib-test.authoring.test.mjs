@@ -763,6 +763,7 @@ test('lib-test: authoring', async () => {
     ['a moving crimson and amber fire mesh gradient that drifts', 'ember'],                               // gradient recipe
     ['put content in the safe content column at any aspect ratio', 'stage'],                              // placement
     ['make a layer jitter randomly forever, a seeded after effects wiggle expression', 'wiggle'],          // driver
+    ['make a layer’s x and y its centre point instead of its top-left corner', 'center'],             // anchor point
   ];
   {
     const inTop3 = (q, want) => { const qt = arsenalToks(q);
