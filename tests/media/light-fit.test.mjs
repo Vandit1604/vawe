@@ -4,7 +4,7 @@
 // Covers the closed-form fit and the colour-delta/apply pair on synthetic light maps built by hand
 // (no ffmpeg/puppeteer here: harness/media/light-fit.mjs's own CLI, which does render, is exercised
 // separately as the proof step in engine-doctrine/CRAFT/RECREATION.md).
-import { fitFieldOpts, colourDelta, applyDelta } from '../../harness/media/light-fit.mjs';
+import { fitFieldOpts, colourDelta, applyDelta, bgWindow } from '../../harness/media/light-fit.mjs';
 import { SCHEMA } from '../../core/lightfield/index.js';
 
 function assert(cond, msg) { if (!cond) throw new Error(`FAIL: ${msg}`); }
@@ -57,6 +57,23 @@ function goldenDiagonal(cols = 16, rows = 9) {
   assert(nudged.colour.deep === opts.colour.deep && nudged.colour.ground === opts.colour.ground,
     'applyDelta must leave deep/ground untouched');
   console.log('✓ light-fit.test.mjs: applyDelta moves bloom/mid only, never deep/ground');
+}
+
+// bgWindow: the tool's output must be shaped as a `bg` WINDOW ({from, to, html, tone}), never a
+// `layers[]` entry, because its var(--t) breakpoints are the scene's ABSOLUTE clock (what a bg window
+// receives), while a layer gets LOCAL time relative to its own start (quality/refs/kinetic-promo/
+// friction.jsonl: pasted into layers[], every key after the first rendered transparent).
+{
+  const w = bgWindow({ start: 5.45, end: 7.67, html: '<div></div>', groundHex: '#050912' });
+  assert(w.from === 5.45 && w.to === 7.67, `bgWindow must key its span as from/to, the bg WINDOW schema, not start/end, a layer's own keys; got ${JSON.stringify(w)}`);
+  assert(w.type === undefined && w.id === undefined, 'bgWindow must carry no layer-shaped keys (type/id) that would invite dropping it into layers[]');
+  assert(w.html === '<div></div>', 'bgWindow must carry the html through unchanged');
+  assert(w.tone === 'dark', `a near-black ground should read tone 'dark' (core/validate/backgrounds.mjs requires tone on a hand-authored bg window), got ${w.tone}`);
+  console.log("✓ light-fit.test.mjs: bgWindow emits {from, to, html, tone}, the shape var(--t) is actually written for");
+
+  const light = bgWindow({ start: 0, end: 1, html: '', groundHex: '#f5f5f5' });
+  assert(light.tone === 'light', `a near-white ground should read tone 'light', got ${light.tone}`);
+  console.log('✓ light-fit.test.mjs: toneFromGround reads light vs dark off the fitted ground colour');
 }
 
 console.log('light-fit.test.mjs: ok');

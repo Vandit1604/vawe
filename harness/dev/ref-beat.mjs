@@ -118,8 +118,9 @@ console.log(`\n✓ wrote ${path.relative(ROOT, ledgerPath)} (pass ${entry.pass})
 
 console.log('\n--- next ---');
 if (!D) {
-  console.log(`  no film yet: author a beat/scene using ${path.relative(ROOT, lightfitOut)} as the background`
-    + ` layer, save it under quality/refs/${REF}/drafts/, then re-run with D=<that file>.`);
+  console.log(`  no film yet: author a beat/scene, spread ${path.relative(ROOT, lightfitOut)}'s contents`
+    + ` into the top-level \`bg\` array (a bg WINDOW, not a layers[] entry: its var(--t) is absolute`
+    + ` scene time), save it under quality/refs/${REF}/drafts/, then re-run with D=<that file>.`);
 } else if (matchRow && matchRow.combined >= 0.70) {
   console.log(`  combined ${matchRow.combined.toFixed(2)} >= 0.70: get two fresh structured judges`
     + ' (make judge STRUCT=1 RUNS=A,B) before calling this beat done.');

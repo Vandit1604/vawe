@@ -17,6 +17,11 @@ and two judges >= 8/10, or report 3 passes without progress."
 **Check preconditions before doing anything else.** Stop and report if any of these are missing:
 - `quality/refs/<ref-name>/source.mp4` and `beats.md` exist.
 - `beats.md` names a `## Beat <n>:` heading with a `- window: s-s` line for this beat.
+- `beats.md`'s windows come from a measured cut list (`node harness/dev/ref-cutlist.mjs
+  REF=<ref-name>`), not eyeballed off a contact sheet: a sheet's frame spacing assumes a pace the real
+  clip may not hold, and a reference can run 2x the assumed speed with an outro the sheet never showed
+  at all (quality/refs/kinetic-promo/friction.jsonl). Look at the tool's own stills before trusting its
+  windows; scene-detect only catches hard cuts, so a soft crossfade's boundary still wants an eye check.
 - A worktree to do the fix in (never on `main`, per the friction step below).
 
 **1. Study.** `make study REF=quality/refs/<ref-name>/source.mp4 D=<film.json> MATCH=1 LIGHT=1` if a
@@ -25,7 +30,17 @@ draft already exists for this beat; otherwise skip to light-fit and author the f
 **2. light.json / camera.json.** `node harness/media/light-fit.mjs --ref source.mp4 --start <s>
 --end <e> --out study/beat<n>.lightfit.json --grid grid/beat<n>.png` (or `harness/dev/ref-beat.mjs`
 below runs this for you). Fit the beat's light before touching anything else: a wrong background
-makes every later score wrong for a reason that is not the beat's motion.
+makes every later score wrong for a reason that is not the beat's motion. Its output is a `bg` WINDOW
+(`{from, to, html, tone}`): spread it into the top-level `bg` array, never into `layers[]` (a layer's
+`var(--t)` is local to the layer, a bg window's is the scene's absolute clock; pasted into `layers[]`
+every key after the first renders transparent). A window whose `end` lands on the clip's own last
+timestamp is clamped a frame short internally; you do not need to trim it in `beats.md`.
+
+**Two more lessons, paid for once already:** a centred layer (`x:'50%' y:'50%'`) needs
+`anchorPoint:'center'`, since `x`/`y` anchor the box's top-left corner by default
+(`core/layout/safe.js`'s `ANCHOR_POINTS`). The engine already applies real per-frame motion blur above
+480px/s, or with explicit `motionBlur:true`/`degrees` (`core/tracks/motion.js`'s `AUTO_BLUR_FLOOR_PER_SEC`);
+do not hand-roll a directional-blur resample.
 
 **3. Look review, then motion.** `make look LOOKS=1 D=<film.json>` for the still frame first. Only
 once the still reads right, direct the motion (camera, transitions, timing).
