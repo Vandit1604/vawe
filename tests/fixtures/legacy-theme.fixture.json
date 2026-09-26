@@ -1,0 +1,10 @@
+{
+  "name": "legacy-fixture",
+  "palette": {
+    "bg": "#101010",
+    "ink": "#f0f0f0",
+    "accent": "#ff5a1f"
+  },
+  "type": { "sans": "Inter", "mono": "Menlo" },
+  "gradient": ["#101010", "#151515", "#1a1a1a"]
+}

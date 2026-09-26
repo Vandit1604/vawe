@@ -277,7 +277,7 @@ export async function fetchThemeFile(spec) {
 
 export async function resolveTheme(spec) {
   const raw = await fetchThemeFile(spec);
-  return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+  return expandTheme(raw, { parseColor, colorAlpha });
 }
 
 // resolveThemeTokenValues(spec): the SAME token-file fetch resolveTheme does, but returning the raw
