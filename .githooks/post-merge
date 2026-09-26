@@ -12,5 +12,5 @@ pending="$git_dir/vawe-regen-pending"
 
 echo "post-merge: regenerating (touched by merge=vawe-generated):"
 sed 's/^/  /' "$pending"
-make regen
+eval "${VAWE_REGEN_CMD:-make regen}"
 rm -f "$pending"
