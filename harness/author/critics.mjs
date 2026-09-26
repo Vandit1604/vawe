@@ -1,20 +1,3 @@
-// harness/author/critics.mjs: THE CRITIC PANEL, as an invokable, recorded step.
-//
-// engine-doctrine/CRAFT/SUBAGENTS.md defines six standing critics (beat · bg-motion · reveal · fidelity · copy ·
-// seam), each with one job, one input path, one verdict shape, and says to run them in parallel and
-// record what they find. That doc was an argument nobody could invoke: launching the panel meant
-// re-deriving six prompts by hand from a table, and "record it" meant a bare instruction with nowhere
-// to write to. This is the tool half: it prints the six prompts, concrete for THIS scene, for the main
-// thread to copy into six parallel Agent calls, and it writes the receipt SUBAGENTS.md asks for once
-// the main thread reports back what each critic found.
-//
-// This file does NOT launch agents. Launching is the harness's job (Agent tool calls in one message);
-// this only composes what to hand each one and records what came back. Pure fs + JSON, no side effects
-// on import.
-//
-//   node harness/author/critics.mjs films/scene/x.json                 # emit the six critic prompts
-//   node harness/author/critics.mjs films/scene/x.json --deciders      # emit the decider roster, in order
-//   node harness/author/critics.mjs films/scene/x.json --record p.json # write the panel receipt
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,9 +12,6 @@ import { PLAN_JUDGE_CODES, isPlanJudgeCode, rankPlanJudgeFindings } from '../lib
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// One decider writes one exclusive scope (engine-doctrine/CRAFT/SUBAGENTS.md), so its rule briefs must stay
-// scoped the same way: a scene decider hears nothing about sound, a sound decider hears nothing about
-// layout. This table is the ONE place that mapping lives.
 const DECIDER_CATEGORIES = {
   storyboard: ['direction', 'content'],
   subject: ['direction', 'content'],
@@ -41,16 +21,10 @@ const DECIDER_CATEGORIES = {
   sound: ['sound', 'captions'],
 };
 
-// The owner's top motion rules must reach the motion brief whatever the default check-then-order
-// ranking would do with a fixed char budget (engine-doctrine/CRAFT/rules/motion.json has 12 records, the flat cap
-// keeps 5). Named here, not hand-typed as prose in DECIDERS below: rulesFor's `pin` is the one selector
-// mechanism, this is just which ids this role insists on.
 export const DECIDER_PIN = {
   motion: ['motion.readable-hold', 'motion.exit-faster', 'motion.no-jolt'],
 };
 
-// engine-doctrine/CRAFT/SUBAGENTS.md owns the worktree agent contract text (marked by these comments) so a
-// DECIDERS=1 brief quotes it rather than carrying its own drifting copy.
 export function worktreeContract() {
   const doc = fs.readFileSync(path.resolve(repoRoot, 'engine-doctrine/CRAFT/SUBAGENTS.md'), 'utf8');
   const start = doc.indexOf('<!-- worktree-contract:start -->');
@@ -64,9 +38,6 @@ function currentSha() {
   catch { return '(unknown, git rev-parse failed)'; }
 }
 
-// The roster, kept in lockstep with engine-doctrine/CRAFT/SUBAGENTS.md's table. `ab` is listed there as built-then-
-// cut (nothing runs today), so it is not in this roster. Each `input` is a function of the scene's
-// paths, matching the table's "input it is handed" column exactly.
 export const ROSTER = [
   {
     name: 'beat',
@@ -117,13 +88,6 @@ function flatLayers(ls) {
   return (ls || []).flatMap((L) => [L, ...flatLayers(L.layers), ...flatLayers(L.children)]);
 }
 
-// The DECIDER roster, kept in lockstep with engine-doctrine/CRAFT/SUBAGENTS.md's second table and with AGENTS.md.
-// A decider WRITES into the film, which is a larger permission than a critic's, so each one carries the
-// field it owns and nothing else: two deciders that share a field fight over it, and a decision that
-// turns out wrong has to be untangled instead of reverted. Order is a dependency chain, not a
-// preference. The one link worth stating twice: motion comes BEFORE transitions, because the
-// content-aware cut reads the velocity at a joint as its strongest signal, so a cut chosen against a
-// still frame is choosing blind.
 export const DECIDERS = [
   {
     name: 'storyboard',
@@ -152,11 +116,6 @@ export const DECIDERS = [
     scope: 'motion[] and idle, on layers the storyboard says move',
     job: 'key the motion the storyboard planned, and prove it moved by MEASURING across frames',
     why: 'nothing moves that nobody asked to move, so every keyed track is a decision somebody made',
-    // The doctrine used to live here as hand-typed prose, drifting from engine-doctrine/CRAFT/rules/motion.json
-    // the moment either one changed. Now only lines that are NOT a restatement of a rule record stay:
-    // the design.md pointer (no shared preamble exists to hold it, see critics.mjs's module comment
-    // above DECIDER_PIN) and the register-budget sentence, which names no motion.json record. The rest
-    // is 3 standing lines plus whatever rulesFor(pin: DECIDER_PIN.motion) below surfaces.
     extra: [
       'Read this film\'s <film>.design.md before writing a size, radius, shadow or colour: reference its --kit-<group>-<name> token, never a literal. A value it does not have yet goes there first.',
       'You carry a budget. The register split (engine-doctrine/CRAFT/MOTION-REGISTERS.md) licenses sustained motion for kinetic work, and that licence is the door effect soup comes through. One named peak, and every other moving thing able to say what it is for.',
@@ -197,10 +156,6 @@ export function buildRoster(scenePath) {
   const fragments = flat
     .filter((L) => L.type === 'html' && typeof L.src === 'string')
     .map((L) => L.src);
-  // A BEAT and a FRAGMENT are different counts and conflating them told every decider brief that a
-  // 5-beat film with no html had "0 beat(s)". A beat is a unit of story; a fragment is one hand-written
-  // surface, and one fragment can serve several beats (the same rendered card, shown once then five
-  // times). Read the beat count from what actually marks a beat, in order of directness.
   const beatBlocks = flat.filter((L) => L.type === 'beat').length;
   const beats = beatBlocks
     || ((scene.transitions || []).length ? scene.transitions.length + 1 : 0)
@@ -264,14 +219,6 @@ export function buildRoster(scenePath) {
   return { ...ctx, roster };
 }
 
-// findCitedStudy: does this storyboard cite a refs/ clip, and did `make study` already look at it?
-//
-// A craft line like "one eyedropped violet/magenta haze" is text describing a picture nobody in the
-// brief can see. The judge can only check field-craft against the actual frames, so if the storyboard
-// names a refs/<clip> and refs/study.mjs already wrote a sheet.png + frames/ for it (harness/media/
-// study.mjs:696), this hands those paths to the judge. No citation, or a citation nothing has studied
-// yet: this returns null and field-craft is judged from the storyboard's own claims, the same as
-// every other question here.
 function findCitedStudy(sbText) {
   const m = sbText.match(/refs\/[\w.-]+\.(?:mp4|mov|webm)/);
   if (!m) return null;
@@ -292,22 +239,6 @@ function findCitedStudy(sbText) {
   return null;
 }
 
-// buildPlanJudgeBrief: THE PLAN JUDGE, at the stage it belongs in.
-//
-// engine-doctrine/CRAFT/SUBAGENTS.md's `storyboard` decider (DECIDERS[0] above) is the only role whose
-// job is "decide the film as a whole: the beats, the through-line, the motion plan and the cut plan",
-// which is exactly the judgement a plan needs and exactly what quality/gates/storyboard-check.mjs
-// cannot give it (that gate checks structure: fields present, holds inside the genre band, no
-// placeholder copy; it does not and cannot say whether the film is worth making). Reusing that role's
-// own categories and rulesFor call, not a second assembler, is the point: two ways to compose a brief
-// is the drift this repo fights hardest.
-//
-// UNLIKE the storyboard DECIDER, this brief never asks for a write. It is a CRITIC in
-// SUBAGENTS.md's own sense: it reports findings against a closed code set (harness/lib/plan-judge-codes.mjs).
-// A PASS is never self-recorded, so this brief never offers one to return.
-//
-// Works from the storyboard ALONE: a plan-stage film may have no scene.json yet (scaffold not run) or
-// one with no fragments (design not started), and this must judge it anyway, before either exists.
 export function buildPlanJudgeBrief(arg) {
   const p = filePaths(arg);
   if (!fs.existsSync(p.sb)) throw new Error(`no storyboard at ${path.relative(repoRoot, p.sb)}`);
@@ -353,11 +284,6 @@ export function buildPlanJudgeBrief(arg) {
       + 'generative: light, particles, a shader), or only a colour, a number or an adjective that could '
       + 'be written without looking at the reference? (code: field-craft)',
     '',
-    // BEFORE the storyboard, not after it. The storyboard is the bulk of this brief, and anything
-    // printed past it is the first thing an output filter drops: `make plan-judge` piped through the
-    // terminal's own truncation cut this block every time, so the one instruction that makes
-    // field-craft answerable never reached the reader. An instruction that arrives after the material
-    // it governs is an instruction nobody follows.
     ...(study ? [
       `Reference study for the clip this storyboard cites (${study.source}). OPEN THESE FIRST: `
         + `field-craft cannot be answered from the text below, only from what these show.`,
@@ -392,8 +318,6 @@ export function buildPlanJudgeBrief(arg) {
     digest, prompt: lines.filter((l) => l !== null).join('\n') };
 }
 
-// Every on-screen string in beat order, for the `copy` critic. "Beat order" here means layer order in
-// the JSON, the only order the tool can see without rendering.
 function copyLines(scene) {
   const out = [];
   for (const L of flatLayers(scene.layers)) {
@@ -427,15 +351,12 @@ export function buildPanel(scenePath, vs) {
   return { scene: D, name, mp4, critics };
 }
 
-// ---- CLI --------------------------------------------------------------------------------------------
 function main() {
   const argv = process.argv;
   const flagPos = (flag) => { const i = argv.indexOf(flag); return i >= 0 ? argv[i + 1] : null; };
   const filmArg = () => argv.find((a, i) => i >= 2 && !a.startsWith('--')
     && argv[i - 1] !== '--record-plan' && argv[i - 1] !== '--record' && argv[i - 1] !== '--vs');
 
-  // THE PLAN JUDGE (harness/author/critics.mjs's own contract: compose and print, never launch).
-  // Works from the storyboard alone, so it runs at plan stage before a scene.json necessarily exists.
   if (argv.includes('--plan-judge')) {
     const arg = filmArg();
     if (!arg) { console.error('usage: node harness/author/critics.mjs <film|storyboard.md> --plan-judge'); process.exit(2); }
@@ -465,9 +386,6 @@ function main() {
       console.error(`✗ "${bad && bad.code}" is not a plan-judge finding code. Valid codes: ${PLAN_JUDGE_CODES.join(', ')}`);
       process.exit(2);
     }
-    // Recorded in Murch's Rule of Six order (harness/lib/plan-judge-codes.mjs, PLAN_JUDGE_PRIORITY),
-    // never in the order the judge happened to report them: a reader of the receipt sees which finding
-    // matters most first, the same ordering a working editor would apply by hand.
     const findings = rankPlanJudgeFindings(rawFindings);
     const rec = writeReceipt('plan-judge', p.sb, { findings, ranAt: new Date().toISOString() });
     if (!rec) { console.error(`✗ could not write the plan-judge receipt (is ${p.sb} readable?)`); process.exit(1); }
@@ -479,10 +397,6 @@ function main() {
     return;
   }
 
-  // Read back a recorded plan-judge verdict. REFUSES rather than reporting a pass over a plan it can no
-  // longer see: a receipt whose hash disagrees with the storyboard on disk was recorded against a
-  // version that has since moved, and showing it as current is the exact context-rot this role exists
-  // to prevent. Mirrors harness/lib/census.mjs's refuse().
   if (argv.includes('--show-plan-verdict')) {
     const arg = filmArg();
     if (!arg) { console.error('usage: node harness/author/critics.mjs <film> --show-plan-verdict'); process.exit(2); }
