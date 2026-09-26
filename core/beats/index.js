@@ -119,9 +119,22 @@ export function beatPeriod(grid) {
  * A joint further than `maxShift` from any beat is LEFT ALONE, snapToBeat's own refusal, honoured
  * and reported, never widened. An author who means a time writes `"snap": false` on that joint.
  */
+// PER-JOINT SNAP GRANULARITY: `j.snap` may be the string "beat"/"bar"/"downbeat" instead of the
+// existing boolean, naming which pulse THIS ONE joint lands on regardless of the scene's own
+// `audio.beatSync.bar` default (still what every joint that leaves `snap` unset uses). Only bindBeats
+// has both pulses to offer (`ctx.altGrids`); every other caller (the CLI preview, every existing
+// test) passes none, so every joint keeps using the one grid it was given, unchanged.
+function gridFor(snap, ctx) {
+  if (snap == null || !ctx.altGrids) return ctx.grid;
+  if (snap === 'bar' || snap === 'downbeat') return ctx.altGrids.bar || ctx.grid;
+  if (snap === 'beat') return ctx.altGrids.fine || ctx.grid;
+  throw new Error(`snap ${JSON.stringify(snap)}: must be false, "beat", "bar", or "downbeat".`);
+}
+
 function snapMark(j, kind, centre, ctx) {
   if (j.snap === false) return;                       // the author meant this time
-  const to = snapToBeat(centre, ctx.grid, ctx.maxShift);
+  const grid = gridFor(typeof j.snap === 'string' ? j.snap : null, ctx);
+  const to = snapToBeat(centre, grid, ctx.maxShift);
   if (to === centre) { ctx.held.push(`${kind}@${centre}`); return; }
   const delta = to - centre;
   j.t = +(j.t + delta).toFixed(3);
@@ -154,8 +167,8 @@ function snapStings(data, grid, ctx) {
   }
 }
 
-export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
-  const ctx = { grid, maxShift, moved: [], held: [], shifts: [] };
+export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT, altGrids = null) {
+  const ctx = { grid, altGrids, maxShift, moved: [], held: [], shifts: [] };
   for (const c of data.cuts || []) if (c && typeof c.t === 'number') snapMark(c, 'cut', c.t, ctx);
   for (const s of data.seams || []) {
     if (!s || typeof s.t !== 'number') continue;
@@ -165,9 +178,41 @@ export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT) {
   return { moved: ctx.moved, held: ctx.held };
 }
 
+const GRID_PIN_RX = /^beat:(\d+)$/;
+
 /**
- * THE OWNER on the render path. Read the declaration, validate the grid, apply the policy above once,
- * and say what moved.
+ * EXPLICIT GRID PINS: a cut/seam/sting's `t` may still read "beat:12" (bare, no `.start`/`.end`) here,
+ * left untouched on purpose by core/timeline/relative-time.js `isGridPin` because the real grid was
+ * not loaded yet. Resolved ONCE, before any nearest-beat nudging, to the exact seconds of that INDEX
+ * (0-based) in `grid` (the fine pulse: an author pins to a beat, not a bar, by number). `snap` is then
+ * forced false, so the nudge pass below leaves a pin exactly where it was pinned rather than treating
+ * it as an ordinary authored time that happens to already sit on the grid.
+ */
+function resolveGridPins(data, grid) {
+  const pins = [];
+  const pinList = (list, kind) => {
+    for (const j of list || []) {
+      if (!j || typeof j.t !== 'string') continue;
+      const m = GRID_PIN_RX.exec(j.t.trim());
+      if (!m) continue;
+      const n = Number(m[1]);
+      if (!(n < grid.length)) throw new Error(`${kind} "beat:${n}": the music grid only has `
+        + `${grid.length} beat(s) (0-${grid.length - 1}), ${FIX} against a longer track.`);
+      const from = j.t;
+      j.t = grid[n];
+      j.snap = false;
+      pins.push(`${kind} ${from} -> ${j.t}s`);
+    }
+  };
+  pinList(data.cuts, 'cut');
+  pinList(data.seams, 'seam');
+  pinList(data.stings, 'sting');
+  return pins;
+}
+
+/**
+ * THE OWNER on the render path. Read the declaration, validate the grid, resolve any explicit pin,
+ * apply the nudge policy above once, and say what moved.
  */
 export function bindBeats(data, sidecar) {
   const cfg = beatSyncOf(data);
@@ -184,9 +229,17 @@ export function bindBeats(data, sidecar) {
       + `(below ${MIN_CONFIDENCE}): the track has no pulse worth snapping to. Use a bed with a clear `
       + 'beat, or drop audio.beatSync.');
   const maxShift = typeof cfg.maxShift === 'number' ? cfg.maxShift : DEFAULT_MAX_SHIFT;
-  const grid = unrollGrid(pulse, Number(sidecar.seconds) || 0, Number(data.duration) || 0);
-  const { moved, held } = snapJoints(data, grid, maxShift);
-  return { unit, bpm: sidecar.bpm, confidence: conf, maxShift, moved, held };
+  const period = Number(sidecar.seconds) || 0;
+  const dur = Number(data.duration) || 0;
+  const grid = unrollGrid(pulse, period, dur);
+  // Both pulses unrolled the SAME way, so a per-joint override (`snap:"beat"`/`"bar"`) lands on the
+  // real grid rather than a different phase of it. `bar` may be absent from an older sidecar.
+  const fineGrid = unrollGrid(sidecar.beats || [], period, dur);
+  const barGrid = Array.isArray(sidecar.downbeats) && sidecar.downbeats.length
+    ? unrollGrid(sidecar.downbeats, period, dur) : null;
+  const pinned = resolveGridPins(data, fineGrid);
+  const { moved, held } = snapJoints(data, grid, maxShift, { fine: fineGrid, bar: barGrid });
+  return { unit, bpm: sidecar.bpm, confidence: conf, maxShift, moved, held, pinned };
 }
 
 /** One line an author can read in the render log: did the grid actually do anything? */
@@ -194,5 +247,6 @@ export function describeBind(r) {
   if (!r) return '';
   return `beatSync: ${r.bpm} BPM ${r.unit}, ${r.moved.length} joint(s) moved`
     + (r.moved.length ? ` (${r.moved.map((m) => `${m.kind} ${m.from}s → ${m.to}s`).join(', ')})` : '')
+    + (r.pinned && r.pinned.length ? `, ${r.pinned.length} pinned (${r.pinned.join(', ')})` : '')
     + (r.held.length ? `, ${r.held.length} left where the author put them (>${r.maxShift}s from any beat): ${r.held.join(', ')}` : '');
 }

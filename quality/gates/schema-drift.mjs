@@ -369,7 +369,7 @@ const defined = new Set();
 })(schema.fields);
 
 // engine internals that are NOT authored data fields (computed / structural), so not in the schema
-const INTERNAL = new Set(['type', 'children', 'part', 'use']);
+const INTERNAL = new Set(['type', 'children', 'part', 'use', 'groupClock']);
 
 const missing = [...engineProps].filter((p) => !defined.has(p) && !INTERNAL.has(p)).sort();
 if (missing.length) {

@@ -695,7 +695,7 @@ test('lib-test: authoring', async () => {
     ["one word melting into the next word", "morphText"],
     // MOVE SHAPES (core/motion/shapes.js). An author reaches these through `move: <shape>:<band>`,
     // so the plain question is about the FEELING of the travel, never the shape's name.
-    ["a scroll that surges then gives up, the way a hand scrolls", "pan"],
+    ["a scroll that surges then gives up, the way a hand scrolls", "pan"], ["make a group of layers loop forever", "forever"],
   ];
   {
     const top3 = (q, want) => { const qt = arsenalToks(q);

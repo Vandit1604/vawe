@@ -1,7 +1,7 @@
 {
-  "total": 726,
-  "previewed": 339,
-  "families": 61,
+  "total": 728,
+  "previewed": 341,
+  "families": 62,
   "tags": [
     [
       "asset",
@@ -101,7 +101,7 @@
     ],
     [
       "timing",
-      84
+      86
     ],
     [
       "top-level",
@@ -4866,6 +4866,33 @@
           "stem": "easings--standard",
           "desc": "MD3's default curve, cubic-bezier(0.2,0,0,1) · the everyday transition when nothing argues for enter, exit or emphasis",
           "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "group-clock-loop-shapes",
+      "title": "Group clock loop shapes",
+      "tag": "timing",
+      "intro": "The `loop` field of a group's `clock`. A whole number repeats the cycle that many times then holds (see `hold`); one of these two names repeats without limit, for as long as the group's own `duration` keeps it on screen.",
+      "mode": "table",
+      "note": null,
+      "noPreview": null,
+      "count": 2,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "forever",
+          "stem": "group-clock-loop-shapes--forever",
+          "desc": "repeat the cycle without limit, restarting at 0 the instant the previous pass reaches the end of its own local duration, never reversing",
+          "scene": "/assets/effects/group-clock-loop-shapes--forever.json",
+          "noPreview": null
+        },
+        {
+          "name": "pingpong",
+          "stem": "group-clock-loop-shapes--pingpong",
+          "desc": "repeat the cycle without limit, but reverse direction every other pass, like a ball bouncing between two walls, so it never jumps back to 0",
+          "scene": "/assets/effects/group-clock-loop-shapes--pingpong.json",
           "noPreview": null
         }
       ]

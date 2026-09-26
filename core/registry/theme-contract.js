@@ -329,16 +329,22 @@ const DEFAULT_FIELD_DARK = { grain: 0.08, vignette: 0.15 };
 const MOTION_FALLBACK = { bounce: 0, settle: 0.6, enter: 48, durationScale: 1 };
 
 // `scale`: DERIVED from `motion.enter`, the pixel distance a theme's own layers already travel on
-// entrance. Regressed off the 7 hand-authored looks (vawe/a24/apple/bloomberg/duolingo/nike/vercel):
-// hook ~= 55 + 1.12*enter tracks all 7 within 7px (nike, the widest miss, predicts 106.5 against an
-// authored 110). The three smaller sizes are NOT independently derived: every authored look keeps the
-// same proportion to its own hook (headline ~0.70x, body ~0.41x, caption ~0.27x, again averaged off
-// the 7 and each within 0.03 of every one of them), so those three ratios are a real, and genuinely
-// constant, type-scale relationship, kept as constants deliberately rather than re-fit per theme.
-const scaleFromMotion = (m) => {
-  const hook = 55 + 1.12 * m.enter;
-  const r = (mul, lo) => Math.max(lo, Math.round(hook * mul));
-  return { hook: Math.round(hook), headline: r(0.70, 20), body: r(0.41, 14), caption: r(0.27, 10) };
+// entrance. The base regression (hook ~= 55 + 1.12*enter, headline/body/caption at 0.70x/0.41x/0.27x
+// of hook) tracked 7 hand-authored looks within 7px, but those looks were themselves undersized for a
+// 1920px canvas watched on a phone: two agent-authored films both shipped a "hook" role around 90-110px,
+// which reads as small, empty type on a real screen (engine-doctrine/MISTAKES.md, judge scores 5/10 and
+// 6/10 the same week). Never gate on how big an object looks; the fix is a bigger DEFAULT, not a check.
+// Rescaled so `hook` lands 120-180px on a 1920-wide landscape canvas across the shipped themes' `enter`
+// range (24-52) and 150-220px on a 1080-wide portrait one (9:16/4:5): a phone-legible hero step by
+// default, still deriving from the theme's own motion so a calm brand and a punchy one keep different
+// looks. The three smaller ratios are re-fit to the same phone-legible target (body ~36-48px,
+// caption floored at MIN_VIDEO_TEXT_PX below), not re-measured off new authored looks, so treat them as
+// tuned constants same as before, not a fresh regression.
+const PORTRAIT_SCALE = 1.2; // 9:16/4:5 hold the phone closer: bump the whole scale, not just the hook
+const scaleFromMotion = (m, portrait) => {
+  const base = (95 + 1.7 * m.enter) * (portrait ? PORTRAIT_SCALE : 1);
+  const r = (mul, lo) => Math.max(lo, Math.round(base * mul));
+  return { hook: Math.round(base), headline: r(0.66, 60), body: r(0.27, 32), caption: r(0.20, 28) };
 };
 
 // `cuts`: DERIVED from `motion.durationScale` (the theme's overall pace: >1 is slower/more cinematic,
@@ -362,12 +368,12 @@ const CUT_ACCENT_TIERS = [ // ordered still -> bouncy; each `max` is the upper e
 ];
 const pickTier = (tiers, v) => (tiers.find((t) => v <= t.max) || tiers[tiers.length - 1]).name;
 
-export function computedLook(theme, { isLightBg } = {}) {
+export function computedLook(theme, { isLightBg, portrait = false } = {}) {
   const bg = theme && theme.palette && theme.palette.bg;
   const light = isLightBg && bg != null ? isLightBg(bg) : true; // unknown bg reads as light, the harmless side
   const m = { ...MOTION_FALLBACK, ...(theme && theme.motion) };
   return {
-    scale: scaleFromMotion(m),
+    scale: scaleFromMotion(m, portrait),
     layout: { ...DEFAULT_LAYOUT },
     cuts: { default: pickTier(CUT_DEFAULT_TIERS, m.durationScale), accent: pickTier(CUT_ACCENT_TIERS, m.bounce) },
     field: light ? { ...DEFAULT_FIELD_LIGHT } : { ...DEFAULT_FIELD_DARK },

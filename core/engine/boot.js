@@ -528,7 +528,7 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion
   const tokenValues = await resolveThemeTokenValues(rawTheme);
   Object.assign(data, resolveTokenRefs(data, tokenValues));
-  const look = resolveLook(theme, { isLightBg }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
+  const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
   bakeTextSizeRoles(data, look);
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
   produceBaseline(data, theme, frame, look);
