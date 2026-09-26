@@ -117,27 +117,35 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   # ONLY when this range touches something it can catch (core/, renderer/, blocks/, generators/,
   # films/scene/ tracked files, site/public's engine copy, quality/gates/snap-*): same scoped-by-range
   # shape as site-build-check above, same reason, an ordinary doc or skill push must stay fast.
-  if ! node quality/gates/e2e-check.mjs "$range"; then
+  if [ -n "$VAWE_FULL" ] && ! node quality/gates/e2e-check.mjs "$range"; then
     echo "✗ pre-push blocked: make e2e failed. Fix it, or --no-verify to override." >&2
     exit 1
   fi
 done
 
-echo "▶ pre-push: framework gates (schema-check + test + craft-coverage + coverage + doc-refs + skill-reach + arsenal + word-action + discovery + generated + scenes + mistakes + docker + prop-probe + seo-surface + rung + provenance + sfx-check + audit-test + glyphs-audit + sim-audit + docker-context + judge-census + inert-check + skill-check + rule-length + bench-fast) …"
-if ! make test bench-fast; then
-  echo "✗ pre-push blocked: framework check (test) failed. Fix it, or push with --no-verify to override." >&2
-  exit 1
+# Two tiers. Every push runs the fast static tier (seconds). The full tier (make test, e2e, the
+# browser-rendering gates) runs once per batch: the integrator pushes with VAWE_FULL=1.
+FAST="schema-check doc-refs skill-reach word-action discovery generated-check no-emdash mistakes-check rung provenance skill-check rule-length"
+FULL="craft-coverage coverage arsenal-check scenes-json docker-check prop-probe seo-surface sfx-check glyphs-audit sim-audit docker-context judge-census inert-check"
+if [ -n "$VAWE_FULL" ]; then
+  echo "▶ pre-push: FULL tier (make test + audit-test + every gate)"
+  if ! make test bench-fast; then
+    echo "✗ pre-push blocked: make test failed." >&2
+    exit 1
+  fi
+  if ! make dev-tool X=audit-test; then
+    echo "✗ pre-push blocked: audit-test failed." >&2
+    exit 1
+  fi
+  GATES="$FAST $FULL"
+else
+  echo "▶ pre-push: fast tier (static gates only; VAWE_FULL=1 git push runs tests and e2e too)"
+  make bench-fast || exit 1
+  GATES="$FAST"
 fi
-if ! make dev-tool X=audit-test; then
-  echo "✗ pre-push blocked: framework check (audit-test) failed. Fix it, or push with --no-verify to override." >&2
-  exit 1
-fi
-for g in schema-check craft-coverage coverage doc-refs skill-reach arsenal-check word-action discovery \
-         generated-check scenes-json no-emdash mistakes-check docker-check prop-probe seo-surface rung \
-         provenance sfx-check glyphs-audit sim-audit docker-context judge-census inert-check skill-check \
-         rule-length; do
+for g in $GATES; do
   if ! make check GATE="$g"; then
-    echo "✗ pre-push blocked: framework check ($g) failed. Fix it, or push with --no-verify to override." >&2
+    echo "✗ pre-push blocked: framework check ($g) failed." >&2
     exit 1
   fi
 done
