@@ -1,14 +1,3 @@
-// harness/media/vo-captions.mjs: VO CAPTION BUILDER. Turns a voiceover word-timing sidecar
-// (audio.voWords → [{ w, t }]) into timed caption layers the scene engine reads: a top-level
-// `captions` array of { t0, t1, text, words } plus a `captionStyle` (core/captions.js CAP_STYLES).
-// Deterministic + pure: reads files only, no TTS, no speech recognition, no network/clock/random.
-//
-// Grouping: words pack into a phrase until it hits the target size (--group, default 6) OR a pause
-// longer than PAUSE_GAP opens between two words (a natural sentence break). Each word's end is the
-// next word's start (or +TAIL for the last word), so the per-line `words` windows track the real VO.
-//
-// Usage: node harness/media/vo-captions.mjs <scene.json> [--style weightShift] [--group 6] [--write]
-//   default: PRINT the caption array (dry run). --write merges into <scene>.captioned.json (non-destructive).
 import fs from 'node:fs';
 import path from 'node:path';
 import { CAP_STYLE_REGISTRY } from '../../core/type/captions.js';
@@ -26,8 +15,6 @@ const WRITE = process.env.WRITE === '1' || process.argv.includes('--write');
 const style = argVal('--style') || 'weightShift';
 const group = Math.max(1, parseInt(argVal('--group') || String(DEFAULT_GROUP), 10) || DEFAULT_GROUP);
 
-// The registry writes the refusal, including the cross-registry hint; this stays a clean CLI exit
-// rather than a stack trace, which is the only reason it is caught rather than thrown through.
 try { CAP_STYLE_REGISTRY.pick(style); } catch (e) { console.error(`--style: ${e.message}`); process.exit(2); }
 
 const scene = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -45,16 +32,12 @@ if (!wordsPath) {
 const raw = JSON.parse(fs.readFileSync(wordsPath, 'utf8'));
 if (!Array.isArray(raw) || !raw.length) { console.error(`voWords sidecar ${wordsPath} is empty or not an array`); process.exit(2); }
 
-// normalize + sort by absolute start time; end = next word's start, last word gets +TAIL.
 const words = raw
   .map((x) => ({ w: String(x.w), t: Number(x.t) }))
   .filter((x) => x.w.trim() && Number.isFinite(x.t))
   .sort((a, b) => a.t - b.t)
   .map((x, i, arr) => ({ ...x, end: i + 1 < arr.length ? arr[i + 1].t : x.t + TAIL }));
 
-// group into phrases: break at the target size, or after a pause. Each word's end is the next
-// word's onset, so a silence shows up as a long trailing word (end - t): a big gap AFTER a word
-// means the speaker paused, so the phrase breaks before the next word.
 const phrases = [];
 let cur = [];
 for (const word of words) {
@@ -68,8 +51,6 @@ for (const word of words) {
 }
 if (cur.length) phrases.push(cur);
 
-// one caption per phrase. `words` gives the engine exact per-word windows (core/captions.js:16),
-// so the karaoke tracks the real VO instead of the length-proportional fallback.
 const captions = phrases.map((p) => ({
   t0: r3(p[0].t),
   t1: r3(p[p.length - 1].end),

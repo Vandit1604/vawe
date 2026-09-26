@@ -1,8 +1,3 @@
-// harness/dev/ref-fetch.mjs: download a reference video for STUDY (refs/, gitignored, never shipped).
-// Pull the real video file behind a Pinterest pin. The pin page renders the player client-side and
-// the mp4 never appears in the served HTML, so watch the network and read the embedded payload.
-// Prefers the plain h264 ladder (expMp4): the av1/hevc variants decode unevenly in ffmpeg, and a
-// reference you cannot step frame by frame is not a reference.
 import puppeteer from 'puppeteer';
 import fs from 'node:fs';
 import path from 'node:path';

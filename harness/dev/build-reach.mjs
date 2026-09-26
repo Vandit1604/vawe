@@ -1,12 +1,7 @@
-// One-off generator for quality/baselines/reach.json (subtraction.plan.md Phase 1).
-// Run once, output committed; not a live gate.
 import fs from 'node:fs';
 
 const R = (path, engine, author, verdict, evidence) => ({ path, engine, author, verdict, evidence });
 
-// engine: file:line of a real consumer, or null.
-// author: "storyboard verb" | "JSON (documented)" | "not at all"
-// verdict: "unreachable" | "unwanted" | "unsure"
 const ROWS = [
 R('alongPath', 'core/fx/along-path.js:1 (registered core/fx/index.js:35)', 'JSON (documented)', 'unwanted',
   'core/fx/index.js DESCRIPTIONS gives the exact modifiers:[{alongPath:{...}}] shape; engine-doctrine/PRIMITIVES.md teaches the modifiers[] mechanism generally. Never used in 182 scenes.'),

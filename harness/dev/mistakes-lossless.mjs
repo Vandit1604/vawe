@@ -1,14 +1,4 @@
 #!/usr/bin/env node
-// Extracts the load-bearing facts from engine-doctrine/MISTAKES.md so an edit pass can be
-// proven lossless: every file:line, every #<number> cross-reference (with the
-// clause naming what it was about), every holds: line, every heading, and a
-// count of every number that appears. Run before editing, save the output,
-// run again after, diff. An empty diff is the only acceptable result.
-//
-// Usage:
-//   node harness/dev/mistakes-lossless.mjs            # print extraction to stdout
-//   node harness/dev/mistakes-lossless.mjs --diff      # compare against a saved baseline
-//   node harness/dev/mistakes-lossless.mjs --save      # save current extraction as baseline
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execSync } from 'node:child_process';
@@ -19,15 +9,11 @@ const BASELINE = 'harness/dev/.mistakes-lossless-baseline.txt';
 function extract(text) {
   const lines = [];
 
-  // Headings (mistakes-dupes compares these; must be byte-identical).
   for (const m of text.matchAll(/^## .+$/gm)) lines.push(`HEADING: ${m[0]}`);
 
-  // file:line references, e.g. core/layout/safe.js:35
   const fileLineRe = /\b[\w./-]+\.(?:js|mjs|ts|go|json|md|css|html)(?::\d+)+/g;
   for (const m of text.matchAll(fileLineRe)) lines.push(`FILELINE: ${m[0]}`);
 
-  // #<number> cross-references, with the sentence they appear in (the clause
-  // naming what the referenced entry was about is usually in the same sentence).
   for (const m of text.matchAll(/#\d+/g)) {
     const idx = m.index;
     const start = text.lastIndexOf('.', idx) + 1;
@@ -37,10 +23,8 @@ function extract(text) {
     lines.push(`XREF: ${m[0]} :: ${sentence}`);
   }
 
-  // holds: lines
   for (const m of text.matchAll(/^holds:.*$/gm)) lines.push(`HOLDS: ${m[0]}`);
 
-  // Every number, with occurrence count.
   const numCounts = new Map();
   for (const m of text.matchAll(/\b\d[\d,]*\.?\d*\b/g)) {
     numCounts.set(m[0], (numCounts.get(m[0]) || 0) + 1);

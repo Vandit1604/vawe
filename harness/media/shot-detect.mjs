@@ -1,15 +1,3 @@
-// harness/media/shot-detect.mjs: the four shot-boundary detectors and the merge that resolves them,
-// pulled out of study.mjs so they can be IMPORTED without also running study.mjs's CLI.
-//
-// study.mjs is a script: importing it for its exported functions used to also run its whole top-level
-// body (probe, decode, sheet-write) as a side effect of the import, because none of that was guarded
-// behind an `is this the main module` check. harness/media/ingest.mjs needs these detectors without
-// study's sheet/grammar output, so they live here, pure and side-effect-free until called; study.mjs
-// now imports them back for its own CLI, so there is exactly one copy of each.
-//
-// All four detection functions are pure: given the frame series (or scene-score hits) a caller already
-// decoded, they return the boundaries. `detectCuts` and `frameSeries` are the two that decode a real
-// file (via ffmpeg); everything else takes numbers in, returns numbers out.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -34,10 +22,7 @@ export function clusterCuts(hits, threshold, minShot) {
   return out;
 }
 
-// ── shot boundaries ──────────────────────────────────────────────────────────────────────────────
-// ffmpeg's scene score per frame. A hard cut spikes it; a dissolve does not, which is why the result
-// below is reported with its evidence instead of asserted. Detections cluster (a cut lands on several
-// consecutive frames), so nearby hits collapse to the highest-scoring one.
+// ffmpeg's scene score per frame: a hard cut spikes it, a dissolve does not, which is why the result is reported with its evidence instead of asserted.
 export function detectCuts(video, scratchDir, threshold, minShot) {
   const meta = path.join(scratchDir, '.scene-scores.txt');
   ffmpegOrDie(['-v', 'error', '-y', '-i', video, '-an',
@@ -54,22 +39,12 @@ export function detectCuts(video, scratchDir, threshold, minShot) {
   const eligible = hits.filter(cutEligible);
   const peak = eligible.reduce((m, h) => Math.max(m, h.score), 0);
   const clustered = clusterCuts(hits, threshold, minShot);
-  // Near-misses are the hint that the threshold is wrong for THIS film, and the author cannot see
-  // them from the sheet. Our own renders cross-dissolve, so half their authored cuts land here.
+  // Near-misses hint the threshold is wrong for THIS film; our own renders cross-dissolve, so half their authored cuts land here.
   const near = eligible.filter((h) => h.score > threshold / 2 && h.score <= threshold).length;
   return { peak, near, cuts: clustered };
 }
 
-// ── ground seams: joints a luma-delta cut can't see ─────────────────────────────────────────────
-// `edgedetect` marks every pixel that belongs to an edge; its per-frame YAVG (the same signalstats
-// reading LUMA/DELTA use, just on the edge map instead of the picture) is near zero exactly when the
-// frame is empty ground and rises with every letterform, icon or UI edge on screen. A run of
-// consecutive frames at or under `threshold` is a beat of empty ground, with no cut in it for
-// detectCuts() to find.
-//
-// A THRESHOLD RUN IS THE PENUMBRA, NOT THE GAP: the frames either side of true zero are the outgoing
-// shot fading OUT and the incoming shot fading IN. So the reported joint is the CORE's (the run's own
-// minimum) midpoint, and the reported gap is the CORE's span, not the outer run's.
+// `edgedetect`'s per-frame YAVG is near zero exactly when the frame is empty ground; the reported joint is the CORE run's (its own minimum) midpoint, since the frames either side are the outgoing/incoming shots fading.
 export function detectSeams(edge, threshold, dur) {
   const runs = [];
   let cur = null;
@@ -119,11 +94,6 @@ export function detectCrossfades(delta, lo, hi, minRun, flatRatio = 1.6) {
   return sustainedRun(delta, lo, hi, minRun, flatRatio);
 }
 
-// ── one per-frame series, one decode ────────────────────────────────────────────────────────────
-// Reads a whole file once at its own frame rate, printing one signalstats value per frame. Callers
-// build LUMA/DELTA/EDGE series by choosing the filter `chain` (see study.mjs's own callers). `video` is
-// a parameter, never a module-level constant, so this decode is reusable for whatever file the caller
-// is studying.
 export function frameSeries(video, chain) {
   const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', video, '-an', '-vf',
     `${chain},metadata=mode=print:key=lavfi.signalstats.YAVG`, '-f', 'null', '-'],
@@ -154,12 +124,7 @@ export function motionDeltaSeries(video) {
   return frameSeries(video, 'scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
 }
 
-// ── four kinds of joint, one boundary list ──────────────────────────────────────────────────────
-// Two joints found within `minShot` of each other are the same moment measured two ways, and the more
-// EXACT measurement wins: a cut is an exact scene-score peak, a seam a run of low-edge frames, a
-// pan/crossfade a run of DELTA frames, in that order of precision. The disagreement is still RECORDED,
-// never silently dropped: a caller can see that two measurements pointed at the same moment and named
-// it differently (study.mjs's own `conflicts` reporting).
+// Two joints found within `minShot` of each other are the same moment measured two ways; the more exact measurement wins, in this order of precision (cut > seam > pan/crossfade).
 export const JOINT_PRIORITY = { cut: 0, seam: 1, pan: 2, crossfade: 3 };
 export function mergeJoints(kindLists, minShot) {
   const items = kindLists.flatMap(({ kind, items: hits }) => hits.map((h) => ({ t: h.t, kind, evidence: h })))
