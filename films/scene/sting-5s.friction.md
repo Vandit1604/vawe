@@ -1,5 +1,7 @@
 # sting-5s: friction log
 
+<!-- doc-refs-allow: make scaffold · finding #1 below IS the report that this target does not exist -->
+
 Every minute lost, cause, and the engine fix it points to.
 
 1. **~2 min: no `make scaffold` target.** AGENTS.md's own quickstart line names
