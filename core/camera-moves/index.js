@@ -1,5 +1,6 @@
 import { defineRegistry, withBlurb, blurbsOf } from '../registry/registry.js';
 import { resolveCameraMove } from '../registry/vocab.js';
+import { nearest } from '../validate/util.mjs';
 // core/camera-moves/index.js: CAMERA CHOREOGRAPHY, the runner. Every move is its own file, pure
 // (params) → camera-keyframe array, the same shape core/timeline/sequence.js `cameraAt` interpolates
 // ([{t,s,x,y,rx,ry,ease}], t in absolute seconds). A move is smooth and CALCULATED instead of
@@ -131,7 +132,8 @@ export function buildCameraMove(spec, canvas = null) {
   const known = paramsOf(f);
   if (known) {
     const unknown = Object.keys(params).filter((k) => !known.has(k));
-    if (unknown.length) throw new Error(`cameraMove "${move}" does not read ${unknown.map((k) => `"${k}"`).join(', ')}`
+    if (unknown.length) throw new Error(`cameraMove "${move}" does not read `
+      + `${unknown.map((k) => `"${k}"${nearest(k, [...known])}`).join(', ')}`
       + `. It accepts: ${[...known].join(', ')}. A dropped param renders a move you did not author.`);
   }
   // The pan math is `canvasW/2 - tx`, so a landscape default under a 1080x1920 portrait scene mis-centres
