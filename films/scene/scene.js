@@ -1436,7 +1436,12 @@ const boxOf = (id) => boxes.get(id) || null;
       // clock ownership is the layer's own, always: never hand a primitive a `t` beyond what it was
       // authored for, and it holds its last real pose by construction instead of by each primitive
       // remembering to (MISTAKES: the demo film's cursor at 6.9-7.2s).
-      const ownEnd = L.duration != null ? (L.start ?? 0) + L.duration : Infinity;
+      // A LOOPING GROUP CHILD's `L.duration` is one CYCLE, not its life on screen: freezing `rawT` at
+      // the cycle's own end would stop the loop after its first pass. `L.groupClock.outerEnd` is the
+      // group's own authored window, the real "authored life" for a clocked child (runTracks then
+      // remaps `rawT` back down into the cycle it belongs to).
+      const ownEnd = L.groupClock ? L.groupClock.outerEnd
+        : L.duration != null ? (L.start ?? 0) + L.duration : Infinity;
       const lt = Number.isFinite(ownEnd) ? Math.min(rawT, ownEnd - EPS) : rawT;
       runTracks(trackKit, el, L, units, lt, L.step != null ? Math.round(lt * fps) : f, view);
     }

@@ -507,6 +507,13 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `sunset-strip` | moving sunset gradient, red amber mesh | red, magenta and amber drifting slowly, a MOVING three-color sunset mesh |
 | `warm-dusk` | sunset gradient, orange gradient | orange into coral, a sunset ramp on a 40deg diagonal |
 
+## group clock loop  `[clock.loop]`
+
+| name | words | action |
+|---|---|---|
+| `forever` | loop forever, repeat endlessly, never stop looping | repeat the cycle without limit, restarting at 0 the instant the previous pass reaches the end of its own local duration, never reversing |
+| `pingpong` | bounce back and forth, reverse every other loop, boomerang loop | repeat the cycle without limit, but reverse direction every other pass, like a ball bouncing between two walls, so it never jumps back to 0 |
+
 ## gsap effect  `[fx]`
 
 | name | words | action |
@@ -1031,5 +1038,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_712 primitives across 61 registries, 712 meeting the word-action contract today.
+_714 primitives across 62 registries, 714 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
