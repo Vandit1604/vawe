@@ -33,6 +33,7 @@ import { fileURLToPath } from 'node:url';
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { bakeCameraMove } from './produce.js';
+import { applyHtmlPartsSugar } from '../motion/parts.js';
 import { frameOf } from '../layout/safe.js';
 import { lowerScene } from '../transitions/lower.js';
 import { expandRecipes } from '../../recipes/expand.mjs';
@@ -174,6 +175,10 @@ export function expandScene(data, aspectKey = '') {
     if (layer.type === 'block') return expandBlock(layer).flatMap((l) => expand(l, stack));
     if (layer.type === 'beat') return expandBeat(layer);
     if (layer.type === 'comp') return expandComp(layer, comps, stack).flatMap((l) => expand(l, [...stack, layer.ref]));
+    // HTML-first timing: an `html` layer's own `data-part-*` attributes lower into the same `parts`
+    // array a hand-authored one would be (core/motion/parts.js), so every downstream reader (validate,
+    // motion-ir, probe-frame) sees the real spec and never the raw markup.
+    if (layer.type === 'html') layer = applyHtmlPartsSugar(layer);
     // SLOTS: a container block/comp's `children` may themselves be sugar (a `listRow` block inside a
     // `phoneFrame` block). Descend through every nesting level; a non-sugar child passes through untouched.
     if (Array.isArray(layer.children) && layer.children.length) {

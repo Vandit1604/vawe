@@ -36,21 +36,6 @@ const AV_INK = { color: onInk(T.accent) };
 const AV_STEP = 0.75;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// profileCard: avatar (image or initials) · name · role. For testimonials / team / "who said it".
-// One of the five identity blocks. They all speak the SAME surface now: {name, handle?, sub?, avatar,
-// initials}, with each block's old prop name kept as an alias. A shared vocabulary is worth nothing
-// if adopting it breaks the callers (MISTAKES #67). `role` is this block's word for `sub`.
-export function profileCard({ x, y, w = 360, name = '', sub = '', role = '', avatar = '', initials = '', start = 0, dur = 4 } = {}) {
-  const html = `<div style="display:flex;align-items:center;gap:${SPACE.md}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;width:${w}px">`
-    + avatarHtml({ avatar, initials, name, size: 56, ...AV_INK })
-    + `<div style="display:flex;flex-direction:column;gap:${SPACE.tight}px;align-items:flex-start;min-width:0">`
-    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink}">${name}</span>`
-    + `<span style="font:500 ${TYPE.body}px var(--font-sans);color:${T.sub}">${sub || role}</span></div></div>`;
-  return [{ type: 'html', x, y, w, ...cardChrome({ radius: R.soft }), html, start, duration: dur, enterDur: 0.45, exitDur: 0.3 }];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // chatBubble: a message thread; `me:true` bubbles right in accent, others left in a hairline card.
 export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } = {}) {
   const bubble = (m, i) => `<div data-i="${i}" style="display:flex;justify-content:${m.me ? 'flex-end' : 'flex-start'}">`
@@ -66,25 +51,6 @@ export function chatBubble({ x, y, w = 480, messages = [], start = 0, dur = 4 } 
   return [{ type: 'html', x, y, w, html, start, duration: dur, anim: 'fade', enterDur: 0.25, exitDur: 0.35,
     parts: messages.map((m, i) => ({ select: `[data-i="${i}"]`, anim: m.me ? 'slide-right' : 'slide-left',
       each: 0.35, delay: r2(0.2 + i * 0.42), out: true })) }];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// tweetCard. A post card: avatar · name · @handle · body · repost/like counts.
-export function tweetCard({ x, y, w = 480, name = '', handle = '', text: body = '', avatar = '', initials = '', likes = '', reposts = '', start = 0, dur = 4 } = {}) {
-  // A handle is an IDENTIFIER and the counts are FIGURES, so all three keep mono. `--text-2`, not
-  // `--dim`: `--dim` measures 2.6:1 on higgsfield and fails `make audit` HARD.
-  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.sm}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;width:${w}px">`
-    + `<div style="display:flex;align-items:center;gap:${SPACE.sm}px">`
-    + avatarHtml({ avatar, initials, name, size: 48, ...AV_INK })
-    + `<div style="display:flex;flex-direction:column;gap:0;align-items:flex-start">`
-    + `<span style="font:700 ${TYPE.base}px var(--font-sans);color:${T.ink}">${name}</span>`
-    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">@${handle}</span></div></div>`
-    + `<span style="font:400 ${TYPE.base}px var(--font-sans);color:${T.ink}">${body}</span>`
-    + `<div style="display:flex;gap:${SPACE.lg}px;align-items:center">`
-    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">↻ ${reposts}</span>`
-    + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">♥ ${likes}</span></div></div>`;
-  return [{ type: 'html', x, y, w, ...cardChrome({ radius: R.soft }), html, start, duration: dur, enterDur: 0.5, exitDur: 0.35 }];
 }
 
 // avatarStack: overlapping avatar circles (initials or images) + an optional "+N" overflow.
@@ -318,16 +284,6 @@ export function installCard({ x, y, w = 400, icon = '', name = '', sub = '', rat
 // older word for a slot is kept as an alias and declared as one, because a shared vocabulary is worth
 // nothing if adopting it breaks the callers.
 export const SOCIAL_SCHEMAS = {
-  profileCard: {
-    w: { kind: 'int', min: 160, max: 1080, def: 360 },
-    name: { kind: 'str', max: 60, def: '' },
-    sub: { kind: 'str', max: 60, def: '' },
-    role: { kind: 'str', max: 60, def: '' },         // alias of sub
-    // An image path wins; otherwise the initials are drawn, derived from `name` when not given.
-    avatar: { kind: 'str', max: 200, def: '' },
-    initials: { kind: 'str', max: 3, def: '' },
-  },
-
   chatBubble: {
     w: { kind: 'int', min: 160, max: 1080, def: 480 },
     messages: { kind: 'list', of: { kind: 'row', fields: {
@@ -335,18 +291,6 @@ export const SOCIAL_SCHEMAS = {
       // Mine: right, in accent. Theirs: left, in a hairline card.
       me: { kind: 'bool' },
     } }, def: [] },
-  },
-
-  tweetCard: {
-    w: { kind: 'int', min: 200, max: 1080, def: 480 },
-    name: { kind: 'str', max: 40, def: '' },
-    handle: { kind: 'str', max: 40, def: '' },
-    text: { kind: 'str', max: 280, def: '' },
-    avatar: { kind: 'str', max: 200, def: '' },
-    initials: { kind: 'str', max: 3, def: '' },
-    // Counts are strings so a caller can write "1.2k". Empty ships no figure.
-    likes: { kind: 'str', max: 12, def: '' },
-    reposts: { kind: 'str', max: 12, def: '' },
   },
 
   avatarStack: {

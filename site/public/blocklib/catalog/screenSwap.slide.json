@@ -9,7 +9,7 @@
   ],
   "dimensions": {
     "width": 504,
-    "height": 116
+    "height": 125
   },
   "install": {
     "kind": "scene-layer",
@@ -27,32 +27,27 @@
       "transition": "slide",
       "screens": [
         {
-          "block": "settingsRow",
+          "block": "notification",
           "props": {
             "w": 460,
-            "label": "Sync across devices",
-            "sub": "Keep every draft current everywhere",
-            "control": "toggle",
-            "value": true
+            "title": "Sync across devices",
+            "body": "Keep every draft current everywhere"
           }
         },
         {
-          "block": "settingsRow",
+          "block": "notification",
           "props": {
             "w": 460,
-            "label": "Notifications",
-            "sub": "Only for shared workspaces",
-            "control": "value",
-            "value": "Mentions"
+            "title": "Notifications",
+            "body": "Only for shared workspaces"
           }
         },
         {
-          "block": "settingsRow",
+          "block": "notification",
           "props": {
             "w": 460,
-            "label": "Appearance",
-            "sub": "Match the system theme",
-            "control": "chevron"
+            "title": "Appearance",
+            "body": "Match the system theme"
           }
         }
       ]
