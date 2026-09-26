@@ -26,7 +26,7 @@ import { parseStoryboard, timeline, fieldIn, fieldAllIn, blocksOf, frontmatter, 
 import { stageOf } from '../quality/gates/stage.mjs';
 import { bgPreset, bgPaletteFrom, BG_NAMES } from '../core/backgrounds/index.js';
 import { isLightBg, parseColor, colorAlpha } from '../core/color/engine.js';
-import { expandTheme, isTokenFile } from '../core/theme/roles.js';
+import { expandTheme } from '../core/theme/roles.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
@@ -540,7 +540,7 @@ const studioRoutes = (req, res) => {
       let themeJson = null;
       try {
         const raw = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8'));
-        themeJson = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+        themeJson = expandTheme(raw, { parseColor, colorAlpha });
       } catch { /* sketch falls back to studio's own greys */ }
       const palette = themeJson ? themeJson.palette : null;
       // Derived the same way films/scene/scene.js and harness/dev/candidates.mjs derive it: the theme's

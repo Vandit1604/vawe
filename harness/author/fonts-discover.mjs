@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -49,7 +49,7 @@ function usedFamilies() {
     let raw, theme;
     try { raw = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); }
     catch (e) { die(`themes/${f} is not valid JSON: ${e.message}`); }
-    try { theme = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw; }
+    try { theme = expandTheme(raw, { parseColor, colorAlpha }); }
     catch (e) { die(`themes/${f} failed to resolve: ${e.message}`); }
     for (const v of Object.values(theme.type || {})) {
       if (typeof v === 'string' && v.trim()) names.add(v.trim());

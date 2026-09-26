@@ -24,7 +24,7 @@ import { population, LIBRARY, SCENE_DIR } from '../../harness/lib/census.mjs';
 import { RULES, runRules } from '../../harness/lib/designspec-rules.mjs';
 import { parseColorRGB, parseColor as parseColorEngine, colorAlpha } from '../../core/color/engine.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
@@ -111,7 +111,7 @@ if (typeof data.theme === 'string') {
   catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} is not valid JSON: ${e.message}`); process.exit(2); }
   // a theme on disk is a token file now (core/theme/tokens.js, core/theme/roles.js): expand it to the
   // palette/type/gradient shape this gate (and the rules it reads colours from) already know how to read.
-  try { theme = isTokenFile(raw) ? expandTheme(raw, { parseColor: parseColorEngine, colorAlpha }) : raw; }
+  try { theme = expandTheme(raw, { parseColor: parseColorEngine, colorAlpha }); }
   catch (e) { console.error(`✗ ${path.relative(ROOT, themePath)} failed to resolve: ${e.message}`); process.exit(2); }
 } else {
   theme = data.theme || {};
