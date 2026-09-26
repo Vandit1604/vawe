@@ -53,4 +53,18 @@ test('resolves BEFORE tempo, so the resolved time scales exactly like any other 
   assert.equal(d.audio.cues[0].t, 10.4);
 });
 
+test('a bare "beat:<n>" on transitions[].at is a MUSIC-GRID pin, left untouched here', () => {
+  const d = scene([], { transitions: [{ at: 'beat:2', fx: 'fade' }] });
+  resolveRelativeTimes(d);
+  // Not resolved: the music grid does not exist yet (core/beats/index.js `bindBeats` resolves it once
+  // audio.beatSync loads the sidecar). A dotted structural beat ref ("beat:x.start") still throws,
+  // proving the two grammars stay distinct rather than one silently swallowing the other's typo.
+  assert.equal(d.transitions[0].at, 'beat:2');
+});
+
+test('a dotted "beat:<id>.start" with no data.beats still throws (distinct from a grid pin)', () => {
+  const d = scene([], { transitions: [{ at: 'beat:x.start', fx: 'fade' }] });
+  assert.throws(() => resolveRelativeTimes(d), /unknown beat reference "x"/);
+});
+
 console.log('ok - relative-time: audio.cues[].t accepts a layer/beat reference, resolved before tempo');

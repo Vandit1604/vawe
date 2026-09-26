@@ -510,7 +510,7 @@ is a workaround rather than the dial.
 | `make music-pack` / `make music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
 | `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
 | `make beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
-| `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js) |
+| `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js). A joint's own `transitions[].at` can also PIN to a beat by index, `"beat:12"` (bare, 0-based, no `.start`/`.end`, distinct from a structural `data.beats[]` id), and `snap:"beat"`/`"bar"`/`"downbeat"` overrides which pulse THAT ONE joint nudges to, regardless of `beatSync.bar`'s own default |
 | `make beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
 | `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
 | `make check GATE=sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
