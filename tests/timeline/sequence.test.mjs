@@ -236,12 +236,13 @@ console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an u
 // which ARE absolute) used to render nothing: `poseAt` holds key 0 for every local time <= its `t`, so
 // with `start` seconds of slack read in as key 0 the layer sat frozen almost its whole life and only
 // reached the later key in the last instant before it ended (tests/fixtures/motion-absolute-time.fixture.json,
-// the vawe-sting bug this refusal exists for).
+// the vawe-sting bug this adaptation exists for).
 {
   const layers = [{ id: 'mover', start: 2.4, duration: 2.6,
     motion: [{ t: 2.4, x: 0 }, { t: 5.0, x: 800, ease: 'linear' }] }];
-  assert.throws(() => resolveKeyedProps(layers), /LOCAL seconds from the layer's OWN start/,
-    'a motion track whose first key equals the layer\'s own `start` is refused as absolute-time misuse');
+  resolveKeyedProps(layers);
+  assert.deepEqual(layers[0].motion.map((k) => k.t), [0, 2.6],
+    'a motion track whose first key equals the layer\'s own `start` is shifted to local time');
 }
 // A legitimate local hold-then-move (first key > 0 but not equal to `start`) is untouched.
 {
@@ -257,4 +258,4 @@ console.log('✓ sequence.test.mjs: radius joins POSE, interpolates, leaves an u
   assert.doesNotThrow(() => resolveKeyedProps(layers), 'a layer with no `start` is unaffected');
 }
 
-console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone; per-property `ease` (Separate Dimensions) lets x and y travel different curves on the same keys; a motion track authored in absolute scene time (first key == the layer\'s own `start`) is refused instead of silently freezing');
+console.log('✓ sequence.test.mjs: arrival-ease adapts a hard stop into a hold, leaves exits and authored handles alone; per-property `ease` (Separate Dimensions) lets x and y travel different curves on the same keys; a motion track authored in absolute scene time (first key == the layer\'s own `start`) is shifted to local time instead of silently freezing');

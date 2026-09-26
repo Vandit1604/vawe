@@ -814,8 +814,8 @@ test('lib-test: gates', async () => {
 // (engine-doctrine/JUDGE.md: "the PASS is not the author's to self-record") can inherit the SAME
 // CLAUDE_CODE_SESSION_ID as the agent that rendered the cut, since env vars propagate to a spawned
 // child by default. Session alone used to be the whole self-record test, so that inherited session
-// refused the one PASS the guard exists to allow. `agent` (CLAUDE_PID) tells them apart: a subagent
-// runs as its own process, so its PID differs even when the session does not.
+// refused the one PASS the guard exists to allow. A subagent also shares CLAUDE_PID, so the judge brief
+// sets VAWE_AGENT, which runlog.mjs agentId() prefers.
 // tests/fixtures/motion-absolute-time.fixture.json's own bug (bug 1) motivated reading a real repro log
 // before fixing; this fix's own repro is quality/runs (sting-raw.log): "judge.mjs refuses to record" a
 // PASS from a fresh judge subagent sharing the authoring session.
@@ -828,19 +828,20 @@ test('lib-test: gates', async () => {
   process.chdir(tmpDir);
   const priorSession = process.env.CLAUDE_CODE_SESSION_ID;
   const priorAgent = process.env.CLAUDE_PID;
+  const priorTag = process.env.VAWE_AGENT;
   try {
     // The authoring agent renders: session S, agent (PID) A.
     process.env.CLAUDE_CODE_SESSION_ID = 'S';
     process.env.CLAUDE_PID = 'A';
     appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
 
-    // THE BUG: a fresh judge subagent, same session S (inherited), but its OWN process B, used to be
-    // refused on session equality alone. It must now be accepted.
+    // THE BUG: a fresh judge subagent, same session S and same PID A, tagged VAWE_AGENT=B, is accepted.
     process.env.CLAUDE_CODE_SESSION_ID = 'S';
-    process.env.CLAUDE_PID = 'B';
+    process.env.VAWE_AGENT = 'B';
     let r = selfRecordCheck(film);
-    ok('judge-self-record: a different agent (PID) in the SAME session is not self-recorded',
+    ok('judge-self-record: a VAWE_AGENT-tagged judge in the SAME session and process is not self-recorded',
       r.selfRecorded === false);
+    delete process.env.VAWE_AGENT;
 
     // THE GUARD STILL WORKS: the exact same agent (same session, same PID) trying to pass its own
     // render is still refused.
@@ -871,6 +872,7 @@ test('lib-test: gates', async () => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     if (priorSession === undefined) delete process.env.CLAUDE_CODE_SESSION_ID; else process.env.CLAUDE_CODE_SESSION_ID = priorSession;
     if (priorAgent === undefined) delete process.env.CLAUDE_PID; else process.env.CLAUDE_PID = priorAgent;
+    if (priorTag === undefined) delete process.env.VAWE_AGENT; else process.env.VAWE_AGENT = priorTag;
   }
 }
 

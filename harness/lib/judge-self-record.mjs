@@ -10,16 +10,14 @@
 // propagate to a spawned child by default (harness/lib/runlog.mjs stamps every run with both). Refusing
 // on session alone then refuses the one PASS this guard exists to allow.
 //
-// `agent` (`CLAUDE_PID`) is the Claude Code PROCESS id, which is per-agent-INSTANCE rather than
-// per-conversation: a spawned subagent runs as its own process, so its PID differs from its parent's
-// even when they share a session. Refused only when BOTH agree; a PID either side lacks (outside Claude
-// Code, or an older run logged before `agent` existed) falls back to the session-only comparison this
-// guard always ran, never weaker than before.
-import { readRuns } from './runlog.mjs';
+// `agent` is harness/lib/runlog.mjs agentId(): an Agent-tool subagent shares the session AND CLAUDE_PID
+// with its parent, so a fresh judge runs with VAWE_AGENT=<name>. Refused only when session and agent
+// both match; a side with no agent falls back to the session-only test.
+import { readRuns, agentId } from './runlog.mjs';
 
 export function selfRecordCheck(inp) {
   const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
-  const thisAgent = process.env.CLAUDE_PID || null;
+  const thisAgent = agentId();
   const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
   const authorSession = authorRun && authorRun.session;
   const authorAgent = authorRun && authorRun.agent;
