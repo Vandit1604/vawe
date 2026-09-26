@@ -164,9 +164,9 @@ console.log(`  the LAYERS deliver ${bare.median.toFixed(2)}, and that is the num
 f.note('ground-share', `the ground is ${Math.round(groundShare * 100)}% of this film's measured motion; the layers deliver ${bare.median.toFixed(2)}`,
   { groundShare });
 if (groundShare > 0.6) {
-  console.log(`\n  ⚠ most of what this film measures is its backdrop. That is not wrong, and it is not the\n    content moving. \`make grammar\` has the band the references sit in.`);
+  console.log(`\n  ⚠ most of what this film measures is its backdrop. That is not wrong, and it is not the\n    content moving. \`make study-tool X=grammar\` has the band the references sit in.`);
   f.note('ground-dominant', 'most of what this film measures is its backdrop, not the content moving',
-    { fix: '`make grammar` has the band the references sit in' });
+    { fix: '`make study-tool X=grammar` has the band the references sit in' });
 }
 
 // THE SHAPE, NOT A SCORE. Both numbers above are BOUNDS: they say how much this film moves and whose

@@ -72,8 +72,8 @@ no real capture behind it) is a waiver, the one mechanism: `{"authoring":{"allow
 > the theme or ask them to point [to a reference]; but you can invent colors and themes beautifully
 > when asked."
 
-- A brand site or URL: the theme comes from it, the ordinary route (`make sections` + `make brandspec`
-  + `make palette`, [`engine-doctrine/CRAFT/COLOR.md`](COLOR.md)).
+- A brand site or URL: the theme comes from it, the ordinary route (`make sections` + `make study-tool X=brandspec`
+  + `make study-tool X=palette`, [`engine-doctrine/CRAFT/COLOR.md`](COLOR.md)).
 - No brand, a bare prompt: ASK. `make quiz` asks a "Theme source" question exactly when no URL is
   known: point at a reference or a theme, or say "you choose".
 - "You choose": INVENT a beautiful theme, never default to plain grey. Seed a palette from

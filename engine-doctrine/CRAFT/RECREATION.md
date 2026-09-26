@@ -37,7 +37,7 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
   the **exit**: does it scale UP + blur to leave (a dolly-out)? a **zoomed crop of the text**: flat
   fill or a GRADIENT / colour-wave? For OUR renders, [`make reveal`](../../harness/author/reveal.mjs)
   does this automatically per beat.
-- **Measure the signature motion.** `make measure VIDEO=ref.mp4 FROM=… TO=…` → duration + nearest
+- **Measure the signature motion.** `make study-tool X=measure VIDEO=ref.mp4 FROM=… TO=…` → duration + nearest
   engine preset ([MEASURE.md](MEASURE.md)). A tight fit is an authorable number; a loose fit means it
   is not one tween (typing, two stacked tweens, a mask), re-author by intent.
 - **Read the dominance by LOOKING, and know site ≠ film.** A brand's live site and its launch film can
@@ -110,7 +110,7 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
 
 ### 6. Verify against the reference (numbers, then eyes)
 - `make reveal D=<file>`: does every beat animate IN the way the reference's does (dolly direction,
-  typing, colour-wave)? `make beats D=<file> VS=<brand>`. Each beat beside its source. `make measure
+  typing, colour-wave)? `make beats D=<file> VS=<brand>`. Each beat beside its source. `make study-tool X=measure
   VIDEO=out/ours.mp4 EXPECT=<preset>`: does our render's motion match the number you measured off the
   reference? Then `make check GATE=audit` (overlap/contrast/safe-zone). Fix data, re-render, never ship unverified.
 

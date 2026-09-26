@@ -24,7 +24,7 @@ rendition Pinterest serves; the HLS ladder tops out at the same size.
 
 > **This is the DEEP study of one film. The cross-film page is [`GRAMMAR.md`](GRAMMAR.md)**, generated
 > from `grammar/*.json`, where every reference sits on one scale. This film's row there carries the
-> conclusions below in machine-readable form, so `make grammar` can compare them; what stays here is the
+> conclusions below in machine-readable form, so `make study-tool X=grammar` can compare them; what stays here is the
 > half no table holds: the palette by pixel share, the type crops, the continuity register, and the
 > command block that rebuilds every strip.
 >

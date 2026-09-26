@@ -280,7 +280,7 @@ test('lib-test: registry', async () => {
   })());
   ok('validate: a scene with no raw junction key passes clean', authoredJunctionErrors({ transitions: [{ at: 1, fx: 'fade' }] }).length === 0);
   // `none` is a real cut (a hard cut with no visual transition) but sits outside the catalog's cut row
-  // (core/transitions/catalog.js: nothing to browse in `make transitions`); it must still ROUTE as a
+  // (core/transitions/catalog.js: nothing to browse in `make study-tool X=transitions`); it must still ROUTE as a
   // boundary cut, the same thing raw `cuts[].style:"none"` always meant.
   ok('lowering: a boundary transition can say "none", and it routes to cut', (() => {
     const d = lowerScene({ transitions: [{ at: 2, fx: 'none' }] });

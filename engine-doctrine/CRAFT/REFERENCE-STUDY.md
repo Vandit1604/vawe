@@ -31,7 +31,7 @@ codes: duration, cut-missed, ground-false-confidence, ground-truth-frame, ground
   reusing gets written to `grammar/_<name>.recipes.json` in the `recipes.json` shape
   ([`recipes/README.md`](../../recipes/README.md)). It is a candidate: a person still promotes it into
   `recipes/recipes.json`.
-- Enforced by `[ref: make study]` / `[ref: make measure]`; no gate. A motif with no mapped primitive is
+- Enforced by `[ref: make study]` / `[ref: make study-tool X=measure]`; no gate. A motif with no mapped primitive is
   a framework finding, log it to `engine-doctrine/MISTAKES.md`, don't fake it.
 - Confirm: did you sample the entrance, the exit and a zoomed crop, not just the beat's middle frame?
 
@@ -41,7 +41,7 @@ extracting them from ANY reference and mapping them to our primitives. Study a r
 studies a cut: measure it, name what it does, reproduce the intent. Add what you learn here so the next
 video starts ahead.
 
-> First tool: **`make measure`** ([MEASURE.md](MEASURE.md)) turns "a slide with some easing" into
+> First tool: **`make study-tool X=measure`** ([MEASURE.md](MEASURE.md)) turns "a slide with some easing" into
 > `0.43s, easeOutSine`. Numbers, not vibes. Second tool: a filmstrip (`ffmpeg fps=… tile=…`) to SEE the
 > beats. Everything below was extracted from the Brew launch film this way.
 
@@ -146,13 +146,13 @@ video starts ahead.
    **For OUR renders, `make reveal D=<scene.json>` does this automatically**, it renders each beat's
    ENTER arc + settled + EXIT arc from the exact layer start-times, so the reveal is never hidden. It is
    the standing fix for the "judged the hold, missed the reveal" trap; run it every render.
-2. **Measure the motion.** For each signature transition, `make measure VIDEO=ref.mp4 FROM=… TO=…` →
+2. **Measure the motion.** For each signature transition, `make study-tool X=measure VIDEO=ref.mp4 FROM=… TO=…` →
    duration + nearest engine preset. Tight fits are authorable numbers; loose fits are the tool telling
    you it is not one tween (typing, two stacked tweens, a mask, re-author by intent).
 3. **Catalog the motifs.** List every recurring device (the habits below are the checklist).
 4. **Map to our primitives** (table at the bottom). If a motif has no primitive, that is a framework
    finding, log it (engine-doctrine/MISTAKES.md), don't fake it.
-5. **Author → verify → write it down.** Build it, then `make measure VIDEO=out/ours.mp4 EXPECT=<preset>`
+5. **Author → verify → write it down.** Build it, then `make study-tool X=measure VIDEO=out/ours.mp4 EXPECT=<preset>`
    to confirm the render matches the reference's motion. `make beats`/`make check GATE=audit`/`make judge` for the
    rest. Then write what you measured as a recipe candidate in `grammar/_<name>.recipes.json`
    ([`recipes/README.md`](../../recipes/README.md)), so the next film reuses the measurement instead of

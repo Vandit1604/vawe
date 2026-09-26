@@ -59,20 +59,20 @@ No style menu, no auto-heuristic: the brand's own site is the art direction, the
 pixels. Load `engine-doctrine/CRAFT/TYPOGRAPHY.md` and `COLOR.md` before authoring the theme, then:
 
 ```bash
-make brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
+make study-tool X=brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
 make sections URL=… NAME=…                              # screenshot every section (the taste lives here)
-make lookbook URL=… NAME=…                              # full-page + viewport screenshots
-make palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
+make study-tool X=lookbook URL=… NAME=…                              # full-page + viewport screenshots
+make study-tool X=palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
 ```
 
-`make brandspec` is the source of truth for type and declared colours: read it, don't guess. It gives
+`make study-tool X=brandspec` is the source of truth for type and declared colours: read it, don't guess. It gives
 the 1-3 real faces mapped to primary/secondary/accent, the weights actually used (author the headline
 at the measured weight, never a default 800), and the site's `--color-*` tokens (a site's declared
-accent is the hex in its CSS, not the nearest colour in its hero image). Use `make palette` for
+accent is the hex in its CSS, not the nearest colour in its hero image). Use `make study-tool X=palette` for
 dominance only. Author the font system per `TYPOGRAPHY.md` §0b (1-3 roles) and validate every colour
 pair's contrast per `COLOR.md` before committing it.
 
-**Dominance is decided by looking, never by a field** (`engine-doctrine/MISTAKES.md #1`). `make palette`
+**Dominance is decided by looking, never by a field** (`engine-doctrine/MISTAKES.md #1`). `make study-tool X=palette`
 reports LIGHT/DARK from the hero's real luminance; then read the screenshot and confirm. A white site
 gets a white-first video: a mislabeled dominance is how the worst videos happen. Author
 `themes/<brand>.json` by hand from the eyedropped hexes: bg = the site's dominant, accent = its vivid

@@ -66,7 +66,7 @@ export function threadOptions(job, dirs = DIRECTIONS) {
     .map((d) => ({ key: d.slug, label: d.thread, description: d.why, pace: d.pace, preset: d.preset }));
 }
 
-// Owner ruling (.claude/plans/content-richness.plan.md "Update 1"): asked only when no URL is known; a known site already gets its theme from `make sections`/`make brandspec`/`make palette`.
+// Owner ruling (.claude/plans/content-richness.plan.md "Update 1"): asked only when no URL is known; a known site already gets its theme from `make sections`/`make study-tool X=brandspec`/`make study-tool X=palette`.
 export const THEME_SOURCE = [
   { key: 'reference', label: 'I will point you at a reference or a theme',
     description: 'Name a real site (studied the ordinary way) or an existing `themes/<name>.json`, and every colour, face and motion policy traces to it, never invented.' },
@@ -91,7 +91,7 @@ export function ask({ name = null, url = null, slug = null } = {}) {
   if (url && !st) {
     const n = name || '<brand>';
     return { error: 'no-study', message: `study the site before asking. A generic question wastes the answer.\n`
-      + `  make sections URL=${url} NAME=${n}\n  make brandspec URL=${url}\n`
+      + `  make sections URL=${url} NAME=${n}\n  make study-tool X=brandspec URL=${url}\n`
       + `then re-run. (Looked for assets/brands/${n}/sections/sections.json)` };
   }
   const proof = proofOptions(st);

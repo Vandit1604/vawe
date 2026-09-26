@@ -7,7 +7,7 @@ group: crosscutting
 # Route: launch-video
 
 - **Input:** a URL to a real product or site, or a brief that names one. `make sections` (whole site,
-  not just the homepage) and `make palette` capture its assets, colours and fonts before you write a
+  not just the homepage) and `make study-tool X=palette` capture its assets, colours and fonts before you write a
   frame.
 - **Output:** a promo / launch film that markets the product, built on its own captured UI and copy.
   Sweet spot 20-60s.

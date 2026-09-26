@@ -96,7 +96,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | Guide | Load it when you are… | Answers |
 |---|---|---|
 | [IDEATE.md](IDEATE.md) | turning a reference video or a raw idea into a film, before any storyboard or JSON exists | what `make ideate` writes, the two ways to run it, and how to fill what it cannot measure |
-| [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
+| [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make study-tool X=measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this"), or reflecting a real WEBSITE section by section | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · one beat per section, in the site's order · the honest 1:1 ceiling |
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
 | [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling, or picking between whole directions | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make concept` forces a round off the median |
@@ -172,5 +172,5 @@ including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
   specific themes and are not listed here).
 - **Real registries** the guides cover in full: 31 composite looks (`core/looks/index.js`), 35 shader stings
   (`SHADER_FX` in `core/stings/index.js`), the palette-driven bg presets (`core/backgrounds/index.js`).
-- **Doctrine**: colours ONLY from the brand (eyedrop, `make palette`); dominance decided by LOOKING;
+- **Doctrine**: colours ONLY from the brand (eyedrop, `make study-tool X=palette`); dominance decided by LOOKING;
   no em-dashes on screen; patterns are seasoning not wallpaper. See [`../MISTAKES.md`](../MISTAKES.md).

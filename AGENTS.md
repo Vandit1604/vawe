@@ -31,7 +31,7 @@ No sign-off step: the draft render at the design stage (`make dev`) is where the
 redirects, before a full render is spent.
 
 **No templates**: compose from `engine-doctrine/PRIMITIVES.md` and real captured assets; `make assemble`
-writes the scene JSON, `make ship` renders it. Reflecting a brand: `make sections` + `make palette`
+writes the scene JSON, `make ship` renders it. Reflecting a brand: `make sections` + `make study-tool X=palette`
 build colours, fonts and a favicon from the site's own colours only.
 
 ## Where to look  `[ref: make help]`

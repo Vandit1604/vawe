@@ -171,7 +171,7 @@ if (moveErrs.length) {
 }
 const transitionInErrs = transitionInErrors(beats);
 if (transitionInErrs.length) {
-  console.error(`assemble: a transition_in does not name a real transition (\`make transitions\` for the catalog):`);
+  console.error(`assemble: a transition_in does not name a real transition (\`make study-tool X=transitions\` for the catalog):`);
   for (const e of transitionInErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }

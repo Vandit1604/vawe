@@ -63,7 +63,7 @@ function mine() {
 
   const report = {
     _: 'Shot clusters found by harness/author/mine.mjs over grammar/*.json. A shape with sources is a '
-      + 'real, traceable candidate for a beats-mined.mjs factory, never an invented one. Regenerate with `make mine`.',
+      + 'real, traceable candidate for a beats-mined.mjs factory, never an invented one. Regenerate with `make study-tool X=mine`.',
     grammarsRead: grammars.map((g) => g.name),
     shapes: SHAPES.map((s) => ({ shape: s.shape, role: s.role, sources: matches[s.shape] })),
   };

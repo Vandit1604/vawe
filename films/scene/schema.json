@@ -959,7 +959,7 @@
   },
   "transitions": {
    "type": "array",
-   "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut \u00b7 seam \u00b7 sting) via core/transitions/catalog.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
+   "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut \u00b7 seam \u00b7 sting) via core/transitions/catalog.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make study-tool X=transitions`.",
    "item": {
     "at": {
      "type": "number|string",
@@ -969,7 +969,7 @@
     },
     "fx": {
      "type": "string",
-     "label": "Transition name (any from `make transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom \u2192 seam; whip/punch/zoom \u2192 cut; glitch/chromaticSplit \u2192 sting; fade/slide/wipe/dissolve \u2192 cut by default (add mech:\"seam\" for the two-scene blend).",
+     "label": "Transition name (any from `make study-tool X=transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom \u2192 seam; whip/punch/zoom \u2192 cut; glitch/chromaticSplit \u2192 sting; fade/slide/wipe/dissolve \u2192 cut by default (add mech:\"seam\" for the two-scene blend).",
      "required": true
     },
     "mech": {

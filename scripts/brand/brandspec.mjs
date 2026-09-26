@@ -4,7 +4,7 @@
 // the key colours (bg/text/accent) with WCAG contrast checks, and the shape language (radius/shadow).
 // This is the "measure, don't guess" fix for the wrong-weight / wrong-font class of mistakes.
 //
-//   node scripts/brand/brandspec.mjs https://example.com/home        ·        make brandspec URL=…
+//   node scripts/brand/brandspec.mjs https://example.com/home        ·        make study-tool X=brandspec URL=…
 import puppeteer from 'puppeteer';
 
 const url = process.argv[2];
@@ -98,7 +98,7 @@ console.log(`  text    : ${hex(text)}   contrast vs bg ${ratio(text, bg)?.toFixe
 if (accentC && rgb(accentC)) console.log(`  accent  : ${hex(accentC)}   vs white ${ratio(accentC, '#fff')?.toFixed(1)}:1 [${grade(ratio(accentC, '#fff'))}] · vs bg ${ratio(accentC, bg)?.toFixed(1)}:1`);
 else if (accentC) console.log(`  accent  : ${accentC}   (non-RGB, e.g. oklch, CONFIRM by eyedrop)`);
 else console.log(`  accent  : none in CSS. The brand colour likely lives in a raster logo/mascot.`);
-console.log(`  → accent is unreliable from CSS alone. EYEDROP the hero to be sure: make palette IMG=assets/brands/<brand>/sections/01-*.png`);
+console.log(`  → accent is unreliable from CSS alone. EYEDROP the hero to be sure: make study-tool X=palette IMG=assets/brands/<brand>/sections/01-*.png`);
 console.log(`  headline vs bg: ${ratio(raw.headline?.color, bg)?.toFixed(1)}:1 [${grade(ratio(raw.headline?.color, bg))}] (display type wants AAA ≥7)`);
 const tokenColors = Object.entries(raw.vars).filter(([k, v]) => /#|rgb|hsl/.test(v) && /colou?r|bg|text|accent|brand|fg|surface/i.test(k));
 const tokenFonts = Object.entries(raw.vars).filter(([k]) => /font/i.test(k));

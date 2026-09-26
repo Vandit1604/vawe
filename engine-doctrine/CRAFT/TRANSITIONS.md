@@ -47,7 +47,7 @@ cut: that is not "smooth," it is a seam that says nothing, ten times.
 deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
 given transition is there.
 
-> **The inventory (what exists) is `core/transitions/catalog.js`, run `make transitions`.** It catalogs all
+> **The inventory (what exists) is `core/transitions/catalog.js`, run `make study-tool X=transitions`.** It catalogs all
 > 106 transitions across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
 > `seam` two-scene), marks the basics, and is derived from the source registries so it can't drift.
 > This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
@@ -58,7 +58,7 @@ given transition is there.
 > canned two-beat A→B scene through one transition as a labelled filmstrip (`/tmp/transition-preview.png`).
 > The labels are eased progress, so `TIMING=linear` vs `smooth` shows as *where the motion bunches*.
 >
-> **MEASURE a real one: `make measure VIDEO=… FROM=… TO=…`** reads a transition's actual duration + easing
+> **MEASURE a real one: `make study-tool X=measure VIDEO=… FROM=… TO=…`** reads a transition's actual duration + easing
 > from a video and names the **nearest engine preset** (a reference to reproduce, or `EXPECT=<preset>` to
 > verify our OWN render matches what we authored). See [MEASURE.md](MEASURE.md).
 >
