@@ -1,0 +1,29 @@
+// harness/lib/judge-self-record.mjs: is the agent recording a PASS right now the SAME AGENT that
+// rendered the cut it is judging? Pulled out of quality/gates/judge.mjs so it can be asserted directly
+// (that script exits the process on a dozen other conditions the moment it is run, which makes it unsafe
+// to import for a unit test) and so nothing else that ever needs "who authored this run" forks a second
+// copy of the answer.
+//
+// Session alone cannot answer "which agent": a subagent launched via the Agent tool (the fresh judge
+// this guard exists to allow, engine-doctrine/JUDGE.md, "the PASS is not the author's to self-record")
+// can inherit the SAME `CLAUDE_CODE_SESSION_ID` as the agent that authored the render, because env vars
+// propagate to a spawned child by default (harness/lib/runlog.mjs stamps every run with both). Refusing
+// on session alone then refuses the one PASS this guard exists to allow.
+//
+// `agent` (`CLAUDE_PID`) is the Claude Code PROCESS id, which is per-agent-INSTANCE rather than
+// per-conversation: a spawned subagent runs as its own process, so its PID differs from its parent's
+// even when they share a session. Refused only when BOTH agree; a PID either side lacks (outside Claude
+// Code, or an older run logged before `agent` existed) falls back to the session-only comparison this
+// guard always ran, never weaker than before.
+import { readRuns } from './runlog.mjs';
+
+export function selfRecordCheck(inp) {
+  const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
+  const thisAgent = process.env.CLAUDE_PID || null;
+  const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
+  const authorSession = authorRun && authorRun.session;
+  const authorAgent = authorRun && authorRun.agent;
+  const sameSession = !!(thisSession && authorSession && thisSession === authorSession);
+  const sameAgent = !thisAgent || !authorAgent || thisAgent === authorAgent;
+  return { selfRecorded: sameSession && sameAgent, thisSession, authorSession };
+}

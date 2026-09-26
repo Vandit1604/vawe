@@ -23,10 +23,22 @@ export function appendRun(film, record = {}) {
   const line = {
     at: new Date().toISOString(),
     cmd: record.cmd || 'unknown',
-    // The one signal the judge's self-recorded-PASS refusal reads (quality/gates/judge.mjs): which
-    // Claude Code session made this run. Auto-captured, never passed by a caller, so it cannot be
-    // spoofed by a call site forgetting to set it. Null outside Claude Code (a human's own shell).
+    // Two of the signals the judge's self-recorded-PASS refusal reads (quality/gates/judge.mjs): which
+    // Claude Code session made this run, and which AGENT PROCESS within it. Auto-captured, never passed
+    // by a caller, so neither can be spoofed by a call site forgetting to set it. Both null outside
+    // Claude Code (a human's own shell).
+    //
+    // `session` alone is not "which agent": a subagent launched via the Agent tool (the harness's own
+    // fresh judge, see engine-doctrine/JUDGE.md) can inherit the SAME `CLAUDE_CODE_SESSION_ID` as the
+    // agent that authored the render, because env vars propagate to a spawned child by default. Refusing
+    // on session alone then refuses the one PASS this guard exists to allow: a genuinely independent
+    // judge. `agent` is the Claude Code PROCESS id (`CLAUDE_PID`), which is per-agent-INSTANCE rather than
+    // per-conversation: a spawned subagent runs as its own process, so its PID differs from its parent's
+    // even when they share a session. The guard below refuses only when BOTH agree (the render and the
+    // verdict are the same agent instance in the same session), so a fresh subagent's PASS is accepted
+    // even from inside the authoring agent's own session.
     session: process.env.CLAUDE_CODE_SESSION_ID || null,
+    agent: process.env.CLAUDE_PID || null,
     git,
     dirty,
     checks: record.checks || [],
