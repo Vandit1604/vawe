@@ -6,7 +6,7 @@
 // site while another consumer went on reading the raw value. Comments do not stop that; a failing
 // test does. Each case below is a real reproduction, and each one hard-failed the audit before it was
 // fixed. The name of each fixture says what it is measuring.
-//   node quality/gates/measure-regression.mjs      ·      make audit-test
+//   node quality/gates/measure-regression.mjs      ·      make dev-tool X=audit-test
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

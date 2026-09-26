@@ -74,7 +74,7 @@ export function printGrouped(targets = collectTargets()) {
   }
   const bad = untagged(targets);
   if (bad.length) {
-    console.log(`  ${bad.length} target(s) carry no valid [phase] tag (make lib-test fails on this):`);
+    console.log(`  ${bad.length} target(s) carry no valid [phase] tag (make test fails on this):`);
     console.log(`    ${bad.map((t) => t.name).join(', ')}\n`);
   }
 }

@@ -42,10 +42,10 @@ look at everything.
 one sheet and one question and it commits. Every standing critic below is defined by the file it is
 handed.
 
-**`make critics D=<file>`** emits this roster as ready-to-launch prompts, concrete for that film (the
+**`make dev-tool X=critics D=<file>`** emits this roster as ready-to-launch prompts, concrete for that film (the
 real `/tmp/beats/<name>.png`, `/tmp/reveal/<name>.png`, `/tmp/seams/<name>.png` paths, and the on-screen
 strings for `copy`). Copy the six prompts into six parallel `Agent` calls. Once they report,
-`make critics D=<file> RECORD=<panels.json>` writes the panel's findings to
+`make dev-tool X=critics D=<file> RECORD=<panels.json>` writes the panel's findings to
 `quality/baselines/approved/panels/<name>.json`, hashed to this version of the scene, so the doc below and the tool
 point at each other: `harness/author/critics.mjs` is the source of the prompts, this table is the source
 of the roster.
@@ -54,12 +54,12 @@ of the roster.
 
 | Critic | Job | Input it is handed | Verdict shape |
 |---|---|---|---|
-| **beat** | does each beat read at a glance | `/tmp/beats/<name>.png` from `make beats D=<file> [VS=<brand>]` | per beat: `{beat, reads: yes/no, flaw, fix}` |
+| **beat** | does each beat read at a glance | `/tmp/beats/<name>.png` from `make dev-tool X=beats D=<file> [VS=<brand>]` | per beat: `{beat, reads: yes/no, flaw, fix}` |
 | **bg-motion** | speed · scale · direction of anything that moves continuously | a 4+ frame strip, reference and render at matched timestamps | per axis: `{axis: speed/scale/direction, ours, reference, delta, fix}` |
-| **reveal** | how each beat enters and exits, never the settled frame | `/tmp/reveal/<name>.png` from `make reveal D=<file>` | per beat: `{beat, enter, exit, paired: yes/no, flaw, fix}` |
+| **reveal** | how each beat enters and exits, never the settled frame | `/tmp/reveal/<name>.png` from `make dev-tool X=reveal D=<file>` | per beat: `{beat, enter, exit, paired: yes/no, flaw, fix}` |
 | **fidelity** | recreations only: how close each beat is to its source | render frames + the source frames, side by side | per beat: `{beat, score 0-10, gaps: [...]}` |
 | **copy** | on-screen writing only | the strings from the scene JSON, in beat order | per line: `{beat, line, tell, rewrite}` |
-| **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
+| **seam** | flash or collision at transitions | `/tmp/seams/<name>.png` from `make check GATE=seam-check D=<file>` | per seam: `{seam, flash: yes/no, evidence, fix}` |
 | **ab** | which of two cuts is better, and does the graphic explain anything | *not built.* `make ab`, `ab-record` and `AB-JUDGE.md` were removed (`cc2dfc2`, 2026-08-05). Use [`compare`](../../Makefile) to tile two candidates and judge them yourself. | n/a |
 <!-- doc-refs-allow: make ab · the row above exists to record that this critic was planned and never built -->
 
@@ -105,7 +105,7 @@ default is pure cost.
 **`storyboard` runs twice, at two different stages, in two different modes.** The row above is its
 WRITE mode: it authors or revises the storyboard file, and belongs wherever this roster runs (`make
 critics D=<file> DECIDERS=1`, AGENTS.md stage 6). Before that, at AGENTS.md **stage 2, plan**, the same
-role runs as a JUDGE instead: `make plan-judge D=<file>` composes a brief from THIS storyboard's own
+role runs as a JUDGE instead: `make dev-tool X=plan-judge D=<file>` composes a brief from THIS storyboard's own
 text, theme tokens and craft rules (reusing this table's categories and `rulesFor`, never a second
 assembler) and hands it to a fresh Agent call that reports findings only, never a write, never a PASS.
 `quality/gates/storyboard-check.mjs` already owns structure (fields present, holds inside the genre
@@ -114,7 +114,7 @@ that earn their seconds, a spectacle that is actually loudest, an eye path that 
 varies. `make stage` may require the plan judge HAS RUN before a film leaves plan, never that it
 passed: findings are advisory, and the owner still reads the draft render and redirects. A verdict
 is recorded against a hash of the storyboard it read (`harness/lib/receipt.mjs`); a storyboard edited
-since is refused as stale rather than shown as current (`make plan-judge D=<file> SHOW=1`).
+since is refused as stale rather than shown as current (`make dev-tool X=plan-judge D=<file> SHOW=1`).
 
 **The order is a dependency, not a preference.** The storyboard first, because it is the lock artefact
 and every role below reads it. Then subject, because a cut cannot be chosen without knowing what sits on
@@ -199,7 +199,7 @@ Notes that matter per critic:
   [`RECREATION.md`](RECREATION.md) for the honest 1:1 ceiling.
 - **copy sees words, not frames.** Hook strength, marketing jargon, a headline restated as a subhead, a
   big number sitting as flat text. Frames distract it into liking the layout.
-- **reveal is not beat.** `make beats` samples the middle of a beat and hides the entrance. Judging the
+- **reveal is not beat.** `make dev-tool X=beats` samples the middle of a beat and hides the entrance. Judging the
   settled frame is how a dolly direction, a colour wave, and a paired exit all got missed.
 
 ## How to run them
@@ -217,10 +217,10 @@ Notes that matter per critic:
 4. **A critic is evidence, not a ruling.** If it flags something you can look at yourself and the flaw
    is not there, it is wrong. Look before you act. The reverse is heavier: if a critic flags something
    and your eye confirms it, that is a FIX, never a rationalization.
-5. **Feed the fixes back through the gates, not through the panel.** Re-run `make author-check` and the
+5. **Feed the fixes back through the gates, not through the panel.** Re-run `make dev-tool X=author-check` and the
    sheet-producing commands after the edits, then re-panel only the critics whose input changed.
 
-Order of operations: run the static ladder first (`make author-check`), produce the sheets, then panel.
+Order of operations: run the static ladder first (`make dev-tool X=author-check`), produce the sheets, then panel.
 A critic reading a sheet from a scene that fails validation is spending your tokens on a frame that will
 change.
 
@@ -258,7 +258,7 @@ should have, which is why each of these is written down rather than remembered.
 ## Worktree agent contract
 
 Every worktree brief must carry this block, in this order. Each line cost a real session before it was
-written down (`make critics D=<file> DECIDERS=1` prints it with the film's real base sha filled in, so
+written down (`make dev-tool X=critics D=<file> DECIDERS=1` prints it with the film's real base sha filled in, so
 there is one owner of the text, not a copy in every brief).
 
 <!-- worktree-contract:start -->
@@ -271,11 +271,11 @@ there is one owner of the text, not a copy in every brief).
 - Work inside a render budget stated in the brief, and when it runs out, stop and report rather than rendering again, because renders are the most expensive step and a budget only holds if it is obeyed.
 - Run `make ship`/`make dev` and every other long command in the foreground and wait for it yourself; never end your turn saying you are waiting for one to finish, because nothing wakes a stalled agent and the task then sits untouched until a human notices.
 - Scene JSON is gitignored, so any film work that edits it runs in the lead's checkout, never a worktree, because a worktree cannot carry the edit home through a merge.
-- Pass the paths this brief says you own as scope globs to `worktree.sh add <name> <glob ...>`, because that is what lets `make worktree-status` warn the NEXT agent before it collides with you instead of after.
+- Pass the paths this brief says you own as scope globs to `worktree.sh add <name> <glob ...>`, because that is what lets `make dev-tool X=worktree-status` warn the NEXT agent before it collides with you instead of after.
 <!-- worktree-contract:end -->
 
 ## Provenance
 
 **Do not re-add:** the claim that an `ab` critic runs today. It shipped and was removed in August 2026
 with five other tools; neither commit hash this note used to carry resolves in this repository any more.
-Use `make compare` and judge by eye instead.
+Use `make dev-tool X=compare` and judge by eye instead.

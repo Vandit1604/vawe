@@ -48,7 +48,7 @@ const CHART_PAD = 22;     // the card's inset, all four sides
 const CHART_GAP = 14;     // between bars
 const CHART_GAP_Y = 8;    // between a bar and its captions
 const CHART_ROW = TYPE.body;   // a caption row's font size, which is what it costs in height. On the
-                               // scale now (was a bare 18); TYPE.body is the smallest step `make audit`
+                               // scale now (was a bare 18); TYPE.body is the smallest step `make check GATE=audit`
                                // will pass, since TYPE.fine (14) sits under its 14.04px floor.
 
 // barChart: labeled bars with values. `data` = [{label, value}]. Scales to the max.
@@ -338,7 +338,7 @@ export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '
 // the checker; the doctrine is core/lightfield/options.js, which this mirrors key for key.
 //
 // x · y · start · dur are absent from every table on purpose. They are placement and timing the SCENE
-// supplies (a container injects them, `make expand` writes them), never content an author dials.
+// supplies (a container injects them, `make dev-tool X=expand` writes them), never content an author dials.
 //
 // A `w` floor is the block's own furniture: `htmlCard` pads CHART_PAD on both sides, so below
 // 2 * CHART_PAD plus one minimum bar there is no plot left to draw into. A `w` ceiling is the stage.

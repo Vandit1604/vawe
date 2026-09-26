@@ -12,7 +12,7 @@ group: crosscutting
   `core/audio/kit.mjs`: no files, no license, nothing that 404s on a fresh clone.
 - Pick by family and placement, not by name alone: an accent is not a transition, and a riser must be
   hand-timed to end on its beat, never auto-mapped to a cut.
-- Enforced by `make audio-check` (code `silence-without-a-reason`): a film that ships `audio.silent:true`
+- Enforced by `make check GATE=audio-check` (code `silence-without-a-reason`): a film that ships `audio.silent:true`
   must say why. Regenerate this doc with `node harness/author/sfx-catalog.mjs`; do not hand-edit it.
 
 | Cue | Family | Energy | Purpose | Placement | Pitfall |

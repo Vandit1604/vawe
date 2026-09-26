@@ -1,7 +1,7 @@
 // theme-contract.js: the look a theme MUST fully define. There are no fallback look values
 // anywhere in the engine: tokens.css registers fonts + geometry only, and every color/font the
 // scene consumes comes from the theme. A theme missing any required key fails LOUD (at
-// `make validate` and again at boot) instead of rendering a wrong-looking video.
+// `make check GATE=validate` and again at boot) instead of rendering a wrong-looking video.
 // Pure data + one pure function: importable from node (validate) and the browser (motion.js/boot.js) alike.
 //
 // A THEME ON DISK IS NOW A TOKEN FILE (core/theme/tokens.js, core/theme/roles.js: `tokens` + a required
@@ -209,7 +209,7 @@ const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
 // that lookup and its near-word hint). `nearMisses` is core/registry/registry.js's own helper; when omitted, a
 // bad name is still refused, just without the "did you mean" suggestion. Any check whose list was not
 // handed in is SKIPPED, never defaulted to "assume it's fine": `themes/*.json` (the write site, checked
-// by `make validate`) hands in every list; `core/engine/boot.js`'s browser-side theme check does too, since
+// by `make check GATE=validate`) hands in every list; `core/engine/boot.js`'s browser-side theme check does too, since
 // backgrounds and transitions are already browser-safe imports there.
 function unknownLookKeyErrors(look, near) {
   const errs = [];
@@ -441,7 +441,7 @@ const scaleFromMotion = (m, portrait) => {
 // brand's ordinary pace, and from `motion.bounce` (the theme's own overshoot, 0..~0.5) for the ACCENT
 // cut, which fires rarely and should read as the brand's peak energy. Every name below is a real entry
 // in `core/transitions/catalog.js` (checked by `lookErrors` when `transitionNames` is injected, which
-// `make validate` and the new gate both do); a theme missing `motion` reads the engine's own pace (1)
+// `make check GATE=validate` and the new gate both do); a theme missing `motion` reads the engine's own pace (1)
 // and its own stillness (0), which lands it on the calmest tier of each, not a guess.
 const CUT_DEFAULT_TIERS = [ // ordered fast -> slow; each `max` is the upper edge of `durationScale` for that tier
   { max: 0.85, name: 'whip' },       // faster than the house pace: a brisk, no-ceremony default cut

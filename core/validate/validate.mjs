@@ -5,7 +5,7 @@
 //
 // data + theme validation against a format's schema.json. Runs in TWO places: (1) core/engine/boot.js
 // boot() imports validateData/validateTheme and aborts the render pre-first-frame on bad data (clear
-// message, no wasted frames); (2) `make validate` (core/validate/cli.mjs runCli) checks data files from
+// message, no wasted frames); (2) `make check GATE=validate` (core/validate/cli.mjs runCli) checks data files from
 // the shell. Pure + browser-safe: no top-level node imports.
 //
 // Schema vocabulary (the authoring schema):
@@ -143,7 +143,7 @@ export function validateAll(schema, data) {
   return [...validateData(schema, data), ...validateTheme(data?.theme)];
 }
 
-// ---------- CLI: `node core/validate/validate.mjs [data.json ...]` (make validate) ----------
+// ---------- CLI: `node core/validate/validate.mjs [data.json ...]` (make check GATE=validate) ----------
 // No args → validate every authored scene. Browser never runs this branch. The CLI itself lives in
 // cli.mjs, loaded with a dynamic import so it (and its node:fs/node:path use) is only ever touched
 // from here. validateAll is passed in rather than let cli.mjs import it back: a static import from

@@ -3,7 +3,7 @@
 // the WHOLE page (every captured section, not just the hero) aggregating a real pixel histogram.
 // That way white-body-text + a blue hero + purple accent all get seen, and dominance = the page's
 // true average luminance, not one section's. Writes a swatch card to /tmp/palette.png. NOT a
-// substitute for looking: confirm against the screenshots + the make beats VS=<brand> fidelity gate.
+// substitute for looking: confirm against the screenshots + the make dev-tool X=beats VS=<brand> fidelity gate.
 //
 //   node scripts/brand/palette.mjs assets/brands/<brand>/sections   # whole page (recommended)
 //   node scripts/brand/palette.mjs path/to/one-screenshot.png              # single image
@@ -102,7 +102,7 @@ if (isMain) {
   console.log(`  text      : ${p.text}`);
   console.log(`  accents   : ${p.accents.join('  ') || '(none saturated)'}`);
   console.log(`  top       : ${p.top.join(' ')}`);
-  console.log(`  → author themes/<brand>.json from these, then CONFIRM with make beats VS=<brand>.\n`);
+  console.log(`  → author themes/<brand>.json from these, then CONFIRM with make dev-tool X=beats VS=<brand>.\n`);
 
   await writeSwatch('/tmp/palette.png', p);
   console.log('  swatch card → /tmp/palette.png\n');

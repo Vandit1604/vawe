@@ -194,6 +194,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log('  A cell with no trail at all is a layer that only fades: it arrives without travelling.');
   } else {
     console.log('  Read the GREEN cells: how does each entrance animate IN? (dolly direction, typing, a colour-wave, a card assembling.)');
-    console.log('  ' + (all ? 'Per-LAYER pass: every distinct entrance, so a staggered sub-reveal mid-beat is caught too.' : 'Beat-level. Add LAYERS=1 for every element own entrance.') + '  `make beats` samples the hold; this samples the reveal.');
+    console.log('  ' + (all ? 'Per-LAYER pass: every distinct entrance, so a staggered sub-reveal mid-beat is caught too.' : 'Beat-level. Add LAYERS=1 for every element own entrance.') + '  `make dev-tool X=beats` samples the hold; this samples the reveal.');
   }
 }

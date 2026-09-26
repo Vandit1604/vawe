@@ -107,7 +107,7 @@ export async function render(scenePath, outFile, { watermark = true, aspect } = 
   const args = [scenePath, '--out', outFile];
   if (aspect) args.push('--aspect', aspect);
   if (watermark) {
-    if (!fs.existsSync(WATERMARK)) throw new Error('watermark sheet missing: run `make watermark`');
+    if (!fs.existsSync(WATERMARK)) throw new Error('watermark sheet missing: run `make media X=watermark`');
     args.push('--watermark', WATERMARK);
   }
   const r = await step(path.join(repoRoot, 'bin/vawe'), args);

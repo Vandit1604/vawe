@@ -7,14 +7,14 @@
 // pure function of n, and every frame renders on one of 8 workers in arbitrary order. So:
 //   · NO THREE.Clock, no performance.now, no Date, no requestAnimationFrame driving anything.
 //   · NO AnimationMixer stepping by delta. Every object is POSED ABSOLUTELY from local time:
-//     obj.position/rotation/scale = f(t). Never "+= velocity", which would make frame 412 depend on
+//     obj.position/rotation/scale = f(t). Never "+= velocity", which would make dev-tool X=frame 412 depend on
 //     411 frames having run first.
 //   · NO Math.random. A seeded PRNG only, so the same seed rebuilds the identical scene.
 // This mirrors exactly how core/layers/lottie.js tamed lottie-web: autoplay off, absolute seek per
 // frame. Same discipline, same reason. Anything genuinely stateful (physics, particles, fluid) does
 // not belong here at all - it belongs in the offline sim baker, which emits a PNG sequence.
 //
-// Verified by `make probe` (DOM signature across render orders) and `make canvas-purity`, which
+// Verified by `make check GATE=probe` (DOM signature across render orders) and `make check GATE=canvas-purity`, which
 // hashes REAL PIXELS because a canvas's contents are invisible to a DOM signature.
 // three.js is the GLOBAL window.THREE, loaded by boot's awaited readiness phase, NOT a static
 // import. This is the same shape as lottie-web (core/layers/lottie.js) and it is not stylistic: a
@@ -216,7 +216,7 @@ function studio(renderer, scene, colors) {
 // characters of the real `lines`. So the silhouette is the actual code's shape, indentation,
 // declining line lengths, a blank line, which is what makes an abstract stack of bars read as code
 // without needing a mono typeface nobody has generated. (`extrudeText` needs a real font and throws
-// without one; `make glyphs` ships Anybody and Fraunces, neither of which is a code face.)
+// without one; `make gen X=glyphs` ships Anybody and Fraunces, neither of which is a code face.)
 //
 // ONE BUILDER, THREE SCENES. `codeExtrude`, `codeDissolve` and `codeAssemble` differ only in what
 // they do with this layout, and that is the whole reason it is a function: three copies of "where
@@ -720,7 +720,7 @@ const SCENES = {
   // THE GLOBE. Land as points, a great-circle route, and a marker flying it.
   //
   // Every dot is a real coordinate: core/globe-dots.js is baked from Natural Earth by
-  // `make globe-dots`, so the continents are SAMPLED rather than drawn, and a texture is deliberately
+  // `make gen X=globe-dots`, so the continents are SAMPLED rather than drawn, and a texture is deliberately
   // not used. That is not only taste. A photographic earth would make the film that carries this
   // prettier and its claim ("computed, not drawn") false.
   //
@@ -955,11 +955,11 @@ const SCENES = {
   },
 
   // Extruded 3D type from the REAL brand font. The typeface JSON is generated from the repo's own
-  // woff2 by `make glyphs`; substituting a generic face would be the silent-font-substitution failure
+  // woff2 by `make gen X=glyphs`; substituting a generic face would be the silent-font-substitution failure
   // this repo has already logged once, so a missing font is a LOUD error rather than a fallback.
   extrudeText(L, colors) {
     const data = (typeof window !== 'undefined' && window.__typefaces) ? window.__typefaces[L.font] : null;
-    if (!data) throw new Error(`three extrudeText: no typeface loaded for "${L.font}", run \`make glyphs\` to generate assets/fonts/3d/${L.font}.typeface.json. Refusing to substitute a different face.`);
+    if (!data) throw new Error(`three extrudeText: no typeface loaded for "${L.font}", run \`make gen X=glyphs\` to generate assets/fonts/3d/${L.font}.typeface.json. Refusing to substitute a different face.`);
     const font = new (T().Font)(data);
     const grp = new (T().Group)();
     const shapes = font.generateShapes(String(L.text ?? ''), L.size ?? 1);

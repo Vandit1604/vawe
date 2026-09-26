@@ -56,7 +56,7 @@ does something you would otherwise hand-roll: `text` measures and fits and carri
 
 **"Walk the beat table" below is not a figure of speech.** The beat table has to exist before you open
 a fragment file, because it is the thing you sort. The decider roster in `AGENTS.md` puts storyboard at
-1 and scene (the role that writes a fragment) at 3, and `make critics DECIDERS=1` refuses to brief the
+1 and scene (the role that writes a fragment) at 3, and `make dev-tool X=critics DECIDERS=1` refuses to brief the
 roles below with `! no storyboard ... Step 1 is not optional`.
 
 Two things break when the fragments are written first, and neither is visible afterwards:
@@ -269,7 +269,7 @@ committed non-generic face** (the real brand font when reflecting a brand; never
 anything generic). Then gate it two ways, and know which one sees what.
 **`make preview HTML=<frag>`** runs the vendored impeccable detector over the FRAGMENT, in a real browser
 with real computed styles. That is where it works, and it is the only place it is still wired.
-**`make designspec-check D=<file>`** runs OUR rule table (`harness/lib/designspec-rules.mjs`) over the
+**`make check GATE=designspec-check D=<file>`** runs OUR rule table (`harness/lib/designspec-rules.mjs`) over the
 scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
 
 <!-- doc-refs-allow: make slop · this line records the target's retirement -->
@@ -285,7 +285,7 @@ scene: the theme colour/font lock plus the copy and effect-dose rules. Both must
 
 ## The stage kit: a foundation, not a reset
 
-`node harness/author/stagekit.mjs <film.json>` (`make stagekit D=<film>`) prints one `<style>` block
+`node harness/author/stagekit.mjs <film.json>` (`make dev-tool X=stagekit D=<film>`) prints one `<style>` block
 every scene fragment in a per-scene fan-out pastes VERBATIM (`node ... --check` asserts byte identity,
 `engine-doctrine/CRAFT/PER-SCENE-FANOUT.md`). It is generated from the FILM's theme, so it is not one fixed
 stylesheet: every theme in `themes/` (`ls themes/*.json | wc -l`) gets its own kit, never one kit reused across colours. Every number in it traces back
@@ -380,7 +380,7 @@ pointed at the right thing:
 - **The video values.** Everything above is web craft, and web craft is the input. Only the decorative
   NUMBERS change: opacity, border weight, scale, padding. See the table below.
 
-**This applies to a CAPTURED surface too.** `make capture URL=… SEL=…` lifts real UI with its computed
+**This applies to a CAPTURED surface too.** `make media X=capture URL=… SEL=…` lifts real UI with its computed
 CSS, and real UI arrives at web values by definition: 1px borders, 6% shadows, 14px labels. Wrap it in
 `.kit-picture` so it keeps its own palette on any ground, then transpose its decoration up. Capturing
 is the better start; it is not the finish.
@@ -390,7 +390,7 @@ is the better start; it is not the finish.
 Read the heading carefully, because the wrong reading of it is expensive. It does NOT mean web design
 is the wrong standard. **Web craft is the input.** The entire reason this engine renders HTML is to
 inherit thirty years of it: a good page is the best-designed artefact most people will see today, and
-a film made of surfaces that hold up as pages is a film that holds up. `make capture URL=… SEL=…`
+a film made of surfaces that hold up as pages is a film that holds up. `make media X=capture URL=… SEL=…`
 exists for exactly that, lifting a REAL component with its computed CSS into an animatable layer, and
 `AGENTS.md` already says to prefer capturing a real surface over inventing one. Hand-authoring a
 fragment is the FALLBACK, for a surface that does not exist yet.
@@ -499,7 +499,7 @@ right? Then render.
 **The gate that compares the plan with the frames built from it:**
 
 ```bash
-make frame-check D=films/scene/<film>.json
+make check GATE=frame-check D=films/scene/<film>.json
 ```
 
 It checks every fragment against its own beat, and it fails a size or a shadow that does not trace to
@@ -536,7 +536,7 @@ A film may declare its own resolved values, once, in `films/scene/<film>.design.
 (`harness/lib/design-spec.mjs`): palette, type roles, radius, shadow, space, laid over the stage kit's
 own numbers. No file, or an empty one, means the kit's values only.
 
-`quality/gates/design-drift.mjs` (`make design-drift D=<film>`, also run from `make frame-check`)
+`quality/gates/design-drift.mjs` (`make check GATE=design-drift D=<film>`, also run from `make check GATE=frame-check`)
 previews every fragment the storyboard names and checks each box's font, radius, shadow and colour
 against that set: near a token warns `design-token-hint` (reach for `var(--kit-...)`); nowhere near one
 blocks as `design-drift`, naming the fix. Silent with no design.md; `scale-drift` stays that check.

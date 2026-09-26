@@ -6,7 +6,7 @@
 - License: **MIT** (© Airbnb, Inc.). Https://github.com/airbnb/lottie-web/blob/master/LICENSE.md
 - Used by `core/layers/lottie.js` to render After Effects (Bodymovin) `.json` animations
   DETERMINISTICALLY: `autoplay:false` + `goToAndStop((t-start)*fr, true)`, an absolute seek per
-  frame, so `renderFrame(n)` stays pure and order-independent (verified by `make probe`).
+  frame, so `renderFrame(n)` stays pure and order-independent (verified by `make check GATE=probe`).
 
 ## three.module.min.js + three.core.min.js
 - **three.js** r185 (v0.185.1), minified ES-module build. Both files are required: `three.module.min.js`
@@ -21,8 +21,8 @@
   `three` layer can build synchronously without racing the module load, which would otherwise render
   empty on whichever workers got there first. That is a purity break, not a glitch.
 - Used by `core/surfaces/three.js` DETERMINISTICALLY: every object is posed absolutely from local time,
-  never accumulated, with no Clock, no AnimationMixer and no Math.random. `make lib-test` enforces the
-  banned-API list; `make canvas-purity` proves the pixels match across render orders.
+  never accumulated, with no Clock, no AnimationMixer and no Math.random. `make test` enforces the
+  banned-API list; `make check GATE=canvas-purity` proves the pixels match across render orders.
 
 ## gsap.min.js (+ MotionPathPlugin / Physics2DPlugin / SplitText)
 - **GSAP** v3.13.0, UMD build (`window.gsap`). The three plugin files are the formerly-paid bonus
@@ -44,5 +44,5 @@
   an author-JS hatch. Loaded on demand by `core/engine/preload.js` (`preloadGsap`) ONLY when a scene uses a
   `gsap`/`morph`/`fx`/`fxOut`/`motionPath`/`physics`/`splitText` field. Made DETERMINISTIC by stopping
   the ticker (`gsap.ticker.sleep()`) and pausing + seeking the global timeline per frame in
-  `seekAll(t)`: every tween is a pure function of `t`, proven by the dedup pass + `make probe`.
+  `seekAll(t)`: every tween is a pure function of `t`, proven by the dedup pass + `make check GATE=probe`.
 - Named effects live in `core/engine/gsap-effects.js` (referenced from JSON by name via `fx`/`fxOut`).

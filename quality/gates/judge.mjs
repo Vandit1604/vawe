@@ -137,7 +137,7 @@ if (verdictArg) {
     ? ` (${fixRecords.map((r) => `${r.code}@${r.beat}`).join(', ')})`
     : (fixesProse ? ` (${fixesProse})` : '');
   console.log(v === 'PASS'
-    ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make ledger-add D=${inp}).`
+    ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make dev-tool X=ledger-add D=${inp}).`
     : `  ✓ judge verdict recorded: FIX${fixSummary}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
   process.exit(0);
 }

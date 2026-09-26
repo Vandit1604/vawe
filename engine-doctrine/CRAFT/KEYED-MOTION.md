@@ -181,8 +181,8 @@ object would actually do.
 Two typing mistakes recur. **Fake typing**: `html` `parts` fading whole words in (`each`/`stagger` on a
 selector like `[data-part="prompt-word"]`), or a static `|`/`▏` glyph beside the copy, has no
 per-character reveal and no caret to chase. Use a `text` layer's own `typing` + `caret` instead
-(`fake-typing`, `make critique`). **Camera left behind**: a hand-keyed push with guessed `tx`/`ty` goes
-stale the moment the line is reworded (`typing-camera-still`, `make critique`). Give the travel leg one
+(`fake-typing`, `make check GATE=critique`). **Camera left behind**: a hand-keyed push with guessed `tx`/`ty` goes
+stale the moment the line is reworded (`typing-camera-still`, `make check GATE=critique`). Give the travel leg one
 station instead: `{ "move": "travel", "stations": [ { "target": "#opening" }, { "caret": "#line" } ] }`.
 `caret: "#<typing text layer id>"` expands to two stations, pushed in as typing begins and panned to the
 caret's end as it finishes, timed off the layer's own `start`/`typing`/text length
@@ -191,7 +191,7 @@ and the typing `text` as children of one `group` that carries the motion track (
 `caret` still resolves, at the child's real stage position (`findLayerById` sums each ancestor
 `layout:"free"` group's own x/y on the way down). Copying the tilt's rotX/rotY keys onto a second
 top-level layer by hand, then pushing its `ox`/`oy` pivot off its own box to fake the shared centre,
-is named by `copied-plane` (`make critique`): nest both under the `group` instead.
+is named by `copied-plane` (`make check GATE=critique`): nest both under the `group` instead.
 
 A typed line can also flash each word its own accent as it lands: `"typingColors": { "colors": ["var(--accent)", "var(--accent-2)"], "hold": 0.4 }`.
 `colors` cycles one per word (colorWave's `colors[i % n]` vocabulary), `hold` is the same 0..1 fraction

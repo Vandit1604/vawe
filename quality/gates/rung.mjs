@@ -67,8 +67,24 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { GATES as CHECK_GATES } from '../../harness/lib/check-gate.mjs';
+import * as GEN_TOOL from '../../harness/lib/gen-tool.mjs';
+import * as SITE_TOOL from '../../harness/lib/site-tool.mjs';
+import * as STUDY_TOOL from '../../harness/lib/study-tool.mjs';
+import * as DEV_TOOL from '../../harness/lib/dev-tool.mjs';
+import * as MEDIA_TOOL from '../../harness/lib/media-tool.mjs';
 
 const GATES = new Set(Object.keys(CHECK_GATES));
+// The dispatcher targets (gen/site/study-tool/dev-tool/media): each folds many names behind X=, so
+// `[ref: make <dispatcher> X=<name>]` is verified against that dispatcher's own table (TOOLS + any
+// CUSTOM entries), the same way `[ref: make check GATE=<g>]` is verified against check-gate.mjs's.
+const toolNames = (mod) => new Set([...Object.keys(mod.TOOLS || {}), ...Object.keys(mod.CUSTOM || {})]);
+const DISPATCH = {
+  gen: toolNames(GEN_TOOL),
+  site: toolNames(SITE_TOOL),
+  'study-tool': toolNames(STUDY_TOOL),
+  'dev-tool': toolNames(DEV_TOOL),
+  media: toolNames(MEDIA_TOOL),
+};
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/rung-ratchet.json');
@@ -156,6 +172,22 @@ function sectionsOf(rel) {
   return out;
 }
 
+/** [ref] takes a plain make target, a `make <dispatcher> X=<name>`, or `make check GATE=<g>`. */
+function verifyRef(names, targets) {
+  const gate = /^make\s+check\s+GATE=([a-z][a-z0-9-]*)$/.exec(names);
+  if (gate) return GATES.has(gate[1]) ? null : `no such gate \`GATE=${gate[1]}\` (harness/lib/check-gate.mjs)`;
+  const disp = /^make\s+([a-z][a-z0-9-]*)\s+X=([a-z][a-z0-9-]*)$/.exec(names);
+  if (disp) {
+    const [, dispatcher, x] = disp;
+    const set = DISPATCH[dispatcher];
+    if (!set) return `no such dispatcher \`${dispatcher}\` (gen/site/study-tool/dev-tool/media)`;
+    return set.has(x) ? null : `no such name \`X=${x}\` in \`make ${dispatcher}\``;
+  }
+  const t = /^make\s+([a-z][a-z0-9-]*)$/.exec(names);
+  if (!t) return `[ref] takes a make target ("make arsenal"), a dispatcher ("make dev-tool X=frame") or a gate ("make check GATE=rung"), not "${names}"`;
+  return targets.has(t[1]) ? null : `no Makefile target \`${t[1]}\``;
+}
+
 /** Verify one tag. Returns null when it holds, or the reason it does not. */
 function verify(s, targets) {
   const { rung, names } = s;
@@ -166,13 +198,7 @@ function verify(s, targets) {
   }
   if (!names) return `[${rung}] names nothing. A tag that claims a mechanism must NAME it, or it is decoration`;
 
-  if (rung === 'ref') {
-    const gate = /^make\s+check\s+GATE=([a-z][a-z0-9-]*)$/.exec(names);
-    if (gate) return GATES.has(gate[1]) ? null : `no such gate \`GATE=${gate[1]}\` (harness/lib/check-gate.mjs)`;
-    const t = /^make\s+([a-z][a-z0-9-]*)$/.exec(names);
-    if (!t) return `[ref] takes a make target ("make arsenal") or a gate ("make check GATE=rung"), not "${names}"`;
-    return targets.has(t[1]) ? null : `no Makefile target \`${t[1]}\``;
-  }
+  if (rung === 'ref') return verifyRef(names, targets);
   if (rung === 'gated') {
     const [script, code] = names.split('#');
     if (!fs.existsSync(path.join(ROOT, script))) return `no such gate: ${script}`;

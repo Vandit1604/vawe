@@ -278,7 +278,7 @@ test('lib-test: registry', async () => {
   })());
   ok('validate: a scene with no raw junction key passes clean', authoredJunctionErrors({ transitions: [{ at: 1, fx: 'fade' }] }).length === 0);
   // `none` is a real cut (a hard cut with no visual transition) but sits outside the catalog's cut row
-  // (core/transitions/catalog.js: nothing to browse in `make transitions`); it must still ROUTE as a
+  // (core/transitions/catalog.js: nothing to browse in `make study-tool X=transitions`); it must still ROUTE as a
   // boundary cut, the same thing raw `cuts[].style:"none"` always meant.
   ok('lowering: a boundary transition can say "none", and it routes to cut', (() => {
     const d = lowerScene({ transitions: [{ at: 2, fx: 'none' }] });
@@ -388,7 +388,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   const names = Object.keys(BLOCKS);
   ok(`registry: ${names.length} blocks exported`, names.length > 0);
 
-  // Call each row the way `make catalog` does: family factory + the manifest's props. A BARE name in
+  // Call each row the way `make site X=catalog` does: family factory + the manifest's props. A BARE name in
   // the registry is the raw factory with NO props merged, so calling it by name yields an empty block
   // (captions with no lines is correctly []). That is the registry working, not a bug to assert on.
   const build = (e, opts = {}) => BLOCKS[e.family]({ ...(e.props || {}), x: 100, y: 100, start: 0, dur: 4, ...opts });
@@ -504,7 +504,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
   // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
   // The cost of committing derived output is that it can go stale silently, add a block, forget
-  // `make blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
+  // `make site X=blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
   // every registry entry must have both its poster and the scene the site plays live.
   // This runs in lib-test because lib-test runs on pre-push, which is the last moment drift is cheap.
   {
@@ -514,14 +514,14 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
       const safe = e.name.replace(/[^a-z0-9.]/gi, '_');
       return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.json`));
     }).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make site X=blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
       noMedia.length === 0);
     // The frame rect is what keeps the poster and the live render framed identically. A block with a
     // scene but no rect renders nothing on the card at all, which is a silent, invisible failure.
     const framesPath = path.join(repoRoot, 'site/lib/block-frames.json');
     const framesOk = fs.existsSync(framesPath) ? JSON.parse(fs.readFileSync(framesPath, 'utf8')) : {};
     const noFrame = gridRows.filter((e) => !framesOk[e.name]).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make site X=blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
       noFrame.length === 0);
   }
 
@@ -1197,7 +1197,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
 // THIS ASSERT EXISTS BECAUSE THE CATALOGUE FAILED CORRECTLY AND FAR TOO LATE. `effects-json.mjs`
 // refuses a family that has no authoring form and no preview (or a stated reason for having none),
 // which is right. But nothing in the gate ladder ran it, so three families were added with no rows and
-// the fault sat there until somebody typed `make effects` by hand and found the whole catalogue could
+// the fault sat there until somebody typed `make regen` by hand and found the whole catalogue could
 // not regenerate. Failing loudly is only half of failing early: a check nobody runs is a check that
 // reports at a time of the author's choosing, which is exactly when they are not looking.
 //
@@ -1458,7 +1458,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   ok('theme.look: scale values must be numbers', lookErrors({ scale: { hook: '90px' } })
     .some((m) => /look\.scale\.hook must be a number/.test(m)));
 
-  // every theme pack this repo ships must itself be clean: the same live registries `make validate`
+  // every theme pack this repo ships must itself be clean: the same live registries `make check GATE=validate`
   // uses, so this is the real contract, not a mocked one.
   const { BG_NAMES: liveBg } = await import('../../core/backgrounds/index.js');
   const { TRANSITIONS: liveTransitions } = await import('../../core/transitions/catalog.js');

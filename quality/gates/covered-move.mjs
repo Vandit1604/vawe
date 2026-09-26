@@ -35,7 +35,7 @@
 // question, seams.mjs's / probe-frame's job, not this JSON-only gate's: an html B is simply
 // never reported as a coverer here.
 //
-//   node quality/gates/covered-move.mjs <scene.json>   ·   make covered-move D=<file>
+//   node quality/gates/covered-move.mjs <scene.json>   ·   make check GATE=covered-move D=<file>
 import fs from 'node:fs';
 import { loadScene } from '../../core/engine/expand.js';
 import { resolveCoords } from '../../core/engine/boot.js';

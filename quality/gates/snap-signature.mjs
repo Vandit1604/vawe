@@ -48,13 +48,13 @@ import path from 'node:path';
 // THE HASH COUNTS ONLY LOCKED FACES, NOT A DIRECTORY LISTING. It used to read every file under
 // assets/fonts/ (plus assets/fonts/local/, removed for the same reason below), and a directory is not a
 // reproducible thing: this repo's own dev worktrees carry leftover faces from font-discovery experiments
-// that `make fonts` never fetches and `harness/media/fonts.lock.json` never names, so two checkouts that
-// both ran the exact same `make fonts` still produced two different hashes, one of them polluted by
+// that `make gen X=fonts` never fetches and `harness/media/fonts.lock.json` never names, so two checkouts that
+// both ran the exact same `make gen X=fonts` still produced two different hashes, one of them polluted by
 // whatever a past session happened to leave on disk. `fonts.lock.json` is the one list any machine can
 // reproduce byte-for-byte (generators/media/fonts.mjs pins a version and a sha256 per face), so it is
 // the one thing the hash is allowed to depend on: read the LOCKED file list, ignore everything else in
 // assets/fonts/, and skip `assets/fonts/local/` outright, the PAID, per-developer faces (Sohne, a
-// hand-captured Tiempos) `make fonts` never touches and no CI runner ever has. No TRACKED theme sets one
+// hand-captured Tiempos) `make gen X=fonts` never touches and no CI runner ever has. No TRACKED theme sets one
 // today; a scene whose theme starts needing one is not made portable by this, it belongs in
 // quality/baselines/e2e-known-broken.json by name, same as any other scene a clean clone cannot render.
 const FONT_DIR = 'assets/fonts';
@@ -62,7 +62,7 @@ const FONTS_LOCK = 'harness/media/fonts.lock.json';
 
 /** A BASELINE IS ONLY VALID WITHIN ONE FONT STATE. See snap-scenes.mjs's original banner for why:
  * `assets/fonts/` is gitignored, so a fresh clone, a worktree with a partial font set, or a mid-session
- * `make fonts` all silently rewrite every text width the signature records. */
+ * `make gen X=fonts` all silently rewrite every text width the signature records. */
 export function fontState(repoRoot) {
   let locked = {};
   try { locked = JSON.parse(fs.readFileSync(path.join(repoRoot, FONTS_LOCK), 'utf8')).faces || {}; }

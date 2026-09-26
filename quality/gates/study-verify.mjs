@@ -2,7 +2,7 @@
 // answers we already know.
 //
 //   node quality/gates/study-verify.mjs films/scene/brew-launch-act1.json
-//   make study-verify D=films/scene/<scene>.json
+//   make check GATE=study-verify D=films/scene/<scene>.json
 //
 // WHY THIS IS POSSIBLE AT ALL, and why it is the right gate. `make study` reads someone else's film and
 // nobody can grade it: the reference has no source, so a wrong measurement and a right one look the

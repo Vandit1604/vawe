@@ -19,7 +19,7 @@
 //
 //   node quality/gates/snap-scenes.mjs --save   # write baselines → quality/baselines/snap/scenes/<name>.json
 //   node quality/gates/snap-scenes.mjs          # diff current vs baselines
-//   make snap-all [SAVE=1]
+//   make check GATE=snap-all [SAVE=1]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -42,7 +42,7 @@ const f = gateFindings();
 const SAVE = args.includes('--save');
 
 // A BASELINE IS ONLY VALID WITHIN ONE FONT STATE, and nothing used to record which one.
-// `assets/fonts/` is gitignored and populated by `make fonts`, so a fresh clone, a worktree, or a
+// `assets/fonts/` is gitignored and populated by `make gen X=fonts`, so a fresh clone, a worktree, or a
 // `make build` that fetches a face mid-session all silently rewrite every text width in the library.
 // Measured: a worktree with 2 faces against this tree's 24 reported 57 scenes changed with not one line
 // of code different, and a `make build` fetching 16 fonts moved 56 scenes the same way.
@@ -179,7 +179,7 @@ for (const scene of scenes) {
       if (!was) nobaseline.push(name);
       else if (was.font !== NOW_FONT.hash) staleFontDigest.push(name);
       else if (was.sig === sigHash) identical.push(name);
-      else changed.push({ name, diffs: [`signature ${was.sig} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make snap-all SAVE=1\` on a tree with the films to see it.)`] });
+      else changed.push({ name, diffs: [`signature ${was.sig} → ${sigHash} (digest only: no full baseline in this checkout, so WHAT moved is not available here. Run \`make check GATE=snap-all SAVE=1\` on a tree with the films to see it.)`] });
       await page.close(); continue;
     }
     const base = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -198,8 +198,8 @@ for (const q of quarantined) f.fail('quarantined', `${q.name}: non-deterministic
 for (const e of errored) f.fail('render-error', e);
 if (!SAVE) {
   for (const c of changed) f.fail('scene-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 12).join(' · ')}${c.diffs.length > 12 ? ` … +${c.diffs.length - 12} more` : ''}`, { at: c.name });
-  for (const n of nobaseline) f.note('no-baseline', `${n}: determinism-checked, but no baseline to diff against, run \`make snap-all SAVE=1\``, { at: n });
-  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make fonts\` to match it or re-save from a checkout in that state`, { at: n });
+  for (const n of nobaseline) f.note('no-baseline', `${n}: determinism-checked, but no baseline to diff against, run \`make check GATE=snap-all SAVE=1\``, { at: n });
+  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make gen X=fonts\` to match it or re-save from a checkout in that state`, { at: n });
   if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) f.fail('nothing-compared', `all ${nobaseline.length + staleFontDigest.length} scene(s) lack a comparable baseline, this gate checked NOTHING`);
 }
 console.log(`\n==== SNAP-ALL · ${scenes.length} scenes ====`);
@@ -213,7 +213,7 @@ if (!SAVE) {
   // for a stack trace. That is the first-run path for every fresh clone and every new worktree, because
   // quality/baselines/snap/ is gitignored. Independent conditions, never a chain: the notes are not alternatives to
   // each other, and writing them as if they were is what made one of them able to break the others.
-  if (!was) console.log(`  ~ these baselines carry no font-state stamp, so a text-width difference cannot be told from a code one. Re-save with \`make snap-all SAVE=1\` to stamp them.`);
+  if (!was) console.log(`  ~ these baselines carry no font-state stamp, so a text-width difference cannot be told from a code one. Re-save with \`make check GATE=snap-all SAVE=1\` to stamp them.`);
   // WHICH CHECKOUT RECORDED THESE. A baseline saved in one tree and compared in another can differ for
   // reasons that have nothing to do with the diff under test, and a "changed" line gives the reader no
   // way to tell which. Four separate agents spent real time on ONE scene (react-demo) that renders
@@ -224,11 +224,11 @@ if (!SAVE) {
   if (was && was.root && was.root !== repoRoot)
     console.log(`  ~ these baselines were recorded in a DIFFERENT checkout:\n      saved in  ${was.root}\n      running in ${repoRoot}\n`
       + `    A scene listed below may differ for environmental reasons rather than because of your change.\n`
-      + `    To get a verdict about your diff alone: re-save here first (\`make snap-all SAVE=1\`), confirm clean, then apply the change.`);
+      + `    To get a verdict about your diff alone: re-save here first (\`make check GATE=snap-all SAVE=1\`), confirm clean, then apply the change.`);
   if (was && was.hash !== now.hash)
     console.log(`  ⚠ FONT STATE CHANGED since these baselines were saved (${was.n} face(s) ${was.hash} → ${now.n} face(s) ${now.hash}).\n`
       + `    Every text width in the library moves with it, so a "changed" scene below is NOT evidence about the code.\n`
-      + `    Run \`make fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);
+      + `    Run \`make gen X=fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);
 }
 if (SAVE) {
   const fsNow = NOW_FONT;
@@ -245,7 +245,7 @@ console.log(`✓ identical: ${identical.length}   △ changed: ${changed.length}
 // merely changed, and the old line both withheld the names and suppressed itself whenever anything else
 // was off, so the very runs where you most need to know were the runs that said nothing.
 if (nobaseline.length) {
-  console.log(`\n○ NO BASELINE (determinism-checked, but nothing to diff against, run \`make snap-all SAVE=1\`):`);
+  console.log(`\n○ NO BASELINE (determinism-checked, but nothing to diff against, run \`make check GATE=snap-all SAVE=1\`):`);
   for (const n of nobaseline) console.log(`  ${n}`);
 }
 if (staleFontDigest.length) {
@@ -269,7 +269,7 @@ if (errored.length) { console.log(`\n⚠ errored:`); for (const e of errored) co
 if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) {
   const n = nobaseline.length + staleFontDigest.length;
   console.error(`\n✗ nothing to compare: all ${n} scene(s) lack a comparable baseline, so this gate checked NOTHING.`);
-  console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make snap-all SAVE=1` to record');
+  console.error('  quality/baselines/snap/ is gitignored, so a fresh clone starts here. Run `make check GATE=snap-all SAVE=1` to record');
   console.error('  the baselines for THIS machine first, then re-run to diff against them.');
   process.exit(1);
 }

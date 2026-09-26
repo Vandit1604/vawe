@@ -17,7 +17,7 @@
 ## Why this direction
 
 <no concept receipt found: this treatment cannot say what was rejected, because nothing recorded it.
- Run `make concept SB=films/scene/thread.storyboard.md` and `make concept-pick` first if you want that argument on the record.>
+ Run `make dev-tool X=concept SB=films/scene/thread.storyboard.md` and `make dev-tool X=concept-pick` first if you want that argument on the record.>
 
 <Why that beats the alternatives below, in your words. This is the paragraph the treatment exists for.>
 

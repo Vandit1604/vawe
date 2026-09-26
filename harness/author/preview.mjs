@@ -25,7 +25,7 @@ if (flagIdx >= 0 && flagData === undefined) {
 }
 if (dataArg && !fs.existsSync(path.resolve(dataArg))) {
   console.error(`preview.mjs: no such data file "${dataArg}"`);
-  console.error('usage: make look D=films/scene/<film>.json  (or make frame D=… N=<n>)');
+  console.error('usage: make look D=films/scene/<film>.json  (or make dev-tool X=frame D=… N=<n>)');
   process.exit(1);
 }
 if (!format || !fs.existsSync(path.join(repoRoot, 'films', format, 'scene.html'))) {

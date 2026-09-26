@@ -3,7 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const env = (k, d) => (process.env[k] != null && process.env[k] !== '' ? process.env[k] : d);
 const VIDEO = env('VIDEO', process.argv[2]);
-if (!VIDEO || !fs.existsSync(VIDEO)) { console.error('usage: make filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=]'); process.exit(2); }
+if (!VIDEO || !fs.existsSync(VIDEO)) { console.error('usage: make media X=filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=]'); process.exit(2); }
 const FPS = +env('FPS', '2');
 const COLS = +env('COLS', '8');
 const PER_SHEET = +env('PER_SHEET', '80');          // tiles per sheet (keeps each sheet readable)
@@ -46,7 +46,7 @@ const estTokensPerSheet = 1200; // ~a 1900px-wide contact sheet
 console.log(`\n  FILMSTRIP · ${VIDEO}${FROM != null ? ` [${FROM}-${TO}s]` : ''} · ${DEDUP ? 'dedup keyframes' : FPS + 'fps'} · ${files.length} frames → ${sheets.length} sheet(s)`);
 for (const s of sheets) console.log(`    ${s}`);
 console.log(`  ≈ ${(sheets.length * estTokensPerSheet / 1000).toFixed(0)}k tokens to read all sheets (vs ~${(files.length * 1.2).toFixed(0)}k reading each frame raw, ~${(2205 * 1.2 / 1000).toFixed(1)}M for every source frame).`);
-console.log(`  Read the sheets in order. For transition detail, re-run with FROM/TO + FPS=12, or crop with make measure.\n`);
+console.log(`  Read the sheets in order. For transition detail, re-run with FROM/TO + FPS=12, or crop with make study-tool X=measure.\n`);
 
 // tile a batch of frames into one sheet with ffmpeg's tile filter (concat demuxer feeds them in order)
 function buildSheetTile(batch, dir, cols, rows, outPath) {

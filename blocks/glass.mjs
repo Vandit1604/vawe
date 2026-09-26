@@ -52,7 +52,7 @@ const HILITE = 'color-mix(in srgb, var(--accent) 30%, transparent)';
 //
 // THE SCRIM IS NOT DECORATION, IT IS WHAT MAKES THE COPY READABLE. A white tint alone tracks whatever
 // is behind it: over a pale backdrop the panel goes pale, and white copy on it measured 1.5:1 in
-// `make audit`. A real dark frosted surface DARKENS what it blurs. So the fill is a white tint over a
+// `make check GATE=audit`. A real dark frosted surface DARKENS what it blurs. So the fill is a white tint over a
 // dark scrim, which holds the panel inside a readable band whichever way the field behind it swings,
 // and still lets the moving colour through, that is the whole point of the block.
 const frost = ({ radius = R.round, tint = 0.09, blur = 18, edge = EDGE, elevation = E.floating,
@@ -115,7 +115,7 @@ const spreadFrom = (dx, dy, { at = 0.15, dur = 0.75, ease = 'spring' } = {}) => 
 // the grid tell the taste system fights. The showcase panel is `glassHeroPanel`, above.
 // BACKDROP: `aurora` or `blobs`. It wants big slow colour moving under the blur.
 // NO KICKER, and the reason is a measurement rather than a preference: `glassHeroPanel` paints its kicker
-// in `var(--accent)`, and an accent line on a frosted panel measured 2.3:1 in `make audit` against a
+// in `var(--accent)`, and an accent line on a frosted panel measured 2.3:1 in `make check GATE=audit` against a
 // 4.5:1 floor. Darkening the scrim under it does not save it, the accent is the light half of that
 // pair. The eyebrow's job is done by the stat tiles' labels instead. See `frameworkFindings`.
 // ONE HTML LAYER PER TILE, not `parts`: each tile already carries its own start offset off `i`, and

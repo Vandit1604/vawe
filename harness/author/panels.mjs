@@ -384,5 +384,5 @@ if (regions.length > 1 && new Set(regions).size === 1) console.log(`  ~ every be
 console.log(`\n  sheet:  ${SHEET}`);
 console.log(`  stills: ${OUTDIR}/beat-NN.png`);
 console.log('\n  READ IT. These are BLOCKING, not drawing: where things sit, how big they are, and how the');
-console.log('  beats compare. They cannot show motion (that is `make animatic`) and they cannot show the');
-console.log('  look (that is `make styleframes`). They are only ever as good as the storyboard.\n');
+console.log('  beats compare. They cannot show motion (that is `make dev-tool X=animatic`) and they cannot show the');
+console.log('  look (that is `make dev-tool X=styleframes`). They are only ever as good as the storyboard.\n');

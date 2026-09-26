@@ -4,7 +4,7 @@ const OUT = 'films/scene/glass.json';
 const DUR = 12.0;
 const r1 = (v) => +v.toFixed(2);
 const layers = [];
-const SHOT = '/assets/cutouts/bulb.png';   // rembg cutout: `make cutout SRC=… NAME=bulb`
+const SHOT = '/assets/cutouts/bulb.png';   // rembg cutout: `make media X=cutout SRC=… NAME=bulb`
 
 layers.push({
   type: 'image', id: 'subject', src: SHOT,

@@ -69,5 +69,5 @@ export function frame(kit, el, L, t, scene, { ken } = L) {
 export const PROPS = mergeProps(
   propsOf(build), propsOf(frame), { edgeFadeColor: { when: 'edgeFade' } }, RESAMPLE_PROPS);
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot";

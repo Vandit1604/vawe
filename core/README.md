@@ -16,7 +16,7 @@ Read by: the renderer, which calls `renderFrame(n)` and expects a pure function 
 Date/random; and any agent naming an effect before building it.
 
 The one doc: `AGENTS.md` for the composition rule, `engine-doctrine/CODEMAPS/ARCHITECTURE.md` for the
-system map. Checked by: `make probe` (structural purity), `make canvas-purity` (pixel purity for
+system map. Checked by: `make check GATE=probe` (structural purity), `make check GATE=canvas-purity` (pixel purity for
 canvas/shader layers), `core/validate/validate.mjs` (the built-in rules run on every scene).
 
 Look first: `engine-doctrine/CODEMAPS/ARCHITECTURE.md`, then the subfolder matching the capability.

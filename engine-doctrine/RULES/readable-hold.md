@@ -1,7 +1,7 @@
 ---
 name: readable-hold
 when: a beat holds still on a clip, a card, or a line of text before it moves on
-holds: reports (make direct, read gate; TASTE=1 gives it teeth; `unreadable-hold`, `text-overstays`)
+holds: reports (make dev-tool X=direct, read gate; TASTE=1 gives it teeth; `unreadable-hold`, `text-overstays`)
 answers: "the minimum time a held frame needs to be readable, and why the fix is always a hold, never a slower move"
 group: look
 codes: unreadable-hold

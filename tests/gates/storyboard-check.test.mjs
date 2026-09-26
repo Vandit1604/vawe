@@ -148,14 +148,14 @@ run('harness/author/assemble.mjs', [film]);
   run('harness/author/assemble.mjs', [film]);
 }
 
-// ---- a frame planned with make screen and no fragment: line is invisible to the stage --------
+// ---- a frame planned with make dev-tool X=screen and no fragment: line is invisible to the stage --------
 {
   const orig = fs.readFileSync(sb, 'utf8');
-  fs.writeFileSync(sb, orig.replace('- duration: 3s', '- duration: 3s\n- design: make screen F=films/scene/v.hook.html KIND=editor'));
+  fs.writeFileSync(sb, orig.replace('- duration: 3s', '- duration: 3s\n- design: make dev-tool X=screen F=films/scene/v.hook.html KIND=editor'));
   const { out } = check();
-  assert.match(out, /plans `make screen F=films\/scene\/v\.hook\.html` but has no `fragment:` line/, 'a make screen plan with no fragment: is named');
-  fs.writeFileSync(sb, orig.replace('- duration: 3s', '- duration: 3s\n- design: make screen F=films/scene/v.hook.html KIND=editor\n- fragment: films/scene/v.hook.html'));
-  assert.doesNotMatch(check().out, /plans `make screen F=/, 'the matching fragment: line silences it');
+  assert.match(out, /plans `make dev-tool X=screen F=films\/scene\/v\.hook\.html` but has no `fragment:` line/, 'a make dev-tool X=screen plan with no fragment: is named');
+  fs.writeFileSync(sb, orig.replace('- duration: 3s', '- duration: 3s\n- design: make dev-tool X=screen F=films/scene/v.hook.html KIND=editor\n- fragment: films/scene/v.hook.html'));
+  assert.doesNotMatch(check().out, /plans `make dev-tool X=screen F=/, 'the matching fragment: line silences it');
   fs.writeFileSync(sb, orig);
 }
 

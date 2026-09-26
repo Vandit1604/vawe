@@ -42,7 +42,7 @@ structure to copy. Compose your own layers from the vocabulary in `engine-doctri
 - Black means `{"preset": "black"}`. That is `#000000`, not a dark tint.
 - No em-dashes in on-screen text. Use a comma, a period, or `·`.
 - The first-frame hook is 12 words or fewer, and it does not spoil the payoff.
-- Prefer a real captured asset (`make assets`, `make capture`) over an emoji or a stock image.
+- Prefer a real captured asset (`make media X=assets`, `make media X=capture`) over an emoji or a stock image.
 - Hand-key the motion you want. Do not just name a preset: write the track
   (`make arsenal SHAPE=pan|blast|drift|enter|exit` gives you a starting shape).
 - Name the effect before you build it. Search `make arsenal Q="what you mean, in plain

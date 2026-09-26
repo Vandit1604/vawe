@@ -1,4 +1,4 @@
-// tests/authoring/eject-block.test.mjs: `make add BLOCK=<name> D=<film>` writes a block factory's own
+// tests/authoring/eject-block.test.mjs: `make dev-tool X=add BLOCK=<name> D=<film>` writes a block factory's own
 // output straight into the film, in place of the sugar layer, tagged `ejectedFrom`. node tests/authoring/eject-block.test.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';

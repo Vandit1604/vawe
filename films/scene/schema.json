@@ -968,7 +968,7 @@
   },
   "transitions": {
    "type": "array",
-   "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut \u00b7 seam \u00b7 sting) via core/transitions/catalog.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make transitions`.",
+   "label": "UNIFIED transitions (one surface): a boundary transition between two beats. `fx` routes to the right mechanism automatically (cut \u00b7 seam \u00b7 sting) via core/transitions/catalog.js, ambiguous basics (fade/slide/wipe) default to a cheap root cut; `mech:\"seam\"` upgrades to the real two-scene blend. Lowered to cuts/stings/seams at load. Inventory: `make study-tool X=transitions`.",
    "item": {
     "at": {
      "type": "number|string",
@@ -978,7 +978,7 @@
     },
     "fx": {
      "type": "string",
-     "label": "Transition name (any from `make transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom \u2192 seam; whip/punch/zoom \u2192 cut; glitch/chromaticSplit \u2192 sting; fade/slide/wipe/dissolve \u2192 cut by default (add mech:\"seam\" for the two-scene blend).",
+     "label": "Transition name (any from `make study-tool X=transitions`). Routed by mechanism: whipPan/crossWarp/cinematicZoom \u2192 seam; whip/punch/zoom \u2192 cut; glitch/chromaticSplit \u2192 sting; fade/slide/wipe/dissolve \u2192 cut by default (add mech:\"seam\" for the two-scene blend).",
      "required": true
     },
     "mech": {
@@ -1058,7 +1058,7 @@
   },
   "content": {
    "type": "object",
-   "label": "A flat {key: value} map. `{{key}}` inside any layer's `text`/`html`/`src` (at any nesting depth) is replaced by `content[key]` at build (core/engine/expand.js resolveContentSlots), so swapping copy or an asset path for a new customer/language/version is one map edited once. An unknown `{{key}}` is refused by name, both at `make validate` and at build."
+   "label": "A flat {key: value} map. `{{key}}` inside any layer's `text`/`html`/`src` (at any nesting depth) is replaced by `content[key]` at build (core/engine/expand.js resolveContentSlots), so swapping copy or an asset path for a new customer/language/version is one map edited once. An unknown `{{key}}` is refused by name, both at `make check GATE=validate` and at build."
   },
   "cameraMove": {
    "label": "Author sugar: { move, ...params } (or an array of them) \u2192 data.camera at expand time. Moves: slowPush | diveIn | panFollow | workspaceZoomOut | orbit | multiPhase | travel | truck | cameraShake | punchIn | driftHold | dollyZoom | followCursor | followLayer. `followCursor` is the one move that is DERIVED rather than typed: give it `\"cursor\": \"<layer id>\"` and it reads that cursor layer's own `path` and `clicks`, pushes toward each press, arrives just before it, holds, then releases, so the pointer stays the single owner of where the camera goes. `followLayer` tracks a layer's live box by id (`\"id\": \"<layer>\"`) instead of a fixed point, and resolves onto `cameraFollow`, not `camera`. This list is free text and has drifted before (it omitted travel and truck for months); CAMERA_MOVE_NAMES in core/camera-moves/index.js is the source of truth, and lib-test asserts the two agree. CAMERA BY ELEMENT: a diveIn, or any travel station, may name `\"target\": \"#<layer id>\"` instead of hand-typing `tx`/`ty`(/`to`): bakeCameraMove (core/engine/produce.js) resolves it once off the layer's own authored box (needs numeric x/y and a declared w/h or size), computes the largest scale that keeps the box plus an optional `margin` (fraction of the frame, default 0.06) inside the canvas, and prints the resolved numbers. Raw `tx`/`ty` on the same spec win and the target is dropped. `{\"move\":\"diveIn\",\"target\":\"#cta\",\"margin\":0.1}`.  A single leg may also declare `\"beats\": [\"<id>\", ...]` naming every `beats[]` id (below) it spans, when the move continues across a beat seam; core/engine/produce.js reports (never blocks) a move whose resolved window runs outside the beats it declares."
@@ -1527,7 +1527,7 @@
     },
     "size": {
      "type": "number",
-     "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make audit` still catch true overflow/clipping.",
+     "label": "Font size (px). Up to 560 for frame-filling hero words (real launch films let a single word bleed the frame, scale contrast). The auto-fit safety + `make check GATE=audit` still catch true overflow/clipping.",
      "min": 18,
      "max": 560
     },
@@ -1886,7 +1886,7 @@
     },
     "ransom": {
      "type": "boolean|object",
-     "label": "Comic/ransom cutout: each glyph a different face, paper swatch + torn edge (implies split:char; pair with fall/bounce). Object form: { palette: 'paper'|'color', sprites, accent, faces, swatches, cycle, stagger }. `sprites:true` uses REAL cut-out letter photos baked by `make ransom-sprites` instead of CSS tiles. `cycle` (s) re-rolls each letter into a different cutout of the SAME glyph in place"
+     "label": "Comic/ransom cutout: each glyph a different face, paper swatch + torn edge (implies split:char; pair with fall/bounce). Object form: { palette: 'paper'|'color', sprites, accent, faces, swatches, cycle, stagger }. `sprites:true` uses REAL cut-out letter photos baked by `make gen X=ransom-sprites` instead of CSS tiles. `cycle` (s) re-rolls each letter into a different cutout of the SAME glyph in place"
     },
     "ransomSeed": {
      "type": "string|number",
@@ -2922,11 +2922,11 @@
   },
   "audio": {
    "type": "object",
-   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio/select.js. The CUES are synthesized and carry no licence (core/audio/kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See engine-doctrine/CRAFT/SOUND.md.",
+   "label": "Sound. Every film should have some, and silence should be a decision you write down (`make check GATE=audio-check D=<file>`). Mixed by internal/audio/audio.go; beds picked by core/audio/select.js. The CUES are synthesized and carry no licence (core/audio/kit.mjs), but the MUSIC beds under assets/music/ are downloaded third-party tracks. Check assets/music/credits.json before any commercial release. See engine-doctrine/CRAFT/SOUND.md.",
    "fields": {
     "music": {
      "type": "string",
-     "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense \u2192 assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make validate` resolves it against assets/music/ and the scene dir and warns if it will not."
+     "label": "Music bed. Silence is the default, so this is opt-in: \"auto\" (audio-select picks a bed by mood), a baked bed NAME (calm | warm | tense \u2192 assets/music/<name>.wav), or a path to a .wav. Omit for no bed. `make check GATE=validate` resolves it against assets/music/ and the scene dir and warns if it will not."
     },
     "auto": {
      "type": "boolean",
@@ -2967,7 +2967,7 @@
     },
     "vo": {
      "type": "string",
-     "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make validate` (the mixer would silently drop it)."
+     "label": "Voice-over WAV path (resolved against the scene dir + repo root). A named-but-missing file fails `make check GATE=validate` (the mixer would silently drop it)."
     },
     "voWords": {
      "type": "string",
@@ -3114,7 +3114,7 @@
     },
     "beatSync": {
      "type": "boolean|object",
-     "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beats/index.js, engine-doctrine/CRAFT/SOUND.md.",
+     "label": "Snap the film's picture joints to the music's pulse. `true` takes the grid `make media X=beatmap` wrote beside audio.music (assets/music/<bed>.beats.json); an object may set `grid` (an explicit .beats.json), `maxShift` (how far a joint may travel, default 0.12s) and `bar` (snap to downbeats, not every beat). Cuts snap their time and seams snap the centre of their blend; stings never snap, because an author offsets one from its cut on purpose. A grid that is missing, empty or below confidence 1.6 FAILS the render rather than quietly leaving the film unmatched. core/beats/index.js, engine-doctrine/CRAFT/SOUND.md.",
      "fields": {
       "grid": {
        "type": "string",
@@ -3134,11 +3134,11 @@
     },
     "silent": {
      "type": "boolean",
-     "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make audio-check` says so."
+     "label": "Render with NO audio track at all. A real device (a film can be better mute) but never a shrug: pair it with `_why`. A film with no sound and no stated reason is not silent by style, it is unfinished, and `make check GATE=audio-check` says so."
     },
     "_why": {
      "type": "string",
-     "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
+     "label": "One sentence saying what the silence is DOING (e.g. \"autoplays muted in-feed; the type carries it alone\"). Required alongside `silent:true` by `make check GATE=audio-check`. Same mechanism as `authoring._why`: waiving costs a sentence, and that cost is what turns a reflex back into a decision."
     },
     "tactile": {
      "type": "boolean|object",

@@ -19,7 +19,7 @@
       "x": 160,
       "y": 160,
       "w": 540,
-      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:#8FB3A0\">deploy.sh</div><div data-part style=\"font:400 19px var(--font-mono);color:#7FD8A4;white-space:pre\">make video D=launch.json</div><div data-part style=\"font:400 19px var(--font-mono);color:#C7E08B;white-space:pre\">make audit</div><div data-part style=\"font:400 19px var(--font-mono);color:#EFCB68;white-space:pre\">git push origin main</div></div>",
+      "html": "<div style=\"display:flex;flex-direction:column;gap:8px;padding:32px;box-sizing:border-box;width:540px\"><div style=\"font:400 17px var(--font-mono);color:#8FB3A0\">deploy.sh</div><div data-part style=\"font:400 19px var(--font-mono);color:#7FD8A4;white-space:pre\">make video D=launch.json</div><div data-part style=\"font:400 19px var(--font-mono);color:#C7E08B;white-space:pre\">make check GATE=audit</div><div data-part style=\"font:400 19px var(--font-mono);color:#EFCB68;white-space:pre\">git push origin main</div></div>",
       "bg": "#0B1F16",
       "radius": 12,
       "border": "1px solid rgba(255,255,255,0.08)",

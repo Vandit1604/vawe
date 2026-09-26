@@ -1,6 +1,6 @@
 // tests/gates/consequence-messages.test.mjs: end to end proof that the messages this pass rewrote
 // (core/validate/schema-walk.mjs, junctions.mjs, fx-knobs.mjs, layout.mjs, captions.mjs, validate.mjs)
-// still fire, through the real CLI (`make validate`'s own entry point), and that each one now states a
+// still fire, through the real CLI (`make check GATE=validate`'s own entry point), and that each one now states a
 // CAUSE (the field, with its bad value), a CONSEQUENCE (what happens on screen or to the render), and a
 // FIX (the one thing to change) rather than just the bare rule it broke. tests/fixtures/
 // consequence-messages.fixture.json is built to be schema-INVALID on purpose, on every rule this test

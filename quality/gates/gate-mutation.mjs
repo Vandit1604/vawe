@@ -1,7 +1,7 @@
 // gate-mutation.mjs, who checks the checkers?
 //
 //   node quality/gates/gate-mutation.mjs        run every case
-//   make gate-test
+//   make dev-tool X=gate-test
 //
 // A gate that cannot fail is worse than no gate: it reports green forever and everyone believes it.
 // That is not hypothetical here: the image legibility floor guarded on `b.height > 1`, so the ONE
@@ -80,7 +80,7 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
   '',
 ].join('\n');
 
-/** A `.intent.json` sidecar, the shape `make intent` writes. plan-vs-render reads exactly two fields off
+/** A `.intent.json` sidecar, the shape `make dev-tool X=intent` writes. plan-vs-render reads exactly two fields off
  *  each beat (the `span` and the `becomes:`) so those are what the cases vary; the rest is carried so a
  *  fixture stays a plausible sidecar rather than a stub shaped to one gate. */
 const B = (name, span, becomes) => ({
@@ -687,7 +687,7 @@ function fakeBake(name, sim) {
 /** A snap baseline the CASE owns. `quality/baselines/snap/` is gitignored, so a fresh clone, a worktree or a CI
  *  box has none, and all three snap cases then reported "fired for the wrong reason" (the gate said
  *  "no baseline, so this checked NOTHING"), which reads in the summary exactly like a rotted fixture
- *  and unproves three gates on every machine but the one that happened to run `make snap-all SAVE=1`.
+ *  and unproves three gates on every machine but the one that happened to run `make check GATE=snap-all SAVE=1`.
  *  Same reasoning as fakeBake: a case must not lean on a machine-local artifact. A baseline already on
  *  disk is stashed and put back, so the harness cannot destroy the one a human saved. ~1s per save. */
 const snapStash = new Map();

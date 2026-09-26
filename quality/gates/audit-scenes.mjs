@@ -3,7 +3,7 @@
 // WHY THIS EXISTS. `quality/audit.mjs` is a good check and it was never the problem. It samples the bg
 // canvas under a text element's own ink box, computes WCAG against it, and reports `1.0:1 (want 3:1)`
 // with the layer named. What it could not do is find a defect that was already in the library: `make
-// audit` takes ONE scene, it is a post-render step rather than part of `make author-check`, so it only
+// audit` takes ONE scene, it is a post-render step rather than part of `make dev-tool X=author-check`, so it only
 // ever grades the file the author has open. `motion-reel` and `motion-reel-v2` rendered dark text on a
 // dark backdrop for their entire runtime and stayed that way, because after they shipped nothing asked
 // them again (engine-doctrine/MISTAKES.md #387).

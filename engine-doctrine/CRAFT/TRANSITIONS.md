@@ -15,7 +15,7 @@ confirm: "does each cut serve the relationship between its two beats, chosen by 
 - Choose each seam by the relationship and feeling between its two beats (Murch's Rule of Six:
   emotion 51%), never by habit. Default to a hard cut; earn ONE primary transition for ~60-70% of
   cuts plus 1-2 bolder accents reserved for the payoff.
-- Enforced by `make direct` (`cut-families`: 3+ families fails) and `make critique`
+- Enforced by `make dev-tool X=direct` (`cut-families`: 3+ families fails) and `make check GATE=critique`
   (`crossfade-mud`, `cut-velocity`, `dead-final-frame`, `no-transition`, `flat-seams`).
 - Checkable action: does each cut serve the relationship between its two beats, chosen by theory
   not habit?
@@ -48,18 +48,18 @@ cut: that is not "smooth," it is a seam that says nothing, ten times.
 deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
 given transition is there.
 
-> **The inventory (what exists) is `core/transitions/catalog.js`, run `make transitions`.** It catalogs
+> **The inventory (what exists) is `core/transitions/catalog.js`, run `make study-tool X=transitions`.** It catalogs
 > every transition across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
 > `seam` two-scene), marks the basics, and is derived from the source registries so it can't drift.
 > This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
 > (`seam` fx `slide · push · uncover · wipe · dissolve`, all dir-aware) are the fundamentals every tool
 > has, rendered as real blends of both beats. Reach for those before the expressive shaders.
 >
-> **SEE it before you author it: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`** renders a
+> **SEE it before you author it: `make media X=transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`** renders a
 > canned two-beat A→B scene through one transition as a labelled filmstrip (`/tmp/transition-preview.png`).
 > The labels are eased progress, so `TIMING=linear` vs `smooth` shows as *where the motion bunches*.
 >
-> **MEASURE a real one: `make measure VIDEO=… FROM=… TO=…`** reads a transition's actual duration + easing
+> **MEASURE a real one: `make study-tool X=measure VIDEO=… FROM=… TO=…`** reads a transition's actual duration + easing
 > from a video and names the **nearest engine preset** (a reference to reproduce, or `EXPECT=<preset>` to
 > verify our OWN render matches what we authored). See [MEASURE.md](MEASURE.md).
 >
@@ -87,7 +87,7 @@ The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) res
 This lowers to the raw `cuts`/`stings`/`seams` fields at load, so everything above (easing, direction,
 the decision procedure) applies unchanged. `transitions` is now the ONLY authored form: the raw fields
 are the INTERNAL shape it lowers to, and a scene that still authors `cuts`/`stings`/`seams` directly is
-refused at `make validate` with a pointer to `harness/author/migrate-junctions.mjs`, which converts an
+refused at `make check GATE=validate` with a pointer to `harness/author/migrate-junctions.mjs`, which converts an
 old scene automatically. An `fx` that names nothing, or a layer-only anim used as a boundary (`pop`), is
 rejected at validate with the catalog, never silently coerced.
 
@@ -141,7 +141,7 @@ speed dial (every curve is a named member of `TIMINGS`, `core/cuts/index.js`):
 | **smooth** | gentle ease-in-out | a calm blend (a cross-dissolve, a fade), where a ramp would fight the mood |
 | **linear** | flat, constant speed | a deliberately mechanical sweep; rarely what you want |
 
-`make direct` warns (`flat-seams`) when a film has two or more boundaries and every one rides a gentle
+`make dev-tool X=direct` warns (`flat-seams`) when a film has two or more boundaries and every one rides a gentle
 curve with no speed ramp anywhere. It never blocks; it is the nudge to spend one ramp.
 
 ### One word for the whole film: `energy`
@@ -342,7 +342,7 @@ This is the thought process. Run it in order; stop when the transition is chosen
 7. **Eye-trace + velocity.** Cut where the eye already is; preserve direction and speed across the seam
    (velocity-matched: exit accelerating, enter decelerating through a shared blur).
 8. **Rhythm.** Set beat durations for tension: accelerate into a climax, then HOLD the payoff. Cut on
-   the music beat when there's a bed (`make beatmap`).
+   the music beat when there's a bed (`make media X=beatmap`).
 9. **Restraint check.** Is this the ONE primary (60-70% of cuts) or one of 2-3 earned accents? One cut
    family. If every seam is flashy, revert to the invisible default.
 
@@ -382,29 +382,29 @@ Same grammar, applied to elements not shots:
 
 ---
 
-## What the gate enforces (`make direct` + `make critique`)
+## What the gate enforces (`make dev-tool X=direct` + `make check GATE=critique`)
 
 Doctrine carries the taste; the gates backstop the source-decidable subset:
 
-- **one cut family** per film; ≥3 families = FAIL (`make direct`).
+- **one cut family** per film; ≥3 families = FAIL (`make dev-tool X=direct`).
 - **adjacent seams vary axis or direction**: two authored transitions back to back that both carry the
   same cardinal `dir` (both `left`, both `down`, …) read as a stutter, one push in one direction
-  repeated. `make direct` warns (`seam-axis-repeat`) and names the two timestamps; switch the axis
+  repeated. `make dev-tool X=direct` warns (`seam-axis-repeat`) and names the two timestamps; switch the axis
   (x to y) or flip the direction the way `example-madera` does.
-- **the frame must not go empty across a joint**: `make seam-check` reads the rendered mp4 at every
+- **the frame must not go empty across a joint**: `make check GATE=seam-check` reads the rendered mp4 at every
   boundary for a luminance dip, and now measures how long content takes to reappear once it dips
   (`seam-flash`, MISTAKES #144). A one-frame dip is a flash; several frames of measured emptiness is
   the outgoing beat leaving before the incoming one arrives, named with both beats and the fix. It also
   checks a second, colour-blind statistic from the same decode: the spread of grey across a small grid
   collapsing toward flat (`seam-empty`). A blank frame on a WHITE ground never dips, it only drains, so
   the luma check alone missed it; spread catches an empty stage whatever colour it is empty in.
-- **the earned seam**: `make direct` suggests ONE two-scene seam at the payoff boundary (the transition
+- **the earned seam**: `make dev-tool X=direct` suggests ONE two-scene seam at the payoff boundary (the transition
   into the longest-held beat), matched to the brand personality (punchy → whipPan, calm → cinematicZoom),
   and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made
   operational: straight cuts are the meat, the seam is the one seasoning reserved for the hero.
 - **no transition-dip**: the stage never goes empty between beats; the transition IS the exit
-  (`make critique`, rule `transition-dip`).
-- **no typing/reveal cut off**: a time-based reveal completes before its seam (`make critique`,
+  (`make check GATE=critique`, rule `transition-dip`).
+- **no typing/reveal cut off**: a time-based reveal completes before its seam (`make check GATE=critique`,
   `typing-cutoff`, MISTAKES #122).
 - **restraint**: a primary used on ~all cuts (monotone) or accents with no earned reason are judgment
   calls the planning skill and `make judge` review; the vision judge scores whether each seam reads.
@@ -464,7 +464,7 @@ found.
 `films/scene/scene.js:550` sets `data-track` to `L.track ?? idx`). Two layers on the same track tie,
 and the tie breaks by their order in `layers[]`: the one written later draws on top.
 A full-bleed layer above must not start mid-move and hide it before it plays, or it reads as a hard cut
-nobody authored. `quality/gates/covered-move.mjs` (`make covered-move D=<file>`) reports
+nobody authored. `quality/gates/covered-move.mjs` (`make check GATE=covered-move D=<file>`) reports
 this, always report-only: it cannot tell a deliberate cover from an accident, only name the collision
 and its fix (start the coverer after the move ends, or move the mover to a higher track).
 

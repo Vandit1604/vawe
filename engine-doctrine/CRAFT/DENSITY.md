@@ -14,7 +14,7 @@ confirm: "does each beat carry the hero + support + metadata triad, not one flat
 - A beat held longer than 3s needs the hero + support + metadata triad, at least 3 sizable elements, not
   one flat headline on empty space. The metadata layer (registration marks, monospace readouts, section
   labels, dimension brackets) is what reads as "a person crafted this."
-- Enforced by `make critique`, which flags a beat below the triad as `thin-beat`; codes: `dead-air`,
+- Enforced by `make check GATE=critique`, which flags a beat below the triad as `thin-beat`; codes: `dead-air`,
   `empty-beat`, `ends-on-nothing`.
 - Checkable action: does each beat carry the hero + support + metadata triad, not one flat line?
 
@@ -37,7 +37,7 @@ Keep it at **~15–25% opacity of attention**: present, legible, never loud. It'
 
 ## The rule
 - **A content beat held > 3s must carry ≥ 3 sizable elements** (a hero + supporting artifact + metadata).
-  Fewer than that and it's a slide, not a shot. `make critique` flags this as `thin-beat`.
+  Fewer than that and it's a slide, not a shot. `make check GATE=critique` flags this as `thin-beat`.
 - **Hero + support + metadata** is the minimum triad. The hero states, the support proves, the metadata
   frames. If a beat has only a hero, add support (a live demo, a stat, a chart) and metadata (a readout).
 - **Exception:** a deliberate held *hook* or *end card* (≤ the first/last beat) may run lean for impact.

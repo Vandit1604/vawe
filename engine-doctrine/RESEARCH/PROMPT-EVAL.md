@@ -96,7 +96,7 @@ than none, because it manufactures confidence. So the limits are stated before a
   same repo, and the same `engine-doctrine/`. `engine-doctrine/CRAFT/SPECIMEN.md` states the unbound-window rule too, and the
   scaffold prints a pointer to it on stderr, so the ablated arm still had a route to the rule and simply
   did not take it. A section removed from `CLAUDE.md` is not a rule removed from the repo.
-- **The archetype pre-supplies the behaviour.** `make demo` writes two unbound windows before the agent
+- **The archetype pre-supplies the behaviour.** `make dev-tool X=demo` writes two unbound windows before the agent
   reads anything, so this measures what an agent ADDS to a good floor, never what it does from a blank
   file. That is the cheapest deterministic authoring path here and it is also the kindest one.
 - **DO NOT PROPOSE REMOVING A SECTION ON THIS EVIDENCE.** One artifact cannot carry that. Evidence from
@@ -109,7 +109,7 @@ than none, because it manufactures confidence. So the limits are stated before a
    noise and the write-up above is wrong.
 2. **A section whose rule the archetype does NOT supply.** `SHOW, DO NOT ONLY TELL` and
    `AUTHOR THE MOTION. DO NOT NAME IT.` are both countable (pictorial share, `motion` track count) and
-   both are pre-satisfied by `make demo`, which is why they were not picked. A task that starts from a
+   both are pre-satisfied by `make dev-tool X=demo`, which is why they were not picked. A task that starts from a
    blank scene would test them, at the cost of the doctrine that forbids authoring a film without a
    locked plan. Resolve that before writing the task, not after.
 3. **A section with no countable target.** `IS THE EMPTY PART OF THE FRAME DOING A JOB?` cannot be read

@@ -1,6 +1,6 @@
 ---
 when: picking the transition/font/look/sting for a feeling, or picking between whole directions
-answers: intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make concept` forces a round off the median
+answers: intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make dev-tool X=concept` forces a round off the median
 group: story
 ---
 
@@ -11,8 +11,8 @@ group: story
 - Pick transition, font, easing and look by the beat's INTENT, traced to a cited principle, never by
   vibes. For a whole film, pick ONE of the 8 named reference profiles (Part 2) instead of inventing a
   coordinated look beat by beat.
-- Enforced by `make direct`, which reads the chosen profile and flags contradictions (bounce on a
-  serious brand, mixed cut families, a loud sting on a restrained profile). `make concept` forces a
+- Enforced by `make dev-tool X=direct`, which reads the chosen profile and flags contradictions (bounce on a
+  serious brand, mixed cut families, a loud sting on a restrained profile). `make dev-tool X=concept` forces a
   round of directions scored against the library median (Part 3).
 - Checkable action: name the profile you picked, then describe the content that would make a DIFFERENT
   profile correct.
@@ -24,7 +24,7 @@ taste-by-vibes. `TASTE-RULES.md` says what's good; this says what to pick.
 
 Three parts: **the decision procedures** (how to pick within one family), **the reference profiles**
 (a whole coordinated look, named after a real brand so the target is concrete, not an adjective), and
-**choosing between whole directions** (how `make concept` forces a round of options off the median).
+**choosing between whole directions** (how `make dev-tool X=concept` forces a round of options off the median).
 
 ---
 
@@ -214,10 +214,10 @@ discipline `make study` gives a reference film's motion (recipes/README.md).
 
 ---
 
-## Part 3: Choosing between whole directions (`make concept`)
+## Part 3: Choosing between whole directions (`make dev-tool X=concept`)
 
 Everything above picks WITHIN a family once the film is decided. This part is the step before: you have
-a storyboard, and several different films could be made from it. `make concept SB=<storyboard.md> N=3`
+a storyboard, and several different films could be made from it. `make dev-tool X=concept SB=<storyboard.md> N=3`
 generates that round.
 
 ### The failure it exists to prevent
@@ -336,4 +336,4 @@ A pick that fights the intent is the tell of no system. These are wrong by rule:
 - **a look on every beat**: effects are earned 2–3 times, never the wallpaper.
 - **a loud sting on `apple`/`linear`**: restraint IS the brand.
 
-`make direct` reads the profile and reports any of these, with the rule that caught it.
+`make dev-tool X=direct` reads the profile and reports any of these, with the rule that caught it.

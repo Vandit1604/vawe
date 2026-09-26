@@ -76,7 +76,7 @@ independent eye agrees. This costs nothing but one dispatch and it removes the o
 For the harder question, whether an edit HELPED, you need a blind A/B judge: two cuts, paired
 beat by beat, arms hidden, three judges. **No such judge exists today.** `make ab`, `make ab-record` and
 `CRAFT/AB-JUDGE.md` were removed on 2026-08-05 (`cc2dfc2`), along with five other tools that had never
-been the reason a video looked better. Until one is built again, tile the two renders with `make compare`
+been the reason a video looked better. Until one is built again, tile the two renders with `make dev-tool X=compare`
 and judge them by eye, knowing you know which arm is which.
 
 <!-- doc-refs-allow: CRAFT/AB-JUDGE.md · named here only to record that this file was built and then cut -->
@@ -99,7 +99,7 @@ It writes `quality/baselines/approved/judge/<name>.json`: the scene's own conten
 bytes (`renderHash`, so a re-render invalidates it even if the scene JSON never changed), the verdict,
 and the date. A receipt is valid only when both hashes still match what is on disk right now.
 
-`make no-judge` (`node quality/gates/ledger.mjs unjudged`) counts rendered films (an `out/<name>.mp4`
+`make dev-tool X=no-judge` (`node quality/gates/ledger.mjs unjudged`) counts rendered films (an `out/<name>.mp4`
 exists) with no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may
 only fall. This CORPUS scan is deliberately NOT wired into CI: both `films/scene/*.json` content and
 `out/*.mp4` are gitignored, so a thin checkout would report a number about itself, not the library (the

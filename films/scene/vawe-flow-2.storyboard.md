@@ -75,7 +75,7 @@ craft:
 - weight: strong
 - borrows: "example-madera's window-focus-rack (blurred and tilted at 0s, sharp and closer by 4.54s) -> vawe-flow-2's terminal tilt-to-flat open"
 - picture: the terminal window tilted at open, straightening as prior commands land: real prior work, an empty prompt bar waiting below
-- design: make screen F=films/scene/vawe-flow-2.terminal.html KIND=editor REF=example-madera ACT=1
+- design: make dev-tool X=screen F=films/scene/vawe-flow-2.terminal.html KIND=editor REF=example-madera ACT=1
 - transition_why: new-place-energy · momentum · expressive
 - fragment: films/scene/vawe-flow-2.terminal.html
 
@@ -95,7 +95,7 @@ craft:
 - archetype: hero-object
 - weight: quiet
 - picture: "npm install -g vawe" fully typed, the green "added 1 package" line already landed beneath it
-- design: make screen F=films/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- design: make dev-tool X=screen F=films/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
@@ -115,7 +115,7 @@ craft:
 - archetype: asymmetric-baseline
 - weight: quiet
 - picture: the prompt bar mid-type, several words already settled to ink, the current word still in its accent colour, framed tight
-- design: make screen F=films/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- design: make dev-tool X=screen F=films/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
@@ -134,7 +134,7 @@ craft:
 - archetype: hero-object
 - weight: quiet
 - picture: the return glyph under the cursor, the output line pulsing green
-- design: make screen F=films/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
+- design: make dev-tool X=screen F=films/scene/vawe-flow-2.terminal.html REF=example-madera ACT=1
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.terminal.html
 
@@ -175,7 +175,7 @@ craft:
 - weight: quiet
 - borrows: "example-madera's flow-seam (axis x, right-entry) -> vawe-flow-2's flow-seam (axis x, left-entry, direction named by the owner)"
 - picture: an almost-empty timeline: one dark track, one clip block, most of the frame still the terminal's own ink
-- design: make screen F=films/scene/vawe-flow-2.timeline.html KIND=dashboard REF=example-madera ACT=2
+- design: make dev-tool X=screen F=films/scene/vawe-flow-2.timeline.html KIND=dashboard REF=example-madera ACT=2
 - fragment: films/scene/vawe-flow-2.timeline.html
 
 ## Beat 7: Timeline assembles from the left (10.44s-13.03s)
@@ -194,7 +194,7 @@ craft:
 - archetype: asymmetric-baseline
 - weight: strong
 - picture: the fully assembled timeline, several tracks deep, real clip thumbnails and labels
-- design: make screen F=films/scene/vawe-flow-2.timeline.html REF=example-madera ACT=3
+- design: make dev-tool X=screen F=films/scene/vawe-flow-2.timeline.html REF=example-madera ACT=3
 - transition_why: same-object · continuity · invisible
 - fragment: films/scene/vawe-flow-2.timeline.html
 
@@ -236,5 +236,5 @@ craft:
 - archetype: lockup
 - weight: quiet
 - picture: the drawn mark with the wordmark grown out beside it, held centred
-- design: this beat is vector mark/wordmark layers, not a product screen; `make screen` does not apply here the way it does to beats 1, 5-7
+- design: this beat is vector mark/wordmark layers, not a product screen; `make dev-tool X=screen` does not apply here the way it does to beats 1, 5-7
 - fragment: films/scene/vawe-flow-2.mark.html

@@ -16,7 +16,7 @@ gates, and renders. Drafts are free and watermarked. Export is the paid step.
 ```bash
 cd /Users/vandit/Developer/code/shortwave
 make build         # bin/vawe (Go + chromedp + ffmpeg)
-make watermark     # assets/watermark/draft.png
+make media X=watermark     # assets/watermark/draft.png
 node mcp/smoke.mjs # renders a real 2s scene, draft + export. Must print "smoke passed".
 ```
 
@@ -135,7 +135,7 @@ Billing is **off** by default, so `vawe_export` works immediately while you are 
 | Symptom | Cause |
 |---|---|
 | `⏸ Pending approval` | Run `claude` in the repo and approve the server. |
-| `watermark sheet missing` | `make watermark` |
+| `watermark sheet missing` | `make media X=watermark` |
 | `render failed` with no detail | `make build`, then `node mcp/smoke.mjs` to see the real error |
 | guide comes back ~5KB | Correct. That is the short reference. `detail: "full"` gives the 46KB one. |
 | guide comes back empty | `engine-doctrine/SCENE-QUICK.md` is missing |

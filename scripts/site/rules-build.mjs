@@ -147,7 +147,7 @@ Colours come from the theme, never hardcoded: \`var(--text)\` \`var(--text-2)\` 
 1. **No em-dashes in on-screen text.** The validator rejects them. Use a comma, a period, or \`·\`.
 2. **\`aspect\` goes in the JSON.**
 3. **A text layer with \`w\` must set \`align\`**, or it left-aligns inside its box and reads off-centre.
-4. **Every colour must clear 4.5:1** against what is behind it. \`make audit\` hard-fails below 3:1.
+4. **Every colour must clear 4.5:1** against what is behind it. \`make check GATE=audit\` hard-fails below 3:1.
 5. **Text under ~26px is unreadable** at 1080p. Headlines are 90px+.
 6. Keep layers inside the safe box: \`x\` 90→1830, \`y\` 60→1020 at 16:9.
 

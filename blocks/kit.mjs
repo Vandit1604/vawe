@@ -317,7 +317,7 @@ export const TINT = { track: 8, area: 16, chip: 8 };   // the three weights the 
 //   `onInk(c)`: "this status colour IS the glyph; make it readable on a card." The colour is
 //     the subject and it stays that hue. There is no token for this direction, and none of
 //     `--accent`/`--up`/`--down` clears 4.5:1 against a card ground: `--up` measured 2.5:1 on
-//     linear and 1.3:1 on higgsfield's lime, both HARD `make audit` failures. `onColor` cannot see
+//     linear and 1.3:1 on higgsfield's lime, both HARD `make check GATE=audit` failures. `onColor` cannot see
 //     it, because a `var()` has no value at build time.
 // Mixing toward `--text` raises contrast in BOTH directions, it brightens the hue on a dark theme
 // and deepens it on a light one, so a block never has to know which kind of theme it is in.
@@ -360,7 +360,7 @@ export const SHADOW_CARD = surfaceCssVar('shadow', '0 1px 1px rgba(0,0,0,0.07), 
 //   capCss()   the surface's own caption: what this instrument reads. Mono, muted, small.
 //   labelCss() an axis tick or a legend name. Sans, muted, same size as cap so a card has one small step.
 //   numCss()   a figure. Mono, tabular, tight, ink. Never smaller than the label beside it.
-// TYPE.body (17) is the floor, not TYPE.fine (14): `make audit` fails text under 14.04px as unreadable.
+// TYPE.body (17) is the floor, not TYPE.fine (14): `make check GATE=audit` fails text under 14.04px as unreadable.
 // The muted colour is `--text-2`, not `--dim`: `--dim` is the chrome role and measures 2.6:1 against
 // the card on higgsfield (a hard audit failure); `--text-2` clears 4.5:1 on every theme.
 // `weight` stays an explicit param a caller can still pass to mean it outright (tabBar's active/
@@ -396,7 +396,7 @@ export function deltaChip({ delta = '', up = true, size = TYPE.body, ...rest } =
   const ink = onInk(c);
   return box({ layout: 'row', items: 'center', gap: SPACE.tight, radius: R.chip,
     bg: tint(c, TINT.chip), pad: '4px 10px', children: [
-      // The arrow is the SAME size as the figure. At 0.8x it came out 13px and `make audit` fails
+      // The arrow is the SAME size as the figure. At 0.8x it came out 13px and `make check GATE=audit` fails
       // anything under 14.04px as unreadable, so the glyph that says which way was the one part of
       // the chip nobody could read.
       text({ text: up ? '▲' : '▼', size, color: ink }),

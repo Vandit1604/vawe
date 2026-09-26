@@ -220,7 +220,7 @@ function main() {
     catch (e) { console.error(`screen: ${e.message}`); process.exit(1); }
   }
 
-  console.log(`\n▶ make screen  ${path.relative(ROOT, frag)}  (theme ${theme})\n`);
+  console.log(`\n▶ make dev-tool X=screen  ${path.relative(ROOT, frag)}  (theme ${theme})\n`);
 
   const png = `/tmp/screen-${path.basename(frag, path.extname(frag))}.png`;
   const boxesFile = `/tmp/screen-${path.basename(frag, path.extname(frag))}.boxes.json`;
@@ -337,7 +337,7 @@ function main() {
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
 
-// clipAgainstBox(boxes, box): same finding shape as clipping() but against an arbitrary {x,y,w,h}, not the canvas margin (build fix 7: `make screen`/`make preview` used to check only the full canvas, so a fragment could pass standalone and clip once placed in a smaller box).
+// clipAgainstBox(boxes, box): same finding shape as clipping() but against an arbitrary {x,y,w,h}, not the canvas margin (build fix 7: `make dev-tool X=screen`/`make preview` used to check only the full canvas, so a fragment could pass standalone and clip once placed in a smaller box).
 export function clipAgainstBox(boxes, box) {
   const x0 = box.x, y0 = box.y, x1 = box.x + box.w, y1 = box.y + box.h;
   const findings = [];

@@ -78,7 +78,7 @@ every one.
 
 The UI is the star. Plan the real surfaces first and fit copy around them, never the reverse.
 
-- **Real surfaces**: `make capture` a live component, or a section screenshot as a clipped `image`.
+- **Real surfaces**: `make media X=capture` a live component, or a section screenshot as a clipped `image`.
   A hand-built `html` panel is acceptable only when reproducing a measured reference (as a
   recreation does) or the surface does not exist yet.
 - **A claim with no UI under it in the same frame is cut.** Not moved later. Cut.

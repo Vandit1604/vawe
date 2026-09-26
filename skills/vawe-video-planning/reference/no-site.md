@@ -9,7 +9,7 @@ group: skill
 > The full narrative for this path is
 > [`engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`](../../../engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md):
 > one video carried blank-page to shipped, chaining the whole arsenal (including the mandatory
-> `make author-check` ladder and the `make judge` step). Read it alongside this page; the four things
+> `make dev-tool X=author-check` ladder and the `make judge` step). Read it alongside this page; the four things
 > below are its Step 1.
 
 `reference/site-study.md`'s steps assume a brand site to study. With none (a topic video, a
@@ -48,7 +48,7 @@ Then read [`engine-doctrine/CRAFT/TASTE-RULES.md`](../../../engine-doctrine/CRAF
 failure-modes catalog and the prime directive) and
 [`SELECTION.md`](../../../engine-doctrine/CRAFT/SELECTION.md) (intent -> effect), and apply their
 continuity + restraint rules: shared elements travel across beats, one cut family, effects earned on
-2-3 beats. `make direct D=<file>` flags any pick that contradicts the chosen profile.
+2-3 beats. `make dev-tool X=direct D=<file>` flags any pick that contradicts the chosen profile.
 
 Skip the site-specific study (there is no site to study); go straight to the storyboard
 (`reference/storyboard.md`) with the profile as the Design Read. Everything else in the contract is

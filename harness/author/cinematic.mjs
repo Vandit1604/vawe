@@ -42,7 +42,7 @@ console.log('');
 console.log('  RECOMMENDS (compose these yourself: they are content choices, not pure motion):');
 console.log('    · CENTER hero/sentence words (the reference is centered; the MOTION gives the dynamism, not asymmetry).');
 for (const p of phrases.slice(0, 6)) console.log(`    · "${stripHtml(p.text).slice(0, 24)}" → typing:true or preset:"colorWave" (a typewriter / colour-wave reveal)`);
-console.log('    · Verify with `make reveal`, read the GREEN cells: does every beat animate IN?');
+console.log('    · Verify with `make dev-tool X=reveal`, read the GREEN cells: does every beat animate IN?');
 
 if (WRITE) {
   if (!hasCamera) d.camera = [{ t: 0, s: 1.0 }, { t: duration, s: 1.09 }];
@@ -56,7 +56,7 @@ if (WRITE) {
   const out = file.replace(/\.json$/, '.cinematic.json');
   fs.writeFileSync(out, JSON.stringify(d, null, 2));
   console.log(`\n  ✓ scaffold applied → ${out}  (${n} dollies${hasCamera ? '' : ' + camera'})`);
-  console.log(`    Now: refine (center, typing/colorWave), then \`make reveal D=${out}\` and render.\n`);
+  console.log(`    Now: refine (center, typing/colorWave), then \`make dev-tool X=reveal D=${out}\` and render.\n`);
 } else {
   console.log('\n  suggest-only. Re-run with WRITE=1 to apply → <file>.cinematic.json\n');
 }

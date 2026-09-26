@@ -22,7 +22,7 @@ literature, each with a checkable translation into a scene JSON. It is the answe
 read as amateur when every layer renders fine?"*
 
 Every rule is tagged:
-- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make author-check D=<file>`.
+- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make dev-tool X=author-check D=<file>`.
 - **`[eye]`**: no static gate can see it; only `make judge` + your own eye. If your eye catches it,
   it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md)).
 
@@ -36,10 +36,10 @@ Every rule is tagged:
 
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
-> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
+> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make dev-tool X=direct`) is the ceiling, too much,
 > undirected; the **ambition floor** (a retired gate, doctrine below) was the floor, too plain, a
 > slideshow, and its hardest checks (`no-continuous-object` among them) used to block on every
-> `make author-check` run, not only under `TASTE=1`. A directed video sits between them.
+> `make dev-tool X=author-check` run, not only under `TASTE=1`. A directed video sits between them.
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
@@ -53,7 +53,7 @@ Every rule is tagged:
 | **Staging** | One clear idea per shot; one focal point. | One headline-scale message per beat; everything else subordinate in size/opacity/motion. | `[eye]` + `[gated]` critique: `scattered-beat` |
 | **Secondary action** | A supporting motion that never competes. | At most one quiet secondary motion per beat (bg drift, glow, cursor), lower-contrast, offset in time. | `[eye]` |
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
-| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
+| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make check GATE=audit` + `designspec` (slop was retired in 2026-08) |
 
 ### Straight-ahead, solid drawing, squash and arcs in this engine
 
@@ -116,7 +116,7 @@ different landings with no stated order.
 ## 2. Editing & pacing, rhythm is the direction
 
 **One global speed dial**: a scene-level `tempo` (1 = unchanged, 0.85 = 15% slower) scales every
-authored time at once, resolved in `core/engine/tempo.js`. Preview it with `make pace D=<file>
+authored time at once, resolved in `core/engine/tempo.js`. Preview it with `make check GATE=pace D=<file>
 TEMPO=<n>` before committing. It is a global correction, not a substitute for the per-beat rhythm
 variety below; footage and the audio bed keep their own native rate regardless of tempo.
 
@@ -131,7 +131,7 @@ variety below; footage and the audio bed keep their own native rate regardless o
   longer breathing beats (2-3s); the payoff is the longest. `[gated]` direct: `pacing`, `monotone-timing`
 - **The hold between moves**: motion needs stillness to read; a beat where everything moves is chaos.
   → After a layer settles, hold it still ≥0.4-0.6s before the next move. Every beat has a resting
-  state where the copy is fully legible. `[eye]` (+ `make audit` reads legibility)
+  state where the copy is fully legible. `[eye]` (+ `make check GATE=audit` reads legibility)
 - **Accelerate toward the climax**: tighten cutting through the build, then release on the payoff. →
   Shorten beats through the middle; the final held frame is the release. `[gated]` direct: `dead-final-frame`
 
@@ -221,7 +221,7 @@ The applied spine lives in [`STORY.md`](STORY.md); §"Provenance" below carries 
 
 ## 5. The pro-vs-amateur checklist (run this before shipping)
 
-Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yours + `make judge`.
+Each is concrete. `[gated]` ones are in `make dev-tool X=author-check`; `[eye]` ones are yours + `make judge`.
 
 1. **A move that starts and stops eases at both ends.** A move with no rest to ease (a pan, a scroll, a spinner, a drift) runs at a constant rate on purpose, and curving it is the defect. The gate reads the whole RUN, not the key: entered or left in motion, or spaced so the keys already decelerate, and it stays quiet. `[gated]` `linear-motion`
 2. **No uniform tempo.** Durations and stagger vary with intent. `[gated]` `monotone-timing`, `pacing`
@@ -237,7 +237,7 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ---
 
-## Reading `make direct`: every finding carries a census
+## Reading `make dev-tool X=direct`: every finding carries a census
 
 Sixteen checks run in `harness/author/motion-director.mjs`; only two of them (`profile`, `cut-families`)
 can fail, the rest warn. Re-run the census before quoting a trip rate here, the library's scene count
@@ -318,7 +318,7 @@ below is kept as a design device to reach for, not a check anything enforces.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
 about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It used to **block on every `make author-check` run**,
+the 4% item, the one he says to sacrifice first. It used to **block on every `make dev-tool X=author-check` run**,
 `TASTE=1` or not; a film exempt from it needed a waiver with a `_why`, never a flag. Reach for it when the
 film's CONTENT is continuous, which is a single-subject
 product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
@@ -348,17 +348,17 @@ all, and a film held by those is properly structured and fails here every time.
 
 A layer the engine confines to its own beat is not a candidate at all: see below.
 
-## beats-wrapped-as-units (always on, in `make beat-check`)
+## beats-wrapped-as-units (always on, in `make check GATE=beat-check`)
 
 Not a taste rule. `core/engine/produce.js` turns `sceneUnits` on for any cut film with no choreographed `motion`
 track, and `films/scene/scene.js` then rewrites every non-last-beat layer to end with its own beat so the
 wrapper can slide the beat out as one block. A layer authored across a cut is **truncated at it**, silently.
-`make beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
+`make check GATE=beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
 should carry the film `"acrossBeats": true` and it attaches to the camera instead of its beat, keeping its
 authored window. It **warns** (blocks under `STRICT=1`): truncation is a fact about the render, and whether
 it is a defect depends on whether you meant the layer to live past the cut.
 
-## beats-held-open (always on, in `make beat-check`)
+## beats-held-open (always on, in `make check GATE=beat-check`)
 
 The same rewrite read the other way. `setLayerTiming` **replaces** the authored duration; it does not keep
 the shorter of the two. So a layer written to leave at 2.0s inside a beat that runs to 9.4s stays on screen

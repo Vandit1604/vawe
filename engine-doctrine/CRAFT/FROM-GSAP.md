@@ -68,7 +68,7 @@ spelling; naming one in the other's field was the single most-repeated mistake i
 an engine-driven field now resolves a recognised GSAP spelling (`power2.out`, `back.out(1.7)`,
 `elastic.out(1, 0.3)`...) to its equivalent engine curve, so the vocabulary an author already knows
 from GSAP works either place. Only the families with no engine equivalent (`steps`, `rough`, `slow`)
-still need the GSAP-owned field; `core/validate/easing.mjs` names that at `make validate`, not at render.
+still need the GSAP-owned field; `core/validate/easing.mjs` names that at `make check GATE=validate`, not at render.
 `motion[].ease` also takes a per-property map instead of one name (Separate Dimensions), `{ "x":
 "linear", "y": "easeOutCubic" }`, for when x and y on the same pair of keys should travel different
 curves; a property the map omits still rides the segment's own curve.

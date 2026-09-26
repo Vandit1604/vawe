@@ -16,9 +16,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const KIND_BY_SURFACE = { editor: KINDS.includes('editor') ? 'editor' : null, dashboard: KINDS.includes('dashboard') ? 'dashboard' : null, card: KINDS.includes('card') ? 'card' : null };
 export function whereProductLives() {
   return [
-    { key: 'terminal', label: 'A terminal', description: `Closest route is \`make screen KIND=${KIND_BY_SURFACE.editor}\`: a typed prompt as the one focal element, dark ground, mono type (screen.mjs BODIES.editor). No core layer draws terminal chrome itself; the window is hand-authored HTML.` },
-    { key: 'app', label: 'An app window', description: `Closest route is \`make screen KIND=${KIND_BY_SURFACE.dashboard}\` or KIND=${KIND_BY_SURFACE.card}: a real desktop surface, stats or a single focal card. No core layer draws a titlebar; not supported as a named capability, hand-author the chrome.` },
-    { key: 'other-frame', label: 'A browser or a phone', description: 'Not supported yet as a named capability: no `make screen` KIND and no core layer draws browser or phone chrome. A phone feed reformats the canvas to a vertical destination (AGENTS.md 9:16/4:5); either chrome is hand-authored HTML (engine-doctrine/CRAFT/HTML-FRAGMENTS.md).' },
+    { key: 'terminal', label: 'A terminal', description: `Closest route is \`make dev-tool X=screen KIND=${KIND_BY_SURFACE.editor}\`: a typed prompt as the one focal element, dark ground, mono type (screen.mjs BODIES.editor). No core layer draws terminal chrome itself; the window is hand-authored HTML.` },
+    { key: 'app', label: 'An app window', description: `Closest route is \`make dev-tool X=screen KIND=${KIND_BY_SURFACE.dashboard}\` or KIND=${KIND_BY_SURFACE.card}: a real desktop surface, stats or a single focal card. No core layer draws a titlebar; not supported as a named capability, hand-author the chrome.` },
+    { key: 'other-frame', label: 'A browser or a phone', description: 'Not supported yet as a named capability: no `make dev-tool X=screen` KIND and no core layer draws browser or phone chrome. A phone feed reformats the canvas to a vertical destination (AGENTS.md 9:16/4:5); either chrome is hand-authored HTML (engine-doctrine/CRAFT/HTML-FRAGMENTS.md).' },
     { key: 'none', label: 'No product surface', description: 'No screen at all this film: type sits directly on the ground, nothing to design or capture.' },
   ];
 }
@@ -84,9 +84,9 @@ export function frameOptions(act) {
   const measured = contentLine(act);
   const suffix = measured ? ` ${measured}` : ' No reference measurement here (IDEA mode): judged on its own.';
   return [
-    { key: 'screen', label: 'A designed screen', description: `\`make screen F=<file> KIND=<${KINDS.join('|')}>\`, then \`make preview\`.${suffix}` },
-    { key: 'capture', label: 'A real capture', description: `\`make capture\` (a live product surface) or \`make sections\` (a brand site's own sections), never a mock.${suffix}` },
-    { key: 'photo', label: 'A real photo or film still', description: `A cutout or still (\`make cutout\`, engine-doctrine/CRAFT/IMAGERY.md); never a stock photo, never AI-generated, per AGENTS.md.${suffix}` },
+    { key: 'screen', label: 'A designed screen', description: `\`make dev-tool X=screen F=<file> KIND=<${KINDS.join('|')}>\`, then \`make preview\`.${suffix}` },
+    { key: 'capture', label: 'A real capture', description: `\`make media X=capture\` (a live product surface) or \`make sections\` (a brand site's own sections), never a mock.${suffix}` },
+    { key: 'photo', label: 'A real photo or film still', description: `A cutout or still (\`make media X=cutout\`, engine-doctrine/CRAFT/IMAGERY.md); never a stock photo, never AI-generated, per AGENTS.md.${suffix}` },
     { key: 'type-only', label: 'Display type only', description: `No product surface in this frame, the words carry it alone.${suffix}` },
   ];
 }
@@ -171,8 +171,8 @@ export function ask({ acts, joints = [] }) {
 }
 
 
-const FRAME_LINE = { screen: (o) => `frame: a designed screen (make screen KIND=${o.kind || KINDS[0]})`,
-  capture: () => 'frame: a real capture (make capture / make sections)', photo: () => 'frame: a real photo or film still',
+const FRAME_LINE = { screen: (o) => `frame: a designed screen (make dev-tool X=screen KIND=${o.kind || KINDS[0]})`,
+  capture: () => 'frame: a real capture (make media X=capture / make sections)', photo: () => 'frame: a real photo or film still',
   'type-only': () => 'frame: display type only, no product surface' };
 const CURSOR_LINE = { pointer: () => 'cursor: a pointer, clicking (core/layers/cursor.js)',
   'caret-blink': () => 'cursor: a typing caret, blinking (typing:true)', 'caret-hard': () => 'cursor: a typewriter, no blinking (preset:"type")',
@@ -293,7 +293,7 @@ function selfTest() {
   const answers = { film: { where: 'terminal', text: 'caret', ground: 'chained' },
     acts: [{ frame: 'screen', kind: 'editor', cursor: 'caret-blink', handoff: 'flow-seam', joint: joints[0] }, { frame: 'type-only', cursor: 'none' }] };
   const applied = applyAnswers(prompt, answers);
-  ok(/frame: a designed screen \(make screen KIND=editor\)/.test(applied), 'act 1 frame line should be replaced with the answer, not duplicated');
+  ok(/frame: a designed screen \(make dev-tool X=screen KIND=editor\)/.test(applied), 'act 1 frame line should be replaced with the answer, not duplicated');
   ok((applied.match(/^frame:.*$/gm) || []).length === 2, 'exactly one frame: line per act, no duplicate');
   ok(/cursor: a typing caret, blinking/.test(applied), 'act 1 cursor line should be set');
   ok(/recipe: flow-seam out=act1 in=act2 axis=x/.test(applied), 'act 1 handoff should become the recipe line');

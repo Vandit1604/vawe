@@ -54,4 +54,4 @@ for (const url of urls) {
   const line = String(r.stdout).split('\n').find((l) => l.startsWith('✓')) || String(r.stderr).slice(0, 200);
   console.log(`  ${line.trim()}`);
 }
-console.log(`\n  Then: make grammar   ·   fill the reading in grammar/<name>.json   ·   make claims\n`);
+console.log(`\n  Then: make study-tool X=grammar   ·   fill the reading in grammar/<name>.json   ·   make study-tool X=claims\n`);
