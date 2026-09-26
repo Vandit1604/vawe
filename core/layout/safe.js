@@ -345,7 +345,7 @@ const ANCHOR_POINT_AKA = {
   top: ['top-centre', 'top edge middle'],
   'top-right': ['top right corner', 'upper right corner'],
   left: ['left-centre', 'middle left'],
-  center: ['dead centre of the box', 'centre point', 'middle of the box'],
+  center: ['dead centre of the box', 'centre point', 'middle of the box', 'a layer\'s x and y as its centre point instead of the top-left corner'],
   right: ['right-centre', 'middle right'],
   'bottom-left': ['bottom left corner', 'lower left corner'],
   bottom: ['bottom-centre', 'bottom edge middle'],
