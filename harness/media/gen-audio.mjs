@@ -1,6 +1,3 @@
-// gen-audio.mjs: synthesize license-free audio (no deps, deterministic).
-// Writes a subtle music bed + a small SFX library used by the audio mixer.
-//   node harness/media/gen-audio.mjs
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +11,6 @@ const SR = 44100;
 const sec = (s) => Math.round(s * SR);
 const TAU = Math.PI * 2;
 
-// deterministic noise
 let _s = 0x9e3779b1;
 const noise = () => { _s = (Math.imul(_s, 1664525) + 1013904223) >>> 0; return (_s / 4294967296) * 2 - 1; };
 
@@ -37,7 +33,6 @@ function writeWav(file, samples) {
   fs.writeFileSync(file, buf);
 }
 
-// a plucked/bell tone with exponential decay + harmonics
 function tone(freq, dur, { type = 'sine', attack = 0.004, decay = 0.25, gain = 0.6, harmonics = [] } = {}) {
   const n = sec(dur), out = new Float32Array(n), aN = sec(attack);
   for (let i = 0; i < n; i++) {
@@ -51,15 +46,11 @@ function tone(freq, dur, { type = 'sine', attack = 0.004, decay = 0.25, gain = 0
 }
 const add = (dst, src, atSec, g = 1) => { const off = sec(atSec); for (let i = 0; i < src.length && off + i < dst.length; i++) dst[off + i] += src[i] * g; };
 
-// ---- SFX ----
-// tick: crisp click for the countdown
 writeWav(path.join(SFX, 'tick.wav'), tone(1180, 0.055, { decay: 0.014, gain: 0.5, harmonics: [[2.01, 0.25]] }));
 
-// countdown beeps before the reveal: two equal beeps + a higher "go" beep
 writeWav(path.join(SFX, 'beep.wav'), tone(680, 0.16, { type: 'sine', attack: 0.006, decay: 0.1, gain: 0.5, harmonics: [[2, 0.16]] }));
 writeWav(path.join(SFX, 'beep3.wav'), tone(960, 0.22, { type: 'sine', attack: 0.006, decay: 0.14, gain: 0.55, harmonics: [[2, 0.18]] }));
 
-// whoosh: band-ish noise swept up then down (card enter)
 (() => {
   const dur = 0.32, n = sec(dur), out = new Float32Array(n); let lp = 0;
   for (let i = 0; i < n; i++) {
@@ -71,7 +62,6 @@ writeWav(path.join(SFX, 'beep3.wav'), tone(960, 0.22, { type: 'sine', attack: 0.
   writeWav(path.join(SFX, 'whoosh.wav'), out);
 })();
 
-// reveal: sub thump + bright upward chirp (the answer lands)
 (() => {
   const dur = 0.5, n = sec(dur), out = new Float32Array(n);
   for (let i = 0; i < n; i++) {
@@ -86,7 +76,6 @@ writeWav(path.join(SFX, 'beep3.wav'), tone(960, 0.22, { type: 'sine', attack: 0.
   writeWav(path.join(SFX, 'reveal.wav'), out);
 })();
 
-// correct: two bright bell notes (positive, "ding-ding")
 (() => {
   const out = new Float32Array(sec(0.62));
   const bell = (f) => tone(f, 0.55, { decay: 0.34, gain: 0.5, harmonics: [[2, 0.35], [3, 0.12]] });
@@ -95,18 +84,15 @@ writeWav(path.join(SFX, 'beep3.wav'), tone(960, 0.22, { type: 'sine', attack: 0.
   writeWav(path.join(SFX, 'correct.wav'), out);
 })();
 
-// wrong: short descending buzz (optional, for the loser/trap)
 (() => {
   const dur = 0.34, n = sec(dur), out = new Float32Array(n);
   for (let i = 0; i < n; i++) { const t = i / SR; const f = 220 - 70 * (t / dur); out[i] = osc('square', f, t) * Math.exp(-t / 0.13) * 0.22; }
   writeWav(path.join(SFX, 'wrong.wav'), out);
 })();
 
-// ---- music bed: subtle anticipation loop (soft pulse + low pad + airy shimmer) ----
 (() => {
   const LOOP = 8, n = sec(LOOP), out = new Float32Array(n);
   const lf = (f) => Math.round(f * LOOP) / LOOP; // snap to integer cycles -> seamless loop
-  // low pad (A minor-ish), very quiet
   const pad = [lf(110), lf(164.8), lf(220)];
   for (let i = 0; i < n; i++) {
     const t = i / SR;
@@ -116,10 +102,8 @@ writeWav(path.join(SFX, 'beep3.wav'), tone(960, 0.22, { type: 'sine', attack: 0.
     out[i] += (v / pad.length) * 0.05 * trem;
     out[i] += Math.sin(TAU * lf(880) * t) * 0.018 * (0.6 + 0.4 * Math.sin(TAU * lf(0.125) * t)); // airy shimmer
   }
-  // soft heartbeat pulse every 0.5s (clock tension)
   const pulse = tone(58, 0.18, { decay: 0.1, gain: 0.18, harmonics: [[2, 0.2]] });
   for (let b = 0; b < LOOP / 0.5; b++) add(out, pulse, b * 0.5, b % 2 === 0 ? 1 : 0.7);
-  // quiet hat tick every 0.25s for motion
   const hat = (() => { const m = sec(0.03), a = new Float32Array(m); for (let i = 0; i < m; i++) a[i] = noise() * Math.exp(-i / sec(0.008)) * 0.06; return a; })();
   for (let b = 0; b < LOOP / 0.25; b++) add(out, hat, b * 0.25, 1);
   writeWav(path.join(ASSETS, 'music.wav'), out);

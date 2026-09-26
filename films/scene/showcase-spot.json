@@ -196,20 +196,19 @@
       "dur": 3.1,
       "children": [
         {
-          "type": "block",
-          "block": "card",
+          "type": "html",
           "w": 660,
           "h": 330,
-          "title": "Week of the 14th",
-          "desc": "Offline queue now survives a reconnect. The second sync pass is gone. Coldharbour import landed a first pass.",
-          "pills": [
-            "3 commits",
-            "2 tickets",
-            "1 draft"
-          ],
-          "cta": "Send it",
+          "bg": "var(--card)",
+          "radius": 14,
+          "border": "1px solid var(--line)",
+          "elevation": 2,
+          "anim": "rise",
+          "html": "<div style='display:flex;flex-direction:column;width:660px;height:330px;box-sizing:border-box'><div style='flex:1;min-height:0;background:var(--card);border-radius:8px;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:12px'><span style='font:700 32px var(--font-sans);color:var(--text);letter-spacing:-0.02em'>Week of the 14th</span><span style='font:400 20px var(--font-sans);color:var(--text-2)'>Offline queue now survives a reconnect. The second sync pass is gone. Coldharbour import landed a first pass.</span><div style='display:flex;flex-wrap:wrap;gap:8px;align-items:center'><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:8px;padding:6px 16px\">3 commits</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:8px;padding:6px 16px\">2 tickets</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:8px;padding:6px 16px\">1 draft</span></div></div><div style='height:1px;background:var(--line)'></div><div style='display:flex;justify-content:space-between;align-items:center;padding:12px 24px'><span style='font:600 17px var(--font-sans);color:var(--text-2)'>Send it</span><span style='font:600 17px var(--font-sans);color:var(--accent)'>→</span></div></div>",
           "start": 10.75,
-          "dur": 2.75
+          "duration": 2.75,
+          "enterDur": 0.5,
+          "exitDur": 0.35
         }
       ]
     },
@@ -352,40 +351,36 @@
       "exitDur": 0.3
     },
     {
-      "type": "block",
-      "block": "card.pricing.free",
+      "type": "html",
       "x": 560,
       "y": 380,
       "w": 360,
-      "plan": "Free",
-      "price": "$0",
-      "features": [
-        "One workspace",
-        "Weekly draft",
-        "You press send"
-      ],
-      "cta": "Open the demo",
-      "highlight": true,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1.5px solid var(--accent)",
+      "elevation": 2,
+      "anim": "rise",
+      "html": "<div style='display:flex;flex-direction:column;gap:16px;padding:24px;box-sizing:border-box;width:360px'><span style='font:600 20px var(--font-mono);color:var(--accent);letter-spacing:0.1em'>FREE</span><div style='display:flex;align-items:flex-end;gap:4px'><span style='font:700 48px var(--font-sans);color:var(--text);letter-spacing:-0.03em'>$0</span><span style='font:500 17px var(--font-mono);color:var(--dim)'>/mo</span></div><div style='display:flex;flex-direction:column;align-items:flex-start;gap:8px'><div style='display:flex;align-items:center;gap:8px'><span style='font:700 17px var(--font-sans);color:var(--accent)'>✓</span><span style='font:400 17px var(--font-sans);color:var(--text-2)'>One workspace</span></div><div style='display:flex;align-items:center;gap:8px'><span style='font:700 17px var(--font-sans);color:var(--accent)'>✓</span><span style='font:400 17px var(--font-sans);color:var(--text-2)'>Weekly draft</span></div><div style='display:flex;align-items:center;gap:8px'><span style='font:700 17px var(--font-sans);color:var(--accent)'>✓</span><span style='font:400 17px var(--font-sans);color:var(--text-2)'>You press send</span></div></div><div style='background:var(--accent);border-radius:8px;padding:12px 0;display:flex;justify-content:center'><span style='font:600 17px var(--font-sans);color:var(--on-accent)'>Open the demo</span></div></div>",
       "start": 17.35,
-      "dur": 2.65
+      "duration": 2.65,
+      "enterDur": 0.5,
+      "exitDur": 0.35
     },
     {
-      "type": "block",
-      "block": "card.pricing.team",
+      "type": "html",
       "x": 1000,
       "y": 380,
       "w": 360,
-      "plan": "Team",
-      "price": "$18",
-      "features": [
-        "Every workspace",
-        "Shared voice",
-        "Scheduled sends"
-      ],
-      "cta": "Talk to us",
-      "highlight": false,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "html": "<div style='display:flex;flex-direction:column;gap:16px;padding:24px;box-sizing:border-box;width:360px'><span style='font:600 20px var(--font-mono);color:var(--dim);letter-spacing:0.1em'>TEAM</span><div style='display:flex;align-items:flex-end;gap:4px'><span style='font:700 48px var(--font-sans);color:var(--text);letter-spacing:-0.03em'>$18</span><span style='font:500 17px var(--font-mono);color:var(--dim)'>/mo</span></div><div style='display:flex;flex-direction:column;align-items:flex-start;gap:8px'><div style='display:flex;align-items:center;gap:8px'><span style='font:700 17px var(--font-sans);color:var(--accent)'>✓</span><span style='font:400 17px var(--font-sans);color:var(--text-2)'>Every workspace</span></div><div style='display:flex;align-items:center;gap:8px'><span style='font:700 17px var(--font-sans);color:var(--accent)'>✓</span><span style='font:400 17px var(--font-sans);color:var(--text-2)'>Shared voice</span></div><div style='display:flex;align-items:center;gap:8px'><span style='font:700 17px var(--font-sans);color:var(--accent)'>✓</span><span style='font:400 17px var(--font-sans);color:var(--text-2)'>Scheduled sends</span></div></div><div style='background:var(--surface-2);border-radius:8px;padding:12px 0;display:flex;justify-content:center'><span style='font:600 17px var(--font-sans);color:var(--text)'>Talk to us</span></div></div>",
       "start": 17.55,
-      "dur": 2.45
+      "duration": 2.45,
+      "enterDur": 0.5,
+      "exitDur": 0.35
     },
     {
       "type": "text",
@@ -458,16 +453,18 @@
       "dur": 2.85,
       "children": [
         {
-          "type": "block",
-          "block": "feedRow",
+          "type": "html",
           "w": 296,
-          "initials": "IM",
-          "name": "Ines",
-          "sub": "@ines",
-          "time": "4:00pm",
-          "body": "Week of the 14th is posted. Offline queue survives a reconnect.",
+          "bg": "var(--card)",
+          "radius": 16,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:296px'><div style='width:48px;height:48px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 19px var(--font-sans);color:var(--accent)'>IM</div><div style='display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-start;min-width:0'><div style='display:flex;align-items:center;gap:8px;width:100%'><span style='font:700 20px var(--font-sans);color:var(--text)'>Ines</span><span style='font:500 16px var(--font-mono);color:var(--dim)'>@ines</span><span style='flex:1'></span><span style='font:500 15px var(--font-mono);color:var(--dim)'>4:00pm</span></div><span style='font:400 19px var(--font-sans);color:var(--text)'>Week of the 14th is posted. Offline queue survives a reconnect.</span></div></div>",
           "start": 20.9,
-          "dur": 2.4
+          "duration": 2.4,
+          "enterDur": 0.45,
+          "exitDur": 0.3
         }
       ]
     }

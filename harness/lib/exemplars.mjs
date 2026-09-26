@@ -1,10 +1,3 @@
-// harness/lib/exemplars.mjs: the ONE owner of exemplar retrieval. `examples.json`'s goldSet names the
-// full films this repo is proudest of; two callers reach for them and must not drift apart:
-//   - preflight prints "EXEMPLARS TO STUDY" (rules tell you what to avoid; an exemplar shows what to reach for).
-//   - scaffold composes the first draft to the shape of the nearest one, so the default draft inherits a
-//     proven film's backdrop rhythm instead of a generic two-window default.
-// Retrieval is token overlap, the same method as arsenal and for the same reason (engine-doctrine/CRAFT/DISCOVERY.md):
-// the corpus is three films, and an embedding model to rank three rows is weight with no payoff.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

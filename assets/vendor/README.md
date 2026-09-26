@@ -31,10 +31,15 @@
   - `Physics2DPlugin.min.js`: velocity/gravity/friction scatter (`physics` field).
   - `SplitText.min.js`: line-aware splitting, used ONLY for line-level reveals (`splitText` field);
     char/word splitting stays with the engine's own `split`.
-- Source: https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ (the npm `gsap` package `dist/`).
 - License: **GreenSock Standard "No Charge" license** (© 2025 GreenSock),
   https://gsap.com/standard-license. Free for this use (rendering our own videos); the header in each
   file states the terms. NOT MIT, do not re-license or redistribute the plugins as a standalone lib.
+- **`gsap.min.js` itself is NOT committed** (unlike the three plugin files above): the Standard license
+  does not clearly allow redistributing the built file in a public Apache-2.0 repo. It is a real npm
+  dependency (`package.json`, pinned `3.13.0`) and `scripts/vendor-gsap.mjs` copies
+  `node_modules/gsap/dist/gsap.min.js` here on every `npm install` (its `postinstall` script);
+  `make doctor` reports it missing with the fix command. The plugin files have no such npm package of
+  their own (GSAP ships them only as loose bonus files), so they stay vendored directly.
 - The engine strips `<script>` from scene HTML by design, so GSAP is an INTERNAL tween engine, never
   an author-JS hatch. Loaded on demand by `core/engine/preload.js` (`preloadGsap`) ONLY when a scene uses a
   `gsap`/`morph`/`fx`/`fxOut`/`motionPath`/`physics`/`splitText` field. Made DETERMINISTIC by stopping

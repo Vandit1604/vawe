@@ -282,7 +282,7 @@ export async function preloadGsap(data) {
   const json = JSON.stringify(data);
   if (!GSAP_TRIGGER_RE.test(json)) return;
   if (!window.gsap) await loadScript('/assets/vendor/gsap.min.js');
-  if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load, so fx/morph/parts/comp layers render unanimated'); return; }
+  if (!window.gsap) { console.warn('gsap: /assets/vendor/gsap.min.js failed to load (run `npm install` or `node scripts/vendor-gsap.mjs` to vendor it), so fx/morph/parts/comp layers render unanimated'); return; }
   // autoRemoveChildren=false IS THE PURITY OF renderFrame(n), not a memory tweak. GSAP's ROOT timeline
   // ships with autoRemoveChildren:true: the instant a tween's playhead passes its end, GSAP unlinks it
   // from the timeline. For a PLAYING page that is right (a finished tween is garbage). For a SEEKED page

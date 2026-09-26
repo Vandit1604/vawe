@@ -1,14 +1,3 @@
-// harness/author/mistakes-compact.mjs: ONE-TIME migration, kept for the record.
-//
-// engine-doctrine/MISTAKES.md was 17,797 lines and 569 entries. Nobody could read that; `mistakes.mjs`'s own
-// header argued against compressing it, on the theory that the reasoning IS the value. The owner
-// overruled that: a file nobody reads preserves nothing, so the working copy becomes a three-line
-// index (title, the one-sentence lesson, what holds it now) and the full reasoning for every entry
-// moves into git history, retrievable on demand by number.
-//
-// Run once: `node harness/author/mistakes-compact.mjs`. It reads the CURRENT engine-doctrine/MISTAKES.md,
-// writes the compact version in place, and prints the archive hash to paste into mistakes.mjs's
-// ARCHIVE_HASH constant (must be the commit made BEFORE this migration's own commit).
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
@@ -25,8 +14,6 @@ const lines = src.split('\n');
 const HEAD = /^## (?:#)?(\d+)[.:) ]*\s*(.*)$/;
 const heads = lines.map((l, i) => (/^## /.test(l) ? i : -1)).filter((i) => i >= 0);
 
-// same shape as mistakes.mjs's own parser: a heading with no leading number is a method note /
-// waiver list, kept verbatim (as one line, since it has no numbered "holds" to compute).
 const entries = [];
 for (let k = 0; k < heads.length; k++) {
   const i = heads[k];
@@ -39,15 +26,8 @@ for (let k = 0; k < heads.length; k++) {
 
 const stripEmphasis = (s) => s.replace(/\*\*/g, '').replace(/__/g, '');
 const noEmdash = (s) => s.replace(/\u2014/g, ', ');
-// A fenced code block collapsed onto one line still opens with ``` at that line's start once
-// written out, and nothing in a one-sentence lesson ever closes it: every line after it in the
-// compact file reads as "inside a fence" to a markdown-aware gate. A lesson is prose, not a fence.
 const noFence = (s) => s.replace(/```[\w-]*\s*/g, '').replace(/`{2,}/g, '`');
 
-// Split on a period/bang/question-mark followed by space + a capital or backtick, which is the
-// shape this doc's own prose uses at a sentence boundary; short enough to not chase every "e.g."
-// A "sentence" that ends on a bare filename or code span ("`x.mjs`.") says nothing: keep pulling
-// sentences until the result carries enough words to read as a lesson, or the text runs out.
 const MIN_LEN = 40;
 const SENTENCE = /^[\s\S]*?[.!?](?=\s+[A-Z0-9`"]|\s*$)/;
 const firstSentence = (text) => {
@@ -85,9 +65,6 @@ const lessonOf = (e) => {
   );
 };
 
-// "holds": every quality/gates/*.mjs or harness/live/*.mjs that cites this entry by number, found
-// by grep so this never drifts into a hand-kept second list. `mistakes-dupes.mjs` and its own test
-// fixtures are excluded from being cited targets, not from citing: this is a straight text search.
 const GATE_DIRS = ['quality/gates', 'harness/live'];
 const gateFiles = [];
 for (const d of GATE_DIRS) {
@@ -136,10 +113,6 @@ the lesson yet.
 
 `;
 
-// Some lessons name a tool or path that no longer exists, ON PURPOSE: the entry IS the record of its
-// removal (a retired gate, a deleted scene, a moved file). doc-refs.mjs already has a waiver syntax
-// for exactly this ("names a thing to say the thing is gone"); carried over verbatim from the archive
-// rather than retyped, since retyping a list like this is how it goes stale.
 const WAIVERS = src.split('\n')
   .filter((l) => l.includes('doc-refs-allow:'))
   .filter((l, i, a) => a.indexOf(l) === i) // dedupe, the archive states some twice for different entries

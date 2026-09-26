@@ -1,22 +1,4 @@
-// sfx-pack.mjs: fetch a real, CC0, shippable-by-licence sample pack and drop it over the synth cues.
-//
-//   node harness/media/sfx-pack.mjs        fetch Kenney "Interface Sounds" and map it onto engine roles
-//   make sfx-pack
-//
-// SAMPLES ARE AN OVERRIDE, NEVER A REPLACEMENT. `make audio` (core/audio/kit.mjs) synthesizes every
-// cue from parameters with no network and no licence at all; that is what makes a fresh clone sound
-// right with zero downloads. This script only OVERWRITES the roles it has a real sample for. Any
-// role it does not map (or that fails to fetch) is left for `make audio` to bake as before, so the
-// fallback always plays.
-//
-// LICENCE, read before trusting this as the default: Kenney's "Interface Sounds" pack is Creative
-// Commons Zero (CC0, public domain), confirmed from the pack's own License.txt:
 //   "License: (Creative Commons Zero, CC0) http://creativecommons.org/publicdomain/zero/1.0/
-//    This content is free to use in personal, educational and commercial projects."
-// CC0 permits redistribution, which is why this pack (and only this pack) is the shippable default
-// this repo suggests. See engine-doctrine/ASSET-SOURCES.md for every other source's terms. The
-// engine's OWN policy stays the one in .gitignore: assets/sfx/*.wav is never committed regardless of
-// licence, so nothing here changes what ships in git; it only decides what a build has by default.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -32,9 +14,6 @@ const PACK_URL = 'https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd
 const PACK_PAGE = 'https://kenney.nl/assets/interface-sounds';
 const LICENCE = 'Creative Commons Zero (CC0), http://creativecommons.org/publicdomain/zero/1.0/';
 
-// engine role -> file inside the pack's Audio/ folder. The engine's cue roster is owned by
-// generators/media/audio-bake.mjs (`--list`), read here rather than retyped, so this table can only
-// ever be a subset of the real roster and never drifts into inventing a role of its own.
 const MAP = {
   whoosh: 'scroll_002', reveal: 'confirmation_002', chime: 'bong_001', sparkle: 'glass_002',
   droplet: 'drop_001', bloom: 'maximize_003', pluck: 'pluck_001', success: 'confirmation_001',
@@ -45,8 +24,6 @@ const MAP = {
   whisper: 'scratch_001', thud: 'close_002', travel: 'scroll_001', sweep: 'scroll_003',
 };
 
-// The one owner of the cue roster is the bake catalogue, not this list. A role this table names that
-// the catalogue does not recognize any more is a stale mapping, not a role to invent.
 const roster = execFileSync('node', [path.join(repoRoot, 'generators/media/audio-bake.mjs'), '--list'])
   .toString().match(/^roles: (.+)$/m)[1].split(', ').map((r) => r.split('<-')[0]);
 for (const role of Object.keys(MAP)) {

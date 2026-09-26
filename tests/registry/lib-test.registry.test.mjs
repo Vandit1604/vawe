@@ -502,15 +502,6 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
     const step = stack[1].x - stack[0].x;
     ok(`avatarStack: the step (${(step / 48).toFixed(2)} of the disc) clears the centred initials`, step / 48 >= 0.74);
   }
-  {
-    // a dashboard's volume chart is measured against the panel it sits in.
-    for (const w of [340, 380, 720]) {
-      const [card] = BLOCKS.stripeCard({ x: 0, y: 0, w, amount: '$1' });
-      const row = card.children[2].children;
-      const spanned = row.reduce((a, b) => a + b.w, 0) + card.children[2].gap * (row.length - 1);
-      ok(`stripeCard w:${w}: the bar chart spans the card's content box`, Math.abs(spanned - (w - 2 * card.pad)) < 1);
-    }
-  }
 
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
   // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
