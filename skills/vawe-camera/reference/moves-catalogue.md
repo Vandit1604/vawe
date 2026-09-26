@@ -1,3 +1,9 @@
+---
+when: "picking a camera move and its params, or targeting a move at a layer instead of hand-typed pixels"
+answers: "every generator's params and behaviour, and how a diveIn or travel station resolves a #layer target"
+group: skill
+---
+
 # The moves (all in `core/camera-moves/index.js`, all pure, all lib-tested)
 
 - **slowPush** `{from,to,dur}`: a gentle continuous zoom in. The default "the frame is alive" move; keep it

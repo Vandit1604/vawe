@@ -1,3 +1,9 @@
+---
+when: "you know GSAP and want the vawe JSON that does the same thing"
+answers: "15 side-by-side pairs, a GSAP tween/timeline/stagger/ease/motionPath/wiggle/loop next to the vawe field or JSON that does the same job, and why the shape differs (renderFrame(n) has no wall clock and no callbacks)"
+group: reference
+---
+
 # Vawe for people who know GSAP
 
 Same mental model, different clock. GSAP plays forward in real time and calls back when a value

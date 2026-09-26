@@ -1,3 +1,9 @@
+---
+when: "writing or editing renderFrame(n), the scene layout scaffold, or a design token"
+answers: "the purity contract in full, the shared .stage/.safe layout, and why a hardcoded colour fallback is always a bug"
+group: skill
+---
+
 # Purity, layout, and the theme
 
 ## The one hard rule: `renderFrame(n)` is PURE in `n`

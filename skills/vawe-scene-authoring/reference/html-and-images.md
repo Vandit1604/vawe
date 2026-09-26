@@ -1,3 +1,9 @@
+---
+when: "hand-writing a hook/CTA/card in HTML, sourcing an image or icon, or cutting real footage with edits[]"
+answers: "the anti-slop moves for hand-authored HTML, the real-image-before-emoji order, and the edits[] cut-list sugar"
+group: skill
+---
+
 # Hand-written HTML, images, and cutting real footage
 
 ## Beat the AI slop when hand-writing HTML (hooks, CTAs, cards)

@@ -1,3 +1,9 @@
+---
+when: "scoring or finishing a review round on a film"
+answers: "how to read a film's prior findings before scoring, log a new round, and sign it off with a receipt"
+group: skill
+---
+
 # The review log and the round receipt
 
 ## The review log: read it before you score, write it after
