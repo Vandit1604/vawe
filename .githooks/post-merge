@@ -1,0 +1,16 @@
+#!/bin/sh
+# post-merge: if the merge touched a file marked merge=vawe-generated, run `make regen` once, so a
+# generated file merged by that driver (which keeps our side untouched) never sits stale on disk.
+#
+# harness/dev/merge-generated.sh appends the path to $GIT_DIR/vawe-regen-pending; this hook is the
+# only reader of that file, so it is safe to remove once regen has run.
+
+git_dir="$(git rev-parse --git-dir)"
+pending="$git_dir/vawe-regen-pending"
+
+[ -s "$pending" ] || exit 0
+
+echo "post-merge: regenerating (touched by merge=vawe-generated):"
+sed 's/^/  /' "$pending"
+eval "${VAWE_REGEN_CMD:-make regen}"
+rm -f "$pending"

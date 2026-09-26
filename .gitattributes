@@ -1,0 +1,21 @@
+# Generated files: a merge that touches two branches' generators must not conflict on the OUTPUT,
+# only on real source. merge=vawe-generated keeps our side and flags the path for `make regen`
+# (see .githooks/post-merge). Paths mirror harness/lib/generated-owners.mjs exactly; add a new
+# generator's owned paths there first, then here.
+engine-doctrine/EFFECTS.md merge=vawe-generated
+site/lib/effects.json merge=vawe-generated
+site/lib/effects-counts.json merge=vawe-generated
+site/lib/effects-body.json merge=vawe-generated
+engine-doctrine/CRAFT/VOCABULARY.md merge=vawe-generated
+engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md merge=vawe-generated
+site/lib/arsenal.json merge=vawe-generated
+site/lib/blocks.json merge=vawe-generated
+engine-doctrine/INDEX.md merge=vawe-generated
+engine-doctrine/CRAFT/README.md merge=vawe-generated
+blocks/catalog/** merge=vawe-generated
+registry/** merge=vawe-generated
+site/lib/site-pages.json merge=vawe-generated
+site/lib/mcp-tools.json merge=vawe-generated
+site/lib/layer-kinds.json merge=vawe-generated
+site/public/llms.txt merge=vawe-generated
+site/public/blocklib/** merge=vawe-generated
