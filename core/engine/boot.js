@@ -23,7 +23,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
 import { loadBeatGrid } from '../beats/index.js';
-import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn } from '../layout/safe.js';
+import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn, resolveAnchorPoint } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
 import { preloadEmbeddedImages, preloadSpectrum, preloadThree, preloadCobe, preloadCanvasFx, preloadComponents, preloadHtml, preloadClips, preloadLottie, preloadGsap, preloadRansomSprites, fetchJson } from './preload.js';
 import { RANSOM_FACES } from '../type/ransom.js';
@@ -141,6 +141,23 @@ function resolveLayerCoords(data, W, H, safe, inset, PIN) {
     const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
     if (L.x != null) L.x = resolveCoord(L.x, W, w, safe.x0, safe.x1);
     if (L.y != null) L.y = resolveCoord(L.y, H, h, safe.y0, safe.y1, hEst);
+    // ANCHOR POINT: baked in here, once, so x/y is a plain left/top edge by the time anything
+    // downstream (scene.js buildLayer, the audit, probe-frame) reads it. `fx`/`fy` are 0 for the
+    // default "top-left" (identity: this whole block is then a no-op).
+    if (L.anchorPoint != null) {
+      const [fx, fy] = resolveAnchorPoint(L.anchorPoint);
+      const id = L.id ? ` "${L.id}"` : '';
+      if (fx && typeof L.w !== 'number')
+        throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric w to find where its `
+          + `centre/right edge falls; declare w, or use an anchorPoint that keeps the left edge `
+          + `("top-left"/"left"/"bottom-left").`);
+      if (fy && !(typeof L.h === 'number' || hEst))
+        throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric h (or, for text, a `
+          + `\`size\` to estimate one from) to find where its centre/bottom edge falls; declare h, or use `
+          + `an anchorPoint that keeps the top edge ("top-left"/"top"/"top-right").`);
+      if (L.x != null && fx) L.x = Math.round(L.x - fx * L.w);
+      if (L.y != null && fy) L.y = Math.round(L.y - fy * (typeof L.h === 'number' ? L.h : hEst));
+    }
   }
 }
 

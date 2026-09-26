@@ -46,6 +46,8 @@ import { seamErrors, durationWordErrors, transitionErrors, authoredJunctionError
 import { handleErrors, easeErrors } from './easing.mjs';
 import { walk } from './schema-walk.mjs';
 import { countEaseErrors } from './count-errors.mjs';
+import { cameraMoveErrors } from './camera.mjs';
+import { contentSlotErrors } from './content.mjs';
 
 export { layoutErrors } from './layout.mjs';
 export { captionErrors } from './captions.mjs';
@@ -58,6 +60,8 @@ export { seamErrors, durationWordErrors, transitionErrors, authoredJunctionError
 export { handleErrors, easeErrors } from './easing.mjs';
 export { lintData } from './lint-warnings.mjs';
 export { countEaseErrors } from './count-errors.mjs';
+export { cameraMoveErrors } from './camera.mjs';
+export { contentSlotErrors } from './content.mjs';
 
 // ON-SCREEN TEXT, out of a string that may be MARKUP. The rule lives in core/type/on-screen-text.js and
 // is re-exported here so the existing importers keep working: it was the strictest of eight copies, and
@@ -88,6 +92,8 @@ export function validateData(schema, data) {
   errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
+  errors.push(...cameraMoveErrors(data || {})); // a cameraMove param it does not read is a typo, caught before render
+  errors.push(...contentSlotErrors(data || {})); // a {{key}} with no matching content entry, caught before render
   return errors;
 }
 

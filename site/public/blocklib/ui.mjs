@@ -4,7 +4,7 @@ import {
   TOKENS, HAIR, r2, text, box, onColor, onInk,
   R, TYPE, SPACE, E, cardChrome, toneColor,
   stackWindows, TONE_NAMES,
-  tint, TINT, SHADOW_CARD, labelCss, numCss,
+  tint, TINT, SHADOW_CARD, labelCss, numCss, needShape,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site, declared here rather than in a
 // hand-kept name-to-category table. A module that declares none is refused at generation time
@@ -259,6 +259,7 @@ export function table({ x, y, w = 640, cols = [], rows = [], start = 0, dur = 4 
 
 // timeline: a vertical rail (dot + connecting line) with entries; `done` fills the dot accent.
 export function timeline({ x, y, w = 480, items = [], start = 0, dur = 4 } = {}) {
+  needShape('timeline', 'items', items, ['title']);
   // THE RAIL ADVANCES DOWN THE SEQUENCE: each dot lands and its entry arrives beside it, in order, so
   // the eye travels the timeline instead of being handed the whole thing at once. `parts` staggers one
   // dot+entry row at a time; the connecting rail stays static, as scaffolding.
