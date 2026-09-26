@@ -18,6 +18,7 @@ import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 import { appendRun, readRuns } from '../../harness/lib/runlog.mjs';
 import { JUDGE_CODES, isJudgeCode, parseFix } from '../../harness/lib/judge-codes.mjs';
 import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
+import { lintCriteriaSet } from '../../harness/lib/evidence-lint.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -212,6 +213,22 @@ if (verdictJsonArg) {
     console.error(`✗ refused: ${missing.length} criterion/criteria missing {score, evidence, t}: ${missing.join(', ')}`);
     console.error('  a receipt without evidence per criterion is not a verdict. Score every criterion and name what you SEE.');
     f.fail('judge-struct-incomplete', `${missing.length} criterion/criteria missing evidence`, { missing });
+    process.exit(1);
+  }
+  // Non-empty is not the same as specific: "beat 1: readability looks fine" clears the check above and
+  // says nothing a fix could act on. lintCriteriaSet asks each entry to name a real element/text plus a
+  // position/size/colour/motion/timing observation, forbids echoing the criterion's own name, checks a
+  // low score names an actual defect, and catches two criteria sharing one templated string.
+  const labeled = Object.fromEntries(structuredCriteria()
+    .filter((c) => payload.criteria[c.code])
+    .map((c) => [c.code, { ...payload.criteria[c.code], label: c.label }]));
+  const lintIssues = lintCriteriaSet(labeled);
+  const lintCodes = Object.keys(lintIssues);
+  if (lintCodes.length) {
+    console.error(`✗ refused: ${lintCodes.length} criterion/criteria carry non-specific evidence:`);
+    for (const code of lintCodes) console.error(`  - ${code}: ${lintIssues[code].join('; ')}`);
+    console.error('  evidence must name a concrete visual observation (an element or text, plus position/size/colour/motion/timing), never filler.');
+    f.fail('judge-struct-filler-evidence', `${lintCodes.length} criterion/criteria carry non-specific evidence`, { codes: lintCodes });
     process.exit(1);
   }
   const v = String(payload.verdict || '').toUpperCase();

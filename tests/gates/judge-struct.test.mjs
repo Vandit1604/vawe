@@ -24,9 +24,11 @@ const sheet = path.join(dir, 'sheet.png');
 fs.writeFileSync(sheet, 'fake sheet');
 const prepReceipt = () => writeReceipt('judge', mp4, { sheet, renderHash: hashFile(mp4), mp4 });
 
+// One distinct, specific evidence string per criterion: the evidence linter (harness/lib/evidence-lint.mjs)
+// now refuses filler ("readability looks fine") and refuses two criteria sharing one templated string.
 const fullVerdict = (run, overrides = {}) => {
-  const criteria = Object.fromEntries(structuredCriteria().map((c) =>
-    [c.code, { score: 3, evidence: `beat 1 @1.0s: ${c.code} looks fine`, t: 1.0 }]));
+  const criteria = Object.fromEntries(structuredCriteria().map((c, i) =>
+    [c.code, { score: 3, evidence: `beat 1 @1.0s: element ${i} sits ${i}px left of its grid column`, t: 1.0 }]));
   Object.assign(criteria, overrides);
   return { run, criteria, verdict: 'FIX' };
 };
@@ -53,7 +55,7 @@ const outA = execFileSync(process.execPath, [judgeMjs, mp4, '--verdict-json', fi
 assert.match(outA, /structured verdict recorded: run A/);
 
 prepReceipt();
-const fileB = writeJson('verdict-B.json', fullVerdict('B', { value: { score: 1, evidence: 'beat 1: value is weak', t: 1.0 } }));
+const fileB = writeJson('verdict-B.json', fullVerdict('B', { value: { score: 1, evidence: 'beat 1 @1.0s: the value stat card is cramped and unreadable, nothing distinct to take away', t: 1.0 } }));
 const outB = execFileSync(process.execPath, [judgeMjs, mp4, '--verdict-json', fileB, '--run', 'B'], { encoding: 'utf8' });
 assert.match(outB, /structured verdict recorded: run B/);
 
