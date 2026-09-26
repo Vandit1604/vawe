@@ -111,9 +111,9 @@ function noEmdash(v, path, errors) {
 // file) and again at boot by applyTheme.
 export function validateTheme(spec) {
   const errors = [];
-  if (spec == null) return ['data.theme is required (a theme name or an inline theme object), no default look exists'];
+  if (spec == null) return ['data.theme is required (a theme name, e.g. "vawe", or an inline theme object): there is no default look, so the render refuses to start until this is fixed. Add "theme": "<a name under themes/>" or an inline theme object.'];
   if (typeof spec === 'string') return errors;
-  if (!isObj(spec)) return [`theme must be a string name or an object (got ${typeof spec})`];
+  if (!isObj(spec)) return [`theme must be a string name or an object, got a ${typeof spec} (${JSON.stringify(spec)}): the render refuses to start until this is fixed. Use a theme name (e.g. "vawe") or an inline {"tokens":..., "roles":...} object.`];
   // A theme is now a token file (`tokens` + a required `roles` map, core/theme/tokens.js,
   // core/theme/roles.js). themeFileErrors names the retired palette/type/gradient shape by itself when
   // it sees one, pointing at migrate-themes.mjs, so there is nothing left for this function to check

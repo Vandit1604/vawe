@@ -25,7 +25,7 @@ export function captionErrors(cfg) {
     if (!isFinite(t0) || !isFinite(t1)) return;   // the schema reports a missing/NaN t0/t1
     // `align` and the shape of `words` are the schema's job (fields.captions.item), and duplicating
     // an enum here printed the same refusal twice under two wordings.
-    if (t1 <= t0) out.push(`captions[${i}] window [${t0}, ${t1}] is empty (t1 must be > t0), it would never draw`);
+    if (t1 <= t0) out.push(`captions[${i}] window [${t0}, ${t1}] has t1 <= t0, so this caption would never draw at any frame: the render refuses to start until this is fixed. Set t1 to a value greater than ${t0}.`);
     // A horizontal pin needs a box to pin. `top`, `bottom` and `center` only ask for a vertical
     // position and the stylesheet's box still applies, so those are complete on their own. `left`,
     // `right` and the corners are asking to move an edge, and a caption has no width until one is
