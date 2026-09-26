@@ -147,8 +147,15 @@ test("a broken scene shows the engine's own refusal, not a blank stage", async (
   await page.click(".ed-cm .cm-content");
   await page.keyboard.down("Meta"); await page.keyboard.press("a"); await page.keyboard.up("Meta");
   // Valid JSON the ENGINE rejects (bg is required), so this exercises the boot handshake rather
-  // than the local parser.
-  await page.keyboard.type('{"module":"scene","aspect":"16:9","duration":2,"layers":[]}');
+  // than the local parser. Pasted, not typed: CodeMirror's bracket matching plus a fast keystroke
+  // stream can leave a stray auto-inserted `}` or `]` mid-document, corrupting the very JSON this
+  // test asserts on.
+  await page.evaluate((json) => {
+    const el = document.querySelector(".ed-cm .cm-content");
+    const dt = new DataTransfer();
+    dt.setData("text/plain", json);
+    el.dispatchEvent(new ClipboardEvent("paste", { clipboardData: dt, bubbles: true, cancelable: true }));
+  }, '{"module":"scene","aspect":"16:9","duration":2,"layers":[]}');
   await page.waitForSelector(".ed-problem", { timeout: BOOT_MS });
   const text = await problem(page);
   assert.match(text, /bg is required/, "the engine's own words never reached the page");
