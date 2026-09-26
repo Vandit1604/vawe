@@ -318,6 +318,28 @@ export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
   },
 });
 
+// ── ANCHOR POINT: which point of a LAYER'S OWN BOX its authored x/y names ──────────────────────────
+// Default (no `anchorPoint`) is unchanged: x/y is the box's top-left corner, exactly as every scene in
+// the library already assumes. The nine names are the same ones PLACEMENT already uses for a `pin`
+// (that table names a point on the FRAME; this one names a point on the LAYER), so an author who
+// already knows "top-left"/"center" from `pin` needs no second vocabulary.
+export const ANCHOR_POINTS = {
+  'top-left': [0, 0], top: [0.5, 0], 'top-right': [1, 0],
+  left: [0, 0.5], center: [0.5, 0.5], right: [1, 0.5],
+  'bottom-left': [0, 1], bottom: [0.5, 1], 'bottom-right': [1, 1],
+};
+export const ANCHOR_POINT_NAMES = Object.keys(ANCHOR_POINTS);
+
+// resolveAnchorPoint(name) -> [fx, fy] in 0..1, the fraction of the box's own w/h that authored x/y
+// names instead of the left/top corner. Absent names the corner (identity, [0,0]), same as before this
+// field existed. An unknown name is refused by name, not silently taken as the corner.
+export function resolveAnchorPoint(name) {
+  if (name == null) return [0, 0];
+  const p = ANCHOR_POINTS[name];
+  if (!p) throw new Error(`layer anchorPoint "${name}" is not one of: ${ANCHOR_POINT_NAMES.join(', ')}.`);
+  return p;
+}
+
 // ── THE CAPTION BAND ────────────────────────────────────────────────────────────────────────────
 // A burnt-in caption owns real estate, and nothing stopped a headline landing on it. The band belongs
 // HERE, next to safeArea, for the reason the header gives: where a caption sits is a property of the

@@ -1429,6 +1429,21 @@
      "type": "number|string",
      "label": "Height: px number or \"50%\" of canvas"
     },
+    "anchorPoint": {
+     "type": "string",
+     "label": "Which point of THIS LAYER'S OWN box x/y names. Default (absent) is the box's top-left corner, unchanged. \"center\" makes x/y the box's centre; needs a numeric w for a centre/right x, and a numeric h (or a text layer's `size`, estimated) for a centre/bottom y.",
+     "enum": [
+      "top-left",
+      "top",
+      "top-right",
+      "left",
+      "center",
+      "right",
+      "bottom-left",
+      "bottom",
+      "bottom-right"
+     ]
+    },
     "pin": {
      "type": "string",
      "label": "Canvas-relative placement: edge/center (center = optical), or a rule-of-thirds power point",

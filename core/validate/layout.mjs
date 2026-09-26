@@ -14,7 +14,7 @@
 // three read; this file keeps the short local name only because `check()` below is written against it.
 import { isObj } from './util.mjs';
 import { onScreenText } from '../type/on-screen-text.js';
-import { ASPECTS, PLACEMENT } from '../layout/safe.js';
+import { ASPECTS, PLACEMENT, ANCHOR_POINTS } from '../layout/safe.js';
 import { motionAt } from '../timeline/sequence.js';
 import { mergePan } from '../timeline/pan-resolve.mjs';
 
@@ -200,6 +200,28 @@ function check(L, label, out) {
     out.push(`${label}: \`dx\`/\`dy\` are offsets from an anchored layer and are IGNORED without \`anchor\` (they will not nudge a \`pin\`ned/\`x\`/\`y\` layer). To stack or offset here: set \`anchor\` (+ \`at\`), or put the lines in one text layer with \`<br>\`, or use \`pin\`/\`y\`.`);
 }
 
+// ANCHOR POINT: the same trap `check()` catches for a centring KEYWORD, one field over. `anchorPoint`
+// shifts x/y to name a point OTHER than the box's top-left corner (core/engine/boot.js resolveLayerCoords
+// bakes the shift in), and that shift needs the box's own w (for a centre/right point) and h (for a
+// centre/bottom point, text excepted: TEXTISH gets the same size*1.2 estimate `check()` already grants).
+// Caught here so a missing `w`/`h` is named before render, not read off a layer sitting at its own
+// left/top edge with no visible sign why.
+function anchorPointWarnings(cfg, out) {
+  (cfg.layers || []).forEach((L, i) => {
+    if (!isObj(L) || L.anchorPoint == null) return;
+    const label = `layers[${i}] (${L.type || 'text'})`;
+    const p = ANCHOR_POINTS[L.anchorPoint];
+    if (!p) { out.push(`${label}: anchorPoint "${L.anchorPoint}" is not one of: ${Object.keys(ANCHOR_POINTS).join(', ')}.`); return; }
+    const [fx, fy] = p;
+    if (fx && L.w == null)
+      out.push(`${label}: anchorPoint "${L.anchorPoint}" makes x the box's centre/right point, but \`w\` is unset (=0), so x still lands on the left edge. Set \`w\`.`);
+    // core/engine/boot.js only estimates a height for `text` (size*1.2), not the rest of TEXTISH, so
+    // this checks the narrower set that runtime actually grants rather than reusing TEXTISH verbatim.
+    if (fy && L.h == null && !(L.type === 'text' && L.size != null))
+      out.push(`${label}: anchorPoint "${L.anchorPoint}" makes y the box's centre/bottom point, but \`h\` is unset (and there is no \`size\` to estimate one from). Set \`h\`.`);
+  });
+}
+
 function positionWarnings(cfg, out) {
   (cfg.layers || []).forEach((L0, i) => {
     if (!isObj(L0)) return;
@@ -228,5 +250,6 @@ export function layoutErrors(cfg) {
   motionSnapWarnings(cfg, out);
   becomesWarnings(cfg, ids, out);
   positionWarnings(cfg, out);
+  anchorPointWarnings(cfg, out);
   return out;
 }
