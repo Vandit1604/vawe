@@ -10,9 +10,10 @@
 //   ends-on-nothing  . does the last 0.2s hold nothing?
 //   empty-beat       . does a declared cut/seam window contain no layer at all?
 //   static-bg        . is the whole film on a flat field, or on hand-authored markup that cannot animate?
-// plus two WARNs:
+// plus three WARNs:
 //   beats-wrapped-as-units . which layers does beat wrapping cut short of their authored duration?
 //   beats-held-open  . …and which does it hold on screen long past theirs?
+//   scene-units-exit-suppressed . which layers' own `out`/`exitDur` never plays because the beat wrapper owns their exit instead?
 //   beats-unseen     . nobody has LOOKED at this version of the scene (`make dev-tool X=beats` writes a receipt).
 //
 // A layer is visible over [start, start+duration), matching films/scene/scene.js (default duration 2,
@@ -304,6 +305,22 @@ if (heldOpen.length) {
   const label = (L) => `${L.type || 'text'}${L.text ? ` "${snippet(L.text)}"` : ''}`;
   const list = heldOpen.slice(0, 5).map(({ L, b, u }) => `${label(L)} authored to ${s(b)}, rendered to ${s(u)}`).join(' · ');
   warn('beats-held-open', `${heldOpen.length} layer(s) stay on screen far past their authored \`duration\` because BEAT WRAPPING replaced it: ${list}${heldOpen.length > 5 ? ` · and ${heldOpen.length - 5} more` : ''}. This film wraps each beat as a unit, and the wrapper runs every layer in a non-last beat to that beat's cut so it can slide the whole beat out together. It does not keep the shorter of the two windows. The frame therefore holds content the JSON says has already gone, and no other gate can see the difference. If the layer really should hold the beat, write its \`duration\` to say so. If it should leave when you wrote it to leave, mark it \`"acrossBeats": true\`: it attaches to the camera instead of the beat wrapper and keeps its authored window (it then fades out on its own rather than sliding with the beat).`);
+}
+
+// ---------- 5c. scene-units-exit-suppressed ----------
+// The SAME wrapping, read for a fact `beats-wrapped-as-units` does not cover: `films/scene/scene.js`
+// (setLayerTiming) does not just stretch a wrapped layer's window, on a non-last beat it also forces
+// that layer's OWN `exitDur` to 0 and hands the exit to the beat's cut transition instead. A layer
+// authored with `out`/`exitDur` for a specific look (a blur-out, a directional slide) silently never
+// plays it: the beat wrapper's own cut style plays instead, and the JSON is the only place the authored
+// exit still exists. `T.unitCut(L)` is exactly the condition scene.js gates this on (mirrors
+// `beatIsCurrent`, see scene-timing.mjs), so a layer with a declared exit AND a unit cut is one this
+// engine has already overridden.
+const exitSuppressed = content.map((L, idx) => (T.lives[idx].exit && T.unitCut(L) != null) ? { L, exit: T.lives[idx].exit } : null).filter(Boolean);
+if (exitSuppressed.length) {
+  const label = (L) => `${L.type || 'text'}${L.text ? ` "${snippet(L.text)}"` : ''}`;
+  const list = exitSuppressed.slice(0, 5).map(({ L, exit }) => `${label(L)} authored out:"${exit.kind}"`).join(' · ');
+  warn('scene-units-exit-suppressed', `${exitSuppressed.length} layer(s) authored their own exit, but it never plays: ${list}${exitSuppressed.length > 5 ? ` · and ${exitSuppressed.length - 5} more` : ''}. This film wraps beats as units, and on a non-last beat the wrapper forces the layer's own \`exitDur\` to 0 and slides the whole beat out with its own cut style instead (films/scene/scene.js setLayerTiming). If the beat's own cut is the look you want, the authored \`out\` is dead weight, drop it. If the layer needs its OWN exit look, mark it \`"acrossBeats": true\` so it attaches to the camera instead of the beat wrapper and keeps its authored exit.`);
 }
 
 // ---------- 6. beats-unseen: the receipt ----------
