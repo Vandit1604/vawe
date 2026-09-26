@@ -1,0 +1,27 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "aspect": "16:9",
+ "duration": -5,
+ "transitions": ["bad"],
+ "seams": [{ "t": -1, "dur": 0.5 }],
+ "captions": [{ "t0": 2, "t1": 1, "words": "late" }],
+ "layers": [
+  {
+   "id": "headline",
+   "type": "text",
+   "text": "hello",
+   "x": 200,
+   "y": 400,
+   "w": 600,
+   "size": 60,
+   "start": 0,
+   "duration": 2.0,
+   "fx": [{}, "bogusEffect"],
+   "aspects": {
+    "bogus": { "x": 1 },
+    "16:9": "not-an-object"
+   }
+  }
+ ]
+}

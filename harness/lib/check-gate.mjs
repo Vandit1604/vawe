@@ -14,6 +14,7 @@ export const GATES = {
   'arsenal-check': () => ['quality/gates/arsenal-check.mjs', ...json()],
   'blocks-audit': () => ['quality/gates/blocks-audit.mjs', ...json()],
   'code-quality': () => ['quality/gates/code-quality.mjs', ...write(), ...json()],
+  'consequence-lint': () => ['quality/gates/consequence-lint.mjs', ...write(), ...list(), ...json()],
   'coverage': () => ['quality/gates/coverage.mjs', ...json()],
   'craft-coverage': () => ['quality/gates/craft-coverage.mjs', ...json()],
   'dead-branch': () => ['quality/gates/dead-branch.mjs', ...json()],

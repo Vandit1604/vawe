@@ -1,0 +1,12 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 3.0,
+ "bg": [{ "preset": "plain" }],
+ "audio": { "silent": true },
+ "layers": [
+  { "id": "headline", "type": "text", "text": "hello", "x": 200, "y": 400, "w": 600, "size": 60, "start": 0, "duration": 2.0 }
+ ]
+}
