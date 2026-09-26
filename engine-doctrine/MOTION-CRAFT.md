@@ -593,7 +593,7 @@ had ten, including one 2.5s dead stretch.
 
 **A jolt** is a frame-to-frame speed jump on a layer or the camera: over 600px/s for position, over
 0.6 scale-units/s for zoom (`quality/gates/speed.mjs`'s `VELOCITY_SPIKE_PX_S`/`_SCALE_S`, still a live
-readout: `make speed D=<film>`). A planted linear camera station or an `easeIn`-into-a-hold is exactly the
+readout: `make check GATE=speed D=<film>`). A planted linear camera station or an `easeIn`-into-a-hold is exactly the
 shape this catches: a move that looks smooth on a storyboard but jerks on screen.
 
 None of this blocks a build any more. `make judge` and a human/agent eye are where a dead or jolting film
