@@ -104,14 +104,14 @@ each one does, and how a draft becomes a paid export: [`mcp/README.md`](mcp/READ
 ## The loop
 
 ```
-author the JSON  →  make author-check / audit  →  make judge (the vision gate)  →  make video
+author the JSON  →  make dev-tool X=author-check / audit  →  make judge (the vision gate)  →  make video
                    (TASTE=1 adds critique · direct · floor · slop · designspec · copy)
 ```
 
 Ask an agent to write the scene, grounded in `films/scene/schema.json` (the contract), the primitive
 vocabulary ([`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md)), and the taste system ([`engine-doctrine/TASTE.md`](engine-doctrine/TASTE.md)).
 Reflecting a real brand? `make study-tool X=brandspec URL=…` reads its real CSS, `make sections`/`make study-tool X=palette` capture
-and eyedrop it, and `make house-style NAME=…` persists the brand's Design Read so the next video stays
+and eyedrop it, and `make dev-tool X=house-style NAME=…` persists the brand's Design Read so the next video stays
 on-brand automatically.
 
 ## What makes the output good: the taste system
@@ -122,10 +122,10 @@ system that fights that:
 | Layer | What it does |
 |---|---|
 | **[Blocks](engine-doctrine/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make site X=catalog` to browse. |
-| **[Per-brand house style](engine-doctrine/TASTE.md)** | `make house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
+| **[Per-brand house style](engine-doctrine/TASTE.md)** | `make dev-tool X=house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
 | **Composition** | `pin:"thirds-*"`, a 12-column grid, and optical centering. Beats are well-composed by default, not by eyeballing pixels. |
 | **Micro-typography** | optical tracking by size, balanced/pretty wrapping, real kerning + ligatures, on every text layer. |
-| **Motion director** | `make direct` picks cuts/stings per transition from the brand's motion personality, restraint by default. |
+| **Motion director** | `make dev-tool X=direct` picks cuts/stings per transition from the brand's motion personality, restraint by default. |
 | **Gate ladder** | `validate` → `critique` (value) → `slop` (anti-slop) → `audit` (contrast/overlap) → **`make judge`**. A vision gate that *sees* the rendered frames and scores composition + brand fidelity, catching what static gates can't. See [`engine-doctrine/JUDGE.md`](engine-doctrine/JUDGE.md). |
 
 ## Determinism
@@ -206,7 +206,7 @@ out/             rendered mp4s (gitignored)
 scripts/         CLI tooling, grouped by WHAT YOU ARE DOING:
   gates/           prove it is good: lib-test · motion-audit · slop · snap · probe · judge · ledger · schema-drift
   brand/           study a real site: brandspec · sections · lookbook · palette · house-style · photos
-  media/           fetch or make assets: fonts · sfx · gen-audio · assets · cards
+  media/           fetch or make media X=assets: fonts · sfx · gen-audio · assets · cards
   author/          compose a scene: beats · expand · batch · captions · preview · capture-*
   site/            build the website: site-assets · site-engine · rules-build · blocks-*
 engine-doctrine/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JUDGE.md · CRAFT/ · CODEMAPS/
@@ -221,8 +221,8 @@ make list                               formats + their schema/sample
 
 # taste
 make site X=catalog [THEME=<brand>]            browse the 100-block registry, reskinned to a brand
-make house-style NAME=<brand>           persist a brand's Design Read
-make direct D=<file> [WRITE=1]          motion director: pick cuts/stings per transition
+make dev-tool X=house-style NAME=<brand>           persist a brand's Design Read
+make dev-tool X=direct D=<file> [WRITE=1]          motion director: pick cuts/stings per transition
 make study-tool X=brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
 
 # gates
@@ -234,9 +234,9 @@ make judge D=… VS=<brand>               THE VISION GATE: rubric + house-style,
 make check GATE=probe [M=…]                        render-order purity (determinism)
 
 # author
-make beats D=… VS=<brand>               first/mid/last of every beat beside the source
-make expand D=…                         debug: print the {type:block}/{type:beat}/{type:comp} expansion (auto at render)
-make compare / scrub / batch            variant selection · contact sheet · data-driven variants
+make dev-tool X=beats D=… VS=<brand>               first/mid/last of every beat beside the source
+make dev-tool X=expand D=…                         debug: print the {type:block}/{type:beat}/{type:comp} expansion (auto at render)
+make dev-tool X=compare / scrub / batch            variant selection · contact sheet · data-driven variants
 
 # publish
 make site X=site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+posters), ratio-preserving

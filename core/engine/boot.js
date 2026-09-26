@@ -252,7 +252,7 @@ export async function preloadImages(data) {
       + `${missing.map((s) => `${urls.get(s)} → "${s}"`).join(' · ')}. `
       + `Either the file does not exist, or its path is outside the roots the render server allows `
       + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/). `
-      + `Capture or fetch it (\`make assets D=<scene> WRITE=1\`), or drop the layer, a repo path that `
+      + `Capture or fetch it (\`make media X=assets D=<scene> WRITE=1\`), or drop the layer, a repo path that `
       + `404s renders as a hole in the frame and says nothing.`);
 }
 

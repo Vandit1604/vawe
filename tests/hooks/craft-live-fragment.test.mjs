@@ -2,7 +2,7 @@
 //
 // The fragment branch of harness/live/craft-live.mjs, fed exactly as Claude Code's PostToolUse feeds
 // it (stdin JSON, stderr on exit 2). Fixtures below use the REAL, current STAGEKIT block (buildKit(),
-// the same generator `make stagekit` runs) rather than a hand-copied snapshot, so a change to the kit
+// the same generator `make dev-tool X=stagekit` runs) rather than a hand-copied snapshot, so a change to the kit
 // itself cannot leave this test proving something the kit no longer looks like.
 import fs from 'node:fs';
 import os from 'node:os';

@@ -14,7 +14,7 @@ rule. It adds no new checks.
 
 ## The one thing to understand first
 
-**Green gates do not mean the film is good.** `make author-check` reads structure. It cannot see murk, a
+**Green gates do not mean the film is good.** `make dev-tool X=author-check` reads structure. It cannot see murk, a
 weak focal point, a beat that lands wrong, or a frame that is merely type on a background. The gates are
 the floor. This loop is what happens above the floor, and skipping the second half below is the failure
 mode it exists to prevent:
@@ -31,8 +31,8 @@ Run rounds until the stopping rule fires. One round is:
 ```bash
 make ship  D=films/scene/<film>.json     # author-check → render → audit → seams
 make judge D=films/scene/<film>.json     # writes /tmp/judge/sheet.png + the rubric
-make beats D=films/scene/<film>.json     # per beat: first/mid/last
-make reveal D=films/scene/<film>.json    # per beat: the ENTER arc, settled, the EXIT arc
+make dev-tool X=beats D=films/scene/<film>.json     # per beat: first/mid/last
+make dev-tool X=reveal D=films/scene/<film>.json    # per beat: the ENTER arc, settled, the EXIT arc
 ```
 
 Then **READ the sheets**. Producing an image is not looking at one. Score every frame on the seven

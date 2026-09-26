@@ -38,7 +38,7 @@ function spawnJs(script, args) {
 }
 
 // gen-video generates the clip then extracts it: the one entry here that is two scripts, not one.
-const CUSTOM = {
+export const CUSTOM = {
   'gen-video': () => {
     const out = `assets/gen/${env.NAME}.mp4`;
     const gen = spawnJs('harness/media/kie.mjs', ['video', env.Q || '', '--out', out, ...(env.ASPECT ? ['--aspect', env.ASPECT] : [])]);

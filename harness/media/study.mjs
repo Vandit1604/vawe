@@ -394,7 +394,7 @@ function stackImages(files, out, axis, padW, padH, what) {
 }
 
 // ── contact sheet: one row per shot, frames chosen by EVENT (see above), not by position ─────────
-// Same shape as make beats, and for the same reason: the middle of a shot is the frame that hides the
+// Same shape as make dev-tool X=beats, and for the same reason: the middle of a shot is the frame that hides the
 // entrance, which is exactly what a study is looking for (engine-doctrine/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
 const frames = path.join(dir, 'frames');
 fs.mkdirSync(frames, { recursive: true });
@@ -668,7 +668,7 @@ up. One event per screen. Mark each row above KEEP or CUT before you write a sto
 ## Carry forward
 
 Open \`${rel(sheet)}\` and \`${rel(frames)}/\` before answering below. Answer these four, then run
-\`make storyboard-draft\` (or write the storyboard by hand) and paste the answers in. The storyboard is
+\`make dev-tool X=storyboard-draft\` (or write the storyboard by hand) and paste the answers in. The storyboard is
 where they turn into our film.
 
 - **pace:** median shot ${study.measured.medianShot}s. Our library runs 2.5-4s beats. Do we match this reference, and can we?

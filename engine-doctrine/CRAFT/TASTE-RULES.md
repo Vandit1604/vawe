@@ -14,8 +14,8 @@ codes: effect-soup
 - Vary ease, duration, entrance direction and stagger per beat. Never repeat one default (one ease,
   one 0.4-0.5s duration, one entrance direction) across a whole film.
 - Enforced by: `codes: effect-soup`, plus the backstop table at the end (`make check GATE=validate`/`critique`,
-  `designspec-check`, `make check GATE=audit`, `make check GATE=knobs-audit`, `make check GATE=motion`, `make ledger`, judgment via
-  `make direct`, `make judge`).
+  `designspec-check`, `make check GATE=audit`, `make check GATE=knobs-audit`, `make check GATE=motion`, `make dev-tool X=ledger`, judgment via
+  `make dev-tool X=direct`, `make judge`).
 - Checkable action: name the beat's motion in one clause. Does it need "and" to join two unrelated
   verbs (a second effect on the same beat)?
 
@@ -201,8 +201,8 @@ The split: prose carries the taste; a gate backstops only the source-decidable s
 | Invisible-at-size text; dead-final-frame; overlap | `make check GATE=audit` |
 | A dial set on a preset that ignores it | `make check GATE=knobs-audit` |
 | Monotone timing; payoff doesn't settle | `make check GATE=motion` |
-| Design repeats a shipped one | `make ledger` |
-| Effect soup / no continuity / mixed cut family | **judgment** (`make direct`) |
+| Design repeats a shipped one | `make dev-tool X=ledger` |
+| Effect soup / no continuity / mixed cut family | **judgment** (`make dev-tool X=direct`) |
 | Does it FEEL right | **judgment** (`make judge` vision pass) |
 
 The last two rows are why a human verdict per beat still matters. A gate proves it did not break a

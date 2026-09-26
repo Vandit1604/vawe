@@ -57,10 +57,10 @@ space: {}
 surfaces: []
 ---
 
-This film's design. It starts from theme "${themeName}"'s own numbers (\`make stagekit D=${film}\`).
+This film's design. It starts from theme "${themeName}"'s own numbers (\`make dev-tool X=stagekit D=${film}\`).
 Add a value here, never inline: a new size, radius, shadow or colour a fragment needs goes under the
 matching group above, and every fragment reaches it as \`var(--kit-<group>-<name>)\` (or, for a type
-role, the \`.kit-<role>\` class). \`make stagekit D=${film}\` re-pastes the kit with these tokens folded
+role, the \`.kit-<role>\` class). \`make dev-tool X=stagekit D=${film}\` re-pastes the kit with these tokens folded
 in, and warns if a value here now disagrees with what the theme itself computes.
 
 ## Type scale (${aspect}, ${W}x${H})

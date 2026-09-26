@@ -19,7 +19,7 @@ confirm: "is the motion hand-keyed with real physics, not a named preset firing 
   `becomes` handoff, never a silent disappearance ("Layering, life and handoffs").
 - Enforced by codes: `enter-and-retreat`, `front-loaded`, `linear-motion`, `monotone-timing`,
   `motion-monotony`, `profile`, `shared-start`, `stagger-total`, `tempo-flat`, `uneven-cascade`, via
-  `make direct` / `motion-audit`. All warn; none block.
+  `make dev-tool X=direct` / `motion-audit`. All warn; none block.
 - Checkable action: is the motion hand-keyed with real physics, not a named preset firing once?
 
 > **How should it FEEL, and what not to do?** See [`CRAFT/TASTE-RULES.md`](CRAFT/TASTE-RULES.md). The cause→feeling layer and the failure-modes catalog. This file is the mechanics; that one is the taste.
@@ -35,7 +35,7 @@ gates enforces each rule: everything else is judgment the ledger can't save you 
 > the direction spine (pacing · restraint · story placement), each rule traced to its book: Disney's 12
 > (Thomas & Johnston, _The Illusion of Life_), Murch's Rule of Six (_In the Blink of an Eye_), Shaw
 > (_Design for Motion_), Google Material Motion, McKee (_Story_), Ogilvy, Loewenstein's curiosity gap.
-> This file is the mechanics; DIRECTION.md is *why*, and tags which rules `make author-check` enforces.
+> This file is the mechanics; DIRECTION.md is *why*, and tags which rules `make dev-tool X=author-check` enforces.
 
 ## The 10 rules
 
@@ -135,7 +135,7 @@ this engine as it stands, not as it is planned to be.
   the junction so the shape belongs to both shots.
 - **Cut on action**: *"the cut on action transition, whereby you cut from one shot to another view
   while matching the first shot's action"* (same source). **[unrouted]**: the mechanism is a plain hard
-  cut placed on the action frame (`cut:"none"`, `make beatsync` for on-the-beat timing), but nothing
+  cut placed on the action frame (`cut:"none"`, `make media X=beatsync` for on-the-beat timing), but nothing
   checks that the two shots' action frames actually line up. The alignment is still the author's eye.
 - **Graphic match / shape morph**: **HAVE**: `svg` layers take `morph: { to: ... }`
   (`core/layers/svg.js`), and `filter: "goo"` morphs several elements as a metaball. Per-vertex control
@@ -277,13 +277,13 @@ All three read clean. Sizing the test against the object's own width does not sa
 bar is the smallest object of the three and fails that version hardest while being the most obviously
 correct. Speed in the JSON cannot tell a travelling subject from a sweeping reveal.
 
-So `make direct` prints your fastest keyed move and where it sits, as a note, and never as a finding.
+So `make dev-tool X=direct` prints your fastest keyed move and where it sits, as a note, and never as a finding.
 Look at the frames.
 
 ## Arrival rhythm: four measures, and the tension between two of them
 
 Rules 1, 3 and 4 above were judgment for a year. These four measures make them countable. All four
-**warn**; none blocks. Run them with `make direct D=<file>` (also inside `TASTE=1 make author-check`).
+**warn**; none blocks. Run them with `make dev-tool X=direct D=<file>` (also inside `TASTE=1 make dev-tool X=author-check`).
 They read the authored JSON, so they cost about a second and change no pixel.
 
 | Finding | What it counts | Warns at | Why that number |
@@ -508,7 +508,7 @@ has to EARN its place. Map the editorial intent to the mechanism:
 
 | Intent between two beats | Use | In the engine |
 |---|---|---|
-| Fast pace / on the beat / raw impact | **Hard cut** (no transition) | just adjacent beats; `cut:"none"`; `make beatsync` puts it on the beat |
+| Fast pace / on the beat / raw impact | **Hard cut** (no transition) | just adjacent beats; `cut:"none"`; `make media X=beatsync` puts it on the beat |
 | Passage of time · location change · montage | **Dissolve** | `seam:"dissolve"` / `fade` |
 | Punch / launch / hide-then-reveal (matched action) | **Cut on action** | a hard cut placed ON the motion (e.g. at a click's impact frame) |
 | Visual continuity: a shape/object carries over | **Match cut** | align the two beats' hero shape + `seam:"fade"`, or a `morph` when a real shape tweens |
@@ -519,7 +519,7 @@ Rules of thumb from the article, as engine doctrine:
 - **Default to the hard cut.** If a transition would overcomplicate the boundary, cut. A film is mostly cuts
   with a few earned transitions, not a transition on every seam (that reads as a template, and the ledger
   flags it).
-- **Cut TO the beat.** A hard cut re-times a boundary to the music, this is exactly what `make beatsync`
+- **Cut TO the beat.** A hard cut re-times a boundary to the music, this is exactly what `make media X=beatsync`
   automates now that beds have a real beat. On-beat cuts read directed; off-beat ones read sloppy.
 - **A transition states a relationship** (time passed, place changed, this-becomes-that). If there is no
   relationship to state, the cut is the honest choice.
@@ -568,7 +568,7 @@ Rules of thumb from the article, as engine doctrine:
   only read as motion while they MOVE, so ramp them across the layer's window.
 
 ### Let the director pick (restraint by default)
-Don't hand-scatter effects. **`make direct D=<file>`** reads the brand's motion personality (`theme.motion`)
+Don't hand-scatter effects. **`make dev-tool X=direct D=<file>`** reads the brand's motion personality (`theme.motion`)
 and applies these rules per transition: cover a hard background jump with a sting · whip/punch only when the
 background *doesn't* change · rotate one cut family (no archetype twice) · punchy brands snap, calm brands
 dissolve. It prints a report; `WRITE=1` applies the picks → `<file>.directed.json`. This is how you kill the

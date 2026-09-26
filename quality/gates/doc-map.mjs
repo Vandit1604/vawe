@@ -104,7 +104,7 @@ const CRAFT_ALSO = [{
   label: '[`vawe-continuous-action`](../../skills/vawe-continuous-action/SKILL.md) (skill)',
   group: 'crosscutting',
   when: 'planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen',
-  answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `films/scene/higgsfield-recreation.json`.',
+  answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make dev-tool X=intent` already eat. Worked from `higgsfield.mp4` + `films/scene/higgsfield-recreation.json`.',
 }];
 
 const GROUPS = [

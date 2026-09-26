@@ -46,7 +46,7 @@
 //
 // -- DECISION 3: a generator is a THIRD kind of item, and its install differs by `produces` --
 // A generator is not a block and not a beat. Nothing in a scene ever NAMES one: the engine has no
-// {"type":"generator"} layer, so there is no factory reference to paste and no `make expand` step.
+// {"type":"generator"} layer, so there is no factory reference to paste and no `make dev-tool X=expand` step.
 // What a generator gives you is its OUTPUT, and the output has two shapes, which the entry declares:
 //
 //   produces:'layers'  render(options) returns concrete scene layers (a shader layer, an html card).

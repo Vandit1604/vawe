@@ -123,7 +123,7 @@ for (let i = 0; i < found.length; i++) {
   } catch (e) { console.warn(`  ⚠ shot failed for ${s.label}: ${e.message}`); continue; }
   const capture = s.kind === 'canvas'
     ? `# canvas, screenshot ${path.relative(ROOT, file)} into a clipped image layer (ken burns)`
-    : `make capture URL="${url}" SEL='${s.sel}' NAME=${brand} LABEL=${s.label.replace(/-/g, '') || 'sec' + (i + 1)}`;
+    : `make media X=capture URL="${url}" SEL='${s.sel}' NAME=${brand} LABEL=${s.label.replace(/-/g, '') || 'sec' + (i + 1)}`;
   manifest.push({ i: i + 1, label: s.label, title: s.title, sel: s.sel, x: s.x, y: s.y, w: s.w, h: s.h, kind: s.kind, note: s.note, shot: path.relative(ROOT, file), capture });
 }
 await browser.close();
@@ -148,4 +148,4 @@ for (const m of manifest) {
   console.log(`  ${String(m.i).padStart(2, ' ')}. ${m.label.padEnd(28)} ${m.w}×${m.h}  [${m.kind}]`);
   console.log(`      ${m.capture}`);
 }
-console.log('\n  then stage each as a `component` layer and give it a window/cut/camera. verify with `make beats`.');
+console.log('\n  then stage each as a `component` layer and give it a window/cut/camera. verify with `make dev-tool X=beats`.');

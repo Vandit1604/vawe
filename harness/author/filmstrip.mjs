@@ -3,7 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const env = (k, d) => (process.env[k] != null && process.env[k] !== '' ? process.env[k] : d);
 const VIDEO = env('VIDEO', process.argv[2]);
-if (!VIDEO || !fs.existsSync(VIDEO)) { console.error('usage: make filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=]'); process.exit(2); }
+if (!VIDEO || !fs.existsSync(VIDEO)) { console.error('usage: make media X=filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=]'); process.exit(2); }
 const FPS = +env('FPS', '2');
 const COLS = +env('COLS', '8');
 const PER_SHEET = +env('PER_SHEET', '80');          // tiles per sheet (keeps each sheet readable)

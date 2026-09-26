@@ -9,10 +9,10 @@ group: crosscutting
 ## AGENT SUMMARY
 
 - Follow the chain in order: spine -> manufacture the four things (taste anchor, real assets, story
-  spine, real copy) -> LOCK SHEET (value-test every beat) -> transcribe JSON -> `make author-check` ->
+  spine, real copy) -> LOCK SHEET (value-test every beat) -> transcribe JSON -> `make dev-tool X=author-check` ->
   `beats`/`reveal` -> `make video` -> `make judge` (read the sheet) -> `ledger` -> harvest. Nothing
   renders before the lock sheet is agreed with whoever asked for the film.
-- Enforced by `[ref]`: each step names the command that runs it; `make author-check` and `make judge`
+- Enforced by `[ref]`: each step names the command that runs it; `make dev-tool X=author-check` and `make judge`
   are the two steps that block/see, everything else is sequence discipline.
 - Checkable action: does the lock sheet exist and match the beats before any JSON is rendered?
 - Just want a first frame of a brand-new name, no plan yet? `make dev D=<file> DRAFT=1` writes a
@@ -111,9 +111,9 @@ This is the `make check` phase of the one spine in
 nothing blocks yet.
 
 ```bash
-make author-check D=films/scene/passwords.json           # the always-on gates: validate · beats · storyboard
+make dev-tool X=author-check D=films/scene/passwords.json           # the always-on gates: validate · beats · storyboard
                                                           #     · assets · inspect · plan-vs-render · motion, and more
-TASTE=1 make author-check D=films/scene/passwords.json  # ...+ critique · direct · floor · dissolve
+TASTE=1 make dev-tool X=author-check D=films/scene/passwords.json  # ...+ critique · direct · floor · dissolve
                                                           #     designspec · copy · pace
 ```
 
@@ -121,7 +121,7 @@ The full ladder is longer than either line above names: read it off `LADDER` in
 [`quality/gates/author-check.mjs`](../../quality/gates/author-check.mjs) rather than trusting a fixed
 count here, it changes as gates are added.
 
-**The style gates always run; `TASTE=1` only promotes them to blocking.** A bare `make author-check`
+**The style gates always run; `TASTE=1` only promotes them to blocking.** A bare `make dev-tool X=author-check`
 runs the always-on half, which catches a film that is BROKEN: schema and em-dash (`validate`), timeline
 holes (`beats`), missing referenced files (`assets`, advisory unless `STRICT=1`), the value contract
 (`inspect` + `plan-vs-render`), plus two advisory notes (`treatment`, `waiver-drift`). It ALSO runs the
@@ -153,8 +153,8 @@ waived code):
 
 Then see it move, not just the settled frames:
 ```bash
-make beats  D=<file>        # first/mid/last of every beat → /tmp/beats/<name>.png
-make reveal D=<file>        # the ENTER arc + settled + EXIT arc → catches how each beat animates IN
+make dev-tool X=beats  D=<file>        # first/mid/last of every beat → /tmp/beats/<name>.png
+make dev-tool X=reveal D=<file>        # the ENTER arc + settled + EXIT arc → catches how each beat animates IN
 ```
 
 ## Step 5: Render, then the gate that SEES
@@ -176,11 +176,11 @@ make check GATE=why   D=films/scene/passwords.json             # what the last f
 
 ## Step 6: Prove it isn't a repeat, then log it
 
-This is the `make ledger` / `make ledger-add` phase of the same spine.
+This is the `make dev-tool X=ledger` / `make dev-tool X=ledger-add` phase of the same spine.
 
 ```bash
-make ledger     D=<file>          # fails if this repeats a shipped design (change ≥2 of cut/beat/layout)
-make ledger-add D=<file>          # once the draft render looks right, logs it to the design memory
+make dev-tool X=ledger     D=<file>          # fails if this repeats a shipped design (change ≥2 of cut/beat/layout)
+make dev-tool X=ledger-add D=<file>          # once the draft render looks right, logs it to the design memory
 ```
 
 ## Step 7: The framework harvest (every render, without being asked)
@@ -194,7 +194,7 @@ rule in the project `CLAUDE.md`. An unlogged fix gets re-broken.
 ### The chain in one line
 
 spine → manufacture the four things → lock sheet (value-test every beat) → transcribe JSON in layering
-order → **`make author-check`** → `beats`/`reveal` → `make video` → **`make judge` (read the sheet)** →
+order → **`make dev-tool X=author-check`** → `beats`/`reveal` → `make video` → **`make judge` (read the sheet)** →
 `ledger` → harvest. Miss the bolded two and you ship effects; run them and you ship a directed film.
 
 ## Provenance

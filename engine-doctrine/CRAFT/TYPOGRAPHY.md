@@ -126,7 +126,7 @@ Pick a ratio, hand-pick ~5 sizes, reuse them. Don't use every step.
 - **Dense / dashboard:** ratio **1.2–1.25** (minor third) so sizes stay close.
 - A landscape hero headline lives around **96–140px**; a supporting line **44–64px**; a caption/label **28–36px**.
   The gap between hero and caption should be *obvious* (scale contrast is the #1 hierarchy tool, see [LAYOUT.md](LAYOUT.md)).
-- **In a per-scene fan-out, don't hand-pick this scale: `make stagekit D=<film>` already derived one
+- **In a per-scene fan-out, don't hand-pick this scale: `make dev-tool X=stagekit D=<film>` already derived one
   from the film's theme** (`.kit-hook/.kit-headline/.kit-body/.kit-caption`, plus `.kit-eyebrow` for an
   uppercase kicker and `.kit-stat` for a tabular numeral display size). It holds this section's own
   ratio automatically: the hook-to-caption ratio across the shipped library sits at 3.4:1 to 4:1, inside

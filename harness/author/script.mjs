@@ -105,7 +105,7 @@ for (const r of rows) {
 const spoken = rows.reduce((s, r) => s + r.speak, 0);
 const total = rows.reduce((s, r) => s + Math.max(r.speak, r.read), 0);
 console.log(`  ${rows.length} beats · ${rows.reduce((s, r) => s + r.nw, 0)} spoken words (~${spoken.toFixed(1)}s at ${SPEAK_WPM}wpm) · ${rows.reduce((s, r) => s + r.cards.length, 0)} text cards`);
-console.log(`  estimated ${total.toFixed(1)}s of words${sb.duration ? ` against a ${sb.duration}s film` : ''}.  Measured clock: make animatic SB=${SB}\n`);
+console.log(`  estimated ${total.toFixed(1)}s of words${sb.duration ? ` against a ${sb.duration}s film` : ''}.  Measured clock: make dev-tool X=animatic SB=${SB}\n`);
 
 for (const f of fail) console.log(`  ✗ ${f}`);
 for (const w of warn) console.log(`  ~ ${w}`);

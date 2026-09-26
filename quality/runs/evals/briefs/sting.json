@@ -8,7 +8,7 @@
  "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited", "static-bg", "no-transition"], "_why": {
    "no-storyboard": "a fixed eval fixture (engine-doctrine/EVALS.md): liveness proof for `make gen X=evals`, not a planned film with a requester to sign a lock sheet",
    "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
-   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full make preflight craft pass",
+   "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full make dev-tool X=preflight craft pass",
    "static-bg": "true black is the brief: BLACK MEANS #000000, a lit or moving field would be a tinted bumper, not this one",
    "no-transition": "one move, the mark, no second beat: this note already says so, a cut would be a second beat this sting deliberately does not have"
  } },

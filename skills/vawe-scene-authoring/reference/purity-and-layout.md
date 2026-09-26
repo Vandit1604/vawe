@@ -51,7 +51,7 @@ determinism reset, `.stage`/`.num`/`.icon-img`/debug overlay. It contains zero c
 scales or shadows. Every look var (`--font-*`, `--bg`, `--text/-2`, `--dim`, `--ink`, `--surface/-2`,
 `--line/-strong`, `--accent/-dim/-glow`, `--up`/`--down`, `--g0..2`) is written by `applyTheme()` from
 the video's theme, and `core/registry/theme-contract.js` requires the theme to be COMPLETE, a missing key
-fails at `make validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
+fails at `make check GATE=validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
 scene: if the var is a look value it comes from the theme (guaranteed), and a hardcoded fallback is
 exactly the "wrong-look video renders anyway" bug the contract exists to prevent. Data JSONs must
 declare `"theme"` (name or inline object).

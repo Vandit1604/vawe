@@ -8,7 +8,7 @@
 // slot, so the cheap reach and the right reach are the same keystrokes.
 //
 // THE WORDS ARE NOT A SECOND VOCABULARY. Each one is an ALIAS onto a value the engine already has,
-// and every target is asserted to exist by `make lib-test`. Nothing here can be picked that could
+// and every target is asserted to exist by `make test`. Nothing here can be picked that could
 // not be picked before; a word is a shorter spelling, never a new capability.
 //
 // WHERE THE MEANINGS COME FROM. Two of these words are already spoken elsewhere in the engine and

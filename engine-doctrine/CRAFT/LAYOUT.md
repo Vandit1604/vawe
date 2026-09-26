@@ -88,7 +88,7 @@ before arguing with any one line.
   Q="…"` finds it), including three named anchors for the de-facto pixel constants this repo already
   hand-types: `stage` (the full-width content column), `text-band` (roughly two-thirds down, where a
   headline sits) and `lower-band` (a thin strip flush to the safe bottom edge).
-- **Inside a hand-authored `html` fragment**, the same grid exists as CSS: `make stagekit` generates
+- **Inside a hand-authored `html` fragment**, the same grid exists as CSS: `make dev-tool X=stagekit` generates
   `.kit-stage` (the content column, inset by the theme's own margin) and `.kit-grid` / `.kit-col-1`
   through `.kit-col-12`. Pick an UNEQUAL span pair (`.kit-col-4` + `.kit-col-8`, `.kit-col-7` +
   `.kit-col-5`); a 6/6 split is the equal grid this whole file argues against, just written in fractions

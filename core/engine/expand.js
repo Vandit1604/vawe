@@ -59,7 +59,7 @@ const shift = (layer, dx, dy, dt) => ({
 });
 
 // warnUnknown(fn, opts, label): an unknown-prop finding for a block/beat instance, printed (an author
-// typo a factory silently ignores, engine-doctrine/MISTAKES.md #60), never thrown: the same posture `make expand`
+// typo a factory silently ignores, engine-doctrine/MISTAKES.md #60), never thrown: the same posture `make dev-tool X=expand`
 // always had. Reads the factory's OWN signature, so nobody maintains a second copy of its parameter list.
 function warnUnknown(fn, opts, label) {
   const sig = fn && /\(\s*\{([^}]*)\}/.exec(fn.toString());
@@ -195,10 +195,10 @@ function resolveContentSlots(data) {
  * no-op if it was already baked, e.g. by core/engine/boot.js for the browser render path), and strips
  * the top-level `comps` map. Unknown-prop findings for a block/beat instance are printed as warnings
  * (an author typo that a factory silently ignores, engine-doctrine/MISTAKES.md #60), never thrown: the same
- * posture `make expand` always had.
+ * posture `make dev-tool X=expand` always had.
  *
  * aspectKey names the canvas any aspect-dependent resolution (the camera bake, a flow-seam's travel)
- * should use. Every Node consumer (loadScene, `make expand`) omits it and keeps today's default, the
+ * should use. Every Node consumer (loadScene, `make dev-tool X=expand`) omits it and keeps today's default, the
  * scene's own declared aspect (frameOf's own fallback). internal/render/expand.go passes the Go render's
  * actual --aspect, because that render happens BEFORE the browser exists to resolve it itself
  * (films/scene/scene.js never imports this module, see the file banner), so without a key here the

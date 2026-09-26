@@ -3,11 +3,11 @@
 //
 // speed.mjs (frame-to-frame speed jumps) and motion-floor.mjs (dead windows against a rendered mp4)
 // both existed and both only printed to a terminal nobody was made to run. A planted linear camera
-// station or an easeIn-into-a-hold never showed up as a finding in `make author-check`, because
+// station or an easeIn-into-a-hold never showed up as a finding in `make dev-tool X=author-check`, because
 // neither script spoke the findings contract (harness/lib/findings.mjs) and neither ran in the ship
 // path. This gate is the one step that puts both in front of an author automatically, report-only.
 //
-//   node quality/gates/jolt-check.mjs films/scene/<film>.json   ·   part of `make author-check`
+//   node quality/gates/jolt-check.mjs films/scene/<film>.json   ·   part of `make dev-tool X=author-check`
 //
 // speed.mjs stays the one owner of the jolt thresholds (VELOCITY_SPIKE_PX_S / _SCALE_S): this file
 // only calls its findVelocitySpikes, it never repeats a number of its own.

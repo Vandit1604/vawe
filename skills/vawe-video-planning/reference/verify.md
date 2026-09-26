@@ -11,9 +11,9 @@ This runs the `check` -> `ship` -> `judge` -> `ledger` phases of the one spine i
 separate ladder.
 
 `make check GATE=validate` -> `make video` -> `make check GATE=motion --data <file>` -> `make check GATE=audit M=<fmt>` (text AND
-image contrast) -> **`make beats D=<file> VS=<brand>`** (fidelity gate, stacks each beat beside its
+image contrast) -> **`make dev-tool X=beats D=<file> VS=<brand>`** (fidelity gate, stacks each beat beside its
 source section; wrong dominance, off colours, untasteful imagery all show here, mandatory) ->
-**`make ledger D=<file>`** (cross-video sameness vs every shipped design, SAME fails; fix by changing
+**`make dev-tool X=ledger D=<file>`** (cross-video sameness vs every shipped design, SAME fails; fix by changing
 >=2 of cut family / beat structure / layout archetype) -> eyeball hook / payoff / CTA frames. Fix
 data, re-render.
 
@@ -22,9 +22,9 @@ data, re-render.
 hierarchy · composition · brand + asset fidelity · produced-not-generated · value).
 
 A flaw your eye catches is a FIX, never a rationalization. This is the gate the static ladder above
-structurally can't be: `engine-doctrine/JUDGE.md`. Once a video ships: `make ledger-add D=<file>`
+structurally can't be: `engine-doctrine/JUDGE.md`. Once a video ships: `make dev-tool X=ledger-add D=<file>`
 logs it to the design memory (`quality/ledger/ledger.json`) so future videos are checked against it.
-<!-- doc-refs-allow: quality/ledger/ledger.json · gitignored, written on first `make ledger-add` -->
+<!-- doc-refs-allow: quality/ledger/ledger.json · gitignored, written on first `make dev-tool X=ledger-add` -->
 
 ## Differentiation rules (why outputs differ per user/brand)
 

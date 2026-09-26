@@ -35,7 +35,7 @@
 // no perception or craft literature answers "how long may an arbitrary visual state hold", because the
 // answer depends on what the beat is SHOWING. Rather than invent a source nobody could check, both
 // numbers stay worth PRINTING (the eps and hold figures, the "asleep" flag in the census), and stop
-// being numbers that fail a film. The craft judgement moved to `make plan-judge`'s `beat-pacing` code,
+// being numbers that fail a film. The craft judgement moved to `make dev-tool X=plan-judge`'s `beat-pacing` code,
 // an agent looking at the plan, same as genre-pacing.mjs's.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -127,7 +127,7 @@ if (held && !waived) {
   F.note('pace', `${m.hold.toFixed(1)}s from ${m.at.toFixed(1)}s with nothing arriving or leaving, past this `
     + `file's own ${HOLD.toFixed(1)}s line. Reported, not enforced: no perception or craft source answers how `
     + `long an arbitrary visual state may hold, the same defect and the same fix as harness/lib/genre-pacing.mjs's `
-    + `\`held-state-too-long\`. Judge it by eye, or with \`make plan-judge\`'s \`beat-pacing\` finding.`);
+    + `\`held-state-too-long\`. Judge it by eye, or with \`make dev-tool X=plan-judge\`'s \`beat-pacing\` finding.`);
 }
 F.emit();
 if (waived && (asleep || held)) {

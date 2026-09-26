@@ -19,7 +19,7 @@
 // A draft that just says "here" is not.
 //
 //   node quality/gates/draft-check.mjs <scene.json> --stage 85|95
-//   make draft D=<scene.json> STAGE=85
+//   make dev-tool X=draft D=<scene.json> STAGE=85
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -60,7 +60,7 @@ need('author-check', 85, { ok: ac.ok, codes: codes(ac.out), out: ac.out, cmd: ac
 
 const beats = readReceipt('beats', file);
 need('beats looked at', 85, { ok: beats.exists && !beats.stale, codes: beats.stale ? ['beats-stale'] : beats.exists ? [] : ['beats-unseen'] },
-  `no gate can score a contact sheet; \`make beats D=${file}\` and read it`);
+  `no gate can score a contact sheet; \`make dev-tool X=beats D=${file}\` and read it`);
 
 // ---- the 95% bar: what needs real pixels ----
 if (STAGE === '95') {

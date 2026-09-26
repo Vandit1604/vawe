@@ -53,7 +53,7 @@
 // WHY NOT PIXELS. The third option was to render frames and score them. It is the only way to see the
 // real thing, and it costs a render per scene, which puts it out of an authoring loop and out of a
 // 158-scene census. The JSON answer is available in 1.4s for the whole library and it is honest about
-// its blind spots. If this gate ever disagrees with your eyes, your eyes win: `make beats`.
+// its blind spots. If this gate ever disagrees with your eyes, your eyes win: `make dev-tool X=beats`.
 //
 // WEIGHTS. The ranking gives an ORDER, not weights. These are mine: 0.35 / 0.30 / 0.20 / 0.15, in the
 // source's order, applied to each term normalised against the largest value among the LIVE layers of

@@ -13,7 +13,7 @@
 // plus two WARNs:
 //   beats-wrapped-as-units . which layers does beat wrapping cut short of their authored duration?
 //   beats-held-open  . …and which does it hold on screen long past theirs?
-//   beats-unseen     . nobody has LOOKED at this version of the scene (`make beats` writes a receipt).
+//   beats-unseen     . nobody has LOOKED at this version of the scene (`make dev-tool X=beats` writes a receipt).
 //
 // A layer is visible over [start, start+duration), matching films/scene/scene.js (default duration 2,
 // default start 0). Exits run INSIDE that window, so the window is the whole truth. `track:0` layers are
@@ -307,7 +307,7 @@ if (heldOpen.length) {
 }
 
 // ---------- 6. beats-unseen: the receipt ----------
-// `make beats` and `make reveal` render a contact sheet a human or agent has to LOOK at. No gate can score
+// `make dev-tool X=beats` and `make dev-tool X=reveal` render a contact sheet a human or agent has to LOOK at. No gate can score
 // that image, so the only checkable fact is whether anyone looked at THIS version. Both tools write a
 // receipt carrying the scene's content hash; a hash that no longer matches means the scene moved on.
 // The hashing and the path live in harness/lib/receipt.mjs now, so every stage can be signed off the
@@ -324,10 +324,10 @@ const seen = readReceipt('beats', file);
 const auto = seen.exists && !seen.stale && !!seen.receipt.auto;
 if (!seen.exists || seen.stale || auto) {
   warn('beats-unseen', auto
-    ? `the contact sheet(s) for this scene are ALREADY ON DISK and current: ${[seen.receipt.sheet, seen.receipt.reveal].filter(Boolean).join(' · ')}. \`make dev\`/\`make ship\` made them; producing an image is not looking at one, and static gates read structure and cannot see murk, overlap or a beat that lands wrong. Open them and read them, then \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) to sign the look off.`
+    ? `the contact sheet(s) for this scene are ALREADY ON DISK and current: ${[seen.receipt.sheet, seen.receipt.reveal].filter(Boolean).join(' · ')}. \`make dev\`/\`make ship\` made them; producing an image is not looking at one, and static gates read structure and cannot see murk, overlap or a beat that lands wrong. Open them and read them, then \`make dev-tool X=beats D=${file}\` (or \`make dev-tool X=reveal D=${file}\` for the entrances) to sign the look off.`
     : seen.exists
-    ? `the scene has CHANGED since its beats were last looked at (receipt ${seen.rel} holds an older hash, sheet ${seen.receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make beats D=${file}\` and read the sheet it prints.`
-    : `nobody has looked at this scene's beats: no receipt at ${seen.rel}. Static gates read structure and cannot see murk, overlap or a beat that lands wrong. Run \`make beats D=${file}\` (or \`make reveal D=${file}\` for the entrances) and read the sheet.`);
+    ? `the scene has CHANGED since its beats were last looked at (receipt ${seen.rel} holds an older hash, sheet ${seen.receipt.sheet}). Static gates read structure and cannot see murk, overlap or a beat that lands wrong, so an unread edit ships unverified. Run \`make dev-tool X=beats D=${file}\` and read the sheet it prints.`
+    : `nobody has looked at this scene's beats: no receipt at ${seen.rel}. Static gates read structure and cannot see murk, overlap or a beat that lands wrong. Run \`make dev-tool X=beats D=${file}\` (or \`make dev-tool X=reveal D=${file}\` for the entrances) and read the sheet.`);
 }
 
 // ---------- report ----------

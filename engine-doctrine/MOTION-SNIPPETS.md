@@ -127,7 +127,7 @@ See [`MOTION-CRAFT.md`](MOTION-CRAFT.md) "Cut, or transition?". Default to the h
 must state a relationship (time/place/this-becomes-that).
 
 - **`hard-cut`**: no transition; fast pace, on the beat, raw impact. Just place adjacent beats; run
-  `make beatsync` to land it on the beat. · _transition, default, sound_
+  `make media X=beatsync` to land it on the beat. · _transition, default, sound_
 - **`punch-cut`**. A scene-level punch-in on a product focus. `{ "transitions": [{ "at": 6.0, "fx": "punch", "dur": 0.28 }] }` · _transition_
 - **`layer-cut`**: a per-layer cut presentation with snappy timing.
   `{ "cut": "whip", "cutTiming": "snappy", "dir": "left" }` · _transition, momentum_
@@ -148,7 +148,7 @@ must state a relationship (time/place/this-becomes-that).
   (Interior camera keyframes use `ease:"linear"`. The default ease-in-out zeroes velocity and pulses.)
 - **`dolly-hero`**: a headline enters oversized, SNAP-settles, drifts, exits bigger with motion-blur.
   `{ "motion": [{ "t": 0, "scale": 1.5, "opacity": 0, "ease": "easeOutCubic" }, { "t": 0.34, "scale": 1, "opacity": 1, "ease": "spring" }, { "t": 2.4, "scale": 1.04, "ease": "linear" }, { "t": 2.8, "scale": 1.8, "opacity": 0, "ease": "easeInCubic" }], "motionBlur": true }` · _camera, overshoot, hero_
-  (Or let the director write it: `make cinematic D=<file> WRITE=1`.)
+  (Or let the director write it: `make dev-tool X=cinematic D=<file> WRITE=1`.)
 - **`impact-shake`**. A decaying shake on an impact frame; a hit, a slam. `{ "cut": "jitter" }` (declared, purity-exempt) · _camera, impact_
 
 ## Animated values: drive what a block DOES (`vars`, count, ken, cursor)
@@ -172,7 +172,7 @@ must state a relationship (time/place/this-becomes-that).
 - **`auto-sfx`**, derive a crisp cue per cut/seam/sting (whoosh/press). `{ "audio": { "auto": true } }` · _sound_
 - **`real-beat`**: opt a real royalty-free loop in (run `make gen X=music-pack` first).
   `{ "audio": { "music": "assets/music/lofi.wav", "musicGain": 0.42, "musicFade": { "in": 0.9, "out": 1.8 } } }` · _sound_
-- **`cut-to-beat`**: snap every cut/seam onto the loop's grid. `make beatsync D=<file> MUSIC=assets/music/lofi.wav WRITE=1` · _sound, transition_
+- **`cut-to-beat`**: snap every cut/seam onto the loop's grid. `make media X=beatsync D=<file> MUSIC=assets/music/lofi.wav WRITE=1` · _sound, transition_
 - **`silence`**: the premium default; no bed, SFX carry it. Omit `audio.music` (or `{ "audio": { "auto": true } }`). · _sound, calm_
 
 ## Brand personality: one theme block tunes every default

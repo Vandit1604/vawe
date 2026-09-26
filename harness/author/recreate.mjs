@@ -65,4 +65,4 @@ console.log(`    across the cuts, which beat is the loud one, and the sound.`);
 const unread = shots.filter((s) => !s.moves).length;
 if (unread) console.log(`\n  ${unread} of ${shots.length} beats have no written reading in grammar/${NAME}.json, so their`);
 if (unread) console.log(`  \`_beat\` notes carry a target and no direction. Fill \`moves\` there and re-run.`);
-console.log(`\n  Then: make preflight D=<file>  ·  make dev D=<file>  ·  ./bin/vawe prints the motion to compare.\n`);
+console.log(`\n  Then: make dev-tool X=preflight D=<file>  ·  make dev D=<file>  ·  ./bin/vawe prints the motion to compare.\n`);

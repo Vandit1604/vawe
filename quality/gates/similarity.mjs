@@ -20,7 +20,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../.
 
 // ---------- fingerprint ----------
 export function fingerprint(input) {
-  // Lowered HERE rather than at each caller, so `make ledger` (quality/gates/ledger.mjs imports this)
+  // Lowered HERE rather than at each caller, so `make dev-tool X=ledger` (quality/gates/ledger.mjs imports this)
   // inherits it. A film that declares its boundaries as `transitions` fingerprinted with no stings at
   // all, so two films could share a sting vocabulary and the ledger would score them as further apart
   // than they are (engine-doctrine/MISTAKES.md #408). Cloned: loadScene mutates and deletes what it is handed,

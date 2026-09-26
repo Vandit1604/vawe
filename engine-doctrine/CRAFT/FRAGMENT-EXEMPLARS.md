@@ -11,7 +11,7 @@ confirm: "does the new fragment name what it refuses, the way each exemplar belo
 [`HTML-FRAGMENTS.md`](HTML-FRAGMENTS.md) describes the stage kit the fragments below are built from.
 These four exist to be looked at, not just read: an author copies what they can SEE, and a bare
 description of "asymmetry" or "scale contrast" does not fix a habit a picture will. Each one is built
-from `make stagekit`'s real output for its own theme (nothing hand-tuned past the kit), passes `make
+from `make dev-tool X=stagekit`'s real output for its own theme (nothing hand-tuned past the kit), passes `make
 preview HTML=<file> THEME=<theme>` clean, and states what it refuses in its own header comment as well
 as here.
 

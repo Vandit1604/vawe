@@ -1,5 +1,5 @@
 // generators/media/watermark.mjs: bake the DRAFT watermark to a transparent PNG.
-//   make watermark  [TEXT="VAWE DRAFT"] [OPACITY=0.1]
+//   make media X=watermark  [TEXT="VAWE DRAFT"] [OPACITY=0.1]
 //
 // WHY A BAKED PNG AND NOT ffmpeg drawtext: drawtext needs a TTF/OTF on disk and every font this repo
 // ships is .woff2, which FreeType will not load. Rasterising it here instead costs nothing at render

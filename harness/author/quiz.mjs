@@ -134,7 +134,7 @@ export function round2({ placement, job } = {}) {
   return { questions: out, note: out.length ? null : 'nothing left to ask. Round 1 and the study decided it all' };
 }
 
-// frontmatter() does not write the .intent.json sidecar; that comes from `make intent` via storyboard-parse.mjs, the shared parser, to avoid drift.
+// frontmatter() does not write the .intent.json sidecar; that comes from `make dev-tool X=intent` via storyboard-parse.mjs, the shared parser, to avoid drift.
 export function frontmatter(a) {
   const pl = PLACEMENT.find((p) => p.key === a.placement) || PLACEMENT[0];
   const job = JOBS.find((j) => j.key === a.job) || JOBS[0];
@@ -291,7 +291,7 @@ if (isMain) {
     for (const s of res.sheets) console.log(`  ${s.thread.padEnd(24)} ${s.sheet}\n      ${s.why}\n`);
     console.log(JSON.stringify({ questions: [{ header: 'Direction', question: 'Which of these is the film?',
       options: res.sheets.map((s) => ({ label: s.thread, description: `${s.why} Drawn at ${s.pace}s a beat. See ${s.sheet}.` })) }] }, null, 2));
-    console.log(`\n  then: make concept-pick SB=<storyboard> OPTION=<direction>`);
+    console.log(`\n  then: make dev-tool X=concept-pick SB=<storyboard> OPTION=<direction>`);
   } else if (argv.includes('--apply')) {
     const res = apply({ answersPath: flag('--answers'), name: flag('--name'), slug: flag('--slug'), out: flag('--out') });
     if (res.error) { console.error(`✗ ${res.message}`); process.exit(2); }
@@ -303,8 +303,8 @@ if (isMain) {
     if (res.fm.beats) console.log(`  the chosen thread paces this at ~${res.fm.beats} beats (${res.fm.pace}s each)`);
     console.log(`\n${res.gate}`);
     console.log(res.gateOk ? '' : `  ↑ the gate's blockers are yours to fill; the brief locked the frontmatter, not the copy.`);
-    console.log(`\n  next: make intent SB=${shown(res.dest)} D=<scene.json>   → then make check GATE=plan-check`);
-    console.log(`        then make concept SB=${shown(res.dest)} N=3. Three directions, rendered, so the LOOK is picked from pictures`);
+    console.log(`\n  next: make dev-tool X=intent SB=${shown(res.dest)} D=<scene.json>   → then make check GATE=plan-check`);
+    console.log(`        then make dev-tool X=concept SB=${shown(res.dest)} N=3. Three directions, rendered, so the LOOK is picked from pictures`);
   } else if (argv.includes('--ask')) {
     const payload = ask({ name: flag('--name'), url: flag('--url'), slug: flag('--slug') });
     if (payload.error) { console.error(`✗ ${payload.message}`); process.exit(2); }

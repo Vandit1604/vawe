@@ -12,8 +12,8 @@ group: crosscutting
   render wait. The flaw: three agents each writing a perfect fragment produce three unrelated
   pictures, the slideshow failure reached faster and at triple the cost. A shared contract has to
   exist BEFORE the fan-out, not be discovered after it.
-- Four commands, in order: `make stagekit D=<film>` (the shared CSS every fragment carries verbatim),
-  `make contract D=<film>` (validate the storyboard's continuous-object handoff), `make scenes
+- Four commands, in order: `make dev-tool X=stagekit D=<film>` (the shared CSS every fragment carries verbatim),
+  `make dev-tool X=contract D=<film>` (validate the storyboard's continuous-object handoff), `make dev-tool X=scenes
   D=<film>` (PRINT one agent brief per scene, launches nothing), `make assemble D=<film>` (write the
   scene JSON once the fragments exist).
 - Overkill for a one-scene film, a film with no continuous object, or anything you would author faster
@@ -26,14 +26,14 @@ Each `html` layer's `<style>` block is wrapped in a prelude-less `@scope { … }
 (`core/type/sanitize-html.js` `scopeStyles`), scoped to that fragment's own subtree. A `<link>` or a
 second `<style>` elsewhere in the document cannot reach across fragments. So the only way three scene
 agents draw the same card, the same radius, the same type scale is to give each of them the identical
-CSS bytes and have each paste them in. `make stagekit D=<film>` generates that block from the film's
+CSS bytes and have each paste them in. `make dev-tool X=stagekit D=<film>` generates that block from the film's
 own theme (`resolveLook`, `core/registry/theme-contract.js`): one card style, a three-step radius
 scale, the theme's own type scale (hook/headline/body/caption), a shadow, and the token names (already
 global, set by `applyTheme`) a fragment may reference without redeclaring.
 
-Because the block is pasted verbatim, it is CHECKABLE: `make stagekit D=<film> --check` (or
+Because the block is pasted verbatim, it is CHECKABLE: `make dev-tool X=stagekit D=<film> --check` (or
 `node harness/author/stagekit.mjs <film> --check`) reads every `<film>.sceneN.html` fragment and
-asserts its kit block is byte-identical to the one `make stagekit` generated. Drift between three
+asserts its kit block is byte-identical to the one `make dev-tool X=stagekit` generated. Drift between three
 agents' fragments becomes impossible to ship silently rather than merely discouraged.
 
 ## The per-scene contract
@@ -42,7 +42,7 @@ The contract is not a second planning artefact. It is two fields the storyboard 
 (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md) asks for on every beat: `object_in` and `object_out`, each
 `"<placement>@<w>x<h>"`, a name from the safe-area placement registry (`core/layout/safe.js`
 `PLACEMENT`) plus a size in px. `object_in` is the continuous object's state at the start of the
-beat; `object_out` is its state at the end. `make contract D=<film>` (`harness/lib/contract.mjs`)
+beat; `object_out` is its state at the end. `make dev-tool X=contract D=<film>` (`harness/lib/contract.mjs`)
 reads the storyboard and refuses to proceed if beat *i*'s `object_out` does not equal beat *i+1*'s
 `object_in`, naming both values:
 
@@ -53,7 +53,7 @@ reads the storyboard and refuses to proceed if beat *i*'s `object_out` does not 
 
 A placement NAME, not a pixel pair, because the contract has to be something a person reviewing the
 storyboard can actually check ("bottom-left, that's the same corner"), and because it stays correct at
-whichever aspect the film ends up at. `make scenes D=<film>` refuses to print a single brief until the
+whichever aspect the film ends up at. `make dev-tool X=scenes D=<film>` refuses to print a single brief until the
 chain is clean: handing three agents a contract that does not chain is handing them three disagreeing
 instructions, not three that will assemble into one film.
 
@@ -83,7 +83,7 @@ markup, the same selector a hand-authored `parts[].select` already takes (`core/
 are the four this repo already names for a duration decision (`engine-doctrine/RULES/speed-bands.md`: energy,
 professional, gravity, cinematic), reused here as the boundary velocity, because a fast (short) exit
 lands the next cut on a picture already moving, exactly what the content-aware cut
-(`core/timeline/velocity-cut.js`) reads for. `make scenes D=<film>` prints each entry's selector under
+(`core/timeline/velocity-cut.js`) reads for. `make dev-tool X=scenes D=<film>` prints each entry's selector under
 "MUST BE ADDRESSABLE": the fragment author is told what has to carry that selector (a `data-part`
 attribute, a class) BEFORE writing the markup, not after. `make assemble D=<film>` builds every entry
 into `parts[]` on that beat's own scene layer, the same vocabulary a hand-authored parts block already
@@ -91,7 +91,7 @@ takes, so nothing here is a second motion mechanism.
 
 ## The fan-out: print, never launch
 
-`make scenes D=<film>` prints one brief per scene: which fragment file to write, the kit block to
+`make dev-tool X=scenes D=<film>` prints one brief per scene: which fragment file to write, the kit block to
 paste, that scene's exact on-screen copy (do not paraphrase), the continuous object's arrival and
 departure state for this scene (the object itself is drawn later by `make assemble`, not by the
 fragment), the motion plan's elements the fragment MUST make addressable (see above), the anti-slop

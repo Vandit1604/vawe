@@ -254,7 +254,7 @@ export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '
 // the checker; the doctrine is core/lightfield/options.js, which this mirrors key for key.
 //
 // x · y · start · dur are absent from every table on purpose. They are placement and timing the SCENE
-// supplies (a container injects them, `make expand` writes them), never content an author dials.
+// supplies (a container injects them, `make dev-tool X=expand` writes them), never content an author dials.
 //
 // A `w` floor is the block's own furniture: `htmlCard` pads CHART_PAD on both sides, so below
 // 2 * CHART_PAD plus one minimum bar there is no plot left to draw into. A `w` ceiling is the stage.

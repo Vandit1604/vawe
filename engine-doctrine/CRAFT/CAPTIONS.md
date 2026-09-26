@@ -10,7 +10,7 @@ confirm: "are captions timed to the words, and do they sit in the safe strip for
 
 ## AGENT SUMMARY
 
-- Time captions to real words (`words:[{t0,t1}]`, via `make vo-captions` or `make captions`), and
+- Time captions to real words (`words:[{t0,t1}]`, via `make media X=vo-captions` or `make media X=captions`), and
   set `"destination"` (`tiktok`/`reels`/`shorts`) so the caption band sits in that platform's safe
   strip, not the default web margin.
 - Enforced by `make check GATE=audit M=<file> ASPECT=all` (overlap / clipped text / safe-zone / WCAG contrast).
@@ -29,8 +29,8 @@ For real word-by-word timing (karaoke, `captionStyle`), add `words: [{ t0, t1 }]
 the markup-stripped word list. Two ways to get it without hand-timing:
 
 ```bash
-make vo-captions D=<file> [STYLE=weightShift] WRITE=1   # from a VO word-timing sidecar (audio.voWords)
-make captions D=<file> TEXT="the line to time"           # times one plain SCRIPT string
+make media X=vo-captions D=<file> [STYLE=weightShift] WRITE=1   # from a VO word-timing sidecar (audio.voWords)
+make media X=captions D=<file> TEXT="the line to time"           # times one plain SCRIPT string
 make check GATE=pace-from-vo VO=<file>.words.json                    # paces the whole film's beats to a voice track
 ```
 

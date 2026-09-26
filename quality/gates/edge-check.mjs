@@ -8,7 +8,7 @@
 // that instant (a floating panel over a full ground): see quality/gates/edge-reveal.mjs's header for
 // why the check is a DOM hit-test, not a size rule.
 //
-//   node quality/gates/edge-check.mjs films/scene/<film>.json   ·   part of `make author-check`
+//   node quality/gates/edge-check.mjs films/scene/<film>.json   ·   part of `make dev-tool X=author-check`
 //
 // Waive a deliberate reveal with {"authoring":{"allow":["edge-reveal"]}} (or scoped to one instance,
 // "edge-reveal@<t0>s-<t1>s"), the same one excuse mechanism every other gate here uses. No new field.

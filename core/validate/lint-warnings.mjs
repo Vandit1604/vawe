@@ -355,7 +355,7 @@ export function lintData(data) {
     //     went on telling authors to strip markup the engine handles correctly, a gate that manufactures
     //     a defect, which is worse than one that misses it, because the author pays by making the film
     //     plainer. engine-doctrine/MISTAKES.md #85.
-    //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make lib-test`, and lint-test
+    //     Nothing replaces it: `stripLen`/`revealHtml` are exercised by `make test`, and lint-test
     //     now pins that typed markup is SILENT so this cannot be reintroduced by reflex.
     ...countWindowWarns(data),
     ...sceneCollisionWarns(data),

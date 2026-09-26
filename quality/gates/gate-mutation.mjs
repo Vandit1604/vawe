@@ -1,7 +1,7 @@
 // gate-mutation.mjs, who checks the checkers?
 //
 //   node quality/gates/gate-mutation.mjs        run every case
-//   make gate-test
+//   make dev-tool X=gate-test
 //
 // A gate that cannot fail is worse than no gate: it reports green forever and everyone believes it.
 // That is not hypothetical here: the image legibility floor guarded on `b.height > 1`, so the ONE
@@ -80,7 +80,7 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
   '',
 ].join('\n');
 
-/** A `.intent.json` sidecar, the shape `make intent` writes. plan-vs-render reads exactly two fields off
+/** A `.intent.json` sidecar, the shape `make dev-tool X=intent` writes. plan-vs-render reads exactly two fields off
  *  each beat (the `span` and the `becomes:`) so those are what the cases vary; the rest is carried so a
  *  fixture stays a plausible sidecar rather than a stub shaped to one gate. */
 const B = (name, span, becomes) => ({

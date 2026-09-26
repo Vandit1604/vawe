@@ -10,7 +10,7 @@ group: skill
 |---|---|
 | `make check GATE=probe M=<fmt>` | render-order **purity** (must pass, protects sharded rendering) |
 | `make check GATE=audit [M=<fmt>]` | **overlap / overflow / safe-zone / tight-spacing** on `[data-layer=critical]`; overlays → `/tmp/audit/<fmt>.png` |
-| `make look D=<file>` / `make frame D=<file> N=<n>` | storyboard / one frame to eyeball |
+| `make look D=<file>` / `make dev-tool X=frame D=<file> N=<n>` | storyboard / one frame to eyeball |
 | `make check GATE=render-verify` | render integrity (dims/fps/codec/audio) + safe-zone + contact sheets |
 | `make gen X=review` | fast snapshot: lib-test + audit + a master overlay sheet (`/tmp/review.png`) |
 

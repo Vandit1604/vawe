@@ -1,6 +1,6 @@
 ---
 when: "writing the storyboard file for a continuous-action film"
-answers: "the exact frontmatter and per-beat fields storyboard-check and make intent parse"
+answers: "the exact frontmatter and per-beat fields storyboard-check and make dev-tool X=intent parse"
 group: skill
 ---
 
@@ -11,14 +11,14 @@ plan format.
 
 ```bash
 make storyboard-check SB=<storyboard.md>          # blocks unless every beat has type + onscreen + why
-make intent SB=<storyboard.md> D=films/scene/<topic>.json   # writes <topic>.intent.json
-make author-check D=films/scene/<topic>.json    # inspect verifies the render against that contract
+make dev-tool X=intent SB=<storyboard.md> D=films/scene/<topic>.json   # writes <topic>.intent.json
+make dev-tool X=author-check D=films/scene/<topic>.json    # inspect verifies the render against that contract
 ```
 
 The shape below is verified against both tools. Four things matter:
 `message`/`audience`/`arc`/`format`/`duration` in the frontmatter, a `type` + quoted `onscreen` +
 `why` on every beat, a `becomes:` on every beat, and a `(0s-1.53s)` range in each heading, which is
-what `make intent` reads to place its check. **The object spine goes in the frontmatter**, because
+what `make dev-tool X=intent` reads to place its check. **The object spine goes in the frontmatter**, because
 anything under a `##` heading is parsed as a beat and will fail the gate.
 
 Under 15s the gate requires the frontmatter to name what holds the film, and takes `threads:` or

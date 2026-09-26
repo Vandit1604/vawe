@@ -14,7 +14,7 @@ Read by: an authoring script that spreads factory output into `scene.layers`, an
 `expand` step, which inlines a block before a caller ever sees it.
 
 The one doc: the CONTRACT comment at the top of `blocks/index.mjs` (pure function, absolute
-coordinates, deterministic timing). Checked by: `make arsenal Q="…"` to search it, `make expand` to
+coordinates, deterministic timing). Checked by: `make arsenal Q="…"` to search it, `make dev-tool X=expand` to
 verify a block's declared props are actually read.
 
 Look first: `blocks/index.mjs` for the contract, then `blocks/catalog/` for what already exists.

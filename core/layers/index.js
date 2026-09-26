@@ -204,7 +204,7 @@ export const LAYER_PROPS = Object.freeze(Object.fromEntries(
 // was the wrong one. An author reading that mp4 concludes the gate is pedantic; the frame is empty.
 //
 // A missing `type` still means text (documented default). A type that is present and unknown is a bug.
-// `block`, `comp` and `beat` USED to be build-time sugar a separate `make expand` step had to resolve
+// `block`, `comp` and `beat` USED to be build-time sugar a separate `make dev-tool X=expand` step had to resolve
 // first; core/engine/expand.js `expandScene` now runs at LOAD (core/transitions/lower.js `loadScene`, called
 // by films/scene/scene.js before any layer is built), so none of the three ever reach this dispatch
 // any more. A scene that somehow still carries one is an unknown type, same as any other typo.

@@ -13,7 +13,7 @@
 // looks total:
 //   · this runs BEFORE a render, on the shell, in milliseconds. The boot throw costs a browser launch
 //     and arrives from inside one of eight workers.
-//   · it names the FIX per asset: the `curl` / `make capture` / `make photos` line that fetches the
+//   · it names the FIX per asset: the `curl` / `make media X=capture` / `make media X=photos` line that fetches the
 //     thing, where the engine can only say the file is not there.
 //   · it covers what no image preloader ever sees: VO and music (`audio.vo`, `audio.music`), lottie,
 //     captured `component` JSON, spectrum sidecars, and `.html` fragment files.
@@ -86,11 +86,11 @@ for (const [where, v] of refs) {
 
 // a targeted "how to get it" per missing kind.
 const howto = (v) => {
-  if (/\.(wav|mp3|m4a)$/i.test(v)) return `narration/music: make tts SCRIPT=… OUT=${v.replace(/\.(wav|mp3|m4a)$/i, '')}, or drop the file in place`;
-  if (/assets\/icons\//.test(v)) return `icon/logo: make assets D=${file} WRITE=1 (fills brand logos + UI icons)`;
+  if (/\.(wav|mp3|m4a)$/i.test(v)) return `narration/music: make media X=tts SCRIPT=… OUT=${v.replace(/\.(wav|mp3|m4a)$/i, '')}, or drop the file in place`;
+  if (/assets\/icons\//.test(v)) return `icon/logo: make media X=assets D=${file} WRITE=1 (fills brand logos + UI icons)`;
   if (/\.html$/i.test(v)) return `hand-authored fragment, write the HTML at this path, then preview it: make preview HTML=${v}`;
-  if (/\.json$/i.test(v)) return `captured component: make capture URL=… SEL=… OUT=${v}`;
-  if (ASSET_EXT.test(v)) return `image: make assets D=${file} WRITE=1, or make capture / make photos`;
+  if (/\.json$/i.test(v)) return `captured component: make media X=capture URL=… SEL=… OUT=${v}`;
+  if (ASSET_EXT.test(v)) return `image: make media X=assets D=${file} WRITE=1, or make media X=capture / make media X=photos`;
   return `add the file at this path`;
 };
 
@@ -177,7 +177,7 @@ for (const [w, v] of missing) f.finding({ severity: sev(), code: 'missing-asset'
 
 if (!missing.length && !missingFonts.length) console.log(`  ✓ every local asset reference and every declared typeface resolves to a file on disk.\n`);
 else if (!missing.length) console.log(`  ✓ every local asset reference resolves to a file on disk.\n`);
-else console.log(strict ? `\n  ✗ asset preflight (strict): fetch these before rendering.\n` : `\n  fetch these before you author around them (make assets D=${file} fills most). Block with --strict.\n`);
+else console.log(strict ? `\n  ✗ asset preflight (strict): fetch these before rendering.\n` : `\n  fetch these before you author around them (make media X=assets D=${file} fills most). Block with --strict.\n`);
 
 f.emit();
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

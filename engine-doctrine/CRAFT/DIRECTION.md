@@ -22,7 +22,7 @@ literature, each with a checkable translation into a scene JSON. It is the answe
 read as amateur when every layer renders fine?"*
 
 Every rule is tagged:
-- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make author-check D=<file>`.
+- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make dev-tool X=author-check D=<file>`.
 - **`[eye]`**: no static gate can see it; only `make judge` + your own eye. If your eye catches it,
   it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md)).
 
@@ -36,9 +36,9 @@ Every rule is tagged:
 
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
-> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
+> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make dev-tool X=direct`) is the ceiling, too much,
 > undirected; the **ambition floor** (`make check GATE=direction-floor`) is the floor, too plain, a slideshow, and
-> its hardest checks (`no-continuous-object` among them) block on every `make author-check` run, not only
+> its hardest checks (`no-continuous-object` among them) block on every `make dev-tool X=author-check` run, not only
 > under `TASTE=1`. A directed video sits between them.
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
@@ -220,7 +220,7 @@ The applied spine lives in [`STORY.md`](STORY.md); §"Provenance" below carries 
 
 ## 5. The pro-vs-amateur checklist (run this before shipping)
 
-Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yours + `make judge`.
+Each is concrete. `[gated]` ones are in `make dev-tool X=author-check`; `[eye]` ones are yours + `make judge`.
 
 1. **A move that starts and stops eases at both ends.** A move with no rest to ease (a pan, a scroll, a spinner, a drift) runs at a constant rate on purpose, and curving it is the defect. The gate reads the whole RUN, not the key: entered or left in motion, or spaced so the keys already decelerate, and it stays quiet. `[gated]` `linear-motion`
 2. **No uniform tempo.** Durations and stagger vary with intent. `[gated]` `monotone-timing`, `pacing`
@@ -236,7 +236,7 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ---
 
-## Reading `make direct`: every finding carries a census
+## Reading `make dev-tool X=direct`: every finding carries a census
 
 Sixteen checks run in `harness/author/motion-director.mjs`; only two of them (`profile`, `cut-families`)
 can fail, the rest warn. Re-run the census before quoting a trip rate here, the library's scene count
@@ -287,7 +287,7 @@ verdict and exits 0.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
 about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It **blocks on every `make author-check` run**,
+the 4% item, the one he says to sacrifice first. It **blocks on every `make dev-tool X=author-check` run**,
 `TASTE=1` or not; a film exempt from it needs a waiver with a `_why`, never a flag. Run it when the
 film's CONTENT is continuous, which is a single-subject
 product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette

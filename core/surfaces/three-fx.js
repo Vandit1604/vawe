@@ -7,7 +7,7 @@
 // pure function of n, and every frame renders on one of 8 workers in arbitrary order. So:
 //   · NO THREE.Clock, no performance.now, no Date, no requestAnimationFrame driving anything.
 //   · NO AnimationMixer stepping by delta. Every object is POSED ABSOLUTELY from local time:
-//     obj.position/rotation/scale = f(t). Never "+= velocity", which would make frame 412 depend on
+//     obj.position/rotation/scale = f(t). Never "+= velocity", which would make dev-tool X=frame 412 depend on
 //     411 frames having run first.
 //   · NO Math.random. A seeded PRNG only, so the same seed rebuilds the identical scene.
 // This mirrors exactly how core/layers/lottie.js tamed lottie-web: autoplay off, absolute seek per

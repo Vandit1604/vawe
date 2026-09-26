@@ -143,7 +143,7 @@ video starts ahead.
    (`fps=12`, first ~0.5s): is the word oversized/blurred and settling (a dolly-in)?; (b) the **exit**
    (`fps=12`, last ~0.5s): does it scale UP + blur to leave (a dolly-out)?; (c) a **hard-zoomed crop of
    the text** (`crop=…,scale=up`): is the fill a flat colour or a GRADIENT / colour-wave?
-   **For OUR renders, `make reveal D=<scene.json>` does this automatically**, it renders each beat's
+   **For OUR renders, `make dev-tool X=reveal D=<scene.json>` does this automatically**, it renders each beat's
    ENTER arc + settled + EXIT arc from the exact layer start-times, so the reveal is never hidden. It is
    the standing fix for the "judged the hold, missed the reveal" trap; run it every render.
 2. **Measure the motion.** For each signature transition, `make study-tool X=measure VIDEO=ref.mp4 FROM=… TO=…` →
@@ -153,7 +153,7 @@ video starts ahead.
 4. **Map to our primitives** (table at the bottom). If a motif has no primitive, that is a framework
    finding, log it (engine-doctrine/MISTAKES.md), don't fake it.
 5. **Author → verify → write it down.** Build it, then `make study-tool X=measure VIDEO=out/ours.mp4 EXPECT=<preset>`
-   to confirm the render matches the reference's motion. `make beats`/`make check GATE=audit`/`make judge` for the
+   to confirm the render matches the reference's motion. `make dev-tool X=beats`/`make check GATE=audit`/`make judge` for the
    rest. Then write what you measured as a recipe candidate in `grammar/_<name>.recipes.json`
    ([`recipes/README.md`](../../recipes/README.md)), so the next film reuses the measurement instead of
    re-eyeballing the reference.

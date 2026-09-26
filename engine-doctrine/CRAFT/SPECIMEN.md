@@ -8,7 +8,7 @@ group: look
 
 ## AGENT SUMMARY
 
-- A demo proves ONE mechanism: `make demo Q="…" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes the
+- A demo proves ONE mechanism: `make dev-tool X=demo Q="…" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes the
   fixed archetype (`films/scene/_demo-<slug>.json`) and runs the dev loop. Never hand-author a demo
   from a blank file, a blank file plus "prove it works" produces a debug-harness grid every time.
 - The subject MUST be a real picture (full-bleed, bled off three edges with the fourth feathered),
@@ -16,7 +16,7 @@ group: look
 - The archetype's constants (one ground: aurora then mesh, no ruled grid, one label treatment, one
   type scale, one motion personality read off the theme, one 9s runtime with one cut at 4.4s) are
   fixed in `harness/dev/demo.mjs` and never overridden per-demo, so a row of demos reads as a series.
-- Enforced by `[ref: make demo]`; no gate. Every scaffolded demo carries four waivers as properties
+- Enforced by `[ref: make dev-tool X=demo]`; no gate. Every scaffolded demo carries four waivers as properties
   of the archetype: `no-storyboard`, `no-preflight`, `slow-pace`, `text-overstays`.
 - Confirm: is the subject a real picture, not a line of type, and did you change the CONSTANT, not
   the demo, if something needs to differ?
@@ -43,7 +43,7 @@ harness. Tokens decide what a frame is made of. They do not decide that it is a 
 
 ## The archetype
 
-`make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes
+`make dev-tool X=demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]` writes
 `films/scene/_demo-<slug>.json` and runs the dev loop on it. A blank file plus "prove it works"
 produces a grid every time, so the archetype arrives with the file:
 
@@ -94,7 +94,7 @@ Change the constant, not the demo. One fact, one owner.
 
 **Nine variants of one effect is a contact sheet, and `make site X=catalog` is honestly a contact sheet.** It
 renders the block registry to paged sheets and it is the right tool for comparing specimens against
-each other. `make demo` is the other question: what does this ONE thing look like when somebody has
+each other. `make dev-tool X=demo` is the other question: what does this ONE thing look like when somebody has
 composed a frame around it.
 
 If you find yourself adding a fourth sibling layer to a demo, you wanted the catalogue.

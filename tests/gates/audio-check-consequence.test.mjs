@@ -47,7 +47,7 @@ test('bed-unresolved (music:"auto"): summary states the consequence, fix names t
   const r = records.find((x) => x.code === 'bed-unresolved');
   assert.ok(r, `expected bed-unresolved, got ${JSON.stringify(records)}`);
   assert.match(r.summary, /plays SILENCE/);
-  assert.match(r.fix, /^Bake it in: {2}make audio-bed/);
+  assert.match(r.fix, /^Bake it in: {2}make media X=audio-bed/);
 });
 
 test('bed-unresolved (implied by profile with no music): fires with the same shape', () => {

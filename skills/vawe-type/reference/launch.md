@@ -30,7 +30,7 @@ the brand beat, never after it: a stat after the logo reads as an afterthought.
   field: `engine-doctrine/CRAFT/MOTION-REGISTERS.md` §1 and `type-spines.mjs`'s `register: 'kinetic'`. A beat that
   moves differently from its neighbours is directed; a beat that copies the last beat's timing is the
   real failure, not the fact that most beats move.
-- **Captured UI, not invented UI.** `make sections` / `make capture` before writing a single layer.
+- **Captured UI, not invented UI.** `make sections` / `make media X=capture` before writing a single layer.
   A hand-drawn dashboard is the fastest way into generic-AI-slop territory.
 - **A continuous object.** One element (the wordmark, a UI element, an accent rule) that survives
   every cut and changes across it. `engine-doctrine/RULES/continuous-object.md`.
@@ -61,8 +61,8 @@ rules, checked by the `craft-live.mjs` hook on every save).
 
 ## Assets and how to get them
 
-`make sections URL=<site> NAME=<name>` inventories every real section; `make capture` grabs one UI
-cluster as an image; `make study-tool X=palette` eyedrops the real colours; `make assets` pulls the real logo (never
+`make sections URL=<site> NAME=<name>` inventories every real section; `make media X=capture` grabs one UI
+cluster as an image; `make study-tool X=palette` eyedrops the real colours; `make media X=assets` pulls the real logo (never
 a bare `curl`, which writes a zero-byte file on a 404). Crawl every page and view mode, not just the
 homepage: the real product often lives one click deeper than the hero.
 

@@ -57,7 +57,7 @@ against the ground is the question that transfers.
 **What the gate cannot see, stated plainly.** It scores JSON, not pixels. It does not know a captured
 component's internal composition, what an `html` fragment paints, or where a face is. About 40% of the
 layers it scores carry a colour it cannot resolve, and it says so on every verdict. If it disagrees
-with your eyes, your eyes win: `make beats`.
+with your eyes, your eyes win: `make dev-tool X=beats`.
 
 ## The eye is STEERED, not only ranked
 

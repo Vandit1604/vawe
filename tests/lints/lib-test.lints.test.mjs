@@ -253,13 +253,15 @@ test('lib-test: lints', async () => {
 // exactly like a passing check. registry/ and blocks.json were both stale for a week underneath it.
 // These asserts hold the wiring, not the freshness: site-check runs the real comparison, and this
 // fails the moment somebody drops the flag again, which is the bug that actually happened.
+// (registry/blocks-docs/blocks-json moved from their own Makefile targets into site-tool.mjs's TOOLS
+// table when the SITE-phase publishers folded into `make site X=<name>`; the wiring lives there now.)
 {
-  const mk = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../../Makefile'), 'utf8');
+  const st = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../../harness/lib/site-tool.mjs'), 'utf8');
+  const sc = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '../../quality/gates/site-check.mjs'), 'utf8');
   for (const gen of ['registry', 'blocks-docs', 'blocks-json']) {
-    ok(`generated: make ${gen} passes CHECK=1 through as --check`,
-      new RegExp(`node scripts/site/${gen}\\.mjs \\$\\(if \\$\\(CHECK\\),--check,\\)`).test(mk));
-    ok(`generated: site-check verifies ${gen}`,
-      new RegExp(`node scripts/site/${gen}\\.mjs --check`).test(mk));
+    ok(`generated: make site X=${gen} passes CHECK=1 through as --check`,
+      new RegExp(`'${gen}':\\s*\\(\\)\\s*=>\\s*\\['scripts/site/${gen}\\.mjs',\\s*\\.\\.\\.check\\(\\)\\]`).test(st));
+    ok(`generated: site-check verifies ${gen}`, new RegExp(`scripts/site/${gen}\\.mjs.*--check`).test(sc));
     ok(`generated: scripts/site/${gen}.mjs reads --check`,
       /--check/.test(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), `../../scripts/site/${gen}.mjs`), 'utf8')));
   }
@@ -395,14 +397,14 @@ test('lib-test: lints', async () => {
 // the output must carry are asserted here rather than left to whoever next edits the printer.
 //
 // Verified by running it against a live site while the tag was written: 6 sections, each with a stable
-// selector and either a ready `make capture` line or the canvas fallback. What a test cannot re-run on
+// selector and either a ready `make media X=capture` line or the canvas fallback. What a test cannot re-run on
 // every machine is the network, so what is checked is the printer, which is the part that can rot.
 {
   const src = fs.readFileSync(path.join(repoRoot, 'scripts/brand/sections.mjs'), 'utf8');
   ok('sections: the inventory tells you to storyboard one beat per section, in the site order',
     /storyboard = one beat per section, in this order/.test(src));
-  ok('sections: and hands you a runnable `make capture` per block, which is the capture-first half',
-    /make capture URL="\$\{url\}" SEL=/.test(src));
+  ok('sections: and hands you a runnable `make media X=capture` per block, which is the capture-first half',
+    /make media X=capture URL="\$\{url\}" SEL=/.test(src));
   // A CRAWL THAT FINDS NOTHING HAS TOLD YOU NOTHING (engine-doctrine/MISTAKES.md #207). An empty inventory that
   // exits 0 is the tag's worst failure: the command ran, said nothing, and the rule reads as answered.
   ok('sections: an empty inventory FAILS rather than printing a green tick over nothing',

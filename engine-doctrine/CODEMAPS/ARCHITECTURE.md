@@ -184,7 +184,7 @@ Each of these cost someone real time. Each cites the file that settles it.
 | `renderer/internal/queue` (Go) | concurrency runner | foundation for batch (wired to `--all`). |
 | `scripts/` | authoring tools + gates | `harness/author/` (preview/storyboards/captions), `harness/media/` (assets/audio/music/beatsync), `scripts/site/` (gallery). **Gates live in `quality/gates/`**: `probe-purity`, `lib-test`, `lint-test`, `snap-scenes` (`make check GATE=snap-all`), `canvas-purity`, `schema-drift`, `blocks-audit`, `motion-audit`, `dead-branch`, `docs-drift`. |
 | `harness/media/kie.mjs` | **planned AI-media client** (kie.ai) | createTask → poll → download for `tts / music / gen-image / gen-video / transcribe`. **Intentional future infra** for fully produced output (sound, vocals, generated imagery). No consumers yet; do not delete as "dead code". |
-| `.githooks/pre-push` | pre-push gate | runs `make check GATE=schema-check` + `make lib-test`; install with `make install-hooks`. |
+| `.githooks/pre-push` | pre-push gate | runs `make check GATE=schema-check` + `make test`; install with `make install-hooks`. |
 
 ## Contracts (don't break these)
 
@@ -202,7 +202,7 @@ Each of these cost someone real time. Each cites the file that settles it.
 ```
 make list                 # formats + where schema/sample live
 make video D=…            # render one JSON → out/<name>.mp4
-make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
+make media X=assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look D=… / frame D=… N=…   # storyboard / one frame
 make check GATE=validate [D=…]       # data + theme against schema.json (boot runs it too)
 make study-tool X=census               # every named population in films/scene, and the question each answers
@@ -222,8 +222,8 @@ there is no CI-only command, because a second path is how the two drift apart.
 
 | workflow | trigger | runs | billed |
 |---|---|---|---|
-| `gates.yml` | push to main · PR | `make lib-test` + `make check GATE=schema-check\|craft-coverage\|arsenal-check` (0.4s of gate) | 1 min |
-| `scene-check.yml` | push · PR, only when `films/scene/**.json` changed | `make author-check D=<file>` on each changed scene (1.6s each) | 2 min |
+| `gates.yml` | push to main · PR | `make test` + `make check GATE=schema-check\|craft-coverage\|arsenal-check` (0.4s of gate) | 1 min |
+| `scene-check.yml` | push · PR, only when `films/scene/**.json` changed | `make dev-tool X=author-check D=<file>` on each changed scene (1.6s each) | 2 min |
 | `audit-scenes.yml` | Monday 06:17 UTC · manual | `make check GATE=audit-all` (1m46s over 34 scenes) | 3 min |
 | `snap-scenes.yml` | manual only | `make gen X=fonts` then `make check GATE=snap-all SAVE=1` (16s) | 2 min |
 

@@ -27,7 +27,7 @@ const MIN_CONFIDENCE = 1.6;
 // left alone and the tool's own "left as-is" report could not fire. A scene overrides per film with
 // `audio.beatSync.maxShift`; the CLI with `SNAP=`.
 export const DEFAULT_MAX_SHIFT = 0.12;
-const FIX = 'run `make beatmap MUSIC=<the track>.wav` to write it';
+const FIX = 'run `make media X=beatmap MUSIC=<the track>.wav` to write it';
 
 /** The declaration, normalised. `null` when the scene does not ask for beat matching. */
 export function beatSyncOf(data) {
@@ -36,7 +36,7 @@ export function beatSyncOf(data) {
   return v === true ? {} : v;
 }
 
-/** Where the grid lives: an explicit `grid`, else the sidecar `make beatmap` writes beside the bed. */
+/** Where the grid lives: an explicit `grid`, else the sidecar `make media X=beatmap` writes beside the bed. */
 export function beatGridPath(data) {
   const cfg = beatSyncOf(data);
   if (!cfg) return null;
@@ -94,7 +94,7 @@ export function beatPeriod(grid) {
 /**
  * THE POLICY, and the ONLY copy of it. Which of a film's joints move onto a grid, and by how much.
  *
- * `bindBeats` (the render path, from an `audio.beatSync` declaration) and `make beatsync` (the
+ * `bindBeats` (the render path, from an `audio.beatSync` declaration) and `make media X=beatsync` (the
  * author-time preview) both call THIS. They used to answer the question separately, with a different
  * tolerance and a different set of joints, and the CLI re-implemented the nearest-beat search rather
  * than importing `snapToBeat`, so nothing linked the two and neither knew it disagreed with the other.

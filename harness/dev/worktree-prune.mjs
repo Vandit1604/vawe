@@ -37,7 +37,7 @@ if (unsafe.length) {
   }
 }
 if (!PRUNE) {
-  console.log(`\n(report only: nothing removed. \`make worktrees PRUNE=1\` retires the ${safe.length} landed one(s).)`);
+  console.log(`\n(report only: nothing removed. \`make dev-tool X=worktrees PRUNE=1\` retires the ${safe.length} landed one(s).)`);
   process.exit(0);
 }
 let n = 0;

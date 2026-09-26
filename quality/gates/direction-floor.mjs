@@ -508,7 +508,7 @@ const opaqueMotion = (l) => l.type === 'composition' || l.type === 'beat' || l._
   // time-driven and no amount of reading the markup will say what it looks like at a given second. The
   // limit, stated plainly: this proves the layer changes CONTINUOUSLY, not that it changes AT the
   // boundary. A strip that morphs from numbers to bars across the cut and a clock ticking in a corner
-  // are indistinguishable here. Only your eyes and `make reveal` tell those apart.
+  // are indistinguishable here. Only your eyes and `make dev-tool X=reveal` tell those apart.
   // `htmlOf`, not `l.html`: the markup is inline OR in a `src` file, and reading only the inline
   // spelling made a film held by a fragment on disk fail `no-continuous-object` with its spine on screen.
   || (l.type === 'html' && /var\(\s*--t\b/.test(htmlOf(l)));
