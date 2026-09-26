@@ -60,9 +60,8 @@ frame, photographic (fill 0.34, detail 12.2, photo 0.28)` or `content: quiet, ty
 `storyboard-check` BLOCKS on `plain-content` when a beat names a screen/window/app/UI/dashboard/grid/
 card/product/photo with no real source stated for it (no `fragment:` file on disk, no `assets/` or
 `.vawe-data/uploads/` path, no `make capture`/`sections`/`screen`/`assets`/`photos`/`gen-image`/
-`gen-video`/`gen-clip` mention). `harness/author/approve.mjs` runs this gate as the one precondition
-for a user's sign-off, so a plan cannot reach approval naming a screen or a photo it has no real
-source for. A film that names no content noun at all never trips this: a chart-only explainer, a
+`gen-video`/`gen-clip` mention). `storyboard-check` BLOCKS on it directly, so a plan cannot name a
+screen or a photo it has no real source for. A film that names no content noun at all never trips this: a chart-only explainer, a
 sting, a pure type film pass untouched. A chosen absence (a beat that draws a screen ON PURPOSE with
 no real capture behind it) is a waiver, the one mechanism: `{"authoring":{"allow":
 ["plain-content@<beat title>"],"_why":{"plain-content@<beat title>":"…"}}}`.

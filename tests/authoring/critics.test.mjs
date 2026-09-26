@@ -65,7 +65,7 @@ test('worktreeContract reads a non-empty block from SUBAGENTS.md', () => {
   const contract = worktreeContract();
   assert.ok(contract && contract.length > 0);
   assert.match(contract, /Prove the base/);
-  assert.match(contract, /Never write an `approved:` line/);
+  assert.match(contract, /Never edit `quality\/baselines\/\*`/);
 });
 
 test('decider briefs carry the contract lines and a real sha', () => {

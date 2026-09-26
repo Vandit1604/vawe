@@ -372,7 +372,7 @@ for (const type of types) {
   // that was NOT CHECKED (a warning naming the machine), never as a type that failed. The safety
   // property is unchanged, because an unchecked type is still reported and never silently passed:
   // the same shape seam-snap's requireTool uses when ffmpeg is missing, and what SAFEGUARDS.md means
-  // by refusing only for determinism, approval and data loss.
+  // by refusing only for determinism and a construction bug.
   const url = `http://127.0.0.1:${port}/films/scene/scene.html`
     + `?data=${encodeURIComponent(`/out/.tmp_prop-probe/${type}-${c}.json`)}&fps=30`;
   let page = null;

@@ -1,6 +1,6 @@
 // harness/author/panels.mjs: the storyboard stop, as a picture.
 //
-// engine-doctrine/CRAFT/APPROVAL-STOPS.md states the rule: "a stop is a picture, not a report." The storyboard
+// engine-doctrine/CRAFT/REVIEW-STOPS.md states the rule: "a stop is a picture, not a report." The storyboard
 // stop was the one with no picture. A storyboard here is prose, so a reviewer was asked to approve a
 // film from `picture:` and `onscreen:` written in English, and prose hides the two things that decide
 // whether a plan is any good: how much of the frame is used, and how the beats compare to each other.
