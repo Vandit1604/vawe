@@ -27,6 +27,21 @@ for (const query of ['caret', 'typing caret']) {
 
 console.log('arsenal.test.mjs: OK (caret/typing queries surface all typed-caret blocks + text)');
 
+// NEAR-MISS GUESSES. A query nothing confidently matches must not come back empty: rankQuery falls
+// back to its best-scoring guesses (below CONFIDENT), and the CLI labels them "WEAK GUESSES", so an
+// agent sees the nearest real names instead of dropping to a raw grep the moment the first query misses.
+{
+  const fs = await import('node:fs');
+  const { queries } = JSON.parse(fs.readFileSync(new URL('../fixtures/arsenal-near-miss-queries.json', import.meta.url)));
+  for (const query of queries) {
+    const r = rankQuery(all, query, { n: 10 });
+    assert.equal(r.confident, false, `query "${query}" was expected to be a near-miss, not a confident hit`);
+    assert.ok(r.results.length > 0, `query "${query}" returned no guesses at all; near-miss must still suggest names`);
+    assert.ok(r.results.every((e) => e.name), 'every guess must carry a real, usable name');
+  }
+  console.log('arsenal.test.mjs: OK (an unconfident query still returns near-miss guesses, never empty)');
+}
+
 // CRAFT RULES: engine-doctrine/CRAFT/rules/*.json should be PULLABLE by search, not only pushed by a hook. A
 // query matching a known rule's own brief must come back as kind "rule" with that rule's id, so an
 // agent can `make arsenal Q="..."` a rule the same way it searches for an effect.
