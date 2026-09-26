@@ -90,7 +90,10 @@ const scenes = population('snap-scenes', { filter: (f) => f !== 'schema.json' &&
 if (!scenes.length) { console.error('no scenes found'); process.exit(1); }
 
 const { server, port } = await serveRepo();
-const launch = () => puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+// protocolTimeout above the 180000ms default: a shared CI runner can leave one heavy scene's
+// captureSig() evaluate() short of that under load, which reads as a scene regression when it is
+// only the runner being slower that minute.
+const launch = () => puppeteer.launch({ headless: true, protocolTimeout: 300000, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
 let browser = await launch();
 
 // RECYCLE THE BROWSER. This sweep used to drive all ~100 scenes through ONE browser, and that made it
