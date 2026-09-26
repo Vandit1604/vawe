@@ -247,6 +247,15 @@ function applyChipPaint(el, L) {
   }
 }
 
+// The glow colour and its two radii (a tight core, a wide bloom), shared by the box path below and by
+// the pure-light path (applyGlyphGlow here, svg.js's own drop-shadow). One formula, so a text layer's
+// glow and a shape layer's glow read as the same light at the same `intensity`.
+export function glowRadii(L) {
+  const spread = L.intensity != null ? Math.max(0.05, Math.min(1, L.intensity)) : 0.25;
+  const color = L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, spread);
+  return { near: Math.round(spread * 48 + 8), far: 64, color };
+}
+
 // `glow` composes with elevation/shadow: elevation (or `shadow`) writes the depth stack, glow
 // appends the bloom, rather than only being reachable from inside the elevation branch.
 function chipShadowStack(L) {
@@ -264,11 +273,27 @@ function chipShadowStack(L) {
     if (e >= 4) stack.push('0 0 64px rgba(0,0,0,0.4)');
   } else if (L.shadow) stack.push('0 24px 70px rgba(20,20,25,0.12)');
   if (L.glow) {
-    const spread = L.intensity != null ? Math.max(0.05, Math.min(1, L.intensity)) : 0.25;
-    stack.push(`0 0 64px ${L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, spread)}`);
+    const { far, color } = glowRadii(L);
+    stack.push(`0 0 ${far}px ${color}`);
   }
   return stack;
 }
+
+// A glow with nothing ELSE painting a box is a LIGHT, not a chip: on a text layer it must hug the
+// glyphs (text-shadow follows the glyph alpha) rather than the tight rectangle box-shadow draws
+// around the whole line, which is the "dark pill behind the words" bug (a headline reading
+// "Introducing" glowed as a box, not as light). text-shadow is a property nothing else on this layer
+// writes, so it is set in full here and never read back, same reasoning as core/fx/shadow.js's
+// box-shadow.
+function applyGlyphGlow(el, L) {
+  const { near, far, color } = glowRadii(L);
+  el.style.textShadow = `0 0 ${near}px ${color}, 0 0 ${far}px ${color}`;
+}
+
+// text (and count, which shares this build) is the only family with glyphs to hug; every other type
+// chipBox reaches is already a box (rect/html/video/group), so a glow with no chip stays a box-shadow
+// there, which is the shape its content already has.
+const isGlyphLayer = (L) => L.type == null || L.type === '' || L.type === 'text' || L.type === 'count';
 
 // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer. `css` can paint a
 // background of its own, and a painted box is a box, so the paint guard also fires on an explicit
@@ -276,6 +301,8 @@ function chipShadowStack(L) {
 function chipBox(el, L) {
   applyChipPadding(el, L);
   if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
+  const hasChip = L.bg != null || !!L.border || !!L.shadow || !!L.elevation;
+  if (L.glow && !hasChip && isGlyphLayer(L)) { applyGlyphGlow(el, L); return; }
   applyChipPaint(el, L);
   const stack = chipShadowStack(L);
   if (stack.length) el.style.boxShadow = stack.join(', ');
