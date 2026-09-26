@@ -639,7 +639,7 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | `ghost` | the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre |
 | `kick` | hit the layer on the film's own joints. A cut, a seam or a sting shoves it, so the frame feels the edit |
 | `lag` | FOLLOW-THROUGH: this layer trails another layer's motion by a frame or three and overruns its stop before settling. Stagger delays a sibling's entrance; this makes one layer drag behind another's continuous motion, which is half of what separates an animated object from a moved image |
-| `matte` | a LUMA MATTE: another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
+| `matte` | a TRACK MATTE: another layer's luma or alpha becomes this layer's own alpha, white shows and black hides, and `-inverted` flips that. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
 | `mixBlend` | how this layer's pixels combine with what is already painted behind it, knock a headline out of a photo |
 | `occlude` | hide this layer where another one covers it, put something BEHIND something else without reordering the stack |
 | `plane` | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax |
