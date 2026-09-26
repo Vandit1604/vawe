@@ -41,6 +41,7 @@ function main() {
   const cmd = firstCommand(st.next);
   console.log(`\n  ${st.name} is at ${st.stage.toUpperCase()}. Running:\n  ${cmd}\n`);
   if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}\n`);
+  if (st.craftDocs.length) console.log(`  read: ${st.craftDocs.join(', ')}\n`);
   printRuleBriefs(st);
   const [bin, ...args] = cmd.split(/\s+/);
   const res = spawnSync(bin, args, { cwd: ROOT, stdio: 'inherit' });

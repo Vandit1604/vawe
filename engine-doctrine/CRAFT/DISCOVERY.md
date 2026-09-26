@@ -2,6 +2,7 @@
 when: you are about to author and want to reach past the default slice into the full vocabulary
 answers: "how to use the whole palette (the layer types `ls core/layers/` lists, plus the effect arsenal `make effects` owns the count of, blueprints, cuts): the always-visible primer, the search, the gap report, and the name-three-reject-the-first discipline; and why the search stays token-overlap, not embeddings"
 group: crosscutting
+routes: three
 ---
 
 # DISCOVERY: use the whole vocabulary, not the slice you remember

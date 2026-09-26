@@ -2,6 +2,7 @@
 when: "before authoring, or when a film reads flat and you cannot say why"
 answers: "what films that read well actually MEASURE: shot length, motion, whether the ground turns, and what carries across a cut"
 group: crosscutting
+routes: camera
 ---
 
 # The motion grammar

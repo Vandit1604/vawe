@@ -90,6 +90,14 @@ export function route(request) {
   return best || FALLBACK;
 }
 
+/** docForType('launch') -> 'engine-doctrine/CRAFT/routes/launch-video.md' | null. Reuses ROUTES, the
+ * one place a film type is already paired with its own doc, rather than a second table of the same
+ * pairing. */
+export function docForType(type) {
+  const r = ROUTES.find((row) => row.type === type);
+  return r ? r.file : null;
+}
+
 function readSection(file, heading) {
   const text = fs.readFileSync(path.join(ROOT, file), 'utf8');
   const start = text.indexOf(`## ${heading}`);
