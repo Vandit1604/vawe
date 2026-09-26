@@ -3,8 +3,8 @@
 // splitText() is a one-time DOM setup (build time); animateUnits() is called every frame.
 import { clamp01, random } from '../motion/motion.js';
 import { defineRegistry } from '../registry/registry.js';
-import { wght, PRESETS, PRESET_BLURBS, PRESET_REGISTRY, DECODE_CHARS, DECODE_CHAR_BLURBS,
-  DECODE_CHARS_REGISTRY, decodeText, flapText } from '../kinetic/presets.js';
+import { wght, axisStyle, AXIS_REGISTRY, PRESETS, PRESET_BLURBS, PRESET_REGISTRY, DECODE_CHARS,
+  DECODE_CHAR_BLURBS, DECODE_CHARS_REGISTRY, decodeText, flapText } from '../kinetic/presets.js';
 
 // HOW FAR THE INK FALLS BELOW THE LINE BOX, in em, for the deepest descender in the faces we ship.
 // Exported because a second consumer arrived: the wordSlot chip (core/fx/word-slot.js) clips at its
@@ -212,8 +212,23 @@ export function unitProgress(t, i, n, { each = 0.5, stagger = 0.06, smoothness =
 // Re-exported here (via the import above) so no importer of './type.js' has to change what it asks
 // for, and animateUnits below (which reads PRESET_REGISTRY/decodeText/flapText directly) still sees
 // them as local bindings, which a bare `export {…} from` does not provide.
-export { wght, PRESETS, PRESET_BLURBS, PRESET_REGISTRY, DECODE_CHARS, DECODE_CHAR_BLURBS,
-  DECODE_CHARS_REGISTRY, decodeText, flapText };
+export { wght, axisStyle, AXIS_REGISTRY, PRESETS, PRESET_BLURBS, PRESET_REGISTRY, DECODE_CHARS,
+  DECODE_CHAR_BLURBS, DECODE_CHARS_REGISTRY, decodeText, flapText };
+
+// axisFrame(axis, u): the per-unit font-variation TRACK, on the SAME clock (`u`, the unit's own local
+// progress from unitProgress below) every other per-unit property already runs on, so it composes with
+// ANY preset and ANY stagger order rather than owning a private timeline. `axis: { wght: [300, 900] }`
+// ramps that axis linearly across u; a two-element array is `[from, to]`, a bare number holds it fixed
+// (so one axis can move while a sibling axis is pinned).
+export function axisFrame(axis, u) {
+  const at = clamp01(u);
+  const vals = {};
+  for (const [tag, spec] of Object.entries(axis || {})) {
+    const [a, b] = Array.isArray(spec) ? spec : [spec, spec];
+    vals[tag] = a + (b - a) * at;
+  }
+  return axisStyle(vals);
+}
 
 // circleText(el, units, {radius}): lay split CHARS around a circle (motion-primitives SpinningText).
 // Each char sits at its angle on the ring, rotated to face outward (seal / badge). The container spins
@@ -262,7 +277,7 @@ function ensureRiseClipWrapper(el) {
 // forwarded nowhere and silently inert (engine-doctrine/MISTAKES.md #543). `each` rides along
 // because the scramble RATE is per second and only the caller knows how long the window is.
 function applyStaggeredPreset(ctx) {
-  const { el, i, units, t, each, stagger, smoothness, preset, popts, fn } = ctx;
+  const { el, i, units, t, each, stagger, smoothness, preset, popts, fn, axis } = ctx;
   const u = unitProgress(t, i, units.length, { each, stagger, smoothness });
   if (preset === 'decode') { decodeText(el, u, i, { ...popts, each }); el.style.opacity = u > 0 ? '1' : '0'; return; }
   // `flap` mutates the character too, but unlike decode it also has a hinge to apply, so the
@@ -273,11 +288,15 @@ function applyStaggeredPreset(ctx) {
   // the unit INDEX as a third argument: `assemble` hashes it for its per-glyph scatter.
   // A third parameter rather than a key in popts, so no existing preset's signature moves.
   Object.assign(el.style, fn(u, popts, i));
+  // AXIS RIDES THE SAME `u`, ON TOP of whatever the preset wrote: a font-variation axis is a property
+  // like any other, not a preset of its own, so it composes with `up`, `blur`, `scale`… rather than
+  // requiring a second preset (`weight`) that owns the whole entrance.
+  if (axis) Object.assign(el.style, axisFrame(axis, u));
 }
 
 // animateUnits(units, t, opts): apply a preset to each split unit at time t. Presets except `wave`
 // are one-shot staggered reveals; `wave` uses (t * speed + i*phaseStep) as a looping phase.
-export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger = 0.06, smoothness = 1, loop = false, speed = 1, phaseStep = 0.5, ...popts } = {}) {
+export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger = 0.06, smoothness = 1, loop = false, speed = 1, phaseStep = 0.5, axis, ...popts } = {}) {
   // An unknown name is a HARD ERROR. It used to fall back to `up`, so a typo - or a preset renamed out
   // from under a scene - rendered a plausible frame that was not what was asked for, and the schema does
   // not enumerate these names either, so nothing else caught it. Same reasoning as the unknown-modifier
@@ -285,7 +304,7 @@ export function animateUnits(units, t, { preset = 'blurUp', each = 0.5, stagger 
   const fn = PRESET_REGISTRY.pick(preset);
   const looping = loop || preset === 'wave' || preset === 'shimmerWave';
   units.forEach((el, i) => {
-    const ctx = { el, i, units, t, each, stagger, smoothness, preset, speed, phaseStep, popts, fn };
+    const ctx = { el, i, units, t, each, stagger, smoothness, preset, speed, phaseStep, popts, fn, axis };
     if (looping) applyLoopingPreset(ctx);
     else applyStaggeredPreset(ctx);
   });
