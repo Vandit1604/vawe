@@ -18,6 +18,9 @@ codes: judge-not-ready, no-judge
   rendered (see "The receipt, and the ratchet that reads it" below): the eye is invited by `make dev`,
   required by `make ship`.
 - Checkable action: if your eye catches a flaw, it's a FIX. Never rationalize a flaw you notice.
+- Run `node harness/dev/conform.mjs D=<file>` BEFORE this: brief conformance (exact copy, a weight ramp
+  in its window, a stroke drawing on, an exit's direction, a caption clearing a mark, a max hold) is a
+  measured fact, not craft, and belongs to engine data, never to the judge's eye.
 
 `validate`/`critique`/`slop`/`audit` are **static**: they read the DOM/JSON. None can see whether the
 mascot is faithful, the headline is centered, or an underline hits its word. That needs an eye. `make judge`
@@ -34,11 +37,11 @@ It writes, into a directory named after the film so judging a second one does no
 
 Then the agent **reads the sheet against the rubric** and returns a structured verdict.
 
-## The full loop: look, then motion, then verify, then two fresh judges
+## The full loop: look, then motion, then conform, then verify, then two fresh judges
 
 One agent scoring its own film PASS is not the only failure this file guards against. A single vision
 judge repeats its own rating on the same clip only about two times in three (Video-Bench), so one
-judging pass, by one agent, is a coin with a thumb on it, not a verdict. Four pieces close that, run in
+judging pass, by one agent, is a coin with a thumb on it, not a verdict. Five pieces close that, run in
 this order:
 
 1. **Look review, before any motion work.** `make look D=<file> LOOKS=1` renders one styleframe per
@@ -50,7 +53,17 @@ this order:
 2. **Motion review, separately**, once the look passes: `make dev-tool X=critics D=<file> DECIDERS=1`
    (the motion director) and `make judge D=<file> STRUCT=1` (below), whose MOTION axis is scored on
    its own.
-3. **`node harness/dev/verify.mjs D=<file> [REF=<ref.mp4>]`: hard numbers, no eye.** Paste the printed
+3. **`node harness/dev/conform.mjs D=<file> [--brief "…"]`: did it do what the brief said, before either
+   verify or the judges run.** A real test film's misses were almost never craft, they were brief
+   conformance: wrong copy, a weight ramp that never runs in its declared window, a stroke that never
+   draws on, an `out` that fades instead of moving in its stated direction, a caption sitting on a mark
+   it was supposed to clear, a static hold past its stated ceiling. `conform.mjs` extracts every
+   CHECKABLE claim from the storyboard's beats, a sibling `.brief.md`, or `--brief` text, and answers
+   each from `harness/dev/probe-frame.mjs`'s engine data (rendered text, font weight, box position over
+   time, svg draw progress), never from a judge's eye: PASS/FAIL with the measured value and timestamp.
+   A claim it cannot measure is printed JUDGE-ONLY, for step 5 below to weigh instead of silently
+   dropping it. Paste its block before verify's, same discipline as verify's own.
+4. **`node harness/dev/verify.mjs D=<file> [REF=<ref.mp4>]`: hard numbers, no eye.** Paste the printed
    block VERBATIM before any judging happens (the discipline HyperFrames enforces with `w2h-verify.mjs`:
    an agent skips a required step unless the raw numeric output is put in front of it, not summarized).
    It reports frame coverage (beats inspected vs the film's real length), exposure range per beat, the
@@ -60,7 +73,7 @@ this order:
    re-detected), and a blank-seam count (`quality/gates/seams.mjs`'s own findings). It exits non-zero
    ONLY on an objective failure: no render, or a referenced asset missing on disk. Everything else is a
    measurement for the eye to weigh, never a verdict the script hands down itself.
-4. **Two independent structured judges.** `make judge D=<file> STRUCT=1` writes a rubric PER RUN
+5. **Two independent structured judges.** `make judge D=<file> STRUCT=1` writes a rubric PER RUN
    (`/tmp/judge/<name>/structured-A.md`, `structured-B.md`) whose required answer is JSON, one entry
    per criterion, `{score, evidence, t}`, split into **LOOK** (light, colour, type, camera, composition)
    and **MOTION** (timing, easing, transitions, continuity), scored as separate axes
