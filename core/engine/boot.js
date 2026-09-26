@@ -595,10 +595,14 @@ async function bakeSceneSeams(scene) {
   }
 }
 
-function wireEngine(scene, fps, width, height, vclock) {
+function wireEngine(scene, fps, width, height, vclock, data) {
   const totalFrames = Math.round(scene.duration * fps);
   window.__engine = {
     meta: { fps, duration: scene.duration, totalFrames, width, height, stings: scene.stings || [], sfx: scene.sfx || [], bridges: scene.bridges || [], beatSync: scene.beatSync || '' },
+    // the SAME object build()'s closures read every frame, so a dev tool can mutate a layer's
+    // motion/vars in place (studio/ui/studio.js:offsetAt already assumed this) and reseek with no
+    // reload. renderFrame(n) stays pure in n: a real render never mutates this, only local tooling does.
+    data,
     renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
     auditFonts: () => auditFonts(document.querySelector('.stage')),
   };
@@ -664,7 +668,7 @@ export async function boot(build) {
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame, beats });
     await bakeSceneSeams(scene);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
-    wireEngine(scene, fps, width, height, vclock);
+    wireEngine(scene, fps, width, height, vclock, data);
     installFrameSig();
     checkWebglLive();
     // Signal readiness BEFORE the warm first frame: renderFrame() first virtualizes the page timers,

@@ -1106,6 +1106,13 @@ sfx-catalog: ## [engine] REGENERATE engine-doctrine/CRAFT/SFX-CATALOG.md from co
 studio: ## [dev] LIVE scrubbable preview (no mp4 render). Its `plan` state shows the storyboard with every beat's real fragment live in it.
 	node studio/server.mjs $(D)
 
+# make tune D=films/scene/<file>.json ID=<layer id>[,<id>...] [PORT=8801]: LIVE per-layer motion tuning.
+# Opens the frame range around that layer with a control per motion-key property (and per `vars`
+# channel), each one re-seeking the frame instantly, no reload. "copy JSON patch" copies the tuned
+# layer's JSON; "write to file" shows a real diff and only writes on a second, confirmed click.
+tune: ## [dev] LIVE per-layer motion tuning: sliders generated from one layer's own motion/vars (D=<file> ID=<layer id>[,<id>])
+	node harness/author/tune-server.mjs $(D) $(ID)
+
 # make seam-check D=films/x/video.json: every checked defect at a join in one pass (quality/gates/seams.mjs) -
 # flash, empty stage, ghost, resurrection, split seam (all pixel checks, need out/<name>.mp4, render first)
 # plus crossfade-mud (markup only, no render needed). Sheet(s) → /tmp/seams/ and /tmp/seam-forensics/
