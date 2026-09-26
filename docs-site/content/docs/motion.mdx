@@ -12,7 +12,7 @@ The craft rules behind these choices (timing as voice, ease out on entrances, on
 
 Split a headline into units with `split` (`char`, `word`, or `line`), then animate each unit with `preset`. Units enter in reading order, staggered, and settle exactly at rest with a gentle overshoot.
 
-There are **25 presets**:
+The kinetic presets (`node -e "import('./core/type/type.js').then(m=>console.log(m.PRESETS.length))"` for the count):
 
 `up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` (looping) · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` (scramble then resolve) · `tilt` · `stretch` · `gradient` (colour sweep) · `highlight` (marker band) · `underline` · `shadow` (poster lift) · `riseClip` (rise from a baseline clip) · `draw` (an SVG stroke drawing itself on) · `chroma` (RGB-split that settles crisp) · `swing` (pendulum from a pivot) · `unfold` (a 3D unfold to flat)
 
@@ -55,7 +55,7 @@ A sting is a brief WebGL effect that covers a cut at a boundary. Set it in the t
 { "stings": [{ "t": 6.0, "fx": "glitch", "dur": 0.5, "seed": 7 }] }
 ```
 
-There are **33 effects**. Fourteen native: `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh`. Eight shape wipes from gl-transitions: `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`. Plus eleven warp and chromatic effects: `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` (a pixel-block curtain that sweeps the cut).
+The full set (`node -e "import('./core/stings/index.js').then(m=>console.log(m.SHADER_FX.length))"` for the count). Fourteen native: `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh`. Eight shape wipes from gl-transitions: `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`. Plus eleven warp and chromatic effects: `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` (a pixel-block curtain that sweeps the cut).
 
 Each takes `dur` (0.3 to 3 seconds) and a `seed`. `color` tints the effect by luminance, `intensity` scales its strength, and `leak` accepts up to four colours in `colors`. Because a sting is keyed on `(progress, seed)` only, it is seek-safe and byte-reproducible.
 

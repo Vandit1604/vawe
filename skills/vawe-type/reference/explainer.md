@@ -32,7 +32,7 @@ next starts, not to keep pace with a product tour.
   everything else still enough that the facts can be read (`register: 'quiet'` in `type-spines.mjs`).
 - **Counts with REAL figures.** The `count` layer compacts >=1e6 automatically; use a real number,
   never a round placeholder. This type's own worked example (`engine-doctrine/EVALS.md`) uses this engine's own
-  facts (24 layer types, CSS animation refused at boot, frame-independent rendering) precisely because
+  facts (the layer types `ls core/layers/` lists, CSS animation refused at boot, frame-independent rendering) precisely because
   they are checkable.
 - **Payoff last, always.** Order beats so the most counterintuitive fact lands at the very end; never
   spoil it in the hook. `engine-doctrine/RULES/payoff-last.md`.
@@ -79,6 +79,6 @@ carrying real information, or is the whole film type on a field (`engine-doctrin
 ## The worked example
 
 `quality/runs/evals/briefs/explainer.json` (20s, 16:9). Shows: this engine's own checkable facts (a frame
-is a pure function of time, 24 layer types each built from `frame(kit,el,L,t)`, CSS animation/transition
+is a pure function of time, each of the layer types `ls core/layers/` lists built from `frame(kit,el,L,t)`, CSS animation/transition
 refused at boot), a live `count` layer reading the film's own elapsed seconds, and the payoff (splitting
 the render across workers loses nothing) landing last. A live t-readout is the continuous object.

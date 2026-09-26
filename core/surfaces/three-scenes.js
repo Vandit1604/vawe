@@ -29,6 +29,7 @@ export const THREE_SCENES = {
   codeDissolve: 'code resolving out of seeded noise behind a chromatic burn edge, then holding crisp',
   codeAssemble: 'thousands of GPU points flying from a seeded cloud to the exact glyph positions and resolving into readable code',
   litPlane: 'a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `motionBlur` (true, or a 0..1 strength, the same word every layer uses) opts it into a shutter-accumulated smear on the fast rise',
+  object: 'a premium composed object: a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses',
 };
 export const THREE_FX = Object.keys(THREE_SCENES);
 
@@ -47,6 +48,7 @@ const THREE_AKA = {
   codeDissolve: ['code resolving from noise', 'code fading in through static', 'a chromatic burn reveal of code'],
   codeAssemble: ['code assembling from a point cloud', 'glyphs flying into place', 'text forming from scattered points'],
   litPlane: ['a lit UI screenshot in 3D', 'a captured screen rising with a tilt', 'a shadowed product screen'],
+  object: ['a glass or metal 3D object', 'a glass shield or extruded badge', 'a refracting glass sphere you orbit'],
 };
 
 export const THREE_REGISTRY = defineRegistry('three scene', Object.fromEntries(THREE_FX.map((n) => [n, n])), { slot: 'three', blurbs: THREE_SCENES, aka: THREE_AKA,

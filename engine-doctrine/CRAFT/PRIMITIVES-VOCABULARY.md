@@ -301,6 +301,14 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `tiktok` | tiktok video, tiktok upload | the tightest phone target: a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9:16 |
 | `web` | website hero, no platform chrome | no platform chrome at all: the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip |
 
+## driver  `[drive{}]`
+
+| name | words | action |
+|---|---|---|
+| `link` | pick whip, expression link, follow a property | the PICK-WHIP: this property copies another layer's own animated value every frame, `mul`/`add` rescale it and `delay` (in seconds, 0.1 is a normal follow-through lag) shifts when it arrives |
+| `loop` | loop out, repeat keyframes forever, cycle the animation | LOOP OUT: past `to` seconds this layer's own keyframes repeat forever, `cycle` restarts at `from` (0 by default), `pingpong` bounces between them, `continue` just holds the last key the way an unlooped track already does |
+| `wiggle` | random jitter, seeded shake, organic wobble | an AFTER EFFECTS EXPRESSION as data: deterministic seeded jitter on one property (x/y in px, rot in deg), default 2Hz at 10 units, reseed to decorrelate two layers so they never wobble in lockstep |
+
 ## duration word  `[enterDur]`
 
 | name | words | action |
@@ -671,7 +679,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `raymarch` | a 3D distance field, a lit 3D surface, a raymarched shape | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
 | `rect` | a box, a solid panel, a rectangle | a plain box, panel, card or pill. it carries no text: put that on a higher track |
 | `shader` | a generative background, a WebGL field, an ambient full-frame look | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
-| `svg` | vector art, an inline icon shape, scalable line art | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `svg` | vector art, an inline icon shape, scalable line art, trim paths, a spinning loader ring | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot |
 | `text` | words on screen, headline, caption text | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink |
 | `three` | a real 3D scene, a three.js object, a posed 3D mesh | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
 | `video` | real footage, a video clip, captured recording | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
@@ -728,11 +736,12 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `ghost` | motion trail, motion blur streak, afterimage trail | the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre |
 | `kick` | hit on the cut, jolt on the beat, impact on edit | hit the layer on the film's own joints. A cut, a seam or a sting shoves it, so the frame feels the edit |
 | `lag` | follow through, drag behind, delayed follow motion | FOLLOW-THROUGH: this layer trails another layer's motion by a frame or three and overruns its stop before settling. Stagger delays a sibling's entrance; this makes one layer drag behind another's continuous motion, which is half of what separates an animated object from a moved image |
-| `matte` | luma matte, brightness mask, wipe reveal | a LUMA MATTE: another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
+| `matte` | luma matte, track matte, brightness mask, wipe reveal, inverted matte | a TRACK MATTE: another layer's luma or alpha becomes this layer's own alpha, white shows and black hides, and `-inverted` flips that. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
 | `mixBlend` | blend mode modifier, composite mode, knock out of photo | how this layer's pixels combine with what is already painted behind it, knock a headline out of a photo |
 | `occlude` | hide behind another layer, occlusion, depth sort hiding | hide this layer where another one covers it, put something BEHIND something else without reordering the stack |
 | `plane` | parallax depth, stand at a distance, depth modifier | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax |
 | `progress` | film progress variable, timeline percent, progress ring driver | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
+| `repeat` | AE repeater, a ring of copies, stamp N instances stepped apart | AE's Repeater: stamp the layer's own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy's own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time |
 | `shadow` | cast shadow, drop shadow with light, directional shadow | a drop shadow that knows where the light is, so every layer does not point the same way |
 | `squash` | squash and stretch, cartoon bounce, stretch on velocity | SQUASH AND STRETCH read off the layer's own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash |
 | `tilt` | 3D tilt, turn out of plane, leaning card | turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding |
@@ -1025,6 +1034,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `liquidBackground` | a churning liquid surface, a rippling 3D plane, a wavy specular background | a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells |
 | `litPlane` | a lit UI screenshot in 3D, a captured screen rising with a tilt, a shadowed product screen | a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `motionBlur` (true, or a 0..1 strength, the same word every layer uses) opts it into a shutter-accumulated smear on the fast rise |
 | `magnetic` | magnetic field lines, field lines between poles, charges sliding along arcs | field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them |
+| `object` | a glass or metal 3D object, a glass shield or extruded badge, a refracting glass sphere you orbit | a premium composed object: a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses |
 | `pointCloud` | a cloud of points, particle point cloud, thousands of lit dots | a GPU point cloud: thousands of lit points posed absolutely from t |
 | `shatter` | breaking into pieces, a slab shattering, shards flying outward | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
 | `uiParallax` | UI layers at depth, parallax screens, stacked flat panels in 3D | flat UI planes stacked at depth, the camera moving past them so the layers separate |
@@ -1053,5 +1063,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_724 primitives across 63 registries, 724 meeting the word-action contract today.
+_729 primitives across 64 registries, 729 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

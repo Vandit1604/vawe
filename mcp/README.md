@@ -25,9 +25,9 @@ What never leaves this machine is the half that makes the output good:
 
 | Server-side | Why it stays |
 |---|---|
-| `blocks/` (154 implementations) | `expand` inlines them; callers see resulting layers, not factories |
+| `blocks/` (`find blocks -name "*.mjs" | wc -l` implementations) | `expand` inlines them; callers see resulting layers, not factories |
 | `engine-doctrine/` taste corpus | the judgment, accumulated over 100+ logged mistakes |
-| 27 gates + the ledger | callers get verdicts, not the rules that produced them |
+| `ls quality/gates/*.mjs | wc -l` gates + the ledger | callers get verdicts, not the rules that produced them |
 | licensed asset packs | gradients and ransom sprites may be USED, never redistributed |
 
 That last row is a permanent structural advantage. A self-hoster legally cannot have those packs.
