@@ -390,7 +390,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   const names = Object.keys(BLOCKS);
   ok(`registry: ${names.length} blocks exported`, names.length > 0);
 
-  // Call each row the way `make catalog` does: family factory + the manifest's props. A BARE name in
+  // Call each row the way `make site X=catalog` does: family factory + the manifest's props. A BARE name in
   // the registry is the raw factory with NO props merged, so calling it by name yields an empty block
   // (captions with no lines is correctly []). That is the registry working, not a bug to assert on.
   const build = (e, opts = {}) => BLOCKS[e.family]({ ...(e.props || {}), x: 100, y: 100, start: 0, dur: 4, ...opts });
@@ -506,7 +506,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
   // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
   // The cost of committing derived output is that it can go stale silently, add a block, forget
-  // `make blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
+  // `make site X=blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
   // every registry entry must have both its poster and the scene the site plays live.
   // This runs in lib-test because lib-test runs on pre-push, which is the last moment drift is cheap.
   {
@@ -516,14 +516,14 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
       const safe = e.name.replace(/[^a-z0-9.]/gi, '_');
       return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.json`));
     }).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make site X=blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
       noMedia.length === 0);
     // The frame rect is what keeps the poster and the live render framed identically. A block with a
     // scene but no rect renders nothing on the card at all, which is a silent, invisible failure.
     const framesPath = path.join(repoRoot, 'site/lib/block-frames.json');
     const framesOk = fs.existsSync(framesPath) ? JSON.parse(fs.readFileSync(framesPath, 'utf8')) : {};
     const noFrame = gridRows.filter((e) => !framesOk[e.name]).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make site X=blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
       noFrame.length === 0);
   }
 

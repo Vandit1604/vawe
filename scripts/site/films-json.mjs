@@ -142,7 +142,7 @@ if (write) {
     const was = prior[k];
     if (!was || was.label !== v.label) console.error(`    ${k}  says ${was ? was.label : 'nothing'}, the mp4 runs ${v.label}`);
   }
-  console.error(`  Fix: make films-json WRITE=1`);
+  console.error(`  Fix: make site X=films-json WRITE=1`);
 } else if (!findings.length) {
   console.log(`✓ ${Object.keys(rows).length} film(s) match their source, and every promised track carries sound`);
 }

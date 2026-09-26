@@ -55,35 +55,6 @@
           "countStart": 0.2,
           "countDur": 1.2,
           "ease": "easeOutExpo"
-        },
-        {
-          "type": "group",
-          "radius": 8,
-          "layout": "row",
-          "items": "center",
-          "gap": 4,
-          "bg": "color-mix(in srgb, var(--up) 8%, transparent)",
-          "pad": "4px 10px",
-          "children": [
-            {
-              "type": "text",
-              "weight": 500,
-              "text": "▲",
-              "size": 17,
-              "color": "color-mix(in srgb, var(--up) 66%, var(--text))"
-            },
-            {
-              "type": "text",
-              "weight": 600,
-              "text": "+12%",
-              "size": 17,
-              "color": "color-mix(in srgb, var(--up) 66%, var(--text))",
-              "font": "num"
-            }
-          ],
-          "delay": 1.25,
-          "anim": "pop",
-          "enterDur": 0.3
         }
       ]
     }

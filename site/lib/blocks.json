@@ -492,13 +492,11 @@
   {
     "name": "card.stat",
     "family": "statCard",
-    "blurb": "a boxed metric: a label, a number counting up, a chip saying how much it went up",
+    "blurb": "a boxed metric: a label, a number counting up, and a delta chip only when you pass one",
     "props": {
       "w": 340,
       "to": 1950,
-      "label": "frames rendered",
-      "delta": "+12%",
-      "deltaUp": true
+      "label": "frames rendered"
     },
     "category": "Data",
     "categoryIntro": "Reach for Data blocks to turn a number into a chart, gauge, or ring instead of a caption."
@@ -666,7 +664,7 @@
           "done": true
         },
         {
-          "text": "make catalog",
+          "text": "make site X=catalog",
           "done": true
         },
         {

@@ -249,7 +249,7 @@ test('lib-test: lints', async () => {
 // ---- the committed GENERATED artifacts have a check, and a target that runs it ----
 // registry/, engine-doctrine/BLOCKS.md and site/lib/blocks.json are generated, committed, and read by outsiders.
 // Each check EXISTED and none was reachable: the registry target documented `CHECK=1` in three places
-// and its recipe passed no flag, so `make registry CHECK=1` regenerated and exited 0, which looks
+// and its recipe passed no flag, so `make site X=registry CHECK=1` regenerated and exited 0, which looks
 // exactly like a passing check. registry/ and blocks.json were both stale for a week underneath it.
 // These asserts hold the wiring, not the freshness: site-check runs the real comparison, and this
 // fails the moment somebody drops the flag again, which is the bug that actually happened.

@@ -359,7 +359,7 @@ const openStep = (name, label, { slow } = {}) => {
   if (slow) process.stdout.write(`  this one is slow: it launches a browser, about 1.4s. Everything above cost milliseconds.\n`);
 };
 
-// The code → doc map, read once from the frontmatter `make doc-index` already gates. Built lazily and
+// The code → doc map, read once from the frontmatter `make site X=doc-index` already gates. Built lazily and
 // cached: a run touches it up to 19 times, and a doc-map failure must not take the ladder down with it,
 // so a broken map costs the pointers and nothing else.
 let DOCS = null;
@@ -398,7 +398,7 @@ const runGate = (name, label, script, args, opts = {}) => {
   // line; the reasoning behind it is a page somebody already wrote and nobody opens. Measured before
   // this line existed: 10 of 64 gates cited a doc, and 12 of 33 CRAFT docs were reachable only by
   // browsing an index. Routing here rather than in each gate means all of them gain it at once, and it
-  // reads the SAME `codes:` frontmatter `make doc-index` already validates, so there is one owner.
+  // reads the SAME `codes:` frontmatter `make site X=doc-index` already validates, so there is one owner.
   // Warnings are included: `continuity` fired as a warning on the film that prompted all of this.
   const warnCodes = live.filter((f) => f.severity === 'warn').map((f) => f.code);
   printDocs([...blockCodes, ...warnCodes]);

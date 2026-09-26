@@ -1,8 +1,8 @@
 // scripts/site/examples-build.mjs: rebuild the whole example showcase from the committed sources.
 // For each registry entry: if its video is a `.beatsync.mp4`, beat-sync the source onto its own music
 // (deterministic) and render that; otherwise render the source directly. Then build the gallery. This
-// is what makes the examples reproducible fixtures. A clean clone runs `make examples` and gets the
-// same showcase (after `make gen X=music-pack` for the beat-synced ones). Run via `make examples`.
+// is what makes the examples reproducible fixtures. A clean clone runs `make site X=examples` and gets the
+// same showcase (after `make gen X=music-pack` for the beat-synced ones). Run via `make site X=examples`.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';

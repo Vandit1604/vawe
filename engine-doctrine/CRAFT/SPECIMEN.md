@@ -1,6 +1,6 @@
 ---
 when: you are about to write a scene that PROVES a mechanism works
-answers: "what a specimen is · why the subject is a picture · the series constants and why each is fixed · when it is `make catalog` instead"
+answers: "what a specimen is · why the subject is a picture · the series constants and why each is fixed · when it is `make site X=catalog` instead"
 group: look
 ---
 
@@ -90,9 +90,9 @@ picks its own ground or parks its label somewhere else, two demos cut together j
 
 Change the constant, not the demo. One fact, one owner.
 
-## When it is `make catalog` instead
+## When it is `make site X=catalog` instead
 
-**Nine variants of one effect is a contact sheet, and `make catalog` is honestly a contact sheet.** It
+**Nine variants of one effect is a contact sheet, and `make site X=catalog` is honestly a contact sheet.** It
 renders the block registry to paged sheets and it is the right tool for comparing specimens against
 each other. `make demo` is the other question: what does this ONE thing look like when somebody has
 composed a frame around it.

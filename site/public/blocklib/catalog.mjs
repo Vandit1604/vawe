@@ -1,5 +1,5 @@
 // blocks/catalog.mjs: the REGISTRY MANIFEST. One data row per named block entry. This is the single
-// source of truth for (a) what the registry contains, (b) how each renders in `make catalog`, and
+// source of truth for (a) what the registry contains, (b) how each renders in `make site X=catalog`, and
 // (c) the auto-generated engine-doctrine/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
 // in its family factory if it's a family.variant). No hand-placement, no per-block catalog code.
 //
@@ -135,7 +135,7 @@ export const CATALOG = [
   { name: 'checklist', family: 'checklist', blurb: "a checklist of items with checkboxes ticking off one by one, done rows dim to read as completed.",
     props: { w: 460, items: [
       { text: 'Write scene JSON', done: true }, { text: 'make check GATE=critique', done: true },
-      { text: 'make catalog', done: true }, { text: 'Render', done: false }] } },
+      { text: 'make site X=catalog', done: true }, { text: 'Render', done: false }] } },
   { name: 'table', family: 'table', blurb: "a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another.",
     props: { w: 560, cols: ['Format', 'FPS', 'Status'], rows: [
       ['portrait', '30', 'ready'], ['landscape', '60', 'ready'], ['alpha', '30', 'beta']] } },

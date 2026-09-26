@@ -45,7 +45,7 @@ point).
 | `bento` | an asymmetric bento grid: one hero cell + supporting cells (glass/mesh/spotlight cell looks, inlined as `sleek.mjs` locals) | scale contrast, not a uniform card grid |
 
 Glass needs something behind it: put an `aurora` paint under a frosted panel or the blur has nothing to
-work on. `make catalog` renders the whole registry; browse it before hand-rolling a surface.
+work on. `make site X=catalog` renders the whole registry; browse it before hand-rolling a surface.
 
 ## Build the HTML FIRST (the default loop)
 

@@ -25,6 +25,6 @@ group: crosscutting
 
 - **`make demo Q="…" [NAME=…] [FX=…] [SUBJECT=…]`** writes the archetype and runs the dev loop
   directly; read `engine-doctrine/CRAFT/SPECIMEN.md` first for why the subject is fixed and every constant is
-  fixed, and when the honest answer is `make catalog` (browse the existing block registry) instead of
+  fixed, and when the honest answer is `make site X=catalog` (browse the existing block registry) instead of
   a new demo.
 - No storyboard, no lock sheet, no ship ladder: a demo never runs `make ship`.

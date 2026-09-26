@@ -26,7 +26,7 @@ const built = fs.readFileSync(SRC, 'utf8')
 const current = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
 if (check) {
   if (current === built) { console.log('✓ site/public/deck.html is current'); process.exit(0); }
-  console.error('✗ site/public/deck.html is stale, run `make deck`'); process.exit(1);
+  console.error('✗ site/public/deck.html is stale, run `make site X=deck`'); process.exit(1);
 }
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
 fs.writeFileSync(OUT, built);

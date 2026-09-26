@@ -9,7 +9,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: stage worktrees dev check ship regen dev-tool gen script animatic panels beats preview storyboard-check styleframes beatsync build video render all look frame blueprints audit-test test lib-test palette brandspec lookbook sections study photos ledger ledger-add captions install-hooks assets list clean gen-image gen-clip gen-video gallery examples docs doc-index grammar claims ref studio doctor
+.PHONY: stage worktrees dev check ship regen dev-tool gen site script animatic panels beats preview storyboard-check styleframes beatsync build video render all look frame blueprints audit-test test lib-test palette brandspec lookbook sections study photos ledger ledger-add captions install-hooks assets list clean gen-image gen-clip gen-video grammar claims ref studio doctor
 
 # make doctor: is the checkout ready to render? Today: is gsap vendored (assets/vendor/gsap.min.js,
 # gitignored, written by the root "postinstall" script). Prints the fix command rather than failing
@@ -38,16 +38,6 @@ audio-bed: ## [dev] resolve `audio.music:"auto"` to a concrete bed from the scen
 # (Distinct from `make captions`, which times captions from a plain SCRIPT string, harness/author/captions.mjs.)
 vo-captions: ## [dev] turn a VO word-timing sidecar (audio.voWords) into timed karaoke captions.
 	node harness/media/vo-captions.mjs $(D) $(if $(STYLE),--style $(STYLE)) $(if $(filter 1,$(WRITE)),--write)
-
-# make gallery: build the hover-to-play example showcase (out/gallery/index.html) from the flagship
-# registry (films/scene/examples.json). Render the examples first (make video / beatsync).
-gallery: ## [site] build the hover-to-play example showcase (out/gallery/index.html) from the flagship registry
-	node scripts/site/examples-gallery.mjs
-
-# make examples: rebuild the whole flagship showcase from committed sources (beatsync + render each,
-# then the gallery). Reproducible fixtures. Run `make music-pack` first for the beat-synced ones.
-examples: build ## [site] rebuild the whole flagship showcase from committed sources (beatsync + render each, then the gallery).
-	node scripts/site/examples-build.mjs
 
 # make beatmap MUSIC=assets/music/launch.wav: detect tempo + beat grid -> <name>.beats.json, so an
 # edit can be built ON the music. Reports confidence; an ambient pad has no beat and it says so.
@@ -251,6 +241,9 @@ dev-tool: ## [maintenance] one-off dev/maintenance tools with no direct caller, 
 gen: ## [engine] the engine's asset/doc bakers, routed by name (X=<name>; bare X lists them)
 	@node harness/lib/gen-tool.mjs "$(X)"
 
+site: ## [site] what vawe.dev publishes, routed by name (X=<name>; bare X lists them)
+	@node harness/lib/site-tool.mjs "$(X)"
+
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
@@ -389,24 +382,6 @@ gate-test: ## [maintenance] MUTATION-test the gates: feed each one a fixture bui
 # the render only reads the finished PNG. Pass it with ./bin/vawe <scene> --watermark assets/watermark/draft.png
 watermark: ## [ship] bake the draft watermark sheet.
 	node generators/media/watermark.mjs
-
-# make docs, TWO MODES ON ONE MAP. With Q= it ANSWERS one question: which document settles this, ranked
-# over the same `when:`/`answers:` frontmatter, the doc-side twin of `make arsenal Q=`. Bare, it prints
-# the whole map to browse, which is what this target always did.
-#
-# Asking beats browsing here for a measured reason. The map is 157 rows, and it used to ALSO ship as
-# `skills/vawe-docs/SKILL.md`, about 9,500 tokens against Anthropic's 5,000-token body budget. Chroma's
-# Context Rot study (18 models) measures that one long coherent document retrieves worse than short
-# independent pieces, so a bigger table was the wrong direction; that skill is retired.
-docs: ## [site] which doc settles this? Q="<your question>" [N=3]; bare, prints the whole map
-	@if [ -n "$(Q)" ]; then node harness/author/docs.mjs "$(Q)" $(if $(N),--n $(N)) $(if $(JSON),--json,); \
-	 else cat engine-doctrine/INDEX.md; fi
-
-# make doc-index, regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md and
-# the table inside engine-doctrine/CRAFT/README.md. Run it after editing a doc's `when:` or
-# `answers:`, or after adding a doc. The views are generated so they cannot drift from the docs.
-doc-index: ## [site] regenerate every index view from the per-doc frontmatter: engine-doctrine/INDEX.md, the `vawe-docs` skill, and
-	@node quality/gates/doc-map.mjs --write $(if $(JSON),--json,)
 
 # make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition
 # across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: engine-doctrine/CRAFT/TRANSITIONS.md.
@@ -735,15 +710,6 @@ capture: ## [dev] lift a REAL UI component off a live site (its HTML + computed 
 # make docker-check: will the image carry what the Dockerfile copies? Reads the COPY lines and
 # applies .dockerignore. A mismatch here is invisible locally and fails the deploy.
 
-# make deploy-check [RANGE=a..b]: run the site's real build steps (site-engine, the fonts generator,
-# tsc --noEmit) so a break in them shows up here instead of on the deploy host. No RANGE checks
-# unconditionally, which is what you want before a push; pre-push passes the pushed range so an
-# unrelated commit (a film, a doc) pays nothing. Skips loudly, never silently, if site/ has no
-# node_modules. See quality/gates/site-build-check.mjs for the incident this replays.
-.PHONY: deploy-check
-deploy-check: ## [site] run the site's real build steps locally (site-engine + fonts + tsc), the check pre-push runs when it applies
-	@node quality/gates/site-build-check.mjs $(RANGE)
-
 .PHONY: worktrees
 # Retire agent worktrees whose work has landed. Reports by default; PRUNE=1 removes.
 # Content is the authority, never the commit graph: agent work here is often copied out rather than
@@ -861,44 +827,6 @@ compare: ## [dev] variant selection: tile candidate frames to pick the best (arg
 expand: ## [dev] expand {type:block} + {type:comp} sugar into real layers (D=<file>)
 	node harness/author/expand-blocks.mjs $(D)
 
-catalog: build ## [site] render the block registry to paged sheets (browse the arsenal)
-	node scripts/site/blocks-catalog.mjs
-	@sh scripts/site/catalog-render.sh
-
-blocks-docs: ## [site] regenerate the engine-doctrine/BLOCKS.md table from the manifest (CHECK=1 to verify only)
-	node scripts/site/blocks-docs.mjs $(if $(CHECK),--check,)
-
-blocks-json: ## [site] regenerate site/lib/blocks.json (the site's grid) from the manifest (CHECK=1 to verify only)
-	node scripts/site/blocks-json.mjs $(if $(CHECK),--check,)
-
-films-json: ## [site] check site/lib/films.json against the rendered films (WRITE=1 to rewrite)
-	node scripts/site/films-json.mjs $(if $(WRITE),--write,)
-
-	@echo "\u2713 site: published scenes, films and counts all agree with their sources"
-
-# make blocks-sync, after adding a block: docs table, the site's grid, and the site's per-block
-# scenes + posters. blocks-scenes is safe to include here because it needs no render: each block is
-# measured on its own stage, so adding one touches only its own files.
-blocks-sync: blocks-docs blocks-json blocks-scenes ## [site] regenerate everything derived from the block manifest
-
-# make blocks-scenes: one scene JSON + one poster still per block, for the site's blocks browser.
-# Each block gets its OWN 1920x1080 stage, so there is no cell arithmetic, no neighbour bleeding into
-# a crop, and no dependency on a rendered catalog reel. The site plays the scene live in the engine it
-# already vendors; the poster is the same scene, framed by the same measured rect.
-blocks-scenes: ## [site] per-block scene JSON + poster still for the site (no render needed)
-	node scripts/site/blocks-scenes.mjs
-
-# make registry. The agent-consumable REGISTRY: an index plus one item per block and beat, in a
-# component-catalog shape, so an outside agent can pick one by name and know what to write where.
-# Block items land in blocks/catalog/, beside the factories they describe; the index and every
-# non-block item land in registry/. Generated from blocks/catalog.mjs + blueprints/index.mjs; never
-# hand-edited.
-# CHECK=1 exits non-zero if either output is stale, so a forgotten regeneration is visible.
-# PHONY because both outputs are real directories, and make would otherwise call the target up to date.
-.PHONY: registry
-registry: ## [site] regenerate blocks/catalog/ + registry/ from the block + beat manifests (CHECK=1 to verify only)
-	node scripts/site/registry.mjs $(if $(CHECK),--check,)
-
 house-style: ## [preflight] scaffold/refresh a brand's persisted Design Read (NAME=<brand> [THEME=<theme>])
 	node scripts/brand/house-style.mjs $(NAME) $(THEME)
 
@@ -910,9 +838,6 @@ judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (
 
 scrub: ## [dev] preview strip: contact sheet of the whole film (M=<fmt> or F=<mp4>)
 	node harness/author/scrub.mjs $(F)
-
-site-assets: ## [site] engine renders -> site/public/assets (+posters). [RENDER=1] [ONLY=films] [CHECK=1] [FORCE=1]
-	node scripts/site/site-assets.mjs $(if $(RENDER),--render) $(if $(ONLY),--only $(ONLY)) $(if $(CHECK),--check) $(if $(FORCE),--force)
 
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
 # renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only
@@ -946,8 +871,4 @@ reveal: ## [dev] see how each beat ANIMATES IN, not where it lands.
 # own beats (not a template). WRITE=1 → <file>.cinematic.json; then refine + `make reveal`.
 cinematic: ## [dev] The CINEMATIC MOTION director: emit the camera-push + per-hero dolly + motion-blur scaffold that
 	node harness/author/cinematic.mjs $(D) $(if $(filter 1,$(WRITE)),--write)
-
-.PHONY: deck
-deck: ## [site] publish engine-doctrine/animation.html to the site as /deck (site/public/deck.html)
-	node scripts/site/deck.mjs
 
