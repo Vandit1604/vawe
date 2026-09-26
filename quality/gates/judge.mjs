@@ -1,7 +1,7 @@
 // quality/gates/judge.mjs: the VISION JUDGE (prep half). Static gates (validate/critique/slop/audit) can't SEE
 // composition or asset fidelity; this preps exactly what a vision model must look at + the criteria, and the
 // agent-in-the-loop scores it. It renders the KEY frames (each beat's mid + hook + CTA) into one labeled
-// sheet and writes the rubric (the brand house-style + the 7 craft dimensions + a verdict template). The
+// sheet and writes the rubric (the brand house-style + the craft rubric (11 dimensions + 2 checks) + a verdict template). The
 // AGENT then reads /tmp/judge/sheet.png against /tmp/judge/rubric.md and returns a PASS/FIX verdict.
 //
 // Usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
@@ -15,7 +15,7 @@ import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
 import { craftRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
-import { appendRun } from '../../harness/lib/runlog.mjs';
+import { appendRun, readRuns } from '../../harness/lib/runlog.mjs';
 import { JUDGE_CODES, isJudgeCode, parseFix } from '../../harness/lib/judge-codes.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -89,6 +89,21 @@ if (verdictArg) {
   if (!renderHash || prep.receipt.renderHash !== renderHash) {
     console.error(`✗ ${mp4} has changed since the sheet was made (its content no longer matches). Re-run \`make judge D=${inp}\` first.`);
     process.exit(1);
+  }
+  // The judge is meant for a SEPARATE agent (engine-doctrine/JUDGE.md: "the PASS is not the author's
+  // to self-record"). The one signal the harness actually has for "which agent" is the Claude Code
+  // session id (runlog.mjs stamps every run with it). If the session recording this PASS is the same
+  // one that produced the render being judged, refuse: a FIX still records, since only PASS claims the
+  // independent eye agreed.
+  if (v === 'PASS') {
+    const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
+    const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
+    const authorSession = authorRun && authorRun.session;
+    if (thisSession && authorSession && thisSession === authorSession) {
+      console.error(`✗ refused: this PASS would be self-recorded. Session ${thisSession} both rendered ${path.basename(mp4)} and is now trying to pass it. Hand ${sheet} and its rubric to a fresh agent/session that did not author this film, and record PASS from there.`);
+      f.fail('judge-self-recorded', 'a PASS was attempted by the same session that rendered this cut', { fix: 'record PASS from a separate agent/session' });
+      process.exit(1);
+    }
   }
   // --fix <code>@<beat>, repeated: the structured replacement for the free-text --fixes string
   // (engine-doctrine/JUDGE.md's own complaint: a finding written as a sentence can never become a
@@ -169,7 +184,7 @@ fs.writeFileSync(`${dir}/rubric.md`, craftRubric({
 
 console.log(`\n  judge · ${path.basename(mp4)} · ${tiles.length} key frames · brand: ${brand || '(none)'}`);
 console.log(`  → sheet:  ${dir}/sheet.png`);
-console.log(`  → rubric: ${dir}/rubric.md  (house-style + 8 craft dimensions + verdict template)`);
+console.log(`  → rubric: ${dir}/rubric.md  (house-style + 11 craft dimensions + 2 checks + verdict template)`);
 console.log(`  → measured: ${measured.length} finding(s) from audit.mjs + sweep-static.mjs, folded into the rubric`);
 console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each frame per dimension, return PASS/FIX + fixes.`);
 // Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
