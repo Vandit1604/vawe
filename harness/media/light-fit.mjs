@@ -17,7 +17,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { probeSize } from '../lib/frame-forensics.mjs';
+import { spawnSync } from 'node:child_process';
+import { probeSize, probeFps } from '../lib/frame-forensics.mjs';
 import { lightMap, lightMapDistance, lightMapPNG } from '../lib/light-map.mjs';
 import { tileGrid } from '../../quality/gates/tile.mjs';
 import { paintField, SCHEMA } from '../../core/lightfield/index.js';
@@ -238,6 +239,35 @@ function crossfadeHtml(keys) {
   return `<div style="position:absolute;inset:0;overflow:hidden">\n${divs.join('\n')}\n</div>`;
 }
 
+// ---------- the output shape: a `bg` WINDOW, never a `layers[]` entry ----------
+//
+// `var(--t)` above is written as the SCENE's absolute clock (core/layout/bg-html.js's `frame(t, ...)`
+// writes the raw scene time onto every hand-authored bg window). An `html` LAYER gets a different
+// clock: core/tracks/index.js resolves `layerTime(L, gt, start, end)` before calling the layer's own
+// `frame`, so a layer's `var(--t)` is LOCAL to the layer's own start, not the scene's. Pasting this
+// tool's crossfade (built on absolute breakpoints) into `layers[]` renders the first key correctly and
+// every key after it transparent, because the CSS is asking for a `--t` value the layer clock never
+// reaches (quality/refs/kinetic-promo/friction.jsonl). The fix is not a smarter div, it is emitting the
+// one shape that is already correct for these breakpoints: a `bg` window (`{from, to, html, tone}`,
+// core/validate/backgrounds.mjs's `BG_WINDOW_KEYS`), spread into the top-level `bg` array.
+const toRgbTriple = (hex) => { const { r, g, b } = toRgb(hex); return [r, g, b]; };
+export function toneFromGround(groundHex) {
+  return linLum(toRgbTriple(groundHex)) > 0.4 ? 'light' : 'dark';
+}
+export function bgWindow({ start, end, html, groundHex }) {
+  return { from: start, to: end, html, tone: toneFromGround(groundHex) };
+}
+
+// probeSize's `duration` is the CONTAINER's, which on this clip (36.310000s) runs past the video
+// STREAM's own duration (36.300000s, 2178 frames at 60fps): seeking anywhere from one frame short of
+// the container duration up to the container duration itself finds no decodable frame, because the
+// stream simply has nothing there. The stream's own duration is what a seek is actually bounded by.
+export function probeStreamDuration(video) {
+  const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',
+    'stream=duration', '-of', 'default=noprint_wrappers=1:nokey=1', video], { encoding: 'utf8' });
+  return +String(r.stdout).trim() || 0;
+}
+
 // ---------- CLI ----------
 const argv = process.argv.slice(2);
 const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
@@ -258,8 +288,18 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   if (!width || !height) die(`${ref} has no readable video stream.`);
   const shotBox = { w: Math.min(width, 640), h: Math.round(Math.min(width, 640) * height / width) };
 
+  // A seek AT OR PAST the video stream's own duration finds no frame (ffmpeg reports success with zero
+  // bytes decoded), and a beat window that ends exactly on the clip's last timestamp is the common
+  // case, not an edge case: quality/refs/kinetic-promo/friction.jsonl hit this on beat 9's `end` sitting
+  // on a 36.3s clip's own 36.3s duration. Clamp the last frame's worth back from the stream duration.
+  const streamDuration = probeStreamDuration(ref);
+  const frameTime = streamDuration > 0 ? 1 / (probeFps(ref) || 30) : 0;
+  const clampToClip = (t) => (streamDuration > 0 && t >= streamDuration - frameTime
+    ? Math.max(start, streamDuration - frameTime) : t);
+
   const n = Math.max(1, Math.min(maxKeys, Math.round((end - start) / step) + 1));
-  const times = n === 1 ? [start] : Array.from({ length: n }, (_, i) => start + (i * (end - start)) / (n - 1));
+  const times = (n === 1 ? [start] : Array.from({ length: n }, (_, i) => start + (i * (end - start)) / (n - 1)))
+    .map(clampToClip);
 
   const refMaps = times.map((t) => lightMap(ref, { t }));
   const fitted = refMaps.map((m) => fitFieldOpts(m));
@@ -291,14 +331,17 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const after = useCorrection ? correctedDist : geo.dist;
 
   const html = crossfadeHtml(keys);
-  const layer = { type: 'html', id: 'lightfit-bg', start, end, html };
+  const win = bgWindow({ start, end, html, groundHex: keys[0].opts.colour.ground });
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, JSON.stringify(layer, null, 2) + '\n');
+  fs.writeFileSync(out, JSON.stringify(win, null, 2) + '\n');
 
   console.log(`  LIGHT-FIT · ${path.basename(ref)} ${start}-${end}s · ${n} key(s)`);
   console.log(`  light-map ΔE: closed-form fit ${before.toFixed(2)} -> geometry search ${geo.dist.toFixed(2)} `
     + `(${geo.evals} evals) -> ${useCorrection ? 'colour-corrected' : 'colour correction rejected, kept'} ${after.toFixed(2)}`);
-  console.log(`  ✓ wrote ${path.relative(ROOT, out)}`);
+  console.log(`  ✓ wrote ${path.relative(ROOT, out)}: a \`bg\` WINDOW ({from, to, html, tone}), spread `
+    + `into the top-level \`bg\` array. Its var(--t) is the scene's ABSOLUTE clock, which is what a bg `
+    + `window gets; pasted into layers[] instead it reads transparent after the first key (a layer gets `
+    + `LOCAL time). Never wrap this in {"type":"html", ...} and drop it into layers[].`);
 
   if (grid) {
     const cell = 40;
