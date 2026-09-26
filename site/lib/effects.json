@@ -1,15 +1,11 @@
 {
-  "total": 716,
-  "previewed": 339,
-  "families": 60,
+  "total": 601,
+  "previewed": 274,
+  "families": 52,
   "tags": [
     [
       "asset",
       16
-    ],
-    [
-      "audio",
-      6
     ],
     [
       "background",
@@ -22,10 +18,6 @@
     [
       "canvas",
       11
-    ],
-    [
-      "captions",
-      19
     ],
     [
       "composition",
@@ -45,7 +37,7 @@
     ],
     [
       "layer",
-      42
+      18
     ],
     [
       "motion key",
@@ -61,7 +53,7 @@
     ],
     [
       "per-layer",
-      92
+      78
     ],
     [
       "per-layer/scene",
@@ -76,20 +68,12 @@
       20
     ],
     [
-      "scene",
-      12
-    ],
-    [
       "static",
       54
     ],
     [
       "text",
-      48
-    ],
-    [
-      "text/parts",
-      6
+      8
     ],
     [
       "theme",
@@ -97,7 +81,7 @@
     ],
     [
       "timing",
-      78
+      84
     ],
     [
       "top-level",
@@ -229,61 +213,6 @@
           "name": "spark",
           "stem": "drawn-icons--spark",
           "desc": "something new, generated, or AI-made. Novelty and creation rather than speed.",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "motion-voices-tactile-sound",
-      "title": "Motion voices (tactile sound)",
-      "tag": "audio",
-      "intro": "The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote · a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `whoosh` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the six can also be placed by hand as `audio.cues[]`. Doctrine · `engine-doctrine/CRAFT/SOUND.md`.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
-      "count": 6,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "bloom",
-          "stem": "motion-voices-tactile-sound--bloom",
-          "desc": "something OPENS · placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut, and on a declared `spectacle`. Slower in than the others, because an opening is not an arrival",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "chime",
-          "stem": "motion-voices-tactile-sound--chime",
-          "desc": "a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "droplet",
-          "stem": "motion-voices-tactile-sound--droplet",
-          "desc": "something falls into place · a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "impact",
-          "stem": "motion-voices-tactile-sound--impact",
-          "desc": "something heavy ARRIVES and lands hard · a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "pluck",
-          "stem": "motion-voices-tactile-sound--pluck",
-          "desc": "punctuation, for a small element or a counter digit. Quiet on purpose · this is the one that becomes a machine gun, and the density rules exist because of it",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "whoosh",
-          "stem": "motion-voices-tactile-sound--whoosh",
-          "desc": "air moving past. One camera gesture, one whoosh, never one per keyframe · the sound rises as the move starts and falls away as it passes",
           "scene": null,
           "noPreview": null
         }
@@ -886,152 +815,6 @@
       ]
     },
     {
-      "id": "caption-styles",
-      "title": "Caption styles",
-      "tag": "captions",
-      "intro": "`captionStyle:\"<name>\"` alongside a `captions:[{t0,t1,text}]` array. How burnt-in captions present. Sound and captions · `engine-doctrine/CRAFT/SOUND.md`.",
-      "mode": "table",
-      "note": null,
-      "noPreview": null,
-      "count": 19,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "clipWipe",
-          "stem": "caption-styles--clipwipe",
-          "desc": "LINE-level · an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time",
-          "scene": "/assets/effects/caption-styles--clipwipe.json",
-          "noPreview": null
-        },
-        {
-          "name": "flipUp",
-          "stem": "caption-styles--flipup",
-          "desc": "the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all",
-          "scene": "/assets/effects/caption-styles--flipup.json",
-          "noPreview": null
-        },
-        {
-          "name": "focusPull",
-          "stem": "caption-styles--focuspull",
-          "desc": "a rack focus · an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size",
-          "scene": "/assets/effects/caption-styles--focuspull.json",
-          "noPreview": null
-        },
-        {
-          "name": "ghostSplit",
-          "stem": "caption-styles--ghostsplit",
-          "desc": "two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme",
-          "scene": "/assets/effects/caption-styles--ghostsplit.json",
-          "noPreview": null
-        },
-        {
-          "name": "highlight",
-          "stem": "caption-styles--highlight",
-          "desc": "a marker band sweeps left to right behind the active word, the accent mixed 28% into transparent so white text over it stays at 4.9 · 1 contrast or better",
-          "scene": "/assets/effects/caption-styles--highlight.json",
-          "noPreview": null
-        },
-        {
-          "name": "inkFill",
-          "stem": "caption-styles--inkfill",
-          "desc": "the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself",
-          "scene": "/assets/effects/caption-styles--inkfill.json",
-          "noPreview": null
-        },
-        {
-          "name": "kineticSlam",
-          "stem": "caption-styles--kineticslam",
-          "desc": "the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still",
-          "scene": "/assets/effects/caption-styles--kineticslam.json",
-          "noPreview": null
-        },
-        {
-          "name": "letterRise",
-          "stem": "caption-styles--letterrise",
-          "desc": "the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter · the line is present from the first frame, where typeOn assembles it out of nothing",
-          "scene": "/assets/effects/caption-styles--letterrise.json",
-          "noPreview": null
-        },
-        {
-          "name": "neonEdge",
-          "stem": "caption-styles--neonedge",
-          "desc": "the accent lives only in a halo · the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all",
-          "scene": "/assets/effects/caption-styles--neonedge.json",
-          "noPreview": null
-        },
-        {
-          "name": "pillKaraoke",
-          "stem": "caption-styles--pillkaraoke",
-          "desc": "a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant",
-          "scene": "/assets/effects/caption-styles--pillkaraoke.json",
-          "noPreview": null
-        },
-        {
-          "name": "readerFocus",
-          "stem": "caption-styles--readerfocus",
-          "desc": "a teleprompter · three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1",
-          "scene": "/assets/effects/caption-styles--readerfocus.json",
-          "noPreview": null
-        },
-        {
-          "name": "scramble",
-          "stem": "caption-styles--scramble",
-          "desc": "the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does",
-          "scene": "/assets/effects/caption-styles--scramble.json",
-          "noPreview": null
-        },
-        {
-          "name": "typeOn",
-          "stem": "caption-styles--typeon",
-          "desc": "a typewriter, per CHARACTER · an unarrived letter holds its space at visibility · hidden so the line never reflows, and the current one carries an inset accent caret",
-          "scene": "/assets/effects/caption-styles--typeon.json",
-          "noPreview": null
-        },
-        {
-          "name": "underlineDraw",
-          "stem": "caption-styles--underlinedraw",
-          "desc": "a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight · it sits below the ink, so it costs the text no contrast",
-          "scene": "/assets/effects/caption-styles--underlinedraw.json",
-          "noPreview": null
-        },
-        {
-          "name": "waveRide",
-          "stem": "caption-styles--waveride",
-          "desc": "one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it",
-          "scene": "/assets/effects/caption-styles--waveride.json",
-          "noPreview": null
-        },
-        {
-          "name": "weightShift",
-          "stem": "caption-styles--weightshift",
-          "desc": "the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix",
-          "scene": "/assets/effects/caption-styles--weightshift.json",
-          "noPreview": null
-        },
-        {
-          "name": "weightWave",
-          "stem": "caption-styles--weightwave",
-          "desc": "a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes",
-          "scene": "/assets/effects/caption-styles--weightwave.json",
-          "noPreview": null
-        },
-        {
-          "name": "wordFlash",
-          "stem": "caption-styles--wordflash",
-          "desc": "ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint",
-          "scene": "/assets/effects/caption-styles--wordflash.json",
-          "noPreview": null
-        },
-        {
-          "name": "wordSlide",
-          "stem": "caption-styles--wordslide",
-          "desc": "the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it",
-          "scene": "/assets/effects/caption-styles--wordslide.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
       "id": "compositions-bespoke-per-beat-timeline",
       "title": "Compositions (bespoke per-beat timeline)",
       "tag": "composition",
@@ -1529,187 +1312,6 @@
           "stem": "glow-presets--spotlight",
           "desc": "a soft-edged cone from an apex, aimed by `angle`, faded with distance so it never clips",
           "scene": "/assets/effects/glow-presets--spotlight.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "layer-types",
-      "title": "Layer types",
-      "tag": "layer",
-      "intro": "The vocabulary itself · `{ \"type\":\"<name>\" }`. Everything else in this document is a dial ON one of these. Full props per type · `films/scene/schema.json`, and `engine-doctrine/PRIMITIVES.md` for what each is FOR.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "a layer type is the noun, not the effect. Every preview on this page is already one of them.",
-      "count": 24,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "adjust",
-          "stem": "layer-types--adjust",
-          "desc": "one grade over everything BENEATH it · blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "beam",
-          "stem": "layer-types--beam",
-          "desc": "a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "board",
-          "stem": "layer-types--board",
-          "desc": "a populated workspace from pure data · up to 4 columns of up to 5 mini issue-cards, entering as one clip",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "clip",
-          "stem": "layer-types--clip",
-          "desc": "a video played as a preloaded PNG frame sequence · the frame swaps the <img> src, so no decoder state can drift between renders",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "component",
-          "stem": "layer-types--component",
-          "desc": "a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w`",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "composition",
-          "stem": "layer-types--composition",
-          "desc": "names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "count",
-          "stem": "layer-types--count",
-          "desc": "a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER · one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "cursor",
-          "stem": "layer-types--cursor",
-          "desc": "a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt` · arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`)",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "doc",
-          "stem": "layer-types--doc",
-          "desc": "a file card from pure data · an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "globe",
-          "stem": "layer-types--globe",
-          "desc": "a dotted planet with tapered route arcs, drawn by vendored cobe · atmospheric glow and a diffuse terminator. reach for `three:\"globe\"` instead only when you need a real sun vector",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "glow",
-          "stem": "layer-types--glow",
-          "desc": "soft light with no WebGL · a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight)",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "group",
-          "stem": "layer-types--group",
-          "desc": "layout by containment · a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "html",
-          "stem": "layer-types--html",
-          "desc": "raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "image",
-          "stem": "layer-types--image",
-          "desc": "an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "lottie",
-          "stem": "layer-types--lottie",
-          "desc": "an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "paint",
-          "stem": "layer-types--paint",
-          "desc": "a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "particles",
-          "stem": "layer-types--particles",
-          "desc": "a deterministic particle emitter · `preset` picks confetti (a gravity-fed burst), sparks (a fast radial flash) or dust (a slow ambient drift). Closed-form per particle, seeded by `seed`, never a running sim",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "raymarch",
-          "stem": "layer-types--raymarch",
-          "desc": "a lit implicit surface from a distance field · a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "rect",
-          "stem": "layer-types--rect",
-          "desc": "a plain box, panel, card or pill. it carries no text · put that on a higher track",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "shader",
-          "stem": "layer-types--shader",
-          "desc": "a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "svg",
-          "stem": "layer-types--svg",
-          "desc": "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin)",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "text",
-          "stem": "layer-types--text",
-          "desc": "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "three",
-          "stem": "layer-types--three",
-          "desc": "a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express · a font outline, a device body, a captured UI plane, a point cloud",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "video",
-          "stem": "layer-types--video",
-          "desc": "real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still",
-          "scene": null,
           "noPreview": null
         }
       ]
@@ -2971,117 +2573,6 @@
       ]
     },
     {
-      "id": "per-layer-modifiers",
-      "title": "Per-layer modifiers",
-      "tag": "per-layer",
-      "intro": "`\"modifiers\"` on a layer, applied in array order after every motion track. A physical treatment rather than an entrance · a kick on the beat, a blend mode, an occlusion, a tilt, a progress ring, a cast shadow. NOT `\"fx\"`, which is the named-GSAP-effect slot and refuses an entry with no name.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "each modifier is a treatment ON another layer, so it has no subject of its own to preview; the arsenal shows them through the scenes that use them.",
-      "count": 14,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "alongPath",
-          "stem": "per-layer-modifiers--alongpath",
-          "desc": "set the line of type ON A CURVE and, if you ask, send it travelling along one. The general case `circle` is one point of, and the only way to bend a headline",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "ghost",
-          "stem": "per-layer-modifiers--ghost",
-          "desc": "the only effect that reads TIME AS A MATERIAL · it evaluates the layer's own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "kick",
-          "stem": "per-layer-modifiers--kick",
-          "desc": "hit the layer on the film's own joints. A cut, a seam or a sting shoves it, so the frame feels the edit",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "lag",
-          "stem": "per-layer-modifiers--lag",
-          "desc": "FOLLOW-THROUGH · this layer trails another layer's motion by a frame or three and overruns its stop before settling. Stagger delays a sibling's entrance; this makes one layer drag behind another's continuous motion, which is half of what separates an animated object from a moved image",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "matte",
-          "stem": "per-layer-modifiers--matte",
-          "desc": "a LUMA MATTE · another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "mixBlend",
-          "stem": "per-layer-modifiers--mixblend",
-          "desc": "how this layer's pixels combine with what is already painted behind it, knock a headline out of a photo",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "occlude",
-          "stem": "per-layer-modifiers--occlude",
-          "desc": "hide this layer where another one covers it, put something BEHIND something else without reordering the stack",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "plane",
-          "stem": "per-layer-modifiers--plane",
-          "desc": "stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "progress",
-          "stem": "per-layer-modifiers--progress",
-          "desc": "hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "shadow",
-          "stem": "per-layer-modifiers--shadow",
-          "desc": "a drop shadow that knows where the light is, so every layer does not point the same way",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "squash",
-          "stem": "per-layer-modifiers--squash",
-          "desc": "SQUASH AND STRETCH read off the layer's own velocity · the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "tilt",
-          "stem": "per-layer-modifiers--tilt",
-          "desc": "turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "upright",
-          "stem": "per-layer-modifiers--upright",
-          "desc": "AUTO-ORIENT · hold this layer UPRIGHT while the layer carrying it rotates, so an arrangement can turn without its contents turning with it. Parenting gives you the rotation for free and it is almost always wrong · photographs carried round a circle go upside down at the bottom exactly when the motion peaks",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "wordSlot",
-          "stem": "per-layer-modifiers--wordslot",
-          "desc": "one word of the sentence swaps for the next while NOTHING after it reflows. The slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
       "id": "idles-ambient-hold-motion",
       "title": "Idles (ambient hold motion)",
       "tag": "per-layer/scene",
@@ -3486,103 +2977,6 @@
           "name": "top-right",
           "stem": "placement--top-right",
           "desc": "pinned into the top-right corner, 6% of the short side in from both edges of the frame",
-          "scene": null,
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "spectacle-devices",
-      "title": "Spectacle devices",
-      "tag": "scene",
-      "intro": "`\"spectacle\": { \"at\", \"of\", \"device\", \"why\" }`. The film NOMINATES its one loud moment. A shader `device` (below) is written as a sting at `at`, above the film; a non-shader one (\"cut · <name>\", \"seam · <name>\", \"kinetic · <name>\", \"layer · <id>\") names a mechanism the film ALREADY builds and is only verified, never injected. Either way the other half is what makes it real · with a spectacle declared the engine pulls EVERY competing amplitude dial down to 55% (other stings, seams, look strength, glow/beam intensity, kick scale) and exempts the layer named by `of` (and the device's own layer, when it named one). Naming the peak is a promise the rest stays restrained. `core/timeline/spectacle.js`.",
-      "mode": "table",
-      "note": null,
-      "noPreview": "a spectacle is a whole film turning its other dials down. One clip cannot show the restraint that makes it work.",
-      "count": 12,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "chromaticSplit",
-          "stem": "spectacle-devices--chromaticsplit",
-          "desc": "the frame tears into red/green/blue and snaps back, impact, energy, a hard landing",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "cinematicZoom",
-          "stem": "spectacle-devices--cinematiczoom",
-          "desc": "a fast push with the blur that comes off it, the frame lunging at the subject",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "dispersion",
-          "stem": "spectacle-devices--dispersion",
-          "desc": "the picture separates into its spectrum and reassembles, glass, prisms, luxury",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "flash",
-          "stem": "spectacle-devices--flash",
-          "desc": "a single bright bloom over the whole frame, up and gone, the plainest peak there is",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "glitch",
-          "stem": "spectacle-devices--glitch",
-          "desc": "a stepped horizontal shear, no smoothing. Alarm, breakage, a system under load",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "iridescence",
-          "stem": "spectacle-devices--iridescence",
-          "desc": "an oil-slick sheen washes across the frame once, colour as the event",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "lens",
-          "stem": "spectacle-devices--lens",
-          "desc": "a wide optical bulge and release. The frame bending under the weight of the moment",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "ripple",
-          "stem": "spectacle-devices--ripple",
-          "desc": "a ring travels out from the centre and distorts what it crosses, an impact you can watch spread",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "sdfIris",
-          "stem": "spectacle-devices--sdfiris",
-          "desc": "a hard iris opens from the centre. A shutter on the moment, theatrical and exact",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "streak",
-          "stem": "spectacle-devices--streak",
-          "desc": "a bright bar sweeps the frame. A specular pass over a mark, the cheapest premium peak",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "vortex",
-          "stem": "spectacle-devices--vortex",
-          "desc": "the frame twists about its centre and unwinds, the loudest of the radial family",
-          "scene": null,
-          "noPreview": null
-        },
-        {
-          "name": "whipPan",
-          "stem": "spectacle-devices--whippan",
-          "desc": "the frame smears sideways as if the camera whipped to it, motion the picture cannot carry alone",
           "scene": null,
           "noPreview": null
         }
@@ -4006,250 +3400,6 @@
       ]
     },
     {
-      "id": "kinetic-text-presets",
-      "title": "Kinetic text presets",
-      "tag": "text",
-      "intro": "`split`+`preset` on a text layer. Words/chars reveal with motion. `{ \"split\":\"word\", \"preset\":\"up\", \"each\":0.4, \"stagger\":0.05 }`",
-      "mode": "table",
-      "note": null,
-      "noPreview": null,
-      "count": 33,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "assemble",
-          "stem": "kinetic-text-presets--assemble",
-          "desc": "each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE \"text animator + randomize-order range selector\" reveal. Pair it with `split: \"char\"`",
-          "scene": "/assets/effects/kinetic-text-presets--assemble.json",
-          "noPreview": null
-        },
-        {
-          "name": "blur",
-          "stem": "kinetic-text-presets--blur",
-          "desc": "resolves out of a 16px blur to 0 as it fades in · calm, premium",
-          "scene": "/assets/effects/kinetic-text-presets--blur.json",
-          "noPreview": null
-        },
-        {
-          "name": "blurUp",
-          "stem": "kinetic-text-presets--blurup",
-          "desc": "letters lift and sharpen out of blur together · the default kinetic headline",
-          "scene": "/assets/effects/kinetic-text-presets--blurup.json",
-          "noPreview": null
-        },
-        {
-          "name": "bounce",
-          "stem": "kinetic-text-presets--bounce",
-          "desc": "a spring bounces the unit up 60px with a visible overshoot (bounce 0.5, settle 0.5s) · playful brands only",
-          "scene": "/assets/effects/kinetic-text-presets--bounce.json",
-          "noPreview": null
-        },
-        {
-          "name": "chroma",
-          "stem": "kinetic-text-presets--chroma",
-          "desc": "R/G/B ghosts split apart and converge to a crisp glyph",
-          "scene": "/assets/effects/kinetic-text-presets--chroma.json",
-          "noPreview": null
-        },
-        {
-          "name": "colorWave",
-          "stem": "kinetic-text-presets--colorwave",
-          "desc": "the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink",
-          "scene": "/assets/effects/kinetic-text-presets--colorwave.json",
-          "noPreview": null
-        },
-        {
-          "name": "decode",
-          "stem": "kinetic-text-presets--decode",
-          "desc": "characters scramble through the chosen charset at 48 refreshes a second by default and resolve left to right as u climbs to 1, techy reveal",
-          "scene": "/assets/effects/kinetic-text-presets--decode.json",
-          "noPreview": null
-        },
-        {
-          "name": "down",
-          "stem": "kinetic-text-presets--down",
-          "desc": "words/chars drop 40px into place from above while fading in · the mirror of `up`",
-          "scene": "/assets/effects/kinetic-text-presets--down.json",
-          "noPreview": null
-        },
-        {
-          "name": "draw",
-          "stem": "kinetic-text-presets--draw",
-          "desc": "an SVG stroke draws itself on · the dash offset runs from 1 to 0 on a path normalised to length 1, easeOutCubic by default, `back:true` draws from the far end",
-          "scene": "/assets/effects/kinetic-text-presets--draw.json",
-          "noPreview": null
-        },
-        {
-          "name": "elastic",
-          "stem": "kinetic-text-presets--elastic",
-          "desc": "scales up from 0.3 with a springy overshoot (bounce 0.62, settle 0.5s), visible wobble · playful brands only",
-          "scene": "/assets/effects/kinetic-text-presets--elastic.json",
-          "noPreview": null
-        },
-        {
-          "name": "fade",
-          "stem": "kinetic-text-presets--fade",
-          "desc": "plain opacity fade, no motion at all · the neutral entrance, and the neutral exit reversed",
-          "scene": "/assets/effects/kinetic-text-presets--fade.json",
-          "noPreview": null
-        },
-        {
-          "name": "fall",
-          "stem": "kinetic-text-presets--fall",
-          "desc": "falls from above under gravity and lands with a small squash",
-          "scene": "/assets/effects/kinetic-text-presets--fall.json",
-          "noPreview": null
-        },
-        {
-          "name": "flap",
-          "stem": "kinetic-text-presets--flap",
-          "desc": "the glyph steps FORWARD through the board's alphabet one flap at a time and lands on its letter, hinging as it turns. An airport board, ordered where `decode` is random",
-          "scene": "/assets/effects/kinetic-text-presets--flap.json",
-          "noPreview": null
-        },
-        {
-          "name": "flip",
-          "stem": "kinetic-text-presets--flip",
-          "desc": "3D flip-up per unit, letters somersault into place · `axis` picks the hinge",
-          "scene": "/assets/effects/kinetic-text-presets--flip.json",
-          "noPreview": null
-        },
-        {
-          "name": "focus",
-          "stem": "kinetic-text-presets--focus",
-          "desc": "focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium",
-          "scene": "/assets/effects/kinetic-text-presets--focus.json",
-          "noPreview": null
-        },
-        {
-          "name": "gradient",
-          "stem": "kinetic-text-presets--gradient",
-          "desc": "a two-colour band (default #8a8f98 to #ffffff) at 250% width sweeps through the letterforms via background-clip text",
-          "scene": "/assets/effects/kinetic-text-presets--gradient.json",
-          "noPreview": null
-        },
-        {
-          "name": "highlight",
-          "stem": "kinetic-text-presets--highlight",
-          "desc": "a marker band, default rgba(255,220,90,0.35), grows left to right to 100% width behind the unit at 78% of its height",
-          "scene": "/assets/effects/kinetic-text-presets--highlight.json",
-          "noPreview": null
-        },
-        {
-          "name": "riseClip",
-          "stem": "kinetic-text-presets--riseclip",
-          "desc": "the word climbs out from behind a hard edge at its own baseline, hidden until it clears the line. The clean editorial reveal",
-          "scene": "/assets/effects/kinetic-text-presets--riseclip.json",
-          "noPreview": null
-        },
-        {
-          "name": "scale",
-          "stem": "kinetic-text-presets--scale",
-          "desc": "punches in from 0.4 scale to 1, an easeOutBack overshoot past the mark and back",
-          "scene": "/assets/effects/kinetic-text-presets--scale.json",
-          "noPreview": null
-        },
-        {
-          "name": "shadow",
-          "stem": "kinetic-text-presets--shadow",
-          "desc": "a long poster shadow collapses as the word settles, poster statements",
-          "scene": "/assets/effects/kinetic-text-presets--shadow.json",
-          "noPreview": null
-        },
-        {
-          "name": "shimmerWave",
-          "stem": "kinetic-text-presets--shimmerwave",
-          "desc": "looping light wave (per-unit) · a 3D crest travelling across the word; never settles",
-          "scene": "/assets/effects/kinetic-text-presets--shimmerwave.json",
-          "noPreview": null
-        },
-        {
-          "name": "skew",
-          "stem": "kinetic-text-presets--skew",
-          "desc": "slides in 70px with a 14deg italic shear that straightens as it lands · editorial, sporty",
-          "scene": "/assets/effects/kinetic-text-presets--skew.json",
-          "noPreview": null
-        },
-        {
-          "name": "slide",
-          "stem": "kinetic-text-presets--slide",
-          "desc": "slides in 80px from one side (`dir`), default left · pair it with the opposite exit",
-          "scene": "/assets/effects/kinetic-text-presets--slide.json",
-          "noPreview": null
-        },
-        {
-          "name": "stretch",
-          "stem": "kinetic-text-presets--stretch",
-          "desc": "stretches from 1.6x horizontal scale down to 1x with a 6px blur that clears as it snaps true · impact words",
-          "scene": "/assets/effects/kinetic-text-presets--stretch.json",
-          "noPreview": null
-        },
-        {
-          "name": "strike",
-          "stem": "kinetic-text-presets--strike",
-          "desc": "a rule draws THROUGH the word and it dims behind the line, still legible. The \"not X, Y\" beat, where the rejection is the content",
-          "scene": "/assets/effects/kinetic-text-presets--strike.json",
-          "noPreview": null
-        },
-        {
-          "name": "swing",
-          "stem": "kinetic-text-presets--swing",
-          "desc": "each unit hinges from its top edge and swings upright, playful, short words",
-          "scene": "/assets/effects/kinetic-text-presets--swing.json",
-          "noPreview": null
-        },
-        {
-          "name": "tilt",
-          "stem": "kinetic-text-presets--tilt",
-          "desc": "each unit rises and swings upright from a small angle, sporty and editorial. A flat rotation, not a 3D hinge · `flip` is the one that turns",
-          "scene": "/assets/effects/kinetic-text-presets--tilt.json",
-          "noPreview": null
-        },
-        {
-          "name": "type",
-          "stem": "kinetic-text-presets--type",
-          "desc": "a hard on/off with no transform · opacity flips from 0 to 1 the instant u passes `at` (default 0). Terminals, timers, code",
-          "scene": "/assets/effects/kinetic-text-presets--type.json",
-          "noPreview": null
-        },
-        {
-          "name": "underline",
-          "stem": "kinetic-text-presets--underline",
-          "desc": "a rule grows left to right along the baseline as the word lands, the marker under a heading",
-          "scene": "/assets/effects/kinetic-text-presets--underline.json",
-          "noPreview": null
-        },
-        {
-          "name": "unfold",
-          "stem": "kinetic-text-presets--unfold",
-          "desc": "opens from edge-on about its left hinge, a panel turning to face you, premium",
-          "scene": "/assets/effects/kinetic-text-presets--unfold.json",
-          "noPreview": null
-        },
-        {
-          "name": "up",
-          "stem": "kinetic-text-presets--up",
-          "desc": "words/chars rise 40px into place while fading in, no blur · the plain lift, and the engine's own default reveal",
-          "scene": "/assets/effects/kinetic-text-presets--up.json",
-          "noPreview": null
-        },
-        {
-          "name": "wave",
-          "stem": "kinetic-text-presets--wave",
-          "desc": "sinusoidal wave across units · a LOOP that never settles; ambient only",
-          "scene": "/assets/effects/kinetic-text-presets--wave.json",
-          "noPreview": null
-        },
-        {
-          "name": "weight",
-          "stem": "kinetic-text-presets--weight",
-          "desc": "the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still",
-          "scene": "/assets/effects/kinetic-text-presets--weight.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
       "id": "ransom-faces",
       "title": "Ransom faces",
       "tag": "text",
@@ -4319,123 +3469,6 @@
       ]
     },
     {
-      "id": "scramble-charsets-chars",
-      "title": "Scramble charsets (`chars`)",
-      "tag": "text",
-      "intro": "What `preset: \"decode\"` scrambles WITH, in `presetOpts` · `{ \"preset\":\"decode\", \"presetOpts\": { \"chars\":\"numbers\", \"rate\":48, \"revealDelay\":0.25 } }`. A named set, or any string of your own glyphs. `rate` is refreshes per SECOND (so a slower reveal is no longer also a slower scramble) and `revealDelay` is the fraction of the window the unit stays fully scrambled before it starts resolving, which is what makes the effect read as decoding rather than as noisy type.",
-      "mode": "table",
-      "note": null,
-      "noPreview": null,
-      "count": 7,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "binary",
-          "stem": "scramble-charsets-chars--binary",
-          "desc": "ones and zeros, the loudest cliche in the set, use it once and only where the subject IS binary",
-          "scene": "/assets/effects/scramble-charsets-chars--binary.json",
-          "noPreview": null
-        },
-        {
-          "name": "blocks",
-          "stem": "scramble-charsets-chars--blocks",
-          "desc": "four shades of block, so the word dissolves into a bar of noise instead of into other letters",
-          "scene": "/assets/effects/scramble-charsets-chars--blocks.json",
-          "noPreview": null
-        },
-        {
-          "name": "lowerCase",
-          "stem": "scramble-charsets-chars--lowercase",
-          "desc": "lowercase only, quieter still, and the right set under a lowercase headline",
-          "scene": "/assets/effects/scramble-charsets-chars--lowercase.json",
-          "noPreview": null
-        },
-        {
-          "name": "mixed",
-          "stem": "scramble-charsets-chars--mixed",
-          "desc": "capitals, digits and four symbols, the house default and the busiest of the sets",
-          "scene": "/assets/effects/scramble-charsets-chars--mixed.json",
-          "noPreview": null
-        },
-        {
-          "name": "numbers",
-          "stem": "scramble-charsets-chars--numbers",
-          "desc": "digits only, for a counter, a price, a code or anything the film is about to state as a number",
-          "scene": "/assets/effects/scramble-charsets-chars--numbers.json",
-          "noPreview": null
-        },
-        {
-          "name": "symbols",
-          "stem": "scramble-charsets-chars--symbols",
-          "desc": "punctuation and operators, a terminal or a cipher rather than a word",
-          "scene": "/assets/effects/scramble-charsets-chars--symbols.json",
-          "noPreview": null
-        },
-        {
-          "name": "upperCase",
-          "stem": "scramble-charsets-chars--uppercase",
-          "desc": "capitals only, the calmest scramble and the one that keeps a headline reading as type",
-          "scene": "/assets/effects/scramble-charsets-chars--uppercase.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
-      "id": "stagger-order-from",
-      "title": "Stagger order (`from`)",
-      "tag": "text/parts",
-      "intro": "The ORDER a stagger runs in, on `stagger` as an object · `{ \"stagger\": { \"amount\": 0.6, \"from\": \"center\" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too · the wave starts at that unit.",
-      "mode": "table",
-      "note": null,
-      "noPreview": null,
-      "count": 6,
-      "undescribed": 0,
-      "entries": [
-        {
-          "name": "center",
-          "stem": "stagger-order-from--center",
-          "desc": "starts at the middle unit and opens outward both ways, so the word arrives as ONE object rather than as a train",
-          "scene": "/assets/effects/stagger-order-from--center.json",
-          "noPreview": null
-        },
-        {
-          "name": "edges",
-          "stem": "stagger-order-from--edges",
-          "desc": "starts at BOTH ends and closes on the middle, a line that shuts like a door",
-          "scene": "/assets/effects/stagger-order-from--edges.json",
-          "noPreview": null
-        },
-        {
-          "name": "first",
-          "stem": "stagger-order-from--first",
-          "desc": "the wave starts at the first unit and runs to the last, the default, and what a line of type being typed looks like",
-          "scene": "/assets/effects/stagger-order-from--first.json",
-          "noPreview": null
-        },
-        {
-          "name": "last",
-          "stem": "stagger-order-from--last",
-          "desc": "starts at the last unit and runs backwards to the first, pair it with a right-to-left exit",
-          "scene": "/assets/effects/stagger-order-from--last.json",
-          "noPreview": null
-        },
-        {
-          "name": "random",
-          "stem": "stagger-order-from--random",
-          "desc": "a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek",
-          "scene": "/assets/effects/stagger-order-from--random.json",
-          "noPreview": null
-        },
-        {
-          "name": "typewriter",
-          "stem": "stagger-order-from--typewriter",
-          "desc": "types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit",
-          "scene": "/assets/effects/stagger-order-from--typewriter.json",
-          "noPreview": null
-        }
-      ]
-    },
-    {
       "id": "theme-look-keys",
       "title": "Theme look keys",
       "tag": "theme",
@@ -4498,7 +3531,7 @@
       "mode": "chips",
       "note": "named by curve; pick by FEELING from the table in engine-doctrine/MOTION-CRAFT.md",
       "noPreview": "a curve is a feeling over time. Read the table in engine-doctrine/MOTION-CRAFT.md, then feel it in the editor.",
-      "count": 42,
+      "count": 46,
       "undescribed": 0,
       "entries": [
         {
@@ -4719,6 +3752,27 @@
           "noPreview": null
         },
         {
+          "name": "emphasized",
+          "stem": "easings--emphasized",
+          "desc": "MD3's hero curve, cubic-bezier(0.05,0.7,0.1,1) · the decelerate half of its two-part emphasis pair, for the one moment that should draw the eye",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "enter",
+          "stem": "easings--enter",
+          "desc": "MD3's decelerate curve, cubic-bezier(0,0,0,1) · the entrance half of this engine's own decelerate/accelerate rule, spelled by intent",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "exit",
+          "stem": "easings--exit",
+          "desc": "MD3's accelerate curve, cubic-bezier(0.3,0,1,1) · the exit half of the same rule, picked when a layer is leaving rather than arriving",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "hold",
           "stem": "easings--hold",
           "desc": "does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it",
@@ -4763,35 +3817,42 @@
         {
           "name": "spring",
           "stem": "easings--spring",
-          "desc": "passes the mark by a little and falls back, a physical landing with some give in it",
+          "desc": "damping ratio 0.65 (35% bounce) · enough give to pass the mark and fall back, settling in under a second",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring-bouncy",
           "stem": "easings--spring-bouncy",
-          "desc": "visibly passes the mark and swings back, the playful one. One per film at most",
+          "desc": "damping ratio 0.45 (55% bounce), the least stiff spring here · swings past the mark and takes over a second to settle. The playful one",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring-stiff",
           "stem": "easings--spring-stiff",
-          "desc": "most of the journey early, then a firm settle with no wobble at all",
+          "desc": "damping ratio 0.88 (12% bounce) · high stiffness, almost no give, and the fastest settle of the springs here at about half a second",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "springEase",
           "stem": "easings--springease",
-          "desc": "spring shaped but damped flat · nearly arrived at once, then creeping the last fraction",
+          "desc": "damping fraction 1 (critically damped) at a 0.5s response · nearly arrived by a third of a second, then creeping the last fraction",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "springStiff",
           "stem": "easings--springstiff",
-          "desc": "tight and quick with no visible pass beyond the mark, for something that must not look playful",
+          "desc": "critically damped, damping ratio 1 · all stiffness and no give, so it never passes the mark, settling about as fast as `spring`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "standard",
+          "stem": "easings--standard",
+          "desc": "MD3's default curve, cubic-bezier(0.2,0,0,1) · the everyday transition when nothing argues for enter, exit or emphasis",
           "scene": null,
           "noPreview": null
         }
@@ -5672,7 +4733,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.",
-      "count": 32,
+      "count": 34,
       "undescribed": 0,
       "entries": [
         {
@@ -5707,6 +4768,13 @@
           "name": "elastic",
           "stem": "plain-words-feel-duration-camera-comparative--elastic",
           "desc": "feel → `ease: \"easeOutElastic\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "expressive",
+          "stem": "plain-words-feel-duration-camera-comparative--expressive",
+          "desc": "duration → `0.4` seconds",
           "scene": null,
           "noPreview": null
         },
@@ -5784,6 +4852,13 @@
           "name": "pop",
           "stem": "plain-words-feel-duration-camera-comparative--pop",
           "desc": "feel → `ease: \"easeOutBack\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "productive",
+          "stem": "plain-words-feel-duration-camera-comparative--productive",
+          "desc": "duration → `0.22` seconds",
           "scene": null,
           "noPreview": null
         },

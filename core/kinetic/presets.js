@@ -52,7 +52,14 @@ const AXIS_AKA = {
 };
 export const AXIS_REGISTRY = defineRegistry('font-variation axis',
   { wght: [100, 900], wdth: [50, 200], slnt: [-15, 0], ital: [0, 1] },
-  { slot: 'axis', blurbs: AXIS_BLURBS, aka: AXIS_AKA });
+  { slot: 'axis', blurbs: AXIS_BLURBS, aka: AXIS_AKA,
+    catalog: {
+      title: 'Font-variation axes',
+      tag: 'text track',
+      intro: 'A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`. `{ "type":"text", "split":"word", "axis": { "wght": [300, 900] } }`',
+      usage: (n, { text }) => text({ split: 'word', axis: { [n]: AXIS_REGISTRY.entries[n] } }),
+      noPreview: true,
+    } });
 
 // axisStyle(axes): the font-variation TRACK, generalising wght() above to every axis a variable face
 // may carry. `axes = { wght: 620, wdth: 100, slnt: -8, GRAD: 40 }` writes every tag into ONE
