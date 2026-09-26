@@ -1015,6 +1015,8 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | name | words | action |
 |---|---|---|
 | `backdrop` | brand background rotation, which bg presets to use | ordered bg preset names the brand turns through, one window per beat: planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159) |
+| `bgDefault` | the theme own backdrop, bg use:"theme" default, brand bg rotation at render | a bg preset spec (or an array of 2+, a rotation) the theme paints when a beat opts in with `bg:[{"use":"theme"}]`; the one look key actually read at render time |
+| `bgPalette` | bg preset colour ramp, the palette bg presets paint with | the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme's own palette when absent |
 | `cuts` | default transition style, brand cut preference | the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat |
 | `field` | backdrop texture defaults, grain and vignette settings | grain and vignette numbers layered over the backdrop, both 0..1 strengths |
 | `layout` | anchor and margin, where content sits on the frame | the anchor band (left/center/right) and margin every beat composes against |
@@ -1063,5 +1065,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_729 primitives across 64 registries, 729 meeting the word-action contract today.
+_731 primitives across 64 registries, 731 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

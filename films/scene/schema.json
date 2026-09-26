@@ -488,6 +488,7 @@
    ],
    "adjust": [
     "amount",
+    "blend",
     "filter",
     "kind"
    ]
