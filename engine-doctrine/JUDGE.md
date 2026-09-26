@@ -47,8 +47,9 @@ this order:
    styleframes before a single frame of motion is built; this is that pass. It samples the same beat
    model `make judge` does (`quality/gates/beats-of.mjs`), so a look approved here and a judge run
    later never disagree about where a beat starts.
-2. **Motion review, separately**, once the look passes: `make direct D=<file>` (the motion director) and
-   `make judge D=<file> STRUCT=1` (below), whose MOTION axis is scored on its own.
+2. **Motion review, separately**, once the look passes: `make dev-tool X=critics D=<file> DECIDERS=1`
+   (the motion director) and `make judge D=<file> STRUCT=1` (below), whose MOTION axis is scored on
+   its own.
 3. **`node harness/dev/verify.mjs D=<file> [REF=<ref.mp4>]`: hard numbers, no eye.** Paste the printed
    block VERBATIM before any judging happens (the discipline HyperFrames enforces with `w2h-verify.mjs`:
    an agent skips a required step unless the raw numeric output is put in front of it, not summarized).
