@@ -38,7 +38,7 @@ const CHART_PAD = 22;     // the card's inset, all four sides
 const CHART_GAP = 14;     // between bars
 const CHART_GAP_Y = 8;    // between a bar and its captions
 const CHART_ROW = TYPE.body;   // a caption row's font size, which is what it costs in height. On the
-                               // scale now (was a bare 18); TYPE.body is the smallest step `make audit`
+                               // scale now (was a bare 18); TYPE.body is the smallest step `make check GATE=audit`
                                // will pass, since TYPE.fine (14) sits under its 14.04px floor.
 
 // barChart: labeled bars with values. `data` = [{label, value}]. Scales to the max.

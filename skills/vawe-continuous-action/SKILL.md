@@ -131,7 +131,7 @@ Then, and only then, write JSON.
   specific reference shot for shot.
 - [`vawe-effects`](../vawe-effects/SKILL.md) and [`vawe-camera`](../vawe-camera/SKILL.md) pick the
   mechanism per state change.
-- After rendering: `make seam-check`, then `make judge`, then the critics in
+- After rendering: `make check GATE=seam-check`, then `make judge`, then the critics in
   [`engine-doctrine/CRAFT/SUBAGENTS.md`](../../engine-doctrine/CRAFT/SUBAGENTS.md).
 
 ## Gotchas

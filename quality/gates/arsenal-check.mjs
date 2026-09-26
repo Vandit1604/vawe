@@ -145,7 +145,7 @@ const WAIVED = new Map(Object.entries({
   PROGRESS_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   SHADOW_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   TILT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
-  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in engine-doctrine/CRAFT/SOUND.md and graded by make audio-check',
+  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in engine-doctrine/CRAFT/SOUND.md and graded by make check GATE=audio-check',
   SEAM_CUE: 'sound, as CUT_CUE',
   CUES: 'sound, as CUT_CUE',
   PROFILE_BED: 'sound, as CUT_CUE',

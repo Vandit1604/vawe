@@ -1,4 +1,4 @@
-// CLI: `node core/validate/validate.mjs [data.json ...]` (make validate). No args → validate every
+// CLI: `node core/validate/validate.mjs [data.json ...]` (make check GATE=validate). No args → validate every
 // authored film scene + every theme pack (see discoverTargets). Never imported by the browser: only
 // validate.mjs's isMain branch reaches this module, and it does so with a dynamic import so the CLI's
 // node:fs/node:path use never has to be resolvable in a browser bundle.

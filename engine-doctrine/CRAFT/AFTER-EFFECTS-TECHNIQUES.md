@@ -4,7 +4,7 @@ answers: "26 named After Effects recipes with their real numbers · a HAVE/PARTL
 group: reference
 ---
 
-<!-- doc-refs-allow: make choreo · being built now by another agent from the choreography plan, not yet a Makefile target -->
+<!-- doc-refs-allow: make check GATE=choreo · being built now by another agent from the choreography plan, not yet a Makefile target -->
 
 # AFTER EFFECTS RECIPES: the named procedures, and what this engine already does
 
@@ -121,7 +121,7 @@ scenes in `films/scene/` carry `parts`, so this is under-used rather than missin
 
 **Routed from the plan today.** The `word-by-word` recipe (`recipes/recipes.json`): a line arrives one
 word after another, each rising into place, in place of one block sliding in.
-**Measured on the reference.** `<measured on example-madera by make choreo>`
+**Measured on the reference.** `<measured on example-madera by make check GATE=choreo>`
 
 **Sources:** https://www.svgator.com/blog/offset-delay-motion-design/ ·
 https://blog.frame.io/2023/12/13/insider-tips-how-to-create-a-staggered-layer-sequence-in-after-effects/
@@ -259,7 +259,7 @@ stop. This engine had no parent-child motion relationship outside the camera and
 makes one layer follow another's motion late and overrun its stop, `amp 0.05, freq 4, decay 8` after
 Ebberts. `kick`, which shoves a layer on the film's joints, remains a different thing: it fires off the
 edit, not off another layer's velocity.
-**Measured on the reference.** `<measured on example-madera by make choreo>`
+**Measured on the reference.** `<measured on example-madera by make check GATE=choreo>`
 
 **Sources:** https://motionscript.com/articles/bounce-and-overshoot.html ·
 https://archive.org/stream/TheAnimatorsSurvivalKitRichardWilliams/The%20Animator's%20Survival%20Kit%20-%20Richard%20Williams_djvu.txt
@@ -548,7 +548,7 @@ walking a diagonal. The engine's numbers agree with the practitioners' numbers, 
 **Routed from the plan today.** `idle: "breathe"`/`"drift"` on a layer, `cameraMove: "driftHold"` on the
 camera; this is the ambient layer in [`MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs),
 never the fix for a hole `motion-floor.mjs` finds (ambient padding does not satisfy it).
-**Measured on the reference.** `<measured on example-madera by make choreo>`
+**Measured on the reference.** `<measured on example-madera by make check GATE=choreo>`
 
 **Sources:** https://aejuice.com/blog/how-to-hold-keyframe-in-after-effects/ ·
 https://www.jakeinmotion.com/animation-principles-for-motion-designers
@@ -660,7 +660,7 @@ bridge and snap apart. What is still missing is per-vertex control of the route.
 match/shape morph handoff; the object-becomes-the-next-shot case is `becomes` instead (see
 [`MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs)), a different mechanism for a
 different question, one shape versus one identity.
-**Measured on the reference.** `<measured on example-madera by make choreo>`
+**Measured on the reference.** `<measured on example-madera by make check GATE=choreo>`
 
 **Sources:** https://lesterbanks.com/2017/10/morph-ae-create-nulls-paths/ ·
 https://helpx.adobe.com/in/after-effects/desktop/drawing-painting-and-paths/null-controllers/create-nulls-for-positional-properties-and-paths.html
@@ -693,7 +693,7 @@ to both shots. Nothing yet MEASURES whether two silhouettes line up; that judgem
 [`MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs). Cut on action, the neighbouring
 handoff in that same section, has no matching field: it is a plain hard cut placed on the action frame,
 unmeasured for alignment.
-**Measured on the reference.** `<measured on example-madera by make choreo>`
+**Measured on the reference.** `<measured on example-madera by make check GATE=choreo>`
 
 **Source:** https://en.wikipedia.org/wiki/Match_cut
 

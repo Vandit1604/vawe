@@ -136,7 +136,7 @@ export function auditFonts(root) {
 // every frame rendered in a substitute with nothing said. That is how Geist, Anybody and Manrope each
 // shipped wrong, and how a fresh worktree rendered its whole library in a fallback serif.
 //
-// The audit that could have caught it existed the whole time and was OPT-IN (`make font-audit`), which
+// The audit that could have caught it existed the whole time and was OPT-IN (`make check GATE=font-audit`), which
 // is a gate for a value we could refuse at the write site. This refuses it there instead: the four
 // families a theme names are author-supplied, they are known before the first frame, and a wrong one
 // invalidates every frame that follows.

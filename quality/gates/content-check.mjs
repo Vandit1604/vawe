@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/content-check.mjs: is a film's CONTENT as rich as the reference it studied, per ACT?
 //
-//   make content-check D=films/scene/<film>.json REF=<ref>
+//   make check GATE=content-check D=films/scene/<film>.json REF=<ref>
 //   node quality/gates/content-check.mjs <film.json> --ref <ref> [--pairs 1:1,2:2] [--strict]
 //
 // WHY PER ACT, NEVER A GLOBAL BAR. Measured with harness/media/content.mjs (engine-doctrine/CRAFT plan,
@@ -112,7 +112,7 @@ if (isMain) {
   const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
   const filmArg = argv.find((a) => !a.startsWith('--') && argv[argv.indexOf(a) - 1] !== '--ref' && argv[argv.indexOf(a) - 1] !== '--pairs') || process.env.D;
-  if (!filmArg) die('usage: make content-check D=films/scene/<film>.json REF=<ref>');
+  if (!filmArg) die('usage: make check GATE=content-check D=films/scene/<film>.json REF=<ref>');
   const refName = flag('--ref', 'REF');
   if (!refName) die('REF=<name> is required: which grammar/<name>.json to compare against.');
   const strict = argv.includes('--strict') || process.env.STRICT === '1';

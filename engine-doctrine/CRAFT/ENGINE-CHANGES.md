@@ -36,7 +36,7 @@ not know a rule exists cannot go and load it.
 **A part of the harness that decides something, refuses something, or tells the author something must
 record what it did AND what it withheld.** Not to a console that scrolls away: to `out/<film>.runs.jsonl`
 through `harness/lib/runlog.mjs`, which owns that file and is the only place its shape is written down.
-`make why` reads it back.
+`make check GATE=why` reads it back.
 
 This is the sixth rule because every expensive failure this repo has had was a silence, not a mistake:
 
@@ -222,7 +222,7 @@ Rules that make this real, not ceremonial:
   in two consumers, which is a pattern. A rule derived from a single run is a rule the next author
   obeys as though it were measured, because nothing in the sentence says it was not. Say so instead.
 - **Check the blast radius** before changing shared behaviour: grep the other scenes for the pattern,
-  and re-run `make probe` + `make snap`. Say plainly which existing videos change output and why.
+  and re-run `make check GATE=probe` + `make check GATE=snap`. Say plainly which existing videos change output and why.
 - **Report it.** Tell the user what was framework vs authoring. Never silently absorb engine bugs into
   a scene file.
 - **FIX THE RULE, NOT THE CALL SITE. Grep every consumer before you close it.** A measurement bug is

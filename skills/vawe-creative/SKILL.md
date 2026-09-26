@@ -20,7 +20,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
    under-reached.
 
 2. **Kinetic typography, always.** Key lines reveal word-by-word or char-by-char (`split`+`preset`), never
-   a flat fade. Numbers COUNT up. `make direction-floor` FAILS `plain-slideshow` if you skip this.
+   a flat fade. Numbers COUNT up. `make check GATE=direction-floor` FAILS `plain-slideshow` if you skip this.
 
 3. **A LIVING background: move the viewer.** Flat static white is the tell. Add a moving backdrop that
    fits the brand (this is a taste call, not a default):
@@ -30,7 +30,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
    - **Warm / expressive brand**: a richer field, `mesh`, `aurora`, `brandglow`, glassmorphism, floating
      shapes, brand-coloured. (Brew's warm peach glassmorphism is the reference for THIS register, not for
      an austere one: match the brand, don't copy Brew onto everything.)
-   Windows it (`bg:[{preset,from,to}]`), and always re-audit contrast. `make direction-floor` warns
+   Windows it (`bg:[{preset,from,to}]`), and always re-audit contrast. `make check GATE=direction-floor` warns
    `no-bg-motion` when the field is static.
 
 4. **Camera + transitions.** One slow camera push minimum; a `cinematicZoom` dive-IN on a product/dashboard
@@ -47,7 +47,7 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 
 7. **Hand-written HTML is BUILT through impeccable, never by eye.** For any `html` fragment / hook / CTA:
    load the `impeccable` skill (its `polish`/`audit`/`quieter` register-craft), and run
-   `make impeccable D=<fragment.html>` (the bundled detector, local + token-efficient), plus `make designspec-check`
+   `make check GATE=impeccable D=<fragment.html>` (the bundled detector, local + token-efficient), plus `make check GATE=designspec-check`
    on the rendered scene. Clear every tell before rendering (overused font, gradient text, card-in-card,
    centered defaults).
 

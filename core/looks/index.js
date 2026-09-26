@@ -9,7 +9,7 @@
 // path. Mirrors core/backgrounds/ (fx.js + presets.js: data; index.js: runner).
 //
 // No per-frame work and no frame feedback here: resolveComposite is pure, so renderFrame(n) stays
-// deterministic and `make probe` holds.
+// deterministic and `make check GATE=probe` holds.
 
 import { defineRegistry, blurbsOf } from '../registry/registry.js';
 import { PASSES, LOOKS, LOOK_AKA, KNOB_ROUTES, PASS_READS, clamp } from './presets.js';

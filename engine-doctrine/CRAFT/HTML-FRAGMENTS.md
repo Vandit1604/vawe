@@ -269,7 +269,7 @@ committed non-generic face** (the real brand font when reflecting a brand; never
 anything generic). Then gate it two ways, and know which one sees what.
 **`make preview HTML=<frag>`** runs the vendored impeccable detector over the FRAGMENT, in a real browser
 with real computed styles. That is where it works, and it is the only place it is still wired.
-**`make designspec-check D=<file>`** runs OUR rule table (`harness/lib/designspec-rules.mjs`) over the
+**`make check GATE=designspec-check D=<file>`** runs OUR rule table (`harness/lib/designspec-rules.mjs`) over the
 scene: the theme colour/font lock plus the copy and effect-dose rules. Both must be clean before you render.
 
 <!-- doc-refs-allow: make slop · this line records the target's retirement -->
@@ -499,7 +499,7 @@ right? Then render.
 **The gate that compares the plan with the frames built from it:**
 
 ```bash
-make frame-check D=films/scene/<film>.json
+make check GATE=frame-check D=films/scene/<film>.json
 ```
 
 It checks every fragment against its own beat, and it fails a size or a shadow that does not trace to
@@ -536,7 +536,7 @@ A film may declare its own resolved values, once, in `films/scene/<film>.design.
 (`harness/lib/design-spec.mjs`): palette, type roles, radius, shadow, space, laid over the stage kit's
 own numbers. No file, or an empty one, means the kit's values only.
 
-`quality/gates/design-drift.mjs` (`make design-drift D=<film>`, also run from `make frame-check`)
+`quality/gates/design-drift.mjs` (`make check GATE=design-drift D=<film>`, also run from `make check GATE=frame-check`)
 previews every fragment the storyboard names and checks each box's font, radius, shadow and colour
 against that set: near a token warns `design-token-hint` (reach for `var(--kit-...)`); nowhere near one
 blocks as `design-drift`, naming the fix. Silent with no design.md; `scale-drift` stays that check.

@@ -26,7 +26,7 @@ velocity-continuous path.
 `window-dolly`) JOINS whatever hand-authored `cameraMove` legs the film already has; it does not replace
 covering the rest of the film. `recipes/expand.mjs` appends the recipe leg after the hand legs, so a film
 with legs only in its opening seconds holds still (at the last leg's pose) for everything after, even
-though the plan asked for camera travel throughout. `make choreo` warns (`camera-coverage-floor`) when the
+though the plan asked for camera travel throughout. `make check GATE=choreo` warns (`camera-coverage-floor`) when the
 resolved legs cover under 40% of a film over 6s long.
 
 **A move HOLDS its end pose, forever, until another move changes it.** `cameraAt` holds the last keyframe
@@ -34,7 +34,7 @@ past its own window; nothing resets the camera at a cut, a recipe seam, or the f
 to `to:1.6` at 1s-2.6s is still at scale 1.6 at 10s if nothing says otherwise. To return to the normal
 frame, author the return as its own leg: `{"move":"slowPush","to":1}` (or any move ending `to:1` with no
 `tx`/`ty`), or, off a `window-dolly` recipe, a later one naming `zoomTo:1`. `make storyboard-check` and
-`make choreo` both warn (never block) when a later beat plans the normal/full-frame camera while an
+`make check GATE=choreo` both warn (never block) when a later beat plans the normal/full-frame camera while an
 earlier push is still open.
 
 ## The moves (all in `core/camera-moves/index.js`, all pure, all lib-tested)

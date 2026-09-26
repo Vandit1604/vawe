@@ -10,7 +10,7 @@
 // cursors, custom motion tracks, fx, background motion, and blueprint beats, and fails a video that
 // uses almost none of it. A scene composed from blueprints (`{type:"beat"}`) is directed by construction.
 //
-//   node quality/gates/direction-floor.mjs <scene.json> [--strict]   ·   make direction-floor D=<file>
+//   node quality/gates/direction-floor.mjs <scene.json> [--strict]   ·   make check GATE=direction-floor D=<file>
 // It also reads the scene as a CONTINUITY: on a short film, one content object must survive each cut
 // and CHANGE there (`no-continuous-object`). A film whose every beat is an island is a slideshow no
 // matter how much motion each island contains. Boundaries come from two places, DECLARED (`cuts` /
@@ -616,7 +616,7 @@ const FIX_MSG = 'Fix: name ONE object (the button, the card, the row, the token)
 // filter, so the frame would go empty).
 const hasSpine = (d.layers || []).some((l) => l && l.acrossBeats === true);
 const wrapNote = (T.sceneUnits && !hasSpine)
-  ? ' This film also wraps each beat as a UNIT, so the engine ends every layer with its own beat and NOTHING can survive a cut until one layer opts out: mark the layer that should carry the film `"acrossBeats": true`. `make beat-check` names each layer the wrapping shortens and by how much.'
+  ? ' This film also wraps each beat as a UNIT, so the engine ends every layer with its own beat and NOTHING can survive a cut until one layer opts out: mark the layer that should carry the film `"acrossBeats": true`. `make check GATE=beat-check` names each layer the wrapping shortens and by how much.'
   : '';
 if (bounds.length && dur < CONTINUITY_MAX_DUR) {
   const { spanning, transforming } = continuity(bounds);

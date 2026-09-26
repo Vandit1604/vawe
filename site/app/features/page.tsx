@@ -38,12 +38,12 @@ export const metadata = pageMetadata({
 // Mono, dark pane, literal strings. Same syntax spans the block already carried, kept as-is.
 const PURITY = `<span class="a">renderFrame</span><span class="p">(</span><span class="k">n</span><span class="p">)</span>  <span class="s">// pure in n</span>
 <span class="p">&rarr;</span> same bytes, any order
-<span class="p">&rarr;</span> <span class="a">make probe</span>  <span class="s">// verifies it</span>`;
+<span class="p">&rarr;</span> <span class="a">make check GATE=probe</span>  <span class="s">// verifies it</span>`;
 
-const LADDER = `<span class="a">make validate</span>     <span class="s">// schema, no em-dash</span>
-<span class="a">make critique</span>     <span class="s">// value of each beat</span>
-<span class="a">make designspec-check</span> <span class="s">// palette + font lock</span>
-<span class="a">make audit</span>        <span class="s">// contrast · overlap</span>
+const LADDER = `<span class="a">make check GATE=validate</span>     <span class="s">// schema, no em-dash</span>
+<span class="a">make check GATE=critique</span>     <span class="s">// value of each beat</span>
+<span class="a">make check GATE=designspec-check</span> <span class="s">// palette + font lock</span>
+<span class="a">make check GATE=audit</span>        <span class="s">// contrast · overlap</span>
 <span class="a">make judge</span>        <span class="s">// vision gate</span>`;
 
 export default function Features() {
@@ -71,11 +71,11 @@ export default function Features() {
               So <code>renderFrame(n)</code> is pure in n, and frame 412 comes out the same whether
               it renders first or last. That is what lets one film shard across parallel browser
               tabs and what makes two renders of a scene diff-able.{" "}
-              <code>make probe</code> renders sampled frames in scrambled order and diffs the DOM,
+              <code>make check GATE=probe</code> renders sampled frames in scrambled order and diffs the DOM,
               which tests the property rather than restating it.{" "}
               <a className="ilink" href="/determinism">How that proof works, in full →</a>
             </p>
-            <span className="tag">guarded by make probe</span>
+            <span className="tag">guarded by make check GATE=probe</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">

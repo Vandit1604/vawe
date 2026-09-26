@@ -16,7 +16,7 @@ import { defineRegistry } from '../registry/registry.js';
 // three.js dependency would actually earn itself; see engine-doctrine/ROADMAP.md.
 //
 // DETERMINISM: pure in (local time, seed). The camera orbit is f(t), never accumulated. No frame
-// feedback, nothing read back. Guarded by `make probe` (DOM) and `make canvas-purity` (real pixels),
+// feedback, nothing read back. Guarded by `make check GATE=probe` (DOM) and `make check GATE=canvas-purity` (real pixels),
 // because a canvas's contents are invisible to a DOM signature.
 //
 // COST: this is the most expensive primitive in the engine. Every pixel marches up to MAX_STEPS times.

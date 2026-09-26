@@ -30,13 +30,13 @@ Read that last clause carefully, because it decides how these files may be store
 Consequences to know:
 
 - **A fresh clone renders every film silent.** A scene naming `assets/music/lofi.wav` finds nothing,
-  and the mixer falls back to silence with only a warning. `make audio-check D=<file>` reports it as
+  and the mixer falls back to silence with only a warning. `make check GATE=audio-check D=<file>` reports it as
   `bed-missing`; run `make audio` and `make music-pack` before rendering anything with a bed.
 - **`credits.json` is untracked too**, so provenance is per-machine. Every entry currently carries
   `licenceVerified: false`. The Mixkit terms above are now read and recorded here, which is the
   durable copy.
 - **Beds with no credits entry exist** (`launch`, `tense`, `warm` on at least one machine). A track
-  nobody recorded the source of cannot be defended if it is ever claimed. `make audio-check` warns
+  nobody recorded the source of cannot be defended if it is ever claimed. `make check GATE=audio-check` warns
   `bed-provenance-unknown`.
 
 Never put a track from anywhere else under a published film without recording its licence here first.

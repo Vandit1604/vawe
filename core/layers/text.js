@@ -49,7 +49,7 @@ export function build(kit, el, L, { fit, w, h, weight, text, maxLines } = L) {
     // returns true for a family that does not exist and false for a registered-but-unloaded one, so
     // this warning fired on correct fonts and stayed silent on missing ones. isPainting() width-probes
     // the family against three generics instead (all-equal = it really resolved). See core/fonts.js.
-    if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back), fit measurement will be wrong. Run: make font-audit`);
+    if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back), fit measurement will be wrong. Run: make check GATE=font-audit`);
     if (L.fitH) kit.fitBox(el, { maxW: w, maxH: L.fitH, max: sizeOf(L), min: 34 });
     else el.style.fontSize = kit.fitText(el.textContent, w, { font: (px) => `${weight ?? 800} ${px}px ${fam}`, max: sizeOf(L), min: 34 }) + 'px';
     el.remove();

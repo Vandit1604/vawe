@@ -138,7 +138,7 @@ only transition that samples the OUTGOING and INCOMING beats as textures and ble
 The two beats either side of the boundary are rasterised ONCE at build (whole stage → `u_from` / `u_to`)
 and a fragment shader keyed on `u_progress` smears / reveals / bends across them. Determinism is intact:
 both textures are pure functions of `n` (baked from two fixed frames), so `renderFrame(n)` only samples
-them and stays order-independent: `make probe` + `make canvas-purity` pass on a seam scene.
+them and stays order-independent: `make check GATE=probe` + `make check GATE=canvas-purity` pass on a seam scene.
 - **JSON seam**: `{ t, fx, dur, dir?, seed?, intensity? }` in a top-level `seams: [...]`. The window is
   `[t, t+dur]`; the leaving beat is baked from the frame just before it, the arriving beat from the
   frame just after. `fx`: `fade` (cross-dissolve, always the fallback) · `crossWarp` (both beats drag to
@@ -453,7 +453,7 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
 - `{type:"lottie", src:"/assets/lottie/<name>.json", x, y, w, h, loop?, speed?, fit?}`
   → an **After Effects (Bodymovin) animation played DETERMINISTICALLY**. The runtime (lottie-web SVG,
   MIT, loaded only when a scene uses it) is driven by ABSOLUTE seek, `goToAndStop((t-start)*fr, true)`
-  per frame, so `renderFrame(n)` stays pure and order-independent (`make probe`). Brings real vector
+  per frame, so `renderFrame(n)` stays pure and order-independent (`make check GATE=probe`). Brings real vector
   motion (animated logos, spinners, checkmarks, confetti) you can't author from primitives. `loop` wraps,
   `speed` retimes, `fit:"contain"` letterboxes (default fills). A missing lib/src degrades to an empty
   layer, never a crash. Drop `.json` exports into `assets/lottie/`.
@@ -462,7 +462,7 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity
   holds. Use theme vars (`var(--font-sans)`, `var(--accent)`) to stay on-brand. The whole block
   animates as ONE unit (use atomic layers when you want per-element choreography). **Preview standalone
-  first (`make preview HTML=frag.html`) and gate the markup (`make designspec-check`)**, hand HTML regresses to slop.
+  first (`make preview HTML=frag.html`) and gate the markup (`make check GATE=designspec-check`)**, hand HTML regresses to slop.
 - Optical tracking: themes with `type.optical: true` get size-scaled letter-spacing via
   `trackingFor(px)` (−0.008em body → −0.022em hero). Variable weights (510/590) pass through.
 - **Animated site sections**: `make capture-scene URL=… SEL="section" NAME=b LABEL=x PARTS="s1,s2"`
@@ -694,9 +694,9 @@ logos and dense real UI. So the default for any hero surface is **capture, then 
 - `make beats D=video.json [VS=b]` → first/mid/last frame of every beat in one sheet → `/tmp/beats/<name>.png`.
   `VS=b` stacks each beat beside its source-section shot: a side-by-side fidelity diff. Read it every render.
 
-Then the gates: `make validate` (schema + no-emdash) → `make probe` (purity) → `make audit`
-(overlap/safe-zone/text+image WCAG contrast) → `make motion` (holds/settles/monotonic/typing) →
-`make similar`/`make ledger` (cross-video sameness) → `make check GATE=feature-audit` (are you reaching for the
+Then the gates: `make check GATE=validate` (schema + no-emdash) → `make check GATE=probe` (purity) → `make check GATE=audit`
+(overlap/safe-zone/text+image WCAG contrast) → `make check GATE=motion` (holds/settles/monotonic/typing) →
+`make check GATE=similar`/`make ledger` (cross-video sameness) → `make check GATE=feature-audit` (are you reaching for the
 best primitive, or defaulting?) → eyeball hook, payoff, CTA.
 
 ## Prefer the better primitive (don't default)
@@ -853,8 +853,8 @@ once the moment a layer can be sampled.
    `<img>` and never reaches the sampled pixels, so it would be silently dropped. Pick one.
 4. **One WebGL context per resampled layer.** This is a hero-shot effect; do not put it on fifty layers.
 5. **Determinism**: pure in local `t`. The source is either static or drawn from `lt` *before* it is
-   sampled, and nothing ever samples its own previous output (no feedback). Proven by `make probe` +
-   `make canvas-purity`.
+   sampled, and nothing ever samples its own previous output (no feedback). Proven by `make check GATE=probe` +
+   `make check GATE=canvas-purity`.
 
 Not the same as its neighbours, and the difference is what to reach for:
 - **vs `canvasFx`**: baked once at build into a static PNG. Static by construction, so it cannot move,

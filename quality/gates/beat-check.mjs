@@ -49,7 +49,7 @@
 // shipped scenes are exactly that, including every white-first launch film, where a flat paper field is
 // the correct answer and the motion lives in the content. One flat window is never flagged either way.
 //
-//   node quality/gates/beat-check.mjs <scene.json> [--strict]   ·   make beat-check D=<file>
+//   node quality/gates/beat-check.mjs <scene.json> [--strict]   ·   make check GATE=beat-check D=<file>
 // FAIL (blocks): dead-air · ends-on-nothing · empty-beat · static-bg (the dead-markup tier).
 // WARN: static-bg (the flat-film tier) · beats-wrapped-as-units · beats-held-open · beats-unseen.
 // The flat-film tier of static-bg is a HARD_CODES entry in author-check.mjs: it stays a warn here, but

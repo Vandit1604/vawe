@@ -4,7 +4,7 @@
 //
 //   node quality/gates/similarity.mjs a.json b.json [...]   # score the given files pairwise
 //   node quality/gates/similarity.mjs                       # scan all authored data JSONs
-//   make similar [D="a.json b.json"]
+//   make check GATE=similar [D="a.json b.json"]
 //
 // Fingerprint = motion vocabulary (cuts/stings/anims/presets/bgs) + beat-structure skeleton +
 // layout signature (where text sits, at what scale). Cross-brand pairs FAIL above 0.75,
@@ -95,7 +95,7 @@ if (process.argv[1] && process.argv[1].endsWith('similarity.mjs')) {
   }
   const f = gateFindings();
   // A `.template.json` holds mustache placeholders, so it is not JSON and never was a video. One of
-  // them threw out of the scan and killed the WHOLE library audit, which is why `make similar` with no
+  // them threw out of the scan and killed the WHOLE library audit, which is why `make check GATE=similar` with no
   // arguments reported nothing at all. Name the skip; an explicitly listed file still throws.
   const fps = [];
   for (const ff of files) {

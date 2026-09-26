@@ -12,7 +12,7 @@
 // rule: scene-timing.mjs already owns it and two copies is how a gate goes stale (see that file's
 // own header).
 //
-//   node quality/gates/render-verify.mjs films/scene/<file>.json     ·     make render-verify D=<file>
+//   node quality/gates/render-verify.mjs films/scene/<file>.json     ·     make check GATE=render-verify D=<file>
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';

@@ -5,7 +5,7 @@
 // rendered frames are unchanged (or see exactly what moved).
 //   node quality/gates/scene-snap.mjs <format> --save     # write baseline → quality/baselines/snap/<format>.json
 //   node quality/gates/scene-snap.mjs <format>            # diff current vs baseline
-//   make snap M=<format> [SAVE=1]
+//   make check GATE=snap M=<format> [SAVE=1]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

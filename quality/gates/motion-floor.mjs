@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/motion-floor.mjs: DOES THE FILM EVER STOP, and is what fills the gaps real?
 //
-//   make motion-floor D=films/scene/<film>.json   ·   node quality/gates/motion-floor.mjs <film> [--json]
+//   make check GATE=motion-floor D=films/scene/<film>.json   ·   node quality/gates/motion-floor.mjs <film> [--json]
 //
 // WHY THIS AND NOT THE THREE GATES THAT ALREADY TOUCH MOTION. `direction-floor` counts FAMILIES, so a
 // film with four families and six dead seconds passes it. `sweep-static` asks whether the WHOLE film is
@@ -63,7 +63,7 @@ export const LOCAL_SHARE = 0.08;
 export const SHIFT_RANGE = 8;      // cells; enough for a half-second pan/push at this window size
 export const RIGID_EXPLAIN = 0.5;  // a shift must cut the residual on the changed pixels at least this much
 const NOISE_FLOOR = 2;             // grayscale levels; ignores encoder/scale noise, not real change
-// How much of the frame the moving thing covers. A rigid shift alone does NOT make motion global:
+// How much of the frame the moving thing covers. A rigid shift alone does NOT make check GATE=motion global:
 // a card sliding across a static ground is a rigid shift and it is exactly what content motion
 // looks like. What separates it from a camera move is EXTENT. Both change only at their edges, so
 // the changed-pixel count cannot tell them apart, but their bounding boxes can: a card's swept box
@@ -207,7 +207,7 @@ export function classifyRegions(a, b, { w = GW, h = GH } = {}) {
     }
     // cx/cy: this region's own centroid, as a FRACTION of the frame (0..1 each axis), so a caller can
     // bucket it into frame thirds without knowing GW/GH. Where the change actually sits, not just how
-    // much of it there is, is what `make choreo`'s eye-plan check reads this for.
+    // much of it there is, is what `make check GATE=choreo`'s eye-plan check reads this for.
     return { kind, amount: amount / total, extent, cx: (x0 + x1) / 2 / w, cy: (y0 + y1) / 2 / h };
   });
 }
@@ -444,7 +444,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
     // primaryRegionAt: the same square-growing-about-its-centre fixture as the `scale` kind above,
     // held for several frames so a window has more than one pair to average across. Its centre sits at
-    // grid (48,27) of a 96x54 grid, i.e. (0.5, 0.5): the KNOWN-ANSWER fixture `make choreo`'s eye-plan
+    // grid (48,27) of a 96x54 grid, i.e. (0.5, 0.5): the KNOWN-ANSWER fixture `make check GATE=choreo`'s eye-plan
     // check is built against, so a beat whose primary motion truly ends centred reads as centred here
     // before that gate ever compares it to a plan.
     const growing = [square(4), square(6), square(8), square(10)];
@@ -491,7 +491,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make motion-floor D=films/scene/<film>.json [--pre]'); process.exit(2); }
+  if (!arg) { console.error('usage: make check GATE=motion-floor D=films/scene/<film>.json [--pre]'); process.exit(2); }
   const base = String(arg).replace(/\.json$/, '');
   const slug = path.basename(base);
   const pre = process.argv.includes('--pre');

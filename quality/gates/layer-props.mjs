@@ -1,6 +1,6 @@
 // layer-props.mjs: does the engine READ the props a layer sets, and will it read them on THIS layer?
 //
-//   node quality/gates/layer-props.mjs [scene.json ...]   ·   make layer-props
+//   node quality/gates/layer-props.mjs [scene.json ...]   ·   make check GATE=layer-props
 //
 // core/engine/expand.js warns when a BLOCK/BEAT is handed a prop its factory does not accept (MISTAKES #60).
 // Nothing did the equivalent for a raw layer, so `{"type":"glow","r":620,"opacity":0.5}` was accepted

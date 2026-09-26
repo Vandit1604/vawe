@@ -16,7 +16,7 @@
     "applies": "hasTextBeats",
     "check": "off-font",
     "adapt": null,
-    "brief": "This is also an impeccable rule, make designspec-check flags overused faces",
+    "brief": "This is also an impeccable rule, make check GATE=designspec-check flags overused faces",
     "doc": "engine-doctrine/CRAFT/TYPOGRAPHY.md"
   },
   {

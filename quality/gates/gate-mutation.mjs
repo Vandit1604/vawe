@@ -800,7 +800,7 @@ function fakeBake(name, sim) {
 /** A snap baseline the CASE owns. `quality/baselines/snap/` is gitignored, so a fresh clone, a worktree or a CI
  *  box has none, and all three snap cases then reported "fired for the wrong reason" (the gate said
  *  "no baseline, so this checked NOTHING"), which reads in the summary exactly like a rotted fixture
- *  and unproves three gates on every machine but the one that happened to run `make snap-all SAVE=1`.
+ *  and unproves three gates on every machine but the one that happened to run `make check GATE=snap-all SAVE=1`.
  *  Same reasoning as fakeBake: a case must not lean on a machine-local artifact. A baseline already on
  *  disk is stashed and put back, so the harness cannot destroy the one a human saved. ~1s per save. */
 const snapStash = new Map();

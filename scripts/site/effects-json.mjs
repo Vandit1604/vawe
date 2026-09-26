@@ -115,7 +115,7 @@ const NO_PREVIEW = {
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
   'plain-words-feel-duration-camera-comparative': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
-  'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
+  'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make check GATE=audit M=<file> ASPECT=all`.',
 };
 
 // ── build ───────────────────────────────────────────────────────────────────────────────────────

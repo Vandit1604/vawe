@@ -5,7 +5,7 @@
 // It reads the on-screen text layers and coaches toward the CLAUDE.md copy rules (hook ≤ ~12 words,
 // front-load the strong word, be specific, numbers are heroes).
 //
-//   node quality/gates/copy-check.mjs <scene.json> [--strict]   ·   make copy-check D=<file>
+//   node quality/gates/copy-check.mjs <scene.json> [--strict]   ·   make check GATE=copy-check D=<file>
 // WARN by default (coaching); --strict blocks. Not taste-policing, it flags the specific tells that make
 // copy read as generated, so you reach past them.
 import fs from 'node:fs';

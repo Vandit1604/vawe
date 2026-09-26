@@ -628,7 +628,7 @@ styleGate('pace', 'pace (is anything happening, and how often)', 'quality/gates/
 styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'quality/gates/eye-trace.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // SOUND. Is the silence a decision, or an omission?
 //
-// WHY IT WAS NOT HERE. It was written, it worked, and nothing ran it. `make audio-check` existed and
+// WHY IT WAS NOT HERE. It was written, it worked, and nothing ran it. `make check GATE=audio-check` existed and
 // no step of this ladder called it, so the one gate that asks about a whole structural register was
 // reachable only by a person who already knew to ask. That is the same shape as a field written and
 // never read, which is the failure this repo logs more than any other.

@@ -123,7 +123,7 @@ has moved on since anyone read a sheet. Use the same stage mechanism rather than
 Rank by what the viewer notices, not by what is easy:
 
 1. **Anything unreadable.** Contrast, clipping, a caption under the platform chrome.
-2. **A seam that flashes.** `make seam-check` finds it; it is the worst defect per unit of effort.
+2. **A seam that flashes.** `make check GATE=seam-check` finds it; it is the worst defect per unit of effort.
 3. **A beat with no focal point.** The eye does not know where to land.
 4. **A beat that is only type.** Ask what it could SHOW: a bar whose length IS the number, the real
    product surface, a diagram. `engine-doctrine/CRAFT/SHOW-DONT-TELL.md`.
@@ -148,7 +148,7 @@ The loop is for a full pass, a recreation, or anything going in front of other p
 ## Gotchas
 
 - A seam gate can print a pass it never earned when a consumer of the shared `transitions` surface
-  falls out of sync; a green `make seam-check` is not proof by itself, sample the boundaries yourself
+  falls out of sync; a green `make check GATE=seam-check` is not proof by itself, sample the boundaries yourself
   on anything you ship. `engine-doctrine/MISTAKES.md #412`.
 - The judge sheet's per-beat time label can come from a different moment than the frame actually
   shown; read the picture, don't trust the printed timestamp on its own. `engine-doctrine/MISTAKES.md #630`.

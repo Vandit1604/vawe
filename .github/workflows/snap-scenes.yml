@@ -74,8 +74,8 @@ jobs:
           ls -l assets/fonts
           sha256sum assets/fonts/* | sort -k2
 
-      - name: make snap-all SAVE=1
-        run: make snap-all SAVE=1 ${{ inputs.scene && format('SCENE={0}', inputs.scene) || '' }}
+      - name: make check GATE=snap-all SAVE=1
+        run: make check GATE=snap-all SAVE=1 ${{ inputs.scene && format('SCENE={0}', inputs.scene) || '' }}
 
       - name: baselines
         if: always()

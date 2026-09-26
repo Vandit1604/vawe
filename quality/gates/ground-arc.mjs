@@ -2,7 +2,7 @@
 // quality/gates/ground-arc.mjs: does the GROUND flip white/dark on purpose, and does it CARRY across
 // a join, or does it flash.
 //
-//   make ground-arc D=films/scene/<film>.json   ·   node quality/gates/ground-arc.mjs <film> [--json]
+//   make check GATE=ground-arc D=films/scene/<film>.json   ·   node quality/gates/ground-arc.mjs <film> [--json]
 //
 // WHY THIS AND NOT `make judge`. The judge rubric grades frames one at a time; a ground that whites
 // out for one beat and blacks out for the next reads fine on EVERY still it is asked to score, because
@@ -249,7 +249,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make ground-arc D=films/scene/<film>.json'); process.exit(2); }
+  if (!arg) { console.error('usage: make check GATE=ground-arc D=films/scene/<film>.json'); process.exit(2); }
   const base = String(arg).replace(/\.json$/, '');
   const jsonPath = path.resolve(ROOT, base + '.json');
   const cfg = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));

@@ -27,7 +27,7 @@
 // the 127 buildable scenes in this library and a rule waived by reflex has already been repealed.
 //
 //   node quality/gates/motion-audit.mjs [format ...] [--stride N] [--data path.json] [--json]
-//   make motion [M=<format>] [STRIDE=2]
+//   make check GATE=motion [M=<format>] [STRIDE=2]
 //
 // --trace: an INSTRUMENT, not a check (no pass/fail, always exits 0). An agent cannot watch a video, it
 // reads frames, and the series this file already builds to run the nine checks above was thrown away
@@ -37,7 +37,7 @@
 // stride auto-scales to ~200 samples over the film so a trace costs seconds. See engine-doctrine/CRAFT/MOTION-TRACE.md.
 //
 //   node quality/gates/motion-audit.mjs scene --data films/scene/x.json --trace [--stride N] [--json]
-//   make motion-trace M=scene D=films/scene/x.json
+//   make check GATE=motion-trace M=scene D=films/scene/x.json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -730,7 +730,7 @@ else {
   for (const r of results) {
     if (r.error) { console.log(`✗ err  ${r.format}: ${r.error}`); continue; }
     const fails = r.findings.filter((x) => x.level === 'FAIL'), warns = r.findings.filter((x) => x.level === 'WARN');
-    // name the data file audited: `make motion D=...` used to drop D and silently audit sample.json,
+    // name the data file audited: `make check GATE=motion D=...` used to drop D and silently audit sample.json,
     // and the report gave no way to tell which scene you were reading (MISTAKES #47).
     console.log(`${fails.length ? '✗ FAIL' : warns.length ? '~ warn' : '✓ ok  '}  ${r.format} · ${r.data}  (${r.total} frames · ${r.segments} segments · ${fails.length} fail · ${warns.length} warn)`);
     console.log(`    windows: ${r.windowSource}`);

@@ -34,7 +34,7 @@
 // the film is unchanged (engine-doctrine/MISTAKES.md #219, #383, #387, #400).
 //
 //   node quality/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
-//   make plan-check D=<file>
+//   make check GATE=plan-check D=<file>
 // FAIL: plan-overruns-render · junction-is-static.
 // WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
 //       spectacle-not-built · spectacle-in-wrong-beat · spectacle-beat-unnamed · pace-not-kept ·

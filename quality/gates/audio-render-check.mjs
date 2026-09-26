@@ -26,7 +26,7 @@
 // trips it and this gate never becomes the kind of twitchy check that gets waived into silence.
 //
 //   node quality/gates/audio-render-check.mjs films/scene/<file>.json [--strict]
-//   make audio-render-check D=<file>
+//   make check GATE=audio-render-check D=<file>
 // FAIL (under --strict only): cue-not-heard.  WARN always: onset-not-declared.
 import fs from 'node:fs';
 import path from 'node:path';

@@ -189,7 +189,7 @@ export const exitDurOf = (el) => (el.dataset.exitDur != null ? parseFloat(el.dat
  */
 export const opacityEnvelope = (enterT, exitT = 0) =>
   easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);
-// Unknown names used to fall back to `fade` SILENTLY, and the comment here pointed at `make conformance`
+// Unknown names used to fall back to `fade` SILENTLY, and the comment here pointed at `make check GATE=conformance`
 // as the mitigation, but conformance asserts each anim is DISTINCT, which is a different property than
 // "the name the author wrote exists". Five layers in three shipped scenes were silently fading because of
 // it. Now it throws, and because three of those five were real names from a NEIGHBOURING registry, the

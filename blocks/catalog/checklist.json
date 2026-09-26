@@ -29,7 +29,7 @@
           "done": true
         },
         {
-          "text": "make critique",
+          "text": "make check GATE=critique",
           "done": true
         },
         {

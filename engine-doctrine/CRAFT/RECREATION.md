@@ -112,7 +112,7 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
 - `make reveal D=<file>`: does every beat animate IN the way the reference's does (dolly direction,
   typing, colour-wave)? `make beats D=<file> VS=<brand>`. Each beat beside its source. `make measure
   VIDEO=out/ours.mp4 EXPECT=<preset>`: does our render's motion match the number you measured off the
-  reference? Then `make audit` (overlap/contrast/safe-zone). Fix data, re-render, never ship unverified.
+  reference? Then `make check GATE=audit` (overlap/contrast/safe-zone). Fix data, re-render, never ship unverified.
 
 ## The honest ceiling
 Two things bound 1:1 fidelity and are worth stating rather than faking:

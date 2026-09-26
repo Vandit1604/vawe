@@ -142,7 +142,7 @@ export function stageOf(arg) {
       why: missingFrags.length
         ? `${missingFrags.length} fragment(s) the plan names do not exist yet: ${missingFrags.join(', ')}`
         : 'the fragments exist and do not match what their beats planned: run frame-check and read it.',
-      next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make frame-check D=${p.base}.json` },
+      next: missingFrags.length ? `node harness/author/stagekit.mjs ${p.base}.json, then author each fragment: stage kit → the reference's grammar → the smallest useful ui-skills set (command npx -y ui-skills categories) → make preview HTML=<frag> THEME=<theme> → look at it` : `make check GATE=frame-check D=${p.base}.json` },
     { id: 'assemble', done: layers > 0,
       why: 'the frames pass and the scene JSON has no layers, so there is no film yet.',
       next: `make assemble D=${p.base}.json` },
@@ -304,7 +304,7 @@ export function lookBlock(film) {
     + (reference ? ` REF=${reference} ACT=<n>` : '') + (theme ? ` THEME=${theme}` : ''));
   const dev = `make dev D=${p.base}.json`;
   const sheets = { beats: path.join(scratchBase(), 'beats', `${p.name}.png`), reveal: path.join(scratchBase(), 'reveal', `${p.name}.png`) };
-  const contentCheck = reference ? `make content-check D=${p.base}.json REF=${reference}` : null;
+  const contentCheck = reference ? `make check GATE=content-check D=${p.base}.json REF=${reference}` : null;
   const addReference = reference ? null
     : `no reference named. Studied one already? add \`reference: "<name>"\` to ${path.relative(ROOT, p.sb)}'s `
       + `frontmatter, matching grammar/<name>.json. Not studied yet: make study VIDEO=<clip> NAME=<name>, then add the field.`;

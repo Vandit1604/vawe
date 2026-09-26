@@ -78,7 +78,7 @@ export const ASPECT_REGISTRY = defineRegistry('output target', {
     tag: 'canvas',
     intro: '`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition: `core/layout/safe.js`.',
     usage: (n, { j }) => j({ module: 'scene', aspect: n }),
-    noPreview: 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
+    noPreview: 'an aspect is a property of the canvas, not something that animates. Render at it, or `make check GATE=audit M=<file> ASPECT=all`.',
   },
 });
 
@@ -96,7 +96,7 @@ export const ASPECTS = ASPECT_REGISTRY.entries;
  * is: eight call sites, three of which read `aspect` and five of which knew only about `orientation`.
  * Since scenes declare `aspect` and almost none declare `orientation`, those five silently rendered
  * every landscape scene into a 1080x1920 portrait viewport and cropped it: `make frame`, `make beats`,
- * `make slop`, `make motion` and `make snap` were all judging a canvas the renderer never produces.
+ * `make slop`, `make check GATE=motion` and `make check GATE=snap` were all judging a canvas the renderer never produces.
  * Nothing failed, because a cropped viewport is a perfectly stable, perfectly deterministic wrong
  * answer. Dimensions and the safe area are the same question asked twice; both live here (MISTAKES #46).
  */
@@ -201,9 +201,9 @@ export const DESTINATION_REGISTRY = defineRegistry('destination', DESTINATIONS, 
   catalog: {
     title: 'Destinations (platform safe area)',
     tag: 'canvas',
-    intro: '`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition: `core/layout/safe.js`.\n\nThe tiktok figures are this repo\'s own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.',
+    intro: '`"destination": "<name>"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect`: 9:16 for a website hero and 9:16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make check GATE=audit` measures every layer against this box. One definition: `core/layout/safe.js`.\n\nThe tiktok figures are this repo\'s own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.',
     usage: (n, { j }) => j({ module: 'scene', aspect: '9:16', destination: n }),
-    noPreview: 'a safe area is a property of the canvas, not something that animates. `make audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.',
+    noPreview: 'a safe area is a property of the canvas, not something that animates. `make check GATE=audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.',
   },
 });
 
@@ -314,7 +314,7 @@ export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
     tag: 'pin',
     intro: '`"pin": "<name>"` on a layer or a caption. An aspect-portable position, resolved against the safe box (`core/layout/safe.js safeArea`) rather than a hand-typed pixel, so the same JSON lands correctly at any of the five canvases. `stage`/`text-band`/`lower-band` are the de-facto anchors this repo already hand-types as 1920px pixels; use them instead of a new magic number.',
     usage: (n, { j }) => j({ pin: n }),
-    noPreview: 'a placement is a position, not a motion: see it with `make audit M=<file> ASPECT=all`, which checks every name against the safe box at every aspect and destination.',
+    noPreview: 'a placement is a position, not a motion: see it with `make check GATE=audit M=<file> ASPECT=all`, which checks every name against the safe box at every aspect and destination.',
   },
 });
 

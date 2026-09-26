@@ -7,7 +7,7 @@
 // 2. A WINDOW THAT IS NOT A WINDOW. t1 <= t0 draws nothing, ever, at any frame.
 //
 // Placement is NOT checked here beyond its shape. Whether a pinned caption collides with a headline
-// is a question about a rendered frame, so it belongs to `make audit`, which reserves the band
+// is a question about a rendered frame, so it belongs to `make check GATE=audit`, which reserves the band
 // (core/layout/safe.js captionBand) and can see where the other layers actually landed.
 import { isObj } from './util.mjs';
 

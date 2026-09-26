@@ -28,7 +28,7 @@ re-adding that requirement: it is a planning habit, not a gate.
 **Per-cue choices, at DIRECT (stage 6).** Which baked cue plays on which junction, whether a bridge
 crosses which cut, the bed's gain and duck, all of it is decided once the cut reads, against the real
 timeline, the way `harness/lib/craft-rules.mjs`'s `STAGE_CATEGORY_ORDER` already places `sound` in
-`direct` (after motion and transitions). The real gate is `make audio-check D=<file>`, wired into
+`direct` (after motion and transitions). The real gate is `make check GATE=audio-check D=<file>`, wired into
 `make check`/`make ship` (stage 7, before render), and it checks the SCENE directly, never the
 storyboard: a storyboard's stated intent is never itself validated, only the built film is.
 
@@ -54,7 +54,7 @@ Choosing an alternative writes it into the scene like any other studio edit (und
 - Sound is the default, not silence. Give every film sound (`make audio` + `make audio-bed
   D=<file> WRITE=1`); ship mute only with a stated reason (`"audio":{"silent":true,"_why":"…"}`).
   A film must still read with the sound off.
-- Enforced by `make audio-check` (codes: `silent-by-omission`, `silence-without-a-reason`,
+- Enforced by `make check GATE=audio-check` (codes: `silent-by-omission`, `silence-without-a-reason`,
   `audio-block-produces-nothing`, `cues-have-no-sound`, `cue-missing`, `bed-unresolved`,
   `bed-missing`, `bed-provenance-unknown`, `bed-licence-unverified`, `bed-muted`).
 - Checkable action: does this film carry sound, or is the silence a stated decision?
@@ -66,7 +66,7 @@ before shipping.
 **`audio.auto`, the cue-derivation flag §4 describes, is now a DEFAULT, not an opt-in**
 (`films/scene/scene.js`, `buildSfx`): a scene's own cuts, stings and seams score themselves
 automatically unless it says `audio.auto: false`. Measured across `films/scene/` before and after
-that flip: scenes that resolve at least one cue went from **18 to 68**. Run `make audio-check` to see
+that flip: scenes that resolve at least one cue went from **18 to 68**. Run `make check GATE=audio-check` to see
 the live census; it is the first thing this document is for.
 
 What is still true, and still the open problem, is the MUSIC BED: **116 of the 184 scenes in
@@ -96,7 +96,7 @@ earn one. Do this, in order, before reading further:
 ```bash
 make audio                       # bake every cue + music bed, no network, deterministic (core/audio/kit.mjs)
 make audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
-make audio-check D=<file>        # is the result a decision or an omission? read what it prints
+make check GATE=audio-check D=<file>        # is the result a decision or an omission? read what it prints
 make video D=<file>               # renders with the mux; listen to out/<file>.mp4
 ```
 
@@ -140,7 +140,7 @@ carry.
 > "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries the whole read alone" }
 > ```
 
-`make audio-check D=<file>` enforces the sentence, the same way `authoring._why` enforces a reason on
+`make check GATE=audio-check D=<file>` enforces the sentence, the same way `authoring._why` enforces a reason on
 a rule waiver, and for the same reason: the cost of one sentence is what turns a reflex back into a
 decision. Nothing judges whether the reason is good. Nothing can. It only has to be written.
 
@@ -505,7 +505,7 @@ is a workaround rather than the dial.
 
 | Command | What it does |
 |---|---|
-| `make audio-check [D=…] [STRICT=1]` | the sound gate (§1). No `D` prints the library census |
+| `make check GATE=audio-check [D=…] [STRICT=1]` | the sound gate (§1). No `D` prints the library census |
 | `make audio` | bake every synthesized cue from parameters |
 | `make music-pack` / `make music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
 | `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
@@ -515,7 +515,7 @@ is a workaround rather than the dial.
 | `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
 | `make check GATE=sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
 | `make tts` · `make vo-captions D=…` | narration, and karaoke captions from its word timings |
-| `make pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
+| `make check GATE=pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
 
 ### Caption styles: eight of the nineteen, and what each one uses to say "here"
 
@@ -547,7 +547,7 @@ background plate, so the ratio is computed against a known backdrop instead of u
 rules were written after this repo shipped sub-4.5:1 captions. The darkest palette in `themes/` puts
 the dimmest state at 4.8:1, which clears AA with room to spare.
 
-**Know the gap before you trust a green audit.** `make audit` grades elements marked
+**Know the gap before you trust a green audit.** `make check GATE=audit` grades elements marked
 `data-layer=critical`, and a caption is not a layer, so **the audit has never measured a caption's
 contrast**. `lib-test` proves each style keeps three distinct states and never reaches for opacity;
 the ratio itself is arithmetic over the theme palette. Neither is a picture. Read a frame.
@@ -561,7 +561,7 @@ a side. A style that wants more has to move the band first, and moving the band 
 **The trap, in bold, because it has bitten twice.** `music:"auto"` is resolved at **authoring** time by
 `core/audio/select.js`. The render binary has no JS pre-pass, so an unresolved `"auto"` reaching the
 mixer is read as a filename, matches nothing, and plays **silence**. Always
-`make audio-bed D=<file> WRITE=1`. `make validate` and `make audio-check` both warn; heed them.
+`make audio-bed D=<file> WRITE=1`. `make check GATE=validate` and `make check GATE=audio-check` both warn; heed them.
 
 **A second trap, currently live.** `core/audio/select.js` maps five of its eight profiles (`apple`,
 `linear`, `vercel`, `a24`, `bloomberg`) to `bed: null`, and an absent or unknown profile also yields
@@ -822,7 +822,7 @@ Confine AI music to internal comps, pitch boards and animatics. Never a client d
 ### The rule for this repo
 
 > Record the source and the licence in `assets/music/credits.json` **before** the track goes under a
-> film. `make audio-check` warns `bed-provenance-unknown` when there is no entry and
+> film. `make check GATE=audio-check` warns `bed-provenance-unknown` when there is no entry and
 > `bed-licence-unverified` when nobody has read the terms. A track whose licence nobody can produce is
 > not usable, however good it sounds.
 

@@ -92,7 +92,7 @@ export default function Determinism() {
                 because a tab that has replayed a later frame can carry stale state the scrambler
                 alone would not catch. It is a real bug this gate found and fixed.
               </p>
-              <span className="cite">quality/gates/probe-purity.mjs · make probe</span>
+              <span className="cite">quality/gates/probe-purity.mjs · make check GATE=probe</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">

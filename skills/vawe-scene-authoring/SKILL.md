@@ -35,7 +35,7 @@ parallel Chrome tabs. So:
 - Set every animated property explicitly each frame. CSS `transition`/`animation` are globally killed.
 - Animate **only** compositor-friendly props: `transform`, `opacity`, `clip-path`, `filter`. Never
   per-frame `width/height/top/left/margin` (layout thrash + impure).
-- Guard it: `make probe M=<format>` asserts purity. Run it after any scene-logic change.
+- Guard it: `make check GATE=probe M=<format>` asserts purity. Run it after any scene-logic change.
 
 ```js
 import { boot } from '/core/engine/boot.js';
@@ -69,7 +69,7 @@ determinism reset, `.stage`/`.num`/`.icon-img`/debug overlay. It contains zero c
 scales or shadows. Every look var (`--font-*`, `--bg`, `--text/-2`, `--dim`, `--ink`, `--surface/-2`,
 `--line/-strong`, `--accent/-dim/-glow`, `--up`/`--down`, `--g0..2`) is written by `applyTheme()` from
 the video's theme, and `core/registry/theme-contract.js` requires the theme to be COMPLETE, a missing key
-fails at `make validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
+fails at `make check GATE=validate` and again at boot. Never write `var(--x, fallback)` with a constant in a
 scene: if the var is a look value it comes from the theme (guaranteed), and a hardcoded fallback is
 exactly the "wrong-look video renders anyway" bug the contract exists to prevent. Data JSONs must
 declare `"theme"` (name or inline object).
@@ -96,7 +96,7 @@ Non-negotiable moves:
   and children can be **nested groups**), never two absolute `x/y` layers you space by eye (that's what
   collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the
   flex-not-pixels rule; it's why the fix for "the % is too close to the label" is a group, not new coords.
-- **Gate it:** `make designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
+- **Gate it:** `make check GATE=designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
   clear its flags before you render. Full routing: `AGENTS.md`.
 
 ## Animation: pure primitives in `core/motion/motion.js` (no GSAP)
@@ -158,10 +158,10 @@ every boundary between edits.
 
 | command | checks |
 |---|---|
-| `make probe M=<fmt>` | render-order **purity** (must pass, protects sharded rendering) |
-| `make audit [M=<fmt>]` | **overlap / overflow / safe-zone / tight-spacing** on `[data-layer=critical]`; overlays → `/tmp/audit/<fmt>.png` |
+| `make check GATE=probe M=<fmt>` | render-order **purity** (must pass, protects sharded rendering) |
+| `make check GATE=audit [M=<fmt>]` | **overlap / overflow / safe-zone / tight-spacing** on `[data-layer=critical]`; overlays → `/tmp/audit/<fmt>.png` |
 | `make look D=<file>` / `make frame D=<file> N=<n>` | storyboard / one frame to eyeball |
-| `make verify` | render integrity (dims/fps/codec/audio) + safe-zone + contact sheets |
+| `make check GATE=verify` | render integrity (dims/fps/codec/audio) + safe-zone + contact sheets |
 | `make review` | fast snapshot: lib-test + audit + a master overlay sheet (`/tmp/review.png`) |
 
 **Always eyeball frames** (storyboard or `/tmp/review.png`), don't claim "looks good" unrendered.

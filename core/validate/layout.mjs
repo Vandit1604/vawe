@@ -2,7 +2,7 @@
 // resolveCoords places a box of size `size` on a canvas line. With `w` unset that size is 0, so
 // `x:"center"` puts the layer's LEFT EDGE on the centre line and `x:"right"` hangs it off the frame,
 // silently, and only visibly wrong at some aspects. The audit has flagged this on the x axis for a
-// while; the rule lives HERE now so it fails at `make validate` AND in boot (which imports this
+// while; the rule lives HERE now so it fails at `make check GATE=validate` AND in boot (which imports this
 // module) before a single frame renders, and so there is exactly one copy of it. Two copies is how
 // the safe box and the canvas size each drifted into four (engine-doctrine/MISTAKES.md #46).
 //

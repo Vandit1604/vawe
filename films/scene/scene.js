@@ -868,7 +868,7 @@ boot((data, fps, theme, canvas) => {
   const boxes = new Map();
   // Every named value a layer PUBLISHES about its own private state (core/layers/index.js `expose`),
   // resolved fresh each frame beside `boxes` and for the same reason: rebuilt from nothing every call,
-  // holding no history, so renderFrame(n) stays pure in n (make probe samples out of order to catch a
+  // holding no history, so renderFrame(n) stays pure in n (make check GATE=probe samples out of order to catch a
   // value that quietly closed over the previous frame).
   const exposed = new Map();
   const topGeom = new Array(topCount);   // every top-level layer, id or not, a child needs its parent's

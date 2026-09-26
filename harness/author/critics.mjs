@@ -85,7 +85,7 @@ export const ROSTER = [
     name: 'seam',
     job: 'flash or collision at transitions',
     input: (name) => `/tmp/seams/${name}.png`,
-    produce: (D, vs, name) => `make seam-check D=${D}  (requires out/${name}.mp4, render first)`,
+    produce: (D, vs, name) => `make check GATE=seam-check D=${D}  (requires out/${name}.mp4, render first)`,
     verdict: '{ findings: [ { seam, flash: "yes"|"no", evidence, fix } ] }',
   },
 ];

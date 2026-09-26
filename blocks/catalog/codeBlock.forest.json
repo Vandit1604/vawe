@@ -28,7 +28,7 @@
       "size": 19,
       "lines": [
         "make video D=launch.json",
-        "make audit",
+        "make check GATE=audit",
         "git push origin main"
       ]
     },

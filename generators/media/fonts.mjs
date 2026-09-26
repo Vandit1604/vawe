@@ -157,7 +157,7 @@ console.log(`fonts: ${ok} downloaded, ${skip} verified, ${fail} failed, ${bad} h
 console.log('note: Sohne is paid (Klim) · drop your own copy in assets/fonts/local/Sohne.woff2 (gitignored).');
 if (bad) {
   console.error('\nA face on this machine is NOT the one the library was measured against, so every text width\n'
-    + 'is suspect and `make snap-all` cannot tell a code change from a font change. Delete the named file\n'
+    + 'is suspect and `make check GATE=snap-all` cannot tell a code change from a font change. Delete the named file\n'
     + 'and re-run `make fonts` to restore the pinned bytes. If the new bytes are the ones you MEAN to have,\n'
     + 'run `node generators/media/fonts.mjs --relock` and re-save the snap baselines in the same pass.');
 }

@@ -184,12 +184,12 @@ if (shortFilm && hasObject) for (const k of ['object_t0', 'object_states', 'obje
 // it, evenly", which is the flat register everything here comes out in by default. `not:` is the exclusion
 // line, because most generic output is not a wrong decision, it is an un-excluded default.
 //
-// The film-side half is `make plan-check D=<file>` (quality/gates/plan-vs-render.mjs): it reads the same
+// The film-side half is `make check GATE=plan-check D=<file>` (quality/gates/plan-vs-render.mjs): it reads the same
 // `spectacle:` line and warns when the scene builds no `spectacle` block, or builds one in another beat.
 // Writing the peak down is not building it, exactly as with `becomes:`.
 const spectacle = field('spectacle');
 const not = field('not');
-if (!spectacle) err('missing-spectacle', 'missing `spectacle:`. NAME THE ONE EXAGGERATED MOMENT: which beat, which layer, which device, and what it is for. It is two-sided, and that is the point: naming the peak is a promise that every other beat stays restrained. A film that names none has not chosen restraint, it has chosen one flat volume for the whole runtime. Then build it in the scene as `"spectacle": { "at", "of", "device", "why" }` (core/timeline/spectacle.js): `device` is a shader sting name (injected), or "<kind>:<name>" naming a cut, seam, kinetic preset, or another layer this film already builds (verified, not injected), which `make plan-check` checks against this line.');
+if (!spectacle) err('missing-spectacle', 'missing `spectacle:`. NAME THE ONE EXAGGERATED MOMENT: which beat, which layer, which device, and what it is for. It is two-sided, and that is the point: naming the peak is a promise that every other beat stays restrained. A film that names none has not chosen restraint, it has chosen one flat volume for the whole runtime. Then build it in the scene as `"spectacle": { "at", "of", "device", "why" }` (core/timeline/spectacle.js): `device` is a shader sting name (injected), or "<kind>:<name>" naming a cut, seam, kinetic preset, or another layer this film already builds (verified, not injected), which `make check GATE=plan-check` checks against this line.');
 if (!not) err('missing-not', 'missing `not:`. NAME WHAT THIS FILM IS NOT. Most generic output is not a wrong decision, it is an un-excluded default: the centred type, the even grid, the fade on everything. Write the defaults you are refusing here, in your own words, so the beats below have something to be measured against. Nothing grades the prose; the line exists so the decision gets made.');
 
 // ── beats: each must state its job ────────────────────────────────────────────────────────────────

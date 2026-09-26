@@ -26,7 +26,7 @@
 // seam-ghost, seam-resurrection, seam-split) are enforced at `make ship`'s render-time seam-check step,
 // which has always been unconditional (no TASTE flag ever gated it).
 //
-//   node quality/gates/seams.mjs films/scene/<file>.json     ·     make seam-check D=<file>
+//   node quality/gates/seams.mjs films/scene/<file>.json     ·     make check GATE=seam-check D=<file>
 //
 // The markup check (crossfade-mud) always runs; it needs only the scene JSON. The five pixel checks need
 // a fresh render (out/<name>.mp4, not older than the scene) and are skipped, not failed, when there is

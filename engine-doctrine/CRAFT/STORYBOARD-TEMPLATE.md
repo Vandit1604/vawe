@@ -21,7 +21,7 @@ not: "the defaults this film refuses, in your own words"
 - Copy this file, fill every field, then run `make storyboard-check SB=<file>` and get sign-off
   BEFORE writing any scene JSON.
 - Name each beat's `archetype:` and `weight:` (exactly one `peak`), and a `borrows:` line whenever
-  a reference device is in play, written as `<their device> -> <our object>`. `make frame-check`
+  a reference device is in play, written as `<their device> -> <our object>`. `make check GATE=frame-check`
   measures the peak against the frames actually built.
 - Two lines are required and gate-checked for PRESENCE only, never for quality: `spectacle:` (the one
   loud moment, named: beat, layer, device, why) and `not:` (the defaults this film refuses).
@@ -67,7 +67,7 @@ not: "the defaults this film refuses, in your own words"
   sting at `at` (injected, the engine's own gesture), or "<kind>:<name>" naming a cut, seam, kinetic preset,
   or another layer the film ALREADY builds (a ground change, a match cut, …): nothing is injected for those,
   the block only verifies the named mechanism is really there at `at`.
-  `make plan-check D=<file>` reads this line and the scene together: it warns `spectacle-not-built` when
+  `make check GATE=plan-check D=<file>` reads this line and the scene together: it warns `spectacle-not-built` when
   the plan names a peak the JSON never builds, and `spectacle-in-wrong-beat` when the block's `at` lands
   outside the beat named here. So NAME THE BEAT in this line, as "beat 4" or by the beat's own title, or
   the two cannot be compared and the gate says so.
@@ -354,7 +354,7 @@ not: "the defaults this film refuses, in your own words"
   So keep the field and hold it to its real job. It feeds the intent sidecar, and it lets a failure
   name what was supposed to happen. It does not make a film better, and a storyboard full of them is
   not evidence about anything but the storyboard. Writing the change down is not building it. The
-  gate that checks the film is `make plan-check D=<file>` (quality/gates/plan-vs-render.mjs): it lays
+  gate that checks the film is `make check GATE=plan-check D=<file>` (quality/gates/plan-vs-render.mjs): it lays
   these beat spans over the render's clock and fails a junction the plan promised and the JSON left
   empty. Run it, and read what it says about the beats you were surest of.
 

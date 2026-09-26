@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/choreo.mjs: HOW THIS FILM CHOREOGRAPHS MOTION, one beat at a time.
 //
-//   make choreo D=films/scene/<film>.json [REF=<ref-clip-name>]
+//   make check GATE=choreo D=films/scene/<film>.json [REF=<ref-clip-name>]
 //   node quality/gates/choreo.mjs <film> [--ref <name>] [--json]
 //
 // REPORT ONLY, exit 0 always. It answers, per beat: which KINDS of motion are live at once (the frame
@@ -176,7 +176,7 @@ export function lateEarlyRatio(prof, start, end) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2);
   const arg = args.find((a) => !a.startsWith('--')) || process.env.D;
-  if (!arg) { console.error('usage: make choreo D=films/scene/<film>.json [REF=<ref-clip-name>]'); process.exit(2); }
+  if (!arg) { console.error('usage: make check GATE=choreo D=films/scene/<film>.json [REF=<ref-clip-name>]'); process.exit(2); }
   const asJson = args.includes('--json');
   const base = String(arg).replace(/\.json$/, '');
   const slug = path.basename(base);
