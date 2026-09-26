@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildRoster, worktreeContract, DECIDERS, DECIDER_PIN } from '../../harness/author/critics.mjs';
+import { buildRoster, buildPlanJudgeBrief, worktreeContract, DECIDERS, DECIDER_PIN } from '../../harness/author/critics.mjs';
 import { rulesFor, briefLine } from '../../harness/lib/craft-rules.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -173,4 +173,53 @@ approved: "ci-fixture"
   assert.match(motion.prompt, /Craft rules for this role \(motion, camera\):/);
   assert.match(motion.prompt, /rule motion\./);
   assert.doesNotMatch(sound.prompt, /rule motion\./, 'sound must not see motion\'s rules');
+});
+
+// The plan judge (buildPlanJudgeBrief, the direction critic that reports on a storyboard) must ask
+// the plan to name which of Willenskomer's 12 UX-in-Motion principles it uses and where, beat by
+// beat, folded into the existing motion-variety code rather than a new one.
+test('the plan judge brief carries the UX-in-Motion checklist, naming all 12 principles', () => {
+  const NAME = 'plan-judge-ux-motion-fixture';
+  const base = path.join(repoRoot, 'tests/fixtures/films', NAME);
+  const sb = `${base}.storyboard.md`;
+  const prevFilmsDir = process.env.VAWE_FILMS_DIR;
+  process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
+  after(() => {
+    try { fs.unlinkSync(sb); } catch { /* already gone */ }
+    if (prevFilmsDir === undefined) delete process.env.VAWE_FILMS_DIR; else process.env.VAWE_FILMS_DIR = prevFilmsDir;
+  });
+  fs.writeFileSync(sb, `---
+message: "test film"
+audience: "ci"
+arc: "hook -> payoff"
+format: 1920x1080
+theme: "themes/default.json"
+duration: 6s
+spectacle: "beat 2, the payoff figure"
+not: "no centred text default"
+---
+
+## Beat 1: Hook (0s-3s)
+- type: hook
+- onscreen: "the strong first line"
+- mechanism: static headline
+- becomes: the bare stage becomes a question
+- why: open loop
+- duration: 3s
+
+## Beat 2: Payoff (3s-6s)
+- type: benefit_highlight
+- onscreen: "the payoff figure"
+- mechanism: hero count-up
+- becomes: the question becomes the answer
+- why: land the result
+- duration: 3s
+`);
+  const { prompt } = buildPlanJudgeBrief(`tests/fixtures/films/${NAME}`);
+  assert.match(prompt, /UX-in-Motion checklist/);
+  for (const principle of ['easing', 'offset & delay', 'parenting', 'transformation', 'value change',
+    'masking', 'overlay', 'cloning', 'obscuration', 'parallax', 'dimensionality', 'dolly & zoom']) {
+    assert.ok(prompt.includes(principle), `checklist is missing "${principle}"`);
+  }
+  assert.match(prompt, /code: motion-variety/);
 });
