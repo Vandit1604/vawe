@@ -4,7 +4,8 @@ import {
   TOKENS, SERIES, seriesAt, r2, text,
   R, TYPE, SPACE, cardChrome, htmlCard, cardInsetY, barWidth,
   sweep,
-  tint, TINT, DATA_CAP, STROKE, capCss, labelCss, numCss, deltaChip, needData } from './kit.mjs';
+  tint, TINT, DATA_CAP, STROKE, strokeCss, trackDashCss, areaFillCss,
+  capCss, labelCss, numCss, deltaChip, needData } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
@@ -86,19 +87,25 @@ export function barChart({ x, y, w = 560, h = 260, data = [], color = SERIES[0],
 // wash: strongest under the line and gone at the baseline. The gradient id is derived from the colour,
 // deterministic: no counter, no random, just the string. `len` is the exact polyline length, so the
 // draw-on dash is right for any data rather than a fudge factor.
-function lineChartSvg({ cw, ch, pad, pts, data, color, area, PX, PY }) {
+function lineChartSvg({ x, y, cw, ch, pad, pts, data, color, area, PX, PY }) {
   const lastI = data.length - 1;
   const dots = lastI < 0 ? '' : `<circle cx="${PX(lastI)}" cy="${PY(data[lastI].value)}" r="4.5" fill="${color}"`
     + ` stroke="${T.card}" stroke-width="3" style="opacity:var(--p, 1)"/>`;
   const len = data.reduce((acc, d, i) => i === 0 ? 0
     : acc + Math.hypot(+PX(i) - +PX(i - 1), +PY(d.value) - +PY(data[i - 1].value)), 0) || 1;
-  const gid = `va${[...color].reduce((acc, c) => (acc * 33 + c.charCodeAt(0)) >>> 0, 5381).toString(36)}`;
+  // Folded in `x,y` (the layer's own position, always in props, never two charts at once): the gid
+  // used to be a hash of `color` ALONE, so two lineChart instances with the same default colour (the
+  // ordinary case: nothing overrides `color`) picked the SAME id, and one instance's <linearGradient>
+  // silently painted the OTHER's polygon (an SVG `url(#id)` reference resolves to the first element in
+  // the document with that id, not the nearest one in its own <svg>). `x,y` breaks the tie for any two
+  // charts sharing one page without needing a mutable counter (still a pure function of props alone).
+  const gid = `va${[...`${color}@${x},${y}`].reduce((acc, c) => (acc * 33 + c.charCodeAt(0)) >>> 0, 5381).toString(36)}`;
   return `<svg viewBox="0 0 ${cw} ${ch}" width="100%" height="${ch}" style="display:block;overflow:visible">`
     + (area ? `<defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">`
       + `<stop offset="0" stop-color="${color}" stop-opacity="0.28"/>`
       + `<stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>`
-      + `<polygon points="${pad},${ch - pad} ${pts} ${cw - pad},${ch - pad}" fill="url(#${gid})"/>` : '')
-    + `<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="${STROKE.line}" stroke-linejoin="round" stroke-linecap="round"`
+      + `<polygon points="${pad},${ch - pad} ${pts} ${cw - pad},${ch - pad}" style="${areaFillCss(`url(#${gid})`)}"/>` : '')
+    + `<polyline points="${pts}" fill="none" stroke="${color}" style="${strokeCss(STROKE.line)}" stroke-linejoin="round"`
     + ` stroke-dasharray="${len.toFixed(1)}" stroke-dashoffset="calc(${len.toFixed(1)} * (1 - var(--p, 1)))"/>${dots}</svg>`;
 }
 
@@ -118,7 +125,7 @@ export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0]
   needData('data', data, 'lineChart');
   const cw = Math.max(0, w - 2 * CHART_PAD), ch = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label })), pad = 8;
   const { PX, PY, pts } = lineChartPoints({ data, cw, ch, pad });
-  const svg = lineChartSvg({ cw, ch, pad, pts, data, color, area, PX, PY });
+  const svg = lineChartSvg({ x, y, cw, ch, pad, pts, data, color, area, PX, PY });
   const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
   // the line DRAWS ON rather than the card sliding in. The motion a line chart is for. `len` is the
   // polyline's own length, so the dash sweep is exact rather than a guess that breaks with the data.
@@ -222,8 +229,8 @@ export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color =
   // colour, so the unfilled half of a meter was the same ink as a divider and read as chrome rather
   // than as the rest of the scale, and on a dark theme it vanished into the card entirely.
   const svg = (inner) => `<svg viewBox="0 0 100 60" width="${inner}" style="display:block;margin:0 auto 4px">`
-    + `<path d="${arc}" fill="none" stroke="${tint(color, TINT.track)}" stroke-width="${STROKE.arc}" stroke-linecap="round"/>`
-    + `<path d="${arc}" fill="none" stroke="${color}" stroke-width="${STROKE.arc}" stroke-linecap="round"`
+    + `<path d="${arc}" fill="none" stroke="${tint(color, TINT.track)}" style="${strokeCss(STROKE.arc)};${trackDashCss()}"/>`
+    + `<path d="${arc}" fill="none" stroke="${color}" style="${strokeCss(STROKE.arc)}"`
     + ` stroke-dasharray="calc(${semi.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${semi.toFixed(2)}"/></svg>`;
   // the reading and its caption sit BELOW the arc, so they are body, not htmlCard's heading row.
   const html = htmlCard({ w, pad: CHART_PAD, align: 'center', body: (inner) => svg(inner)

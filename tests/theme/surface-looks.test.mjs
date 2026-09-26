@@ -21,11 +21,25 @@ import {
   }
 }
 
-// ---- glass vs brutalist disagree on most of their nine tokens, not just colour ----
+// ---- glass vs brutalist disagree on most of their tokens, not just colour ----
 {
   const glass = resolveSurfaceLook('glass'), brutalist = resolveSurfaceLook('brutalist');
   const disagreements = SURFACE_TOKEN_KEYS.filter((k) => glass[k] !== brutalist[k]);
   assert.ok(disagreements.length >= 6, `glass vs brutalist should disagree on most tokens, agreed on all but ${disagreements}`);
+}
+
+// ---- the MARKS AND TYPE tokens vary too, not only the container: a theme is a different drawing,
+// not a recoloured frame around the same one. brutalist reads square/loud, editorial reads
+// hairline/quiet, and they must disagree on the tokens that decide that. ----
+{
+  const brutalist = resolveSurfaceLook('brutalist'), editorial = resolveSurfaceLook('editorial');
+  assert.equal(brutalist.strokeCap, 'square');
+  assert.equal(editorial.strokeCap, 'butt');
+  assert.ok(brutalist.strokeScale > editorial.strokeScale, 'brutalist draws a heavier stroke than editorial\'s hairline');
+  assert.equal(brutalist.labelCase, 'uppercase');
+  assert.equal(editorial.labelVariant, 'small-caps');
+  assert.notEqual(brutalist.numFont, editorial.numFont, 'brutalist and editorial read numbers in different faces');
+  assert.notEqual(brutalist.areaFill, editorial.areaFill, 'a solid block vs no wash at all: the FILL style differs, not only its colour');
 }
 
 // ---- an object spec: {preset, ...overrides}, overrides win, unknown keys refused ----

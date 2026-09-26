@@ -301,6 +301,21 @@ export const DATA_CAP = 6;
 // which is why a donut read as a thick toy ring beside a hairline-thin trend line in the same film.
 export const STROKE = { line: 2.4, arc: 9 };
 
+// strokeCss(px): the ambient stroke treatment every SVG mark reads instead of a bare stroke-width and
+// a hardcoded round cap. `px` (STROKE.line/STROKE.arc/DATA_CAP at the call site) is scaled by
+// `--v-stroke-scale` (a look's own multiplier: brutalist draws thicker, editorial hairline-thin), and
+// the cap comes from `--v-stroke-cap` (round/square/butt), so a look changes the MARK, not just the
+// frame around it. Unset, this renders `stroke-width:9px;stroke-linecap:round` exactly as before.
+export const strokeCss = (px) => `stroke-width:calc(${px} * ${surfaceCssVar('strokeScale', 1)});stroke-linecap:${surfaceCssVar('strokeCap', 'round')}`;
+// trackDashCss(): a look may turn a filled track/rule into a dashed one (editorial's fine hairline
+// dash, print's halftone-like dotted screen) with one var; unset, `stroke-dasharray:none` is a no-op.
+export const trackDashCss = () => `stroke-dasharray:${surfaceCssVar('trackDash', 'none')}`;
+// areaFillCss(fallbackPaint): the paint a filled area/track reads. `fallbackPaint` is the block's own
+// per-instance default (lineChart's gradient url, a gauge track's tint), so a look that sets
+// `areaFill` (brutalist: a flat solid block; editorial/print: 'none', no wash at all) repaints the
+// FILL STYLE itself, not only the frame holding it, and a look that leaves it unset changes nothing.
+export const areaFillCss = (fallbackPaint) => `fill:${surfaceCssVar('areaFill', fallbackPaint)}`;
+
 // SHADOW_CARD. ONE step of elevation, matching what `elevation: 1` stacks in core/layers/util.js:216
 // for a native layer. html cards had NO shadow at all, so an html chart and a native stat card sat at
 // visibly different depths on the same stage. Drop shadow only: the inset ring the engine adds needs
@@ -317,12 +332,27 @@ export const SHADOW_CARD = surfaceCssVar('shadow', '0 1px 1px rgba(0,0,0,0.07), 
 // TYPE.body (17) is the floor, not TYPE.fine (14): `make audit` fails text under 14.04px as unreadable.
 // The muted colour is `--text-2`, not `--dim`: `--dim` is the chrome role and measures 2.6:1 against
 // the card on higgsfield (a hard audit failure); `--text-2` clears 4.5:1 on every theme.
-export const capCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 600 } = {}) =>
-  `font:${weight} ${size}px var(--font-mono);color:${color};letter-spacing:0.02em`;
-export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 500 } = {}) =>
-  `font:${weight} ${size}px var(--font-sans);color:${color}`;
-export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = 700 } = {}) =>
-  `font:${weight} ${size}px var(--font-num);color:${color};letter-spacing:-0.01em;font-variant-numeric:tabular-nums`;
+// `weight` stays an explicit param a caller can still pass to mean it outright (tabBar's active/
+// inactive contrast, ui.mjs's bold digit): passing a number wins, no ambient var involved, exactly as
+// before. Left at its default (`null`), the ambient `--v-label-*`/`--v-num-*` tokens carry the weight
+// instead, along with font/case/tracking/variant a caller never had a way to set at all: a look's own
+// choice, or exactly today's literal (600/mono/0.02em/normal) when no look is set. `font-family` is
+// the one JS default that differs by role (capCss: mono, labelCss: sans, numCss: the theme's num
+// face), so the three roles still read as three different faces on a theme with no `look.surface`.
+export const capCss = ({ size = TYPE.body, color = TOKENS.sub, weight = null } = {}) =>
+  `font:${weight ?? surfaceCssVar('labelWeight', 600)} ${size}px ${surfaceCssVar('labelFont', 'var(--font-mono)')};`
+  + `color:${color};letter-spacing:${surfaceCssVar('labelTracking', '0.02em')};`
+  + `text-transform:${surfaceCssVar('labelCase', 'none')};font-variant:${surfaceCssVar('labelVariant', 'normal')}`;
+// `weightFallback` is the JS-only weight a caller wants when NO look is set (labelCss is reused for
+// both a quiet legend name at 500 and a bold headline at 700); a look's own `labelWeight` still wins
+// over it the moment one is set, same as every other ambient token here.
+export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = null, weightFallback = 500 } = {}) =>
+  `font:${weight ?? surfaceCssVar('labelWeight', weightFallback)} ${size}px ${surfaceCssVar('labelFont', 'var(--font-sans)')};`
+  + `color:${color};letter-spacing:${surfaceCssVar('labelTracking', '0em')};`
+  + `text-transform:${surfaceCssVar('labelCase', 'none')};font-variant:${surfaceCssVar('labelVariant', 'normal')}`;
+export const numCss = ({ size = TYPE.lead, color = TOKENS.ink, weight = null } = {}) =>
+  `font:${weight ?? surfaceCssVar('numWeight', 700)} ${size}px ${surfaceCssVar('numFont', 'var(--font-num)')};`
+  + `color:${color};letter-spacing:-0.01em;font-variant-numeric:tabular-nums`;
 
 // deltaChip. The verdict on a reading: a tinted pill carrying an arrow and a figure, in the tone's
 // own colour. It is a PAIR with the value it sits under and must never outweigh it, so it is one

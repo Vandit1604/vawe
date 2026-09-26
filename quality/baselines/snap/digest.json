@@ -475,11 +475,11 @@
    "font": "db51b5ddc8c7"
   },
   "barChart": {
-   "sig": "59a826a722bce572",
+   "sig": "661fd5e9107685cd",
    "font": "db51b5ddc8c7"
   },
   "barChart.green": {
-   "sig": "c9be80b5ca9e9e1e",
+   "sig": "7440bb54c47e682b",
    "font": "db51b5ddc8c7"
   },
   "bento": {
@@ -667,7 +667,7 @@
    "font": "db51b5ddc8c7"
   },
   "comparison.screens": {
-   "sig": "abed5fba7ee4d07f",
+   "sig": "585d8b4abb23cfd8",
    "font": "db51b5ddc8c7"
   },
   "deploySuccess": {
@@ -683,11 +683,11 @@
    "font": "db51b5ddc8c7"
   },
   "donutChart": {
-   "sig": "76c3bef77c2bc616",
+   "sig": "e5d6649d2ab49bf7",
    "font": "db51b5ddc8c7"
   },
   "donutChart.two": {
-   "sig": "17c04ac929b51de1",
+   "sig": "e7f18cf8b738f387",
    "font": "db51b5ddc8c7"
   },
   "emptyState": {
@@ -715,15 +715,15 @@
    "font": "db51b5ddc8c7"
   },
   "gauge": {
-   "sig": "4423c869be30a5ab",
+   "sig": "e84118d11db645b7",
    "font": "db51b5ddc8c7"
   },
   "gauge.full": {
-   "sig": "045e1324e8567908",
+   "sig": "81ab88416823e7e5",
    "font": "db51b5ddc8c7"
   },
   "gauge.warn": {
-   "sig": "4f9912ab8f7523ad",
+   "sig": "bf44e7b89647c636",
    "font": "db51b5ddc8c7"
   },
   "glassCard": {
@@ -791,15 +791,15 @@
    "font": "db51b5ddc8c7"
   },
   "lineChart": {
-   "sig": "1fe82a2cef3e864c",
+   "sig": "404c725bbd680a5a",
    "font": "db51b5ddc8c7"
   },
   "lineChart.area": {
-   "sig": "ec7f7e6e9a04e824",
+   "sig": "57984d450768641f",
    "font": "db51b5ddc8c7"
   },
   "lineChart.down": {
-   "sig": "1e0e7799488ff123",
+   "sig": "fae911407710163b",
    "font": "db51b5ddc8c7"
   },
   "listRow": {
@@ -891,19 +891,19 @@
    "font": "db51b5ddc8c7"
   },
   "notification": {
-   "sig": "a2514de5907adfc6",
+   "sig": "a2c5d9699360b733",
    "font": "db51b5ddc8c7"
   },
   "notification.error": {
-   "sig": "1fb0a6af59c863b2",
+   "sig": "958b5628d611bb3f",
    "font": "db51b5ddc8c7"
   },
   "notification.stack": {
-   "sig": "eb9c0359df722140",
+   "sig": "1442e4a58b766482",
    "font": "db51b5ddc8c7"
   },
   "notification.warn": {
-   "sig": "e8cef1a1cb4ce84d",
+   "sig": "f7981af07f927711",
    "font": "db51b5ddc8c7"
   },
   "nowPlaying": {
@@ -915,11 +915,11 @@
    "font": "db51b5ddc8c7"
   },
   "parallaxUnzoom": {
-   "sig": "708c3723158150f5",
+   "sig": "30387203cd3ce7ca",
    "font": "db51b5ddc8c7"
   },
   "parallaxZoom": {
-   "sig": "4a817a85723048f0",
+   "sig": "d5f9ea4c49136560",
    "font": "db51b5ddc8c7"
   },
   "phoneFrame": {
@@ -943,15 +943,15 @@
    "font": "db51b5ddc8c7"
   },
   "progressRing": {
-   "sig": "9b500c58bf4d7060",
+   "sig": "306a25f979749e77",
    "font": "db51b5ddc8c7"
   },
   "progressRing.done": {
-   "sig": "affc6a48d09bb262",
+   "sig": "28803bccccafbc36",
    "font": "db51b5ddc8c7"
   },
   "progressRing.low": {
-   "sig": "37447b2767a67eb1",
+   "sig": "b92ed6f4db4b4c7c",
    "font": "db51b5ddc8c7"
   },
   "quote": {
@@ -979,11 +979,11 @@
    "font": "db51b5ddc8c7"
   },
   "screenSwap": {
-   "sig": "0de3f8a47f76cb4d",
+   "sig": "1f411e478245a298",
    "font": "db51b5ddc8c7"
   },
   "screenSwap.slide": {
-   "sig": "64c868e7225424e5",
+   "sig": "b3c7de696ba1fecb",
    "font": "db51b5ddc8c7"
   },
   "searchEngine.home": {
@@ -1019,7 +1019,7 @@
    "font": "db51b5ddc8c7"
   },
   "splitScreen": {
-   "sig": "7aee90dce67b869e",
+   "sig": "df35b3ec3556bfe4",
    "font": "db51b5ddc8c7"
   },
   "splitScreen.pip": {
@@ -1031,11 +1031,11 @@
    "font": "db51b5ddc8c7"
   },
   "stackedBar": {
-   "sig": "4d9114d8665764fc",
+   "sig": "a796617c9e67766b",
    "font": "db51b5ddc8c7"
   },
   "stackedBar.three": {
-   "sig": "46ba3d17079faa7f",
+   "sig": "ea5df816d9196b14",
    "font": "db51b5ddc8c7"
   },
   "statBig": {
@@ -1051,19 +1051,19 @@
    "font": "db51b5ddc8c7"
   },
   "stepFlow": {
-   "sig": "84004ec3b08edbf6",
+   "sig": "829cf7985588d7f5",
    "font": "db51b5ddc8c7"
   },
   "stepFlow.build": {
-   "sig": "9c37ddf312f7a8b5",
+   "sig": "982f9ee56c69b70d",
    "font": "db51b5ddc8c7"
   },
   "stepFlow.done": {
-   "sig": "f198207abe976290",
+   "sig": "f25ee330aa53dc5e",
    "font": "db51b5ddc8c7"
   },
   "stepFlow.start": {
-   "sig": "7eed40e066b72821",
+   "sig": "f86cfc96cda179db",
    "font": "db51b5ddc8c7"
   },
   "stripeCard": {
@@ -1071,19 +1071,19 @@
    "font": "db51b5ddc8c7"
   },
   "tabBar": {
-   "sig": "c5bcef84bc829e73",
+   "sig": "831d9e1b3bd56eac",
    "font": "db51b5ddc8c7"
   },
   "tabBar.four": {
-   "sig": "6df2353e142d1a3d",
+   "sig": "fd421625841d3196",
    "font": "db51b5ddc8c7"
   },
   "tabBar.icons": {
-   "sig": "e35050b71e7309a5",
+   "sig": "2c0765632319f6c9",
    "font": "db51b5ddc8c7"
   },
   "tabBar.switch": {
-   "sig": "4236d7cef150c413",
+   "sig": "456867eab3bb23bc",
    "font": "db51b5ddc8c7"
   },
   "table": {
@@ -1159,7 +1159,7 @@
    "font": "db51b5ddc8c7"
   },
   "uiReveal3d": {
-   "sig": "7eacf4ba6f4a609a",
+   "sig": "4074da9017188809",
    "font": "db51b5ddc8c7"
   },
   "usMap": {
