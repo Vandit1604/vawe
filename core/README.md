@@ -7,7 +7,7 @@ group: engine
 
 # core/
 
-The engine's own vocabulary: one subfolder per capability family (`layers/` the 24 layer types,
+The engine's own vocabulary: one subfolder per capability family (`layers/` the layer types `ls core/layers/` lists,
 `kinetic/` text presets, `camera-moves/`, `transitions/`, `backgrounds/`, `type/`, `color/`, `layout/`,
 `audio/`, and more). Every effect in the engine composes from what is here; nothing bypasses it with a
 private code path (`AGENTS.md`, "EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE").

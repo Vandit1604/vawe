@@ -139,6 +139,25 @@ export const needData = (what, v, block) => {
     + `Pass \`${what}\`, or copy the example from this block's catalog row.`);
 };
 
+// needShape(block, what, items, fields): needData asserts the ARRAY is non-empty; this asserts each
+// ELEMENT is the object the block reads, not just present. A plain string item (`items: ["Step 1"]`
+// where `items: [{title:"Step 1"}]` was meant) does not error on its own: `it.title` on a string is
+// simply `undefined`, and a template literal prints that as the literal word "undefined", or, behind
+// an `it.x || ''` guard, a silently blank row. `fields` is the list this block reads that must ALL be
+// set for the row to draw anything at all.
+export const needShape = (block, what, items, fields) => {
+  (items || []).forEach((it, i) => {
+    if (it == null || typeof it !== 'object' || Array.isArray(it))
+      throw new Error(`block "${block}": \`${what}[${i}]\` must be an object with ${fields.map((f) => `\`${f}\``).join(', ')}. `
+        + `Got ${JSON.stringify(it)}. A plain string here reads as the field it stands in for, so ${what}[${i}].${fields[0]} `
+        + `becomes \`undefined\` and either prints as the word "undefined" or renders a blank row, with no error.`);
+    const missing = fields.filter((f) => it[f] == null);
+    if (missing.length)
+      throw new Error(`block "${block}": \`${what}[${i}]\` is missing ${missing.map((f) => `\`${f}\``).join(', ')} `
+        + `(got keys: ${Object.keys(it).join(', ') || '(none)'}).`);
+  });
+};
+
 // cardChrome: the hairline card. `{bg, border, elevation, anim}` was retyped in ~15 factories; every
 // one of those was a chance for the set to drift, and it did. Timing stays at the call site because
 // entrance duration is a per-block motion decision, not chrome.

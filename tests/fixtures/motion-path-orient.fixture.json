@@ -1,0 +1,95 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "tempo": 1,
+ "duration": 3.4,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "plane-oriented",
+   "type": "svg",
+   "x": 300,
+   "y": 500,
+   "w": 40,
+   "h": 20,
+   "viewBox": "0 0 40 20",
+   "d": "M 40 10 L 0 0 L 10 10 L 0 20 Z",
+   "fill": "var(--accent)",
+   "start": 0,
+   "duration": 3.4,
+   "anim": "none",
+   "motionPath": {
+    "d": "M 0 130 C 162 10.4 288 10.4 450 130 S 738 249.6 900 130",
+    "dur": 3,
+    "ease": "easeInOutCubic",
+    "autoOrient": true
+   }
+  },
+  {
+   "id": "plane-offset",
+   "type": "svg",
+   "x": 300,
+   "y": 700,
+   "w": 40,
+   "h": 20,
+   "viewBox": "0 0 40 20",
+   "d": "M 40 10 L 0 0 L 10 10 L 0 20 Z",
+   "fill": "var(--accent)",
+   "start": 0,
+   "duration": 3.4,
+   "anim": "none",
+   "motionPath": {
+    "d": "M 0 130 C 162 10.4 288 10.4 450 130 S 738 249.6 900 130",
+    "dur": 3,
+    "ease": "easeInOutCubic",
+    "autoOrient": true,
+    "orientOffset": 90
+   }
+  },
+  {
+   "id": "plane-unoriented",
+   "type": "svg",
+   "x": 300,
+   "y": 900,
+   "w": 40,
+   "h": 20,
+   "viewBox": "0 0 40 20",
+   "d": "M 40 10 L 0 0 L 10 10 L 0 20 Z",
+   "fill": "var(--accent)",
+   "start": 0,
+   "duration": 3.4,
+   "anim": "none",
+   "motionPath": {
+    "d": "M 0 130 C 162 10.4 288 10.4 450 130 S 738 249.6 900 130",
+    "dur": 3,
+    "ease": "easeInOutCubic",
+    "autoOrient": false
+   }
+  },
+  {
+   "id": "plane-trimmed",
+   "type": "svg",
+   "x": 900,
+   "y": 500,
+   "w": 40,
+   "h": 20,
+   "viewBox": "0 0 40 20",
+   "d": "M 40 10 L 0 0 L 10 10 L 0 20 Z",
+   "fill": "var(--accent)",
+   "start": 0,
+   "duration": 3.4,
+   "anim": "none",
+   "motionPath": {
+    "d": "M 0 130 C 162 10.4 288 10.4 450 130 S 738 249.6 900 130",
+    "dur": 3,
+    "ease": "linear",
+    "autoOrient": false,
+    "from": 0.2,
+    "to": 0.8
+   }
+  }
+ ]
+}

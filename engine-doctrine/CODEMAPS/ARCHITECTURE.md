@@ -67,10 +67,11 @@ frame  seekAll
 accumulate  core/tracks/react.js
 accumulate  core/tracks/follow.js
 accumulate  core/tracks/motion.js
+accumulate  core/tracks/drive.js
 accumulate  core/tracks/idle.js
 ```
 
-**THE ACCUMULATOR HAS TO BE EMPTIED, and for a long time nothing did it.** The four tracks above read
+**THE ACCUMULATOR HAS TO BE EMPTIED, and for a long time nothing did it.** The five tracks above read
 `el.style.transform` back and PREPEND to it, which is only safe if the element starts each frame clean.
 `driveClips` clears a property only when one of the layer's OWN anims writes it, so a layer entering on
 `wipe`, `iris` or `clock` (all clip-path, no transform) composed onto the string left by whichever frame

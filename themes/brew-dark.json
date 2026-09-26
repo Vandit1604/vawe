@@ -9,64 +9,6 @@
     "durationScale": 0.85,
     "stagger": 0.045
   },
-  "bg": {
-    "accent": "255,116,46",
-    "tint": "80,52,32",
-    "tint2": "241,100,46",
-    "dotLight": "60,48,40",
-    "paperBase": [
-      "#161512",
-      "#0b0a09"
-    ],
-    "softBase": [
-      "#1a1512",
-      "#0e0b09"
-    ],
-    "accentBase": [
-      "#e85c28",
-      "#cf4712"
-    ],
-    "inkBase": [
-      "#0d0c0b",
-      "#000000"
-    ],
-    "border": "#26221d",
-    "dark": [
-      "#141110",
-      "#000000"
-    ],
-    "darkMesh": [
-      "#1a1310",
-      "#000000"
-    ],
-    "deep": [
-      "#0c0806",
-      "#000000"
-    ],
-    "light": [
-      "#1c1c1e",
-      "#0f0f10"
-    ],
-    "ink": [
-      "#0d0c0b",
-      "#000000"
-    ],
-    "paper": "#121110"
-  },
-  "vars": {
-    "--ink": "#f6f3ee",
-    "--paper": "#121110",
-    "--muted": "#a49b92",
-    "--em": "#ff742e",
-    "--accent-ink": "#ff8a4d",
-    "--on-light": "#1c1613",
-    "--on-dark": "#f6f3ee",
-    "--border": "#26221d",
-    "--accent-soft": "rgba(255,116,46,0.16)"
-  },
-  "bgDefault": {
-    "preset": "ink"
-  },
   "tokens": {
     "color": {
       "bg": {
@@ -188,5 +130,54 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": {
+      "preset": "ink"
+    },
+    "bgPalette": {
+      "accent": "255,116,46",
+      "tint": "80,52,32",
+      "tint2": "241,100,46",
+      "dotLight": "60,48,40",
+      "paperBase": [
+        "#161512",
+        "#0b0a09"
+      ],
+      "softBase": [
+        "#1a1512",
+        "#0e0b09"
+      ],
+      "accentBase": [
+        "#e85c28",
+        "#cf4712"
+      ],
+      "inkBase": [
+        "#0d0c0b",
+        "#000000"
+      ],
+      "border": "#26221d",
+      "dark": [
+        "#141110",
+        "#000000"
+      ],
+      "darkMesh": [
+        "#1a1310",
+        "#000000"
+      ],
+      "deep": [
+        "#0c0806",
+        "#000000"
+      ],
+      "light": [
+        "#1c1c1e",
+        "#0f0f10"
+      ],
+      "ink": [
+        "#0d0c0b",
+        "#000000"
+      ],
+      "paper": "#121110"
+    }
   }
 }

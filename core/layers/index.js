@@ -85,7 +85,7 @@ export const LAYER_BLURBS = blurbsOf('layer type', REGISTRY);
 // product recreation, and is the one worth a second look if it is still unused after a few more of
 // those; that is a note for the next audit, not a case for deleting a working primitive today.
 const LAYER_DOCS = {
-  text: { doc: 'engine-doctrine/PRIMITIVES.md#kinetic-type-coretypetypejs-31-presets-charwordline-splits',
+  text: { doc: 'engine-doctrine/PRIMITIVES.md#kinetic-type-coretypetypejs-every-name-in-presets-charwordline-splits',
     brief: 'JSON knobs on a layer' },
   count: { doc: 'engine-doctrine/CRAFT/MOTION-REGISTERS.md#3-seven-motion-devices-not-two',
     brief: 'a number has no mass and overshoot paints a false value for several frames' },
@@ -147,7 +147,7 @@ const LAYER_AKA = {
   rect: ['a box', 'a solid panel', 'a rectangle'],
   glow: ['a soft light', 'a halo', 'a glowing highlight'],
   beam: ['a light bar', 'a travelling light', 'a light border'],
-  svg: ['vector art', 'an inline icon shape', 'scalable line art'],
+  svg: ['vector art', 'an inline icon shape', 'scalable line art', 'trim paths', 'a spinning loader ring'],
   cursor: ['a mouse pointer', 'a fake cursor', 'a click demo pointer'],
   clip: ['a baked animation', 'a frame sequence', 'a pre-rendered clip'],
   html: ['a hand-written fragment', 'real markup', 'a web snippet'],

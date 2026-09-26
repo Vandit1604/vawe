@@ -46,6 +46,8 @@ import { seamErrors, durationWordErrors, transitionErrors, authoredJunctionError
 import { handleErrors, easeErrors } from './easing.mjs';
 import { walk } from './schema-walk.mjs';
 import { countEaseErrors } from './count-errors.mjs';
+import { cameraMoveErrors } from './camera.mjs';
+import { contentSlotErrors } from './content.mjs';
 
 export { layoutErrors } from './layout.mjs';
 export { captionErrors } from './captions.mjs';
@@ -58,6 +60,8 @@ export { seamErrors, durationWordErrors, transitionErrors, authoredJunctionError
 export { handleErrors, easeErrors } from './easing.mjs';
 export { lintData } from './lint-warnings.mjs';
 export { countEaseErrors } from './count-errors.mjs';
+export { cameraMoveErrors } from './camera.mjs';
+export { contentSlotErrors } from './content.mjs';
 
 // ON-SCREEN TEXT, out of a string that may be MARKUP. The rule lives in core/type/on-screen-text.js and
 // is re-exported here so the existing importers keep working: it was the strictest of eight copies, and
@@ -88,6 +92,8 @@ export function validateData(schema, data) {
   errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
+  errors.push(...cameraMoveErrors(data || {})); // a cameraMove param it does not read is a typo, caught before render
+  errors.push(...contentSlotErrors(data || {})); // a {{key}} with no matching content entry, caught before render
   return errors;
 }
 
@@ -111,15 +117,14 @@ function noEmdash(v, path, errors) {
 // file) and again at boot by applyTheme.
 export function validateTheme(spec) {
   const errors = [];
-  if (spec == null) return ['data.theme is required (a theme name or an inline theme object), no default look exists'];
+  if (spec == null) return ['data.theme is required (a theme name, e.g. "vawe", or an inline theme object): there is no default look, so the render refuses to start until this is fixed. Add "theme": "<a name under themes/>" or an inline theme object.'];
   if (typeof spec === 'string') return errors;
-  if (!isObj(spec)) return [`theme must be a string name or an object (got ${typeof spec})`];
+  if (!isObj(spec)) return [`theme must be a string name or an object, got a ${typeof spec} (${JSON.stringify(spec)}): the render refuses to start until this is fixed. Use a theme name (e.g. "vawe") or an inline {"tokens":..., "roles":...} object.`];
   // A theme is now a token file (`tokens` + a required `roles` map, core/theme/tokens.js,
   // core/theme/roles.js). themeFileErrors names the retired palette/type/gradient shape by itself when
   // it sees one, pointing at migrate-themes.mjs, so there is nothing left for this function to check
   // about that shape directly.
   errors.push(...themeFileErrors(spec, { parseColor, colorAlpha, contrastRatio }).map((m) => `theme incomplete: ${m}`));
-  if ('vars' in spec && !isObj(spec.vars)) errors.push('theme.vars must be an object');
   if ('motion' in spec) {
     if (!isObj(spec.motion)) errors.push('theme.motion must be an object');
     else for (const k of ['bounce', 'settle', 'enter', 'durationScale', 'stagger']) {

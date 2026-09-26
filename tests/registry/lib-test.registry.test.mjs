@@ -1436,8 +1436,10 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
     .some((m) => /look\.backdorp/.test(m) && /did you mean "backdrop"/.test(m)));
   // `cues` used to be a name here: dropped from LOOK_KEYS entirely, `buildSfx` (films/scene/scene.js)
   // already derives every cue from the transition actually used, so a fixed per-brand list is unanswerable.
+  // `bgDefault`/`bgPalette` joined later: the retired top-level `theme.bgDefault`/`theme.bg` fields,
+  // moved under `look` (core/theme/roles.js RETIRED_FIELDS), not a second top-level mechanism.
   ok('theme.look: LOOK_KEYS is the registry\'s own name list (one owner, not a second copy), and cues is gone',
-    LOOK_KEYS.length === 6 && LOOK_KEYS.includes('backdrop') && !LOOK_KEYS.includes('cues'));
+    LOOK_KEYS.length === 8 && LOOK_KEYS.includes('backdrop') && LOOK_KEYS.includes('bgDefault') && LOOK_KEYS.includes('bgPalette') && !LOOK_KEYS.includes('cues'));
 
   ok('theme.look: a bad bg preset name refuses with the near word', lookErrors({ backdrop: ['sof'] }, { bgNames, nearMisses })
     .some((m) => /look\.backdrop names "sof"/.test(m) && /did you mean "soft"/.test(m)));

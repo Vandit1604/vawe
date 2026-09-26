@@ -47,8 +47,8 @@ cut: that is not "smooth," it is a seam that says nothing, ten times.
 deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
 given transition is there.
 
-> **The inventory (what exists) is `core/transitions/catalog.js`, run `make study-tool X=transitions`.** It catalogs all
-> 106 transitions across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
+> **The inventory (what exists) is `core/transitions/catalog.js`, run `make study-tool X=transitions`.** It catalogs
+> every transition across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
 > `seam` two-scene), marks the basics, and is derived from the source registries so it can't drift.
 > This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
 > (`seam` fx `slide · push · uncover · wipe · dissolve`, all dir-aware) are the fundamentals every tool

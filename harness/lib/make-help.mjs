@@ -52,6 +52,7 @@ export function untagged(targets = collectTargets()) {
 export function printFast(targets = collectTargets()) {
   const byName = new Map(targets.map((t) => [t.name, t]));
   console.log('\n  make <target> [ARGS...]  ·  the fast path, brief to rendered film:\n');
+  console.log('  first preview of a brand-new name, no plan yet? make dev D=<file> DRAFT=1\n');
   for (const name of FAST_PATH) {
     const t = byName.get(name);
     console.log(`    ${name.padEnd(14)} ${t ? (t.help || '') : '(missing from Makefile)'}`);

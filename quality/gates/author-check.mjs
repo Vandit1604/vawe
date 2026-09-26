@@ -8,13 +8,19 @@
 // EVERY STEP RUNS, EVERY TIME. There is no opt-in half any more. A mechanism nobody is made to use is a
 // mechanism that does not exist, and half this ladder sat behind TASTE=1 where almost nobody set it.
 //
-// What is NOT uniform is SEVERITY, and that separation is the whole design:
-//   BLOCKS: the film is broken. A schema error, a hole in the clock, a plan the render does not deliver.
-//   REPORTS: the film may be off the house style. Always printed, never a wall, promoted by TASTE=1.
+// AUTHOR-SIDE GATES ADVISE, NEVER BLOCK. HyperFrames and Remotion ship with no authoring quality gates
+// at all; gates here are DX friction unless they stop something that cannot render. So only two things
+// still stop the run: `validate` (schema, vocabulary, em-dashes; the engine itself refuses this at
+// boot) and determinism (renderFrame purity, checked outside this ladder by probe-purity.mjs, which
+// nothing here can waive either). Every other finding prints in full and exits 0.
+//   STRICT=1 restores the old teeth on every structural step (beats, storyboard, motion, seams, the
+//     HARD_CODES escalation, inspect/plan against an intent sidecar).
+//   TASTE=1 restores the old teeth on the house-style steps only (critique, direct, floor, designspec,
+//     copy, read, pace, eye, sound), same as it always did.
 // Measured before this was written: turning the REPORTS half into blocks fails 116 of the 141 scenes in
 // this library, four films in five, which is the exact shape CLAUDE.md warns about, a rule waived by
-// reflex has already been repealed and nobody wrote it down. So the steps became mandatory and the
-// severities did not move. See engine-doctrine/TASTE.md · "One process, two severities".
+// reflex has already been repealed and nobody wrote it down. See engine-doctrine/SAFEGUARDS.md and
+// engine-doctrine/TASTE.md · "One process, two severities".
 //
 // BLOCKS:
 //   validate: schema + em-dash (correctness; never waivable)
@@ -419,10 +425,19 @@ const runGate = (name, label, script, args, opts = {}) => {
 };
 
 const results = [];
-// tier decides what a finding COSTS, and it is the only thing TASTE=1 moves. `reports` steps still run,
-// still print and still land in the verdict table; they simply cannot fail the build unless asked to.
+// AUTHOR-SIDE GATES ADVISE, NEVER BLOCK, except the two the engine itself cannot survive: schema
+// (validate) and determinism (renderFrame purity, checked outside this ladder by probe-purity.mjs).
+// Owner decision: HyperFrames and Remotion ship with no authoring quality gates at all. Every other
+// finding here, whatever its historical `tier`, prints in full and costs nothing unless STRICT=1
+// restores the old teeth. See engine-doctrine/SAFEGUARDS.md.
+const HARD_TIER = new Set(['validate']);
+// a hard-tier check always has teeth; a structural 'blocks' check needs STRICT=1; a style 'reports'
+// check needs TASTE=1, exactly as it always did.
+const hasTeeth = (name, tier) => HARD_TIER.has(name) || (tier === 'blocks' ? strict : taste);
+// tier decides what a finding COSTS. `reports` steps still run, still print and still land in the
+// verdict table; they simply cannot fail the build unless TASTE=1 (style) or STRICT=1 (structural).
 const record = (name, { code, blockCodes, blockRecords = blockCodes.map((c) => ({ code: c, at: undefined })), warnCodes = [], findings = 0 }, { waivable, exitMeansFail = true, tier = 'blocks' }) => {
-  const teeth = tier === 'blocks' || taste;
+  const teeth = hasTeeth(name, tier);
   const failed = exitMeansFail && teeth ? code !== 0 : false;
   // if the gate failed only on findings the scene explicitly allows, downgrade to a waiver. Matching is
   // PER FINDING now (code + its instance, where the gate names one), not per code: a scoped waiver
@@ -489,12 +504,13 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
     console.log(`      Then point this scene at it, so a rename cannot break the link:`);
     console.log(`        "storyboard": "films/scene/${sbBase}.storyboard.md"`);
     const excused = isWaivedBy(allowRaw, 'no-storyboard'); // whole-film code, carries no instance
+    const blocks = strict && !excused;
     if (!excused) {
-      console.log(`        The rule blocks here. Write the plan, or waive it with a reason someone can read:`);
+      console.log(`        ${strict ? 'The rule blocks here (STRICT=1).' : 'Advisory only; STRICT=1 makes this block.'} Write the plan, or waive it with a reason someone can read:`);
       console.log(`          {"authoring":{"allow":["no-storyboard"],"_why":{"no-storyboard":"…"}}}`);
     }
-    console.log(`  → 1 finding: no-storyboard${excused ? ' (waived)' : ' (BLOCKS)'}.`);
-    results.push({ name: 'storyboard', tier: 'blocks', failed: !excused, waived: excused, reported: false, findings: 1, unwaived: excused ? [] : ['no-storyboard'], blockCodes: ['no-storyboard'] });
+    console.log(`  → 1 finding: no-storyboard${excused ? ' (waived)' : blocks ? ' (BLOCKS)' : ' (advisory)'}.`);
+    results.push({ name: 'storyboard', tier: 'blocks', failed: blocks, waived: excused, reported: !blocks && !excused, findings: 1, unwaived: blocks ? ['no-storyboard'] : [], blockCodes: ['no-storyboard'] });
   } else {
     console.log(`  plan: ${path.relative(repoRoot, sbPath)}${declaredSb ? ' (declared by the scene)' : ' (found by name)'}`);
     const sbRun = spawnSync('node', [path.join(repoRoot, 'quality/gates/storyboard-check.mjs'), sbPath], { encoding: 'utf8', cwd: repoRoot });
@@ -805,8 +821,8 @@ const AMBITION_CODES = new Set(['plain-slideshow', 'no-continuous-object']);
     blocked.push([c, step, isAmbitionCode]);
   }
   if (blocked.length) {
-    console.log(`\n  ✗ ${blocked.length} hard code(s) BLOCK this film. They are not new rules: they are the`);
-    console.log(`    house-style findings above, made binding regardless of TASTE=1.`);
+    console.log(`\n  ${strict ? '✗' : '~'} ${blocked.length} hard code(s) ${strict ? 'BLOCK' : 'would block under STRICT=1'} this film. They are not new rules: they are`);
+    console.log(`    the house-style findings above, ${strict ? 'made binding regardless of TASTE=1.' : 'advisory by default (AUTHOR-SIDE GATES ADVISE).'}`);
     for (const [c, step, isAmbitionCode] of blocked) {
       console.log(`      [${c}] (step ${step})`);
       const d = docFor(c); if (d) console.log(`          read: ${d}`);
@@ -818,7 +834,7 @@ const AMBITION_CODES = new Set(['plain-slideshow', 'no-continuous-object']);
     }
     console.log(`\n    Fix them, or decide against one in the scene and say why:`);
     console.log(`      "authoring": { "allow": ["${blocked[0][0]}"], "_why": { "${blocked[0][0]}": "…" } }`);
-    for (const [c] of blocked) results.push({ name: `hard:${c}`, tier: 'blocks', failed: true, waived: false, reported: false, findings: 0, unwaived: [c], blockCodes: [c], warnCodes: [] });
+    if (strict) for (const [c] of blocked) results.push({ name: `hard:${c}`, tier: 'blocks', failed: true, waived: false, reported: false, findings: 0, unwaived: [c], blockCodes: [c], warnCodes: [] });
   }
 }
 const failedStrict = results.filter((r) => r.failed);

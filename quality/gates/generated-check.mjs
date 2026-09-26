@@ -23,53 +23,13 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { GENERATORS } from '../../harness/lib/generated-owners.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const write = process.argv.includes('--write');
 // The printed line is rendered FROM the record (engine-doctrine/MISTAKES.md #401): each `stale` record's summary
 // already carries the file/cmd detail a human reads, so the custom renderer prints it verbatim.
 const f = gateFindings({ line: (r) => r.summary });
-
-// [label, argv, the paths it owns]. A generator that writes outside its declared paths is a finding in
-// itself: the diff below would report it and name a path this table does not list.
-const GENERATORS = [
-  ['effects catalogue', ['scripts/site/effects-catalog.mjs'],
-    ['engine-doctrine/EFFECTS.md', 'site/lib/effects.json', 'site/lib/effects-counts.json', 'site/lib/effects-body.json']],
-  ['vocabulary catalogue', ['scripts/site/vocab-catalog.mjs'],
-    ['engine-doctrine/CRAFT/VOCABULARY.md']],
-  ['motion numbers', ['scripts/site/motion-numbers-catalog.mjs'],
-    ['engine-doctrine/RULES/ease-direction.md', 'engine-doctrine/RULES/stagger-total.md', 'engine-doctrine/RULES/speed-bands.md']],
-  ['films llms.txt', ['harness/author/llms-txt.mjs'],
-    ['films/llms.txt']],
-  ['arsenal index', ['scripts/site/arsenal-json.mjs'],
-    ['site/lib/arsenal.json', 'site/lib/blocks.json']],
-  ['doc map', ['quality/gates/doc-map.mjs', '--write'],
-    ['engine-doctrine/INDEX.md', 'engine-doctrine/CRAFT/README.md']],
-  // blocks/catalog/ + registry/ is 216 generated files with its own `--check` mode that nothing ran.
-  // It went stale the same way arsenal.json did: block blurbs changed, the tree carried the old
-  // `description`, and only an agent regenerating it by hand noticed 110 files were behind. A
-  // generated tree with a checker nobody calls is a generated tree with no checker.
-  ['registry', ['scripts/site/registry.mjs'], ['blocks/catalog', 'registry']],
-  // The sitemap needs the docs URLs, and the site builds BEFORE docs-site exists in the Docker image
-  // (see scripts/site/site-pages.mjs). So the list is generated here and committed, and this gate is
-  // what stops it drifting the day someone adds or renames a docs page.
-  ['site pages', ['scripts/site/site-pages.mjs'], ['site/lib/site-pages.json']],
-  // The plain-word aliases (feel/duration/camera) and the full per-registry word-action listing, both
-  // read off core/registry/vocab.js and registries() so neither doc can claim a word the engine does
-  // not resolve. quality/gates/word-action.mjs is the ratchet PRIMITIVES-VOCABULARY.md's numbers feed.
-  ['vocabulary catalogue', ['scripts/site/vocab-catalog.mjs'],
-    ['engine-doctrine/CRAFT/VOCABULARY.md', 'engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md']],
-  // Three pages claimed three different MCP tool counts on the same day (six, ten, four) against a
-  // server registering eleven. site/CLAUDE.md's law is that site numbers are never typed; this is how
-  // that one stops being typed.
-  ['mcp tools', ['scripts/site/mcp-tools.mjs'], ['site/lib/mcp-tools.json']],
-  // The studio timeline's layer-type lanes, which the site's hero timeline must colour the same way.
-  ['layer kinds', ['scripts/site/layer-kinds.mjs'], ['site/lib/layer-kinds.json']],
-  // Reads site/lib/site-pages.json + site/lib/arsenal.json, so it must run after both are current.
-  // Not a fix for AI-search visibility on its own (Google's guidance treats llms.txt as ineffective,
-  // see scripts/site/llms-txt.mjs's header); registered here so it cannot go stale unnoticed either.
-  ['llms.txt', ['scripts/site/llms-txt.mjs'], ['site/public/llms.txt']],
-];
 
 const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' }).stdout || '';
 // Only tracked files, and only the ones a generator claims. An untracked build artefact is not drift.

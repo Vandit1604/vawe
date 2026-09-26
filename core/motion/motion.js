@@ -235,6 +235,13 @@ export function resolveHandle(h, side, who = '') {
   return { influence, speed };
 }
 
+// isEaseMap(e): true when `ease` is a PER-PROPERTY map (Separate Dimensions: x and y on the same
+// keys travel on different curves) rather than one name for the whole segment. A plain object is
+// never a legal whole-segment `ease` (that is always a string or a function), so the shape alone
+// tells the two apart; a handle spec ({influence,speed}) never lives directly under `ease`, only
+// under `easeIn`/`easeOut`, so there is no case this collides with.
+export const isEaseMap = (e) => e != null && typeof e === 'object' && !Array.isArray(e);
+
 /**
  * handleCurve(out, into, who): the two handles of ONE segment -> an easing function, or null when
  * neither side authored one and the segment belongs to the named-easing path exactly as before.

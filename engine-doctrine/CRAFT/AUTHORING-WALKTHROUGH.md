@@ -15,6 +15,10 @@ group: crosscutting
 - Enforced by `[ref]`: each step names the command that runs it; `make author-check` and `make judge`
   are the two steps that block/see, everything else is sequence discipline.
 - Checkable action: does the lock sheet exist and match the beats before any JSON is rendered?
+- Just want a first frame of a brand-new name, no plan yet? `make dev D=<file> DRAFT=1` writes a
+  minimal scene from the brief if one exists, or a one-line title if not, and renders it. No
+  storyboard required. The chain below is still how a real film gets planned and directed; this is
+  the one command that removes the wait between naming a film and seeing it move.
 
 Every other doc is a *reference* you dip into. This is the one **narrative**: it walks a single video
 from a bare brief to a shipped file, calling each tool and doc in the order you actually use it. It

@@ -1,0 +1,15 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "tempo": 0.5,
+ "duration": 4,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "content": { "brand": "Acme", "cta": "Get started" },
+ "layers": [
+  { "type": "text", "text": "Welcome to {{brand}}", "x": 200, "y": 400, "size": 64, "start": 0, "duration": 4 },
+  { "type": "html", "html": "<button>{{cta}}</button>", "x": 200, "y": 600, "w": 200, "start": 0, "duration": 4 }
+ ]
+}

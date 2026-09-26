@@ -37,8 +37,8 @@
 // verified licence under a commercial product film is a Content ID claim waiting to land, so it warns
 // loudly and names the file. See engine-doctrine/CRAFT/SOUND.md §Licensing.
 //
-//   node quality/gates/audio-check.mjs <scene.json> [--strict]   ·   make check GATE=audio-check D=<file>
-//   node quality/gates/audio-check.mjs --all                     ·   make check GATE=audio-check
+//   node quality/gates/audio-check.mjs <scene.json> [--strict]   ·   make audio-check D=<file>
+//   node quality/gates/audio-check.mjs --all                     ·   make audio-check
 // WARN by default; --strict blocks. The library census (--all) never blocks.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -135,110 +135,127 @@ const F = gateFindings({
   line: (r, g) => `    ${g} [${r.code}] ${r.summary}\n        \u2192 ${r.fix}`,
 });
 
-function findings(scene, sceneDir) {
-  const out = F.records;
-  const a = (scene && typeof scene.audio === 'object' && scene.audio) || null;
-  const state = classify(scene);
-
+// The three shapes of "this film declared nothing to say" (or said it with no reason). Split out of
+// `findings` so that function stays one job (the derived-sound checks below); this one is the
+// declaration checks. Each message states the CONSEQUENCE (SILENT, and why nobody decided that) rather
+// than splitting the sentence across `summary` and `fix`, which used to leave `fix` holding a
+// continuation of the description rather than an instruction (a JSON reader saw a broken sentence).
+function silenceFindings(state, a) {
   if (state === OMITTED) {
     F.fail('silent-by-omission',
-      'this film names no `audio` block AND has no cut, sting or seam for the engine\'s default cue',
-      { fix: 'derivation to score, so it renders with no sound at all and nobody decided that.\n' +
-      '        Give it a junction to cut on, name a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n' +
-      '        "audio": { "silent": true, "_why": "why this film is better with no sound" }' });
+      'this film names no `audio` block and has no cut, sting or seam for the engine\'s default cue '
+      + 'derivation to score, so it renders with no sound at all and nobody decided that.',
+      { fix: 'Give it a junction to cut on, name a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n'
+      + '        "audio": { "silent": true, "_why": "why this film is better with no sound" }' });
   } else if (state === SILENT && !reasonOf(a)) {
     F.fail('silence-without-a-reason',
-      '`audio.silent:true` with no `_why`. Silence is a legitimate choice and a strong one, but it is a',
-      { fix: 'choice, so write the one line that says what the silence is doing:\n' +
-      '        "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }' });
+      '`audio.silent:true` with no `_why`. Silence is a legitimate choice and a strong one, but with no '
+      + 'stated reason a reviewer cannot tell it apart from a film nobody scored.',
+      { fix: 'Write the one line that says what the silence is doing:\n'
+      + '        "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries it alone" }' });
   } else if (state === HOLLOW) {
     F.fail('audio-block-produces-nothing',
-      'this scene has an `audio` block, but between it and its own cuts/stings/seams nothing produces a',
-      { fix: 'sound: no music, no VO, no cues, no bridges, and either `auto:false` opts out of the default\n' +
-      '        cue derivation or the film has no junction to derive one from. The mixer\'s emptiness guard\n' +
-      '        writes no track at all, so this renders SILENT while reading as sounded.\n' +
-      '        Name a bed, drop the `auto:false`, or say `"silent": true` with a `_why` and mean it.' });
+      'this scene has an `audio` block, but between it and its own cuts/stings/seams nothing produces a '
+      + 'sound: no music, no VO, no cues, no bridges, and either `auto:false` opts out of the default cue '
+      + 'derivation or the film has no junction to derive one from. The mixer\'s emptiness guard writes no '
+      + 'track at all, so this renders SILENT while `audio-check` reads it as sounded.',
+      { fix: 'Name a bed, drop the `auto:false`, or say `"silent": true` with a `_why` and mean it.' });
   }
+}
 
-  // A DECLARATION IS NOT A TRACK. `auto` defaulting on and an explicit `cues` array both make this
-  // gate say "this film has sound", and both render DIGITAL SILENCE when `assets/sfx/` is empty: the
-  // Go mixer resolves each cue to `sfx/<name>.wav` (internal/audio/audio.go:140), finds nothing, and
-  // writes a silent track. Two films shipped that way this week at -91 dB while this gate printed its
-  // tick. Checked whenever derivation is actually LIVE, which since the default flip is any scene that
-  // has not said `auto:false` AND has a junction to score, `a` present or not.
-  //
-  // `assets/sfx/` is gitignored build output regenerated by `make gen X=audio`, so a FRESH CLONE is exactly
-  // the machine where this bites, and it is the machine nobody checks on. The bed already gets this
-  // treatment (`bed-missing`, above); a cue never did.
-  // A FILM THAT DECLARED SILENCE HAS NO CUES TO MISS. `silent: true` is the author saying this film
-  // carries no sound, so asking whether its cue files exist is asking about sound it never wanted, and
-  // the answer read as a defect. That mattered the moment these codes became blocking: 116 of the
-  // library's films declare silence, and without this clause every one of them would have been stopped
-  // by a finding about cues they do not have. engine-doctrine/MISTAKES.md #25 and #159 are the bill for
-  // exactly that mistake, paid twice; the `sound` step in author-check.mjs cites them.
+// A DECLARATION IS NOT A TRACK. `auto` defaulting on and an explicit `cues` array both make this
+// gate say "this film has sound", and both render DIGITAL SILENCE when `assets/sfx/` is empty: the
+// Go mixer resolves each cue to `sfx/<name>.wav` (internal/audio/audio.go:140), finds nothing, and
+// writes a silent track. Two films shipped that way this week at -91 dB while this gate printed its
+// tick. Checked whenever derivation is actually LIVE, which since the default flip is any scene that
+// has not said `auto:false` AND has a junction to score, `a` present or not.
+//
+// `assets/sfx/` is gitignored build output regenerated by `make gen X=audio`, so a FRESH CLONE is exactly
+// the machine where this bites, and it is the machine nobody checks on. The bed already gets this
+// treatment (`bed-missing`, below); a cue never did.
+// A FILM THAT DECLARED SILENCE HAS NO CUES TO MISS. `silent: true` is the author saying this film
+// carries no sound, so asking whether its cue files exist is asking about sound it never wanted, and
+// the answer read as a defect. That mattered the moment these codes became blocking: 116 of the
+// library's films declare silence, and without this clause every one of them would have been stopped
+// by a finding about cues they do not have. engine-doctrine/MISTAKES.md #25 and #159 are the bill for
+// exactly that mistake, paid twice; the `sound` step in author-check.mjs cites them.
+function cueFindings(scene, a) {
   const declaredSilent = !!(a && a.silent);
   const autoLive = !declaredSilent && (!a || a.auto !== false) && hasScoredJunction(scene);
-  if (!declaredSilent && (autoLive || (a && Array.isArray(a.cues) && a.cues.length))) {
-    const dir = path.join(ROOT, 'assets/sfx');
-    const have = fs.existsSync(dir) ? new Set(fs.readdirSync(dir).filter((f) => f.endsWith('.wav')).map((f) => f.slice(0, -4))) : new Set();
-    const named = new Set(a && Array.isArray(a.cues) ? a.cues.map((c) => c && c.name).filter(Boolean) : []);
-    // With `auto`, the cue set is derived from the film's own junctions, so the honest check is
-    // whether the sfx pack exists at all rather than which entry a given cut will reach for.
-    if (!have.size) {
-      F.fail('cues-have-no-sound',
-        'this film derives or declares cues (auto by default, or an explicit `cues` array) and',
-        { fix: 'assets/sfx/ holds no .wav at all, so every cue resolves to nothing and the mixer writes a\n' +
-        '        SILENT track while this gate reads it as sounded.\n' +
-        '        Bake them:  make gen X=audio' });
-    } else {
-      const missing = [...named].filter((n) => !have.has(n));
-      if (missing.length) F.fail('cue-missing',
-        `audio.cues names ${missing.length} sound(s) with no file under assets/sfx/: ${missing.join(', ')}.`,
-        { fix: 'Each one is dropped in silence. Run `make gen X=audio`, or name a cue that exists.' });
-    }
+  if (declaredSilent || !(autoLive || (a && Array.isArray(a.cues) && a.cues.length))) return;
+  const dir = path.join(ROOT, 'assets/sfx');
+  const have = fs.existsSync(dir) ? new Set(fs.readdirSync(dir).filter((f) => f.endsWith('.wav')).map((f) => f.slice(0, -4))) : new Set();
+  const named = new Set(a && Array.isArray(a.cues) ? a.cues.map((c) => c && c.name).filter(Boolean) : []);
+  // With `auto`, the cue set is derived from the film's own junctions, so the honest check is
+  // whether the sfx pack exists at all rather than which entry a given cut will reach for.
+  if (!have.size) {
+    F.fail('cues-have-no-sound',
+      'this film derives or declares cues (auto by default, or an explicit `cues` array), but '
+      + 'assets/sfx/ holds no .wav at all, so every cue resolves to nothing and the mixer writes a '
+      + 'SILENT track while this gate reads it as sounded.',
+      { fix: 'Bake them:  make gen X=audio' });
+  } else {
+    const missing = [...named].filter((n) => !have.has(n));
+    if (missing.length) F.fail('cue-missing',
+      `audio.cues names ${missing.length} sound(s) with no file under assets/sfx/: ${missing.join(', ')}, `
+      + 'each one dropped in silence.',
+      { fix: 'Run `make gen X=audio`, or name a cue that exists.' });
   }
+}
 
+// THE BED: `music`, resolved to a file, credited and licence-checked. Split out of `findings` so
+// that function is one job (the declaration/cue checks above); this one is the bed itself.
+function bedFindings(scene, a, sceneDir) {
   // `core/audio/select.js` now ALSO defaults `music` to "auto" when a scene names no `music` at all
   // but does declare `profile`: same sentinel, same trap, just no explicit word to have grepped for.
   const impliedAutoMusic = !!(scene && scene.profile) && !(a && 'music' in a);
   if (impliedAutoMusic) {
     F.warn('bed-unresolved',
-      '`profile` is set and no `music` is named, so `core/audio/select.js` defaults `music` to the',
-      { fix: '"auto" sentinel, resolved at AUTHORING time, not at render, the mixer does not run\n' +
-      `        core/audio-select.js. Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
+      '`profile` is set and no `music` is named, so `core/audio/select.js` defaults `music` to the '
+      + '"auto" sentinel, resolved at AUTHORING time. The mixer does not run core/audio-select.js at '
+      + 'render, so an unresolved "auto" reaching it plays SILENCE.',
+      { fix: `Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
   }
-
-  if (!a) return { state, out };
-
+  if (!a) return;
   if (a.music === 'auto') {
     F.warn('bed-unresolved',
-      '`music:"auto"` is a sentinel resolved at AUTHORING time, not at render, the mixer does not run',
-      { fix: 'core/audio-select.js, so an unresolved "auto" reaching it plays SILENCE.\n' +
-      `        Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
-  } else if (typeof a.music === 'string' && a.music) {
-    const hit = resolveBed(a.music, sceneDir);
-    if (!hit) {
-      F.fail('bed-missing',
-        `audio.music "${a.music}" resolves to no file: the mixer falls back to SILENCE.`,
-        { fix: 'Use a bed that exists under assets/music/ (`make gen X=music-pack`), or a real .wav path.' });
-    } else {
-      const k = bedKey(a.music);
-      const c = credits[k];
-      if (!c) {
-        F.warn('bed-provenance-unknown',
-          `bed "${k}" has no entry in assets/music/credits.json: nobody recorded where it came from.`,
-          { fix: 'An unattributed track under a commercial product film cannot be defended if it is claimed.\n' +
-          '        Record its source + licence in credits.json, or replace it with a bed that has one.' });
-      } else if (c.licenceVerified !== true) {
-        F.warn('bed-licence-unverified',
-          `bed "${k}" is recorded as ${c.licence || 'an unread licence'} with licenceVerified:false.`,
-          { fix: `        ${c.note || 'Nobody has read the terms.'}\n` +
-          '        Read the licence, confirm commercial + no-attribution, then set licenceVerified:true.' });
-      }
-    }
+      '`music:"auto"` is a sentinel resolved at AUTHORING time, not at render: the mixer does not run '
+      + 'core/audio-select.js, so an unresolved "auto" reaching it plays SILENCE.',
+      { fix: `Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
+    return;
   }
+  if (typeof a.music !== 'string' || !a.music) return;
+  const hit = resolveBed(a.music, sceneDir);
+  if (!hit) {
+    F.fail('bed-missing',
+      `audio.music "${a.music}" resolves to no file: the mixer falls back to SILENCE.`,
+      { fix: 'Use a bed that exists under assets/music/ (`make gen X=music-pack`), or a real .wav path.' });
+    return;
+  }
+  const k = bedKey(a.music);
+  const c = credits[k];
+  if (!c) {
+    F.warn('bed-provenance-unknown',
+      `bed "${k}" has no entry in assets/music/credits.json: nobody recorded where it came from, so `
+      + 'an unattributed track under a commercial product film cannot be defended if it is claimed.',
+      { fix: 'Record its source + licence in credits.json, or replace it with a bed that has one.' });
+  } else if (c.licenceVerified !== true) {
+    F.warn('bed-licence-unverified',
+      `bed "${k}" is recorded as ${c.licence || 'an unread licence'} with licenceVerified:false: nobody `
+      + `has confirmed the terms allow this use. ${c.note || 'Nobody has read the terms.'}`,
+      { fix: 'Read the licence, confirm commercial + no-attribution, then set licenceVerified:true.' });
+  }
+}
 
-  if (typeof a.musicGain === 'number' && a.musicGain === 0 && !a.vo) {
+function findings(scene, sceneDir) {
+  const out = F.records;
+  const a = (scene && typeof scene.audio === 'object' && scene.audio) || null;
+  const state = classify(scene);
+  silenceFindings(state, a);
+  cueFindings(scene, a);
+  bedFindings(scene, a, sceneDir);
+
+  if (a && typeof a.musicGain === 'number' && a.musicGain === 0 && !a.vo) {
     F.warn('bed-muted',
       '`musicGain: 0` mutes the bed entirely. That is silence with extra steps.',
       { fix: 'Either give it a level, or drop the bed and declare the silence honestly.' });

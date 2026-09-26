@@ -9,51 +9,6 @@
     "durationScale": 0.95,
     "stagger": 0.05
   },
-  "bg": {
-    "accent": "94,224,200",
-    "tint": "21,44,56",
-    "tint2": "29,65,72",
-    "dotLight": "45,53,67",
-    "paperBase": [
-      "#ffffff",
-      "#f4f5f8"
-    ],
-    "light": [
-      "#ffffff",
-      "#f4f5f8"
-    ],
-    "paper": "#ffffff",
-    "softBase": [
-      "#ffffff",
-      "#eff0f3"
-    ],
-    "accentBase": [
-      "#f2fdfb",
-      "#f4f5f8"
-    ],
-    "border": "#2d3543",
-    "dark": [
-      "#0b1424",
-      "#070d17"
-    ],
-    "deep": [
-      "#0b1424",
-      "#060a12"
-    ],
-    "ink": [
-      "#09101d",
-      "#04080e"
-    ],
-    "inkBase": [
-      "#0b1424",
-      "#070d17"
-    ],
-    "darkMesh": [
-      "#132834",
-      "#070d17"
-    ]
-  },
-  "bgDefault": "spotlight",
   "tokens": {
     "color": {
       "bg": {
@@ -175,5 +130,52 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": "spotlight",
+    "bgPalette": {
+      "accent": "94,224,200",
+      "tint": "21,44,56",
+      "tint2": "29,65,72",
+      "dotLight": "45,53,67",
+      "paperBase": [
+        "#ffffff",
+        "#f4f5f8"
+      ],
+      "light": [
+        "#ffffff",
+        "#f4f5f8"
+      ],
+      "paper": "#ffffff",
+      "softBase": [
+        "#ffffff",
+        "#eff0f3"
+      ],
+      "accentBase": [
+        "#f2fdfb",
+        "#f4f5f8"
+      ],
+      "border": "#2d3543",
+      "dark": [
+        "#0b1424",
+        "#070d17"
+      ],
+      "deep": [
+        "#0b1424",
+        "#060a12"
+      ],
+      "ink": [
+        "#09101d",
+        "#04080e"
+      ],
+      "inkBase": [
+        "#0b1424",
+        "#070d17"
+      ],
+      "darkMesh": [
+        "#132834",
+        "#070d17"
+      ]
+    }
   }
 }
