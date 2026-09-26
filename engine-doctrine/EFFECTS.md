@@ -230,7 +230,7 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 
 ## Scene finish keys  `[finish]`
 
-data.finish is the ONE dial for the cinematic grade a premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.
+data.finish is the ONE dial for the cinematic grade a premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time. A scene naming no `finish` key at all gets a subtle default (light grain, soft bloom, gentle vignette); `finish: false` opts out.
 
 | name | what / when |
 |---|---|
@@ -409,7 +409,7 @@ A `glass` prop any layer can carry (core/layers/util.js), independent of its typ
 
 ## Anchor points  `[layout]`
 
-`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.
+`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME. A scene with exactly one authored top-level layer, itself a text/count layer naming no position at all, gets `center` automatically (`core/engine/boot.js` `applyLoneTextCenter`).
 
 | name | what / when |
 |---|---|
