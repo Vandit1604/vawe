@@ -34,6 +34,18 @@ reference and cannot work out why yours drifts while the original snaps.
 | motion blur on fast movers | applies itself above `AUTO_BLUR_FLOOR` (16px/frame) at a gentle `AUTO_SHUTTER` of 0.16. The exemplar author's own hand-picked value. `motionBlur: false` opts out; a number overrides the shutter. |
 | exits faster than entrances | `theme.motion.exitRatio` scales the default exit. Any theme that leaves it unset now gets `exitRatioFromMotion(durationScale)` instead of the old silent `1`; an explicit value, e.g. `themes/higgsfield.json` at `0.45`, still wins. Numbers: engine-doctrine/RULES/ease-direction.md. |
 
+**`choreo.mjs`'s `exitEmphasis`/`entranceEmphasis` graded whether an AUTHORED exit/entrance
+honours the rule above. It was a TASTE gate and is RETIRED (`engine-doctrine/SAFEGUARDS.md`).**
+
+Its thresholds, kept as doctrine. An exit reads as emphasised when it is at most `0.6x` its own entrance's
+duration, OR its ease accelerates (`easeIn*`/`rush`, never `easeInOutX`, which decelerates first), OR its
+measured end speed exceeds its start speed.
+
+An entrance reads as settled when its measured end speed is lower than its start speed (it decelerates
+INTO place); graded only when there is a real start speed to decelerate from. `0.6` is not one published
+number: NN/g and other UI-motion guides give a 50%-75% exit:entrance range with no consensus figure, and
+`0.6` sits inside it (`engine-doctrine/RESEARCH/TIMING-SOURCES.md` part 6).
+
 **Two more are one line away:** `panWith` (below) and the `typedHook` / `morphButton` blueprints.
 
 **The rest cannot be defaults and pretending otherwise would be dishonest.** Traced timings come from
@@ -191,10 +203,10 @@ station are untouched: they still measure the plain typed characters, never the 
 ## 5c. The camera does not sit still
 
 Every film moves the camera at least once: a slowPush or a diveIn is the smallest way to keep the
-frame alive, and a film with none at all fires `no-camera`. Recipe camera legs join hand-authored
+frame alive, and a film with none at all reads as `no-camera`. Recipe camera legs join hand-authored
 legs rather than replace them, so a film with legs only in its opening seconds holds still for the
-rest: `make choreo` warns `camera-coverage-floor` when the resolved legs cover under 40% of a film
-over 6s long (`skills/vawe-camera/SKILL.md`).
+rest: a retired gate used to warn `camera-coverage-floor` when the resolved legs covered under 40% of a
+film over 6s long (`skills/vawe-camera/SKILL.md`).
 
 ---
 
@@ -368,9 +380,9 @@ level up: their timing lives inside an opaque, registered GSAP effect function, 
 can read. A gate that needs a REAL number for one of these still has to render or measure; the IR's job
 is only to say, truthfully, that something moves there and name why it cannot say when.
 
-**One gate reads it so far**: `quality/gates/jolt-check.mjs` (the velocity-spike / dead-window check)
-now discovers which layers and camera legs are worth scanning off `buildMotionIR` instead of its own
-`Array.isArray(L.motion)` check. The velocity ARITHMETIC is untouched, still `sequence.js`'s own
+**One gate read it**: `jolt-check.mjs` (the velocity-spike / dead-window check, since retired as a TASTE
+gate: `engine-doctrine/SAFEGUARDS.md`) discovered which layers and camera legs were worth scanning off
+`buildMotionIR` instead of its own `Array.isArray(L.motion)` check. The velocity ARITHMETIC is untouched, still `sequence.js`'s own
 `velocityAt`/`cameraAt`/`cameraVelocityAt` on each layer's raw keyframes (`ease: "through"` fits a
 Hermite curve off a key's neighbours, which a flattened segment alone cannot reconstruct), so the
 migration changed WHERE the gate looks, never HOW FAST it decides a track is moving there. Proved on

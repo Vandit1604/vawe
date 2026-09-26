@@ -2,7 +2,7 @@
 when: "\"what holds this film together across its cuts\""
 answers: the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last
 group: crosscutting
-codes: continuity, no-continuous-object, no-continuous-object-inferred, becomes-is-preset, chain-breaks, missing-object-field, single-thread, stub-why, trigger-is-mechanism, trigger-is-sequence, object-diverges, object-not-built, unmet-beat
+codes: continuity, becomes-is-preset, chain-breaks, missing-object-field, single-thread, stub-why, trigger-is-mechanism, trigger-is-sequence, object-diverges, object-not-built, unmet-beat
 applies-when: short
 confirm: "what holds this film across its cuts?"
 ---
@@ -193,12 +193,13 @@ Treat any confident decision framework on this topic, including Part 4 below, as
 provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
 `films/scene/higgsfield-recreation.json`) is not a sequence of beats. It is one continuous action." The
 gate generalised that single sample into a floor for every film under 15 seconds
-(`CONTINUITY_MAX_DUR = 15` in `quality/gates/direction-floor.mjs:455`).
+(`CONTINUITY_MAX_DUR = 15` in the retired `direction-floor.mjs`).
 
 The sample was a good one. A five-second product film with one subject and one process is exactly the case
 the transforming-object device was made for. The generalisation is the problem.
 
-**What the gate measures.** `continuity()` in `quality/gates/direction-floor.mjs:579` walks each boundary,
+**What the gate measured**, before it was retired (a TASTE gate, `engine-doctrine/SAFEGUARDS.md`).
+`continuity()` walked each boundary,
 finds layers visible on both sides, and keeps only those whose pose differs across it. That is spatial
 persistence plus a state change. In Murch's ranking it is item six, the 4% item. **Our only blocking
 structural rule enforces the thing Murch says to sacrifice first.**

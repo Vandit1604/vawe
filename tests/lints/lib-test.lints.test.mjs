@@ -121,9 +121,7 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from '../../quality/gates/content-check.mjs';
 import { evenSamples } from '../../quality/gates/beats-of.mjs';
 import { gradeable, tileBox, baseOf } from '../../quality/gates/tile.mjs';
-import { classifyRegions } from '../../quality/gates/motion-floor.mjs';
 import { sceneTiming } from '../../quality/gates/scene-timing.mjs';
-import { exitEmphasis, entranceEmphasis } from '../../quality/gates/choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { DIAL_CONTRACT_VIOLATIONS } from '../../core/registry/knobs.js';
@@ -423,8 +421,6 @@ test('lib-test: lints', async () => {
     ok(label, r.status === 0);
     if (r.status !== 0) console.error(`  (${script} ${args.join(' ')}): ${(r.stderr || r.stdout || '').trim().slice(0, 300)}`);
   };
-  runSelftest('known-answer: motion-floor --self-test (still=0, drift=global, reveal=local)',
-    'quality/gates/motion-floor.mjs', ['--self-test']);
   runSelftest('known-answer: harness/media/content.mjs --selftest', 'harness/media/content.mjs', ['--selftest']);
   runSelftest('known-answer: harness/media/study.mjs --selftest', 'harness/media/study.mjs', ['--selftest']);
   runSelftest('known-answer: screen-readiness.test.mjs (readiness() against fixed markup)',

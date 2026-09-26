@@ -19,7 +19,7 @@ assembling into its full form, held. There is no length at which this type takes
 One move. No hook/build/payoff structure at all: the mark or the word arrives, resolves, holds. Pace
 band: **4.0-8.0s total runtime**, not per-beat, because there is usually exactly one beat. Where the
 film needs no cuts, use none: `engine-doctrine/RULES/one-cut-family.md`'s floor does not fire under 8s
-(`quality/gates/direction-floor.mjs`), so a single continuous move is not a violation, it is the point.
+(the retired `direction-floor.mjs`), so a single continuous move is not a violation, it is the point.
 
 ## What this type needs that others do not
 

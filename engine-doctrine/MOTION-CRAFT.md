@@ -2,7 +2,7 @@
 when: picking a preset, a cut or a sting and you need the mechanics behind it
 answers: "the stored rules of good motion: timing, physics, the gates that enforce each one"
 group: process
-codes: enter-and-retreat, front-loaded, linear-motion, monotone-timing, motion-monotony, profile, shared-start, stagger-total, tempo-flat, uneven-cascade, median-below-reference, sweep-static, dead-window, floor-below-reference, ambient-padding
+codes: enter-and-retreat, linear-motion, monotone-timing, profile, shared-start, stagger-total, tempo-flat, uneven-cascade, sweep-static
 applies-when: always
 confirm: "is the motion hand-keyed with real physics, not a named preset firing once?"
 ---
@@ -187,15 +187,12 @@ move travelling through), never a seam mechanism, however close the seam's name 
 
 ### What checks this
 
-- **`make choreo`** (in progress, built by another agent as this section was written): measures kinds of
-  motion at once, element lives, and handoffs against `example-madera`, extending `motion-floor.mjs` and
-  the scene timing reader. Not yet runnable; this doc names the doctrine ahead of the gate on purpose.
-- **`quality/gates/motion-floor.mjs`**: local motion holes over time, and the `ambient-padding` finding
-  above.
 - **`harness/author/motion-director.mjs`**: `enter-and-retreat`, `linear-motion`, `monotone-timing`
   (see the AGENT SUMMARY and codes list at the top of this file).
-- **`quality/gates/eye-trace.mjs`**: where the eye lands at a cut, Murch's rule already cited in
-  [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md).
+- **`choreo.mjs`, `motion-floor.mjs`, `eye-trace.mjs`**: measured kinds of motion at once, element lives,
+  handoffs, local motion holes over time, and where the eye lands at a cut (Murch's rule, cited in
+  [`CRAFT/DIRECTION.md`](CRAFT/DIRECTION.md)). All three were TASTE gates and are RETIRED
+  (`engine-doctrine/SAFEGUARDS.md`); a human/agent judge applies this doctrine by eye now.
 
 ## Speed dials: the numbers, in one place
 
@@ -573,6 +570,34 @@ and applies these rules per transition: cover a hard background jump with a stin
 background *doesn't* change · rotate one cut family (no archetype twice) · punchy brands snap, calm brands
 dissolve. It prints a report; `WRITE=1` applies the picks → `<file>.directed.json`. This is how you kill the
 "too many effects" tell: the director chooses fewer, righter effects than an author reaching for variety.
+
+## Does the film ever stop (the motion floor, RETIRED gate, live doctrine)
+
+`motion-floor.mjs` and its companion `jolt-check.mjs` were TASTE gates (measuring HOW a
+film moves, not whether it was broken: `engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE") and were
+deleted rather than kept report-only. The measurement they made is real and worth judging a film against
+by eye, so it stays here as doctrine.
+
+**Local motion, not global motion.** The obvious way to raise a motion score is ambient motion everywhere
+(`idle`/`breathe`/`drift`), which buys the number and costs the film: it is motion for the metric, not for
+the viewer. Grade LOCAL motion (does something arrive, concentrated in a small region) and GLOBAL motion
+(does everything drift a little, spread across the whole frame) separately. Measured across a reference
+and a recreation of it: 80% of the change in a moving window lived in 3.1%-3.9% of the frame in both,
+because both films moved by REVEALING CONTENT in one place, not by breathing everywhere.
+
+**A dead window** is a sampled 0.5s span with no local content motion: a reveal finished and nothing took
+over. Corpus-derived floor (no published perceptual source): a reference film's quietest window still
+measured 0.42 on this scale against a median of 1.33, so a tenth of the median (0.13) is comfortably under
+anything a real film does. `vawe-flow-2` had zero windows below 0.2 across 19.8s; a bad recreation of it
+had ten, including one 2.5s dead stretch.
+
+**A jolt** is a frame-to-frame speed jump on a layer or the camera: over 600px/s for position, over
+0.6 scale-units/s for zoom (`quality/gates/speed.mjs`'s `VELOCITY_SPIKE_PX_S`/`_SCALE_S`, still a live
+readout: `make speed D=<film>`). A planted linear camera station or an `easeIn`-into-a-hold is exactly the
+shape this catches: a move that looks smooth on a storyboard but jerks on screen.
+
+None of this blocks a build any more. `make judge` and a human/agent eye are where a dead or jolting film
+now gets caught.
 
 ## The enforcement map (what code already guarantees)
 
