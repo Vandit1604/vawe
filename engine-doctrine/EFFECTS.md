@@ -539,6 +539,16 @@ What shape a `cursor` layer draws (`"style": "hand"`), and how it can change mid
 | `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. Held, 1.18x the rate |
 | `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. Held, 1.39x the rate |
 
+## Drivers (expressions as data)  `[per-layer]`
+
+The `drive` field on a layer: AFTER EFFECTS EXPRESSIONS, written as data instead of code, resolved fresh every frame so a seek and a forward render always agree. `wiggle` is a seeded jitter on one property, `link` is the pick-whip (this property copies another layer's own animated value, with an optional delay), and `loop` repeats this layer's own keyframes past a point instead of holding on the last one. `{ "drive": { "wiggle": { "prop": "rot", "freq": 1.5, "amp": 2 } } }`
+
+| name | what / when |
+|---|---|
+| `link` | the PICK-WHIP: this property copies another layer's own animated value every frame, `mul`/`add` rescale it and `delay` (in seconds, 0.1 is a normal follow-through lag) shifts when it arrives |
+| `loop` | LOOP OUT: past `to` seconds this layer's own keyframes repeat forever, `cycle` restarts at `from` (0 by default), `pingpong` bounces between them, `continue` just holds the last key the way an unlooped track already does |
+| `wiggle` | an AFTER EFFECTS EXPRESSION as data: deterministic seeded jitter on one property (x/y in px, rot in deg), default 2Hz at 10 units, reseed to decorrelate two layers so they never wobble in lockstep |
+
 ## Effector drives  `[per-layer]`
 
 What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence. `push` is the one a stagger cannot imitate, because it reads the direction from the point to the clone as well as the distance.
@@ -1192,4 +1202,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_728 effects across 62 families. Regenerate: `make effects`._
+_731 effects across 63 families. Regenerate: `make effects`._
