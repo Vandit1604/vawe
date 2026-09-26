@@ -74,7 +74,15 @@ function warnUnknown(fn, opts, label) {
 function expandBlock(layer) {
   const f = B.BLOCKS[layer.block];
   if (!f) throw new Error(`unknown block "${layer.block}". known: ${Object.keys(B.BLOCKS).join(', ')}`);
-  const { type: _type, block: _block, ...opts } = layer;
+  const { type: _type, block: _block, duration, ...opts } = layer;
+  // DURATION VS DUR: every block family's own timing param is `dur` (blocks/schema.mjs: "x · y ·
+  // start · dur appear in NO table ... placement and timing the scene supplies"), but the layer
+  // schema every OTHER layer type shares calls the same thing `duration`. An author who wrote a block
+  // layer the way they write any other layer had `duration` silently dropped (no factory destructures
+  // it) and the factory's own default `dur` won instead, indistinguishable from a typo, while
+  // core/validate/lint-warnings.mjs missingWindowWarns still warned the layer had no window at all.
+  // Bridged here, the one place both vocabularies meet: `dur` wins if the author set both.
+  if (duration != null && opts.dur == null) opts.dur = duration;
   // A namespaced entry ("searchEngine.home") resolves to a WRAPPER; walk to the family the catalog
   // declares so introspecting its signature reads the right function (engine-doctrine/MISTAKES.md).
   const entry = CATALOG.find((e) => e.name === layer.block);
