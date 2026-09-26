@@ -19,9 +19,9 @@ PROSE next to the beat table, the same register as `arc` or `not:`, not a struct
 against a registry: "sound carries the films seam" or "silent by design, autoplays muted in-feed" is
 enough to answer it. It belongs at the plan for the same reason `NOT` does: naming the intent before
 building is what stops an author reaching `render` having never once decided whether the film is meant
-to be heard. It is **not** part of what a person approves at stage 3: the picture is approved before
-anyone has to have an opinion on sound's specifics, and this line commits to nothing that would block
-approval. A storyboard's `craft:` map still carries no required `sound:` entry (`craft-checklist.mjs`'s
+to be heard. It is **not** part of what a person looks at first: the picture is what draws the eye
+before anyone has to have an opinion on sound's specifics, and this line commits to nothing that would
+block that look. A storyboard's `craft:` map still carries no required `sound:` entry (`craft-checklist.mjs`'s
 `applies-when: always` line for it is gone on purpose, see below), and this intent line is not
 re-adding that requirement: it is a planning habit, not a gate.
 

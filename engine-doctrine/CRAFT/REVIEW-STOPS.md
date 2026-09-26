@@ -5,20 +5,20 @@ group: crosscutting
 codes: all-median, beats-unseen, close-pace, no-preflight, options-collapse, stale-variant, tell-lost-its-source, unscorable, no-panels, stale-panels
 ---
 
-# Approval stops: show the work before it is finished
+# Review stops: show the work before it is finished
 
 ## AGENT SUMMARY
 
 - Stop and show one screen at each of four points (concept, storyboard panels, hand-written fragment,
-  style frames) plus the 85% draft, and wait for approve/deny/change before starting the next phase.
-  Three genuinely different options, or it is not a choice.
-- Not a gate: nothing here is automated, nothing passes or fails. `make approve STAGE=<stage> D=<file>`
-  records the answer as a hash receipt; editing the file withdraws its own approval.
+  style frames) plus the 85% draft, and let the person who asked for the film react before the next
+  phase starts. Three genuinely different options, or it is not a choice.
+- Not a gate: nothing here is automated, nothing passes or fails, and nothing is recorded. There is no
+  sign-off step; the draft render is where the owner looks and redirects.
 - Checkable action: did the reviewer see this stop before the next phase began, and was it three real
   options, not one option with a question mark?
 
 Points in the pipeline where the author **stops**, shows one screen, and does not start the next
-phase until the person who asked for the film answers: approve, deny, or change it.
+phase until the person who asked for the film has seen it and reacted.
 
 This is not a gate. Nothing here is automated and nothing here passes or fails. It is the studio's
 client review, written down, because the tooling for it already existed and was never used.
@@ -151,9 +151,8 @@ Then 95%, then `make judge`, then ship.
   built the thing that gets rejected.
 - **Three options, or it is not a choice.** One option with a question mark is a request for
   permission.
-- **Record the answer.** `make approve STAGE=<stage> D=<file>` writes a hash receipt, so editing the
-  file withdraws its own approval. An approval that outlives what it approved is worse than none,
-  because it reads as verified.
+- **Nothing is recorded, so nothing goes stale.** There is no receipt to outlive the thing it signed
+  off: the draft render is the record, and a new one replaces the old one.
 - **This applies to subagents.** An agent told to "build the film" will build the whole film. The
   stops belong in its brief, or they do not happen.
 

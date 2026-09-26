@@ -60,7 +60,6 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [APPROVAL-STOPS.md](APPROVAL-STOPS.md) | "we built the whole thing and then it was rejected" | the points where the work gets shown before it is finished: concept · storyboard panels · a hand-written fragment · style frames · the 85% draft |
 | [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
 | [CAPTIONS.md](CAPTIONS.md) | adding burnt-in captions, or shipping to a phone feed (tiktok / reels / shorts) | caption timing (words, vo-captions), the safe strip per destination, captionMode vs captionStyle |
 | [COMMAND-OUTPUT.md](COMMAND-OUTPUT.md) | you are writing or changing a command that reports something (a gate, a check, an audit) | the one output contract every reporting command follows, tight prose by default and --json for structure |
@@ -75,6 +74,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [PER-SCENE-FANOUT.md](PER-SCENE-FANOUT.md) | "one agent per scene, writing HTML" or "why do my three fragments not read as one film" | the lock-step-before-fan-out chain: stagekit, contract, scenes, assemble, and when it is overkill |
 | [PITCH.md](PITCH.md) | the brief is unformed, "make a video about X" with no locked angle yet | diverge before you converge: five concepts sampled wide, an anti-median probability gate, a silhouette check, the three-line pitch format, how the chosen angle becomes the storyboard's spine |
 | [REF-together-chat.md](REF-together-chat.md) | "what does a film we admire actually measure" | a frame-by-frame study of one product film: shot timings, palette dominance by pixel count, what holds it together |
+| [REVIEW-STOPS.md](REVIEW-STOPS.md) | "we built the whole thing and then it was rejected" | the points where the work gets shown before it is finished: concept · storyboard panels · a hand-written fragment · style frames · the 85% draft |
 | [ROUTING.md](ROUTING.md) | "let's make a video", before opening any JSON: which deliverable is this? | the priority-ordered deliverable table, how to read one route file instead of all of them, and where the per-deliverable intake questions live |
 | [SFX-CATALOG.md](SFX-CATALOG.md) | a film is about to ship mute, or you need a real sound for a beat instead of silence | which of the 13 synthesized cues to reach for, its family, energy, how it attaches to a scene, and its known failure mode |
 | [SOUND.md](SOUND.md) | the film has no sound, or you are about to ship it mute | sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · how to write a sound bridge (audio.bridges) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands |

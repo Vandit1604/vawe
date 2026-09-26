@@ -193,7 +193,6 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `capture-motion.mjs` | 74 | yes | capture-motion.mjs: WATCH a real element animate and emit a motion track our engine can replay. |
 | `build-orbit.mjs` | 68 | no | harness/author/build-orbit.mjs: generate films/scene/orbit-proof.json. |
 | `scene-page.mjs` | 57 | no | harness/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber. |
-| `approve.mjs` | 53 | yes | harness/author/approve.mjs: write the USER's signature onto a film's plan. |
 | `captions.mjs` | 52 | yes | captions.mjs: burn muted-social subtitles onto a video with zero hand-timing. Splits a script into |
 | `pitch.test.mjs` | 45 | no | harness/author/pitch.test.mjs: does the pitch receipt round-trip, and does it go stale? |
 | `contract.mjs` | 41 | yes | contract.mjs CLI: `make contract D=<film>`: validate the per-beat continuous-object contract a |
