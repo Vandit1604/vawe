@@ -45,7 +45,6 @@ export const TOOLS = {
   'ledger': () => ['quality/gates/ledger.mjs', 'check', env.D, ...json()],
   'ledger-add': () => ['quality/gates/ledger.mjs', 'add', env.D, ...json()],
   'mcp-smoke': () => ['mcp/smoke.mjs', '--no-render'],
-  'motion-lab': () => ['harness/dev/motion-lab.mjs', ...(env.SELFTEST === '1' ? ['--self-test'] : [env.D, '--variants', env.VARIANTS]), ...(env.KEEP ? ['--keep'] : [])],
   'no-judge': () => ['quality/gates/ledger.mjs', 'unjudged', ...stamp(), ...json()],
   'og': () => ['scripts/site/og-image.mjs'],
   'panels': () => ['harness/author/panels.mjs', env.SB, ...(env.OUT ? ['--out', env.OUT] : [])],
