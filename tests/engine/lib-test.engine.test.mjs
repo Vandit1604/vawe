@@ -671,7 +671,9 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   ok(`three: ${THREE_FX.length} scenes, all unique`, THREE_FX.length > 0 && new Set(THREE_FX).size === THREE_FX.length);
   // ONE list: three-scenes.js names them, three-fx.js implements them, and these must agree. The
   // split exists only because Node cannot resolve the browser-absolute three import.
-  const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors\) \{/gm)].map((m) => m[1]);
+  // Most scenes take (L, colors); `object` also takes (renderer, threeScene) to orbit its own camera
+  // and read the scene environment, so the signature check allows, but doesn't require, trailing params.
+  const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors(?:, \w+)*\) \{/gm)].map((m) => m[1]);
   const missing = THREE_FX.filter((n) => !implemented.includes(n));
   const extra = implemented.filter((n) => !THREE_FX.includes(n));
   ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ', missing: ' + missing.join(', ') : ''}${extra.length ? ', orphaned: ' + extra.join(', ') : ''}`,
@@ -681,8 +683,9 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   ok(`three: no wall-clock or unseeded randomness${used.length ? ', found: ' + used.join(', ') : ''}`, used.length === 0);
   // A scene that never reads t is a still image rendered the most expensive way available.
   const frozen = THREE_FX.filter((n) => {
-    const i = code.indexOf(`  ${n}(L, colors) {`);
-    if (i < 0) return true;
+    const m = code.match(new RegExp(`^  ${n}\\(L, colors(?:, \\w+)*\\) \\{`, 'm'));
+    if (!m) return true;
+    const i = m.index;
     const body = code.slice(i, code.indexOf('\n  },', i));
     return !/pose\(t\b/.test(body);
   });
