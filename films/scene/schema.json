@@ -1892,6 +1892,10 @@
      "type": "string",
      "label": "CSS filter string OR a named grade preset (duotone/tritone/gradientMap/posterize/sepia/vignette, or chromaGlow) OR a composite LOOK (neon/dreamyHaze/vhs/crt/filmNoir/cyberpunk/thermal/lomo/\u2026 core/looks/index.js). One positional arg = strength 0..1 (e.g. \"neon:0.9\"); full knobs via lookOpts"
     },
+    "blend": {
+     "type": "string",
+     "label": "mix-blend-mode for a RAW `filter` on an adjust layer, e.g. \"screen\" for a bloom pass built from a blurred brightness copy. A named `kind` (bloom/blur/desaturate/\u2026) already carries its own blend by default; state this only when writing `filter` directly with no `kind` to hang it on. core/layers/adjust.js."
+    },
     "mask": {
      "type": "string",
      "label": "CSS mask-image"
