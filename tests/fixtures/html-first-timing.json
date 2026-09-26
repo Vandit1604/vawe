@@ -1,0 +1,21 @@
+{
+ "$schema": "./schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 3,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "card",
+   "type": "html",
+   "x": 200,
+   "y": 300,
+   "w": 1200,
+   "start": 0,
+   "duration": 3,
+   "html": "<div class=\"hf-card\"><h1 data-part-anim=\"riseIn\" data-part-start=\"0.4\" data-part-dur=\"0.6\" data-part-ease=\"expo.out\" data-part-stagger=\"0.05\">Fast to ship</h1><p data-part-anim=\"fade\" data-part-start=\"0.8\">No JSON parts array written by hand.</p></div>"
+  }
+ ]
+}

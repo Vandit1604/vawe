@@ -1,6 +1,6 @@
 import { boot } from '/core/engine/boot.js';
 import { junctionTable, marksOf, isJunctionRef, resolveJunction, bindWindowsToJunctions } from '/core/timeline/junctions.js';
-import { PART_REGISTRY, PARTS } from '/core/motion/parts.js';
+import { PART_REGISTRY, PARTS, applyHtmlPartsSugar } from '/core/motion/parts.js';
 import { icon, clamp01, lerp, kenBurns, interpolate, resolveEasing, gsapEase, trackingFor, hashSeed, motionDefaults, stepClock } from '/core/motion/motion.js';
 import { isLightBg } from '/core/color/engine.js';
 import { collectClips, driveClips, clipStyleAt, enterDurOf, exitDurOf, seekAll, entranceWarp, BASE_ENTER, BASE_EXIT } from '/core/timeline/clips.js';
@@ -36,7 +36,7 @@ import { normalizeIdle } from '/core/engine/idle.js';
 import { resolveSpectacle } from '/core/timeline/spectacle.js';
 import { followOffset, followVelocity } from '/core/camera-moves/follow.js';
 import { computeGroup3D, applyGroup3DOpacityAdapt } from '/core/tracks/group3d.js';
-import { resolveRelativeTimes } from '/core/timeline/relative-time.js';
+import { resolveRelativeTimes, eachLayerDeep } from '/core/timeline/relative-time.js';
 const $ = (id) => document.getElementById(id);
 
 // GROUP 3D: computeGroup3D / applyGroup3DOpacityAdapt now live in core/tracks/group3d.js (unit-tested
@@ -109,6 +109,20 @@ function resolveBecomes(data, sizeOf) {
     // handover window is dropped, because during it the layer is not itself yet.
     B.motion = [open, settle].concat(own.filter((k) => num(k.t, 0) > dur + 1e-6));
   }
+}
+
+// lowerHtmlPartsSugar: the browser-side twin of core/engine/expand.js's own call to the same
+// applyHtmlPartsSugar (core/motion/parts.js). Go's render path only round-trips a scene through Node
+// when it carries block/beat/comp/recipes/voice/tempo/edits sugar (renderer/internal/render/expand.go
+// `hasSugar`), so a plain one-fragment film with no other sugar reaches this page never having been
+// through expand.js at all; lowering here as well, at the SAME shared function, keeps the two spellings
+// one mechanism regardless of which path a given scene took to get here.
+function lowerHtmlPartsSugar(data) {
+  eachLayerDeep(data.layers, (L) => {
+    if (L.parts != null || L.type !== 'html' || typeof L.html !== 'string') return;
+    const patched = applyHtmlPartsSugar(L);
+    if (patched !== L) L.parts = patched.parts;
+  });
 }
 
 // resolveAnchors: position a layer RELATIVE to another (`anchor` id → `at`/`dx`/`dy`), so annotations,
@@ -402,6 +416,7 @@ boot((data, fps, theme, canvas) => {
   // record covers the pre-passes below as well as the build itself.
   data.layers = (data.layers || []).map(watchProps);
   resolveRelativeTimes(data); // "otherId+0.5" / "otherId.end-0.2" → numeric starts (declared stagger chains).
+  lowerHtmlPartsSugar(data);  // an `html` layer's own data-part-* attributes, when it declares no `parts` array.
   // A no-op when Go already pre-expanded this scene (internal/render/expand.go); still needed here for a
   // scene with nothing else to expand, since that gate only shells to Node on block/beat/comp/recipes/voice.
   resolvePans(data);           // panWith:"<id>" → that layer's motion, same wall clock, this layer's origin
