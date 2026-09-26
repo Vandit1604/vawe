@@ -3,7 +3,7 @@ import { sceneDims } from '../../core/layout/safe.js';
 import { flattenLayers } from './layers.mjs';
 
 /**
- * layerBoxes(data) → [{ type, start, end, box }] for every layer, `data` already through `loadScene`.
+ * layerBoxes(data) → [{ i, id, type, start, end, box }] for every layer, `data` already through `loadScene`.
  * `box` is `{x,y,w,h}` in canvas px, or null when the layer declares no usable extent (no `x`/`y`, or a
  * text layer with neither `w` nor `size` to estimate one): a real blind spot, not a guess papered over:
  * a layer this can't box is a layer neither seam-forensics check can look inside, only pass over quietly.
@@ -23,7 +23,7 @@ export function layerBoxes(data) {
     const box = (typeof l.x === 'number' && typeof l.y === 'number' && typeof l.w === 'number' && h != null)
       ? { x: l.x, y: l.y, w: l.w, h } : null;
     const label = l.text ? String(l.text).slice(0, 30) : `${l.type}#${i}`;
-    return { i, type: l.type, label, start, end, box };
+    return { i, id: l.id ?? null, type: l.type, label, start, end, box };
   });
 }
 
