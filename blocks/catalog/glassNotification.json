@@ -27,20 +27,20 @@
         {
           "icon": "bolt",
           "title": "Render finished",
-          "body": "1,920 frames, no dropped seams.",
+          "body": "Every frame accounted for, no dropped seams.",
           "meta": "now"
         },
         {
           "icon": "shield",
           "title": "Audit clean",
           "body": "No overlap, no clipped text.",
-          "meta": "2m"
+          "meta": "moments ago"
         },
         {
           "icon": "check",
           "title": "Ledger updated",
           "body": "Design recorded.",
-          "meta": "5m"
+          "meta": "a bit ago"
         }
       ]
     },
