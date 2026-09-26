@@ -1,9 +1,9 @@
 // coverage-reel.mjs: build a reel that renders whatever nothing else renders.
 //
 //   node harness/author/coverage-reel.mjs          write films/scene/_coverage-reel.json
-//   make coverage-reel                             write it, then render it
+//   make check GATE=coverage-reel                             write it, then render it
 //
-// `make coverage` says which vocabulary no authored scene exercises. Conformance already proves those
+// `make check GATE=coverage` says which vocabulary no authored scene exercises. Conformance already proves those
 // values CHANGE the frame, but "changes the frame" is not "looks right": the descender bug (#35) was
 // a real effect doing real work and slicing the glyphs while it did. Nobody caught it for 11 scenes
 // because nobody had reason to look closely at that word.

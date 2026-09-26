@@ -38,7 +38,7 @@ import { rowsFrom, compactDials } from './block-dials.mjs';
 // to grade a blurb by exactly the words this search will find it by.
 import { searchWords } from '../../core/registry/registry.js';
 import { emitJson } from '../lib/findings.mjs';
-// The same population walk `make unused` and `make census` already use. A hand-rolled `readdirSync`
+// The same population walk `make check GATE=unused` and `make census` already use. A hand-rolled `readdirSync`
 // here used to count whatever sat on THIS machine's disk, most of it gitignored brand content
 // (.gitignore:93), so "used in 34 films" was a number nobody else could reproduce. `population` is the
 // one owner of "which films can this checkout see, and is it blind to some of them" (its own header);
@@ -569,10 +569,10 @@ async function main() {
 
   // ---- W11: the ONE discovery front door. `make schema`, `make track`,
   // `make previews`, `make preset-sheets`, `make mistakes` and `make theme-sheet` were six
-  // commands for "what can I say, and how do I ask for it". Each is now a flag here; each old
-  // target is a one-line alias in the Makefile that still runs, so muscle memory survives one
-  // release. This owns none of their logic, only dispatches to it, for the same reason `collect()`
-  // owns no list above: a copy of somebody else's answer is the thing that goes stale.
+  // commands for "what can I say, and how do I ask for it". Each is now a flag here, dispatching
+  // straight to the script that used to be its own target. This owns none of their logic, only
+  // dispatches to it, for the same reason `collect()` owns no list above: a copy of somebody
+  // else's answer is the thing that goes stale.
   const runScript = async (rel, args) => {
     const { spawnSync } = await import('node:child_process');
     const r = spawnSync(process.execPath, [path.join(repoRoot, rel), ...args], { stdio: 'inherit' });

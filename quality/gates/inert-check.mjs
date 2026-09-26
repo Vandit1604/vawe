@@ -1,6 +1,6 @@
 // quality/gates/inert-check.mjs: a mechanism that is wired and does nothing, found by machine.
 //
-//   node quality/gates/inert-check.mjs           ·   make inert-check
+//   node quality/gates/inert-check.mjs           ·   make check GATE=inert-check
 //   node quality/gates/inert-check.mjs --json
 //
 // WHY THIS EXISTS. Six defects this repo shipped this week share one shape: a gate, a hook or a

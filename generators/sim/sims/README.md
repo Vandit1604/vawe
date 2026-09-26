@@ -21,7 +21,7 @@ row.
 
 ```bash
 make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # bake → assets/baked/ember-burst/
-make sim-audit                              # seeded? bake fresh? sequence intact?
+make check GATE=sim-audit                              # seeded? bake fresh? sequence intact?
 ```
 
 ## The module contract
@@ -70,7 +70,7 @@ entire point of moving the work offline.
 - `Date.now()`, `new Date()`, `performance.now()`: a bake that depends on when it ran is not a bake.
 - `crypto.getRandomValues()`, same reason.
 
-`make sim-audit` fails on all of these by static scan, because the failure mode otherwise is silent:
+`make check GATE=sim-audit` fails on all of these by static scan, because the failure mode otherwise is silent:
 the sequence still renders, still plays, and simply differs every time somebody re-bakes it.
 
 ## Playback
@@ -89,7 +89,7 @@ The baker writes both files the two consumers need:
   scene has to restate the frame count. `loop: true` wraps; without it the last frame holds.
 
 - `meta.json`: provenance. fps, count, dims, seed, and a SHA-256 of the sim source **and every local
-  module it imports**. `make sim-audit` recomputes that hash and fails if it moved, because a bake
+  module it imports**. `make check GATE=sim-audit` recomputes that hash and fails if it moved, because a bake
   that silently keeps playing the frames of a sim you have since edited is the exact shape of failure
   this repo keeps writing gates against.
 

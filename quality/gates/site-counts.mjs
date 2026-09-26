@@ -1,5 +1,5 @@
 // quality/gates/site-counts.mjs: assert every capability count written on the SITE still matches the
-// registry it describes.  make site-counts
+// registry it describes.  make check GATE=site-counts
 //
 // AMBIGUOUS NOUNS ARE SCOPED BY SURFACE, and that is the fix this file's own KNOWN LIMIT used to ask
 // for and not do. "families" belongs to at least four registries (blocks, effects, cuts, fonts), and
@@ -82,7 +82,7 @@ const TRUTH = {
   // The layer vocabulary is the one count a reader USES rather than admires: a docs page that names
   // fourteen types when the registry holds twenty-three does not merely misreport a size, it hides
   // nine primitives, and nothing on the page says it is partial. Read from the registry itself, the
-  // same source `make coverage` was fixed to use after it reported 14/14 while a 15th type existed.
+  // same source `make check GATE=coverage` was fixed to use after it reported 14/14 while a 15th type existed.
   'layer types': size(LAYER_TYPES),
   // COUNT WHAT SHIPS, not what is on this disk. Three brand themes are deliberately untracked but
   // still present locally, so `readdirSync` says 38 here and a fresh clone has 35. A copy line reading

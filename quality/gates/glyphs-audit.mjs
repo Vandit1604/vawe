@@ -1,7 +1,7 @@
 // glyphs-audit.mjs: fail the build if a 3D typeface JSON no longer matches the font it came from.
 //
 //   node quality/gates/glyphs-audit.mjs
-//   make glyphs-audit
+//   make check GATE=glyphs-audit
 //
 // assets/fonts/3d/*.typeface.json are BAKED artifacts: outlines copied out of a woff2 at a moment in
 // time. Nothing at render time re-reads the woff2, so when the font is re-subset or swapped, the

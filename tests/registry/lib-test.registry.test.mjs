@@ -1540,7 +1540,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   ok('site-counts: the resolved surface list reaches the author-facing tools',
     files.includes('harness/author/arsenal.mjs') && files.includes('quality/gates/audio-check.mjs'));
   {
-    // The extension is joined rather than written, because `make doc-refs` reads this file too and a
+    // The extension is joined rather than written, because `make check GATE=doc-refs` reads this file too and a
     // literal `quality/gates/*.mjs` in it is a script path the repo does not have. A probe that exists
     // for a hundred milliseconds is not a promise to a reader, so it must not read as one.
     const probe = path.join(repoRoot, 'quality/gates', ['_lib-test-count', 'mjs'].join('.'));

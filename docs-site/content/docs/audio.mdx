@@ -39,7 +39,7 @@ obligation and no network.
 
 ```bash
 make audio        # bake every cue into assets/sfx/ (additive; --force to re-bake)
-make sfx-check    # is each cue the SHAPE its role claims?
+make check GATE=sfx-check    # is each cue the SHAPE its role claims?
 ```
 
 The cues: `chime`, `sparkle`, `droplet`, `bloom`, `whisper`, `tick`, `press`, `release`, `toggle`,
@@ -58,7 +58,7 @@ speed and the clicks follow. Variation comes from dynamics (a deterministic ±12
 because a real keyboard varies in force, not in identity. `keyClicks: false` silences it; `keyGain`
 sets the level.
 
-`make sfx-check` exists because a downloaded file named `click` was once **19.6 seconds** long and the
+`make check GATE=sfx-check` exists because a downloaded file named `click` was once **19.6 seconds** long and the
 typing stacked it into a drone. It decodes each WAV and measures how long the signal is actually
 audible (not how long the file is), then holds it to a cap derived from the cue's role.
 

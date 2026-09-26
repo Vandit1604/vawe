@@ -86,5 +86,5 @@ if (write) {
 console.error(`✗ ${drifted.length} of ${files.length} site scene(s) have drifted from films/scene/:`);
 for (const f of drifted) console.error(`    ${f}`);
 console.error(`\n  /editor serves these, so a visitor sees whichever version this directory happens to hold.`);
-console.error(`  Fix: make scenes-json WRITE=1`);
+console.error(`  Fix: make check GATE=scenes-json WRITE=1`);
 process.exit(1);

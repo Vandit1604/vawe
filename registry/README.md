@@ -14,6 +14,6 @@ Read by: `vawe_capabilities` (the MCP tool) and any author searching for what th
 without hand-building it.
 
 The one doc: the `usage` field at the top of `registry/registry.json` itself. Checked by:
-`make discovery` (can an author still find what's registered here).
+`make check GATE=discovery` (can an author still find what's registered here).
 
 Look first: `registry/registry.json`'s `usage` field, then `registry/generators/` for a source entry.

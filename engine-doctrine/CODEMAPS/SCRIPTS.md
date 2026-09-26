@@ -85,7 +85,7 @@ REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a 
 | `asset-check.mjs` | 159 | yes | quality/gates/asset-check.mjs: ASSET-READINESS PREFLIGHT. A scene that names a logo / icon / captured |
 | `sweep-static.mjs` | 156 | yes | quality/gates/sweep-static.mjs: does the film's PIXELS ever move, mechanically checked. |
 | `storyboard-check.test.mjs` | 153 | no | quality/gates/storyboard-check.test.mjs: the film-vs-plan divergence check. Builds a real three-beat |
-| `lint-test.mjs` | 142 | yes | lint-test.mjs: regression asserts for validate.mjs lintData (make lint-test). Each rule below maps |
+| `lint-test.mjs` | 142 | yes | lint-test.mjs: regression asserts for validate.mjs lintData (make check GATE=lint-test). Each rule below maps |
 | `ledger.mjs` | 138 | yes | ledger.mjs. The DESIGN LEDGER: cross-video memory that makes anti-sameness enforceable. |
 | `legacy-fold.mjs` | 135 | yes | quality/gates/legacy-fold.mjs · ONE-TIME (but re-runnable) migration: fold legacy-manifest.json rows |
 | `draft-check.mjs` | 132 | yes | quality/gates/draft-check.mjs: IS THIS AN 85% DRAFT OR A 95% ONE? Say which, and say what is missing. |

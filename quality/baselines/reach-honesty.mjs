@@ -1,13 +1,13 @@
-// reach-honesty.mjs: keeps quality/baselines/reach.json truthful against `make coverage`'s real output.
+// reach-honesty.mjs: keeps quality/baselines/reach.json truthful against `make check GATE=coverage`'s real output.
 //
 //   node quality/baselines/reach-honesty.mjs
 //
-// reach.json (subtraction.plan.md Phase 1) hand-classifies every schema prop `make coverage` flags as
+// reach.json (subtraction.plan.md Phase 1) hand-classifies every schema prop `make check GATE=coverage` flags as
 // unused into unreachable / unwanted / unsure, each with real evidence. That table rots the moment a
 // scene starts (or stops) using a prop, or a new prop joins the schema unused: reach.json would then be
 // silently short of, or stale about, the very list it claims to cover. This is NOT a gate (nothing here
 // blocks a render or a commit) and it never runs on its own; run it by hand after touching schema.json
-// or the scene library, the same way `make coverage` itself is a WARN-tier report, not a build failure.
+// or the scene library, the same way `make check GATE=coverage` itself is a WARN-tier report, not a build failure.
 //
 // Deliberately small: one diff, two directions. `missing` is the dangerous one (an unused prop with no
 // verdict at all); `stale` just means reach.json is a step ahead (fine, but worth knowing before editing

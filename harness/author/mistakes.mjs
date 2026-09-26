@@ -4,7 +4,7 @@
 //   node harness/author/mistakes.mjs "silent fallback"   # the entries that match, one line each
 //   node harness/author/mistakes.mjs --n 496             # one entry's title + lesson + what holds it
 //   node harness/author/mistakes.mjs --n 496 --full      # the ORIGINAL prose, from git history
-//   make mistakes [Q="…"] [N=496] [FULL=1]
+//   make arsenal MISTAKES=1 [Q="…"] [N=496] [FULL=1]
 //
 // WHY THIS FILE CHANGED SHAPE. engine-doctrine/MISTAKES.md was 17,797 lines and 569 entries, 45% of every word of
 // documentation in this repo. Its own header used to say "read this before authoring", and that was
@@ -205,12 +205,12 @@ if (!QUERY) {
   const unclassed = entries.filter((e) => !e.classes.length).length;
   if (unclassed) console.log(`  ${String(unclassed).padStart(4)}  unclassified`);
   console.log(`\n  An entry can carry more than one class, so these sum past ${entries.length}.`);
-  console.log(`  Filter: make mistakes Q="<area or class>"\n`);
+  console.log(`  Filter: make arsenal MISTAKES=1 Q="<area or class>"\n`);
   console.log(`  This file used to be 17,797 lines of prose nobody could read whole. It is now an index:`);
   console.log(`  title, one lesson, what holds it. The full reasoning for any entry is one command away:\n`);
-  console.log(`    make mistakes Q="a prop the engine accepted and ignored"`);
-  console.log(`    make mistakes N=496`);
-  console.log(`    make mistakes N=496 FULL=1   # the original write-up, from git history\n`);
+  console.log(`    make arsenal MISTAKES=1 Q="a prop the engine accepted and ignored"`);
+  console.log(`    make arsenal MISTAKES=1 N=496`);
+  console.log(`    make arsenal MISTAKES=1 N=496 FULL=1   # the original write-up, from git history\n`);
   process.exit(0);
 }
 
@@ -242,6 +242,6 @@ for (const { e } of scored.slice(0, LIMIT)) show(e);
 if (scored.length > LIMIT) {
   console.log(`\n  ${scored.length - LIMIT} more, by title:`);
   for (const { e } of scored.slice(LIMIT, LIMIT + 12)) console.log(`    #${String(e.n).padStart(4)}  ${e.title.slice(0, 92)}`);
-  console.log(`  Show one: make mistakes N=<number>`);
+  console.log(`  Show one: make arsenal MISTAKES=1 N=<number>`);
 }
 console.log('');

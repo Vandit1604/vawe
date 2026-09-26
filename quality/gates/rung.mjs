@@ -1,6 +1,6 @@
 // quality/gates/rung.mjs · which rules are only PROSE, and which ones something actually enforces?
 //
-//   node quality/gates/rung.mjs            ·   make rung
+//   node quality/gates/rung.mjs            ·   make check GATE=rung
 //   node quality/gates/rung.mjs --list     ·   the [eye] worklist, the rules nothing but the sentence holds
 //   node quality/gates/rung.mjs --stamp    ·   record today's [eye] count as the new ceiling
 //
@@ -34,6 +34,7 @@
 //
 // WHAT "EXISTS" MEANS, per rung, and the strength is deliberately uneven because the evidence is:
 //   [ref: make <t>]        the Makefile defines <t>. Read off the Makefile, never a list.
+//   [ref: make check GATE=<g>]  <g> is a key in harness/lib/check-gate.mjs's GATES table.
 //   [gated: <script>]      the script exists AND emits at least one finding code. A gate that emits
 //                          nothing cannot refuse anything, so naming it is a false tag.
 //   [gated: <script>#code] stronger, and preferred: that script emits THAT code.
@@ -65,6 +66,9 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { codesEmitted } from '../../harness/lib/finding-codes.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { GATES as CHECK_GATES } from '../../harness/lib/check-gate.mjs';
+
+const GATES = new Set(Object.keys(CHECK_GATES));
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/rung-ratchet.json');
@@ -163,8 +167,10 @@ function verify(s, targets) {
   if (!names) return `[${rung}] names nothing. A tag that claims a mechanism must NAME it, or it is decoration`;
 
   if (rung === 'ref') {
+    const gate = /^make\s+check\s+GATE=([a-z][a-z0-9-]*)$/.exec(names);
+    if (gate) return GATES.has(gate[1]) ? null : `no such gate \`GATE=${gate[1]}\` (harness/lib/check-gate.mjs)`;
     const t = /^make\s+([a-z][a-z0-9-]*)$/.exec(names);
-    if (!t) return `[ref] takes a make target ("make arsenal"), not "${names}"`;
+    if (!t) return `[ref] takes a make target ("make arsenal") or a gate ("make check GATE=rung"), not "${names}"`;
     return targets.has(t[1]) ? null : `no Makefile target \`${t[1]}\``;
   }
   if (rung === 'gated') {

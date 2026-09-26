@@ -19,7 +19,7 @@ codes: effect-soup
   transformation/morph, camera/viewport, physics-driven, time remapping (§3).
 - Cut rate has a real accepted metric (average shot length, the Cinemetrics corpus). "Is this motion
   good" does not. Frame-difference detects dead frames; it cannot judge direction (§4).
-- `make track`'s five shapes are measured off two films IN THIS REPO (higgsfield-recreation and
+- `make arsenal SHAPE=`'s five shapes are measured off two films IN THIS REPO (higgsfield-recreation and
   brew-launch-act1), never off an external reference (§5).
 
 This is a research doc, not a rule page: it exists to hold the sourced argument so the correction to
@@ -185,7 +185,7 @@ to a field with no accepted quality metric, not a workaround for one this repo h
 
 ---
 
-## 5. Provenance correction: `make track`'s shapes are measured off THIS repo's own films
+## 5. Provenance correction: `make arsenal SHAPE=`'s shapes are measured off THIS repo's own films
 
 `harness/author/track.mjs` emits a hand-keyed `motion` track from one of five shapes
 (`pan`/`blast`/`drift`/`enter`/`exit`). Its own header states the source plainly:
