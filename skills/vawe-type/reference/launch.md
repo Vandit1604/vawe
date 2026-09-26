@@ -1,14 +1,13 @@
 ---
-name: vawe-type-launch
-description: "Playbook for a SaaS/product launch video in this engine: captured UI, a continuous object, a hue-turning field, logo prominence. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches launch-video, or the request is to market/showcase a real product, company or site."
-stage: plan
+when: "authoring a SaaS or product launch video from a captured site"
+answers: "the launch type's spine, motion to reach for, rules, assets and worked example"
+group: skill
 ---
 
-# vawe-type-launch: the SaaS launch playbook
+# The launch playbook: SaaS/product
 
-A launch film is built from CAPTURE, not invention. Its taste already lives on the real site; your job
-is to reflect it, never redesign it. This is the playbook; `vawe-launch` (a separate skill) is the
-step-by-step orchestrated pipeline if you want the full gated flow instead of authoring by hand.
+A launch film is built from CAPTURE, not invention. Its taste already lives on the real site; the job
+is to reflect it, never redesign it.
 
 ## The spine changes shape with length
 

@@ -1,10 +1,10 @@
 ---
-name: vawe-type-recreation
-description: "Playbook for matching a reference film's or site's exact look in this engine: study the grammar, take it, never the frames. Load when the route table (engine-doctrine/CRAFT/ROUTING.md) matches recreation, or the request is to recreate a specific reference with no product to sell."
-stage: plan
+when: "authoring a recreation of a specific reference film or site"
+answers: "the recreation type's spine, motion to reach for, rules, assets and worked example"
+group: skill
 ---
 
-# vawe-type-recreation: the studied-grammar playbook
+# The recreation playbook: studied-grammar
 
 A recreation is not a reflection of our own product; the reference IS the subject. The whole discipline
 is one sentence: **take the grammar, never the frames.** Pacing, cut rate, the device that holds the

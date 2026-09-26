@@ -2,6 +2,7 @@
 name: vawe-animation
 description: "Motion doctrine for a vawe scene: easing choice, entrance/exit pairing, stagger order, and the text-effect vocabulary. Load while authoring or tuning a scene JSON when motion reads floaty, monotone, or toy-like."
 stage: direct
+effort: low
 ---
 
 # vawe-animation: how motion should FEEL
@@ -51,3 +52,12 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
 - **Blur out when moving would fight the content** (`out:"defocus"` for faces, dense grids, 50-element scenes).
 
 Primitives are pure and tested (`make test`). Effects catalog: `vawe-effects`. Doctrine: [`engine-doctrine/CRAFT/DIRECTION.md`](../../engine-doctrine/CRAFT/DIRECTION.md) · [`engine-doctrine/MOTION-CRAFT.md`](../../engine-doctrine/MOTION-CRAFT.md).
+
+## Gotchas
+
+- `resolveEasing` used to swallow an unknown easing name silently instead of warning; if a curve
+  reads generic, check the name is actually one of the registered eases. `engine-doctrine/MISTAKES.md #138`.
+- Two kinetic knobs can cancel each other out (a spring input fighting `settle`) and produce no
+  motion at all; drive frequency from one knob, not two. `engine-doctrine/MISTAKES.md #118`.
+- A merged motion track must state the WHOLE pose at every key it fabricates; a partial key silently
+  inherits stale values from the previous one. `engine-doctrine/MISTAKES.md #201`.
