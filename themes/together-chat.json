@@ -10,9 +10,6 @@
     "stagger": 0.05,
     "exitRatio": 0.35
   },
-  "bgDefault": {
-    "preset": "plain"
-  },
   "look": {
     "backdrop": [
       "paper"
@@ -34,6 +31,9 @@
     "field": {
       "grain": 0,
       "vignette": 0
+    },
+    "bgDefault": {
+      "preset": "plain"
     }
   },
   "tokens": {

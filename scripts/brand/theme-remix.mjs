@@ -24,7 +24,7 @@ const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] 
 // ── colour maths (self-contained, pure) ───────────────────────────────────────────────────────────
 // The shared half lives in harness/lib/theme-bg.mjs, because invent-look.mjs writes themes too and a
 // second copy of the bg mapping is how a theme gains a missing key.
-import { parseHex as parse, mix, lighten, darken, rgbStr, relLum, contrast, bgBlock } from '../../harness/lib/theme-bg.mjs';
+import { parseHex as parse, mix, lighten, darken, rgbStr, relLum, contrast } from '../../harness/lib/theme-bg.mjs';
 const rgbaOf = (c, a) => { const [r, g, b] = parse(c); return `rgba(${r},${g},${b},${a})`; };
 const isLight = (c) => relLum(c) > 0.4;
 
@@ -91,8 +91,10 @@ const theme = {
   gradient,
   type,
   motion: preset.motion,
-  bg: bgBlock(palette, light),
-  bgDefault: preset.bgDefault || (light ? 'plain' : 'dark'),
+  // `bg` is not written any more: core/backgrounds/palette.js `bgPaletteFrom(palette)` derives the same
+  // bg-preset palette from the palette this theme already carries, and core/theme/roles.js refuses a
+  // theme that still writes it by hand. `look.bgDefault` replaces the retired top-level `bgDefault`.
+  look: { bgDefault: preset.bgDefault || (light ? 'plain' : 'dark') },
 };
 
 const errs = themeErrors(theme);

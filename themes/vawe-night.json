@@ -1,192 +1,184 @@
 {
- "name": "vawe-night",
- "note": "THE BRAND AFTER DARK, for the launch film. Derived from themes/vawe.json, not invented, and deliberately NOT vawe-dark: that ships accent #5ee0c8, and near-black plus one teal accent is the exact look this project's own design read rules out. vawe.json already solved the dark case in prose: 'cobalt on #0f1620 is ~2.5:1 and unreadable. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab.' So this carries TWO blues at two roles rather than one flat accent. #8fc0ff is the readable accent on the ground; the real brand cobalt #2563eb survives as the caret and the glow, where it is a light source rather than something to read. The ground is #0d1117, cool rather than neutral, so it belongs to the blue rather than sitting under it.",
- "motion": {
-  "easing": "easeOutExpo",
-  "bounce": 0.08,
-  "settle": 0.5,
-  "enter": 36,
-  "durationScale": 0.88,
-  "stagger": 0.045
- },
- "bg": {
-  "accent": "143,192,255",
-  "tint": "35,43,57",
-  "tint2": "22,27,38",
-  "dotLight": "143,192,255",
-  "paperBase": [
-   "#11161f",
-   "#0d1117"
-  ],
-  "softBase": [
-   "#11161f",
-   "#080b10"
-  ],
-  "accentBase": [
-   "#12233d",
-   "#080b10"
-  ],
-  "inkBase": [
-   "#080b10",
-   "#05070a"
-  ],
-  "border": "#232b39",
-  "dark": [
-   "#0d1117",
-   "#080b10"
-  ],
-  "darkMesh": [
-   "#101827",
-   "#080b10"
-  ],
-  "deep": [
-   "#080b10",
-   "#05070a"
-  ],
-  "light": [
-   "#161b26",
-   "#0d1117"
-  ],
-  "ink": [
-   "#080b10",
-   "#05070a"
-  ],
-  "paper": "#0d1117"
- },
- "vars": {
-  "--ink": "#e6e9ef",
-  "--paper": "#0b0d12",
-  "--muted": "#7c8797",
-  "--em": "#5ee0c8",
-  "--on-light": "#0b0d12",
-  "--on-dark": "#e6e9ef",
-  "--border": "#222831",
-  "--accent-soft": "rgba(94,224,200,0.12)"
- },
- "bgDefault": {
-  "preset": "plain",
-  "value": "dark"
- },
- "tokens": {
-  "color": {
-   "bg": {
-    "$type": "color",
-    "$value": "#0d1117"
-   },
-   "bg2": {
-    "$type": "color",
-    "$value": "#11161f"
-   },
-   "surface": {
-    "$type": "color",
-    "$value": "#161b26"
-   },
-   "surface2": {
-    "$type": "color",
-    "$value": "#1b212e"
-   },
-   "line": {
-    "$type": "color",
-    "$value": "#232b39"
-   },
-   "lineStrong": {
-    "$type": "color",
-    "$value": "#313b4d"
-   },
-   "text": {
-    "$type": "color",
-    "$value": "#e8ecf3"
-   },
-   "text2": {
-    "$type": "color",
-    "$value": "#aab4c5"
-   },
-   "dim": {
-    "$type": "color",
-    "$value": "#7d8798"
-   },
-   "accent": {
-    "$type": "color",
-    "$value": "#8fc0ff"
-   },
-   "accentDim": {
-    "$type": "color",
-    "$value": "rgba(143,192,255,0.12)"
-   },
-   "accentGlow": {
-    "$type": "color",
-    "$value": "rgba(37,99,235,0.42)"
-   },
-   "up": {
-    "$type": "color",
-    "$value": "#84e06a"
-   },
-   "down": {
-    "$type": "color",
-    "$value": "#ff4d6d"
-   },
-   "ink": {
-    "$type": "color",
-    "$value": "#e8ecf3"
-   }
+  "name": "vawe-night",
+  "note": "THE BRAND AFTER DARK, for the launch film. Derived from themes/vawe.json, not invented, and deliberately NOT vawe-dark: that ships accent #5ee0c8, and near-black plus one teal accent is the exact look this project's own design read rules out. vawe.json already solved the dark case in prose: 'cobalt on #0f1620 is ~2.5:1 and unreadable. Two-surface accent: cobalt on light, ice-blue #8fc0ff on a charcoal code slab.' So this carries TWO blues at two roles rather than one flat accent. #8fc0ff is the readable accent on the ground; the real brand cobalt #2563eb survives as the caret and the glow, where it is a light source rather than something to read. The ground is #0d1117, cool rather than neutral, so it belongs to the blue rather than sitting under it.",
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0.08,
+    "settle": 0.5,
+    "enter": 36,
+    "durationScale": 0.88,
+    "stagger": 0.045
   },
-  "font": {
-   "sans": {
-    "$type": "fontFamily",
-    "$value": "Anybody"
-   },
-   "serif": {
-    "$type": "fontFamily",
-    "$value": "Anybody"
-   },
-   "mono": {
-    "$type": "fontFamily",
-    "$value": "JetBrains Mono"
-   },
-   "num": {
-    "$type": "fontFamily",
-    "$value": "JetBrains Mono"
-   }
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#0d1117"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#11161f"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#161b26"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#1b212e"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#232b39"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#313b4d"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#e8ecf3"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#aab4c5"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#7d8798"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#8fc0ff"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(143,192,255,0.12)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.42)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#84e06a"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#ff4d6d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#e8ecf3"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Anybody"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "JetBrains Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#0d1117"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#11161f"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#161b26"
+      }
+    }
   },
-  "gradient": {
-   "stop0": {
-    "$type": "color",
-    "$value": "#0d1117"
-   },
-   "stop1": {
-    "$type": "color",
-    "$value": "#11161f"
-   },
-   "stop2": {
-    "$type": "color",
-    "$value": "#161b26"
-   }
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  },
+  "look": {
+    "bgDefault": {
+      "preset": "plain",
+      "value": "dark"
+    },
+    "bgPalette": {
+      "accent": "143,192,255",
+      "tint": "35,43,57",
+      "tint2": "22,27,38",
+      "dotLight": "143,192,255",
+      "paperBase": [
+        "#11161f",
+        "#0d1117"
+      ],
+      "softBase": [
+        "#11161f",
+        "#080b10"
+      ],
+      "accentBase": [
+        "#12233d",
+        "#080b10"
+      ],
+      "inkBase": [
+        "#080b10",
+        "#05070a"
+      ],
+      "border": "#232b39",
+      "dark": [
+        "#0d1117",
+        "#080b10"
+      ],
+      "darkMesh": [
+        "#101827",
+        "#080b10"
+      ],
+      "deep": [
+        "#080b10",
+        "#05070a"
+      ],
+      "light": [
+        "#161b26",
+        "#0d1117"
+      ],
+      "ink": [
+        "#080b10",
+        "#05070a"
+      ],
+      "paper": "#0d1117"
+    }
   }
- },
- "roles": {
-  "ground": "{color.bg}",
-  "bg2": "{color.bg2}",
-  "surface": "{color.surface}",
-  "surface2": "{color.surface2}",
-  "line": "{color.line}",
-  "lineStrong": "{color.lineStrong}",
-  "text": "{color.text}",
-  "text2": "{color.text2}",
-  "dim": "{color.dim}",
-  "accent": "{color.accent}",
-  "accentDim": "{color.accentDim}",
-  "accentGlow": "{color.accentGlow}",
-  "up": "{color.up}",
-  "down": "{color.down}",
-  "ink": "{color.ink}",
-  "font.sans": "{font.sans}",
-  "font.serif": "{font.serif}",
-  "font.mono": "{font.mono}",
-  "font.num": "{font.num}",
-  "gradient": [
-   "{gradient.stop0}",
-   "{gradient.stop1}",
-   "{gradient.stop2}"
-  ]
- }
 }

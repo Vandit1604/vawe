@@ -147,17 +147,39 @@ export function deriveLegacy(tokenFile, opts = {}) {
 export function isTokenFile(spec) { return spec != null && typeof spec === 'object' && spec.roles != null; }
 const isLegacyShape = (spec) => spec != null && typeof spec === 'object' && spec.palette != null && spec.roles == null;
 
+// RETIRED FIELDS: `vars` (a free-form CSS custom-prop passthrough), `bg` (a hand-authored copy of the
+// bg-preset palette `core/backgrounds/palette.js` `bgPaletteFrom` already derives from `tokens`/`roles`)
+// and top-level `bgDefault` (the theme's own default bg spec, now `look.bgDefault`, a look key beside
+// the other six rather than a second top-level field). Not backward compatible on purpose: every
+// shipped theme was migrated (commit b24d977f) before this check landed, so a file still carrying one
+// is either hand-edited against the old doc or copy-pasted from a pre-migration theme, and either way
+// the reader needs a name and a place to put the fact, not a silent extra key nothing reads any more.
+const RETIRED_FIELDS = {
+  vars: 'delete it: `--paper`/`--ink`/`--muted`/`--em`/`--border`/`--accent-soft` are now written from the theme\'s own palette (P.bg/P.ink/P.dim/P.accent/P.line/P.accentDim), and `--on-light`/`--on-dark` are ON_INK entries a theme overrides with `roles.onLight`/`roles.onDark` (core/registry/theme-contract.js)',
+  bg: 'move it to `look.bgPalette` (a look key like `look.bgDefault`), or delete it and let `core/backgrounds/palette.js` `bgPaletteFrom(theme.palette)` derive the bg-preset palette from `tokens`/`roles` instead',
+  bgDefault: 'move it to `look.bgDefault` (core/registry/theme-contract.js LOOK_KEY_ENTRIES), a look key like `look.backdrop`/`look.cuts`, not a second top-level field',
+};
+function retiredFieldErrors(tokenFile) {
+  const errs = [];
+  for (const [key, replacement] of Object.entries(RETIRED_FIELDS)) {
+    if (tokenFile && Object.hasOwn(tokenFile, key)) errs.push(`theme.${key} is retired, this schema is not backward compatible: ${replacement}`);
+  }
+  return errs;
+}
+
 // expandTheme(tokenFile, opts) -> the legacy-shaped theme object (name/note/palette/type/gradient, plus
-// every passthrough section: motion/bg/vars/bgDefault/look/invented, untouched). THROWS on any
-// resolution problem: this is the fail-loud entry point boot.js and the migration's round-trip proof
-// call directly; a caller that wants every problem in one pass (validate.mjs) uses themeFileErrors
-// instead, which never throws.
+// every passthrough section: motion/look/invented, untouched). THROWS on any resolution problem,
+// including a retired `vars`/`bg`/`bgDefault` field (see RETIRED_FIELDS above): this is the fail-loud
+// entry point boot.js and the migration's round-trip proof call directly; a caller that wants every
+// problem in one pass (validate.mjs) uses themeFileErrors instead, which never throws.
 export function expandTheme(tokenFile, opts = {}) {
   if (isLegacyShape(tokenFile)) {
     throw new Error(`this theme is written in the retired palette/type/gradient shape. Run `
       + `\`node harness/author/migrate-themes.mjs\` to convert it to tokens + roles.`);
   }
   if (!isTokenFile(tokenFile)) throw new Error('theme has no `roles`: not a valid token file');
+  const retired = retiredFieldErrors(tokenFile);
+  if (retired.length) throw new Error(`theme "${tokenFile.name || 'inline'}" ${retired.join('; ')}`);
   const { palette, type, gradient, errors } = deriveLegacy(tokenFile, opts);
   if (errors.length) throw new Error(`theme "${tokenFile.name || 'inline'}" failed to resolve: ${errors.join('; ')}`);
   const { tokens: _tokens, roles: _roles, ...passthrough } = tokenFile;
@@ -173,6 +195,8 @@ export function themeFileErrors(tokenFile, opts = {}) {
       + '`node harness/author/migrate-themes.mjs` to convert it to tokens + roles.'];
   }
   if (!isTokenFile(tokenFile)) return ['theme has no `roles`: not a valid token file'];
+  const retired = retiredFieldErrors(tokenFile);
+  if (retired.length) return retired;
   const { palette, type, gradient, errors } = deriveLegacy(tokenFile, opts);
   if (errors.length) return errors; // resolution failed: theme-contract's checks would only repeat it
   // Defense in depth: once the token file resolves cleanly, run it through the SAME contract check the

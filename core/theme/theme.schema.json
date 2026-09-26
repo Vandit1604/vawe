@@ -21,9 +21,6 @@
       }
     },
     "motion": { "type": "object" },
-    "bg": { "type": "object" },
-    "vars": { "type": "object" },
-    "bgDefault": {},
     "look": { "type": "object" },
     "invented": {}
   },

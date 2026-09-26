@@ -214,8 +214,10 @@ boot((data, fps, theme, canvas) => {
     // use:"theme" pulls the brand's OWN authored backdrop from themes/<name>.json (bgDefault),
     // so each brand has a custom bg it declares once, not a shared global preset name repeated
     // (the "customize, don't default" rule; fails loud if the theme never authored one).
-    if (b0.use === 'theme' && !(theme && theme.bgDefault)) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no bgDefault`);
-    const b = b0.use === 'theme' ? { ...theme.bgDefault, from: b0.from, to: b0.to } : b0;
+    const themeBgDefault = theme && theme.look && theme.look.bgDefault;
+    if (b0.use === 'theme' && !themeBgDefault) throw new Error(`bg use:"theme" but theme "${(theme && theme.name) || '?'}" defines no look.bgDefault`);
+    const themeBgSpec = typeof themeBgDefault === 'string' ? { preset: themeBgDefault } : themeBgDefault;
+    const b = b0.use === 'theme' ? { ...themeBgSpec, from: b0.from, to: b0.to } : b0;
     // a HAND-AUTHORED window (core/layout/bg-html.js) paints in the DOM, not on the canvas: no preset spec,
     // and the canvas is hidden while it is on screen.
     // `src` is resolved to markup HERE, once, so every downstream reader of a window (bg-html, the ink
@@ -230,8 +232,9 @@ boot((data, fps, theme, canvas) => {
     // throw is the backstop for anything that reaches the renderer unvalidated.
     if (b.preset == null && b.base == null && b.fx == null)
       throw new Error(`bg[${bi}] names no backdrop: no preset, no base/fx composition, no use, no html/src.`);
+    const themeBgPalette = theme && theme.look && theme.look.bgPalette;
     const spec = b.preset != null
-      ? applyBgOver(bgPreset(b.preset, b.value, (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined), b.opts)
+      ? applyBgOver(bgPreset(b.preset, b.value, themeBgPalette || bgPaletteFrom(theme && theme.palette) || undefined), b.opts)
       : { base: b.base ? { ...b.base } : null, fx: (b.fx || []).map((f) => ({ ...f })) };
     // grain is OPT-IN (`"grain": true`), strip the in-engine canvas grain unless a video asks for
     // it, matching the ffmpeg pass. Default-off: no per-frame speck crawl over sharp text.

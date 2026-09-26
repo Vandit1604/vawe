@@ -158,7 +158,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       } catch { /* palette falls back */ }
     }
   }
-  const PAL = (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined;
+  const PAL = (theme && theme.look && theme.look.bgPalette) || bgPaletteFrom(theme && theme.palette) || undefined;
 
   const lookOf = (name) => look(name, win.value, PAL);
 
