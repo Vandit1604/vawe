@@ -68,7 +68,7 @@ const scene = {
     + 'film and ONE expressive cinematicZoom seam is earned at the 10s payoff (engine-doctrine/CRAFT/TRANSITIONS.md). '
     + 'The sound-form is the spine: a flat bar, then four stems, then one merged waveform, all one SVG '
     + 'driven by var(--t), so it survives both transitions and CHANGES at each. Built by '
-    + 'harness/author/build-cadence-film.mjs; the cut easings are verified with `make measure`.',
+    + 'harness/author/build-cadence-film.mjs; the cut easings are verified with `make study-tool X=measure`.',
   layers: [
     T({ text: 'CADENCE', x: 200, y: 150, w: 900, size: 26, weight: 500, color: 'var(--text-2)',
       font: 'mono', ls: '0.22em', start: 0.08,  duration: 4.72, anim: 'fade', enterDur: 0.5 }),

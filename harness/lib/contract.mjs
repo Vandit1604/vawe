@@ -890,7 +890,7 @@ function sameFragment(prev, b) {
 /** isContinuousBoundary(prev, b) → true when the boundary is not a cut at all: the same fragment file
  * carries across it, a shared element (`becomes:`) crosses it, or a camera `travel` move spans it
  * (core/transitions/relationships.js DEVICES: "camera travel"/"shared-element morph"). A continuous
- * boundary needs no transition and is never `boundary-uncovered`; `make transitions D=` reports it as
+ * boundary needs no transition and is never `boundary-uncovered`; `make study-tool X=transitions D=` reports it as
  * "continuous (same surface)" via the same check, so the gate and the report can't disagree. */
 export function isContinuousBoundary(prev, b) {
   if (sameFragment(prev, b)) return true;

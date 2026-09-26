@@ -28,7 +28,7 @@ const defaultTiming = (fx) => (RAMP_BY_DEFAULT.has(fx) ? 'ramp' : undefined);
 
 export function boundaryMechanism(fx, mech) {
   const have = MECHS_OF.get(fx);
-  if (!have) throw new Error(`unknown transition fx "${fx}", see \`make transitions\` for the catalog`);
+  if (!have) throw new Error(`unknown transition fx "${fx}", see \`make study-tool X=transitions\` for the catalog`);
   if (mech) {
     if (mech === 'anim') throw new Error(`transition "${fx}": mech "anim" is a LAYER transition, not a boundary. Put it in a layer's transition.in/out`);
     if (!have.has(mech)) throw new Error(`transition "${fx}" is not a ${mech}. It is a ${[...have].join('/')} (drop \`mech\`, or pick a ${mech} fx)`);

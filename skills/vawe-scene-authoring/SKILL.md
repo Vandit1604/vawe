@@ -88,7 +88,7 @@ Non-negotiable moves:
   of extremes, not one safe size step.
 - **A committed non-generic face.** Reflecting a real brand → its captured font. Anything else → never
   Inter or Space Grotesk (the slop faces); reach for Instrument Serif (editorial), a captured face, or one
-  you register via `make brandspec` + `make palette`.
+  you register via `make study-tool X=brandspec` + `make study-tool X=palette`.
 - **One bespoke visual device, not card soup.** Avoid the equal rounded-card grid and the rounded-icon-
   tile-above-a-heading. Invent one signature motif per video.
 - **Layout by containment: group-first.** Anything with a spatial relationship (a label+value, a logo

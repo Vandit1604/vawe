@@ -62,7 +62,7 @@ rules, checked by the `craft-live.mjs` hook on every save).
 ## Assets and how to get them
 
 `make sections URL=<site> NAME=<name>` inventories every real section; `make capture` grabs one UI
-cluster as an image; `make palette` eyedrops the real colours; `make assets` pulls the real logo (never
+cluster as an image; `make study-tool X=palette` eyedrops the real colours; `make assets` pulls the real logo (never
 a bare `curl`, which writes a zero-byte file on a 404). Crawl every page and view mode, not just the
 homepage: the real product often lives one click deeper than the hero.
 

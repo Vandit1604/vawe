@@ -403,7 +403,7 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
 ## Icons & images: real assets first, in this order
 
 1. `make sections` + `make capture` (real product UI, pixel-faithful, animatable)
-2. `make lookbook URL=… NAME=…`: study shots (art direction, not for rendering)
+2. `make study-tool X=lookbook URL=… NAME=…`: study shots (art direction, not for rendering)
 3. Brand logos: `curl https://cdn.simpleicons.org/<slug>/<hex>` → `assets/icons/` (free)
 4. Flags: `flagcdn.com/<iso2>.svg` (public domain) → `assets/flags/`
 5. Photos: `make photos Q="…" NAME=brand`, Openverse cc0/pdm/by, attribution auto-recorded in
@@ -717,7 +717,7 @@ video, not the framework. It's a WARN, not a blocker, but treat a flag as "prove
 
 ## The no-template doctrine
 
-Study the site (`make lookbook`), inventory every section (`make sections`), name its design
+Study the site (`make study-tool X=lookbook`), inventory every section (`make sections`), name its design
 language in words, trace every choice to an observation, pull copy from the site's own words, then
 **capture its real sections and re-animate them**; compose connective tissue from THIS vocabulary.
 Structure is designed per product; nothing here decides your story for you.

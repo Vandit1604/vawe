@@ -110,7 +110,7 @@ author the JSON  →  make author-check / audit  →  make judge (the vision gat
 
 Ask an agent to write the scene, grounded in `films/scene/schema.json` (the contract), the primitive
 vocabulary ([`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md)), and the taste system ([`engine-doctrine/TASTE.md`](engine-doctrine/TASTE.md)).
-Reflecting a real brand? `make brandspec URL=…` reads its real CSS, `make sections`/`make palette` capture
+Reflecting a real brand? `make study-tool X=brandspec URL=…` reads its real CSS, `make sections`/`make study-tool X=palette` capture
 and eyedrop it, and `make house-style NAME=…` persists the brand's Design Read so the next video stays
 on-brand automatically.
 
@@ -223,7 +223,7 @@ make list                               formats + their schema/sample
 make site X=catalog [THEME=<brand>]            browse the 100-block registry, reskinned to a brand
 make house-style NAME=<brand>           persist a brand's Design Read
 make direct D=<file> [WRITE=1]          motion director: pick cuts/stings per transition
-make brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
+make study-tool X=brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
 
 # gates
 make check GATE=validate [D=…]                     schema + no-em-dash + build-time sugar checks

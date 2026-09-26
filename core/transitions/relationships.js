@@ -88,7 +88,7 @@ export const RELATIONSHIP_REGISTRY = defineRegistry('transition relationship', R
   },
 });
 
-/** candidatesFor(relationship) -> string[] | null. The exact list a gate or `make transitions` prints. */
+/** candidatesFor(relationship) -> string[] | null. The exact list a gate or `make study-tool X=transitions` prints. */
 export function candidatesFor(relationship) {
   return RELATIONSHIPS[relationship] ? RELATIONSHIPS[relationship].candidates : null;
 }

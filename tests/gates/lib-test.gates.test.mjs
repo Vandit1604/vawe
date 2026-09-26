@@ -562,7 +562,7 @@ test('lib-test: gates', async () => {
 }
 
 
-// ---- make transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
+// ---- make study-tool X=transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
 {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-transitions-'));
   const sbPath = path.join(tmp, 'x.storyboard.md');
@@ -593,17 +593,17 @@ test('lib-test: gates', async () => {
   ].join('\n'));
   fs.writeFileSync(jsonPath, '{"module":"scene"}');
   const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/transitions-catalog.mjs'), jsonPath], { encoding: 'utf8', cwd: repoRoot });
-  ok('make transitions D=: exits 0 on a fixture storyboard', r.status === 0);
-  ok('make transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
-  ok('make transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
+  ok('make study-tool X=transitions D=: exits 0 on a fixture storyboard', r.status === 0);
+  ok('make study-tool X=transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
+  ok('make study-tool X=transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
   // (b) no transition_why: never guess a candidate from the beat's name ("grain gradient" -> "grain").
   const candidateLines = r.stdout.split('\n').filter((l) => l.trim().startsWith('candidates'));
-  ok('make transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
+  ok('make study-tool X=transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
     candidateLines.some((l) => l.includes('state the relationship first (transition_why)'))
     && !candidateLines.some((l) => l.includes('grain')));
   // (c) the relationships list + doc anchor print exactly once, not once per boundary (3 boundaries here).
   const relLines = (r.stdout.match(/^  relationships: /gm) || []).length;
-  ok('make transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
+  ok('make study-tool X=transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
   fs.rmSync(tmp, { recursive: true, force: true });
 }
 

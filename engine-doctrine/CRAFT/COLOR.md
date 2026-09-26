@@ -11,14 +11,14 @@ confirm: "is the palette eyedropped from one dominant source, not invented?"
 
 ## AGENT SUMMARY
 
-- Eyedrop the palette from the real brand (`make palette`), never invent. Decide light-first vs
+- Eyedrop the palette from the real brand (`make study-tool X=palette`), never invent. Decide light-first vs
   dark-first by LOOKING at the hero, build from one accent held to 10% (60-30-10), and hit ~7:1
   contrast on headline type.
 - Enforced by `make check GATE=audit` (contrast fails hard) and `make check GATE=designspec-check` (`off-colour`,
   `dead-token`, `contrast-unmeasurable`).
 - Checkable action: is the palette eyedropped from one dominant source, not invented?
 
-Colours come **only from the brand**: eyedrop the real pixels (`make palette`), never invent. This guide is
+Colours come **only from the brand**: eyedrop the real pixels (`make study-tool X=palette`), never invent. This guide is
 how to turn those pixels into a full `theme.palette` and use it well. Maps to the theme contract keys:
 `bg, bg2, surface, surface2, line, lineStrong, text, text2, dim, ink, accent, accentDim, accentGlow, up, down`
 + 3 `gradient` stops.
@@ -53,7 +53,7 @@ Two more of theirs, and both are rules we did not have:
 
 ## 1. Decide dominance FIRST, by looking, never by a field
 A white site gets a **light-first** video; a dark site gets **dark-first**. Decide by looking at the hero
-(confirm with `make palette`'s luminance read). A mislabeled dominance is how the worst videos happen
+(confirm with `make study-tool X=palette`'s luminance read). A mislabeled dominance is how the worst videos happen
 (see [../MISTAKES.md](../MISTAKES.md) #1). Commit fully, don't do 50/50.
 - **Light-first:** `bg` = the site's off-white, `text` = near-black `ink`, `accent` = its vivid colour.
 - **Dark-first:** `bg` = a tinted near-black (never pure `#000`), `text` = off-white, `accent` = its vivid colour.

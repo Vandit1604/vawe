@@ -117,7 +117,7 @@ else {
 //
 // Each row is a pure function of the scene, and each carries the share of the library in the same
 // state, because "you could use depth" is advice and "44 of the 47 films with a camera move have every
-// layer at z = 0" is a fact about the house. Re-derive the shares with `make census` and the counters
+// layer at z = 0" is a fact about the house. Re-derive the shares with `make study-tool X=census` and the counters
 // beside it; they are quoted, so they go stale, and a stale share is the failure mode this repo logs
 // most often.
 const flat = (ls) => (ls || []).flatMap((L) => [L, ...flat(L.layers), ...flat(L.children)]);

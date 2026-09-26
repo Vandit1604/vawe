@@ -63,7 +63,7 @@ covers all three: here's where each lives.
 > arsenal in the order you actually use it. It's the front-to-back companion to the reference docs below.
 
 Every design decision must trace to the **brand's real site**, not your defaults. Colours by eyedrop
-(`make palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because
+(`make study-tool X=palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because
 their sites differ, not because a preset changed. Recurring failures: [`MISTAKES.md`](MISTAKES.md).
 
 ## Per-brand house style (remembered taste)

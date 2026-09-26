@@ -1,7 +1,7 @@
 // scripts/brand/theme-remix.mjs: the "pick a preset, remix it onto the brand" move, applied to our
 // theme system. A PRESET (directions/*.json) is a shippable design SYSTEM, dominance,
 // type roles, motion character, bg style, colour-derivation rules, with placeholder base colours. The
-// remix maps a brand's real base + accent (from `make palette`/`brandspec`, or --flags) onto the preset's
+// remix maps a brand's real base + accent (from `make study-tool X=palette`/`brandspec`, or --flags) onto the preset's
 // ROLES and DERIVES the full 15-key palette (surfaces, lines, text ladder, accent tints) so good, coherent
 // design is one command instead of hand-authoring every theme from pixels.
 //

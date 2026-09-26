@@ -204,7 +204,7 @@ make video D=…            # render one JSON → out/<name>.mp4
 make assets D=… [WRITE=1] # fill missing icons (flag/logo/card)
 make look D=… / frame D=… N=…   # storyboard / one frame
 make check GATE=validate [D=…]       # data + theme against schema.json (boot runs it too)
-make census               # every named population in films/scene, and the question each answers
+make study-tool X=census               # every named population in films/scene, and the question each answers
 make test                 # the whole test suite: tests/**/*.test.mjs + renderer's go test
 make check GATE=lint-test            # regression asserts for validate's lint/fx/ease/block rules (instant)
 make check GATE=audit [M=…]          # overlap/overflow/safe-zone/spacing  → /tmp/audit/<fmt>.png
@@ -240,7 +240,7 @@ cache it against `package-lock.json`. `CHROME_BIN` steers `allocOpts` in `render
 that path belongs to the Go renderer, which no workflow invokes.
 
 **`doc-refs` is missing from CI on purpose, and it is not a softened gate.** `films/scene/*.json` is
-gitignored, so a clone carries a fraction of the scenes a maintainer's tree holds (`make census` prints
+gitignored, so a clone carries a fraction of the scenes a maintainer's tree holds (`make study-tool X=census` prints
 both numbers, and names which population each answers, because four different counts of this directory
 are all true and mean different things). `doc-refs` resolves every
 repo path the docs cite, and on a fresh clone 20 of its 22 findings are scene files no clone will ever

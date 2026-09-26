@@ -140,7 +140,7 @@ export const DECIDERS = [
     extra: [
       'Read the RENDERED joins, not the JSON. That is the same admission test the critics are held to: what did you see that the author did not.',
       'Most joins are invisible. Earn two or three accents by meaning and make the outro the simplest one.',
-      'Run `make transitions D=<film>` FIRST: it prints every boundary\'s current transition, stated why, '
+      'Run `make study-tool X=transitions D=<film>` FIRST: it prints every boundary\'s current transition, stated why, '
         + 'and top candidates. Answer the procedure per boundary by writing `transition_why: <relationship> · '
         + '<feeling> · <invisible|expressive>` on the storyboard beat.',
     ],

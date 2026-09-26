@@ -1,23 +1,23 @@
 ---
 when: "you need a transition's REAL numbers (a reference to reproduce, or to verify our own render)"
-answers: "`make measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop"
+answers: "`make study-tool X=measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop"
 group: story
 ---
 
 # MEASURE, read a transition's real motion, in our own vocabulary
 
-## AGENT SUMMARY  `[ref: make measure]`
+## AGENT SUMMARY  `[ref: make study-tool X=measure]`
 
-- Run `make measure VIDEO=<file> FROM=<t> TO=<t>` to get a transition's real duration and nearest engine
+- Run `make study-tool X=measure VIDEO=<file> FROM=<t> TO=<t>` to get a transition's real duration and nearest engine
   preset (with residual), instead of guessing "a slide with some easing."
-- Also self-verifies your own renders: `make measure VIDEO=out/<name>.mp4 FROM=<t> TO=<t> EXPECT=<preset>`
+- Also self-verifies your own renders: `make study-tool X=measure VIDEO=out/<name>.mp4 FROM=<t> TO=<t> EXPECT=<preset>`
   checks whether what rendered matches what you authored.
 - Checkable action: residual < 0.07, trust and author the named preset; residual > 0.07, the motion is
   not one eased tween, re-author by intent (see "What it CANNOT see" below).
 
 **You will watch the reference, write "a slide with some easing", and then name a duration and a curve
 that you did not measure. That is confabulation, and it is indistinguishable from knowing.** Run `make
-measure`. `duration: 0.43s, ease: easeOutSine` is **measured, not seen**, and the tool reports the answer
+study-tool X=measure`. `duration: 0.43s, ease: easeOutSine` is **measured, not seen**, and the tool reports the answer
 as **the nearest preset the engine actually has**, not an arbitrary bezier we can't use.
 
 The second half of the same discipline: **you will read `residual > 0.07` and author the named preset
@@ -31,8 +31,8 @@ Two jobs, one tool:
   (point it at `out/<ours>.mp4` with `EXPECT=<preset>`).
 
 ```bash
-make measure VIDEO=twitter.mp4 FROM=47.55 TO=48.35            # what is the "Send" whip?
-make measure VIDEO=out/brew.mp4 FROM=9.7 TO=10.3 EXPECT=snappy # did my cut render as snappy?
+make study-tool X=measure VIDEO=twitter.mp4 FROM=47.55 TO=48.35            # what is the "Send" whip?
+make study-tool X=measure VIDEO=out/brew.mp4 FROM=9.7 TO=10.3 EXPECT=snappy # did my cut render as snappy?
 ```
 
 ## How it works (and why it's dependency-free)
@@ -95,9 +95,9 @@ a curve for motion that isn't one. That distinction is the whole point.
 ## Self-verification workflow (use this on our own renders)
 
 1. Author a transition (say `timing: "snappy"` on a cut/seam).
-2. `make video`, then `make measure VIDEO=out/<name>.mp4 FROM=<cut-0.1> TO=<cut+dur+0.1> EXPECT=snappy`.
+2. `make video`, then `make study-tool X=measure VIDEO=out/<name>.mp4 FROM=<cut-0.1> TO=<cut+dur+0.1> EXPECT=snappy`.
 3. Read the `EXPECT` line: a low residual means the render is faithful to the authored intent; a high one
    with a different `best` preset means what shipped isn't what you asked for, a real bug to chase.
 
-This closes the loop the static gates can't: `make direct`/`make check GATE=designspec-check` check *choice*; `make measure`
+This closes the loop the static gates can't: `make direct`/`make check GATE=designspec-check` check *choice*; `make study-tool X=measure`
 checks that the **rendered motion** matches the choice.

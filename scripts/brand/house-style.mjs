@@ -50,7 +50,7 @@ const body = `# House style: ${brand}
 > The persisted **Design Read** for ${brand}. The planning skill reads this FIRST so taste isn't
 > re-derived each video and every render stays on-brand. The measured block is auto-filled from
 > \`themes/${themeName}.json\` (regenerate with \`make house-style NAME=${brand}\`); the judgment
-> lines below are yours to sharpen from the site study (\`make sections\`/\`make lookbook\`).
+> lines below are yours to sharpen from the site study (\`make sections\`/\`make study-tool X=lookbook\`).
 
 ## Measured facts
 ${measured}

@@ -33,7 +33,7 @@ that ties them into a front-door you fill before writing a single layer.
 
 ## Part 1: The design-system spec (our `frame.md`)
 
-One page, authored from the brand study (`make brandspec` + `make palette`). It is normative: the storyboard
+One page, authored from the brand study (`make study-tool X=brandspec` + `make study-tool X=palette`). It is normative: the storyboard
 and every layer use ONLY these values. Fill the design-spec table in [SURFACES.md](SURFACES.md#the-design-spec)
 plus these video-scale rules, proven in practice:
 
@@ -41,7 +41,7 @@ plus these video-scale rules, proven in practice:
   The accent is *voltage*: eyebrows, numerals, one rule per frame, the CTA, **no frame lets it dominate by
   area.** ("The absent shadow is the premium signal.") Encode it in `themes/<brand>.json`.
 - **Type by role, in fixed faces.** Display / body / **mono for every numeral** ("a dollar figure in
-  anything but mono is a bug"). Author at the MEASURED weights from `make brandspec`, never a default 800.
+  anything but mono is a bug"). Author at the MEASURED weights from `make study-tool X=brandspec`, never a default 800.
 - **A negative list.** Name what this video will NOT do: no nav/footer/cursor chrome, no AI gradients/bokeh/
   glow washes, no second accent. Banned easings by name: no `back`/`bounce`/`elastic` unless the brand IS toy.
 - **A pre-render self-audit** (squint / silence / restraint / reference), copy the one in `frame.md`'s spirit.

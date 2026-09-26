@@ -12,9 +12,9 @@ primitives, reflecting the real site. The old `demo`/`brandfilm` templates were 
 ## The workflow
 
 ```bash
-make brandspec URL=https://site.com                # real font families, weights, :root tokens, WCAG contrast
+make study-tool X=brandspec URL=https://site.com                # real font families, weights, :root tokens, WCAG contrast
 make sections URL=https://site.com NAME=<brand>   # inventory every real section → sections/*.png + sections.json
-make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero pixels → dominance + swatches
+make study-tool X=palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero pixels → dominance + swatches
 # then hand-author themes/<brand>.json from those two. There is no one-shot `brandkit`; it went with the templates.
 ```
 

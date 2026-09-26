@@ -274,7 +274,7 @@ not: "the defaults this film refuses, in your own words"
   is an ERROR naming the nearest real names. Free prose is a WARNING, never silently dropped, naming
   the 3 best-ranked entries as ready `use:` lines.
     `transition_in:` IS WRITTEN `fx:<name> [timing=<t>] [dur=<s>] [dir=<left|right|up|down>] [mech=<cut|seam|sting>]`,
-  read against the same transition catalog `make transitions` lists. A hard cut with no visual
+  read against the same transition catalog `make study-tool X=transitions` lists. A hard cut with no visual
   transition is still a decision, and it is written `fx:none`, never the bare word "cut": a bare word
   does not reach the engine and is reported as prose, waiting to be built. Naming an entrance effect
   on the incoming layer itself (a blur, a wipe, a rise) belongs on `mechanism:`/`motion:`, not folded

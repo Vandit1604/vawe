@@ -46,7 +46,7 @@ const estTokensPerSheet = 1200; // ~a 1900px-wide contact sheet
 console.log(`\n  FILMSTRIP · ${VIDEO}${FROM != null ? ` [${FROM}-${TO}s]` : ''} · ${DEDUP ? 'dedup keyframes' : FPS + 'fps'} · ${files.length} frames → ${sheets.length} sheet(s)`);
 for (const s of sheets) console.log(`    ${s}`);
 console.log(`  ≈ ${(sheets.length * estTokensPerSheet / 1000).toFixed(0)}k tokens to read all sheets (vs ~${(files.length * 1.2).toFixed(0)}k reading each frame raw, ~${(2205 * 1.2 / 1000).toFixed(1)}M for every source frame).`);
-console.log(`  Read the sheets in order. For transition detail, re-run with FROM/TO + FPS=12, or crop with make measure.\n`);
+console.log(`  Read the sheets in order. For transition detail, re-run with FROM/TO + FPS=12, or crop with make study-tool X=measure.\n`);
 
 // tile a batch of frames into one sheet with ffmpeg's tile filter (concat demuxer feeds them in order)
 function buildSheetTile(batch, dir, cols, rows, outPath) {

@@ -9,7 +9,7 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: stage worktrees dev check ship regen dev-tool gen site script animatic panels beats preview storyboard-check styleframes beatsync build video render all look frame blueprints audit-test test lib-test palette brandspec lookbook sections study photos ledger ledger-add captions install-hooks assets list clean gen-image gen-clip gen-video grammar claims ref studio doctor
+.PHONY: stage worktrees dev check ship regen dev-tool gen site study-tool script animatic panels beats preview storyboard-check styleframes beatsync build video render all look frame blueprints audit-test test lib-test sections study photos ledger ledger-add captions install-hooks assets list clean gen-image gen-clip gen-video ref studio doctor
 
 # make doctor: is the checkout ready to render? Today: is gsap vendored (assets/vendor/gsap.min.js,
 # gitignored, written by the root "postinstall" script). Prints the fix command rather than failing
@@ -244,6 +244,9 @@ gen: ## [engine] the engine's asset/doc bakers, routed by name (X=<name>; bare X
 site: ## [site] what vawe.dev publishes, routed by name (X=<name>; bare X lists them)
 	@node harness/lib/site-tool.mjs "$(X)"
 
+study-tool: ## [study] reference-material tools read less than make study/sections/ref, routed by name (X=<name>; bare X lists them)
+	@node harness/lib/study-tool.mjs "$(X)"
+
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
 # need real pixels, so it is the one command that says a film is actually done.
@@ -337,28 +340,10 @@ frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n> or N=b<bea
 	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing films/scene/sample.json"
 	node harness/author/preview.mjs scene $(N) $(if $(D),--data $(D))
 
-# make grammar [N=<name>]: what we have learned about how good films are BUILT, from the committed
-# grammar/ store that `make study` writes. No argument prints every reference as one comparison table
-# and names the ones nobody has read.
-# DOC=1 regenerates engine-doctrine/CRAFT/GRAMMAR.md, the cross-film page, from the same store.
-grammar: ## [study] what we have learned about how good films are BUILT, from the committed grammar/ store that `make
-	node harness/author/grammar.mjs $(if $(DOC),--doc,$(N))
-
-# make claims: check this repo's own doctrine against the films it claims to describe. Every
-# quantitative claim in CRAFT/CLAUDE.md is a test over grammar/*.json; the verdict strengthens or
-# reverses as references are studied.
-claims: ## [study] check this repo's own doctrine against the films it claims to describe.
-	node harness/author/claims.mjs
-
 # make ref URL=<pin or video url> [NAME=x]: fetch a reference film and study it in one step. The file
 # lands in refs/ (gitignored); the committed artefact is grammar/<name>.json.
 ref: ## [study] fetch a reference film and study it in one step.
 	node harness/media/ref.mjs $(URL) $(if $(NAME),--name $(NAME))
-
-# make census: every named population in films/scene, with the question each one answers.
-# Quote a NAME in prose and print this to get the number (harness/lib/census.mjs owns the definitions).
-census: ## [study] every named population in films/scene, with the question each one answers.
-	node harness/lib/census.mjs
 
 # make assets D=films/x/topic.json [WRITE=1], fill missing icons: country→flag, brand→logo,
 # else a generated topic card. Dry-run without WRITE.
@@ -383,14 +368,6 @@ gate-test: ## [maintenance] MUTATION-test the gates: feed each one a fixture bui
 watermark: ## [ship] bake the draft watermark sheet.
 	node generators/media/watermark.mjs
 
-# make transitions [BASIC=1], print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition
-# across all four mechanisms (anim/cut/sting/seam), grouped, basics marked. Decision theory: engine-doctrine/CRAFT/TRANSITIONS.md.
-# make transitions D=<film.json>, run the DECISION PROCEDURE per boundary of that film's storyboard: the
-# current transition_in/recipe seam or "nothing", the stated transition_why or "unreasoned", and the top
-# candidates for the relationship (engine-doctrine/CRAFT/TRANSITIONS.md).
-transitions: ## [study] print THE TRANSITION DATABASE (core/transitions/catalog.js): every transition across all four
-	@node quality/gates/transitions-catalog.mjs $(D) $(if $(JSON),--json,)
-
 # make transition-preview FX=<name> [MECH=seam|cut|sting|anim] [DIR=left|right|up|down] [TIMING=smooth|linear] [DUR=0.7]
 # SEE one transition before authoring: renders a canned two-beat scene (blue A → orange B) through the
 # transition and lays the window out as a labelled filmstrip → /tmp/transition-preview.png. The labels are
@@ -398,14 +375,6 @@ transitions: ## [study] print THE TRANSITION DATABASE (core/transitions/catalog.
 # from the name when unambiguous (default seam). Inventory: `make transitions`. Theory: engine-doctrine/CRAFT/TRANSITIONS.md.
 transition-preview: ## [dev] renders a canned two-beat scene (blue A → orange B) through the transition and lays the window out
 	node harness/author/transition-preview.mjs
-
-# make measure VIDEO=<file> FROM=<s> TO=<s> [EXPECT=<preset>], MEASURE a transition's real motion and
-# name it in OUR vocabulary: per-frame tracks the moving element and fits the progress curve against the
-# engine's own easings (core/motion/motion.js + core/cuts.js), reporting the nearest preset + residual. Point it
-# at a reference video ("what transition is this?") or at our own render + EXPECT=<preset> ("did my cut
-# render as the curve I authored?"). Dependency-free (ffmpeg + Node). Notes/limits: engine-doctrine/CRAFT/MEASURE.md.
-measure: ## [study] MEASURE a transition's real motion and name it in OUR vocabulary: per-frame tracks the moving
-	node harness/author/measure-motion.mjs $(VIDEO) $(FROM) $(TO) $(EXPECT)
 
 # make test: the whole test suite. Every *.test.mjs under tests/, organised by domain (engine,
 # timeline, motion, layers, type, registry, theme, validate, hooks, authoring, gates, lints, ...),
@@ -416,25 +385,6 @@ test: ## [maintenance] the whole test suite: tests/**/*.test.mjs (node --test) +
 
 # lib-test: kept as an alias, the pre-push hook and CI used to call it by this name.
 lib-test: test ## [maintenance] alias for `make test`
-
-# make lookbook URL=https://site.com NAME=brand, screenshot the site (full page + viewports) for
-# art direction study: derive the video's design language from the brand's own look, no canned styles.
-lookbook: ## [study] screenshot the site (full page + viewports) for art direction study: derive the video's design
-	node scripts/brand/lookbook.mjs $(URL) $(NAME)
-
-# make palette IMG=assets/brands/<brand>/sections/01-*.png: EYEDROP the real hero pixels →
-# dominant colours + LIGHT/DARK dominance (grounded, not a heuristic) + a swatch card to /tmp/palette.png.
-# Author themes/<brand>.json from THIS, then verify the video with `make beats VS=<brand>`.
-palette: ## [study] EYEDROP the real hero pixels → dominant colours + LIGHT/DARK dominance (grounded, not a heuristic)
-	node scripts/brand/palette.mjs $(IMG)
-
-# make brandspec URL=https://site.com, READ the site's real CSS + computed styles (don't guess): the
-# 1-3 real font families with the WEIGHTS actually used (→ primary/secondary/accent), declared :root
-# design tokens (--color-*/--font-*), key colours with WCAG contrast, radius. Run this BEFORE authoring
-# a theme: the accurate source for weight/accent that eyedrop (pixels) can't give (it read creed's
-# accent as the sky-photo blue; the CSS says #2563eb). Pair with `make palette` for dominance.
-brandspec: ## [study] READ the site's real CSS + computed styles (don't guess): the 1-3 real font families with the
-	node scripts/brand/brandspec.mjs $(URL)
 
 sections: ## [study] capture a website's real sections into assets/brands/<brand>
 	node scripts/brand/sections.mjs $(URL) $(NAME) $(if $(VIEWPORT),--viewport $(VIEWPORT))
@@ -451,12 +401,6 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # grammar, never ship the frames). engine-doctrine/CRAFT/REFERENCE-STUDY.md
 study: ## [study] the film-side twin of `make sections`. STRIPS=<n> adds a contiguous motion strip for the n busiest shots.
 	node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS))
-
-# make mine: cluster every studied grammar/*.json shot by device into named shapes, each with the
-# grammar + shot index that backs it, → grammar/_mined-shapes.json. The receipt beats-mined.mjs's
-# `sources:` lines are read from. engine-doctrine/CRAFT/BLUEPRINTS.md "Mined blueprints".
-mine: ## [study] cluster every studied grammar/*.json shot by device into named shapes, each with the grammar + shot
-	node harness/author/mine.mjs $(if $(JSON),--json,)
 
 # make preview HTML=path/frag.html [THEME=linear] [BG=#hex] [W=1400] [SERVE=1], render a single
 # hand-written fragment (or a captured component JSON) STANDALONE on the theme bg → /tmp/preview.png.

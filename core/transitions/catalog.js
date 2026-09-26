@@ -12,7 +12,7 @@
 //   a texture/energy accent painted over a cut → STING.
 //
 // This file is the INVENTORY (what exists); engine-doctrine/CRAFT/TRANSITIONS.md is the DECISION layer (what to
-// pick and why). `make transitions` prints this catalog.
+// pick and why). `make study-tool X=transitions` prints this catalog.
 
 import { ANIM_NAMES } from '../timeline/clips.js';
 import { PRESENTATIONS } from '../cuts/index.js';
@@ -84,7 +84,7 @@ function entry(name, mechanism) {
 }
 
 // THE CATALOG: derived from the live registries, so adding an effect to any registry auto-lists it.
-// `none` stays OUT of the anim listing's cut row in `make transitions` (it is the absence of an
+// `none` stays OUT of the anim listing's cut row in `make study-tool X=transitions` (it is the absence of an
 // effect, not one to browse), but it is still a real PRESENTATIONS entry, and `boundaryMechanism`
 // below routes it to `cut` explicitly: a scene using `transitions[]` must be able to say "hard cut,
 // no visual transition" the same way a raw `cuts[].style:"none"` always could.

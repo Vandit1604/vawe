@@ -1,7 +1,7 @@
 // quality/gates/transitions-catalog.mjs: print THE TRANSITION DATABASE (core/transitions.js).
-//   make transitions            → the full catalog, grouped by mechanism, basics marked ★
-//   make transitions BASIC=1    → just the basics (the fundamentals every tool has)
-//   make transitions D=<film.json> → per-boundary: current transition/seam, stated why, top candidates
+//   make study-tool X=transitions            → the full catalog, grouped by mechanism, basics marked ★
+//   make study-tool X=transitions BASIC=1    → just the basics (the fundamentals every tool has)
+//   make study-tool X=transitions D=<film.json> → per-boundary: current transition/seam, stated why, top candidates
 // The catalog is DERIVED from the four source registries, so this is always in sync, its only failure
 // mode is a name the family classifier didn't recognise (family "other"), which it reports at the end.
 import fs from 'node:fs';
@@ -18,7 +18,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // A report, never a rule: it never blocks, so every finding here is a WARN and the exit code stays 0.
 const f = gateFindings();
 
-// make transitions D=<film.json>: PER-BOUNDARY, the same procedure `make critics` briefs the transition
+// make study-tool X=transitions D=<film.json>: PER-BOUNDARY, the same procedure `make critics` briefs the transition
 // decider to run first (engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-
 // seam). Read here, never re-derived: the exact fields storyboard-check.mjs already checks.
 const filmArg = process.argv.slice(2).find((a) => !a.startsWith('--') && a.endsWith('.json'));

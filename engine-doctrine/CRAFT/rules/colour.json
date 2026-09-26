@@ -6,7 +6,7 @@
     "applies": "always",
     "check": "off-colour",
     "adapt": null,
-    "brief": "Colours come only from the brand: eyedrop the real pixels (make palette), never invent",
+    "brief": "Colours come only from the brand: eyedrop the real pixels (make study-tool X=palette), never invent",
     "doc": "engine-doctrine/CRAFT/COLOR.md"
   },
   {

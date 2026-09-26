@@ -68,7 +68,7 @@ Building first is what stops the "tweak coords blind, re-render, repeat" spiral 
 ## The design spec (lock a look in one page)
 
 Before authoring a bespoke surface, fill this: it is the frame's contract, and every block/fragment obeys it.
-The values come from the brand study ([`../DESIGN-DATABASE.md`], `make brandspec`).
+The values come from the brand study ([`../DESIGN-DATABASE.md`], `make study-tool X=brandspec`).
 
 | Token | Decide | Example |
 |---|---|---|
