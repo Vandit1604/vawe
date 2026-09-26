@@ -15,6 +15,42 @@
 // math on the JSON, before a single frame renders.
 import { bloomFilter, chromaSplitFilter, resolveFilter } from '../looks/filters.js';
 import { lightfield } from '../lightfield/index.js';
+import { defineRegistry } from '../registry/registry.js';
+
+// FINISH_REGISTRY, so `make arsenal Q="cinematic look"` (or "bloom", "film grain", "depth of field")
+// surfaces this block. Before this registry existed a film agent had no way to find `finish` short of
+// reading this file: it is a scene-level dial, not a layer type or a bg preset, so it lived in none of
+// the vocabularies arsenal already scans. engine-doctrine/MISTAKES.md.
+const FINISH_ENTRIES = { light: true, bloom: true, grade: true, aberration: true, vignette: true, grain: true, dof: true };
+const FINISH_AKA = {
+  light: ['large soft light', 'ambient key light', 'soft light source', 'premium launch glow'],
+  bloom: ['glow', 'highlight bloom', 'blown out highlights', 'halo'],
+  grade: ['colour grade', 'cinematic grade', 'film look', 'cinematic look'],
+  aberration: ['chromatic aberration', 'lens fringing', 'colour split', 'rgb split'],
+  vignette: ['dark corners', 'darkened edges', 'frame edge falloff'],
+  grain: ['film grain', 'texture noise', 'analog grain', 'grainy texture'],
+  dof: ['depth of field', 'focus rack', 'background blur', 'bokeh'],
+};
+export const FINISH_REGISTRY = defineRegistry('finish key', FINISH_ENTRIES, {
+  slot: 'finish',
+  aka: FINISH_AKA,
+  blurbs: {
+    light: 'a large soft key light dropped in as an html layer (core/lightfield), the premium launch-film source',
+    bloom: 'blurs the frame 16px, lifts brightness 9% and screens the halo back over the sharp original',
+    grade: 'a named colour grade (core/looks/filters.js) laid over the whole frame',
+    aberration: 'a chromatic split in px over the whole frame, the lens-fringing finish',
+    vignette: 'a full-frame vignette rect, amount 0..1 plus an optional colour',
+    grain: 'a strength override on the existing bg grain toggle, applied to every window that already carries one',
+    dof: "a blur baked from the camera's own keyframed focus against each layer's plane z, no new authoring vocabulary needed",
+  },
+  catalog: {
+    title: 'Scene finish keys', tag: 'finish', intro: 'data.finish is the ONE dial for the cinematic grade a '
+      + 'premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, '
+      + 'depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.',
+    usage: (n) => ({ finish: { [n]: true } }),
+    noPreview: 'a scene-level pass, not a per-layer effect: render the film to see it',
+  },
+});
 
 const FULL = (type, extra, W, H, total) =>
   ({ type, w: W, h: H, start: 0, duration: total, acrossBeats: true, ...extra });
