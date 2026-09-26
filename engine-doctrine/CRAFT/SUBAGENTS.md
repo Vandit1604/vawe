@@ -112,7 +112,7 @@ assembler) and hands it to a fresh Agent call that reports findings only, never 
 band, no placeholder copy); the plan judge answers what an exit code cannot: one through-line, beats
 that earn their seconds, a spectacle that is actually loudest, an eye path that holds, motion that
 varies. `make stage` may require the plan judge HAS RUN before a film leaves plan, never that it
-passed: findings are advisory, and the owner still signs the plan off at approval (stage 4). A verdict
+passed: findings are advisory, and the owner still reads the draft render and redirects. A verdict
 is recorded against a hash of the storyboard it read (`harness/lib/receipt.mjs`); a storyboard edited
 since is refused as stale rather than shown as current (`make plan-judge D=<file> SHOW=1`).
 
@@ -267,7 +267,6 @@ there is one owner of the text, not a copy in every brief).
 - Run git only as plain `git <cmd>` from your own worktree, never `git -C`, `command git`, or `/usr/bin/git`, because those are exactly the paths the worktree guard exists to refuse.
 - If a hook denies a command, stop and quote the denial rather than working around it, because going around a guard is how a killed server or a silenced gate happened before.
 - Never edit `quality/baselines/*`, because a ratchet must only fall, never be pushed back up to hide a finding.
-- Never write an `approved:` line, and never drop one that is already there, because only the user's own signature counts as approval.
 - Start any server on your own port, and stop it by PID, because stopping by name kills whatever else is listening on that name, including another session's.
 - Work inside a render budget stated in the brief, and when it runs out, stop and report rather than rendering again, because renders are the most expensive step and a budget only holds if it is obeyed.
 - Run `make ship`/`make dev` and every other long command in the foreground and wait for it yourself; never end your turn saying you are waiting for one to finish, because nothing wakes a stalled agent and the task then sits untouched until a human notices.

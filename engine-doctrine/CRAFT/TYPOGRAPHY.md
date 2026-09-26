@@ -49,7 +49,7 @@ source before you argue with any of it.
   Black, DM Serif Display, Space Grotesk, Fredoka. **Six of those names are bundled in `core/tokens.css`:
   Inter, Bricolage Grotesque, Instrument Serif, Fraunces, Archivo and Space Grotesk.** Being bundled is
   not an argument for using one. Instrument Serif was picked here for a real film and rejected by the
-  person who asked for it as *"a saturated AI-default face"* ([APPROVAL-STOPS.md](APPROVAL-STOPS.md)).
+  person who asked for it as *"a saturated AI-default face"* ([REVIEW-STOPS.md](REVIEW-STOPS.md)).
 - **Reject your first instinct.** *"The first font that feels right is usually your training-data default
   for that register. If you picked it last time too, find something else."*
 - **Don't pair two sans-serifs.** *"You do this constantly, one for headlines, one for body. Cross the

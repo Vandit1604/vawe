@@ -18,7 +18,7 @@ group: crosscutting
   `vawe-video-planning`'s interview, or when unsure which route file to open.
 - This table decides the DELIVERABLE. It does not replace the planning contract: `vawe-video-planning`
   (or `AUTHORING-WALKTHROUGH.md` by hand) still runs the brief -> lock sheet -> JSON chain for whichever
-  deliverable this table names, and nothing renders before that lock sheet is approved.
+  deliverable this table names, and nothing renders before that lock sheet is agreed.
 
 ## Why a table, not one long doctrine file
 
