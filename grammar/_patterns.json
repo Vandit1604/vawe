@@ -1,5 +1,5 @@
 {
- "_": "Devices seen in MORE THAN ONE film. A pattern is authored, not measured: it is what a person noticed after reading every sheet. Each cites the films it was seen in, so a reader can check it and so its weight is visible. One film is an idea; three is a technique. Rendered into engine-doctrine/CRAFT/GRAMMAR.md by `make grammar DOC=1`.",
+ "_": "Devices seen in MORE THAN ONE film. A pattern is authored, not measured: it is what a person noticed after reading every sheet. Each cites the films it was seen in, so a reader can check it and so its weight is visible. One film is an idea; three is a technique. Rendered into engine-doctrine/CRAFT/GRAMMAR.md by `make study-tool X=grammar DOC=1`.",
  "patterns": [
   {
    "name": "A beat is a BURST then a REST, never a constant rate",

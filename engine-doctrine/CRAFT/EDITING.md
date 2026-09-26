@@ -51,7 +51,7 @@ workspace settings (a teammate opening one file without the repo's `.vscode` fol
 `core/validate/validate.mjs` only checks fields it knows about and ignores the rest (`module`, `audio`,
 `theme`, and now `$schema` all pass through unexamined), so this key is safe to add: it does not
 change what a scene validates against, or what the engine reads at render time. Verified: `make
-validate D=films/scene/sample.json` and `make check GATE=site-counts` both stay green with `$schema` present.
+check GATE=validate D=films/scene/sample.json` and `make check GATE=site-counts` both stay green with `$schema` present.
 
 ## The gap: `schema.json` is not JSON Schema
 

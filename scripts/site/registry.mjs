@@ -1,6 +1,6 @@
-// scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes blocks/catalog/
+// scripts/site/registry.mjs: GENERATED, never hand-edited. `make site X=registry` writes blocks/catalog/
 // (one file per block, beside the factories they describe) and registry/ (the index plus every
-// non-block item). `make registry CHECK=1` fails if what is on disk differs from what the sources
+// non-block item). `make site X=registry CHECK=1` fails if what is on disk differs from what the sources
 // say. Edit a row in blocks/catalog.mjs and re-run; editing either output by hand is undone by the
 // next run.
 //
@@ -12,8 +12,8 @@
 // SOURCES (one each. Nothing here is re-derived and nothing is hand-typed):
 //   blocks/catalog.mjs          name · family · blurb · props · overlay      (the block manifest)
 //   core/generators/generators.js          GENERATORS                                     (the playground registry)
-//   site/lib/block-frames.json  the measured ink rect of each block           (make blocks-scenes)
-//   site/public/assets/blocks/  a standalone scene + poster per block         (make blocks-scenes)
+//   site/lib/block-frames.json  the measured ink rect of each block           (make site X=blocks-scenes)
+//   site/public/assets/blocks/  a standalone scene + poster per block         (make site X=blocks-scenes)
 //
 // ── DECISION 1: what `type` and `target` mean here ──
 // A vawe block is not a file. It is a named factory in blocks/index.mjs, reached from scene JSON as
@@ -46,7 +46,7 @@
 //
 // -- DECISION 3: a generator is a THIRD kind of item, and its install differs by `produces` --
 // A generator is not a block and not a beat. Nothing in a scene ever NAMES one: the engine has no
-// {"type":"generator"} layer, so there is no factory reference to paste and no `make expand` step.
+// {"type":"generator"} layer, so there is no factory reference to paste and no `make dev-tool X=expand` step.
 // What a generator gives you is its OUTPUT, and the output has two shapes, which the entry declares:
 //
 //   produces:'layers'  render(options) returns concrete scene layers (a shader layer, an html card).
@@ -163,7 +163,7 @@ function blockItem(entry) {
       requires: 'vawe engine (blocks/index.mjs); expands automatically at load, no separate step',
       layer,
       // No requiredProps for a block: the example layer is COMPLETE. Every one of these is rendered
-      // and screenshotted by make blocks-scenes, so the fragment is proven, not merely plausible.
+      // and screenshotted by make site X=blocks-scenes, so the fragment is proven, not merely plausible.
       // `props` is everything the family factory accepts, in signature order, for customising it.
       props: [...spec.required, ...spec.optional],
     },
@@ -260,7 +260,7 @@ if (CHECK) {
   }
   for (const p of have) if (!want.has(p)) bad.push(`orphan  ${label(p)}`);
   if (bad.length) {
-    console.error(`registry is STALE (${bad.length} file(s)), run \`make registry\`:`);
+    console.error(`registry is STALE (${bad.length} file(s)), run \`make site X=registry\`:`);
     for (const b of bad.slice(0, 20)) console.error('  ' + b);
     process.exit(1);
   }

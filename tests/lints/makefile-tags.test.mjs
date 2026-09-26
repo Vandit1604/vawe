@@ -1,5 +1,5 @@
 // Every Makefile target must carry a `## [phase]` tag, or `make list` silently drops it and nobody
-// notices. Moved out of the old `make lib-test` target (harness/lib/make-help.mjs --check).
+// notices. Moved out of the old `make test` target (harness/lib/make-help.mjs --check).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';

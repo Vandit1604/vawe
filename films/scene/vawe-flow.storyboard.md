@@ -19,7 +19,7 @@ craft:
     html-fragments: "Every move comes from the engine: keyframe tracks for position, rotation, depth and blur, `typing` for the prompt, `vars` for the colour flash. No CSS animation or transition."
     layout: "Asymmetric and off-centre while things move; the window sits tilted and low, the taglines start right of centre and travel left, the mark alone is centred at the end."
     motion-craft: "Hand-keyed with real deceleration: arrivals ease out, exits accelerate past 480 px/s so the automatic motion blur smears them, and the camera drifts continuously underneath."
-    show-dont-tell: "The claim that vawe renders what you write is shown as a request being typed and sent, then real stills of films vawe rendered. The determinism claim is stated once, briefly, and backed by `make probe`."
+    show-dont-tell: "The claim that vawe renders what you write is shown as a request being typed and sent, then real stills of films vawe rendered. The determinism claim is stated once, briefly, and backed by `make check GATE=probe`."
     sound: "Silence is the decision, as in the reference. The film is carried entirely by motion and colour."
     typography: "One face, the vawe theme's sans. Interface type at UI size inside the windows, taglines at display size, the mark at its own weight. Size is the only variable."
 ---

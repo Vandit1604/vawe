@@ -68,7 +68,7 @@ export async function preloadCobe(data) {
 // three.js is LAZY and AWAITED. Lazy because it is 635KB and most scenes never touch it; awaited
 // because a `three` layer builds synchronously and would otherwise race the module load, a layer that
 // renders empty on the workers that got there first is a purity break, not a glitch. Extruded type
-// needs glyph outlines (make glyphs); a missing typeface is a LOUD failure in three-fx.js, not a swap.
+// needs glyph outlines (make gen X=glyphs); a missing typeface is a LOUD failure in three-fx.js, not a swap.
 export async function preloadThree(data) {
   if (!JSON.stringify(data).includes('"three"')) return;
   try { window.THREE = await import('/assets/vendor/three.module.min.js'); }
@@ -101,7 +101,7 @@ export async function preloadThree(data) {
   walkData(data, (o) => { if (o && typeof o === 'object' && o.three === 'extrudeText' && typeof o.font === 'string') fonts.add(o.font); });
   for (const f of fonts) {
     try { window.__typefaces[f] = await fetchJson(`/assets/fonts/3d/${f}.typeface.json`, 'typeface'); }
-    catch { /* left absent on purpose: three-fx.js throws with the `make glyphs` instruction */ }
+    catch { /* left absent on purpose: three-fx.js throws with the `make gen X=glyphs` instruction */ }
   }
 }
 
@@ -241,7 +241,7 @@ export async function preloadRansomSprites(data) {
   const base = '/assets/ransom/';
   let manifest;
   try { manifest = await fetchJson(base + 'manifest.json', 'ransom sprites'); }
-  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable, run `make ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/', { cause: e }); }
+  catch (e) { throw new Error('ransom sprites: /assets/ransom/manifest.json is missing or unreadable, run `make gen X=ransom-sprites` after unzipping a cut-out letter pack into assets/ransom-src/', { cause: e }); }
   await Promise.all(Object.values(manifest).flat().map((v) => decodeImage(base + v.file).catch(() => {})));
   window.__ransomSprites = { base, manifest };
 }

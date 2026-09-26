@@ -13,9 +13,9 @@ codes: effect-soup
   rule below is a corollary; when two rules collide, this one wins.
 - Vary ease, duration, entrance direction and stagger per beat. Never repeat one default (one ease,
   one 0.4-0.5s duration, one entrance direction) across a whole film.
-- Enforced by: `codes: effect-soup`, plus the backstop table at the end (`make validate`/`critique`,
-  `designspec-check`, `make audit`, `make knobs-audit`, `make motion`, `make ledger`, judgment via
-  `make direct`, `make judge`).
+- Enforced by: `codes: effect-soup`, plus the backstop table at the end (`make check GATE=validate`/`critique`,
+  `designspec-check`, `make check GATE=audit`, `make check GATE=knobs-audit`, `make check GATE=motion`, `make dev-tool X=ledger`, judgment via
+  `make dev-tool X=direct`, `make judge`).
 - Checkable action: name the beat's motion in one clause. Does it need "and" to join two unrelated
   verbs (a second effect on the same beat)?
 
@@ -68,7 +68,7 @@ the part you skip.
 - **Subtle reads as static at 30fps.** *"Err toward more movement than feels safe."* Measured here: two
   films authored as improvements on a third both came out SLOWER than the film they criticised, at 0.95
   and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #336).
-  `make pace-check` fails below 1.0.
+  A retired gate used to fail below 1.0 events/second; the floor is doctrine now (`engine-doctrine/CRAFT/DIRECTION.md`).
 
 **One accusation this repo has to add for itself, because their engine has no counter layer:** you will
 put a spring or an overshoot ease on a `count`. Don't. `core/layers/count.js` runs the value through
@@ -135,7 +135,7 @@ this engine actually shipped (`engine-doctrine/MISTAKES.md`).
   than none.
 - **Centered everything**: one size, everything centred, Inter, a blue→purple gradient. The AI-slop
   signature. → Asymmetry over centred; one huge hero + one tiny caption (scale contrast); a committed
-  non-generic face; one accent hue. (`make designspec-check` catches the mechanical tells.)
+  non-generic face; one accent hue. (`make check GATE=designspec-check` catches the mechanical tells.)
 - **The dead final frame**: the CTA fades out, or the last held word sits over an emptied plate. → End
   on a held frame, `exitDur:0`. Never fade the payoff.
 
@@ -196,13 +196,13 @@ The split: prose carries the taste; a gate backstops only the source-decidable s
 
 | Taste rule | Backstop |
 |---|---|
-| No em-dash; unbacked number; claim-not-shown | `make validate` / `make critique` |
-| Centered / overused-font / gradient tells | `make designspec-check` |
-| Invisible-at-size text; dead-final-frame; overlap | `make audit` |
-| A dial set on a preset that ignores it | `make knobs-audit` |
-| Monotone timing; payoff doesn't settle | `make motion` |
-| Design repeats a shipped one | `make ledger` |
-| Effect soup / no continuity / mixed cut family | **judgment** (`make direct`) |
+| No em-dash; unbacked number; claim-not-shown | `make check GATE=validate` / `make check GATE=critique` |
+| Centered / overused-font / gradient tells | `make check GATE=designspec-check` |
+| Invisible-at-size text; dead-final-frame; overlap | `make check GATE=audit` |
+| A dial set on a preset that ignores it | `make check GATE=knobs-audit` |
+| Monotone timing; payoff doesn't settle | `make check GATE=motion` |
+| Design repeats a shipped one | `make dev-tool X=ledger` |
+| Effect soup / no continuity / mixed cut family | **judgment** (`make dev-tool X=direct`) |
 | Does it FEEL right | **judgment** (`make judge` vision pass) |
 
 The last two rows are why a human verdict per beat still matters. A gate proves it did not break a

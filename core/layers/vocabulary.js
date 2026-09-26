@@ -71,7 +71,7 @@ const isAnnotation = (k) => k.startsWith('_');
 // UNKNOWN, NOT INERT. A prop nothing declares is refused. A prop declared behind a guard the layer
 // never sets (`preset` without `split`) is NOT refused here: it is a real prop that this layer will
 // not reach, the fix is a missing enabler rather than a typo, and 22 of the 23 findings in the shipped
-// library are of that shape. `make layer-props` reports those; a build must not die on them.
+// library are of that shape. `make check GATE=layer-props` reports those; a build must not die on them.
 export function checkLayer(L, typeProps, where) {
   for (const k of Object.keys(L)) {
     if (isAnnotation(k) || typeProps[k] || SHARED_PROPS[k]) continue;

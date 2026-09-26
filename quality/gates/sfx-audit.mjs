@@ -17,9 +17,9 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 import { population } from '../../harness/lib/census.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
-// CUES is the owner of which sounds exist. assets/sfx/*.wav is BAKED from it by `make audio`
+// CUES is the owner of which sounds exist. assets/sfx/*.wav is BAKED from it by `make gen X=audio`
 // (core/audio/kit.mjs:17), so a .wav whose name is not a cue is a leftover from an earlier bake.
-// ROLES, not CUES. CUES is the 13 synth voicings; ROLES is the 28 names `make audio` actually WRITES
+// ROLES, not CUES. CUES is the 13 synth voicings; ROLES is the 28 names `make gen X=audio` actually WRITES
 // a file for, 15 of which are deliberate aliases onto a surviving voicing so a shipped scene that
 // still names a retired cue keeps baking (generators/media/audio-bake.mjs's own comment says so).
 // Diffing against CUES called all 15 orphans and was wrong.
@@ -67,7 +67,7 @@ function measure(file) {
   return { file: frames / rate, audible: (last + 1) / rate };
 }
 
-if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make audio`). Nothing to check'); f.emit(); process.exit(0); }
+if (!fs.existsSync(SFX)) { console.log('~ assets/sfx is absent (gitignored, self-heals via `make gen X=audio`). Nothing to check'); f.emit(); process.exit(0); }
 // assets/sfx is entirely gitignored, so a checkout without it swept zero cues and said nothing was
 // wrong with them. population() states N and refuses a checkout that should hold more.
 const files = population('sfx audit', { dir: 'assets/sfx', ext: '.wav', quiet: true }).names;
@@ -102,15 +102,15 @@ console.log('');
 if (orphans.length) {
   console.log(`   ~ ${orphans.length} file(s) with no role in the bake, not graded: ${orphans.join(', ')}`);
   f.note('sfx-orphan', `${orphans.length} baked sound(s) have no role in generators/media/audio-bake.mjs and nothing writes them: `
-    + `${orphans.join(', ')}. Re-bake with \`make audio\` to clear them, or add the cue back.`);
+    + `${orphans.join(', ')}. Re-bake with \`make gen X=audio\` to clear them, or add the cue back.`);
   console.log('');
 }
 if (!bad.length) { console.log('✓ every sound effect is the shape its role claims'); f.emit(); process.exit(0); }
 for (const b of bad) {
   console.log(`  ✗ ${b.name}: ${b.why}`);
   f.fail('sfx-shape', `${b.name}: ${b.why}`, { at: `assets/sfx/${b.name}.wav`,
-    fix: 're-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node generators/media/audio-bake.mjs --force`)' });
+    fix: 're-fetch it (`make gen X=audio` with `--force`) or bake the synthesized voicing (`node generators/media/audio-bake.mjs --force`)' });
 }
-console.log('\nRe-fetch it (`make audio` with `--force`) or bake the synthesized voicing (`node generators/media/audio-bake.mjs --force`).');
+console.log('\nRe-fetch it (`make gen X=audio` with `--force`) or bake the synthesized voicing (`node generators/media/audio-bake.mjs --force`).');
 f.emit();
 process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);

@@ -12,6 +12,7 @@ import { isLightBg, parseColor } from '../color/engine.js';
 // The frame authority. One builder, so a kit that has to derive a frame derives the SAME one boot did.
 import { frameOf } from '../layout/safe.js';
 import { resolveGroupClock } from '../timeline/group-clock.js';
+import { defineRegistry } from '../registry/registry.js';
 
 // REFUSE A VALUE THE BROWSER WOULD DROP, at every named style write, not only the `css` catch-all
 // (applyCss below already does this for `L.css`; this is the same check, same mechanism, extended to
@@ -115,6 +116,29 @@ export const PROPS = {
   // tracks run on this cycle instead of the group's outer start/duration.
   clock: {},
 };
+
+// SURFACE_REGISTRY: `glass`, the universal per-layer decoration above, named nowhere `make arsenal
+// Q="…"` reads. A film agent building a recreation needing a frosted panel had no way to be told
+// `glass` exists short of reading this file: it is not a layer type, a bg preset or a named `filter`
+// look, so it sat in none of the vocabularies arsenal already scanned. engine-doctrine/MISTAKES.md #364.
+const SURFACE_ENTRIES = { glass: true };
+const SURFACE_AKA = {
+  glass: ['glass panels', 'frosted glass', 'glassmorphism', 'frosted panel', 'backdrop blur panel'],
+};
+export const SURFACE_REGISTRY = defineRegistry('surface look', SURFACE_ENTRIES, {
+  slot: 'layers[]',
+  aka: SURFACE_AKA,
+  blurbs: {
+    glass: 'backdrop-filter blur and saturate on the layer itself, a frosted pane; `glass: "refract"` bends the picture through it instead of blurring, for real glass',
+  },
+  catalog: {
+    title: 'Universal surface decoration', tag: 'layer', intro: 'A `glass` prop any layer can carry '
+      + '(core/layers/util.js), independent of its type: a frosted backdrop-filter pane, or a true '
+      + 'refraction when named `"refract"`.',
+    usage: () => ({ layers: [{ glass: true }] }),
+    noPreview: 'a per-layer decoration, not its own scene: render a layer carrying it to see it',
+  },
+});
 
 // crtSpec(o) -> { filter, background }. Pure, and exported so the arithmetic is testable without a
 // DOM, the same reason core/layers/glow.js exports presetSpec.
@@ -247,6 +271,15 @@ function applyChipPaint(el, L) {
   }
 }
 
+// The glow colour and its two radii (a tight core, a wide bloom), shared by the box path below and by
+// the pure-light path (applyGlyphGlow here, svg.js's own drop-shadow). One formula, so a text layer's
+// glow and a shape layer's glow read as the same light at the same `intensity`.
+export function glowRadii(L) {
+  const spread = L.intensity != null ? Math.max(0.05, Math.min(1, L.intensity)) : 0.25;
+  const color = L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, spread);
+  return { near: Math.round(spread * 48 + 8), far: 64, color };
+}
+
 // `glow` composes with elevation/shadow: elevation (or `shadow`) writes the depth stack, glow
 // appends the bloom, rather than only being reachable from inside the elevation branch.
 function chipShadowStack(L) {
@@ -264,11 +297,27 @@ function chipShadowStack(L) {
     if (e >= 4) stack.push('0 0 64px rgba(0,0,0,0.4)');
   } else if (L.shadow) stack.push('0 24px 70px rgba(20,20,25,0.12)');
   if (L.glow) {
-    const spread = L.intensity != null ? Math.max(0.05, Math.min(1, L.intensity)) : 0.25;
-    stack.push(`0 0 64px ${L.glow === true ? 'var(--accent-glow)' : hexA(L.glow, spread)}`);
+    const { far, color } = glowRadii(L);
+    stack.push(`0 0 ${far}px ${color}`);
   }
   return stack;
 }
+
+// A glow with nothing ELSE painting a box is a LIGHT, not a chip: on a text layer it must hug the
+// glyphs (text-shadow follows the glyph alpha) rather than the tight rectangle box-shadow draws
+// around the whole line, which is the "dark pill behind the words" bug (a headline reading
+// "Introducing" glowed as a box, not as light). text-shadow is a property nothing else on this layer
+// writes, so it is set in full here and never read back, same reasoning as core/fx/shadow.js's
+// box-shadow.
+function applyGlyphGlow(el, L) {
+  const { near, far, color } = glowRadii(L);
+  el.style.textShadow = `0 0 ${near}px ${color}, 0 0 ${far}px ${color}`;
+}
+
+// text (and count, which shares this build) is the only family with glyphs to hug; every other type
+// chipBox reaches is already a box (rect/html/video/group), so a glow with no chip stays a box-shadow
+// there, which is the shape its content already has.
+const isGlyphLayer = (L) => L.type == null || L.type === '' || L.type === 'text' || L.type === 'count';
 
 // shared box treatment: bg/pad/radius/border/shadow/elevation on ANY layer. `css` can paint a
 // background of its own, and a painted box is a box, so the paint guard also fires on an explicit
@@ -276,6 +325,8 @@ function chipShadowStack(L) {
 function chipBox(el, L) {
   applyChipPadding(el, L);
   if (L.bg == null && !L.border && !L.shadow && !L.elevation && !L.glow && !(L.css && L.radius != null)) return;
+  const hasChip = L.bg != null || !!L.border || !!L.shadow || !!L.elevation;
+  if (L.glow && !hasChip && isGlyphLayer(L)) { applyGlyphGlow(el, L); return; }
   applyChipPaint(el, L);
   const stack = chipShadowStack(L);
   if (stack.length) el.style.boxShadow = stack.join(', ');

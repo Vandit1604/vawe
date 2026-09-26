@@ -21,7 +21,7 @@ let MECH = env('MECH', '');
 const REG = { seam: SEAM_FX, cut: Object.keys(PRESENTATIONS).filter((n) => n !== 'none'), sting: SHADER_FX, anim: [...ANIM_NAMES] };
 
 if (!FX) {
-  console.error('usage: make transition-preview FX=<name> [MECH=seam|cut|sting|anim] [DIR=left|right|up|down] [TIMING=smooth|linear|…] [DUR=0.7]');
+  console.error('usage: make media X=transition-preview FX=<name> [MECH=seam|cut|sting|anim] [DIR=left|right|up|down] [TIMING=smooth|linear|…] [DUR=0.7]');
   console.error(`  seams:  ${REG.seam.join(' ')}`);
   process.exit(2);
 }

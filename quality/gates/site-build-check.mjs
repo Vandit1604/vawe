@@ -1,7 +1,7 @@
 // quality/gates/site-build-check.mjs: run the site's REAL build steps locally before they can fail
 // silently on the deploy host.
 //
-//   node quality/gates/site-build-check.mjs [range]     ·   make deploy-check
+//   node quality/gates/site-build-check.mjs [range]     ·   make site X=deploy-check
 //
 // WHY. vawe.dev was dead for ten days (2026-09-06 to 2026-09-16) behind three stacked breaks, and every
 // one would have shown up the moment someone ran the site's own build commands:
@@ -66,7 +66,7 @@ for (const line of dockerfile) {
 }
 
 const range = process.argv[2];
-let changed = null; // null = "check unconditionally" (manual `make deploy-check`)
+let changed = null; // null = "check unconditionally" (manual `make site X=deploy-check`)
 if (range) {
   changed = execFileSync('git', ['diff', '--name-only', range], { cwd: ROOT, encoding: 'utf8' })
     .split('\n').filter(Boolean);
@@ -84,7 +84,7 @@ if (!triggered) {
 if (!fs.existsSync(path.join(ROOT, 'site', 'node_modules'))) {
   console.log('~ deploy-check: SKIPPED, site/ dependencies are not installed here.');
   console.log('  This push touches the site build and was NOT verified. Run `npm ci` in site/, then');
-  console.log('  `make deploy-check`, before you push for real.');
+  console.log('  `make site X=deploy-check`, before you push for real.');
   f.warn('deploy-check-skipped', 'site/node_modules missing, site build not verified locally');
   f.emit();
   process.exit(0);

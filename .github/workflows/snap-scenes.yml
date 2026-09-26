@@ -6,7 +6,7 @@ name: "snap-all: baseline the library (MANUAL, never scheduled)"
 #    baseline set every time. Diff mode has nothing to diff against: it would print "no-baseline" for
 #    every scene and prove nothing. That is why this job runs SAVE=1.
 #
-# 2. THE FONT SET IS NOT PINNED, AND CANNOT BE PINNED BY `make fonts` AS IT STANDS. A snap baseline is
+# 2. THE FONT SET IS NOT PINNED, AND CANNOT BE PINNED BY `make gen X=fonts` AS IT STANDS. A snap baseline is
 #    only valid inside one font state, and snap-scenes.mjs stamps the state precisely because a changed
 #    one silently rewrites every text width in the library (its own words: a "changed" scene is then not
 #    evidence about the code). generators/media/fonts.mjs fetches 16 faces from jsDelivr with NO VERSION in
@@ -26,7 +26,7 @@ name: "snap-all: baseline the library (MANUAL, never scheduled)"
 # not render video. It samples a DOM signature at the frames where the motion is (entrance and exit
 # midpoints, cuts, stings, plus a spread) and compares ascending against descending. Measured: 34 scenes
 # on a fresh clone in 16 seconds; 105 scenes on a full working tree in 64 seconds. Call it 3 minutes
-# billed here, once the runner boot, npm ci and `make fonts` are paid for.
+# billed here, once the runner boot, npm ci and `make gen X=fonts` are paid for.
 #
 # It stays manual anyway, and not for the runtime. It stays manual because the two facts above mean a
 # green run says less than a reader will assume, and a job nobody started is better than a tick nobody
@@ -64,7 +64,7 @@ jobs:
       - name: fetch the faces
         # Text widths come out wrong with no faces at all, and "wrong the same way twice" would still
         # pass the purity check while making the baselines useless to anyone reading them.
-        run: make fonts
+        run: make gen X=fonts
 
       - name: record which faces this run actually got
         # The one honest thing available given unversioned URLs: say what landed, so a baseline
@@ -74,8 +74,8 @@ jobs:
           ls -l assets/fonts
           sha256sum assets/fonts/* | sort -k2
 
-      - name: make snap-all SAVE=1
-        run: make snap-all SAVE=1 ${{ inputs.scene && format('SCENE={0}', inputs.scene) || '' }}
+      - name: make check GATE=snap-all SAVE=1
+        run: make check GATE=snap-all SAVE=1 ${{ inputs.scene && format('SCENE={0}', inputs.scene) || '' }}
 
       - name: baselines
         if: always()

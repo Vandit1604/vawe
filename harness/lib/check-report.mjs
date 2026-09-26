@@ -56,24 +56,10 @@ console.log('\n▶ generated-check (read-only; `make regen` writes)');
 const gc = spawnSync('node', [path.join(ROOT, 'quality/gates/generated-check.mjs')], { stdio: 'inherit', cwd: ROOT });
 if ((gc.status ?? 0) !== 0) decisions.push('generated-check: at least one generated file has drifted. `make regen`' + (film ? ` D=${film}` : '') + ' writes them.');
 
-const jsonGate = (label, args) => {
-  console.log(`\n▶ ${label}`);
-  const r = spawnSync('node', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 16 << 20 });
-  let items = [];
-  try { items = JSON.parse(r.stdout || '[]'); } catch { decisions.push(`${label}: could not read its --json output (exit ${r.status})`); return; }
-  if (!Array.isArray(items)) items = items.findings || [];
-  for (const it of items) {
-    const text = String(it.summary || it.message || it.line || '').replace(/\s+/g, ' ');
-    if (it.adapted || /^adapted /.test(text)) { fixed.push(text.slice(0, 180)); continue; }
-    if (it.severity === 'info' || /-declared$/.test(it.code || '')) continue;
-    decisions.push(`${label} [${it.code}]: ${text.slice(0, 200)}`);
-  }
-  console.log(`  ${items.length} finding(s)`);
-};
-if (film && fs.existsSync(path.resolve(ROOT, film))) {
-  jsonGate('ground arc', [path.join(ROOT, 'quality/gates/ground-arc.mjs'), film, '--json']);
-  jsonGate('motion floor (pre-render)', [path.join(ROOT, 'quality/gates/motion-floor.mjs'), film, '--pre', '--json']);
-}
+// ground-arc and motion-floor used to run here as direct --json calls. Both were TASTE gates
+// (engine-doctrine/SAFEGUARDS.md): deleted, not run any more. Ground continuity is now a judge rubric
+// dimension (quality/gates/rubric.mjs); the motion floor's dead-window rule is documented in
+// engine-doctrine/MOTION-CRAFT.md for a human/agent judge to apply by eye.
 
 console.log(`\n════════ check summary${film ? ` · ${path.basename(film)}` : ''} ════════`);
 console.log(`  fixed automatically: ${fixed.length ? fixed.join('; ') : 'none (make check only reports; make regen writes generated files)'}`);

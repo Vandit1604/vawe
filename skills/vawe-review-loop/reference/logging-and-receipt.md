@@ -44,5 +44,5 @@ import { writeReceipt } from './harness/lib/receipt.mjs';
 writeReceipt('review', 'films/scene/<film>.json', { round: 3, lowest: 4, stopped: 'done' });
 ```
 
-`make beats` and `make reveal` already write theirs, and `beat-check` fails `beats-unseen` when the
+`make dev-tool X=beats` and `make dev-tool X=reveal` already write theirs, and `beat-check` fails `beats-unseen` when the
 scene has moved on since anyone read a sheet. Use the same stage mechanism rather than a second one.

@@ -3,7 +3,7 @@
 //
 //   node quality/gates/arsenal-check.mjs
 //
-// WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make effects →
+// WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make regen →
 // engine-doctrine/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/surfaces/three-fx.js` sat in
 // the repo with a full three.js scene-graph layer, a written determinism contract and four registered
 // scenes. The author had not read the arsenal doc, which is one failure. The doc did not contain three
@@ -12,7 +12,7 @@
 //
 // The cause WAS that `scripts/site/effects-catalog.mjs` imported a HAND-WRITTEN list of registries. Add
 // a vocabulary to core/ and it appeared in the catalogue only if someone remembered an import line.
-// `make effects-check` cannot catch that: it proves the registries the catalogue knows about are not
+// `make check GATE=generated-check` cannot catch that: it proves the registries the catalogue knows about are not
 // stale, and has no way to know about the one it was never told about.
 //
 // THAT HALF IS NOW UNREPRESENTABLE, AND THIS GATE SHRANK ACCORDINGLY. A registry carries a `catalog`
@@ -24,7 +24,7 @@
 // WHY NOT AUTOMATE THAT HALF TOO. Generating a section mechanically from any old export would produce a
 // worse document: its value is the one-line description beside each name, which is judgement. So the
 // remaining sections keep their prose, and this makes an OMISSION LOUD instead of silent. Same trade as
-// `make beats`: the tool cannot look at the picture, so it checks that somebody did.
+// `make dev-tool X=beats`: the tool cannot look at the picture, so it checks that somebody did.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -95,6 +95,9 @@ const WAIVED = new Map(Object.entries({
   LOOK_MARK_KEYS: 'the fixed shape of `theme.look.marks`. Same argument as LOOK_SCALE_KEYS',
   LOOK_CUT_SLOTS: 'the fixed shape of `theme.look.cuts` (default/accent). Same argument as LOOK_SCALE_KEYS',
   LOOK_FIELD_KEYS: 'the fixed shape of `theme.look.field` (grain/vignette). Same argument as LOOK_SCALE_KEYS',
+  SURFACE_TOKEN_KEYS: 'the fixed shape of one `look.surface` bundle (radius/borderW/.../density). `look.surface` itself is catalogued as a value of the "Theme look keys" surface entry, and the surface LOOKS (glass/soft/...) are their own catalogued registry; this is the nine fields inside one bundle, not a fifth vocabulary',
+  KIT_DEFAULTS: 'the literal fallback bundle every surface token already renders as with no look set (blocks/kit.mjs R.card/HAIR/SHADOW_CARD, named once). Not a pickable look: SURFACE_LOOK_NAMES is the catalogued vocabulary',
+  CSS_VAR_NAMES: 'the internal token-name -> `--v-*` CSS custom property map, plumbing between core/theme/surface-looks.js and blocks/kit.mjs, never authored directly',
   // FOUND BY A COLLISION, not by a new export. `named()` is a bare word match over the catalogue
   // source, and the catalogue used to import `PRESETS` from core/type/type.js for the kinetic-preset
   // section, so core/lightfield/PRESETS was silently credited with a different file's import line.
@@ -112,7 +115,7 @@ const WAIVED = new Map(Object.entries({
   // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER
   // treats that style (one word on screen, or split per character); an author never writes it and
   // could not use it if they did. The fact it carries IS catalogued, in the place an author actually
-  // reads: every shaped style says so in its own CAPTION_BLURBS line, which is the row `make effects`
+  // reads: every shaped style says so in its own CAPTION_BLURBS line, which is the row `make regen`
   // prints. A second entry naming the mechanism would be the same fact filed under a word nobody
   // searches for.
   CAP_STYLE_SHAPE: 'how the renderer treats a style (one-word / per-character); the scene names the STYLE, and each shaped style says so in its own blurb',
@@ -139,7 +142,7 @@ const WAIVED = new Map(Object.entries({
   PROGRESS_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   SHADOW_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
   TILT_KEYS: 'option keys of one fx; the fx itself is catalogued under FX_TYPES',
-  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in engine-doctrine/CRAFT/SOUND.md and graded by make audio-check',
+  CUT_CUE: 'sound. The catalogue is picture; the sound vocabulary is documented in engine-doctrine/CRAFT/SOUND.md and graded by make check GATE=audio-check',
   SEAM_CUE: 'sound, as CUT_CUE',
   CUES: 'sound, as CUT_CUE',
   PROFILE_BED: 'sound, as CUT_CUE',
@@ -426,7 +429,7 @@ if (!missing.length) {
 }
 for (const [name, file] of missing) f.fail('arsenal-missing', `${name.padEnd(22)} ${file}`, {
   fix: 'a REGISTRY writes its own section: give its defineRegistry call a `catalog` block '
-    + '(title / tag / intro / usage / preview or noPreview, core/registry/registry.js) and run `make effects`. '
+    + '(title / tag / intro / usage / preview or noPreview, core/registry/registry.js) and run `make regen`. '
     + `Anything else adds a section to ${CATALOG}, or is waived in this file WITH A REASON if it is `
     + 'not something a scene can name',
   doc: 'engine-doctrine/EFFECTS.md',

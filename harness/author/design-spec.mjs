@@ -6,6 +6,8 @@ import { isLightBg } from '../../core/color/engine.js';
 import { buildKit, MIN_VIDEO_TEXT_PX } from '../lib/stagekit.mjs';
 import { expandThemeFile } from '../lib/theme-load.mjs';
 import { sceneDims, safeArea } from '../../core/layout/safe.js';
+import { findStoryboard } from '../../quality/gates/content-check.mjs';
+import { finishAdvice } from '../lib/finish-advice.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv.slice(2).find((a) => !a.startsWith('--'));
@@ -33,6 +35,10 @@ const m = { ...(theme.motion || {}) };
 const durationTier = (look.cuts && look.cuts.default) || 'normal';
 const exitRatio = m.exitRatio != null ? m.exitRatio : 0.5;
 
+const slug = path.basename(film).replace(/\.json$/, '');
+const sbPath = findStoryboard(film, slug, ROOT);
+const tip = finishAdvice({ stage: 'design', scene, sbText: sbPath ? fs.readFileSync(sbPath, 'utf8') : null, slug });
+
 const md = `---
 type:
   hook:
@@ -57,10 +63,10 @@ space: {}
 surfaces: []
 ---
 
-This film's design. It starts from theme "${themeName}"'s own numbers (\`make stagekit D=${film}\`).
+This film's design. It starts from theme "${themeName}"'s own numbers (\`make dev-tool X=stagekit D=${film}\`).
 Add a value here, never inline: a new size, radius, shadow or colour a fragment needs goes under the
 matching group above, and every fragment reaches it as \`var(--kit-<group>-<name>)\` (or, for a type
-role, the \`.kit-<role>\` class). \`make stagekit D=${film}\` re-pastes the kit with these tokens folded
+role, the \`.kit-<role>\` class). \`make dev-tool X=stagekit D=${film}\` re-pastes the kit with these tokens folded
 in, and warns if a value here now disagrees with what the theme itself computes.
 
 ## Type scale (${aspect}, ${W}x${H})
@@ -83,7 +89,7 @@ Content stays inside x ${box.x0}-${box.x1}, y ${box.y0}-${box.y1} (margin ${box.
 
 ## Motion language
 Entrance: ${m.easing || 'ease'}, ${durationTier} pace (durationScale ${m.durationScale ?? 1}). Exit: faster, ${Math.round(exitRatio * 100)}% of the entrance duration.
-`;
+${tip ? `\n${tip}\n` : ''}`;
 
 fs.writeFileSync(path.resolve(ROOT, designPath), md);
 console.log(`✓ design-spec: wrote ${designPath}`);

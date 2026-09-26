@@ -1,7 +1,7 @@
 // verify-render.mjs: prove a generated typeface JSON actually EXTRUDES, in the right typeface.
 //
 //   node generators/fonts/verify-render.mjs Anybody
-//   make glyphs-verify FONT=Anybody
+//   make gen X=glyphs-verify FONT=Anybody
 //
 // Writes /tmp/glyphs-<Name>.png, to be LOOKED AT. Inspecting the JSON proves nothing: a file full of
 // plausible numbers with the curve arguments transposed parses cleanly and renders as spaghetti, and

@@ -12,7 +12,7 @@ const MAP_FILE = path.join(repoRoot, 'harness/media/sfx-local-map.json');
 const argv = process.argv.slice(2);
 const dirAt = argv.indexOf('--dir');
 const DIR = dirAt >= 0 ? argv[dirAt + 1] : null;
-if (!DIR) { console.error('usage: node harness/media/sfx-local.mjs --dir <path-to-your-downloaded-sounds>  (or make sfx-local DIR=<path>)'); process.exit(1); }
+if (!DIR) { console.error('usage: node harness/media/sfx-local.mjs --dir <path-to-your-downloaded-sounds>  (or make gen X=sfx-local DIR=<path>)'); process.exit(1); }
 if (!fs.existsSync(DIR) || !fs.statSync(DIR).isDirectory()) { console.error(`✗ sfx-local: ${DIR} is not a directory`); process.exit(1); }
 
 const map = JSON.parse(fs.readFileSync(MAP_FILE, 'utf8'));

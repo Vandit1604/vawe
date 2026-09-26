@@ -53,7 +53,7 @@ if (isMain) {
   const query = argv.filter((a, i) => !a.startsWith('--') && !(nFlag >= 0 && i === nFlag + 1))
     .join(' ').trim();
   if (!query) {
-    console.error(`usage: make docs Q="<your question>"\n`
+    console.error(`usage: make site X=docs Q="<your question>"\n`
       + `       node harness/author/docs.mjs "<your question>" [--n 3] [--json]\n\n`
       + `  The full table, to browse rather than ask: engine-doctrine/INDEX.md\n`);
     process.exit(2);

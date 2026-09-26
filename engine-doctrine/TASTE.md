@@ -12,7 +12,7 @@ group: crosscutting
   demo, a proof); cut a beat if the viewer loses nothing when it's gone.
 - Route through the three spines (house-style, composition, motion, direction, film structure,
   story-spine) before authoring from your own priors.
-- Enforced by `make author-check D=<file>` every time (BLOCKS: validate, beats, backdrop-turn, inspect,
+- Enforced by `make dev-tool X=author-check D=<file>` every time (BLOCKS: validate, beats, backdrop-turn, inspect,
   plan-vs-render; REPORTS: critique, direct, floor, dissolve, designspec, copy, pace, hero,
   treatment, waiver-drift, promoted to blocking by `TASTE=1`), then post-render `make judge`.
 - `floor` (direction-floor.mjs) also reports whether THIS film is a template: `library-top5-only`
@@ -63,7 +63,7 @@ covers all three: here's where each lives.
 > arsenal in the order you actually use it. It's the front-to-back companion to the reference docs below.
 
 Every design decision must trace to the **brand's real site**, not your defaults. Colours by eyedrop
-(`make palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because
+(`make study-tool X=palette`), dominance by *looking*, copy from the brand's own words. Two brands differ because
 their sites differ, not because a preset changed. Recurring failures: [`MISTAKES.md`](MISTAKES.md).
 
 ## Per-brand house style (remembered taste)
@@ -72,7 +72,7 @@ The spines above are *general* craft. A brand's *specific* taste is persisted on
 `assets/brands/<brand>/house-style.md`: its Design Read as declarative rules (dominance · faces ·
 palette · motion · shape · signature details · **NEVERs**). The planning skill **reads it first** so taste
 isn't re-derived every video and every render for that brand stays consistent. Generate/refresh it with
-`make house-style NAME=<brand>` (measured facts auto-fill from the theme; sharpen the judgment lines by
+`make dev-tool X=house-style NAME=<brand>` (measured facts auto-fill from the theme; sharpen the judgment lines by
 hand). This is the engine's brand memory. The thing that makes the second video for a brand fast and the
 tenth still on-brand. Example: [`assets/brands/argus/house-style.md`](../assets/brands/argus/house-style.md).
 
@@ -83,7 +83,7 @@ Don't author beat structure from scratch: that's where beats regress to hollow. 
 scene-layer JSON). Browse them, drop one in, fill its props.
 
 ```bash
-make catalog                 # render every block on paged stages → eyeball the arsenal
+make site X=catalog                 # render every block on paged stages → eyeball the arsenal
 ```
 ```json
 { "type": "block", "block": "chart.donut", "x": 1200, "y": 400, "start": 3, "dur": 4 }
@@ -103,7 +103,7 @@ static loop**, and `make video` runs it for you (skip only with an explicit `NOC
 effect-soup video can no longer ship silently:
 
 ```bash
-make author-check D=<file> [VS=<brand>]           # THE LADDER. Every step, every time (15 or 16 of
+make dev-tool X=author-check D=<file> [VS=<brand>]           # THE LADDER. Every step, every time (15 or 16 of
                                                   # them: the intent sidecar and a landscape canvas each
                                                   # add one).
                                                   # BLOCKS:  validate · beats · backdrop-turn · inspect ·
@@ -122,7 +122,7 @@ make author-check D=<file> [VS=<brand>]           # THE LADDER. Every step, ever
                                                   #     "_why":{"dead-air":"why this film is the exception"}}}
                                                   # STRICT=1 makes warnings block.
 
-TASTE=1 make author-check D=<file> [VS=<brand>]   # same steps; the style findings now BLOCK.
+TASTE=1 make dev-tool X=author-check D=<file> [VS=<brand>]   # same steps; the style findings now BLOCK.
 ```
 
 ## One process, two severities
@@ -276,7 +276,7 @@ stays in the repo as the record of how the migration was done, and because a fut
 straight to `HARD_CODES` after a maintenance sweep can use the same shape by hand: write the waiver into
 the scene, with a `_why` a person could have written.
 
-These are the `make judge` / `make ledger` phases of the one spine in
+These are the `make judge` / `make dev-tool X=ledger` phases of the one spine in
 [`AGENTS.md`](../AGENTS.md#the-process-has-one-owner-and-it-is-not-this-file) ("THE PROCESS HAS ONE
 OWNER"): `preflight` → `dev`/`studio` → `check` → `ship` (which runs `author-check` → render → `audit`
 → `seam-check`) → `judge` → `ledger`. The eyeball + memory rungs below are read UNDER `judge`, not a
@@ -284,14 +284,14 @@ separate ladder (not chained: you must look):
 
 ```bash
 make studio   D=<file>              # LIVE scrubbable preview + TIMELINE (bars, ramps, cuts, dead-air bands)
-make beats    D=<file> VS=<brand>   # eyeball first/mid/last of every beat, stacked beside the source
-make reveal   D=<file>              # the ENTER + settled + EXIT arc per beat (how it animates IN)
-make audit                          # overlap / clipped text / safe-zone / WCAG contrast
-make ledger   D=<file>              # cross-video sameness, fails if it repeats a shipped design
+make dev-tool X=beats    D=<file> VS=<brand>   # eyeball first/mid/last of every beat, stacked beside the source
+make dev-tool X=reveal   D=<file>              # the ENTER + settled + EXIT arc per beat (how it animates IN)
+make check GATE=audit                          # overlap / clipped text / safe-zone / WCAG contrast
+make dev-tool X=ledger   D=<file>              # cross-video sameness, fails if it repeats a shipped design
 make judge    D=<file> VS=<brand>   # THE GATE THAT SEES, vision rubric on the near-final cut (JUDGE.md)
 ```
 
-`make author-check` is necessary but **not sufficient**: the static gates can't see composition,
+`make dev-tool X=author-check` is necessary but **not sufficient**: the static gates can't see composition,
 centering, or asset fidelity. After rendering you must run `make judge` ([`JUDGE.md`](JUDGE.md)), it
 preps the key frames + brand house-style + a rubric and the agent scores them. If your eye catches a
 flaw, it's a FIX; never rationalize one you noticed ([`MISTAKES.md`](MISTAKES.md) #15).
@@ -391,4 +391,4 @@ The enforcement lives in `skills/{taste-skill, impeccable}`, dials + a 41-rule d
 The doctrine, in one breath: **asymmetry over centered · scale contrast (one huge hero + tiny
 caption) · a committed non-generic face (the real brand font) · real assets over emoji · colour only
 from the brand · patterns as seasoning, never wallpaper · no em-dashes on screen.** CRAFT tells you
-what to do; `make designspec-check` checks you did it; this doc tells you the loop that ties it together.
+what to do; `make check GATE=designspec-check` checks you did it; this doc tells you the loop that ties it together.

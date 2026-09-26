@@ -22,7 +22,7 @@
 //   * `var(--t)`: the raw scene clock, used only for the caret blink, which is genuinely periodic and
 //     therefore something a one-shot vars ramp cannot express.
 // Nothing here reads Date or Math.random. Same props → same layers → same pixels.
-import { TOKENS, HAIR, r2, R, E } from './kit.mjs';
+import { TOKENS, HAIR, r2, R, RCSS, E } from './kit.mjs';
 import { CODE_THEMES } from './dev.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -70,7 +70,7 @@ const lineColor = (ln, P, i) => (typeof ln === 'string' ? tok(P, i) : (ln.color 
 // border and nothing else, which is what makes the two families read as one.
 function surface({ w, h, P, label = '', inner = '' }) {
   const lift = P.elevation ? 'box-shadow:0 22px 52px -22px color-mix(in srgb, var(--text) 34%, transparent);' : '';
-  return `<div style="position:relative;width:${w}px;height:${h}px;border-radius:${R.card}px;`
+  return `<div style="position:relative;width:${w}px;height:${h}px;border-radius:${RCSS('card')};`
     + `background:${P.bg};border:${P.border || HAIR};overflow:hidden;${lift}font-variant-ligatures:none">`
     + (label ? `<div style="position:absolute;left:${PAD}px;top:${PAD - 6}px;font:600 16px var(--font-mono);`
       + `letter-spacing:0.05em;color:${P.label}">${esc(label)}</div>` : '')
@@ -105,7 +105,7 @@ const htmlLayer = (o) => ({ type: 'html', anim: 'fade', enterDur: 0.3, exitDur: 
 // no text, no caret and no error. Found by cropping a frame, not by any gate. The catalog's demo
 // content does NOT rescue it: `blocks/index.mjs` merges a catalog row's `props` only for a NAMESPACED
 // name, so `{"type":"block","block":"codeTyping"}` reaches the raw factory with nothing in it while
-// `make catalog` and the site render the same name WITH the props and look perfect.
+// `make site X=catalog` and the site render the same name WITH the props and look perfect.
 //
 // So the refusal goes here, at the factory, where the emptiness is knowable. Silence is never the third
 // option (CLAUDE.md); an author who forgot the content gets told which prop, not a black bar.

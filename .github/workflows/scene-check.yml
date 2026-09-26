@@ -1,6 +1,6 @@
 name: author-check (changed scenes)
 
-# The per-edit authoring ladder, scoped to what the push actually touched. `make author-check` on one
+# The per-edit authoring ladder, scoped to what the push actually touched. `make dev-tool X=author-check` on one
 # scene costs about 1.6 seconds, so the scoping is not about the gate: it is about the minute the runner
 # spends booting. The paths filter keeps the job off every push that touches no scene at all.
 #
@@ -10,7 +10,7 @@ name: author-check (changed scenes)
 # therefore guards the films the project ships to explain itself, and it cannot guard a brand film that
 # never leaves a laptop. That is the gitignore policy working as intended, not a hole to plug here.
 #
-# TASTE is off, matching `make author-check` with no flags: the style half reports and does not block.
+# TASTE is off, matching `make dev-tool X=author-check` with no flags: the style half reports and does not block.
 # Turn it on for a run with the dispatch input when you want the house-style findings to have teeth.
 
 on:

@@ -2,6 +2,7 @@
 when: a theme should carry more than colours and fonts, or a film keeps re-deciding the same thing per film
 answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field/bgDefault/bgPalette) · how it is validated · how a storyboard merges it over the type spine · how to see it as a picture"
 group: crosscutting
+routes: finish, recreation
 ---
 
 # THEME LOOK: the whole-film default a theme fixes
@@ -18,7 +19,7 @@ group: crosscutting
   carries the old top-level field, naming the look key that replaces it.
 - Validated at load, same discipline as every other named vocabulary: an unknown `look` key, an
   unknown bg preset, or an unknown transition refuses with the near word (`core/validate/validate.mjs`
-  `validateTheme`, checked for every `themes/*.json` pack by `make validate`).
+  `validateTheme`, checked for every `themes/*.json` pack by `make check GATE=validate`).
 - Writing a storyboard from a type spine (`harness/author/type-spines.mjs`)? Read `theme.look` first
   and let it win: the brand's own fixed look overrides the type spine, which is only a fallback for a
   theme with none.

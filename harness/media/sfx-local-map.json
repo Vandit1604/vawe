@@ -1,5 +1,5 @@
 {
-  "_readme": "make sfx-local DIR=<path>: map YOUR downloaded sound files onto engine cue names. Fill in the filename (relative to DIR, extension included) for any role you have a file for; leave null for the rest, they keep the synth from `make audio`. Roster: generators/media/audio-bake.mjs --list. Owner's preferred source: soundeffect-lab.info (see engine-doctrine/ASSET-SOURCES.md) - download the sounds you want from the site yourself, this file never fetches anything.",
+  "_readme": "make gen X=sfx-local DIR=<path>: map YOUR downloaded sound files onto engine cue names. Fill in the filename (relative to DIR, extension included) for any role you have a file for; leave null for the rest, they keep the synth from `make gen X=audio`. Roster: generators/media/audio-bake.mjs --list. Owner's preferred source: soundeffect-lab.info (see engine-doctrine/ASSET-SOURCES.md) - download the sounds you want from the site yourself, this file never fetches anything.",
   "whoosh": null,
   "reveal": null,
   "chime": null,

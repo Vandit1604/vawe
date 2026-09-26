@@ -5,7 +5,7 @@
 // threads the original `rootL` through recursion), so a deeply nested row cannot carry an offset of
 // its own without fighting that rule. Top-level siblings sidestep it entirely and are exactly the
 // shape this medium is being asked to show off: many discrete, independently timed, individually
-// measurable objects, each one a real box `make audit` can see and grade on its own.
+// measurable objects, each one a real box `make check GATE=audit` can see and grade on its own.
 import { TOKENS, HAIR, r2, text, rect, R, toneColor, fillRight } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -97,7 +97,7 @@ function terminalProBuildBar({ contentX, contentW, barY, barStart, barDur, runsT
 }
 
 // every file is its OWN top-level row, staggered in on its own start, each +/- a real coloured chip
-// (a box, not a coloured span). A line `make audit` can measure on its own, which one opaque `html`
+// (a box, not a coloured span). A line `make check GATE=audit` can measure on its own, which one opaque `html`
 // panel covering the whole diff cannot be.
 function terminalProDiffRows(diff, { contentX, diffY0, diffStart, diffRowStep, diffRowH, runsTo }) {
   return diff.map((f, i) => {

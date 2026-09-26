@@ -9,7 +9,7 @@
 // ADVISORY, NEVER AUTOMATIC, and that is a decision rather than a shortcut. A scene that writes
 // `cuts: [{ t: 4.2 }]` has stated a time, and an engine that quietly rendered the cut at 4.55 would
 // make the file disagree with the film. So this reports and the author moves the number, the same
-// trade `make direct` already makes for every cut it suggests.
+// trade `make dev-tool X=direct` already makes for every cut it suggests.
 //
 // ONE VELOCITY READ, and it is not this file's. `velocityAt` (core/sequence.js) is the engine's
 // single owner of "how fast is this layer going": the automatic motion blur, the ghost trail and

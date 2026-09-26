@@ -3,7 +3,7 @@
 // looked at, a page nobody described, or a shot whose onScreen/moves/trigger is still null.
 //
 //   node quality/gates/study-check.mjs <name>
-//   make study-check NAME=<name>
+//   make check GATE=study-check NAME=<name>
 //
 // This never re-measures (that is `make study`'s job); it reads what `make study` already wrote
 // (refs/<name>/pages.json, refs/<name>/pages.md, grammar/<name>.json) and reports EXACTLY what is

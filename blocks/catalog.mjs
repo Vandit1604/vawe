@@ -1,5 +1,5 @@
 // blocks/catalog.mjs: the REGISTRY MANIFEST. One data row per named block entry. This is the single
-// source of truth for (a) what the registry contains, (b) how each renders in `make catalog`, and
+// source of truth for (a) what the registry contains, (b) how each renders in `make site X=catalog`, and
 // (c) the auto-generated engine-doctrine/BLOCKS.md table. Adding a block = adding a row here (+ a `variant` branch
 // in its family factory if it's a family.variant). No hand-placement, no per-block catalog code.
 //
@@ -134,8 +134,8 @@ export const CATALOG = [
   // ── wave 3: lists & structure ──
   { name: 'checklist', family: 'checklist', blurb: "a checklist of items with checkboxes ticking off one by one, done rows dim to read as completed.",
     props: { w: 460, items: [
-      { text: 'Write scene JSON', done: true }, { text: 'make critique', done: true },
-      { text: 'make catalog', done: true }, { text: 'Render', done: false }] } },
+      { text: 'Write scene JSON', done: true }, { text: 'make check GATE=critique', done: true },
+      { text: 'make site X=catalog', done: true }, { text: 'Render', done: false }] } },
   { name: 'table', family: 'table', blurb: "a table of rows and columns: a header plus data rows divided by hairlines, rows fill in one after another.",
     props: { w: 560, cols: ['Format', 'FPS', 'Status'], rows: [
       ['portrait', '30', 'ready'], ['landscape', '60', 'ready'], ['alpha', '30', 'beta']] } },
@@ -275,7 +275,7 @@ export const CATALOG = [
   { name: 'codeBlock.ember', family: 'codeBlock', blurb: 'code theme · warm dark, amber and rose',
     props: {"w": 540, "theme": "ember", "label": "render.py", "size": 19, "lines": ["from vawe import render", "clip = render('launch.json')", "clip.save('out.mp4')"]} },
   { name: 'codeBlock.forest', family: 'codeBlock', blurb: 'code theme · deep green, mossy accents',
-    props: {"w": 540, "theme": "forest", "label": "deploy.sh", "size": 19, "lines": ["make video D=launch.json", "make audit", "git push origin main"]} },
+    props: {"w": 540, "theme": "forest", "label": "deploy.sh", "size": 19, "lines": ["make video D=launch.json", "make check GATE=audit", "git push origin main"]} },
   { name: 'codeBlock.ocean', family: 'codeBlock', blurb: 'code theme · deep blue, cyan-led',
     props: {"w": 540, "theme": "ocean", "label": "scene.json", "size": 19, "lines": ["{ \"module\": \"scene\",", "  \"theme\": \"argus\",", "  \"fps\": 30 }"]} },
   { name: 'codeBlock.neon', family: 'codeBlock', blurb: 'code theme · near-black, vivid signage hues',

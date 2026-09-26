@@ -5,7 +5,7 @@
 // without earning it" gap: after rendering, author-check's inspect step confirms each beat's mustShow text
 // is on screen and (if mustAnimate) something is moving.
 //
-//   make intent SB=<storyboard.md> [D=films/scene/<topic>.json]   → writes <topic>.intent.json (or prints)
+//   make dev-tool X=intent SB=<storyboard.md> [D=films/scene/<topic>.json]   → writes <topic>.intent.json (or prints)
 // It reads the storyboard's beat time ranges for `at` + `span`, the quoted copy in `onscreen:` for
 // `mustShow`, and `why:` for the artifact note. A beat whose onscreen is still a <fill:…> placeholder is
 // emitted WITHOUT mustShow (nothing to verify yet) and flagged, sharpen the storyboard first for a real
@@ -21,7 +21,7 @@ import { onScreenText } from '../../harness/lib/text.mjs';
 import path from 'node:path';
 
 const SB = process.env.SB || process.argv[2];
-if (!SB || !fs.existsSync(SB)) { console.error('usage: make intent SB=<storyboard.md> [D=<scene.json>]'); process.exit(2); }
+if (!SB || !fs.existsSync(SB)) { console.error('usage: make dev-tool X=intent SB=<storyboard.md> [D=<scene.json>]'); process.exit(2); }
 const src = fs.readFileSync(SB, 'utf8');
 const D = process.env.D || null;
 
@@ -80,7 +80,7 @@ for (const b of blocks) {
   });
 }
 
-if (!beats.length) { console.error('✗ no beats with a time range found, is this a storyboard from make storyboard-draft / STORYBOARD-TEMPLATE.md?'); process.exit(1); }
+if (!beats.length) { console.error('✗ no beats with a time range found, is this a storyboard from make dev-tool X=storyboard-draft / STORYBOARD-TEMPLATE.md?'); process.exit(1); }
 if (!spine.object) warns.push('frontmatter has no `object:` key, so the intent records no spine and nothing states what the film is about.');
 const out = JSON.stringify({ ...(Object.keys(spine).length ? { spine } : {}), beats }, null, 2) + '\n';
 
@@ -91,7 +91,7 @@ if (dest) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, out);
   console.log(`\n✓ wrote ${dest}: ${beats.length} beat(s), ${beats.filter((b) => b.mustShow.length).length} with verifiable copy.`);
-  console.log(`  Align the \`at\` times + mustShow to the final scene, then \`make author-check D=${D || '<scene>.json'}\` runs inspect against it.`);
+  console.log(`  Align the \`at\` times + mustShow to the final scene, then \`make dev-tool X=author-check D=${D || '<scene>.json'}\` runs inspect against it.`);
 } else {
   console.log(out);
   console.log(`  (no D=<scene.json> given: printed only. Pass D= to write <scene>.intent.json next to it.)`);

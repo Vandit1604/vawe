@@ -84,6 +84,33 @@ try {
   const withSb = runMatch(refClip, sbDir);
   assert(/storyboard beats/.test(withSb.stdout), `expected the storyboard path once a sidecar exists: ${withSb.stdout}`);
   assert(withSb.ssims.length === 1, `one storyboard beat must produce one row, got ${withSb.ssims.length}`);
+
+  // (d) the documented `make study REF=<x> D=<y> MATCH=1` invocation, copied verbatim as argv (KEY=value
+  // tokens, not `--flags`), must work when the script is run directly and not only through `make`.
+  fs.copyFileSync(refClip, RENDER_MP4);
+  const kvDir = path.join(tmp, 'kv');
+  fs.mkdirSync(kvDir, { recursive: true });
+  const kvOut = execFileSync('node', [SCRIPT, `REF=${refClip}`, `D=${FILM}`, '--out', kvDir, '--step', '0.2'],
+    { cwd: ROOT, encoding: 'utf8' });
+  assert(fs.existsSync(path.join(kvDir, 'match.md')), `REF=/D= argv style must still write match.md: ${kvOut}`);
+
+  // (e) a DRAFT render (30fps, `make dev --draft`) is scored, not refused, and the report says which
+  // render (draft or final) it scored.
+  const draftClip = path.join(tmp, 'draft.mp4');
+  ff(['-f', 'lavfi', '-i', 'color=c=red:s=100x60:d=2.0:r=30', '-pix_fmt', 'yuv420p', draftClip]);
+  fs.copyFileSync(draftClip, RENDER_MP4);
+  const draftDir = path.join(tmp, 'draft');
+  const draft = runMatch(refClip, draftDir);
+  assert(/draft/.test(draft.stdout), `a 30fps render must be reported as a draft: ${draft.stdout}`);
+
+  // (f) a storyboard sidecar that EXISTS but names no usable beat must say so and name the fallback,
+  // instead of silently behaving as if no storyboard had been written.
+  fs.writeFileSync(SB, 'notes about this film, no `## Beat N:` heading and no beat table\n');
+  fs.copyFileSync(refClip, RENDER_MP4);
+  const unreadableDir = path.join(tmp, 'unreadable-sb');
+  const unreadable = runMatch(refClip, unreadableDir);
+  assert(/exists but named no usable beat/.test(unreadable.stdout), `expected the fallback to be announced: ${unreadable.stdout}`);
+  assert(/scene cut\(s\) detected in the reference/.test(unreadable.stdout), `must still fall back to detected cuts: ${unreadable.stdout}`);
 } finally {
   fs.rmSync(RENDER_MP4, { force: true });
   fs.rmSync(SB, { force: true });

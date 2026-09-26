@@ -1,5 +1,5 @@
 {
- "_": "Shot clusters found by harness/author/mine.mjs over grammar/*.json. A shape with sources is a real, traceable candidate for a beats-mined.mjs factory, never an invented one. Regenerate with `make mine`.",
+ "_": "Shot clusters found by harness/author/mine.mjs over grammar/*.json. A shape with sources is a real, traceable candidate for a beats-mined.mjs factory, never an invented one. Regenerate with `make study-tool X=mine`.",
  "grammarsRead": [
   "arc-space-swiping",
   "arc-zero-chrome",

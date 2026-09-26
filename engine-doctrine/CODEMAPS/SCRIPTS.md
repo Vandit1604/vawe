@@ -16,7 +16,7 @@ is for, which is itself the finding.
 
 | folder | files | lines | role |
 |---|---|---|---|
-| `quality/gates` | 90 | 26430 | REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
+| `quality/gates` | 90 | 26430 | REFUSE. Every check that can say no. `make dev-tool X=author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block. |
 | `harness/author` | 72 | 13562 | WRITE. Everything that produces or edits a film: the brief, the storyboard, the stage kit, the fragments' briefs, assemble, the motion director. |
 | `harness/dev` | 37 | 6390 | LOOK. Nothing here changes a film. The studio, the previews, the contact sheets, the experiment rigs. |
 | `scripts/site` | 23 | 3251 | PUBLISH. The public website and docs site, and the checks that keep their numbers true. |
@@ -35,7 +35,7 @@ bake an asset a film loads, which is a different job from the rest of this tree.
 
 ## `quality/gates`
 
-REFUSE. Every check that can say no. `make author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block.
+REFUSE. Every check that can say no. `make dev-tool X=author-check` runs ~23 of these as a ladder; the rest are on-demand or CI. A gate reports a finding; only some block.
 
 | file | lines | make | what it says it does |
 |---|---|---|---|
@@ -143,7 +143,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `grammar.mjs` | 299 | yes | harness/author/grammar.mjs: what we have learned about how good films are BUILT. |
 | `schema-at.mjs` | 296 | yes | schema-at.mjs: what may I WRITE at this path in a scene JSON? |
 | `assemble.test.mjs` | 289 | no | harness/author/assemble.test.mjs: assemble owns what it GENERATES (html layers by `id: scene<N>`, |
-| `reveal.mjs` | 279 | yes | reveal.mjs: see how each beat ANIMATES IN, not just where it lands. `make beats` samples a beat's |
+| `reveal.mjs` | 279 | yes | reveal.mjs: see how each beat ANIMATES IN, not just where it lands. `make dev-tool X=beats` samples a beat's |
 | `build-refstudy.mjs` | 260 | no | harness/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4. |
 | `patch-motion.mjs` | 254 | yes | patch-motion.mjs: SURGICAL edits to a scene's `motion` tracks, as TEXT. |
 | `mistakes.mjs` | 244 | yes | harness/author/mistakes.mjs: ASK the mistake log instead of reading it. |
@@ -178,7 +178,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `showcase-build.mjs` | 122 | no | showcase-build.mjs: emits the six capability clips the site's showcase rows play. |
 | `preview.mjs` | 121 | yes | preview.mjs, FAST iteration: render the key frames of a format directly (no encode), |
 | `mine.mjs` | 116 | yes | harness/author/mine.mjs · MINE beat blueprints out of the studied reference corpus (grammar/*.json). |
-| `scenes.mjs` | 107 | yes | scenes.mjs: `make scenes D=<film>`: THE FAN-OUT. PRINTS one agent brief per scene: the kit block, |
+| `scenes.mjs` | 107 | yes | scenes.mjs: `make dev-tool X=scenes D=<film>`: THE FAN-OUT. PRINTS one agent brief per scene: the kit block, |
 | `recreate.mjs` | 103 | yes | harness/author/recreate.mjs: turn a studied reference into a scene SKELETON. |
 | `reimagine.mjs` | 102 | no | harness/author/reimagine.mjs: rebuild the flagged beats through the taste library. Run once. |
 | `lightfield.mjs` | 101 | yes | harness/author/lightfield.mjs: generate a light field from the command line. |
@@ -187,7 +187,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `cinematic.mjs` | 81 | yes | cinematic.mjs. The CINEMATIC MOTION director. Real launch films are never static: a continuous |
 | `sheets.mjs` | 80 | yes | sheets.mjs, BOTH review contact sheets from ONE browser, and the rule that keeps them honest. |
 | `recency.mjs` | 79 | no | recency.mjs: which named things are NEW? Read out of git, never out of a list. |
-| `stagekit.mjs` | 79 | yes | stagekit.mjs: `make stagekit D=<film>`: THE STAGE KIT for a per-scene HTML-fragment fan-out. |
+| `stagekit.mjs` | 79 | yes | stagekit.mjs: `make dev-tool X=stagekit D=<film>`: THE STAGE KIT for a per-scene HTML-fragment fan-out. |
 | `argus.mjs` | 75 | no | harness/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library + |
 | `filmstrip.mjs` | 75 | yes | filmstrip.mjs, SEE a whole video efficiently: extract frames and pack them into a few dense, |
 | `capture-motion.mjs` | 74 | yes | capture-motion.mjs: WATCH a real element animate and emit a motion track our engine can replay. |
@@ -195,7 +195,7 @@ WRITE. Everything that produces or edits a film: the brief, the storyboard, the 
 | `scene-page.mjs` | 57 | no | harness/author/scene-page.mjs: open a scene in a headless browser and hand back a frame grabber. |
 | `captions.mjs` | 52 | yes | captions.mjs: burn muted-social subtitles onto a video with zero hand-timing. Splits a script into |
 | `pitch.test.mjs` | 45 | no | harness/author/pitch.test.mjs: does the pitch receipt round-trip, and does it go stale? |
-| `contract.mjs` | 41 | yes | contract.mjs CLI: `make contract D=<film>`: validate the per-beat continuous-object contract a |
+| `contract.mjs` | 41 | yes | contract.mjs CLI: `make dev-tool X=contract D=<film>`: validate the per-beat continuous-object contract a |
 | `directions.mjs` | 38 | no | harness/author/directions.mjs: THE CREATIVE DIRECTIONS a brief can be taken in. |
 | `llms-txt.test.mjs` | 37 | no | harness/author/llms-txt.test.mjs: the runnable self-check for llms-txt.mjs. |
 | `scrub.mjs` | 36 | yes | harness/author/scrub.mjs: the PREVIEW LOOP. Extract N frames evenly across a rendered video into one |
@@ -262,7 +262,7 @@ PUBLISH. The public website and docs site, and the checks that keep their number
 | file | lines | make | what it says it does |
 |---|---|---|---|
 | `type-specimens.mjs` | 474 | no | scripts/site/type-specimens.mjs: the /type page's catalogue, DERIVED from the registries. |
-| `registry.mjs` | 309 | yes | scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes registry/; |
+| `registry.mjs` | 309 | yes | scripts/site/registry.mjs: GENERATED, never hand-edited. `make site X=registry` writes registry/; |
 | `effects-json.mjs` | 263 | yes | scripts/site/effects-json.mjs: derive the site's effects index from the SAME family list that |
 | `effects-catalog.mjs` | 254 | yes | scripts/site/effects-catalog.mjs, GENERATE engine-doctrine/EFFECTS.md: the single arsenal catalog so the model |
 | `site-assets.mjs` | 228 | yes | site-assets.mjs: the ONE way engine renders become site assets. |
@@ -300,7 +300,7 @@ CAPTURE. Real pixels from the outside world: screenshots of live sites, video pr
 | `assets.mjs` | 103 | yes | harness/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a |
 | `music.mjs` | 97 | yes | music.mjs: fetch a real soundtrack for a launch video, and record where it came from. |
 | `beatsync.mjs` | 93 | yes | beatsync.mjs: align a scene's joints to the music's beat grid, at AUTHOR time. |
-| `sfx.mjs` | 92 | yes | RETIRED: the sound library is SYNTHESIZED now (`make audio`, core/audio-kit.mjs). This fetcher is |
+| `sfx.mjs` | 92 | yes | RETIRED: the sound library is SYNTHESIZED now (`make gen X=audio`, core/audio-kit.mjs). This fetcher is |
 | `tts.mjs` | 89 | yes | harness/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script, |
 | `ref.mjs` | 79 | yes | harness/media/ref.mjs: fetch a reference film from a link, and study it. |
 | `cards.mjs` | 78 | no | harness/media/cards.mjs: parametric, copyright-safe topic cards (designed SVGs) for ANY topic. |
@@ -308,7 +308,7 @@ CAPTURE. Real pixels from the outside world: screenshots of live sites, video pr
 | `beatmap.mjs` | 60 | yes | beatmap.mjs: detect a track's pulse and write it beside the audio. |
 | `export-edl.test.mjs` | 50 | no | harness/media/export-edl.test.mjs: house-rule self-check, no framework. |
 | `wav-read.mjs` | 45 | no | wav-read.mjs: ONE PCM WAV reader. Walks the chunk table rather than assuming a 44-byte header |
-| `pace-from-vo.mjs` | 44 | yes | harness/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the |
+| `pace-from-vo.mjs` | 44 | yes | harness/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make media X=tts), then pace the |
 | `gen-clip.mjs` | 37 | yes | gen-clip.mjs: turn a video (a kie.ai generation, or any mp4) into a DETERMINISTIC clip the engine |
 | `spectrum.mjs` | 34 | yes | spectrum.mjs: bake a track's per-frame band energy beside the audio. |
 

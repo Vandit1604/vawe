@@ -121,9 +121,7 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from '../../quality/gates/content-check.mjs';
 import { evenSamples } from '../../quality/gates/beats-of.mjs';
 import { gradeable, tileBox, baseOf } from '../../quality/gates/tile.mjs';
-import { classifyRegions } from '../../quality/gates/motion-floor.mjs';
 import { sceneTiming } from '../../quality/gates/scene-timing.mjs';
-import { exitEmphasis, entranceEmphasis } from '../../quality/gates/choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { DIAL_CONTRACT_VIOLATIONS } from '../../core/registry/knobs.js';
@@ -431,7 +429,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
 
 // ---- wave 1 effects: filters · glow presets · caption styles ----
 // Each family's pure surface, held to the contract its consumers rely on. The DOM halves (SVG def
-// injection, the caption runtime) are covered by make probe + the rendered reel, not here.
+// injection, the caption runtime) are covered by make check GATE=probe + the rendered reel, not here.
 {
   // colour-grade presets (core/looks/filters.js)
   ok('filter: raw CSS passes through', resolveFilter('blur(4px) saturate(1.2)').filter === 'blur(4px) saturate(1.2)');
@@ -673,7 +671,9 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   ok(`three: ${THREE_FX.length} scenes, all unique`, THREE_FX.length > 0 && new Set(THREE_FX).size === THREE_FX.length);
   // ONE list: three-scenes.js names them, three-fx.js implements them, and these must agree. The
   // split exists only because Node cannot resolve the browser-absolute three import.
-  const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors\) \{/gm)].map((m) => m[1]);
+  // Most scenes take (L, colors); `object` also takes (renderer, threeScene) to orbit its own camera
+  // and read the scene environment, so the signature check allows, but doesn't require, trailing params.
+  const implemented = [...code.matchAll(/^  ([a-zA-Z][a-zA-Z0-9]*)\(L, colors(?:, \w+)*\) \{/gm)].map((m) => m[1]);
   const missing = THREE_FX.filter((n) => !implemented.includes(n));
   const extra = implemented.filter((n) => !THREE_FX.includes(n));
   ok(`three: every name in THREE_FX has a SCENES implementation${missing.length ? ', missing: ' + missing.join(', ') : ''}${extra.length ? ', orphaned: ' + extra.join(', ') : ''}`,
@@ -683,8 +683,9 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   ok(`three: no wall-clock or unseeded randomness${used.length ? ', found: ' + used.join(', ') : ''}`, used.length === 0);
   // A scene that never reads t is a still image rendered the most expensive way available.
   const frozen = THREE_FX.filter((n) => {
-    const i = code.indexOf(`  ${n}(L, colors) {`);
-    if (i < 0) return true;
+    const m = code.match(new RegExp(`^  ${n}\\(L, colors(?:, \\w+)*\\) \\{`, 'm'));
+    if (!m) return true;
+    const i = m.index;
     const body = code.slice(i, code.indexOf('\n  },', i));
     return !/pose\(t\b/.test(body);
   });

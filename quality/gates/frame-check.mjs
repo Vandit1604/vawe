@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // quality/gates/frame-check.mjs: THE PLAN, COMPARED WITH THE FRAMES BUILT FROM IT.
 //
-//   make frame-check D=films/scene/<film>.json   ·   node quality/gates/frame-check.mjs <film> [--json]
+//   make check GATE=frame-check D=films/scene/<film>.json   ·   node quality/gates/frame-check.mjs <film> [--json]
 //
 // Nothing in this repo did this. `storyboard-check` grades the plan against itself; `critique` and
 // `eye-trace` read the scene JSON after assembly; `make preview` judges one fragment with no idea which
@@ -25,7 +25,7 @@ import { parseFragmentSpec } from '../../harness/lib/contract.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const arg = process.argv.slice(2).find((a) => !a.startsWith('--')) || process.env.D;
-if (!arg) { console.error('usage: make frame-check D=films/scene/<film>.json'); process.exit(2); }
+if (!arg) { console.error('usage: make check GATE=frame-check D=films/scene/<film>.json'); process.exit(2); }
 const base = String(arg).replace(/\.(json|storyboard\.md)$/, '');
 const sbPath = [base + '.storyboard.md', path.join('films/scene', path.basename(base) + '.storyboard.md')]
   .map((f) => path.resolve(ROOT, f)).find((f) => fs.existsSync(f));
@@ -90,7 +90,7 @@ if (!designSpec && filmSizes.size > SCALE_DRIFT_MAX) {
 
 // ── 1b. design-drift: every visible box's font, radius, shadow and colour against the declared set ──
 // ONE IMPLEMENTATION, TWO ENTRY POINTS: the check itself lives in design-drift.mjs (also its own
-// `make design-drift D=` target); this just calls it, on the SAME `gf` emitter, rather than shelling
+// `make check GATE=design-drift D=` target); this just calls it, on the SAME `gf` emitter, rather than shelling
 // out and parsing prose back. Silent (no browser launched) when the film has no design.md.
 if (designSpec) {
   const before = gf.records.length;

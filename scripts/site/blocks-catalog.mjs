@@ -1,6 +1,6 @@
 // scripts/site/blocks-catalog.mjs: auto-renders EVERY registry entry from the manifest onto paged stages.
 // Proof + visual regression + the browsable arsenal. No hand-placement: drop a row in blocks/catalog.mjs
-// and it shows up here. Writes films/scene/_catalog-<n>.json (one per page). Run via `make catalog`.
+// and it shows up here. Writes films/scene/_catalog-<n>.json (one per page). Run via `make site X=catalog`.
 import fs from 'node:fs';
 import { BLOCKS } from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -34,7 +34,7 @@ for (let p = 0; p < pages; p++) {
   });
   const scene = { module: 'scene', orientation: 'landscape', theme: process.env.THEME || 'vawe', duration: 9,
     audio: { silent: true }, bg: [{ preset: 'plain', from: 0, to: 9 }], layers: L };
-  // Write only on CHANGE, so `make catalog` can skip re-rendering untouched pages by mtime. This
+  // Write only on CHANGE, so `make site X=catalog` can skip re-rendering untouched pages by mtime. This
   // matters more than it looks: the renderer's frame-dedup picks a representative frame per
   // static-ish group, and WHICH frame wins varies across the 8 parallel workers when spring settles
   // leave sub-pixel motion inside the signature's rounding, so re-rendering an UNCHANGED page
@@ -44,7 +44,7 @@ for (let p = 0; p < pages; p++) {
   const body = JSON.stringify(scene, null, 2);
   if (!fs.existsSync(out) || fs.readFileSync(out, 'utf8') !== body) fs.writeFileSync(out, body);
 }
-// Remove pages a SHRINKING registry left behind. `make catalog` renders films/scene/_catalog-*.json
+// Remove pages a SHRINKING registry left behind. `make site X=catalog` renders films/scene/_catalog-*.json
 // by glob, so a stale page keeps getting rendered as a real one long after nothing points at it.
 const stale = fs.readdirSync('films/scene')
   .filter((f) => /^_catalog-(\d+)\.json$/.test(f) && +f.match(/^_catalog-(\d+)\.json$/)[1] > pages);

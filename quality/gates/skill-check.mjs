@@ -133,7 +133,7 @@ export function run({ root = ROOT } = {}) {
 
     // NO GENERATED-BODY CARVE-OUT. There was one, for `vawe-docs`, whose body a generator wrote from a
     // corpus that only grows: an author could not trim it, so the size contract could not apply. That
-    // skill is retired (`make docs` answers the same question), and every remaining body is
+    // skill is retired (`make site X=docs` answers the same question), and every remaining body is
     // hand-authored, so every body is held to the contract. A future generated skill is the wrong shape
     // for a skill, and should be a lookup for the same reason that one was.
     const body = text.slice(text.indexOf('---', 3) + 3).replace(/^\n/, '');

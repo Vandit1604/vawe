@@ -28,7 +28,7 @@ const defaultTiming = (fx) => (RAMP_BY_DEFAULT.has(fx) ? 'ramp' : undefined);
 
 export function boundaryMechanism(fx, mech) {
   const have = MECHS_OF.get(fx);
-  if (!have) throw new Error(`unknown transition fx "${fx}", see \`make transitions\` for the catalog`);
+  if (!have) throw new Error(`unknown transition fx "${fx}", see \`make study-tool X=transitions\` for the catalog`);
   if (mech) {
     if (mech === 'anim') throw new Error(`transition "${fx}": mech "anim" is a LAYER transition, not a boundary. Put it in a layer's transition.in/out`);
     if (!have.has(mech)) throw new Error(`transition "${fx}" is not a ${mech}. It is a ${[...have].join('/')} (drop \`mech\`, or pick a ${mech} fx)`);
@@ -40,7 +40,7 @@ export function boundaryMechanism(fx, mech) {
 }
 
 // A non-hex sting `color` used to become NaN then black with no error (engine-doctrine/MISTAKES.md
-// #476); this refuses it here so `make validate` names it instead. Keep in step with core/filters.js
+// #476); this refuses it here so `make check GATE=validate` names it instead. Keep in step with core/filters.js
 // `glowRGB`, the one owner of resolving a theme token to a literal rgb.
 const STING_TOKEN = /^var\(\s*--(accent|ink)\b/;
 

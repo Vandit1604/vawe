@@ -14,13 +14,13 @@ group: look
 - Weight each on-screen cue into the back ~50% of its beat (build 0-30% / breathe 30-70% / resolve
   70-100%); never dump everything in the first 30% (slideshow) or fake life with independent drift
   during a hold (screensaver).
-- After rendering, QA the SEAMS not the centres: `make seam-check D=<file>` pulls the frames
+- After rendering, QA the SEAMS not the centres: `make check GATE=seam-check D=<file>` pulls the frames
   straddling every transition and flags a luminance flash or a bad morph.
 - Enforced by `[gated: quality/gates/author-check.mjs#front-loaded]` (+ `motion-monotony`, same gate)
-  for the reveal-model floor; `[ref: make seam-check]` for the seam QA; the two locked artifacts
+  for the reveal-model floor; `[ref: make check GATE=seam-check]` for the seam QA; the two locked artifacts
   themselves are `[eye]`, checked by sign-off before authoring.
 - Confirm: is every on-screen cue weighted into the back half of its beat, and did you run
-  `make seam-check` after rendering?
+  `make check GATE=seam-check` after rendering?
 
 A great video is not authored frame-first. Two artifacts are locked first and every frame then *obeys
 them line by line*: a **design-system spec** (our `frame.md`) and a **scene-by-scene storyboard** (our
@@ -33,7 +33,7 @@ that ties them into a front-door you fill before writing a single layer.
 
 ## Part 1: The design-system spec (our `frame.md`)
 
-One page, authored from the brand study (`make brandspec` + `make palette`). It is normative: the storyboard
+One page, authored from the brand study (`make study-tool X=brandspec` + `make study-tool X=palette`). It is normative: the storyboard
 and every layer use ONLY these values. Fill the design-spec table in [SURFACES.md](SURFACES.md#the-design-spec)
 plus these video-scale rules, proven in practice:
 
@@ -41,7 +41,7 @@ plus these video-scale rules, proven in practice:
   The accent is *voltage*: eyebrows, numerals, one rule per frame, the CTA, **no frame lets it dominate by
   area.** ("The absent shadow is the premium signal.") Encode it in `themes/<brand>.json`.
 - **Type by role, in fixed faces.** Display / body / **mono for every numeral** ("a dollar figure in
-  anything but mono is a bug"). Author at the MEASURED weights from `make brandspec`, never a default 800.
+  anything but mono is a bug"). Author at the MEASURED weights from `make study-tool X=brandspec`, never a default 800.
 - **A negative list.** Name what this video will NOT do: no nav/footer/cursor chrome, no AI gradients/bokeh/
   glow washes, no second accent. Banned easings by name: no `back`/`bounce`/`elastic` unless the brand IS toy.
 - **A pre-render self-audit** (squint / silence / restraint / reference), copy the one in `frame.md`'s spirit.
@@ -82,7 +82,7 @@ Rule: **each on-screen cue is its own reveal window**, weighted into the back ~5
 t=0 only its first cue is present; later cues enter on their own beats. Aliveness during a hold is *subtle
 jitter only*, not drift, not breathing.
 
-`make author-check` now enforces the floor of this: **`front-loaded`** fires when nearly all reveals land in
+`make dev-tool X=author-check` now enforces the floor of this: **`front-loaded`** fires when nearly all reveals land in
 the first 30% and the back half is frozen; **`motion-monotony`** fires when every kinetic line uses the same
 preset ("no two beats move alike"). Reach past both.
 
@@ -98,12 +98,12 @@ preset ("no two beats move alike"). Reach past both.
 ## Part 5: QA the SEAMS, not the centers
 
 The highest-value render bugs (a black flash, a morph that reads as a collision) hide inside the transition
-overlap, where every center-sampling gate steps over them. After rendering, run **`make seam-check D=<file>`**:
+overlap, where every center-sampling gate steps over them. After rendering, run **`make check GATE=seam-check D=<file>`**:
 it pulls the frames straddling every transition out of the mp4 and flags a luminance flash, and writes
 `/tmp/seams/<name>.png` for the eye. Sample the seams, always.
 
 ---
 
 **The loop:** lock Part 1 + Part 2 (get sign-off) → author the JSON obeying the spec →
-`make author-check` (floor now checks front-load + monotony) → render → `make seam-check` + `make judge`.
+`make dev-tool X=author-check` (floor now checks front-load + monotony) → render → `make check GATE=seam-check` + `make judge`.
 Full authoring narrative: [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md). Bespoke frames: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md).

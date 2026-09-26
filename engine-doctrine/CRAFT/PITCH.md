@@ -136,6 +136,6 @@ compute the probabilities itself, that is your judgement to make, not a thing a 
 
 `node harness/author/pitch.mjs <name> --chose "<angle>" [--left "<median left behind>"]` records the
 decision as a receipt under `quality/baselines/approved/pitch/<name>.json`, hashed against the subject the same
-way `make preflight` and `make beats` record theirs (`harness/lib/receipt.mjs`). Edit the subject and
+way `make dev-tool X=preflight` and `make dev-tool X=beats` record theirs (`harness/lib/receipt.mjs`). Edit the subject and
 the receipt goes stale, the same property that makes every other receipt in this repo worth trusting.
 It also prints the `angle:` line ready to paste into the storyboard frontmatter.

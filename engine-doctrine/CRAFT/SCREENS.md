@@ -1,9 +1,9 @@
 ---
 when: you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped
-answers: "why a product screen is designed for the video, not a plain mock · the one make screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used"
+answers: "why a product screen is designed for the video, not a plain mock · the one make dev-tool X=screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used"
 group: look
 applies-when: wantsProductScreen
-confirm: "does the screen fill most of the frame with display-size type, real images shown whole, and one accent, and does `make screen` report no anti-patterns, no text under 28px, nothing clipped, and fill/detail at or above 80% of the reference act?"
+confirm: "does the screen fill most of the frame with display-size type, real images shown whole, and one accent, and does `make dev-tool X=screen` report no anti-patterns, no text under 28px, nothing clipped, and fill/detail at or above 80% of the reference act?"
 ---
 
 # Product screens: designed for the video, not a plain mock
@@ -12,7 +12,7 @@ confirm: "does the screen fill most of the frame with display-size type, real im
 
 - The owner's ruling: "use a ui design harness to build beautiful mocks, not plain by default. You can
   invent colours and themes beautifully when asked." A product screen in a film is DESIGNED, by default.
-- ONE command: `make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [THEME=] [INVENT=1]
+- ONE command: `make dev-tool X=screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [THEME=] [INVENT=1]
   [REF=<ref> ACT=<n>] [W= H=]`. If `F` does not exist, `KIND` is required and writes a video-ready
   starting fragment there first; if `F` exists, passing `KIND` refuses rather than overwrite an authored
   screen. Either way it then always renders, runs impeccable's detector, measures content against a
@@ -32,18 +32,18 @@ subject filling the frame. A hand-written mock defaults to the opposite: a grey 
 sparse grid, because that is what "a UI" looks like in the training data. Naming the gap is not enough;
 the fix is a route every screen takes, and a command that measures whether it actually closed the gap.
 
-## `make screen`: ONE command, write-if-new then always check
+## `make dev-tool X=screen`: ONE command, write-if-new then always check
 
 ```
-make screen F=films/scene/vawe-flow-editor.html THEME=vawe REF=example-madera ACT=1        # check an existing screen
-make screen F=films/scene/new-results.html KIND=grid THEME=vawe                             # write, then check
+make dev-tool X=screen F=films/scene/vawe-flow-editor.html THEME=vawe REF=example-madera ACT=1        # check an existing screen
+make dev-tool X=screen F=films/scene/new-results.html KIND=grid THEME=vawe                             # write, then check
 ```
 
 The owner: "why two? not single one." There used to be a separate `screen-new` target; it is gone.
-`make screen` decides which half of the job is needed from whether `F` exists:
+`make dev-tool X=screen` decides which half of the job is needed from whether `F` exists:
 
 - **`F` does not exist:** `KIND` is required. Writes `<F>` and `<F minus .html>.kit.css`
-  (`harness/lib/stagekit.mjs`'s `buildKit`, the same function `make stagekit` uses, so the pasted block
+  (`harness/lib/stagekit.mjs`'s `buildKit`, the same function `make dev-tool X=stagekit` uses, so the pasted block
   is never a second, drifting copy of the ramp), full-bleed, theme tokens only, display-size type, a
   layout that fills most of the frame. `THEME=` with no matching `themes/<name>.json` refuses unless
   `INVENT=1` is also passed (see below).
@@ -90,7 +90,7 @@ regardless (a real multi-aspect screen route waits on `make preview` itself carr
 | `chat` | a sent bubble and a reply, on a dark ground | an agent conversation |
 | `card` | one large photo card, centred | a swipe/result card |
 
-A `<fill: image path>` marker is left where a real image belongs; `make screen` refuses to render a
+A `<fill: image path>` marker is left where a real image belongs; `make dev-tool X=screen` refuses to render a
 fragment that still carries one, so a screen cannot ship with a silently blank slot.
 
 **`INVENT=1`** never fabricates a full theme file mechanically: it runs impeccable's `palette.mjs --from
@@ -120,17 +120,17 @@ skills; these are product screens, not a page), `ericzakariasson/scandinavian-de
 Built for the `vawe` theme against `example-madera`:
 
 - `films/scene/vawe-flow-editor.html`, `KIND=editor`, the typed prompt "Make a 12 second launch
-  film" in a bezelled window on a dark ground. `make screen ... REF=example-madera ACT=1`: fill 0.45
+  film" in a bezelled window on a dark ground. `make dev-tool X=screen ... REF=example-madera ACT=1`: fill 0.45
   (ref 0.52, ok), detail 11.6 (ref 3.75, ok), colourfulness 12 (ref 12.05, ok), smallest text 38px,
   nothing clipped, no impeccable findings.
 - `films/scene/vawe-flow-results.html`, `KIND=grid`, six real stills from
   `/.vawe-data/uploads/vawe-flow/` in a 3x2 grid, each cell at `aspect-ratio:16/9` (the source stills'
   own aspect), so `object-fit:cover` neither crops nor letterboxes: every still shows its own
-  composition whole. `make screen ... REF=example-madera ACT=5`: fill 0.22 (ref 0.27, ok), detail 9.5
+  composition whole. `make dev-tool X=screen ... REF=example-madera ACT=5`: fill 0.22 (ref 0.27, ok), detail 9.5
   (ref 11.43, ok), smallest text 38px, nothing clipped, no impeccable findings.
 
 **A caught regression, worth stating because the eye missed it and a gate did not exist to catch it
-either.** The first version of the results screen passed `make screen` (fill/detail both "ok") while
+either.** The first version of the results screen passed `make dev-tool X=screen` (fill/detail both "ok") while
 badly broken: the title "SIX FILMS SHIPPED THIS WEEK" was clipped by the top edge, the bottom row ran
 off the bottom, and cropped stills cut their own on-screen text ("...M" for "4.8M", "...ers ask
 Reddit." for "Buyers ask Reddit."). Content measurement (fill/detail/photo) cannot see this: a title cut
@@ -140,7 +140,7 @@ replaced with the storyboard's own beat-8 copy, "Your films". And the CLIPPED ch
 a static source parse cannot see a percentage width or an `object-fit` crop resolve, so it reads the
 LAID-OUT page instead (`preview-fragment.mjs --boxes-out`), which is the only way to catch it.
 
-Before (`make screen` on the broken version):
+Before (`make dev-tool X=screen` on the broken version):
 ```
 · clipped ·
   [OFF FRAME] <p> "SIX FILMS SHIPPED THIS WEEK": 13px past the top edge

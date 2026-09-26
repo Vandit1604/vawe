@@ -151,7 +151,7 @@ form.
 across the whole film and reports how much of the motion is the GROUND and how much is the FILM, and it
 runs inside `make ship`. `engine-doctrine/CRAFT/GRAMMAR.md` records a per-shot motion range for 16 reference films
 ("a shot in work that reads well measures 0.37 to 13.49"). Both are BOUNDS. Neither reads the SHAPE. The
-nearest existing finding, `front-loaded` (`quality/gates/direction-floor.mjs:393`), counts where reveals
+nearest existing finding, `front-loaded` (`direction-floor.mjs:393` (retired)), counts where reveals
 land, not how intensity moves.
 
 **The concrete change.** A doc rule, not a gate: `motion-split` already has the per-sample series in
@@ -258,7 +258,7 @@ Two things follow, and neither is engine code:
    cost a line and is the highest-value edit in this document.
 2. **The handle vocabulary is named but not demonstrated.** `hang`, `fling`, `overshoot`, `easyEase` and
    `linear` all carry good blurbs in `core/motion/motion.js:226`. No shipped film shows what one looks like.
-   A `make catalog` card per handle, or one demo scene, would do more than any new feature here.
+   A `make site X=catalog` card per handle, or one demo scene, would do more than any new feature here.
 
 **The Separate Dimensions finding, which is the sharpest thing this pass turned up.** In After Effects,
 Position is ONE property with a spatial motion path, and a designer who wants X and Y on different

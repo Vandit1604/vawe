@@ -1,7 +1,7 @@
 ---
 name: caption-safe-strip
 when: shipping to a phone feed (tiktok/reels/shorts) or captioning any video
-holds: gated (make audit ASPECT=all; overlap/clipped-text/safe checks read core/layout/safe.js DESTINATIONS)
+holds: gated (make check GATE=audit ASPECT=all; overlap/clipped-text/safe checks read core/layout/safe.js DESTINATIONS)
 answers: "the per-destination safe strip a caption or a bottom-anchored headline must clear"
 group: density
 ---

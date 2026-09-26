@@ -14,7 +14,7 @@ const THEME_INK = () => `rgb(${glowRGB('var(--ink)').join(',')})`;
 // static PNG data-URL that replaces the <img> src. The source bitmap is static and each pass is a PURE
 // function of (pixels, opts, seed), so after the bake every renderFrame(n) returns identical bytes.
 // No wall clock, no per-frame canvas, no state. This is why Tier 2 is safe: static source, one-shot
-// transform (unlike Tier 5 sim/audio). `make probe`/`make snap` are the judges.
+// transform (unlike Tier 5 sim/audio). `make check GATE=probe`/`make check GATE=snap` are the judges.
 //
 // A pass is `(srcCtx, dstCtx, W, H, opts, seed) => void`, read the source, draw the result on dst.
 // Pure numeric helpers (luma, Bayer, cell average) are exported for node lib-tests (no DOM needed).

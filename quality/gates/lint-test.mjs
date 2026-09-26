@@ -106,14 +106,9 @@ ok(/\[enter-and-retreat\]/.test(badDir), 'direct: enter-and-retreat tell fires (
 const cleanDir = direct('films/scene/sample.json');
 ok(!/\[(linear-motion|monotone-timing|enter-and-retreat)\]/.test(cleanDir), 'direct: clean sample.json trips none of the new tells', 'direct-clean-silent');
 
-// --- direction floor: fails a plain slideshow, passes a directed scene (the ambition floor) ---
-// quality/fixtures/directed-beat.json is a beat's baked output (blueprints are retired, engine-doctrine/MISTAKES.md
-// the retire-blueprints migration): literal kinetic-reveal + count-up layers, `_beat`-tagged, the same
-// shape every shipped film that used {type:"beat"} was baked to.
-const floor = (rel) => { try { execFileSync('node', [path.join(root, 'quality/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); return 0; } catch (e) { return e.status ?? 1; } };
-const floorOut = (rel) => { try { return execFileSync('node', [path.join(root, 'quality/gates/direction-floor.mjs'), path.join(root, rel)], { encoding: 'utf8' }); } catch (e) { return `${e.stdout || ''}${e.stderr || ''}`; } };
-ok(floor('quality/fixtures/plain-slideshow.json') === 1 && /\[plain-slideshow\]/.test(floorOut('quality/fixtures/plain-slideshow.json')), 'direction-floor: FAILS a plain slideshow (rise/fade only)', 'floor-plain-slideshow-fails');
-ok(floor('quality/fixtures/directed-beat.json') === 0, 'direction-floor: PASSES a directed (baked-beat) scene', 'floor-directed-beat-passes');
+// direction-floor.mjs (the ambition floor: plain-slideshow, low-vocab, sparse-beats, feature-poverty)
+// was a TASTE gate and was deleted, not moved (engine-doctrine/SAFEGUARDS.md); its thresholds now live
+// in engine-doctrine/CRAFT/DIRECTION.md as doctrine for a human/agent judge, not a static check.
 
 // --- staggerTotalWarns: an authored split stagger over the 0.5s total-arrival budget must say so ---
 const wideChar = lintData({ module: 'scene', duration: 5, layers: [

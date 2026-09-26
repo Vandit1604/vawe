@@ -160,7 +160,7 @@ layers.push({
 
 CLAUSES.forEach((_, i) => { const c = clause(i); if (c) layers.push(c); });
 
-// `make seam-check` can (engine-doctrine/MISTAKES.md #144). Holding each span a little past its cut means the frame
+// `make check GATE=seam-check` can (engine-doctrine/MISTAKES.md #144). Holding each span a little past its cut means the frame
 const BG_LAP = 0.2;
 const bg = TONE.map((tone, i) => {
   const to = i === TONE.length - 1 ? CUTS[i + 1] : r1(CUTS[i + 1] + BG_LAP);

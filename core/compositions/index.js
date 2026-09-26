@@ -14,7 +14,7 @@
 //     with `delay` offset by `ctx.start` and `immediateRender:true` so the start values are pinned.
 //   • No `Date.now()`, no `Math.random()`, no reading prior DOM/frame state, pure in the frame.
 //   • `seekAll(t)` (core/clips.js) pauses+seeks `gsap.globalTimeline` each frame, so the whole timeline
-//     is a pure function of t regardless of render order. `make probe` guards it.
+//     is a pure function of t regardless of render order. `make check GATE=probe` guards it.
 // SVG draw-on uses the pathLength=1 / dasharray "1 1" trick (as PARTS.drawOn) so it needs no getTotalLength
 // (the layer is not in the document yet at build() time, scene.js appends AFTER renderer.build).
 
@@ -76,7 +76,7 @@ function buildPipelineDom(el, labels, accent) {
 // EVERY tween is a fromTo with immediateRender:true so its start value is PINNED at build time,
 // seeking the paused global timeline to any t then yields the same DOM regardless of which frames
 // rendered before it (pure in n). No `gsap.to(...immediateRender:false)`: that leaves the END value
-// stuck when the timeline is seeked backwards, which is exactly the render-order impurity `make probe`
+// stuck when the timeline is seeked backwards, which is exactly the render-order impurity `make check GATE=probe`
 // exists to catch. The travelling token appears/moves/vanishes in ONE keyframed fromTo for the same
 // reason. No colour tween between two `var()` strings, GSAP can't interpolate them (it snaps/NaNs).
 function animatePipelineFlow(gsap, start, R, dom) {
@@ -173,7 +173,7 @@ function buildCommaSplitDom(fields, layout) {
 // ---- the timeline ----
 // Every tween is a fromTo with immediateRender:true, so seeking to any t gives the same DOM whatever
 // rendered before it. See the pipelineFlow note above: a bare `.to()` leaves the end value stuck when
-// the paused global timeline is seeked backwards, which is the render-order impurity `make probe` catches.
+// the paused global timeline is seeked backwards, which is the render-order impurity `make check GATE=probe` catches.
 function animateCommaFields(gsap, start, R, HOLD, dom, targets) {
   dom.texts.forEach((_, i) => {
     const to = targets[i];

@@ -121,9 +121,7 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from '../../quality/gates/content-check.mjs';
 import { evenSamples } from '../../quality/gates/beats-of.mjs';
 import { gradeable, tileBox, baseOf } from '../../quality/gates/tile.mjs';
-import { classifyRegions } from '../../quality/gates/motion-floor.mjs';
 import { sceneTiming } from '../../quality/gates/scene-timing.mjs';
-import { exitEmphasis, entranceEmphasis } from '../../quality/gates/choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { DIAL_CONTRACT_VIOLATIONS } from '../../core/registry/knobs.js';
@@ -143,7 +141,7 @@ const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error(
 test('lib-test: gates', async () => {
 // ---- a gate's own FIX INSTRUCTION must be a command that runs ----
 // `quality/gates/audio-check.mjs` told an author to run `make sfx` in two places and printed it inside
-// the finding, in the tone of the fix. There is no such target; the bake is `make audio`. So following
+// the finding, in the tone of the fix. There is no such target; the bake is `make gen X=audio`. So following
 // a gate's own advice failed with "No rule to make target `sfx`", which is worse than no advice: it
 // teaches the reader that the gates do not know their own repo, and the next real instruction gets
 // ignored too. `make check GATE=doc-refs` already checks this for DOCS, and found 111 stale paths when it landed.
@@ -320,9 +318,9 @@ test('lib-test: gates', async () => {
   // EVERY CONVERTED GATE, BY NAME. A gate that goes back to printing its findings by hand is the whole
   // bug returning, and it would return quietly, so it is named here rather than counted.
   const CONVERTED = ['quality/gates/preflight.mjs', 'quality/gates/beat-check.mjs',
-    'quality/gates/direction-floor.mjs', 'quality/gates/seams.mjs',
+    'quality/gates/seams.mjs',
     'quality/gates/designspec-check.mjs', 'quality/gates/copy-check.mjs', 'quality/gates/read-check.mjs',
-    'quality/gates/pace-check.mjs', 'quality/gates/eye-trace.mjs', 'quality/gates/plan-vs-render.mjs',
+    'quality/gates/plan-vs-render.mjs',
     'harness/author/motion-director.mjs', 'quality/audit.mjs'];
   for (const g of CONVERTED) {
     const src = fs.readFileSync(path.join(repoRoot, g), 'utf8');
@@ -444,31 +442,8 @@ test('lib-test: gates', async () => {
 }
 
 
-// ---- direction-floor: a seam recipe is a declared transition, read before recipe expansion --------
-// DEFECT: direction-floor reads `sig.transition` off the EXPANDED scene, where recipes/expand.mjs has
-// already compiled a `recipes[]` seam line to plain `motion` keys and deleted `recipes`. A film whose
-// every joint is a seam recipe (no raw `seams`/`cuts`/`transitions`) then measured zero transitions and
-// fired `no-transition` on a film that had in fact earned several. Fixed by counting seam-kind recipe
-// lines on the RAW scene, before expansion.
-{
-  const seamScene = {
-    module: 'scene', duration: 4,
-    layers: [
-      { id: 'a', type: 'text', text: 'Hello', size: 60, w: 400, start: 0 },
-      { id: 'b', type: 'text', text: 'World', size: 60, w: 400, start: 1.4 },
-    ],
-    recipes: [{ recipe: 'flow-seam', at: 1, out: 'a', in: 'b' }],
-  };
-  const tmp2 = fs.mkdtempSync(path.join(os.tmpdir(), 'direction-floor-seam-'));
-  const seamFile = path.join(tmp2, 'seam.json');
-  fs.writeFileSync(seamFile, JSON.stringify(seamScene));
-  const seamRun = spawnSync(process.execPath, [path.join(repoRoot, 'quality/gates/direction-floor.mjs'), seamFile], { encoding: 'utf8' });
-  ok('direction-floor: a seam recipe counts as a transition (transition×1 in the vocabulary line)',
-    /transition×1/.test(seamRun.stdout));
-  ok('direction-floor: a seam recipe means no-transition does not fire',
-    !/no-transition/.test(seamRun.stdout));
-  fs.rmSync(tmp2, { recursive: true, force: true });
-}
+// direction-floor.mjs was a TASTE gate (engine-doctrine/SAFEGUARDS.md) and was deleted; the seam-recipe
+// vocabulary defect its own test named here no longer has a gate to regress in.
 
 
 // ---- beats-of: a film's storyboard beat table wins over the layer-start guess ----------------------
@@ -562,7 +537,7 @@ test('lib-test: gates', async () => {
 }
 
 
-// ---- make transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
+// ---- make study-tool X=transitions D=<film.json>: the per-boundary CLI report, on a fixture storyboard ----------
 {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-transitions-'));
   const sbPath = path.join(tmp, 'x.storyboard.md');
@@ -593,17 +568,17 @@ test('lib-test: gates', async () => {
   ].join('\n'));
   fs.writeFileSync(jsonPath, '{"module":"scene"}');
   const r = spawnSync('node', [path.join(repoRoot, 'quality/gates/transitions-catalog.mjs'), jsonPath], { encoding: 'utf8', cwd: repoRoot });
-  ok('make transitions D=: exits 0 on a fixture storyboard', r.status === 0);
-  ok('make transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
-  ok('make transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
+  ok('make study-tool X=transitions D=: exits 0 on a fixture storyboard', r.status === 0);
+  ok('make study-tool X=transitions D=: names the boundary and its current fx', /beat 1 \(open\) -> beat 2 \(reveal\)/.test(r.stdout) && /fx:cinematicZoom/.test(r.stdout));
+  ok('make study-tool X=transitions D=: prints the stated why', /time · a slow reveal · invisible/.test(r.stdout));
   // (b) no transition_why: never guess a candidate from the beat's name ("grain gradient" -> "grain").
   const candidateLines = r.stdout.split('\n').filter((l) => l.trim().startsWith('candidates'));
-  ok('make transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
+  ok('make study-tool X=transitions D=: an unreasoned boundary states the relationship first, never a name-guessed fx',
     candidateLines.some((l) => l.includes('state the relationship first (transition_why)'))
     && !candidateLines.some((l) => l.includes('grain')));
   // (c) the relationships list + doc anchor print exactly once, not once per boundary (3 boundaries here).
   const relLines = (r.stdout.match(/^  relationships: /gm) || []).length;
-  ok('make transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
+  ok('make study-tool X=transitions D=: the relationships legend prints once, not per boundary', relLines === 1);
   fs.rmSync(tmp, { recursive: true, force: true });
 }
 
@@ -746,12 +721,9 @@ test('lib-test: gates', async () => {
   // HARD_CODES escalates to blocking regardless of TASTE, so the true answer is blocked:true.
   ok('run-author-check.mjs: a HARD_CODES-escalated report-tier code logs blocked:true', runs[0]
     && runs[0].checks.some((c) => c.name === 'preflight' && c.blocked === true));
-  // direction-floor's no-transition finding is severity WARN (F.warn, not F.fail) but is ALSO a
-  // HARD_CODES code, so it blocks too. This is the shape the old `severity === 'error'` rule missed
-  // entirely (a warn-severity finding could never be marked blocked), which is exactly the real defect
-  // being fixed: a run log that said "reported" for a code that was actually stopping the ship.
-  ok('run-author-check.mjs: a HARD_CODES-escalated WARN-severity code also logs blocked:true', runs[0]
-    && runs[0].checks.some((c) => c.name === 'direction-floor' && c.codes.includes('no-transition') && c.blocked === true));
+  // The WARN-severity HARD_CODES case this used to pin (direction-floor's no-transition) was a TASTE
+  // gate and was deleted (engine-doctrine/SAFEGUARDS.md); the escalation mechanism itself is still
+  // covered by the report-tier case just above.
   // TIMING: the whole ladder's wall time lands at the top level, and at least one gate that actually
   // ran (preflight always fires on sample.json) carries its own wallMs, read off the `.wallms` sidecar
   // spawnGate drops in quality/gates/author-check.mjs.
@@ -867,46 +839,8 @@ test('lib-test: gates', async () => {
 }
 
 
-// ---- quality/gates/motion-floor.mjs classifyRegions: one known-answer fixture per KIND ------------
-// GW/GH match motion-floor's own grid (96x54); fixtures reuse the exact same shapes its own
-// --self-test asserts against, so the two never drift into disagreeing about what a "clean camera
-// pan" looks like.
-{
-  const GW = 96, GH = 54;
-  const kindOf = (a, b) => classifyRegions(a, b).sort((x, y) => y.amount - x.amount)[0]?.kind;
-
-  const block = (shiftX) => {
-    const f = new Uint8Array(GW * GH).fill(80);
-    for (let y = 1; y < GH - 1; y++) for (let x = 1 + shiftX; x < GW - 1 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 200;
-    return f;
-  };
-  ok('classifyRegions: a whole-frame rigid pan reads as camera', kindOf(block(0), block(3)) === 'camera');
-
-  const card = (shiftX) => {
-    const f = new Uint8Array(GW * GH).fill(240);
-    for (let y = 18; y < 36; y++) for (let x = 30 + shiftX; x < 58 + shiftX; x++) if (x >= 0 && x < GW) f[y * GW + x] = 40;
-    return f;
-  };
-  ok('classifyRegions: a box translating reads as move', kindOf(card(0), card(3)) === 'move');
-
-  const square = (half) => {
-    const f = new Uint8Array(GW * GH).fill(240);
-    for (let y = 27 - half; y < 27 + half; y++) for (let x = 48 - half; x < 48 + half; x++) f[y * GW + x] = 40;
-    return f;
-  };
-  ok('classifyRegions: a box growing about its own centre reads as scale', kindOf(square(6), square(10)) === 'scale');
-
-  const flat = new Uint8Array(GW * GH).fill(120);
-  const reveal = Uint8Array.from(flat); for (let i = 0; i < 90; i++) reveal[i] = 250;
-  ok('classifyRegions: a small region appearing reads as reveal', kindOf(flat, reveal) === 'reveal');
-
-  const drift = Uint8Array.from(flat, (v) => v + 3);
-  ok('classifyRegions: a whole-frame low-amplitude drift reads as ambient', kindOf(flat, drift) === 'ambient');
-}
-
-
 // ---- quality/gates/scene-timing.mjs choreography: lives, beat motion, handoffs ---------------------
-// Known-answer SCENES, one per claim `make choreo` makes. Minimal on purpose: each fixture isolates
+// Known-answer SCENES, one per claim `make check GATE=choreo` makes. Minimal on purpose: each fixture isolates
 // the one condition its name tests, so a failure here points at the one rule that broke rather than
 // requiring a real film to be re-read to find it.
 {
@@ -1011,82 +945,10 @@ test('lib-test: gates', async () => {
 }
 
 
-// ---- quality/gates/choreo.mjs exitEmphasis: owner rule, "exits read faster than entrances" --------
-{
-  // symmetric: the exit takes exactly as long as the entrance, and eases with no accelerating curve.
-  // Flagged: neither half of the rule (shorter, or an accelerating ease) is true.
-  const slowSymmetric = sceneTiming({ module: 'scene', duration: 6, layers: [
-    { type: 'rect', id: 'slow', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, anim: 'fade', enterDur: 1,
-      out: 'fade', exitDur: 1, motion: [{ t: 0, opacity: 1 }, { t: 1, opacity: 0 }] },
-  ] });
-  const slowLife = slowSymmetric.lives.find((L) => L.id === 'slow');
-  const slowCheck = exitEmphasis(slowLife);
-  ok('exitEmphasis: a slow symmetric exit (no accel ease) is flagged', slowCheck && slowCheck.ok === false);
-
-  // a short exit, eased in: both halves of the rule hold (it is also clearly shorter than its entry).
-  const shortEaseIn = sceneTiming({ module: 'scene', duration: 6, layers: [
-    { type: 'rect', id: 'quick', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, anim: 'fade', enterDur: 1,
-      out: 'fade', exitDur: 0.2, motion: [{ t: 0, opacity: 1 }, { t: 1, opacity: 0, ease: 'easeInCubic' }] },
-  ] });
-  const quickLife = shortEaseIn.lives.find((L) => L.id === 'quick');
-  const quickCheck = exitEmphasis(quickLife);
-  ok('exitEmphasis: a short, ease-in exit passes', quickCheck && quickCheck.ok === true && quickCheck.ease === 'easeInCubic');
-
-  // a long exit that nonetheless EASES with an accelerating curve still passes: duration is not the
-  // only door, an accelerating ease earns it on its own (this is the case the "rush" alias exists for).
-  const longButAccel = sceneTiming({ module: 'scene', duration: 6, layers: [
-    { type: 'rect', id: 'rushed', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, anim: 'fade', enterDur: 1,
-      out: 'rush', exitDur: 1 },
-  ] });
-  const rushedCheck = exitEmphasis(longButAccel.lives.find((L) => L.id === 'rushed'));
-  ok('exitEmphasis: an equal-length exit with an accelerating ease (out:"rush") passes', rushedCheck && rushedCheck.ok === true);
-
-  // no exit declared at all: nothing to grade, exitEmphasis says so rather than inventing a verdict.
-  const noExitLife = sceneTiming({ module: 'scene', duration: 2, layers: [
-    { type: 'rect', id: 'bare', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
-  ] }).lives.find((L) => L.id === 'bare');
-  ok('exitEmphasis: a layer with no declared exit is not graded', exitEmphasis(noExitLife) === null);
-
-  // MEASURED SPEED: a symmetric duration, a non-accelerating ease, but the layer's own x track
-  // measurably speeds up toward the exit -> passes on the measured number alone.
-  const measuredFast = sceneTiming({ module: 'scene', duration: 6, layers: [
-    { type: 'rect', id: 'zoomOut', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1, out: 'fade', exitDur: 1,
-      motion: [{ t: 0, x: 0 }, { t: 3, x: 10 }, { t: 3.5, x: 60 }, { t: 4, x: 900 }] },
-  ] });
-  const zoomOutCheck = exitEmphasis(measuredFast.lives.find((L) => L.id === 'zoomOut'));
-  ok('exitEmphasis: a symmetric duration with no accelerating ease still passes on measured speed alone',
-    zoomOutCheck && zoomOutCheck.ok === true && zoomOutCheck.endSpeed > zoomOutCheck.startSpeed);
-
-  // an exit that never moves position (fade-only) has nothing to measure: the speed fields stay null
-  // and the verdict rests on duration/ease exactly as before (unchanged behaviour, #arrival note above).
-  ok('exitEmphasis: an opacity-only exit reports no measured speed', quickCheck.startSpeed === null && quickCheck.endSpeed === null);
-}
-
-
-// ---- quality/gates/choreo.mjs entranceEmphasis: an entrance should DECELERATE into place ----------
-{
-  const settling = sceneTiming({ module: 'scene', duration: 6, layers: [
-    { type: 'rect', id: 'lands', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1,
-      motion: [{ t: 0, x: 900 }, { t: 1, x: 0, ease: 'easeOutCubic' }] },
-  ] });
-  const landsCheck = entranceEmphasis(settling.lives.find((L) => L.id === 'lands'));
-  ok('entranceEmphasis: an entrance that slows into place passes', landsCheck && landsCheck.ok === true
-    && landsCheck.endSpeed < landsCheck.startSpeed);
-
-  const notSettling = sceneTiming({ module: 'scene', duration: 6, layers: [
-    { type: 'rect', id: 'overshoots', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 4, enterDur: 1,
-      motion: [{ t: 0, x: 900 }, { t: 1, x: 0, ease: 'easeInCubic' }] },
-  ] });
-  const overshootsCheck = entranceEmphasis(notSettling.lives.find((L) => L.id === 'overshoots'));
-  ok('entranceEmphasis: an entrance that never decelerates is flagged', overshootsCheck && overshootsCheck.ok === false);
-
-  const noMotion = sceneTiming({ module: 'scene', duration: 2, layers: [
-    { type: 'rect', id: 'bare2', x: 0, y: 0, w: 300, h: 300, start: 0, duration: 2 },
-  ] }).lives.find((L) => L.id === 'bare2');
-  ok('entranceEmphasis: nothing measured (no `anim`, no motion) gives no verdict', entranceEmphasis(noMotion) === null);
-}
-
+// choreo.mjs's exitEmphasis/entranceEmphasis ("exits read faster than entrances", "an entrance should
+// decelerate into place") were a TASTE gate and were deleted, not moved: the owner rule itself still
+// lives in engine-doctrine/CRAFT/KEYED-MOTION.md, unwatched by any static check now.
 
   assert.equal(fail, 0, `${fail} of ${pass + fail} assertion(s) failed`);
-  assert.ok(pass >= 157, `expected at least 157 assertions (the count this file was split with) to have run, saw ${pass}`);
+  assert.ok(pass >= 143, `expected at least 143 assertions (the count after retiring the choreo/motion-floor TASTE gates) to have run, saw ${pass}`);
 });

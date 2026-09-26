@@ -15,7 +15,7 @@ Read by: `harness/author/claims.mjs` (evaluates `_claims.json`) and anyone minin
 a `recipes/` entry.
 
 The one doc: the `_` field at the top of `grammar/_claims.json`, which explains the claim format.
-Checked by: `make claims`.
+Checked by: `make study-tool X=claims`.
 
 Look first: `grammar/_claims.json` for the claim format, `grammar/example-madera.json` for a worked
 mined reference.

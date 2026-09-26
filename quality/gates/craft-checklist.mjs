@@ -23,7 +23,7 @@
 // a fabricated one-liner defeats it, and a gate that pretended to grade prose would manufacture verdicts.
 // What it can hold an author to is whether the decision was written down at all.
 //
-//   node quality/gates/craft-checklist.mjs <scene.json>   ·   make craft-check D=<file>
+//   node quality/gates/craft-checklist.mjs <scene.json>   ·   make check GATE=craft-check D=<file>
 // Wired into author-check.mjs (HARD_CODES, ~line 152): `craft-unvisited` blocks a ship.
 //
 // A DOC ADDED TODAY MUST NOT RETROACTIVELY BLOCK A FILM APPROVED BEFORE IT EXISTED. A doc is relevant
@@ -57,7 +57,7 @@ function walkLayers(layers, fn) {
 }
 
 // A "product screen" is what SCREENS.md is actually about (an editor, a results grid, a dashboard, a
-// chat, a card, per `make screen KIND=`): a BEAT that WANTS one, not a layer TYPE. Gating this on
+// chat, a card, per `make dev-tool X=screen KIND=`): a BEAT that WANTS one, not a layer TYPE. Gating this on
 // `hasHtml` (the original shape of this feature) made the rule unreachable on the exact anti-pattern
 // it exists to catch: a film that screenshots a product screen as a plain `image` layer never sets
 // `hasHtml`, so the doc stayed silent on it forever (`harness/lib/craft-rules.mjs`'s `rulesFor` receipt
@@ -288,7 +288,7 @@ const isMain = import.meta.url === pathToFileURL(process.argv[1] || '').href;
 if (isMain) {
   const file = process.argv.slice(2).find((a) => !a.startsWith('--'));
   if (!file || !fs.existsSync(file)) {
-    console.error('usage: node quality/gates/craft-checklist.mjs <scene.json>  |  make craft-check D=<file>');
+    console.error('usage: node quality/gates/craft-checklist.mjs <scene.json>  |  make check GATE=craft-check D=<file>');
     process.exit(2);
   }
   run(file);

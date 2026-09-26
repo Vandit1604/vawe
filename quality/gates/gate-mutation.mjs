@@ -1,7 +1,7 @@
 // gate-mutation.mjs, who checks the checkers?
 //
 //   node quality/gates/gate-mutation.mjs        run every case
-//   make gate-test
+//   make dev-tool X=gate-test
 //
 // A gate that cannot fail is worse than no gate: it reports green forever and everyone believes it.
 // That is not hypothetical here: the image legibility floor guarded on `b.height > 1`, so the ONE
@@ -80,7 +80,7 @@ const SB = ({ object = true, threads = false, beatObject = true, duration = '5s'
   '',
 ].join('\n');
 
-/** A `.intent.json` sidecar, the shape `make intent` writes. plan-vs-render reads exactly two fields off
+/** A `.intent.json` sidecar, the shape `make dev-tool X=intent` writes. plan-vs-render reads exactly two fields off
  *  each beat (the `span` and the `becomes:`) so those are what the cases vary; the rest is carried so a
  *  fixture stays a plausible sidecar rather than a stub shaped to one gate. */
 const B = (name, span, becomes) => ({
@@ -457,118 +457,6 @@ const CASES = [
         start: 0.2, duration: 1.6,
         motion: [{ t: 0, x: 0, y: 0 }, { t: 0.7, x: -380, y: -40, ease: 'linear' }, { t: 1.2, x: -470, y: -96, ease: 'easeOutCubic' }] },
     ], { duration: 2.4 }) },
-  { gate: 'directionfloor', name: 'no-continuous-object · every beat is an island across a cut', expect: 'fail',
-    match: /no-continuous-object/,   // blocking tier: must exit non-zero
-    scene: scene([TXT({ text: 'First island', start: 0.3, duration: 1.9 }),
-                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
-      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
-  // `sceneUnits: false` on both fail cases is not decoration: with beat-wrapping left on, the engine
-  // truncates every layer at its own beat and no spine is expressible at all, which is a different
-  // finding (below). These two pin the spine rule itself, so they must be films that could have one.
-  // The strong half: a persistent element that never CHANGES at the cut is a watermark, not a spine.
-  // Without this case the rule quietly degrades to "put a logo on every frame".
-  { gate: 'directionfloor', name: 'no-continuous-object · a static layer riding the cut is not a spine', expect: 'fail',
-    match: /none of them CHANGE there/,
-    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6 },
-                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
-      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
-  // The precondition, which cost a wasted render before it existed: a cut film with no choreographed
-  // `motion` gets beat-wrapping by default, so the renderer slides each beat out whole and truncates
-  // any layer authored across the cut. The gate used to read the raw `start`/`duration`, see a crosser,
-  // and pass a film whose spine had already been cut in half. A layer the wrapper confines to its own
-  // beat is therefore not a spine candidate at all, and the film is graded as having none. (The FACT
-  // of the truncation is `beats-wrapped-as-units`, pinned against beat-check below.)
-  { gate: 'directionfloor', name: 'a layer the beat wrapper truncates is not a spine', expect: 'fail',
-    match: /acrossBeats/,
-    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
-                    ken: { from: 1, to: 1.4 } },
-                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
-      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
-  // ...and the escape hatch must actually open. Same wrapped film, same cut, but the spine declares
-  // `acrossBeats`, so the renderer attaches it to the camera and leaves its window alone. If this case
-  // ever fails, the gate is demanding a continuous object and refusing to recognise the only way to
-  // author one, which is the contradiction that cost three authors a workaround each (MISTAKES #186).
-  { gate: 'directionfloor', name: 'acrossBeats lets a spine out of the beat wrapper', expect: 'pass',
-    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
-                    acrossBeats: true,
-                    motion: [{ t: 0, dx: 0, scale: 1 }, { t: 1.8, dx: 0, scale: 1 }, { t: 2.2, dx: -420, scale: 0.4 }, { t: 4.6, dx: -420, scale: 0.4 }] },
-                  TXT({ text: 'Second island', start: 2.6, duration: 2.4 })],
-      { sceneUnits: true, duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
-  // ...and the mirror (#25): a real continuous-object film must stay green, or the tell buys its
-  // sensitivity by calling every short film a slideshow, which trains everyone to ignore it (#159).
-  { gate: 'directionfloor', name: 'a continuous object that transforms across the cut is NOT a slideshow', expect: 'pass',
-    scene: scene([{ type: 'rect', x: 700, y: 460, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0.4, duration: 4.6,
-                    motion: [{ t: 0, x: 0, scale: 1 }, { t: 2.6, x: -420, scale: 0.4, ease: 'easeInOutCubic' }, { t: 4.6, x: -420, scale: 0.4 }],
-                    vars: { '--p': [0, 1] }, varsDelay: 1.6, varsDur: 0.6 },
-                  TXT({ text: 'Generating', start: 3, duration: 2, size: 64, split: 'word', preset: 'up' })],
-      { duration: 5, bg: [{ preset: 'gradient', from: 0, to: 5 }], cuts: [{ t: 2.4, style: 'punch', dur: 0.2 }] }) },
-
-  // ---- direction-floor · no-continuous-object, INFERRED half. The declared half above only wakes up
-  // when the scene says `cuts`/`seams`/`transitions`; a film of cross-faded islands says none of those
-  // and was invisible to it (MISTAKES #163). Boundaries are now inferred from the layer windows: a
-  // moment where ≥2 content layers leave and ≥2 unrelated ones arrive. All three directions pinned,
-  // because this half's whole risk is crying wolf, and a WARN-tier false positive is invisible to an
-  // exit code (#25, #159), hence `notMatch` on the mirrors.
-  { gate: 'directionfloor', name: 'no-continuous-object · cross-faded islands with no declared cut', expect: 'fail',
-    match: /no-continuous-object-inferred/, outputOnly: true,   // WARN tier: assert it SPOKE
-    scene: scene([TXT({ text: 'First island', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 0.1, duration: 1.6 }),
-                  TXT({ text: 'Second island', y: 300, start: 1.9, duration: 1.6, split: 'word', preset: 'scale' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 1.6 }),
-                  TXT({ text: 'Third island', y: 300, start: 3.7, duration: 2.0, split: 'word', preset: 'blur' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 3.7, duration: 2.0 })],
-      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
-  // The mirror: identical island structure, but a card rides every junction and MOVES through it.
-  { gate: 'directionfloor', name: 'an object carried through an undeclared junction is NOT a slideshow', expect: 'pass',
-    notMatch: /no-continuous-object/,
-    scene: scene([{ type: 'rect', x: 700, y: 700, w: 520, h: 160, bg: '#c2f23b', radius: 80, start: 0, duration: 6,
-                    motion: [{ t: 0, x: 0, scale: 1 }, { t: 1.8, x: -300, scale: 0.6, ease: 'easeInOutCubic' },
-                             { t: 3.6, x: 300, scale: 1.2, ease: 'easeInOutCubic' }, { t: 6, x: 0, scale: 1 }] },
-                  TXT({ text: 'First island', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 0.1, duration: 1.6 }),
-                  TXT({ text: 'Second island', y: 300, start: 1.9, duration: 1.6, split: 'word', preset: 'scale' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 1.6 }),
-                  TXT({ text: 'Third island', y: 300, start: 3.7, duration: 2.0, split: 'word', preset: 'blur' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 3.7, duration: 2.0 })],
-      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
-  // The second mirror, pinning the clause that keeps the inference narrow: a junction the STANDING SET
-  // outnumbers is a busy overlap, not an island break. Three elements hold the frame while one pair of
-  // lines swaps for another. A persistent set, so no boundary is inferred and nothing is said.
-  { gate: 'directionfloor', name: 'a standing set outnumbering the swap is not an island junction', expect: 'pass',
-    notMatch: /no-continuous-object/,
-    scene: scene([{ type: 'rect', x: 140, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
-                  { type: 'rect', x: 500, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
-                  { type: 'rect', x: 860, y: 700, w: 300, h: 120, bg: '#c2f23b', radius: 20, start: 0, duration: 6 },
-                  TXT({ text: 'First line', y: 300, start: 0.1, duration: 1.6, split: 'word', preset: 'up' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 0.1, duration: 1.6 }),
-                  TXT({ text: 'Second line', y: 300, start: 1.9, duration: 3.8, split: 'word', preset: 'scale' }),
-                  TXT({ text: 'and its caption', y: 460, size: 44, start: 1.9, duration: 3.8 })],
-      { duration: 6, bg: [{ preset: 'gradient', from: 0, to: 6 }] }) },
-
-  // ---- direction-floor · A MATCH CUT IS A CONTINUOUS OBJECT. The spanning test asks for one layer
-  // alive either side of the joint, and a match cut is two layers by construction, so a film held
-  // entirely by match cuts failed the rule for doing the exact thing the rule's fix message names.
-  // Both directions are pinned, because the fix's whole risk is handing out a free pass: the two
-  // fixtures below differ ONLY in where the handover lands.
-  { gate: 'directionfloor', name: 'a film held by match cuts is NOT a slideshow', expect: 'pass',
-    notMatch: /no-continuous-object/,
-    scene: scene([{ type: 'rect', id: 'dot', x: 900, y: 480, w: 120, h: 120, radius: 60, bg: '#c2f23b',
-                    start: 0, duration: 2.4, anim: 'none', out: 'none', exitDur: 0, becomes: 'card' },
-                  { type: 'rect', id: 'card', x: 700, y: 340, w: 520, h: 400, radius: 18, bg: '#1b1e26',
-                    start: 2.4, duration: 2.6, anim: 'none', exitDur: 0 }],
-      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }],
-        cuts: [{ t: 2.4, style: 'none' }] }) },
-  // ...and a handover whose two halves do not meet at the cut buys nothing. Without this the fix
-  // would be decoration: declare `becomes` anywhere near the film and the slideshow goes green.
-  { gate: 'directionfloor', name: 'a handover away from the joint is not a spine', expect: 'fail',
-    match: /no-continuous-object/,
-    scene: scene([{ type: 'rect', id: 'dot', x: 900, y: 480, w: 120, h: 120, radius: 60, bg: '#c2f23b',
-                    start: 0, duration: 0.8, anim: 'none', out: 'none', exitDur: 0, becomes: 'card' },
-                  { type: 'rect', id: 'card', x: 700, y: 340, w: 520, h: 400, radius: 18, bg: '#1b1e26',
-                    start: 2.4, duration: 2.6, anim: 'none', exitDur: 0 }],
-      { duration: 5, sceneUnits: false, bg: [{ preset: 'gradient', from: 0, to: 5 }],
-        cuts: [{ t: 2.4, style: 'none' }] }) },
-
   // ---- motion-director · linear-motion. WARN tier both ways, so both cases read the OUTPUT: the
   // exit code cannot see a warning, and the false positive this rule shipped for months was invisible
   // to it. The two fixtures carry the same travel on the same curve; only the ends differ.
@@ -729,7 +617,6 @@ const GATE_CMD = {
   validate: (f) => ['node', ['core/validate/validate.mjs', f]],
   beatcheck: (f) => ['node', ['quality/gates/beat-check.mjs', f]],
   layerprops: (f) => ['node', ['quality/gates/layer-props.mjs', f]],
-  directionfloor: (f) => ['node', ['quality/gates/direction-floor.mjs', f]],
   motiondirector: (f) => ['node', ['harness/author/motion-director.mjs', f]],
   designspec: (f) => ['node', ['quality/gates/designspec-check.mjs', f, '--strict']],
   storyboard: (f) => ['node', ['quality/gates/storyboard-check.mjs', f]],
@@ -800,7 +687,7 @@ function fakeBake(name, sim) {
 /** A snap baseline the CASE owns. `quality/baselines/snap/` is gitignored, so a fresh clone, a worktree or a CI
  *  box has none, and all three snap cases then reported "fired for the wrong reason" (the gate said
  *  "no baseline, so this checked NOTHING"), which reads in the summary exactly like a rotted fixture
- *  and unproves three gates on every machine but the one that happened to run `make snap-all SAVE=1`.
+ *  and unproves three gates on every machine but the one that happened to run `make check GATE=snap-all SAVE=1`.
  *  Same reasoning as fakeBake: a case must not lean on a machine-local artifact. A baseline already on
  *  disk is stashed and put back, so the harness cannot destroy the one a human saved. ~1s per save. */
 const snapStash = new Map();

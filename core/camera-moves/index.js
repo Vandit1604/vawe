@@ -7,7 +7,7 @@ import { nearest } from '../validate/util.mjs';
 // hand-typed, and the multi-keyframe ones emit interior `ease:"linear"` automatically so a chained push
 // is velocity-CONTINUOUS (engine-doctrine/MISTAKES.md #125: a chained ease-in-out pulses because it zeroes velocity
 // at every keyframe. The "shaking zoom"). Only the final settle eases out. All pure → renderFrame(n)
-// stays seek-safe; assert the endpoints with `make lib-test`.
+// stays seek-safe; assert the endpoints with `make test`.
 //
 // Pan math: the camera transform is `scale(s) translate(x,y)` about the stage centre, so translating by
 // (W/2 - tx, H/2 - ty) brings a target point (tx,ty) to centre at ANY scale, diveIn uses exactly this.

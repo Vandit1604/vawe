@@ -1,6 +1,6 @@
 // localize-assets.mjs: make a CAPTURED component self-contained, so a render never touches the network.
 //
-// `make capture` lifts a real UI block off a live site and absolutizes every asset URL against that
+// `make media X=capture` lifts a real UI block off a live site and absolutizes every asset URL against that
 // site. That makes the capture depend, at RENDER time, on a third party's CDN: the render is not
 // reproducible, it degrades offline with no error, and an archived film silently changes when the site
 // does. This module pulls every referenced asset next to the JSON and rewrites the markup to point at

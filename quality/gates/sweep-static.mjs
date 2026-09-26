@@ -6,7 +6,7 @@
 // cuts and content all sit frozen for the whole runtime still passes it clean. This gate reads the
 // rendered mp4 instead and asks the only question that matters at the end: did the pixels change.
 //
-//   node quality/gates/sweep-static.mjs films/scene/<file>.json   ·   make sweep-static D=<file>
+//   node quality/gates/sweep-static.mjs films/scene/<file>.json   ·   make check GATE=sweep-static D=<file>
 //
 // Requires out/<name>.mp4 (render first; the pixels only exist after render, same reason seams.mjs
 // needs the mp4 and not renderFrame). Missing or stale render: reported, not a crash, exit 0, because

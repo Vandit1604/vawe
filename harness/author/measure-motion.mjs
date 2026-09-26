@@ -10,7 +10,7 @@ const FROM = parseFloat(process.env.FROM ?? argv[1]);
 const TO = parseFloat(process.env.TO ?? argv[2]);
 const EXPECT = process.env.EXPECT || argv[3] || null;
 if (!VIDEO || !isFinite(FROM) || !isFinite(TO) || TO <= FROM) {
-  console.error('usage: make measure VIDEO=<file> FROM=<s> TO=<s> [EXPECT=<preset>]');
+  console.error('usage: make study-tool X=measure VIDEO=<file> FROM=<s> TO=<s> [EXPECT=<preset>]');
   process.exit(2);
 }
 const tmp = path.join(process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp', 'measure');

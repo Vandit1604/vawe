@@ -31,7 +31,7 @@ craft:
      heavy face at display scale, one accent, and editor chrome (a cursor, a selection box) giving every
      move a visible CAUSE. That film never changes composition; the words move inside it. This one does
      the same with a single word, and spends the difference on a claim that is true and checkable:
-     `make probe` proves renderFrame(n) is pure, so the closing frame really is the opening frame. -->
+     `make check GATE=probe` proves renderFrame(n) is pure, so the closing frame really is the opening frame. -->
 
 ## Beat 1: Land (0s-1.4s)
 - type: hook

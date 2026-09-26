@@ -41,7 +41,7 @@ craft:
          film on this brand inherits the same decision.
        - the CUT FAMILY was derived, not picked. fathom's durationScale of 0.85 resolves to a whip
          default through core/registry/theme-contract.js. Nobody typed "whip".
-       - the MOTION was verified by measurement, not by looking: `make motion-trace` reports the depth
+       - the MOTION was verified by measurement, not by looking: `make check GATE=motion-trace` reports the depth
          rule's per-frame velocity, which is the only way to know a hand-keyed track actually moved.
 
      WHY NO DIVER. Every dive-product film cuts to a diver, and the diver is the least informative

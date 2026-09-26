@@ -12,9 +12,9 @@ primitives, reflecting the real site. The old `demo`/`brandfilm` templates were 
 ## The workflow
 
 ```bash
-make brandspec URL=https://site.com                # real font families, weights, :root tokens, WCAG contrast
+make study-tool X=brandspec URL=https://site.com                # real font families, weights, :root tokens, WCAG contrast
 make sections URL=https://site.com NAME=<brand>   # inventory every real section → sections/*.png + sections.json
-make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero pixels → dominance + swatches
+make study-tool X=palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero pixels → dominance + swatches
 # then hand-author themes/<brand>.json from those two. There is no one-shot `brandkit`; it went with the templates.
 ```
 
@@ -23,7 +23,7 @@ make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero 
    respect dominance (white-first vs dark).
 2. **Storyboard = one beat per real section, in the site's order** (hook → suspense → payoff overall).
 3. **Reflect each section with its real assets:**
-   - `make capture URL=… SEL='<selector>' NAME=<brand> LABEL=<x>` → a crisp, animatable `component`
+   - `make media X=capture URL=… SEL='<selector>' NAME=<brand> LABEL=<x>` → a crisp, animatable `component`
      (target the UI cluster, e.g. `[class*=illustration]`, to avoid a duplicate headline).
    - Only a true `<canvas>`/WebGL section can't DOM-capture → use the section screenshot as a clipped
      `image` layer with `ken`. Both keep the real logos/gradients/copy.
@@ -31,8 +31,8 @@ make palette   IMG=assets/brands/<brand>/sections/01-*.png   # eyedrop the hero 
      layer, never by editing captured glyphs.
 4. **Hand-write HTML only for connective tissue**: the hook, the CTA, number counters. Preview every
    hand fragment before rendering: `make preview HTML=frag.html THEME=<brand>` → `/tmp/preview.png`.
-5. **Verify:** `make beats D=<file> VS=<brand>` (fidelity vs source) → render → `make audit` →
-   `make motion` → `make ledger`. See `CLAUDE.md` for the full loop.
+5. **Verify:** `make dev-tool X=beats D=<file> VS=<brand>` (fidelity vs source) → render → `make check GATE=audit` →
+   `make check GATE=motion` → `make dev-tool X=ledger`. See `CLAUDE.md` for the full loop.
 
 ## References
 - Primitive vocabulary: **`engine-doctrine/PRIMITIVES.md`**  ·  Motion rules: **`engine-doctrine/MOTION-CRAFT.md`**

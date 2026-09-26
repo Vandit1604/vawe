@@ -271,9 +271,18 @@ function buildCss(opts, { cls, mo, mask, ridge, darkCells, litCells, throughCell
     : '';
 
   return [
+    // EDGE FALLOFF ON THE GROUND ITSELF. Every lobe/shade/cell layer below already fades to nothing
+    // well inside its own (overscanned, inset:-4%) box, but the ground fill was a flat colour reaching
+    // exactly to inset:0, so a field dropped into any box smaller than the full frame (the documented
+    // use: "a caller drops the result into a {type:html} layer") showed that box's edge as a hard
+    // rectangle. A radial mask on the outer element hides everything inside it, ground included, the
+    // same taper the rest of the field already has. Full-frame usage (finish.js's `light` key) reads
+    // as a gentle frame-edge vignette instead, never a solid colour meeting nothing.
     `.${cls}{position:absolute;inset:0;overflow:hidden;isolation:isolate;background:${opts.colour.ground}`
       // A dial at its no-op value emits nothing, so the markup says what the options said.
-      + `${opts.colour.vivid === 1 ? '' : `;filter:saturate(${n(opts.colour.vivid)})`}}`,
+      + `${opts.colour.vivid === 1 ? '' : `;filter:saturate(${n(opts.colour.vivid)})`}`
+      + ';mask-image:radial-gradient(75% 75% at 50% 50%, #000 78%, transparent 100%)'
+      + ';-webkit-mask-image:radial-gradient(75% 75% at 50% 50%, #000 78%, transparent 100%)}',
     `.${cls} .f{position:absolute;inset:-4%;background:${paintField(opts)}}`,
     // Ambient fill, and the reason a picture can have warm light and cool shadows at once.
     //

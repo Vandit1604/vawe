@@ -1,7 +1,7 @@
 {
-  "total": 744,
+  "total": 763,
   "previewed": 345,
-  "families": 64,
+  "families": 67,
   "tags": [
     [
       "asset",
@@ -36,6 +36,10 @@
       9
     ],
     [
+      "finish",
+      7
+    ],
+    [
       "generator",
       37
     ],
@@ -45,7 +49,7 @@
     ],
     [
       "layer",
-      43
+      44
     ],
     [
       "layout",
@@ -101,7 +105,7 @@
     ],
     [
       "theme",
-      8
+      19
     ],
     [
       "timing",
@@ -121,7 +125,7 @@
       "id": "drawn-icons",
       "title": "Drawn icons",
       "tag": "asset",
-      "intro": "`svgIcon(\"<name>\")` · a first-party vector, when no real logo or captured UI exists. Prefer a real asset · `make capture`, then a brand mark, then these, then emoji last.",
+      "intro": "`svgIcon(\"<name>\")` · a first-party vector, when no real logo or captured UI exists. Prefer a real asset · `make media X=capture`, then a brand mark, then these, then emoji last.",
       "mode": "chips",
       "note": "the name is the drawing",
       "noPreview": "the name is the drawing. Every one of them is on the page already, at /blocks.",
@@ -249,7 +253,7 @@
       "intro": "The film SOUNDS its own motion. `audio:{tactile:true}` and core/audio-tactile.js read the timeline you already wrote · a layer thuds or plucks by its footprint and how far it travelled, a camera move is one `whoosh` per gesture, a counter plucks on the number's own easing curve, a declared `spectacle` blooms on the moment. These six are motion voices, distinct from the fifteen INTERACTION cues (press, toggle, success) which are for a UI where somebody clicked and which a film never picks from. Any of the six can also be placed by hand as `audio.cues[]`. Doctrine · `engine-doctrine/CRAFT/SOUND.md`.",
       "mode": "table",
       "note": null,
-      "noPreview": "a sound has no visual preview: these are heard, not seen. `make audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
+      "noPreview": "a sound has no visual preview: these are heard, not seen. `make gen X=audio` bakes them to assets/sfx and any film with `audio:{tactile:true}` plays them.",
       "count": 6,
       "undescribed": 0,
       "entries": [
@@ -794,10 +798,10 @@
       "id": "destinations-platform-safe-area",
       "title": "Destinations (platform safe area)",
       "tag": "canvas",
-      "intro": "`\"destination\": \"<name>\"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect` · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make audit` measures every layer against this box. One definition · `core/layout/safe.js`.\n\nThe tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.",
+      "intro": "`\"destination\": \"<name>\"`. WHERE the film is watched, which decides the SAFE AREA inside the canvas. It is a different question from `aspect` · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. Chrome and margin combine with max(), never summed. `make check GATE=audit` measures every layer against this box. One definition · `core/layout/safe.js`.\n\nThe tiktok figures are this repo's own portrait numbers carried over as fractions and are the only platform numbers here with any provenance; reels and shorts are conservative interpolations of the same shape and should be re-measured against the real apps before a launch trusts them.",
       "mode": "table",
       "note": null,
-      "noPreview": "a safe area is a property of the canvas, not something that animates. `make audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.",
+      "noPreview": "a safe area is a property of the canvas, not something that animates. `make check GATE=audit M=<file> ASPECT=all` is how you see it, as a measurement against your own layers.",
       "count": 6,
       "undescribed": 0,
       "entries": [
@@ -852,7 +856,7 @@
       "intro": "`aspect` picks the CANVAS. Five ratios; a ratio not named here is still honoured, sized to fit the long edge at 1920. WHERE the film is watched is the other half of the question and has its own section, Destinations · 9 · 16 for a website hero and 9 · 16 for TikTok are the same canvas, and only one of them has buttons painted down the right. One definition · `core/layout/safe.js`.",
       "mode": "table",
       "note": null,
-      "noPreview": "an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.",
+      "noPreview": "an aspect is a property of the canvas, not something that animates. Render at it, or `make check GATE=audit M=<file> ASPECT=all`.",
       "count": 5,
       "undescribed": 0,
       "entries": [
@@ -1138,6 +1142,68 @@
           "stem": "cut-timings--spring",
           "desc": "easeOutSpring · a damped-spring overshoot that settles, physical life for something landing · a badge, a chip, a number",
           "scene": "/assets/effects/cut-timings--spring.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "scene-finish-keys",
+      "title": "Scene finish keys",
+      "tag": "finish",
+      "intro": "data.finish is the ONE dial for the cinematic grade a premium launch film needs · large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a scene-level pass, not a per-layer effect: render the film to see it",
+      "count": 7,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "aberration",
+          "stem": "scene-finish-keys--aberration",
+          "desc": "a chromatic split in px over the whole frame, the lens-fringing finish",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bloom",
+          "stem": "scene-finish-keys--bloom",
+          "desc": "blurs the frame 16px, lifts brightness 9% and screens the halo back over the sharp original",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "dof",
+          "stem": "scene-finish-keys--dof",
+          "desc": "a blur baked from the camera's own keyframed focus against each layer's plane z, no new authoring vocabulary needed",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "grade",
+          "stem": "scene-finish-keys--grade",
+          "desc": "a named colour grade (core/looks/filters.js) laid over the whole frame",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "grain",
+          "stem": "scene-finish-keys--grain",
+          "desc": "a strength override on the existing bg grain toggle, applied to every window that already carries one",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "light",
+          "stem": "scene-finish-keys--light",
+          "desc": "a large soft key light dropped in as an html layer (core/lightfield), the premium launch-film source",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "vignette",
+          "stem": "scene-finish-keys--vignette",
+          "desc": "a full-frame vignette rect, amount 0..1 plus an optional colour",
+          "scene": null,
           "noPreview": null
         }
       ]
@@ -1583,7 +1649,7 @@
         {
           "name": "component",
           "stem": "layer-types--component",
-          "desc": "a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w`",
+          "desc": "a REAL captured UI block (`make media X=capture`), or one named part of a captured scene, scaled to fit `w`",
           "scene": null,
           "noPreview": null
         },
@@ -1781,7 +1847,7 @@
       "id": "three-js-scenes-real-geometry",
       "title": "three.js scenes (real geometry)",
       "tag": "layer",
-      "intro": "`{ \"type\":\"three\", \"three\":\"<name>\" }`. A scene graph · meshes, materials, lights, a camera. For what a distance field structurally cannot express · a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/surfaces/three-fx.js`), and `make canvas-purity` hashes the real pixels to prove it.",
+      "intro": "`{ \"type\":\"three\", \"three\":\"<name>\" }`. A scene graph · meshes, materials, lights, a camera. For what a distance field structurally cannot express · a font outline, a device body, a captured UI plane, a point cloud. Deterministic by contract. Every object is POSED ABSOLUTELY from t, never stepped by delta (`core/surfaces/three-fx.js`), and `make check GATE=canvas-purity` hashes the real pixels to prove it.",
       "mode": "table",
       "note": null,
       "noPreview": null,
@@ -1821,7 +1887,7 @@
           "stem": "three-js-scenes-real-geometry--extrudetext",
           "desc": "a real font outline extruded into a lit 3D solid that rotates through space",
           "scene": null,
-          "noPreview": "it needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts."
+          "noPreview": "it needs a 3D typeface baked by `make gen X=glyphs`, and the site ships no 3D fonts."
         },
         {
           "name": "globe",
@@ -1877,6 +1943,26 @@
           "stem": "three-js-scenes-real-geometry--uiparallax",
           "desc": "flat UI planes stacked at depth, the camera moving past them so the layers separate",
           "scene": "/assets/effects/three-js-scenes-real-geometry--uiparallax.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "universal-surface-decoration",
+      "title": "Universal surface decoration",
+      "tag": "layer",
+      "intro": "A `glass` prop any layer can carry (core/layers/util.js), independent of its type · a frosted backdrop-filter pane, or a true refraction when named `\"refract\"`.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a per-layer decoration, not its own scene: render a layer carrying it to see it",
+      "count": 1,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "glass",
+          "stem": "universal-surface-decoration--glass",
+          "desc": "backdrop-filter blur and saturate on the layer itself, a frosted pane; `glass: \"refract\"` bends the picture through it instead of blurring, for real glass",
+          "scene": null,
           "noPreview": null
         }
       ]
@@ -3477,7 +3563,7 @@
       "intro": "`\"pin\": \"<name>\"` on a layer or a caption. An aspect-portable position, resolved against the safe box (`core/layout/safe.js safeArea`) rather than a hand-typed pixel, so the same JSON lands correctly at any of the five canvases. `stage`/`text-band`/`lower-band` are the de-facto anchors this repo already hand-types as 1920px pixels; use them instead of a new magic number.",
       "mode": "table",
       "note": null,
-      "noPreview": "a placement is a position, not a motion: see it with `make audit M=<file> ASPECT=all`, which checks every name against the safe box at every aspect and destination.",
+      "noPreview": "a placement is a position, not a motion: see it with `make check GATE=audit M=<file> ASPECT=all`, which checks every name against the safe box at every aspect and destination.",
       "count": 20,
       "undescribed": 0,
       "entries": [
@@ -4609,6 +4695,89 @@
       ]
     },
     {
+      "id": "surface-looks",
+      "title": "Surface looks",
+      "tag": "theme",
+      "intro": "A named bundle of shape tokens (`core/theme/surface-looks.js`) a theme, a scene or one block instance can set as `look.surface`, repainting radius/border/shadow/blur/pad/gap/density together without editing a single block.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a shape bundle, not a rendered effect: render one block in each look to compare",
+      "count": 10,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "brutalist",
+          "stem": "surface-looks--brutalist",
+          "desc": "square (0px) corners, a thick 3px ink rule, an 8px hard offset shadow with no blur",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cinematic",
+          "stem": "surface-looks--cinematic",
+          "desc": "18px radius, a 24px backdrop blur behind a 62%-opacity fill, a deep shadow plus an accent glow",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "editorial",
+          "stem": "surface-looks--editorial",
+          "desc": "near-square (2px) corners, a plain hairline, no shadow, 28px of padding for generous air",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "glass",
+          "stem": "surface-looks--glass",
+          "desc": "20px radius, a 55%-opacity fill behind an 18px backdrop blur, a 1px translucent rim",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "industrial",
+          "stem": "surface-looks--industrial",
+          "desc": "4px radius, a thick 2px rule, a flat 4px hard-edge shadow, tighter padding than the rest",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "neon",
+          "stem": "surface-looks--neon",
+          "desc": "16px radius, a 1px accent-coloured rim, a three-layer glow in place of a shadow",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "outlined",
+          "stem": "surface-looks--outlined",
+          "desc": "12px radius, a firm 1.5px hairline rule, no shadow at all · flat and quiet",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "playful",
+          "stem": "surface-looks--playful",
+          "desc": "28px pill radius, no rule, a tinted fill, a flat coloured shadow ledge underneath",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "print",
+          "stem": "surface-looks--print",
+          "desc": "3px radius, a solid 1px ink rule, no shadow · flat ink on stock",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "soft",
+          "stem": "surface-looks--soft",
+          "desc": "24px radius, no rule at all, a wide 12px/24px double shadow · reads as an object, not a panel",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "theme-look-keys",
       "title": "Theme look keys",
       "tag": "theme",
@@ -4616,7 +4785,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
-      "count": 8,
+      "count": 9,
       "undescribed": 0,
       "entries": [
         {
@@ -4672,6 +4841,13 @@
           "name": "scale",
           "stem": "theme-look-keys--scale",
           "desc": "how big text should be · named px sizes for the hook / headline / body / caption roles at 16 · 9, so a layer writes `\"size\": \"headline\"` instead of guessing a number",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "surface",
+          "stem": "theme-look-keys--surface",
+          "desc": "a named shape look (glass/soft/outlined/brutalist/editorial/neon/playful/print/cinematic/industrial, `core/theme/surface-looks.js`) every block reads instead of its own literal corner rounding, rule weight and drop shadow",
           "scene": null,
           "noPreview": null
         }
@@ -5910,7 +6086,7 @@
       "id": "plain-words-feel-duration-camera-comparative",
       "title": "Plain words (feel · duration · camera · comparative)",
       "tag": "timing",
-      "intro": "The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value · `ease:\"snappy\"`, `enterDur:\"fast\"`, `cameraMove:{move:\"pull back\"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. The comparative words are the one exception · they name a DIRECTION, not a value, and step the DURATION ladder from whatever is already there via `resolveComparative(word, current)` (core/registry/vocab.js); nothing in a scene consumes it automatically yet. When to reach for which · `engine-doctrine/CRAFT/VOCABULARY.md` (`make vocab`).",
+      "intro": "The row above lists 41 curves named by mechanism, which is why the default is to name none of them. These words resolve IN THE SAME SLOT as the concrete value · `ease:\"snappy\"`, `enterDur:\"fast\"`, `cameraMove:{move:\"pull back\"}`. Each is an alias onto something the engine already has, never a new capability, and an unknown one throws with the near misses named rather than falling back. The comparative words are the one exception · they name a DIRECTION, not a value, and step the DURATION ladder from whatever is already there via `resolveComparative(word, current)` (core/registry/vocab.js); nothing in a scene consumes it automatically yet. When to reach for which · `engine-doctrine/CRAFT/VOCABULARY.md` (`make regen`).",
       "mode": "table",
       "note": null,
       "noPreview": "each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.",

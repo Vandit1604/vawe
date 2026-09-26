@@ -2,6 +2,7 @@
 when: adding burnt-in captions, or shipping to a phone feed (tiktok / reels / shorts)
 answers: "caption timing (words, vo-captions), the safe strip per destination, captionMode vs captionStyle"
 group: crosscutting
+routes: captions
 applies-when: hasAudio
 confirm: "are captions timed to the words, and do they sit in the safe strip for the destination?"
 ---
@@ -10,10 +11,10 @@ confirm: "are captions timed to the words, and do they sit in the safe strip for
 
 ## AGENT SUMMARY
 
-- Time captions to real words (`words:[{t0,t1}]`, via `make vo-captions` or `make captions`), and
+- Time captions to real words (`words:[{t0,t1}]`, via `make media X=vo-captions` or `make media X=captions`), and
   set `"destination"` (`tiktok`/`reels`/`shorts`) so the caption band sits in that platform's safe
   strip, not the default web margin.
-- Enforced by `make audit M=<file> ASPECT=all` (overlap / clipped text / safe-zone / WCAG contrast).
+- Enforced by `make check GATE=audit M=<file> ASPECT=all` (overlap / clipped text / safe-zone / WCAG contrast).
 - Checkable action: are captions timed to the words, and do they sit in the safe strip for the
   destination?
 
@@ -29,9 +30,9 @@ For real word-by-word timing (karaoke, `captionStyle`), add `words: [{ t0, t1 }]
 the markup-stripped word list. Two ways to get it without hand-timing:
 
 ```bash
-make vo-captions D=<file> [STYLE=weightShift] WRITE=1   # from a VO word-timing sidecar (audio.voWords)
-make captions D=<file> TEXT="the line to time"           # times one plain SCRIPT string
-make pace-from-vo VO=<file>.words.json                    # paces the whole film's beats to a voice track
+make media X=vo-captions D=<file> [STYLE=weightShift] WRITE=1   # from a VO word-timing sidecar (audio.voWords)
+make media X=captions D=<file> TEXT="the line to time"           # times one plain SCRIPT string
+make check GATE=pace-from-vo VO=<file>.words.json                    # paces the whole film's beats to a voice track
 ```
 
 `vo-captions` reads a TTS transcript sidecar, never a live model; there is no timing without one.
@@ -62,10 +63,10 @@ launch trusts them.)
 **`pin:"bottom"` always lands inside the safe box**, chrome included: an edge-pinned caption can never
 produce a safe-zone failure. The band itself reserves two lines at the skin's font size
 (`CAPTION_LINES = 2` in `core/layout/safe.js`), so a headline placed near the bottom on a `tiktok` destination
-can still collide with it, which `make audit` catches, not the placement code:
+can still collide with it, which `make check GATE=audit` catches, not the placement code:
 
 ```bash
-make audit M=<file> ASPECT=all      # overlap / clipped text / safe-zone / WCAG contrast, every canvas
+make check GATE=audit M=<file> ASPECT=all      # overlap / clipped text / safe-zone / WCAG contrast, every canvas
 ```
 
 Going to a phone feed and skipping `destination` is the common miss: the film renders fine at `web`

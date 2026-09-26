@@ -198,7 +198,7 @@ if (isMain) {
       for (const msg of e) { console.error(`    - ${msg}`); f.fail(code, msg); }
     }
     console.error('\n  Fix: classify new looks/stings in engine-doctrine/CRAFT/SELECTION.md §4, repair the link, add the doc to README,');
-    console.error('  or give the doc `when:`/`answers:`/`group:` frontmatter and run `make doc-index`.');
+    console.error('  or give the doc `when:`/`answers:`/`group:` frontmatter and run `make site X=doc-index`.');
     process.exit(1);
   }
   console.log(`✓ craft-coverage: ${LOOK_NAMES.length} looks + ${SHADER_FX.length} stings classified · all CRAFT links + index intact`);

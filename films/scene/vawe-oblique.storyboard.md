@@ -19,7 +19,7 @@ craft:
   DIRECTION: "the through-line is one object, the scene file, changing state at every cut; the bookend is the write/build/get rail on beats 1 and 7"
   FRAGMENT-EXEMPLARS: "the plate is the reused surface, at 1330, 560 and 300px across beats 4, 6 and 5; everything else is authored once"
   HTML-FRAGMENTS: "every size names a kit role and every shadow a kit elevation; the four hooks are --focus, --typed, --rule and parts, and all four are driven"
-  LAYOUT: "seven archetypes, none repeated on adjacent beats, declared per beat as archetype: and checked by make frame-check"
+  LAYOUT: "seven archetypes, none repeated on adjacent beats, declared per beat as archetype: and checked by make check GATE=frame-check"
   SOUND: "silent. A twenty-second film about determinism has nothing to say over its own type, and a bed would be decoration"
   TRANSITIONS: "six cuts, one family. The cinematicZoom into beat 4 is the only accent and it lands on the spectacle"
   MOTION-CRAFT: "entrances decelerate (easeOutExpo on the peak landing), the two holds carry a 1% breathe, and no two beats enter alike"

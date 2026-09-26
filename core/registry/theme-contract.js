@@ -1,7 +1,7 @@
 // theme-contract.js: the look a theme MUST fully define. There are no fallback look values
 // anywhere in the engine: tokens.css registers fonts + geometry only, and every color/font the
 // scene consumes comes from the theme. A theme missing any required key fails LOUD (at
-// `make validate` and again at boot) instead of rendering a wrong-looking video.
+// `make check GATE=validate` and again at boot) instead of rendering a wrong-looking video.
 // Pure data + one pure function: importable from node (validate) and the browser (motion.js/boot.js) alike.
 //
 // A THEME ON DISK IS NOW A TOKEN FILE (core/theme/tokens.js, core/theme/roles.js: `tokens` + a required
@@ -132,12 +132,13 @@ export function themeErrors(theme, { parseColor, contrastRatio } = {}) {
 // than a hand-rolled second implementation of the same lookup. `defineRegistry` is pure JS (no node
 // imports), so pulling it in here does not cost this file its node+browser purity.
 import { defineRegistry } from './registry.js';
+import { SURFACE_LOOK_NAMES, SURFACE_TOKEN_KEYS } from '../theme/surface-looks.js';
 
 // `cues` used to be an eighth key here (a fixed per-theme audio-cue list). Deleted: `buildSfx`
 // (films/scene/scene.js:1593-1602) already derives every cue from `CUT_CUE`/`SEAM_CUE`, keyed on the
 // transition actually used at each joint, so a fixed list cannot say which cue replaces which. A film
 // changes its cut family beat to beat; the cue has to follow the cut, not a brand-wide preference.
-const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field', bgDefault: 'bgDefault', bgPalette: 'bgPalette' };
+const LOOK_KEY_ENTRIES = { backdrop: 'backdrop', scale: 'scale', layout: 'layout', marks: 'marks', cuts: 'cuts', field: 'field', bgDefault: 'bgDefault', bgPalette: 'bgPalette', surface: 'surface' };
 const LOOK_KEY_AKA = {
   backdrop: ['brand background rotation', 'which bg presets to use'],
   scale: ['type scale', 'named text sizes'],
@@ -147,6 +148,7 @@ const LOOK_KEY_AKA = {
   field: ['backdrop texture defaults', 'grain and vignette settings'],
   bgDefault: ['the theme own backdrop', 'bg use:"theme" default', 'brand bg rotation at render'],
   bgPalette: ['bg preset colour ramp', 'the palette bg presets paint with'],
+  surface: ['block shape', 'skinnable blocks', 'reskin every block at once'],
 };
 export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRIES, {
   slot: 'theme.look',
@@ -176,6 +178,9 @@ export const LOOK_KEY_REGISTRY = defineRegistry('theme look key', LOOK_KEY_ENTRI
     // the same floor every theme used before this key existed. A brand with its own bg-preset colours
     // that the derivation does not reproduce (a hand-tuned pastel accentBase, say) sets this and wins.
     bgPalette: 'the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme\'s own palette when absent',
+    surface: 'a named shape look (glass/soft/outlined/brutalist/editorial/neon/playful/print/cinematic/'
+      + 'industrial, `core/theme/surface-looks.js`) every block reads instead of its own literal corner '
+      + 'rounding, rule weight and drop shadow',
   },
   catalog: {
     title: 'Theme look keys', tag: 'theme', intro: 'A theme (`themes/<name>.json`) may carry a `look` '
@@ -204,7 +209,7 @@ const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
 // that lookup and its near-word hint). `nearMisses` is core/registry/registry.js's own helper; when omitted, a
 // bad name is still refused, just without the "did you mean" suggestion. Any check whose list was not
 // handed in is SKIPPED, never defaulted to "assume it's fine": `themes/*.json` (the write site, checked
-// by `make validate`) hands in every list; `core/engine/boot.js`'s browser-side theme check does too, since
+// by `make check GATE=validate`) hands in every list; `core/engine/boot.js`'s browser-side theme check does too, since
 // backgrounds and transitions are already browser-safe imports there.
 function unknownLookKeyErrors(look, near) {
   const errs = [];
@@ -323,6 +328,27 @@ function fieldErrors(look) {
   return errs;
 }
 
+// surfaceErrors(look): `look.surface` is EITHER a preset name (a string, one of SURFACE_LOOK_NAMES)
+// OR an object `{ preset?, ...token overrides }` (core/theme/surface-looks.js resolveSurfaceLook does
+// the actual resolving; this only grades the shape so a typo is refused at validate, not at render).
+function surfaceErrors(look, near) {
+  if (!('surface' in look)) return [];
+  const s = look.surface;
+  if (typeof s === 'string') {
+    if (SURFACE_LOOK_NAMES.includes(s)) return [];
+    const hint = near(s, SURFACE_LOOK_NAMES);
+    return [`look.surface names "${s}", which is not a known surface look${hint.length ? `, did you mean "${hint[0]}"?` : ''}. Known: ${SURFACE_LOOK_NAMES.join(', ')}`];
+  }
+  if (!isObj(s)) return ['look.surface must be a preset name (string) or an object'];
+  const errs = [];
+  if ('preset' in s && !SURFACE_LOOK_NAMES.includes(s.preset)) errs.push(`look.surface.preset "${s.preset}" is not a known surface look. Known: ${SURFACE_LOOK_NAMES.join(', ')}`);
+  for (const k of Object.keys(s)) {
+    if (k === 'preset') continue;
+    if (!SURFACE_TOKEN_KEYS.includes(k)) errs.push(`look.surface.${k} is not a known surface token. Known: ${SURFACE_TOKEN_KEYS.join(', ')}`);
+  }
+  return errs;
+}
+
 export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) {
   if (look == null) return [];
   if (!isObj(look)) return ['look must be an object'];
@@ -337,6 +363,7 @@ export function lookErrors(look, { bgNames, transitionNames, nearMisses } = {}) 
     ...fieldErrors(look),
     ...bgDefaultErrors(look, bgNames, near),
     ...bgPaletteErrors(look),
+    ...surfaceErrors(look, near),
   ];
 }
 
@@ -414,7 +441,7 @@ const scaleFromMotion = (m, portrait) => {
 // brand's ordinary pace, and from `motion.bounce` (the theme's own overshoot, 0..~0.5) for the ACCENT
 // cut, which fires rarely and should read as the brand's peak energy. Every name below is a real entry
 // in `core/transitions/catalog.js` (checked by `lookErrors` when `transitionNames` is injected, which
-// `make validate` and the new gate both do); a theme missing `motion` reads the engine's own pace (1)
+// `make check GATE=validate` and the new gate both do); a theme missing `motion` reads the engine's own pace (1)
 // and its own stillness (0), which lands it on the calmest tier of each, not a guess.
 const CUT_DEFAULT_TIERS = [ // ordered fast -> slow; each `max` is the upper edge of `durationScale` for that tier
   { max: 0.85, name: 'whip' },       // faster than the house pace: a brisk, no-ceremony default cut

@@ -1,7 +1,7 @@
 // quality/gates/review.mjs: one-command system health snapshot. Runs the fast checks and tiles the
 // per-format layout overlays into a single sheet you can scan. The heavier render-integrity check
-// (make verify) and purity guard (make probe) stay separate; this is the routine "are we good?".
-//   node quality/gates/review.mjs        (make review)
+// (make check GATE=verify) and purity guard (make check GATE=probe) stay separate; this is the routine "are we good?".
+//   node quality/gates/review.mjs        (make gen X=review)
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -44,7 +44,7 @@ if (tiles.length) {
 console.log('\n==================== REVIEW ====================');
 for (const r of results) console.log(`  ${r.ok ? '✓' : '✗'}  ${r.label}`);
 if (tiles.length) console.log(`\n  system snapshot → /tmp/review.png  (${tiles.length} formats)`);
-console.log('\n  deeper checks:  make probe  (render-order purity)   ·   make verify  (render integrity)');
+console.log('\n  deeper checks:  make check GATE=probe  (render-order purity)   ·   make check GATE=verify  (render integrity)');
 const failed = results.filter((r) => !r.ok);
 console.log(`\n${failed.length ? '✗ ' + failed.length + ' check(s) failed' : '✓ all review checks passed'}`);
 process.exit(failed.length ? 1 : 0);

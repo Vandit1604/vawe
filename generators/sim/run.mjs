@@ -2,7 +2,7 @@
 //
 //   node generators/sim/run.mjs generators/sim/sims/ember-burst.mjs            (dry run: report, write nothing)
 //   node generators/sim/run.mjs generators/sim/sims/ember-burst.mjs --write     (bake → assets/baked/ember-burst/)
-//   make sim D=generators/sim/sims/ember-burst.mjs WRITE=1
+//   make gen X=sim D=generators/sim/sims/ember-burst.mjs WRITE=1
 //
 // WHY THIS EXISTS. `renderFrame(n)` is a pure function of n, eight workers, arbitrary order,
 // byte-identical output. A simulation is the exact opposite: frame 412 exists only because 411 ran

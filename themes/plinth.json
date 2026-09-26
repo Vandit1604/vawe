@@ -132,5 +132,8 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "surface": "soft"
   }
 }

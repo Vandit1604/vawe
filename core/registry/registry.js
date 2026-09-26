@@ -262,7 +262,7 @@ export function checkBlurb(kind, name, blurb) {
   if (typeof blurb !== 'string' || !blurb.trim())
     throw new Error(`${kind} "${name}" has no blurb, wrap it where it is written: `
       + `${name}: withBlurb("what it does, in one line", …). Without one it is absent from `
-      + `\`make effects\`, engine-doctrine/EFFECTS.md and the site, so nobody can choose it.`);
+      + `\`make regen\`, engine-doctrine/EFFECTS.md and the site, so nobody can choose it.`);
   // What a reader already has before the blurb: the entry's own name, its morphological variants
   // (`fade` → `fades`), and the KIND, which every sibling shares and which therefore separates nothing.
   // Prefix matching in both directions is what makes "the fade cut fades" a restatement rather than
@@ -331,7 +331,7 @@ export function withBlurb(blurb, value) {
 
 /**
  * blurbsOf(kind, entries): the name→blurb map, DERIVED from the entries so the two cannot drift.
- * Refuses at load, naming the entry: the blurb is the row `make effects`, engine-doctrine/EFFECTS.md and the site
+ * Refuses at load, naming the entry: the blurb is the row `make regen`, engine-doctrine/EFFECTS.md and the site
  * print, so an entry without one exists and cannot be chosen, and that was caught by a gate after the
  * fact instead of at the point of writing.
  */
