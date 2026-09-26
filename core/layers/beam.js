@@ -122,5 +122,5 @@ export function maskPaint(L, lt, geom, { mode, color, period, angle, intensity }
 
 export const PROPS = mergeProps(propsOf(build), propsOf(frame), propsOf(maskPaint));
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe";

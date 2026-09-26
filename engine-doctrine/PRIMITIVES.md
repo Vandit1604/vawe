@@ -112,7 +112,7 @@ and the engine keeps that promise rather than trusting the author to.
 - **The peak.** `device` is written as a shader sting at `at`, at 1.35 against the sting default of 1.
   Twelve devices, every one already in `SHADER_FX`: nothing new was added for this:
   `flash` `chromaticSplit` `glitch` `streak` `whipPan` `ripple` `sdfIris` `vortex` `lens` `dispersion`
-  `iridescence` `cinematicZoom`. `make effects` lists them under **Spectacle devices**.
+  `iridescence` `cinematicZoom`. `make regen` lists them under **Spectacle devices**.
 - **The floor.** Every competing amplitude dial in the film is multiplied by **0.55**: other stings'
   and seams' `intensity`, composite-look strength (`filter: "neon"` and `"neon:0.9"` alike, resolved
   through the look's own default), an authored `intensity` on a `glow` or `beam` layer, and a `kick`

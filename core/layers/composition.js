@@ -30,5 +30,5 @@ export function build(kit, el, L, { comp: compName, props } = L) {
 
 export const PROPS = propsOf(build);
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express";

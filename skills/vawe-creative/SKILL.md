@@ -69,7 +69,7 @@ border-beam / shine (`{type:"beam"}`), aurora / meteor paint fields (`{type:"pai
 `flash`, an svg logo that draws-on or shape-morphs (the `logoReveal` beat / `{type:"svg","morph":{…}}`), and
 calculated camera moves (`"cameraMove":{"move":"diveIn",…}`). Companion skills: **`vawe-effects`** (see the
 whole catalog + pick), **`vawe-animation`** (easing feel + `springEase`), **`vawe-camera`** (smooth camera
-work). Full list: `make effects` → `engine-doctrine/EFFECTS.md`.
+work). Full list: `make regen` → `engine-doctrine/EFFECTS.md`.
 
 ## The bar
 Study `films/scene/brew-native.json` (warm, expressive) and `films/scene/preface-launch.json`

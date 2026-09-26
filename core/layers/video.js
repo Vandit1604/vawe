@@ -110,5 +110,5 @@ export function frame(kit, el, L, t) {
   }));
 }
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still";

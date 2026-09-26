@@ -4,7 +4,7 @@
 // it drifts. This asserts every prop the engine reads is defined somewhere in the schema.
 //
 //   node quality/gates/schema-drift.mjs            (make check GATE=schema-check), exits 1 on drift
-//   node quality/gates/schema-drift.mjs --write    (make schema-write) regenerate EVERY derived part,
+//   node quality/gates/schema-drift.mjs --write    (make check GATE=schema-check WRITE=1) regenerate EVERY derived part,
 //                                                  layerProps AND the registry-owned enums, then
 //                                                  re-run with no flag to verify. A write that would
 //                                                  DROP a prop name is refused; --force overrides.

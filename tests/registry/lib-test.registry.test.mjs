@@ -1196,7 +1196,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
 // THIS ASSERT EXISTS BECAUSE THE CATALOGUE FAILED CORRECTLY AND FAR TOO LATE. `effects-json.mjs`
 // refuses a family that has no authoring form and no preview (or a stated reason for having none),
 // which is right. But nothing in the gate ladder ran it, so three families were added with no rows and
-// the fault sat there until somebody typed `make effects` by hand and found the whole catalogue could
+// the fault sat there until somebody typed `make regen` by hand and found the whole catalogue could
 // not regenerate. Failing loudly is only half of failing early: a check nobody runs is a check that
 // reports at a time of the author's choosing, which is exactly when they are not looking.
 //

@@ -252,12 +252,6 @@ assemble: ## [preflight] write the scene JSON from the storyboard's contract + t
 pitch: ## [preflight] diverge to 5 concepts under the anti-median gate before authoring (NAME=, CHOSE=, LEFT=)
 	node harness/author/pitch.mjs $(NAME) $(if $(CHOSE),--chose "$(CHOSE)") $(if $(LEFT),--left "$(LEFT)")
 
-# make llms-txt: regenerate films/llms.txt, the portable, drift-proof vocabulary primer (one rule + a
-# when-to-use per layer type + the effect families + the hard rules + the loop), generated from the live
-# registries so an agent can author a compliant scene from the full palette without loading the whole repo.
-llms-txt: ## [engine] regenerate films/llms.txt, the portable vocabulary primer
-	node harness/author/llms-txt.mjs
-
 # make check D=<file>: every gate, every finding, ZERO consequence. Same information `make ship`
 # blocks on, printed while you are still exploring. Use it to see where a film stands without stopping.
 # W11: preflight used to be a step an author had to remember to run FIRST; it is now the hidden
@@ -780,11 +774,6 @@ gen-video: ## [dev] generate a video AND extract it to a clip in one step (a det
 capture: ## [dev] lift a REAL UI component off a live site (its HTML + computed CSS) into an animatable `component`
 	node harness/author/capture-component.mjs $(URL) "$(SEL)" $(NAME) $(LABEL) $(if $(LS),--localstorage "$(LS)") $(if $(SETTLE),--settle $(SETTLE))
 
-# make schema-write: regenerate every DERIVED part of schema.json (the layerProps table + the enums
-# that copy a code registry) so a registry that grew needs no second, hand edit. schema-check verifies.
-schema-write: ## [engine] regenerate every DERIVED part of schema.json (the layerProps table + the enums that copy a code
-	@node quality/gates/schema-drift.mjs --write $(if $(JSON),--json,)
-
 # make engine-sync [CHECK=1]: publish the engine into site/public, which is what the site's
 # in-browser engine actually boots. Runs automatically on the site's prebuild; this target is for
 # running it (or checking it) without a site build. CHECK=1 only reports.
@@ -912,10 +901,6 @@ arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE
 e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site test + author-check, one report
 	node harness/dev/e2e.mjs
 
-effects: ## [engine] regenerate engine-doctrine/EFFECTS.md. The whole arsenal in one place (from the registries)
-	node scripts/site/effects-catalog.mjs
-	node scripts/site/effects-json.mjs
-
 # make effects-json [CHECK=1]. The site's copy of the same arsenal: site/lib/effects.json plus one
 # playable scene per previewable effect. Same family list as engine-doctrine/EFFECTS.md, imported not restated.
 .PHONY: effects-json
@@ -940,21 +925,6 @@ globe-dots: ## [engine] re-bake core/globe-dots.js from Natural Earth (SPACING=2
 # --stamp lowers the ceiling after judging a batch; it never rises unnoticed.
 no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
 	@node quality/gates/ledger.mjs unjudged $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
-
-effects-check: ## [engine] fail if engine-doctrine/EFFECTS.md is stale vs the registries
-	node scripts/site/effects-catalog.mjs --check
-
-vocab: ## [engine] regenerate engine-doctrine/CRAFT/VOCABULARY.md. The plain words (feel/duration/camera) from core/registry/vocab.js
-	node scripts/site/vocab-catalog.mjs
-
-vocab-check: ## [engine] fail if engine-doctrine/CRAFT/VOCABULARY.md is stale vs core/registry/vocab.js
-	node scripts/site/vocab-catalog.mjs --check
-
-motion-numbers: ## [engine] regenerate the motion-number tables in engine-doctrine/RULES from core/motion/motion.js + vocab.js
-	node scripts/site/motion-numbers-catalog.mjs
-
-motion-numbers-check: ## [engine] fail if a engine-doctrine/RULES motion-number table is stale vs the engine
-	node scripts/site/motion-numbers-catalog.mjs --check
 
 compare: ## [dev] variant selection: tile candidate frames to pick the best (args in ARGS)
 	node quality/gates/compare.mjs $(ARGS)

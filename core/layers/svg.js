@@ -156,5 +156,5 @@ export function frame(kit, el, L, t, scene, { draw, morph } = L) {
 // build time. mergeProps unions them (core/props.js).
 export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin)";

@@ -3,7 +3,7 @@
 //
 //   node quality/gates/arsenal-check.mjs
 //
-// WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make effects →
+// WHY THIS EXISTS. CLAUDE.md step 0a says "see the whole arsenal, then choose: make regen →
 // engine-doctrine/EFFECTS.md". A film was authored around a hand-built SVG chart while `core/surfaces/three-fx.js` sat in
 // the repo with a full three.js scene-graph layer, a written determinism contract and four registered
 // scenes. The author had not read the arsenal doc, which is one failure. The doc did not contain three
@@ -12,7 +12,7 @@
 //
 // The cause WAS that `scripts/site/effects-catalog.mjs` imported a HAND-WRITTEN list of registries. Add
 // a vocabulary to core/ and it appeared in the catalogue only if someone remembered an import line.
-// `make effects-check` cannot catch that: it proves the registries the catalogue knows about are not
+// `make check GATE=generated-check` cannot catch that: it proves the registries the catalogue knows about are not
 // stale, and has no way to know about the one it was never told about.
 //
 // THAT HALF IS NOW UNREPRESENTABLE, AND THIS GATE SHRANK ACCORDINGLY. A registry carries a `catalog`
@@ -118,7 +118,7 @@ const WAIVED = new Map(Object.entries({
   // A scene names a caption STYLE and the shape follows it. CAP_STYLE_SHAPE is how the RENDERER
   // treats that style (one word on screen, or split per character); an author never writes it and
   // could not use it if they did. The fact it carries IS catalogued, in the place an author actually
-  // reads: every shaped style says so in its own CAPTION_BLURBS line, which is the row `make effects`
+  // reads: every shaped style says so in its own CAPTION_BLURBS line, which is the row `make regen`
   // prints. A second entry naming the mechanism would be the same fact filed under a word nobody
   // searches for.
   CAP_STYLE_SHAPE: 'how the renderer treats a style (one-word / per-character); the scene names the STYLE, and each shaped style says so in its own blurb',
@@ -432,7 +432,7 @@ if (!missing.length) {
 }
 for (const [name, file] of missing) f.fail('arsenal-missing', `${name.padEnd(22)} ${file}`, {
   fix: 'a REGISTRY writes its own section: give its defineRegistry call a `catalog` block '
-    + '(title / tag / intro / usage / preview or noPreview, core/registry/registry.js) and run `make effects`. '
+    + '(title / tag / intro / usage / preview or noPreview, core/registry/registry.js) and run `make regen`. '
     + `Anything else adds a section to ${CATALOG}, or is waived in this file WITH A REASON if it is `
     + 'not something a scene can name',
   doc: 'engine-doctrine/EFFECTS.md',

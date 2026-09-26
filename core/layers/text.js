@@ -416,5 +416,5 @@ export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, {
   font: {}, ls: {}, tracking: {}, raw: {}, size: {},
 });
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink";

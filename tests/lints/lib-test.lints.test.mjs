@@ -279,7 +279,7 @@ test('lib-test: lints', async () => {
   const src = fs.readFileSync(path.join(repoRoot, 'mcp/server.mjs'), 'utf8');
   ok('mcp: vawe_capabilities and vawe_guide both carry it',
     (src.match(/\+ inventoryLine/g) || []).length >= 2);
-  // ABSENCE MUST DEGRADE, NEVER LIE. A fresh clone has no site/lib/effects.json until `make effects`
+  // ABSENCE MUST DEGRADE, NEVER LIE. A fresh clone has no site/lib/effects.json until `make regen`
   // has run, and a description inventing a count would be worse than one that omits it.
   ok('mcp: a missing index yields null rather than a made-up number',
     /catch \{ return null; \}/.test(fs.readFileSync(path.join(repoRoot, 'mcp/catalog.mjs'), 'utf8')));

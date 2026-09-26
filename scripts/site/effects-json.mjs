@@ -186,7 +186,7 @@ if (gaps.length) {
 
 // `--check`: the gap check above and nothing else, so a GATE can run it without regenerating 255
 // preview scenes. It exists because this file failed correctly and far too late. Three families were
-// added with no rows and the fault sat there until somebody happened to type `make effects`, which
+// added with no rows and the fault sat there until somebody happened to type `make regen`, which
 // nothing in the ladder does, so the whole catalogue could not rebuild and no run said so. A check
 // that only fires when a human invokes the build is not fail-early, it is fail-eventually.
 // lib-test spawns this, so the run that ADDS a vocabulary is the run that goes red.
