@@ -9,7 +9,7 @@
 > placement) these decisions all serve.
 >
 > **Writing the storyboard itself?** [`STORYBOARD-TEMPLATE.md`](STORYBOARD-TEMPLATE.md) is the fill-in
-> block `make storyboard-check` and `make intent` both read. It is linked here in prose rather than in
+> block `make storyboard-check` and `make dev-tool X=intent` both read. It is linked here in prose rather than in
 > the generated table below, because its own frontmatter is the example an author copies and cannot
 > also carry index metadata.
 
@@ -89,7 +89,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [routes/motion-graphic.md](routes/motion-graphic.md) | routed here by `engine-doctrine/CRAFT/ROUTING.md`, or a request wants a short unnarrated motion-first unit under 10s | the motion-graphic intake questions, its pace band, and which CRAFT docs and blueprints it draws on |
 | [routes/recreation.md](routes/recreation.md) | routed here by `engine-doctrine/CRAFT/ROUTING.md`, or a request must faithfully reflect a real film or site with no product to sell | the recreation intake questions, its honesty ceiling, and which CRAFT docs it draws on |
 | [rules/README.md](rules/README.md) | writing or reading a engine-doctrine/CRAFT/rules/<category>.json file, or wiring a new consumer of harness/lib/craft-rules.mjs | the rule-record schema, one worked example, the owner rules every record obeys, and why brief quotes the doc |
-| [`vawe-continuous-action`](../../skills/vawe-continuous-action/SKILL.md) (skill) | planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen | the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make intent` already eat. Worked from `higgsfield.mp4` + `films/scene/higgsfield-recreation.json`. |
+| [`vawe-continuous-action`](../../skills/vawe-continuous-action/SKILL.md) (skill) | planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen | the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make dev-tool X=intent` already eat. Worked from `higgsfield.mp4` + `films/scene/higgsfield-recreation.json`. |
 
 **What & why (the story layer):**
 
@@ -99,7 +99,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make study-tool X=measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this"), or reflecting a real WEBSITE section by section | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · one beat per section, in the site's order · the honest 1:1 ceiling |
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
-| [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling, or picking between whole directions | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make concept` forces a round off the median |
+| [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling, or picking between whole directions | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make dev-tool X=concept` forces a round off the median |
 | [STORY.md](STORY.md) | deciding the beats and their order | the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats |
 | [TASTE-RULES.md](TASTE-RULES.md) | it "renders fine but feels cheap" | cause→feeling ease table · the failure-modes catalog · restraint · continuity |
 | [TRANSITIONS.md](TRANSITIONS.md) | choosing the CUT between two beats (you can't say why a transition is there) | the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure |
@@ -120,7 +120,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 | [MOTION-REGISTERS.md](MOTION-REGISTERS.md) | the restraint rule (one loud moment, effects as seasoning) reads wrong for the type you are writing, or you need a published number instead of an adjective | why restraint is register-dependent, not universal; the Material Design 3 curves and the duration/stagger numbers that replace our adjectives; the seven-device motion taxonomy; what is and is not measurable about motion |
 | [MOTION-STANDARDS.md](MOTION-STANDARDS.md) | motion is technically correct and still feels wrong, or you are choosing an easing or a duration | the outside standards for why motion reads well, which of them transfer to FILM, and what this engine already has against what it is missing |
 | [PARITY-AUDIT.md](PARITY-AUDIT.md) | you are about to reach for an effect we already ship, and want to know whether ours is any good | seven of the most-demanded SaaS motion effects, each measured against the recipe practitioners publish, with a verdict and the concrete gap |
-| [SCREENS.md](SCREENS.md) | you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped | why a product screen is designed for the video, not a plain mock · the one make screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used |
+| [SCREENS.md](SCREENS.md) | you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped | why a product screen is designed for the video, not a plain mock · the one make dev-tool X=screen command · what the video-readiness and clipping checks catch and why · how a screen is measured against a reference act · where a theme comes from when the user has none, and which ui-skills were used |
 | [SPECIMEN.md](SPECIMEN.md) | you are about to write a scene that PROVES a mechanism works | what a specimen is · why the subject is a picture · the series constants and why each is fixed · when it is `make site X=catalog` instead |
 | [SURFACES.md](SURFACES.md) | choosing the SURFACE copy sits on (glass/mesh/spotlight/bento) | the sleek block library · the build-HTML-first loop · the design spec + 8 visual styles picker |
 | [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking a font or type face (`type.sans/serif/mono`), sizing headlines | which face signals which personality · pairing · the size scale · weight/tracking/leading |
@@ -173,5 +173,5 @@ including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
   specific themes and are not listed here).
 - **Real registries** the guides cover in full: 31 composite looks (`core/looks/index.js`), 35 shader stings
   (`SHADER_FX` in `core/stings/index.js`), the palette-driven bg presets (`core/backgrounds/index.js`).
-- **Doctrine**: colours ONLY from the brand (eyedrop, `make palette`); dominance decided by LOOKING;
+- **Doctrine**: colours ONLY from the brand (eyedrop, `make study-tool X=palette`); dominance decided by LOOKING;
   no em-dashes on screen; patterns are seasoning not wallpaper. See [`../MISTAKES.md`](../MISTAKES.md).

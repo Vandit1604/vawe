@@ -6,7 +6,7 @@
 // The failure that found it: a scene carrying 18 `shader` layers rendered COMPLETELY BLANK and exited
 // 0. Browsers cap live WebGL contexts at around 16; past that `getContext` returns null, the layer
 // stored an undefined surface, and `core/layers/canvas.js:50`'s `if (!s) return` swallowed it every
-// frame. `make beats` produced seven blank beats and said nothing. Six layers per scene works, so
+// frame. `make dev-tool X=beats` produced seven blank beats and said nothing. Six layers per scene works, so
 // nothing about the scene looked wrong.
 //
 // That is the accepted-then-ignored class this repo logs most, and the reason it survived is that the

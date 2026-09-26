@@ -33,7 +33,7 @@ const extra = args.filter((a) => !a.startsWith('--')).slice(1);
 if (extra.length) {
   console.error(`scene-snap takes a FORMAT name, not a data file. It always snapshots films/${m}/sample.json.`);
   console.error(`  ignored: ${extra.join(', ')}`);
-  console.error('  to compare one scene, render it and use `make compare`.');
+  console.error('  to compare one scene, render it and use `make dev-tool X=compare`.');
   process.exit(1);
 }
 

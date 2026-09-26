@@ -179,8 +179,8 @@ if (isMain) {
     if (placeholder)
       gf.warn('placeholder-surface', `act ${fi} (${act.label}) reads as a flat mock: fill ${ours.fill} (>= `
         + `${PLACEHOLDER.FILL_MIN}), band ${ours.band}, photo ${ours.photo} (< ${PLACEHOLDER.PHOTO_MAX}), `
-        + `detail ${ours.detail} (< ${PLACEHOLDER.DETAIL_MAX}). Design the screen: make screen `
-        + '(engine-doctrine/CRAFT/SCREENS.md) or capture a real one: make capture / make sections.', { at: `act ${fi}` });
+        + `detail ${ours.detail} (< ${PLACEHOLDER.DETAIL_MAX}). Design the screen: make dev-tool X=screen `
+        + '(engine-doctrine/CRAFT/SCREENS.md) or capture a real one: make media X=capture / make sections.', { at: `act ${fi}` });
   }
   gf.emit();
   process.exit(strict && (anyUnder || anyPlaceholder) ? 1 : 0);

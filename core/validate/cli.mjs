@@ -258,8 +258,8 @@ function axisFontWarnings(data, fs, path, readJSON, root) {
 function musicWarning(m, resolves, root, path, fs) {
   // music: a bed name or path must resolve or the bed drops to silence. A warning, not a failure: a
   // scene can name a bed baked on another machine. `music:"auto"` is resolved at authoring time
-  // (`make audio-bed`), NOT at render, so an unresolved "auto" reaching the mixer = silence.
-  if (m === 'auto') return 'audio.music:"auto" is unresolved, run `make audio-bed D=… WRITE=1` to bake the profile\'s bed in, or the mixer falls back to SILENCE.';
+  // (`make media X=audio-bed`), NOT at render, so an unresolved "auto" reaching the mixer = silence.
+  if (m === 'auto') return 'audio.music:"auto" is unresolved, run `make media X=audio-bed D=… WRITE=1` to bake the profile\'s bed in, or the mixer falls back to SILENCE.';
   if (typeof m !== 'string') return null;
   // `auto` is the auto-SOUND-DESIGN flag (derives SFX cues); it has NOTHING to do with music
   // resolution. Skipping the music check when auto:true is how vawe-identity's bare "tense" bed
@@ -322,7 +322,7 @@ function beatGridErrors(data, resolves) {
   const errors = [];
   try {
     const gp = beatGridPath(data);
-    if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp}, run \`make beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
+    if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp}, run \`make media X=beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
   } catch (e) { errors.push(e.message); }
   return errors;
 }

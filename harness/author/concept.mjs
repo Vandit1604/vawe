@@ -31,7 +31,7 @@ const PICK = flag('--pick', null);
 if (PICK) {
   const src = path.join(OUTDIR, `${path.basename(SB).replace(/\.storyboard\.md$/i, '').replace(/\.md$/i, '')}-${PICK}.storyboard.md`);
   if (!fs.existsSync(src)) {
-    console.error(`✗ no such direction: ${src}\n  run \`make concept SB=${SB}\` first, or check the slug.`);
+    console.error(`✗ no such direction: ${src}\n  run \`make dev-tool X=concept SB=${SB}\` first, or check the slug.`);
     process.exit(2);
   }
   const dir = DIRECTIONS.find((d) => d.slug === PICK);
@@ -46,7 +46,7 @@ if (PICK) {
   });
   console.log(`  ✓ ${PICK} promoted → ${SB}`);
   console.log(`    thread ${dir?.thread} · look ${dir?.preset}`);
-  console.log(`\n  next: make treatment SB=${SB}   (it reads which directions you turned down)\n`);
+  console.log(`\n  next: make dev-tool X=treatment SB=${SB}   (it reads which directions you turned down)\n`);
   process.exit(0);
 }
 
@@ -407,7 +407,7 @@ console.log(`    Left behind: ${left.dir.slug} (p ${left.p.toFixed(2)}) is the m
 console.log('    A low p buys nothing on its own. It says the idea is unusual, never that it is good.\n');
 
 console.log('  These are STARTING POINTS, not finished films: whether the one you pick ends up too close');
-console.log('  to something already shipped is a question about a real scene, and `make ledger` answers it.\n');
+console.log('  to something already shipped is a question about a real scene, and `make dev-tool X=ledger` answers it.\n');
 console.log('  next: fill the <…> slots in the direction you believe in, then');
-console.log(`        make concept-pick SB=${SB} OPTION=<direction>\n`);
+console.log(`        make dev-tool X=concept-pick SB=${SB} OPTION=<direction>\n`);
 process.exit(STRICT && options.some((o) => o.placeholders > 40) ? 1 : 0);

@@ -95,7 +95,7 @@ export const ASPECTS = ASPECT_REGISTRY.entries;
  * disagreed. The same thing had already happened one level down, to the question of how big the frame
  * is: eight call sites, three of which read `aspect` and five of which knew only about `orientation`.
  * Since scenes declare `aspect` and almost none declare `orientation`, those five silently rendered
- * every landscape scene into a 1080x1920 portrait viewport and cropped it: `make frame`, `make beats`,
+ * every landscape scene into a 1080x1920 portrait viewport and cropped it: `make dev-tool X=frame`, `make dev-tool X=beats`,
  * `make slop`, `make check GATE=motion` and `make check GATE=snap` were all judging a canvas the renderer never produces.
  * Nothing failed, because a cropped viewport is a perfectly stable, perfectly deterministic wrong
  * answer. Dimensions and the safe area are the same question asked twice; both live here (MISTAKES #46).

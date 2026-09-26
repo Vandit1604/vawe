@@ -24,7 +24,7 @@
 // WHY NOT AUTOMATE THAT HALF TOO. Generating a section mechanically from any old export would produce a
 // worse document: its value is the one-line description beside each name, which is judgement. So the
 // remaining sections keep their prose, and this makes an OMISSION LOUD instead of silent. Same trade as
-// `make beats`: the tool cannot look at the picture, so it checks that somebody did.
+// `make dev-tool X=beats`: the tool cannot look at the picture, so it checks that somebody did.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

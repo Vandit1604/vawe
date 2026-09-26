@@ -283,7 +283,7 @@ const timeContext = (prompt) => {
       active.length ? `active layers ${active.join(', ')}.` : 'no layer is active.',
       cam ? `camera leg ${cam.move || 'move'} ${cam.start}-${(cam.start + cam.dur).toFixed(2)}s.` : '',
       near ? `nearest transition ${near.fx || near.mech || 'transition'} at ${near.at}s.` : '',
-      `To see this exact frame run: make frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
+      `To see this exact frame run: make dev-tool X=frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
     ].filter(Boolean).join(' ');
   });
   return blocks.join(' ');

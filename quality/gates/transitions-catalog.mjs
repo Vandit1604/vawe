@@ -18,7 +18,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // A report, never a rule: it never blocks, so every finding here is a WARN and the exit code stays 0.
 const f = gateFindings();
 
-// make study-tool X=transitions D=<film.json>: PER-BOUNDARY, the same procedure `make critics` briefs the transition
+// make study-tool X=transitions D=<film.json>: PER-BOUNDARY, the same procedure `make dev-tool X=critics` briefs the transition
 // decider to run first (engine-doctrine/CRAFT/TRANSITIONS.md#the-decision-procedure-the-algorithm-to-run-at-every-
 // seam). Read here, never re-derived: the exact fields storyboard-check.mjs already checks.
 const filmArg = process.argv.slice(2).find((a) => !a.startsWith('--') && a.endsWith('.json'));

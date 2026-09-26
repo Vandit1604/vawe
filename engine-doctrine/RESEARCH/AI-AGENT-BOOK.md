@@ -125,7 +125,7 @@ BEFORE YOU BUILD IT" is 3,274 bytes that ends by telling the reader to load the
 `vawe-name-the-effect` skill, which holds the same procedure. That is a ch2 Layer-2 body sitting in
 Layer 1. Same shape, smaller: "Hand-writing HTML? Beat the AI slop" (3,273) routes to `taste-skill`
 and `impeccable`; "Reflecting a real website" (1,982) routes to `make sections`; "A DEMO IS A
-TEN-SECOND FILM" (1,505) routes to `make demo`.
+TEN-SECOND FILM" (1,505) routes to `make dev-tool X=demo`.
 
 **Change.** Move the BODY of each to a doc or skill. `engine-doctrine/CRAFT/` already carries `when:`/`answers:`
 frontmatter that `make site X=doc-index` turns into a routing catalogue, which is ch2's Layer 1 with the
@@ -196,7 +196,7 @@ is measuring the bias rather than the craft.
 This is the direct answer to live question 2 and is argued in full below. The change it recommends is
 one line of output: `make dev` and `make check` should print, on every run, the handful of arsenal
 entries that rank against this scene and appear nowhere in it. That is ch4's status-bar tool-name list
-placed inside the loop the author is already in, rather than in `make preflight`, which is one
+placed inside the loop the author is already in, rather than in `make dev-tool X=preflight`, which is one
 optional step at the start. Baselines already measured: beat blueprints used by 2 of 134 scenes, 12 of
 19 beats at zero users, `EXIT_FX` at zero users across the whole library.
 
@@ -279,7 +279,7 @@ this is the lowest-ranked ADOPT here.
 ### 9. Small, obviously right, left to you
 
 Captured third-party HTML is untrusted content flowing into both a scene file and the agent's context.
-`make capture` DOM-captures a live site and `mcp/server.mjs` `vawe_reflect` fetches an arbitrary URL.
+`make media X=capture` DOM-captures a live site and `mcp/server.mjs` `vawe_reflect` fetches an arbitrary URL.
 `core/type/sanitize-html.js` refuses `transition` and `animation`, but for DETERMINISM, and nothing in its
 header says which trust boundary it is or is not. Ch4's tool description poisoning, ch3's
 "retrieved documents are the most typical vector for indirect prompt injection", and ch9's "LLM
@@ -510,7 +510,7 @@ one line and the pointer.
 file deliberately moved its ladder OUT ("THE PROCESS HAS ONE OWNER, AND IT IS NOT THIS FILE") because
 three prose copies of one process went stale, and `make ship` now declares its own twenty steps when
 it runs. By this repo's drift rules that was right, and it costs what ch2 would flag: an agent that
-never runs `make ship` never sees an ordered process, only 28 independent rules. `make preflight` is
+never runs `make ship` never sees an ordered process, only 28 independent rules. `make dev-tool X=preflight` is
 the mitigation and it is optional. Putting the ordered chain in nine lines at the top would close the
 gap without re-creating the stale copy.
 
@@ -574,7 +574,7 @@ Three ways to apply that here, cheapest first:
    entries that rank against this scene's own text and appear nowhere in it. That is ch4's status-bar
    name list, inside the loop the author is already in, on every iteration, with no new gate and no
    new file. This is the one to do.
-2. **Make `make preflight`'s arsenal ranking an input the scene records**, so authoring transcribes a
+2. **Make `make dev-tool X=preflight`'s arsenal ranking an input the scene records**, so authoring transcribes a
    choice rather than recalling one. The receipt mechanism exists and already goes stale when the
    scene changes.
 3. **Do not build proactive declare-match-inject.** Ch4 is blunt about its cost: "an embedding index

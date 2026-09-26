@@ -37,5 +37,5 @@ jobs:
 
       - run: npm ci
 
-      - name: make gate-test
-        run: make gate-test
+      - name: make dev-tool X=gate-test
+        run: make dev-tool X=gate-test

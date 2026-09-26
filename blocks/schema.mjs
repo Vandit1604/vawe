@@ -29,7 +29,7 @@
 //            comparison's screen form all take one, and it is not a string, a row or a list.
 //
 // x · y · start · dur appear in NO table. They are placement and timing the scene supplies (a
-// container injects them, `make expand` writes them), never content an author dials. The check in
+// container injects them, `make dev-tool X=expand` writes them), never content an author dials. The check in
 // quality/gates/block-schema.mjs holds every table to that, and to the defaults the code really has.
 
 // The tables themselves are DISCOVERED, not imported: blocks/index.mjs reads the family modules and

@@ -10,7 +10,7 @@ import { wipe, circleWipe, clockWipe } from '../cuts/presentations.js';
 import { defineRegistry } from '../registry/registry.js';
 
 // enter/exit animation registry: data-anim / data-out name → (t)=>styleObject.
-// Exported so `make lib-test` can hold the DIRECTION contract of each name as a pure assertion, a
+// Exported so `make test` can hold the DIRECTION contract of each name as a pure assertion, a
 // registry entry whose motion contradicts its own name is invisible to every gate that only counts
 // names, and that is exactly how `wipe-right` revealed right-to-left for as long as it did.
 export const ANIM = {
@@ -129,7 +129,7 @@ export const ANIM_NAMES = ANIM_REGISTRY.names;
 
 // The entrances that accept a WARP, and therefore the ones `anticipate` and `overshoot` are real on.
 // Written out rather than probed, because a hand-written list of a registry's members is exactly what
-// drifts here: `make lib-test` asserts this set is precisely the set of ANIM entries whose output
+// drifts here: `make test` asserts this set is precisely the set of ANIM entries whose output
 // actually CHANGES when a warp is handed to them, so a new entrance that threads one and is not named
 // here fails the build, and a name here that quietly ignores the warp fails it too.
 export const WARPABLE = Object.freeze(['up', 'rise', 'pop', 'scale', 'lift',
@@ -185,7 +185,7 @@ export const exitDurOf = (el) => (el.dataset.exitDur != null ? parseFloat(el.dat
  * The opacity envelope every layer fades through. Eased, and MIRRORED: the exit curve is the
  * complement of the entrance curve, so two layers handing over the same pixels sum to exactly 1.
  * Independent ease-out/ease-in curves both sit high mid-blend (measured 1.71 across a real handoff)
- * and the dissolve goes muddy. Pure, and exported so `make lib-test` can hold both properties.
+ * and the dissolve goes muddy. Pure, and exported so `make test` can hold both properties.
  */
 export const opacityEnvelope = (enterT, exitT = 0) =>
   easeOutCubic(clamp01(enterT)) * (exitT > 0 ? 1 - easeOutCubic(clamp01(exitT)) : 1);

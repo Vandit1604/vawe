@@ -2,7 +2,7 @@
 // `degrees`; `slowPush`/`punchIn` want `dur`, not `duration`; `travel` wants `stations`, not `dolly`),
 // and until now the check for that lived only in core/camera-moves/index.js buildCameraMove, reached
 // the first time the scene actually RENDERED. A typo'd param is a real error, correctly named, just
-// three renders late. Same check, same message, run here at `make validate` time instead of waiting
+// three renders late. Same check, same message, run here at `make check GATE=validate` time instead of waiting
 // for boot() to call buildCameraMove for real.
 //
 // `target`/`cursor`/`beats` are consumed by core/engine/produce.js's own resolution pass BEFORE

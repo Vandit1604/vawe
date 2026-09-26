@@ -1,7 +1,7 @@
 ---
 name: stagger-total
 when: a group of items arrives with a stagger
-holds: warns (make direct, stagger-total finding; engine-doctrine/MOTION-CRAFT.md "Arrival rhythm")
+holds: warns (make dev-tool X=direct, stagger-total finding; engine-doctrine/MOTION-CRAFT.md "Arrival rhythm")
 answers: "the cap on a staggered group's total arrival time, and why past it the last item lands in a different beat"
 group: look
 ---

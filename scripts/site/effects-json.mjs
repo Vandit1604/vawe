@@ -1,7 +1,7 @@
 // scripts/site/effects-json.mjs: derive the site's effects index from the SAME family list that
 // generates engine-doctrine/EFFECTS.md, plus one playable scene per previewable effect.
 //
-//   node scripts/site/effects-json.mjs [--check]   ·   make effects-json
+//   node scripts/site/effects-json.mjs [--check]   ·   make site X=effects-json
 //
 // Writes:
 //   site/lib/effects.json                       the index the /showcase/effects page renders
@@ -242,7 +242,7 @@ if (CHECK) {
     || curCounts.trim() !== (j(counts) + '\n').trim()
     || curBody.trim() !== (j(bodies) + '\n').trim()
     || [...want].some(([f, body]) => !fs.existsSync(path.join(SCENES, f)) || fs.readFileSync(path.join(SCENES, f), 'utf8') !== body);
-  if (stale) { console.error('✗ site/lib/effects.json is stale, run `make effects-json`.'); process.exit(1); }
+  if (stale) { console.error('✗ site/lib/effects.json is stale, run `make site X=effects-json`.'); process.exit(1); }
   console.log(`✓ effects index in sync: ${total} effects, ${previewed} previewable`);
   process.exit(0);
 }

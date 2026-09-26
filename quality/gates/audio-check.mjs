@@ -145,7 +145,7 @@ function silenceFindings(state, a) {
     F.fail('silent-by-omission',
       'this film names no `audio` block and has no cut, sting or seam for the engine\'s default cue '
       + 'derivation to score, so it renders with no sound at all and nobody decided that.',
-      { fix: 'Give it a junction to cut on, name a bed (`make audio-bed D=<file> WRITE=1`), or state the silence:\n'
+      { fix: 'Give it a junction to cut on, name a bed (`make media X=audio-bed D=<file> WRITE=1`), or state the silence:\n'
       + '        "audio": { "silent": true, "_why": "why this film is better with no sound" }' });
   } else if (state === SILENT && !reasonOf(a)) {
     F.fail('silence-without-a-reason',
@@ -214,14 +214,14 @@ function bedFindings(scene, a, sceneDir) {
       '`profile` is set and no `music` is named, so `core/audio/select.js` defaults `music` to the '
       + '"auto" sentinel, resolved at AUTHORING time. The mixer does not run core/audio-select.js at '
       + 'render, so an unresolved "auto" reaching it plays SILENCE.',
-      { fix: `Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
+      { fix: `Bake it in:  make media X=audio-bed D=${file || '<file>'} WRITE=1` });
   }
   if (!a) return;
   if (a.music === 'auto') {
     F.warn('bed-unresolved',
       '`music:"auto"` is a sentinel resolved at AUTHORING time, not at render: the mixer does not run '
       + 'core/audio-select.js, so an unresolved "auto" reaching it plays SILENCE.',
-      { fix: `Bake it in:  make audio-bed D=${file || '<file>'} WRITE=1` });
+      { fix: `Bake it in:  make media X=audio-bed D=${file || '<file>'} WRITE=1` });
     return;
   }
   if (typeof a.music !== 'string' || !a.music) return;

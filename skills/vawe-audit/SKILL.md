@@ -9,7 +9,7 @@ effort: high
 
 Eighteen skills serve this engine. Eight of them serve one stage: plan. The back half of a film's
 life, where it is judged, gets one skill (`vawe-review-loop`), and nothing today composes `make
-check`, `make check GATE=audit`, `make judge`, `make ledger`, `make beats`, `make check GATE=probe` into a single verdict
+check`, `make check GATE=audit`, `make judge`, `make dev-tool X=ledger`, `make dev-tool X=beats`, `make check GATE=probe` into a single verdict
 with one meaning. This skill is that composition. **It owns the ORDER and how to read each output.
 It does not own a single fact a gate already owns**: if you find yourself writing a rule about what
 counts as a defect, stop, that rule belongs in the gate, not here.
@@ -37,10 +37,10 @@ none subsumes another.
 make check       D=films/scene/<film>.json                 # every static gate, zero consequence
 make check GATE=audio-check D=films/scene/<film>.json STRICT=1          # is the silence a decision or an omission; bed licence
 make check GATE=audit       D=films/scene/<film>.json ASPECT=<ratio>   # layout: overlap/overflow/safe-zone, per canvas shipped
-make beats       D=films/scene/<film>.json                  # contact sheet: first/mid/last of every beat
-make reveal      D=films/scene/<film>.json                  # contact sheet: how each beat ARRIVES
+make dev-tool X=beats       D=films/scene/<film>.json                  # contact sheet: first/mid/last of every beat
+make dev-tool X=reveal      D=films/scene/<film>.json                  # contact sheet: how each beat ARRIVES
 make judge       D=films/scene/<film>.json VS=<brand>       # the only gate that SEES: writes sheet.png + rubric.md
-make ledger      D=films/scene/<film>.json                  # cross-film memory: does this repeat a shipped shape
+make dev-tool X=ledger      D=films/scene/<film>.json                  # cross-film memory: does this repeat a shipped shape
 make check GATE=plan-check  D=films/scene/<film>.json                  # plan vs render: did it land where the storyboard promised
 ```
 

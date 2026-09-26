@@ -27,11 +27,11 @@ not: "the defaults this film refuses, in your own words"
   loud moment, named: beat, layer, device, why) and `not:` (the defaults this film refuses).
 - Fill `pace:` (showreel 1.5-4s/idea, explainer 3-8s, held 6s+), `threads:`/`object:` (what holds the
   film across its cuts), and per-beat `shot:`/`layout:`/`becomes:`/`trigger:`/`picture:`, then watch
-  `make animatic SB=<file>` before writing any JSON.
+  `make dev-tool X=animatic SB=<file>` before writing any JSON.
 - Enforced by `[gated: quality/gates/storyboard-check.mjs]` (presence of `spectacle:`/`not:`, plus
   `timeline-hole`), `[gated: quality/gates/plan-vs-render.mjs]` (`pace-not-chosen`) once a scene
-  exists; `[ref: make panels]` / `[ref: make animatic]` draw what each field means but check nothing.
-- Confirm: are `spectacle:` and `not:` both filled, and have you watched `make animatic` before
+  exists; `[ref: make dev-tool X=panels]` / `[ref: make dev-tool X=animatic]` draw what each field means but check nothing.
+- Confirm: are `spectacle:` and `not:` both filled, and have you watched `make dev-tool X=animatic` before
   writing any scene JSON?
 
 <!--
@@ -152,7 +152,7 @@ not: "the defaults this film refuses, in your own words"
 
   ALL FOUR ARE OPTIONAL, AND ADOPTION RIDES A RATCHET, NOT A REQUIREMENT. 44 storyboards existed before
   these fields did; a required field would have invalidated every one of them at once.
-  `make storyboard-decide-ratchet` counts how many beats across the whole corpus declare NONE of the
+  `make dev-tool X=storyboard-decide-ratchet` counts how many beats across the whole corpus declare NONE of the
   four and fails only on an INCREASE from the stamped baseline (harness/dev/
   storyboard-decide-ratchet.json, kept outside quality/baselines/ because this ratchet is adoption-only
   and never load-bearing on a push), exactly as `quality/gates/output-contract.mjs` and
@@ -170,7 +170,7 @@ not: "the defaults this film refuses, in your own words"
   asks for a coarse region and how much of the frame it fills ("filling the lower half", "top-left
   against the UI"), never coordinates. That is the level a reviewer can actually approve.
 
-  `layout:` IS NOW DRAWN. `make panels SB=<this file>` reads the line, tints the region it names inside
+  `layout:` IS NOW DRAWN. `make dev-tool X=panels SB=<this file>` reads the line, tints the region it names inside
   the panel frame, and sizes or centres the subject box against it, so a beat that says "the UI fills
   the lower two thirds" stops being drawn as a medium box dead centre. What it reads: halves, thirds,
   two-thirds and quarters ("lower half", "middle third", "top-left"), plus a stated share ("60% of frame
@@ -188,12 +188,12 @@ not: "the defaults this film refuses, in your own words"
   at all. `node harness/author/panels.mjs --self-test` asserts both against that same hairline.
 
   EVERY BEAT DECLARES ITS STYLE AND ITS REST. Be clear about what reads which, because a field nobody
-  reads is worse than no field. `rest:` is consumed. `layout:` is consumed by `make panels`, as above,
+  reads is worse than no field. `rest:` is consumed. `layout:` is consumed by `make dev-tool X=panels`, as above,
   and by nothing else: no gate and no renderer compares it against the film, so writing the region down
-  is not building it. `style:` is consumed by `make panels` as WORDS ONLY. It is carried onto the panel
+  is not building it. `style:` is consumed by `make dev-tool X=panels` as WORDS ONLY. It is carried onto the panel
   and listed beat by beat under the report, where five beats declaring one treatment is visible at a
   glance. It is NOT drawn, and it must not be: panels are grey on purpose and the look is judged at
-  `make styleframes`. Nothing anywhere grades the prose in either line.
+  `make dev-tool X=styleframes`. Nothing anywhere grades the prose in either line.
   `style:` is the visual treatment for THIS beat, the slot the reference system's beat formula has
   (Element · Motion · Layout · Style · Timing) and ours did not. Without it, style is decided once for
   the whole film and every beat inherits it, which is how a film ends up looking like one long shot.
@@ -215,7 +215,7 @@ not: "the defaults this film refuses, in your own words"
   label out as it goes (`op`). `make assemble` keys all four (x, y, w, h, rot, opacity are all properties
   `layers[].motion[]` already takes) into the SAME motion track the plain position form always built, so
   a film that never states a pose builds the exact track it always did. A stated pose is part of the
-  contract exactly like placement already is: `make contract` refuses a beat whose pose does not match
+  contract exactly like placement already is: `make dev-tool X=contract` refuses a beat whose pose does not match
   the one it hands off to, named on both sides, same as a placement mismatch.
   What this still cannot say: a shape morph (a rectangle becoming a pill becoming a circle) needs a
   keyable corner radius the engine does not have yet; reach for `morph` (character/path melt, one layer)
@@ -365,7 +365,7 @@ not: "the defaults this film refuses, in your own words"
   core/camera-moves/index.js), so the plan simply did not speak the language the renderer already had, and
   camera work got invented at JSON time or not at all. Name `shot:` and `camera:` per beat.
 
-  `shot:` NOW DRAWS SOMETHING, so it is worth filling in properly. `make panels SB=<this file>` renders
+  `shot:` NOW DRAWS SOMETHING, so it is worth filling in properly. `make dev-tool X=panels SB=<this file>` renders
   one rough grey still per beat, and `shot:` sizes the subject box in it: a wide leaves the frame mostly
   empty, a close fills it. A beat with no `shot:` is drawn as a medium and named in the warnings, which
   makes the omission visible rather than average. Placement words inside `shot:` or `picture:` are read
@@ -382,7 +382,7 @@ not: "the defaults this film refuses, in your own words"
 
   THE TIMES ARE READ NOW. The `(0s-1.53s)` range in each heading is parsed. A gap between two beats,
   or a last beat that stops short of the frontmatter `duration`, fails as `timeline-hole`.
-  THEN PLAY IT: `make animatic SB=<this file>`. A storyboard shows WHAT happens; an animatic shows
+  THEN PLAY IT: `make dev-tool X=animatic SB=<this file>`. A storyboard shows WHAT happens; an animatic shows
   whether the things you planned have the TIME to happen, which is the one question no amount of
   re-reading the plan can answer and the one this repo keeps getting wrong. It renders grey slots and
   your real copy at your real durations, deliberately ugly so that pacing is the only thing left to

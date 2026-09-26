@@ -62,7 +62,7 @@ By role (`make arsenal Q="…"` to search):
 
 ## Assets and how to get them
 
-Prefer a real captured UI (`make capture`) over a hand-drawn panel; the worked example below uses a
+Prefer a real captured UI (`make media X=capture`) over a hand-drawn panel; the worked example below uses a
 plain panel only because no real product was in scope, and says so in its `note`. A cursor demo never
 needs a video recording of a real click, since the engine draws and animates the pointer itself.
 

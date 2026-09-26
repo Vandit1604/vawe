@@ -147,13 +147,13 @@ const { beats } = timeline(sb);
 
 const errs = chainErrors(beats);
 if (errs.length) {
-  console.error(`assemble: the continuous-object contract does not chain (\`make contract D=${film}\` for detail):`);
+  console.error(`assemble: the continuous-object contract does not chain (\`make dev-tool X=contract D=${film}\` for detail):`);
   for (const e of errs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
 const motionErrs = motionErrors(beats);
 if (motionErrs.length) {
-  console.error(`assemble: the motion plan does not parse (\`make contract D=${film}\` for detail):`);
+  console.error(`assemble: the motion plan does not parse (\`make dev-tool X=contract D=${film}\` for detail):`);
   for (const e of motionErrs) console.error(`  ✗ ${e}`);
   process.exit(1);
 }
@@ -349,7 +349,7 @@ if (moveConflicts.length) {
   process.exit(1);
 }
 if (missing.length) {
-  console.error(`assemble: missing fragment(s), run \`make scenes D=${film}\` for the briefs and write them first:`);
+  console.error(`assemble: missing fragment(s), run \`make dev-tool X=scenes D=${film}\` for the briefs and write them first:`);
   for (const m of missing) console.error(`  ✗ ${m}`);
   process.exit(1);
 }
@@ -575,4 +575,4 @@ if (preserved.length) {
   if (candidates.length) console.log(`  (${candidates.map(nameOf).join(", ")} spans beats: a candidate for the continuous-object contract, not a permanent exception)`);
 }
 if (staleWarnings.length) { console.log("  STALE:"); for (const w of staleWarnings) console.log(w); }
-console.log(`  Next: make author-check D=${film}`);
+console.log(`  Next: make dev-tool X=author-check D=${film}`);

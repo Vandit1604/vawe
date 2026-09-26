@@ -78,7 +78,7 @@ export const ICON_REGISTRY = defineRegistry('icon', ICONS, { slot: 'svgIcon()', 
   catalog: {
     title: 'Drawn icons',
     tag: 'asset',
-    intro: '`svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.',
+    intro: '`svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make media X=capture`, then a brand mark, then these, then emoji last.',
     skip: 'the name is the drawing',
     usage: (n) => `svgIcon(${JSON.stringify(n)})`,
     noPreview: 'the name is the drawing. Every one of them is on the page already, at /blocks.',

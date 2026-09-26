@@ -75,7 +75,7 @@ export function resolveAudio(scene) {
 
 // ── CLI: `node core/audio/select.js <scene.json> [--write]`. Prints the resolved audio block;
 //    --write bakes it back INTO the scene (in place), turning `music:"auto"` into a concrete bed so
-//    the render path (a Go binary with no JS pre-pass) never sees the "auto" sentinel. `make audio-bed`.
+//    the render path (a Go binary with no JS pre-pass) never sees the "auto" sentinel. `make media X=audio-bed`.
 // Both node: imports below are dynamic and load only inside this CLI-only branch, so core/ (fetched
 // and evaluated by a browser) never carries a static node:* import.
 if (typeof process !== 'undefined' && process.argv && process.argv[1]) {

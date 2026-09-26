@@ -113,7 +113,7 @@ with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md)
 - **A FULL-SCREEN LINEAR GRADIENT ON A DARK GROUND WILL BAND, and the banding is the encoder, not the design.**
   h264 quantises a slow luminance ramp into visible steps, and it is worst exactly where a dark backdrop is
   most attractive: a large area, a shallow slope, few edges for the encoder to spend bits on. The frame looks
-  clean in the browser and in `make frame`, and the stripes appear only in the mp4, which is why nothing here
+  clean in the browser and in `make dev-tool X=frame`, and the stripes appear only in the mp4, which is why nothing here
   ever caught it: every gate we own samples the PAGE, not the encode.
   Prefer a radial over a full-width linear on dark, keep the ramp short, or break it with texture the encoder
   can hold: the `grain` fx, `paperDots`, `dotmatrix`, or a `dither`/`posterize` filter

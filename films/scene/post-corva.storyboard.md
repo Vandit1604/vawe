@@ -23,7 +23,7 @@ craft:
   layout: "off-center hero column at x=90 with the right rail left empty (it is also the reels chrome rail); nothing centered-grid except the one-time wordmark on the end card"
   motion-craft: "the accent bar is hand-keyed (6 keys, easeInOutSine) tied to the real cut points, not a fired-once preset"
   show-dont-tell: "the payoff (a citation you can check) is SHOWN as a real document card with a highlighted line, a resolving citation chip and a separate verified badge, never just stated in a caption"
-  sound: "audio.music: auto, resolved with `make audio-bed WRITE=1`; not silent"
+  sound: "audio.music: auto, resolved with `make media X=audio-bed WRITE=1`; not silent"
   transitions: "the four boundaries are soft dissolves: the argument builds by addition (problem -> proof -> contrast -> stat -> close), not by hard contrast, so a cut that stops the eye would fight the case being made"
   typography: "Geist (theme preface); one size scale throughout, hook and end card the loudest, everything else in the support register"
 ---

@@ -11,7 +11,7 @@
 // polyline only exists during the melt.
 //
 // The pure maths (lerpPoints / pointsToD / bestRotation / morphPoints) take plain arrays and are covered
-// by `make lib-test`; only resamplePath needs a live <path> element.
+// by `make test`; only resamplePath needs a live <path> element.
 
 // resamplePath(pathEl, n) → [{x,y}]: n points spaced evenly BY LENGTH along the path. Build-time DOM read.
 export function resamplePath(pathEl, n = 180) {

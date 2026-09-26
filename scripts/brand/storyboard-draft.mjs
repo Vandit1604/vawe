@@ -1,11 +1,11 @@
 // scripts/brand/storyboard-draft.mjs: turn a captured `sections.json` into a STORYBOARD.md SKELETON:
 // one beat per real section, in the site's order, pre-wired with a type + on-screen cues (where the
-// section itself supplies them) + a ready `make capture` command + a suggested blueprint. It writes
+// section itself supplies them) + a ready `make media X=capture` command + a suggested blueprint. It writes
 // only the MECHANICAL structure it can derive from the capture; it never invents `why:`, `becomes:`,
 // `message:` or the hook/CTA copy, those are the human's to write directly into the file. This is the
 // "auto-draft the storyboard from the capture" step. The human still owns the spine and the approval.
 //
-//   make storyboard-draft NAME=<brand> [MSG="one sentence"] [DUR=30] [FORMAT=landscape|portrait] [OUT=<path>]
+//   make dev-tool X=storyboard-draft NAME=<brand> [MSG="one sentence"] [DUR=30] [FORMAT=landscape|portrait] [OUT=<path>]
 // Reads assets/brands/<brand>/sections/sections.json (from `make sections`). Output is a DRAFT: with no
 // MSG given, `make storyboard-check` will hard-error on the missing `message:` (and on every beat's
 // missing `onscreen`/`why`/`becomes`) rather than pass a skeleton off as a proposal.
@@ -13,7 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const NAME = process.env.NAME || process.argv[2];
-if (!NAME) { console.error('usage: make storyboard-draft NAME=<brand> [MSG=… DUR=30 FORMAT=landscape]'); process.exit(2); }
+if (!NAME) { console.error('usage: make dev-tool X=storyboard-draft NAME=<brand> [MSG=… DUR=30 FORMAT=landscape]'); process.exit(2); }
 const secPath = `assets/brands/${NAME}/sections/sections.json`;
 if (!fs.existsSync(secPath)) { console.error(`✗ ${secPath} not found, run \`make sections URL=… NAME=${NAME}\` first.`); process.exit(1); }
 
@@ -54,8 +54,8 @@ const beats = sections.map((s, i) => {
   const start = t; t = +(t + per).toFixed(1);
   // suggest a shot shape by POSITION + the section's capture kind (canvas => clipped image + ken).
   const blueprint = first ? 'kineticHook' : last ? 'ctaEnd' : (s.kind === 'canvas' ? 'screenDive (clipped image + ken)' : 'component capture (live UI) + a re-typed headline');
-  const type = first ? 'text (kinetic hook)' : last ? 'text + logo (end card)' : (s.kind === 'canvas' ? 'image (clipped section screenshot) + ken' : 'component (make capture) + text');
-  const cap = s.capture ? s.capture.split('\n').pop().trim() : `make capture URL=${doc.url || '<url>'} SEL='${s.sel || '<selector>'}' OUT=assets/brands/${NAME}/caps/${String(i + 1).padStart(2, '0')}.json`;
+  const type = first ? 'text (kinetic hook)' : last ? 'text + logo (end card)' : (s.kind === 'canvas' ? 'image (clipped section screenshot) + ken' : 'component (make media X=capture) + text');
+  const cap = s.capture ? s.capture.split('\n').pop().trim() : `make media X=capture URL=${doc.url || '<url>'} SEL='${s.sel || '<selector>'}' OUT=assets/brands/${NAME}/caps/${String(i + 1).padStart(2, '0')}.json`;
   return { i: i + 1, label: s.label, title: s.title, start, dur: per, blueprint, type, shot: s.shot, sel: s.sel, kind: s.kind, cap, first, last };
 });
 

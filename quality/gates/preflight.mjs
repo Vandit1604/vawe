@@ -16,7 +16,7 @@
 // itself read; a step can.
 //
 // WHAT THIS IS NOT. It does not grade the answers, and it must not pretend to. It proves the chain was
-// PUT IN FRONT OF SOMEBODY for this version of this scene, which is the same thing `make beats` proves
+// PUT IN FRONT OF SOMEBODY for this version of this scene, which is the same thing `make dev-tool X=beats` proves
 // about a contact sheet, using the same mechanism (harness/lib/receipt.mjs, stage-agnostic by design).
 // Whether the decisions are any good is `make judge` and your eyes.
 import fs from 'node:fs';
@@ -56,14 +56,14 @@ if (check) {
   // future tool) saw a bare fact ("never been through the chain") with no reason to act on it. Stated
   // here instead, once, so it travels with the record.
   const why = r.stale
-    ? `the scene has CHANGED since the preflight was run: the decisions on record were made against an older cut of this film, so a beat, an effect or a colour choice may no longer answer what is actually on screen now. Re-run \`make preflight D=${file}\`.`
-    : `this scene has never been through the decision chain: nothing here proves the nine decisions in engine-doctrine/CRAFT/README.md (beats, anchor, per-beat effect, type/colour/layout, density, restraint, sound) were made before this JSON existed, which is how a film ends up composed of whatever the author happened to remember. Run \`make preflight D=${file}\`.`;
+    ? `the scene has CHANGED since the preflight was run: the decisions on record were made against an older cut of this film, so a beat, an effect or a colour choice may no longer answer what is actually on screen now. Re-run \`make dev-tool X=preflight D=${file}\`.`
+    : `this scene has never been through the decision chain: nothing here proves the nine decisions in engine-doctrine/CRAFT/README.md (beats, anchor, per-beat effect, type/colour/layout, density, restraint, sound) were made before this JSON existed, which is how a film ends up composed of whatever the author happened to remember. Run \`make dev-tool X=preflight D=${file}\`.`;
   const F = gateFindings({ scene: file, indent: '  ' });
-  F.fail('no-preflight', why, { fix: `make preflight D=${file}`, doc: 'engine-doctrine/CRAFT/README.md' });
+  F.fail('no-preflight', why, { fix: `make dev-tool X=preflight D=${file}`, doc: 'engine-doctrine/CRAFT/README.md' });
   F.emit();
   console.log(`      The chain is nine decisions that each constrain the next, and skipping it is how a film`);
   console.log(`      ends up composed of whatever the author happened to remember. It costs one command:`);
-  console.log(`        make preflight D=${file}`);
+  console.log(`        make dev-tool X=preflight D=${file}`);
   console.log(`      read: engine-doctrine/CRAFT/README.md`);
   process.exit(1);
 }

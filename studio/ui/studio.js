@@ -235,7 +235,7 @@ function preAssembleNote(){
  const planRow=(label,v)=>v?'<div class=prow><dt>'+label+'</dt><dd>'+esc(v)+'</dd></div>':'';
  // Gate warnings/errors as short chips; several "beat X has no scene layer" findings collapse to one.
  function gateChips(findings){
-   const warn=(findings||[]).filter(f=>f.kind!=='✓'&&!/make panels|continuous-object contract/.test(f.line));
+   const warn=(findings||[]).filter(f=>f.kind!=='✓'&&!/make dev-tool X=panels|continuous-object contract/.test(f.line));
    const unbuilt=warn.filter(f=>/no scene layer starts there/.test(f.line));
    const chips=warn.filter(f=>!unbuilt.includes(f))
      .map(f=>[f.kind,/continuous-object contract/.test(f.line)?'object contract not assembled':shortFinding(f.line)]);

@@ -6,7 +6,7 @@
   "applies": "always",
   "check": null,
   "adapt": null,
-  "brief": "Prefer the lightest real visual: captured real UI (make capture) first, a raw stock photo last",
+  "brief": "Prefer the lightest real visual: captured real UI (make media X=capture) first, a raw stock photo last",
   "doc": "engine-doctrine/CRAFT/IMAGERY.md"
  },
  {
@@ -56,7 +56,7 @@
   "applies": "hasImages",
   "check": null,
   "adapt": null,
-  "brief": "Use make assets for logos, and if you curl one by hand, use -f",
+  "brief": "Use make media X=assets for logos, and if you curl one by hand, use -f",
   "doc": "engine-doctrine/CRAFT/IMAGERY.md"
  },
  {

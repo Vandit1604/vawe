@@ -21,7 +21,7 @@
   `three` layer can build synchronously without racing the module load, which would otherwise render
   empty on whichever workers got there first. That is a purity break, not a glitch.
 - Used by `core/surfaces/three.js` DETERMINISTICALLY: every object is posed absolutely from local time,
-  never accumulated, with no Clock, no AnimationMixer and no Math.random. `make lib-test` enforces the
+  never accumulated, with no Clock, no AnimationMixer and no Math.random. `make test` enforces the
   banned-API list; `make check GATE=canvas-purity` proves the pixels match across render orders.
 
 ## gsap.min.js (+ MotionPathPlugin / Physics2DPlugin / SplitText)

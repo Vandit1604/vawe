@@ -51,7 +51,7 @@ Choosing an alternative writes it into the scene like any other studio edit (und
 
 ## AGENT SUMMARY
 
-- Sound is the default, not silence. Give every film sound (`make gen X=audio` + `make audio-bed
+- Sound is the default, not silence. Give every film sound (`make gen X=audio` + `make media X=audio-bed
   D=<file> WRITE=1`); ship mute only with a stated reason (`"audio":{"silent":true,"_why":"…"}`).
   A film must still read with the sound off.
 - Enforced by `make check GATE=audio-check` (codes: `silent-by-omission`, `silence-without-a-reason`,
@@ -95,13 +95,13 @@ earn one. Do this, in order, before reading further:
 
 ```bash
 make gen X=audio                       # bake every cue + music bed, no network, deterministic (core/audio/kit.mjs)
-make audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
+make media X=audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
 make check GATE=audio-check D=<file>        # is the result a decision or an omission? read what it prints
 make video D=<file>               # renders with the mux; listen to out/<file>.mp4
 ```
 
 Write `"audio": { "music": "auto" }` in the scene (or name a bed directly, `"music": "lofi"`) before the
-first command. `make audio-bed` picks the bed from the scene's `profile`, and it MUST run before
+first command. `make media X=audio-bed` picks the bed from the scene's `profile`, and it MUST run before
 render: the render binary has no JS pre-pass, so an unresolved `"auto"` reaching the mixer is read as a
 filename and plays silence (`§6` below has the full trap). Five profiles (`apple`, `linear`, `vercel`,
 `a24`, `bloomberg`) still resolve `"auto"` to nothing, so on those, name a bed by hand or fetch a real
@@ -262,9 +262,9 @@ audio and the visual key moments, design against the markers.
 **We have this both ways already, and should use the second one more.**
 
 ```bash
-make beatmap MUSIC=assets/music/lofi.wav        # detect tempo + the beat grid; reports confidence
-make beatsync D=<scene.json> MUSIC=… WRITE=1    # snap the scene's cuts and seams ONTO that grid
-make spectrum MUSIC=… FPS=30                    # per-frame band energy → a layer can react in pure n
+make media X=beatmap MUSIC=assets/music/lofi.wav        # detect tempo + the beat grid; reports confidence
+make media X=beatsync D=<scene.json> MUSIC=… WRITE=1    # snap the scene's cuts and seams ONTO that grid
+make media X=spectrum MUSIC=… FPS=30                    # per-frame band energy → a layer can react in pure n
 ```
 
 `beatmap` reports low confidence on an ambient pad and says so, which is the correct answer rather than
@@ -286,7 +286,7 @@ DECLARE the grid and let the engine bind the joints at boot, on the one path eve
 }
 ```
 
-`true` takes the sidecar `make beatmap` wrote beside the bed (`assets/music/beat.beats.json`). The
+`true` takes the sidecar `make media X=beatmap` wrote beside the bed (`assets/music/beat.beats.json`). The
 object form sets the three knobs: `grid` (an explicit `.beats.json`), `maxShift` (how far a joint may
 travel, default 0.12s) and `bar` (snap to downbeats instead of every beat).
 
@@ -302,7 +302,7 @@ beat destroys the timing somebody meant. To keep one exact time inside a bound f
 `"snap": false` on that cut or seam.
 
 **What fails loudly.** A named grid that is missing, empty, or scored below confidence 1.6 stops the
-render and names the file and `make beatmap`. A film that asks to be beat-matched and quietly renders
+render and names the file and `make media X=beatmap`. A film that asks to be beat-matched and quietly renders
 unmatched is the bug this replaces, not a softer version of it.
 
 A short bed loops to fill the film, so the grid is unrolled across the runtime (`warm` is 8 seconds;
@@ -439,7 +439,7 @@ memory before ffmpeg muxes it.
   "cues":     [{ "t": "installLine.end+0.1", "name": "chime", "gain": 0.6 }],
   "sfxGain":    0.8,                      // master over every cue, authored and derived
   "vo":        "voice.wav",
-  "voWords":   "voice.words.json",        // [{w,t}] → make vo-captions builds timed captions
+  "voWords":   "voice.words.json",        // [{w,t}] → make media X=vo-captions builds timed captions
   "spectrum":  "assets/music/x.spectrum.json",
   "silent":     false,                    // + "_why" if true (§1)
   "_why":      "…"
@@ -508,13 +508,13 @@ is a workaround rather than the dial.
 | `make check GATE=audio-check [D=…] [STRICT=1]` | the sound gate (§1). No `D` prints the library census |
 | `make gen X=audio` | bake every synthesized cue from parameters |
 | `make gen X=music-pack` / `make gen X=music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
-| `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
-| `make beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
+| `make media X=audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
+| `make media X=beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
 | `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js). A joint's own `transitions[].at` can also PIN to a beat by index, `"beat:12"` (bare, 0-based, no `.start`/`.end`, distinct from a structural `data.beats[]` id), and `snap:"beat"`/`"bar"`/`"downbeat"` overrides which pulse THAT ONE joint nudges to, regardless of `beatSync.bar`'s own default |
-| `make beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
-| `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
+| `make media X=beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
+| `make media X=spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
 | `make check GATE=sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
-| `make tts` · `make vo-captions D=…` | narration, and karaoke captions from its word timings |
+| `make media X=tts` · `make media X=vo-captions D=…` | narration, and karaoke captions from its word timings |
 | `make check GATE=pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
 
 ### Caption styles: eight of the nineteen, and what each one uses to say "here"
@@ -561,7 +561,7 @@ a side. A style that wants more has to move the band first, and moving the band 
 **The trap, in bold, because it has bitten twice.** `music:"auto"` is resolved at **authoring** time by
 `core/audio/select.js`. The render binary has no JS pre-pass, so an unresolved `"auto"` reaching the
 mixer is read as a filename, matches nothing, and plays **silence**. Always
-`make audio-bed D=<file> WRITE=1`. `make check GATE=validate` and `make check GATE=audio-check` both warn; heed them.
+`make media X=audio-bed D=<file> WRITE=1`. `make check GATE=validate` and `make check GATE=audio-check` both warn; heed them.
 
 **A second trap, currently live.** `core/audio/select.js` maps five of its eight profiles (`apple`,
 `linear`, `vercel`, `a24`, `bloomberg`) to `bed: null`, and an absent or unknown profile also yields

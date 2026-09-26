@@ -35,7 +35,7 @@ function runMake(args) {
 
 // The two that needed the compiled binary (`build` was a Makefile prerequisite, not a plain script
 // call) and the one real dependency chain (blocks-sync ran three other targets in a row).
-const CUSTOM = {
+export const CUSTOM = {
   'catalog': () => runMake(['build']) || spawnJs('scripts/site/blocks-catalog.mjs', []),
   'examples': () => runMake(['build']) || spawnJs('scripts/site/examples-build.mjs', []),
   'docs': () => (env.Q

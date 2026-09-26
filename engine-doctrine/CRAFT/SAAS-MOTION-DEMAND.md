@@ -75,7 +75,7 @@ at row 6.
 | 17 | **Whip pan / velocity-hidden cut** | 2 | the frame smears sideways and lands on the next shot | influence 75 both sides (`AE-TECHNIQUES.md` §1) | **SHIPPED** | `whip`, `skewWhip` cuts; `whipPan` sting. Recipes #13 |
 | 18 | **Counter roll-up** | 2 | a number climbs on screen, digits rolling | none published | **SHIPPED** | `count` layer, `"roll": true`: an odometer mode, one wheel per digit (`core/layers/count.js`) |
 | 19 | **Proximity hover** | 1 | elements swell or lift as the pointer passes near them | none published | **MISSING** | The falloff maths already exists: `sphere` in `core/motion/effector.js:43` computes a radial weight. It is driven by an item index, not by a cursor position |
-| 20 | **Figma to AE layer import** | 1 | a design file becomes animatable layers without redrawing | vendor claims one click, layer for layer | **N/A, different architecture** | We do not import a design file; `make capture` and the `component` layer take the LIVE surface instead, which is a better source than a design file. Nothing to build |
+| 20 | **Figma to AE layer import** | 1 | a design file becomes animatable layers without redrawing | vendor claims one click, layer for layer | **N/A, different architecture** | We do not import a design file; `make media X=capture` and the `component` layer take the LIVE surface instead, which is a better source than a design file. Nothing to build |
 
 ---
 

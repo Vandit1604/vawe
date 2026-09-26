@@ -795,7 +795,7 @@ craft rule is that the push must END on the thing the copy names, not merely mov
 has used the product spots a fabricated screen instantly.
 
 **Verdict: HAVE.** `screenDive` is the beat, `component` captures live DOM, `ken` pushes an image, and
-`make capture` is the documented route to a real surface. This repo's launch doctrine already treats it
+`make media X=capture` is the documented route to a real surface. This repo's launch doctrine already treats it
 as the default.
 
 **Source:** https://www.premiumbeat.com/blog/create-seamless-transitons-whip-pan/

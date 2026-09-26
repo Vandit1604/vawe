@@ -16,7 +16,7 @@ which preloads a manifest and swaps an `<img>` src per frame. Non-determinism is
 time; the renderer keeps exactly one contract.
 
 This is the same shape as two things already in the repo: `core/canvas/effects.js` bakes a per-pixel image
-pass once at boot, and `make spectrum` bakes FFT band energy to a per-frame table the render reads by
+pass once at boot, and `make media X=spectrum` bakes FFT band energy to a per-frame table the render reads by
 row.
 
 ```bash

@@ -82,7 +82,7 @@ function extractStrip(clip, ref, label, from, to, fps) {
 
 const look = (from, to, stripPath) => stripPath
   ? `<look: ${from}s to ${to}s, see ${stripPath}>`
-  : `<look: ${from}s to ${to}s, no clip found, extract by hand: make filmstrip VIDEO=<clip> FROM=${from} TO=${to} FPS=12>`;
+  : `<look: ${from}s to ${to}s, no clip found, extract by hand: make media X=filmstrip VIDEO=<clip> FROM=${from} TO=${to} FPS=12>`;
 
 // ── prompt assembly ─────────────────────────────────────────────────────────────────────────────────
 

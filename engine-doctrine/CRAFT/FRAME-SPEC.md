@@ -82,7 +82,7 @@ Rule: **each on-screen cue is its own reveal window**, weighted into the back ~5
 t=0 only its first cue is present; later cues enter on their own beats. Aliveness during a hold is *subtle
 jitter only*, not drift, not breathing.
 
-`make author-check` now enforces the floor of this: **`front-loaded`** fires when nearly all reveals land in
+`make dev-tool X=author-check` now enforces the floor of this: **`front-loaded`** fires when nearly all reveals land in
 the first 30% and the back half is frozen; **`motion-monotony`** fires when every kinetic line uses the same
 preset ("no two beats move alike"). Reach past both.
 
@@ -105,5 +105,5 @@ it pulls the frames straddling every transition out of the mp4 and flags a lumin
 ---
 
 **The loop:** lock Part 1 + Part 2 (get sign-off) → author the JSON obeying the spec →
-`make author-check` (floor now checks front-load + monotony) → render → `make check GATE=seam-check` + `make judge`.
+`make dev-tool X=author-check` (floor now checks front-load + monotony) → render → `make check GATE=seam-check` + `make judge`.
 Full authoring narrative: [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md). Bespoke frames: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md).

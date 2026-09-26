@@ -1,7 +1,7 @@
 ---
 name: speed-bands
 when: choosing a duration for an entrance, an exit, or a keyed move
-holds: warns (make direct, tempo-flat / motion-monotony findings; engine-doctrine/MOTION-CRAFT.md Rule 1)
+holds: warns (make dev-tool X=direct, tempo-flat / motion-monotony findings; engine-doctrine/MOTION-CRAFT.md Rule 1)
 answers: "the four named speed bands, the 3x rule between the slowest and fastest beat, and why no two independent layers share an ease in one beat"
 group: look
 ---

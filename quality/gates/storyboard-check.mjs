@@ -43,7 +43,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // decided are load-bearing on every push, and this one is new and adoption-only, never to be
 // hand-edited or raised by an agent (see AGENTS.md `quality/baselines/`).
 //
-//   node quality/gates/storyboard-check.mjs --ratchet [--stamp]   ·   make storyboard-decide-ratchet
+//   node quality/gates/storyboard-check.mjs --ratchet [--stamp]   ·   make dev-tool X=storyboard-decide-ratchet
 if (process.argv.includes('--ratchet')) {
   const RATCHET = path.join(ROOT, 'harness/dev/storyboard-decide-ratchet.json');
   const DECIDES = ['ground', 'kinetic', 'elements', 'transition_value'];
@@ -320,14 +320,14 @@ function plainContentCheck(b, title) {
   if (isWaivedBy(allowRaw, 'plain-content', title)) return;   // {"authoring":{"allow":["plain-content@<title>"],"_why":{...}}}
   if (/^photo$/i.test(noun)) {
     err('plain-content', `beat "${title}": names a photo with no real source stated. ASK for the real image, `
-      + 'do not invent one. Get it with `make photos` (engine-doctrine/CRAFT/IMAGERY.md), or `make gen-image` '
+      + 'do not invent one. Get it with `make media X=photos` (engine-doctrine/CRAFT/IMAGERY.md), or `make media X=gen-image` '
       + 'if none exists to capture; never draw an invented photo.');
     return;
   }
   err('plain-content', `beat "${title}": names a ${noun.toLowerCase()} but no real source is stated (no `
     + '`fragment:` file that exists on disk, no assets/ or .vawe-data/uploads/ path, no capture/sections/'
     + 'screen/assets/photos mention). ASK for the real source, do not invent one. A real screen already exists? '
-    + '`make capture` or `make sections URL=<site>`. Otherwise design one for this beat: `make screen '
+    + '`make media X=capture` or `make sections URL=<site>`. Otherwise design one for this beat: `make dev-tool X=screen '
     + 'F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] [THEME=<name>]` '
     + '(engine-doctrine/CRAFT/SCREENS.md). Chosen absence, not a gap? Waive it: '
     + `{"authoring":{"allow":["plain-content@${title}"],"_why":{"plain-content@${title}":"…"}}}.`);
@@ -385,12 +385,12 @@ for (const b of blocks) {
   const missing = REQ.filter((k) => !has(k));
   if (missing.length) err('beat-missing-fields', `beat "${title}" is missing: ${missing.map((m) => `\`${m}\``).join(', ')} (every beat needs a type, its on-screen cues, and a WHY).`);
   plainContentCheck(b, title);
-  // A beat that plans its frame with `make screen F=` and no matching `fragment:` has a frame no reader
+  // A beat that plans its frame with `make dev-tool X=screen F=` and no matching `fragment:` has a frame no reader
   // can see: the stage, frame-check and the studio read `fragment:` only, so the film skips design.
   const screenFile = (/\bmake\s+screen\s+F=(\S+)/i.exec(b) || [])[1];
   const fragNamed = parseFragmentSpec(fieldIn(b, 'fragment')).path || '';
   if (screenFile && path.basename(fragNamed) !== path.basename(screenFile)) {
-    err('screen-without-fragment', `beat "${title}": plans \`make screen F=${screenFile}\` but `
+    err('screen-without-fragment', `beat "${title}": plans \`make dev-tool X=screen F=${screenFile}\` but `
       + (fragNamed ? `its \`fragment:\` is ${fragNamed}` : 'has no `fragment:` line')
       + `. The stage, frame-check and the studio read \`fragment:\`, so this frame is invisible and the film `
       + `skips design. Add \`- fragment: ${screenFile}\`.`);
@@ -425,7 +425,7 @@ for (const b of blocks) {
     // argument, including why read-check.mjs's subtitling MAX_HOLD was tried here and rejected, for
     // the same reason a per-word formula was: a held beat need carry no prose at all). So this fires
     // only against `thresholdFor()`'s reported MOTION-CRAFT.md band, when one is known, worded as a
-    // NOTE, not a cap: printed for an author or `make plan-judge`'s `beat-pacing` code to weigh, never
+    // NOTE, not a cap: printed for an author or `make dev-tool X=plan-judge`'s `beat-pacing` code to weigh, never
     // as a finding this gate enforces.
     const span = spans[n - 1];
     if (holdMaxS != null && span.start != null && span.end - span.start >= holdMaxS && changes.length <= 1) {
@@ -437,7 +437,7 @@ for (const b of blocks) {
         + `${recreationNote}. This is a REPORT, not a bar: no external or house source sets a ceiling on how long an `
         + `arbitrary visual state may hold, only on how long readable PROSE may hold (that is read-check.mjs's job, `
         + `already cited: BBC subtitling, 2-5s). If this beat's text is prose, look there. Otherwise judge it by eye, `
-        + `or with \`make plan-judge\`'s \`beat-pacing\` finding. ${describeReferenceBank()}. Either name the second `
+        + `or with \`make dev-tool X=plan-judge\`'s \`beat-pacing\` finding. ${describeReferenceBank()}. Either name the second `
         + `change or split the beat if it earns it.`);
     }
     // ── THE PICTURE'S OWN DECISIONS ──────────────────────────────────────────────────────────────
@@ -658,8 +658,8 @@ if (filmPath && fs.existsSync(filmPath)) {
 // waive it. But "the storyboard changed since anyone last looked at the pictures" is precisely what the
 // receipt exists to say out loud.
 const seen = readReceipt('panels', f);
-if (!seen.exists) warn('no-panels', `no panels have been drawn for this storyboard, run \`make panels SB=${f}\` and READ the sheet. This gate grades the plan against itself and cannot see composition; the panels are the only artefact at this stage that can.`);
-else if (seen.stale) warn('stale-panels', `the panels are stale: they were drawn from an older version of this file (${seen.receipt.at}). Re-run \`make panels SB=${f}\` and look again; the beat you changed is the one nobody has seen.`);
+if (!seen.exists) warn('no-panels', `no panels have been drawn for this storyboard, run \`make dev-tool X=panels SB=${f}\` and READ the sheet. This gate grades the plan against itself and cannot see composition; the panels are the only artefact at this stage that can.`);
+else if (seen.stale) warn('stale-panels', `the panels are stale: they were drawn from an older version of this file (${seen.receipt.at}). Re-run \`make dev-tool X=panels SB=${f}\` and look again; the beat you changed is the one nobody has seen.`);
 
 // ── report ────────────────────────────────────────────────────────────────────────────────────────
 console.log(`  storyboard-check · ${f} · ${blocks.length} beat(s)`);

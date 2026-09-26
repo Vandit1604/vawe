@@ -39,7 +39,7 @@ layers.push(...B.deploySuccess({ x: 700, y: 300, url: 'app.stripe.com', start: 4
 layers.push(...B.stripeCard({ x: 1200, y: 260, start: 40 }));
 ```
 
-**Pick the best of N variants:** `make compare ARGS="a.json b.json c.json --at 3"` → a labeled sheet.
+**Pick the best of N variants:** `make dev-tool X=compare ARGS="a.json b.json c.json --at 3"` → a labeled sheet.
 
 **Preview the whole library:** `make site X=catalog` (auto-renders every entry to paged sheets).
 
@@ -280,7 +280,7 @@ A **block** is a library factory (shared across films). A **comp** is a cluster 
 The instance's `x/y/start` **offset** every layer in the comp (group children flow, so they're
 untouched). Comps may contain blocks and other comps, expansion is recursive and cycle-guarded.
 Like blocks, comps are **build-time sugar**, expanded at LOAD time (`core/engine/expand.js`); validate and
-render the source file directly, no separate step. `make expand D=<file>` still exists to print the
+render the source file directly, no separate step. `make dev-tool X=expand D=<file>` still exists to print the
 expanded JSON to stdout when you want to see what a comp becomes.
 
 ## Tokens

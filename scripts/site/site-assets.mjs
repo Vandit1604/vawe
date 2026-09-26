@@ -71,7 +71,7 @@ const MANIFEST = [
   // launch films. Two rows here used to be pixel recreations of other companies' marketing pages and
   // were converted into fillable TEMPLATES (docs: CONTRIBUTING.md). saas-hero-launch
   // is authored with `{type:"block"}` sugar, which now expands at LOAD time (core/engine/expand.js) rather
-  // than a separate `make expand` step, so it renders straight off the source file.
+  // than a separate `make dev-tool X=expand` step, so it renders straight off the source file.
   // Posters are chosen for the frame, not the midpoint: 28s is the saas film's number-and-chart beat,
   // 9s is the tour's issue board. A 3s poster on either is a headline on an empty field.
   ['films',  'saas-hero-launch', 'saas-hero-launch', 'films/saas-hero-launch.mp4', 1280, 28.0, 16 / 9],

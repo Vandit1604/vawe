@@ -135,7 +135,7 @@ same three-question check; until then this line stands as the placeholder.**
 - `make gen X=sfx-pack` (Kenney, CC0) is the only automated fetcher this repo runs that lands a file which
   could legally be committed, and it still writes into the gitignored `assets/sfx/`, matching every
   other asset-fetcher's behaviour: nothing downloaded is ever put in git.
-- `make gen X=music`, `make gen X=music-pack`, `make photos`, and any future footage fetcher pull from LOCAL ONLY
+- `make gen X=music`, `make gen X=music-pack`, `make media X=photos`, and any future footage fetcher pull from LOCAL ONLY
   sources; the gitignore is the enforcement, not a licence technicality.
 - A LOCAL ONLY source is still a fine choice for the film you are making right now. The distinction
   only matters for what may sit inside this git repository as a redistributable asset pack.

@@ -57,7 +57,7 @@ function walkLayers(layers, fn) {
 }
 
 // A "product screen" is what SCREENS.md is actually about (an editor, a results grid, a dashboard, a
-// chat, a card, per `make screen KIND=`): a BEAT that WANTS one, not a layer TYPE. Gating this on
+// chat, a card, per `make dev-tool X=screen KIND=`): a BEAT that WANTS one, not a layer TYPE. Gating this on
 // `hasHtml` (the original shape of this feature) made the rule unreachable on the exact anti-pattern
 // it exists to catch: a film that screenshots a product screen as a plain `image` layer never sets
 // `hasHtml`, so the doc stayed silent on it forever (`harness/lib/craft-rules.mjs`'s `rulesFor` receipt

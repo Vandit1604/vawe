@@ -27,5 +27,5 @@ group: crosscutting
 - Read `engine-doctrine/CRAFT/KEYED-MOTION.md` and "AUTHOR THE MOTION. DO NOT NAME IT." in `AGENTS.md`: a unit
   this short is judged entirely on its hand-keyed motion track, never a named preset.
 - `engine-doctrine/CRAFT/SPECIMEN.md` if the point is to prove one mechanism works rather than to ship a film
-  (`make demo`).
+  (`make dev-tool X=demo`).
 - Blueprint family: `kineticHook` or `statReveal` alone, never chained with unrelated beats.

@@ -76,7 +76,7 @@ export const TOOLS = {
 };
 
 // Entries that shell out to another make target/binary instead of one script.
-const CUSTOM = {
+export const CUSTOM = {
   'animatic': () => {
     const r1 = spawnJs('harness/author/animatic.mjs', [env.SB, ...(env.VOICE ? ['--voice', env.VOICE] : []), ...(env.OUT ? ['--out', env.OUT] : [])]);
     if (r1) return r1;

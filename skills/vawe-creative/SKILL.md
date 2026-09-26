@@ -57,9 +57,9 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
 make arsenal Q="…"              # find directed motion → pick one per storyboard beat
 … author films/scene/<x>.json (beats + brand content + a living bg + camera + seams) …
                                  # beats/blocks/comps expand into real layers at LOAD, no separate step
-make author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop
+make dev-tool X=author-check D=<x>.json    # validate · critique · direct(effect-soup ceiling) · FLOOR(slideshow) · slop
 make video    D=<x>.json        # render (author-check runs first; NOCHECK=1 to skip during iteration)
-make reveal   D=<x>.json        # SEE the entrance motion (mid-frames hide it), is it kinetic, not fading?
+make dev-tool X=reveal   D=<x>.json        # SEE the entrance motion (mid-frames hide it), is it kinetic, not fading?
 make judge    D=<x>.json VS=<brand>   # the gate that SEES, score every frame; a flaw you notice is a FIX
 ```
 

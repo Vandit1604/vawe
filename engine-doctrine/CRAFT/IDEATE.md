@@ -54,7 +54,7 @@ So reference-mode ideate writes a marked placeholder instead:
 on screen: <look: 4.54s to 6.00s, see refs/example-madera/ideate-strips/act2.png>
 ```
 
-and extracts the frames that answer it: one dense strip (`make filmstrip`, 10 to 20fps) per act and
+and extracts the frames that answer it: one dense strip (`make media X=filmstrip`, 10 to 20fps) per act and
 per joint, written to `refs/<ref>/ideate-strips/` (gitignored, same rule as everything else under
 `refs/`: a reference's frames are studied, never published, `AGENTS.md` "never embed copyrighted
 material"). Fill every `<look:>` marker by opening its strip and describing what it actually shows.
@@ -85,7 +85,7 @@ lines). Read it before editing.
 Once the acts are known (measured, from `--ref`, or a plain default shape, from `--name`/`--idea` alone), a second pass
 asks the detail a good plan needs before any frame is drawn: what fills each frame, where the product
 lives, how text arrives, which cursor, how an act hands off, what the ground does. Every option traces
-to a real registry (a recipe, a kinetic preset, a camera move, a `make screen` KIND) or to the
+to a real registry (a recipe, a kinetic preset, a camera move, a `make dev-tool X=screen` KIND) or to the
 reference's own measurement (`shots[].content`); a question with no registry to answer it is dropped,
 never answered with an invented option. `harness/author/ideate-ask.mjs` owns this half.
 

@@ -21,7 +21,7 @@
 // scene moves on, and the only fact that sees that is the scene's own bytes.
 //
 // The mechanism is the repo's existing one, not a new one: harness/lib/receipt.mjs hashes a subject
-// plus the html fragments it names, and `make beats` already uses it to prove somebody LOOKED at a
+// plus the html fragments it names, and `make dev-tool X=beats` already uses it to prove somebody LOOKED at a
 // sheet. Here the same hash proves a film was rendered from the scene that is on disk today.
 //
 // WHAT THIS CANNOT DO, said plainly. It proves a film matches its source and carries a track that is

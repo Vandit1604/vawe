@@ -25,7 +25,7 @@
 
 ## Drawn icons  `[asset]`
 
-`svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make capture`, then a brand mark, then these, then emoji last.
+`svgIcon("<name>")`: a first-party vector, when no real logo or captured UI exists. Prefer a real asset: `make media X=capture`, then a brand mark, then these, then emoji last.
 
 | name | what / when |
 |---|---|
@@ -331,7 +331,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `beam` | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
 | `board` | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
 | `clip` | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
-| `component` | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
+| `component` | a REAL captured UI block (`make media X=capture`), or one named part of a captured scene, scaled to fit `w` |
 | `composition` | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express |
 | `count` | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
 | `cursor` | a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`) |

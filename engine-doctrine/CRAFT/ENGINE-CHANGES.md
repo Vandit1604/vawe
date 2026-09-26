@@ -108,14 +108,14 @@ An authoring convenience that needs a build step to work is a trap: the author w
 skips a step they did not know about, and watches a still frame with nothing to tell them why.
 
 This engine resolves four sugars, and this section used to be their cautionary tale: `block`, `beat`
-and `comp` needed a separate `make expand` CLI pass to become layer TYPES, and a scene rendered without
+and `comp` needed a separate `make dev-tool X=expand` CLI pass to become layer TYPES, and a scene rendered without
 it was refused by name at boot rather than left to paint nothing, silent failure being worse than a
 loud one. That refusal is gone now, not the discipline behind it: `core/engine/expand.js`'s `expandScene`/
 `loadScene` resolves all three at LOAD time, for every Node gate and script directly, and for
 `./bin/vawe` a level down in Go (`renderer/internal/render/expand.go` shells out to this module's CLI wrapper
 before the browser ever fetches the JSON, because the render page's file server default-denies the
 ~186 block/beat factories by design, a security boundary for MCP/stranger scenes, so the browser itself
-never expands sugar). Either way the two-file world (`x.json` + a `make expand`-written
+never expands sugar). Either way the two-file world (`x.json` + a `make dev-tool X=expand`-written
 `x.expanded.json`) is gone: a scene naming `{type:"block"}` is correct as authored and renders
 directly, and the build-step failure this section described can no longer happen because the step no
 longer exists for an author to skip, even though the engine still performs it, just never in the JSON
@@ -131,7 +131,7 @@ is not "convert it here", it is "make surviving unconverted impossible" (`engine
 **The rule: sugar either resolves at LOAD, or its absence fails loudly. Silence is never the third
 option.** `block`/`beat`/`comp` used to satisfy this with the second half (a loud refusal at boot); they
 satisfy it with the first half now, which is the better of the two, because there is nothing left to
-forget to run. `make expand` still exists, as a plain debugging command that prints the expanded JSON
+forget to run. `make dev-tool X=expand` still exists, as a plain debugging command that prints the expanded JSON
 to stdout, nothing more.
 
 ## LOOSE COUPLING: adding a thing must not mean touching everything

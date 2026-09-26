@@ -80,7 +80,7 @@ fixing a layout. It now measures the ink for layers that paint no box of their o
 | Per-aspect overrides, `aspects: { "9:16": {…} }` | **SHIPS** | Validated per declared ratio at `core/validate/validate.mjs:207-213`; `aspects` is in the shared prop list at `films/scene/schema.json:8`. An override cannot reintroduce the centring trap at one ratio only. |
 | A scene composed for all five ratios | **SHIPS** | `films/scene/aspects-demo.json`, which passes `make check GATE=audit ASPECT=all`. |
 | Layout that RESOLVES rather than gets computed | **PART** | The refusal half ships: a centring keyword with nothing to centre is a VALIDATE error (`core/validate/validate.mjs` `layoutErrors`), on both axes, in one place, imported by `quality/audit.mjs`. The **measure** half, `center` sizing itself from the rendered layer, is **NOT BUILT**. It moves every centred layer, so it stays deliberate. |
-| The y-axis version of the same trap | **PART** | Checked, except on text and count, where `size*1.2` is the estimate and enough scenes have tuned around it that changing it would move shipped content. That carve-out is pinned in `make gate-test`. |
+| The y-axis version of the same trap | **PART** | Checked, except on text and count, where `size*1.2` is the estimate and enough scenes have tuned around it that changing it would move shipped content. That carve-out is pinned in `make dev-tool X=gate-test`. |
 | **Library-wide adoption** | **NOT BUILT** | Counted on this branch over the 170 JSON files in `films/scene/`: `"aspects"` appears in **1** scene (`aspects-demo.json`), `"col"` in **0**, `"pin"` in **14**. The relative-coordinate system is one demo and fourteen pins. Everything else is hand-placed absolute pixels tuned to a 1920x1080 canvas. |
 
 Read the last row carefully, because it is not "the library is broken". Each of those scenes declares
@@ -219,7 +219,7 @@ gate can read the names without resolving the browser-absolute three.js import.
 ## Tier 5: blocked on a determinism story
 
 These are **not** "hard", they are **unsolved for this engine**, and shipping them naively breaks the
-product's central claim. Audio-reactivity used to sit here and no longer does: `make spectrum` bakes
+product's central claim. Audio-reactivity used to sit here and no longer does: `make media X=spectrum` bakes
 per-frame band energy offline and the render reads row `n` of a table (`core/tracks/spectrum.js`), so it
 never was a determinism problem once the analysis moved out of the frame.
 
