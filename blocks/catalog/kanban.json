@@ -7,10 +7,6 @@
   "tags": [
     "kanban"
   ],
-  "dimensions": {
-    "width": 604,
-    "height": 166
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

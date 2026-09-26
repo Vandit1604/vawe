@@ -7,10 +7,6 @@
   "tags": [
     "terminalPro"
   ],
-  "dimensions": {
-    "width": 864,
-    "height": 380
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,10 +7,6 @@
   "tags": [
     "checklist"
   ],
-  "dimensions": {
-    "width": 504,
-    "height": 240
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

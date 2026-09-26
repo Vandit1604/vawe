@@ -7,10 +7,6 @@
   "tags": [
     "statCard"
   ],
-  "dimensions": {
-    "width": 384,
-    "height": 176
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

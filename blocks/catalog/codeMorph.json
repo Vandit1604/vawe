@@ -7,10 +7,6 @@
   "tags": [
     "codeMorph"
   ],
-  "dimensions": {
-    "width": 664,
-    "height": 180
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

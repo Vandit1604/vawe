@@ -7,10 +7,6 @@
   "tags": [
     "terminalHtml"
   ],
-  "dimensions": {
-    "width": 864,
-    "height": 184
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,10 +7,6 @@
   "tags": [
     "nowPlaying"
   ],
-  "dimensions": {
-    "width": 424,
-    "height": 245
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

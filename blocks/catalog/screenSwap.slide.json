@@ -7,10 +7,6 @@
   "tags": [
     "screenSwap"
   ],
-  "dimensions": {
-    "width": 504,
-    "height": 116
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

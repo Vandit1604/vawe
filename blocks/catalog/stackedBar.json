@@ -7,10 +7,6 @@
   "tags": [
     "stackedBar"
   ],
-  "dimensions": {
-    "width": 564,
-    "height": 306
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

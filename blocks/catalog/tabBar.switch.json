@@ -7,10 +7,6 @@
   "tags": [
     "tabBar"
   ],
-  "dimensions": {
-    "width": 544,
-    "height": 96
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

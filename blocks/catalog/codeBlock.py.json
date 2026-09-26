@@ -7,10 +7,6 @@
   "tags": [
     "codeBlock"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 198
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

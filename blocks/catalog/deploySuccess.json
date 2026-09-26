@@ -7,10 +7,6 @@
   "tags": [
     "deploySuccess"
   ],
-  "dimensions": {
-    "width": 564,
-    "height": 329
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

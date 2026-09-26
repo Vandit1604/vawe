@@ -7,10 +7,6 @@
   "tags": [
     "glassDock"
   ],
-  "dimensions": {
-    "width": 595,
-    "height": 277
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

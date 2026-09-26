@@ -7,10 +7,6 @@
   "tags": [
     "codeScroll"
   ],
-  "dimensions": {
-    "width": 664,
-    "height": 330
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
