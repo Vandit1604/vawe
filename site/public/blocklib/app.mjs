@@ -35,67 +35,6 @@ const surface = ({ x, y, w, start, dur, radius = R.card, ...chrome } = {}) => ({
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// feedRow. One item in a social/activity feed: avatar · name · handle · timestamp · body.
-// The generic sibling of tweetCard, minus the engagement counts: a feed item is not always a post.
-export function feedRow({ x, y, w = 520, avatar = '', initials = '', name = '', sub = '', time = '', body = '',
-  start = 0, dur = 4 } = {}) {
-  const html = `<div style="display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:${w}px">`
-    + avatarHtml({ avatar, initials, name, size: 48 })
-    + `<div style="display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-start;min-width:0">`
-    + `<div style="display:flex;align-items:center;gap:8px;width:100%">`
-    + `<span style="font:700 20px var(--font-sans);color:${T.ink}">${name}</span>`
-    + (sub ? `<span style="font:500 16px var(--font-mono);color:${T.dim}">${sub}</span>` : '')
-    + `<span style="flex:1"></span>`                 // pushes the timestamp to the row's far edge
-    + (time ? `<span style="font:500 15px var(--font-mono);color:${T.dim}">${time}</span>` : '')
-    + '</div>'
-    + (body ? `<span style="font:400 19px var(--font-sans);color:${T.ink}">${body}</span>` : '')
-    + '</div></div>';
-  return [{ ...surface({ x, y, w, start, dur, radius: R.soft }), html }];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// listRow. One row of a generic list (a mail item, a file, a track): leading icon tile · title over
-// sub · trailing meta. The workhorse: three of these stacked read as "an app" faster than any card.
-export function listRow({ x, y, w = 520, icon = '', title = '', sub = '', meta = '', start = 0, dur = 4 } = {}) {
-  const html = `<div style="display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:${w}px">`
-    + (icon ? `<div style="width:44px;height:44px;flex:none;border-radius:${R.tight}px;background:${T.surface};`
-      + `display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:${T.ink}">${icon}</div>` : '')
-    + `<div style="display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0">`
-    + `<span style="font:600 20px var(--font-sans);color:${T.ink}">${title}</span>`
-    + (sub ? `<span style="font:400 16px var(--font-sans);color:${T.sub}">${sub}</span>` : '') + '</div>'
-    + (meta ? `<span style="font:500 15px var(--font-mono);color:${T.dim}">${meta}</span>` : '')
-    + '</div>';
-  return [{ ...surface({ x, y, w, start, dur }), html }];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// settingsRow, label (+ optional sub) with a control on the right.
-//   control: 'toggle'  → a switch; `value` is its state (anything but `false` reads as on)
-//            'chevron' → a disclosure arrow into a sub-screen
-//            'value'   → the current setting, as text
-export function settingsRow({ x, y, w = 520, label = '', sub = '', control = 'chevron', value = '',
-  start = 0, dur = 4 } = {}) {
-  const on = value !== false;
-  // the track is accent when on and neutral when off; the knob's side carries the state, so the two
-  // states are one shape with one differing property (a scene can cut between them cleanly).
-  const CONTROLS = {
-    toggle: `<div style="width:52px;height:30px;flex:none;border-radius:100px;padding:2px;box-sizing:border-box;`
-      + `background:${on ? T.accent : T.surface};display:flex;align-items:center;justify-content:${on ? 'flex-end' : 'flex-start'}">`
-      + `<div style="width:24px;height:24px;border-radius:100%;background:${T.card}"></div></div>`,
-    chevron: `<span style="font:600 26px var(--font-sans);color:${T.dim};flex:none">›</span>`,
-    value: `<span style="font:400 18px var(--font-sans);color:${T.sub};flex:none">${String(value)}</span>`,
-  };
-  if (!(control in CONTROLS)) throw new Error(`blocks/app.mjs settingsRow: unknown control "${control}". `
-    + `Known: ${Object.keys(CONTROLS).join(', ')}`);
-  const html = `<div style="display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:${w}px">`
-    + `<div style="display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0">`
-    + `<span style="font:600 20px var(--font-sans);color:${T.ink}">${label}</span>`
-    + (sub ? `<span style="font:400 16px var(--font-sans);color:${T.sub}">${sub}</span>` : '') + '</div>'
-    + CONTROLS[control] + '</div>';
-  return [{ ...surface({ x, y, w, start, dur }), html }];
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // profileHeader. The top of an account screen: avatar over name · @handle · a small stat row.
 // `stats` is [{value, label}] and defaults to empty: a caller with no counts ships no counts.
 export function profileHeader({ x, y, w = 460, avatar = '', initials = '', name = '', handle = '',
@@ -167,35 +106,6 @@ export function emptyState({ x, y, w = 460, icon = '', title = '', body = '', ct
 // CONTENT RULE, restated as a contract: these surfaces carry counts and metadata by nature, so every
 // count is a prop that defaults to empty. No table below has a figure in a `def`.
 export const APP_SCHEMAS = {
-  feedRow: {
-    w: { kind: 'int', min: 200, max: 1920, def: 520 },
-    avatar: { kind: 'str', max: 200, def: '' },
-    initials: { kind: 'str', max: 3, def: '' },
-    name: { kind: 'str', max: 60, def: '' },
-    sub: { kind: 'str', max: 40, def: '' },
-    time: { kind: 'str', max: 20, def: '' },
-    body: { kind: 'str', max: 280, def: '' },
-  },
-
-  listRow: {
-    w: { kind: 'int', min: 200, max: 1920, def: 520 },
-    // One glyph in a 44px tile. Empty draws no tile and the title takes the row's leading edge.
-    icon: { kind: 'str', max: 4, def: '' },
-    title: { kind: 'str', max: 80, def: '' },
-    sub: { kind: 'str', max: 80, def: '' },
-    meta: { kind: 'str', max: 20, def: '' },
-  },
-
-  settingsRow: {
-    w: { kind: 'int', min: 200, max: 1920, def: 520 },
-    label: { kind: 'str', max: 80, def: '' },
-    sub: { kind: 'str', max: 120, def: '' },
-    control: { kind: 'enum', of: ['toggle', 'chevron', 'value'], def: 'chevron' },
-    // For `toggle` this is the switch state, where anything but false reads as on. For `value` it is
-    // the setting itself, drawn as text. `chevron` ignores it.
-    value: { kind: 'oneOf', of: [{ kind: 'bool' }, { kind: 'str', max: 40 }], def: '' },
-  },
-
   profileHeader: {
     w: { kind: 'int', min: 200, max: 1920, def: 460 },
     avatar: { kind: 'str', max: 200, def: '' },

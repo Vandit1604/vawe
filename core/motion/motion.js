@@ -360,14 +360,18 @@ export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
       "rush": "holds back for most of the span then covers the distance late. The exit curve: it leaves in a hurry",
       "brake": "half the distance in the first quarter, then a long decline to a stop",
       "ramp": "mild and symmetric: gathers pace, crosses the middle at full speed, tails off",
-      "spring": "passes the mark by a little and falls back, a physical landing with some give in it",
-      "springStiff": "tight and quick with no visible pass beyond the mark, for something that must not look playful",
+      "spring": "damping ratio 0.65 (35% bounce): enough give to pass the mark and fall back, settling in under a second",
+      "springStiff": "critically damped, damping ratio 1: all stiffness and no give, so it never passes the mark, settling about as fast as `spring`",
       "hold": "does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it",
-      "spring-bouncy": "visibly passes the mark and swings back, the playful one. One per film at most",
-      "spring-stiff": "most of the journey early, then a firm settle with no wobble at all",
-      "springEase": "spring shaped but damped flat: nearly arrived at once, then creeping the last fraction",
+      "spring-bouncy": "damping ratio 0.45 (55% bounce), the least stiff spring here: swings past the mark and takes over a second to settle. The playful one",
+      "spring-stiff": "damping ratio 0.88 (12% bounce): high stiffness, almost no give, and the fastest settle of the springs here at about half a second",
+      "springEase": "damping fraction 1 (critically damped) at a 0.5s response: nearly arrived by a third of a second, then creeping the last fraction",
       "settle": "most of the move happens immediately, then it eases the remainder and stops dead",
-      "snap": "covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement"
+      "snap": "covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement",
+      "standard": "MD3's default curve, cubic-bezier(0.2,0,0,1): the everyday transition when nothing argues for enter, exit or emphasis",
+      "enter": "MD3's decelerate curve, cubic-bezier(0,0,0,1): the entrance half of this engine's own decelerate/accelerate rule, spelled by intent",
+      "exit": "MD3's accelerate curve, cubic-bezier(0.3,0,1,1): the exit half of the same rule, picked when a layer is leaving rather than arriving",
+      "emphasized": "MD3's hero curve, cubic-bezier(0.05,0.7,0.1,1): the decelerate half of its two-part emphasis pair, for the one moment that should draw the eye"
   },
   catalog: {
     title: 'Easings',
@@ -383,6 +387,50 @@ export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
 // error instead of a list of 41 names it is not in. Same cross-registry hint as core/type.js.
 const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|rough|slow)\b/;
 
+// GSAP EASE ALIASES, on the ENGINE side of the fence. `gsapEase` above already lets a GSAP-driven
+// field (parts[].ease, morph.ease, fx:{ease}) take GSAP's own names, because those hand the string
+// straight to gsap.fromTo. This is the OTHER direction: an author who already knows GSAP's naming
+// (power1-4, sine, expo, circ, back, elastic, bounce, none, each with .in/.out/.inOut) can use it on
+// an ENGINE-driven field too (`motion[].ease`, a camera key, `count.ease`), and it resolves to the
+// mathematically equivalent curve already in EASINGS: never a second easing implementation, one
+// alias table onto the 41 curves that already exist.
+//
+// The power-family offset is GSAP's own, not ours to invent: power1 is Quad, power2 is Cubic, power3
+// is Quart, power4 is Quint (power0 is linear/`none`). Verified against the vendored engine itself
+// (assets/vendor/gsap.min.js `gsap.parseEase`), sampled at t=0.25/0.5/0.75/1: `power2.out` matches
+// `easeOutCubic` to 4 decimal places, `power3.out` matches `easeOutQuart`, and so on through power4/quint.
+// A bare family name with no suffix defaults to `.out`, the same default `gsap.parseEase` itself uses.
+const GSAP_POWER_TO_ENGINE = { power0: 'linear', power1: 'quad', power2: 'cubic', power3: 'quart', power4: 'quint' };
+const GSAP_SUFFIX_TO_ENGINE = { in: 'In', out: 'Out', inOut: 'InOut' };
+
+// back{In,Out,InOut}(overshoot): the Penner `back` formula generalised over its own overshoot constant
+// (1.70158 by default, engine-doctrine calls it out on easeOutBack above), so GSAP's `back.out(1.7)`
+// resolves to the EXACT curve it would run there, not the fixed-constant curve under a different name.
+const backIn = (c1 = 1.70158) => (t) => (c1 + 1) * t * t * t - c1 * t * t;
+const backOut = (c1 = 1.70158) => (t) => 1 + (c1 + 1) * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+const backInOut = (c1 = 1.70158) => { const c2 = c1 * 1.525; return (t) => t < 0.5
+  ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
+  : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2; };
+const BACK_FACTORY = { In: backIn, Out: backOut, InOut: backInOut };
+
+const GSAP_ALIAS_RE = /^(power[0-4]|sine|expo|circ|back|elastic|bounce|none)(?:\.(in|out|inOut))?(?:\(([\d.]+)\))?$/;
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
+
+/**
+ * resolveGsapAlias(name): a GSAP ease spelling -> the equivalent engine easing function, or `undefined`
+ * when `name` is not one of these spellings (never a fallback: the caller decides what "not one of
+ * these" means, same contract as every other resolver in this file).
+ */
+export function resolveGsapAlias(name) {
+  const m = typeof name === 'string' ? GSAP_ALIAS_RE.exec(name.trim()) : null;
+  if (!m) return undefined;
+  const [, family, suffixRaw, param] = m;
+  if (family === 'none' || family === 'power0') return EASINGS.linear;
+  const suffix = GSAP_SUFFIX_TO_ENGINE[suffixRaw || 'out'];
+  if (family === 'back' && param != null) return BACK_FACTORY[suffix](Number(param));
+  return EASINGS[`ease${suffix}${cap(GSAP_POWER_TO_ENGINE[family] || family)}`];
+}
+
 // isEasingName(n): would resolveEasing accept this string? The ONE membership test, so a gate can ask
 // instead of re-deriving it. core/validate.mjs held its own copy and it was already one registry behind.
 // INTERPOLATION MODES COUNT AS VALID HERE AND NOWHERE ELSE. `through` is not a curve and
@@ -392,7 +440,7 @@ const GSAP_EASE = /^(power[0-4]|back|elastic|bounce|circ|expo|sine|steps|none|ro
 // table would be resolvable, and something would eventually resolve it.
 export const isEasingName = (n) => typeof n === 'string'
   && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n)
-      || Object.prototype.hasOwnProperty.call(INTERP, n));
+      || Object.prototype.hasOwnProperty.call(INTERP, n) || resolveGsapAlias(n) !== undefined);
 
 // gsapEase(e, fallback, where): an author-supplied easing for a GSAP-DRIVEN field -> something GSAP
 // will actually honour. GSAP does not refuse a name it does not know (`parseEase` returns undefined
@@ -430,10 +478,15 @@ export const resolveEasing = (e) => {
   // a pass above: the words have to be accepted wherever the value is, or reaching for the right
   // curve still costs a document read and the default stays `fade`. core/vocab.js.
   if (Object.prototype.hasOwnProperty.call(FEEL, e)) return EASINGS[FEEL[e]];
+  // A GSAP ease spelling resolves to its equivalent engine curve (resolveGsapAlias, above), so the
+  // vocabulary an author already knows from GSAP works on an engine-driven field too.
+  const gsapCurve = resolveGsapAlias(e);
+  if (gsapCurve) return gsapCurve;
+  // GSAP_EASE matches a wider family than resolveGsapAlias resolves (steps/rough/slow have no engine
+  // equivalent), so a name can fail here and still be a real GSAP ease, just not one this alias table covers.
   const hint = GSAP_EASE.test(String(e))
-    ? ` "${e}" is a GSAP ease, and GSAP eases are real here but only on GSAP-driven fields `
-      + '(`parts[].ease`, `morph.ease`, `fx:{ease}`). This field is driven by the engine\'s own '
-      + 'interpolator, so it takes an engine easing.'
+    ? ` "${e}" looks like a GSAP ease this engine does not alias (steps/rough/slow have no engine `
+      + 'equivalent). Those are real only on GSAP-driven fields (`parts[].ease`, `morph.ease`, `fx:{ease}`).'
     : '';
   const near = nearMisses(String(e), [...Object.keys(EASINGS), ...Object.keys(FEEL)]);
   throw new Error(`unknown easing ${JSON.stringify(e)}.${hint}`
@@ -514,6 +567,23 @@ Object.assign(EASING_AKA, {
   springEase: ['damped spring settle', 'nearly-arrived creep', 'flat spring curve'],
   settle: ['immediate move then ease', 'quick then stops dead', 'default entrance settle'],
   snap: ['near-instant landing', 'fast with a hair of overshoot', 'default layer snap'],
+});
+// MD3'S FOUR CURVES, wired through the cubicBezier primitive that already exists (no new curve math),
+// picked by PURPOSE rather than by curve family: engine-doctrine/CRAFT/MOTION-REGISTERS.md §2 cites the
+// exact control points (m3.material.io/styles/motion/easing-and-duration/tokens-specs). `enter` and
+// `exit` are MD3's own decelerate/accelerate split, i.e. this engine's existing "entrances decelerate,
+// exits accelerate" rule (MOTION-STANDARDS.md), spelled by INTENT instead of by mechanism. `emphasized`
+// is MD3's decelerate half of its two-part hero curve: the more common of the two in isolation (an
+// element ARRIVING with emphasis), so a single easing carries it rather than a two-segment composite.
+EASINGS.standard = cubicBezier(0.2, 0, 0, 1);
+EASINGS.enter = cubicBezier(0, 0, 0, 1);
+EASINGS.exit = cubicBezier(0.3, 0, 1, 1);
+EASINGS.emphasized = cubicBezier(0.05, 0.7, 0.1, 1);
+Object.assign(EASING_AKA, {
+  standard: ['default MD3 curve', 'material motion', 'most transitions'],
+  enter: ['decelerate curve', 'material entrance', 'arriving from off-frame'],
+  exit: ['accelerate curve', 'material exit', 'leaving the frame'],
+  emphasized: ['hero curve', 'material emphasis', 'draw the eye'],
 });
 // springSettle(opts): seconds for the spring's envelope to decay below eps (size your holds with this).
 export function springSettle({ bounce = 0.3, settle = 0.6, eps = 0.02 } = {}) {

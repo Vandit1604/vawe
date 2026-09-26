@@ -1,7 +1,7 @@
 {
-  "total": 716,
+  "total": 726,
   "previewed": 339,
-  "families": 60,
+  "families": 61,
   "tags": [
     [
       "asset",
@@ -88,6 +88,10 @@
       48
     ],
     [
+      "text track",
+      4
+    ],
+    [
       "text/parts",
       6
     ],
@@ -97,7 +101,7 @@
     ],
     [
       "timing",
-      78
+      84
     ],
     [
       "top-level",
@@ -4381,6 +4385,47 @@
       ]
     },
     {
+      "id": "font-variation-axes",
+      "title": "Font-variation axes",
+      "tag": "text track",
+      "intro": "A variable face moves inside the letters · an `axis` track ramps one axis per unit on the same stagger clock as `preset`. `{ \"type\":\"text\", \"split\":\"word\", \"axis\": { \"wght\": [300, 900] } }`",
+      "mode": "table",
+      "note": null,
+      "noPreview": "the change is in the letterforms over time, which a single still cannot show",
+      "count": 4,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "ital",
+          "stem": "font-variation-axes--ital",
+          "desc": "the italic axis, 0 or 1 · some variable faces expose the roman/italic swap as an axis instead of a second font file",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "slnt",
+          "stem": "font-variation-axes--slnt",
+          "desc": "the slant axis, an upright face leaning to an italic ANGLE in degrees (usually -15 to 0) rather than swapping to a separate italic file",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wdth",
+          "stem": "font-variation-axes--wdth",
+          "desc": "the width axis, condensed to expanded · none of the 31 faces this engine vendors keep it post-subsetting (core/tokens.css), so animating it is a validated no-op today",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "wght",
+          "stem": "font-variation-axes--wght",
+          "desc": "the weight axis, 100 to 900 on every variable face this engine vendors · thin to black in one continuous ramp instead of jumping between static cuts",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "stagger-order-from",
       "title": "Stagger order (`from`)",
       "tag": "text/parts",
@@ -4498,7 +4543,7 @@
       "mode": "chips",
       "note": "named by curve; pick by FEELING from the table in engine-doctrine/MOTION-CRAFT.md",
       "noPreview": "a curve is a feeling over time. Read the table in engine-doctrine/MOTION-CRAFT.md, then feel it in the editor.",
-      "count": 42,
+      "count": 46,
       "undescribed": 0,
       "entries": [
         {
@@ -4719,6 +4764,27 @@
           "noPreview": null
         },
         {
+          "name": "emphasized",
+          "stem": "easings--emphasized",
+          "desc": "MD3's hero curve, cubic-bezier(0.05,0.7,0.1,1) · the decelerate half of its two-part emphasis pair, for the one moment that should draw the eye",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "enter",
+          "stem": "easings--enter",
+          "desc": "MD3's decelerate curve, cubic-bezier(0,0,0,1) · the entrance half of this engine's own decelerate/accelerate rule, spelled by intent",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "exit",
+          "stem": "easings--exit",
+          "desc": "MD3's accelerate curve, cubic-bezier(0.3,0,1,1) · the exit half of the same rule, picked when a layer is leaving rather than arriving",
+          "scene": null,
+          "noPreview": null
+        },
+        {
           "name": "hold",
           "stem": "easings--hold",
           "desc": "does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it",
@@ -4763,35 +4829,42 @@
         {
           "name": "spring",
           "stem": "easings--spring",
-          "desc": "passes the mark by a little and falls back, a physical landing with some give in it",
+          "desc": "damping ratio 0.65 (35% bounce) · enough give to pass the mark and fall back, settling in under a second",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring-bouncy",
           "stem": "easings--spring-bouncy",
-          "desc": "visibly passes the mark and swings back, the playful one. One per film at most",
+          "desc": "damping ratio 0.45 (55% bounce), the least stiff spring here · swings past the mark and takes over a second to settle. The playful one",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "spring-stiff",
           "stem": "easings--spring-stiff",
-          "desc": "most of the journey early, then a firm settle with no wobble at all",
+          "desc": "damping ratio 0.88 (12% bounce) · high stiffness, almost no give, and the fastest settle of the springs here at about half a second",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "springEase",
           "stem": "easings--springease",
-          "desc": "spring shaped but damped flat · nearly arrived at once, then creeping the last fraction",
+          "desc": "damping fraction 1 (critically damped) at a 0.5s response · nearly arrived by a third of a second, then creeping the last fraction",
           "scene": null,
           "noPreview": null
         },
         {
           "name": "springStiff",
           "stem": "easings--springstiff",
-          "desc": "tight and quick with no visible pass beyond the mark, for something that must not look playful",
+          "desc": "critically damped, damping ratio 1 · all stiffness and no give, so it never passes the mark, settling about as fast as `spring`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "standard",
+          "stem": "easings--standard",
+          "desc": "MD3's default curve, cubic-bezier(0.2,0,0,1) · the everyday transition when nothing argues for enter, exit or emphasis",
           "scene": null,
           "noPreview": null
         }
@@ -5672,7 +5745,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.",
-      "count": 32,
+      "count": 34,
       "undescribed": 0,
       "entries": [
         {
@@ -5707,6 +5780,13 @@
           "name": "elastic",
           "stem": "plain-words-feel-duration-camera-comparative--elastic",
           "desc": "feel → `ease: \"easeOutElastic\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "expressive",
+          "stem": "plain-words-feel-duration-camera-comparative--expressive",
+          "desc": "duration → `0.4` seconds",
           "scene": null,
           "noPreview": null
         },
@@ -5784,6 +5864,13 @@
           "name": "pop",
           "stem": "plain-words-feel-duration-camera-comparative--pop",
           "desc": "feel → `ease: \"easeOutBack\"`",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "productive",
+          "stem": "plain-words-feel-duration-camera-comparative--productive",
+          "desc": "duration → `0.22` seconds",
           "scene": null,
           "noPreview": null
         },

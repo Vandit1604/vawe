@@ -886,6 +886,17 @@ What `preset: "decode"` scrambles WITH, in `presetOpts`: `{ "preset":"decode", "
 | `symbols` | punctuation and operators, a terminal or a cipher rather than a word |
 | `upperCase` | capitals only, the calmest scramble and the one that keeps a headline reading as type |
 
+## Font-variation axes  `[text track]`
+
+A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`. `{ "type":"text", "split":"word", "axis": { "wght": [300, 900] } }`
+
+| name | what / when |
+|---|---|
+| `ital` | the italic axis, 0 or 1: some variable faces expose the roman/italic swap as an axis instead of a second font file |
+| `slnt` | the slant axis, an upright face leaning to an italic ANGLE in degrees (usually -15 to 0) rather than swapping to a separate italic file |
+| `wdth` | the width axis, condensed to expanded: none of the 31 faces this engine vendors keep it post-subsetting (core/tokens.css), so animating it is a validated no-op today |
+| `wght` | the weight axis, 100 to 900 on every variable face this engine vendors: thin to black in one continuous ramp instead of jumping between static cuts |
+
 ## Stagger order (`from`)  `[text/parts]`
 
 The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount": 0.6, "from": "center" } }`. Works in BOTH slots that take a stagger, a split text layer and `parts[]`. `each` is the per-unit delay; `amount` is the TOTAL seconds the whole train may take and derives that delay from the unit count, so a 90-glyph headline and a 6-word one hold the same beat. A number index is legal too: the wave starts at that unit.
@@ -949,17 +960,21 @@ A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default 
 | `easeOutQuart` | lands fast and settles crisply, snappier than cubic and it never passes its target. Good on an element arriving |
 | `easeOutQuint` | covers nearly all the distance at once then creeps the last of it, a very sharp arrival |
 | `easeOutSine` | the softest landing there is, closer to speed fading away than to stopping |
+| `emphasized` | MD3's hero curve, cubic-bezier(0.05,0.7,0.1,1): the decelerate half of its two-part emphasis pair, for the one moment that should draw the eye |
+| `enter` | MD3's decelerate curve, cubic-bezier(0,0,0,1): the entrance half of this engine's own decelerate/accelerate rule, spelled by intent |
+| `exit` | MD3's accelerate curve, cubic-bezier(0.3,0,1,1): the exit half of the same rule, picked when a layer is leaving rather than arriving |
 | `hold` | does nothing whatever until the last instant, then jumps. Parks a value across a span rather than moving it |
 | `linear` | no acceleration at all, constant speed start to finish. Right for a loop or a marquee, wrong for anything a viewer watches arrive |
 | `ramp` | mild and symmetric: gathers pace, crosses the middle at full speed, tails off |
 | `rush` | holds back for most of the span then covers the distance late. The exit curve: it leaves in a hurry |
 | `settle` | most of the move happens immediately, then it eases the remainder and stops dead |
 | `snap` | covers the distance almost at once with a hair of overshoot, the fastest landing that still reads as movement |
-| `spring` | passes the mark by a little and falls back, a physical landing with some give in it |
-| `spring-bouncy` | visibly passes the mark and swings back, the playful one. One per film at most |
-| `spring-stiff` | most of the journey early, then a firm settle with no wobble at all |
-| `springEase` | spring shaped but damped flat: nearly arrived at once, then creeping the last fraction |
-| `springStiff` | tight and quick with no visible pass beyond the mark, for something that must not look playful |
+| `spring` | damping ratio 0.65 (35% bounce): enough give to pass the mark and fall back, settling in under a second |
+| `spring-bouncy` | damping ratio 0.45 (55% bounce), the least stiff spring here: swings past the mark and takes over a second to settle. The playful one |
+| `spring-stiff` | damping ratio 0.88 (12% bounce): high stiffness, almost no give, and the fastest settle of the springs here at about half a second |
+| `springEase` | damping fraction 1 (critically damped) at a 0.5s response: nearly arrived by a third of a second, then creeping the last fraction |
+| `springStiff` | critically damped, damping ratio 1: all stiffness and no give, so it never passes the mark, settling about as fast as `spring` |
+| `standard` | MD3's default curve, cubic-bezier(0.2,0,0,1): the everyday transition when nothing argues for enter, exit or emphasis |
 
 ## Time remaps (the layer's own clock)  `[timing]`
 
@@ -1137,6 +1152,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `dive` | camera → `move: "diveIn"` |
 | `drift hold` | camera → `move: "driftHold"` |
 | `elastic` | feel → `ease: "easeOutElastic"` |
+| `expressive` | duration → `0.4` seconds |
 | `fast` | duration → `0.18` seconds |
 | `faster` | comparative → one step toward `instant` on the DURATION ladder |
 | `follow` | camera → `move: "panFollow"` |
@@ -1148,6 +1164,7 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `medium` | duration → `0.3` seconds |
 | `pan stations` | camera → `move: "travel"` |
 | `pop` | feel → `ease: "easeOutBack"` |
+| `productive` | duration → `0.22` seconds |
 | `pull back` | camera → `move: "workspaceZoomOut"` |
 | `punch in` | camera → `move: "punchIn"` |
 | `push in` | camera → `move: "slowPush"` |
@@ -1166,4 +1183,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_716 effects across 60 families. Regenerate: `make effects`._
+_726 effects across 61 families. Regenerate: `make effects`._

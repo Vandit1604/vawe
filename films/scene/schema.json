@@ -15,6 +15,7 @@
    "anticipate",
    "aspects",
    "at",
+   "axis",
    "basis",
    "becomes",
    "becomesDur",
@@ -1853,6 +1854,10 @@
     "presetOpts": {
      "type": "object",
      "label": "Per-preset knobs (e.g. gradient c1/c2, highlight color, blur px, tilt deg, wave amp, spring bounce/settle)"
+    },
+    "axis": {
+     "type": "object",
+     "label": "Font-variation axis TRACK on a split text layer: { wght: [300, 900] } (or wdth/slnt/ital/a custom 4-letter tag) rides the SAME per-unit clock as `preset`/`stagger`, so it composes with any preset rather than needing one of its own. A bare number pins the axis; a [from, to] pair ramps it across the unit's own entrance. Requires `split`. e.g. {\"wght\":[300,900]}"
     },
     "gradient": {
      "type": "object",

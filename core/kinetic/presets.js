@@ -33,6 +33,55 @@ export const wght = (n) => {
   return { fontWeight: String(Math.round(v / 100) * 100), fontVariationSettings: `'wght' ${v}` };
 };
 
+// AXIS_REGISTRY: the variation axes this engine names, each with the sane default range an author's
+// number gets clamped into absent a more specific one (core/validate reads the font's REAL range off
+// core/tokens.css's own @font-face rules and warns separately when a static face is asked to move one).
+// A tag not listed here (a display face's own custom axis, e.g. `GRAD`) is still legal on `axis`, just
+// unclamped: this engine has no default to clamp it against.
+const AXIS_BLURBS = {
+  wght: "the weight axis, 100 to 900 on every variable face this engine vendors: thin to black in one continuous ramp instead of jumping between static cuts",
+  wdth: "the width axis, condensed to expanded: none of the 31 faces this engine vendors keep it post-subsetting (core/tokens.css), so animating it is a validated no-op today",
+  slnt: "the slant axis, an upright face leaning to an italic ANGLE in degrees (usually -15 to 0) rather than swapping to a separate italic file",
+  ital: "the italic axis, 0 or 1: some variable faces expose the roman/italic swap as an axis instead of a second font file",
+};
+const AXIS_AKA = {
+  wght: ['weight axis', 'font weight ramp', 'thin to bold', 'variable weight'],
+  wdth: ['width axis', 'condensed to expanded', 'font stretch', 'variable width'],
+  slnt: ['slant axis', 'oblique angle', 'lean italic', 'variable slant'],
+  ital: ['italic axis', 'italic switch', 'roman to italic', 'variable italic'],
+};
+export const AXIS_REGISTRY = defineRegistry('font-variation axis',
+  { wght: [100, 900], wdth: [50, 200], slnt: [-15, 0], ital: [0, 1] },
+  { slot: 'axis', blurbs: AXIS_BLURBS, aka: AXIS_AKA,
+    catalog: {
+      title: 'Font-variation axes',
+      tag: 'text track',
+      intro: 'A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`. `{ "type":"text", "split":"word", "axis": { "wght": [300, 900] } }`',
+      usage: (n, { text }) => text({ split: 'word', axis: { [n]: AXIS_REGISTRY.entries[n] } }),
+      noPreview: 'the change is in the letterforms over time, which a single still cannot show',
+    } });
+
+// axisStyle(axes): the font-variation TRACK, generalising wght() above to every axis a variable face
+// may carry. `axes = { wght: 620, wdth: 100, slnt: -8, GRAD: 40 }` writes every tag into ONE
+// `font-variation-settings` string, so several axes move together in a single style read, and still
+// writes the `fontWeight` fallback (rounded to the CSS 100-step) wght() already wrote alone, for the
+// static faces that silently ignore the variation channel. A known axis (AXIS_REGISTRY) is clamped to
+// its sane range; a custom tag is passed through as authored, because this engine has no default to
+// clamp it against.
+export function axisStyle(axes) {
+  const style = {};
+  const parts = [];
+  for (const [tag, raw] of Object.entries(axes || {})) {
+    const range = AXIS_REGISTRY.has(tag) ? AXIS_REGISTRY.entries[tag] : null;
+    const v = range ? Math.max(range[0], Math.min(range[1], raw)) : raw;
+    const shown = tag === 'wght' ? Math.round(v) : Number(v.toFixed(2));
+    parts.push(`'${tag}' ${shown}`);
+    if (tag === 'wght') style.fontWeight = String(Math.round(shown / 100) * 100);
+  }
+  if (parts.length) style.fontVariationSettings = parts.join(', ');
+  return style;
+}
+
 
 // ---------- presets: u∈[0,1] → style object (compositor-friendly props only) ----------
 export const PRESETS = {

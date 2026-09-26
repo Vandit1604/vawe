@@ -100,7 +100,10 @@ function inspectLayer(id) {
 }
 
 function buildRow(id, authoredLayer, dom, pageT) {
-  const row = { id, authored: authoredLayer ? { type: authoredLayer.type, start: authoredLayer.start ?? 0, duration: authoredLayer.duration ?? null } : null, dom };
+  // `parts` here is the EXPANDED value (core/engine/expand.js already ran, above): an `html` layer
+  // authored with data-part-* attributes and no `parts` array shows its lowered spec here, same as a
+  // hand-written one would, so the lowering is checkable without opening devtools.
+  const row = { id, authored: authoredLayer ? { type: authoredLayer.type, start: authoredLayer.start ?? 0, duration: authoredLayer.duration ?? null, parts: authoredLayer.parts ?? null } : null, dom };
   if (!authoredLayer) row.warning = 'no layer with this id in the scene JSON (checked top-level and every group child)';
   if (!dom) row.warning = (row.warning ? row.warning + '; ' : '') + 'no [data-id] element in the DOM at this frame (did the scene ever build this layer?)';
   if (dom && authoredLayer) {
@@ -124,6 +127,11 @@ async function main() {
     if (err) throw new Error(`scene did not load: ${err}`);
     const meta = await page.evaluate(() => window.__engine.meta);
     report.fps = meta.fps;
+    // `meta.beatSync` carries bindBeats' own resolved-times line (core/beats/index.js describeBind),
+    // produced at boot but never read past this point until now: the render process cannot hear the
+    // page's console.log (engine-doctrine/MISTAKES.md #477), so this was the one line an author had no
+    // way to see outside a real render.
+    if (meta.beatSync) report.beatSync = meta.beatSync;
     if (pageT > meta.duration + 1e-6) {
       console.error(`--t ${viewerT}s (page time ${pageT.toFixed(3)}s) is past this film's authored duration (${meta.duration.toFixed(3)}s)`);
       process.exit(1);
@@ -154,11 +162,13 @@ async function main() {
 
 function printText(r) {
   console.log(`viewer T=${r.viewerT}s  tempo=${r.tempo}  page T=${r.pageT.toFixed(3)}s (authored clock)  frame ${r.frame} @ ${r.fps}fps`);
+  if (r.beatSync) console.log(r.beatSync);
   if (r.camera) console.log(`camera: style="${r.camera.styleTransform}"  computed="${r.camera.computedTransform}"`);
   for (const [id, row] of Object.entries(r.samples)) {
     console.log(`\n-- ${id} --`);
     if (row.warning) console.log(`  WARNING: ${row.warning}`);
     if (row.authored) console.log(`  authored: type=${row.authored.type} start=${row.authored.start} duration=${row.authored.duration}`);
+    if (row.authored?.parts) console.log(`  parts (resolved): ${JSON.stringify(row.authored.parts)}`);
     const d = row.dom;
     if (!d) continue;
     console.log(`  clip window (resolved): [${row.clipWindow[0]}, ${row.clipWindow[1] ?? '∞'}]  live at T: ${row.liveAtT}`);

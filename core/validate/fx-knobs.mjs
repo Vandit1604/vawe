@@ -2,7 +2,7 @@
 // console.warns on a typo (a warn the render swallows), so an unknown name shipped an unanimated layer
 // silently. Catch it here, loudly, with a "did you mean" pointer.
 import { isObj, nearest } from './util.mjs';
-import { STAGGER_FROM } from '../type/type.js';
+import { STAGGER_FROM, isStaggerFrom } from '../type/type.js';
 import { GSAP_FX, GSAP_REGISTRY } from '../engine/gsap-effects.js';
 import { KNOBS, knobsFor } from '../registry/knobs.js';
 
@@ -104,8 +104,8 @@ function staggerSpecErrors(spec, at, out) {
     if (spec[k] != null && !(typeof spec[k] === 'number' && spec[k] >= 0)) out.push(`${at}.${k} must be a number of seconds ≥ 0 (got ${JSON.stringify(spec[k])})`);
   }
   const f = spec.from;
-  if (f != null && !(typeof f === 'number') && !STAGGER_FROM.includes(f))
-    out.push(`${at}.from "${f}" is not a stagger order. One of: ${STAGGER_FROM.join(', ')}, or a unit index.${nearest(String(f), STAGGER_FROM)}`);
+  if (f != null && !(typeof f === 'number') && !isStaggerFrom(f))
+    out.push(`${at}.from "${f}" is not a stagger order. One of: ${STAGGER_FROM.join(', ')} (or GSAP's start/end), or a unit index.${nearest(String(f), STAGGER_FROM)}`);
 }
 
 export function staggerErrors(cfg) {
