@@ -230,6 +230,7 @@ media: ## [dev] capture, generation and audio/video processing tools, routed by 
 # seam check is the same `quality/gates/seams.mjs` `make seam-check` calls, no longer a step to
 # remember: flash, empty stage, ghost, resurrection and split seam, all in one pass.
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
+	@echo "  (if you backgrounded this: check with \`make ship-status D=$(D)\`, do not sleep)"
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
 	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
 	t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
@@ -471,6 +472,10 @@ e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site
 
 judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>] [STRUCT=1] [RUNS=A,B] [VERDICT_JSON=<f> RUN=<id>] [COMPARE="a.json b.json"])
 	@$(if $(COMPARE),node quality/gates/judge.mjs --compare $(COMPARE),node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,) $(if $(filter 1,$(STRUCT)),--struct) $(if $(RUNS),--runs $(RUNS)) $(if $(VERDICT_JSON),--verdict-json $(VERDICT_JSON) --run $(RUN)))
+	@echo "  (judge is synchronous, it already returned above; do not poll or sleep for it)"
+
+ship-status: ## [dev] done/running/failed for a backgrounded `make ship` D=<file>, and the film's last recorded judge run. Never sleep-poll: re-run this.
+	@node harness/dev/job-status.mjs D=$(D)
 
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
 # renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only
