@@ -4,7 +4,7 @@ import {
   TOKENS, HAIR, r2, text, box, onColor, onInk,
   R, RCSS, TYPE, SPACE, E, cardChrome, toneColor,
   stackWindows, TONE_NAMES,
-  tint, TINT, SHADOW_CARD, labelCss, numCss, needShape,
+  tint, TINT, SHADOW_CARD, labelCss, numCss, needShape, composeLook,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site, declared here rather than in a
 // hand-kept name-to-category table. A module that declares none is refused at generation time
@@ -65,31 +65,38 @@ export function pillRow({ x, y, items = [], fg = T.accentInk, bg = T.accentSoft,
 // `items` stacks N alerts arriving in order and expiring; one card is the block calling itself with the
 // stack flattened away, so the stacked and single forms cannot render differently.
 export function notification({ x, y, w = 460, title, message = '', body, desc = '', icon = null, accent = TOKENS.accent,
-  items = null, life = 2.4, step = 1, rowH = 96, gap = 12, start = 0, dur = 4 } = {}) {
+  items = null, life = 2.4, step = 1, rowH = 96, gap = 12, start = 0, dur = 4, look = null } = {}) {
   if (items && items.length) {
     return stackWindows({ n: items.length, start, dur, step, life, rowH, gap }).flatMap((wnd, i) => {
       const it = items[i];
       return notification({ x, y: r2(y + wnd.dy), w, title: it.title ?? it.message, body: it.body ?? it.desc,
-        icon: it.icon ?? icon, accent: it.accent || accent, start: wnd.start, dur: wnd.dur });
+        icon: it.icon ?? icon, accent: it.accent || accent, start: wnd.start, dur: wnd.dur, look });
     });
   }
   title = title ?? message; body = body ?? desc;
+  const cl = composeLook(look);
   // 26/TYPE.body, not 22/14: `make audit` fails any text under 14.04px as unreadable, so the glyph
   // that says WHAT happened was the one part of the alert nobody could read. The dot grows to fit it.
+  const dotSize = Math.round(26 * (cl ? cl.numScale : 1)), dotSizeBare = Math.round(12 * (cl ? cl.numScale : 1));
   const dot = icon
-    ? `<div style="width:26px;height:26px;border-radius:${R.pill}px;background:${accent};flex:none;`
+    ? `<div style="width:${dotSize}px;height:${dotSize}px;border-radius:${R.pill}px;background:${accent};flex:none;`
       + `display:flex;align-items:center;justify-content:center;font:700 ${TYPE.body}px var(--font-sans);`
       + `color:${onColor(accent)}">${icon}</div>`
-    : `<div style="width:12px;height:12px;border-radius:${R.pill}px;background:${accent};flex:none"></div>`;
-  const html = `<div style="display:flex;align-items:flex-start;gap:${SPACE.sm}px;padding:${SPACE.md}px;`
-    + `box-sizing:border-box;width:${w}px">` + dot
-    + `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px;align-items:flex-start;flex:1;min-width:0">`
+    : `<div style="width:${dotSizeBare}px;height:${dotSizeBare}px;border-radius:${R.pill}px;background:${accent};flex:none"></div>`;
+  const textAlign = cl && cl.align === 'center' ? 'center' : 'flex-start';
+  const text_ = `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px;align-items:${textAlign};flex:1;min-width:0">`
     + `<span style="${labelCss({ size: TYPE.lead, color: T.ink, weightFallback: 700 })}">${title}</span>`
     + (body ? `<span style="${labelCss({ size: TYPE.body, color: T.sub, weightFallback: 400 })}">${body}</span>` : '')
-    + '</div></div>';
+    + '</div>';
+  // `labelPos: 'above'` (brutalist, editorial, print) stacks the glyph above the copy, like a stamped
+  // alert, instead of the default side-by-side row every other look reads as.
+  const html = cl && cl.labelPos === 'above'
+    ? `<div style="display:flex;flex-direction:column;align-items:${textAlign === 'center' ? 'center' : 'flex-start'};gap:${SPACE.sm}px;padding:${SPACE.md}px;box-sizing:border-box;width:${w}px">${dot}${text_}</div>`
+    : `<div style="display:flex;align-items:flex-start;gap:${SPACE.sm}px;padding:${SPACE.md}px;`
+      + `box-sizing:border-box;width:${w}px">${dot}${text_}</div>`;
   // a notification ARRIVES FROM THE EDGE and leaves the way it came, the short, correct entrance for a
   // chip. Nothing inside it should perform; it is one small statement, so no `parts` here.
-  return [{ type: 'html', x, y, w, html, ...cardChrome({ elevation: E.card, anim: 'slide-right' }), out: 'slide-right',
+  return [{ type: 'html', x, y, w, html, ...cardChrome({ elevation: E.card, anim: 'slide-right', look }), out: 'slide-right',
     start, duration: dur, enterDur: 0.4, exitDur: 0.3 }];
 }
 

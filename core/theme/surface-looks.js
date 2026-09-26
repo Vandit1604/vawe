@@ -24,11 +24,22 @@ const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
 // read as the same kit with a different frame: the drawing itself changes too. Every one of these is a
 // plain CSS value (a stroke-linecap keyword, a paint, a font-family, a text-transform keyword, a bare
 // number for a `calc()`/font-weight), never a second enum a block has to branch on.
+// The last four are COMPOSITION, not paint: where the label sits against the number
+// (`labelPos`: above/below/inline), how big the number reads relative to its kit default
+// (`numScale`), how the block's content aligns in its box (`align`: left/center/split, `split`
+// pins the label to one edge and the number to the other), and whether the number dominates the
+// card or sits balanced with its label (`emphasis`: balanced/oversized). Author-time only, like
+// `density`: a factory reads these off the resolved bundle directly, never as a CSS var, because
+// they decide which elements a factory emits and in what order, not a paintable property.
 export const SURFACE_TOKEN_KEYS = [
   'radius', 'borderW', 'borderStyle', 'borderColor', 'bg', 'shadow', 'pad', 'gap', 'blur', 'density',
   'strokeCap', 'strokeScale', 'areaFill', 'trackDash',
   'numFont', 'numWeight', 'labelFont', 'labelCase', 'labelVariant', 'labelTracking', 'labelWeight',
+  'labelPos', 'numScale', 'align', 'emphasis',
 ];
+// Composition keys never become `--v-*` custom properties (see `surfaceCssVars` below): a factory
+// reads them off the resolved bundle to decide its OWN markup, the same reason `density` is excluded.
+const COMPOSITION_KEYS = new Set(['density', 'labelPos', 'numScale', 'align', 'emphasis']);
 
 // KIT_DEFAULTS: today's literals, named once so "no look set" and "look: kit" are the same bundle by
 // construction. blocks/kit.mjs's own R.card/HAIR/SHADOW_CARD/STROKE/capCss/labelCss/numCss stay the
@@ -40,6 +51,7 @@ export const KIT_DEFAULTS = {
   strokeCap: 'round', strokeScale: 1, areaFill: null, trackDash: 'none',
   numFont: 'var(--font-num)', numWeight: 700,
   labelFont: 'var(--font-mono)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0.02em', labelWeight: 600,
+  labelPos: 'below', numScale: 1, align: 'center', emphasis: 'balanced',
 };
 
 // SURFACE_LOOKS: named design languages a theme's `look.surface` points at (by name, or an inline
@@ -53,6 +65,7 @@ const SURFACE_LOOKS = {
     strokeCap: 'round', strokeScale: 1, trackDash: 'none',
     numFont: 'var(--font-sans)', numWeight: 600,
     labelFont: 'var(--font-sans)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0.01em', labelWeight: 500,
+    labelPos: 'below', numScale: 1, align: 'center', emphasis: 'balanced',
   },
   soft: {
     radius: 24, borderW: 0, borderStyle: 'none', borderColor: 'transparent',
@@ -60,6 +73,7 @@ const SURFACE_LOOKS = {
     strokeCap: 'round', strokeScale: 1.1, trackDash: 'none',
     numFont: 'var(--font-sans)', numWeight: 700,
     labelFont: 'var(--font-sans)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0', labelWeight: 600,
+    labelPos: 'below', numScale: 1, align: 'center', emphasis: 'balanced',
   },
   outlined: {
     radius: 12, borderW: 1.5, borderStyle: 'solid', borderColor: 'var(--line-strong)',
@@ -67,6 +81,7 @@ const SURFACE_LOOKS = {
     strokeCap: 'butt', strokeScale: 0.85, trackDash: 'none',
     numFont: 'var(--font-num)', numWeight: 600,
     labelFont: 'var(--font-mono)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0.02em', labelWeight: 500,
+    labelPos: 'below', numScale: 1, align: 'center', emphasis: 'balanced',
   },
   // brutalist: square, heavy, loud. Square caps on a thick stroke, a flat solid area (never a
   // gradient wash), bold uppercase sans labels wide-tracked to read as stencilled, not typeset.
@@ -76,6 +91,10 @@ const SURFACE_LOOKS = {
     strokeCap: 'square', strokeScale: 1.5, areaFill: 'color-mix(in srgb, var(--accent) 35%, transparent)', trackDash: 'none',
     numFont: 'var(--font-sans)', numWeight: 800,
     labelFont: 'var(--font-sans)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.08em', labelWeight: 800,
+    // The label sits ABOVE as a stencilled header, not tucked under the number: brutalist reads
+    // top-down like a hazard sign. Left-aligned, and the number itself runs big: the loudest
+    // reading in the set.
+    labelPos: 'above', numScale: 1.3, align: 'left', emphasis: 'oversized',
   },
   // editorial: hairline, quiet, set like a magazine page. Butt-capped thin strokes, a fine dashed
   // rule in place of a filled track, serif numerals, small-caps labels, generous tracking.
@@ -85,6 +104,9 @@ const SURFACE_LOOKS = {
     strokeCap: 'butt', strokeScale: 0.75, areaFill: 'none', trackDash: '1 3',
     numFont: 'var(--font-serif)', numWeight: 400,
     labelFont: 'var(--font-serif)', labelCase: 'none', labelVariant: 'small-caps', labelTracking: '0.06em', labelWeight: 500,
+    // Label above as a small-caps kicker, the figure held small-caps-serif quiet rather than
+    // shouted, split left/right like a caption line under a plate.
+    labelPos: 'above', numScale: 0.85, align: 'split', emphasis: 'balanced',
   },
   // neon: glowing rim, terminal-bright marks: round caps, mono numerals, wide-tracked uppercase
   // mono labels, the register a cyberpunk/console brand already carries in its borders.
@@ -95,6 +117,9 @@ const SURFACE_LOOKS = {
     strokeCap: 'round', strokeScale: 1.1, trackDash: 'none',
     numFont: 'var(--font-mono)', numWeight: 700,
     labelFont: 'var(--font-mono)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.1em', labelWeight: 700,
+    // The label sits INLINE with the number, like a terminal readout ("42% ONLINE"), oversized
+    // and centred so the glow reads as one emissive unit.
+    labelPos: 'inline', numScale: 1.15, align: 'center', emphasis: 'oversized',
   },
   // playful: pill radii, no border, a bold saturated fill: bubbly and light, for a friendly brand.
   // Chunky round-capped strokes and bold rounded sans type carry the same bounce into the marks.
@@ -102,9 +127,16 @@ const SURFACE_LOOKS = {
     radius: 28, borderW: 0, borderStyle: 'none', borderColor: 'transparent',
     bg: 'color-mix(in srgb, var(--card) 92%, var(--accent) 8%)',
     shadow: '0 6px 0 0 color-mix(in srgb, var(--accent) 22%, transparent)', pad: 22, gap: 18, blur: 0, density: 1.1,
-    strokeCap: 'round', strokeScale: 1.35, trackDash: 'none',
+    strokeCap: 'round', strokeScale: 1.35,
+    // A BOLD FLAT FILL, not the soft translucent wash every other look falls back to. Unset, an
+    // area chart read as the same faint gradient on every look regardless of the theme's own
+    // accent, so a warm-accent theme in `playful` still read as a cool, washed-out area: bumping
+    // the mix to 55% against the theme's OWN accent makes the fill visibly that theme's colour,
+    // not a generic tint.
+    areaFill: 'color-mix(in srgb, var(--accent) 55%, transparent)', trackDash: 'none',
     numFont: 'var(--font-sans)', numWeight: 800,
     labelFont: 'var(--font-sans)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0', labelWeight: 700,
+    labelPos: 'below', numScale: 1.2, align: 'center', emphasis: 'oversized',
   },
   // print: paper-flat, a hairline rule, near-square corners, no shadow at all: reads as ink on stock.
   // No area wash (a wash has no ink-on-paper equivalent), a fine dotted track standing in for a
@@ -115,6 +147,8 @@ const SURFACE_LOOKS = {
     strokeCap: 'butt', strokeScale: 0.9, areaFill: 'none', trackDash: '1 2',
     numFont: 'var(--font-mono)', numWeight: 400,
     labelFont: 'var(--font-mono)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.06em', labelWeight: 500,
+    // A caption under a plate: label above, split to the margins, held modest like set type.
+    labelPos: 'above', numScale: 0.9, align: 'split', emphasis: 'balanced',
   },
   // cinematic: deep glass with a glow ring, more depth than `glass`, for a dark, high-production brand.
   cinematic: {
@@ -211,7 +245,7 @@ export function surfaceCssVars(bundle) {
   if (!bundle) return {};
   const out = {};
   for (const key of SURFACE_TOKEN_KEYS) {
-    if (key === 'density' || bundle[key] == null) continue;
+    if (COMPOSITION_KEYS.has(key) || bundle[key] == null) continue;
     out[CSS_VAR_NAMES[key]] = cssValue(key, bundle[key]);
   }
   return out;
