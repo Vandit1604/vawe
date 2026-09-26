@@ -3,7 +3,7 @@
 // The xstack + pad + fill=white graph was written twice (compare.mjs, judge.mjs) with small differences
 // that were accidents rather than decisions. One implementation, so a sheet from one tool reads the same
 // as a sheet from the next, and so a fix to the ffmpeg graph lands everywhere at once.
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -41,6 +41,23 @@ export function tileGrid(tiles, { cols = 3, tw, th, gap = 2, out }) {
     : `${pads};${chain}xstack=inputs=${tiles.length}:layout=${tiles.map((_, i) => `${(i % cols) * W}_${Math.floor(i / cols) * H}`).join('|')}:fill=white`;
   ff(['-y', ...tiles.flatMap((t) => ['-i', t]), '-filter_complex', filter, out]);
   return out;
+}
+
+// blendDiff(a, b, out): ffmpeg's own difference blend between two same-size PNGs, black where they
+// agree, lit where they don't. Same "one owner" reasoning as tileGrid: a second hand-rolled
+// blend=all_mode=difference call is exactly the kind of duplicate this file exists to prevent.
+export function blendDiff(a, b, out) {
+  ff(['-y', '-i', a, '-i', b, '-filter_complex', 'blend=all_mode=difference', out]);
+  return out;
+}
+
+// ssimOf(a, b): mean SSIM (ffmpeg's own "All:" figure) between two same-size PNGs, or null if ffmpeg
+// printed no summary line (a size mismatch is the usual cause, and null is a fact worth keeping, not a
+// zero to average away).
+export function ssimOf(a, b) {
+  const r = spawnSync('ffmpeg', ['-i', a, '-i', b, '-filter_complex', 'ssim', '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = /All:([\d.]+)/.exec(r.stderr || '');
+  return m ? Number(m[1]) : null;
 }
 
 // tile box for a given video aspect: scrutiny-sized, not thumbnails.
