@@ -45,6 +45,7 @@
    "dir",
    "direction",
    "dist",
+   "drive",
    "duration",
    "dx",
    "dy",
@@ -1907,6 +1908,10 @@
     "follow": {
      "type": "object",
      "label": "Pin this layer to another layer's LIVE box, every frame: { id, edge, gap, dx, dy, from, to }. `anchor` places against the canvas and `becomes` hands one pose to another, and both resolve ONCE at build against numbers; neither can keep a label under a card that is moving, because the card's position after its motion track is only known at t. edge is center (default) \u00b7 above \u00b7 below \u00b7 left \u00b7 right, and `gap` is the space outside that edge. Centres are matched, not corners. `from`/`to` (seconds, optional) window the pin to that span of the film's clock; outside it this is a no-op. The pin lands BEFORE this layer's own motion track, so the follower may still have choreography of its own and it plays about the pinned position. This layer needs an `id` (it is placed by its own measured size). Following a layer that is itself following a third pins you to the middle one's UNPINNED position."
+    },
+    "drive": {
+     "type": "object",
+     "label": "AFTER EFFECTS EXPRESSIONS, as data, resolved fresh every frame. { wiggle, link, loop }. `wiggle`: { prop: x|y|rot, freq (Hz), amp (px or deg), seed, octaves } is deterministic seeded jitter. `link`: { from: \"<layerId>.<prop>\", mul, add, delay } is the pick-whip, this property copies another layer's own animated value, delayed (seconds) for follow-through; a link cycle is refused by name. `loop`: { mode: cycle|pingpong|continue, from, to } repeats this layer's OWN keyframes past `to` seconds instead of holding on the last one. `wiggle`/`link` take one spec or an array. `make arsenal Q=\"wiggle expression\"` lists them."
     },
     "style": {
      "type": "string",

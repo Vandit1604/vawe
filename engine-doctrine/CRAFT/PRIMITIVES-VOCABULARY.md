@@ -301,6 +301,14 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `tiktok` | tiktok video, tiktok upload | the tightest phone target: a rail down the RIGHT at 16.7% of the width for the action buttons, 12.5% off the top and 30.2% off the bottom for the caption and handle. Serves 9:16 |
 | `web` | website hero, no platform chrome | no platform chrome at all: the whole frame is usable and only the 4% margin applies. A site hero, an X or LinkedIn post, a docs clip |
 
+## driver  `[drive{}]`
+
+| name | words | action |
+|---|---|---|
+| `link` | pick whip, expression link, follow a property | the PICK-WHIP: this property copies another layer's own animated value every frame, `mul`/`add` rescale it and `delay` (in seconds, 0.1 is a normal follow-through lag) shifts when it arrives |
+| `loop` | loop out, repeat keyframes forever, cycle the animation | LOOP OUT: past `to` seconds this layer's own keyframes repeat forever, `cycle` restarts at `from` (0 by default), `pingpong` bounces between them, `continue` just holds the last key the way an unlooped track already does |
+| `wiggle` | random jitter, seeded shake, organic wobble | an AFTER EFFECTS EXPRESSION as data: deterministic seeded jitter on one property (x/y in px, rot in deg), default 2Hz at 10 units, reseed to decorrelate two layers so they never wobble in lockstep |
+
 ## duration word  `[enterDur]`
 
 | name | words | action |
@@ -1053,5 +1061,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_724 primitives across 63 registries, 724 meeting the word-action contract today.
+_727 primitives across 64 registries, 727 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
