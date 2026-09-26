@@ -1265,6 +1265,34 @@ worktree-status: ## [maintenance] what is running, on what, since when: every li
 token-cost: ## [maintenance] agent session cost by billing type, model, tool and hook, streamed from local transcripts
 	@node harness/dev/token-cost.mjs $(if $(SINCE),--since $(SINCE)) $(if $(SESSION),--session $(SESSION)) $(if $(LIMIT),--limit $(LIMIT)) $(if $(filter 1,$(JSON)),--json) $(if $(filter 1,$(SELFTEST)),--self-test)
 
+.PHONY: bench-fast
+# make bench-fast, TWO DETERMINISTIC RATCHETS on the speed of authoring a video, modelled on claude.dev's
+# "how we made claude.ai 3x faster": a proxy that cannot be noisy stands in for the real, noisy number,
+# and CI fails the moment it gets worse. read-load is how many words (CLAUDE.md + AGENTS.md + the
+# skills `make stage` routes for stages 1-5) an agent must load before it can write its first layer.
+# fast-path is how many commands stand between a brief and the first draft render, plus the Makefile's
+# own target count. Both are pure file reads, so nothing here is noisy: STAMP=1 lowers the ceiling
+# when either number shrinks; see quality/gates/coverage.mjs for the house pattern this reuses.
+bench-fast: ## [maintenance] ratchet: read-load word/token count + fast-path command/Makefile-target count, gated
+	@node harness/dev/bench.mjs fast $(if $(filter 1,$(STAMP)),--stamp) $(if $(filter 1,$(JSON)),--json)
+
+.PHONY: bench
+# make bench, bench-fast plus a REPORT-ONLY draft-render speed: renders tests/fixtures/films/sample.json
+# (never a film in films/, which is gitignored and not a fixture) three times with --draft and reports
+# ms/frame and total seconds, median of three. Wall-clock render time is real but noisy machine to
+# machine, so this never fails a push; it is a number to watch, not a gate. STAMP=1 records today's
+# median as the one this prints a delta against next time.
+bench: build ## [maintenance] bench-fast + report-only draft render speed (ms/frame, median of 3 runs)
+	@node harness/dev/bench.mjs all $(if $(filter 1,$(STAMP)),--stamp) $(if $(filter 1,$(JSON)),--json)
+
+.PHONY: bench-session
+# make bench-session T=<path>, the real "prompt to first draft" number: minutes, tool calls,
+# input/output tokens and cache hit rate from the first user message to the first successful draft
+# render command (make dev / vawe --draft / make preview) in a session transcript. T may be one
+# transcript file or a session directory (main .jsonl + its subagents/ folder); report-only.
+bench-session: ## [maintenance] prompt-to-first-draft benchmark from a session transcript: T=<path>
+	@node harness/dev/bench.mjs session $(T) $(if $(filter 1,$(JSON)),--json)
+
 # make review. One-command health snapshot: lib-test + layout audit + a master overlay sheet
 # (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
 review: ## [engine] One-command health snapshot: lib-test + layout audit + a master overlay sheet (/tmp/review.png).
