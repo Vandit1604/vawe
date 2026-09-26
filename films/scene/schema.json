@@ -703,13 +703,13 @@
    "label": "INTERNAL: the lowered output of transitions[] (mech:\"cut\"). Never author this directly, write transitions[] and run `node harness/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
-     "type": "number",
-     "label": "Cut time (s)",
+     "type": "number|string",
+     "label": "Cut time (s), or \"beat:<n>\" (bare, 0-based) pinning this cut to the nth beat of the film's music grid, resolved by core/beats/index.js once audio.beatSync loads it.",
      "required": true
     },
     "snap": {
-     "type": "boolean",
-     "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beats/index.js)."
+     "type": "boolean|string",
+     "label": "false keeps this exact time when audio.beatSync is on. \"beat\"/\"bar\"/\"downbeat\" instead snaps THIS cut to that pulse regardless of audio.beatSync.bar's own default (core/beats/index.js)."
     },
     "style": {
      "type": "string",
@@ -789,8 +789,8 @@
    "label": "INTERNAL: the lowered output of transitions[] (mech:\"sting\"). Never author this directly, write transitions[] and run `node harness/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
-     "type": "number",
-     "label": "Center time (s)",
+     "type": "number|string",
+     "label": "Center time (s), or \"beat:<n>\" (bare, 0-based) pinning it to the nth beat of the film's music grid (core/beats/index.js).",
      "required": true
     },
     "fx": {
@@ -865,14 +865,14 @@
    "label": "INTERNAL: the lowered output of transitions[] (mech:\"seam\"). Never author this directly, write transitions[] and run `node harness/author/migrate-junctions.mjs` on an old file that still has one.",
    "item": {
     "t": {
-     "type": "number",
-     "label": "Seam start time (s), the window is [t, t+dur]",
+     "type": "number|string",
+     "label": "Seam start time (s), the window is [t, t+dur]. Or \"beat:<n>\" (bare, 0-based) pinning it to the nth beat of the film's music grid, resolved by core/beats/index.js once audio.beatSync loads it.",
      "required": true,
      "min": 0
     },
     "snap": {
-     "type": "boolean",
-     "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beats/index.js)."
+     "type": "boolean|string",
+     "label": "false keeps this exact time when audio.beatSync is on. \"beat\"/\"bar\"/\"downbeat\" instead snaps THIS seam to that pulse regardless of audio.beatSync.bar's own default (core/beats/index.js)."
     },
     "fx": {
      "type": "string",
@@ -963,7 +963,7 @@
    "item": {
     "at": {
      "type": "number|string",
-     "label": "Boundary time (s), or a relative reference like \"otherId.end+0.5\" (core/timeline/relative-time.js). The transition plays over [at, at+dur]",
+     "label": "Boundary time (s), a relative reference like \"otherId.end+0.5\" (core/timeline/relative-time.js), or \"beat:<n>\" (bare, 0-based) pinning it to the nth beat of the film's music grid (audio.beatSync, core/beats/index.js). The transition plays over [at, at+dur]",
      "required": true,
      "min": 0
     },
@@ -1022,8 +1022,8 @@
      "min": 0
     },
     "snap": {
-     "type": "boolean",
-     "label": "Set false to keep this exact time when audio.beatSync is on. A written time the author means wins over the grid (core/beats/index.js)."
+     "type": "boolean|string",
+     "label": "false keeps this exact time when audio.beatSync is on. \"beat\"/\"bar\"/\"downbeat\" instead snaps THIS boundary to that pulse regardless of audio.beatSync.bar's own default (core/beats/index.js)."
     },
     "cx": {
      "type": "number",

@@ -26,6 +26,12 @@
 // delay resolves to). Accepting the SAME reference grammar every other absolute field already accepts
 // lets a cue read "installLine.end+0.1" instead, so moving the layer moves the cue with it.
 //
+// A THIRD, bare-digit form ("beat:12", no `.start`/`.end`) is NOT this file's to resolve: it names a
+// beat INDEX in the film's detected MUSIC grid, not a `data.beats[]` id, and that grid is only known
+// once `core/beats/index.js` `bindBeats` fetches its sidecar, well after this resolver has run. Left
+// untouched here (`isGridPin`), it survives lowering and tempo scaling (both skip non-numbers) as a
+// plain string on `transitions[].at` -> the lowered `cuts`/`seams`/`stings` `t`, for bindBeats to pin.
+//
 // BEAT TARGETS ("beat:<id>.start"/"beat:<id>.end", plus offset), a SEPARATE grammar from the layer-id
 // one above, only live where `data.beats` (`{id,start,duration}[]`, item 3) is present. The `beat:`
 // prefix is the one thing that lets this share a string slot with the bg window's junction grammar
@@ -79,6 +85,13 @@ function resolveRef(str, byId, label) {
 const roundTime = (x) => Math.round(x * 1e6) / 1e6;
 
 const isBeatTarget = (v) => typeof v === 'string' && v.trim().startsWith('beat:');
+
+// A MUSIC-GRID PIN ("beat:12", bare, no `.start`/`.end`): not this file's grammar at all. It names a
+// beat INDEX in the film's own detected music grid (assets/music/*.beats.json), which only exists
+// once `core/beats/index.js` `bindBeats` has fetched the sidecar, well after this resolver runs. The
+// two share the `beat:` prefix but never collide (a structural beat id always carries `.start`/`.end`
+// here); this resolver just leaves a bare-digit form untouched for bindBeats to resolve.
+const isGridPin = (v) => typeof v === 'string' && /^beat:\d+$/.test(v.trim());
 
 // resolveBeatRef(str, label) -> number, or null if the beat it names is not resolved YET (its own
 // `start` is still a string, mid multi-pass below). Throws on an unknown beat id, the same shape
@@ -155,7 +168,7 @@ function resolveLayerStarts(all, byId, beatById, beatResolutions, nameOf) {
 function resolveOtherFields(data, byId, beatById, beatResolutions) {
   const ref = (str, label) => (isBeatTarget(str) ? resolveBeatRef(str, label, beatById, beatResolutions) : resolveRef(str, byId, label));
   if (Array.isArray(data.transitions)) for (const T of data.transitions)
-    if (typeof T.at === 'string') T.at = ref(T.at, 'transition "at"');
+    if (typeof T.at === 'string' && !isGridPin(T.at)) T.at = ref(T.at, 'transition "at"');
   if (data.cameraMove) {
     const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
     for (const s of specs) if (s && typeof s.start === 'string') s.start = ref(s.start, 'cameraMove "start"');
