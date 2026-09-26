@@ -1,0 +1,228 @@
+{
+  "module": "scene",
+  "theme": {
+    "name": "fixture-generic-seam",
+    "note": "THE DEFAULT LOOK, and it is deliberately the vawe brand: white-first with one cobalt accent, mirroring the real site (site/app/globals.css). `default` is the name every author reaches for by habit, so it must not be a palette that belongs to nobody - it used to hold mono+lime, which is why films kept shipping in a colour no site of ours uses. The neutral starting point for a fork or a new brand kit now lives in themes/neutral.json. This file MIRRORS themes/vawe.json and lib-test fails if the two palettes drift apart.",
+    "motion": {
+      "easing": "easeOutExpo",
+      "bounce": 0.08,
+      "settle": 0.5,
+      "enter": 36,
+      "durationScale": 0.88,
+      "stagger": 0.045,
+      "exitRatio": 0.5,
+      "_exitRatio": "the house default: half, which is the middle of the band the five existing themes already use. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
+    },
+    "bg": {
+      "accent": "37,99,235",
+      "tint": "180,190,205",
+      "tint2": "205,214,226",
+      "dotLight": "150,163,182",
+      "paperBase": [
+        "#ffffff",
+        "#f6f8fb"
+      ],
+      "softBase": [
+        "#f8fafc",
+        "#eef2f8"
+      ],
+      "accentBase": [
+        "#eef3ff",
+        "#f8fafc"
+      ],
+      "inkBase": [
+        "#0f1620",
+        "#0a0f16"
+      ],
+      "border": "#e7eaf0",
+      "dark": [
+        "#0f1620",
+        "#0a0f16"
+      ],
+      "darkMesh": [
+        "#141d2a",
+        "#0a0f16"
+      ],
+      "deep": [
+        "#0f1620",
+        "#080c12"
+      ],
+      "light": [
+        "#ffffff",
+        "#f6f8fb"
+      ],
+      "ink": [
+        "#0f1620",
+        "#0a0f16"
+      ],
+      "paper": "#ffffff"
+    },
+    "vars": {
+      "--ink": "#0f1620",
+      "--paper": "#ffffff",
+      "--muted": "#697182",
+      "--em": "#2563eb",
+      "--on-light": "#0f1620",
+      "--on-dark": "#ffffff",
+      "--border": "#e7eaf0",
+      "--accent-soft": "rgba(37,99,235,0.10)"
+    },
+    "bgDefault": {
+      "preset": "plain"
+    },
+    "tokens": {
+      "color": {
+        "bg": {
+          "$type": "color",
+          "$value": "#ffffff"
+        },
+        "bg2": {
+          "$type": "color",
+          "$value": "#f6f8fb"
+        },
+        "surface": {
+          "$type": "color",
+          "$value": "#ffffff"
+        },
+        "surface2": {
+          "$type": "color",
+          "$value": "#f6f8fb"
+        },
+        "line": {
+          "$type": "color",
+          "$value": "#e7eaf0"
+        },
+        "lineStrong": {
+          "$type": "color",
+          "$value": "#d7dce4"
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#0f1620"
+        },
+        "text2": {
+          "$type": "color",
+          "$value": "#454f5e"
+        },
+        "dim": {
+          "$type": "color",
+          "$value": "#697182"
+        },
+        "accent": {
+          "$type": "color",
+          "$value": "#2563eb"
+        },
+        "accentDim": {
+          "$type": "color",
+          "$value": "rgba(37,99,235,0.10)"
+        },
+        "accentGlow": {
+          "$type": "color",
+          "$value": "rgba(37,99,235,0.30)"
+        },
+        "up": {
+          "$type": "color",
+          "$value": "#2f7d55"
+        },
+        "down": {
+          "$type": "color",
+          "$value": "#a3282d"
+        },
+        "ink": {
+          "$type": "color",
+          "$value": "#0f1620"
+        }
+      },
+      "font": {
+        "sans": {
+          "$type": "fontFamily",
+          "$value": "sans-serif"
+        },
+        "serif": {
+          "$type": "fontFamily",
+          "$value": "serif"
+        },
+        "mono": {
+          "$type": "fontFamily",
+          "$value": "monospace"
+        },
+        "num": {
+          "$type": "fontFamily",
+          "$value": "monospace"
+        }
+      },
+      "gradient": {
+        "stop0": {
+          "$type": "color",
+          "$value": "#ffffff"
+        },
+        "stop1": {
+          "$type": "color",
+          "$value": "#f8fafc"
+        },
+        "stop2": {
+          "$type": "color",
+          "$value": "#f1f4f9"
+        }
+      }
+    },
+    "roles": {
+      "ground": "{color.bg}",
+      "bg2": "{color.bg2}",
+      "surface": "{color.surface}",
+      "surface2": "{color.surface2}",
+      "line": "{color.line}",
+      "lineStrong": "{color.lineStrong}",
+      "text": "{color.text}",
+      "text2": "{color.text2}",
+      "dim": "{color.dim}",
+      "accent": "{color.accent}",
+      "accentDim": "{color.accentDim}",
+      "accentGlow": "{color.accentGlow}",
+      "up": "{color.up}",
+      "down": "{color.down}",
+      "ink": "{color.ink}",
+      "font.sans": "{font.sans}",
+      "font.serif": "{font.serif}",
+      "font.mono": "{font.mono}",
+      "font.num": "{font.num}",
+      "gradient": [
+        "{gradient.stop0}",
+        "{gradient.stop1}",
+        "{gradient.stop2}"
+      ]
+    }
+  },
+  "aspect": "16:9",
+  "duration": 2.2,
+  "audio": {
+    "silent": true,
+    "_why": "a seam-blank fixture, never fed to a mixer"
+  },
+  "layers": [
+    {
+      "type": "text",
+      "text": "hi",
+      "x": 100,
+      "y": 100,
+      "w": 400,
+      "size": 40,
+      "start": 0.0,
+      "duration": 0.3,
+      "exitDur": 0.05
+    }
+  ],
+  "bg": [
+    {
+      "t": 0,
+      "preset": "black"
+    }
+  ],
+  "transitions": [
+    {
+      "at": 1.0,
+      "fx": "whip",
+      "dur": 0.3
+    }
+  ]
+}

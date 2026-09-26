@@ -1,7 +1,3 @@
-// placement-resolve.mjs: turn a contract edge ({placement,w,h}) into real px, by calling the ENGINE'S
-// OWN resolveCoords (core/engine/boot.js), never a second copy of its keyword math. resolveCoords is
-// pure JS with no DOM touched at call time (only at module scope of sibling files it imports, none of
-// which run anything on import), so it loads and runs fine under plain node.
 import { resolveCoords } from '../../core/engine/boot.js';
 import { sceneDims, safeArea } from '../../core/layout/safe.js';
 

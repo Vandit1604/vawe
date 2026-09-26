@@ -1,15 +1,3 @@
-// harness/lib/code-fires.mjs: does a finding code still genuinely fire on a scene, RIGHT NOW?
-//
-// One question, one owner. `quality/gates/legacy-fold.mjs` asked it to decide whether a manifest row
-// was still real before writing a waiver; `quality/gates/legacy-unfold.mjs` asks it in reverse, to
-// measure the debt left behind after deleting one; `quality/gates/waiver-drift.mjs --ratchet` asks it
-// to check that debt has not grown back. Three callers had started copying the same ~20 lines; this is
-// the one place it lives.
-//
-// Two codes (`no-storyboard`, `no-authored-motion`) are emitted only from inside author-check.mjs,
-// which cannot be spawned to check its own waiver (it would just read the waiver and skip the check).
-// PURE_FAILS re-implements their pure predicate for exactly those two codes; every other code is
-// checked by spawning the real gate that owns it and reading what it actually finds.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

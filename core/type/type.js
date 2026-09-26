@@ -142,9 +142,24 @@ export function staggerOffset(i, n, from = 'first') {
   return i; // 'first' and 'typewriter' both rank in index order; typewriter only changes the STEP below
 }
 
+// GSAP names two of these five differently (`start`/`end`). Accepted here, at the ONE place a stagger
+// spec is read, so every caller (staggerOffset, staggerStep, unitProgress) gets the alias for free
+// rather than a second reader learning a second word set. `gsapStagger` below is the same table read
+// in the OTHER direction, translating an engine spec OUT to a GSAP-driven field.
+const GSAP_TO_STAGGER_FROM = { start: 'first', end: 'last' };
+
 // staggerFrom / staggerStep: the ONE reader of a stagger spec, so units, parts and the tactile mixer
 // cannot each decide what `{ amount: 0.6 }` means. A bare number is the per-unit delay it always was.
-export const staggerFrom = (spec) => (spec && typeof spec === 'object' ? (spec.from ?? 'first') : 'first');
+export const staggerFrom = (spec) => {
+  const f = spec && typeof spec === 'object' ? (spec.from ?? 'first') : 'first';
+  return GSAP_TO_STAGGER_FROM[f] ?? f;
+};
+
+// isStaggerFrom(f): would staggerFrom treat this as a real order (a named one or its GSAP spelling)?
+// The one membership test, so core/validate/fx-knobs.mjs asks instead of re-deriving the list
+// (core/motion.js isEasingName is the same argument for easings).
+export const isStaggerFrom = (f) => STAGGER_FROM_REGISTRY.has(f)
+  || Object.prototype.hasOwnProperty.call(GSAP_TO_STAGGER_FROM, f);
 
 export function staggerStep(spec, n, fallback = 0.06) {
   if (spec && typeof spec === 'object') {

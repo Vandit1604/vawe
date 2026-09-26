@@ -1,16 +1,3 @@
-// harness/lib/skill-stages.mjs: which skill serves THIS stage, read off the skills themselves.
-//
-// WHY THIS EXISTS. `make stage`/`make next` already name the one command a stage wants
-// (quality/gates/stage.mjs). They did not name the one skill, so an agent that has not memorised
-// AGENTS.md's skill router table authors a whole stage from habit instead of the doctrine that skill
-// carries. A hand-kept second table (stage -> skill) would be exactly the kind of table this repo has
-// been bitten by before (engine-doctrine/MISTAKES.md): it drifts the moment a skill is renamed, split,
-// or reassigned, because nothing forces the two edits to happen together.
-//
-// So there is no second table. Each skills/*/SKILL.md names its OWN stage in a `stage:` frontmatter
-// line (one of quality/gates/stage.mjs's STAGE_ORDER ids), and this module is the one place that reads
-// it back. A skill with no `stage:` is cross-cutting on purpose (a vendored skill, or a
-// direction/effect playbook) and simply never surfaces here; that is not an error.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

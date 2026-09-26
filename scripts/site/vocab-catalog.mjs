@@ -47,7 +47,9 @@ const WHEN = {
 
   instant: 'a state change, not a move. Under the threshold where the eye reads travel.',
   fast: 'quick, but still legibly a move.',
+  productive: 'a small, frequent UI-adjacent move: Carbon\'s utilitarian tier, quick enough to cost the viewer nothing.',
   medium: 'the engine\'s own default entrance. Reach past it on purpose, not by omission.',
+  expressive: 'an occasional bigger moment: Carbon\'s emphasis tier, slower than `productive` so the one that matters reads as the one that matters.',
   slow: 'the eye follows the whole path. For a subject, not for furniture.',
   luxurious: 'a held gesture. One per film.',
 
