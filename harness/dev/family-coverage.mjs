@@ -1,22 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/family-coverage.mjs · does the labeled eval have a plain-English query for every family?
-//
-// WHY THIS EXISTS. Coverage of the SEARCH is closed: every entry carries a blurb (checkBlurb refuses a
-// bare one at load) and the discovery ratchet is at 0. That guarantees a thing is IN the index. It does
-// not guarantee the index answers the words a person actually types. The labeled eval in
-// tests/authoring/lib-test.authoring.test.mjs (PRESENT + PLAIN) is what measures that, and its blind
-// spot is silent: a whole FAMILY can have no author-phrased query at all, so nobody ever checks that "a
-// drifting colour background" reaches an `aurora`. This lists the families the eval never asks about.
-//
-// THE STANDING RULE this feeds (discovery.mjs check 5): every SEARCHABLE family must carry at least one
-// labeled query that resolves to it confidently, the same way every entry must carry a blurb. A family
-// that authors reach for by MECHANISM rather than by describing a look (an easing curve, a blend mode,
-// a keyframe handle) is exempt, because there is no plain-English request for it to answer; those are
-// still covered per-entry by harness/dev/blurb-retrieval.mjs (their own words find them).
-//
-// The eval lives as inline arrays in tests/authoring/lib-test.authoring.test.mjs. Importing that module
-// would run the whole suite, so the two labeled arrays are read out of its SOURCE. That is a parse, and
-// a parse can rot, so `evalWants` asserts it found a plausible number and the gate says so if it finds none.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,20 +8,10 @@ import { emitJson } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Families an author reaches for by mechanism or parameter, never by describing a look, so a
-// plain-English golden query would be invented rather than real. Exempt from the family gate; still
-// covered per-entry by blurb self-retrieval. Kept here, named and reviewable, rather than inferred: the
-// judgement "nobody phrases this in prose" is a decision and belongs written down.
 export const MECHANISM_NAMED = new Set([
   'easing', 'blend mode', 'icon',                 // also carry catalog `skip`; listed for one source of truth
   'camera dial', 'depth', 'interpolation mode', 'time remap', 'keyframe handle', 'stagger order',
   'effector drive', 'effector falloff', 'scramble charset', 'resample fx',
-  // The registries themselves are named 'envelope anchor' / 'shadow direction' (core/lightfield/
-  // options.js, defineRegistry's first arg), not 'lightfield envelope anchor' / 'lightfield shadow
-  // direction': this set is matched against that exact kind string. The two entries carried the
-  // longer, wrong spelling since they were written, invisible until W9's arsenal.mjs fix (core/
-  // moved from three hardcoded directories to a real per-package walk) discovered
-  // core/lightfield/options.js's registries for the first time and the mismatch finally mattered.
   'envelope anchor', 'envelope shape', 'field motion',
   'lightfield pattern', 'shadow direction',
 ]);
@@ -59,10 +31,6 @@ export function evalWants() {
 /** covered / uncovered / exempt families, from the live corpus and the live eval. */
 export async function familyCoverage() {
   const all = await collect();
-  // A name maps to EVERY family that has it, not the first one seen. `breathe` is an idle preset AND a
-  // gsap effect, `fade` lives in four families: crediting only the first-seen would leave a family with
-  // its own labeled query reported as uncovered, because a sibling family shares the entry's name. A
-  // family is covered when one of ITS entries' names is a confident eval target, whichever else shares it.
   const kindsOf = new Map();
   const sizes = new Map();
   for (const e of all) {
@@ -70,7 +38,6 @@ export async function familyCoverage() {
     kindsOf.get(e.name).add(e.kind);
     sizes.set(e.kind, (sizes.get(e.kind) || 0) + 1);
   }
-  // catalog `skip` is the other, code-owned half of the exemption (a self-describing family).
   const skip = new Set();
   for (const r of catalogued()) if (r.catalog && r.catalog.skip) skip.add(r.catalog.register || r.kind);
   const exempt = new Set([...MECHANISM_NAMED, ...skip]);
