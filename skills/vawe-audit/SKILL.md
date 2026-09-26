@@ -2,6 +2,7 @@
 name: vawe-audit
 description: "Audits a finished, rendered film against every repo check in one fixed order and hands the owner one composed verdict with evidence. Use after `make ship`, or when asked whether a film passes, is ready, or still needs work. Routes make check/audit/audio-check/beats/reveal/judge/ledger; never records a PASS itself."
 stage: judge
+effort: high
 ---
 
 # vawe-audit: one verdict, composed from what already exists
@@ -89,3 +90,12 @@ owner or a separate critic, not to this pass.
 A one-line tweak you can verify by eye in one frame: run `make dev` and look, this skill is for a full
 pass on a film someone might ship or already has. For the iteration loop itself, once you are already
 fixing rounds, use `vawe-review-loop` instead, this skill would just repeat its own steps every round.
+
+## Gotchas
+
+- Uniform-tick sampling can miss a whole beat; the layout audit samples the resting midpoint of every
+  layer, not just fixed ticks. `engine-doctrine/MISTAKES.md #45`.
+- A genuine cross-dissolve hand-off (one layer exiting, the other entering, both under full opacity)
+  is not a collision; only flag an overlap that isn't a real hand-off. `engine-doctrine/MISTAKES.md #25`.
+- An image box that exists only to clip (Ken Burns) is not evidence for the *clipped-text* overflow
+  rule; don't let a structural clip box read as a bug. `engine-doctrine/MISTAKES.md #111`.

@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "note": "STING worked example (engine-doctrine/EVALS.md, skills/vawe-type-sting/SKILL.md). One move, the mark, six seconds: Halyard's eye-splice mark, a taut line ending in a spliced loop, draws itself on stroke by stroke and holds as an outline (a closed loop filled solid would drop the line, which has no area of its own), and the wordmark settles in behind it. No cuts, no second beat: `BLACK MEANS #000000` (AGENTS.md) since the brief calls for a true black bumper. Theme mercury.",
+ "note": "STING worked example (engine-doctrine/EVALS.md, skills/vawe-type/reference/sting.md). One move, the mark, six seconds: Halyard's eye-splice mark, a taut line ending in a spliced loop, draws itself on stroke by stroke and holds as an outline (a closed loop filled solid would drop the line, which has no area of its own), and the wordmark settles in behind it. No cuts, no second beat: `BLACK MEANS #000000` (AGENTS.md) since the brief calls for a true black bumper. Theme mercury.",
  "theme": "mercury",
  "aspect": "16:9",
  "duration": 6,

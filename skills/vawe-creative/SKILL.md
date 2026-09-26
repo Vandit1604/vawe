@@ -2,6 +2,7 @@
 name: vawe-creative
 description: "Pushes a video toward a directed, non-slideshow result: mandates recipes, kinetic motion, a living background, rich layout, and an impeccable pass, then gates it with the ambition floor. Load after vawe-video-planning locks the brief and before or while writing the scene JSON, for a launch film, promo, or any 'make it amazing' request."
 stage: design
+effort: medium
 ---
 
 # vawe-creative: the anti-slideshow forcing layer
@@ -74,3 +75,9 @@ work). Full list: `make effects` → `engine-doctrine/EFFECTS.md`.
 Study `films/scene/brew-native.json` (warm, expressive) and `films/scene/preface-launch.json`
 (minimal, technical) before authoring: one of them is your register. If your draft would look at home as
 a Keynote slide deck, it has failed this skill. Make the viewer feel the motion.
+
+## Gotchas
+
+- A `SPECTACLE` field can be added to the brief and read by the parser while nothing downstream
+  actually consumes it; check the spectacle beat is really wired into the render, not just declared.
+  `engine-doctrine/MISTAKES.md #400`.

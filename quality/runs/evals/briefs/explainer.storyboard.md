@@ -17,7 +17,7 @@ not: "no product, no CTA, no logo, no gradient hero, no centered text, no Inter,
 ---
 
 <!--
-  THE FLOW USED: read skills/vawe-type-explainer/SKILL.md + engine-doctrine/CRAFT/HTML-FRAGMENTS.md +
+  THE FLOW USED: read skills/vawe-type/reference/explainer.md + engine-doctrine/CRAFT/HTML-FRAGMENTS.md +
   engine-doctrine/CRAFT/SHOW-DONT-TELL.md + engine-doctrine/RULES/INDEX.md first. Theme chosen by reading themes/vawe.json
   directly (its own `motion._exitRatio` note already says "this engine is about determinism and speed"),
   not by a render, because the note is decisive on its own: a white-first, flat-field, mono-numerals

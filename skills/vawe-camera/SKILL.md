@@ -3,6 +3,7 @@ name: vawe-camera
 description: "Camera moves for a vawe scene: slowPush, diveIn, travel, truck, panFollow, workspaceZoomOut, orbit, multiPhase, plus depth parallax via the plane modifier. Load while authoring a scene JSON when a beat should move the viewer through space, or when the camera itself should be the transition."
 codes: no-camera
 stage: direct
+effort: low
 ---
 
 # vawe-camera: smooth, calculated camera work
@@ -118,3 +119,10 @@ layer at the size the distance asks for. `plane` turns the 3D rig on by itself, 
 - **Calm and calculated beats frantic.** A slow push under a payoff reads premium; a fast whip everywhere reads cheap.
 
 Feel of the easing: `vawe-animation`. Effects to move over: `vawe-effects`. Depth: [`engine-doctrine/CRAFT/DIRECTION.md`](../../engine-doctrine/CRAFT/DIRECTION.md).
+
+## Gotchas
+
+- Perspective (`rx`/`ry`/`p`) is a CAMERA property, applied once on the camera root; setting it on a
+  layer breaks the shared vanishing point. `engine-doctrine/MISTAKES.md #59`.
+- `cameraAt` can ease EVERY segment of a multi-leg move, zeroing velocity at each keyframe and reading
+  as a shake instead of one smooth arc; check the eased points, not just the endpoints. `engine-doctrine/MISTAKES.md #128`.

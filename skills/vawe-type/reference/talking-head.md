@@ -1,10 +1,10 @@
 ---
-name: vawe-type-talking-head
-description: "Playbook for a talking-head / narrated video in this engine: VO + word-timed captions, a face-safe layout, a lower-third, a quiet field, B-roll cut rhythm. Load whenever the request is a narrated presenter-style video, a voiceover explainer with a face, or a phone-feed talking-head clip."
-stage: plan
+when: "authoring a narrated, presenter-style talking-head video"
+answers: "the talking-head type's spine, motion to reach for, rules, assets and worked example"
+group: skill
 ---
 
-# vawe-type-talking-head: the narrated presenter playbook
+# The talking-head playbook: narrated presenter
 
 Not in the priority route table (`engine-doctrine/CRAFT/ROUTING.md` names five deliverables; this is a sixth,
 reached directly by request wording: "narrated", "voiceover", "presenter", "talking head"). This is the

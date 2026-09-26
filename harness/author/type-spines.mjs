@@ -1,5 +1,5 @@
 // harness/author/type-spines.mjs: one beat spine per VIDEO TYPE, read by `harness/lib/genre-pacing.mjs`
-// and by the matching `skills/vawe-type-*/SKILL.md` when an agent writes a storyboard by hand.
+// and by the matching `skills/vawe-type/reference/<type>.md` when an agent writes a storyboard by hand.
 //
 // WHY A SEPARATE TABLE. A generic feature-reel rotation (cardCascade/wordBlast/chipGrid on repeat) is
 // one shape. A launch film, an explainer and a sting are not built the same way (AGENTS.md W10,
@@ -59,7 +59,7 @@ export const TYPE_SPINES = {
     // The pace band is the type's own decision, and it sits just past the floor's 3.5s boundary rule
     // (sparse-beats). Written here once, so every explainer scaffold carries the reasoned waiver instead
     // of each author rediscovering the block after a render (the acceptance run did, 2026-09-06).
-    waive: { 'sparse-beats': 'explainer pace band, 2.5-4.0s per beat (skills/vawe-type-explainer): one idea must land before the next starts, so a boundary every ~3.7s is the type\'s own rhythm, not a slideshow' },
+    waive: { 'sparse-beats': 'explainer pace band, 2.5-4.0s per beat (skills/vawe-type/reference/explainer.md): one idea must land before the next starts, so a boundary every ~3.7s is the type\'s own rhythm, not a slideshow' },
     // A held figure, not a UI control, is this type's natural continuous object: an explainer under
     // 15s still has one thing to show becoming true, it just is not a product surface.
     continuousObject: {

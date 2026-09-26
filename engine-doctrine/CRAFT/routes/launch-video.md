@@ -27,7 +27,8 @@ group: crosscutting
 
 ## Blueprint family + docs
 
-- Load skill `vawe-launch` (or read `skills/vawe-launch/SKILL.md` by hand) for the gated pipeline.
+- Load skill `vawe-type` (`reference/launch.md`) for the launch playbook: spine, motion to reach for,
+  the rules that matter most.
 - Storyboard from `RECREATION.md` step 2 (capture-first, one beat per real section) and
   `SHOW-DONT-TELL.md` (the product must be shown working, not only claimed).
 - Launch-specific standing rules live in `AGENTS.md` under "Launch-video rules": logo prominence,
