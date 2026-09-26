@@ -97,3 +97,69 @@ export const PART_REGISTRY = defineRegistry('part entrance', PARTS, { slot: 'par
   },
 });
 export const PART_NAMES = PART_REGISTRY.names;
+
+// HTML-FIRST TIMING: the same `parts` vocabulary, spelled on the element instead of in `parts: [...]`.
+// `<h1 data-part-anim="riseIn" data-part-start="0.4" data-part-dur="0.6" data-part-ease="expo.out">`
+// lowers to the identical spec object a hand-authored `parts` array entry would be, so a one-fragment
+// film needs no JSON array at all for its entrances. `select` is built from the SAME attributes
+// (canonical order below, not authoring order), so two elements sharing one exact tuple lower to one
+// shared entry and stagger together, same as a hand-written selector matching several siblings.
+//
+// NOT `data-start`/`data-anim`: those names are already the engine's own layer-timing vocabulary
+// (core/timeline/clips.js `collectClips` walks the WHOLE scene root for `[data-start]`, driven by the
+// ANIM registry, not this one), and a hand-authored `<h1 data-start=...>` inside an `html` fragment
+// would be swept into that query and driven as if it were a layer. `data-part-*` is namespaced so the
+// two vocabularies cannot collide on the same attribute name.
+const PART_ATTR_ORDER = ['data-part-anim', 'data-part-start', 'data-part-dur', 'data-part-ease', 'data-part-stagger', 'data-part-out', 'data-part-exit-dur'];
+const PART_ATTR_TO_SPEC = { 'data-part-start': 'delay', 'data-part-dur': 'each', 'data-part-ease': 'ease', 'data-part-stagger': 'stagger', 'data-part-out': 'out', 'data-part-exit-dur': 'exitDur' };
+const escAttr = (v) => String(v).replace(/["\\]/g, '\\$&');
+const OPEN_TAG_RE = /<([a-zA-Z][\w-]*)\b([^>]*)>/g;
+const ATTR_RE = /([\w:-]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'))?/g;
+
+/** lowerHtmlParts(html) -> parts[] spec array, or [] if the markup names no HTML-first entrance. */
+export function lowerHtmlParts(html) {
+  if (typeof html !== 'string' || !html.includes('data-part-anim')) return [];
+  const stripped = html.replace(/<!--[\s\S]*?-->/g, ''); // a comment naming the attribute is prose, not markup
+  const seen = new Map(); // select -> spec: an identical attribute tuple is one shared entry, not two
+  let m;
+  OPEN_TAG_RE.lastIndex = 0; // a shared `g` regex carries its scan position between calls otherwise
+  while ((m = OPEN_TAG_RE.exec(stripped))) {
+    const attrStr = m[2];
+    if (!attrStr.includes('data-part-anim')) continue;
+    const attrs = {};
+    let am;
+    ATTR_RE.lastIndex = 0;
+    while ((am = ATTR_RE.exec(attrStr))) {
+      const name = am[1].toLowerCase();
+      if (name.startsWith('data-part-')) attrs[name] = am[2] !== undefined ? am[2] : (am[3] !== undefined ? am[3] : true);
+    }
+    const animName = attrs['data-part-anim'];
+    if (animName == null || animName === true) continue; // `data-part-anim` with no name: not a part
+    PART_REGISTRY.pick(animName); // unknown name -> throws with a "did you mean" suggestion, same as any other registry
+    const select = PART_ATTR_ORDER.filter((a) => a in attrs)
+      .map((a) => (attrs[a] === true ? `[${a}]` : `[${a}="${escAttr(attrs[a])}"]`)).join('');
+    const spec = { select, anim: animName };
+    for (const attr of PART_ATTR_ORDER) {
+      const key = PART_ATTR_TO_SPEC[attr];
+      if (!key || !(attr in attrs)) continue;
+      const v = attrs[attr];
+      if (key === 'ease') spec[key] = v;
+      else if (key === 'out') spec[key] = v !== 'false';
+      else {
+        const n = parseFloat(v);
+        if (!Number.isFinite(n)) throw new Error(`html part <${m[1]}>: ${attr}="${v}" must be a number of seconds.`);
+        spec[key] = n;
+      }
+    }
+    if (!seen.has(select)) seen.set(select, spec);
+  }
+  return [...seen.values()];
+}
+
+/** applyHtmlPartsSugar(L) -> L unchanged if it already has `parts` (JSON wins) or is not an `html`
+ * layer; otherwise a copy with `parts` filled from its own markup's `data-part-*` attributes. */
+export function applyHtmlPartsSugar(L) {
+  if (!L || L.parts != null || L.type !== 'html' || typeof L.html !== 'string') return L;
+  const lowered = lowerHtmlParts(L.html);
+  return lowered.length ? { ...L, parts: lowered } : L;
+}

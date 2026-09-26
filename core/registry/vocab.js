@@ -51,7 +51,16 @@ export const FEEL = {
 export const DURATION = {
   instant: 0.08,     // under the threshold where the eye reads travel. A state change, not a move.
   fast: 0.18,        // read as quick but still a move.
+  // productive/expressive: Carbon Design System's own two duration REGISTERS (carbondesignsystem.com/
+  // elements/motion/overview), picked by how much the moment is worth, not by how far something
+  // travels. Their numbers are the same published bands engine-doctrine/CRAFT/MOTION-REGISTERS.md §2
+  // already cites (MD3's "standard transition" 200-300ms, "dramatic/hero" 300-500ms): productive sits
+  // at the low end of the standard band, expressive at the low end of the dramatic one. Slotted into
+  // THIS SAME ladder rather than a second table, since `resolveComparative`'s "faster"/"slower" walks
+  // one ordered ladder and a second table would leave these two words unreachable by it.
+  productive: 0.22,  // Carbon's utilitarian tier: small, frequent moves. Sits inside MD3's 200-300ms band.
   medium: 0.3,       // BASE_ENTER, the engine's own default entrance.
+  expressive: 0.4,   // Carbon's emphasis tier: an occasional, bigger moment. Sits inside MD3's 300-500ms band.
   slow: 0.6,         // deliberate. The eye has time to follow the whole path.
   luxurious: 1.2,    // a held gesture. One per film, on the beat that deserves the screen time.
 };
@@ -147,16 +156,18 @@ const FEEL_BLURBS = {
   gentle: 'slow at both ends, but shallower than smooth. Ambient drift, backgrounds, anything not asking for attention.',
   heavy: 'slow at both ends and slow in the middle: reads as mass. Big panels and full-frame moves.',
   pop: 'overshoots the target and comes back: a small bounce of emphasis on something as it lands.',
-  bouncy: 'a spring that gives a visible bounce on landing before it settles. Playful, and loud: one per film at most.',
+  bouncy: 'a spring with heavy give and low stiffness, damping ratio 0.45 (55% bounce): swings past the mark before it settles, over a second to rest. Playful, and loud: one per film at most.',
   elastic: 'overshoots repeatedly with a decaying wobble. The loudest option here and rarely the right one.',
-  stiff: 'a spring with almost no give: fast, tight, barely any overshoot. Springs that must not look playful.',
+  stiff: 'a spring with high stiffness and almost no give, damping ratio 0.88 (12% bounce): settles in about half a second with barely a wobble. Springs that must not look playful.',
   mechanical: 'no acceleration at all, constant speed start to finish. Correct for a loop or a marquee, wrong for anything a person is meant to watch arrive.',
 };
 
 const DURATION_BLURBS = {
   instant: '0.08s, about a twelfth of a second. Barely perceptible as motion: a state flip that must not feel animated.',
   fast: '0.18s, under a fifth of a second. A payoff snapping into place, a value ticking over.',
+  productive: '0.22s, Carbon\'s utilitarian tier for small, frequent UI-adjacent moves: quick enough that the motion never costs the viewer attention.',
   medium: '0.3s, BASE_ENTER, the engine\'s own default entrance. About a third of a second, reach past it on purpose.',
+  expressive: '0.4s, Carbon\'s emphasis tier for an occasional bigger moment: slower than `productive` on purpose, so the one that matters reads as the one that matters.',
   slow: '0.6s, a little over half a second. A thesis line taking its time, a deliberate reveal.',
   luxurious: '1.2s, over a second. The pace of a hero moment, and monotonous if more than one beat uses it.',
 };
@@ -167,7 +178,9 @@ const DURATION_BLURBS = {
 const DURATION_AKA = {
   instant: ['snap', 'no visible motion', 'immediate'],
   fast: ['quick', 'brief', 'snappy pace'],
+  productive: ['utilitarian pace', 'small UI move', 'frequent-motion tier'],
   medium: ['default speed', 'normal pace', 'moderate'],
+  expressive: ['emphasis pace', 'bigger moment', 'occasional-motion tier'],
   slow: ['deliberate', 'unhurried', 'takes its time'],
   luxurious: ['lingering', 'held', 'extended hold'],
 };
@@ -272,7 +285,11 @@ const COMPARATIVE_AKA = {
 export const COMPARATIVE_REGISTRY = defineRegistry('comparative duration word', COMPARATIVE,
   { slot: 'enterDur / exitDur / duration (relative)', blurbs: COMPARATIVE_BLURBS, aka: COMPARATIVE_AKA });
 
-const DURATION_LADDER = Object.keys(DURATION);
+// The stepping ladder is the five ORIGINAL words, not every DURATION key: `productive`/`expressive`
+// are a REGISTER choice (which MD3/Carbon tier this beat belongs to), a fixed pair, not a point on the
+// single generic speed dial, so "one step toward instant" does not have an honest answer for them the
+// way it does for `medium`. Same argument the FEEL exclusion above already makes, one word set over.
+const DURATION_LADDER = ['instant', 'fast', 'medium', 'slow', 'luxurious'];
 
 /**
  * resolveComparative(word, current): one step along the DURATION ladder from `current`.
