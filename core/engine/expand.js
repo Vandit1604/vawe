@@ -74,7 +74,15 @@ function warnUnknown(fn, opts, label) {
 function expandBlock(layer) {
   const f = B.BLOCKS[layer.block];
   if (!f) throw new Error(`unknown block "${layer.block}". known: ${Object.keys(B.BLOCKS).join(', ')}`);
-  const { type: _type, block: _block, ...opts } = layer;
+  const { type: _type, block: _block, duration, ...opts } = layer;
+  // DURATION VS DUR: every block family's own timing param is `dur` (blocks/schema.mjs: "x · y ·
+  // start · dur appear in NO table ... placement and timing the scene supplies"), but the layer
+  // schema every OTHER layer type shares calls the same thing `duration`. An author who wrote a block
+  // layer the way they write any other layer had `duration` silently dropped (no factory destructures
+  // it) and the factory's own default `dur` won instead, indistinguishable from a typo, while
+  // core/validate/lint-warnings.mjs missingWindowWarns still warned the layer had no window at all.
+  // Bridged here, the one place both vocabularies meet: `dur` wins if the author set both.
+  if (duration != null && opts.dur == null) opts.dur = duration;
   // A namespaced entry ("searchEngine.home") resolves to a WRAPPER; walk to the family the catalog
   // declares so introspecting its signature reads the right function (engine-doctrine/MISTAKES.md).
   const entry = CATALOG.find((e) => e.name === layer.block);
@@ -151,6 +159,35 @@ function lowerEdits(data) {
   delete data.edits;
 }
 
+// ── CONTENT SLOTS ────────────────────────────────────────────────────────────────────────────────
+// A scene-level `content` map: `{{key}}` inside a layer's own `text`/`html`/`src` (at any nesting
+// depth) is replaced by `content[key]` at build, so swapping copy or an asset path for a new
+// customer/language/version is one map edited once, not a hunt through every layer that repeats a
+// string. `vars` (a layer's own, or a theme's) drives an animated CSS custom PROPERTY over TIME; this
+// is plain text substitution, resolved once at build and gone by the time anything downstream (a
+// gate, the renderer) reads the layer. An unknown key is refused by name, never left as the literal
+// `{{key}}` on screen.
+const CONTENT_TOKEN = /\{\{\s*([A-Za-z_][\w.-]*)\s*\}\}/g;
+function resolveContentSlots(data) {
+  if (data.content == null) return;
+  if (typeof data.content !== 'object' || Array.isArray(data.content))
+    throw new Error('`content` must be an object of {key: value} pairs, the flat map layer text/html/src slot into.');
+  const content = data.content;
+  const fill = (s, at) => s.replace(CONTENT_TOKEN, (whole, key) => {
+    if (!(key in content))
+      throw new Error(`${at} references content key "${key}" ({{${key}}}), which \`content\` does not have. `
+        + `Known keys: ${Object.keys(content).join(', ') || '(none, content is empty)'}.`);
+    return String(content[key]);
+  });
+  const visit = (layer, at) => {
+    if (!layer || typeof layer !== 'object') return;
+    for (const k of ['text', 'html', 'src']) if (typeof layer[k] === 'string') layer[k] = fill(layer[k], `${at}.${k}`);
+    if (Array.isArray(layer.children)) layer.children.forEach((c, i) => visit(c, `${at}.children[${i}]`));
+  };
+  (data.layers || []).forEach((l, i) => visit(l, `layers[${i}]`));
+  delete data.content;
+}
+
 /**
  * expandScene(data, aspectKey = '') -> data, mutated in place and returned. Expands every
  * `{type:"block"}`, `{type:"beat"}` and `{type:"comp"}` layer (at any nesting depth, recursively) into
@@ -188,6 +225,11 @@ export function expandScene(data, aspectKey = '') {
   }
 
   data.layers = (data.layers || []).flatMap((l) => expand(l, []));
+
+  // content slots, resolved once the layers a block/beat/comp produced are the final tree: a token
+  // inside a block's OWN template (an author passed prop `{{key}}` through to `htmlCard`) still sits
+  // in that block's resulting `html` string verbatim, so it is caught here too.
+  resolveContentSlots(data);
 
   // edits[] sugar -> plain `video` layers, chained by relative start. Runs before recipes/relative-time
   // so a cut's id is a normal layer id by the time either reads it.

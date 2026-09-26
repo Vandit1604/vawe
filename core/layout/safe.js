@@ -318,6 +318,63 @@ export const PLACEMENT_REGISTRY = defineRegistry('placement', PLACEMENT, {
   },
 });
 
+// ── ANCHOR POINT: which point of a LAYER'S OWN BOX its authored x/y names ──────────────────────────
+// Default (no `anchorPoint`) is unchanged: x/y is the box's top-left corner, exactly as every scene in
+// the library already assumes. The nine names are the same ones PLACEMENT already uses for a `pin`
+// (that table names a point on the FRAME; this one names a point on the LAYER), so an author who
+// already knows "top-left"/"center" from `pin` needs no second vocabulary.
+export const ANCHOR_POINTS = {
+  'top-left': [0, 0], top: [0.5, 0], 'top-right': [1, 0],
+  left: [0, 0.5], center: [0.5, 0.5], right: [1, 0.5],
+  'bottom-left': [0, 1], bottom: [0.5, 1], 'bottom-right': [1, 1],
+};
+export const ANCHOR_POINT_NAMES = Object.keys(ANCHOR_POINTS);
+
+// resolveAnchorPoint(name) -> [fx, fy] in 0..1, the fraction of the box's own w/h that authored x/y
+// names instead of the left/top corner. Absent names the corner (identity, [0,0]), same as before this
+// field existed. An unknown name is refused by name, not silently taken as the corner.
+export function resolveAnchorPoint(name) {
+  if (name == null) return [0, 0];
+  const p = ANCHOR_POINTS[name];
+  if (!p) throw new Error(`layer anchorPoint "${name}" is not one of: ${ANCHOR_POINT_NAMES.join(', ')}.`);
+  return p;
+}
+
+const ANCHOR_POINT_AKA = {
+  'top-left': ['left/top edge', 'the box\'s corner', 'unset (default)'],
+  top: ['top-centre', 'top edge middle'],
+  'top-right': ['top right corner', 'upper right corner'],
+  left: ['left-centre', 'middle left'],
+  center: ['dead centre of the box', 'centre point', 'middle of the box'],
+  right: ['right-centre', 'middle right'],
+  'bottom-left': ['bottom left corner', 'lower left corner'],
+  bottom: ['bottom-centre', 'bottom edge middle'],
+  'bottom-right': ['bottom right corner', 'lower right corner'],
+};
+
+export const ANCHOR_POINT_REGISTRY = defineRegistry('anchor point', ANCHOR_POINTS, {
+  slot: 'anchorPoint',
+  aka: ANCHOR_POINT_AKA,
+  blurbs: {
+    'top-left': 'the default (0% across, 0% down the box): x/y is the top-left corner, unchanged from before this field existed',
+    top: 'x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred',
+    'top-right': 'x/y lands at 100% across the box and 0% down it: the top-right corner',
+    left: 'x/y lands at 0% across the box and 50% down it: the left edge, vertically centred',
+    center: 'x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute',
+    right: 'x/y lands at 100% across the box and 50% down it: the right edge, vertically centred',
+    'bottom-left': 'x/y lands at 0% across the box and 100% down it: the bottom-left corner',
+    bottom: 'x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred',
+    'bottom-right': 'x/y lands at 100% across the box and 100% down it: the bottom-right corner',
+  },
+  catalog: {
+    title: 'Anchor points',
+    tag: 'layout',
+    intro: '`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER\'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.',
+    usage: (n, { j }) => j({ x: 960, y: 540, w: 200, h: 100, anchorPoint: n }),
+    noPreview: 'an anchor point is where a coordinate lands, not a look: see it on any layer with `w`/`h` set and `anchorPoint: "center"`.',
+  },
+});
+
 // ── THE CAPTION BAND ────────────────────────────────────────────────────────────────────────────
 // A burnt-in caption owns real estate, and nothing stopped a headline landing on it. The band belongs
 // HERE, next to safeArea, for the reason the header gives: where a caption sits is a property of the

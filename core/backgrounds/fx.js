@@ -308,7 +308,32 @@ function gradientRamp(ctx, w, h, { kind, cx, cy, angle }) {
   const rad = (angle * Math.PI) / 180, len = Math.hypot(w, h) / 2, mx = w / 2, my = h / 2;
   return ctx.createLinearGradient(mx - Math.cos(rad) * len, my - Math.sin(rad) * len, mx + Math.cos(rad) * len, my + Math.sin(rad) * len);
 }
+// gradientShapeErrors(o, at): the shapes `colors`/`stops` must have before this ever touches a canvas
+// ctx. `colors` is the ramp's hex/CSS colours; `stops` is where each one sits along it, 0..1, NOT a
+// second colour array. Written a hex string into `stops` (guessed from the word alone) reached
+// `addColorStop` as a non-finite offset and crashed deep inside canvas fill code with nothing pointing
+// at the actual bad key. Pure (no ctx) so core/validate/backgrounds.mjs can run the same check
+// pre-render; gradientFill below calls it too, so a caller that skips validate is still refused by
+// name rather than by a canvas exception.
+export function gradientShapeErrors(o = {}, at = 'bg opts') {
+  const out = [];
+  if (o.colors != null && !(Array.isArray(o.colors) && o.colors.every((c) => typeof c === 'string')))
+    out.push(`${at}.colors must be an array of colour strings (hex or a CSS colour). Got ${JSON.stringify(o.colors)}.`);
+  if (o.stops != null) {
+    const ok = Array.isArray(o.stops) && o.stops.every((s) => typeof s === 'number' && Number.isFinite(s) && s >= 0 && s <= 1);
+    if (!ok) {
+      const looksLikeColors = Array.isArray(o.stops) && o.stops.some((s) => typeof s === 'string');
+      out.push(`${at}.stops must be an array of NUMBERS between 0 and 1, each colour's position along the `
+        + `ramp, not the colours themselves. Got ${JSON.stringify(o.stops)}.`
+        + (looksLikeColors ? ' Looks like colour strings: did you mean `colors`?' : ''));
+    }
+  }
+  return out;
+}
+
 export function gradientFill(ctx, w, h, t, o = {}) {
+  const shapeErrs = gradientShapeErrors(o, 'gradient opts');
+  if (shapeErrs.length) throw new Error(shapeErrs.join(' '));
   const rec = o.recipe ? GRADIENT_RECIPE_REGISTRY.pick(o.recipe) : {};
   const kind = o.kind ?? rec.kind ?? 'linear';
   const colors = o.colors ?? rec.colors ?? ['#ff9966', '#ff5e62'];
