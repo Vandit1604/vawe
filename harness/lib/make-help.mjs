@@ -29,6 +29,14 @@ export const PHASES = [
 ];
 const PHASE_NAMES = new Set(PHASES.map(([p]) => p));
 
+// `make help`: the fast path only, brief to rendered film, the stage table's own order (AGENTS.md
+// "THE EIGHT STAGES"). `make list` still prints all 200+; this is the twelve an agent needs before it
+// has to go read anything else.
+export const FAST_PATH = [
+  'stage', 'next', 'quiz', 'ideate', 'studio', 'preview', 'dev',
+  'probe-frame', 'check', 'ship', 'judge', 'arsenal', 'regen',
+];
+
 // A real target line: `name:` (not `name:=`) at column 0, not a recipe line (tab-indented) and not
 // `.PHONY`. Matches the same shape the W11 tagging pass wrote, so this is the read side of one
 // convention rather than a second, looser parser that could disagree with it.
@@ -56,6 +64,16 @@ export function collectTargets(makefilePath = path.join(repoRoot, 'Makefile')) {
 // failure as no phase at all, and would otherwise just print under its own heading forever.
 export function untagged(targets = collectTargets()) {
   return targets.filter((t) => !t.phase || !PHASE_NAMES.has(t.phase));
+}
+
+export function printFast(targets = collectTargets()) {
+  const byName = new Map(targets.map((t) => [t.name, t]));
+  console.log('\n  make <target> [ARGS...]  ·  the fast path, brief to rendered film:\n');
+  for (const name of FAST_PATH) {
+    const t = byName.get(name);
+    console.log(`    ${name.padEnd(14)} ${t ? (t.help || '') : '(missing from Makefile)'}`);
+  }
+  console.log('\n  everything else: make list\n');
 }
 
 export function printGrouped(targets = collectTargets()) {
@@ -89,5 +107,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`✓ every Makefile target carries a [phase] tag (${collectTargets().length} total)`);
     process.exit(0);
   }
-  printGrouped();
+  if (process.argv.includes('--fast')) printFast();
+  else printGrouped();
 }

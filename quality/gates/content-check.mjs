@@ -17,7 +17,7 @@
 // equal-length acts would compare against nothing real (the same reasoning study.mjs's own "no silent
 // fallback" already applies to shot detection).
 //
-// REPORT-ONLY BY DEFAULT. "The owner rejects gates that hold work back" (AGENTS.md, `[ref: make rung]`).
+// REPORT-ONLY BY DEFAULT. "The owner rejects gates that hold work back" (AGENTS.md, `[ref: make check GATE=rung]`).
 // This always exits 0 unless STRICT=1: it names a gap, it never blocks a render.
 import fs from 'node:fs';
 import path from 'node:path';

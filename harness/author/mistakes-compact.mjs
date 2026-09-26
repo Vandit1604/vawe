@@ -126,7 +126,7 @@ now three lines: the title, the one-sentence lesson, and what holds it today (a 
 or "none" if it is still just a sentence someone has to remember).
 
 The full write-up for any entry, root cause and all, still exists: it is git history as of
-${ARCHIVE_HASH}. Read one with \`make mistakes N=<n> FULL=1\`. A citation elsewhere in the repo
+${ARCHIVE_HASH}. Read one with \`make arsenal MISTAKES=1 N=<n> FULL=1\`. A citation elsewhere in the repo
 (\`engine-doctrine/MISTAKES.md #N\`) still resolves here by number; nothing renumbers.
 
 New incidents: add a rule or a gate message first. Only add a line here if nothing else can hold

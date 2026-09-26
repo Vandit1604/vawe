@@ -15,6 +15,6 @@ browsing; `media/` and `design/` also feed generated views.
 
 The one doc: `engine-doctrine/INDEX.md`, the generated repo-wide map (every file carries its own
 `when`/`answers`/`group` frontmatter, which is what generates it). Checked by: `make doc-index`
-(regenerates the index) and `make craft-coverage` (keeps it honest).
+(regenerates the index) and `make check GATE=craft-coverage` (keeps it honest).
 
 Look first: `engine-doctrine/INDEX.md`.

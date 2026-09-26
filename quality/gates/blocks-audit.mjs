@@ -1,6 +1,6 @@
 // blocks-audit.mjs: do the block FACTORIES obey the rules the videos are held to?
 //
-//   node quality/gates/blocks-audit.mjs      ·   make blocks-audit
+//   node quality/gates/blocks-audit.mjs      ·   make check GATE=blocks-audit
 //
 // Two defects shipped in the registry and were found by a human storyboarding a film, not by a gate:
 //   • deploySuccess baked "Ready in 1.2s" into the factory, so every caller published a statistic

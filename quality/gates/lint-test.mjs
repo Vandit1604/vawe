@@ -1,4 +1,4 @@
-// lint-test.mjs: regression asserts for validate.mjs lintData (make lint-test). Each rule below maps
+// lint-test.mjs: regression asserts for validate.mjs lintData (make check GATE=lint-test). Each rule below maps
 // to a bug that shipped this session and slipped every other gate; this pins that the rule still fires,
 // so a future refactor can't silently un-catch it. Pure, no browser.
 //   node quality/gates/lint-test.mjs

@@ -41,7 +41,7 @@ prose to stdout exactly as before.
 Every reporting gate honours `--json`. A `make` target forwards it with `JSON=1`:
 
 ```bash
-make discovery JSON=1        # JSON-only on stdout, same exit code as prose
+make check GATE=discovery JSON=1        # JSON-only on stdout, same exit code as prose
 ```
 
 ## What is NOT in scope

@@ -5,9 +5,11 @@
 # nothing changed. This is a command catalogue with memorable names, not a dependency graph, and
 # that is deliberate: see engine-doctrine/MAKEFILE-AUDIT.md for why it stays a Makefile despite that.
 
+.DEFAULT_GOAL := help
+
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites docker-context build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add feature-audit captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim sim-audit music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar mistakes mistakes-check claims study-verify recreate ref motion-split prop-probe studio core-node-boundary waiver-ratchet ingest
+.PHONY: motion-floor ground-arc edge-check motion-lab frame-check design-drift stage worktrees dev check ship regen script animatic panels beats sheets preview storyboard-check styleframes beatsync gradients ransom-sprites build video render all look frame verify audit blueprints audit-test probe snap snap-all motion test lib-test validate palette brandspec lookbook sections study photos similar ledger ledger-add captions review install-hooks assets list formats clean gen-image gen-clip gen-video sim music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar claims study-verify recreate ref motion-split studio core-node-boundary waiver-ratchet ingest
 
 # make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
 # (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
@@ -125,81 +127,8 @@ sfx-local: ## [engine] map YOUR downloaded sounds (DIR=<path>) onto the cue rost
 spectrum: ## [dev] bake per-frame band energy beside a track (MUSIC=<file> [FPS=30])
 	node harness/media/spectrum.mjs $(MUSIC) $(if $(FPS),--fps $(FPS))
 
-# make blocks-audit: do the block FACTORIES obey the copy rules the videos are held to? A block
-# ships to every caller, so an invented number or a brand default in one reaches every video.
-blocks-audit: ## [maintenance] do the block FACTORIES obey the copy rules the videos are held to?
-	@node quality/gates/blocks-audit.mjs $(if $(JSON),--json,)
-
-# make layer-props [D=<file>]: does the engine READ the props a layer sets? `make expand` does this
-# for blocks; the primitive path had nothing, so {"type":"glow","r":620} was accepted and dropped.
-# make dead-branch: a ternary whose arms are identical, i.e. a decision that decides nothing.
-# deploySuccess shipped one next to an always-true condition and its cascade was unreachable; no
-# RENDER gate can see that, because the output is valid, deterministic and wrong by omission.
-dead-branch: ## [maintenance] a ternary whose arms are identical: a decision that decides nothing
-	@node quality/gates/dead-branch.mjs $(if $(JSON),--json,)
-
-# make inert-check: a mechanism that is wired and does nothing, and nothing reports the inertness.
-# coverage.mjs crashed for six days in neither this file's callers nor CI; audit-scenes.yml failed
-# five weeks into nobody's inbox. This is the general check for that shape: a standing gate absent
-# from both pre-push and every workflow, a generator that can write an empty result without failing,
-# a scheduled workflow nothing polls, a baseline a CI checkout can never see.
-inert-check: ## [maintenance] a Makefile gate, a generator or a scheduled workflow that is wired and does nothing
-	@node quality/gates/inert-check.mjs $(if $(JSON),--json,)
-
-# make doc-refs · every `make <target>` and every repo path the docs NAME must exist, and every
-# Makefile recipe must run a script that exists. Docs are read as instructions: a wrong one is worse
-# than a missing one, because an author types it and then distrusts the whole file. `craft-coverage`
-# already resolves markdown links to .md files; nothing checked a command, a backticked source path,
-# or a target whose script had been deleted under it.
-doc-refs: ## [maintenance] every `make <target>` and every repo path the docs NAME must exist, and every Makefile recipe must
-	@node quality/gates/doc-refs.mjs $(if $(JSON),--json,)
-
-# make skill-reach: does anything actually route an agent to this skill? doc-refs checks that a link
-# resolves and discovery checks that a registry entry can be found; neither checked whether a
-# skills/*/SKILL.md is ever POINTED AT. vawe-review-loop carried the judge loop's stopping rule and
-# nothing named it from AGENTS.md, engine-doctrine/CRAFT/ROUTING.md, the Makefile, or another skill,
-# so it was unreachable, same failure class as an unrouted doc, one layer up.
-skill-reach: ## [maintenance] every skills/*/SKILL.md is routed to from AGENTS.md, ROUTING.md, the Makefile, or another skill
-	@node quality/gates/skill-reach.mjs $(if $(JSON),--json,)
-
-# make skill-check: does every skills/*/SKILL.md match Anthropic's published skill-authoring contract?
-# `skill-reach` checks something POINTS at a skill; this checks the skill ITSELF: name shape, a
-# third-person description under 1024 chars with a stated trigger, frontmatter opening at byte 0 (the
-# same anchor skill-stages.mjs parses), and a body under 500 lines / ~5000 tokens. Hard, not a ratchet.
-skill-check: ## [maintenance] does every skills/*/SKILL.md match the published name/description/size contract?
-	@node quality/gates/skill-check.mjs $(if $(JSON),--json,)
-
-# make rung: which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
-# Every non-[eye] tag has to NAME its mechanism, and the named gate, hook, command or file:line has to
-# exist. LIST=1 prints the [eye] worklist instead; STAMP=1 records today's [eye] count as the ceiling.
-rung: ## [maintenance] which rules in CLAUDE.md and engine-doctrine/CRAFT are enforced by something, and which are only prose?
-	@node quality/gates/rung.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
-
-# make provenance: which quality/gates + harness/lib constants decide a verdict with no cited source?
-# read-check.mjs is the model: every constant names its source and converts its units. A new threshold
-# added with no citation is refused; the existing backlog is ratcheted, not walled off in one day.
-# LIST=1 prints the sourceless worklist instead; STAMP=1 records today's sourceless count as the ceiling.
-provenance: ## [maintenance] which verdict-deciding constants have no cited source, and does that count only fall?
-	@node quality/gates/threshold-provenance.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
-
-# make rule-length: how many rules across AGENTS.md, skills/*/SKILL.md and engine-doctrine/CRAFT run
-# over the length engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md sets, and does that count only fall? A
-# formatting convention, not a quality bar: harness/lib/rule-length.mjs says why. LIST=1 prints the
-# over-length worklist instead; STAMP=1 records today's count as the ceiling.
-rule-length: ## [maintenance] how many rules in an agent-facing doc run over the stated length, and does that count only fall?
-	@node quality/gates/rule-length.mjs $(if $(filter 1,$(LIST)),--list) $(if $(filter 1,$(STAMP)),--stamp) $(if $(JSON),--json,)
-
-# make docs-drift: ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count. It decayed this way twice and
-# routed two planning passes at work that already existed; its own closing warning says nothing
-# checked it. Now something does.
-docs-drift: ## [maintenance] ROADMAP/PRIMITIVES list shipped effects as missing, or quote a stale count.
-	@node quality/gates/docs-drift.mjs $(if $(JSON),--json,)
-
 layer-props: ## [check] does the engine READ the props a layer sets on a layer? (D=<file>)
 	@node quality/gates/layer-props.mjs $(D) $(if $(JSON),--json,)
-
-sfx-check: ## [check] is each sound effect the SHAPE its role claims? (engine-doctrine/MISTAKES.md #51)
-	@node quality/gates/sfx-audit.mjs $(if $(JSON),--json,)
 
 # make canvas-purity [M=scene] [D=<file>]: do the shader/paint PIXELS depend only on n? `make probe`
 # compares a DOM signature and structurally cannot see inside a canvas (engine-doctrine/MISTAKES.md #64).
@@ -356,10 +285,21 @@ llms-txt: ## [engine] regenerate films/llms.txt, the portable vocabulary primer
 # FIX 2/8: author-check -> the page audit (no render needed) -> generated-check (read-only) -> ONE
 # summary block, via harness/lib/check-report.mjs. `make ship` still runs its own author-check/audit;
 # this only runs the same commands earlier, before a render is paid for.
-check: ## [check] every gate, every finding, ZERO consequence (runs preflight first if it hasn't)
-	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
-	@node harness/lib/check-report.mjs $(D) $(if $(filter 1,$(TASTE)),--taste)
-	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+#
+# make check GATE=<name>: the OTHER thing this word meant. 35 quality gates each had their own
+# one-line Makefile target (arsenal-check, schema-check, coverage, ...), a straight passthrough to one
+# quality/gates/*.mjs script; harness/lib/check-gate.mjs is now the one table that answers "what is
+# GATE=", so a new gate joins one file instead of the Makefile too. D= still means the film check
+# above; GATE= is the single-gate door, and the two never collide because a bare `make check` with
+# neither runs the film check with D= empty (the census/no-film path each gate already handles).
+check: ## [check] every gate, every finding, ZERO consequence (D=<film>, or GATE=<name> for one gate)
+	@if [ -n "$(GATE)" ]; then \
+	  node harness/lib/check-gate.mjs "$(GATE)"; \
+	else \
+	  $(if $(D),node harness/lib/ensure-preflight.mjs $(D);,) \
+	  node harness/lib/check-report.mjs $(D) $(if $(filter 1,$(TASTE)),--taste); \
+	  node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true; \
+	fi
 
 # make regen: write every generated file in one command (FIX 8). `make check` above only REPORTS drift
 # (generated-check with no --write); this is the write half, so the fix for reported drift is one
@@ -459,7 +399,7 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 # make formats: show the scene module + where its schema/sample live (for authoring the JSON).
 # Was `make list`; W11 gave that name to the target listing below, the one question with seven
 # separate commands used to answer, so it moved here rather than staying misnamed.
-formats: build ## [maintenance] MOVED from `make list` (W11): the scene module + its schema/sample
+formats: build ## [maintenance] the scene module + where its schema/sample live (for authoring the JSON)
 	./bin/vawe --list
 
 # make list / make help: every target, grouped by the ten-phase spine, with its one-line help. Reads
@@ -468,7 +408,8 @@ formats: build ## [maintenance] MOVED from `make list` (W11): the scene module +
 .PHONY: list help
 list: ## [maintenance] every target, grouped by phase, with its one-line help (the front page)
 	@node harness/lib/make-help.mjs
-help: list ## [maintenance] alias for `make list`
+help: ## [maintenance] the fast path only: ~12 commands from brief to rendered film (make list: everything)
+	@node harness/lib/make-help.mjs --fast
 
 # make render M=scene: render a format's bundled sample.json
 render: build ## [ship] render a format's bundled sample.json
@@ -506,13 +447,6 @@ frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n> or N=b<bea
 # DOC=1 regenerates engine-doctrine/CRAFT/GRAMMAR.md, the cross-film page, from the same store.
 grammar: ## [study] what we have learned about how good films are BUILT, from the committed grammar/ store that `make
 	node harness/author/grammar.mjs $(if $(DOC),--doc,$(N))
-
-# make mistakes [Q="…"] [N=496] [FULL=1]: ASK the mistake log. engine-doctrine/MISTAKES.md is now a three-line
-# index (title, lesson, what holds it) per entry; FULL=1 with N=<n> prints that entry's original
-# write-up from the git commit taken just before the index migration.
-mistakes: ## [study] MOVED into `make arsenal MISTAKES=1 Q=...` (W11); still works, one release
-	@echo "  · make mistakes moved: use make arsenal MISTAKES=1 $(if $(Q),Q=\"$(Q)\")"
-	node harness/author/mistakes.mjs $(if $(N),--n $(N),$(if $(Q),$(Q))) $(if $(FULL),--full,)
 
 # make claims: check this repo's own doctrine against the films it claims to describe. Every
 # quantitative claim in CRAFT/CLAUDE.md is a test over grammar/*.json; the verdict strengthens or
@@ -641,9 +575,9 @@ conformance: ## [check] does the engine DO what it says it accepts?
 gate-test: ## [maintenance] MUTATION-test the gates: feed each one a fixture built to trip it and assert it FIRES, plus
 	node quality/gates/gate-mutation.mjs
 
-# make coverage-reel: generate + render a reel of whatever `make coverage` says nothing exercises,
-# derived from the LIVE gap so it never goes stale. Watch it: the gates only prove it did not crash.
-coverage-reel: ## [check] generate + render a reel of whatever `make coverage` says nothing exercises, derived from the LIVE
+# make coverage-reel: generate + render a reel of whatever `make check GATE=coverage` says nothing
+# exercises, derived from the LIVE gap so it never goes stale. Watch it: the gates only prove it did not crash.
+coverage-reel: ## [check] generate + render a reel of whatever `make check GATE=coverage` says nothing exercises, derived from
 	node harness/author/coverage-reel.mjs
 	$(MAKE) video D=films/scene/_coverage-reel.json
 
@@ -652,31 +586,11 @@ coverage-reel: ## [check] generate + render a reel of whatever `make coverage` s
 watermark: ## [ship] bake the draft watermark sheet.
 	node generators/media/watermark.mjs
 
-# make site-counts: every capability number written on the SITE, checked against the registry it
-# describes. The copy claimed 96 blocks / 44 families / 22 presets / 32 stings long after the
-# registries had moved (engine-doctrine/MISTAKES.md #114). Hand-typed counts about a growing registry go stale
-# by default; this is what notices.
-site-counts: ## [maintenance] every capability number written on the SITE, checked against the registry it describes.
-	@node quality/gates/site-counts.mjs $(if $(JSON),--json,)
-
 # make knobs-audit [D=<file>], DRIFT GUARD: every dial core/registry/knobs.js advertises must actually change
 # the render (a manifest that lies is worse than none). With D, also reports knobs set on a preset that
 # ignores them (pointSize on extrudeText), turning a silent no-op into a message.
 knobs-audit: ## [check] DRIFT GUARD: every dial core/registry/knobs.js advertises must actually change the render (a
 	@node quality/gates/knobs-audit.mjs $(D) $(if $(JSON),--json,)
-
-# make coverage, which engine vocabulary no authored scene exercises. Conformance proves a value
-# works; this says whether anything USES it. WARN tier, always exits 0.
-coverage: ## [check] which engine vocabulary no authored scene exercises.
-	@node quality/gates/coverage.mjs $(if $(JSON),--json,)
-
-# make craft-coverage, keep the docs honest: every look/sting in the engine is classified in
-# SELECTION.md, no doc names a removed effect, cross-links resolve REPO-WIDE, no guide is orphaned from
-# an index, every indexed doc carries its `when:`/`answers:` frontmatter, and every generated index view
-# is current. FAIL tier (exits 1) so the docs can't silently rot. Also runs in .githooks/pre-push,
-# because a doc-only commit never touches a render gate. Doc-map detail: quality/gates/doc-map.mjs.
-craft-coverage: ## [maintenance] keep the docs honest: every look/sting in the engine is classified in SELECTION.md, no doc names a
-	@node quality/gates/craft-coverage.mjs $(if $(JSON),--json,)
 
 # make docs, TWO MODES ON ONE MAP. With Q= it ANSWERS one question: which document settles this, ranked
 # over the same `when:`/`answers:` frontmatter, the doc-side twin of `make arsenal Q=`. Bare, it prints
@@ -735,25 +649,6 @@ test: ## [maintenance] the whole test suite: tests/**/*.test.mjs (node --test) +
 
 # lib-test: kept as an alias, the pre-push hook and CI used to call it by this name.
 lib-test: test ## [maintenance] alias for `make test`
-
-# make mistakes-check: is a engine-doctrine/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
-# A property only knowable across the whole library, so it is a gate, not a write-site fix (CLAUDE.md).
-# Two verbatim duplicates and a restatement shipped because nobody rereads a 540-entry file before
-# appending; this is the reread, automated. Exits non-zero on a hit.
-mistakes-check: ## [maintenance] is a engine-doctrine/MISTAKES.md entry a near-verbatim duplicate of an earlier one?
-	@node quality/gates/mistakes-dupes.mjs $(if $(JSON),--json,)
-
-# make silent-check: is any named vocabulary still resolved with a silent default? A wrong name must
-# not become a plausible substitute; absence may keep its documented default. core/registry/registry.js removes
-# the ability to BUILD such a fallback, this catches one written by hand. engine-doctrine/MISTAKES.md #376.
-silent-check: ## [maintenance] is any named vocabulary still resolved with a silent default?
-	@node quality/gates/silent-fallback.mjs $(if $(JSON),--json,)
-
-# make unused, which registered effects has no shipped scene ever named? A REPORT, not a rule: it
-# always exits 0. Read a zero as "nobody can find it", "it does not work", or "something else does it
-# better": three effects nobody used turned out to be broken. Do NOT treat the count as a target (#359).
-unused: ## [maintenance] which registered effects has no shipped scene ever named?
-	@node quality/gates/unused.mjs $(if $(JSON),--json,)
 
 # make lookbook URL=https://site.com NAME=brand, screenshot the site (full page + viewports) for
 # art direction study: derive the video's design language from the brand's own look, no canned styles.
@@ -951,7 +846,6 @@ sheets: ## [dev] BOTH review contact sheets from ONE browser: the beat sheet (/t
 sheet: ## [dev] DESIGN SHEET: every captured element on one page (on the theme bg), labelled with size +
 	node scripts/brand/design-sheet.mjs $(NAME) $(if $(THEME),--theme $(THEME)) $(if $(SERVE),--serve)
 
-
 # make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex], pick a design-system
 # PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
 # "pick a preset, paint the brand into it" move: good coherent design in one command, not
@@ -1063,7 +957,6 @@ intent: ## [preflight] export the storyboard's per-beat whys into a <topic>.inte
 designspec-check: ## [check] THE DESIGN-SPEC LOCK: the theme is the locked visual system; flag any layer using an off-palette
 	node quality/gates/designspec-check.mjs $(if $(filter 1,$(SELFTEST)),--self-test,$(if $(filter 1,$(CENSUS)),--census,$(D))) $(if $(STRICT),--strict,)
 
-
 # make copy-check D=<scene.json> [STRICT=1]. THE COPY GATE: on-screen writing tells (hook >12 words /
 # weak opener, marketing jargon, vague quantifiers, restated headlines, a big number as flat text). The
 # words are the video's voice. Runs inside author-check every time; TASTE=1 makes its findings block.
@@ -1134,12 +1027,6 @@ sweep-static: ## [check] THE PIXELS-MOVED CHECK: sample 10 frames from the RENDE
 similar: ## [check] sameness audit: score authored videos pairwise (motion vocab + beat structure + layout).
 	@node quality/gates/similarity.mjs $(D) $(if $(JSON),--json,)
 
-# make feature-audit, static utilization report: framework vocabulary (kinetic presets / cuts /
-# shader stings) + capability primitives (group/motion/spring/fitH…) vs what authored videos use.
-# Surfaces under-adopted primitives + preset-monotony. WARN tier (always exits 0).
-feature-audit: ## [check] static utilization report: framework vocabulary (kinetic presets / cuts / shader stings) +
-	@node quality/gates/feature-audit.mjs $(if $(JSON),--json,)
-
 # make captions D=films/x/video.json TEXT="script": auto-time a script into muted-social burned-in
 # subtitles (captionMode:pop). Deterministic (time proportional to word count). See harness/author/captions.mjs.
 captions: ## [dev] auto-time a script into muted-social burned-in subtitles (captionMode:pop).
@@ -1195,38 +1082,10 @@ capture: ## [dev] lift a REAL UI component off a live site (its HTML + computed 
 validate: ## [check] check data + inline theme against the format schema.
 	node core/validate/validate.mjs $(D)
 
-# make schema AT='layers[].motion[]', what may I WRITE at this path. The sibling of `make arsenal`:
-# arsenal answers "what can the engine DO" from the registries, this answers "what may I write HERE"
-# from films/scene/schema.json, which already carries a written label on every field and served it to
-# nobody. Built after an author guessed the two bezier handles on a keyframe were `in`/`out` (they are
-# `easeIn`/`easeOut`) and shipped a refusal that rejected three correct films. No AT prints the
-# top-level shape; a partial or wrong path names what IS legal there, the way a failed registry pick does.
-schema: ## [dev] MOVED into `make arsenal AT=...` (W11); still works, one release
-	@echo "  · make schema moved: use make arsenal AT='$(AT)'"
-	@node harness/author/schema-at.mjs $(if $(AT),'$(AT)')
-
-# make schema-check: assert every layer prop the engine (scene.html) reads is defined in schema.json
-# (catches drift like a new primitive that shipped without a schema entry). Exits 1 on drift.
-schema-check: ## [check] assert every layer prop the engine (scene.html) reads is defined in schema.json (catches drift like
-	@node quality/gates/schema-drift.mjs $(if $(JSON),--json,)
-
 # make schema-write: regenerate every DERIVED part of schema.json (the layerProps table + the enums
 # that copy a code registry) so a registry that grew needs no second, hand edit. schema-check verifies.
 schema-write: ## [engine] regenerate every DERIVED part of schema.json (the layerProps table + the enums that copy a code
 	@node quality/gates/schema-drift.mjs --write $(if $(JSON),--json,)
-
-# make prop-probe: set EVERY declared layer prop on a layer of EVERY type that declares it, build the
-# lot through the real pipeline, and report the ones nothing read. core/registry/prop-audit.js already refuses a
-# dead prop at render time; its only gap was that an author had to write the prop first, which is how
-# `metalness` sat declared and ignored on the three layer for months. Takes ~35s (one browser, ~110
-# probe scenes). PROP=<type> narrows it to one layer type.
-prop-probe: ## [check] set EVERY declared layer prop on a layer of EVERY type that declares it, build the lot through the
-	@node quality/gates/prop-probe.mjs $(PROP) $(if $(JSON),--json,)
-
-# make lint-test: regression asserts for validate's lintData (missing-duration / typing+markup /
-# scene-collision). Each rule caught a real bug this session; this pins that it still fires.
-lint-test: ## [check] regression asserts for validate's lintData (missing-duration / typing+markup / scene-collision).
-	@node quality/gates/lint-test.mjs $(if $(JSON),--json,)
 
 # make engine-sync [CHECK=1]: publish the engine into site/public, which is what the site's
 # in-browser engine actually boots. Runs automatically on the site's prebuild; this target is for
@@ -1237,9 +1096,6 @@ engine-sync: ## [engine] publish the engine into site/public (the site's in-brow
 
 # make docker-check: will the image carry what the Dockerfile copies? Reads the COPY lines and
 # applies .dockerignore. A mismatch here is invisible locally and fails the deploy.
-.PHONY: docker-check
-docker-check: ## [site] will the image carry what the Dockerfile COPY lines expect?
-	@node quality/gates/docker-context-check.mjs
 
 # make deploy-check [RANGE=a..b]: run the site's real build steps (site-engine, the fonts generator,
 # tsc --noEmit) so a break in them shows up here instead of on the deploy host. No RANGE checks
@@ -1394,25 +1250,13 @@ backdrop-turn: ## [check] REPORTS: does the backdrop change tone anywhere, or ho
 impeccable: ## [check] impeccable detector on raw HTML fragment(s) (D=<file...>)
 	node skills/impeccable/scripts/detect.mjs --json $(D)
 
-# make preset-sheets [ONLY=<name>]: one rendered showcase per reference profile (SELECTION.md Part 2),
-# site/public/blocklib/presets/. "an adjective is vague; a brand is a spec" made visible, not just named.
-preset-sheets: ## [site] MOVED into `make arsenal PRESETS=1` (W11); still works, one release
-	@echo "  · make preset-sheets moved: use make arsenal PRESETS=1 $(if $(ONLY),ONLY=$(ONLY))"
-	node harness/dev/preset-sheets.mjs $(if $(ONLY),--only=$(ONLY))
-
-# make theme-sheet THEME=<name>: one rendered contact sheet for ONE theme's `look` (W8), so a brand's
-# look is a picture, not a JSON. Reuses preset-sheets' own tile machinery. engine-doctrine/CRAFT/THEME-LOOK.md.
-theme-sheet: ## [site] MOVED into `make arsenal THEME=...` (W11); still works, one release
-	@echo "  · make theme-sheet moved: use make arsenal THEME=$(THEME)"
-	node harness/dev/theme-sheet.mjs --theme=$(THEME)
-
 # make arsenal Q="a page scrolling under a tilt", THE ONE DISCOVERY FRONT DOOR (W11): ranked search
 # across every vocabulary the engine names, plus every question a separate `make <x>` used to answer
 # ("what may I write here", "emit a track", "what did we already get wrong"). It owns no list itself;
 # `defineRegistry` already carries each name's kind, slot and blurb, and every folded flag below
 # dispatches straight to the script that used to be its own target - a thin front door, not a fourth
-# copy of the answer. Old targets (schema/track/preset-sheets/mistakes/theme-sheet) still work,
-# printing where they moved, for one release.
+# copy of the answer: AT= (`make schema`), SHAPE= (`make track`), PRESETS=1 (`make preset-sheets`),
+# MISTAKES=1 (`make mistakes`), THEME= (`make theme-sheet`).
 arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE= a track, MISTAKES=1/PRESETS=1/THEME= the rest, CENSUS=1/NEW=1
 	node harness/author/arsenal.mjs "$(Q)" $(if $(KIND),--kind "$(KIND)") $(if $(N),--n $(N)) \
 	  $(if $(filter 1,$(CENSUS)),--census) $(if $(filter 1,$(NEW)),--new) \
@@ -1430,16 +1274,6 @@ arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE
 # blocks is checkBlurb in core/registry/registry.js, at the point a blurb is written.
 blurbs: ## [maintenance] how well does each entry's own blurb retrieve it? (ALL=1 for every rank)
 	node harness/dev/blurb-retrieval.mjs $(if $(ALL),--all)
-
-# make track SHAPE=pan TO=-600 DUR=1.25 [D=<scene.json> LAYER=<n>], a hand-keyed motion track from a
-# MEASURED shape rather than a preset name. studio's keyframe mode writes keys by DRAGGING on the stage,
-# which an agent cannot do, so the cheap path existed for a person and not for the author who writes
-# most of these scenes. engine-doctrine/CRAFT/KEYED-MOTION.md.
-track: ## [dev] MOVED into `make arsenal SHAPE=...` (W11); still works, one release
-	@echo "  · make track moved: use make arsenal SHAPE=$(or $(SHAPE),pan)"
-	node harness/author/track.mjs $(or $(SHAPE),pan) $(if $(TO),--to $(TO)) $(if $(DUR),--dur $(DUR)) \
-	  $(if $(FROM),--from $(FROM)) $(if $(AMP),--amp $(AMP)) $(if $(AXIS),--axis $(AXIS)) \
-	  $(if $(OFFSET),--offset $(OFFSET)) $(if $(D),--scene $(D)) $(if $(LAYER),--layer $(LAYER))
 
 # make mcp-smoke, end-to-end over the real MCP server: connects, reads the guide, refuses three leak
 # vectors, drafts a scene. It is the only thing that exercises that path, and it sat FAILING for a while
@@ -1498,24 +1332,6 @@ pace: ## [check] preview a scene's duration/pace at a given TEMPO, writes nothin
 paints-nothing: ## [check] does each layer paint anything in its own box? pixel diff, not DOM (D=<file> [STRICT=1])
 	@node quality/gates/paints-nothing.mjs $(D) $(if $(filter 1,$(STRICT)),--strict) $(if $(JSON),--json,)
 
-arsenal-check: ## [engine] fail if the engine exports a capability engine-doctrine/EFFECTS.md never mentions
-	@node quality/gates/arsenal-check.mjs $(if $(JSON),--json,)
-
-# word-action: every registry entry needs >= 2 `aka` words (plain phrases that find it) and a `blurb`
-# naming its real default number (distance/duration/scale/ease). Ratcheted per registry, same shape as
-# rung.mjs: a registry's missing count may fall and may never rise, and a brand-new registry starts at
-# ratchet 0. --stamp lowers the ceiling after a batch of entries is filled in.
-word-action: ## [engine] fail if any registry's missing word-to-action vocabulary count rose
-	@node quality/gates/word-action.mjs $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
-
-# discovery: can an author still FIND what the engine can do? Registry blurbs are refused at load, so
-# this reads the SEARCH CORPUS instead, which is the only place that sees every source at once: the
-# catalogue reaches it without passing a write site, and 33 entries hid there while core/registry/registry.js
-# correctly reported zero. It also compares the two indexes over one library, which disagreed by 185
-# entries for months with nothing noticing.
-discovery: ## [engine] can an author still FIND what the engine can do?
-	@node quality/gates/discovery.mjs $(if $(JSON),--json,)
-
 # no-judge: has the eye actually looked at every film that shipped a render? make judge writes a
 # receipt (engine-doctrine/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
 # stale on either one changing; this ratchets the count of rendered films with no valid one. Not wired
@@ -1525,38 +1341,12 @@ discovery: ## [engine] can an author still FIND what the engine can do?
 no-judge: ## [judge] ratchet: rendered films with no valid judge receipt (--stamp to lower)
 	@node quality/gates/ledger.mjs unjudged $(if $(STAMP),--stamp,) $(if $(JSON),--json,)
 
-# judge-census: a COUNT of what the eye has caught across every judge receipt, never a score
-# (engine-doctrine/EVALS.md refuses one on purpose). Tallies `--fix <code>@<beat>` records by dimension
-# and by their relative position in the film (first/middle/last). Read-only, writes no baseline.
-judge-census: ## [judge] count judge fix codes by dimension and beat position (never a score)
-	@node quality/gates/ledger.mjs census $(if $(JSON),--json,)
-
-# output-contract: every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
-# Ratchets the count of gates that still print ad-hoc prose DOWN. engine-doctrine/CRAFT/COMMAND-OUTPUT.md.
-# JSON=1 emits the whole migration worklist as findings; --stamp lowers the ratchet after a batch.
-output-contract: ## [maintenance] every reporting gate renders through harness/lib/findings.mjs (tight prose + --json).
-	@node quality/gates/output-contract.mjs $(if $(JSON),--json,) $(if $(STAMP),--stamp,)
-
 # blocking-findings-check: a BLOCKING finding must name what it saw, where (`at`), and the one fix
 # (`fix`); a doc pointer belongs in `doc`, not `fix`. Ratchets the count of blocking finding calls in
 # quality/gates/ still missing `at`/`fix` DOWN, same shape as harness/dev/prose-check.mjs. --stamp
 # lowers the ceiling after a batch adopts it. Not wired into pre-push or CI yet.
 blocking-findings-check: ## [maintenance] a blocking finding must name what/where/fix, ratcheted
 	@node harness/dev/blocking-findings-check.mjs $(if $(JSON),--json,) $(if $(STAMP),--stamp,)
-
-# generated-check: run every generator, then ask git what moved. Three artefacts had no drift check at
-# all and one of them, site/lib/arsenal.json, went 67 items stale while still advertising a deleted
-# sound cue. WRITE=1 regenerates and exits 0; without it the run fails and leaves the files in place so
-# the fix is `git add`, not another command to remember.
-generated-check: ## [maintenance] run every generator, then ask git what moved.
-	@node quality/gates/generated-check.mjs $(if $(WRITE),--write,) $(if $(JSON),--json,)
-
-# seo-surface: canonical + opengraph-image + sitemap-vs-registries + JSON-LD, in one gate.
-# sitemap.ts/robots.ts/seo.ts/ogCard.tsx/schema.ts are all generated surfaces with no write-time check
-# of their own (a new route, a renamed docs page, a deleted card, a broken JSON-LD field: none of them
-# fail a build). Four hard assertions, no ratchet: today's count is 0 for all of them.
-seo-surface: ## [maintenance] canonical + og-image + sitemap-vs-registries + JSON-LD, all hard
-	@node quality/gates/seo-surface.mjs $(if $(JSON),--json,)
 
 effects-check: ## [engine] fail if engine-doctrine/EFFECTS.md is stale vs the registries
 	node scripts/site/effects-catalog.mjs --check
@@ -1592,9 +1382,6 @@ blocks-docs: ## [site] regenerate the engine-doctrine/BLOCKS.md table from the m
 blocks-json: ## [site] regenerate site/lib/blocks.json (the site's grid) from the manifest (CHECK=1 to verify only)
 	node scripts/site/blocks-json.mjs $(if $(CHECK),--check,)
 
-scenes-json: ## [site] check site/public/scenes/ against films/scene/ (WRITE=1 to rewrite)
-	node scripts/site/scenes-json.mjs $(if $(WRITE),--write,)
-
 films-json: ## [site] check site/lib/films.json against the rendered films (WRITE=1 to rewrite)
 	node scripts/site/films-json.mjs $(if $(WRITE),--write,)
 
@@ -1603,7 +1390,9 @@ films-json: ## [site] check site/lib/films.json against the rendered films (WRIT
 # how three shipped films drifted from their sources at once: one rendered from a scene edit later
 # lost in a merge, one committed before its sound existed, one still 9:16 while its film was 16:9.
 # A gate nobody runs is not a gate.
-site-check: scenes-json films-json site-counts ## [site] check every published artifact against its source
+site-check: films-json ## [site] check every published artifact against its source
+	@node harness/lib/check-gate.mjs scenes-json
+	@node harness/lib/check-gate.mjs site-counts
 	@# The three GENERATED artifacts that are committed: blocks/catalog/ + registry/ (outside agents
 	@# fetch these), engine-doctrine/BLOCKS.md and site/lib/blocks.json. Each is written by a target
 	@# somebody has to remember, and the registry output had drifted from blocks/catalog.mjs for a
@@ -1612,22 +1401,9 @@ site-check: scenes-json films-json site-counts ## [site] check every published a
 	@node scripts/site/blocks-docs.mjs --check
 	@node scripts/site/blocks-json.mjs --check
 
-# make code-quality: the codebase may get simpler, never more tangled.
-# A RATCHET, not a threshold: 334 findings exist today, and a threshold would fail every build on day
-# one, which is how a rule gets waived by reflex and quietly repealed. This holds the current line and
-# lets it move only downward. WRITE=1 accepts the current state, which is how you bank a cleanup.
-code-quality: ## [maintenance] refuse code that is more tangled than the baseline (WRITE=1 to accept the current state)
-	@node quality/gates/code-quality.mjs $(if $(WRITE),--write,) $(if $(JSON),--json,)
-
 # make code-quality-top: what is worst right now, ranked. A number here is a question, not a verdict.
 code-quality-top: ## [maintenance] the 25 most tangled functions in the repo
 	@node quality/gates/code-quality.mjs --top $(if $(JSON),--json,)
-
-# make no-emdash: the house rule, enforced. The owner's standing rule bans the em dash everywhere,
-# and this repo held about 6000 of them, including inside the engine's own error messages. The gate
-# prints what is still out of scope rather than hiding it, so the remaining debt is never silent.
-no-emdash: ## [maintenance] refuse an em dash anywhere the house rule covers
-	node harness/dev/no-emdash.mjs
 
 # make style-drop-check: refuse a new core/layers/*.js write of `el.style.<prop> = <authorValue>` that
 # skips checkDropped. pad and radius both took a raw author string straight to el.style with no check
@@ -1635,13 +1411,11 @@ no-emdash: ## [maintenance] refuse an em dash anywhere the house rule covers
 style-drop-check: ## [maintenance] every core/layers write of an author value must guard against a dropped CSS value
 	node harness/dev/style-drop-check.mjs
 
-
 # make og: the social card. Its source is site/og/card.html, which reads the SITE's tokens and the
 # SITE's vendored fonts, so the card cannot drift from the site it advertises the way an exported PNG
 # does. The three frames it shows are pulled from three shipped films, not mocked up.
 og: ## [site] render site/public/assets/og.png from site/og/card.html
 	node scripts/site/og-image.mjs
-
 
 	@echo "\u2713 site: published scenes, films and counts all agree with their sources"
 
@@ -1708,9 +1482,6 @@ glyphs: ## [engine] woff2 -> 3D typeface JSON (FONT=<Name> [WEIGHT=700] [CHARSET
 glyphs-verify: ## [engine] render a baked typeface with three.js next to the real woff2 -> /tmp/glyphs-<Name>.png (LOOK AT IT)
 	node generators/fonts/verify-render.mjs $(FONT) $(TEXT)
 
-glyphs-audit: ## [engine] fail if any baked 3D typeface is stale against its woff2 or has charset gaps
-	@node quality/gates/glyphs-audit.mjs $(if $(JSON),--json,)
-
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
 # renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only
 # because 411 ran first. So it runs HERE instead, offline, in its own process, in frame order, as
@@ -1719,19 +1490,6 @@ glyphs-audit: ## [engine] fail if any baked 3D typeface is stale against its wof
 # `make spectrum` (FFT baked to a per-frame table). Contract: generators/sim/sims/README.md.
 sim: ## [engine] bake a simulation to frames: D=generators/sim/sims/<name>.mjs [WRITE=1] -> assets/baked/<name>/
 	node generators/sim/run.mjs $(D) $(if $(WRITE),--write)
-
-# It is confined, not abolished: same source + same seed must still give the same PNGs. This fails a
-# sim that reaches for Math.random or the clock, a bake whose sim has been edited since (the frames
-# would silently keep playing the previous version of the effect), and a sequence with a hole in it.
-sim-audit: ## [engine] sims seeded? bakes fresh against their source? sequences intact?
-	@node quality/gates/sim-audit.mjs $(if $(JSON),--json,)
-
-# The build context is the WORKING TREE, so .gitignore does not apply to it. assets/baked and
-# assets/gen were gitignored, referenced by no COPY, and shipped to the daemon on every build
-# regardless: 72M of bake output nobody could see in a diff. This measures what Docker would
-# actually send and fails when it exceeds the budget.
-docker-context: ## [maintenance] does the docker build context still fit its budget?
-	@node quality/gates/docker-context.mjs $(if $(JSON),--json,)
 
 # Bake a pack of REAL cut-out letter images into the sprite set the `ransom` layer composes from.
 # Unzip your pack into assets/ransom-src/ (a folder per character is ideal), then run this once.

@@ -1,6 +1,6 @@
 // quality/gates/craft-coverage.mjs, keep the docs honest: against the engine, and against each other.
 //
-//   make craft-coverage
+//   make check GATE=craft-coverage
 //
 // Four ways the docs rot, each caught here so a doc can never silently lie to an author:
 //   1. COVERAGE. A look (core/looks.js) or sting (core/stings.js SHADER_FX) exists in the engine but

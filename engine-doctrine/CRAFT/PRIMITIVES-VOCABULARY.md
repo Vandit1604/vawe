@@ -1,6 +1,6 @@
 ---
 when: "you want to see every primitive the engine has, the plain words that find it, and the sentence that says what it does"
-answers: "the full word-action listing every defineRegistry registry carries, grouped by registry, graded the same way make word-action grades it"
+answers: "the full word-action listing every defineRegistry registry carries, grouped by registry, graded the same way make check GATE=word-action grades it"
 group: reference
 ---
 
@@ -10,7 +10,7 @@ group: reference
 
 Every row is one primitive from one `defineRegistry` call. **words** are its `aka` (never printed
 elsewhere, folded into search only); **action** is its `blurb`. A row with either column blank
-fails `make word-action`: `words` needs 2+ phrases, `action` needs a stated number or a full
+fails `make check GATE=word-action`: `words` needs 2+ phrases, `action` needs a stated number or a full
 sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact contract.
 
 ## adjustment  `[kind]`
@@ -1032,4 +1032,4 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 
 ---
 _712 primitives across 61 registries, 712 meeting the word-action contract today.
-Regenerate: `make vocab`. Ratchet: `make word-action`._
+Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

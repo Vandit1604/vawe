@@ -10,7 +10,7 @@
 // them back through the existing `clip` layer. Non-determinism is confined to bake time.
 //
 // It is confined, not abolished. A bake must REPRODUCE: same source + same seed → the same bytes.
-// That is what `generators/sim/sims/lib/rng.mjs` and `make sim-audit` are for, and it is why the manifest records
+// That is what `generators/sim/sims/lib/rng.mjs` and `make check GATE=sim-audit` are for, and it is why the manifest records
 // a hash of the source that produced it.
 //
 // Rasterising happens in headless Chromium, the same engine the renderer uses, so a sim can be

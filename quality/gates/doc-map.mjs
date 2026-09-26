@@ -1,6 +1,6 @@
 // quality/gates/doc-map.mjs. The doc map: one source of truth, every index generated from it.
 //
-//   node quality/gates/doc-map.mjs            verify (used by craft-coverage / make craft-coverage)
+//   node quality/gates/doc-map.mjs            verify (used by craft-coverage / make check GATE=craft-coverage)
 //   node quality/gates/doc-map.mjs --write    regenerate every index view (make doc-index)
 //
 // WHY THIS EXISTS. This repo carries ~120 markdown files and ~1.5 MB of written knowledge. An agent
@@ -414,7 +414,7 @@ function indexBody(entries) {
     out.push('');
     out.push(`⚠ ${pend.length} doc${pend.length > 1 ? 's' : ''} above carr${pend.length > 1 ? 'y' : 'ies'} no frontmatter of its own; the line shown is held in`);
     out.push('`quality/gates/doc-map.mjs` PENDING because another agent owned the file when the map was built.');
-    out.push('`make craft-coverage` names them on every run.');
+    out.push('`make check GATE=craft-coverage` names them on every run.');
     out.push('');
   }
   return out.join('\n');

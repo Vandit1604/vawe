@@ -59,7 +59,7 @@ const PRESERVED_FILM_FIELDS = ['camera'];
 // ── USE: the general door onto the arsenal's 790-entry corpus (harness/lib/contract.mjs resolveUse),
 // written by ONE table keyed by slot SCOPE, never by family. Split into small functions, one job each,
 // rather than one long dispatch, so no single function outgrows this repo's own complexity ceiling
-// (`make code-quality`) the way a hand-rolled per-kind switch would.
+// (`make check GATE=code-quality`) the way a hand-rolled per-kind switch would.
 
 // STRUCTURAL: these two kinds resolve to fields assemble.mjs reads and freezes before any beat is
 // processed (`aspect`/`destination` decide every fragment's box, far above this point in the file), so

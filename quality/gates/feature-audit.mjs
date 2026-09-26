@@ -4,7 +4,7 @@
 // and surface the newest/best primitives (group layout, spring easing, multi-line fit) that videos
 // haven't adopted yet. WARN-tier: always exits 0 (a coaching report, not a blocker).
 //
-// Run: node quality/gates/feature-audit.mjs   (make feature-audit)
+// Run: node quality/gates/feature-audit.mjs   (make check GATE=feature-audit)
 import fs from 'fs';
 import path from 'path';
 import { PRESETS } from '../../core/type/type.js';

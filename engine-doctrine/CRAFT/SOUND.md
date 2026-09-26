@@ -513,7 +513,7 @@ is a workaround rather than the dial.
 | `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js) |
 | `make beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
 | `make spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
-| `make sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
+| `make check GATE=sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
 | `make tts` · `make vo-captions D=…` | narration, and karaoke captions from its word timings |
 | `make pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
 

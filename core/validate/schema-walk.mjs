@@ -1,7 +1,7 @@
 import { isObj, typeOf, nearest } from './util.mjs';
 
 // `block`/`beat`/`comp` are build-time sugar (core/engine/expand.js), not layer types the base schema
-// describes: a layer naming one carries the factory's own props, checked by `make blocks-audit`
+// describes: a layer naming one carries the factory's own props, checked by `make check GATE=blocks-audit`
 // instead. Pulled out to its own function rather than three `||`s inline at each of checkField's two
 // call sites, which is what pushed that switch over the complexity ceiling for one extra layer type.
 const isSugarType = (t) => t === 'block' || t === 'beat' || t === 'comp';

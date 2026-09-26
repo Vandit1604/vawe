@@ -44,7 +44,7 @@ structure to copy. Compose your own layers from the vocabulary in `engine-doctri
 - The first-frame hook is 12 words or fewer, and it does not spoil the payoff.
 - Prefer a real captured asset (`make assets`, `make capture`) over an emoji or a stock image.
 - Hand-key the motion you want. Do not just name a preset: write the track
-  (`make track SHAPE=pan|blast|drift|enter|exit` gives you a starting shape).
+  (`make arsenal SHAPE=pan|blast|drift|enter|exit` gives you a starting shape).
 - Name the effect before you build it. Search `make arsenal Q="what you mean, in plain
   English"` before you invent a technique by hand.
 

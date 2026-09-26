@@ -18,7 +18,7 @@ group: crosscutting
 - Writing a storyboard from a type spine (`harness/author/type-spines.mjs`)? Read `theme.look` first
   and let it win: the brand's own fixed look overrides the type spine, which is only a fallback for a
   theme with none.
-- `make theme-sheet THEME=<name>` renders one contact sheet so a brand's look is a picture, not JSON.
+- `make arsenal THEME=<name>` renders one contact sheet so a brand's look is a picture, not JSON.
 
 ## Why this exists
 
@@ -128,10 +128,10 @@ no layers yet to merge it onto; a theme's `backdrop`/`cuts`/`scale`/`layout` are
 about the brand they always were, and the assembling author (`make assemble`, or the recipe that
 composes a beat's motion) reads them at that later stage instead.
 
-## Seeing it: `make theme-sheet`
+## Seeing it: `make arsenal THEME=`
 
 ```
-make theme-sheet THEME=vawe
+make arsenal THEME=vawe
 ```
 
 Renders one scene that shows a headline on every `backdrop` window, names the `cuts` pair on screen,

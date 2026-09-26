@@ -477,7 +477,7 @@ for (const u of unchecked) {
   console.log(`  ? ${u.type}: the probe page did not boot within the timeout, twice. NOT checked on this run.`);
   findingsOut.warn('probe-boot-timeout', `${u.type}: the probe page did not boot in time on two attempts, so this type was NOT checked`, {
     at: u.type,
-    fix: 're-run `make prop-probe` on a quieter machine; this says nothing about the layer, only that the page did not answer',
+    fix: 're-run `make check GATE=prop-probe` on a quieter machine; this says nothing about the layer, only that the page did not answer',
   });
 }
 if (unchecked.length) console.log(`\n${unchecked.length} type(s) went unchecked because the page did not boot in time. That is a fact about this machine, not about the engine.`);

@@ -1,6 +1,6 @@
 // quality/gates/word-action.mjs · does every primitive have word-to-action vocabulary?
 //
-//   node quality/gates/word-action.mjs            ·   make word-action
+//   node quality/gates/word-action.mjs            ·   make check GATE=word-action
 //   node quality/gates/word-action.mjs --list     ·   every entry missing words, action, or both
 //   node quality/gates/word-action.mjs --stamp    ·   record today's per-registry missing counts as the new ceiling
 //
