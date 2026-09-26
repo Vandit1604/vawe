@@ -1,0 +1,24 @@
+{
+  "$schema": "./schema.json",
+  "module": "scene",
+  "theme": "default",
+  "aspect": "16:9",
+  "duration": 3,
+  "captionMode": "sentence",
+  "audio": { "silent": true, "_why": "fixture for the tune curve editor, never played" },
+  "bg": [{ "t": 0, "preset": "black" }],
+  "layers": [
+    {
+      "id": "puck",
+      "type": "rect",
+      "x": 200, "y": 400, "w": 120, "h": 120, "radius": 16,
+      "fill": "#0a87ff",
+      "start": 0,
+      "duration": 2,
+      "motion": [
+        { "t": 0, "x": 0, "scale": 1, "easeOut": { "influence": 33.33, "speed": 0 } },
+        { "t": 1.6, "x": 900, "scale": 1.4, "easeIn": { "influence": 33.33, "speed": 0 } }
+      ]
+    }
+  ]
+}

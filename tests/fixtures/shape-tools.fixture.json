@@ -1,0 +1,52 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 4,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "logo",
+   "type": "svg",
+   "x": 260,
+   "y": 300,
+   "w": 300,
+   "h": 300,
+   "viewBox": "0 0 100 100",
+   "d": "M50 6 L94 90 L6 90 Z",
+   "stroke": "var(--accent)",
+   "strokeWidth": 4,
+   "start": 0,
+   "duration": 4,
+   "anim": "none",
+   "trim": { "start": 0, "end": 0, "offset": 0 },
+   "motion": [
+    { "t": 0, "trimEnd": 0, "trimOffset": 0, "ease": "easeInOutCubic" },
+    { "t": 2, "trimEnd": 1, "trimOffset": 0.4 },
+    { "t": 4, "trimEnd": 1, "trimOffset": 1.4 }
+   ]
+  },
+  {
+   "id": "ring",
+   "type": "rect",
+   "x": 1360,
+   "y": 300,
+   "w": 24,
+   "h": 24,
+   "bg": "var(--accent)",
+   "radius": 4,
+   "start": 0,
+   "duration": 4,
+   "anim": "none",
+   "motion": [
+    { "t": 0, "rot": 0 },
+    { "t": 4, "rot": 90, "ease": "linear" }
+   ],
+   "modifiers": [
+    { "repeat": { "copies": 12, "from": "center", "offset": { "rot": 30, "scale": 0.94, "opacity": 0.25 }, "stagger": 0.06 } }
+   ]
+  }
+ ]
+}

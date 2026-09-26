@@ -34,9 +34,28 @@ waiver use is the second case, an author declaring "I chose this", not "I broke 
 `no-continuous-object`, `dead-air`, `plain-slideshow`, `static-bg`, `no-transition`, `ends-on-nothing`
 are the codes this shows up on most.
 
-Hard refusals are the third tier and stay hard: determinism (a non-finite render target) and a
-construction bug (an empty beat, a plan that doesn't match the render). Nothing adapts those, because
-there is no film-context reading that makes them correct.
+Hard refusals are the third tier and stay hard: determinism (a non-finite render target, `renderFrame`
+purity checked by `quality/gates/probe-purity.mjs`) and a schema failure the engine itself would refuse
+at boot (`core/validate/validate.mjs`). Nothing adapts those, because there is no film-context reading
+that makes them correct.
+
+## AUTHOR-SIDE GATES ADVISE, NEVER BLOCK
+
+Owner decision: HyperFrames and Remotion ship with no authoring quality gates at all; a gate on the
+author's path is DX friction unless it stops something that literally cannot render. So every finding
+on that path (`make author-check`, `make check D=`, `make ship`, `make stage`/`make next`, the
+`stage-gate`/`craft-live` hooks) is advisory by default: it prints in full and exits 0. Only two things
+still stop the run: **validate** (schema, vocabulary, em-dashes) and **determinism** (`renderFrame`
+purity). Everything this page calls "stays hard" above those two is a construction bug the engine would
+have refused anyway, never a craft opinion.
+
+`STRICT=1` is the one opt-in that restores the old blocking behaviour for someone who wants the teeth
+back: `quality/gates/author-check.mjs`'s structural steps (beats, storyboard, backdrop-turn, motion,
+seams, the HARD_CODES escalation, inspect/plan against an intent sidecar), and the `stage-gate.mjs` /
+`craft-live.mjs` live hooks all read it. `TASTE=1` is unchanged: it still gives teeth to the house-style
+steps only (critique, direct, floor, designspec, copy, read, pace, eye, sound). The engine-contributor
+gates (`.githooks/pre-push`, `.github/workflows/gates.yml`) are untouched by either flag: they protect
+the engine, not one film, and stay hard.
 
 ## The guards
 

@@ -119,7 +119,6 @@ export function validateTheme(spec) {
   // it sees one, pointing at migrate-themes.mjs, so there is nothing left for this function to check
   // about that shape directly.
   errors.push(...themeFileErrors(spec, { parseColor, colorAlpha, contrastRatio }).map((m) => `theme incomplete: ${m}`));
-  if ('vars' in spec && !isObj(spec.vars)) errors.push('theme.vars must be an object');
   if ('motion' in spec) {
     if (!isObj(spec.motion)) errors.push('theme.motion must be an object');
     else for (const k of ['bounce', 'settle', 'enter', 'durationScale', 'stagger']) {

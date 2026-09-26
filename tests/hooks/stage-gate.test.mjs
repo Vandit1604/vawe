@@ -18,10 +18,10 @@ const HOOK = join(here, '../../harness/live', 'stage-gate.mjs');
 
 const FILMS_DIR = 'tests/fixtures/films';
 
-function run(rel, content = '') {
+function run(rel, content = '', { strict = false } = {}) {
   const r = spawnSync('node', [HOOK], { encoding: 'utf8',
     input: JSON.stringify({ tool_input: { file_path: path.join(ROOT, rel), content } }),
-    env: { ...process.env, VAWE_FILMS_DIR: FILMS_DIR } });
+    env: { ...process.env, VAWE_FILMS_DIR: FILMS_DIR, ...(strict ? { STRICT: '1' } : {}) } });
   assert.equal(r.status, 0, 'the hook always exits 0; it answers with JSON, it does not throw');
   if (!r.stdout.trim()) return { denied: false, reason: '' };
   const d = JSON.parse(r.stdout).hookSpecificOutput;
@@ -79,9 +79,12 @@ test('layers may be written into a film with a plan behind it', () => {
   assert.equal(run(FILM, JSON.stringify({ module: 'scene', layers: [] })).denied, false);
 });
 
-test('a fragment no storyboard claims is denied, and one with a plan behind it is not', () => {
-  assert.ok(run(`${FILMS_DIR}/_nothing-claims-this.hook.html`, '<div></div>').denied);
+test('a fragment no storyboard claims is advisory by default, and blocked under STRICT=1', () => {
+  const orphan = `${FILMS_DIR}/_nothing-claims-this.hook.html`;
+  assert.equal(run(orphan, '<div></div>').denied, false);
+  assert.ok(run(orphan, '<div></div>', { strict: true }).denied);
   assert.equal(run(FRAG, '<div></div>').denied, false);
+  assert.equal(run(FRAG, '<div></div>', { strict: true }).denied, false);
 });
 
 test('both fragment naming conventions resolve to the right film', () => {

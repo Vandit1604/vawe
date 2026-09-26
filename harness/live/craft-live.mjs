@@ -58,6 +58,9 @@ process.stdin.on('end', () => {
   const say = result.say;
   if (!say.length) process.exit(0);                    // the reward for work doing fine is silence
 
+  // AUTHOR-SIDE GATES ADVISE, NEVER BLOCK: exit 2 from a PostToolUse hook reads as blocking feedback to
+  // the agent even though the write already happened. STRICT=1 keeps that; the default is exit 0.
+  const strict = process.env.STRICT === '1';
   const full = `${path.basename(rel)}\n${say.join('\n')}\n`
     + `  Nothing here blocks. These are structural facts about this fragment, not a style opinion.`;
   const out = summarize('craft-live', rel, full);
@@ -71,5 +74,5 @@ process.stdin.on('end', () => {
       });
     } catch { /* the receipt is a nudge too; never let a log failure touch the printed findings above */ }
   }
-  process.exit(2);
+  process.exit(strict ? 2 : 0);
 });

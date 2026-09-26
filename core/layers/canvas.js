@@ -42,6 +42,9 @@ export function canvasLayer(name, blurb) {
       s.canvas.style.cssText = `display:block;width:100%;height:100%;border-radius:${L.radius ?? 0}px`;
       if (L.radius) el.style.overflow = 'hidden';
       el.appendChild(s.canvas);
+      // Which surface owns this canvas, read by quality/gates/canvas-purity.mjs to decide whether an
+      // exact pixel hash applies or a `three` (real GPU lighting) canvas gets a byte tolerance instead.
+      s.canvas.dataset.surface = name;
       el.__surface = s;
       // `resample` on a surface that cannot be sampled was accepted and then ignored, the bug class
       // logged most in this repo, because raymarch and three simply never called attachResample and
