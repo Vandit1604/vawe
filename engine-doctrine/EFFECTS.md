@@ -922,6 +922,23 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 | `random` | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
 | `typewriter` | types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit |
 
+## Surface looks  `[theme]`
+
+A named bundle of shape tokens (`core/theme/surface-looks.js`) a theme, a scene or one block instance can set as `look.surface`, repainting radius/border/shadow/blur/pad/gap/density together without editing a single block.
+
+| name | what / when |
+|---|---|
+| `brutalist` | square (0px) corners, a thick 3px ink rule, an 8px hard offset shadow with no blur |
+| `cinematic` | 18px radius, a 24px backdrop blur behind a 62%-opacity fill, a deep shadow plus an accent glow |
+| `editorial` | near-square (2px) corners, a plain hairline, no shadow, 28px of padding for generous air |
+| `glass` | 20px radius, a 55%-opacity fill behind an 18px backdrop blur, a 1px translucent rim |
+| `industrial` | 4px radius, a thick 2px rule, a flat 4px hard-edge shadow, tighter padding than the rest |
+| `neon` | 16px radius, a 1px accent-coloured rim, a three-layer glow in place of a shadow |
+| `outlined` | 12px radius, a firm 1.5px hairline rule, no shadow at all: flat and quiet |
+| `playful` | 28px pill radius, no rule, a tinted fill, a flat coloured shadow ledge underneath |
+| `print` | 3px radius, a solid 1px ink rule, no shadow: flat ink on stock |
+| `soft` | 24px radius, no rule at all, a wide 12px/24px double shadow: reads as an object, not a panel |
+
 ## Theme look keys  `[theme]`
 
 A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the eight keys it accepts.
@@ -936,6 +953,7 @@ A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default 
 | `layout` | the anchor band (left/center/right) and margin every beat composes against |
 | `marks` | the logo path plus its end-card and headline-adjacent sizes, both named pixel numbers |
 | `scale` | how big text should be: named px sizes for the hook / headline / body / caption roles at 16:9, so a layer writes `"size": "headline"` instead of guessing a number |
+| `surface` | a named shape look (glass/soft/outlined/brutalist/editorial/neon/playful/print/cinematic/industrial, `core/theme/surface-looks.js`) every block reads instead of its own literal corner rounding, rule weight and drop shadow |
 
 ## Easings  `[timing]`
 
@@ -1206,4 +1224,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_735 effects across 63 families. Regenerate: `make effects`._
+_746 effects across 64 families. Regenerate: `make effects`._

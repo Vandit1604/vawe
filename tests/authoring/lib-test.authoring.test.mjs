@@ -549,6 +549,8 @@ test('lib-test: authoring', async () => {
     ['the move stops dead in the middle of a travel', 'through'],
     // theme.look (W8): the bg presets a brand turns through are fixed once, in the theme.
     ['the backdrops a brand turns through, fixed once in its theme', 'backdrop'],
+    // look.surface: a named shape bundle a theme repaints every card's radius/border/shadow with.
+    ['a card with hard square corners and a thick ink border', 'brutalist'],
   ];
   for (const [q, want] of PRESENT) {
     ok(`arsenal answers "${q}" with ${want}`, covers(q, want) >= CONFIDENT);

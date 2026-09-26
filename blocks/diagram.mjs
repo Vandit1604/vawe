@@ -21,7 +21,7 @@
 // ONE ROUTER. `routeEdge` is the whole geometry surface: two boxes in, an orthogonal path between
 // their NEAREST edges out, plus the arrowhead and where a label can sit. flowchart and nodeGraph both
 // call it; neither owns a second copy.
-import { TOKENS, HAIR, R, SPACE, TYPE, r2, onColor } from './kit.mjs';
+import { TOKENS, HAIR, R, RCSS, SPACE, TYPE, r2, onColor } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
@@ -69,7 +69,7 @@ function nodeEl(n) {
       + `border-radius:${R.pill}px;color:${onColor(T.accent)}">${label}</div>`;
   }
   return `<div data-node style="${seat};padding:0 ${SPACE.md}px;background:${T.card};`
-    + `border:${hot ? `2px solid ${T.accent}` : HAIR};border-radius:${R.card}px;color:${T.ink}`
+    + `border:${hot ? `2px solid ${T.accent}` : HAIR};border-radius:${RCSS('card')};color:${T.ink}`
     + (hot ? `;box-shadow:0 0 0 6px ${T.accentSoft}` : '') + `">${label}</div>`;
 }
 
