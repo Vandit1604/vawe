@@ -2,6 +2,7 @@
 when: a theme should carry more than colours and fonts, or a film keeps re-deciding the same thing per film
 answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field/bgDefault/bgPalette) · how it is validated · how a storyboard merges it over the type spine · how to see it as a picture"
 group: crosscutting
+routes: finish, recreation
 ---
 
 # THEME LOOK: the whole-film default a theme fixes
