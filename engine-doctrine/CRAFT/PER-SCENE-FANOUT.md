@@ -114,9 +114,9 @@ explicit `transitions[]` boundary at every beat start.
 Two things it gets right that are easy to get wrong by hand:
 
 - **`acrossBeats: true` on the object layer.** `sceneUnits: true` wraps every beat as its own unit, so
-  nothing survives a cut unless it opts out (`quality/gates/direction-floor.mjs`
-  `no-continuous-object`'s own wrap note). Miss this and the gate reports no continuous object even
-  though the layer is right there with a real motion track.
+  nothing survives a cut unless it opts out (the retired `direction-floor.mjs`'s own `no-continuous-object`
+  wrap note). Miss this and a reviewer sees no continuous object even though the layer is right there
+  with a real motion track.
 - **`mech: "seam"` on the transitions, not the "cut" a bare `fx` name defaults to.** A `cut` only
   transforms the scene ROOT (one opacity ramp over the whole stack), so two beats with different `bg`
   presets swap hard mid-ramp instead of blending, the exact "hard swap disguised inside a soft

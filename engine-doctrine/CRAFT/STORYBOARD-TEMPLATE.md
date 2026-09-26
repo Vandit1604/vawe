@@ -141,8 +141,8 @@ not: "the defaults this film refuses, in your own words"
 
   `transition_value:` sits beside `transition_in:`/`transition_why:` and answers the question neither
   does: what this boundary does to ground VALUE, one of `dark->light` · `light->dark` · `held`. Nothing
-  declared this before the render existed: `quality/gates/ground-arc.mjs` could only measure a flip
-  AFTER the film was built. The set is exactly what `ground-arc.mjs` itself classifies a frame into, so
+  declared this before the render existed: the retired `ground-arc.mjs` could only measure a flip
+  AFTER the film was built. The set is exactly what `ground-arc.mjs` itself classified a frame into, so
   a declared value and a measured one are directly comparable: `quality/gates/plan-vs-render.mjs` warns
   `ground-value-mismatch` when they disagree, naming both the declaration and the measurement, and never
   claims more than that (its own stated restraint: presence of a disagreement, not a taste judgement

@@ -24,7 +24,7 @@
     "category": "direction",
     "stage": "direct",
     "applies": "hasBoundaries",
-    "check": "no-continuous-object",
+    "check": null,
     "adapt": null,
     "brief": "Carry continuity in TWO OR MORE registers at once",
     "doc": "engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md"
@@ -54,7 +54,7 @@
     "category": "direction",
     "stage": "direct",
     "applies": "hasBoundaries",
-    "check": "eye-trace",
+    "check": null,
     "adapt": null,
     "brief": "Read the focal point of the frame before the cut. Put the incoming subject at or near that same screen",
     "doc": "engine-doctrine/CRAFT/EYE-TRACE.md"
@@ -94,7 +94,7 @@
     "category": "direction",
     "stage": "direct",
     "applies": "always",
-    "check": "no-continuous-object",
+    "check": null,
     "adapt": null,
     "brief": "One object survives a cut and changes across it, or name what else holds the film",
     "doc": "engine-doctrine/RULES/continuous-object.md"
@@ -104,7 +104,7 @@
     "category": "direction",
     "stage": "direct",
     "applies": "always",
-    "check": "backdrop-never-turns",
+    "check": null,
     "adapt": null,
     "brief": "The backdrop changes tone per beat, or the film is a slide with effects on it",
     "doc": "engine-doctrine/RULES/world-turns.md"

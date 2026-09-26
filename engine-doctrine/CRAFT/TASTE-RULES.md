@@ -68,7 +68,7 @@ the part you skip.
 - **Subtle reads as static at 30fps.** *"Err toward more movement than feels safe."* Measured here: two
   films authored as improvements on a third both came out SLOWER than the film they criticised, at 0.95
   and 0.85 events per second against a library median of 1.20 ([`../MISTAKES.md`](../MISTAKES.md) #336).
-  `make pace-check` fails below 1.0.
+  A retired gate used to fail below 1.0 events/second; the floor is doctrine now (`engine-doctrine/CRAFT/DIRECTION.md`).
 
 **One accusation this repo has to add for itself, because their engine has no counter layer:** you will
 put a spring or an overshoot ease on a `count`. Don't. `core/layers/count.js` runs the value through
