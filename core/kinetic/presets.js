@@ -58,7 +58,7 @@ export const AXIS_REGISTRY = defineRegistry('font-variation axis',
       tag: 'text track',
       intro: 'A variable face moves inside the letters: an `axis` track ramps one axis per unit on the same stagger clock as `preset`. `{ "type":"text", "split":"word", "axis": { "wght": [300, 900] } }`',
       usage: (n, { text }) => text({ split: 'word', axis: { [n]: AXIS_REGISTRY.entries[n] } }),
-      noPreview: true,
+      noPreview: 'the change is in the letterforms over time, which a single still cannot show',
     } });
 
 // axisStyle(axes): the font-variation TRACK, generalising wght() above to every axis a variable face
