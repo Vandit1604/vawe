@@ -1,22 +1,16 @@
-// studio/server.mjs: a LIVE SCRUBBABLE preview of a scene, for fast iteration without rendering an
-// mp4. Starts a local static server and serves a wrapper page: the real scene.html in an iframe, plus a
-// scrubber + play/pause + frame/time readout that drive `__engine.renderFrame(n)` directly (the same pure
-// function the Go renderer seeks). Edit the JSON, hit reload, scrub, no 30-60s render round-trip.
+// studio/server.mjs: a live scrubbable preview of a scene, without rendering an mp4. Starts a local
+// static server and serves a wrapper page: the real scene.html in an iframe, plus a scrubber and
+// transport that drive `__engine.renderFrame(n)` directly, the same pure function the Go renderer seeks.
 //
-// The shell is studio/page.mjs + studio/ui/ (shell.html, studio.css, studio.js): a top bar, an icon
-// sidebar of the four states, a property panel, the preview and its transport, the timeline along the
-// bottom, and a draggable divider between preview and timeline. This file owns the server, the gate run behind the timeline model,
-// and the write side.
+// The shell is studio/page.mjs + studio/ui/ (shell.html, studio.css, studio.js). This file owns the
+// server, the gate run behind the timeline model, and the write side.
 //
-// The timeline: one bar per top-level layer against a seconds/frames ruler, with the
-// cuts/seams/stings marked, the enter/exit ramps shaded off the settled middle, and every dead-air hole
-// painted as a hazard band. It answers the question a contact sheet cannot, what is on screen WHEN.
+// The timeline: one bar per top-level layer against a seconds/frames ruler, cuts/seams/stings marked,
+// enter/exit ramps shaded off the settled middle, every dead-air hole painted as a hazard band.
 //
 //   make studio D=films/scene/<file>.json [PORT=8799]
-//     → open the printed URL, leave it running (Ctrl-C to stop).
 //
-// DEV TOOLING ONLY. It does not touch the renderer or the determinism contract; it just calls the engine's
-// own renderFrame(n) from the parent frame (same-origin), exactly as the Go capture loop does per frame.
+// Dev tooling only: it never touches the renderer or the determinism contract.
 import fs from 'node:fs';
 import { onScreenText } from '../harness/lib/text.mjs';
 import path from 'node:path';
@@ -36,28 +30,20 @@ import { expandTheme, isTokenFile } from '../core/theme/roles.js';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const dataArg = process.env.D || process.argv[2];
-// A film at `plan` (AGENTS.md stage 2) has a storyboard and no scene.json yet: no scene JSON is
-// written before assemble, but the storyboard is what the Plan pane needs, so a film named by its
-// future scene.json path (not yet on disk) still opens on the plan instead of refusing outright. Every other
-// route already tolerates a missing/unparsable dataArg (`THEME_NAME`, `storyboardPath()`, and the
-// engine's own boot() all fail readable rather than throw raw), so this only widens the ONE hard gate.
+// A film at `plan` (AGENTS.md stage 2) has a storyboard and no scene.json yet, so a film named by its
+// future scene.json path still opens on the plan instead of refusing outright.
 const hasStoryboard = !!dataArg && fs.existsSync(dataArg.replace(/\.json$/, '.storyboard.md'));
 if (!dataArg || (!fs.existsSync(dataArg) && !hasStoryboard)) { console.error('usage: make studio D=films/scene/<file>.json [PORT=8799]'); process.exit(2); }
 const dataUrl = '/' + path.relative(repoRoot, path.resolve(dataArg)).split(path.sep).join('/');
-// The film's theme, read once. The plan pane previews every fragment on it, and a fragment previewed
-// on the wrong palette is a different picture with no warning (engine-doctrine/MISTAKES.md #382).
+// A fragment previewed on the wrong palette is a different picture with no warning (MISTAKES.md #382).
 const THEME_NAME = (() => { try { return JSON.parse(fs.readFileSync(dataArg, 'utf8')).theme || 'default'; } catch { return 'default'; } })();
 const PORT = Number(process.env.PORT) || 8799;
 
 
 // ---------- the timeline model ----------
-// Where "dead air" comes from. The definition (which layers count as content: a full-canvas opaque rect
-// is a blackout, a box under 8% of the canvas is a speck, track:0 is backdrop) lives in
-// quality/gates/beat-check.mjs. That file is a SCRIPT, not a module, it reads process.argv and calls
-// process.exit at top level, so it cannot be imported into a long-lived server. Restating its rules here
-// would give the timeline a second definition free to drift from the gate that blocks the build, which is
-// the one thing this band must never do. So the gate is RUN and its findings are read back. If it is ever
-// split into an importable core, import it and delete this.
+// "dead air" is defined in quality/gates/beat-check.mjs, a SCRIPT (calls process.exit at top level)
+// that cannot be imported here, so it is run as a subprocess and its findings read back, rather than
+// restating its rules and letting them drift from the gate that blocks the build.
 const beatCheck = (file) => {
   let out = '';
   try { out = execFileSync(process.execPath, [path.join(repoRoot, 'quality/gates/beat-check.mjs'), file], { encoding: 'utf8' }); }
@@ -74,24 +60,19 @@ const beatCheck = (file) => {
   };
 };
 
-// The JSON's own view of the film: the transition markers, and a label pool the page matches its DOM bars
-// against (the DOM knows the real timing, the JSON knows what each layer IS).
+// A label pool the page matches its DOM bars against: the DOM knows the real timing, the JSON knows
+// what each layer is.
 const label = (L) => L.id || (L.text && onScreenText(L.text))
   || (L.src && path.basename(String(L.src))) || L.comp || L.capture || L.preset || '';
-// UNDO is a stack of whole previous file contents. A scene is a few kilobytes and an editing session is
-// tens of edits, so keeping the bytes is simpler and more honest than replaying inverse operations.
-// There is no way for it to drift from what is on disk.
+// Undo is a stack of whole previous file contents: a scene is a few kilobytes, so keeping the bytes is
+// simpler than replaying inverse operations and cannot drift from what is on disk.
 const undoStack = [];
 
 // ---- the AUDIO lane -------------------------------------------------------------------------------
-// A film's sound is not a layer and it never was: it has a bed, a beat grid, one-shot cues and bridges
-// that hang off the film's own joints. Drawn as another grey bar it said nothing at all. What this
-// gathers is what the SCENE declares plus the one thing measured off disk, the beat map, because seams
-// are supposed to land on it and that is checkable by eye the moment the grid is on screen.
-//
-// The bridges are RESOLVED by the engine's own resolver (core/audio-bridges.js), never re-derived: a
-// bridge is hung off a named junction (`at: "cut@2"`) and a second implementation of "where does this
-// film turn" is the drift MISTAKES #159 is about.
+// Sound is not a layer: this gathers what the scene declares plus the beat map measured off disk, so
+// seams landing on the grid are checkable by eye.
+// Bridges are resolved by the engine's own resolver (core/audio-bridges.js), never re-derived, since a
+// second implementation of "where does this film turn" is the drift MISTAKES #159 is about.
 const beatMap = (music) => {
   if (!music) return null;
   const p = path.join(REPO_ROOT, String(music).replace(/\.[a-z0-9]+$/i, '.beats.json'));
@@ -156,15 +137,12 @@ const timelineModel = (file) => {
     cameraMove: normCamera(d),
     transitions: normTransitions(d),
     layers: (Array.isArray(d.layers) ? d.layers : []).filter((L) => L && typeof L === 'object')
-      // `raw` is the authored object, carried whole. The picker hands it back when you click the
-      // picture, and the point is that what you copy is EXACTLY what is in the file: a summary you
-      // then have to reconcile with the JSON is worth less than the JSON.
+      // `raw` is the authored object, carried whole, so what you copy is exactly what is in the file.
       .map((L, i) => ({ i, type: L.type || 'text', label: label(L), start: L.start ?? 0, dur: L.duration ?? L.dur ?? 2,
         keys: Array.isArray(L.motion) ? L.motion.map((k) => k.t ?? 0) : [], raw: L })),
-    // The backdrop is a layer of the film in every sense that matters, so it is selectable too.
     bg: Array.isArray(d.bg) ? d.bg : (d.bg ? [d.bg] : []),
-    // Captions are a KIND OF ROW, not a layer: they are authored as [{t0,t1,text}] and were being drawn
-    // as ordinary grey bars, which said they were the same sort of thing as a `text` layer. They are not.
+    // Captions are a kind of row, not a layer: authored as [{t0,t1,text}], drawn distinct from a
+    // `text` layer's grey bar.
     captions: (Array.isArray(d.captions) ? d.captions : []).filter((c) => c && typeof c === 'object')
       .map((c) => ({ t0: c.t0 ?? c.start ?? c.t ?? 0, t1: c.t1 ?? ((c.t0 ?? 0) + (c.dur ?? 2)), text: String(c.text || '') })),
     audio: audioLane(d, [...marks('cuts'), ...marks('seams'), ...marks('stings')], d.duration || 0),
@@ -173,11 +151,8 @@ const timelineModel = (file) => {
   };
 };
 
-// The 28 files `make audio` bakes (25 sfx roles + 3 music beds), READ off the catalogue
-// (generators/media/audio-bake.mjs) rather than restated here: that file is the one owner of which
-// role aliases which cue, and a second hand-kept list is exactly the drift this repo logs most. Same
-// spawn-and-parse shape as beatCheck above (the catalogue also bakes as a side effect of import, so
-// it cannot be required in-process). Computed once: the roster does not change while `make studio` runs.
+// Sfx roles are read off the catalogue (generators/media/audio-bake.mjs), the one owner of which role
+// aliases which cue, rather than a second hand-kept list. Computed once per `make studio` run.
 let SFX_ROLES = null;
 const bakedRoles = () => {
   if (SFX_ROLES) return SFX_ROLES;
@@ -189,10 +164,8 @@ const bakedRoles = () => {
   return SFX_ROLES;
 };
 
-// The ambition floor (plain-slideshow, no-continuous-object, no-camera, no-transition, no-bg-motion...)
-// is a SCRIPT, same shape as beat-check above, so it is run the same way: once, and its findings read
-// back from stdout+stderr rather than re-implemented here. Console only, never blocking: `make studio`
-// is the iteration loop, and the loop is not where a gate gets teeth.
+// Same spawn-and-parse shape as beatCheck above. Console only, never blocking: `make studio` is the
+// iteration loop, and the loop is not where a gate gets teeth.
 const directionFloorFindings = (file) => {
   let out = '';
   try { out = execFileSync(process.execPath, [path.join(repoRoot, 'quality/gates/direction-floor.mjs'), file], { encoding: 'utf8' }); }
@@ -200,16 +173,12 @@ const directionFloorFindings = (file) => {
   return out.split('\n').map((l) => l.trim()).filter((l) => /^[^[]*\[[a-z-]+\]/.test(l));
 };
 
-// FOUR PANES, FOUR ROUTES. "should we make the pages per url so we can control what to open properly
-// as well as agent can also specifically check" (the owner's own words): before this, every route
-// answered '/studio' and always opened on Make, so an agent (or a shared link) could only ever verify
-// that the shell booted, never a specific pane. /studio/<pane> opens directly on that pane; bare
-// '/studio' still works and picks a pane off the film's own stage.
+// FOUR PANES, FOUR ROUTES. /studio/<pane> opens directly on that pane; bare '/studio' picks a pane off
+// the film's own stage.
 const PANES = ['plan', 'make', 'ship', 'sound'];
-// Reuses stageOf's own verdict (quality/gates/stage.mjs), the ONE place stage order lives: this only
-// maps that verdict to a pane, it never re-derives what stage the film is in. A film with no scene yet
-// (brief..design) has nothing to scrub, so it opens on the plan pane; a film with
-// layers but nothing shipped opens on Make; a rendered or judged film opens on Ship.
+// Reuses stageOf's own verdict (quality/gates/stage.mjs), the one place stage order lives, and only
+// maps it to a pane: brief..design has nothing to scrub and opens on plan; assemble/direct opens on
+// make; anything rendered or judged opens on ship.
 const paneForStage = (stage) => {
   if (['brief', 'plan', 'design'].includes(stage)) return 'plan';
   if (['assemble', 'direct'].includes(stage)) return 'make';
@@ -362,45 +331,32 @@ const run = (name, args, done) => {
     (err, stdout, stderr) => { jobs.delete(name); done(err, stdout, stderr); });
 };
 
-// The two contact sheets Look is built out of, each with the file it writes and what it needs first.
-// The paths are the ones those tools choose, read from the same helper they use, never restated as a
-// literal: a sheet the page cannot find is indistinguishable from a sheet that was never drawn.
-// LOOK IS PRE-RENDER, and two of these three prove it: `beats` and `frames` both seek renderFrame in a
-// headless page exactly as the scrubber does, so they are available on a scene that has never been
-// rendered, which is the whole point of looking at a strip. Only `seams` needs an mp4, because a seam is
-// composited during the encode and exists nowhere else. The half that needs a render must never gate the
-// half that does not, so they are three buttons and not one.
+// The three contact sheets Look is built out of. `beats` and `frames` both seek renderFrame in a
+// headless page, exactly as the scrubber does, so they are available on a scene never rendered. Only
+// `seams` needs an mp4, since a seam is composited during the encode and exists nowhere else: the half
+// that needs a render must never gate the half that does not.
 const SHEETS = {
   beats: { file: () => scratch('beats', `${SLUG}.png`), args: ['harness/author/beats.mjs', dataArg],
            what: 'every beat, in · mid · out' },
-  // preview.mjs names its sheet after the FORMAT, not the scene (/tmp/preview_scene.png), so two studios
-  // on two scenes would overwrite each other's. Copied to a per-scene path the moment it lands, which
-  // narrows that to the width of one run rather than the width of a session: `after` only fires on a
-  // run that actually SUCCEEDED for THIS scene (the caller passes `err`), and only trusts the shared
-  // file if its mtime is at or after the run's own start, never a leftover from a run this studio never
-  // made. Missing either check, a stale scaffold sheet from an unrelated film sat behind this route and
-  // was served as pin-recreation's own frames: real bytes, real 200, the wrong film entirely.
+  // preview.mjs names its sheet after the format, not the scene (/tmp/preview_scene.png), so two
+  // studios on two scenes would overwrite each other's; copied to a per-scene path the moment it
+  // lands, and only trusted if its mtime is at or after this run's own start (else a leftover from an
+  // unrelated film's run gets served as this scene's frames).
   frames: { file: () => scratch('look', `${SLUG}.png`), args: ['harness/author/preview.mjs', 'scene', '--data', dataArg],
             what: 'the key frames of the whole film',
             after: (err, startedAt) => { if (err) return; const src = '/tmp/preview_scene.png';
               if (fs.existsSync(src) && fs.statSync(src).mtimeMs >= startedAt) fs.copyFileSync(src, scratch('look', `${SLUG}.png`)); } },
   seams: { file: () => `/tmp/seams/${SLUG}.png`, args: ['quality/gates/seams.mjs', dataArg],
            what: 'the frames straddling every transition, out of the rendered mp4',
-           // seams.mjs reads PIXELS for this sheet, so it cannot run without one. Said plainly rather than drawn as
-           // an empty grid, and the page offers the render.
            needs: () => (fs.existsSync(MP4) ? null : `seams are composited during the render, so they exist only in out/${SLUG}.mp4, and there is no such file yet.`) },
 };
 
-// ---- THE FILMSTRIP: the timeline shows PICTURES, not only names -----------------------------------
-// A browser cannot screenshot itself, so the strip cannot be grabbed out of the preview iframe however
-// convenient that sounds. It is captured the way everything else in this repo captures: a headless page
-// on this same server, seeking the engine's own renderFrame and shooting each frame. That also settles
-// the stutter question by construction, since it happens in another process and the strip is then a set
-// of static images: scrubbing never touches it.
+// ---- THE FILMSTRIP: the timeline shows pictures, not only names -----------------------------------
+// Captured by a headless page on this same server, seeking the engine's own renderFrame and shooting
+// each frame, since a browser cannot screenshot the preview iframe itself.
 //
-// MEASURED, on a 15s portrait film: ~1.1s to launch, ~55ms a frame at 74x132, 14 frames, 1.9s all in.
-// The stride is duration/14 with a 0.6s floor, so a 5s film gets 8 thumbs and a 60s film gets 14 wider
-// apart. Cached against the scene's mtime, so it is built once and then free until the film changes.
+// Measured, on a 15s portrait film: ~1.1s to launch, ~55ms a frame at 74x132, 14 frames, 1.9s all in.
+// Stride is duration/14 with a 0.6s floor. Cached against the scene's mtime.
 const STRIP_N = 14;
 let strip = null;
 async function buildStrip() {
@@ -465,19 +421,9 @@ function stillLayers(samples) {
 }
 
 // ---- THE PLAN'S OWN FRAMES: a real rendered still per beat, never a shape ------------------------
-// "plan should only show complete rendered sheet actual how it will look in video" (the owner's own
-// words): a fragment previewed alone, or a box drawn from `archetype:`, is a different picture from
-// what the engine actually paints (camera, other layers, the ground, transitions). This seeks the
-// SAME scene.html this studio already boots and shoots one frame per beat, one page launch and N
-// seeks, the same shape as buildStrip() above (never one browser per beat).
-//
-// A beat only gets a real frame once the scene has SOMETHING to seek: a film with zero layers has
-// nothing to paint, and says which command draws it. Beyond that, EVERY beat is rendered as-is,
-// whatever is actually on screen at its start time, because that is what "how it will look in video"
-// means: a beat-to-html-layer positional guess (assemble.mjs writes one per beat, in order) holds for
-// a fragment-per-beat film and is simply wrong for a continuous-object film (one shader/group layer
-// spanning the whole duration, no per-beat html at all), so it is not used here. The render is the
-// single source of truth for what a beat shows; nothing upstream of it gets to overrule that by name.
+// Seeks the same scene.html this studio already boots and shoots one frame per beat: one page launch
+// and N seeks, same shape as buildStrip() above. The render is the single source of truth for what a
+// beat shows, whatever is actually on screen at its start time; nothing upstream overrules that by name.
 let planFrames = null;
 async function buildPlanFrames() {
   const sbPath = storyboardPath();
@@ -570,19 +516,11 @@ const studioRoutes = (req, res) => {
     fs.createReadStream(file).pipe(res);
     return true;
   }
-  // rebuilt per request (and the gate re-run), so an edit + reload shows the new timeline
   // ---- the PLAN, as the film rather than as grey boxes -------------------------------------------
-  // A film has two artefacts and studio only ever showed one. This used to serve `make panels`, one
-  // grey still per beat sized from `shot:`, which answers how big and where and nothing about what is
-  // in the frame, so nobody could approve a plan from it (engine-doctrine/MISTAKES.md #592). A later
-  // pass replaced that with a fragment previewed alone, or a box drawn from `archetype:`: closer, but
-  // still not the picture the film will actually show, since a fragment on its own carries none of the
-  // camera, the other layers or the transitions around it (the owner's own words: "plan should only
-  // show complete rendered sheet actual how it will look in video"). So this route serves the
-  // storyboard's own fields as DATA, and /api/plan-frames (below buildPlanFrames) serves one real
-  // rendered still per beat, seeked out of the same scene.html this studio already boots.
-  // WHERE THE FILM IS, in the tool that shows the film. `make stage` answers this in a terminal, and a
-  // terminal is not where anyone is looking while they work on a film.
+  // A fragment previewed alone, or a box drawn from `archetype:`, carries none of the camera, other
+  // layers or transitions around it (MISTAKES.md #592), so this route serves the storyboard's own
+  // fields as data, and /api/plan-frames (below buildPlanFrames) serves one real rendered still per
+  // beat, seeked out of the same scene.html this studio already boots.
   if (url === '/api/stage') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     try { const st = stageOf(dataArg); res.end(JSON.stringify({ ok: true, ...st, ...splitNext(st.next) })); }
@@ -597,19 +535,17 @@ const studioRoutes = (req, res) => {
       const src = fs.readFileSync(sbPath, 'utf8');
       const sb = parseStoryboard(src);
       const blocks = blocksOf(src);
-      // `archetype`/`weight`/`borrows` still travel here for the tags and the colour arc; the picture
-      // itself now comes from /api/plan-frames, never composed from these fields on the client.
+      // `archetype`/`weight`/`borrows` travel here for the tags and colour arc; the picture itself
+      // comes from /api/plan-frames.
       let themeJson = null;
       try {
         const raw = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'themes', THEME_NAME + '.json'), 'utf8'));
         themeJson = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
       } catch { /* sketch falls back to studio's own greys */ }
       const palette = themeJson ? themeJson.palette : null;
-      // the bg palette a `ground:` name resolves against, DERIVED the same way films/scene/scene.js and
-      // harness/dev/candidates.mjs already derive it: the theme's own `bg` block wins, else it is built
-      // from the palette. Reusing bgPreset()/isLightBg() here (rather than a hand-kept light/dark preset
-      // list) means a declared ground gets the SAME colour the engine would actually paint, from the one
-      // place that knows how: a name alone (`accent`) is not light or dark, the theme is.
+      // Derived the same way films/scene/scene.js and harness/dev/candidates.mjs derive it: the theme's
+      // own `bg` block wins, else it is built from the palette, so a declared ground gets the same
+      // colour the engine would actually paint.
       const bgPal = themeJson ? ((themeJson.bg) || bgPaletteFrom(themeJson.palette)) : undefined;
       // groundSwatch(name) -> {css, tone} | null. `null` for an undeclared or unrecognised name: the
       // caller must show absence AS absence (engine-doctrine's own rule for this pane), never a plausible
