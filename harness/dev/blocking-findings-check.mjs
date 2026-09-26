@@ -1,40 +1,3 @@
-// harness/dev/blocking-findings-check.mjs: a BLOCKING finding must name what it saw, where, and the
-// one fix. harness/lib/findings.mjs already carries `at` and `fix` fields beside `summary`; this checks
-// whether a gate actually fills them in.
-//
-// THE PROOF THIS MATTERS IS RECORDED. quality/gates/seam-snap.mjs printed "flash at 12.30s (frame 369)"
-// and was ignored for ten days. Rewritten to name the outgoing beat, the incoming beat, the measured
-// dip and the one fix, it was acted on within the hour. Same measurement, different text: a summary
-// alone tells a reader something broke, `at` tells them where to look, `fix` tells them what to type.
-//
-// Same shape as ledger.mjs's `unjudged` ratchet and harness/dev/prose-check.mjs: report the count, fail only on an
-// INCREASE, --stamp lowers the ceiling on purpose. The baseline lives here, not under
-// quality/baselines/, for the same reason prose-check.mjs's does: that directory is the record of what
-// a SCENE passed, and this ratchet is about the gate suite's own code, never a scene.
-//
-// DETECTION METHOD, AND ITS LIMITS. This reads each gate's SOURCE TEXT and looks for `.fail(` calls and
-// `.finding({...})` calls carrying a literal `severity: 'error'`, then checks whether that call's own
-// object argument spells `at:` and `fix:`. It cannot run the gates (a scene-shaped finding needs a
-// scene loaded, an asset captured, sometimes ffmpeg), so it never sees the REAL argument values, only
-// the literal text of the call. Three known blind spots, all resolved toward the conservative count
-// (missing wins on a tie), because a false BLOCK from over-counting is a wasted --stamp, but a false
-// PASS from under-counting is a gate this ratchet was built to catch, quietly not caught:
-//   - a `.fail(code, msg, extra)` call passing a VARIABLE for `extra` (built up elsewhere in the
-//     function, or forwarded through a local wrapper like frame-check.mjs's `err`) cannot be read
-//     without tracing that variable's assignments; counted as missing.
-//   - a `.finding({ ..., severity: cond ? 'error' : 'warn', ... })` call whose severity depends on
-//     runtime data is not literally 'error', so it is not counted as blocking at all (a real occurrence
-//     could still be a blocking record at runtime; this undercounts that shape, but every such call in
-//     the gate suite today also carries a literal `waived: true`, which the aggregator already treats
-//     as not-a-block (quality/gates/author-check.mjs: `records.filter((f) => !f.waived)`), so excluding
-//     it matches the aggregator's own rule rather than fighting it).
-//   - a finding built through a helper this file does not know about (not `.fail`/`.finding` on a
-//     `gateFindings()` handle) is invisible to this scan entirely.
-// Measured today (see the printed count): the great majority of `.fail(` calls in this repo pass a
-// literal object or none at all, so the literal-text read is accurate for nearly all of them; the
-// handful of indeterminate calls are named above rather than silently folded into the total.
-//
-//   node harness/dev/blocking-findings-check.mjs [--stamp] [--json]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -97,10 +60,6 @@ function splitTopArgs(inner) {
   return args;
 }
 
-// SHORTHAND COUNTS. `{ at, fix, doc: '...' }` sets the same two fields as `{ at: at, fix: fix }`, and
-// a scanner that only matched `key:` read the shorthand form as ABSENT and failed a gate that had done
-// exactly what this ratchet asks for. So match either `key:` or `key` followed by a comma or the
-// closing brace, which is the only other shape a property name can legally take in an object literal.
 const hasKey = (text, key) => new RegExp(`\\b${key}\\s*(?::|,|\\}|$)`).test(text);
 const isWaived = (text) => /\bwaived\s*:\s*true\b/.test(text);
 
@@ -142,8 +101,6 @@ function blockingCalls(file, src) {
 function census() {
   const files = fs.readdirSync(GATES).filter((f) => f.endsWith('.mjs') && !f.endsWith('.test.mjs')).sort();
   const all = files.flatMap((file) => blockingCalls(file, fs.readFileSync(path.join(GATES, file), 'utf8')));
-  // Missing wins on a tie: an indeterminate call (variable extra) cannot be proven to carry at+fix, so
-  // it counts as missing rather than being dropped from the count entirely (see file header).
   const missing = all.filter((c) => !c.determinate || !(c.hasAt && c.hasFix));
   return { total: all.length, missing };
 }

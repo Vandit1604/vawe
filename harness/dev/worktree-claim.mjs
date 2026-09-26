@@ -1,11 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/worktree-claim.mjs: the CLI worktree.sh calls to record and clear a claim.
-//   node harness/dev/worktree-claim.mjs add <name> <branch> [scope-glob ...]
-//   node harness/dev/worktree-claim.mjs rm  <name>
-//
-// Scopes are OPTIONAL. A worktree with none declared just carries no overlap check, exactly like a
-// brief that never wrote "you touch X" in prose today, no worse than the status quo. See
-// harness/lib/worktree-claims.mjs for the storage and the overlap rule (warn, never block).
 import { addClaim, removeClaim } from '../lib/worktree-claims.mjs';
 
 const [cmd, name, ...rest] = process.argv.slice(2);
