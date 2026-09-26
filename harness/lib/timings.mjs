@@ -1,11 +1,3 @@
-// harness/lib/timings.mjs: `make timings D=<film> [N=10]`. Prints the real wall-clock time each
-// logged step took, read off the run log's wallMs fields (harness/lib/runlog.mjs), never `render.ms`:
-// that field is the rendered VIDEO's length (internal/render/render.go's own printed seconds), not
-// how long the render took. wallMs is measured around the actual command (Makefile for the render,
-// harness/lib/run-author-check.mjs for the gate ladder) with a monotonic clock, so this is the answer
-// to "how long did this take", which the video-length number could not give.
-//
-// Usage: node harness/lib/timings.mjs <film> [N]
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readRuns } from './runlog.mjs';

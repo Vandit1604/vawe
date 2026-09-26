@@ -1,17 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/bench.mjs: is authoring a video in THIS repo getting faster or slower, as a number.
-//
-//   node harness/dev/bench.mjs fast    [--stamp] [--json]   # read-load size + fast-path length (gated)
-//   node harness/dev/bench.mjs render  [--json]             # draft render speed, report-only
-//   node harness/dev/bench.mjs all     [--stamp] [--json]   # fast + render
-//   node harness/dev/bench.mjs session <transcript.jsonl>   # prompt-to-first-draft, report-only
-//
-// claude.dev's "how we made claude.ai 3x faster" is the model: a deterministic proxy stands in for a
-// noisy wall-clock number, CI fails when the proxy gets worse, and the ceiling drops when it improves.
-// Two proxies are gated here because they are pure file reads and cannot vary run to run: how many
-// words an agent must load before it writes its first layer (readLoad), and how many commands plus
-// Makefile targets stand between a brief and the first draft render (fastPath). The draft render
-// itself is real wall-clock, so it is report-only: read it, watch the trend, never gate a push on it.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -24,8 +11,6 @@ import { skillsForStage } from '../lib/skill-stages.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/bench-ratchet.json');
 
-// "before it writes its first layer": a scene has layers from the assemble stage on, so the read-load
-// floor stops at the stage that produces them, not at the whole eight-stage pipeline.
 const READ_LOAD_STAGES = STAGE_ORDER.slice(0, STAGE_ORDER.indexOf('assemble') + 1);
 const FIRST_DRAFT_RENDER_CMD = /^make (dev|preview)$/; // the table's own name for the first draft render
 
@@ -41,7 +26,6 @@ function saveRatchet(patch) {
   fs.writeFileSync(RATCHET, `${JSON.stringify({ ...prior, ...patch }, null, 1)}\n`);
 }
 
-// ---- 1. read-load: the words an agent must load before writing its first layer --------------------
 function readLoad() {
   const detail = [];
   let words = 0;
@@ -65,13 +49,6 @@ function readLoad() {
   return { words, tokens: Math.round(words * 1.33), stages: READ_LOAD_STAGES, skills: [...skillNames].sort(), detail };
 }
 
-// ---- 2. fast-path: commands from brief to first draft render, plus the size of the catalogue -------
-// Reads AGENTS.md's own stage table rather than re-deriving the count by hand, for the reason
-// harness/lib/skill-stages.mjs gives for not hand-keeping a second stage->skill table: a hand-kept
-// number drifts from the doc the moment a row changes and nothing forces the two edits together.
-// Scans the table row by row and stops the moment it reaches the first draft render, inclusive:
-// "brief to first draft render" is a point in the SEQUENCE of commands, not a fixed row count, so a
-// reordered or merged stage row cannot silently change what this counts.
 function fastPathCommands() {
   const text = fs.readFileSync(path.join(ROOT, 'AGENTS.md'), 'utf8');
   const lines = text.split('\n');
@@ -107,7 +84,6 @@ function fastPath() {
   return { commands: commands.length, commandList: commands, makefileTargets: makefileTargetCount() };
 }
 
-// ---- 3. draft render speed: report-only, wall clock is noisy ---------------------------------------
 const RENDER_FIXTURE = path.join(ROOT, 'tests/fixtures/films/sample.json');
 const RENDER_RUNS = 3;
 
@@ -121,9 +97,6 @@ function runOneRender(outPath) {
   const t0 = Date.now();
   let stdout = '';
   try {
-    // VAWE_SERVE_ALL=1: the render server's own escape hatch for a scene outside films/ (renderer's
-    // internal/scene path allowlist), documented in its refusal message as "a local debug render".
-    // The fixture lives in tests/ on purpose (never in films/, which is gitignored and not a fixture).
     stdout = execFileSync('sh', ['-c',
       `. harness/dev/chrome-pin.sh bench >/dev/null 2>&1; VAWE_SERVE_ALL=1 ./bin/vawe --module scene --data "${RENDER_FIXTURE}" --draft --workers 4 --out "${outPath}"`,
     ], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
@@ -148,17 +121,9 @@ function renderBench() {
   return { runs: ms, msMedian, frames, msPerFrame: frames ? msMedian / frames : null };
 }
 
-// ---- 4. session benchmark: prompt to first draft render, from a real transcript --------------------
-// Robust to a SUBAGENT transcript too: same JSONL line shape as a main session (harness/dev/token-cost.mjs),
-// so a bare file is read exactly the same way whether it is `<session>.jsonl` or
-// `<session>/subagents/agent-*.jsonl`. Given a directory, every subagent file under it is folded in by
-// timestamp so a tool call issued by a subagent still counts toward the total.
 const DRAFT_RENDER_RE = /\bmake\s+dev\b|\bmake\s+preview\b|vawe(\.mjs)?\b[^\n]*--draft\b|--draft\b[^\n]*vawe\b/i;
 const DRAFT_TOOL_NAMES = new Set(['mcp__vawe__vawe_draft']);
 
-// A 'user' line is either the human's own message or a tool_result carried back to the model; only
-// the former counts as "the prompt started here", so a bare tool_result line is read for its
-// tool-success side effect and never mistaken for a real user turn.
 function handleUserLine(d, ts, events, pendingToolUse) {
   const content = d.message.content;
   const isRealUserText = typeof content === 'string'
@@ -257,7 +222,6 @@ async function sessionBench(transcriptPath) {
   };
 }
 
-// ---- report + gate -----------------------------------------------------------------------------
 const f = gateFindings({ line: (r) => `  ${r.summary}` });
 
 function reportFast(stamp) {
@@ -319,10 +283,6 @@ function reportRender(stamp) {
   return r;
 }
 
-// JSON mode carries the real numbers, not just pass/fail: findings.mjs's gateFindings alone would
-// only surface a fail/warn record, and a report-only mode (render, session) has no fail record ever,
-// so its --json would otherwise say nothing at all. emitJson is the documented escape hatch for a
-// caller that needs a payload richer than a findings array.
 async function main() {
   const [, , cmdRaw, ...rest] = process.argv;
   const cmd = cmdRaw && !cmdRaw.startsWith('-') ? cmdRaw : 'all';

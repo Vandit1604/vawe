@@ -251,24 +251,6 @@ export function deploySuccess({ x, y, w = 620, url = 'app.vawe.dev', title = 'De
   return out;
 }
 
-// diff: a code diff card. `lines` = [{sign:'+'|'-'|' ', text}] with add/del colouring.
-export function diff({ x, y, w = 620, lines = [], start = 0, dur = 4 } = {}) {
-  const col = { '+': T.green, '-': T.down, ' ': T.sub };
-  // EVERY CHANGED LINE SITS IN ITS OWN TINTED BAND, which is what a diff looks like everywhere it is
-  // read. Colouring the glyphs alone leaves the eye to scan for green and red words in a wall of
-  // mono; the band makes the shape of the change visible before a single word is. `--up` and `--down`
-  // are spent here on real direction (added / removed), which is the one thing they are for.
-  const band = { '+': tint(T.green, TINT.chip), '-': tint(T.down, TINT.chip) };
-  for (const ln of lines) if (!(ln.sign in col)) throw new Error(`blocks/dev.mjs diff: unknown sign `
-    + `"${ln.sign}". Known: ${Object.keys(col).map((k) => JSON.stringify(k)).join(', ')}`);
-  const rows = lines.map((ln) => `<div style="font:400 ${TYPE.lead}px var(--font-mono);color:${col[ln.sign]};`
-    + `padding:${SPACE.tight}px ${SPACE.snug}px${band[ln.sign] ? `;background:${band[ln.sign]};border-radius:${R.micro}px` : ''};`
-    + `white-space:pre">${ln.sign} ${ln.text}</div>`).join('');
-  const html = `<div style="display:flex;flex-direction:column;gap:${SPACE.hair}px;padding:${SPACE.lg}px;`
-    + `box-sizing:border-box;width:${w}px">${rows}</div>`;
-  return [{ type: 'html', x, y, w, ...cardChrome({ radius: R.tight }), html, start, duration: dur, enterDur: 0.5, exitDur: 0.35 }];
-}
-
 // fileTree: an indented file/folder list; `active` highlights the focused row.
 export function fileTree({ x, y, w = 360, items = [], start = 0, dur = 4 } = {}) {
   // THE TREE EXPANDS: rows arrive top-down, each sliding in from its own indent (`parts`, one
@@ -394,15 +376,6 @@ export const DEV_SCHEMAS = {
     active: { kind: 'int', min: 0, max: 20, def: null },
     // The pitch between step rows. The success card is placed at steps.length * rowGap + 30.
     rowGap: { kind: 'int', min: 24, max: 200, def: 52 },
-  },
-
-  diff: {
-    w: { kind: 'int', min: 200, max: 1920, def: 620 },
-    lines: { kind: 'list', of: { kind: 'row', fields: {
-      // The sign picks the colour: added, removed, or context.
-      sign: { kind: 'enum', of: ['+', '-', ' '] },
-      text: { kind: 'str', max: 200 },
-    } }, def: [] },
   },
 
   fileTree: {

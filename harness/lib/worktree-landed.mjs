@@ -1,11 +1,3 @@
-// harness/lib/worktree-landed.mjs: is a worktree's work already present in main, byte for byte?
-//
-// Extracted out of harness/dev/worktree-prune.mjs so worktree-status.mjs can ask the same question
-// (Task 3: a branch sitting on unmerged commits, never reported, is exactly the "agent stalled and
-// nobody noticed" case) without a second implementation of "landed" drifting from the one prune already
-// trusts. Same rule, same caveats: `git diff main..branch` is the wrong question (it also reports
-// every file main itself moved on), so this compares each commit's OWN files, and each dirty/untracked
-// file, against the main working tree, content-first, never by commit graph.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -55,15 +47,6 @@ export function dirtyFiles(t) {
     .map((l) => l.slice(3).replace(/^"|"$/g, '')).filter((f) => f && !f.endsWith('/'));
 }
 
-// ponytail: a worktree hundreds of commits ahead of main is almost never "149 real edits nobody
-// landed"; measured here, it is a worktree whose `main` moved on underneath it or that was branched
-// from something else entirely (one on this machine sat at 2206). Diffing every one of those commits
-// file-by-file, each file re-checked with its own `git show`, is the byte-for-byte guarantee this
-// module exists for, but past this cap it turns a status check into a multi-minute git subprocess
-// storm for a number nobody would act on differently. Above the cap this reports the commit count and
-// SKIPS the per-commit byte check (still runs the cheap dirty-file check below); the caller sees a
-// real, large number and a note, never a silent hang. Raise it if a legitimate long-lived branch needs
-// the full check; drop CAP_COMMITS to 0 to always skip it.
 const CAP_COMMITS = 200;
 
 /** `{ commits, stranded, capped }` for one worktree: commit count ahead of main, the list of files

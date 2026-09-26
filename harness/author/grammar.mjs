@@ -1,18 +1,3 @@
-// harness/author/grammar.mjs: what we have learned about how good films are BUILT.
-//
-//   node harness/author/grammar.mjs            # the whole store, as one comparison table
-//   node harness/author/grammar.mjs <name>     # one film's full reading
-//   make grammar [N=<name>]
-//
-// WHY THIS EXISTS. `make study` reads one reference and writes `grammar/<name>.json`. That is a fact
-// per film. The question an author actually has is comparative: how long does a shot hold in work that
-// reads well, how active is it, does the ground turn, what survives a cut. Answering that meant opening
-// several JSON files and holding five numbers in your head, which is where a reading goes to die.
-//
-// IT REPORTS WHAT IS MISSING AS LOUDLY AS WHAT IS THERE. A grammar file with every judgement blank is
-// a film that was measured and never read, and a table that quietly omitted those rows would present a
-// corpus of three as a corpus of nine. That is the absence-read-as-a-pass shape harness/lib/census.mjs
-// exists for, so the unread films are counted in the header and listed at the end.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,12 +7,6 @@ const DIR = path.join(ROOT, 'grammar');
 const ONE = process.argv.slice(2).find((a) => !a.startsWith('--'));
 
 let files = [];
-// A LEADING UNDERSCORE MEANS "not a film", which is the convention films/scene already uses for a
-// file that is in the directory but not part of the population. `_claims.json` and `_patterns.json`
-// live here because they are ABOUT the films and belong beside them; they are excluded by RULE rather
-// than by a list of names, because a list of exceptions grows and the second time I added one I had
-// already forgotten the first. Anything without the prefix must be a film, so a real grammar file
-// missing `measured` still crashes loudly instead of being quietly skipped.
 try { files = fs.readdirSync(DIR).filter((f) => f.endsWith('.json') && !f.startsWith('_')).sort(); } catch { /* none yet */ }
 if (!files.length) {
   console.log(`\n  No grammar yet. \`make study VIDEO=refs/<file>.mp4 NAME=<name>\` measures a reference and`);
@@ -57,36 +36,8 @@ if (ONE) {
   process.exit(0);
 }
 
-// A SHOT COUNT THIS TOOL GUESSED MUST NOT PRINT LIKE ONE IT MEASURED, and the first version of this
-// table did exactly that. `study.mjs` falls back to fixed sampling when no frame scores above the cut
-// threshold, which is the correct answer for a film built on dissolves, and it records the fallback in
-// `measured.shotDetection`. The table read `measured.shots` and `measured.medianShot` without asking,
-// so a 19.78s film sampled into 10 equal 1.98s slices printed as "10 shots, median 1.98s, 30.3/min".
-//
-// The hand study of that same film (engine-doctrine/CRAFT/REF-pin-16818198602994243.md) counted 15 shots at a
-// 1.08s median, by eye, correctly. Five of the seven rows here were in that state. So the store's first
-// act was to contradict the one careful reading the repo already had, in a table with nothing on it to
-// say which number to believe. That is absence read as a pass, in a file whose own header warns about
-// absence read as a pass.
-//
-// A fixed-sampled row keeps its ground and motion, which are real: those are measured over spans and do
-// not care where the spans came from. It loses its shot count, its median and its cut rate, because
-// those are answers to a question that was never answered.
 const sampled = (g) => g.measured.shotDetection !== 'scene-score';
 
-// ── the document: one page an author reads BEFORE authoring ──────────────────────────────────────
-//
-// GENERATED, never hand-written, and that is the whole difference between it and the deep studies it
-// links to. `engine-doctrine/CRAFT/REF-<name>.md` is a person going frame by frame through ONE film: palette by
-// pixel share, type crops, the continuity register, what the engine cannot do. Those are worth writing
-// and there is no machine substitute for them. What no one was ever going to keep current by hand is
-// the CROSS-FILM page: every reference on one scale, so "how long does a shot hold in work that reads
-// well" has an answer instead of an impression.
-//
-// So the two are not two owners of one fact. The store owns the measurements and the per-film reading;
-// a deep study owns one film in depth and names itself in `deepStudy`; this page is a VIEW over the
-// store and is overwritten every run. Editing it by hand is the one thing to not do, which is why it
-// says so in its own first line.
 function renderDoc(all) {
   const sampled = (g) => g.measured.shotDetection !== 'scene-score';
   const readN = (g) => (g.shots || []).filter((s) => s.moves).length;
@@ -162,10 +113,6 @@ function renderDoc(all) {
       L.push('');
     }
   }
-  // PATTERNS: what recurs ACROSS films, which is the only thing a corpus can say that a single study
-  // cannot. Authored, never derived: a device seen in three films is a person's judgement that the three
-  // are doing the same thing, and no measurement reaches that. Each cites its films so the weight is
-  // visible and a reader can check it.
   try {
     const P = JSON.parse(fs.readFileSync(path.join(DIR, '_patterns.json'), 'utf8'));
     if (P.patterns && P.patterns.length) {
@@ -188,10 +135,6 @@ function renderDoc(all) {
     }
   } catch { /* no patterns file yet */ }
 
-  // GAPS: what a reference does that we cannot. The other half of reading a film, and the half that
-  // turns a study into engine work. Each names the film that motivated it and says whether a probe was
-  // actually rendered, because "we cannot do this" asserted without a probe is how a capability gets
-  // rebuilt beside the one that already existed.
   try {
     const G = JSON.parse(fs.readFileSync(path.join(DIR, '_gaps.json'), 'utf8'));
     if (G.gaps && G.gaps.length) {
@@ -237,10 +180,6 @@ function writeDoc(all) {
   return out;
 }
 
-// A GENERATED DOC WITH NO DRIFT CHECK IS A HAND-WRITTEN DOC THAT LOOKS GENERATED. GRAMMAR.md is
-// rebuilt by `--doc`, and until this existed the rebuild happened when somebody remembered, which is
-// the same "one fact, two owners" the page itself is about. `--check` regenerates in memory and
-// compares; docs-drift runs it, so studying a film and not regenerating the page now fails.
 if (process.argv.includes('--check')) {
   const out = path.join(ROOT, 'engine-doctrine/CRAFT/GRAMMAR.md');
   const want = renderDoc(all);
@@ -279,8 +218,6 @@ if (guessed.length) {
   console.log(`  reading into grammar/<name>.json, which is what the authored half is for.`);
 }
 
-// THE NUMBER THIS WHOLE STORE EXISTS TO PUT IN FRONT OF SOMEBODY. Our renderer prints the same motion
-// figure beside every render, so the comparison is one scale, not two impressions.
 const bands = all.map((g) => g.motionBand).filter(Boolean);
 if (bands.length) {
   const lo = Math.min(...bands.map((b) => b.lo)), hi = Math.max(...bands.map((b) => b.hi));

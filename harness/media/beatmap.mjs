@@ -1,12 +1,3 @@
-// beatmap.mjs: detect a track's pulse and write it beside the audio.
-//
-//   node harness/media/beatmap.mjs assets/music/calm.wav
-//   make beatmap MUSIC=assets/music/calm.wav
-//
-// Writes assets/music/<name>.beats.json = { bpm, confidence, beats[], downbeats[] }.
-// Authors then snap cut times to it (core/beats.js snapToBeat), so a transition lands ON the pulse
-// instead of near it. Deterministic: same wav in, same grid out, so a beat-matched video stays
-// reproducible. Maths lives in core/beats.js and is asserted by `make lib-test`.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

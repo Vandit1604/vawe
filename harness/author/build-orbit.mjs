@@ -1,12 +1,3 @@
-// harness/author/build-orbit.mjs: generate films/scene/orbit-proof.json.
-//
-// The single shot that proved keyed depth was worth building. In the reference a ribbon sweeps around
-// a photograph, passing IN FRONT of it on the near side and BEHIND it on the far side, so the flat
-// composite reads as an object in space. `track` was a static number, so before this the ribbon could
-// only ever be entirely in front or entirely behind, and the shot had no way to exist.
-//
-// Two ribbon halves rather than one, because that is what the real object is: a ring, and a ring is
-// near for half its circumference and far for the other half. Each half carries its own depth key.
 import fs from 'node:fs';
 
 const OUT = 'films/scene/orbit-proof.json';
@@ -14,8 +5,6 @@ const DUR = 4.0;
 const CX = 960, CY = 540;             // 16:9 centre
 const PW = 620, PH = 400;             // the photograph, the thing being orbited
 
-// The photo sits at depth 5. A half-ring keyed from 9 down to 1 crosses it exactly once, and the
-// crossing is what sells the space, not the sweep, the OCCLUSION.
 const layers = [
   {
     type: 'image', id: 'photo', src: '/assets/brands/zerochrome/photos/architecture-interior-landscape-2.jpg',
@@ -24,7 +13,6 @@ const layers = [
   },
 ];
 
-// the two halves of the ring, each a rotating arc drawn as an SVG stroke
 const arc = (id, d, color, track0, track1) => ({
   type: 'svg', id, d, viewBox: '0 0 900 900',
   fill: 'none', stroke: color, strokeWidth: 30,
@@ -36,8 +24,6 @@ const arc = (id, d, color, track0, track1) => ({
   ],
 });
 
-// The two halves of one ring. Near half starts in front of the photo (9) and ends behind it (1); far
-// half is the mirror. As they rotate, each crosses the photo's depth of 5 exactly once.
 layers.push(arc('ribbonA', 'M 150 450 A 300 300 0 0 1 750 450', '#c8e64a', 9, 1));
 layers.push(arc('ribbonB', 'M 750 450 A 300 300 0 0 1 150 450', '#0f5132', 1, 9));
 

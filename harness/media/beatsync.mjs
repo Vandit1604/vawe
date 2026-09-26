@@ -1,22 +1,4 @@
-// beatsync.mjs: align a scene's joints to the music's beat grid, at AUTHOR time.
-//
-//   make beatsync D=films/scene/x.json MUSIC=assets/music/warm.wav            # report: what would move
-//   make beatsync D=films/scene/x.json MUSIC=assets/music/warm.wav WRITE=1    # → x.beatsync.json
-//   [GRID=beat|downbeat]  [SNAP=0.12]  [LAYERS=1]
-//
-// THE SNAP ITSELF IS NOT HERE ANY MORE. `core/beats/index.js` owns which joints move and how far; this
-// reads the grid, calls `snapJoints`, and reports. It used to answer the same question separately:
-// its own nearest-beat search (so it never appeared as an importer of `snapToBeat` and nothing linked
-// the two), its own tolerance (half a beat capped at 0.18s, against beat-bind's 0.12s), and its own
-// joint set (transitions and stings as well as cuts and seams). Two owners of one fact, drifting
 // quietly, engine-doctrine/MISTAKES.md #477.
-//
-// A scene that will be beat-matched EVERY render should declare it instead and skip the derivative
-// entirely: `"audio": { "music": "warm", "beatSync": true }`. This tool is the preview, and the
-// escape hatch for a film that wants the snapped times written down where a human can edit them.
-//
-// Deterministic: the snap is a pure function of the scene + the (deterministic) beatmap.
-// Idempotent: a synced scene re-syncs to itself (its joints already sit on grid points).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -38,7 +20,6 @@ const GRID = (flag('--grid') || process.env.GRID || 'beat').toLowerCase();
 const WRITE = has('--write') || process.env.WRITE === '1';
 const SNAP_LAYERS = has('--layers') || process.env.LAYERS === '1';
 
-// ---- beat grid: read the sidecar; generate it once if missing (make beatmap) --------------------
 const beatsFile = MUSIC.replace(/\.(wav|mp3|m4a|aac)$/i, '.beats.json');
 if (!fs.existsSync(beatsFile)) {
   process.stderr.write(`  no ${path.basename(beatsFile)} yet, running beatmap…\n`);
@@ -49,9 +30,6 @@ const bm = JSON.parse(fs.readFileSync(beatsFile, 'utf8'));
 const pulse = (GRID === 'downbeat' ? bm.downbeats : bm.beats) || [];
 if (!pulse.length) { console.error(`✗ beatmap has no ${GRID}s (an ambient pad has no beat). Nothing to snap to`); process.exit(1); }
 
-// LOWER FIRST, for the same reason core/engine/boot.js binds after the lowering pass: a junction written as
-// `transitions` is not a cut or a seam until then, so snapping its `at` would snap a seam by its start
-// where the engine snaps it by its centre. This is why the CLI no longer knows the word `transitions`.
 const data = loadScene(JSON.parse(fs.readFileSync(D, 'utf8')));
 let sceneDur = data.duration || 0;
 if (!sceneDur) for (const L of data.layers || []) sceneDur = Math.max(sceneDur, (L.start ?? 0) + (L.duration ?? 2));
@@ -61,8 +39,6 @@ const unrolled = grid.length - pulse.length;
 const TOL = Number(flag('--snap') || process.env.SNAP) || DEFAULT_MAX_SHIFT;
 const { moved, held } = snapJoints(data, grid, TOL);
 
-// LAYER STARTS are not junctions, so they are not part of the shared policy and stay here: moving a
-// start moves that layer's CONTENT, which is a content decision, not an edit. Off by default.
 const layersMoved = [];
 if (SNAP_LAYERS && Array.isArray(data.layers)) {
   for (const L of data.layers) {

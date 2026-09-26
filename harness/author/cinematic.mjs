@@ -1,14 +1,3 @@
-// cinematic.mjs. The CINEMATIC MOTION director. Real launch films are never static: a continuous
-// camera push + a dolly enter/exit on every hero word is what makes them feel alive (engine-doctrine/CRAFT/
-// REFERENCE-STUDY.md). Authoring that by hand on every beat is slow and is how static/off beats slip in.
-// This emits the motion SCAFFOLD (camera push + per-hero dolly + motion-blur) derived from the scene's
-// OWN beats (not a template), which you then refine. Suggest-first; WRITE=1 → <file>.cinematic.json.
-//
-//   make cinematic D=films/scene/x.json            # report: what it would add
-//   make cinematic D=films/scene/x.json WRITE=1    # → x.cinematic.json (then `make reveal` it)
-//
-// NOT a template: it adds MOTION to the layers/beats you already authored and never invents content or
-// a canned layout. The ledger + `make direct` one-family rule stay the gate. Verify with `make reveal`.
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 
@@ -20,24 +9,17 @@ const layers = d.layers || [];
 const stripHtml = onScreenText;
 const wordCount = (s) => stripHtml(s).split(/\s+/).filter(Boolean).length;
 
-// duration: explicit, else last layer end (+0.4 tail), mirrors scene.html
 let duration = d.duration || 0;
 if (!duration) for (const l of layers) duration = Math.max(duration, (l.start ?? 0) + (l.duration ?? 2));
 duration = +(duration + (d.duration ? 0 : 0.4)).toFixed(2);
 
-// beats = layer-start clusters (>1.4s gap), same signal as the critique/motion-director
 const starts = [...new Set(layers.filter((l) => l.track !== 0).map((l) => l.start ?? 0))].sort((a, b) => a - b);
 const beats = [];
 for (const t of starts) { const last = beats[beats.length - 1]; if (last == null || t - last > 1.4) beats.push(t); }
 
-// HERO = a big, short text word (the thing that should dolly). Not a sentence, not a chip, not already moving.
 const isHero = (l) => l.type === 'text' && (l.size ?? 96) >= 180 && wordCount(l.text) <= 2 && !l.motion && l.text != null;
-// PHRASE = a multi-word text line (candidate for typing / colorWave colour-wave)
 const isPhrase = (l) => l.type === 'text' && wordCount(l.text) >= 2 && !l.typing && l.preset == null && l.text != null;
 
-// the dolly: enter oversized → SNAP to rest (spring settle, slight overshoot) → drift → exit bigger
-// (with motion-blur streak). Pure motion track. The settle uses `spring` and lands in ~0.34s so a
-// hero arrives directed, not floaty. The same snap the default entrances now carry.
 const dolly = (du) => [
   { t: 0, scale: 1.5, opacity: 0, ease: 'easeOutCubic' },
   { t: 0.34, scale: 1.0, opacity: 1, ease: 'spring' },
