@@ -287,7 +287,7 @@ sbBeats.forEach((b, i) => {
 // AGENTS.md), still passes.
 const CONTENT_NOUN_RE = /\b(screen|window|app|ui|dashboard|grid|card|product|photo)\b/i;
 const REAL_ASSET_RE = /assets\/|\.vawe-data\/uploads\//;
-const REAL_COMMAND_RE = /\bmake\s+(capture|sections|screen|assets|photos|gen-image|gen-video|gen-clip)\b/i;
+const REAL_COMMAND_RE = /\bmake\s+(?:(?:media|dev-tool)\s+X=)?(capture|sections|screen|assets|photos|gen-image|gen-video|gen-clip)\b/i;
 
 // A RECIPE: structure measured off a real film (recipes/README.md), applied to layers the author
 // already named. One parser, shared with assemble.mjs (harness/lib/contract.mjs parseRecipeLine), so
@@ -387,7 +387,7 @@ for (const b of blocks) {
   plainContentCheck(b, title);
   // A beat that plans its frame with `make dev-tool X=screen F=` and no matching `fragment:` has a frame no reader
   // can see: the stage, frame-check and the studio read `fragment:` only, so the film skips design.
-  const screenFile = (/\bmake\s+screen\s+F=(\S+)/i.exec(b) || [])[1];
+  const screenFile = (/\bmake\s+(?:dev-tool\s+X=screen|screen)\s+F=(\S+)/i.exec(b) || [])[1];
   const fragNamed = parseFragmentSpec(fieldIn(b, 'fragment')).path || '';
   if (screenFile && path.basename(fragNamed) !== path.basename(screenFile)) {
     err('screen-without-fragment', `beat "${title}": plans \`make dev-tool X=screen F=${screenFile}\` but `
