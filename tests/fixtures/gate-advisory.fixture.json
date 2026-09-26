@@ -1,0 +1,25 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 3,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "hook",
+   "type": "text",
+   "text": "Gate advisory fixture",
+   "x": 120,
+   "y": 700,
+   "w": 1700,
+   "align": "left",
+   "size": 140,
+   "color": "var(--text)",
+   "start": 0,
+   "duration": 3,
+   "anim": "none"
+  }
+ ]
+}
