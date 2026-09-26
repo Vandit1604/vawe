@@ -283,12 +283,42 @@ its median: the aim is to catch a film that is asleep, not to make every film mo
 fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
 verdict and exits 0.
 
-## no-continuous-object (and its inferred twin)
+## The ambition floor: neither soup nor slideshow (`quality/gates/direction-floor.mjs`, RETIRED)
+
+**RETIRED 2026-09, not demoted.** `direction-floor.mjs` was a TASTE gate under the OBJECTIVE/TASTE split
+(`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a film moves, never whether it was
+broken, so it was deleted rather than kept report-only. Its numbers are doctrine now, for a human or an
+agent judge to hold a film to by eye, not a script to enforce:
+
+- **plain-slideshow.** A film with no kinetic typography, no camera move, no transitions AND a motion
+  vocabulary under 2 distinct techniques reads as a slideshow outright. Short of that: 4+ headlines where
+  85%+ just fade/rise with no kinetic reveal is the plain-authoring tell on its own.
+- **low-vocab.** Fewer than 3 distinct motion techniques in play (kinetic type, camera, transitions,
+  count-ups, ken push, a cursor demo, a custom motion track, a `composition` beat) leaves range unused.
+- **sparse-beats.** Past 8s of runtime, a boundary roughly every 3.5s is the floor (`ceil(duration / 3.5)`
+  beats): a 12s film needs about 4 beats, and two or three cards held for twelve seconds is a slideshow by
+  length, not a film.
+- **feature-poverty.** The engine holds about 15 expressive families; past 8s, a film should reach for
+  `min(6, 3 + floor(duration / 8))` of them. Reaching for three of the five things every other film already
+  leans on clears the count and is still a template (the "same shape as the last twenty" check, scored
+  against the library's own `libraryProfile()`, never a fixed list).
+- **flat-seams.** Every boundary riding one gentle speed (`smooth`/`linear`/`out`, no ramp/rush/brake) reads
+  same-y however many effects are used: vary the boundary's VELOCITY, not just its effect
+  (`engine-doctrine/CRAFT/TRANSITIONS.md`, the speed dial).
+
+None of this blocks a build any more. `make judge` and a human/agent eye are where a plain-slideshow film
+now gets caught, the same way `TASTE.md` already argues craft has to be judged, not metered.
+
+## no-continuous-object (and its inferred twin, RETIRED alongside direction-floor.mjs)
+
+**RETIRED 2026-09.** This device lived in `direction-floor.mjs`, the same TASTE gate as the ambition floor
+above, and was deleted with it (`engine-doctrine/SAFEGUARDS.md`). It no longer runs anywhere; the doctrine
+below is kept as a design device to reach for, not a check anything enforces.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
 about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It **blocks on every `make author-check` run**,
-`TASTE=1` or not; a film exempt from it needs a waiver with a `_why`, never a flag. Run it when the
+the 4% item, the one he says to sacrifice first. It used to **block on every `make author-check` run**,
+`TASTE=1` or not; a film exempt from it needed a waiver with a `_why`, never a flag. Reach for it when the
 film's CONTENT is continuous, which is a single-subject
 product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
 anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
@@ -297,15 +327,15 @@ What it measures: one content layer that both spans a cut and CHANGES across it.
 boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing. A
 layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
 failure out of something it cannot see. A layer the engine confines to its own beat is not a candidate at
-all (see `beats-wrapped-as-units` below). **Blocks when the gate is run.**
+all (see `beats-wrapped-as-units` below). **Used to block when the gate ran; no gate runs it now.**
 
-`no-continuous-object-inferred` is the same test where the author declared no cuts at all. An island
+`no-continuous-object-inferred` was the same test where the author declared no cuts at all. An island
 boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and the
-layers standing through it do not outnumber either side. It exists because three films authored on one brief
+layers standing through it do not outnumber either side. It existed because three films authored on one brief
 declared zero cuts between them, so the blocking tell evaluated none of them, including a textbook slideshow
-(MISTAKES #163). It **warns**, and blocks under `STRICT=1`: failing a build over a boundary the author never
-wrote is a bad error to be wrong about, and the threshold that separates the exemplar from the slideshow is a
-single integer validated against four films.
+(MISTAKES #163). It used to **warn**, and block under `STRICT=1`: failing a build over a boundary the author
+never wrote is a bad error to be wrong about, and the threshold that separates the exemplar from the
+slideshow is a single integer validated against four films.
 
 **What neither tell can see.** Both measure that a prop survives a junction and moves. Neither can tell a
 card that travels from a card that BECOMES the next thing, which is the actual grammar. Two of the A/B films

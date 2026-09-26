@@ -15,8 +15,11 @@
 // nothing here can waive either). Every other finding prints in full and exits 0.
 //   STRICT=1 restores the old teeth on every structural step (beats, storyboard, motion, seams, the
 //     HARD_CODES escalation, inspect/plan against an intent sidecar).
-//   TASTE=1 restores the old teeth on the house-style steps only (critique, direct, floor, designspec,
-//     copy, read, pace, eye, sound), same as it always did.
+//   TASTE=1 restores the old teeth on the house-style steps only (critique, direct, designspec,
+//     copy, read, sound), same as it always did. The look-or-move TASTE gates that used to sit here
+//     (direction-floor, motion-floor, eye-trace, ground-arc, choreo, backdrop-turn, pace-check,
+//     jolt-check) were deleted, not demoted: engine-doctrine/SAFEGUARDS.md "OBJECTIVE vs TASTE" says
+//     where each one's real knowledge went.
 // Measured before this was written: turning the REPORTS half into blocks fails 116 of the 141 scenes in
 // this library, four films in five, which is the exact shape CLAUDE.md warns about, a rule waived by
 // reflex has already been repealed and nobody wrote it down. See engine-doctrine/SAFEGUARDS.md and
@@ -34,12 +37,9 @@
 //   critique. The value gate: hollow/placeholder/unbacked/thin/mis-centre beats
 //   direct. The direction gate: cut families, effect-soup, continuity, pacing, and the book-grounded
 //               motion tells (linear-motion, monotone-timing, enter-and-retreat)
-//   floor. The AMBITION floor (inverse of effect-soup): fails a plain slideshow (no kinetic type,
-//               no camera, no transitions). Directed lives BETWEEN soup and slideshow.
 //   dissolve. The TRANSITION gate: two text states cross-dissolved in place
 //   designspec. The LOOK lock: off-palette colours / non-role fonts vs the theme
 //   copy. The WORDS lock: hook/jargon/restatement/flat-number tells in on-screen text
-//   pace, is anything happening, and how often
 //   sound. The SILENCE gate: silent:true with no `_why`, an audio block that produces nothing, and
 //               where the bed came from. It ran for months and nothing read it, because it was not a
 //               step here and stated its findings in a shape finding-codes.mjs could not see.
@@ -163,7 +163,6 @@ const HARD_CODES = {
   // Only fires at all for a film that opted in (`<film>.design.md` exists); silent otherwise, see
   // quality/gates/design-drift.mjs. `design-token-hint` is its non-blocking sibling, always a warn.
   'design-drift': 'every visible box\'s font, radius, shadow and colour is a declared value, in the kit or in the film\'s design.md',
-  'plain-slideshow': 'the film reaches past a slideshow: kinetic type, a camera move, or real transitions',
   // A FILM THAT ASKS FOR SOUND AND HAS NONE IS BROKEN, NOT UNPOLISHED. quality/gates/audio-check.mjs
   // has always said this exactly right ("every cue resolves to nothing and the mixer writes a SILENT
   // track while this gate reads it as sounded") and always exited 0 about it. The owner rejected that
@@ -180,13 +179,10 @@ const HARD_CODES = {
   'cue-missing': 'every cue a film names by hand exists under assets/sfx/',
   'no-preflight': 'the film went through the decision chain before the JSON existed',
   'crossfade-mud': 'no transition dissolves one text state into another in place',
-  'no-continuous-object': 'something survives the film\'s cuts',
   'effect-soup': 'the film does not stack more effect families than it can spend',
   'linear-motion': 'motion carries easing, not a constant rate',
   'monotone-timing': 'the film varies its timing rather than moving everything alike',
   'enter-and-retreat': 'a layer leaves the way it came, in one direction of travel',
-  'no-transition': 'a multi-beat film earns at least one real seam or cut, not flat jumps',
-  'feature-poverty': 'the film reaches into the engine\'s expressive families, not just the top of the box',
   'craft-unvisited': 'every CRAFT doc that applies to this film is answered in the plan',
   // The backdrop is the largest area of the frame. beat-check has warned on it for a while.
   'static-bg': 'the backdrop moves, at least one beat is not a flat field asleep for the whole film',
@@ -321,13 +317,10 @@ const LADDER = [
   ['validate', 'blocks', 'the schema, the vocabulary, and em-dashes in on-screen text'],
   ['storyboard', 'blocks', 'whether this film has a written plan, and whether the plan holds together'],
   ['beats', 'blocks', 'the clock: dead air, an empty closing frame, a backdrop that cannot move'],
-  ['backdrop-turn', 'blocks', 'the world: do the film\'s own bg windows disagree at least once, or is it one tone held the whole way'],
   ['sweep-static', 'reports', 'the RENDERED pixels: did anything move, or is the whole film frozen (needs a render; hard code)'],
-  ['jolt', 'reports', 'frame-to-frame speed jumps on any layer or the camera, plus motion-floor dead windows (needs a current render)'],
   ['edge', 'reports', 'a full-bleed layer stops covering the frame while on screen (edge-reveal)'],
   ['critique', 'reports', 'beat value: hollow, placeholder, unbacked or thin beats'],
   ['direct', 'reports', 'direction: cut families, effect soup, continuity, and the motion tells'],
-  ['floor', 'reports', 'ambition: whether this is a plain slideshow'],
   ['motion', 'blocks', 'whether anything in this film is choreographed rather than named'],
   ['seams', 'blocks', 'every checked defect at a join: crossfade mud, flash, empty stage, ghost, resurrection, split seam'],
   ['covered-move', 'reports', 'a full-bleed layer above starts mid-move and hides it before it plays'],
@@ -336,8 +329,6 @@ const LADDER = [
   ['craft', 'reports', 'the craft checklist: every CRAFT doc relevant to this film is answered in the plan'],
   ['copy', 'reports', 'the words: weak hook, jargon, a restated headline, a number set flat'],
   ['read', 'reports', 'whether a viewer can read each line in the seconds it is on screen'],
-  ['pace', 'reports', 'whether anything happens, and how often'],
-  ['eye', 'reports', 'where the eye is when a cut lands, and where the next shot sends it'],
   ['sound', 'reports', 'whether this film\'s silence is a decision somebody wrote down'],
   ['assets', strict ? 'blocks' : 'reports', 'every referenced image, icon, capture and voice file exists'],
   ...(sbPath ? [['treatment', 'reports', 'whether the written rationale still describes this plan']] : []),
@@ -457,12 +448,12 @@ const record = (name, { code, blockCodes, blockRecords = blockCodes.map((c) => (
   results.push({ name, tier, failed: failed && !waived, waived, reported, findings, unwaived, blockCodes, warnCodes });
 };
 
-// TASTE GATES ARE OPT-IN. Seven of the steps below do not check that a film is BROKEN; they check that
+// TASTE GATES ARE OPT-IN. The steps below do not check that a film is BROKEN; they check that
 // it matches a house style, and the style they were fitted to is a library this repo's own docs call
-// debt. Fitted rules do not stay true: `direction-floor` blocked 38 of 130 shipped scenes and
-// `visual-vocabulary` was waived by a quarter of the library before it was deleted for measuring the
-// wrong thing. A rule that is waived by reflex has already been repealed; leaving it switched on only
-// hides that fact behind a green tick.
+// debt. Fitted rules do not stay true: `direction-floor` blocked 38 of 130 shipped scenes before it was
+// deleted (engine-doctrine/SAFEGUARDS.md) and `visual-vocabulary` was waived by a quarter of the
+// library before it was deleted for measuring the wrong thing. A rule that is waived by reflex has
+// already been repealed; leaving it switched on only hides that fact behind a green tick.
 //
 // THAT REASONING IS ABOUT SEVERITY, AND IT WAS APPLIED TO EXISTENCE. Skipping the step does not protect
 // an author from a rule fitted to the wrong library; it protects the rule from ever being read. So the
@@ -527,23 +518,11 @@ record('validate', runGate('validate', 'validate (schema + em-dash)', 'core/vali
 //     one walks the clock. Blocking, waivable by code.
 record('beats', runGate('beats', 'beat check (timeline holes)', 'quality/gates/beat-check.mjs', strict ? ['--strict'] : []), { waivable: true });
 
-// 1b1. backdrop-turn. Does the film's own declared bg[] windows disagree with each other at least
-//     once, or does one tone hold for the whole run? Reads the authored JSON only, same as beats above,
-//     so it sits beside it and ahead of anything that needs a render. No bg[] at all (a film that
-//     paints its backdrop through a layer instead) is not gradeable and never fails: see
-//     quality/gates/backdrop-turn.mjs `turns()`. Owner-confirmed blocker: engine-doctrine/RULES/world-turns.md.
-record('backdrop-turn', runGate('backdrop-turn', 'backdrop-turn (does the world turn)', 'quality/gates/backdrop-turn.mjs', []), { waivable: true });
-
 // sweep-static. The pixels-moved check, the post-render twin of beats' declared-backdrop check. It reads
 // the RENDERED mp4, so before a render it reports "render first" and finds nothing; once rendered, a film
 // whose whole timeline is frozen emits [sweep-static], a HARD_CODE (below), so it blocks unless waived.
 // Reports here; the escalation pass below gives it teeth.
 record('sweep-static', runGate('sweep-static', 'sweep-static (rendered pixels moved)', 'quality/gates/sweep-static.mjs', []), { waivable: true, tier: 'reports' });
-// 1c. jolt. Frame-to-frame speed jumps (speed.mjs's findVelocitySpikes, over every moving layer and
-// camera leg, cuts excluded) plus motion-floor's dead-window read WHEN a current render exists.
-// Report-only, like sweep-static above; motion-floor needs the mp4 and skips itself with one line
-// when there is none, or when the one on disk predates this version of the scene.
-record('jolt', runGate('jolt', 'jolt (frame-to-frame speed jumps + dead windows)', 'quality/gates/jolt-check.mjs', []), { waivable: true, tier: 'reports' });
 // 1d. edge-reveal. Does a full-bleed layer stop covering the frame while it is on screen, so the
 // ground or the page shows at the border (a camera under scale 1, a layer scaled below 1, an
 // un-overscanned tilt, a corner radius). Report-only: names the fix, never blocks.
@@ -552,8 +531,6 @@ record('edge', runGate('edge', 'edge-check (full-bleed layer stops covering the 
 styleGate('critique', 'critique (value gate)', 'quality/gates/critique.mjs', strict ? ['--strict'] : [], { waivable: true });
 // 3. direct, direction gate; FAILs report, waivable by code.
 styleGate('direct', 'direct (direction gate)', 'harness/author/motion-director.mjs', [], { waivable: true });
-// 3b. direction floor. The AMBITION lower bound (inverse of effect-soup): fails a plain slideshow.
-styleGate('floor', 'direction floor (ambition)', 'quality/gates/direction-floor.mjs', strict ? ['--strict'] : [], { waivable: true });
 
 // 3c. AUTHORED MOTION. The floor above measures a VOCABULARY: it counts techniques and clears a film
 //     that names three of them. This one asks a narrower question the count cannot reach: did anybody
@@ -630,18 +607,6 @@ styleGate('copy', 'copy gate (on-screen writing)', 'quality/gates/copy-check.mjs
 // to BLOCKS on a written condition rather than a wish: when fewer than a fifth of gate-visible scenes
 // carry an `unreadable-hold` finding. The other four codes fit the library today.
 styleGate('read', 'read gate (can a viewer read it in time)', 'quality/gates/read-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
-// PACE. A still film is sometimes right, so this reports rather than blocks. What it is NOT is a matter
-// of opinion: two films authored as a deliberate improvement came out slower than the one they replaced,
-// measured, and the only thing that noticed was a census run by hand afterwards (engine-doctrine/MISTAKES.md #336).
-styleGate('pace', 'pace (is anything happening, and how often)', 'quality/gates/pace-check.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
-// EYE-TRACE. Murch ranks it fourth of six at 7% and says to sacrifice upward from the bottom, so a cut
-// that serves the story may fairly cost the eye a journey. It reports for that reason, not because the
-// measurement is weak. Know two limits before you act on it. The focal point is scored from the JSON,
-// so a layer whose colour is a color-mix or a gradient cannot be read: those are dropped and the count
-// prints on every verdict, never defaulted to zero. And a side holding ONE live layer is marked, because
-// a layer can win by being alone. The first false positive found was a corner watermark scoring 43%
-// across an 0.8s hole, where the real defect is dead air and `beats` owns it.
-styleGate('eye', 'eye-trace (where the viewer is looking at each cut)', 'quality/gates/eye-trace.mjs', strict ? ['--strict'] : [], { waivable: true, exitMeansFail: strict });
 // SOUND. Is the silence a decision, or an omission?
 //
 // WHY IT WAS NOT HERE. It was written, it worked, and nothing ran it. `make audio-check` existed and
@@ -794,13 +759,6 @@ console.log(`      If your eye catches a flaw, it is a FIX, never ship one you n
 // sits in. This re-runs nothing: every code below came out of a gate that already ran in the ladder
 // above, so the cost is a Set lookup on a code we already have.
 //
-// THE AMBITION FLOOR IS NO LONGER GRANDFATHERED. `plain-slideshow` and `no-continuous-object` already
-// carry a stricter waiver test inside direction-floor.mjs itself (PLAN_BACKED_WAIVERS: a bare `_why`
-// is not enough, the storyboard must name `threads:`); a bare `isWaivedBy` `_why` with no named plan
-// does not clear either code, for any film, old or new. Only a waiver direction-floor.mjs itself
-// already honoured (plan-backed) keeps it off this list, because an honoured waiver never reaches
-// `blockCodes` in the first place (`runGate`'s `live` filter drops it before this loop ever sees it).
-const AMBITION_CODES = new Set(['plain-slideshow', 'no-continuous-object']);
 {
   const seen = new Map();
   for (const r of results) for (const c of [...(r.blockCodes || []), ...(r.warnCodes || [])]) {
@@ -813,24 +771,18 @@ const AMBITION_CODES = new Set(['plain-slideshow', 'no-continuous-object']);
   const blocked = [];
   for (const [c, step] of seen) {
     if (!inLibrary) continue;
-    const isAmbitionCode = AMBITION_CODES.has(c);
     // None of HARD_CODES sets `at` on its finding today (no gate that raises one names a beat, layer or
     // value), so only a BARE waiver can ever match here; isWaivedBy(allowRaw, c) with no instance is
     // exactly that. A scoped entry like "static-bg@beat:2" would parse but never match this code.
-    if (isWaivedBy(allowRaw, c) && !isAmbitionCode) continue;   // waived, with a `_why` the always-on half checks
-    blocked.push([c, step, isAmbitionCode]);
+    if (isWaivedBy(allowRaw, c)) continue;   // waived, with a `_why` the always-on half checks
+    blocked.push([c, step]);
   }
   if (blocked.length) {
     console.log(`\n  ${strict ? '✗' : '~'} ${blocked.length} hard code(s) ${strict ? 'BLOCK' : 'would block under STRICT=1'} this film. They are not new rules: they are`);
     console.log(`    the house-style findings above, ${strict ? 'made binding regardless of TASTE=1.' : 'advisory by default (AUTHOR-SIDE GATES ADVISE).'}`);
-    for (const [c, step, isAmbitionCode] of blocked) {
+    for (const [c, step] of blocked) {
       console.log(`      [${c}] (step ${step})`);
       const d = docFor(c); if (d) console.log(`          read: ${d}`);
-      if (isAmbitionCode) {
-        console.log(`          a bare waiver does not clear this one: write a storyboard beside it naming the`);
-        console.log(`          device that holds the film in its \`threads:\` frontmatter line, or actually reach`);
-        console.log(`          past the slideshow (kinetic type, a camera move, a continuous object across the cut).`);
-      }
     }
     console.log(`\n    Fix them, or decide against one in the scene and say why:`);
     console.log(`      "authoring": { "allow": ["${blocked[0][0]}"], "_why": { "${blocked[0][0]}": "…" } }`);

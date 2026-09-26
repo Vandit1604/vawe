@@ -59,10 +59,6 @@ const FORMULA = new Set([
   'quality/gates/beat-check.mjs#STEP',               // search-loop step size
   'quality/gates/compare.mjs#TW',                    // thumbnail pixel width, display geometry
   'quality/gates/compare.mjs#TH',                    // thumbnail pixel height, display geometry
-  'quality/gates/direction-floor.mjs#STEP',          // 1/30s, one frame: a unit conversion
-  'quality/gates/eye-trace.mjs#B',                   // histogram bucket count
-  'quality/gates/motion-floor.mjs#GW',               // motion-sampling grid cell width
-  'quality/gates/motion-floor.mjs#GH',               // motion-sampling grid cell height
   'quality/gates/motion-split.mjs#GRID',             // grid subdivision count
   'quality/gates/motion-split.mjs#SUB',              // grid subdivision count
   'quality/gates/snap-blocks.mjs#CTX',               // diff display context lines

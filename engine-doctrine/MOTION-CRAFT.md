@@ -574,6 +574,34 @@ background *doesn't* change · rotate one cut family (no archetype twice) · pun
 dissolve. It prints a report; `WRITE=1` applies the picks → `<file>.directed.json`. This is how you kill the
 "too many effects" tell: the director chooses fewer, righter effects than an author reaching for variety.
 
+## Does the film ever stop (the motion floor, RETIRED gate, live doctrine)
+
+`quality/gates/motion-floor.mjs` and its companion `jolt-check.mjs` were TASTE gates (measuring HOW a
+film moves, not whether it was broken: `engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE") and were
+deleted rather than kept report-only. The measurement they made is real and worth judging a film against
+by eye, so it stays here as doctrine.
+
+**Local motion, not global motion.** The obvious way to raise a motion score is ambient motion everywhere
+(`idle`/`breathe`/`drift`), which buys the number and costs the film: it is motion for the metric, not for
+the viewer. Grade LOCAL motion (does something arrive, concentrated in a small region) and GLOBAL motion
+(does everything drift a little, spread across the whole frame) separately. Measured across a reference
+and a recreation of it: 80% of the change in a moving window lived in 3.1%-3.9% of the frame in both,
+because both films moved by REVEALING CONTENT in one place, not by breathing everywhere.
+
+**A dead window** is a sampled 0.5s span with no local content motion: a reveal finished and nothing took
+over. Corpus-derived floor (no published perceptual source): a reference film's quietest window still
+measured 0.42 on this scale against a median of 1.33, so a tenth of the median (0.13) is comfortably under
+anything a real film does. `vawe-flow-2` had zero windows below 0.2 across 19.8s; a bad recreation of it
+had ten, including one 2.5s dead stretch.
+
+**A jolt** is a frame-to-frame speed jump on a layer or the camera: over 600px/s for position, over
+0.6 scale-units/s for zoom (`quality/gates/speed.mjs`'s `VELOCITY_SPIKE_PX_S`/`_SCALE_S`, still a live
+readout: `make speed D=<film>`). A planted linear camera station or an `easeIn`-into-a-hold is exactly the
+shape this catches: a move that looks smooth on a storyboard but jerks on screen.
+
+None of this blocks a build any more. `make judge` and a human/agent eye are where a dead or jolting film
+now gets caught.
+
 ## The enforcement map (what code already guarantees)
 
 Purity probe (determinism) · motion contract i–v (holds/settles/monotonic/counters/typing) ·
