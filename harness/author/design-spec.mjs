@@ -6,6 +6,8 @@ import { isLightBg } from '../../core/color/engine.js';
 import { buildKit, MIN_VIDEO_TEXT_PX } from '../lib/stagekit.mjs';
 import { expandThemeFile } from '../lib/theme-load.mjs';
 import { sceneDims, safeArea } from '../../core/layout/safe.js';
+import { findStoryboard } from '../../quality/gates/content-check.mjs';
+import { finishAdvice } from '../lib/finish-advice.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const film = process.argv.slice(2).find((a) => !a.startsWith('--'));
@@ -32,6 +34,10 @@ const P = theme.palette || {};
 const m = { ...(theme.motion || {}) };
 const durationTier = (look.cuts && look.cuts.default) || 'normal';
 const exitRatio = m.exitRatio != null ? m.exitRatio : 0.5;
+
+const slug = path.basename(film).replace(/\.json$/, '');
+const sbPath = findStoryboard(film, slug, ROOT);
+const tip = finishAdvice({ stage: 'design', scene, sbText: sbPath ? fs.readFileSync(sbPath, 'utf8') : null, slug });
 
 const md = `---
 type:
@@ -83,7 +89,7 @@ Content stays inside x ${box.x0}-${box.x1}, y ${box.y0}-${box.y1} (margin ${box.
 
 ## Motion language
 Entrance: ${m.easing || 'ease'}, ${durationTier} pace (durationScale ${m.durationScale ?? 1}). Exit: faster, ${Math.round(exitRatio * 100)}% of the entrance duration.
-`;
+${tip ? `\n${tip}\n` : ''}`;
 
 fs.writeFileSync(path.resolve(ROOT, designPath), md);
 console.log(`✓ design-spec: wrote ${designPath}`);

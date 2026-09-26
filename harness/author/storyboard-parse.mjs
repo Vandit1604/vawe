@@ -43,6 +43,50 @@ export const fieldAllIn = (block, k) => {
 
 export const blocksOf = (src) => src.split(/^##\s+/m).slice(1);
 
+// TABLE BEATS: a `## Beat N: ...` heading per beat is the documented shape, but a beat table
+// (`| beat | start | end | ... |`) is the same information laid out as rows, and a storyboard written
+// that way used to parse to ZERO beats: `blocksOf` only ever split on headings, so every consumer here
+// (match.mjs, choreo, coverage, storyboard-check, …) silently fell back to whatever it does with none,
+// which for `harness/media/match.mjs` was detecting cuts in the REFERENCE and saying nothing about why.
+// Recognised header names, matched case-insensitively so `| Beat | Start | End |` and `| beat | start
+// (s) | end (s) |` both work; a header this does not recognise is dropped, never guessed at.
+const TABLE_HEADER = /^\|\s*beat\s*\|.*\bstart\b.*\bend\b/im;
+const KNOWN_FIELDS = ['type', 'object', 'blueprint', 'onscreen', 'mechanism', 'becomes', 'why', 'motion',
+  'move', 'style', 'layout', 'rest', 'narration', 'archetype', 'weight', 'ground', 'kinetic', 'elements',
+  'fragment', 'recipe', 'camera', 'shot', 'picture', 'placement', 'eye', 'borrows', 'trigger'];
+
+function tableBeats(src) {
+  const lines = src.split('\n').map((l) => l.trim()).filter((l) => l.startsWith('|'));
+  const headerIdx = lines.findIndex((l) => /\bbeat\b/i.test(l) && /\bstart\b/i.test(l) && /\bend\b/i.test(l));
+  if (headerIdx < 0) return [];
+  const cells = (l) => l.replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+  const headers = cells(lines[headerIdx]).map((h) => h.toLowerCase());
+  const col = (name) => headers.findIndex((h) => h === name || h.startsWith(name));
+  const iBeat = col('beat'), iStart = col('start'), iEnd = col('end');
+  if (iBeat < 0 || iStart < 0 || iEnd < 0) return [];
+  const known = Object.fromEntries(KNOWN_FIELDS.map((k) => [k, col(k)]).filter(([, i]) => i >= 0));
+  const rows = lines.slice(headerIdx + 1).filter((l) => !/^\|\s*[-: |]+\|?\s*$/.test(l));
+  return rows.map((l, i) => {
+    const c = cells(l);
+    const start = parseFloat(c[iStart]), end = parseFloat(c[iEnd]);
+    const raw = Object.fromEntries(Object.entries(known).map(([k, idx]) => [k, c[idx] || null]));
+    return {
+      i, title: c[iBeat] || `Beat ${i + 1}`, name: c[iBeat] || `Beat ${i + 1}`,
+      start: Number.isFinite(start) ? start : null, end: Number.isFinite(end) ? end : null,
+      duration: Number.isFinite(start) && Number.isFinite(end) ? end - start : null,
+      type: null, object: null, blueprint: null, mechanism: null, becomes: null, why: null,
+      transition_in: null, transition_why: null, transition_value: null,
+      shot: null, camera: null, picture: null, placement: null,
+      object_in: null, object_out: null, motion: null, move: null,
+      style: null, layout: null, rest: null, narration: null, trigger: null, eye: null,
+      archetype: null, weight: null, borrows: null, ground: null, kinetic: null, elements: null,
+      fragment: null, recipe: null, uses: [], feedback: [],
+      ...raw,
+      onscreen: onscreenLines(raw.onscreen),
+    };
+  });
+}
+
 // parseObjectLine: `object:` may carry a source after an arrow ("name -> films/scene/_together.bar.html"), the real layer to draw instead of assemble.mjs's placeholder rect.
 export function parseObjectLine(raw) {
   if (!raw) return { name: raw, src: null };
@@ -69,7 +113,12 @@ export function onscreenLines(v) {
 export function parseStoryboard(src) {
   const { present, field } = frontmatter(src);
   const total = durSec(field('duration'));
-  const beats = blocksOf(src).map((b, i) => {
+  const headingBlocks = blocksOf(src);
+  // A beat TABLE only when there is no heading beat to prefer: a storyboard authored the documented
+  // way never touches this branch, so the table shape adds recall without changing a single existing
+  // parse. TABLE_HEADER guards tableBeats() with a cheap match first, so a storyboard with an unrelated
+  // table elsewhere (frontmatter, notes) never gets misread as a beat table.
+  const beats = headingBlocks.length ? headingBlocks.map((b, i) => {
     const title = b.split('\n')[0].trim();
     const r = RANGE.exec(title);
     const f = (k) => fieldIn(b, k);
@@ -103,7 +152,7 @@ export function parseStoryboard(src) {
       uses: fieldAllIn(b, 'use'),
       feedback: fieldAllIn(b, 'feedback'),
     };
-  });
+  }) : (TABLE_HEADER.test(src) ? tableBeats(src) : []);
   const { name: objectName, src: objectSrc } = parseObjectLine(field('object'));
   return {
     hasFrontmatter: present, field, duration: total,

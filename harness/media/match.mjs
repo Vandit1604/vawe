@@ -12,7 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { requireTool, probeSize } from '../lib/frame-forensics.mjs';
+import { requireTool, probeSize, probeFps } from '../lib/frame-forensics.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
 import { sampleFrames, tileGrid, blendDiff, ssimOf, gradeable, meanColorOf, labDeltaE } from '../../quality/gates/tile.mjs';
@@ -20,12 +20,18 @@ import { actsFromStoryboard, findStoryboard } from '../../quality/gates/content-
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
-const flag = (n, envKey, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : ((envKey && process.env[envKey]) || d); };
-const positional = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
+// `make study REF=<x> D=<y> MATCH=1` is the DOCUMENTED invocation (engine-doctrine/CRAFT/RECREATION.md),
+// and an agent that copies it verbatim into `node harness/media/match.mjs` (skipping `make`, common when
+// debugging or scripting) passes `REF=<x>` and `D=<y>` as literal argv tokens, not `make` variables: an
+// earlier agent hit exactly this and reported the flags "mismatched". Accepted here too, so the one line
+// the doc teaches works both ways instead of only through `make`.
+const KV = Object.fromEntries(argv.filter((a) => /^[A-Z_]+=/.test(a)).map((a) => { const i = a.indexOf('='); return [a.slice(0, i), a.slice(i + 1)]; }));
+const flag = (n, envKey, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : ((envKey && (KV[envKey] || process.env[envKey])) || d); };
+const positional = argv.filter((a, i) => !a.startsWith('--') && !/^[A-Z_]+=/.test(a) && !(argv[i - 1] || '').startsWith('--'));
 const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
-const REF = positional[0] || process.env.REF;
-const FILM = positional[1] || process.env.D;
+const REF = KV.REF || positional[0] || process.env.REF;
+const FILM = KV.D || positional[1] || process.env.D;
 if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<film.json> MATCH=1  '
   + '(or: node harness/media/match.mjs <ref.mp4> <film.json>)');
 if (!fs.existsSync(REF)) die(`no such reference video: ${REF}`);
@@ -39,16 +45,32 @@ const filmPath = path.resolve(ROOT, FILM);
 if (!fs.existsSync(filmPath)) die(`no such film: ${FILM}`);
 const slug = path.basename(filmPath).replace(/\.json$/, '');
 const g = gradeable(filmPath);
-if (!g.ok) die(`${g.why}. ${g.fix}`);
+// A DRAFT RENDER (`make dev`, 30fps) writes the SAME out/<slug>.mp4 a full `make video`/`make ship`
+// does (renderOf names one path for both), so `gradeable`'s own freshness check already accepts either:
+// it only refuses when the JSON is newer than whatever is there. The one thing it never did was say
+// WHICH render it scored, so a fresh draft and a fresh final looked identical in the report; a friction
+// this caused was an agent believing a draft was silently refused when it had in fact been scored.
+if (!g.ok) die(`${g.why}. ${g.fix}, or \`make dev D=${FILM} --draft\` for a quick pass.`);
 const mp4 = g.mp4;
 
 const { width: W, height: H } = probeSize(mp4);
+const fps = probeFps(mp4);
+const renderKind = fps && fps <= 31 ? 'draft (--draft, ~30fps)' : 'final (~60fps)';
 if (!W || !H) die(`${mp4} has no readable video stream.`);
 
 // ── beats: the film's own storyboard first, the reference's own detected cuts otherwise ────────────
 const sbPath = findStoryboard(filmPath, slug, ROOT);
 let beats = sbPath ? actsFromStoryboard(fs.readFileSync(sbPath, 'utf8')) : null;
 let beatsSource = sbPath ? `storyboard beats (${path.relative(ROOT, sbPath)})` : null;
+
+// A storyboard that EXISTS but names no usable beat (a shape the parser does not read, or beats with
+// no start/end) used to fall through to cut-detection with no word said about it: the report read
+// "scene cut(s) detected in the reference" as if no storyboard had ever been written, and an author
+// who had in fact written one had no way to learn it went unread.
+if (sbPath && (!beats || !beats.length)) {
+  console.log(`  ⚠ ${path.relative(ROOT, sbPath)} exists but named no usable beat (no \`## Beat N:\` `
+    + 'heading and no beat table this parser reads), falling back to scene cuts detected in the reference.');
+}
 
 if (!beats || !beats.length) {
   const cutsDir = scratch('match', slug, '.cuts');
@@ -120,7 +142,7 @@ const rel = (p) => path.relative(ROOT, p);
 const fmt = (v, d = 4) => (v != null ? v.toFixed(d) : 'n/a');
 const lines = [
   `# match: ${slug} vs ${path.basename(REF)}`, '',
-  `beats: ${beats.length} (${beatsSource}) · reference: ${REF} · render: ${rel(mp4)} · size ${W}x${H} · step ${STEP}s`, '',
+  `beats: ${beats.length} (${beatsSource}) · reference: ${REF} · render: ${rel(mp4)}, ${renderKind} · size ${W}x${H} · step ${STEP}s`, '',
   '| beat | window | samples | mean SSIM | colour ΔE | combined | strip | diff |',
   '|---|---|---|---|---|---|---|---|',
   ...ranked.map((r) => `| ${r.i} (${r.label}) | ${r.start.toFixed(1)}-${r.end.toFixed(1)}s | ${r.samples} `
@@ -133,6 +155,7 @@ const mdPath = path.join(OUT_DIR, 'match.md');
 fs.writeFileSync(mdPath, `${lines.join('\n')}\n`);
 
 console.log(`\n  MATCH · ${slug} vs ${path.basename(REF)}\n`);
+console.log(`  scored: ${rel(mp4)}, ${renderKind}, ${W}x${H}`);
 console.log(`  beats: ${beats.length} (${beatsSource})`);
 for (const r of ranked)
   console.log(`  beat ${r.i} (${r.label}, ${r.start.toFixed(1)}-${r.end.toFixed(1)}s): ssim ${fmt(r.ssim)} · `
