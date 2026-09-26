@@ -1,0 +1,30 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "vawe",
+ "aspect": "16:9",
+ "duration": 3,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "axis-demo",
+   "type": "text",
+   "text": "Weight moves live",
+   "x": 120,
+   "y": 700,
+   "w": 1700,
+   "align": "left",
+   "size": 140,
+   "color": "var(--text)",
+   "split": "word",
+   "preset": "fade",
+   "stagger": { "amount": 0.5 },
+   "each": 1.4,
+   "axis": { "wght": [300, 900] },
+   "start": 0,
+   "duration": 3,
+   "anim": "none"
+  }
+ ]
+}
