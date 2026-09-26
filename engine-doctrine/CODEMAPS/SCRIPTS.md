@@ -300,7 +300,7 @@ CAPTURE. Real pixels from the outside world: screenshots of live sites, video pr
 | `assets.mjs` | 103 | yes | harness/media/assets.mjs: make integrating images easy. Given a data JSON, fill every item that has a |
 | `music.mjs` | 97 | yes | music.mjs: fetch a real soundtrack for a launch video, and record where it came from. |
 | `beatsync.mjs` | 93 | yes | beatsync.mjs: align a scene's joints to the music's beat grid, at AUTHOR time. |
-| `sfx.mjs` | 92 | yes | RETIRED: the sound library is SYNTHESIZED now (`make audio`, core/audio-kit.mjs). This fetcher is |
+| `sfx.mjs` | 92 | yes | RETIRED: the sound library is SYNTHESIZED now (`make gen X=audio`, core/audio-kit.mjs). This fetcher is |
 | `tts.mjs` | 89 | yes | harness/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script, |
 | `ref.mjs` | 79 | yes | harness/media/ref.mjs: fetch a reference film from a link, and study it. |
 | `cards.mjs` | 78 | no | harness/media/cards.mjs: parametric, copyright-safe topic cards (designed SVGs) for ANY topic. |

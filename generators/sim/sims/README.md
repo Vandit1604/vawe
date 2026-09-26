@@ -20,7 +20,7 @@ pass once at boot, and `make spectrum` bakes FFT band energy to a per-frame tabl
 row.
 
 ```bash
-make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # bake → assets/baked/ember-burst/
+make gen X=sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # bake → assets/baked/ember-burst/
 make check GATE=sim-audit                              # seeded? bake fresh? sequence intact?
 ```
 

@@ -4,7 +4,7 @@
 // GSAP is a normal npm dependency (package.json), never committed as a file: GSAP's Standard license
 // grants USE but not clear redistribution, so the built file cannot sit in this public, Apache-2.0
 // repo (unlike the three MIT plugin files that stay vendored as-is, see assets/vendor/README.md).
-// Runs as the root "postinstall" script, so `npm install` self-heals it, same pattern as `make fonts`
+// Runs as the root "postinstall" script, so `npm install` self-heals it, same pattern as `make gen X=fonts`
 // for the gitignored font binaries.
 //
 //   node scripts/vendor-gsap.mjs           copy node_modules/gsap → assets/vendor/gsap.min.js

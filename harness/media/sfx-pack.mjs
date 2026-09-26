@@ -57,7 +57,7 @@ fs.writeFileSync(CREDITS, JSON.stringify(credits, null, 1) + '\n');
 fs.rmSync(TMP, { recursive: true, force: true });
 
 const untouched = roster.length - ok - fail;
-console.log(`sfx-pack: ${ok} role(s) overridden with real samples, ${fail} failed, ${untouched} untouched (synth fallback from \`make audio\`).`);
+console.log(`sfx-pack: ${ok} role(s) overridden with real samples, ${fail} failed, ${untouched} untouched (synth fallback from \`make gen X=audio\`).`);
 console.log(`  pack   → Kenney "Interface Sounds", CC0 (${PACK_PAGE})`);
 console.log(`  credits → assets/sfx/credits.json (kept, never committed with the .wav files it describes)`);
 if (fail) process.exit(1);

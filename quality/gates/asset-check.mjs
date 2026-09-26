@@ -119,7 +119,7 @@ if (fs.existsSync(cssPath)) {
   }
 }
 const missingFonts = [...fonts].filter(([u]) => !resolvesToFile(u));
-// A face `make fonts` fetches (listed in fonts.lock.json) is missing because a step was skipped, and
+// A face `make gen X=fonts` fetches (listed in fonts.lock.json) is missing because a step was skipped, and
 // --strict is right to block on it. A face that is NOT in that lock (Tiempos Headline, Modern Era: hand-
 // captured from a reference site, tokens.css says so directly) has no automated fetch at all, so blocking
 // on it would tell an author to run a command that can never produce the file. Those stay a WARN always.
@@ -166,8 +166,8 @@ for (const [u, fam] of missingFonts) {
   const managed = managedFonts.has(path.basename(u));
   f.finding({ severity: managed ? sev() : 'warn', code: 'missing-font',
     summary: `${u} (${[...fam].join(', ')}) has no vendored file, every frame renders in a fallback face and nothing else will say so`,
-    at: u, fix: managed ? 'make fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)'
-      : 'not managed by `make fonts`, a hand-captured face; vendor it by hand or drop the @font-face in core/tokens.css' });
+    at: u, fix: managed ? 'make gen X=fonts   (about twenty seconds; assets/fonts is gitignored, so a fresh worktree has none)'
+      : 'not managed by `make gen X=fonts`, a hand-captured face; vendor it by hand or drop the @font-face in core/tokens.css' });
 }
 for (const [w, v] of remotes) f.note('remote-asset', `${v}  [${w}]  not checked (remote)`, { at: w });
 for (const [w, v] of adapted) f.note('adapted-asset-src',

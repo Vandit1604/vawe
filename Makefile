@@ -9,27 +9,13 @@
 
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
-.PHONY: stage worktrees dev check ship regen dev-tool script animatic panels beats preview storyboard-check styleframes beatsync gradients ransom-sprites build video render all look frame blueprints audit-test test lib-test palette brandspec lookbook sections study photos ledger ledger-add captions review install-hooks assets list clean gen-image gen-clip gen-video sim music music-pack sfx-pack sfx-local gallery examples docs doc-index grammar claims ref studio doctor
-
-# make fonts: download the free, openly-licensed faces into the gitignored assets/fonts/
-# (no font binary is committed; a fresh clone self-heals). Sohne is paid → drop it in fonts/local/.
-fonts: ## [engine] download the free, openly-licensed faces into the gitignored assets/fonts/ (no font binary is
-	node generators/media/fonts.mjs
+.PHONY: stage worktrees dev check ship regen dev-tool gen script animatic panels beats preview storyboard-check styleframes beatsync build video render all look frame blueprints audit-test test lib-test palette brandspec lookbook sections study photos ledger ledger-add captions install-hooks assets list clean gen-image gen-clip gen-video gallery examples docs doc-index grammar claims ref studio doctor
 
 # make doctor: is the checkout ready to render? Today: is gsap vendored (assets/vendor/gsap.min.js,
 # gitignored, written by the root "postinstall" script). Prints the fix command rather than failing
 # silent-substitution style; add more self-heal checks here as they show up.
 doctor: ## [engine] is the checkout ready to render (gsap vendored, and anything else self-heals need); prints the fix
 	node scripts/vendor-gsap.mjs --check
-
-# make fonts-discover SEED=7 [COUNT=12] [CATEGORY=serif|sans-serif|display|monospace|handwriting] [JSON=1]:
-# sample the live Google Fonts catalogue by popularity band and by recency, minus every family already
-# named in themes/*.json and the training-data defaults (Inter, Poppins, Space Grotesk and the rest).
-# Seeded and deterministic: the same seed returns the same faces, so a look stays reproducible.
-# (Distinct from `make fonts`, which DOWNLOADS a fixed vendored set, and from `make font-audit`, which
-# verifies those vendored faces painted. Neither can name a face you have not already used.)
-fonts-discover: ## [engine] sample the live Google Fonts catalogue by popularity band and by recency, minus every family
-	node harness/author/fonts-discover.mjs --seed $(SEED) $(if $(COUNT),--count $(COUNT)) $(if $(CATEGORY),--category $(CATEGORY)) $(if $(filter 1,$(JSON)),--json)
 
 # make invent-look SB=<storyboard.md> [SEED=7] [COUNT=5] [PICK=n NAME=<theme>] [JSON=1]:
 # AUTHOR a look instead of picking one. Reads the storyboard's brief, proposes 4 to 6 complete
@@ -40,11 +26,6 @@ fonts-discover: ## [engine] sample the live Google Fonts catalogue by popularity
 # Every other look tool here reflects a real brand or selects an existing theme; this is the third move.
 invent-look: ## [preflight] AUTHOR a look instead of picking one.
 	node harness/author/invent-look.mjs $(SB) $(if $(SEED),--seed $(SEED)) $(if $(COUNT),--count $(COUNT)) $(if $(PICK),--pick $(PICK)) $(if $(NAME),--name $(NAME)) $(if $(FORCE),--force) $(if $(filter 1,$(JSON)),--json)
-
-# make audio: bake every cue + music bed from PARAMETERS (core/audio/kit.mjs). No network, no
-# licence, deterministic: same params -> same bytes. Replaces downloading a sample library.
-audio: ## [engine] bake every cue + music bed from PARAMETERS (core/audio/kit.mjs).
-	node generators/media/audio-bake.mjs
 
 # make audio-bed D=<file> [WRITE=1]: resolve `audio.music:"auto"` to a concrete bed from the scene's
 # profile (engine-doctrine/CRAFT/SOUND.md via core/audio/select.js). Prints by default; WRITE bakes it in place,
@@ -57,18 +38,6 @@ audio-bed: ## [dev] resolve `audio.music:"auto"` to a concrete bed from the scen
 # (Distinct from `make captions`, which times captions from a plain SCRIPT string, harness/author/captions.mjs.)
 vo-captions: ## [dev] turn a VO word-timing sidecar (audio.voWords) into timed karaoke captions.
 	node harness/media/vo-captions.mjs $(D) $(if $(STYLE),--style $(STYLE)) $(if $(filter 1,$(WRITE)),--write)
-
-# make music GENRE=ambient N=0 NAME=launch: fetch a real soundtrack (Mixkit free stock music) into
-#   NOTE: SFX are synthesized (`make audio`); this MUSIC fetcher is the only remaining download.
-# the gitignored assets/music/ and record its provenance in credits.json. The MUSIC licence differs
-# from the sfx one and is not machine-readable: confirm before commercial release.
-music: ## [engine] fetch a real soundtrack (Mixkit free stock music) into NOTE: SFX are synthesized (`make audio`);
-	node harness/media/music.mjs $(if $(ID),--id $(ID)) $(GENRE) $(N) $(NAME)
-
-# make music-pack: fetch the curated real-loop pack (lofi/chill/beat) the engine ships as its
-# default sound, replacing the synthesized drone beds. core/audio/select.js maps profiles onto these.
-music-pack: ## [engine] fetch the curated real-loop pack (lofi/chill/beat) the engine ships as its default sound, replacing
-	node harness/media/music.mjs --pack
 
 # make gallery: build the hover-to-play example showcase (out/gallery/index.html) from the flagship
 # registry (films/scene/examples.json). Render the examples first (make video / beatsync).
@@ -99,17 +68,6 @@ beatsync: ## [dev] snap the scene's cuts and seams onto the track's beat grid so
 # a downloaded file named `click` turned out to be 19.6 seconds long and nothing noticed (MISTAKES #51).
 # A sample is an OVERRIDE of that synth, never a replacement: an unmapped role still bakes from
 # parameters. engine-doctrine/ASSET-SOURCES.md covers every other source and which are safe to commit.
-
-# make sfx-pack: fetch Kenney's "Interface Sounds" pack (CC0, verified, shippable) and map it onto
-# the engine's cue roster.
-sfx-pack: ## [engine] fetch Kenney's CC0 "Interface Sounds" pack and map it onto the engine's cue roster
-	node harness/media/sfx-pack.mjs
-
-# make sfx-local DIR=<path>: map sounds YOU already downloaded (soundeffect-lab.info is the owner's
-# preferred source, redistribution prohibited so nothing here fetches from it) onto the cue roster,
-# via harness/media/sfx-local-map.json.
-sfx-local: ## [engine] map YOUR downloaded sounds (DIR=<path>) onto the cue roster via sfx-local-map.json
-	node harness/media/sfx-local.mjs --dir $(DIR)
 
 # make sfx-check: is each sound effect the SHAPE its role claims? A 19.6s file named `click` is how
 # a typed line came out sounding like a passing train (engine-doctrine/MISTAKES.md #51).
@@ -289,6 +247,9 @@ regen: ## [maintenance] write every generated file: schema-write + generated-che
 # the one lookup table; X= with no match lists the known names and exits 2, same contract as GATE=.
 dev-tool: ## [maintenance] one-off dev/maintenance tools with no direct caller, routed by name (X=<name>; bare X lists them)
 	@node harness/lib/dev-tool.mjs "$(X)"
+
+gen: ## [engine] the engine's asset/doc bakers, routed by name (X=<name>; bare X lists them)
+	@node harness/lib/gen-tool.mjs "$(X)"
 
 # make ship D=<file>. The ladder with its teeth in: full author-check, render, audit, seams.
 # `make video` is the same render with the ladder in front of it; `ship` adds the post-render gates that
@@ -616,13 +577,6 @@ beats: ## [judge] first/mid/last frame of every beat in one contact sheet (D=<fi
 sheet: ## [dev] DESIGN SHEET: every captured element on one page (on the theme bg), labelled with size +
 	node scripts/brand/design-sheet.mjs $(NAME) $(if $(THEME),--theme $(THEME)) $(if $(SERVE),--serve)
 
-# make theme-remix PRESET=editorial BRAND=acme [BG=#hex ACCENT=#hex TEXT=#hex], pick a design-system
-# PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete themes/<brand>.json. The
-# "pick a preset, paint the brand into it" move: good coherent design in one command, not
-# hand-authored per pixel. Reads assets/brands/<brand>/palette.json when BG/ACCENT are omitted.
-theme-remix: ## [engine] pick a design-system PRESET (directions/*.json) and remix it onto a brand's base+accent → a complete
-	node scripts/brand/theme-remix.mjs --preset $(PRESET) --brand $(BRAND) $(if $(BG),--bg "$(BG)") $(if $(ACCENT),--accent "$(ACCENT)") $(if $(TEXT),--text "$(TEXT)")
-
 # make tts (SCRIPT=narration.txt | TEXT="…") OUT=films/scene/<name>.vo [VOICE=Samantha], LOCAL narration:
 # synthesize a voiceover WAV + word-timing sidecar offline with macOS `say` (no cloud, no key). Writes
 # <OUT>.wav + <OUT>.words.json; wire them into the scene's audio block: { "vo":…, "voWords":… }.
@@ -816,25 +770,6 @@ worktree-status: ## [maintenance] what is running, on what, since when: every li
 bench-fast: ## [maintenance] ratchet: read-load word/token count + fast-path command/Makefile-target count, gated
 	@node harness/dev/bench.mjs fast $(if $(filter 1,$(STAMP)),--stamp) $(if $(filter 1,$(JSON)),--json)
 
-# make review. One-command health snapshot: lib-test + layout audit + a master overlay sheet
-# (/tmp/review.png). Heavier gates stay separate: make probe (purity), make verify (render integrity).
-review: ## [engine] One-command health snapshot: lib-test + layout audit + a master overlay sheet (/tmp/review.png).
-	node quality/gates/review.mjs
-
-# make evals: render the fixed set of eval briefs (quality/runs/evals/briefs/*.json) under the CURRENT
-# engine + rules, into a fresh quality/runs/evals/runs/<timestamp>/ with a contact sheet per brief, one
-# combined sheet, and manifest.json. Asserts LIVENESS only (mp4 exists, duration + dims match the
-# scene): no aesthetic score, a human reads the sheets. Exits 1 if any brief is not live. engine-doctrine/EVALS.md.
-evals: build ## [engine] render the fixed set of eval briefs (quality/runs/evals/briefs/*.json) under the CURRENT engine + rules,
-	node harness/dev/evals.mjs
-
-# make evals-compare BEFORE=quality/runs/evals/runs/<ts> [AFTER=<ts>]: before/after sheets stacked per brief
-# plus compare.html laying the two mp4s side by side (opened automatically). No AFTER renders a fresh
-# run first. Run this whenever a change touches motion, transitions, backgrounds, type or layout, and
-# carry the compare.html link in the commit/PR body.
-evals-compare: build ## [engine] before/after sheets stacked per brief plus compare.html laying the two mp4s side by side (opened
-	node harness/dev/evals.mjs --compare --before $(BEFORE) $(if $(AFTER),--after $(AFTER))
-
 # make critics D=<scene.json> [VS=brand] [DECIDERS=1] [RECORD=<panels.json>]: THE ROSTER
 # (engine-doctrine/CRAFT/SUBAGENTS.md), as an invokable, recorded step. Bare: the six critics' prompts, concrete
 # for this film, to launch as parallel Agent calls. DECIDERS=1: the other half, the roles that WRITE
@@ -911,12 +846,6 @@ effects-json: ## [engine] regenerate the /showcase/effects index (and its previe
 # the real scenes effects-json just wrote. Run it after `make effects-json` changes which effects are
 # previewable, or to re-shoot one family (ONLY=backgrounds) after tuning its poster frame.
 
-# make globe-dots [SPACING=2.2]: re-bake core/globe-dots.js from Natural Earth. Run this only when
-# the spacing or the source changes; the output is committed and the runtime never fetches anything.
-.PHONY: globe-dots
-globe-dots: ## [engine] re-bake core/globe-dots.js from Natural Earth (SPACING=2.2)
-	node generators/media/globe-dots.mjs $(if $(SPACING),--spacing $(SPACING))
-
 # no-judge: has the eye actually looked at every film that shipped a render? make judge writes a
 # receipt (engine-doctrine/JUDGE.md) hashing both the scene JSON and the rendered mp4's own bytes, so it goes
 # stale on either one changing; this ratchets the count of rendered films with no valid one. Not wired
@@ -985,35 +914,18 @@ scrub: ## [dev] preview strip: contact sheet of the whole film (M=<fmt> or F=<mp
 site-assets: ## [site] engine renders -> site/public/assets (+posters). [RENDER=1] [ONLY=films] [CHECK=1] [FORCE=1]
 	node scripts/site/site-assets.mjs $(if $(RENDER),--render) $(if $(ONLY),--only $(ONLY)) $(if $(CHECK),--check) $(if $(FORCE),--force)
 
-# make glyphs FONT=Anybody [WEIGHT=700] [CHARSET=ascii|latin1]
-# woff2 -> three.js typeface JSON (glyph OUTLINES) for extruded 3D text, into assets/fonts/3d/.
-# wawoff2 + fontkit are devDependencies: build-time only, never bundled, never on the render path.
-# Every face here is a VARIABLE font, so the weight is baked explicitly, the default master of
-# Anybody is Thin, and baking it silently would ship the brand headline in a hairline.
-glyphs: ## [engine] woff2 -> 3D typeface JSON (FONT=<Name> [WEIGHT=700] [CHARSET=ascii])
-	node generators/fonts/glyphs.mjs $(FONT) $(if $(WEIGHT),--weight $(WEIGHT)) $(if $(CHARSET),--charset $(CHARSET))
-
-glyphs-verify: ## [engine] render a baked typeface with three.js next to the real woff2 -> /tmp/glyphs-<Name>.png (LOOK AT IT)
-	node generators/fonts/verify-render.mjs $(FONT) $(TEXT)
-
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
 # renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only
 # because 411 ran first. So it runs HERE instead, offline, in its own process, in frame order, as
 # stateful as it likes, and emits a PNG sequence the scene plays back through the existing `clip`
 # layer. Non-determinism is confined to bake time. Same shape as canvas-fx (baked once at boot) and
 # `make spectrum` (FFT baked to a per-frame table). Contract: generators/sim/sims/README.md.
-sim: ## [engine] bake a simulation to frames: D=generators/sim/sims/<name>.mjs [WRITE=1] -> assets/baked/<name>/
-	node generators/sim/run.mjs $(D) $(if $(WRITE),--write)
 
 # Bake a pack of REAL cut-out letter images into the sprite set the `ransom` layer composes from.
 # Unzip your pack into assets/ransom-src/ (a folder per character is ideal), then run this once.
-ransom-sprites: ## [engine] bake assets/ransom-src/ -> assets/ransom/ + manifest.json
-	node generators/ransom/sprites.mjs
 
 # Bake a gradient-background pack into a render-ready library (4K -> 1920, indexed).
 # Royalty-free to use, NOT to redistribute: assets/gradients is gitignored. SRC=<zip|folder>
-gradients: ## [engine] bake a gradient pack -> assets/gradients/ + index.json
-	node generators/media/gradients.mjs
 
 # make filmstrip VIDEO=<file> [FPS=2] [COLS=8] [DEDUP=1] [FROM= TO=], SEE a whole video efficiently:
 # extract frames and pack them into a few dense timestamped contact sheets (the whole piece in a small
@@ -1039,15 +951,3 @@ cinematic: ## [dev] The CINEMATIC MOTION director: emit the camera-push + per-he
 deck: ## [site] publish engine-doctrine/animation.html to the site as /deck (site/public/deck.html)
 	node scripts/site/deck.mjs
 
-# make lightfield [PRESET=ref|tide|fern] [ARGS='--seed 9 --pattern.kind rings ...']  generate a light
-# field: a seeded, palette-driven backdrop. No PRESET rebuilds all three committed fields into
-# films/scene/ and shoots a PNG of each into out/. Options and dials: engine-doctrine/LIGHTFIELD.md.
-.PHONY: lightfield
-lightfield: ## [engine] generate a seeded, palette-driven backdrop (PRESET=ref|tide|fern)
-ifdef PRESET
-	node harness/author/lightfield.mjs --preset $(PRESET) --out films/scene/_lightfield-$(PRESET).html --shot $(ARGS)
-else ifdef ARGS
-	node harness/author/lightfield.mjs $(ARGS)
-else
-	@for p in $$(node -e "import('./core/lightfield/presets.js').then(m=>console.log(Object.keys(m.PRESETS).join(' ')))"); do node harness/author/lightfield.mjs --preset $$p --out films/scene/_lightfield-$$p.html --shot; done
-endif

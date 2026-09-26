@@ -9,7 +9,7 @@ object_t0: "what it looks like before anything happens"
 object_states: "what it becomes at each cut, in order"
 object_last: "the last frame: the payoff, or the moment just before it"
 format: 1920x1080
-theme: "themes/<brand>.json (or: preset <name> remixed via make theme-remix)"
+theme: "themes/<brand>.json (or: preset <name> remixed via make gen X=theme-remix)"
 duration: 29s
 pace: "showreel | explainer | held, CHOSEN before any beat is written, with a seconds-per-idea budget"
 spectacle: "beat N · which layer · which device · what the moment is for, the ONE loud moment"

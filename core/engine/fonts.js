@@ -149,9 +149,9 @@ export function assertFamilies(families, where = 'theme') {
   const bad = rows.filter((r) => r.verdict !== 'OK');
   if (bad.length) {
     const why = {
-      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}), run \`make fonts\``,
+      BROKEN: (r) => `its @font-face file never loaded (${r.src || 'no src'}), run \`make gen X=fonts\``,
       FALLBACK: (r) => (r.registered
-        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved, run \`make fonts\``
+        ? `declared by an @font-face (${r.src || 'no src'}) that never resolved, run \`make gen X=fonts\``
         : 'no @font-face declares it: add one to core/tokens.css, or name a family that has one'),
       'SYSTEM-LUCK': () => 'it paints only because this machine happens to have it installed, and no '
         + '@font-face declares it: every other machine renders a substitute',

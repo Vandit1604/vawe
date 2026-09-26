@@ -2,7 +2,7 @@
 
 Unzip a royalty-free ransom / cut-out letter pack into this folder, then run:
 
-    make ransom-sprites
+    make gen X=ransom-sprites
 
 Preferred layout is a folder per character (several variants each is what makes a note look
 hand-assembled rather than typed):

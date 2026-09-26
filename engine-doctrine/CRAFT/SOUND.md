@@ -51,7 +51,7 @@ Choosing an alternative writes it into the scene like any other studio edit (und
 
 ## AGENT SUMMARY
 
-- Sound is the default, not silence. Give every film sound (`make audio` + `make audio-bed
+- Sound is the default, not silence. Give every film sound (`make gen X=audio` + `make audio-bed
   D=<file> WRITE=1`); ship mute only with a stated reason (`"audio":{"silent":true,"_why":"…"}`).
   A film must still read with the sound off.
 - Enforced by `make check GATE=audio-check` (codes: `silent-by-omission`, `silence-without-a-reason`,
@@ -60,7 +60,7 @@ Choosing an alternative writes it into the scene like any other studio edit (und
 - Checkable action: does this film carry sound, or is the silence a stated decision?
 
 A derived or declared cue still needs a baked file under `assets/sfx/`; an empty pack resolves every
-cue to silence while the gate still reads the film as sounded (`cues-have-no-sound`). Run `make audio`
+cue to silence while the gate still reads the film as sounded (`cues-have-no-sound`). Run `make gen X=audio`
 before shipping.
 
 **`audio.auto`, the cue-derivation flag §4 describes, is now a DEFAULT, not an opt-in**
@@ -94,7 +94,7 @@ Most films need none of the theory below. They need a bed under the type and cue
 earn one. Do this, in order, before reading further:
 
 ```bash
-make audio                       # bake every cue + music bed, no network, deterministic (core/audio/kit.mjs)
+make gen X=audio                       # bake every cue + music bed, no network, deterministic (core/audio/kit.mjs)
 make audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
 make check GATE=audio-check D=<file>        # is the result a decision or an omission? read what it prints
 make video D=<file>               # renders with the mux; listen to out/<file>.mp4
@@ -105,7 +105,7 @@ first command. `make audio-bed` picks the bed from the scene's `profile`, and it
 render: the render binary has no JS pre-pass, so an unresolved `"auto"` reaching the mixer is read as a
 filename and plays silence (`§6` below has the full trap). Five profiles (`apple`, `linear`, `vercel`,
 `a24`, `bloomberg`) still resolve `"auto"` to nothing, so on those, name a bed by hand or fetch a real
-track: `make music GENRE=ambient NAME=<film>` (Mixkit free stock, the one step here that touches the
+track: `make gen X=music GENRE=ambient NAME=<film>` (Mixkit free stock, the one step here that touches the
 network; confirm its licence before commercial release, `§7`).
 
 **When silence is genuinely right,** it is because the destination autoplays muted in-feed and every
@@ -446,7 +446,7 @@ memory before ffmpeg muxes it.
 }
 ```
 
-**The cues** (`CUES` in `core/audio/kit.mjs:270`, baked by `make audio`): `pluck · chime · sparkle ·
+**The cues** (`CUES` in `core/audio/kit.mjs:270`, baked by `make gen X=audio`): `pluck · chime · sparkle ·
 droplet · bloom · success · ready · whoosh · riser · drop · impact · swell · braam`. Thirteen, because
 ten were removed after a listening pass: every cue that was kept has zero noise layers, and the chance
 of rejection rose with the noise-layer count (`core/audio/kit.mjs:196`,
@@ -470,7 +470,7 @@ number; that is not the gap.
 
 **A cue may synthesize its own sound instead of naming a baked one**: `{"t":1,"voice":"chime","params":{"freq":800}}`
 in place of `name`. `voice` picks a live entry in `core/audio/kit.mjs`'s `CUES` table (the same synth
-`make audio` bakes the static cues from), and `params` retunes it: `freq` (Hz, rescales every tone
+`make gen X=audio` bakes the static cues from), and `params` retunes it: `freq` (Hz, rescales every tone
 layer so the voice's own intervals hold), `gain`, `attack`, `decay` (a multiplier, 1 = unchanged), and
 `seed`. It exists for the case a fixed baked cue cannot cover: a beat that wants THIS voice at a pitch
 or a length none of the static roles ship. `generators/media/voice-cue.mjs` bakes it on demand into
@@ -506,8 +506,8 @@ is a workaround rather than the dial.
 | Command | What it does |
 |---|---|
 | `make check GATE=audio-check [D=…] [STRICT=1]` | the sound gate (§1). No `D` prints the library census |
-| `make audio` | bake every synthesized cue from parameters |
-| `make music-pack` / `make music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
+| `make gen X=audio` | bake every synthesized cue from parameters |
+| `make gen X=music-pack` / `make gen X=music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
 | `make audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
 | `make beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
 | `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js). A joint's own `transitions[].at` can also PIN to a beat by index, `"beat:12"` (bare, 0-based, no `.start`/`.end`, distinct from a structural `data.beats[]` id), and `snap:"beat"`/`"bar"`/`"downbeat"` overrides which pulse THAT ONE joint nudges to, regardless of `beatSync.bar`'s own default |
@@ -678,9 +678,9 @@ Two consequences, both already true of this repo and both important:
 - **The files must stay untracked.** `assets/music/` is gitignored. Committing it would publish the
   tracks as standalone downloadable files, which the licence forbids. See `assets/README-LICENCE.md`.
 - **Our sound EFFECTS have no licence question at all, by default.** They are synthesized from
-  parameters by `make audio`, not downloaded. That is a real and underrated advantage; keep it. A real
-  sample is an optional OVERRIDE of one cue, never a replacement of the fallback: `make sfx-pack`
-  fetches a CC0, shippable-by-licence pack, `make sfx-local DIR=<path>` maps sounds you already
+  parameters by `make gen X=audio`, not downloaded. That is a real and underrated advantage; keep it. A real
+  sample is an optional OVERRIDE of one cue, never a replacement of the fallback: `make gen X=sfx-pack`
+  fetches a CC0, shippable-by-licence pack, `make gen X=sfx-local DIR=<path>` maps sounds you already
   downloaded by hand. Every source's licence, and which may be committed vs. kept local-only, is in
   [`../ASSET-SOURCES.md`](../ASSET-SOURCES.md).
 

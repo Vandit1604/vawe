@@ -11,7 +11,7 @@ confirm: "which face was chosen for its personality, and does the size scale hol
 
 ## AGENT SUMMARY
 
-- Run `make brandspec URL=…` (or `make fonts-discover` with no site) BEFORE picking a face or a
+- Run `make brandspec URL=…` (or `make gen X=fonts-discover` with no site) BEFORE picking a face or a
   weight; never guess. Pick 1-3 faces with roles (primary/secondary/accent), pair for contrast not
   conflict, and size hero type to fill 60-80% of frame width, not a web-sized box.
 - Enforced by `make check GATE=audit` (`off-font`, `weak-headline`) and `make check GATE=designspec-check`
@@ -39,7 +39,7 @@ reads pixels: good for dominance, but it read creed's accent as the *sky-photo* 
 Borrowed close to verbatim from the reference notes. Their sentences, our measurements. Go and read the
 source before you argue with any of it.
 
-- **RUN `make fonts-discover` BEFORE you pick a pairing. This is not optional.** *"You will otherwise
+- **RUN `make gen X=fonts-discover` BEFORE you pick a pairing. This is not optional.** *"You will otherwise
   reach for the same 8 fonts every time. That's your training data default, not a contextual choice."*
   They keep two lists. The BANNED faces (`typography.md`): Inter, Roboto, Open Sans, Noto Sans, Arimo,
   Lato, Source Sans, PT Sans, Nunito, Poppins, Outfit, Sora, Playfair Display, Cormorant Garamond, Bodoni

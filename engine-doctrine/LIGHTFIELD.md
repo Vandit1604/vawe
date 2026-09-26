@@ -288,12 +288,12 @@ most-logged bug class in this repo.
 ## The commands
 
 ```bash
-make lightfield                                  # ref, tide and fern only: the loop in the Makefile
+make gen X=lightfield                                  # ref, tide and fern only: the loop in the Makefile
                                                  # is hardcoded and does not yet know about the two
                                                  # new presets. Use the CLI for those.
 node harness/author/lightfield.mjs --preset ember --out films/scene/_lightfield-ember.html --shot
-make lightfield PRESET=tide                      # one preset
-make lightfield ARGS='--seed 91 --pattern.kind shards --bloom "#ffd166" --out /tmp/f.html --shot'
+make gen X=lightfield PRESET=tide                      # one preset
+make gen X=lightfield ARGS='--seed 91 --pattern.kind shards --bloom "#ffd166" --out /tmp/f.html --shot'
 ```
 
 Every flag is derived from the option table, so the CLI cannot drift from the generator. Group keys

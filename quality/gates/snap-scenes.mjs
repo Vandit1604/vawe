@@ -42,7 +42,7 @@ const f = gateFindings();
 const SAVE = args.includes('--save');
 
 // A BASELINE IS ONLY VALID WITHIN ONE FONT STATE, and nothing used to record which one.
-// `assets/fonts/` is gitignored and populated by `make fonts`, so a fresh clone, a worktree, or a
+// `assets/fonts/` is gitignored and populated by `make gen X=fonts`, so a fresh clone, a worktree, or a
 // `make build` that fetches a face mid-session all silently rewrite every text width in the library.
 // Measured: a worktree with 2 faces against this tree's 24 reported 57 scenes changed with not one line
 // of code different, and a `make build` fetching 16 fonts moved 56 scenes the same way.
@@ -199,7 +199,7 @@ for (const e of errored) f.fail('render-error', e);
 if (!SAVE) {
   for (const c of changed) f.fail('scene-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 12).join(' · ')}${c.diffs.length > 12 ? ` … +${c.diffs.length - 12} more` : ''}`, { at: c.name });
   for (const n of nobaseline) f.note('no-baseline', `${n}: determinism-checked, but no baseline to diff against, run \`make check GATE=snap-all SAVE=1\``, { at: n });
-  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make fonts\` to match it or re-save from a checkout in that state`, { at: n });
+  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make gen X=fonts\` to match it or re-save from a checkout in that state`, { at: n });
   if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) f.fail('nothing-compared', `all ${nobaseline.length + staleFontDigest.length} scene(s) lack a comparable baseline, this gate checked NOTHING`);
 }
 console.log(`\n==== SNAP-ALL · ${scenes.length} scenes ====`);
@@ -228,7 +228,7 @@ if (!SAVE) {
   if (was && was.hash !== now.hash)
     console.log(`  ⚠ FONT STATE CHANGED since these baselines were saved (${was.n} face(s) ${was.hash} → ${now.n} face(s) ${now.hash}).\n`
       + `    Every text width in the library moves with it, so a "changed" scene below is NOT evidence about the code.\n`
-      + `    Run \`make fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);
+      + `    Run \`make gen X=fonts\` to restore the recorded set, or re-save the baselines once the font state is the one you mean to verify against.`);
 }
 if (SAVE) {
   const fsNow = NOW_FONT;

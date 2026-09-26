@@ -443,7 +443,7 @@ function register(vendored) {
     added.push(`@font-face { font-family: '${v.family}'; font-weight: ${weight}; font-display: block; src: url('/assets/fonts/${v.file}') format('woff2'); }`);
   }
   if (added.length) {
-    if (!css.includes(MARK)) css += `\n${MARK}\n/* the woff2 files are gitignored; assets/fonts/invented.json lets `+'`make fonts`'+` re-fetch them. */\n`;
+    if (!css.includes(MARK)) css += `\n${MARK}\n/* the woff2 files are gitignored; assets/fonts/invented.json lets `+'`make gen X=fonts`'+` re-fetch them. */\n`;
     css = css.trimEnd() + '\n' + added.join('\n') + '\n';
     fs.writeFileSync(TOKENS, css);
   }

@@ -7,7 +7,7 @@
  "duration": 21,
  "energy": "calm",
  "authoring": { "allow": ["no-storyboard", "no-preflight", "craft-unvisited"], "_why": {
-   "no-storyboard": "a fixed eval fixture (engine-doctrine/EVALS.md): liveness + before/after proof for `make evals`, not a planned film with a requester to sign a lock sheet",
+   "no-storyboard": "a fixed eval fixture (engine-doctrine/EVALS.md): liveness + before/after proof for `make gen X=evals`, not a planned film with a requester to sign a lock sheet",
    "no-preflight": "same fixture: the 9-step decision chain precedes a real brief, this file's brief is fixed and re-run unchanged on every doctrine change",
    "craft-unvisited": "same fixture: it exists to stay small and pass validate/liveness, not to carry a full production craft pass"
  } },

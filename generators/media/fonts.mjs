@@ -1,6 +1,6 @@
 // Fetch the FREE, openly-licensed faces the engine registers in core/tokens.css into the
 // gitignored assets/fonts/. No font binary is committed to the repo (redistribution), a
-// fresh clone runs `make fonts` (or `make build`) to self-heal. Söhne is paid and stays manual in
+// fresh clone runs `make gen X=fonts` (or `make build`) to self-heal. Söhne is paid and stays manual in
 // assets/fonts/local/ (see tokens.css). Idempotent: skips files already present (--force redownloads).
 //
 //   node generators/media/fonts.mjs            download any missing free faces, verify every one
@@ -131,7 +131,7 @@ if (RELOCK) {
   }
   if (missing.length) { console.error(`✗ cannot relock: ${missing.length} face(s) absent from assets/fonts/ · ${missing.join(', ')}`); process.exit(1); }
   fs.writeFileSync(LOCK, JSON.stringify({
-    _why: 'sha256 of every face `make fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node generators/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.',
+    _why: 'sha256 of every face `make gen X=fonts` fetches. Pinned so two machines hold identical bytes and a snap baseline means something across them. Regenerate with `node generators/media/fonts.mjs --relock` ONLY when a version bump is intended, and re-save the snap baselines in the same pass.',
     faces,
   }, null, 2) + '\n');
   console.log(`✓ relocked ${Object.keys(faces).length} faces → harness/media/fonts.lock.json`);
@@ -158,7 +158,7 @@ console.log('note: Sohne is paid (Klim) · drop your own copy in assets/fonts/lo
 if (bad) {
   console.error('\nA face on this machine is NOT the one the library was measured against, so every text width\n'
     + 'is suspect and `make check GATE=snap-all` cannot tell a code change from a font change. Delete the named file\n'
-    + 'and re-run `make fonts` to restore the pinned bytes. If the new bytes are the ones you MEAN to have,\n'
+    + 'and re-run `make gen X=fonts` to restore the pinned bytes. If the new bytes are the ones you MEAN to have,\n'
     + 'run `node generators/media/fonts.mjs --relock` and re-save the snap baselines in the same pass.');
 }
 if (fail || bad || unlocked) process.exit(1);

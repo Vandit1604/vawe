@@ -160,7 +160,7 @@ for (const e of errored) f.fail('block-error', e);
 if (!SAVE) {
   for (const c of changed) f.fail('block-changed', `${c.name}: ${c.diffs.length} change(s): ${c.diffs.slice(0, 10).join(' · ')}${c.diffs.length > 10 ? ` … +${c.diffs.length - 10} more` : ''}`, { at: c.name });
   for (const n of nobaseline) f.note('no-baseline', `${n}: no baseline to diff against, run \`make check GATE=snap-blocks SAVE=1\``, { at: n });
-  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make fonts\` to match it or re-save from a checkout in that state`, { at: n });
+  for (const n of staleFontDigest) f.note('digest-font-mismatch', `${n}: digest entry recorded under a different font state than this run, cannot compare, run \`make gen X=fonts\` to match it or re-save from a checkout in that state`, { at: n });
   if (!identical.length && !changed.length && (nobaseline.length || staleFontDigest.length)) f.fail('nothing-compared', `all ${nobaseline.length + staleFontDigest.length} block(s) lack a comparable baseline, this gate checked NOTHING`);
 }
 console.log(`\n==== SNAP-BLOCKS · ${entries.length} catalog entr${entries.length === 1 ? 'y' : 'ies'} from ${mods.n} block module(s) ====`);

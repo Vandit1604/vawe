@@ -143,7 +143,7 @@ const ok = (name, cond) => { if (cond) { pass++; } else { fail++; console.error(
 test('lib-test: gates', async () => {
 // ---- a gate's own FIX INSTRUCTION must be a command that runs ----
 // `quality/gates/audio-check.mjs` told an author to run `make sfx` in two places and printed it inside
-// the finding, in the tone of the fix. There is no such target; the bake is `make audio`. So following
+// the finding, in the tone of the fix. There is no such target; the bake is `make gen X=audio`. So following
 // a gate's own advice failed with "No rule to make target `sfx`", which is worse than no advice: it
 // teaches the reader that the gates do not know their own repo, and the next real instruction gets
 // ignored too. `make check GATE=doc-refs` already checks this for DOCS, and found 111 stale paths when it landed.

@@ -103,10 +103,10 @@ const PREVIEW = {
 // nothing in node can start the engine). Re-run it after adding a preview family.
 //   `shapes` is exported by BG_NAMES and rejected by films/scene/schema.json, so engine-doctrine/EFFECTS.md
 //   lists a background a scene may not use. That drift is a real bug, reported upstream, not ours.
-//   `extrudeText` needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts.
+//   `extrudeText` needs a 3D typeface baked by `make gen X=glyphs`, and the site ships no 3D fonts.
 const UNPLAYABLE = {
   'backgrounds--shapes': 'the engine rejects it: `shapes` is a registered background name that the scene schema does not accept. The name is real, the preset is not reachable from JSON.',
-  'three-js-scenes-real-geometry--extrudetext': 'it needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts.',
+  'three-js-scenes-real-geometry--extrudetext': 'it needs a 3D typeface baked by `make gen X=glyphs`, and the site ships no 3D fonts.',
 };
 
 // Why a family cannot be played here. Stated on the page, per family, in the author's own terms.

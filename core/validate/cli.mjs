@@ -266,7 +266,7 @@ function musicWarning(m, resolves, root, path, fs) {
   // shipped SILENT for so long (engine-doctrine/MISTAKES.md #132). The mixer now resolves a bare bed
   // name to assets/music/<name>.wav, so mirror EXACTLY that here, the two must agree.
   const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
-  return ok ? null : `audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`;
+  return ok ? null : `audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make gen X=audio / make gen X=music-pack).`;
 }
 
 // A CUE IDENTIFIES ITS SOUND EXACTLY ONE WAY. Since a cue may now be a synthesised `voice` instead of
@@ -309,7 +309,7 @@ function bridgeErrors(bridges, resolves, root, path, fs) {
     if (typeof s !== 'string' || !s.trim()) { errors.push(`audio.bridges[${i}].sound must name a bed, a cue, or a .wav path.`); continue; }
     const bare = !/[\\/]/.test(s) && !path.extname(s);
     const ok = resolves(s) || (bare && ['music', 'sfx'].some((d) => fs.existsSync(path.join(root, 'assets', d, s + '.wav'))));
-    if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav). The render fails rather than dropping the bridge. Run make audio / make music-pack.`);
+    if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav). The render fails rather than dropping the bridge. Run make gen X=audio / make gen X=music-pack.`);
     if (!/^[a-z]+@\d+$/.test(String(b?.at ?? ''))) errors.push(`audio.bridges[${i}].at must be "<kind>@<index>" (cut@1 · seam@0 · sting@2 · junction@3), got ${JSON.stringify(b?.at)}.`);
   }
   return errors;

@@ -570,7 +570,7 @@ function preAssembleNote(){
      +'<button class=splay data-name="'+esc(c.name)+'" aria-label="play '+esc(c.name)+'" title="Play '+esc(c.name)+'">'+ICON.sound+'</button>'
      +'<button class=swhat data-t="'+c.t+'" title="Go to '+c.t.toFixed(2)+'s in Make">'
        +'<b>'+label+' &middot; '+verb+'</b><s>'+c.t.toFixed(2)+'s</s></button>'
-     +'<span class=scur>'+esc(c.name)+(missing?'<i class=miss>needs <code>make audio</code></i>':'')+'</span>'
+     +'<span class=scur>'+esc(c.name)+(missing?'<i class=miss>needs <code>make gen X=audio</code></i>':'')+'</span>'
      +'<div class=spick>'+roles.map(r=>'<span class=alt>'
        +'<button class=altplay data-name="'+esc(r)+'" aria-label="Play '+esc(r)+'" title="Play '+esc(r)+'">'+ICON.sound+'</button>'
        +'<button class=altuse data-i="'+i+'" data-name="'+esc(r)+'" aria-pressed="'+(r===c.name)+'" title="Use '+esc(r)+' here">'+esc(r)+'</button></span>').join('')+'</div>'
