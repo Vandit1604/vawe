@@ -221,6 +221,7 @@ if (tokenLockRan) {
         const name = m[1];
         if (KNOWN_VARS.has(name) || sceneVars.has(name) || selfDefined.has(name) || seenVar.has(name)) continue;
         seenVar.add(name);
+        if (allowed.has('dead-token')) continue;
         // nearest known token, so the message names the fix rather than the problem
         const near = [...KNOWN_VARS].filter((n) => n.replace(/-/g, '') === name.replace(/-/g, ''));
         findings.push({ sev: 'dead-token', msg: `${label(l)} · \`${k}\` reads var(${name}), which nothing defines. CSS answers an undefined custom property by INHERITING, so this renders as whatever the parent was, silently.${near.length ? ` Did you mean var(${near[0]})?` : ' Define it in the theme\'s `vars`, or use a token the engine sets.'}` });

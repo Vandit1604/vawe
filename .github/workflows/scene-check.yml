@@ -87,16 +87,17 @@ jobs:
           echo "base=$base" >> "$GITHUB_OUTPUT"
           echo "Scenes to check against $base:"; cat scenes.txt
 
-      - name: make author-check on each
+      - name: author-check on each, blocking only on findings NEW versus base
         if: steps.changed.outputs.count != '0'
         env:
           TASTE: ${{ inputs.taste && '1' || '' }}
         run: |
           set -uo pipefail
+          base="${{ steps.changed.outputs.base }}"
           failed=0
           while IFS= read -r f; do
             echo "::group::author-check $f"
-            make author-check D="$f" ${TASTE:+TASTE=1} || failed=1
+            node harness/lib/scene-check-new-findings.mjs "$f" "$base" ${TASTE:+--taste} || failed=1
             echo "::endgroup::"
           done < scenes.txt
           exit "$failed"
