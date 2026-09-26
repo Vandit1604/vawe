@@ -28,17 +28,10 @@ export function appendRun(film, record = {}) {
     // by a caller, so neither can be spoofed by a call site forgetting to set it. Both null outside
     // Claude Code (a human's own shell).
     //
-    // `session` alone is not "which agent": a subagent launched via the Agent tool (the harness's own
-    // fresh judge, see engine-doctrine/JUDGE.md) can inherit the SAME `CLAUDE_CODE_SESSION_ID` as the
-    // agent that authored the render, because env vars propagate to a spawned child by default. Refusing
-    // on session alone then refuses the one PASS this guard exists to allow: a genuinely independent
-    // judge. `agent` is the Claude Code PROCESS id (`CLAUDE_PID`), which is per-agent-INSTANCE rather than
-    // per-conversation: a spawned subagent runs as its own process, so its PID differs from its parent's
-    // even when they share a session. The guard below refuses only when BOTH agree (the render and the
-    // verdict are the same agent instance in the same session), so a fresh subagent's PASS is accepted
-    // even from inside the authoring agent's own session.
+    // `agent` tells a fresh judge from its author: an Agent-tool subagent shares BOTH the session id and
+    // CLAUDE_PID with its parent (measured 2026-09-27), so the judge brief sets VAWE_AGENT=<name>.
     session: process.env.CLAUDE_CODE_SESSION_ID || null,
-    agent: process.env.CLAUDE_PID || null,
+    agent: agentId(),
     git,
     dirty,
     checks: record.checks || [],
@@ -64,4 +57,9 @@ export function readRuns(film) {
   return fs.readFileSync(p, 'utf8').split('\n').filter(Boolean)
     .map((l) => { try { return JSON.parse(l); } catch { return null; } })
     .filter(Boolean);
+}
+
+// agentId(): VAWE_AGENT when the brief set one (a fresh judge), else the Claude process id.
+export function agentId() {
+  return process.env.VAWE_AGENT || process.env.CLAUDE_PID || null;
 }

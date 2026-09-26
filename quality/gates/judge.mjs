@@ -133,7 +133,7 @@ if (verdictArg) {
   if (v === 'PASS') {
     const { selfRecorded, thisSession } = selfRecordCheck(inp);
     if (selfRecorded) {
-      console.error(`✗ refused: this PASS would be self-recorded. Session ${thisSession} both rendered ${path.basename(mp4)} and is now trying to pass it. Hand ${sheet} and its rubric to a fresh agent that did not author this film, and record PASS from there.`);
+      console.error(`✗ refused: this PASS would be self-recorded. Session ${thisSession} both rendered ${path.basename(mp4)} and is now trying to pass it. Hand ${sheet} and its rubric to a fresh agent that did not author this film, and have it record PASS with VAWE_AGENT=<its-name> set (a subagent shares this session and process id).`);
       f.fail('judge-self-recorded', 'a PASS was attempted by the same agent that rendered this cut', { fix: 'record PASS from a separate agent' });
       process.exit(1);
     }
