@@ -178,7 +178,9 @@ function extensionFor(buf, contentType) {
   return null;
 }
 
-async function download(url, referer) {
+// exported: the one verified (magic-byte-checked, never zero-byte) fetch, reused wherever a caller
+// needs a site's own media instead of a second bare-fetch implementation.
+export async function download(url, referer) {
   const res = await fetch(url, {
     redirect: 'follow',
     headers: {
