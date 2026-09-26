@@ -11,54 +11,6 @@
     "exitRatio": 0.45,
     "_exitRatio": "a security brand: things leave decisively. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
   },
-  "bg": {
-    "accent": "71,114,245",
-    "tint": "138,143,156",
-    "tint2": "121,149,241",
-    "dotLight": "200,208,230",
-    "paperBase": [
-      "#ffffff",
-      "#f5f8ff"
-    ],
-    "softBase": [
-      "#eef3ff",
-      "#e2ecff"
-    ],
-    "accentBase": [
-      "#4772f5",
-      "#3a5fe0"
-    ],
-    "inkBase": [
-      "#0a0b0e",
-      "#05060a"
-    ],
-    "border": "#e4e7ef",
-    "dark": [
-      "#0a0b0e",
-      "#05060a"
-    ],
-    "darkMesh": [
-      "#0e1220",
-      "#05060a"
-    ],
-    "deep": [
-      "#0a0c14",
-      "#05060a"
-    ],
-    "light": [
-      "#ffffff",
-      "#f5f8ff"
-    ],
-    "ink": [
-      "#0a0b0e",
-      "#05060a"
-    ],
-    "paper": "#ffffff"
-  },
-  "bgDefault": {
-    "preset": "plain",
-    "value": "light"
-  },
   "tokens": {
     "color": {
       "bg": {
@@ -210,5 +162,55 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": {
+      "preset": "plain",
+      "value": "light"
+    },
+    "bgPalette": {
+      "accent": "71,114,245",
+      "tint": "138,143,156",
+      "tint2": "121,149,241",
+      "dotLight": "200,208,230",
+      "paperBase": [
+        "#ffffff",
+        "#f5f8ff"
+      ],
+      "softBase": [
+        "#eef3ff",
+        "#e2ecff"
+      ],
+      "accentBase": [
+        "#4772f5",
+        "#3a5fe0"
+      ],
+      "inkBase": [
+        "#0a0b0e",
+        "#05060a"
+      ],
+      "border": "#e4e7ef",
+      "dark": [
+        "#0a0b0e",
+        "#05060a"
+      ],
+      "darkMesh": [
+        "#0e1220",
+        "#05060a"
+      ],
+      "deep": [
+        "#0a0c14",
+        "#05060a"
+      ],
+      "light": [
+        "#ffffff",
+        "#f5f8ff"
+      ],
+      "ink": [
+        "#0a0b0e",
+        "#05060a"
+      ],
+      "paper": "#ffffff"
+    }
   }
 }
