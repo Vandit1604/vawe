@@ -47,7 +47,7 @@ export const FINISH_REGISTRY = defineRegistry('finish key', FINISH_ENTRIES, {
     title: 'Scene finish keys', tag: 'finish', intro: 'data.finish is the ONE dial for the cinematic grade a '
       + 'premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, '
       + 'depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time. '
-      + 'A scene naming no `finish` key at all gets a subtle default (light grain, soft bloom, gentle vignette); '
+      + 'A scene naming no `finish` key at all gets a subtle default (light grain, gentle vignette, no bloom); '
       + '`finish: false` opts out.',
     usage: (n) => ({ finish: { [n]: true } }),
     noPreview: 'a scene-level pass, not a per-layer effect: render the film to see it',
