@@ -90,9 +90,9 @@ Set `split` (`char` / `word` / `line` / `path`) to break text into units, then `
   lines). The SVG must be inline in `text`, an `<img>` has no reachable paths.
 - `presetOpts` passes per-preset knobs, e.g. `{"px":30}` for `blur`, `{"ease":"easeOutQuint"}` for `draw`.
 
-## Easings (42)
+## Easings (46)
 
-`linear` · `easeInCubic` · `easeOutCubic` · `easeInOutCubic` · `easeOutQuart` · `easeOutExpo` · `easeOutBack` · `easeOutElastic` · `easeInQuart` · `easeInExpo` · `easeInOutExpo` · `easeInSine` · `easeOutSine` · `easeInOutSine` · `easeOutQuint` · `easeInOutQuart` · `easeInQuad` · `easeOutQuad` · `easeInOutQuad` · `easeInQuint` · `easeInOutQuint` · `easeInCirc` · `easeOutCirc` · `easeInOutCirc` · `easeInBack` · `easeInOutBack` · `easeInElastic` · `easeInOutElastic` · `easeInBounce` · `easeOutBounce` · `easeInOutBounce` · `rush` · `brake` · `ramp` · `spring` · `springStiff` · `hold` · `spring-bouncy` · `spring-stiff` · `springEase` · `settle` · `snap`
+`linear` · `easeInCubic` · `easeOutCubic` · `easeInOutCubic` · `easeOutQuart` · `easeOutExpo` · `easeOutBack` · `easeOutElastic` · `easeInQuart` · `easeInExpo` · `easeInOutExpo` · `easeInSine` · `easeOutSine` · `easeInOutSine` · `easeOutQuint` · `easeInOutQuart` · `easeInQuad` · `easeOutQuad` · `easeInOutQuad` · `easeInQuint` · `easeInOutQuint` · `easeInCirc` · `easeOutCirc` · `easeInOutCirc` · `easeInBack` · `easeInOutBack` · `easeInElastic` · `easeInOutElastic` · `easeInBounce` · `easeOutBounce` · `easeInOutBounce` · `rush` · `brake` · `ramp` · `spring` · `springStiff` · `hold` · `spring-bouncy` · `spring-stiff` · `springEase` · `settle` · `snap` · `standard` · `enter` · `exit` · `emphasized`
 
 Entrances decelerate (`easeOut*`), exits accelerate (`rush`), ambient loops are sinusoidal
 (`easeInOutSine`). Never `linear` on a visible move.

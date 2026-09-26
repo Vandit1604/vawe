@@ -60,6 +60,10 @@
     const s = document.createElement('select');
     s.appendChild(new Option('(unset)', ''));
     for (const name of eases) s.appendChild(new Option(name, name));
+    // A scene may already carry a name this list does not enumerate (a GSAP alias like
+    // "power2.inOut", accepted by resolveEasing but not one of the curated EASINGS keys): add it so
+    // the select shows the real value instead of silently falling back to "(unset)".
+    if (value && !eases.includes(value)) s.appendChild(new Option(value, value));
     s.value = value || '';
     s.addEventListener('change', () => { onSet(s.value || undefined); livePreview(); });
     return s;

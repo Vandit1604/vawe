@@ -350,13 +350,13 @@ test('lib-test: registry', async () => {
   })());
 }
 
-// The engine carries TWO easing vocabularies and the FIELD decides which is in force. The exclusion
-// list is the whole rule, and it can rot in silence: too strict invents findings on scenes that name a
-// GSAP ease correctly (showcase-lumen, showcase-type-labour both do), too loose and the wrong-slot
-// name renders on a curve nobody chose. One assertion per direction. engine-doctrine/MISTAKES.md #381.
-ok('easeErrors: a GSAP ease in an engine field is caught', (() => {
-  const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] });
-  return e.length === 1 && /GSAP ease/.test(e[0]);
+// The engine carries TWO easing vocabularies and the FIELD decides which is in force. A GSAP ease is
+// now an ALIAS onto its engine equivalent (resolveGsapAlias, core/motion.js), so it is allowed on an
+// engine field too; a name with no engine equivalent (`steps`) still names the #381 wrong-slot mistake.
+ok('easeErrors: an aliased GSAP ease in an engine field is allowed, an unaliased one still caught', (() => {
+  const ok1 = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] }).length === 0;
+  const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'steps(4)' }] }] });
+  return ok1 && e.length === 1 && /GSAP ease/.test(e[0]);
 })());
 ok('easeErrors: a GSAP ease in a GSAP field is allowed', easeErrors({ layers: [
   { parts: [{ select: 'rect', anim: 'growUp', ease: 'power2.inOut' }] },
