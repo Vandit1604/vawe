@@ -70,6 +70,7 @@ export function findNumberClaims(text, truth) {
   return out;
 }
 
+// A mechanism this repo deleted; naming HISTORY ("retired/deleted/removed" in the same breath, see RETIRED_OK below) is not a mistake and is left alone.
 export const RETIRED_NAMES = [
   { label: 'blueprints/', re: /\bblueprints\// },
   { label: '`make blueprints`', re: /`make blueprints`/ },

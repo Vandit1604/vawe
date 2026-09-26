@@ -18,6 +18,7 @@ export const PHASES = [
 ];
 const PHASE_NAMES = new Set(PHASES.map(([p]) => p));
 
+// `make help`'s fast path only, brief to rendered film, the stage table's own order (AGENTS.md "THE EIGHT STAGES"); `make list` still prints all 200+, this is the twelve an agent needs first.
 export const FAST_PATH = [
   'stage', 'next', 'quiz', 'ideate', 'studio', 'preview', 'dev',
   'probe-frame', 'check', 'ship', 'judge', 'arsenal', 'regen',
@@ -43,6 +44,7 @@ export function collectTargets(makefilePath = path.join(repoRoot, 'Makefile')) {
   return targets;
 }
 
+// Every phase named on a target must be one of the ten declared above: a typo'd phase is as silent a failure as no phase at all, and would otherwise just print under its own heading forever.
 export function untagged(targets = collectTargets()) {
   return targets.filter((t) => !t.phase || !PHASE_NAMES.has(t.phase));
 }

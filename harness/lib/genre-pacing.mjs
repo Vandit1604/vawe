@@ -1,7 +1,9 @@
 import { readReferenceBars, MIN_REFERENCES } from './reference-bars.mjs';
 
+// No genre band names anything past this. MOTION-CRAFT.md's own margin, not an external citation.
 export const CEILING_S = 10;
 
+// engine-doctrine/MOTION-CRAFT.md "Genre pacing tables": house craft doctrine, not a published standard, reported for an author or plan-judge to weigh, never enforced as a bar.
 export const GENRE_PACING = {
   launch: { maxS: 7, doc: 'Launch film (30-60s): 4-7s' },
   walkthrough: { maxS: 8, doc: 'Product walkthrough: 5-8s' },
@@ -19,6 +21,7 @@ const TYPE_GENRE = {
 
 const RECREATION_MAX_S = CEILING_S;
 
+// Real measurement of real external clips, worth printing as evidence; not a source for a threshold here (wiring it to a constant once swung 2.6s-3.6s off the same two clips with zero new data).
 export const referenceBank = readReferenceBars();
 export function describeReferenceBank() {
   const bank = referenceBank;

@@ -1,3 +1,5 @@
+// Measured from real films/scene/ films by duration bucket: transitions/film avg is 1.34 at 10-15s, jumps to 2.57 at 15-18s and 4.47 at 18-25s, the break sits right at 15s.
+// Also the value quality/gates/storyboard-check.mjs's SPINE_MAX_S already used; not picked to match vawe-continuous-action's "~15s".
 export const CONTINUOUS_ACTION_MAX_S = 15;
 
 export const TYPE_SPINES = {

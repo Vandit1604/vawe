@@ -9,6 +9,7 @@ const stamp = () => (env.STAMP ? ['--stamp'] : []);
 const write = () => (env.WRITE ? ['--write'] : []);
 const list = () => (env.LIST ? ['--list'] : []);
 
+// name -> the script + args; keep alphabetical, this is the only place the list is kept.
 export const GATES = {
   'arsenal-check': () => ['quality/gates/arsenal-check.mjs', ...json()],
   'blocks-audit': () => ['quality/gates/blocks-audit.mjs', ...json()],

@@ -179,6 +179,7 @@ export function parseMoveEntries(raw) {
   return s.split(';').map((e) => e.trim()).filter(Boolean).map(parseMoveEntry);
 }
 
+// COMPAT: `motion:` is still a legal field (40 shipped films write it); a `motion:` entry always names a selector so it is always scope PART, and the alias is exact, not approximate.
 export const parseMotionEntry = parseMoveEntry;
 export const parseMotion = parseMoveEntries;
 
@@ -281,6 +282,7 @@ export function elementsErrors(beats) {
   return errs;
 }
 
+// `transition_value:` declares whether a boundary carries the ground from dark to light, light to dark, or holds it; the set matches exactly what quality/gates/ground-arc.mjs measures a frame into (core/backgrounds LIGHT/DARK bands), so declared and measured values are directly comparable (quality/gates/plan-vs-render.mjs).
 export const TRANSITION_VALUES = ['dark->light', 'light->dark', 'held'];
 
 /** parseTransitionValueLine(raw) -> null | {value} | {error}. */
@@ -304,6 +306,7 @@ export function transitionValueErrors(beats) {
   return errs;
 }
 
+// Measured (AGENTS.md's build brief): the core has 14 named camera moves plus a 14-phrase "camera word" registry, and across 42 authored films, ZERO use a named move.
 const CAMERA_PARAM_RE = /(\w+)\s*=\s*(-?[\w.]+)/g;
 const CAMERA_WORD_BY_LOWER = new Map(Object.keys(CAMERA_WORDS).map((w) => [w.toLowerCase(), w]));
 const DECISIVE_CAMERA_TOKEN_RE = /^[a-z][a-z0-9-]*$/i;
@@ -438,6 +441,7 @@ const NORMAL_SHOT_RE = /\b(wide|full|establishing|rest|normal)\b/i;
 const NORMAL_EYE_START_RE = /\b(whole|full)\s+(frame|window|screen|app|composition)\b/i;
 const NORMAL_PICTURE_RE = /\bfull(?:[\s-])?(?:frame|screen)\b|\bfills?\s+the\s+frame\b|\bwhole\s+(?:app|window|screen|frame)\b/i;
 // FULL_FRAME_OBJECT_AREA clears the smallest of the five aspect ratio canvases (1080x1080); engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6
+// 1,400,000px^2 clears every one of the five canvas sizes (smallest is 1080x1080 = 1,166,400) while still excluding a large card or panel; MEDIUM-DERIVED, not invented (engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6).
 const FULL_FRAME_OBJECT_AREA = 1_400_000;
 
 /** normalCameraEvidence(b) -> the matched evidence string, or null. Exported (not just the boolean
@@ -488,6 +492,7 @@ export function cameraStillHeldWarnings(beats, dims = [1920, 1080]) {
   return warns;
 }
 
+// A device named in `eye:` must be real: it either names one of these words (a mechanism this repo actually has) or overlaps a capability the beat already declares in camera:/move:/motion:/use:/recipe:, ranked the same word-overlap way `make arsenal` scores.
 export const EYE_DEVICE_WORDS = ['cursor', 'caret', 'camera', 'push', 'dolly', 'travel', 'pan',
   'dive', 'zoom', 'colour', 'color', 'contrast', 'size', 'scale', 'blur', 'focus', 'motion',
   'stagger', 'reveal', 'cut', 'draw', 'wordmark', 'flash', 'word-by-word', 'ground', 'type', 'typing'];
@@ -530,10 +535,12 @@ export function eyeErrors(beats) {
   return errs;
 }
 
+// A beat "has motion" when it declares anything the eye could plausibly be pulled by: a real camera, a layer-scope move, a parts entrance, or a recipe. A beat with none of those has nothing an `eye:` line would even describe.
 export function hasEyeCandidateMotion(b) {
   return !!(b.camera || b.move || b.motion || b.recipe || (b.uses && b.uses.length));
 }
 
+// Curated on purpose, narrower than EYE_DEVICE_WORDS: a generic word like "motion" or "camera" appears in nearly every beat's mechanism and would fire on almost everything, so only these five unambiguous names are checked here.
 export const EYE_NAMED_DEVICE_HINTS = [
   { re: /per-word|word-by-word|word.*colou?r|colou?r.*word/i, name: 'per-word colour' },
   { re: /\bcursor\b/i, name: 'cursor' },
@@ -558,6 +565,7 @@ export function eyeUntargetedDevices(b) {
   return declared.filter((name) => !EYE_NAMED_DEVICE_HINTS.find((h) => h.name === name).re.test(p.device));
 }
 
+// Multi-word phrases only, deliberately narrower than EYE_DEVICE_WORDS: a bare word like "travel" or "push" is an ordinary verb as often as it is a device, so only unambiguous named phrases count here.
 export const EYE_DEVICE_PHRASES = ['per-word colour', 'per-word color', 'word-by-word', 'camera push',
   'camera dolly', 'camera pan', 'camera dive', 'camera travel', 'blur-to-sharp', 'colour flash',
   'color flash', 'cursor click', 'drawn line'];
@@ -572,6 +580,7 @@ export function competingEyeDevices(device) {
   return (hits.length >= 2 && !EYE_ORDER_WORDS.test(dLower)) ? hits : null;
 }
 
+// A boundary with no cut is a `flow-seam` recipe's job (recipes/README.md); shared with harness/live/beat-surfacer.mjs so the "no cut here" test and the "which recipe to suggest" pick have exactly one owner.
 export const BOUNDARY_NO_CUT_RE = /\b(exits?|leaves?|arrives?|no cut|crossfades?)\b/i;
 
 /** seamRecipeEntry() -> [name, def] for the first recipes/recipes.json entry whose kind is "seam", or null. */
@@ -579,6 +588,7 @@ export function seamRecipeEntry() {
   return Object.entries(RECIPES).find(([, r]) => r.kind === 'seam') || null;
 }
 
+// Every camera move in core/camera-moves/*.js resets x/y to an identity pose at its own `start` key (none accepts an arbitrary starting x/y), so two legs across a boundary with no cut to hide the reset would visibly snap mid-shot.
 /** cameraContinuityErrors(beats) -> string[]: a camera: pairing across a boundary this film builds no cut for. */
 export function cameraContinuityErrors(beats) {
   const errs = [];
@@ -601,6 +611,7 @@ export function cameraContinuityErrors(beats) {
   return errs;
 }
 
+// post hoc is not propter hoc: a trigger that only says WHEN ("then", "3.2s", "the beat ends") is a sequence marker, not a cause, and does not earn a stagger.
 export const TRIGGER_SEQUENCE = /^(then\b|next\b|and then\b|afterwards?\b|later\b|time passes|the (?:beat|shot|scene|cut|film) (?:begins|starts|ends|changes|moves on)|\d+(?:\.\d+)?\s*s\b)/i;
 export const TRIGGER_EMPTY = /^(none|nothing|n\/?a|tbd|[-\u2013\u2014.\u00b7]+)$/i;
 
@@ -612,6 +623,7 @@ export function isCausedTrigger(raw) {
   return !TRIGGER_SEQUENCE.test(s);
 }
 
+// Evidence, not a guess: higgsfield-recreation.json (engine-doctrine/MISTAKES.md's reference film) stages its three key events roughly 30ms and 150ms apart (3.07s, 3.10s, 3.25s); 0.05s sits at the small end of that range on purpose.
 export const STAGE_S = 0.05;
 
 /**
@@ -931,6 +943,7 @@ export function transitionFindings(beats) {
   return { unreasoned, uncovered, mismatch };
 }
 
+// `use:` is the general door onto the arsenal's 790-entry corpus (harness/author/arsenal.mjs collect()). NO SECOND MECHANISM: a kind that already has a dedicated field reaches the engine there, and `use:` refuses it rather than becoming a second spelling of the same decision.
 export const USE_DEDICATED_FIELD = {
   'camera move': 'camera:', 'camera word': 'camera:',
   cut: 'transition_in:', 'seam fx': 'transition_in:', 'sting fx': 'transition_in:', 'cut timing': 'transition_in:',
@@ -941,6 +954,7 @@ export const USE_DEDICATED_FIELD = {
   'background preset': 'ground:', 'kinetic preset': 'kinetic:', 'layer type': 'elements:',
 };
 
+// INTERNAL: engine machinery an author never names from a storyboard, each refused naming the doc or field that actually sets it (a generator, a keyframe handle, a derived value, or a slot owned by a different file entirely).
 export const USE_INTERNAL_KIND = {
   generator: 'a lightfield generator is chosen by the field\'s own config (core/generators/generators.js), never named per beat.',
   'envelope shape': 'an envelope shape is an internal keyframe-shaping detail (envelope.kind), not authored from a storyboard.',

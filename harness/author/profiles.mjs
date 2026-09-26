@@ -1,3 +1,4 @@
+// engine-doctrine/CRAFT/SELECTION.md Part 2 is the source of truth for these profiles; where the two disagree the doc wins and this file is the bug.
 export const PROFILES = {
   linear: {
     cuts: ['none', 'blur'], stings: [], bounceOk: false, restraint: 'high',
@@ -66,4 +67,5 @@ export const PROFILES = {
   },
 };
 
+// `banCuts` checks against core/cuts.js CUT STYLES, `banMotion` against per-layer entrance names (core/clips.js anims or core/type.js kinetic presets); kept as two lists after a24's `pop` ban and vercel's `bounce` ban silently never fired on one shared list.
 export const PROFILE_NAMES = Object.keys(PROFILES);

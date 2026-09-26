@@ -8,6 +8,7 @@ import { emitJson } from '../lib/findings.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+// Families reached for by mechanism or parameter, not by describing a look; exempt from the family gate, still covered per-entry by blurb self-retrieval.
 export const MECHANISM_NAMED = new Set([
   'easing', 'blend mode', 'icon',                 // also carry catalog `skip`; listed for one source of truth
   'camera dial', 'depth', 'interpolation mode', 'time remap', 'keyframe handle', 'stagger order',

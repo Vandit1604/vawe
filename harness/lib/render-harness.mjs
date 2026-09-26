@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+// The union of every table the 22 copies carried; a narrower table served a real file as application/octet-stream, which is how a .mp4 or an .otf silently failed to play or load.
 export const MIME = {
   '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.json': 'application/json',
   '.css': 'text/css', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.otf': 'font/otf',
@@ -12,6 +13,7 @@ export const MIME = {
   '.webp': 'image/webp', '.gif': 'image/gif', '.mp4': 'video/mp4', '.webm': 'video/webm',
 };
 
+// Every copy wrote `p.startsWith(root)`, which also accepts a SIBLING whose name merely begins with the root's (/repo passes for /repo-evil); path.relative answers the question that was meant: is p at or below root.
 export function insideRoot(root, p) {
   const rel = path.relative(root, p);
   return rel === '' || (!rel.startsWith('..' + path.sep) && rel !== '..' && !path.isAbsolute(rel));
@@ -38,6 +40,7 @@ export async function serveRepo({ root = REPO_ROOT, port = 0, route = null } = {
   return { server, port: server.address().port, close: () => server.close() };
 }
 
+// The flags a deterministic capture needs: no sandbox (CI), no scrollbars over the canvas, and a device scale the caller owns rather than the host's display.
 export const RENDER_ARGS = ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'];
 
 /** launchPage({ width, height, scale, args }) → { browser, page, close } */

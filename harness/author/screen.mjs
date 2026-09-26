@@ -11,6 +11,7 @@ import { expandThemeFile } from '../lib/theme-load.mjs';
 import { adaptFinding } from '../lib/safeguards.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// exported so ideate-ask.mjs can offer these as the real designed-screen routes, never a second hardcoded copy of this list.
 export const KINDS = ['editor', 'grid', 'dashboard', 'chat', 'card'];
 
 const BODIES = {
@@ -118,6 +119,7 @@ function wrapperRanges(html) {
 }
 const inWrapper = (ranges, idx) => ranges.some(([a, b]) => idx >= a && idx < b);
 
+// readiness(source): source-only, no render; pure and exported so it's unit-testable on a string (quality/gates/screen-readiness.test.mjs).
 export function readiness(source) {
   const kit = extractKitBlock(source);
   const own = kit ? source.replace(kit, '') : source;
@@ -159,11 +161,13 @@ export function readiness(source) {
   return { smallest, elementCount, tokenUses, rawColorUses, images, hasRealImage: images.some((i) => i.ok), adaptedLines };
 }
 
+// smallestRendered: the smallest text the browser actually laid out; the source parse can't see cascade overrides like a `font:` shorthand or an inline size beating a kit class.
 export function smallestRendered(boxes) {
   const px = (boxes || []).map((b) => b.fontPx).filter((n) => Number.isFinite(n) && n > 0);
   return px.length ? Math.min(...px) : null;
 }
 
+// clipping(): rendered-only (a static parse can't see a % width, a grid track, or an object-fit crop); boxes come from preview-fragment.mjs's `--boxes-out`, checked against the 1920x1080 frame and core/layout/safe.js MARGIN (0.06 of the short edge).
 export function clipping(boxes, w = 1920, h = 1080) {
   const margin = Math.round(Math.min(w, h) * MARGIN);
   const safe = { x0: margin, y0: margin, x1: w - margin, y1: h - margin };
@@ -333,6 +337,7 @@ function main() {
 
 if (import.meta.url === `file://${process.argv[1]}`) main();
 
+// clipAgainstBox(boxes, box): same finding shape as clipping() but against an arbitrary {x,y,w,h}, not the canvas margin (build fix 7: `make screen`/`make preview` used to check only the full canvas, so a fragment could pass standalone and clip once placed in a smaller box).
 export function clipAgainstBox(boxes, box) {
   const x0 = box.x, y0 = box.y, x1 = box.x + box.w, y1 = box.y + box.h;
   const findings = [];

@@ -164,6 +164,7 @@ the script, then run \`node harness/author/sfx-catalog.mjs\` to regenerate.
 `;
 }
 
+// cueCorpus() is a function, not an exported map, so arsenal-check doesn't read it as a second, uncatalogued vocabulary of the same cues (META stays the one owner).
 export function cueCorpus() {
   assertCoverage();
   return Object.entries(META).map(([name, m]) => ({

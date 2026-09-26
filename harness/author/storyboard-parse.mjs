@@ -1,3 +1,5 @@
+// storyboard-parse is the one reader for the storyboard contract (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md); its regexes are lifted verbatim from storyboard-check.mjs so gate and animatic never drift apart.
+// ARCHETYPES/WEIGHTS are exported so storyboard-check, frame-check and the template read ONE list, not three copies that drift.
 export const ARCHETYPES = ['centred', 'split', 'hero-object', 'asymmetric-baseline', 'full-bleed-row',
   'symmetric-pair', 'lockup'];
 export const WEIGHTS = ['peak', 'strong', 'quiet'];
@@ -7,7 +9,7 @@ export const isArchetype = (v) => !v || ARCHETYPES.includes(String(v).trim().spl
 
 export const RANGE = /\(([\d.]+)\s*s\s*[–: -]\s*([\d.]+)\s*s\)/;
 
-// and a decision that lives in a transcript cannot be checked tomorrow (engine-doctrine/MISTAKES.md #599).
+// referenceDevices exists because an early pass caught only 3 of a reference's 12 moves with the catalogue living in a chat message (engine-doctrine/MISTAKES.md #599).
 export function referenceDevices(src) {
   const m = /^###\s+Reference devices\s*$([\s\S]*?)(?=^##\s|\Z)/m.exec(src || '');
   if (!m) return [];
@@ -31,6 +33,7 @@ export const fieldIn = (block, k) => {
   return m ? m[1].trim() : null;
 };
 
+// fieldAllIn: `use:` is the one field a beat may write more than once (harness/lib/contract.mjs parseUseLine); every other field stays single-valued via fieldIn's first match.
 export const fieldAllIn = (block, k) => {
   const re = new RegExp(`(?:^|\\n)\\s*[-*]?\\s*${k}\\s*:\\s*(.+)`, 'gi');
   const out = [];
@@ -40,12 +43,14 @@ export const fieldAllIn = (block, k) => {
 
 export const blocksOf = (src) => src.split(/^##\s+/m).slice(1);
 
+// parseObjectLine: `object:` may carry a source after an arrow ("name -> films/scene/_together.bar.html"), the real layer to draw instead of assemble.mjs's placeholder rect.
 export function parseObjectLine(raw) {
   if (!raw) return { name: raw, src: null };
   const m = /^(.*?)\s*->\s*(\S+)\s*$/.exec(raw);
   return m ? { name: m[1].trim(), src: m[2] } : { name: raw, src: null };
 }
 
+// seconds from a `duration:` value that may say "29s", "1.5 min", or a bare number.
 export function durSec(raw) {
   if (!raw) return null;
   const m = /^\s*(\d+(?:\.\d+)?)\s*(s|sec|secs|seconds|m|min|mins|minutes)?\s*$/i.exec(raw);
@@ -53,6 +58,7 @@ export function durSec(raw) {
   return /^m/i.test(m[2] || 's') ? parseFloat(m[1]) * 60 : parseFloat(m[1]);
 }
 
+// onscreenLines: `onscreen: "a" / "b"` -> ['a','b']; quoted segments win, a bare value splits on ` / `, and empty strings are dropped since an empty text layer reads as dead air in the animatic.
 export function onscreenLines(v) {
   if (!v) return [];
   const quoted = [...v.matchAll(/["“]([^"”]+)["”]/g)].map((m) => m[1].trim());
@@ -110,6 +116,7 @@ export function parseStoryboard(src) {
   };
 }
 
+// timeline fills missing beat spans by dividing whatever time is left equally, and tells the caller which ones were guessed.
 export function timeline(sb) {
   const out = [], guessed = [];
   let cursor = 0;

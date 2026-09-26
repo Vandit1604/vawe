@@ -22,6 +22,7 @@ export function clusterCuts(hits, threshold, minShot) {
   return out;
 }
 
+// ffmpeg's scene score per frame: a hard cut spikes it, a dissolve does not, which is why the result is reported with its evidence instead of asserted.
 export function detectCuts(video, scratchDir, threshold, minShot) {
   const meta = path.join(scratchDir, '.scene-scores.txt');
   ffmpegOrDie(['-v', 'error', '-y', '-i', video, '-an',
@@ -38,10 +39,12 @@ export function detectCuts(video, scratchDir, threshold, minShot) {
   const eligible = hits.filter(cutEligible);
   const peak = eligible.reduce((m, h) => Math.max(m, h.score), 0);
   const clustered = clusterCuts(hits, threshold, minShot);
+  // Near-misses hint the threshold is wrong for THIS film; our own renders cross-dissolve, so half their authored cuts land here.
   const near = eligible.filter((h) => h.score > threshold / 2 && h.score <= threshold).length;
   return { peak, near, cuts: clustered };
 }
 
+// `edgedetect`'s per-frame YAVG is near zero exactly when the frame is empty ground; the reported joint is the CORE run's (its own minimum) midpoint, since the frames either side are the outgoing/incoming shots fading.
 export function detectSeams(edge, threshold, dur) {
   const runs = [];
   let cur = null;
@@ -82,6 +85,7 @@ function sustainedRun(delta, lo, hi, minRun, flatRatio) {
   }).filter((r) => r.flatness <= flatRatio);
 }
 
+// 1.6 is study.mjs's own default (checked, not tuned, against two real clips: see study.mjs's header).
 export function detectPans(delta, floor, minRun, flatRatio = 1.6) {
   return sustainedRun(delta, floor, Infinity, minRun, flatRatio);
 }
@@ -120,6 +124,7 @@ export function motionDeltaSeries(video) {
   return frameSeries(video, 'scale=160:90,tblend=all_mode=difference,signalstats').slice(1);
 }
 
+// Two joints found within `minShot` of each other are the same moment measured two ways; the more exact measurement wins, in this order of precision (cut > seam > pan/crossfade).
 export const JOINT_PRIORITY = { cut: 0, seam: 1, pan: 2, crossfade: 3 };
 export function mergeJoints(kindLists, minShot) {
   const items = kindLists.flatMap(({ kind, items: hits }) => hits.map((h) => ({ t: h.t, kind, evidence: h })))

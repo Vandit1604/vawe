@@ -18,6 +18,7 @@ export function isWaivedBy(allow, code, at) {
   return (allow || []).some((e) => waiverCovers(e, code, at));
 }
 
+// THE ONE BAR FOR "HAS A REASON" (AGENTS.md: "a waiver with no `_why` blocks"); waiver-drift.mjs used to check `_why` with its own ad hoc logic, so this is the one predicate both author-check.mjs and waiver-drift.mjs call now.
 export const MIN_REASON_LEN = 12;
 
 /** Does `why[entry]` (the `authoring._why` map, keyed by the raw allow entry) hold a real reason? */

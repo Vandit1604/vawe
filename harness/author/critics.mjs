@@ -12,6 +12,8 @@ import { PLAN_JUDGE_CODES, isPlanJudgeCode, rankPlanJudgeFindings } from '../lib
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+// One decider writes one exclusive scope (engine-doctrine/CRAFT/SUBAGENTS.md), so its rule briefs must
+// stay scoped the same way; this table is the ONE place that mapping lives.
 const DECIDER_CATEGORIES = {
   storyboard: ['direction', 'content'],
   subject: ['direction', 'content'],
@@ -21,6 +23,8 @@ const DECIDER_CATEGORIES = {
   sound: ['sound', 'captions'],
 };
 
+// Pins the owner's top motion rules into the motion brief past the fixed char-budget cap:
+// engine-doctrine/CRAFT/rules/motion.json has 12 records, the cap keeps only 5.
 export const DECIDER_PIN = {
   motion: ['motion.readable-hold', 'motion.exit-faster', 'motion.no-jolt'],
 };
@@ -38,6 +42,8 @@ function currentSha() {
   catch { return '(unknown, git rev-parse failed)'; }
 }
 
+// Kept in lockstep with engine-doctrine/CRAFT/SUBAGENTS.md's table; `ab` is listed there as
+// built-then-cut (nothing runs today) so it is not in this roster.
 export const ROSTER = [
   {
     name: 'beat',
@@ -88,6 +94,8 @@ function flatLayers(ls) {
   return (ls || []).flatMap((L) => [L, ...flatLayers(L.layers), ...flatLayers(L.children)]);
 }
 
+// Order is a dependency chain, not a preference: motion runs before transitions because the
+// content-aware cut reads the velocity at a joint, so a cut chosen against a still frame is choosing blind.
 export const DECIDERS = [
   {
     name: 'storyboard',
@@ -239,6 +247,8 @@ function findCitedStudy(sbText) {
   return null;
 }
 
+// Works from the storyboard alone: a plan-stage film may have no scene.json yet (scaffold not run)
+// or one with no fragments (design not started), and this must judge it anyway.
 export function buildPlanJudgeBrief(arg) {
   const p = filePaths(arg);
   if (!fs.existsSync(p.sb)) throw new Error(`no storyboard at ${path.relative(repoRoot, p.sb)}`);

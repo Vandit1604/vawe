@@ -46,6 +46,7 @@ export const JOBS = [
     description: 'Buys mood and holds. Buys no explanation: a newcomer will not learn what the product does.' },
 ];
 
+// antiOptions renders from each profile's own antiBlurb (elimination, not aspiration); the user never sees a profile name.
 export function antiOptions(profiles = PROFILES) {
   const pick = ['duolingo', 'a24', 'bloomberg', 'apple'];
   return pick.map((k) => {
@@ -56,6 +57,7 @@ export function antiOptions(profiles = PROFILES) {
   });
 }
 
+// threadOptions is asked only on a short film, because storyboard-check hard-errors without `threads:`; each option's description is the direction's own `why`, verbatim.
 export function threadOptions(job, dirs = DIRECTIONS) {
   const drop = new Set();
   if (job === 'number') drop.add('rhymed');          // a match cut cannot carry a figure
@@ -64,6 +66,7 @@ export function threadOptions(job, dirs = DIRECTIONS) {
     .map((d) => ({ key: d.slug, label: d.thread, description: d.why, pace: d.pace, preset: d.preset }));
 }
 
+// Owner ruling (.claude/plans/content-richness.plan.md "Update 1"): asked only when no URL is known; a known site already gets its theme from `make sections`/`make brandspec`/`make palette`.
 export const THEME_SOURCE = [
   { key: 'reference', label: 'I will point you at a reference or a theme',
     description: 'Name a real site (studied the ordinary way) or an existing `themes/<name>.json`, and every colour, face and motion policy traces to it, never invented.' },
@@ -71,6 +74,7 @@ export const THEME_SOURCE = [
     description: 'No brand to study, so the theme is DESIGNED, not defaulted: a fresh palette seeded from skills/impeccable/scripts/palette.mjs and a colour direction named from `ui-skills list --category color`, recorded as `theme: invented` so the choice is not lost.' },
 ];
 
+// proofOptions: `kind` on each option tells the author what it costs to put that section on screen.
 export function proofOptions(st) {
   if (!st || !st.sections.length) return null;
   const rich = st.sections.filter((s) => s.kind === 'rich').slice(0, 3);
@@ -112,6 +116,7 @@ export function ask({ name = null, url = null, slug = null } = {}) {
   };
 }
 
+// round2 may return no questions; that's expected once round 1 and the study already decided everything.
 export function round2({ placement, job } = {}) {
   const pl = PLACEMENT.find((p) => p.key === placement);
   const out = [];
@@ -129,6 +134,7 @@ export function round2({ placement, job } = {}) {
   return { questions: out, note: out.length ? null : 'nothing left to ask. Round 1 and the study decided it all' };
 }
 
+// frontmatter() does not write the .intent.json sidecar; that comes from `make intent` via storyboard-parse.mjs, the shared parser, to avoid drift.
 export function frontmatter(a) {
   const pl = PLACEMENT.find((p) => p.key === a.placement) || PLACEMENT[0];
   const job = JOBS.find((j) => j.key === a.job) || JOBS[0];

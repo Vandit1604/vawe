@@ -18,6 +18,7 @@ const FONT_KEYS = ['sans', 'serif', 'mono', 'num'];
 
 const ROLE_NAME = { bg: 'ground', ink: 'ink', accent: 'accent' };
 
+// migrateOne(theme) -> { next, ok, err }: `next` is the token-file form, `ok` is the round-trip proof (expandTheme(next) deep-equals theme), `err` names why it failed.
 export function migrateOne(theme) {
   if (!theme || typeof theme !== 'object' || !theme.palette) return { next: theme, ok: true, clean: true };
   if (isTokenFile(theme)) return { next: theme, ok: true, clean: true }; // already migrated
