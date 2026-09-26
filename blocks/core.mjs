@@ -12,7 +12,7 @@
 import {
   TOKENS, HAIR, r2, text, rect, box,
   R, E, SPACE, TYPE, cardChrome,
-  stagger, blockFactory,
+  stagger, blockFactory, composeLook,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that ships
@@ -57,16 +57,24 @@ export function colorCycle({ x, y, word = 'colour', size = 78, weight = 700,
 // one that gives a formatted string `value` (`$2.4M`, `42ms`, shapes the count layer cannot render)
 // lands as one `html` fragment carrying value + label. Hybrid by construction: the two paths need
 // different layer types, so a caller opts into the counting by giving a number, not by rewriting the row.
-export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4 } = {}) {
+export function kpiRow({ x, y, items = [], gap = 80, start = 0, dur = 4, look = null } = {}) {
+  const cl = composeLook(look);
+  const numSize = Math.round(64 * (cl ? cl.numScale : 1));
+  const heroSize = Math.round(TYPE.hero * (cl ? cl.numScale : 1));
+  const colAlign = cl && cl.align === 'center' ? 'center' : 'flex-start';
+  const above = cl && cl.labelPos === 'above';
   const cell = (it, beat) => {
-    if (it.to != null) return { type: 'group', layout: 'column', items: 'flex-start', gap: SPACE.tight, children: [
-      { type: 'count', from: it.from ?? 0, to: it.to, unit: it.unit || '', font: 'sans', size: 64, weight: 700,
-        color: T.ink, ls: '-0.02em', countStart: 0.15, countDur: 1.1, ease: 'easeOutExpo', ...beat },
-      text({ text: it.label, size: TYPE.body, tracking: '0.06em', color: T.dim, font: 'mono', ...beat }),
-    ] };
-    const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:${SPACE.tight}px">`
-      + `<span style="font:700 ${TYPE.hero}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">${it.value}</span>`
-      + `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.dim};letter-spacing:0.06em">${it.label}</span></div>`;
+    if (it.to != null) {
+      const num = { type: 'count', from: it.from ?? 0, to: it.to, unit: it.unit || '', font: 'sans', size: numSize, weight: 700,
+        color: T.ink, ls: '-0.02em', countStart: 0.15, countDur: 1.1, ease: 'easeOutExpo', ...beat };
+      const lbl = text({ text: it.label, size: TYPE.body, tracking: '0.06em', color: T.dim, font: 'mono', ...beat });
+      return { type: 'group', layout: 'column', items: colAlign, gap: SPACE.tight,
+        children: above ? [lbl, num] : [num, lbl] };
+    }
+    const numHtml = `<span style="font:700 ${heroSize}px var(--font-sans);color:${T.ink};letter-spacing:-0.02em">${it.value}</span>`;
+    const lblHtml = `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.dim};letter-spacing:0.06em">${it.label}</span>`;
+    const html = `<div style="display:flex;flex-direction:column;align-items:${colAlign};gap:${SPACE.tight}px">`
+      + (above ? lblHtml + numHtml : numHtml + lblHtml) + '</div>';
     return { type: 'html', html, ...beat };
   };
   return [{ type: 'group', x, y, layout: 'row', items: 'flex-start', gap, start, duration: dur, anim: 'fade', enterDur: 0.25,
