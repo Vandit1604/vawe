@@ -1552,6 +1552,10 @@
      "type": "number|string",
      "label": "Window length (s), or a duration word (core/registry/vocab.js): instant | fast | medium | slow | luxurious"
     },
+    "clock": {
+     "type": "object",
+     "label": "group only: a local clock for the children, {duration, rate, loop: n | forever | pingpong, hold}; child track times are local to it (core/timeline/group-clock.js)"
+    },
     "track": {
      "type": "number",
      "label": "z-order track"
