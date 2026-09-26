@@ -2,7 +2,7 @@
 // bug that shipped once: emphasis vanished because its --em colour equalled the background). The
 // fixture forces that exact case (emColor = the accent, over an accentPlain field); this asserts the
 // audit hard-fails it. If this ever passes silently, the emphasis-contrast check has regressed.
-//   node quality/gates/contrast-regression.mjs      ·      make audit-test
+//   node quality/gates/contrast-regression.mjs      ·      make dev-tool X=audit-test
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

@@ -8,7 +8,7 @@
 // slot, so the cheap reach and the right reach are the same keystrokes.
 //
 // THE WORDS ARE NOT A SECOND VOCABULARY. Each one is an ALIAS onto a value the engine already has,
-// and every target is asserted to exist by `make lib-test`. Nothing here can be picked that could
+// and every target is asserted to exist by `make test`. Nothing here can be picked that could
 // not be picked before; a word is a shorter spelling, never a new capability.
 //
 // WHERE THE MEANINGS COME FROM. Two of these words are already spoken elsewhere in the engine and
@@ -128,7 +128,7 @@ export const INTERP_REGISTRY = defineRegistry('interpolation mode', INTERP, { sl
     title: 'Interpolation modes (not easings)',
     tag: 'motion key',
     intro: 'On a `motion` key\'s `ease`, but NOT a curve. An easing is a function of one segment\'s own progress, so it necessarily starts and ends that segment at zero velocity and an interior keyframe becomes a dead stop. A MODE decides how the value is computed at all and may read the keys either side. `{ "t":0.6, "x":400, "ease":"through" }`',
-    // THREE FAMILIES ADDED WITHOUT THEIR ROWS, and `make effects` was red for all three at once, so the
+    // THREE FAMILIES ADDED WITHOUT THEIR ROWS, and `make regen` was red for all three at once, so the
     // catalogue could not regenerate at all. A family is not shipped until it can be looked up: this
     // table is the only place that says how to WRITE one.
     // An interpolation mode is not an easing and does not go in `ease`'s usual slot mentally, so the

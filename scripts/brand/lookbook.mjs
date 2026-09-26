@@ -4,7 +4,7 @@
 // shape language and density, instead of picking a canned style.
 //
 //   node scripts/brand/lookbook.mjs <url> <brand>     →  assets/brands/<brand>/look/*.png
-//   make lookbook URL=https://site.com NAME=acme
+//   make study-tool X=lookbook URL=https://site.com NAME=acme
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer';

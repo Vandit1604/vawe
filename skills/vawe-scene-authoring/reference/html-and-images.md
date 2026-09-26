@@ -17,7 +17,7 @@ Non-negotiable moves:
   of extremes, not one safe size step.
 - **A committed non-generic face.** Reflecting a real brand → its captured font. Anything else → never
   Inter or Space Grotesk (the slop faces); reach for Instrument Serif (editorial), a captured face, or one
-  you register via `make brandspec` + `make palette`.
+  you register via `make study-tool X=brandspec` + `make study-tool X=palette`.
 - **One bespoke visual device, not card soup.** Avoid the equal rounded-card grid and the rounded-icon-
   tile-above-a-heading. Invent one signature motif per video.
 - **Layout by containment: group-first.** Anything with a spatial relationship (a label+value, a logo
@@ -25,7 +25,7 @@ Non-negotiable moves:
   and children can be **nested groups**), never two absolute `x/y` layers you space by eye (that's what
   collides). Absolute `x/y` + `motion` is only for free placement / choreography. This is the
   flex-not-pixels rule; it's why the fix for "the % is too close to the label" is a group, not new coords.
-- **Gate it:** `make designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
+- **Gate it:** `make check GATE=designspec-check D=<file>` runs the impeccable detector (41 rules, no LLM) on the rendered DOM;
   clear its flags before you render. Full routing: `AGENTS.md`.
 
 ## Images & visuals: real first, emoji last
@@ -33,7 +33,7 @@ Non-negotiable moves:
 Order of preference (CLAUDE.md): **real licensed image → generated card → emoji**. Never embed
 copyrighted media (posters/stills/album art) in a published video.
 
-- **Auto-source:** `make assets D=films/<fmt>/<topic>.json`, fills missing icons: country→flag
+- **Auto-source:** `make media X=assets D=films/<fmt>/<topic>.json`, fills missing icons: country→flag
   (flagcdn, PD), brand→logo (simple-icons, free), else a generated topic card. Dry-run by default;
   `WRITE=1` to apply.
 - **Topic cards (any subject):** `node harness/media/cards.mjs "Quantum Computing" --sub "…"` → a designed

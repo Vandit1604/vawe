@@ -11,7 +11,7 @@ object_t0: "drawn in dim grey, cell by cell, week by week. Six months of it are 
 object_states: "b1 dark and drawing · b2 the right half IGNITES in a wave · b3 pushed back and small, the numbers stand in front of it · b4 dimmed to a ground under three bars · b5 the camera dives 2.5x onto ONE cell and a box snaps around it · b6 that one cell is the whole frame and it is the payoff"
 object_last: "one lit cell, 12 Aug, boxed, with the repo it belongs to named beside it for the first time"
 format: 1920x1080
-theme: "themes/ashfall.json (INVENTED by make invent-look, seed 41, from this storyboard)"
+theme: "themes/ashfall.json (INVENTED by make dev-tool X=invent-look, seed 41, from this storyboard)"
 duration: 17s
 pace: "showreel · 2.8s per idea, 6 ideas. A wrapped film competes with a thumb, so no idea gets a second beat and no beat carries two."
 spectacle: "beat 5 · the snapbox layer · ripple · the whole film has been getting larger, and this is the one moment it gets SMALLER, so the impact has to be felt rather than read"

@@ -11,14 +11,14 @@ confirm: "is the palette eyedropped from one dominant source, not invented?"
 
 ## AGENT SUMMARY
 
-- Eyedrop the palette from the real brand (`make palette`), never invent. Decide light-first vs
+- Eyedrop the palette from the real brand (`make study-tool X=palette`), never invent. Decide light-first vs
   dark-first by LOOKING at the hero, build from one accent held to 10% (60-30-10), and hit ~7:1
   contrast on headline type.
-- Enforced by `make audit` (contrast fails hard) and `make designspec-check` (`off-colour`,
+- Enforced by `make check GATE=audit` (contrast fails hard) and `make check GATE=designspec-check` (`off-colour`,
   `dead-token`, `contrast-unmeasurable`).
 - Checkable action: is the palette eyedropped from one dominant source, not invented?
 
-Colours come **only from the brand**: eyedrop the real pixels (`make palette`), never invent. This guide is
+Colours come **only from the brand**: eyedrop the real pixels (`make study-tool X=palette`), never invent. This guide is
 how to turn those pixels into a full `theme.palette` and use it well. Maps to the theme contract keys:
 `bg, bg2, surface, surface2, line, lineStrong, text, text2, dim, ink, accent, accentDim, accentGlow, up, down`
 + 3 `gradient` stops.
@@ -49,11 +49,11 @@ Two more of theirs, and both are rules we did not have:
   built for a white site is [`../MISTAKES.md`](../MISTAKES.md) #1, and two beats of dark text on a dark
   backdrop shipped for their whole runtime because a token name lied about its theme family (#387).
 - **Declare the palette up front. Don't invent colours per element.** Our version is stronger and already
-  written: colours come only from the brand, and `make designspec-check` locks them.
+  written: colours come only from the brand, and `make check GATE=designspec-check` locks them.
 
 ## 1. Decide dominance FIRST, by looking, never by a field
 A white site gets a **light-first** video; a dark site gets **dark-first**. Decide by looking at the hero
-(confirm with `make palette`'s luminance read). A mislabeled dominance is how the worst videos happen
+(confirm with `make study-tool X=palette`'s luminance read). A mislabeled dominance is how the worst videos happen
 (see [../MISTAKES.md](../MISTAKES.md) #1). Commit fully, don't do 50/50.
 - **Light-first:** `bg` = the site's off-white, `text` = near-black `ink`, `accent` = its vivid colour.
 - **Dark-first:** `bg` = a tinted near-black (never pure `#000`), `text` = off-white, `accent` = its vivid colour.
@@ -81,7 +81,7 @@ and the accent appears once.
 ## 5. Contrast, overshoot for big video type
 WCAG floors: **4.5:1** body · **3:1** large text (≥24px, or ≥18.7px bold) · **3:1** non-text/UI. AAA = **7:1**.
 - **Aim ~7:1 for headlines.** Motion, grain, compression, and busy/photographic backgrounds all erode *effective*
-  contrast, so AA is not enough for display type. `make audit` hard-fails the unreadable and flags weak headlines.
+  contrast, so AA is not enough for display type. `make check GATE=audit` hard-fails the unreadable and flags weak headlines.
 - **Emphasis (`<b>`) on an accent-coloured background** must not be the accent (blue-on-blue vanishes), the engine
   auto-falls-back to the layer colour; override with `emColor` if needed (see [../MISTAKES.md](../MISTAKES.md) #9).
 
@@ -113,7 +113,7 @@ with content, so it follows the plain-vs-busy rule (see [DENSITY.md](DENSITY.md)
 - **A FULL-SCREEN LINEAR GRADIENT ON A DARK GROUND WILL BAND, and the banding is the encoder, not the design.**
   h264 quantises a slow luminance ramp into visible steps, and it is worst exactly where a dark backdrop is
   most attractive: a large area, a shallow slope, few edges for the encoder to spend bits on. The frame looks
-  clean in the browser and in `make frame`, and the stripes appear only in the mp4, which is why nothing here
+  clean in the browser and in `make dev-tool X=frame`, and the stripes appear only in the mp4, which is why nothing here
   ever caught it: every gate we own samples the PAGE, not the encode.
   Prefer a radial over a full-width linear on dark, keep the ramp short, or break it with texture the encoder
   can hold: the `grain` fx, `paperDots`, `dotmatrix`, or a `dither`/`posterize` filter

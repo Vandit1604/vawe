@@ -36,9 +36,9 @@ export function example(name) {
 // the engine had none of this. That is the discovery failure this repo spent a day on, in the one place
 // where the reader is a model rather than a person.
 //
-// Read from site/lib/effects.json, which `make effects` generates from the registries and
+// Read from site/lib/effects.json, which `make regen` generates from the registries and
 // `effects-json --check` verifies, so this cannot drift into a promise the engine does not keep. If the
-// file is missing (a fresh clone before `make effects`), return null and the description falls back to
+// file is missing (a fresh clone before `make regen`), return null and the description falls back to
 // its static sentence rather than inventing a number.
 export function inventory() {
   try {

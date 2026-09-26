@@ -31,7 +31,7 @@ editor: the JSON *is* the video, and the same input always produces byte-identic
 
 - **Deterministic.** `renderFrame(n)` is a pure function of the frame number, same JSON, same bytes,
   any render order. That's what lets frames shard across parallel browser tabs, and what makes every
-  video reproducible and diff-able. Guarded by `make probe`.
+  video reproducible and diff-able. Guarded by `make check GATE=probe`.
 - **Agent-native.** Built to be authored by an AI agent from a schema + a taste system, not clicked
   together in a UI. One open canvas (`scene`) of composable primitives, **no templates**.
 - **Taste built in.** A 100-block component registry, per-brand memory, composition + micro-typography
@@ -69,7 +69,7 @@ machines.
 **From source**: needs Go 1.26+, Node 18+, ffmpeg, and a Chrome or Chromium.
 
 ```bash
-make build                              # → bin/vawe  (also runs `make fonts` to fetch the free faces)
+make build                              # → bin/vawe  (also runs `make gen X=fonts` to fetch the free faces)
 ./bin/vawe films/scene/sample.json    # → out/sample.mp4
 make video D=films/scene/sample.json  # same, via make  (add --draft for a fast, no-grain preview)
 ```
@@ -104,14 +104,14 @@ each one does, and how a draft becomes a paid export: [`mcp/README.md`](mcp/READ
 ## The loop
 
 ```
-author the JSON  →  make author-check / audit  →  make judge (the vision gate)  →  make video
+author the JSON  →  make dev-tool X=author-check / audit  →  make judge (the vision gate)  →  make video
                    (TASTE=1 adds critique · direct · floor · slop · designspec · copy)
 ```
 
 Ask an agent to write the scene, grounded in `films/scene/schema.json` (the contract), the primitive
 vocabulary ([`engine-doctrine/PRIMITIVES.md`](engine-doctrine/PRIMITIVES.md)), and the taste system ([`engine-doctrine/TASTE.md`](engine-doctrine/TASTE.md)).
-Reflecting a real brand? `make brandspec URL=…` reads its real CSS, `make sections`/`make palette` capture
-and eyedrop it, and `make house-style NAME=…` persists the brand's Design Read so the next video stays
+Reflecting a real brand? `make study-tool X=brandspec URL=…` reads its real CSS, `make sections`/`make study-tool X=palette` capture
+and eyedrop it, and `make dev-tool X=house-style NAME=…` persists the brand's Design Read so the next video stays
 on-brand automatically.
 
 ## What makes the output good: the taste system
@@ -121,18 +121,18 @@ system that fights that:
 
 | Layer | What it does |
 |---|---|
-| **[Blocks](engine-doctrine/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make catalog` to browse. |
-| **[Per-brand house style](engine-doctrine/TASTE.md)** | `make house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
+| **[Blocks](engine-doctrine/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make site X=catalog` to browse. |
+| **[Per-brand house style](engine-doctrine/TASTE.md)** | `make dev-tool X=house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
 | **Composition** | `pin:"thirds-*"`, a 12-column grid, and optical centering. Beats are well-composed by default, not by eyeballing pixels. |
 | **Micro-typography** | optical tracking by size, balanced/pretty wrapping, real kerning + ligatures, on every text layer. |
-| **Motion director** | `make direct` picks cuts/stings per transition from the brand's motion personality, restraint by default. |
+| **Motion director** | `make dev-tool X=direct` picks cuts/stings per transition from the brand's motion personality, restraint by default. |
 | **Gate ladder** | `validate` → `critique` (value) → `slop` (anti-slop) → `audit` (contrast/overlap) → **`make judge`**. A vision gate that *sees* the rendered frames and scores composition + brand fidelity, catching what static gates can't. See [`engine-doctrine/JUDGE.md`](engine-doctrine/JUDGE.md). |
 
 ## Determinism
 
 `renderFrame(n)` is pure in `n`: no wall-clock, no un-seeded randomness (a virtual clock coerces
 `Date`/`rAF`/`Math.random` to frame-time). The same JSON renders byte-identical frames regardless of
-order: verified by `make probe` (renders sampled frames in scrambled order and diffs the DOM).
+order: verified by `make check GATE=probe` (renders sampled frames in scrambled order and diffs the DOM).
 
 ## Architecture
 
@@ -206,7 +206,7 @@ out/             rendered mp4s (gitignored)
 scripts/         CLI tooling, grouped by WHAT YOU ARE DOING:
   gates/           prove it is good: lib-test · motion-audit · slop · snap · probe · judge · ledger · schema-drift
   brand/           study a real site: brandspec · sections · lookbook · palette · house-style · photos
-  media/           fetch or make assets: fonts · sfx · gen-audio · assets · cards
+  media/           fetch or make media X=assets: fonts · sfx · gen-audio · assets · cards
   author/          compose a scene: beats · expand · batch · captions · preview · capture-*
   site/            build the website: site-assets · site-engine · rules-build · blocks-*
 engine-doctrine/            TASTE.md · PRIMITIVES.md · BLOCKS.md · MOTION-CRAFT.md · JUDGE.md · CRAFT/ · CODEMAPS/
@@ -220,26 +220,26 @@ make video D=<file> [ASPECT=9:16,1:1]   render one JSON → out/<name>.mp4  (--d
 make list                               formats + their schema/sample
 
 # taste
-make catalog [THEME=<brand>]            browse the 100-block registry, reskinned to a brand
-make house-style NAME=<brand>           persist a brand's Design Read
-make direct D=<file> [WRITE=1]          motion director: pick cuts/stings per transition
-make brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
+make site X=catalog [THEME=<brand>]            browse the 100-block registry, reskinned to a brand
+make dev-tool X=house-style NAME=<brand>           persist a brand's Design Read
+make dev-tool X=direct D=<file> [WRITE=1]          motion director: pick cuts/stings per transition
+make study-tool X=brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
 
 # gates
-make validate [D=…]                     schema + no-em-dash + build-time sugar checks
-make critique D=…                       value gate (hollow/scattered/mis-centre beats)
-make designspec-check D=…                           anti-slop detector (brand-face aware)
-make audit [M=…]                        overlap / clipped text / safe-zone / WCAG contrast
+make check GATE=validate [D=…]                     schema + no-em-dash + build-time sugar checks
+make check GATE=critique D=…                       value gate (hollow/scattered/mis-centre beats)
+make check GATE=designspec-check D=…                           anti-slop detector (brand-face aware)
+make check GATE=audit [M=…]                        overlap / clipped text / safe-zone / WCAG contrast
 make judge D=… VS=<brand>               THE VISION GATE: rubric + house-style, agent scores the frames
-make probe [M=…]                        render-order purity (determinism)
+make check GATE=probe [M=…]                        render-order purity (determinism)
 
 # author
-make beats D=… VS=<brand>               first/mid/last of every beat beside the source
-make expand D=…                         debug: print the {type:block}/{type:beat}/{type:comp} expansion (auto at render)
-make compare / scrub / batch            variant selection · contact sheet · data-driven variants
+make dev-tool X=beats D=… VS=<brand>               first/mid/last of every beat beside the source
+make dev-tool X=expand D=…                         debug: print the {type:block}/{type:beat}/{type:comp} expansion (auto at render)
+make dev-tool X=compare / scrub / batch            variant selection · contact sheet · data-driven variants
 
 # publish
-make site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+posters), ratio-preserving
+make site X=site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+posters), ratio-preserving
 ```
 
 ## Docs

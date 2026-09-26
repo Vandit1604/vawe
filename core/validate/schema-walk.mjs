@@ -8,7 +8,7 @@ const isSugarType = (t) => t === 'block' || t === 'beat' || t === 'comp';
 
 // Every message here ends the same way, because every one of them has the same consequence: a schema
 // error is never a warning. validateData feeds boot.js, which throws before the first frame, and the
-// same errors[] feeds `make validate`'s exit code. So the fact worth stating once, in every message
+// same errors[] feeds `make check GATE=validate`'s exit code. So the fact worth stating once, in every message
 // rather than trusted to context, is what happens next: the render refuses to start until this line
 // is fixed. (engine-doctrine/MISTAKES.md: a schema error with no stated consequence read as advice.)
 const REFUSES = 'the render refuses to start until this is fixed';

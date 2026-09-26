@@ -1,5 +1,5 @@
 // The site's motion-numbers catalog blocks must stay current with the registry they quote. Moved
-// out of the old `make lib-test` target (scripts/site/motion-numbers-catalog.mjs --check).
+// out of the old `make test` target (scripts/site/motion-numbers-catalog.mjs --check).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';

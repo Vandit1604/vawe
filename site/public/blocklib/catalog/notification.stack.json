@@ -61,7 +61,8 @@
       "rowH",
       "gap",
       "start",
-      "dur"
+      "dur",
+      "look"
     ]
   },
   "files": [

@@ -73,7 +73,7 @@ https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
 
 A GENERATED body is not a skill. One used to exist, a vawe-docs skill written by
 `quality/gates/doc-map.mjs` from every indexed doc: about 9,500 tokens against a 5,000 budget, and no
-author could trim it, because the only fix was trimming the corpus. It is retired, and `make docs
+author could trim it, because the only fix was trimming the corpus. It is retired, and `make site X=docs
 Q="…"` answers the same question one answer at a time. If a body has to be generated, the thing wants
 to be a lookup, not a skill.
 

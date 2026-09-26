@@ -7,6 +7,7 @@ import { bakeResamples } from '../resample/index.js';
 import { glLive } from './webgl.js';
 import '../layers/frame-settle.js'; // installs window.__frameSettle, the capture's async barrier
 import { canvasKind } from '../canvas/kind.js'; // records each canvas's context kind at creation
+import { resolveSurfaceLook, surfaceCssVars } from '../theme/surface-looks.js';
 import { themeErrors, resolveLook, REQUIRED, ON_INK_MIN, ON_INK, WARN_DEFAULT } from '../registry/theme-contract.js';
 import { isLightBg, parseColor, colorAlpha, contrastRatio, ensureContrast } from '../color/engine.js';
 import { expandTheme, isTokenFile } from '../theme/roles.js';
@@ -54,7 +55,7 @@ const deriveCard = (P) => { const base = P.surface || P.bg || '#ffffff'; return 
 // this file is imported by node, so a gate can read the declaration without knowing where boot lives.
 export const PROPS = {
   pin: {}, col: {}, cols: { when: 'col' }, gutter: { when: 'col' },
-  aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {},
+  aspects: {}, x: {}, y: {}, w: {}, h: {}, size: {}, children: {}, anchorPoint: {},
 };
 
 // keywords place a layer of `size` on a canvas line. TWO different lines, on purpose:
@@ -129,6 +130,25 @@ function applyLayerCol(L, safe, inset) {
   L.w = Math.round((c2 - c1 + 1) * colW + (c2 - c1) * g);
 }
 
+// ANCHOR POINT: baked in here, once, so x/y is a plain left/top edge by the time anything downstream
+// (scene.js buildLayer, the audit, probe-frame) reads it. `fx`/`fy` are 0 for the default "top-left"
+// (identity: this whole function is then a no-op).
+function applyAnchorPoint(L, hEst) {
+  if (L.anchorPoint == null) return;
+  const [fx, fy] = resolveAnchorPoint(L.anchorPoint);
+  const id = L.id ? ` "${L.id}"` : '';
+  if (fx && typeof L.w !== 'number')
+    throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric w to find where its `
+      + `centre/right edge falls; declare w, or use an anchorPoint that keeps the left edge `
+      + `("top-left"/"left"/"bottom-left").`);
+  if (fy && !(typeof L.h === 'number' || hEst))
+    throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric h (or, for text, a `
+      + `\`size\` to estimate one from) to find where its centre/bottom edge falls; declare h, or use `
+      + `an anchorPoint that keeps the top edge ("top-left"/"top"/"top-right").`);
+  if (L.x != null && fx) L.x = Math.round(L.x - fx * L.w);
+  if (L.y != null && fy) L.y = Math.round(L.y - fy * (typeof L.h === 'number' ? L.h : hEst));
+}
+
 function resolveLayerCoords(data, W, H, safe, inset, PIN) {
   for (const L of flattenLayers(data.layers)) {
     applyLayerPin(L, PIN, W, safe);
@@ -141,23 +161,7 @@ function resolveLayerCoords(data, W, H, safe, inset, PIN) {
     const hEst = h || (L.type === 'text' && L.size ? L.size * 1.2 : h);
     if (L.x != null) L.x = resolveCoord(L.x, W, w, safe.x0, safe.x1);
     if (L.y != null) L.y = resolveCoord(L.y, H, h, safe.y0, safe.y1, hEst);
-    // ANCHOR POINT: baked in here, once, so x/y is a plain left/top edge by the time anything
-    // downstream (scene.js buildLayer, the audit, probe-frame) reads it. `fx`/`fy` are 0 for the
-    // default "top-left" (identity: this whole block is then a no-op).
-    if (L.anchorPoint != null) {
-      const [fx, fy] = resolveAnchorPoint(L.anchorPoint);
-      const id = L.id ? ` "${L.id}"` : '';
-      if (fx && typeof L.w !== 'number')
-        throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric w to find where its `
-          + `centre/right edge falls; declare w, or use an anchorPoint that keeps the left edge `
-          + `("top-left"/"left"/"bottom-left").`);
-      if (fy && !(typeof L.h === 'number' || hEst))
-        throw new Error(`layer${id} anchorPoint "${L.anchorPoint}" needs a numeric h (or, for text, a `
-          + `\`size\` to estimate one from) to find where its centre/bottom edge falls; declare h, or use `
-          + `an anchorPoint that keeps the top edge ("top-left"/"top"/"top-right").`);
-      if (L.x != null && fx) L.x = Math.round(L.x - fx * L.w);
-      if (L.y != null && fy) L.y = Math.round(L.y - fy * (typeof L.h === 'number' ? L.h : hEst));
-    }
+    applyAnchorPoint(L, hEst);
   }
 }
 
@@ -249,7 +253,7 @@ export async function preloadImages(data) {
       + `${missing.map((s) => `${urls.get(s)} → "${s}"`).join(' · ')}. `
       + `Either the file does not exist, or its path is outside the roots the render server allows `
       + `(core/, themes/, films/, assets/, .vawe-data/scenes/, .vawe-data/uploads/). `
-      + `Capture or fetch it (\`make assets D=<scene> WRITE=1\`), or drop the layer, a repo path that `
+      + `Capture or fetch it (\`make media X=assets D=<scene> WRITE=1\`), or drop the layer, a repo path that `
       + `404s renders as a hole in the frame and says nothing.`);
 }
 
@@ -322,11 +326,16 @@ export async function resolveThemeTokenValues(spec) {
 // `target`, :root by default. A host page that is not a scene (the site's playground) passes its
 // own element so the theme cannot repaint the page it is embedded in.
 // The ONLY writer of look CSS: tokens.css carries fonts + geometry, never colors or type choices.
-export function applyTheme(theme, target = document.documentElement) {
+// `surfaceLook` (core/theme/surface-looks.js resolveSurfaceLook's return, or null/undefined) writes the
+// `--v-*` shape vars blocks/kit.mjs reads with a fallback, so "no look set" and "this theme has no
+// surface" render byte-identically to before this existed: nothing is written, every block falls back
+// to its own literal.
+export function applyTheme(theme, target = document.documentElement, surfaceLook = null) {
   const missing = themeErrors(theme, { parseColor, contrastRatio });
   if (missing.length) throw new Error(`theme "${theme?.name || 'inline'}" incomplete, missing ${missing.join(', ')}`);
   const root = target.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
+  for (const [k, v] of Object.entries(surfaceCssVars(surfaceLook))) set(k, v);
   const P = theme.palette || {};
   set('--bg', P.bg); set('--paper', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
   set('--card', P.card || deriveCard(P)); // raised card surface (blocks use var(--card))
@@ -545,6 +554,11 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   const tokenValues = await resolveThemeTokenValues(rawTheme);
   Object.assign(data, resolveTokenRefs(data, tokenValues));
   const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
+  // A scene may override just the surface: `data.look.surface`, checked by the same lookErrors() the
+  // theme's own `look` is. It wins over the theme's, the "theme OR scene-level look" every other look
+  // key already gets.
+  const surfaceSpec = (isObj(data.look) && 'surface' in data.look) ? data.look.surface : look.surface;
+  const surfaceLook = resolveSurfaceLook(surfaceSpec);
   bakeTextSizeRoles(data, look);
   resolveFinishLayers(data, width, height); // `finish` sugar → real layers, before they get baked like any other
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
@@ -556,7 +570,7 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   assertKeyHandles(data.camera, 'camera');
   bakeTimeRemaps(data);
   checkNoSurvivingDepth(data);
-  applyTheme(theme); // once, pre-first-frame: pure (identical every frame)
+  applyTheme(theme, document.documentElement, surfaceLook); // once, pre-first-frame: pure (identical every frame)
   return theme;
 }
 

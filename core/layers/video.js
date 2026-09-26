@@ -4,7 +4,7 @@
 // whatever the decoder reached, which differs between the six capture workers and between two renders of
 // the same file. `renderFrame(n)` must be a function of `n` alone (engine-doctrine/MISTAKES.md #370), so this layer
 // never calls play(): it computes a source time from the scene clock and seeks there. The picture is then
-// as deterministic as a still image, and `make probe` can hold it to the same standard as everything else.
+// as deterministic as a still image, and `make check GATE=probe` can hold it to the same standard as everything else.
 //
 // The seek is asynchronous, which the engine had no way to express until now. core/frame-settle.js is the
 // barrier the capture drains before it shoots; this layer is its first caller.
@@ -110,5 +110,5 @@ export function frame(kit, el, L, t) {
   }));
 }
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still";

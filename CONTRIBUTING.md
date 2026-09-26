@@ -33,7 +33,7 @@ typeface.
 
 **`renderFrame(n)` is a pure function of `n`.** The same frame number must produce the same pixels
 regardless of what was rendered before it, because frames are captured across six parallel workers.
-Anything that breaks that is a bug even if it looks right. `make probe` and
+Anything that breaks that is a bug even if it looks right. `make check GATE=probe` and
 `node quality/gates/probe-purity.mjs scene` check it.
 
 ## Before you open a PR

@@ -1,6 +1,6 @@
 {
   "name": "plainyear",
-  "note": "INVENTED (not selected) by harness/author/invent-look.mjs from films/scene/_concepts/gh-wrapped.storyboard.md, seed 41. Stance \"instrument\": days is measured rather than felt, and the frame behaves like a calibrated instrument. Texture: no grain at all: hairlines, tabular figures and a lot of air. The flaw would be visible. Accent darkened from the generated #157ca2 to #0e4f67 after make audit: at 4.2:1 every hero number failed the 7:1 headline target on this ground.",
+  "note": "INVENTED (not selected) by harness/author/invent-look.mjs from films/scene/_concepts/gh-wrapped.storyboard.md, seed 41. Stance \"instrument\": days is measured rather than felt, and the frame behaves like a calibrated instrument. Texture: no grain at all: hairlines, tabular figures and a lot of air. The flaw would be visible. Accent darkened from the generated #157ca2 to #0e4f67 after make check GATE=audit: at 4.2:1 every hero number failed the 7:1 headline target on this ground.",
   "motion": {
     "easing": "easeOutQuart",
     "bounce": 0.02,
@@ -13,7 +13,7 @@
   "invented": {
     "tool": "harness/author/invent-look.mjs",
     "storyboard": "films/scene/_concepts/gh-wrapped.storyboard.md",
-    "subject": "GitHub wrapped · Vandit1604 · 20 Aug 2025 to 20 Aug 2026",
+    "subject": "GitHub wrapped \u00b7 Vandit1604 \u00b7 20 Aug 2025 to 20 Aug 2026",
     "seed": 41,
     "resolvedSeed": 755485821,
     "subjectFingerprint": 2447404321,
@@ -235,6 +235,7 @@
         "#10202d",
         "#0a0e15"
       ]
-    }
+    },
+    "surface": "editorial"
   }
 }

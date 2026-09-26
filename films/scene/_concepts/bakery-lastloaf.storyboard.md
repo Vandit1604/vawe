@@ -6,7 +6,7 @@ threads:
 
 # The bakery that sells out before lunch
 
-> A FIXTURE, not a film in the queue. It is the second brief `make invent-look` is tested against:
+> A FIXTURE, not a film in the queue. It is the second brief `make dev-tool X=invent-look` is tested against:
 > a look that suits this and also suits a GitHub year in review is a look that suits anything.
 
 SUBJECT: Aylmer Street Bakery, a two-person neighbourhood bakery whose sourdough is gone by 11am

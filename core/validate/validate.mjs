@@ -5,7 +5,7 @@
 //
 // data + theme validation against a format's schema.json. Runs in TWO places: (1) core/engine/boot.js
 // boot() imports validateData/validateTheme and aborts the render pre-first-frame on bad data (clear
-// message, no wasted frames); (2) `make validate` (core/validate/cli.mjs runCli) checks data files from
+// message, no wasted frames); (2) `make check GATE=validate` (core/validate/cli.mjs runCli) checks data files from
 // the shell. Pure + browser-safe: no top-level node imports.
 //
 // Schema vocabulary (the authoring schema):
@@ -48,6 +48,7 @@ import { walk } from './schema-walk.mjs';
 import { countEaseErrors } from './count-errors.mjs';
 import { cameraMoveErrors } from './camera.mjs';
 import { contentSlotErrors } from './content.mjs';
+import { svgLayerErrors } from './svg.mjs';
 
 export { layoutErrors } from './layout.mjs';
 export { captionErrors } from './captions.mjs';
@@ -62,6 +63,7 @@ export { lintData } from './lint-warnings.mjs';
 export { countEaseErrors } from './count-errors.mjs';
 export { cameraMoveErrors } from './camera.mjs';
 export { contentSlotErrors } from './content.mjs';
+export { svgLayerErrors, pathIsDegenerate } from './svg.mjs';
 
 // ON-SCREEN TEXT, out of a string that may be MARKUP. The rule lives in core/type/on-screen-text.js and
 // is re-exported here so the existing importers keep working: it was the strictest of eight copies, and
@@ -94,6 +96,7 @@ export function validateData(schema, data) {
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame
   errors.push(...cameraMoveErrors(data || {})); // a cameraMove param it does not read is a typo, caught before render
   errors.push(...contentSlotErrors(data || {})); // a {{key}} with no matching content entry, caught before render
+  errors.push(...svgLayerErrors(data || {}));    // a degenerate svg `d` (zero length) renders invisible
   return errors;
 }
 
@@ -140,7 +143,7 @@ export function validateAll(schema, data) {
   return [...validateData(schema, data), ...validateTheme(data?.theme)];
 }
 
-// ---------- CLI: `node core/validate/validate.mjs [data.json ...]` (make validate) ----------
+// ---------- CLI: `node core/validate/validate.mjs [data.json ...]` (make check GATE=validate) ----------
 // No args → validate every authored scene. Browser never runs this branch. The CLI itself lives in
 // cli.mjs, loaded with a dynamic import so it (and its node:fs/node:path use) is only ever touched
 // from here. validateAll is passed in rather than let cli.mjs import it back: a static import from

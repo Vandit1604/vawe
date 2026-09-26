@@ -1,5 +1,5 @@
 // One SCENE + one poster still per block → site/public/assets/blocks/<name>.{json,png}
-// plus site/lib/block-frames.json (the crop rect each one is framed by). Run via `make blocks-scenes`.
+// plus site/lib/block-frames.json (the crop rect each one is framed by). Run via `make site X=blocks-scenes`.
 //
 // The site plays these scenes LIVE, in the real engine, in an iframe. It used to ship a pre-encoded
 // mp4 per block, which was a marketing page for a render engine playing baked video of its own

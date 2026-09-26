@@ -100,7 +100,7 @@ support is DISJOINT SCOPES and SEQUENTIAL DEPENDENCY, never a number:**
 - **Disjoint scopes.** Rule 5 already says "do not send two agents to the same files," for token cost.
   The same rule also prevents failure 4 and, as a warning rather than a lock, failure 5: declare the
   globs a worktree owns to `worktree.sh add <name> <glob ...>` (mirroring the write-scope table
-  `harness/author/critics.mjs`'s DECIDERS already carry), and `make worktree-status` warns when a new
+  `harness/author/critics.mjs`'s DECIDERS already carry), and `make dev-tool X=worktree-status` warns when a new
   worktree's declared scope overlaps a live one's.
 - **Sequential dependency stays one agent.** Rule 8 already argues this on token cost; failures 1-3 are
   the reliability argument for the same conclusion. A chain of dependent steps run as a fan-out cannot
@@ -108,7 +108,7 @@ support is DISJOINT SCOPES and SEQUENTIAL DEPENDENCY, never a number:**
   until the whole chain is expected back. One agent, watched in the foreground, catches all three as
   they happen.
 - **Never trust a report; read the artefact.** Failure 1 is the general case `harness/dev/`
-  now backstops directly: `make worktree-status` reads commits and file activity off disk, never a
+  now backstops directly: `make dev-tool X=worktree-status` reads commits and file activity off disk, never a
   claim a turn typed, the same reasoning `quality/gates/stage.mjs` already applies to a film's stage.
 
 A count would have prevented none of these five, and this repo just spent two days removing count-based

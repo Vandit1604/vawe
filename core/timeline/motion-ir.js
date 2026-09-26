@@ -5,8 +5,8 @@
 // entrances (core/motion/parts.js, timed in films/scene/scene.js applyGsapHooks), named GSAP `fx` and
 // motionPath/physics (core/engine/gsap-effects.js, seeked by core/timeline/clips.js), kinetic split
 // presets (core/kinetic/presets.js, core/tracks/units.js), and authored idle (core/engine/idle.js).
-// quality/gates/jolt-check.mjs reads `L.motion` and the camera keys DIRECTLY, so a jolt inside a
-// kinetic ramp or a GSAP fx is invisible to it: the gate has never heard of those systems.
+// The retired jolt-check.mjs read `L.motion` and the camera keys DIRECTLY, so a jolt inside a
+// kinetic ramp or a GSAP fx was invisible to it: the gate had never heard of those systems.
 //
 // buildMotionIR(scene) walks an EXPANDED scene (post core/engine/expand.js: relative times and beats
 // are already plain numbers) and returns one flat list of entries:

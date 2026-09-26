@@ -82,7 +82,7 @@ function extractStrip(clip, ref, label, from, to, fps) {
 
 const look = (from, to, stripPath) => stripPath
   ? `<look: ${from}s to ${to}s, see ${stripPath}>`
-  : `<look: ${from}s to ${to}s, no clip found, extract by hand: make filmstrip VIDEO=<clip> FROM=${from} TO=${to} FPS=12>`;
+  : `<look: ${from}s to ${to}s, no clip found, extract by hand: make media X=filmstrip VIDEO=<clip> FROM=${from} TO=${to} FPS=12>`;
 
 // ── prompt assembly ─────────────────────────────────────────────────────────────────────────────────
 
@@ -382,7 +382,7 @@ function runFromRef(ref, clipArg, { ask: askFlag, answersPath } = {}) {
     process.exit(1);
   }
   if (grammar.coverage && grammar.coverage.ledger && grammar.coverage.ledger !== 'complete') {
-    console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make study-check NAME=${ref}`);
+    console.error(`ideate: ${ref}'s coverage ledger is "${grammar.coverage.ledger}", not "complete". Run: make check GATE=study-check NAME=${ref}`);
     process.exit(1);
   }
   if (askFlag) { console.log(JSON.stringify(ideateAsk(ideateLoadActs({ ref })), null, 2)); return; }

@@ -5,7 +5,7 @@
 // video is.
 //
 // THREE RULES, each learned somewhere in this repo:
-//   1. Type comes from the MAGIC BYTES, never the filename. `make photos` named every WebP it
+//   1. Type comes from the MAGIC BYTES, never the filename. `make media X=photos` named every WebP it
 //      downloaded .jpg and nothing noticed for months (MISTAKES #109). A caller-supplied name is a
 //      worse source of truth than a URL was.
 //   2. The stored name is ours, derived from the content hash. A filename that reaches the filesystem

@@ -21,9 +21,9 @@ is in and the one next command; `make next D=<film>` runs that step.
 |---|---|---|
 | 1 | brief | `make quiz NAME= URL=` |
 | 2 | plan | `make ideate` → write the storyboard → `make storyboard-check` |
-| 3 | design | `make preview` → `make design-spec` → `make studio D=` |
+| 3 | design | `make preview` → `make dev-tool X=design-spec` → `make studio D=` |
 | 4 | assemble | `make assemble D=` writes the scene JSON |
-| 5 | direct | `make critics D= DECIDERS=1` |
+| 5 | direct | `make dev-tool X=critics D= DECIDERS=1` |
 | 6 | render | `make ship D=` |
 | 7 | judge | `make judge D=` → **vawe-audit** composes one verdict; **vawe-review-loop** owns the fix loop; a PASS is never self-recorded |
 
@@ -31,7 +31,7 @@ No sign-off step: the draft render at the design stage (`make dev`) is where the
 redirects, before a full render is spent.
 
 **No templates**: compose from `engine-doctrine/PRIMITIVES.md` and real captured assets; `make assemble`
-writes the scene JSON, `make ship` renders it. Reflecting a brand: `make sections` + `make palette`
+writes the scene JSON, `make ship` renders it. Reflecting a brand: `make sections` + `make study-tool X=palette`
 build colours, fonts and a favicon from the site's own colours only.
 
 ## Where to look  `[ref: make help]`

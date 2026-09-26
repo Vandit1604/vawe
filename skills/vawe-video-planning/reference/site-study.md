@@ -12,7 +12,7 @@ Before any study, check `assets/brands/<brand>/house-style.md`. If it exists, tr
 locked Design Read: the brand's remembered taste (dominance, faces, palette, motion, shape,
 signature details, NEVERs). Do NOT re-derive what it already states; only study what it leaves open.
 This is the per-brand memory that keeps every video for a brand consistent. If it's missing, do the
-full study below, then persist it with `make house-style NAME=<brand>` and sharpen the `<…>` judgment
+full study below, then persist it with `make dev-tool X=house-style NAME=<brand>` and sharpen the `<…>` judgment
 lines so the next video is faster and on-brand (`engine-doctrine/TASTE.md` -> per-brand house style).
 
 ## Study first, then ask site-grounded questions
@@ -30,8 +30,8 @@ The brief comes from a script, not from prose, because the script knows what the
 ```bash
 make quiz NAME=<brand> URL=<url>          # → the AskUserQuestion payload, as JSON
 # ask it, collect the answers into a JSON file, then:
-make quiz-apply ANSWERS=<file.json> NAME=<brand>    # → a STORYBOARD.md that passes storyboard-check
-make quiz-look SB=<the storyboard> N=3             # → the directions DRAWN, pick one from pictures
+make dev-tool X=quiz-apply ANSWERS=<file.json> NAME=<brand>    # → a STORYBOARD.md that passes storyboard-check
+make dev-tool X=quiz-look SB=<the storyboard> N=3             # → the directions DRAWN, pick one from pictures
 ```
 
 `make quiz` refuses to run generically (exit 2) when a URL is known and `make sections` has not run.
@@ -45,7 +45,7 @@ something the engine cannot do.
 - It asks what holds the film when the cut is under 15s. `storyboard-check` hard-errors without
   `threads:`, the one thing no site study can guess.
 
-It never asks about motion or effects: `make quiz-look` renders two or three directions as panels,
+It never asks about motion or effects: `make dev-tool X=quiz-look` renders two or three directions as panels,
 and the question is which picture. Tone is not asked either, it is derived from the site (below).
 
 If the script is unavailable, the five questions it replaced are: goal, platform+orientation,
@@ -59,20 +59,20 @@ No style menu, no auto-heuristic: the brand's own site is the art direction, the
 pixels. Load `engine-doctrine/CRAFT/TYPOGRAPHY.md` and `COLOR.md` before authoring the theme, then:
 
 ```bash
-make brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
+make study-tool X=brandspec URL=…                                    # READ the CSS: real faces + WEIGHTS, tokens, colours+contrast
 make sections URL=… NAME=…                              # screenshot every section (the taste lives here)
-make lookbook URL=… NAME=…                              # full-page + viewport screenshots
-make palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
+make study-tool X=lookbook URL=… NAME=…                              # full-page + viewport screenshots
+make study-tool X=palette IMG=assets/brands/<brand>/sections/01-*.png   # EYEDROP the hero → dominance (LIGHT/DARK)
 ```
 
-`make brandspec` is the source of truth for type and declared colours: read it, don't guess. It gives
+`make study-tool X=brandspec` is the source of truth for type and declared colours: read it, don't guess. It gives
 the 1-3 real faces mapped to primary/secondary/accent, the weights actually used (author the headline
 at the measured weight, never a default 800), and the site's `--color-*` tokens (a site's declared
-accent is the hex in its CSS, not the nearest colour in its hero image). Use `make palette` for
+accent is the hex in its CSS, not the nearest colour in its hero image). Use `make study-tool X=palette` for
 dominance only. Author the font system per `TYPOGRAPHY.md` §0b (1-3 roles) and validate every colour
 pair's contrast per `COLOR.md` before committing it.
 
-**Dominance is decided by looking, never by a field** (`engine-doctrine/MISTAKES.md #1`). `make palette`
+**Dominance is decided by looking, never by a field** (`engine-doctrine/MISTAKES.md #1`). `make study-tool X=palette`
 reports LIGHT/DARK from the hero's real luminance; then read the screenshot and confirm. A white site
 gets a white-first video: a mislabeled dominance is how the worst videos happen. Author
 `themes/<brand>.json` by hand from the eyedropped hexes: bg = the site's dominant, accent = its vivid

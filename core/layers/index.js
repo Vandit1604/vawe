@@ -204,7 +204,7 @@ export const LAYER_PROPS = Object.freeze(Object.fromEntries(
 // was the wrong one. An author reading that mp4 concludes the gate is pedantic; the frame is empty.
 //
 // A missing `type` still means text (documented default). A type that is present and unknown is a bug.
-// `block`, `comp` and `beat` USED to be build-time sugar a separate `make expand` step had to resolve
+// `block`, `comp` and `beat` USED to be build-time sugar a separate `make dev-tool X=expand` step had to resolve
 // first; core/engine/expand.js `expandScene` now runs at LOAD (core/transitions/lower.js `loadScene`, called
 // by films/scene/scene.js before any layer is built), so none of the three ever reach this dispatch
 // any more. A scene that somehow still carries one is an unknown type, same as any other typo.
@@ -283,7 +283,7 @@ export function createRenderer(ctx) {
     // already computes internally, made readable BY NAME instead of a second private computation
     // drifting from the first. Optional per type; most expose nothing. Pure in (L, t, scene): no DOM
     // read, no state kept between frames, so it is safe to resolve before any layer's own frame() runs
-    // and to re-run out of order (make probe samples frames out of order for exactly this reason).
+    // and to re-run out of order (make check GATE=probe samples frames out of order for exactly this reason).
     expose(L, t, scene) { const m = pick(L); return m.expose ? m.expose(L, t, scene) : null; },
   };
 }

@@ -59,7 +59,7 @@ device a continuous-object gate cannot verify) · `engine-doctrine/RULES/continu
 ## Assets and how to get them
 
 A film reference: `make study VIDEO=<file> NAME=<name>`. A site reference: `make sections URL=<site>
-NAME=<name>` + `make palette`. Never re-download or commit the reference's own frames; the grammar file
+NAME=<name>` + `make study-tool X=palette`. Never re-download or commit the reference's own frames; the grammar file
 is the only artefact this type keeps.
 
 ## Writing the storyboard

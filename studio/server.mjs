@@ -164,15 +164,6 @@ const bakedRoles = () => {
   return SFX_ROLES;
 };
 
-// Same spawn-and-parse shape as beatCheck above. Console only, never blocking: `make studio` is the
-// iteration loop, and the loop is not where a gate gets teeth.
-const directionFloorFindings = (file) => {
-  let out = '';
-  try { out = execFileSync(process.execPath, [path.join(repoRoot, 'quality/gates/direction-floor.mjs'), file], { encoding: 'utf8' }); }
-  catch (e) { out = String(e.stdout || '') + String(e.stderr || ''); } // the gate exits 1 on a FAIL
-  return out.split('\n').map((l) => l.trim()).filter((l) => /^[^[]*\[[a-z-]+\]/.test(l));
-};
-
 // FOUR PANES, FOUR ROUTES. /studio/<pane> opens directly on that pane; bare '/studio' picks a pane off
 // the film's own stage.
 const PANES = ['plan', 'make', 'ship', 'sound'];
@@ -231,7 +222,7 @@ const storyboardPath = () => {
 // ---- the CHAT sidebar's own child process and conversation -------------------------------------
 let chatJob = null;        // the running `claude -p` child, or null
 let chatSessionId = null;  // the CLI's own session_id, so the next prompt --resumes it
-const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make validate:*)';
+const CHAT_TOOLS = 'Read,Edit,Write,Glob,Grep,Bash(node core/validate/validate.mjs:*),Bash(make check GATE=validate:*)';
 // An overlap test on [aStart,aEnd) x [bStart,bEnd), used to find what a mentioned layer's window
 // touches: the camera moves and transitions running while it is on screen.
 const overlaps = (aStart, aEnd, bStart, bEnd) => aStart < bEnd - 1e-9 && bStart < aEnd - 1e-9;
@@ -283,7 +274,7 @@ const timeContext = (prompt) => {
       active.length ? `active layers ${active.join(', ')}.` : 'no layer is active.',
       cam ? `camera leg ${cam.move || 'move'} ${cam.start}-${(cam.start + cam.dur).toFixed(2)}s.` : '',
       near ? `nearest transition ${near.fx || near.mech || 'transition'} at ${near.at}s.` : '',
-      `To see this exact frame run: make frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
+      `To see this exact frame run: make dev-tool X=frame D=${path.relative(REPO_ROOT, dataArg)} N=${n}`,
     ].filter(Boolean).join(' ');
   });
   return blocks.join(' ');
@@ -1008,12 +999,3 @@ if (!process.env.NOOPEN) {
   catch { /* the printed URL above is the fallback, and it is enough */ }
 }
 
-// Never fatal: a gate crash here must not take the server down with it.
-try {
-  const floor = directionFloorFindings(dataArg);
-  if (floor.length) {
-    console.log(`  direction floor (\`make direction-floor D=${path.relative(repoRoot, dataArg)}\` for the full report):`);
-    for (const l of floor) console.log(`    ${l}`);
-    console.log('');
-  }
-} catch { /* the studio loop never blocks on a gate */ }

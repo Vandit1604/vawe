@@ -1,6 +1,6 @@
 // core/layers/lottie.js: an After Effects (Bodymovin) animation rendered DETERMINISTICALLY.
 // No autoplay, no internal ticker: renderFrame(n) drives it by ABSOLUTE seek (goToAndStop with a
-// frame index), so a frame is a pure function of n and order-independent (verified by `make probe`).
+// frame index), so a frame is a pure function of n and order-independent (verified by `make check GATE=probe`).
 // The animationData is preloaded in boot() into kit.lottie[src]; lottie-web is the global window.lottie
 // (vendored, SVG-light build). A missing lib or src degrades to an empty box, never a throw.
 import { mergeProps, propsOf } from '../registry/props.js';
@@ -38,5 +38,5 @@ export function frame(kit, el, L, t, scene, { speed, loop } = L) {
 // build time. mergeProps unions them (core/props.js).
 export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay";

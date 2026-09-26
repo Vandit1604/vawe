@@ -65,7 +65,7 @@ import { produceBaseline } from '../../core/engine/produce.js';
 import { resolveRelativeTimes } from '../../core/timeline/relative-time.js';
 import { expandScene } from '../../core/engine/expand.js';
 import { resolveTempo } from '../../core/engine/tempo.js';
-import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors } from '../../core/validate/validate.mjs';
+import { easeErrors, bgErrors, durationWordErrors, cssErrors, authoredJunctionErrors, svgLayerErrors, pathIsDegenerate } from '../../core/validate/validate.mjs';
 import { raise as raiseJunction, deepEqual as junctionDeepEqual, migrateOne } from '../../harness/author/migrate-junctions.mjs';
 import { splitWaiver, waiverCovers, isWaivedBy, groupWaivers, bareWaiverCoverage } from '../../harness/lib/waivers.mjs';
 import { FEEL, DURATION, CAMERA_WORDS, resolveSeconds, resolveCameraMove, verifyVocab,
@@ -121,9 +121,7 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from '../../quality/gates/content-check.mjs';
 import { evenSamples } from '../../quality/gates/beats-of.mjs';
 import { gradeable, tileBox, baseOf } from '../../quality/gates/tile.mjs';
-import { classifyRegions } from '../../quality/gates/motion-floor.mjs';
 import { sceneTiming } from '../../quality/gates/scene-timing.mjs';
-import { exitEmphasis, entranceEmphasis } from '../../quality/gates/choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { DIAL_CONTRACT_VIOLATIONS } from '../../core/registry/knobs.js';
@@ -162,6 +160,26 @@ test('lib-test: validate', async () => {
     return errs.length === 0;
   })());
   ok('css: no `css` prop at all is silent', cssErrors({ layers: [{ type: 'rect' }] }).length === 0);
+}
+
+// ---- svg degenerate path: a lone moveto (or every command on one point) renders invisible, and used
+// to validate clean (core/validate/svg.mjs) ----------------------------------------------------------
+{
+  ok('pathIsDegenerate: a lone moveto is degenerate', pathIsDegenerate('M0 0'));
+  ok('pathIsDegenerate: every command landing on the same point is degenerate', pathIsDegenerate('M5 5 L5 5 Z'));
+  ok('pathIsDegenerate: a real triangle is not', !pathIsDegenerate('M50 5 L95 95 L5 95 Z'));
+  ok('pathIsDegenerate: a real arc is not', !pathIsDegenerate('M10 10 A5 5 0 1 0 20 20'));
+  ok('pathIsDegenerate: missing/blank `d` is degenerate', pathIsDegenerate(undefined) && pathIsDegenerate(''));
+  ok('svgLayerErrors: a degenerate svg layer is refused, naming its `d`', (() => {
+    const errs = svgLayerErrors({ layers: [{ type: 'svg', d: 'M0 0' }] });
+    return errs.some((e) => /^layer\[0\] \(svg\) has a degenerate `d`/.test(e) && e.includes('"M0 0"'));
+  })());
+  ok('svgLayerErrors: a real path is silent', svgLayerErrors({ layers: [{ type: 'svg', d: 'M50 5 L95 95 L5 95 Z' }] }).length === 0);
+  ok('svgLayerErrors: a non-svg layer is never checked', svgLayerErrors({ layers: [{ type: 'rect', d: 'M0 0' }] }).length === 0);
+  ok('svgLayerErrors: a group child is walked too, not just top-level layers', (() => {
+    const errs = svgLayerErrors({ layers: [{ type: 'group', children: [{ type: 'svg', d: 'M0 0' }] }] });
+    return errs.some((e) => /^layer\[0\]\.children\[0\] \(svg\)/.test(e));
+  })());
 }
 
 

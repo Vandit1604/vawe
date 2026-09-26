@@ -17,13 +17,13 @@ group: reference
 
 No templates. These are the words; you write the sentences. These are registries in code, so their
 sizes never go stale here: `node harness/author/arsenal.mjs --census` prints the live total, and
-`make vocab` regenerates `engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md` with every registry broken
+`make check GATE=vocab` regenerates `engine-doctrine/CRAFT/PRIMITIVES-VOCABULARY.md` with every registry broken
 out by name. Everything is pure in the frame number: same input, same bytes, any render order.
 
 **Vocabulary shape: cut presentations × timings × directions, shader stings, ambient shader looks,
 composite looks, canvas passes, resample effects (layer-as-texture), kinetic presets × split modes,
 easings (the velocity ramps among them), background presets (recolored by every brand theme),
-drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse; see `make vocab` for
+drawn icons + fetchable logos/flags/photos, camera + ken burns + shake + pulse; see `make check GATE=vocab` for
 the live counts.**
 That is millions of distinct combinations before copy, layout, and color even enter.
 
@@ -113,7 +113,7 @@ and the engine keeps that promise rather than trusting the author to.
 - **The peak.** `device` is written as a shader sting at `at`, at 1.35 against the sting default of 1.
   Twelve devices, every one already in `SHADER_FX`: nothing new was added for this:
   `flash` `chromaticSplit` `glitch` `streak` `whipPan` `ripple` `sdfIris` `vortex` `lens` `dispersion`
-  `iridescence` `cinematicZoom`. `make effects` lists them under **Spectacle devices**.
+  `iridescence` `cinematicZoom`. `make regen` lists them under **Spectacle devices**.
 - **The floor.** Every competing amplitude dial in the film is multiplied by **0.55**: other stings'
   and seams' `intensity`, composite-look strength (`filter: "neon"` and `"neon:0.9"` alike, resolved
   through the look's own default), an authored `intensity` on a `glow` or `beam` layer, and a `kick`
@@ -139,7 +139,7 @@ only transition that samples the OUTGOING and INCOMING beats as textures and ble
 The two beats either side of the boundary are rasterised ONCE at build (whole stage → `u_from` / `u_to`)
 and a fragment shader keyed on `u_progress` smears / reveals / bends across them. Determinism is intact:
 both textures are pure functions of `n` (baked from two fixed frames), so `renderFrame(n)` only samples
-them and stays order-independent: `make probe` + `make canvas-purity` pass on a seam scene.
+them and stays order-independent: `make check GATE=probe` + `make check GATE=canvas-purity` pass on a seam scene.
 - **JSON seam**: `{ t, fx, dur, dir?, seed?, intensity? }` in a top-level `seams: [...]`. The window is
   `[t, t+dur]`; the leaving beat is baked from the frame just before it, the arriving beat from the
   frame just after. `fx`: `fade` (cross-dissolve, always the fallback) · `crossWarp` (both beats drag to
@@ -167,7 +167,7 @@ every gate are unchanged.
   `uncover`) default to a cheap root **cut**; `mech: "seam"` upgrades to the two-scene blend.
 - A raw `cuts`/`stings`/`seams` value set on the same beat wins; an unroutable `fx` (a typo, or a
   layer-only anim like `pop` used as a boundary) is rejected at validate, never coerced.
-- **See any transition before authoring**: `make transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
+- **See any transition before authoring**: `make media X=transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`
   renders a labelled A→B filmstrip. Decision theory: `engine-doctrine/CRAFT/TRANSITIONS.md`.
 - A layer's own entrance/exit is `anim`/`out` directly, not a second sugar over the same fields: a
   `{ transition: { in, out, dir?, dur? } }` shorthand used to live here too and was removed for
@@ -231,7 +231,7 @@ byte-identical across render order. Mixed case is preserved from the input.
   16 glyphs at size 150-170 is byte-identical 3/3; 7 glyphs at 180 is 4/4. But 32 glyphs on screen at
   once varies run to run, and so does 11 glyphs at size 88. **Keep roughly ≤16 glyphs on screen at
   size ≥150**: reveal long copy a line at a time rather than stacking it. Verify with a repeat render,
-  never with `make frame` (see MISTAKES #102).
+  never with `make dev-tool X=frame` (see MISTAKES #102).
 - Faces must be registered in `core/tokens.css` or `ransomStyle` throws (never a silent body-font
   fallback). Edges stay near-axis-aligned on purpose: steeper diagonal cuts rasterise
   non-deterministically under the per-glyph rotation. Reel: ransom-demo.mp4 · ransom-color-demo.mp4.
@@ -398,19 +398,19 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   `renderer/internal/audio/audio.go`. A junction the film does not have, a lead longer than the beat before it, or
   a `sound` that is not on disk all FAIL the render and name the cause. See `engine-doctrine/CRAFT/SOUND.md` §2.
 - **Muted-social captions**: `captionMode: "pop"`, big bold bottom-third burned-in subtitles (accent on
-  `<b>…</b>`), the style social autoplay needs. `make captions D=<file> TEXT="First line. The <b>payoff</b>."`
+  `<b>…</b>`), the style social autoplay needs. `make media X=captions D=<file> TEXT="First line. The <b>payoff</b>."`
   auto-times a script into the `captions` array (time ∝ word count, deterministic). Watches fine on mute.
 
 ## Icons & images: real assets first, in this order
 
-1. `make sections` + `make capture` (real product UI, pixel-faithful, animatable)
-2. `make lookbook URL=… NAME=…`: study shots (art direction, not for rendering)
+1. `make sections` + `make media X=capture` (real product UI, pixel-faithful, animatable)
+2. `make study-tool X=lookbook URL=… NAME=…`: study shots (art direction, not for rendering)
 3. Brand logos: `curl https://cdn.simpleicons.org/<slug>/<hex>` → `assets/icons/` (free)
 4. Flags: `flagcdn.com/<iso2>.svg` (public domain) → `assets/flags/`
-5. Photos: `make photos Q="…" NAME=brand`, Openverse cc0/pdm/by, attribution auto-recorded in
+5. Photos: `make media X=photos Q="…" NAME=brand`, Openverse cc0/pdm/by, attribution auto-recorded in
    `credits.json`; use ONLY in clipped frames with `ken` (CC-BY needs visible credit)
 6. Drawn icons: `svgIcon(name)`, `file check shield bolt dollar link cube agent braces globe arrowRight spark plug clock layers`
-7. Generated topic cards: `make assets D=…` (deterministic palette cards)
+7. Generated topic cards: `make media X=assets D=…` (deterministic palette cards)
 8. Emoji: last resort. **Never** copyrighted posters/stills/paid stock.
 
 ## Light, depth & density (July 11: the "looks like the site" vocabulary)
@@ -440,10 +440,10 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   lines · `{code}` · `{bullets:[…]}`. Auto-height, theme-styled (`--surface`/`--line`/fonts). ONE
   layer instead of hand-placing rect+filename+chip+bar+body. Sizes: `nameSize/hSize/bodySize`.
 - `{type:"clip", src:"/assets/gen/<name>/manifest.json", x, y, w, loop?, speed?, fit?, radius?}`
-  → a generated/any **video played DETERMINISTICALLY** as a preloaded PNG frame sequence. `make gen-video
-  Q="…" NAME=<name>` (kie.ai) or `make gen-clip IN=any.mp4 NAME=<name>` extracts frames + a manifest;
+  → a generated/any **video played DETERMINISTICALLY** as a preloaded PNG frame sequence. `make media X=gen-video
+  Q="…" NAME=<name>` (kie.ai) or `make media X=gen-clip IN=any.mp4 NAME=<name>` extracts frames + a manifest;
   `renderFrame(n)` swaps a preloaded `<img>` src per frame (no `<video>`, no async decode → purity holds).
-  `loop` wraps, `speed` scales playback. Generated imagery: `make gen-image Q="…" NAME=<name>` → a normal
+  `loop` wraps, `speed` scales playback. Generated imagery: `make media X=gen-image Q="…" NAME=<name>` → a normal
   `image` layer. (Generation needs `KIE_API_KEY`; `gen-clip` works on any local mp4 with no key.)
 - `{type:"video", src, in?, out?, rate?, contentStart?, fit?, radius?, audio?}` → real footage,
   SEEKED to a computed source time every frame and never played, so the picture stays as deterministic
@@ -454,7 +454,7 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
 - `{type:"lottie", src:"/assets/lottie/<name>.json", x, y, w, h, loop?, speed?, fit?}`
   → an **After Effects (Bodymovin) animation played DETERMINISTICALLY**. The runtime (lottie-web SVG,
   MIT, loaded only when a scene uses it) is driven by ABSOLUTE seek, `goToAndStop((t-start)*fr, true)`
-  per frame, so `renderFrame(n)` stays pure and order-independent (`make probe`). Brings real vector
+  per frame, so `renderFrame(n)` stays pure and order-independent (`make check GATE=probe`). Brings real vector
   motion (animated logos, spinners, checkmarks, confetti) you can't author from primitives. `loop` wraps,
   `speed` retimes, `fit:"contain"` letterboxes (default fills). A missing lib/src degrades to an empty
   layer, never a crash. Drop `.json` exports into `assets/lottie/`.
@@ -463,10 +463,10 @@ The Go mixer (`renderer/internal/audio`) was always there (music bed + VO auto-d
   animated (`anim`/motion tracks) by the engine. MUST be static: `<script>` is stripped so purity
   holds. Use theme vars (`var(--font-sans)`, `var(--accent)`) to stay on-brand. The whole block
   animates as ONE unit (use atomic layers when you want per-element choreography). **Preview standalone
-  first (`make preview HTML=frag.html`) and gate the markup (`make designspec-check`)**, hand HTML regresses to slop.
+  first (`make preview HTML=frag.html`) and gate the markup (`make check GATE=designspec-check`)**, hand HTML regresses to slop.
 - Optical tracking: themes with `type.optical: true` get size-scaled letter-spacing via
   `trackingFor(px)` (−0.008em body → −0.022em hero). Variable weights (510/590) pass through.
-- **Animated site sections**: `make capture-scene URL=… SEL="section" NAME=b LABEL=x PARTS="s1,s2"`
+- **Animated site sections**: `make media X=capture-scene URL=… SEL="section" NAME=b LABEL=x PARTS="s1,s2"`
   captures parts + relative geometry to `scenes/<label>.json` and prints layer stubs; re-stage the
   site's animation with windows/cuts (`component` + `part:"p1"`). Re-type text by overlaying our
   own `type`-preset layer. Icons/dots must be DOM shapes, never out-of-face glyphs.
@@ -677,10 +677,10 @@ Hand-written HTML leaks the site's taste: the real page already has the assets, 
 logos and dense real UI. So the default for any hero surface is **capture, then re-animate**:
 
 1. `make sections URL=… NAME=b` → one screenshot per major block + `sections.json` (a stable
-   selector + a ready-to-paste `make capture` command per section). This is the anti-omission step:
+   selector + a ready-to-paste `make media X=capture` command per section). This is the anti-omission step:
    every section is on the table, so you can't silently ignore the ones you didn't think of.
-2. **Storyboard = one beat per section, in the site's own order.** For each beat, `make capture`
-   (static hero) or `make capture-scene` (animated section → parts) the REAL block, its logos,
+2. **Storyboard = one beat per section, in the site's own order.** For each beat, `make media X=capture`
+   (static hero) or `make media X=capture-scene` (animated section → parts) the REAL block, its logos,
    shadows, gradients, copy come along for free. Stage it as a `component` layer and animate OUR way:
    window + cut + camera push + staggered parts; re-type text by overlaying our own `type` layer,
    never by editing captured glyphs (purity + font faithfulness).
@@ -692,12 +692,12 @@ logos and dense real UI. So the default for any hero surface is **capture, then 
 **Look before you render** (answers "is my HTML doing what I want?"):
 - `make preview HTML=frag.html THEME=b` → one hand fragment (or a captured component JSON) rendered
   STANDALONE on the theme bg → `/tmp/preview.png`. Read it; fix; repeat, before the 900-frame render.
-- `make beats D=video.json [VS=b]` → first/mid/last frame of every beat in one sheet → `/tmp/beats/<name>.png`.
+- `make dev-tool X=beats D=video.json [VS=b]` → first/mid/last frame of every beat in one sheet → `/tmp/beats/<name>.png`.
   `VS=b` stacks each beat beside its source-section shot: a side-by-side fidelity diff. Read it every render.
 
-Then the gates: `make validate` (schema + no-emdash) → `make probe` (purity) → `make audit`
-(overlap/safe-zone/text+image WCAG contrast) → `make motion` (holds/settles/monotonic/typing) →
-`make similar`/`make ledger` (cross-video sameness) → `make check GATE=feature-audit` (are you reaching for the
+Then the gates: `make check GATE=validate` (schema + no-emdash) → `make check GATE=probe` (purity) → `make check GATE=audit`
+(overlap/safe-zone/text+image WCAG contrast) → `make check GATE=motion` (holds/settles/monotonic/typing) →
+`make check GATE=similar`/`make dev-tool X=ledger` (cross-video sameness) → `make check GATE=feature-audit` (are you reaching for the
 best primitive, or defaulting?) → eyeball hook, payoff, CTA.
 
 ## Prefer the better primitive (don't default)
@@ -718,7 +718,7 @@ video, not the framework. It's a WARN, not a blocker, but treat a flag as "prove
 
 ## The no-template doctrine
 
-Study the site (`make lookbook`), inventory every section (`make sections`), name its design
+Study the site (`make study-tool X=lookbook`), inventory every section (`make sections`), name its design
 language in words, trace every choice to an observation, pull copy from the site's own words, then
 **capture its real sections and re-animate them**; compose connective tissue from THIS vocabulary.
 Structure is designed per product; nothing here decides your story for you.
@@ -854,8 +854,8 @@ once the moment a layer can be sampled.
    `<img>` and never reaches the sampled pixels, so it would be silently dropped. Pick one.
 4. **One WebGL context per resampled layer.** This is a hero-shot effect; do not put it on fifty layers.
 5. **Determinism**: pure in local `t`. The source is either static or drawn from `lt` *before* it is
-   sampled, and nothing ever samples its own previous output (no feedback). Proven by `make probe` +
-   `make canvas-purity`.
+   sampled, and nothing ever samples its own previous output (no feedback). Proven by `make check GATE=probe` +
+   `make check GATE=canvas-purity`.
 
 Not the same as its neighbours, and the difference is what to reach for:
 - **vs `canvasFx`**: baked once at build into a static PNG. Static by construction, so it cannot move,
@@ -925,10 +925,10 @@ three.js dependency would earn itself; see `engine-doctrine/ROADMAP.md`.
 `captionStyle:` layers a word-timed treatment on the pop caption layout (core/type/captions.js):
 `highlight` · `pillKaraoke` · `weightShift` · `clipWipe`. Per-line `words:[{t0,t1}]` gives real
 karaoke timing; without it, windows distribute across the line proportional to word length, so
-`make captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
+`make media X=captions` output still reads as intentional. Inactive words dim via colour mix toward the bg,
 never opacity: the styled plate keeps every state above WCAG 4.5:1.
 
-## Baked simulation (`generators/sim/sims/` · `make sim`): the stateful tier, run offline
+## Baked simulation (`generators/sim/sims/` · `make gen X=sim`): the stateful tier, run offline
 
 `renderFrame(n)` is a pure function of `n`: eight workers, arbitrary order, byte-identical output.
 A simulation is the exact opposite (frame 412 exists only because 411 ran first) so nothing
@@ -939,10 +939,10 @@ They are not excluded from the videos, only from the renderer. A sim runs **offl
 process, in frame order, as stateful as it likes**, and emits a PNG frame sequence; the scene plays
 that sequence back through the existing `clip` layer. Non-determinism is confined to bake time and
 the renderer keeps exactly one contract. Same shape as `canvasFx` (an image pass baked once at boot)
-and `make spectrum` (band energy baked to a table the render reads by row).
+and `make media X=spectrum` (band energy baked to a table the render reads by row).
 
 ```bash
-make sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
+make gen X=sim D=generators/sim/sims/ember-burst.mjs WRITE=1     # → assets/baked/ember-burst/{f0001.png…,manifest.json,meta.json}
 make check GATE=sim-audit                              # seeded? bake fresh against its source? sequence intact?
 ```
 

@@ -11,7 +11,6 @@ const PATTERNS = [
   /\bsev\s*:\s*'([a-z][a-z0-9-]{2,})'/g,                  // designspec-check's finding objects
   /\ballow(?:ed)?\.has\('([a-z][a-z0-9-]{2,})'\)/g,       // a gate reading its own waiver
   /\braise\(\s*'([a-z][a-z0-9-]{2,})'/g,                  // a gate helper that adapts through safeguards.mjs, then fails or warns
-  /=\s*`([a-z][a-z0-9]*-[a-z][a-z0-9-]*): /g,             // a message assigned as `code: prose`, printed with no brackets (choreo.mjs's camera-coverage-floor)
 ];
 
 const SET_DECLS = [['quality/audit.mjs', /^const (?:HARD|SOFT)\s*=\s*new Set\(\[([^\]]*)\]/gm]];

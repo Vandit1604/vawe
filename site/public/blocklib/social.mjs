@@ -181,7 +181,7 @@ export function videoLowerThird({ x, y, w = 520, name = '', channel = '', sub = 
     + avatarHtml({ avatar, initials, name: who, size: 56, ...AV_INK })
     + `<div style="display:flex;flex-direction:column;gap:2px;align-items:flex-start;flex:1;min-width:0">`
     + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink}">${who}</span>`
-    // A subscriber count is a FIGURE, so it keeps mono. `--dim` fails `make audit` HARD at 2.6:1.
+    // A subscriber count is a FIGURE, so it keeps mono. `--dim` fails `make check GATE=audit` HARD at 2.6:1.
     + (count ? `<span style="font:500 ${TYPE.body}px var(--font-mono);color:${T.sub}">${count}</span>` : '') + '</div>'
     + `<div data-part style="background:${T.accent};border-radius:${R.pill}px;padding:${SPACE.xs}px ${SPACE.lg}px;flex:none">`
     + `<span style="font:700 ${TYPE.body}px var(--font-sans);color:${onColor(T.accent)}">${cta}</span></div></div>`;

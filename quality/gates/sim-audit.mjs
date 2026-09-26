@@ -112,7 +112,7 @@ for (const name of bakes) {
       note('stale', rel,
         `${meta.sim} has changed since this was baked, so the scene is playing the PREVIOUS version of the effect.\n` +
         `         changed: ${[...moved, ...gone.map((g) => g + ' (removed)')].join(', ') || '(source graph reshaped)'}\n` +
-        `         fix: make sim D=${meta.sim} WRITE=1`);
+        `         fix: make gen X=sim D=${meta.sim} WRITE=1`);
     }
   }
 

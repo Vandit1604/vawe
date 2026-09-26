@@ -14,7 +14,7 @@
 // envelope -> feedback delay) is reimplemented here as offline DSP. The parameter tables are its
 // design work; the DSP below is our implementation of the same signal path.
 //
-// Used by harness/media/gen-audio.mjs (`make audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
+// Used by harness/media/gen-audio.mjs (`make gen X=audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
 // which the Go mixer (internal/audio/audio.go) beds under the render.
 
 export const SR = 44100;

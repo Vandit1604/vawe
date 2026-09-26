@@ -145,5 +145,5 @@ export function build(kit, el, L, { kind, amount, filter, blend } = L) {
 
 export const PROPS = propsOf(build);
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust`";

@@ -175,7 +175,7 @@ if (fs.existsSync(LAYERS_MDX)) {
 
   const CLAIMS = [
     { re: /(\d+) effects across (\d+) families/, want: effects && effects.slice(1),
-      src: 'engine-doctrine/EFFECTS.md, which `make effects` generates' },
+      src: 'engine-doctrine/EFFECTS.md, which `make regen` generates' },
     { re: /(\d+) named things/, want: census, src: 'harness/author/arsenal.mjs --census' },
     { re: /(\d+) gate-visible scenes/, want: scenes, src: 'quality/gates/waiver-drift.mjs' },
   ];

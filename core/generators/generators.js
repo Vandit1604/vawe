@@ -56,11 +56,11 @@ const LOOKS = [
 ];
 
 // `ember` (refs/ref-a.jpg, scored 22.2, READY) is not in LOOKS: a taste call, not a measurement gap.
-// Its preset stays in core/lightfield/presets.js (`make lightfield PRESET=ember`), so bringing back its
+// Its preset stays in core/lightfield/presets.js (`make gen X=lightfield PRESET=ember`), so bringing back its
 // row here is the only thing needed to restore it.
 
 // `tide` and `fern` are not in LOOKS: invented looks with no reference, never scored. Their presets
-// stay reachable via `make lightfield`; adding a row here needs a reference and a score first.
+// stay reachable via `make gen X=lightfield`; adding a row here needs a reference and a score first.
 
 const build = ({ name, preset, ref, blurb, ready }) => {
   const opts = LIGHTFIELD_PRESETS[preset];

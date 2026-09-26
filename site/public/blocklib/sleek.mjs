@@ -2,7 +2,7 @@
 // treatments that read premium under the determinism reset. The rule (engine-doctrine/MISTAKES.md): a block holds
 // only STATIC CSS; anything that MOVES comes from a Phase-2 engine effect (a `beam` layer for the border
 // beam, an `aurora` paint behind a glass panel), never a frozen CSS @keyframe. Colours are semantic theme
-// vars so every brand reskins them; the theme owns the palette and `make audit` owns contrast.
+// vars so every brand reskins them; the theme owns the palette and `make check GATE=audit` owns contrast.
 //
 // Each factory is PURE (props → array of scene-layer JSON), the same contract as blocks/ui.mjs. Compose in
 // an authoring script or via `{ "type":"block", "block":"glassCard", ... }`, which expands at load

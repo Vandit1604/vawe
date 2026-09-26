@@ -1,7 +1,7 @@
 // generators/media/voice-cue.mjs: turn a `{voice, params}` cue into an ordinary named cue.
 //
 // A `voice` cue asks for a synthesised sound tuned by per-cue numbers (freq, gain, attack, decay,
-// seed), which the static bake catalogue (generators/media/audio-bake.mjs, run once by `make audio`)
+// seed), which the static bake catalogue (generators/media/audio-bake.mjs, run once by `make gen X=audio`)
 // cannot cover: its ROLES table is fixed at build time, one file per role, no per-scene parameters.
 // So a voice cue is baked HERE, on demand, keyed by a content hash of (voice, params, sample rate),
 // into assets/sfx/ alongside the static roles. Once written it is an ordinary named sample: the Go

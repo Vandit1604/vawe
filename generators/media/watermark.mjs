@@ -1,10 +1,10 @@
 // generators/media/watermark.mjs: bake the DRAFT watermark to a transparent PNG.
-//   make watermark  [TEXT="VAWE DRAFT"] [OPACITY=0.1]
+//   make media X=watermark  [TEXT="VAWE DRAFT"] [OPACITY=0.1]
 //
 // WHY A BAKED PNG AND NOT ffmpeg drawtext: drawtext needs a TTF/OTF on disk and every font this repo
 // ships is .woff2, which FreeType will not load. Rasterising it here instead costs nothing at render
 // time, keeps the mark in the real brand face, and follows the same offline-bake rule as
-// `make ransom-sprites` and `make gradients`: the render only ever reads a finished file.
+// `make gen X=ransom-sprites` and `make gen X=gradients`: the render only ever reads a finished file.
 //
 // One 1920x1080 sheet covers every output shape. encode.Video scales it to the frame with scale2ref,
 // so a 9:16 export stretches the diagonal a little, which at 10% opacity nobody can see and nobody

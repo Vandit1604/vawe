@@ -1,5 +1,5 @@
 // generators/ransom/sprites.mjs: turn a pack of real cut-out letter images into a sprite set the
-// engine can compose notes from.  make ransom-sprites  [SRC=assets/ransom-src] [H=220]
+// engine can compose notes from.  make gen X=ransom-sprites  [SRC=assets/ransom-src] [H=220]
 //
 // IN:  assets/ransom-src/<CHAR>/<anything>.png    (a folder per character, preferred)
 //      assets/ransom-src/<CHAR>.png               (or flat: A.png, A-2.png, a3.png …)
@@ -28,7 +28,7 @@ if (!fs.existsSync(SRC)) {
   console.error(`ransom-sprites: no source dir at ${path.relative(repoRoot, SRC)}`);
   console.error('  Unzip your cut-out letter pack there: a folder per character is ideal:');
   console.error('    assets/ransom-src/A/a1.png  assets/ransom-src/A/a2.png  assets/ransom-src/B/…');
-  console.error('  Flat files (A.png, A-2.png) also work. Then re-run: make ransom-sprites');
+  console.error('  Flat files (A.png, A-2.png) also work. Then re-run: make gen X=ransom-sprites');
   process.exit(1);
 }
 

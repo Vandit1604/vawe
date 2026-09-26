@@ -11,7 +11,7 @@ import { bindBeats } from '../../core/beats/index.js';
 
 const throws = (fn, re) => assert.throws(fn, re);
 
-// A fixture grid, the shape `make beatmap` writes to assets/music/<name>.beats.json.
+// A fixture grid, the shape `make media X=beatmap` writes to assets/music/<name>.beats.json.
 const GRID = { bpm: 120, confidence: 8, beats: [0, 0.5, 1, 1.5, 2, 2.5, 3], downbeats: [0, 2] };
 
 test('"beat:<n>" pins a cut to the nth beat of the music grid (0-based)', () => {

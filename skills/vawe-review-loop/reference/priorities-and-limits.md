@@ -11,7 +11,7 @@ group: skill
 Rank by what the viewer notices, not by what is easy:
 
 1. **Anything unreadable.** Contrast, clipping, a caption under the platform chrome.
-2. **A seam that flashes.** `make seam-check` finds it; it is the worst defect per unit of effort.
+2. **A seam that flashes.** `make check GATE=seam-check` finds it; it is the worst defect per unit of effort.
 3. **A beat with no focal point.** The eye does not know where to land.
 4. **A beat that is only type.** Ask what it could SHOW: a bar whose length IS the number, the real
    product surface, a diagram. `engine-doctrine/CRAFT/SHOW-DONT-TELL.md`.

@@ -26,7 +26,7 @@
 // themselves read off the storyboard's own `(0s-3s)` headings (scripts/brand/intent-from-storyboard.mjs):
 // the sidecar is a cache of the storyboard, not a second source, so this gate reads it when present and
 // falls back to the storyboard directly when it is not, rather than skipping every beat-span check on a
-// film nobody ran `make intent` against. Two frontmatter decisions never reach the sidecar either way,
+// film nobody ran `make dev-tool X=intent` against. Two frontmatter decisions never reach the sidecar either way,
 // and both are decisions ABOUT the render: `spectacle:` names the film's one loud moment, and `pace:`
 // budgets its seconds per idea. So this gate reads the storyboard as a second input regardless of which
 // source the beat spans came from, and joins those two lines to the film. Without that they are fields
@@ -34,7 +34,7 @@
 // the film is unchanged (engine-doctrine/MISTAKES.md #219, #383, #387, #400).
 //
 //   node quality/gates/plan-vs-render.mjs <scene.json> [--intent p] [--sb storyboard.md] [--strict]
-//   make plan-check D=<file>
+//   make check GATE=plan-check D=<file>
 // FAIL: plan-overruns-render · junction-is-static.
 // WARN: held-through-the-change · beat-holds-still · unplanned-junction · plan-has-no-spans ·
 //       spectacle-not-built · spectacle-in-wrong-beat · spectacle-beat-unnamed · pace-not-kept ·
@@ -56,7 +56,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
 import { parseStoryboard, timeline } from '../../harness/author/storyboard-parse.mjs';
-import { measureGroundFlips, JOIN_TOLERANCE } from './ground-arc.mjs';
+import { measureGroundFlips, JOIN_TOLERANCE } from '../../harness/lib/ground-flip.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { gradeable } from './tile.mjs';
@@ -348,7 +348,7 @@ if (endClause) {
 // beat spans, written out once, and there is nothing beat-span checks below need that the
 // storyboard itself does not already hold. Read the sidecar when it exists (an author may have
 // hand-corrected it after generation, and that correction should win); otherwise read the same
-// two fields straight off the storyboard, so a film gets checked before anyone runs `make intent`.
+// two fields straight off the storyboard, so a film gets checked before anyone runs `make dev-tool X=intent`.
 // This is the fix for the 38-of-44 films that had no sidecar and so never reached a single check
 // below: reading storyboard-derived beats HERE, once, means every check downstream (junction-is-
 // static, beat-holds-still, held-through-the-change, unplanned-junction, plan-overruns-render,
@@ -435,7 +435,7 @@ const moverSpans = T.content.filter(CONTINUOUS).map((L) => {
 console.log(`\n  plan vs render · ${file}${planSource === 'sidecar' ? ` vs ${intentPath}` : ''}`);
 console.log(`  ${beats.length} planned beat(s) · film runs ${s(T.duration)} · ${events.length} render event(s)`);
 if (planSource === 'storyboard') {
-  console.log(`  ○ no ${intentPath} sidecar: beat spans and \`becomes:\` read straight off ${sbPath} instead (same fields \`make intent\` would have cached).`);
+  console.log(`  ○ no ${intentPath} sidecar: beat spans and \`becomes:\` read straight off ${sbPath} instead (same fields \`make dev-tool X=intent\` would have cached).`);
   if (skippedBeats.length) console.log(`  ○ skipped ${skippedBeats.length} beat(s) with no (0s-3s) heading range, so no span could be read: ${skippedBeats.join(', ')}.`);
 } else if (planSource === null) {
   console.log(`  ○ no plan to check against: no ${intentPath} sidecar and no storyboard beside this scene.`);
@@ -456,7 +456,7 @@ if (planSource === null) {
 } else if (!spanned.length) {
   warn('plan-has-no-spans', planSource === 'sidecar'
     ? `no beat in ${intentPath} carries a \`span\`, so there is nothing to line the film up against. `
-      + `Spans come from the (0s-3s) ranges in the storyboard headings. Re-run \`make intent SB=<storyboard.md> D=${file}\` `
+      + `Spans come from the (0s-3s) ranges in the storyboard headings. Re-run \`make dev-tool X=intent SB=<storyboard.md> D=${file}\` `
       + `against a storyboard whose headings are timed, and this gate starts working.`
     : `no beat heading in ${sbPath} carries a (0s-3s) time range, so there is nothing to line the film up against. `
       + `Time every beat's heading, and this gate starts working (no sidecar needed).`);
@@ -467,7 +467,7 @@ if (planSource === null) {
   if (drift > OVERRUN) {
     const msg = `the plan budgets ${s(planEnd)} and the film runs ${s(T.duration)}, a gap of ${s(drift)}. `
       + `Every beat span below is therefore pointing at the wrong part of the film, so nothing this gate says about them can be trusted. `
-      + `Either the storyboard's times are stale (re-time it and re-run \`make intent\`) or the scene's \`duration\` is not what you planned.`;
+      + `Either the storyboard's times are stale (re-time it and re-run \`make dev-tool X=intent\`) or the scene's \`duration\` is not what you planned.`;
     const fps = num(d.fps, 60);
     const adapted = adaptFinding({ kind: 'plan-overruns-render', driftFrames: drift * fps }, { fps }).adapted;
     if (adapted) { console.log(`  ${adapted.line}`); warn('plan-overruns-render', msg); }

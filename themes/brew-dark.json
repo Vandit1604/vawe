@@ -1,6 +1,6 @@
 {
   "name": "brew-dark",
-  "note": "DARK-first Brew, eyedropped from the real brew.new hero (make palette → luminance 0.41, bg #1a1a1a, white text, orange send-button accent #ff742e). This is the ACTUAL product look (the launch film's cream was one film's choice; the shipped app is dark). Near-black field, near-white type, a single vivid orange accent, warm-dark cards. Bold Hanken Grotesk, Geist Mono for {{code}}. Motion: punchy easeOutBack.",
+  "note": "DARK-first Brew, eyedropped from the real brew.new hero (make study-tool X=palette → luminance 0.41, bg #1a1a1a, white text, orange send-button accent #ff742e). This is the ACTUAL product look (the launch film's cream was one film's choice; the shipped app is dark). Near-black field, near-white type, a single vivid orange accent, warm-dark cards. Bold Hanken Grotesk, Geist Mono for {{code}}. Motion: punchy easeOutBack.",
   "motion": {
     "easing": "easeOutBack",
     "bounce": 0.16,

@@ -2,7 +2,7 @@
 when: it "reads amateur" though every layer renders fine
 answers: "the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it"
 group: crosscutting
-codes: pace, pace-not-chosen, pace-not-kept, pacing, archetype-repeat, feature-poverty, library-top5-only, no-peak, sparse-beats, uniform-cadence, preset-monotony, never-adopted, similarity-same, similarity-close, eye-missing, eye-unresolved, eye-device-untargeted, eye-competing-focal-points, ground-flash
+codes: pace-not-chosen, pace-not-kept, pacing, archetype-repeat, no-peak, preset-monotony, never-adopted, similarity-same, similarity-close, eye-missing, eye-unresolved, eye-device-untargeted, eye-competing-focal-points
 applies-when: always
 confirm: "where is the restraint, and what does the spectacle beat earn against it?"
 ---
@@ -22,7 +22,7 @@ literature, each with a checkable translation into a scene JSON. It is the answe
 read as amateur when every layer renders fine?"*
 
 Every rule is tagged:
-- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make author-check D=<file>`.
+- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make dev-tool X=author-check D=<file>`.
 - **`[eye]`**: no static gate can see it; only `make judge` + your own eye. If your eye catches it,
   it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md)).
 
@@ -36,10 +36,10 @@ Every rule is tagged:
 
 > **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
 > directed motion measured off a real film, so you start from directed motion instead of a blank
-> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make direct`) is the ceiling, too much,
-> undirected; the **ambition floor** (`make direction-floor`) is the floor, too plain, a slideshow, and
-> its hardest checks (`no-continuous-object` among them) block on every `make author-check` run, not only
-> under `TASTE=1`. A directed video sits between them.
+> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make dev-tool X=direct`) is the ceiling, too much,
+> undirected; the **ambition floor** (a retired gate, doctrine below) was the floor, too plain, a
+> slideshow, and its hardest checks (`no-continuous-object` among them) used to block on every
+> `make dev-tool X=author-check` run, not only under `TASTE=1`. A directed video sits between them.
 
 ## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
 
@@ -53,7 +53,7 @@ Every rule is tagged:
 | **Staging** | One clear idea per shot; one focal point. | One headline-scale message per beat; everything else subordinate in size/opacity/motion. | `[eye]` + `[gated]` critique: `scattered-beat` |
 | **Secondary action** | A supporting motion that never competes. | At most one quiet secondary motion per beat (bg drift, glow, cursor), lower-contrast, offset in time. | `[eye]` |
 | **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
-| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make audit` + `designspec` (slop was retired in 2026-08) |
+| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make check GATE=audit` + `designspec` (slop was retired in 2026-08) |
 
 ### Straight-ahead, solid drawing, squash and arcs in this engine
 
@@ -100,10 +100,11 @@ The plan has to say where each device points, or the device is a guess wearing a
   destination is wallpaper; a colour flash that walks in reading order to the key word is direction. The
   test is the same one §3 already applies to a layer's motion: say out loud what the colour is FOR, in
   one clause. "It walks the eye to launch film" passes. "It's on-brand" does not.
-- **Measured, not asserted.** `quality/gates/eye-trace.mjs` scores where the eye actually is at a cut
-  (Murch's Rule of Six, §2 above, the 7% eye-trace term); `make choreo` reports, per beat, where the
-  measured primary motion region ends against what the plan's `eye:` line said would be there. Neither
-  one invents a number: both read the frame or the render, never a guess.
+- **Measured, not asserted, when a human/agent judge does the measuring.** Where the eye actually is at a
+  cut (Murch's Rule of Six, §2 above, the 7% eye-trace term) and where the measured primary motion region
+  ends against what the plan's `eye:` line said would be there were both gate-scored once
+  (`eye-trace.mjs`, `choreo.mjs`); both were TASTE gates and are retired (`engine-doctrine/SAFEGUARDS.md`).
+  Read the frame or the render, never guess.
 
 Storyboard grammar: a film names its whole journey once, `attention:` in the frontmatter (one sentence:
 the path the eye travels across the film); a beat names its own leg, `eye: <where it starts> -> <what
@@ -115,22 +116,22 @@ different landings with no stated order.
 ## 2. Editing & pacing, rhythm is the direction
 
 **One global speed dial**: a scene-level `tempo` (1 = unchanged, 0.85 = 15% slower) scales every
-authored time at once, resolved in `core/engine/tempo.js`. Preview it with `make pace D=<file>
+authored time at once, resolved in `core/engine/tempo.js`. Preview it with `make check GATE=pace D=<file>
 TEMPO=<n>` before committing. It is a global correction, not a substitute for the per-beat rhythm
 variety below; footage and the audio bed keep their own native rate regardless of tempo.
 
 - **The Rule of Six**. A cut serves, in priority: **emotion (51%) · story (23%) · rhythm (10%) ·
   eye-trace (7%) · screen plane (5%) · spatial continuity (4%)**. Emotion dominates; spatial logic is
   nearly worthless. → Cut/transition to serve the feeling and the beat first. When a move and the
-  meaning fight, keep the meaning. `[eye]` The 7% item is now MEASURED, and only reported, see
-  [`EYE-TRACE.md`](EYE-TRACE.md) and `node quality/gates/eye-trace.mjs <scene.json>`.
+  meaning fight, keep the meaning. `[eye]` The 7% item was MEASURED, report-only, by a since-retired
+  gate; see [`EYE-TRACE.md`](EYE-TRACE.md) for the doctrine a judge now applies by hand.
 - **Cut on motion / the blink**: the eye accepts a cut on a movement or a natural attention-blink. →
   Change beats on an action (a word lands, a count finishes), never in a dead hold. `[eye]`
 - **Rhythm variety**: uniform beat lengths deaden. → Alternate short punchy beats (0.8-1.5s) with
   longer breathing beats (2-3s); the payoff is the longest. `[gated]` direct: `pacing`, `monotone-timing`
 - **The hold between moves**: motion needs stillness to read; a beat where everything moves is chaos.
   → After a layer settles, hold it still ≥0.4-0.6s before the next move. Every beat has a resting
-  state where the copy is fully legible. `[eye]` (+ `make audit` reads legibility)
+  state where the copy is fully legible. `[eye]` (+ `make check GATE=audit` reads legibility)
 - **Accelerate toward the climax**: tighten cutting through the build, then release on the payoff. →
   Shorten beats through the middle; the final held frame is the release. `[gated]` direct: `dead-final-frame`
 
@@ -220,7 +221,7 @@ The applied spine lives in [`STORY.md`](STORY.md); §"Provenance" below carries 
 
 ## 5. The pro-vs-amateur checklist (run this before shipping)
 
-Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yours + `make judge`.
+Each is concrete. `[gated]` ones are in `make dev-tool X=author-check`; `[eye]` ones are yours + `make judge`.
 
 1. **A move that starts and stops eases at both ends.** A move with no rest to ease (a pan, a scroll, a spinner, a drift) runs at a constant rate on purpose, and curving it is the defect. The gate reads the whole RUN, not the key: entered or left in motion, or spaced so the keys already decelerate, and it stays quiet. `[gated]` `linear-motion`
 2. **No uniform tempo.** Durations and stagger vary with intent. `[gated]` `monotone-timing`, `pacing`
@@ -236,7 +237,7 @@ Each is concrete. `[gated]` ones are in `make author-check`; `[eye]` ones are yo
 
 ---
 
-## Reading `make direct`: every finding carries a census
+## Reading `make dev-tool X=direct`: every finding carries a census
 
 Sixteen checks run in `harness/author/motion-director.mjs`; only two of them (`profile`, `cut-families`)
 can fail, the rest warn. Re-run the census before quoting a trip rate here, the library's scene count
@@ -283,29 +284,62 @@ its median: the aim is to catch a film that is asleep, not to make every film mo
 fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
 verdict and exits 0.
 
-## no-continuous-object (and its inferred twin)
+## The ambition floor: neither soup nor slideshow (`direction-floor.mjs`, RETIRED)
+
+**RETIRED 2026-09, not demoted.** `direction-floor.mjs` was a TASTE gate under the OBJECTIVE/TASTE split
+(`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a film moves, never whether it was
+broken, so it was deleted rather than kept report-only. Its numbers are doctrine now, for a human or an
+agent judge to hold a film to by eye, not a script to enforce:
+
+- **plain-slideshow.** A film with no kinetic typography, no camera move, no transitions AND a motion
+  vocabulary under 2 distinct techniques reads as a slideshow outright. Short of that: 4+ headlines where
+  85%+ just fade/rise with no kinetic reveal is the plain-authoring tell on its own.
+- **low-vocab.** Fewer than 3 distinct motion techniques in play (kinetic type, camera, transitions,
+  count-ups, ken push, a cursor demo, a custom motion track, a `composition` beat) leaves range unused.
+- **sparse-beats.** Past 8s of runtime, a boundary roughly every 3.5s is the floor (`ceil(duration / 3.5)`
+  beats): a 12s film needs about 4 beats, and two or three cards held for twelve seconds is a slideshow by
+  length, not a film.
+- **feature-poverty.** The engine holds about 15 expressive families; past 8s, a film should reach for
+  `min(6, 3 + floor(duration / 8))` of them. Reaching for three of the five things every other film already
+  leans on clears the count and is still a template (the "same shape as the last twenty" check, scored
+  against the library's own `libraryProfile()`, never a fixed list).
+- **flat-seams.** Every boundary riding one gentle speed (`smooth`/`linear`/`out`, no ramp/rush/brake) reads
+  same-y however many effects are used: vary the boundary's VELOCITY, not just its effect
+  (`engine-doctrine/CRAFT/TRANSITIONS.md`, the speed dial).
+
+None of this blocks a build any more. `make judge` and a human/agent eye are where a plain-slideshow film
+now gets caught, the same way `TASTE.md` already argues craft has to be judged, not metered.
+
+## no-continuous-object (and its inferred twin, RETIRED alongside direction-floor.mjs)
+
+**RETIRED 2026-09.** This device lived in `direction-floor.mjs`, the same TASTE gate as the ambition floor
+above, and was deleted with it (`engine-doctrine/SAFEGUARDS.md`). It no longer runs anywhere; the doctrine
+below is kept as a design device to reach for, not a check anything enforces.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
 about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It **blocks on every `make author-check` run**,
-`TASTE=1` or not; a film exempt from it needs a waiver with a `_why`, never a flag. Run it when the
+the 4% item, the one he says to sacrifice first. It used to **block on every `make dev-tool X=author-check` run**,
+`TASTE=1` or not; a film exempt from it needed a waiver with a `_why`, never a flag. Reach for it when the
 film's CONTENT is continuous, which is a single-subject
 product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
 anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
 
 What it measures: one content layer that both spans a cut and CHANGES across it. Pose either side of the
-boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing. A
-layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
-failure out of something it cannot see. A layer the engine confines to its own beat is not a candidate at
-all (see `beats-wrapped-as-units` below). **Blocks when the gate is run.**
+boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing.
 
-`no-continuous-object-inferred` is the same test where the author declared no cuts at all. An island
+A layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
+failure out of something it cannot see. A layer the engine confines to its own beat is not a candidate at
+all (see `beats-wrapped-as-units` below).
+
+**Used to block when the gate ran; no gate runs it now.**
+
+`no-continuous-object-inferred` was the same test where the author declared no cuts at all. An island
 boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and the
-layers standing through it do not outnumber either side. It exists because three films authored on one brief
+layers standing through it do not outnumber either side. It existed because three films authored on one brief
 declared zero cuts between them, so the blocking tell evaluated none of them, including a textbook slideshow
-(MISTAKES #163). It **warns**, and blocks under `STRICT=1`: failing a build over a boundary the author never
-wrote is a bad error to be wrong about, and the threshold that separates the exemplar from the slideshow is a
-single integer validated against four films.
+(MISTAKES #163). It used to **warn**, and block under `STRICT=1`: failing a build over a boundary the author
+never wrote is a bad error to be wrong about, and the threshold that separates the exemplar from the
+slideshow is a single integer validated against four films.
 
 **What neither tell can see.** Both measure that a prop survives a junction and moves. Neither can tell a
 card that travels from a card that BECOMES the next thing, which is the actual grammar. Two of the A/B films
@@ -314,17 +348,17 @@ all, and a film held by those is properly structured and fails here every time.
 
 A layer the engine confines to its own beat is not a candidate at all: see below.
 
-## beats-wrapped-as-units (always on, in `make beat-check`)
+## beats-wrapped-as-units (always on, in `make check GATE=beat-check`)
 
 Not a taste rule. `core/engine/produce.js` turns `sceneUnits` on for any cut film with no choreographed `motion`
 track, and `films/scene/scene.js` then rewrites every non-last-beat layer to end with its own beat so the
 wrapper can slide the beat out as one block. A layer authored across a cut is **truncated at it**, silently.
-`make beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
+`make check GATE=beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
 should carry the film `"acrossBeats": true` and it attaches to the camera instead of its beat, keeping its
 authored window. It **warns** (blocks under `STRICT=1`): truncation is a fact about the render, and whether
 it is a defect depends on whether you meant the layer to live past the cut.
 
-## beats-held-open (always on, in `make beat-check`)
+## beats-held-open (always on, in `make check GATE=beat-check`)
 
 The same rewrite read the other way. `setLayerTiming` **replaces** the authored duration; it does not keep
 the shorter of the two. So a layer written to leave at 2.0s inside a beat that runs to 9.4s stays on screen

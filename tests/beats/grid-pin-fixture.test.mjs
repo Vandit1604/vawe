@@ -1,7 +1,7 @@
 // tests/beats/grid-pin-fixture.test.mjs: the WHOLE authoring path for a music-grid beat pin, JSON on
 // disk through expandScene/lowerScene (core/engine/expand.js `loadScene`, what every Node gate calls)
 // to bindBeats (core/beats/index.js, what films/scene/scene.js calls before the first frame), reading
-// the real beats.json sidecar `make beatmap` writes. Unit-level bindBeats calls with a synthetic
+// the real beats.json sidecar `make media X=beatmap` writes. Unit-level bindBeats calls with a synthetic
 // `cuts` array live in tests/beats/grid-pin.test.mjs; this is the one that proves the JSON syntax
 // (transitions[].at: "beat:2", transitions[].snap: "bar") survives every stage in between.
 //   node tests/beats/grid-pin-fixture.test.mjs

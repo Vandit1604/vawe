@@ -39,7 +39,7 @@ which easing, how long, in what order. The vocabulary is real and checkable (`ma
 - **The full preset list is generated, never hand-copied here**: `core/kinetic/presets.js` (30+ presets:
   `up`, `scale`, `blur`, `decode`, `type` the hard on/off for terminals/timers, `wave`/`shimmerWave`,
   `draw`, `riseClip`, `colorWave` and more) is the source, [`engine-doctrine/EFFECTS.md`](../../engine-doctrine/EFFECTS.md)
-  the regenerated catalogue (`make effects`). Pick by mood there, in `vawe-effects`'s mechanism table,
+  the regenerated catalogue (`make regen`). Pick by mood there, in `vawe-effects`'s mechanism table,
   not from a memorised subset, which is exactly how a preset added after this line goes unused.
 - **GSAP char fx** (`core/engine/gsap-effects.js`): `charOvershoot`, `charBlurCascade`, `charFold`, `charTilt` on a
   `split` layer; idle loops `float`/`pulse`/`breathe`. Pair with `anim:"none"`.

@@ -45,20 +45,20 @@ momentum carried the work past the moment when redirecting it was free.
 
 Show **three genuinely different directions**, one line each and one frame each. Different in
 structure, not only in colour: a different message, a different object, a different shape.
-`make concept` produces them and `make compare` tiles them.
+`make dev-tool X=concept` produces them and `make dev-tool X=compare` tiles them.
 
 The reviewer picks one, kills one, or says none of these. A wrong call costs minutes.
 
 **You will build the one direction you already like, show it, and ask whether it is good. Don't.** That is
 not a choice, it is a request for permission, and it gets approved by default. Three genuinely different
-directions or you have not run this stop. And "different" is measured, not asserted: `make concept` scores
+directions or you have not run this stop. And "different" is measured, not asserted: `make dev-tool X=concept` scores
 how likely each direction is to be the FIRST thing anybody proposes for the brief, and **throws the round
 away unless two of them score under 0.10** ([SELECTION.md](SELECTION.md) Part 3). Asked for three, a
 generator produces the first thing three times in three palettes.
 
 ### 1a. Storyboard panels, before any JSON exists
 
-`make panels SB=<storyboard.md>` draws one rough grey still per beat and tiles them into a sheet.
+`make dev-tool X=panels SB=<storyboard.md>` draws one rough grey still per beat and tiles them into a sheet.
 
 The storyboard was the stop that broke the rule below. A storyboard here is prose, so the reviewer was
 handed `picture:` and `onscreen:` in English and asked to approve a film. `onefilm` was approved that
@@ -76,7 +76,7 @@ dashed box.
   and how big they are. Never approve a LOOK from one; that is style frames, and the grey is there so
   nobody tries.
 - **It cannot show motion.** One held still per beat says nothing about how a thing arrives or how
-  long it takes. `make animatic` is the clock, `make reveal` is the entrance.
+  long it takes. `make dev-tool X=animatic` is the clock, `make dev-tool X=reveal` is the entrance.
 - **It is only as good as the storyboard.** A beat whose `picture:` reads "a nice shot of the product"
   draws a grey box with that sentence in it. That is a true report, and often the most useful thing a
   panel does.
@@ -123,17 +123,17 @@ hierarchy and the cobalt glow in `engine-doctrine/animation.html`.
 
 ### 2. Style frames, before any motion exists
 
-Show two or three stills at **final quality** via `make styleframes`. The reviewer approves the LOOK:
+Show two or three stills at **final quality** via `make dev-tool X=styleframes`. The reviewer approves the LOOK:
 palette, face, composition, density, how much is on screen.
 
-`make styleframes` states the case in its own help text: `onefile` passed every gate with a backdrop
+`make dev-tool X=styleframes` states the case in its own help text: `onefile` passed every gate with a backdrop
 that rendered as loud blue blooms, and one still showed it in three seconds.
 
 A wrong call here costs a theme edit. The same wrong call found after animating costs the film.
 
 ### 3. The 85% draft, structure and timing locked, polish open
 
-`make draft D=<scene.json> STAGE=85`. It records the bar cleared **and every warning carried to clear
+`make dev-tool X=draft D=<scene.json> STAGE=85`. It records the bar cleared **and every warning carried to clear
 it**, so the reviewer reads what was knowingly accepted instead of re-deriving it, and does not flag
 the placeholder photo as a defect.
 

@@ -29,8 +29,8 @@ beat**, the slowest of any type, because the voice track, not a device, sets the
   §1's first register stated another way: a face reads only against restraint, so motion is a cost paid
   in attention taken away from the voice (`register: 'quiet'` in `type-spines.mjs`).
 - **VO + word-timed captions.** A real film needs `audio.vo` + `audio.voWords` (a `[{w,t}]` sidecar),
-  then `make vo-captions D=<file> WRITE=1` builds karaoke-timed `captions[]` from it. `engine-doctrine/CRAFT/CAPTIONS.md`.
-- **`make pace-from-vo`.** Once a real VO track exists, `make pace-from-vo VO=<file>.words.json`
+  then `make media X=vo-captions D=<file> WRITE=1` builds karaoke-timed `captions[]` from it. `engine-doctrine/CRAFT/CAPTIONS.md`.
+- **`make check GATE=pace-from-vo`.** Once a real VO track exists, `make check GATE=pace-from-vo VO=<file>.words.json`
   proposes beat timings that land reveals ON the voice instead of guessing durations by ear.
 - **A face-safe layout.** Keep the safe centre of the frame free for a presenter shot; do not stack
   type or UI over where a face would sit. On a phone destination, also mind the platform chrome
@@ -62,7 +62,7 @@ There is no dedicated "face" device: the presenter slot is always a placeholder 
 
 The presenter shot is real footage or a real `video`/`component` capture, never generated. Until one
 exists, use a clearly-labelled placeholder rect (state this in the scene `note`, not on screen) so the
-film is honest about what is a stand-in. The VO itself: `make tts` for a synthesised draft, or a real
+film is honest about what is a stand-in. The VO itself: `make media X=tts` for a synthesised draft, or a real
 recording; either way, get its word-timing sidecar before writing captions by hand.
 
 ## Writing the storyboard

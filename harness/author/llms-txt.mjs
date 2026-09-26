@@ -21,7 +21,7 @@ const WHEN = {
   cursor: 'the beat IS a product demo; this is the one primitive built to drive a click-through.',
   clip: 'footage came in as a frame sequence (PNG/WebP), not a video file, and must stay seek-exact.',
   html: 'the surface does not exist yet and CSS genuinely expresses it faster than composing primitives; see engine-doctrine/CRAFT/HTML-FRAGMENTS.md before hand-writing one.',
-  component: 'a real product surface was captured (`make capture`); always prefer this over `html` when the surface actually exists.',
+  component: 'a real product surface was captured (`make media X=capture`); always prefer this over `html` when the surface actually exists.',
   board: 'the beat is "here is our roadmap/backlog" from pure data, no captured asset needed.',
   doc: 'the beat is "here is a file/diff/README" from pure data, no captured asset needed.',
   shader: 'the whole frame is a generative backdrop; it cannot sample what is beneath it.',
@@ -141,7 +141,7 @@ half: what fields are legal to write at one JSON path, read live off \`films/sce
 ## The loop
 
 \`\`\`
-make pitch                          # ask the four questions: subject, data, payoff, audience/feeling
+make dev-tool X=pitch                          # ask the four questions: subject, data, payoff, audience/feeling
                                      # write films/scene/x.storyboard.md from engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md
 make dev D=films/scene/x.json     # THE iteration loop: build, draft-render, look. No gates.
 make ship D=films/scene/x.json    # the real ladder: author-check -> render -> audit -> seams

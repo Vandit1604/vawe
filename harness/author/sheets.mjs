@@ -41,7 +41,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(`\n  READ BOTH. Neither is scored by any gate.`);
     console.log(`    beats  ${beats}   - where each beat LANDS (in - mid - out)`);
     console.log(`    reveal ${reveal}   - how each beat ARRIVES (green enter arc - white settled - orange exit arc)`);
-    if (!read) console.log('  Made automatically, so they do NOT count as read: `make beats D=...` signs the look off.');
+    if (!read) console.log('  Made automatically, so they do NOT count as read: `make dev-tool X=beats D=...` signs the look off.');
     console.log(`\nLook at this before you change anything: ${beats}`);
   }, (e) => {
     console.error(`\u2717 contact sheets: ${e.message}`);

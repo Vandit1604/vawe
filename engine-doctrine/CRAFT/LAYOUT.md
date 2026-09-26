@@ -14,7 +14,7 @@ confirm: "is each frame asymmetric with one hero, not centered with an equal gri
 - Compose asymmetric with one hero (scale contrast), never centered with an equal grid. Fill 60-80%
   of frame width with hero text, anchor to edges/thirds, and keep essential content inside the
   title-safe box and out of the caption band.
-- Enforced by `make audit` (codes: `buried`, `clipped-component`, `clipped-text`, `collapsed-image`,
+- Enforced by `make check GATE=audit` (codes: `buried`, `clipped-component`, `clipped-text`, `collapsed-image`,
   `degenerate-pin`, `overflow`, `overlap`, `safe`).
 - Checkable action: is each frame asymmetric with one hero, not centered with an equal grid?
 
@@ -88,7 +88,7 @@ before arguing with any one line.
   Q="…"` finds it), including three named anchors for the de-facto pixel constants this repo already
   hand-types: `stage` (the full-width content column), `text-band` (roughly two-thirds down, where a
   headline sits) and `lower-band` (a thin strip flush to the safe bottom edge).
-- **Inside a hand-authored `html` fragment**, the same grid exists as CSS: `make stagekit` generates
+- **Inside a hand-authored `html` fragment**, the same grid exists as CSS: `make dev-tool X=stagekit` generates
   `.kit-stage` (the content column, inset by the theme's own margin) and `.kit-grid` / `.kit-col-1`
   through `.kit-col-12`. Pick an UNEQUAL span pair (`.kit-col-4` + `.kit-col-8`, `.kit-col-7` +
   `.kit-col-5`); a 6/6 split is the equal grid this whole file argues against, just written in fractions
@@ -97,7 +97,7 @@ before arguing with any one line.
 
 ## 5. Video safe zones (this engine)
 - Keep essential text/hero inside **title-safe ≈ inner 90%** of the frame; for social keep key content out of the
-  outer ~10-12% (captions/UI overlap there). `make audit` enforces the safe box (`SAFE` / `SAFE_LAND`).
+  outer ~10-12% (captions/UI overlap there). `make check GATE=audit` enforces the safe box (`SAFE` / `SAFE_LAND`).
 - **Portrait 9:16:** anchor the hero in the **upper-middle third** (the lower third gets covered by captions/UI).
 - **Landscape 16:9:** hero on a thirds intersection, never hugging edges.
 - **Measure, on BODY and captions only:** set text-layer `w` so lines are 45-75 chars (~66 ideal);
@@ -129,10 +129,10 @@ At 1080x1920: `web` reserves y 1522..1690 across all three skins, `tiktok` 1176.
 moves up with the chrome, because on TikTok the caption itself moves up with it
 ([`../MISTAKES.md`](../MISTAKES.md) #409).
 
-`make audit` warns **`caption-band`** when settled content overlaps the strip by more than 8px, **on a
+`make check GATE=audit` warns **`caption-band`** when settled content overlaps the strip by more than 8px, **on a
 film that declares `captions`**, and holds the band for the whole runtime rather than only inside a
 caption window. Held on every film instead, it fired on **69 of 103** shipped scenes at last count
-(the library has since grown to 197 films; re-run `make audit` over the whole set for a current figure);
+(the library has since grown to 197 films; re-run `make check GATE=audit` over the whole set for a current figure);
 scoped to captioned films it fired on **none** of them at that count, so it guards the next captioned
 film rather than catching an existing one.
 
@@ -202,7 +202,7 @@ is usually stronger than centring it with room to spare.
 
 ### What no gate will tell you
 
-There is none for this, and there probably cannot be: `make audit` measures overlap, clipping, safe
+There is none for this, and there probably cannot be: `make check GATE=audit` measures overlap, clipping, safe
 zones and contrast, all of which are about content COLLIDING, and none of which fires on a frame that
 is half empty because nobody decided anything. `pace-check` measures time, not space. This is `make
 judge` and your eyes, and the question to ask the sheet is the first test above, per beat.

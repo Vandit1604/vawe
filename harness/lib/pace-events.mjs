@@ -1,4 +1,4 @@
-// The one place that decides what an EVENT is (a layer arriving or leaving, or a cut) and the longest gap between events; quality/gates/pace-check.mjs and quality/gates/pace.mjs both read this rather than each walking it themselves.
+// The one place that decides what an EVENT is (a layer arriving or leaving, or a cut) and the longest gap between events; quality/gates/pace.mjs (the retired pace-check.mjs used to too) reads this rather than walking it itself.
 export function measureEvents(d) {
   if (!d.layers || !d.duration) return null;
   const ev = new Set();

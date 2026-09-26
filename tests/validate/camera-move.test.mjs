@@ -1,7 +1,7 @@
 // tests/validate/camera-move.test.mjs: cameraMove params are picky per move (orbit wants `deg`, not
 // `degrees`; slowPush/punchIn want `dur`, not `duration`; travel wants `stations`, not `dolly`), and
 // the check for that used to live only in core/camera-moves/index.js buildCameraMove, which a scene
-// only reaches by actually rendering. cameraMoveErrors runs the same check at `make validate` time.
+// only reaches by actually rendering. cameraMoveErrors runs the same check at `make check GATE=validate` time.
 //   node --test tests/validate/camera-move.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';

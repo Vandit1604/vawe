@@ -2,29 +2,39 @@
 when: a cut moves the subject across the frame
 answers: "where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports"
 group: look
-codes: eye-trace, camera-aimed-at-nothing
+codes: camera-aimed-at-nothing
 ---
 
 # Eye-trace: where the viewer is looking when you cut
 
+**`eye-trace.mjs` is RETIRED, not demoted.** It was a TASTE gate under the OBJECTIVE/TASTE
+split (`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a cut reads to the eye, never
+whether a film was broken, so it was deleted rather than kept report-only.
+
+Everything below is the doctrine it measured, for a human or an agent judge to hold a cut to by eye now.
+`camera-aimed-at-nothing` (`quality/gates/beat-check.mjs`, a live OBJECTIVE check) is unaffected: it fires
+when the camera has travelled off content that is still alive, a different, still-enforced fact.
+
 ## AGENT SUMMARY
 
 - At each cut, put the incoming subject at or near the screen point the eye was on before the cut. Do not make the eye cross the frame at a junction.
-- `[ref: node quality/gates/eye-trace.mjs <scene.json>]` (code: `eye-trace`). It REPORTS only and never blocks: Murch ranks eye-trace 4th of 6, at 7%, below emotion/story/rhythm, so a cut that serves the story is allowed to cost the eye a journey. `camera-aimed-at-nothing` is a related but separate finding, owned by `quality/gates/beat-check.mjs`, not this gate: it fires when the camera has travelled off content that is still alive.
 - Checkable action: where is the eye at the start of this shot, where should it be at the end, and what moves it?
 
 Murch ranks eye-trace fourth of six, at 7%, under emotion (51%), story (23%) and rhythm (10%).
-`quality/gates/eye-trace.mjs` measures it.
+The retired gate measured it; a judge measures it now.
 
 Read the ranking before you read anything else here. Murch's instruction is to **sacrifice upward from
 the bottom**: a cut that serves the story is allowed to cost the eye a journey. So this is a REPORT.
 It prints a number and stops nobody. A gate that blocked on the 7% item would make it the one thing a
 film cannot spend, which inverts the ranking it came from.
 
-```bash
-node quality/gates/eye-trace.mjs films/scene/<topic>.json     # one film
-node quality/gates/eye-trace.mjs --selftest                     # the scorer's own fixtures
-node quality/gates/eye-trace.mjs --census [--worst]             # the whole library
+The commands below no longer run (the gate is deleted); read them as the shape the retired tool took,
+not as something to type:
+
+```
+node <the retired gate> films/scene/<topic>.json     # one film
+node <the retired gate> --selftest                     # the scorer's own fixtures
+node <the retired gate> --census [--worst]             # the whole library
 ```
 
 ## The rule, in one sentence
@@ -57,7 +67,7 @@ against the ground is the question that transfers.
 **What the gate cannot see, stated plainly.** It scores JSON, not pixels. It does not know a captured
 component's internal composition, what an `html` fragment paints, or where a face is. About 40% of the
 layers it scores carry a colour it cannot resolve, and it says so on every verdict. If it disagrees
-with your eyes, your eyes win: `make beats`.
+with your eyes, your eyes win: `make dev-tool X=beats`.
 
 ## The eye is STEERED, not only ranked
 

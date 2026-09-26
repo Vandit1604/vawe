@@ -38,8 +38,9 @@
 // syntax for this.
 //
 // WHAT "VERIFIES" CAN HONESTLY MEAN HERE. This file runs before any DOM exists (see below), so it
-// cannot render a frame and look at it: that is `quality/gates/ground-arc.mjs`'s job, post-render, and
-// it stays that job. What this file CAN see is the scene JSON itself, already lowered from
+// cannot render a frame and look at it: that was `ground-arc.mjs`'s job, post-render,
+// before it was retired (a TASTE gate, engine-doctrine/SAFEGUARDS.md); a human/agent judge does it now.
+// What this file CAN see is the scene JSON itself, already lowered from
 // `transitions[]` into `cuts`/`seams` by the time it runs. So "verify" means: the named cut/seam is
 // declared at `at` (by name, by time), the named kinetic preset sits on a layer active at `at`, or the
 // named layer exists and is active at `at`. That is honest and useful (a moved beat or a renamed layer

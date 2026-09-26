@@ -3,7 +3,7 @@
 // the same contract as core/type.js PRESETS (and `highlight` literally reuses that preset).
 // Degradation is built in: a line with no `words` array gets deterministic per-word windows
 // distributed proportionally to word length (longer words hold longer, like speech), so every
-// style still reads as intentional karaoke on plain `make captions` output.
+// style still reads as intentional karaoke on plain `make media X=captions` output.
 import { clamp01 } from '../motion/motion.js';
 import { PRESETS, wght } from './type.js';
 import { onScreenText } from './on-screen-text.js';

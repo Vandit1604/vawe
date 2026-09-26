@@ -59,7 +59,7 @@ defect. `make ideate --annotate <ref>` writes this per act into the reference's 
 frame, photographic (fill 0.34, detail 12.2, photo 0.28)` or `content: quiet, type on ground only`.
 `storyboard-check` BLOCKS on `plain-content` when a beat names a screen/window/app/UI/dashboard/grid/
 card/product/photo with no real source stated for it (no `fragment:` file on disk, no `assets/` or
-`.vawe-data/uploads/` path, no `make capture`/`sections`/`screen`/`assets`/`photos`/`gen-image`/
+`.vawe-data/uploads/` path, no `make media X=capture`/`sections`/`screen`/`assets`/`photos`/`gen-image`/
 `gen-video`/`gen-clip` mention). `storyboard-check` BLOCKS on it directly, so a plan cannot name a
 screen or a photo it has no real source for. A film that names no content noun at all never trips this: a chart-only explainer, a
 sting, a pure type film pass untouched. A chosen absence (a beat that draws a screen ON PURPOSE with
@@ -72,8 +72,8 @@ no real capture behind it) is a waiver, the one mechanism: `{"authoring":{"allow
 > the theme or ask them to point [to a reference]; but you can invent colors and themes beautifully
 > when asked."
 
-- A brand site or URL: the theme comes from it, the ordinary route (`make sections` + `make brandspec`
-  + `make palette`, [`engine-doctrine/CRAFT/COLOR.md`](COLOR.md)).
+- A brand site or URL: the theme comes from it, the ordinary route (`make sections` + `make study-tool X=brandspec`
+  + `make study-tool X=palette`, [`engine-doctrine/CRAFT/COLOR.md`](COLOR.md)).
 - No brand, a bare prompt: ASK. `make quiz` asks a "Theme source" question exactly when no URL is
   known: point at a reference or a theme, or say "you choose".
 - "You choose": INVENT a beautiful theme, never default to plain grey. Seed a palette from
@@ -84,20 +84,20 @@ no real capture behind it) is a waiver, the one mechanism: `{"authoring":{"allow
 
 > "Use a UI design harness to build beautiful mocks, not plain by default."
 
-A product screen in a film is DESIGNED for the video by default: a real capture (`make capture` / `make
+A product screen in a film is DESIGNED for the video by default: a real capture (`make media X=capture` / `make
 sections URL=`) when a real, video-ready screen exists; otherwise a fragment built for the shot with
-`make screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] [THEME=<name>]`
+`make dev-tool X=screen F=<fragment.html> [KIND=editor|grid|dashboard|chat|card] [REF=<ref> ACT=<n>] [THEME=<name>]`
 ([`SCREENS.md`](SCREENS.md)). Never a plain grey window standing in for a screen nobody built.
 
 ## What "real material" means
 
 - A captured or designed screen at hero size (not a thumbnail), filling the share of frame the
   reference's own act fills.
-- Real photos (`make photos`), never an invented image.
+- Real photos (`make media X=photos`), never an invented image.
 - Display-size type: a headline sized to be read, not a caption doing a headline's job.
 
 ## See also
 
 - [`IMAGERY.md`](IMAGERY.md): the image ladder, treatment, licensing.
-- [`SCREENS.md`](SCREENS.md): `make screen`, the design-harness route for a mock.
+- [`SCREENS.md`](SCREENS.md): `make dev-tool X=screen`, the design-harness route for a mock.
 - [`TASTE.md`](../TASTE.md): the value test every beat must pass regardless of content richness.

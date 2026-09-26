@@ -69,7 +69,7 @@ comparing a title sequence to a settings dialog and marking the title sequence o
 | UI-adjacent / quiet explainer | a cost the viewer pays for legibility | one loud moment, everything else quiet; NN/g and Apple HIG apply directly | `vawe-type` (`reference/explainer.md`, `reference/talking-head.md`) |
 | Kinetic typography / hype / launch promo / continuous title | the content itself | sustained motion across the whole runtime is correct; a still beat is the cost | `vawe-type` (`reference/launch.md`, `reference/sting.md`), `higgsfield-recreation`, `brew-launch-act1` |
 
-**This does not repeal `effect-soup`, `monotone-timing` or the rest of `make direct`.** Those gates
+**This does not repeal `effect-soup`, `monotone-timing` or the rest of `make dev-tool X=direct`.** Those gates
 measure whether motion VARIES (different eases, different durations, different directions), and
 variety is required in both registers. What changes is whether the register EXPECTS one loud moment
 against a quiet field, or expects the field itself to move for the whole runtime. A hype film with 100%

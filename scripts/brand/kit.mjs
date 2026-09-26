@@ -75,7 +75,7 @@ console.log(`  ${kit.sections.count} sections · ${p.light ? 'LIGHT' : 'DARK'}-f
 
 if (init) {
   // Stage 1 brief skeleton (AGENTS.md "brief"): the five lines a person still owes, not the storyboard
-  // itself (`make quiz`/`make quiz-apply` write that, from real answers, not a guess).
+  // itself (`make quiz`/`make dev-tool X=quiz-apply` write that, from real answers, not a guess).
   const briefPath = path.join(ROOT, 'films/scene', `${name}.brief.md`);
   fs.mkdirSync(path.dirname(briefPath), { recursive: true });
   const brief = [
@@ -99,5 +99,5 @@ if (init) {
   console.log(`\n✓ brief skeleton → ${path.relative(ROOT, briefPath)}`);
   console.log(`\nnext: make quiz NAME=${name} URL=${url}`);
 } else {
-  console.log('  → author themes/<name>.json from these, then CONFIRM with make beats VS=<name>.');
+  console.log('  → author themes/<name>.json from these, then CONFIRM with make dev-tool X=beats VS=<name>.');
 }

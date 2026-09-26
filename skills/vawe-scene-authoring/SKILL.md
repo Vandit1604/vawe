@@ -26,14 +26,14 @@ writing needs, from the table there: one numeric rule per file, a right-JSON rec
 anti-pattern. This is where the specific numbers live (durations, sizes, offsets); do not guess one.
 
 Read `<film>.design.md` before you write a size, radius, shadow or colour: it is the film's own
-resolved design, laid over the theme's numbers (`make design-spec D=<film>` seeds it). Reference its
+resolved design, laid over the theme's numbers (`make dev-tool X=design-spec D=<film>` seeds it). Reference its
 `--kit-<group>-<name>` token instead of a literal.
 
 ## The one hard rule: `renderFrame(n)` is PURE in `n`
 
 `renderFrame(n)` must produce byte-identical DOM for a given `n`, regardless of call order: the
 renderer shards frames across parallel Chrome tabs. Derive everything from `n`, animate only
-`transform`/`opacity`/`clip-path`/`filter`, and run `make probe M=<format>` after any scene-logic
+`transform`/`opacity`/`clip-path`/`filter`, and run `make check GATE=probe M=<format>` after any scene-logic
 change. Full contract, code sample, layout scaffold and the theme's no-fallback rule:
 **read `reference/purity-and-layout.md` before touching `renderFrame` or a CSS var.**
 
@@ -45,7 +45,7 @@ change. Full contract, code sample, layout scaffold and the theme's no-fallback 
    guaranteed complete; a fallback masks a real missing-key bug. Same reference file.
 3. **A figure animated as one block instead of by `parts`.** Reads flat, not produced.
    `engine-doctrine/MISTAKES.md #153`; primitives in `reference/motion-primitives.md`.
-4. **Cards/logos with no real asset**, or emoji reached for before `make assets` ran.
+4. **Cards/logos with no real asset**, or emoji reached for before `make media X=assets` ran.
    `reference/html-and-images.md`.
 5. **Declaring "done" unrendered.** The audit and eyeball pass catch overlap, overflow and safe-zone
    breaks that no amount of reading the JSON will show you. `reference/qa-loop.md`.

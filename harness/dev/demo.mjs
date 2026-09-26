@@ -45,7 +45,7 @@ if (!q) {
   --subject  the picture the effect acts on (default: the house plaster cast). A capture, an
              image, anything with real detail. The box it fills is a series constant.
 
-  doctrine: engine-doctrine/CRAFT/SPECIMEN.md   ·   nine variants of one effect is \`make catalog\``);
+  doctrine: engine-doctrine/CRAFT/SPECIMEN.md   ·   nine variants of one effect is \`make site X=catalog\``);
 }
 if (q.includes('\u2014')) die('✗ --q contains an em dash. The validator rejects them in on-screen text.');
 if (q.length > SERIES.maxCaptionChars) {
@@ -162,5 +162,5 @@ fs.writeFileSync(path.join(repoRoot, rel), JSON.stringify(migrateOne(scene).next
 
 console.error(`✓ ${rel}  ${D}s · one picture full bleed, one cut, one camera move, two grounds, a keyed track`);
 console.error(`  The picture carries the effect and the line captions it. Swap the picture with --subject.`);
-console.error(`  Nine variants of one effect is \`make catalog\`, never this. engine-doctrine/CRAFT/SPECIMEN.md`);
+console.error(`  Nine variants of one effect is \`make site X=catalog\`, never this. engine-doctrine/CRAFT/SPECIMEN.md`);
 if (has('print-path')) console.log(rel);

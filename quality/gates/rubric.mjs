@@ -34,10 +34,11 @@ const DIMENSIONS = [
   '**Produced-not-generated**: every element in the frame is doing a job, and so is the empty part.\n   A dense frame where two elements repeat the same point FAILS. A spare frame whose emptiness\n   isolates the subject PASSES. Ask what the space is doing, never how much of it there is.',
   '**Value**: this frame teaches/proves/delights something no other frame does.',
   // Every dimension above grades ONE frame. A ground flip only exists BETWEEN two frames: a beat that
-  // whites out then blacks out reads fine on each still in isolation, which is exactly why nothing
-  // caught it before quality/gates/ground-arc.mjs measured it pre-render. That gate answers "is this
-  // flip DECLARED" against the scene's own schedule; it cannot answer whether the CUT ITSELF reads as
-  // a jarring flash across the sheet, which needs an eye on the sequence. Ask it here instead.
+  // whites out then blacks out reads fine on each still in isolation. ground-arc.mjs used to measure
+  // this pre-render (is a flip DECLARED against the scene's own schedule); it was a TASTE gate and was
+  // retired (engine-doctrine/SAFEGUARDS.md). Its measurement lives on in harness/lib/ground-flip.mjs
+  // for the OBJECTIVE plan-vs-render check; whether the CUT ITSELF reads as a jarring flash across the
+  // sheet needs an eye on the sequence, which is what this dimension asks for now, alone.
   '**Ground continuity**: where the background changes light/dark between adjacent frames, is it a\n'
   + '   planned beat change carried across the join (a crossfade, a colour that follows the content), or\n'
   + '   does it flash cold from one still to the next with nothing bridging it? A carried change PASSES\n'
@@ -172,10 +173,9 @@ A \`TIE\` is a real answer. Do not break one to look decisive.
 `;
 }
 
-// Guarded the same way motion-floor.mjs's self-test is: importing this module for its exports must
-// never run a CLI-only check.
+// Guarded so importing this module for its exports never runs a CLI-only check.
 if (import.meta.url === `file://${process.argv[1]}` && process.argv.includes('--self-test')) {
-  // The real defect this guards: ground-arc.mjs measures a flip between frames, which no per-frame
+  // The real defect this guards: a ground flip only exists BETWEEN frames, which no per-frame
   // dimension above can see. Adding the dimension without checking it landed would ship a rubric that
   // still cannot ask the question.
   if (!DIMENSIONS.some((d) => /Ground continuity/.test(d))) {

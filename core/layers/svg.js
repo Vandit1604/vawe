@@ -24,6 +24,7 @@
 import { interpolate, easeOutCubic, resolveEasing } from '../motion/motion.js';
 import { resamplePath, bestRotation, rotatePoints, morphD } from './path-morph.js';
 import { mergeProps, propsOf } from '../registry/props.js';
+import { glowRadii } from './util.js';
 
 const SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -105,6 +106,15 @@ export function build(kit, el, L, { w, h, viewBox, d, fill: fillIn, stroke: stro
   el.appendChild(svg);
   el.__svgPath = p;
 
+  // GLOW, wired to the shape's own alpha (a filter drop-shadow hugs the stroke/fill silhouette), not
+  // to `el`'s box: `el`'s own `filter` is `decorate()`'s (mask/look/fade), written after this build
+  // runs, so writing there would either be clobbered by it or clobber it right back. The `<svg>` child
+  // is nobody else's, so the two compose for free instead of racing.
+  if (L.glow) {
+    const { near, far, color } = glowRadii(L);
+    svg.style.filter = `drop-shadow(0 0 ${near}px ${color}) drop-shadow(0 0 ${far}px ${color})`;
+  }
+
   if (morph && morph.to) applyMorph(el, svg, p, morph);
 }
 
@@ -156,5 +166,5 @@ export function frame(kit, el, L, t, scene, { draw, morph } = L) {
 // build time. mergeProps unions them (core/props.js).
 export const PROPS = mergeProps(propsOf(build), propsOf(frame));
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot";

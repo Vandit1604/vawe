@@ -63,11 +63,12 @@ test('scan() walks a real, non-empty surface and returns { files, vague } withou
   }
 });
 
-test('scan() finds schema-walk.mjs and jolt-check.mjs fully clean under this heuristic', () => {
-  // These two were rewritten line-for-line in this pass and every message in them now states its
-  // consequence, so the gate should report zero for both, not just "fewer than before".
+test('scan() finds schema-walk.mjs fully clean under this heuristic', () => {
+  // Rewritten line-for-line in this pass so every message in it now states its consequence, so the
+  // gate should report zero, not just "fewer than before". (jolt-check.mjs, its old companion here,
+  // was a TASTE gate and was deleted: engine-doctrine/SAFEGUARDS.md.)
   const { vague } = scan();
-  for (const f of ['core/validate/schema-walk.mjs', 'quality/gates/jolt-check.mjs']) {
+  for (const f of ['core/validate/schema-walk.mjs']) {
     const here = vague.filter((v) => v.file === f);
     assert.equal(here.length, 0, `${f} still has a vague message per this gate's own heuristic: ${JSON.stringify(here)}`);
   }

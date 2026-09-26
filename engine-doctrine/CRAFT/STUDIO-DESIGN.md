@@ -47,8 +47,8 @@ motion path, no onion skin, no key deletion. Add to that list: no live reload, n
 no search over the effects, the blocks or the themes, no undo outside the key endpoint, and no way
 for the agent driving the session to read what the person clicked.
 
-The plan and the film are still in two places. `make panels` renders the storyboard as a grey sheet and
-`make animatic` cuts it to a scratch read, but neither reaches the studio page.
+The plan and the film are still in two places. `make dev-tool X=panels` renders the storyboard as a grey sheet and
+`make dev-tool X=animatic` cuts it to a scratch read, but neither reaches the studio page.
 
 ## 2. COPY / REJECT
 
@@ -59,7 +59,7 @@ The plan and the film are still in two places. `make panels` renders the storybo
 | COPY | name the failure instead of returning empty | Studio already learned this once when a boot error sat one property away from a blank stage. Apply it to every new endpoint. |
 | COPY | in and out points that bound playback and the draft render | Cheap on a scrubber that already owns the clock, and it makes iterating on one beat of a 30s film possible. |
 | COPY | a per-layer hide toggle | Answers "what is under that" without editing the file. Ours stays preview-only (see the REJECT row). |
-| COPY | onion-skin proof of a move | `make reveal` proves this reads well as a sheet. On a selected layer in the studio it is the thing that makes a keyed track legible. |
+| COPY | onion-skin proof of a move | `make dev-tool X=reveal` proves this reads well as a sheet. On a selected layer in the studio it is the thing that makes a keyed track legible. |
 | COPY | search by intent, not a browse grid | `node harness/author/arsenal.mjs --census` prints how many named things exist across how many vocabularies, and how many of them are blocks; too many to browse. Rank them against a plain-English description of the beat. `engine-doctrine/EFFECTS.md` and `blocks/index.mjs` are already the index. |
 | COPY | one implementation, two surfaces | Studio's write path must call the same functions the CLI authoring scripts call, exactly as it re-runs `quality/gates/beat-check.mjs` rather than restating its rules. A second definition drifts. |
 | COPY | stop at the preview and wait for approval | Already our doctrine (`make judge`). Any render button added to the studio must not become a reason to skip the eye. |
@@ -83,7 +83,7 @@ Cost is measured against this one file with no build step.
 | 1 | **Reload on change.** Watch the scene file, push a line over Server-Sent Events, call the existing `reloadScene()` so the frame is kept. Refresh the timeline model in the same beat. | cheap | Every other item. The edit-and-reload tax is paid on every single change today, and it is the reason people scrub less than they should. |
 | 2 | **A selection endpoint.** `GET /api/selection` returns the current layer index, its authored object, the frame and time, and the picker's hit box, or `{"selection":null,"code":"no-selection"}`. The page POSTs it on every pick. Print the curl line in the studio banner. | cheap | The context hand-off the owner asked for. A person clicks the wrong thing on screen and the agent knows exactly which layer it is, without a screenshot or a description. |
 | 3 | **Generalise the write.** `POST /api/set {layer, path, value}` on top of `propSpan` and `layerSpan`, which `harness/author/patch-motion.mjs` already exports. Every write pushes the whole file onto the existing undo stack, so undo covers everything at once. | medium | Editing a number without leaving the studio, and items 5, 6 and 8, which are all writes. |
-| 4 | **The plan beside the film.** Draw the storyboard's beat spans as a band on the timeline ruler, and put the `make panels` sheet behind a key as an overlay. The storyboard path is already resolved by the authoring ladder. | medium | Seeing the promise and the render on one clock, which is the question `plan-check` answers in text and nobody reads at the moment of the edit. |
+| 4 | **The plan beside the film.** Draw the storyboard's beat spans as a band on the timeline ruler, and put the `make dev-tool X=panels` sheet behind a key as an overlay. The storyboard path is already resolved by the authoring ladder. | medium | Seeing the promise and the render on one clock, which is the question `plan-check` answers in text and nobody reads at the moment of the edit. |
 | 5 | **In and out points.** `i`, `o`, `x` on the scrubber. Playback loops the range, and the range is offered as the draft render window. | cheap | Iterating on one beat of a long film instead of scrubbing past it every time. |
 | 6 | **Search the arsenal.** A key opens a box, you type what the beat should do, and the studio ranks effects, blocks and themes by word overlap against their own descriptions. Selecting one copies the JSON snippet; it does not insert it. | medium | The named things counted by `node harness/author/arsenal.mjs --census`, currently reachable only by reading a generated file. Rank by intent, don't auto-install. |
 | 7 | **Per-layer hide.** A toggle on each bar, preview only, held in the page, never written to disk. | cheap | Answering "what is behind that" during a layout argument. |

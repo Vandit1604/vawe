@@ -121,9 +121,7 @@ import { THREE_FX } from '../../core/surfaces/three-scenes.js';
 import { pairActs, parsePairs, verdictOf, isPlaceholderSurface } from '../../quality/gates/content-check.mjs';
 import { evenSamples } from '../../quality/gates/beats-of.mjs';
 import { gradeable, tileBox, baseOf } from '../../quality/gates/tile.mjs';
-import { classifyRegions } from '../../quality/gates/motion-floor.mjs';
 import { sceneTiming } from '../../quality/gates/scene-timing.mjs';
-import { exitEmphasis, entranceEmphasis } from '../../quality/gates/choreo.mjs';
 import { deriveEngineTruth, findNumberClaims, findRetiredNames } from '../../harness/lib/claims-truth.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { DIAL_CONTRACT_VIOLATIONS } from '../../core/registry/knobs.js';
@@ -280,7 +278,7 @@ test('lib-test: registry', async () => {
   })());
   ok('validate: a scene with no raw junction key passes clean', authoredJunctionErrors({ transitions: [{ at: 1, fx: 'fade' }] }).length === 0);
   // `none` is a real cut (a hard cut with no visual transition) but sits outside the catalog's cut row
-  // (core/transitions/catalog.js: nothing to browse in `make transitions`); it must still ROUTE as a
+  // (core/transitions/catalog.js: nothing to browse in `make study-tool X=transitions`); it must still ROUTE as a
   // boundary cut, the same thing raw `cuts[].style:"none"` always meant.
   ok('lowering: a boundary transition can say "none", and it routes to cut', (() => {
     const d = lowerScene({ transitions: [{ at: 2, fx: 'none' }] });
@@ -390,7 +388,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   const names = Object.keys(BLOCKS);
   ok(`registry: ${names.length} blocks exported`, names.length > 0);
 
-  // Call each row the way `make catalog` does: family factory + the manifest's props. A BARE name in
+  // Call each row the way `make site X=catalog` does: family factory + the manifest's props. A BARE name in
   // the registry is the raw factory with NO props merged, so calling it by name yields an empty block
   // (captions with no lines is correctly []). That is the registry working, not a bug to assert on.
   const build = (e, opts = {}) => BLOCKS[e.family]({ ...(e.props || {}), x: 100, y: 100, start: 0, dur: 4, ...opts });
@@ -506,7 +504,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy
   // would mean Chromium inside a node:22-alpine image to buy only what this assert buys for free.
   // The cost of committing derived output is that it can go stale silently, add a block, forget
-  // `make blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
+  // `make site X=blocks-scenes`, ship a card with a broken image. So the gate stands in for the build step:
   // every registry entry must have both its poster and the scene the site plays live.
   // This runs in lib-test because lib-test runs on pre-push, which is the last moment drift is cheap.
   {
@@ -516,14 +514,14 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
       const safe = e.name.replace(/[^a-z0-9.]/gi, '_');
       return !fs.existsSync(path.join(mediaDir, `${safe}.png`)) || !fs.existsSync(path.join(mediaDir, `${safe}.json`));
     }).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster + scene${noMedia.length ? `, run \`make site X=blocks-scenes\` for: ${noMedia.slice(0, 4).join(', ')}` : ''}`,
       noMedia.length === 0);
     // The frame rect is what keeps the poster and the live render framed identically. A block with a
     // scene but no rect renders nothing on the card at all, which is a silent, invisible failure.
     const framesPath = path.join(repoRoot, 'site/lib/block-frames.json');
     const framesOk = fs.existsSync(framesPath) ? JSON.parse(fs.readFileSync(framesPath, 'utf8')) : {};
     const noFrame = gridRows.filter((e) => !framesOk[e.name]).map((e) => e.name);
-    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
+    ok(`registry: all ${gridRows.length} grid blocks have a poster frame rect${noFrame.length ? `, run \`make site X=blocks-scenes\` for: ${noFrame.slice(0, 4).join(', ')}` : ''}`,
       noFrame.length === 0);
   }
 
@@ -625,8 +623,11 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
     } catch { return false; }   // a registry with no catalog reaching the sort throws, and that is a fail
   })());
   ok('registry: catalogued() is ordered by tag then title, not by definition order', (() => {
-    const k = (r) => `${r.catalog.tag} ${r.catalog.title}`;
-    return catalogued().every((r, i, a) => i === 0 || k(a[i - 1]) <= k(r));
+    // localeCompare, not a raw < : it must agree with catalogued()'s own sort (registry.js), which
+    // sorts case-insensitively (`three.js` before `Universal`); a raw comparison here put uppercase
+    // ahead of every lowercase letter and flagged a correctly-sorted lowercase title as out of order.
+    const k = (r) => `${r.catalog.tag} ${r.catalog.title}`;
+    return catalogued().every((r, i, a) => i === 0 || k(a[i - 1]).localeCompare(k(r)) <= 0);
   })());
   // PARTS lived inline inside scene.js's build path, which is why it had no catalogue entry.
   ok(`parts: the part-entrance vocabulary is importable (${PART_NAMES.length} entries)`, PART_NAMES.length === 9);
@@ -1196,7 +1197,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
 // THIS ASSERT EXISTS BECAUSE THE CATALOGUE FAILED CORRECTLY AND FAR TOO LATE. `effects-json.mjs`
 // refuses a family that has no authoring form and no preview (or a stated reason for having none),
 // which is right. But nothing in the gate ladder ran it, so three families were added with no rows and
-// the fault sat there until somebody typed `make effects` by hand and found the whole catalogue could
+// the fault sat there until somebody typed `make regen` by hand and found the whole catalogue could
 // not regenerate. Failing loudly is only half of failing early: a check nobody runs is a check that
 // reports at a time of the author's choosing, which is exactly when they are not looking.
 //
@@ -1438,8 +1439,10 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   // already derives every cue from the transition actually used, so a fixed per-brand list is unanswerable.
   // `bgDefault`/`bgPalette` joined later: the retired top-level `theme.bgDefault`/`theme.bg` fields,
   // moved under `look` (core/theme/roles.js RETIRED_FIELDS), not a second top-level mechanism.
+  // `surface` joined later still: the named shape bundle every block's cardChrome/composeLook reads
+  // (core/theme/surface-looks.js), one look.surface per theme rather than a per-block override.
   ok('theme.look: LOOK_KEYS is the registry\'s own name list (one owner, not a second copy), and cues is gone',
-    LOOK_KEYS.length === 8 && LOOK_KEYS.includes('backdrop') && LOOK_KEYS.includes('bgDefault') && LOOK_KEYS.includes('bgPalette') && !LOOK_KEYS.includes('cues'));
+    LOOK_KEYS.length === 9 && LOOK_KEYS.includes('backdrop') && LOOK_KEYS.includes('bgDefault') && LOOK_KEYS.includes('bgPalette') && LOOK_KEYS.includes('surface') && !LOOK_KEYS.includes('cues'));
 
   ok('theme.look: a bad bg preset name refuses with the near word', lookErrors({ backdrop: ['sof'] }, { bgNames, nearMisses })
     .some((m) => /look\.backdrop names "sof"/.test(m) && /did you mean "soft"/.test(m)));
@@ -1455,7 +1458,7 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   ok('theme.look: scale values must be numbers', lookErrors({ scale: { hook: '90px' } })
     .some((m) => /look\.scale\.hook must be a number/.test(m)));
 
-  // every theme pack this repo ships must itself be clean: the same live registries `make validate`
+  // every theme pack this repo ships must itself be clean: the same live registries `make check GATE=validate`
   // uses, so this is the real contract, not a mocked one.
   const { BG_NAMES: liveBg } = await import('../../core/backgrounds/index.js');
   const { TRANSITIONS: liveTransitions } = await import('../../core/transitions/catalog.js');

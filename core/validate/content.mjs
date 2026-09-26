@@ -1,5 +1,5 @@
 // core/validate/content.mjs: the same `{{key}}` scan core/engine/expand.js resolveContentSlots runs
-// at build, run here (pure, no mutation) so an unknown content key is a `make validate` finding, not a
+// at build, run here (pure, no mutation) so an unknown content key is a `make check GATE=validate` finding, not a
 // render-time throw. Kept in sync by hand rather than imported both ways: expand.js is a build-time
 // MUTATOR (it deletes `data.content` when done) and importing a mutator into a validator that must
 // never rewrite the scene it grades is the wrong direction (core/validate/backgrounds.mjs junctionBindingErrors

@@ -29,11 +29,11 @@
           "done": true
         },
         {
-          "text": "make critique",
+          "text": "make check GATE=critique",
           "done": true
         },
         {
-          "text": "make catalog",
+          "text": "make site X=catalog",
           "done": true
         },
         {

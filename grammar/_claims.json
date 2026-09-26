@@ -1,5 +1,5 @@
 {
- "_": "Claims this repo's own doctrine makes about how films behave, each written as a TEST over the grammar corpus. `make claims` evaluates every one against grammar/*.json and reports SUPPORTED / CONTRADICTED / SPLIT / UNTESTABLE with the evidence count. A claim is only as strong as the films that have been studied, so a verdict here strengthens or reverses as references arrive. Add a claim by adding a row; add a metric by adding one to METRICS in harness/author/claims.mjs.",
+ "_": "Claims this repo's own doctrine makes about how films behave, each written as a TEST over the grammar corpus. `make study-tool X=claims` evaluates every one against grammar/*.json and reports SUPPORTED / CONTRADICTED / SPLIT / UNTESTABLE with the evidence count. A claim is only as strong as the films that have been studied, so a verdict here strengthens or reverses as references arrive. Add a claim by adding a row; add a metric by adding one to METRICS in harness/author/claims.mjs.",
  "claims": [
   {
    "id": "ref-motion-band",

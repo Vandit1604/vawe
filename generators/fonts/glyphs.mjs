@@ -2,7 +2,7 @@
 //
 //   node generators/fonts/glyphs.mjs Anybody
 //   node generators/fonts/glyphs.mjs assets/fonts/Fraunces.woff2 --weight 900
-//   make glyphs FONT=Anybody WEIGHT=700
+//   make gen X=glyphs FONT=Anybody WEIGHT=700
 //
 // three.js TextGeometry extrudes vector outlines, so it cannot read a woff2 the way the browser
 // does. It needs the contours as numbers. Every font in this repo is woff2 (Brotli-compressed,
@@ -47,7 +47,7 @@ function die(msg) {
   process.exit(1);
 }
 
-// Accept either a bare family name or a path, so `make glyphs FONT=Anybody` works.
+// Accept either a bare family name or a path, so `make gen X=glyphs FONT=Anybody` works.
 function resolveSource(arg) {
   const candidates = arg.endsWith('.woff2')
     ? [path.resolve(arg), path.join(repoRoot, arg)]

@@ -13,7 +13,7 @@
 // re-evaluated on every seeked frame, which is what makes frame 412 independent of frame 411.
 import {
   TOKENS, HAIR, r2, seriesAt,
-  R, TYPE, SPACE, SHADOW_CARD,
+  R, RCSS, TYPE, SPACE, SHADOW_CARD,
   capCss, labelCss, numCss, needData, needShape,
 } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
@@ -116,7 +116,7 @@ function parallaxBoard({ x, y, w = 1200, h = 760, title = '', caption = '', tile
     // already sits on and the ring reads as one plane opening rather than eight cards scattering.
     const ox = r2(dx * cw * travel), oy = r2(dy * ch * travel);
     return `<div style="position:absolute;left:${p.left}px;top:${p.top}px;width:${cw}px;height:${ch}px;`
-      + `box-sizing:border-box;background:var(--card);border:${HAIR};border-radius:${R.card}px;`
+      + `box-sizing:border-box;background:var(--card);border:${HAIR};border-radius:${RCSS('card')};`
       + `box-shadow:${SHADOW_CARD};padding:${SPACE.md}px;display:flex;flex-direction:column;`
       + `justify-content:space-between;overflow:hidden;`
       + `transform:translate(calc(var(--p,0) * ${ox}px), calc(var(--p,0) * ${oy}px));`
@@ -129,7 +129,7 @@ function parallaxBoard({ x, y, w = 1200, h = 760, title = '', caption = '', tile
   const c = cell(1, 1);
   const hero = `<div style="position:absolute;left:${c.left}px;top:${c.top}px;width:${cw}px;height:${ch}px;`
     + `box-sizing:border-box;background:var(--surface-2);border:1px solid var(--line-strong);`
-    + `border-radius:${R.card}px;box-shadow:${SHADOW_CARD};padding:${SPACE.md}px;`
+    + `border-radius:${RCSS('card')};box-shadow:${SHADOW_CARD};padding:${SPACE.md}px;`
     + `display:flex;flex-direction:column;justify-content:center;gap:${SPACE.xs}px;overflow:hidden;`
     // transform-origin is the board's centre by construction (the cell IS centred), so a plain scale
     // grows it symmetrically into the frame with no compensating translate.
@@ -256,7 +256,7 @@ export function uiReveal3d({ x, y, w = 680, items = [], rowH = 76, gap = SPACE.x
   const rows = items.map((it, i) => {
     const u = `clamp(0, (var(--p,0) - ${r2(i * step)}) * ${r2(1 / Math.max(1e-3, width))}, 1)`;
     return `<div style="height:${rowH}px;box-sizing:border-box;background:var(--card);border:${HAIR};`
-      + `border-radius:${R.card}px;box-shadow:${SHADOW_CARD};padding:0 ${SPACE.md}px;`
+      + `border-radius:${RCSS('card')};box-shadow:${SHADOW_CARD};padding:0 ${SPACE.md}px;`
       + `display:flex;align-items:center;justify-content:space-between;gap:${SPACE.md}px;`
       + `transform-origin:50% 0%;opacity:calc(${u});`
       + `transform:perspective(${r2(depth * 4)}px) `

@@ -49,7 +49,7 @@ export function build(kit, el, L, { fit, w, h, weight, text, maxLines } = L) {
     // returns true for a family that does not exist and false for a registered-but-unloaded one, so
     // this warning fired on correct fonts and stayed silent on missing ones. isPainting() width-probes
     // the family against three generics instead (all-equal = it really resolved). See core/fonts.js.
-    if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back), fit measurement will be wrong. Run: make font-audit`);
+    if (!isPainting(fam)) console.warn(`fit: font "${fam}" is NOT painting (falling back), fit measurement will be wrong. Run: make check GATE=font-audit`);
     if (L.fitH) kit.fitBox(el, { maxW: w, maxH: L.fitH, max: sizeOf(L), min: 34 });
     else el.style.fontSize = kit.fitText(el.textContent, w, { font: (px) => `${weight ?? 800} ${px}px ${fam}`, max: sizeOf(L), min: 34 }) + 'px';
     el.remove();
@@ -135,7 +135,7 @@ export function gradientFill(el, L) {
 }
 
 // splitFillCss(css, box, offset): the fill ONE split unit must carry, resolved in the CONTAINER's
-// coordinates. PURE, and exported so `make lib-test` can assert the resolved paint with no browser.
+// coordinates. PURE, and exported so `make test` can assert the resolved paint with no browser.
 // The trap this bug set is that a DOM check passes on transparent glyphs, so geometry proves nothing.
 //
 // The offset is the whole point. A unit painted with the raw gradient restarts the ramp inside every
@@ -195,7 +195,7 @@ function microType(kit, el, L) {
   // correction (#388). Both were patched by threading one more argument into this line, which left the
   // trap set for whoever wrote the third. The resolution now happens exactly once, in `trackingCss` in
   // core/layers/util.js, and it already knows about mono, `raw`, `ls`/`tracking` and the polarity.
-  // A new opinion about tracking belongs in that function. `make lib-test` fails if it is written here.
+  // A new opinion about tracking belongs in that function. `make test` fails if it is written here.
   // widow/orphan control: balance headlines (even line lengths), pretty on body (no lone last word).
   if (!mono && !L.split) el.style.textWrap = size >= 40 ? 'balance' : 'pretty';
   // legibility: real kerning + ligatures on display type; crisp rasterization.
@@ -206,7 +206,7 @@ function microType(kit, el, L) {
 
 // typedLen: how many characters are visible at local second `lt`. EXPORTED because the rule was
 // inline in frame(), which needs a DOM, so the one part of typing that can actually be wrong (the
-// count) could not be proven by any test, and only its wiring was checked. Out here `make lib-test`
+// count) could not be proven by any test, and only its wiring was checked. Out here `make test`
 // asserts the real behaviour with no browser. There is exactly one definition; frame() calls this.
 //
 // BACKSPACE (`untype`): the line types in, holds, then DELETES itself character by character, the
@@ -299,7 +299,7 @@ export function typingColorFor(dt, i, { colors, hold = 0.5 } = {}) {
 //
 // PLAIN TEXT NEVER TOUCHES A DOM: the branch below is a pure string splice (words come from the same
 // full-text slice frame() already committed to using), which is what makes typingColorFor's ramp and
-// the word-boundary maths independently testable with plain node:assert (make lib-test). Markup
+// the word-boundary maths independently testable with plain node:assert (make test). Markup
 // (`<b>`, an entity) is the one case that must go through a real HTML tree, exactly as revealHtml
 // already does for the same reason, and colorizeMarkup below does that walk.
 export function colorizeTyped(full, n, lt, cps, opts) {
@@ -416,5 +416,5 @@ export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, {
   font: {}, ls: {}, tracking: {}, raw: {}, size: {},
 });
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink";

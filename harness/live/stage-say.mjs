@@ -5,6 +5,7 @@ import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
 import { computeFeatures } from '../../quality/gates/craft-checklist.mjs';
 import { rulesFor, briefLine, STAGE_CATEGORY_ORDER } from '../lib/craft-rules.mjs';
 import { appendRun } from '../lib/runlog.mjs';
+import { finishAdvice } from '../lib/finish-advice.mjs';
 
 const SESSION_STATE = path.join(ROOT, '.vawe-data/stage-say-session-state.json');
 
@@ -17,6 +18,12 @@ function writeSessionState(state) {
     fs.writeFileSync(SESSION_STATE, JSON.stringify(state));
   } catch { /* best effort: a state-file write failure only costs a repeated block, never a crash */ }
 }
+
+/** readJsonQuiet/readTextQuiet: a best-effort read, `null` on anything wrong. Pulled out of main() so
+ *  a stage's own scene+storyboard reads (for finishAdvice) do not add a branch to that function twice
+ *  over, once here and again at line ~100 below for the craft-rule briefs. */
+function readJsonQuiet(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }
+function readTextQuiet(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
 
 if (process.argv.includes('--reset')) {
   let raw = '';
@@ -59,13 +66,20 @@ process.stdin.on('end', () => {
   try { st = stageOf(best.film); } catch { process.exit(0); }
   if (st.stage === 'judge') process.exit(0);
 
+  const tip = finishAdvice({ stage: st.stage,
+    scene: st.sceneExists ? readJsonQuiet(st.scene) : null,
+    sbText: st.sbExists ? readTextQuiet(st.sb) : null,
+    slug: st.name });
+
   const stageBlock = [
     `vawe: ${st.name} is at stage ${st.stage.toUpperCase()} (${st.order.join(' → ')}).`,
     `  ${st.why}`,
     `  next: ${st.next}`,
     ...(st.skills.length ? [`  skill: ${st.skills.join(', ')}`] : []),
+    ...(st.craftDocs.length ? [`  read: ${st.craftDocs.join(', ')}`] : []),
     '  Do that stage, not the one after it. `make stage D=films/scene/'
       + `${st.name}.json\` re-reads this from the files on disk.`,
+    ...(tip ? [tip] : []),
   ].join('\n');
 
   const printBlock = process.env.VAWE_STAGE_SAY === 'always' || !sessionId

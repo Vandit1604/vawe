@@ -11,12 +11,12 @@ group: engine
 loop's supporting checks, doc-honesty gates like `doc-refs.mjs` and `craft-coverage.mjs`. `fixtures/`
 are small inputs the gates test against. `baselines/` are ratchet files a gate compares today's count
 to, so a metric can only get better, never silently worse. `runs/` holds recorded gate output.
-`audit.mjs` is the entry point `make audit` calls.
+`audit.mjs` is the entry point `make check GATE=audit` calls.
 
 Read by: `make <gate-name>` and CI; an agent about to touch a gate should read the one it's changing
 before writing to it.
 
 The one doc: none single; each `gates/*.mjs` carries its own header comment explaining why it exists.
-Checked by: `make audit` runs the full set; `quality/baselines/gate-census.json` tracks how many exist.
+Checked by: `make check GATE=audit` runs the full set; `quality/baselines/gate-census.json` tracks how many exist.
 
 Look first: `quality/gates/` for the check itself, `quality/baselines/` if it fails on a ratchet.

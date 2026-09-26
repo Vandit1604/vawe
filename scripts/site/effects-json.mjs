@@ -1,7 +1,7 @@
 // scripts/site/effects-json.mjs: derive the site's effects index from the SAME family list that
 // generates engine-doctrine/EFFECTS.md, plus one playable scene per previewable effect.
 //
-//   node scripts/site/effects-json.mjs [--check]   ·   make effects-json
+//   node scripts/site/effects-json.mjs [--check]   ·   make site X=effects-json
 //
 // Writes:
 //   site/lib/effects.json                       the index the /showcase/effects page renders
@@ -103,10 +103,10 @@ const PREVIEW = {
 // nothing in node can start the engine). Re-run it after adding a preview family.
 //   `shapes` is exported by BG_NAMES and rejected by films/scene/schema.json, so engine-doctrine/EFFECTS.md
 //   lists a background a scene may not use. That drift is a real bug, reported upstream, not ours.
-//   `extrudeText` needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts.
+//   `extrudeText` needs a 3D typeface baked by `make gen X=glyphs`, and the site ships no 3D fonts.
 const UNPLAYABLE = {
   'backgrounds--shapes': 'the engine rejects it: `shapes` is a registered background name that the scene schema does not accept. The name is real, the preset is not reachable from JSON.',
-  'three-js-scenes-real-geometry--extrudetext': 'it needs a 3D typeface baked by `make glyphs`, and the site ships no 3D fonts.',
+  'three-js-scenes-real-geometry--extrudetext': 'it needs a 3D typeface baked by `make gen X=glyphs`, and the site ships no 3D fonts.',
 };
 
 // Why a family cannot be played here. Stated on the page, per family, in the author's own terms.
@@ -115,7 +115,7 @@ const NO_PREVIEW = {
   'blend-modes': 'a blend mode is a relationship with what is underneath, and the index has no underneath.',
   'plain-words-feel-duration-camera-comparative': 'each word is an alias onto a value listed elsewhere on this page. Preview the thing it resolves to.',
   'ransom-faces': 'a typeface is judged by looking. The ransom clip on /showcase sets all eight.',
-  'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make audit M=<file> ASPECT=all`.',
+  'output-targets': 'an aspect is a property of the canvas, not something that animates. Render at it, or `make check GATE=audit M=<file> ASPECT=all`.',
 };
 
 // ── build ───────────────────────────────────────────────────────────────────────────────────────
@@ -186,7 +186,7 @@ if (gaps.length) {
 
 // `--check`: the gap check above and nothing else, so a GATE can run it without regenerating 255
 // preview scenes. It exists because this file failed correctly and far too late. Three families were
-// added with no rows and the fault sat there until somebody happened to type `make effects`, which
+// added with no rows and the fault sat there until somebody happened to type `make regen`, which
 // nothing in the ladder does, so the whole catalogue could not rebuild and no run said so. A check
 // that only fires when a human invokes the build is not fail-early, it is fail-eventually.
 // lib-test spawns this, so the run that ADDS a vocabulary is the run that goes red.
@@ -242,7 +242,7 @@ if (CHECK) {
     || curCounts.trim() !== (j(counts) + '\n').trim()
     || curBody.trim() !== (j(bodies) + '\n').trim()
     || [...want].some(([f, body]) => !fs.existsSync(path.join(SCENES, f)) || fs.readFileSync(path.join(SCENES, f), 'utf8') !== body);
-  if (stale) { console.error('✗ site/lib/effects.json is stale, run `make effects-json`.'); process.exit(1); }
+  if (stale) { console.error('✗ site/lib/effects.json is stale, run `make site X=effects-json`.'); process.exit(1); }
   console.log(`✓ effects index in sync: ${total} effects, ${previewed} previewable`);
   process.exit(0);
 }

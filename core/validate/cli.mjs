@@ -1,4 +1,4 @@
-// CLI: `node core/validate/validate.mjs [data.json ...]` (make validate). No args → validate every
+// CLI: `node core/validate/validate.mjs [data.json ...]` (make check GATE=validate). No args → validate every
 // authored film scene + every theme pack (see discoverTargets). Never imported by the browser: only
 // validate.mjs's isMain branch reaches this module, and it does so with a dynamic import so the CLI's
 // node:fs/node:path use never has to be resolvable in a browser bundle.
@@ -163,6 +163,23 @@ function resampleErrors(data) {
   return errors;
 }
 
+// SVG DEGENERATE PATH. A lone `M` with no draw command after it (`"M0 0"`) is valid SVG grammar and an
+// empty picture: a moveto alone paints nothing, so the layer passes every other check and renders as a
+// blank box with nothing to say why (engine-doctrine/MISTAKES.md #428's class: accepted, then ignored).
+export function svgDegeneratePathErrors(data) {
+  const errors = [];
+  (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
+    if (!isObj(L) || L.type !== 'svg') return;
+    const d = typeof L.d === 'string' ? L.d.trim() : '';
+    const commands = d.match(/[MLHVCSQTAZ]/gi) || [];
+    if (!d || commands.length <= 1)
+      errors.push(`layer[${i}] (svg) \`d\` is degenerate: ${JSON.stringify(L.d ?? '')}. A single \`M\` with `
+        + `no draw command after it paints nothing, so this layer validates clean and renders invisible. `
+        + `Give it a real path (at least one L/H/V/C/S/Q/T/A/Z after the moveto).`);
+  });
+  return errors;
+}
+
 // CLIP AUDIO. `audio` on a video layer is the one prop the LAYER owns for sound (the mixer owns how it
 // is heard): `true` or `{gain, duck}`. Anything else is caught here rather than at build time in the
 // browser, so a bad value fails the author-check gate instead of a silent render.
@@ -258,15 +275,15 @@ function axisFontWarnings(data, fs, path, readJSON, root) {
 function musicWarning(m, resolves, root, path, fs) {
   // music: a bed name or path must resolve or the bed drops to silence. A warning, not a failure: a
   // scene can name a bed baked on another machine. `music:"auto"` is resolved at authoring time
-  // (`make audio-bed`), NOT at render, so an unresolved "auto" reaching the mixer = silence.
-  if (m === 'auto') return 'audio.music:"auto" is unresolved, run `make audio-bed D=… WRITE=1` to bake the profile\'s bed in, or the mixer falls back to SILENCE.';
+  // (`make media X=audio-bed`), NOT at render, so an unresolved "auto" reaching the mixer = silence.
+  if (m === 'auto') return 'audio.music:"auto" is unresolved, run `make media X=audio-bed D=… WRITE=1` to bake the profile\'s bed in, or the mixer falls back to SILENCE.';
   if (typeof m !== 'string') return null;
   // `auto` is the auto-SOUND-DESIGN flag (derives SFX cues); it has NOTHING to do with music
   // resolution. Skipping the music check when auto:true is how vawe-identity's bare "tense" bed
   // shipped SILENT for so long (engine-doctrine/MISTAKES.md #132). The mixer now resolves a bare bed
   // name to assets/music/<name>.wav, so mirror EXACTLY that here, the two must agree.
   const ok = resolves(m) || (!/[\\/]/.test(m) && !path.extname(m) && fs.existsSync(path.join(root, 'assets/music', m + '.wav')));
-  return ok ? null : `audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make audio / make music-pack).`;
+  return ok ? null : `audio.music "${m}" will not resolve to a file. The mixer falls back to SILENCE. Use "auto", a real .wav path, or a bed name that exists under assets/music/ (run make gen X=audio / make gen X=music-pack).`;
 }
 
 // A CUE IDENTIFIES ITS SOUND EXACTLY ONE WAY. Since a cue may now be a synthesised `voice` instead of
@@ -309,7 +326,7 @@ function bridgeErrors(bridges, resolves, root, path, fs) {
     if (typeof s !== 'string' || !s.trim()) { errors.push(`audio.bridges[${i}].sound must name a bed, a cue, or a .wav path.`); continue; }
     const bare = !/[\\/]/.test(s) && !path.extname(s);
     const ok = resolves(s) || (bare && ['music', 'sfx'].some((d) => fs.existsSync(path.join(root, 'assets', d, s + '.wav'))));
-    if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav). The render fails rather than dropping the bridge. Run make audio / make music-pack.`);
+    if (!ok) errors.push(`audio.bridges[${i}].sound "${s}" is not on disk (looked as a path, assets/music/${s}.wav, assets/sfx/${s}.wav). The render fails rather than dropping the bridge. Run make gen X=audio / make gen X=music-pack.`);
     if (!/^[a-z]+@\d+$/.test(String(b?.at ?? ''))) errors.push(`audio.bridges[${i}].at must be "<kind>@<index>" (cut@1 · seam@0 · sting@2 · junction@3), got ${JSON.stringify(b?.at)}.`);
   }
   return errors;
@@ -322,7 +339,7 @@ function beatGridErrors(data, resolves) {
   const errors = [];
   try {
     const gp = beatGridPath(data);
-    if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp}, run \`make beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
+    if (gp && !resolves(gp)) errors.push(`audio.beatSync names a beat grid that is not on disk: ${gp}, run \`make media X=beatmap MUSIC=<the track>.wav\` to write it. The render fails rather than leaving the film unmatched.`);
   } catch (e) { errors.push(e.message); }
   return errors;
 }
@@ -381,6 +398,7 @@ async function validateOneFile(file, ctx) {
   const errors = validateAll(schema, data);
   errors.push(...unknownLayerPropErrors(data, schema));
   errors.push(...resampleErrors(data));
+  errors.push(...svgDegeneratePathErrors(data));
   errors.push(...videoAudioErrors(data));
   errors.push(...namedThemeErrors(data, fs, path, readJSON, root));
   const readRef = readRefFactory(fs, path, file, root);
