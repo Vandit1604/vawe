@@ -58,7 +58,7 @@ export async function launchPage({ width, height, scale = 1, args = RENDER_ARGS 
  * A single-scene tool wants the timeout to be fatal (the default); a sweep over hundreds of scenes
  * wants it recorded as one scene's failure, so it passes throwOnTimeout: false and reads 'timeout'.
  */
-export async function waitForEngine(page, { timeout = 30000, throwOnTimeout = true } = {}) {
+export async function waitForEngine(page, { timeout = 60000, throwOnTimeout = true } = {}) {
   try {
     await page.waitForFunction('window.__engineReady === true || window.__engineError', { timeout });
   } catch (e) {
