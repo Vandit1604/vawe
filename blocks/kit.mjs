@@ -1,37 +1,28 @@
-// blocks/kit.mjs: the shared vocabulary every factory in blocks/index.mjs is built from.
+// blocks/kit.mjs: the shared vocabulary every factory in blocks/index.mjs is built from, so avatars,
+// card chrome and tone→colour maps have one implementation rather than drifting copies.
 //
-// WHY: the same four things were retyped in fifty places and drifted apart in every one of them.
-// Four avatar implementations with two different fallback strategies, three html-card wrappers whose
-// inner width disagreed with their own padding, ~15 copies of the hairline-card chrome carrying three
-// radii with no rule, and two tone→colour maps where `ok` and `success` were the same state under two
-// names. Drift is the failure mode: a copy is only correct until someone fixes one of them.
-//
-// PURE BY CONTRACT: these are props → plain-object functions. No DOM, no I/O, no Date, no
+// Pure by contract: these are props → plain-object functions. No DOM, no I/O, no Date, no
 // Math.random. Same props → same objects, which is what makes a render reproducible.
 
-// THEME-AWARE tokens: blocks emit CSS vars (resolved at render from :root, set by applyTheme) and
-// color-mix() for tints, so the SAME block reskins to any brand theme. Still deterministic: the
+// Theme-aware tokens: blocks emit CSS vars (resolved at render from :root, set by applyTheme) and
+// color-mix() for tints, so the same block reskins to any brand theme, still deterministic since the
 // strings are static. The Stripe hexes stay literal because stripeCard is a deliberate "reflect
 // Stripe" demo, not a generic surface.
 export const TOKENS = {
-  // `--warn` is written for every theme by core/boot.js, defaulted rather than required so no brand
-  // has to hold an opinion about amber. It exists because TONES.warn was the one status colour with
-  // no token behind it.
+  // `--warn` is written for every theme by core/boot.js, defaulted rather than required, so no brand
+  // has to hold an opinion about amber.
   warn: 'var(--warn)',
   ink: 'var(--text)', sub: 'var(--text-2)', dim: 'var(--dim)',
   paper: 'var(--bg)', card: 'var(--card)', hair: 'var(--line)', surface: 'var(--surface-2)',
   accent: 'var(--accent)',
   accentSoft: 'color-mix(in srgb, var(--accent) 14%, transparent)',
   accentInk: 'var(--accent)',
-  // Text that READS on an accent fill. core/boot.js computes it per theme from that theme's own
-  // accent (25 of 38 could not carry white; higgsfield's lime scored 1.16:1). NOT the same thing as
-  // `accentInk`, which is the accent used AS text. The names invite confusion and five themes already
-  // override `--accent-ink`, which is why this does not reuse that name.
+  // Text that reads on an accent fill: core/boot.js computes it per theme from that theme's own
+  // accent (25 of 38 could not carry white; higgsfield's lime scored 1.16:1). Not the same as
+  // `accentInk`, which is the accent used as text.
   onAccent: 'var(--on-accent)',
-  // The same answer for the three STATUS fills. Same reason, same computation, same file: core/boot.js
-  // picks white or black per theme off that theme's own `--up` / `--down` / `--warn`. `--warn` was the
-  // worst of them, `badge` painted `--text` on amber, which is dark only on a LIGHT theme and measured
-  // 1.87:1 on higgsfield, 1.93:1 on linear.
+  // Same computation for the three status fills, from `--up`/`--down`/`--warn`: white on amber
+  // measured 1.87:1 on higgsfield, 1.93:1 on linear.
   onUp: 'var(--on-up)', onDown: 'var(--on-down)', onWarn: 'var(--on-warn)',
   green: 'var(--up)', greenBright: 'var(--up)',
   greenSoft: 'color-mix(in srgb, var(--up) 16%, transparent)',
@@ -40,18 +31,12 @@ export const TOKENS = {
 };
 const T = TOKENS;
 
-// SERIES: the CATEGORICAL chart palette, and it is a SINGLE-HUE RAMP on purpose.
-// It used to be [accent, up, down, …], which spent the SEMANTIC colours on categories: a
-// three-segment donut of Direct/Search/Social rendered blue/green/red, so a reader saw a verdict
-// where the data carried none. `up` and `down` mean direction, and only `toneColor()` may spend them.
-// The ramp steps the accent toward `--text-2` instead, which is the only second colour every one of
-// the 38 themes is guaranteed to have (only 4 declare an `accent2`, and accentDim/accentGlow are
-// alpha versions of the accent, not distinct hues). Segments then separate by VALUE, which is what a
-// category legend is for, and every theme keeps one voice.
-// The steps are WIDE (100 / 62 / 34 / 18 / 8) because a one-hue ramp only has lightness to separate
-// with. A first draft stepped 100/72/48/28/14 and steps 2 and 3 were indistinguishable in a
-// three-segment donut on both a dark and a light theme, which is the common case. The tail washes out
-// toward the text colour, which is honest: past four categories a chart wants a legend, not a hue.
+// SERIES: the categorical chart palette, a single-hue ramp on purpose. `up`/`down` mean direction and
+// only `toneColor()` may spend them, so a category chart would otherwise read as a verdict the data
+// never carried. The ramp steps the accent toward `--text-2`, the only second colour every one of the
+// 38 themes is guaranteed to have; segments separate by value instead.
+// Steps are wide (100/62/34/18/8) because a one-hue ramp only has lightness to separate with: a
+// tighter 100/72/48/28/14 draft made steps 2 and 3 indistinguishable in a three-segment donut.
 export const SERIES = ['var(--accent)',
   'color-mix(in srgb, var(--accent) 62%, var(--text-2))',
   'color-mix(in srgb, var(--accent) 34%, var(--text-2))',
@@ -60,26 +45,17 @@ export const SERIES = ['var(--accent)',
 export const seriesAt = (i) => SERIES[i % SERIES.length];
 
 export const HAIR = `1px solid ${T.hair}`;
-// The heavier rule. `--line-strong` is written for EVERY theme (core/boot.js:219, and the theme
-// contract requires `lineStrong`), so this names plumbing that already exists rather than adding any.
-// It was missing, so a block that wanted a divider stronger than a hairline had nowhere on-system to
-// reach and wrote a literal instead. Found by an impeccable audit of the token set.
+// The heavier rule. `--line-strong` is written for every theme (core/boot.js:219, the theme contract
+// requires `lineStrong`), naming plumbing that already exists.
 export const HAIR_STRONG = '1px solid var(--line-strong)';
 
 // ── ELEVATION, NAMED ─────────────────────────────────────────────────────────────────────────────
-// core/layers/util.js:199 already clamps `elevation` to 1..4 and stacks a heavier shadow per tier, so
-// the model is real and shipped. What was missing is the vocabulary: every call site wrote a bare
-// integer, which is exactly the state `radius` was in before `R` existed. A number does not say what
-// it is FOR, and 2 versus 3 is then a guess rather than a choice.
+// core/layers/util.js:199 already clamps `elevation` to 1..4 and stacks a heavier shadow per tier; this
+// names the vocabulary, since a bare integer does not say what it is for.
 export const E = { flat: 1, card: 2, raised: 3, floating: 4 };
 
 // ── WHEN A HEX LITERAL IS LEGITIMATE ─────────────────────────────────────────────────────────────
-// 36 factories emit a raw hex instead of a token, and some of those are CORRECT. The instinct was
-// already in this codebase, scattered: the CODE_THEMES in blocks/dev.mjs and the macOS traffic-light
-// dots in blocks/ui.mjs both carry a comment defending their literals, and both defences hold. What
-// was missing is a single test an author can apply BEFORE adding the thirty-seventh.
-//
-// A literal is legitimate ONLY when the colour IS the identity of something outside this theme:
+// A literal is legitimate only when the colour is the identity of something outside this theme:
 //   * a real brand's own palette (Stripe's blurple, in TOKENS below, is Stripe's not ours)
 //   * an operating system's chrome (macOS traffic lights are red/amber/green by definition)
 //   * a named editor theme being reproduced (dev.mjs CODE_THEMES)
@@ -97,26 +73,10 @@ export const box = (o) => ({ type: 'group', radius: 0, ...o });    // a coloured
 export const pill = (t, fg = T.accentInk, bg = T.accentSoft) =>
   text({ text: t, size: 17, weight: 500, color: fg, bg, radius: 100, pad: '6px 16px' });
 
-// onColor(bg): pick a foreground that can actually be READ on `bg`. A block that hardcodes '#fff'
-// over a caller-supplied colour is fine until the caller passes a light one: `banner` put white on an
-// arbitrary `accent` with no check, and on the amber tone that measures 2.05:1.
-//
-// THE ACCENT CASE WAS A GUARD THAT NEVER RAN. `TOKENS.accent` is the STRING 'var(--accent)', so the
-// hex regex below misses it and this returned `light` ('#fff') every single time. Four blocks called
-// it on the accent believing they were protected, and blocks/social.mjs even carried a comment saying
-// it "picks its ink with onColor rather than assuming white clears it", describing a check that did
-// not happen. The old note here claimed the theme contract requires an accent to carry white; it never
-// did, and 25 of 38 themes could not (higgsfield's lime: 1.16:1).
-//
-// A var still cannot be judged at build time (it resolves in the browser) so the answer is not to
-// measure it here but to defer to the one that was already computed: core/boot.js writes --on-accent,
-// --on-up, --on-down and --on-warn per theme from that theme's own colours.
-//
-// THE ACCENT WAS NOT THE ONLY FILL. Every argument above applies verbatim to `--up`, `--down` and
-// `--warn`, and the guard missed all three the same way: white came back for each, 1.25:1 on
-// higgsfield's `--up` and 2.50:1 on linear's. `badge` had to hand-special-case `warn` to `--text` and
-// documented, honestly, that it fixed nothing on a dark theme. One table, so a fill and its ink cannot
-// drift apart.
+// onColor(bg): pick a foreground that can actually be read on `bg`. A CSS var like `TOKENS.accent`
+// cannot be judged at build time (it resolves in the browser), so a var bg defers to the answer
+// core/boot.js already computed per theme (--on-accent, --on-up, --on-down, --on-warn), rather than
+// falling through to a hardcoded '#fff' that fails on themes like higgsfield's lime accent (1.16:1).
 const ON_TOKEN = {
   __proto__: null,   // a colour string must never reach Object.prototype ('constructor' is not an ink)
   [TOKENS.accent]: TOKENS.onAccent,
@@ -136,63 +96,41 @@ export function onColor(bg, light = '#fff', dark = TOKENS.ink) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RADIUS. Three values shipped across the library with no rule behind them, so which one a new block
-// got was whichever block its author happened to copy. The rule now: RADIUS ENCODES THE SURFACE'S
-// REGISTER, not its size.
-//   tight, instrument surfaces. Mono readouts and technical chrome: a terminal, a log stream, a
-//           status strip. Corners stay close to square because the content is machine output.
+// RADIUS ENCODES THE SURFACE'S REGISTER, not its size.
+//   tight: instrument surfaces (a terminal, a log stream, a status strip); corners stay close to
+//          square because the content is machine output.
 //   card: the default content card. Anything in a hairline card gets this and nothing else.
-//   soft: person-facing surfaces. Social, identity and commerce cards a human is meant to read as
-//           an object rather than a panel: a post, a profile, a player, a price.
+//   soft: person-facing surfaces a human reads as an object rather than a panel (a post, a profile,
+//         a player, a price).
 // A new block picks the role, never the number.
 // ── THE SCALES ───────────────────────────────────────────────────────────────────────────────────
-// Measured across every factory's emitted output before these were chosen, because a scale that does
-// not absorb what is already there is a rewrite pretending to be a convention:
-//   gap     232 emitted values, 20 DISTINCT
-//   pad     277 emitted values, 25 DISTINCT
-//   size    452 emitted values, 29 DISTINCT, of which 19/22/18/20/17/21 alone are 316 uses
-//   radius  271 emitted values, 17 distinct, but 216 of those already sit on R.* / 100 / 0
+// Measured across every factory's emitted output before these were chosen: gap 232 values/20 distinct,
+// pad 277/25, size 452/29 (19/22/18/20/17/21 alone are 316 uses), radius 271/17 (216 already on R.*/100/0).
+// A scale turns "what number looks right here" into "which step", checkable in a way a nudge never is.
 //
-// Six adjacent integers carrying 316 type sizes is not six decisions, it is one decision nudged 316
-// times. That is what a scale is for: it turns "what number looks right here" into "which step", and a
-// step is checkable in a way a nudge never is. It also makes every future block cheaper to build well,
-// which is the whole argument for having one at all.
-//
-// SPACE is 4-based with fine steps at the bottom, because the small end is where real distinctions
-// live (a dot beside its label is 6, not 4 or 8) and the large end never needs that resolution. The
-// `layout` skill makes the same argument: an 8-only scale misses the useful middle.
+// SPACE is 4-based with fine steps at the bottom, since the small end is where real distinctions live
+// (a dot beside its label is 6, not 4 or 8) and the large end never needs that resolution.
 export const SPACE = { none: 0, hair: 2, tight: 4, snug: 6, xs: 8, sm: 12, md: 16, lg: 24, xl: 32, xxl: 48 };
 export const SPACE_STEPS = Object.values(SPACE);
 
-// TYPE collapses the nudge band. Adjacent steps are far enough apart to read as a decision: 20 next to
+// TYPE collapses the nudge band: adjacent steps are far enough apart to read as a decision, 20 next to
 // 19 is an accident, 20 next to 24 is a hierarchy.
 export const TYPE = { fine: 14, body: 17, base: 20, lead: 24, head: 32, display: 48, hero: 64, mega: 92 };
 export const TYPE_STEPS = Object.values(TYPE);
 
-// R already existed and is already 80% adopted once `pill` and `none` are named, which they were not:
-// `radius: 100` appears 52 times and `radius: 0` 18 times, both spelled as bare numbers.
-//
-// THE STEPS CAME FROM THE HISTOGRAM, and the first draft of them was wrong in a way a dry run caught:
-// a scale of 0/6/12/14/16/100 snapped `radius: 100` to 16, which squares off a pill. Radius is not a
-// linear quantity. Past a certain fraction of the box it stops meaning "a bit rounded" and starts
-// meaning "fully rounded", so the top of this scale is a jump, not a step. `chip` is 8 rather than 6
-// because 8 is what the library actually reaches for (12 uses against 8), and `micro` exists because
-// 1/2/3/4px radii appear 20 times to take the hard edge off a hairline, which 0 would lose.
+// Radius is not a linear quantity: past a certain fraction of the box it stops meaning "a bit
+// rounded" and starts meaning "fully rounded" (`radius: 100` appears 52 times, `radius: 0` 18 times),
+// so the top of this scale is a jump, not a step. `micro` exists because 1-4px radii appear 20 times
+// to take the hard edge off a hairline, which 0 would lose.
 export const R = { none: 0, micro: 4, chip: 8, tight: 12, card: 14, soft: 16, round: 24, pill: 100 };
 export const R_STEPS = Object.values(R);
 
-// needData(prop, value, block): a block whose SUBJECT is missing refuses instead of rendering a shell.
-//
-// WHY THIS IS NOT PEDANTRY. A catalog row's `props` are the block's documented example, and
-// blocks/index.mjs merges them only for a NAMESPACED name, a BARE name gets the raw factory with
-// nothing in it (engine-doctrine/MISTAKES.md #449). So the site renders `barChart` WITH its demo data and an
-// author writing {"type":"block","block":"barChart"} gets an empty track, `statBig` counts to 0, and
-// `quote` printed the literal string "undefined" on screen. The site was showing one thing and the
-// engine doing another, silently, for every bare name in the library.
-//
-// Merging the demo props for bare names is the WRONG fix: it would give every field an author left
-// unset some example content, which is the same substitution wearing the other coat. So the block
-// refuses, and the message points at the catalog row that holds a working example.
+// needData(prop, value, block): a block whose subject is missing refuses instead of rendering a shell.
+// A bare block name does not inherit the catalog's demo props (only a namespaced one does,
+// MISTAKES.md #449), so an author writing {"type":"block","block":"barChart"} would otherwise get an
+// empty track or a literal "undefined" on screen. Merging demo props for bare names is the wrong fix
+// (it substitutes example content for a field the author left unset), so the block refuses instead,
+// and the message points at the catalog row that holds a working example.
 export const needData = (what, v, block) => {
   if (Array.isArray(v) ? v.length : (v != null && v !== '')) return;
   throw new Error(`block "${block}": \`${what}\` is empty, so there is nothing to draw. `
@@ -212,20 +150,17 @@ export function cardChrome({ radius = R.card, elevation = 1, border = HAIR, bg =
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MOTION. Every factory in the library wore `anim: 'rise'` (a CONTAINER entrance) because the
-// engine could only animate transform/opacity, so a block could only ever ARRIVE. That made the
-// registry unbrowsable: 101 tiles all swiped up and none of them showed what the block is FOR.
-// Three shapes cover the whole library, and each is a pure function of the layer's own window.
+// MOTION. Three shapes cover the whole library, each a pure function of the layer's own window.
 //
-//   sweep(). The CONTENT performs. The engine interpolates `--p` across the layer's window and
-//               the block writes var(--p) into its own CSS/SVG (an arc's dash, a line's dashoffset).
-//               The card just fades in, fast, and gets out of the way.
-//   stagger(): one row's own start INSIDE its group. Group children are driven off `delay`
-//               (relative to the group's start), never `start`: the engine overwrites a child's
-//               `start` with the group's, so an authored one is accepted and silently ignored.
-//   growUp() / fillRight(): a bar grows from its baseline / a fill wipes L→R. A group child's
-//               height is written as inline px so it cannot be a calc(); the honest equivalent is a
-//               hard-edged mask whose visible fraction IS `--p`, measured from the anchored edge.
+//   sweep(). The content performs: the engine interpolates `--p` across the layer's window and the
+//               block writes var(--p) into its own CSS/SVG (an arc's dash, a line's dashoffset). The
+//               card just fades in, fast, and gets out of the way.
+//   stagger(): one row's own start inside its group. Group children are driven off `delay` (relative
+//               to the group's start), never `start`: the engine overwrites a child's `start` with
+//               the group's, so an authored one is accepted and silently ignored.
+//   growUp() / fillRight(): a bar grows from its baseline / a fill wipes L→R. A group child's height
+//               is written as inline px so it cannot be a calc(); the equivalent is a hard-edged mask
+//               whose visible fraction is `--p`, measured from the anchored edge.
 
 const P_EASE = 'easeOutCubic';
 
@@ -328,19 +263,13 @@ export const STROKE = { line: 2.4, arc: 9 };
 export const SHADOW_CARD = '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)';
 
 // THE THREE TEXT ROLES INSIDE A DATA SURFACE, as CSS `font:` shorthands so an html block and a native
-// `text` layer cannot drift apart on them. The split is the register's: MONO CARRIES NUMBERS, SANS
-// CARRIES WORDS. The library had it exactly backwards, axis ticks ("Mon", "Q3") were set in mono and
-// the figures above them in sans, which loses the one thing mono is for, a column of digits that
-// lines up.
+// `text` layer cannot drift apart on them. Mono carries numbers, sans carries words.
 //   capCss()   the surface's own caption: what this instrument reads. Mono, muted, small.
 //   labelCss() an axis tick or a legend name. Sans, muted, same size as cap so a card has one small step.
 //   numCss()   a figure. Mono, tabular, tight, ink. Never smaller than the label beside it.
-// TYPE.body (17) is the floor, not TYPE.fine (14): `make audit` fails text under 14.04px as
-// unreadable, so the scale's smallest step is four hundredths of a pixel below what will pass.
-// THE MUTED COLOUR IS `--text-2`, NOT `--dim`. The charts reached for `--dim` for every caption and
-// tick, and `--dim` is the de-emphasised CHROME role: on higgsfield it measures 2.6:1 against the
-// card and `make audit` fails it HARD, on linear 4.3:1 and it warns. `--text-2` is the secondary
-// TEXT role and clears 4.5:1 on every theme, which is the whole difference between quiet and unread.
+// TYPE.body (17) is the floor, not TYPE.fine (14): `make audit` fails text under 14.04px as unreadable.
+// The muted colour is `--text-2`, not `--dim`: `--dim` is the chrome role and measures 2.6:1 against
+// the card on higgsfield (a hard audit failure); `--text-2` clears 4.5:1 on every theme.
 export const capCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 600 } = {}) =>
   `font:${weight} ${size}px var(--font-mono);color:${color};letter-spacing:0.02em`;
 export const labelCss = ({ size = TYPE.body, color = TOKENS.sub, weight = 500 } = {}) =>
@@ -391,13 +320,9 @@ export const TONE_NAMES = Object.keys(TONES);
 export const initialsOf = (s) => String(s ?? '').trim().split(/\s+/).slice(0, 2)
   .map((w) => (w[0] || '').toUpperCase()).join('') || '•';
 
-// AN AVATAR IS AN OPAQUE OBJECT. The default fill was `accentSoft`, which is the accent at 14% over
-// TRANSPARENT: correct for a chip lying flat on a card, wrong for a disc that overlaps its own
-// siblings. `avatarStack` steps its discs by 0.65 of their size, so 35% of every avatar sat over the
-// one before it and you read both fills at once; the 2px `--card` ring that is meant to cut each disc
-// out of the next separated nothing, because there was nothing behind it to cut. Mixing toward
-// `--card` instead of `transparent` renders IDENTICALLY on a card ground, which is where every
-// single-avatar block puts it, and makes the stack a stack.
+// AN AVATAR IS AN OPAQUE OBJECT. The default fill mixes toward `--card`, not `transparent`: a stacked
+// avatar overlaps its neighbour by 35% of its size, and a transparent fill would let both show through,
+// making the 2px `--card` ring meant to cut discs apart cut nothing.
 export function avatarEl({ avatar = '', initials = '', name = '', size = 56, radius = 100,
   bg = 'color-mix(in srgb, var(--accent) 14%, var(--card))', color = TOKENS.accentInk } = {}) {
   if (avatar) return { type: 'image', src: avatar, w: size, h: size, radius };
