@@ -1,12 +1,20 @@
 // tests/authoring/eject-block.test.mjs: `make dev-tool X=add BLOCK=<name> D=<film>` writes a block factory's own
 // output straight into the film, in place of the sugar layer, tagged `ejectedFrom`. node tests/authoring/eject-block.test.mjs
+//
+// Fixtures live under tests/fixtures/films/ (VAWE_FILMS_DIR points ejectBlock's containment check there
+// for this run, never films/scene/, which is real film content this suite must not depend on).
+process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
+
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { ejectBlock } from '../../harness/author/eject-block.mjs';
 
-const tmp = path.join(os.tmpdir(), `eject-block-test-${process.pid}.json`);
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const FIXTURES = path.join(ROOT, 'tests/fixtures/films');
+fs.mkdirSync(FIXTURES, { recursive: true });
+const tmp = path.join(FIXTURES, `eject-block-test-${process.pid}.json`);
 fs.writeFileSync(tmp, JSON.stringify({
   module: 'scene',
   theme: 'default',
@@ -28,6 +36,21 @@ try {
   assert.match(layer.html, /var\(--v-radius/, 'the ejected HTML still reads the ambient surface vars, editable from here on');
 
   assert.throws(() => ejectBlock(tmp, 'gauge'), /no \{type:"block"/, 'ejecting twice finds nothing left to eject');
+
+  const outside = path.join(ROOT, `.vawe-eject-outside-test-${process.pid}.json`);
+  fs.writeFileSync(outside, JSON.stringify({
+    module: 'scene',
+    theme: 'default',
+    layers: [{ type: 'block', block: 'gauge', x: 0, y: 0, w: 100, value: 1, label: 'x', start: 0, dur: 1 }],
+  }));
+  try {
+    assert.throws(() => ejectBlock(outside, 'gauge'), /refusing to eject into a path outside/,
+      'a D= path outside films/ is refused, never written');
+    assert.deepEqual(JSON.parse(fs.readFileSync(outside, 'utf8')).layers[0].type, 'block',
+      'the refused file is left untouched');
+  } finally {
+    fs.rmSync(outside, { force: true });
+  }
 } finally {
   fs.rmSync(tmp, { force: true });
 }

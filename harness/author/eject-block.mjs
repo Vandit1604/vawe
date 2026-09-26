@@ -42,7 +42,12 @@ function findBlockLayer(layers, block, id) {
 }
 
 export function ejectBlock(filmPath, blockName, id = null) {
+  const filmsDir = process.env.VAWE_FILMS_DIR || 'films/scene';
   const abs = path.isAbsolute(filmPath) ? filmPath : path.join(ROOT, filmPath);
+  const rel = path.relative(ROOT, abs);
+  if (rel.startsWith('..') || !rel.startsWith(filmsDir + '/')) {
+    throw new Error(`${filmPath}: refusing to eject into a path outside ${filmsDir}/`);
+  }
   const data = JSON.parse(fs.readFileSync(abs, 'utf8'));
   if (!Array.isArray(data.layers)) throw new Error(`${filmPath}: no top-level "layers" array`);
 

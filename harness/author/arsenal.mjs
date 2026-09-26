@@ -182,6 +182,12 @@ const jsonish = (v) => {
   return JSON.stringify(v);
 };
 
+// `text` is a search hit for "typing"/"typewriter" (its own blurb says the reveal and caret live
+// there), but the bare `{"type":"text"}` the generic rule below builds for every layer type left the
+// real fields invisible right where a friction log caught an agent writing `typeOn` (a captionStyle,
+// an unrelated vocabulary entry) onto a text layer instead of the actual `typing`+`caret` props.
+const PASTE_EXTRA = { 'layer type\u0000text': { typing: true, caret: true } };
+
 /** The object an author pastes this entry into, or null when the slot is prose rather than a path. */
 export function pasteOf(entry) {
   const slot = entry.slot;
@@ -191,7 +197,7 @@ export function pasteOf(entry) {
   let node;
   if (last.endsWith('[]')) node = { [last.slice(0, -2)]: [{ [entry.name]: {} }] };
   else if (last.endsWith('{}')) node = { [last.slice(0, -2)]: { [entry.name]: 1 } };
-  else node = { [last]: entry.name };
+  else node = { [last]: entry.name, ...PASTE_EXTRA[`${entry.kind}\u0000${entry.name}`] };
   for (const seg of segs.reverse()) {
     node = seg.endsWith('[]') ? { [seg.slice(0, -2)]: [node] } : { [seg]: node };
   }
