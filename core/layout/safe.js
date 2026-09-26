@@ -369,7 +369,7 @@ export const ANCHOR_POINT_REGISTRY = defineRegistry('anchor point', ANCHOR_POINT
   catalog: {
     title: 'Anchor points',
     tag: 'layout',
-    intro: '`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER\'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.',
+    intro: '`"anchorPoint": "<name>"` on a layer: which point of THIS LAYER\'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME. A scene with exactly one authored top-level layer, itself a text/count layer naming no position at all, gets `center` automatically (`core/engine/boot.js` `applyLoneTextCenter`).',
     usage: (n, { j }) => j({ x: 960, y: 540, w: 200, h: 100, anchorPoint: n }),
     noPreview: 'an anchor point is where a coordinate lands, not a look: see it on any layer with `w`/`h` set and `anchorPoint: "center"`.',
   },

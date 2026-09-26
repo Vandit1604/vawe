@@ -11,9 +11,14 @@
 // splitting text for kinetic reveals mutated structure and broke motion-track layers + the contrast audit,
 // so kinetic type is nudged by the direction floor instead, MISTAKES).
 //
-// The BACKGROUND is deliberately NOT here. It used to be injected (light brand → dotmatrix, dark → aurora),
-// which meant the backdrop (the single largest area of the frame) was the one design decision no author
-// ever made. `bg` is now a required field (core/validate.mjs); this pass supplies motion, not taste.
+// THE BACKGROUND ITSELF IS STILL DECIDED BY THE THEME, NEVER GUESSED HERE. It used to be injected by
+// picking a preset per brand (light → dotmatrix, dark → aurora), which meant the backdrop (the single
+// largest area of the frame) was the one design decision this file made instead of an author. `bg` no
+// longer THROWS when absent (films/scene/schema.json's own `required` flag), because a bare scene with
+// no `bg` at all now gets the SAME opt-in sugar an author already has one line away: `bg:[{use:"theme"}]`
+// (core/backgrounds/theme-rotation.js, films/scene/scene.js), the brand's own authored, ALREADY-ANIMATED
+// backdrop (owner rule: backgrounds move), never a flat fill this pass would have to invent. See
+// applyBgDefault below, called before validation so the required check never fires on a defaulted scene.
 //
 // Determinism: it only mutates the scene DATA once, before the first frame, renderFrame(n) stays pure.
 // ABSENT-ONLY: an explicitly set field is the author's opt-out (set `sceneUnits` yourself to override).
@@ -79,14 +84,42 @@ export function resolveTextSize(value, scale, where = 'size') {
 // (boot.js calls resolveCoords then produceBaseline, in that order). A string size reaching that
 // arithmetic becomes NaN with no error. boot.js calls this one line earlier, between resolving `look`
 // and calling resolveCoords, the one gap the existing ordering leaves for it.
+// AUTO_ROLE_ORDER: a text/count layer that names NO size at all (not even a role string) used to fall
+// through to text.js's TEXT_SIZE_DEFAULT (96px, a debug-frame size on a 1920 canvas: MISTAKES, agent-
+// authored films kept shipping small type on empty grounds). Rather than a second fixed number, it gets
+// the theme's own role scale, positionally: the first text/count layer encountered reads as the film's
+// hook, the second as its headline/subline, anything after as body. Order, not a new field, because a
+// hurried scene already implies the roles by which layer comes first.
+const AUTO_ROLE_ORDER = ['hook', 'headline', 'body', 'caption'];
+
 export function bakeTextSizeRoles(data, look) {
   const scale = look && look.scale;
+  let autoIndex = 0;
   const walk = (ls) => { for (const L of ls || []) {
     if (!L || typeof L !== 'object') continue;
+    const isTextish = L.type === 'text' || L.type === 'count';
     if (typeof L.size === 'string') L.size = resolveTextSize(L.size, scale, `layer "${L.id || L.type || 'text'}" size`);
+    else if (L.size == null && isTextish && scale) {
+      const role = AUTO_ROLE_ORDER[Math.min(autoIndex, AUTO_ROLE_ORDER.length - 1)];
+      if (typeof scale[role] === 'number') L.size = scale[role];
+    }
+    if (isTextish) autoIndex++;
     walk(L.children);
   } };
   walk(data && data.layers);
+  return data;
+}
+
+// applyBgDefault(data): a scene that names NO `bg` at all (never authored the key, or authored an
+// empty array) gets the theme's own backdrop, `bg:[{use:"theme"}]`, the SAME opt-in sugar an author
+// already reaches for one line away. Called from boot.js before schema validation, so the schema's
+// own `bg.required` check (films/scene/schema.json) never has to see the gap. AN AUTHORED, non-empty
+// `bg` is left completely untouched: this only fills the hole a hurried scene left, never overrides
+// a real decision.
+export function applyBgDefault(data) {
+  if (!data || typeof data !== 'object') return data;
+  if (data.module && data.module !== 'scene') return data;
+  if (!Array.isArray(data.bg) || data.bg.length === 0) data.bg = [{ use: 'theme' }];
   return data;
 }
 
