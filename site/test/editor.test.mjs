@@ -127,13 +127,14 @@ test("a scene using build-time sugar boots directly, no separate expand step", a
   // what the picker serves under site/public/scenes/ is already plain layers. Nothing expands sugar at
   // load: films/scene/scene.js:152 never imports core/engine/expand.js, on purpose. That is exactly why
   // site/app/editor/sugar.ts still refuses sugar a visitor TYPES, which has no publish step behind it.
+  // The editor mounts a NEW iframe per scene, and the old one still reads as booted until it is removed.
+  await page.$eval(".sp-frame", (f) => { f.dataset.old = "1"; });
   await page.select("#ed-scene", "saas-hero-launch");
-  await settled(page);
   const booted = await page
-    .waitForFunction(() => document.querySelector(".sp-frame")?.contentWindow?.__engine?.meta, { timeout: BOOT_MS })
+    .waitForFunction(() => document.querySelector(".sp-frame:not([data-old])")?.contentWindow?.__engine?.meta, { timeout: BOOT_MS })
     .then(() => true, () => false);
   assert.ok(booted, "window.__engine.meta never appeared — the engine did not boot");
-  const meta = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engine.meta);
+  const meta = await page.evaluate(() => document.querySelector(".sp-frame:not([data-old])").contentWindow.__engine.meta);
   assert.ok(meta.totalFrames > 0);
   assert.equal(await problem(page), null, "a build-time-sugar scene must not raise a problem any more");
   assert.match(await status(page), /rendering live/);
