@@ -66,7 +66,8 @@ beatsync: ## [dev] snap the scene's cuts and seams onto the track's beat grid so
 spectrum: ## [dev] bake per-frame band energy beside a track (MUSIC=<file> [FPS=30])
 	node harness/media/spectrum.mjs $(MUSIC) $(if $(FPS),--fps $(FPS))
 
-build: fonts ## [ship] compile bin/vawe from the Go source
+build: ## [ship] compile bin/vawe from the Go source
+	@node harness/lib/gen-tool.mjs fonts
 	go build -C renderer -o ../bin/vawe ./cmd/render
 
 # make build-all: one binary per platform we ship, named for the machine that runs it.
@@ -79,7 +80,8 @@ build: fonts ## [ship] compile bin/vawe from the Go source
 #
 # Go cross-compiles with no toolchain per target, so this costs one command and no dependencies.
 .PHONY: build-all
-build-all: fonts ## [ship] cross-compile a render binary for every shipped platform
+build-all: ## [ship] cross-compile a render binary for every shipped platform
+	@node harness/lib/gen-tool.mjs fonts
 	@sh harness/dev/build-all.sh
 
 # make video D=path/to/video.json: one self-describing JSON → out/<name>.mp4
