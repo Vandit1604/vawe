@@ -175,7 +175,7 @@ const GSAP_AKA = {
   flipInX: ['flip up on x axis', 'hinge up entrance', 'card flip vertical'],
   flipInY: ['flip in on y axis', 'page turn entrance', 'card flip horizontal'],
   clipUp: ['bottom to top wipe', 'mask uncover up', 'reveal from below'],
-  maskReveal: ['left to right wipe', 'editorial headline reveal', 'mask uncover sideways'],
+  maskReveal: ['left to right wipe', 'editorial headline reveal', 'mask uncover sideways', 'a shape or text mask wiping content in', 'masked reveal'],
   revealUp: ['clip and lift reveal', 'uncover and rise', 'wipe up with a lift'],
   tiltIn: ['door swing entrance', 'hinge open from the left', 'swing into frame'],
   driftIn: ['soft diagonal float in', 'quiet blur entrance', 'atmosphere entrance'],

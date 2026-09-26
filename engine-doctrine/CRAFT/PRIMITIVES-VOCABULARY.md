@@ -172,7 +172,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `slow push-in` | creep closer, gradual zoom in, slow zoom | the same slow move closer, spelled the way a storyboard usually spells it. |
 | `sweep` | sweep across, truck sideways, lateral move | the camera trucks sideways across the scene, revealing what was beyond the edge. |
 | `tour` | multi-stop flight, visit several spots, station to station | a multi-leg move that visits several places in turn, one continuous shot rather than cuts. |
-| `ui focus zoom` | zoom to a control, focus on a panel, highlight a UI element | a dive aimed at one control or panel, for showing exactly where a click lands. |
+| `ui focus zoom` | zoom to a control, focus on a panel, highlight a UI element, camera push-in onto a UI region, push in on a button or panel | a dive aimed at one control or panel, for showing exactly where a click lands. |
 | `zoom out` | widen the shot, show the whole scene, back off | the same widening move, spelled the way most people ask for it. |
 
 ## canvas fx  `[canvasFx]`
@@ -546,7 +546,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `foldIn` | unfold from the top, dropdown entrance, panel unfold | unfolds downward from its top edge and springs level, dropdowns, panels, receipts; needs 3D perspective |
 | `glitchIn` | glitch entrance, stepped snap in, digital glitch reveal | snaps in through five hard steps, sheared and offset. No smoothing at all, alarm and glitch beats only |
 | `heartbeat` | throbbing loop, urgent pulse loop, live recording throb | LOOP, never settles: a fast 12% throb twice a second. Urgency, live counts, recording dots |
-| `maskReveal` | left to right wipe, editorial headline reveal, mask uncover sideways | a hard left-to-right wipe, fast then a long settle. The premium editorial reveal for a headline |
+| `maskReveal` | left to right wipe, editorial headline reveal, mask uncover sideways, a shape or text mask wiping content in, masked reveal | a hard left-to-right wipe, fast then a long settle. The premium editorial reveal for a headline |
 | `pulse` | pulsing loop, breathing scale loop, draw attention pulse | LOOP, never settles: breathes 6% larger and back every second, draws the eye to a CTA |
 | `revealUp` | clip and lift reveal, uncover and rise, wipe up with a lift | clipUp plus a short lift and fade, so the layer rises as it is uncovered, the fuller version of clipUp |
 | `rollIn` | roll in from the left, wheel arrival, rotate while sliding in | rolls in from the left, its rotation unwinding as it travels, reads as a wheel arriving |
