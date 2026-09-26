@@ -1,11 +1,3 @@
-// harness/media/pace-from-vo.mjs: SCRIPT-FIRST PACING. Write the narration first (make tts), then pace the
-// video TO THE VOICE instead of guessing seconds per beat. This reads a voWords sidecar ([{w,t}], from
-// make tts / captions) and proposes beat boundaries at the sentence breaks, with each beat's start +
-// duration taken from when the words are actually spoken. Transcribe those onto each beat's hero layer so
-// the reveals land on the narration instead of a guessed clock. It PROPOSES; it never
-// mutates the scene.
-//
-//   make pace-from-vo VO=<file>.words.json [BEATS=<n>]   (BEATS forces n roughly-equal chunks by word count)
 import fs from 'node:fs';
 
 const VO = process.env.VO || process.argv[2];
@@ -13,12 +5,10 @@ if (!VO || !fs.existsSync(VO)) { console.error('usage: make pace-from-vo VO=<fil
 const words = JSON.parse(fs.readFileSync(VO, 'utf8'));
 if (!Array.isArray(words) || !words.length || words[0].t == null) { console.error(`✗ ${VO} is not a voWords sidecar ([{w,t}]).`); process.exit(1); }
 
-// average inter-word gap → a sensible tail for the last beat (and a floor for degenerate gaps).
 const gaps = []; for (let i = 1; i < words.length; i++) gaps.push(words[i].t - words[i - 1].t);
 const avgGap = gaps.length ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0.4;
 const total = +(words[words.length - 1].t + Math.max(0.4, avgGap * 2)).toFixed(2);
 
-// segment: by sentence-ending punctuation, or into N equal-ish chunks if BEATS is set.
 const N = process.env.BEATS ? Math.max(1, parseInt(process.env.BEATS, 10)) : null;
 const groups = [];
 if (N) {

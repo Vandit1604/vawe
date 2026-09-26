@@ -1,41 +1,9 @@
-// block-dials.mjs: what can I DIAL on this block, and what does each dial mean?
-//
-// WHY THIS EXISTS, from a real gap. `make arsenal Q="glass panel"` answered with a name, a blurb and
-// the line `"block": "glassCard"`. That block takes nine options, each with a type, a range and a
-// default, and none of them reached the author. The block library's own comparison makes the point:
-// a HyperFrames block is one HTML document with a private timeline, and it PUBLISHES its 14
-// parameters; ours is a function the engine animates, which is the better architecture, and it
-// published nothing. A capability that is present, correct and unreachable is indistinguishable from
-// one that is absent.
-//
-// NOTHING HERE IS A NEW CONTRACT. Every family module already exports `<FAM>_SCHEMAS`, merged into
-// `SCHEMAS` by blocks/index.mjs, and quality/gates/block-schema.mjs already holds every table against
-// the factory's real signature. This file reads that table and the comments written above it. It owns
-// no list, declares no default, and cannot disagree with the engine.
-//
-// THE NOTES ARE THE POINT, and they are comments, so they are not in the runtime object:
-//
-//   // How milky the glass is. 0 is clear and the panel is only its edge and its blur; 1 is opaque
-//   // white and the backdrop it exists to blur stops reading at all.
-//   tint: { kind: 'unit', def: 0.06 },
-//
-// The rule says `0..1`. Only the note says what 0 and 1 LOOK like, which is the thing that decides
-// whether an author moves the dial at all. Harvested from source, lazily, and only by the deep view:
-// the compact line in a search result is built from the runtime table alone and reads no files.
-//
-// WHY AUTHORING-SIDE and not blocks/schema.mjs: that module is imported on the validate path, which
-// runs on every scene, and it must not grow file reads to serve a help tool.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// ---- which FILE owns a family --------------------------------------------------------------------
-//
-// Derived, never a second map. blocks/index.mjs keys FAMILY_MODULES by file and builds its own
-// `ownerOf` in a loop that does not export it; rather than ask for that to be exported, the same fact
-// is re-derived from the tables themselves, which is where this file is already looking.
 let OWNER = null;
 async function ownerOf(family) {
   if (!OWNER) {
@@ -50,13 +18,6 @@ async function ownerOf(family) {
   return OWNER[family] || null;
 }
 
-// ---- harvesting the notes ------------------------------------------------------------------------
-//
-// A line scan, not a parser, and the limits are deliberate. It tracks brace depth with strings and
-// trailing comments stripped first, because a `str` default may hold a brace and counting it would
-// close the table early. Depth 1 is a family, depth 2 is one of its dials, and a `//` run directly
-// above a key is that key's note. A blank line or any other statement clears the buffer, so a comment
-// about the TABLE does not become the first dial's note.
 const stripped = (line) => line
   .replace(/'(?:[^'\\]|\\.)*'/g, "''")
   .replace(/"(?:[^"\\]|\\.)*"/g, '""')
@@ -108,7 +69,6 @@ export async function notesFor(family) {
   return CACHE.get(file)[family] || {};
 }
 
-// ---- the rows ------------------------------------------------------------------------------------
 
 /**
  * One family's table as rows, in the table's own key order (which is also the order
@@ -129,9 +89,6 @@ export async function dialsFor(family, { withNotes = false } = {}) {
   return rowsFrom(SCHEMAS[family], withNotes ? await notesFor(family) : {});
 }
 
-// A default, short enough to sit in a list of nine of them. A string prints bare when it is one word,
-// because `anim=pop` is the thing an author copies and `anim="pop"` is not. Anything with structure
-// prints as its KIND, since half a chart's data array in a summary line is noise, not an answer.
 const shortDef = (d, kind) => {
   if (d === undefined) return null;
   if (typeof d === 'string') return /^[\w.\-#]+$/.test(d) ? d : `<${kind}>`;

@@ -19,17 +19,16 @@
       "x": 160,
       "y": 160,
       "w": 540,
-      "h": 300,
-      "html": "<div style=\"display:flex;flex-direction:column;width:540px;height:300px;box-sizing:border-box\"><div style=\"flex:1;min-height:0;background:var(--card);border-radius:8px;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;align-items:flex-start;gap:12px\"><span style=\"font:700 32px var(--font-sans);color:var(--text);letter-spacing:-0.02em\">Open canvas</span><span style=\"font:400 20px var(--font-sans);color:var(--text-2)\">Compose a beat from the vocabulary.</span><div style=\"display:flex;flex-wrap:wrap;gap:8px;align-items:center\"><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Text</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Image</span><span style=\"display:inline-flex;align-items:center;font:500 17px var(--font-sans);color:var(--text-2);background:var(--surface-2);border-radius:100px;padding:6px 16px\">Group</span></div></div><div style=\"height:1px;background:var(--line)\"></div><div style=\"display:flex;justify-content:space-between;align-items:center;padding:12px 24px\"><span style=\"font:600 17px var(--font-sans);color:var(--text-2)\">Explore</span><span style=\"font:600 17px var(--font-sans);color:var(--accent)\">→</span></div></div>",
       "bg": "var(--card)",
-      "radius": 14,
+      "radius": 16,
       "border": "1px solid var(--line)",
-      "elevation": 2,
+      "elevation": 1,
       "anim": "rise",
       "start": 0.2,
       "duration": 8,
-      "enterDur": 0.5,
-      "exitDur": 0.35
+      "enterDur": 0.45,
+      "exitDur": 0.3,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:stretch;padding:24px;box-sizing:border-box;width:540px\"><div style=\"display:flex;align-items:center;gap:8px\"><span style=\"width:22px;height:8px;border-radius:100px;background:var(--accent)\"></span><span style=\"width:8px;height:8px;border-radius:100px;background:var(--surface-2)\"></span><span style=\"flex:1\"></span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">1 of 2</span></div><div style=\"display:flex;flex-direction:column;gap:8px;align-items:flex-start\"><span style=\"font:700 30px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">Open canvas</span><span style=\"font:400 19px var(--font-sans);color:var(--text-2)\">Compose a beat from the vocabulary.</span></div></div>"
     },
     {
       "type": "html",
@@ -41,11 +40,18 @@
       "border": "1px solid var(--line)",
       "elevation": 1,
       "anim": "rise",
-      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:24px;box-sizing:border-box;width:248px\"><div style=\"width:56px;height:56px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 22px var(--font-sans);color:color-mix(in srgb, var(--accent) 66%, var(--text))\">AL</div><div style=\"display:flex;flex-direction:column;gap:4px;align-items:flex-start;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Ana Roth</span><span style=\"font:500 17px var(--font-sans);color:var(--text-2)\">Founding Engineer</span></div></div>",
       "start": 0.38,
       "duration": 7.82,
       "enterDur": 0.45,
-      "exitDur": 0.3
+      "exitDur": 0.3,
+      "html": "<div style=\"display:flex;flex-direction:column;gap:16px;align-items:flex-start;padding:24px;box-sizing:border-box;width:248px\"><div style=\"width:76px;height:76px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 30px var(--font-sans);color:var(--accent)\">AR</div><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start\"><span style=\"font:700 28px var(--font-sans);letter-spacing:-0.02em;color:var(--text)\">Ana Roth</span><span style=\"font:500 17px var(--font-mono);color:var(--dim)\">@ana</span></div><div data-part style=\"display:flex;gap:32px;align-items:flex-start\"><div style=\"display:flex;flex-direction:column;gap:2px;align-items:flex-start\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">12</span><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">ships</span></div></div></div>",
+      "parts": [
+        {
+          "anim": "fadeUp",
+          "each": 0.35,
+          "delay": 0.18
+        }
+      ]
     }
   ],
   "produced": false

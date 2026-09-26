@@ -1,17 +1,3 @@
-// harness/media/tts.mjs, LOCAL narration: synthesize a voiceover WAV + word-timing sidecar from a script,
-// entirely offline with macOS `say` (on-device neural voices, no cloud, no API key, no downloads). The
-// engine already mixes VO (audio.go: `vo` + `voWords`, ducks the music under speech), this is the missing
-// generation half, done with a local model instead of a cloud call.
-//
-//   node harness/media/tts.mjs --script narration.txt --out films/scene/myvideo.vo [--voice Samantha]
-//   node harness/media/tts.mjs --text "Line one.\nLine two." --out out/vo
-//   make tts SCRIPT=narration.txt OUT=films/scene/myvideo.vo VOICE=Samantha
-//
-// Writes <out>.wav (the VO) and <out>.words.json ([{w,t}], the voWords format captions read). Each
-// non-empty line of the script is one caption UNIT: it is synthesized separately so line boundaries are
-// exact, the wavs are concatenated, and words inside a line are timed by character weight across that
-// line's measured duration. Deterministic: same text + voice → same audio + same timings (TTS has no
-// randomness), so it never breaks the render's determinism.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -30,15 +16,10 @@ const scriptPath = flag('--script');
 if (scriptPath) { if (!fs.existsSync(scriptPath)) { console.error(`✗ no script at ${scriptPath}`); process.exit(2); } text = fs.readFileSync(scriptPath, 'utf8'); }
 if (!text) { console.error('✗ provide --text or --script'); process.exit(2); }
 
-// lines = caption units (drop blank lines and markdown headings/comments)
 const lines = text.replace(/\\n/g, '\n').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#') && !l.startsWith('//'));
 if (!lines.length) { console.error('✗ script has no speakable lines'); process.exit(2); }
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-tts-'));
-// READ BACK what ffprobe answered. `|| 0` turned every failure, ffprobe absent, a wav ffmpeg never
-// wrote, a file it cannot parse. Into a duration of ZERO, and a zero duration is not an error here: it
-// stacks that line's words at one instant, gives the line no room in the offset, and the VO ships short
-// with the captions off. A tool we do not own reporting nothing must not read as "0.0 seconds".
 const dur = (f) => {
   const r = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', f], { encoding: 'utf8' });
   if (r.error) { console.error(`✗ could not run ffprobe (${r.error.message})`); process.exit(1); }
@@ -61,8 +42,6 @@ for (let i = 0; i < lines.length; i++) {
   ffmpegOrDie(['-v', 'error', '-y', '-i', aiff, '-ar', '48000', '-ac', '2', wav], wav, `tts line ${i + 1}`);
   const d = dur(wav);
   wavs.push(wav);
-  // distribute this line's words across its duration by character weight (a longer word takes longer to
-  // say). A small 4% head/tail padding keeps the first word off the exact boundary.
   const ws = line.split(/\s+/).filter(Boolean);
   const totalChars = ws.reduce((s, w) => s + w.length + 1, 0);
   const speak = d * 0.92, head = offset + d * 0.04;
@@ -71,7 +50,6 @@ for (let i = 0; i < lines.length; i++) {
   offset += d;
 }
 
-// concatenate the line wavs into one VO track
 const listFile = path.join(tmp, 'list.txt');
 fs.writeFileSync(listFile, wavs.map((w) => `file '${w}'`).join('\n'));
 const wavOut = out.endsWith('.wav') ? out : `${out}.wav`;

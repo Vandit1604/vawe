@@ -1,24 +1,3 @@
-// harness/author/build-refstudy.mjs: a shot-for-shot study of refs/pin-522769469268499616.mp4.
-//
-// THIS IS A RECREATION EXERCISE (engine-doctrine/CRAFT/RECREATION.md). The point is to reproduce the reference's
-// STRUCTURE exactly and see what our engine cannot do, so the gaps become the roadmap. Everything
-// structural is measured from the file rather than eyeballed:
-//
-//   cuts    0 · 1.44 · 3.2 · 4.88 · 5.96 · 7.48 · 9.56 · 12.76 · 14.16 · 15.56 · 16.32 · 17.87
-//   shots   1.44 1.76 1.68 1.08 1.52 2.08 3.20 1.40 1.40 0.76 1.55   (median 1.52s, min 0.76s)
-//
-// That cut rate is the single biggest difference from anything in this library: our beats run 2.5-4s,
-// roughly half the pace, and no amount of composition reads as energetic at half the cut rate.
-//
-// WHAT IS COPIED: the skeleton. Shot count and lengths, the palette sequence, one clause per shot with
-// the sentence never finishing, emphasis on a word rather than a line, a prop per shot, the list card
-// that builds a row at a time, the fast 0.76s shot before the payoff, and the grey PATH that runs
-// through the light section (the thing a first pass at this reference missed entirely).
-//
-// WHAT IS NOT COPIED: its content, copy, artwork and assets. Its subject is audience growth; ours is
-// hand-built video. Props are openly-licensed photographs fetched via `make photos` with attribution in
-// assets/brands/refstudy/photos/credits.json, and the brand slot holds our own mark rather than the
-// third-party wordmark the reference puts there.
 import fs from 'node:fs';
 
 const OUT = 'films/scene/refstudy.json';
@@ -32,14 +11,9 @@ const shot = (i) => ({ t: CUTS[i], d: r1(CUTS[i + 1] - CUTS[i]) });
 const DUR = 17.87;
 const layers = [];
 
-// The palette sequence, taken from the reference shot by shot. It flips seven times in eighteen seconds.
-// A held backdrop across this many cuts would flatten the whole thing.
 const DARK = ['ink', 'deep', 'ink'];
 const TONE = ['dark', 'dark', 'dark', 'light', 'light', 'dark', 'light', 'light', 'light', 'light', 'dark'];
 
-// ── the sentence, one clause per shot, none of them finishing ──────────────────────────────────────
-// Written to the reference's SHAPE, not its words: a setup, a question that turns it, a definition, a
-// list, a contrast pair, and a full stop that only arrives on the last shot.
 const CLAUSES = [
   'You had the <b>idea</b>,',
   'but the edit? <b>still manual</b>,',
@@ -71,25 +45,9 @@ const clause = (i) => {
   };
 };
 
-// ── the PATH lives in the BACKGROUND, not in layers ────────────────────────────────────────────────
-// It is the spatial thread the first study of this reference missed: a pale band curving through the
-// light shots, dropping out for the dark briefcase shot and returning, so those shots read as one
-// travelling surface rather than separate cards.
-//
-// It belongs in `bg` because it is a BACKDROP and backdrops are expected to bleed off-frame. Authored as
-// a layer it was a 1000px rotating box that failed the safe-zone audit on both spans, and the only fixes
-// available were to shrink a band whose whole job is to run past the edges, or to waive a gate that was
-// reading it as content. Neither is right when the element is simply in the wrong place.
-// `var(--t)` is the scene clock, so the drift is pure in t and the render stays deterministic.
 const pathBg = (from, to, a0, a1) => ({
   from: CUTS[from], to: CUTS[to],
-  // `tone` is REQUIRED and the validator is right to insist: the engine cannot read lightness out of
-  // arbitrary CSS, so without it a layer with no explicit colour falls back to theme ink and can land
-  // white on white. The base fill lives here too; the band alone is transparent and would show nothing.
   tone: 'light',
-  // An inline SVG, not a linear-gradient. A gradient can only produce a straight-edged wedge, and that is
-  // what it produced: a flat grey triangle instead of a band curving through the shots. The reference's
-  // path bends, and the bend is what makes consecutive shots read as one travelling surface.
   html: `<div style="position:absolute;inset:0;background:#f4f6fb"></div>
     <svg viewBox="0 0 1080 1920" preserveAspectRatio="xMidYMid slice"
          style="position:absolute;inset:-15%;width:130%;height:130%;
@@ -100,8 +58,6 @@ const pathBg = (from, to, a0, a1) => ({
     </svg>`,
 });
 
-// ── the props, one per shot, photographic ──────────────────────────────────────────────────────────
-// Sized and centred on the SAFE box, never the canvas: reels paints a rail right and captions bottom.
 const prop = (src, i, { y = 720, w = 700, ken = true, rot = 0, scale = 1 } = {}) => {
   const s = shot(i);
   const h = Math.round(w * 0.66);
@@ -109,9 +65,6 @@ const prop = (src, i, { y = 720, w = 700, ken = true, rot = 0, scale = 1 } = {})
     type: 'image', id: `prop${i}`, src: P + src, radius: 18, motionBlur: false,
     x: Math.round(SAFE.x0 + (SAFE.x1 - SAFE.x0 - w) / 2), y, w, h, ken, track: 8,
     start: r1(s.t), duration: s.d, anim: 'none', exitDur: 0.2,
-    // FAST. At a 1.5s cut rate a 0.34s fade-in leaves the first tenth of the shot on bare backdrop, which
-    // seam-check reads as a dark flash at the cut and the eye reads as the film losing its footing. The
-    // prop starts already mostly present and settles; it never arrives from nothing.
     motion: [
       { t: 0, opacity: 0.55, scale: scale * 0.965, rot: rot * 1.5 },
       { t: 0.16, opacity: 1, scale, rot, ease: 'brake' },
@@ -120,11 +73,8 @@ const prop = (src, i, { y = 720, w = 700, ken = true, rot = 0, scale = 1 } = {})
 };
 layers.push(prop('light-bulb-1.jpg', 0, { y: 700, w: 620, rot: -2 }));
 layers.push(prop('mechanical-keyboard-1.jpg', 1, { y: 760, w: 760, rot: 2.5 }));
-// shot 3 is type only on black, exactly as the reference plays it: one shot with no prop, so the line lands
 layers.push(prop('briefcase-money-1.webp', 5, { y: 700, w: 720, rot: -3 }));
 
-// shots 4 and 5 share ONE prop at three scales and depths, the reference's parallax move: same object,
-// near/mid/far, the far ones dimmed so the frame has depth instead of a flat sticker.
 [
   { i: 3, x: 520, y: 430, w: 330, o: 0.30 },
   { i: 3, x: 130, y: 780, w: 620, o: 1 },
@@ -142,10 +92,6 @@ layers.push(prop('briefcase-money-1.webp', 5, { y: 700, w: 720, rot: -3 }));
   });
 });
 
-// Shots 8-10 had a clause and nothing else, and on the judge sheet they read as blank frames. The
-// reference never does this: every shot has something in it. These three are the contrast pair and its
-// payoff, so the props argue the point rather than decorate it - what a timeline gives you, versus what
-// the source gives you.
 layers.push({
   type: 'image', id: 'timeline', src: '/assets/brands/vawe/stills/frame-4.jpg',
   x: 145, y: 760, w: 700, h: 394, radius: 14, track: 8, motionBlur: false,
@@ -156,7 +102,6 @@ layers.push({
     { t: r1(shot(7).d + shot(8).d), opacity: 1, scale: 1.06, y: 0, ease: 'linear' },
   ],
 });
-// the 0.76s shot, the fastest in the film: it needs one loud object and no time to read anything else
 layers.push({
   type: 'image', id: 'click', src: P + 'mechanical-keyboard-1.jpg',
   x: 105, y: 700, w: 790, h: 521, radius: 16, track: 9, motionBlur: false,
@@ -167,10 +112,6 @@ layers.push({
   ],
 });
 
-// ── shot 7 · the list card, built one row at a time ────────────────────────────────────────────────
-// The longest shot in the film (3.2s) and the only one that earns its length, because the prop is doing
-// the explaining: each row arrives separately, so the viewer reads a cost accumulating rather than a
-// finished list. Rows are separate layers so they can actually arrive.
 const S7 = shot(6);
 const CARD = { x: 300, y: 640, w: 470, h: 470 };
 layers.push({
@@ -219,12 +160,7 @@ layers.push({
 
 CLAUSES.forEach((_, i) => { const c = clause(i); if (c) layers.push(c); });
 
-// ── the scene ──────────────────────────────────────────────────────────────────────────────────────
-// Spans OVERLAP by a beat at their trailing edge. Cut to cut they used to abut exactly, and at 7.48s the
-// outgoing light backdrop and the incoming dark one were both mid-fade at the same instant, so neither was
-// opaque and the black root showed through: a dark flash the centre-sampling gates cannot see and
 // `make seam-check` can (engine-doctrine/MISTAKES.md #144). Holding each span a little past its cut means the frame
-// is never uncovered.
 const BG_LAP = 0.2;
 const bg = TONE.map((tone, i) => {
   const to = i === TONE.length - 1 ? CUTS[i + 1] : r1(CUTS[i + 1] + BG_LAP);

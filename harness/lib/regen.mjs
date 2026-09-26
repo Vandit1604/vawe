@@ -1,19 +1,3 @@
-// harness/lib/regen.mjs: `make regen` (FIX 8): write every generated file in one command.
-//
-// `make check` already runs generated-check READ-ONLY (schema enums, catalogue, doc counts, rules-build)
-// and reports drift; this is its write half, so the fix for reported drift is one command, not a
-// checklist of four. Runs, in order:
-//   1. schema-write         (quality/gates/schema-drift.mjs --write)
-//   2. generated-check       (quality/gates/generated-check.mjs --write; the catalogue/doc-count generators)
-//   3. rules-build           (scripts/site/rules-build.mjs)
-//   4. kit re-paste          (D=<film> only) re-paste the golden STAGEKIT block into every fragment this
-//                            film uses, byte-identical, then run kitCheck to prove it landed.
-//
-// Step 4 does not edit harness/lib/stagekit.mjs or harness/author/stagekit.mjs (another agent's file);
-// it only IMPORTS the golden-block builder and the verifier those files already export (buildKit,
-// extractKitBlock, kitCheck) and does the one thing neither file does today: write the block back into
-// a fragment that already carries one but has drifted. A fragment with NO block at all is not a drift,
-// it never opted in, so this never inserts one; kitCheck still names it afterward.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -30,9 +14,6 @@ const run = (label, cmd, args) => {
   return r.status ?? 1;
 };
 
-// Same fragment-discovery a film's own layers name, mirroring harness/author/stagekit.mjs --check: the
-// film's `src` values are authoritative, the numbered <base>.sceneN.html sweep is the fallback for a
-// fan-out still in progress.
 function fragmentsFor(film) {
   const base = path.basename(film, '.json');
   const dir = path.dirname(film);
