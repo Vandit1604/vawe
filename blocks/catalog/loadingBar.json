@@ -7,10 +7,6 @@
   "tags": [
     "loadingBar"
   ],
-  "dimensions": {
-    "width": 384,
-    "height": 117
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

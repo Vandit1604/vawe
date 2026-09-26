@@ -7,10 +7,6 @@
   "tags": [
     "tapRipple"
   ],
-  "dimensions": {
-    "width": 194,
-    "height": 194
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

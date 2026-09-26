@@ -7,10 +7,6 @@
   "tags": [
     "installCard"
   ],
-  "dimensions": {
-    "width": 464,
-    "height": 149
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

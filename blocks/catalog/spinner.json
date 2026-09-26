@@ -7,10 +7,6 @@
   "tags": [
     "spinner"
   ],
-  "dimensions": {
-    "width": 144,
-    "height": 167
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

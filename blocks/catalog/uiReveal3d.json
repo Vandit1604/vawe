@@ -7,10 +7,6 @@
   "tags": [
     "uiReveal3d"
   ],
-  "dimensions": {
-    "width": 724,
-    "height": 456
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

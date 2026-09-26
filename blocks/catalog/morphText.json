@@ -7,10 +7,6 @@
   "tags": [
     "morphText"
   ],
-  "dimensions": {
-    "width": 944,
-    "height": 194
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,10 +7,6 @@
   "tags": [
     "keyboard"
   ],
-  "dimensions": {
-    "width": 464,
-    "height": 218
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

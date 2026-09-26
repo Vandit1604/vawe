@@ -7,10 +7,6 @@
   "tags": [
     "avatarStack"
   ],
-  "dimensions": {
-    "width": 236,
-    "height": 92
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
