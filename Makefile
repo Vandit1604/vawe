@@ -181,7 +181,10 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # dev-range below instead, which skips the sheets and content-check: those read the WHOLE film and
 # would either crash on a partial mp4 or report a false gap against a clip that was never meant to
 # hold the other acts.
-dev: build ## [dev] THE ITERATION LOOP. BEAT=/JOIN=/FROM=&TO=: only that slice, not the whole film.
+dev: build ## [dev] THE ITERATION LOOP. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice, not the whole film.
+ifneq ($(strip $(GROUP)),)
+	@g=$$(node harness/dev/group-only.mjs "$(D)" "$(GROUP)") && $(MAKE) --no-print-directory dev D=$$g WORKERS=$(WORKERS) NOSHEETS=1
+else
 ifneq ($(strip $(BEAT)$(JOIN)$(FROM)$(TO)),)
 	@$(MAKE) --no-print-directory dev-range D=$(D) BEAT=$(BEAT) JOIN=$(JOIN) FROM=$(FROM) TO=$(TO) WORKERS=$(WORKERS)
 else
@@ -200,6 +203,7 @@ else
 	fi
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+endif
 endif
 
 # make dev-range D=<file> BEAT=<n|name>|JOIN=<n>|FROM=<s> TO=<s>: the guts of `make dev`'s range path,
