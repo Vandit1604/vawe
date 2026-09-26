@@ -1562,8 +1562,8 @@
      "label": "Fill (rect)"
     },
     "radius": {
-     "type": "number",
-     "label": "Corner radius (rect/ken-image)"
+     "type": "number|string",
+     "label": "Corner radius (rect/ken-image); a var(--v-radius, …) string is the ambient surface-look token a card's cardChrome/htmlCard falls back to with no explicit look"
     },
     "border": {
      "type": "string|boolean",
