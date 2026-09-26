@@ -391,15 +391,15 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 
 | name | what / when |
 |---|---|
-| `bottom` | x/y is the bottom-centre of the box |
-| `bottom-left` | x/y is the box's bottom-left corner |
-| `bottom-right` | x/y is the box's bottom-right corner |
-| `center` | x/y is the box's exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
-| `left` | x/y is the left-centre of the box: x sits on the left edge, y on its vertical middle |
-| `right` | x/y is the right-centre of the box |
-| `top` | x/y is the top-centre of the box: y sits on the top edge, x on its horizontal middle |
-| `top-left` | the default: x/y is the box's top-left corner, unchanged from before this field existed |
-| `top-right` | x/y is the box's top-right corner |
+| `bottom` | x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred |
+| `bottom-left` | x/y lands at 0% across the box and 100% down it: the bottom-left corner |
+| `bottom-right` | x/y lands at 100% across the box and 100% down it: the bottom-right corner |
+| `center` | x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
+| `left` | x/y lands at 0% across the box and 50% down it: the left edge, vertically centred |
+| `right` | x/y lands at 100% across the box and 50% down it: the right edge, vertically centred |
+| `top` | x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred |
+| `top-left` | the default (0% across, 0% down the box): x/y is the top-left corner, unchanged from before this field existed |
+| `top-right` | x/y lands at 100% across the box and 0% down it: the top-right corner |
 
 ## Interpolation modes (not easings)  `[motion key]`
 

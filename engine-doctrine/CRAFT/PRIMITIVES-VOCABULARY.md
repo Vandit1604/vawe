@@ -60,15 +60,15 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 
 | name | words | action |
 |---|---|---|
-| `bottom` | _missing_ | x/y is the bottom-centre of the box |
-| `bottom-left` | _missing_ | x/y is the box's bottom-left corner |
-| `bottom-right` | _missing_ | x/y is the box's bottom-right corner |
-| `center` | _missing_ | x/y is the box's exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
-| `left` | _missing_ | x/y is the left-centre of the box: x sits on the left edge, y on its vertical middle |
-| `right` | _missing_ | x/y is the right-centre of the box |
-| `top` | _missing_ | x/y is the top-centre of the box: y sits on the top edge, x on its horizontal middle |
-| `top-left` | _missing_ | the default: x/y is the box's top-left corner, unchanged from before this field existed |
-| `top-right` | _missing_ | x/y is the box's top-right corner |
+| `bottom` | bottom-centre, bottom edge middle | x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred |
+| `bottom-left` | bottom left corner, lower left corner | x/y lands at 0% across the box and 100% down it: the bottom-left corner |
+| `bottom-right` | bottom right corner, lower right corner | x/y lands at 100% across the box and 100% down it: the bottom-right corner |
+| `center` | dead centre of the box, centre point, middle of the box | x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute |
+| `left` | left-centre, middle left | x/y lands at 0% across the box and 50% down it: the left edge, vertically centred |
+| `right` | right-centre, middle right | x/y lands at 100% across the box and 50% down it: the right edge, vertically centred |
+| `top` | top-centre, top edge middle | x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred |
+| `top-left` | left/top edge, the box's corner, unset (default) | the default (0% across, 0% down the box): x/y is the top-left corner, unchanged from before this field existed |
+| `top-right` | top right corner, upper right corner | x/y lands at 100% across the box and 0% down it: the top-right corner |
 
 ## anim  `[anim]`
 
@@ -1077,5 +1077,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_738 primitives across 65 registries, 729 meeting the word-action contract today.
+_738 primitives across 65 registries, 738 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

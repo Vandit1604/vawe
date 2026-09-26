@@ -340,18 +340,31 @@ export function resolveAnchorPoint(name) {
   return p;
 }
 
+const ANCHOR_POINT_AKA = {
+  'top-left': ['left/top edge', 'the box\'s corner', 'unset (default)'],
+  top: ['top-centre', 'top edge middle'],
+  'top-right': ['top right corner', 'upper right corner'],
+  left: ['left-centre', 'middle left'],
+  center: ['dead centre of the box', 'centre point', 'middle of the box'],
+  right: ['right-centre', 'middle right'],
+  'bottom-left': ['bottom left corner', 'lower left corner'],
+  bottom: ['bottom-centre', 'bottom edge middle'],
+  'bottom-right': ['bottom right corner', 'lower right corner'],
+};
+
 export const ANCHOR_POINT_REGISTRY = defineRegistry('anchor point', ANCHOR_POINTS, {
   slot: 'anchorPoint',
+  aka: ANCHOR_POINT_AKA,
   blurbs: {
-    'top-left': 'the default: x/y is the box\'s top-left corner, unchanged from before this field existed',
-    top: 'x/y is the top-centre of the box: y sits on the top edge, x on its horizontal middle',
-    'top-right': 'x/y is the box\'s top-right corner',
-    left: 'x/y is the left-centre of the box: x sits on the left edge, y on its vertical middle',
-    center: 'x/y is the box\'s exact centre, needs a numeric w and h (or, for text, a `size`) to compute',
-    right: 'x/y is the right-centre of the box',
-    'bottom-left': 'x/y is the box\'s bottom-left corner',
-    bottom: 'x/y is the bottom-centre of the box',
-    'bottom-right': 'x/y is the box\'s bottom-right corner',
+    'top-left': 'the default (0% across, 0% down the box): x/y is the top-left corner, unchanged from before this field existed',
+    top: 'x/y lands at 50% across the box and 0% down it: the top edge, horizontally centred',
+    'top-right': 'x/y lands at 100% across the box and 0% down it: the top-right corner',
+    left: 'x/y lands at 0% across the box and 50% down it: the left edge, vertically centred',
+    center: 'x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute',
+    right: 'x/y lands at 100% across the box and 50% down it: the right edge, vertically centred',
+    'bottom-left': 'x/y lands at 0% across the box and 100% down it: the bottom-left corner',
+    bottom: 'x/y lands at 50% across the box and 100% down it: the bottom edge, horizontally centred',
+    'bottom-right': 'x/y lands at 100% across the box and 100% down it: the bottom-right corner',
   },
   catalog: {
     title: 'Anchor points',
