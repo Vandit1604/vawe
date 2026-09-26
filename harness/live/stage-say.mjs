@@ -79,6 +79,7 @@ process.stdin.on('end', () => {
     ...(st.craftDocs.length ? [`  read: ${st.craftDocs.join(', ')}`] : []),
     '  Do that stage, not the one after it. `make stage D=films/scene/'
       + `${st.name}.json\` re-reads this from the files on disk.`,
+    ...(st.lookAdvice ? [st.lookAdvice] : []),
     ...(tip ? [tip] : []),
   ].join('\n');
 
