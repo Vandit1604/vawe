@@ -289,11 +289,10 @@ function listFilms() {
 
 server.registerTool('vawe_next', {
   title: 'What stage this film is in, and the one next step',
-  description: 'The authoring ladder has eight stages (brief, plan, design, approval, assemble, '
+  description: 'The authoring ladder has seven stages (brief, plan, design, assemble, '
     + 'direct, render, judge) and this is the only question an agent outside the repo could not ask '
     + 'before: where is this film, and what is the ONE next command. Pass a film name (same as you\'d '
-    + 'give `make stage D=`) or omit it to list films on disk and whether each has shipped. Approval '
-    + 'is a human act: this tool can tell you a plan is waiting on it, but nothing can grant it.',
+    + 'give `make stage D=`) or omit it to list films on disk and whether each has shipped.',
   inputSchema: {
     film: z.string().optional().describe('Film name or path, e.g. "launch" or "films/scene/launch.json". Omit to list films.'),
   },
@@ -323,10 +322,6 @@ server.registerTool('vawe_next', {
     `why: ${st.why}`,
     `do:  ${st.next}`,
   ];
-  if (st.stage === 'approval') {
-    out.push('', 'approval is a human act: no tool, including this one, can grant it. A person has to '
-      + 'look at the plan and run /vawe-approve themselves.');
-  }
   return text(out.join('\n'));
 });
 

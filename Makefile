@@ -780,7 +780,7 @@ design-drift: ## [check] every visible box's font/radius/shadow/colour against <
 stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>, or no D= for the roster, or Q="…" before a film exists)
 	@node quality/gates/stage.mjs $(D) $(if $(Q),--q "$(Q)") $(if $(JSON),--json,)
 
-next: ## [preflight] RUN the one command the stage names, then stop (D=<film>). Refuses at approval: only the user signs.
+next: ## [preflight] RUN the one command the stage names, then stop (D=<film>)
 	@node quality/gates/next.mjs $(D)
 
 preflight: ## [preflight] the decisions that belong BEFORE the JSON, recorded for this version of the scene
@@ -819,14 +819,6 @@ concept: ## [preflight] N DIRECTIONS FOR ONE BRIEF, before any of them is built.
 # The rejected set is what a treatment argues against; it is only available at the moment of choosing.
 concept-pick: ## [preflight] promote one direction and record the rest.
 	node harness/author/concept.mjs $(SB) --pick $(OPTION)
-
-# make approve D=<file>: SIGN OFF the plan for this exact film (harness/author/approve.mjs writes
-# `approved: <date>` into its storyboard's own frontmatter). Editing the storyboard after this silently
-# withdraws the signature (approve.mjs strips any stale `approved:` line before it re-checks), so an
-# approval never outlives what it approved. This is the USER's signature: an agent runs `make studio
-# D=` to show the plan, but only the user runs this command (or `/vawe-approve`).
-approve: ## [preflight] SIGN OFF the plan for this exact film (D=<file>; run by the USER, never an agent)
-	@node harness/author/approve.mjs "$(D)"
 
 beats: ## [judge] first/mid/last frame of every beat in one contact sheet (D=<file> [VS=brand])
 	node harness/author/beats.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(STRIDE),--stride $(STRIDE))
@@ -1190,7 +1182,7 @@ critics: ## [judge] THE ROSTER (engine-doctrine/CRAFT/SUBAGENTS.md): critics bar
 # RECORD=<file>: given the agent's { findings: [...] } back, writes the receipt to
 # quality/baselines/approved/plan-judge/<name>.json (stale the moment the storyboard changes). SHOW=1:
 # read the recorded verdict back, refusing rather than showing one recorded against an older storyboard.
-# Findings only: no verdict here approves anything, the owner still signs off at approval.
+# Findings only: no verdict here passes or fails anything, the owner reads the draft render and redirects.
 plan-judge: ## [judge] the plan judge (AGENTS.md stage 2): composes a brief bare, records with RECORD=, reads back with SHOW=1.
 	node harness/author/critics.mjs $(D) $(if $(RECORD),--record-plan $(RECORD),$(if $(SHOW),--show-plan-verdict,--plan-judge))
 

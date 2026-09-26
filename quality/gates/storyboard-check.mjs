@@ -1,5 +1,5 @@
 // quality/gates/storyboard-check.mjs: the STORYBOARD-AS-PROPOSAL gate.
-// A great video is planned on paper and approved BEFORE the JSON. This gate enforces that the plan is a
+// A great video is planned on paper BEFORE the JSON. This gate enforces that the plan is a
 // real proposal, not a vibe: a one-sentence MESSAGE + audience + arc up front, and per beat a type, the
 // on-screen cues, and a WHY (its narrative role / persuasion). A beat with no "why" is decoration; a video
 // with no one-sentence message has no spine. It does not judge taste, it enforces that the decisions that
@@ -281,8 +281,7 @@ sbBeats.forEach((b, i) => {
 // is the grey mock the owner named directly ("their content is designed for the video; ours is
 // plain"). A BLOCKER, not a warning (the owner's own words: "no made-up content... always ask for
 // these details explicitly"): a film that never names a real source for the content it draws reached
-// approval with nothing to show, and nothing stopped it (harness/author/approve.mjs runs this gate as
-// its one precondition). This does not fire on a film that names no content noun at all, so a
+// design with nothing to show, and nothing stopped it. This does not fire on a film that names no content noun at all, so a
 // legitimately asset-free film (a sting, a chart-only explainer, a pure type film) is never touched;
 // a beat that DOES declare a real source, or is waived with a `_why` (the one waiver mechanism,
 // AGENTS.md), still passes.
@@ -673,7 +672,7 @@ if (links.length) {
 for (const e of errs) console.error(`    ✗ ${e}`);
 for (const w of warns) console.log(`    ~ ${w}`);
 for (const n of notes) console.log(`    · ${n}`);
-if (errs.length) { console.error(`\n✗ storyboard incomplete, ${errs.length} blocker(s). Fill them, then present the proposal for approval before authoring JSON.`); process.exit(1); }
+if (errs.length) { console.error(`\n✗ storyboard incomplete, ${errs.length} blocker(s). Fill them before authoring JSON.`); process.exit(1); }
 // `<fill: …>` IS the repo's placeholder convention, `intent-from-storyboard.mjs` already refuses to emit
 // a `mustShow` for one, and this gate had never heard of it. So a storyboard where every single line was
 // still a placeholder came back as "a complete proposal", which is the one thing it certainly was not. A

@@ -38,8 +38,8 @@
 //              print at, not once per turn: this hook runs on every keystroke and a line-per-turn write
 //              would be the exact noise runlog's own one-line-per-fact rule exists to avoid.
 //     refusal: { rule, file, reason } | null
-//              a PreToolUse DENY from harness/live/stage-gate.mjs: which of its three rules fired
-//              (approval-is-human / no-storyboard / unapproved-layers), the file it refused, and the
+//              a PreToolUse DENY from harness/live/stage-gate.mjs: which rule fired
+//              (no-storyboard), the file it refused, and the
 //              reason it printed back to the model. A refusal that leaves no record means nobody can
 //              later ask how often the harness blocks, for what, or whether a given block was right.
 //              Logged EVERY time: unlike a nudge that fires on every keystroke, a deny fires only on
