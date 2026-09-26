@@ -1,17 +1,8 @@
-// frag-page: ONE definition of the standalone page a hand-written fragment is previewed on.
-//
-// Two tools show a fragment outside a render now: `make preview` (the PNG + craft detector) and the
-// storyboard studio, which embeds every beat's real fragment beside its plan. A second copy of this
-// wrapper would drift, and the drift is invisible in the worst way: a fragment that previews clean in
-// one tool and wrong in the other, with nothing saying which page is lying. See the comments below,
-// every one of them records a bug this markup already caused.
+// ONE definition of the standalone page a hand-written fragment is previewed on, shared by `make preview` and the storyboard studio so a fragment can't preview clean in one and wrong in the other.
 export const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
 export const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 
-// `box` (optional): {x,y,w,h,W,H}, the ASSEMBLED FILM's real layer box, in canvas pixels. Passing it
-// swaps the centred/full-bleed preview layout for the same absolute placement `core/layers/html.js`
-// gives the layer: #stage fills the real W×H canvas and #frag sits at (x,y) sized (w,h), so a fragment
-// that fits the generic preview box but overruns its actual assembled box clips here too (build fix 7).
+// `box` (optional): {x,y,w,h,W,H}, the assembled film's real layer box in canvas pixels; passing it swaps the centred/full-bleed preview layout for the same absolute placement core/layers/html.js gives the layer, so a fragment that clips its actual assembled box clips here too (build fix 7).
 export function fragPage({ raw, theme, bg, boxW = 1400, tSec = 0, fullBleed = false, box = null }) {
   const W = box ? box.W : 1920, H = box ? box.H : 1080;
   const stageCss = box
@@ -39,8 +30,6 @@ html,body{margin:0;background:${bg};color:var(--text);width:auto;height:auto;ove
 #frag{--t:${tSec};--p:0;${fragCss};font-family:'Inter',system-ui,sans-serif}</style></head>
 <body><div id="stage"><div id="frag">${raw}</div></div>
 <script type="module">
-  // ONE definition of what a theme means. Importing the engine's own applyTheme is the point: a second
-  // copy of the palette-to-token mapping here is how it drifted the first time (#159, #368).
   import { applyTheme } from '/core/engine/boot.js';
   try { applyTheme(${JSON.stringify(theme)}); window.__themed = true; }
   catch (e) { window.__themed = 'error: ' + e.message; }

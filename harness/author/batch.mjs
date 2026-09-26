@@ -1,9 +1,3 @@
-// harness/author/batch.mjs: DATA-DRIVEN VARIANTS. One template scene + an array of data rows → N rendered
-// videos. Deterministic per row. `{{key}}` placeholders in any string field are substituted from each
-// row; `expand-blocks` runs automatically so templates can use {type:"block"} layers.
-//
-// Usage: node harness/author/batch.mjs <template.json> <data.json> [--render]
-//   data.json = [ { "name":"acme", "stat":42 }, { "name":"globex", "stat":88 } ]
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,25 +1,6 @@
-// build-cadence.mjs: a 5-second launch clip for a made-up product, authored in the higgsfield
-// register (engine-doctrine/CRAFT/KEYED-MOTION.md) rather than by tracing a reference.
-//
-// The grammar it copies, deliberately and item by item:
-//   • ONE continuous action, no cuts. The engine's whole transition vocabulary goes unused, because a
-//     cut happens BETWEEN shots and this film never leaves its shot.
-//   • ONE object that survives everything: the COMPOSE button. It rides the page, peels off it, lifts
-//     to centre and becomes the loading dot. The button is the verb.
-//   • Dense keys, linear between them, easing only where the motion settles.
-//   • The chrome, the prompt and the button share ONE pan, `panWith`, instead of the same deltas
-//     typed three times.
-//   • `--p` for the morph position cannot express, one clock and a different power per property.
-//   • The hook erases itself instead of fading.
-//
-// What it does NOT copy: the traced timings. There is no reference here, so these are chosen.
 import fs from 'node:fs';
 import { glyphText } from '../../core/type/on-screen-text.js';
 
-// typedHook/morphButton: inlined from the retired blueprints/beats.mjs (engine-doctrine/MISTAKES.md, the
-// retire-blueprints migration). Both are recipe CANDIDATES now (grammar/_blueprints.recipes.json,
-// "typed-erase-enter" and "morph-to-next-seam"), but this specimen calls them as plain literal-layer
-// factories, the same way it always did, not through the deleted `{type:"beat"}` sugar.
 function typedHook({ text, x = 368, y = 459, w = 1400, size = 126, weight = 700, color = 'var(--text)',
   cps = 33, ls = '0.04em', start = 0, dur = 1.6 } = {}) {
   const chars = glyphText(text).length;
@@ -55,7 +36,6 @@ const W = 1920;
 const CHROME_AT = 1.46;                   // the app arrives
 const BTN = { x: 1156, y: 452, w: 372, h: 128 };
 
-// the page's own drift, keyed by hand. Dense through the middle so it reads mechanical, not floaty.
 const PAN = [
   { t: 0, x: 26 },
   { t: 0.68, x: 0, ease: 'easeInOutSine' },   // holds while the prompt is typed
@@ -66,7 +46,6 @@ const PAN = [
   { t: 1.38, x: -486, ease: 'easeOutCubic' },
 ];
 
-// the app chrome, at measured coordinates: the same hand-built approach the reference uses
 const chrome = () => {
   const pill = (x, y, w, h, r = 18, fill = 'var(--surface2)') =>
     `<div style="position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${r}px;background:${fill}"></div>`;
@@ -81,7 +60,6 @@ const chrome = () => {
   return h + '</div>';
 };
 
-// a pulse ring that blooms out of the dot, curves, not linear: this is a bloom, not a machine
 const ring = {
   type: 'rect', x: 812, y: 230, w: 296, h: 296, radius: 148, bg: 'transparent',
   border: '3px solid var(--accent-glow)', start: 3.68, duration: 0.62,
@@ -94,7 +72,6 @@ const ring = {
   ],
 };
 
-// the button: rides the pan, then peels off it and lifts to centre. Keys past the pan's last are its own.
 const btn = morphButton({
   label: 'COMPOSE  ✦', x: BTN.x, y: BTN.y, w: BTN.w, h: BTN.h,
   fill: 'radial-gradient(112% 86% at 50% 116%, #ffc24d 0%, #ffb020 44%, #f59b06 78%)',
@@ -103,16 +80,7 @@ const btn = morphButton({
 })[0];
 btn.id = 'btn';
 btn.panWith = 'chrome';
-// -382 lands the button's centre on 960, where the ring blooms and the waveform is centred. The first
-// cut ended at -600, so the dot sat 218px left of its own pulse and the hand-off read as two objects.
-//
-// The button MUST break away before the pan carries it past -382, and the pan crosses -382 at t≈1.115.
-// Peeling later means travelling left past the destination and coming back, and a reversal is a snap no
-// easing can hide: the previous cut peeled at 1.44, by which time the pan sat at -512, so the first own
 // key threw the button 194px RIGHT in two frames at 3244 px/s (engine-doctrine/MISTAKES.md #200). So it leaves at
-// 1.05 carrying the pan's own speed (825 px/s against the pan's 877) and decelerates along its arc,
-// 825 → 601 → 555 → 362 → 183, while the page keeps sliding out from under it. The break reads as the
-// button refusing to leave with the page, which is the whole point of it being the object.
 btn.motion = [
   { t: 0, x: 0, y: 0 },                                   // origin for the shared pan
   { t: 1.05, x: -330, y: -10, rot: -2, ease: 'linear' },  // peels away, matching the page's speed
@@ -127,24 +95,15 @@ btn.motion = [
   { t: 2.64, x: -382, y: -138, scale: 0.05, opacity: 0, ease: 'easeInCubic' },
 ];
 
-// The object's arc completes here: button -> dot -> WAVEFORM. The reference stops at the dot, which is
-// right for an image generator; for a product that writes music the payoff has to be sound made visible,
-// and a spinner is a stand-in for a picture rather than a picture. It also means the film SHOWS its
-// claim instead of only saying "Composing", which is what the show floor is for.
 const WAVE = { x: 300, y: 596, w: 1320, h: 224, at: 3.62 };
 const wave = () => {
   const N = 68, gap = 4, bw = (WAVE.w - gap * (N - 1)) / N;
   const out = [`<svg viewBox="0 0 ${WAVE.w} ${WAVE.h}" width="${WAVE.w}" xmlns="http://www.w3.org/2000/svg">`];
   for (let i = 0; i < N; i++) {
-    // a fixed, hand-shaped envelope: two swells and a tail, so it reads as a phrase and not as noise
     const u = i / (N - 1);
     const env = Math.sin(u * Math.PI) * (0.55 + 0.45 * Math.sin(u * 9.1 + 0.6)) * (0.62 + 0.38 * Math.sin(u * 21.7));
     const hgt = Math.max(6, Math.round(Math.abs(env) * WAVE.h * 0.92));
     const x = +(i * (bw + gap)).toFixed(1), y = +((WAVE.h - hgt) / 2).toFixed(1);
-    // Fully drawn by ~4.08s, so the last 0.9s HOLDS and the finished waveform can actually be read. It
-    // was briefly stretched to 4.6s to cover a dead tail, but that tail only existed because the status
-    // indicator had been cut: the fix was to restore the indicator, not to keep the payoff moving so
-    // nothing looked still. A settle is not dead air when something on the frame is alive.
     const at = +(WAVE.at + 0.0068 * i).toFixed(3);
     out.push(`<rect x="${x}" y="${y}" width="${bw.toFixed(1)}" height="${hgt}" rx="${(bw / 2).toFixed(1)}" fill="var(--accent)"`
       + ` style="transform-box:view-box;transform-origin:${(x + bw / 2).toFixed(1)}px ${WAVE.h / 2}px;`
@@ -155,13 +114,6 @@ const wave = () => {
 
 const scene = {
   module: 'scene',
-  // Waived against MEASURED evidence, not preference. The reference this register comes from trips the
-  // same three findings at the same frames: contrast on its button label at f48 (a dark label on a
-  // gradient still fading in. One frame of an entrance, and the audit measures the nested span, which
-  // has no timing of its own to be skipped by), safe on its prompt panning off-frame by design, and
-  // overlap where the button sits inside its own input bar. On the safe one this film measures better
-  // than the reference (56px inside the frame against -34px outside it). Fixing any of the three means
-  // leaving the register, not improving the film.
   authoring: {
     allow: ['contrast', 'safe', 'overlap'],
     _why: {
@@ -196,22 +148,7 @@ const scene = {
         { t: 0.34, x: -66, ease: 'linear' }, { t: 0.44, x: -24, ease: 'linear' }, { t: 0.58, x: 0, ease: 'easeOutCubic' }] },
     { type: 'html', id: 'wave', x: WAVE.x, y: WAVE.y, w: WAVE.w, h: WAVE.h, html: wave(),
       start: 3.5, duration: 1.5, anim: 'fade', enterDur: 0.22, exitDur: 0 },
-    // The status line needs a companion or "Composing" is a label rather than a state. It used to be a
-    // rotating ring, which for 12 frames sat beside the pulse ring blooming out of the dot and read as
-    // two spinners. The collision was in the FORM, not in the element: what it contributed (this is
-    // live, it is still going) the beat genuinely needs. So the affordance stays and the circle goes.
-    //
-    // Three dots, pulsing in sequence, are literally the ellipsis of "Composing…", the one indicator
-    // that cannot be mistaken for the ring because it is not round, and the only one that reads as part
-    // of the sentence instead of as furniture parked next to it. Separate layers rather than one html
-    // block: a single layer's scale would throb all three together, and a sequence is what says
-    // "working" while a throb just says "here". Each rides `gen` so the line travels as one, and each
-    // states only opacity/scale, so the pan carries them (core/pan-resolve.mjs).
     ...[0, 1, 2].map((i) => ({
-      // 932, not 1178: `gen` travels +246 across its entrance, and a panWith layer's authored x is where
-      // it STARTS, not where it settles. Placing these by their resting position parked them 274px off
-      // the end of the word. That is #194 exactly, walked into again by the author who had just fixed it:
-      // the pan's total delta still appears nowhere near the layer that has to account for it.
       type: 'rect', id: `dot${i}`, panWith: 'gen', x: 932 + i * 30, y: 520, w: 14, h: 14, radius: 7,
       bg: 'var(--accent)', start: +(4.0 + i * 0.13).toFixed(2), duration: +(1.0 - i * 0.13).toFixed(2),
       exitDur: 0,

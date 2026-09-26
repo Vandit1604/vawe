@@ -1,10 +1,3 @@
-// design-spec.mjs: `make design-spec D=<film>`: writes `<film>.design.md` when it does not exist yet,
-// seeded from the theme's own resolveLook numbers (the same ones harness/lib/stagekit.mjs buildKit
-// derives), so the film starts from what the kit already computed rather than a blank sheet. If the
-// file already exists this PRINTS it and does nothing else: it is the film's own resolved design once
-// written, never something a re-run should overwrite.
-//
-//   node harness/author/design-spec.mjs films/scene/launch.json
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,9 +21,6 @@ if (!theme) { console.error(`design-spec: ${film} names no theme`); process.exit
 
 const { look } = buildKit(theme, resolveLook, isLightBg);
 const s = look.scale;
-// The same floor buildKit itself applies (harness/lib/stagekit.mjs): seeding the raw scale value here
-// instead would seed a number the kit never actually renders, and `make stagekit` would immediately
-// warn that design.md disagrees with a kit that, in truth, agrees with the floor.
 const caption = Math.max(MIN_VIDEO_TEXT_PX, s.caption);
 const family = (theme.type && theme.type.sans) || 'sans-serif';
 

@@ -1,25 +1,5 @@
 #!/usr/bin/env node
-// harness/dev/overlap-sweep.mjs: does OVERLAP (when the next reveal starts, relative to the last
-// one's own duration) move the motion-floor, holding the number of moves per beat CONSTANT at 4?
 // engine-doctrine/MISTAKES.md #608 ruled out structure (a shared fragment, a keyed object chain); this rig tests
-// the gate's own stated advice instead: "the fix is overlap, not ambience: start the next reveal
-// before the last one lands."
-//
-//   node harness/dev/overlap-sweep.mjs [--keep]
-//
-// Five variants, one fragment (4 addressable rows), same easings, same beat duration (4s). Only
-// parts[].delay changes: each row's move starts at FRACTION * (the previous row's own duration) after
-// the previous row started. 100% = strictly sequential (no time-overlap). 0% = all four fire together
-// (today's default when no delay is set on multiple parts).
-//
-// WHY THIS DOES NOT GO THROUGH motion-lab.mjs / the storyboard's `motion:` line: assemble.mjs's own
-// spread (docs comment at harness/author/assemble.mjs:176) always distributes a beat's entries evenly
-// across the beat's own leftover time; it has no dial for "start at X% of the PREVIOUS entry's
-// duration". That is a real gap in the storyboard vocabulary, not an oversight in this script: an
-// overlap fraction is written directly into `parts[].delay` here, bypassing `motion:` entirely.
-//
-// Writes scene JSON + the shared fragment under .vawe-data/scenes/overlap-sweep/ (gitignored, and
-// outside films/scene/ so the stage-gate hook does not ask for a storyboard this is not a film).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -33,9 +13,6 @@ const DURATION = 4;
 const SELECTORS = ['[data-part="line1"]', '[data-part="line2"]', '[data-part="line3"]', '[data-part="line4"]'];
 const FRACTIONS = { '100': 1, '75': 0.75, '50': 0.5, '25': 0.25, '0': 0 };
 
-// Rows carry distinct dark/saturated colours (never white): the fragment's own `.stage` background
-// does not survive into the render (the theme's own surface sits behind it), so a white row on that
-// surface would be invisible and read as "no motion" for a reason that has nothing to do with overlap.
 const FRAG = `<style>
 .stage{position:absolute;inset:0;display:flex;flex-direction:column;align-items:flex-start;
   justify-content:center;gap:28px;padding:0 140px}

@@ -1,20 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/worktree-prune.mjs: retire agent worktrees once their work has landed.
-//   make worktrees            report only (default; touches nothing)
-//   make worktrees PRUNE=1    remove the SAFE ones + their branches
-//
-// WHY THIS EXISTS. Agent worktrees accumulate: 35 of them reached 9.1G here, and the harness only
-// auto-removes the ones that were never changed, precisely the cheap half. The ones that DID change
-// something are the ones that pile up, and they are also the only ones that can lose work.
-//
-// The hazard is not the disk, it is deleting the one worktree that still holds something. Auditing 35
-// by hand took eight passes and came within one command of destroying five storyboard files that
-// existed nowhere else. So the rule here is inverted from the usual cleanup script: a worktree is
-// removed only when every file it touches is PROVEN present and identical in the main tree. Anything
-// unproven is reported with the exact command to rescue it, and left alone.
-//
-// "Landed" itself (content-first, never by commit graph) is harness/lib/worktree-landed.mjs, shared
-// with worktree-status.mjs's Task 3 check: one implementation of "is this stranded", not two drifting.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,8 +18,6 @@ if (!trees.length) { console.log('✓ no agent worktrees: nothing to retire'); p
 const safe = [], unsafe = [];
 for (const t of trees) {
   const { commits, stranded, capped } = landedStatus(root, t);
-  // capped: too many commits ahead of main to prove byte-for-byte quickly. Unproven is unsafe, same as
-  // a real stranded file: this tool only removes what it has actually checked.
   (stranded.length || capped ? unsafe : safe).push({ ...t, stranded, commits, capped });
 }
 

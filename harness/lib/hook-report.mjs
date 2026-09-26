@@ -1,17 +1,3 @@
-// harness/lib/hook-report.mjs: shrink a live hook's message before it lands in the transcript.
-//
-// WHY. Every PostToolUse hook's stderr stays in the conversation forever and is re-read, as cached
-// input, on every later request. code-quality.mjs, scene-live.mjs, craft-live.mjs, beat-surfacer.mjs
-// and vocabulary.mjs each print a full argued case (one line per finding, sometimes one per oxlint
-// diagnostic): a single tangled file can print 40+ lines. None of that needs to sit in the model's
-// context: the fix is one edit away, argued once, in the file this writes.
-//
-// ONE OWNER for "shrink a hook message", used by every hook above instead of five copies of the same
-// truncate-and-point logic. summarize() writes the FULL text to a report file under .vawe-data/
-// (already gitignored) and returns a short block naming the count, the top lines, and the file. When
-// the same file still says the same thing (hashed, not compared by eye) it returns one line saying so,
-// never silence: an unchanged finding after an edit is itself the news, and the caller's exit code must
-// stay exactly what it was.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';

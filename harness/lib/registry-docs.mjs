@@ -1,14 +1,3 @@
-// harness/lib/registry-docs.mjs: the freshness check for a registry entry's `docs` doctrine pointer,
-// the same problem harness/lib/craft-rules.mjs already solved for a craft rule's `doc`. Reused rather
-// than reimplemented: `checkDoc` there already does file-exists, anchor-exists, and "the quoted brief
-// still appears in that section" (the part that fails loudly the moment a doc's wording drifts).
-//
-// WHY THIS IS NODE-SIDE AND NOT INSIDE `defineRegistry`. `core/registry/registry.js` runs in the
-// browser during render (scene.html imports core/layers/index.js, which calls defineRegistry), so it
-// cannot read the filesystem at call time. `defineRegistry`'s own `docs` option (there) only checks
-// SHAPE: does the pointer name a real entry, is `doc` a plausible path, is `brief` a real quoted
-// string. This file is the other half, run from Node by whatever imports it (`make lib-test`, a gate,
-// or by hand), and it is the half that actually catches drift.
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkDoc, ROOT as CRAFT_ROOT } from './craft-rules.mjs';

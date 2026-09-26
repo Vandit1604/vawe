@@ -1,13 +1,3 @@
-// harness/lib/claims-truth.mjs: what a doc is allowed to CLAIM about the engine, derived from the
-// code that owns each fact, never hardcoded here. doc-refs.mjs already proves a cited PATH exists;
-// this proves a cited NUMBER or NAME is still true. Used by quality/gates/docs-drift.mjs (the wiring
-// and the file-scan live there) and asserted directly in quality/gates/lib-test.mjs, so this file
-// stays pure: no process.exit, no console output, no reading the whole repo.
-//
-// WHY THIS SHAPE. AGENTS.md said 30fps while renderer/cmd/render renders 60 (measured this week); a skill told
-// an agent to run `make blueprints`, a deleted target. Both are the same defect: a sentence that was
-// true once and never re-checked. `deriveEngineTruth` reads the number FROM the code that owns it, so
-// a doc is compared against today's engine, not against whatever the last author remembered.
 import fs from 'node:fs';
 import path from 'node:path';
 import { LAYER_TYPES } from '../../core/layers/index.js';
@@ -80,11 +70,7 @@ export function findNumberClaims(text, truth) {
   return out;
 }
 
-// RETIRED: a mechanism this repo deleted. Naming one as something to REACH FOR is a live instruction
-// an agent will follow into a dead end (engine-doctrine/MISTAKES.md: a storyboard warning told authors to run
-// `make blueprints` after it was removed). Naming one as HISTORY ("blueprints were retired when...")
-// is not a mistake, so a sentence that also says retired/deleted/removed in the same breath is left
-// alone: see the RETIRED_OK guard in findRetiredNames.
+// A mechanism this repo deleted; naming HISTORY ("retired/deleted/removed" in the same breath, see RETIRED_OK below) is not a mistake and is left alone.
 export const RETIRED_NAMES = [
   { label: 'blueprints/', re: /\bblueprints\// },
   { label: '`make blueprints`', re: /`make blueprints`/ },
@@ -96,9 +82,6 @@ export const RETIRED_NAMES = [
 
 const RETIRED_OK = /\b(retired|deleted|removed)\b/i;
 
-// A comment can say anything about the past without misleading anyone; a PRINTED line reaches an
-// agent mid-task the way a doc does. So code-file scanning (harness/, quality/gates/) is restricted to
-// lines that actually emit a string an agent reads, never a comment or a path-existence guard.
 const PRINT_CALL = /\b(?:console\.(?:log|error|warn)|f\.fail|lines\.push|out\.push)\s*\(/;
 
 /**

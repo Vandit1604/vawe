@@ -1,16 +1,3 @@
-// harness/dev/theme-sheet.mjs: ONE rendered contact sheet for ONE theme's `look` (W8,
-// core/registry/theme-contract.js), so a brand's look is a picture an author can glance at, not a JSON they have
-// to read. Same machinery as harness/dev/preset-sheets.mjs (frameTile/tileGrid/tileBox/renderOf from
-// quality/gates/tile.mjs), reused rather than reimplemented: a second render-and-tile pipeline is a
-// second thing to drift.
-//
-// Reads the RESOLVED look (`resolveLook`), not the authored one: `computedLook` now derives scale/cuts/
-// field from a theme's own motion and dominance (engine-doctrine/CRAFT/THEME-LOOK.md), so the 37 themes with no
-// authored `look` block have a real, non-constant one to show too. Only `backdrop` stays a taste
-// decision that is never computed (the same file explains why), so an un-authored theme's sheet falls
-// back to a single `plain` window rather than refusing outright.
-//
-//   node harness/dev/theme-sheet.mjs --theme vawe   ·   make theme-sheet THEME=vawe
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -37,8 +24,6 @@ const windows = look.backdrop && look.backdrop.length ? look.backdrop : ['plain'
 const perWindow = 2.2, tail = 0.4;
 const dur = +(windows.length * perWindow + tail).toFixed(2);
 
-// One bg window per backdrop preset, evenly split (a theme sheet is a reference clip, not a film: no
-// cuts to bind windows to, so `from`/`to` is written explicitly rather than junction-bound).
 const bg = windows.map((preset, i) => ({ from: +(i * perWindow).toFixed(2), to: +((i + 1) * perWindow).toFixed(2), preset }));
 
 const cutDefault = look.cuts?.default || 'fade';
@@ -53,23 +38,18 @@ const align = anchor === 'center' ? 'center' : anchor === 'right' ? 'right' : 'l
 const x = margin, w = 1920 - margin * 2;
 
 const layers = [
-  // beat A: the hook, at the theme's own hook scale.
   { type: 'text', text: `${theme}`, x, y: 380, w, align, size: hookSize, weight: 800,
     anim: 'pop', enterDur: 0.4, start: 0.1, duration: perWindow - 0.2, out: 'fade', exitDur: 0.3 },
   { type: 'text', text: 'the look', x, y: 380 + hookSize * 0.9, w, align, size: 32, weight: 500,
     font: 'mono', color: 'var(--dim)', anim: 'fade', enterDur: 0.4, start: 0.3, duration: perWindow - 0.4 },
-  // one headline per backdrop window, naming the preset it sits on, at the theme's headline scale.
   ...windows.map((preset, i) => ({
     type: 'text', text: preset, x, y: 480, w, align, size: headlineSize, weight: 700,
     anim: 'pop', enterDur: 0.4, start: +(i * perWindow + 0.15).toFixed(2), duration: perWindow - 0.3, out: 'fade', exitDur: 0.3,
   })).slice(1),
-  // cut family, named once so the sheet documents it rather than only demonstrating it.
   { type: 'text', text: `cuts: ${cutDefault} -> ${cutAccent}`, x, y: 960, w, align: 'left', size: 26, weight: 600,
     font: 'mono', color: 'var(--accent)', anim: 'fade', enterDur: 0.3, start: perWindow + 0.2, duration: dur - perWindow - 0.4 },
 ];
 
-// the mark, at both sizes W8 fixes (end-card + headline-adjacent), held on the LAST window so the sheet's
-// closing frame is also the one a real end card would use.
 if (look.marks?.logo) {
   const markPath = path.join(ROOT, look.marks.logo);
   if (fs.existsSync(markPath)) {
@@ -95,8 +75,6 @@ const scene = {
   theme,
   aspect: '16:9',
   duration: dur,
-  // `fade`/`dissolve`-family cuts need something underneath to cross-fade INTO: without this, a
-  // whole-frame fade cut throws "the frame would go empty".
   sceneUnits: true,
   audio: { silent: true, _why: 'theme-sheet: a look reference, not a film' },
   bg,

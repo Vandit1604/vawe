@@ -1,16 +1,3 @@
-// harness/author/pitch.mjs: THE PITCH ROUND, before the storyboard converges.
-//
-//   node harness/author/pitch.mjs <name>                                   # print the protocol
-//   node harness/author/pitch.mjs <name> --chose "<angle>" [--left "<median>"]  # record the decision
-//
-// WHY. engine-doctrine/CRAFT/PITCH.md is the doctrine: an unformed brief has nothing to converge on, so five
-// concepts get sampled wide (one per path) under an anti-median gate before any storyboard question
-// gets asked. This script is a HARNESS, not the agent doing that sampling: it cannot estimate a
-// concept's probability of being the median, that is judgement, not arithmetic. What it CAN do is put
-// the protocol's shape in front of the agent every time (so the four questions and the five paths are
-// never re-derived from memory), and make the outcome auditable the same way every other stage-gate in
-// this repo is: a receipt, hashed against the subject, that goes stale the moment the subject changes.
-// See harness/lib/receipt.mjs and quality/gates/preflight.mjs for the pattern this mirrors.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,8 +11,6 @@ function arg(name) {
   return i >= 0 && process.argv[i + 1] != null ? process.argv[i + 1] : null;
 }
 
-// Guarded so importing this module never parses argv, writes a receipt, or exits, matching the guarded
-// main() in llms-txt/route/sweep-static. The CLI body runs only when this file is the entry point.
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) main();
 
@@ -55,7 +40,6 @@ const subjectExists = fs.existsSync(subject.abs);
 const chose = arg('chose');
 const left = arg('left');
 
-// ---- record mode: --chose was given -----------------------------------------------------------
 if (chose) {
   if (!subjectExists) {
     console.error(`✗ cannot record: no file at ${subject.rel} yet. Write the scene or storyboard first,`);
@@ -76,7 +60,6 @@ if (chose) {
   process.exit(0);
 }
 
-// ---- protocol mode: print the four questions, the five paths, the gate, the format --------------
 const r = subjectExists ? readReceipt(STAGE, subject.abs) : { exists: false, stale: false };
 console.log(`\n  PITCH · ${subject.rel}${subjectExists ? '' : ' (not written yet)'}`);
 if (r.exists) {
