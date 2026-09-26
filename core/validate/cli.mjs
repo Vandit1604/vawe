@@ -163,6 +163,23 @@ function resampleErrors(data) {
   return errors;
 }
 
+// SVG DEGENERATE PATH. A lone `M` with no draw command after it (`"M0 0"`) is valid SVG grammar and an
+// empty picture: a moveto alone paints nothing, so the layer passes every other check and renders as a
+// blank box with nothing to say why (engine-doctrine/MISTAKES.md #428's class: accepted, then ignored).
+export function svgDegeneratePathErrors(data) {
+  const errors = [];
+  (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => {
+    if (!isObj(L) || L.type !== 'svg') return;
+    const d = typeof L.d === 'string' ? L.d.trim() : '';
+    const commands = d.match(/[MLHVCSQTAZ]/gi) || [];
+    if (!d || commands.length <= 1)
+      errors.push(`layer[${i}] (svg) \`d\` is degenerate: ${JSON.stringify(L.d ?? '')}. A single \`M\` with `
+        + `no draw command after it paints nothing, so this layer validates clean and renders invisible. `
+        + `Give it a real path (at least one L/H/V/C/S/Q/T/A/Z after the moveto).`);
+  });
+  return errors;
+}
+
 // CLIP AUDIO. `audio` on a video layer is the one prop the LAYER owns for sound (the mixer owns how it
 // is heard): `true` or `{gain, duck}`. Anything else is caught here rather than at build time in the
 // browser, so a bad value fails the author-check gate instead of a silent render.
@@ -381,6 +398,7 @@ async function validateOneFile(file, ctx) {
   const errors = validateAll(schema, data);
   errors.push(...unknownLayerPropErrors(data, schema));
   errors.push(...resampleErrors(data));
+  errors.push(...svgDegeneratePathErrors(data));
   errors.push(...videoAudioErrors(data));
   errors.push(...namedThemeErrors(data, fs, path, readJSON, root));
   const readRef = readRefFactory(fs, path, file, root);

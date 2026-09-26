@@ -1,0 +1,15 @@
+{
+  "module": "scene",
+  "note": "Fixture for text/svg glow: verified by tests/layers/glow-pure-light.test.mjs.",
+  "aspect": "16:9",
+  "theme": "vawe-dark",
+  "duration": 1.5,
+  "destination": "web",
+  "audio": { "silent": true, "_why": "a determinism fixture, not a film" },
+  "bg": [{ "preset": "black", "from": 0, "to": 1.5 }],
+  "layers": [
+    { "type": "text", "id": "bare", "text": "Introducing", "x": 100, "y": 100, "w": 800, "size": 96, "color": "var(--text)", "glow": true, "start": 0, "duration": 1.5 },
+    { "type": "text", "id": "chip", "text": "Introducing", "x": 100, "y": 400, "w": 800, "size": 96, "color": "var(--text)", "bg": "var(--card)", "glow": true, "start": 0, "duration": 1.5 },
+    { "type": "svg", "id": "mark", "x": 900, "y": 100, "w": 200, "h": 200, "viewBox": "0 0 100 100", "d": "M50 5 L95 95 L5 95 Z", "fill": "var(--accent)", "glow": true, "start": 0, "duration": 1.5 }
+  ]
+}
