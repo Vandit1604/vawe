@@ -424,9 +424,9 @@ export const CATALOG = [
       chips: ['deterministic', 'seeked', 'pure(n)'] } },
   { name: 'glassNotification', family: 'glassNotification', blurb: "frosted push notifications sliding in from the side and stacking up, like a phone lock screen",
     props: { w: 520, items: [
-      { icon: 'bolt', title: 'Render finished', body: '1,920 frames, no dropped seams.', meta: 'now' },
-      { icon: 'shield', title: 'Audit clean', body: 'No overlap, no clipped text.', meta: '2m' },
-      { icon: 'check', title: 'Ledger updated', body: 'Design recorded.', meta: '5m' }] } },
+      { icon: 'bolt', title: 'Render finished', body: 'Every frame accounted for, no dropped seams.', meta: 'now' },
+      { icon: 'shield', title: 'Audit clean', body: 'No overlap, no clipped text.', meta: 'moments ago' },
+      { icon: 'check', title: 'Ledger updated', body: 'Design recorded.', meta: 'a bit ago' }] } },
   { name: 'glassMenu', family: 'glassMenu', blurb: "a frosted right-click or context menu: icon column, list of rows, one row highlighted",
     props: { w: 440, title: 'ACTIONS', highlight: 3, rows: [
       { icon: 'spark', label: 'New surface', hint: 'N' }, { icon: 'layers', label: 'Stack behind', hint: '[' },
