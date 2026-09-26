@@ -615,9 +615,8 @@
   "bg": {
    "type": "array",
    "label": "Background windows (canvas, theme palette)",
-   "required": true,
    "minItems": 1,
-   "hint": "the backdrop is the largest area of the frame, so the engine will not pick it for you. Use `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix \u00b7 gradientWash \u00b7 blobs \u00b7 metallic \u00b7 metallicSheen \u00b7 aurora \u00b7 \u2026, each one a named recipe over the same vocabulary), `{ \"base\": {...}, \"fx\": [...] }` to compose that vocabulary yourself, or `{ \"html\": \"\u2026\" }` to hand-author one. See docs backgrounds-and-images.",
+   "hint": "the backdrop is the largest area of the frame. Naming none defaults to `bg:[{use:\"theme\"}]`, the theme's own animated backdrop (core/engine/produce.js applyBgDefault); say so explicitly, or choose your own: `\"bg\": [{ \"preset\": \"plain\" }]` for a deliberately flat field, a living preset (dotmatrix \u00b7 gradientWash \u00b7 blobs \u00b7 metallic \u00b7 metallicSheen \u00b7 aurora \u00b7 \u2026, each one a named recipe over the same vocabulary), `{ \"base\": {...}, \"fx\": [...] }` to compose that vocabulary yourself, or `{ \"html\": \"\u2026\" }` to hand-author one. See docs backgrounds-and-images.",
    "item": {
     "html": {
      "type": "string",

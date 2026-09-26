@@ -234,10 +234,15 @@ is where you want the eye when the cut comes.
 
 **THREE PLANES.** Foreground, middle, background. Depth comes from having all three doing something,
 and most films here have exactly one: a subject on a flat field. A backdrop that moves is the cheapest
-second plane, which is one more reason the bg is a required field.
+second plane, which is why a scene naming no `bg` at all now defaults to the theme's own animated one
+(`core/engine/produce.js` `applyBgDefault`) rather than a flat fill nobody chose.
 
 **THE FRAME EDGE IS A TOOL.** Covered above under cropping, and it belongs to this list: containing a
 subject and cropping it are two different statements, not a tidy version and a sloppy one.
+
+**A LONE LAYER STILL NEEDS A HOME.** A scene with exactly one authored top-level text/count layer that
+names no position at all is centred on the frame's optical centre automatically (`anchorPoint: "center"`,
+`core/engine/boot.js` `applyLoneTextCenter`) rather than left at the page's own flat corner default.
 
 ### Why these are in the storyboard, not the audit
 
