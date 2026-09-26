@@ -44,7 +44,9 @@ The layer timing slots. A junction (`cuts[].dur`, `seams[].dur`, `stings[].dur`)
 |---|---|---|
 | `instant` | `0.08`s | a state change, not a move. Under the threshold where the eye reads travel. |
 | `fast` | `0.18`s | quick, but still legibly a move. |
+| `productive` | `0.22`s | a small, frequent UI-adjacent move: Carbon's utilitarian tier, quick enough to cost the viewer nothing. |
 | `medium` | `0.3`s | the engine's own default entrance. Reach past it on purpose, not by omission. |
+| `expressive` | `0.4`s | an occasional bigger moment: Carbon's emphasis tier, slower than `productive` so the one that matters reads as the one that matters. |
 | `slow` | `0.6`s | the eye follows the whole path. For a subject, not for furniture. |
 | `luxurious` | `1.2`s | a held gesture. One per film. |
 
@@ -85,5 +87,5 @@ second mechanism for what each move already names for itself. `gentle` stays a F
 it is not repeated here with a different meaning.
 
 ---
-_32 words across 4 families. Regenerate: `make vocab`. The full engine
+_34 words across 4 families. Regenerate: `make vocab`. The full engine
 vocabularies these alias: `engine-doctrine/EFFECTS.md` (`make effects`)._

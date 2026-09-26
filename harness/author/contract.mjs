@@ -1,6 +1,3 @@
-// contract.mjs CLI: `make contract D=<film>`: validate the per-beat continuous-object contract a
-// storyboard carries (object_in/object_out on each beat, harness/lib/contract.mjs). Standalone so a
-// broken handoff is visible before `make scenes`/`make assemble` refuse to run it for you.
 import fs from 'node:fs';
 import path from 'node:path';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';

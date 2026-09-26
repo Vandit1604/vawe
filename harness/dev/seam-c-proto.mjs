@@ -1,9 +1,3 @@
-// harness/dev/seam-c-proto.mjs: does the Seam C technique hold renderFrame(n) purity?
-//
-//   node harness/dev/seam-c-proto.mjs
-//
-// Serves the repo, renders five frames forwards, backwards, shuffled and again, and compares pixel
-// hashes. See the header of seam-c-proto.html for what this is and why it exists.
 import puppeteer from 'puppeteer'; import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,8 +5,6 @@ import { serveRepo } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PORT = 8917;
-// file:// cannot load an ES module, so the proof needs an origin. Its own server rather than a make
-// target, so this stays one command with nothing to remember.
 const { server } = await serveRepo({ port: PORT });
 
 const b = await puppeteer.launch({ args: ['--no-sandbox'] });

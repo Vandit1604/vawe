@@ -1,19 +1,3 @@
-// harness/dev/library-stats.mjs: the library figures CLAUDE.md argues from, all measured in one run.
-//
-// WHY THIS EXISTS. CLAUDE.md quotes about a dozen numbers about the scene library ("112 of the 134
-// scenes paint ONE bg window", "110 ship mute", "the median film gives 6% of its layers to picture")
-// and every one of them was measured by hand, once, and then decayed in place. Three had drifted far
-// enough to be wrong by the time docs-drift learned to check them, and the file's own warning says why
-// that matters: "a number in this file gets quoted downstream faster than it gets checked."
-//
-// A hand-measured figure has no owner, so it cannot be re-run and cannot be checked. This is the owner.
-// Run it, read the numbers off it, and quote THOSE.
-//
-//   node harness/dev/library-stats.mjs            # the table
-//   node harness/dev/library-stats.mjs --json     # the same, for a gate to compare against
-//
-// THE POPULATION IS NOT DEFINED HERE. It comes from harness/lib/census.mjs, the same helper
-// waiver-drift uses, which REFUSES a checkout that cannot see the library rather than counting what is
 // left (engine-doctrine/MISTAKES.md #391). Two definitions of "the library" is the drift this file exists to end.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,17 +7,8 @@ import { population, LIBRARY } from '../lib/census.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'films/scene');
 
-// WHAT COUNTS AS A PICTURE, stated rather than assumed. CLAUDE.md's own worked example is brew, 16 of
-// 35 layers, and it reaches 16 as 11 image + 5 html, so `html` counts and the effect layers do not.
-// The rest of this set is the same argument applied to the types brew does not happen to use: anything
-// whose job is to put real pictorial detail on screen. `glow`, `beam` and `rect` are not here, because
-// they dress a frame rather than carry information, and that distinction is the whole point of the
-// figure. This is a COUNT OF LAYERS and not a share of the frame's AREA: CLAUDE.md is emphatic about
-// the difference, because the one gate that ever measured area got it wrong and was deleted for it.
 const PICTORIAL = new Set(['image', 'html', 'component', 'svg', 'video', 'clip', 'lottie', 'board', 'doc']);
 
-// --files a.json b.json: measure the named scenes instead of the population, and print the per-file
-// counts a prompt ablation compares (harness/dev/prompt-eval.sh). Same definitions, one owner.
 const fileArgs = process.argv.indexOf('--files');
 if (fileArgs !== -1) {
   const files = process.argv.slice(fileArgs + 1).filter((a) => !a.startsWith('--'));

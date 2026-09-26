@@ -1,25 +1,3 @@
-// schema-at.mjs: what may I WRITE at this path in a scene JSON?
-//
-//   node harness/author/schema-at.mjs                          # the top-level shape, one line per field
-//   node harness/author/schema-at.mjs 'layers[].motion[]'      # every field legal on a keyframe
-//   node harness/author/schema-at.mjs motion                   # a partial path, found rather than refused
-//
-// WHY THIS EXISTS, from a real failure. An author needed the names of the two bezier handles on a
-// motion keyframe, guessed `in`/`out` from a comment, and shipped a refusal that rejected three
-// correct films. The real names are `easeIn`/`easeOut`, and films/scene/schema.json HAS them, with a
-// written label on every field, and nothing served it. So the answer existed, was checked by a gate,
-// and was reachable only by reading a 2848-line JSON file, which is the same shape of failure
-// `make arsenal` was built for one level up: a capability that is present, correct and unreachable is
-// indistinguishable from one that is absent.
-//
-// THE SIBLING, and the division of labour. `make arsenal` answers "what can the engine DO" and ranks a
-// plain-English question across every registry. This answers "what may I write HERE" and takes a PATH.
-// Neither owns a list. Everything below is read from films/scene/schema.json at runtime, and the one
-// thing that is not (which vocabulary an enum belongs to) is read from core/registry.js, live.
-//
-// THIS IS NOT A GATE. It checks nothing and blocks nothing. quality/gates/schema-drift.mjs already
-// holds the schema against the code, both directions, and its `layers.item.motion.item` block is
-// exactly the fact this tool serves. Adding a second opinion about the contract would be a fork.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,19 +8,7 @@ const SCHEMA_PATH = path.join(repoRoot, 'films/scene/schema.json');
 /** The one owner of every field, type, label and enum printed by this tool. */
 export const loadSchema = () => JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
 
-// ---- the path an author types ---------------------------------------------------------------------
-//
-// TWO SPELLINGS, ONE MEANING, and the rule is stated here because it is the only thing about this tool
-// somebody has to learn. `[]` says "into the element of this array": `layers[].motion[]` is the shape
-// of one keyframe. The schema's own spelling for that step is the literal key `item`
-// (`layers.item.motion.item`, which is how quality/gates/schema-drift.mjs addresses the same node), so
-// a bare `item` segment is accepted and means the same thing, and a bare `fields` segment is accepted
-// and means nothing at all, because descending into an object's fields already happens by name.
-//
-// The `[]` form is the one to write. It is what an author reading a scene sees (`"layers": [ … ]`),
-// and it is unambiguous in a way the bare name is not: `layers.motion` also resolves here, because a
-// help tool that refuses a nearly-right path teaches nobody anything, but it does not say whether
-// `motion` sits on the array or on one layer.
+// steps(at): `[]` and the schema's literal `item` segment mean the same array-descent step; a `fields` segment is accepted but means nothing (object descent already happens by name).
 export function steps(at) {
   const out = [];
   for (const raw of String(at || '').split('.')) {
@@ -108,22 +74,6 @@ export function allPaths(schema, maxDepth = 6) {
   return out;
 }
 
-// ---- which VOCABULARY an enum is ------------------------------------------------------------------
-//
-// `make arsenal` tells you a vocabulary exists and `make schema AT=` tells you a field exists. The gap
-// between them is the question this closes: `layers[].preset` is a string with a 38-name enum, and
-// knowing that tells you nothing about what to search for next.
-//
-// DERIVED FROM THE REGISTRIES, NOT FROM A TABLE. A registry owns its `kind` and its `names`
-// (core/registry.js), so an enum whose values contain every name of a registry IS that registry's
-// vocabulary, and the match is made by value at runtime. A second table mapping schema path to
-// registry would be a fourth copy of a fact that already has three, and it would drift: that is the
-// failure the whole `defineRegistry` primitive exists to stop.
-//
-// Containment rather than equality, deliberately. Schema enums append documented sentinels the
-// registry does not carry (`none`), and `layers.item.preset` is the UNION of two vocabularies that do
-// not overlap (31 kinetic presets + 7 glow presets), so equality would report neither and containment
-// reports both, which is the more useful answer.
 const MIN_REG = 2;   // a one-name registry is contained in almost anything, so it proves nothing
 export function kindsOfEnum(values, regs) {
   const have = new Set(values);
@@ -142,10 +92,7 @@ async function registriesLive() {
   } catch { return []; }                               // the kind line is a courtesy, never the answer
 }
 
-// ---- printing -------------------------------------------------------------------------------------
 const COL = 78;
-// The enum line sits under the label column, so it can run wider than the label without wrapping past
-// a normal terminal, and it carries the two things nothing else prints: the values and their registry.
 const ENUM_COL = 96;
 const oneLine = (s) => String(s || '').replace(/\s+/g, ' ').trim();
 const clip = (s, n) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
@@ -164,9 +111,6 @@ function wrap(s, indent, width = COL) {
   return lines.map((l) => indent + l).join('\n');
 }
 
-// The VALUES are what gets truncated, never the vocabulary's name. A first cut clipped the whole line
-// at one width, and on `bg[].preset` (21 names) that ate the only half an author cannot get anywhere
-// else: the enum is visible again one drill-down away, the registry it belongs to is not.
 function enumLine(node, regs, room = COL) {
   if (!Array.isArray(node.enum) || !node.enum.length) return null;
   const kinds = kindsOfEnum(node.enum, regs);
@@ -203,15 +147,12 @@ function printNode(trail, node, regs) {
   // the track, which reads as though a track carries an `x`.
   const here = fmtPath(trail) + (node.item ? '[]' : '');
   const map = childrenOf(node);
-  // The label heads a CONTAINER and is printed in full under a LEAF, never both: a leaf's label is the
-  // whole answer and is often a paragraph, and it read as a stutter when the header carried it too.
   console.log(`\n  ${here}${map && label ? `  ·  ${label}` : ''}\n`);
   if (map) {
     const n = printFields(map, regs);
     console.log(`\n  ${n} field(s). Drill in with AT='${here}.<field>'.\n`);
     return;
   }
-  // A leaf: this IS the answer, so nothing about it is truncated.
   const bits = [`type ${typeOf(node)}`];
   for (const k of ['default', 'min', 'max', 'minLength', 'pattern']) if (node[k] !== undefined) bits.push(`${k} ${JSON.stringify(node[k])}`);
   console.log(`    ${bits.join('  ·  ')}`);
@@ -225,17 +166,6 @@ function printNode(trail, node, regs) {
   console.log('');
 }
 
-// ---- the other path space: `block.<family>` --------------------------------------------------------
-//
-// THIS IS NOT A SECOND SCHEMA. films/scene/schema.json deliberately knows nothing about block props: a
-// block layer is `{type:"block", block:"<name>", …props}` and blocks/schema.mjs `resolve()` is what
-// validates those props, per family, against a table quality/gates/block-schema.mjs holds to the
-// factory's real signature. So the path `block.<family>` has no owner in schema.json and never will.
-// One tool, two disjoint path spaces, rather than a copy of one fact in both.
-//
-// The rules are converted into the schema's own node shape and handed to the SAME printers, so the
-// answer to "what may I write on a glassCard" reads exactly like the answer to "what may I write on a
-// motion keyframe". An author learns one output format, not two.
 const BLOCK_KINDS_WITH_FIELDS = new Set(['group', 'row']);
 
 function ruleNode(rule, note) {
@@ -246,8 +176,6 @@ function ruleNode(rule, note) {
   if (rule.kind === 'enum' && Array.isArray(rule.of)) n.enum = rule.of;
   if (BLOCK_KINDS_WITH_FIELDS.has(rule.kind) && rule.fields) n.fields = tableNode(rule.fields);
   if (rule.kind === 'list' && rule.of) {
-    // A list of ROWS has children worth drilling into; a list of scalars does not, and giving it an
-    // empty `item` would print a heading over nothing. The element's kind goes in the type instead.
     if (rule.of.fields) n.item = tableNode(rule.of.fields);
     else n.type = `list of ${rule.of.kind}`;
   }
@@ -260,10 +188,6 @@ function ruleNode(rule, note) {
 const tableNode = (table, notes = {}) =>
   Object.fromEntries(Object.entries(table).map(([k, r]) => [k, ruleNode(r, notes[k])]));
 
-// A BLOCK'S TABLE WANTS ITS DEFAULTS IN THE ROW, which is where this parts company with printFields.
-// A schema container's children are mostly objects you drill into, so name + type + label is the right
-// summary there. A block's children are all leaves, and the default and the range ARE the answer: an
-// author who has to run nine more commands to learn nine defaults has been told nothing useful.
 function printDials(rows, fields, regs) {
   const w = Math.max(...rows.map((r) => r.name.length), 4);
   const types = rows.map((r) => fields[r.name].type);
@@ -279,8 +203,6 @@ function printDials(rows, fields, regs) {
   const bw = Math.max(...bounds.map((b) => b.length), 0);
   rows.forEach((r, i) => {
     const node = fields[r.name];
-    // Wider than COL on purpose: the bounds column ate the note's room at the schema's width, and the
-    // note is the one thing here that exists nowhere else an author can reach.
     const room = ENUM_COL - (w + tw + bw + 10);
     console.log(`    ${r.name.padEnd(w + 2)}${types[i].padEnd(tw + 2)}${bounds[i].padEnd(bw + 2)}`
       + clip(oneLine(r.note || ''), Math.max(room, 20)));
@@ -313,9 +235,6 @@ async function printBlockPath(steps_, regs) {
   }
 
   if (!SCHEMAS[family]) {
-    // A scene writes `card.pricing`, so an author asking about that name is in the right place and
-    // holding a variant. Its options are its FAMILY's options, so answer with the family rather than
-    // refuse a name the registry really has.
     const row = (CATALOG || []).find((r) => r && r.name === family);
     if (row && SCHEMAS[row.family]) {
       console.log(`\n  "${family}" is ${row.family} with preset props, so it takes ${row.family}'s options.`);
@@ -332,15 +251,9 @@ async function printBlockPath(steps_, regs) {
   const notes = Object.fromEntries(rows.filter((r) => r.note).map((r) => [r.name, r.note]));
   const fields = tableNode(SCHEMAS[family], notes);
 
-  // ONE DIAL, asked about by name. The schema's own leaf printer already says type · default · min ·
-  // max, wraps the note in full and lists an enum's legal values with the registry it belongs to,
-  // which is exactly the shape of a block rule. Nothing about this branch is block-specific.
   const dial = steps_[2];
   if (dial) {
     if (!fields[dial]) {
-      // A SCENE WRITES `card.pricing`, so `AT=block.card.pricing` is the path an author actually types,
-      // and it arrives here looking like an unknown option on the `card` family. It is a variant name:
-      // answer with the family whose options it really takes.
       const variant = (CATALOG || []).find((r) => r && r.name === `${family}.${dial}`);
       if (variant && SCHEMAS[variant.family]) {
         console.log(`\n  "${family}.${dial}" is ${variant.family} with preset props, so it takes ${variant.family}'s options.`);
@@ -364,17 +277,11 @@ async function printBlockPath(steps_, regs) {
   printDials(rows, fields, regs);
   const withNote = rows.find((r) => r.note) || rows[0];
   console.log(`\n  ${rows.length} option(s). One in full, with its note: AT='block.${family}.${withNote.name}'`);
-  // PLACEMENT AND TIMING APPEAR IN NO TABLE, by design (blocks/schema.mjs PASSTHROUGH): the scene
-  // supplies them and a container injects them. Without this line the table reads as complete and an
-  // author concludes a block cannot be placed.
   console.log(`  Plus x · y · start · dur on every block. Those are the scene's, not the block's, so`);
   console.log(`  they are in no table: blocks/schema.mjs passes them through untouched.\n`);
   return true;
 }
 
-// ---- the CLI --------------------------------------------------------------------------------------
-// Guarded the way arsenal.mjs is, because everything above is a library: quality/gates/lib-test.mjs
-// imports `resolve`, `steps` and `kindsOfEnum` and would otherwise print a schema map on import.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const schema = loadSchema();
   const regs = await registriesLive();
@@ -395,15 +302,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const r = resolve(schema, want);
   if (!r.error) { printNode(r.trail, r.node, regs); process.exit(0); }
 
-  // ---- a wrong or partial path must HELP -----------------------------------------------------------
-  //
-  // Modelled on core/registry.js `hint`, which is the tone this repo already uses for "that name is not
-  // in this vocabulary": name what IS legal, offer the near word, and never resolve to something
-  // plausible instead. The two failures are different questions and get different answers.
-  //
-  // A PARTIAL PATH (`AT=motion`) fails at the root, and the author almost certainly typed a real field
-  // and not its address. So the tree is searched for a field of that name, and one hit is simply
-  // ANSWERED: making somebody retype the full path they did not know is the whole problem restated.
   if (r.trail.length === 0) {
     const key = String(r.want || '').toLowerCase();
     const hits = allPaths(schema).filter((p) => p.name.toLowerCase() === key);
@@ -429,9 +327,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.exit(0);
   }
 
-  // AN UNKNOWN FIELD AT A REAL PATH names the legal set, because the author is already in the right
-  // place and one word out. `nearMisses` is core/registry.js's own "did you mean", reused rather than
-  // re-spelled: two spellings of that is one too many, which is why that helper is exported at all.
   const where = fmtPath(r.trail) || 'the top level';
   const legal = r.map ? Object.keys(r.map).sort() : [];
   let near = [];

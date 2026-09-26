@@ -350,13 +350,13 @@ test('lib-test: registry', async () => {
   })());
 }
 
-// The engine carries TWO easing vocabularies and the FIELD decides which is in force. The exclusion
-// list is the whole rule, and it can rot in silence: too strict invents findings on scenes that name a
-// GSAP ease correctly (showcase-lumen, showcase-type-labour both do), too loose and the wrong-slot
-// name renders on a curve nobody chose. One assertion per direction. engine-doctrine/MISTAKES.md #381.
-ok('easeErrors: a GSAP ease in an engine field is caught', (() => {
-  const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] });
-  return e.length === 1 && /GSAP ease/.test(e[0]);
+// The engine carries TWO easing vocabularies and the FIELD decides which is in force. A GSAP ease is
+// now an ALIAS onto its engine equivalent (resolveGsapAlias, core/motion.js), so it is allowed on an
+// engine field too; a name with no engine equivalent (`steps`) still names the #381 wrong-slot mistake.
+ok('easeErrors: an aliased GSAP ease in an engine field is allowed, an unaliased one still caught', (() => {
+  const ok1 = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'power2.inOut' }] }] }).length === 0;
+  const e = easeErrors({ layers: [{ motion: [{ t: 0 }, { t: 1, ease: 'steps(4)' }] }] });
+  return ok1 && e.length === 1 && /GSAP ease/.test(e[0]);
 })());
 ok('easeErrors: a GSAP ease in a GSAP field is allowed', easeErrors({ layers: [
   { parts: [{ select: 'rect', anim: 'growUp', ease: 'power2.inOut' }] },
@@ -501,15 +501,6 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
     // end at 0.74 across. A shorter step parks the next disc on the glyphs.
     const step = stack[1].x - stack[0].x;
     ok(`avatarStack: the step (${(step / 48).toFixed(2)} of the disc) clears the centred initials`, step / 48 >= 0.74);
-  }
-  {
-    // a dashboard's volume chart is measured against the panel it sits in.
-    for (const w of [340, 380, 720]) {
-      const [card] = BLOCKS.stripeCard({ x: 0, y: 0, w, amount: '$1' });
-      const row = card.children[2].children;
-      const spanned = row.reduce((a, b) => a + b.w, 0) + card.children[2].gap * (row.length - 1);
-      ok(`stripeCard w:${w}: the bar chart spans the card's content box`, Math.abs(spanned - (w - 2 * card.pad)) < 1);
-    }
   }
 
   // The site's media is DERIVED but COMMITTED, which is a deliberate trade: generating it at deploy

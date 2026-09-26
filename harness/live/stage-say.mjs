@@ -1,30 +1,4 @@
 #!/usr/bin/env node
-// harness/live/stage-say.mjs: a UserPromptSubmit hook that says, every turn, which stage the film in
-// flight is at and the ONE next command.
-//
-// THIS IS THE CONTEXT-ROT FIX, and it is the half a gate cannot do. A gate refuses a wrong write; it
-// cannot tell you the right one is available. The order was in AGENTS.md the whole time, read once at
-// session start and then buried under a few hundred messages. Measured elsewhere and matching what
-// happened here: reasoning quality degrades as input length grows, and for long-running agents the
-// effect compounds with every step, so a rule read once is a rule that fails late in the work. Its
-// stdout is injected as context, so the order is RE-STATED each turn instead of recalled.
-//
-// SILENT UNLESS A FILM IS IN FLIGHT, and one line when it speaks. A hook that talks every turn is a
-// hook whose output stops being read, which would leave the rule exactly where it started.
-//
-// THE FILM IN FLIGHT is the most recently modified storyboard in films/scene/, within a day. Not a
-// stored "current film": that is a second source of truth, free to disagree with the repo, and this
-// whole design refuses those (see quality/gates/stage.mjs, state is derived).
-//
-// THE STAGE BLOCK BELOW IS RATIONED PER SESSION, NOT PRINTED EVERY TURN. It used to print unconditionally
-// on every UserPromptSubmit (measured ~786 bytes/prompt), so a long session working on something else
-// entirely (the site, say) carried dozens of identical copies in its own history, re-read on every later
-// request. A UserPromptSubmit hook is handed its payload as JSON on stdin (session_id among the fields);
-// this hook now remembers, per session_id, the last stage block it printed and stays silent on a repeat.
-// A first prompt has no prior entry, so it always prints; a changed stage or next command changes the
-// block text, so it prints again; VAWE_STAGE_SAY=always restores the old every-turn behaviour for A/B
-// comparison. `--reset` (wired to PreCompact in .claude/settings.json) forgets one session's entry, so
-// the block prints again right after compaction throws away the copy that was sitting in history.
 import fs from 'node:fs';
 import path from 'node:path';
 import { stageOf, ROOT } from '../../quality/gates/stage.mjs';
@@ -44,7 +18,6 @@ function writeSessionState(state) {
   } catch { /* best effort: a state-file write failure only costs a repeated block, never a crash */ }
 }
 
-// PreCompact mode: forget this session's remembered block, then exit. No film scan, no stage line.
 if (process.argv.includes('--reset')) {
   let raw = '';
   process.stdin.on('data', (d) => { raw += d; });
@@ -75,8 +48,6 @@ process.stdin.on('end', () => {
   let best = null;
   for (const f of (fs.existsSync(dir) ? fs.readdirSync(dir) : [])) {
     if (!f.endsWith('.storyboard.md')) continue;
-    // Same scratch convention roster() already applies (quality/gates/stage.mjs): a leading underscore
-    // marks a throwaway rig fixture, never a film, so it must not be announced as one in flight.
     if (f.startsWith('_')) continue;
     const m = fs.statSync(path.join(dir, f)).mtimeMs;
     if (Date.now() - m > DAY) continue;
@@ -86,24 +57,17 @@ process.stdin.on('end', () => {
 
   let st;
   try { st = stageOf(best.film); } catch { process.exit(0); }
-  // Nothing to say about a film that is finished, and nothing to say twice: the gate speaks when a write
-  // is wrong, this speaks when a stage is open.
   if (st.stage === 'judge') process.exit(0);
 
   const stageBlock = [
     `vawe: ${st.name} is at stage ${st.stage.toUpperCase()} (${st.order.join(' → ')}).`,
     `  ${st.why}`,
     `  next: ${st.next}`,
-    // The skill(s) that stage wants, read off skills/*/SKILL.md's own `stage:` frontmatter
-    // (harness/lib/skill-stages.mjs), not a second hand-kept table.
     ...(st.skills.length ? [`  skill: ${st.skills.join(', ')}`] : []),
     '  Do that stage, not the one after it. `make stage D=films/scene/'
       + `${st.name}.json\` re-reads this from the files on disk.`,
   ].join('\n');
 
-  // Print only when this session hasn't already seen this exact block: a repeat prompt on an unchanged
-  // stage stays silent, a changed stage or next command (a different block string) speaks again, and a
-  // session with no prior entry (first prompt, or just reset by --reset) always speaks.
   const printBlock = process.env.VAWE_STAGE_SAY === 'always' || !sessionId
     || readSessionState()[sessionId] !== stageBlock;
   if (printBlock) {
@@ -115,13 +79,6 @@ process.stdin.on('end', () => {
     }
   }
 
-  // Rule briefs for this film's own stage and features, but only ONCE per (film, stage): printed on
-  // every turn, these would be exactly the always-loaded context Update 1 (the anti-bloat policy in
-  // .claude/plans/craft-rules-into-harness.plan.md) argues against, on top of the stage line above,
-  // which already re-states every turn on purpose. A tiny state file remembers the last (film, stage)
-  // this hook spoke the briefs for; a repeat prompt in the same stage stays silent, and moving to a new
-  // stage (or a new film) speaks again. `make next` (quality/gates/next.mjs) is a deliberate, one-shot
-  // command an author runs on purpose, so it always prints its briefs; only this every-turn hook rations.
   const RULES_STATE = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
   function alreadySpoke(film, stage) {
     try {
@@ -136,25 +93,17 @@ process.stdin.on('end', () => {
     } catch { /* best effort: a state-file write failure only costs a repeated brief, never a crash */ }
   }
 
-  // Never let a bad/missing rules file break the hook: this line is a nudge, not a gate, and a hook that
-  // can crash the prompt is worse than one that silently says nothing this one time.
   try {
     if (!alreadySpoke(best.film, st.stage)) {
       const scene = fs.existsSync(st.scene) ? JSON.parse(fs.readFileSync(st.scene, 'utf8')) : null;
       const sbText = fs.existsSync(st.sb) ? fs.readFileSync(st.sb, 'utf8') : null;
       const features = computeFeatures(scene, sbText);
-      // A stage AGENTS.md gives an order for (direct: motion/transitions/sound, etc.) prints by that
-      // order, 2 lines and 320 chars per category, so motion cannot crowd out transitions and sound at
-      // the same stage. A stage with no named order keeps the old flat cap/budget.
       const order = STAGE_CATEGORY_ORDER[st.stage];
       const { rules, dropped } = order
         ? rulesFor({ stage: st.stage, features, categories: order, capPerCategory: 2, maxCharsPerCategory: 320, withReceipt: true })
         : rulesFor({ stage: st.stage, features, withReceipt: true });
       for (const r of rules) console.log(`  ${briefLine(r)}`);
       markSpoke(best.film, st.stage);
-      // The receipt: what the author was actually shown vs. what existed and was not (and why). Logged
-      // once per (film, stage) transition, the same gate as markSpoke above, not once per turn: this hook
-      // fires on every keystroke and `runlog.mjs` wants one line per fact, not one per prompt.
       try {
         appendRun(best.film, {
           cmd: 'stage-say',

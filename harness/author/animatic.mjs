@@ -1,23 +1,3 @@
-// harness/author/animatic.mjs: cut the picture to the sound, before building the film.
-//
-// THE FIRST VERSION OF THIS FILE WAS NOT AN ANIMATIC. It laid grey boxes on the storyboard's own
-// declared timings and shipped `audio: {silent: true}`, and the trade's own definition is blunt about
-// that: "a silent animatic is just a slideshow, without scratch voiceover and temp music you cannot
-// evaluate pacing accurately." It tested the plan against itself, which is the one thing
-// `storyboard-check` already does, so nobody ever ran it and it was deleted.
-//
-// What an animatic is FOR is the clock, and the clock comes from the voice. So this one works the way
-// a studio does: synthesize a scratch read of the script, MEASURE it, and cut the picture to what the
-// words actually take. The storyboard says a beat is five seconds; the scratch read says the copy takes
-// six and a half. That gap is the entire product of this step, and no static gate can produce it.
-//
-// Scratch audio is meant to be ugly. macOS `say` is a robot and that is correct: its only job is to
-// carry the rhythm the picture is cut against, and a beautiful read would tempt you to judge the read.
-// It is also DETERMINISTIC (same text + voice → same audio, same timings), so an animatic never breaks
-// the render's purity contract.
-//
-//   node harness/author/animatic.mjs <STORYBOARD.md> [--voice Samantha] [--out <scene.json>]
-//   make animatic SB=<file>            (generates, then renders draft)
 import fs from 'node:fs';
 import { onScreenText } from '../lib/text.mjs';
 import path from 'node:path';
@@ -38,21 +18,12 @@ if (!sb.beats.length) { console.error(`✗ no beats in ${SB}, beats are "## Beat
 
 const name = path.basename(SB).replace(/\.(md|markdown)$/i, '').replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
 const OUT = flag('--out') || `films/scene/${name}.animatic.json`;
-// `make animatic` renders what this writes, so it needs the path. It used to rebuild the name in shell
-// and got a different answer (`tr -c` turned basename's trailing newline into an extra dash), so the
-// render ran against a file that never existed. One derivation, asked for by name.
 if (args.includes('--path')) { console.log(OUT); process.exit(0); }
 const VOICE = flag('--voice');
 const VODIR = path.join('/tmp/animatic', name);
 fs.rmSync(VODIR, { recursive: true, force: true });
 fs.mkdirSync(VODIR, { recursive: true });
 
-// ── the scratch read ───────────────────────────────────────────────────────────────────────────────
-// TWO CLOCKS, AND THEY ARE NOT THE SAME CLOCK. Narration is SPOKEN, and the honest way to measure it
-// is to say it and time it. On-screen copy is READ, and reading is far faster than speech: ~238wpm for
-// silent English reading against ~150wpm for a voice, and a three-word headline is grasped well inside
-// a second. The first cut of this file ran both through TTS and reported a 12s storyboard as 35.3s,
-// which is not a finding, it is a unit error wearing a finding's clothes.
 const READ_WPM = 238;      // Brysbaert 2019, silent reading of English prose
 const FIXATION = 0.35;     // per line: the eye has to land before it can read
 const readSec = (lines) => {
@@ -72,8 +43,6 @@ const speech = sb.beats.map((b) => {
 const durOf = (wav) => parseFloat(execFileSync('ffprobe',
   ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', wav], { encoding: 'utf8' }).trim());
 
-// Synthesize each beat SEPARATELY rather than as one script, because the number wanted is per beat and
-// deriving it from a combined word track means guessing where one beat's words end and the next begin.
 const parts = [];
 for (const [i, s] of speech.entries()) {
   if (!s.text) { parts.push({ ...s, sec: 0, wav: null, words: [] }); continue; }
@@ -90,9 +59,6 @@ const MIN_SILENT = 1.2;   // a beat with no copy still has to be seen
 let t = 0;
 const timed = parts.map((p) => {
   const planned = p.beat.duration ?? (p.beat.end != null && p.beat.start != null ? p.beat.end - p.beat.start : null);
-  // A narrated beat lasts as long as the voice takes. An un-narrated one lasts as long as its copy
-  // takes to READ. Either way the number comes from the content, never from the author's estimate of
-  // it, and that inversion is the whole reason this file exists.
   const need = p.sec > 0 ? p.sec + BREATH : Math.max(MIN_SILENT, p.read + FIXATION);
   const row = { ...p, planned, spoken: +need.toFixed(2), start: +t.toFixed(2), voiced: p.sec > 0 };
   t += need;
@@ -100,8 +66,6 @@ const timed = parts.map((p) => {
 });
 const total = +t.toFixed(2);
 
-// concatenate the beat wavs into one scratch track, with the breath between them as real silence, so
-// the animatic's audio and its picture are the same clock rather than two clocks that agree on paper.
 const listFile = path.join(VODIR, 'concat.txt');
 const silence = path.join(VODIR, 'breath.wav');
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', `anullsrc=r=48000:cl=stereo:d=${BREATH}`, '-c:a', 'pcm_s16le', silence]);
@@ -114,15 +78,11 @@ fs.writeFileSync(listFile, seq.map((f) => `file '${path.resolve(f)}'`).join('\n'
 const VO = path.join(VODIR, 'scratch.wav');
 execFileSync('ffmpeg', ['-v', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', listFile, '-ar', '48000', '-ac', '2', '-c:a', 'pcm_s16le', VO]);
 
-// one word track for the whole film, each beat's words shifted onto the film clock
 const allWords = [];
 for (const r of timed) for (const w of r.words) allWords.push({ w: w.w, t: +(r.start + w.t).toFixed(3) });
 const WORDS = path.join(VODIR, 'scratch.words.json');
 fs.writeFileSync(WORDS, JSON.stringify(allWords, null, 1));
 
-// ── the picture: deliberately ugly ─────────────────────────────────────────────────────────────────
-// Grey blocks, one weight of type, no brand, no colour. Every ounce of styling is something the eye
-// would rather look at than the pacing, and pacing is the only question this file may answer.
 const fmt = /(\d+)\s*[x×]\s*(\d+)/.exec(sb.format || '');
 const W = fmt ? +fmt[1] : 1920, H = fmt ? +fmt[2] : 1080;
 const INK = '#111111', GREY = '#c9c9c9', SLOT = '#e6e6e6', MUTED = '#8a8a8a';
@@ -150,8 +110,6 @@ for (const r of timed) {
     cursorY += Math.round(size * 1.18 * lines) + (big ? 14 : 6);
   });
 
-  // the picture slot: drawn even when the beat names nothing to draw, because an empty labelled box
-  // IS the dual-channel gap and it should be impossible to skim past
   const hasPic = !!(b.picture || b.blueprint);
   const capt = b.picture || (b.blueprint ? `blueprint: ${b.blueprint}` : 'NO PICTURE NAMED, this beat is type only');
   const slotTop = Math.max(Math.round(H * 0.30), cursorY + 16);
@@ -164,8 +122,6 @@ for (const r of timed) {
     start: +r.start.toFixed(2), duration: +dur.toFixed(2), anim: 'fade', enterDur: +enter.toFixed(2), exitDur: 0 });
   layers.push(...copy);
 
-  // the HUD carries the VERDICT, not just the clock: a beat that overran its plan says so on the frame
-  // at the moment it overruns, which is where the author is actually looking.
   const over = r.planned != null ? r.spoken - r.planned : null;
   const verdict = over == null ? 'no planned span'
     : over > 0.35 ? `PLAN SAID ${r.planned.toFixed(1)}s, NEEDS ${r.spoken.toFixed(1)}s  (+${over.toFixed(1)}s)`

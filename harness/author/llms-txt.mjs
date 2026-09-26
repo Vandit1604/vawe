@@ -1,23 +1,3 @@
-// harness/author/llms-txt.mjs: GENERATE films/llms.txt, a portable vocabulary primer for any agent
-// (this one or a fresh one with no repo access) that has to write a vawe scene JSON from scratch.
-// Structured as: About -> a runnable skeleton -> one rule + one snippet per
-// capability, escalating -> the hard rules -> the command loop.
-//
-//   node harness/author/llms-txt.mjs   ·   make llms-txt (wired by the caller)
-//
-// WHY GENERATED, NOT HAND-WRITTEN. Every vocabulary here already lives in a `defineRegistry` (the layer
-// types in core/layers/index.js, the 693 effects behind `catalogued()`), and every entry there already
-// carries a blurb refused at load if it is missing or if it only restates the name (core/registry.js,
-// `checkBlurb`). A hand-typed primer is a FOURTH copy of a fact three other things already hold and
-// would drift the moment a layer type or a family was added, exactly the failure AGENTS.md names as the
-// one this repo pays for most (a search that goes stale silently). This script reads the same live
-// registries `make arsenal`/`make effects` read, so the primer cannot say a count that is wrong.
-//
-// What is curated, and what is not: the layer-type WHEN-TO-USE clauses in WHEN below are hand-written
-// (a blurb says what a thing IS, not when to reach for it over its neighbours), but the vocabulary itself
-// -- which layer types exist, how many, their blurbs, the family list and its counts -- is pulled live.
-// A layer type with no WHEN entry still prints (name + blurb), it just does not get the extra clause,
-// so a newly added type cannot make this generator throw.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,9 +8,6 @@ import { collect } from './arsenal.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const OUT = path.join(ROOT, 'films/llms.txt');
 
-// Curated direction, one clause per layer type: why reach for THIS one over its neighbours. The blurb
-// (pulled live below) says what it does; this says when to pick it. Optional by design -- see the file
-// header for why a missing entry cannot break the build.
 const WHEN = {
   text: 'the default for any on-screen word or line; reach for it before any other layer for copy.',
   count: 'a claim IS a number; use this instead of typing the number into a `text` layer.',
@@ -75,16 +52,12 @@ function layerSection() {
 }
 
 function familySection() {
-  // catalogued() already excludes nothing; drop "Layer types" here, it is section 3's own table above.
   const fams = catalogued().filter((r) => r.catalog.title !== 'Layer types');
   const lines = fams.map((r) => `- **${r.catalog.title}** (${r.names.length}, \`${r.catalog.tag}\`): ${firstSentence(r.catalog.intro)}.`);
   return { count: fams.length, lines };
 }
 
 export async function buildLlmsTxt() {
-  // collect() walks every core/*, core/fx/* and core/layers/* module and imports it, which is also
-  // the only thing that populates the registry list catalogued() reads. Call it first, or a family
-  // whose module nothing here imports directly would silently be missing from the family section.
   const rows = await collect();
   const total = rows.length;
   const layers = layerSection();
@@ -190,6 +163,4 @@ async function main() {
   console.error(`✓ llms-txt: wrote ${path.relative(ROOT, OUT)} (${text.split('\n').length} lines)`);
 }
 
-// Run only when invoked directly (`node harness/author/llms-txt.mjs`), never on import, so the test
-// self-check can import buildLlmsTxt/OUT without writing a file as a side effect of loading the module.
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
