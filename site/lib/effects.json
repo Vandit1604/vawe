@@ -1,7 +1,7 @@
 {
-  "total": 735,
+  "total": 744,
   "previewed": 345,
-  "families": 63,
+  "families": 64,
   "tags": [
     [
       "asset",
@@ -46,6 +46,10 @@
     [
       "layer",
       43
+    ],
+    [
+      "layout",
+      9
     ],
     [
       "motion key",
@@ -1873,6 +1877,82 @@
           "stem": "three-js-scenes-real-geometry--uiparallax",
           "desc": "flat UI planes stacked at depth, the camera moving past them so the layers separate",
           "scene": "/assets/effects/three-js-scenes-real-geometry--uiparallax.json",
+          "noPreview": null
+        }
+      ]
+    },
+    {
+      "id": "anchor-points",
+      "title": "Anchor points",
+      "tag": "layout",
+      "intro": "`\"anchorPoint\": \"<name>\"` on a layer · which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "an anchor point is where a coordinate lands, not a look: see it on any layer with `w`/`h` set and `anchorPoint: \"center\"`.",
+      "count": 9,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "bottom",
+          "stem": "anchor-points--bottom",
+          "desc": "x/y lands at 50% across the box and 100% down it · the bottom edge, horizontally centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-left",
+          "stem": "anchor-points--bottom-left",
+          "desc": "x/y lands at 0% across the box and 100% down it · the bottom-left corner",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "bottom-right",
+          "stem": "anchor-points--bottom-right",
+          "desc": "x/y lands at 100% across the box and 100% down it · the bottom-right corner",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "center",
+          "stem": "anchor-points--center",
+          "desc": "x/y lands at 50% across and 50% down the box, its exact centre, needs a numeric w and h (or, for text, a `size`) to compute",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "left",
+          "stem": "anchor-points--left",
+          "desc": "x/y lands at 0% across the box and 50% down it · the left edge, vertically centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "right",
+          "stem": "anchor-points--right",
+          "desc": "x/y lands at 100% across the box and 50% down it · the right edge, vertically centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top",
+          "stem": "anchor-points--top",
+          "desc": "x/y lands at 50% across the box and 0% down it · the top edge, horizontally centred",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-left",
+          "stem": "anchor-points--top-left",
+          "desc": "the default (0% across, 0% down the box) · x/y is the top-left corner, unchanged from before this field existed",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "top-right",
+          "stem": "anchor-points--top-right",
+          "desc": "x/y lands at 100% across the box and 0% down it · the top-right corner",
+          "scene": null,
           "noPreview": null
         }
       ]
