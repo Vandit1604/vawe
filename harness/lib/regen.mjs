@@ -70,6 +70,12 @@ let failed = 0;
 failed |= run('schema-write', 'quality/gates/schema-drift.mjs', ['--write']);
 failed |= run('generated-check --write', 'quality/gates/generated-check.mjs', ['--write']);
 failed |= run('rules-build', 'scripts/site/rules-build.mjs', []);
+// site-engine re-vendors blocks/ (just rewritten by generated-check --write above) into
+// site/public/blocklib. Without this, blocklib was only ever refreshed as a side effect of the
+// site's own `predev`/`prebuild` (site/package.json), so `make e2e`'s site-test ran it later and the
+// tree went dirty after a supposedly read-only check. regen is the owner now; site-test just finds
+// nothing left to vendor.
+failed |= run('site-engine', 'scripts/site/site-engine.mjs', []);
 if (film) failed |= kitRepaste(film);
 console.log(`\n${failed ? '✗ regen finished with a step that could not fully resolve itself; see above.' : '✓ regen finished. Every generated file is current.'}`);
 process.exit(failed ? 1 : 0);
