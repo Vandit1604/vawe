@@ -1,9 +1,4 @@
-// harness/author/argus.mjs: composes the argushq.cc launch teaser (landscape 16:9) from the taste library +
-// the brand's signature details (pixel-eye mascot, hand-drawn cobalt underline, X-native surfaces).
-// Colours come from themes/argus.json via CSS vars (theme-aware blocks), so everything is cobalt-on-white.
-// Writes films/scene/argus-launch.json. Run: node harness/author/argus.mjs
 import fs from 'node:fs';
-// Named off BLOCKS: index.mjs is the registry now, not a barrel of 200 re-exported names.
 import { BLOCKS } from '../../blocks/index.mjs';
 const { tweetCard, chatBubble, statCard, barChart, reactionBar, avatarStack, kpiRow } = BLOCKS;
 
@@ -12,11 +7,9 @@ const INK = 'var(--ink)', SUB = 'var(--text-2)', DIM = 'var(--dim)', COBALT = 'v
 const T = (o) => ({ type: 'text', weight: 400, color: INK, ...o });                 // Archivo defaults light
 const L = [];
 
-// the REAL pixel mascot (captured from the site, white bg → composites on our white scene). w centers.
 const eye = (w, y, start, dur) => ({ type: 'image', src: '/assets/brands/argus/mascot.png',
   x: Math.round((W - w) / 2), y, w, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.3 });
 
-// hand-drawn cobalt underline (a rough marker scribble) under a word, a signature detail.
 const underline = (x, y, w, start) => ({ type: 'html', x, y, w, start, duration: 3,
   html: `<svg viewBox="0 0 ${w} 16" width="${w}" height="16" style="display:block"><path d="M2 11 Q ${w * 0.3} 4, ${w * 0.55} 9 T ${w - 4} 7" stroke="#4772f5" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`,
   anim: 'wipe', enterDur: 0.5 });
@@ -41,7 +34,6 @@ L.push(...statCard({ x: 1450, y: 660, w: 330, to: 3, unit: 'k', label: 'impressi
 L.push(T({ text: 'it drafts each reply in your voice.', x: 360, y: 150, w: 1200, align: 'center', size: 56, weight: 400, ls: '-0.03em', start: 10.2, duration: 5.8, anim: 'rise', enterDur: 0.5, cut: 'whip' }));
 L.push(...tweetCard({ x: 460, y: 270, w: 820, name: 'a big account', handle: 'founder', initials: 'F', likes: '1.2k', reposts: '210',
   text: 'shipping is the only growth hack that compounds.', start: 10.4, dur: 5.6 }));
-// the reply threads DIRECTLY below the post (indented), so it visibly replies TO it.
 L.push(T({ text: '↳ argus drafts in your voice', x: 560, y: 500, font: 'mono', size: 20, weight: 500, color: COBALT, start: 11.4, duration: 4.6, anim: 'rise', enterDur: 0.4 }));
 L.push(...chatBubble({ x: 560, y: 542, w: 820, start: 11.6, dur: 4.4, messages: [
   { text: 'agreed. we shipped 40 times last month and every reply here came from argus.', me: true },
@@ -58,8 +50,6 @@ L.push(...barChart({ x: 1080, y: 300, w: 700, h: 460, color: COBALT, start: 16.8
 
 // ═══ BEAT 5 · CTA (20–23s): the site's exact words + cobalt waitlist pill ═══
 L.push(eye(150, 360, 20.1, 3)); // mascot lower so it groups with the headline
-// headline + underline as ONE html layer: text-align centres the line, and the underline SVG is
-// absolutely positioned UNDER the "purpose." span, so it tracks the word regardless of metrics/centring.
 L.push({ type: 'html', x: 360, y: 490, w: 1200, start: 20.2, duration: 2.8, anim: 'rise', enterDur: 0.5,
   html: `<div style="font:400 88px var(--font-sans);letter-spacing:-0.035em;color:var(--ink);text-align:center;line-height:1.05;white-space:nowrap">grow on X, on <span style="position:relative;display:inline-block">purpose.<svg viewBox="0 0 300 18" preserveAspectRatio="none" style="position:absolute;left:0;top:98%;width:100%;height:18px;overflow:visible"><path d="M4 12 Q 90 4, 150 10 T 296 8" stroke="#4772f5" stroke-width="7" fill="none" stroke-linecap="round"/></svg></span></div>` });
 L.push({ type: 'group', x: 760, y: 680, w: 400, bg: COBALT, radius: 999, pad: '22px 0', layout: 'row', justify: 'center', items: 'center',

@@ -10,17 +10,25 @@ The owner's decision is that everything in `blocks/` builds from HTML: one marku
 (`bg`/`border`/`radius`/`elevation`) carried as a LAYER PROP, and `parts` for a multi-item family's own
 staggered children (`engine-doctrine/CRAFT/HTML-FRAGMENTS.md`). `blocks/ui.mjs`, `blocks/app.mjs`,
 `blocks/social.mjs`, `blocks/interact.mjs` were converted first; `core.mjs`, `dev.mjs`, `glass.mjs`,
-`sleek.mjs` and `vfx.mjs`'s `redditPost` followed in the pass this table now reflects.
+`sleek.mjs` and `vfx.mjs` followed in the pass this table now reflects.
 
-Counted by `export function` factory, not by file: 65 factories across `board.mjs`, `camera-chrome.mjs`,
+A later pass cut every block that was only a static styled HTML fragment with no mechanism beyond
+markup an authoring script can write inline: `card`, `quote`, `pricingCard`, `stripeCard` (core.mjs),
+`diff` (dev.mjs), `glassCard`, `meshPanel`, `spotlightCard`, `grainOverlay` (sleek.mjs), `redditPost`
+(vfx.mjs), plus `profileCard`/`tweetCard` (social.mjs), `logoWall`/`badge`/`banner` (ui.mjs), and
+`feedRow`/`listRow`/`settingsRow` (app.mjs, converted in the earlier pass, so never in this table's
+count). `bento` (sleek.mjs) keeps its three cell looks as local, unexported helpers now that
+`glassCard`/`meshPanel`/`spotlightCard` are gone.
+
+Counted by `export function` factory, not by file: 55 factories across `board.mjs`, `camera-chrome.mjs`,
 `charts.mjs`, `codeanim.mjs`, `core.mjs`, `dev.mjs`, `diagram.mjs`, `geo.mjs`, `glass.mjs`, `sleek.mjs`,
 `terminal-html.mjs`, `terminal-layers.mjs`, `vfx.mjs`. Two exports are excluded because they are not
 blocks (`blocks/index.mjs`'s own `NOT_A_BLOCK`, with its reason): `codeanim.mjs`'s `palette` and
 `diagram.mjs`'s `routeEdge`.
 
-**51 already html · 0 convert candidates left · 14 deliberately native.**
+**43 already html · 0 convert candidates left · 12 deliberately native.**
 
-## Already html (51)
+## Already html (43)
 
 | file | factory |
 |---|---|
@@ -30,11 +38,11 @@ blocks (`blocks/index.mjs`'s own `NOT_A_BLOCK`, with its reason): `codeanim.mjs`
 | diagram.mjs | flowchart, nodeGraph |
 | geo.mjs | usMapHex, worldMap, usMap, usMapBubble, usMapFlow |
 | terminal-html.mjs | terminalHtml |
-| vfx.mjs | textCursor, parallaxZoom, parallaxUnzoom, morphText, uiReveal3d, redditPost |
-| core.mjs | card, colorCycle, quote, kpiRow (hybrid, see below), comparison (string-list path only, see below), captions, pricingCard |
-| dev.mjs | codeBlock, deploySuccess (success card only, see below), diff, fileTree, logLines, commitRow |
+| vfx.mjs | textCursor, parallaxZoom, parallaxUnzoom, morphText, uiReveal3d |
+| core.mjs | colorCycle, kpiRow (hybrid, see below), comparison (string-list path only, see below), captions |
+| dev.mjs | codeBlock, deploySuccess (success card only, see below), fileTree, logLines, commitRow |
 | glass.mjs | glassWidgets, glassNotification, glassMenu, glassHome, glassControls |
-| sleek.mjs | glassCard, meshPanel, spotlightCard, borderBeamCard (panel half; the paired `beam` layer stays native), bento (pure composition of the three above, needed no edit of its own) |
+| sleek.mjs | borderBeamCard (panel half; the paired `beam` layer stays native), bento (pure composition of `glassCell`/`meshCell`/`spotlightCell`, its own local helpers, not exported blocks) |
 
 Four of these are not a flat "one factory, one markup string" and are worth naming so the next reader
 does not mistake a partial conversion for an incomplete one:
@@ -51,7 +59,7 @@ does not mistake a partial conversion for an incomplete one:
   layers (one per hue step, one per caption line). They convert layer-by-layer: N `html` layers instead
   of N `text` layers, same shape, same timing.
 
-## Deliberately native (14), with the reason
+## Deliberately native (12), with the reason
 
 | file | factory | reason |
 |---|---|---|
@@ -66,11 +74,9 @@ does not mistake a partial conversion for an incomplete one:
 | core.mjs | searchEngine | **no-html-equivalent**: uses `type:'image'`, a `typing` (char-reveal) prop, and a `type:'cursor'` layer, three native-only mechanisms in one factory |
 | dev.mjs | terminal | **no-html-equivalent**: `typing:cps`, the native char-reveal mechanism |
 | dev.mjs | spinner | **no-html-equivalent**: is a `type:'lottie'` layer, no html equivalent |
-| core.mjs | stripeCard | **gate dependency, found during the conversion pass**: `tests/registry/lib-test.registry.test.mjs` asserts the bar chart's span directly off `card.children[2].children` ("the bar chart spans the card's content box"). That test file is out of scope for a blocks-only pass; converting stripeCard to one markup string would have broken a real invariant the test checks with no way to fix the test in the same pass. Reverted to its original `group`+`box()` bars. |
-| glass.mjs | glassDock | **gate dependency, found during the conversion pass**: `tests/registry/lib-test.registry.test.mjs` asserts every tile's corner is the same fraction of its own size off `dock.children[i].radius / .w`. Same constraint as stripeCard: reverted to its original `group`+`box()` tiles. Its magnified-item label chip converted to html regardless (that one had no test dependency). |
-| sleek.mjs | grainOverlay | **judgment call, converted to a decision not a mechanism**: it is a bare `type:'rect'` with a data-uri noise texture as `bg` plus `opacity`/`blend` as layer props, no text, no children, no `parts` target. `type:'html'` would carry the exact same three layer props with an empty markup body: a lateral rename, not a conversion, since there is no "what the frame looks like" content to move into markup. Left as `type:'rect'`. |
+| glass.mjs | glassDock | **gate dependency, found during the conversion pass**: `tests/registry/lib-test.registry.test.mjs` asserts every tile's corner is the same fraction of its own size off `dock.children[i].radius / .w`. Reverted to its original `group`+`box()` tiles. Its magnified-item label chip converted to html regardless (that one had no test dependency). |
 
-None of the 14 fall in the fourth sub-reason this table started with ("a data picture needing SVG/canvas
+None of the 12 fall in the fourth sub-reason this table started with ("a data picture needing SVG/canvas
 primitives an html layer can't host"): every chart, gauge, ring, map and diagram in the "already html"
 list already proves an `<svg>` fragment inside an `html` layer covers that case, so nothing here is left
 native for that reason.

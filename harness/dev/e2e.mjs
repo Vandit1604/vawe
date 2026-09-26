@@ -1,23 +1,3 @@
-// harness/dev/e2e.mjs: THE ONE END-TO-END SUITE. AGENTS.md's testing doctrine names six pieces that
-// already exist and nothing ran together: probe, snap-all, snap-blocks, mcp-smoke, the site's real-browser
-// test, and author-check on a real film. This runs all six, in that fixed order, continuing past a
-// failure so one run reports on everything rather than stopping at the first, and leaves a verifiable,
-// repeatable artifact behind: quality/runs/e2e/<UTC timestamp>/report.json + report.md, and
-// quality/runs/e2e/latest.json pointing at the newest one.
-//
-//   node harness/dev/e2e.mjs     ·     make e2e
-//
-// WHY A NODE SCRIPT AND NOT A MAKE RECIPE. Six checks, each needing its own env var, its own parse of
-// what "pass" means, and a shared known-broken exemption list, is state a shell recipe has no clean way
-// to hold. A `continue`-past-failure shell loop can only report exit codes; this needs the actual counts.
-//
-// TRUSTWORTHY, NOT GREEN BY DEFAULT. A snap check that compared nothing (every scene stale-font or
-// no-baseline) is a failure here, never a pass; that is already snap-scenes.mjs's/snap-blocks.mjs's own
-// rule (see their "nothing-compared" exit), carried through unchanged. `changed` always fails. An errored
-// scene is reported by name and, unless it is on the list below, fails the run. `quality/baselines/
-// e2e-known-broken.json` is the one escape hatch: a scene erroring TODAY, with a reason, so this suite is
-// green on today's tree and goes red the moment a NEW scene starts erroring, never by silently widening.
-// It shrinks as those tracked films get repaired (not this script's job: it only reads the list).
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -65,7 +45,6 @@ function record(name, command, res, extra) {
   return entry;
 }
 
-// ---- 1. probe: renderFrame(n) pure across render orders, every shipped format ----------------------
 {
   const filmsDir = path.join(repoRoot, 'films');
   const formats = fs.existsSync(filmsDir)
@@ -90,7 +69,6 @@ function record(name, command, res, extra) {
     { pass: allOk && formats.length > 0, counts: { formats: formats.length, framesSampled: sampled, framesFailed: failedFrames }, perFormat });
 }
 
-// ---- shared: run a snap gate, parse its summary counts + structured findings -------------------------
 function runSnap(name, script, sceneKeyword) {
   const out = findingsPath(name);
   const res = run('node', [script], { env: { ...process.env, VAWE_FINDINGS_OUT: out } });
@@ -107,15 +85,9 @@ function runSnap(name, script, sceneKeyword) {
   const quarantinedNames = namesFor('quarantined').concat(namesFor('non-deterministic'));
   const nothingCompared = records.some((r) => r.code === 'nothing-compared');
 
-  // `changed` always fails, unconditionally: it is the one signal this whole suite exists to catch.
-  // An errored scene is excused only when it is on quality/baselines/e2e-known-broken.json, by name.
-  // The net is the repo: a film only on this machine (untracked, often needing gitignored brand assets)
-  // is listed but cannot fail the suite, because a clean clone never has it.
   const newErrored = erroredNames.filter((n) => !(n in knownScenes) && isTrackedScene(n));
   const untrackedErrored = erroredNames.filter((n) => !isTrackedScene(n));
 
-  // A run that printed no summary, or compared nothing, verified nothing: snap-scenes refuses a blind
-  // sweep inside a git worktree, and that refusal must read as a failure here, never as a quiet pass.
   const compared = counts.identical + counts.changed;
   const pass = Boolean(m) && compared > 0 && newErrored.length === 0 && changedNames.length === 0
     && quarantinedNames.length === 0 && !nothingCompared;
@@ -125,13 +97,10 @@ function runSnap(name, script, sceneKeyword) {
   });
 }
 
-// ---- 2. snap-all: the whole scene library ------------------------------------------------------------
 runSnap('snap-all', 'quality/gates/snap-scenes.mjs');
 
-// ---- 3. snap-blocks: the block catalog -----------------------------------------------------------------
 runSnap('snap-blocks', 'quality/gates/snap-blocks.mjs');
 
-// ---- 4. mcp-smoke: the real MCP server drafts a scene --------------------------------------------------
 {
   const res = run('node', ['mcp/smoke.mjs', '--no-render']);
   fs.writeFileSync(path.join(runDir, 'mcp-smoke.log'), res.stdout + res.stderr);
@@ -142,7 +111,6 @@ runSnap('snap-blocks', 'quality/gates/snap-blocks.mjs');
   });
 }
 
-// ---- 5. site test: the real engine in a browser --------------------------------------------------------
 {
   const siteDir = path.join(repoRoot, 'site');
   const testDir = path.join(siteDir, 'test');
@@ -166,11 +134,8 @@ runSnap('snap-blocks', 'quality/gates/snap-blocks.mjs');
   }
 }
 
-// ---- 6. author-check: the whole authoring ladder on a real film ----------------------------------------
 {
   const out = findingsPath('author-check');
-  // A finished, tracked film. sample.json is a bare demo that never went through the decision chain,
-  // and the preflight receipt is local, so author-check refuses it on every clean clone.
   const target = 'films/scene/preface-launch.json';
   const res = run('node', ['quality/gates/author-check.mjs', target], { env: { ...process.env, VAWE_FINDINGS_OUT: out } });
   fs.writeFileSync(path.join(runDir, 'author-check.log'), res.stdout + res.stderr);
@@ -181,7 +146,6 @@ runSnap('snap-blocks', 'quality/gates/snap-blocks.mjs');
   });
 }
 
-// ---- report -------------------------------------------------------------------------------------------
 const overallPass = results.every((r) => r.pass);
 const report = { timestamp: new Date().toISOString(), sha, fontState: font, pass: overallPass, checks: results };
 

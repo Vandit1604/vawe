@@ -425,75 +425,6 @@ export function toast({ x, y, w = 420, title, message = '', body: _body = '', ac
     ].filter(Boolean) }];
 }
 
-// logoWall: a grid of wordmark (or logo image) cells. logos = [{text}] or [{src}].
-export function logoWall({ x, y, w = 640, logos = [], cols = 3, start = 0, dur = 4 } = {}) {
-  const rows = []; for (let i = 0; i < logos.length; i += cols) rows.push(logos.slice(i, i + cols));
-  return [{ type: 'group', x, y, w, layout: 'column', items: 'stretch', gap: SPACE.sm, start, duration: dur, anim: 'rise', enterDur: 0.5, exitDur: 0.35,
-    children: rows.map((r) => ({ type: 'group', layout: 'row', gap: SPACE.sm, items: 'stretch', children:
-      // Hairline, no shadow: a grid of cells reads as a grid because of its rules, and one drop
-      // shadow per cell turns a wall into a pile.
-      r.map((lg) => ({ type: 'group', grow: 1, bg: T.card, radius: R.card, border: HAIR, pad: `${SPACE.lg}px 0`, layout: 'row', justify: 'center', items: 'center',
-        children: [lg.src ? { type: 'image', src: lg.src, h: 28 } : text({ text: lg.text, size: TYPE.lead, weight: 700, color: T.sub, ls: '-0.02em' })] })) })) }];
-}
-
-// badge. A CI-shield token: dark label + a coloured value chip. tone picks the value colour.
-export function badge({ x, y, label = '', value = '', tone = 'ok', start = 0, dur = 4 } = {}) {
-  const ac = toneColor(tone);
-  // core/boot.js writes `--on-up`/`--on-down`/`--on-warn` beside `--on-accent`, each white-or-black
-  // chosen per theme off that theme's own fill, clearing all 152 theme x tone pairs (floor 4.69:1).
-  // `onColor` defers to them so this block holds no colour opinion of its own.
-  const onAc = onColor(ac);
-  // A shield stamps in, its value chip a beat later; nothing more, to keep it reading as a vocabulary.
-  // Plate and text use `T.ink`/`T.paper` (the theme contract's guaranteed pair), inverted: a dark plate
-  // with light text on a light theme, and vice versa, legible on both by construction.
-  // `shadow` and `border` do apply to a group, despite both being labelled "(rect)" in the schema. The
-  // shadow says the sticker sits above the frame (elevation); a border would be the wrong instrument,
-  // and the seam inside the badge is drawn with a colour change instead.
-  // Mono on both halves is deliberate, not the library's inversion: a CI shield is machine chrome end
-  // to end ("build | passing", "v2.4.1"), the same register as a terminal.
-  //
-  // One rectangle in two halves, which is what a shields.io badge is: same padding, one height, and the
-  // plate owns the only radius and clips them so the seam is square. `pad` on a layer with no background
-  // is dropped (core/layers/util.js:202 returns before writing padding), so each half is a group with
-  // its own fill, which is what makes its padding real.
-  const half = `${SPACE.snug}px ${SPACE.sm}px`;
-  // The label half stamps in with the plate, the value half pops a beat later. `parts` on the value
-  // half alone reproduces that; the label is plain content, not a separately-timed part.
-  const html = `<div style="display:flex;align-items:stretch">`
-    + `<div style="background:${TOKENS.ink};padding:${half};display:flex;align-items:center">`
-    + `<span style="font:600 ${TYPE.body}px var(--font-mono);color:${TOKENS.paper}">${label}</span></div>`
-    + `<div data-part style="background:${ac};padding:${half};display:flex;align-items:center">`
-    + `<span style="font:700 ${TYPE.body}px var(--font-mono);color:${onAc}">${value}</span></div>`
-    + '</div>';
-  return [{ type: 'html', x, y, bg: TOKENS.ink, radius: R.chip,
-    // The clip is what keeps the coloured half square at the seam and round at the plate's edge, so
-    // one radius describes the whole object and there is no nested radius to get wrong.
-    css: { overflow: 'hidden' }, shadow: true, html,
-    start, duration: dur, anim: 'pop', enterDur: 0.32, exitDur: 0.3,
-    parts: [{ anim: 'popIn', each: 0.26, delay: 0.22 }] }];
-}
-
-// banner. A full-width accent announcement bar: icon · message · CTA.
-export function banner({ x, y, w = 720, text: msg = '', body = '', title = '', cta = '', icon = '★', accent = TOKENS.accent, start = 0, dur = 4 } = {}) {
-  msg = msg || body || title;
-  const ink = onColor(accent);
-  // THE CTA CHIP IS A TINT OF ITS OWN INK, not a hardcoded white wash. `rgba(255,255,255,0.18)` assumes
-  // the bar is dark; on a light accent (higgsfield's lime) it was a white chip carrying dark text, i.e.
-  // invisible against the bar it sits on. Tinting the colour `onColor` already chose lifts the chip off
-  // the bar in both directions without the block knowing which it is in.
-  const html = `<div style="display:flex;align-items:center;gap:${SPACE.sm}px;padding:${SPACE.md}px ${SPACE.lg}px;`
-    + `box-sizing:border-box;width:${w}px">`
-    + `<span style="font:400 ${TYPE.base}px var(--font-sans);color:${ink}">${icon}</span>`
-    + `<span style="flex:1;font:600 ${TYPE.base}px var(--font-sans);color:${ink}">${msg}</span>`
-    + (cta ? `<div data-part style="background:${tint(ink, 18)};border-radius:${R.chip}px;padding:${SPACE.xs}px ${SPACE.md}px">`
-      + `<span style="font:600 ${TYPE.body}px var(--font-sans);color:${ink}">${cta}</span></div>` : '')
-    + '</div>';
-  // a full-width bar arrives EDGE-FIRST (broadcast grammar), then its CTA lands
-  return [{ type: 'html', x, y, w, bg: accent, radius: R.tight, html,
-    start, duration: dur, anim: 'wipe', enterDur: 0.45, exitDur: 0.3,
-    ...(cta ? { parts: [{ anim: 'popIn', each: 0.3, delay: 0.35 }] } : {}) }];
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // THE OPTION CONTRACT for this file's families. Vocabulary and checker: blocks/schema.mjs.
 // x · y · start · dur are excluded from every table: the scene supplies them, an author does not dial them.
@@ -637,30 +568,4 @@ export const UI_SCHEMAS = {
     gap: { kind: 'int', min: 0, max: 80, def: 12 },
   },
 
-  logoWall: {
-    w: { kind: 'int', min: 160, max: 1920, def: 640 },
-    // A cell is a wordmark or a real logo file. `src` is preferred: a mark re-typed in the theme's
-    // face is a lookalike, not the brand.
-    logos: { kind: 'list', of: { kind: 'row', fields: {
-      text: { kind: 'str', max: 40 },
-      src: { kind: 'str', max: 200 },
-    } }, def: [] },
-    cols: { kind: 'int', min: 1, max: 8, def: 3 },
-  },
-
-  badge: {
-    label: { kind: 'str', max: 24, def: '' },
-    value: { kind: 'str', max: 24, def: '' },
-    tone: { kind: 'enum', of: TONE_NAMES, def: 'ok' },
-  },
-
-  banner: {
-    w: { kind: 'int', min: 200, max: 1920, def: 720 },
-    text: { kind: 'str', max: 200, def: '' },
-    body: { kind: 'str', max: 200, def: '' },        // alias of text
-    title: { kind: 'str', max: 200, def: '' },       // alias of text
-    cta: { kind: 'str', max: 24, def: '' },
-    icon: { kind: 'str', max: 4, def: '★' },
-    accent: { kind: 'color', def: 'var(--accent)' },
-  },
 };

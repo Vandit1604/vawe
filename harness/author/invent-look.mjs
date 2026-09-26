@@ -1,33 +1,3 @@
-// invent-look.mjs: the THIRD move. Every other look tool here either REFLECTS a real brand
-// (`make palette`, `make brandspec`) or SELECTS from what already exists (`make lookbook`,
-// `make quiz-look`, `make theme-remix`). So an author asked to invent a look has two options, copy or
-// pick, and picks arrive before their reasoning. This one AUTHORS: it reads a storyboard's brief,
-// proposes 4 to 6 complete looks that each tell a DIFFERENT story about that subject, shows them, and
-// writes the chosen one as a new themes/<name>.json.
-//
-//   node harness/author/invent-look.mjs films/scene/_concepts/gh-wrapped.storyboard.md --seed 7
-//   node harness/author/invent-look.mjs <storyboard.md> --seed 7 --pick 3 --name <theme>
-//   make invent-look SB=<storyboard.md> SEED=7            → /tmp/invent-look/<slug>-sheet.png
-//   make invent-look SB=<storyboard.md> SEED=7 PICK=3     → themes/<name>.json (+ the faces vendored)
-//
-// THE RULES THIS TOOL IS BUILT ON. They are in the second person because that is the register that
-// survives being skimmed, and every one of them is aimed at you, the author reading the sheet:
-//
-//   · GENERIC OPTIONS THAT COULD APPEAR ON ANY PICKER ARE A FAILURE. If these candidates would suit any
-//     subject, you are looking at a menu, not at proposals, and you should re-run with another seed or
-//     say why the tool is wrong. Every hue here is derived from THIS brief's own fingerprint, so two
-//     unrelated subjects cannot land on the same colours; that is arithmetic, not a promise.
-//   · EVERY CANDIDATE MUST TELL A DIFFERENT STORY ABOUT THE SUBJECT. Not six shades of one idea. For a
-//     coffee brand: playful chaos, premium restraint, worn and domestic, social-native loud. Four
-//     worlds, not four blues. The STANCES below are those worlds; a run never picks two from the same
-//     family.
-//   · NAME A PALETTE AFTER THE SUBJECT'S WORLD, never after its colour. "heatmap-ignition", never
-//     "dark blue". The nouns are mined from the storyboard itself for exactly that reason.
-//   · TWO CANDIDATES YOU CANNOT TELL APART IN A 14px CHIP ARE ONE CANDIDATE. That is enforced in code
-//     against this generator's own output (see the distinctness gate) and a collision is REGENERATED,
-//     not reported. A gate on the author would be advice; a gate on the generator is a floor.
-//
-// Fails loud, never substitutes: no hardcoded palette, no default font list, no silent theme fallback.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -38,11 +8,6 @@ import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 import { migrateOne } from './migrate-themes.mjs';
 
-// asTokenFile(theme, dest): the engine now refuses a theme written in the retired palette/type/gradient
-// shape (core/theme/roles.js expandTheme), so every WRITE site here converts through the same pure
-// converter migrate-themes.mjs already proved on the library, rather than growing a second one.
-// migrateOne always succeeds on a theme this generator just built (every key concrete, nothing to fail
-// a round trip on); a failure here is a bug in buildTheme, not something to paper over.
 function asTokenFile(theme, dest) {
   const { next, ok, err } = migrateOne(theme);
   if (!ok) die(`${dest}: could not convert to a token file: ${err}`);
@@ -55,9 +20,6 @@ const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] 
 const has = (n) => argv.includes(n);
 const die = (msg) => { console.error(`invent-look: ${msg}`); process.exit(1); };
 
-// ---------------------------------------------------------------- seeded RNG
-// mulberry32, the same generator Phase 1 uses. Math.random() is banned engine-side because a render
-// must be pure in n; a look must be reproducible for the same reason.
 function mulberry32(a) {
   return function () {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -74,10 +36,6 @@ function shuffled(list, seed) {
   return out;
 }
 
-// ---------------------------------------------------------------- OKLab / OKLCH
-// Perceptual, not sRGB. Two reasons, both load-bearing: a palette built by moving LIGHTNESS in OKLCH
-// keeps its hue where an sRGB mix drifts, and the 14px distinctness gate needs a distance that matches
-// what an eye reports. Björn Ottosson's matrices.
 const f2s = (x) => (x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055);
 const s2f = (x) => (x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4));
 function oklabToLinear(L, a, b) {
@@ -107,7 +65,6 @@ function oklch(L, C, H) {
   const rad = (H * Math.PI) / 180;
   let c = C;
   let lin = oklabToLinear(L, c * Math.cos(rad), c * Math.sin(rad));
-  // Clipping RGB channels shifts the hue; walking the chroma down keeps it. 40 halvings is exact enough.
   for (let i = 0; i < 40 && !inGamut(lin); i++) { c *= 0.94; lin = oklabToLinear(L, c * Math.cos(rad), c * Math.sin(rad)); }
   const hx = (v) => Math.max(0, Math.min(255, Math.round(f2s(Math.max(0, Math.min(1, v))) * 255))).toString(16).padStart(2, '0');
   return `#${hx(lin[0])}${hx(lin[1])}${hx(lin[2])}`;
@@ -117,11 +74,6 @@ const toOklab = (hex) => { const [r, g, b] = parseHex(hex).map((v) => s2f(v / 25
 const dE = (a, b) => { const A = toOklab(a), B = toOklab(b); return 100 * Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); };
 const rgba = (hex, a) => { const [r, g, b] = parseHex(hex); return `rgba(${r},${g},${b},${a})`; };
 
-// ---------------------------------------------------------------- the brief
-// The house brief is SUBJECT / DATA / PAYOFF / AUDIENCE / FEELING (CLAUDE.md). Real storyboards in this
-// repo carry it as prose under a title rather than as labelled lines, so both are read, and what was
-// read is PRINTED, because a tool that guesses the subject and says nothing invents a look for the
-// wrong film.
 const FIELDS = ['SUBJECT', 'DATA', 'PAYOFF', 'AUDIENCE', 'FEELING'];
 function readBrief(file) {
   if (!fs.existsSync(file)) die(`no storyboard at ${file}`);
@@ -141,23 +93,17 @@ function readBrief(file) {
   return { brief, title: title || brief.SUBJECT, prose, file };
 }
 
-// Nouns for the palette NAME. Mined from the storyboard so a look is named after the subject's world.
 const STOP = new Set(`the a an and or but of to in on at by for from with without into over under is are was
 were be been being it its this that these those as if then than so such not no nor only own same too very
 can will just should now what which who whom when where why how all any both each few more most other some
 have has had do does did done get got make makes made say says said one two three first last next also
 about after again against because before between during through until while your you they them he she his
 her their our we us i me my mine here there does doing done up down out off again further once`.split(/\s+/));
-// Repo jargon is not the subject's world. A palette called "layer-ignition" names the tool, not the film.
 const JARGON = new Set(`beat beats layer layers frame frames scene scenes theme themes film films video
 videos camera cut cuts render renders json canvas motion palette colour color font fonts type shot shots
 second seconds portrait landscape storyboard payoff hook subject audience feeling data bg text accent
 make node script tool gate check rule rules
 back front left right side wide close still open into onto whole huge small large real full`.split(/\s+/));
-// WHERE a word appears matters more than how often it does. A storyboard's beat prose is mostly
-// DIRECTION ("the camera pulls back", "the cells ignite left to right"), so plain frequency names a look
-// after the tool: screen, window, count. Titles, headings, bold text, brief fields and table cells are
-// where a film says what it is ABOUT, and they count triple.
 function mineNouns(key, body, seed, want) {
   const score = new Map();
   const add = (text, weight) => {
@@ -171,8 +117,6 @@ function mineNouns(key, body, seed, want) {
   add(key, 3);
   const ranked = [...score.entries()].sort((a, b) => b[1] - a[1] || b[0].length - a[0].length || a[0].localeCompare(b[0])).slice(0, 16).map(([w]) => w);
   if (ranked.length < want) die(`the storyboard has only ${ranked.length} usable nouns and ${want} candidates need one each. Write more of the brief, or lower --count.`);
-  // Seeded across the top of the ranking so no two candidates share a noun, and the same brief always
-  // names them the same way.
   return shuffled(ranked, seed).slice(0, want);
 }
 /** The lines where a storyboard says what it is ABOUT: title, brief fields, headings, bold, table cells. */
@@ -182,14 +126,6 @@ function keyText(prose, brief, title) {
   return parts.join(' \n ');
 }
 
-// ---------------------------------------------------------------- the stances
-// A STANCE is a posture toward a subject, not a colour scheme. It fixes dominance, where in the hue
-// circle the accent may fall, how much chroma the world carries, the texture it is made of and how it
-// moves. The SUBJECT decides where inside that arc the hue actually lands, so "ignition" for a bakery
-// and "ignition" for a code year-in-review are not the same amber.
-//
-// `family` exists so one run never proposes two neighbours: six candidates from one family is the exact
-// "six shades of the same idea" failure. `cues` let the brief's own FEELING pull a stance forward.
 const STANCES = [
   {
     key: 'ignition', world: 'ignition', family: 'heat', dominance: 'dark', arc: [22, 62],
@@ -265,7 +201,6 @@ const STANCES = [
   },
 ];
 
-// ---------------------------------------------------------------- palette synthesis
 function buildPalette(stance, hue) {
   const dark = stance.dominance === 'dark';
   const gH = (hue + stance.ground.dh + 360) % 360;
@@ -274,8 +209,6 @@ function buildPalette(stance, hue) {
   const text = oklch(stance.textL, stance.textC, gH);
   const accent = oklch(stance.accent.L, stance.accent.C, hue);
   const lineHex = dark ? oklch(Math.min(0.99, stance.ground.L + 0.35), stance.ground.C, gH) : oklch(Math.max(0.02, stance.ground.L - 0.35), stance.ground.C, gH);
-  // `down` is semantic (a fall, a loss) so it stays red whatever the accent does, unless the accent is
-  // already red, in which case it moves to crimson so the two are never confusable in a chart.
   const warmAccent = hue < 60 || hue > 340;
   const down = oklch(0.58, 0.18, warmAccent ? 8 : 30);
   return {
@@ -298,36 +231,9 @@ function buildPalette(stance, hue) {
   };
 }
 
-// ---------------------------------------------------------------- the 14px chip distinctness gate
-// TWO CANDIDATES YOU CANNOT TELL APART IN A 14px CHIP ARE ONE CANDIDATE. At that size a palette is its
-// ground and its accent; the surfaces and the text ladder are sub-pixel decoration. So the signature is
-// exactly those two, weighted toward the ground because that is most of the chip's area.
-//
-// A SUM, not a distance: a candidate can earn its separation on the accent alone, because in a 14px
-// chip the accent is the identifying mark and the ground is only its backing.
-//
-// The threshold is in OKLab ΔE×100 and it is CALIBRATED against this repo's own 35 themes, not chosen.
-// Over the 595 pairs those themes make: p05 is 3.7, p10 is 6.9, p25 is 15.6, the median is 44. The
-// closest pairs score 0.0 (default vs vawe vs vawe-inter, preface vs vawe-paper) and they are
-// genuinely one look wearing two names. 16 sits just above p25, so two candidates here must be further
-// apart than three quarters of the pairs the library already ships.
 const CHIP_MIN = 16;
 const chipDistance = (a, b) => 0.55 * dE(a.palette.bg, b.palette.bg) + 0.45 * dE(a.palette.accent, b.palette.accent);
 
-// ---------------------------------------------------------------- fonts (Phase 1's output, filtered)
-// Never reimplemented here: fonts-discover.mjs owns the catalogue query, the popularity bands and the
-// exact-name exclusions. This layer adds the one judgement a data query has no business making.
-//
-// BAN BY LINEAGE, NOT BY FAMILY. Phase 1 bans exact names, so `--seed 3 --category serif` returned
-// Roboto Slab: a different family from the banned Roboto and the identical reflex. A sibling of a face
-// you already reach for is still the face you already reach for, so the whole superfamily goes. The cost
-// is real and accepted: banning the stem "archivo" also loses Archivo Narrow, which nobody here has
-// used. Losing an unused sibling costs one face out of 1500; keeping it costs the entire point of the
-// tool, because the sibling is what the reflex reaches for once the parent is barred.
-// The suffix list carries the three ways a superfamily names its children: by CLASS (sans, serif, slab,
-// mono), by WIDTH or CUT (condensed, expanded, looped, rounded), and by SCRIPT (Thai, Arabic, JP, SC).
-// A script cut is the same design with different glyphs, so "IBM Plex Sans Thai Looped" and "IBM Plex
-// Mono" are one lineage and a run must not spend two candidates on them.
 const LINEAGE_SUFFIXES = /\s+(sans|serif|slab|mono|display|text|condensed|narrow|expanded|extended|semicondensed|semiexpanded|looped|rounded|deck|caption|variable|flex|extra|pro|neue|new|code|micro|sc|tc|hk|jp|kr|thai|arabic|hebrew|devanagari|cyrillic|greek|georgian|armenian|khmer|lao|myanmar|tamil|telugu|bengali|sinhala|ethiopic|naskh|kufi|two|one)$/i;
 const lineage = (family) => {
   let s = String(family).trim();
@@ -353,14 +259,12 @@ function discover(seed, category, count) {
 }
 /** A pool of families in `category`, with every lineage of a used or banned face removed. */
 function pool(seed, category, want, bannedLineages) {
-  // Ask for far more than needed: the lineage filter and the no-repeat rule both eat into the draw.
   const raw = discover(seed, category, Math.max(want * 4, 16));
   const kept = raw.filter((f) => !bannedLineages.has(lineage(f.family)));
   if (kept.length < want) die(`only ${kept.length} ${category} faces survive the lineage ban, fewer than the ${want} needed. Raise --seed or lower --count.`);
   return kept;
 }
 
-// ---------------------------------------------------------------- inputs
 const src = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--')) || flag('--sb', null);
 if (!src) die('usage: node harness/author/invent-look.mjs <storyboard.md> [--seed n] [--count 5] [--pick n --name theme] [--json]');
 const seed = Number(flag('--seed', '1'));
@@ -368,21 +272,14 @@ if (!Number.isInteger(seed)) die(`--seed must be an integer, got ${JSON.stringif
 const count = Number(flag('--count', '5'));
 if (!Number.isInteger(count) || count < 4 || count > 6) die(`--count must be 4 to 6 (fewer is a menu of one idea, more is a menu), got ${JSON.stringify(flag('--count', '5'))}`);
 const pick = flag('--pick', null);
-// Checked here rather than after generation, so `--pick 9 --json` fails on the number instead of
-// printing a sheet the caller did not ask for.
 if (pick != null && !(Number.isInteger(Number(pick)) && Number(pick) >= 1 && Number(pick) <= count)) die(`--pick must be 1..${count} (the candidate count), got ${JSON.stringify(pick)}`);
 const asJson = has('--json');
 
 const { brief, title, prose, file } = readBrief(path.resolve(src));
 
-// THE SUBJECT'S FINGERPRINT, and the reason two unrelated briefs cannot land on the same look. Only the
-// SUBJECT line and the title feed it: hashing the whole document would make a look change whenever a
-// beat is reworded, and reproducibility is the point.
 const fingerprint = fnv(`${brief.SUBJECT}\n${title}`.toLowerCase().replace(/[^a-z0-9 ]/g, ''));
 const resolved = streamSeed(seed, fingerprint);
 
-// Stance selection. The brief's own words pull matching stances forward; the rest are seeded. One
-// family only, and both dominances present. A sheet of five dark candidates is one candidate.
 const hay = `${Object.values(brief).join(' ')} ${prose}`.toLowerCase();
 const cueScore = (s) => s.cues.reduce((n, c) => n + (hay.includes(c) ? 1 : 0), 0);
 const ordered = shuffled(STANCES, resolved).sort((a, b) => cueScore(b) - cueScore(a));
@@ -402,17 +299,10 @@ if (doms.size < 2) {
   chosen[chosen.length - 1] = other;
 }
 
-// Hue placement + the distinctness gate. Each candidate draws from its OWN stream, so re-running with a
-// different --count cannot reshuffle another candidate's hue.
 const hueIn = (stance, r) => { const [a, b] = stance.arc; const span = ((b - a) + 360) % 360 || 360; return (a + r * span) % 360; };
 const collisions = [];
 const candidates = [];
 const replacements = [];
-// A slot is tried 12 times: a fresh hue from the stance's arc each time, and past attempt 6 a lightness
-// nudge as well, because two pale grounds cannot separate on hue alone. If the stance still cannot clear
-// the gate it is the WRONG STANCE for this set, not a bad draw, so the slot is handed to an unused
-// stance from another family. The alternative, telling the author to re-run with another seed, makes the
-// generator's problem the author's problem.
 const spare = ordered.filter((s) => !chosen.includes(s));
 for (const first of chosen) {
   let cand = null, stance = first;
@@ -438,8 +328,6 @@ for (const first of chosen) {
   candidates.push(cand);
 }
 
-// Type. One pairing per candidate, no family and no LINEAGE repeated inside a run, two candidates
-// sharing a display face are two colourways of one look.
 const bannedLineages = new Set();
 for (const f of fs.readdirSync(path.join(ROOT, 'themes')).filter((n) => n.endsWith('.json'))) {
   const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
@@ -475,7 +363,6 @@ candidates.forEach((c, i) => {
   c.contrast = { text: +contrast(c.palette.text, c.palette.bg).toFixed(1), accent: +contrast(c.palette.accent, c.palette.bg).toFixed(1) };
 });
 
-// ---------------------------------------------------------------- the theme
 function buildTheme(c, name) {
   const light = relLum(c.palette.bg) > 0.4;
   const P = { ...c.palette };
@@ -485,13 +372,10 @@ function buildTheme(c, name) {
     : [P.bg, mix(P.bg, P.accent, 0.06), mix(P.bg, '#000000', 0.45)];
   return {
     name,
-    // Provenance in prose, because the note is what the next author reads.
     note: `INVENTED (not selected) by harness/author/invent-look.mjs from ${path.relative(ROOT, file)}, seed ${seed}. Stance "${c.stance.key}": ${c.sentence}. Texture: ${c.texture}.`,
     palette: P,
     gradient,
     type: {
-      // sans is the workhorse; serif carries the DISPLAY face, which is the role scenes reach for when
-      // a headline needs a voice. num follows mono so counters stay tabular.
       sans: c.type.body.family,
       serif: c.type.display.family,
       mono: c.type.mono.family,
@@ -505,10 +389,6 @@ function buildTheme(c, name) {
       '--on-light': light ? P.text : P.bg, '--on-dark': light ? P.bg : P.text,
       '--border': lineHex, '--accent-soft': P.accentDim,
     },
-    // REPRODUCIBILITY. The seed alone will not rebuild this look: fonts-discover samples a LIVE
-    // catalogue and Google adds families every week, so the same seed months from now draws from a
-    // different pool. The RESOLVED family names are therefore the source of truth and the seed is only
-    // provenance, enough to retrace how the look was reached, never enough to regenerate it.
     invented: {
       tool: 'harness/author/invent-look.mjs',
       storyboard: path.relative(ROOT, file),
@@ -526,10 +406,6 @@ function buildTheme(c, name) {
   };
 }
 
-// ---------------------------------------------------------------- vendoring the faces
-// A theme naming a face that has no @font-face renders in a substitute and says nothing (core/fonts.js
-// exists because that shipped twice). So a picked look VENDORS its faces and registers them, and fails
-// loud if it cannot. An invented theme that does not paint is worse than no theme.
 const slug = (fam) => fam.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 const fileName = (fam) => fam.replace(/[^A-Za-z0-9]/g, '') + '.woff2';
 const isWoff2 = (b) => b.length > 4 && b[0] === 0x77 && b[1] === 0x4f && b[2] === 0x46 && b[3] === 0x32;
@@ -571,29 +447,18 @@ function register(vendored) {
     css = css.trimEnd() + '\n' + added.join('\n') + '\n';
     fs.writeFileSync(TOKENS, css);
   }
-  // The manifest is what makes a fresh clone self-heal: assets/fonts/ is gitignored, so without it an
-  // invented theme paints on this machine only.
   const manifest = fs.existsSync(FONT_MANIFEST) ? JSON.parse(fs.readFileSync(FONT_MANIFEST, 'utf8')) : {};
   for (const v of vendored) manifest[v.file] = { family: v.family, url: v.url, license: 'OFL/Apache (Google Fonts via Fontsource)' };
   fs.writeFileSync(FONT_MANIFEST, JSON.stringify(manifest, null, 2) + '\n');
   return added.length;
 }
 
-// ---------------------------------------------------------------- the sheet
-// Each candidate is photographed THROUGH THE ENGINE: its theme is written to a temp file and rendered by
-// harness/author/preview-fragment.mjs, which applies it with core/boot.js's own applyTheme. A second
-// theme renderer here is exactly how the preview came to paint every brand colour black (#368), so
-// there is not one. This only lays the resulting PNGs out side by side.
 const OUT = '/tmp/invent-look';
 const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 function specimen(c, theme) {
   const fams = [c.type.display, c.type.body, c.type.mono].map((f) => `family=${f.family.replace(/\s+/g, '+')}:wght@400;700`).join('&');
-  // The specimen carries the film's OWN words, so a candidate is judged on the copy it will hold. Cut to
-  // five words, then drop a trailing separator or orphan number so the sample never ends mid-date.
   const headline = (brief.PAYOFF || title).split(/\s+/).slice(0, 5).join(' ')
     .replace(/[\s·,:;-]*(?:\d+)?[\s·,:;-]*$/, '').replace(/\s+(a|an|the|and|of|to|in|on|is|are|that|with|by|for)$/i, '');
-  // The counter shows a REAL figure from this storyboard, so the specimen is the film's own material.
-  // A borrowed number would make every sheet carry another film's data.
   const figures = (keyText(prose, brief, title).match(/\b\d[\d,.]{1,9}\b/g) || []);
   const figure = figures.find((n) => !/^(19|20)\d\d$/.test(n)) || figures[0] || String(count);
   return `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?${fams}&display=block">
@@ -632,7 +497,6 @@ if (asJson) {
   process.exit(0);
 }
 
-// ---------------------------------------------------------------- pick, or show
 if (pick != null) {
   const c = candidates[Number(pick) - 1];
   const name = flag('--name', c.name);
@@ -695,7 +559,6 @@ ${shots.map(({ c, png }, i) => `<section style="margin-bottom:34px">
 <div style="color:#6f6f6f;font:13px ui-monospace,monospace">pick one:  make invent-look SB=${esc(path.relative(ROOT, file))} SEED=${seed} PICK=&lt;n&gt; NAME=&lt;theme&gt;</div>
 </body>`);
 
-// One screenshot of the sheet, so the whole set can be READ in a single image rather than five.
 const sheetPng = path.join(OUT, `${slugName}-sheet.png`);
 {
   const puppeteer = (await import('puppeteer')).default;

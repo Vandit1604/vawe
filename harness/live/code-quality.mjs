@@ -1,26 +1,4 @@
 #!/usr/bin/env node
-// harness/live/code-quality.mjs - tell the author about a tangled function while they are still in it.
-//
-// PostToolUse on Edit|Write. Exit 2 returns stderr to the model, so the feedback arrives at the moment
-// the code was written rather than at push time. That timing is the whole point: a rule enforced at the
-// end of a session gets satisfied by a waiver, and a rule enforced at the keystroke gets satisfied by
-// writing a smaller function.
-//
-// IT ONLY EVER COMPLAINS ABOUT WHAT YOU MADE WORSE. The repo carries 334 known findings across 126
-// files. Blocking every edit that touches an already-tangled file would make the hook noise, and noise
-// is how a rule gets turned off. So "worse" is measured against the LOWER of two numbers: the file's
-// own count in quality/baselines/code-quality-baseline.json, and the count in the file as it stood at
-// git HEAD, linted the same way. The baseline alone was not enough: 615 baseline entries were compiled
-// once and never mean to be re-run after every rename or new file, so a file with real pre-existing
-// debt but no baseline entry (an untracked-by-the-baseline file, count defaults to 0) tripped the hook
-// on every touch, including a no-op. HEAD always has an entry for a tracked file, so it closes that
-// gap; the baseline still wins when it is the stricter (lower) of the two, so debt already paid down
-// there can never be re-borrowed by comparing against a laxer HEAD. A brand new file (no HEAD version)
-// falls back to baseline-only, today's behaviour.
-//
-// It is affordable because oxlint is Rust: a single file measures in a few milliseconds, and the whole
-// repo in about 70. An ESLint-based version of this hook would add seconds to every edit and would be
-// removed within a day.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -32,8 +10,6 @@ const BASELINE = path.join(ROOT, 'quality/baselines/code-quality-baseline.json')
 const BIN = path.join(ROOT, 'node_modules/.bin/oxlint');
 const CFG = path.join(ROOT, '.oxlintrc.json');
 
-// Only the rules about SHAPE. correctness findings are the linter's own business and are handled by the
-// gate; interrupting an edit for an unused variable would be exactly the noise described above.
 const SHAPE = new Set(['complexity', 'max-lines-per-function', 'max-depth', 'max-nested-callbacks', 'max-params']);
 
 /** Run oxlint over one file's content, without touching the real working tree copy. */
@@ -87,11 +63,6 @@ process.stdin.on('end', () => {
   const atHead = headContent(rel);
   const headCounts = atHead === null ? null : tally(lintContent(rel, atHead));
 
-  // The allowed count per rule. A MISSING baseline entry means "never measured", not "zero": treating
-  // it as zero is exactly what tripped the hook on every touch of a file the baseline never recorded.
-  // So an absent entry defers entirely to HEAD. Only when the baseline DOES have an entry do the two
-  // compete, and the lower wins, so neither source can raise the bar past what the other already
-  // holds. No HEAD version (a new file) means baseline alone decides, unchanged from before.
   const allowed = (rule) => {
     const key = `${rel}::${rule}`;
     const hasBase = Object.prototype.hasOwnProperty.call(base, key);

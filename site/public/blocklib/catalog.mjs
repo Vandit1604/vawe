@@ -18,8 +18,6 @@
 // Hex literals (not TOKENS) on purpose: index.mjs imports THIS, so this must not import index.mjs.
 
 export const CATALOG = [
-  { name: 'card', family: 'card', blurb: "a raised info card: a heading, a line of body text, tag pills, and a call-to-action link under a hairline at the bottom",
-    props: { w: 540, h: 300, title: 'Layers', desc: 'Text, image, count, cursor.', pills: ['Text', 'Image', 'Count'] } },
   { name: 'codeBlock', family: 'codeBlock', blurb: "a code snippet card: lines of code write themselves in one by one, syntax-coloured, like a syntax-highlighted editor screenshot",
     props: { w: 540, dark: true, label: 'scene.json', size: 19, lines: [
       { text: '{', color: '#8898AA' }, { text: '  "module": "scene",', color: '#E8ECF1' },
@@ -51,18 +49,10 @@ export const CATALOG = [
     props: { word: 'SHIPPED', label: 'status', size: 88 } },
   { name: 'splitFlapBoard.small', family: 'splitFlapBoard', blurb: 'the board at caption size, no header rail',
     props: { word: 'LIVE', size: 52, steps: 10 } },
-  { name: 'stripeCard', family: 'stripeCard', blurb: "a payments checkout card that copies Stripe's real look: amount, a small spend graph, a Pay button",
-    props: { w: 340 } },
   { name: 'barChart', family: 'barChart', blurb: "a bar chart: labeled vertical bars scaled to the tallest one, for comparing values side by side",
     props: { w: 520, h: 240, data: [
       { label: 'Mon', value: 38 }, { label: 'Tue', value: 66 }, { label: 'Wed', value: 52 },
       { label: 'Thu', value: 80 }, { label: 'Fri', value: 72 }] } },
-  { name: 'diff', family: 'diff', blurb: "a git diff card: added and removed code lines highlighted in green and red bands, like a pull request review",
-    props: { w: 520, lines: [
-      { sign: '-', text: 'const x = fetch()' }, { sign: '+', text: 'const x = await fetch()' },
-      { sign: ' ', text: 'return x.json()' }] } },
-  { name: 'quote', family: 'quote', blurb: "a big pull quote with the person's name credited underneath, for a testimonial or a line to remember",
-    props: { w: 540, text: 'One JSON becomes one video.', author: 'vawe' } },
   { name: 'notification', family: 'notification', blurb: "a light system alert card that slides in from the edge, a status dot, a heading and a message, arrives and leaves like a phone banner.",
     props: { w: 440, title: 'Render complete', body: 'out.mp4 is ready', accent: 'var(--up)' } },
   { name: 'kpiRow', family: 'kpiRow', blurb: "a row of numbers side by side, each with a small label under it, and the numbers count up",
@@ -116,12 +106,8 @@ export const CATALOG = [
   // `searchEngine`. Closing it is a change to arsenal.mjs (index a family with no bare row), not five
   // more rows here: a bare row also needs a poster, a scene and a frame rect, and moves the block
   // count three doc surfaces state by hand.
-  { name: 'card.pricing', family: 'pricingCard', blurb: 'a pricing plan card: plan name, price per month, a ticked list of what you get, a sign up button',
-    props: { w: 340, plan: 'Pro', price: '$29', features: ['Unlimited renders', 'Every format', '60fps export'], cta: 'Start free', highlight: true } },
   { name: 'card.stat', family: 'statCard', blurb: 'a boxed metric: a label, a number counting up, a chip saying how much it went up',
     props: { w: 340, to: 1950, label: 'frames rendered', delta: '+12%', deltaUp: true } },
-  { name: 'card.profile', family: 'profileCard', blurb: "a person's photo beside their name, with their job title under it",
-    props: { w: 360, name: 'Ada Lovelace', role: 'Founding Engineer', initials: 'AL' } },
 
   // ── wave 2: dev blocks + device/UI chrome ──
   { name: 'fileTree', family: 'fileTree', blurb: "a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar",
@@ -168,9 +154,6 @@ export const CATALOG = [
     props: { w: 460, messages: [
       { text: 'One JSON becomes one video?' }, { text: 'Yep. Pure in n.', me: true },
       { text: 'No timeline?' }, { text: 'None. Just renderFrame.', me: true }] } },
-  { name: 'tweetCard', family: 'tweetCard', blurb: "a tweet or X post card: avatar, handle, body text, like and reply counts",
-    props: { w: 480, name: 'Vawe', handle: 'vawe', initials: 'SW', likes: '1.2k', reposts: '340',
-      text: 'One JSON. One video. Deterministic, no timeline.' } },
   { name: 'avatarStack', family: 'avatarStack', blurb: "overlapping circular profile pictures in a row with a +N overflow count",
     props: { extra: 8, avatars: [{ initials: 'AL' }, { initials: 'GH' }, { initials: 'VS' }, { initials: 'KM' }] } },
   { name: 'toast', family: 'toast', blurb: "a dark snackbar with a status dot, a message, and an optional action link, the popup that says something just happened.",
@@ -179,18 +162,10 @@ export const CATALOG = [
     props: { reactions: [{ emoji: '🔥', count: 24, mine: true }, { emoji: '👍', count: 12 }, { emoji: '🎉', count: 5 }] } },
 
   // ── wave 5: brand & motion ──
-  { name: 'logoWall', family: 'logoWall', blurb: "a grid of company wordmarks or logo images, for a social proof or partner strip.",
-    props: { w: 560, logos: [{ text: 'Northwind' }, { text: 'Meridian' }, { text: 'Kite Studio' }, { text: 'Fieldwork' }, { text: 'Atlas Type' }, { text: 'Orbit Labs' }] } },
-  { name: 'badge', family: 'badge', blurb: "a small label plus coloured value chip, like a CI shield or a status token (e.g. version, warning, beta).",
-    props: { label: 'build', value: 'passing', tone: 'ok' } },
-  { name: 'badge.version', family: 'badge', blurb: "a small chip showing which release is running, like a v2.1.0 shield in a README",
-    props: { label: 'vawe', value: 'v2.0', tone: 'accent' } },
   { name: 'gauge', family: 'gauge', blurb: "a speedometer-style dial: a semicircular meter needle showing one value against a max",
     props: { w: 300, value: 72, label: 'coverage' } },
   { name: 'progressRing', family: 'progressRing', blurb: "a circular progress ring with the percent complete written in its centre",
     props: { size: 150, value: 68, label: 'render' } },
-  { name: 'banner', family: 'banner', blurb: "a full width coloured announcement bar with an icon, a message, and an optional CTA chip, spans the whole row edge to edge.",
-    props: { w: 560, text: 'Now with 60fps export', cta: 'See how' } },
   { name: 'spinner', family: 'spinner', blurb: "a small looping loading spinner animation for a busy or working state",
     props: { size: 90, label: 'rendering' } },
 
@@ -202,8 +177,6 @@ export const CATALOG = [
     props: { w: 540, command: 'git push origin main', output: ['Enumerating objects: 12, done.', 'main -> main'] } },
   { name: 'terminal.install', family: 'terminal', blurb: 'install command',
     props: { w: 540, command: 'npm i vawe', output: ['added 1 package', 'added 1 package'] } },
-  { name: 'diff.config', family: 'diff', blurb: "a settings or yaml file changing: removed lines in red above the new ones in green",
-    props: { w: 520, lines: [{ sign: '-', text: '"fps": 30' }, { sign: '+', text: '"fps": 60' }, { sign: ' ', text: '"theme": "argus"' }] } },
   { name: 'barChart.green', family: 'barChart', blurb: 'bars in success green',
     props: { w: 520, h: 240, color: 'var(--up)', data: [{ label: 'Q1', value: 40 }, { label: 'Q2', value: 55 }, { label: 'Q3', value: 68 }, { label: 'Q4', value: 90 }] } },
   { name: 'lineChart.down', family: 'lineChart', blurb: 'declining trend (red)',
@@ -229,10 +202,6 @@ export const CATALOG = [
     props: { w: 340, to: 320, label: 'active users', delta: '-8%', deltaUp: false } },
   { name: 'card.stat.plain', family: 'statCard', blurb: 'KPI card, no delta',
     props: { w: 340, to: 57, label: 'blocks', delta: '' } },
-  { name: 'card.pricing.free', family: 'pricingCard', blurb: 'pricing, free tier',
-    props: { w: 340, plan: 'Free', price: '$0', features: ['3 renders / day', 'Portrait + landscape', 'Watermarked'], cta: 'Get started', highlight: false } },
-  { name: 'card.pricing.team', family: 'pricingCard', blurb: 'pricing, team tier',
-    props: { w: 340, plan: 'Team', price: '$99', features: ['Everything in Pro', 'Shared brand kit', 'Priority render'], cta: 'Contact us', highlight: false } },
   { name: 'notification.error', family: 'notification', blurb: 'toast, error',
     props: { w: 440, title: 'Render failed', body: 'em-dash in on-screen copy', accent: 'var(--down)' } },
   { name: 'checklist.todo', family: 'checklist', blurb: 'checklist, all open',
@@ -261,29 +230,14 @@ export const CATALOG = [
     props: { size: 64, extra: 24, avatars: [{ initials: 'AL' }, { initials: 'GH' }, { initials: 'VS' }, { initials: 'KM' }, { initials: 'JR' }] } },
   { name: 'reactionBar.love', family: 'reactionBar', blurb: 'reactions (love set)',
     props: { reactions: [{ emoji: '❤️', count: 41, mine: true }, { emoji: '😂', count: 9 }, { emoji: '🙌', count: 6 }] } },
-  { name: 'logoWall.four', family: 'logoWall', blurb: 'four logos, 2 cols',
-    props: { w: 440, cols: 2, logos: [{ text: 'Northwind' }, { text: 'Meridian' }, { text: 'Kite Studio' }, { text: 'Atlas Type' }] } },
-  { name: 'badge.warn', family: 'badge', blurb: "an amber chip that flags something needing attention, a caution token",
-    props: { label: 'coverage', value: '62%', tone: 'warn' } },
-  { name: 'badge.info', family: 'badge', blurb: "a blue chip carrying a neutral fact, no alarm attached",
-    props: { label: 'docs', value: 'latest', tone: 'info' } },
-  { name: 'banner.info', family: 'banner', blurb: 'banner, info (blurple)',
-    props: { w: 560, text: 'Read the migration guide', cta: 'Open', accent: 'var(--accent)', icon: 'i' } },
-  { name: 'banner.warn', family: 'banner', blurb: 'banner, warning (amber)',
-    props: { w: 560, text: 'Söhne is licensed, do not commit', accent: 'var(--warn)', icon: '!' } },
   { name: 'spinner.small', family: 'spinner', blurb: 'small looping Lottie',
     props: { size: 56 } },
-  { name: 'quote.customer', family: 'quote', blurb: "a testimonial pulled big, with the person and their company credited underneath",
-    props: { w: 540, text: 'We shipped a launch film in an afternoon.', author: 'a happy user' } },
   { name: 'terminal.build', family: 'terminal', blurb: 'build output',
     props: { w: 560, command: 'make video D=launch.json', output: ['▶ scene : capturing across 8 workers...', '✓ done → out.mp4'] } },
   { name: 'checklist.done', family: 'checklist', blurb: 'checklist, all complete',
     props: { w: 460, items: [{ text: 'Blocks library', done: true }, { text: 'Registry + catalog', done: true }, { text: 'Docs auto-gen', done: true }] } },
   { name: 'kpiRow.time', family: 'kpiRow', blurb: 'latency percentiles',
     props: { items: [{ value: '42ms', label: 'p50' }, { value: '120ms', label: 'p95' }, { value: '380ms', label: 'p99' }] } },
-  { name: 'badge.beta', family: 'badge', blurb: 'beta status badge',
-    props: { label: 'status', value: 'beta', tone: 'accent' } },
-
   // ── lower thirds ─────────────────────────────────────────────────────────────
   // Twelve entries, one factory: the layout (name over role) is fixed, the material around it is the
   // variant. Each row's copy suits its chrome, because a BILD block and a soft pill are not the same
@@ -366,12 +320,6 @@ export const CATALOG = [
   // APP SURFACES (blocks/app.mjs). Before these, `nowPlaying` was the only block that depicted the
   // inside of a product, so a product-demo film could only be about a music app. Appended at the END
   // on purpose: the site crops thumbnails by cell index, so inserting mid-list re-cuts every later still.
-  { name: 'feedRow', family: 'feedRow', blurb: "one row of a social or activity feed: avatar, name, handle, timestamp, and a line of body text.",
-    props: { w: 520, name: 'Wren Alcott', sub: '@wren', time: 'just now', body: 'Moved the Fieldwork draft into the shared workspace.' } },
-  { name: 'listRow', family: 'listRow', blurb: "a generic list item: leading icon tile, title over a subtitle, trailing detail like a date or count, the workhorse app row.",
-    props: { w: 520, icon: '✉', title: 'Weekly digest', sub: 'Kite Studio', meta: 'Today' } },
-  { name: 'settingsRow', family: 'settingsRow', blurb: "a settings row: a label with a toggle switch, a chevron into a sub-screen, or a current value shown as text.",
-    props: { w: 520, label: 'Sync across devices', sub: 'Keep every draft current everywhere', control: 'toggle', value: true } },
   { name: 'profileHeader', family: 'profileHeader', blurb: "the top of an account screen: avatar over a name and @handle, with a small row of stat counts below.",
     props: { w: 460, name: 'Wren Alcott', handle: 'wren', stats: [{ value: '0', label: 'posts' }, { value: '0', label: 'lists' }, { value: '0', label: 'saved' }] } },
   { name: 'onboardCard', family: 'onboardCard', blurb: "one pane of a first-run onboarding flow: progress dots, a title, body copy, and a CTA button.",
@@ -402,22 +350,22 @@ export const CATALOG = [
   // END for the same reason as every wave before it. The site crops thumbnails by cell index.
   { name: 'splitScreen', family: 'splitScreen', blurb: "the screen divided into two side-by-side panes, or a small inset video in the corner like picture-in-picture",
     props: { w: 540, h: 96, split: 0.5, gap: 32, divider: true,
-      left: { block: 'listRow', props: { icon: '✉', title: 'Digest', sub: 'Kite Studio', meta: 'Today' } },
-      right: { block: 'listRow', props: { icon: '☰', title: 'Drafts', sub: 'Fieldwork', meta: 'Fri' } } } },
+      left: { block: 'notification', props: { title: 'Weekly digest', body: 'Kite Studio · Today' } },
+      right: { block: 'notification', props: { title: 'Drafts', body: 'Fieldwork · Fri' } } } },
   { name: 'splitScreen.pip', family: 'splitScreen', blurb: 'picture-in-picture · an aside inset over the subject',
     props: { w: 540, h: 300, pip: true, pipScale: 0.46, pipInset: 16,
-      left: { block: 'card', props: { w: 540, h: 300, title: 'Open canvas', desc: 'Compose a beat from the vocabulary.', pills: ['Text', 'Image', 'Group'] } },
-      right: { block: 'card.profile', props: { name: 'Ana Roth', role: 'Founding Engineer', initials: 'AL' } } } },
+      left: { block: 'onboardCard', props: { w: 540, step: 1, of: 2, title: 'Open canvas', body: 'Compose a beat from the vocabulary.' } },
+      right: { block: 'profileHeader', props: { name: 'Ana Roth', handle: 'ana', stats: [{ value: '12', label: 'ships' }] } } } },
   { name: 'screenSwap', family: 'screenSwap', blurb: "one app screen replaces another in the same spot, either a wipe or a slide, like swiping between phone screens",
     props: { w: 460, hold: 2.4, transition: 'wipe', screens: [
       { block: 'emptyState', props: { w: 460, icon: '☐', title: 'Nothing here yet', body: 'Anything you save shows up in this list.', cta: 'Add the first one' } },
-      { block: 'listRow', props: { w: 460, icon: '✓', title: 'Fieldwork draft', sub: 'Saved to this list', meta: 'now' } },
+      { block: 'notification', props: { w: 460, title: 'Fieldwork draft', body: 'Saved to this list' } },
       { block: 'onboardCard', props: { w: 460, step: 2, of: 3, title: 'Pick a workspace', body: 'Choose where new drafts are saved.', cta: 'Continue' } }] } },
   { name: 'screenSwap.slide', family: 'screenSwap', blurb: 'screen change that reads as travel · enters right, leaves left',
     props: { w: 460, hold: 2.4, transition: 'slide', screens: [
-      { block: 'settingsRow', props: { w: 460, label: 'Sync across devices', sub: 'Keep every draft current everywhere', control: 'toggle', value: true } },
-      { block: 'settingsRow', props: { w: 460, label: 'Notifications', sub: 'Only for shared workspaces', control: 'value', value: 'Mentions' } },
-      { block: 'settingsRow', props: { w: 460, label: 'Appearance', sub: 'Match the system theme', control: 'chevron' } }] } },
+      { block: 'notification', props: { w: 460, title: 'Sync across devices', body: 'Keep every draft current everywhere' } },
+      { block: 'notification', props: { w: 460, title: 'Notifications', body: 'Only for shared workspaces' } },
+      { block: 'notification', props: { w: 460, title: 'Appearance', body: 'Match the system theme' } }] } },
   { name: 'socialProof', family: 'socialProof', blurb: "an avatar stack next to a trust line, like Trusted by 8,000 teams, for social proof",
     props: { extra: 8, size: 48, caption: 'Trusted by working teams', sub: 'across every plan',
       avatars: [{ initials: 'AL' }, { initials: 'GH' }, { initials: 'VS' }, { initials: 'KM' }] } },
@@ -443,20 +391,12 @@ export const CATALOG = [
   { name: 'comparison.screens', family: 'comparison', blurb: 'before / after as two SCREENS, not two lists',
     props: { w: 560, gap: 24, leftTitle: 'Before', rightTitle: 'After',
       leftScreen: { block: 'emptyState', props: { icon: '☐', title: 'No drafts', body: 'Nothing has been saved to this list.' } },
-      rightScreen: { block: 'listRow', props: { icon: '✓', title: 'Draft saved', sub: 'Fieldwork', meta: 'now' } } } },
+      rightScreen: { block: 'notification', props: { title: 'Draft saved', body: 'Fieldwork · now' } } } },
 
-  // SLEEK SURFACES (blocks/sleek.mjs): glassy/mesh/spotlit/grain/bento. Static CSS; movement comes from a
-  // Phase-2 engine effect (a beam layer, an aurora paint behind the glass). Put a living bg behind glass.
-  { name: 'glassCard', family: 'glassCard', blurb: "a frosted glass panel that blurs the moving content it sits over, like iOS or macOS translucency",
-    props: { w: 560, h: 300, kicker: 'GLASS', title: 'Backdrop blur', desc: 'It blurs whatever moves behind it.' } },
-  { name: 'meshPanel', family: 'meshPanel', blurb: "a soft blurry gradient background made of overlapping colour blobs, calm and branded",
-    props: { w: 560, h: 320, title: 'Mesh gradient', desc: 'A calm branded surface behind copy.' } },
-  { name: 'spotlightCard', family: 'spotlightCard', blurb: "a dark card lit by a soft glow from one corner or edge, like a spotlight in a dark room",
-    props: { w: 560, h: 300, from: 'top', title: 'Spotlight', desc: 'The light directs the eye.' } },
+  // SLEEK SURFACES (blocks/sleek.mjs): the movement is a Phase-2 engine effect (a beam layer, an
+  // aurora paint behind the glass). Put a living bg behind glass.
   { name: 'borderBeamCard', family: 'borderBeamCard', blurb: "a glass card with a bright line of light chasing around its border, like a loading ring on the edge",
     props: { w: 560, h: 260, title: 'Border beam', desc: 'A light travels the border.' } },
-  { name: 'grainOverlay', family: 'grainOverlay', blurb: "a layer of film grain or noise texture over the whole frame, so it looks shot on film instead of flat digital", overlay: true,
-    props: { w: 560, h: 320, opacity: 0.12 } },
   { name: 'bento', family: 'bento', blurb: "an asymmetric grid of boxes in different sizes, one big hero box and smaller ones around it, like a bento box or an Apple feature grid",
     props: { w: 760, h: 420, cells: [
       { kind: 'mesh', title: 'Hero', desc: 'The big one.' }, { kind: 'glass', title: 'Cell', desc: 'Support.' },
@@ -555,11 +495,6 @@ export const CATALOG = [
         { label: 'store' }, { label: 'logs' }, { label: 'auth' }, { label: 'jobs' }] } },
   { name: 'morphText', family: 'morphText', blurb: "a gooey word swap: one word melting into the next through a metaball blur, letters with no correspondence",
     props: { w: 900, words: ['ideas', 'drafts', 'inbox', 'shipped'], size: 120, hold: 0.8 } },
-  { name: 'redditPost', family: 'redditPost', blurb: "a Reddit-style post: upvote arrows beside the title, subreddit name, body text, comment count",
-    props: { w: 620, sub: 'programming', author: 'deterministic', age: '4h',
-      title: 'Every frame is a pure function of n',
-      body: 'No clock, no random, no accumulation. Render 412 alone or after 411 others.',
-      votes: 2410, comments: 188, voted: 'up' } },
   { name: 'uiReveal3d', family: 'uiReveal3d', blurb: "rows of a UI folding upright out of the floor in 3D perspective, one after another",
     props: { w: 680, items: [{ label: 'Frames rendered', value: '1,320' }, { label: 'Workers', value: '8' },
       { label: 'Draft render', value: '31s' }, { label: 'Blocks swept', value: '179' },

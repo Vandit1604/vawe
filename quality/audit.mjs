@@ -262,11 +262,25 @@ const inkRect = (el) => {
     if (![left, top, right, bottom].every(Number.isFinite)) return null;
     return clampToBox({ left, top, right, bottom, width: right - left, height: bottom - top, geometry: true }, el);
   }
+  const b = rangeInk(el);
+  return b ? clampToBox(b, el) : null;
+};
+const rangeInk = (el) => {
   const r = document.createRange();
   r.selectNodeContents(el);
   const b = r.getBoundingClientRect();
-  return (b.width > 1 && b.height > 1) ? clampToBox(b, el) : null;
+  return (b.width > 1 && b.height > 1) ? b : null;
 };
+// The Range already reports where a transformed descendant (a bounced word, a per-character kinetic
+// track) actually painted, since Range.getBoundingClientRect() reads real screen geometry, transform
+// and all. `inkRect`'s clampToBox then pulls that back inside the LAYER's own untransformed layout
+// box, which is right for the off-safe-margin check (#242: protects it from a 3D-rig mismeasurement)
+// but wrong for a frame-edge crop check, which must answer "where did the ink really land". Text
+// bouncing past its own container and off the canvas measured as safely inside the container's box
+// (MISTAKES: two shipped films clipped "BOUNCE" against the right edge and a left-aligned label at
+// x=0, neither caught). svg and raster layers keep the existing clamped path; only unclamped for the
+// plain-text case this bug was in.
+const textInkRaw = (el) => (el.querySelector('img, svg') ? null : rangeInk(el));
 // The safe box governs LEGIBLE CONTENT; decoration (gradient blobs, glows, hairline rules) bleeds
 // off-frame by design, so a layer only earns the safe check when it carries a text node or an image.
 // Uses inkText, not textContent, for the same reason clipped-text and overlap do: a hand-authored
@@ -473,7 +487,8 @@ function checkLayerBounds(ctx) {
     // against, see unCam); the FRAME is asked on SCREEN, since a box past the frame edge is genuinely
     // cropped whatever put it there.
     if (stageRotated || midMove(el, ctx) || !carriesContent(el)) return;
-    const sf = safeFinding(sb, ctx, id, li, t);
+    const rawInk = !paintsBox(s) && textInkRaw(el);
+    const sf = safeFinding(sb, ctx, id, li, t, rawInk || null);
     if (sf) issues.push(sf);
     const cf = captionBandFinding(sb, CAPBAND, id, li, t);
     if (cf) issues.push(cf);
@@ -505,7 +520,7 @@ function overflowFinding(el, s, id, li, t) {
 // Both spaces must agree: on screen alone, the injected 1.06 push carries correctly placed content
 // out of its margin; un-scaled alone, a camera zoomed OUT (gh-wrapped holds s=0.98) reports a layer
 // sitting comfortably inside as outside. Agreeing means outside the margin as authored AND delivered.
-function safeFinding(sb, ctx, id, li, t) {
+function safeFinding(sb, ctx, id, li, t, rawInk) {
   const { SAFE, FW, FH } = ctx;
   // Off camera is not off safe: a box that does not touch the frame at all is neither outside the
   // margin nor crossing the edge, it is elsewhere in the world (a travelling camera's other stations).
@@ -516,7 +531,11 @@ function safeFinding(sb, ctx, id, li, t) {
   const cb = unCam(sb, ctx);
   const outside = (r) => r.left < SAFE.x0 - 1 || r.right > SAFE.x1 + 1 || r.top < SAFE.y0 - 1 || r.bottom > SAFE.y1 + 1;
   const offSafe = outside(sb) && outside(cb);
-  const cropped = sb.left < -1 || sb.right > FW + 1 || sb.top < -1 || sb.bottom > FH + 1;
+  // Crop reads the UNCLAMPED ink when one was measured (rawInk, a Range over the actual text): the
+  // layer's own box (sb) is what clampToBox pulled the ink back inside, so a word transformed past
+  // its container by the camera or its own motion track would never register here otherwise.
+  const crop = rawInk || sb;
+  const cropped = crop.left < -1 || crop.right > FW + 1 || crop.top < -1 || crop.bottom > FH + 1;
   if (!(offSafe || cropped)) return null;
   return { kind: 'safe', a: id, li, t, detail: `(${cb.left | 0},${cb.top | 0},${cb.right | 0},${cb.bottom | 0})${cropped ? ', cropped by the frame edge' : ''}` };
 }
@@ -971,7 +990,7 @@ function restoreHiddenFn() {
 // other by name exactly as nested functions did, which is what lets them be separate functions at
 // all. Insertion order is the order below, so the bundle is byte-identical run to run.
 const PAGE_FNS = { vis, effOpacity, arrived, paintsOwnBox, inkText, maskedByDesign, paintsBox,
-  shapeInk, svgInk, hasTextOutsideSvg, clampToBox, inkRect, carriesContent, atRest, opaqueAt, parse, boxOf,
+  shapeInk, svgInk, hasTextOutsideSvg, clampToBox, rangeInk, textInkRaw, inkRect, carriesContent, atRest, opaqueAt, parse, boxOf,
   frameContext, unCam, midMove, checkLayerBounds, overflowFinding, safeFinding, captionBandFinding,
   checkImageFloor, checkTinyText, checkClippedText, checkClippedComponent, checkVerticalMass,
   fading, crossDissolve, occluded, checkPairs, pairFinding, checkBuried, coverSample,

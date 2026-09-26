@@ -92,40 +92,46 @@
       "dur": 3.05,
       "children": [
         {
-          "type": "block",
-          "block": "feedRow",
+          "type": "html",
           "w": 312,
-          "initials": "WA",
-          "name": "Wren Alcott",
-          "sub": "@wren",
-          "time": "now",
-          "body": "Surveyed the north ridge. Notes synced.",
+          "bg": "var(--card)",
+          "radius": 16,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:312px'><div style='width:48px;height:48px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 19px var(--font-sans);color:var(--accent)'>WA</div><div style='display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-start;min-width:0'><div style='display:flex;align-items:center;gap:8px;width:100%'><span style='font:700 20px var(--font-sans);color:var(--text)'>Wren Alcott</span><span style='font:500 16px var(--font-mono);color:var(--dim)'>@wren</span><span style='flex:1'></span><span style='font:500 15px var(--font-mono);color:var(--dim)'>now</span></div><span style='font:400 19px var(--font-sans);color:var(--text)'>Surveyed the north ridge. Notes synced.</span></div></div>",
           "start": 3.7,
-          "dur": 2.5
+          "duration": 2.5,
+          "enterDur": 0.45,
+          "exitDur": 0.3
         },
         {
-          "type": "block",
-          "block": "feedRow",
+          "type": "html",
           "w": 312,
-          "initials": "KS",
-          "name": "Kite Studio",
-          "sub": "@kite",
-          "time": "earlier",
-          "body": "New site plan is up for review.",
+          "bg": "var(--card)",
+          "radius": 16,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:312px'><div style='width:48px;height:48px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 19px var(--font-sans);color:var(--accent)'>KS</div><div style='display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-start;min-width:0'><div style='display:flex;align-items:center;gap:8px;width:100%'><span style='font:700 20px var(--font-sans);color:var(--text)'>Kite Studio</span><span style='font:500 16px var(--font-mono);color:var(--dim)'>@kite</span><span style='flex:1'></span><span style='font:500 15px var(--font-mono);color:var(--dim)'>earlier</span></div><span style='font:400 19px var(--font-sans);color:var(--text)'>New site plan is up for review.</span></div></div>",
           "start": 3.95,
-          "dur": 2.25
+          "duration": 2.25,
+          "enterDur": 0.45,
+          "exitDur": 0.3
         },
         {
-          "type": "block",
-          "block": "feedRow",
+          "type": "html",
           "w": 312,
-          "initials": "MR",
-          "name": "Meridian",
-          "sub": "@meridian",
-          "time": "yesterday",
-          "body": "Three sites logged offline.",
+          "bg": "var(--card)",
+          "radius": 16,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:312px'><div style='width:48px;height:48px;border-radius:100%;background:color-mix(in srgb, var(--accent) 14%, var(--card));flex:none;display:flex;align-items:center;justify-content:center;font:700 19px var(--font-sans);color:var(--accent)'>MR</div><div style='display:flex;flex-direction:column;gap:6px;flex:1;align-items:flex-start;min-width:0'><div style='display:flex;align-items:center;gap:8px;width:100%'><span style='font:700 20px var(--font-sans);color:var(--text)'>Meridian</span><span style='font:500 16px var(--font-mono);color:var(--dim)'>@meridian</span><span style='flex:1'></span><span style='font:500 15px var(--font-mono);color:var(--dim)'>yesterday</span></div><span style='font:400 19px var(--font-sans);color:var(--text)'>Three sites logged offline.</span></div></div>",
           "start": 4.2,
-          "dur": 2
+          "duration": 2,
+          "enterDur": 0.45,
+          "exitDur": 0.3
         }
       ]
     },
@@ -141,26 +147,32 @@
       "dur": 3,
       "children": [
         {
-          "type": "block",
-          "block": "listRow",
+          "type": "html",
           "w": 312,
-          "icon": "◈",
-          "title": "North ridge",
-          "sub": "12 notes",
-          "meta": "synced",
+          "bg": "var(--card)",
+          "radius": 14,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:312px'><div style='width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)'>◈</div><div style='display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0'><span style='font:600 20px var(--font-sans);color:var(--text)'>North ridge</span><span style='font:400 16px var(--font-sans);color:var(--text-2)'>12 notes</span></div><span style='font:500 15px var(--font-mono);color:var(--dim)'>synced</span></div>",
           "start": 7,
-          "dur": 2.5
+          "duration": 2.5,
+          "enterDur": 0.45,
+          "exitDur": 0.3
         },
         {
-          "type": "block",
-          "block": "listRow",
+          "type": "html",
           "w": 312,
-          "icon": "◇",
-          "title": "Coast survey",
-          "sub": "4 notes",
-          "meta": "offline",
+          "bg": "var(--card)",
+          "radius": 14,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:312px'><div style='width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)'>◇</div><div style='display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0'><span style='font:600 20px var(--font-sans);color:var(--text)'>Coast survey</span><span style='font:400 16px var(--font-sans);color:var(--text-2)'>4 notes</span></div><span style='font:500 15px var(--font-mono);color:var(--dim)'>offline</span></div>",
           "start": 7.2,
-          "dur": 2.3
+          "duration": 2.3,
+          "enterDur": 0.45,
+          "exitDur": 0.3
         }
       ]
     },
@@ -224,42 +236,52 @@
       "exitDur": 0.3
     },
     {
-      "type": "block",
-      "block": "settingsRow",
+      "type": "html",
       "x": 560,
       "y": 460,
       "w": 800,
-      "label": "Offline capture",
-      "sub": "Keep working with no signal",
-      "control": "toggle",
-      "value": true,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "html": "<div style='display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:800px'><div style='display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0'><span style='font:600 20px var(--font-sans);color:var(--text)'>Offline capture</span><span style='font:400 16px var(--font-sans);color:var(--text-2)'>Keep working with no signal</span></div><div style='width:52px;height:30px;flex:none;border-radius:100px;padding:2px;box-sizing:border-box;background:var(--accent);display:flex;align-items:center;justify-content:flex-end'><div style='width:24px;height:24px;border-radius:100%;background:var(--card)'></div></div></div>",
       "start": 10.3,
-      "dur": 2.6
+      "duration": 2.6,
+      "enterDur": 0.45,
+      "exitDur": 0.3
     },
     {
-      "type": "block",
-      "block": "settingsRow",
+      "type": "html",
       "x": 560,
       "y": 580,
       "w": 800,
-      "label": "Sync on arrival",
-      "sub": "Upload when a network appears",
-      "control": "toggle",
-      "value": true,
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "html": "<div style='display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:800px'><div style='display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0'><span style='font:600 20px var(--font-sans);color:var(--text)'>Sync on arrival</span><span style='font:400 16px var(--font-sans);color:var(--text-2)'>Upload when a network appears</span></div><div style='width:52px;height:30px;flex:none;border-radius:100px;padding:2px;box-sizing:border-box;background:var(--accent);display:flex;align-items:center;justify-content:flex-end'><div style='width:24px;height:24px;border-radius:100%;background:var(--card)'></div></div></div>",
       "start": 10.5,
-      "dur": 2.4
+      "duration": 2.4,
+      "enterDur": 0.45,
+      "exitDur": 0.3
     },
     {
-      "type": "block",
-      "block": "settingsRow",
+      "type": "html",
       "x": 560,
       "y": 700,
       "w": 800,
-      "label": "Storage",
-      "control": "value",
-      "value": "Local",
+      "bg": "var(--card)",
+      "radius": 14,
+      "border": "1px solid var(--line)",
+      "elevation": 1,
+      "anim": "rise",
+      "html": "<div style='display:flex;align-items:center;gap:16px;padding:16px 24px;box-sizing:border-box;width:800px'><div style='display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0'><span style='font:600 20px var(--font-sans);color:var(--text)'>Storage</span></div><span style='font:400 18px var(--font-sans);color:var(--text-2);flex:none'>Local</span></div>",
       "start": 10.7,
-      "dur": 2.2
+      "duration": 2.2,
+      "enterDur": 0.45,
+      "exitDur": 0.3
     },
     {
       "type": "block",
@@ -412,15 +434,18 @@
       "dur": 2.7,
       "children": [
         {
-          "type": "block",
-          "block": "listRow",
+          "type": "html",
           "w": 260,
-          "icon": "◈",
-          "title": "North ridge",
-          "sub": "12 notes",
-          "meta": "synced",
+          "bg": "var(--card)",
+          "radius": 14,
+          "border": "1px solid var(--line)",
+          "elevation": 1,
+          "anim": "rise",
+          "html": "<div style='display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:260px'><div style='width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)'>◈</div><div style='display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0'><span style='font:600 20px var(--font-sans);color:var(--text)'>North ridge</span><span style='font:400 16px var(--font-sans);color:var(--text-2)'>12 notes</span></div><span style='font:500 15px var(--font-mono);color:var(--dim)'>synced</span></div>",
+          "enterDur": 0.45,
+          "exitDur": 0.3,
           "start": 19.9,
-          "dur": 2.2
+          "duration": 2.2
         }
       ]
     }

@@ -18,7 +18,9 @@ beat's duration, and no two layers moving independently in the same beat share o
 |---|---|---|
 | `instant` | 0.08s | `DURATION.instant` (core/registry/vocab.js) |
 | `fast` | 0.18s | `DURATION.fast` (core/registry/vocab.js) |
+| `productive` | 0.22s | `DURATION.productive` (core/registry/vocab.js) |
 | `medium` | 0.3s | `DURATION.medium` (core/registry/vocab.js) |
+| `expressive` | 0.4s | `DURATION.expressive` (core/registry/vocab.js) |
 | `slow` | 0.6s | `DURATION.slow` (core/registry/vocab.js) |
 | `luxurious` | 1.2s | `DURATION.luxurious` (core/registry/vocab.js) |
 

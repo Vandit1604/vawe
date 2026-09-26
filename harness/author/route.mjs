@@ -1,22 +1,9 @@
-// harness/author/route.mjs: DELIVERABLE-AWARE ROUTING. A request maps to one of a few vawe
-// deliverables (engine-doctrine/CRAFT/routes/*.md) before any brief-collection or authoring starts. A small
-// priority table picks the deliverable, then only that deliverable's route file is read, never the
-// whole doctrine at once.
-//
-//   node harness/author/route.mjs "<what the user asked, plain english>"
-//   make route Q="market our launch from hinge.co"
-//
-// Deterministic keyword/priority match, same table as engine-doctrine/CRAFT/ROUTING.md. Never an LLM call: a
-// route decision has to be reproducible from the same words every time, and this is a lookup, not a
-// judgement call worth spending a model on.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
-// Priority order matches engine-doctrine/CRAFT/ROUTING.md's table exactly. First matching row wins; keep the two
-// in sync by hand, `route.test.mjs` is the check that they still agree with real requests.
 const ROUTES = [
   {
     name: 'recreation',
@@ -128,14 +115,10 @@ function main() {
     const blueprint = readSection(matched.file, 'Blueprint family + docs');
     if (blueprint) { console.log(''); console.log(blueprint); }
   }
-  // The playbook for this deliverable: one skill per video TYPE (AGENTS.md W10), each carrying its
-  // own beat spine + worked example. The agent writes the storyboard from that spine, not a generic
-  // rotation, using engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md.
   if (matched.type) {
     console.log('');
     console.log(`Type skill: skills/vawe-type/SKILL.md (skills/vawe-type/reference/${matched.type}.md)`);
   }
 }
 
-// Only run as a CLI when invoked directly; route.test.mjs imports `route()` without triggering this.
 if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) main();

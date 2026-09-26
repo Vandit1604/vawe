@@ -1,16 +1,4 @@
-// harness/dev/bar-probe.mjs: PROVE the continuous subject is actually drawn, by counting pixels.
-//
-// A film whose spine is one travelling mark can pass every static gate while that mark is invisible:
-// under the 3D rig painting is by DEPTH, not by layer order, so a tilted 1440px capture happily paints
 // in front of a bar that the JSON says is on top (engine-doctrine/MISTAKES.md #252, and again #246). The eye
-// misses it because the frame is busy and the hole is a fifth of a second.
-//
-// So: recolour the subject layers to a colour that appears nowhere else, render headless, and COUNT.
-//
-//   node harness/dev/bar-probe.mjs films/scene/playhead.json --ids playhead,bar --at 0.5,2,3.2,3.4
-//
-// Headless (this tool) is for iterating. The shipped proof is counted off the ENCODED mp4, because
-// that is the artifact that ships and h264 is one more thing between the bar and the viewer.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -25,8 +13,6 @@ const IDS = flag('--ids', 'playhead,bar').split(',').map((s) => s.trim()).filter
 const TIMES = flag('--at', '0.5,2,3.2,3.4,6.3,9.5,12.5,15.5').split(',').map(Number);
 const MARK = '#ff00ff';
 
-// Paint the subjects, and strip their glow: a bloom is a box-shadow of the same hue and would be
-// counted as the bar, which would turn "the bar is drawn" into "something near the bar is lit".
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 let hit = 0;
 (function paint(ls) {

@@ -19,16 +19,17 @@
       "x": 160,
       "y": 160,
       "w": 254,
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:254px\"><div style=\"width:12px;height:12px;border-radius:100px;background:var(--accent);flex:none\"></div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start;flex:1;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Weekly digest</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">Kite Studio · Today</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
-      "elevation": 1,
-      "anim": "rise",
+      "elevation": 2,
+      "anim": "slide-right",
+      "out": "slide-right",
       "start": 0.2,
       "duration": 8,
-      "enterDur": 0.45,
-      "exitDur": 0.3,
-      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:254px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">✉</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Digest</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Kite Studio</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">Today</span></div>"
+      "enterDur": 0.4,
+      "exitDur": 0.3
     },
     {
       "type": "rect",
@@ -49,16 +50,17 @@
       "x": 446,
       "y": 160,
       "w": 254,
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:254px\"><div style=\"width:12px;height:12px;border-radius:100px;background:var(--accent);flex:none\"></div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start;flex:1;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Drafts</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">Fieldwork · Fri</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
-      "elevation": 1,
-      "anim": "rise",
+      "elevation": 2,
+      "anim": "slide-right",
+      "out": "slide-right",
       "start": 0.38,
       "duration": 7.82,
-      "enterDur": 0.45,
-      "exitDur": 0.3,
-      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:254px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">☰</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Drafts</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Fieldwork</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">Fri</span></div>"
+      "enterDur": 0.4,
+      "exitDur": 0.3
     }
   ],
   "produced": false
