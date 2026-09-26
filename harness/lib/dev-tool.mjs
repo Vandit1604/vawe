@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -106,6 +107,34 @@ export const CUSTOM = {
   },
   'edge-check': () => spawnJs('quality/gates/edge-check.mjs', [env.D, ...json()]),
   'formats': () => runMake(['build']) || (spawnSync(path.join(ROOT, 'bin/vawe'), ['--list'], { stdio: 'inherit', cwd: ROOT }).status || 0),
+  // new TYPE=<name> NAME=<film>: copy a frozen films/examples/<type>.json (+ its .brief.md, when one
+  // exists beside it) into films/scene/<film>.json, ready to draft-render. The example's own `content`
+  // map is the thing to edit for a new brand: never the layers. One dispatcher entry rather than a new
+  // top-level Makefile target, same reasoning every tool in this file already follows.
+  'new': () => {
+    if (!env.TYPE || !env.NAME) {
+      console.error('usage: make dev-tool X=new TYPE=<name> NAME=<film>  (TYPE names a films/examples/<type>.json)');
+      return 2;
+    }
+    const src = path.join(ROOT, 'films/examples', `${env.TYPE}.json`);
+    if (!fs.existsSync(src)) {
+      const known = fs.existsSync(path.join(ROOT, 'films/examples'))
+        ? fs.readdirSync(path.join(ROOT, 'films/examples')).filter((f) => f.endsWith('.json')).map((f) => f.replace(/\.json$/, '')).join(', ')
+        : '(none)';
+      console.error(`no such example: films/examples/${env.TYPE}.json. Known: ${known || '(none)'}`);
+      return 2;
+    }
+    const dest = path.join(ROOT, 'films/scene', `${env.NAME}.json`);
+    if (fs.existsSync(dest)) { console.error(`refusing to overwrite an existing film: ${path.relative(ROOT, dest)}`); return 1; }
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
+    const briefSrc = src.replace(/\.json$/, '.brief.md');
+    if (fs.existsSync(briefSrc)) fs.copyFileSync(briefSrc, dest.replace(/\.json$/, '.brief.md'));
+    console.log(`✓ films/scene/${env.NAME}.json  (from films/examples/${env.TYPE}.json)`);
+    console.log(`  edit its "content" map for this brand's words, then:`);
+    console.log(`  next: make dev D=films/scene/${env.NAME}.json  (draft-render it)`);
+    return 0;
+  },
   'plan-judge': () => spawnJs('harness/author/critics.mjs', [env.D, ...(env.RECORD ? ['--record-plan', env.RECORD] : (env.SHOW ? ['--show-plan-verdict'] : ['--plan-judge']))]),
   'worktrees': () => spawnJs('harness/dev/worktree-prune.mjs', [...(env.PRUNE ? ['--prune'] : [])]),
 };
