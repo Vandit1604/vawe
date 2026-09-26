@@ -8,6 +8,7 @@ import { sceneDims } from '../../core/layout/safe.js';
 import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { marksOf, junctionTable, shotWindows } from '../../core/timeline/junctions.js';
+import { beatsOf } from '../../quality/gates/beats-of.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -16,8 +17,9 @@ const flagData = flagIdx >= 0 ? argv[flagIdx + 1] : undefined;
 if (flagIdx >= 0) argv.splice(flagIdx, flagData === undefined ? 1 : 2);
 const format = argv[0];
 const frameArg = argv[1] != null && argv[1] !== '' ? argv[1] : null;
-const beatMatch = frameArg != null ? /^b(\d+)$/i.exec(frameArg.trim()) : null;
-let single = frameArg != null && !beatMatch ? Number(frameArg) : null;
+const looksMode = frameArg != null && frameArg.trim().toLowerCase() === 'looks';
+const beatMatch = frameArg != null && !looksMode ? /^b(\d+)$/i.exec(frameArg.trim()) : null;
+let single = frameArg != null && !beatMatch && !looksMode ? Number(frameArg) : null;
 const dataArg = flagData ?? argv[2];
 if (flagIdx >= 0 && flagData === undefined) {
   console.error('preview.mjs: --data needs a file path after it');
@@ -70,6 +72,40 @@ const grab = async (frame, file) => {
   await page.evaluate((n) => window.__engine.renderFrame(n), frame);
   await page.screenshot({ path: file, clip: { x: 0, y: 0, width: VW, height: VH } });
 };
+
+// LOOKS=1: one styleframe per beat AT ITS HOLD (light, colour, type, camera), for the look review
+// that comes before any motion work. beatsOf is the same beat model quality/gates/judge.mjs samples,
+// storyboard-first when the film has one, so "look review" and "judge" never disagree about where a
+// beat starts.
+if (looksMode) {
+  if (!dataArg) {
+    console.error('make look LOOKS=1 needs D=<file.json> (beats need a scene to read)');
+    await browser.close(); server.close(); process.exit(1);
+  }
+  const beats = beatsOf(cfg, duration, dataArg);
+  if (!beats.length) {
+    console.error('preview.mjs: no beats found for LOOKS=1');
+    await browser.close(); server.close(); process.exit(1);
+  }
+  const TILE_W = VW >= VH ? 400 : 300, TILE_H = Math.round(TILE_W * VH / VW);
+  const tmp = '/tmp/preview_looks'; fs.rmSync(tmp, { recursive: true, force: true }); fs.mkdirSync(tmp, { recursive: true });
+  const tiles = [];
+  for (const [i, b] of beats.entries()) {
+    const raw = path.join(tmp, `r${i}.png`);
+    await grab(Math.round(b.t * F), raw);
+    const labeled = path.join(tmp, `${String(i).padStart(2, '0')}.png`);
+    spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', raw, '-vf',
+      `scale=${TILE_W}:${TILE_H},drawtext=text='beat ${i + 1} @${b.t.toFixed(1)}s':x=8:y=8:fontsize=24:fontcolor=white:box=1:boxcolor=black@0.65`, labeled]);
+    tiles.push(labeled);
+  }
+  await browser.close(); server.close();
+  const cols = Math.min(4, tiles.length), sheet = `/tmp/preview_${format}_looks.png`;
+  spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', path.join(tmp, '%02d.png'), '-vf',
+    `tile=${cols}x${Math.ceil(tiles.length / cols)}:padding=10:color=0x0a0a0c`, '-frames:v', '1', sheet]);
+  console.log(`${format}  ${duration.toFixed(1)}s  ${tiles.length} beat styleframe(s) (LOOK review, before motion)  →  ${sheet}   `
+    + `[${((Date.now() - t0) / 1000).toFixed(1)}s]`);
+  process.exit(0);
+}
 
 if (single != null) {
   const out = `/tmp/preview_${format}_${single}.png`;
