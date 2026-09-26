@@ -1,0 +1,34 @@
+{
+  "name": "fixture-new-schema",
+  "note": "tests/theme/retired-migration.e2e.test.mjs fixture: a clean tokens+roles theme with the current look keys (bgDefault as a rotation, bgPalette overriding the derived bg-preset colours). No vars/bg/bgDefault at the top level on purpose.",
+  "tokens": {
+    "color": {
+      "bg": { "$type": "color", "$value": "#0a0b10" },
+      "ink": { "$type": "color", "$value": "#f4f6fb" },
+      "accent": { "$type": "color", "$value": "#6d8bff" }
+    },
+    "font": {
+      "sans": { "$type": "fontFamily", "$value": "Inter" },
+      "mono": { "$type": "fontFamily", "$value": "JetBrains Mono" }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "font.sans": "{font.sans}",
+    "font.mono": "{font.mono}"
+  },
+  "look": {
+    "bgDefault": [
+      { "preset": "plain" },
+      { "preset": "paper" }
+    ],
+    "bgPalette": {
+      "accent": "109,139,255",
+      "paperBase": ["#ffffff", "#f4f4f1"],
+      "inkBase": ["#232320", "#161613"],
+      "border": "#e6e6e1"
+    }
+  }
+}

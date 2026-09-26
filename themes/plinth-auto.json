@@ -1,60 +1,6 @@
 {
   "name": "plinth-auto",
   "note": "Colours pack auto-extracted from https://plinthai.xyz by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Palette completed to the theme contract from values already in this pack (vars.--border/--muted/--accent-soft, bg.inkBase, bg.paperBase). Nothing invented. No serif on the brand, so serif maps to the sans explicitly.",
-  "bg": {
-    "accent": "31,59,255",
-    "tint": "110,110,104",
-    "tint2": "31,59,255",
-    "dotLight": "110,110,104",
-    "paperBase": [
-      "#fff",
-      "#f4f4f1"
-    ],
-    "softBase": [
-      "#ebedff",
-      "#dee0f1"
-    ],
-    "accentBase": [
-      "#1f3bff",
-      "#1930d1"
-    ],
-    "inkBase": [
-      "#343431",
-      "#181815"
-    ],
-    "border": "#e6e6e1",
-    "light": [
-      "#fff",
-      "#f4f4f1"
-    ],
-    "dark": [
-      "#191f44",
-      "#181815"
-    ],
-    "darkMesh": [
-      "#1a2150",
-      "#181815"
-    ],
-    "deep": [
-      "#3b3b38",
-      "#181815"
-    ],
-    "ink": [
-      "#1f3bff",
-      "#1930d1"
-    ],
-    "paper": "#fff"
-  },
-  "vars": {
-    "--ink": "#181815",
-    "--paper": "#fff",
-    "--muted": "#6e6e68",
-    "--em": "#1f3bff",
-    "--on-light": "#181815",
-    "--on-dark": "#fff",
-    "--border": "#e6e6e1",
-    "--accent-soft": "#ebedff"
-  },
   "tokens": {
     "color": {
       "bg": {
@@ -181,5 +127,51 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgPalette": {
+      "accent": "31,59,255",
+      "tint": "110,110,104",
+      "tint2": "31,59,255",
+      "dotLight": "110,110,104",
+      "paperBase": [
+        "#fff",
+        "#f4f4f1"
+      ],
+      "softBase": [
+        "#ebedff",
+        "#dee0f1"
+      ],
+      "accentBase": [
+        "#1f3bff",
+        "#1930d1"
+      ],
+      "inkBase": [
+        "#343431",
+        "#181815"
+      ],
+      "border": "#e6e6e1",
+      "light": [
+        "#fff",
+        "#f4f4f1"
+      ],
+      "dark": [
+        "#191f44",
+        "#181815"
+      ],
+      "darkMesh": [
+        "#1a2150",
+        "#181815"
+      ],
+      "deep": [
+        "#3b3b38",
+        "#181815"
+      ],
+      "ink": [
+        "#1f3bff",
+        "#1930d1"
+      ],
+      "paper": "#fff"
+    }
   }
 }

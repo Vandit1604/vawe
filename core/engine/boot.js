@@ -14,6 +14,7 @@ import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
 import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
+import { resolveFinishLayers, bakeDepthOfField } from './finish.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -277,7 +278,7 @@ export async function fetchThemeFile(spec) {
 
 export async function resolveTheme(spec) {
   const raw = await fetchThemeFile(spec);
-  return isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+  return expandTheme(raw, { parseColor, colorAlpha });
 }
 
 // resolveThemeTokenValues(spec): the SAME token-file fetch resolveTheme does, but returning the raw
@@ -310,7 +311,7 @@ export function applyTheme(theme, target = document.documentElement) {
   const root = target.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
-  set('--bg', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
+  set('--bg', P.bg); set('--paper', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
   set('--card', P.card || deriveCard(P)); // raised card surface (blocks use var(--card))
   set('--line', P.line); set('--line-strong', P.lineStrong);
   set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim); set('--ink', P.ink);
@@ -353,8 +354,6 @@ export function applyTheme(theme, target = document.documentElement) {
   set('--font-num', `'${T.num}'`);
   set('--font-serif', `'${T.serif}'`);
   set('--font-mono', `'${T.mono}'`);
-  // raw passthrough: theme.vars = { "--anything": "value" } for scene-local custom props.
-  if (isObj(theme.vars)) for (const [k, v] of Object.entries(theme.vars)) set(k, v);
 }
 
 // ---------- virtual clock: determinism is COERCED, not just required ----------
@@ -530,11 +529,13 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   Object.assign(data, resolveTokenRefs(data, tokenValues));
   const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
   bakeTextSizeRoles(data, look);
+  resolveFinishLayers(data, width, height); // `finish` sugar → real layers, before they get baked like any other
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
   produceBaseline(data, theme, frame, look);
   if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
   bakeDepth(data);
   bakeFocus(data);
+  bakeDepthOfField(data); // `finish.dof` + the camera's own focus keyframes → a blur, per layer `plane` z
   assertKeyHandles(data.camera, 'camera');
   bakeTimeRemaps(data);
   checkNoSurvivingDepth(data);

@@ -13,63 +13,6 @@
       "exitRatio": 0.5,
       "_exitRatio": "the house default: half, which is the middle of the band the five existing themes already use. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
     },
-    "bg": {
-      "accent": "37,99,235",
-      "tint": "180,190,205",
-      "tint2": "205,214,226",
-      "dotLight": "150,163,182",
-      "paperBase": [
-        "#ffffff",
-        "#f6f8fb"
-      ],
-      "softBase": [
-        "#f8fafc",
-        "#eef2f8"
-      ],
-      "accentBase": [
-        "#eef3ff",
-        "#f8fafc"
-      ],
-      "inkBase": [
-        "#0f1620",
-        "#0a0f16"
-      ],
-      "border": "#e7eaf0",
-      "dark": [
-        "#0f1620",
-        "#0a0f16"
-      ],
-      "darkMesh": [
-        "#141d2a",
-        "#0a0f16"
-      ],
-      "deep": [
-        "#0f1620",
-        "#080c12"
-      ],
-      "light": [
-        "#ffffff",
-        "#f6f8fb"
-      ],
-      "ink": [
-        "#0f1620",
-        "#0a0f16"
-      ],
-      "paper": "#ffffff"
-    },
-    "vars": {
-      "--ink": "#0f1620",
-      "--paper": "#ffffff",
-      "--muted": "#697182",
-      "--em": "#2563eb",
-      "--on-light": "#0f1620",
-      "--on-dark": "#ffffff",
-      "--border": "#e7eaf0",
-      "--accent-soft": "rgba(37,99,235,0.10)"
-    },
-    "bgDefault": {
-      "preset": "plain"
-    },
     "tokens": {
       "color": {
         "bg": {
@@ -191,6 +134,11 @@
         "{gradient.stop1}",
         "{gradient.stop2}"
       ]
+    },
+    "look": {
+      "bgDefault": {
+        "preset": "plain"
+      }
     }
   },
   "aspect": "16:9",
@@ -207,7 +155,7 @@
       "y": 100,
       "w": 400,
       "size": 40,
-      "start": 0.0,
+      "start": 0,
       "duration": 0.3,
       "exitDur": 0.05
     }
@@ -220,7 +168,7 @@
   ],
   "transitions": [
     {
-      "at": 1.0,
+      "at": 1,
       "fx": "whip",
       "dur": 0.3
     }

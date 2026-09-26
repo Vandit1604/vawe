@@ -129,6 +129,7 @@ const SCHEMA_PROPS = SCHEMA.fields.layers.item;
 // bare name: `out` is an exit-animation NAME everywhere and a source out-point in SECONDS on `video`,
 // one spelling for two things, and a string there renders `currentTime = NaN`.
 const VALUES = {
+  clock: { duration: 1 },
   src: '/assets/icons/anthropic.svg',
   'video.in': 0,
   'video.out': 3,
@@ -258,6 +259,12 @@ const AS = {
   'glow.color2': { color: '#2563eb', vars: { '--glow-c': [0, 1] }, varsDur: 0.8 },
   // doc: `blockGap` is the margin on a HEADING block (core/layers/doc.js:17); a code block has none.
   'doc.blockGap': { blocks: [{ h: 'Heading' }, { code: 'const a = 1' }] },
+  // group: `gridCols` is read only inside layoutGroupGrid (core/layers/util.js:528), one of three
+  // branches layoutGroup picks by `layout`. The guard is only presence of `layout`, satisfied by
+  // 'row' (the schema enum's first entry, valueFor's default), which runs layoutGroupFlex instead
+  // and never reaches gridCols. Same class as beam's `mode: 'shine'` above: point the guard at the
+  // one value that actually reads the dial.
+  'group.gridCols': { layout: 'grid' },
 };
 
 // The `globe` three scene reads a dozen dials off the layer (core/three-fx.js:372, :417) and has no

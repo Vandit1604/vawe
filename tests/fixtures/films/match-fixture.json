@@ -1,0 +1,10 @@
+{
+ "$schema": "./schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 2,
+ "layers": [
+  { "type": "text", "text": "match fixture", "x": 40, "y": 40, "w": 400, "size": 32, "start": 0, "duration": 2 }
+ ]
+}

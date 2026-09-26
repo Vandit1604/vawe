@@ -23,6 +23,10 @@
 // `make schema-drift` crashed exactly that way before this was changed. Vendored libs are globals here.
 import { THREE_FX } from './three-scenes.js';
 import { LONLAT } from './globe-dots.js';
+// `object`'s camera/object pose reads the SAME keyframe sampler and easing every other layer's `motion`
+// track reads (core/tracks/motion.js reads it too), so a person who already knows how to key a rect's
+// x/y/scale keys a glass shield's orbit the identical way. Not a second interpolation rule.
+import { motionAt } from '../timeline/sequence.js';
 // The dials a three scene reads OFF THE LAYER (it is handed the whole layer, named `LL` where `L` is
 // taken). Declared here because this is where they are read; core/surfaces/three.js merges them.
 export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
@@ -40,7 +44,10 @@ export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, 
   // `motionBlur` opts a scene into the in-canvas shutter accumulation createThreeLayer can do, with the
   // same meaning it has on every layer (true = half-shutter, 0..1 = strength); see the comment on `taps`
   // below for why a three scene needs its own at all.
-  rise: {}, motionBlur: { when: 'three' } };
+  rise: {}, motionBlur: { when: 'three' },
+  // `object`: geometry/material/env pick what to build; objectMotion/cameraMotion pose it and the
+  // camera per frame through motionAt, the SAME sampler `L.motion` on any other layer reads.
+  geometry: {}, material: {}, env: {}, objectMotion: {}, cameraMotion: {} };
 
 export { THREE_FX };
 const T = () => {
@@ -430,6 +437,154 @@ function buildGlobe(L, colors) {
   return { grp, n: dots.n, pos: dots.pos, dg: dots.dg, dcol: dots.dcol, og: dots.og, opos: dots.opos, ocol: dots.ocol,
     rg: rte.rg, route: rte.route, arc: rte.arc, SEG: rte.SEG, plane: rte.plane,
     cDay, cNight, oDay, oNight, tmp, litness };
+}
+
+// ---- object: composed geometry + material + environment, camera-orbited by keyed motion ----------
+//
+// A MINIMAL SVG PATH PARSER, not a general one. Only M/L/H/V/C/Q/Z (absolute and relative), which is
+// every command a flattened badge/shield outline needs. A/S/T (arcs and shorthand curves) throw by
+// name rather than silently drop the segment, since a dropped curve is a wrong silhouette nobody
+// would notice from the error output alone: flatten those in the source tool first (Illustrator's
+// "simplify path", or any SVG-to-path flattener) and re-export M/L/C/Q.
+const UNSUPPORTED_SVG_CMD = /[AaSsTt]/;
+// One handler per command, dispatched off a table rather than an if-chain: each handler mutates the
+// shared cursor `st` ({cx,cy,sx,sy}) and draws into `shape`. Splits the parser's own complexity across
+// six small functions instead of one branching on every letter.
+function svgMoveTo(shape, args, rel, scale, st) {
+  const at = (i) => args[i] * scale;
+  st.cx = rel ? st.cx + at(0) : at(0); st.cy = rel ? st.cy + at(1) : at(1);
+  st.sx = st.cx; st.sy = st.cy; shape.moveTo(st.cx, -st.cy);
+  for (let i = 2; i + 1 < args.length; i += 2) {
+    st.cx = rel ? st.cx + at(i) : at(i); st.cy = rel ? st.cy + at(i + 1) : at(i + 1);
+    shape.lineTo(st.cx, -st.cy);
+  }
+}
+function svgLineTo(shape, args, rel, scale, st) {
+  const at = (i) => args[i] * scale;
+  for (let i = 0; i + 1 < args.length; i += 2) {
+    st.cx = rel ? st.cx + at(i) : at(i); st.cy = rel ? st.cy + at(i + 1) : at(i + 1);
+    shape.lineTo(st.cx, -st.cy);
+  }
+}
+function svgHorizontal(shape, args, rel, scale, st) {
+  for (const v of args) { st.cx = rel ? st.cx + v * scale : v * scale; shape.lineTo(st.cx, -st.cy); }
+}
+function svgVertical(shape, args, rel, scale, st) {
+  for (const v of args) { st.cy = rel ? st.cy + v * scale : v * scale; shape.lineTo(st.cx, -st.cy); }
+}
+function svgCubic(shape, args, rel, scale, st) {
+  const at = (i) => args[i] * scale;
+  for (let i = 0; i + 5 < args.length; i += 6) {
+    const x1 = rel ? st.cx + at(i) : at(i), y1 = rel ? st.cy + at(i + 1) : at(i + 1);
+    const x2 = rel ? st.cx + at(i + 2) : at(i + 2), y2 = rel ? st.cy + at(i + 3) : at(i + 3);
+    const nx = rel ? st.cx + at(i + 4) : at(i + 4), ny = rel ? st.cy + at(i + 5) : at(i + 5);
+    shape.bezierCurveTo(x1, -y1, x2, -y2, nx, -ny); st.cx = nx; st.cy = ny;
+  }
+}
+function svgQuadratic(shape, args, rel, scale, st) {
+  const at = (i) => args[i] * scale;
+  for (let i = 0; i + 3 < args.length; i += 4) {
+    const x1 = rel ? st.cx + at(i) : at(i), y1 = rel ? st.cy + at(i + 1) : at(i + 1);
+    const nx = rel ? st.cx + at(i + 2) : at(i + 2), ny = rel ? st.cy + at(i + 3) : at(i + 3);
+    shape.quadraticCurveTo(x1, -y1, nx, -ny); st.cx = nx; st.cy = ny;
+  }
+}
+function svgClose(shape, args, rel, scale, st) { shape.closePath(); st.cx = st.sx; st.cy = st.sy; }
+const SVG_CMD = { M: svgMoveTo, L: svgLineTo, H: svgHorizontal, V: svgVertical, C: svgCubic, Q: svgQuadratic, Z: svgClose };
+
+function shapeFromSvgPath(d, scale) {
+  if (UNSUPPORTED_SVG_CMD.test(d)) {
+    throw new Error('three object: geometry.kind "svgExtrude" only reads M/L/H/V/C/Q/Z path commands; '
+      + 'this path uses an arc or shorthand curve (A/S/T). Flatten it to M/L/C/Q first.');
+  }
+  const shape = new (T().Shape)();
+  const nums = (s) => (s.match(/-?\d*\.?\d+(?:e-?\d+)?/gi) || []).map(Number);
+  const st = { cx: 0, cy: 0, sx: 0, sy: 0 };
+  for (const [, cmd, argStr] of d.matchAll(/([MLHVCQZmlhvcqz])([^MLHVCQZmlhvcqz]*)/g)) {
+    const args = nums(argStr), rel = cmd === cmd.toLowerCase();
+    SVG_CMD[cmd.toUpperCase()](shape, args, rel, scale, st);
+  }
+  return shape;
+}
+
+// Extruded geometry sources. `textExtrude` mirrors the `extrudeText` scene's own font path exactly
+// (same typeface preload, same "no silent substitution" refusal); it is not re-exported from there
+// because that scene bakes its own bevel constants in, and `object` exposes them as author dials.
+function svgExtrudeGeometry(g) {
+  if (typeof g.path !== 'string' || !g.path.trim()) {
+    throw new Error('three object: geometry.kind "svgExtrude" needs a non-empty `path` (an SVG path `d` string).');
+  }
+  const shape = shapeFromSvgPath(g.path, g.scale ?? 0.01);
+  const geo = new (T().ExtrudeGeometry)(shape, { depth: g.depth ?? 0.4, bevelEnabled: (g.bevelSize ?? 0.04) > 0,
+    bevelSize: g.bevelSize ?? 0.04, bevelThickness: g.bevelThickness ?? g.bevelSize ?? 0.04,
+    bevelSegments: g.bevelSegments ?? 4, curveSegments: g.curveSegments ?? 12 });
+  geo.center();
+  return geo;
+}
+function textExtrudeGeometry(g) {
+  const data = (typeof window !== 'undefined' && window.__typefaces) ? window.__typefaces[g.font] : null;
+  if (!data) throw new Error(`three object: geometry.kind "textExtrude" needs a loaded typeface for "${g.font}", run \`make glyphs\` to generate assets/fonts/3d/${g.font}.typeface.json.`);
+  const font = new (T().Font)(data);
+  const shapes = font.generateShapes(String(g.text ?? ''), g.size ?? 1);
+  const geo = new (T().ExtrudeGeometry)(shapes, { depth: g.depth ?? 0.22, bevelEnabled: true,
+    bevelSize: g.bevelSize ?? 0.018, bevelThickness: g.bevelThickness ?? 0.02, bevelSegments: g.bevelSegments ?? 2, curveSegments: 8 });
+  geo.center();
+  return geo;
+}
+const OBJECT_GEOMETRY_KINDS = ['sphere', 'box', 'torus', 'svgExtrude', 'textExtrude'];
+function geometryFor(g) {
+  g = g || {};
+  const kind = g.kind ?? 'sphere';
+  const t = T();
+  if (kind === 'sphere') return new t.SphereGeometry(g.radius ?? 1, 48, 32);
+  if (kind === 'box') return new t.BoxGeometry(g.w ?? 1.4, g.h ?? 1.4, g.d ?? 1.4);
+  if (kind === 'torus') return new t.TorusGeometry(g.radius ?? 1, g.tube ?? 0.35, 24, 64);
+  if (kind === 'svgExtrude') return svgExtrudeGeometry(g);
+  if (kind === 'textExtrude') return textExtrudeGeometry(g);
+  throw new Error(`three object: unknown geometry.kind "${kind}", one of: ${OBJECT_GEOMETRY_KINDS.join(', ')}`);
+}
+
+// Material PRESETS, the vocabulary an author picks from rather than hand-tuning a dozen PBR dials.
+// `glass`/`frostedGlass` need MeshPhysicalMaterial's `transmission` (a real refraction the renderer
+// composites through, not a transparency hack); `metal`/`matte` are plain MeshStandardMaterial at the
+// two ends of the roughness range. `studio()`'s room IBL (already built for every three scene, see
+// its own header) is what a transmissive or metal surface reflects; nothing extra to wire here.
+// One builder per preset, dispatched off a table (the same shape as SVG_CMD above) rather than an
+// if-chain, so no single function carries every preset's own complexity.
+const OBJECT_MATERIAL_BUILDERS = {
+  glass: (t, tint, m) => new t.MeshPhysicalMaterial({ color: tint, metalness: 0,
+    roughness: m.roughness ?? 0.05, transmission: m.transmission ?? 1, thickness: m.thickness ?? 0.6,
+    ior: m.ior ?? 1.5, clearcoat: m.clearcoat ?? 1, clearcoatRoughness: 0.08, envMapIntensity: m.envMapIntensity ?? 1.2 }),
+  frostedGlass: (t, tint, m) => new t.MeshPhysicalMaterial({ color: tint, metalness: 0,
+    roughness: m.roughness ?? 0.45, transmission: m.transmission ?? 0.9, thickness: m.thickness ?? 0.6,
+    ior: m.ior ?? 1.45, envMapIntensity: m.envMapIntensity ?? 1 }),
+  metal: (t, tint, m) => new t.MeshStandardMaterial({ color: tint, metalness: m.metalness ?? 0.9, roughness: m.roughness ?? 0.3 }),
+  matte: (t, tint, m) => new t.MeshStandardMaterial({ color: tint, metalness: 0, roughness: m.roughness ?? 0.85 }),
+};
+const OBJECT_MATERIAL_PRESETS = Object.keys(OBJECT_MATERIAL_BUILDERS);
+function materialFor(m, colors) {
+  m = m || {};
+  const preset = m.preset ?? 'matte';
+  const build = OBJECT_MATERIAL_BUILDERS[preset];
+  if (!build) throw new Error(`three object: unknown material.preset "${preset}", one of: ${OBJECT_MATERIAL_PRESETS.join(', ')}`);
+  return build(T(), hex(m.color ?? m.tint, colors?.[0] ?? '#e8ecf5'), m);
+}
+
+// An optional REAL environment image (an equirectangular capture, jpg or png) in place of `studio()`'s
+// procedural room, for the reflections/refractions a hand-tuned room can't match. Reuses the ordinary
+// image preload path every other layer's images go through (core/engine/preload.js), never a second
+// loader: a true .hdr (float radiance) format would need three's RGBELoader addon, not vendored here,
+// so `env.image` takes an already-tone-mapped equirect (a Poly Haven "Tonemapped JPG" export is exactly
+// this), left as a follow-up for a vendored RGBELoader.
+function applyObjectEnvironment(renderer, scene, env) {
+  if (!env || !env.image) return;
+  const t = T();
+  const tx = textureFrom(env.image, 'object env');
+  tx.ensure();
+  tx.tex.mapping = t.EquirectangularReflectionMapping;
+  const pmrem = new t.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromEquirectangular(tx.tex).texture;
+  pmrem.dispose();
 }
 
 // ---- scenes -------------------------------------------------------------------------------------
@@ -1005,6 +1160,45 @@ const SCENES = {
       },
     };
   },
+
+  // A composed object: geometry.kind picks the shape, material.preset picks glass/frostedGlass/metal/
+  // matte, env.image optionally replaces the studio room. Both the object's own pose and the camera's
+  // orbit are keyed through motionAt, the identical sampler `L.motion` reads on every other layer type,
+  // so `objectMotion`/`cameraMotion` use the same {t, x, y, z, rotX, rotY, rot, scale} keys and eases.
+  object(L, colors) {
+    const grp = new (T().Group)();
+    const mesh = new (T().Mesh)(geometryFor(L.geometry), materialFor(L.material, colors));
+    // THE OFF ANGLE IT ARRIVES AT, the same idea deviceShowcase's YAW0/PITCH0 names: a flat extruded
+    // face presented dead-on to the camera shows almost no fresnel edge or bevel highlight (transmission
+    // near the normal is close to 100% straight-through, which is physically correct and reads as a
+    // plain flat colour, not glass). Baked onto the MESH, not the group `pose()` moves, so `objectMotion`
+    // still starts wherever the author keys it, on top of this baseline presentation tilt.
+    mesh.rotation.set(-0.14, 0.22, 0);
+    grp.add(mesh);
+    return {
+      obj: grp,
+      toneMap: true,
+      pose(t, LL) {
+        const kfs = Array.isArray(LL.objectMotion) && LL.objectMotion.length ? LL.objectMotion : null;
+        const p = kfs ? motionAt(kfs, t) : null;
+        grp.position.set((p?.dx ?? 0) * 0.01, -(p?.dy ?? 0) * 0.01, p?.z ?? 0);
+        grp.rotation.set((p?.rotX ?? 0) * Math.PI / 180, (p?.rotY ?? 0) * Math.PI / 180, (p?.rot ?? 0) * Math.PI / 180);
+        grp.scale.setScalar(p?.scale ?? 1);
+      },
+      // Only `object` defines this: createThreeLayer calls it after pose() when present, and every
+      // other scene simply has no camera of its own to orbit (a fixed camera.position stays their
+      // default, unchanged by this addition).
+      poseCamera(camera, t, LL) {
+        const kfs = Array.isArray(LL.cameraMotion) && LL.cameraMotion.length ? LL.cameraMotion : null;
+        if (!kfs) return;
+        const c = motionAt(kfs, t);
+        const az = ((c.rotY ?? 0) * Math.PI) / 180, el = ((c.rotX ?? 0) * Math.PI) / 180;
+        const r = (LL.dolly ?? 5.2) + (c.z ?? 0);
+        camera.position.set(r * Math.sin(az) * Math.cos(el), r * Math.sin(el), r * Math.cos(az) * Math.cos(el));
+        camera.lookAt(0, 0, 0);
+      },
+    };
+  },
 };
 
 // shadowBlob(): a soft dark ellipse fading to nothing at the edge, painted once. The contact-shadow
@@ -1089,6 +1283,7 @@ export function createThreeLayer(w, h, L, colors) {
   const camera = new (T().PerspectiveCamera)(L.fov ?? 35, w / h, 0.1, 100);
   camera.position.set(0, 0, L.dolly ?? 5.2);
   studio(renderer, scene, colors);
+  applyObjectEnvironment(renderer, scene, L.env);
 
   const make = SCENES[L.three];
   if (!make) throw new Error(`unknown three scene "${L.three}", one of: ${THREE_FX.join(', ')}`);
@@ -1106,7 +1301,9 @@ export function createThreeLayer(w, h, L, colors) {
   // plane sits to the ground. It is a poorer shadow than a real one done right, and it is the one that
   // actually shows up on screen; the case for the real thing is in this scene's remaining-differences
   // note in the render report, not silently swallowed here.
-  if (built.shadow) {
+  // `toneMap`: the same filmic tonemapping `shadow` opts litPlane into, under its own name because
+  // `object`'s glass/metal presets want it for their highlights and have no grounding shadow to ask for.
+  if (built.shadow || built.toneMap) {
     renderer.toneMapping = T().ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.0;
   }
@@ -1136,14 +1333,21 @@ export function createThreeLayer(w, h, L, colors) {
   return {
     canvas: outCanvas,
     draw(t, LL) {
-      if (taps <= 1) { built.pose(t, LL); renderer.render(scene, camera); return; }
+      if (taps <= 1) {
+        built.pose(t, LL);
+        if (built.poseCamera) built.poseCamera(camera, t, LL);
+        renderer.render(scene, camera);
+        return;
+      }
       // NO SECOND SHUTTER. `shutterSecs` was a per-layer override for this window, a second number for the
       // idea `motionBlur` already carries; core/tracks/motion.js refuses exactly that for the film dial.
       const shutter = (1 / 30) * 1.2 * strength;
       octx.clearRect(0, 0, w, h);
       octx.globalAlpha = 1 / taps;
       for (let i = 0; i < taps; i++) {
-        built.pose(t + ((i / (taps - 1)) - 0.5) * shutter, LL);
+        const tt = t + ((i / (taps - 1)) - 0.5) * shutter;
+        built.pose(tt, LL);
+        if (built.poseCamera) built.poseCamera(camera, tt, LL);
         renderer.render(scene, camera);
         octx.drawImage(glCanvas, 0, 0);
       }

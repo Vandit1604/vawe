@@ -9,75 +9,6 @@
     "durationScale": 0.9,
     "stagger": 0.05
   },
-  "bg": {
-    "accent": "255,116,46",
-    "tint": "232,190,150",
-    "tint2": "241,100,46",
-    "dotLight": "220,180,150",
-    "paperBase": [
-      "#fdf6ec",
-      "#f7e2cf"
-    ],
-    "softBase": [
-      "#fdeede",
-      "#fbe0cb"
-    ],
-    "accentBase": [
-      "#e85c28",
-      "#cf4712"
-    ],
-    "inkBase": [
-      "#120c09",
-      "#000000"
-    ],
-    "border": "#efe2d2",
-    "dark": [
-      "#120c09",
-      "#000000"
-    ],
-    "darkMesh": [
-      "#1a110b",
-      "#000000"
-    ],
-    "deep": [
-      "#0c0806",
-      "#000000"
-    ],
-    "light": [
-      "#fffdf9",
-      "#f7e2cf"
-    ],
-    "ink": [
-      "#120c09",
-      "#000000"
-    ],
-    "paper": "#fdf6ec"
-  },
-  "vars": {
-    "--ink": "#1c1613",
-    "--paper": "#fdf6ec",
-    "--muted": "#8a7d72",
-    "--em": "#ff742e",
-    "--accent-ink": "#b83a0f",
-    "--on-light": "#1c1613",
-    "--on-dark": "#ffffff",
-    "--border": "#efe2d2",
-    "--accent-soft": "rgba(255,116,46,0.14)"
-  },
-  "bgDefault": [
-    {
-      "preset": "paper"
-    },
-    {
-      "preset": "dark"
-    },
-    {
-      "preset": "paper"
-    },
-    {
-      "preset": "accent"
-    }
-  ],
   "tokens": {
     "color": {
       "bg": {
@@ -199,5 +130,65 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgDefault": [
+      {
+        "preset": "paper"
+      },
+      {
+        "preset": "dark"
+      },
+      {
+        "preset": "paper"
+      },
+      {
+        "preset": "accent"
+      }
+    ],
+    "bgPalette": {
+      "accent": "255,116,46",
+      "tint": "232,190,150",
+      "tint2": "241,100,46",
+      "dotLight": "220,180,150",
+      "paperBase": [
+        "#fdf6ec",
+        "#f7e2cf"
+      ],
+      "softBase": [
+        "#fdeede",
+        "#fbe0cb"
+      ],
+      "accentBase": [
+        "#e85c28",
+        "#cf4712"
+      ],
+      "inkBase": [
+        "#120c09",
+        "#000000"
+      ],
+      "border": "#efe2d2",
+      "dark": [
+        "#120c09",
+        "#000000"
+      ],
+      "darkMesh": [
+        "#1a110b",
+        "#000000"
+      ],
+      "deep": [
+        "#0c0806",
+        "#000000"
+      ],
+      "light": [
+        "#fffdf9",
+        "#f7e2cf"
+      ],
+      "ink": [
+        "#120c09",
+        "#000000"
+      ],
+      "paper": "#fdf6ec"
+    }
   }
 }

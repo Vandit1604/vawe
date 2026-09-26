@@ -26,13 +26,14 @@ import * as plane from './plane.js';
 import * as wordSlot from './word-slot.js';
 import * as alongPath from './along-path.js';
 import * as ghost from './ghost.js';
+import * as repeat from './repeat.js';
 import * as squash from './squash.js';
 import * as matte from './matte.js';
 import * as lag from './lag.js';
 import * as upright from './upright.js';
 import { defineRegistry } from '../registry/registry.js';
 
-const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, shadow, squash, tilt, upright, wordSlot };
+const REGISTRY = { alongPath, ghost, kick, lag, matte, mixBlend, occlude, plane, progress, repeat, shadow, squash, tilt, upright, wordSlot };
 
 // Exported so gates DERIVE the modifier vocabulary instead of restating it, the contract LAYER_TYPES
 // already has. schema-drift compares the schema's copy of this list against it in both directions.
@@ -50,13 +51,14 @@ export const FX_BLURBS = {
   alongPath: 'set the line of type ON A CURVE and, if you ask, send it travelling along one. The general case `circle` is one point of, and the only way to bend a headline',
   ghost: 'the only effect that reads TIME AS A MATERIAL: it evaluates the layer\'s own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre',
   lag: 'FOLLOW-THROUGH: this layer trails another layer\'s motion by a frame or three and overruns its stop before settling. Stagger delays a sibling\'s entrance; this makes one layer drag behind another\'s continuous motion, which is half of what separates an animated object from a moved image',
-  matte: 'a LUMA MATTE: another layer\'s brightness is this layer\'s alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer\'s live box',
+  matte: 'a TRACK MATTE: another layer\'s luma or alpha becomes this layer\'s own alpha, white shows and black hides, and `-inverted` flips that. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer\'s live box',
   squash: 'SQUASH AND STRETCH read off the layer\'s own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash',
   kick: 'hit the layer on the film\'s own joints. A cut, a seam or a sting shoves it, so the frame feels the edit',
   mixBlend: 'how this layer\'s pixels combine with what is already painted behind it, knock a headline out of a photo',
   occlude: 'hide this layer where another one covers it, put something BEHIND something else without reordering the stack',
   plane: 'stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax',
   progress: 'hand the layer the FILM\'s progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with',
+  repeat: 'AE\'s Repeater: stamp the layer\'s own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy\'s own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time',
   shadow: 'a drop shadow that knows where the light is, so every layer does not point the same way',
   upright: 'AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates, so an arrangement can turn without its contents turning with it. Parenting gives you the rotation for free and it is almost always wrong: photographs carried round a circle go upside down at the bottom exactly when the motion peaks',
   tilt: 'turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding',
@@ -74,13 +76,14 @@ const FX_AKA = {
   alongPath: ['text on a curve', 'type on a path', 'curved text'],
   ghost: ['motion trail', 'motion blur streak', 'afterimage trail'],
   lag: ['follow through', 'drag behind', 'delayed follow motion'],
-  matte: ['luma matte', 'brightness mask', 'wipe reveal'],
+  matte: ['luma matte', 'track matte', 'brightness mask', 'wipe reveal', 'inverted matte'],
   squash: ['squash and stretch', 'cartoon bounce', 'stretch on velocity'],
   kick: ['hit on the cut', 'jolt on the beat', 'impact on edit'],
   mixBlend: ['blend mode modifier', 'composite mode', 'knock out of photo'],
   occlude: ['hide behind another layer', 'occlusion', 'depth sort hiding'],
   plane: ['parallax depth', 'stand at a distance', 'depth modifier'],
   progress: ['film progress variable', 'timeline percent', 'progress ring driver'],
+  repeat: ['AE repeater', 'a ring of copies', 'stamp N instances stepped apart'],
   shadow: ['cast shadow', 'drop shadow with light', 'directional shadow'],
   upright: ['auto orient', 'stay upright', 'counter rotate'],
   tilt: ['3D tilt', 'turn out of plane', 'leaning card'],

@@ -113,6 +113,21 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
   typing, colour-wave)? `make beats D=<file> VS=<brand>`. Each beat beside its source. `make measure
   VIDEO=out/ours.mp4 EXPECT=<preset>`: does our render's motion match the number you measured off the
   reference? Then `make audit` (overlap/contrast/safe-zone). Fix data, re-render, never ship unverified.
+- **`make study REF=<reference.mp4> D=<file.json> MATCH=1`: does a beat MOVE the way the reference
+  moves, not just resemble it in a still frame?** (`harness/media/match.mjs`.) Beats come from the
+  film's own storyboard, or (with none) scene cuts detected in the reference itself. Per beat it writes
+  a dense strip (reference row over render row, one column per sampled instant), a difference overlay
+  (ffmpeg `blend=all_mode=difference`) and a mean SSIM (ffmpeg's `ssim` filter, both sides scaled to the
+  render's own size), then ranks every beat worst-to-best in `out/match/<film>/match.md`. A beat scored
+  against its own render reads near SSIM 1; a beat that diverges in timing or path reads low, and the
+  strip/diff for that beat is where to look first. STEP=<seconds> sets the sample rate (default 0.1).
+- **Measuring one element's move instead of guessing it from sparse frames:**
+  `node harness/media/track.mjs <reference.mp4> --box x,y,w,h --from t0 --to t1 [--fps 10] [--thresh 128]
+  [--dark]` (`harness/media/track.mjs`) crops the box, tracks the brightest (or, with `--dark`, darkest)
+  region's centroid frame by frame, and prints `{t,x,y,scale,opacity}` keyframes plus a suggested ease
+  (`easeInCubic`/`easeOutCubic`/`linear`, read off whether the move speeds up or slows down), ready to
+  paste into `motion[]`. It is a brightness-threshold tracker, not a model: pick a box around one
+  high-contrast subject (a cursor, a logo, a card) over a roughly flat ground.
 
 ## The honest ceiling
 Two things bound 1:1 fidelity and are worth stating rather than faking:

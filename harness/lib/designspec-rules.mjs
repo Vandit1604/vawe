@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { onScreenText as plain } from './text.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -46,7 +46,7 @@ function loadThemeSans() {
     if (!f.endsWith('.json')) continue;
     try {
       const raw = JSON.parse(fs.readFileSync(path.join(REPO, 'themes', f), 'utf8'));
-      const t = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+      const t = expandTheme(raw, { parseColor, colorAlpha });
       if (t && t.type && typeof t.type.sans === 'string') out.set(f.slice(0, -5), t.type.sans);
     } catch { /* a theme that will not parse (or resolve) is designspec-check's finding to report, not this rule's */ }
   }
