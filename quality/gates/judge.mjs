@@ -13,10 +13,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
-import { craftRubric } from './rubric.mjs';
+import { craftRubric, structuredRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 import { appendRun, readRuns } from '../../harness/lib/runlog.mjs';
 import { JUDGE_CODES, isJudgeCode, parseFix } from '../../harness/lib/judge-codes.mjs';
+import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -32,10 +33,43 @@ const renderHashOf = (file) => { try { return crypto.createHash('sha256').update
 // agent to score, so there is nothing to emit under --json when it succeeds. The one real finding is
 // "cannot prep" (bad usage, or a stale/missing render), which --json now has a record for.
 const f = gateFindings();
-const inp = process.argv[2];
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : d; };
 // every occurrence of a repeated flag, in order: `--fix a@1 --fix b@2` -> ['a@1', 'b@2'].
 const argAll = (k) => process.argv.reduce((acc, v, i) => (v === k ? [...acc, process.argv[i + 1]] : acc), []);
+
+// --compare <verdict-A.json> <verdict-B.json>: a single vision judge repeats its own rating on the
+// same clip only ~two times in three (Video-Bench), so one structured run alone is not the signal,
+// agreement across two INDEPENDENT ones is. Diffs every criterion the two runs share and flags any
+// where the scores disagree by more than 2 points. Needs no film/render/prep at all, so it runs
+// before `inp` is even resolved: the two files are exactly what `structuredRubric`'s instructions
+// told each judge to write.
+const compareIdx = process.argv.indexOf('--compare');
+if (compareIdx >= 0) {
+  const [fileA, fileB] = [process.argv[compareIdx + 1], process.argv[compareIdx + 2]];
+  if (!fileA || !fileB || !fs.existsSync(fileA) || !fs.existsSync(fileB)) {
+    console.error('usage: node quality/gates/judge.mjs --compare <verdict-A.json> <verdict-B.json>');
+    process.exit(2);
+  }
+  const a = JSON.parse(fs.readFileSync(fileA, 'utf8'));
+  const b = JSON.parse(fs.readFileSync(fileB, 'utf8'));
+  const codes = [...new Set([...Object.keys(a.criteria || {}), ...Object.keys(b.criteria || {})])].sort();
+  const disagreements = codes
+    .map((code) => ({ code, a: a.criteria?.[code]?.score, b: b.criteria?.[code]?.score }))
+    .filter((d) => typeof d.a === 'number' && typeof d.b === 'number' && Math.abs(d.a - d.b) > 2);
+  console.log(`\n  compare · run ${a.run || 'A'} (${fileA}) vs run ${b.run || 'B'} (${fileB})`);
+  if (!disagreements.length) {
+    console.log('  ✓ no criterion disagrees by more than 2 points');
+  } else {
+    for (const d of disagreements) {
+      console.log(`  ⚠ ${d.code}: ${d.a} vs ${d.b} (Δ${Math.abs(d.a - d.b)})`);
+      f.warn('judge-disagreement', `${d.code}: run ${a.run || 'A'} scored ${d.a}, run ${b.run || 'B'} scored ${d.b}`, { code: d.code });
+    }
+    console.log('  a disagreement this large means the two eyes saw different things: get a third opinion on those criteria before trusting either.');
+  }
+  process.exit(0);
+}
+
+const inp = process.argv[2];
 if (!inp) {
   console.error('usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]');
   f.fail('judge-usage', 'usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]');
@@ -142,6 +176,63 @@ if (verdictArg) {
   process.exit(0);
 }
 
+// --verdict-json <file> --run <A|B|...>: the STRUCTURED judge. Same freshness guard as --verdict (a
+// prep receipt for THIS render, sheet still on disk, render hash unchanged), but the payload is JSON,
+// one entry per criterion, and a criterion with no {score, evidence, t} is refused outright: a
+// receipt without evidence per criterion is not a verdict, it's the same free-text problem --fixes
+// had, wearing JSON. Recorded under its own stage per run (`judge-struct-<run>`) so two independent
+// judges never overwrite each other's receipt.
+const verdictJsonArg = arg('--verdict-json', null);
+if (verdictJsonArg) {
+  const run = arg('--run', null);
+  if (!run) { console.error('--verdict-json needs --run <A|B|...> (which of the independent judges this is)'); process.exit(2); }
+  if (!fs.existsSync(verdictJsonArg)) { console.error(`✗ no such file: ${verdictJsonArg}`); process.exit(2); }
+  let payload;
+  try { payload = JSON.parse(fs.readFileSync(verdictJsonArg, 'utf8')); }
+  catch (e) { console.error(`✗ ${verdictJsonArg} is not valid JSON: ${e.message}`); process.exit(2); }
+
+  const prep = readReceipt('judge', inp);
+  const sheet = prep.exists && prep.receipt && prep.receipt.sheet;
+  if (!prep.exists || prep.stale || !sheet || !fs.existsSync(sheet)) {
+    console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`make judge D=${inp} STRUCT=1\` first.`);
+    process.exit(1);
+  }
+  const renderHash = renderHashOf(mp4);
+  if (!renderHash || prep.receipt.renderHash !== renderHash) {
+    console.error(`✗ ${mp4} has changed since the sheet was made. Re-run \`make judge D=${inp} STRUCT=1\` first.`);
+    process.exit(1);
+  }
+
+  const missing = structuredCriteria().filter((c) => {
+    const entry = payload.criteria && payload.criteria[c.code];
+    return !entry || typeof entry.score !== 'number' || entry.score < 1 || entry.score > 5
+      || typeof entry.evidence !== 'string' || !entry.evidence.trim() || typeof entry.t !== 'number';
+  }).map((c) => c.code);
+  if (missing.length) {
+    console.error(`✗ refused: ${missing.length} criterion/criteria missing {score, evidence, t}: ${missing.join(', ')}`);
+    console.error('  a receipt without evidence per criterion is not a verdict. Score every criterion and name what you SEE.');
+    f.fail('judge-struct-incomplete', `${missing.length} criterion/criteria missing evidence`, { missing });
+    process.exit(1);
+  }
+  const v = String(payload.verdict || '').toUpperCase();
+  if (v !== 'PASS' && v !== 'FIX') { console.error('the JSON\'s "verdict" must be PASS or FIX'); process.exit(2); }
+  if (v === 'PASS') {
+    const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
+    const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
+    const authorSession = authorRun && authorRun.session;
+    if (thisSession && authorSession && thisSession === authorSession) {
+      console.error(`✗ refused: this PASS would be self-recorded (session ${thisSession} both rendered and is judging ${path.basename(mp4)}).`);
+      f.fail('judge-self-recorded', 'a PASS was attempted by the same session that rendered this cut');
+      process.exit(1);
+    }
+  }
+  const stage = `judge-struct-${String(run).replace(/[^A-Za-z0-9_-]/g, '')}`;
+  writeReceipt(stage, inp, { run, verdict: v, criteria: payload.criteria, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
+  appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, file: verdictJsonArg } });
+  console.log(`  ✓ structured verdict recorded: run ${run}, ${v}. Every criterion carries evidence.`);
+  process.exit(0);
+}
+
 const dur = parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', mp4]).toString().trim());
 const dims = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', mp4]).toString().trim().split(',').map(Number);
 const landscape = dims[0] >= dims[1];
@@ -181,6 +272,23 @@ const measured = scene
 fs.writeFileSync(`${dir}/rubric.md`, craftRubric({
   name: path.basename(mp4), frames: tiles.length, landscape, brand, dir, findings: measured,
 }));
+
+// --struct: also write a STRUCTURED rubric per independent run (--runs A,B by default), whose
+// required answer is JSON, one entry per criterion, split LOOK/MOTION. Two files, not one, because a
+// single vision judge repeats its own rating on the same clip only ~two times in three (Video-Bench):
+// the second file is what `--compare` above needs to exist at all.
+if (process.argv.includes('--struct')) {
+  const runs = arg('--runs', 'A,B').split(',').map((s) => s.trim()).filter(Boolean);
+  fs.mkdirSync(`${dir}/verdicts`, { recursive: true });
+  for (const run of runs) {
+    const outFile = `${dir}/verdicts/${run}.json`;
+    fs.writeFileSync(`${dir}/structured-${run}.md`, structuredRubric({
+      name: path.basename(mp4), subject: inp, frames: tiles.length, landscape, dir, run, outFile,
+    }));
+  }
+  console.log(`  → structured: ${runs.map((r) => `${dir}/structured-${r}.md`).join(', ')} `
+    + `(${runs.length} independent run(s), LOOK + MOTION axes, JSON verdict required)`);
+}
 
 console.log(`\n  judge · ${path.basename(mp4)} · ${tiles.length} key frames · brand: ${brand || '(none)'}`);
 console.log(`  → sheet:  ${dir}/sheet.png`);
