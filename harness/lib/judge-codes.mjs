@@ -7,6 +7,11 @@ export const JUDGE_CODES = Object.freeze([
   'asset-fidelity',
   'produced-not-generated',
   'value',
+  'motion-smoothness',
+  'temporal-flicker',
+  'aesthetic-quality',
+  'edge-clip',
+  'blank-frame',
 ]);
 
 const CODE_SET = new Set(JUDGE_CODES);

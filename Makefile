@@ -194,7 +194,6 @@ else
 	t1=$$(node -e 'process.stdout.write(String(Date.now()))'); \
 	node harness/lib/record-render.mjs dev $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
 	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
-	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 	@ref=$$(node -e "import('./quality/gates/stage.mjs').then(m=>{const l=m.lookBlock('$(D)'); console.log((l&&l.reference)||'');})") ; \
 	if [ -n "$$ref" ]; then \
 	  cc=$$(node quality/gates/content-check.mjs $(D) --ref $$ref 2>&1); rc=$$? ; \
@@ -203,6 +202,7 @@ else
 	fi
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)))
 endif
 endif
 
@@ -441,10 +441,16 @@ all: build ## [ship] every format via the render queue
 # preview.mjs's raw usage blob, naming neither the mistake nor the fix. D omitted previews the module's
 # sample.json (a deliberate default, not an error); D pointing at a file that does not exist is loud;
 # M set here (the old, wrong habit) is now loud too instead of being silently ignored.
-look: ## [dev] storyboard (key frames) for visual review, of the film at D.
+look: ## [dev] storyboard (key frames) for visual review, of the film at D. T=<s>|BEAT=<n>: one still, no full sheet.
 	@test -z "$(M)" || { echo "make look takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make look D=$(M)"; exit 1; }
 	@test -n "$(D)" || echo "  · no D=<file.json> given, previewing films/scene/sample.json"
+ifneq ($(strip $(T)),)
+	node harness/author/preview.mjs scene $$(node -e "console.log(Math.round($(T)*30))") $(if $(D),--data $(D))
+else ifneq ($(strip $(BEAT)),)
+	node harness/author/preview.mjs scene b$(BEAT) $(if $(D),--data $(D))
+else
 	node harness/author/preview.mjs scene "" $(if $(D),--data $(D))
+endif
 
 frame: ## [dev] one exact frame of the film at D (D=<file.json> N=<n> or N=b<beat>)
 	@test -z "$(M)" || { echo "make frame takes D=<file.json>, not M= (M was the module, always \"scene\"). Use: make frame D=$(M) N=$(N)"; exit 1; }
