@@ -1,29 +1,5 @@
 #!/usr/bin/env node
-// harness/dev/motion-lab.mjs: does a motion change actually raise the local-motion floor, or is it an
-// opinion. Renders a BASE storyboard's named VARIANTS the same way and reports one table, so "I think
-// this motion helps" becomes a number instead of a feeling.
-//
-//   node harness/dev/motion-lab.mjs <base.storyboard.md> --variants <variants.json> [--keep]
-//   node harness/dev/motion-lab.mjs --self-test
-//   make motion-lab D=<base.storyboard.md> VARIANTS=<variants.json>
-//
-// variants.json: { "<name>": { "<beat number>": "<selector>@<kind>:<band>", ... }, ... }. A variant
-// touches ONLY the named beats' `motion:` line (harness/lib/contract.mjs parseMotion), because that is
 // the one knob engine-doctrine/MISTAKES.md #608 did NOT already rule out: it proved structure (a shared fragment,
-// a keyed object chain) moves the floor by nothing, so what is left to test is density, the number and
-// placement of keyed reveals per second. An implicit "base" variant (no edits) always runs first, so
-// every named variant is read against the unmodified film.
-//
-// A variant copied under a scratch name still has to find the real fragments on disk: any beat that
-// names no explicit `fragment:` gets one pointing at the ORIGINAL film's own fragment
-// (`<origBase>.sceneN.html`), so assemble.mjs's default naming (`<scratchBase>.sceneN.html`) never gets
-// asked to resolve against a file that was never written.
-//
-// EVERY VARIANT IS BUILT, RENDERED AND MEASURED THE SAME WAY, on purpose: `assemble.mjs` then
-// `./bin/vawe --draft` then `quality/gates/motion-floor.mjs`'s own `pullFrames`/`profile` (imported, not
-// reimplemented) on the resulting out/<name>.mp4. If the variants were not rendered identically the
-// comparison would be worthless, which is the whole reason this file exists instead of eyeballing three
-// renders.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -33,12 +9,6 @@ import { parseMotion } from '../lib/contract.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCRATCH_TAG = '_motion-lab';
 
-// motion-floor.mjs runs ITS OWN self-test as an unguarded top-level side effect the instant
-// `process.argv` contains `--self-test` (it has no `import.meta.url === main` guard around that one
-// check, only around its CLI). A static `import` of it here would run and exit(0) before this file's
-// own `--self-test` ever got to do anything, because both scripts share one process's argv. So the
-// import is deferred and process.argv is hidden from it for the one moment it evaluates, restored
-// right after: motion-floor.mjs itself is untouched, per the plan ("call it as it is").
 let motionFloor = null;
 async function loadMotionFloor() {
   if (motionFloor) return motionFloor;
@@ -56,8 +26,6 @@ function run(cmd, args) {
   return spawnSync(cmd, args, { cwd: ROOT, encoding: 'utf8' });
 }
 
-// ── storyboard mutation: touch ONLY the beats' `motion:` line, plus a fragment default that keeps a
-// scratch-named copy pointed at the ORIGINAL film's fragments ─────────────────────────────────────
 
 /** setField(block, key, value) -> block with `- key: value` set, replacing an existing line or
  * inserting one right after the beat's title line. */
@@ -103,7 +71,6 @@ async function measure(mp4) {
   const frames = pullFrames(mp4);
   if (!frames) return { error: 'ffmpeg returned no frames' };
   const prof = profile(frames);
-  // Same convention motion-floor.mjs uses: the last two windows are the outro, allowed to hold.
   const body = prof.slice(0, -2);
   if (!body.length) return { error: 'render too short to profile (need at least 3 windows of 0.5s)' };
   const dead = body.filter((w) => w.local < DEAD).length;
@@ -157,12 +124,6 @@ function printTable(rows) {
 }
 
 // ── self-test: reproduce engine-doctrine/MISTAKES.md #608 (the A/B/C structural experiment) end to end ────────
-//
-// A: two beats, a fragment each, torn down and rebuilt at the cut. B: the same two beats sharing ONE
-// fragment (acrossBeats survives the cut), no object. C: B plus a keyed object chain across the cut
-// (a slow center@900x420 -> center@760x360 drift, the SAME shape #608 measured: ambient, not local).
-// Same theme, same copy, same 6 seconds, one fadeUp reveal per 3s beat in every variant: the only thing
-// that differs between A/B/C is the structure #608 is about, never the motion plan under it.
 async function selfTest() {
   const dir = path.join(ROOT, 'films/scene');
   const FRAG = (label) => `<style>.stage{position:absolute;inset:0;display:flex;align-items:center;`
@@ -191,8 +152,6 @@ async function selfTest() {
 
   const results = [];
 
-  // A: two distinct fragments, no fragment: override needed (default naming already gives each beat
-  // its own file), no object chain.
   {
     const tag = 'a';
     const f1 = path.join(dir, `${SCRATCH_TAG}-${tag}.scene1.html`);
@@ -205,8 +164,6 @@ async function selfTest() {
       jsonSeed: { module: 'scene', theme: 'vawe' }, extraFiles: [f1, f2] }));
   }
 
-  // B: the same two beats sharing ONE fragment (fragment: named explicitly on both, so assemble.mjs's
-  // run-merging keeps the DOM alive across the cut), still no object.
   {
     const tag = 'b';
     const shared = path.join(dir, `${SCRATCH_TAG}-${tag}.shared.html`);
@@ -219,8 +176,6 @@ async function selfTest() {
       jsonSeed: { module: 'scene', theme: 'vawe' }, extraFiles: [shared] }));
   }
 
-  // C: B plus a keyed object chain, a slow drift (center@900x420 -> center@760x360 over the whole
-  // film), the SAME shape #608 measured: ambient (whole-frame, gentle) rather than local (a reveal).
   {
     const tag = 'c';
     const shared = path.join(dir, `${SCRATCH_TAG}-${tag}.shared.html`);
@@ -252,8 +207,6 @@ async function selfTest() {
     console.log('  ✓ motion-lab self-test: reproduced the exact #608 figures (9, 9, 10)');
     process.exit(0);
   }
-  // The qualitative finding, checked honestly rather than declared: structure (A vs B) buys nothing,
-  // and the object chain (C) is worse or equal, never better, because its motion is ambient.
   const structureBuysNothing = dead[0] === dead[1];
   const chainNotBetter = dead[2] >= dead[1];
   if (structureBuysNothing && chainNotBetter) {

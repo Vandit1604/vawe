@@ -1,18 +1,4 @@
 #!/usr/bin/env node
-// harness/dev/mistakes-holds-check.mjs: does every "holds:" line in engine-doctrine/MISTAKES.md name
-// something real? The file's own header promises "what holds it today (a gate, a live check, or
-// 'none')". A holds: value naming a quality/gates/*.mjs file that was never written, or a symbol that
-// never made it into the gate it claims, is a false claim sitting in the one place meant to be trusted
-// over memory. Not a quality gate (no write site here to refuse; MISTAKES.md entries are hand-authored
-// prose, so this is a report to read and fix by hand, per engine-doctrine/CRAFT/ENGINE-CHANGES.md).
-//
-// Checks, per holds: entry, for each comma-separated reference that names quality/gates/<file>.mjs:
-//   1. the file exists on disk
-//   2. if the reference carries a `backticked code` or (parenthetical) naming a symbol/string, that
-//      literal text appears somewhere in the gate file's source
-// A bare gate-file mention with no parenthetical only gets check 1: the file existing is the whole claim.
-//
-// Run: node harness/dev/mistakes-holds-check.mjs [--json]
 
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -41,8 +27,6 @@ function parseEntries(text) {
   return entries;
 }
 
-// Split "a.mjs (`sym`), b.mjs (note)" into per-reference chunks on top-level commas (not commas inside
-// parens, since a parenthetical note routinely lists several symbols itself).
 function splitRefs(holds) {
   const refs = [];
   let depth = 0, start = 0;
@@ -84,9 +68,6 @@ function main() {
         continue;
       }
       if (!note) continue;
-      // Only backticked tokens are code claims ("(`getTotalLength`)"); free-English commentary in a
-      // parenthetical ("(now clean on showcase-lumen.json)") is a human note, not a thing to grep for,
-      // and checking it as a literal produces false positives on real, correct entries.
       const codes = [...note.matchAll(/`([^`]+)`/g)].map((mm) => mm[1]);
       for (const lit of codes) {
         if (!gate.src.includes(lit)) {

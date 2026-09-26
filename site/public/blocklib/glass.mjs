@@ -16,7 +16,6 @@
 // PURE BY CONTRACT, like every factory in blocks/: props → array of scene-layer JSON. No Date, no
 // Math.random, absolute coords on the 1920x1080 stage, `{x, y}` = the block's top-left.
 import { text, rect, box, stagger, R, SPACE, TYPE, E, r2 } from './kit.mjs';
-import { glassCard } from './sleek.mjs';
 import { svgIcon } from '../core/icons/icons.js';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
@@ -62,9 +61,29 @@ const frost = ({ radius = R.round, tint = 0.09, blur = 18, edge = EDGE, elevatio
   radius, border: `1.5px solid ${edge}`, glass: blur, elevation,
 });
 
-// scrimFor: the same dark band under a panel this family does NOT own the fill of (the `glassCard`
-// hero below). Placed behind it so the borrowed surface sits in the same readable band as ours,
-// rather than growing a second copy of glassCard here just to change one colour.
+// glassHeroPanel: the frosted-glass showcase panel `glassWidgets` uses for its hero. This used to be
+// `glassCard` from blocks/sleek.mjs; that block was cut (a static HTML fragment with no mechanism
+// beyond markup), so the one caller here keeps its own copy instead of depending on a removed block.
+const WHITE_HAIR = 'rgba(255,255,255,0.14)';
+function glassHeroPanel({ x, y, w = 640, h = 360, title, desc, kicker, tint = 0.06,
+  radius = 22, start = 0, dur = 4, anim = 'pop', enterDur = 0.5 } = {}) {
+  const html = `<div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:32px;`
+    + `box-sizing:border-box;width:${w}px;height:${h}px">`
+    + `<div style="width:${w - 80}px;height:2px;background:linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)"></div>`
+    + (kicker ? `<span style="font:600 22px var(--font-mono);color:var(--accent);letter-spacing:0.08em">${kicker}</span>` : '')
+    + (title ? `<span style="font:700 52px var(--font-sans);color:#fff;letter-spacing:-0.02em">${title}</span>` : '')
+    + (desc ? `<span style="font:400 28px var(--font-serif);color:rgba(255,255,255,0.72);width:${w - 80}px">${desc}</span>` : '')
+    + '</div>';
+  return [{
+    type: 'html', x, y, w, h, html,
+    bg: `rgba(255,255,255,${tint})`, radius, border: `1.5px solid ${WHITE_HAIR}`, glass: 16,
+    shadow: true, start, duration: dur, anim, enterDur, out: 'defocus', exitDur: 0.4,
+  }];
+}
+
+// scrimFor: the same dark band under a panel this family does NOT own the fill of (the
+// `glassHeroPanel` hero below). Placed behind it so the borrowed surface sits in the same readable
+// band as ours, rather than growing a second copy of it just to change one colour.
 const scrimFor = ({ x, y, w, h, radius = R.round, alpha = 0.62, start, dur, anim = 'pop', enterDur = 0.55 }) =>
   rect({ x, y, w, h, radius, bg: `rgba(9,11,17,${alpha})`, start, duration: dur, anim, enterDur,
     out: 'defocus', exitDur: 0.4 });
@@ -93,10 +112,9 @@ const spreadFrom = (dx, dy, { at = 0.15, dur = 0.75, ease = 'spring' } = {}) => 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 // 1. glassWidgets. The SCALE-CONTRAST member of the family: one large showcase panel beside a
 // column of small stat tiles, with chips under it. Deliberately unequal, because six equal cards is
-// the grid tell the taste system fights. The showcase panel IS `glassCard` from blocks/sleek.mjs.
-// This block places and times it rather than growing a second copy of the same surface.
+// the grid tell the taste system fights. The showcase panel is `glassHeroPanel`, above.
 // BACKDROP: `aurora` or `blobs`. It wants big slow colour moving under the blur.
-// NO KICKER, and the reason is a measurement rather than a preference: `glassCard` paints its kicker
+// NO KICKER, and the reason is a measurement rather than a preference: `glassHeroPanel` paints its kicker
 // in `var(--accent)`, and an accent line on a frosted panel measured 2.3:1 in `make audit` against a
 // 4.5:1 floor. Darkening the scrim under it does not save it, the accent is the light half of that
 // pair. The eyebrow's job is done by the stat tiles' labels instead. See `frameworkFindings`.
@@ -146,7 +164,7 @@ export function glassWidgets({ x, y, w = 1080, h = 560, title = 'Frosted surface
   const sideW = w - gap - heroW, n = Math.max(1, stats.length);
   const tileH = (bodyH - gap * (n - 1)) / n;
   const out = [scrimFor({ x, y, w: heroW, h: bodyH, radius: R.round, start, dur }),
-    ...glassCard({ x, y, w: heroW, h: bodyH, title, desc, tint: 0.09,
+    ...glassHeroPanel({ x, y, w: heroW, h: bodyH, title, desc, tint: 0.09,
       radius: R.round, start, dur, anim: 'pop', enterDur: 0.55 }),
     ...stats.map((s, i) => glassStatTile(s, i, { x, y, heroW, sideW, tileH, gap, start, dur }))];
   if (chips.length) out.push(glassChipsRow(chips, { x, y: r2(y + bodyH + gap), start, dur }));

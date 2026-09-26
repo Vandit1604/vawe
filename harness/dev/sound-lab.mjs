@@ -1,16 +1,3 @@
-// harness/dev/sound-lab.mjs: hear every cue the engine can make, and say which ones are any good.
-//
-// WHY THIS EXISTS. core/audio-kit.mjs synthesises 20 cues from parameters, and until now the only way
-// to hear one was to put it in a film and render the film. So the voicings have never been judged as
-// voicings: they were tuned by reading numbers, and it shows. A film shipped today was pulled back for
-// exactly that.
-//
-// The verdicts are the point, not the page. `quality/baselines/sound-verdicts.json` is a record of which cues a
-// person actually liked, per cue, with a note. That is the input a tuning pass needs and has never had:
-// without it, "the sounds are bad" is one sentence covering twenty different sounds.
-//
-//   node harness/dev/sound-lab.mjs            # bake the wavs, write the page, print the path
-//   node harness/dev/sound-lab.mjs --open     # and open it
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,11 +12,6 @@ fs.mkdirSync(OUT, { recursive: true });
 const names = Object.keys(CUES).sort();
 for (const n of names) fs.writeFileSync(path.join(OUT, `${n}.wav`), encodeWav(normalize(renderCue(CUES[n], 1))));
 
-// A cue's own family, so the page groups sounds that should be judged against each other rather than
-// against the whole set: a `thud` and a `sparkle` are not competing for the same slot.
-// A CUE MISSING FROM THIS MAP DOES NOT RENDER ON THE PAGE, because the groups below are a fixed list
-// and an unfamilied cue falls to 'other', which no group prints. Silent omission from a judging tool
-// is the worst failure it can have: the sound is never heard and the absence looks like a decision.
 const FAMILY = {
   whoosh: 'movement', riser: 'movement', swell: 'movement',
   impact: 'weight', drop: 'weight', braam: 'weight',
@@ -100,10 +82,6 @@ ${GROUPS
 <script>
 const KEY='vawe-sound-verdicts';
 const stored=JSON.parse(localStorage.getItem(KEY)||'{}');
-// PRUNE ON LOAD. A cue deleted between rounds leaves its verdict behind, and Copy verdicts then
-// emits a union of the live set and every ghost: one paste carried 25 verdicts for 13 cues, and
-// twelve of them judged sounds that no longer exist. The page knows which cues it just rendered,
-// so it is the only place that can tell a stale verdict from a real one.
 const live=new Set(Array.from(document.querySelectorAll('[data-cue]')).map(el=>el.dataset.cue));
 const state={}; for(const k of Object.keys(stored)) if(live.has(k)) state[k]=stored[k];
 localStorage.setItem(KEY,JSON.stringify(state));
@@ -147,22 +125,6 @@ console.log('  "the sounds are bad" is one sentence covering twenty different so
 
 if (process.argv.includes('--open')) execFileSync('open', [path.join(OUT, 'index.html')]);
 
-// ---------------------------------------------------------------- --measure
-// WHY A NUMBER AND NOT A VERDICT. Nobody can judge a sound from its parameters, and an agent tuning
-// these cues cannot hear at all. What it CAN do is check that a sound has the shape its name claims:
-// a whoosh whose brightness never moves is a static buzz, and a "tail" of 40ms is a click whatever the
-// comment above it says. So this prints, per cue, the two things a spec lies about most often:
-// the loudness envelope over time, and where the spectrum sits over time.
-//
-// THE CENTROID IS AN RMS FREQUENCY, NOT AN FFT BIN CENTROID, and the difference is worth knowing before
-// you quote it. For any signal, sqrt(∫f²|X(f)|² df / ∫|X(f)|² df) equals RMS(dx/dt) / (2π·RMS(x)), so
-// the quadratic spectral centroid falls straight out of the derivative with no transform at all
-// (Parseval; the identity is standard in the "spectral moments" literature). It weights the top octave
-// harder than a linear-mean centroid does, so treat it as a brightness INDEX that must MOVE, never as
-// a frequency you could tune a filter to.
-//
-//   node harness/dev/sound-lab.mjs --measure          # every cue
-//   node harness/dev/sound-lab.mjs --measure whoosh   # one
 function measure(x, slices = 8) {
   const n = x.length, per = Math.floor(n / slices);
   const rmsOf = (a, i0, i1) => { let s = 0; for (let i = i0; i < i1; i++) s += a[i] * a[i]; return Math.sqrt(s / Math.max(1, i1 - i0)); };
@@ -175,8 +137,6 @@ function measure(x, slices = 8) {
   }
   let peak = 0, peakAt = 0;
   for (let i = 0; i < n; i++) { const a = Math.abs(x[i]); if (a > peak) { peak = a; peakAt = i; } }
-  // Tail = time from the peak until the signal stays under -40dB of it. Measured backwards so one
-  // late ring does not get averaged away by the silence around it.
   let end = n - 1; while (end > peakAt && Math.abs(x[end]) < peak * 0.01) end--;
   return { dur: n / SR, peak, peakAt: peakAt / SR, tail: (end - peakAt) / SR, band };
 }

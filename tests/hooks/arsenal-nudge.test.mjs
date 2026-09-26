@@ -99,7 +99,7 @@ test('a catalogue view is not a search, so it is never logged and never suppress
   for (const command of [
     'node harness/author/arsenal.mjs --census 2>&1 | head -24',
     'node harness/author/arsenal.mjs --new --kind block',
-    'node harness/author/arsenal.mjs --at block.glassCard',
+    'node harness/author/arsenal.mjs --at block.browserFrame',
     'cd /x && rtk proxy grep -n "caret typing cursor" core/',
   ]) {
     const { status } = run({ tool_name: 'Bash', tool_input: { command } }, dir);

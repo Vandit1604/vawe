@@ -1,22 +1,3 @@
-// harness/dev/evals.mjs: THE EVAL HARNESS (W6 of the motion-design
-// plan). A fixed set of brief scenes, rendered under the CURRENT engine + rules, kept with a contact
-// sheet, and a before/after diff so a doctrine or engine change can be judged against what it actually
-// moved instead of a hunch.
-//
-// NO AESTHETIC SCORE, by design: a number that
-// claims to measure "looks good" trains everyone to optimize the number instead of the film, and it
-// hides disagreement a human would have caught. The one thing this file asserts by machine is
-// LIVENESS: did every brief produce an mp4 of the duration and dimensions the scene declared. Beyond
-// that, a human looks at the sheets and the compare page and says which one is better. See
-// engine-doctrine/EVALS.md.
-//
-//   node harness/dev/evals.mjs                                    render every brief, write a run, assert liveness
-//   node harness/dev/evals.mjs --compare --before <run-dir> [--after <run-dir>]
-//                                                                  before/after sheets + an html side-by-side (opens it)
-//   node harness/dev/evals.mjs --save-baseline [--run <run-dir>]  copy sheets + manifest into quality/runs/evals/baseline/
-//                                                                  (mp4s excluded: see .gitignore). No --run renders fresh.
-//
-// make evals / make evals-compare BEFORE=... [AFTER=...] are the Makefile forms.
 import { execFileSync, execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -26,9 +7,6 @@ import { sceneDims } from '../../core/layout/safe.js';
 const BRIEFS_DIR = 'quality/runs/evals/briefs';
 const RUNS_DIR = 'quality/runs/evals/runs';
 const BASELINE_DIR = 'quality/runs/evals/baseline';
-// The per-brief sheet: 6 evenly spaced frames (the in/mid/out points and 3 more between them), laid
-// out 3 across. A fixed shape so a sheet from one run always tiles against the matching sheet from
-// another (`evals-compare` stacks them and needs identical geometry to not lie about what moved).
 const FRAMES_PER_SHEET = 6;
 const SHEET_COLS = 3;
 const SHEET_GAP = 6;
@@ -68,8 +46,6 @@ function probeImage(png) {
   return { w, h };
 }
 
-// A sheet's own tile box, letterboxed to the brief's aspect so a portrait brief and a landscape one
-// each fill their tile without distortion (frameTile's scale+pad does the letterboxing).
 function tileBoxFor(w, h) {
   return w >= h ? { tw: 600, th: 338 } : { tw: 340, th: 604 };
 }
@@ -80,9 +56,6 @@ function renderBrief(name, runDir) {
   const scene = JSON.parse(fs.readFileSync(src, 'utf8'));
   const [expectW, expectH] = sceneDims(scene);
 
-  // VAWE_SERVE_ALL: the render server only serves core/ themes/ films/ assets/ .vawe-data/ by
-  // default, and these fixtures live under quality/runs/ on purpose (they are eval scaffolding, not a film
-  // to author further), so the debug escape hatch is the correct way to reach them, not a workaround.
   execFileSync('./bin/vawe', [src, '--draft', '--workers', '2'],
     { stdio: 'inherit', env: { ...process.env, VAWE_SERVE_ALL: '1' } });
   const rendered = path.join('out', `${name}.mp4`);
@@ -97,8 +70,6 @@ function renderBrief(name, runDir) {
   const tmp = fs.mkdtempSync(path.join(runDir, `.tiles-${name}-`));
   const tiles = [];
   for (let i = 0; i < FRAMES_PER_SHEET; i++) {
-    // Clamp the last frame inside the decoded duration: seeking at exactly `duration` lands past the
-    // final frame on some encodes and comes back blank, which would silently drop the "out" tile.
     const wanted = (scene.duration * i) / (FRAMES_PER_SHEET - 1);
     const t = Math.min(wanted, Math.max(0, got.duration - 0.08));
     tiles.push(frameTile(mp4, t, path.join(tmp, `f${i}.png`), { ...box, label: `${t.toFixed(1)}s` }));
@@ -136,8 +107,6 @@ function runEvals() {
     return r;
   });
 
-  // One glance across every brief: a single mid-frame per brief, letterboxed into a common box so
-  // mixed aspects (9:16 next to 16:9) tile without one crowding the other.
   const box = { tw: 600, th: 338 };
   const midTiles = briefs.map((b) => {
     const t = Math.min(b.expectedDuration / 2, Math.max(0, b.duration - 0.08));
@@ -206,8 +175,6 @@ function compare() {
   }
 
   const abs = (p) => `file://${path.resolve(p)}`;
-  // A committed baseline holds only sheets + manifest (mp4s are too big to commit), so its `mp4` path
-  // may not exist on this checkout. Say so instead of embedding a <video> that will 404 silently.
   const videoOrNote = (v, label) => fs.existsSync(v.mp4)
     ? `<video src="${abs(v.mp4)}" controls muted loop></video>`
     : `<p class="missing">no mp4 on disk for ${label} (a committed baseline keeps sheets + manifest only, see engine-doctrine/EVALS.md)</p>`;
@@ -263,8 +230,6 @@ function saveBaseline() {
   fs.copyFileSync(manifest.sheet, relocate(manifest.sheet));
   const briefs = manifest.briefs.map((b) => {
     fs.copyFileSync(b.sheet, relocate(b.sheet));
-    // mp4 deliberately NOT copied; the path is kept so the field's shape matches a live run's, and
-    // evals-compare's videoOrNote() already handles a manifest whose mp4 does not exist on disk.
     return { ...b, sheet: relocate(b.sheet), mp4: relocate(b.mp4) };
   });
   const baseline = { ...manifest, runDir: BASELINE_DIR, sheet: relocate(manifest.sheet), briefs };

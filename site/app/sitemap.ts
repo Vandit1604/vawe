@@ -9,7 +9,7 @@ import blocks from "../lib/blocks.json";
 /* site/app/sitemap.ts — every URL vawe.dev serves, generated from the same files the pages are.
  *
  * WHAT THIS FIXES, measured on 2026-09-19: vawe.dev/sitemap.xml returned 404 while the site was
- * already serving 879 crawlable detail pages (694 effects + 185 blocks) plus 7 routes and 17 docs
+ * already serving a crawlable detail page per effect and per block plus 7 routes and 17 docs
  * pages. Every one of them had no discovery path. A search for what vawe does returned the GitHub
  * repo and not the site: the README was doing the ranking.
  *

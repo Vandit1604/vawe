@@ -1,11 +1,3 @@
-// stagekit.mjs: `make stagekit D=<film>`: THE STAGE KIT for a per-scene HTML-fragment fan-out.
-// Writes <film>.kit.css (the bare rules) next to the film, prints the exact <style> block every scene
-// agent must paste VERBATIM into its fragment, and `--check` verifies they did (byte-identical, no
-// drift): harness/lib/stagekit.mjs explains why a shared stylesheet cannot work here (fragment <style>
-// blocks are @scope-isolated per fragment, core/type/sanitize-html.js).
-//
-//   node harness/author/stagekit.mjs films/scene/launch.json          # write + print the kit
-//   node harness/author/stagekit.mjs films/scene/launch.json --check  # verify every scene fragment
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,22 +26,12 @@ const kitPath = film.replace(/\.json$/, '') + '.kit.css';
 
 const base = path.basename(film, '.json');
 const dir = path.dirname(film);
-// The naming convention scenes.mjs briefs and assemble.mjs both read: one fragment per scene, numbered.
 const fragGlob = (n) => path.join(dir, `${base}.scene${n}.html`);
 
 if (check) {
-  // ASK THE FILM WHICH FRAGMENTS IT USES, rather than enumerating a naming convention. This used to
-  // walk `<base>.scene1.html` through `.scene30.html` and stop, so a film whose layers point at any
-  // other fragment name had those fragments silently unchecked: the kit could drift in them and this
-  // check would still print a tick. A continuous-action film is exactly that case, since its layers are
-  // named for what they are (`<base>.arm.html`) rather than numbered by beat. The film's own `src`
-  // values are the authoritative list; the numbered sweep stays as a fallback for a film whose JSON is
-  // not readable yet, which is the case while a fan-out is still writing fragments.
   const seen = new Set();
   const fragments = [];
   const add = (p0) => {
-    // Resolve before the dedup: the film's `src` values and the numbered fallback arrive in different
-    // shapes (absolute against relative), so keying the set on the raw string counted one fragment twice.
     const abs = path.resolve(ROOT, p0);
     if (!fs.existsSync(abs) || seen.has(abs)) return;
     seen.add(abs);

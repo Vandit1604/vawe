@@ -1,16 +1,4 @@
 #!/usr/bin/env node
-// harness/author/migrate-themes.mjs: ONE-TIME (but re-runnable) migration. A theme file is now a token
-// store (`tokens` + a required `roles` map, core/theme/tokens.js, core/theme/roles.js), not a hand-
-// written `palette`/`type`/`gradient` object. This converts every old-shape theme into the new one with
-// EVERY old key mapped to an explicit token + role, so derivation (core/theme/roles.js's OKLab mixing
-// for an undeclared bg2/line/text2/...) is never exercised by a migrated theme: the file after migration
-// carries exactly the opinion the file before it did, key for key.
-//
-// Follows harness/author/migrate-junctions.mjs's pattern: a round-trip proof, and a file that fails it
-// is SKIPPED, not written.
-//
-//   node harness/author/migrate-themes.mjs [--dry-run] [file.json ...]
-// No files named -> every themes/*.json (and themes/presets/*.json, if that directory exists).
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -26,20 +14,11 @@ function indentOf(raw) {
   return m ? m[1] : '  ';
 }
 
-// FONT ROLE NAMES: the legacy `type` keys sans/serif/mono/num map 1:1 onto the `font.*` role space;
-// `optical` is not a font family (it is a boolean switch, harness/author/fonts-discover.mjs already
-// says so), so it rides as a LITERAL role value rather than a `fontFamily` token.
 const FONT_KEYS = ['sans', 'serif', 'mono', 'num'];
 
-// PALETTE KEYS THAT NAME A REQUIRED ROLE, not a role of the same name: `bg` is the theme's `ground`,
-// `ink` and `accent` keep their name. Every OTHER palette key (bg2, surface, line, ..., and any brand-
-// specific extra like `raw`/`limeDim`) becomes a role of that exact same name, so an unrecognised extra
-// still round-trips: core/theme/roles.js copies any role it does not otherwise know onto `palette`
-// unchanged (see its own comment on that loop).
 const ROLE_NAME = { bg: 'ground', ink: 'ink', accent: 'accent' };
 
-// migrateOne(theme) -> { next, ok, err }. `next` is the token-file form; `ok` is the round-trip proof
-// (expandTheme(next) deep-equals the theme it was built from); `err` names why it failed.
+// migrateOne(theme) -> { next, ok, err }: `next` is the token-file form, `ok` is the round-trip proof (expandTheme(next) deep-equals theme), `err` names why it failed.
 export function migrateOne(theme) {
   if (!theme || typeof theme !== 'object' || !theme.palette) return { next: theme, ok: true, clean: true };
   if (isTokenFile(theme)) return { next: theme, ok: true, clean: true }; // already migrated
@@ -79,12 +58,6 @@ export function migrateOne(theme) {
   return { next, ok, err: ok ? undefined : (err || 'expanded theme does not match the original') };
 }
 
-// sameTheme: the SAME comparison a round-trip proof needs (deep, order-independent), except a leaf pair
-// of strings that both PARSE as the same colour counts as equal even if their text differs (alpha's
-// trailing zero: "0.10" written by hand vs "0.1" this engine's own colorAlpha reads back). Two colours
-// that render identically ARE round-trip identical; a byte-for-byte string compare would fail the proof
-// on a formatting difference no pixel will ever show, which `make snap-all` (the real, rendered proof)
-// is what actually has the last word on anyway.
 function sameTheme(a, b) {
   if (a === b) return true;
   if (typeof a !== typeof b || a == null || b == null) return false;
@@ -104,7 +77,6 @@ function sameTheme(a, b) {
   return a === b;
 }
 
-// ---- CLI ----
 const isMain = typeof process !== 'undefined' && process.argv?.[1] && import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const dryRun = process.argv.includes('--dry-run');

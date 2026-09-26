@@ -1,20 +1,3 @@
-// gh-wrapped.mjs: a GitHub year in review, as DATA. Pulls one account's real contribution record and
-// derives the handful of facts a film can carry, plus the contribution heatmap as an SVG fragment.
-//
-//   node harness/media/gh-wrapped.mjs <login> [--from 2025-08-19] [--to 2026-08-19]
-//
-// Writes:
-//   films/scene/_data/gh-wrapped.json          the batch row(s), scalars only, see below
-//   assets/gen/gh-heat-<login>.html              the 366-cell heatmap as an inline SVG fragment
-//
-// WHY THE HEATMAP IS A FILE AND NOT A FIELD. harness/author/batch.mjs substitutes `{{key}}` into the
-// template's raw JSON TEXT and parses afterwards, so a value carrying a `"` breaks the parse. Rows are
-// therefore safe for scalars only. The fragment goes to disk and the row carries its PATH, which is a
-// scalar. Anything richer than a number or a bare word has to travel this way.
-//
-// Every figure here comes from the API. Nothing is estimated, and a number the query does not return is
-// absent rather than filled in. An on-screen number that nobody can trace is the one thing the content
-// rules in CLAUDE.md refuse outright.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -47,7 +30,6 @@ fs.rmSync(qf, { force: true });
 const C = user.contributionsCollection;
 const days = C.contributionCalendar.weeks.flatMap((w) => w.contributionDays);
 
-// --- derived facts -------------------------------------------------------------------------------
 const active = days.filter((d) => d.contributionCount > 0);
 const peak = days.reduce((a, b) => (b.contributionCount > a.contributionCount ? b : a), days[0]);
 let streak = 0, best = 0, bestEnd = null;
@@ -57,8 +39,6 @@ for (const d of days) {
 const byMonth = {};
 for (const d of days) byMonth[d.date.slice(0, 7)] = (byMonth[d.date.slice(0, 7)] || 0) + d.contributionCount;
 const months = Object.entries(byMonth).sort();
-// The QUIET SPELL: the longest run of consecutive months at or under a token count. This is the film's
-// hook, so it is derived rather than eyeballed. A month with two commits is not activity.
 let qRun = 0, qBest = 0, qFrom = null, qTo = null, runStart = null;
 for (const [m, n] of months) {
   if (n <= 5) { if (!qRun) runStart = m; qRun++; if (qRun > qBest) { qBest = qRun; qFrom = runStart; qTo = m; } } else qRun = 0;
@@ -68,10 +48,6 @@ const repos = C.commitContributionsByRepository
     priv: r.repository.isPrivate, stars: r.repository.stargazerCount, n: r.contributions.totalCount }))
   .sort((a, b) => b.n - a.n);
 
-// The furthest-travelled change: a MERGED pull request into somebody else's repository, ranked by that
-// repository's stars, inside the window. The film's payoff, so it is a query result and not a memory.
-// Query from a FILE and retried: the same query inline returned an intermittent 502 from the API
-// gateway, and a wrapped that dies on a flaky read is a wrapped nobody can regenerate.
 const pf = path.join('/tmp', `ghw-pr-${process.pid}.graphql`);
 fs.writeFileSync(pf, `query($login:String!){user(login:$login){pullRequests(first:60,states:MERGED,
   orderBy:{field:CREATED_AT,direction:DESC}){nodes{title mergedAt additions deletions
@@ -88,16 +64,12 @@ const prs = prsRaw.data.user.pullRequests.nodes
   .sort((a, b) => b.repository.stargazerCount - a.repository.stargazerCount);
 const far = prs[0] || null;
 
-// --- the heatmap fragment ------------------------------------------------------------------------
-// 7 rows x N weeks of real cells. Quartile classes let the film animate the QUIET half and the LOUD
-// half separately (`parts: [{select:".lit"}]`), which is what makes the map a subject rather than a chart.
 const counts = active.map((d) => d.contributionCount).sort((a, b) => a - b);
 const q = (p) => counts[Math.floor(counts.length * p)] || 1;
 const [q1, q2, q3] = [q(0.25), q(0.5), q(0.75)];
 const level = (n) => (n === 0 ? 0 : n <= q1 ? 1 : n <= q2 ? 2 : n <= q3 ? 3 : 4);
 const CELL = 15, GAP = 4, weeks = C.contributionCalendar.weeks;
 const W = weeks.length * (CELL + GAP), H = 7 * (CELL + GAP);
-// The month the work came back: the first month AFTER the quiet spell, which is where the film turns.
 const firstLoud = (() => { const i = months.findIndex(([m]) => m === qTo); return (months[i + 1] || months[months.length - 1])[0]; })();
 const cells = weeks.map((w, x) => w.contributionDays.map((d) => {
   const lv = level(d.contributionCount);
@@ -105,10 +77,6 @@ const cells = weeks.map((w, x) => w.contributionDays.map((d) => {
   return `<rect class="c l${lv}${lit ? ' lit' : ' dim'}" x="${x * (CELL + GAP)}" y="${d.weekday * (CELL + GAP)}" `
     + `width="${CELL}" height="${CELL}" rx="3" data-d="${d.date}" data-n="${d.contributionCount}"/>`;
 }).join('')).join('');
-// width:100% + viewBox, so the LAYER's `w` sizes the map. A fixed px width here would make the
-// fragment's size a property of the data (53 weeks vs 52) rather than of the composition.
-// Solid fill + fill-opacity rather than color-mix(): the grid was the only region of the frame that
-// differed between worker tabs, and color-mix in an SVG fill is the only thing here the rest of the
 // scene does not also do. See engine-doctrine/MISTAKES.md #384.
 const heat = `<div style="width:100%">
 <svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block">
@@ -157,8 +125,6 @@ const row = {
   farwhen: far ? nice(far.mergedAt.slice(0, 10)) : '',
   fartitle: far ? far.title : '',
   heat: heatPath,
-  // WITH THE YEAR. Without it a 12-month window renders as "19 Aug to 19 Aug", which is not a smaller
-  // truth, it is a false one: the film's whole claim is what happened across those months.
   from: niceY(from), to: niceY(to),
 };
 fs.writeFileSync('films/scene/_data/gh-wrapped.json', JSON.stringify([row], null, 2));

@@ -42,17 +42,17 @@
       "x": 160,
       "y": 160,
       "w": 460,
+      "html": "<div style=\"display:flex;align-items:flex-start;gap:12px;padding:16px;box-sizing:border-box;width:460px\"><div style=\"width:12px;height:12px;border-radius:100px;background:var(--accent);flex:none\"></div><div style=\"display:flex;flex-direction:column;gap:6px;align-items:flex-start;flex:1;min-width:0\"><span style=\"font:700 24px var(--font-sans);color:var(--text)\">Fieldwork draft</span><span style=\"font:400 17px var(--font-sans);color:var(--text-2)\">Saved to this list</span></div></div>",
       "bg": "var(--card)",
       "radius": 14,
       "border": "1px solid var(--line)",
-      "elevation": 1,
+      "elevation": 2,
       "anim": "wipe",
+      "out": "wipe-left",
       "start": 2.6,
       "duration": 2.85,
       "enterDur": 0.45,
-      "exitDur": 0.4,
-      "html": "<div style=\"display:flex;align-items:center;gap:16px;padding:16px;box-sizing:border-box;width:460px\"><div style=\"width:44px;height:44px;flex:none;border-radius:12px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font:600 20px var(--font-sans);color:var(--text)\">✓</div><div style=\"display:flex;flex-direction:column;gap:2px;flex:1;align-items:flex-start;min-width:0\"><span style=\"font:600 20px var(--font-sans);color:var(--text)\">Fieldwork draft</span><span style=\"font:400 16px var(--font-sans);color:var(--text-2)\">Saved to this list</span></div><span style=\"font:500 15px var(--font-mono);color:var(--dim)\">now</span></div>",
-      "out": "wipe-left"
+      "exitDur": 0.4
     },
     {
       "type": "html",

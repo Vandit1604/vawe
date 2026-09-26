@@ -1,31 +1,8 @@
-// design-spec.mjs: THE ONE FILE a film's frames agree with. `<film>.design.md` is the film's own
-// resolved design choices (a value here, never inline), laid over the theme's own numbers
-// (core/registry/theme-contract.js resolveLook, the same values harness/lib/stagekit.mjs buildKit
-// uses). No design.md, or an empty one, and a film has exactly the kit's tokens: nothing here narrows
-// or replaces the kit, it only lets a film DECLARE the values it needs beyond it, once, in one place,
-// instead of a literal repeated in every fragment.
-//
-// The frontmatter reader is the same one storyboards use (harness/author/storyboard-parse.mjs
-// frontmatter): one `---\n...\n---` block at the top of the file. Its own `field()` only reads
-// flat top-level scalars, so this file adds a small indented-YAML reader for the nested shape a
-// design spec needs (palette map, type roles, radius/shadow/space maps, a surfaces list). No new
-// dependency: js-yaml sits in node_modules only as someone else's transitive dependency, nothing in
-// this repo imports it, and the shape design.md needs (two levels of maps, one flat list) does not
-// earn one.
 import fs from 'node:fs';
 import path from 'node:path';
 import { frontmatter } from '../author/storyboard-parse.mjs';
 import { colorDistance } from '../../core/color/engine.js';
 
-// A minimal indented map/list reader, built for exactly design.md's shape:
-//   key: scalar
-//   key:
-//     nested: scalar
-//   key:
-//     - item
-//     - item
-// Comments (`# ...`) and blank lines are skipped. A quoted scalar loses its quotes; a bare number
-// parses as a number so `size: 40` reads as 40, not `"40"`.
 function parseScalar(v) {
   const unquoted = v.replace(/^["']|["']$/g, '');
   return /^-?\d+(\.\d+)?$/.test(unquoted) ? parseFloat(unquoted) : unquoted;
@@ -157,8 +134,6 @@ function closest(candidates, delta) {
 
 const NUMERIC_DELTA = (value) => (c) => Math.abs(c.value - Number(value));
 const SHADOW_DELTA = (value) => (c) => (c.value === String(value) ? 0 : 1);
-// core/color/engine.js#colorDistance is alpha-aware and shared with quality/gates/design-drift.mjs's
-// own nearest-colour search, so a token declared `rgba(...)` can't read as a match for its opaque hex.
 const COLOR_DELTA = (value) => (c) => {
   const d = colorDistance(value, c.value);
   return Number.isFinite(d) ? d : null;
