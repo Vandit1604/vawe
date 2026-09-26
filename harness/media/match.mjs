@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { requireTool, probeSize } from '../lib/frame-forensics.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
-import { sampleFrames, tileGrid, blendDiff, ssimOf, gradeable } from '../../quality/gates/tile.mjs';
+import { sampleFrames, tileGrid, blendDiff, ssimOf, gradeable, meanColorOf, labDeltaE } from '../../quality/gates/tile.mjs';
 import { actsFromStoryboard, findStoryboard } from '../../quality/gates/content-check.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -100,22 +100,34 @@ for (const [i, b] of beats.entries()) {
   const ssims = Array.from({ length: pairs }, (_, k) => ssimOf(refTiles[k], renderTiles[k])).filter((v) => v != null);
   const meanSsim = ssims.length ? ssims.reduce((a, v) => a + v, 0) / ssims.length : null;
 
+  // Colour/light distance: SSIM rewards two frames agreeing on STRUCTURE, so a black frame against a
+  // black-heavy reference scores well regardless of colour. deltaEs, off the same thumbnails the strip
+  // already sampled, catches that: two frames of matching shape but wrong colour or brightness.
+  const deltaEs = Array.from({ length: thumbPairs }, (_, k) => labDeltaE(meanColorOf(refThumbs[k]), meanColorOf(renderThumbs[k])))
+    .filter((v) => v != null);
+  const meanDeltaE = deltaEs.length ? deltaEs.reduce((a, v) => a + v, 0) / deltaEs.length : null;
+  const colorSim = meanDeltaE != null ? Math.max(0, 1 - meanDeltaE / 100) : null;
+  const parts = [meanSsim, colorSim].filter((v) => v != null);
+  const combined = parts.length ? parts.reduce((a, v) => a + v, 0) / parts.length : null;
+
   results.push({ i: i + 1, label: b.label, start: b.start, end: b.end, samples: pairs,
-    ssim: meanSsim, strip: stripPath, diff: diffPath });
+    ssim: meanSsim, deltaE: meanDeltaE, combined, strip: stripPath, diff: diffPath });
 }
 fs.rmSync(framesDir, { recursive: true, force: true });
 
-const ranked = [...results].sort((a, b2) => (a.ssim ?? -1) - (b2.ssim ?? -1));
+const ranked = [...results].sort((a, b2) => (a.combined ?? -1) - (b2.combined ?? -1));
 const rel = (p) => path.relative(ROOT, p);
+const fmt = (v, d = 4) => (v != null ? v.toFixed(d) : 'n/a');
 const lines = [
   `# match: ${slug} vs ${path.basename(REF)}`, '',
   `beats: ${beats.length} (${beatsSource}) · reference: ${REF} · render: ${rel(mp4)} · size ${W}x${H} · step ${STEP}s`, '',
-  '| beat | window | samples | mean SSIM | strip | diff |',
-  '|---|---|---|---|---|---|',
+  '| beat | window | samples | mean SSIM | colour ΔE | combined | strip | diff |',
+  '|---|---|---|---|---|---|---|---|',
   ...ranked.map((r) => `| ${r.i} (${r.label}) | ${r.start.toFixed(1)}-${r.end.toFixed(1)}s | ${r.samples} `
-    + `| ${r.ssim != null ? r.ssim.toFixed(4) : 'n/a'} | ${r.strip ? rel(r.strip) : 'n/a'} | ${r.diff ? rel(r.diff) : 'n/a'} |`),
+    + `| ${fmt(r.ssim)} | ${fmt(r.deltaE, 1)} | ${fmt(r.combined)} | ${r.strip ? rel(r.strip) : 'n/a'} | ${r.diff ? rel(r.diff) : 'n/a'} |`),
   '',
-  '_ranked worst-to-best: the lowest SSIM is the beat whose motion diverges most from the reference._',
+  '_ranked worst-to-best by the combined score: mean SSIM (structure) averaged with a colour similarity',
+  'derived from mean Lab ΔE (colour/light, so a dark frame can no longer coast on SSIM alone)._',
 ];
 const mdPath = path.join(OUT_DIR, 'match.md');
 fs.writeFileSync(mdPath, `${lines.join('\n')}\n`);
@@ -123,5 +135,6 @@ fs.writeFileSync(mdPath, `${lines.join('\n')}\n`);
 console.log(`\n  MATCH · ${slug} vs ${path.basename(REF)}\n`);
 console.log(`  beats: ${beats.length} (${beatsSource})`);
 for (const r of ranked)
-  console.log(`  beat ${r.i} (${r.label}, ${r.start.toFixed(1)}-${r.end.toFixed(1)}s): ssim ${r.ssim != null ? r.ssim.toFixed(4) : 'n/a'}`);
+  console.log(`  beat ${r.i} (${r.label}, ${r.start.toFixed(1)}-${r.end.toFixed(1)}s): ssim ${fmt(r.ssim)} · `
+    + `ΔE ${fmt(r.deltaE, 1)} · combined ${fmt(r.combined)}`);
 console.log(`\n  ✓ wrote ${rel(mdPath)}`);
