@@ -109,7 +109,7 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
 }
 
 // ---- bakeTextSizeRoles: lowers size roles across the WHOLE tree (group children included) before
-// resolveCoords ever runs, and leaves a plain number or an absent size untouched ----
+// resolveCoords ever runs, and leaves an already-numeric size untouched ----
 {
   const data = {
     module: 'scene',
@@ -123,6 +123,28 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
   assert.equal(data.layers[0].size, 92, 'a top-level role lowers to the theme number');
   assert.equal(data.layers[1].size, 40, 'an already-numeric size is untouched');
   assert.equal(data.layers[2].children[0].size, 24, 'a role inside a group is still a role');
+}
+
+// ---- a text/count layer that names NO size at all gets a role by POSITION (first is the hook,
+// second the headline, a rect/image/etc with no size is never touched) instead of falling through to
+// text.js's flat 96px default ----
+{
+  const data = {
+    module: 'scene',
+    layers: [
+      { type: 'text', id: 'headline' },
+      { type: 'text', id: 'subline' },
+      { type: 'count', id: 'stat' },
+      { type: 'text', id: 'caption-ish' }, // 4th and beyond clamp to the last role
+      { type: 'rect', id: 'r' },
+    ],
+  };
+  bakeTextSizeRoles(data, look);
+  assert.equal(data.layers[0].size, 92, 'the first sizeless text layer reads as the hook');
+  assert.equal(data.layers[1].size, 64, 'the second reads as the headline');
+  assert.equal(data.layers[2].size, 38, 'the third reads as body');
+  assert.equal(data.layers[3].size, 24, 'a fourth clamps to the last role, caption, rather than throwing');
+  assert.equal(data.layers[4].size, undefined, 'a non-text layer with no size is never auto-sized');
 }
 
 // ---- THE ORDERING ITSELF: a bottom-pinned, named-size layer must resolve to the safe bottom, not NaN.
@@ -222,6 +244,65 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
   bakeCameraMove(grouped, { W: 1920, H: 1080 });
   assert.deepEqual(groupSpec.stations, flatSpec.stations,
     'a caret station on a group child resolves to the same stage box as an equivalent flat layer');
+}
+
+// ---- applyBgDefault: a scene naming no `bg` (or an empty one) gets the theme's own animated backdrop
+// sugar; an authored, non-empty `bg` is left completely untouched ----
+{
+  const { applyBgDefault } = await import('../../core/engine/produce.js');
+  const bare = { module: 'scene', layers: [] };
+  applyBgDefault(bare);
+  assert.deepEqual(bare.bg, [{ use: 'theme' }], 'no bg key at all defaults to the theme\'s own backdrop');
+  const empty = { module: 'scene', bg: [], layers: [] };
+  applyBgDefault(empty);
+  assert.deepEqual(empty.bg, [{ use: 'theme' }], 'an empty bg array is treated the same as no bg at all');
+  const authored = { module: 'scene', bg: [{ preset: 'plain' }], layers: [] };
+  applyBgDefault(authored);
+  assert.deepEqual(authored.bg, [{ preset: 'plain' }], 'an authored bg is never touched');
+}
+
+// ---- resolveCoords: a lone top-level text layer naming no position at all centres itself on the
+// frame's optical centre (anchorPoint:"center", OPTICAL_Y down), rather than the page's own flat
+// (60, 240) corner default (films/scene/scene.js) ----
+{
+  const { resolveCoords } = await import('../../core/engine/boot.js');
+  const data = { module: 'scene', layers: [{ type: 'text', id: 'solo', size: 92, text: 'Hello' }] };
+  resolveCoords(data, 1920, 1080);
+  const L = data.layers[0];
+  assert.equal(L.anchorPoint, 'center', 'a lone text layer with no position gets a center anchor point');
+  assert.ok(L.w > 0, 'it gets a real width to centre against');
+  const hEst = L.size * 1.2;
+  assert.equal(L.x, Math.round(1920 / 2 - L.w / 2), 'its box, not just its corner, is horizontally centred');
+  assert.equal(L.y, Math.round(1080 * 0.46 - hEst / 2), 'its box is vertically centred on the optical centre, ~46% down');
+}
+
+// ---- the loneness check ignores synthetic `_finish` layers (core/engine/finish.js resolveFinishLayers
+// runs BEFORE resolveCoords in boot.js's real pipeline, so a defaulted scene's `data.layers` already
+// holds a bloom + vignette by the time resolveCoords sees it): a scene with one authored text layer
+// plus two `_finish` layers still centres the text, not "3 top-level layers so do nothing" ----
+{
+  const { resolveCoords } = await import('../../core/engine/boot.js');
+  const data = {
+    module: 'scene',
+    layers: [
+      { type: 'text', id: 'solo', size: 92, text: 'Hello' },
+      { type: 'adjust', _finish: true, w: 1920, h: 1080 },
+      { type: 'rect', _finish: true, w: 1920, h: 1080 },
+    ],
+  };
+  resolveCoords(data, 1920, 1080);
+  assert.equal(data.layers[0].anchorPoint, 'center', 'the authored layer is still recognised as lone despite the finish layers');
+}
+
+// ---- a lone text layer that DOES name a position (or a pin, or an anchorPoint) keeps exactly what it
+// authored: the default only fills a gap, it never overrides a real decision ----
+{
+  const { resolveCoords } = await import('../../core/engine/boot.js');
+  const data = { module: 'scene', layers: [{ type: 'text', id: 'solo', size: 92, x: 10, y: 20 }] };
+  resolveCoords(data, 1920, 1080);
+  assert.equal(data.layers[0].x, 10);
+  assert.equal(data.layers[0].y, 20);
+  assert.equal(data.layers[0].anchorPoint, undefined, 'no anchorPoint is invented for an authored position');
 }
 
 console.log('produce.test.mjs: ok');
