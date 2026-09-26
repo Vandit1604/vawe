@@ -961,6 +961,15 @@ A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default 
 | `springEase` | spring shaped but damped flat: nearly arrived at once, then creeping the last fraction |
 | `springStiff` | tight and quick with no visible pass beyond the mark, for something that must not look playful |
 
+## Group clock loop shapes  `[timing]`
+
+The `loop` field of a group's `clock`. A whole number repeats the cycle that many times then holds (see `hold`); one of these two names repeats without limit, for as long as the group's own `duration` keeps it on screen.
+
+| name | what / when |
+|---|---|
+| `forever` | repeat the cycle without limit, restarting at 0 the instant the previous pass reaches the end of its own local duration, never reversing |
+| `pingpong` | repeat the cycle without limit, but reverse direction every other pass, like a ball bouncing between two walls, so it never jumps back to 0 |
+
 ## Time remaps (the layer's own clock)  `[timing]`
 
 `timeRemap` on a layer. After Effects' Time Remapping: the CLOCK accelerates, brakes, holds or reverses, so everything the layer does moves with it (its motion, its size, its idle, its typing, its count). An easing on a motion track cannot do this: it bends one property across one segment while the counter underneath still counts at an even rate. Name one of these shapes, or write your own keys `[{"t":0,"at":0},{"t":1.4,"at":0.3}]`, where `t` is the layer's elapsed second and `at` is the second it believes it is. The neighbouring dials: `timeWarp` is the one-easing form of the same idea, and `stepFps` posterizes the clock to a lower rate (15 in a 30fps film is the hand-drawn "on twos" look).
@@ -1166,4 +1175,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_716 effects across 60 families. Regenerate: `make effects`._
+_718 effects across 61 families. Regenerate: `make effects`._

@@ -52,6 +52,7 @@ import * as tFollow from './follow.js';
 import * as tMotion from './motion.js';
 import { DEFAULT_SHUTTER } from './motion.js';
 import { layerTime } from '../timeline/time.js';
+import { groupClockAbsoluteTime } from '../timeline/group-clock.js';
 import * as tIdle from './idle.js';
 import * as tModifiers from './modifiers.js';
 
@@ -151,7 +152,13 @@ export const ORDER = (() => {
 // motionAt would have warped the position and left the typing behind.
 export function runTracks(kit, el, L, units, t, f, scene) {
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
-  const ctx = { kit, el, L, units, t: layerTime(L, t, start, end), f, start, end, scene };
+  // A LOOPING GROUP composes ONE LEVEL UP from a layer's own clock: `L.groupClock` (baked at build by
+  // core/layers/util.js resolveGroupWindow) remaps the film's `t` into where this child's cycle
+  // believes it is, BEFORE `layerTime` reads it, so a child's own `timeWarp`/`timeRemap` still shapes
+  // its clock inside the cycle it was given, the same composition order the camera and driveClips
+  // already keep with a layer's own clock.
+  const gt = L.groupClock ? groupClockAbsoluteTime(L.groupClock, t) : t;
+  const ctx = { kit, el, L, units, t: layerTime(L, gt, start, end), f, start, end, scene };
   for (let i = 0; i < ORDER.length; i++) ORDER[i](ctx);
 }
 
