@@ -75,7 +75,7 @@ const GENERATED = {
     group: 'reference',
     when: 'choosing an effect and you want to see the whole arsenal before defaulting to rise+fade',
     answers: 'every registered effect in the engine, generated from the engine registries so it cannot drift',
-    by: 'make effects',
+    by: 'make regen',
   },
   'engine-doctrine/vawe-rules.md': {
     group: 'reference',

@@ -130,7 +130,7 @@ export const GLOW_REGISTRY = defineRegistry('glow preset', GLOW_PRESETS, { slot:
     title: 'Glow presets',
     tag: 'glow layer',
     intro: '`preset` on a `glow` layer, the same slot the kinetic presets use on a text layer and a different vocabulary, because a glow carries no split text. Each one is a named lighting behaviour rather than a gradient you tune by hand: `{ "type":"glow", "preset":"halation", "intensity":0.3 }`. `cx`/`cy` move the light centre, `angle` aims the spotlight cone, and `cycle` times the one preset that moves on its own. An unknown name THROWS and suggests the near word; it used to return null and paint the plain gradient in silence.',
-    // PRE-EXISTING GAP, closed while adding the family above: `make effects` was already red on this
+    // PRE-EXISTING GAP, closed while adding the family above: `make regen` was already red on this
     // one, so the catalogue could not regenerate at all. A modifier is an array entry on a layer.
     // A glow preset is a whole LAYER, not a prop on somebody else's, so its usage shows the layer.
     usage: (n, { j }) => j({ type: 'glow', preset: n, x: 460, y: 240, w: 1000, h: 600, intensity: 0.4,
@@ -343,5 +343,5 @@ export function frame(kit, el, L, t, scene, { preset, pulse, flash } = L) {
 // core/props.js). `color2` unions in too: read only inside liveColor(), never destructured directly.
 export const PROPS = mergeProps(propsOf(build), propsOf(frame), GUARDED, { color2: {} });
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight)";

@@ -7,9 +7,9 @@ effort: low
 
 # vawe-effects: pick from the whole arsenal, don't default
 
-The proven failure: with hundreds of effects available (`make effects` prints the live count), authoring
+The proven failure: with hundreds of effects available (`make regen` prints the live count), authoring
 from a blank JSON still regresses to `rise`+`fade`.
-This skill is the map. **Read [`engine-doctrine/EFFECTS.md`](../../engine-doctrine/EFFECTS.md) first** (regenerate with `make effects`);
+This skill is the map. **Read [`engine-doctrine/EFFECTS.md`](../../engine-doctrine/EFFECTS.md) first** (regenerate with `make regen`);
 it is generated from the engine registries, so every effect that exists is listed and nothing is invented.
 
 ## Pick by what you need (the mechanism table)

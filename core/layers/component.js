@@ -20,5 +20,5 @@ export function build(kit, el, L, { src, part, w } = L) {
 
 export const PROPS = propsOf(build);
 
-// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make effects`). core/layers/index.js refuses one without it.
+// The catalogue row for this type (engine-doctrine/EFFECTS.md, `make regen`). core/layers/index.js refuses one without it.
 export const blurb = "a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w`";
