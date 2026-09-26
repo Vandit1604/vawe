@@ -264,7 +264,7 @@
       {
         "ref": "quality/runs/evals/briefs/demo.json",
         "t": 5.7,
-        "note": "the vawe-type-demo worked example: cursor and click land on 'save-btn' at the same instant, no gap. Not a filmed clip like the other sources here, this engine's own canonical demo, kept as a source because every number above still had to be typed as raw pixels by hand until this recipe existed"
+        "note": "the vawe-type demo worked example: cursor and click land on 'save-btn' at the same instant, no gap. Not a filmed clip like the other sources here, this engine's own canonical demo, kept as a source because every number above still had to be typed as raw pixels by hand until this recipe existed"
       }
     ],
     "slots": {

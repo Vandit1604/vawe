@@ -2,6 +2,7 @@
 name: vawe-effects
 description: "Lists the full effect arsenal to choose from by need, instead of defaulting to rise+fade: kinetic reveals, living backgrounds, border-beam/shine, shape-morph logos, paint fields (aurora/meteor/matrix), cuts/stings/seams. Load while authoring a scene JSON when an effect must be chosen. Points at the generated `engine-doctrine/EFFECTS.md`."
 stage: design
+effort: low
 ---
 
 # vawe-effects: pick from the whole arsenal, don't default
@@ -46,3 +47,8 @@ If you want motion, never reach for a `canvasFx`/`filter` and expect it to anima
 - **Back every claim with the effect on screen** (engine-doctrine/MISTAKES.md value gate). "22 stings" must SHOW stings.
 
 Depth: [`engine-doctrine/CRAFT/DIRECTION.md`](../../engine-doctrine/CRAFT/DIRECTION.md) · snippets: [`engine-doctrine/MOTION-SNIPPETS.md`](../../engine-doctrine/MOTION-SNIPPETS.md) · motion feel: `vawe-animation` · camera: `vawe-camera`.
+
+## Gotchas
+
+- A backtick inside a GLSL comment can silently end the shader source; the render then times out
+  with nothing useful in the log instead of a named compile error. `engine-doctrine/MISTAKES.md #308`.

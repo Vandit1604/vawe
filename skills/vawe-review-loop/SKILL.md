@@ -2,6 +2,7 @@
 name: vawe-review-loop
 description: "Reviews a rendered film, fixes what is wrong, and repeats until it stops improving, wrapping the gates, the critic roster, and make judge into one loop with a written stopping rule. Load after a scene JSON renders, for any film about to ship, when it needs to be good rather than merely valid."
 stage: judge
+effort: high
 ---
 
 # vawe-review-loop: make it, look at it, fix it, again
@@ -76,6 +77,34 @@ the film worse, suspect the gate.* If a fix means shrinking, recentring or delet
 is right, stop and read what the gate actually measures. A gate that measures the wrong thing does not
 miss defects, it manufactures them, and the author pays by deforming a good design until a number moves.
 
+## The review log: read it before you score, write it after
+
+Every round already writes one line to `out/<film>.runs.jsonl` (`harness/lib/runlog.mjs`), the film's
+own append-only history. `quality/gates/judge.mjs` logs `{ cmd: 'judge', judge: { verdict, file } }`
+automatically on every `make judge`; nothing else in this repo owns a second log for the same fact, so
+extend that one instead of starting a new file.
+
+**Before scoring a round**, read the film's own history first, so a pass does not re-discover and
+re-report a finding an earlier pass already named:
+
+```js
+import { readRuns } from './harness/lib/runlog.mjs';
+const priorFindings = readRuns(film).filter((r) => r.judge).flatMap((r) => r.judge.findings || []);
+```
+
+**After scoring a round**, append the verdict AND the top findings (the issues named for anything
+scoring 3 or below), not just the verdict:
+
+```js
+import { appendRun } from './harness/lib/runlog.mjs';
+appendRun(film, { cmd: 'judge', judge: { verdict: 'FIX', file: sheet,
+  findings: ['weak hook on beat 2, restates the headline', 'seam flash at 3.2s'] } });
+```
+
+A finding already logged and still unresolved is worth re-stating as still open; the point is not
+repeating it as if it were new, so the stopping rule (below) can tell a genuinely quiet round from
+one that just forgot what the last round found.
+
 ## Sign the round off
 
 A receipt makes "somebody looked" checkable, and hashes the scene so editing it silently withdraws its own
@@ -115,3 +144,13 @@ The loop is for a full pass, a recreation, or anything going in front of other p
   to score honestly about your own work. This is why the critics are separate agents.
 - Two consecutive quiet rounds is a heuristic, not a proof. A defect nobody looked for stays invisible
   however many rounds run.
+
+## Gotchas
+
+- A seam gate can print a pass it never earned when a consumer of the shared `transitions` surface
+  falls out of sync; a green `make seam-check` is not proof by itself, sample the boundaries yourself
+  on anything you ship. `engine-doctrine/MISTAKES.md #412`.
+- The judge sheet's per-beat time label can come from a different moment than the frame actually
+  shown; read the picture, don't trust the printed timestamp on its own. `engine-doctrine/MISTAKES.md #630`.
+- A preview that animates (a rAF-driven `--t`) cannot be judged from a screenshot; freeze the field
+  before scoring it. `engine-doctrine/MISTAKES.md #295`.

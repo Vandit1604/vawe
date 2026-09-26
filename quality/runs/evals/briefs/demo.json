@@ -1,6 +1,6 @@
 {
  "module": "scene",
- "note": "DEMO worked example (engine-doctrine/EVALS.md, skills/vawe-type-demo/SKILL.md). Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map with a real cursor path, and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. No captured site: fictional, self-contained, invented figures. Theme satara: warm paper, single trail-orange accent, geometric rounded sans, snappy easeOutBack motion, chosen for an outdoor/warm/spatial register.",
+ "note": "DEMO worked example (engine-doctrine/EVALS.md, skills/vawe-type/reference/demo.md). Trailhead, a fictional hiker's route planner. Proves ONE mechanism: a person draws a route on a map with a real cursor path, and the elevation profile fills in underneath the drawn line as it is drawn, so the climb is visible before the walk. No captured site: fictional, self-contained, invented figures. Theme satara: warm paper, single trail-orange accent, geometric rounded sans, snappy easeOutBack motion, chosen for an outdoor/warm/spatial register.",
  "theme": "satara",
  "aspect": "16:9",
  "duration": 15,

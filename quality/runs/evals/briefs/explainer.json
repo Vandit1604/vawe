@@ -1,7 +1,7 @@
 {
  "module": "scene",
  "storyboard": "quality/runs/evals/briefs/explainer.storyboard.md",
- "note": "EXPLAINER worked example (engine-doctrine/EVALS.md, skills/vawe-type-explainer/SKILL.md). No product, no site: teaches that a frame in this engine is a pure function of time (checkable facts: 24 layer types each built from `frame(kit,el,L,t)`, CSS animation/transition refused at boot, the render captures across worker tabs), and holds the payoff (splitting the render loses nothing because no frame depends on the one before it) for last. A live t-readout is the continuous object: it starts as a tiny corner mark and grows into the hero of the closing line, which is itself the proof made literal. Theme vawe, white-first cobalt, chosen because the theme's own motion note already calls this engine's register 'determinism and speed'.",
+ "note": "EXPLAINER worked example (engine-doctrine/EVALS.md, skills/vawe-type/reference/explainer.md). No product, no site: teaches that a frame in this engine is a pure function of time (checkable facts: 24 layer types each built from `frame(kit,el,L,t)`, CSS animation/transition refused at boot, the render captures across worker tabs), and holds the payoff (splitting the render loses nothing because no frame depends on the one before it) for last. A live t-readout is the continuous object: it starts as a tiny corner mark and grows into the hero of the closing line, which is itself the proof made literal. Theme vawe, white-first cobalt, chosen because the theme's own motion note already calls this engine's register 'determinism and speed'.",
  "theme": "vawe",
  "aspect": "16:9",
  "duration": 20,
