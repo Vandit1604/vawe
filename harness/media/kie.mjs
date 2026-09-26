@@ -23,6 +23,7 @@ async function api(pathname, { method = 'GET', body } = {}) {
   return json.data ?? json;
 }
 
+// unified Jobs API (image, tts, stt, kling video, …)
 export async function createTask(model, input, { callBackUrl } = {}) {
   const data = await api('/api/v1/jobs/createTask', { method: 'POST', body: { model, input, ...(callBackUrl ? { callBackUrl } : {}) } });
   const taskId = data.taskId || data.task_id;
@@ -30,6 +31,7 @@ export async function createTask(model, input, { callBackUrl } = {}) {
   return taskId;
 }
 
+// poll recordInfo until terminal; returns the parsed result object (with resultUrls[]).
 export async function pollTask(taskId, { interval = 3000, timeout = 600000, onProgress } = {}) {
   const start = Date.now();
   for (;;) {
@@ -50,6 +52,7 @@ export async function pollTask(taskId, { interval = 3000, timeout = 600000, onPr
   }
 }
 
+// run a unified job end to end → array of result URLs.
 export async function runJob(model, input, opts = {}) {
   const taskId = await createTask(model, input, opts);
   if (opts.onTask) opts.onTask(taskId);
@@ -57,6 +60,7 @@ export async function runJob(model, input, opts = {}) {
   return urls;
 }
 
+// upload a local file → hosted URL (for STT audio / img2img inputs).
 export async function uploadFile(localPath) {
   const buf = fs.readFileSync(localPath);
   const b64 = buf.toString('base64');
@@ -70,7 +74,7 @@ export async function uploadFile(localPath) {
   return url;
 }
 
-// file that EXISTS, passes every path check, and renders as a hole. That is engine-doctrine/MISTAKES.md #446 with
+// Read back the body, not just the status: a CDN can answer 200 with an HTML/JSON error page for an expired asset, so `download` also requires a magic-number match before writing (engine-doctrine/MISTAKES.md #446).
 const MAGIC = [ // enough of each container to tell media from an error page
   [[0xff, 0xd8, 0xff], 'jpeg'], [[0x89, 0x50, 0x4e, 0x47], 'png'], [[0x47, 0x49, 0x46], 'gif'],
   [[0x52, 0x49, 0x46, 0x46], 'riff/webp/wav'], [[0x49, 0x44, 0x33], 'mp3'], [[0xff, 0xfb], 'mp3'],
@@ -124,6 +128,7 @@ export async function transcribeUrl(audioUrl, opts = {}) {
   return result; // { text, words:[{text,start,end}], ... }
 }
 
+// music uses the dedicated Suno API (submit + poll a different endpoint).
 export async function music(prompt, { model = 'V4_5', instrumental = true, style, title, ...opts } = {}) {
   const body = { prompt, model, customMode: !!(style || title), instrumental, ...(style ? { style } : {}), ...(title ? { title } : {}) };
   const data = await api('/api/v1/generate', { method: 'POST', body });
@@ -131,6 +136,7 @@ export async function music(prompt, { model = 'V4_5', instrumental = true, style
   if (opts.onTask) opts.onTask(taskId);
   const start = Date.now();
   for (;;) {
+    // Suno poll endpoint (verify against docs.kie.ai/suno-api/get-music-details if this 404s)
     const d = await api(`/api/v1/generate/record-info?taskId=${encodeURIComponent(taskId)}`).catch((e) => ({ __err: e }));
     const items = d?.response?.sunoData || d?.data || d?.items || [];
     const done = Array.isArray(items) && items.find((x) => x.audioUrl || x.audio_url);

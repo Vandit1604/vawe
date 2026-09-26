@@ -15,6 +15,10 @@ function indentOf(raw) {
 
 const MECH_OF_KEY = { cuts: 'cut', stings: 'sting', seams: 'seam' };
 
+// One cuts/stings/seams entry -> its transitions[] equivalent, field-for-field. PINNING: going through
+// transitions[] fills a bare motion fx's `timing` with `ramp` (RAMP_BY_DEFAULT) when the film names no
+// `energy`, so this pins the render-time default it already had (`smooth`, core/cuts/index.js) explicitly
+// to keep the round trip honest without ever silently re-timing a cut.
 export function raise(entry, key, film) {
   const T = { at: entry.t, mech: MECH_OF_KEY[key] };
   if (key === 'cuts' || key === 'seams') {
@@ -35,6 +39,8 @@ export function raise(entry, key, film) {
   return T;
 }
 
+// Order-independent: `raise` rebuilds each object with its own key order (mech first), and there is
+// no reason that should match the order an author happened to type keys in.
 export function deepEqual(a, b) {
   if (a === b) return true;
   if (typeof a !== typeof b) return false;
@@ -55,6 +61,8 @@ const pick = (d) => ({
   seams: (d.seams || []).map((s) => ({ ...s, timing: s.timing ?? 'smooth' })),
 });
 
+// -> { next, ok, err }: `next` is `data` with cuts/stings/seams rewritten to transitions[] (or `data`
+// itself if it authors none); `ok` is the round-trip proof, `err` names why it failed.
 export function migrateOne(data) {
   const keys = ['cuts', 'stings', 'seams'].filter((k) => Array.isArray(data[k]) && data[k].length);
   if (!keys.length) return { next: data, ok: true, clean: true };

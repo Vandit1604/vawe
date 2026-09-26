@@ -1,6 +1,8 @@
+// ONE definition of the standalone page a hand-written fragment is previewed on, shared by `make preview` and the storyboard studio so a fragment can't preview clean in one and wrong in the other.
 export const FULLBLEED_RE = /position\s*:\s*(?:absolute|fixed)/i;
 export const INSET_RE = /inset\s*:\s*0|(?:top|left|right|bottom)\s*:\s*0\s*(?:;|})/i;
 
+// `box` (optional): {x,y,w,h,W,H}, the assembled film's real layer box in canvas pixels; passing it swaps the centred/full-bleed preview layout for the same absolute placement core/layers/html.js gives the layer, so a fragment that clips its actual assembled box clips here too (build fix 7).
 export function fragPage({ raw, theme, bg, boxW = 1400, tSec = 0, fullBleed = false, box = null }) {
   const W = box ? box.W : 1920, H = box ? box.H : 1080;
   const stageCss = box

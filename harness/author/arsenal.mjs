@@ -139,8 +139,9 @@ export const toks = searchWords;
 /** Everything an entry is INDEXED by: what it is called, what it is, what it does, what it is also called. */
 export const corpusOf = (e) => `${e.name} ${e.kind} ${e.blurb} ${(e.aka || []).join(' ')}`;
 
-// wrong things (engine-doctrine/MISTAKES.md #551).
-
+// Calibrated, not picked: worst known-good match scores 0.634, best known-absent scores 0.402 (two
+// query sets in quality/gates/lib-test.mjs), 0.47 sits between them. Must be measured with `toks`,
+// never a raw regex split: a plain /[a-z0-9]+/g re-derivation gave 0.366 and let a known-absent query through.
 export const CONFIDENT = 0.47;
 
 const FILLER_SHARE = 0.06;
@@ -205,6 +206,9 @@ export function snippet(entry) {
   return Object.entries(obj).map(([k, v]) => `"${k}": ${jsonish(v)}`).join(', ');
 }
 
+// score has no ceiling and cannot say whether the winner is an answer: "a light that travels around
+// the border of a card" once returned cardCascade, lightLeak and highlight, three confident wrong
+// things (engine-doctrine/MISTAKES.md #551); coverageIn/CONFIDENT below exist to catch that.
 /** The rank order itself. Exported so harness/dev/blurb-retrieval.mjs measures THIS, not a copy of it. */
 export function score(entry, qt) {
   const name = entry.name.toLowerCase();
@@ -219,8 +223,14 @@ export function score(entry, qt) {
   return s;
 }
 
+// `s` is discrete (12/6/3/1 per matched word) so ties on it are real; `c` is continuous idf coverage
+// (0..1), so covBand rounds it to a 0.05 step before tiebreaking, wide enough to catch near-equal
+// answers without calling a much-better match merely comparable.
 const covBand = (c) => Math.round(c * 20);
 
+// Kinds that rank on their own list, never mixed into the vocabulary results: a craft rule answers
+// "how do I decide", a skill "what should I load"; about a hundred rules once crowded effects out of
+// their own results when they shared one list.
 export const SIDE_KINDS = new Set(['rule', 'skill']);
 
 /** One side-list: the best `n` entries of a SIDE_KIND for this query, or [] when none match. */

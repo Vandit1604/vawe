@@ -8,6 +8,7 @@ const SCHEMA_PATH = path.join(repoRoot, 'films/scene/schema.json');
 /** The one owner of every field, type, label and enum printed by this tool. */
 export const loadSchema = () => JSON.parse(fs.readFileSync(SCHEMA_PATH, 'utf8'));
 
+// steps(at): `[]` and the schema's literal `item` segment mean the same array-descent step; a `fields` segment is accepted but means nothing (object descent already happens by name).
 export function steps(at) {
   const out = [];
   for (const raw of String(at || '').split('.')) {

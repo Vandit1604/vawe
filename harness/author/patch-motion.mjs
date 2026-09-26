@@ -1,4 +1,5 @@
 
+// scan forward from `i` (which must sit on the opening bracket) to the matching close, skipping strings.
 export function matchBracket(src, i) {
   const open = src[i];
   const close = open === '{' ? '}' : open === '[' ? ']' : null;
@@ -18,6 +19,7 @@ export function matchBracket(src, i) {
   throw new Error(`matchBracket: unterminated ${open} from ${i}`);
 }
 
+// the character span [start, end) of the top-level "layers" array's Nth element.
 export function layerSpan(src, index) {
   const key = /"layers"\s*:\s*\[/g;
   const m = key.exec(src);
@@ -37,6 +39,7 @@ export function layerSpan(src, index) {
   throw new Error(`layer index ${index} is out of range (found ${n})`);
 }
 
+// the span of a property's VALUE inside an object span, plus where its key starts.
 export function propSpan(src, obj, name) {
   const needle = `"${name}"`;
   let p = obj.start, inStr = false, depth = 0;
@@ -70,6 +73,7 @@ function valueEnd(src, v, limit) {
   return limit;
 }
 
+// Two styles exist in this library (expanded and one-line) and both are deliberate: the patcher copies whichever it replaced rather than imposing one.
 export function renderKeys(keys, { expanded, indent = '      ' }) {
   const one = (k) => {
     const parts = Object.entries(k)
@@ -82,6 +86,7 @@ export function renderKeys(keys, { expanded, indent = '      ' }) {
   return `[\n${keys.map((k) => inner + one(k)).join(',\n')}\n${indent}]`;
 }
 
+// keyframe times and offsets are measured, not symbolic: 3 decimals is finer than one frame at any fps this engine renders, and keeps 0.1 + 0.2 from writing 0.30000000000000004 into a tracked file.
 const trimNum = (v) => String(+(+v).toFixed(3));
 
 function indentAt(src, pos) {
@@ -90,6 +95,7 @@ function indentAt(src, pos) {
   return m ? m[0] : '      ';
 }
 
+// patchMotion(src, layerIndex, keys) -> new source text; `keys` of null/[] removes the track, and a layer with no `motion` gets one inserted after its last property.
 export function patchMotion(src, layerIndex, keys) {
   const obj = layerSpan(src, layerIndex);
   const existing = propSpan(src, obj, 'motion');
@@ -136,6 +142,7 @@ export function patchMotion(src, layerIndex, keys) {
   return src.slice(0, insertAt) + text + src.slice(insertAt);
 }
 
+// the [start,end) span of each object element inside the array that opens at `arrOpen`.
 export function elementSpans(src, arrOpen) {
   const close = matchBracket(src, arrOpen);
   const out = [];
@@ -165,6 +172,7 @@ function renderKey(k, proto) {
   return `{\n${kv.map((x) => ind + x).join(',\n')}\n${closeInd}}`;
 }
 
+// upsertKey(keys, k): sets a keyframe at time k.t, replacing any key already at that time (within one tick) and keeping the track sorted.
 export function upsertKey(keys, k, eps = 1e-4) {
   const out = (keys || []).filter((x) => Math.abs((x.t ?? 0) - (k.t ?? 0)) > eps);
   const prev = (keys || []).find((x) => Math.abs((x.t ?? 0) - (k.t ?? 0)) <= eps);

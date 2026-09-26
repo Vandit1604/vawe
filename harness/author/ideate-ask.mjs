@@ -23,6 +23,7 @@ export function whereProductLives() {
   ];
 }
 
+// Every option is a real recipe or kinetic preset name, never an invented style word.
 export function howTextArrives() {
   const wbw = RECIPES['word-by-word'];
   return [
@@ -35,6 +36,8 @@ export function howTextArrives() {
   ];
 }
 
+// GROUND is decided once per film, a strategy not a colour: "chained from previous" is the flow-seam
+// recipe's own ground slot, applied at every joint rather than re-asked per act.
 export function groundStrategy() {
   const seam = RECIPES['flow-seam'];
   return [
@@ -68,6 +71,8 @@ export function filmLevelBatch() {
 
 // ── per-act questions (one batch each) ─────────────────────────────────────────────────────────────
 
+// The reference's own measured content line (shots[].content, when this is a REF act) rides in the
+// description so the option is judged against how full the reference actually is.
 export function contentLine(act) {
   const c = act && act.content;
   if (!c) return null;
@@ -118,11 +123,14 @@ export function handoffOptions(joint) {
   ];
 }
 
+// Named moves whose blurbs are read straight off core/camera-moves/index.js.
 export function cameraOptions() {
   const pick = ['diveIn', 'panFollow', 'driftHold'];
   return pick.filter((k) => CAMERA_MOVE_BLURBS[k]).map((k) => ({ key: k, label: k, description: `core/camera-moves: ${CAMERA_MOVE_BLURBS[k]}.` }));
 }
 
+// Four options, the AskUserQuestion ceiling, so this REPLACES the old standalone "what does the
+// camera do" question rather than sitting beside it.
 export function eyeOptions() {
   const wbw = RECIPES['word-by-word'];
   return [

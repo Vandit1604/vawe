@@ -1,16 +1,18 @@
-// the rule. A rule nothing checks is a rule that has already been repealed (engine-doctrine/MISTAKES.md #511).
+// The engine broke its own no-em-dash rule 7,345 times before this check existed (engine-doctrine/MISTAKES.md #511).
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const EM = String.fromCharCode(0x2014);   // never write the literal here: this file is in scope
 const QUIET = process.argv.includes('--quiet');
 
+// Exported so harness/live's write-time twin can tell which files this scan already reaches, and stay quiet on them instead of repeating the same finding at push time.
 export const SCOPE = [
   'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'films', 'scene', 'films',
   'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
   'cmd', 'internal', 'mcp', 'themes', 'directions', 'registry',
 ];
 
+// Exported so harness/live's write-time twin checks the same allowlist instead of growing its own copy.
 export const EXCLUDE = [
   (f) => f.startsWith('site/') || f.startsWith('docs-site/'),
   (f) => f.startsWith('assets/vendor/') || f.includes('/vendor/') || f.includes('node_modules/'),
@@ -18,6 +20,7 @@ export const EXCLUDE = [
 
 const MISTAKES = 'engine-doctrine/MISTAKES.md';
 
+// Only run the CLI scan when this file is the entrypoint: harness/live's write-time twin imports EM and EXCLUDE above and must not pay for a repo-wide git grep just to reuse the matcher.
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
 if (isMain) {
   const raw = execSync(`git grep -nI '${EM}' -- ${SCOPE.map((s) => `'${s}'`).join(' ')} || true`,

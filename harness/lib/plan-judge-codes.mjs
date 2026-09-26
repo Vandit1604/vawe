@@ -1,3 +1,4 @@
+// Same shape as harness/lib/judge-codes.mjs's own closed set: an unknown code is refused rather than silently minting a new category.
 export const PLAN_JUDGE_CODES = Object.freeze([
   'through-line',
   'beat-pacing',
@@ -19,6 +20,8 @@ export function assertPlanJudgeCode(code) {
   }
 }
 
+// Murch's Rule of Six (Walter Murch, "In the Blink of an Eye", 1995): emotion 51%, story 23%, rhythm 10%, eye-trace 7%, screen-plane 5%, continuity 4%, cited at engine-doctrine/CRAFT/TRANSITIONS.md:3,14 and EYE-TRACE.md:170.
+// field-craft is a sixth code outside Murch's six, placed last on purpose: it is a precondition on the other five, not a rival cutting reason.
 export const PLAN_JUDGE_PRIORITY = Object.freeze([
   'spectacle',
   'through-line',

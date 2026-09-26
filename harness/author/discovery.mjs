@@ -38,6 +38,9 @@ import { DESTINATION_REGISTRY } from '../../core/layout/safe.js';
 import { RECIPES } from '../../recipes/index.mjs';
 import { score, toks } from './arsenal.mjs';
 
+// `layer type:three` is excluded because its name is an ordinary counting word: calibrating against
+// vawe-flow, a beat line like "(stills of three real vawe films...)" scored a false coverage-1.0 match
+// against the 3D layer type.
 const IDENTITY = new Set(['none', 'linear', 'hold', 'layer type:three']);
 const identityKey = (e) => `${e.kind}:${e.name}`;
 
@@ -93,8 +96,11 @@ const DEDICATED_FIELD = {
   recipe: 'recipe',
 };
 
+// Returns null (a `use:` kind) when the kind kept no dedicated field of its own.
 export const dedicatedField = (kind) => DEDICATED_FIELD[kind] || null;
 
+// Named explicitly rather than the whole beat block: a field label itself ("mechanism", "onscreen")
+// would otherwise pad every beat's corpus with the same handful of words.
 export const PROSE_FIELDS = ['mechanism', 'picture', 'style', 'becomes', 'onscreen'];
 
 export const fieldBlob = (beats, keys = PROSE_FIELDS) => beats.map((b) => keys.map((k) => {
@@ -102,8 +108,13 @@ export const fieldBlob = (beats, keys = PROSE_FIELDS) => beats.map((b) => keys.m
   return Array.isArray(v) ? v.join(' ') : (v || '');
 }).join(' ')).join(' ');
 
+// Measured calibrating this file: "which" alone put thermalBlur and followLayer over CONFIDENT on
+// vawe-flow, and "their" alone put three unrelated background presets over it on ab-skill-shotcode;
+// this only prunes beat-prose windows, it is deliberately not a change to core/registry/registry.js's STOP.
 const PROSE_STOP = new Set(['which', 'their', 'while', 'then', 'each', 'same', 'being', 'whose',
   'whom', 'who', 'this', 'these', 'those', 'than', 'once', 'twice',
+  // Measured over the 157-doc corpus: `choose` has df 1 and `font` has df 4, so a question's own verb
+  // outweighs its subject noun and wins a match with nothing behind it.
   'how', 'what', 'when', 'where', 'why', 'do', 'does', 'should', 'would', 'could',
   'choose', 'choosing', 'pick', 'picking', 'use', 'using', 'make', 'making', 'get', 'find']);
 
@@ -112,6 +123,8 @@ const PROSE_STOP = new Set(['which', 'their', 'while', 'then', 'each', 'same', '
  * object) gets the identical filtering rather than a second copy of this list. */
 export const filteredToks = (text) => toks(text).filter((t) => !PROSE_STOP.has(t));
 
+// One token array PER FIELD, never fields joined: a window sliding across a field boundary would
+// manufacture a phrase nobody wrote.
 export const tokenGroupsOf = (beat, keys = PROSE_FIELDS) => keys
   .map((k) => (Array.isArray(beat[k]) ? beat[k].join(' ') : beat[k]))
   .filter(Boolean)

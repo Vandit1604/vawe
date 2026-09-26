@@ -1,3 +1,6 @@
+// Split out of concept.mjs: it was defined after that file's usage guard, so importing it without CLI
+// args exited before this table existed. Ordered so the first N gives the widest spread: thread, pace
+// band and preset dominance all change between adjacent entries, so `--n 2` is already a real choice.
 export const DIRECTIONS = [
   { slug: 'held-object', thread: 'transforming object', pace: 3.4, preset: 'editorial',
     why: 'One prop carries the whole film and changes shape at each junction. Slow enough to read, and the most legible option: the viewer always knows what they are looking at.' },

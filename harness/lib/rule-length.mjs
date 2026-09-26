@@ -1,7 +1,9 @@
+// 500 characters is roughly three 30-word sentences at typical English word length, matching pattern 2's own "one to three sentences, then stop"; not a measured perception floor, a round number chosen to match the prose rule it enforces.
 export const RULE_LENGTH_LIMIT = 500;
 
 export const RULE_LENGTH_DOC = 'engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md';
 
+// Agent-facing prose surfaces only, not reference tables, generated indexes, or per-film artifacts: engine-doctrine/CRAFT/*.md (not its subfolders), plus AGENTS.md and skills/*/SKILL.md named directly.
 export function isAgentDoc(rel) {
   if (rel === 'AGENTS.md') return true;
   if (/^skills\/[^/]+\/SKILL\.md$/.test(rel)) return true;

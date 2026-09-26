@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+// MIN_REFERENCES is measured, not chosen by taste: at n=2, one atypical reference swung genre-pacing.mjs's DEFAULT_MAX_S 2.6s-3.6s (a 38% swing) and moved held-state-too-long findings from 71 to 42.
+// Below 5, readReferenceBars still measures and returns everything it can, but `ready` is false and no caller may treat the bank's numbers as a bar to enforce.
 export const MIN_REFERENCES = 5;
 
 function median(nums) {

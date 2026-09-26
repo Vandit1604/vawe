@@ -112,6 +112,7 @@ const REGISTRY = {
   },
 };
 
+// adaptFinding(finding, ctx) -> finding, unchanged for a code with no entry or one that does not apply, or the same finding carrying `.adapted = { verdict, value, line }` when a registry entry judged it; ctx = { scene, storyboard beats, layer, element facts } as the film supplies them.
 export function adaptFinding(finding, ctx = {}) {
   const entry = REGISTRY[finding.kind];
   if (!entry || !entry.applies(finding, ctx)) return finding;

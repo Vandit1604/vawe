@@ -19,6 +19,7 @@ function collectClipLayers(layers) {
   return out;
 }
 
+// A leading slash is the repo root, not the disk root (core/engine/src-url.js owns that rule); reading it as a filesystem absolute path once handed ffmpeg a nonexistent /assets/x.mp4 and the render died in the pre-pass with "No such file".
 function resolveSrc(src, formatDir, repoRoot) {
   if (src.startsWith("/")) {
     const rooted = path.join(repoRoot, src.slice(1));
@@ -32,6 +33,8 @@ function resolveSrc(src, formatDir, repoRoot) {
   return null;
 }
 
+// A source with no audio track is normal in an edit, not an error (measured: 5 of 6 clips in one film had no audio stream); asking ffmpeg for it would fail the whole render.
+// Exported so harness/media/ingest.mjs can ask the same question of a whole source file without a second ffprobe incantation.
 export function hasAudioStream(src) {
   const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a',
     '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', src], { encoding: 'utf8' });
@@ -49,6 +52,7 @@ function extractOne(src, inPoint, outPoint, rate, outFile) {
   execFileSync('ffmpeg', args, { stdio: ['ignore', 'ignore', 'pipe'] });
 }
 
+// extractClipAudio: the entry point render.go shells out to. Returns the ClipTrack rows it wrote wav files for; a layer with a missing source is skipped with a stderr warning rather than failing the whole render.
 export function extractClipAudio({ layers, formatDir, repoRoot, outDir }) {
   fs.mkdirSync(outDir, { recursive: true });
   const rows = [];
@@ -65,6 +69,7 @@ export function extractClipAudio({ layers, formatDir, repoRoot, outDir }) {
     }
     const inPoint = L.in ?? 0;
     const rate = L.rate ?? 1;
+    // `out` is the source-time trim point read here, but core/timeline/clips.js also reads a layer's `out` as an EXIT ANIMATION NAME (driveClips) unconditionally, for every layer type (engine-doctrine/MISTAKES.md candidate); `duration` avoids the collision.
     const outPoint = L.out ?? (L.duration != null ? inPoint + L.duration * rate : null);
     if (outPoint == null || outPoint <= inPoint) {
       process.stderr.write(`⚠ clip-audio: layer ${L.id || i} has no valid \`out\` or \`duration\` past \`in\`, so its clip audio has no window to extract. Skipped.\n`);
@@ -81,6 +86,7 @@ export function extractClipAudio({ layers, formatDir, repoRoot, outDir }) {
   return rows;
 }
 
+// Prints the ClipTrack rows as JSON on stdout; Go unmarshals them straight into []ClipTrack.
 if (import.meta.url === `file://${process.argv[1]}`) {
   const [sceneFile, formatDir, repoRoot, outDir] = process.argv.slice(2);
   if (!sceneFile || !formatDir || !repoRoot || !outDir) {
@@ -88,6 +94,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(1);
   }
   const data = JSON.parse(fs.readFileSync(sceneFile, 'utf8'));
+  // internal/render/expand.go only pre-resolves relative-time strings when the scene also carries block/beat/comp/recipes/voice sugar; resolving here too is a no-op when Go already did it, required when it did not.
   resolveRelativeTimes(data);
   const rows = extractClipAudio({ layers: data.layers, formatDir, repoRoot, outDir });
   process.stdout.write(JSON.stringify(rows));

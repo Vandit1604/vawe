@@ -18,6 +18,7 @@ export function authoredFilms() {
 // silent-drift heuristic this repo warns against elsewhere (findings.mjs, engine-doctrine/MISTAKES.md #401).
 export const LIBRARIES = ['beats-of.mjs', 'block-schema.mjs', 'edge-reveal.mjs', 'paths.mjs', 'rubric.mjs', 'scene-timing.mjs', 'snap-signature.mjs', 'tile.mjs'];
 
+// film: single positional arg is a films/scene/<name>.json path (a few need a second literal arg).
 export const FILM_CHECKS = {
   'asset-check.mjs': (f) => [f],
   'audio-check.mjs': (f) => [f],
@@ -52,6 +53,7 @@ export const FILM_CHECKS = {
   'storyboard-check.mjs': (_f, name) => [path.join('films', 'scene', `${name}.storyboard.md`)],
 };
 
+// repo: no film argument, scans the whole tree once.
 export const REPO_CHECKS = [
   'arsenal-check.mjs', 'audit-scenes.mjs', 'blocks-audit.mjs', 'code-quality.mjs', 'conformance.mjs',
   'coverage.mjs', 'craft-coverage.mjs', 'dead-branch.mjs', 'doc-map.mjs', 'doc-refs.mjs',
@@ -63,8 +65,10 @@ export const REPO_CHECKS = [
   'discovery.mjs',
 ];
 
+// other: real CLIs, but their contract is N arbitrary files, a baseline-writer, or a probe harness, not "one check over one film" or "one check over the repo"; listed, never run, never deleted for firing zero times.
 export const OTHER_TOOLS = ['compare.mjs', 'similarity.mjs', 'canvas-purity.mjs', 'ledger.mjs', 'probe-purity.mjs', 'scene-snap.mjs', 'snap-blocks.mjs', 'snap-scenes.mjs'];
 
+// reporter: always exits 0, never emits a finding; stage.mjs is the pipeline status line, pace.mjs the tempo-preview instrument (no floor, no verdict, per its own header).
 export const REPORTERS = ['stage.mjs', 'pace.mjs'];
 
 export function allGateFiles() {
@@ -82,6 +86,7 @@ function referencedBy(basename) {
   grep(['Makefile'], 'Makefile');
   grep(['.githooks'], '.githooks');
   grep(['.github/workflows', '--include=*.yml'], 'ci');
+  // exclude the file's own gate-dir self-hit from "other-gate" (it always contains its own name in its usage comment)
   grep(['quality/gates', '--include=*.mjs'], 'other-gate');
   grep(['harness', '--include=*.mjs'], 'harness');
   grep(['engine-doctrine', '--include=*.md'], 'docs');
@@ -242,4 +247,5 @@ function main() {
   for (const w of waivers) console.log(`${w.code.padEnd(33)} ${String(w.total).padStart(6)}  ${w.films}`);
 }
 
+// Guarded: quality/gates/gate-classification.mjs imports FILM_CHECKS/REPO_CHECKS/etc. from this module; a bare main() would re-run the whole census as a side effect of that import.
 if (import.meta.url === `file://${process.argv[1]}`) main();

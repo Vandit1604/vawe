@@ -7,6 +7,7 @@ import { codesEmitted } from './finding-codes.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
+// The feature-key vocabulary IS whatever computeFeatures actually produces, never a copy: a second list drifts the day a feature is renamed.
 export const FEATURE_KEYS = Object.keys(computeFeatures({}, null));
 
 const EM_DASH = String.fromCharCode(0x2014);
@@ -165,6 +166,7 @@ export function briefLine(rec) {
   return `rule ${rec.id}: ${rec.brief} (${rec.doc})`;
 }
 
+// The order AGENTS.md already names for a stage's own categories (direct: motion, transitions, sound; design: layout, imagery, typography, colour, content; plan: direction, content).
 export const STAGE_CATEGORY_ORDER = {
   direct: ['motion', 'transitions', 'sound'],
   design: ['layout', 'imagery', 'typography', 'colour', 'content'],
