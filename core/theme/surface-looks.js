@@ -16,18 +16,30 @@ import { defineRegistry } from '../registry/registry.js';
 
 const isObj = (o) => o != null && typeof o === 'object' && !Array.isArray(o);
 
-// THE NINE TOKENS. Not a `--surface` enum a block branches on in JS: an enum would be a SECOND
+// THE TOKENS. Not a `--surface` enum a block branches on in JS: an enum would be a SECOND
 // mechanism beside the one CSS custom properties already give for free, so a look is only ever a
-// bundle of concrete values for these nine names.
-export const SURFACE_TOKEN_KEYS = ['radius', 'borderW', 'borderStyle', 'borderColor', 'bg', 'shadow', 'pad', 'gap', 'blur', 'density'];
+// bundle of concrete values for these names. The first ten are the CONTAINER (radius, border, shadow,
+// blur, pad/gap/density); the rest are the MARKS AND TYPE drawn inside it (stroke weight and cap, the
+// area/track paint, and the number/label typography), so two themes with the same container no longer
+// read as the same kit with a different frame: the drawing itself changes too. Every one of these is a
+// plain CSS value (a stroke-linecap keyword, a paint, a font-family, a text-transform keyword, a bare
+// number for a `calc()`/font-weight), never a second enum a block has to branch on.
+export const SURFACE_TOKEN_KEYS = [
+  'radius', 'borderW', 'borderStyle', 'borderColor', 'bg', 'shadow', 'pad', 'gap', 'blur', 'density',
+  'strokeCap', 'strokeScale', 'areaFill', 'trackDash',
+  'numFont', 'numWeight', 'labelFont', 'labelCase', 'labelVariant', 'labelTracking', 'labelWeight',
+];
 
 // KIT_DEFAULTS: today's literals, named once so "no look set" and "look: kit" are the same bundle by
-// construction. blocks/kit.mjs's own R.card/HAIR/SHADOW_CARD stay the single source for the NUMBER;
-// this only names which token each one becomes.
+// construction. blocks/kit.mjs's own R.card/HAIR/SHADOW_CARD/STROKE/capCss/labelCss/numCss stay the
+// single source for the NUMBER; this only names which token each one becomes.
 export const KIT_DEFAULTS = {
   radius: 14, borderW: 1, borderStyle: 'solid', borderColor: 'var(--line)', bg: 'var(--card)',
   shadow: '0 1px 1px rgba(0,0,0,0.07), 0 2px 6px rgba(0,0,0,0.05)',
   pad: 22, gap: 16, blur: 0, density: 1,
+  strokeCap: 'round', strokeScale: 1, areaFill: null, trackDash: 'none',
+  numFont: 'var(--font-num)', numWeight: 700,
+  labelFont: 'var(--font-mono)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0.02em', labelWeight: 600,
 };
 
 // SURFACE_LOOKS: named design languages a theme's `look.surface` points at (by name, or an inline
@@ -38,38 +50,71 @@ const SURFACE_LOOKS = {
     radius: 20, borderW: 1, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.28)',
     bg: 'color-mix(in srgb, var(--card) 55%, transparent)',
     shadow: '0 8px 32px rgba(0,0,0,0.18)', pad: 24, gap: 16, blur: 18, density: 1.05,
+    strokeCap: 'round', strokeScale: 1, trackDash: 'none',
+    numFont: 'var(--font-sans)', numWeight: 600,
+    labelFont: 'var(--font-sans)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0.01em', labelWeight: 500,
   },
   soft: {
     radius: 24, borderW: 0, borderStyle: 'none', borderColor: 'transparent',
     shadow: '0 2px 4px rgba(0,0,0,0.04), 0 12px 24px rgba(0,0,0,0.08)', pad: 24, gap: 16, blur: 0, density: 1,
+    strokeCap: 'round', strokeScale: 1.1, trackDash: 'none',
+    numFont: 'var(--font-sans)', numWeight: 700,
+    labelFont: 'var(--font-sans)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0', labelWeight: 600,
   },
   outlined: {
     radius: 12, borderW: 1.5, borderStyle: 'solid', borderColor: 'var(--line-strong)',
     shadow: 'none', pad: 20, gap: 14, blur: 0, density: 0.95,
+    strokeCap: 'butt', strokeScale: 0.85, trackDash: 'none',
+    numFont: 'var(--font-num)', numWeight: 600,
+    labelFont: 'var(--font-mono)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0.02em', labelWeight: 500,
   },
+  // brutalist: square, heavy, loud. Square caps on a thick stroke, a flat solid area (never a
+  // gradient wash), bold uppercase sans labels wide-tracked to read as stencilled, not typeset.
   brutalist: {
     radius: 0, borderW: 3, borderStyle: 'solid', borderColor: 'var(--ink)',
     shadow: '8px 8px 0 0 var(--ink)', pad: 20, gap: 20, blur: 0, density: 1,
+    strokeCap: 'square', strokeScale: 1.5, areaFill: 'color-mix(in srgb, var(--accent) 35%, transparent)', trackDash: 'none',
+    numFont: 'var(--font-sans)', numWeight: 800,
+    labelFont: 'var(--font-sans)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.08em', labelWeight: 800,
   },
+  // editorial: hairline, quiet, set like a magazine page. Butt-capped thin strokes, a fine dashed
+  // rule in place of a filled track, serif numerals, small-caps labels, generous tracking.
   editorial: {
     radius: 2, borderW: 1, borderStyle: 'solid', borderColor: 'var(--line)',
     shadow: 'none', pad: 28, gap: 24, blur: 0, density: 1.15,
+    strokeCap: 'butt', strokeScale: 0.75, areaFill: 'none', trackDash: '1 3',
+    numFont: 'var(--font-serif)', numWeight: 400,
+    labelFont: 'var(--font-serif)', labelCase: 'none', labelVariant: 'small-caps', labelTracking: '0.06em', labelWeight: 500,
   },
+  // neon: glowing rim, terminal-bright marks: round caps, mono numerals, wide-tracked uppercase
+  // mono labels, the register a cyberpunk/console brand already carries in its borders.
   neon: {
     radius: 16, borderW: 1, borderStyle: 'solid', borderColor: 'var(--accent)',
     shadow: '0 0 1px var(--accent), 0 0 18px var(--accent-glow, var(--accent)), 0 0 42px var(--accent-glow, var(--accent))',
     pad: 22, gap: 16, blur: 0, density: 1,
+    strokeCap: 'round', strokeScale: 1.1, trackDash: 'none',
+    numFont: 'var(--font-mono)', numWeight: 700,
+    labelFont: 'var(--font-mono)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.1em', labelWeight: 700,
   },
   // playful: pill radii, no border, a bold saturated fill: bubbly and light, for a friendly brand.
+  // Chunky round-capped strokes and bold rounded sans type carry the same bounce into the marks.
   playful: {
     radius: 28, borderW: 0, borderStyle: 'none', borderColor: 'transparent',
     bg: 'color-mix(in srgb, var(--card) 92%, var(--accent) 8%)',
     shadow: '0 6px 0 0 color-mix(in srgb, var(--accent) 22%, transparent)', pad: 22, gap: 18, blur: 0, density: 1.1,
+    strokeCap: 'round', strokeScale: 1.35, trackDash: 'none',
+    numFont: 'var(--font-sans)', numWeight: 800,
+    labelFont: 'var(--font-sans)', labelCase: 'none', labelVariant: 'normal', labelTracking: '0', labelWeight: 700,
   },
   // print: paper-flat, a hairline rule, near-square corners, no shadow at all: reads as ink on stock.
+  // No area wash (a wash has no ink-on-paper equivalent), a fine dotted track standing in for a
+  // halftone screen, mono numerals and tracked uppercase mono labels like a caption under a plate.
   print: {
     radius: 3, borderW: 1, borderStyle: 'solid', borderColor: 'var(--ink)',
     shadow: 'none', pad: 26, gap: 20, blur: 0, density: 1.1,
+    strokeCap: 'butt', strokeScale: 0.9, areaFill: 'none', trackDash: '1 2',
+    numFont: 'var(--font-mono)', numWeight: 400,
+    labelFont: 'var(--font-mono)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.06em', labelWeight: 500,
   },
   // cinematic: deep glass with a glow ring, more depth than `glass`, for a dark, high-production brand.
   cinematic: {
@@ -77,11 +122,19 @@ const SURFACE_LOOKS = {
     bg: 'color-mix(in srgb, var(--card) 62%, transparent)',
     shadow: '0 24px 60px rgba(0,0,0,0.55), 0 0 40px var(--accent-glow, transparent)',
     pad: 26, gap: 18, blur: 24, density: 1.05,
+    strokeCap: 'round', strokeScale: 1, trackDash: 'none',
+    numFont: 'var(--font-sans)', numWeight: 600,
+    labelFont: 'var(--font-sans)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.12em', labelWeight: 500,
   },
-  // industrial: heavy square hardware, thick dark border, hard low shadow, tight padding.
+  // industrial: heavy square hardware, thick dark border, hard low shadow, tight padding. Square
+  // caps and a heavier stroke read as milled metal; mono numerals and tracked uppercase labels read
+  // as stencilled equipment markings.
   industrial: {
     radius: 4, borderW: 2, borderStyle: 'solid', borderColor: 'var(--line-strong)',
     shadow: '0 4px 0 0 var(--line-strong)', pad: 18, gap: 14, blur: 0, density: 0.9,
+    strokeCap: 'square', strokeScale: 1.2, trackDash: 'none',
+    numFont: 'var(--font-mono)', numWeight: 700,
+    labelFont: 'var(--font-mono)', labelCase: 'uppercase', labelVariant: 'normal', labelTracking: '0.04em', labelWeight: 700,
   },
 };
 
@@ -142,7 +195,11 @@ export function resolveSurfaceLook(spec) {
 // CSS_VAR_NAMES: the one place a token name becomes its `--v-*` custom property.
 export const CSS_VAR_NAMES = Object.fromEntries(SURFACE_TOKEN_KEYS.map((k) => [k, `--v-${k.replace(/([A-Z])/g, '-$1').toLowerCase()}`]));
 
-const UNITLESS = new Set(['borderStyle', 'borderColor', 'bg', 'shadow', 'density']);
+const UNITLESS = new Set([
+  'borderStyle', 'borderColor', 'bg', 'shadow', 'density',
+  'strokeCap', 'strokeScale', 'areaFill', 'trackDash',
+  'numFont', 'numWeight', 'labelFont', 'labelCase', 'labelVariant', 'labelTracking', 'labelWeight',
+]);
 // `blur` is a bare px NUMBER in a bundle (so it can also be READ, not just written), but CSS's
 // `backdrop-filter` needs the function form.
 const cssValue = (key, v) => (key === 'blur' ? `blur(${v}px)` : UNITLESS.has(key) ? String(v) : `${v}px`);

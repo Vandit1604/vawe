@@ -84,8 +84,8 @@ export function notification({ x, y, w = 460, title, message = '', body, desc = 
   const html = `<div style="display:flex;align-items:flex-start;gap:${SPACE.sm}px;padding:${SPACE.md}px;`
     + `box-sizing:border-box;width:${w}px">` + dot
     + `<div style="display:flex;flex-direction:column;gap:${SPACE.snug}px;align-items:flex-start;flex:1;min-width:0">`
-    + `<span style="font:700 ${TYPE.lead}px var(--font-sans);color:${T.ink}">${title}</span>`
-    + (body ? `<span style="font:400 ${TYPE.body}px var(--font-sans);color:${T.sub}">${body}</span>` : '')
+    + `<span style="${labelCss({ size: TYPE.lead, color: T.ink, weightFallback: 700 })}">${title}</span>`
+    + (body ? `<span style="${labelCss({ size: TYPE.body, color: T.sub, weightFallback: 400 })}">${body}</span>` : '')
     + '</div></div>';
   // a notification ARRIVES FROM THE EDGE and leaves the way it came, the short, correct entrance for a
   // chip. Nothing inside it should perform; it is one small statement, so no `parts` here.
