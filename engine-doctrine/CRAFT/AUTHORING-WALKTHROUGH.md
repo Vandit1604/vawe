@@ -11,10 +11,10 @@ group: crosscutting
 - Follow the chain in order: spine -> manufacture the four things (taste anchor, real assets, story
   spine, real copy) -> LOCK SHEET (value-test every beat) -> transcribe JSON -> `make author-check` ->
   `beats`/`reveal` -> `make video` -> `make judge` (read the sheet) -> `ledger` -> harvest. Nothing
-  renders before the lock sheet is approved.
+  renders before the lock sheet is agreed with whoever asked for the film.
 - Enforced by `[ref]`: each step names the command that runs it; `make author-check` and `make judge`
   are the two steps that block/see, everything else is sequence discipline.
-- Checkable action: is the lock sheet approved before any JSON is rendered?
+- Checkable action: does the lock sheet exist and match the beats before any JSON is rendered?
 
 Every other doc is a *reference* you dip into. This is the one **narrative**: it walks a single video
 from a bare brief to a shipped file, calling each tool and doc in the order you actually use it. It
@@ -69,7 +69,7 @@ no site you make each deliberately (this is the planning skill's Step 0.5, appli
 Beat table in your reply first (not the JSON): per beat name the **archetype** (rotate them,
 [`MOTION-CRAFT.md`](../MOTION-CRAFT.md) rule 7), the **exact copy**, the **artifact that earns the
 frame** (§value test below), and the **motion**. Then freeze it as the planning skill's LOCK SHEET and
-get sign-off. **Nothing renders before the lock sheet is approved.**
+get sign-off. **Nothing renders before the lock sheet exists and is agreed.**
 
 Apply **the value test** on every beat ([`../TASTE.md`](../TASTE.md), the one law). If the answer is
 "a restatement of the headline," the beat isn't done, give it a real artifact (a live meter filling, a
@@ -176,7 +176,7 @@ This is the `make ledger` / `make ledger-add` phase of the same spine.
 
 ```bash
 make ledger     D=<file>          # fails if this repeats a shipped design (change ≥2 of cut/beat/layout)
-make ledger-add D=<file>          # after the user approves, logs it to the design memory
+make ledger-add D=<file>          # once the draft render looks right, logs it to the design memory
 ```
 
 ## Step 7: The framework harvest (every render, without being asked)

@@ -34,9 +34,9 @@ waiver use is the second case, an author declaring "I chose this", not "I broke 
 `no-continuous-object`, `dead-air`, `plain-slideshow`, `static-bg`, `no-transition`, `ends-on-nothing`
 are the codes this shows up on most.
 
-Hard refusals are the third tier and stay hard: determinism (a non-finite render target), the owner's
-own approval signature, and a construction bug (an empty beat, a plan that doesn't match the render).
-Nothing adapts those, because there is no film-context reading that makes them correct.
+Hard refusals are the third tier and stay hard: determinism (a non-finite render target) and a
+construction bug (an empty beat, a plan that doesn't match the render). Nothing adapts those, because
+there is no film-context reading that makes them correct.
 
 ## The guards
 
@@ -72,7 +72,6 @@ as any other finding: `{"authoring":{"allow":["edge-reveal"]}}`.
 ## Stays hard, always
 
 - `renderFrame` purity (a scene function may not have side effects across frames).
-- `stage-gate.mjs` refusing `approved:` written by anything but the user's own signature.
 - `beat-check.mjs` empty-beat (a declared beat with nothing in it).
 - storyboard timeline over/underrun (the plan's own spans don't add up).
 - `dive-in.js` non-finite `tx`/`ty` targets (a camera move that resolves to NaN has no safe value to clamp to).

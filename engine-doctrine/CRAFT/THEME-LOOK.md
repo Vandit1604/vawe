@@ -121,7 +121,7 @@ old `cues` check did.
 
 ## How a storyboard uses it
 
-Blueprints are retired (recipes/README.md). No scene JSON exists before approval: the storyboard is
+Blueprints are retired (recipes/README.md). No scene JSON exists before assemble: the storyboard is
 the plan, written from a type spine (`harness/author/type-spines.mjs`) and
 `engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`. `look` is not merged into any shell, because there are
 no layers yet to merge it onto; a theme's `backdrop`/`cuts`/`scale`/`layout` are still the fixed facts

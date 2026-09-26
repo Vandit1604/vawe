@@ -117,7 +117,7 @@ export function stageOf(arg) {
     ? blocksOf(sbSrc).map((b) => parseFragmentSpec(fieldIn(b, 'fragment')).path).filter(Boolean)
     : [];
   const missingFrags = [...new Set(fragments)].filter((f) => !fs.existsSync(path.join(ROOT, f)));
-  // No scene JSON exists before approval: the storyboard is the plan, and `make assemble` (AGENTS.md
+  // No scene JSON exists before assemble: the storyboard is the plan, and `make assemble` (AGENTS.md
   // stage 5) writes `layers` for the first time. A `_scaffold: true` filter used to live here for a
   // placeholder layer `make scaffold` wrote; that generator is gone and no film on disk carries the tag.
   const layers = scene && Array.isArray(scene.layers) ? scene.layers.length : 0;
@@ -127,10 +127,11 @@ export function stageOf(arg) {
   // never gate a stage (harness/lib/receipt.mjs's hash already refuses a stale read on its own: a
   // receipt whose subject moved reads `stale: true`, never a false PASS over an outdated plan).
   //
-  // AN EXISTING `approved:` LINE ALSO SATISFIES IT. The judge exists to inform the owner's signature,
-  // not to be imposed after it: `approved:` is a fact only a human writes (harness/live/stage-gate.mjs
-  // refuses it from an agent), so a plan a person already signed off has already cleared a higher bar
-  // than this gate asks for. Without this, every already-approved film in the library reads backwards
+  // AN EXISTING `approved:` LINE ALSO SATISFIES IT (backward compatibility only: no current stage
+  // writes this field, and stage-gate.mjs no longer refuses it either way). The judge exists to
+  // inform the owner's old signature, not to be imposed after it: a plan a person already signed off
+  // has already cleared a higher bar than this gate asks for. Without this, every already-approved
+  // film in the library reads backwards
   // (measured: 4 films at assemble/direct/render, none of them at plan judgement, regress to PLAN the
   // day this ships) the moment this gate exists, which is the exact failure `design before approval`
   // (474981ba) measured and refused to reintroduce: "every approved film stays approved." A film still
@@ -185,11 +186,11 @@ export function stageOf(arg) {
  */
 export function roster({ all = false, cap = 12 } = {}) {
   const scenePop = population('stage roster (scene)', { filter: LIBRARY, quiet: true });
-  // LIBRARY requires a parseable scene.json, so a film still at brief/plan/design/approval that has
+  // LIBRARY requires a parseable scene.json, so a film still at brief/plan/design that has
   // not been SCAFFOLDED yet has no scene.json and is invisible to scenePop alone, which is exactly the
-  // population `make stage` exists to shepherd: a film can sit at approval indefinitely and never
+  // population `make stage` exists to shepherd: a film can sit at plan/design indefinitely and never
   // appear in the one command that answers "what is in flight" (measured: latch-recreation, a
-  // storyboard and a prompt, no scene.json, reads APPROVAL by `stageOf` directly but was absent from
+  // storyboard and a prompt, no scene.json, reads its stage by `stageOf` directly but was absent from
   // `--all` entirely). A `.storyboard.md` sidecar is LIBRARY's own signal a person planned a film
   // (census.mjs's comment above LIBRARY), so the honest population is the UNION of both walks,
   // deduplicated by basename so a film that already has both is counted once. Both walks go through
