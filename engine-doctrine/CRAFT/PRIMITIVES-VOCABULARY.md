@@ -1044,5 +1044,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_718 primitives across 61 registries, 718 meeting the word-action contract today.
+_720 primitives across 62 registries, 720 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._

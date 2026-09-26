@@ -1181,4 +1181,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_722 effects across 60 families. Regenerate: `make effects`._
+_724 effects across 61 families. Regenerate: `make effects`._
