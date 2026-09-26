@@ -5,23 +5,6 @@ import { sceneDims } from '../../core/layout/safe.js';
 import { sourceTime } from '../../core/layers/video.js';
 import { expandScene } from '../../core/engine/expand.js';
 
-const argv = process.argv.slice(2);
-const file = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
-const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
-const asJson = argv.includes('--json');
-const tArg = flag('--t', null);
-const idArg = flag('--id', null);
-
-if (!file || tArg == null || !idArg) {
-  console.error('usage: probe-frame.mjs <scene.json> --t <seconds> --id <layerId>[,<id>...] [--json]');
-  process.exit(1);
-}
-const viewerT = Number(tArg);
-const ids = idArg.split(',').map((s) => s.trim()).filter(Boolean);
-if (!Number.isFinite(viewerT)) { console.error(`--t "${tArg}" is not a number`); process.exit(1); }
-
-const abs = path.resolve(file);
-
 function findLayer(id, layers) {
   for (const L of layers || []) {
     if (!L || typeof L !== 'object') continue;
@@ -190,12 +173,6 @@ export async function probeMany(filmPath, requests, { tempo: tempoOverride } = {
   return results;
 }
 
-async function main() {
-  const [r] = await probeMany(abs, [{ t: viewerT, ids }]);
-  if (r.error) { console.error(r.error); process.exit(1); }
-  return r;
-}
-
 function printText(r) {
   console.log(`viewer T=${r.viewerT}s  tempo=${r.tempo}  page T=${r.pageT.toFixed(3)}s (authored clock)  frame ${r.frame} @ ${r.fps}fps`);
   if (r.beatSync) console.log(r.beatSync);
@@ -220,6 +197,24 @@ function printText(r) {
   }
 }
 
-const r = await main();
-if (asJson) console.log(JSON.stringify(r, null, 2));
-else printText(r);
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const argv = process.argv.slice(2);
+  const file = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
+  const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
+  const asJson = argv.includes('--json');
+  const tArg = flag('--t', null);
+  const idArg = flag('--id', null);
+
+  if (!file || tArg == null || !idArg) {
+    console.error('usage: probe-frame.mjs <scene.json> --t <seconds> --id <layerId>[,<id>...] [--json]');
+    process.exit(1);
+  }
+  const viewerT = Number(tArg);
+  const ids = idArg.split(',').map((s) => s.trim()).filter(Boolean);
+  if (!Number.isFinite(viewerT)) { console.error(`--t "${tArg}" is not a number`); process.exit(1); }
+
+  const [r] = await probeMany(path.resolve(file), [{ t: viewerT, ids }]);
+  if (r.error) { console.error(r.error); process.exit(1); }
+  if (asJson) console.log(JSON.stringify(r, null, 2));
+  else printText(r);
+}
