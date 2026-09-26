@@ -1,0 +1,15 @@
+{
+ "readLoad": {
+  "words": 18304,
+  "tokens": 24344
+ },
+ "fastPath": {
+  "commands": 3,
+  "makefileTargets": 266
+ },
+ "render": {
+  "msMedian": 9077,
+  "msPerFrame": 39.81140350877193,
+  "frames": 228
+ }
+}
