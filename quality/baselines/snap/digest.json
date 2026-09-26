@@ -1,7 +1,7 @@
 {
  "scenes": {
   "app-showcase": {
-   "sig": "ee31637d2771c636",
+   "sig": "fac4ae228ff37c98",
    "font": "db51b5ddc8c7"
   },
   "argus-launch": {
@@ -129,7 +129,7 @@
    "font": "db51b5ddc8c7"
   },
   "linear-journey": {
-   "sig": "121019ff5bc27e21",
+   "sig": "9338d740b652d2aa",
    "font": "db51b5ddc8c7"
   },
   "linear-launch": {
@@ -253,7 +253,7 @@
    "font": "db51b5ddc8c7"
   },
   "saas-hero-launch": {
-   "sig": "7c81b6ccab383341",
+   "sig": "4cdb746c45a0d124",
    "font": "db51b5ddc8c7"
   },
   "sample": {
@@ -281,7 +281,7 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-count": {
-   "sig": "9d40c00b7b82305b",
+   "sig": "ac0bf8d508df2160",
    "font": "db51b5ddc8c7"
   },
   "showcase-cuts": {
@@ -313,7 +313,7 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-spot": {
-   "sig": "36b6ab033d51e661",
+   "sig": "aaa69a5871a70a08",
    "font": "db51b5ddc8c7"
   },
   "showcase-stings": {
@@ -329,7 +329,7 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-ui": {
-   "sig": "cd81ee90c7857794",
+   "sig": "67f0a6456de53786",
    "font": "db51b5ddc8c7"
   },
   "showcase-vawe-reel": {
@@ -349,7 +349,7 @@
    "font": "db51b5ddc8c7"
   },
   "stripe": {
-   "sig": "d291cb42a87a359e",
+   "sig": "a42e7f99b2eb218f",
    "font": "db51b5ddc8c7"
   },
   "thread": {
@@ -357,7 +357,7 @@
    "font": "db51b5ddc8c7"
   },
   "threadcite-3s": {
-   "sig": "821d2d7e928ddeea",
+   "sig": "c99ea7fe4315e21c",
    "font": "db51b5ddc8c7"
   },
   "threadcite-open": {
@@ -394,7 +394,7 @@
   },
   "vawe-flow-2": {
    "sig": "ea56c7e13abbd109",
-   "font": "5ac22a3620f3"
+   "font": "db51b5ddc8c7"
   },
   "vawe-glass-hero": {
    "sig": "36ab1c90fc92f475",
