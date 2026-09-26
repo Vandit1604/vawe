@@ -34,6 +34,49 @@ It writes, into a directory named after the film so judging a second one does no
 
 Then the agent **reads the sheet against the rubric** and returns a structured verdict.
 
+## The full loop: look, then motion, then verify, then two fresh judges
+
+One agent scoring its own film PASS is not the only failure this file guards against. A single vision
+judge repeats its own rating on the same clip only about two times in three (Video-Bench), so one
+judging pass, by one agent, is a coin with a thumb on it, not a verdict. Four pieces close that, run in
+this order:
+
+1. **Look review, before any motion work.** `make look D=<file> LOOKS=1` renders one styleframe per
+   beat AT ITS HOLD (light, colour, type, camera; no render needed, a live-page grab like the rest of
+   `make look`) and tiles them into `/tmp/preview_scene_looks.png`. Studios review the LOOK on
+   styleframes before a single frame of motion is built; this is that pass. It samples the same beat
+   model `make judge` does (`quality/gates/beats-of.mjs`), so a look approved here and a judge run
+   later never disagree about where a beat starts.
+2. **Motion review, separately**, once the look passes: `make direct D=<file>` (the motion director) and
+   `make judge D=<file> STRUCT=1` (below), whose MOTION axis is scored on its own.
+3. **`node harness/dev/verify.mjs D=<file> [REF=<ref.mp4>]`: hard numbers, no eye.** Paste the printed
+   block VERBATIM before any judging happens (the discipline HyperFrames enforces with `w2h-verify.mjs`:
+   an agent skips a required step unless the raw numeric output is put in front of it, not summarized).
+   It reports frame coverage (beats inspected vs the film's real length), exposure range per beat, the
+   light-map distance to a reference when `REF` is given (mean CIE76 ΔE, reusing `harness/media/match.mjs`'s
+   own colour-distance code), beat timing against the storyboard, asset use (referenced vs present on
+   disk), a count of text clipped at the frame edge (`quality/audit.mjs`'s own findings, not
+   re-detected), and a blank-seam count (`quality/gates/seams.mjs`'s own findings). It exits non-zero
+   ONLY on an objective failure: no render, or a referenced asset missing on disk. Everything else is a
+   measurement for the eye to weigh, never a verdict the script hands down itself.
+4. **Two independent structured judges.** `make judge D=<file> STRUCT=1` writes a rubric PER RUN
+   (`/tmp/judge/<name>/structured-A.md`, `structured-B.md`) whose required answer is JSON, one entry
+   per criterion, `{score, evidence, t}`, split into **LOOK** (light, colour, type, camera, composition)
+   and **MOTION** (timing, easing, transitions, continuity), scored as separate axes
+   (`harness/lib/judge-axes.mjs`). A criterion with no evidence is refused, not recorded:
+   `node quality/gates/judge.mjs <file> --verdict-json <run>.json --run A` checks every criterion for a
+   real `evidence` string and a `t` before it writes anything down. Run it again from a second, fresh
+   agent/session with `--run B`, then
+   `node quality/gates/judge.mjs --compare <A>.json <B>.json` flags any criterion where the two runs
+   disagree by more than 2 points, so a real disagreement gets a third opinion instead of averaging
+   itself away.
+
+**One page for all of it**: `node harness/author/review-server.mjs D=<file> [REF=<ref.mp4>] [PORT=8802]`,
+served like `make tune`. It shows a frame grid per beat with a time slider, the reference side by side
+when `REF` is given, the verify block, and whatever structured judge JSON already exists for this cut,
+so nobody has to open four tools to review one render. `--screenshot <out.png>` takes one headless shot
+and exits, for a non-interactive check.
+
 ## The 7 dimensions (score each frame 1-5, name the issue + the fix)
 1. **Readability**: legible at size, sufficient contrast.
 2. **Hierarchy**: one clear focal; the eye knows where to land.
