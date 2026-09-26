@@ -20,7 +20,8 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
    under-reached.
 
 2. **Kinetic typography, always.** Key lines reveal word-by-word or char-by-char (`split`+`preset`), never
-   a flat fade. Numbers COUNT up. `make direction-floor` FAILS `plain-slideshow` if you skip this.
+   a flat fade. Numbers COUNT up. Skip this and the film reads as a plain-slideshow (a retired gate used
+   to fail that name; the doctrine is now `engine-doctrine/CRAFT/DIRECTION.md`, "The ambition floor").
 
 3. **A LIVING background: move the viewer.** Flat static white is the tell. Add a moving backdrop that
    fits the brand (this is a taste call, not a default):
@@ -30,8 +31,8 @@ range. Directed lives between two walls: not a slideshow (the ambition floor), n
    - **Warm / expressive brand**: a richer field, `mesh`, `aurora`, `brandglow`, glassmorphism, floating
      shapes, brand-coloured. (Brew's warm peach glassmorphism is the reference for THIS register, not for
      an austere one: match the brand, don't copy Brew onto everything.)
-   Windows it (`bg:[{preset,from,to}]`), and always re-audit contrast. `make direction-floor` warns
-   `no-bg-motion` when the field is static.
+   Windows it (`bg:[{preset,from,to}]`), and always re-audit contrast. A static field reads as
+   `no-bg-motion` (doctrine only now; the gate that used to warn on it was retired).
 
 4. **Camera + transitions.** One slow camera push minimum; a `cinematicZoom` dive-IN on a product/dashboard
    shot (zoom into the real UI, don't show a static card); 1-3 earned seams between beats. Never flat cuts

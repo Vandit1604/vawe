@@ -56,7 +56,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { sceneTiming, num } from './scene-timing.mjs';
 import { parseStoryboard, timeline } from '../../harness/author/storyboard-parse.mjs';
-import { measureGroundFlips, JOIN_TOLERANCE } from './ground-arc.mjs';
+import { measureGroundFlips, JOIN_TOLERANCE } from '../../harness/lib/ground-flip.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { adaptFinding } from '../../harness/lib/safeguards.mjs';
 import { gradeable } from './tile.mjs';

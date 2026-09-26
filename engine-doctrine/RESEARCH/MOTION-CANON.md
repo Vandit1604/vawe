@@ -151,7 +151,7 @@ form.
 across the whole film and reports how much of the motion is the GROUND and how much is the FILM, and it
 runs inside `make ship`. `engine-doctrine/CRAFT/GRAMMAR.md` records a per-shot motion range for 16 reference films
 ("a shot in work that reads well measures 0.37 to 13.49"). Both are BOUNDS. Neither reads the SHAPE. The
-nearest existing finding, `front-loaded` (`quality/gates/direction-floor.mjs:393`), counts where reveals
+nearest existing finding, `front-loaded` (`direction-floor.mjs:393` (retired)), counts where reveals
 land, not how intensity moves.
 
 **The concrete change.** A doc rule, not a gate: `motion-split` already has the per-sample series in

@@ -34,9 +34,9 @@ Every moving thing on screen has a cause. Ask, for each one: who moved it?
   to a static frame from outside. It teaches nothing.
 
 The slideshow failure mode, by name: a static frame plus an entrance. Card fades up, holds, slides
-out. Card two fades up. It passes `make direction-floor` if you add enough easing, and it is still a
-slideshow, because nothing on screen caused anything else on screen. (That gate is opt-in,
-`TASTE=1 make author-check`, which makes this your job rather than a tool's.)
+out. Card two fades up. Add enough easing and no tool will catch it, because nothing on screen caused
+anything else on screen. (`direction-floor` used to grade this; it was a TASTE gate and was retired,
+engine-doctrine/SAFEGUARDS.md, which makes this your job rather than a tool's.)
 
 In the reference, count the diegetic moves: the hook types itself and untypes itself (1.14s, 60 cps)
 to clear the stage. The prompt field types. The camera pans left because the prompt text ran past
