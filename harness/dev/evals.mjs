@@ -212,7 +212,7 @@ ${rows.map(row).join('\n')}
 
   console.log(`\n  compare → ${outDir}`);
   console.log(`  ${htmlPath}`);
-  try { execFileSync('open', [htmlPath]); } catch { /* no GUI on this machine; the path above still works */ }
+  if (process.stdout.isTTY && !process.env.CI && !process.env.VAWE_NO_OPEN) try { execFileSync('open', [htmlPath]); } catch { /* no GUI on this machine; the path above still works */ }
   return htmlPath;
 }
 
