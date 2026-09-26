@@ -1,0 +1,70 @@
+{
+  "module": "scene",
+  "note": "GOLD EXAMPLE: a motion-graphic-sting type (skills/vawe-type-sting), one continuous transformation: a JSON literal types itself out, its punctuation flies off on real motionPath arcs, the brand word scales up and thickens into its display face, an accent stroke draws under it into the wave mark, a tagline rises in on a breathing accent light, then everything clears upward faster than it entered onto a clean solid-accent end frame. Demonstrates: typing (kinetic `type` preset), motionPath arcs with autoOrient, an axis weight ramp (kinetic `weight` preset), a trim draw-on (`svg` layer `draw`), an idle `drift` standing in for a hand-keyed wiggle, and a scene-level `rise` cut for the upward exit. `content` carries every brand word; edit it, not the layers, to reskin this for a new brand. `\"produced\": false` is load-bearing here: the engine's baseline auto-injects a cut into any 1.2s+ gap between layer starts (core/engine/produce.js), which fought this film's own hand-authored cut and bg switch; turn it back on only if a future edit wants the baseline's help again.",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 5.0,
+  "energy": "brand",
+  "produced": false,
+  "authoring": { "allow": ["no-storyboard", "no-preflight"], "_why": {
+    "no-storyboard": "a sting this short is one continuous move with no beats to plan against; the brief above is the whole plan",
+    "no-preflight": "same: this is the frozen gold example, not a film in progress"
+  } },
+  "audio": { "silent": true },
+  "content": {
+    "brand": "vawe",
+    "tagline": "motion from data"
+  },
+  "bg": [
+    { "t": 0, "preset": "plain" },
+    { "t": 4.5, "base": { "kind": "solid", "color": "#2563eb" }, "fx": [ { "type": "grain", "alpha": 0.03, "fps": 30 } ] }
+  ],
+  "transitions": [
+    { "at": 4.5, "fx": "rise", "dur": 0.5 }
+  ],
+  "sceneUnits": true,
+  "layers": [
+    { "id": "jsonPrefix", "type": "text", "text": "{\"text\":\"", "font": "mono", "size": 64, "weight": 500,
+      "color": "var(--text)", "align": "left", "x": 675, "y": 492, "w": 342, "h": 90,
+      "split": "char", "preset": "type", "stagger": 0.06, "each": 0.1,
+      "start": 0, "duration": 2.4, "anim": "none",
+      "motionPath": { "path": "M 0 0 Q -260 -300 -640 -760", "dur": 1.2, "delay": 1.2, "autoOrient": true, "ease": "power1.in" }
+    },
+    { "id": "jsonMiddle", "type": "text", "text": "{{brand}}", "font": "mono", "size": 64, "weight": 500,
+      "color": "var(--text)", "align": "left", "x": 1017, "y": 492, "w": 152, "h": 90,
+      "split": "char", "preset": "type", "stagger": 0.06, "each": 0.1,
+      "start": 0.58, "duration": 0.62, "anim": "none", "out": "none"
+    },
+    { "id": "jsonSuffix", "type": "text", "text": "\"}", "font": "mono", "size": 64, "weight": 500,
+      "color": "var(--text)", "align": "left", "x": 1169, "y": 492, "w": 76, "h": 90,
+      "split": "char", "preset": "type", "stagger": 0.06, "each": 0.1,
+      "start": 0.86, "duration": 1.54, "anim": "none",
+      "motionPath": { "path": "M 0 0 Q 260 -300 640 -760", "dur": 1.2, "delay": 0.34, "autoOrient": true, "ease": "power1.in" }
+    },
+    { "id": "wordLight", "type": "text", "text": "{{brand}}", "font": "sans", "size": 280, "weight": 400,
+      "color": "var(--text)", "align": "center", "x": 360, "y": 440, "w": 1200, "h": 200,
+      "split": "char", "preset": "scale", "presetOpts": { "from": 0.24 }, "stagger": 0.06, "each": 0.35,
+      "start": 1.28, "duration": 1.12, "anim": "none", "out": "none"
+    },
+    { "id": "wordHeavy", "type": "text", "text": "{{brand}}", "font": "sans", "size": 280, "weight": 800,
+      "color": "var(--text)", "align": "center", "x": 360, "y": 440, "w": 1200, "h": 200,
+      "split": "char", "preset": "weight", "presetOpts": { "from": 300, "to": 800 }, "stagger": 0.05, "each": 1.0,
+      "start": 2.4, "duration": 2.6, "anim": "none", "out": "none",
+      "idle": "drift"
+    },
+    { "id": "strokeWave", "type": "svg", "x": 810, "y": 690, "w": 300, "h": 157, "viewBox": "0 0 46 24",
+      "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "fill": "none", "stroke": "var(--accent)", "strokeWidth": 4,
+      "draw": { "dur": 1.0, "weight": 4, "ease": "easeOutCubic" },
+      "start": 2.4, "duration": 2.6, "anim": "none", "out": "none",
+      "idle": "drift"
+    },
+    { "id": "glowBack", "type": "glow", "x": 610, "y": 340, "w": 700, "h": 700,
+      "preset": "bloom", "intensity": 0.22, "idle": "breathe",
+      "start": 3.6, "duration": 1.4, "anim": "fade", "enterDur": 0.5
+    },
+    { "id": "tagline", "type": "text", "text": "{{tagline}}", "font": "sans", "size": 44, "weight": 500,
+      "color": "var(--text-2)", "align": "center", "x": 660, "y": 860, "w": 600,
+      "anim": "rise", "enterDur": 0.5, "start": 3.6, "duration": 1.1, "out": "fade", "exitDur": 0.3
+    }
+  ]
+}
