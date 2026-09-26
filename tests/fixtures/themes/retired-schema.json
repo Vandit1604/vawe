@@ -1,0 +1,25 @@
+{
+  "name": "fixture-retired-schema",
+  "note": "tests/theme/retired-migration.e2e.test.mjs fixture: the same colours as new-schema.json, but written the OLD way (top-level vars/bg/bgDefault) to prove the schema refuses it by name.",
+  "tokens": {
+    "color": {
+      "bg": { "$type": "color", "$value": "#0a0b10" },
+      "ink": { "$type": "color", "$value": "#f4f6fb" },
+      "accent": { "$type": "color", "$value": "#6d8bff" }
+    },
+    "font": {
+      "sans": { "$type": "fontFamily", "$value": "Inter" },
+      "mono": { "$type": "fontFamily", "$value": "JetBrains Mono" }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "ink": "{color.ink}",
+    "accent": "{color.accent}",
+    "font.sans": "{font.sans}",
+    "font.mono": "{font.mono}"
+  },
+  "vars": { "--paper": "#0a0b10" },
+  "bg": { "accent": "109,139,255", "paperBase": ["#ffffff", "#f4f4f1"], "border": "#e6e6e1" },
+  "bgDefault": { "preset": "plain" }
+}

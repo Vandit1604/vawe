@@ -9,60 +9,6 @@
     "durationScale": 0.95,
     "stagger": 0.05
   },
-  "bg": {
-    "accent": "242,110,33",
-    "tint": "138,133,125",
-    "tint2": "242,110,33",
-    "dotLight": "150,145,136",
-    "paperBase": [
-      "#ffffff",
-      "#f2f1ee"
-    ],
-    "softBase": [
-      "#fdeee3",
-      "#fbe2d1"
-    ],
-    "accentBase": [
-      "#f26e21",
-      "#d9591a"
-    ],
-    "inkBase": [
-      "#2a211a",
-      "#160f0a"
-    ],
-    "border": "#e4e2dc",
-    "dark": [
-      "#2a211a",
-      "#160f0a"
-    ],
-    "darkMesh": [
-      "#31261d",
-      "#160f0a"
-    ],
-    "deep": [
-      "#241c15",
-      "#120c08"
-    ],
-    "light": [
-      "#ffffff",
-      "#f2f1ee"
-    ],
-    "ink": [
-      "#2a211a",
-      "#160f0a"
-    ],
-    "paper": "#f2f1ee"
-  },
-  "vars": {
-    "--ink": "#1c1712",
-    "--paper": "#f2f1ee",
-    "--muted": "#8a857d",
-    "--em": "#f26e21",
-    "--on-light": "#1c1712",
-    "--on-dark": "#f7f6f3",
-    "--border": "#e4e2dc",
-    "--accent-soft": "rgba(242,110,33,0.16)"
-  },
   "tokens": {
     "color": {
       "bg": {
@@ -184,5 +130,51 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgPalette": {
+      "accent": "242,110,33",
+      "tint": "138,133,125",
+      "tint2": "242,110,33",
+      "dotLight": "150,145,136",
+      "paperBase": [
+        "#ffffff",
+        "#f2f1ee"
+      ],
+      "softBase": [
+        "#fdeee3",
+        "#fbe2d1"
+      ],
+      "accentBase": [
+        "#f26e21",
+        "#d9591a"
+      ],
+      "inkBase": [
+        "#2a211a",
+        "#160f0a"
+      ],
+      "border": "#e4e2dc",
+      "dark": [
+        "#2a211a",
+        "#160f0a"
+      ],
+      "darkMesh": [
+        "#31261d",
+        "#160f0a"
+      ],
+      "deep": [
+        "#241c15",
+        "#120c08"
+      ],
+      "light": [
+        "#ffffff",
+        "#f2f1ee"
+      ],
+      "ink": [
+        "#2a211a",
+        "#160f0a"
+      ],
+      "paper": "#f2f1ee"
+    }
   }
 }
