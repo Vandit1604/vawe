@@ -1,0 +1,12 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 2.0,
+ "produced": false,
+ "layers": [],
+ "captions": [
+  { "t0": 0, "t1": 1, "text": "this caption alone reads far too fast for anyone to follow" }
+ ]
+}
