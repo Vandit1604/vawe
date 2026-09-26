@@ -1,14 +1,4 @@
 #!/usr/bin/env node
-// harness/media/content.mjs: how rich a frame's CONTENT is, measured one way for a reference and for our
-// own render, so the two can be compared act by act. Motion, joints and grounds are measured elsewhere
-// (harness/media/study.mjs); this owns the other half: is there something worth looking at in the frame.
-//
-// Four numbers, each chosen because a still frame can carry it:
-//   colorfulness  Hasler and Süsstrunk 2003, the "M" metric on sRGB. 0 is grey; their bands name the rest.
-//   fill          share of pixels the ground flood, started from the 4% border ring, never reaches.
-//   detail        mean luma gradient: flat panels score low, type and imagery score high.
-//   photo         share of 16px cells with natural texture: many distinct colours and real luma spread.
-// Not measured: type size in frame, which needs text detection. The look pass records it by eye.
 import { spawnSync } from 'node:child_process';
 
 export const W = 480, H = 270;
@@ -16,24 +6,11 @@ export const W = 480, H = 270;
 const BANDS = [[15, 'not'], [33, 'slightly'], [45, 'moderately'], [59, 'averagely'], [82, 'quite'], [109, 'highly']];
 export const bandOf = (m) => (BANDS.find(([lim]) => m < lim) || [0, 'extremely'])[1];
 
-// FILL, by flood, not by distance-from-one-colour. The old measure compared every pixel to the single
-// median colour of the border ring: a subject within 36 (summed over three channels) of that one number
-// read as ground no matter how sharp its own edge was. Measured failure: a #fafafa card on a #eef2fa
-// ground differs by 20, under that bar, and vanished from fill entirely. A real subject is set apart from
-// its ground by an EDGE as much as by colour, so this floods the ground inward from the border ring and
-// refuses to cross a WALL: a pixel where the picture changes sharply over a short span. Comparing only
-// ADJACENT pixels missed real edges anti-aliasing had softened over 2-4px (a downscaled 480x270 frame
-// blurs most boundaries that much), so the wall test looks a few pixels either side instead of one: a
-// window wide enough to catch a softened edge whole, narrow enough that a slow wash spread over hundreds
-// of pixels never trips it. Whatever the flood never reaches, wall pixels included, is subject.
 const EDGE_SPAN = 3;     // pixels either side of the test point; wide enough for a softened edge, no wider
 const EDGE_TOL = 15;     // window jump this high is a wall; below the #fafafa/#eef2fa case's 20-plus
 function wallMap(px, w, h) {
   const wall = new Uint8Array(w * h);
   const clamp = (v, hi) => v < 0 ? 0 : v >= hi ? hi - 1 : v;
-  // A single sampled pixel is noisy (compression/grain), and two noisy samples 6px apart can spike past
-  // EDGE_TOL on nothing but grain, fragmenting a genuinely flat ground into scattered false subject. A
-  // 3x3 box average at each sample point costs little here and cuts that noise down before it is compared.
   const box = (cx, cy) => {
     let r = 0, g = 0, b = 0, c = 0;
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
@@ -51,17 +28,7 @@ function wallMap(px, w, h) {
   return wall;
 }
 const NEIGHBORS = [[1, 0], [-1, 0], [0, 1], [0, -1]];
-// THE BORDER RING IS NOT ALWAYS GROUND. Seeding every border pixel unconditionally assumed the ring is
-// always the backdrop, and madera's own hero crop breaks that: its editor window runs off every edge of
-// the frame, so the ring is PART OF THE SUBJECT there, and seeding it as ground flooded the whole window
-// away (measured: fill 0.02 at 2.3s, when the window covers most of the frame). A border run that is a
-// different surface, a window, a card, a photo crossing the edge, is subject, not ground, so only the
-// ring's DOMINANT colour cluster (the most common quantised bucket among ring pixels, a tight tolerance
-// around its true mean) gets to seed the flood. A ring pixel that does not match it is left unseeded: it
-// floods in only if some genuine ground seed reaches it without crossing a wall, exactly like any other
-// pixel.
 const GROUND_TOL = 16;   // tight, and BELOW the #fafafa/#eef2fa case's diff of 20: that case is exactly
-// the subject this exists to catch, so a border run of it must not pass as ground moving fill.
 function dominantGroundColor(px, w, h, ring) {
   const buckets = new Map();
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
@@ -77,9 +44,6 @@ function dominantGroundColor(px, w, h, ring) {
   for (const e of buckets.values()) if (!best || e.count > best.count) best = e;
   return best ? [best.r / best.count, best.g / best.count, best.b / best.count] : [128, 128, 128];
 }
-// ponytail: a windowed colour-jump heuristic, not a real edge detector; a genuinely noisy ground can still
-// throw an occasional false wall and fragment into stray subject pixels. Upgrade path: a real gradient
-// operator (Sobel) if that shows up on real footage.
 function floodFill(px, w, h, ring) {
   const n = w * h;
   const wall = wallMap(px, w, h);
@@ -143,7 +107,6 @@ export function measureFrame(px, w = W, h = H) {
       s += lum[k]; s2 += lum[k] * lum[k];
     }
     const sd = Math.sqrt(Math.max(0, s2 / (C * C) - (s / (C * C)) ** 2));
-    // ponytail: a texture heuristic, not a classifier; a busy gradient can pass, a flat UI panel cannot
     if (seen.size > 24 && sd > 12) photo++;
   }
   const r1 = (v) => Math.round(v * 10) / 10, r2 = (v) => Math.round(v * 100) / 100;
@@ -181,9 +144,6 @@ function selftest() {
   const frame = (fn) => { const b = Buffer.alloc(W * H * 3); for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) b.set(fn(x, y), (y * W + x) * 3); return b; };
   const grey = measureFrame(frame(() => [128, 128, 128]));
   if (grey.colorfulness !== 0 || grey.fill !== 0 || grey.photo !== 0) throw new Error(`flat grey should score 0, got ${JSON.stringify(grey)}`);
-  // An inset block, not a full edge-to-edge half split: a split that touches the border on every side is
-  // itself two grounds, not a subject sitting inside one, and a border-seeded flood correctly floods a
-  // uniform region that is seeded from its own border pixels. A real subject sits inside the ring.
   const card = measureFrame(frame((x, y) => (x > 60 && x < 420 && y > 30 && y < 240 ? [220, 40, 60] : [236, 238, 240])));
   if (card.fill < 0.45 || card.colorfulness < 45) throw new Error(`an inset red block should fill about half and be colourful, got ${JSON.stringify(card)}`);
   let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -191,33 +151,22 @@ function selftest() {
   if (noise.photo < 0.9) throw new Error(`textured noise should read as photo cells, got ${JSON.stringify(noise)}`);
   const mock = measureFrame(frame((x, y) => (x > 60 && x < 420 && y > 40 && y < 230 ? [250, 250, 252] : [238, 242, 250])));
   if (mock.photo !== 0 || mock.colorfulness > 15) throw new Error(`a pale flat mock should be photo-free and not colourful, got ${JSON.stringify(mock)}`);
-  // The reported bug: a white card only 20 (summed over three channels) from its ground vanished under
-  // the old global 36 threshold. Flooded by edge instead of by distance, it must fill near its true area.
   const whiteRect = { x0: 60, x1: 420, y0: 30, y1: 240 };
   const trueArea = ((whiteRect.x1 - whiteRect.x0) * (whiteRect.y1 - whiteRect.y0)) / (W * H);
   const whiteCard = measureFrame(frame((x, y) => (x > whiteRect.x0 && x < whiteRect.x1 && y > whiteRect.y0 && y < whiteRect.y1 ? [250, 250, 250] : [238, 242, 250])));
   if (Math.abs(whiteCard.fill - trueArea) > 0.03)
     throw new Error(`a white card on a pale blue ground should fill near its true area ${trueArea.toFixed(2)}, got ${JSON.stringify(whiteCard)}`);
 
-  // THE DEFECT: seeding every border pixel unconditionally assumed the ring is always ground. A card
-  // running off the frame edge puts SUBJECT on part of the ring, and the old code seeded it as ground
-  // anyway, flooding the whole card away. Only the ring's dominant colour may seed now, so most of the
-  // ring (three full sides, the fourth only partly covered) still seeds correctly and floods around it.
   const edgeRect = { x0: 280, x1: W, y0: 60, y1: 210 };
   const edgeArea = ((edgeRect.x1 - edgeRect.x0) * (edgeRect.y1 - edgeRect.y0)) / (W * H);
   const edgeCard = measureFrame(frame((x, y) => (x >= edgeRect.x0 && y > edgeRect.y0 && y < edgeRect.y1 ? [250, 250, 250] : [238, 242, 250])));
   if (Math.abs(edgeCard.fill - edgeArea) > 0.05)
     throw new Error(`a card running off the right edge should still fill near its true area ${edgeArea.toFixed(2)}, got ${JSON.stringify(edgeCard)}`);
 
-  // A full-bleed photo: no ring pixel repeats, so no colour dominates it, so almost nothing seeds the
-  // flood and almost the whole frame reads as subject, near 1.0.
   let fbSeed = 11; const fbRnd = () => (fbSeed = (fbSeed * 16807) % 2147483647) / 2147483647;
   const fullBleed = measureFrame(frame(() => [fbRnd() * 255, fbRnd() * 255, fbRnd() * 255]));
   if (fullBleed.fill < 0.9) throw new Error(`a full-bleed photo should fill near 1.0, got ${JSON.stringify(fullBleed)}`);
 
-  // A plain ground, even a gentle wash rather than one flat colour, has no subject and must still fill
-  // near 0: the dominant-cluster seed only needs to catch PART of the ring, and a gradient carries no
-  // wall for the flood to cross.
   const wash = measureFrame(frame((x) => { const t = x / W; return [230 - 30 * t, 235 - 30 * t, 245 - 30 * t]; }));
   if (wash.fill > 0.05) throw new Error(`a gentle wash with no subject should fill near 0, got ${JSON.stringify(wash)}`);
 

@@ -1,26 +1,9 @@
-// harness/lib/rule-length.mjs: ONE owner for "how long is this rule", read by both
-// harness/live/craft-live.mjs (the keystroke nudge) and quality/gates/rule-length.mjs (the ratchet).
-// Two callers, one measurement, so the number a hook shows at save time can never drift from the
-// number the gate counts at commit time.
-//
-// THE LIMIT IS A FORMATTING CONVENTION, NOT A QUALITY THRESHOLD. It does not decide whether a rule is
-// TRUE, only whether it is likely to survive a truncating filter unread past its first screen
-// (engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md, pattern 6). It is exempt from the sourceless-constant
-// worklist `node quality/gates/threshold-provenance.mjs --list` walks: nothing here decides a film's
-// pass or fail, so nothing here needs a perception or craft citation the way a film gate's threshold
-// does.
-//
-// 500 characters is roughly three 30-word sentences at typical English word length (~5.5 chars +
-// space), which is pattern 2's own "one to three sentences, then stop". Not a measured perception
-// floor; a round number chosen to match the prose rule it enforces.
+// 500 characters is roughly three 30-word sentences at typical English word length, matching pattern 2's own "one to three sentences, then stop"; not a measured perception floor, a round number chosen to match the prose rule it enforces.
 export const RULE_LENGTH_LIMIT = 500;
 
-// The doc this repo points an author at when a rule runs long.
 export const RULE_LENGTH_DOC = 'engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md';
 
-// Agent-facing prose surfaces: the doctrine an agent reads to decide what to do, not reference tables,
-// generated indexes, or per-film artifacts. `engine-doctrine/CRAFT/*.md` (not its subfolders) covers
-// the craft doctrine; `AGENTS.md` and `skills/*/SKILL.md` are named directly.
+// Agent-facing prose surfaces only, not reference tables, generated indexes, or per-film artifacts: engine-doctrine/CRAFT/*.md (not its subfolders), plus AGENTS.md and skills/*/SKILL.md named directly.
 export function isAgentDoc(rel) {
   if (rel === 'AGENTS.md') return true;
   if (/^skills\/[^/]+\/SKILL\.md$/.test(rel)) return true;

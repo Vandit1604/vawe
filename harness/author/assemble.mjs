@@ -1,21 +1,3 @@
-// assemble.mjs: `make assemble D=<film>`: ASSEMBLE. Writes the scene JSON from the storyboard's
-// per-beat contract + the fragment files a scene fan-out (or one agent) already wrote:
-//   - one `html` layer per scene (or per RUN of consecutive scenes sharing a `fragment:` file, see
-//     below), `src`-loaded, timed at the contract's start/end, boxed full-bleed unless `fragment:`
-//     names a placement
-//   - the continuous object: ONE layer with a hand-keyed `motion` track built from every beat's
-//     object_in/object_out, resolved to px through the ENGINE's own resolveCoords
-//     (harness/lib/placement-resolve.mjs), never a second copy of that math. Drawn as a rect UNLESS
-//     the storyboard's `object:` line names a source ("the input bar -> path/to/bar.html"), in which
-//     case it is that source's own layer type instead of the placeholder
-//   - one `bg` window per beat, cycling the theme's own look.backdrop rotation
-//   - explicit `transitions[]` at each beat boundary (look.cuts.default): produce.js's own cuts/
-//     sceneUnits auto-injection (core/engine/produce.js) SKIPS any scene that already carries a
-//     multi-key `motion` track ("choreographed"), which this film always does once it has a continuous
-//     object, so this is the one place that injection has to be done by hand instead of left to the
-//     engine.
-// Kept THIN on purpose: no camera, no captions, no audio beyond `auto:true`. Everything else the
-// engine already supplies once cuts + sceneUnits are on the page.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,48 +11,13 @@ import { expandThemeFile } from '../lib/theme-load.mjs';
 import { sceneDims } from '../../core/layout/safe.js';
 import { boundaryMechanism } from '../../core/transitions/lower.js';
 
-// OWNERSHIP. Assemble owns what it GENERATES and nothing else: the html layer per beat, each stamped
-// `id: scene<N>`, and the one continuous object it builds from the contract, stamped `id: object`. So
-// the set it owns is nameable rather than guessed at from shape. Everything else in `layers[]` (a
-// hand-keyed height ramp, a count that climbs, anything the per-beat contract has no vocabulary for)
-// passes through untouched, appended after the generated layers in its original order, so a
-// re-assemble is idempotent. A few film-level fields survive the same way through the allowlist below,
-// which is an allowlist and not a blanket spread on purpose: `duration`, `bg`, `transitions` and
-// `sceneUnits` are assemble's own and resurrecting a stale copy of them would be the worse bug.
-//
-// A PRESERVED LAYER CAN GO STALE, and staging makes that likelier: every caused junction shifts, so a
-// layer that was correct before a re-assemble can now point at nothing. Carrying it silently would be
-// worse than dropping it was, so each one is reported by name and any whose window falls outside the
-// new film is warned about.
-// `camera` sits here because the DIRECT stage writes it and the ASSEMBLE stage used to destroy it.
-// harness/author/motion-director.mjs emits a resolved `camera` track (stage 6 of the eight), and
-// re-running assemble (stage 5) dropped it without a word, so going back one step to fix a fragment
-// silently threw away every camera move that had been directed. This file builds no `camera` keyframe
-// array of its own, so it has no claim on the field and no business deleting it.
-//
-// `cameraMove` is DIFFERENT since a beat can now declare `camera:` (harness/lib/contract.mjs
-// parseCameraLine/resolvedCamera): this pass DOES generate `cameraMove` entries, one per beat that
-// resolves one, windowed to that beat. So `cameraMove` is preserved-as-is only when NO beat declares a
-// `camera:` line (byte-identical for every film that never writes one); the moment one does, this pass
-// owns the field the same way it owns htmlLayers/objectLayer, regenerating it whole each run rather
-// than merging, so a re-assemble stays idempotent instead of appending a duplicate leg every time.
 const PRESERVED_FILM_FIELDS = ['camera'];
 
-// ── USE: the general door onto the arsenal's 790-entry corpus (harness/lib/contract.mjs resolveUse),
-// written by ONE table keyed by slot SCOPE, never by family. Split into small functions, one job each,
-// rather than one long dispatch, so no single function outgrows this repo's own complexity ceiling
-// (`make check GATE=code-quality`) the way a hand-rolled per-kind switch would.
 
-// STRUCTURAL: these two kinds resolve to fields assemble.mjs reads and freezes before any beat is
-// processed (`aspect`/`destination` decide every fragment's box, far above this point in the file), so
-// a beat's use: line naming one is too late to matter, not merely unwritten.
 const USE_TOO_LATE = {
   'output target': 'aspect: set the film\'s top-level "aspect" (or --aspect on the CLI) before assemble runs, not per beat.',
   destination: 'destination: set the film\'s top-level "destination" before assemble runs, not per beat.',
 };
-// Settable once for the whole film (task scope b), refused if a second beat disagrees. `camera dial`
-// (cameraBlur, a boolean toggle, not a name) is handled by kind instead, since its one entry has no
-// value to compare beats on.
 const USE_SCENE_LEVEL_SLOT = new Set(['energy', 'captionStyle']);
 
 /** ownLayerIdOf(runs) -> (beatIndex) -> the layer id THIS beat's own run built ("scene<run-start+1>"),
@@ -257,46 +204,20 @@ const destination = scene.destination;
 const base = path.basename(film, '.json');
 const dir = path.dirname(film);
 
-// ---- STAGING: a documented cause becomes a mechanical stagger, inserted, not carved out -----------
-// `trigger:` on beat i already answers WHAT MADE it happen (storyboard-check.mjs's causal chain); this
-// is the one place that answer gets built instead of reported and discarded. `stagedSchedule`
-// (harness/lib/contract.mjs) is the ONE shifted timeline every block below builds from (bg, transitions,
-// the object's keys, the total duration) and the ONE `storyboard-check.mjs` re-derives to grade this
-// film against: two independent copies of "when does beat i really start" is exactly the drift
-// CLAUDE.md calls a fork. A caused junction gets STAGE_S of REAL time INSERTED before it (every beat
-// keeps its full planned duration; nothing is shrunk to make room). An uncaused junction is left as a
-// plain absolute number: staging an undocumented cause would be inventing one, not reading one off the
-// storyboard. A film with no `trigger:` at all reproduces the exact numbers it always did.
 const { caused, shiftedStart, shiftedEnd } = stagedSchedule(beats);
 const staged = caused.filter(Boolean).length;
 
-// ---- one html layer per beat, or per RUN of consecutive beats sharing a `fragment:` file -----------
 const [canvasW, canvasH] = sceneDims({ aspect });
 const FULL_BLEED = { x: 0, y: 0, w: canvasW, h: canvasH };
 const fragSpecs = beats.map((b) => parseFragmentSpec(b.fragment));
-// The DEFAULT convention, unchanged: `<base>.scene<N>.html`. `fragment:` overrides it per beat; two
-// consecutive beats naming the SAME override are a RUN (below), never two beats that merely happen to
-// share the default (which never collide, one file per index).
-// WHERE A NAMED FRAGMENT LIVES. Both spellings are real and they resolve against different roots:
-// every storyboard in this repo that names one writes it ROOT-relative
-// (`films/scene/_film.beat.html`), while a bare filename means the film's own directory, which is
-// the only reading that works for a film assembled outside films/scene at all. A separator is the
-// deterministic tell between them, so neither has to be guessed. Unnamed keeps the `make scenes`
-// convention. A trailing parenthetical note after the path is stripped.
 const fragPathOf = (i) => {
   const named = (fragSpecs[i].path || '').split(/\s+\(/)[0].trim();
   if (!named) return path.join(dir, `${base}.scene${i + 1}.html`);
   return named.includes('/') ? path.resolve(ROOT, named) : path.join(dir, named);
 };
-// `fragment: @ <placement>@<w>x<h>` boxes the layer instead of full-bleed. `parseEdge`'s own error
-// case is already refused above (fragmentErrors), so a present edge here is always clean.
 const boxOf = (i) => (fragSpecs[i].edge ? resolvePx(fragSpecs[i].edge, { aspect, destination }) : FULL_BLEED);
 
-// RUNS: a shared `fragment:` file across consecutive beats is ONE component, alive across the cut, not
-// torn down and rebuilt as two layers (that destroy/recreate is the measured cause of a film reading as
 // a slideshow, engine-doctrine/MISTAKES.md #603 for the truncation failure mode of the fix below). A run needs
-// BOTH beats to name the SAME explicit override: the default path is unique per index and can never
-// collide on its own.
 const runs = [];
 for (let i = 0; i < beats.length; ) {
   let j = i;
@@ -312,20 +233,11 @@ const htmlLayers = runs.map(([i, j]) => {
   const merged = j > i;
   const fragPath = fragPathOf(i);
   const fragExists = fs.existsSync(fragPath);
-  // A beat whose only declared content is a recipe seam (no on-screen copy, no `fragment:` override)
-  // has nothing new to draw: the recipe moves layers that already exist elsewhere in the scene, and
-  // the beat is real time on the clock, not a scene of its own. Forcing an author to write an empty
-  // placeholder fragment just to satisfy this loop would be the requirement inventing content nobody
-  // asked for, so it is exempted from `missing` rather than blocked.
   const recipeOnly = !merged && beats[i].recipe && !(beats[i].onscreen && beats[i].onscreen.length) && !fragSpecs[i].path && !fragExists;
   if (!fragExists && !recipeOnly) missing.push(path.relative(ROOT, fragPath));
   if (recipeOnly) return null;
   const box = boxOf(i);
 
-  // A PLACEMENT CHANGE INSIDE A SHARED RUN becomes a `motion` key on this ONE layer, never a second
-  // layer: the whole point of the run is that the DOM never gets torn down. Keyed the same way the
-  // continuous object is (harness/lib/placement-resolve.mjs resolvePx, x/y as OFFSETS from the layer's
-  // own base box, w/h absolute only when the box's size actually changes).
   let motionKeys;
   if (merged) {
     const usesSize = Array.from({ length: j - i }, (_, k) => boxOf(i + 1 + k)).some((bx) => bx.w !== box.w || bx.h !== box.h);
@@ -340,14 +252,6 @@ const htmlLayers = runs.map(([i, j]) => {
     if (keys.length > 1) motionKeys = keys;
   }
 
-  // THE MOVE: a beat's `move:` can name up to three scopes, read from the entry (harness/lib/contract.mjs):
-  // LAYER builds a sustained track on THIS layer, spanning that beat's own duration, keyed on the RUN's
-  // own clock (offset from the run's start, never the film's absolute time) so a merged run's later beat
-  // still lands its move at the right wall-clock second. HOLD sets this layer's `idle`. PART entries join
-  // the SAME `parts[]` list `motion:` builds below, since a part-scope `move:` entry is the identical
-  // grammar `motion:` already accepts. At most one LAYER and one HOLD per run: each would want to own a
-  // single field (`motion`, `idle`), and there is no rule for which wins, so both are refused rather than
-  // one silently picked. Any number of PART entries is fine, the same as `motion:`.
   const moveDecls = [];
   const pathDecls = [];
   const holdDecls = [];
@@ -399,8 +303,6 @@ const htmlLayers = runs.map(([i, j]) => {
     }
   }
 
-  // HOLD: idle rides outside the transform/parts tracks (core/tracks/idle.js), so it never competes
-  // with a placement track or a layer-scope move the way two of those would compete with each other.
   let idle;
   if (holdDecls.length > 1) {
     moveConflicts.push(`scene${i + 1}: beats ${holdDecls.map((d) => d.k + 1).join(' and ')} each declare move: hold:, but only one hold per shared-fragment run is supported. Pick one.`);
@@ -409,49 +311,8 @@ const htmlLayers = runs.map(([i, j]) => {
     movesBuilt.push(`scene${i + 1} (beat ${holdDecls[0].k + 1}, hold:${idle})`);
   }
 
-  // track:1, NEVER 0: direction-floor.mjs (and other gates) treat any track-0 layer as the backdrop
-  // lane, invisible to the content-coverage checks (feature-poverty, empty-beat, ends-on-nothing all
-  // read as "no content" against a track-0 fragment even though it fills the frame).
-  // w/h/x/y default to the full canvas: an `html` layer with no declared box stays its wrapper's
-  // default (near-zero), so a fragment written full-bleed (`position:absolute;inset:0`, the shape
-  // scenes.mjs's briefs and preview-fragment.mjs both assume) would collapse to nothing at real render
-  // time even though it previewed correctly (core/layers/html.js build(): w/h are the only thing that
-  // sizes it). `fragment: @ <placement>` (boxOf above) is the one way to ask for less than that.
-  //
-  // THE MOTION PLAN, consumed here and nowhere else: a beat's `motion:` entries become `parts[]` on
-  // its own scene layer, the SAME `select`/`anim` vocabulary a hand-authored parts block already takes
-  // (core/motion/parts.js), so this is not a second motion mechanism, it is the storyboard filling in
-  // the one the engine already has. `each`/`exitDur` come from the named speed band
-  // (harness/lib/contract.mjs SPEED_BAND), never a raw second written here.
-  //
-  // SPREAD WITHIN A BEAT, OFFSET ACROSS A RUN. Two separate timing problems, and both are solved with
-  // the `delay` that `parts[]` already has (films/scene/scene.js reads it as `layer.start + delay`,
-  // defaulting to 0.1), so this is not a second motion mechanism.
-  //
-  // SPREAD: measured against a real launch film, an assembled beat goes still after its first second,
-  // because every `motion:` line fires at once inside that 0.1 default. The last entry now starts near
-  // the beat's own end, proportional to the beat's duration. `each`/`exitDur` are untouched, so no
-  // motion is invented, only re-timed. A single entry has nothing to spread against and keeps no
-  // `delay` key at all, matching every pre-existing assembled film byte for byte.
-  //
-  // OFFSET: a run's later beats must still fire at their OWN wall-clock second, not the run's start,
-  // so their entries carry the run offset on top of their own spread.
-  //
-  // `rest:` (free-text, unbuilt: see the HOLD note above `moveDecls`) was considered for the spread and
-  // rejected: it names ambient HOLD motion, which is what `move: hold:<idle>` now builds, a separate
-  // field entirely (`idle`, not a part delay). This pass only ever moves a delay the storyboard's own
-  // `motion:` already implied.
-  //
-  // WHAT THIS CANNOT DO: a part's `out` exit is anchored to the LAYER's end
-  // (`layer.start + (layer.duration - exitDur)`, same file), which for a merged run is the run's last
-  // beat, not each beat's own. So only the last beat in a run keeps its exit; an earlier beat's part
-  // stays on screen rather than exiting at the wrong second. Expressing a per-part exit would take an
-  // engine change, and this file does not make one.
   const parts = [];
   for (let k = i; k <= j; k++) {
-    // `motion:` and a part-scope `move:` entry are the same grammar, so they feed the same list: an
-    // author can name a part's entrance on either field, and a beat can use both without either field
-    // knowing the other exists.
     const motion = [...parseMotion(beats[k].motion), ...(movePartsByBeat.get(k) || [])];
     if (!motion.length) continue;
     const beatDuration = +(beats[k].end - beats[k].start).toFixed(3);
@@ -459,13 +320,8 @@ const htmlLayers = runs.map(([i, j]) => {
     motion.forEach((m, mi) => {
       const each = SPEED_BAND[m.inBand];
       const exitDur = SPEED_BAND[m.outBand];
-      // The latest a part can start and still finish its entrance before its own exit begins. A beat
-      // too short for that budget collapses every delay to 0: the pre-existing behaviour, never a
-      // negative number.
       const maxDelay = Math.max(0, beatDuration - each - exitDur);
       const spread = motion.length > 1 ? (mi / (motion.length - 1)) * maxDelay : null;
-      // Merged: always an explicit delay, and an un-spread first entry keeps the engine's own 0.1
-      // lead so it lands exactly where a lone beat's layer would have put it.
       const delay = merged ? +(runOffset + (spread ?? 0.1)).toFixed(3) : (spread == null ? null : +spread.toFixed(3));
       parts.push({
         select: m.selector, anim: m.kind, each,
@@ -476,20 +332,6 @@ const htmlLayers = runs.map(([i, j]) => {
     });
   }
 
-  // STAGING: `start` is the SHIFTED, fully-resolved second (shiftedStart[i]), not the raw `b.start` a
-  // flat build would have used, and not the relative-start STRING form ("scene1.end+0.05")
-  // layers[].start also legally accepts. Measured trying it: `make beats`'s own coverage check and
-  // `motion-director.mjs` (engine-doctrine/CRAFT/SUBAGENT-BUDGET.md-adjacent tooling this file does not own) both
-  // read `layers[].start` as a number in several places and mishandle a string one, one of them a
-  // crash. `make assemble` owns exactly one film's numbers, resolving the reference itself and writing
-  // the number is the same "one source of truth" the relative form buys a hand-author, without a
-  // representation the rest of the toolchain cannot yet read. `id` stays on every layer regardless:
-  // it is what a human (or a future resolver) uses to name "this scene's cause" when reading the film.
-  // A run's `duration` runs shiftedEnd[j]-shiftedStart[i] (spans every beat it merged); a lone beat
-  // keeps the ORIGINAL `b.end - b.start` formula rather than the algebraically-equal shifted-minus-
-  // shifted form, because each side of that subtraction is independently rounded to 3dp and the two
-  // paths can differ by a thousandth of a second on an unstaged, non-round beat, which would break
-  // the byte-identical contract for every existing film that names no new syntax.
   const duration = merged ? +(shiftedEnd[j] - shiftedStart[i]).toFixed(3) : +(beats[i].end - beats[i].start).toFixed(3);
   return {
     id: `scene${i + 1}`, type: 'html', src: path.relative(ROOT, fragPath), start: shiftedStart[i], duration, track: 1,
@@ -512,14 +354,6 @@ if (missing.length) {
   process.exit(1);
 }
 
-// ---- WHAT THE OBJECT IS DRAWN AS. `object: <name> -> <src>` (storyboard-parse.mjs) names the real
-// layer to build instead of assemble's own placeholder rect. `.html`/`.htm` becomes an `html` layer,
-// `src`-loaded like every scene fragment; anything else (a raster, or an `.svg`) becomes an `image`
-// layer: the `svg` LAYER TYPE has no `src` field at all (films/scene/schema.json: it takes `d` and
-// `viewBox`, a shape baked into the JSON, never a file), so a vector file loads the same way a raster
-// does, through an `<img>` tag, which renders an .svg source correctly. Getting a REAL `svg`-type layer
-// (draw-on, morph) out of a vector file would mean extracting its path data at assemble time, a second
-// feature this task did not ask for and this file does not attempt.
 let objectSrcRel = null, objectType = 'rect';
 if (sb.objectSrc) {
   const objectSrcAbs = path.isAbsolute(sb.objectSrc) ? sb.objectSrc : path.join(ROOT, sb.objectSrc);
@@ -532,27 +366,16 @@ if (sb.objectSrc) {
   objectType = (ext === '.html' || ext === '.htm') ? 'html' : 'image';
 }
 
-// ---- the continuous object: one layer, a keyed motion track derived from the contract's edges -----
 const chain = edges(beats);
 let objectLayer = null;
 let usesSize = false, usesRot = false, usesOpacity = false, usesRadius = false;
 if (chain.length) {
   const first = chain[0];
   const base0 = resolvePx(first.in, { aspect, destination });
-  // THE POSE, not only the position. w/h/rot/opacity are only written into a key when the chain
-  // actually USES them (differs from the object's base pose somewhere), so a film with no pose beyond
-  // x/y builds the exact same track it always did. `w`/`h` are the object's real size at that edge
-  // (motion[].w/h are absolute, unlike x/y which are offsets); `rot`/`opacity` are absolute too.
   usesSize = chain.some((e) => e.in.w !== base0.w || e.in.h !== base0.h || e.out.w !== base0.w || e.out.h !== base0.h);
   usesRot = chain.some((e) => e.in.rot || e.out.rot);
-  // A radius is keyed only when an edge actually names one. Unstated means the object keeps the
-  // corner it was built with, matching the null identity radius carries in the engine's POSE table:
-  // a track that never mentions radius must not start writing one.
   usesRadius = chain.some((e) => e.in.radius != null || e.out.radius != null);
   usesOpacity = chain.some((e) => e.in.opacity !== 1 || e.out.opacity !== 1);
-  // Keyed on the SHIFTED schedule, not the storyboard's raw beat.start/end: the object's arrival has to
-  // land where the beat visually starts NOW, staged junctions included, or it would reach its next pose
-  // before (or after) the content it hands off to actually appears.
   const objStart = shiftedStart[0];
   const keys = [];
   const pushKey = (t, edge) => {
@@ -569,76 +392,26 @@ if (chain.length) {
   chain.forEach((e, i) => { pushKey(shiftedStart[i], e.in); pushKey(shiftedEnd[i], e.out); });
   objectLayer = {
     id: 'object', type: objectType, track: 5, x: base0.x, y: base0.y, w: base0.w, h: base0.h,
-    // `fill` is a rect-only prop (films/scene/schema.json byType.rect); an html/image layer refuses
-    // an unknown prop, so the placeholder's fill is dropped the moment a real source replaces it.
     ...(objectType === 'rect' ? { fill: 'var(--accent)' } : { src: objectSrcRel }),
-    // RADIUS IS ONLY WRITTEN WHERE SOMETHING READS IT. The rect keeps its historic `?? 4` default, so
-    // every film that had a placeholder object assembles byte-identically. An html layer consumes
-    // radius only through chipBox, which paints nothing without a surface prop beside it, so a
-    // fabricated default there is a prop set and never read: core/registry/prop-audit.js refuses the
     // render outright rather than let it look accepted and be dropped (engine-doctrine/MISTAKES.md #428). So a
-    // non-rect object carries a radius only when the contract actually names one.
     ...(objectType === 'rect'
       ? { radius: chain[0].in.radius ?? 4 }
       : (chain[0].in.radius != null ? { radius: chain[0].in.radius } : {})),
     start: objStart, duration: +(shiftedEnd[chain.length - 1] - objStart).toFixed(3),
-    // `sceneUnits: true` wraps each beat as its own unit, so nothing survives a cut unless it opts
-    // out: `acrossBeats` attaches this layer to the camera instead of its beat wrapper
-    // (quality/gates/direction-floor.mjs), which is exactly what a continuous object needs to be.
     acrossBeats: true,
     motion: keys,
   };
 }
 
-// ---- bg: one window per beat, cycling the theme's own backdrop rotation --------------------------
-// A THEME THAT DECLARES ITS OWN ROTATION OWNS THE DECISION, and this pass must not restate it.
-// `theme.bgDefault` as an array is the render-time rotation core/backgrounds/theme-rotation.js expands
-// behind `{use:"theme"}`, one window per shot. Writing the presets out here instead would fork that
-// decision: the theme would say one thing and every assembled film a copy of it, drifting the moment
-// the brand changed its mind. `look.backdrop` is deliberately NOT that field (engine-doctrine/CRAFT/THEME-LOOK.md
-// says three times it is scaffold-only and never read at render), so it stays the fallback for a theme
-// that declares no rotation at all. That fallback reads the SHIFTED schedule: a staged junction moved
-// where beat i actually starts, and the backdrop has to turn there too, or the ground swaps while the
-// previous beat's content is still on screen. The `{use:"theme"}` branch needs no times at all, since
-// the engine binds each window to the joint the film already cut.
 const rotation = Array.isArray(theme && theme.bgDefault) ? theme.bgDefault : null;
 const backdrop = (look.backdrop && look.backdrop.length) ? look.backdrop : ['soft', 'accent'];
 const bg = rotation
   ? [{ use: 'theme' }]
   : beats.map((b, i) => ({ from: shiftedStart[i], to: shiftedEnd[i], preset: backdrop[i % backdrop.length] }));
 
-// ---- transitions: an explicit boundary at every internal cut, since a choreographed scene (this one
-// always is, once it has an object layer) is skipped by produce.js's own auto-injection -------------
-// mech:"seam", not the "cut" a bare fx name defaults to: a "cut" only transforms the scene ROOT (an
-// opacity ramp over the whole stack), so two beats with DIFFERENT bg presets swap hard mid-ramp rather
-// than blending, which is exactly the "hard swap disguised inside a soft transition" seams.mjs
-// (#seam-split) exists to catch. "seam" is the real two-scene GPU blend, so the bg crossfades too.
-// ...WHEN THE FX CAN BE ONE. `look.cuts.default` is DERIVED from the theme's own pace
-// (core/registry/theme-contract.js), so a brisk brand resolves to `whip`, which is cut-only, and
-// pairing it with mech:"seam" wrote a scene `make validate` refuses: "whip is not a seam". Asking
-// boundaryMechanism instead of assuming keeps the crossfade wherever it is available and lets a
-// cut-only family through as the cut it is, rather than making every fast theme unassemblable.
-// The boundary lands at the SHIFTED time for the same reason the backdrop does: the cut has to arrive
-// where the new beat's content arrives, not where a flat build would have put it.
-// A beat's own `transition_in` (validated above, transitionInErrors) is the author's opinion about the
-// cut INTO it, and wins over the theme default for that one boundary; a beat naming none keeps the
-// theme's `cutFx`, exactly as before this field was built (byte-identical for every film that never
-// writes it).
 const cutFx = look.cuts.default || 'fade';
 let cutMech;
 try { cutMech = boundaryMechanism(cutFx, 'seam'); } catch { cutMech = undefined; }
-// A BOUNDARY WHOSE ARRIVING BEAT CARRIES `recipe:` GETS NO DEFAULT CUT. recipes/README.md's own seam
-// (e.g. `flow-seam`) IS the boundary: a continuous flow-through with no cut at all, measured off a real
-// film (madera, vawe-flow: zero `transitions[]` entries, every joint a recipe). Forcing the theme's
-// default cut/fade on top of that seam does not decorate it, it fights it: two mechanisms racing the
-// same boundary. An author who wants BOTH still can, by naming an explicit `transition_in:` on that
-// same beat (checked first, unchanged), the same "an explicit decision always wins" rule every other
-// field here already keeps.
-// A BOUNDARY A SHARED-FRAGMENT RUN SWALLOWS gets no transition at all: `runs` merged beats i..j into
-// ONE layer (above), so a boundary strictly between them (ri <= k < rj) never separates two layers.
-// core/transitions/lower.js needs two layers to build a seam; asked for one, it lowers to nothing,
-// so the write here would be dead weight the render silently drops. Caught at the write site rather
-// than downstream, so the film's json never claims a cut that cannot happen.
 const runOf = (k) => runs.find(([ri, rj]) => rj > ri && k >= ri && k < rj);
 const transitions = beats.slice(1).map((b, i) => {
   const swallowedBy = runOf(i);
@@ -656,13 +429,6 @@ const transitions = beats.slice(1).map((b, i) => {
   return { at: shiftedStart[i + 1], fx: cutFx, ...(cutMech ? { mech: cutMech } : {}) };
 }).filter(Boolean);
 
-// ---- recipes: structure copied from real video, on the beat whose START is the seam --------------
-// `at` is the beat's own SHIFTED start (a staged junction moves it, same as bg/transitions above): a
-// recipe seam has to land where this beat's content actually arrives, not where a flat build would
-// have put it. Slots and params are read straight off the beat's `recipe:` line (already validated,
-// recipeErrors above); ids are layer ids the author already wrote elsewhere in this scene, never
-// generated here. Nothing downstream of this file reads `recipes[]` yet, the expander does
-// (recipes/README.md): assemble's whole job is making the line reachable from the plan.
 const recipes = beats
   .map((b, i) => ({ b, i }))
   .filter(({ b }) => b.recipe)
@@ -671,13 +437,6 @@ const recipes = beats
     return { recipe: rp.name, at: shiftedStart[i], ...rp.slots, ...(Object.keys(rp.params).length ? { params: rp.params } : {}) };
   });
 
-// ---- camera: a beat's `camera:` line, windowed to that beat's own SHIFTED start/duration -----------
-// `camera:` names a move (or a camera-word phrase), the same "name first, params after" grammar
-// `recipe:`/`move:` already use; harness/lib/contract.mjs parseCameraLine/resolvedCamera do the parsing
-// and the "is this move real" check (cameraErrors, refused above, prose left documentary). This pass's
-// own job is narrow: WINDOW it. Every move here reads `start`/`dur` off its own signature
-// (core/camera-moves/*.js), so the window is exactly the beat's own shifted start/duration UNLESS the
-// beat's own params already named one (an explicit override wins, never silently clobbered).
 const cameraSpecs = [];
 beats.forEach((b, i) => {
   const r = resolvedCamera(b);
@@ -687,11 +446,6 @@ beats.forEach((b, i) => {
   cameraSpecs.push({ i, spec: { move: r.move, start: r.params.start ?? beatStart, dur: r.params.dur ?? beatDur, ...r.params } });
 });
 const cameraConflicts = [];
-// `followLayer` resolves at RENDER time off a live layer box (core/camera-moves/follow.js), not a
-// keyframe array, so it cannot be one leg among others: core/engine/produce.js bakeCameraMove refuses
-// a `cameraMove` array of length > 1 that contains it. Two beats naming camera: independently is
-// exactly how that array grows past 1, so it is caught HERE, with the beats named, rather than left to
-// surface as an opaque render-time throw with no storyboard line to point at.
 if (cameraSpecs.length > 1) {
   const followLayerBeats = cameraSpecs.filter((c) => c.spec.move === 'followLayer');
   if (followLayerBeats.length) {
@@ -704,10 +458,6 @@ if (cameraSpecs.length > 1) {
   }
 }
 if (cameraSpecs.length) {
-  // A hand-keyed `camera[]` (stage 6, motion-director.mjs) is a SECOND way of building the same field
-  // this pass now writes. Both are legal on their own; both at once, overlapping the same seconds, is
-  // not a decision anybody made, it is two decisions racing. Refused with BOTH named, never silently
-  // picking one, the same rule chainErrors already enforces for the continuous object.
   const handCamera = Array.isArray(scene.camera) ? scene.camera : null;
   if (handCamera && handCamera.length) {
     const times = handCamera.map((k) => k && k.t).filter((t) => typeof t === 'number');
@@ -721,14 +471,6 @@ if (cameraSpecs.length) {
       }
     }
   }
-  // A `recipe:` of kind "camera" (e.g. `window-dolly`) ALSO writes into `cameraMove`, but not until
-  // render-time expand (recipes/expand.mjs expandCameraLine), which APPENDS its own leg to whatever
-  // this pass already wrote, with no ordering or overlap check of its own. `bakeCameraMove`
-  // (core/engine/produce.js) just CONCATENATES every spec's keyframes in array order, and `cameraAt`
-  // (core/timeline/sequence.js) walks that array assuming ascending time; two specs racing the same
-  // seconds, or landing out of order, is not a decision anybody made. `from`/`to` on a camera-kind
-  // recipe line are both author-filled seconds (recipeErrors already required them), so the window is
-  // knowable HERE, before either side is built, and is refused with both named.
   for (let bi = 0; bi < beats.length; bi++) {
     const b = beats[bi];
     if (!b.recipe) continue;
@@ -753,7 +495,6 @@ if (cameraConflicts.length) {
   process.exit(1);
 }
 
-// ---- ownership: what this pass generated, against what the last one (or a hand edit) left behind ----
 const newDuration = shiftedEnd[shiftedEnd.length - 1];
 const ownedIds = new Set(htmlLayers.map((l) => l.id).concat(objectLayer ? [objectLayer.id] : []));
 const prevLayers = Array.isArray(scene.layers) ? scene.layers : [];
@@ -768,13 +509,7 @@ for (const l of preserved) {
   }
 }
 const preservedFilmFields = PRESERVED_FILM_FIELDS.filter((k) => scene[k] !== undefined);
-// The report names every film-level field kept as-is. `cameraMove` is kept when no beat declares its own
-// `camera:` line (see the out object below), so it belongs in the report then, even though it is not in
-// PRESERVED_FILM_FIELDS: that list is what is copied, this is what the author is told was kept.
 
-// ---- USE: the general door onto the arsenal's 790-entry corpus, resolved once (harness/lib/contract.mjs,
-// the SAME corpus `make arsenal` searches) and written by ONE table below, split only by helper
-// functions and never by family --------------------------------------------------------------------
 const useCorpus = await arsenalCorpus();
 const useErrs = useErrors(beats, useCorpus);
 if (useErrs.length) {
@@ -810,12 +545,6 @@ const out = {
   ...(cameraBlurSet ? { cameraBlur: true } : {}),
   bg: [...bg, ...extraBg],
   transitions,
-  // beats[] (item 3, core/timeline/relative-time.js): ONE clock per beat, written here so it can never
-  // be hand-typed out of sync with the beats this pass just staged. `id` reuses the `scene<N>` vocabulary
-  // the html layer above already carries (RISK 1, two owners of beat timing: `quality/gates/
-  // plan-vs-render.mjs` reports, never blocks, any beat whose start/duration here disagrees with the
-  // storyboard it was built from). A re-assemble always regenerates this whole array, the same "own it
-  // outright" rule the generated layers above follow, never merges it with a hand edit.
   beats: beats.map((b, k) => ({ id: `scene${k + 1}`, start: shiftedStart[k], duration: +(shiftedEnd[k] - shiftedStart[k]).toFixed(3) })),
   ...(recipes.length ? { recipes } : {}),
   layers: objectLayer ? [...htmlLayers, objectLayer, ...preserved] : [...htmlLayers, ...preserved],
@@ -842,9 +571,6 @@ if ([...preservedFilmFields, ...(!cameraSpecs.length && scene.cameraMove !== und
 if (!preserved.length) console.log("  no hand-authored layers to preserve: everything in this film is generated from the storyboard.");
 if (preserved.length) {
   console.log(`  preserved ${preserved.length} hand-authored layer(s) this contract has no vocabulary for: ${preserved.map(nameOf).join(", ")}`);
-  // A preserved layer that rides the whole film is the SHAPE of a continuous object, so it is the one
-  // worth pulling back into the contract rather than leaving as a permanent exception. Saying so is
-  // the point of reporting at all: the gaps in the contract become visible instead of being papered over.
   const candidates = preserved.filter((l) => l.acrossBeats);
   if (candidates.length) console.log(`  (${candidates.map(nameOf).join(", ")} spans beats: a candidate for the continuous-object contract, not a permanent exception)`);
 }

@@ -1,26 +1,3 @@
-// recency.mjs: which named things are NEW? Read out of git, never out of a list.
-//
-// WHY. The census says which entries have zero users, and its own output states the problem: nothing
-// distinguishes "undiscoverable" from "genuinely unwanted", so both look the same. Age separates them.
-// A capability that landed this week and has no users has not been rejected by anybody, it has not been
-// SEEN, and the one moment that fact is worth anything is while an author is still choosing, which is
-// `make preflight`.
-//
-// WHY GIT AND NOT A CHANGELOG. A hand-kept "what's new" list goes stale the first time somebody forgets
-// a line, and is then worse than nothing, because it reads as complete. `git log` cannot forget. Same
-// principle as `paramsOf` in core/camera-moves.js, which refuses an unknown parameter by reading the
-// generator's OWN signature so that nobody maintains a list of parameters.
-//
-// HOW, AND WHY NOT THE OBVIOUS WAY. The obvious derivation is `git log -S<name>` per entry: 397
-// processes, unusable. The second-obvious one is a single `git log -p` over the window, marking any
-// name added on a `+` line. That was built and thrown away, because it LIES: adding a new map keyed by
-// existing names (the `REQUESTS` table did exactly this) re-writes every name as a key on a `+` line,
-// and eleven blueprint beats that have existed for months were reported as twelve days old.
-//
-// So newness is asked as a question about STATE, not about diffs: was this name in the registry sources
-// at all, `days` ago? Two cheap processes, no heuristic, and it cannot be fooled by a line that moved.
-// The cost is granularity: the answer is "newer than the window", never "three days old". An author
-// choosing an effect does not need the date, only "you have probably not seen this".
 import { spawnSync } from 'node:child_process';
 
 /**
@@ -63,16 +40,9 @@ export function presentIn(text, names) {
 export function existingAt(commit, names, cwd) {
   const want = [...names];
   if (!commit || !want.length) return new Set();
-  // A PATH THAT NO LONGER EXISTS MUST NARROW THE SEARCH, NEVER KILL IT, and this is written from the
-  // failure it repairs. `blueprints/index.mjs` was retired into recipes/ and this list still named it;
-  // `git archive` refuses the WHOLE call when any pathspec matches nothing, so every name came back as
-  // "already existed" and nothing in the arsenal was ever reported new again. Nothing said so: the
-  // output read `0 newer than 14 days`, which is also what a quiet fortnight looks like. Two lib-test
-  // assertions had been red for as long as it took anyone to look.
   const paths = REGISTRY_PATHS.filter((p) => git(['ls-tree', commit, '--', p], cwd).stdout.trim());
   if (!paths.length) return new Set(want);
   const r = git(['archive', '--format=tar', commit, '--', ...paths], cwd, 'latin1');
-  // A failure must not report "nothing existed", which would call the whole arsenal new.
   if (r.status !== 0 || !r.stdout) return new Set(want);
   return presentIn(r.stdout, want);
 }

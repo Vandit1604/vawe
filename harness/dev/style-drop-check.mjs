@@ -1,31 +1,9 @@
-// harness/dev/style-drop-check.mjs: find every `el.style.<prop> = <value>` write in core/layers/*.js
-// whose value can come straight from an author field (an `L.<field>` or `C.<field>` read) and is not
-// routed through `checkDropped` (core/layers/util.js:24), the one place that catches a CSS value the
-// browser silently drops instead of rejecting.
-//
-// WHY THIS EXISTS. `pad` (util.js:244, :530) and `radius` on a glass layer (util.js:325) both took a
-// raw author string straight to `el.style.*` with no check: an invalid value ("20pxx") rendered as if
-// pad or radius were never set, with no error anywhere. Two independent instances of the same bug is a
-// class, not a typo, so this script watches the whole file list rather than the two sites that were found
-// by hand.
-//
-//   node harness/dev/style-drop-check.mjs           report every unguarded write, exit 1 if any
-//   node harness/dev/style-drop-check.mjs --list    print every write this script can see, guarded or not
-//
-// WHAT COUNTS AS "CAN COME FROM AN AUTHOR FIELD": the assigned value's expression contains `L.<x>` or
-// `C.<x>` naming a layer/child prop, AND that prop is not one this script knows is numeric-only or
-// enum-only (SAFE_FIELDS below). A numeric field coerced with `+ 'px'` always yields a valid CSS length;
-// there is no author-string branch for the browser to drop. A field with a real string branch (`pad`,
-// `radius`, `glass`) is exactly the shape that bit us, and is the one this script must not miss again.
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
 const DIR = 'core/layers';
 const LIST = process.argv.includes('--list');
 
-// Fields whose CSS write is safe with no checkDropped: schema-numeric only (a bad author value here
-// is a type error the validator catches elsewhere, not a silently-dropped string), or a fixed
-// internal enum the code itself chooses between (never the author's raw string).
 const SAFE_FIELDS = new Set([
   'w', 'h', 'x', 'y', 'grow', 'basis', 'size', 'gap', 'colGap', 'rowGap', 'gridCols', 'colw',
   'italic', 'weight', 'reflect', // dual type but every branch is either boolean or a bounded number
@@ -34,9 +12,6 @@ const SAFE_FIELDS = new Set([
 
 const files = readdirSync(DIR).filter((f) => f.endsWith('.js')).map((f) => join(DIR, f));
 
-// A write is "guarded" if the same statement, or the line right before it, calls checkDropped for
-// that property. Good enough for the patterns this codebase actually uses (one write per guard, right
-// next to it) without parsing JS for real.
 const STYLE_RE = /\.style\.([a-zA-Z]+)\s*=\s*([^;]+);/g;
 const FIELD_RE = /\b[LC]\.([a-zA-Z]+)\b/g;
 
