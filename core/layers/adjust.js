@@ -97,7 +97,7 @@ export const ADJUST_REGISTRY = defineRegistry('adjustment', KINDS, { blurbs: ADJ
 
 // The props are read off this signature (propsOf, core/props.js). `w`/`h` stay `L.x`: they are the
 // shared box props every layer type accepts, not spelled out by this file's own declaration.
-export function build(kit, el, L, { kind, amount, filter } = L) {
+export function build(kit, el, L, { kind, amount, filter, blend } = L) {
   // NO GROUND OF ITS OWN, and this is not cosmetic. `backdrop-filter` composites what is painted behind
   // the element; give the element a background and it paints over the very pixels it is filtering, so
   // the grade lands on a solid colour and reads as nothing happening.
@@ -137,8 +137,10 @@ export function build(kit, el, L, { kind, amount, filter } = L) {
   el.style.webkitBackdropFilter = css;
   // SCREEN, so the halo ADDS to the sharp picture instead of standing in front of it. Only for `bloom`:
   // every other kind is a grade and a grade that blended would be a different effect wearing the name.
-  // An author can still set any blend on any kind through `css`, which is how this recipe was found.
-  if (filter == null && (kind ?? 'desaturate') === 'bloom') el.style.mixBlendMode = 'screen';
+  // `blend` generalises this to a RAW `filter` too (a scene-wide bloom built from filters.js's own
+  // `bloomFilter` has no named `kind` to hang the default on, so it states its blend explicitly).
+  if (blend) el.style.mixBlendMode = blend;
+  else if (filter == null && (kind ?? 'desaturate') === 'bloom') el.style.mixBlendMode = 'screen';
 }
 
 export const PROPS = propsOf(build);
