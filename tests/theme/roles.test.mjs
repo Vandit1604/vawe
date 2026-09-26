@@ -59,14 +59,24 @@ const MIN = {
 
 // ---- expandTheme produces the exact legacy shape, passthrough sections untouched ----
 {
-  const withSections = { ...MIN, motion: { bounce: 0.1 }, vars: { '--x': '1px' } };
+  const withSections = { ...MIN, motion: { bounce: 0.1 }, look: { bgDefault: { preset: 'plain' } } };
   const legacy = expandTheme(withSections, { parseColor });
   assert.equal(legacy.name, 'min');
   assert.ok(legacy.palette && legacy.type && legacy.gradient);
   assert.deepEqual(legacy.motion, { bounce: 0.1 });
-  assert.deepEqual(legacy.vars, { '--x': '1px' });
+  assert.deepEqual(legacy.look, { bgDefault: { preset: 'plain' } });
   assert.equal(legacy.tokens, undefined, 'the adapter output has no `tokens`/`roles`, only the legacy keys consumers read');
   assert.equal(legacy.roles, undefined);
+}
+
+// ---- a retired top-level field (vars/bg/bgDefault) is refused, naming the field and its replacement ----
+{
+  for (const [key, value] of [['vars', { '--x': '1px' }], ['bg', { paper: '#fff' }], ['bgDefault', { preset: 'plain' }]]) {
+    const bad = { ...MIN, [key]: value };
+    assert.throws(() => expandTheme(bad, { parseColor }), new RegExp(`theme\\.${key} is retired`));
+    const errs = themeFileErrors(bad, { parseColor });
+    assert.ok(errs.some((e) => e.includes(`theme.${key} is retired`)), `themeFileErrors must name theme.${key}`);
+  }
 }
 
 // ---- the retired palette/type/gradient shape is refused, not silently accepted ----

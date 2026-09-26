@@ -310,7 +310,7 @@ export function applyTheme(theme, target = document.documentElement) {
   const root = target.style;
   const set = (k, v) => { if (v != null) root.setProperty(k, v); };
   const P = theme.palette || {};
-  set('--bg', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
+  set('--bg', P.bg); set('--paper', P.bg); set('--bg-2', P.bg2); set('--surface', P.surface); set('--surface-2', P.surface2);
   set('--card', P.card || deriveCard(P)); // raised card surface (blocks use var(--card))
   set('--line', P.line); set('--line-strong', P.lineStrong);
   set('--text', P.text); set('--text-2', P.text2); set('--dim', P.dim); set('--ink', P.ink);
@@ -353,8 +353,6 @@ export function applyTheme(theme, target = document.documentElement) {
   set('--font-num', `'${T.num}'`);
   set('--font-serif', `'${T.serif}'`);
   set('--font-mono', `'${T.mono}'`);
-  // raw passthrough: theme.vars = { "--anything": "value" } for scene-local custom props.
-  if (isObj(theme.vars)) for (const [k, v] of Object.entries(theme.vars)) set(k, v);
 }
 
 // ---------- virtual clock: determinism is COERCED, not just required ----------
