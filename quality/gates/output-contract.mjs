@@ -34,11 +34,17 @@ const RATCHET = path.join(ROOT, 'quality/baselines/output-contract-ratchet.json'
 // gate-classification.mjs REGENERATES engine-doctrine/GATE-CLASSIFICATION.md (the doc-map.mjs/
 // effects-catalog.mjs pattern); its one printed line reports what it wrote, not a finding about a
 // film, the same reason next.mjs and stage.mjs are exempt for navigation instead of a verdict.
+// hook-report-check.mjs is a self-test of harness/lib/hook-report.mjs's own shrinking logic (a
+// pass/fail tally against a scratch dir), the same shape as lib-test.mjs and contrast-regression.mjs:
+// not a finding about a scene.
+// e2e-check.mjs runs `make e2e` with `stdio: 'inherit'` when a push touches the engine, the same
+// reason review.mjs is exempt: a child's own live output can't be deferred through findings.mjs or
+// silenced under --json.
 const EXEMPT = new Set([
   'output-contract.mjs', 'compare.mjs', 'gate-mutation.mjs',
   'next.mjs', 'stage.mjs', 'rubric.mjs', 'legacy-unfold.mjs',
   'contrast-regression.mjs', 'measure-regression.mjs', 'review.mjs',
-  'gate-classification.mjs',
+  'gate-classification.mjs', 'hook-report-check.mjs', 'e2e-check.mjs',
 ]);
 
 /** A gate CONFORMS when it renders through findings.mjs. It is a MIGRATION TARGET when it prints its own

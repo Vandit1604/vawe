@@ -137,6 +137,8 @@ const FIGURE_IS_THE_POINT = {
   videoLowerThird: 'a subscriber count is the specimen on a creator lower third',
   followCard: 'a follower count is the specimen', commitRow: 'a commit row shows relative times',
   nowPlaying: 'a player shows a track position', card: 'the pricing variant exists to show a price',
+  glassHome: 'a home-screen widget exists to show one stat',
+  uiReveal3d: 'a stat reveal exists to show stats',
 };
 
 // every string a catalog row ships as content: the props ARE the block's default content
