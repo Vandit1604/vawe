@@ -1303,7 +1303,7 @@ arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE
 # block name and the commit this ran at). The film owns the ejected layers from then on: it can restyle
 # radius, border, colour, wording, anything, with no factory left in the way. ID=<layer id> disambiguates
 # when the film carries more than one instance of the same block.
-add: ## [author] eject BLOCK=<name> in D=<film> into its own literal layers, tagged ejectedFrom
+add: ## [dev] eject BLOCK=<name> in D=<film> into its own literal layers, tagged ejectedFrom
 	@if [ -z "$(BLOCK)" ] || [ -z "$(D)" ]; then echo "usage: make add BLOCK=<name> D=<film.json> [ID=<layer id>]"; exit 1; fi
 	D=$(D) BLOCK=$(BLOCK) ID=$(ID) node harness/author/eject-block.mjs
 
