@@ -25,6 +25,7 @@ import { RULES, runRules } from '../../harness/lib/designspec-rules.mjs';
 import { parseColorRGB, parseColor as parseColorEngine, colorAlpha } from '../../core/color/engine.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { expandTheme } from '../../core/theme/roles.js';
+import { nearest } from '../../core/validate/util.mjs';
 
 /** A scene's text as UNITS. One per layer, one per named fragment. Never joined: a joined blob let a
  *  pattern match across eight layers and invent a finding (see runRules). Fragments are read off
@@ -310,8 +311,11 @@ scanTargets.forEach((l, i) => {
       findings.push({ sev: 'off-colour', msg: `${label(l, i)} · \`${k}\` uses ${lit}. A chromatic colour NOT in the ${themeName} palette (nearest is ${(near * 100).toFixed(0)}% away). Use a var(--token) or a color-mix of one, or add it to the theme.` });
     }
   }
-  // fonts (the engine's roles). A `font` outside sans/serif/mono is dropped silently or off-system.
-  if (typeof l.font === 'string' && !ROLES.has(l.font)) findings.push({ sev: 'off-font', msg: `${label(l, i)} · font "${l.font}" is not a theme role (sans/serif/mono/num). Map it to a role in themes/${themeName}.json type.` });
+  // fonts (the engine's roles). A `font` outside sans/serif/mono/num is dropped silently or off-system.
+  // There is no "display" role: an agent's own friction log hit this writing `font:"display"`, which
+  // reads as a real word but names nothing `core/theme/roles.js` derives. Name the real roles and the
+  // closest one, the same shape as the off-colour and dead-token findings just above.
+  if (typeof l.font === 'string' && !ROLES.has(l.font)) findings.push({ sev: 'off-font', msg: `${label(l, i)} · font "${l.font}" is not a theme role. Real roles: ${[...ROLES].join('/')}.${nearest(l.font, ROLES)} Map it to a role in themes/${themeName}.json type.` });
   // optional radii / shadow lock (only when the scene declares the spec)
   if (specRadii && l.radius != null && !specRadii.has(String(l.radius))) findings.push({ sev: 'off-radius', msg: `${label(l, i)} · radius ${l.radius} is off the locked scale [${[...specRadii].join(', ')}].` });
   if (specShadows && l.shadow != null && !specShadows.has(String(l.shadow))) findings.push({ sev: 'off-shadow', msg: `${label(l, i)} · shadow "${l.shadow}" is off the locked set.` });
