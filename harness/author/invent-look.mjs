@@ -3,8 +3,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { themeErrors } from '../../core/registry/theme-contract.js';
-import { mix, contrast, relLum, parseHex } from '../lib/theme-bg.mjs';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { bgBlock, mix, contrast, relLum, parseHex } from '../lib/theme-bg.mjs';
+import { expandTheme } from '../../core/theme/roles.js';
 import { parseColor, colorAlpha } from '../../core/color/engine.js';
 import { migrateOne } from './migrate-themes.mjs';
 
@@ -331,7 +331,7 @@ for (const first of chosen) {
 const bannedLineages = new Set();
 for (const f of fs.readdirSync(path.join(ROOT, 'themes')).filter((n) => n.endsWith('.json'))) {
   const raw = JSON.parse(fs.readFileSync(path.join(ROOT, 'themes', f), 'utf8'));
-  let t; try { t = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw; } catch { continue; }
+  let t; try { t = expandTheme(raw, { parseColor, colorAlpha }); } catch { continue; }
   for (const v of Object.values(t.type || {})) if (typeof v === 'string' && v.trim()) bannedLineages.add(lineage(v));
 }
 for (const b of ['Inter', 'Poppins', 'Playfair Display', 'Syne', 'Space Grotesk', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Nunito', 'Oswald']) bannedLineages.add(lineage(b));
