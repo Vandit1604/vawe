@@ -188,30 +188,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `pixelSort` | glitch sort, databend smear, sorted pixels glitch | sorts each contiguous BRIGHT run of a scan line by luma. The signature glitch smear, and deterministic: the span is bounded by a threshold, nothing is random |
 | `stipple` | pointillism, ink dot texture, seeded dots | seeded ink dots on paper, denser where the source is dark, each jittered inside its own cell |
 
-## caption style  `[captionStyle]`
-
-| name | words | action |
-|---|---|---|
-| `clipWipe` | wipe reveal captions, clip path karaoke, accent wipe subtitles | LINE-level: an accent copy of the line is revealed left to right, the wipe front tracking the spoken word rather than wall-clock time |
-| `flipUp` | 3d flip captions, hinge up subtitles, card flip karaoke | the word hinges up from edge-on · an upcoming word sits at -90deg, which is invisible without being dim, so it costs the text no contrast at all |
-| `focusPull` | blur to sharp captions, rack focus subtitles, out of focus subtitles | a rack focus: an upcoming word sits 2.8px out of focus and resolves sharp as it is spoken, a spoken one settling back to a soft 1px · the one style that says its state with focus rather than with ink, light or size |
-| `ghostSplit` | rgb split captions, chromatic aberration subtitles, double vision karaoke | two offset ghosts converge as the word is spoken, the accent one way and a muted ink the other · a split reads as a split from the OFFSET, not from being red and blue, so it stays on the theme |
-| `highlight` | marker highlight, highlighter sweep, underline sweep | a marker band sweeps left to right behind the active word, the accent mixed 28% into transparent so white text over it stays at 4.9:1 contrast or better |
-| `inkFill` | karaoke fill through letters, gradient fill subtitles, color fill karaoke | the karaoke fill runs through the GLYPHS rather than behind them, full ink trailing a narrow accent front · the word body is never the accent, so its contrast is that of the plate itself |
-| `kineticSlam` | punch in captions, impact word subtitles, oversize word slam | the word lands at 1.22 with its tracking open and settles cubically to 1, so the travel is all in the first third of its window and the rest holds still |
-| `letterRise` | letters rise into place subtitles, per character rise captions | the letters of the whole line rise the last 12px into their slots as they are spoken, one per CHARACTER · not a second typewriter: the line is present from the first frame, where typeOn assembles it out of nothing |
-| `neonEdge` | glowing captions, neon glow subtitles, halo karaoke | the accent lives only in a halo: the spoken word blooms and settles, earlier words keep a quieter glow, upcoming words hold a 76% text-mix with no light at all |
-| `pillKaraoke` | pill fill karaoke, progress bar captions, fill bar subtitles | a pill fill sweeps left to right through the line, the accent mixed 42% into the bg so the bg stays dominant |
-| `readerFocus` | teleprompter captions, dimmed unread subtitles, read-ahead captions | a teleprompter: three ink levels and three scales, upcoming at 76% and 0.90, spoken at 88% and 0.96, the current word full ink at 1 |
-| `scramble` | decode subtitles, scramble captions, matrix style karaoke | the letters settle out of noise, left to right · the only style that rewrites the text rather than its style, so it carries the same carve-out clipWipe does |
-| `typeOn` | typewriter subtitles, typing captions, letter by letter subtitles | a typewriter, per CHARACTER: an unarrived letter holds its space at visibility:hidden so the line never reflows, and the current one carries an inset accent caret |
-| `underlineDraw` | underline karaoke, rule draws under word, quiet highlight subtitles | a 4px accent rule draws under each word as it is spoken and stays, the quiet sibling of highlight: it sits below the ink, so it costs the text no contrast |
-| `waveRide` | bobbing captions, word bounces as spoken, wave subtitles | one crest per word, ridden as it is spoken · a half-sine is bounded by the word window, where a looping wave would simply be cut off by it |
-| `weightShift` | bold the spoken word, weight ramp captions, font weight karaoke | the spoken word RAMPS along the font's own wght axis to 800 with a small rise-and-settle bump, the rest hold 600 at a 76% text-mix |
-| `weightWave` | weight crest captions, variable font wave subtitles, bold wave karaoke | a crest of WEIGHT travels the line, each word riding the font's wght axis from 500 to 900 and back · the one register a static font cannot fake, and the line breathes as the crest passes |
-| `wordFlash` | one word at a time subtitles, big word captions, TikTok style captions | ONE word on screen, swapped whole at the next onset, landing at 1.14 and settling cubically · the default of short-form video, and it needs no dimming because the unread words are absent, not faint |
-| `wordSlide` | one word slides up subtitles, big word slide captions | the same one-word swap arriving from 26px below instead of from scale · for a film already moving vertically, where a second unrelated motion would fight it |
-
 ## comparative duration word  `[enterDur / exitDur / duration (relative)]`
 
 | name | words | action |
@@ -459,15 +435,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `tritone` | three color grade, three tone, risograph grade | duotone with a third stop in the middle, which is what stops the midtones going muddy |
 | `vignette` | darkened corners, lens falloff, edge darkening | NOT a filter. A darkening field composited over the layer box, so it is an inset radial-gradient overlay div and stays sharp at the edges |
 
-## font-variation axis  `[axis]`
-
-| name | words | action |
-|---|---|---|
-| `ital` | italic axis, italic switch, roman to italic, variable italic | the italic axis, 0 or 1: some variable faces expose the roman/italic swap as an axis instead of a second font file |
-| `slnt` | slant axis, oblique angle, lean italic, variable slant | the slant axis, an upright face leaning to an italic ANGLE in degrees (usually -15 to 0) rather than swapping to a separate italic file |
-| `wdth` | width axis, condensed to expanded, font stretch, variable width | the width axis, condensed to expanded: none of the 31 faces this engine vendors keep it post-subsetting (core/tokens.css), so animating it is a validated no-op today |
-| `wght` | weight axis, font weight ramp, thin to bold, variable weight | the weight axis, 100 to 900 on every variable face this engine vendors: thin to black in one continuous ramp instead of jumping between static cuts |
-
 ## generator  `[generator]`
 
 | name | words | action |
@@ -602,73 +569,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `linear` | constant speed handle, straight handle, no easing on this side | the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped |
 | `overshoot` | sails past and settles, ten percent overshoot handle, back-ease handle | arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it |
 
-## kinetic preset  `[preset]`
-
-| name | words | action |
-|---|---|---|
-| `assemble` | scatter assemble, fly in and land, particles assemble, randomized entrance | each glyph flies in from its OWN scattered offset and rotation and settles into the word, arriving in a shuffled order · the AE "text animator + randomize-order range selector" reveal. Pair it with `split: "char"` |
-| `blur` | soft focus resolve, defocus in | resolves out of a 16px blur to 0 as it fades in: calm, premium |
-| `blurUp` | blur and rise, sharpen in, defocus lift, the default kinetic headline | letters lift and sharpen out of blur together: the default kinetic headline |
-| `bounce` | springy bounce in, bouncy entrance, playful bounce | a spring bounces the unit up 60px with a visible overshoot (bounce 0.5, settle 0.5s): playful brands only |
-| `chroma` | chromatic aberration, rgb split, colour fringing | R/G/B ghosts split apart and converge to a crisp glyph |
-| `colorWave` | per word colour, per-word color, each word its own colour, colour per word, words leave one by one | the accent sweeps word by word along a line, each unit lighting then settling to the resting colour · `colors` gives EACH unit its OWN arrival colour instead of one shared accent, per-word colour before the line settles to one ink |
-| `decode` | scramble text, matrix decode, hacker text effect, techy scramble reveal | characters scramble through the chosen charset at 48 refreshes a second by default and resolve left to right as u climbs to 1, techy reveal |
-| `down` | drop in, fall down, slide down from above | words/chars drop 40px into place from above while fading in: the mirror of `up` |
-| `draw` | line drawing, path draw, svg stroke animation | an SVG stroke draws itself on: the dash offset runs from 1 to 0 on a path normalised to length 1, easeOutCubic by default, `back:true` draws from the far end |
-| `elastic` | elastic pop, springy scale, wobbly bounce | scales up from 0.3 with a springy overshoot (bounce 0.62, settle 0.5s), visible wobble: playful brands only |
-| `fade` | word by word exit, words leave one by one, text disappears word by word, split exit | plain opacity fade, no motion at all: the neutral entrance, and the neutral exit reversed |
-| `fall` | gravity drop, falls from above, drop with a bounce landing | falls from above under gravity and lands with a small squash |
-| `flap` | split flap, airport board, flip board, departure board | the glyph steps FORWARD through the board's alphabet one flap at a time and lands on its letter, hinging as it turns. An airport board, ordered where `decode` is random |
-| `flip` | 3d flip, card flip, flip in, somersault | 3D flip-up per unit, letters somersault into place: `axis` picks the hinge |
-| `focus` | focus pull, rack focus, blur to sharp, dreamy resolve | focus pull, heavy blur and over-scale resolving to crisp, dreamy, premium |
-| `gradient` | rainbow text, colour sweep text, gradient text reveal | a two-colour band (default #8a8f98 to #ffffff) at 250% width sweeps through the letterforms via background-clip text |
-| `highlight` | marker highlight, highlighter sweep, underline sweep | a marker band, default rgba(255,220,90,0.35), grows left to right to 100% width behind the unit at 78% of its height |
-| `riseClip` | rise from behind a mask, clip reveal, masked rise | the word climbs out from behind a hard edge at its own baseline, hidden until it clears the line. The clean editorial reveal |
-| `scale` | zoom in text, grow text from small | punches in from 0.4 scale to 1, an easeOutBack overshoot past the mark and back |
-| `shadow` | poster shadow, long shadow collapse, drop shadow lift | a long poster shadow collapses as the word settles, poster statements |
-| `shimmerWave` | shimmer, light sweep, 3d shimmer, traveling shine | looping light wave (per-unit): a 3D crest travelling across the word; never settles |
-| `skew` | italic shear, slanted slide in, skewed entrance | slides in 70px with a 14deg italic shear that straightens as it lands: editorial, sporty |
-| `slide` | slide in from the side, enter from left or right, push in sideways | slides in 80px from one side (`dir`), default left: pair it with the opposite exit |
-| `stretch` | horizontal smear, stretch and snap, squash and stretch | stretches from 1.6x horizontal scale down to 1x with a 6px blur that clears as it snaps true: impact words |
-| `strike` | strikethrough, crossed out, struck through | a rule draws THROUGH the word and it dims behind the line, still legible. The "not X, Y" beat, where the rejection is the content |
-| `swing` | pendulum swing, hinge down, swing upright | each unit hinges from its top edge and swings upright, playful, short words |
-| `tilt` | tilt in, swing upright, angled rise, small rotate in | each unit rises and swings upright from a small angle, sporty and editorial. A flat rotation, not a 3D hinge: `flip` is the one that turns |
-| `type` | typing, letters one at a time, keystroke, terminal caret | a hard on/off with no transform: opacity flips from 0 to 1 the instant u passes `at` (default 0). Terminals, timers, code |
-| `underline` | underline draw, draw a line under, rule grows underneath | a rule grows left to right along the baseline as the word lands, the marker under a heading |
-| `unfold` | unfold open, panel turn, card unfold, door opening | opens from edge-on about its left hinge, a panel turning to face you, premium |
-| `up` | rise in, float up, the default reveal, lift into place | words/chars rise 40px into place while fading in, no blur: the plain lift, and the engine's own default reveal |
-| `wave` | sine wave, bobbing text, idle wave, ambient wave | sinusoidal wave across units: a LOOP that never settles; ambient only |
-| `weight` | weight ramp, variable font weight, font gets bolder, thicken in | the glyphs THICKEN into place along the font's own `wght` axis, a crest of weight travelling the line · the one register a static face cannot fake, and it degrades to the nearest static cut rather than to a dead still |
-
-## layer type  `[layers[].type]`
-
-| name | words | action |
-|---|---|---|
-| `adjust` | a color grade layer, a filter over everything below, a full-frame adjustment | one grade over everything BENEATH it: blur, desaturate, darken, brighten or contrast the whole frame from a single layer, keyable through `vars` on `--adjust` |
-| `beam` | a light bar, a travelling light, a light border | a light that travels the rounded-rect border, or a sheen that sweeps across the box; the travel is closed-form in t, not a CSS keyframe |
-| `board` | a background card, a dimmed backdrop panel, a behind card | a populated workspace from pure data: up to 4 columns of up to 5 mini issue-cards, entering as one clip |
-| `clip` | a baked animation, a frame sequence, a pre-rendered clip | a video played as a preloaded PNG frame sequence: the frame swaps the <img> src, so no decoder state can drift between renders |
-| `component` | a captured UI block, a reflected site section, a recreated page piece | a REAL captured UI block (`make capture`), or one named part of a captured scene, scaled to fit `w` |
-| `composition` | a hand-timed sub-timeline, nested keyframed motion, a custom mini animation | names a first-party hand-authored GSAP timeline in core/compositions/ and passes it DATA; for choreography `parts` and recipes cannot express |
-| `count` | counting number, ticking stat, number that goes up | a number that counts from -> to across its own window, formatted (compacts at 1e6, prefix/suffix/decimals). The text build plus a per-frame value. `roll: true` makes it an ODOMETER: one masked wheel per digit, each sliding to its next value, geared so a wheel only turns as the wheel below it crosses 9 |
-| `cursor` | a mouse pointer, a fake cursor, a click demo pointer | a pointer that follows [{t,x,y}] keyframes (`path`) or eases magnetically onto another layer's live box (`snapTo`), fires a ripple at `clicks`, can change shape mid-move (`style`/`styleAt`: arrow/hand/ibeam/block), carry a name tag (`label`), and drag another layer along with it (`carry`) |
-| `doc` | a file card, a markdown card, a source-file preview | a file card from pure data: an optional filename + diff chip, then heading / body / code / bullet blocks, theme-styled and auto-height |
-| `globe` | a spinning globe, a dotted planet, a world map globe | a dotted planet with tapered route arcs, drawn by vendored cobe: atmospheric glow and a diffuse terminator. reach for `three:"globe"` instead only when you need a real sun vector |
-| `glow` | a soft light, a halo, a glowing highlight | soft light with no WebGL: a radial centre glow, a directional beam, or a named phenomenon (bloom · halation · diffusion · rimLight · spotlight) |
-| `group` | a container, nested layers, a folder of layers | layout by containment: a flex/grid box whose children (any depth) flow with a gap, so a card + label + chip can never desync |
-| `html` | a hand-written fragment, real markup, a web snippet | raw hand-authored HTML/CSS as ONE layer, still positioned and animated by the engine; <script> is stripped and CSS transition/animation refused, use `parts` to give its pieces the clock |
-| `image` | a photo, a picture, a screenshot | an <img> with cover-fit, radius, a ken-burns slow zoom and an edge dissolve; `canvasFx` bakes a per-pixel pass into it at boot |
-| `lottie` | a Lottie animation, an After Effects export, a JSON animation file | an After Effects (Bodymovin) export driven by ABSOLUTE seek, goToAndStop at a frame index, never autoplay |
-| `paint` | a canvas 2D field, a drawn generative background, a resamplable canvas look | a generative Canvas 2D field drawn per frame from local time. The canvas family written in JS rather than GLSL, and the one you can resample |
-| `particles` | confetti, sparks, a dust burst | a deterministic particle emitter: `preset` picks confetti (a gravity-fed burst), sparks (a fast radial flash) or dust (a slow ambient drift). Closed-form per particle, seeded by `seed`, never a running sim |
-| `raymarch` | a 3D distance field, a lit 3D surface, a raymarched shape | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
-| `rect` | a box, a solid panel, a rectangle | a plain box, panel, card or pill. it carries no text: put that on a higher track |
-| `shader` | a generative background, a WebGL field, an ambient full-frame look | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
-| `svg` | vector art, an inline icon shape, scalable line art | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
-| `text` | words on screen, headline, caption text | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink |
-| `three` | a real 3D scene, a three.js object, a posed 3D mesh | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
-| `video` | real footage, a video clip, captured recording | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
-
 ## lightfield pattern  `[pattern.kind]`
 
 | name | words | action |
@@ -712,36 +612,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `vhs` | videotape, retro tape, analog video, camcorder footage, old video | colour split 3px, slight defocus, scanlines and heavy grain. Tape: no vignette and no glow, so the frame stays flat and dirty |
 | `vintageAnamorphic` | old cinema lens, anamorphic streaks, blue lens flare | the only look with horizontal blue streaks off the highlights, plus split, grain and a deep vignette, old spherical glass |
 | `watercolor` | painted look, watercolour paper, pigment on stock | displaced, desaturated, contrast lowered under a multiplied paper wash and grain, pigment on stock |
-
-## modifier  `[modifiers[]]`
-
-| name | words | action |
-|---|---|---|
-| `alongPath` | text on a curve, type on a path, curved text | set the line of type ON A CURVE and, if you ask, send it travelling along one. The general case `circle` is one point of, and the only way to bend a headline |
-| `ghost` | motion trail, motion blur streak, afterimage trail | the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre |
-| `kick` | hit on the cut, jolt on the beat, impact on edit | hit the layer on the film's own joints. A cut, a seam or a sting shoves it, so the frame feels the edit |
-| `lag` | follow through, drag behind, delayed follow motion | FOLLOW-THROUGH: this layer trails another layer's motion by a frame or three and overruns its stop before settling. Stagger delays a sibling's entrance; this makes one layer drag behind another's continuous motion, which is half of what separates an animated object from a moved image |
-| `matte` | luma matte, brightness mask, wipe reveal | a LUMA MATTE: another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
-| `mixBlend` | blend mode modifier, composite mode, knock out of photo | how this layer's pixels combine with what is already painted behind it, knock a headline out of a photo |
-| `occlude` | hide behind another layer, occlusion, depth sort hiding | hide this layer where another one covers it, put something BEHIND something else without reordering the stack |
-| `plane` | parallax depth, stand at a distance, depth modifier | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax |
-| `progress` | film progress variable, timeline percent, progress ring driver | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
-| `shadow` | cast shadow, drop shadow with light, directional shadow | a drop shadow that knows where the light is, so every layer does not point the same way |
-| `squash` | squash and stretch, cartoon bounce, stretch on velocity | SQUASH AND STRETCH read off the layer's own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash |
-| `tilt` | 3D tilt, turn out of plane, leaning card | turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding |
-| `upright` | auto orient, stay upright, counter rotate | AUTO-ORIENT: hold this layer UPRIGHT while the layer carrying it rotates, so an arrangement can turn without its contents turning with it. Parenting gives you the rotation for free and it is almost always wrong: photographs carried round a circle go upside down at the bottom exactly when the motion peaks |
-| `wordSlot` | word swap, rotating word, text slot machine | one word of the sentence swaps for the next while NOTHING after it reflows. The slot is a grid cell auto-sized to the widest candidate, and `chip: true` makes it the brand-coloured box the launch rule asks for |
-
-## motion voice  `[audio.cues[].name]`
-
-| name | words | action |
-|---|---|---|
-| `bloom` | an opening sound, a swelling reveal sound | something OPENS: placed automatically on an `iris`, `softiris`, `rise` or `riseBlur` cut, and on a declared `spectacle`. Slower in than the others, because an opening is not an arrival |
-| `chime` | a small bright accent, a ding, a resolve sound | a small bright accent where a moment resolves. Noticed rather than announced, so it survives repetition better than a sting does |
-| `droplet` | a drop sound, a light plink, a short pitched drop | something falls into place: a short pitched drop, placed automatically on a `drop` or `zoom` cut. The lightest of the arrival sounds |
-| `impact` | a hard landing sound, a hit sound, a thud | something heavy ARRIVES and lands hard: a hit with an edge, a mass and a room, in that order. A frame-sized card reaching its mark, a panel slamming home |
-| `pluck` | a small punctuation sound, a counter tick sound | punctuation, for a small element or a counter digit. Quiet on purpose: this is the one that becomes a machine gun, and the density rules exist because of it |
-| `whoosh` | a camera whoosh, an air rush sound, a swoosh | air moving past. One camera gesture, one whoosh, never one per keyframe: the sound rises as the move starts and falls away as it passes |
 
 ## move shape  `[move:<shape>:<band>]`
 
@@ -867,18 +737,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `spinBlur` | rotation blur, spinning smear, pivot blur | smear along the arc with the radius preserved, so the pivot itself stays sharp, a rotating badge or seal. `cx`/`cy` move the pivot off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16) |
 | `zoomBlur` | radial blur, zoom impact blur, speed zoom | radial smear out from a centre, near samples kept crisp. An impact moment; ramp `amount:[0.6, 0]` so the frame rushes in and snaps sharp. `cx`/`cy` move the centre off screen-middle (0..1, default 0.5/0.5); `count` trades sample quality for cost (2..32, default 16) |
 
-## scramble charset  `[presetOpts.chars]`
-
-| name | words | action |
-|---|---|---|
-| `binary` | ones and zeros, binary code scramble, matrix style | ones and zeros, the loudest cliche in the set, use it once and only where the subject IS binary |
-| `blocks` | block shading, ascii blocks, noise bar | four shades of block, so the word dissolves into a bar of noise instead of into other letters |
-| `lowerCase` | lowercase scramble, small letters only | lowercase only, quieter still, and the right set under a lowercase headline |
-| `mixed` | default scramble, random characters, letters and numbers | capitals, digits and four symbols, the house default and the busiest of the sets |
-| `numbers` | digits only, numeric scramble, counting up scramble | digits only, for a counter, a price, a code or anything the film is about to state as a number |
-| `symbols` | punctuation scramble, cipher characters, terminal symbols | punctuation and operators, a terminal or a cipher rather than a word |
-| `upperCase` | all caps scramble, capital letters only, uppercase only | capitals only, the calmest scramble and the one that keeps a headline reading as type |
-
 ## seam fx  `[seam]`
 
 | name | words | action |
@@ -925,34 +783,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `top-and-bottom` | lit band across the middle, low sun band | a lit band across the middle with darkness above and below it and nothing taken off the sides, the shape a low sun makes |
 | `top-left` | northwest shadow, shadow falls top left | a diagonal fall away to the top left, light rarely leaves along an axis, and no edge keyword says this |
 | `top-right` | upper right corner, northeast shadow | a diagonal fall away to the top right, light rarely leaves along an axis, and no edge keyword says this |
-
-## spectacle device  `[spectacle.device]`
-
-| name | words | action |
-|---|---|---|
-| `chromaticSplit` | RGB split, color channel tear, glitchy color split | the frame tears into red/green/blue and snaps back, impact, energy, a hard landing |
-| `cinematicZoom` | a fast push with blur, a lunge zoom | a fast push with the blur that comes off it, the frame lunging at the subject |
-| `dispersion` | a prism split, light separating into color | the picture separates into its spectrum and reassembles, glass, prisms, luxury |
-| `flash` | a white flash, a bright pop over everything | a single bright bloom over the whole frame, up and gone, the plainest peak there is |
-| `glitch` | digital glitch, system breakage effect, stepped shear | a stepped horizontal shear, no smoothing. Alarm, breakage, a system under load |
-| `iridescence` | an oil-slick sheen, a rainbow sheen wash | an oil-slick sheen washes across the frame once, colour as the event |
-| `lens` | a lens bulge, a fisheye bend | a wide optical bulge and release. The frame bending under the weight of the moment |
-| `ripple` | a shockwave ring, a ripple from impact | a ring travels out from the centre and distorts what it crosses, an impact you can watch spread |
-| `sdfIris` | an iris wipe, a shutter reveal | a hard iris opens from the centre. A shutter on the moment, theatrical and exact |
-| `streak` | a light streak, a specular sweep | a bright bar sweeps the frame. A specular pass over a mark, the cheapest premium peak |
-| `vortex` | a spinning twist, a whirlpool distortion | the frame twists about its centre and unwinds, the loudest of the radial family |
-| `whipPan` | a whip pan, a camera smear | the frame smears sideways as if the camera whipped to it, motion the picture cannot carry alone |
-
-## stagger order  `[stagger.from]`
-
-| name | words | action |
-|---|---|---|
-| `center` | middle out, from the middle, outward both ways, centre out | starts at the middle unit and opens outward both ways, so the word arrives as ONE object rather than as a train |
-| `edges` | both ends, closing like a door, inward, converge on the middle | starts at BOTH ends and closes on the middle, a line that shuts like a door |
-| `first` | left to right, in order, typing order, front to back | the wave starts at the first unit and runs to the last, the default, and what a line of type being typed looks like |
-| `last` | right to left, reverse order, backwards, back to front | starts at the last unit and runs backwards to the first, pair it with a right-to-left exit |
-| `random` | shuffled, scattered, seeded random, out of order | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
-| `typewriter` | typing effect, one character at a time, chars per second, letters appear one by one | types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit |
 
 ## sting fx  `[sting]`
 
@@ -1046,5 +876,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_722 primitives across 62 registries, 722 meeting the word-action contract today.
+_597 primitives across 53 registries, 597 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
