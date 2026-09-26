@@ -89,7 +89,7 @@ else
 	bash -c 'set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh "$(D)" ./bin/vawe $(D) --draft $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log'; \
 	t1=$$(node -e 'process.stdout.write(String(Date.now()))'); \
 	node harness/lib/record-render.mjs dev $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
-	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; open $$o 2>/dev/null || true
+	@o=out/$$(basename $(D) .json).mp4; echo "  → $$o"; if [ -t 1 ] && [ -z "$$CI$$VAWE_NO_OPEN" ]; then open $$o 2>/dev/null || true; fi
 	@ref=$$(node -e "import('./quality/gates/stage.mjs').then(m=>{const l=m.lookBlock('$(D)'); console.log((l&&l.reference)||'');})") ; \
 	if [ -n "$$ref" ]; then \
 	  cc=$$(node quality/gates/content-check.mjs $(D) --ref $$ref 2>&1); rc=$$? ; \
@@ -123,7 +123,7 @@ dev-range: build ## [dev] the range path `make dev BEAT=/JOIN=/FROM=&TO=` dispat
 	bash -c "set -o pipefail; . harness/dev/chrome-pin.sh dev && harness/dev/render-lock.sh '$(D)' ./bin/vawe $(D) --draft --from $$f --to $$t $(if $(WORKERS),--workers $(WORKERS),--workers 4) 2>&1 | tee /tmp/.vawe-render-$(notdir $(basename $(D))).log"; \
 	t1=$$(node -e 'process.stdout.write(String(Date.now()))'); \
 	node harness/lib/record-render.mjs dev-range $(D) /tmp/.vawe-render-$(notdir $(basename $(D))).log $$((t1-t0)) 2>/dev/null || true
-	@o=$$(ls -t out/$$(basename $(D) .json).range-*.mp4 2>/dev/null | head -1); echo "  → $$o"; open "$$o" 2>/dev/null || true
+	@o=$$(ls -t out/$$(basename $(D) .json).range-*.mp4 2>/dev/null | head -1); echo "  → $$o"; if [ -t 1 ] && [ -z "$$CI$$VAWE_NO_OPEN" ]; then open "$$o" 2>/dev/null || true; fi
 
 # make demo Q="what this shows" [NAME=<slug>] [FX=<key>] [SUBJECT=<path>]: scaffold a SPECIMEN scene
 # and run the dev loop on it. A demo written from a blank file comes out a contact sheet every time (27
