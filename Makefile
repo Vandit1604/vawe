@@ -712,9 +712,9 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # reference). Writes out/match/<film>/: a dense strip per beat (reference row over render row), a
 # difference overlay, a mean SSIM, and a match.md ranking beats worst-to-best. STEP=<seconds> sets the
 # sample rate (default 0.1). engine-doctrine/CRAFT/RECREATION.md
-study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> instead scores a recreation against its reference, beat by beat.
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> instead scores a recreation against its reference, beat by beat. LIGHT=1 with MATCH=1 adds a per-beat light-map ΔE.
 	@if [ -n "$(MATCH)" ]; then \
-	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
+	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)) $(if $(LIGHT),--light 1); \
 	else \
 	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
 	fi
