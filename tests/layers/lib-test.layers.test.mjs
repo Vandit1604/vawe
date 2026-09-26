@@ -434,6 +434,56 @@ ok('every entrance writes a transform a box can fold (px translate / unitless sc
     })());
 }
 
+// bestRotation is a CLOSED-shape search (no canonical start point on a ring, so it hunts for the
+// ordering offset that lines the two rings up). Run unconditionally, it twists an OPEN path's point
+// correspondence instead: a straight line morphing into a wave crossed itself into a blob
+// (tests/fixtures/svg-morph-open-path.fixture.json, the sting bug this fix is for). It must be skipped
+// when the author declares `morph.closed: false`, the same flag `pointsToD`'s trailing `Z` already reads.
+{
+  const fixture = JSON.parse(fs.readFileSync(
+    path.join(repoRoot, 'tests/fixtures/svg-morph-open-path.fixture.json'), 'utf8'));
+  const [{ d: FROM_D, morph: { to: TO_D } }] = fixture.layers;
+
+  // A tiny synthetic ring standing in for the two real paths: `to` is `from` cyclically shifted by 8 of
+  // 20 points, so the CLOSED search (default step 4, tests k=0,4,8,...) finds a perfect match at k=8 and
+  // an OPEN morph must ignore that and keep k=0.
+  const N = 20, SHIFT = 8;
+  const POINTS = {
+    [FROM_D]: Array.from({ length: N }, (_, i) => ({ x: i, y: 0 })),
+    [TO_D]: Array.from({ length: N }, (_, i) => ({ x: (i + SHIFT) % N, y: 0 })),
+  };
+  const mkPathEl = () => ({
+    attrs: {}, style: {}, childNodes: [], parentNode: null,
+    setAttribute(k, v) { this.attrs[k] = String(v); },
+    getAttribute(k) { return this.attrs[k]; },
+    appendChild(n) { n.parentNode = this; this.childNodes.push(n); return n; },
+    removeChild(n) { this.childNodes = this.childNodes.filter((c) => c !== n); return n; },
+    getTotalLength() { return N; },
+    getPointAtLength(len) { return POINTS[this.attrs.d][Math.round(len)]; },
+  });
+  const DOC = { createElement: mkPathEl, createElementNS: () => mkPathEl() };
+  const svgMorph = await import('../../core/layers/svg.js');
+  const mountMorph = (morphOpts) => {
+    const prior = globalThis.document;
+    globalThis.document = DOC;
+    try {
+      const el = mkPathEl();
+      svgMorph.build(null, el, { type: 'svg', d: FROM_D, morph: { to: TO_D, points: N, ...morphOpts } });
+      return el;
+    } finally { globalThis.document = prior; }
+  };
+
+  // rotatePoints(to, k) aligns b's ring to a's: with a[i]=i and b[j]=(j+SHIFT)%N, the perfect
+  // rotation is k = N - SHIFT = 12, which lands rotatePoints(to,12)[0] on 0.
+  const closedDefault = mountMorph({});
+  ok('svg morph: a CLOSED shape (default) rotates the target to its best-matching offset',
+    closedDefault.__morph.to[0].x === 0);
+
+  const open = mountMorph({ closed: false });
+  ok('svg morph: an OPEN path (`closed: false`) skips bestRotation, keeping the target unrotated',
+    open.__morph.to[0].x === SHIFT);
+}
+
 
   assert.equal(fail, 0, `${fail} of ${pass + fail} assertion(s) failed`);
   assert.ok(pass >= 55, `expected at least 55 assertions (the count this file was split with) to have run, saw ${pass}`);
