@@ -1,6 +1,6 @@
 {
   "module": "scene",
-  "note": "GOLD EXAMPLE: a motion-graphic-sting type (skills/vawe-type-sting), one continuous transformation: a JSON literal types itself out, its punctuation flies off on real motionPath arcs, the brand word scales up and thickens into its display face, an accent stroke draws under it into the wave mark, a tagline rises in on a breathing accent light, then everything clears upward faster than it entered onto a clean solid-accent end frame. Demonstrates: typing (kinetic `type` preset), motionPath arcs with autoOrient, an axis weight ramp (kinetic `weight` preset), a trim draw-on (`svg` layer `draw`), an idle `drift` standing in for a hand-keyed wiggle, and a scene-level `rise` cut for the upward exit. `content` carries every brand word; edit it, not the layers, to reskin this for a new brand. `\"produced\": false` is load-bearing here: the engine's baseline auto-injects a cut into any 1.2s+ gap between layer starts (core/engine/produce.js), which fought this film's own hand-authored cut and bg switch; turn it back on only if a future edit wants the baseline's help again.",
+  "note": "GOLD EXAMPLE: a motion-graphic-sting type (skills/vawe-type-sting), one continuous transformation: a JSON literal types itself out centred, holds, then clears; the brand word scales up (with follow-through overshoot) and thickens into its display weight in ONE layer so the scale-in and the weight ramp share a single clock, never a swap; an accent stroke draws under it into the wave mark; a tagline rises in on a breathing accent light; then the whole lockup rises out over 0.3s as the ground turns cobalt on the same eased window, ending on the wave mark alone, held to 5.0s. `content` carries every brand word; edit it, not the layers, to reskin this for a new brand. `\"produced\": false` is load-bearing here: the engine's baseline auto-injects a cut into any 1.2s+ gap between layer starts (core/engine/produce.js), which fought this film's own hand-authored cut and bg switch; turn it back on only if a future edit wants the baseline's help again.",
   "theme": "vawe",
   "aspect": "16:9",
   "duration": 5.0,
@@ -17,54 +17,44 @@
   },
   "bg": [
     { "t": 0, "preset": "plain" },
-    { "t": 4.5, "base": { "kind": "solid", "color": "#2563eb" }, "fx": [ { "type": "grain", "alpha": 0.03, "fps": 30 } ] }
+    { "t": 4.6, "base": { "kind": "solid", "color": "#2563eb" }, "fx": [ { "type": "grain", "alpha": 0.03, "fps": 30 } ] }
   ],
   "transitions": [
-    { "at": 4.5, "fx": "rise", "dur": 0.5 }
+    { "at": 4.6, "fx": "wipe", "dir": "down", "dur": 0.3, "timing": "rush" }
   ],
   "sceneUnits": true,
   "layers": [
-    { "id": "jsonPrefix", "type": "text", "text": "{\"text\":\"", "font": "mono", "size": 64, "weight": 500,
-      "color": "var(--text)", "align": "left", "x": 675, "y": 492, "w": 342, "h": 90,
-      "split": "char", "preset": "type", "stagger": 0.06, "each": 0.1,
-      "start": 0, "duration": 2.4, "anim": "none",
-      "motionPath": { "path": "M 0 0 Q -260 -300 -640 -760", "dur": 1.2, "delay": 1.2, "autoOrient": true, "ease": "power1.in" }
-    },
-    { "id": "jsonMiddle", "type": "text", "text": "{{brand}}", "font": "mono", "size": 64, "weight": 500,
-      "color": "var(--text)", "align": "left", "x": 1017, "y": 492, "w": 152, "h": 90,
-      "split": "char", "preset": "type", "stagger": 0.06, "each": 0.1,
-      "start": 0.58, "duration": 0.62, "anim": "none", "out": "none"
-    },
-    { "id": "jsonSuffix", "type": "text", "text": "\"}", "font": "mono", "size": 64, "weight": 500,
-      "color": "var(--text)", "align": "left", "x": 1169, "y": 492, "w": 76, "h": 90,
-      "split": "char", "preset": "type", "stagger": 0.06, "each": 0.1,
-      "start": 0.86, "duration": 1.54, "anim": "none",
-      "motionPath": { "path": "M 0 0 Q 260 -300 640 -760", "dur": 1.2, "delay": 0.34, "autoOrient": true, "ease": "power1.in" }
-    },
-    { "id": "wordLight", "type": "text", "text": "{{brand}}", "font": "sans", "size": 280, "weight": 400,
-      "color": "var(--text)", "align": "center", "x": 360, "y": 440, "w": 1200, "h": 200,
-      "split": "char", "preset": "scale", "presetOpts": { "from": 0.24 }, "stagger": 0.06, "each": 0.35,
-      "start": 1.28, "duration": 1.12, "anim": "none", "out": "none"
+    { "id": "jsonLine", "type": "text", "text": "{\"text\":\"{{brand}}\"}", "font": "mono", "size": 64, "weight": 500,
+      "color": "var(--text)", "align": "center", "x": 650, "y": 497, "w": 620, "h": 90,
+      "split": "char", "preset": "type", "stagger": { "from": "typewriter", "cps": 30 }, "each": 0.12,
+      "start": 0, "duration": 1.4, "anim": "none", "out": "fade", "exitDur": 0.3
     },
     { "id": "wordHeavy", "type": "text", "text": "{{brand}}", "font": "sans", "size": 280, "weight": 800,
-      "color": "var(--text)", "align": "center", "x": 360, "y": 440, "w": 1200, "h": 200,
-      "split": "char", "preset": "weight", "presetOpts": { "from": 300, "to": 800 }, "stagger": 0.05, "each": 1.0,
-      "start": 2.4, "duration": 2.6, "anim": "none", "out": "none",
-      "idle": "drift"
+      "color": "var(--text)", "align": "center", "x": 360, "y": 440, "w": 1200, "h": 200, "tracking": "-0.04em",
+      "split": "char", "preset": "scale", "presetOpts": { "from": 0.3 }, "axis": { "wght": [300, 800] },
+      "each": 1.4, "stagger": 0.05,
+      "start": 1.1, "duration": 3.9, "anim": "none", "out": "none",
+      "idle": "drift",
+      "motionPath": { "path": "M 0 0 L 0 -500", "dur": 0.3, "delay": 3.5, "ease": "power1.in" }
     },
     { "id": "strokeWave", "type": "svg", "x": 810, "y": 690, "w": 300, "h": 157, "viewBox": "0 0 46 24",
       "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "fill": "none", "stroke": "var(--accent)", "strokeWidth": 4,
       "draw": { "dur": 1.0, "weight": 4, "ease": "easeOutCubic" },
-      "start": 2.4, "duration": 2.6, "anim": "none", "out": "none",
-      "idle": "drift"
+      "start": 2.2, "duration": 2.8, "anim": "none", "out": "none",
+      "idle": "drift",
+      "motionPath": { "path": "M 0 0 L 0 -500", "dur": 0.3, "delay": 2.4, "ease": "power1.in" }
     },
     { "id": "glowBack", "type": "glow", "x": 610, "y": 340, "w": 700, "h": 700,
       "preset": "bloom", "intensity": 0.22, "idle": "breathe",
-      "start": 3.6, "duration": 1.4, "anim": "fade", "enterDur": 0.5
+      "start": 2.4, "duration": 2.6, "anim": "fade", "enterDur": 0.5
     },
-    { "id": "tagline", "type": "text", "text": "{{tagline}}", "font": "sans", "size": 44, "weight": 500,
-      "color": "var(--text-2)", "align": "center", "x": 660, "y": 860, "w": 600,
-      "anim": "rise", "enterDur": 0.5, "start": 3.6, "duration": 1.1, "out": "fade", "exitDur": 0.3
+    { "id": "tagline", "type": "text", "text": "{{tagline}}", "font": "sans", "size": 36, "weight": 500,
+      "color": "var(--text-2)", "align": "center", "x": 660, "y": 890, "w": 600,
+      "anim": "rise", "enterDur": 0.5, "start": 3.0, "duration": 1.7, "out": "fade", "exitDur": 0.3
+    },
+    { "id": "endMark", "type": "svg", "x": 845, "y": 480, "w": 230, "h": 120, "viewBox": "0 0 46 24",
+      "d": "M1 12 Q7 1 12 12 T23 12 T34 12 T46 4", "fill": "none", "stroke": "var(--bg)", "strokeWidth": 13,
+      "start": 4.6, "duration": 0.4, "anim": "fade", "enterDur": 0.15, "out": "none"
     }
   ]
 }
