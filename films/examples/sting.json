@@ -20,7 +20,7 @@
     { "t": 4.6, "base": { "kind": "solid", "color": "#2563eb" }, "fx": [ { "type": "grain", "alpha": 0.03, "fps": 30 } ] }
   ],
   "transitions": [
-    { "at": 4.6, "fx": "wipe", "dir": "down", "dur": 0.3, "timing": "rush" }
+    { "at": 4.6, "fx": "wipe", "dir": "down", "dur": 0.3, "timing": "out" }
   ],
   "sceneUnits": true,
   "layers": [
