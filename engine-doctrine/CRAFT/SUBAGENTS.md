@@ -252,6 +252,11 @@ should have, which is why each of these is written down rather than remembered.
   so a check that globs `films/scene/*.json` comes back nearly empty and the agent will report it as a
   defect. Say it in the brief. For the same reason a finished film cannot travel home through a merge:
   copy it across by hand, or track it.
+- **Create the worktree with `harness/dev/worktree.sh add <name>`, never a bare `git worktree add`.**
+  It symlinks `node_modules` and `site/node_modules` from the main checkout, links `bin/vawe`, and
+  copies the other gitignored inputs the task needs (fonts, refs, scene JSON), so the agent never runs
+  its own `npm install` in a worktree. A bare `git worktree add` carries none of that and renders
+  nothing.
 - **Never run the mutation gate inside an agent.** An interrupted run leaves planted mutations in the
   tree, and the next agent inherits them as real findings.
 
