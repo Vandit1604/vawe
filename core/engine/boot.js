@@ -14,6 +14,7 @@ import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
 import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
+import { resolveFinishLayers, bakeDepthOfField } from './finish.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -530,11 +531,13 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   Object.assign(data, resolveTokenRefs(data, tokenValues));
   const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
   bakeTextSizeRoles(data, look);
+  resolveFinishLayers(data, width, height); // `finish` sugar → real layers, before they get baked like any other
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
   produceBaseline(data, theme, frame, look);
   if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
   bakeDepth(data);
   bakeFocus(data);
+  bakeDepthOfField(data); // `finish.dof` + the camera's own focus keyframes → a blur, per layer `plane` z
   assertKeyHandles(data.camera, 'camera');
   bakeTimeRemaps(data);
   checkNoSurvivingDepth(data);
