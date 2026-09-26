@@ -7,6 +7,10 @@
   "tags": [
     "worldMap"
   ],
+  "dimensions": {
+    "width": 944,
+    "height": 552
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

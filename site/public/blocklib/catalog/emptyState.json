@@ -7,10 +7,6 @@
   "tags": [
     "emptyState"
   ],
-  "dimensions": {
-    "width": 504,
-    "height": 294
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

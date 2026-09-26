@@ -7,10 +7,6 @@
   "tags": [
     "callout"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 106
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

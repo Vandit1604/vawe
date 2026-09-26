@@ -7,6 +7,10 @@
   "tags": [
     "nodeGraph"
   ],
+  "dimensions": {
+    "width": 1144,
+    "height": 520
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

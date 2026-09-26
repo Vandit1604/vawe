@@ -7,6 +7,10 @@
   "tags": [
     "borderBeamCard"
   ],
+  "dimensions": {
+    "width": 604,
+    "height": 304
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

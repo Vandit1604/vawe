@@ -7,10 +7,6 @@
   "tags": [
     "pressButton"
   ],
-  "dimensions": {
-    "width": 324,
-    "height": 97
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

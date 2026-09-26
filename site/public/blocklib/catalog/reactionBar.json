@@ -7,10 +7,6 @@
   "tags": [
     "reactionBar"
   ],
-  "dimensions": {
-    "width": 267,
-    "height": 87
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

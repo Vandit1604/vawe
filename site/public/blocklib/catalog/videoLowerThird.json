@@ -7,10 +7,6 @@
   "tags": [
     "videoLowerThird"
   ],
-  "dimensions": {
-    "width": 564,
-    "height": 132
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

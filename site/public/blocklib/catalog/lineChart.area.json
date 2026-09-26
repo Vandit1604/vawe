@@ -7,10 +7,6 @@
   "tags": [
     "lineChart"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 287
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

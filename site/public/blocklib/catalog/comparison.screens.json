@@ -7,10 +7,6 @@
   "tags": [
     "comparison"
   ],
-  "dimensions": {
-    "width": 604,
-    "height": 299
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
@@ -35,12 +31,10 @@
         }
       },
       "rightScreen": {
-        "block": "listRow",
+        "block": "notification",
         "props": {
-          "icon": "✓",
           "title": "Draft saved",
-          "sub": "Fieldwork",
-          "meta": "now"
+          "body": "Fieldwork · now"
         }
       }
     },

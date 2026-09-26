@@ -7,10 +7,6 @@
   "tags": [
     "phoneFrame"
   ],
-  "dimensions": {
-    "width": 274,
-    "height": 484
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

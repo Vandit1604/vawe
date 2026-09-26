@@ -7,10 +7,6 @@
   "tags": [
     "splitScreen"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 120
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
@@ -28,21 +24,17 @@
       "gap": 32,
       "divider": true,
       "left": {
-        "block": "listRow",
+        "block": "notification",
         "props": {
-          "icon": "✉",
-          "title": "Digest",
-          "sub": "Kite Studio",
-          "meta": "Today"
+          "title": "Weekly digest",
+          "body": "Kite Studio · Today"
         }
       },
       "right": {
-        "block": "listRow",
+        "block": "notification",
         "props": {
-          "icon": "☰",
           "title": "Drafts",
-          "sub": "Fieldwork",
-          "meta": "Fri"
+          "body": "Fieldwork · Fri"
         }
       }
     },

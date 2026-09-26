@@ -7,6 +7,10 @@
   "tags": [
     "table"
   ],
+  "dimensions": {
+    "width": 604,
+    "height": 271
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

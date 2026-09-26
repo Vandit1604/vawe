@@ -7,10 +7,6 @@
   "tags": [
     "glassWidgets"
   ],
-  "dimensions": {
-    "width": 1124,
-    "height": 545
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

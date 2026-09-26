@@ -7,10 +7,6 @@
   "tags": [
     "kpiRow"
   ],
-  "dimensions": {
-    "width": 617,
-    "height": 136
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

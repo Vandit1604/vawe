@@ -7,6 +7,10 @@
   "tags": [
     "profileHeader"
   ],
+  "dimensions": {
+    "width": 504,
+    "height": 300
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

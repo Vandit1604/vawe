@@ -7,10 +7,6 @@
   "tags": [
     "splitScreen"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 344
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
@@ -28,25 +24,26 @@
       "pipScale": 0.46,
       "pipInset": 16,
       "left": {
-        "block": "card",
+        "block": "onboardCard",
         "props": {
           "w": 540,
-          "h": 300,
+          "step": 1,
+          "of": 2,
           "title": "Open canvas",
-          "desc": "Compose a beat from the vocabulary.",
-          "pills": [
-            "Text",
-            "Image",
-            "Group"
-          ]
+          "body": "Compose a beat from the vocabulary."
         }
       },
       "right": {
-        "block": "card.profile",
+        "block": "profileHeader",
         "props": {
           "name": "Ana Roth",
-          "role": "Founding Engineer",
-          "initials": "AL"
+          "handle": "ana",
+          "stats": [
+            {
+              "value": "12",
+              "label": "ships"
+            }
+          ]
         }
       }
     },

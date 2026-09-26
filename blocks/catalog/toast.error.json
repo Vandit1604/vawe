@@ -7,6 +7,10 @@
   "tags": [
     "toast"
   ],
+  "dimensions": {
+    "width": 464,
+    "height": 103
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

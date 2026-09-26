@@ -7,10 +7,6 @@
   "tags": [
     "logLines"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 214
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

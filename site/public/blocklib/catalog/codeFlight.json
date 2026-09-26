@@ -7,10 +7,6 @@
   "tags": [
     "codeFlight"
   ],
-  "dimensions": {
-    "width": 664,
-    "height": 334
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

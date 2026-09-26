@@ -7,10 +7,6 @@
   "tags": [
     "usMapFlow"
   ],
-  "dimensions": {
-    "width": 864,
-    "height": 544
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

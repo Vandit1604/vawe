@@ -7,10 +7,6 @@
   "tags": [
     "pointer"
   ],
-  "dimensions": {
-    "width": 88,
-    "height": 88
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,10 +7,6 @@
   "tags": [
     "gauge"
   ],
-  "dimensions": {
-    "width": 344,
-    "height": 317
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
