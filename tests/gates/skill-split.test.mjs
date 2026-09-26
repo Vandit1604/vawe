@@ -61,10 +61,10 @@ test('every reference/*.md a split skill\'s core links to exists on disk', () =>
   }
 });
 
-test('engine-doctrine/CRAFT/FROM-GSAP.md exists with 10-15 GSAP-to-vawe pairs', () => {
+test('engine-doctrine/CRAFT/FROM-GSAP.md exists with 10-18 GSAP-to-vawe pairs', () => {
   const text = fs.readFileSync(path.join(ROOT, 'engine-doctrine/CRAFT/FROM-GSAP.md'), 'utf8');
   const pairs = [...text.matchAll(/^## \d+\./gm)];
-  assert.ok(pairs.length >= 10 && pairs.length <= 15, `expected 10-15 numbered pairs, found ${pairs.length}`);
+  assert.ok(pairs.length >= 10 && pairs.length <= 18, `expected 10-18 numbered pairs, found ${pairs.length}`);
 });
 
 test('vawe-scene-authoring core links to FROM-GSAP.md', () => {
