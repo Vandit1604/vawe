@@ -58,6 +58,8 @@ const EXCLUDE = [
   ['node_modules/', 'dependencies'],
   ['.venv-tools/', 'dependencies'],
   ['tests/fixtures/', 'test fixtures, not repo doctrine'],
+  ['quality/refs/_synthetic-test/', 'a synthetic fixture for testing the reference loop, not repo doctrine'],
+  ['quality/refs/queue.md', 'a live work queue, ordered data the loop edits, not guidance'],
 ];
 const EXCLUDE_SUFFIX = [
   ['.storyboard.md', 'a per-video artifact, not guidance'],

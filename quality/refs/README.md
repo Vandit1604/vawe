@@ -1,3 +1,9 @@
+---
+when: setting up or navigating the reference-recreation loop for the first time
+answers: what lives in this folder · how the queue and ledger fit together · what the loop reuses
+group: process
+---
+
 # quality/refs: the reference loop
 
 Drop 10-15 reference videos here. An agent works them beat by beat, closing the gap between this

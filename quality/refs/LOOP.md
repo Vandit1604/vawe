@@ -1,3 +1,9 @@
+---
+when: an agent is about to close one beat of one reference recreation
+answers: the exact step order · the stopping rule · the preconditions to check first
+group: process
+---
+
 # LOOP: the reference-loop prompt
 
 Give this to the agent working one beat. It names every step in order, reuses only existing
