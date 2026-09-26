@@ -13,8 +13,10 @@ function assert(cond, msg) { if (!cond) throw new Error(`FAIL: ${msg}`); }
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const run = () => execFileSync(process.execPath, [path.join(ROOT, 'harness/dev/clean-state.mjs')], { cwd: ROOT, encoding: 'utf8' });
 
-const clean = run();
-assert(/working tree is clean/.test(clean), `expected a clean tree to report clean, got:\n${clean}`);
+// Not asserting a clean tree here: a sibling test running concurrently (fixtures under
+// tests/fixtures, brand-kit's own scratch dir) can leave the real repo tree untracked-dirty for the
+// span of this test, and that is not this test's business either way.
+const before = run();
 
 // A generated file, dirtied without regenerating it: clean-state must name its owner, never run it.
 const GENERATED = path.join(ROOT, 'site/lib/arsenal.json');
@@ -23,6 +25,7 @@ fs.writeFileSync(GENERATED, `${original}\n`);
 
 try {
   const out = run();
+  assert(out !== before || !/clean/.test(before), 'dirtying a tracked file must change clean-state\'s report');
   assert(/site\/lib\/arsenal\.json/.test(out), `expected the dirtied path to be named, got:\n${out}`);
   assert(/arsenal index/.test(out), `expected the owning generator's label, got:\n${out}`);
   assert(/node scripts\/site\/arsenal-json\.mjs/.test(out), `expected the fix command, got:\n${out}`);
