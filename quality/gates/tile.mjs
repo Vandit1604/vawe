@@ -6,6 +6,7 @@
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { srgbToLinear } from '../../core/color/linear.js';
 
 const ff = (a) => execFileSync('ffmpeg', a, { stdio: ['ignore', 'ignore', 'ignore'] });
 
@@ -78,6 +79,34 @@ export function ssimOf(a, b) {
   const r = spawnSync('ffmpeg', ['-i', a, '-i', b, '-filter_complex', 'ssim', '-f', 'null', '-'], { encoding: 'utf8' });
   const m = /All:([\d.]+)/.exec(r.stderr || '');
   return m ? Number(m[1]) : null;
+}
+
+// meanColorOf(png): the whole image collapsed to one [r,g,b] (0..255), ffmpeg's own scale=1:1 doing
+// the averaging. SSIM measures structure and rewards two frames agreeing on being dark; this feeds
+// labDeltaE, which measures colour and brightness instead, so a black-frame beat can't hide behind it.
+export function meanColorOf(png) {
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', png, '-vf', 'scale=1:1', '-frames:v', '1',
+    '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { maxBuffer: 1 << 20 });
+  const b = r.stdout;
+  return (b && b.length >= 3) ? [b[0], b[1], b[2]] : null;
+}
+
+// labDeltaE(a, b): CIE76 distance between two 0..255 sRGB colours, converted through linear light and
+// CIE XYZ (D65) to CIELAB. 0 is identical; a few units is a just-noticeable difference; 100+ is
+// black-vs-white. srgbToLinear is core/color/linear.js's own conversion, not a second copy of it.
+export function labDeltaE(a, b) {
+  const toLab = ([r, g, b2]) => {
+    const [R, G, B] = [srgbToLinear(r), srgbToLinear(g), srgbToLinear(b2)];
+    const X = (0.4124564 * R + 0.3575761 * G + 0.1804375 * B) / 0.95047;
+    const Y = 0.2126729 * R + 0.7151522 * G + 0.0721750 * B;
+    const Z = (0.0193339 * R + 0.1191920 * G + 0.9503041 * B) / 1.08883;
+    const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (841 / 108) * t + 4 / 29);
+    const [fx, fy, fz] = [f(X), f(Y), f(Z)];
+    return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
+  };
+  if (!a || !b) return null;
+  const [L1, a1, b1] = toLab(a), [L2, a2, b2] = toLab(b);
+  return Math.sqrt((L1 - L2) ** 2 + (a1 - a2) ** 2 + (b1 - b2) ** 2);
 }
 
 // tile box for a given video aspect: scrutiny-sized, not thumbnails.
