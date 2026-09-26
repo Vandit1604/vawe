@@ -13,7 +13,7 @@ const list = () => (env.LIST ? ['--list'] : []);
 export const GATES = {
   'arsenal-check': () => ['quality/gates/arsenal-check.mjs', ...json()],
   'blocks-audit': () => ['quality/gates/blocks-audit.mjs', ...json()],
-  'code-quality': () => ['quality/gates/code-quality.mjs', ...write(), ...json()],
+  'code-quality': () => ['quality/gates/code-quality.mjs', ...(env.TOP ? ['--top'] : []), ...write(), ...json()],
   'coverage': () => ['quality/gates/coverage.mjs', ...json()],
   'craft-coverage': () => ['quality/gates/craft-coverage.mjs', ...json()],
   'dead-branch': () => ['quality/gates/dead-branch.mjs', ...json()],
@@ -40,6 +40,7 @@ export const GATES = {
   'seo-surface': () => ['quality/gates/seo-surface.mjs', ...json()],
   'sfx-check': () => ['quality/gates/sfx-audit.mjs', ...json()],
   'silent-check': () => ['quality/gates/silent-fallback.mjs', ...json()],
+  'site-check': () => ['quality/gates/site-check.mjs'],
   'sim-audit': () => ['quality/gates/sim-audit.mjs', ...json()],
   'site-counts': () => ['quality/gates/site-counts.mjs', ...json()],
   'skill-check': () => ['quality/gates/skill-check.mjs', ...json()],
