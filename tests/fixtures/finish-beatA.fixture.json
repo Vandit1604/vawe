@@ -1,0 +1,31 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 3,
+ "bg": [{
+  "base": { "kind": "radial", "from": "#3a2405", "to": "#000000", "cx": 0.2, "cy": 0.1 },
+  "fx": [
+   { "type": "spotlight", "color": "232,163,61", "y": 0.95, "intensity": 0.35 },
+   { "type": "particles", "count": 40, "color": "244,200,105" },
+   { "type": "grain", "alpha": 0.12 }
+  ]
+ }],
+ "finish": {
+  "bloom": { "threshold": 0.82, "strength": 0.35, "radius": 8 },
+  "vignette": 0.55,
+  "grain": 0.12,
+  "dof": { "strength": 0.03 }
+ },
+ "camera": [{ "t": 0, "f": 0 }],
+ "layers": [
+  { "type": "text", "text": "CMMC preparation", "x": 560, "y": 500, "w": 900, "size": 44, "weight": 600,
+    "color": "#fff6e6", "emColor": "#f4c869", "glow": "#f4c869", "align": "center", "preset": "up",
+    "start": 0.1, "duration": 2.8 },
+  { "type": "rect", "id": "timeline", "x": 160, "y": 980, "w": 1600, "h": 2, "bg": "#4a3a20",
+    "start": 0.2, "duration": 2.7 },
+  { "type": "rect", "id": "playhead", "x": 706, "y": 970, "w": 2, "h": 22, "bg": "#f4c869",
+    "glow": "#f4c869", "modifiers": [{ "plane": { "z": 90 } }], "start": 0.2, "duration": 2.7 }
+ ]
+}

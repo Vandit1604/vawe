@@ -347,7 +347,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `raymarch` | a lit implicit surface from a distance field: a camera, a normal and a silhouette. the most expensive primitive in the engine. One hero shot, sized to what it needs |
 | `rect` | a plain box, panel, card or pill. it carries no text: put that on a higher track |
 | `shader` | a full-frame generative WebGL field (see the ambient shaders), pure in t and palette-tintable; it carries no sampler, so it cannot read what is beneath it. `shaderKeys` cycles ONE panel through several looks on hard cuts, in one context, instead of stacking a layer per look |
-| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin) |
+| `svg` | a vector mark that DRAWS itself on (stroke dashoffset) and then RESOLVES INTO ITS FILL, the stroke leaving as the solid logo arrives, or MELTS from one path into another (true point-lerp morph, optional spin). `trim: { start, end, offset }` (AE Trim Paths, core/tracks/trim.js) reveals any fraction 0 to 1 of the path and can slide that segment around a closed loop, each of the three keyframable in `motion` alongside x/y/rot |
 | `text` | theme-styled words in an optional chip box, auto-fit to a width; the typewriter reveal and caret live here too; `typingColors` flashes each word its own accent colour the instant it types, then settles to ink |
 | `three` | a real three.js scene graph (meshes, materials, lights, a camera) posed absolutely from t, for what a distance field cannot express: a font outline, a device body, a captured UI plane, a point cloud |
 | `video` | real footage, SEEKED to a computed source time every frame and never played, so the picture is as deterministic as a still |
@@ -380,6 +380,7 @@ The vocabulary itself: `{ "type":"<name>" }`. Everything else in this document i
 | `liquidBackground` | a subdivided plane churning under summed sine displacement, specular highlights sliding across the swells |
 | `litPlane` | a captured UI plane, LIT (MeshStandardMaterial under the studio rig, not MeshBasicMaterial), rising with a tilt and a rotation into a soft-shadowed ground with an overshoot settle; `motionBlur` (true, or a 0..1 strength, the same word every layer uses) opts it into a shutter-accumulated smear on the fast rise |
 | `magnetic` | field lines arcing from pole to pole, traced from the real summed inverse-square field, with charges sliding along them |
+| `object` | a premium composed object: a primitive, an extruded SVG path or brand-font text, under a glass (1.5 ior), frosted-glass, metal or matte material, camera-orbited and object-posed by the SAME keyed motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) and eases every other layer uses |
 | `pointCloud` | a GPU point cloud: thousands of lit points posed absolutely from t |
 | `shatter` | one solid slab holds, then breaks into a seeded grid of shards that tumble outward and toward camera |
 | `uiParallax` | flat UI planes stacked at depth, the camera moving past them so the layers separate |
@@ -539,6 +540,16 @@ What shape a `cursor` layer draws (`"style": "hand"`), and how it can change mid
 | `front` | just in front of the picture plane: a caption or a chip that rides ahead of the subject. Held, 1.18x the rate |
 | `near` | nearest the eye: the thing that crosses the frame fastest and leaves it first. Held, 1.39x the rate |
 
+## Drivers (expressions as data)  `[per-layer]`
+
+The `drive` field on a layer: AFTER EFFECTS EXPRESSIONS, written as data instead of code, resolved fresh every frame so a seek and a forward render always agree. `wiggle` is a seeded jitter on one property, `link` is the pick-whip (this property copies another layer's own animated value, with an optional delay), and `loop` repeats this layer's own keyframes past a point instead of holding on the last one. `{ "drive": { "wiggle": { "prop": "rot", "freq": 1.5, "amp": 2 } } }`
+
+| name | what / when |
+|---|---|
+| `link` | the PICK-WHIP: this property copies another layer's own animated value every frame, `mul`/`add` rescale it and `delay` (in seconds, 0.1 is a normal follow-through lag) shifts when it arrives |
+| `loop` | LOOP OUT: past `to` seconds this layer's own keyframes repeat forever, `cycle` restarts at `from` (0 by default), `pingpong` bounces between them, `continue` just holds the last key the way an unlooped track already does |
+| `wiggle` | an AFTER EFFECTS EXPRESSION as data: deterministic seeded jitter on one property (x/y in px, rot in deg), default 2Hz at 10 units, reseed to decorrelate two layers so they never wobble in lockstep |
+
 ## Effector drives  `[per-layer]`
 
 What an effector's influence is SPENT on: `drives: { scale: 0.6, push: 90 }`, where the number is the amount at full influence. `push` is the one a stagger cannot imitate, because it reads the direction from the point to the clone as well as the distance.
@@ -638,11 +649,12 @@ A storyboard's `move: <curve>:<band>` (harness/lib/contract.mjs, scope PATH: fli
 | `ghost` | the only effect that reads TIME AS A MATERIAL: it evaluates the layer's own motion track a few frames BACK and draws from the difference, `trail` leaves faded copies at the poses it just left, `blur` samples the same poses inside one frame so the layer smears along its real direction of travel, not around a fixed centre |
 | `kick` | hit the layer on the film's own joints. A cut, a seam or a sting shoves it, so the frame feels the edit |
 | `lag` | FOLLOW-THROUGH: this layer trails another layer's motion by a frame or three and overruns its stop before settling. Stagger delays a sibling's entrance; this makes one layer drag behind another's continuous motion, which is half of what separates an animated object from a moved image |
-| `matte` | a LUMA MATTE: another layer's brightness is this layer's alpha, white shows and black hides. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
+| `matte` | a TRACK MATTE: another layer's luma or alpha becomes this layer's own alpha, white shows and black hides, and `-inverted` flips that. The general case of the whole wipe family, and the matte MOVES, because it is placed from the source layer's live box |
 | `mixBlend` | how this layer's pixels combine with what is already painted behind it, knock a headline out of a photo |
 | `occlude` | hide this layer where another one covers it, put something BEHIND something else without reordering the stack |
 | `plane` | stand the layer at a DEPTH so the camera moves it by a different amount than its neighbours, this is parallax |
 | `progress` | hand the layer the FILM's progress, 0 at the first frame and 1 at the last, as a CSS custom property its markup can draw with |
+| `repeat` | AE's Repeater: stamp the layer's own content 1 to 64 times, each copy stepped a little further (position, rotation, a compounding scale, an end opacity) than the last, and each copy's own arrival can stagger in seconds so a ring or a row builds itself one spoke at a time |
 | `shadow` | a drop shadow that knows where the light is, so every layer does not point the same way |
 | `squash` | SQUASH AND STRETCH read off the layer's own velocity: the travel axis stretches and the perpendicular one squeezes by exactly the reciprocal, so the volume holds. Scale both and it is a zoom, not a squash |
 | `tilt` | turn the layer out of the picture plane and hold it there. A card leaning away, a phone at an angle, panels receding |
@@ -912,11 +924,13 @@ The ORDER a stagger runs in, on `stagger` as an object: `{ "stagger": { "amount"
 
 ## Theme look keys  `[theme]`
 
-A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the six keys it accepts.
+A theme (`themes/<name>.json`) may carry a `look` block: the whole-film default a brand fixes so a scaffold does not re-decide it per video (engine-doctrine/CRAFT/THEME-LOOK.md). These are the eight keys it accepts.
 
 | name | what / when |
 |---|---|
 | `backdrop` | ordered bg preset names the brand turns through, one window per beat: planning-only, seeds a storyboard's `bg[]` plan, never read at render (bg is required, engine-doctrine/MISTAKES.md #159) |
+| `bgDefault` | a bg preset spec (or an array of 2+, a rotation) the theme paints when a beat opts in with `bg:[{"use":"theme"}]`; the one look key actually read at render time |
+| `bgPalette` | the 15-key colour ramp bg presets paint with (accent/tint/paperBase/accentBase/darkMesh/...); optional, derived from the theme's own palette when absent |
 | `cuts` | the default and accent cut/transition names the brand favours, one for almost every boundary and one reserved for its peak-energy beat |
 | `field` | grain and vignette numbers layered over the backdrop, both 0..1 strengths |
 | `layout` | the anchor band (left/center/right) and margin every beat composes against |
@@ -1192,4 +1206,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_728 effects across 62 families. Regenerate: `make effects`._
+_735 effects across 63 families. Regenerate: `make effects`._

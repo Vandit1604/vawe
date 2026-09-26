@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { BG_NAMES, BG_BLURBS, bgPreset, bgPaletteFrom, bgOptKeys, bgOverErrors } from '../../core/backgrounds/index.js';
 import { isLightBg, parseColor, colorAlpha } from '../../core/color/engine.js';
-import { expandTheme, isTokenFile } from '../../core/theme/roles.js';
+import { expandTheme } from '../../core/theme/roles.js';
 import { junctionTable, marksOf, bindWindowsToJunctions } from '../../core/timeline/junctions.js';
 import { bgErrors } from '../../core/validate/validate.mjs';
 import { checkCuts } from '../../core/fx/ancestor-kills.js';
@@ -154,11 +154,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     if (fs.existsSync(tp)) {
       try {
         const raw = JSON.parse(fs.readFileSync(tp, 'utf8'));
-        theme = isTokenFile(raw) ? expandTheme(raw, { parseColor, colorAlpha }) : raw;
+        theme = expandTheme(raw, { parseColor, colorAlpha });
       } catch { /* palette falls back */ }
     }
   }
-  const PAL = (theme && theme.bg) || bgPaletteFrom(theme && theme.palette) || undefined;
+  const PAL = (theme && theme.look && theme.look.bgPalette) || bgPaletteFrom(theme && theme.palette) || undefined;
 
   const lookOf = (name) => look(name, win.value, PAL);
 

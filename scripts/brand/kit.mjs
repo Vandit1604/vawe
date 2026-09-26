@@ -4,7 +4,10 @@
 // sections.mjs still crawls and screenshots, palette.mjs's eyedrop() still does the pixel histogram,
 // localize-assets.mjs's download() still does the one verified fetch.
 //
-//   node scripts/brand/kit.mjs <url> <name>     ·     make kit URL=https://linear.app NAME=linear
+//   node scripts/brand/kit.mjs <url> <name>            ·  make kit URL=https://linear.app NAME=linear
+//   node scripts/brand/kit.mjs <url> <name> --init      ·  make kit URL=... NAME=... INIT=1
+//     --init also runs `make doctor` and writes the stage-1 brief skeleton (films/scene/<name>.brief.md),
+//     so one command takes a fresh film from nothing to "answer the quiz next" (AGENTS.md stage 1).
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -12,11 +15,23 @@ import { eyedrop, writeSwatch } from './palette.mjs';
 import { download } from './localize-assets.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
-const [url, name] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-if (!url || !name) { console.error('usage: node scripts/brand/kit.mjs <url> <name>'); process.exit(1); }
+const args = process.argv.slice(2);
+const init = args.includes('--init');
+const [url, name] = args.filter((a) => !a.startsWith('--'));
+if (!url || !name) { console.error('usage: node scripts/brand/kit.mjs <url> <name> [--init]'); process.exit(1); }
 
 const dir = path.join(ROOT, 'assets/brands', name);
 fs.mkdirSync(dir, { recursive: true });
+
+// ---- init: is the checkout ready to render, before spending a capture on it? (scripts/vendor-gsap.mjs) ----
+if (init) {
+  console.log('→ doctor: is the checkout ready to render');
+  try {
+    console.log(`  ${execFileSync(process.execPath, [path.join(ROOT, 'scripts/vendor-gsap.mjs'), '--check'], { cwd: ROOT, encoding: 'utf8' }).trim()}`);
+  } catch (e) {
+    console.warn(`  ⚠ ${(e.stderr || e.stdout || e.message).trim()}`);
+  }
+}
 
 // ---- sections: reuse sections.mjs as-is (it clears/writes assets/brands/<name>/sections itself) ----
 console.log(`→ sections: crawling ${url}`);
@@ -57,4 +72,32 @@ const kit = {
 fs.writeFileSync(path.join(dir, 'kit.json'), JSON.stringify(kit, null, 2) + '\n');
 console.log(`\n✓ kit → ${path.relative(ROOT, dir)}/kit.json`);
 console.log(`  ${kit.sections.count} sections · ${p.light ? 'LIGHT' : 'DARK'}-first · bg ${p.bg} · text ${p.text} · accents ${p.accents.join(' ')}${favicon ? ` · favicon ${favicon}` : ''}`);
-console.log('  → author themes/<name>.json from these, then CONFIRM with make beats VS=<name>.');
+
+if (init) {
+  // Stage 1 brief skeleton (AGENTS.md "brief"): the five lines a person still owes, not the storyboard
+  // itself (`make quiz`/`make quiz-apply` write that, from real answers, not a guess).
+  const briefPath = path.join(ROOT, 'films/scene', `${name}.brief.md`);
+  fs.mkdirSync(path.dirname(briefPath), { recursive: true });
+  const brief = [
+    `# Brief: ${name}`,
+    '',
+    `Captured from ${url} (assets/brands/${name}/kit.json). The five lines below are what \`make quiz\``,
+    'still needs answered; nothing here is invented.',
+    '',
+    '```',
+    'SUBJECT   <fill: the product or moment this film is about>',
+    'DATA      <fill: any real number/claim this film can back, or "none needed">',
+    'PAYOFF    <fill: the one thing the viewer takes away>',
+    'AUDIENCE  <fill: who this is for, role and context>',
+    'FEELING   <fill: three words for the register>',
+    '```',
+    '',
+    `next: make quiz NAME=${name} URL=${url}`,
+    '',
+  ].join('\n');
+  fs.writeFileSync(briefPath, brief);
+  console.log(`\n✓ brief skeleton → ${path.relative(ROOT, briefPath)}`);
+  console.log(`\nnext: make quiz NAME=${name} URL=${url}`);
+} else {
+  console.log('  → author themes/<name>.json from these, then CONFIRM with make beats VS=<name>.');
+}

@@ -44,6 +44,22 @@
  .del>ins{background:#3a0a0e;color:#e68f8f;text-decoration:none;display:block}
  #note{color:var(--ink-3);font-size:11px;margin-top:6px;min-height:14px}
  [hidden]{display:none!important}
+ .curves{border-top:1px solid var(--line);padding:8px 0;margin-top:4px}
+ .curves h3{font-size:11px;font-weight:600;margin:0 0 6px;color:var(--ink-3);display:flex;align-items:center;gap:8px}
+ .curves select{background:var(--field);color:var(--ink);border:1px solid var(--line-2);border-radius:5px;
+   padding:3px 5px;font:11px var(--mono)}
+ .graph{width:100%;display:block;background:var(--field);border:1px solid var(--line-2);border-radius:6px}
+ .graph .grid{stroke:var(--line);stroke-width:1}
+ .graph .curve{fill:none;stroke:var(--accent);stroke-width:1.6}
+ .graph .zero{stroke:var(--line-2);stroke-width:1;stroke-dasharray:2,3}
+ .graph .handle{fill:var(--panel-2);stroke:var(--ink);stroke-width:1.5;cursor:grab}
+ .graph .handle:hover,.graph .handle:focus{fill:var(--accent);stroke:var(--ink)}
+ .graph .handle:focus{outline:none}
+ .graph .handle.dragging{cursor:grabbing}
+ .graph .stem{stroke:var(--ink-3);stroke-width:1}
+ .graph .keydot{fill:var(--ink-2)}
+ .glabel{font-size:9px;fill:var(--ink-3);font-family:var(--mono)}
+ .curves .hint{font-size:10px;color:var(--ink-3);margin-top:4px}
 </style>
 </head>
 <body>
@@ -55,6 +71,6 @@
     <span id="read">0f</span>
   </div>
 </div>
-<script src="/tune/tune.js"></script>
+<script type="module" src="/tune/tune.js"></script>
 </body>
 </html>

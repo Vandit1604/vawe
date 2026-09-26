@@ -1,60 +1,6 @@
 {
   "name": "threadcite",
   "note": "Colours pack auto-extracted from https://threadcite.live by scripts/brandkit.mjs. Dominant: light. Use ONLY these. Motion: punchy/editorial (site is fast, confident, live-data). Palette completed to the theme contract (core/theme-contract.js) from values already in this pack (vars.--border, --muted, --accent-soft, bg.inkBase, bg.accent). Nothing invented.",
-  "bg": {
-    "accent": "225,80,15",
-    "tint": "95,94,88",
-    "tint2": "225,80,15",
-    "dotLight": "95,94,88",
-    "paperBase": [
-      "#fbfaf8",
-      "#fff"
-    ],
-    "softBase": [
-      "#f7e2d7",
-      "#e9d5cb"
-    ],
-    "accentBase": [
-      "#e1500f",
-      "#b9420c"
-    ],
-    "inkBase": [
-      "#2b2a29",
-      "#0f0e0d"
-    ],
-    "border": "#dad9d7",
-    "light": [
-      "#fbfaf8",
-      "#fff"
-    ],
-    "dark": [
-      "#391b0d",
-      "#0f0e0d"
-    ],
-    "darkMesh": [
-      "#441f0e",
-      "#0f0e0d"
-    ],
-    "deep": [
-      "#323130",
-      "#0f0e0d"
-    ],
-    "ink": [
-      "#e1500f",
-      "#b9420c"
-    ],
-    "paper": "#fbfaf8"
-  },
-  "vars": {
-    "--ink": "#0f0e0d",
-    "--paper": "#fbfaf8",
-    "--muted": "#5f5e58",
-    "--em": "#e1500f",
-    "--on-light": "#0f0e0d",
-    "--on-dark": "#fbfaf8",
-    "--border": "#dad9d7",
-    "--accent-soft": "#f7e2d7"
-  },
   "motion": {
     "easing": "easeOutQuart",
     "bounce": 0.42,
@@ -191,5 +137,51 @@
       "{gradient.stop1}",
       "{gradient.stop2}"
     ]
+  },
+  "look": {
+    "bgPalette": {
+      "accent": "225,80,15",
+      "tint": "95,94,88",
+      "tint2": "225,80,15",
+      "dotLight": "95,94,88",
+      "paperBase": [
+        "#fbfaf8",
+        "#fff"
+      ],
+      "softBase": [
+        "#f7e2d7",
+        "#e9d5cb"
+      ],
+      "accentBase": [
+        "#e1500f",
+        "#b9420c"
+      ],
+      "inkBase": [
+        "#2b2a29",
+        "#0f0e0d"
+      ],
+      "border": "#dad9d7",
+      "light": [
+        "#fbfaf8",
+        "#fff"
+      ],
+      "dark": [
+        "#391b0d",
+        "#0f0e0d"
+      ],
+      "darkMesh": [
+        "#441f0e",
+        "#0f0e0d"
+      ],
+      "deep": [
+        "#323130",
+        "#0f0e0d"
+      ],
+      "ink": [
+        "#e1500f",
+        "#b9420c"
+      ],
+      "paper": "#fbfaf8"
+    }
   }
 }

@@ -1,6 +1,6 @@
 ---
 when: a theme should carry more than colours and fonts, or a film keeps re-deciding the same thing per film
-answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field) · how it is validated · how a storyboard merges it over the type spine · how to see it as a picture"
+answers: "the `look` block's shape (backdrop/scale/layout/marks/cuts/field/bgDefault/bgPalette) · how it is validated · how a storyboard merges it over the type spine · how to see it as a picture"
 group: crosscutting
 ---
 
@@ -11,7 +11,11 @@ group: crosscutting
 - `theme.look` (optional; `core/registry/theme-contract.js`) fixes the things AGENTS.md names as re-decided per
   film: `backdrop` (bg preset rotation, planning-only, see below), `scale` (hook/headline/body/caption
   type sizes), `layout` (anchor + margin), `marks` (logo path + its two sizes), `cuts` (default/accent
-  transition), `field` (grain/vignette).
+  transition), `field` (grain/vignette), `bgDefault` (the theme's own bg spec for `bg:[{"use":"theme"}]`,
+  read at render), `bgPalette` (the 15-key colour ramp bg presets paint with, optional).
+- `bgDefault` and `bgPalette` used to be separate top-level `theme.bgDefault`/`theme.bg` fields. Both
+  moved under `look` (not backward compatible): `core/theme/roles.js` refuses a theme that still
+  carries the old top-level field, naming the look key that replaces it.
 - Validated at load, same discipline as every other named vocabulary: an unknown `look` key, an
   unknown bg preset, or an unknown transition refuses with the near word (`core/validate/validate.mjs`
   `validateTheme`, checked for every `themes/*.json` pack by `make validate`).
@@ -41,7 +45,8 @@ over the theme (the theme is a DEFAULT, never a constraint an author cannot over
   "layout": { "anchor": "left", "margin": 160 },
   "marks": { "logo": "site/public/assets/favicon.svg", "endCardSize": 160, "headlineSize": 108 },
   "cuts": { "default": "fade", "accent": "cinematicZoom" },
-  "field": { "grain": 0, "vignette": 0 }
+  "field": { "grain": 0, "vignette": 0 },
+  "bgDefault": { "preset": "plain" }
 }
 ```
 
@@ -53,6 +58,8 @@ over the theme (the theme is a DEFAULT, never a constraint an author cannot over
 | `marks` | `{logo: path, endCardSize: number, headlineSize: number}` | (structural only, `logo` is a path an author must keep valid) |
 | `cuts` | `{default, accent}`, each a transition name | `core/transitions/catalog.js` `TRANSITIONS` (anim + cut + sting + seam, one merged catalog) |
 | `field` | `{grain, vignette}`, each a number | (structural only) |
+| `bgDefault` | a bg preset spec `{preset, value?}`, or an array of 2+ (a rotation) | **read at render** (see below), preset name against `BG_NAMES` |
+| `bgPalette` | the 15-key colour ramp a bg preset paints with (`accent`/`tint`/`paperBase`/`accentBase`/...) | shape-checked only (`core/backgrounds/palette.js`); optional, derived from the theme's own palette (`bgPaletteFrom`) when absent |
 
 Every field is optional; a theme with no `look` behaves exactly as it did before this existed. Writing
 one key does not require the others: a theme can fix only `backdrop` and leave layout/marks/cuts/field
@@ -77,32 +84,34 @@ background, so nobody ever designed one." Wiring `look.backdrop` as a render-tim
 reopen that hole under a new name; the next author who reaches for it should find this paragraph
 instead of rebuilding it.
 
-### `bgDefault` can now be a ROTATION, not only a single backdrop
+### `look.bgDefault` can now be a ROTATION, not only a single backdrop
 
 Measured across `films/scene/`: 143 of the 182 scenes with a `bg` array (79%) paint exactly one window for the whole
 runtime, however many times the film cuts. That is not the mistake `backdrop` above guards against: an
 author who writes `bg:[{use:"theme"}]` has already asked for the theme's own backdrop, the same
-explicit door `bgDefault` opened as a single spec. `theme.bgDefault` now accepts an ARRAY of specs (a
+explicit door `bgDefault` opened as a single spec. `look.bgDefault` now accepts an ARRAY of specs (a
 rotation) as well as the single object it always could:
 
 ```json
-"bgDefault": [
-  { "preset": "paper" },
-  { "preset": "dark" },
-  { "preset": "accent" }
-]
+"look": {
+  "bgDefault": [
+    { "preset": "paper" },
+    { "preset": "dark" },
+    { "preset": "accent" }
+  ]
+}
 ```
 
 On a film whose single `bg` window is `{use:"theme"}` with no `from`/`to` of its own, and whose theme
-declares a `bgDefault` array of 2+ specs, `core/backgrounds/theme-rotation.js`'s `expandThemeRotation`
+declares a `look.bgDefault` array of 2+ specs, `core/backgrounds/theme-rotation.js`'s `expandThemeRotation`
 turns that one window into one per shot (`shotWindows`, `core/timeline/junctions.js`), cycling the
 rotation in order. A film with no joints stays one shot: there is nowhere for a second window to live,
 which is a true answer, not a fallback. A film that authors its own `bg` windows (any count, any
 `from`/`to`) is untouched, and a theme with a single-object `bgDefault` behaves exactly as before.
 
 This is NOT `look.backdrop` reopened under a new name. `look.backdrop` stays planning-only and is still
-never read at render; the rotation lives on the field already read at render (`bgDefault`), and only
-fires when the author already wrote the opt-in the engine has always honoured.
+never read at render; the rotation lives on the sibling look key already read at render (`bgDefault`),
+and only fires when the author already wrote the opt-in the engine has always honoured.
 
 `look` used to carry an eighth key, `cues`: a fixed per-theme list of audio cue names. It is gone.
 `buildSfx` (`films/scene/scene.js:1713`) already derives every cue from the `CUT_CUE`/`SEAM_CUE`
@@ -152,9 +161,9 @@ Three themes carry one: `themes/vawe.json` (the real brand, derived from `site/a
 `themes/linear.json`/`themes/stripe.json` do not; a theme with no `look` is not an error, it is a theme
 that has not been given one.
 
-## The computed look, for the other 28
+## The computed look, for the rest
 
-Only 3 of the 31 themes in `themes/` carry an authored `look`, so an engine default reading
+Only a few of the themes in `themes/` (`ls themes/*.json | wc -l` for the total, `grep -l '"look"' themes/*.json | wc -l` for how many carry one) have an authored `look`, so an engine default reading
 `theme.look` alone would do nothing for nearly all of them, `themes/default.json` included. `computedLook(theme, { isLightBg })` and `resolveLook(theme,
 opts)` (`core/registry/theme-contract.js`, beside `lookErrors`) close that gap: `resolveLook` returns
 `{...computedLook(theme), ...(theme.look||{})}`, so an authored key always wins over the computed one,
@@ -182,7 +191,7 @@ check inline.
 - `field` is unchanged: `isLightBg(theme.palette.bg)` decides `{grain:0,vignette:0}` vs
   `{grain:0.08,vignette:0.15}`, the same light-vs-dark split every authored look already used.
 - `layout` STAYS a constant (`{anchor:"left", margin:160}`, `themes/vawe.json`'s own values), and says
-  so where it is written: no field any theme carries (palette, type, motion, bg, bgDefault) correlates
+  so where it is written: no field any theme carries (palette, type, motion, look.bgDefault) correlates
   with anchor or margin across the 7 hand-authored looks, and margin is structurally a per-video canvas
   decision, not a brand one. Fitting a formula to 7 points with no real signal would be curve-fitting,
   not derivation.
@@ -199,7 +208,7 @@ reason.
 - **`backdrop` is never a computed default, and is never read at render time at all.** Which bg preset
   a film turns through is a taste decision, and the engine choosing it for an author is
   `engine-doctrine/MISTAKES.md` #159 by name: `bg` is a required authoring field (`core/engine/produce.js:14-16`)
-  precisely so this cannot happen again. `theme.bgDefault` remains the one engine-owned bg default;
+  precisely so this cannot happen again. `look.bgDefault` remains the one engine-owned bg default;
   `computedLook` does not become a second one, and `look.backdrop` stays a storyboard-planning seed only.
 - **`marks` needs a real logo path.** No theme-agnostic default exists (a made-up path 404s at render),
   so a theme with no `marks` stays without one until it declares its own.
