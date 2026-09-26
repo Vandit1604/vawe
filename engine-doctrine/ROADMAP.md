@@ -103,7 +103,7 @@ aspect; a scene is composed for the ones it declares), or compose the films for 
 | named effect | status | proof |
 |---|---|---|
 | Lower Thirds, all twelve variants | **SHIPS** | `lowerThird` at `blocks/core.mjs:230`; `BLOCKS` carries `lowerThird.cleanBar` · `.boldBlock` · `.bild` · `.darkCard` · `.sideRule` · `.kickerName` · `.accentUnderline` · `.maskReveal` · `.softPill` · `.colourBlock` · `.stackBars` · `.newsTicker`. |
-| Social Overlays: X post · Reddit · Spotify · YouTube · follow | **SHIPS** | `tweetCard` · `redditPost` · `nowPlaying` · `videoLowerThird` · `followCard`, all in `BLOCKS` (`blocks/index.mjs`). Licence caveat stands: ship the *shape*, never a platform's logo lockup, unless the mark is used nominatively. |
+| Social Overlays: Spotify · YouTube · follow | **SHIPS** | `nowPlaying` · `videoLowerThird` · `followCard`, all in `BLOCKS` (`blocks/index.mjs`). `tweetCard` and `redditPost` were cut (static HTML fragments, no mechanism): author an X post or Reddit post shape as an inline `html` layer in the film's own style. Licence caveat stands: ship the *shape*, never a platform's logo lockup, unless the mark is used nominatively. |
 | macOS notification | **PART** | No macOS-specific block. `notification` (plus `.warn` · `.error` · `.stack`) covers the shape without the platform chrome. |
 | CSS Transitions: 3D · blur · cover · push · radial · scale · mechanical | **SHIPS** | `PRESENTATIONS` in `core/cuts/index.js` holds 27 entries: `cube` (3D) · `blur` · `slide` (cover) · `wipe` · `iris` · `zoom` (scale) · `squeeze` · `blinds` · `barn` · `flip` · `roll` · `letterbox` · `skewWhip` · `matchCut` and more. |
 | CSS Transitions: dissolve · grid | **NOT BUILT** *as cuts* | Neither name is in `PRESENTATIONS`. The dissolve exists one level up as `SEAM_FX.dissolve` (`core/timeline/seams.js:32`) and as `RESAMPLE_FX.dissolve`; the grid one exists as `SHADER_FX.gridPixelateWipe` (`core/stings/index.js:33`). Both are reachable, neither is a cut. |
@@ -267,7 +267,8 @@ status row); `browserFrame` defaulted `url` to a real company's domain; `deployS
 invented statistic "Ready in 1.2s".
 
 **Closed, all in `blocks/`:** app content beyond a music player (`feedRow` · `listRow` ·
-`settingsRow` · `profileHeader` · `onboardCard` · `emptyState`); split-screen and picture-in-picture
+`settingsRow` · `profileHeader` · `onboardCard` · `emptyState`; the first three were later cut as
+static HTML fragments with no mechanism, `profileHeader`/`onboardCard`/`emptyState` stayed); split-screen and picture-in-picture
 (`splitScreen`, `splitScreen.pip`, whose sides are block descriptors and which injects `w` and NOT
 `h` on purpose, because most factories size off content and a prop a factory does not destructure is
 dropped in silence); `comparison.screens`; moving state (`tabBar.switch` · `tabBar.icons` ·
