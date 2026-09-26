@@ -1292,6 +1292,15 @@ arsenal: ## [site] the ONE discovery command: Q= search, AT= what's legal, SHAPE
 	  $(if $(FROM),--from $(FROM)) $(if $(AMP),--amp $(AMP)) $(if $(AXIS),--axis $(AXIS)) \
 	  $(if $(OFFSET),--offset $(OFFSET)) $(if $(D),--scene $(D)) $(if $(LAYER),--layer $(LAYER))
 
+# make add BLOCK=<name> D=<film>: run that block's factory ONCE and write its output straight into the
+# film's own layers[], in place of the {type:"block"} sugar layer, tagged `ejectedFrom` (the source
+# block name and the commit this ran at). The film owns the ejected layers from then on: it can restyle
+# radius, border, colour, wording, anything, with no factory left in the way. ID=<layer id> disambiguates
+# when the film carries more than one instance of the same block.
+add: ## [author] eject BLOCK=<name> in D=<film> into its own literal layers, tagged ejectedFrom
+	@if [ -z "$(BLOCK)" ] || [ -z "$(D)" ]; then echo "usage: make add BLOCK=<name> D=<film.json> [ID=<layer id>]"; exit 1; fi
+	D=$(D) BLOCK=$(BLOCK) ID=$(ID) node harness/author/eject-block.mjs
+
 # make blurbs: does each entry's own description find that entry? A blurb is not a caption, it is the
 # RETRIEVAL INDEX `make arsenal` ranks on, so a description that cannot retrieve the thing it describes
 # is carrying no signal whatever it reads like. Take each blurb as the query, strip the words the NAME
