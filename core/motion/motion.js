@@ -111,19 +111,12 @@ export function speedRamp(t, { peak = 0.5, sharp = 2.4 } = {}) {
   return t < peak ? peak * Math.pow(t / peak, sharp) : 1 - (1 - peak) * Math.pow((1 - t) / (1 - peak), sharp);
 }
 
-// ---------- THE GRAPH EDITOR: a cubic bezier on the unit square ----------
+// A cubic bezier on the unit square, P0 (0,0) and P3 (1,1) fixed, P1/P2 authored: the same maths CSS
+// `cubic-bezier()` runs, so a curve copied from CSS or After Effects reproduces here exactly.
 //
-// Every curve above is a fixed shape with a name. This one is the shape an author DRAWS, and it is the
-// primitive under After Effects' graph editor: two control points on the unit square, P0 (0,0) and
-// P3 (1,1) fixed, P1 = (x1,y1) and P2 = (x2,y2) authored. It is the same maths CSS `cubic-bezier()`
-// runs, so a curve copied off a CSS reference or out of AE reproduces here exactly.
-//
-// THE SOLVE, and why it is not a closed form. The curve is parametric in s, and BOTH axes are cubics
-// in s. What an easing needs is y as a function of x, so x(s) = t has to be inverted first.
-// Newton-Raphson converges in a handful of steps because x(s) is monotone for x1, x2 in [0,1], and a
-// bisection fallback covers the flat spots where the derivative goes to zero and Newton would stall or
-// shoot out of range. Deterministic and allocation-free: the returned closure holds four numbers and
-// creates nothing per call, which matters because it is sampled once per property per layer per frame.
+// x(s) = t is inverted by Newton-Raphson (monotone for x1, x2 in [0,1]), with a bisection fallback for
+// the flat spots where the derivative goes to zero. Deterministic, allocation-free: sampled once per
+// property per layer per frame.
 const bezA = (a1, a2) => 1 - 3 * a2 + 3 * a1;
 const bezB = (a1, a2) => 3 * a2 - 6 * a1;
 const bezC = (a1) => 3 * a1;
@@ -163,77 +156,36 @@ export function cubicBezier(x1, y1, x2, y2) {
   };
 }
 
-// ---------- KEYFRAME HANDLES: influence AND speed, on the unit square ----------
+// A handle belongs to a KEY and one SIDE of it (easeOut on key a shapes the segment leaving a, easeIn
+// on key b shapes the segment arriving at b), unlike a named easing which shapes a whole segment.
 //
-// A named easing shapes a segment from OUTSIDE it: one curve for the whole gap, the same curve
-// whatever the keys either side are doing. A HANDLE belongs to a KEY and to one SIDE of it, which is
-// what a graph editor actually gives you and what the rest of this engine could not express.
+//   influence   how far along the segment the handle reaches, 0-100% of duration: x1 = outInfluence/100.
+//   speed       how fast the value moves AT the key, as a MULTIPLE of the segment's average velocity.
+//               0 = dead stop, 1 = straight line, 4 = rushes out, negative = leaves backwards first.
 //
-//   easeOut on key a   shapes the segment LEAVING a
-//   easeIn  on key b   shapes the segment ARRIVING at b
-//   so the segment a -> b is drawn by a.easeOut and b.easeIn, one handle each.
-//
-// A handle carries TWO numbers, and the second one is the reason this is a feature rather than a
-// second spelling of `ease`:
-//
-//   influence   how far along the segment the handle reaches, 0 to 100 per cent of its DURATION.
-//               This is the x of the control point: x1 = outInfluence/100, x2 = 1 - inInfluence/100.
-//   speed       how fast the value is moving AT the key, as a MULTIPLE of the segment's own average
-//               velocity. 0 is a dead stop, 1 is "exactly the average" (a straight line), 4 rushes
-//               out, and a negative number leaves backwards before turning round.
-//
-// WHY SPEED IS A MULTIPLE AND NOT UNITS PER SECOND, which is the whole design decision here.
-// After Effects keys speed in real units (pixels/sec, degrees/sec, per cent/sec) and pays for it by
-// keying every property dimension SEPARATELY: x, scale and rot do not share a scale, so one handle
-// pair cannot serve all three with an absolute speed on it. Putting speed on the unit square needs
-//
-//     y1 = (outSpeed * influenceSeconds) / valueDelta
-//
-// and that expression carries the property's own delta, so it divides by zero on a property that does
-// not change across the segment and gives a different curve to x than to scale for the same authored
-// number. Written as a multiple of the average velocity, outSpeed = frac * (valueDelta / segDur), the
-// substitution cancels EXACTLY:
-//
-//     y1 = frac * (valueDelta / segDur) * ((influence/100) * segDur) / valueDelta = frac * influence/100
-//
-// No delta, no duration, no division. One handle pair is therefore correct for every property on the
-// key at once, a zero delta is not a special case because nothing is divided by it, and the authoring
-// surface stays flat: `{ "influence": 20, "speed": 4 }` and not a map keyed by property name. It is
-// also what an author reasons in ("leave at a quarter speed, arrive at twice"), which is the
-// secondary reason, not the deciding one. The deciding one is that the arithmetic is exact.
-//
-// The cost, stated plainly: a per-property speed in real units is not expressible. A move whose x
-// should leave at 400 px/s while its scale leaves at rest needs two layers or two tracks. That is the
-// trade for one handle pair that is always right instead of five that each need a delta.
+// Speed is a multiple, not units/sec, because AE keys speed per property dimension separately (x,
+// scale and rot don't share a scale). Written as a multiple, the substitution
+// `y1 = frac * (valueDelta/segDur) * ((influence/100)*segDur) / valueDelta` cancels exactly to
+// `frac * influence/100`: no delta, no duration, no division, so one handle pair is correct for every
+// property on the key at once. Cost: a per-property speed in real units is not expressible.
 const HANDLE_DEFAULT_INFLUENCE = 100 / 3;   // AE's Easy Ease reaches a third of the way in
 
-// A side with NO handle contributes the LINEAR half of the curve, which is AE's own default temporal
-// interpolation: influence a third, speed equal to the average, so the control point sits on the
-// diagonal and that half of the segment is a straight line. It is what makes a one-sided handle mean
-// what it says: `easeOut: "easyEase"` alone gives (1/3, 0, 2/3, 2/3), eased out of the key and linear
-// into the next, exactly as applying Easy Ease Out to a single keyframe does.
+// A side with no handle is the linear half (influence a third, speed 1): the control point sits on
+// the diagonal, matching AE's own default temporal interpolation.
 const LINEAR_SIDE = { influence: HANDLE_DEFAULT_INFLUENCE, speed: 1 };
 
-// THE SYMMETRIC FLAT-ENDS, STEEP-MIDDLE CURVE ALREADY EXISTS. `speedRamp` (below) owns it and is
-// exposed as `ease: "ramp"`, so a named handle preset that reproduced it on both sides would be a
-// second spelling of a shipped curve. Measured: a symmetric handle pair at influence 55, speed 0
-// reproduces `ramp` to within 0.0037 over the whole segment. `hang` is not that curve at a different
-// name, it is the SIDE of it, and the side is what a named easing cannot give you: the swap the
-// velocity-hidden cut describes is `hang` leaving one key and something else arriving at the next.
-//
-// The doses, measured as peak slope in multiples of the segment's average velocity, so the choice is
-// not by feel: easyEase 1.50x, `ramp` 2.40x, easeInOutCubic (the engine default) 3.00x, `hang` on
-// both sides 4.00x. Note the order: the DEFAULT is already steeper than `ramp`, so reaching for
-// `ramp` to make a move snappier makes it softer.
+// `hang` is not `speedRamp`/`ease:"ramp"` under another name (a symmetric handle pair at influence 55,
+// speed 0 reproduces `ramp` to within 0.0037): it is one SIDE of that shape, which a named easing
+// cannot give. Peak slope in multiples of average velocity: easyEase 1.50x, `ramp` 2.40x,
+// easeInOutCubic (engine default) 3.00x, `hang` both sides 4.00x. The default is already steeper than
+// `ramp`, so reaching for `ramp` to snap a move up actually softens it.
 const HANDLES = {
   easyEase: withBlurb('AE\'s Easy Ease: reaches a third of the way in and arrives at a DEAD STOP. The default handle, and the one to use when you just want a key to stop being mechanical', { influence: HANDLE_DEFAULT_INFLUENCE, speed: 0 }),
   linear: withBlurb('the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped', { ...LINEAR_SIDE }),
   hang: withBlurb('influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state', { influence: 75, speed: 0 }),
   fling: withBlurb('a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move', { influence: 18, speed: 4 }),
-  // A NEGATIVE arriving speed is the whole trick, and shipping this with a positive one made the name a
-  // lie: `y2 = 1 - speed * influence`, so a positive speed pulls the control point BELOW the key and the
-  // curve peaks at exactly 1.000000, measured over 20,001 samples. It was a plain ease-in wearing an
-  // overshoot's blurb. Negative lifts the control point past the key, which is what sailing past means.
+  // Speed must be NEGATIVE here: `y2 = 1 - speed*influence`, so a positive speed pulls the control
+  // point below the key (measured peak 1.000000 over 20,001 samples, a plain ease-in, no overshoot).
   // -0.8 at influence 62 peaks at 1.1008, the 10 per cent practitioners state for a snappy overshoot.
   overshoot: withBlurb('arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: -0.8 }),
 };
@@ -252,9 +204,7 @@ export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {
     title: 'Keyframe handles (the graph editor)',
     tag: 'motion key',
     intro: 'On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles. A named easing is one stock curve for the whole gap; a handle is a control point you place. Each carries an `influence` (how far along the segment it reaches, 0-100 per cent of the DURATION) and a `speed` (how fast the value moves AT the key, as a MULTIPLE of the segment\'s own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out). A multiple and not px/sec, so one handle pair is correct for x, scale and rot at once. The names below are ONE SIDE each and the slot picks the side: `{ "t":0.6, "x":400, "easeOut":"fling", "easeIn":"easyEase" }`, or the long form `{ "influence": 18, "speed": 4 }`. Refused beside `ease` on the same segment.',
-    // A HANDLE is one SIDE of one key, and the slot says which side, so the form has to show both
-    // sides of a segment at once or the name reads as a whole-segment easing, which is the thing it
-    // is not. Written as a name here; the long form is { influence, speed }.
+    // Shows both sides of a segment, since a single-sided example would read as a whole-segment easing.
     usage: (n, { text }) => text({ anim: 'none', motion: [{ t: 0, x: -300, easeOut: n }, { t: 0.9, x: 300, easeIn: n }] }),
     noPreview: 'a handle is half the shape of a segment, so it has the same problem a mode has: a still frame is one point on the curve and says nothing about the curve. The playground card draws the curve itself with both handles on dials.',
   },
@@ -319,26 +269,14 @@ export const EASINGS = {
   hold: (t) => (t >= 1 ? 1 : 0),
 };
 
-// THE CATALOGUE AND THE SEARCH ONLY. NOTHING RESOLVES THROUGH THIS.
+// The catalogue and search only; nothing resolves through this. `resolveEasing` below keeps its own
+// refusal because the valid `ease` set is wider than this table (EASINGS + FEEL + INTERP;
+// `isEasingName` is the one membership test), and it carries its own GSAP-name hint.
 //
-// `resolveEasing` below must keep its own refusal, and the reason is that the valid set of the `ease`
-// field is WIDER than this table: it is EASINGS + FEEL + INTERP, `isEasingName` is the one membership
-// test over that union, and resolveEasing accepts a feel word by design. A `pick()` here would refuse
-// `ease: "snappy"`, which is a shipped spelling. It also carries a cross-registry hint of its own for
-// GSAP ease names, which are real in this engine but only on GSAP-driven fields.
-//
-// What the registry is for: the section in engine-doctrine/EFFECTS.md, which was hand-listed in
-// scripts/site/effects-catalog.mjs with its usage form and its no-preview reason a file further on.
-// `skip` stays, and it is a DECISION, not a gap: 41 curves named by mechanism are better served by the
-// feel table in engine-doctrine/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
-// THE WORDS A PERSON WOULD SAY, filled per-curve so `make arsenal` can find a named curve by feeling
-// rather than by mechanism (the FEEL table in vocab.js covers the same ground for a WORD in the `ease`
-// slot; this is the same words indexed onto the curve names themselves, since an author who already
-// typed a curve name half-remembered is still searching by feeling). Five names added by
-// `Object.assign(EASINGS, …)` below (spring-bouncy, spring-stiff, springEase) and by direct assignment
-// further down (settle, snap) do not exist on this object yet at the point `defineRegistry` runs, so
-// their aka is merged in AFTER those assignments, once EASING_AKA has been handed to the registry by
-// reference (see the Object.assign(EASING_AKA, …) below EASINGS.snap).
+// `skip` is deliberate: 41 curves named by mechanism are better served by the feel table in
+// engine-doctrine/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
+// `Object.assign(EASING_AKA, …)` below EASINGS.snap merges in the aka for five names (spring-bouncy,
+// spring-stiff, springEase, settle, snap) added to EASINGS after this registry is defined.
 const EASING_AKA = {
   linear: ['constant speed', 'no easing', 'mechanical motion'],
   easeInCubic: ['strong ease in', 'gathers speed', 'committed departure'],
@@ -456,21 +394,13 @@ export const isEasingName = (n) => typeof n === 'string'
   && (Object.prototype.hasOwnProperty.call(EASINGS, n) || Object.prototype.hasOwnProperty.call(FEEL, n)
       || Object.prototype.hasOwnProperty.call(INTERP, n));
 
-// gsapEase(e, fallback, where): an author-supplied easing for a GSAP-DRIVEN field → something GSAP
-// will actually honour.
+// gsapEase(e, fallback, where): an author-supplied easing for a GSAP-DRIVEN field -> something GSAP
+// will actually honour. GSAP does not refuse a name it does not know (`parseEase` returns undefined
+// and the tween silently runs GSAP's default): measured, `gsap.parseEase('easeOutCubic')` is undefined,
+// exactly like a typo, which is how `blocks/camera-chrome.mjs` ran on GSAP's default unnoticed.
 //
-// WHY THIS EXISTS. `parts[].ease`, `parts[].exitEase`, `morph.ease` and the sting/motion-path eases go
-// straight into `gsap.fromTo`, and GSAP does not refuse a name it does not know: `parseEase` returns
-// undefined and the tween silently runs on GSAP's default. So the two vocabularies were asymmetric.
-// resolveEasing (below) throws on a GSAP name and even explains that GSAP eases are real on these
-// fields, while these fields accepted an ENGINE name and quietly rendered a different curve.
-// `blocks/camera-chrome.mjs` names `easeOutCubic` twice and has been running on GSAP's default ever
-// since it was written. Measured: gsap.parseEase('easeOutCubic') is undefined, exactly like
-// gsap.parseEase('totalNonsenseXYZ').
-//
-// An ENGINE name resolves to its own FUNCTION rather than to a GSAP look-alike, because GSAP accepts a
-// function as an ease. So the author gets the curve they named, not the nearest approximation, there
-// is no mapping table to maintain and none to drift.
+// An engine name resolves to its own function rather than a GSAP look-alike (GSAP accepts a function
+// as an ease), so the author gets the curve they named with no mapping table to drift.
 export const gsapEase = (e, fallback, where = '') => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return fallback;
@@ -489,20 +419,9 @@ export const gsapEase = (e, fallback, where = '') => {
     + ' unchecked name here renders a plausible frame that is not the one asked for.');
 };
 
-// resolveEasing: an easing name or a function → a pure easing function.
-//
-// ABSENT → easeOutCubic. A WRONG NAME → throw. Those are different questions and this used to answer
-// them the same way: first silently, then (after the typo `ease:"eastOutQuart"` rendered the wrong
-// curve) with a warn-once-and-substitute. But a warning printed once per process, from one of eight
-// render workers, into a log nobody reads, is the same as silence, the argument this repo already
-// makes at films/scene/scene.js about `fx`. The frame still rendered on the wrong curve.
-//
-// core/fx/progress.js saw this and hand-rolled its own membership test above its call, with the note
-// that warn-and-substitute is "right for a prop authored in a hundred scenes and wrong for this
-// registry". That fear was measurable and it was unfounded: across 151 scene files and 35 themes,
-// 22 distinct easing names are in use and NOT ONE is unknown. The only two odd values in the library
-// are `power2.inOut` and `power3.inOut`, and both sit on GSAP-driven fields that never reach here.
-// So the check is one copy again, and it lives where the vocabulary does. engine-doctrine/MISTAKES.md #367.
+// resolveEasing: an easing name or a function -> a pure easing function.
+// Absent -> easeOutCubic. A wrong name -> throw, not warn-and-substitute: a typo like
+// `ease:"eastOutQuart"` still rendered the wrong curve under a warning nobody reads (MISTAKES #367).
 export const resolveEasing = (e) => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return easeOutCubic;
@@ -616,30 +535,18 @@ export function track(n, fps, beats) {
   return { name: null, index: -1, t01: 0, localT: 0, elapsed: t, start: 0, dur: 0 };
 }
 
-// ---------- THE ENTRANCE WARP: anticipation and the overshoot dial ----------
+// Anticipation (a curve dipping below 0 before it comes forward) and overshoot (passing 1 and ringing
+// down) are both shapes of the entrance's own easing, needing no new transform, layer or track.
 //
-// Both are one idea. An entrance moves a layer from an offset to rest, and the SHAPE of that travel is
-// its easing. Anticipation is that curve dipping BELOW 0 for two or three frames (the layer winds back
-// along its own travel axis before it comes forward); an overshoot is the same curve passing 1 and
-// ringing down. Neither needs a new transform, a new layer or a new track: they are the ease.
-//
-// So an entrance takes an optional WARP, a function of its OWN easing, and every directional entrance
-// resolves it through `warpEase` below. The warp receives the anim's own curve because the anim is the
-// only thing that knows it: `rise` settles on easeOutSnap and `slide` on easeOutCubic, and a caller
-// that had to name the curve to wind it up would be a second owner of that fact.
-//
-// PURE, and terminal at both ends: every warp here returns exactly 0 at u<=0 and exactly 1 at u>=1, so
-// the resting keys the clip pipeline writes are unchanged and a warped layer holds at true rest.
+// An entrance takes an optional WARP, a function of its own easing, resolved through `warpEase`: the
+// warp receives the anim's own curve since the anim is the only thing that knows it (`rise` on
+// easeOutSnap, `slide` on easeOutCubic). Every warp is pure and terminal (exactly 0 at u<=0, exactly 1
+// at u>=1), so the clip pipeline's resting keys are unchanged.
 export const warpEase = (own, warp) => (typeof warp === 'function' ? warp(own) : own);
 
-// anticipateEase(ease, {amount, windup}). The wind-up, after the Disney principle as motion designers
-// apply it: the layer travels `amount` of its distance BACKWARDS over `windup` of the entrance, then
-// goes straight into the main move with no hold between them. 10 to 20% over 2 to 4 frames is the band
-// practitioners quote; `amount` is a fraction of the travel, `windup` a fraction of the enter ramp.
-//
-// The wind-back rides easeOutSine, which arrives at the turn with its speed already bled off, so the
-// reversal reads as a hinge rather than a bounce off a wall. The main move then launches on the anim's
-// own curve over the remaining window, rescaled by (1 + amount) so it still lands exactly at rest.
+// anticipateEase: the layer travels `amount` of its distance backwards over `windup` of the entrance
+// (10-20% over 2-4 frames is the band practitioners quote), then launches into the main move with no
+// hold. The wind-back rides easeOutSine so the reversal reads as a hinge, not a bounce off a wall.
 export function anticipateEase(ease = easeOutCubic, { amount = 0.15, windup = 0.25 } = {}) {
   const a = Math.min(0.6, Math.max(0.01, amount));
   const w = Math.min(0.6, Math.max(0.05, windup));
@@ -651,19 +558,11 @@ export function anticipateEase(ease = easeOutCubic, { amount = 0.15, windup = 0.
   };
 }
 
-// overshootEase(amount). The dial the presets bake. `amount` is the FIRST overshoot, as a fraction of
-// the travel: 0.12 passes the target by 12% and rings down to rest inside the entrance window. Every
-// overshooting entrance in this engine picks a `bounce` and takes whatever peak that produces; this
-// inverts the relation instead, so an author states the number they can see.
-//
-// The inversion is the standard second-order step response, Mp = exp(-pi*zeta / sqrt(1 - zeta^2)),
-// solved for zeta. spring() below is that step response and `bounce` is 1 - zeta, so the amount an
-// author asks for is the amount the curve delivers rather than a number fitted by eye.
-//
-// The SETTLE TIME is deliberately not a second dial here. It is `enterDur`, which already exists, is
-// already the window this curve is mapped into, and is already what an author sets to make an entrance
-// take 0.4s. A `settle` prop beside it would be two ways to say one thing, which is the drift this
-// codebase logs most.
+// overshootEase(amount): `amount` is the first overshoot as a fraction of travel (0.12 = passes the
+// target by 12%, rings down inside the entrance window). Inverts the standard second-order step
+// response Mp = exp(-pi*zeta / sqrt(1 - zeta^2)) for zeta, so the number an author states is the
+// number the curve delivers, not a peak fitted by eye. No separate settle-time dial: that is
+// `enterDur`, already the window this curve maps into.
 export function overshootEase(amount = 0.12) {
   const a = Math.min(0.6, Math.max(0.01, amount));
   const L = Math.log(a);
@@ -751,26 +650,14 @@ export function shake(t, { amp = 14, freq = 11, decay = 3.2, seed = 0 } = {}) {
 export const pulse = (t, { period = 2.4, amt = 0.03 } = {}) => 1 + amt * Math.sin((t / period) * Math.PI * 2);
 
 // trackingFor(px, dark). Optical letter-spacing: display type tightens as it grows (measured off
-// linear.app's real ramp: −0.008em body → −0.022em hero). Themes opt in via type.optical.
+// linear.app's ramp: -0.008em body to -0.022em hero). Themes opt in via type.optical.
 //
-// `dark` is the POLARITY of the type: true when light ink sits on a dark ground. That is not a taste
-// dial, it is an optics fact about the eye and about the encoder. A light glyph on a dark ground
-// spreads (the bright form irradiates into the dark counters around it) so it reads heavier and the
-// gaps between letters read smaller than the identical pair inverted. The ramp above was measured on
-// dark-on-light type, so on a dark ground it is already too tight before the size term is applied.
-// The correction OPENS the tracking again, and it grows with the type: 0 at 14px body, the full
-// +0.010em the rule names by 120px hero. Body is left alone on purpose, the source fixes body for a
-// dark ground with weight and line-height, not with tracking.
-//
-// The lift rides the SAME knots as the base ramp, and rises more slowly than the base falls, so dark
-// tracking is still monotone: bigger type is still tighter type. A flat +0.010em above 32px is the
-// obvious first shape and it is wrong. The base only travels 0.010em across that whole span, so a
-// flat lift cancels it and re-expands it, and 64px type came out LOOSER than 32px type. That reads as
-// a size ramp with a dent in it.
-//
-// The one-argument form is byte-identical to the ramp it always was: the `dark` branch is not taken,
-// so no caller that has not opted in can move a single glyph. That is deliberate, 21 of 37 themes
-// here carry a dark palette, and a silent global re-tracking of the library is not a bug fix.
+// `dark`: light ink on a dark ground irradiates into its counters and reads tighter than the same
+// pair inverted, so the ramp (measured on dark-on-light type) is already too tight there. The
+// correction opens tracking again, growing from 0 at 14px to +0.010em at 120px, riding the same knots
+// as the base ramp so it stays monotone (a flat +0.010em above 32px would make 64px type read looser
+// than 32px, since the base only travels 0.010em over that span). The one-argument form is
+// byte-identical to the old ramp: `dark` is opt-in, not a silent global re-tracking.
 const DARK_TRACK_LIFT = (px) => interpolate(px, [14, 32, 64, 120], [0, 0.002, 0.006, 0.010]);
 export const trackingFor = (px, dark = false) => {
   const base = interpolate(px, [14, 32, 64, 120], [-0.008, -0.012, -0.017, -0.022]);
@@ -814,59 +701,34 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
   return +(min + ((seed >>> 0) % (steps + 1)) * 0.1).toFixed(2);
 }
 
-// ---------- taste: swappable theme (palette + gradient + fonts + motion personality) ----------
-// A theme is data and OWNS the entire look. There is no default look and no merge-over-defaults.
-// Named themes (themes/<name>.json) are brand kits; an inline object on data.theme is the one-off
-// escape hatch. A theme missing required keys (core/theme-contract.js) throws at boot, so a video
-// can never render with fallback CSS. Motion personality alone keeps engine defaults, it tunes
-// HOW primitives move, not what the video looks like.
-// `idle` is the ONLY key here that describes how a layer LIVES; the other six all govern an entrance
-// or an exit. THE OWNER'S CALL (2026-09): a default that induces motion nobody authored is a bug, not
-// a taste choice, so `idle` defaults to `none`. It was briefly `'breathe'` (measured: the reference
-// films in refs/ are still for 13-24% of their frames and ours for 84%, and that number is real), but
-// shipping it as the SILENT default meant static text pulsed a 1.5% scale nobody asked for. The
-// argument for authored idle stands, it just has to be authored: `idle: "breathe"` on a theme, a
-// scene, or a layer opts in (core/engine/idle.js, which has said `none` is the default in its own
-// blurb the whole time; this line was the one place that disagreed with it).
-// THE DEFAULT EASE IS THE STRONG ONE, and the change is one word with a measurable reason behind it.
-// The outside standards argue the built-in CSS curves are too weak and name a custom ease-out,
-// `cubic-bezier(0.23, 1, 0.32, 1)`. Sampled at 21 points against all 41 of our easings, the nearest is
-// `easeOutQuint` at a mean error of 0.0044: we have shipped their curve under another name the whole
-// time and defaulted to `easeOutCubic`, which is the weaker built-in they specifically argue against
-// (engine-doctrine/CRAFT/MOTION-STANDARDS.md).
+// A theme is data and OWNS the entire look: no default look, no merge-over-defaults. Named themes
+// (themes/<name>.json) are brand kits; an inline object on data.theme is the one-off escape hatch. A
+// theme missing required keys (core/theme-contract.js) throws at boot rather than falling back to CSS.
 //
-// `stagger` 0.045 is 45ms, mid-band of their 30 to 80.
-// `bounce`, `settle` and `enter` are resolved here but NOT currently read by any entrance: `rise`
-// (core/motion.js) is hardcoded to `easeOutSnap` (bounce 0.2), `pop`/`lift` to `easeOutBack`/
-// `easeOutSettle`, none of them take `M`. Left as documented, inert knobs rather than wired up here:
-// wiring them into the entrance registry is a real change to what every `anim:"rise"` looks like, and
-// this pass is about removing motion nobody asked for, not adding a new one. `bounce` still defaults
-// to 0 below so the field reads correctly if a future change wires it in.
+// `idle` defaults to `none`: a default that induces motion nobody authored is a bug, not a taste
+// choice (it was briefly `breathe`, silently pulsing static text 1.5% nobody asked for). Authored idle
+// still works via `idle: "breathe"` on a theme, scene or layer (core/engine/idle.js).
+//
+// Default ease is `easeOutQuint`: sampled at 21 points, it is the nearest of our 41 easings (mean
+// error 0.0044) to the custom ease-out `cubic-bezier(0.23, 1, 0.32, 1)` outside motion standards argue
+// for (engine-doctrine/CRAFT/MOTION-STANDARDS.md), which the old default `easeOutCubic` was weaker than.
+// `stagger` 0.045 (45ms) is mid-band of their 30-80ms range.
+//
+// `bounce`, `settle` and `enter` are resolved here but not read by any entrance yet: `rise` is
+// hardcoded to `easeOutSnap`, `pop`/`lift` to `easeOutBack`/`easeOutSettle`. Documented, inert knobs
+// rather than wired up, since wiring them changes what every `anim:"rise"` looks like.
 export const DEFAULT_MOTION = { easing: 'easeOutQuint', bounce: 0, settle: 0.6, enter: 48, durationScale: 1, stagger: 0.045, idle: 'none' };
 
-// exitRatioFromMotion(durationScale): `exitRatio` DERIVED from the theme's own overall pace, the same
-// axis `core/registry/theme-contract.js` already reads for the default cut tier (`durationScale` < 1
-// is a brisk brand, > 1 is cinematic). A theme that already runs fast should also leave fast: half its
-// own pace, anchored so the engine's own pace (durationScale 1) lands on 0.5, the exact value
-// `themes/default.json` names "the house default: half, the middle of the band" and `themes/plinth.json`
-// (durationScale 1) also authors by hand. Checked against the 11 themes that hand-author `exitRatio`:
-// this formula is within 0.05 of 8 of them (exact on plinth) and its one clear miss, `themes/
-// plainyear.json` (durationScale 0.9, hand-authored 0.6), is a calm brand that happens to also be
-// paced fast, which durationScale alone cannot see; an author who wants that split still states it
-// and wins (see below). Clamped to the authored band with a little headroom either side, so a custom
-// theme's `durationScale` outside 0.8-1.05 cannot compute an exit slower than its own entrance or one
-// so fast it reads as a glitch.
+// exitRatio derived from the theme's own pace (durationScale, same axis theme-contract.js reads for
+// cut tier): half its pace, anchored so durationScale 1 lands on 0.5 (themes/default.json's stated
+// house value). Checked against the 11 themes that hand-author exitRatio: within 0.05 of 8 of them.
+// Clamped to 0.3-0.7 so an out-of-band durationScale cannot compute an exit slower than its entrance.
 export const exitRatioFromMotion = (durationScale) => Math.min(0.7, Math.max(0.3, 0.5 * durationScale));
 
-// anticipateFromMotion(bounce): the wind-up AMOUNT `core/engine/produce.js` defaults onto a qualifying
-// directional entrance (any WARPABLE `anim`, core/timeline/clips.js), so `anticipate` becomes opt-out
-// rather than a word an author has to remember. DERIVED, same shape as exitRatioFromMotion above: reads
-// `theme.motion.bounce`, the axis `core/registry/theme-contract.js` already reads for the accent-cut
-// tier, so a calm brand and a bouncy one wind up by different amounts instead of all getting one
-// constant. engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md states the practitioner band directly ("roughly 10 to
-// 20% of the total move"): the engine default (bounce 0) sits at the floor, and the bounciest theme
-// shipped today (threadcite, 0.42) lands at the ceiling; clamped so a still-bouncier future theme
-// cannot wind up past the band the recipe names.
+// The wind-up amount `core/engine/produce.js` defaults onto a qualifying directional entrance, derived
+// from `theme.motion.bounce` so a calm and a bouncy theme wind up by different amounts. Practitioner
+// band is 10-20% of the move (engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md): bounce 0 sits at the
+// floor, the bounciest shipped theme (threadcite, 0.42) at the ceiling, clamped to that band.
 export const anticipateFromMotion = (bounce) => Math.min(0.2, Math.max(0.1, 0.1 + 0.25 * (bounce ?? 0)));
 
 // motionDefaults(theme): the theme's motion personality with `easing` resolved to a function.
@@ -883,17 +745,11 @@ export function motionDefaults(theme) {
     enter: m.enter ?? DEFAULT_MOTION.enter,
     durationScale,
     stagger: m.stagger ?? DEFAULT_MOTION.stagger,
-    // The theme's answer to "how does a layer behave once it has arrived". Read by
-    // films/scene/scene.js as the third rung of layer -> scene -> theme -> engine default, and
-    // normalized there so a misspelled name is refused at boot rather than on a later frame.
+    // Third rung of layer -> scene -> theme -> engine default (films/scene/scene.js), normalized here
+    // so a misspelled name is refused at boot rather than on a later frame.
     idle: m.idle ?? DEFAULT_MOTION.idle,
-    // THINGS SHOULD LEAVE FASTER THAN THEY ARRIVE. An entrance is an introduction and deserves its
-    // time; an exit is over. The exemplar states this per layer (a scrim that fades in over 0.32 and
-    // out over 0.07, a hook that types at 33cps and erases at 60), and every other film in this library
-    // leaves everything at the same speed it arrived because a single symmetric constant is the
-    // default. `exitRatio` moves that decision to the theme, where a brand's snap belongs. An explicit
-    // `exitRatio` still wins outright; only the 30 of 41 themes that never say it now get a real number
-    // (`exitRatioFromMotion` above) instead of 1 (symmetric, which is what "no rule" actually shipped).
+    // Exits should leave faster than they arrive. An explicit `exitRatio` wins outright; themes that
+    // never say it get a derived number instead of 1 (symmetric, "no rule").
     exitRatio: m.exitRatio ?? exitRatioFromMotion(durationScale),
   };
 }

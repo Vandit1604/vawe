@@ -1,45 +1,17 @@
-// core/generators.js: the registry of PLAYABLE GENERATORS.
+// Registry of PLAYABLE GENERATORS: a pure function from an options object to markup, with no
+// knowledge of scenes, layers or the renderer, so the same function runs in Go render, `make
+// preview`, and the marketing site's dials.
 //
-// A generator is a pure function from an options object to markup. It knows nothing about scenes,
-// layers or the renderer, which is what lets the same function run in the Go render, in `make
-// preview`, and in a browser on the marketing site with dials attached to it.
+// Entry shape: { name, blurb, schema, render(opts) -> html, docs }
+//   schema     declarative option table (core/lightfield/options.js): `{ kind, ...bounds, def }`,
+//              `kind: 'group'` nests via `fields`. Drives the generated control (slider/select/well).
+//   presets    named full option objects; the schema `def` is a neutral value, not a good result.
+//   normalise  optional: turns a plausible option set into a legal one, throws if it cannot.
+//   render     must validate and throw on anything it does not understand, never substitute a default.
+//   produces   'html' (markup for `--t`) or 'layers' (scene layers, previewed by booting the engine).
 //
-// THE CONTRACT. An entry is:
-//
-//   { name, blurb, schema, render(opts) -> html, docs }
-//
-//   schema  a DECLARATIVE option table, the shape core/lightfield/options.js defines: every field is
-//           `{ kind, ...bounds, def }`, and `kind: 'group'` nests via `fields`. This is the whole
-//           reason the registry exists. A JS default (`w = 560`) is a value; a schema entry is a
-//           contract, and only a contract can produce a control: a range makes a slider, an `of`
-//           makes a select, `hex` makes a colour well.
-//   presets an optional named set of full option objects, and the better place to START someone. A
-//           schema's `def` is the neutral value a field takes when nobody said otherwise, which is not
-//           the same thing as a good-looking result: lightfield's fitted `ref` differs from its
-//           defaults on three colour stops. Landing a visitor on the raw defaults shows them the
-//           least considered version of the thing you are asking them to judge.
-//   normalise optional. Turns a PLAUSIBLE option set into a legal one, and throws if it cannot. Some
-//           dials are only meaningful for some structures, and a caller that picks a structure at
-//           random cannot be expected to know the table. Without this the randomiser makes illegal
-//           pairs and the person clicking sees an error they did not cause. It is not a silent
-//           substitution: what it resets is a value the chosen structure has no way to express.
-//   render  called with a partial options object. It MUST validate and throw on anything it does not
-//           understand, rather than substituting a default. The playground shows that message to the
-//           person turning the dial, so a thrown error is a feature here, not a failure.
-//   produces what `render` returns: 'html', a markup string to inject and drive with `--t`. The page
-//           also understands 'layers', an array of scene layers, which it previews by booting the
-//           engine on a scene built around them. Nothing declares that today; it is kept because it is
-//           the only correct way to show a scene fragment, and re-deriving it later would mean writing
-//           a second engine that agrees with the first until it does not.
-//
-// WHY A REGISTRY AND NOT A LIST IN THE SITE. The site is a separate app that vendors this directory
-// (scripts/site/site-engine.mjs). A hand-kept list over there is a second source of truth that goes
-// stale silently, which is precisely how site/public froze 77 files behind core/ (engine-doctrine/MISTAKES.md
-// #271). The site reads GENERATORS and renders whatever it finds.
-//
-// ADDING ONE. Export a `SCHEMA` and a render function from your module, then add a row here. If your
-// generator has no schema it does not belong in the playground yet: without one there is nothing to
-// build a panel from, and inferring dials from example values guesses ranges and misses enums.
+// A hand-kept list on the site side is a second source of truth that goes stale silently
+// (engine-doctrine/MISTAKES.md #271), so the site reads GENERATORS directly.
 import { lightfield } from '../lightfield/index.js';
 import { crtSpec } from '../layers/util.js';
 import { blurbsOf, defineRegistry } from '../registry/registry.js';
@@ -49,23 +21,15 @@ import { FALLOFF_NAMES } from '../motion/effector.js';
 import { handleCurve } from '../motion/motion.js';
 import { SCHEMA as LIGHTFIELD_SCHEMA, normalise as lightfieldNormalise, HONOURS } from '../lightfield/options.js';
 import { PRESETS as LIGHTFIELD_PRESETS } from '../lightfield/presets.js';
-// The playground lists FIELD GENERATORS only. The 70 block families keep their declared schemas and
-// their gate (blocks/schema.mjs, quality/gates/block-schema.mjs), because a contract is worth having
-// whether or not a page renders it. They are not here because a block is a scene FRAGMENT rather than a
-// picture: previewing one means booting a whole scene around it, and a picker of 71 entries buried the
-// thing people came to turn.
+// The playground lists FIELD GENERATORS only. Block families (blocks/schema.mjs) are scene FRAGMENTS,
+// not pictures, so they are not listed here.
 //
-// ONE ENTRY PER LOOK, not one entry with five presets. `slats`, `rings` and `shards` are different
-// pictures with different dials and different references, and folding them together meant one averaged
-// fidelity score that could not say which look regressed. Each look now carries its own reference and
-// is measured on its own (research/lightfield/lightfield-check.mjs).
-//
-// One implementation underneath. A look is a name, a preset, a reference, and a NARROWED VIEW of the
-// same schema.
+// One entry per LOOK, not per preset: `slats`, `rings` and `shards` are different pictures with
+// different dials and references, each measured on its own (research/lightfield/lightfield-check.mjs).
+// A look is a name, a preset, a reference, and a narrowed view of the shared schema.
 
-// Which dials a look does not honour, taken from the generator's own HONOURS table rather than listed
-// again here. Narrowing is why a `rings` look cannot show `shadow.seamWidth` and therefore cannot build
-// the illegal pair that used to throw in someone's face (engine-doctrine/MISTAKES.md #277).
+// Which dials a look does not honour, from the generator's own HONOURS table. Narrowing is why a
+// `rings` look cannot build the illegal pair `shadow.seamWidth` used to throw on (MISTAKES #277).
 function narrow(schema, kind) {
   const drop = HONOURS.filter((r) => !r.by.includes(kind)).map((r) => r.at);
   const out = {};
@@ -79,55 +43,24 @@ function narrow(schema, kind) {
   return out;
 }
 
-// A look's reference, where one exists. `tide` and `fern` have none, and that is stated rather than
-// scored against nothing.
-// `ready` is the gate, and it is a HUMAN'S judgement rather than a number.
-//
-// The first version of this list gated on "has a reference", which only means a look CAN be measured.
-// ember had a reference and scored 64.2: its reference is black with white-hot flames and the render was
-// a pale field with black wedges, the tonal inverse. Measurable and wrong are not opposites, and
-// shipping the second because of the first is how a library fills up with things nobody would defend.
-// (ember has since left this list altogether. The argument is why `ready` exists and it stands; see the
-// note under LOOKS for where the look itself went.)
-//
-// A look is `ready` when somebody has put it beside its reference, looked, and would stand behind it.
-// The score is evidence for that judgement and never a substitute: `lightfield-check.mjs` prints every
-// look including the ones held back, so the gap is visible rather than hidden by omission.
+// `ready` is a human judgement, not a number: a look is ready when somebody has put it beside its
+// reference, looked, and would stand behind it.
+// `lightfield-check.mjs` prints every look including held-back ones, so the gap stays visible.
 const LOOKS = [
   { name: 'colonnade', preset: 'colonnade', ref: 'refs/ref-b.png', ready: true,
     blurb: 'Wide panels split by bright hairlines, soft masses under a glow.' },
-  // HELD BACK still. Its shadow temperature was fixed (+11.3 to -1.7) and its score did not move off
-  // 20.0, because the remaining gap is COMPOSITION: the reference is a flowing field of magenta and
-  // orange and this is one soft lobe that reads as a spotlight. A number that stays put while another
-  // improves is the useful kind of stuck, and it says the next work is layout rather than colour.
+  // HELD BACK: score stuck at 20.0 after the shadow temperature fix; the remaining gap is composition
+  // (reference is a flowing field, this is one soft lobe), not colour.
   { name: 'blinds', preset: 'ref', ref: 'refs/lightfield-ref.jpg', ready: false,
     blurb: 'A backlit blind. Fine slats, a warm bloom behind them, cool shadow.' },
 ];
 
-// `ember` is NOT here, and it left for a different reason than tide and fern did.
-//
-// It was never unmeasured: it carries refs/ref-a.jpg and scored 22.2, and it was READY. The owner
-// looked at the library and did not want the card, which is a taste call and the only kind of call
-// that can retire a look that passes. A row was deleted; a capability was not.
-//
-// WHAT STAYS REACHABLE. `PRESETS.ember` in core/lightfield/presets.js, so
-// `make lightfield PRESET=ember` still builds the field, films/scene/_lightfield-ember.html still
-// renders, and the flame construction that took three passes to find is still readable as a worked
-// example. WHAT WAS LOST: its row in `make lightfield-check`, because that tool walks this list. A
-// look off this list is unscored, so a later change to the shared shadow or envelope code can move
-// ember's picture and no number will say so. Bringing it back is this row plus nothing else.
+// `ember` (refs/ref-a.jpg, scored 22.2, READY) is not in LOOKS: a taste call, not a measurement gap.
+// Its preset stays in core/lightfield/presets.js (`make lightfield PRESET=ember`), so bringing back its
+// row here is the only thing needed to restore it.
 
-// `tide` and `fern` are NOT here either, and their reason is different again.
-//
-// They were invented: no reference, never compared to anything, and `lightfield-check.mjs` reported
-// them as unscored rather than passing. The user looked at the library and said everything except
-// colonnade looked bad, which is the same finding arrived at by eye. An invented look is not a look, it
-// is a guess with a name, and a library that shows guesses beside measured work teaches nobody which is
-// which.
-//
-// The presets stay in core/lightfield/presets.js, so `rings` and `shards` are still reachable and still
-// rendered by `make lightfield`. What they do not get is a card, until each has a reference and a score.
-// Bringing one back is two lines here plus an image on disk.
+// `tide` and `fern` are not in LOOKS: invented looks with no reference, never scored. Their presets
+// stay reachable via `make lightfield`; adding a row here needs a reference and a score first.
 
 const build = ({ name, preset, ref, blurb, ready }) => {
   const opts = LIGHTFIELD_PRESETS[preset];
@@ -147,37 +80,20 @@ const build = ({ name, preset, ref, blurb, ready }) => {
   };
 };
 
-// EVERY look, ready or not. The check scores this list, so holding one back keeps it measured instead
-// of making it disappear: a look nobody can see is exactly how tide and fern went unexamined (#282).
-// `bands` is a SHADER, not markup: our own branch in core/shaders-ambient.js. It reaches the playground
-// as scene LAYERS rather than HTML, which is the path the page already has for a scene fragment, so the
-// preview boots the real engine on it and there is no second renderer to keep in step.
+// `bands` is a SHADER (core/shaders-ambient.js), reaching the playground as scene layers rather than
+// HTML, so the preview boots the real engine on it instead of a second renderer.
 //
-// Its schema is declared here rather than beside the shader because the shader's parameter vector is
-// four anonymous floats by design: `u_p` means whatever the branch reading it says, so the NAMES live
-// with the generator that knows them.
-// NAMES THAT SAY WHAT THEY DO. The first version of this table read count / angle / glow / softness /
-// edge / warm / core / deep, and every one of those failed the only test that matters for a control:
-// somebody who has not read the shader cannot tell what it changes. `count` of what. `angle` in TURNS,
-// so a right angle was 0.25. `glow` was a radius but is named like a switch. `softness` when three
-// different things in the picture are soft. So they are renamed here, in DEGREES and in percent, and
-// the shader's uniform layout did not move: this file is the layer whose whole job is turning names
-// into positions, and the mapping lives in `render` below.
+// Schema lives here, not with the shader: the shader's parameter vector is four anonymous floats
+// (`u_p`), and the NAMES belong with the generator that knows them, in degrees and percent.
 //
-// WHERE A NUMBER MEANS A PLACE it is the same spelling the lightfield generator settled on: percent of
-// the frame, 50/50 unmoved, off-frame values legal because a light source is often just outside the
-// picture (core/lightfield/options.js, `colour.originX`). Two generators inventing two vocabularies for
-// "where is the light" is how an author ends up converting units in their head.
-// The name a person picks, and the distance function the shader runs. NOT the same list in the same
-// order: `round` and `oval` are one function with a different second radius, so two names share an
-// index, and the shader's numbering was fixed before these names existed. Sending the position in the
-// name list instead of this table is a bug that draws a plausible picture, which is the worst kind:
-// every shape rendered as a different shape and every one of them looked deliberate.
+// Position and place share the lightfield generator's own spelling: percent of the frame, 50/50
+// unmoved, off-frame values legal (core/lightfield/options.js, `colour.originX`).
+// `round` and `oval` share an index deliberately: one distance function, a different second radius.
+// The shader's own numbering is fixed, so this table maps names to that fixed order, not the reverse.
 const LIGHT_SHAPES = { round: 0, oval: 0, bar: 1, rounded: 2, cross: 3, sweep: 4 };
 const LIGHT_SHAPE_NAMES = Object.keys(LIGHT_SHAPES);
 
-// Every dial that describes the LIGHT, shared by both cards, because it is the same light. Declared
-// once so the two panels cannot drift apart.
+// Shared by both cards: same light, one declaration, so the two panels cannot drift apart.
 const LIGHT_SCHEMA = {
   lightShape:    { kind: 'enum', of: LIGHT_SHAPE_NAMES, def: 'round', primary: true,
                    note: 'round and oval are ellipses; bar is a band of light with no hot centre; cross is two bars; rounded is a chamfered box; sweep is a sector, like a beacon.' },
@@ -195,16 +111,9 @@ const LIGHT_SCHEMA = {
   lightPolarity: { kind: 'num', min: -2, max: 2, def: 1, note: 'positive lights the field, negative DARKENS it: a shadow mass behind the bands rather than a glow in front.' },
 };
 
-// The bands themselves, shared for the same reason.
 const BAND_SCHEMA = {
-  // 48, not 25. MEASURED BY LOOKING: rendered at 8, 16, 25, 40, 60 and 80 side by side, the picture
-  // changes character between 25 and 40. Below it the stripes are the subject and they cut the light
-  // into slabs; above it the light is the subject and the stripes are texture across it, which is what
-  // "a light behind a screen" means. 25 sat on the wrong side of that line and nothing had chosen it.
-  // 48 leaves room to roll both ways inside the half that reads.
-  //
-  // NOT raised on `spectrum`, which overrides this with 10.7. That one is fitted to a photograph and
-  // scores 14.2 against it, so its default is a measurement and not a preference.
+  // 48: measured by rendering 8/16/25/40/60/80 side by side; the picture reads as light-behind-a-screen
+  // above ~40, as cut stripes below ~25. `spectrum` overrides this with 10.7, fitted to a photo (14.2 err).
   bands:       { kind: 'num', min: 2, max: 80, def: 48, primary: true, scale: 'log',
                  note: 'how many bands fit across the frame at zoom 1.' },
   bandAngle:   { kind: 'num', min: -90, max: 90, def: 0, note: 'degrees. 0 stands the bands upright.' },
@@ -221,11 +130,8 @@ const BANDS_SCHEMA = {
   shapeOriginX: { kind: 'num', min: -50, max: 150, def: 50, note: 'percent across. Where arcs and rounded rectangles are centred; panels ignore it.' },
   shapeOriginY: { kind: 'num', min: -50, max: 150, def: 50, note: 'percent down. The other half of the same point.' },
   ...LIGHT_SCHEMA,
-  // NO `brightness`. It read as a brightness dial and was an OPACITY one: the shared shader tail does
-  // `alpha *= clamp(u_intensity)`, so anything under 1 made the whole field translucent and let the
-  // page behind it wash through. Every value except 1 looked broken, which means it was never a
-  // control, it was a way to spoil the picture. The light's own strength is `lightPolarity`, and the
-  // colours are where you change how bright the thing is.
+  // No `brightness`: the shared shader tail does `alpha *= clamp(u_intensity)`, so it was an opacity
+  // dial, not a light one. Use `lightPolarity` for light strength, colour fields for how bright it reads.
   seed:       { kind: 'int', min: 0, max: 4294967295, def: 7, primary: true },
   colour: {
     kind: 'group',
@@ -256,24 +162,15 @@ const SPECTRUM_SCHEMA = {
   ...LIGHT_SCHEMA,
   lightPolarity: { ...LIGHT_SCHEMA.lightPolarity, def: 0, note: 'positive lights the field, negative darkens it, and here 0 means NO light at all: the ramp carries the picture on its own.' },
   seed:       { kind: 'int', min: 0, max: 4294967295, def: 0 },
-  // Eight stops read in order from the start of the ramp to its end. They are numbered rather than
-  // named because on a ramp the POSITION is the meaning: stop 3 is a third of the way down and calling
-  // it "midField" would be a guess about a picture nobody has made yet.
+  // Numbered, not named: position IS the meaning on a ramp.
   colour: {
     kind: 'group',
     fields: Object.fromEntries(['#effce6', '#def9de', '#68b290', '#c0e87a', '#7ccdd8', '#56a0dd', '#dcf4fb', '#eeffff']
       .flatMap((def, i) => [
         [`ramp${i + 1}`, { kind: 'hex', def, primary: i < 4,
           note: `ramp stop ${i + 1} of 8, by default ${Math.round((i / 7) * 100)}% along the gradient.` }],
-        // WHERE the stop sits. Defaulted to the even spacing this ramp always had, so nothing moves
-        // until someone moves it, and NOT primary: it is the axis you reach for after the colours are
-        // right, when a feature is too narrow for eight evenly spaced stops to describe. Adding stops
-        // cannot fix that, because the narrowest thing eight even stops can draw is a seventh of the
-        // ramp however many you have.
-        // EXACTLY i/7, never rounded for looks. `Number((i/7).toFixed(4))` is 0.1429, and a ramp
-        // built on 0.1429 is not the ramp built on 1/7: the divisor below it becomes 0.1429 instead
-        // of 0.142857 and every field that never asked for positions would quietly shift. A default
-        // whose whole job is to reproduce the old behaviour has to reproduce it to the last bit.
+        // def is exactly i/7, not a rounded decimal: `(i/7).toFixed(4)` would not equal 1/7 in the
+        // shader's own arithmetic and would shift every untouched ramp.
         [`ramp${i + 1}At`, { kind: 'num', min: 0, max: 1, def: i / 7, primary: false, monotone: 'ramp',
           note: `how far along the gradient stop ${i + 1} sits. Stops must stay in order.` }],
       ])),
@@ -284,27 +181,22 @@ const deg = (d) => (d ?? 0) / 360;                       // the shader counts tu
 const frac = (pct, mid = 50) => ((pct ?? mid) - mid) / 100;  // percent of frame -> fraction from that point
 const pick = (o, k, s) => o?.[k] ?? s[k]?.def;
 
-// One mapping, both cards. `render` is called with PARTIAL option objects (a card previews from a
-// preset that sets almost nothing), so every read falls back to the schema's own declared default
-// rather than to a literal written twice.
+// One mapping, both cards. `render` is called with partial option objects, so every read falls back to
+// the schema's own default.
 function bandLayers(o, S, { gradient }) {
   const shape = pick(o, 'shape', S) ?? 'panels';
   const lname = pick(o, 'lightShape', S);
   const lshape = LIGHT_SHAPES[lname];
   if (lshape === undefined) throw new Error(`unknown lightShape "${lname}". One of: ${LIGHT_SHAPE_NAMES.join(', ')}`);
   const width = pick(o, 'lightWidth', S);
-  // `round` has no second radius to give, so it is the ratio 1 whatever the height dial says. This is
-  // the same reset `normalise` performs on the option object; doing it here as well means a caller who
-  // skipped normalise gets a circle rather than silently gets an oval called round.
+  // `round` has no second radius, so height is forced equal to width here too, same reset `normalise` does.
   const height = pick(o, 'lightShape', S) === 'round' ? width : pick(o, 'lightHeight', S);
   const bands = pick(o, 'bands', S);
   if (!(bands > 0)) throw new Error(`bands must be a positive number, got ${bands}`);
   const zoom = pick(o, 'zoom', S);
   if (!(zoom > 0)) throw new Error(`zoom must be greater than 0, got ${zoom}`);
-  // The STOPS are the hex fields. A schema may also declare a companion `<name>At` position for each
-  // one, and then every stop carries its own place on the ramp as a `#rrggbb@0.42` suffix
-  // (core/surfaces/palette.js). A schema that declares no positions, like BANDS_SCHEMA, emits plain
-  // hex and is spread evenly exactly as before.
+  // A schema may declare a companion `<name>At` position per hex stop, sent as `#rrggbb@0.42`
+  // (core/surfaces/palette.js). Without one, like BANDS_SCHEMA, stops emit as plain hex, spread evenly.
   const stopKeys = Object.keys(S.colour.fields).filter((k) => S.colour.fields[k].kind === 'hex');
   const colours = stopKeys.map((k) => {
     const hex = o?.colour?.[k] ?? S.colour.fields[k].def;
@@ -328,16 +220,10 @@ function bandLayers(o, S, { gradient }) {
   const stops = even ? colours.map((c) => c.split('@')[0]) : colours;
   return [{
     type: 'shader', shader: 'bands',
-    // Always 1. See the note where `brightness` used to be: this uniform is alpha in the shared tail,
-    // not luminance, so the only value that does not spoil the picture is full.
-    intensity: 1,
+    intensity: 1,   // this uniform is alpha in the shared shader tail, not luminance
     seed: pick(o, 'seed', S),
-    // NO aspect divide. It used to be here because the shader's band axis was in aspect-scaled units,
-    // so `bands` had to be corrected to keep meaning bands-across-the-frame. The shader normalises that
-    // axis itself now, and dividing here as well applied the correction TWICE: on a 16:9 canvas the
-    // band index that drives `converge` came out wrong and the ramp clamped to its end stop, which for
-    // `spectrum` is white, so the right of the frame went flat. One correction, in the place that knows
-    // the aspect, which is the shader.
+    // No aspect divide here: the shader normalises its own band axis. Dividing here too doubled the
+    // correction and clamped `spectrum`'s ramp to its end stop, flattening the right of the frame.
     params: [bands, deg(pick(o, 'bandAngle', S)), width, pick(o, 'lightEdge', S)],
     params2: [['panels', 'arcs', 'rounded'].indexOf(shape),
       frac(pick(o, 'shapeOriginX', S) ?? 50), -frac(pick(o, 'shapeOriginY', S) ?? 50),
@@ -350,11 +236,8 @@ function bandLayers(o, S, { gradient }) {
       pick(o, 'bandShading', S) ?? 0, pick(o, 'bandLean', S) ?? 0],
     params6: [pick(o, 'lightRing', S), pick(o, 'lightPoints', S), pick(o, 'lightSpike', S), zoom],
     colors: stops,
-    // NO w/h. core/surfaces/shader.js sizes an UNBOXED ambient layer to the frame. Declaring a box
-    // bakes in whatever aspect the generator was fitted at: `spectrum` carried 1080x1920, so on a 16:9
-    // canvas it painted 1080 of 1920 pixels and the right 44% was bare background. I chased that as a
-    // shader bug through three wrong hypotheses; sampling the pixel said rgb(12,19,29), the scene's own
-    // dark, and the answer was the box all along.
+    // No w/h: core/surfaces/shader.js sizes an unboxed ambient layer to the frame. A declared box bakes
+    // in whatever aspect the generator was fitted at, leaving bare background outside it on other canvases.
     x: 0, y: 0, start: 0, duration: 6,
   }];
 }
@@ -382,9 +265,8 @@ const BANDS = {
   render: (o) => bandLayers(o, BANDS_SCHEMA, { gradient: false, w: 1920, h: 1080 }),
 };
 
-// MEASURED, not invented. Fitted to refs/colonnade/c6.jpg at that image's own 9:16, where it scores a
-// mean per-channel error of 14.2 out of 255 against the reference. What still differs is written down
-// in engine-doctrine/LIGHTFIELD.md rather than left for the next person to rediscover.
+// Fitted to refs/colonnade/c6.jpg at its own 9:16, mean per-channel error 14.2/255 against the
+// reference; remaining differences are in engine-doctrine/LIGHTFIELD.md.
 const SPECTRUM = {
   name: 'spectrum',
   group: 'shader',
@@ -396,22 +278,12 @@ const SPECTRUM = {
   produces: 'layers',
   ready: true,
   normalise: bandsNormalise,
-  // PORTRAIT, because the look is: the ramp needs the long axis to read, and the reference it was
-  // fitted against is 9:16. Landscape draws the same construction squashed.
-  render: (o) => bandLayers(o, SPECTRUM_SCHEMA, { gradient: true, w: 1080, h: 1920 }),
+  render: (o) => bandLayers(o, SPECTRUM_SCHEMA, { gradient: true, w: 1080, h: 1920 }),  // portrait: fitted at 9:16
 };
 
-// The CRT card.
-//
-// Every other card in this library is a FIELD: it paints a backdrop and that backdrop is the whole
-// subject. `crt` is not one. It is a treatment applied to whatever is under it, so a card showing it
-// on its own would show nothing at all, and a card showing it over a flat colour would show only its
-// scanlines, which is the half that was already easy.
-//
-// So this card carries a stand-in screen, and the dials act on the treatment rather than on the
-// screen. The stand-in is deliberately plain and deliberately BRIGHT ON DARK, because the thing worth
-// looking at is what happens to a lit edge: the bloom is the half a generative overlay cannot do, and
-// it is invisible unless there is something lit to bloom.
+// Unlike the field cards, `crt` is a treatment applied to whatever is under it, so it needs a stand-in
+// screen to show it on. The stand-in is bright on dark deliberately: the bloom on a lit edge is the
+// part a generative overlay cannot do, and it is invisible with nothing lit to bloom.
 const CRT_SCHEMA = {
   bloom:     { kind: 'num', min: 0, max: 8, def: 1.6, primary: true,
                note: 'how far the picture underneath spreads, in pixels. This is the phosphor, and it is the part an overlay cannot do. Brightness rises with it, because blurring a bright shape over more area would otherwise dim it.' },
@@ -422,20 +294,9 @@ const CRT_SCHEMA = {
   scan:      { kind: 'num', min: 0, max: 6, def: 1,
                note: 'pixels of dark in each line. It can never exceed the gap, or the field would be solid black.' },
   vignette:  { kind: 'unit', def: 0.5, primary: true, note: 'how much the corners fall away.' },
-  // THE PHOSPHOR IS ON BY DEFAULT, and it was not, which made the one dial named "colour" look
-  // broken. Two independent reasons, and fixing either alone still read as a bug: `tintAmount`
-  // defaulted to 0, so `render` discarded the colour outright, AND neither field was `primary`, so
-  // both hid behind "all options" while `bloom`, `lines`, `gap` and `vignette` sat in the open. A
-  // user set the colour well to red on the panel, watched nothing happen, and reported it.
-  // 0.25 shows the phosphor without swamping the picture; the tint is multiplied by 0.35 in `render`,
-  // so this lands at about a twelfth of full strength, which is a screen with a cast rather than a
-  // screen painted one colour.
   tintAmount:{ kind: 'unit', def: 0.25, primary: true, note: 'how much of the phosphor colour is laid over the whole picture. 0 leaves the colours alone.' },
-  // THREE COLOURS, BECAUSE THEY ARE THREE DECISIONS. The last pass made the phosphor tint work and
-  // stopped there, so a red tint still could not produce red WORDS: the text was a literal in the
-  // markup and the only reachable dial washed the whole picture. Asking for red text on a white tube
-  // was unanswerable. The tube's ground, the words on it, and the phosphor laid over both are now
-  // separate fields, which is what lets a red line sit inside a white bloom.
+  // Three colour fields, not one: text, ground and phosphor tint are three separate decisions, which
+  // is what lets a red line sit inside a white bloom.
   colour: {
     kind: 'group', primary: true,
     fields: {
@@ -479,43 +340,24 @@ const CRT = {
       vignette: pick(o, 'vignette', CRT_SCHEMA),
       tint: amt > 0 ? hexToRgba(o?.colour?.tint ?? CRT_SCHEMA.colour.fields.tint.def, amt * 0.35) : null,
     });
-    // ONE element over the screen, carrying exactly what the engine's `crt` layer prop carries. Not a
-    // second implementation: crtSpec is the same function core/layers/util.js calls, so a card that
-    // looks right is evidence about the layer and not about this file.
-    // SANITISED, with the engine's own sanitiser rather than a second rule. These words arrive from a
-    // text box on a public page, so they are bytes somebody else wrote, which is the exact case
-    // core/sanitize-html.js exists for. `<b>` and `<em>` survive; a script or an iframe does not.
+    // crtSpec is the same function core/layers/util.js calls, so a card that looks right is evidence
+    // about the layer, not just this file. Sanitised with the engine's own sanitiser: these words come
+    // from a public text box, so `<b>`/`<em>` survive but a script or iframe does not.
     const line = sanitizeHtml(o?.text ?? CRT_SCHEMA.text.def);
     const sub = sanitizeHtml(o?.sub ?? CRT_SCHEMA.sub.def);
     const F = CRT_SCHEMA.colour.fields;
     const ink = o?.colour?.text ?? F.text.def;
     const ground = o?.colour?.ground ?? F.ground.def;
-    // The sub-line is DERIVED from the main one rather than being a fourth dial. It has always been a
-    // dimmer version of the same light, and two independent colours a user has to keep in agreement is
-    // a way to make the card look wrong, not a way to give them control. Note the limit: the derivation
-    // assumes the words are lighter than the tube. On a LIGHT ground the sub-line goes quiet, which is
-    // the honest consequence of one dial driving two things, not a bug to chase with a fourth field.
+    // Sub-line colour is derived, not a fourth dial: a dimmer version of the main ink. On a light
+    // ground the derivation goes quiet, an accepted limit of one dial driving two things.
     const subInk = hexToRgba(ink, 0.72);
-    // THE BLOOM IS A `filter` ON THE PICTURE, NOT A `backdrop-filter` OVER IT, and that is a decision
-    // about EXPORT rather than about the look. The playground rasterises a card by wrapping its markup
-    // in an SVG <foreignObject> and drawing that to a canvas, and backdrop-filter does not composite
-    // inside a foreignObject: it needs a backdrop from the page, and there is no page in there. So a
-    // downloaded or copied CRT arrived with its scanlines, its vignette and its tint (all plain
-    // gradients, which do render) and NO PHOSPHOR, which is the one part of a cathode ray tube that
-    // cannot be faked with an overlay. Silently, because nothing errors.
-    //
-    // Filtering the picture instead gives the identical result in both places. The ground and the
-    // words sit together inside one filtered element, which is exactly the stack backdrop-filter was
-    // sampling, so brightness and saturate still land on the ground and not only on the glyphs.
-    //
-    // The engine's `crt` LAYER prop still uses backdrop-filter, and correctly: there it is a treatment
-    // over arbitrary content it does not own, and it renders in a real browser, never through a
-    // foreignObject. Same crtSpec, same numbers, two mounts.
-    // THE TYPE IS SIZED FROM THE CARD, NOT THE VIEWPORT, and that is the second export bug in this
-    // card. `vw` resolves against whatever viewport the markup finds itself in: the browser window in
-    // the live preview, and the SVG's own width inside the exporter's foreignObject. A 560px card on a
-    // 1220px page therefore rendered its headline at the 96px clamp ceiling live and at 47px in the
-    // downloaded PNG. Container units ask the card instead, and the card is the same box in both.
+    // The bloom is a `filter` on the picture, not `backdrop-filter` over it: the playground rasterises
+    // through an SVG foreignObject, and backdrop-filter does not composite inside one (no page backdrop
+    // to sample), so the phosphor silently vanished on export. Filtering the picture works in both
+    // places. The engine's own `crt` layer prop keeps backdrop-filter, correctly, since it renders in a
+    // real browser over content it does not own.
+    // Type is sized in `cqw` (from the card), not `vw` (from the viewport): the two differ inside the
+    // exporter's foreignObject, which is a different viewport than the live preview.
     return `<div style="position:absolute;inset:0;overflow:hidden;container-type:size">
   <div style="position:absolute;inset:0;background:${ground};${filter ? `filter:${filter};` : ''}">
     <div style="position:absolute;inset:0;display:grid;place-content:center;text-align:center;
@@ -529,22 +371,14 @@ const CRT = {
 };
 
 
-// THERMAL BLUR, the After Effects effect of that name, with its one dial on screen.
+// The After Effects thermal-blur look, as a generator rather than only the `thermalBlur` filter
+// preset: on a transparent layer the ramp's bottom stops never arrive, so the full three-band look
+// needs an opaque black plate under `mix-blend-mode: screen`, a construction this card provides.
 //
-// It is here as a generator and not only as the `thermalBlur` filter preset because the preset cannot
-// show you its best form. On a transparent layer the ramp's bottom stops land where the alpha has
-// already gone, so the blue rim never arrives; the full three-band look needs the type on an OPAQUE
-// BLACK plate under `mix-blend-mode: screen`, which is a construction and not a prop. This card is
-// that construction, so the playground shows what the effect actually looks like and hands you the
-// markup that produces it.
-//
-// The filter chain is NOT re-authored here: `thermalPrimitives` in core/filters.js is the one owner,
-// and the engine's `filter: "thermalBlur"` builds the identical primitives from the same function. So
-// a card that looks right is evidence about the preset, not about this file. The <svg> is inlined
-// rather than referenced because the playground rasterises a card through an SVG foreignObject, where
-// a `url(#id)` pointing at a def on the page resolves to nothing and the look silently vanishes: the
-// same export trap the CRT card's phosphor hit, and the reason its bloom is a filter and not a
-// backdrop-filter.
+// `thermalPrimitives` in core/filters.js is the one owner of the filter chain; the engine's
+// `filter: "thermalBlur"` builds from the same function. The <svg> is inlined rather than referenced
+// because a `url(#id)` def resolves to nothing inside the exporter's SVG foreignObject, the same
+// export trap the CRT card's phosphor hit.
 const THERMAL_SCHEMA = {
   radius:  { kind: 'num', min: 1, max: 24, def: 6, primary: true,
              note: 'the near blur, in pixels, and the only dial that matters. Small keeps the letters legible with a hot edge; large lets the ramp EAT the thin strokes, which is the reference look.' },
@@ -590,13 +424,8 @@ const THERMAL = {
 };
 
 
-// ── the effector card ───────────────────────────────────────────────────────────────────────────
-//
-// The dial worth turning here is `sticky`, and the card exists mostly to make that one legible. At 0
-// the point is a moving highlight and the grid looks like a spotlight passing over it. Above about
-// half a second the same rig paints a TRAIL: the clones the point has already passed are still
-// displaced, so what you see is a stroke drawn across the grid rather than a light sliding under it.
-// Nothing else in the panel changes as much for as small a move.
+// The dial worth turning is `sticky`: at 0 the point is a moving highlight; above ~0.5s the same rig
+// paints a trail, since clones the point has passed stay displaced.
 const EFFECTOR_SCHEMA = {
   sticky:    { kind: 'num', min: 0, max: 2, def: 1, primary: true,
                note: 'seconds a clone HOLDS what the pass did to it before easing back. 0 is a moving highlight; 1 is the value the technique states, and it is what turns the pass into a painted trail.' },
@@ -654,13 +483,8 @@ const EFFECTOR = {
   },
 };
 
-// ── the range-selector card ─────────────────────────────────────────────────────────────────────
-//
-// One dial, and it is `smoothness`. Every other control here is context for it. At 1, which is what
-// every kinetic preset in this engine has always done, a glyph crosses its whole window continuously
-// and `up` reads as type sliding into place. At 0 the same preset SWAPS each glyph between its two
-// states with nothing in between, and the line stops being type that moves and becomes type that is
-// replaced. Drag it and watch the middle of the line, not the ends.
+// One dial: `smoothness`. At 1 (the engine's historic default) a glyph crosses its window
+// continuously; at 0 it swaps between states with nothing in between.
 const SELECTOR_SCHEMA = {
   smoothness: { kind: 'unit', def: 1, primary: true,
                 note: 'how WIDE each glyph\'s transition band is, which is not the same as its curve. 1 is continuous, the engine\'s historic behaviour. 0 is a swap with no interpolation, and it is the value a font morph is built on.' },
@@ -691,23 +515,9 @@ const SELECTOR = {
   }],
 };
 
-// ── the keyframe-handle card: the graph editor, with the handles ON the dials ────────────────────
-//
-// A named easing has nothing worth a card: it is one fixed shape and a picture of it is a picture of
-// a constant. A HANDLE has four numbers and the whole point of a graph editor is that you cannot
-// predict the feel from them, so this is the one motion primitive in the engine where seeing the
-// curve while you drag is the difference between authoring it and guessing at it.
-//
-// TWO PANELS, and the second is the one that actually answers the question. The graph is the
-// familiar picture and it flatters everything: any curve from (0,0) to (1,1) looks reasonable. The
-// STRIP underneath samples the same curve at even intervals of TIME and marks where the value is,
-// so a handle that crushes the movement into the middle shows as a crowd of ticks at both ends and
-// a gap across the centre. That is what the eye reads on the rendered frame, and it is invisible in
-// the graph.
-//
-// The curve is NOT re-authored here. `handleCurve` in core/motion.js is the one owner and this card
-// samples it, so a card that looks right is evidence about the shipped interpolator rather than
-// about this file.
+// A handle has four numbers you cannot predict the feel of, so this card samples `handleCurve`
+// (core/motion.js, the one owner) live. Two panels: the graph flatters any curve; the strip below it
+// samples at even TIME intervals and marks the value, showing what the eye actually reads on a frame.
 const HANDLE_SCHEMA = {
   outInfluence: { kind: 'num', min: 0, max: 100, def: 100 / 3, primary: true,
                   note: 'how far along the segment the LEAVING handle reaches, as a per cent of its duration. AE\'s Easy Ease is a third. Large means the value hangs at this key and the movement is crushed into the far end.' },
@@ -785,12 +595,8 @@ export const ALL_GENERATORS = [...LOOKS.map(build), BANDS, SPECTRUM, CRT, THERMA
 // What the library shows.
 export const GENERATORS = ALL_GENERATORS.filter((g) => g.ready);
 
-// Every generator already wrote its own blurb; nothing READ them, so all four rendered as an em-dash in
-// engine-doctrine/EFFECTS.md. Derived here rather than in the catalogue so a new generator without one is refused
-// at load instead of shipping a blank row.
-// The name-keyed map used to be built here, read once by blurbsOf and thrown away. It is kept and
-// handed to defineRegistry, which is what lets the catalogue section below live at the definition site
-// instead of being a fourth hand-written listing of the same names.
+// Derived here, not the catalogue, so a new generator without a blurb is refused at load rather than
+// shipping a blank row.
 const GENERATOR_ENTRIES = Object.fromEntries(GENERATORS.map((g) => [g.name, g]));
 export const GENERATOR_BLURBS = blurbsOf('generator', GENERATOR_ENTRIES);
 
@@ -806,10 +612,9 @@ const GENERATOR_AKA = {
   rangeSelector: ['a per-character range selector', 'a text range dial'],
 };
 
-// THE REGISTRY HOLDS WHAT SHIPS, NOT ALL_GENERATORS. A generator with `ready:false` is built and held
-// back on purpose (HELD_BACK below counts them for the playground), and a catalogue advertising an
-// unbuilt thing is worse than one that is short. There is no `pick()` caller: a scene never names a
-// generator, it pastes the markup the playground emits, which is why this registry declares no slot.
+// Holds what ships (GENERATOR_ENTRIES), not ALL_GENERATORS: `ready:false` looks stay held back
+// (HELD_BACK counts them). No `pick()` caller: a scene pastes the markup the playground emits, it
+// never names a generator, so this registry declares no slot.
 export const GENERATOR_REGISTRY = defineRegistry('generator', GENERATOR_ENTRIES, { blurbs: GENERATOR_BLURBS, aka: GENERATOR_AKA,
   catalog: {
     title: 'Generators (the playground)',
@@ -864,64 +669,22 @@ export function diffFromDefaults(opts, schema) {
   return out;
 }
 
-// ── randomise, within what each field DECLARES ──────────────────────────────────────────────────
+// Randomise within what each field DECLARES: every bounded number, enum and boolean already carries
+// its legal set, so nothing here invents a bound. A field with no declared range is left alone
+// (`skipped` records which), because inventing a limit would produce values the generator refuses.
 //
-// The point of a schema is that a range is stated rather than guessed, so a randomiser is derivable:
-// every bounded number, every enum, every boolean already carries its own legal set. Nothing here
-// invents a bound. A field with no declared range is LEFT ALONE, and `skipped` says which, because a
-// randomiser that makes up limits produces values the generator will refuse, and the person turning the
-// dial gets an error they did not cause.
-//
-// IT VARIES THE LOOK ON SCREEN, it does not replace it. Rolling every field uniformly changes the
-// STRUCTURE and the COLOUR at once, so each click is an unrelated picture and most of them are muddy.
-// Here the preset chooses what kind of thing this is and randomise explores inside it:
-//
-//   enum      KEPT. `pattern.kind` and `motion.kind` are what the thing IS.
-//   number    NUDGED around its current value, not rolled across its range.
-//   colour    hue and saturation roll, LIGHTNESS is kept, so the palette's own ordering survives.
-//   seed      rolled outright. A range in the billions is an identifier, not a dial, and re-rolling
-//             it is the cheapest way to get a genuinely different arrangement of the same look.
-//
-// Every one of those is derived from what the schema already declares. Nothing here knows what a
-// lightfield is.
-//
-// `rand` is injected so a caller can seed it. Same rand and same base, same options.
-// A number moves by up to 22% of its declared range OR half of where it already sits, whichever is
-// SMALLER. The second clause is what keeps a nudge a nudge: `pattern.count` is declared 1 to 400, so a
-// flat 22% is plus or minus 88, and a field of 58 slats became 138. Half the current value keeps a
-// small number in its own neighbourhood while a large one still gets room.
+// It varies the look, not replaces it: the preset picks what kind of thing this is, randomise
+// explores inside it.
+//   enum    kept: `pattern.kind` is what the thing IS.
+//   number  nudged around its current value, not rolled across the whole range.
+//   colour  hue and saturation roll; lightness is kept, so the palette's ordering survives.
+//   seed    rolled outright: a billions-wide range is an identifier, not a dial.
 const NUDGE = 0.22;
 const IDENTIFIER = 100000;          // a range wider than this is an id, not a dial
 
-// `free` rolls a field across its whole declared range instead of nudging, and lets an enum change.
-// That is what a PER SECTION button means: the global one varies the look you have, and asking for one
-// section by name is asking for that aspect to be different, not slightly different.
+// `free` rolls a field across its whole declared range and lets an enum change (the per-section
+// button), instead of nudging around the current value (the global button).
 
-// An identifier is rolled; a dial is nudged around where it already sits.
-// A nudge is bounded by the smaller of 22% of the RANGE and half of where the dial already sits.
-// The second clause is what keeps it a nudge rather than a jump, and it does two jobs. It stops
-// `pattern.count` at 58 landing on 138. And on a SIGNED dial it preserves the sign: `sheen: -1`
-// means an emitted silhouette and `seam: -0.6` means a bright hairline, so a roll that crosses
-// zero does not vary the picture, it deletes the thing the picture is made of. Rolling `shadow`
-// freely took colonnade's near-black from 23% of the frame to 3.2%, measured, while rolling
-// `colour` freely left it at 25.1%. Contrast is composition, and composition is what a
-// randomiser preserves.
-// A COUNT IS PERCEPTUALLY LOGARITHMIC, and a linear nudge on one is lopsided. `bands` sits at
-// 48 in a range to 80: plus 12 adds a quarter more stripes and is barely a change, while minus
-// 12 removes a quarter and visibly coarsens the picture. Halving a count is an enormous visual
-// step; adding half again is a small one. So a symmetric nudge in the number is an asymmetric
-// nudge in the picture, and it spends half its rolls at the crude end.
-//
-// Looking at the renders is what settles it rather than the arithmetic. Below about 25 bands
-// the stripes ARE the subject and they break the light into slabs; above about 40 the light is
-// the subject and the stripes are texture over it, which is the whole idea of the generator.
-// Half of every roll was landing in the first half.
-//
-// A schema declares `scale: 'log'` and the nudge becomes multiplicative. Note what this
-// replaces: `Math.abs(from) * 0.5` was already a linear stand-in for exactly this, added
-// because `pattern.count` at 58 rolled to 138. That clause stays for every other dial, where
-// it is doing a different job, which is holding the sign on a signed dial.
-// What the thing IS. Rolling it is picking a different subject, which the presets already do.
 function rollEnumField(key, spec, state) {
   const { base, free, rand, out } = state;
   out[key] = free || base?.[key] === undefined ? spec.of[Math.floor(rand() * spec.of.length)] : base[key];
@@ -934,6 +697,11 @@ function rollBoolField(key, state) {
 
 // The same 22% of the declared range, measured in log space, and capped so a roll can never
 // more than 1.6x or less than 1/1.6x the count.
+// Nudge is bounded by the smaller of 22% of the range and half the current value, which stops a
+// signed dial (`sheen`, `seam`) crossing zero: rolling `shadow` freely moved colonnade's near-black
+// from 23% of frame to 3.2%, measured, while a bounded roll on `colour` left it at 25.1%.
+// `scale: 'log'` makes the nudge multiplicative: a linear nudge on `bands` (48 of 2..80) is
+// perceptually lopsided, since halving a count is a bigger visual step than adding half again.
 function nudgeNumber(bounds, rand) {
   const { min, max, from, free, logScale } = bounds;
   const span = max - min;
@@ -967,22 +735,11 @@ function rollNumberField(key, spec, state) {
 // `fern` at 86, and `fern` is one of the two looks that was judged bad by eye. So narrow is not
 // a taste I am imposing; it is what everything that works here already does.
 //
-// So the palette's own SHAPE is kept and only its anchor moves: each role holds its hue offset
-// from the bloom, its lightness, and roughly its saturation. Same argument as the lightness rule
-// below it, one axis over. A roll gives the same palette in a different colour, which is a
-// variation; four random hues is a collision.
-// ROTATING AN ARC DOES NOT PRESERVE ITS CHARACTER, which is the hole in the paragraph above.
-// Keeping each role's offset from the anchor keeps the palette's SHAPE, and the shape is not
-// the whole of what makes a palette work, because hue space is not uniform. `spectrum` spans
-// 125 degrees, from yellow-green through to blue: wide, and every colour in it clean. Rotate
-// that same arc onto magenta and its middle now crosses red, orange and yellow, and at these
-// stops' saturation that middle IS brown. Measured on one roll: #bb6b5f brick, #d3bb81 khaki,
-// #dce152 mustard. Those are stops, not a mixing artefact between them.
-//
-// So a wide arc is COMPRESSED toward its anchor before it is rotated. The cap is 60 degrees,
-// chosen above every preset that works (10, 22, 39, 40) and well under the one judged bad
-// (86). The fitted palettes themselves are untouched: this runs only on a roll.
-// A little play in saturation, none in the relationship. Presets run 0.55 to 1.00.
+// Each role holds its hue offset from the anchor and roughly its saturation, so a roll varies the
+// palette's colour without breaking its shape. A wide hue arc is compressed toward its anchor before
+// rotating (cap 60 degrees: above every working preset's span of 10-40, below the one judged bad at
+// 86), because hue space is not uniform: rotating `spectrum`'s clean 125-degree arc onto magenta
+// measured brown stops (#bb6b5f, #d3bb81, #dce152) where it crossed red/orange/yellow.
 function rotateHueToAnchor(me, anchorHue, state) {
   const { base, rand, ctx } = state;
   const arc = paletteArc(base, ctx);
@@ -1002,16 +759,8 @@ function rollHexField(key, spec, state) {
   out[key] = hslHex(((offset % 360) + 360) % 360, sat, me.l * 100);
 }
 
-// SOME NUMBERS ARE A SET, NOT A ROW OF INDEPENDENT DIALS. The ramp positions must not cross: stop 5
-// sitting before stop 4 is not a ramp, and the generator rightly refuses it. Rolling each one on its
-// own produced exactly that, and the playground threw on its first random spectrum.
-//
-// Sorting is the whole fix, and it is the right one rather than a repair: what a caller wants from
-// rolling these is different SPACING, and the spacing is a property of the set. Sorting varies where
-// the ramp's features sit and can never produce an order nobody asked for.
-//
-// Declared with `monotone: '<name>'` on each member, so this stays a rule about a declaration and
-// not a rule about ramps.
+// Ramp positions (`monotone: '<name>'` group) must not cross, or the generator refuses them. Rolling
+// each independently can invert their order, so this sorts each group back into place after rolling.
 function sortMonotoneGroups(schema, out) {
   const groups = new Map();
   for (const [key, spec] of Object.entries(schema)) {
@@ -1026,10 +775,8 @@ function sortMonotoneGroups(schema, out) {
 }
 
 export function randomOptions(schema, rand = Math.random, out = {}, skipped = [], base = null, free = false, ctx = null) {
-  // ONE hue anchor per CALL, so every role in a palette agrees where the palette went while consecutive
-  // rolls land somewhere new. The first version cached it on the base object, which is the same object
-  // every time the panel rolls, so five rolls produced the same colour and the fix looked like a
-  // regression that had merely stopped moving.
+  // One hue anchor per call, not cached on the base object, so every role agrees on where the
+  // palette went and consecutive rolls still land somewhere new.
   ctx = ctx || { hue: rand() * 360 };
   const state = { base, free, rand, out, skipped, ctx };
   for (const [key, spec] of Object.entries(schema)) {
@@ -1078,15 +825,12 @@ const signedHue = (d) => ((((d % 360) + 540) % 360) - 180);
 
 // The anchor this palette's hues are measured from, and how wide an arc they cover.
 //
-// `hueOf(base, ANCHOR_ROLE)` returned 0 whenever the named role was absent, and a ramp has no
-// `bloom`: `spectrum`'s eight stops are ramp1..ramp8. So every spectrum palette was being measured
-// against red, a colour not in it. It happened to look right, because measuring a whole palette from
-// a fixed wrong origin still rotates it rigidly, which is the same answer for a different reason. It
-// stops being the same answer the moment anything else uses the offset, as the compression below now
-// does. So the anchor falls back to the first stop with real colour in it.
+// Falls back to the first saturated stop when ANCHOR_ROLE is absent: a ramp like `spectrum` (ramp1..8)
+// has no `bloom`, and anchoring on a missing role's implicit 0 measured every spectrum palette against
+// red, a colour not in it.
 //
-// The span is the SMALLEST arc containing every saturated hue, found as the circle minus its largest
-// gap. Taking max-minus-min would call a palette straddling zero nearly 360 degrees wide.
+// Span is the smallest arc containing every saturated hue (circle minus its largest gap): max-minus-min
+// would call a palette straddling zero nearly 360 degrees wide.
 function paletteArc(base, ctx) {
   ctx.arcs = ctx.arcs || new Map();
   if (ctx.arcs.has(base)) return ctx.arcs.get(base);
