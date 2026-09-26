@@ -103,7 +103,7 @@ const BOOT_URL = "/core/engine/boot.js";
 // existing fails `lib-test`, which asserts every one of these resolves to a real family.
 const FEATURED = new Set([
   // surfaces you feel before you read: glass, light, grain
-  "glassCard", "borderBeamCard", "spotlightCard", "meshPanel", "grainOverlay", "glassDock",
+  "borderBeamCard", "glassDock",
   // type and text doing something a still cannot show
   "morphText", "splitFlapBoard", "textCursor", "colorCycle",
   // whole-frame moves
