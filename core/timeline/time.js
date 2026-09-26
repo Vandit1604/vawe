@@ -32,6 +32,7 @@
 // believes it is, so `start` and `duration` still mean what they say.
 import { resolveEasing, handleCurve } from '../motion/motion.js';
 import { defineRegistry, withBlurb, blurbsOf } from '../registry/registry.js';
+import { groupLocalTime } from './group-clock.js';
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
@@ -182,15 +183,60 @@ export function bakeTimeRemap(L) {
  * left the typing behind.
  */
 export function layerTime(L, t, start, end) {
-  if (!L.timeWarp && !L.timeRemap) return t;
-  const who = L.id || L.type || 'a layer';
-  if (L.timeWarp && L.timeRemap)
-    throw new Error(`${who} declares BOTH \`timeWarp\` and \`timeRemap\`. They are two spellings of one `
-      + `decision, a curve on this layer's clock, so one of them would silently win. \`timeRemap\` is `
-      + `the general form: [{"t":0,"at":0},…]. Keep one.`);
-  const span = end - start;
-  if (!(span > 0) || t <= start) return t;
-  const u = clamp01((t - start) / span);
-  if (L.timeWarp) return start + resolveEasing(L.timeWarp)(u) * span;
-  return start + remapAt(resolveRemap(L.timeRemap, span, who), u * span);
+  let out = t;
+  if (L.timeWarp || L.timeRemap) {
+    const who = L.id || L.type || 'a layer';
+    if (L.timeWarp && L.timeRemap)
+      throw new Error(`${who} declares BOTH \`timeWarp\` and \`timeRemap\`. They are two spellings of `
+        + `one decision, a curve on this layer's clock, so one of them would silently win. `
+        + `\`timeRemap\` is the general form: [{"t":0,"at":0},…]. Keep one.`);
+    const span = end - start;
+    if (span > 0 && t > start) {
+      const u = clamp01((t - start) / span);
+      out = L.timeWarp ? start + resolveEasing(L.timeWarp)(u) * span
+        : start + remapAt(resolveRemap(L.timeRemap, span, who), u * span);
+    }
+  }
+  // `drive.loop` composes AFTER any warp, on the already-warped clock: it is a separate decision (loop
+  // this layer's OWN keyframes past a point) from timeWarp/timeRemap (bend the speed across one pass),
+  // so the two stack rather than being refused together the way timeWarp/timeRemap refuse each other.
+  if (L.drive && L.drive.loop) out = applyDriveLoop(L, out, start);
+  return out;
+}
+
+const DRIVE_LOOP_MODES = ['cycle', 'pingpong', 'continue'];
+
+function validateDriveLoop(spec, who) {
+  if (!spec || typeof spec !== 'object' || Array.isArray(spec))
+    throw new Error(`drive.loop on ${who}: expected an object like { "mode": "cycle", "to": 1.4 }, `
+      + `got ${JSON.stringify(spec)}.`);
+  const mode = spec.mode ?? 'cycle';
+  if (!DRIVE_LOOP_MODES.includes(mode))
+    throw new Error(`drive.loop on ${who}: \`mode\` must be one of ${DRIVE_LOOP_MODES.join(', ')}, `
+      + `got ${JSON.stringify(spec.mode)}.`);
+  const from = spec.from ?? 0;
+  if (typeof from !== 'number' || !Number.isFinite(from) || from < 0)
+    throw new Error(`drive.loop on ${who}: \`from\` must be a non-negative number of seconds, got `
+      + `${JSON.stringify(spec.from)}.`);
+  if (typeof spec.to !== 'number' || !(spec.to > from))
+    throw new Error(`drive.loop on ${who}: \`to\` must be a number of seconds greater than \`from\` `
+      + `(${from}), got ${JSON.stringify(spec.to)}. This is the ONE cycle of the layer's own `
+      + `keyframes that repeats.`);
+  return { mode, from, to: spec.to };
+}
+
+// applyDriveLoop(L, t, start): `drive.loop` reuses groupLocalTime, the SAME cycle/pingpong arithmetic a
+// group's own clock already runs (core/timeline/group-clock.js), so a layer's OWN keyframes repeat
+// past `to` exactly the way a group repeats its children: restart at `from` (cycle) or bounce
+// (pingpong). `continue` is a no-op here, the pass-through motionAt already gives for free by holding
+// the last keyframe once time runs past it.
+function applyDriveLoop(L, t, start) {
+  const spec = validateDriveLoop(L.drive.loop, L.id || L.type || 'a layer');
+  const elapsed = t - start;
+  if (spec.mode === 'continue' || elapsed <= spec.from) return t;
+  const dur = spec.to - spec.from;
+  const local = groupLocalTime(
+    { duration: dur, rate: 1, loop: { count: Infinity, infinite: true, pingpong: spec.mode === 'pingpong' }, hold: true },
+    elapsed - spec.from);
+  return start + spec.from + local;
 }

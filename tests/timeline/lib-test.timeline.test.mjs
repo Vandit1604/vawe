@@ -384,8 +384,8 @@ test('lib-test: timeline', async () => {
     catch (e) { return /paints nothing a mask can use/.test(e.message); }
   })());
   ok('matte refuses an unknown mode by name', (() => {
-    try { matteFrame(null, { style: {} }, { id: 'plate' }, 0, mview, { from: 'sweep', mode: 'luma' }); return false; }
-    catch (e) { return /unknown mode "luma"/.test(e.message); }
+    try { matteFrame(null, { style: {} }, { id: 'plate' }, 0, mview, { from: 'sweep', mode: 'chroma' }); return false; }
+    catch (e) { return /unknown mode "chroma"/.test(e.message); }
   })());
   ok('matte refuses to share `mask-image` with the layer\'s own `mask`', (() => {
     try { matteBuild(null, { style: {} }, { id: 'plate', mask: 'linear-gradient(#000,#fff)' }, 'sweep'); return false; }
