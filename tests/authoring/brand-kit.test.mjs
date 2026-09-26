@@ -15,6 +15,9 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const SITE = path.join(ROOT, 'tests/fixtures/brand-kit-site');
 const NAME = 'kit-fixture-brand';
 const KIT_DIR = path.join(ROOT, 'assets/brands', NAME);
+const INIT_NAME = 'kit-fixture-brand-init';
+const INIT_KIT_DIR = path.join(ROOT, 'assets/brands', INIT_NAME);
+const BRIEF_PATH = path.join(ROOT, 'films/scene', `${INIT_NAME}.brief.md`);
 
 function assert(cond, msg) { if (!cond) throw new Error(`FAIL: ${msg}`); }
 
@@ -27,6 +30,8 @@ const server = http.createServer((req, res) => {
 });
 
 fs.rmSync(KIT_DIR, { recursive: true, force: true });
+fs.rmSync(INIT_KIT_DIR, { recursive: true, force: true });
+fs.rmSync(BRIEF_PATH, { force: true });
 
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const url = `http://127.0.0.1:${server.address().port}/`;
@@ -46,7 +51,20 @@ try {
   assert(fs.existsSync(path.join(ROOT, kit.favicon)), 'favicon file must exist');
 
   console.log('OK: make kit writes sections + palette + favicon into one kit.json');
+
+  // --init (make kit ... INIT=1): also runs doctor and writes the stage-1 brief skeleton.
+  const { stdout } = await execFileAsync(process.execPath,
+    [path.join(ROOT, 'scripts/brand/kit.mjs'), url, INIT_NAME, '--init'], { cwd: ROOT, encoding: 'utf8' });
+  assert(/doctor:/.test(stdout), 'INIT=1 must run the doctor check');
+  assert(fs.existsSync(BRIEF_PATH), 'INIT=1 must write the brief skeleton');
+  const brief = fs.readFileSync(BRIEF_PATH, 'utf8');
+  assert(brief.includes('SUBJECT'), 'brief skeleton must carry the five brief lines');
+  assert(brief.includes(`make quiz NAME=${INIT_NAME} URL=${url}`), 'brief skeleton must print the one next command');
+
+  console.log('OK: make kit INIT=1 runs doctor and writes the brief skeleton');
 } finally {
   server.close();
   fs.rmSync(KIT_DIR, { recursive: true, force: true });
+  fs.rmSync(INIT_KIT_DIR, { recursive: true, force: true });
+  fs.rmSync(BRIEF_PATH, { force: true });
 }

@@ -1,7 +1,7 @@
 // Pure timeline evaluators, lifted out of scene.html so they can be unit-tested without a browser.
 // Every export is a pure function of time (pure in frame n), zero DOM access; scene.html does the DOM
 // writes, the math lives here (asserted by harness/lib-test.mjs).
-import { clamp01, lerp, resolveEasing, handleCurve,
+import { clamp01, lerp, resolveEasing, handleCurve, isEaseMap, isEasingName,
   resolveHandle as resolveHandleSide } from '../motion/motion.js';
 
 // `s` is where the camera stands, not a second idea beside depth: under a lens of focal length L, a
@@ -103,7 +103,12 @@ export const POSE = { x: ['dx', 0], y: ['dy', 0], scale: ['scale', 1], rot: ['ro
   // declared depth still has one (zero). Not a second `plane`/`tilt`: those are static per-layer
   // modifiers resolved once at build into a different CSS longhand (core/fx/plane.js, core/fx/tilt.js),
   // so keying depth and giving a static one cannot collide.
-  z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0] };
+  z: ['z', 0], rotX: ['rotX', 0], rotY: ['rotY', 0],
+  // AE Trim Paths, keyed: fractions of an SVG path (core/tracks/trim.js). Identity null, like
+  // `radius`/`ox`/`oy`: a segment omitted from one endpoint of a motion key means "not keyed here",
+  // and the track falls back to the layer's own static `trim.start`/`.end`/`.offset` (or 0/1/0)
+  // rather than reading a number this keyframe never wrote.
+  trimStart: ['trimStart', null], trimEnd: ['trimEnd', null], trimOffset: ['trimOffset', null] };
 
 // ARRIVAL_EASE_PROPS/IDENTITY: the visual props whose motion this checks for an unfinished stop
 // (engine-doctrine/CRAFT/MOTION-CRAFT.md owns the speed/motion vocabulary this feeds). Not `opacity`: a move
@@ -246,9 +251,33 @@ export function segmentAt(kfs, i, t, dfltEase) {
   // handleCurve). A handle beside a named `ease` on the same segment is refused at boot by
   // keyHandleErrors below, so this never has to decide which of two authored curves wins.
   const drawn = handleCurve(a.easeOut, b.easeIn);
+  // `ease` as a MAP (Separate Dimensions, core/motion.js isEaseMap) is not a name, so it never goes
+  // through resolveEasing for the WHOLE segment; it only overrides individual properties below, and
+  // every property neither map names falls through to `p`, exactly as before the map existed.
   const p = !(seg > 0) ? 1
-    : (drawn || resolveEasing(b.ease || dfltEase))(clamp01((t - a.t) / seg));
-  return (prop, dflt) => lerp(a[prop] ?? dflt, b[prop] ?? dflt, p);
+    : (drawn || resolveEasing(isEaseMap(b.ease) ? null : (b.ease || dfltEase)))(clamp01((t - a.t) / seg));
+  if (!isEaseMap(a.ease) && !isEaseMap(b.ease)) return (prop, dflt) => lerp(a[prop] ?? dflt, b[prop] ?? dflt, p);
+  const u = clamp01((t - a.t) / seg);
+  return (prop, dflt) => {
+    const curve = propEaseCurve(a.ease, b.ease, prop);
+    return lerp(a[prop] ?? dflt, b[prop] ?? dflt, curve ? curve(u) : p);
+  };
+}
+
+// propEaseCurve(aEase, bEase, prop): the curve ONE property uses across a segment when either
+// endpoint's `ease` is a per-property map, or null when neither map names this property (the segment
+// falls back to its ordinary shape). `bEase[prop]` is a NAME (a whole curve for this property alone,
+// exactly like a whole-segment `ease`) or a handle pair `{easeIn, easeOut}`; `aEase[prop].easeOut` is
+// that property's own leaving handle, symmetric with the whole-segment `easeOut` on the leaving key
+// (and, symmetrically, `bEase[prop].easeOut` becomes the leaving handle of the NEXT segment).
+function propEaseCurve(aEase, bEase, prop) {
+  const av = isEaseMap(aEase) ? aEase[prop] : undefined;
+  const bv = isEaseMap(bEase) ? bEase[prop] : undefined;
+  if (av == null && bv == null) return null;
+  if (typeof bv === 'string' || typeof bv === 'function') return resolveEasing(bv);
+  const outH = av && typeof av === 'object' ? av.easeOut : undefined;
+  const inH = bv && typeof bv === 'object' ? bv.easeIn : undefined;
+  return handleCurve(outH, inH) || null;
 }
 
 // keyHandleErrors(kfs, who) -> messages[]. Checked at boot (core/boot.js) and at author-check
@@ -260,6 +289,40 @@ const SIDES = ['easeIn', 'easeOut'];
 // `t` is the time, `ease` drives the segment INTO this key, SIDES are its two bezier handles, and the
 // rest are the values that travel. Every name here is read; nothing here is a second copy of anything.
 export const KEYFRAME_PROPS = ['t', 'ease', ...SIDES, ...Object.keys(POSE)];
+
+// easeMapErrors(map, who): one key's `ease` MAP -> messages[], the per-property twin of the whole-key
+// checks in keyHandleErrors (same two questions, asked per property instead of once): is the value a
+// real easing name, or a handle carrying only `easeIn`/`easeOut`, and does it name a real property.
+function easeMapErrors(map, who) {
+  const out = [];
+  for (const [prop, spec] of Object.entries(map)) {
+    if (!Object.prototype.hasOwnProperty.call(POSE, prop)) {
+      out.push(`${who} \`ease.${prop}\`: per-property ease names a property nothing interpolates. `
+        + `A key carries: ${Object.keys(POSE).join(' · ')}.`);
+      continue;
+    }
+    if (typeof spec === 'string' || typeof spec === 'function') {
+      if (typeof spec === 'string' && !isEasingName(spec))
+        out.push(`${who} \`ease.${prop}\`: unknown easing ${JSON.stringify(spec)}.`);
+      continue;
+    }
+    if (spec == null || typeof spec !== 'object' || Array.isArray(spec)) {
+      out.push(`${who} \`ease.${prop}\` takes an easing name or `
+        + `{ "easeIn": handle, "easeOut": handle }, got ${JSON.stringify(spec)}.`);
+      continue;
+    }
+    for (const side of SIDES) {
+      if (spec[side] == null) continue;
+      try { resolveHandleSide(spec[side], side, `${who} \`ease.${prop}\``); }
+      catch (e) { out.push(e.message); }
+    }
+    const stray = Object.keys(spec).filter((s) => !SIDES.includes(s));
+    if (stray.length) out.push(`${who} \`ease.${prop}\` carries ${stray.map((s) => `\`${s}\``).join(', ')}, `
+      + `which a per-property handle does not take. Only ${SIDES.join('/')}.`);
+  }
+  return out;
+}
+
 export function keyHandleErrors(kfs, who = 'a track') {
   const out = [];
   if (!Array.isArray(kfs)) return out;
@@ -277,12 +340,19 @@ export function keyHandleErrors(kfs, who = 'a track') {
         + '`through` COMPUTES the velocity at this key from its neighbours; a handle AUTHORS it. '
         + 'They are two answers to one question, so one would silently win. Keep one: drop the handle '
         + 'to let the neighbours decide, or drop `through` to draw the curve yourself.');
+    // `ease` as a MAP (Separate Dimensions, core/motion.js isEaseMap): each entry is either a NAME
+    // (that property's own whole-segment curve) or a handle pair, checked exactly like the whole-key
+    // SIDES above, just one property at a time.
+    if (isEaseMap(k.ease)) out.push(...easeMapErrors(k.ease, `${who} key ${i}`));
   }
   for (let i = 0; i < kfs.length - 1; i++) {
     const a = kfs[i], b = kfs[i + 1];
     // `through` is caught by the per-key rule above, which says something sharper about it than
-    // "two curves on one segment" would, so it is skipped here rather than reported twice.
-    if (!a || !b || b.ease == null || b.ease === 'through') continue;
+    // "two curves on one segment" would, so it is skipped here rather than reported twice. A MAP is
+    // not "one curve for the whole segment" (isEaseMap): it names some properties and leaves the rest
+    // to whatever the segment would otherwise use, including a top-level handle, so it never conflicts
+    // with one the way a whole-segment name does.
+    if (!a || !b || b.ease == null || b.ease === 'through' || isEaseMap(b.ease)) continue;
     const drawn = [has(a, 'easeOut') && `key ${i} \`easeOut\``, has(b, 'easeIn') && `key ${i + 1} \`easeIn\``].filter(Boolean);
     if (!drawn.length) continue;
     out.push(`${who}: the segment from key ${i} to key ${i + 1} is shaped twice, by `

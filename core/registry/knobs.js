@@ -109,6 +109,16 @@ export const KNOBS = {
     codeDissolve: [{ name: 'lines', type: 'string', default: '', desc: 'the snippet, one string per line (array)' }, n('breakAt', 0.8, 'seconds before the burn starts'), n('breakDur', 2, 'seconds the burn takes'), n('seed', 5, 'grain seed'), n('spin', 1, 'drift rate'), n('yaw', -0.28, 'yaw'), n('pitch', 0.14, 'pitch')],
     codeAssemble: [{ name: 'lines', type: 'string', default: '', desc: 'the snippet, one string per line (array)' }, n('breakAt', 0.3, 'seconds before the first token flies in'), n('breakDur', 1.2, 'seconds one token takes to land'), n('travel', 1, 'how far apart the arrivals are spread'), n('seed', 5, 'scatter seed'), n('spin', 1, 'tumble rate'), n('roughness', 0.34, 'surface roughness'), n('metalness', 0.5, 'metalness'), n('yaw', -0.3, 'yaw'), n('pitch', 0.15, 'pitch')],
     liquidBackground: [n('count', 96, 'plane subdivisions per side'), n('amp', 0.34, 'swell height'), n('morphSpeed', 1, 'churn rate'), n('seed', 11, 'wave-set seed'), n('roughness', 0.22, 'surface roughness'), n('metalness', 0.62, 'metalness'), n('pitch', 0.62, 'tilt away from camera'), n('yaw', 0, 'roll')],
+    // A composed object: a real mesh (sphere/box/torus/an extruded SVG path or brand-font text) under
+    // a glass/frostedGlass/metal/matte material, camera-orbited and object-posed by the same keyed
+    // motion[] vocabulary (x,y,z,rotX,rotY,rot,scale) every other layer's `motion` reads.
+    object: [
+      { name: 'geometry', type: 'object', desc: 'shape to build: {kind: sphere|box|torus|svgExtrude|textExtrude, ...}' },
+      { name: 'material', type: 'object', desc: 'surface: {preset: glass|frostedGlass|metal|matte, ...}' },
+      { name: 'env', type: 'object', desc: 'optional real environment image {image: src}, replacing the procedural studio room' },
+      { name: 'objectMotion', type: 'array', desc: 'keyed motion for the object, same {t,x,y,z,rotX,rotY,rot,scale} vocabulary as a layer\'s own motion[]' },
+      { name: 'cameraMotion', type: 'array', desc: 'keyed motion orbiting the camera around the object: rotY azimuth, rotX elevation, z adds to dolly' },
+    ],
   },
 
   // ── raymarch (core/raymarch-fx.js), `raymarch: "name"`, SAME dials for all 5 ────────────────────
