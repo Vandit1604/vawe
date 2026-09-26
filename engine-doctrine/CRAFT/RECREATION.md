@@ -121,6 +121,29 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
   render's own size), then ranks every beat worst-to-best in `out/match/<film>/match.md`. A beat scored
   against its own render reads near SSIM 1; a beat that diverges in timing or path reads low, and the
   strip/diff for that beat is where to look first. STEP=<seconds> sets the sample rate (default 0.1).
+- **`LIGHT=1` with `MATCH=1`: does the beat carry the reference's LIGHT, not just its structure and
+  average colour?** A recreation can score well on SSIM (same shapes moving) and on the mean-colour ΔE
+  above (one averaged colour can hide a bright corner against a mostly dark frame) and still be wrong in
+  the way a viewer notices first: measured on one recreation, the reference read 4-8x brighter with a
+  diagonal field of light and the render was mostly black with a small glow spot bolted on. `LIGHT=1`
+  adds a `light ΔE` column: the mean Lab distance between a 16x9 low-frequency light map (area-averaged
+  IN LINEAR LIGHT, `harness/lib/light-map.mjs`) of the reference and of the render, one representative
+  frame per beat.
+- **`harness/media/light-fit.mjs`: fit a beat's light, not just measure it missing.** For a beat that
+  scores badly on `light ΔE`, this FITS a replacement background on the engine's own light-field owner
+  (`core/lightfield/index.js`'s `paintField`, a few large soft radial gradients as data: position,
+  reach, colour, no hard edges, ever): a closed-form read of the reference's light map (brightness
+  centroid for position, the most saturated bright cell for `bloom`, the furthest-in-colour lit cell for
+  `mid`, the darker quartile for `deep`, the darkest cell for `ground`), then a bounded coordinate search
+  over `spread`/`evenness`/`originX`/`originY` against the reference's own light map (never against the
+  reference's fine detail, which this step is not trying to match), and one measured colour correction.
+  It writes an `{"type":"html", ...}` background layer whose `html` cross-fades between the fitted keys
+  purely as a function of `var(--t)` (a `min()`/`max()`/`clamp()` tent per key, never a CSS transition or
+  animation): `node harness/media/light-fit.mjs --ref <reference.mp4> --start <s> --end <s> [--step 2]
+  [--keys 4] --out <beat.lightfit.json> [--grid <compare.png>]`. Paste the written layer into the film;
+  `--grid` writes the reference's light map stacked over the fit's own, to look at side by side. Run it
+  again after any change to the fit and check the number moved the right way: a colour correction is
+  measured, not assumed, and is kept only when it actually lowers the distance.
 - **Measuring one element's move instead of guessing it from sparse frames:**
   `node harness/media/track.mjs <reference.mp4> --box x,y,w,h --from t0 --to t1 [--fps 10] [--thresh 128]
   [--dark]` (`harness/media/track.mjs`) crops the box, tracks the brightest (or, with `--dark`, darkest)
