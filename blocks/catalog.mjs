@@ -106,8 +106,8 @@ export const CATALOG = [
   // `searchEngine`. Closing it is a change to arsenal.mjs (index a family with no bare row), not five
   // more rows here: a bare row also needs a poster, a scene and a frame rect, and moves the block
   // count three doc surfaces state by hand.
-  { name: 'card.stat', family: 'statCard', blurb: 'a boxed metric: a label, a number counting up, a chip saying how much it went up',
-    props: { w: 340, to: 1950, label: 'frames rendered', delta: '+12%', deltaUp: true } },
+  { name: 'card.stat', family: 'statCard', blurb: 'a boxed metric: a label, a number counting up, and a delta chip only when you pass one',
+    props: { w: 340, to: 1950, label: 'frames rendered' } },
 
   // ── wave 2: dev blocks + device/UI chrome ──
   { name: 'fileTree', family: 'fileTree', blurb: "a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar",
