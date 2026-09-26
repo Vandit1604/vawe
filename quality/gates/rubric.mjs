@@ -11,6 +11,7 @@
 // That is the failure `similarity.mjs` exists to catch, so the A/B loop must not manufacture it.
 import fs from 'node:fs';
 import path from 'node:path';
+import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
 
 export function houseStyleFor(brand) {
   const p = brand && path.join('assets', 'brands', brand, 'house-style.md');
@@ -124,6 +125,43 @@ these frames cannot answer, write \`CANNOT TELL\` for it and name the evidence t
 \`CANNOT TELL\` is a real answer and costs you nothing. A guess dressed as a finding costs the author a
 render, and it arrives in the same shape as a true one, so nobody downstream can tell them apart. If
 every dimension a frame CAN answer is clear and the rest are \`CANNOT TELL\`, the frame is not a FIX.
+`;
+}
+
+// structuredRubric: the same craft rubric, but the REQUIRED answer is JSON, one entry per criterion,
+// {score, evidence, t}, split into LOOK (light, colour, type, camera, composition) and MOTION (timing,
+// easing, transitions, continuity), scored as two SEPARATE passes: a single vision judge repeats its
+// own rating on the same clip roughly two times in three (Video-Bench), so one pass, one number, one
+// rubric is not a verdict, it's a coin with a thumb on it. `run` names which of the (at least two,
+// independent) judges is answering; `--compare` in judge.mjs then flags any criterion where the two
+// runs disagree by more than 2 points.
+export function structuredRubric({ name, subject, frames, landscape, dir, run, outFile }) {
+  const criteria = structuredCriteria();
+  const look = criteria.filter((c) => c.axis === 'look');
+  const motion = criteria.filter((c) => c.axis === 'motion');
+  const section = (label, list) => `### ${label}\n${list.map((c) => `- \`${c.code}\`: ${c.label}`).join('\n')}\n`;
+  return `# Structured judge, ${name} (${frames} key frames, ${landscape ? 'landscape' : 'portrait'}), run ${run}
+
+READ \`${dir}/sheet.png\`. Score EVERY criterion below. A score with no evidence is refused, not
+recorded: \`node quality/gates/judge.mjs\` checks each entry has a non-empty \`evidence\` string and a
+\`t\` (seconds) before it writes anything down.
+
+${section('LOOK (score this pass; static, per-frame)', look)}
+${section('MOTION (score from what adjacent frames imply; write CANNOT_TELL in evidence if a still cannot answer it)', motion)}
+
+## Write this JSON to \`${outFile}\`, and nothing else
+\`\`\`json
+{
+  "run": "${run}",
+  "criteria": {
+${criteria.map((c) => `    "${c.code}": {"score": 1-5, "evidence": "<quoted visual observation>", "t": <seconds>}`).join(',\n')}
+  },
+  "verdict": "PASS|FIX"
+}
+\`\`\`
+Every \`evidence\` string must name what you actually SEE (a timestamp/beat, the exact element, the
+exact defect), never a bare number. Then record it:
+\`node quality/gates/judge.mjs ${subject} --verdict-json ${outFile} --run ${run}\`
 `;
 }
 
