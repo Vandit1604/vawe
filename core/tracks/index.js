@@ -54,11 +54,12 @@ import { DEFAULT_SHUTTER } from './motion.js';
 import { layerTime } from '../timeline/time.js';
 import { groupClockAbsoluteTime } from '../timeline/group-clock.js';
 import * as tIdle from './idle.js';
+import * as tDrive from './drive.js';
 import * as tModifiers from './modifiers.js';
 
 const REGISTRY = { cut: tCut, units: tUnits, ransom: tRansom, primitive: tPrimitive, resample: tResample,
   borderTrail: tBorderTrail, circle: tCircle, effector: tEffector, vars: tVars, react: tReact, box: tBox,
-  follow: tFollow, motion: tMotion, idle: tIdle, modifiers: tModifiers };
+  follow: tFollow, motion: tMotion, drive: tDrive, idle: tIdle, modifiers: tModifiers };
 
 // Exported so a gate can DERIVE the pipeline instead of restating it, the contract LAYER_TYPES and
 // FX_TYPES already have. A hand-typed copy of this list is how `make check GATE=coverage` reported 14/14 while a
@@ -97,6 +98,7 @@ export const SLOTS = Object.freeze([
   'box',        // w / h / depth over time, the layer's SIZE, not its scale
   'follow',     // pin to another layer's live box, before that layer's own choreography plays
   'transform',  // the motion track and motion blur
+  'drive',      // expressions as data: wiggle and link, composed onto the motion track's own transform
   'idle',       // ambient motion across the settled middle, riding outside the choreography above
   'post',       // modifiers (core/fx), always last, on a finished frame
 ]);
