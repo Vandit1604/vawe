@@ -1,0 +1,32 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 2.0,
+ "produced": false,
+ "audio": {
+  "music": "tests/fixtures/beat-sync.wav",
+  "beatSync": true
+ },
+ "bg": [{ "preset": "plain" }],
+ "layers": [
+  {
+   "id": "back",
+   "type": "rect",
+   "x": 700,
+   "y": 400,
+   "w": 500,
+   "h": 300,
+   "bg": "#101010",
+   "radius": 0,
+   "start": 0,
+   "duration": 2.0,
+   "anim": "none"
+  }
+ ],
+ "transitions": [
+  { "at": "beat:2", "mech": "cut", "fx": "none" },
+  { "at": 0.05, "mech": "cut", "fx": "none", "snap": "bar" }
+ ]
+}
