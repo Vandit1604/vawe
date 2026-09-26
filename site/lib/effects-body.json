@@ -125,6 +125,41 @@
   "cut-timings--smooth": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"push\",\n      \"timing\": \"smooth\"\n    }\n  ]\n}",
   "cut-timings--snappy": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"push\",\n      \"timing\": \"snappy\"\n    }\n  ]\n}",
   "cut-timings--spring": "{\n  \"cuts\": [\n    {\n      \"t\": 2.4,\n      \"style\": \"push\",\n      \"timing\": \"spring\"\n    }\n  ]\n}",
+  "scene-finish-keys--aberration": {
+    "finish": {
+      "aberration": true
+    }
+  },
+  "scene-finish-keys--bloom": {
+    "finish": {
+      "bloom": true
+    }
+  },
+  "scene-finish-keys--dof": {
+    "finish": {
+      "dof": true
+    }
+  },
+  "scene-finish-keys--grade": {
+    "finish": {
+      "grade": true
+    }
+  },
+  "scene-finish-keys--grain": {
+    "finish": {
+      "grain": true
+    }
+  },
+  "scene-finish-keys--light": {
+    "finish": {
+      "light": true
+    }
+  },
+  "scene-finish-keys--vignette": {
+    "finish": {
+      "vignette": true
+    }
+  },
   "generators-the-playground--bands": "// turn the dials at /playground?gen=bands, then paste the markup:\n{\n  \"bg\": [\n    {\n      \"html\": \"…\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "generators-the-playground--colonnade": "// turn the dials at /playground?gen=colonnade, then paste the markup:\n{\n  \"bg\": [\n    {\n      \"html\": \"…\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
   "generators-the-playground--crt": "// turn the dials at /playground?gen=crt, then paste the markup:\n{\n  \"bg\": [\n    {\n      \"html\": \"…\",\n      \"from\": 0,\n      \"to\": 6\n    }\n  ]\n}",
@@ -212,6 +247,13 @@
   "three-js-scenes-real-geometry--pointcloud": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"pointCloud\"\n}",
   "three-js-scenes-real-geometry--shatter": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"shatter\"\n}",
   "three-js-scenes-real-geometry--uiparallax": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"three\",\n  \"three\": \"uiParallax\"\n}",
+  "universal-surface-decoration--glass": {
+    "layers": [
+      {
+        "glass": true
+      }
+    ]
+  },
   "anchor-points--bottom": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"bottom\"\n}",
   "anchor-points--bottom-left": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"bottom-left\"\n}",
   "anchor-points--bottom-right": "{\n  \"x\": 960,\n  \"y\": 540,\n  \"w\": 200,\n  \"h\": 100,\n  \"anchorPoint\": \"bottom-right\"\n}",

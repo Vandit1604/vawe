@@ -76,7 +76,7 @@ JSON *is* the video.
 | `unit` | string | Count unit appended after the number (e.g. %, k, $B); raw ≥1e6 auto-compacts ( |
 | `ease` | string | Count easing (EASINGS name, e.g. ramp) |
 | `src` | string | Path to the layer's source file: an image, a captured component (.json), a lot |
-| `radius` | number | Corner radius (rect/ken-image) |
+| `radius` | number|string | Corner radius (rect/ken-image); a var(--v-radius, …) string is the ambient sur |
 | `bg` | string | Fill (rect) |
 | `border` | string|boolean | Border (rect) (true = a 1px hairline in var(--line)) |
 
