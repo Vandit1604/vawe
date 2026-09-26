@@ -425,7 +425,17 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   // Same identity rule the safe-zone walk uses: a layer's index in document order. Labelling by ink y
   // instead made one bug report as four, since a drifting headline gets a different label per frame.
   const layerIdx = new Map([...document.querySelectorAll('.hs-layer')].map((e, i) => [e, i]));
-  return { SAFE, MIN_GAP, CAPBAND, info, tNow, inCut, stageRotated, CX, CY, camScale, travelling,
+  // A MARK, not a shape: `logotype:true` (core/layers/util.js) is the author's own declaration that
+  // this layer IS the wordmark/logo, the one thing `checkPairs`'s "text over a shape is design" was
+  // never meant to excuse. `els` above skips anything with no text, so a mark never entered `info` and
+  // never got paired against anything; `checkTextMarkOverlap` reads this list instead.
+  const marks = [...document.querySelectorAll('[data-logotype]')].filter((el) => {
+    const b = el.getBoundingClientRect(); return b.width > 1 && b.height > 1 && vis(el);
+  }).map((el) => {
+    const b1 = inkRect(el) || el.getBoundingClientRect();
+    return { el, id: el.dataset.id || el.id || el.tagName, x: b1.left, y: b1.top, r: b1.right, btm: b1.bottom };
+  });
+  return { SAFE, MIN_GAP, CAPBAND, info, marks, tNow, inCut, stageRotated, CX, CY, camScale, travelling,
     inOverlay, layerIdx, FW: window.innerWidth, FH: window.innerHeight };
 }
 
@@ -709,6 +719,27 @@ function checkPairs(ctx) {
   return issues;
 }
 
+// TEXT OVER A MARK AT REST. `pairFinding`'s "text over a shape is design, not collision" is right for
+// a layer's own background chip, but a `logotype` layer (`marks` in frameContext, `data-logotype`) is
+// not scenery, it is the wordmark itself: a wave mark drawn over its letters, or a tagline sitting on
+// top of it, is the same failure `checkPairs` already catches between two texts, just never tested
+// because a mark carries no text and `info` only holds text. Advice, never a hard fail (a mark
+// deliberately touching a caption at the edge is common, unlike two texts truly overlapping) and
+// waivable the same way as every other kind here (`authoring.allow: ["overlap-mark"]`).
+function checkTextMarkOverlap(ctx) {
+  const { info, marks, stageRotated } = ctx;
+  const issues = [];
+  if (stageRotated || !marks.length) return issues;
+  for (const A of info) for (const B of marks) {
+    if (A.el.contains(B.el) || B.el.contains(A.el)) continue;
+    if (midMove(A.el, ctx) || midMove(B.el, ctx)) continue;               // "at rest" only
+    const ox = Math.min(A.r, B.r) - Math.max(A.x, B.x);
+    const oy = Math.min(A.btm, B.btm) - Math.max(A.y, B.y);
+    if (ox > 2 && oy > 2 && !occluded(A, B, ox, oy)) issues.push({ kind: 'overlap-mark', a: A.id, b: B.id, detail: `${ox | 0}x${oy | 0}px` });
+  }
+  return issues;
+}
+
 // One pair, one verdict: they collide, they sit too close, or there is nothing to say.
 function pairFinding(A, B, ctx) {
   const { MIN_GAP, tNow } = ctx;
@@ -965,7 +996,7 @@ function auditFrame(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   const ctx = frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND);
   const issues = [];
   for (const check of [checkLayerBounds, checkImageFloor, checkTinyText, checkClippedText,
-    checkClippedComponent, checkVerticalMass, checkPairs, checkBuried])
+    checkClippedComponent, checkVerticalMass, checkPairs, checkTextMarkOverlap, checkBuried])
     issues.push(...check(ctx));
   const { probes, hideList } = collectProbes(ctx);
   hideProbeSubjects(hideList);
@@ -993,7 +1024,7 @@ const PAGE_FNS = { vis, effOpacity, arrived, paintsOwnBox, inkText, maskedByDesi
   shapeInk, svgInk, hasTextOutsideSvg, clampToBox, rangeInk, textInkRaw, inkRect, carriesContent, atRest, opaqueAt, parse, boxOf,
   frameContext, unCam, midMove, checkLayerBounds, overflowFinding, safeFinding, captionBandFinding,
   checkImageFloor, checkTinyText, checkClippedText, checkClippedComponent, checkVerticalMass,
-  fading, crossDissolve, occluded, checkPairs, pairFinding, checkBuried, coverSample,
+  fading, crossDissolve, occluded, checkPairs, pairFinding, checkTextMarkOverlap, checkBuried, coverSample,
   collectTextProbes, collectSpanProbes, onOwnFill,
   collectHeadlineProbes, collectImageProbes, collectProbes, hideProbeSubjects, auditFrame };
 const PAGE_SRC = `(() => {\n${Object.entries(PAGE_FNS).map(([k, f]) => `const ${k} = ${f};`).join('\n')}\n`
