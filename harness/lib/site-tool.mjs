@@ -17,6 +17,7 @@ export const TOOLS = {
   'deck': () => ['scripts/site/deck.mjs'],
   'deploy-check': () => ['quality/gates/site-build-check.mjs', env.RANGE],
   'doc-index': () => ['quality/gates/doc-map.mjs', '--write', ...json()],
+  'effects-json': () => ['scripts/site/effects-json.mjs', ...check()],
   'films-json': () => ['scripts/site/films-json.mjs', ...(env.WRITE ? ['--write'] : [])],
   'gallery': () => ['scripts/site/examples-gallery.mjs'],
   'registry': () => ['scripts/site/registry.mjs', ...check()],
