@@ -1010,6 +1010,21 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `whipPan` | whip pan streaks, camera whip, motion smear pan | horizontal smear streaks racing across, as if the camera whipped sideways. Energy carried into a payoff. |
 | `wipe` | directional wipe, band wipe, sweep wipe | a directional band sweeping across the frame. The plainest geometric transition, and it always reads. |
 
+## surface look  `[look.surface]`
+
+| name | words | action |
+|---|---|---|
+| `brutalist` | square blocky surface, hard-edge panel | square (0px) corners, a thick 3px ink rule, an 8px hard offset shadow with no blur |
+| `cinematic` | deep glass surface, glowing dark panel | 18px radius, a 24px backdrop blur behind a 62%-opacity fill, a deep shadow plus an accent glow |
+| `editorial` | magazine-style surface, airy quiet panel | near-square (2px) corners, a plain hairline, no shadow, 28px of padding for generous air |
+| `glass` | frosted panel, translucent surface, glassmorphism | 20px radius, a 55%-opacity fill behind an 18px backdrop blur, a 1px translucent rim |
+| `industrial` | heavy hardware surface, square dark-edged panel | 4px radius, a thick 2px rule, a flat 4px hard-edge shadow, tighter padding than the rest |
+| `neon` | glowing surface, cyberpunk panel | 16px radius, a 1px accent-coloured rim, a three-layer glow in place of a shadow |
+| `outlined` | flat quiet panel, no-shadow surface | 12px radius, a firm 1.5px hairline rule, no shadow at all: flat and quiet |
+| `playful` | pill-shaped surface, bubbly friendly panel | 28px pill radius, no rule, a tinted fill, a flat coloured shadow ledge underneath |
+| `print` | paper surface, ink-on-stock panel | 3px radius, a solid 1px ink rule, no shadow: flat ink on stock |
+| `soft` | rounded pillowy surface, gentle elevated panel | 24px radius, no rule at all, a wide 12px/24px double shadow: reads as an object, not a panel |
+
 ## theme look key  `[theme.look]`
 
 | name | words | action |
@@ -1022,6 +1037,7 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `layout` | anchor and margin, where content sits on the frame | the anchor band (left/center/right) and margin every beat composes against |
 | `marks` | logo settings, brand mark sizes | the logo path plus its end-card and headline-adjacent sizes, both named pixel numbers |
 | `scale` | type scale, named text sizes | how big text should be: named px sizes for the hook / headline / body / caption roles at 16:9, so a layer writes `"size": "headline"` instead of guessing a number |
+| `surface` | block shape, skinnable blocks, reskin every block at once | a named shape look (glass/soft/outlined/brutalist/editorial/neon/playful/print/cinematic/industrial, `core/theme/surface-looks.js`) every block reads instead of its own literal corner rounding, rule weight and drop shadow |
 
 ## three scene  `[three]`
 
@@ -1065,5 +1081,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_731 primitives across 64 registries, 731 meeting the word-action contract today.
+_742 primitives across 65 registries, 742 meeting the word-action contract today.
 Regenerate: `make vocab`. Ratchet: `make check GATE=word-action`._
