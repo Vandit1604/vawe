@@ -36,7 +36,8 @@
       "label",
       "color",
       "start",
-      "dur"
+      "dur",
+      "look"
     ]
   },
   "files": [

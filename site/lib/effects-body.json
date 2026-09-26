@@ -564,6 +564,76 @@
   "stagger-order-from--last": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.5,\n  \"stagger\": {\n    \"amount\": 0.6,\n    \"from\": \"last\"\n  }\n}",
   "stagger-order-from--random": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.5,\n  \"stagger\": {\n    \"amount\": 0.6,\n    \"from\": \"random\"\n  }\n}",
   "stagger-order-from--typewriter": "{\n  \"type\": \"text\",\n  \"text\": \"Deterministic by design\",\n  \"x\": 160,\n  \"y\": 420,\n  \"w\": 1600,\n  \"size\": 120,\n  \"weight\": 800,\n  \"split\": \"char\",\n  \"preset\": \"up\",\n  \"each\": 0.15,\n  \"stagger\": {\n    \"from\": \"typewriter\",\n    \"cps\": 24\n  }\n}",
+  "surface-looks--brutalist": {
+    "theme": {
+      "look": {
+        "surface": "brutalist"
+      }
+    }
+  },
+  "surface-looks--cinematic": {
+    "theme": {
+      "look": {
+        "surface": "cinematic"
+      }
+    }
+  },
+  "surface-looks--editorial": {
+    "theme": {
+      "look": {
+        "surface": "editorial"
+      }
+    }
+  },
+  "surface-looks--glass": {
+    "theme": {
+      "look": {
+        "surface": "glass"
+      }
+    }
+  },
+  "surface-looks--industrial": {
+    "theme": {
+      "look": {
+        "surface": "industrial"
+      }
+    }
+  },
+  "surface-looks--neon": {
+    "theme": {
+      "look": {
+        "surface": "neon"
+      }
+    }
+  },
+  "surface-looks--outlined": {
+    "theme": {
+      "look": {
+        "surface": "outlined"
+      }
+    }
+  },
+  "surface-looks--playful": {
+    "theme": {
+      "look": {
+        "surface": "playful"
+      }
+    }
+  },
+  "surface-looks--print": {
+    "theme": {
+      "look": {
+        "surface": "print"
+      }
+    }
+  },
+  "surface-looks--soft": {
+    "theme": {
+      "look": {
+        "surface": "soft"
+      }
+    }
+  },
   "theme-look-keys--backdrop": {
     "theme": {
       "look": {
@@ -617,6 +687,13 @@
     "theme": {
       "look": {
         "scale": "…"
+      }
+    }
+  },
+  "theme-look-keys--surface": {
+    "theme": {
+      "look": {
+        "surface": "…"
       }
     }
   },

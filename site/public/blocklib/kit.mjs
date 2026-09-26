@@ -247,6 +247,18 @@ export const stackWindows = ({ n = 0, start = 0, dur = 4, step = 0.9, life = 2.2
     return { start: st, dur: Math.max(0.4, r2(Math.min(life, start + dur - st))), dy: i * (rowH + gap) };
   });
 
+// composeLook(look): the COMPOSITION half of a surface look, read directly by a factory to decide
+// its own layout (label placement, number scale, alignment, emphasis), never as a CSS var (see
+// core/theme/surface-looks.js's COMPOSITION_KEYS). Returns `null` for no look, same as
+// `resolveSurfaceLook`, so "no look set" stays each factory's OWN original literal layout rather
+// than a shared default fighting it: a factory branches `look ? composeLook(look) : <its old
+// code>` instead of composeLook silently substituting a bundle-wide default no single factory ever
+// asked for. Only a named look (or an inline override object) restructures anything.
+export function composeLook(look) {
+  const r = resolveSurfaceLook(look);
+  return r && { labelPos: r.labelPos, numScale: r.numScale, align: r.align, emphasis: r.emphasis };
+}
+
 // htmlCard: the same hairline card for the html+SVG blocks (charts and gauges, which need curves).
 // THE INNER WIDTH IS DERIVED FROM THE PAD. It used to be restated by hand and two of the three
 // wrappers were wrong against their own padding (`w - 48` on padding 22, `w - 44` on padding 24).

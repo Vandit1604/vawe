@@ -5,7 +5,7 @@ import {
   R, TYPE, SPACE, cardChrome, htmlCard, cardInsetY, barWidth,
   sweep,
   tint, TINT, DATA_CAP, STROKE, strokeCss, trackDashCss, areaFillCss,
-  capCss, labelCss, numCss, deltaChip, needData } from './kit.mjs';
+  capCss, labelCss, numCss, deltaChip, needData, composeLook } from './kit.mjs';
 // The label this module's blocks are grouped under on the site. Declared HERE, in the module that owns
 // the blocks, so nothing keeps a 176-row name-to-category table in sync by hand. A module that
 // declares none is refused by scripts/site/blocks-json.mjs at generation time, not discovered later.
@@ -16,18 +16,27 @@ const T = TOKENS;
 // ─────────────────────────────────────────────────────────────────────────────
 // statBig, scale-contrast stat: a huge animated number + a tiny label. `to` counts up.
 export function statBig({ x, y, to = 0, from = 0, unit = '', prefix = '', label, size = 150, color = T.ink,
-  start = 0, dur = 4 } = {}) {
+  start = 0, dur = 4, look = null } = {}) {
+  const cl = composeLook(look);
+  const scaledSize = Math.round(size * (cl ? cl.numScale : 1));
+  // `labelPos: 'above'` puts the kicker where a magazine stat runs it, above the figure it captions
+  // rather than under it; every other position (below/inline) still reads below, since a huge count-up
+  // number has nowhere else for a caption to sit without colliding with the digits themselves.
+  const labelAbove = cl && cl.labelPos === 'above';
+  const labelSize = cl && cl.emphasis === 'oversized' ? TYPE.fine : TYPE.base;
   // THE NUMBER COUNTS UP and the label is already there to receive it. The layer only fades in: a
   // stat that also slides has two motions competing for the one thing you are meant to read.
   return [
+    label && labelAbove && text({ text: label, x, y: y - TYPE.base * 1.3, font: 'mono', size: labelSize, weight: 600, ls: '0.02em',
+      color: T.sub, start, duration: dur }),
     // `num` is the theme's TABULAR face. It was `sans`, so a figure that counts up changed WIDTH as
     // it climbed and the whole stat jittered under its own animation.
-    { type: 'count', x, y, from, to, unit, prefix, font: 'num', size, weight: 700, color, ls: '-0.03em',
+    { type: 'count', x, y, from, to, unit, prefix, font: 'num', size: scaledSize, weight: 700, color, ls: '-0.03em',
       countStart: 0.15, countDur: 1.4, ease: 'easeOutExpo', start, duration: dur, anim: 'fade', enterDur: 0.25 },
     // 1.02, not 0.9. The label is placed below the figure's LINE BOX, not below its digits: at 0.9 it
     // sat exactly where a `$` or a `(` descends, so `statBig.currency` rendered "market" through the
     // bottom of "$880B" while plain `statBig` looked fine. A number with no descender is not proof.
-    label && text({ text: label, x, y: y + size * 1.02, font: 'mono', size: TYPE.base, weight: 600, ls: '0.02em',
+    label && !labelAbove && text({ text: label, x, y: y + scaledSize * 1.02, font: 'mono', size: labelSize, weight: 600, ls: '0.02em',
       color: T.sub, start: r2(start + 0.3), duration: dur - 0.3 }),
   ].filter(Boolean);
 }
@@ -121,12 +130,16 @@ function lineChartPoints({ data, cw, ch, pad }) {
 }
 
 // lineChart: a trend line (optional area fill) in a hairline card. data = [{label,value}].
-export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4 } = {}) {
+export function lineChart({ x, y, w = 560, h = 240, data = [], color = SERIES[0], area = false, label = '', start = 0, dur = 4, look = null } = {}) {
   needData('data', data, 'lineChart');
   const cw = Math.max(0, w - 2 * CHART_PAD), ch = Math.max(0, h - cardInsetY({ pad: CHART_PAD, label })), pad = 8;
   const { PX, PY, pts } = lineChartPoints({ data, cw, ch, pad });
   const svg = lineChartSvg({ x, y, cw, ch, pad, pts, data, color, area, PX, PY });
-  const html = htmlCard({ w, pad: CHART_PAD, label, body: () => svg });
+  // ALIGNMENT is the one composition axis a trend line has room for: its own caption, left, centred
+  // or split (label left, nothing to put on the right for a single series, so split reads as left).
+  // No look at all: no `align` at all, exactly as before (left, unstated).
+  const cl = composeLook(look);
+  const html = htmlCard({ w, pad: CHART_PAD, label, look, align: cl ? (cl.align === 'center' ? 'center' : 'left') : '', body: () => svg });
   // the line DRAWS ON rather than the card sliding in. The motion a line chart is for. `len` is the
   // polyline's own length, so the dash sweep is exact rather than a guess that breaks with the data.
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ dur: 1.2 }) }];
@@ -218,7 +231,7 @@ export function statCard({ x, y, w = 340, to = 0, from = 0, unit = '', label = '
 }
 
 // gauge: a semicircular meter (value / max) in a card.
-export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
+export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4, look = null } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const semi = Math.PI * 42;
   const arc = 'M8 52 A42 42 0 0 1 92 52';
   // The arc SWEEPS to its reading instead of the whole card sliding in. `--p` is driven by the engine
@@ -232,16 +245,25 @@ export function gauge({ x, y, w = 300, value = 0, max = 100, label = '', color =
     + `<path d="${arc}" fill="none" stroke="${tint(color, TINT.track)}" style="${strokeCss(STROKE.arc)};${trackDashCss()}"/>`
     + `<path d="${arc}" fill="none" stroke="${color}" style="${strokeCss(STROKE.arc)}"`
     + ` stroke-dasharray="calc(${semi.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${semi.toFixed(2)}"/></svg>`;
-  // the reading and its caption sit BELOW the arc, so they are body, not htmlCard's heading row.
-  const html = htmlCard({ w, pad: CHART_PAD, align: 'center', body: (inner) => svg(inner)
-    + `<div style="${numCss({ size: TYPE.head })};margin-top:-2px">${value}${max === 100 ? '%' : ''}</div>`
-    + (label ? `<div style="${capCss()};margin-top:${SPACE.snug}px">${label}</div>` : '') });
+  // COMPOSITION: `look.surface` decides where the reading sits against the arc, not just the card's
+  // frame around it. No look at all skips this entirely: number then caption, both below the arc,
+  // centred, byte-identical to before.
+  const cl = composeLook(look);
+  const numHtml = `<div style="${numCss({ size: Math.round(TYPE.head * (cl ? cl.numScale : 1)) })};margin-top:-2px">${value}${max === 100 ? '%' : ''}</div>`;
+  const labelHtml = label ? `<div style="${capCss({ size: cl && cl.emphasis === 'oversized' ? TYPE.fine : TYPE.body })};margin-top:${SPACE.snug}px">${label}</div>` : '';
+  const reading = !cl || cl.labelPos === 'below' ? numHtml + labelHtml
+    : cl.labelPos === 'above' ? labelHtml + numHtml
+    : `<div style="display:flex;align-items:baseline;justify-content:center;gap:${SPACE.xs}px">${numHtml}${labelHtml}</div>`; // inline
+  const html = htmlCard({ w, pad: CHART_PAD, align: cl && cl.align === 'left' ? 'left' : 'center', look,
+    body: (inner) => svg(inner) + reading });
   return [{ type: 'html', x, y, w, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
 
 // progressRing: a circular progress ring with a % centre label (bare, for overlaying).
-export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4 } = {}) {
+export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '', color = TOKENS.accent, start = 0, dur = 4, look = null } = {}) {
   const pct = Math.max(0, Math.min(1, value / max)); const C = 2 * Math.PI * 42;
+  const cl = composeLook(look);
+  const fontSize = Math.round(22 * (cl ? cl.numScale : 1));
   // The ring FILLS to its reading (the same `--p` mechanism as gauge), rather than the whole card
   // sliding in. The dash length is computed in CSS from the driven variable, so the motion is what
   // the block is for. The `%` stays put: it is the destination the ring is travelling to.
@@ -250,9 +272,14 @@ export function progressRing({ x, y, size = 160, value = 0, max = 100, label = '
     + `<circle cx="50" cy="50" r="42" fill="none" stroke="${tint(color, TINT.track)}" stroke-width="${STROKE.arc}"/>`
     + `<circle cx="50" cy="50" r="42" fill="none" stroke="${color}" stroke-width="${STROKE.arc}" stroke-linecap="round"`
     + ` stroke-dasharray="calc(${C.toFixed(2)} * var(--p, ${pct.toFixed(4)})) ${C.toFixed(2)}" transform="rotate(-90 50 50)"/>`
-    + `<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="var(--font-num)" font-weight="700" font-size="22"`
+    + `<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="var(--font-num)" font-weight="700" font-size="${fontSize}"`
     + ` letter-spacing="-0.5" fill="${T.ink}">${Math.round(pct * 100)}%</text></svg>`;
-  const html = `<div style="width:${size}px">${svg}${label ? `<div style="text-align:center;${capCss()};margin-top:${SPACE.xs}px">${label}</div>` : ''}</div>`;
+  // `labelPos: 'inline'` (neon) reads the caption beside the ring, like a console readout, rather
+  // than captioned underneath like every other look.
+  const labelHtml = label ? `<div style="text-align:center;${capCss({ size: cl && cl.emphasis === 'oversized' ? TYPE.fine : TYPE.body })};margin-top:${SPACE.xs}px">${label}</div>` : '';
+  const html = cl && cl.labelPos === 'inline' && label
+    ? `<div style="display:flex;align-items:center;gap:${SPACE.sm}px">${svg}<div style="${capCss()}">${label}</div></div>`
+    : `<div style="width:${size}px">${svg}${labelHtml}</div>`;
   return [{ type: 'html', x, y, w: size, html, start, duration: dur, ...sweep({ to: pct, dur: 1.1 }) }];
 }
 

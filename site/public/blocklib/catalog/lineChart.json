@@ -62,7 +62,8 @@
       "area",
       "label",
       "start",
-      "dur"
+      "dur",
+      "look"
     ]
   },
   "files": [

@@ -1,7 +1,7 @@
 {
-  "total": 744,
+  "total": 755,
   "previewed": 345,
-  "families": 64,
+  "families": 65,
   "tags": [
     [
       "asset",
@@ -101,7 +101,7 @@
     ],
     [
       "theme",
-      8
+      19
     ],
     [
       "timing",
@@ -4609,6 +4609,89 @@
       ]
     },
     {
+      "id": "surface-looks",
+      "title": "Surface looks",
+      "tag": "theme",
+      "intro": "A named bundle of shape tokens (`core/theme/surface-looks.js`) a theme, a scene or one block instance can set as `look.surface`, repainting radius/border/shadow/blur/pad/gap/density together without editing a single block.",
+      "mode": "table",
+      "note": null,
+      "noPreview": "a shape bundle, not a rendered effect: render one block in each look to compare",
+      "count": 10,
+      "undescribed": 0,
+      "entries": [
+        {
+          "name": "brutalist",
+          "stem": "surface-looks--brutalist",
+          "desc": "square (0px) corners, a thick 3px ink rule, an 8px hard offset shadow with no blur",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "cinematic",
+          "stem": "surface-looks--cinematic",
+          "desc": "18px radius, a 24px backdrop blur behind a 62%-opacity fill, a deep shadow plus an accent glow",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "editorial",
+          "stem": "surface-looks--editorial",
+          "desc": "near-square (2px) corners, a plain hairline, no shadow, 28px of padding for generous air",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "glass",
+          "stem": "surface-looks--glass",
+          "desc": "20px radius, a 55%-opacity fill behind an 18px backdrop blur, a 1px translucent rim",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "industrial",
+          "stem": "surface-looks--industrial",
+          "desc": "4px radius, a thick 2px rule, a flat 4px hard-edge shadow, tighter padding than the rest",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "neon",
+          "stem": "surface-looks--neon",
+          "desc": "16px radius, a 1px accent-coloured rim, a three-layer glow in place of a shadow",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "outlined",
+          "stem": "surface-looks--outlined",
+          "desc": "12px radius, a firm 1.5px hairline rule, no shadow at all · flat and quiet",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "playful",
+          "stem": "surface-looks--playful",
+          "desc": "28px pill radius, no rule, a tinted fill, a flat coloured shadow ledge underneath",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "print",
+          "stem": "surface-looks--print",
+          "desc": "3px radius, a solid 1px ink rule, no shadow · flat ink on stock",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "soft",
+          "stem": "surface-looks--soft",
+          "desc": "24px radius, no rule at all, a wide 12px/24px double shadow · reads as an object, not a panel",
+          "scene": null,
+          "noPreview": null
+        }
+      ]
+    },
+    {
       "id": "theme-look-keys",
       "title": "Theme look keys",
       "tag": "theme",
@@ -4616,7 +4699,7 @@
       "mode": "table",
       "note": null,
       "noPreview": "a theme key, not a per-video effect: see `make theme-sheet THEME=<name>` for the rendered picture of one theme's whole look",
-      "count": 8,
+      "count": 9,
       "undescribed": 0,
       "entries": [
         {
@@ -4672,6 +4755,13 @@
           "name": "scale",
           "stem": "theme-look-keys--scale",
           "desc": "how big text should be · named px sizes for the hook / headline / body / caption roles at 16 · 9, so a layer writes `\"size\": \"headline\"` instead of guessing a number",
+          "scene": null,
+          "noPreview": null
+        },
+        {
+          "name": "surface",
+          "stem": "theme-look-keys--surface",
+          "desc": "a named shape look (glass/soft/outlined/brutalist/editorial/neon/playful/print/cinematic/industrial, `core/theme/surface-looks.js`) every block reads instead of its own literal corner rounding, rule weight and drop shadow",
           "scene": null,
           "noPreview": null
         }
