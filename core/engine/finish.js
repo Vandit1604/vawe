@@ -118,9 +118,9 @@ function resolveGrain(data, amount) {
 // gets this subtle grade instead of the flat, un-graded frame a hurried agent scene used to ship
 // (MISTAKES: small type on an empty, static-reading ground). Deliberately lighter than every hand-tuned
 // default in this file (grain 0.5, bloom strength 1, vignette 0.45): a default has to read as designed,
-// not as the loudest setting. `finish: false`, written by the author, opts out; any other authored
+// not as the loudest setting. No bloom: it washed a white card and its body text out (measured). `finish: false`, written by the author, opts out; any other authored
 // object is the author's own choice and is used exactly as written, untouched.
-const DEFAULT_FINISH = { grain: 0.15, bloom: { strength: 0.3 }, vignette: 0.1 };
+const DEFAULT_FINISH = { grain: 0.15, vignette: 0.1 };
 
 export function resolveFinishLayers(data, W, H) {
   const f = data.finish === undefined ? DEFAULT_FINISH : data.finish;

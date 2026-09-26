@@ -230,7 +230,7 @@ The SPEED CURVE a cut travels on, chosen separately from the cut itself: `cuts:[
 
 ## Scene finish keys  `[finish]`
 
-data.finish is the ONE dial for the cinematic grade a premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time. A scene naming no `finish` key at all gets a subtle default (light grain, soft bloom, gentle vignette); `finish: false` opts out.
+data.finish is the ONE dial for the cinematic grade a premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time. A scene naming no `finish` key at all gets a subtle default (light grain, gentle vignette, no bloom); `finish: false` opts out.
 
 | name | what / when |
 |---|---|
