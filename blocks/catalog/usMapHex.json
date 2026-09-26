@@ -7,6 +7,10 @@
   "tags": [
     "usMapHex"
   ],
+  "dimensions": {
+    "width": 864,
+    "height": 597
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

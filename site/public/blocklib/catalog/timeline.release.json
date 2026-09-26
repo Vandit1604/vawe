@@ -7,10 +7,6 @@
   "tags": [
     "timeline"
   ],
-  "dimensions": {
-    "width": 504,
-    "height": 299
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,6 +7,10 @@
   "tags": [
     "statBig"
   ],
+  "dimensions": {
+    "width": 386,
+    "height": 187
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,6 +7,10 @@
   "tags": [
     "scanGate"
   ],
+  "dimensions": {
+    "width": 804,
+    "height": 504
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,6 +7,10 @@
   "tags": [
     "notification"
   ],
+  "dimensions": {
+    "width": 489,
+    "height": 341
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

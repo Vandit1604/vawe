@@ -7,10 +7,6 @@
   "tags": [
     "pillRow"
   ],
-  "dimensions": {
-    "width": 428,
-    "height": 74
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,10 +7,6 @@
   "tags": [
     "screenSwap"
   ],
-  "dimensions": {
-    "width": 504,
-    "height": 294
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
@@ -37,13 +33,11 @@
           }
         },
         {
-          "block": "listRow",
+          "block": "notification",
           "props": {
             "w": 460,
-            "icon": "✓",
             "title": "Fieldwork draft",
-            "sub": "Saved to this list",
-            "meta": "now"
+            "body": "Saved to this list"
           }
         },
         {

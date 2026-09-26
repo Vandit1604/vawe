@@ -7,10 +7,6 @@
   "tags": [
     "glassNotification"
   ],
-  "dimensions": {
-    "width": 564,
-    "height": 392
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

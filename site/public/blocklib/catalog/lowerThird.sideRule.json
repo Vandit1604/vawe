@@ -7,10 +7,6 @@
   "tags": [
     "lowerThird"
   ],
-  "dimensions": {
-    "width": 280,
-    "height": 125
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

@@ -7,6 +7,10 @@
   "tags": [
     "parallaxUnzoom"
   ],
+  "dimensions": {
+    "width": 1244,
+    "height": 804
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

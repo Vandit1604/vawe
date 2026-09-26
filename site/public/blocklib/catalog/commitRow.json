@@ -7,10 +7,6 @@
   "tags": [
     "commitRow"
   ],
-  "dimensions": {
-    "width": 584,
-    "height": 191
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

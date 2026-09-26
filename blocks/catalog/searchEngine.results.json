@@ -7,6 +7,10 @@
   "tags": [
     "searchEngine"
   ],
+  "dimensions": {
+    "width": 584,
+    "height": 388
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

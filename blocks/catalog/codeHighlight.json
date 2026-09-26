@@ -7,6 +7,10 @@
   "tags": [
     "codeHighlight"
   ],
+  "dimensions": {
+    "width": 664,
+    "height": 240
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

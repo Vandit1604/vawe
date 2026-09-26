@@ -7,10 +7,6 @@
   "tags": [
     "glassHome"
   ],
-  "dimensions": {
-    "width": 644,
-    "height": 581
-  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

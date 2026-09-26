@@ -7,6 +7,10 @@
   "tags": [
     "glassMenu"
   ],
+  "dimensions": {
+    "width": 484,
+    "height": 339
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",

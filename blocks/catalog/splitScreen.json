@@ -7,6 +7,10 @@
   "tags": [
     "splitScreen"
   ],
+  "dimensions": {
+    "width": 584,
+    "height": 125
+  },
   "install": {
     "kind": "scene-layer",
     "target": "layers[]",
