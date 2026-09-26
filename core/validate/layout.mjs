@@ -210,8 +210,8 @@ function positionWarnings(cfg, out) {
     // failure mode per-aspect overrides exist to prevent, so it cannot be the failure mode they add.
     const variants = [[L0, label0]];
     if (isObj(L0.aspects)) for (const [k, over] of Object.entries(L0.aspects)) {
-      if (!ASPECTS[k]) { out.push(`${label0}: aspects."${k}" is not a known aspect. One of ${Object.keys(ASPECTS).join(', ')}`); continue; }
-      if (!isObj(over)) { out.push(`${label0}: aspects."${k}" must be an object of layer props`); continue; }
+      if (!ASPECTS[k]) { out.push(`${label0}: aspects."${k}" is not a known canvas ratio, so this override is never applied and the layer renders with its default props at every aspect: the render refuses to start until this is fixed. Use one of ${Object.keys(ASPECTS).join(', ')}.`); continue; }
+      if (!isObj(over)) { out.push(`${label0}: aspects."${k}" is a ${typeof over}, not an object of layer props, so it cannot be merged onto the layer at that aspect: the render refuses to start until this is fixed. Write it as {"x": ..., "w": ..., ...}, the same props a layer takes.`); continue; }
       variants.push([{ ...L0, ...over }, `${label0} at "${k}"`]);
     }
     for (const [L, label] of variants) check(L, label, out);

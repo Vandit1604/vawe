@@ -62,7 +62,7 @@ T.content.forEach((L, idx) => {
     L.motion[0].t, L.motion[L.motion.length - 1].t, fps, VELOCITY_SPIKE_PX_S, cutsRel);
   for (const s of spikes) {
     const at = +(layerStart + s.t).toFixed(2);
-    f.warn('velocity-spike', `layer ${id} jumps +${s.jump} px/s in one frame at ${at}s (outside any cut)`, { at: `${at}s` });
+    f.warn('velocity-spike', `layer ${id} jumps +${s.jump} px/s in one frame at ${at}s (outside any cut): the layer snaps rather than moves, which reads as a stutter on screen. Add an intermediate keyframe between the two keys that produce this jump, spreading the change over more time, or ease into it instead of jumping straight to the value.`, { at: `${at}s` });
   }
 });
 
@@ -70,11 +70,11 @@ T.content.forEach((L, idx) => {
 if (ir.some((e) => e.source === 'camera')) {
   const posSpikes = findVelocitySpikes((t, dt) => cameraVelocityAt(camKf, t, dt).speed,
     camKf[0].t, camKf[camKf.length - 1].t, fps, VELOCITY_SPIKE_PX_S, cutsAt);
-  for (const s of posSpikes) f.warn('velocity-spike', `camera jumps +${s.jump} px/s in one frame at ${s.t}s (outside any cut)`, { at: `${s.t}s` });
+  for (const s of posSpikes) f.warn('velocity-spike', `camera jumps +${s.jump} px/s in one frame at ${s.t}s (outside any cut): the whole frame snaps sideways rather than panning, which reads as a jump-cut nobody authored. Add an intermediate camera key between the two keys that produce this jump, or ease into the move.`, { at: `${s.t}s` });
 
   const zoomSpikes = findVelocitySpikes((t, dt) => (cameraAt(camKf, t).s - cameraAt(camKf, t - dt).s) / dt,
     camKf[0].t, camKf[camKf.length - 1].t, fps, VELOCITY_SPIKE_SCALE_S, cutsAt);
-  for (const s of zoomSpikes) f.warn('velocity-spike', `camera zoom jumps +${s.jump} scale/s in one frame at ${s.t}s (outside any cut)`, { at: `${s.t}s` });
+  for (const s of zoomSpikes) f.warn('velocity-spike', `camera zoom jumps +${s.jump} scale/s in one frame at ${s.t}s (outside any cut): the frame snaps to a new scale rather than pushing or pulling smoothly, which reads as a jolt. Add an intermediate camera key between the two keys that produce this jump, or ease into the zoom.`, { at: `${s.t}s` });
 }
 
 f.emit();

@@ -19,8 +19,8 @@ export function fxErrors(cfg) {
     if (L.fx != null) {
       for (const item of (Array.isArray(L.fx) ? L.fx : [L.fx])) {
         const nm = nameOf(item);
-        if (nm == null) { out.push(`layers[${i}].fx entry needs a name (string or {name})`); continue; }
-        if (!GSAP_REGISTRY.has(nm)) out.push(`layers[${i}].fx "${nm}" is not a known effect.${nearest(nm, GSAP_FX)}`);
+        if (nm == null) { out.push(`layers[${i}].fx entry has no name (write it as a string, or {"name": "..."}): the render refuses to start until this is fixed.`); continue; }
+        if (!GSAP_REGISTRY.has(nm)) out.push(`layers[${i}].fx "${nm}" is not a known effect: the render refuses to start until this is fixed.${nearest(nm, GSAP_FX)} Known effects: ${GSAP_FX.join(', ')}`);
       }
     }
     // splitText (GSAP line reveal) re-wraps the layer AFTER the engine's own `split` already did, the two
@@ -96,7 +96,7 @@ export function knobErrors(cfg) {
 const STAGGER_KEYS = ['each', 'amount', 'from', 'cps']; // cps: the typing rate, only read when from:'typewriter'
 function staggerSpecErrors(spec, at, out) {
   if (spec == null || typeof spec === 'number') return;
-  if (!isObj(spec)) { out.push(`${at} must be a number (the per-unit delay) or { each, amount, from }`); return; }
+  if (!isObj(spec)) { out.push(`${at} is a ${typeof spec}, not a number or an object: the render refuses to start until this is fixed. Write a number (the per-unit delay, in seconds) or { each, amount, from }.`); return; }
   for (const k of Object.keys(spec)) {
     if (!STAGGER_KEYS.includes(k)) out.push(`${at} sets \`${k}\`, which a stagger does not read. It takes \`each\` (the per-unit delay, seconds), \`amount\` (the TOTAL seconds the whole train may take, from which the delay is derived) and \`from\` (the order).${nearest(k, STAGGER_KEYS)}`);
   }

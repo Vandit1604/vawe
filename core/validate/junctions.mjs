@@ -17,8 +17,8 @@ export function seamErrors(cfg) {
     if (!isObj(s)) return;
     const t = +s.t, d = +(s.dur ?? 0.5);
     if (!isFinite(t)) return; // schema reports the missing/NaN t
-    if (t < 0) out.push(`seams[${i}] t must be ≥ 0 (got ${s.t})`);
-    if (dur && t + d > dur + 1e-6) out.push(`seams[${i}] window [${t}, ${(t + d).toFixed(2)}] runs past the video (${dur}s), move it earlier or shorten dur`);
+    if (t < 0) out.push(`seams[${i}] t is ${s.t}, before the video starts: the render refuses to start until this is fixed. Set t to 0 or later.`);
+    if (dur && t + d > dur + 1e-6) out.push(`seams[${i}] window [${t}, ${(t + d).toFixed(2)}] runs past the end of the ${dur}s video, so the outgoing/incoming beats would be baked from clamped edge frames and the transition would blend the wrong thing: the render refuses to start until this is fixed. Move t earlier or shorten dur so the window ends by ${dur}s.`);
   });
   return out;
 }
@@ -49,7 +49,7 @@ export function transitionErrors(cfg) {
   const out = [];
   const list = Array.isArray(cfg.transitions) ? cfg.transitions : [];
   list.forEach((T, i) => {
-    if (!isObj(T)) { out.push(`transitions[${i}] must be an object`); return; }
+    if (!isObj(T)) { out.push(`transitions[${i}] is a ${typeof T}, not an object: the render refuses to start until this is fixed. Write it as {"at": <seconds>, "fx": "<name>"}.`); return; }
     if (T.fx == null) return; // the schema reports the missing required `fx`/`at`
     try { boundaryMechanism(T.fx, T.mech); }
     catch (e) { out.push(`transitions[${i}]: ${e.message}`); }
