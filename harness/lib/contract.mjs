@@ -969,6 +969,7 @@ export const USE_INTERNAL_KIND = {
   'scramble charset': 'a scramble charset is an internal text-fx detail (presetOpts.chars), not authored per beat.',
   'theme look key': 'a theme look key belongs to the theme file (themes/*.json), never a per-beat use:.',
   'ransom face': 'a ransom face is a text layer\'s own `ransom.faces`, a LIST of {family, weight} records, not a single name a use: line can write.',
+  'surface look': 'a surface look is set once for the whole theme (look.surface in themes/*.json), read by composeLook/cardChrome; not a per-beat use:.',
 };
 
 let _arsenalCorpus = null;
@@ -1023,9 +1024,16 @@ export function resolveUse(p, corpus) {
       return { error: `use: "${p.kindHint}" is not a known kind${near.length ? `, did you mean "${near[0]}"?` : ''}. Known kinds: ${kindsKnown.join(', ')}.` };
     }
   }
-  if (matches.length > 1) return { ambiguous: matches.map((e) => `${e.kind}:${e.name}`) };
-  if (matches.length === 1) {
-    const entry = matches[0];
+  // A kindHint already narrowed matches to one kind, so it stands as given. A bare name hides
+  // engine-internal kinds from the ambiguity count first: an author choosing between "neon" the
+  // grading look and "neon" the theme's surface look was never a real choice, since the surface one
+  // is never reachable from a beat at all (USE_INTERNAL_KIND). Falls back to the full match list when
+  // every match is internal, so that case still gets a real answer (a match, or its own refusal).
+  const visible = p.kindHint ? matches : matches.filter((e) => !USE_INTERNAL_KIND[e.kind]);
+  const effective = visible.length ? visible : matches;
+  if (effective.length > 1) return { ambiguous: effective.map((e) => `${e.kind}:${e.name}`) };
+  if (effective.length === 1) {
+    const entry = effective[0];
     if (USE_DEDICATED_FIELD[entry.kind]) return { entry, refusedField: USE_DEDICATED_FIELD[entry.kind] };
     if (USE_INTERNAL_KIND[entry.kind]) return { entry, refusedInternal: USE_INTERNAL_KIND[entry.kind] };
     return { entry };
