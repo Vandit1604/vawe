@@ -128,7 +128,7 @@ and `impeccable`; "Reflecting a real website" (1,982) routes to `make sections`;
 TEN-SECOND FILM" (1,505) routes to `make demo`.
 
 **Change.** Move the BODY of each to a doc or skill. `engine-doctrine/CRAFT/` already carries `when:`/`answers:`
-frontmatter that `make doc-index` turns into a routing catalogue, which is ch2's Layer 1 with the
+frontmatter that `make site X=doc-index` turns into a routing catalogue, which is ch2's Layer 1 with the
 drift problem already solved. Keep the TRIGGER resident, one line each. Ch2's thought question 7 is
 why the trigger must stay: "if the model does not know what it does not know, it cannot correctly
 trigger the loading of a Skill." The harvest rule is the clearest case: its trigger ("after every

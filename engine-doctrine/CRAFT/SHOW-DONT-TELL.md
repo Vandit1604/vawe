@@ -116,7 +116,7 @@ and defended. It is not an answer to "I could not think of one".
 
 ## 5. Where to get the graphic
 
-- **Blocks** (`engine-doctrine/BLOCKS.md`, `make catalog`): `barChart` · `lineChart` · `donutChart` · `gauge` ·
+- **Blocks** (`engine-doctrine/BLOCKS.md`, `make site X=catalog`): `barChart` · `lineChart` · `donutChart` · `gauge` ·
   `progressRing` · `kpiRow` · `stepFlow` · `table` · `comparison`. Fastest route from a number to a
   shape. Note that a block is build-time sugar: `{"type":"block","block":"lineChart"}` becomes real
   layers at load, no separate step; run `make expand D=<file>` (prints to stdout) when you want to see

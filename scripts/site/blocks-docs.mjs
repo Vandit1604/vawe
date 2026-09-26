@@ -1,8 +1,8 @@
 // scripts/site/blocks-docs.mjs: regenerate the block table in engine-doctrine/BLOCKS.md from the manifest, so the docs
 // never drift from the registry. Replaces everything between <!-- BLOCKS:START --> and <!-- BLOCKS:END -->.
-// Run via `make blocks-docs` (or directly). Deterministic; no network.
-// `--check` (make blocks-docs CHECK=1) reports a stale table and exits 1 instead of writing one. The
-// table is committed and only `make blocks-sync` rewrites it, so before the check existed a new block
+// Run via `make site X=blocks-docs` (or directly). Deterministic; no network.
+// `--check` (make site X=blocks-docs CHECK=1) reports a stale table and exits 1 instead of writing one. The
+// table is committed and only `make site X=blocks-sync` rewrites it, so before the check existed a new block
 // row reached the manifest and never reached the docs, and no run said so.
 import fs from 'node:fs';
 import { CATALOG } from '../../blocks/catalog.mjs';
@@ -27,7 +27,7 @@ const i = src.indexOf(S), j = src.indexOf(E);
 if (i < 0 || j < 0) { console.error(`markers ${S} / ${E} not found in ${DOC}`); process.exit(1); }
 const out = src.slice(0, i + S.length) + '\n' + table + '\n' + src.slice(j);
 if (process.argv.includes('--check')) {
-  if (out !== src) { console.error(`${DOC} is STALE (its block table disagrees with blocks/catalog.mjs), run \`make blocks-docs\``); process.exit(1); }
+  if (out !== src) { console.error(`${DOC} is STALE (its block table disagrees with blocks/catalog.mjs), run \`make site X=blocks-docs\``); process.exit(1); }
   console.log(`${DOC}: up to date (${CATALOG.length} entries)`);
   process.exit(0);
 }

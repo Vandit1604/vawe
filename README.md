@@ -121,7 +121,7 @@ system that fights that:
 
 | Layer | What it does |
 |---|---|
-| **[Blocks](engine-doctrine/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make catalog` to browse. |
+| **[Blocks](engine-doctrine/BLOCKS.md)** | a 100-entry component registry (charts, cards, code, tweets, terminals, KPIs…). Vetted, deterministic, and **theme-aware** (they reskin to any brand). `make site X=catalog` to browse. |
 | **[Per-brand house style](engine-doctrine/TASTE.md)** | `make house-style` persists a brand's dominance / faces / palette / signature details / NEVERs so taste is *remembered*, not re-derived each time. |
 | **Composition** | `pin:"thirds-*"`, a 12-column grid, and optical centering. Beats are well-composed by default, not by eyeballing pixels. |
 | **Micro-typography** | optical tracking by size, balanced/pretty wrapping, real kerning + ligatures, on every text layer. |
@@ -220,7 +220,7 @@ make video D=<file> [ASPECT=9:16,1:1]   render one JSON → out/<name>.mp4  (--d
 make list                               formats + their schema/sample
 
 # taste
-make catalog [THEME=<brand>]            browse the 100-block registry, reskinned to a brand
+make site X=catalog [THEME=<brand>]            browse the 100-block registry, reskinned to a brand
 make house-style NAME=<brand>           persist a brand's Design Read
 make direct D=<file> [WRITE=1]          motion director: pick cuts/stings per transition
 make brandspec URL=… / sections / palette   read a real site's CSS + eyedrop its colours
@@ -239,7 +239,7 @@ make expand D=…                         debug: print the {type:block}/{type:be
 make compare / scrub / batch            variant selection · contact sheet · data-driven variants
 
 # publish
-make site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+posters), ratio-preserving
+make site X=site-assets [RENDER=1] [CHECK=1]   engine renders → site/public/assets (+posters), ratio-preserving
 ```
 
 ## Docs

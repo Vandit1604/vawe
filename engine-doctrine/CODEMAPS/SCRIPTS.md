@@ -262,7 +262,7 @@ PUBLISH. The public website and docs site, and the checks that keep their number
 | file | lines | make | what it says it does |
 |---|---|---|---|
 | `type-specimens.mjs` | 474 | no | scripts/site/type-specimens.mjs: the /type page's catalogue, DERIVED from the registries. |
-| `registry.mjs` | 309 | yes | scripts/site/registry.mjs: GENERATED, never hand-edited. `make registry` writes registry/; |
+| `registry.mjs` | 309 | yes | scripts/site/registry.mjs: GENERATED, never hand-edited. `make site X=registry` writes registry/; |
 | `effects-json.mjs` | 263 | yes | scripts/site/effects-json.mjs: derive the site's effects index from the SAME family list that |
 | `effects-catalog.mjs` | 254 | yes | scripts/site/effects-catalog.mjs, GENERATE engine-doctrine/EFFECTS.md: the single arsenal catalog so the model |
 | `site-assets.mjs` | 228 | yes | site-assets.mjs: the ONE way engine renders become site assets. |

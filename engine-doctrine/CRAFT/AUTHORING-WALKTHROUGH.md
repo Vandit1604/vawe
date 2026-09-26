@@ -54,7 +54,7 @@ no site you make each deliberately (this is the planning skill's Step 0.5, appli
    [`TYPOGRAPHY.md`](TYPOGRAPHY.md) + [`COLOR.md`](COLOR.md): one committed non-generic face, a palette
    built from one dominant + 60-30-10. Never Inter, never a blue→purple gradient.
 2. **Real assets, not placeholders.** A lock icon, a key, a real password-strength meter → a `block`
-   (browse `make catalog`), a Lucide UI icon (`assets/icons/ui/`), or a real brand mark
+   (browse `make site X=catalog`), a Lucide UI icon (`assets/icons/ui/`), or a real brand mark
    (`cdn.simpleicons.org`). See [`IMAGERY.md`](IMAGERY.md). Emoji is the last resort. "SHOW, don't say"
    ([`../TASTE.md`](../TASTE.md) the one law) starts here.
 3. **Story spine.** Pick a spine from [`STORY.md`](STORY.md) and lay the beats per

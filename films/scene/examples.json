@@ -1,5 +1,5 @@
 {
-  "note": "The flagship example registry. `make gallery` reads this to build a hover-to-play showcase from the rendered videos. Each entry: the scene source, the rendered video in out/, and gallery metadata. Add a row when you ship a new flagship example (example-*.json).",
+  "note": "The flagship example registry. `make site X=gallery` reads this to build a hover-to-play showcase from the rendered videos. Each entry: the scene source, the rendered video in out/, and gallery metadata. Add a row when you ship a new flagship example (example-*.json).",
   "examples": [
     {
       "source": "example-product-promo.json",

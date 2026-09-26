@@ -1,6 +1,6 @@
 ---
 when: "you want a ready-made composed block instead of stacking primitives by hand"
-answers: "the block registry (`make catalog`) · the contract each block honours · what every block renders"
+answers: "the block registry (`make site X=catalog`) · the contract each block honours · what every block renders"
 group: reference
 ---
 
@@ -13,7 +13,7 @@ scratch. Each factory is a pure function of props → an array of scene-layer JS
 timed, animated) that is already tasteful.
 
 **The registry is manifest-driven** (`blocks/catalog.mjs`): every named entry is a data row, so adding a
-block = adding a row (+ a factory or a `variant` branch). `make catalog` auto-renders the whole arsenal to
+block = adding a row (+ a factory or a `variant` branch). `make site X=catalog` auto-renders the whole arsenal to
 paged sheets, browse it before authoring. Two kinds of name: bare (`card`) and namespaced `family.variant`
 (`card.pricing`, `lineChart.area`): a namespaced entry is the family with preset props you can still
 override. See [`TASTE.md`](TASTE.md) for where blocks sit in the quality loop.
@@ -41,7 +41,7 @@ layers.push(...B.stripeCard({ x: 1200, y: 260, start: 40 }));
 
 **Pick the best of N variants:** `make compare ARGS="a.json b.json c.json --at 3"` → a labeled sheet.
 
-**Preview the whole library:** `make catalog` (auto-renders every entry to paged sheets).
+**Preview the whole library:** `make site X=catalog` (auto-renders every entry to paged sheets).
 
 **Gate a scene for value:** `make check GATE=critique D=films/scene/<file>.json`, flags placeholder words,
 <!-- site-counts-allow: "22 shader stings" is a made-up on-screen claim in an example, not a count of the registry -->
@@ -52,7 +52,7 @@ false claims (e.g. "22 shader stings" with no shader layer), static lists, illeg
 - `{x,y}` = top-left, absolute on the 1920×1080 stage. `{start,dur}` in seconds.
 - **Theme-aware:** `TOKENS` emit CSS vars (`var(--accent)`, `var(--card)`, …) + `color-mix()`, so the
   SAME block reskins to any brand theme. Multi-series charts default from a `SERIES` ramp derived from
-  the theme. Preview under any brand: `make catalog THEME=<name>`. (Overridable per call; Stripe hexes in
+  the theme. Preview under any brand: `make site X=catalog THEME=<name>`. (Overridable per call; Stripe hexes in
   `stripeCard` stay literal on purpose.)
 - Deterministic: no `Date`/random, var strings are static. Same props → same layers.
 
@@ -89,8 +89,8 @@ the factory really destructures, every parameter is declared or listed in `OMIT`
 
 ## Blocks
 
-Auto-generated from `blocks/catalog.mjs`, run `make blocks-docs` after editing the manifest. Browse
-them rendered with `make catalog`. `family.variant` names are the family with preset props (still overridable).
+Auto-generated from `blocks/catalog.mjs`, run `make site X=blocks-docs` after editing the manifest. Browse
+them rendered with `make site X=catalog`. `family.variant` names are the family with preset props (still overridable).
 
 <!-- BLOCKS:START -->
 _159 entries across 82 families._
@@ -151,7 +151,7 @@ _159 entries across 82 families._
 | `donutChart.two` | two-segment ring |
 | `stackedBar` | a stacked bar chart: multiple series piled in one bar per category to show a total and its parts |
 | `stackedBar.three` | three-series stack |
-| `card.stat` | a boxed metric: a label, a number counting up, a chip saying how much it went up |
+| `card.stat` | a boxed metric: a label, a number counting up, and a delta chip only when you pass one |
 | `card.stat.down` | KPI card, negative delta |
 | `card.stat.plain` | KPI card, no delta |
 | `fileTree` | a project file explorer: an indented list of folders and files, rows expanding in top to bottom like a sidebar |

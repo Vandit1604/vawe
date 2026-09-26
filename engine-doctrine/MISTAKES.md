@@ -2021,7 +2021,7 @@ holds: none
 holds: none
 
 ## 492. a poster drifted on every run, and nothing anywhere looked at a poster
-What. `make blocks-scenes` rewrote `borderBeamCard.png` and `glassCard.png` on every run.
+What. `make site X=blocks-scenes` rewrote `borderBeamCard.png` and `glassCard.png` on every run.
 holds: none
 
 ## 493. a gate printed "this film has sound" over a track measuring -91 dB

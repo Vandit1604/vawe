@@ -33,7 +33,7 @@
           "done": true
         },
         {
-          "text": "make catalog",
+          "text": "make site X=catalog",
           "done": true
         },
         {

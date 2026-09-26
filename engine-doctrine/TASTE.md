@@ -83,7 +83,7 @@ Don't author beat structure from scratch: that's where beats regress to hollow. 
 scene-layer JSON). Browse them, drop one in, fill its props.
 
 ```bash
-make catalog                 # render every block on paged stages → eyeball the arsenal
+make site X=catalog                 # render every block on paged stages → eyeball the arsenal
 ```
 ```json
 { "type": "block", "block": "chart.donut", "x": 1200, "y": 400, "start": 3, "dur": 4 }
