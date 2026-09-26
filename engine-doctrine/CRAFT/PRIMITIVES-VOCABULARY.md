@@ -954,14 +954,6 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `random` | shuffled, scattered, seeded random, out of order | a hashed, seeded shuffle of the order, scattered arrival that is identical on every render and at every seek |
 | `typewriter` | typing effect, one character at a time, chars per second, letters appear one by one | types one character at a time at a fixed TYPING RATE (`cps`, chars/sec) instead of a shared budget, so any split layer can reveal char by char at a chosen speed and still use a preset, a colour ramp, or a reversed exit |
 
-**Organic stagger** (Rauno Freiberg, "Invisible Details of Interaction Design",
-every.to/p/invisible-details-of-interaction-design): a stagger reads as alive, not mechanical, when
-it varies degree as well as order, not a metronome step repeated unit to unit. `from` above only
-picks the ORDER; `random` is the existing tool for an organic feel, a seeded shuffle that is not a
-straight line. There is no per-unit timing jitter yet (each unit's delay is still the closed formula
-`defaultStaggerStep`/`staggerStep` compute, `core/tracks/units.js`); reach for `random` first, and
-treat a jitter primitive as a real gap to fill later, not one to approximate by hand now.
-
 ## sting fx  `[sting]`
 
 | name | words | action |
