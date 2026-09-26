@@ -26,7 +26,7 @@ const RATCHET = path.join(ROOT, 'quality/baselines/bench-ratchet.json');
 
 // "before it writes its first layer": a scene has layers from the assemble stage on, so the read-load
 // floor stops at the stage that produces them, not at the whole eight-stage pipeline.
-const READ_LOAD_STAGES = STAGE_ORDER.slice(0, 5); // brief, plan, design, approval, assemble
+const READ_LOAD_STAGES = STAGE_ORDER.slice(0, STAGE_ORDER.indexOf('assemble') + 1);
 const FIRST_DRAFT_RENDER_CMD = /^make (dev|preview)$/; // the table's own name for the first draft render
 
 const wordsIn = (text) => text.trim().split(/\s+/).filter(Boolean).length;
