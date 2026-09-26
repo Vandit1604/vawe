@@ -19,8 +19,10 @@ and two judges >= 8/10, or report 3 passes without progress."
 - `beats.md` names a `## Beat <n>:` heading with a `- window: s-s` line for this beat.
 - A worktree to do the fix in (never on `main`, per the friction step below).
 
-**1. Study.** `make study REF=quality/refs/<ref-name>/source.mp4 D=<film.json> MATCH=1 LIGHT=1` if a
-draft already exists for this beat; otherwise skip to light-fit and author the first draft.
+**1. Study.** `make study REF=quality/refs/<ref-name>/source.mp4 SEE=1` first: read its index.md and
+grids (Read tool) before writing or re-checking beats.md, it is far cheaper than watching the clip.
+Then `make study REF=quality/refs/<ref-name>/source.mp4 D=<film.json> MATCH=1 LIGHT=1` if a draft
+already exists for this beat; otherwise skip to light-fit and author the first draft.
 
 **2. light.json / camera.json.** `node harness/media/light-fit.mjs --ref source.mp4 --start <s>
 --end <e> --out study/beat<n>.lightfit.json --grid grid/beat<n>.png` (or `harness/dev/ref-beat.mjs`
