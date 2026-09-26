@@ -2,26 +2,17 @@
  const sc=$('sc'),read=$('read'),play=$('play');
  const lanes=$('lanes'),ruler=$('ruler'),rows=$('rows'),ph=$('ph');
  let fps=30,total=0,n=0,playing=false,W=1920,H=1080,dur=1,model=null;
-// The stage chip's own fetch below is the ONE place `/api/stage` is read; cached here so a scene/look/
-// sound pane that finds no engine can say WHICH stage the film is in and the one command that moves it,
-// instead of re-deriving that (make stage already owns it) or just printing a raw boot failure.
+// stageInfo caches the one /api/stage fetch, so any pane can name the stage instead of showing a raw boot failure.
 let stageInfo=null;
-// A pre-assemble film (AGENTS.md stages brief..design) has no `layers` yet on purpose
-// (no scene JSON exists before assemble) so the engine's own validator refusing to boot it is not a
-// bug to report, it is the expected shape of an unbuilt film. One line, reused by every pane that
-// would otherwise show a raw engine error for this exact, ordinary case.
+// A pre-assemble film has no `layers` yet, so a validator boot failure here is expected, not a bug to report.
 function preAssembleNote(){
   if(!stageInfo||!stageInfo.ok) return null;
   const order=stageInfo.order||[], at=order.indexOf(stageInfo.stage), asm=order.indexOf('assemble');
   if(at<0||asm<0||at>=asm) return null; // already assembled, or the stage could not be read: show the real error
   return 'This film has no scene yet: it is at the '+stageInfo.stage+' stage.\nNext: '+(stageInfo.command||stageInfo.next);
 }
- // ---- GEOMETRY IS MEASURED ONCE PER CHANGE, NEVER PER EVENT ---------------------------------------
- // Every hover used to read the ruler's rect, the peek's own offsetWidth and the timeline panel's rect
- // and then write three style properties, which is a forced synchronous layout inside a pointermove,
- // thirty to a hundred times a second, on a page whose lane stack can be seventy rows. The playhead did
- // the same every frame of playback. Nothing here changes without something else changing first (a
- // resize, a zoom, the divider, a repaint), so the reads happen there and the hot paths read variables.
+ // Geometry is read here, only on resize/zoom/divider/repaint, never in the pointermove/frame hot
+ // paths, to avoid forcing a synchronous layout tens of times a second.
  let rulerW=1, rulerL=0, laneScroll=0, stageBox=null, scBox=null, tlTop=0, peekW=0, peekH=0, workL=8;
  function measureBoxes(){
    rulerW=ruler.clientWidth||1; rulerL=ruler.getBoundingClientRect().left;
@@ -31,20 +22,14 @@ function preAssembleNote(){
  }
  const el=()=>document.activeElement||document.body;
  const typing=()=>/^(INPUT|TEXTAREA|SELECT)$/.test(el().tagName);
- // THE ONE LIVE REGION. The chooser's status line used to be aria-live and carried a seconds counter
- // ticking four times a second, so a screen reader read the whole panel again every 250ms for fifteen
- // seconds. The ticking figure is for the eye; this is for the ear, and it is written twice: once when
- // the work starts and once when it finishes.
+ // say() is the one aria-live region: cleared then set on a delay, so a screen reader announces once per call.
  const say=(m)=>{ const el=$('say'); el.textContent=''; setTimeout(()=>{ el.textContent=m; },40); };
- // FOCUS SURVIVES A STATE CHANGE. The rail, the centre and the timeline are display:none'd by state,
- // and focus inside one of them was dropped to the body, which puts the next Tab back at the top of
- // the page. Whatever was hidden, focus lands on the control that hid it.
+ // keepFocus moves focus off an element hidden by a state change (display:none), to the given fallback.
  const keepFocus=(fallback)=>{ const a=document.activeElement;
    if(a&&a!==document.body&&a.checkVisibility&&!a.checkVisibility()) fallback.focus(); };
 
  // ---------- the divider ----------
- // The preview and the timeline compete for the same vertical space and only the person looking knows
- // which one they need right now, so the split is theirs and it sticks per browser.
+ // Split position between preview and timeline is user-adjustable and persisted per browser.
  const split=$('split'), tl=$('tl');
  const TLH_KEY='vawe-studio-tlh';
  function setTlh(px){ const max=Math.max(120,innerHeight-240);
@@ -54,8 +39,7 @@ function preAssembleNote(){
    try{ localStorage.setItem(TLH_KEY,String(v)); }catch{}
    fit(); measureBoxes(); }
  try{ const s=+localStorage.getItem(TLH_KEY); if(s) setTlh(s); }catch{}
- // GRAB OFFSET, not a snap. Dragging from the bottom of the 9px handle used to jerk the divider up to
-   // put the pointer at its middle; the timeline now keeps the size it had when you took hold of it.
+ // splitGrab holds the pointer's offset within the handle, so grabbing it does not jump the divider.
  let splitGrab=0;
  split.addEventListener('pointerdown',e=>{ split.setPointerCapture(e.pointerId); split.classList.add('on');
    splitGrab=(innerHeight-e.clientY)-tl.getBoundingClientRect().height; });
@@ -69,11 +53,8 @@ function preAssembleNote(){
    if(e.key==='ArrowDown'){ e.preventDefault(); setTlh(h-24); } });
 
  // ---------- the composition breadcrumb ----------
- // HONEST STUB, and the honesty is the feature. A \`composition\` layer does NOT hold a nested layer tree:
- // core/layers/composition.js looks the name up in core/compositions/ and hands a first-party JS function
- // the DOM plus its props. There is nothing on disk to drill INTO, so the crumb lists the compositions
- // this scene names and drilling in shows what that comp is and the data it was given. When the engine
- // grows real nested scenes, this is where the deeper levels attach.
+ // A `composition` layer has no nested tree on disk (core/layers/composition.js hands a JS function the
+ // DOM plus its props), so the crumb only lists the compositions this scene names.
  let crumbAt=null, insideLayer=null;
  function drawCrumbs(){ const c=$('crumbs'); const file=(model&&model.file)||document.title.split(' · ').pop();
    const comps=(model?model.layers:[]).filter(L=>L.type==='composition');
@@ -88,9 +69,8 @@ function preAssembleNote(){
    c.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click',()=>{ crumbAt=null; exitInside(); })); }
  function enterComp(i){ crumbAt=i; drawCrumbs(); setSel(i); }
 
- // ---- INSIDE VIEW: double-click a layer bar (or its "Open" button) to zoom the timeline to that
- // layer's own window, and see what runs inside it: its parts, its motion keys, and the camera moves
- // and transitions that happen while it is on screen. Nothing here edits the file; chat does that.
+ // INSIDE VIEW: double-click a layer bar to zoom the timeline to its own window (parts, motion keys,
+ // camera, transitions). Read-only; editing happens through chat.
  let insideParts=null;   // the last /api/fragment result for the open layer's src, or [] / null
  function overlapPct(s,e,vs,ve){ return { l:100*Math.max(0,Math.min(1,(s-vs)/(ve-vs)))+'%',
    w:100*Math.max(0.006,Math.min(1,(e-s)/(ve-vs)))+'%' }; }
@@ -144,12 +124,9 @@ function preAssembleNote(){
    drawCrumbs(); if(model) paint(model); if(selIdx>=0) layerProps(selIdx); }
 
  // ---------- keyframing ----------
- // ONE interaction, end to end: pick a layer, scrub to a frame, drag it. That writes a motion key at
- // that frame. Everything else an editor eventually needs sits on top of this loop.
+ // Pick a layer, scrub to a frame, drag it: writes a motion key at that frame.
  let FITS=1, keyMode=false, selIdx=-1, selStart=0, selLabel='', dragging=null, selCam=-1, selTrans=-1;
- // ---- eye toggle: PREVIEW ONLY. Never touches the scene JSON, never affects a render: it hides the
- // layer's element in the iframe every frame it draws, so a hidden layer stays hidden through seeking
- // and playback. Alt-click solos one layer (hides every other). Persisted per film, best effort.
+ // eye toggle is PREVIEW ONLY: never touches the scene JSON or a render. Alt-click solos one layer.
  let hiddenLayers=new Set(), soloLayer=-1;
  const EYE_ON='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
  const EYE_OFF='<svg viewBox="0 0 16 16"><path d="M1.5 8S4 3 8 3s6.5 5 6.5 5-2.5 5-6.5 5S1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/><path d="M2 2l12 12"/></svg>';
@@ -166,10 +143,9 @@ function preAssembleNote(){
    if(alt) soloLayer=soloLayer===i?-1:i;
    else { soloLayer=-1; if(hiddenLayers.has(i)) hiddenLayers.delete(i); else hiddenLayers.add(i); saveHidden(); }
    refreshEyeUI(); applyHiddenVisibility(); }
- // re-applied every frame draw(), so a hidden layer stays hidden across a seek or a play loop.
- // An ATTRIBUTE plus one injected rule, never the layer's own visibility style: the engine writes that
- // style itself (a matte source, a resample source and its clone), so clearing it re-showed layers the
- // engine had hidden. Runs even with nothing hidden, so a layer shown again loses its mark.
+ // Uses a data attribute plus one injected CSS rule, never the layer's own visibility style: the engine
+ // itself writes that style (a matte source, a resample source and its clone), so setting it directly
+ // would fight the engine's own writes.
  function applyHiddenVisibility(){
    try{ const doc=sc.contentDocument; if(!doc||!doc.head) return;
      if(!doc.getElementById('studio-hidden-rule')){ const st=doc.createElement('style'); st.id='studio-hidden-rule';
@@ -184,9 +160,8 @@ function preAssembleNote(){
    layerProps(i); selReadout();
    [...rows.querySelectorAll('.bar')].forEach(b=>b.classList.toggle('sel',b.dataset.camI==null&&b.dataset.transI==null&&+b.dataset.i===i));
    drawSelBox(); paintSel(); }
- // a camera leg or transition is a moment, not a layer: selecting one shows its OWN Curves, not a
- // layer's, so it goes through showProps directly rather than layerProps. curvesFor is reused with an
- // empty layer (no motion/parts) and just the one camera or transition in its list.
+ // A camera leg or transition is a moment, not a layer, so selecting one goes through showProps
+ // directly rather than layerProps; curvesFor is reused with an empty layer and just that one entry.
  function paintSel(){
    [...document.querySelectorAll('#ruler .camleg,#ruler .m,.bar[data-cam-i],.bar[data-trans-i]')].forEach(el=>
      el.classList.toggle('sel',(el.dataset.camI!=null&&+el.dataset.camI===selCam)||(el.dataset.transI!=null&&+el.dataset.transI===selTrans)));
@@ -218,8 +193,8 @@ function preAssembleNote(){
    keepFocus(document.querySelector('#states button[data-state="'+s+'"]'));
    [...document.querySelectorAll('#states button[data-state]')].forEach(b=>
      b.setAttribute('aria-pressed',String(b.dataset.state===s)));
-   // Each pane has its own route (/studio/plan etc, studio/server.mjs), so the address bar always names
-   // the pane on screen: an agent (or a bookmark) can come straight back to the one that was broken.
+   // Each pane has its own route (/studio/plan etc, studio/server.mjs), so a bookmark or reload returns
+   // to the same pane.
    if(history.replaceState) history.replaceState(null,'','/studio/'+s);
    if(s==='make') fit();
    if(s==='plan'){ drawPlan(); if(planSub==='sheets') showSheet(sheetKind); }
@@ -228,10 +203,8 @@ function preAssembleNote(){
  }
  document.querySelectorAll('#states button[data-state]').forEach(b=>b.addEventListener('click',()=>setState(b.dataset.state)));
 
- // ---- PLAN's two sub-views: the composed frames (default), and the rendered contact sheets that
- // used to be their own "Look" nav entry. One place answers both "what is in this beat" and "what did
- // it look like once assembled", because reviewing a plan and checking it against the render are the
- // same errand, not two.
+ // PLAN has two sub-views: composed frames (default), and rendered contact sheets, since reviewing a
+ // plan and checking it against the render are one errand, not two.
  let planSub='frames';
  const planviewEl=$('planview'), lookpaneEl=$('lookpane');
  function setPlanSub(sub){
@@ -243,9 +216,8 @@ function preAssembleNote(){
  document.querySelectorAll('#planpane .panehead .seg [data-sub]').forEach(b=>b.addEventListener('click',()=>setPlanSub(b.dataset.sub)));
 
  // ---- PLAN: the film as its own frames, not as grey boxes ---------------------------------------
- // The person signing a plan off judges what is in the frame (engine-doctrine/MISTAKES.md #592), so every beat that
- // names a `fragment:` shows that markup live, on the film's theme. The pane keeps only what that person
- // decides yes or no on; the fields written for the agents that build the film stay in the storyboard.
+ // The person signing a plan off judges what is in the frame (engine-doctrine/MISTAKES.md #592), so a
+ // beat naming a `fragment:` shows that markup live, on the film's theme.
  const planPath=$('planpath'), planNote=$('plannote'), planBody=$('planbody');
  let planDrawn=false;
  // A STORYBOARD SAYS "NO COPY" IN PROSE: "onscreen: (none, the mark itself is the only mark)" is the
@@ -261,9 +233,7 @@ function preAssembleNote(){
      +'<li><code>make storyboard-check SB=&lt;file&gt;</code></li></ul>';
  }
  const planRow=(label,v)=>v?'<div class=prow><dt>'+label+'</dt><dd>'+esc(v)+'</dd></div>':'';
- // the film as a whole: its message, who it is for, how long, what shape, its one loud moment and what it
- // refuses, and only the storyboard gate's warnings and errors
- // the gate's warnings and errors as short values; five "beat X has no scene layer" lines are one fact
+ // Gate warnings/errors as short chips; several "beat X has no scene layer" findings collapse to one.
  function gateChips(findings){
    const warn=(findings||[]).filter(f=>f.kind!=='✓'&&!/make panels|continuous-object contract/.test(f.line));
    const unbuilt=warn.filter(f=>/no scene layer starts there/.test(f.line));
@@ -284,21 +254,11 @@ function preAssembleNote(){
      +'</div>';
  }
  // ---- THE COLOUR STRIP: one swatch per beat, storyboard order, seams marked between them ---------
- // "when storyboarding the frames do we see colors across frames and how transitions will handle the
- // colors" (the owner's own words). Today that arc is one paragraph of frontmatter prose nobody sees
- // until the film renders; this draws it here, in the plan pane.
- //
- // EVERY SWATCH IS THE REAL RENDERED FRAME'S OWN COLOUR, never a value read off the storyboard's
- // `ground:` line: two authors reading the same "ground: dusk" line pictured different colours before
- // this existed, which is exactly the gap `/api/plan-frames` (studio/server.mjs) closed for the
- // picture beneath each beat. A swatch is a downsample of THAT SAME frame (`paintColorStrip` below),
- // so it can never show a colour the render would not. A seam's arrow is `transition_value`
- // (harness/lib/contract.mjs, closed vocabulary: dark->light · light->dark · held), read off the ONE
- // storyboard parser like every other field on this pane.
- //
- // A beat with no rendered frame yet says so IN WORDS and names the command that renders one, the same
- // honest-missing shape `beatPicture()` uses for the picture itself. Never a hatched placeholder: a
- // shape that says nothing is indistinguishable from a colour nobody looked at.
+ // Every swatch is a downsample of the real rendered frame (`paintColorStrip` below), never a value
+ // read off the storyboard's `ground:` line, so it can never show a colour the render would not. A
+ // seam's arrow is `transition_value` (harness/lib/contract.mjs: dark->light · light->dark · held).
+ // A beat with no rendered frame yet says so in words and names the command to render one; never a
+ // hatched placeholder, which is indistinguishable from a colour nobody looked at.
  function seamChip(v){
    if(!v) return '<span class="cseam none" title="no transition_value declared for this join">?</span>';
    if(v==='held') return '<span class="cseam held" title="transition_value: held">held</span>';
@@ -324,11 +284,8 @@ function preAssembleNote(){
    return '<div id=colorstrip role=group aria-label="colour arc: one swatch per beat, storyboard order">'
      +'<h4>Colour arc</h4><div id=cstrip>'+cells+'</div></div>';
  }
- // paintColorStrip(): fills every swatch left blank by colorStrip (a real frame exists, its colour does
- // not yet) by downsampling that SAME jpg to a few pixels and averaging them. Canvas, not a library: a
- // dominant colour for a 44x32 swatch does not need k-means, it needs the frame's own average tone.
- // Runs after the HTML lands because it needs the <img> decode; harmless to call again on a re-draw,
- // `data-painted` skips a swatch already done.
+ // Fills a swatch's colour by downsampling its frame to 8x8 and averaging, since a 44x32 swatch needs
+ // only the frame's average tone, not k-means. `data-painted` skips a swatch already done.
  function paintColorStrip(){
    document.querySelectorAll('#cstrip .cswatch[data-src]').forEach((el)=>{
      if(el.dataset.painted) return; el.dataset.painted='1';
@@ -347,11 +304,8 @@ function preAssembleNote(){
      img.src=el.dataset.src;
    });
  }
- // ---- THE PICTURE: a real rendered still of the assembled scene at this beat's start, or the honest
- // reason there is none yet. Never a shape, never a fragment previewed alone (MISTAKES.md #592, and
- // the owner's own words: "plan should only show complete rendered sheet actual how it will look in
- // video"). `frames[i]` comes from /api/plan-frames, one entry per beat, built server-side by seeking
- // the real scene.html this studio already boots.
+ // A real rendered still of the assembled scene, never a shape or a fragment previewed alone
+ // (MISTAKES.md #592). `frames[i]` comes from /api/plan-frames, seeking the real scene.html server-side.
  function beatPicture(b,i,frames){
    const f=(frames||[])[i];
    if(f&&f.src) return '<div class=pstage><img loading=lazy alt="'+esc(b.name)+' at '+f.t+'s"'
@@ -374,12 +328,9 @@ function preAssembleNote(){
      +motionBlock(b)+feedbackBlock(b.feedback,i)+'</div></section>';
  }
  // ---- HOW IT ANIMATES, in the beat's own words -----------------------------------------------
- // "how they will be animated, written in english" (the owner's own words). No new vocabulary: this
- // reads the fields a beat already declares (`becomes:`, `mechanism:`, `eye:`, `camera:`, `move:`,
- // `motion:`, `transition_in:`/`transition_why:`/`transition_value:`) and shows them legibly, in
- // storyboard order, rather than inventing a keyframe grammar this repo does not have. `becomes:` and
- // `mechanism:` are already prose (the before/after and the how); `move:`/`motion:`/`camera:` are the
- // engine's own compact grammar strings and are shown as declared, not re-narrated.
+ // Reads the fields a beat already declares (`becomes:`, `mechanism:`, `eye:`, `camera:`, `move:`,
+ // `motion:`, `transition_in:`/`transition_why:`/`transition_value:`) and shows them as declared,
+ // rather than inventing a keyframe grammar this repo does not have.
  function motionBlock(b){
    const seam=b.transition_in?(b.transition_in+(b.transition_why?' · '+b.transition_why:'')):null;
    const rows=[planRow('Becomes',b.becomes),planRow('Mechanism',b.mechanism),planRow('Eye',b.eye),
@@ -387,11 +338,9 @@ function preAssembleNote(){
    return rows?'<h4 class=psub>How it animates</h4><dl>'+rows+'</dl>':'';
  }
  // ---- FEEDBACK, written straight into the storyboard --------------------------------------------
- // "in plan mode itself i should be able to give feedback in studio so i can do changes there only"
- // (the owner). The storyboard file is the only store: a submit POSTs to /api/plan/feedback, the
- // server appends a `- feedback:` line into this beat's own block (or the frontmatter for a film-level
- // note, `beatIdx===null`), and the pane re-fetches the plan, so what is shown here is always exactly
- // what is on disk, never a second copy that could drift from it.
+ // The storyboard file is the only store: a submit POSTs to /api/plan/feedback, the server appends a
+ // `- feedback:` line into this beat's block (or the frontmatter when `beatIdx===null`), and the pane
+ // re-fetches the plan, so what is shown is always exactly what is on disk.
  function feedbackBlock(list,beatIdx){
    const items=(list||[]).map((t)=>'<li>'+esc(t)+'</li>').join('');
    return '<div class=pfeedback>'
@@ -412,10 +361,8 @@ function preAssembleNote(){
        say('feedback saved to the storyboard'); drawPlan(true);
      }).catch((err)=>{ btn.disabled=false; btn.textContent='Add'; say('feedback not saved: '+err.message); });
  });
- // Two fetches: the storyboard's own fields, and the rendered still per beat (/api/plan-frames, which
- // seeks the real scene.html server-side and can take a couple of seconds the first time). Neither
- // blocks the other's failure: a storyboard with no scene yet still shows its words, with an honest
- // "no rendered frame yet" in place of a picture.
+ // Two independent fetches (storyboard fields, /api/plan-frames stills): a storyboard with no scene
+ // yet still shows its words, with an honest "no rendered frame yet" in place of a picture.
  function drawPlan(force){
    if(planDrawn&&!force) return;
    planDrawn=true; planPath.textContent='reading…';
@@ -431,16 +378,13 @@ function preAssembleNote(){
      planBody.innerHTML=planHead(d,frames)+d.beats.map((b,i)=>{ const s=beatHtml(b,i,prev,frames); prev=b.archetype||''; return s; }).join('');
      paintColorStrip();
      say('the plan is drawn, '+d.beats.length+' beats');
-     // The frame render is still running server-side (a scene launch + N seeks): come back for the
-     // pictures once it finishes, rather than leaving every beat on "not loaded yet" forever.
      if(pf&&pf.busy) setTimeout(()=>drawPlan(true),1500);
    }).catch(e=>{ planPath.textContent=''; planEmpty('could not read the plan: '+e.message); });
  }
  $('planredraw').addEventListener('click',()=>drawPlan(true));
 
- // ---- the stage chip, filled from the same reader that make stage prints ----------------------------
- // READ-ONLY: the stage comes from the files on disk (quality/gates/stage.mjs), so the chip cannot claim
- // a stage the repo is not in. Clicking it copies the one next command.
+ // The stage chip is read-only: the stage comes from disk (quality/gates/stage.mjs). Clicking it
+ // copies the one next command.
  fetch('/api/stage').then(r=>r.json()).then(d=>{
    stageInfo=d;
    if(!d||!d.ok) return;
@@ -455,24 +399,19 @@ function preAssembleNote(){
        ()=>{ name.textContent='Copy failed'; back(); }); });
  }).catch(()=>{});
 
- // ---- PLAN / Rendered sheets: the film as a STRIP, which is a different question from a frame -----
- // Scrubbing tells you what a frame IS. A strip tells you whether the film WORKS, and the two sheets
- // here are the ones this repo already makes and least often reads: every beat in · mid · out, and
- // both sides of every transition pulled out of the rendered mp4. Neither needs new engine work. This
- // used to be its own "Look" state; it is now Plan's second sub-view (setPlanSub above), because
- // reviewing what a beat shows and checking what it rendered to are the same errand.
+ // ---- PLAN / Rendered sheets: two sheets, every beat in/mid/out and both sides of every transition
+ // pulled from the rendered mp4. Plan's second sub-view (setPlanSub above).
  const sheetImg=$('sheet'), sheetBtn=$('sheetzoom'), sheetNote=$('sheetnote'), lookStat=$('lookstat');
- // THE SHEET'S REAL SIZE, SENT WITH IT. The server reads the PNG's IHDR and answers X-Dim; the page
- // writes it to the width/height ATTRIBUTES, so the box is the right shape before a byte is decoded.
- // The CSS keeps both axes auto, which is the guard against the scar this repo already has: a mapped
- // height attribute beating an aspect-ratio and squashing every thumbnail on the site.
+ // The server reads the PNG's IHDR and answers X-Dim; the page sets width/height attributes from it so
+ // the box is the right shape before a byte decodes. CSS keeps both axes auto: a mapped height
+ // attribute would beat an aspect-ratio and squash the thumbnail.
  const dimOf=(s)=>{ const p=String(s||'').split('x').map(Number);
    return (p.length===2&&p[0]>0&&p[1]>0)?p:null; };
  function setSheet(u,dim){ const d=dimOf(dim);
    if(d){ sheetImg.width=d[0]; sheetImg.height=d[1]; } else { sheetImg.removeAttribute('width'); sheetImg.removeAttribute('height'); }
    sheetImg.src=u; sheetBtn.hidden=false; sheetNote.hidden=true; }
- // The first two need NO RENDER: both seek renderFrame in a headless page, exactly as the scrubber does,
- // so a scene that has never been rendered can still be judged as a strip. Only the seams need an mp4.
+ // The first two sheets need no render: both seek renderFrame in a headless page, same as the scrubber.
+ // Only the seams need an mp4.
  let sheetKind='beats', sheetHave={};
  let renderPoll=null;
  function lookBusy(msg){ lookStat.innerHTML='<span class=work><i></i>'+esc(msg)+'</span>'; }
@@ -487,14 +426,12 @@ function preAssembleNote(){
    const busy={beats:'rendering beats',frames:'rendering key frames',seams:'decoding seams'}[kind]||'rendering';
    lookBusy(busy); say(busy);
    sheetBtn.hidden=true; sheetNote.hidden=true;
-   // EACH SHEET COSTS SECONDS, so two can be in flight and the slower one used to land last and
-   // overwrite the one you asked for second. A reply for a sheet nobody is looking at now is dropped.
+   // Two sheets can be in flight; a reply for a sheet nobody is looking at now is dropped.
    const mine=()=>sheetKind===kind;
    fetch('/__sheet?kind='+kind+'&t='+Date.now()).then(r=>{
      if(!mine()) return;
      const dim=r.headers.get('X-Dim');
      if(r.headers.get('X-Needs-Render')) return r.text().then(()=>{ lookStat.textContent=''; say('there are no seam frames yet');
-       // SAY IT, never draw an empty grid. And offer the one thing that would fix it.
        note('No seam frames yet',window.sceneFailed?'':'<p><button id=dorender>Render</button></p>');
        const dr=$('dorender'); if(dr) dr.addEventListener('click',startRender); });
      if(r.headers.get('X-Scene-Error')) return r.text().then(t=>{ lookStat.textContent='';
@@ -509,8 +446,7 @@ function preAssembleNote(){
  sheetBtn.addEventListener('click',()=>{ const full=sheetBtn.classList.toggle('full');
    sheetBtn.setAttribute('aria-pressed',String(full));
    sheetBtn.setAttribute('aria-label',full?'fit the sheet to the pane':'show the sheet at real pixels'); });
- // THE RENDER, polled rather than awaited: a fetch held open for four minutes is a frozen panel with
- // nothing to say for itself.
+ // Polled rather than awaited: a fetch held open for four minutes is a frozen panel with nothing to say.
  function startRender(){
    fetch('/api/render',{method:'POST'}).then(r=>r.json()).then(pollRender);
  }
@@ -522,8 +458,6 @@ function preAssembleNote(){
    if(st.error){ note('the render failed','<pre style="white-space:pre-wrap;user-select:text;font:11px/1.5 ui-monospace,monospace">'+esc(st.error)+'</pre>'); return; }
    sheetHave.seams=null; say('the render finished'); showSheet('seams',true);
  }
- // THE PLAYHEAD IS SHARED, and this is where that pays: every marked moment in the film is one click
- // from the strip, and the click lands you in Make at that frame.
  function drawJump(){
    const j=$('jump'); if(!model) return;
    const ms=(model.marks||[]).map(k=>[k.t,k.kind]);
@@ -548,40 +482,29 @@ function preAssembleNote(){
      .then(()=>{ lab.textContent='Copied'; say('copied: '+cmd); back(); },()=>{ lab.textContent='Copy failed'; back(); }));
  }
  // ---- SOUND: hear every cue before it ships, against the frame it lands on ------------------------
- // Sound used to be the one decision made blind: an author wrote a cue's NAME into JSON and only heard
- // it after a full render. This reads the SAME list the render mixes, `window.__engine.meta.sfx`
- // (films/scene/scene.js buildSfx()), so the row can never claim a different mix than the one that
- // ships. It includes the IMPLICIT cues (a keystroke, a layer arrival, a tactile pluck), not just the
- // three an author might have hand-placed, because those are the ones a cue list that only reads
- // `audio.cues` would lie about.
- //
- // `why` (what happens at this instant) is RECONSTRUCTED here from the model this pane already holds
- // (layers, transitions, camera, typing), never re-derived engine-side: a wrong guess here only
- // mislabels a row, it can never change what plays.
+ // Reads the same list the render mixes, `window.__engine.meta.sfx` (films/scene/scene.js buildSfx()),
+ // including implicit cues (a keystroke, a layer arrival), so the row can never claim a different mix
+ // than the one that ships. `why` is reconstructed here from the model, never re-derived engine-side:
+ // a wrong guess only mislabels a row, it can never change what plays.
  let soundSfx=[];
  const sfxWavExists={}; // cue name -> true/false, HEAD-checked once and cached for the session
  function playCue(name){
    try{ const a=new Audio('/assets/sfx/'+encodeURIComponent(name)+'.wav'); a.play().catch(()=>{}); }catch{}
  }
- // The verb is read off the CUE NAME, never the event: the same "pluck" always "pops", whatever
- // caused it, so the row names what will be HEARD, matching the label to a sound the ear can learn.
+ // The verb is read off the CUE NAME, never the event: the same "pluck" always "pops", so the row
+ // names what will be heard rather than what caused it.
  const SOUND_VERB={impact:'lands',pluck:'pops',bloom:'opens',droplet:'drops',whoosh:'pans',
    riser:'builds',chime:'chimes',sparkle:'sparkles',success:'resolves',ready:'settles',
    drop:'falls',swell:'swells',braam:'hits',
-   // the interaction-vocabulary ALIASES a keystroke or a UI-style cue actually names
-   // (generators/media/audio-bake.mjs ROLES), each pointing at the voicing it bakes to.
+   // aliases for interaction-vocabulary cues (generators/media/audio-bake.mjs ROLES).
    click:'pops',pop:'drops',tick:'pops',key:'pops',press:'pops',release:'pops',toggle:'pops',
    page:'pans',loading:'swells',error:'lands',whisper:'swells',thud:'lands',travel:'pans',
    sweep:'pans',reveal:'chimes'};
- // The timeline model only lists TOP-LEVEL layers (studio/server.mjs), but a `group`'s children
- // (nested under `children`) are where most typed text and small parts actually live, so a keystroke
- // is invisible here unless this pane walks down into them itself. `path` records the exact chain of
- // array/index hops (`['layers',3,'children',1]`) so an override can be written back through the same
- // hops with `/api/apply`, which only ever edits the object literal actually on disk.
- // A group CHILD'S clock is its parent's, offset by `delay`, and that is the whole vocabulary
- // (core/layers/util.js addGroupChild): a child's own `start` is authored but never read by the
- // engine, only `delay` is. Recomputing that same rule here (rather than the child's `start`) is what
- // made the first pass of this pane mislabel every nested keystroke by up to a second.
+ // The timeline model only lists top-level layers (studio/server.mjs); a `group`'s children walk down
+ // via `path` (`['layers',3,'children',1]`), so an override can be written back through /api/apply,
+ // which only ever edits the object literal on disk.
+ // A group child's clock is its parent's, offset by `delay` (core/layers/util.js addGroupChild): the
+ // child's own `start` is authored but never read by the engine, only `delay` is.
  function flattenLayers(m){
    const out=[];
    const walk=(L,start,path,label)=>{
@@ -598,9 +521,8 @@ function preAssembleNote(){
      if(!F.raw.typing||F.raw.keyClicks===false) continue;
      const cps=F.raw.typing===true?24:+F.raw.typing, full=String(F.raw.text||'');
      if(!full.length) continue;
-     // one keystroke every 1/cps seconds, closer together than `eps`, so the NEAREST index is solved
-     // directly (core/type/type.js: character i lands at start+(i+1)/cps) rather than found by a
-     // threshold scan, which used to match several adjacent keys to the same row.
+     // Character i lands at start+(i+1)/cps (core/type/type.js); the nearest index is solved directly
+     // rather than found by a threshold scan, which can match several adjacent keys to the same row.
      const i=Math.round((t-F.start)*cps)-1;
      if(i<0||i>=full.length) continue;
      if(Math.abs(t-(F.start+(i+1)/cps))<eps) return { label:F.label+' keystroke '+(i+1)+' of '+full.length, path:F.path };
@@ -613,11 +535,9 @@ function preAssembleNote(){
      return { label:F.label+' arrives', arrival:true };
    return { label:null };
  }
- // Every row is overridable, even a purely derived one: `audio.cues[]` placed by hand ALWAYS beats a
- // derived cue at the same joint (core/audio/tactile.js), so "choose an alternative" always ends up
- // writing one. If this exact cue is already an authored entry, its own index is patched in place;
- // otherwise a new one is hand-placed 1ms earlier, which is enough to win buildSfx's tie-break (sorts
- // by time, then keeps the first of any two cues under 0.09s apart) without touching the engine.
+ // `audio.cues[]` placed by hand always beats a derived cue at the same joint (core/audio/tactile.js).
+ // A new override lands 1ms earlier, enough to win buildSfx's tie-break (sorts by time, keeps the
+ // first of two cues under 0.09s apart) without touching the engine.
  function cueTarget(c,m){
    const authored=(m.audio&&m.audio.cues)||[];
    const ci=authored.findIndex(a=>Math.abs(a.t-c.t)<0.03&&a.name===c.name);
@@ -667,8 +587,6 @@ function preAssembleNote(){
        note.innerHTML='<h2>No sound yet</h2><p>'+esc(pre||'The scene did not load, so there is nothing to derive sound from yet.')+'</p>'; }
      else note.innerHTML='<h2>Loading&hellip;</h2><p>Waiting for the scene to boot.</p>';
      $('soundstat').textContent=''; return; }
-   // The label is reconstructed once per draw, off the SAME flattened layer tree (group children
-   // included, studio/server.mjs's model only lists the top level) rather than re-walked per row.
    const flat=flattenLayers(model);
    soundSfx=(eng.meta.sfx||[]).map(c=>({ ...c, why:cueWhy(c.t,flat,model) }));
    if(!soundSfx.length){ note.hidden=false; body.innerHTML='';
@@ -688,19 +606,14 @@ function preAssembleNote(){
    }
  }
  // ---- THE CHOOSER: six takes of this film, at this frame ------------------------------------------
- // IT NEVER ASKS FOR A WORD. There is no search box here and there will not be one: the person this
- // panel is for can see what they want and cannot name it, which is exactly what \`make arsenal\` cannot
- // help with. You point at a frame, it renders six real versions of that frame, and you pick one.
- //
- // Every card is a LOOPING CLIP, never a still. A still hides speed, scale and direction, and this repo
- // has been burned by exactly that (engine-doctrine/MISTAKES.md #155).
+ // No search box: you point at a frame, it renders six real versions of that frame, and you pick one.
+ // Every card is a looping clip, never a still, since a still hides speed, scale and direction
+ // (engine-doctrine/MISTAKES.md #155).
  const cands=$('cands'), candStat=$('candstat'), candGo=$('candgo');
  let candBusy=false, candTick=null;
  function candWorking(){
    const t0=Date.now();
    candStat.innerHTML='<span class=work><i></i>rendering six takes at '+(n/fps).toFixed(2)+'s · <b class=el>0</b>s</span>';
-   // six clips of the real scene take roughly ten to fifteen seconds. SAY SO WHILE IT HAPPENS: a panel
-   // that sits still for fifteen seconds reads as broken, which is the one thing this cannot afford.
    cands.style.setProperty('--ar',W+'/'+H);
    cands.innerHTML=Array.from({length:6},()=>'<div class=cand><span class=sk></span></div>').join('');
    clearInterval(candTick);
@@ -722,8 +635,6 @@ function preAssembleNote(){
     .then(r=>r.json()).then(d=>{
       candBusy=false; candGo.disabled=false;
       if(!d.ok){ cands.innerHTML='';
-        // The refusals are the useful half: a window painted with \`html\` has no preset to swap, and
-        // saying which window and why beats an empty strip.
         candFail(d.error||'no candidates');
         say('no candidates: '+(d.error||''));
         return; }
@@ -735,23 +646,17 @@ function preAssembleNote(){
    const w=d.window||{}, cs=(d.candidates||[]).filter(c=>c.clip);
    clearInterval(candTick);
    candStat.textContent='';
-   // SIX AUTOPLAYING LOOPS IS EXACTLY THE MOTION SOMEBODY MAY HAVE ASKED TO BE SPARED, so under
-   // prefers-reduced-motion they load paused and the panel offers one control that starts them all.
-   // Not silently replaced by stills: a still hides speed, scale and direction, which is the whole
-   // reason these are clips, so the honest answer is "paused, and here is how to play them".
+   // Under prefers-reduced-motion the six loops load paused, with one control that starts them all,
+   // rather than silently replaced by stills (which would hide speed, scale and direction).
    const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-   // a <button> takes phrasing content, so the card is spans: a <p> inside a button is invalid markup
-   // and the parser closes the button around it, which is why the cards were one hit target on paper
-   // and several in the tree.
+   // A <button> takes phrasing content only, so the card is spans: a <p> inside a button is invalid
+   // markup and the parser closes the button around it.
    cands.innerHTML=cs.map((c,i)=>'<button class=cand data-i="'+i+'">'
      +'<video src="/'+esc(c.clip)+'" loop muted playsinline preload=metadata'+(still?'':' autoplay')+'></video>'
      +'<span class=t><b>'+esc(c.name)+'</b>'+(c.new?'<s>new</s>':'')+'</span>'
      +(c.warnings||[]).map(w2=>'<span class="d warn">'+esc(w2)+'</span>').join('')
      +'</button>').join('');
    cands.querySelectorAll('.cand').forEach(b=>b.addEventListener('click',()=>applyCand(cs[+b.dataset.i])));
-   // SIX LOOPS THAT NEVER STOP IS AN AUTOPLAY NOBODY CAN INTERRUPT. The control was only drawn under
-   // prefers-reduced-motion, which reads the setting as the only reason to want them still. It is one
-   // button either way, and it says which state it is about to move you to.
    if(!$('candplay')) cands.insertAdjacentHTML('afterend','<button id=candplay class=wide></button>');
    const cp=$('candplay'); let running=!still;
    const label=()=>{ cp.textContent=running?'Pause takes':'Play takes'; };
@@ -1143,15 +1048,9 @@ function preAssembleNote(){
         body:JSON.stringify({title:title,detail:detail})}); }catch{}
    redrawLiveEnginePanes();
  }
- // A direct hit on /studio/sound or /studio/ship (each pane's own route, so an agent can open one
- // without passing through Make first) draws its pane BEFORE either of its two async inputs is ready:
- // the iframe's own boot (`sc.contentWindow.__engine`, read directly by drawSound()) and the server
- // fetch (`model`, from timeline() below, read by both drawSound() and drawShip()). Sound needs BOTH.
- // Called once, on the FIRST of the two to resolve, it stayed on "Loading... Waiting for the scene to
- // boot" even once both had actually landed, because nothing ever asked it to redraw a second time.
- // Called from every place either input can finish (fail() and ready() for the boot, timeline()'s own
- // fetch for the model), so whichever settles LAST is the one that redraws the pane, not only a click
- // that happens to land after both already have.
+ // A direct hit on /studio/sound or /studio/ship draws its pane before either of its two async inputs
+ // is ready (the iframe boot, and the server fetch in timeline()). Called from every place either
+ // input can finish, so whichever settles last is the one that redraws the pane.
  function redrawLiveEnginePanes(){
    const st=document.body.dataset.state;
    if(st==='sound') drawSound(); else if(st==='ship') drawShip();
@@ -1545,14 +1444,10 @@ function preAssembleNote(){
    measureBoxes();
  }
  // ---- THE THUMBNAIL AT THE POINTER ---------------------------------------------------------------
- // HOVER LOOKS, DRAG COMMITS. This never writes the playhead and never touches the main iframe: it owns a second
- // engine of its own, so the picture in the centre is exactly where you left it while you read ahead.
- //
- // THROTTLED TO ONE SEEK PER ANIMATION FRAME, coalesced: the pointer writes a time into a variable and
- // a single rAF drains it, so twenty mousemoves inside one frame cost ONE renderFrame and it is always
- // the latest one. Measured on the 76-layer film: a peek seek is 4 to 9ms at this size, so the drain
- // never overruns its frame, and scrubbing the main preview is unaffected because it is a different
- // engine in a different document.
+ // Hover looks, drag commits: this owns a second engine, in a different document, so it never touches
+ // the main iframe or writes the playhead.
+ // Throttled to one seek per animation frame: the pointer writes a time into a variable and a single
+ // rAF drains it, so N mousemoves inside one frame cost one renderFrame, always the latest.
  const peek=$('peek'), peekBox=$('peekbox'), peekT=$('peekt');
  let peekFrame=null, peekReady=false, peekWant=null, peekPending=false, peekScale=1;
  function peekBoot(){
