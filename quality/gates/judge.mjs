@@ -213,6 +213,16 @@ if (verdictJsonArg) {
     f.fail('judge-struct-incomplete', `${missing.length} criterion/criteria missing evidence`, { missing });
     process.exit(1);
   }
+  // `overall`: this judge's own holistic 1-10 read of the cut, never averaged with the other judge's
+  // (engine-doctrine/JUDGE.md still refuses to aggregate PER-DIMENSION scores across judges; this is a
+  // single judge's own number, compared independently against the other run's own number). `make ship`
+  // requires both of the two latest fresh structured runs at 7 or above (harness/lib/judge-consensus.mjs).
+  const overall = payload.overall;
+  if (typeof overall !== 'number' || !Number.isInteger(overall) || overall < 1 || overall > 10) {
+    console.error('✗ refused: "overall" must be an integer 1-10, this judge\'s own holistic score.');
+    f.fail('judge-struct-incomplete', '"overall" missing or out of range 1-10');
+    process.exit(1);
+  }
   // Non-empty is not the same as specific: "beat 1: readability looks fine" clears the check above and
   // says nothing a fix could act on. lintCriteriaSet asks each entry to name a real element/text plus a
   // position/size/colour/motion/timing observation, forbids echoing the criterion's own name, checks a
@@ -240,9 +250,9 @@ if (verdictJsonArg) {
     }
   }
   const stage = `judge-struct-${String(run).replace(/[^A-Za-z0-9_-]/g, '')}`;
-  writeReceipt(stage, inp, { run, verdict: v, criteria: payload.criteria, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
-  appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, file: verdictJsonArg } });
-  console.log(`  ✓ structured verdict recorded: run ${run}, ${v}. Every criterion carries evidence.`);
+  writeReceipt(stage, inp, { run, verdict: v, overall, criteria: payload.criteria, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
+  appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, overall, file: verdictJsonArg } });
+  console.log(`  ✓ structured verdict recorded: run ${run}, ${v}, overall ${overall}/10. Every criterion carries evidence.`);
   process.exit(0);
 }
 
