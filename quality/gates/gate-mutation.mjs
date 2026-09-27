@@ -260,16 +260,20 @@ const CASES = [
   { gate: 'validate', name: 'html layer · a src file alone is the legal spelling', expect: 'pass',
     aux: { 'quality/fixtures/mut-frag-clean.html': '<div style="color:#fff;font-size:80px">Fragment in a file</div>' },
     scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'quality/fixtures/mut-frag-clean.html' }]) },
-  // The dead-CSS rule has always applied to the markup, not to where the markup is stored. A fragment
-  // moved into a file must not become the one place transition/animation goes unread.
-  { gate: 'validate', name: 'html layer · dead CSS inside the src FILE', expect: 'fail', match: /DEAD STILL/,
-    aux: { 'quality/fixtures/mut-frag-dead.html': '<style>@keyframes drift{to{opacity:1}}</style><div style="color:#fff">x</div>' },
+  // The unseekable-timeline rule has always applied to the markup, not to where the markup is stored.
+  // A fragment moved into a file must not become the one place a scroll-linked timeline goes unread.
+  // (`@keyframes`/`transition` are no longer refused here at all: seekAll(t) makes them deterministic.)
+  { gate: 'validate', name: 'html layer · scroll-linked timeline inside the src FILE', expect: 'fail', match: /animation-timeline/,
+    aux: { 'quality/fixtures/mut-frag-dead.html': '<style>.x{animation-timeline:scroll(root)}</style><div style="color:#fff">x</div>' },
     scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'quality/fixtures/mut-frag-dead.html' }]) },
   // A group child's html was checked by nothing at all: the walk was flat, so one level of nesting was
   // an exemption from a rule nobody meant to make optional.
-  { gate: 'validate', name: 'html inside a GROUP child is checked too', expect: 'fail', match: /DEAD STILL/,
+  { gate: 'validate', name: 'html inside a GROUP child is checked too', expect: 'fail', match: /animation-timeline/,
     scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', start: 0, duration: 2, children: [
-      { type: 'html', html: '<div style="transition:opacity .3s;color:#fff">nested</div>' }] }]) },
+      { type: 'html', html: '<div style="animation-timeline:view();color:#fff">nested</div>' }] }]) },
+  { gate: 'validate', name: 'html layer · a CSS animation is allowed now, seekAll(t) makes it deterministic', expect: 'pass',
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2,
+      html: '<style>@keyframes drift{to{opacity:1}}</style><div style="animation:drift 1s both;color:#fff">x</div>' }]) },
 
   // ---- asset preflight: a fragment that is not on disk STOPS the render, so it is the one asset the
   // preflight most has to see. `.html` was not even a candidate extension until the fragment loader
@@ -1008,9 +1012,9 @@ const srcCases = [
     mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
     cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
-  { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'films/scene/example-html-bg.json',
-    mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),
-    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /DEAD STILL/ },
+  { name: 'validate · a hand-authored bg driven off a scroll timeline (no seek reaches it)', file: 'films/scene/example-html-bg.json',
+    mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation-timeline:scroll(root)}.fan{'),
+    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /animation-timeline/ },
   { name: 'validate · a hand-authored bg that never says whether it is light or dark', file: 'films/scene/example-html-bg.json',
     mutate: (s) => s.replace('"tone": "light",', ''),
     cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /declares no `tone`/ },

@@ -5,7 +5,7 @@
 // A GROUP's children were invisible to this: the walk was a flat pass over cfg.layers, so the identical
 // fragment was checked at the top level and unchecked one nesting deep. Nesting is not an exemption.
 import { isObj } from './util.mjs';
-import { timeCssUsed } from '../type/sanitize-html.js';
+import { unseekableCssUsed } from '../type/sanitize-html.js';
 
 export function htmlLayerErrors(cfg) {
   const out = [];
@@ -20,8 +20,8 @@ export function htmlLayerErrors(cfg) {
     if (L.html == null && L.src == null)
       out.push(`${at} (html) declares neither \`html\` nor \`src\`, so it renders an empty box. Put the markup inline in \`html\`, or point \`src\` at a .html fragment.`);
     if (L.html == null) return;
-    const timeCss = timeCssUsed(L.html);
-    if (timeCss) out.push(`${at} (html) uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Animate the layer with the engine's own motion (\`anim\`/\`motion\`/\`vars\`), or drive your CSS from a \`vars\` custom property.`);
+    const badCss = unseekableCssUsed(L.html);
+    if (badCss) out.push(`${at} (html) uses \`${badCss}\`, which no per-frame seek can reach: it drives progress off scrolling, not off the film's own clock, so it never plays the same way twice. Animate the fragment with \`element.animate()\`/\`@keyframes\` (both are seeked deterministically now), the engine's own motion (\`anim\`/\`motion\`/\`vars\`), or \`core/motion/timeline.js\`'s \`vawe.timeline()\`.`);
   };
   (Array.isArray(cfg.layers) ? cfg.layers : []).forEach((L, i) => visit(L, `layer[${i}]`));
   return out;
@@ -38,8 +38,8 @@ export function htmlLayerErrors(cfg) {
 const OWNED_CSS = {
   opacity: 'written every frame from the enter/exit envelope (core/timeline/clips.js:220), use `anim` / `motion`',
   transform: 'written every frame by motion tracks and named entrances (core/timeline/clips.js, GSAP), use `motion`',
-  animation: 'killed engine-wide (core/tokens.css:28, `* { animation: none !important }`) because a frame is seeked, not played, use `parts` for a seeked entrance into your own markup, or drive a value from `vars`',
-  transition: 'killed engine-wide (core/tokens.css:28, `* { transition: none !important }`) for the same reason as `animation`, use `parts` or `vars`',
+  animation: 'written once at build here vs. every frame by `motion`/`anim` (core/timeline/clips.js) or seeked hand-authored CSS inside an `html` layer, a second animation channel on the same layer is a fork, not a fix, use `motion`/`anim`, or `parts` + `core/motion/timeline.js` inside your own markup',
+  transition: 'the same fork as `animation` above (a build-time value on a per-frame-driven layer), use `motion`/`anim`, or `parts` + `core/motion/timeline.js` inside your own markup',
   position: 'the coordinate system the engine lays the layer out with (films/scene/scene.js), use `x` / `y` / `w`',
   left: "written from the layer's `x` on every build (films/scene/scene.js), set `x` instead",
   top: "written from the layer's `y` on every build (films/scene/scene.js), set `y` instead",
@@ -64,14 +64,14 @@ export function cssErrors(cfg) {
 }
 
 // EXTERNAL HTML, markup a scene NAMES but does not contain. Two kinds: a `src` fragment on an html
-// layer or a bg window, and a CAPTURED component's markup. Both hit the same dead-CSS trap the inline
-// `html` string has been checked for all along, and neither was ever looked at: `grep component` in this
-// file returned nothing, while core/tokens.css:28 disables transition and animation for all three alike.
-// Captured site UI carries hover transitions almost by definition, so this was the loudest silence here.
+// layer or a bg window, and a CAPTURED component's markup. Both hit the same unseekable-timeline check
+// the inline `html` string gets, and neither was ever looked at: `grep component` in this file returned
+// nothing. Captured site UI can carry a scroll-linked animation almost by definition (a parallax hero),
+// so this was the loudest silence here.
 //
 // `read(p)` returns a file's text or null, so this stays pure and browser-safe; only the CLI supplies one.
 // A fragment is an ERROR (it is the author's own markup, held to the same bar as `html`). A capture is a
-// WARN: the dead CSS was written by the site, not by us, and it costs a still, not a broken render.
+// WARN: the timeline choice was made by the site, not by us, and it costs a still on that one element.
 export function externalHtmlErrors(cfg, read) {
   const out = [];
   const seen = new Set();
@@ -82,8 +82,8 @@ export function externalHtmlErrors(cfg, read) {
     if (text == null) return; // existence is asset-check's question, and the render's
     let markup;
     try { markup = pick(text); } catch (e) { out.push({ level: 'error', msg: `${at} "${src}" is unreadable, ${e.message}` }); return; }
-    const timeCss = timeCssUsed(markup);
-    if (timeCss) out.push({ level, msg: `${at} "${src}" uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive the motion from \`var(--t)\` / a \`vars\` custom property instead.` });
+    const badCss = unseekableCssUsed(markup);
+    if (badCss) out.push({ level, msg: `${at} "${src}" uses \`${badCss}\`, which no per-frame seek can reach: it drives progress off scrolling, not off the film's own clock. Drive it from \`var(--t)\` / \`var(--p)\`, or an \`@keyframes\`/\`element.animate()\` motion instead, both seeked deterministically now.` });
   };
   const asHtml = (t) => t;
   const asCapture = (t) => { const j = JSON.parse(t); return [j.html, ...(j.parts || []).map((p) => p && p.html)].filter((s) => typeof s === 'string').join('\n'); };

@@ -25,6 +25,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
   ? [L, ...flatDepth(L.children), ...flatDepth(L.layers)] : []);
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
+import { applyDefaultFills } from '../timeline/clips.js';
 import { loadBeatGrid } from '../beats/index.js';
 import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn, resolveAnchorPoint } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
@@ -742,6 +743,9 @@ export async function boot(build) {
     const beats = await loadBeatGrid(data, fetchJson);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame, beats });
+    // every fragment's animations exist in the DOM now (build() is done); apply the fill:both default
+    // ONCE, before the first frame, never per frame (core/timeline/clips.js applyDefaultFills).
+    applyDefaultFills();
     await bakeSceneSeams(scene);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     wireEngine(scene, fps, width, height, vclock, data);

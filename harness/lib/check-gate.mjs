@@ -18,6 +18,7 @@ const valFlag = (name, f) => (env[name] ? [f, env[name]] : []);
 
 // name -> the script + args; keep alphabetical, this is the only place the list is kept.
 export const GATES = {
+  'anim-traps': () => ['quality/gates/anim-traps.mjs', ...words('D'), ...flag1('STRICT', '--strict')],
   'arsenal-check': () => ['quality/gates/arsenal-check.mjs', ...json()],
   'asset-check': () => ['quality/gates/asset-check.mjs', ...words('D'), ...flag('STRICT', '--strict'), ...json()],
   'audio-check': () => ['quality/gates/audio-check.mjs', ...(env.D ? words('D') : ['--all']), ...flag1('STRICT', '--strict')],

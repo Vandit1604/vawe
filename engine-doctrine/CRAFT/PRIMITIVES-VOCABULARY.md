@@ -239,6 +239,8 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 |---|---|---|
 | `commaSplit` | comma separated values animation, delimited line to table | a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure |
 | `pipelineFlow` | pipeline diagram, flow chart animation, cards and connectors | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
+| `timelineDemo` | web animations timeline, staggered bars, element.animate sequence | labelled bars settle in, hold, exit, staggered by core/motion/timeline.js on plain element.animate() instead of GSAP |
+| `timelineSheet` | editable timing sheet, json row timeline, data-driven element.animate | a sweep of dots choreographed by an editable `<script type="application/json">` row sheet inside this comp, read back by timelineFromScript, never by hand-editing this file |
 
 ## cursor style  `[style]`
 
@@ -1113,5 +1115,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_759 primitives across 68 registries, 759 meeting the word-action contract today.
+_761 primitives across 68 registries, 761 meeting the word-action contract today.
 Regenerate: `make regen`. Ratchet: `make check GATE=word-action`._
