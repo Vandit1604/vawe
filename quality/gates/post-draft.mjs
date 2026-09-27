@@ -83,11 +83,14 @@ function motionStep(scene, filmPath, filmArg, mp4, allow) {
       why: `this film declares a reference (${scene.reference}) but its draft has not been checked against it yet.` };
   }
   if (motion.receipt.ok === false && !isWaivedBy(allow, 'motion-still')) {
+    const windows = motion.receipt.tooStillWindows || [];
+    const hints = windows.map((w) => w.hint).filter(Boolean);
     return { step: 'motion', done: false,
       next: `make study REF=${scene.reference} COMPARE=${mp4} D=${filmArg}`,
       why: `${motion.receipt.tooStillCount} window(s) read "too still" against the reference last run `
-        + `(${(motion.receipt.tooStillWindows || []).map((w) => `${w.t0}-${w.t1}s`).join(', ')}). Fix the `
-        + 'motion and re-run, or waive with {"authoring":{"allow":["motion-still"],"_why":{"motion-still":"…"}}}.' };
+        + `(${windows.map((w) => `${w.t0}-${w.t1}s`).join(', ')}).`
+        + (hints.length ? `\n${hints.map((h) => `  - ${h}`).join('\n')}\n` : ' ')
+        + 'Fix the motion and re-run, or waive with {"authoring":{"allow":["motion-still"],"_why":{"motion-still":"…"}}}.' };
   }
   return null;
 }
