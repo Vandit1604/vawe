@@ -53,6 +53,7 @@ function renderDoc(all) {
   L.push('when: "before authoring, or when a film reads flat and you cannot say why"');
   L.push('answers: "what films that read well actually MEASURE: shot length, motion, whether the ground turns, and what carries across a cut"');
   L.push('group: crosscutting');
+  L.push('routes: camera');
   L.push('---');
   L.push('');
   L.push('# The motion grammar');
