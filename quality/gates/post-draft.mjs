@@ -83,12 +83,16 @@ function motionStep(scene, filmPath, filmArg, mp4, allow) {
       why: `this film declares a reference (${scene.reference}) but its draft has not been checked against it yet.` };
   }
   if (motion.receipt.ok === false && !isWaivedBy(allow, 'motion-still')) {
-    const windows = motion.receipt.tooStillWindows || [];
+    const stillWindows = motion.receipt.tooStillWindows || [];
+    const busyWindows = motion.receipt.tooBusyWindows || [];
+    const windows = [...stillWindows, ...busyWindows];
     const hints = windows.map((w) => w.hint).filter(Boolean);
+    const parts = [];
+    if (stillWindows.length) parts.push(`${stillWindows.length} window(s) read "too still" (${stillWindows.map((w) => `${w.t0}-${w.t1}s`).join(', ')})`);
+    if (busyWindows.length) parts.push(`${busyWindows.length} window(s) read "too busy" (${busyWindows.map((w) => `${w.t0}-${w.t1}s`).join(', ')})`);
     return { step: 'motion', done: false,
       next: `make study REF=${scene.reference} COMPARE=${mp4} D=${filmArg}`,
-      why: `${motion.receipt.tooStillCount} window(s) read "too still" against the reference last run `
-        + `(${windows.map((w) => `${w.t0}-${w.t1}s`).join(', ')}).`
+      why: `${parts.join('; ')} against the reference last run.`
         + (hints.length ? `\n${hints.map((h) => `  - ${h}`).join('\n')}\n` : ' ')
         + 'Fix the motion and re-run, or waive with {"authoring":{"allow":["motion-still"],"_why":{"motion-still":"…"}}}.' };
   }
