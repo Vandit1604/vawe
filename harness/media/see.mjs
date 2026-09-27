@@ -871,8 +871,23 @@ async function runDom(htmlPath, outDirRoot, opts) {
 // (`runCompare`'s own from/to assumes both sides start at the same origin; the page render starts its
 // mp4 at 0 regardless of `from`, so the reference is re-cut to 0-relative too, never left absolute).
 // `--final` ignores any window and renders full length, matching what `make ship` will actually cut.
+// A --final pass's own render already IS the shippable cut (full size, full length, real blur): the
+// path this persists to once every check passes, next to the page, so `make next PAGE= REF= FINAL=1`
+// is both the check and the one render an agent would otherwise run again by hand right after.
+function finalOutputFor(htmlPath) {
+  const base = path.basename(htmlPath).replace(/\.[^.]+$/, '');
+  return path.join(path.dirname(htmlPath), `${base}.mp4`);
+}
+
 async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
   if (!fs.existsSync(refPath)) die(`no such --ref file: ${refPath}`);
+  const finalOut = opts.final ? finalOutputFor(htmlPath) : null;
+  // Nothing changed since the last passing FINAL: the stamp (keyed on the page's own content hash) is
+  // still fresh AND the render it produced is still on disk, so re-running ffmpeg buys nothing.
+  if (opts.final && motionStampFresh(htmlPath) && fs.existsSync(finalOut)) {
+    console.log(`✓ ${finalOut}: already verified and rendered for this page's current content, skipping.`);
+    return;
+  }
   const refP = probeVideo(refPath);
   const from = opts.final ? 0 : (opts.from || 0);
   const to = opts.final ? refP.dur : (opts.to != null ? opts.to : refP.dur);
@@ -885,7 +900,10 @@ async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
   const refWindow = windowed ? path.join(outDir, `.ref-window-${process.pid}.mp4`) : refPath;
   try {
     const { renderPage } = await import('./render-page.mjs');
-    await renderPage(htmlPath, tmpMp4, { fps: 30, w: opts.w, h: opts.h, blur: opts.blur, from, durArg: to - from });
+    if (opts.final) console.log(`  rendering FINAL ${htmlPath} (foreground, one pass)...`);
+    await renderPage(htmlPath, tmpMp4, {
+      fps: 30, w: opts.w, h: opts.h, blur: opts.blur, from, durArg: to - from, progress: opts.final,
+    });
     if (windowed) {
       ffmpegOrDie(['-v', 'error', '-y', '-i', refPath, '-ss', String(from), '-to', String(to),
         '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', refWindow], refWindow, 'ref window slice');
@@ -896,10 +914,16 @@ async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
     const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg);
     const textOk = await runTextScaleCheck(htmlPath, refWindow, outDirRoot, { from, windowDur: to - from, w: opts.w, h: opts.h });
     if (!ok || !textOk) process.exitCode = 1;
-    // A pass (motion AND text-scale/placement) stamps the PAGE'S CURRENT content hash
-    // (harness/lib/motion-stamp.mjs), so render-page.mjs can refuse a FINAL render for a page never
-    // checked since its last edit, without re-running ffmpeg.
-    else writeMotionStamp(htmlPath);
+    else {
+      // A pass (motion AND text-scale/placement) stamps the PAGE'S CURRENT content hash
+      // (harness/lib/motion-stamp.mjs), so render-page.mjs can refuse a FINAL render for a page never
+      // checked since its last edit, without re-running ffmpeg.
+      writeMotionStamp(htmlPath);
+      if (opts.final) {
+        fs.copyFileSync(tmpMp4, finalOut);
+        console.log(`✓ ${finalOut}`);
+      }
+    }
   } finally {
     fs.rmSync(tmpMp4, { force: true });
     if (windowed) fs.rmSync(refWindow, { force: true });
