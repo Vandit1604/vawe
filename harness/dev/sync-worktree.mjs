@@ -104,34 +104,26 @@ if (verifyPath) {
     + `  node harness/dev/sync-worktree.mjs ${WT}`);
 }
 
-function linkedWorktrees() {
-  let out;
-  try { out = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd: MAIN, encoding: 'utf8' }); }
-  catch { return []; }
-  return out.split('\n\n').slice(1)
-    .map((st) => (st.split('\n').find((l) => l.startsWith('worktree ')) || '').slice('worktree '.length))
-    .filter(Boolean)
-    .map((d) => path.resolve(d))
-    .filter((d) => d !== path.resolve(MAIN));
-}
-
 const countable = (dir, pat) =>
   expand(pat, dir).reduce((n, m) => n + listFiles(path.join(dir, m))
     .filter((f) => !path.basename(f).startsWith('_')).length, 0);
 
+// Compared against MAIN only, never a sibling worktree. This used to also loop over every OTHER
+// linked worktree and refuse the sync if ANY of them held more files than main, so an unrelated
+// worktree that had simply accumulated more scene files on its own blocked a completely different
+// worktree's sync, which had nothing to do with it and was not itself ahead of main. The only
+// comparison that means anything is main (the intended source) against WT (the actual destination):
+// if WT already holds more than main, syncing FROM main would overwrite a bigger local library with
+// a smaller stale one, and that is worth refusing; a sibling's count is not this worktree's business.
 function refuseIfMainIsNotTheSource(patterns) {
-  const others = linkedWorktrees();
-  if (!others.length) return;
   for (const pat of patterns) {
     const mine = countable(MAIN, pat);
-    for (const other of others) {
-      const theirs = countable(other, pat);
-      if (theirs > mine) {
-        die(`"${pat}": the main checkout holds ${mine} file(s), but ${other} holds ${theirs}.\n`
-          + `  Everything synced here is gitignored, so git's "main checkout" is not proof of where the\n`
-          + `  library lives, and syncing from it would install the SMALLER copy over this worktree.\n`
-          + `  Fix the main checkout first (copy the missing files into ${MAIN}), then re-run.`);
-      }
+    const theirs = countable(WT, pat);
+    if (theirs > mine) {
+      die(`"${pat}": the main checkout holds ${mine} file(s), but this worktree already holds ${theirs}.\n`
+        + `  Everything synced here is gitignored, so git's "main checkout" is not proof of where the\n`
+        + `  library lives, and syncing from it would install the SMALLER copy over what is already here.\n`
+        + `  Fix the main checkout first (copy the missing files into ${MAIN}), then re-run.`);
     }
   }
 }

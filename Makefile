@@ -473,6 +473,7 @@ install-hooks: ## [maintenance] activate the version-controlled git hooks (pre-p
 	git config merge.vawe-generated.driver 'harness/dev/merge-generated.sh %O %A %B %P'
 	@echo "✓ git hooks active (.githooks):"
 	@echo "    commit-msg  refuses an assistant attribution trailer as it is written"
+	@echo "    pre-commit  em dashes, generated-file drift, bench-fast ratchets, word-action, scoped to this commit's files; warns on the wrong worktree branch"
 	@echo "    pre-push    push-guard (attribution + force-added ignored files) then the framework gates"
 	@echo "    post-merge  regenerates a generated file .gitattributes marked merge=vawe-generated"
 	@echo "    post-checkout  a linked worktree (even one made with plain \`git worktree add\`) gets its untracked library, fonts and node_modules link"
