@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import { produceBaseline, resolveTextSize, bakeTextSizeRoles, applyAnticipateDefault, bakeCameraMove } from '../../core/engine/produce.js';
 import { anticipateFromMotion } from '../../core/motion/motion.js';
+import { lowerScene } from '../../core/transitions/lower.js';
 
 const look = { cuts: { default: 'fade', accent: 'cinematicZoom' }, scale: { hook: 92, headline: 64, body: 38, caption: 24 } };
 const frame = { w: 1920, h: 1080 };
@@ -99,18 +100,22 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
   assert.equal(data.cuts[0].style, 'none', 'and not rewritten');
 }
 
-// ---- a film with an AUTHORED transitions[] (the only authoring surface for a boundary, not yet
-// lowered to cuts/seams at this point in the pipeline) is left alone too: films/examples/sting.json
-// needed `"produced": false` to work around the inferred cut fighting this exact declared one ----
+// ---- a film with an AUTHORED transitions[] is left alone too: films/examples/sting.json needed
+// `"produced": false` to work around the inferred cut fighting this exact declared one. Lowered
+// FIRST, the same order core/engine/pipeline.js runProducePass always runs it in (lowerScene, then
+// produceBaseline): a raw, not-yet-lowered `transitions[]` is no longer a shape produceBaseline is
+// asked to read on its own, so this exercises the real two-step pipeline, not one half of it ----
 {
   const data = {
     module: 'scene', duration: 10, bg: [{ preset: 'plain' }],
     transitions: [{ at: 4.6, fx: 'wipe', dir: 'down', dur: 0.3, timing: 'out' }],
     layers: beatLayers([0, 3, 4.6]),
   };
+  lowerScene(data);
   produceBaseline(data, {}, frame, look);
-  assert.equal(data.cuts, undefined, 'an authored transitions[] boundary is not layered under an inferred cut');
-  assert.equal(data.transitions.length, 1, 'the author\'s own transition survives untouched');
+  assert.equal(data.cuts.length, 1, 'the author\'s own lowered transition is the only cut: no inferred one layered under it');
+  assert.equal(data.cuts[0].style, 'wipe', 'the author\'s own fx survives untouched');
+  assert.equal(data.transitions, undefined, 'transitions[] is consumed by lowering, not carried forward');
 }
 
 // ---- resolveTextSize: a role resolves, a number passes through, an unknown role names the real ones ----

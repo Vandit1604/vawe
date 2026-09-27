@@ -134,9 +134,8 @@ function isChoreographed(data) {
 }
 
 // INFERRED CUTS, ABSENT-ONLY and ADDITIVE (MISTAKES #157): a film that already declares a boundary
-// (raw `transitions[]`, the only authoring surface for one, or its lowered `cuts`/`seams` form, which
-// this pass never sees since lowerScene runs later in scene.js's build()) or motion tracks is
-// untouched, and one with no boundary gets none. `look.cuts.default`
+// (authored `transitions[]`, always LOWERED to `cuts`/`seams` before this pass runs, core/engine/
+// pipeline.js) or motion tracks is untouched, and one with no boundary gets none. `look.cuts.default`
 // supplies the fx name so the injected cut carries the brand's own personality. A raw `cuts[].style`
 // drives a whole-frame CUT presentation only, so `look.cuts.accent` is offered only when it is
 // mechanically usable as one (never the seam-only `cinematicZoom` default, which would inject a cut
@@ -172,22 +171,19 @@ export function produceBaseline(data, theme, frame, look) {
   //
   // ORDER IS LOAD-BEARING: injection must run BEFORE the sceneUnits block below, so that block sees
   // the cuts just added and turns beat wrappers on for them in the SAME pass.
-  // `data.transitions` is the AUTHORED form (AGENTS.md: "author a boundary through transitions[]
-  // only") and it has NOT been lowered into `cuts`/`seams` yet at this point in the pipeline
-  // (boot.js runs produceBaseline before build() calls lowerScene), so checking only `cuts`/`seams`
-  // here never once sees an author's own declared boundary and always injects on top of it
-  // (films/examples/sting.json needed `"produced": false` to work around exactly this).
+  // `data.transitions` is ALREADY LOWERED into `cuts`/`seams` by the time this runs (core/engine/
+  // pipeline.js's shared pass runs lowerScene before produceBaseline, on both the Node/gate path and
+  // the render path), so checking `cuts`/`seams` alone here does see an author's own declared
+  // boundary. No separate `transitions` read is needed.
   if (data.sceneUnits !== false
       && !(Array.isArray(data.cuts) && data.cuts.length) && !(Array.isArray(data.seams) && data.seams.length)
-      && !(Array.isArray(data.transitions) && data.transitions.length)
       && !choreographed) {
     injectCuts(data, look);
   }
 
   // SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
   // beats swap as whole units (the produced default). Skip choreographed scenes.
-  const hasBoundary = (Array.isArray(data.cuts) && data.cuts.length)
-    || (Array.isArray(data.transitions) && data.transitions.length);
+  const hasBoundary = Array.isArray(data.cuts) && data.cuts.length;
   if (hasBoundary && data.sceneUnits == null && !choreographed) {
     data.sceneUnits = true;
   }
