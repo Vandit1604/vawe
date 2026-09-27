@@ -164,7 +164,7 @@ test('lib-test: authoring', async () => {
 // must be a zero-byte diff, in every formatting style the library actually uses. Everything else about
 // the editor can be redone; silently reformatting 104 scenes cannot be undone from a diff.
 {
-  for (const name of ['higgsfield-recreation', 'showcase', 'ledgerline-neon', 'demo-interactions']) {
+  for (const name of ['continuous-action-recreation', 'camera-move-fixture', 'ledgerline-neon', 'demo-interactions']) {
     const f = path.join(repoRoot, 'tests/fixtures/films', `${name}.json`);
     if (!fs.existsSync(f)) continue;
     const src = fs.readFileSync(f, 'utf8');
@@ -191,7 +191,7 @@ test('lib-test: authoring', async () => {
       ok(`patch-motion one key = a small diff (${name}, ${churn} lines)`, churn <= 8);
     }
   }
-  const hf = path.join(repoRoot, 'tests/fixtures/films/higgsfield-recreation.json');
+  const hf = path.join(repoRoot, 'tests/fixtures/films/continuous-action-recreation.json');
   if (fs.existsSync(hf)) {
     const src = fs.readFileSync(hf, 'utf8'), d = JSON.parse(src);
     const btn = d.layers.findIndex((l) => l.id === 'btn');

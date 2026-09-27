@@ -1,8 +1,8 @@
 // node --test tests/gates/stage.test.mjs
 //
 // Every one of the seven stages, derived by stageOf() from fixture films this file builds and removes
-// itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film,
-// vawe-oblique, as a fixture, and it broke the day that film's own state moved on (the state it
+// itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film as a fixture,
+// and it broke the day that film's own state moved on (the state it
 // needed to test stopped existing). The fix there, and the rule here, is the same: never borrow a real
 // film's CURRENT state as a fixture, because a real film's state is the one thing this repo promises
 // will keep changing.
