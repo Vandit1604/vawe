@@ -801,7 +801,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 			// twice, wrongly. Unprofiled, the batched call is kept: it is one round trip, not three.
 			if prof == nil {
 				err := chromedp.Run(ctx,
-					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil),
+					chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil, awaitPromise),
 					chromedp.Evaluate(settleJS, nil, awaitPromise),
 					chromedp.Evaluate(paintJS, nil, awaitPromise),
 					capture(capFmt, &buf),
@@ -812,7 +812,7 @@ func Capture(repoRoot, module, dataURL string, fps, workers int, framesDir strin
 				return resolve(buf, ss, capFmt)
 			}
 			t0 := time.Now()
-			if err := chromedp.Run(ctx, chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil)); err != nil {
+			if err := chromedp.Run(ctx, chromedp.Evaluate(fmt.Sprintf("window.__engine.renderFrame(%d)", f), nil, awaitPromise)); err != nil {
 				return nil, err
 			}
 			t1 := time.Now()

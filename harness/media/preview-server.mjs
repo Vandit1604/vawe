@@ -89,10 +89,12 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, args 
 async function daemonMain() {
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
-  // `--disable-gpu`, same as render-page.mjs's own PAGE_ARGS: this browser is shared with a window
-  // draft's rapid seek+screenshot loop too, which crashed the GPU-accelerated renderer outright on this
-  // machine at ~150+ round trips (render-page.mjs's own file banner).
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: [...RENDER_ARGS, '--disable-gpu'] }));
+  // `--disable-gpu-compositing`, same as render-page.mjs's own PAGE_ARGS and the same reason: this
+  // browser is shared with a window draft's rapid seek+screenshot loop too, which crashed the
+  // GPU-accelerated renderer outright on this machine at ~150+ round trips (render-page.mjs's own file
+  // banner), and the narrower flag keeps that fix while leaving WebGL (a bare page's own `three.js`,
+  // core/engine/page-api.js) able to create a context at all, which the broader `--disable-gpu` cannot.
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: [...RENDER_ARGS, '--disable-gpu-compositing'] }));
   fs.writeFileSync(STATE_FILE, JSON.stringify({ pid: process.pid, port, wsEndpoint: browser.wsEndpoint() }));
 
   const shutdown = async () => {

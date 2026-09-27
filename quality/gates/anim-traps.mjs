@@ -4,6 +4,11 @@
 // shape: it boots the REAL render page (films/scene/scene.html) so it reads exactly the animations
 // `seekAll(t)` will drive, never a synthetic re-parse of the JSON.
 //
+// A bare HTML page (harness/media/render-page.mjs's own render target, a hand-written vawe.onFrame +
+// plain three.js page) hits a DIFFERENT five traps: a live clock instead of the t argument, unseeded
+// Math.random, a WebGLRenderer that can't be captured, a canvas nobody redraws. `<name>.html` on the
+// command line runs those instead of the six DOM traps above, off the page's own source text.
+//
 //   1. FILL COLLISION: two animations on one element write the same property with overlapping fill
 //      windows, so the later one's `backwards` fill covers the earlier one's held end state for all
 //      time, not just where they overlap.
@@ -35,6 +40,8 @@ import { population, SCENE_DIR } from '../../harness/lib/census.mjs';
 import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
+import { isWaivedBy, hasReason } from '../../harness/lib/waivers.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -141,6 +148,30 @@ function unevenSegmentEasing(add) {
   }
 }
 
+// traps 7-11: a hand-authored BARE page (vawe.onFrame + plain three.js, harness/media/render-page.mjs)
+// hitting the same non-determinism this file's own header rules out for a scene layer, plus one wiring
+// mistake (a WebGL canvas that never redraws). Source-level, not DOM-level: these read the page's own
+// <script> text rather than booting it, since the thing being checked (did the author reach for a
+// live clock or an unseeded RNG) is a fact about the CODE, not about one frame's rendered DOM.
+function pageTraps(src, add) {
+  const has = (re) => re.test(src);
+  if (has(/requestAnimationFrame\s*\(/))
+    add('page uses requestAnimationFrame', 'script', 'drive motion from vawe.onFrame((t) => {...}) instead: the render clock seeks CSS/WAAPI/SMIL and calls every onFrame hook with film time t; a live rAF loop never runs under headless capture and makes the frame depend on wall-clock timing');
+  if (has(/new\s+THREE\.Clock\b/) || has(/\.getDelta\s*\(/))
+    add('page uses THREE.Clock', 'script', 'pose every object from the t argument vawe.onFrame((t) => {...}) hands you, never from an accumulated delta: renderFrame(n) must stay a pure function of n');
+  if (has(/\bperformance\.now\s*\(/))
+    add('page reads performance.now()', 'script', 'use the t argument vawe.onFrame((t) => {...}) already hands you');
+  if (has(/\bDate\.now\s*\(/))
+    add('page reads Date.now()', 'script', 'use the t argument vawe.onFrame((t) => {...}) already hands you');
+  if (has(/\bMath\.random\s*\(/))
+    add('page calls unseeded Math.random()', 'script', 'seed a small PRNG (the same rng(seed) shape core/surfaces/three-fx.js uses) so the same seed rebuilds the identical scene across render orders and re-renders');
+  const webgl = has(/WebGLRenderer/);
+  if (webgl && !has(/preserveDrawingBuffer/))
+    add('a WebGLRenderer is built without preserveDrawingBuffer', 'script', 'pass {preserveDrawingBuffer:true}, or the capture (a screenshot taken after the draw call) can read a blank/cleared buffer depending on the browser\'s own swap timing');
+  if (webgl && !has(/\.onFrame\s*\(/))
+    add('page draws WebGL but registers no onFrame hook', 'script', 'call vawe.onFrame((t) => { renderer.render(scene, camera); }) so the render clock actually redraws the canvas each frame; otherwise the capture reads whatever the canvas happened to hold from page load');
+}
+
 function checkTraps(durMs) {
   const findings = [];
   const add = (what, where, fix) => findings.push({ what, where, fix });
@@ -188,14 +219,26 @@ async function checkScene(browser, port, absFile) {
   } finally { await page.close(); }
 }
 
+// A bare page (harness/media/render-page.mjs's own render target) instead of a scene.json: no browser
+// needed, this reads the file's own text. Waivable through the SAME `authoring.allow` + `_why` mechanism
+// render-page.mjs's assertFinalReady already reads out of `#authoring` in the page, never a second one.
+function checkPage(absFile) {
+  const relFile = path.relative(repoRoot, absFile);
+  const src = fs.readFileSync(absFile, 'utf8');
+  const findings = [];
+  pageTraps(src, (what, where, fix) => findings.push({ what, where, fix }));
+  const { allow = [], _why = {} } = pageAuthoring(absFile);
+  const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps');
+  return { file: relFile, findings, waived };
+}
+
 function reportFindings(r) {
   const sev = strict && !r.waived ? 'error' : 'warn';
   for (const t of r.findings) f.finding({ severity: sev, code: 'anim-traps',
     summary: `${t.what} | ${t.where} | fix: ${t.fix}`, at: `${r.file}: ${t.where}`, scene: r.file, waived: r.waived });
 }
 
-async function reportOne(browser, port, abs) {
-  const r = await checkScene(browser, port, abs);
+function printResult(r) {
   console.log(`\n  anim-traps · ${r.file}`);
   if (r.skip) { console.log(`  · ${r.skip}\n`); return; }
   if (r.error) { console.log(`  ✗ ${r.error}\n`); return; }
@@ -220,12 +263,22 @@ async function reportCensus(browser, port) {
 }
 
 async function runCli() {
+  // A bare page needs no browser or file server: `checkPage` reads its own source. Scene JSON still
+  // boots the real render page, since its traps (fill collisions, a dead selector) are facts about the
+  // live DOM the CSS produces, not about the JSON text.
+  if (file && file.endsWith('.html')) {
+    const abs = path.resolve(file);
+    if (!fs.existsSync(abs)) { console.error(`✗ no such page: ${file}`); process.exit(2); }
+    printResult(checkPage(abs));
+    f.emit();
+    process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
+  }
   const { server, port } = await serveRepo();
   const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
   if (file) {
     const abs = path.resolve(file);
     if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); await browser.close(); server.close(); process.exit(2); }
-    await reportOne(browser, port, abs);
+    printResult(await checkScene(browser, port, abs));
   } else {
     await reportCensus(browser, port);
   }

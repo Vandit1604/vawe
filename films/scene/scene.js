@@ -1421,7 +1421,7 @@ const boxOf = (id) => boxes.get(id) || null;
   const trackKit = createTrackKit({ renderer, theme, M, fps, idle: normalizeIdle(sceneIdle),
     shutter: resolveShutter(data.shutter), cameraBlur: resolveCameraBlur(data.cameraBlur) });
 
-  function renderFrame(f) {
+  async function renderFrame(f) {
     const t = f / fps;
     drawBg(t);
     driveClips(CLIPS, t); // declarative clip timing + enter/exit + z-order
@@ -1489,7 +1489,7 @@ const boxOf = (id) => boxes.get(id) || null;
     drawCameraAndCut(t, camNow);
     drawStings(t);
     drawSeams(t);
-    seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface)
+    await seekAll(t); // drive any registered/WAAPI paused timelines (adapter interface), then any vawe.onFrame hook
   }
 
   // drawCaptions: show the caption whose window contains t. `captionStyle` layers a word-timed

@@ -202,14 +202,35 @@ function glassEnvironment(renderer, colors) {
   return tex;
 }
 
-function studio(renderer, scene, colors) {
+// `kind` picks the ROOM: 'metal' (the default, `environment()`'s bright softbox, tuned so a highly
+// reflective metal body never goes near-black) or 'glass' (`glassEnvironment()`'s mostly-dark room, so
+// a transmissive body has somewhere to go dark and one tight hot patch to catch). Both rooms share the
+// same four-light rig; only `scene.environment` (the room a punctual light can't fake) differs. Exported
+// as `studio` for `vawe.three.studio(renderer, scene, kind)` (core/runtime/vawe-frame.mjs), the same
+// function `createThreeLayer` below already calls for every declarative `three` layer: one lighting rig,
+// two consumers, never a second copy tuned separately and drifting from this one.
+export function studio(renderer, scene, colors, kind = 'metal') {
   const ambient = new (T().AmbientLight)(0xffffff, 0.55); scene.add(ambient);
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
   const fill = new (T().DirectionalLight)(hex(colors?.[1], '#9fb6ff'), 0.9); fill.position.set(-5, 2, 3); scene.add(fill);
   const rim = new (T().DirectionalLight)(0xffffff, 1.5); rim.position.set(-2, 3, -6); scene.add(rim);
-  environment(renderer, scene, colors);
+  if (kind === 'glass') scene.environment = glassEnvironment(renderer, colors);
+  else environment(renderer, scene, colors);
   return { key, fill, rim, ambient };   // handed back so a scene that needs shadows can ask the RIG,
 }                                        // not build a second one; every other scene ignores this.
+
+// `vawe.three.extrude(pathD, {depth, bevel, scale})`: a flat SVG path (`d` attribute) to a solid
+// ExtrudeGeometry. Thin wrapper over `svgExtrudeGeometry` below, the same M/L/H/V/C/Q/Z parser the
+// declarative `object` scene's `geometry.kind: "svgExtrude"` already uses: one path parser, not a
+// second one for hand-written three.js pages to drift from.
+export function extrude(pathD, { depth, bevel, scale } = {}) {
+  return svgExtrudeGeometry({ path: pathD, depth, bevelSize: bevel, scale });
+}
+
+// `vawe.three.material(preset, opts)`: the same tuned preset table `object`'s `material.preset` reads
+// (materialFor below), so a hand-written page picks 'chrome'/'iridescent'/'glass'/'frostedGlass'/
+// 'metal'/'matte' by name instead of re-deriving PBR dials from scratch.
+export function material(preset, opts) { return materialFor({ preset, ...opts }, null); }
 
 // ---- the code board, shared by the three code-* scenes ------------------------------------------
 // A snippet laid out as SLABS: one per whitespace-delimited token, sized and placed from the real
@@ -604,6 +625,14 @@ const OBJECT_MATERIAL_BUILDERS = {
     attenuationColor: hex(m.attenuationColor, `#${tint.getHexString()}`), attenuationDistance: m.attenuationDistance ?? 0.9 }),
   metal: (t, tint, m) => new t.MeshStandardMaterial({ color: tint, metalness: m.metalness ?? 0.9, roughness: m.roughness ?? 0.3 }),
   matte: (t, tint, m) => new t.MeshStandardMaterial({ color: tint, metalness: 0, roughness: m.roughness ?? 0.85 }),
+  // `chrome`: metal pushed to the edge of the range (near-1 metalness, near-0 roughness), a plain
+  // mirror finish rather than the brushed/tinted default `metal` aims for.
+  chrome: (t, tint, m) => new t.MeshStandardMaterial({ color: hex(m.color, '#e7ebf2'), metalness: m.metalness ?? 1, roughness: m.roughness ?? 0.05 }),
+  // `iridescent`: three's own thin-film `iridescence` layered on a low-roughness metal base, so the
+  // hue shifts with viewing angle instead of being a fixed vertex/fragment colour ramp.
+  iridescent: (t, tint, m) => new t.MeshPhysicalMaterial({ color: hex(m.color, tint), metalness: m.metalness ?? 0.35, roughness: m.roughness ?? 0.25,
+    iridescence: m.iridescence ?? 1, iridescenceIOR: m.iridescenceIOR ?? 1.3,
+    iridescenceThicknessRange: m.iridescenceThicknessRange ?? [100, 400] }),
 };
 const OBJECT_MATERIAL_PRESETS = Object.keys(OBJECT_MATERIAL_BUILDERS);
 const GLASS_PRESETS = ['glass', 'frostedGlass'];

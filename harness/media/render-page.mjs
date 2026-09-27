@@ -29,12 +29,33 @@ import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 // outright ("Execution context was destroyed", no page error, no console output) on this machine;
 // the same run never crashed once GPU compositing was off. Only this tool adds it (`RENDER_ARGS` is
 // shared by every other headless caller in the repo, none of which screenshots in this volume).
-const PAGE_ARGS = [...RENDER_ARGS, '--disable-gpu'];
+//
+// `--disable-gpu-compositing`, NOT the broader `--disable-gpu`: the fix this comment names is GPU
+// COMPOSITING (Chrome reusing a rasterised tile across rapid seeks, ENGINE-CHANGES.md's own "speed is a
+// property you can lose without noticing"), and `--disable-gpu` also tears down the GPU process
+// SwiftShader needs, so a bare page's `new THREE.WebGLRenderer(...)` (core/engine/page-api.js) failed
+// outright ("Could not create a WebGL context") the moment a page tried to use one, with no scene ever
+// having exercised this path before (a `three` scene layer boots via films/scene/scene.html, a
+// different launch in preview-server.mjs's own shared daemon, never through here). Measured on this
+// machine (harness/dev/_webgl-flags-scratch.mjs, since deleted): `--disable-gpu` fails WebGL context
+// creation outright; `--disable-gpu-compositing` creates one same as no GPU flag at all. Narrowing to
+// the flag the comment above actually describes fixes both: the crash stays fixed, WebGL starts working.
+const PAGE_ARGS = [...RENDER_ARGS, '--disable-gpu-compositing'];
 
 const die = (msg, code = 1) => { console.error(`✗ ${msg}`); process.exit(code); };
 
+// Same adapter interface core/timeline/clips.js's seekAll owns for a scene-module page, by hand for a
+// bare authored page: seek every CSS/WAAPI/SMIL animation to `ms`, then call every `vawe.onFrame(fn)`
+// hook (core/runtime/vawe-frame.mjs) with film time in SECONDS, awaited, so a hook that decodes a
+// texture or builds three.js geometry lazily settles before the screenshot below fires.
 async function seekAll(page, ms) {
-  await page.evaluate((t) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = t; } }, ms);
+  await page.evaluate(async (t) => {
+    for (const a of document.getAnimations()) { a.pause(); a.currentTime = t; }
+    document.querySelectorAll('svg').forEach((svg) => {
+      if (typeof svg.pauseAnimations === 'function') { try { svg.pauseAnimations(); svg.setCurrentTime(t / 1000); } catch { /* best-effort */ } }
+    });
+    for (const fn of window.__vaweFrameHooks || []) await fn(t / 1000);
+  }, ms);
 }
 
 function ffmpegEncode(tmpDir, fps, blur, tmpOut) {
