@@ -14,8 +14,10 @@ import { expandTheme, isTokenFile } from '../theme/roles.js';
 import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
-import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles, applyBgDefault } from './produce.js';
-import { resolveFinishLayers, bakeDepthOfField } from './finish.js';
+import { bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, applyBgDefault } from './produce.js';
+import { bakeDepthOfField } from './finish.js';
+import { runProducePass } from './pipeline.js';
+import { lowerScene } from '../transitions/lower.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -577,12 +579,21 @@ function checkNoSurvivingDepth(data) {
     throw new Error(`\`depth\` survived bakeDepth on a ${L.type || 'text'} layer, it would render as nothing`);
 }
 
-// Theme, token refs, look and every produce-time bake, in the order resolveCoords and
-// produceBaseline need them (theme before resolveCoords, camera baked before depth/focus).
+// Theme, token refs, look, lowerScene + the shared produced-baseline pass (core/engine/pipeline.js),
+// then resolveCoords and every remaining produce-time bake (camera baked before depth/focus).
+// resolveCoords runs AFTER the shared pass, not before it: it is browser-only (needs a real frame
+// size) and Node's loadScene never resolves coordinates either, so both paths now decide cuts/
+// sceneUnits/anticipate/size-roles/finish against the SAME (unresolved-coordinate) scene.
 async function resolveThemeAndBake(data, frame, width, height, safe) {
   const rawTheme = await fetchThemeFile(data.theme);
   const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion
   const tokenValues = await resolveThemeTokenValues(rawTheme);
+  // Lower `transitions[]` into `cuts`/`seams`/`stings` BEFORE resolving token refs and running the
+  // produced baseline below (core/engine/pipeline.js), the SAME order core/engine/expand.js loadScene
+  // runs for every Node gate. Used to run later, inside films/scene/scene.js build(), which is AFTER
+  // this whole function: a transitions-only scene then looked cut-less to produceBaseline and got a
+  // baseline cut injected on top of its own (engine-doctrine/MISTAKES.md).
+  lowerScene(data);
   Object.assign(data, resolveTokenRefs(data, tokenValues));
   const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
   // A scene may override just the surface: `data.look.surface`, checked by the same lookErrors() the
@@ -590,10 +601,11 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   // key already gets.
   const surfaceSpec = (isObj(data.look) && 'surface' in data.look) ? data.look.surface : look.surface;
   const surfaceLook = resolveSurfaceLook(surfaceSpec);
-  bakeTextSizeRoles(data, look);
-  resolveFinishLayers(data, width, height); // `finish` sugar → real layers, before they get baked like any other
+  // bakeTextSizeRoles + resolveFinishLayers + produceBaseline: the SAME shared pass loadScene runs,
+  // in the SAME order, before resolveCoords, which is browser-only (needs a real frame size) and
+  // therefore stays outside the shared pass rather than before it.
+  runProducePass(data, theme, frame, look);
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
-  produceBaseline(data, theme, frame, look);
   if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
   bakeDepth(data);
   bakeFocus(data);
