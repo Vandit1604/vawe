@@ -186,7 +186,9 @@ export function produceBaseline(data, theme, frame, look) {
 
   // SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
   // beats swap as whole units (the produced default). Skip choreographed scenes.
-  if (Array.isArray(data.cuts) && data.cuts.length && data.sceneUnits == null && !choreographed) {
+  const hasBoundary = (Array.isArray(data.cuts) && data.cuts.length)
+    || (Array.isArray(data.transitions) && data.transitions.length);
+  if (hasBoundary && data.sceneUnits == null && !choreographed) {
     data.sceneUnits = true;
   }
 
