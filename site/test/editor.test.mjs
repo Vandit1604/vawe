@@ -21,6 +21,7 @@ import puppeteer from "puppeteer";
 
 const PORT = 3100 + (process.pid % 400);
 const BASE = `http://localhost:${PORT}`;
+// A hang anywhere in a test fails at 90 s with a timeout, not after 17 min (measured under make e2e).
 const BOOT_MS = 20000;
 
 let server, browser;
@@ -41,7 +42,7 @@ async function open(setup) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 1000 });
   if (setup) await setup(page);
-  await page.goto(`${BASE}/editor`, { waitUntil: "networkidle0" });
+  await page.goto(`${BASE}/editor`, { waitUntil: "load", timeout: 90000 });
   return page;
 }
 
@@ -77,7 +78,7 @@ after(async () => {
   server?.kill("SIGTERM");
 });
 
-test("the page renders and the starter scene boots the real engine", async () => {
+test("the page renders and the starter scene boots the real engine", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   const booted = await page
@@ -91,7 +92,7 @@ test("the page renders and the starter scene boots the real engine", async () =>
   await page.close();
 });
 
-test("a scene loads, plays and seeks", async () => {
+test("a scene loads, plays and seeks", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   await page.select("#ed-scene", "showcase-type");
@@ -119,7 +120,7 @@ test("a scene loads, plays and seeks", async () => {
   await page.close();
 });
 
-test("a scene using build-time sugar boots directly, no separate expand step", async () => {
+test("a scene using build-time sugar boots directly, no separate expand step", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   // saas-hero-launch is SHIPPED in the picker, and it AUTHORS four `"type":"block"` layers. It boots
@@ -141,7 +142,7 @@ test("a scene using build-time sugar boots directly, no separate expand step", a
   await page.close();
 });
 
-test("a broken scene shows the engine's own refusal, not a blank stage", async () => {
+test("a broken scene shows the engine's own refusal, not a blank stage", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   await page.click(".ed-cm .cm-content");
@@ -166,7 +167,7 @@ test("a broken scene shows the engine's own refusal, not a blank stage", async (
   await page.close();
 });
 
-test("a scene that 404s names the file", async () => {
+test("a scene that 404s names the file", { timeout: 90000 }, async () => {
   const page = await open(async (p) => {
     await p.setRequestInterception(true);
     p.on("request", (r) => (r.url().endsWith("/scenes/hero-site.json")
@@ -180,7 +181,7 @@ test("a scene that 404s names the file", async () => {
   await page.close();
 });
 
-test("every control is reachable by keyboard, and the code pane can be left", async () => {
+test("every control is reachable by keyboard, and the code pane can be left", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   await page.focus("#ed-scene");
