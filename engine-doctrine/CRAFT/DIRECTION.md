@@ -167,7 +167,7 @@ explainer register, where motion is a cost the viewer pays for legibility (NN/g,
 backwards for kinetic typography, hype/launch promos and continuous title sequences, where sustained
 motion IS the content and stillness is the cost (kinetic-typography practice, beat-synced editing, the
 Saul Bass / Kyle Cooper title-sequence tradition). **Both films this file argues from,
-`higgsfield-recreation` and `brew-launch-act1`, sit in the second register**, so read their numbers in
+a continuous-action recreation and `brew-launch-act1`, sit in the second register**, so read their numbers in
 §1 above as evidence for sustained motion, not as an exception to a quiet-by-default rule. Pick the
 register from `harness/author/type-spines.mjs`'s `register` field (`kinetic` or `quiet`) before judging
 a beat against the list below; a `kinetic`-register film with every beat moving differently is directed,

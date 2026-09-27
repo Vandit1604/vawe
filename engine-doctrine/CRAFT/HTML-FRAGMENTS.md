@@ -543,7 +543,7 @@ blocks as `design-drift`, naming the fix. Silent with no design.md; `scale-drift
 
 ## ui-skills: what was used on this repo's frames, and what was refused
 
-Consulted 2026-09-09 while building `films/scene/_vawe-oblique.*.html`.
+Consulted 2026-09-09 while building a film's hand-written HTML fragments.
 
 **Used, both refiners rather than builders, so neither competes with the vendored `impeccable`:**
 

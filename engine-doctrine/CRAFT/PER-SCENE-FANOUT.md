@@ -127,7 +127,7 @@ Two things it gets right that are easy to get wrong by hand:
   `trigger:` names a real cause (`harness/lib/contract.mjs isCausedTrigger`, the same test
   `storyboard-check`'s causal-chain report already uses), 0.05s of REAL time is inserted before that
   beat: every beat keeps its full planned duration (nothing is shrunk to make room), so the film runs
-  0.05s longer per caused junction. 0.05s is evidence, not a guess: higgsfield-recreation's own three
+  0.05s longer per caused junction. 0.05s is evidence, not a guess: a continuous-action recreation's own three
   key events land roughly 30ms and 150ms apart. A junction with no stated trigger is left exactly where
   it always was: staging an undocumented cause would be inventing one. `layers[].start` also legally
   accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it), same for

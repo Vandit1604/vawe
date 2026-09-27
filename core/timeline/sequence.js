@@ -46,7 +46,7 @@ export function cameraAt(camKf, t) {
 // cameraView(camKf, t, CW, CH): the stage-space rectangle the camera is looking at, or null when there
 // is no axis-aligned answer. Every static gate measures a layer against the canvas box at the origin
 // (frame 0's camera position), which is wrong for a film that lays content across a canvas far larger
-// than the frame and travels between stations (films/scene/linear-journey.json, 5760x2160, zero cuts).
+// than the frame and travels between stations (5760x2160, 12 camera keys, zero cuts).
 //
 // The map is inverted from the flat camera transform: #cam is `inset:0` with `transform-origin:50% 50%`
 // (scene.css:15), drawCameraAndCut writes `scale(s) translate(x, y)` (scene.js:888). A stage point p

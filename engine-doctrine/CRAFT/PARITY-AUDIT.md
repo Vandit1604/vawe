@@ -92,7 +92,7 @@ Two implementations, and they do not share a dial.
 
 Measured over the library: 365 split-text layers. Median stagger train
 (`(n-1) * stagger + each`) is 0.62s and only 9 exceed 1.5s, so the shipped work is not broken. But
-`linear-launch.json` splits 90 characters and the author hand-dropped `stagger` to 0.028 to keep the
+One launch film splits 90 characters and the author hand-dropped `stagger` to 0.028 to keep the
 train under 2.6s, and `product-feature-tour.json` did the same at 72 characters. That is the `amount`
 dial being simulated by arithmetic in the scene file.
 

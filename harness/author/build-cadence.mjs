@@ -117,7 +117,7 @@ const scene = {
   authoring: {
     allow: ['contrast', 'safe', 'overlap'],
     _why: {
-      contrast: 'the COMPOSE label at f48 is mid-entrance on a gradient; the audit measures the nested span, which carries no timing so midMove cannot skip it. higgsfield-recreation reports 1.1:1 at the same frame for the same reason.',
+      contrast: 'the COMPOSE label at f48 is mid-entrance on a gradient; the audit measures the nested span, which carries no timing so midMove cannot skip it. A continuous-action recreation reports 1.1:1 at the same frame for the same reason.',
       safe: 'the prompt rides the page off-frame after it is typed and read, which is the register. The pan is delayed until typing finishes so it IS read first.',
       overlap: 'the COMPOSE button sits inside the input bar it belongs to. Two html layers overlapping is the composition, not a collision.',
     },

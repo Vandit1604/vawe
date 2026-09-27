@@ -17,7 +17,7 @@
 //
 // WHAT A MISMATCH MEANS IS NOT ALWAYS "THE TOOL IS WRONG", and the first run proved it. `cuts` in a
 // scene is the ENGINE's cut mechanism; a scene score measures a VISUAL discontinuity. A film can have
-// the second without the first, and higgsfield-recreation does: at 3.10s two layers end and a third is
+// the second without the first, and a continuous-action recreation does: at 3.10s two layers end and a third is
 // travelling at speed, so the frame changes hard while the JSON declares no cut at all. The tool is
 // right about what a viewer sees, which is the thing a grammar study is for. So a cut the JSON does not
 // declare is reported as UNDECLARED and explained, never as a failure.
@@ -152,7 +152,7 @@ const grounds = (g.shots || []).map((x) => x.ground);
 const measuredRuns = grounds.filter((x, i) => i === 0 || x !== grounds[i - 1]).length;
 // REPORTED, NEVER FAILED, and the first run is why. `ground` is the whole FRAME's mean luma and a
 // scene's `bg` list is only the backdrop, so a bright card entering a dark frame moves one and not the
-// other. higgsfield-recreation declares one backdrop and reads dark → mid because its content arrives,
+// other. A continuous-action recreation declares one backdrop and reads dark → mid because its content arrives,
 // which is correct on both sides. The line is worth printing and is not evidence of a defect.
 const groundNote = `backdrop: ${declaredRuns} declared run(s), frame lightness reads ${measuredRuns} (${g.groundPattern})`
   + (measuredRuns > declaredRuns ? '. More runs than backdrops is normal: content changes frame luma.' : '');
