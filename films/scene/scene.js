@@ -9,7 +9,7 @@ import { buildMorph } from '/core/motion/morph.js';
 import { GSAP_REGISTRY } from '/core/engine/gsap-effects.js';
 import { ransomStyle } from '/core/type/ransom.js';
 import { capUnitWins, capShape, wordU, lineU, CAP_STYLES, CAP_STYLE_REGISTRY } from '/core/type/captions.js';
-import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds/index.js';
+import { renderBg, bgPreset, applyBgOver, bgPaletteFrom, applyCssClipPath } from '/core/backgrounds/index.js';
 import { expandThemeRotation } from '/core/backgrounds/theme-rotation.js';
 import { createBgHtml } from '/core/layout/bg-html.js';
 import { htmlSource } from '/core/type/sanitize-html.js';
@@ -1324,29 +1324,51 @@ const boxOf = (id) => boxes.get(id) || null;
   // presentation that reveals through a MASK rather than opacity (wipe/iris/blinds/…) holds opacity
   // at '1' throughout, which would read as "already fully in": those fall back to the eased timing,
   // a reasonable dissolve in place of a shape this canvas cannot draw a clip-path reveal of anyway.
+  // paintIncomingBgReveal(ctx, w, h, incomingCv, cut): the three ways the incoming bg window can show
+  // through the outgoing one already painted on `ctx`, picked by what bgCutAt found for this cut.
+  // `cut.clip`: a real clipPath string → clip and paint fully opaque, the actual reveal shape, no
+  // blend. `'unclippable'` → a maskImage-only style with no hard region to clip to: cut at the fx's
+  // own midpoint rather than a continuing alpha blend, so a pale tint between two saturated colours
+  // never paints. Neither → the ordinary alpha crossfade, an authored dissolve doing exactly that.
+  function paintIncomingBgReveal(ctx, w, h, incomingCv, cut) {
+    if (cut.clip === 'unclippable') { if (cut.p >= 0.5) ctx.drawImage(incomingCv, 0, 0); return; }
+    if (cut.clip) { ctx.save(); applyCssClipPath(ctx, w, h, cut.clip); ctx.drawImage(incomingCv, 0, 0); ctx.restore(); return; }
+    ctx.save(); ctx.globalAlpha = cut.p; ctx.drawImage(incomingCv, 0, 0); ctx.restore();
+  }
+
+  // sceneUnitsBgReveal(cu, raw): the sceneUnits half of bgCutAt's job, split out so bgCutAt itself
+  // stays a plain window-search loop. driveSceneUnits (below) reveals the INCOMING beat wrapper
+  // through cutStyle's `enter` phase at this same raw progress, `cutStyle(cu.style, { exit: 0, enter:
+  // p }, o)`; that is where a masking style's clipPath/maskImage actually lives, every masking
+  // presentation's own `exit` is a plain opacity fade (core/cuts/presentations.js: wipe/iris/clock/
+  // barn/letterbox/blinds/softwipe/softiris all write clip/mask only on `enter`). Reading `exit` used
+  // to check the one phase that never carries it, so `masked` was never true and every bg switch fell
+  // back to the alpha blend below regardless of the author's own cut style (MISTAKES: the pale
+  // intermediate tint on a white-to-cobalt bg change under `wipe`).
+  function sceneUnitsBgReveal(cu, raw, fallbackP) {
+    const opts = { timing: cu.timing, dir: cu.dir, dist: cu.dist ?? W, cx: cu.cx, cy: cu.cy };
+    const enterStyle = cutStyle(cu.style, { exit: 0, enter: raw }, opts);
+    if (enterStyle.clipPath === 'none' && enterStyle.maskImage === 'none') {
+      const exitStyle = cutStyle(cu.style, { exit: raw, enter: 1 }, opts);
+      const p = exitStyle.opacity != null ? clamp01(1 - parseFloat(exitStyle.opacity)) : fallbackP;
+      return { p, clip: null };
+    }
+    // a hard-edged clip (inset/circle/polygon) becomes a real canvas reveal in drawBg; a maskImage-only
+    // style (a feathered gradient band: softwipe/softiris/blinds) has no hard region to clip to, so
+    // `clip` reads 'unclippable' and drawBg cuts at the midpoint instead.
+    return { p: fallbackP, clip: enterStyle.clipPath !== 'none' ? enterStyle.clipPath : 'unclippable' };
+  }
+
   const bgCutAt = (t) => {
     for (const cu of sceneCuts) {
       const ct = +cu.t;
       const from = sceneUnits ? ct : ct - (cu.dur ?? 0.36) / 2;
       const dur = sceneUnits ? (cu.dur ?? 0.4) : (cu.dur ?? 0.36);
-      if (t >= from && t < from + dur) {
-        const raw = clamp01((t - from) / dur);
-        const T = cu.timing == null ? CUT_TIMINGS.smooth : CUT_TIMINGS[cu.timing];
-        let p = T(raw);
-        if (sceneUnits) {
-          const opts = { timing: cu.timing, dir: cu.dir, dist: cu.dist ?? W, cx: cu.cx, cy: cu.cy };
-          // The OUTGOING wrapper's own exit opacity is the signal: as it clears (fades toward 0),
-          // more of the field behind it is what the viewer is actually seeing change, so the bg
-          // reveals the incoming window at the complement of that same curve. `enter`'s opacity was
-          // tried first and read WORSE (a punch's enter ramps `clamp01(p*1.5)`, reaching full before
-          // its own exit has cleared, so the bg would have switched while the outgoing card was
-          // still half-visible on top of it).
-          const exitStyle = cutStyle(cu.style, { exit: raw, enter: 1 }, opts);
-          const masked = exitStyle.clipPath !== 'none' || exitStyle.maskImage !== 'none';
-          if (!masked && exitStyle.opacity != null) p = clamp01(1 - parseFloat(exitStyle.opacity));
-        }
-        return { ct: from, dur, p };
-      }
+      if (t < from || t >= from + dur) continue;
+      const raw = clamp01((t - from) / dur);
+      const T = cu.timing == null ? CUT_TIMINGS.smooth : CUT_TIMINGS[cu.timing];
+      const { p, clip } = sceneUnits ? sceneUnitsBgReveal(cu, raw, T(raw)) : { p: T(raw), clip: null };
+      return { ct: from, dur, p, clip };
     }
     return null;
   };
@@ -1383,11 +1405,10 @@ const boxOf = (id) => boxes.get(id) || null;
     // cross-fades a preset window into an html one, those stale pixels become visible.
     if (authored) { ctx.clearRect(0, 0, W, H); return; }
     if (blending) {
-      const p = cut.p;
       renderBg(ctx, W, H, t, before.spec);       // the outgoing field, opaque, on the real canvas
       if (!bgBlendCv) { bgBlendCv = document.createElement('canvas'); bgBlendCv.width = W; bgBlendCv.height = H; }
       renderBg(bgBlendCv.getContext('2d'), W, H, t, after.spec); // the incoming field, off-screen
-      ctx.save(); ctx.globalAlpha = p; ctx.drawImage(bgBlendCv, 0, 0); ctx.restore();
+      paintIncomingBgReveal(ctx, W, H, bgBlendCv, cut);
     } else {
       renderBg(ctx, W, H, t, w.spec);
     }
