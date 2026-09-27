@@ -292,7 +292,7 @@ function tokenValuesFor(themeSpec) {
 // Node-side twin of core/engine/boot.js `resolveTheme`, or null when no valid theme resolves (no
 // `data.theme`, an unknown theme file, or the retired palette/type/gradient shape). A scene with no
 // usable theme gets no produced baseline here rather than a Node-only throw a scene that still renders
-// fine in the browser (where `data.theme` is required) would never hit — same ABSENT-ONLY posture
+// fine in the browser (where `data.theme` is required) would never hit: the same absent-only posture
 // tokenValuesFor already has.
 function resolveThemeNode(themeSpec) {
   const raw = rawThemeFor(themeSpec);
@@ -300,16 +300,9 @@ function resolveThemeNode(themeSpec) {
   try { return expandTheme(raw, { parseColor, colorAlpha }); } catch { return null; }
 }
 
-// loadScene(data): THE loader every Node consumer of a scene JSON calls (a gate, a script). Expands
-// build-time sugar, lowers the unified transitions surface, resolves token refs, then runs the SAME
-// produced-baseline pass the render path runs (core/engine/pipeline.js `runProducePass`), in the same
-// order — load -> expand -> lower -> resolve token refs -> produce — so a gate checks exactly the
-// scene that renders. This ONE shared pipeline replaces two former divergences: lowerScene used to run
-// before produceBaseline here but after it in the browser (core/engine/boot.js resolveThemeAndBake,
-// films/scene/scene.js build()), so a transitions-only scene could get a baseline cut injected on top
-// of its own author-declared one; and produceBaseline never ran here at all (engine-doctrine/MISTAKES.md
-// #157, which was about a DIFFERENT, earlier-ordered wiring that masked what a gate tests — this shared
-// pass is the fix, not a repeat of that mistake, since both paths now run identically). films/scene/
+// loadScene(data): THE loader every Node consumer of a scene JSON calls (a gate, a script). It runs
+// load, expand, lower, resolve token refs, then produce (core/engine/pipeline.js `runProducePass`),
+// the same order as the render path, so a gate checks exactly the scene that renders. films/scene/
 // scene.js (the render page) does not call this loader itself: see the file banner for why, and
 // internal/render/expand.go for where the same block/beat/comp expansion happens for that path
 // instead, server-side, before either path runs the shared pass below.
