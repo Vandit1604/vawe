@@ -3,6 +3,7 @@
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 19.6,
+  "sceneUnits": true,
   "audio": {
     "silent": true
   },

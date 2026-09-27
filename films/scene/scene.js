@@ -18,7 +18,7 @@ import { IDENT as CUT_IDENT } from '/core/cuts/index.js';
 import { checkCuts } from '/core/fx/ancestor-kills.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings/index.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/timeline/seams.js';
-import { lowerScene, checkStingColor } from '/core/transitions/lower.js';
+import { checkStingColor } from '/core/transitions/lower.js';
 import { glowRGB } from '/core/looks/filters.js';
 import { bindBeats, describeBind } from '/core/beats/index.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio/cues.js';
@@ -159,14 +159,16 @@ function resolveAnchors(data) {
 }
 
 boot((data, fps, theme, canvas) => {
-  // lower the unified `transitions` surface into the raw cuts/stings/seams fields BEFORE any parse
-  // below reads them. Pure + idempotent; a scene without the unified key is untouched. Kept here (top
-  // of the callback) so every parser sees the lowered form.
+  // `transitions[]` is ALREADY lowered into the raw cuts/stings/seams fields by the time this
+  // callback runs: core/engine/boot.js's resolveThemeAndBake calls lowerScene before the produced
+  // baseline (core/engine/pipeline.js), the same order core/engine/expand.js loadScene runs for every
+  // Node gate, so both paths inject cuts/sceneUnits against the SAME already-lowered scene. Calling
+  // lowerScene a second time here would be a no-op (it deletes `data.transitions` on the way out) but
+  // is not needed: one call site, one owner.
   //
   // block/beat/comp sugar is NOT expanded here: this file never imports core/engine/expand.js, on purpose
   // (core/engine/expand.js's own banner says why, and internal/render/expand.go is where that expansion
   // actually happens for this render path, server-side, before the page ever fetches this JSON).
-  data = lowerScene(data);
   // Snap the film's joints to the track's pulse, if the scene named a grid. AFTER lowering (a cut
   // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time, the bg
   // windows bound to `cut@n` below therefore follow the snapped joint rather than the written one.
