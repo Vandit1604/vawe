@@ -28,11 +28,11 @@ const PAGE_HTML = (name, refBase, duration) => `<!-- films/recreations/${name}/p
 <meta charset="utf-8">
 <meta name="duration" content="${duration.toFixed(2)}">
 <style>
-@font-face { font-family: "Inter"; src: url("../../../assets/fonts/Inter.woff2") format("woff2");
-             font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Anybody"; src: url("../../../assets/fonts/Anybody.woff2") format("woff2");
+             font-weight: 100 900; font-stretch: 50% 150%; font-display: swap; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0a0a0a; }
-body { font-family: "Inter", sans-serif; color: #f5f5f5; display: flex; align-items: center; justify-content: center; }
+body { font-family: "Anybody", sans-serif; color: #f5f5f5; display: flex; align-items: center; justify-content: center; }
 .hero { font-size: 96px; font-weight: 700; letter-spacing: -0.02em; opacity: 0; }
 .hero .letter { display: inline-block; opacity: 0; transform: translateY(24px); }
 </style>
