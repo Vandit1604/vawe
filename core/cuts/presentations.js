@@ -86,15 +86,15 @@ export const PRESENTATIONS = {
     enter: (p) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `scale(${lerp(1.07, 1, p).toFixed(4)})` }),
     exit: (p) => style({ opacity: (1 - p * p).toFixed(3), transform: `scale(${lerp(1, 1.12, p).toFixed(4)})`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
   }),
-  wipe: withBlurb('hard directional reveal, playful, "notice the cut"; masks', {
+  wipe: withBlurb('hard directional reveal, playful, "notice the cut"; a straight edge sweeps across and masks the incoming beat in', {
     enter: (p, o) => style(wipe(p, o.dir)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
-  iris: withBlurb('circular reveal growing from a point (cx/cy), masks', {
+  iris: withBlurb('circular reveal growing from a point (cx/cy); the incoming beat opens out of that point through a circular mask', {
     enter: (p, o) => style(circleWipe(p, o.cx, o.cy)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
-  clock: withBlurb('clock-hand sweep reveal, masks', {
+  clock: withBlurb('clock-hand sweep reveal: a radial hand turns around the centre and masks the incoming beat in behind it', {
     enter: (p) => style(clockWipe(p)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -132,7 +132,7 @@ export const PRESENTATIONS = {
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
   // soft iris: feathered circular reveal from a point
-  softiris: withBlurb('feathered circular reveal from a point (cx/cy), masks', {
+  softiris: withBlurb('feathered circular reveal from a point (cx/cy); the incoming beat opens through a soft-edged circular mask', {
     enter: (p, o) => { const r = clamp01(p) * 92; return style({ ...mask(`radial-gradient(circle at ${o.cx}% ${o.cy}%, #000 ${r.toFixed(1)}%, transparent ${(r + 14).toFixed(1)}%)`) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -157,7 +157,7 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translateY(${(p * p * o.dist * 2.2).toFixed(2)}px) rotate(${(p * 2.5).toFixed(2)}deg)` }),
   }),
   // venetian blinds: slat mask sweeps open (editorial reveal)
-  blinds: withBlurb('venetian slat mask sweeps open, editorial reveal; masks', {
+  blinds: withBlurb('venetian slat mask sweeps open, editorial reveal; parallel slats turn open and show the incoming beat between them', {
     enter: (p, o) => { const off = ((1 - clamp01(p)) * 120).toFixed(1); return style({ ...mask(`repeating-linear-gradient(${gradAngle(o.dir)}, #000 0 84px, transparent 84px 120px)`), maskSize: '100% 100%', maskPosition: `0 ${off}px`, WebkitMaskPosition: `0 ${off}px`, opacity: clamp01(p * 1.2 + 0.25).toFixed(3) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
