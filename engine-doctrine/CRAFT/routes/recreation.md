@@ -6,8 +6,8 @@ group: crosscutting
 
 # Route: recreation
 
-- **Input:** a specific reference video (`make study VIDEO=refs/ref.mp4 NAME=ref`) or a specific
-  website whose exact look this film must match, section by section.
+- **Input:** a specific reference video. Start it with `make dev-tool X=new TYPE=recreation NAME=<name>
+  REF=<ref.mp4>`: it writes the page, studies the reference and prints the one loop command.
 - **Output:** a film that faithfully reflects the reference's grammar (cuts, pacing, palette,
   layout), honest about a 1:1 ceiling never reachable exactly. Length matches the reference.
 - **Trigger:** "recreate this ad/film", "make ours look like this video", "match this site's design
@@ -17,7 +17,8 @@ group: crosscutting
 
 ## Intake (ask before authoring)
 
-- **The reference**: exact URL or file. Run `make study` for a film, `make sections` for a site.
+- **The reference**: exact file. The starter studies it; loop `make next PAGE=<page> REF=<ref.mp4>`
+  until the motion, timing and layout checks pass, then `make next ... FINAL=1`. Never `make ship`.
 - **What to match**: grammar (cut rate, palette, motion) versus content (do not copy competitor copy
   verbatim into a shipped video; recreations built this way do not ship publicly, see `AGENTS.md`).
 - **Honesty check**: name up front which parts cannot be matched exactly, so the sign-off is against
@@ -25,8 +26,8 @@ group: crosscutting
 
 ## Blueprint family + docs
 
-- Follow `engine-doctrine/CRAFT/RECREATION.md`'s ordered loop: measure -> capture -> build -> score -> beat-sync
-  -> verify. One beat per section, in the reference's own order.
+- The loop is `make next PAGE= REF=` (window drafts with `FROM=`/`TO=`), one beat at a time in the
+  reference's own order; `engine-doctrine/CRAFT/RECREATION.md` explains each check it runs.
 - `engine-doctrine/CRAFT/REFERENCE-STUDY.md` for a film reference: shot boundaries, in/mid/out frames, the four
   judgement columns to fill by eye.
 - Blueprint family: whatever the reference itself uses; do not default to `kineticHook`/`statReveal`

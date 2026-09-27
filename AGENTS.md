@@ -34,9 +34,8 @@ the owner looks and redirects, before a full render is spent.
 writes the scene JSON, `make ship` renders it. Reflecting a brand: `make kit URL= INIT=1` builds
 colours, fonts and a favicon from the site's own colours only, in one command.
 
-Recreating a reference as a raw page: `make dev-tool X=new TYPE=recreation NAME= REF=`, then loop
-`make next PAGE= REF=` (never `make ship`); a scene-JSON recreation scores against its reference beat
-by beat instead: `make study REF= D= MATCH=1 [LIGHT=1]`.
+Recreating a reference: `make dev-tool X=new TYPE=recreation NAME= REF=`, then loop
+`make next PAGE= REF=` until it passes (never `make ship`).
 
 ## Where to look  `[ref: make help]`
 
