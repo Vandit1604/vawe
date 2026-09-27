@@ -193,7 +193,7 @@ function boxForCrop(boxesForId) {
 // all, e.g. `text` on a text layer) is reported as unchecked, not folded into "dead": this gate is
 // answering "does removing it move a pixel", and it never got to ask that question.
 async function captureVisibility(browser, page, ctx, sinks) {
-  const { url, type, c, batch, ids, boxesById } = ctx;
+  const { url, type, c, batch, ids, boxesById, requiredIdx } = ctx;
   const onPng = path.join(OUT, `${type}-${c}.on.png`);
   const offPng = path.join(OUT, `${type}-${c}.off.png`);
   await page.evaluate((n) => window.__engine.renderFrame(n), FLOOR_FRAME);
@@ -206,6 +206,14 @@ async function captureVisibility(browser, page, ctx, sinks) {
 
   const cropBoxes = [];
   for (let i = 0; i < batch.length; i++) {
+    // schema.json#layerContracts named this one REQUIRED: nothing was removed to build its "without",
+    // so a pixel diff here would report 0 and read as near-dead when it is the opposite, load-bearing.
+    // Reported per-prop, never folded into the batch failure the same field would otherwise cause.
+    if (requiredIdx && requiredIdx.has(i)) {
+      sinks.visSkipped.push({ type, props: batch[i].prop,
+        reason: 'required to build the layer at all (schema.json#layerContracts); no "without" variant exists to diff against' });
+      continue;
+    }
     const b = boxForCrop(boxesById[ids[i]]);
     if (!b) continue;   // never visible at any sampled frame: nothing to crop, nothing to claim
     cropBoxes.push({ x: b.left, y: b.top, w: b.width, h: b.height });
@@ -330,6 +338,32 @@ const BASE = {
 // (`false` is how every opt-out in this engine is spelled, core/props.js:29).
 const SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'films/scene/schema.json'), 'utf8'));
 const SCHEMA_PROPS = SCHEMA.fields.layers.item;
+
+// THE OWNER OF "must this field stay". schema.json#layerContracts names every field a layer type
+// refuses to build without (`required`), a field where at least one of a pair must survive
+// (`requiredOneOf`), and a field whose removal strands another (`coupled`), each one read off the
+// real throw (see the block's own `_source`). A prop named here is never deleted alone when this
+// file builds the "without" variant, so removing it cannot break the eleven OTHER probes sharing its
+// batch's off-scene (one page, one boot, one bad layer refuses all twelve).
+const CONTRACTS = SCHEMA.layerContracts || {};
+const REQUIRED = CONTRACTS.required || {};
+const REQUIRED_ONE_OF = CONTRACTS.requiredOneOf || {};
+const COUPLED = CONTRACTS.coupled || {};
+const REQUIRED_FOR_PRESET = CONTRACTS.requiredForPreset || {};
+// `preset` is `three`'s own `at` (the scene name this probe was asked against): `lines` is required
+// only on the two code* scenes that lay it out, never on the nine that never read it.
+const isRequired = (type, prop, preset) => (REQUIRED[type] || []).includes(prop)
+  || (REQUIRED_ONE_OF[type] || []).includes(prop)
+  || (preset != null && (REQUIRED_FOR_PRESET[type]?.[preset] || []).includes(prop));
+
+// Delete a dotted path (`vars.--glow-c`) off a plain object, the shape a coupling needs when the
+// stranded field lives inside another prop's own object rather than beside it.
+function deletePath(obj, dotted) {
+  const parts = dotted.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) { cur = cur?.[parts[i]]; if (cur == null) return; }
+  delete cur[parts[parts.length - 1]];
+}
 
 // Names whose generic value would throw or be ignored, one line each. A `type.prop` key wins over a
 // bare name: `out` is an exit-animation NAME everywhere and a source out-point in SECONDS on `video`,
@@ -597,11 +631,24 @@ for (const type of types) {
   // prop that has nothing to do with the one under test). Guards already part of BASE (a real preset
   // selector like `three`) are left alone: `g in BASE[type]` is true for those, never for a guard this
   // file injected only for the probe.
+  //
+  // A prop schema.json#layerContracts names REQUIRED (or half of a requiredOneOf pair) is never
+  // deleted at all: the layer would refuse to build with it gone, and one refused layer takes the
+  // whole batch's off-scene down with it (twelve layers, one page, one boot). That layer's own
+  // "without" is therefore identical to its "with", reported per-prop in `requiredIdx` below rather
+  // than measured, so its eleven neighbours still get a real number. A COUPLED pair is the opposite
+  // shape: removing one strands the other (`color2` gone, `vars['--glow-c']` still keyed), so both go.
+  const requiredIdx = new Set();
   const offLayers = layers.map((L, i) => {
     const o = structuredClone(L);
     const targetProp = batch[i].prop;
+    if (isRequired(type, targetProp, batch[i].at)) { requiredIdx.add(i); return o; }
     delete o[targetProp];
     for (const g of guardsOf(declOf(type, targetProp))) if (!(g in (BASE[type] || {}))) delete o[g];
+    for (const [a, b] of COUPLED[type] || []) {
+      if (a === targetProp) deletePath(o, b);
+      else if (b === targetProp) deletePath(o, a);
+    }
     return o;
   });
   const file = path.join(OUT, `${type}-${c}.json`);
@@ -688,7 +735,7 @@ for (const type of types) {
   // WHERE/WHEN, off the same boxes: does the JSON's x/y/start/duration/motion agree with what rendered.
   applyPositionChecks(type, batch, layers, ids, result.boxes, mismatches);
 
-  await captureVisibility(browser, page, { url, type, c, batch, ids, boxesById: result.boxes },
+  await captureVisibility(browser, page, { url, type, c, batch, ids, boxesById: result.boxes, requiredIdx },
     { nearDead, visSkipped, leaks });
   }
 }
