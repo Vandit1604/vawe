@@ -4,7 +4,6 @@
  "theme": "vawe-paper",
  "aspect": "16:9",
  "duration": 22,
- "sceneUnits": true,
  "authoring": {
   "allow": [
    "no-preflight"

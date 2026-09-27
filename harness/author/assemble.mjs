@@ -534,7 +534,6 @@ const out = {
   aspect,
   ...(destination ? { destination } : {}),
   duration: shiftedEnd[shiftedEnd.length - 1],
-  sceneUnits: true,
   ...(scene.authoring ? { authoring: scene.authoring } : {}),   // preserve a hand-written waiver across re-assembles
   audio: audioOut,
   ...Object.fromEntries(preservedFilmFields.map((k) => [k, scene[k]])),

@@ -4,10 +4,11 @@
 // its wind-ups are creative decisions, and a decision this file guesses at is a decision the author
 // never made and cannot find by reading their own JSON.
 //
-// This used to inject a cut list, turn `sceneUnits` on, and add a wind-up to entrances the author
-// never asked for (engine-doctrine/MISTAKES.md #157, "force rich-by-default at the engine"). That
-// additive-baseline posture is retired: a film with no boundary now renders with no boundary, a film
-// with no `sceneUnits` stays without it, and an entrance the author wrote plays exactly as written.
+// This used to inject a cut list, turn beat-unit transitions on as an opt-in mode, and add a wind-up to
+// entrances the author never asked for (engine-doctrine/MISTAKES.md #157, "force rich-by-default at
+// the engine"). That additive-baseline posture is retired: a film with no boundary now renders with no
+// boundary, and an entrance the author wrote plays exactly as written. Beat-unit transitions are no
+// longer a mode either: every beat a film's cuts create is always its own unit.
 // `produced: false` used to opt a scene out of that injection; there is nothing left to opt out of, so
 // the field is gone from the schema, every tracked film, and prop-probe's fixtures.
 //

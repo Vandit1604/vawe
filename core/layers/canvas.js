@@ -65,7 +65,7 @@ export function canvasLayer(name, blurb) {
       // element's contents depend on which frames were rendered before it, and frames render across
       // 8 workers in arbitrary order. driveClips hides the layer at opacity 0, which is exactly why
       // it would never be noticed: it is impurity waiting for the day a canvas layer is given a
-      // non-zero resting opacity, or for sceneUnits to extend its visible window. MISTAKES #41, #64.
+      // non-zero resting opacity, or for a beat unit's exit slide to extend its visible window. MISTAKES #41, #64.
       if (!(t >= start && t < end)) { s.clear(); return; }
       const lt = (t - start) * (L.speed ?? 1);
       s.draw(lt, L);

@@ -350,8 +350,8 @@ A layer the engine confines to its own beat is not a candidate at all: see below
 
 ## beats-wrapped-as-units (always on, in `make check GATE=beat-check`)
 
-Not a taste rule. `core/engine/produce.js` turns `sceneUnits` on for any cut film with no choreographed `motion`
-track, and `films/scene/scene.js` then rewrites every non-last-beat layer to end with its own beat so the
+Not a taste rule. Every cut film wraps its beats as units (not a mode: there is no flag to turn this off), and
+`films/scene/scene.js` rewrites every non-last-beat layer to end with its own beat so the
 wrapper can slide the beat out as one block. A layer authored across a cut is **truncated at it**, silently.
 `make check GATE=beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
 should carry the film `"acrossBeats": true` and it attaches to the camera instead of its beat, keeping its

@@ -1268,7 +1268,7 @@ function preAssembleNote(){
    sound:'<svg viewBox="0 0 16 16"><path d="M6 12V3.5l6.5-1.5v8.5"/><circle cx=4.5 cy=12 r=1.6 /><circle cx=11 cy=10.5 r=1.6 /></svg>' };
  // The bars come from the LIVE DOM, not from the JSON: the engine writes each clip's real window and ramp
  // into data-start/duration/enter/exitDur (core/clips.js reads exactly these), and that survives the theme's
- // durationScale, sceneUnits rewrites and the produced baseline. The JSON only supplies the label.
+ // durationScale, beat-unit rewrites and the produced baseline. The JSON only supplies the label.
  function domBars(){
    const doc=sc.contentDocument;
    return [...doc.querySelectorAll('.hs-layer[data-start]')]

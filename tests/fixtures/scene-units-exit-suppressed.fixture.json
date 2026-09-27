@@ -6,7 +6,6 @@
  "duration": 4,
  "produced": false,
  "bg": [{ "preset": "plain" }],
- "sceneUnits": true,
  "cuts": [{ "t": 2, "style": "fade", "dur": 0.4 }],
  "layers": [
   { "id": "beatA", "type": "text", "text": "beat one", "x": 200, "y": 400, "size": 64,

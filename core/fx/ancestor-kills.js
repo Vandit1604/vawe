@@ -23,7 +23,7 @@
 // pair, once with the capability declared and once without, and reports how much the declaration
 // actually changed. Re-run it before trusting a row; a browser update is allowed to move one.
 
-import { PRESENTATIONS, SOLO_BLIND, cutWrites } from '../cuts/index.js';
+import { PRESENTATIONS, cutWrites } from '../cuts/index.js';
 
 // ---- what a descendant can be reaching for ----
 // `killedBy` lists the ANCESTOR properties measured to take the capability away. A property absent from
@@ -89,28 +89,33 @@ export const nameOf = (p) => ({ maskImage: 'a mask', clipPath: 'a clip', backdro
 // capability away for a third of a second and hand it back, which is what makes it invisible in a still
 // and the reason the glass bug shipped. Everything else here is static and an author sees it on frame 0.
 //
-// KNOWN CEILING, stated rather than hidden: with `sceneUnits` the cut styles a per-beat wrapper, and
-// this only knows which beat a layer starts in, so it treats every non-`acrossBeats` layer whose window
-// touches the cut window as wrapped. That over-reaches by at most one beat and never under-reaches.
+// `acrossBeats` opts a TOP-LEVEL layer OUT of the wrapper (films/scene/scene.js beatIndexOf): it
+// attaches flat to `cam` instead, and `cam` itself never carries a cut style (drawCameraAndCut resets
+// it to identity every frame; a scene cut transitions the per-beat wrappers, never the camera root). So
+// an `acrossBeats` layer, and everything nested inside it, is never inside the ancestor a cut styles,
+// and is exempt here, not merely tolerated: skipping it is exact, not an over-reach. A group CHILD's own
+// `acrossBeats` is meaningless (only the top-level layer's placement decides the wrapper), so exemption
+// is carried down from the top-level layer, never read off a descendant directly.
 const win = (L) => [L.start ?? 0, (L.start ?? 0) + (L.duration ?? Infinity)];
-const flat = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object' ? [L, ...flat(L.children)] : []));
+const under = (ls, exempt) => (ls || []).flatMap((L) => (L && typeof L === 'object'
+  ? [[L, exempt], ...under(L.children, exempt)] : []));
+const flat = (ls) => (ls || []).flatMap((L) => under([L], L && L.acrossBeats === true));
 
-export function checkCuts({ cuts, layers, sceneUnits }) {
+export function checkCuts({ cuts, layers }) {
   for (const cu of cuts) {
-    const props = cutWrites(cu.style, { solo: !sceneUnits });
-    const t = +cu.t, dur = cu.dur ?? (sceneUnits ? 0.4 : 0.36);
-    // solo centres the window on t, sceneUnits runs it forward from t (core/cuts.js consumers)
-    const [c0, c1] = sceneUnits ? [t, t + dur] : [t - dur / 2, t + dur / 2];
-    for (const L of flat(layers)) {
+    const props = cutWrites(cu.style);
+    const t = +cu.t, dur = cu.dur ?? 0.4;
+    const [c0, c1] = [t, t + dur];
+    for (const [L, exempt] of flat(layers)) {
+      if (exempt) continue;
       const [l0, l1] = win(L);
       if (l1 <= c0 || l0 >= c1) continue;                       // the layer is not on screen for this cut
       for (const { cap, via } of capabilitiesOf(L)) {
         const hit = killedBy(props, cap);
         if (!hit.length) continue;
         const id = L.id || L.text || L.type || 'a layer';
-        const solo = !sceneUnits;
         const alts = Object.keys(PRESENTATIONS).filter((k) => k !== cu.style
-          && (solo ? !SOLO_BLIND.has(k) : true) && !killedBy(cutWrites(k, { solo }), cap).length);
+          && !killedBy(cutWrites(k), cap).length);
         throw new Error(`layer "${id}" declares ${via}, which ${CAPABILITIES[cap].what}, and the `
           + `"${cu.style}" cut at t=${cu.t}s puts ${hit.map(nameOf).join(' and ')} on the element every `
           + `layer sits inside. CSS makes that element a boundary, so for the ${dur}s of the cut the `

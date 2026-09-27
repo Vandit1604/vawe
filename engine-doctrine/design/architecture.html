@@ -125,7 +125,7 @@ and mix; it holds no opinion about what a film looks like.</p>
 <span class="m">lib-test</span> parses it out of the doc. BUILD runs once at boot. FRAME is
 <span class="m">renderFrame(n)</span>, top to bottom.</p>
 <pre><b>build</b>   measure → becomes → childOffsets
-<b>frame</b>   drawBg → driveClips → driveSceneUnits → resolveBoxes → <b>runTracks</b>
+<b>frame</b>   drawBg → driveClips → driveBeatUnits → resolveBoxes → <b>runTracks</b>
         → drawCaptions → drawCameraAndCut → drawStings → drawSeams → seekAll
 </pre>
 <p><code>resolveBoxes</code> runs before any track, so <code>scene.boxOf(id)</code> is authored

@@ -1,8 +1,8 @@
 // quality/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen.
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
-// the renderer then rewrites them. core/engine/produce.js turns `sceneUnits` on for any cut film that is not
-// already choreographed, and films/scene/scene.js (setLayerTiming) then REPLACES the duration of each
+// the renderer then rewrites them. Every beat a film's `cuts` create is always its own unit, and
+// films/scene/scene.js (setLayerTiming) then REPLACES the duration of each
 // non-last-beat layer that is still the beat's CURRENT STATE with the run to `beatEnd + cutDur`, so the
 // beat wrapper can slide the whole beat out as one unit. A gate that reads the raw fields sees holes the
 // render does not have, and misses ones it does. beat-check learned that the expensive way
@@ -20,7 +20,7 @@
 //   T.allSpans     // the same for every top-level layer, blackouts and specks included
 //   T.duration     // declared, else last end + a beat, the renderer's own rule
 //   T.cutTimes     // sorted times of every real (style !== 'none') cut
-//   T.sceneUnits   // whether the engine will wrap beats as units
+//   T.beatUnits    // whether the film has cuts, so the engine wraps beats as units
 //   T.edges        // [0, ...cutTimes], the start of each beat
 //   T.cutDurAt(t)  // the cut window that closes the beat at t
 //   T.unitCut(L)   // the cut that closes this layer's beat (null when the wrapper leaves it alone)
@@ -254,9 +254,7 @@ export function sceneTiming(input) {
   const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])
     .filter((c) => c && typeof c === 'object' && c.style && c.style !== 'none' && num(c.t, null) !== null)
     .map((c) => num(c.t, 0)))].sort((a, b) => a - b);
-  // core/engine/produce.js no longer turns `sceneUnits` on by default (the owner's rule: fill blanks,
-  // never add structure), so `d.sceneUnits` is exactly what the author wrote, nothing inferred here.
-  const sceneUnits = d.sceneUnits === true;
+  const beatUnits = cutTimes.length > 0;
   const choreographed = layers.some(function has(L) {
     return L && typeof L === 'object' && ((Array.isArray(L.motion) && L.motion.length > 1) || (L.children || []).some(has));
   });
@@ -286,7 +284,7 @@ export function sceneTiming(input) {
     return true;
   };
   const unitCut = (L) => {
-    if (!sceneUnits || !cutTimes.length) return null;
+    if (!beatUnits) return null;
     // `acrossBeats` opts a layer out of the wrapper (films/scene/scene.js beatIndexOf), so the engine
     // leaves its authored window alone. Modelling it as truncated would make every gate that reasons
     // about time deny the existence of the one thing they ask for.
@@ -522,7 +520,7 @@ export function sceneTiming(input) {
   // surface, not the rendered one; this is the same scene with the sugar already expanded.
   return {
     scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges,
-    sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
+    beatUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
     lives, beatMotion, beatMotionAt, handoffs, cameraStillHeldAt, cameraLegSpans,
   };
 }

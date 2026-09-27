@@ -174,7 +174,7 @@ test('lib-test: gates', async () => {
 
 
 // ---------------------------------------------------------------------------------------------------
-// SCENE UNITS: which layers the beat wrapper carries through the cut (engine-doctrine/MISTAKES.md #555).
+// BEAT UNITS: which layers the beat wrapper carries through the cut (engine-doctrine/MISTAKES.md #555).
 //
 // The wrapper owns the exit slide, so a layer it carries loses its own exit and lives to the end of the
 // cut window. Applied to EVERY layer of the beat, a beat that is a whole act paints its entire history
@@ -183,29 +183,29 @@ test('lib-test: gates', async () => {
 // baseline is what proves the two still agree in the DOM.
 {
   const { sceneTiming } = await import('../../quality/gates/scene-timing.mjs');
-  const scene = (layers) => ({ module: 'scene', duration: 12, sceneUnits: true,
+  const scene = (layers) => ({ module: 'scene', duration: 12,
     cuts: [{ t: 6, style: 'slide', dur: 0.6 }], bg: [{ t: 0, preset: 'plain' }], layers });
   const held = (layers, i) => { const T = sceneTiming(scene(layers)); return T.unitEnd(T.scene.layers[i]); };
   const L = (start, duration, extra = {}) => ({ type: 'text', text: 'x', size: 80, start, duration, ...extra });
 
-  ok('sceneUnits: the beat\'s last state rides the wrapper out, so it lives to the end of the cut window',
+  ok('beat units: the beat\'s last state rides the wrapper out, so it lives to the end of the cut window',
     held([L(0, 6)], 0) === 6.6);
-  ok('sceneUnits: a layer SUPERSEDED inside its beat keeps its authored window and is not resurrected',
+  ok('beat units: a layer SUPERSEDED inside its beat keeps its authored window and is not resurrected',
     held([L(0, 3), L(3, 3)], 0) === null && held([L(0, 3), L(3, 3)], 1) === 6.6);
-  ok('sceneUnits: three sequential lines in one beat leave only the third on screen at the cut',
+  ok('beat units: three sequential lines in one beat leave only the third on screen at the cut',
     (() => { const ls = [L(0, 2), L(2, 2), L(4, 2)];
       return held(ls, 0) === null && held(ls, 1) === null && held(ls, 2) === 6.6; })());
   // The reason the fix moves ONE scene and not fifteen. A line that lands a beat early and waits for the
   // cut in silence was never replaced, so the wrapper still carries it: a strict on-screen-at-the-cut
   // test would drop it and slide an empty beat out, which is a regression in every showcase scene.
-  ok('sceneUnits: a deliberate hold (nothing starts after it ends) still rides the wrapper out',
+  ok('beat units: a deliberate hold (nothing starts after it ends) still rides the wrapper out',
     held([L(0, 5.5)], 0) === 6.6);
-  ok('sceneUnits: supersession is measured against when a layer ENDS, so an overlapping pair both ride out',
+  ok('beat units: supersession is measured against when a layer ENDS, so an overlapping pair both ride out',
     (() => { const ls = [L(0, 6), L(1, 5)]; return held(ls, 0) === 6.6 && held(ls, 1) === 6.6; })());
   // float noise: 17.4 + 2.7 lands on 20.099999999999998, and a cut at 20.1 must not read that as gone.
-  ok('sceneUnits: a layer ending ON its cut is current, float noise included',
+  ok('beat units: a layer ending ON its cut is current, float noise included',
     held([L(0, 2), L(2, 4.0000000000001)], 1) === 6.6);
-  ok('sceneUnits: `acrossBeats` still opts a layer out of the wrapper entirely',
+  ok('beat units: `acrossBeats` still opts a layer out of the wrapper entirely',
     held([L(0, 2, { acrossBeats: true }), L(2, 4)], 0) === null);
 }
 
@@ -383,9 +383,9 @@ test('lib-test: gates', async () => {
 
 // ---- scene-units-exit-suppressed: an authored exit that the beat wrapper silently owns instead ------
 //
-// `sceneUnits: true` forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
+// Beat wrapping forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
 // cut (films/scene/scene.js setLayerTiming), so an authored `out` on that layer never plays and nothing
-// used to say so. tests/fixtures/scene-units-exit-suppressed.fixture.json: two beats, sceneUnits on, the
+// used to say so. tests/fixtures/scene-units-exit-suppressed.fixture.json: two beats, cuts present, the
 // first beat's layer authors `out:"blur"` and is current when its beat cuts.
 {
   const fixture = path.join(repoRoot, 'tests/fixtures/scene-units-exit-suppressed.fixture.json');

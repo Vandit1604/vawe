@@ -330,7 +330,7 @@ test('lib-test: authoring', async () => {
   {
     const from = { id: 'word', type: 'text', x: 300, y: 420, start: 0, duration: 3, becomes: 'card' };
     const to = { id: 'card', type: 'rect', x: 660, y: 340, w: 600, h: 400, start: 3, duration: 4 };
-    const scene = { duration: 8, sceneUnits: false, cuts: [{ t: 3, style: 'none' }], layers: [from, to] };
+    const scene = { duration: 8, cuts: [{ t: 3, style: 'none' }], layers: [from, to] };
     resolveBecomes(scene, (L) => (L === from ? { w: 780, h: 187 } : null));
     ok('a hand-authored becomes handover is measured too', to.motion[0].scale === +Math.max(780 / 600, 187 / 400).toFixed(3));
   }

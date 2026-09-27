@@ -312,18 +312,11 @@ const CASES = [
 
   // A DECLARED CUT IS NOT CONTENT (MISTAKES #166). dead-air used to exempt any hole a cut/seam window
   // touched, on the reading that a transition fills its time. A transition is a TREATMENT of whatever is
-  // already on screen: over an empty frame it produces an empty frame. Both sides are pinned, because the
-  // two paths differ in the engine and the difference is the whole point.
-  //   SINGLE ROOT (a `motion` track makes the scene choreographed, so core/engine/produce.js withholds
-  //   sceneUnits): the cut only transforms the camera root. Nothing is extended, the hole stays a hole.
-  { gate: 'beatcheck', name: 'dead-air · a cut over a hole does not fill it (single-root path)', expect: 'fail', match: /dead-air/,
-    scene: scene([TXT({ duration: 0.6, motion: [{ t: 0, x: 200 }, { t: 0.6, x: 240 }] }),
-                  TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
-                 { cuts: [{ t: 0.8, style: 'punch', dur: 0.5 }] }) },
-  //   SCENE UNITS (no motion track → produce.js injects them): scene.js runs every non-last-beat layer
-  //   to `beatEnd + cutDur`, so the outgoing beat really is on screen across the window. That is coverage
-  //   the raw JSON spans do not show, and the gate has to model it or it invents holes.
-  { gate: 'beatcheck', name: 'scene units really do carry a layer across the cut', expect: 'pass',
+  // already on screen: over an empty frame it produces an empty frame. Every cut film wraps its beats as
+  // units, so scene.js runs every non-last-beat layer to `beatEnd + cutDur`, and the outgoing beat really
+  // is on screen across the window. That is coverage the raw JSON spans do not show, and the gate has to
+  // model it or it invents holes.
+  { gate: 'beatcheck', name: 'beat units really do carry a layer across the cut', expect: 'pass',
     scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
                  { cuts: [{ t: 0.6, style: 'punch', dur: 0.8 }] }) },
 

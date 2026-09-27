@@ -1083,32 +1083,32 @@ One word at the top of the scene sets the default speed curve for every cut and 
 
 | name | what / when |
 |---|---|
-| `barn` | barn doors open from the centre outward, cinematic opener; masks, so a whole-frame cut needs sceneUnits |
-| `blinds` | venetian slat mask sweeps open, editorial reveal; masks, so a whole-frame cut needs sceneUnits |
+| `barn` | barn doors open from the centre outward, cinematic opener; masks |
+| `blinds` | venetian slat mask sweeps open, editorial reveal; masks |
 | `blur` | resolves out of a 16px defocus, calm, premium |
-| `clock` | clock-hand sweep reveal, masks, so a whole-frame cut needs sceneUnits |
+| `clock` | clock-hand sweep reveal, masks |
 | `collapse` | vertical fold, scaleY from 0.05 up to 1, terminal and data beats |
 | `cube` | perspective hinge with travel, the beats turning like faces of a cube |
 | `drop` | falls in from above under gravity, leaves by falling away |
-| `fade` | opacity only, 0 to 1 over the whole cut window, masks nothing, so a whole-frame cut needs sceneUnits |
+| `fade` | opacity only, 0 to 1 over the whole cut window, masks nothing |
 | `flip` | perspective hinge flip about an edge, rotates up to 55 degrees through a 1400px perspective, cards and panels |
-| `iris` | circular reveal growing from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits |
+| `iris` | circular reveal growing from a point (cx/cy), masks |
 | `jitter` | decaying deterministic shake, up to 14px of jitter, alarm and glitch beats only |
-| `letterbox` | cinema curtains open and close top and bottom, cinematic opener; masks, so a whole-frame cut needs sceneUnits |
-| `matchCut` | a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks, so a whole-frame cut needs sceneUnits |
-| `none` | no transition at all, the beats simply replace each other. Masks nothing and moves nothing, so a whole-frame cut needs sceneUnits |
+| `letterbox` | cinema curtains open and close top and bottom, cinematic opener; masks |
+| `matchCut` | a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks |
+| `none` | no transition at all, the beats simply replace each other. Masks nothing and moves nothing |
 | `punch` | scale burst, the leaving beat bursts past the camera, product focus |
 | `rise` | translates up along the cut distance (default 90px) while fading in from 0 to 1 |
 | `riseBlur` | slow rise through a 22px defocus, premium slow beats |
 | `roll` | tilts in from a corner (7 degrees) and settles level |
 | `skewWhip` | sheared throw whose shear straightens as it lands, velocity you can read in the letterforms, same-background beats only |
 | `slide` | the frame travels one way, dir-aware. The plain workhorse, between same-background beats only |
-| `softiris` | feathered circular reveal from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits |
-| `softwipe` | feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits |
+| `softiris` | feathered circular reveal from a point (cx/cy), masks |
+| `softwipe` | feathered wipe, a 20%-wide gradient band instead of a hard line; masks |
 | `spin` | rotates in 90 degrees while scaling from 0.5 to 1, logos, badges, seals |
 | `squeeze` | smear-stretch along the travel axis, a speed ramp you can see |
 | `whip` | motion-blurred directional throw, travels 3.2x the cut distance and blurs up to 14px, momentum, between same-background beats only |
-| `wipe` | hard directional reveal, playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits |
+| `wipe` | hard directional reveal, playful, "notice the cut"; masks |
 | `zoom` | push-through: the leaving beat shrinks away, the arriving one lands from too close, product focus |
 
 ## Seams (2-scene blends)  `[transition]`
