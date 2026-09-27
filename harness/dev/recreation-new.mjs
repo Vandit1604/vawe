@@ -76,6 +76,9 @@ function main() {
   const duration = ffprobeDuration(refAbs);
   const pagePath = path.join(outDir, 'page.html');
   fs.writeFileSync(pagePath, PAGE_HTML(name, path.basename(ref), duration));
+  // reference.json: the folder's own declaration that this page is a recreation of `ref`, read by
+  // render-page.mjs to refuse a FINAL render until the required motion check has passed.
+  fs.writeFileSync(path.join(outDir, 'reference.json'), JSON.stringify({ ref: path.relative(ROOT, refAbs) }, null, 1) + '\n');
 
   const seeDir = path.join(outDir, 'see');
   const r = spawnSync(process.execPath, [path.join(ROOT, 'harness/media/see.mjs'), refAbs, seeDir],
