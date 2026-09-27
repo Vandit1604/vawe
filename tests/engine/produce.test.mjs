@@ -99,6 +99,20 @@ const beatLayers = (starts) => starts.map((start, i) => ({ type: 'text', track: 
   assert.equal(data.cuts[0].style, 'none', 'and not rewritten');
 }
 
+// ---- a film with an AUTHORED transitions[] (the only authoring surface for a boundary, not yet
+// lowered to cuts/seams at this point in the pipeline) is left alone too: films/examples/sting.json
+// needed `"produced": false` to work around the inferred cut fighting this exact declared one ----
+{
+  const data = {
+    module: 'scene', duration: 10, bg: [{ preset: 'plain' }],
+    transitions: [{ at: 4.6, fx: 'wipe', dir: 'down', dur: 0.3, timing: 'out' }],
+    layers: beatLayers([0, 3, 4.6]),
+  };
+  produceBaseline(data, {}, frame, look);
+  assert.equal(data.cuts, undefined, 'an authored transitions[] boundary is not layered under an inferred cut');
+  assert.equal(data.transitions.length, 1, 'the author\'s own transition survives untouched');
+}
+
 // ---- resolveTextSize: a role resolves, a number passes through, an unknown role names the real ones ----
 {
   assert.equal(resolveTextSize('headline', look.scale, 'size'), 64, 'a known role resolves to the theme number');
