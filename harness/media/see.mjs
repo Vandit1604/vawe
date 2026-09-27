@@ -347,8 +347,7 @@ function runShot(video, outDirRoot, from, to, fps) {
   const curve = bucketMean(energy, from, clampedTo, 0.5)
     .map((w) => ({ t0: Number(w.t0.toFixed(2)), t1: Number(w.t1.toFixed(2)), mean: Number(w.mean.toFixed(3)) }));
 
-  fs.writeFileSync(path.join(outDir, 'motion.json'),
-    JSON.stringify({ video, from, to: clampedTo, fps, curve }, null, 1) + '\n');
+  writeJsonAtomic(path.join(outDir, 'motion.json'), { video, from, to: clampedTo, fps, curve });
 
   const rows = curve.map((w) => `| ${w.t0.toFixed(2)}-${w.t1.toFixed(2)}s | ${w.mean.toFixed(2)} |`).join('\n');
   const index = `# see --shot: ${path.basename(video)} ${from}-${clampedTo}s
@@ -445,12 +444,12 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
     '## Grids', '', ...gridPaths.map((p) => `- ${path.relative(ROOT, p)}`),
   ];
   fs.writeFileSync(path.join(outDir, 'compare.md'), `${lines.join('\n')}\n`);
-  fs.writeFileSync(path.join(outDir, 'motion.json'), JSON.stringify({
+  writeJsonAtomic(path.join(outDir, 'motion.json'), {
     ref: refPath, draft: draftPath, from, to: clampedTo,
     windows: rows.map((r) => ({ t0: Number(r.t0.toFixed(2)), t1: Number(r.t1.toFixed(2)),
       refMean: Number(r.refMean.toFixed(3)), draftMean: Number(r.draftMean.toFixed(3)), tooStill: r.tooStill })),
     refLongestStill: refLongest, draftLongestStill: draftLongest,
-  }, null, 1) + '\n');
+  });
 
   console.log(`\n  COMPARE · ${path.basename(refPath)} vs ${path.basename(draftPath)}, ${from}-${clampedTo}s\n`);
   for (const r of rows)
@@ -656,7 +655,7 @@ function writeOutputs({ outDir, video, dur, fps, cutTimes, energy, holds, beats,
     holds: holds.map((h) => ({ t0: Number(h.t0.toFixed(2)), t1: Number(h.t1.toFixed(2)) })),
     beats,
   };
-  fs.writeFileSync(path.join(outDir, 'motion.json'), JSON.stringify(motion, null, 1) + '\n');
+  writeJsonAtomic(path.join(outDir, 'motion.json'), motion);
 
   const tokenEstimate = gridPaths.length * 1568 + 400;
   const beatRows = beats.map((b) => {
