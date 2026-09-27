@@ -56,8 +56,8 @@ change. Full contract, code sample, layout scaffold and the theme's no-fallback 
    `engine-doctrine/MISTAKES.md #153`; primitives in `reference/motion-primitives.md`.
 4. **Cards/logos with no real asset**, or emoji reached for before `make media X=assets` ran.
    `reference/html-and-images.md`.
-5. **Declaring "done" unrendered.** The audit and eyeball pass catch overlap, overflow and safe-zone
-   breaks that no amount of reading the JSON will show you. `reference/qa-loop.md`.
+5. **Declaring "done" unrendered.** `make study REF=<html> LOOK=…/PROBE=1/LAYOUT=…` sees a fragment
+   cheaply, no render, before the audit and eyeball pass catch what those miss. `reference/qa-loop.md`.
 
 ## Where to look next
 

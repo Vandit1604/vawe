@@ -347,13 +347,32 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # by-side grids (reference top, draft bottom, every 0.25s) and a per-0.5s motion-energy table marking
 # "too still" where the draft is under half the reference. FROM=<s> TO=<s> narrows the window.
 # harness/media/see.mjs --compare
-study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference; SEE=1 REF=<video> sees it cheaply; SHOT=<from>-<to> REF=<video> is a dense strip; COMPARE=<draft.mp4> REF=<video> checks a draft's motion against it.
+#
+# make study REF=<fragment.html> PROBE=1 AT=<s> SEL=<css>: box, opacity, computed transform/filter, and
+# every active animation's current progress, for every element matching SEL at one instant. No render.
+# harness/media/see.mjs --probe
+#
+# make study REF=<fragment.html> LOOK=<s,s,...> [COMPARE=<reference.mp4>]: a still per time, gridded;
+# paired against the reference at the same timestamps when COMPARE names one. For checking the settled
+# look BEFORE touching motion. harness/media/see.mjs --look
+#
+# make study REF=<fragment.html> LAYOUT=<s,s,...> [D=<film.json>]: clipped/overflowing text, text
+# overlapping text, elements off the frame, and two opaque full-frame shots visible at once, read off
+# the DOM at each time. D=<film.json> also records a `layout` receipt for post-draft.mjs.
+# harness/media/see.mjs --layout
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference; SEE=1 REF=<video> sees it cheaply; SHOT=<from>-<to> REF=<video> is a dense strip; COMPARE=<draft.mp4> REF=<video> checks a draft's motion against it; PROBE=1 REF=<html> AT=<s> SEL=<css> reads one element's box/animation state; LOOK=<s,s,...> REF=<html> stills at key times (COMPARE=<mp4> pairs them against the reference); LAYOUT=<s,s,...> REF=<html> flags clipped/off-frame/overlapping text and stacked opaque shots.
 	@if [ -n "$(MATCH)" ]; then \
 	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
 	elif [ -n "$(SEE)" ]; then \
 	  node harness/media/see.mjs $(REF) $(OUT) $(if $(FRAMES),--frames $(FRAMES)); \
 	elif [ -n "$(SHOT)" ]; then \
 	  node harness/media/see.mjs $(REF) $(OUT) --shot $(SHOT) $(if $(FPS),--fps $(FPS)); \
+	elif [ -n "$(PROBE)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --probe --at $(AT) --sel "$(SEL)"; \
+	elif [ -n "$(LOOK)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --look --times $(LOOK) $(if $(COMPARE),--ref $(COMPARE)); \
+	elif [ -n "$(LAYOUT)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --layout --times $(LAYOUT) $(if $(D),--film $(D)); \
 	elif [ -n "$(COMPARE)" ]; then \
 	  node harness/media/see.mjs $(REF) $(OUT) --compare $(COMPARE) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(D),--film $(D)); \
 	else \
