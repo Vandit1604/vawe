@@ -62,7 +62,7 @@ export function idleErrors(cfg, IDLES = IDLE) {
   return out;
 }
 
-// SCENE UNITS AND THE LAYER THAT LOSES MOST OF ITSELF. With `sceneUnits:true` a layer is assigned to a
+// BEAT UNITS AND THE LAYER THAT LOSES MOST OF ITSELF. Whenever a film has cuts, a layer is assigned to a
 // beat BY ITS START TIME (films/scene/scene.js `beatIndexOf`) and its wrapper is only on screen for
 // that beat, so a layer that begins just before a boundary is truncated to the sliver between its start
 // and that boundary. It does not error and it does not warn: the beat simply renders empty.
@@ -81,7 +81,6 @@ export function idleErrors(cfg, IDLES = IDLE) {
 // checked. It says what the engine will do and names the flag that changes it.
 export function sceneUnitWarnings(cfg) {
   const d = cfg || {};
-  if (d.sceneUnits !== true) return [];
   const cuts = [...(d.transitions || []), ...(d.cuts || []), ...(d.seams || [])]
     .map((t) => (typeof t === 'object' ? (t.at ?? t.t) : t))
     .filter((n) => typeof n === 'number').sort((a, b) => a - b);
@@ -98,7 +97,7 @@ export function sceneUnitWarnings(cfg) {
     // Under a fifth surviving is not a judgement call. Above it, the author may well have meant a
     // layer that hands off at the cut, and this stays quiet about it.
     if (kept > 0.2) continue;
-    out.push(`layers[${i}]${L.id ? ` (#${L.id})` : ''} starts at ${a}s and runs ${dur}s, but a sceneUnits `
+    out.push(`layers[${i}]${L.id ? ` (#${L.id})` : ''} starts at ${a}s and runs ${dur}s, but a beat `
       + `boundary at ${boundary}s ends its beat: only ${(kept * 100).toFixed(0)}% of it will ever be on `
       + 'screen, and the rest of the beat renders EMPTY with no other symptom. Either end this layer at '
       + `${boundary}s and start its continuation there, or set \`"acrossBeats": true\` if it is meant to `

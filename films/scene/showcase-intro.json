@@ -1,8 +1,7 @@
 {
   "module": "scene",
-  "authoringNote": "The continuous object is the compositing stack: one html layer runs from the grade/cut/score beat through the 'nothing here was shot' beat, and the passes it drops onto the empty output frame are what changes across the cut. It carries acrossBeats so beat wrapping does not truncate it at 5.9s, which leaves sceneUnits on and the softiris cut intact.",
+  "authoringNote": "The continuous object is the compositing stack: one html layer runs from the grade/cut/score beat through the 'nothing here was shot' beat, and the passes it drops onto the empty output frame are what changes across the cut. It carries acrossBeats so beat wrapping does not truncate it at 5.9s, keeping the softiris cut intact.",
   "aspect": "16:9",
-  "sceneUnits": true,
   "theme": "mercury",
   "duration": 12.4,
   "audio": {

@@ -1064,16 +1064,6 @@ ok('every wipe direction is a distinct reveal', new Set(['wipe-left', 'wipe-righ
   ok('the GSAP loops and one-shots are disjoint and cover GSAP_FX',
     LOOP_FX.every((n) => !ONESHOT_FX.includes(n)) && LOOP_FX.length + ONESHOT_FX.length === GSAP_FX.length);
   ok('every GSAP loop says it never settles', LOOP_FX.every((n) => /LOOP|never settles/i.test(GSAP_BLURBS[n] || '')));
-
-  // THE CAUTION IS DERIVABLE, so it must not drift. SOLO_BLIND is computed at load by probing every
-  // presentation for a transform/filter that ever leaves identity, and scene.js throws on those styles
-  // when sceneUnits is off. A blurb that names the caution for a different set than the runtime one is
-  // worse than none: an author would trust it. Change a cut's mechanics and this fails until the blurb
-  // is corrected.
-  const cautioned = Object.entries(CUT_BLURBS).filter(([, v]) => /sceneUnits/.test(v)).map(([k]) => k).sort();
-  const blind = [...SOLO_BLIND].sort();
-  ok(`the sceneUnits caution names exactly the mask-only cuts (${blind.length})`,
-    cautioned.length === blind.length && blind.every((n, i) => n === cautioned[i]));
 }
 
 

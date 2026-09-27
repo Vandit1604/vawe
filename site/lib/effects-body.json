@@ -225,7 +225,7 @@
   "layer-types--rect": "{\n  \"type\": \"rect\"\n}",
   "layer-types--shader": "{\n  \"type\": \"shader\"\n}",
   "layer-types--svg": "{\n  \"type\": \"svg\"\n}",
-  "layer-types--text": "{\n  \"type\": \"text\"\n}",
+  "layer-types--text": "{\n  \"type\": \"text\",\n  \"typing\": true,\n  \"caret\": true\n}",
   "layer-types--three": "{\n  \"type\": \"three\"\n}",
   "layer-types--video": "{\n  \"type\": \"video\"\n}",
   "raymarched-surfaces--caustics": "{\n  \"x\": 0,\n  \"y\": 0,\n  \"w\": 1920,\n  \"h\": 1080,\n  \"start\": 0,\n  \"duration\": 6,\n  \"type\": \"raymarch\",\n  \"raymarch\": \"caustics\"\n}",

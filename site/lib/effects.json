@@ -1150,7 +1150,7 @@
       "id": "scene-finish-keys",
       "title": "Scene finish keys",
       "tag": "finish",
-      "intro": "data.finish is the ONE dial for the cinematic grade a premium launch film needs · large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.",
+      "intro": "data.finish is the ONE dial for the cinematic grade a premium launch film needs · large soft light, bloom, grade, chromatic aberration, vignette, grain, depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time. A scene naming no `finish` key at all gets a subtle default (light grain, gentle vignette, no bloom); `finish: false` opts out.",
       "mode": "table",
       "note": null,
       "noPreview": "a scene-level pass, not a per-layer effect: render the film to see it",
@@ -1971,7 +1971,7 @@
       "id": "anchor-points",
       "title": "Anchor points",
       "tag": "layout",
-      "intro": "`\"anchorPoint\": \"<name>\"` on a layer · which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME.",
+      "intro": "`\"anchorPoint\": \"<name>\"` on a layer · which point of THIS LAYER'S OWN BOX its authored x/y names, instead of always the top-left corner. The same nine names `pin` already uses for a point on the FRAME. A scene with exactly one authored top-level layer, itself a text/count layer naming no position at all, gets `center` automatically (`core/engine/boot.js` `applyLoneTextCenter`).",
       "mode": "table",
       "note": null,
       "noPreview": "an anchor point is where a coordinate lands, not a look: see it on any layer with `w`/`h` set and `anchorPoint: \"center\"`.",
@@ -5311,14 +5311,14 @@
         {
           "name": "barn",
           "stem": "scene-cuts--barn",
-          "desc": "barn doors open from the centre outward, cinematic opener; masks, so a whole-frame cut needs sceneUnits",
+          "desc": "barn doors open from the centre outward, cinematic opener; masks",
           "scene": "/assets/effects/scene-cuts--barn.json",
           "noPreview": null
         },
         {
           "name": "blinds",
           "stem": "scene-cuts--blinds",
-          "desc": "venetian slat mask sweeps open, editorial reveal; masks, so a whole-frame cut needs sceneUnits",
+          "desc": "venetian slat mask sweeps open, editorial reveal; masks",
           "scene": "/assets/effects/scene-cuts--blinds.json",
           "noPreview": null
         },
@@ -5332,7 +5332,7 @@
         {
           "name": "clock",
           "stem": "scene-cuts--clock",
-          "desc": "clock-hand sweep reveal, masks, so a whole-frame cut needs sceneUnits",
+          "desc": "clock-hand sweep reveal, masks",
           "scene": "/assets/effects/scene-cuts--clock.json",
           "noPreview": null
         },
@@ -5360,7 +5360,7 @@
         {
           "name": "fade",
           "stem": "scene-cuts--fade",
-          "desc": "opacity only, 0 to 1 over the whole cut window, masks nothing, so a whole-frame cut needs sceneUnits",
+          "desc": "opacity only, 0 to 1 over the whole cut window, masks nothing",
           "scene": "/assets/effects/scene-cuts--fade.json",
           "noPreview": null
         },
@@ -5374,7 +5374,7 @@
         {
           "name": "iris",
           "stem": "scene-cuts--iris",
-          "desc": "circular reveal growing from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits",
+          "desc": "circular reveal growing from a point (cx/cy), masks",
           "scene": "/assets/effects/scene-cuts--iris.json",
           "noPreview": null
         },
@@ -5388,21 +5388,21 @@
         {
           "name": "letterbox",
           "stem": "scene-cuts--letterbox",
-          "desc": "cinema curtains open and close top and bottom, cinematic opener; masks, so a whole-frame cut needs sceneUnits",
+          "desc": "cinema curtains open and close top and bottom, cinematic opener; masks",
           "scene": "/assets/effects/scene-cuts--letterbox.json",
           "noPreview": null
         },
         {
           "name": "matchCut",
           "stem": "scene-cuts--matchcut",
-          "desc": "a GRAPHIC MATCH · both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks, so a whole-frame cut needs sceneUnits",
+          "desc": "a GRAPHIC MATCH · both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks",
           "scene": "/assets/effects/scene-cuts--matchcut.json",
           "noPreview": null
         },
         {
           "name": "none",
           "stem": "scene-cuts--none",
-          "desc": "no transition at all, the beats simply replace each other. Masks nothing and moves nothing, so a whole-frame cut needs sceneUnits",
+          "desc": "no transition at all, the beats simply replace each other. Masks nothing and moves nothing",
           "scene": "/assets/effects/scene-cuts--none.json",
           "noPreview": null
         },
@@ -5451,14 +5451,14 @@
         {
           "name": "softiris",
           "stem": "scene-cuts--softiris",
-          "desc": "feathered circular reveal from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits",
+          "desc": "feathered circular reveal from a point (cx/cy), masks",
           "scene": "/assets/effects/scene-cuts--softiris.json",
           "noPreview": null
         },
         {
           "name": "softwipe",
           "stem": "scene-cuts--softwipe",
-          "desc": "feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits",
+          "desc": "feathered wipe, a 20%-wide gradient band instead of a hard line; masks",
           "scene": "/assets/effects/scene-cuts--softwipe.json",
           "noPreview": null
         },
@@ -5486,7 +5486,7 @@
         {
           "name": "wipe",
           "stem": "scene-cuts--wipe",
-          "desc": "hard directional reveal, playful, \"notice the cut\"; masks, so a whole-frame cut needs sceneUnits",
+          "desc": "hard directional reveal, playful, \"notice the cut\"; masks",
           "scene": "/assets/effects/scene-cuts--wipe.json",
           "noPreview": null
         },

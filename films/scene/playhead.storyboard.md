@@ -110,8 +110,8 @@ destination: web
 
   THE CAPTURE THIS FILM DEPENDS ON. SETTLED, with numbers. The subject is
   `films/scene/_playhead-subject.json`, a real renderable 16s draft built for this: fourteen layers of
-  SIX types (text, rect, count, svg, group, and the component's own naming), and NO cuts, so `sceneUnits`
-  never turns on and no authored duration is rewritten. Its dead-air hole is genuine, and beat-check
+  SIX types (text, rect, count, svg, group, and the component's own naming), and NO cuts, so beat
+  wrapping never turns on and no authored duration is rewritten. Its dead-air hole is genuine, and beat-check
   names it 9.60s to 10.80s, 1.20s. Beat 4's copy is that measurement.
   Two things were learned by doing it. The LANE COUNT is not the only lever: capture WIDTH is, and it is
   the better one. `#tl` captured at an 1800px viewport is 1800x368 (4.9:1), at 1240px it is 1240x368

@@ -63,7 +63,6 @@ const scene = {
   theme: 'cadence',
   aspect: '16:9',
   duration: 15,
-  sceneUnits: false,
   authoringNote: 'Three dense 5s beats, two transitions: an invisible riseBlur cut at 5s carries the '
     + 'film and ONE expressive cinematicZoom seam is earned at the 10s payoff (engine-doctrine/CRAFT/TRANSITIONS.md). '
     + 'The sound-form is the spine: a flat bar, then four stems, then one merged waveform, all one SVG '
@@ -84,7 +83,7 @@ const scene = {
       start: 2.05, duration: 2.6, out: 'fade', motion: [{ t: -0.4, y: 0 }] }),
 
     { type: 'html', id: 'form', x: FORM.x, y: FORM.y, w: FORM.w, h: FORM.h, html: form(),
-      start: 0.4, duration: 14.6, anim: 'fade', enterDur: 0.5, exitDur: 0 },
+      start: 0.4, duration: 14.6, anim: 'fade', enterDur: 0.5, exitDur: 0, acrossBeats: true },
 
     { type: 'rect', id: 'stems', x: 176, y: 528, w: 1568, h: 444, radius: 26, bg: 'rgba(255,255,255,0.02)',
       border: '1px solid var(--line)', start: 4.72, duration: 5.08, anim: 'fade', enterDur: 0.56, out: 'fade' },
