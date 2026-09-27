@@ -16,7 +16,7 @@ The engine can build anything. What it cannot do is plan something great from a 
 feature card, logo card. Every gate passes. Nobody watches it twice.
 
 The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
-`films/scene/higgsfield-recreation.json`) is not a sequence of beats. **It is one continuous action.**
+the higgsfield recreation (archived 2026-09-27)) is not a sequence of beats. **It is one continuous action.**
 You type a prompt. You press generate. The generate button itself becomes the loading dot. One object
 is on screen from the first frame to the last and every cut is that object changing state.
 

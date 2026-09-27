@@ -191,7 +191,7 @@ Treat any confident decision framework on this topic, including Part 4 below, as
 
 `no-continuous-object` came from one reference. The `vawe-continuous-action` skill states its own
 provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
-`films/scene/higgsfield-recreation.json`) is not a sequence of beats. It is one continuous action." The
+the higgsfield recreation (archived 2026-09-27)) is not a sequence of beats. It is one continuous action." The
 gate generalised that single sample into a floor for every film under 15 seconds
 (`CONTINUITY_MAX_DUR = 15` in the retired `direction-floor.mjs`).
 
