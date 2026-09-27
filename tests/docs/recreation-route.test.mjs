@@ -31,7 +31,7 @@ const RECREATION_DOCS = [
 
 // Docs that route TO the recreation type but never author it (no starter/loop expected there); they
 // still must never point at make ship/bin/vawe as this type's own render path.
-const NO_ROUTE_DOCS = ['engine-doctrine/CRAFT/ROUTING.md', 'engine-doctrine/CRAFT/routes/recreation.md'];
+const NO_ROUTE_DOCS = ['engine-doctrine/CRAFT/ROUTING.md'];
 
 const DIRECT_RENDER = /(make ship|\.\/bin\/vawe|\bbin\/vawe\b)/g;
 
