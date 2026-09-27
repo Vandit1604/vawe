@@ -97,6 +97,7 @@ export const CUSTOM = {
   'audit-test': () => spawnJs('quality/gates/contrast-regression.mjs', []) || spawnJs('quality/gates/measure-regression.mjs', []),
   'bench': () => runMake(['build']) || spawnJs('harness/dev/bench.mjs', ['all', ...(env.STAMP ? ['--stamp'] : []), ...json()]),
   'bench-session': () => spawnJs('harness/dev/bench.mjs', ['session', env.T, ...json()]),
+  'verify-batch': () => spawnSync('sh', [path.join(ROOT, 'harness/dev/verify-batch.sh')], { cwd: ROOT, stdio: 'inherit' }).status || 0,
   'clean': () => spawnSync('sh', ['-c', 'rm -rf bin out/*.mp4'], { cwd: ROOT, stdio: 'inherit' }).status || 0,
   'coverage-reel': () => spawnJs('harness/author/coverage-reel.mjs', []) || runMake(['video', 'D=films/scene/_coverage-reel.json']),
   'demo': () => {

@@ -1,5 +1,5 @@
 # harness/dev/verify-tiers.sh: the gate tiers, sourced (not executed) by BOTH .githooks/pre-push and
-# `make verify-batch`, so "the full tier" has exactly one definition. Before this, VAWE_FULL=1 took
+# `make dev-tool X=verify-batch`, so "the full tier" has exactly one definition. Before this, VAWE_FULL=1 took
 # ~40 minutes running INSIDE pre-push, and GitHub drops an idle SSH connection well before that: the
 # hook still exits 0 (the push itself already landed the first time it managed to complete a round
 # trip; a later retry is what actually stalls) so nothing lands and nothing says why. `make
@@ -13,7 +13,7 @@ FULL="craft-coverage coverage arsenal-check scenes-json docker-check prop-probe 
 # the first failure. This is exactly what pre-push's VAWE_FULL=1 branch ran inline before this file
 # existed; e2e is NOT in here because pre-push already runs it separately, scoped to the pushed range
 # (quality/gates/e2e-check.mjs), so it stays out of this shared function to keep that scoping intact.
-# `make verify-batch` runs e2e itself, unscoped, alongside this.
+# `make dev-tool X=verify-batch` runs e2e itself, unscoped, alongside this.
 run_full_tier() {
   make test bench-fast || return 1
   make dev-tool X=audit-test || return 1
@@ -27,5 +27,5 @@ run_full_tier() {
 # decision directly without running push-guard, site-build-check or an actual push.
 stamp_message_for() {
   stamp=".vawe-data/verified/$1"
-  [ -f "$stamp" ] && echo "verified by make verify-batch at $(cat "$stamp")"
+  [ -f "$stamp" ] && echo "verified by make dev-tool X=verify-batch at $(cat "$stamp")"
 }

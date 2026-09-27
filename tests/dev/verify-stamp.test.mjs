@@ -33,7 +33,7 @@ test('a stamped commit reports its verification time', () => {
   fs.mkdirSync(path.join(dir, '.vawe-data/verified'), { recursive: true });
   fs.writeFileSync(path.join(dir, '.vawe-data/verified', sha), '2026-09-27T00:00:00.000Z');
   const msg = stampMessageFor(dir, sha);
-  assert.match(msg, /^verified by make verify-batch at 2026-09-27T00:00:00\.000Z$/);
+  assert.match(msg, /^verified by make dev-tool X=verify-batch at 2026-09-27T00:00:00\.000Z$/);
   fs.rmSync(dir, { recursive: true, force: true });
 });
 

@@ -9,7 +9,7 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 `1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an
 open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions.
 
-The settled frame is HTML. Animate it with `parts`, `motion` and `vars`, or with standard CSS
+The settled frame is HTML. Animate it with `parts`, `motion` and `vars`, or standard CSS
 animations and `element.animate()`, which the clock seeks each frame (details: `vawe-scene-authoring`).
 
 ## THE SEVEN STAGES, IN ORDER  `[live: harness/live/stage-say.mjs]`
@@ -37,8 +37,7 @@ against its reference beat by beat: `make study REF= D= MATCH=1 [LIGHT=1]`.
 
 ## Where to look  `[ref: make help]`
 
-`make help` prints the ~12-command fast path; `make list` prints all 39 targets, grouped by phase,
-never stale. Six route to sub-tools by name (X=<name>): `gen`, `site`, `study-tool`, `dev-tool`,
+`make help` prints the fast path; `make list` prints every target by phase. Six route to sub-tools by name (X=<name>): `gen`, `site`, `study-tool`, `dev-tool`,
 `media`, `check GATE=<name>`. `make arsenal Q="…"` searches every effect and block before you
 hand-build one (`harness/live/arsenal-nudge.mjs` nudges this at save).
 
@@ -90,9 +89,7 @@ scene, the browser engine, the whole authoring ladder) and leaves one artefact,
 `quality/runs/e2e/<timestamp>/report.md`. A known-broken tracked scene is excused by name in
 `quality/baselines/e2e-known-broken.json`, never by loosening what counts as a pass.
 
-Before a push: `make verify-batch`, then `git push`. It runs the full tier (test, audit-test, e2e,
-every gate) as its own step, with no push holding a connection open for the ~40 minutes that takes, and
-stamps the commit so a plain push skips re-running it.
+Push: `make dev-tool X=verify-batch`, then `git push`.
 
 ## Comments  `[eye]`
 
