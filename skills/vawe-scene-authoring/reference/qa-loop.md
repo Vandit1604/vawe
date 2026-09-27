@@ -13,6 +13,7 @@ group: skill
 | `make look D=<file>` / `make dev-tool X=frame D=<file> N=<n>` | storyboard / one frame to eyeball |
 | `make check GATE=render-verify` | render integrity (dims/fps/codec/audio) + safe-zone + contact sheets |
 | `make gen X=review` | fast snapshot: lib-test + audit + a master overlay sheet (`/tmp/review.png`) |
+| `make media X=filmstrip VIDEO=<file>.mp4 FPS=4` | a still every 0.25s, tiled into one sheet (`FPS=2` for one every 0.5s) |
 
 **Always eyeball frames** (storyboard or `/tmp/review.png`), don't claim "looks good" unrendered.
 If the audit flags overlap/overflow, fix with the spacing tokens and re-run. Mark new key text
