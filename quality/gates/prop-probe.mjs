@@ -109,7 +109,7 @@ function maskedDiffMean(a, b, boxes, metaFile) {
 // WHERE/WHEN: a prop that moves or times a layer is checked against the JSON, not just against
 // itself. `motion`'s `x` is an OFFSET added to `L.x` (films/scene/scene.js resolveBoxes: `x = (L.x ??
 // 60) + (m ? m.dx : 0) + p.dx`), and a keyframe's `t` is SECONDS since the layer's own start (
-// core/timeline/sequence.js poseAt compares it to `lt` directly, never a 0..1 fraction) — both read
+// core/timeline/sequence.js poseAt compares it to `lt` directly, never a 0..1 fraction); both read
 // off that one function, not re-derived here, so this check cannot drift from what actually renders.
 function checkXY(prop, L, boxesByFrame, push) {
   const [fx, fy] = resolveAnchorPoint(L.anchorPoint ?? null);
@@ -786,7 +786,7 @@ for (const f of nearDead) {
   });
 }
 for (const m of mismatches) {
-  console.log(`  x ${m.type}: ${m.prop} ${m.msg} — expected ${m.expected}, got ${m.got}`);
+  console.log(`  x ${m.type}: ${m.prop} ${m.msg}: expected ${m.expected}, got ${m.got}`);
   findingsOut.warn('prop-position-mismatch', `${m.type}: ${m.prop} ${m.msg} (expected ${m.expected}, got ${m.got})`, {
     at: `${m.type}.${m.prop}`,
     fix: 'the rendered box disagrees with the JSON: check the layer builder or the layout math for this prop',
@@ -802,7 +802,7 @@ for (const l of leaks) {
 }
 for (const v of visSkipped) {
   console.log(`  ? ${v.type}: floor/leak not checked (${v.reason})`);
-  findingsOut.warn('prop-visibility-not-checked', `${v.type}: ${v.props} — the off-variant did not build: ${v.reason}`, {
+  findingsOut.warn('prop-visibility-not-checked', `${v.type}: ${v.props}: the off-variant did not build: ${v.reason}`, {
     at: v.type, fix: 'a required field was removed to build the off-variant; this is a coverage gap, not a defect',
   });
 }
