@@ -1,7 +1,12 @@
 // harness/media/render-page.mjs: render a bare HTML page (seeked CSS/Web Animations motion) to an
 // mp4, with an optional N-subframe motion blur blended into each output frame.
 //
-//   node harness/media/render-page.mjs <page.html> <out.mp4> [--fps 30] [--dur s] [--blur N] [--w 1920] [--h 1080]
+//   node harness/media/render-page.mjs <page.html> <out.mp4> [--fps 30] [--from s] [--dur s | --to s] [--blur N] [--w 960] [--h 540] [--final]
+//
+// Default is a DRAFT: 960x540, no blur, and --from/--to windows the render to one slice instead of the
+// whole page (a 5s window at full size with blur measured ~57s; a windowed draft is the one that gets
+// re-run every iteration, so it, not the final, owns the cheap defaults). --final renders the way `make
+// ship` does: full size (1920x1080 unless overridden), the whole page from 0, blur=3.
 //
 // Replaces the scratchpad csskit prototype (render.mjs --blur), which wrote a 0-byte mp4 and exited
 // silently under load: it spawned ONE ffmpeg process PER FRAME to blend that frame's subframes
@@ -15,7 +20,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { serveRepo, launchPage, RENDER_ARGS } from '../lib/render-harness.mjs';
+import { RENDER_ARGS } from '../lib/render-harness.mjs';
+import { openPreview } from './preview-server.mjs';
 
 // A run of ~150+ rapid seek+screenshot round trips crashed the GPU-accelerated headless renderer
 // outright ("Execution context was destroyed", no page error, no console output) on this machine;
@@ -43,29 +49,28 @@ function ffmpegEncode(tmpDir, fps, blur, tmpOut) {
 
 /**
  * renderPage(pagePath, outPath, opts) -> { frames, subframes, captureMs, encodeMs, dur }.
- * opts: fps (30), w (1920), h (1080), blur (1, subframes blended per output frame), durArg (seconds,
- * overrides the page's own <meta name="duration">).
+ * opts: fps (30), w (960), h (540), blur (1, subframes blended per output frame), from (0, seconds into
+ * the page's own timeline the render starts at), durArg (seconds rendered from `from`; defaults to the
+ * page's own <meta name="duration"> minus `from`).
  */
 export async function renderPage(pagePath, outPath, opts = {}) {
-  const { fps = 30, w = 1920, h = 1080, blur = 1, durArg = null } = opts;
+  const { fps = 30, w = 960, h = 540, blur = 1, durArg = null, from = 0 } = opts;
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
-  const root = path.resolve(pagePath, '..');
-  const rel = path.basename(pagePath);
-  const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width: w, height: h, args: PAGE_ARGS });
+  const { page, url, close } = await openPreview(pagePath, { width: w, height: h, args: PAGE_ARGS });
   const tmpDir = `${outPath}.frames-${process.pid}`;
   fs.rmSync(tmpDir, { recursive: true, force: true });
   fs.mkdirSync(tmpDir, { recursive: true });
   try {
-    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    await page.goto(url, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
 
-    const dur = durArg || await page.evaluate(() => {
+    const totalDur = await page.evaluate(() => {
       const m = document.querySelector('meta[name="duration"]');
       if (m) return Number(m.content);
       return Math.max(0, ...document.getAnimations().map((a) => (a.effect.getComputedTiming().endTime || 0) / 1000));
     });
-    if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur)`);
+    const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
+    if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
@@ -73,7 +78,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const t0 = Date.now();
     let n = 0;
     for (let i = 0; i < frames; i++) {
-      const baseMs = (i / fps) * 1000;
+      const baseMs = from * 1000 + (i / fps) * 1000;
       for (let k = 0; k < blur; k++) {
         await seekAll(page, baseMs + (k / blur) * (1000 / fps));
         await page.screenshot({ path: path.join(tmpDir, `f${String(n).padStart(6, '0')}.png`) });
@@ -98,8 +103,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     return { frames, subframes: n, captureMs, encodeMs, dur };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
-    await closePage();
-    closeServer();
+    await close();
   }
 }
 
@@ -109,15 +113,21 @@ async function main() {
   const positional = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
   const [pagePath, outPath] = positional;
   if (!pagePath || !outPath) {
-    die('usage: node harness/media/render-page.mjs <page.html> <out.mp4> [--fps 30] [--dur s] [--blur N] [--w 1920] [--h 1080]', 2);
+    die('usage: node harness/media/render-page.mjs <page.html> <out.mp4> [--fps 30] [--from s] [--dur s | --to s] '
+      + '[--blur N] [--w 960] [--h 540] [--final]', 2);
   }
+  const final = argv.includes('--final');
+  const from = final ? 0 : Number(flag('--from', 0));
+  const toFlag = flag('--to', null);
   const durFlag = flag('--dur', null);
+  const durArg = final ? null : (toFlag != null ? Number(toFlag) - from : (durFlag != null ? Number(durFlag) : null));
   const opts = {
-    fps: Number(flag('--fps', 30)), w: Number(flag('--w', 1920)), h: Number(flag('--h', 1080)),
-    blur: Number(flag('--blur', 1)), durArg: durFlag != null ? Number(durFlag) : null,
+    fps: Number(flag('--fps', 30)),
+    w: Number(flag('--w', final ? 1920 : 960)), h: Number(flag('--h', final ? 1080 : 540)),
+    blur: Number(flag('--blur', final ? 3 : 1)), from, durArg,
   };
   const r = await renderPage(pagePath, outPath, opts);
-  console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${r.dur}s`
+  console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${opts.w}x${opts.h}, ${from}s-${(from + r.dur).toFixed(2)}s`
     + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}, `
     + `capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
 }

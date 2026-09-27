@@ -10,9 +10,10 @@
 // --probe/--look/--layout exist because agents kept writing their own throwaway browser probe scripts
 // to debug a fragment (one stalled twice doing it), never made a still before touching motion (0 of 7
 // agents did), and lost whole sessions to a stray `position:absolute` or two stacked opaque backgrounds
-// nothing had ever screenshotted together. All three reuse this file's own serveRepo/launchPage page
-// loader and the same animation-seek (`document.getAnimations()` paused at a given `currentTime`) that
-// --dom already uses, never a second page-loading path.
+// nothing had ever screenshotted together. All four (--dom too) reuse preview-server.mjs's one
+// openPreview() page loader (a shared, kept-open browser when one is running, a fresh one otherwise)
+// and the same animation-seek (`document.getAnimations()` paused at a given `currentTime`), never a
+// second page-loading path.
 //
 // WHY THIS EXISTS: an agent reads images, not video, and one image costs at most ~1,568 tokens
 // regardless of its content (a 3x3 grid at 1568px long edge runs ~174 tokens/frame, per Claude's own
@@ -39,7 +40,7 @@ import { ffmpegOrDie, scratch } from '../lib/scratch.mjs';
 import { detectCuts, motionDeltaSeries } from './shot-detect.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
 import { writeReceipt } from '../lib/receipt.mjs';
-import { serveRepo, launchPage } from '../lib/render-harness.mjs';
+import { openPreview } from './preview-server.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
@@ -635,8 +636,8 @@ function runSheetCheck(refFile, filmFile, filmArg) {
 }
 
 // ── --dom: read a film's motion straight from the DOM, no video, no screenshot per sample ────────────
-// Loads `html` once (harness/lib/render-harness.mjs's own serveRepo/launchPage, the same pair every
-// other headless tool in this repo uses), then SEEKS every `document.getAnimations()` (the Web
+// Loads `html` once (preview-server.mjs's own openPreview, the same loader every other check in this
+// file uses), then SEEKS every `document.getAnimations()` (the Web
 // Animations API this repo's `element.animate()` scenes already use) by setting `currentTime`, reading
 // each tracked element's box/opacity straight from the live page: 30x/s costs one page.evaluate call
 // each, not a screenshot decode. Also captures screenshots at the --compare cadence (4/s) into the same
@@ -726,10 +727,9 @@ async function domStillGrid(page, outDir, from, to, w, h) {
 // `fps`, bucketed to 0.5s windows: `{energy, area}`-curved, plus raw events. The one path both `--dom`
 // and the reference-required-motion-match check sample through, so a page's ids/window/box-reading are
 // resolved exactly once per caller, never twice.
-async function sampleDomMotion(page, htmlPath, port, opts) {
+async function sampleDomMotion(page, url, opts) {
   const { from: fromArg, to: toArg, fps: domFps, w, h, ids: idsArg } = opts;
-  const rel = path.basename(htmlPath);
-  await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+  await page.goto(url, { waitUntil: 'load' });
   const info = await page.evaluate(() => {
     const durMeta = document.querySelector('meta[name="duration"]');
     const anims = document.getAnimations();
@@ -770,11 +770,9 @@ async function sampleDomMotion(page, htmlPath, port, opts) {
 
 async function runDom(htmlPath, outDirRoot, opts) {
   const { fps: domFps, w, h } = opts;
-  const root = path.resolve(htmlPath, '..');
-  const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width: w, height: h });
+  const { page, url, close } = await openPreview(htmlPath, { width: w, height: h });
   try {
-    const { ids, from, to, curve, events } = await sampleDomMotion(page, htmlPath, port, opts);
+    const { ids, from, to, curve, events } = await sampleDomMotion(page, url, opts);
 
     const outDir = path.join(outDirRoot, 'dom');
     fs.rmSync(outDir, { recursive: true, force: true });
@@ -790,8 +788,7 @@ async function runDom(htmlPath, outDirRoot, opts) {
     console.log(`\n  ${events.length} event(s): ${events.map((e) => `${e.id} ${e.type}@${e.t}s`).join(', ') || 'none'}`);
     console.log(`  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'motion.json'))}, ${gridPaths.length} still grid(s)`);
   } finally {
-    await closePage();
-    closeServer();
+    await close();
   }
 }
 
@@ -804,25 +801,39 @@ async function runDom(htmlPath, outDirRoot, opts) {
 // diffing one against the other produced a ratio in the THOUSANDS, meaningless noise, not a hint. Two
 // curves of the SAME unit (pixel energy, both from a real render) is the one comparison that means
 // anything, so this never invents a second one.
+//
+// `from`/`to` window the check to one slice instead of the whole page (a draft's whole point:
+// iteration speed, not full-length fidelity). The reference is cut to the SAME window before compare
+// (`runCompare`'s own from/to assumes both sides start at the same origin; the page render starts its
+// mp4 at 0 regardless of `from`, so the reference is re-cut to 0-relative too, never left absolute).
+// `--final` ignores any window and renders full length, matching what `make ship` will actually cut.
 async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
   if (!fs.existsSync(refPath)) die(`no such --ref file: ${refPath}`);
-  if (opts.from) die('--dom --ref: --from is not supported yet, the page always renders from 0');
   const refP = probeVideo(refPath);
-  const to = opts.to != null ? opts.to : refP.dur;
+  const from = opts.final ? 0 : (opts.from || 0);
+  const to = opts.final ? refP.dur : (opts.to != null ? opts.to : refP.dur);
+  if (!(to > from)) die(`--dom --ref: bad window ${from}-${to}`);
+  const windowed = from > 0 || to < refP.dur;
 
   const outDir = path.join(outDirRoot, 'required-motion');
   fs.mkdirSync(outDir, { recursive: true });
   const tmpMp4 = path.join(outDir, `.page-render-${process.pid}.mp4`);
+  const refWindow = windowed ? path.join(outDir, `.ref-window-${process.pid}.mp4`) : refPath;
   try {
     const { renderPage } = await import('./render-page.mjs');
-    await renderPage(htmlPath, tmpMp4, { fps: 30, w: opts.w, h: opts.h, durArg: to });
+    await renderPage(htmlPath, tmpMp4, { fps: 30, w: opts.w, h: opts.h, blur: opts.blur, from, durArg: to - from });
+    if (windowed) {
+      ffmpegOrDie(['-v', 'error', '-y', '-i', refPath, '-ss', String(from), '-to', String(to),
+        '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '18', refWindow], refWindow, 'ref window slice');
+    }
     // Unlike a bare `--compare` (report-only, this repo's own house rule), a bare-page check has no
     // film/post-draft step wrapping it to refuse the ship on its behalf, so THIS is the one place that
     // must actually fail the process: a recreation agent running this standalone needs a non-zero exit.
-    const { ok } = runCompare(refPath, tmpMp4, outDirRoot, 0, to, opts.filmArg);
+    const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg);
     if (!ok) process.exitCode = 1;
   } finally {
     fs.rmSync(tmpMp4, { force: true });
+    if (windowed) fs.rmSync(refWindow, { force: true });
   }
 }
 
@@ -837,12 +848,9 @@ async function seekPage(page, t) {
 // every element matching `sel` at one instant. Built because agents kept writing throwaway
 // page.evaluate() scripts by hand to answer exactly this (one stalled twice doing it).
 async function runProbe(htmlPath, atS, sel, outDir) {
-  const root = path.resolve(htmlPath, '..');
-  const rel = path.basename(htmlPath);
-  const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  const { page, url, close } = await openPreview(htmlPath, { width: 1920, height: 1080 });
   try {
-    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    await page.goto(url, { waitUntil: 'load' });
     await seekPage(page, atS);
     const rows = await page.evaluate((selector) => {
       const shortSelInPage = (el) => (el.id ? `#${el.id}` : (el.className && String(el.className).trim() ? `.${String(el.className).split(' ')[0]}` : el.tagName.toLowerCase()));
@@ -894,24 +902,21 @@ async function runProbe(htmlPath, atS, sel, outDir) {
       if (!row.animations.length) console.log('    (no active animation on this element)');
     }
     console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'probe.json'))}`);
-  } finally { await closePage(); closeServer(); }
+  } finally { await close(); }
 }
 
 // ── --look: a still per requested time, gridded, optionally paired against the reference at the same
 // timestamps. Built because 0 of 7 agents made a still frame before touching motion; layout faults
 // then surfaced only after a full render.
 async function runLook(htmlPath, times, refPath, outDir) {
-  const root = path.resolve(htmlPath, '..');
-  const rel = path.basename(htmlPath);
-  const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  const { page, url, close } = await openPreview(htmlPath, { width: 1920, height: 1080 });
   fs.rmSync(outDir, { recursive: true, force: true });
   fs.mkdirSync(outDir, { recursive: true });
   const longEdge = 1568;
   const tileW = Math.floor(longEdge / 3);
   const tileH = Math.round((tileW * 1080) / 1920);
   try {
-    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    await page.goto(url, { waitUntil: 'load' });
     const cellFiles = [];
     for (const [i, t] of times.entries()) {
       await seekPage(page, t);
@@ -945,7 +950,7 @@ ${gridPaths.map((p) => `- ${path.relative(ROOT, p)}`).join('\n')}
 `;
     fs.writeFileSync(path.join(outDir, 'index.md'), index);
     console.log(`✓ look: ${gridPaths.length} grid(s) -> ${path.relative(ROOT, path.join(outDir, 'index.md'))}`);
-  } finally { await closePage(); closeServer(); }
+  } finally { await close(); }
 }
 
 // ── --layout: clipped/overflowing text, text overlapping text, off-frame elements, and two opaque
@@ -1041,13 +1046,10 @@ async function domLayoutFindings(page) {
 }
 
 async function runLayout(htmlPath, times, outDir, filmArg) {
-  const root = path.resolve(htmlPath, '..');
-  const rel = path.basename(htmlPath);
-  const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  const { page, url, close } = await openPreview(htmlPath, { width: 1920, height: 1080 });
   fs.mkdirSync(outDir, { recursive: true });
   try {
-    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    await page.goto(url, { waitUntil: 'load' });
     const perTime = [];
     for (const t of times) { await seekPage(page, t); perTime.push({ t, findings: await domLayoutFindings(page) }); }
     const total = perTime.reduce((n, p) => n + p.findings.length, 0);
@@ -1067,7 +1069,7 @@ async function runLayout(htmlPath, times, outDir, filmArg) {
     console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'layout.md'))}`);
 
     if (filmArg) writeReceipt('layout', filmArg, { ok: total === 0, faultCount: total, html: htmlPath, times });
-  } finally { await closePage(); closeServer(); }
+  } finally { await close(); }
 }
 
 function writeOutputs({ outDir, video, dur, fps, cutTimes, energy, holds, beats, gridPaths }) {
@@ -1130,7 +1132,8 @@ async function main() {
 
   if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
     + '| --shot <from>-<to> [--fps N] [--page <html>] | --compare <draft.mp4> [--from s --to s] '
-    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] [--ref <mp4> [--film <f.json>]] '
+    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] '
+    + '[--ref <mp4> [--film <f.json>] [--final] [--w N --h N] [--blur N]] '
     + '| --sheet-check <ref.json> <film.json> [--film <f.json>] '
     + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...> [--film <f.json>]');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
@@ -1142,7 +1145,7 @@ async function main() {
   if (argv.includes('--probe')) return dispatchProbe(video, positional, flag);
   if (argv.includes('--look')) return dispatchLook(video, positional, flag);
   if (argv.includes('--layout')) return dispatchLayout(video, positional, flag);
-  if (argv.includes('--dom')) return dispatchDom(video, positional, flag);
+  if (argv.includes('--dom')) return dispatchDom(video, positional, flag, argv);
 
   const shotSpec = flag('--shot', null);
   if (shotSpec) return dispatchShot(video, positional, shotSpec, flag);
@@ -1180,21 +1183,27 @@ function dispatchLayout(video, positional, flag) {
   return runLayout(video, times, outDir, filmArg);
 }
 
-function dispatchDom(video, positional, flag) {
+function dispatchDom(video, positional, flag, argv) {
   const fromArg = Number(flag('--from', 0));
   const toArg = flag('--to', null);
   const domFps = Number(flag('--dom-fps', 30));
-  const w = Number(flag('--w', 1920));
-  const h = Number(flag('--h', 1080));
   const idsArg = flag('--ids', null);
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+  // `--dom --ref <mp4>`: required-motion-match on a bare page, no scene.json, no draft render
+  // (`make next PAGE=<html> REF=<mp4>`, item 2 of this file's own required-motion-match doctrine). This
+  // is the one branch that renders the page through render-page.mjs, the real cost measured on this
+  // repo (~57s for a 5s window at full size with blur), so it alone defaults to a half-size draft;
+  // --final renders the way `make ship` does (full size, full length, motion blur), for the one check
+  // that must match the actual shipped cut rather than a fast iteration draft.
+  const refArg = flag('--ref', null);
+  const final = argv.includes('--final');
+  const w = Number(flag('--w', refArg && !final ? 960 : 1920));
+  const h = Number(flag('--h', refArg && !final ? 540 : 1080));
+  const blur = Number(flag('--blur', final ? 3 : 1));
   const opts = {
-    from: fromArg, to: toArg != null ? Number(toArg) : null, fps: domFps, w, h,
+    from: fromArg, to: toArg != null ? Number(toArg) : null, fps: domFps, w, h, blur, final,
     ids: idsArg ? idsArg.split(',') : null,
   };
-  // `--dom --ref <mp4>`: required-motion-match on a bare page, no scene.json, no draft render
-  // (`make next PAGE=<html> REF=<mp4>`, item 2 of this file's own required-motion-match doctrine).
-  const refArg = flag('--ref', null);
   if (refArg) return runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null) });
   return runDom(video, outDirRoot, opts);
 }
