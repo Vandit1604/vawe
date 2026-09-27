@@ -6,6 +6,7 @@
  "tempo": 0.5,
  "duration": 8,
  "produced": false,
+ "finish": false,
  "bg": [{ "preset": "plain" }],
  "layers": [
   {

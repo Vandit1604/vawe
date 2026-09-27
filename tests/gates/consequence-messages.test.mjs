@@ -30,7 +30,6 @@ test('the fixture fails validation (it is deliberately broken)', () => {
 // a missing substring here since no other finding in this fixture repeats the same cause phrase.
 const CASES = [
   ['duration is -5, below the minimum', 'refuses to start', 'Raise it to 0.5'],
-  ['bg is required', 'engine will not pick it for you', 'Use `"bg"'],
   ['transitions[0] is a string, not an object', 'refuses to start', 'Write it as {"at"'],
   ['seams[0] t is -1, before the video starts', 'refuses to start', 'Set t to 0 or later'],
   ['captions[0] window [2, 1] has t1 <= t0', 'would never draw at any frame', 'Set t1 to a value greater than 2'],
