@@ -102,6 +102,15 @@ Bad, filler that the linter refuses:
 - `hierarchy is good` (same failure under a different criterion's name)
 - `looks fine (composition)` (echoes the criterion label back as its own content)
 
+**A contact sheet's grid position means nothing.** Each tile is a separate, independent frame laid out
+left to right, top to bottom for reading convenience only; a tile's row and column carry no time or
+motion information. Comparing an element's position between two tiles in different rows is not
+comparing two moments, it is comparing two unrelated layouts, and calling the difference a "jump" is a
+false positive. The same misread runs the other way: a device that is deliberately visible across
+several tiles (a persistent caret, a repeated icon) is intended motion, not a "ghost". Any claim about
+motion or position must come from same-scale, full-resolution stills read in their real time order, or
+from `probe-frame` numbers, never from where a tile sits in the sheet.
+
 **One page for all of it**: `node harness/author/review-server.mjs D=<file> [REF=<ref.mp4>] [PORT=8802]`,
 served like `make tune`. It shows a frame grid per beat with a time slider, the reference side by side
 when `REF` is given, the verify block, and whatever structured judge JSON already exists for this cut,

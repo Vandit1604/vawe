@@ -110,8 +110,19 @@ export function run(name) {
   }
   const [script, ...args] = build();
   const exe = script.endsWith('.sh') ? 'sh' : process.execPath;
-  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { stdio: 'inherit', cwd: ROOT });
-  return r.status ?? 1;
+  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { encoding: 'utf8', cwd: ROOT });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  const status = r.status ?? 1;
+  // Every gate prints its own ✓/✗ lines, but a failure could scroll off above the exit code.
+  // One summary line, always last, so a failure is never buried under passing checks.
+  if (!env.JSON) {
+    const failing = `${r.stdout || ''}${r.stderr || ''}`.split('\n').filter((l) => l.includes('✗'));
+    console.log(status === 0
+      ? `✓ ${name}: passed`
+      : `✗ ${name}: ${failing.length || 1} failed: ${(failing[0] || `exited ${status}`).trim()}`);
+  }
+  return status;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

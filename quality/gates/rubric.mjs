@@ -125,6 +125,12 @@ these frames cannot answer, write \`CANNOT TELL\` for it and name the evidence t
 \`CANNOT TELL\` is a real answer and costs you nothing. A guess dressed as a finding costs the author a
 render, and it arrives in the same shape as a true one, so nobody downstream can tell them apart. If
 every dimension a frame CAN answer is clear and the rest are \`CANNOT TELL\`, the frame is not a FIX.
+
+## The sheet is a grid of separate frames, not a filmstrip
+Each tile's row/column position is a layout choice, not a moment in time. Do not compare an element's
+position across tiles in different rows and call it a "jump"; do not call a device that is meant to
+stay on screen across several tiles a "ghost". Read motion and position claims off same-scale,
+full-resolution stills in real time order, or off \`probe-frame\` numbers, never off where a tile sits.
 `;
 }
 
