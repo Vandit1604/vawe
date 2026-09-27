@@ -151,6 +151,19 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
   (`easeInCubic`/`easeOutCubic`/`linear`, read off whether the move speeds up or slows down), ready to
   paste into `motion[]`. It is a brightness-threshold tracker, not a model: pick a box around one
   high-contrast subject (a cursor, a logo, a card) over a roughly flat ground.
+- **Seeing a shot densely, before matching it: `make study REF=<reference.mp4> SHOT=<from>-<to>`
+  (`harness/media/see.mjs --shot`).** A wide 3x3 grid or a beat-level SSIM can both miss a shot that
+  is quietly under-animated in the middle; this samples one window at FPS=<n> (default 10) into dense
+  timestamped grids plus that window's own motion curve every 0.5s, written under the `see` output dir.
+- **Checking a draft's motion against the reference, at the same timestamps:
+  `make study REF=<reference.mp4> COMPARE=<draft.mp4> [FROM=<s> TO=<s>] [D=<file.json>]`
+  (`harness/media/see.mjs --compare`).** Side-by-side grids (reference top, draft bottom, every 0.25s)
+  plus a per-0.5s energy table marking a window "too still" when the draft moves under half the
+  reference's rate, and both clips' longest still span.
+- **`D=<file.json>` records the run against that film.** A film with a top-level
+  `"reference": "<path>"` field gets this check run automatically by the post-draft loop
+  (`quality/gates/post-draft.mjs`) before verify/judges, waivable with
+  `{"authoring":{"allow":["motion-still"],"_why":{"motion-still":"…"}}}`.
 
 ## The honest ceiling
 Two things bound 1:1 fidelity and are worth stating rather than faking:

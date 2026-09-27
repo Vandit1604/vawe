@@ -33,6 +33,29 @@ export function judgeBrief(filmArg, run) {
   ].join('\n');
 }
 
+// `scene.reference`: the reference video this film was built to match (a plain path, the same
+// free-form convention `scene.authoring` already uses). A film that declares one gets its draft's
+// motion checked against it before verify/judges: a rendered cut that "looks right" in a single still
+// can still read as stalled net motion once played against the thing it was built to match. Returns
+// null when the film names no reference (nothing to check) or the check already passed.
+function motionStep(scene, filmPath, filmArg, mp4, allow) {
+  if (!scene.reference) return null;
+  const motion = readReceipt('motion-compare', filmPath);
+  if (!motion.exists || motion.stale) {
+    return { step: 'motion', done: false,
+      next: `make study REF=${scene.reference} COMPARE=${mp4} D=${filmArg}`,
+      why: `this film declares a reference (${scene.reference}) but its draft has not been checked against it yet.` };
+  }
+  if (motion.receipt.ok === false && !isWaivedBy(allow, 'motion-still')) {
+    return { step: 'motion', done: false,
+      next: `make study REF=${scene.reference} COMPARE=${mp4} D=${filmArg}`,
+      why: `${motion.receipt.tooStillCount} window(s) read "too still" against the reference last run `
+        + `(${(motion.receipt.tooStillWindows || []).map((w) => `${w.t0}-${w.t1}s`).join(', ')}). Fix the `
+        + 'motion and re-run, or waive with {"authoring":{"allow":["motion-still"],"_why":{"motion-still":"…"}}}.' };
+  }
+  return null;
+}
+
 /**
  * postDraftStep(filmArg) -> { step, done, next, why, brief? }. `next` is always ONE runnable command
  * (`quality/gates/next.mjs`'s own contract: run it, stop, re-derive on the next call). `done: true` only
@@ -66,6 +89,9 @@ export function postDraftStep(filmArg) {
       why: `${conform.receipt.failedCount} brief claim(s) failed last run (see the fix: lines it printed). `
         + `Fix them and re-run, or waive with {"authoring":{"allow":["conform-fail"],"_why":{"conform-fail":"…"}}}.` };
   }
+
+  const motionFail = motionStep(scene, filmPath, filmArg, mp4, allow);
+  if (motionFail) return motionFail;
 
   const verify = readReceipt('verify', filmPath);
   if (!verify.exists || verify.stale) {
