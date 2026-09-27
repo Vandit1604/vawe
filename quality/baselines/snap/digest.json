@@ -76,18 +76,6 @@
    "sig": "ffec8256e7e332e6",
    "font": "db51b5ddc8c7"
   },
-  "example-product-promo": {
-   "sig": "695a73f43c2f443d",
-   "font": "db51b5ddc8c7"
-  },
-  "example-product-promo.beatsync": {
-   "sig": "a127b94d5d74d4a8",
-   "font": "db51b5ddc8c7"
-  },
-  "example-swiss-grid": {
-   "sig": "44c2317c1044e4d0",
-   "font": "db51b5ddc8c7"
-  },
   "glass": {
    "sig": "5e3894109140cdc7",
    "font": "db51b5ddc8c7"
@@ -98,14 +86,6 @@
   },
   "hero-site": {
    "sig": "36410f8e60a87d4a",
-   "font": "db51b5ddc8c7"
-  },
-  "higgsfield-recreation": {
-   "sig": "4219e184edeff90e",
-   "font": "db51b5ddc8c7"
-  },
-  "kanban-drag": {
-   "sig": "242610c555c72170",
    "font": "db51b5ddc8c7"
   },
   "keyframe": {
@@ -122,18 +102,6 @@
   },
   "ledgerline-shown": {
    "sig": "12c1c77d025bbd48",
-   "font": "db51b5ddc8c7"
-  },
-  "linear-agents": {
-   "sig": "bbc5abe062885559",
-   "font": "db51b5ddc8c7"
-  },
-  "linear-journey": {
-   "sig": "9338d740b652d2aa",
-   "font": "db51b5ddc8c7"
-  },
-  "linear-launch": {
-   "sig": "92a163836fbfe13c",
    "font": "db51b5ddc8c7"
   },
   "looks": {
@@ -272,10 +240,6 @@
    "sig": "a4dd03481ea9342d",
    "font": "db51b5ddc8c7"
   },
-  "showcase": {
-   "sig": "122519e22e988b19",
-   "font": "db51b5ddc8c7"
-  },
   "showcase-aspect": {
    "sig": "42bc452f4469566c",
    "font": "db51b5ddc8c7"
@@ -350,10 +314,6 @@
   },
   "stings-demo": {
    "sig": "bcc4c029635dfb5e",
-   "font": "db51b5ddc8c7"
-  },
-  "stripe": {
-   "sig": "a42e7f99b2eb218f",
    "font": "db51b5ddc8c7"
   },
   "thread": {

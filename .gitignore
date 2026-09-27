@@ -147,9 +147,7 @@ films/scene/example-*.expanded.json
 # example a clone does not have is not an example, same rule as _auto-orient above.
 !films/scene/_kinetic-cut.json
 !films/scene/_kinetic-cut-plain.json
-!films/scene/higgsfield-recreation.json
 !films/scene/zerochrome.json
-!films/scene/linear-launch.json
 !films/scene/brew-native.json
 !films/scene/aspects-demo.json
 !films/scene/app-showcase.json
