@@ -725,11 +725,23 @@ function checkWebglLive() {
     + `resampled layer takes one each), or split the beats so they do not co-exist.`);
 }
 
+// BOOT_TIMEOUT_MS bounds the whole boot body, not any one await in it, so it is the one place that
+// answers "why did neither __engineReady nor __engineError ever get set". Every step above this line
+// throws or resolves; nothing did until this existed: a captured component's own `document.fonts.ready`
+// (loadThemeFonts) can sit behind a real requestAnimationFrame, and Chrome throttles or fully withholds
+// rAF on a backgrounded/occluded tab, which many concurrent headless renders reliably produce
+// (measured: quality/gates/snap-scenes.mjs on brew-launch, and site/test/editor.test.mjs under load).
+// Native window.setTimeout still fires there (installVirtualClock keeps timers native through boot,
+// see its own comment), so a plain setTimeout race is the one thing not itself at risk of the same
+// stall. `boot(build)` is the ONE caller every render page and every test goes through, so a fix here
+// is a fix for all of them, not a timeout added at each call site.
+const BOOT_TIMEOUT_MS = 45000;
+
 export async function boot(build) {
   const params = new URLSearchParams(location.search);
   const dataUrl = params.get('data');
   const fps = Number(params.get('fps')) || FPS;
-  try {
+  const bootBody = async () => {
     await loadRegisteredFontsBestEffort();
     if (!dataUrl) throw new Error('no ?data= in the scene URL, nothing names the JSON to render');
     const data = await fetchJson(dataUrl, 'scene data');
@@ -755,8 +767,21 @@ export async function boot(build) {
     // and chromedp observes __engineReady in rAF-polling mode while rAF is still native.
     window.__engineReady = true;
     window.__engine.renderFrame(0);
+  };
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(
+      `boot timed out after ${BOOT_TIMEOUT_MS}ms: an awaited step never resolved or rejected `
+      + `(a hung fetch, a font load, or a requestAnimationFrame withheld from a backgrounded/`
+      + `contended tab). Neither __engineReady nor __engineError would otherwise be set.`,
+    )), BOOT_TIMEOUT_MS);
+  });
+  try {
+    await Promise.race([bootBody(), timeout]);
   } catch (e) {
     window.__engineError = String(e && e.stack ? e.stack : e);
     document.title = 'ENGINE_ERROR';
+  } finally {
+    clearTimeout(timer);
   }
 }
