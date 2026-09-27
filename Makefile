@@ -395,6 +395,7 @@ stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next co
 
 next: ## [preflight] RUN the one command the stage names, then stop (D=<film>, or PAGE=<html> REF=<mp4> for a bare page's required-motion-match, no film needed; FROM=/TO= windows a half-size draft, FINAL=1 checks the full render)
 ifdef PAGE
+	@node quality/gates/anim-traps.mjs $(PAGE)
 	@node harness/media/see.mjs $(PAGE) --dom --ref $(REF) $(if $(D),--film $(D),) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(FINAL),--final)
 else
 	@node quality/gates/next.mjs $(D)
