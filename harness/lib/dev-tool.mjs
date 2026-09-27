@@ -107,6 +107,7 @@ export const CUSTOM = {
   },
   'edge-check': () => spawnJs('quality/gates/edge-check.mjs', [env.D, ...json()]),
   'formats': () => runMake(['build']) || (spawnSync(path.join(ROOT, 'bin/vawe'), ['--list'], { stdio: 'inherit', cwd: ROOT }).status || 0),
+  'new': () => spawnJs('harness/dev/recreation-new.mjs', []),
   'plan-judge': () => spawnJs('harness/author/critics.mjs', [env.D, ...(env.RECORD ? ['--record-plan', env.RECORD] : (env.SHOW ? ['--show-plan-verdict'] : ['--plan-judge']))]),
   'worktrees': () => spawnJs('harness/dev/worktree-prune.mjs', [...(env.PRUNE ? ['--prune'] : [])]),
 };
