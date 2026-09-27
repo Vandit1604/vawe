@@ -2,7 +2,6 @@
   "module": "scene",
   "theme": "default",
   "aspect": "16:9",
-  "produced": false,
   "authoring": {
     "allow": [
       "no-preflight",

@@ -1937,12 +1937,6 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
   const choreo = produceBaseline({ ...base(), layers: [{ type: 'text', text: 'x', motion: [{ t: 0, x: 0 }, { t: 2, x: 50 }] }] }, {});
   ok('produce: a choreographed scene gets no camera', choreo.camera === undefined && choreo.cameraMove === undefined);
 
-  const off = produceBaseline({ ...base(), produced: false }, {});
-  ok('produce: "produced": false stays camera-free', off.camera === undefined);
-  const offSugar = produceBaseline({ ...base(), produced: false, cameraMove: { move: 'slowPush', dur: 4 } }, {});
-  ok('produce: "produced": false still BAKES the author\'s own sugar (never ignores a written field)',
-    offSugar.cameraMove === undefined && Array.isArray(offSugar.camera) && offSugar.camera.length > 1);
-
   let msg = '';
   try { produceBaseline({ ...base(), camera: [{ t: 0, s: 1 }], cameraMove: { move: 'slowPush' } }, {}); } catch (e) { msg = e.message; }
   ok('produce: camera + cameraMove together is refused, never silently clobbered', /BOTH/.test(msg));

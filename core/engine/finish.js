@@ -123,8 +123,10 @@ function resolveGrain(data, amount) {
 const DEFAULT_FINISH = { grain: 0.15, vignette: 0.1 };
 
 export function resolveFinishLayers(data, W, H) {
-  const f = data.finish === undefined ? DEFAULT_FINISH : data.finish;
+  const filled = data.finish === undefined;
+  const f = filled ? DEFAULT_FINISH : data.finish;
   if (!f) return;
+  if (filled) console.log(`filled: no \`finish\` declared, filled with the default grade (${JSON.stringify(DEFAULT_FINISH)})`);
   const total = Number(data.duration) || 9999;
   const extra = [];
   for (const [key, build] of Object.entries(LAYER_FROM)) if (f[key]) extra.push(build(f[key], W, H, total));

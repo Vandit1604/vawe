@@ -1,35 +1,35 @@
 {
  "scenes": {
   "app-showcase": {
-   "sig": "7788fc4dfdf3fc47",
+   "sig": "9c2aaf32608a5077",
    "font": "db51b5ddc8c7"
   },
   "argus-launch": {
-   "sig": "5f9254645626fc62",
+   "sig": "3f62265ddaa3368e",
    "font": "db51b5ddc8c7"
   },
   "aspects-demo": {
-   "sig": "85933ceecf7998d6",
+   "sig": "914e6105dba6c472",
    "font": "db51b5ddc8c7"
   },
   "brew-launch": {
-   "sig": "e753f541eda16232",
+   "sig": "96ce0b62c169d30a",
    "font": "db51b5ddc8c7"
   },
   "brew-launch-act1": {
-   "sig": "b0734262bd0257c2",
+   "sig": "cb55cbe9feccfb85",
    "font": "db51b5ddc8c7"
   },
   "brew-launch.beatsync": {
-   "sig": "e753f541eda16232",
+   "sig": "96ce0b62c169d30a",
    "font": "db51b5ddc8c7"
   },
   "brew-native": {
-   "sig": "6294fa712e38c370",
+   "sig": "74f58aaa7f417c13",
    "font": "db51b5ddc8c7"
   },
   "brew-native.beatsync": {
-   "sig": "a0a6d55d787edc07",
+   "sig": "ca4fe8b5058dec26",
    "font": "db51b5ddc8c7"
   },
   "cadence": {
@@ -37,7 +37,7 @@
    "font": "db51b5ddc8c7"
   },
   "cadence-film": {
-   "sig": "bf476ae0bcbed177",
+   "sig": "199f9cfa4eeff2f9",
    "font": "db51b5ddc8c7"
   },
   "canvasfx-reel": {
@@ -45,7 +45,7 @@
    "font": "db51b5ddc8c7"
   },
   "chromatic": {
-   "sig": "cd616ba76832eda7",
+   "sig": "e6965b4f5f0d007c",
    "font": "db51b5ddc8c7"
   },
   "cuts-demo": {
@@ -53,23 +53,23 @@
    "font": "db51b5ddc8c7"
   },
   "demo-interactions": {
-   "sig": "753ca7a944806ed3",
+   "sig": "1c9de15abf4dcb9f",
    "font": "db51b5ddc8c7"
   },
   "ditherkit": {
-   "sig": "0000cb1ee33f267b",
+   "sig": "437c198565db5818",
    "font": "db51b5ddc8c7"
   },
   "example-html-bg": {
-   "sig": "f7bab8bbea0cc6ee",
+   "sig": "7cc2a3e5b843b8ae",
    "font": "db51b5ddc8c7"
   },
   "example-kinetic-type": {
-   "sig": "4fb874a535ed6bc1",
+   "sig": "dfc65be7336dc269",
    "font": "db51b5ddc8c7"
   },
   "example-kinetic-type.beatsync": {
-   "sig": "cdf6bcac190c311d",
+   "sig": "241b24ca447afb36",
    "font": "db51b5ddc8c7"
   },
   "example-metallic-bg": {
@@ -89,19 +89,19 @@
    "font": "db51b5ddc8c7"
   },
   "keyframe": {
-   "sig": "5ee7603b4ad1e995",
+   "sig": "554ba221353b5189",
    "font": "db51b5ddc8c7"
   },
   "ledgerline-cyber": {
-   "sig": "0294de2154a785e7",
+   "sig": "304d9c12ba411154",
    "font": "db51b5ddc8c7"
   },
   "ledgerline-neon": {
-   "sig": "02211f2174d9801b",
+   "sig": "d078ce5975493e8a",
    "font": "db51b5ddc8c7"
   },
   "ledgerline-shown": {
-   "sig": "12c1c77d025bbd48",
+   "sig": "d51f2105e176cdda",
    "font": "db51b5ddc8c7"
   },
   "looks": {
@@ -113,7 +113,7 @@
    "font": "db51b5ddc8c7"
   },
   "motion-showcase": {
-   "sig": "5d62d411c1ea27bc",
+   "sig": "8a101a032d75dedb",
    "font": "db51b5ddc8c7"
   },
   "motion-test": {
@@ -121,7 +121,7 @@
    "font": "db51b5ddc8c7"
   },
   "northwind": {
-   "sig": "5bdf1ce41f1215d0",
+   "sig": "2bfee949c08272b7",
    "font": "db51b5ddc8c7"
   },
   "one-word": {
@@ -149,7 +149,7 @@
    "font": "db51b5ddc8c7"
   },
   "paint-demo": {
-   "sig": "50020e070ff56074",
+   "sig": "bc8df1f0818dab9a",
    "font": "db51b5ddc8c7"
   },
   "playhead": {
@@ -161,7 +161,7 @@
    "font": "f3817797e998"
   },
   "post-corva": {
-   "sig": "9f017855f66bc2ef",
+   "sig": "2912ed1ecca0881a",
    "font": "db51b5ddc8c7"
   },
   "post-determinism": {
@@ -185,11 +185,11 @@
    "font": "db51b5ddc8c7"
   },
   "post-trailhead": {
-   "sig": "3cdf3726e66d9956",
+   "sig": "8f47a7cc2806b66a",
    "font": "db51b5ddc8c7"
   },
   "preface-launch": {
-   "sig": "111f0d845aed77ba",
+   "sig": "17e28a0ef0d8d63d",
    "font": "db51b5ddc8c7"
   },
   "process": {
@@ -197,7 +197,7 @@
    "font": "db51b5ddc8c7"
   },
   "product-feature-tour": {
-   "sig": "1ef9db7eb2c0a8a1",
+   "sig": "7439671631b8b6da",
    "font": "db51b5ddc8c7"
   },
   "ransom-color-demo": {
@@ -213,15 +213,15 @@
    "font": "db51b5ddc8c7"
   },
   "react-demo": {
-   "sig": "0a67e28b28d923e6",
+   "sig": "7a157077be362593",
    "font": "db51b5ddc8c7"
   },
   "refstudy": {
-   "sig": "118b3c91102cceb9",
+   "sig": "c73e8107a88584be",
    "font": "db51b5ddc8c7"
   },
   "saas-hero-launch": {
-   "sig": "4038a7739f84dcad",
+   "sig": "7f3a5e5678674e55",
    "font": "db51b5ddc8c7"
   },
   "sample": {
@@ -229,15 +229,15 @@
    "font": "db51b5ddc8c7"
   },
   "seam-demo": {
-   "sig": "44cbd9774f59c98a",
+   "sig": "196db520071237ff",
    "font": "db51b5ddc8c7"
   },
   "search-demo": {
-   "sig": "d5d391af7f925a0e",
+   "sig": "2a25c4852766367e",
    "font": "db51b5ddc8c7"
   },
   "sf-recreation": {
-   "sig": "a4dd03481ea9342d",
+   "sig": "4b85a1681fdf5005",
    "font": "db51b5ddc8c7"
   },
   "showcase-aspect": {
@@ -245,11 +245,11 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-composition": {
-   "sig": "70a71e23f055df57",
+   "sig": "8c1d5b3424b7e0e1",
    "font": "db51b5ddc8c7"
   },
   "showcase-count": {
-   "sig": "270894a28f3906eb",
+   "sig": "c48cff0f39d5482c",
    "font": "db51b5ddc8c7"
   },
   "showcase-cuts": {
@@ -257,11 +257,11 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-data": {
-   "sig": "f1cec187c57baa01",
+   "sig": "b8b6ef5118d0480b",
    "font": "db51b5ddc8c7"
   },
   "showcase-flight-globe": {
-   "sig": "4a765c65cc02d9c4",
+   "sig": "f2489d6f79e6e0ea",
    "font": "db51b5ddc8c7"
   },
   "showcase-globe": {
@@ -269,19 +269,19 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-intro": {
-   "sig": "e65be9c03921b7c5",
+   "sig": "50bf22246a9644ca",
    "font": "db51b5ddc8c7"
   },
   "showcase-lumen": {
-   "sig": "aba7b9d214325b93",
+   "sig": "aafc53cfd06cdb26",
    "font": "db51b5ddc8c7"
   },
   "showcase-scenecut": {
-   "sig": "e5f938b76d8f2ef4",
+   "sig": "1a9bcea649eda6c8",
    "font": "db51b5ddc8c7"
   },
   "showcase-spot": {
-   "sig": "217447298a49bbae",
+   "sig": "276e533b8f5195c1",
    "font": "db51b5ddc8c7"
   },
   "showcase-stings": {
@@ -289,23 +289,23 @@
    "font": "db51b5ddc8c7"
   },
   "showcase-type": {
-   "sig": "78d5f54619edf5fa",
+   "sig": "badd670bf7ef3377",
    "font": "db51b5ddc8c7"
   },
   "showcase-type-labour": {
-   "sig": "bb0b9483f56362d0",
+   "sig": "2b0be21c70ad7c72",
    "font": "db51b5ddc8c7"
   },
   "showcase-ui": {
-   "sig": "82bd759b462e4b51",
+   "sig": "3467c4f872477ef9",
    "font": "db51b5ddc8c7"
   },
   "showcase-vawe-reel": {
-   "sig": "797c069533b15579",
+   "sig": "e4921d84df91ddbf",
    "font": "db51b5ddc8c7"
   },
   "showcase-vocabulary": {
-   "sig": "6bb36a66db8cc9ae",
+   "sig": "de535d976628acbd",
    "font": "db51b5ddc8c7"
   },
   "site-backdrop": {
@@ -313,7 +313,7 @@
    "font": "db51b5ddc8c7"
   },
   "stings-demo": {
-   "sig": "bcc4c029635dfb5e",
+   "sig": "f59731df6a1025c8",
    "font": "db51b5ddc8c7"
   },
   "thread": {
@@ -321,15 +321,15 @@
    "font": "db51b5ddc8c7"
   },
   "threadcite-3s": {
-   "sig": "e480f42f874c6f38",
+   "sig": "3b0fe17dc42de7e3",
    "font": "db51b5ddc8c7"
   },
   "threadcite-open": {
-   "sig": "1b28d21276b6ffbe",
+   "sig": "ea0089ed2ee58efd",
    "font": "db51b5ddc8c7"
   },
   "three-showcase": {
-   "sig": "fcadd1d6ab75731f",
+   "sig": "84fcfc77e67a50ed",
    "font": "db51b5ddc8c7"
   },
   "tierc-reel": {
@@ -341,7 +341,7 @@
    "font": "db51b5ddc8c7"
   },
   "tpot-launch": {
-   "sig": "2f147e43c845a6c7",
+   "sig": "27220eb8aa300379",
    "font": "db51b5ddc8c7"
   },
   "type-demo": {
@@ -349,11 +349,11 @@
    "font": "db51b5ddc8c7"
   },
   "typing-catalog": {
-   "sig": "7bc5a79e9447a7cf",
+   "sig": "1bc79174b3116535",
    "font": "db51b5ddc8c7"
   },
   "vawe-explainer-v2": {
-   "sig": "98a3608c51d98fdd",
+   "sig": "634e6d7338c00a0f",
    "font": "db51b5ddc8c7"
   },
   "vawe-flow-2": {
@@ -365,15 +365,15 @@
    "font": "db51b5ddc8c7"
   },
   "vawe-identity": {
-   "sig": "0830f67d97b4f545",
+   "sig": "0cc98f5d3dbe84f8",
    "font": "db51b5ddc8c7"
   },
   "vawe-intro": {
-   "sig": "3bd024d4c73b3406",
+   "sig": "d314fd707a1280b0",
    "font": "db51b5ddc8c7"
   },
   "vawe-launch": {
-   "sig": "7f9d0912ad2a3efb",
+   "sig": "d89588ce63695927",
    "font": "db51b5ddc8c7"
   },
   "vawe-oneline": {
@@ -385,7 +385,7 @@
    "font": "db51b5ddc8c7"
   },
   "vawe-shader-terminal": {
-   "sig": "25110d44f2ca672f",
+   "sig": "e3c46b179f3838fe",
    "font": "db51b5ddc8c7"
   },
   "vawe-teaser": {

@@ -38,7 +38,7 @@ design, laid over the theme's numbers (`make dev-tool X=design-spec D=<film>` se
 | [`handover-glide`](handover-glide.md) | one layer becomes another | built: `scene.js`, `junctions.js` default 0.9s |
 | [`stagger-total`](stagger-total.md) | a group arrives with a stagger | warns: `make dev-tool X=direct` |
 | [`first-arrival`](first-arrival.md) | a layer's first entrance in a beat | eye |
-| [`anticipate-default`](anticipate-default.md) | a directional entrance after the film's opening wave | built: `core/engine/produce.js` |
+| [`anticipate-default`](anticipate-default.md) | a directional entrance after the film's opening wave | eye (the engine no longer adds this by default; write `anticipate` yourself) |
 | [`speed-bands`](speed-bands.md) | choosing a duration | warns: `make dev-tool X=direct` |
 | [`video-scale`](video-scale.md) | sizing a hero graphic or type | warns: `make check GATE=audit` |
 | [`text-on-flat`](text-on-flat.md) | placing a headline over a background fx | gated: `make check GATE=audit` |
