@@ -1,0 +1,53 @@
+#!/bin/sh
+# pre-commit gate: the SAME gate code pre-push runs (harness/lib/check-gate.mjs, GATE=<name> -> the
+# one script), moved up to commit time so an em dash, a stale generated file, or a dropped word-action
+# vocabulary is caught before the commit exists rather than four commits later at push. Four pushes
+# landed on this repo blocked late by exactly these four checks; each is also in pre-push's own FAST
+# tier (harness/dev/verify-tiers.sh), so nothing here can disagree with what push already enforces.
+#
+# Scoped by SCOPE, harness/dev/no-emdash.mjs's own list of paths this framework cares about (asked,
+# never a second list): a commit touching none of them (site-only, docs-site-only, an asset) skips
+# the whole hook. In scope, every check below is already proven fast in pre-push's own comments
+# (each well under a couple of seconds); this just runs the same four earlier.
+#
+# Bypass with `git commit --no-verify` when you know better.
+set -u
+
+staged="$(git diff --cached --name-only --diff-filter=ACMR)"
+[ -z "$staged" ] && exit 0
+
+scope_words="$(node -e 'import("./harness/dev/no-emdash.mjs").then((m) => console.log(m.SCOPE.join(" ")))' 2>/dev/null)"
+if [ -n "$scope_words" ]; then
+  # shellcheck disable=SC2086
+  in_scope="$(git diff --cached --name-only --diff-filter=ACMR -- $scope_words ':!site' ':!docs-site')"
+  [ -z "$in_scope" ] && exit 0
+fi
+
+# A commit made on the wrong branch inside a linked worktree is easy to lose: it looks fine locally
+# and the lead never sees it merge because nothing is watching that branch. `git worktree add`
+# (harness/dev/worktree.sh) and this repo's own agent worktrees both name the branch after the
+# worktree directory (`wt-<name>` / `worktree-<name>`), so a mismatch here is real signal, not noise.
+# Warn only: a wrong branch is the author's business, not a reason to block the commit.
+wt_root="$(git rev-parse --show-toplevel 2>/dev/null)"
+main_root="$(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2; exit}')"
+if [ -n "$wt_root" ] && [ -n "$main_root" ] && [ "$wt_root" != "$main_root" ]; then
+  cur_branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"
+  wt_name="$(basename "$wt_root")"
+  case "$cur_branch" in
+    "wt-$wt_name" | "worktree-$wt_name") ;;  # own branch, no warning
+    HEAD | "") ;;                            # detached HEAD, a different problem
+    *) echo "! pre-commit: this linked worktree ($wt_root) is committing on '$cur_branch', not its own branch (wt-$wt_name / worktree-$wt_name). A commit here is easy to lose if nothing else watches '$cur_branch'." >&2 ;;
+  esac
+fi
+
+for g in no-emdash generated-check word-action; do
+  if ! make check GATE="$g"; then
+    echo "✗ pre-commit blocked: framework check ($g) failed." >&2
+    exit 1
+  fi
+done
+if ! make bench-fast; then
+  echo "✗ pre-commit blocked: bench-fast (read-load / target-count ratchets) failed." >&2
+  exit 1
+fi
+exit 0
