@@ -151,15 +151,11 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
   (`easeInCubic`/`easeOutCubic`/`linear`, read off whether the move speeds up or slows down), ready to
   paste into `motion[]`. It is a brightness-threshold tracker, not a model: pick a box around one
   high-contrast subject (a cursor, a logo, a card) over a roughly flat ground.
-- **Seeing a shot densely, before matching it: `make study REF=<reference.mp4> SHOT=<from>-<to>`
-  (`harness/media/see.mjs --shot`).** A wide 3x3 grid or a beat-level SSIM can both miss a shot that
-  is quietly under-animated in the middle; this samples one window at FPS=<n> (default 10) into dense
-  timestamped grids plus that window's own motion curve every 0.5s, written under the `see` output dir.
-- **Checking a draft's motion against the reference, at the same timestamps:
-  `make study REF=<reference.mp4> COMPARE=<draft.mp4> [FROM=<s> TO=<s>] [D=<file.json>]`
-  (`harness/media/see.mjs --compare`).** Side-by-side grids (reference top, draft bottom, every 0.25s)
-  plus a per-0.5s energy table marking a window "too still" when the draft moves under half the
-  reference's rate, and both clips' longest still span.
+- **Recreating a raw page, not a scene?** Start from `make dev-tool X=new TYPE=recreation NAME=<name>
+  REF=<reference.mp4>` (`harness/dev/recreation-new.mjs`), which writes the page and a first `see` pass
+  together, then run only `make next PAGE=<page.html> REF=<reference.mp4>` in a loop until it passes,
+  then the final render. Don't reach for `see.mjs`'s flags (`--shot`, `--compare`, ...) by hand; `make
+  next` already picks the right one for where the page stands.
 - **`D=<file.json>` records the run against that film.** A film with a top-level
   `"reference": "<path>"` field gets this check run automatically by the post-draft loop
   (`quality/gates/post-draft.mjs`) before verify/judges, waivable with
