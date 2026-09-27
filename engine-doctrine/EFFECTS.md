@@ -1084,15 +1084,15 @@ One word at the top of the scene sets the default speed curve for every cut and 
 | name | what / when |
 |---|---|
 | `barn` | barn doors open from the centre outward, cinematic opener; masks |
-| `blinds` | venetian slat mask sweeps open, editorial reveal; masks |
+| `blinds` | venetian slat mask sweeps open, editorial reveal; parallel slats turn open and show the incoming beat between them |
 | `blur` | resolves out of a 16px defocus, calm, premium |
-| `clock` | clock-hand sweep reveal, masks |
+| `clock` | clock-hand sweep reveal: a radial hand turns around the centre and masks the incoming beat in behind it |
 | `collapse` | vertical fold, scaleY from 0.05 up to 1, terminal and data beats |
 | `cube` | perspective hinge with travel, the beats turning like faces of a cube |
 | `drop` | falls in from above under gravity, leaves by falling away |
 | `fade` | opacity only, 0 to 1 over the whole cut window, masks nothing |
 | `flip` | perspective hinge flip about an edge, rotates up to 55 degrees through a 1400px perspective, cards and panels |
-| `iris` | circular reveal growing from a point (cx/cy), masks |
+| `iris` | circular reveal growing from a point (cx/cy); the incoming beat opens out of that point through a circular mask |
 | `jitter` | decaying deterministic shake, up to 14px of jitter, alarm and glitch beats only |
 | `letterbox` | cinema curtains open and close top and bottom, cinematic opener; masks |
 | `matchCut` | a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks |
@@ -1103,12 +1103,12 @@ One word at the top of the scene sets the default speed curve for every cut and 
 | `roll` | tilts in from a corner (7 degrees) and settles level |
 | `skewWhip` | sheared throw whose shear straightens as it lands, velocity you can read in the letterforms, same-background beats only |
 | `slide` | the frame travels one way, dir-aware. The plain workhorse, between same-background beats only |
-| `softiris` | feathered circular reveal from a point (cx/cy), masks |
+| `softiris` | feathered circular reveal from a point (cx/cy); the incoming beat opens through a soft-edged circular mask |
 | `softwipe` | feathered wipe, a 20%-wide gradient band instead of a hard line; masks |
 | `spin` | rotates in 90 degrees while scaling from 0.5 to 1, logos, badges, seals |
 | `squeeze` | smear-stretch along the travel axis, a speed ramp you can see |
 | `whip` | motion-blurred directional throw, travels 3.2x the cut distance and blurs up to 14px, momentum, between same-background beats only |
-| `wipe` | hard directional reveal, playful, "notice the cut"; masks |
+| `wipe` | hard directional reveal, playful, "notice the cut"; a straight edge sweeps across and masks the incoming beat in |
 | `zoom` | push-through: the leaving beat shrinks away, the arriving one lands from too close, product focus |
 
 ## Seams (2-scene blends)  `[transition]`

@@ -254,15 +254,15 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | name | words | action |
 |---|---|---|
 | `barn` | barn doors, curtains open, centre split | barn doors open from the centre outward, cinematic opener; masks |
-| `blinds` | venetian blinds, slat wipe, blinds open | venetian slat mask sweeps open, editorial reveal; masks |
+| `blinds` | venetian blinds, slat wipe, blinds open | venetian slat mask sweeps open, editorial reveal; parallel slats turn open and show the incoming beat between them |
 | `blur` | blur dissolve, defocus fade, soft blur cut | resolves out of a 16px defocus, calm, premium |
-| `clock` | clock wipe, radial sweep, clock hand sweep | clock-hand sweep reveal, masks |
+| `clock` | clock wipe, radial sweep, clock hand sweep | clock-hand sweep reveal: a radial hand turns around the centre and masks the incoming beat in behind it |
 | `collapse` | fold down, vertical collapse, squash to a line | vertical fold, scaleY from 0.05 up to 1, terminal and data beats |
 | `cube` | cube turn, rotate cube, cube rotation | perspective hinge with travel, the beats turning like faces of a cube |
 | `drop` | drop in, falls in, gravity drop | falls in from above under gravity, leaves by falling away |
 | `fade` | cross fade, dissolve, fade to black | opacity only, 0 to 1 over the whole cut window, masks nothing |
 | `flip` | card flip, page flip, hinge flip | perspective hinge flip about an edge, rotates up to 55 degrees through a 1400px perspective, cards and panels |
-| `iris` | iris in, circle reveal, spotlight reveal | circular reveal growing from a point (cx/cy), masks |
+| `iris` | iris in, circle reveal, spotlight reveal | circular reveal growing from a point (cx/cy); the incoming beat opens out of that point through a circular mask |
 | `jitter` | glitch shake, alarm jitter, quake cut | decaying deterministic shake, up to 14px of jitter, alarm and glitch beats only |
 | `letterbox` | cinema bars, letterbox open, curtains top and bottom | cinema curtains open and close top and bottom, cinematic opener; masks |
 | `matchCut` | graphic match, invisible cut, shape match cut | a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks |
@@ -273,12 +273,12 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `roll` | tilt roll, corner tilt, roll in | tilts in from a corner (7 degrees) and settles level |
 | `skewWhip` | skewed whip, sheared whip, shear pan | sheared throw whose shear straightens as it lands, velocity you can read in the letterforms, same-background beats only |
 | `slide` | push cut, slide over, travel cut | the frame travels one way, dir-aware. The plain workhorse, between same-background beats only |
-| `softiris` | feathered iris, soft circle reveal, soft spotlight | feathered circular reveal from a point (cx/cy), masks |
+| `softiris` | feathered iris, soft circle reveal, soft spotlight | feathered circular reveal from a point (cx/cy); the incoming beat opens through a soft-edged circular mask |
 | `softwipe` | feathered wipe, soft edge wipe, gradient wipe | feathered wipe, a 20%-wide gradient band instead of a hard line; masks |
 | `spin` | spin in, rotate and scale, seal spin | rotates in 90 degrees while scaling from 0.5 to 1, logos, badges, seals |
 | `squeeze` | smear cut, stretch cut, speed smear | smear-stretch along the travel axis, a speed ramp you can see |
 | `whip` | whip pan, swish pan, blur throw | motion-blurred directional throw, travels 3.2x the cut distance and blurs up to 14px, momentum, between same-background beats only |
-| `wipe` | hard wipe, directional wipe, edge wipe | hard directional reveal, playful, "notice the cut"; masks |
+| `wipe` | hard wipe, directional wipe, edge wipe | hard directional reveal, playful, "notice the cut"; a straight edge sweeps across and masks the incoming beat in |
 | `zoom` | zoom through, push through, dolly cut | push-through: the leaving beat shrinks away, the arriving one lands from too close, product focus |
 
 ## cut timing  `[cutTiming]`
@@ -1113,5 +1113,5 @@ sentence naming the mechanism. See `quality/gates/word-action.mjs` for the exact
 | `time` | passage of time, dissolve between images, time passing | passage of time, a connection, gentleness: link two images, soften, show time passing. Candidates: dissolve, fade. |
 
 ---
-_759 primitives across 68 registries, 754 meeting the word-action contract today.
+_759 primitives across 68 registries, 759 meeting the word-action contract today.
 Regenerate: `make regen`. Ratchet: `make check GATE=word-action`._
