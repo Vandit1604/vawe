@@ -146,6 +146,46 @@ export function applyBgOver(spec, over) {
   return spec;
 }
 
+// applyCssClipPath(ctx, w, h, css): the SAME clip geometry a masking cut style (wipe/iris/clock/barn/
+// letterbox/matchCut, core/cuts/presentations.js) writes as a CSS `clipPath` for the DOM, parsed back
+// into a real canvas clip region. It exists so a bg window change at a masking cut can REVEAL the
+// incoming window through the actual shape instead of the generic alpha crossfade every bg switch used
+// to do (films/scene/scene.js drawBg): an alpha blend between two saturated colours (white → cobalt)
+// passes through a pale, muddy midpoint no author asked for, and it never happens for the presentations
+// whose whole point is that nothing dissolves, something opens. Handles the three CSS clip-path
+// functions this engine's presentations ever emit: `inset()`, `circle()`, `polygon()`. A style that
+// masks through `maskImage` instead (softwipe/softiris/blinds: a feathered gradient band, not a hard
+// edge) returns false, there is no hard region to clip to; the caller falls back to a midpoint cut
+// rather than a continuing alpha blend, so the pale tint still never paints.
+export function applyCssClipPath(ctx, w, h, css) {
+  if (!css || css === 'none') return false;
+  let m = /^inset\(([^)]+)\)$/.exec(css);
+  if (m) {
+    const v = m[1].trim().split(/\s+/).map(parseFloat);
+    const [top, right, bottom, left] = v.length === 4 ? v : v.length === 2 ? [v[0], v[1], v[0], v[1]] : v.length === 1 ? [v[0], v[0], v[0], v[0]] : [v[0], v[1], v[2], v[1]];
+    const x = (left / 100) * w, y = (top / 100) * h;
+    const rw = Math.max(0, w - ((left + right) / 100) * w), rh = Math.max(0, h - ((top + bottom) / 100) * h);
+    ctx.beginPath(); ctx.rect(x, y, rw, rh); ctx.clip();
+    return true;
+  }
+  m = /^circle\(([\d.]+)% at ([\d.]+)% ([\d.]+)%\)$/.exec(css);
+  if (m) {
+    const [, rPct, cxPct, cyPct] = m.map(parseFloat);
+    const ref = Math.sqrt(w * w + h * h) / Math.SQRT2; // CSS circle()'s own percentage reference box
+    ctx.beginPath(); ctx.arc((cxPct / 100) * w, (cyPct / 100) * h, (rPct / 100) * ref, 0, Math.PI * 2); ctx.clip();
+    return true;
+  }
+  m = /^polygon\(([^)]+)\)$/.exec(css);
+  if (m) {
+    const pts = m[1].split(',').map((pair) => pair.trim().split(/\s+/).map(parseFloat));
+    ctx.beginPath();
+    pts.forEach(([px, py], i) => { const X = (px / 100) * w, Y = (py / 100) * h; if (i) ctx.lineTo(X, Y); else ctx.moveTo(X, Y); });
+    ctx.closePath(); ctx.clip();
+    return true;
+  }
+  return false; // a maskImage-only reveal (a feathered gradient band): no hard region to clip to
+}
+
 // renderBg(canvas, t, spec): paint a full scene background from a spec (base + ordered fx list).
 // spec = { base:{...}, fx:[{type:'aurora'|'dots'|'particles'|'spotlight'|'grain', ...opts}] }
 export function renderBg(ctx, w, h, t, spec) {
