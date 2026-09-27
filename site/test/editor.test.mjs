@@ -181,6 +181,28 @@ test("a scene that 404s names the file", { timeout: 90000 }, async () => {
   await page.close();
 });
 
+test("an asset that never answers still names itself, boot does not hang forever", { timeout: 90000 }, async () => {
+  // Regression for the class of bug this suite could not previously catch: a request that neither
+  // resolves nor rejects (dropped, not refused) leaves an awaited promise in core/engine/boot.js
+  // pending forever, and neither __engineReady nor __engineError is ever set — the same shape as the
+  // brew-launch snap-scenes timeout and this file's own 17-minute hang under load. Simulated here by
+  // intercepting the theme fetch and never calling respond/continue/abort on it, which is exactly
+  // what a stalled connection to a dead host looks like from the page's side.
+  const page = await open(async (p) => {
+    await p.setRequestInterception(true);
+    p.on("request", (r) => { if (!r.url().endsWith("/themes/vawe.json")) r.continue(); });
+  });
+  await settled(page);
+  await page.select("#ed-scene", "hero-site");
+  await page.waitForFunction(
+    () => document.querySelector(".sp-frame")?.contentWindow?.__engineError,
+    { timeout: 55000, polling: 500 },
+  );
+  const err = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engineError);
+  assert.match(err, /boot timed out/, "a dropped request must still resolve to a named __engineError");
+  await page.close();
+});
+
 test("every control is reachable by keyboard, and the code pane can be left", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
