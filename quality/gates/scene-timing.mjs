@@ -254,11 +254,12 @@ export function sceneTiming(input) {
   const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])
     .filter((c) => c && typeof c === 'object' && c.style && c.style !== 'none' && num(c.t, null) !== null)
     .map((c) => num(c.t, 0)))].sort((a, b) => a - b);
+  // core/engine/produce.js no longer turns `sceneUnits` on by default (the owner's rule: fill blanks,
+  // never add structure), so `d.sceneUnits` is exactly what the author wrote, nothing inferred here.
+  const sceneUnits = d.sceneUnits === true;
   const choreographed = layers.some(function has(L) {
     return L && typeof L === 'object' && ((Array.isArray(L.motion) && L.motion.length > 1) || (L.children || []).some(has));
   });
-  const sceneUnits = d.sceneUnits === true
-    || (d.sceneUnits == null && d.produced !== false && cutTimes.length > 0 && !choreographed);
   // the cut window that closes beat i, matching scene.js's `dur ?? 0.4`.
   const cutDurAt = (t) => {
     const c = (Array.isArray(d.cuts) ? d.cuts : []).find((x) => x && num(x.t, null) === t);
