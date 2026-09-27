@@ -162,11 +162,14 @@ ${section('MOTION (score from what adjacent frames imply; write CANNOT_TELL in e
   "criteria": {
 ${criteria.map((c) => `    "${c.code}": {"score": 1-5, "evidence": "<quoted visual observation>", "t": <seconds>}`).join(',\n')}
   },
+  "overall": 1-10,
   "verdict": "PASS|FIX"
 }
 \`\`\`
 Every \`evidence\` string must name what you actually SEE (a timestamp/beat, the exact element, the
-exact defect), never a bare number. Then record it:
+exact defect), never a bare number. \`overall\` is YOUR OWN holistic 1-10 read of this cut, never
+averaged with the other judge's: \`make ship\` requires both independent judges at 7 or above. Then
+record it:
 \`node quality/gates/judge.mjs ${subject} --verdict-json ${outFile} --run ${run}\`
 `;
 }
