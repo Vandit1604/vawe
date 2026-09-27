@@ -81,7 +81,10 @@ const fingerprint = (file) => {
   }).join('|');
 };
 
-const CACHE = path.join(ROOT, '.vawe-data/stage-gate-cache.json');
+// VAWE_STATE_DIR (harness/live/stage-say.mjs's own var) lets a test keep its own cache: two test
+// files calling stageOf() concurrently used to race on this one shared file, non-atomic read then
+// write, last writer's entries winning and the other's silently dropped.
+const CACHE = path.join(process.env.VAWE_STATE_DIR || path.join(ROOT, '.vawe-data'), 'stage-gate-cache.json');
 const readCache = () => { try { return JSON.parse(fs.readFileSync(CACHE, 'utf8')); } catch { return {}; } };
 
 const gatePasses = (script, file) => {
