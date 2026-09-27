@@ -2,10 +2,11 @@
 //   node tests/media/see-required-motion.test.mjs
 //
 // Proves harness/media/see.mjs's sheetCheck() required-motion-match gate: `ok` fails on ANY window
-// under MATCH_FLOOR (0.5) of the reference's energy, or on peak/exit speed under MATCH_FLOOR, passes
-// when a curve is checked against itself, and each failing window's hint is built from that window's
-// own numbers (energy value, moving-area fraction when a DOM curve supplies one), never canned text.
-import { sheetCheck, MATCH_FLOOR } from '../../harness/media/see.mjs';
+// under MATCH_FLOOR (0.5) of the reference's energy or over BUSY_CEIL (2) of it, or on peak/exit speed
+// under MATCH_FLOOR, passes when a curve is checked against itself, and each failing window's hint is
+// built from that window's own numbers (energy value, moving-area fraction when a DOM curve supplies
+// one), never canned text.
+import { sheetCheck, MATCH_FLOOR, BUSY_CEIL } from '../../harness/media/see.mjs';
 
 function assert(cond, msg) { if (!cond) throw new Error(`FAIL: ${msg}`); }
 
@@ -63,6 +64,27 @@ const refCurve = [
   assert(r.tooStillWindows[0].area == null, 'expected no area on an mp4-vs-mp4 (no DOM) row');
   assert(!/enlarge the moving area/i.test(r.tooStillWindows[0].hint), 'no area data: hint must not claim a moving-area fix');
   console.log(`✓ see-required-motion.test.mjs: no-area hint -> "${r.tooStillWindows[0].hint}"`);
+}
+
+// ── a draft over BUSY_CEIL (2x) the reference in one window fails as "too busy", with a numeric hint ──
+{
+  const busyFilm = refCurve.map((c, i) => (i === 0 ? { ...c, mean: c.mean * 4 } : c));
+  const r = sheetCheck({ curve: refCurve }, { curve: busyFilm });
+  assert(r.ok === false, 'expected a 4x-busy window to fail required motion match');
+  assert(r.tooBusyWindows.length === 1, `expected exactly one too-busy window, got ${r.tooBusyWindows.length}`);
+  assert(r.tooStillWindows.length === 0, 'a too-busy window is not also too-still');
+  const hint = r.tooBusyWindows[0].hint;
+  assert(hint.includes('4.0x the reference'), `expected the ratio in the hint: ${hint}`);
+  assert(/slow it down/i.test(hint), `expected a slow-down fix in a too-busy hint: ${hint}`);
+  console.log(`✓ see-required-motion.test.mjs: too-busy window hint -> "${hint}"`);
+}
+
+// ── a window exactly at the band's edges passes (BUSY_CEIL is exclusive, matching MATCH_FLOOR) ────────
+{
+  const edgeFilm = refCurve.map((c) => ({ ...c, mean: c.mean * BUSY_CEIL }));
+  const r = sheetCheck({ curve: refCurve }, { curve: edgeFilm });
+  assert(r.tooBusyWindows.length === 0, `expected exactly BUSY_CEIL to pass (ratio must EXCEED it), got ${r.tooBusyWindows.length} busy window(s)`);
+  console.log('✓ see-required-motion.test.mjs: a draft at exactly BUSY_CEIL reads clean, not too busy');
 }
 
 console.log('see-required-motion.test.mjs: ok');

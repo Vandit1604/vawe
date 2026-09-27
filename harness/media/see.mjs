@@ -111,44 +111,72 @@ function probeVideo(video) {
   return { width, height, dur, fps };
 }
 
+// A generated OCR frame's own pixel size (the `scale=640:-2` output, not the source video's): tesseract's
+// tsv box columns are in THIS frame's pixels, so a box fraction (of frame height/width) needs this, not
+// the source. Falls back to the 640x360 nominal size when no frame exists (nothing to OCR).
+function pngDims(file) {
+  const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height',
+    '-of', 'default=noprint_wrappers=1', file], { encoding: 'utf8' });
+  const m = Object.fromEntries(String(r.stdout).trim().split('\n').filter(Boolean).map((l) => l.split('=')));
+  return { width: Number(m.width) || 640, height: Number(m.height) || 360 };
+}
+
 // ── OCR: tesseract on downscaled frames at ocrFps, psm 11 (sparse text, no layout) ─────────────────
-function ocrWords(video, outDir, ocrFps, minConf, minLen) {
+// Each surviving word also carries `box`: its own average height/width/centre as a FRACTION of the
+// frame, the input the type-scale/placement check (textScaleCheck below) needs to say a headline reads
+// smaller or sits lower than the reference, not just that different words were seen.
+export function ocrWords(video, outDir, ocrFps, minConf, minLen) {
   const ocrDir = path.join(outDir, '.ocr');
   fs.mkdirSync(ocrDir, { recursive: true });
   const framesGlob = path.join(ocrDir, 'f_%05d.png');
   ffmpegOrDie(['-v', 'error', '-y', '-i', video, '-vf', `fps=${ocrFps},scale=640:-2`, framesGlob],
     null, 'ocr frame extraction');
   const files = fs.readdirSync(ocrDir).filter((f) => f.endsWith('.png')).sort();
+  const { width: frameW, height: frameH } = files.length ? pngDims(path.join(ocrDir, files[0])) : { width: 640, height: 360 };
   const perFrame = files.map((f, i) => {
     const t = i / ocrFps;
     const base = path.join(ocrDir, `f_${String(i + 1).padStart(5, '0')}`);
-    const r = spawnSync('tesseract', [path.join(ocrDir, f), base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
+    const src = path.join(ocrDir, f);
+    // One retry: a non-zero exit right after ffmpeg wrote the frame is cheaper to retry once than to
+    // silently read as "no text in this frame" (the failure mode before this: an empty tsv either way).
+    let r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
+    if (r.status !== 0) r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
     const tsv = fs.existsSync(`${base}.tsv`) ? fs.readFileSync(`${base}.tsv`, 'utf8') : '';
-    const words = new Set();
+    const words = [];
     for (const line of tsv.split('\n').slice(1)) {
       const cols = line.split('\t');
       if (cols.length < 12) continue;
       const conf = Number(cols[10]), text = (cols[11] || '').trim();
-      if (conf >= minConf && text.length >= minLen && /[a-zA-Z]/.test(text)) words.add(text);
+      if (conf >= minConf && text.length >= minLen && /[a-zA-Z]/.test(text)) {
+        const left = Number(cols[6]), top = Number(cols[7]), w = Number(cols[8]), h = Number(cols[9]);
+        words.push({ text, box: { hFrac: h / frameH, wFrac: w / frameW, cxFrac: (left + w / 2) / frameW, cyFrac: (top + h / 2) / frameH } });
+      }
     }
     return { t, words };
   });
   fs.rmSync(ocrDir, { recursive: true, force: true });
-  // A word "seen" is one that persists >= 2 consecutive samples; tIn is the first of that run.
-  const seenAt = new Map();   // text -> [t,t,...]
+  // A word "seen" is one that persists >= 2 consecutive samples; tIn is the first of that run, box is
+  // that run's own average geometry.
+  const seenAt = new Map();   // text -> [{t, box}, ...]
   for (const f of perFrame) for (const w of f.words) {
-    if (!seenAt.has(w)) seenAt.set(w, []);
-    seenAt.get(w).push(f.t);
+    if (!seenAt.has(w.text)) seenAt.set(w.text, []);
+    seenAt.get(w.text).push({ t: f.t, box: w.box });
   }
+  const avgBox = (boxes) => ({
+    hFrac: boxes.reduce((s, b) => s + b.hFrac, 0) / boxes.length,
+    wFrac: boxes.reduce((s, b) => s + b.wFrac, 0) / boxes.length,
+    cxFrac: boxes.reduce((s, b) => s + b.cxFrac, 0) / boxes.length,
+    cyFrac: boxes.reduce((s, b) => s + b.cyFrac, 0) / boxes.length,
+  });
   const words = [];
-  for (const [text, times] of seenAt) {
-    times.sort((a, b) => a - b);
-    let runStart = times[0], prev = times[0], runLen = 1;
-    for (let i = 1; i <= times.length; i++) {
-      const t = times[i];
-      if (t !== undefined && t - prev <= 1 / ocrFps + 0.01) { runLen++; prev = t; continue; }
-      if (runLen >= 2) words.push({ text, tIn: Number(runStart.toFixed(2)) });
-      runStart = t; prev = t; runLen = 1;
+  for (const [text, occ] of seenAt) {
+    occ.sort((a, b) => a.t - b.t);
+    let runStart = occ[0].t, prev = occ[0].t, runBoxes = [occ[0].box];
+    for (let i = 1; i <= occ.length; i++) {
+      const o = occ[i];
+      if (o && o.t - prev <= 1 / ocrFps + 0.01) { runBoxes.push(o.box); prev = o.t; continue; }
+      if (runBoxes.length >= 2) words.push({ text, tIn: Number(runStart.toFixed(2)), box: avgBox(runBoxes) });
+      if (o) { runStart = o.t; prev = o.t; runBoxes = [o.box]; }
     }
   }
   return words.sort((a, b) => a.tIn - b.tIn);
@@ -458,7 +486,7 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   // Required-motion-match's own diff (window ratio + peak/exit speed + a numeric hint per failing
   // window), the same one --dom --ref and --sheet-check run: one owner for "is the motion close
   // enough", not a second bespoke tooStill calc living only here.
-  const { rows, tooStillWindows, ok, peakRatio, exitRatio } = sheetCheck({ curve: refCurve }, { curve: draftCurve });
+  const { rows, tooStillWindows, tooBusyWindows, ok, peakRatio, exitRatio } = sheetCheck({ curve: refCurve }, { curve: draftCurve });
 
   const refHolds = findHolds(refEnergy, HOLD_FLOOR, HOLD_MIN);
   const draftHolds = findHolds(draftEnergy, HOLD_FLOOR, HOLD_MIN);
@@ -466,7 +494,7 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   const draftLongest = longestHold(draftHolds);
 
   const tableRows = rows.map((r) => `| ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s | ${r.refMean.toFixed(2)} `
-    + `| ${r.filmMean.toFixed(2)} |${r.tooStill ? ' <- too still' : ''} |`).join('\n');
+    + `| ${r.filmMean.toFixed(2)} |${r.tooStill ? ' <- too still' : r.tooBusy ? ' <- too busy' : ''} |`).join('\n');
   const lines = [
     `# see --compare: ${path.basename(refPath)} vs ${path.basename(draftPath)}`, '',
     `window ${from}-${clampedTo}s · ${gridPaths.length} grid(s) every 0.25s, reference top, draft bottom.`, '',
@@ -479,17 +507,23 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   writeJsonAtomic(path.join(outDir, 'motion.json'), {
     ref: refPath, draft: draftPath, from, to: clampedTo,
     windows: rows.map((r) => ({ t0: Number(r.t0.toFixed(2)), t1: Number(r.t1.toFixed(2)),
-      refMean: Number(r.refMean.toFixed(3)), draftMean: Number(r.filmMean.toFixed(3)), tooStill: r.tooStill })),
+      refMean: Number(r.refMean.toFixed(3)), draftMean: Number(r.filmMean.toFixed(3)), tooStill: r.tooStill, tooBusy: r.tooBusy })),
     refLongestStill: refLongest, draftLongestStill: draftLongest, peakRatio, exitRatio,
   });
 
   console.log(`\n  COMPARE · ${path.basename(refPath)} vs ${path.basename(draftPath)}, ${from}-${clampedTo}s\n`);
   for (const r of rows)
-    console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  draft ${r.filmMean.toFixed(2)}${r.tooStill ? '  <- too still' : ''}`);
+    console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  draft ${r.filmMean.toFixed(2)}${r.tooStill ? '  <- too still' : r.tooBusy ? '  <- too busy' : ''}`);
   console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'compare.md'))}`);
-  if (tooStillWindows.length) {
-    console.log(`  next: fix motion in ${tooStillWindows.length} window(s) marked "too still":`);
-    for (const r of tooStillWindows) console.log(`    - ${r.hint}`);
+  if (tooStillWindows.length || tooBusyWindows.length) {
+    if (tooStillWindows.length) {
+      console.log(`  next: fix motion in ${tooStillWindows.length} window(s) marked "too still":`);
+      for (const r of tooStillWindows) console.log(`    - ${r.hint}`);
+    }
+    if (tooBusyWindows.length) {
+      console.log(`  next: fix motion in ${tooBusyWindows.length} window(s) marked "too busy":`);
+      for (const r of tooBusyWindows) console.log(`    - ${r.hint}`);
+    }
   } else {
     console.log('  next: draft matches the reference\'s motion in every window; proceed to the next post-draft step.');
   }
@@ -499,8 +533,9 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   // answer instead of re-running ffmpeg itself.
   if (filmArg) {
     writeReceipt('motion-compare', filmArg, {
-      ok, tooStillCount: tooStillWindows.length,
+      ok, tooStillCount: tooStillWindows.length, tooBusyCount: tooBusyWindows.length,
       tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
+      tooBusyWindows: tooBusyWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
       peakRatio, exitRatio, ref: refPath, draft: draftPath, from, to: clampedTo,
     });
   }
@@ -508,7 +543,7 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   // or through a specific caller that opts in, e.g. --film for post-draft.mjs's own required-motion
   // step, or runRequiredMotionMatch below for a bare-page check with no film to gate). `ok` is
   // returned so a caller that DOES want to refuse (no film/scene wrapping it) can.
-  return { ok, tooStillWindows, peakRatio, exitRatio };
+  return { ok, tooStillWindows, tooBusyWindows, peakRatio, exitRatio };
 }
 
 // Write-then-rename: a reader that opens `file` either sees the old content or the whole new one,
@@ -520,9 +555,13 @@ function writeJsonAtomic(file, data) {
   fs.renameSync(tmp, file);
 }
 
-// Required-motion-match threshold: the same 0.5 (draft under HALF the reference's energy reads
-// "tooStill") --compare has always used, now also applied to peak and exit speed, and to `ok` overall.
+// Required-motion-match thresholds: a BAND, not a floor alone. Under HALF the reference reads
+// "tooStill" (--compare's original rule, now also applied to peak and exit speed); over TWICE the
+// reference reads "tooBusy": a film passed the floor-only check with windows sitting at 4x the
+// reference because several glows pulsed at once, everywhere, all at once, reading as noise rather
+// than the reference's one deliberate move. Both ends fail `ok`.
 export const MATCH_FLOOR = 0.5;
+export const BUSY_CEIL = 2;
 
 // Qualitative read of a raw energy number, for a hint a person can act on without knowing this file's
 // own units. Bucketed off measured values already on record in this file: sting's frozen span reads
@@ -549,11 +588,25 @@ function windowHint(row, isEdgeWindow) {
     + `yours ${row.filmMean.toFixed(1)} ${filmDesc}. ${advice[0].toUpperCase()}${advice.slice(1)}.`;
 }
 
+// The other end of the band: a window moving MORE than BUSY_CEIL times the reference. Worded the same
+// way as windowHint (both sides' numbers, no canned text), but the fix is the opposite direction: this
+// window is not too weak, it is too loud, usually several things pulsing/glowing at once where the
+// reference commits to one.
+function busyHint(row) {
+  const refDesc = describeEnergy(row.refMean);
+  const filmDesc = row.area == null ? describeEnergy(row.filmMean)
+    : row.area < 0.4 ? 'across part of the frame' : 'across most of the frame';
+  return `${row.t0.toFixed(1)}-${row.t1.toFixed(1)}s: reference moves ${row.refMean.toFixed(1)} ${refDesc}; `
+    + `yours ${row.filmMean.toFixed(1)} ${filmDesc} (${row.ratio.toFixed(1)}x the reference). `
+    + 'Slow it down, or drop one of the simultaneous motion devices in this window.';
+}
+
 // ── --sheet-check: compare two ALREADY-COMPUTED motion curves, no render, no ffmpeg ──────────────────
 // Both --shot's and --dom's own motion.json share one shape (`curve`: [{t0,t1,mean}], --dom's also
 // carrying `area`), so one function diffs either pairing: a reference's `see --shot` sheet against a
 // film's `--dom` sheet, or two shots of the same reference. `ok` (required-motion-match's own gate)
-// fails on ANY window under MATCH_FLOOR of the reference, or peak/exit speed under MATCH_FLOOR.
+// fails on ANY window outside [MATCH_FLOOR, BUSY_CEIL] of the reference, or peak/exit speed under
+// MATCH_FLOOR.
 export function sheetCheck(refSheet, filmSheet) {
   const refCurve = refSheet.curve || [];
   const filmCurve = filmSheet.curve || [];
@@ -562,8 +615,10 @@ export function sheetCheck(refSheet, filmSheet) {
   const rows = Array.from({ length: n }, (_, i) => {
     const r = refCurve[i], f = filmCurve[i];
     const ratio = r.mean > 1e-6 ? f.mean / r.mean : (f.mean > 1e-6 ? Infinity : 1);
-    const row = { t0: r.t0, t1: r.t1, refMean: r.mean, filmMean: f.mean, area: f.area ?? null, ratio, tooStill: ratio < MATCH_FLOOR };
-    return { ...row, isEdgeWindow: i >= n - edgeCount, hint: row.tooStill ? windowHint(row, i >= n - edgeCount) : null };
+    const tooStill = ratio < MATCH_FLOOR, tooBusy = ratio > BUSY_CEIL;
+    const row = { t0: r.t0, t1: r.t1, refMean: r.mean, filmMean: f.mean, area: f.area ?? null, ratio, tooStill, tooBusy };
+    const isEdgeWindow = i >= n - edgeCount;
+    return { ...row, isEdgeWindow, hint: tooStill ? windowHint(row, isEdgeWindow) : tooBusy ? busyHint(row) : null };
   });
   const peakIdx = (curve) => curve.reduce((bi, c, i) => (c.mean > (curve[bi]?.mean ?? -Infinity) ? i : bi), 0);
   const winLen = refCurve[0] ? refCurve[0].t1 - refCurve[0].t0 : 0.5;
@@ -581,10 +636,13 @@ export function sheetCheck(refSheet, filmSheet) {
   const exitRatio = refEdge.exit > 1e-6 ? filmEdge.exit / refEdge.exit : (filmEdge.exit > 1e-6 ? Infinity : 1);
 
   const tooStillWindows = rows.filter((r) => r.tooStill);
-  const ok = n > 0 && tooStillWindows.length === 0 && peakRatio >= MATCH_FLOOR && exitRatio >= MATCH_FLOOR;
+  const tooBusyWindows = rows.filter((r) => r.tooBusy);
+  const ok = n > 0 && tooStillWindows.length === 0 && tooBusyWindows.length === 0
+    && peakRatio >= MATCH_FLOOR && exitRatio >= MATCH_FLOOR;
 
   return {
-    rows, tooStillWindows, ok, peakOffset, refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null,
+    rows, tooStillWindows, tooBusyWindows, ok, peakOffset,
+    refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null,
     refPeak, filmPeak, peakRatio, refExit: refEdge.exit, filmExit: filmEdge.exit, exitRatio,
   };
 }
@@ -593,11 +651,11 @@ export function sheetCheck(refSheet, filmSheet) {
 // curves) and --required-motion (a live reference video + a live HTML page), so the table/hints/pass
 // line are worded identically wherever this runs.
 function printSheetCheck(result, refLabel, filmLabel) {
-  const { rows, tooStillWindows, ok, peakOffset, refPeakT, filmPeakT, refPeak, filmPeak, peakRatio, refExit, filmExit, exitRatio } = result;
+  const { rows, tooStillWindows, tooBusyWindows, ok, peakOffset, refPeakT, filmPeakT, refPeak, filmPeak, peakRatio, refExit, filmExit, exitRatio } = result;
   console.log(`\n  SHEET CHECK · ${refLabel} vs ${filmLabel}\n`);
   for (const r of rows) {
     const ratioTxt = Number.isFinite(r.ratio) ? `${r.ratio.toFixed(2)}x` : 'n/a';
-    const note = r.ratio < 0.5 ? '  <- much slower' : r.ratio > 2 ? '  <- much faster' : '';
+    const note = r.tooStill ? '  <- too still' : r.tooBusy ? '  <- too busy' : '';
     console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  film ${r.filmMean.toFixed(2)}  ratio ${ratioTxt}${note}`);
   }
   const dir = peakOffset > 1e-6 ? 'late' : peakOffset < -1e-6 ? 'early' : 'on time';
@@ -607,8 +665,12 @@ function printSheetCheck(result, refLabel, filmLabel) {
   console.log(`  peak speed: ref ${refPeak.toFixed(2)}, film ${filmPeak.toFixed(2)} (film is ${describeRatio(peakRatio)})`);
   console.log(`  exit speed: ref ${refExit.toFixed(2)}, film ${filmExit.toFixed(2)} (film's exit is ${describeRatio(exitRatio)})`);
   if (tooStillWindows.length) {
-    console.log(`\n  ${tooStillWindows.length} window(s) fail required motion match (< ${MATCH_FLOOR}x the reference):\n`);
+    console.log(`\n  ${tooStillWindows.length} window(s) read too still (< ${MATCH_FLOOR}x the reference):\n`);
     for (const r of tooStillWindows) console.log(`  - ${r.hint}`);
+  }
+  if (tooBusyWindows.length) {
+    console.log(`\n  ${tooBusyWindows.length} window(s) read too busy (> ${BUSY_CEIL}x the reference):\n`);
+    for (const r of tooBusyWindows) console.log(`  - ${r.hint}`);
   }
   if (peakRatio < MATCH_FLOOR) console.log(`\n  peak speed fails required motion match: ${describeRatio(peakRatio)}.`);
   if (exitRatio < MATCH_FLOOR) console.log(`  exit speed fails required motion match: ${describeRatio(exitRatio)}.`);
@@ -622,14 +684,15 @@ function runSheetCheck(refFile, filmFile, filmArg) {
   const refSheet = JSON.parse(fs.readFileSync(refFile, 'utf8'));
   const filmSheet = JSON.parse(fs.readFileSync(filmFile, 'utf8'));
   const result = sheetCheck(refSheet, filmSheet);
-  const { rows, tooStillWindows, ok, peakRatio, exitRatio } = result;
+  const { rows, tooStillWindows, tooBusyWindows, ok, peakRatio, exitRatio } = result;
   if (!rows.length) die(`no overlapping curve windows between ${refFile} and ${filmFile} (missing "curve"?)`);
   printSheetCheck(result, path.basename(refFile), path.basename(filmFile));
 
   if (filmArg) {
     writeReceipt('motion-match', filmArg, {
-      ok, tooStillCount: tooStillWindows.length,
+      ok, tooStillCount: tooStillWindows.length, tooBusyCount: tooBusyWindows.length,
       tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
+      tooBusyWindows: tooBusyWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
       peakRatio, exitRatio, ref: refFile, film: filmFile,
     });
   }
@@ -831,14 +894,133 @@ async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
     // film/post-draft step wrapping it to refuse the ship on its behalf, so THIS is the one place that
     // must actually fail the process: a recreation agent running this standalone needs a non-zero exit.
     const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg);
-    if (!ok) process.exitCode = 1;
-    // A pass stamps the PAGE'S CURRENT content hash (harness/lib/motion-stamp.mjs), so render-page.mjs
-    // can refuse a FINAL render for a page never checked since its last edit, without re-running ffmpeg.
+    const textOk = await runTextScaleCheck(htmlPath, refWindow, outDirRoot, { from, windowDur: to - from, w: opts.w, h: opts.h });
+    if (!ok || !textOk) process.exitCode = 1;
+    // A pass (motion AND text-scale/placement) stamps the PAGE'S CURRENT content hash
+    // (harness/lib/motion-stamp.mjs), so render-page.mjs can refuse a FINAL render for a page never
+    // checked since its last edit, without re-running ffmpeg.
     else writeMotionStamp(htmlPath);
   } finally {
     fs.rmSync(tmpMp4, { force: true });
     if (windowed) fs.rmSync(refWindow, { force: true });
   }
+}
+
+// ── text-scale/placement: does the page's on-screen text match the reference's SCALE and PLACEMENT,
+// never its glyphs (a recreation writes its own words on purpose, so comparing text CONTENT is the
+// wrong check)? Buckets the reference's OCR word boxes (ocrWords, now carrying box geometry) and the
+// page's own DOM text boxes (domTextBoxes) into the SAME 0.5s windows runCompare already uses for
+// motion, and flags a window where the two disagree by more than TEXT_SCALE_TOLERANCE on height, width,
+// or either centre axis: a headline typeset at the reference's own timing but the wrong size, or sitting
+// in the wrong place, reads exactly as broken as one moving at the wrong speed, and nothing before this
+// ever compared type at all.
+export const TEXT_SCALE_TOLERANCE = 0.2;
+
+// Reads text geometry off the actual rendered GLYPH rects (Range.getClientRects() on every visible text
+// node), never off a container element's own box: a hand-authored headline is usually built from many
+// nested per-letter/per-word spans (this repo's own typing effect included) inside a background/stage
+// wrapper that is itself sized to the full frame (`inset:0`), so a container-based box either fragments
+// into one box per glyph or, worse, inherits the wrapper's full-frame size and says nothing. Clustering
+// glyph rects by vertical proximity into "lines" mirrors exactly what an OCR pass reads a text line as
+// (tesseract's own box), regardless of how the DOM built it.
+export async function domTextBoxes(page) {
+  return page.evaluate(() => {
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const isVisible = (el) => { const cs = getComputedStyle(el); return cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity) > 0.05; };
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => (node.textContent.trim() && node.parentElement && isVisible(node.parentElement)
+        ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT),
+    });
+    const glyphRects = [];
+    let node;
+    while ((node = walker.nextNode())) {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for (const r of range.getClientRects()) if (r.width > 0 && r.height > 0) glyphRects.push(r);
+    }
+    const lines = [];
+    for (const r of glyphRects.sort((a, b) => (a.top + a.height / 2) - (b.top + b.height / 2))) {
+      const cy = r.top + r.height / 2;
+      const line = lines.find((l) => Math.abs(l.cy - cy) < r.height / 2 + 4);
+      if (line) { line.rects.push(r); line.cy = (line.cy * (line.rects.length - 1) + cy) / line.rects.length; }
+      else lines.push({ cy, rects: [r] });
+    }
+    return lines.map((line) => {
+      const left = Math.min(...line.rects.map((r) => r.left)), right = Math.max(...line.rects.map((r) => r.right));
+      const top = Math.min(...line.rects.map((r) => r.top)), bottom = Math.max(...line.rects.map((r) => r.bottom));
+      return { hFrac: (bottom - top) / vh, wFrac: (right - left) / vw,
+        cxFrac: (left + right) / 2 / vw, cyFrac: (top + bottom) / 2 / vh };
+    }).filter((b) => b.hFrac > 0 && b.wFrac > 0);
+  });
+}
+
+// The single largest box in a set, by area: the most prominent text on screen at that instant, the one
+// a viewer's eye actually lands on, not an average across every caption and label sharing the frame.
+function biggestBox(boxes) {
+  return boxes.reduce((best, b) => (!best || b.hFrac * b.wFrac > best.hFrac * best.wFrac ? b : best), null);
+}
+
+// One line per mismatched window, built from the numbers this run measured: never canned text, same
+// discipline windowHint/busyHint already follow.
+function textScaleHint(row) {
+  const refPct = Math.round(row.ref.hFrac * 100), filmPct = Math.round(row.film.hFrac * 100);
+  const centreDelta = Math.round((row.film.cyFrac - row.ref.cyFrac) * 100);
+  const vDir = centreDelta === 0 ? '' : centreDelta > 0 ? `, ${Math.abs(centreDelta)}% lower` : `, ${Math.abs(centreDelta)}% higher`;
+  return `${row.t0.toFixed(1)}-${row.t1.toFixed(1)}s: reference text ${refPct}% of frame height centred; yours ${filmPct}%${vDir}.`;
+}
+
+// textScaleCheck(refWords, filmBoxesByWindow, windows) -> {rows, mismatched, ok}. `refWords` is
+// ocrWords()'s own return (each word carries `tIn` and a `box`); `filmBoxesByWindow` maps each window's
+// `t0` to the DOM text boxes sampled at that window's midpoint. Pure and framework-free on purpose, so
+// a test can prove it against literal boxes with no browser and no OCR.
+export function textScaleCheck(refWords, filmBoxesByWindow, windows) {
+  const rows = [];
+  for (const w of windows) {
+    const refBox = biggestBox(refWords.filter((word) => word.tIn >= w.t0 && word.tIn < w.t1).map((word) => word.box));
+    const filmBox = biggestBox(filmBoxesByWindow.get(w.t0) || []);
+    if (!refBox || !filmBox) continue;
+    const hDiff = Math.abs(filmBox.hFrac - refBox.hFrac) / Math.max(refBox.hFrac, 1e-6);
+    const wDiff = Math.abs(filmBox.wFrac - refBox.wFrac) / Math.max(refBox.wFrac, 1e-6);
+    const cxDiff = Math.abs(filmBox.cxFrac - refBox.cxFrac);
+    const cyDiff = Math.abs(filmBox.cyFrac - refBox.cyFrac);
+    const mismatch = hDiff > TEXT_SCALE_TOLERANCE || wDiff > TEXT_SCALE_TOLERANCE
+      || cxDiff > TEXT_SCALE_TOLERANCE || cyDiff > TEXT_SCALE_TOLERANCE;
+    const row = { t0: w.t0, t1: w.t1, ref: refBox, film: filmBox, hDiff, wDiff, cxDiff, cyDiff, mismatch };
+    rows.push({ ...row, hint: mismatch ? textScaleHint(row) : null });
+  }
+  const mismatched = rows.filter((r) => r.mismatch);
+  return { rows, mismatched, ok: mismatched.length === 0 };
+}
+
+// Drives textScaleCheck for a live page against a live (already windowed) reference clip: OCR's the
+// reference once, samples the page's own DOM text boxes at each window's midpoint (seekPage, the same
+// seek --probe/--look/--layout already share), then prints and returns `ok`. Skips, never fails, when
+// tesseract is not on PATH, the same house rule the full `see` flow already applies.
+async function runTextScaleCheck(htmlPath, refWindowPath, outDirRoot, { from, windowDur, w, h }) {
+  if (spawnSync('tesseract', ['-version'], { encoding: 'utf8' }).error) {
+    console.log('\n  (skipping text-scale/placement check: tesseract not on PATH)');
+    return true;
+  }
+  const outDir = path.join(outDirRoot, 'required-motion');
+  const refWords = ocrWords(refWindowPath, outDir, 4, 60, 3);
+  const windows = timeRange(0, windowDur, 0.5).map((t0) => ({ t0, t1: Math.min(windowDur, t0 + 0.5) }));
+  const { page, url, close } = await openPreview(htmlPath, { width: w, height: h });
+  const filmBoxesByWindow = new Map();
+  try {
+    await page.goto(url, { waitUntil: 'load' });
+    for (const win of windows) {
+      await seekPage(page, from + (win.t0 + win.t1) / 2);
+      filmBoxesByWindow.set(win.t0, await domTextBoxes(page));
+    }
+  } finally { await close(); }
+  const result = textScaleCheck(refWords, filmBoxesByWindow, windows);
+  if (result.mismatched.length) {
+    console.log(`\n  ${result.mismatched.length} window(s) fail text-scale/placement match (> ${Math.round(TEXT_SCALE_TOLERANCE * 100)}% off):\n`);
+    for (const r of result.mismatched) console.log(`  - ${r.hint}`);
+  } else if (result.rows.length) {
+    console.log('\n  ✓ text scale and placement matches the reference in every checked window.');
+  }
+  return result.ok;
 }
 
 // Every animation paused at one shared `currentTime`: the same seek --dom already relies on
