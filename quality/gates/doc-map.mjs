@@ -64,6 +64,7 @@ const EXCLUDE = [
 const EXCLUDE_SUFFIX = [
   ['.storyboard.md', 'a per-video artifact, not guidance'],
   ['.design.md', 'a per-film design declaration read by design-drift, not guidance'],
+  ['/beats.md', 'a per-reference measured beat list the reference loop edits, data not guidance'],
   ['.treatment.md', 'a per-video artifact, not guidance'],
   ['.lock.md', 'a per-video artifact, not guidance: the frozen spec one film was authored from'],
   ['.brief.md', 'a per-video artifact, not guidance: the five-line brief one film was authored from'],
