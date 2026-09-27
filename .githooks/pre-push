@@ -106,12 +106,21 @@ case "$hooks_path" in
   /*) echo "! core.hooksPath is absolute ($hooks_path); it will not follow this worktree. Run: make install-hooks" >&2 ;;
 esac
 
+# A stamp from `make verify-batch` (.vawe-data/verified/<sha>, gitignored, one per verified commit)
+# means the full tier already ran for this exact tip, outside pre-push, with no push connection
+# depending on it staying open for 40 minutes. It is reported here, not silently trusted: a VAWE_FULL=1
+# push still re-runs the full tier below regardless of any stamp, because that is what asking for it
+# explicitly means.
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
     range="$local_sha"                     # a new branch: every commit it carries is new to the remote
   else
     range="$remote_sha..$local_sha"
+  fi
+  if [ -z "$VAWE_FULL" ]; then
+    msg="$(. harness/dev/verify-tiers.sh && stamp_message_for "$local_sha")"
+    [ -n "$msg" ] && echo "✓ $local_sha $msg"
   fi
   if ! node harness/dev/push-guard.mjs "$range"; then
     echo "✗ pre-push blocked by push-guard. These are house rules, not style checks." >&2
@@ -131,32 +140,25 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
   fi
 done
 
-# Two tiers. Every push runs the fast static tier (seconds). The full tier (make test, e2e, the
-# browser-rendering gates) runs once per batch: the integrator pushes with VAWE_FULL=1.
-FAST="schema-check doc-refs skill-reach word-action discovery generated-check no-emdash mistakes-check rung provenance skill-check rule-length"
-FULL="craft-coverage coverage arsenal-check scenes-json docker-check prop-probe seo-surface sfx-check glyphs-audit sim-audit docker-context judge-census inert-check"
+# Two tiers, defined once in harness/dev/verify-tiers.sh (also sourced by `make verify-batch`), so the
+# gate lists cannot drift into two different ideas of "full" between this hook and that command.
+. harness/dev/verify-tiers.sh
 if [ -n "$VAWE_FULL" ]; then
   echo "▶ pre-push: FULL tier (make test + audit-test + every gate)"
-  if ! make test bench-fast; then
-    echo "✗ pre-push blocked: make test failed." >&2
+  if ! run_full_tier; then
+    echo "✗ pre-push blocked: the full tier failed." >&2
     exit 1
   fi
-  if ! make dev-tool X=audit-test; then
-    echo "✗ pre-push blocked: audit-test failed." >&2
-    exit 1
-  fi
-  GATES="$FAST $FULL"
 else
-  echo "▶ pre-push: fast tier (static gates only; VAWE_FULL=1 git push runs tests and e2e too)"
+  echo "▶ pre-push: fast tier (static gates only; VAWE_FULL=1 git push runs tests and e2e too, or run \`make verify-batch\` first)"
   make bench-fast || exit 1
-  GATES="$FAST"
+  for g in $FAST; do
+    if ! make check GATE="$g"; then
+      echo "✗ pre-push blocked: framework check ($g) failed." >&2
+      exit 1
+    fi
+  done
 fi
-for g in $GATES; do
-  if ! make check GATE="$g"; then
-    echo "✗ pre-push blocked: framework check ($g) failed." >&2
-    exit 1
-  fi
-done
 echo "✓ pre-push: framework healthy"
 
 # ci-status is informational only, never a gate: it reports the LAST CI run (this push has no run yet)

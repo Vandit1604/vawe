@@ -30,7 +30,7 @@ import { SCENE_DIR } from './paths.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames, fontState, sha, loadDigest, digestEntry, mergeDigest, writeDigest } from './snap-signature.mjs';
-import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
+import { serveRepo, waitForEngine, bootPathFor, trackBrowser } from '../../harness/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
@@ -93,7 +93,7 @@ const { server, port } = await serveRepo();
 // protocolTimeout above the 180000ms default: a shared CI runner can leave one heavy scene's
 // captureSig() evaluate() short of that under load, which reads as a scene regression when it is
 // only the runner being slower that minute.
-const launch = () => puppeteer.launch({ headless: true, protocolTimeout: 300000, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+const launch = async () => trackBrowser(await puppeteer.launch({ headless: true, protocolTimeout: 300000, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] }));
 let browser = await launch();
 
 // RECYCLE THE BROWSER. This sweep used to drive all ~100 scenes through ONE browser, and that made it
