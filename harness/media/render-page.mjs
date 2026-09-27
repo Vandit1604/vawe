@@ -22,6 +22,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { RENDER_ARGS } from '../lib/render-harness.mjs';
 import { openPreview } from './preview-server.mjs';
+import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
+import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 
 // A run of ~150+ rapid seek+screenshot round trips crashed the GPU-accelerated headless renderer
 // outright ("Execution context was destroyed", no page error, no console output) on this machine;
@@ -107,6 +109,24 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   }
 }
 
+// A page whose folder declares a reference (the recreation starter writes `reference.json`) refuses a
+// FINAL render until the required-motion-match has passed for this page's CURRENT content (a stamp
+// keyed on the page's own hash, harness/lib/motion-stamp.mjs: an edit invalidates the old pass). A
+// bare page with no declared reference is untouched. The one way out is the existing `authoring.allow`
+// + `_why` mechanism, read out of the page's own `#authoring` script tag, never a second waiver path.
+export function assertFinalReady(pagePath) {
+  const ref = referenceFor(pagePath);
+  if (!ref) return;
+  if (motionStampFresh(pagePath)) return;
+  const { allow = [], _why = {} } = pageAuthoring(pagePath);
+  const code = 'unverified-final';
+  if (isWaivedBy(allow, code) && hasReason(_why, code)) return;
+  die(`${pagePath}: FINAL render refused, no passing required-motion-match for this page's current `
+    + `content. Run: make next PAGE=${pagePath} REF=${ref}\n`
+    + `Waivable only via <script type="application/json" id="authoring">{"allow":["${code}"],`
+    + `"_why":{"${code}":"…"}}</script> in the page.`);
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (name, d) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : d; };
@@ -117,6 +137,7 @@ async function main() {
       + '[--blur N] [--w 960] [--h 540] [--final]', 2);
   }
   const final = argv.includes('--final');
+  if (final) assertFinalReady(pagePath);
   const from = final ? 0 : Number(flag('--from', 0));
   const toFlag = flag('--to', null);
   const durFlag = flag('--dur', null);

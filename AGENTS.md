@@ -23,33 +23,35 @@ is in and the one next command; `make next D=<film>` runs that step.
 | 2 | plan | `make ideate` → write the storyboard → `make storyboard-check` |
 | 3 | design | `make preview` → `make dev-tool X=design-spec` → `make studio D=` |
 | 4 | assemble | `make assemble D=` writes the scene JSON |
-| 5 | direct | `make look LOOKS=1` (styleframe per beat, look review before motion) → `make dev-tool X=critics D= DECIDERS=1` |
+| 5 | direct | `make look LOOKS=1` (look review before motion) → `make dev-tool X=critics D= DECIDERS=1` |
 | 6 | render | `make ship D=` |
-| 7 | judge | `node harness/dev/verify.mjs D=` (hard numbers, paste its block) → `make judge D= [STRUCT=1 RUNS=A,B]` (double-run, evidence must be specific) → **vawe-audit** composes one verdict; **vawe-review-loop** owns the fix loop; a PASS is never self-recorded |
+| 7 | judge | `node harness/dev/verify.mjs D=` → `make judge D= [STRUCT=1 RUNS=A,B]` (double-run) → **vawe-audit** composes one verdict; **vawe-review-loop** owns the fix loop; a PASS is never self-recorded |
 
 No sign-off step: the draft render at the design stage (`make dev DRAFT=1`, no plan needed) is where
 the owner looks and redirects, before a full render is spent.
 
 **No templates**: compose from `engine-doctrine/PRIMITIVES.md` and real captured assets; `make assemble`
 writes the scene JSON, `make ship` renders it. Reflecting a brand: `make kit URL= INIT=1` builds
-colours, fonts and a favicon from the site's own colours only, in one command. A recreation scores
-against its reference beat by beat: `make study REF= D= MATCH=1 [LIGHT=1]`.
+colours, fonts and a favicon from the site's own colours only, in one command.
+
+Recreating a reference as a raw page: `make dev-tool X=new TYPE=recreation NAME= REF=`, then loop
+`make next PAGE= REF=` (never `make ship`); a scene-JSON recreation scores against its reference beat
+by beat instead: `make study REF= D= MATCH=1 [LIGHT=1]`.
 
 ## Where to look  `[ref: make help]`
 
-`make help` prints the fast path; `make list` prints every target by phase. Six route to sub-tools by name (X=<name>): `gen`, `site`, `study-tool`, `dev-tool`,
-`media`, `check GATE=<name>`. `make arsenal Q="…"` searches every effect and block before you
-hand-build one (`harness/live/arsenal-nudge.mjs` nudges this at save).
+`make help` prints the fast path; `make list` prints every target by phase. Six sub-tools route by
+name (X=<name>): `gen site study-tool dev-tool media check GATE=<name>`. `make arsenal Q="…"` searches
+every effect and block before you hand-build one (`harness/live/arsenal-nudge.mjs` nudges this at save).
 
 Eject a block into its own literal layers: `make dev-tool X=add BLOCK= D=`. Tune one layer's motion
 live: `make tune D= ID=`. One page with the frame grid, verify and judge together:
 `node harness/author/review-server.mjs D=`.
 
-Claude Code loads a skill on demand; `make stage`/`make next` name the one the open stage wants and
-print a `read:` line naming its CRAFT doc, for everyone else. Load `vawe-scene-authoring` before
-writing any layer. Everyone else reads `engine-doctrine/CRAFT/ROUTING.md`, which also maps a request
-to its film type and the one `vawe-type` skill for it. Hand-writing HTML, or fixing "looks AI":
-`taste-skill`, then `impeccable`.
+Claude Code loads a skill on demand; `make stage`/`make next` name the one the open stage wants, with
+a `read:` line for everyone else. Load `vawe-scene-authoring` before writing any layer. Everyone else
+reads `engine-doctrine/CRAFT/ROUTING.md`, which maps a request to its film type and `vawe-type` skill.
+Hand-writing HTML, or fixing "looks AI": `taste-skill`, then `impeccable`.
 
 ## Built-in rules  `[built: core/validate/validate.mjs:74]`
 
@@ -86,7 +88,7 @@ with its words too: 2+ `aka` phrases and a `blurb` naming its real default, enfo
 Never write unit tests after the code. Write down every way a system can fail, then test end to end:
 `make e2e` runs six checks in one command (snapshot digests, renderFrame purity, a real MCP-drafted
 scene, the browser engine, the whole authoring ladder) and leaves one artefact,
-`quality/runs/e2e/<timestamp>/report.md`. A known-broken tracked scene is excused by name in
+`quality/runs/e2e/<timestamp>/report.md`. Excuse a known-broken tracked scene by name in
 `quality/baselines/e2e-known-broken.json`, never by loosening what counts as a pass.
 
 Push: `make dev-tool X=verify-batch`, then `git push`.

@@ -41,6 +41,7 @@ import { detectCuts, motionDeltaSeries } from './shot-detect.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { openPreview } from './preview-server.mjs';
+import { writeMotionStamp } from '../lib/motion-stamp.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
@@ -831,6 +832,9 @@ async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
     // must actually fail the process: a recreation agent running this standalone needs a non-zero exit.
     const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg);
     if (!ok) process.exitCode = 1;
+    // A pass stamps the PAGE'S CURRENT content hash (harness/lib/motion-stamp.mjs), so render-page.mjs
+    // can refuse a FINAL render for a page never checked since its last edit, without re-running ffmpeg.
+    else writeMotionStamp(htmlPath);
   } finally {
     fs.rmSync(tmpMp4, { force: true });
     if (windowed) fs.rmSync(refWindow, { force: true });

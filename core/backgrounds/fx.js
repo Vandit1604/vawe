@@ -79,13 +79,27 @@ export function particles(ctx, w, h, t, o = {}) {
   for (const p of pos) { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(${color},${p.a})`; ctx.fill(); }
 }
 
+// aurora's blobs land inside a bare `rgba(${color},a)` template, so `color` must already be an
+// "r,g,b" string; a hex value there used to reach canvas addColorStop as `rgba(#3b82f6,a)` and throw.
+// This accepts any colour parseColor reads (hex, rgb()/rgba()) and converts it, logging the swap so
+// the conversion is visible, not silent; an already-bare "r,g,b" string passes straight through.
+function auroraColor(input) {
+  const s = String(input);
+  if (/^\d+\s*,\s*\d+\s*,\s*\d+$/.test(s.trim())) return s.trim();
+  const rgb = parseColor(s);
+  if (!rgb) return s; // unparseable: fails downstream the same way it always did, no worse
+  const out = rgb.slice(0, 3).map((v) => Math.round(v)).join(',');
+  console.log(`aurora: converted color "${s}" -> "${out}"`);
+  return out;
+}
+
 // ---- aurora: 2–4 large soft radial blobs drifting on slow independent sine paths ('lighter' glow).
 export function aurora(ctx, w, h, t, o = {}) {
-  const blobs = o.blobs || [
+  const blobs = (o.blobs || [
     { color: '31,59,255', x: 0.3, y: 0.4, r: 620, ax: 120, ay: 90, px: 16, py: 20, ph: 0 },
     { color: '106,31,255', x: 0.7, y: 0.55, r: 560, ax: 150, ay: 110, px: 19, py: 14, ph: 2 },
     { color: '31,182,255', x: 0.55, y: 0.3, r: 480, ax: 100, ay: 80, px: 13, py: 22, ph: 4 },
-  ];
+  ]).map((b) => ({ ...b, color: auroraColor(b.color) }));
   ctx.globalCompositeOperation = 'lighter';
   const so = o.seed ?? 0; // seed jitters blob positions + phase so the SAME preset differs per video
   // motionScale: ONE knob for how alive this field is. It widens the drift AND shortens the period
