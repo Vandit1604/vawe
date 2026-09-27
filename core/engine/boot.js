@@ -583,7 +583,7 @@ function checkNoSurvivingDepth(data) {
 // then resolveCoords and every remaining produce-time bake (camera baked before depth/focus).
 // resolveCoords runs AFTER the shared pass, not before it: it is browser-only (needs a real frame
 // size) and Node's loadScene never resolves coordinates either, so both paths now decide cuts/
-// sceneUnits/anticipate/size-roles/finish against the SAME (unresolved-coordinate) scene.
+// anticipate/size-roles/finish against the SAME (unresolved-coordinate) scene.
 async function resolveThemeAndBake(data, frame, width, height, safe) {
   const rawTheme = await fetchThemeFile(data.theme);
   const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion

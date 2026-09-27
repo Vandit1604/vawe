@@ -1,0 +1,41 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "captionStyle": "neonEdge",
+  "captions": [
+    {
+      "t0": 0.3,
+      "t1": 5.4,
+      "text": "Ship the payoff last",
+      "pin": "center",
+      "size": 96
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "neonEdge",
+      "x": 160,
+      "y": 940,
+      "w": 1600,
+      "size": 44,
+      "weight": 800,
+      "align": "center",
+      "start": 0,
+      "duration": 6,
+      "anim": "fade"
+    }
+  ]
+}

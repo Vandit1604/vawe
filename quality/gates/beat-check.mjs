@@ -37,8 +37,8 @@
 // so it really is content for its span. A CUT or a SEAM is not. Both are treatments of what is already on
 // screen (a cut transforms the scene root or cross-fades two beat wrappers, a seam blends two baked
 // frames), and over an empty frame both produce an empty frame. brew-launch shipped five black frames
-// inside a 0.28s punch on exactly that exemption (#166). What a cut DOES buy is modelled instead: under
-// `sceneUnits` the engine runs every non-last-beat layer to `beatEnd + cutDur`, and this gate computes the
+// inside a 0.28s punch on exactly that exemption (#166). What a cut DOES buy is modelled instead: the
+// engine runs every non-last-beat layer to `beatEnd + cutDur`, and this gate computes the
 // same spans, so the coverage it credits is the coverage the renderer actually produces.
 //
 // STATIC BACKGROUNDS, and why this is not measured. core/backgrounds/index.js paints on a canvas, so it cannot
@@ -103,7 +103,7 @@ const DEAD_AIR = 0.4;   // seconds of nothing that stops reading as a breath
 // presence). engine-doctrine/RESEARCH/TIMING-SOURCES.md part 6. Downgraded to report-only below.
 const TAIL = 0.2;       // the closing plate: it must hold something
 const T = sceneTiming(d);
-const { layers, content, spans, contentSpans, duration, sceneUnits } = T;
+const { layers, content, spans, contentSpans, duration } = T;
 
 // windows a declared transition owns. A cut/seam/sting IS the content of its span, it just is not a layer.
 const owned = [];
@@ -260,9 +260,9 @@ if (bgs.length && movingWindows.length === 0 && duration > 3 && !backdropMotion)
 }
 
 // ---------- 5. beats-wrapped-as-units ----------
-// The authored `duration` is not always the rendered one. `core/engine/produce.js` turns `sceneUnits` on for
-// any cut film with no choreographed `motion` track, and `films/scene/scene.js` then rewrites every
-// non-last-beat layer to end with its own beat so the wrapper can slide the beat out as one block. A
+// The authored `duration` is not always the rendered one. Every cut film wraps its beats as units, and
+// `films/scene/scene.js` rewrites every non-last-beat layer to end with its own beat so the wrapper can
+// slide the beat out as one block. A
 // layer authored across a cut is truncated at it, silently, and the JSON keeps saying otherwise.
 //
 // This finding used to live in direction-floor, and went invisible when that gate became opt-in. It is
@@ -282,7 +282,7 @@ const truncated = content.map((L) => {
 if (truncated.length) {
   const label = (L) => `${L.type || 'text'}${L.text ? ` "${snippet(L.text)}"` : ''}`;
   const list = truncated.slice(0, 5).map(({ L, a, b, u }) => `${label(L)} authored ${s(a)} to ${s(b)}, rendered to ${s(u)}`).join(' · ');
-  warn('beats-wrapped-as-units', `${truncated.length} layer(s) are cut short by BEAT WRAPPING: ${list}${truncated.length > 5 ? ` · and ${truncated.length - 5} more` : ''}. This film wraps each beat as a unit (the engine does that by default for a cut film with no choreographed \`motion\` track), so every layer is truncated at its own beat's end and slid out with it, and nothing can survive a cut until one layer opts out. If the layer was meant to end there, shorten its \`duration\` so the JSON says what the render does. If it was meant to carry the film across the cut, mark it \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored window.`);
+  warn('beats-wrapped-as-units', `${truncated.length} layer(s) are cut short by BEAT WRAPPING: ${list}${truncated.length > 5 ? ` · and ${truncated.length - 5} more` : ''}. This film wraps each beat as a unit (every cut film does), so every layer is truncated at its own beat's end and slid out with it, and nothing can survive a cut until one layer opts out. If the layer was meant to end there, shorten its \`duration\` so the JSON says what the render does. If it was meant to carry the film across the cut, mark it \`"acrossBeats": true\` and it attaches to the camera instead of its beat, keeping its authored window.`);
 }
 
 // ---------- 5b. beats-held-open ----------

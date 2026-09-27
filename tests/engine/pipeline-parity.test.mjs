@@ -8,7 +8,7 @@
 // and produceBaseline never ran on the Node path at all. A gate reading a transitions-only scene could
 // approve a DIFFERENT cut list than the one the browser actually rendered.
 //
-// Scope: compares only the fields the produced baseline decides (cuts/seams/stings, sceneUnits, and
+// Scope: compares only the fields the produced baseline decides (cuts/seams/stings, and
 // each layer's anticipate/size-role/_finish), never raw pixel coordinates: `resolveCoords` is
 // browser-only (needs a real frame size) and legitimately runs only on the render path, so `L.x`/`L.y`
 // differ between the two by design (core/engine/pipeline.js's own header explains why): comparing
@@ -41,7 +41,6 @@ function producedFieldsOf(data) {
     cuts: (data.cuts || []).map((c) => ({ t: c.t, style: c.style })),
     seams: (data.seams || []).map((s) => ({ t: s.t, fx: s.fx })),
     stings: (data.stings || []).map((s) => ({ t: s.t, fx: s.fx })),
-    sceneUnits: data.sceneUnits ?? null,
     layers: flatten(data.layers).map((L) => ({
       id: L.id ?? null,
       type: L.type ?? null,
@@ -85,7 +84,7 @@ try {
     }
 
     assert.deepEqual(browserFields, nodeFields,
-      `${name}: the Node/gate path and the browser render path produced different cuts/sceneUnits/`
+      `${name}: the Node/gate path and the browser render path produced different cuts/seams/stings/`
       + `layer baselines. A gate checking this film would be approving a different scene than the `
       + `one that renders.`);
   }

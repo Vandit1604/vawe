@@ -1,5 +1,5 @@
 // tests/timeline/cut-split-parity-render.test.mjs: end-to-end proof that a per-character split +
-// preset text layer takes a scene-root cut's EXIT (films/scene/scene.js driveSceneUnits) exactly like
+// preset text layer takes a scene-root cut's EXIT (films/scene/scene.js driveBeatUnits) exactly like
 // an adjacent plain text layer, not a smaller or absent move. Investigated as a reported engine fault
 // ("a split+preset layer does not translate on a scene-root cut's exit") and could not be reproduced:
 // a split layer attaches under the SAME beat wrapper (`beatWrap[bi]`, films/scene/scene.js buildLayer)

@@ -1,0 +1,37 @@
+{
+  "module": "scene",
+  "aspect": "16:9",
+  "theme": "vawe",
+  "duration": 6,
+  "audio": {
+    "silent": true
+  },
+  "bg": [
+    {
+      "preset": "plain",
+      "from": 0,
+      "to": 6
+    }
+  ],
+  "layers": [
+    {
+      "type": "text",
+      "text": "wiggle",
+      "x": 160,
+      "y": 400,
+      "w": 1600,
+      "size": 150,
+      "weight": 800,
+      "align": "center",
+      "start": 0.3,
+      "duration": 5.4,
+      "drive": {
+        "wiggle": {
+          "prop": "rot",
+          "freq": 1.5,
+          "amp": 6
+        }
+      }
+    }
+  ]
+}

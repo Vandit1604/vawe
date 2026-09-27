@@ -1,11 +1,10 @@
 {
   "module": "scene",
   "storyboard": "films/scene/showcase-type.storyboard.md",
-  "authoringNote": "The continuous object is the timing diagram: one html layer runs the whole film, keeps its ruler and its rows across every cut, and re-slopes as each preset's stagger changes. sceneUnits is off so the cuts do not chop it into four islands. The film shows three presets, REJECTS the reading that this is a typeface choice (strike), and names what it is instead (wordSlot).",
+  "authoringNote": "The continuous object is the timing diagram: one html layer runs the whole film, keeps its ruler and its rows across every cut, and re-slopes as each preset's stagger changes. It carries acrossBeats so beat wrapping does not chop it into four islands. The film shows three presets, REJECTS the reading that this is a typeface choice (strike), and names what it is instead (wordSlot).",
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 13,
-  "sceneUnits": false,
   "audio": {
     "auto": true,
     "sfxGain": 0.5,
@@ -179,6 +178,7 @@
       "anim": "fade",
       "enterDur": 0.45,
       "exitDur": 0,
+      "acrossBeats": true,
       "src": "films/scene/_showcase-type-timing.html"
     }
   ],

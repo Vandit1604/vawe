@@ -12,8 +12,9 @@
 // `cut`, and the site's copy never heard. So the editor faithfully showed a user a bug that had not
 // existed for forty days, and the CLI rendered the same film clean in 23 seconds.
 //
-// Worse than stale: the copies were missing `bg` on NINE scenes and `sceneUnits` on three. `bg` is a
-// required field, so those films were playing on the site without the backdrop the author wrote.
+// Worse than stale: the copies were missing `bg` on NINE scenes and a beat-unit opt-in field (since
+// removed) on three. `bg` is a required field, so those films were playing on the site without the
+// backdrop the author wrote.
 //
 // WHAT THE CURATION ACTUALLY IS, now that it is written down rather than done by hand. A scene
 // carries two kinds of key: what the engine renders, and what an AUTHOR needs and a viewer does not.

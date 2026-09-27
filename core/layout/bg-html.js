@@ -54,8 +54,8 @@ export function createBgHtml(root, windows, table) {
     // against it rendered a still. engine-doctrine/MISTAKES.md #353.
     frame(t, active, filmDur) {
       // EVERY element is written EVERY frame, including the inactive ones. An early return that leaves
-      // a stale display/opacity on a window we are no longer in is precisely the glow×sceneUnits bug
-      // (MISTAKES #152): pixels that depend on which frames were rendered before this one.
+      // a stale display/opacity on a window we are no longer in is precisely the glow x beat-unit
+      // extension bug (MISTAKES #152): pixels that depend on which frames were rendered before this one.
       for (const [w, el] of els) {
         const on = w === active;
         el.style.display = on ? 'block' : 'none';

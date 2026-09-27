@@ -9,7 +9,6 @@
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 9,
-  "sceneUnits": true,
   "cameraMove": [
     {
       "move": "slowPush",
@@ -124,7 +123,7 @@
     },
     {
       "type": "text",
-      "text": "sceneUnits: true",
+      "text": "not a setting. every cut.",
       "x": 160,
       "y": 570,
       "w": 1600,
