@@ -29,6 +29,7 @@ import { ffmpegOrDie, scratch } from '../lib/scratch.mjs';
 import { detectCuts, motionDeltaSeries } from './shot-detect.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
 import { writeReceipt } from '../lib/receipt.mjs';
+import { serveRepo, launchPage } from '../lib/render-harness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
@@ -245,38 +246,49 @@ function stackImages(files, out, axis, padW, padH) {
     '-filter_complex', `${stack}${pad}`, '-frames:v', '1', out], out, 'grid stack');
 }
 
+// Tiles `cellFiles` (already the right size, one image per panel) into <=`cellsPerGrid`-panel grids,
+// 3 columns wide, via stackImages for both axes. ONE tiler: renderGrids, buildCompareGrids's stacked
+// ref/draft pairs, and --dom's screenshot stills all feed it instead of each re-writing the row/grid
+// loop, which is the same math regardless of how a cell's image was produced (ffmpeg -ss or a page
+// screenshot).
+function tileInGrids(cellFiles, outDir, prefix, tileW, tileH, cellsPerGrid) {
+  const gridPaths = [];
+  for (let g = 0; g * cellsPerGrid < cellFiles.length; g++) {
+    const chunk = cellFiles.slice(g * cellsPerGrid, (g + 1) * cellsPerGrid);
+    const cols = Math.min(3, chunk.length);
+    const rowsN = Math.ceil(chunk.length / cols);
+    const rowFiles = [];
+    for (let r = 0; r < rowsN; r++) {
+      const rowCells = chunk.slice(r * cols, (r + 1) * cols);
+      const rowOut = path.join(outDir, `.${prefix}row_${g}_${r}.png`);
+      stackImages(rowCells, rowOut, 'h', tileW * cols, tileH);
+      rowFiles.push(rowOut);
+    }
+    const gridOut = path.join(outDir, `${prefix}-${String(g + 1).padStart(2, '0')}.png`);
+    stackImages(rowFiles, gridOut, 'v', null, null);
+    gridPaths.push(gridOut);
+    for (const f of rowFiles) fs.rmSync(f, { force: true });
+  }
+  return gridPaths;
+}
+
 // ── grids: 3x3, <=9 panels, 1568px long edge ────────────────────────────────────────────────────
 function renderGrids(video, outDir, chosen, width, height, dur) {
   const GRID_CELLS = 9;
   const longEdge = 1568;
   const tileW = Math.floor(longEdge / 3);
   const tileH = Math.round((tileW * height) / width);
-  const gridPaths = [];
-  for (let g = 0; g * GRID_CELLS < chosen.length; g++) {
-    const chunk = chosen.slice(g * GRID_CELLS, (g + 1) * GRID_CELLS);
-    const cellFiles = chunk.map((c, k) => {
-      const t = Math.max(0, Math.min(c.t, dur - 0.03));
-      const out = path.join(outDir, `.cell_${g}_${k}.png`);
-      const label = c.tag ? `${c.tag} ${t.toFixed(2)}s` : `${t.toFixed(2)}s`;
-      ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', video, '-frames:v', '1', '-vf',
-        `scale=${tileW}:${tileH},drawtext=text='${drawtext(label)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
-        out], out, `grid ${g} cell ${k}`);
-      return out;
-    });
-    const cols = Math.min(3, cellFiles.length);
-    const rowsN = Math.ceil(cellFiles.length / cols);
-    const rowFiles = [];
-    for (let r = 0; r < rowsN; r++) {
-      const rowCells = cellFiles.slice(r * cols, (r + 1) * cols);
-      const rowOut = path.join(outDir, `.row_${g}_${r}.png`);
-      stackImages(rowCells, rowOut, 'h', tileW * cols, tileH);
-      rowFiles.push(rowOut);
-    }
-    const gridOut = path.join(outDir, `grid-${String(g + 1).padStart(2, '0')}.png`);
-    stackImages(rowFiles, gridOut, 'v', null, null);
-    gridPaths.push(gridOut);
-    for (const f of [...cellFiles, ...rowFiles]) fs.rmSync(f, { force: true });
-  }
+  const cellFiles = chosen.map((c, i) => {
+    const t = Math.max(0, Math.min(c.t, dur - 0.03));
+    const out = path.join(outDir, `.cell_${i}.png`);
+    const label = c.tag ? `${c.tag} ${t.toFixed(2)}s` : `${t.toFixed(2)}s`;
+    ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', video, '-frames:v', '1', '-vf',
+      `scale=${tileW}:${tileH},drawtext=text='${drawtext(label)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
+      out], out, `grid cell ${i}`);
+    return out;
+  });
+  const gridPaths = tileInGrids(cellFiles, outDir, 'grid', tileW, tileH, GRID_CELLS);
+  for (const f of cellFiles) fs.rmSync(f, { force: true });
   return gridPaths;
 }
 
@@ -376,32 +388,16 @@ function buildCompareGrids(ref, draft, outDir, window, dims) {
   const tileW = Math.floor(longEdge / 3);
   const tileH = Math.round((tileW * dims.height) / dims.width);
   const times = timeRange(window.from, window.to, 0.25);
-
-  const gridPaths = [];
-  for (let g = 0; g * CELLS_PER_GRID < times.length; g++) {
-    const chunk = times.slice(g * CELLS_PER_GRID, (g + 1) * CELLS_PER_GRID);
-    const pairFiles = chunk.map((t, k) => {
-      const refCell = compareCell(ref, t, outDir, `ref_${g}_${k}`, tileW, tileH);
-      const draftCell = compareCell(draft, t, outDir, `draft_${g}_${k}`, tileW, tileH);
-      const pairOut = path.join(outDir, `.pair_${g}_${k}.png`);
-      stackImages([refCell, draftCell], pairOut, 'v', tileW, tileH * 2);
-      fs.rmSync(refCell, { force: true }); fs.rmSync(draftCell, { force: true });
-      return pairOut;
-    });
-    const cols = Math.min(3, pairFiles.length);
-    const rowsN = Math.ceil(pairFiles.length / cols);
-    const rowFiles = [];
-    for (let r = 0; r < rowsN; r++) {
-      const rowCells = pairFiles.slice(r * cols, (r + 1) * cols);
-      const rowOut = path.join(outDir, `.crow_${g}_${r}.png`);
-      stackImages(rowCells, rowOut, 'h', tileW * cols, tileH * 2);
-      rowFiles.push(rowOut);
-    }
-    const gridOut = path.join(outDir, `side-${String(g + 1).padStart(2, '0')}.png`);
-    stackImages(rowFiles, gridOut, 'v', null, null);
-    gridPaths.push(gridOut);
-    for (const f of [...pairFiles, ...rowFiles]) fs.rmSync(f, { force: true });
-  }
+  const pairFiles = times.map((t, i) => {
+    const refCell = compareCell(ref, t, outDir, `ref_${i}`, tileW, tileH);
+    const draftCell = compareCell(draft, t, outDir, `draft_${i}`, tileW, tileH);
+    const pairOut = path.join(outDir, `.pair_${i}.png`);
+    stackImages([refCell, draftCell], pairOut, 'v', tileW, tileH * 2);
+    fs.rmSync(refCell, { force: true }); fs.rmSync(draftCell, { force: true });
+    return pairOut;
+  });
+  const gridPaths = tileInGrids(pairFiles, outDir, 'side', tileW, tileH * 2, CELLS_PER_GRID);
+  for (const f of pairFiles) fs.rmSync(f, { force: true });
   return gridPaths;
 }
 
@@ -476,6 +472,182 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   }
 }
 
+// Write-then-rename: a reader that opens `file` either sees the old content or the whole new one,
+// never a half-written one (the same failure a compare once hit reading a half-written mp4 mid-render,
+// "moov atom not found"). Cheap enough to use for every JSON this file writes.
+function writeJsonAtomic(file, data) {
+  const tmp = `${file}.tmp-${process.pid}`;
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 1) + '\n');
+  fs.renameSync(tmp, file);
+}
+
+// ── --sheet-check: compare two ALREADY-COMPUTED motion curves, no render, no ffmpeg ──────────────────
+// Both --shot's and --dom's own motion.json share one shape (`curve`: [{t0,t1,mean}]), so one function
+// diffs either pairing: a reference's `see --shot` sheet against a film's `--dom` sheet, or two shots
+// of the same reference. Plain numbers only: a ratio per window, and how far the two curves' peaks land
+// apart in time.
+function sheetCheck(refSheet, filmSheet) {
+  const refCurve = refSheet.curve || [];
+  const filmCurve = filmSheet.curve || [];
+  const n = Math.min(refCurve.length, filmCurve.length);
+  const rows = Array.from({ length: n }, (_, i) => {
+    const r = refCurve[i], f = filmCurve[i];
+    const ratio = r.mean > 1e-6 ? f.mean / r.mean : (f.mean > 1e-6 ? Infinity : 1);
+    return { t0: r.t0, t1: r.t1, refMean: r.mean, filmMean: f.mean, ratio };
+  });
+  const peakIdx = (curve) => curve.reduce((bi, c, i) => (c.mean > (curve[bi]?.mean ?? -Infinity) ? i : bi), 0);
+  const winLen = refCurve[0] ? refCurve[0].t1 - refCurve[0].t0 : 0.5;
+  const refPeakIdx = peakIdx(refCurve), filmPeakIdx = peakIdx(filmCurve);
+  const peakOffset = (filmPeakIdx - refPeakIdx) * winLen;
+  return { rows, peakOffset, refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null };
+}
+
+function runSheetCheck(refFile, filmFile) {
+  if (!fs.existsSync(refFile)) die(`no such file: ${refFile}`);
+  if (!fs.existsSync(filmFile)) die(`no such file: ${filmFile}`);
+  const refSheet = JSON.parse(fs.readFileSync(refFile, 'utf8'));
+  const filmSheet = JSON.parse(fs.readFileSync(filmFile, 'utf8'));
+  const { rows, peakOffset, refPeakT, filmPeakT } = sheetCheck(refSheet, filmSheet);
+  if (!rows.length) die(`no overlapping curve windows between ${refFile} and ${filmFile} (missing "curve"?)`);
+
+  console.log(`\n  SHEET CHECK · ${path.basename(refFile)} vs ${path.basename(filmFile)}\n`);
+  for (const r of rows) {
+    const ratioTxt = Number.isFinite(r.ratio) ? `${r.ratio.toFixed(2)}x` : 'n/a';
+    const note = r.ratio < 0.5 ? '  <- much slower' : r.ratio > 2 ? '  <- much faster' : '';
+    console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  film ${r.filmMean.toFixed(2)}  ratio ${ratioTxt}${note}`);
+  }
+  const dir = peakOffset > 1e-6 ? 'late' : peakOffset < -1e-6 ? 'early' : 'on time';
+  const refTxt = refPeakT != null ? refPeakT.toFixed(2) : 'n/a';
+  const filmTxt = filmPeakT != null ? filmPeakT.toFixed(2) : 'n/a';
+  console.log(`\n  peak motion: reference at ${refTxt}s, film at ${filmTxt}s (${Math.abs(peakOffset).toFixed(2)}s ${dir})`);
+}
+
+// ── --dom: read a film's motion straight from the DOM, no video, no screenshot per sample ────────────
+// Loads `html` once (harness/lib/render-harness.mjs's own serveRepo/launchPage, the same pair every
+// other headless tool in this repo uses), then SEEKS every `document.getAnimations()` (the Web
+// Animations API this repo's `element.animate()` scenes already use) by setting `currentTime`, reading
+// each tracked element's box/opacity straight from the live page: 30x/s costs one page.evaluate call
+// each, not a screenshot decode. Also captures screenshots at the --compare cadence (4/s) into the same
+// side-by-side style grid via tileInGrids, without spinning up a second page or a second browser.
+async function domSample(page, ids, t) {
+  return page.evaluate((ms, trackedIds) => {
+    for (const a of document.getAnimations()) { a.pause(); a.currentTime = ms; }
+    return trackedIds.map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const r = el.getBoundingClientRect();
+      const opacity = Number(getComputedStyle(el).opacity);
+      return { id, x: r.x + r.width / 2, y: r.y + r.height / 2, opacity };
+    });
+  }, t * 1000, ids);
+}
+
+function domCurveAndEvents(samples, ids) {
+  const perElement = new Map(ids.map((id) => [id, []]));
+  for (const s of samples) {
+    for (const row of s.boxes) {
+      if (row) perElement.get(row.id).push({ t: s.t, x: row.x, y: row.y, opacity: row.opacity });
+    }
+  }
+  const energy = [];
+  for (let i = 1; i < samples.length; i++) {
+    const dt = samples[i].t - samples[i - 1].t;
+    let total = 0;
+    for (const id of ids) {
+      const a = samples[i - 1].boxes.find((b) => b?.id === id);
+      const b = samples[i].boxes.find((b2) => b2?.id === id);
+      if (!a || !b) continue;
+      const dist = Math.hypot(b.x - a.x, b.y - a.y);
+      total += (dist / (dt || 1)) * Math.max(a.opacity, b.opacity);
+    }
+    energy.push({ t: samples[i].t, v: total });
+  }
+  const VISIBLE = 0.05;
+  const events = [];
+  for (const [id, pts] of perElement) {
+    let wasVisible = false;
+    for (const p of pts) {
+      const visible = p.opacity > VISIBLE;
+      if (visible && !wasVisible) events.push({ id, type: 'appear', t: Number(p.t.toFixed(2)) });
+      if (!visible && wasVisible) events.push({ id, type: 'leave', t: Number(p.t.toFixed(2)) });
+      wasVisible = visible;
+    }
+  }
+  return { energy, events: events.sort((a, b) => a.t - b.t) };
+}
+
+async function domStillGrid(page, outDir, from, to, w, h) {
+  const times = timeRange(from, to, 0.25);
+  const longEdge = 1568;
+  const tileW = Math.floor(longEdge / 3);
+  const tileH = Math.round((tileW * h) / w);
+  const cellFiles = [];
+  for (const [i, t] of times.entries()) {
+    await domSample(page, [], t); // seeks currentTime; ids irrelevant here, only the seek matters
+    const raw = path.join(outDir, `.domraw_${i}.png`);
+    await page.screenshot({ path: raw });
+    const out = path.join(outDir, `.domcell_${i}.png`);
+    ffmpegOrDie(['-v', 'error', '-y', '-i', raw, '-frames:v', '1', '-vf',
+      `scale=${tileW}:${tileH},drawtext=text='${drawtext(`${t.toFixed(2)}s`)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
+      out], out, `dom still ${i}`);
+    fs.rmSync(raw, { force: true });
+    cellFiles.push(out);
+  }
+  const gridPaths = tileInGrids(cellFiles, outDir, 'dom-still', tileW, tileH, 9);
+  for (const f of cellFiles) fs.rmSync(f, { force: true });
+  return gridPaths;
+}
+
+async function runDom(htmlPath, outDirRoot, opts) {
+  const { from: fromArg, to: toArg, fps: domFps, w, h, ids: idsArg } = opts;
+  const root = path.resolve(htmlPath, '..');
+  const rel = path.basename(htmlPath);
+  const { close: closeServer, port } = await serveRepo({ root });
+  const { page, close: closePage } = await launchPage({ width: w, height: h });
+  try {
+    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    const info = await page.evaluate(() => {
+      const durMeta = document.querySelector('meta[name="duration"]');
+      const anims = document.getAnimations();
+      const ids = [...new Set(anims.map((a) => a.effect && a.effect.target).filter(Boolean).map((t) => t.id).filter(Boolean))];
+      const maxEndMs = anims.reduce((m, a) => {
+        const timing = a.effect.getComputedTiming();
+        return Math.max(m, (timing.delay || 0) + (timing.duration || 0) * (timing.iterations || 1));
+      }, 0);
+      return { durationS: durMeta ? Number(durMeta.content) : null, ids, maxEndMs, animCount: anims.length };
+    });
+    if (!info.animCount) die(`${htmlPath} has no document.getAnimations() (no element.animate() calls ran).`);
+
+    const ids = idsArg || info.ids;
+    const to = toArg != null ? toArg : (info.durationS != null ? info.durationS : info.maxEndMs / 1000);
+    if (!(to > fromArg)) die(`--dom: bad window ${fromArg}-${to}`);
+
+    const outDir = path.join(outDirRoot, 'dom');
+    fs.rmSync(outDir, { recursive: true, force: true });
+    fs.mkdirSync(outDir, { recursive: true });
+
+    const times = timeRange(fromArg, to, 1 / domFps);
+    const samples = [];
+    for (const t of times) samples.push({ t, boxes: await domSample(page, ids, t) });
+    const { energy, events } = domCurveAndEvents(samples, ids);
+    const curve = bucketMean(energy, fromArg, to, 0.5)
+      .map((wnd) => ({ t0: Number(wnd.t0.toFixed(2)), t1: Number(wnd.t1.toFixed(2)), mean: Number(wnd.mean.toFixed(3)) }));
+
+    const gridPaths = await domStillGrid(page, outDir, fromArg, to, w, h);
+
+    const sheet = { html: htmlPath, from: fromArg, to, fps: domFps, ids, events, curve };
+    writeJsonAtomic(path.join(outDir, 'motion.json'), sheet);
+
+    console.log(`\n  DOM · ${path.basename(htmlPath)}, ${fromArg}-${to}s, ${ids.length} tracked element(s)\n`);
+    for (const c of curve) console.log(`  ${c.t0.toFixed(2)}-${c.t1.toFixed(2)}s  ${c.mean.toFixed(2)}`);
+    console.log(`\n  ${events.length} event(s): ${events.map((e) => `${e.id} ${e.type}@${e.t}s`).join(', ') || 'none'}`);
+    console.log(`  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'motion.json'))}, ${gridPaths.length} still grid(s)`);
+  } finally {
+    await closePage();
+    closeServer();
+  }
+}
+
 function writeOutputs({ outDir, video, dur, fps, cutTimes, energy, holds, beats, gridPaths }) {
   const motion = {
     dur: Number(dur.toFixed(2)), fps: Number(fps.toFixed(3)),
@@ -519,38 +691,72 @@ text. The grids are the truth; look at them before trusting a beat's word list.
   console.log(`✓ see: ${beats.length} beat(s), ${gridPaths.length} grid(s), ~${tokenEstimate} tokens -> ${path.relative(ROOT, outDir)}/index.md`);
 }
 
-function main() {
+async function main() {
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
   const positional = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
+
+  // --sheet-check needs no video and no ffmpeg: pure JSON-to-JSON, <1s.
+  if (argv.includes('--sheet-check')) {
+    const [refFile, filmFile] = positional;
+    if (!refFile || !filmFile)
+      die('usage: node harness/media/see.mjs --sheet-check <ref-sheet.json> <film-sheet.json>');
+    return runSheetCheck(refFile, filmFile);
+  }
+
   const video = positional[0];
 
   if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
-    + '| --shot <from>-<to> [--fps N] | --compare <draft.mp4> [--from s --to s]');
+    + '| --shot <from>-<to> [--fps N] | --compare <draft.mp4> [--from s --to s] '
+    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] | --sheet-check <ref.json> <film.json>');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   for (const bin of ['ffprobe', 'ffmpeg']) {
     if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
       die(`${bin} is not on PATH. see.mjs needs ffmpeg (and tesseract for the full flow); install and re-run.`);
   }
 
+  if (argv.includes('--dom')) return dispatchDom(video, positional, flag);
+
   const shotSpec = flag('--shot', null);
-  if (shotSpec) {
-    const { from, to } = parseRange(shotSpec);
-    const fps = Number(flag('--fps', 10));
-    const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
-    return runShot(video, outDirRoot, from, to, fps);
-  }
+  if (shotSpec) return dispatchShot(video, positional, shotSpec, flag);
 
   const compareArg = flag('--compare', null);
-  if (compareArg) {
-    if (!fs.existsSync(compareArg)) die(`no such draft file: ${compareArg}`);
-    const fromArg = flag('--from', null);
-    const toArg = flag('--to', null);
-    const filmArg = flag('--film', null);
-    const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
-    return runCompare(video, compareArg, outDirRoot, fromArg != null ? Number(fromArg) : null, toArg != null ? Number(toArg) : null, filmArg);
-  }
+  if (compareArg) return dispatchCompare(video, positional, compareArg, flag);
 
+  return runFullFlow(video, positional, flag);
+}
+
+function dispatchDom(video, positional, flag) {
+  const fromArg = Number(flag('--from', 0));
+  const toArg = flag('--to', null);
+  const domFps = Number(flag('--dom-fps', 30));
+  const w = Number(flag('--w', 1920));
+  const h = Number(flag('--h', 1080));
+  const idsArg = flag('--ids', null);
+  const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+  return runDom(video, outDirRoot, {
+    from: fromArg, to: toArg != null ? Number(toArg) : null, fps: domFps, w, h,
+    ids: idsArg ? idsArg.split(',') : null,
+  });
+}
+
+function dispatchShot(video, positional, shotSpec, flag) {
+  const { from, to } = parseRange(shotSpec);
+  const fps = Number(flag('--fps', 10));
+  const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+  return runShot(video, outDirRoot, from, to, fps);
+}
+
+function dispatchCompare(video, positional, compareArg, flag) {
+  if (!fs.existsSync(compareArg)) die(`no such draft file: ${compareArg}`);
+  const fromArg = flag('--from', null);
+  const toArg = flag('--to', null);
+  const filmArg = flag('--film', null);
+  const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+  return runCompare(video, compareArg, outDirRoot, fromArg != null ? Number(fromArg) : null, toArg != null ? Number(toArg) : null, filmArg);
+}
+
+function runFullFlow(video, positional, flag) {
   if (spawnSync('tesseract', ['-version'], { encoding: 'utf8' }).error)
     die('tesseract is not on PATH. see.mjs needs it for the full flow (--shot/--compare do not); install and re-run.');
 
