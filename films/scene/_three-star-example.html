@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.2">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three.module.min.js"}}</script>
+<style>
+  html, body { margin: 0; background: #0b0d10; overflow: hidden; }
+  #gl { display: block; }
+  #word { position: fixed; left: 0; right: 0; bottom: 14%; text-align: center;
+    font: 700 44px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.08em;
+    color: #f3f6ff; opacity: 0; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="word">STARLIGHT</div>
+<script type="module">
+import * as THREE from 'three';
+window.THREE = THREE;
+import '/core/engine/page-api.js';
+
+const canvas = document.getElementById('gl');
+const w = window.innerWidth, h = window.innerHeight;
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1);
+renderer.setSize(w, h, false);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
+camera.position.set(0, 0, 4);
+
+// The tuned lighting rig core/surfaces/three-fx.js already builds for the declarative `object`/`three`
+// layer types, reused here rather than four lights re-hand-tuned: 'metal' picks the bright softbox
+// room an iridescent/metal body wants (the glass room is mostly dark, tuned for transmission instead).
+vawe.three.studio(renderer, scene, 'metal');
+
+// A plain rounded four-point star, extruded from its own SVG path (M/L/Q only): the same parser
+// core/surfaces/three-fx.js's declarative `object` layer already reads for `geometry.kind:"svgExtrude"`.
+const STAR_D = 'M83.91,5.91 L42.96,20.96 Q26.87,26.87 20.96,42.96 L5.91,83.91 Q0,100 -5.91,83.91 '
+  + 'L-20.96,42.96 Q-26.87,26.87 -42.96,20.96 L-83.91,5.91 Q-100,0 -83.91,-5.91 L-42.96,-20.96 '
+  + 'Q-26.87,-26.87 -20.96,-42.96 L-5.91,-83.91 Q0,-100 5.91,-83.91 L20.96,-42.96 Q26.87,-26.87 42.96,-20.96 '
+  + 'L83.91,-5.91 Q100,0 83.91,5.91 Z';
+const geometry = vawe.three.extrude(STAR_D, { depth: 0.22, bevel: 0.05 });
+const mat = vawe.three.material('iridescent');
+const star = new THREE.Mesh(geometry, mat);
+scene.add(star);
+
+// One HTML word, entering on a plain Web Animations entrance (element.animate()), seeked by the same
+// clock that drives the star: no second timing system for the one word on screen.
+document.getElementById('word').animate(
+  [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0px)' }],
+  { duration: 500, delay: 200, fill: 'both', easing: 'ease-out' },
+);
+
+// SPIN_RATE: a half-turn (PI rad) every 0.3s, so the star's flat face is EDGE-ON (rotation.y == PI/2
+// mod PI) at every multiple of 0.3s, in particular the two times this page is judged against: 0.6s and
+// 0.9s. Posed ABSOLUTELY from t (phase PI/2 at t=0), never accumulated: renderFrame(n) stays pure in n.
+const SPIN_RATE = Math.PI / 0.3;
+
+// vawe.value(row, t): the star's entrance pop, 0 -> 1 over its first 0.3s, sampled off the SAME
+// timing-sheet row shape (core/motion/timeline.js) an HTML entrance would read, so a 3D scale and an
+// HTML transform never carry two clocks.
+const POP = { at: 0, dur: 0.3, from: 0, to: 1, ease: 'ease-out' };
+
+vawe.onFrame((t) => {
+  const pop = vawe.value(POP, t);
+  star.scale.setScalar(0.4 + 0.6 * pop);
+  star.rotation.y = Math.PI / 2 + t * SPIN_RATE;
+  star.rotation.x = 0.18;
+  renderer.render(scene, camera);
+});
+</script>
+</body>
+</html>

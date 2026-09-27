@@ -361,6 +361,16 @@ export function driveClips(clips, t) {
 export function registerTimeline(tl) {
   (window.__timelines || (window.__timelines = [])).push(tl);
 }
+
+// vawe.onFrame(fn): a page's own hand-written driver (a canvas 2D ctx, a WebGL/three.js scene, a
+// particle sim) registers ONE hook here instead of inventing a second clock. seekAll(t) calls every
+// hook, in registration order, AFTER every declarative/WAAPI/SMIL animation on the page has already
+// been seeked to t, and AWAITS it when it returns a promise (a hook that decodes a texture or builds
+// geometry lazily on first call needs that). This is the one hook list a page's own JS may register
+// on: a second ad-hoc rAF loop is exactly the non-determinism this file exists to rule out.
+export function onFrame(fn) {
+  (window.__vaweFrameHooks || (window.__vaweFrameHooks = [])).push(fn);
+}
 export function seekAll(t) {
   // registered / GSAP-style paused timelines
   for (const tl of window.__timelines || []) {
@@ -381,6 +391,11 @@ export function seekAll(t) {
   document.querySelectorAll('svg').forEach((svg) => {
     if (typeof svg.pauseAnimations === 'function') { try { svg.pauseAnimations(); svg.setCurrentTime(t); } catch { /* best-effort */ } }
   });
+  const hooks = window.__vaweFrameHooks;
+  if (!hooks || !hooks.length) return;
+  // Sequential, not Promise.all: two hooks racing to the same canvas/GL context is a render-order
+  // dependency, the exact bug this file's whole header rules out.
+  return (async () => { for (const fn of hooks) await fn(t); })();
 }
 
 // Self-contained on purpose (the skip-list is a literal inside the function, not a module const):

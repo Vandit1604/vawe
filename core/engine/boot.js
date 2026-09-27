@@ -679,7 +679,7 @@ function wireEngine(scene, fps, width, height, vclock, data) {
     // motion/vars in place (studio/ui/studio.js:offsetAt already assumed this) and reseek with no
     // reload. renderFrame(n) stays pure in n: a real render never mutates this, only local tooling does.
     data,
-    renderFrame: (n) => { vclock.set(n, fps); scene.renderFrame(n); },
+    renderFrame: async (n) => { vclock.set(n, fps); await scene.renderFrame(n); },
     auditFonts: () => auditFonts(document.querySelector('.stage')),
   };
 }

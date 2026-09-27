@@ -19,6 +19,8 @@ HTML). Get the settled frame right first; add motion second.
 
 CSS `animation`, `transition` and `element.animate()` move a fragment as deterministically as
 `motion`: `seekAll(t)` (core/timeline/clips.js) seeks every page animation and SVG SMIL root each frame.
+A page's own `vawe.onFrame(t)` hook (plain three.js/canvas, `vawe.three.studio`/`extrude`/`material`) is
+called the same way, awaited if async.
 
 `vawe.timeline()` (core/motion/timeline.js) adds relative timing (`at: "<"`, `">"`, `"+=0.2"`, a label)
 and reads timing-sheet rows (`{el, at, dur, from, to, ease, stagger}`) from a
