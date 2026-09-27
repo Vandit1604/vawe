@@ -9,8 +9,20 @@ This repo turns **one self-describing JSON → one rendered video** (60fps mp4 f
 `1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an
 open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions.
 
-The settled frame is HTML; the JSON animates it, never CSS. Author motion through `parts`, `motion`
-and `vars`.
+The settled frame is HTML; the JSON animates it. Author motion through `parts`, `motion` and `vars`,
+or through CSS `animation`/`transition`/`element.animate()` inside your own markup.
+
+`seekAll(t)` (core/timeline/clips.js) pauses and seeks every `document.getAnimations()` entry and
+every SVG SMIL root on every frame, so CSS animation, CSS transition and Web Animations are all as
+deterministic as the engine's own tracks.
+
+`make check GATE=anim-traps D=<film>` catches the ways a seeked animation still goes wrong: a fill
+collision, a missing end keyframe, `var()` inside the `animation` shorthand, a dead selector, a delay
+past the film's end, or one easing stretched over several keyframes.
+
+`core/motion/timeline.js`'s `vawe.timeline()` gives trusted engine code the same relative-timing
+vocabulary `motion` uses, over plain `element.animate()` calls, including a data-row form read back
+from a `<script type="application/json">` block for an editable timing sheet.
 
 ## THE SEVEN STAGES, IN ORDER  `[live: harness/live/stage-say.mjs]`
 

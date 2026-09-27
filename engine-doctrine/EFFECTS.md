@@ -211,6 +211,8 @@ The tiktok figures are this repo's own portrait numbers carried over as fraction
 |---|---|
 | `commaSplit` | a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure |
 | `pipelineFlow` | staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline) |
+| `timelineDemo` | labelled bars settle in, hold, exit, staggered by core/motion/timeline.js on plain element.animate() instead of GSAP |
+| `timelineSheet` | a sweep of dots choreographed by an editable `<script type="application/json">` row sheet inside this comp, read back by timelineFromScript, never by hand-editing this file |
 
 ## Cut timings  `[cuts[]/per-layer]`
 
@@ -1262,4 +1264,4 @@ The row above lists 41 curves named by mechanism, which is why the default is to
 | `zoom out` | camera → `move: "workspaceZoomOut"` |
 
 ---
-_763 effects across 67 families. Regenerate: `make regen`._
+_765 effects across 67 families. Regenerate: `make regen`._

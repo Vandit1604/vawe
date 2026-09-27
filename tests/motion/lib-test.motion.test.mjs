@@ -739,6 +739,92 @@ ok('EASINGS linear', EASINGS.linear(0.42) === 0.42);
 }
 
 
+// ---- core/motion/timeline.js: the relative-timing helper over element.animate() ------------------
+//
+// `.animate` is stubbed rather than real, so this stays a pure-JS test: what matters here is the
+// DELAY math (resolveAt), not that a browser actually plays the animation.
+{
+  const { timeline } = await import('../../core/motion/timeline.js');
+  const stubEl = () => {
+    const calls = [];
+    return { el: { animate: (kfs, opts) => { calls.push(opts); return opts; } }, calls };
+  };
+
+  const { el: e1, calls: c1 } = stubEl();
+  const tl = timeline();
+  tl.to(e1, [{ opacity: 0 }, { opacity: 1 }], { duration: 1, at: 0 });
+  tl.to(e1, [{ opacity: 1 }, { opacity: 0 }], { duration: 0.5 }); // no `at`: sequential, off the cursor
+  ok('timeline: an untimed call starts at the cursor (end of the previous call)', c1[1].delay === 1000);
+
+  const { el: e2, calls: c2 } = stubEl();
+  const tl2 = timeline();
+  tl2.to(e2, [{ x: 0 }], { duration: 1, at: 0 });
+  tl2.to(e2, [{ x: 0 }], { duration: 1, at: '<' });
+  ok('timeline: "<" starts together with the previous call', c2[1].delay === 0);
+
+  const { el: e3, calls: c3 } = stubEl();
+  const tl3 = timeline();
+  tl3.to(e3, [{ x: 0 }], { duration: 1, at: 0 });
+  tl3.to(e3, [{ x: 0 }], { duration: 1, at: '+=0.2' });
+  ok('timeline: "+=n" adds n seconds to the cursor', c3[1].delay === 1200);
+
+  const { el: e4, calls: c4 } = stubEl();
+  const tl4 = timeline();
+  tl4.label('mark', 2);
+  tl4.to(e4, [{ x: 0 }], { duration: 1, at: 'mark' });
+  ok('timeline: a label resolves to its own recorded time', c4[0].delay === 2000);
+
+  const { el: e5, calls: c5 } = stubEl();
+  const tl5 = timeline();
+  tl5.stagger([e5, e5, e5], [{ x: 0 }], { duration: 1, at: 0 }, 0.1);
+  ok('timeline: stagger offsets each element by `each` off the same base',
+    c5.map((c) => c.delay).join(',') === '0,100,200');
+
+  ok('timeline: fill defaults to both, so the end state holds under seekAll(t)',
+    c1[0].fill === 'both');
+  ok('timeline: an unresolved position throws by name, never silently lands at 0', (() => {
+    try { timeline().to(stubEl().el, [], { at: 'no-such-label' }); return false; }
+    catch (e) { return /unknown position/.test(e.message); }
+  })());
+
+  // ---- rows: the array-calling convention, same builder, same element.animate() underneath -------
+  const { el: e6, calls: c6 } = stubEl();
+  const rowsTl = timeline([
+    { el: e6, at: 0, dur: 0.4, to: { x: 100, y: 20, opacity: 1 } },
+    { el: e6, at: '+=0.2', dur: 0.3, to: { opacity: 0 } },
+  ]);
+  ok('timeline(rows): a row chains off the row before it, same as an imperative call',
+    c6[1].delay === (0.4 + 0.2) * 1000);
+  ok('timeline(rows): the returned builder is the normal one (duration reflects every row)',
+    Math.abs(rowsTl.duration - 0.9) < 1e-9);
+
+  // el.animate is stubbed to return its OPTIONS (see stubEl), so the built keyframes are read off the
+  // call the stub recorded instead, one layer up: re-stub with keyframes captured too.
+  const kfCalls = [];
+  const kfEl = { animate: (kfs, opts) => { kfCalls.push({ kfs, opts }); return opts; } };
+  timeline([{ el: kfEl, at: 0, dur: 0.5, to: { x: 100, y: 20, opacity: 1 } }]);
+  ok('timeline(rows): to:{x,y} becomes a translate() keyframe, w/h become width/height',
+    kfCalls[0].kfs[1].transform === 'translate(100px, 20px)' && kfCalls[0].kfs[1].opacity === 1);
+
+  // ---- timelineFromScript: the editable-sheet half, a <script type="application/json"> read back --
+  // Rows in a real script block name a CSS selector (JSON cannot carry a live element reference), so
+  // the fake root here carries both querySelector (for the script block) and querySelectorAll (for a
+  // row's own selector, scoped to this SAME root rather than a global document).
+  const { timelineFromScript } = await import('../../core/motion/timeline.js');
+  const scriptCalls = [];
+  const fakeRoot = {
+    querySelector: (sel) => (sel === 'script#timing[type="application/json"]'
+      ? { textContent: JSON.stringify([{ el: '.dot', at: 0, dur: 1 }]) }
+      : null),
+    querySelectorAll: (sel) => (sel === '.dot' ? [{ animate: (kfs, opts) => { scriptCalls.push(opts); return opts; } }] : []),
+  };
+  const fromScript = timelineFromScript(fakeRoot, 'timing');
+  ok('timelineFromScript: reads rows out of the script block and runs them', scriptCalls.length === 1);
+  ok('timelineFromScript: returns the same builder shape as timeline(rows)', typeof fromScript.duration === 'number');
+  ok('timelineFromScript: a fragment with no such block does nothing, never throws',
+    timelineFromScript({ querySelector: () => null }, 'timing') === null);
+}
+
   assert.equal(fail, 0, `${fail} of ${pass + fail} assertion(s) failed`);
   assert.ok(pass >= 138, `expected at least 138 assertions (the count this file was split with) to have run, saw ${pass}`);
 });

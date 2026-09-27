@@ -6,7 +6,7 @@ import { resolveSpectacle } from '../timeline/spectacle.js';
 import { lowerScene } from '../transitions/lower.js';
 import { bgPreset, bgOverErrors, bgOptKeys, BG_NAMES, FX_PARAMS } from '../backgrounds/index.js';
 import { gradientShapeErrors } from '../backgrounds/fx.js';
-import { timeCssUsed } from '../type/sanitize-html.js';
+import { unseekableCssUsed } from '../type/sanitize-html.js';
 
 // The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
 // Listed rather than derived: a window's own vocabulary is small and stable, and deriving it from the
@@ -133,9 +133,9 @@ function namedPresetWindowErrors(b, at, sources, out) {
 function authoredWindowErrors(b, at, out) {
   if (b.opts != null)
     out.push(`${at} sets \`opts\` on a hand-authored (\`html\`) backdrop, \`opts\` tunes the canvas fx a PRESET is built from, and an html window paints no fx, so nothing would read it. Style the fragment itself.`);
-  const timeCss = b.html != null ? timeCssUsed(b.html) : null; // a `src` fragment is read off disk by fragmentFileErrors
-  if (timeCss)
-    out.push(`${at} uses CSS \`${timeCss}\`, which renders as a DEAD STILL: core/tokens.css disables transition and animation globally because both run on wall-clock, and a frame is seeked, not played. Drive motion from \`var(--t)\` (seconds) or \`var(--p)\` (0→1 across this window) instead, e.g. \`transform: rotate(calc(var(--t) * 12deg))\`. Both are written every frame.`);
+  const badCss = b.html != null ? unseekableCssUsed(b.html) : null; // a `src` fragment is read off disk by fragmentFileErrors
+  if (badCss)
+    out.push(`${at} uses \`${badCss}\`, which no per-frame seek can reach: it drives progress off scrolling, not off the film's own clock. Drive motion from \`var(--t)\` (seconds) or \`var(--p)\` (0→1 across this window) instead, e.g. \`transform: rotate(calc(var(--t) * 12deg))\`, or an \`@keyframes\`/\`element.animate()\` animation, both seeked deterministically now.`);
   if (b.tone == null)
     out.push(`${at} is hand-authored but declares no \`tone\` ("light" or "dark"). The engine cannot read the lightness out of your CSS, so a layer with no explicit \`color\` falls back to the theme's ink and may land white-on-white. Say which it is.`);
 }

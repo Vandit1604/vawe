@@ -15,7 +15,28 @@ almost never edit the Go renderer.** You write data JSON (most common) or the sh
 
 A scene is two layers that must never blur together: **the HTML is the settled frame** (what a beat
 looks like, holding still), and **the JSON is the motion** (`parts`, `motion`, `vars`, on top of that
-HTML, never CSS `transition`/`animation`). Get the settled frame right first; add motion second.
+HTML). Get the settled frame right first; add motion second.
+
+CSS `animation`, CSS `transition` and `element.animate()` (Web Animations) all move a fragment too,
+exactly as deterministically as `motion`/`anim`/`parts`. `seekAll(t)` (core/timeline/clips.js) pauses
+and seeks every `document.getAnimations()` entry, and every SVG SMIL root, on every frame, wherever it
+lives: a stylesheet, an inline style, or hand-authored markup inside an `html` layer.
+
+Run `make check GATE=anim-traps D=<film>` on anything that uses them. It catches the five ways a
+seeked animation still goes wrong (a fill collision, a keyframe list with no end state, `var()` inside
+the `animation` shorthand, a selector matching 0 elements, a delay past the film's own end), plus a
+sixth: one easing curve stretched across 3+ keyframes with none carrying its own.
+
+`core/motion/timeline.js`'s `vawe.timeline()` gives trusted engine code (a `composition`, see
+core/compositions/index.js) the same relative-timing vocabulary (`at: "<"`/`">"`/`"+=0.2"`/a label)
+`motion` tracks use internally, built on plain `element.animate()` calls.
+
+`vawe.timeline(rows)` also takes an array of plain data rows (`{el, at, dur, from, to, ease, stagger}`),
+and `timelineFromScript()` reads that array out of a `<script type="application/json">` block inside a
+fragment's own DOM, so an editable timing sheet can live beside the markup it drives.
+
+The one thing still refused: `animation-timeline: scroll()`/`view()`, because it drives progress off
+scrolling, not off `t`, and no seek reaches it.
 
 ## Rules, loaded before you write a layer
 
