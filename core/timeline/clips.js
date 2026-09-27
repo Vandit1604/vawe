@@ -434,6 +434,39 @@ export function fillCollisionPairs() {
   return pairs;
 }
 
+// activeOverlapPairs(): every pair of animations, on the same element, sharing a property (both
+// composite:'replace', the WAAPI default), whose ACTIVE windows (delay..delay+duration*iterations,
+// fill ignored) genuinely overlap. WAAPI composites later-registered animations on top of earlier ones
+// FOR THE WHOLE OVERLAP, regardless of either one's fill: a per-letter animation registered after a
+// timing-sheet row on the same element/property wins for as long as both are playing, so the earlier
+// row's motion is invisible there even though it is still "running". fillCollisionPairs (above) catches
+// a narrower case, one side reaching BACKWARD past its own start; this one needs no backward reach at
+// all, only two active spans that share real time. ONE definition, so anim-traps.mjs's gate can never
+// disagree with what actually composites on screen.
+export function activeOverlapPairs() {
+  const byElement = new Map();
+  for (const a of document.getAnimations()) {
+    if (!a.effect || !a.effect.target) continue;
+    (byElement.get(a.effect.target) || byElement.set(a.effect.target, []).get(a.effect.target)).push(a);
+  }
+  const pairs = [];
+  for (const anims of byElement.values()) {
+    if (anims.length < 2) continue;
+    for (let i = 0; i < anims.length; i++) for (let j = i + 1; j < anims.length; j++) {
+      const [A, B] = [anims[i], anims[j]];
+      if ((A.effect.composite || 'replace') !== 'replace' || (B.effect.composite || 'replace') !== 'replace') continue;
+      const shared = [...animatedProps(A)].filter((p) => animatedProps(B).has(p));
+      if (!shared.length) continue;
+      const tA = A.effect.getComputedTiming(), tB = B.effect.getComputedTiming();
+      const activeSpan = (t) => [t.delay || 0, (t.delay || 0) + (t.duration || 0) * (t.iterations === Infinity ? 1 : (t.iterations || 1))];
+      const [aStart, aEnd] = activeSpan(tA), [bStart, bEnd] = activeSpan(tB);
+      const overlapMs = Math.min(aEnd, bEnd) - Math.max(aStart, bStart);
+      if (overlapMs > 1) pairs.push({ a: A, b: B, props: shared, overlapMs });
+    }
+  }
+  return pairs;
+}
+
 // An animation authored with no `fill` (or `fill:'none'`/`'auto'`) settles back to its base style the
 // instant it ends, which reads as a snap-back on a seeked render exactly as it would on a live one; the
 // author almost always meant to hold the last frame. Runs ONCE, right after the scene builds and every
