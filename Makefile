@@ -393,8 +393,12 @@ preview: ## [dev] render a single hand-written fragment (or a captured component
 stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>, or no D= for the roster, or Q="…" before a film exists)
 	@node quality/gates/stage.mjs $(D) $(if $(Q),--q "$(Q)") $(if $(JSON),--json,)
 
-next: ## [preflight] RUN the one command the stage names, then stop (D=<film>)
+next: ## [preflight] RUN the one command the stage names, then stop (D=<film>, or PAGE=<html> REF=<mp4> for a bare page's required-motion-match, no film needed)
+ifdef PAGE
+	@node harness/media/see.mjs $(PAGE) --dom --ref $(REF) $(if $(D),--film $(D),)
+else
 	@node quality/gates/next.mjs $(D)
+endif
 
 # `make legacy` (the ratchet census/adopt/stamp) is RETIRED. quality/gates/legacy-manifest.json and the
 # author-check.mjs ratchet engine that read it are gone: quality/gates/legacy-fold.mjs folded every row

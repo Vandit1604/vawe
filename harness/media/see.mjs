@@ -453,19 +453,18 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   const draftEnergy = computeEnergy(draftPath).filter((p) => p.t >= from && p.t < clampedTo);
   const refCurve = bucketMean(refEnergy, from, clampedTo, 0.5);
   const draftCurve = bucketMean(draftEnergy, from, clampedTo, 0.5);
-  const rows = refCurve.map((w, i) => {
-    const draftMean = draftCurve[i] ? draftCurve[i].mean : 0;
-    return { t0: w.t0, t1: w.t1, refMean: w.mean, draftMean, tooStill: draftMean < 0.5 * w.mean };
-  });
+  // Required-motion-match's own diff (window ratio + peak/exit speed + a numeric hint per failing
+  // window), the same one --dom --ref and --sheet-check run: one owner for "is the motion close
+  // enough", not a second bespoke tooStill calc living only here.
+  const { rows, tooStillWindows, ok, peakRatio, exitRatio } = sheetCheck({ curve: refCurve }, { curve: draftCurve });
 
   const refHolds = findHolds(refEnergy, HOLD_FLOOR, HOLD_MIN);
   const draftHolds = findHolds(draftEnergy, HOLD_FLOOR, HOLD_MIN);
   const refLongest = longestHold(refHolds);
   const draftLongest = longestHold(draftHolds);
-  const tooStillWindows = rows.filter((r) => r.tooStill);
 
   const tableRows = rows.map((r) => `| ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s | ${r.refMean.toFixed(2)} `
-    + `| ${r.draftMean.toFixed(2)} |${r.tooStill ? ' <- too still' : ''} |`).join('\n');
+    + `| ${r.filmMean.toFixed(2)} |${r.tooStill ? ' <- too still' : ''} |`).join('\n');
   const lines = [
     `# see --compare: ${path.basename(refPath)} vs ${path.basename(draftPath)}`, '',
     `window ${from}-${clampedTo}s · ${gridPaths.length} grid(s) every 0.25s, reference top, draft bottom.`, '',
@@ -478,28 +477,36 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
   writeJsonAtomic(path.join(outDir, 'motion.json'), {
     ref: refPath, draft: draftPath, from, to: clampedTo,
     windows: rows.map((r) => ({ t0: Number(r.t0.toFixed(2)), t1: Number(r.t1.toFixed(2)),
-      refMean: Number(r.refMean.toFixed(3)), draftMean: Number(r.draftMean.toFixed(3)), tooStill: r.tooStill })),
-    refLongestStill: refLongest, draftLongestStill: draftLongest,
+      refMean: Number(r.refMean.toFixed(3)), draftMean: Number(r.filmMean.toFixed(3)), tooStill: r.tooStill })),
+    refLongestStill: refLongest, draftLongestStill: draftLongest, peakRatio, exitRatio,
   });
 
   console.log(`\n  COMPARE · ${path.basename(refPath)} vs ${path.basename(draftPath)}, ${from}-${clampedTo}s\n`);
   for (const r of rows)
-    console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  draft ${r.draftMean.toFixed(2)}${r.tooStill ? '  <- too still' : ''}`);
+    console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  draft ${r.filmMean.toFixed(2)}${r.tooStill ? '  <- too still' : ''}`);
   console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'compare.md'))}`);
-  console.log(tooStillWindows.length
-    ? `  next: fix motion in ${tooStillWindows.length} window(s) marked "too still" (${tooStillWindows.map((r) => `${r.t0.toFixed(1)}-${r.t1.toFixed(1)}s`).join(', ')}), then re-run --compare.`
-    : '  next: draft matches the reference\'s motion in every window; proceed to the next post-draft step.');
+  if (tooStillWindows.length) {
+    console.log(`  next: fix motion in ${tooStillWindows.length} window(s) marked "too still":`);
+    for (const r of tooStillWindows) console.log(`    - ${r.hint}`);
+  } else {
+    console.log('  next: draft matches the reference\'s motion in every window; proceed to the next post-draft step.');
+  }
 
   // `--film` records this run against the FILM's own hash (harness/lib/receipt.mjs), the same receipt
   // shape conform.mjs/verify.mjs already write, so quality/gates/post-draft.mjs can read one fresh/stale
   // answer instead of re-running ffmpeg itself.
   if (filmArg) {
     writeReceipt('motion-compare', filmArg, {
-      ok: tooStillWindows.length === 0, tooStillCount: tooStillWindows.length,
-      tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1 })),
-      ref: refPath, draft: draftPath, from, to: clampedTo,
+      ok, tooStillCount: tooStillWindows.length,
+      tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
+      peakRatio, exitRatio, ref: refPath, draft: draftPath, from, to: clampedTo,
     });
   }
+  // Reports, does not block by default (this repo's own house rule: a gate blocks only with --strict
+  // or through a specific caller that opts in, e.g. --film for post-draft.mjs's own required-motion
+  // step, or runRequiredMotionMatch below for a bare-page check with no film to gate). `ok` is
+  // returned so a caller that DOES want to refuse (no film/scene wrapping it) can.
+  return { ok, tooStillWindows, peakRatio, exitRatio };
 }
 
 // Write-then-rename: a reader that opens `file` either sees the old content or the whole new one,
@@ -511,19 +518,50 @@ function writeJsonAtomic(file, data) {
   fs.renameSync(tmp, file);
 }
 
+// Required-motion-match threshold: the same 0.5 (draft under HALF the reference's energy reads
+// "tooStill") --compare has always used, now also applied to peak and exit speed, and to `ok` overall.
+export const MATCH_FLOOR = 0.5;
+
+// Qualitative read of a raw energy number, for a hint a person can act on without knowing this file's
+// own units. Bucketed off measured values already on record in this file: sting's frozen span reads
+// ~0.1, HOLD_FLOOR is 0.6 (nothing visibly moving below it), a full-frame flash/sweep reads 8+.
+function describeEnergy(v) {
+  if (v >= 6) return 'a full-frame flash and sweep';
+  if (v >= 2) return 'broad movement across the frame';
+  if (v >= HOLD_FLOOR) return 'movement across part of the frame';
+  return 'almost nothing moving';
+}
+
+// One line, per failing window, built from the numbers this run actually measured: never canned text.
+// `filmArea` (0-1, tracked-element box area / frame area) only exists on a `--dom` curve; the mp4-vs-mp4
+// path (no DOM to read boxes from) falls back to describing the film side by its energy number alone.
+function windowHint(row, isEdgeWindow) {
+  const refDesc = describeEnergy(row.refMean);
+  const filmDesc = row.area == null ? describeEnergy(row.filmMean)
+    : row.area < 0.15 ? 'in a small area' : row.area < 0.4 ? 'across part of the frame' : 'across most of the frame';
+  const actions = [];
+  if (row.area != null && row.area < 0.15) actions.push('enlarge the moving area');
+  actions.push(isEdgeWindow ? 'speed up the exit' : 'speed up the motion');
+  const advice = actions.join(' and ');
+  return `${row.t0.toFixed(1)}-${row.t1.toFixed(1)}s: reference moves ${row.refMean.toFixed(1)} ${refDesc}; `
+    + `yours ${row.filmMean.toFixed(1)} ${filmDesc}. ${advice[0].toUpperCase()}${advice.slice(1)}.`;
+}
+
 // ── --sheet-check: compare two ALREADY-COMPUTED motion curves, no render, no ffmpeg ──────────────────
-// Both --shot's and --dom's own motion.json share one shape (`curve`: [{t0,t1,mean}]), so one function
-// diffs either pairing: a reference's `see --shot` sheet against a film's `--dom` sheet, or two shots
-// of the same reference. Plain numbers only: a ratio per window, and how far the two curves' peaks land
-// apart in time.
-function sheetCheck(refSheet, filmSheet) {
+// Both --shot's and --dom's own motion.json share one shape (`curve`: [{t0,t1,mean}], --dom's also
+// carrying `area`), so one function diffs either pairing: a reference's `see --shot` sheet against a
+// film's `--dom` sheet, or two shots of the same reference. `ok` (required-motion-match's own gate)
+// fails on ANY window under MATCH_FLOOR of the reference, or peak/exit speed under MATCH_FLOOR.
+export function sheetCheck(refSheet, filmSheet) {
   const refCurve = refSheet.curve || [];
   const filmCurve = filmSheet.curve || [];
   const n = Math.min(refCurve.length, filmCurve.length);
+  const edgeCount = Math.max(1, Math.round(n * 0.2));
   const rows = Array.from({ length: n }, (_, i) => {
     const r = refCurve[i], f = filmCurve[i];
     const ratio = r.mean > 1e-6 ? f.mean / r.mean : (f.mean > 1e-6 ? Infinity : 1);
-    return { t0: r.t0, t1: r.t1, refMean: r.mean, filmMean: f.mean, ratio };
+    const row = { t0: r.t0, t1: r.t1, refMean: r.mean, filmMean: f.mean, area: f.area ?? null, ratio, tooStill: ratio < MATCH_FLOOR };
+    return { ...row, isEdgeWindow: i >= n - edgeCount, hint: row.tooStill ? windowHint(row, i >= n - edgeCount) : null };
   });
   const peakIdx = (curve) => curve.reduce((bi, c, i) => (c.mean > (curve[bi]?.mean ?? -Infinity) ? i : bi), 0);
   const winLen = refCurve[0] ? refCurve[0].t1 - refCurve[0].t0 : 0.5;
@@ -540,21 +578,21 @@ function sheetCheck(refSheet, filmSheet) {
   const peakRatio = refPeak > 1e-6 ? filmPeak / refPeak : (filmPeak > 1e-6 ? Infinity : 1);
   const exitRatio = refEdge.exit > 1e-6 ? filmEdge.exit / refEdge.exit : (filmEdge.exit > 1e-6 ? Infinity : 1);
 
+  const tooStillWindows = rows.filter((r) => r.tooStill);
+  const ok = n > 0 && tooStillWindows.length === 0 && peakRatio >= MATCH_FLOOR && exitRatio >= MATCH_FLOOR;
+
   return {
-    rows, peakOffset, refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null,
+    rows, tooStillWindows, ok, peakOffset, refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null,
     refPeak, filmPeak, peakRatio, refExit: refEdge.exit, filmExit: filmEdge.exit, exitRatio,
   };
 }
 
-function runSheetCheck(refFile, filmFile) {
-  if (!fs.existsSync(refFile)) die(`no such file: ${refFile}`);
-  if (!fs.existsSync(filmFile)) die(`no such file: ${filmFile}`);
-  const refSheet = JSON.parse(fs.readFileSync(refFile, 'utf8'));
-  const filmSheet = JSON.parse(fs.readFileSync(filmFile, 'utf8'));
-  const { rows, peakOffset, refPeakT, filmPeakT, refPeak, filmPeak, peakRatio, refExit, filmExit, exitRatio } = sheetCheck(refSheet, filmSheet);
-  if (!rows.length) die(`no overlapping curve windows between ${refFile} and ${filmFile} (missing "curve"?)`);
-
-  console.log(`\n  SHEET CHECK · ${path.basename(refFile)} vs ${path.basename(filmFile)}\n`);
+// Prints a sheetCheck() result and returns its `ok`. Shared by --sheet-check (two pre-computed JSON
+// curves) and --required-motion (a live reference video + a live HTML page), so the table/hints/pass
+// line are worded identically wherever this runs.
+function printSheetCheck(result, refLabel, filmLabel) {
+  const { rows, tooStillWindows, ok, peakOffset, refPeakT, filmPeakT, refPeak, filmPeak, peakRatio, refExit, filmExit, exitRatio } = result;
+  console.log(`\n  SHEET CHECK · ${refLabel} vs ${filmLabel}\n`);
   for (const r of rows) {
     const ratioTxt = Number.isFinite(r.ratio) ? `${r.ratio.toFixed(2)}x` : 'n/a';
     const note = r.ratio < 0.5 ? '  <- much slower' : r.ratio > 2 ? '  <- much faster' : '';
@@ -566,6 +604,34 @@ function runSheetCheck(refFile, filmFile) {
   console.log(`\n  peak motion: reference at ${refTxt}s, film at ${filmTxt}s (${Math.abs(peakOffset).toFixed(2)}s ${dir})`);
   console.log(`  peak speed: ref ${refPeak.toFixed(2)}, film ${filmPeak.toFixed(2)} (film is ${describeRatio(peakRatio)})`);
   console.log(`  exit speed: ref ${refExit.toFixed(2)}, film ${filmExit.toFixed(2)} (film's exit is ${describeRatio(exitRatio)})`);
+  if (tooStillWindows.length) {
+    console.log(`\n  ${tooStillWindows.length} window(s) fail required motion match (< ${MATCH_FLOOR}x the reference):\n`);
+    for (const r of tooStillWindows) console.log(`  - ${r.hint}`);
+  }
+  if (peakRatio < MATCH_FLOOR) console.log(`\n  peak speed fails required motion match: ${describeRatio(peakRatio)}.`);
+  if (exitRatio < MATCH_FLOOR) console.log(`  exit speed fails required motion match: ${describeRatio(exitRatio)}.`);
+  console.log(`\n  ${ok ? '✓ passes required motion match.' : '✗ fails required motion match.'}`);
+  return ok;
+}
+
+function runSheetCheck(refFile, filmFile, filmArg) {
+  if (!fs.existsSync(refFile)) die(`no such file: ${refFile}`);
+  if (!fs.existsSync(filmFile)) die(`no such file: ${filmFile}`);
+  const refSheet = JSON.parse(fs.readFileSync(refFile, 'utf8'));
+  const filmSheet = JSON.parse(fs.readFileSync(filmFile, 'utf8'));
+  const result = sheetCheck(refSheet, filmSheet);
+  const { rows, tooStillWindows, ok, peakRatio, exitRatio } = result;
+  if (!rows.length) die(`no overlapping curve windows between ${refFile} and ${filmFile} (missing "curve"?)`);
+  printSheetCheck(result, path.basename(refFile), path.basename(filmFile));
+
+  if (filmArg) {
+    writeReceipt('motion-match', filmArg, {
+      ok, tooStillCount: tooStillWindows.length,
+      tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
+      peakRatio, exitRatio, ref: refFile, film: filmFile,
+    });
+  }
+  if (!ok) process.exitCode = 1;
 }
 
 // ── --dom: read a film's motion straight from the DOM, no video, no screenshot per sample ────────────
@@ -578,17 +644,26 @@ function runSheetCheck(refFile, filmFile) {
 async function domSample(page, ids, t) {
   return page.evaluate((ms, trackedIds) => {
     for (const a of document.getAnimations()) { a.pause(); a.currentTime = ms; }
+    // Looked up by `data-see-track`, not `id`: most animated elements in a real authored page (a
+    // per-letter/word span, a particle, an icon wrapper) carry a class, never an id, so tracking only
+    // `document.getAnimations()` targets that HAPPEN to have one misses almost everything real pages
+    // animate. `sampleDomMotion`'s own setup pass tags every target with this attribute once, using its
+    // real id when it has one so this stays a superset of the old id-only behaviour, never a narrower one.
     return trackedIds.map((id) => {
-      const el = document.getElementById(id);
+      const el = document.querySelector(`[data-see-track="${id}"]`);
       if (!el) return null;
       const r = el.getBoundingClientRect();
       const opacity = Number(getComputedStyle(el).opacity);
-      return { id, x: r.x + r.width / 2, y: r.y + r.height / 2, opacity };
+      return { id, x: r.x + r.width / 2, y: r.y + r.height / 2, w: r.width, h: r.height, opacity };
     });
   }, t * 1000, ids);
 }
 
-function domCurveAndEvents(samples, ids) {
+// `area`: at each sample, the tracked elements' own box area (summed, uncapped at the frame) as a
+// fraction of the viewport. Not "how much moved" (`energy` already answers that) but "how much of the
+// frame the moving elements occupy" - the number required-motion-match's hint needs to say a fix is
+// "enlarge the moving area" rather than only "speed it up".
+function domCurveAndEvents(samples, ids, frameArea) {
   const perElement = new Map(ids.map((id) => [id, []]));
   for (const s of samples) {
     for (const row of s.boxes) {
@@ -596,6 +671,7 @@ function domCurveAndEvents(samples, ids) {
     }
   }
   const energy = [];
+  const area = [];
   for (let i = 1; i < samples.length; i++) {
     const dt = samples[i].t - samples[i - 1].t;
     let total = 0;
@@ -607,6 +683,8 @@ function domCurveAndEvents(samples, ids) {
       total += (dist / (dt || 1)) * Math.max(a.opacity, b.opacity);
     }
     energy.push({ t: samples[i].t, v: total });
+    const visibleArea = samples[i].boxes.reduce((sum, b) => sum + (b && b.opacity > 0.05 ? b.w * b.h : 0), 0);
+    area.push({ t: samples[i].t, v: frameArea > 0 ? visibleArea / frameArea : 0 });
   }
   const VISIBLE = 0.05;
   const events = [];
@@ -619,7 +697,7 @@ function domCurveAndEvents(samples, ids) {
       wasVisible = visible;
     }
   }
-  return { energy, events: events.sort((a, b) => a.t - b.t) };
+  return { energy, area, events: events.sort((a, b) => a.t - b.t) };
 }
 
 async function domStillGrid(page, outDir, from, to, w, h) {
@@ -644,53 +722,107 @@ async function domStillGrid(page, outDir, from, to, w, h) {
   return gridPaths;
 }
 
-async function runDom(htmlPath, outDirRoot, opts) {
+// Boots `htmlPath`, resolves its tracked element ids and window, and samples domSample() across it at
+// `fps`, bucketed to 0.5s windows: `{energy, area}`-curved, plus raw events. The one path both `--dom`
+// and the reference-required-motion-match check sample through, so a page's ids/window/box-reading are
+// resolved exactly once per caller, never twice.
+async function sampleDomMotion(page, htmlPath, port, opts) {
   const { from: fromArg, to: toArg, fps: domFps, w, h, ids: idsArg } = opts;
-  const root = path.resolve(htmlPath, '..');
   const rel = path.basename(htmlPath);
+  await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+  const info = await page.evaluate(() => {
+    const durMeta = document.querySelector('meta[name="duration"]');
+    const anims = document.getAnimations();
+    // Tag EVERY animation target with `data-see-track`, using its real id when it has one, a
+    // synthetic `_N` otherwise: most animated elements on a real authored page (a per-letter span, a
+    // particle, an icon wrapper) carry a class, never an id, so tracking id'd elements only would miss
+    // almost everything such a page actually moves.
+    const targets = [...new Set(anims.map((a) => a.effect && a.effect.target).filter(Boolean))];
+    const ids = targets.map((el, i) => {
+      const key = el.id || `_${i}`;
+      el.setAttribute('data-see-track', key);
+      return key;
+    });
+    const maxEndMs = anims.reduce((m, a) => {
+      const timing = a.effect.getComputedTiming();
+      return Math.max(m, (timing.delay || 0) + (timing.duration || 0) * (timing.iterations || 1));
+    }, 0);
+    return { durationS: durMeta ? Number(durMeta.content) : null, ids, maxEndMs, animCount: anims.length };
+  });
+  if (!info.animCount) die(`${htmlPath} has no document.getAnimations() (no element.animate() calls ran).`);
+
+  const ids = idsArg || info.ids;
+  const to = toArg != null ? toArg : (info.durationS != null ? info.durationS : info.maxEndMs / 1000);
+  if (!(to > fromArg)) die(`--dom: bad window ${fromArg}-${to}`);
+
+  const times = timeRange(fromArg, to, 1 / domFps);
+  const samples = [];
+  for (const t of times) samples.push({ t, boxes: await domSample(page, ids, t) });
+  const { energy, area, events } = domCurveAndEvents(samples, ids, w * h);
+  const energyCurve = bucketMean(energy, fromArg, to, 0.5);
+  const areaCurve = bucketMean(area, fromArg, to, 0.5);
+  const curve = energyCurve.map((wnd, i) => ({
+    t0: Number(wnd.t0.toFixed(2)), t1: Number(wnd.t1.toFixed(2)),
+    mean: Number(wnd.mean.toFixed(3)), area: Number((areaCurve[i]?.mean ?? 0).toFixed(3)),
+  }));
+  return { ids, from: fromArg, to, curve, events };
+}
+
+async function runDom(htmlPath, outDirRoot, opts) {
+  const { fps: domFps, w, h } = opts;
+  const root = path.resolve(htmlPath, '..');
   const { close: closeServer, port } = await serveRepo({ root });
   const { page, close: closePage } = await launchPage({ width: w, height: h });
   try {
-    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
-    const info = await page.evaluate(() => {
-      const durMeta = document.querySelector('meta[name="duration"]');
-      const anims = document.getAnimations();
-      const ids = [...new Set(anims.map((a) => a.effect && a.effect.target).filter(Boolean).map((t) => t.id).filter(Boolean))];
-      const maxEndMs = anims.reduce((m, a) => {
-        const timing = a.effect.getComputedTiming();
-        return Math.max(m, (timing.delay || 0) + (timing.duration || 0) * (timing.iterations || 1));
-      }, 0);
-      return { durationS: durMeta ? Number(durMeta.content) : null, ids, maxEndMs, animCount: anims.length };
-    });
-    if (!info.animCount) die(`${htmlPath} has no document.getAnimations() (no element.animate() calls ran).`);
-
-    const ids = idsArg || info.ids;
-    const to = toArg != null ? toArg : (info.durationS != null ? info.durationS : info.maxEndMs / 1000);
-    if (!(to > fromArg)) die(`--dom: bad window ${fromArg}-${to}`);
+    const { ids, from, to, curve, events } = await sampleDomMotion(page, htmlPath, port, opts);
 
     const outDir = path.join(outDirRoot, 'dom');
     fs.rmSync(outDir, { recursive: true, force: true });
     fs.mkdirSync(outDir, { recursive: true });
 
-    const times = timeRange(fromArg, to, 1 / domFps);
-    const samples = [];
-    for (const t of times) samples.push({ t, boxes: await domSample(page, ids, t) });
-    const { energy, events } = domCurveAndEvents(samples, ids);
-    const curve = bucketMean(energy, fromArg, to, 0.5)
-      .map((wnd) => ({ t0: Number(wnd.t0.toFixed(2)), t1: Number(wnd.t1.toFixed(2)), mean: Number(wnd.mean.toFixed(3)) }));
+    const gridPaths = await domStillGrid(page, outDir, from, to, w, h);
 
-    const gridPaths = await domStillGrid(page, outDir, fromArg, to, w, h);
-
-    const sheet = { html: htmlPath, from: fromArg, to, fps: domFps, ids, events, curve };
+    const sheet = { html: htmlPath, from, to, fps: domFps, ids, events, curve };
     writeJsonAtomic(path.join(outDir, 'motion.json'), sheet);
 
-    console.log(`\n  DOM · ${path.basename(htmlPath)}, ${fromArg}-${to}s, ${ids.length} tracked element(s)\n`);
+    console.log(`\n  DOM · ${path.basename(htmlPath)}, ${from}-${to}s, ${ids.length} tracked element(s)\n`);
     for (const c of curve) console.log(`  ${c.t0.toFixed(2)}-${c.t1.toFixed(2)}s  ${c.mean.toFixed(2)}`);
     console.log(`\n  ${events.length} event(s): ${events.map((e) => `${e.id} ${e.type}@${e.t}s`).join(', ') || 'none'}`);
     console.log(`  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'motion.json'))}, ${gridPaths.length} still grid(s)`);
   } finally {
     await closePage();
     closeServer();
+  }
+}
+
+// ── --dom --ref <mp4>: required-motion-match on a BARE HTML PAGE, no scene.json, no wiring into a
+// film first. A recreation agent authors the fragment before it is ever wired in; this renders it with
+// harness/media/render-page.mjs (item 4's own batched, reliable HTML-page renderer: write-then-rename,
+// fails loudly, one ffmpeg pass) into a scratch mp4, then hands both mp4s to the SAME runCompare() the
+// post-draft loop already runs on a scene's own draft. A DOM-sampled curve (this file's --dom) reads in
+// px/s; a video's own pixel-energy curve reads in a wholly different unit (0-255 frame-diff intensity):
+// diffing one against the other produced a ratio in the THOUSANDS, meaningless noise, not a hint. Two
+// curves of the SAME unit (pixel energy, both from a real render) is the one comparison that means
+// anything, so this never invents a second one.
+async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
+  if (!fs.existsSync(refPath)) die(`no such --ref file: ${refPath}`);
+  if (opts.from) die('--dom --ref: --from is not supported yet, the page always renders from 0');
+  const refP = probeVideo(refPath);
+  const to = opts.to != null ? opts.to : refP.dur;
+
+  const outDir = path.join(outDirRoot, 'required-motion');
+  fs.mkdirSync(outDir, { recursive: true });
+  const tmpMp4 = path.join(outDir, `.page-render-${process.pid}.mp4`);
+  try {
+    const { renderPage } = await import('./render-page.mjs');
+    await renderPage(htmlPath, tmpMp4, { fps: 30, w: opts.w, h: opts.h, durArg: to });
+    // Unlike a bare `--compare` (report-only, this repo's own house rule), a bare-page check has no
+    // film/post-draft step wrapping it to refuse the ship on its behalf, so THIS is the one place that
+    // must actually fail the process: a recreation agent running this standalone needs a non-zero exit.
+    const { ok } = runCompare(refPath, tmpMp4, outDirRoot, 0, to, opts.filmArg);
+    if (!ok) process.exitCode = 1;
+  } finally {
+    fs.rmSync(tmpMp4, { force: true });
   }
 }
 
@@ -714,8 +846,28 @@ async function runProbe(htmlPath, atS, sel, outDir) {
     await seekPage(page, atS);
     const rows = await page.evaluate((selector) => {
       const shortSelInPage = (el) => (el.id ? `#${el.id}` : (el.className && String(el.className).trim() ? `.${String(el.className).split(' ')[0]}` : el.tagName.toLowerCase()));
+      // getBoundingClientRect() on an SVG shape (not the root <svg>) is inconsistent across engines
+      // once it carries its own rotate/scale, some report the rect of the UNTRANSFORMED bbox translated
+      // only by position. getBBox() (the shape's own coordinate space) transformed through
+      // getScreenCTM() (that space -> screen pixels, folding in every ancestor SVG and CSS transform)
+      // is the one path that is always screen-space and always right; box comes from those two calls
+      // on any nested SVG shape, getBoundingClientRect only for the root <svg> and every non-SVG element.
+      function screenBox(el) {
+        if (el instanceof SVGGraphicsElement && el.ownerSVGElement && el.getBBox && el.getScreenCTM) {
+          const bbox = el.getBBox();
+          const ctm = el.getScreenCTM();
+          if (ctm) {
+            const corners = [[bbox.x, bbox.y], [bbox.x + bbox.width, bbox.y], [bbox.x, bbox.y + bbox.height], [bbox.x + bbox.width, bbox.y + bbox.height]]
+              .map(([px, py]) => ({ x: ctm.a * px + ctm.c * py + ctm.e, y: ctm.b * px + ctm.d * py + ctm.f }));
+            const xs = corners.map((p) => p.x), ys = corners.map((p) => p.y);
+            const x = Math.min(...xs), y = Math.min(...ys);
+            return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+          }
+        }
+        return el.getBoundingClientRect();
+      }
       return [...document.querySelectorAll(selector)].map((el) => {
-        const r = el.getBoundingClientRect();
+        const r = screenBox(el);
         const cs = getComputedStyle(el);
         const anims = document.getAnimations().filter((a) => a.effect && a.effect.target === el).map((a) => {
           const t = a.effect.getComputedTiming();
@@ -970,15 +1122,16 @@ async function main() {
   if (argv.includes('--sheet-check')) {
     const [refFile, filmFile] = positional;
     if (!refFile || !filmFile)
-      die('usage: node harness/media/see.mjs --sheet-check <ref-sheet.json> <film-sheet.json>');
-    return runSheetCheck(refFile, filmFile);
+      die('usage: node harness/media/see.mjs --sheet-check <ref-sheet.json> <film-sheet.json> [--film <film.json>]');
+    return runSheetCheck(refFile, filmFile, flag('--film', null));
   }
 
   const video = positional[0];
 
   if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
-    + '| --shot <from>-<to> [--fps N] | --compare <draft.mp4> [--from s --to s] '
-    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] | --sheet-check <ref.json> <film.json> '
+    + '| --shot <from>-<to> [--fps N] [--page <html>] | --compare <draft.mp4> [--from s --to s] '
+    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] [--ref <mp4> [--film <f.json>]] '
+    + '| --sheet-check <ref.json> <film.json> [--film <f.json>] '
     + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...> [--film <f.json>]');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   for (const bin of ['ffprobe', 'ffmpeg']) {
@@ -1035,16 +1188,24 @@ function dispatchDom(video, positional, flag) {
   const h = Number(flag('--h', 1080));
   const idsArg = flag('--ids', null);
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
-  return runDom(video, outDirRoot, {
+  const opts = {
     from: fromArg, to: toArg != null ? Number(toArg) : null, fps: domFps, w, h,
     ids: idsArg ? idsArg.split(',') : null,
-  });
+  };
+  // `--dom --ref <mp4>`: required-motion-match on a bare page, no scene.json, no draft render
+  // (`make next PAGE=<html> REF=<mp4>`, item 2 of this file's own required-motion-match doctrine).
+  const refArg = flag('--ref', null);
+  if (refArg) return runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null) });
+  return runDom(video, outDirRoot, opts);
 }
 
 function dispatchShot(video, positional, shotSpec, flag) {
   const { from, to } = parseRange(shotSpec);
   const fps = Number(flag('--fps', 10));
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+  const pageArg = flag('--page', null);
+  if (pageArg) console.log(`\n  next: node harness/media/see.mjs ${pageArg} --dom --ref ${video} --from ${from} --to ${to}`
+    + `  (or: make next PAGE=${pageArg} REF=${video})`);
   return runShot(video, outDirRoot, from, to, fps);
 }
 

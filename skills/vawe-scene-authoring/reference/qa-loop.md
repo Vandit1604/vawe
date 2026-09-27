@@ -22,4 +22,8 @@ group: skill
 If the audit flags overlap/overflow, fix with the spacing tokens and re-run. Mark new key text
 `data-layer="critical"` so the audit can see it.
 
+A long QA job (a full render, a judge pass) needs the foreground or the tool's own background
+handoff: each Bash call is a fresh shell, so a plain `cmd &` in one call has no `wait` a later call
+can see.
+
 See `engine-doctrine/CODEMAPS/ARCHITECTURE.md` for the full system map.

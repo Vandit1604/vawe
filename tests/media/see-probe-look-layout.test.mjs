@@ -35,6 +35,22 @@ document.getElementById('box').animate([
 ], { duration: 2000, fill: 'both' });
 </script></body></html>`);
 
+// A 40x20 rect at (10,10) in its own SVG user space, rotated 30deg about its center then scaled 2x by
+// a CSS transform on the <svg> host: getBoundingClientRect() on the <rect> itself is the exact bug
+// report this fixture is for (some engines answer with the UNTRANSFORMED rect's translation only,
+// ignoring the rotate/scale). getBBox()+getScreenCTM() must answer the SAME screen box every time.
+const svgHtml = path.join(tmp, 'svg-shape.html');
+fs.writeFileSync(svgHtml, `<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="1">
+<style>*{margin:0}body{width:640px;height:360px;background:#000}
+svg{position:absolute;left:0;top:0;transform:scale(2);transform-origin:0 0}</style>
+</head><body>
+<svg width="200" height="200" viewBox="0 0 200 200">
+  <rect id="shape" x="10" y="10" width="40" height="20" fill="#fff"
+    transform="rotate(30 30 20)" />
+</svg>
+</body></html>`);
+
 const brokenHtml = path.join(tmp, 'broken.html');
 fs.writeFileSync(brokenHtml, `<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="duration" content="2">
@@ -67,6 +83,21 @@ try {
   assert(row.animations.length === 1 && Math.abs(row.animations[0].progress - 0.25) < 0.05,
     `expected one animation at ~0.25 progress, got ${JSON.stringify(row.animations)}`);
   console.log(`✓ see-probe-look-layout.test.mjs: --probe read #box at x=${row.box.x}, progress ${row.animations[0].progress.toFixed(2)}`);
+
+  // ── --probe on a rotated + scaled SVG shape: getBBox()+getScreenCTM(), not getBoundingClientRect()
+  // (engine-doctrine bug: some engines answer a rotated SVG shape's getBoundingClientRect() with the
+  // UNTRANSFORMED box's own translation only, ignoring the rotate/scale) ────────────────────────────
+  const svgProbeOut = path.join(tmp, 'svg-probe-out');
+  execFileSync('node', [SCRIPT, svgHtml, svgProbeOut, '--probe', '--at', '0', '--sel', '#shape'], { encoding: 'utf8' });
+  const svgProbe = JSON.parse(fs.readFileSync(path.join(svgProbeOut, 'probe', 'probe.json'), 'utf8'));
+  assert(svgProbe.rows.length === 1, `expected exactly one #shape match, got ${svgProbe.rows.length}`);
+  const shapeBox = svgProbe.rows[0].box;
+  // hand-computed: a 40x20 rect at (10,10) rotated 30deg about its center (30,20) in the svg's own
+  // 1:1 viewBox, then the whole <svg> scaled 2x from the page origin.
+  const expected = { x: 15.36, y: 2.68, w: 89.28, h: 74.64 };
+  for (const [k, v] of Object.entries(expected))
+    assert(Math.abs(shapeBox[k] - v) <= 2, `expected rotated svg shape ${k}~=${v}, got ${JSON.stringify(shapeBox)}`);
+  console.log(`✓ see-probe-look-layout.test.mjs: --probe reads a rotated+scaled SVG shape's screen box via getBBox+getScreenCTM (${JSON.stringify(shapeBox)})`);
 
   // ── --look: one grid, no reference ──────────────────────────────────────────────────────────────
   const lookOut = path.join(tmp, 'look-out');
