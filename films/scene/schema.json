@@ -1549,8 +1549,8 @@
      "label": "<b> emphasis colour (default: brand accent, or inherit over an accent bg)"
     },
     "tracking": {
-     "type": "string",
-     "label": "Letter-spacing"
+     "type": "string|number",
+     "label": "Letter-spacing (a number is read as em, e.g. -0.04)"
     },
     "fit": {
      "type": "boolean",

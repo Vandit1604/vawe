@@ -98,6 +98,14 @@
 # under a tenth of a second. Neither is in gates.yml, matching the rest of this maintenance tier
 # (skill-reach, rung, provenance): pre-push and CI do not mirror past the fast job gates.yml itself
 # names, and these belong with their siblings.
+# An ABSOLUTE core.hooksPath survives a `git worktree` move or a repo re-clone at a new path, so this
+# pre-push keeps running from wherever it was FIRST installed, stale and pointed at a checkout that may
+# no longer exist. `make install-hooks` sets it relative (.githooks); warn, don't block, on the way out.
+hooks_path="$(git config core.hooksPath 2>/dev/null || true)"
+case "$hooks_path" in
+  /*) echo "! core.hooksPath is absolute ($hooks_path); it will not follow this worktree. Run: make install-hooks" >&2 ;;
+esac
+
 while read -r _local_ref local_sha _remote_ref remote_sha; do
   [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
