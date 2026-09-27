@@ -110,7 +110,8 @@ export function run(name) {
   }
   const [script, ...args] = build();
   const exe = script.endsWith('.sh') ? 'sh' : process.execPath;
-  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { encoding: 'utf8', cwd: ROOT });
+  // Node's default 1 MiB capture limit killed gates with long output and hid the cause.
+  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { encoding: 'utf8', cwd: ROOT, maxBuffer: 256 * 1024 * 1024 });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
   const status = r.status ?? 1;
@@ -120,7 +121,7 @@ export function run(name) {
     const failing = `${r.stdout || ''}${r.stderr || ''}`.split('\n').filter((l) => l.includes('✗'));
     console.log(status === 0
       ? `✓ ${name}: passed`
-      : `✗ ${name}: ${failing.length || 1} failed: ${(failing[0] || `exited ${status}`).trim()}`);
+      : `✗ ${name}: ${failing.length || 1} failed: ${(failing[0] || (r.error ? `could not run: ${r.error.message}` : `exited ${status}`)).trim()}`);
   }
   return status;
 }
