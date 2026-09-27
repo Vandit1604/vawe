@@ -12,6 +12,10 @@ film together, the ground tone: these transfer. The literal pixels, the brand ma
 do not, and copying them is both a taste failure and, for anything captured from someone else's site or
 footage, a rights problem this repo's asset rules already forbid.
 
+Recreating a raw page instead of a full film? `make dev-tool X=new TYPE=recreation NAME=<name>
+REF=<reference.mp4>` writes the starter page, then loop `make next PAGE=<page.html> REF=<reference.mp4>`
+until it passes: `engine-doctrine/CRAFT/RECREATION.md`'s own note on the page path.
+
 ## The spine, at every length
 
 Whatever the reference's own spine is. Do not force a hook/build/payoff shape onto a film that was
