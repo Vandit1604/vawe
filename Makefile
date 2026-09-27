@@ -478,19 +478,6 @@ install-hooks: ## [maintenance] activate the version-controlled git hooks (pre-p
 	@echo "    post-checkout  a linked worktree (even one made with plain \`git worktree add\`) gets its untracked library, fonts and node_modules link"
 	@echo "✓ merge.vawe-generated.driver registered (.gitattributes marks the owned paths)"
 
-# make verify-batch: runs the full push tier (make test, audit-test, e2e, every FAST+FULL gate) as its
-# own step, with no push and no SSH connection depending on it staying open for the ~40 minutes it
-# takes. A push under VAWE_FULL=1 ran this same tier INSIDE pre-push, and GitHub drops an idle SSH
-# connection before that finishes, so the push silently never lands (happened four times in one day).
-# On success this stamps .vawe-data/verified/<commit-sha> (gitignored), which pre-push reads: a plain
-# `git push` (no VAWE_FULL) against a stamped tip reports "verified by make verify-batch at <time>" and
-# runs only the fast tier, the same fast tier every push already runs. The recipe: `make verify-batch`,
-# then `git push`.
-verify-batch: ## [maintenance] run the full tier (test+audit-test+e2e+every gate) and stamp this commit verified for pre-push
-	. harness/dev/verify-tiers.sh && run_full_tier
-	@make e2e
-	@node -e "const fs=require('node:fs'),sha=require('node:child_process').execSync('git rev-parse HEAD').toString().trim(); fs.mkdirSync('.vawe-data/verified',{recursive:true}); fs.writeFileSync('.vawe-data/verified/'+sha, new Date().toISOString())"
-	@echo "✓ verified $$(git rev-parse HEAD): make test, audit-test, e2e, and every FAST+FULL gate passed. Now: git push"
 
 # clean, author-check: `make dev-tool X=clean` / `make dev-tool X=author-check D=<file>`.
 
