@@ -12,7 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { gradeable, renderOf } from './tile.mjs';
-import { readReceipt } from '../../harness/lib/receipt.mjs';
+import { readReceipt, fragmentsOf, ROOT } from '../../harness/lib/receipt.mjs';
 import { twoJudgesStatus } from '../../harness/lib/judge-consensus.mjs';
 import { isWaivedBy } from '../../harness/lib/waivers.mjs';
 
@@ -31,6 +31,42 @@ export function judgeBrief(filmArg, run) {
     `  VAWE_AGENT=judge-${run || '<n>'} node quality/gates/judge.mjs ${filmArg} --verdict-json <file> --run ${run || 'A|B'}`,
     '  --- end brief ---',
   ].join('\n');
+}
+
+// Times to check a fragment's settled layout at: its own <meta name="duration">, sampled at 0%, 25%,
+// 50%, 75%, 100%, so a fragment with no motion at all still gets one check. Falls back to 2s (this
+// repo's smallest common beat length) when the meta tag is missing or unreadable.
+function sampleTimes(fragPath) {
+  let dur = 2;
+  try {
+    const m = /<meta\s+name=["']duration["']\s+content=["']([\d.]+)["']/.exec(fs.readFileSync(fragPath, 'utf8'));
+    if (m) dur = Number(m[1]);
+  } catch { /* fall back to the default */ }
+  return [0, 0.25, 0.5, 0.75, 1].map((f) => Number((f * dur).toFixed(2))).join(',');
+}
+
+// A film's own html fragments (layer type "html", any depth) checked for clipped/overflowing text,
+// text-on-text, off-frame elements and stacked opaque shots BEFORE the motion check: a fragment whose
+// settled frame is already broken makes any motion measured against it meaningless. Returns null for a
+// film with no fragment (nothing to check) or a check already fresh and clean/waived.
+function layoutStep(filmPath, filmArg, allow) {
+  const frags = fragmentsOf(filmPath);
+  if (!frags.length) return null;
+  const layout = readReceipt('layout', filmPath);
+  if (!layout.exists || layout.stale) {
+    const first = path.resolve(ROOT, frags[0]);
+    return { step: 'layout', done: false,
+      next: `node harness/media/see.mjs ${frags[0]} --layout --times ${sampleTimes(first)} --film ${filmArg}`,
+      why: `this film names ${frags.length} html fragment(s); their settled layout has not been checked yet.` };
+  }
+  if (layout.receipt.ok === false && !isWaivedBy(allow, 'layout-fault')) {
+    const first = path.resolve(ROOT, frags[0]);
+    return { step: 'layout', done: false,
+      next: `node harness/media/see.mjs ${frags[0]} --layout --times ${sampleTimes(first)} --film ${filmArg}`,
+      why: `${layout.receipt.faultCount} layout fault(s) found last run. Fix them and re-run, or waive with `
+        + '{"authoring":{"allow":["layout-fault"],"_why":{"layout-fault":"…"}}}.' };
+  }
+  return null;
 }
 
 // `scene.reference`: the reference video this film was built to match (a plain path, the same
@@ -89,6 +125,9 @@ export function postDraftStep(filmArg) {
       why: `${conform.receipt.failedCount} brief claim(s) failed last run (see the fix: lines it printed). `
         + `Fix them and re-run, or waive with {"authoring":{"allow":["conform-fail"],"_why":{"conform-fail":"…"}}}.` };
   }
+
+  const layoutFail = layoutStep(filmPath, filmArg, allow);
+  if (layoutFail) return layoutFail;
 
   const motionFail = motionStep(scene, filmPath, filmArg, mp4, allow);
   if (motionFail) return motionFail;

@@ -161,3 +161,56 @@ writeReceipt('motion-compare', refScenePath, { ok: true, tooStillCount: 0, tooSt
 
 refCleanup();
 console.log('✓ post-draft.test.mjs: scene.reference gates a `motion` step (unchecked -> too-still -> passed -> verify)');
+
+// ── html fragment: a film that names one gets a `layout` step BEFORE conform/motion ──────────────────
+const fragName = '_post-draft-fragment-fixture.html';
+const fragPath = path.join(ROOT, 'tests/fixtures/films', fragName);
+const lName = '_post-draft-layout-fixture.json';
+const lScenePath = path.join(ROOT, 'tests/fixtures/films', lName);
+const lMp4 = path.join(ROOT, renderOf(lScenePath));
+const lCleanup = () => {
+  for (const stage of ['conform', 'verify', 'still-sheet', 'layout']) {
+    try { fs.unlinkSync(receiptPath(stage, lScenePath)); } catch { /* fine */ }
+  }
+  try { fs.unlinkSync(lScenePath); } catch { /* fine */ }
+  try { fs.unlinkSync(lMp4); } catch { /* fine */ }
+  try { fs.unlinkSync(fragPath); } catch { /* fine */ }
+};
+lCleanup();
+fs.mkdirSync(path.dirname(lMp4), { recursive: true });
+fs.writeFileSync(fragPath, '<div>hi</div>');
+fs.writeFileSync(lScenePath, JSON.stringify({
+  module: 'scene', layers: [{ type: 'html', src: 'tests/fixtures/films/_post-draft-fragment-fixture.html', start: 0, duration: 2 }],
+}));
+fs.writeFileSync(lMp4, 'fake rendered bytes');
+writeReceipt('still-sheet', lScenePath, { sheets: ['fake.png'] });
+writeReceipt('conform', lScenePath, { ok: true, failedCount: 0 });
+
+// conform passed: stalls at `layout` next, before motion/verify ever runs, naming the fragment
+{
+  const r = postDraftStep(lScenePath);
+  assert.equal(r.step, 'layout');
+  assert.match(r.next, /see\.mjs .*_post-draft-fragment-fixture\.html --layout/);
+  assert.match(r.why, /1 html fragment\(s\)/);
+}
+
+writeReceipt('layout', lScenePath, { ok: false, faultCount: 2 });
+
+// layout ran and found faults: stays at `layout`, names the count, offers the waiver
+{
+  const r = postDraftStep(lScenePath);
+  assert.equal(r.step, 'layout');
+  assert.match(r.why, /2 layout fault\(s\)/);
+  assert.match(r.why, /layout-fault/);
+}
+
+writeReceipt('layout', lScenePath, { ok: true, faultCount: 0 });
+
+// layout passed: falls through to the un-run verify step (no `reference`, so `motion` is skipped too)
+{
+  const r = postDraftStep(lScenePath);
+  assert.equal(r.step, 'verify');
+}
+
+lCleanup();
+console.log('✓ post-draft.test.mjs: a film with an html fragment gates a `layout` step before motion/verify (unchecked -> faults -> passed -> verify)');

@@ -3,6 +3,16 @@
 //   node harness/media/see.mjs <video> [outDir] [--frames N]           · make study REF=<video> SEE=1
 //   node harness/media/see.mjs <video> --shot <from>-<to> [--fps N]    · make study REF=<video> SHOT=<from>-<to>
 //   node harness/media/see.mjs <video> --compare <draft.mp4> [--from s --to s]  · make study REF=<video> COMPARE=<draft.mp4>
+//   node harness/media/see.mjs <html> --probe --at <s> --sel <css>     · make study REF=<html> PROBE=1 AT=<s> SEL=<css>
+//   node harness/media/see.mjs <html> --look --times <s,...> [--ref <mp4>]  · make study REF=<html> LOOK=<s,...> [COMPARE=<mp4>]
+//   node harness/media/see.mjs <html> --layout --times <s,...> [--film <film.json>]  · make study REF=<html> LAYOUT=<s,...>
+//
+// --probe/--look/--layout exist because agents kept writing their own throwaway browser probe scripts
+// to debug a fragment (one stalled twice doing it), never made a still before touching motion (0 of 7
+// agents did), and lost whole sessions to a stray `position:absolute` or two stacked opaque backgrounds
+// nothing had ever screenshotted together. All three reuse this file's own serveRepo/launchPage page
+// loader and the same animation-seek (`document.getAnimations()` paused at a given `currentTime`) that
+// --dom already uses, never a second page-loading path.
 //
 // WHY THIS EXISTS: an agent reads images, not video, and one image costs at most ~1,568 tokens
 // regardless of its content (a 3x3 grid at 1568px long edge runs ~174 tokens/frame, per Claude's own
@@ -207,10 +217,16 @@ function buildBeats(cutTimes, holds, ocr, energy, dur) {
     const progress = easeProgressCurve(vals.length ? vals : [0]);
     const fit = fitEase(progress);
     const words = ocr.filter((w) => w.tIn >= b.t0 && w.tIn < b.t1);
+    // How often something visibly changes (share of samples above HOLD_FLOOR), and the exit-to-entrance
+    // speed ratio (last 20% of the beat's energy over its first 20%): a beat that enters fast and dies
+    // slow reads as unfinished motion, and neither number was visible before this.
+    const changeRate = vals.length ? Number((vals.filter((v) => v > HOLD_FLOOR).length / vals.length).toFixed(2)) : 0;
+    const edge = edgeMean(vals.length ? vals : [0], 0.2);
+    const exitEntryRatio = edge.entrance > 1e-6 ? Number((edge.exit / edge.entrance).toFixed(2)) : null;
     return {
       t0: Number(b.t0.toFixed(2)), t1: Number(b.t1.toFixed(2)),
       meanSpeed, peak: Number(peak.toFixed(2)), peakT: Number(peakT.toFixed(2)),
-      ease: fit.name, easeRmse: fit.rmse, words,
+      ease: fit.name, easeRmse: fit.rmse, changeRate, exitEntryRatio, words,
     };
   });
 }
@@ -317,6 +333,21 @@ function bucketMean(series, from, to, winLen) {
 function timeRange(from, to, step) {
   const n = Math.max(0, Math.floor((to - from) / step + 1e-9));
   return Array.from({ length: n }, (_, i) => Number((from + i * step).toFixed(6)));
+}
+
+// ── edge speeds: mean of a curve's first/last `frac` share, used both for a beat's own
+// exit-to-entrance ratio and for --sheet-check's ref-vs-film exit comparison. `vals` is a plain array
+// of energy numbers; a `{mean}`-shaped curve maps to one before calling this.
+function edgeMean(vals, frac) {
+  const n = Math.max(1, Math.round(vals.length * frac));
+  const head = vals.slice(0, n), tail = vals.slice(-n);
+  const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
+  return { entrance: avg(head), exit: avg(tail) };
+}
+
+function describeRatio(ratio) {
+  if (!Number.isFinite(ratio) || ratio <= 0) return 'n/a';
+  return ratio >= 1 ? `${ratio.toFixed(1)}x faster than the reference` : `${(1 / ratio).toFixed(1)}x slower than the reference`;
 }
 
 function longestHold(holds) {
@@ -498,7 +529,21 @@ function sheetCheck(refSheet, filmSheet) {
   const winLen = refCurve[0] ? refCurve[0].t1 - refCurve[0].t0 : 0.5;
   const refPeakIdx = peakIdx(refCurve), filmPeakIdx = peakIdx(filmCurve);
   const peakOffset = (filmPeakIdx - refPeakIdx) * winLen;
-  return { rows, peakOffset, refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null };
+
+  // Peak and exit speed, not only the mean-energy ratio per window: a draft can hit the reference's
+  // AVERAGE motion while its fast whips and its exits are both dead flat, and the per-window table above
+  // never says so.
+  const refPeak = refCurve.length ? Math.max(...refCurve.map((c) => c.mean)) : 0;
+  const filmPeak = filmCurve.length ? Math.max(...filmCurve.map((c) => c.mean)) : 0;
+  const refEdge = edgeMean(refCurve.map((c) => c.mean), 0.2);
+  const filmEdge = edgeMean(filmCurve.map((c) => c.mean), 0.2);
+  const peakRatio = refPeak > 1e-6 ? filmPeak / refPeak : (filmPeak > 1e-6 ? Infinity : 1);
+  const exitRatio = refEdge.exit > 1e-6 ? filmEdge.exit / refEdge.exit : (filmEdge.exit > 1e-6 ? Infinity : 1);
+
+  return {
+    rows, peakOffset, refPeakT: refCurve[refPeakIdx]?.t0 ?? null, filmPeakT: filmCurve[filmPeakIdx]?.t0 ?? null,
+    refPeak, filmPeak, peakRatio, refExit: refEdge.exit, filmExit: filmEdge.exit, exitRatio,
+  };
 }
 
 function runSheetCheck(refFile, filmFile) {
@@ -506,7 +551,7 @@ function runSheetCheck(refFile, filmFile) {
   if (!fs.existsSync(filmFile)) die(`no such file: ${filmFile}`);
   const refSheet = JSON.parse(fs.readFileSync(refFile, 'utf8'));
   const filmSheet = JSON.parse(fs.readFileSync(filmFile, 'utf8'));
-  const { rows, peakOffset, refPeakT, filmPeakT } = sheetCheck(refSheet, filmSheet);
+  const { rows, peakOffset, refPeakT, filmPeakT, refPeak, filmPeak, peakRatio, refExit, filmExit, exitRatio } = sheetCheck(refSheet, filmSheet);
   if (!rows.length) die(`no overlapping curve windows between ${refFile} and ${filmFile} (missing "curve"?)`);
 
   console.log(`\n  SHEET CHECK · ${path.basename(refFile)} vs ${path.basename(filmFile)}\n`);
@@ -519,6 +564,8 @@ function runSheetCheck(refFile, filmFile) {
   const refTxt = refPeakT != null ? refPeakT.toFixed(2) : 'n/a';
   const filmTxt = filmPeakT != null ? filmPeakT.toFixed(2) : 'n/a';
   console.log(`\n  peak motion: reference at ${refTxt}s, film at ${filmTxt}s (${Math.abs(peakOffset).toFixed(2)}s ${dir})`);
+  console.log(`  peak speed: ref ${refPeak.toFixed(2)}, film ${filmPeak.toFixed(2)} (film is ${describeRatio(peakRatio)})`);
+  console.log(`  exit speed: ref ${refExit.toFixed(2)}, film ${filmExit.toFixed(2)} (film's exit is ${describeRatio(exitRatio)})`);
 }
 
 // ── --dom: read a film's motion straight from the DOM, no video, no screenshot per sample ────────────
@@ -647,6 +694,230 @@ async function runDom(htmlPath, outDirRoot, opts) {
   }
 }
 
+// Every animation paused at one shared `currentTime`: the same seek --dom already relies on
+// (`document.getAnimations()`), the one owner for "make this page hold still at time t" that --probe,
+// --look and --layout all call instead of each inventing its own.
+async function seekPage(page, t) {
+  return page.evaluate((ms) => { for (const a of document.getAnimations()) { a.pause(); a.currentTime = ms; } }, t * 1000);
+}
+
+// ── --probe: box, opacity, computed transform/filter, and every active animation's progress, for
+// every element matching `sel` at one instant. Built because agents kept writing throwaway
+// page.evaluate() scripts by hand to answer exactly this (one stalled twice doing it).
+async function runProbe(htmlPath, atS, sel, outDir) {
+  const root = path.resolve(htmlPath, '..');
+  const rel = path.basename(htmlPath);
+  const { close: closeServer, port } = await serveRepo({ root });
+  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  try {
+    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    await seekPage(page, atS);
+    const rows = await page.evaluate((selector) => {
+      const shortSelInPage = (el) => (el.id ? `#${el.id}` : (el.className && String(el.className).trim() ? `.${String(el.className).split(' ')[0]}` : el.tagName.toLowerCase()));
+      return [...document.querySelectorAll(selector)].map((el) => {
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        const anims = document.getAnimations().filter((a) => a.effect && a.effect.target === el).map((a) => {
+          const t = a.effect.getComputedTiming();
+          return { id: a.id || null, playState: a.playState, progress: t.progress, localTimeMs: t.localTime };
+        });
+        return {
+          sel: shortSelInPage(el),
+          box: { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) },
+          opacity: Number(cs.opacity), transform: cs.transform === 'none' ? null : cs.transform,
+          filter: cs.filter === 'none' ? null : cs.filter, animations: anims,
+        };
+      });
+    }, sel);
+    if (!rows.length) die(`--probe: no element matched "${sel}" in ${htmlPath}`);
+    fs.mkdirSync(outDir, { recursive: true });
+    writeJsonAtomic(path.join(outDir, 'probe.json'), { html: htmlPath, at: atS, sel, rows });
+    console.log(`\n  PROBE · ${path.basename(htmlPath)} @ ${atS}s, sel "${sel}"\n`);
+    for (const row of rows) {
+      console.log(`  ${row.sel}  box(${row.box.x},${row.box.y} ${row.box.w}x${row.box.h})  opacity ${row.opacity.toFixed(2)}`);
+      if (row.transform) console.log(`    transform: ${row.transform}`);
+      if (row.filter) console.log(`    filter: ${row.filter}`);
+      for (const a of row.animations)
+        console.log(`    animation${a.id ? ` "${a.id}"` : ''}: ${a.playState}, progress ${a.progress == null ? 'n/a' : a.progress.toFixed(3)}`);
+      if (!row.animations.length) console.log('    (no active animation on this element)');
+    }
+    console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'probe.json'))}`);
+  } finally { await closePage(); closeServer(); }
+}
+
+// ── --look: a still per requested time, gridded, optionally paired against the reference at the same
+// timestamps. Built because 0 of 7 agents made a still frame before touching motion; layout faults
+// then surfaced only after a full render.
+async function runLook(htmlPath, times, refPath, outDir) {
+  const root = path.resolve(htmlPath, '..');
+  const rel = path.basename(htmlPath);
+  const { close: closeServer, port } = await serveRepo({ root });
+  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  fs.rmSync(outDir, { recursive: true, force: true });
+  fs.mkdirSync(outDir, { recursive: true });
+  const longEdge = 1568;
+  const tileW = Math.floor(longEdge / 3);
+  const tileH = Math.round((tileW * 1080) / 1920);
+  try {
+    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    const cellFiles = [];
+    for (const [i, t] of times.entries()) {
+      await seekPage(page, t);
+      const raw = path.join(outDir, `.raw_${i}.png`);
+      await page.screenshot({ path: raw });
+      const pageCell = path.join(outDir, `.page_${i}.png`);
+      ffmpegOrDie(['-v', 'error', '-y', '-i', raw, '-frames:v', '1', '-vf',
+        `scale=${tileW}:${tileH},drawtext=text='${drawtext(`page ${t.toFixed(2)}s`)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
+        pageCell], pageCell, `look page cell ${i}`);
+      fs.rmSync(raw, { force: true });
+      if (!refPath) { cellFiles.push(pageCell); continue; }
+      const refCell = path.join(outDir, `.ref_${i}.png`);
+      ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', refPath, '-frames:v', '1', '-vf',
+        `scale=${tileW}:${tileH},drawtext=text='${drawtext(`ref ${t.toFixed(2)}s`)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
+        refCell], refCell, `look ref cell ${i}`);
+      const pairOut = path.join(outDir, `.pair_${i}.png`);
+      stackImages([refCell, pageCell], pairOut, 'v', tileW, tileH * 2);
+      fs.rmSync(refCell, { force: true }); fs.rmSync(pageCell, { force: true });
+      cellFiles.push(pairOut);
+    }
+    const cellH = refPath ? tileH * 2 : tileH;
+    const gridPaths = tileInGrids(cellFiles, outDir, 'look', tileW, cellH, 9);
+    for (const f of cellFiles) fs.rmSync(f, { force: true });
+    const index = `# see --look: ${path.basename(htmlPath)}
+
+${times.length} still(s) at ${times.map((t) => `${t}s`).join(', ')}${refPath ? `, paired with ${path.basename(refPath)} at the same timestamps (ref top, page bottom)` : ''}.
+
+## Grids
+
+${gridPaths.map((p) => `- ${path.relative(ROOT, p)}`).join('\n')}
+`;
+    fs.writeFileSync(path.join(outDir, 'index.md'), index);
+    console.log(`✓ look: ${gridPaths.length} grid(s) -> ${path.relative(ROOT, path.join(outDir, 'index.md'))}`);
+  } finally { await closePage(); closeServer(); }
+}
+
+// ── --layout: clipped/overflowing text, text overlapping text, off-frame elements, and two opaque
+// full-frame shots visible at once, read straight off the DOM at each requested time. Built because
+// one agent lost 8 minutes to a blanket `position:absolute`, another lost most of a session to two
+// stacked full-frame shots showing the wrong background, neither caught until the render came back.
+// One check per job, called from the single page.evaluate below (one round trip). Nested so each
+// keeps its own low complexity instead of one long function carrying the whole rule set.
+async function domLayoutFindings(page) {
+  return page.evaluate(() => {
+    // Only when the box actually HIDES the overflow: an auto-sized span whose scrollWidth reads a
+    // hair over its clientWidth (subpixel rounding, common on single-letter spans) shows nothing
+    // clipped at all unless overflow is set to hide or clip it.
+    function clippedTextFindings(textEls, shortSelInPage) {
+      const findings = [];
+      for (const el of textEls) {
+        const cs = getComputedStyle(el);
+        const clips = cs.overflow === 'hidden' || cs.overflow === 'clip' || cs.overflowX === 'hidden' || cs.overflowX === 'clip';
+        if (clips && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1))
+          findings.push({ kind: 'clipped-text', sel: shortSelInPage(el), text: el.textContent.trim().slice(0, 40) });
+      }
+      return findings;
+    }
+
+    function offFrameFindings(all, vw, vh, shortSelInPage) {
+      const offFrame = (r) => r.width > 0 && r.height > 0 && (r.right <= 0 || r.bottom <= 0 || r.left >= vw || r.top >= vh);
+      return all.filter((el) => offFrame(el.getBoundingClientRect())).map((el) => ({ kind: 'off-frame', sel: shortSelInPage(el) }));
+    }
+
+    function textOverlapFindings(textEls) {
+      const overlapArea = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
+        * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+      const findings = [];
+      for (let i = 0; i < textEls.length; i++) {
+        for (let j = i + 1; j < textEls.length; j++) {
+          const a = textEls[i], b = textEls[j];
+          if (a.contains(b) || b.contains(a)) continue;
+          const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
+          const areaA = ra.width * ra.height, areaB = rb.width * rb.height;
+          if (areaA && areaB && overlapArea(ra, rb) / Math.min(areaA, areaB) > 0.25)
+            findings.push({ kind: 'text-overlap', a: a.textContent.trim().slice(0, 30), b: b.textContent.trim().slice(0, 30) });
+        }
+      }
+      return findings;
+    }
+
+    // "Opaque" means it actually PAINTS a near-full-frame surface (a solid background-color, or an
+    // image/video), not merely CSS `opacity:1`: a bare positioning wrapper is opacity:1 and paints
+    // nothing, and a decorative radial-gradient background is meant to layer under other art. Neither
+    // is the "two full-frame shots hiding one another" failure this check exists for.
+    // ponytail: does not account for `clip-path`, so a fully clipped full-frame layer (a wipe parked
+    // at zero width) can still read as stacked; check the grid if this fires oddly.
+    function stackedOpaqueFindings(all, vw, vh, shortSelInPage) {
+      const frameArea = vw * vh;
+      const paintsSolid = (el) => {
+        const cs = getComputedStyle(el);
+        if (['IMG', 'VIDEO', 'CANVAS'].includes(el.tagName)) return true;
+        if (cs.backgroundImage && cs.backgroundImage !== 'none') return false;
+        const m = /rgba?\([^)]*?(?:,\s*([\d.]+)\s*)?\)/.exec(cs.backgroundColor);
+        const alpha = m && m[1] !== undefined ? Number(m[1]) : (cs.backgroundColor && cs.backgroundColor !== 'transparent' ? 1 : 0);
+        return alpha >= 0.95;
+      };
+      const fullFrame = all.filter((el) => {
+        const r = el.getBoundingClientRect();
+        return Number(getComputedStyle(el).opacity) >= 0.95 && r.width * r.height >= frameArea * 0.9 && paintsSolid(el);
+      });
+      const findings = [];
+      for (let i = 0; i < fullFrame.length; i++) {
+        for (let j = i + 1; j < fullFrame.length; j++) {
+          const a = fullFrame[i], b = fullFrame[j];
+          if (!a.contains(b) && !b.contains(a)) findings.push({ kind: 'stacked-opaque', a: shortSelInPage(a), b: shortSelInPage(b) });
+        }
+      }
+      return findings;
+    }
+
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const shortSelInPage = (el) => (el.id ? `#${el.id}` : (el.className && String(el.className).trim() ? `.${String(el.className).split(' ')[0]}` : el.tagName.toLowerCase()));
+    const isVisible = (el) => {
+      const cs = getComputedStyle(el);
+      return cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity) > 0.05;
+    };
+    const hasOwnText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim().length > 0);
+    const all = [...document.querySelectorAll('body *')].filter(isVisible);
+    const textEls = all.filter(hasOwnText);
+    return [
+      ...clippedTextFindings(textEls, shortSelInPage),
+      ...offFrameFindings(all, vw, vh, shortSelInPage),
+      ...textOverlapFindings(textEls),
+      ...stackedOpaqueFindings(all, vw, vh, shortSelInPage),
+    ];
+  });
+}
+
+async function runLayout(htmlPath, times, outDir, filmArg) {
+  const root = path.resolve(htmlPath, '..');
+  const rel = path.basename(htmlPath);
+  const { close: closeServer, port } = await serveRepo({ root });
+  const { page, close: closePage } = await launchPage({ width: 1920, height: 1080 });
+  fs.mkdirSync(outDir, { recursive: true });
+  try {
+    await page.goto(`http://127.0.0.1:${port}/${rel}`, { waitUntil: 'load' });
+    const perTime = [];
+    for (const t of times) { await seekPage(page, t); perTime.push({ t, findings: await domLayoutFindings(page) }); }
+    const total = perTime.reduce((n, p) => n + p.findings.length, 0);
+    writeJsonAtomic(path.join(outDir, 'layout.json'), { html: htmlPath, times, perTime, faultCount: total });
+
+    const lines = [`# see --layout: ${path.basename(htmlPath)}`, '', `${times.length} time(s) checked, ${total} fault(s).`, ''];
+    for (const p of perTime) {
+      lines.push(`## t=${p.t}s`);
+      lines.push(...(p.findings.length ? p.findings.map((f) => `- ${f.kind}: ${JSON.stringify(f)}`) : ['- clean']));
+      lines.push('');
+    }
+    fs.writeFileSync(path.join(outDir, 'layout.md'), lines.join('\n'));
+
+    console.log(`\n  LAYOUT · ${path.basename(htmlPath)}, ${times.length} time(s)\n`);
+    for (const p of perTime)
+      console.log(`  t=${p.t}s: ${p.findings.length} fault(s)${p.findings.length ? ` -> ${p.findings.map((f) => f.kind).join(', ')}` : ''}`);
+    console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'layout.md'))}`);
+
+    if (filmArg) writeReceipt('layout', filmArg, { ok: total === 0, faultCount: total, html: htmlPath, times });
+  } finally { await closePage(); closeServer(); }
+}
+
 function writeOutputs({ outDir, video, dur, fps, cutTimes, energy, holds, beats, gridPaths }) {
   const motion = {
     dur: Number(dur.toFixed(2)), fps: Number(fps.toFixed(3)),
@@ -662,7 +933,7 @@ function writeOutputs({ outDir, video, dur, fps, cutTimes, energy, holds, beats,
     const hs = holds.filter((h) => h.t0 >= b.t0 && h.t1 <= b.t1)
       .map((h) => `${h.t0.toFixed(1)}-${h.t1.toFixed(1)}`).join(', ') || '-';
     const ws = b.words.map((w) => `"${w.text}"@${w.tIn}s`).join(', ') || '-';
-    return `| ${b.t0}-${b.t1} | ${b.meanSpeed} | ${b.ease ?? '-'} (rmse ${b.easeRmse ?? '-'}) | ${hs} | ${ws} |`;
+    return `| ${b.t0}-${b.t1} | ${b.meanSpeed} | ${b.peak} | ${b.changeRate} | ${b.exitEntryRatio ?? '-'} | ${b.ease ?? '-'} (rmse ${b.easeRmse ?? '-'}) | ${hs} | ${ws} |`;
   }).join('\n');
 
   const index = `# see: ${path.basename(video)}
@@ -671,8 +942,8 @@ ${dur.toFixed(1)}s, ${fps.toFixed(1)}fps, ${cutTimes.length} cut(s), ${holds.len
 
 ## Beats
 
-| span (s) | mean speed | ease | holds | OCR words |
-|---|---|---|---|---|
+| span (s) | mean speed | peak speed | change rate | exit:entrance | ease | holds | OCR words |
+|---|---|---|---|---|---|---|---|
 ${beatRows}
 
 ## Grids
@@ -707,13 +978,17 @@ async function main() {
 
   if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
     + '| --shot <from>-<to> [--fps N] | --compare <draft.mp4> [--from s --to s] '
-    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] | --sheet-check <ref.json> <film.json>');
+    + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] | --sheet-check <ref.json> <film.json> '
+    + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...> [--film <f.json>]');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   for (const bin of ['ffprobe', 'ffmpeg']) {
     if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
       die(`${bin} is not on PATH. see.mjs needs ffmpeg (and tesseract for the full flow); install and re-run.`);
   }
 
+  if (argv.includes('--probe')) return dispatchProbe(video, positional, flag);
+  if (argv.includes('--look')) return dispatchLook(video, positional, flag);
+  if (argv.includes('--layout')) return dispatchLayout(video, positional, flag);
   if (argv.includes('--dom')) return dispatchDom(video, positional, flag);
 
   const shotSpec = flag('--shot', null);
@@ -723,6 +998,33 @@ async function main() {
   if (compareArg) return dispatchCompare(video, positional, compareArg, flag);
 
   return runFullFlow(video, positional, flag);
+}
+
+function dispatchProbe(video, positional, flag) {
+  const at = Number(flag('--at', 0));
+  const sel = flag('--sel', null);
+  if (!sel) die('usage: node harness/media/see.mjs <html> --probe --at <s> --sel <css>');
+  const outDir = path.join(path.resolve(positional[1] || defaultOutDir(video)), 'probe');
+  return runProbe(video, at, sel, outDir);
+}
+
+function dispatchLook(video, positional, flag) {
+  const timesArg = flag('--times', null);
+  if (!timesArg) die('usage: node harness/media/see.mjs <html> --look --times <s,s,...> [--ref <mp4>]');
+  const times = timesArg.split(',').map(Number);
+  const refArg = flag('--ref', null);
+  if (refArg && !fs.existsSync(refArg)) die(`no such --ref file: ${refArg}`);
+  const outDir = path.join(path.resolve(positional[1] || defaultOutDir(video)), 'look');
+  return runLook(video, times, refArg, outDir);
+}
+
+function dispatchLayout(video, positional, flag) {
+  const timesArg = flag('--times', null);
+  if (!timesArg) die('usage: node harness/media/see.mjs <html> --layout --times <s,s,...> [--film <film.json>]');
+  const times = timesArg.split(',').map(Number);
+  const filmArg = flag('--film', null);
+  const outDir = path.join(path.resolve(positional[1] || defaultOutDir(video)), 'layout');
+  return runLayout(video, times, outDir, filmArg);
 }
 
 function dispatchDom(video, positional, flag) {
