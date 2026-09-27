@@ -17,7 +17,7 @@ routes: camera
 > (or re-run `make study`) and regenerate. The measured half comes off the film; the authored half
 > is written by a person into the JSON and merged forward on every re-study.
 
-23 reference film(s) measured. 17 carry a written reading.
+22 reference film(s) measured. 17 carry a written reading.
 
 ## The numbers, on one scale
 
@@ -32,7 +32,6 @@ every render**, so this table is a target and not a mood.
 | framer-hero | 21.03s | 2 | 10.52s | 5.7 | 1.66–3.78 | dark → dark |
 | latch-recreation | 19.52s | · | · | · | 0.29–2.32 | light? → light? → light? → dark → mid → dark → dark → mid → dark |
 | make-it-move | 8.98s | · | · | · | 1.5–18.28 | mid → mid → light → dark → light → mid |
-| ours-oblique | 20.3s | 4 | 5.57s | 11.8 | 0.15–1.08 | mid → light → light → light |
 | ours-tc | 19.8s | · | · | · | 0.09–6.65 | light → light → light → light → light → light → light → light → light → light |
 | pin-1119918632363453012 | 5.44s | 2 | 2.72s | 22.1 | 0.83–2.14 | dark → light |
 | pin-310748443060787071 | 30.86s | 3 | 9.01s | 5.8 | 1.23–10.21 | dark? → light → dark |
@@ -129,10 +128,6 @@ ITS PEAKS ARE ARRIVALS, NOT DEPARTURES. 28.1, 16.8, 30.8, 40.2 are all something
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
 
 ### make-it-move
-
-_Measured, never read. The numbers above are real; nobody has written down what causes what._
-
-### ours-oblique
 
 _Measured, never read. The numbers above are real; nobody has written down what causes what._
 
