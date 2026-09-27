@@ -4,7 +4,6 @@
   "aspect": "16:9",
   "duration": 4,
   "produced": false,
-  "sceneUnits": true,
   "bg": [{ "preset": "plain" }],
   "transitions": [{ "at": 2, "fx": "rise", "dir": "up", "dur": 0.6 }],
   "layers": [

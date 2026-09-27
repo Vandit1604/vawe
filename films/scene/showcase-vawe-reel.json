@@ -3,7 +3,6 @@
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 15,
-  "sceneUnits": true,
   "cameraMove": [
     {
       "move": "slowPush",

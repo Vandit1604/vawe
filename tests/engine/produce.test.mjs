@@ -1,10 +1,11 @@
 // tests/engine/produce.test.mjs: the runnable self-check for core/engine/produce.js's FILL-ONLY
 // contract. The engine may fill a value the author left blank (a text size role, the default bg/finish,
 // an authored cameraMove's real keyframes) but must never add structure the author did not write: no
-// invented cut, no sceneUnits switch, no wind-up on an entrance that named none. This file used to also
-// cover injectCuts (an inferred-cut default) and applyAnticipateDefault (an entrance wind-up default);
-// both are retired (the owner's rule: fill blanks, never add structure) and removed from produce.js, so
-// their tests are gone too, not adapted.
+// invented cut, no wind-up on an entrance that named none. This file used to also
+// cover injectCuts (an inferred-cut default), applyAnticipateDefault (an entrance wind-up default) and
+// a retired beat-unit opt-in flag (every beat of a cut film is always its own unit now, not a
+// mode a scene can turn on or leave off); all three are gone from produce.js, so their tests are gone
+// too, not adapted.
 //   node tests/engine/produce.test.mjs
 import assert from 'node:assert/strict';
 import { produceBaseline, resolveTextSize, bakeTextSizeRoles, bakeCameraMove, applyBgDefault } from '../../core/engine/produce.js';
@@ -12,8 +13,8 @@ import { produceBaseline, resolveTextSize, bakeTextSizeRoles, bakeCameraMove, ap
 const look = { cuts: { default: 'fade', accent: 'cinematicZoom' }, scale: { hook: 92, headline: 64, body: 38, caption: 24 } };
 const frame = { w: 1920, h: 1080 };
 
-// ---- produceBaseline adds NOTHING to a scene with no boundary, no sceneUnits and no cameraMove: no
-// inferred cut, no sceneUnits switch, no camera. The engine fills blanks; it does not add structure ----
+// ---- produceBaseline adds NOTHING to a scene with no boundary and no cameraMove: no
+// inferred cut, no camera. The engine fills blanks; it does not add structure ----
 {
   const data = {
     module: 'scene', duration: 10, bg: [{ preset: 'plain' }],
@@ -21,17 +22,15 @@ const frame = { w: 1920, h: 1080 };
   };
   produceBaseline(data, {}, frame, look);
   assert.equal(data.cuts, undefined, 'no cut is invented for a film that declared none');
-  assert.equal(data.sceneUnits, undefined, 'sceneUnits is never turned on by default');
   assert.equal(data.camera, undefined, 'no camera is invented for a film that declared none');
 }
 
-// ---- a film that already has a cut, or an explicit sceneUnits, is left byte-for-byte alone ----
+// ---- a film that already has a cut is left byte-for-byte alone ----
 {
-  const data = { module: 'scene', duration: 10, bg: [{ preset: 'plain' }], cuts: [{ t: 4, style: 'none' }], sceneUnits: false, layers: [] };
+  const data = { module: 'scene', duration: 10, bg: [{ preset: 'plain' }], cuts: [{ t: 4, style: 'none' }], layers: [] };
   produceBaseline(data, {}, frame, look);
   assert.equal(data.cuts.length, 1, 'an authored cut is not added to');
   assert.equal(data.cuts[0].style, 'none', 'and not rewritten');
-  assert.equal(data.sceneUnits, false, 'an authored sceneUnits survives untouched');
 }
 
 // ---- NO auto camera, and cameraMove sugar still becomes real camera keys on the one funnel ----

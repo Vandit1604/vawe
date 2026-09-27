@@ -55,7 +55,7 @@ build  childOffsets    const childRel = new Map();
 
 frame  drawBg
 frame  driveClips
-frame  driveSceneUnits
+frame  driveBeatUnits
 frame  resolveBoxes
 frame  runTracks
 frame  drawCaptions

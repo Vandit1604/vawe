@@ -7,7 +7,6 @@
  "profile": "duolingo",
  "duration": 24.1,
  "storyboard": "films/scene/post-trailhead.storyboard.md",
- "sceneUnits": true,
  "authoring": { "allow": ["slow-pace"], "_why": { "slow-pace": "a demo's whole value is one uninterrupted full-frame hold long enough to watch the route drawn and the profile fill in lockstep; cutting to the launch-film event floor would cut away before the mechanism finishes reading" } },
  "audio": {
   "music": "assets/music/warm.wav",

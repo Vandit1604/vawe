@@ -47,7 +47,7 @@ what genuinely is not a picture: a `count` layer's live figure, a `cursor` layer
   destination, and a B-roll stat card (html+parts around a native `count`).
 - **`sting.json`**: a 6s logo sting, the wave draws on frame 1, the wordmark fades in behind it. No
   group-of-rect here to convert: "type and mark" is the whole brief.
-- **`recreation.json`**: `sceneUnits` with a continuous object (the pricing card, `acrossBeats`,
+- **`recreation.json`**: a continuous object (the pricing card, `acrossBeats`,
   now one html+parts layer) crossing a cut, then the reference's own "it is really finished" payoff, a
   three-viewport row (also html+parts).
 
