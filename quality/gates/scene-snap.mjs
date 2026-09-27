@@ -15,7 +15,7 @@ import { sceneDims } from '../../core/layout/safe.js';
 // keep their own hand-copied version; that duplication is how a field gets added to one and not the
 // other, and how a gate goes blind without saying so (MISTAKES #159).
 import { captureSig, diffSig, primeFrames } from './snap-signature.mjs';
-import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
+import { serveRepo, waitForEngine, trackBrowser } from '../../harness/lib/render-harness.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -39,7 +39,7 @@ if (extra.length) {
 
 const { server, port } = await serveRepo();
 
-const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+const browser = trackBrowser(await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] }));
 const page = await browser.newPage();
 // Signatures must be captured at the format's real dims, or the baseline records a cropped canvas.
 const snapCfg = (() => { try { return JSON.parse(fs.readFileSync(path.join(repoRoot, 'films', m, 'sample.json'), 'utf8')); } catch { return {}; } })();

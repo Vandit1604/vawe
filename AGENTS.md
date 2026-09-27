@@ -90,6 +90,10 @@ scene, the browser engine, the whole authoring ladder) and leaves one artefact,
 `quality/runs/e2e/<timestamp>/report.md`. A known-broken tracked scene is excused by name in
 `quality/baselines/e2e-known-broken.json`, never by loosening what counts as a pass.
 
+Before a push: `make verify-batch`, then `git push`. It runs the full tier (test, audit-test, e2e,
+every gate) as its own step, with no push holding a connection open for the ~40 minutes that takes, and
+stamps the commit so a plain push skips re-running it.
+
 ## Comments  `[eye]`
 
 Keep a comment only when it holds a fact the code cannot show: an exported function's contract
