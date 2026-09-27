@@ -174,7 +174,7 @@ export function boxOf(L, root = ROOT) {
 //
 // `view` is WHERE THE FRAME IS, from cameraView(). Without it the frame is the canvas box at the origin,
 // which is where the camera stands on frame 0 and nowhere else: on a film that travels between stations
-// (linear-journey lays five of them across 5760x2160) a station that FILLS the screen scored 0, because
+// (a station-travel film lays five of them across 5760x2160) a station that FILLS the screen scored 0, because
 // every one of its pixels is off-canvas at the origin. Pass a view and both halves move with the camera.
 // The clip and the denominator, so the share stays "how much of what the viewer sees is this layer".
 // Absent or null it is the old canvas-box answer, byte for byte.

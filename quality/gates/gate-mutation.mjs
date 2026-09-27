@@ -850,7 +850,7 @@ const srcCases = [
   // that same collapse in the declared world: it must report itself broken, never blame the scenes.
   { name: 'layer-props · the shared declarations go blind', file: `${SCENE_DIR}/props.js`,
     mutate: (s) => s.replace(/^  start: \{\}.*$/m, ''),
-    cmd: ['node', ['quality/gates/layer-props.mjs', `${SCENE_DIR}/higgsfield-recreation.json`]], match: /layer-props is blind/ },
+    cmd: ['node', ['quality/gates/layer-props.mjs', `${SCENE_DIR}/brew-launch-act1.json`]], match: /layer-props is blind/ },
   // THE SHAPE THE OLD MEASUREMENT WAS WORST AT, pinned deliberately (#234): a prop read ONLY inside a
   // registry directory that did not exist when the gate was written. core/tracks/ is that directory,
   // 1454 live props reported as dropped the day it landed, because a scanner can only look where its

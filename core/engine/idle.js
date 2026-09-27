@@ -1,8 +1,8 @@
 // core/idle.js, AUTHORED IDLE: the small continuous motion a layer carries while it is at REST.
 //
 // WHY THIS EXISTS. Measured across this library and the reference films: the reference frame is
-// near-static 41% of its runtime, ours 20%, and `higgsfield-recreation` 0.0%, nothing in it is ever at
-// rest for its whole five seconds. That reads as genre until you read the reference's own prompting
+// near-static 41% of its runtime, ours 20%, and one continuous-action recreation 0.0%, nothing in it
+// is ever at rest for its whole five seconds. That reads as genre until you read the reference's own prompting
 // guide, which asks for it by name on every example: "nothing ever fully stops. Every hold carries a
 // little ambient idle motion, a 1-2% breathing scale, a slow drift."
 //

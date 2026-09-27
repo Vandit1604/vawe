@@ -441,7 +441,7 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
 
 // Undoes the ZOOM only, about the viewport centre; the camera's translation must stay, since a
 // travelling shot parks the stage at a station and the screen box there is what the viewer sees.
-// linear-journey pans across a 5500px stage, and undoing the translation too reported sixteen
+// a station-travel film pans across a 5500px stage, and undoing the translation too reported sixteen
 // findings about layers that were centred on screen.
 const unCam = (b, ctx) => ctx.camScale
   ? { left: ctx.CX + (b.left - ctx.CX) / ctx.camScale.sx, right: ctx.CX + (b.right - ctx.CX) / ctx.camScale.sx,

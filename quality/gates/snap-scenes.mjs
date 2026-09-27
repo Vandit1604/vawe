@@ -98,7 +98,7 @@ let browser = await launch();
 
 // RECYCLE THE BROWSER. This sweep used to drive all ~100 scenes through ONE browser, and that made it
 // report regressions that had not happened: across two back-to-back runs of the identical tree, three
-// scenes moved between `identical` and `changed` (showcase-intro by 9 findings, linear-launch by 238,
+// scenes moved between `identical` and `changed` (showcase-intro by 9 findings, one launch film by 238,
 // example-kinetic-type.beatsync by 17, the last of those as `cam.opacity: 1 → 0.002`). Every one of them
 // is stable when snapshotted ON ITS OWN, repeatedly. The variable was never the scene: it was how much
 // the browser had already done. A long-lived Chrome under accumulating memory pressure evicts decoded

@@ -230,7 +230,7 @@ const MECHANICS = [
     // NO `split` here, deliberately. A gradient fill paints the CONTAINER and clips it to the text,
     // and a split layer moves the glyphs into child spans that carry no background of their own, so
     // they inherit `color: transparent` and paint nothing at all. See the note in the return report:
-    // films/scene/example-product-promo.json combines the two and its headline is invisible.
+    // one since-removed example combined the two and its headline was invisible.
     layer: { text: 'Painted through the letterforms', size: 130, weight: 800, anim: 'fade', enterDur: 0.5,
       gradient: { colors: ['#2563eb', '#8b5cf6', '#06b6d4'], animate: 'spin', speed: 0.35 } } },
   { id: 'ransom', label: 'ransom', props: [], poster: 1.6,

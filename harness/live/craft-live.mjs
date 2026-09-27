@@ -10,7 +10,7 @@ const FRAGMENT_CHECKS = ['kit-intact', 'storyboard-order'];
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../..');
 const FILMS_DIR = process.env.VAWE_FILMS_DIR || 'films/scene';
 
-// broken on `films/scene/_vawe-oblique.*.html` by an author who had read them (engine-doctrine/MISTAKES.md #591,
+// broken on a film's hand-authored HTML fragments by an author who had read them (engine-doctrine/MISTAKES.md #591,
 function fragment(rel, file) {
   const out = [];
   const fired = [];

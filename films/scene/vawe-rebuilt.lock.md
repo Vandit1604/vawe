@@ -11,8 +11,8 @@ surviving every cut. Scale contrast as the single loud moment.
 
 **Not borrowed, and this is not negotiable.** Their mark, their name, their copy, their captured UI,
 their photography. `CLAUDE.md` forbids embedding copyrighted material in a published film, and a brand
-film is entirely brand. The subject is **vawe**, so this one ships; `brew-launch-act1` and
-`higgsfield-recreation` do not, and that is the difference.
+film is entirely brand. The subject is **vawe**, so this one ships; `brew-launch-act1` and a
+continuous-action recreation do not, and that is the difference.
 
 ## The five beats
 

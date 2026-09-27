@@ -247,7 +247,7 @@ export function collectClips(root) {
 // promises it is not.
 //
 // It surfaced the moment a second accumulator ran on such a layer: turning the idle default on
-// quarantined `linear-agents`, whose `wipe-right` rect also carries a keyed motion track, at
+// a quarantined film whose `wipe-right` rect also carries a keyed motion track, at
 // scale 0.9897 forwards and 0.9694 backwards. The bug was older than the idle; the idle only gave it
 // a second voice loud enough to hear.
 //

@@ -84,7 +84,7 @@ frames after position; rotation cannot trail the travel.
 
 **The engine has already solved this exact problem one channel-space over.** `core/tracks/vars.js:21`
 gives `varsEase`, `varsDur` and `varsDelay` a PER-CHANNEL form (a map keyed by channel, with `'*'` as
-the default), and its comment says why: higgsfield-recreation needed width on one curve and radius on
+the default), and its comment says why: a continuous-action recreation needed width on one curve and radius on
 another, its author hand-wrote the easing as polynomials inside `calc()`, and this repo's own rule says
 a workaround is a bug report (`engine-doctrine/MISTAKES.md` #357). The identical argument applies to the transform
 track, and the transform track is where most motion lives.
