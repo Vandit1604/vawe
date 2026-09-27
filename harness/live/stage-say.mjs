@@ -7,7 +7,9 @@ import { rulesFor, briefLine, STAGE_CATEGORY_ORDER } from '../lib/craft-rules.mj
 import { appendRun } from '../lib/runlog.mjs';
 import { finishAdvice } from '../lib/finish-advice.mjs';
 
-const SESSION_STATE = path.join(ROOT, '.vawe-data/stage-say-session-state.json');
+// VAWE_STATE_DIR lets a test keep its own state: two test files share this hook and raced on one file.
+const STATE_DIR = process.env.VAWE_STATE_DIR || path.join(ROOT, '.vawe-data');
+const SESSION_STATE = path.join(STATE_DIR, 'stage-say-session-state.json');
 
 function readSessionState() {
   try { return JSON.parse(fs.readFileSync(SESSION_STATE, 'utf8')); } catch { return {}; }
@@ -94,7 +96,7 @@ process.stdin.on('end', () => {
     }
   }
 
-  const RULES_STATE = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
+  const RULES_STATE = path.join(STATE_DIR, 'stage-say-rules-state.json');
   function alreadySpoke(film, stage) {
     try {
       const s = JSON.parse(fs.readFileSync(RULES_STATE, 'utf8'));

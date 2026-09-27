@@ -1,3 +1,4 @@
+import os from 'node:os';
 // tests/hooks/stage-say.test.mjs: the rule-brief lines this hook appends after the stage line, against
 // a fixture film under tests/fixtures/films/stage-say/ (VAWE_FILMS_DIR points both stage-say.mjs and
 // stageOf() at it for this run). A PRIVATE subdirectory, not the shared tests/fixtures/films/ every
@@ -91,8 +92,9 @@ fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspec
   authoring: { allow: ['plain-content@Beat 2: Build (3s-6s)'],
     _why: { 'plain-content@Beat 2: Build (3s-6s)': 'fixture beat, no real UI to capture' } } }));
 fs.writeFileSync(sb, SB);
-const rulesState = path.join(ROOT, '.vawe-data/stage-say-rules-state.json');
-const sessionState = path.join(ROOT, '.vawe-data/stage-say-session-state.json');
+process.env.VAWE_STATE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-say-'));
+const rulesState = path.join(process.env.VAWE_STATE_DIR, 'stage-say-rules-state.json');
+const sessionState = path.join(process.env.VAWE_STATE_DIR, 'stage-say-session-state.json');
 after(() => {
   for (const f of [film, sb, rulesState, sessionState]) { try { fs.unlinkSync(f); } catch { /* already gone */ } }
 });
