@@ -52,6 +52,13 @@ try {
   assert(Math.abs(ffprobeDuration(out2) - 1) < 0.2, `expected ~1s of video, got ${ffprobeDuration(out2)}`);
   console.log('✓ render-page.test.mjs: blur=3 render wrote a playable 1s mp4 from one ffmpeg blend pass');
 
+  // ── --from/--to windows the render to a slice instead of the whole page ────────────────────────────
+  const out4 = path.join(tmp, 'window.mp4');
+  const stdout4 = execFileSync('node', [SCRIPT, htmlPath, out4, '--fps', '10', '--from', '0.5', '--to', '1'], { encoding: 'utf8' });
+  assert(/5 frame\(s\)/.test(stdout4), `expected a 5-frame summary line (0.5s at 10fps): ${stdout4}`);
+  assert(Math.abs(ffprobeDuration(out4) - 0.5) < 0.2, `expected ~0.5s of video, got ${ffprobeDuration(out4)}`);
+  console.log('✓ render-page.test.mjs: --from/--to rendered only the requested 0.5s window');
+
   // ── a missing page fails loudly, writes nothing ─────────────────────────────────────────────────
   const out3 = path.join(tmp, 'never.mp4');
   let threw = false, message = '';
