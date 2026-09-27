@@ -57,6 +57,7 @@ export const TOOLS = {
   'reveal': () => ['harness/author/reveal.mjs', env.D, ...(env.ENTER ? ['--enter', env.ENTER] : []), ...(env.N ? ['--n', env.N] : []), ...(env.LAYERS === '1' ? ['--layers'] : [])],
   'route': () => ['harness/author/route.mjs', env.Q],
   'scenes': () => ['harness/author/scenes.mjs', env.D],
+  'ship-status': () => ['harness/dev/job-status.mjs', `D=${env.D}`],
   'screen': () => ['harness/author/screen.mjs', env.F, ...(env.KIND ? ['--kind', env.KIND] : []), ...(env.THEME ? ['--theme', env.THEME] : []), ...(env.INVENT ? ['--invent'] : []), ...(env.REF ? ['--ref', env.REF] : []), ...(env.ACT ? ['--act', env.ACT] : []), ...(env.W ? ['--w', env.W] : []), ...(env.H ? ['--h', env.H] : []), ...(env.D ? ['--film', env.D] : [])],
   'script': () => ['harness/author/script.mjs', env.SB, ...strict1()],
   'sfx-catalog': () => ['harness/author/sfx-catalog.mjs'],
