@@ -6,7 +6,7 @@ group: skill
 
 # The 5-second budget and two worked examples
 
-Every number below is read off the higgsfield recreation (archived 2026-09-27), which was measured frame by
+Every number below is read off the higgsfield reference, measured frame by
 frame from the reference.
 
 | Cost | Measured |
