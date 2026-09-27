@@ -1,12 +1,19 @@
 // harness/media/see.mjs · let an agent SEE a reference video for the price of a few images.
 //
-//   node harness/media/see.mjs <video> [outDir] [--frames N]   ·   make study REF=<video> SEE=1
+//   node harness/media/see.mjs <video> [outDir] [--frames N]           · make study REF=<video> SEE=1
+//   node harness/media/see.mjs <video> --shot <from>-<to> [--fps N]    · make study REF=<video> SHOT=<from>-<to>
+//   node harness/media/see.mjs <video> --compare <draft.mp4> [--from s --to s]  · make study REF=<video> COMPARE=<draft.mp4>
 //
 // WHY THIS EXISTS: an agent reads images, not video, and one image costs at most ~1,568 tokens
 // regardless of its content (a 3x3 grid at 1568px long edge runs ~174 tokens/frame, per Claude's own
 // vision pricing). Reading every frame of a reference is either impossible (no video reader) or
 // ruinous (one call per frame). This writes a FEW grids plus one index.md an agent reads first, all
 // from ffmpeg + tesseract, both already required by this repo; no new dependency, no OpenCV.
+//
+// --shot and --compare exist because agents kept failing to match a reference without ever seeing a
+// shot DENSELY (every 0.1-0.25s, not the sparse cut/hold/peak sampling below) or comparing a draft
+// against the reference AT THE SAME TIMESTAMPS. Both reuse this file's own computeEnergy/HOLD_FLOOR
+// and the renderGrids/stackImages helpers below rather than duplicating them.
 //
 // REUSE, not rewrite: detectCuts/motionDeltaSeries/frameSeries/mergeJoints all come from
 // shot-detect.mjs, exactly as study.mjs uses them. ffmpegOrDie from lib/scratch.mjs. The ease-name
@@ -21,6 +28,7 @@ import { drawtext } from '../author/sheets.mjs';
 import { ffmpegOrDie, scratch } from '../lib/scratch.mjs';
 import { detectCuts, motionDeltaSeries } from './shot-detect.mjs';
 import { EASINGS } from '../../core/motion/motion.js';
+import { writeReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const die = (msg, code = 2) => { console.error(`✗ ${msg}`); process.exit(code); };
@@ -249,8 +257,9 @@ function renderGrids(video, outDir, chosen, width, height, dur) {
     const cellFiles = chunk.map((c, k) => {
       const t = Math.max(0, Math.min(c.t, dur - 0.03));
       const out = path.join(outDir, `.cell_${g}_${k}.png`);
+      const label = c.tag ? `${c.tag} ${t.toFixed(2)}s` : `${t.toFixed(2)}s`;
       ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', video, '-frames:v', '1', '-vf',
-        `scale=${tileW}:${tileH},drawtext=text='${drawtext(`${c.tag} ${t.toFixed(2)}s`)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
+        `scale=${tileW}:${tileH},drawtext=text='${drawtext(label)}':x=6:y=6:fontsize=16:fontcolor=white:box=1:boxcolor=black@0.65`,
         out], out, `grid ${g} cell ${k}`);
       return out;
     });
@@ -269,6 +278,202 @@ function renderGrids(video, outDir, chosen, width, height, dur) {
     for (const f of [...cellFiles, ...rowFiles]) fs.rmSync(f, { force: true });
   }
   return gridPaths;
+}
+
+// ── shared by --shot and --compare: bucket a computeEnergy series into fixed windows ────────────────
+function bucketMean(series, from, to, winLen) {
+  const buckets = new Map();
+  for (const p of series) {
+    if (p.t < from || p.t >= to) continue;
+    const k = Math.floor((p.t - from) / winLen);
+    if (!buckets.has(k)) buckets.set(k, []);
+    buckets.get(k).push(p.v);
+  }
+  const n = Math.max(0, Math.ceil((to - from) / winLen));
+  return Array.from({ length: n }, (_, k) => {
+    const vals = buckets.get(k) || [];
+    return {
+      t0: from + k * winLen, t1: Math.min(to, from + (k + 1) * winLen),
+      mean: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0,
+    };
+  });
+}
+
+// Index-based, not accumulated (`t += step`): float drift on an accumulator (0.1 * 49 = 4.900000000000002)
+// can push one extra tick past `to` that a `t < to` guard alone won't catch, which minted a spurious
+// 51st sample over a clean 5.0s/10fps window and crashed a later grid on a cell that should not exist.
+function timeRange(from, to, step) {
+  const n = Math.max(0, Math.floor((to - from) / step + 1e-9));
+  return Array.from({ length: n }, (_, i) => Number((from + i * step).toFixed(6)));
+}
+
+function longestHold(holds) {
+  return holds.reduce((m, h) => (h.t1 - h.t0 > m.len ? { len: h.t1 - h.t0, at: h.t0 } : m), { len: 0, at: 0 });
+}
+
+function parseRange(spec) {
+  const m = /^([\d.]+)-([\d.]+)$/.exec(String(spec || ''));
+  if (!m) die(`bad range "${spec}": expected <from>-<to> in seconds, e.g. --shot 12-18`);
+  const from = Number(m[1]), to = Number(m[2]);
+  if (!(to > from)) die(`bad range "${spec}": <to> (${to}) must be greater than <from> (${from})`);
+  return { from, to };
+}
+
+// ── --shot <from>-<to>: a dense strip of ONE window, plus its motion curve ──────────────────────────
+function runShot(video, outDirRoot, from, to, fps) {
+  const { width, height, dur } = probeVideo(video);
+  if (from >= dur) die(`--shot ${from}-${to}: from (${from}s) is past ${video}'s duration (${dur.toFixed(2)}s)`);
+  const clampedTo = Math.min(to, dur);
+  const outDir = path.join(outDirRoot, `shot-${from}-${to}`);
+  fs.rmSync(outDir, { recursive: true, force: true });
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const chosen = timeRange(from, clampedTo, 1 / fps).map((t) => ({ t, tag: '' }));
+  const gridPaths = renderGrids(video, outDir, chosen, width, height, dur);
+
+  const energy = computeEnergy(video).filter((p) => p.t >= from && p.t < clampedTo);
+  const curve = bucketMean(energy, from, clampedTo, 0.5)
+    .map((w) => ({ t0: Number(w.t0.toFixed(2)), t1: Number(w.t1.toFixed(2)), mean: Number(w.mean.toFixed(3)) }));
+
+  fs.writeFileSync(path.join(outDir, 'motion.json'),
+    JSON.stringify({ video, from, to: clampedTo, fps, curve }, null, 1) + '\n');
+
+  const rows = curve.map((w) => `| ${w.t0.toFixed(2)}-${w.t1.toFixed(2)}s | ${w.mean.toFixed(2)} |`).join('\n');
+  const index = `# see --shot: ${path.basename(video)} ${from}-${clampedTo}s
+
+${gridPaths.length} grid(s) at ${fps}fps, 1568px long edge, chronological.
+
+## Grids
+
+${gridPaths.map((p) => `- ${path.relative(ROOT, p)}`).join('\n')}
+
+## Motion (0.5s windows)
+
+| window | mean energy |
+|---|---|
+${rows}
+`;
+  fs.writeFileSync(path.join(outDir, 'index.md'), index);
+  console.log(`✓ shot ${from}-${clampedTo}s: ${gridPaths.length} grid(s) at ${fps}fps -> ${path.relative(ROOT, outDir)}/index.md`);
+}
+
+// ── --compare <draft.mp4>: reference vs draft at the SAME timestamps ────────────────────────────────
+// Side-by-side grids (reference top, draft bottom, every 0.25s) tiled 3x2, plus a per-0.5s energy
+// table that marks a window "too still" when the draft's energy is under half the reference's: the
+// same HOLD_FLOOR/computeEnergy this file's own `see` flow and conform.mjs's `hold` claim both read.
+function compareCell(clip, t, outDir, tag, tileW, tileH) {
+  const at = Math.max(0, Math.min(t, clip.dur - 0.03));
+  const out = path.join(outDir, `.${tag}.png`);
+  ffmpegOrDie(['-v', 'error', '-y', '-ss', at.toFixed(3), '-i', clip.path, '-frames:v', '1', '-vf',
+    `scale=${tileW}:${tileH},drawtext=text='${drawtext(`${clip.label} ${t.toFixed(2)}s`)}':x=6:y=6:fontsize=14:fontcolor=white:box=1:boxcolor=black@0.65`,
+    out], out, `compare ${tag} cell`);
+  return out;
+}
+
+function buildCompareGrids(ref, draft, outDir, window, dims) {
+  const CELLS_PER_GRID = 6; // 3x2
+  const longEdge = 1568;
+  const tileW = Math.floor(longEdge / 3);
+  const tileH = Math.round((tileW * dims.height) / dims.width);
+  const times = timeRange(window.from, window.to, 0.25);
+
+  const gridPaths = [];
+  for (let g = 0; g * CELLS_PER_GRID < times.length; g++) {
+    const chunk = times.slice(g * CELLS_PER_GRID, (g + 1) * CELLS_PER_GRID);
+    const pairFiles = chunk.map((t, k) => {
+      const refCell = compareCell(ref, t, outDir, `ref_${g}_${k}`, tileW, tileH);
+      const draftCell = compareCell(draft, t, outDir, `draft_${g}_${k}`, tileW, tileH);
+      const pairOut = path.join(outDir, `.pair_${g}_${k}.png`);
+      stackImages([refCell, draftCell], pairOut, 'v', tileW, tileH * 2);
+      fs.rmSync(refCell, { force: true }); fs.rmSync(draftCell, { force: true });
+      return pairOut;
+    });
+    const cols = Math.min(3, pairFiles.length);
+    const rowsN = Math.ceil(pairFiles.length / cols);
+    const rowFiles = [];
+    for (let r = 0; r < rowsN; r++) {
+      const rowCells = pairFiles.slice(r * cols, (r + 1) * cols);
+      const rowOut = path.join(outDir, `.crow_${g}_${r}.png`);
+      stackImages(rowCells, rowOut, 'h', tileW * cols, tileH * 2);
+      rowFiles.push(rowOut);
+    }
+    const gridOut = path.join(outDir, `side-${String(g + 1).padStart(2, '0')}.png`);
+    stackImages(rowFiles, gridOut, 'v', null, null);
+    gridPaths.push(gridOut);
+    for (const f of [...pairFiles, ...rowFiles]) fs.rmSync(f, { force: true });
+  }
+  return gridPaths;
+}
+
+function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
+  const refP = probeVideo(refPath);
+  const draftP = probeVideo(draftPath);
+  const from = fromArg != null ? fromArg : 0;
+  const to = toArg != null ? toArg : Math.min(refP.dur, draftP.dur);
+  if (!(to > from)) die(`--compare: bad window ${from}-${to}`);
+  const clampedTo = Math.min(to, refP.dur, draftP.dur);
+
+  const outDir = path.join(outDirRoot, 'compare');
+  fs.rmSync(outDir, { recursive: true, force: true });
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const width = Math.min(refP.width, draftP.width);
+  const height = Math.round((width * refP.height) / refP.width);
+  const ref = { path: refPath, dur: refP.dur, label: 'ref' };
+  const draft = { path: draftPath, dur: draftP.dur, label: 'draft' };
+  const gridPaths = buildCompareGrids(ref, draft, outDir, { from, to: clampedTo }, { width, height });
+
+  const refEnergy = computeEnergy(refPath).filter((p) => p.t >= from && p.t < clampedTo);
+  const draftEnergy = computeEnergy(draftPath).filter((p) => p.t >= from && p.t < clampedTo);
+  const refCurve = bucketMean(refEnergy, from, clampedTo, 0.5);
+  const draftCurve = bucketMean(draftEnergy, from, clampedTo, 0.5);
+  const rows = refCurve.map((w, i) => {
+    const draftMean = draftCurve[i] ? draftCurve[i].mean : 0;
+    return { t0: w.t0, t1: w.t1, refMean: w.mean, draftMean, tooStill: draftMean < 0.5 * w.mean };
+  });
+
+  const refHolds = findHolds(refEnergy, HOLD_FLOOR, HOLD_MIN);
+  const draftHolds = findHolds(draftEnergy, HOLD_FLOOR, HOLD_MIN);
+  const refLongest = longestHold(refHolds);
+  const draftLongest = longestHold(draftHolds);
+  const tooStillWindows = rows.filter((r) => r.tooStill);
+
+  const tableRows = rows.map((r) => `| ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s | ${r.refMean.toFixed(2)} `
+    + `| ${r.draftMean.toFixed(2)} |${r.tooStill ? ' <- too still' : ''} |`).join('\n');
+  const lines = [
+    `# see --compare: ${path.basename(refPath)} vs ${path.basename(draftPath)}`, '',
+    `window ${from}-${clampedTo}s · ${gridPaths.length} grid(s) every 0.25s, reference top, draft bottom.`, '',
+    '| window | ref energy | draft energy | |', '|---|---|---|---|', tableRows, '',
+    `ref longest still span: ${refLongest.len.toFixed(2)}s at ${refLongest.at.toFixed(2)}s`,
+    `draft longest still span: ${draftLongest.len.toFixed(2)}s at ${draftLongest.at.toFixed(2)}s`, '',
+    '## Grids', '', ...gridPaths.map((p) => `- ${path.relative(ROOT, p)}`),
+  ];
+  fs.writeFileSync(path.join(outDir, 'compare.md'), `${lines.join('\n')}\n`);
+  fs.writeFileSync(path.join(outDir, 'motion.json'), JSON.stringify({
+    ref: refPath, draft: draftPath, from, to: clampedTo,
+    windows: rows.map((r) => ({ t0: Number(r.t0.toFixed(2)), t1: Number(r.t1.toFixed(2)),
+      refMean: Number(r.refMean.toFixed(3)), draftMean: Number(r.draftMean.toFixed(3)), tooStill: r.tooStill })),
+    refLongestStill: refLongest, draftLongestStill: draftLongest,
+  }, null, 1) + '\n');
+
+  console.log(`\n  COMPARE · ${path.basename(refPath)} vs ${path.basename(draftPath)}, ${from}-${clampedTo}s\n`);
+  for (const r of rows)
+    console.log(`  ${r.t0.toFixed(2)}-${r.t1.toFixed(2)}s  ref ${r.refMean.toFixed(2)}  draft ${r.draftMean.toFixed(2)}${r.tooStill ? '  <- too still' : ''}`);
+  console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'compare.md'))}`);
+  console.log(tooStillWindows.length
+    ? `  next: fix motion in ${tooStillWindows.length} window(s) marked "too still" (${tooStillWindows.map((r) => `${r.t0.toFixed(1)}-${r.t1.toFixed(1)}s`).join(', ')}), then re-run --compare.`
+    : '  next: draft matches the reference\'s motion in every window; proceed to the next post-draft step.');
+
+  // `--film` records this run against the FILM's own hash (harness/lib/receipt.mjs), the same receipt
+  // shape conform.mjs/verify.mjs already write, so quality/gates/post-draft.mjs can read one fresh/stale
+  // answer instead of re-running ffmpeg itself.
+  if (filmArg) {
+    writeReceipt('motion-compare', filmArg, {
+      ok: tooStillWindows.length === 0, tooStillCount: tooStillWindows.length,
+      tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1 })),
+      ref: refPath, draft: draftPath, from, to: clampedTo,
+    });
+  }
 }
 
 function writeOutputs({ outDir, video, dur, fps, cutTimes, energy, holds, beats, gridPaths }) {
@@ -319,19 +524,42 @@ function main() {
   const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
   const positional = argv.filter((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').startsWith('--'));
   const video = positional[0];
+
+  if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
+    + '| --shot <from>-<to> [--fps N] | --compare <draft.mp4> [--from s --to s]');
+  if (!fs.existsSync(video)) die(`no such file: ${video}`);
+  for (const bin of ['ffprobe', 'ffmpeg']) {
+    if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
+      die(`${bin} is not on PATH. see.mjs needs ffmpeg (and tesseract for the full flow); install and re-run.`);
+  }
+
+  const shotSpec = flag('--shot', null);
+  if (shotSpec) {
+    const { from, to } = parseRange(shotSpec);
+    const fps = Number(flag('--fps', 10));
+    const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+    return runShot(video, outDirRoot, from, to, fps);
+  }
+
+  const compareArg = flag('--compare', null);
+  if (compareArg) {
+    if (!fs.existsSync(compareArg)) die(`no such draft file: ${compareArg}`);
+    const fromArg = flag('--from', null);
+    const toArg = flag('--to', null);
+    const filmArg = flag('--film', null);
+    const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
+    return runCompare(video, compareArg, outDirRoot, fromArg != null ? Number(fromArg) : null, toArg != null ? Number(toArg) : null, filmArg);
+  }
+
+  if (spawnSync('tesseract', ['-version'], { encoding: 'utf8' }).error)
+    die('tesseract is not on PATH. see.mjs needs it for the full flow (--shot/--compare do not); install and re-run.');
+
   const framesBudget = Number(flag('--frames', 12));
   const holdFloor = Number(flag('--hold-floor', HOLD_FLOOR));
   const holdMin = Number(flag('--hold-min', HOLD_MIN));
   const ocrFps = Number(flag('--ocr-fps', 4));
   const ocrMinConf = Number(flag('--ocr-conf', 60));
   const ocrMinLen = 3;
-
-  if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N]');
-  if (!fs.existsSync(video)) die(`no such file: ${video}`);
-  for (const bin of ['ffprobe', 'ffmpeg', 'tesseract']) {
-    if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
-      die(`${bin} is not on PATH. see.mjs needs ffmpeg and tesseract; install and re-run.`);
-  }
 
   const outDir = path.resolve(positional[1] || defaultOutDir(video));
   fs.rmSync(outDir, { recursive: true, force: true });

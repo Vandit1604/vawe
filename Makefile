@@ -338,11 +338,24 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # hand. Writes cuts/holds/beats/ease/OCR + a few 3x3 frame grids an agent reads with Read, and one
 # index.md naming them. quality/refs/<name>/see/ when REF sits in quality/refs/, scratch otherwise
 # (OUT=<dir> to force one); FRAMES=<n> sets the frame budget (default 12). harness/media/see.mjs
-study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference beat by beat; SEE=1 REF=<video> lets an agent see it cheaply, in grids.
+#
+# make study REF=<reference.mp4> SHOT=<from>-<to>: a DENSE strip of one time window of the reference
+# (3x3 grids, timestamps on tiles) plus that window's motion curve every 0.5s. FPS=<n> sets the sample
+# rate (default 10). harness/media/see.mjs --shot
+#
+# make study REF=<reference.mp4> COMPARE=<draft.mp4>: reference vs draft AT THE SAME TIMESTAMPS: side-
+# by-side grids (reference top, draft bottom, every 0.25s) and a per-0.5s motion-energy table marking
+# "too still" where the draft is under half the reference. FROM=<s> TO=<s> narrows the window.
+# harness/media/see.mjs --compare
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference; SEE=1 REF=<video> sees it cheaply; SHOT=<from>-<to> REF=<video> is a dense strip; COMPARE=<draft.mp4> REF=<video> checks a draft's motion against it.
 	@if [ -n "$(MATCH)" ]; then \
 	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
 	elif [ -n "$(SEE)" ]; then \
 	  node harness/media/see.mjs $(REF) $(OUT) $(if $(FRAMES),--frames $(FRAMES)); \
+	elif [ -n "$(SHOT)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --shot $(SHOT) $(if $(FPS),--fps $(FPS)); \
+	elif [ -n "$(COMPARE)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --compare $(COMPARE) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(D),--film $(D)); \
 	else \
 	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
 	fi

@@ -114,3 +114,50 @@ writeReceipt('judge-struct-B', scenePath, { run: 'B', verdict: 'PASS', overall: 
 
 cleanup();
 console.log('✓ post-draft.test.mjs: render -> still-sheet -> conform -> verify -> judges -> ship, one step per call, each stall named');
+
+// ── scene.reference: a film that declares one gets a `motion` step between conform and verify ───────
+const refName = '_post-draft-reference-fixture.json';
+const refScenePath = path.join(ROOT, 'tests/fixtures/films', refName);
+const refMp4 = path.join(ROOT, renderOf(refScenePath));
+const refCleanup = () => {
+  for (const stage of ['conform', 'verify', 'still-sheet', 'motion-compare']) {
+    try { fs.unlinkSync(receiptPath(stage, refScenePath)); } catch { /* fine */ }
+  }
+  try { fs.unlinkSync(refScenePath); } catch { /* fine */ }
+  try { fs.unlinkSync(refMp4); } catch { /* fine */ }
+};
+refCleanup();
+fs.mkdirSync(path.dirname(refMp4), { recursive: true });
+fs.writeFileSync(refScenePath, JSON.stringify({ module: 'scene', layers: [], reference: 'refs/example.mp4' }));
+fs.writeFileSync(refMp4, 'fake rendered bytes');
+writeReceipt('still-sheet', refScenePath, { sheets: ['fake.png'] });
+writeReceipt('conform', refScenePath, { ok: true, failedCount: 0 });
+
+// no motion-compare receipt yet: stalls at `motion`, names the reference, before verify ever runs
+{
+  const r = postDraftStep(refScenePath);
+  assert.equal(r.step, 'motion');
+  assert.match(r.why, /declares a reference \(refs\/example\.mp4\)/);
+  assert.match(r.next, /make study REF=refs\/example\.mp4 COMPARE=/);
+}
+
+writeReceipt('motion-compare', refScenePath, { ok: false, tooStillCount: 2, tooStillWindows: [{ t0: 1, t1: 1.5 }, { t0: 1.5, t1: 2 }] });
+
+// motion-compare ran and failed: stays at `motion`, names the failing windows, offers the waiver
+{
+  const r = postDraftStep(refScenePath);
+  assert.equal(r.step, 'motion');
+  assert.match(r.why, /2 window\(s\) read "too still"/);
+  assert.match(r.why, /motion-still/);
+}
+
+writeReceipt('motion-compare', refScenePath, { ok: true, tooStillCount: 0, tooStillWindows: [] });
+
+// motion-compare passed: falls through to the un-run verify step, same as a film with no reference
+{
+  const r = postDraftStep(refScenePath);
+  assert.equal(r.step, 'verify');
+}
+
+refCleanup();
+console.log('✓ post-draft.test.mjs: scene.reference gates a `motion` step (unchecked -> too-still -> passed -> verify)');
