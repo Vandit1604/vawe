@@ -38,6 +38,8 @@ import { readReceipt, dirFor } from '../../harness/lib/receipt.mjs';
 import { JUDGE_CODES } from '../../harness/lib/judge-codes.mjs';
 import { population, ROOT } from '../../harness/lib/census.mjs';
 import { renderOf } from './tile.mjs';
+import { twoJudgesStatus } from '../../harness/lib/judge-consensus.mjs';
+import { isWaivedBy } from '../../harness/lib/waivers.mjs';
 
 const LEDGER = path.join(ROOT, 'quality', 'ledger', 'ledger.json');
 const RATCHET = path.join(ROOT, 'quality/baselines/no-judge-ratchet.json');
@@ -115,6 +117,39 @@ export function checkOne(scenePath, mp4 = renderOf(scenePath)) {
   if (r.receipt.renderHash !== hashFile(mp4)) {
     return { ok: false, reason: 'the mp4 changed since the receipt was written (re-rendered without re-judging)' };
   }
+  return { ok: true, reason: null };
+}
+
+/**
+ * shipReady(scenePath, mp4): the whole `make ship` gate, single-film. THREE conditions, checked in the
+ * order a film actually clears them (so the refusal names the first one still failing, never all of
+ * them at once): a fresh judge receipt (isJudged's own question, unchanged), fresh brief conformance
+ * (`harness/dev/conform.mjs`'s own receipt, `ok: true` or waived), and two fresh structured judges both
+ * at 7/10 or above (`harness/lib/judge-consensus.mjs`, or waived). Waivable ONLY through the existing
+ * `authoring.allow` + `_why` mechanism (AGENTS.md): `conform-fail` / `judge-score`, no second channel.
+ * `ok: true` for a fresh PASS *or* FIX judge verdict alike, same as checkOne: this still asks whether
+ * the eye ran and the numbers clear the bar, never whether the judge liked what it saw.
+ */
+export function shipReady(scenePath, mp4 = renderOf(scenePath)) {
+  const judged = checkOne(scenePath, mp4);
+  if (!judged.ok) return { ok: false, reason: judged.reason };
+
+  let scene;
+  try { scene = JSON.parse(fs.readFileSync(path.resolve(ROOT, scenePath), 'utf8')); } catch { scene = {}; }
+  const allow = (scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : [];
+
+  const conform = readReceipt('conform', scenePath);
+  if (!isWaivedBy(allow, 'conform-fail')) {
+    if (!conform.exists) return { ok: false, reason: 'no brief conformance has been checked for this cut' };
+    if (conform.stale) return { ok: false, reason: 'the brief conformance receipt is for an older cut of this film' };
+    if (conform.receipt.ok === false) return { ok: false, reason: `${conform.receipt.failedCount} brief claim(s) failed conform` };
+  }
+
+  const judges = twoJudgesStatus(scenePath, mp4);
+  if (!judges.ok && !isWaivedBy(allow, 'judge-score')) {
+    return { ok: false, reason: judges.reason };
+  }
+
   return { ok: true, reason: null };
 }
 
@@ -244,13 +279,15 @@ if (process.argv[1] && process.argv[1].endsWith('ledger.mjs')) {
   }
   if (cmd === 'judged') {
     // single-film mode: `make ship`'s last step. Not just whether the eye looked, but WHY not, so the
-    // refusal names the exact condition instead of a bare "unjudged".
+    // refusal names the exact condition instead of a bare "unjudged". `shipReady` is the ONE owner of
+    // all three conditions (judge receipt, conform, two structured judges); this only prints its answer.
     if (!file) { console.error('usage: node quality/gates/ledger.mjs judged films/x/video.json'); process.exit(2); }
-    const { ok, reason } = checkOne(file);
-    if (ok) { console.log(`  ✓ ${file} has a fresh judge receipt`); process.exit(0); }
-    console.error(`  ✗ ${file}: no fresh judge receipt (${reason})` +
-      `\n    make judge D=${file}, then READ the sheet and record the verdict:` +
-      `\n    node quality/gates/judge.mjs ${file} --verdict PASS|FIX ...\n`);
+    const { ok, reason } = shipReady(file);
+    if (ok) { console.log(`  ✓ ${file}: judge receipt fresh, brief conformance passed, two independent judges at 7/10+`); process.exit(0); }
+    console.error(`  ✗ ${file}: not ready to ship (${reason})` +
+      `\n    node harness/dev/conform.mjs D=${file}                        # brief claims` +
+      `\n    make judge D=${file} STRUCT=1                                # prep the sheet for two FRESH judges` +
+      `\n    node quality/gates/judge.mjs ${file} --verdict PASS|FIX ...   # or the plain single-judge verdict\n`);
     process.exit(1);
   }
 

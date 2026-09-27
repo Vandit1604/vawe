@@ -15,6 +15,7 @@ import { beatsOf, beatStarts } from '../../quality/gates/beats-of.mjs';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { gateFindings, readFindings } from '../lib/findings.mjs';
 import { scratch } from '../lib/scratch.mjs';
+import { writeReceipt } from '../lib/receipt.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -171,7 +172,11 @@ export function verify(filmArg, refArg) {
 
   lines.push('=== END VERIFY ===');
   const hardFail = missing.length ? [`missing asset(s): ${missing.join(', ')}`] : [];
-  return { text: lines.join('\n'), ok: !hardFail.length, hardFail, beats: beatRows, dur };
+  const ok = !hardFail.length;
+  // A receipt so `make next`'s post-draft loop can ask "did verify already run, fresh" without
+  // re-running the whole beat/exposure/audit pass every call.
+  writeReceipt('verify', filmPath, { ok, hardFail, at: new Date().toISOString().slice(0, 10) });
+  return { text: lines.join('\n'), ok, hardFail, beats: beatRows, dur };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

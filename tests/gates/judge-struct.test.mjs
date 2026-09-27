@@ -26,11 +26,11 @@ const prepReceipt = () => writeReceipt('judge', mp4, { sheet, renderHash: hashFi
 
 // One distinct, specific evidence string per criterion: the evidence linter (harness/lib/evidence-lint.mjs)
 // now refuses filler ("readability looks fine") and refuses two criteria sharing one templated string.
-const fullVerdict = (run, overrides = {}) => {
+const fullVerdict = (run, overrides = {}, overall = 7) => {
   const criteria = Object.fromEntries(structuredCriteria().map((c, i) =>
     [c.code, { score: 3, evidence: `beat 1 @1.0s: element ${i} sits ${i}px left of its grid column`, t: 1.0 }]));
   Object.assign(criteria, overrides);
-  return { run, criteria, verdict: 'FIX' };
+  return { run, criteria, overall, verdict: 'FIX' };
 };
 
 const writeJson = (name, obj) => { const p = path.join(dir, name); fs.writeFileSync(p, JSON.stringify(obj, null, 2)); return p; };
@@ -48,6 +48,18 @@ try {
   assert.match(String(e.stderr || ''), /value/);
 }
 
+// --- a verdict with no "overall" (or one out of 1-10) is refused, not recorded ---
+prepReceipt();
+const noOverall = fullVerdict('A');
+delete noOverall.overall;
+const noOverallFile = writeJson('no-overall.json', noOverall);
+try {
+  execFileSync(process.execPath, [judgeMjs, mp4, '--verdict-json', noOverallFile, '--run', 'A'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+  assert.fail('a verdict with no overall score must be refused');
+} catch (e) {
+  assert.match(String(e.stderr || ''), /"overall" must be an integer 1-10/);
+}
+
 // --- two complete, independent runs record under separate receipts ---
 prepReceipt();
 const fileA = writeJson('verdict-A.json', fullVerdict('A'));
@@ -63,6 +75,7 @@ const recA = readReceipt('judge-struct-A', mp4);
 const recB = readReceipt('judge-struct-B', mp4);
 assert.equal(recA.receipt.run, 'A');
 assert.equal(recB.receipt.run, 'B');
+assert.equal(recA.receipt.overall, 7, 'the overall score must be stored on the receipt');
 assert.notEqual(recA.receipt.criteria.value.score, recB.receipt.criteria.value.score,
   'runs A and B must be recorded separately, neither overwriting the other');
 

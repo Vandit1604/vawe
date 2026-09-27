@@ -1,0 +1,116 @@
+// tests/gates/post-draft.test.mjs: the post-draft loop (quality/gates/post-draft.mjs), one step per
+// call: render -> still-sheet -> conform -> verify -> judges -> ship. `postDraftStep` reads only
+// receipts + files on disk (harness/lib/receipt.mjs), the same contract `make stage` already uses, so
+// this test drives it by writing exactly those receipts, never by rendering a real video.
+//   node tests/gates/post-draft.test.mjs
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import { fileURLToPath } from 'node:url';
+import { writeReceipt, receiptPath } from '../../harness/lib/receipt.mjs';
+import { postDraftStep } from '../../quality/gates/post-draft.mjs';
+import { renderOf } from '../../quality/gates/tile.mjs';
+
+const rh = () => crypto.createHash('sha256').update(fs.readFileSync(mp4)).digest('hex');
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(here, '../..');
+const name = '_post-draft-fixture.json';
+const scenePath = path.join(ROOT, 'tests/fixtures/films', name);
+const mp4 = path.join(ROOT, renderOf(scenePath));
+
+const cleanup = () => {
+  for (const stage of ['conform', 'verify', 'still-sheet', 'judge-struct-A', 'judge-struct-B']) {
+    try { fs.unlinkSync(receiptPath(stage, scenePath)); } catch { /* fine */ }
+  }
+  try { fs.unlinkSync(scenePath); } catch { /* fine */ }
+  try { fs.unlinkSync(mp4); } catch { /* fine */ }
+};
+cleanup();
+fs.mkdirSync(path.dirname(mp4), { recursive: true });
+fs.writeFileSync(scenePath, JSON.stringify({ module: 'scene', layers: [] }));
+
+// step 1: no render yet
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'render');
+  assert.match(r.next, /make dev D=/);
+}
+
+fs.writeFileSync(mp4, 'fake rendered bytes');
+
+// step 2: rendered, no still sheet
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'still-sheet');
+  assert.match(r.next, /still-sheet\.mjs/);
+}
+
+writeReceipt('still-sheet', scenePath, { sheets: ['fake.png'] });
+
+// step 3: still sheet fresh, no conform
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'conform');
+  assert.match(r.next, /conform\.mjs/);
+}
+
+writeReceipt('conform', scenePath, { ok: false, failedCount: 1 });
+
+// step 3b: conform ran and FAILED - stays at conform, names the failure
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'conform');
+  assert.match(r.why, /1 brief claim\(s\) failed/);
+}
+
+writeReceipt('conform', scenePath, { ok: true, failedCount: 0 });
+
+// step 4: conform passed, no verify yet
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'verify');
+  assert.match(r.next, /verify\.mjs/);
+}
+
+writeReceipt('verify', scenePath, { ok: true, hardFail: [] });
+
+// step 5: verify passed, no judges yet
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'judges');
+  assert.match(r.next, /make judge D=.*STRUCT=1/);
+  assert.ok(r.brief && /VAWE_AGENT=judge-/.test(r.brief), 'the judges step must carry the hand-off brief');
+}
+
+writeReceipt('judge-struct-A', scenePath, { run: 'A', verdict: 'PASS', overall: 8, renderHash: rh(), mp4 });
+
+// step 5b: one judge scored, the other missing
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'judges');
+  assert.match(r.why, /run\(s\) B/);
+}
+
+writeReceipt('judge-struct-B', scenePath, { run: 'B', verdict: 'FIX', overall: 5, renderHash: rh(), mp4 });
+
+// step 5c: both scored, but B is below 7/10
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'judges');
+  assert.match(r.why, /B=5\/10/);
+}
+
+writeReceipt('judge-struct-B', scenePath, { run: 'B', verdict: 'PASS', overall: 8, renderHash: rh(), mp4 });
+
+// step 6: everything fresh and passing - ready to ship
+{
+  const r = postDraftStep(scenePath);
+  assert.equal(r.step, 'ship');
+  assert.equal(r.done, true);
+  assert.match(r.next, /make ship D=/);
+}
+
+cleanup();
+console.log('✓ post-draft.test.mjs: render -> still-sheet -> conform -> verify -> judges -> ship, one step per call, each stall named');
