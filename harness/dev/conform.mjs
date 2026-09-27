@@ -31,6 +31,7 @@ import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard } from '../author/storyboard-parse.mjs';
 import { renderOf, gradeable } from '../../quality/gates/tile.mjs';
 import { computeEnergy, HOLD_FLOOR } from '../media/see.mjs';
+import { writeReceipt } from '../lib/receipt.mjs';
 
 function readArg(key) {
   const pref = `${key}=`;
@@ -283,6 +284,23 @@ function judgeHold(c, index, scene, dur, holdSource) {
   return judgeHoldFromDom(c, index, scene, dur);
 }
 
+// FIX HINTS, kept next to the claim parsers/printers above rather than in a second file: the JSON
+// pattern that satisfies each failed claim, not just the fact that it failed. `r` is the judged result
+// (same shape judgeCopy/judgeWeight/... returns), so a hint can read whatever it measured.
+const HINTS = {
+  copy: (r) => `set the layer's \`text\` to exactly "${r.expected}" (rendered: ${r.measured === null ? 'nothing, check the layer exists at this time' : `"${r.measured}"`})`,
+  weight: (r) => `give the layer a \`weight\` motion key spanning ${r.from}->${r.to} across ${r.t0}-${r.t1}s, e.g. "motion": [{"t": ${r.t0}, "weight": ${r.from}}, {"t": ${r.t1}, "weight": ${r.to}}]`,
+  draw: (r) => `the svg needs \`"draw": {"to": ${r.t}}\` (or an earlier \`start\`) so the stroke reads fully drawn by ${r.t.toFixed(2)}s; measured only ${r.measured == null ? 'no stroke path' : `${(r.measured * 100).toFixed(0)}%`}`,
+  exit: (r) => `name the span and push it: \`"exitDur"\` long enough that a motionPath \`up\` (or \`"anim": "rise"\`) actually clears 8px+ before ${r.t.toFixed(2)}s, opacity held (not faded) until the last third of the exit`,
+  overlap: (r) => `stagger \`${r.a}\` and \`${r.b}\` so their on-screen windows don't coincide, or shift one layer's \`x\`/\`y\` so the boxes clear`,
+  hold: (r) => `name the span holding still (starts @${r.worstAt.toFixed(2)}s${r.worstId ? ` on "${r.worstId}"` : ''}) and give it a visible push there: an earlier next entrance, a camera move, or idle motion; ceiling is ${r.maxHold}s`,
+};
+
+function hintFor(r) {
+  const h = HINTS[r.kind];
+  return h ? h(r) : null;
+}
+
 export async function conform(filmArg, briefArg) {
   const filmPath = path.resolve(filmArg);
   if (!fs.existsSync(filmPath)) throw new Error(`no such film: ${filmArg}`);
@@ -329,6 +347,7 @@ export async function conform(filmArg, briefArg) {
       else if (r.kind === 'exit') lines.push(`[${mark}] exit ${r.id} up by ${r.t.toFixed(2)}s: rose ${r.measured == null ? 'n/a' : `${r.measured.toFixed(1)}px`} from ${r.t0.toFixed(2)}s to ${r.t1.toFixed(2)}s${r.wasVisible ? '' : ' (not visible at window start)'}`);
       else if (r.kind === 'overlap') lines.push(`[${mark}] overlap ${r.a} !x ${r.b}: ${r.note || `${r.measured ? 'DO overlap' : 'clear'} @${r.t.toFixed(2)}s`}`);
       else if (r.kind === 'hold') lines.push(`[${mark}] hold max ${r.maxHold}s: longest static run ${r.worstRun.toFixed(1)}s${r.worstId ? ` on "${r.worstId}"` : ''} starting @${r.worstAt.toFixed(2)}s (${r.source})`);
+      if (r.pass === false) { const hint = hintFor(r); if (hint) lines.push(`        fix: ${hint}`); }
     }
   }
 
@@ -344,7 +363,12 @@ export async function conform(filmArg, briefArg) {
   const outPath = scratch('conform', `${path.basename(filmPath, '.json')}.claims.json`);
   fs.writeFileSync(outPath, JSON.stringify(claimsJson, null, 2));
 
-  return { text: lines.join('\n'), ok: failed.length === 0, results, leftover, claimsJsonPath: outPath };
+  const ok = failed.length === 0;
+  // A receipt, same shape as every other stage's (harness/lib/receipt.mjs): so `make ship` and
+  // `make next` can ask "did brief conformance already run, fresh, and pass" without re-running it.
+  writeReceipt('conform', filmPath, { ok, failedCount: failed.length, claimCount: claims.length, at: new Date().toISOString().slice(0, 10) });
+
+  return { text: lines.join('\n'), ok, results, leftover, claimsJsonPath: outPath };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
