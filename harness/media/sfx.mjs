@@ -67,5 +67,8 @@ for (const r of results) {
 }
 fs.writeFileSync(CREDITS, JSON.stringify(credits, null, 2) + '\n');
 console.log(`sfx: ${ok} downloaded, ${skip} present, ${fail} failed${fail ? '' : '. Library ready'} (Mixkit Free License)`);
-console.log('cues: cuts→whoosh, stings→reveal are auto-placed by the mixer; add {sfx:[{t,name}]} for more.');
+const have = SFX.map(([name]) => name).filter((name) => fs.existsSync(path.join(DEST, `${name}.wav`)));
+console.log('paste into a film at films/<name>/page.html (data-at in seconds, data-gain in dB):');
+for (const name of have) console.log(`  <audio src="../../assets/sfx/${name}.wav" data-at="0"></audio>`);
+console.log('no file needed: <audio data-synth="whoosh" data-at="0"></audio>  (voices: core/audio/kit.mjs CUES)');
 if (fail) process.exit(1);
