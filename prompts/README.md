@@ -7,8 +7,10 @@ group: reference
 # prompts/: the library
 
 Twelve templates. Each is one markdown file with: when to use it, the template (XML-sectioned
-where the original was), the inputs to ask for, the gotchas, and a `source:` line with URL, author
-and licence. Every template targets the vawe page contract:
+where the original was), a question bank (at most five questions, ordered by how much they change
+the film, each with its reason and its default), the gotchas, and a `source:` line with URL, author
+and licence. How to build a prompt from scratch, with the corpus counts behind each section, is
+[ANATOMY.md](ANATOMY.md). Every template targets the vawe page contract:
 
 - one `films/<name>/page.html` with `<meta name="duration" content="<s>">`, relative assets;
 - time is the seek: CSS `@keyframes` and `element.animate()` (the renderer seeks them), or
@@ -48,9 +50,12 @@ not copied. Every file's `source:` line records this per template.
 
 ## How to use one
 
-1. Pick the row. If two fit, the shorter film wins; under 15 s most types are one continuous action
-  .
-2. Copy the template block into the session. Fill the `<inputs>` by asking; never guess an asset.
+1. Pick the row. If two fit, the shorter film wins; under 15 s most types are one continuous action.
+2. `bin/vawe new <name> --from prompts/<t>.md` prints the template's questions with their defaults
+   and writes `films/<name>/brief.md` with the defaults filled in, each marked
+   `[unanswered: default taken]`. Ask the bank in one message; a skipped answer keeps its default.
+   The agent side of this is the `vawe-brief` skill (`skills/vawe-brief/SKILL.md`; everyone else
+   reads `ANATOMY.md`).
 3. Every template stops before code at least once. Honour the stop: the beat grid, the facts list or
    the SPEC is what the owner reads.
 4. Draft with `bin/vawe dev <page>`, then run `critique-pass.md` as a fresh agent.
