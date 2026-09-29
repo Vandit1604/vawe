@@ -18,7 +18,8 @@ preview in the Opus 5.5 dataset (102 s) belongs to this type, so plan the length
 <inputs>
 Ask me for: the source material (a link, a paper, a recipe, an outline), the audience in one line,
 the three things they must be able to explain afterwards, the length, the canvas, and narration:
-"none", a TTS voice with a timings file, or "captions only".
+"none", a TTS voice with a timings file, or "captions only". If I skip one, take the default from
+the Questions section and go on.
 </inputs>
 
 <facts>
@@ -69,9 +70,15 @@ Ask me for the inputs, write the facts list, stop. Then the scene list, stop. Th
 One container, one continuous fill (a glass, a build log, a render queue). Every ingredient is
 labelled as it enters, with its measure. Under 15 seconds this is one continuous action. Pattern from Ror Fly's cocktail-recipe request.
 
-## Inputs to ask for
+## Questions
 
-Source, audience, the three takeaways, length, canvas, narration plan.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **Source**: the material (a link, a paper, a recipe, an outline)? Default: `site/app/determinism/` (vawe's own page on determinism). Why: every claim is copied from it; without a source there is no facts list.
+2. **Audience**: who watches, in one line? Default: an engineer who has used one video tool. Why: it sets the vocabulary and how much each scene explains.
+3. **Takeaways**: the three things they must be able to explain afterwards? Default: the source's first three headings, verbatim. Why: one scene per takeaway is the structure.
+4. **Length and canvas**: seconds and aspect? Default: 40 s, 4:5. Why: over 60 s the director's brief takes over, and the canvas sets the caption band.
+5. **Narration**: none, captions only, or a TTS voice with a timings file? Default: captions only. Why: with narration every scene start is a measured word boundary, not a guess.
 
 ## Gotchas
 

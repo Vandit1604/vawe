@@ -49,9 +49,14 @@ below removes one default.
 Run the plain line first, then one variant, and keep the pair. The diff between them is the
 agent's default, written down.
 
-## Inputs to ask for
+## Questions
 
-None. If the person offers a subject, take variant 4.
+The plain line needs none. Ask these only to choose the second run; a skipped question takes its default.
+
+1. **Subject**: a subject, or none? Default: none; the plain line. Why: a subject is variant 4 and turns the reel into a product film.
+2. **Variant**: which anti-contagion variant runs second? Default: 2, the named bans. Why: the pair is the point; the diff between the two runs is the agent's default, written down.
+3. **Constraint**: one form-forcing constraint for variant 3, or none? Default: none. Why: a single constraint forces a form the agent would not pick.
+4. **Length and canvas**: seconds and aspect? Default: 15 s, 16:9. Why: the original line was 15 s; a longer reel needs holds and a waiver.
 
 ## Gotchas
 

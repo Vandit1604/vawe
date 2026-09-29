@@ -16,7 +16,8 @@ its own colours, its own type, its own screens. Never invented UI.
 ```
 <inputs>
 Ask me for: the site URL, the one-line promise, 3 to 5 moments in the product worth showing, the
-platform (16:9 or 9:16), and a song or "no music". Then run `node scripts/brand/kit.mjs <url> <name> --init`: it writes
+platform (16:9 or 9:16) and length, and a song or "no music". If I skip one, take the default from
+the Questions section and go on. Then run `node scripts/brand/kit.mjs <url> <name> --init`: it writes
 assets/brands/<brand>/kit.json with the site's own palette, fonts and favicon. Use nothing else.
 </inputs>
 
@@ -60,10 +61,17 @@ you write any code.
 </start>
 ```
 
-## Inputs to ask for
+## Questions
 
-URL, promise, moments, platform, music. Also: is there a claim that needs a source (a number, a
-customer name)? If yes, get the source before the beat list.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **URL**: which site or product is the subject? Default: `site/app/` (vawe's own site, served locally). Why: the kit, every capture and every colour come from it; nothing invented may appear.
+2. **Promise**: the one line the film proves, under 12 words? Default: the site's own hero headline, verbatim. Why: it is the first frame and the hook, and every beat has to prove it.
+3. **Moments**: which 3 to 5 things does the film show the product doing? Default: the first three surfaces the hero links to. Why: density is information per frame; each moment is one beat with one real capture.
+4. **Platform**: 16:9 or 9:16, and how long? Default: 16:9, 24 s. Why: the canvas decides the layout and the pace; a reel is one column, a launch is a stage.
+5. **Music**: a licensed song file, or synth cues only? Default: synth cues, no music. Why: a song sets the beat grid; without one the cuts follow the picture.
+
+A claim that needs a source (a number, a customer name) gets its source before the beat list.
 
 ## Gotchas
 

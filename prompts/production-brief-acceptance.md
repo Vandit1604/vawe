@@ -61,9 +61,16 @@ what must stay exact, and three gates with a named reviewer. Fill it before the 
 - Public credit: what the agent did, what rendered the pixels, what was supplied, what a person did.
 ```
 
-## Inputs to ask for
+## Questions
 
-Everything in the first two sections. The rest is filled as the film is made.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+The rest of the brief is filled as the film is made.
+
+1. **Audience**: who watches, and the one thing they should understand or feel? Default: the product's buyer; "this works, and I can trust it". Why: the goal line decides every shot's job.
+2. **Delivery**: where it plays, the duration, the aspect, the language? Default: the product's own site, 30 s, 16:9, English. Why: fps, duration and aspect are fixed in the brief, not discovered in the render.
+3. **Exact**: what must stay exact (claims, names, wordmark, strings, numbers)? Default: every string and number on screen is copied from the source; none is invented. Why: gate 1 checks strings and gate 3 checks them again.
+4. **Rights**: the assets, data and references, each with its owner and licence? Default: only assets that sit in the repo with a licence file beside them. Why: the rights table is the film's provenance.
+5. **Owner**: who signs off, and by when? Default: the person who asked for the film, after the first draft and one critique round. Why: gate 3 needs a named reviewer and a result.
 
 ## Gotchas
 
