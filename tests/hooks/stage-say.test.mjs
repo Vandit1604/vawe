@@ -17,6 +17,10 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 fs.mkdirSync('tests/fixtures/films/stage-say', { recursive: true });
+// Also set before the dynamic import below: stage.mjs's gate-verdict cache is a module-scope path
+// constant too, and this suite's in-process stageOf() call raced other suites on the SAME shared
+// .vawe-data/stage-gate-cache.json before this was scoped per run.
+process.env.VAWE_STATE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-say-'));
 const { stageOf } = await import('../../quality/gates/stage.mjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -92,7 +96,6 @@ fs.writeFileSync(film, JSON.stringify({ module: 'scene', theme: 'default', aspec
   authoring: { allow: ['plain-content@Beat 2: Build (3s-6s)'],
     _why: { 'plain-content@Beat 2: Build (3s-6s)': 'fixture beat, no real UI to capture' } } }));
 fs.writeFileSync(sb, SB);
-process.env.VAWE_STATE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-say-'));
 const rulesState = path.join(process.env.VAWE_STATE_DIR, 'stage-say-rules-state.json');
 const sessionState = path.join(process.env.VAWE_STATE_DIR, 'stage-say-session-state.json');
 after(() => {

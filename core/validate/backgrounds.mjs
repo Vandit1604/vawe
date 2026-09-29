@@ -5,7 +5,7 @@ import { junctionTable, marksOf, bindWindowsToJunctions } from '../timeline/junc
 import { resolveSpectacle } from '../timeline/spectacle.js';
 import { lowerScene } from '../transitions/lower.js';
 import { bgPreset, bgOverErrors, bgOptKeys, BG_NAMES, FX_PARAMS } from '../backgrounds/index.js';
-import { gradientShapeErrors } from '../backgrounds/fx.js';
+import { gradientShapeErrors, isColorLike } from '../backgrounds/fx.js';
 import { unseekableCssUsed } from '../type/sanitize-html.js';
 
 // The keys a bg WINDOW owns. Everything else that matches a preset parameter belongs under `opts`.
@@ -65,6 +65,22 @@ function sourceConflictError(b, at) {
       : '`html`/`src` paint in the DOM, `preset` and `base`+`fx` paint on canvas; they do not layer. Split them into two windows (with `from`/`to`) if you want both in one video.');
 }
 
+// COLOUR FORMAT. `color`/`color2`/`color3`/`gridColor` and each `blobs[].color` land in a bare
+// `rgba(${color},a)` canvas template (core/backgrounds/fx.js), so a value the SAME parser cannot read
+// (an object, an unparseable string) is not refused: it renders wrong or invisible, no worse than
+// before, and nothing at validate time says which key or why (the aurora/liquid case this exists
+// for). `isColorLike` is the exact predicate fx.js's own aurora conversion already applies, asked
+// here rather than re-tested by a second regex.
+const COLOR_KEYS = ['color', 'color2', 'color3', 'gridColor'];
+function colorFormatErrors(bag, at, out) {
+  if (!isObj(bag)) return;
+  for (const k of COLOR_KEYS) {
+    if (bag[k] != null && !isColorLike(bag[k]))
+      out.push(`${at}.${k} (${JSON.stringify(bag[k])}) is not a colour the engine can read: it renders wrong or invisible instead of refusing. Use a hex string ("#3b82f6"), an rgb()/rgba() string, or a bare "r,g,b" triplet.`);
+  }
+  if (Array.isArray(bag.blobs)) bag.blobs.forEach((blob, i) => colorFormatErrors(blob, `${at}.blobs[${i}]`, out));
+}
+
 function composedWindowErrors(b, at, out) {
   if (b.preset != null || b.html != null || b.src != null) return; // already reported as a source conflict
   if (b.base != null && (!isObj(b.base) || !BG_BASE_KINDS.has(b.base.kind)))
@@ -77,6 +93,7 @@ function composedWindowErrors(b, at, out) {
     if (!isObj(f) || !f.type) { out.push(`${at}.fx[${fi}] needs a \`type\`: one of ${Object.keys(FX_PARAMS).join(', ')}.`); return; }
     if (!(f.type in FX_PARAMS)) { out.push(`${at}.fx[${fi}] type "${f.type}" is not a known painter.${nearest(f.type, Object.keys(FX_PARAMS))}`); return; }
     if (f.type === 'gradientFill') out.push(...gradientShapeErrors(f, `${at}.fx[${fi}]`));
+    colorFormatErrors(f, `${at}.fx[${fi}]`, out);
   });
   if (b.opts != null)
     out.push(`${at} sets \`opts\` on a composed (\`base\`/\`fx\`) backdrop, \`opts\` retunes a named PRESET's fx. Composing directly, just write the values on each \`fx\` entry.`);
@@ -98,6 +115,7 @@ function presetOptsErrors(b, at, out) {
   if (isObj(b.opts) && b.use == null && bgKnown) {
     out.push(...bgOverErrors(bgPreset(b.preset || 'paper', b.value), b.opts, at));
     out.push(...gradientShapeErrors(b.opts, `${at}.opts`));
+    colorFormatErrors(b.opts, `${at}.opts`, out);
   }
   // ...AND THE SAME KEY ONE LEVEL UP. #157 made an unknown key INSIDE `opts` throw. Nothing checked
   // a real fx parameter written OUTSIDE it: `{"preset":"gradientWash","intensity":0.3}` is read by
