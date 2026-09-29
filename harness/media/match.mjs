@@ -48,7 +48,7 @@ requireTool('ffprobe');
 
 const mp4 = path.resolve(ROOT, FILM);
 if (!fs.existsSync(mp4)) die(`no such render: ${FILM}`);
-if (!/\.(mp4|mov|webm)$/i.test(mp4)) die(`${FILM} is not a video: render the page first (make dev PAGE=...)`);
+if (!/\.(mp4|mov|webm)$/i.test(mp4)) die(`${FILM} is not a video: render the page first (vawe dev ...)`);
 const slug = path.basename(mp4).replace(/\.(mp4|mov|webm)$/i, '');
 
 const { width: W, height: H } = probeSize(mp4);

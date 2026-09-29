@@ -43,11 +43,12 @@ function main(argv) {
     if (verb.raw) return process.exit(runStep(verb.build({}, rest)[0]));
     const { values, positional } = parseArgs(verb, rest);
     requireFiles(verb, values, positional);
-    if (verb.local === 'new') {
+    const steps = verb.build ? verb.build(values, positional) : null;
+    if (!steps) {
       const page = newFilm(positional[0], { from: values.from, root: ROOT });
       return console.log(`wrote ${page} and films/${positional[0]}/brief.md\nnext: fill brief.md, then vawe dev ${page}`);
     }
-    for (const step of verb.build(values, positional)) {
+    for (const step of steps) {
       const code = runStep(step);
       if (code !== 0) process.exit(code);
     }

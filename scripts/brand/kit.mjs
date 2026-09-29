@@ -72,4 +72,4 @@ fs.writeFileSync(path.join(dir, 'kit.json'), JSON.stringify(kit, null, 2) + '\n'
 console.log(`\n✓ kit → ${path.relative(ROOT, dir)}/kit.json`);
 console.log(`  ${kit.sections.count} sections · ${p.light ? 'LIGHT' : 'DARK'}-first · bg ${p.bg} · text ${p.text} · accents ${p.accents.join(' ')}${favicon ? ` · favicon ${favicon}` : ''}`);
 
-console.log(`  next: write films/${name}/page.html with these colours and fonts, then make dev PAGE=films/${name}/page.html`);
+console.log(`  next: write films/${name}/page.html with these colours and fonts, then vawe dev films/${name}/page.html`);

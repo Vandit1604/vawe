@@ -35,7 +35,7 @@ test('scorecard reports the route-level facts a scorecard.md would', async () =>
   assert.equal(sc.errorCount, 2, 'two failed ship attempts');
   assert.equal(sc.repeatedFailures.length, 1);
   assert.equal(sc.repeatedFailures[0].n, 2);
-  assert.match(sc.repeatedFailures[0].target, /make ship/);
+  assert.match(sc.repeatedFailures[0].target, /vawe ship/);
   assert.ok(sc.waitMinutes >= 7, 'the ~7min gap before the third ship attempt counts as waiting');
   assert.ok(sc.byKind.some((r) => r.kind === 'render'));
 });

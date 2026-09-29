@@ -5,11 +5,13 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import readline from 'node:readline';
 import { gateFindings, emitJson } from '../lib/findings.mjs';
+import { STARTER } from '../cli/new.mjs';
+import { VERBS } from '../cli/verbs.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATCHET = path.join(ROOT, 'quality/baselines/bench-ratchet.json');
 
-const FIRST_DRAFT_RENDER_CMD = /^make (dev|preview)$/; // the table's own name for the first draft render
+const FIRST_DRAFT_RENDER_CMD = /^vawe dev$/;
 
 const wordsIn = (text) => text.trim().split(/\s+/).filter(Boolean).length;
 
@@ -26,11 +28,14 @@ function saveRatchet(patch) {
 function readLoad() {
   const detail = [];
   let words = 0;
-  for (const rel of ['CLAUDE.md', 'AGENTS.md']) {
+  for (const rel of ['CLAUDE.md', 'AGENTS.md', 'skills/vawe-page/SKILL.md']) {
     const w = wordsIn(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
     words += w;
     detail.push({ file: rel, words: w });
   }
+  const starter = wordsIn(STARTER);
+  words += starter;
+  detail.push({ file: 'the vawe new starter', words: starter });
 
   return { words, tokens: Math.round(words * 1.33), detail };
 }
@@ -47,8 +52,8 @@ function fastPathCommands() {
     if (!row.trim().startsWith('|')) break;
     const cells = row.split('|');
     const commandCell = cells[cells.length - 2] || '';
-    for (const m of commandCell.match(/`make [\w-]+/g) || []) {
-      const cmd = m.slice(1);
+    for (const m of commandCell.match(/`(?:bin\/)?vawe [\w-]+/g) || []) {
+      const cmd = m.slice(1).replace(/^bin\//, '');
       commands.push(cmd);
       if (FIRST_DRAFT_RENDER_CMD.test(cmd)) return commands;
     }
@@ -56,18 +61,9 @@ function fastPathCommands() {
   return commands;
 }
 
-function makefileTargetCount() {
-  const text = fs.readFileSync(path.join(ROOT, 'Makefile'), 'utf8');
-  let count = 0;
-  for (const line of text.split('\n')) {
-    if (/^[A-Za-z][A-Za-z0-9_-]*:/.test(line) && !line.startsWith('.PHONY')) count++;
-  }
-  return count;
-}
-
 function fastPath() {
   const commands = fastPathCommands();
-  return { commands: commands.length, commandList: commands, makefileTargets: makefileTargetCount() };
+  return { commands: commands.length, commandList: commands, makefileTargets: VERBS.length };
 }
 
 const RENDER_FIXTURE = path.join(ROOT, 'tests/fixtures/pages/seek-canvas.html');

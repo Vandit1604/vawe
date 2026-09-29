@@ -53,7 +53,7 @@ test('a page declaring a reference, never checked, refuses FINAL', () => {
   } catch (e) { threw = true; message = String(e.stderr || e.message); }
   assertOk(threw, 'a never-checked recreation page must refuse a FINAL render');
   assertOk(/FINAL render refused/.test(message), `expected the refusal reason: ${message}`);
-  assertOk(/make next PAGE=.*REF=refs\/fake\.mp4/.test(message), `expected the exact next command: ${message}`);
+  assertOk(/vawe critique .* --ref refs\/fake\.mp4/.test(message), `expected the exact next command: ${message}`);
   assertOk(!fs.existsSync(out), 'a refused render must leave no output file');
 });
 
