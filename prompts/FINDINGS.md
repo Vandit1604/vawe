@@ -23,8 +23,8 @@ Battle-of-Austerlitz-Film, HyperFrames (21 skills) and Remotion's 12 skills.
    `ANIMATION_GUIDE.md:21`, claude-animation-skill `SKILL.md:8-10` (`frame(ctx,t,i,S)` plus a
    `verify` mode that renders out of order and diffs), HyperFrames `determinism-rules.md`. Why: the
    one contract that lets the renderer seek, blur and parallelise. Lands: house rule in `AGENTS.md`;
-   a `make check GATE=seek-purity` that renders two frames out of order and diffs them
-   (`canvas-purity.mjs` does this for JSON; the page needs the same).
+   a seek-purity check that renders two frames out of order and diffs them
+   (`tests/media/render-page-determinism.test.mjs` covers the engine).
 
 3. **Guardrails written against the agent's own defaults.** Seen: HyperFrames
    `hyperframes-creative/references/motion-principles.md` ("you default to power2.out", "don't
@@ -47,7 +47,7 @@ Battle-of-Austerlitz-Film, HyperFrames (21 skills) and Remotion's 12 skills.
 
 6. **The hardest 2 to 4 seconds first, a named reviewer per gate.** Seen: athemeroy
    `docs/visual-effects-fit.md`, `docs/production-brief.md`. Why: the film fails where it is
-   hardest; that window is the cheapest test. Lands: `make dev PAGE= FROM= TO=` as the documented
+   hardest; that window is the cheapest test. Lands: `bin/vawe dev <page> --from s --to s` as the documented
    first render; `prompts/production-brief-acceptance.md`.
 
 7. **A per-element seed so a still element does not boil.** Seen: ClaudeAnimationBase
@@ -64,8 +64,8 @@ Battle-of-Austerlitz-Film, HyperFrames (21 skills) and Remotion's 12 skills.
    grades effort. Lands: `prompts/critique-pass.md` (done), `VAWE_AGENT=<name>` judges (exist).
 
 10. **Search the arsenal before hand-building a named look.** Seen: HyperFrames `hyperframes catalog
-    --query`, 400 items ranked with nothing installed. Lands: `make arsenal Q=` exists; the
-    templates name it.
+    --query`, 400 items ranked with nothing installed. Lands: a search step in the
+    templates.
 
 11. **Two render tricks we lack.** (a) Text measured before the first seek, not inside it
     (HyperFrames `fitTextFontSize`, `pretext`): await `document.fonts.ready` in `render-page.mjs`,
@@ -75,7 +75,7 @@ Battle-of-Austerlitz-Film, HyperFrames (21 skills) and Remotion's 12 skills.
 
 12. **Contagion is measurable, so measure it.** athemeroy `data/prompt-overlap.json`: a 1,750-word
     prompt reused a day later shared 87 percent of its 5-grams. Lands: the anti-contagion variants
-    in `prompts/showreel-one-liner.md` (done); a `make check GATE=look-drift` comparing a new film's
+    in `prompts/showreel-one-liner.md` (done); a look-drift check comparing a new film's
     palette and ease histogram to the last five.
 
 ## Judgements the task asked for
@@ -114,12 +114,12 @@ Battle-of-Austerlitz-Film, HyperFrames (21 skills) and Remotion's 12 skills.
    `films/golden-reel/page.html`."
 3. **canvas seek + captures, 16:9, launch** (`brand-launch-from-url.md`): "URL: `site/app/`.
    Promise: 'Write a scene. Get a film.' Moments: the editor diff, five canvases from one page,
-   frame 412 rendered twice, `make ship`. Kit: `themes/vawe.json`. Synth cues, no music. 24 s.
+   frame 412 rendered twice, `bin/vawe ship`. Kit: `themes/vawe.css`. Synth cues, no music. 24 s.
    `films/golden-launch/page.html`."
 4. **reference rebuild, 16:9** (`reference-rebuild.md`): "Reference:
    `quality/refs/kinetic-promo/source.mp4`. SPEC.md, then KEEP/CHANGE (CHANGE every string to
    vawe's, every colour to the kit), then rebuild to `films/golden-rebuild/page.html` and loop
-   `make next PAGE= REF=` to 0.70."
+   `bin/vawe critique <page> --ref <mp4>` to 0.70."
 5. **beat-synced, vertical 9:16** (`music-video-beat-synced.md`): "Song: a royalty-free 120 BPM
    track in `assets/audio/` with its licence. 20 s, 10 bars. Subject: vawe, real captures. Drop at
    bar 3 opens the charcoal code slab with ice-blue `#8fc0ff` type. `films/golden-beat/page.html`,

@@ -144,7 +144,7 @@ export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 // renderOf(sceneJson) → the mp4 the RENDERER actually writes for it. `.expanded` is a build artifact
 // (harness/author/expand-blocks.mjs), and cmd/render/main.go:188 trims it so a scene never ships as
 // "x.expanded.mp4". Two gates kept their own copy of that name and only stripped `.json`, so
-// `make judge D=<x>.expanded.json` looked for a file the renderer never writes. Normally that is a
+// `vawe judge <x>.expanded.json` looked for a file the renderer never writes. Normally that is a
 // clean "render first" error; when a stale `x.expanded.mp4` from an earlier film is lying in out/, the
 // judge grades THAT and reports a clean run on a video the author never made. Observed exactly once,
 // on a rewritten film whose predecessor's render was still on disk. quality/gates/seams.mjs had
@@ -166,7 +166,7 @@ export const pageRenderOf = (pagePath) => {
 // EXISTS IS NOT FRESH, and the comment above stops one step short of its own lesson. Resolving the
 // right NAME was half the bug: the other half is that `out/x.mp4` can be the right name for a film the
 // author has since rewritten, and every consumer of this path checks only `existsSync`. So an author
-// edits a scene, runs `make judge`, and is handed a verdict about a video that no longer exists. There
+// edits a scene, runs `vawe judge`, and is handed a verdict about a video that no longer exists. There
 // is no error, because nothing is wrong with the file: it is simply the previous answer.
 //
 // Named `gradeable` rather than folded into `renderOf`, because `renderOf` is also the right function
@@ -186,7 +186,7 @@ const ago = (ms) => {
 };
 
 export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
-  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `make video D=${scenePath}`;
+  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `node harness/media/render-page.mjs ${scenePath}`;
   if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix };
   if (!/\.(json|html)$/.test(scenePath)) return { ok: true, mp4 };
   const src = fs.statSync(scenePath).mtimeMs, out = fs.statSync(mp4).mtimeMs;

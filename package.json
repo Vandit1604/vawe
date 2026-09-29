@@ -2,7 +2,10 @@
   "name": "vawe",
   "version": "2.0.0",
   "type": "module",
-  "description": "Deterministic motion-graphics engine: one self-describing JSON in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
+  "description": "Deterministic motion-graphics engine: one HTML page in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
+  "bin": {
+    "vawe": "bin/vawe"
+  },
   "scripts": {
     "setup:audio": "node harness/media/gen-audio.mjs",
     "postinstall": "node scripts/vendor-gsap.mjs"

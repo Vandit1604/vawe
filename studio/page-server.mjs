@@ -2,7 +2,7 @@
 // rhythm, so this edits exactly what the agent wrote: every edit is a text patch at a literal's range in
 // the page file (studio/page-source.mjs), never a private format.
 //
-//   make studio PAGE=films/<name>/page.html [PORT=8799]
+//   vawe studio films/<name>/page.html [--port 8799]
 //
 // The page is served as itself, with the renderer's virtual clock and frame facts injected before its
 // scripts (the same functions render-page.mjs injects), and the browser seeks it with core/engine/
@@ -18,7 +18,7 @@ import { parsePage, applyEdits } from './page-source.mjs';
 import { chatRoutes } from './chat.mjs';
 
 const pageArg = process.env.PAGE || process.argv[2];
-if (!pageArg || !fs.existsSync(pageArg)) { console.error('usage: make studio PAGE=films/<name>/page.html [PORT=8799]'); process.exit(2); }
+if (!pageArg || !fs.existsSync(pageArg)) { console.error('usage: vawe studio films/<name>/page.html [--port 8799]'); process.exit(2); }
 const pageFile = path.resolve(pageArg);
 const pageRel = path.relative(REPO_ROOT, pageFile).split(path.sep).join('/');
 if (pageRel.startsWith('..')) { console.error('the page must sit inside the repo'); process.exit(2); }
@@ -52,18 +52,17 @@ function framedPage(aspect) {
   return html.slice(0, i) + boot + html.slice(i);
 }
 
-// ---- actions: the same make targets an agent runs ----------------------------------------------------
-const makeHas = (target) => new RegExp(`^${target}:`, 'm').test(fs.readFileSync(path.join(REPO_ROOT, 'Makefile'), 'utf8'));
+// ---- actions: the same vawe verbs an agent runs ------------------------------------------------------
 const ACTIONS = {
-  draft: (aspect) => ['dev', `PAGE=${pageRel}`, ...(aspect ? [`ASPECT=${aspect}`] : [])],
-  final: () => ['ship', `PAGE=${pageRel}`],
-  critique: () => [makeHas('critique') ? 'critique' : 'next', `PAGE=${pageRel}`],
+  draft: (aspect) => ['dev', pageRel, ...(aspect ? ['--aspect', aspect] : [])],
+  final: () => ['ship', pageRel],
+  critique: () => ['critique', pageRel],
 };
 let job = null;
 function startJob(kind, aspect) {
   const args = ACTIONS[kind](aspect);
-  const child = spawn('make', args, { cwd: REPO_ROOT });
-  job = { kind, cmd: `make ${args.join(' ')}`, lines: [], code: null, child };
+  const child = spawn(process.execPath, [path.join(REPO_ROOT, 'bin/vawe'), ...args], { cwd: REPO_ROOT });
+  job = { kind, cmd: `vawe ${args.join(' ')}`, lines: [], code: null, child };
   const take = (chunk) => { job.lines.push(...String(chunk).split('\n').filter(Boolean)); job.lines = job.lines.slice(-200); };
   child.stdout.on('data', take);
   child.stderr.on('data', take);
@@ -135,7 +134,7 @@ const routes = (req, res) => {
 };
 
 const { server } = await serveRepo({ port: PORT, route: routes }).catch((e) => {
-  console.error(e.code === 'EADDRINUSE' ? `port ${PORT} is busy, set a free one: make studio PAGE=${pageRel} PORT=8800` : e.message);
+  console.error(e.code === 'EADDRINUSE' ? `port ${PORT} is busy, set a free one: vawe studio ${pageRel} --port 8800` : e.message);
   process.exit(1);
 });
 server.on('error', (e) => { console.error(e.message); process.exit(1); });

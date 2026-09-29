@@ -5,7 +5,7 @@
 //     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--audio]
 //
 // Default is a DRAFT: half size, 30 fps, no blur, silent, and --from/--to windows the render to one
-// slice instead of the whole page. --final renders the way `make ship` does: full size, 60 fps, the
+// slice instead of the whole page. --final renders the way `vawe ship` does: full size, 60 fps, the
 // whole page from 0, blur up to 3, and the page's <audio> elements mixed in (harness/media/page-audio.mjs).
 // The canvas is the page's <meta name="aspect"> (else 16:9), overridden by --aspect; `all` renders every
 // aspect to its own file. Sizes come from core/layout/aspects.js ASPECTS, halved for a draft.
@@ -389,7 +389,7 @@ export function assertFinalReady(pagePath) {
   const code = 'unverified-final';
   if (isWaivedBy(allow, code) && hasReason(_why, code)) return;
   die(`${pagePath}: FINAL render refused, no passing required-motion-match for this page's current `
-    + `content. Run: make next PAGE=${pagePath} REF=${ref}\n`
+    + `content. Run: vawe critique ${pagePath} --ref ${ref}\n`
     + `Waivable only via <script type="application/json" id="authoring">{"allow":["${code}"],`
     + `"_why":{"${code}":"…"}}</script> in the page.`);
 }

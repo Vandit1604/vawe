@@ -1,0 +1,62 @@
+#!/usr/bin/env node
+// vawe: the one command for authoring, rendering and checking a page film. `vawe --help` lists the verbs.
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
+import { VERBS } from '../harness/cli/verbs.mjs';
+import { newFilm } from '../harness/cli/new.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+function fail(message) {
+  console.error(`vawe: ${message}`);
+  process.exit(2);
+}
+
+function requireFiles(verb, values, positional) {
+  (verb.positional || []).forEach((p, i) => {
+    if (p.kind === 'file' && positional[i] && !fs.existsSync(positional[i])) throw new UsageError(`no such ${p.name}: ${positional[i]}`);
+  });
+  for (const f of verb.flags || []) {
+    if (f.kind === 'file' && values[f.name] && !fs.existsSync(values[f.name])) throw new UsageError(`no such file for --${f.name}: ${values[f.name]}`);
+  }
+}
+
+function runStep(step) {
+  const argv = step.node || [path.join(ROOT, step.script), ...step.args];
+  const r = spawnSync(process.execPath, argv, { stdio: 'inherit', cwd: ROOT, env: { ...process.env, ...step.env } });
+  return r.status ?? 1;
+}
+
+function main(argv) {
+  const [name, ...rest] = argv;
+  if (!name || name === '--help' || name === '-h' || name === 'help') return console.log(topHelp(VERBS));
+  const verb = VERBS.find((v) => v.name === name);
+  if (!verb) {
+    const guess = closest(name, VERBS.map((v) => v.name));
+    return fail(`unknown verb ${name}; valid: ${VERBS.map((v) => v.name).join(' ')}${guess ? `; did you mean ${guess}?` : ''}`);
+  }
+  if (rest.includes('--help') || rest.includes('-h')) return console.log(verbHelp(verb));
+  try {
+    if (verb.raw) return process.exit(runStep(verb.build({}, rest)[0]));
+    const { values, positional } = parseArgs(verb, rest);
+    requireFiles(verb, values, positional);
+    const steps = verb.build ? verb.build(values, positional) : null;
+    if (!steps) {
+      const page = newFilm(positional[0], { from: values.from, root: ROOT });
+      return console.log(`wrote ${page} and films/${positional[0]}/brief.md\nnext: fill brief.md, then vawe dev ${page}`);
+    }
+    for (const step of steps) {
+      const code = runStep(step);
+      if (code !== 0) process.exit(code);
+    }
+    if (verb.next) console.log(`\nnext: ${verb.next(values, positional)}`);
+  } catch (e) {
+    if (e instanceof UsageError) return fail(e.message);
+    throw e;
+  }
+}
+
+main(process.argv.slice(2));

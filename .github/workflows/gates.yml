@@ -30,7 +30,7 @@ jobs:
       - name: gates
         run: |
           for g in no-emdash mistakes-check provenance rule-length skill-reach seo-surface; do
-            make check GATE="$g"
+            node bin/vawe check "$g"
           done
 
   e2e:
@@ -49,8 +49,8 @@ jobs:
           key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npm ci
       - name: fetch the locked faces
-        run: make gen X=fonts
-      - run: make e2e
+        run: node generators/media/fonts.mjs
+      - run: node bin/vawe e2e
       - name: upload e2e report
         if: always()
         uses: actions/upload-artifact@v4
