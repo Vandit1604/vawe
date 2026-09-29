@@ -35,9 +35,15 @@ const tally = (found) => {
   return counts;
 };
 
+// A file inside a linked worktree (.claude/worktrees/<x>/...) is compared with that worktree's HEAD.
+function checkoutOf(file) {
+  const r = spawnSync('git', ['rev-parse', '--show-toplevel'], { cwd: path.dirname(file), encoding: 'utf8' });
+  return r.status === 0 ? r.stdout.trim() : ROOT;
+}
+
 /** The file's content at git HEAD, or null for an untracked/new file. */
-function headContent(rel) {
-  const r = spawnSync('git', ['show', `HEAD:${rel}`], { cwd: ROOT, encoding: 'utf8' });
+function headContent(top, rel) {
+  const r = spawnSync('git', ['show', `HEAD:${rel}`], { cwd: top, encoding: 'utf8' });
   return r.status === 0 ? r.stdout : null;
 }
 
@@ -49,9 +55,10 @@ process.stdin.on('end', () => {
   if (!file || !/\.m?js$/.test(file)) process.exit(0);
   if (!fs.existsSync(BIN) || !fs.existsSync(CFG)) process.exit(0);   // no toolchain, no opinion
 
-  const rel = path.relative(ROOT, file);
-  if (rel.startsWith('..') || rel.startsWith('site/') || rel.includes('node_modules')) process.exit(0);
   if (!fs.existsSync(file)) process.exit(0);
+  const top = checkoutOf(file);
+  const rel = path.relative(top, file);
+  if (rel.startsWith('..') || rel.startsWith('site/') || rel.includes('node_modules')) process.exit(0);
 
   const found = lintContent(rel, fs.readFileSync(file, 'utf8'));
   if (!found.length) process.exit(0);
@@ -60,7 +67,7 @@ process.stdin.on('end', () => {
   let base = {};
   try { base = JSON.parse(fs.readFileSync(BASELINE, 'utf8')); } catch { /* no baseline yet */ }
 
-  const atHead = headContent(rel);
+  const atHead = headContent(top, rel);
   const headCounts = atHead === null ? null : tally(lintContent(rel, atHead));
 
   const allowed = (rule) => {
@@ -69,7 +76,7 @@ process.stdin.on('end', () => {
     const fromHead = headCounts === null ? null : (headCounts[rule] || 0);
     if (!hasBase) return fromHead === null ? 0 : fromHead;
     if (fromHead === null) return base[key];
-    return Math.min(base[key], fromHead);
+    return fromHead;
   };
 
   const worse = Object.entries(counts).filter(([rule, n]) => n > allowed(rule));
