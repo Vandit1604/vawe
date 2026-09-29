@@ -184,7 +184,7 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
     speeds[i] = sum / next.length;
     local.prev = next;
     return 2;
-  });
+  }, { fps, from });
   return speeds;
 }
 
@@ -215,11 +215,17 @@ function clampSegments(kArr, cap = 200) {
 
 // Runs work(page, i, local) for every frame 0..frames-1 in fixed SLICE_FRAMES slices, `workers` slices at
 // a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state.
-async function runShards(pagePath, frame, frames, workers, work) {
+// A slice whose browser or page dies is restarted once from its first frame (returns the restarted
+// slices as "lo-hi s" strings); a second death exits 2. `clock` is { fps, from } and only names the time range.
+const LOST_PAGE = /Connection closed|Target closed|Session closed|Protocol error|timed out|timeout/i;
+
+async function runShards(pagePath, frame, frames, workers, work, clock) {
   const slices = [];
   for (let lo = 0; lo < frames; lo += SLICE_FRAMES) slices.push([lo, Math.min(frames, lo + SLICE_FRAMES)]);
+  const restarted = [];
   let next = 0;
-  const runSlice = async ([lo, hi]) => {
+  const range = ([lo, hi]) => `${(clock.from + lo / clock.fps).toFixed(2)}-${(clock.from + hi / clock.fps).toFixed(2)}s`;
+  const runSliceOnce = async ([lo, hi]) => {
     const local = {};
     let opened = null;
     let sinceOpen = 0;
@@ -233,14 +239,25 @@ async function runShards(pagePath, frame, frames, workers, work) {
         }
         sinceOpen += await work(opened.page, i, local);
       }
-    } finally { if (opened) await opened.close(); }
+    } finally { if (opened) await opened.close().catch(() => {}); }
+  };
+  const runSlice = async (slice) => {
+    try { await runSliceOnce(slice); } catch (e) {
+      if (!LOST_PAGE.test(String(e && e.message))) throw e;
+      restarted.push(range(slice));
+      try { await runSliceOnce(slice); } catch (e2) {
+        if (!LOST_PAGE.test(String(e2 && e2.message))) throw e2;
+        die(`slice ${slice[0]}-${slice[1]} (${range(slice)}) lost its page twice: another process closed the shared browser, or the page crashed (${e2.message})`, 2);
+      }
+    }
   };
   const lane = async () => { while (next < slices.length) await runSlice(slices[next++]); };
   await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, lane));
+  return restarted;
 }
 
 async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe) {
-  await runShards(pagePath, frame, frames, workers, async (page, i) => {
+  return runShards(pagePath, frame, frames, workers, async (page, i) => {
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
@@ -250,7 +267,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
       onSubframe();
     }
     return k;
-  });
+  }, { fps, from });
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -378,7 +395,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const tick = progress ? setInterval(() => {
       process.stdout.write(`\r  capturing ${doneSub}/${totalSub} subframe(s)...`);
     }, 1000) : null;
-    await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, () => { doneSub++; });
+    const restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, () => { doneSub++; });
     if (tick) { clearInterval(tick); process.stdout.write(`\r${' '.repeat(40)}\r`); }
     const captureMs = Date.now() - t0;
 
@@ -398,7 +415,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
-    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed) };
+    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
@@ -466,7 +483,7 @@ async function main() {
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
     const r = await renderPage(pagePath, outPath, opts);
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.width}x${frame.height} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
-      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}, `
+      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
   }
 }
