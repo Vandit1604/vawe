@@ -1,24 +1,32 @@
-// core/produce.js, PRODUCE THE BASELINE. The engine's "go all-in" default: inject the universal produced
-// motion into a scene that didn't specify it, so a film with cuts swaps its beats as whole scene-units
-// by default. This posture is forced at BUILD time.
+// core/produce.js, PRODUCE THE BASELINE. THE RULE: the engine may FILL a value the author left blank
+// (and must log what it filled), but it may NEVER ADD STRUCTURE the author did not write: no invented
+// cut, no boundary, no mode switch, no motion on a layer that named none. A film's beats, its camera,
+// its wind-ups are creative decisions, and a decision this file guesses at is a decision the author
+// never made and cannot find by reading their own JSON.
 //
-// NO AUTO CAMERA. This pass used to inject a slowPush (s 1 -> 1.06) into every scene that declared no
-// camera, so the frame "stayed alive". It fought text: a still headline zoomed the whole runtime, and
-// `bg` (a REQUIRED, must-animate field) already keeps the frame alive without moving the subject. The
-// doctrine is "move on purpose" (engine-doctrine/CRAFT/TRANSITIONS.md): a push is an authored choice now, one line
-// away (`cameraMove: {move:'slowPush', ...}`), not a default that resizes type nobody asked to move.
-// ADDITIVE ONLY: it adds camera/sceneUnits fields; it NEVER rewrites a layer the author wrote (auto-
-// splitting text for kinetic reveals mutated structure and broke motion-track layers + the contrast audit,
-// so kinetic type is nudged by the direction floor instead, MISTAKES).
+// This used to inject a cut list, turn beat-unit transitions on as an opt-in mode, and add a wind-up to
+// entrances the author never asked for (engine-doctrine/MISTAKES.md #157, "force rich-by-default at
+// the engine"). That additive-baseline posture is retired: a film with no boundary now renders with no
+// boundary, and an entrance the author wrote plays exactly as written. Beat-unit transitions are no
+// longer a mode either: every beat a film's cuts create is always its own unit.
+// `produced: false` used to opt a scene out of that injection; there is nothing left to opt out of, so
+// the field is gone from the schema, every tracked film, and prop-probe's fixtures.
 //
-// The BACKGROUND is deliberately NOT here. It used to be injected (light brand → dotmatrix, dark → aurora),
-// which meant the backdrop (the single largest area of the frame) was the one design decision no author
-// ever made. `bg` is now a required field (core/validate.mjs); this pass supplies motion, not taste.
+// NO AUTO CAMERA (unchanged, still true): this pass never invents a cameraMove. `bakeCameraMove` below
+// only resolves the sugar the author DID write (`data.cameraMove`) into real keyframes; an absent one
+// stays absent.
+//
+// THE BACKGROUND ITSELF IS STILL DECIDED BY THE THEME, NEVER GUESSED HERE. A bare scene with no `bg`
+// at all gets the SAME opt-in sugar an author already has one line away: `bg:[{use:"theme"}]`
+// (core/backgrounds/theme-rotation.js, films/scene/scene.js), the brand's own authored, ALREADY-ANIMATED
+// backdrop (owner rule: backgrounds move), never a flat fill this pass would have to invent. This is a
+// BLANK-FILLER, not structure: every author already reaches for it, one line away. See applyBgDefault
+// below, called before validation so the required check never fires on a defaulted scene, and logged so
+// an author can find the fill by reading the render log, not just the JSON.
 //
 // Determinism: it only mutates the scene DATA once, before the first frame, renderFrame(n) stays pure.
-// ABSENT-ONLY: an explicitly set field is the author's opt-out (set `sceneUnits` yourself to override).
-// `"produced": false` disables the whole pass. Applies to the `scene` module only. Pure JS → runs in the
-// browser AND in node gates, so the gates evaluate the SAME produced scene the renderer does.
+// Applies to the `scene` module only. Pure JS → runs in the browser AND in node gates, so the gates
+// evaluate the SAME scene the renderer does (core/engine/pipeline.js).
 
 import { buildCameraMove, followCamera } from '../camera-moves/index.js';
 import { resolveCameraTarget } from '../camera-moves/resolve-target.js';
@@ -27,30 +35,9 @@ import { resolveCameraMove } from '../registry/vocab.js';
 import { nearMisses } from '../registry/registry.js';
 import { sceneDims } from '../layout/safe.js';
 import { depthZ } from '../fx/plane.js';
-import { inferCuts, chooseCutStyles } from '../timeline/junctions.js';
-import { layerSpeedAt } from '../timeline/velocity-cut.js';
-import { PRESENTATIONS as CUT_PRESENTATIONS } from '../cuts/presentations.js';
-import { WARPABLE } from '../timeline/clips.js';
-import { anticipateFromMotion } from '../motion/motion.js';
 // Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
 // This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
 // maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
-
-// `look` (core/registry/theme-contract.js resolveLook): passed through from boot.js so a later phase
-// can read the brand's own scale/layout/cuts/field defaults from the ONE place a scene's produced
-// baseline is decided, instead of a second call site somewhere else. Nothing reads it yet: this phase
-// only wires it through, phases 2-5 add the actual defaults inside this function.
-// Same walk as harness/lib/layers.mjs flattenLayers, duplicated rather than imported because core/
-// never imports scripts/ (a Node-tooling directory) and this pass must stay pure JS the browser can
-// run. Parents before children, a non-object skipped rather than thrown on.
-function flattenLayers(list, out = []) {
-  for (const l of Array.isArray(list) ? list : []) {
-    if (!l || typeof l !== 'object') continue;
-    out.push(l);
-    if (Array.isArray(l.children)) flattenLayers(l.children, out);
-  }
-  return out;
-}
 
 // resolveTextSize(value, scale, where) → a number. `size: "headline"` names a ROLE in `look.scale`
 // (hook/headline/body/caption, core/registry/theme-contract.js LOOK_SCALE_KEYS) rather than a raw px
@@ -70,8 +57,7 @@ export function resolveTextSize(value, scale, where = 'size') {
 }
 
 // bakeTextSizeRoles(data, look): lower every layer's `size: "<role>"` to the theme's real px number.
-// Walks the WHOLE tree including group children (unlike flattenLayers above, which this file's other
-// passes use top-level-only): a role written inside a group is still a role.
+// Walks the WHOLE tree including group children: a role written inside a group is still a role.
 //
 // CRITICAL ORDERING, and it is why this is a separate exported bake rather than a line inside
 // produceBaseline: resolveCoords (core/engine/boot.js) reads `L.size` DIRECTLY to estimate a text
@@ -79,131 +65,66 @@ export function resolveTextSize(value, scale, where = 'size') {
 // (boot.js calls resolveCoords then produceBaseline, in that order). A string size reaching that
 // arithmetic becomes NaN with no error. boot.js calls this one line earlier, between resolving `look`
 // and calling resolveCoords, the one gap the existing ordering leaves for it.
+// AUTO_ROLE_ORDER: a text/count layer that names NO size at all (not even a role string) used to fall
+// through to text.js's TEXT_SIZE_DEFAULT (96px, a debug-frame size on a 1920 canvas: MISTAKES, agent-
+// authored films kept shipping small type on empty grounds). Rather than a second fixed number, it gets
+// the theme's own role scale, positionally: the first text/count layer encountered reads as the film's
+// hook, the second as its headline/subline, anything after as body. Order, not a new field, because a
+// hurried scene already implies the roles by which layer comes first.
+const AUTO_ROLE_ORDER = ['hook', 'headline', 'body', 'caption'];
+
 export function bakeTextSizeRoles(data, look) {
   const scale = look && look.scale;
+  let autoIndex = 0;
   const walk = (ls) => { for (const L of ls || []) {
     if (!L || typeof L !== 'object') continue;
+    const isTextish = L.type === 'text' || L.type === 'count';
     if (typeof L.size === 'string') L.size = resolveTextSize(L.size, scale, `layer "${L.id || L.type || 'text'}" size`);
+    else if (L.size == null && isTextish && scale) {
+      const role = AUTO_ROLE_ORDER[Math.min(autoIndex, AUTO_ROLE_ORDER.length - 1)];
+      if (typeof scale[role] === 'number') {
+        L.size = scale[role];
+        console.log(`filled: layer "${L.id || L.type}" named no size, positionally reads as "${role}" (${L.size}px)`);
+      }
+    }
+    if (isTextish) autoIndex++;
     walk(L.children);
   } };
   walk(data && data.layers);
   return data;
 }
 
-// A scene that already choreographs layers with `motion` tracks is ALREADY directed, and its tracks
-// often span beats and use absolute times, which fight the injected camera and beat-wrapper model.
-// So the DIRECTED injections (camera + sceneUnits) skip such a scene (MISTAKES: a camera×motion /
-// sceneUnits×motion interaction produced non-deterministic garbage). The author can still opt in.
-function isChoreographed(data) {
-  return (data.layers || []).some(function has(L) {
-    return L && typeof L === 'object' && (Array.isArray(L.motion) && L.motion.length > 1 || (L.children || []).some(has));
-  });
+// applyBgDefault(data): a scene that names NO `bg` at all (never authored the key, or authored an
+// empty array) gets the theme's own backdrop, `bg:[{use:"theme"}]`, the SAME opt-in sugar an author
+// already reaches for one line away. Called from boot.js before schema validation, so the schema's
+// own `bg.required` check (films/scene/schema.json) never has to see the gap. AN AUTHORED, non-empty
+// `bg` is left completely untouched: this only fills the hole a hurried scene left, never overrides
+// a real decision.
+export function applyBgDefault(data) {
+  if (!data || typeof data !== 'object') return data;
+  if (data.module && data.module !== 'scene') return data;
+  if (!Array.isArray(data.bg) || data.bg.length === 0) {
+    data.bg = [{ use: 'theme' }];
+    console.log('filled: no `bg` declared, filled with the theme\'s own animated backdrop (bg:[{use:"theme"}])');
+  }
+  return data;
 }
 
-// INFERRED CUTS, ABSENT-ONLY and ADDITIVE (MISTAKES #157): a film that already declares a cut, a
-// seam, or motion tracks is untouched, and one with no boundary gets none. `look.cuts.default`
-// supplies the fx name so the injected cut carries the brand's own personality. A raw `cuts[].style`
-// drives a whole-frame CUT presentation only, so `look.cuts.accent` is offered only when it is
-// mechanically usable as one (never the seam-only `cinematicZoom` default, which would inject a cut
-// that throws at render).
-function injectCuts(data, look) {
-  const flat = flattenLayers(data.layers);
-  const boundaries = inferCuts(flat, data.duration);
-  if (!boundaries.length) return;
-  // chooseCutStyles (core/timeline/junctions.js) reads the relationship at each joint and RULES OUT
-  // what it makes dishonest, choosing only among what the theme already supplied (never inventing a
-  // name into it, MISTAKES #159).
-  const defaultName = (look && look.cuts && look.cuts.default) || 'fade';
-  const accentName = (look && look.cuts && look.cuts.accent) || 'cinematicZoom';
-  const cutsLook = { default: CUT_PRESENTATIONS[defaultName] ? defaultName : 'fade' };
-  if (CUT_PRESENTATIONS[accentName]) cutsLook.accent = accentName;
-  data.cuts = chooseCutStyles(boundaries, flat, { cuts: cutsLook, bg: data.bg, layerSpeedAt })
-    .map(({ t, style, reason }) => ({ t, style, _why: reason }));
-}
-
-export function produceBaseline(data, theme, frame, look) {
+// produceBaseline(data, frame): the fill-only pass. `theme`/`look` no longer read here (the injections
+// that used them are gone); kept as the third/fourth positional params so core/engine/pipeline.js and
+// callers elsewhere do not need a second call shape.
+export function produceBaseline(data, _theme, frame, _look) {
   if (!data || typeof data !== 'object') return data;
   if (data.module && data.module !== 'scene') return data;   // scene module only
-  if (data.produced === false) return bakeCameraMove(data, frame);  // opts out of the INJECTED baseline, not of
-  // the author's own `cameraMove` sugar: that must still become real keys or it renders as nothing.
-  // NOTE: the baseline no longer INJECTS a background. `bg` is a REQUIRED authoring field
-  // (core/validate.mjs): the author must declare a preset or an explicit `plain`.
-
-  const choreographed = isChoreographed(data);
-
-  // `sceneUnits: false`, WRITTEN BY THE AUTHOR, skips injection outright: a fading cut with no
-  // scene-unit wrapper is refused at render, so an explicit `false` must survive untouched rather
-  // than sit under a freshly-injected fading cut (cadence-film.json is exactly this case).
-  //
-  // ORDER IS LOAD-BEARING: injection must run BEFORE the sceneUnits block below, so that block sees
-  // the cuts just added and turns beat wrappers on for them in the SAME pass.
-  if (data.sceneUnits !== false
-      && !(Array.isArray(data.cuts) && data.cuts.length) && !(Array.isArray(data.seams) && data.seams.length)
-      && !choreographed) {
-    injectCuts(data, look);
-  }
-
-  // SCENE-UNIT TRANSITIONS. A film WITH cuts that hasn't opted into unit transitions gets them, so the
-  // beats swap as whole units (the produced default). Skip choreographed scenes.
-  if (Array.isArray(data.cuts) && data.cuts.length && data.sceneUnits == null && !choreographed) {
-    data.sceneUnits = true;
-  }
-
-  // NOTE: kinetic headlines are NOT injected here (structure-changing baselines are unsafe to inject
-  // blindly); the baseline stays ADDITIVE, never rewriting a layer the author already wrote.
-  applyAnticipateDefault(data, theme);
   bakeCameraMove(data, frame);
   return data;
 }
 
-// applyAnticipateDefault(data, theme): ANTICIPATE, OPT-OUT NOT OPT-IN. engine-doctrine/CRAFT/AFTER-EFFECTS-
-// RECIPES.md #5 calls a wind-up before a directional entrance "the loudest missing principle in the
-// engine" as long as it has to be typed. On every entrance that already carries travel (`WARPABLE`,
-// core/timeline/clips.js, imported rather than re-listed: one fact, one owner) it becomes the reflex
-// instead: a qualifying layer that names none gets `anticipate` added, amount DERIVED from the theme's
-// own `bounce` (`anticipateFromMotion`, core/motion/motion.js) the same way `exitRatioFromMotion` reads
-// `durationScale` above it, so a calm brand winds up less than a bouncy one instead of every theme
-// getting one constant.
-//
-// STILL BY DEFAULT, KEPT: this reshapes the EASE CURVE of an entrance the author already wrote; it
-// never sets an unmoving layer moving. `warpEase` is terminal at both ends (0 at u<=0, 1 at u>=1), so
-// the resting pose a layer settles to is unchanged.
-//
-// TWO EXCLUSIONS, both named by the recipe doc's own caution ("wrong: anywhere the viewer is already
-// looking, and on anything informational"):
-//   - the FIRST WAVE (the earliest `start` in the flattened tree): the viewer is watching the frame
-//     open, already looking there, so a wind-up would buy attention already held.
-//   - `type: "count"`: a rolling number is read, not glanced at; the doc names counters by name.
-// Split and cut layers are excluded outright: `films/scene/scene.js` (setLayerTiming) THROWS if
-// either carries an `anticipate`, because a split's rhythm and a cut's entrance are owned elsewhere.
-//
-// OPT-OUT via the same sentinel this file already uses for `produced`/`sceneUnits`: `anticipate: false`
-// on a qualifying layer strips the field, rather than reaching scene.js, which validates it as a
-// 0.01-0.6 fraction and would throw on `false`. Any OTHER authored value (including a real number) is
-// the author's own choice and is left untouched (ABSENT-ONLY).
-export function applyAnticipateDefault(data, theme) {
-  const flat = flattenLayers(data.layers);
-  if (!flat.length) return;
-  const bounce = (theme && theme.motion && typeof theme.motion.bounce === 'number') ? theme.motion.bounce : 0;
-  const amount = anticipateFromMotion(bounce);
-  const starts = flat.map((L) => L.start ?? 0);
-  const firstWave = Math.min(...starts);
-  flat.forEach((L, i) => {
-    if ('anticipate' in L) { if (L.anticipate === false) delete L.anticipate; return; }
-    if (L.split || L.cut) return;
-    if (L.type === 'count') return;
-    if (starts[i] === firstWave) return;
-    if (!WARPABLE.includes(L.anim)) return;
-    L.anticipate = amount;
-  });
-}
-
 // THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (films/scene/scene.js reads
-// `data.camera`). It used to be resolved only by harness/author/expand-blocks.mjs, at AUTHOR time, so the
-// baseline push produce.js injects at BOOT time, after expansion, was written and never once read: a static
-// scene rendered identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes
-// through, means the field cannot be written and ignored again. Runs even under `produced: false`, because
-// that opts out of the injected baseline, not out of the author's own sugar.
+// `data.camera`). It used to be resolved only by harness/author/expand-blocks.mjs, at AUTHOR time, so
+// a camera move written and never expanded was written and never once read: a static scene rendered
+// identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes through,
+// means the field cannot be written and ignored again.
 // `frame` is the ONE frame object (core/safe.js frameOf), and passing it is not optional politeness.
 // Without it this fell back to `sceneDims(data)`, which reads `data.aspect` from the scene and CANNOT
 // see the `?aspect=`/`--aspect` override that boot has already resolved. So rendering a 16:9 scene at

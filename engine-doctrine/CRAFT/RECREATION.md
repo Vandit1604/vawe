@@ -151,6 +151,19 @@ time.") with no on-screen proof; (3) UNDER-USING the real surfaces you captured.
   (`easeInCubic`/`easeOutCubic`/`linear`, read off whether the move speeds up or slows down), ready to
   paste into `motion[]`. It is a brightness-threshold tracker, not a model: pick a box around one
   high-contrast subject (a cursor, a logo, a card) over a roughly flat ground.
+- **Recreating a raw page, not a scene?** Start from `make dev-tool X=new TYPE=recreation NAME=<name>
+  REF=<reference.mp4>` (`harness/dev/recreation-new.mjs`), which writes the page and a first `see` pass
+  together, then loop `make next PAGE=<page.html> REF=<reference.mp4>` until it passes, then add
+  `FINAL=1` for the final render. Don't reach for `see.mjs`'s flags by hand; `make next` picks the
+  right one.
+
+  Never `make ship` or a bare `./bin/vawe`/renderer call for this page: the starter's `reference.json`
+  makes `harness/media/render-page.mjs` refuse a `--final` render with no fresh required-motion pass on
+  file.
+- **`D=<file.json>` records the run against that film.** A film with a top-level
+  `"reference": "<path>"` field gets this check run automatically by the post-draft loop
+  (`quality/gates/post-draft.mjs`) before verify/judges, waivable with
+  `{"authoring":{"allow":["motion-still"],"_why":{"motion-still":"…"}}}`.
 
 ## The honest ceiling
 Two things bound 1:1 fidelity and are worth stating rather than faking:

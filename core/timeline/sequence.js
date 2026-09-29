@@ -46,7 +46,7 @@ export function cameraAt(camKf, t) {
 // cameraView(camKf, t, CW, CH): the stage-space rectangle the camera is looking at, or null when there
 // is no axis-aligned answer. Every static gate measures a layer against the canvas box at the origin
 // (frame 0's camera position), which is wrong for a film that lays content across a canvas far larger
-// than the frame and travels between stations (films/scene/linear-journey.json, 5760x2160, zero cuts).
+// than the frame and travels between stations (5760x2160, 12 camera keys, zero cuts).
 //
 // The map is inverted from the flat camera transform: #cam is `inset:0` with `transform-origin:50% 50%`
 // (scene.css:15), drawCameraAndCut writes `scale(s) translate(x, y)` (scene.js:888). A stage point p
@@ -155,12 +155,25 @@ function adaptDurationForMotion(L, who) {
   L.duration = last;
 }
 
+// adaptLocalKeyTimes(L, who): a motion key's `t` is local seconds from the layer's own start, never the
+// scene's absolute clock a camera key or cut uses. A first key at exactly the layer's own `start` is the
+// fingerprint of that mix-up: `poseAt` would hold key 0 for nearly the whole layer and play the move in
+// its last instant (the vawe sting's "fly-off never fired"). Shifted to local time and logged, like
+// adaptDurationForMotion below.
+function adaptLocalKeyTimes(L, who) {
+  if (!(L.start > 0) || Math.abs(L.motion[0].t - L.start) >= 1e-6) return;
+  console.log(`adapted motion-local-time: ${who} keys shifted by -${L.start} `
+    + `(the first key sat at the layer's own start; motion t is local to the layer, not scene time)`);
+  for (const k of L.motion) k.t = +(k.t - L.start).toFixed(6);
+}
+
 export function resolveKeyedProps(layers) {
   (layers || []).forEach((L, idx) => {
     if (!Array.isArray(L.motion) || !L.motion.length) return;
     const who = L.id || L.type || '?';
     // Two authored curves on one segment, refused with the layer in hand rather than a second pass.
     assertKeyHandles(L.motion, `layer "${who}"`);
+    adaptLocalKeyTimes(L, who);
     adaptArrivalEase(L.motion, who);
     adaptDurationForMotion(L, who);
     // A key carrying a property nothing interpolates is accepted then ignored: `origin` reads as a

@@ -113,7 +113,7 @@ explicit `transitions[]` boundary at every beat start.
 
 Two things it gets right that are easy to get wrong by hand:
 
-- **`acrossBeats: true` on the object layer.** `sceneUnits: true` wraps every beat as its own unit, so
+- **`acrossBeats: true` on the object layer.** Every beat of a cut film wraps as its own unit, so
   nothing survives a cut unless it opts out (the retired `direction-floor.mjs`'s own `no-continuous-object`
   wrap note). Miss this and a reviewer sees no continuous object even though the layer is right there
   with a real motion track.
@@ -127,7 +127,7 @@ Two things it gets right that are easy to get wrong by hand:
   `trigger:` names a real cause (`harness/lib/contract.mjs isCausedTrigger`, the same test
   `storyboard-check`'s causal-chain report already uses), 0.05s of REAL time is inserted before that
   beat: every beat keeps its full planned duration (nothing is shrunk to make room), so the film runs
-  0.05s longer per caused junction. 0.05s is evidence, not a guess: higgsfield-recreation's own three
+  0.05s longer per caused junction. 0.05s is evidence, not a guess: a continuous-action recreation's own three
   key events land roughly 30ms and 150ms apart. A junction with no stated trigger is left exactly where
   it always was: staging an undocumented cause would be inventing one. `layers[].start` also legally
   accepts a live relative reference (`"otherId.end+0.5"`, 2 of 120 films used it), same for
@@ -135,8 +135,8 @@ Two things it gets right that are easy to get wrong by hand:
   number at load (`core/engine/expand.js`, before `resolveTempo`), so every gate reads a plain number
   and `assemble` no longer needs to pre-resolve it for them.
 
-`assemble` deliberately does nothing else: no camera, no captions, no authored `cuts`/`sceneUnits`
-beyond the two lines above. Everything past that is the engine's, or the next author's, to add.
+`assemble` deliberately does nothing else: no camera, no captions, no authored `cuts` beyond the two
+lines above. Everything past that is the engine's, or the next author's, to add.
 
 ## Ownership: what a re-assemble keeps, and what it warns about
 
@@ -147,8 +147,8 @@ builds, so its own set is nameable rather than guessed at from shape. Any existi
 whose `id` is not in that set passes through untouched, appended after the generated layers in its
 original relative order, so re-assembling twice in a row with nothing changed reproduces the file
 byte-identically. A short allowlist of film-level fields (`cameraMove`, for now) survives the same
-way; `duration`, `bg`, `transitions` and `sceneUnits` stay assemble's own and are never resurrected
-from a stale scene.
+way; `duration`, `bg` and `transitions` stay assemble's own and are never resurrected from a stale
+scene.
 
 A preserved layer can still go stale: it was timed against beats that have since moved or shrunk.
 `assemble` reports every preserved layer and field by name, and warns when a preserved layer's

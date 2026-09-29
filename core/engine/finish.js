@@ -46,14 +46,20 @@ export const FINISH_REGISTRY = defineRegistry('finish key', FINISH_ENTRIES, {
   catalog: {
     title: 'Scene finish keys', tag: 'finish', intro: 'data.finish is the ONE dial for the cinematic grade a '
       + 'premium launch film needs: large soft light, bloom, grade, chromatic aberration, vignette, grain, '
-      + 'depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time.',
+      + 'depth of field (core/engine/finish.js). Composed of primitives that already exist, added at produce time. '
+      + 'A scene naming no `finish` key at all gets a subtle default (light grain, gentle vignette, no bloom); '
+      + '`finish: false` opts out.',
     usage: (n) => ({ finish: { [n]: true } }),
     noPreview: 'a scene-level pass, not a per-layer effect: render the film to see it',
   },
 });
 
+// `_finish: true` marks a layer as SYNTHETIC (added here, never authored), so a later pass that counts
+// or inspects "the layers the author wrote" (core/engine/boot.js applyLoneTextCenter: is this scene a
+// LONE layer, or one with a finish grade already bolted on) can tell the two apart without guessing
+// off `track`, a number this file alone assigns meaning to.
 const FULL = (type, extra, W, H, total) =>
-  ({ type, w: W, h: H, start: 0, duration: total, acrossBeats: true, ...extra });
+  ({ type, w: W, h: H, start: 0, duration: total, acrossBeats: true, _finish: true, ...extra });
 
 function lightLayer(spec, W, H, total) {
   const html = lightfield(spec === true ? {} : spec);
@@ -108,9 +114,19 @@ function resolveGrain(data, amount) {
 // early in core/engine/boot.js's resolveThemeAndBake, before resolveCoords/produceBaseline, so the
 // synthetic layers this adds go through the SAME production pass (motion defaults, id assignment) as
 // anything an author wrote by hand.
+// DEFAULT_FINISH: a bare scene that names no `finish` at all (the field is `undefined`, never written)
+// gets this subtle grade instead of the flat, un-graded frame a hurried agent scene used to ship
+// (MISTAKES: small type on an empty, static-reading ground). Deliberately lighter than every hand-tuned
+// default in this file (grain 0.5, bloom strength 1, vignette 0.45): a default has to read as designed,
+// not as the loudest setting. No bloom: it washed a white card and its body text out (measured). `finish: false`, written by the author, opts out; any other authored
+// object is the author's own choice and is used exactly as written, untouched.
+const DEFAULT_FINISH = { grain: 0.15, vignette: 0.1 };
+
 export function resolveFinishLayers(data, W, H) {
-  const f = data.finish;
+  const filled = data.finish === undefined;
+  const f = filled ? DEFAULT_FINISH : data.finish;
   if (!f) return;
+  if (filled) console.log(`filled: no \`finish\` declared, filled with the default grade (${JSON.stringify(DEFAULT_FINISH)})`);
   const total = Number(data.duration) || 9999;
   const extra = [];
   for (const [key, build] of Object.entries(LAYER_FROM)) if (f[key]) extra.push(build(f[key], W, H, total));

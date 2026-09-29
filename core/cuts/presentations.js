@@ -67,8 +67,8 @@ const MATCH_FULL = 150, MATCH_R = 16;
 // Each presentation: { enter(p, o) → style, exit(p, o) → style }. p is that phase's progress
 // (enter 0→1 = revealing, exit 0→1 = leaving); enter(1)/exit(0) must equal identity.
 export const PRESENTATIONS = {
-  none: withBlurb('no transition at all, the beats simply replace each other. Masks nothing and moves nothing, so a whole-frame cut needs sceneUnits', { enter: () => style({}), exit: () => style({}) }),
-  fade: withBlurb('opacity only, 0 to 1 over the whole cut window, masks nothing, so a whole-frame cut needs sceneUnits', {
+  none: withBlurb('no transition at all, the beats simply replace each other. Masks nothing and moves nothing', { enter: () => style({}), exit: () => style({}) }),
+  fade: withBlurb('opacity only, 0 to 1 over the whole cut window, masks nothing', {
     enter: (p) => style({ opacity: p.toFixed(3) }),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -86,15 +86,15 @@ export const PRESENTATIONS = {
     enter: (p) => style({ opacity: clamp01(p * 1.6).toFixed(3), transform: `scale(${lerp(1.07, 1, p).toFixed(4)})` }),
     exit: (p) => style({ opacity: (1 - p * p).toFixed(3), transform: `scale(${lerp(1, 1.12, p).toFixed(4)})`, filter: `blur(${(p * 10).toFixed(2)}px)` }),
   }),
-  wipe: withBlurb('hard directional reveal, playful, "notice the cut"; masks, so a whole-frame cut needs sceneUnits', {
+  wipe: withBlurb('hard directional reveal, playful, "notice the cut"; a straight edge sweeps across and masks the incoming beat in', {
     enter: (p, o) => style(wipe(p, o.dir)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
-  iris: withBlurb('circular reveal growing from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits', {
+  iris: withBlurb('circular reveal growing from a point (cx/cy); the incoming beat opens out of that point through a circular mask', {
     enter: (p, o) => style(circleWipe(p, o.cx, o.cy)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
-  clock: withBlurb('clock-hand sweep reveal, masks, so a whole-frame cut needs sceneUnits', {
+  clock: withBlurb('clock-hand sweep reveal: a radial hand turns around the centre and masks the incoming beat in behind it', {
     enter: (p) => style(clockWipe(p)),
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -122,17 +122,17 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `perspective(1400px) translate${axis(o.dir)}(${(-sign(o.dir) * p * o.dist * 2.4).toFixed(2)}px) rotate${axis(o.dir) === 'X' ? 'Y' : 'X'}(${((axis(o.dir) === 'X' ? 1 : -1) * sign(o.dir) * p * 55).toFixed(1)}deg)` }),
   }),
   // barn doors: reveal opens from the center out
-  barn: withBlurb('barn doors open from the centre outward, cinematic opener; masks, so a whole-frame cut needs sceneUnits', {
+  barn: withBlurb('barn doors open from the centre outward, cinematic opener; masks', {
     enter: (p) => { const r = ((1 - clamp01(p)) * 50).toFixed(2); const c = `inset(0 ${r}% 0 ${r}%)`; return style({ opacity: clamp01(p * 3).toFixed(3), clipPath: c, WebkitClipPath: c }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
   // soft wipe: the feathered-edge reveal. A 20%-wide gradient band instead of a hard line
-  softwipe: withBlurb('feathered wipe, a 20%-wide gradient band instead of a hard line; masks, so a whole-frame cut needs sceneUnits', {
+  softwipe: withBlurb('feathered wipe, a 20%-wide gradient band instead of a hard line; masks', {
     enter: (p, o) => { const e = clamp01(p) * 130 - 5; return style({ ...mask(`linear-gradient(${gradAngle(o.dir)}, #000 ${(e - 18).toFixed(1)}%, transparent ${(e + 2).toFixed(1)}%)`) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
   // soft iris: feathered circular reveal from a point
-  softiris: withBlurb('feathered circular reveal from a point (cx/cy), masks, so a whole-frame cut needs sceneUnits', {
+  softiris: withBlurb('feathered circular reveal from a point (cx/cy); the incoming beat opens through a soft-edged circular mask', {
     enter: (p, o) => { const r = clamp01(p) * 92; return style({ ...mask(`radial-gradient(circle at ${o.cx}% ${o.cy}%, #000 ${r.toFixed(1)}%, transparent ${(r + 14).toFixed(1)}%)`) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -147,7 +147,7 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p).toFixed(3), transform: `rotate(${(-sign(o.dir) * p * 7).toFixed(2)}deg) translateY(${(-p * o.dist * 0.5).toFixed(2)}px)` }),
   }),
   // letterbox: reveal opens like cinema curtains top+bottom
-  letterbox: withBlurb('cinema curtains open and close top and bottom, cinematic opener; masks, so a whole-frame cut needs sceneUnits', {
+  letterbox: withBlurb('cinema curtains open and close top and bottom, cinematic opener; masks', {
     enter: (p) => { const r = ((1 - clamp01(p)) * 50).toFixed(2); const c = `inset(${r}% 0 ${r}% 0)`; return style({ opacity: clamp01(p * 3).toFixed(3), clipPath: c, WebkitClipPath: c }); },
     exit: (p) => { const r = (clamp01(p) * 50).toFixed(2); const c = `inset(${r}% 0 ${r}% 0)`; return style({ opacity: (1 - p * 0.4).toFixed(3), clipPath: c, WebkitClipPath: c }); },
   }),
@@ -157,7 +157,7 @@ export const PRESENTATIONS = {
     exit: (p, o) => style({ opacity: (1 - p * p).toFixed(3), transform: `translateY(${(p * p * o.dist * 2.2).toFixed(2)}px) rotate(${(p * 2.5).toFixed(2)}deg)` }),
   }),
   // venetian blinds: slat mask sweeps open (editorial reveal)
-  blinds: withBlurb('venetian slat mask sweeps open, editorial reveal; masks, so a whole-frame cut needs sceneUnits', {
+  blinds: withBlurb('venetian slat mask sweeps open, editorial reveal; parallel slats turn open and show the incoming beat between them', {
     enter: (p, o) => { const off = ((1 - clamp01(p)) * 120).toFixed(1); return style({ ...mask(`repeating-linear-gradient(${gradAngle(o.dir)}, #000 0 84px, transparent 84px 120px)`), maskSize: '100% 100%', maskPosition: `0 ${off}px`, WebkitMaskPosition: `0 ${off}px`, opacity: clamp01(p * 1.2 + 0.25).toFixed(3) }); },
     exit: (p) => style({ opacity: (1 - p).toFixed(3) }),
   }),
@@ -204,8 +204,8 @@ export const PRESENTATIONS = {
   // WHAT YOU STILL HAVE TO DO, because no engine can do it for you: put the two subjects in the same
   // place at the same size. `cx`/`cy` aim the shape; the match is only a match if the thing inside it
   // is the same shape in both shots. That is composition, and it is the whole craft of the device.
-  // Masks the frame, so a whole-frame cut needs sceneUnits.
-  matchCut: withBlurb('a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks, so a whole-frame cut needs sceneUnits', {
+  // Masks the frame.
+  matchCut: withBlurb('a GRAPHIC MATCH: both beats are clipped to the same circle at cx/cy, the content swaps inside it at the midpoint, and the shape opens back out. The eye follows one form across the join. Unlike `iris`, the shape belongs to BOTH shots, which is what makes it a match rather than a reveal. You still have to place the two subjects at the same size and spot; masks', {
     enter: (p, o) => {
       const q = clamp01(p);
       if (q >= 1) return style({});
@@ -231,16 +231,19 @@ export const PRESENTATIONS = {
 // CUT_BLURBS: derived from the presentations, which each carry their own blurb (core/registry.js).
 // Consumed by the generated docs table and by any catalog/MCP surface. There is no second list to keep
 // in step: a presentation with no blurb throws here, naming itself.
-// The MASK-ONLY styles (SOLO_BLIND, derived just below) say so: on a whole-frame cut there is nothing
-// underneath them, so films/scene/scene.js refuses them unless `sceneUnits: true` splits the beats.
+// The MASK-ONLY styles (SOLO_BLIND, derived just below) say so: on a SINGLE root there is nothing
+// underneath them for the mask to reveal, which is why films/scene/scene.js always splits a cut's two
+// beats into their own wrappers (the A/B model below) rather than driving the transition on one root.
 export const CUT_BLURBS = blurbsOf('cut', PRESENTATIONS);
 
 // ---- SOLO MODE: a cut applied to ONE root that carries the whole frame ----
 // The A/B model above assumes two elements: the outgoing plays exit while the incoming plays enter,
-// so the frame is always covered. Drive the SAME sequential pair onto a single root and the two
-// halves stack in time instead of in space. The root dims/masks itself to nothing at the midpoint
-// and the frame goes empty (MISTAKES #166). Solo mode holds every VISIBILITY channel at identity and
-// lets the transition ride on transform + filter alone, so anything on screen stays on screen.
+// so the frame is always covered. Driving the SAME sequential pair onto a single root instead stacks
+// the two halves in time rather than in space: the root dims/masks itself to nothing at the midpoint
+// and the frame goes empty (MISTAKES #166). Solo mode is this engine's answer for a caller that must
+// use one root anyway: it holds every VISIBILITY channel at identity and lets the transition ride on
+// transform + filter alone, so anything on screen stays on screen. Kept as a generic primitive; no
+// current caller drives a scene cut through it (films/scene/scene.js always uses the A/B model).
 const HIDE_CHANNELS = ['opacity', 'clipPath', 'WebkitClipPath', 'maskImage', 'WebkitMaskImage', 'maskSize', 'maskPosition', 'WebkitMaskPosition'];
 const KEEP_CHANNELS = ['transform', 'filter'];
 

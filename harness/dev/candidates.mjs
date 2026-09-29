@@ -181,7 +181,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   function refusals(patched) {
     const out = [];
     for (const m of bgErrors(patched)) if (m.startsWith(`bg[${winIdx}]`) || m.startsWith('bg:')) out.push(m);
-    try { checkCuts({ cuts: patched.cuts || [], layers: patched.layers || [], sceneUnits: patched.sceneUnits }); }
+    try { checkCuts({ cuts: patched.cuts || [], layers: patched.layers || [] }); }
     catch (e) { out.push(e.message); }
     return out;
   }

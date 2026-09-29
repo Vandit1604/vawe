@@ -15,7 +15,16 @@ almost never edit the Go renderer.** You write data JSON (most common) or the sh
 
 A scene is two layers that must never blur together: **the HTML is the settled frame** (what a beat
 looks like, holding still), and **the JSON is the motion** (`parts`, `motion`, `vars`, on top of that
-HTML, never CSS `transition`/`animation`). Get the settled frame right first; add motion second.
+HTML). Get the settled frame right first; add motion second.
+
+CSS `animation`, `transition` and `element.animate()` move a fragment as deterministically as
+`motion`: `seekAll(t)` (core/timeline/clips.js) seeks every page animation and SVG SMIL root each frame.
+
+`vawe.timeline()` (core/motion/timeline.js) adds relative timing (`at: "<"`, `">"`, `"+=0.2"`, a label)
+and reads timing-sheet rows (`{el, at, dur, from, to, ease, stagger}`) from a
+`<script type="application/json">` block.
+
+`make check GATE=anim-traps D=<film>` names each trap and its fix. Refused: `animation-timeline: scroll()`/`view()`, which no seek reaches.
 
 ## Rules, loaded before you write a layer
 
@@ -47,8 +56,8 @@ change. Full contract, code sample, layout scaffold and the theme's no-fallback 
    `engine-doctrine/MISTAKES.md #153`; primitives in `reference/motion-primitives.md`.
 4. **Cards/logos with no real asset**, or emoji reached for before `make media X=assets` ran.
    `reference/html-and-images.md`.
-5. **Declaring "done" unrendered.** The audit and eyeball pass catch overlap, overflow and safe-zone
-   breaks that no amount of reading the JSON will show you. `reference/qa-loop.md`.
+5. **Declaring "done" unrendered.** `make study REF=<html> LOOK=…/PROBE=1/LAYOUT=…` sees a fragment
+   cheaply, no render, before the audit and eyeball pass catch what those miss. `reference/qa-loop.md`.
 
 ## Where to look next
 

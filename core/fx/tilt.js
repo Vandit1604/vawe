@@ -18,7 +18,7 @@
 //   1. ANY intervening element flattens the 3D context, including a bare <div> with no clip, no filter
 //      and no opacity. `transform-style: flat` is the default on every element, and that, not overflow
 //      and not filter, is the rule. The camera must therefore sit on the layer's DIRECT parent, which
-//      is `#cam` for a plain layer, the `.hs-beat` wrapper under `sceneUnits`, and the group element for
+//      is `#cam` for a plain layer, the `.hs-beat` wrapper for a layer inside a cut beat, and the group element for
 //      a group child. This modifier writes it to `el.parentNode` and to nothing else.
 //   2. overflow, filter and opacity ON the tilted layer itself are all harmless. The engine puts at
 //      least one of them on nearly every layer, so this was the load-bearing question.

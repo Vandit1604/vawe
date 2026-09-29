@@ -8,7 +8,7 @@ group: crosscutting
 # One object survives a cut and changes across it, or name what else holds the film
 
 A slideshow is beats born and dying inside their own window: every cut jumps between unrelated shots.
-The cheapest fix is a continuous object, one layer marked `acrossBeats: true` (under `sceneUnits`) or
+The cheapest fix is a continuous object, one layer marked `acrossBeats: true` or
 one `becomes`/`matches` handover, that crosses the cut and changes on the far side. `Murch ranks this
 device LAST` of six a cut must serve, so name three ways this film could hold its subject and reject
 the first one before defaulting to it. A film held by a real alternative (a sound bridge, a motif, an

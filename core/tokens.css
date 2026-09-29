@@ -24,8 +24,13 @@
   --safe-right: 65px;
 }
 
-/* determinism: every frame is set explicitly, kill all time-based motion */
-* { margin: 0; padding: 0; box-sizing: border-box; transition: none !important; animation: none !important; }
+/* determinism: every frame is set explicitly. transition/animation used to be killed here, because
+   nothing paused and seeked them; core/timeline/clips.js's seekAll() now pauses and seeks every
+   document.getAnimations() entry (CSS animation, CSS transition, Web Animation) and every SVG SMIL
+   root to the film's own t on every frame, so a wall-clock effect became a seeked one instead of a
+   forbidden one. See core/type/sanitize-html.js for what is still refused (a timeline source no seek
+   can reach, e.g. `animation-timeline: scroll()`). */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
   width: var(--vw); height: var(--vh); overflow: hidden;

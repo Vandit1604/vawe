@@ -4,7 +4,6 @@
  "aspect": "16:9",
  "theme": "vawe",
  "duration": 13,
- "sceneUnits": false,
  "audio": {
   "auto": true,
   "sfxGain": 0.5,
@@ -170,6 +169,7 @@
    "anim": "fade",
    "enterDur": 0.45,
    "exitDur": 0,
+   "acrossBeats": true,
    "src": "films/scene/_showcase-type-timing.html"
   }
  ],

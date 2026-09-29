@@ -107,16 +107,31 @@ function unknownPropErrors(L, where, isChild, tables, errors) {
   // here: a `rect` child validated clean and then hard-failed the render with "not valid. Did you mean
   // 'text'?". Green validate followed by a boot crash is a worse experience than either outcome alone,
   // because the author trusts the first one.
-  const { LI, CI, CHILD_TYPES } = tables;
+  const { LI, CI, CHILD_TYPES, LAYER_PROPS } = tables;
   if (isChild && L.type != null && CHILD_TYPES.length && !CHILD_TYPES.includes(L.type)
     && L.type !== 'block' && L.type !== 'beat' && L.type !== 'comp') {
     errors.push(`${where} type "${L.type}" is not valid as a group child, one of: ${CHILD_TYPES.join(', ')}.`);
   }
   if (L.type === 'block' || L.type === 'beat' || L.type === 'comp') return;
   const known = isChild ? [...CI, ...LI] : LI;
+  // The flat schema list (LI/CI) is a union across every layer TYPE, which is right for "is this key
+  // known at all" (a `preset` on a `rect` is not a typo, just a prop that type does not read) but
+  // wrong for "which key did you mean": against 269 names, a short abbreviation ("i" on a glow, meant
+  // as `intensity`) matches nothing under the old length>3 prefix guard, and an unscoped edit-distance
+  // guess lands on an unrelated one-letter prop instead. `schema.layerProps` (byType/shared) is the
+  // SAME per-type vocabulary the renderer throws on at boot (core/layers/vocabulary.js), generated
+  // from it by `make check GATE=schema-check` rather than a second list, and much smaller per type, so a
+  // prefix match against it (own props first, then the shared cross-type ones) resolves the same
+  // abbreviation to the one field this layer's type actually has.
+  const typeKey = L.type == null || L.type === '' ? 'text' : L.type;
+  const scopedOwn = LAYER_PROPS?.byType?.[typeKey] || [];
+  const scopedShared = LAYER_PROPS?.shared || [];
   for (const k of Object.keys(L)) {
     if (k.startsWith('_') || known.includes(k)) continue;
-    const near = known.filter((n) => n.toLowerCase() === k.toLowerCase()
+    const prefixOf = (list) => list.filter((n) => n.toLowerCase() === k.toLowerCase() || n.toLowerCase().startsWith(k.toLowerCase()));
+    let near = prefixOf(scopedOwn);
+    if (!near.length) near = prefixOf(scopedShared);
+    if (!near.length) near = known.filter((n) => n.toLowerCase() === k.toLowerCase()
       || (k.length > 3 && (n.startsWith(k.slice(0, 3)) || k.startsWith(n.slice(0, 3)))));
     errors.push(`${where} has unknown prop "${k}". The engine will ignore it silently.${near.length ? ' Did you mean: ' + near.slice(0, 3).join(' / ') + '?' : ''}`);
   }
@@ -130,13 +145,14 @@ function checkLayerTree(L, where, isChild, tables, errors) {
   }
 }
 
-function unknownLayerPropErrors(data, schema) {
+export function unknownLayerPropErrors(data, schema) {
   const errors = [];
   if (!(schema && schema.fields && schema.fields.layers && schema.fields.layers.item)) return errors;
   const tables = {
     LI: Object.keys(schema.fields.layers.item),
     CI: Object.keys((schema.fields.layers.item.children || {}).item || {}),
     CHILD_TYPES: ((schema.fields.layers.item.children || {}).item || {}).type?.enum || [],
+    LAYER_PROPS: schema.layerProps,
   };
   (Array.isArray(data.layers) ? data.layers : []).forEach((L, i) => checkLayerTree(L, `layer[${i}]`, false, tables, errors));
   return errors;

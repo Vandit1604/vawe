@@ -246,7 +246,7 @@ server.registerTool('vawe_capabilities', {
     `  ambient:  ${(c.knobs.ambient._shared).map((k) => k.name).join(' ')}`,
     `  sting:    ${(c.knobs.sting._shared).map((k) => k.name).join(' ')}`,
     ``,
-    `cuts (${c.cuts.length}): one family per film; the ten that only MASK need sceneUnits:`,
+    `cuts (${c.cuts.length}): one family per film:`,
     ...c.cuts.map((x) => `  ${x.name.padEnd(12)} ${x.blurb || ''}`.trimEnd()),
     // The rest of the vocabulary a caller has to choose from. Listed with meanings for the same reason as
     // the three above: a name on its own is not a choice.

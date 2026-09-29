@@ -27,6 +27,7 @@
 // construction: one tab, ascending frames, no scrambler.
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { serveRepo, waitForEngine } from '../../harness/lib/render-harness.mjs';
 import { LAYER_TYPES, LAYER_PROPS } from '../../core/layers/index.js';
@@ -35,8 +36,217 @@ import { auditedProps } from '../../core/registry/prop-audit.js';
 import { KNOBS } from '../../core/registry/knobs.js';
 import { guardsOf } from '../../core/registry/props.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { resolveAnchorPoint } from '../../core/layout/safe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// out/.tmp_* is gitignored: the probe scenes are a build artefact, not films.
+const OUT = path.join(ROOT, 'out/.tmp_prop-probe');
+
+// VISIBILITY FLOOR: does this prop's own effect clear the noise floor, not just get READ.
+// `deadProps` (above) answers "read or not"; it counts idle:drift's ~0.09/255 mean frame diff as
+// alive because it never looks at a pixel. 0.6/255 is harness/media/see.mjs's own HOLD_FLOOR, the
+// mean |diff| (YAVG of ffmpeg's tblend=difference,signalstats) under which nothing reads as moving
+// on a real render; reused here, not re-derived, so the two tools cannot silently disagree on what
+// "changed" means.
+const VISIBILITY_FLOOR = 0.6;
+// A 4x3 grid of non-overlapping slots on a 1920x1080 canvas, one per probe layer in a batch, so a
+// with/without pixel diff for ONE prop never picks up a neighbour's own change. `board`/`doc` (900px/
+// 700px wide BASE layers) can spill past their own 480px cell into the next; that dilutes their own
+// crop with a few pixels of an unrelated, UNCHANGED neighbour (which contributes zero to a diff, since
+// it is identical in both variants), never contaminates another prop's verdict.
+const GRID_COLS = 4;
+const CANVAS_W = 1920, CANVAS_H = 1080;
+const CELL_W = CANVAS_W / GRID_COLS, CELL_H = CANVAS_H / Math.ceil(12 / GRID_COLS);
+const gridOffset = (i) => ({ ox: (i % GRID_COLS) * CELL_W, oy: Math.floor(i / GRID_COLS) * CELL_H });
+
+const FRAMES = [0, 15, 25, 35, 50, 70, 90];
+const FPS = 30;
+const FLOOR_FRAME = 50;   // 1.67s: past every default `start` (0.5s) and every default motion hold
+const frameAtOrAfter = (tSec) => {
+  const target = Math.round(tSec * FPS);
+  return FRAMES.find((f) => f >= target) ?? FRAMES[FRAMES.length - 1];
+};
+const frameBefore = (tSec) => {
+  const target = Math.round(tSec * FPS);
+  return [...FRAMES].reverse().find((f) => f < target) ?? null;
+};
+
+// One ffmpeg process, two crops, one blend=difference: the same "how much did this change" question
+// harness/media/see.mjs asks of two video frames, asked here of two PNGs (a prop present, a prop
+// absent). Returns the mean |diff| on 0..255 (YAVG), or null if the crop could not be read (an
+// out-of-canvas box, an ffmpeg failure): a null is reported as unchecked, never as a pass.
+function pngDiffMean(a, b, box, metaFile) {
+  const x = Math.max(0, Math.round(box.x)), y = Math.max(0, Math.round(box.y));
+  const w = Math.max(2, Math.min(Math.round(box.w), CANVAS_W - x));
+  const h = Math.max(2, Math.min(Math.round(box.h), CANVAS_H - y));
+  const crop = `crop=${w}:${h}:${x}:${y}`;
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', a, '-i', b, '-filter_complex',
+    `[0:v]${crop}[a];[1:v]${crop}[b];[a][b]blend=all_mode=difference,signalstats,metadata=mode=print:file=${metaFile}`,
+    '-f', 'null', '-'], { encoding: 'utf8' });
+  if (r.status !== 0 || !fs.existsSync(metaFile)) return null;
+  const m = /lavfi\.signalstats\.YAVG=([\d.]+)/.exec(fs.readFileSync(metaFile, 'utf8'));
+  fs.rmSync(metaFile, { force: true });
+  return m ? +m[1] : null;
+}
+
+// Same question, asked OUTSIDE every declared layer box at once (blacked out on both sides first):
+// did toggling this batch's props leak pixels anywhere but their own boxes. Attributed to the whole
+// batch, not one prop, because every layer in it changed between the two images: see the note beside
+// its call site.
+function maskedDiffMean(a, b, boxes, metaFile) {
+  if (!boxes.length) return null;
+  const draw = boxes.map(({ x, y, w, h }) => `drawbox=x=${Math.round(x)}:y=${Math.round(y)}:`
+    + `w=${Math.round(w)}:h=${Math.round(h)}:color=black:t=fill`).join(',');
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', a, '-i', b, '-filter_complex',
+    `[0:v]${draw}[a];[1:v]${draw}[b];[a][b]blend=all_mode=difference,signalstats,metadata=mode=print:file=${metaFile}`,
+    '-f', 'null', '-'], { encoding: 'utf8' });
+  if (r.status !== 0 || !fs.existsSync(metaFile)) return null;
+  const m = /lavfi\.signalstats\.YAVG=([\d.]+)/.exec(fs.readFileSync(metaFile, 'utf8'));
+  fs.rmSync(metaFile, { force: true });
+  return m ? +m[1] : null;
+}
+
+// WHERE/WHEN: a prop that moves or times a layer is checked against the JSON, not just against
+// itself. `motion`'s `x` is an OFFSET added to `L.x` (films/scene/scene.js resolveBoxes: `x = (L.x ??
+// 60) + (m ? m.dx : 0) + p.dx`), and a keyframe's `t` is SECONDS since the layer's own start (
+// core/timeline/sequence.js poseAt compares it to `lt` directly, never a 0..1 fraction); both read
+// off that one function, not re-derived here, so this check cannot drift from what actually renders.
+function checkXY(prop, L, boxesByFrame, push) {
+  const [fx, fy] = resolveAnchorPoint(L.anchorPoint ?? null);
+  const w = typeof L.w === 'number' ? L.w : 0;
+  const h = typeof L.h === 'number' ? L.h : 0;
+  const f = FRAMES.find((fr) => boxesByFrame[fr] && boxesByFrame[fr].visible);
+  if (f == null) { push('never visible in any sampled frame; position not checked', null, null); return; }
+  const box = boxesByFrame[f];
+  const expLeft = L.x - fx * w, expTop = L.y - fy * h;
+  if (Math.abs(box.left - expLeft) > 2) push(`left at frame ${f}`, expLeft, box.left);
+  if (Math.abs(box.top - expTop) > 2) push(`top at frame ${f}`, expTop, box.top);
+}
+
+function checkTiming(L, boxesByFrame, push) {
+  // Both edges, always: testing `duration` alone still opens at `start` (frame0 is invisible for that
+  // reason, nothing to do with the prop under test), and testing `start` alone still closes at
+  // `start + duration`. Asserting only the edge named by the prop under test read frame 0 as a
+  // `duration` failure when it was really just "before start" (caught empirically: text.duration).
+  const sf = Math.round((L.start ?? 0) * FPS);
+  const ef = Math.round(((L.start ?? 0) + (L.duration ?? 0)) * FPS);
+  for (const fr of FRAMES) {
+    if (Math.abs(fr - sf) < 2 || Math.abs(fr - ef) < 2) continue;   // ambiguous within a frame of either edge
+    const box = boxesByFrame[fr];
+    const visible = !!(box && box.visible);
+    const shouldBeVisible = fr > sf && fr < ef;
+    if (visible !== shouldBeVisible) push(`visible at frame ${fr}`, shouldBeVisible, visible);
+  }
+}
+
+function checkMotion(L, boxesByFrame, push) {
+  if (!Array.isArray(L.motion) || L.motion.length < 2) return;
+  const [fx] = resolveAnchorPoint(L.anchorPoint ?? null);
+  const w = typeof L.w === 'number' ? L.w : 0;
+  const k0 = L.motion[0], k1 = L.motion[L.motion.length - 1];
+  const startBox = boxesByFrame[frameAtOrAfter((L.start ?? 0) + (k0.t ?? 0))];
+  const endBox = boxesByFrame[frameAtOrAfter((L.start ?? 0) + (k1.t ?? 0))];
+  if (startBox && typeof k0.x === 'number') {
+    const exp = L.x + k0.x - fx * w;
+    if (Math.abs(startBox.left - exp) > 2) push('left at motion start key', exp, startBox.left);
+  }
+  if (endBox && typeof k1.x === 'number') {
+    const exp = L.x + k1.x - fx * w;
+    if (Math.abs(endBox.left - exp) > 2) push('left at motion end key (or held there)', exp, endBox.left);
+  }
+}
+
+function assertPosition(type, prop, at, L, boxesByFrame, mismatches) {
+  const push = (msg, expected, got) => mismatches.push({ type, prop, at, msg, expected, got });
+  if (prop === 'x' || prop === 'y' || prop === 'anchorPoint') checkXY(prop, L, boxesByFrame, push);
+  else if (prop === 'start' || prop === 'duration') checkTiming(L, boxesByFrame, push);
+  else if (prop === 'motion') checkMotion(L, boxesByFrame, push);
+}
+const MOVE_PROPS = new Set(['x', 'y', 'anchorPoint', 'start', 'duration', 'motion']);
+void frameBefore;   // read by nothing yet; kept for a future before/after pair on a boundary prop
+
+// `cursor` is the one type films/scene/scene.js documents as NOT reading x/y/motion like every other
+// layer: its own comment says its on-screen point comes from `path` inside its own frame(), so testing
+// x/y/motion against it is not a mismatch, it is asking the wrong question of a documented exception.
+// `start`/`duration` still gate its visibility the same as any layer, so those two stay checked.
+const NO_XY_MOTION = new Set(['cursor']);
+
+function applyPositionChecks(type, batch, layers, ids, boxesById, mismatches) {
+  for (let i = 0; i < batch.length; i++) {
+    const prop = batch[i].prop;
+    if (!MOVE_PROPS.has(prop)) continue;
+    if (NO_XY_MOTION.has(type) && prop !== 'start' && prop !== 'duration') continue;
+    assertPosition(type, prop, batch[i].at, layers[i], boxesById[ids[i]], mismatches);
+  }
+}
+
+// One layer's own box at the frame the floor/leak screenshots were taken, or the first frame it was
+// visible at all: a prop that only shows up briefly (a caret blink, a `start` near the sample grid)
+// still gets a crop to measure, instead of being silently skipped because FLOOR_FRAME missed it.
+function boxForCrop(boxesForId) {
+  return boxesForId[FLOOR_FRAME] || FRAMES.map((f) => boxesForId[f]).find(Boolean);
+}
+
+// VISIBILITY FLOOR + LOCALITY: one screenshot of this batch WITH every prop, one of the same batch with
+// each layer's own target prop removed, cropped per layer for the floor and masked whole-frame for the
+// leak check. A boot failure on the off-variant (a prop that turns out to be load-bearing to build at
+// all, e.g. `text` on a text layer) is reported as unchecked, not folded into "dead": this gate is
+// answering "does removing it move a pixel", and it never got to ask that question.
+async function captureVisibility(browser, page, ctx, sinks) {
+  const { url, type, c, batch, ids, boxesById, requiredIdx } = ctx;
+  const onPng = path.join(OUT, `${type}-${c}.on.png`);
+  const offPng = path.join(OUT, `${type}-${c}.off.png`);
+  await page.evaluate((n) => window.__engine.renderFrame(n), FLOOR_FRAME);
+  await page.screenshot({ path: onPng });
+  await page.close();
+
+  const offUrl = url.replace(`${type}-${c}.json`, `${type}-${c}.off.json`);
+  const offErr = await bootAndShoot(browser, offUrl, offPng);
+  if (offErr) { sinks.visSkipped.push({ type, props: batch.map((b) => b.prop).join(' '), reason: offErr }); return; }
+
+  const cropBoxes = [];
+  for (let i = 0; i < batch.length; i++) {
+    // schema.json#layerContracts named this one REQUIRED: nothing was removed to build its "without",
+    // so a pixel diff here would report 0 and read as near-dead when it is the opposite, load-bearing.
+    // Reported per-prop, never folded into the batch failure the same field would otherwise cause.
+    if (requiredIdx && requiredIdx.has(i)) {
+      sinks.visSkipped.push({ type, props: batch[i].prop,
+        reason: 'required to build the layer at all (schema.json#layerContracts); no "without" variant exists to diff against' });
+      continue;
+    }
+    const b = boxForCrop(boxesById[ids[i]]);
+    if (!b) continue;   // never visible at any sampled frame: nothing to crop, nothing to claim
+    cropBoxes.push({ x: b.left, y: b.top, w: b.width, h: b.height });
+    const meta = path.join(OUT, `${type}-${c}-${i}.meta.txt`);
+    const meanDiff = pngDiffMean(onPng, offPng, { x: b.left, y: b.top, w: b.width, h: b.height }, meta);
+    if (meanDiff != null && meanDiff < VISIBILITY_FLOOR)
+      sinks.nearDead.push({ type, prop: batch[i].prop, at: batch[i].at, meanDiff });
+  }
+  const leak = maskedDiffMean(onPng, offPng, cropBoxes, path.join(OUT, `${type}-${c}-leak.meta.txt`));
+  if (leak != null && leak >= VISIBILITY_FLOOR) sinks.leaks.push({ type, c, meanDiff: leak });
+}
+
+async function bootAndShoot(browser, url, outPng) {
+  let offPage = null;
+  try {
+    offPage = await browser.newPage();
+    await offPage.setViewport({ width: CANVAS_W, height: CANVAS_H });
+    // Same suppression the "on" page gets (core/registry/prop-audit.js auditLayer): stripping one
+    // guarded prop can leave another, unrelated field of the SAME layer unread (a coupling this file
+    // does not model), and that must not crash a batch's floor check the way it would a real render.
+    await offPage.evaluateOnNewDocument(() => { window.__PROP_PROBE = []; });
+    await offPage.goto(url, { waitUntil: 'load' });
+    const err = await waitForEngine(offPage, { throwOnTimeout: false });
+    if (err) return String(err).slice(0, 300);
+    await offPage.evaluate((n) => window.__engine.renderFrame(n), FLOOR_FRAME);
+    await offPage.screenshot({ path: outPng });
+    return null;
+  } catch (e) {
+    return String(e.message || e).slice(0, 300);
+  } finally {
+    if (offPage) await offPage.close();
+  }
+}
 
 // ---------------------------------------------------------------------------------------------
 // WAIVERS. Keyed `type.prop`, every entry carrying a reason, the shape quality/gates/arsenal-check.mjs
@@ -98,7 +308,11 @@ const BASE = {
   // way a missing image is (core/boot.js preloads images only).
   video: { src: '/assets/clips/probe.mp4', w: 400, h: 300 },
   group: { children: [{ type: 'text', text: 'probe' }] },
-  rect: { w: 200, h: 40 },
+  // A visible fill by default: the dead-prop check never needed one (it only asks "was this read"),
+  // but the visibility floor asks "did this move a pixel", and a transparent box has no pixel for
+  // `opacity`/`radius`/`shadow`/`reflect`/`progressiveBlur`/`mask` to modulate, near-dead by
+  // construction rather than by measurement. `bg` itself still overrides this when IT is the target.
+  rect: { w: 200, h: 40, bg: '#2563eb' },
   glow: { x: 400, y: 400, w: 200, h: 200 },
   beam: { x: 400, y: 400, w: 300, h: 200 },
   svg: { d: 'M1 12 Q7 1 12 12', viewBox: '0 0 47 24', w: 200 },
@@ -124,6 +338,32 @@ const BASE = {
 // (`false` is how every opt-out in this engine is spelled, core/props.js:29).
 const SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'films/scene/schema.json'), 'utf8'));
 const SCHEMA_PROPS = SCHEMA.fields.layers.item;
+
+// THE OWNER OF "must this field stay". schema.json#layerContracts names every field a layer type
+// refuses to build without (`required`), a field where at least one of a pair must survive
+// (`requiredOneOf`), and a field whose removal strands another (`coupled`), each one read off the
+// real throw (see the block's own `_source`). A prop named here is never deleted alone when this
+// file builds the "without" variant, so removing it cannot break the eleven OTHER probes sharing its
+// batch's off-scene (one page, one boot, one bad layer refuses all twelve).
+const CONTRACTS = SCHEMA.layerContracts || {};
+const REQUIRED = CONTRACTS.required || {};
+const REQUIRED_ONE_OF = CONTRACTS.requiredOneOf || {};
+const COUPLED = CONTRACTS.coupled || {};
+const REQUIRED_FOR_PRESET = CONTRACTS.requiredForPreset || {};
+// `preset` is `three`'s own `at` (the scene name this probe was asked against): `lines` is required
+// only on the two code* scenes that lay it out, never on the nine that never read it.
+const isRequired = (type, prop, preset) => (REQUIRED[type] || []).includes(prop)
+  || (REQUIRED_ONE_OF[type] || []).includes(prop)
+  || (preset != null && (REQUIRED_FOR_PRESET[type]?.[preset] || []).includes(prop));
+
+// Delete a dotted path (`vars.--glow-c`) off a plain object, the shape a coupling needs when the
+// stranded field lives inside another prop's own object rather than beside it.
+function deletePath(obj, dotted) {
+  const parts = dotted.split('.');
+  let cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) { cur = cur?.[parts[i]]; if (cur == null) return; }
+  delete cur[parts[parts.length - 1]];
+}
 
 // Names whose generic value would throw or be ignored, one line each. A `type.prop` key wins over a
 // bare name: `out` is an exit-animation NAME everywhere and a source out-point in SECONDS on `video`,
@@ -301,6 +541,11 @@ const EXCLUSIVE = [['html', 'src']];
 function probeLayer(type, prop, preset) {
   const L = { type, ...BASE[type], start: 0.5, duration: 4 };
   for (const pair of EXCLUSIVE) if (pair.includes(prop)) for (const k of pair) if (k !== prop) delete L[k];
+  // rect.js: `const paint = bg ?? fill ?? color;`. BASE.rect's own default `bg` (added so a bare rect
+  // has a visible fill for the visibility floor) would otherwise shadow `fill`/`color` forever: the
+  // fallback chain never reaches past `bg`, so testing either would always read as near-dead by
+  // construction, exactly the false positive this file exists to avoid producing.
+  if (type === 'rect' && (prop === 'fill' || prop === 'color')) delete L.bg;
   // The three code* scenes derive their whole layout from the snippet and refuse to build without it
   // (core/three-fx.js:179), so it is part of a minimal valid layer for those three presets.
   // litPlane is the same shape for a different input: it textures a real capture and refuses to render an
@@ -333,11 +578,10 @@ export { probesOf, surfaceOf };
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
 
+const RUN_STARTED = Date.now();
 const puppeteer = (await import('puppeteer')).default;
 const only = process.argv.slice(2).filter((a) => !a.startsWith('-'));
 const types = only.length ? only : LAYER_TYPES;
-// out/.tmp_* is gitignored: the probe scenes are a build artefact, not films.
-const OUT = path.join(ROOT, 'out/.tmp_prop-probe');
 fs.mkdirSync(OUT, { recursive: true });
 
 const { server, port } = await serveRepo();
@@ -346,6 +590,10 @@ const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] 
 const findings = [];   // { type, prop }
 const errors = [];     // { type, error }   a real engine error: this type is BROKEN
 const unchecked = [];  // { type, props }   the page never answered in time: this type is UNKNOWN
+const nearDead = [];   // { type, prop, at, meanDiff }   read, but under the visibility floor
+const visSkipped = []; // { type, props, reason }        the off-variant could not be built or read
+const mismatches = []; // { type, prop, at, msg, expected, got }   box disagrees with the JSON
+const leaks = [];      // { type, c, meanDiff }   a batch's own props moved a pixel outside every declared box
 
 // TWELVE LAYERS PER SCENE, and the number is load-bearing. A `three` or `globe` layer owns a WebGL
 // context and a browser hands out about sixteen; forty-six in one page fails inside three.js with a
@@ -356,19 +604,58 @@ const PER_SCENE = 12;
 for (const type of types) {
   if (!BASE[type]) { errors.push({ type, error: 'no BASE layer declared in prop-probe.mjs' }); continue; }
   const all = probesOf(type);
+  // x/y/anchorPoint/start/duration/motion are read off the raw layer by buildLayer itself
+  // (films/scene/scene.js), never through the watched-proxy `auditedProps` scopes, so `surfaceOf`
+  // never surfaces them and the dead-prop check has no opinion on them (correctly: they can never be
+  // dead). WHERE/WHEN still needs them on a layer to measure against, so they are added here, once per
+  // type, skipped if the type's own surface already carries the name (LAYER_PROPS-declared, so already
+  // in `all`; the position check would otherwise ask about it twice on two different layers).
+  const already = new Set(all.map((p) => p.prop));
+  for (const prop of MOVE_PROPS) if (!already.has(prop)) all.push({ prop, at: null, layer: probeLayer(type, prop, null) });
   for (let c = 0; c * PER_SCENE < all.length; c++) {
   const batch = all.slice(c * PER_SCENE, (c + 1) * PER_SCENE);
   const props = batch.map((b) => b.prop);
   const layers = batch.map((b) => b.layer);
+  // A unique id and a grid slot per layer, so a with/without screenshot pair can be cropped to THIS
+  // prop's own box alone: x/y are universal (films/scene/scene.js buildLayer: `el.style.left = L.x ??
+  // 60`), so adding a slot offset to whatever x/y the probe already gave the layer works for every
+  // type without knowing its shape, and does not change what is being asked (is this prop read).
+  layers.forEach((L, i) => {
+    L.id = `p${c}_${i}`;
+    const { ox, oy } = gridOffset(i);
+    L.x = ox + (typeof L.x === 'number' ? L.x : 0);
+    L.y = oy + (typeof L.y === 'number' ? L.y : 0);
+  });
+  // Deleting the target prop can strand a guard that was injected ONLY to reach it (`colw` needs
+  // `layout` set; remove `colw` and a bare `layout` is itself unread, refused at boot as ANOTHER dead
+  // prop that has nothing to do with the one under test). Guards already part of BASE (a real preset
+  // selector like `three`) are left alone: `g in BASE[type]` is true for those, never for a guard this
+  // file injected only for the probe.
+  //
+  // A prop schema.json#layerContracts names REQUIRED (or half of a requiredOneOf pair) is never
+  // deleted at all: the layer would refuse to build with it gone, and one refused layer takes the
+  // whole batch's off-scene down with it (twelve layers, one page, one boot). That layer's own
+  // "without" is therefore identical to its "with", reported per-prop in `requiredIdx` below rather
+  // than measured, so its eleven neighbours still get a real number. A COUPLED pair is the opposite
+  // shape: removing one strands the other (`color2` gone, `vars['--glow-c']` still keyed), so both go.
+  const requiredIdx = new Set();
+  const offLayers = layers.map((L, i) => {
+    const o = structuredClone(L);
+    const targetProp = batch[i].prop;
+    if (isRequired(type, targetProp, batch[i].at)) { requiredIdx.add(i); return o; }
+    delete o[targetProp];
+    for (const g of guardsOf(declOf(type, targetProp))) if (!(g in (BASE[type] || {}))) delete o[g];
+    for (const [a, b] of COUPLED[type] || []) {
+      if (a === targetProp) deletePath(o, b);
+      else if (b === targetProp) deletePath(o, a);
+    }
+    return o;
+  });
   const file = path.join(OUT, `${type}-${c}.json`);
-  // `produced: false` because a PROBE IS NOT A FILM. The produced baseline injects a camera, scene
-  // units and (since the inferred-cut default) a cut into any film that declares none, and these
-  // fixtures declare none by construction: they are one layer per prop on a plain field. An injected
-  // `fade` cut puts an `opacity` on the wrapper every layer sits inside, which is exactly what a prop
-  // that reads the pixels BEHIND it (`glass`, `progressiveBlur`) cannot survive, so every such prop
-  // reported itself dead. The opt-out is the engine's own (core/engine/produce.js), and it is the right
-  // one here: this gate asks "does the engine read this prop", not "does this scene look directed".
-  fs.writeFileSync(file, JSON.stringify({ module: 'scene', produced: false, theme: 'default', duration: 4, bg: [{ preset: 'plain' }], layers }, null, 1));
+  const offFile = path.join(OUT, `${type}-${c}.off.json`);
+  const wrap = (ls) => ({ module: 'scene', theme: 'default', aspect: '16:9', duration: 4, bg: [{ preset: 'plain' }], layers: ls });
+  fs.writeFileSync(file, JSON.stringify(wrap(layers), null, 1));
+  fs.writeFileSync(offFile, JSON.stringify(wrap(offLayers), null, 1));
 
   // A TIMEOUT IS A STATEMENT ABOUT THIS MACHINE, NOT ABOUT THE LAYER, and this gate used to conflate
   // the two. `waitForEngine` returns the literal string 'timeout' when the page does not park
@@ -390,6 +677,10 @@ for (const type of types) {
   for (let attempt = 0; attempt < 2; attempt++) {
     if (page) await page.close();
     page = await browser.newPage();
+    // Full canvas viewport, not puppeteer's 800x600 default: a screenshot narrower than the grid this
+    // batch is laid out on would crop `col >= 2` clean off, and every prop in those columns would crop
+    // to background and read as dead by construction, not by measurement.
+    await page.setViewport({ width: CANVAS_W, height: CANVAS_H });
     await page.evaluateOnNewDocument(() => { window.__PROP_PROBE = []; });
     await page.goto(url, { waitUntil: 'load' });
     err = await waitForEngine(page, { throwOnTimeout: false });
@@ -400,32 +691,52 @@ for (const type of types) {
 
   // A frame can throw from inside a primitive (a dial the probe gave a shape the fx cannot draw), and
   // that is a chunk that was not checked, not a crash of the run.
-  let dead;
+  let result;
+  const ids = layers.map((L) => L.id);
   try {
-  dead = await page.evaluate(async (names) => {
+  result = await page.evaluate(async (names, layerIds, frames) => {
     const engine = window.__engine;
     // A resample samples the layer's own <img>, so an undecoded picture is "no pixels" and throws.
     await Promise.all([...document.images].map((i) => i.decode().catch(() => {})));
+    const boxes = {};
+    for (const id of layerIds) boxes[id] = {};
     // Five ascending frames in one tab, not three: a caret BLINKS, so `caretHold` is only reached on the
-    // frames where the blink is on, and three samples all landed in the off phase.
-    for (const n of [0, 15, 25, 35, 50, 70, 90]) engine.renderFrame(n);
+    // frames where the blink is on, and three samples all landed in the off phase. The SAME pass also
+    // takes each layer's own box at each frame, so where/when checks cost nothing beyond what dead-prop
+    // reading already pays for.
+    for (const n of frames) {
+      engine.renderFrame(n);
+      for (const id of layerIds) {
+        const el = document.querySelector(`[data-id="${CSS.escape(id)}"]`);
+        if (!el) { boxes[id][n] = null; continue; }
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        boxes[id][n] = { left: r.left, top: r.top, width: r.width, height: r.height,
+          visible: cs.display !== 'none' && cs.visibility !== 'hidden' && parseFloat(cs.opacity || '1') > 0.01 };
+      }
+    }
     const { deadProps } = await import('/core/registry/prop-audit.js');
-    const out = [];
+    const dead = [];
     const sink = window.__PROP_PROBE;
     for (let i = 0; i < names.length; i++) {
       const e = sink[i];
-      if (!e) { out.push(i); continue; }              // never audited: report it, do not assume it passed
-      if (deadProps(e.layer, new Set([names[i]])).length) out.push(i);
+      if (!e) { dead.push(i); continue; }              // never audited: report it, do not assume it passed
+      if (deadProps(e.layer, new Set([names[i]])).length) dead.push(i);
     }
-    return out;
-  }, props);
+    return { dead, boxes };
+  }, props, ids, FRAMES);
   } catch (e) {
     errors.push({ type, error: `${props.join(' ')}\n    ${String(e.message || e).slice(0, 400)}` });
     await page.close();
     continue;
   }
-  await page.close();
-  for (const i of dead) findings.push({ type, prop: batch[i].prop, at: batch[i].at });
+  for (const i of result.dead) findings.push({ type, prop: batch[i].prop, at: batch[i].at });
+
+  // WHERE/WHEN, off the same boxes: does the JSON's x/y/start/duration/motion agree with what rendered.
+  applyPositionChecks(type, batch, layers, ids, result.boxes, mismatches);
+
+  await captureVisibility(browser, page, { url, type, c, batch, ids, boxesById: result.boxes, requiredIdx },
+    { nearDead, visSkipped, leaks });
   }
 }
 
@@ -496,6 +807,43 @@ if (live.length) {
     + ` engine accepts and ignores: fix the reader, delete the declaration, or waive it with a reason`
     + ` in WAIVERS (quality/gates/prop-probe.mjs).`);
 }
+
+// NEAR-DEAD: read, but its own on/off diff never clears the floor harness/media/see.mjs uses for "is
+// anything moving". Reported as a warning, not folded into `dead`: the prop IS read (deadProps agrees),
+// this only says a human would not see it.
+console.log(`\nVISIBILITY · ${nearDead.length} near-dead (< ${VISIBILITY_FLOOR}/255) · `
+  + `${mismatches.length} where/when mismatches · ${leaks.length} batches leaking outside their boxes · `
+  + `${visSkipped.length} off-variants not checked`);
+for (const f of nearDead) {
+  console.log(`  ~ ${f.type}: ${label(f)} moved ${f.meanDiff.toFixed(3)}/255, under the ${VISIBILITY_FLOOR} floor`);
+  findingsOut.warn('prop-near-dead', `${f.type}: ${label(f)} set, read, but ${f.meanDiff.toFixed(3)}/255 mean diff `
+    + `(floor ${VISIBILITY_FLOOR}) with the prop removed: a human would not see it change`, {
+    at: `${f.type}.${f.prop}${f.at ? `@${f.at}` : ''}`,
+    fix: 'confirm the effect is meant to be this subtle, or the reader is computing the wrong thing',
+  });
+}
+for (const m of mismatches) {
+  console.log(`  x ${m.type}: ${m.prop} ${m.msg}: expected ${m.expected}, got ${m.got}`);
+  findingsOut.warn('prop-position-mismatch', `${m.type}: ${m.prop} ${m.msg} (expected ${m.expected}, got ${m.got})`, {
+    at: `${m.type}.${m.prop}`,
+    fix: 'the rendered box disagrees with the JSON: check the layer builder or the layout math for this prop',
+  });
+}
+for (const l of leaks) {
+  console.log(`  ! ${l.type} batch ${l.c}: ${l.meanDiff.toFixed(3)}/255 changed outside every declared layer box`);
+  findingsOut.warn('prop-leak', `${l.type} batch ${l.c}: ${l.meanDiff.toFixed(3)}/255 mean diff outside every `
+    + `layer's own box when its props were removed (attributed to the batch, not one prop: see the comment `
+    + `beside captureVisibility in quality/gates/prop-probe.mjs)`, { at: l.type,
+    fix: 're-run this type alone (`node quality/gates/prop-probe.mjs ' + l.type + '`) to narrow the batch',
+  });
+}
+for (const v of visSkipped) {
+  console.log(`  ? ${v.type}: floor/leak not checked (${v.reason})`);
+  findingsOut.warn('prop-visibility-not-checked', `${v.type}: ${v.props}: the off-variant did not build: ${v.reason}`, {
+    at: v.type, fix: 'a required field was removed to build the off-variant; this is a coverage gap, not a defect',
+  });
+}
+console.log(`\nRUNTIME · ${((Date.now() - RUN_STARTED) / 1000).toFixed(1)}s`);
 findingsOut.emit();
 process.exit(findingsOut.records.some((r) => r.severity === 'error') ? 1 : 0);
 

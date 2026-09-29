@@ -260,16 +260,20 @@ const CASES = [
   { gate: 'validate', name: 'html layer · a src file alone is the legal spelling', expect: 'pass',
     aux: { 'quality/fixtures/mut-frag-clean.html': '<div style="color:#fff;font-size:80px">Fragment in a file</div>' },
     scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'quality/fixtures/mut-frag-clean.html' }]) },
-  // The dead-CSS rule has always applied to the markup, not to where the markup is stored. A fragment
-  // moved into a file must not become the one place transition/animation goes unread.
-  { gate: 'validate', name: 'html layer · dead CSS inside the src FILE', expect: 'fail', match: /DEAD STILL/,
-    aux: { 'quality/fixtures/mut-frag-dead.html': '<style>@keyframes drift{to{opacity:1}}</style><div style="color:#fff">x</div>' },
+  // The unseekable-timeline rule has always applied to the markup, not to where the markup is stored.
+  // A fragment moved into a file must not become the one place a scroll-linked timeline goes unread.
+  // (`@keyframes`/`transition` are no longer refused here at all: seekAll(t) makes them deterministic.)
+  { gate: 'validate', name: 'html layer · scroll-linked timeline inside the src FILE', expect: 'fail', match: /animation-timeline/,
+    aux: { 'quality/fixtures/mut-frag-dead.html': '<style>.x{animation-timeline:scroll(root)}</style><div style="color:#fff">x</div>' },
     scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2, src: 'quality/fixtures/mut-frag-dead.html' }]) },
   // A group child's html was checked by nothing at all: the walk was flat, so one level of nesting was
   // an exemption from a rule nobody meant to make optional.
-  { gate: 'validate', name: 'html inside a GROUP child is checked too', expect: 'fail', match: /DEAD STILL/,
+  { gate: 'validate', name: 'html inside a GROUP child is checked too', expect: 'fail', match: /animation-timeline/,
     scene: scene([{ type: 'group', x: 200, y: 400, layout: 'row', start: 0, duration: 2, children: [
-      { type: 'html', html: '<div style="transition:opacity .3s;color:#fff">nested</div>' }] }]) },
+      { type: 'html', html: '<div style="animation-timeline:view();color:#fff">nested</div>' }] }]) },
+  { gate: 'validate', name: 'html layer · a CSS animation is allowed now, seekAll(t) makes it deterministic', expect: 'pass',
+    scene: scene([{ type: 'html', x: 200, y: 400, w: 800, start: 0, duration: 2,
+      html: '<style>@keyframes drift{to{opacity:1}}</style><div style="animation:drift 1s both;color:#fff">x</div>' }]) },
 
   // ---- asset preflight: a fragment that is not on disk STOPS the render, so it is the one asset the
   // preflight most has to see. `.html` was not even a candidate extension until the fragment loader
@@ -312,18 +316,11 @@ const CASES = [
 
   // A DECLARED CUT IS NOT CONTENT (MISTAKES #166). dead-air used to exempt any hole a cut/seam window
   // touched, on the reading that a transition fills its time. A transition is a TREATMENT of whatever is
-  // already on screen: over an empty frame it produces an empty frame. Both sides are pinned, because the
-  // two paths differ in the engine and the difference is the whole point.
-  //   SINGLE ROOT (a `motion` track makes the scene choreographed, so core/engine/produce.js withholds
-  //   sceneUnits): the cut only transforms the camera root. Nothing is extended, the hole stays a hole.
-  { gate: 'beatcheck', name: 'dead-air · a cut over a hole does not fill it (single-root path)', expect: 'fail', match: /dead-air/,
-    scene: scene([TXT({ duration: 0.6, motion: [{ t: 0, x: 200 }, { t: 0.6, x: 240 }] }),
-                  TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
-                 { cuts: [{ t: 0.8, style: 'punch', dur: 0.5 }] }) },
-  //   SCENE UNITS (no motion track → produce.js injects them): scene.js runs every non-last-beat layer
-  //   to `beatEnd + cutDur`, so the outgoing beat really is on screen across the window. That is coverage
-  //   the raw JSON spans do not show, and the gate has to model it or it invents holes.
-  { gate: 'beatcheck', name: 'scene units really do carry a layer across the cut', expect: 'pass',
+  // already on screen: over an empty frame it produces an empty frame. Every cut film wraps its beats as
+  // units, so scene.js runs every non-last-beat layer to `beatEnd + cutDur`, and the outgoing beat really
+  // is on screen across the window. That is coverage the raw JSON spans do not show, and the gate has to
+  // model it or it invents holes.
+  { gate: 'beatcheck', name: 'beat units really do carry a layer across the cut', expect: 'pass',
     scene: scene([TXT({ duration: 0.6 }), TXT({ text: 'Second beat', start: 1.4, duration: 0.6 })],
                  { cuts: [{ t: 0.6, style: 'punch', dur: 0.8 }] }) },
 
@@ -850,7 +847,7 @@ const srcCases = [
   // that same collapse in the declared world: it must report itself broken, never blame the scenes.
   { name: 'layer-props · the shared declarations go blind', file: `${SCENE_DIR}/props.js`,
     mutate: (s) => s.replace(/^  start: \{\}.*$/m, ''),
-    cmd: ['node', ['quality/gates/layer-props.mjs', `${SCENE_DIR}/higgsfield-recreation.json`]], match: /layer-props is blind/ },
+    cmd: ['node', ['quality/gates/layer-props.mjs', `${SCENE_DIR}/brew-launch-act1.json`]], match: /layer-props is blind/ },
   // THE SHAPE THE OLD MEASUREMENT WAS WORST AT, pinned deliberately (#234): a prop read ONLY inside a
   // registry directory that did not exist when the gate was written. core/tracks/ is that directory,
   // 1454 live props reported as dropped the day it landed, because a scanner can only look where its
@@ -1015,9 +1012,9 @@ const srcCases = [
     mutate: (s) => s.replace(', sc = o.scale ??', ', sc = o.scaleX ??'),
     cmd: ['node', ['tests/engine/lib-test.engine.test.mjs']], match: /bg opts vocabulary is derived from the fx implementation/ },
 
-  { name: 'validate · a hand-authored bg animated with CSS (which never runs)', file: 'films/scene/example-html-bg.json',
-    mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation:spin 2s linear infinite}.fan{'),
-    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /DEAD STILL/ },
+  { name: 'validate · a hand-authored bg driven off a scroll timeline (no seek reaches it)', file: 'films/scene/example-html-bg.json',
+    mutate: (s) => s.replace('<style>.fan{', '<style>.x{animation-timeline:scroll(root)}.fan{'),
+    cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /animation-timeline/ },
   { name: 'validate · a hand-authored bg that never says whether it is light or dark', file: 'films/scene/example-html-bg.json',
     mutate: (s) => s.replace('"tone": "light",', ''),
     cmd: ['node', ['core/validate/validate.mjs', 'films/scene/example-html-bg.json']], match: /declares no `tone`/ },

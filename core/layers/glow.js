@@ -313,8 +313,9 @@ export function frame(kit, el, L, t, scene, { preset, pulse, flash } = L) {
   if ((!pulse && !cycling && !flash) || !el.__glowInner) return;
   // Set the inner DETERMINISTICALLY for EVERY t, never early-return and leave a STALE value. Outside the
   // layer's own window driveClips normally hides the layer, so a stale inner used to be invisible; but
-  // sceneUnits can EXTEND the visible window past L.duration, and then the stale inner shows AND becomes
-  // render-order-dependent (a latent purity break sceneUnits exposed, MISTAKES). So compute a resting
+  // a beat unit's exit slide can EXTEND the visible window past L.duration, and then the stale inner
+  // shows AND becomes render-order-dependent (a latent purity break that extension exposed, MISTAKES).
+  // So compute a resting
   // value outside the window instead of skipping.
   const start = L.start ?? 0, end = start + (L.duration ?? 2);
   const inWindow = t >= start && t < end;

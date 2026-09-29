@@ -11,7 +11,10 @@ export const dirFor = (stage) => LEGACY[stage] || path.join(ROOT, 'quality', 'ba
 const keyOf = (subject) => path.basename(subject).replace(/\.(json|md|markdown)$/i, '');
 export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf(subject)}.json`);
 
-function fragmentsOf(subject) {
+/** The `.html` fragment paths a scene JSON names (`{"type":"html","src":…}` layers, any depth, plus
+ *  `bg` entries), relative to the repo root: the one scan `hashOf` already does, exported so a caller
+ *  that needs to know WHICH files (post-draft.mjs's own layout step) never re-walks the scene itself. */
+export function fragmentsOf(subject) {
   if (!/\.json$/i.test(subject)) return [];
   let data;
   try { data = JSON.parse(fs.readFileSync(subject, 'utf8')); } catch { return []; }

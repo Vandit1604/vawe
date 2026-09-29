@@ -125,6 +125,12 @@ these frames cannot answer, write \`CANNOT TELL\` for it and name the evidence t
 \`CANNOT TELL\` is a real answer and costs you nothing. A guess dressed as a finding costs the author a
 render, and it arrives in the same shape as a true one, so nobody downstream can tell them apart. If
 every dimension a frame CAN answer is clear and the rest are \`CANNOT TELL\`, the frame is not a FIX.
+
+## The sheet is a grid of separate frames, not a filmstrip
+Each tile's row/column position is a layout choice, not a moment in time. Do not compare an element's
+position across tiles in different rows and call it a "jump"; do not call a device that is meant to
+stay on screen across several tiles a "ghost". Read motion and position claims off same-scale,
+full-resolution stills in real time order, or off \`probe-frame\` numbers, never off where a tile sits.
 `;
 }
 
@@ -156,11 +162,14 @@ ${section('MOTION (score from what adjacent frames imply; write CANNOT_TELL in e
   "criteria": {
 ${criteria.map((c) => `    "${c.code}": {"score": 1-5, "evidence": "<quoted visual observation>", "t": <seconds>}`).join(',\n')}
   },
+  "overall": 1-10,
   "verdict": "PASS|FIX"
 }
 \`\`\`
 Every \`evidence\` string must name what you actually SEE (a timestamp/beat, the exact element, the
-exact defect), never a bare number. Then record it:
+exact defect), never a bare number. \`overall\` is YOUR OWN holistic 1-10 read of this cut, never
+averaged with the other judge's: \`make ship\` requires both independent judges at 7 or above. Then
+record it:
 \`node quality/gates/judge.mjs ${subject} --verdict-json ${outFile} --run ${run}\`
 `;
 }

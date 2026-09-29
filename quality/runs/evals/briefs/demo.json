@@ -21,7 +21,6 @@
   { "at": 2.8, "fx": "fade", "dur": 0.5, "mech": "seam" },
   { "at": 11.5, "fx": "cinematicZoom", "dur": 0.45, "mech": "seam" }
  ],
- "sceneUnits": true,
  "recipes": [
   { "recipe": "hover-click", "at": 5.7, "cursor": "cursor", "target": "save-btn", "params": { "approach": 5.7, "clickDelay": 0 } }
  ],

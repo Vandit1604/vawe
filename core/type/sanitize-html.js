@@ -27,6 +27,16 @@ const EMBED = new RegExp(`<\\s*(${EMBEDDING})\\b[\\s\\S]*?(?:<\\/\\s*\\1\\s*>|>)
 // and any orphan closing tag the pass above leaves behind (harmless to a browser, but "harmless" is
 // not a claim worth making twice about the same element)
 const EMBED_CLOSE = new RegExp(`<\\s*\\/\\s*(?:${EMBEDDING})\\s*>`, 'gi');
+
+// ONE EXCEPTION TO "script goes": `type="application/json"` (and `application/ld+json`). A browser
+// never executes a script element carrying either type, it is inert data the page reads with
+// `.textContent`, so it carries none of the risk the EMBEDDING list exists to refuse. `core/motion/
+// timeline.js`'s `timelineFromScript()` reads exactly this shape (`<script type="application/json"
+// id="timing">[…rows]</script>`) so a fragment can hold an editable timing sheet: an agent changes one
+// row's `at`/`to` in that JSON without touching the trusted JS that reads it. Held out BEFORE the EMBED
+// pass runs and restored after, so a real `<script>` (any other type, or none) is still stripped.
+const JSON_SCRIPT = /<script\b[^>]*\btype\s*=\s*(["'])(?:application\/json|application\/ld\+json)\1[^>]*>[\s\S]*?<\/script\s*>/gi;
+const HOLE = (i) => `\u0000json-script-${i}\u0000`;
 // The render server's own allowlist (internal/scene/scene.go's `served`), duplicated here because the
 // two have to agree: a path this sanitiser lets through and the server then 404s is a blank layer with
 // no error; a path the server would serve and this strips is the bug below.
@@ -67,11 +77,10 @@ const CSS_COMMENT = /\/\*[\s\S]*?\*\//g;
 export const stripComments = (src) => String(src || '').replace(COMMENT, '').replace(CSS_COMMENT, '');
 
 export function sanitizeHtml(src) {
-  return stripEscapingUrls(
-    stripComments(src)
-      .replace(EMBED, '')
-      .replace(EMBED_CLOSE, '')
-  ).replace(ON_HANDLER, '');
+  const held = [];
+  const holed = stripComments(src).replace(JSON_SCRIPT, (m) => HOLE(held.push(m) - 1));
+  const stripped = stripEscapingUrls(holed.replace(EMBED, '').replace(EMBED_CLOSE, '')).replace(ON_HANDLER, '');
+  return held.reduce((s, block, i) => s.replace(HOLE(i), block), stripped);
 }
 
 // SCOPE A FRAGMENT'S OWN STYLESHEET TO ITS OWN SUBTREE. A `<style>` block inside hand-authored markup
@@ -116,30 +125,27 @@ export function htmlSource(o, table, where) {
   return got;
 }
 
-// CSS `transition` and `animation` DO NOT RUN in a rendered scene. core/tokens.css kills both globally
-// with `!important`, because both are wall-clock: a transition fires off a property change and an
-// animation runs against the document timeline, so neither survives being seeked to frame 300 by one of
-// 8 parallel render workers. Time in this engine is a parameter, not something that elapses.
+// CSS `transition` and `animation` USED TO NOT RUN in a rendered scene: core/tokens.css killed both
+// globally with `!important`, because a render is SEEKED across 8 parallel workers and neither
+// survives being seeked to frame 300 on its own. That is no longer the gap. `seekAll(t)`
+// (core/timeline/clips.js) pauses and seeks every `document.getAnimations()` entry every frame,
+// CSS animation, CSS transition and Web Animation alike, wherever it lives, a stylesheet, an inline
+// style, or hand-authored markup inside an `html` layer. A fragment's own `@keyframes` loop is exactly
+// as deterministic as `motion`/`anim` now, because the same clock drives both.
 //
-// The failure that makes this worth a named check: hand-authored CSS animation does not error, it does
-// nothing. The fragment animates perfectly in a browser, renders as a dead still in the mp4, and the
-// author has no way to find out why. Silent substitution is the worst failure mode this codebase has
-// (engine-doctrine/MISTAKES.md), so the authoring gate names it and points at what does work: `var(--t)` (seconds),
-// written every frame, and `var(--p)`, 0→1 across the window, but ONLY if the layer DECLARES it:
-//   "vars": { "--p": [0, 1] }, "varsDur": 1.5, "varsDelay": 0.12, "varsEase": "easeOutQuart"
-// Without that declaration `--p` is simply undefined, `var(--p, 1)` falls back to 1, and the fragment
-// renders permanently settled: the same silent no-op this comment exists to warn about, one level down.
-// `blocks/kit.mjs`'s `sweep()` exists to stamp exactly those four fields onto a block's html layer.
-// The anchor also accepts a QUOTE, because `style="transition:opacity .3s"` is how hand-authored markup
-// and captured site UI write this far more often than a stylesheet rule does, and an inline style is
-// the one spelling that opens on a quote. Anchored on nothing at all, the check would fire on the word
-// inside a sentence; anchored only on `;{` and whitespace, it read every stylesheet and no attribute.
-const TIME_CSS = /(?:^|[;{"'\s])(transition|animation)(?:-[a-z-]+)?\s*:|@keyframes\b/i;
-export function timeCssUsed(src) {
-  // Comments first, for the reason stripComments gives: a note saying "no CSS transition here" is
+// What is STILL refused, because no seek reaches it: a timing source that is not the film's own clock.
+// `animation-timeline: scroll(...)`/`view(...)` ties an animation to the SCROLLING of an element this
+// engine never scrolls, so its progress has no relationship to `t` at all; seeking `t` would seek
+// nothing. The authoring gate names this one, rather than "no animation", and points at the film clock:
+// `var(--t)` (seconds) and `var(--p)` (0→1 across the window) are still there for CSS that wants to be
+// driven from a value rather than from `element.animate()`/`@keyframes`, and `core/motion/timeline.js`'s
+// `vawe.timeline()` computes Web Animations delays from the same beat vocabulary `motion` uses.
+const UNSEEKABLE_CSS = /animation-timeline\s*:\s*(?:scroll|view)\s*\(/i;
+export function unseekableCssUsed(src) {
+  // Comments first, for the reason stripComments gives: a note saying "no scroll-timeline here" is
   // prose, and reading it as a declaration refuses the fragment for the sentence explaining the rule.
-  const m = TIME_CSS.exec(stripComments(src));
-  return m ? (m[1] ? m[1].toLowerCase() : 'keyframes') : null;
+  const m = UNSEEKABLE_CSS.exec(stripComments(src));
+  return m ? 'animation-timeline' : null;
 }
 
 // A CSS DECLARATION THE PARSER REJECTS IS NOT AN ERROR ANYWHERE. It drops that one declaration, keeps

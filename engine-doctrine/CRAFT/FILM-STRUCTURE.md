@@ -58,7 +58,7 @@ register the answer lives in. A film can and should run several registers at onc
 | **Match cut** (shape · motion · colour · subject · thematic) | a form, a direction of travel, or a hue | the two frames genuinely rhyme | the rhyme is forced, and the cut reads as a trick |
 | **Long take / oner** | one unbroken space and time | the subject is a place, or a walk through a system | the content has no spatial logic, so the move is decoration |
 | **Camera travel across shots** | one continuous surface or path | the beats share a world | the beats are unrelated claims |
-| ↳ *how, here* | lay the beats out as STATIONS on a canvas bigger than the frame, then `cameraMove:{move:"travel", stations:[…]}`. The camera is global and does not reset at a boundary, so the flight replaces the cut. Reference films: `linear-journey.json` (12 keys, zero cuts) · `playhead.json` (20 keys, `s` 1→2.66 while it travels). Pair with the `plane` modifier or a truck moves every layer by the same amount and reads as a slide. Skill: `vawe-camera`. | | |
+| ↳ *how, here* | lay the beats out as STATIONS on a canvas bigger than the frame, then `cameraMove:{move:"travel", stations:[…]}`. The camera is global and does not reset at a boundary, so the flight replaces the cut. Reference films: a station-travel film (5760x2160, 12 keys, zero cuts) · `playhead.json` (20 keys, `s` 1→2.66 while it travels). Pair with the `plane` modifier or a truck moves every layer by the same amount and reads as a slide. Skill: `vawe-camera`. | | |
 | **Masking / reveal** | the object, partly concealed then shown | utility changes with what is exposed | nothing is being withheld |
 | **Cloning** | a new object visibly born from the old one | a one-to-many or many-to-one relation | used as a generic entrance |
 | **Dolly and zoom** | your position in one space | navigating between places in a system | there is no system, only slides |
@@ -190,8 +190,8 @@ Treat any confident decision framework on this topic, including Part 4 below, as
 ## Part 3, where our rule came from, and what it costs
 
 `no-continuous-object` came from one reference. The `vawe-continuous-action` skill states its own
-provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
-`films/scene/higgsfield-recreation.json`) is not a sequence of beats. It is one continuous action." The
+provenance: "The reference in this repo (`higgsfield.mp4`, first 5 seconds)
+is not a sequence of beats. It is one continuous action." The
 gate generalised that single sample into a floor for every film under 15 seconds
 (`CONTINUITY_MAX_DUR = 15` in the retired `direction-floor.mjs`).
 

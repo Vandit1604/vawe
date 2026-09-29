@@ -9,6 +9,7 @@ import { serveRepo, waitForEngine } from '../lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { marksOf, junctionTable, shotWindows } from '../../core/timeline/junctions.js';
 import { beatsOf } from '../../quality/gates/beats-of.mjs';
+import { writeReceipt } from '../lib/receipt.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -102,6 +103,10 @@ if (looksMode) {
   const cols = Math.min(4, tiles.length), sheet = `/tmp/preview_${format}_looks.png`;
   spawnSync('ffmpeg', ['-v', 'error', '-y', '-i', path.join(tmp, '%02d.png'), '-vf',
     `tile=${cols}x${Math.ceil(tiles.length / cols)}:padding=10:color=0x0a0a0c`, '-frames:v', '1', sheet]);
+  // Record that THIS scene (by content hash) had its styleframes reviewed, so `make stage`
+  // (quality/gates/stage.mjs) can stop advising a look review once one has actually happened, the
+  // same receipt mechanism `plan-judge` already uses instead of a second hand-kept flag.
+  writeReceipt('look', dataArg, { sheet });
   console.log(`${format}  ${duration.toFixed(1)}s  ${tiles.length} beat styleframe(s) (LOOK review, before motion)  →  ${sheet}   `
     + `[${((Date.now() - t0) / 1000).toFixed(1)}s]`);
   process.exit(0);

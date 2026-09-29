@@ -161,11 +161,11 @@ how many charts.
 **The 19, in campaign order.** Gallery flagships first (highest exposure, and the reference set every
 future author copies, so these go strict-clean), then the most self-indicting failure, then site assets:
 
-1. `example-product-promo` · `example-swiss-grid` · `example-kinetic-type`, the gallery flagships.
+1. Two since-removed gallery examples · `example-kinetic-type`, the gallery flagships.
 2. `showcase-vocabulary`: its own on-screen text reads *"17.8M looks from one file · 832 x 33 x 26 x 25"*
    and it draws no combinatorics at all. The most self-indicting film in the library.
 3. `hero-site` · `ransom-intro` · `showcase-cuts` · `showcase-type` · `showcase-stings` ·
-   `showcase-aspect` · `creed-launch` · `stripe`, shipped site assets. **These do not get the probe
+   `showcase-aspect` · `creed-launch` · a since-removed film, shipped site assets. **These do not get the probe
    waiver**: a public showcase of a capability is a film a stranger watches.
 4. `app-showcase` · `northwind` · `threadcite-3s` · `vawe-identity` · `showcase-intro` ·
    `showcase-flight` · `ledgerline-neon`. Everything else, taken opportunistically when touched.

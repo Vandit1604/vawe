@@ -6,7 +6,7 @@ group: skill
 
 # The 5-second budget and two worked examples
 
-Every number below is read off `films/scene/higgsfield-recreation.json`, which was measured frame by
+Every number below is read off the higgsfield reference, measured frame by
 frame from the reference.
 
 | Cost | Measured |

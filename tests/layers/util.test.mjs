@@ -8,7 +8,7 @@
 // therefore either fake a DOM (the "hand-rolled CSS grammar drifts from the real one" mistake this
 // check exists to avoid) or test nothing. So this launches the real engine in a real Chromium page,
 // the same way `make check GATE=snap-all` caught the reported bug live in the library (films/scene/one-word.json
-// and films/scene/vawe-oblique.json both shipped a bare `"color": "accent"`/`"text"` and rendered
+// and one other film both shipped a bare `"color": "accent"`/`"text"` and rendered
 // silently wrong until this check existed).
 //
 // Fixtures are written under tests/fixtures/films/ with a `stagetest-` prefix (never films/scene/,

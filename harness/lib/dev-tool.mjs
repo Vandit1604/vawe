@@ -58,6 +58,7 @@ export const TOOLS = {
   'reveal': () => ['harness/author/reveal.mjs', env.D, ...(env.ENTER ? ['--enter', env.ENTER] : []), ...(env.N ? ['--n', env.N] : []), ...(env.LAYERS === '1' ? ['--layers'] : [])],
   'route': () => ['harness/author/route.mjs', env.Q],
   'scenes': () => ['harness/author/scenes.mjs', env.D],
+  'ship-status': () => ['harness/dev/job-status.mjs', `D=${env.D}`],
   'screen': () => ['harness/author/screen.mjs', env.F, ...(env.KIND ? ['--kind', env.KIND] : []), ...(env.THEME ? ['--theme', env.THEME] : []), ...(env.INVENT ? ['--invent'] : []), ...(env.REF ? ['--ref', env.REF] : []), ...(env.ACT ? ['--act', env.ACT] : []), ...(env.W ? ['--w', env.W] : []), ...(env.H ? ['--h', env.H] : []), ...(env.D ? ['--film', env.D] : [])],
   'script': () => ['harness/author/script.mjs', env.SB, ...strict1()],
   'sfx-catalog': () => ['harness/author/sfx-catalog.mjs'],
@@ -97,6 +98,7 @@ export const CUSTOM = {
   'audit-test': () => spawnJs('quality/gates/contrast-regression.mjs', []) || spawnJs('quality/gates/measure-regression.mjs', []),
   'bench': () => runMake(['build']) || spawnJs('harness/dev/bench.mjs', ['all', ...(env.STAMP ? ['--stamp'] : []), ...json()]),
   'bench-session': () => spawnJs('harness/dev/bench.mjs', ['session', env.T, ...json()]),
+  'verify-batch': () => spawnSync('sh', [path.join(ROOT, 'harness/dev/verify-batch.sh')], { cwd: ROOT, stdio: 'inherit' }).status || 0,
   'clean': () => spawnSync('sh', ['-c', 'rm -rf bin out/*.mp4'], { cwd: ROOT, stdio: 'inherit' }).status || 0,
   'coverage-reel': () => spawnJs('harness/author/coverage-reel.mjs', []) || runMake(['video', 'D=films/scene/_coverage-reel.json']),
   'demo': () => {
@@ -107,12 +109,13 @@ export const CUSTOM = {
   },
   'edge-check': () => spawnJs('quality/gates/edge-check.mjs', [env.D, ...json()]),
   'formats': () => runMake(['build']) || (spawnSync(path.join(ROOT, 'bin/vawe'), ['--list'], { stdio: 'inherit', cwd: ROOT }).status || 0),
-  // new TYPE=<name> NAME=<film>: copy a frozen films/examples/<type>.json (+ its .brief.md, when one
-  // exists beside it) into films/scene/<film>.json, ready to draft-render. The example's own `content`
+  // new TYPE=<name> NAME=<film>: TYPE=recreation (or no TYPE) starts a recreation. Any other TYPE copies
+  // a frozen films/examples/<type>.json (+ its .brief.md, when one exists beside it) into films/scene/<film>.json, ready to draft-render. The example's own `content`
   // map is the thing to edit for a new brand: never the layers. One dispatcher entry rather than a new
   // top-level Makefile target, same reasoning every tool in this file already follows.
   'new': () => {
-    if (!env.TYPE || !env.NAME) {
+    if (!env.TYPE || env.TYPE === 'recreation') return spawnJs('harness/dev/recreation-new.mjs', []);
+    if (!env.NAME) {
       console.error('usage: make dev-tool X=new TYPE=<name> NAME=<film>  (TYPE names a films/examples/<type>.json)');
       return 2;
     }

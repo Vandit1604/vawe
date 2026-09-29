@@ -1,9 +1,9 @@
 ---
-when: you are about to author a fragment and want to know what has to exist first, you are deciding HOW MANY fragments a film needs, you are writing an `html` layer by hand, or a fragment renders as a dead still and nothing says why
-answers: "how to route a frame through the stage kit and ui-skills before writing markup · why the storyboard has to exist before any fragment · how many fragments a film needs and why beats, frames and fragments are three different counts · how to author a resting frame the engine can grab · what a layer actually wraps · the four ways a fragment moves · the three things the engine refuses and what to use instead · the traps that cost a render each · the defaults that make hand-written markup read as AI slop, and which of the two gates sees what"
+when: you are about to author a fragment and want to know what has to exist first, you are deciding HOW MANY fragments a film needs, you are writing an `html` layer by hand, or a fragment's motion does not show up in the render
+answers: "how to route a frame through the stage kit and ui-skills before writing markup · why the storyboard has to exist before any fragment · how many fragments a film needs and why beats, frames and fragments are three different counts · how to author a resting frame the engine can grab · what a layer actually wraps · the ways a fragment moves, including CSS animation/transition and Web Animations, all seeked deterministically · the one thing still refused and why · the traps that cost a render each · the defaults that make hand-written markup read as AI slop, and which of the two gates sees what"
 group: look
 applies-when: hasHtml
-confirm: "does each html fragment move by the engine's mechanisms, not CSS animation or transition?"
+confirm: "does each html fragment's motion pass the anim-traps gate (make check GATE=anim-traps), whichever mechanism it uses?"
 codes: design-drift, design-token-hint
 ---
 
@@ -13,8 +13,11 @@ codes: design-drift, design-token-hint
 
 - The stage kit ships type ROLES (`.kit-display` … `.kit-caption`), a three-level elevation ramp
   (`--kit-elev-1/2/3`), spacing and radius tokens. Use it for consistency; any CSS is also allowed for
-  size, shadow, radius and spacing (engine-doctrine/MISTAKES.md #621). Only `animation`/`transition`, `opacity`/
-  `filter` in the layer `css` prop, and `<script>` are refused outright, for determinism.
+  size, shadow, radius and spacing (engine-doctrine/MISTAKES.md #621).
+- `opacity`/`transform` on the layer `css` prop (and `animation`/`transition`, still, there specifically)
+  and `<script>` are refused outright: the first two are already written every frame by the engine's own
+  envelope, so a second writer is a fork, and nothing runs a script at all (it is stripped before it
+  ever reaches the DOM).
 - The STORYBOARD comes first. Sort its beat table into who-draws-what, then author only the
   fragments it asked for, against the `motion:` selectors it already named (MISTAKES #591).
 - Fragment count comes from the REQUIREMENT, one per hand-drawn surface, never one per beat: a
@@ -24,10 +27,18 @@ codes: design-drift, design-token-hint
   that moves separately, DOM in reading order, keyable numbers behind a `var()` with a fallback.
 - An `html` layer is content, not an escape hatch: every layer effect (`filter`, `modifiers`, `depth`,
   `origin`, `timeWarp`, `motion`, `vars`, camera) applies to it exactly as it does to a `text` layer.
-- Move a fragment with `--t` in `calc()`, `parts`, a `motion` track, or `vars`. Never CSS `animation`
-  or `transition`: the engine refuses both at boot, because they run on a clock it does not own.
-- Checkable action: does each html fragment move by the engine's mechanisms, not CSS animation or
-  transition?
+- Move a fragment with `--t` in `calc()`, `parts`, a `motion` track, `vars`, an `@keyframes` animation,
+  a CSS transition, or `element.animate()`. All of these are seeked, deterministically, by `seekAll(t)`
+  (core/timeline/clips.js) on every frame, the same clock `motion`/`anim` already use.
+- `core/motion/timeline.js`'s `vawe.timeline()` computes the delays for a relatively-timed sequence of
+  `element.animate()` calls, the hand-authored twin of a `motion` track. The one thing still refused:
+  `animation-timeline: scroll()`/`view()`, because it drives progress off scrolling, not off the film's
+  own `t` at all.
+- Every fragment carrying motion runs through `make check GATE=anim-traps`, which catches five specific
+  traps (a fill collision, a keyframe list with no end state, `var()` inside the `animation` shorthand, a
+  selector matching 0 elements, and a delay past the film's own end) before the render, not after.
+- Checkable action: does each html fragment's motion pass `make check GATE=anim-traps`, whichever
+  mechanism (engine track or seeked CSS/Web Animations) it uses?
 
 An `html` layer is not an escape hatch from the engine. It is the engine's **content**, and **every
 layer effect works on it, which is the architecture and not a coincidence**: `filter`, `modifiers`
@@ -543,7 +554,7 @@ blocks as `design-drift`, naming the fix. Silent with no design.md; `scale-drift
 
 ## ui-skills: what was used on this repo's frames, and what was refused
 
-Consulted 2026-09-09 while building `films/scene/_vawe-oblique.*.html`.
+Consulted 2026-09-09 while building a film's hand-written HTML fragments.
 
 **Used, both refiners rather than builders, so neither competes with the vendored `impeccable`:**
 
@@ -589,6 +600,10 @@ theme's ground moved from `#161616` to true `#000000`, with `--line`/`--line-2` 
 
 ## The one thing to remember
 
-A fragment animated with CSS renders as a **dead still**, and the engine tells you so at boot rather
-than letting you find out from the mp4. Every other way of moving it is above, and `parts` is the one
-you are most likely not to have tried.
+CSS `animation`, CSS `transition` and `element.animate()` all move a fragment now, exactly as
+deterministically as `motion`/`anim`/`parts`/`vars` do: `seekAll(t)` (core/timeline/clips.js) pauses and
+seeks every one of them, every frame.
+
+What still renders as a dead still is `animation-timeline: scroll()`/`view()`, because it is driven by
+scrolling, not by `t`, and the validator names it by saying so at boot rather than letting you find out
+from the mp4. `parts` is still the one you are most likely not to have tried.

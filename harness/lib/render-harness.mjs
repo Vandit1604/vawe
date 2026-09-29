@@ -43,10 +43,50 @@ export async function serveRepo({ root = REPO_ROOT, port = 0, route = null } = {
 // The flags a deterministic capture needs: no sandbox (CI), no scrollbars over the canvas, and a device scale the caller owns rather than the host's display.
 export const RENDER_ARGS = ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'];
 
+// A time-capped scene command (`perl -e 'alarm ...' exec`) SIGTERMs this process and leaves Chrome
+// behind, because puppeteer's browser.close() runs on the way out only if something calls it; a killed
+// node process never gets there. Tracked here once, so every caller that launches through this file (or
+// registers its own puppeteer.launch() with trackBrowser) gets the close for free instead of each one
+// re-inventing its own signal handler.
+const liveBrowsers = new Set();
+let handlersInstalled = false;
+
+function installCleanupHandlers() {
+  if (handlersInstalled) return;
+  handlersInstalled = true;
+  const closeAll = async () => {
+    const browsers = [...liveBrowsers];
+    liveBrowsers.clear();
+    for (const b of browsers) {
+      try { await b.close(); }
+      catch { try { b.process()?.kill('SIGKILL'); } catch { /* already gone */ } }
+    }
+  };
+  for (const sig of ['SIGTERM', 'SIGINT', 'SIGALRM']) {
+    process.on(sig, async () => { await closeAll(); process.kill(process.pid, sig === 'SIGALRM' ? 'SIGTERM' : sig); });
+  }
+  process.on('uncaughtException', async (e) => { await closeAll(); console.error(e); process.exit(1); });
+  process.on('unhandledRejection', async (e) => { await closeAll(); console.error(e); process.exit(1); });
+}
+
+/**
+ * trackBrowser(browser) → browser, registered so a SIGTERM/SIGINT/SIGALRM or an uncaught error closes
+ * it before this process exits. Idempotent to call more than once per process. Use this directly for a
+ * puppeteer.launch() call that bypasses launchPage below (scene-snap.mjs, snap-scenes.mjs: both need a
+ * fresh, non-default launch() of their own).
+ */
+export function trackBrowser(browser) {
+  installCleanupHandlers();
+  liveBrowsers.add(browser);
+  const origClose = browser.close.bind(browser);
+  browser.close = async (...a) => { liveBrowsers.delete(browser); return origClose(...a); };
+  return browser;
+}
+
 /** launchPage({ width, height, scale, args }) → { browser, page, close } */
 export async function launchPage({ width, height, scale = 1, args = RENDER_ARGS } = {}) {
   const { default: puppeteer } = await import('puppeteer');
-  const browser = await puppeteer.launch({ headless: true, args });
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args }));
   const page = await browser.newPage();
   await page.setViewport({ width, height, deviceScaleFactor: scale });
   return { browser, page, close: () => browser.close() };

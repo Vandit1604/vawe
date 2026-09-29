@@ -10,7 +10,7 @@
 # Every target whose name matches a real path MUST be listed here, or make sees the directory,
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
 .PHONY: stage next quiz ideate kit storyboard-check preview dev dev-range look probe-frame tune studio \
-  assemble check ship judge arsenal regen doctor test e2e study bench-fast install-hooks \
+  assemble check ship judge arsenal regen doctor test e2e study bench-fast install-hooks verify-batch \
   build build-all render all gen site study-tool dev-tool media video sections ref list help
 
 # make doctor: is the checkout ready to render? Today: is gsap vendored (assets/vendor/gsap.min.js,
@@ -230,6 +230,7 @@ media: ## [dev] capture, generation and audio/video processing tools, routed by 
 # seam check is the same `quality/gates/seams.mjs` `make seam-check` calls, no longer a step to
 # remember: flash, empty stage, ghost, resurrection and split seam, all in one pass.
 ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
+	@echo "  (if you backgrounded this: check with \`make dev-tool X=ship-status D=$(D)\`, do not sleep)"
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
 	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
 	t0=$$(node -e 'process.stdout.write(String(Date.now()))'); \
@@ -332,9 +333,48 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # reference). Writes out/match/<film>/: a dense strip per beat (reference row over render row), a
 # difference overlay, a mean SSIM, and a match.md ranking beats worst-to-best. STEP=<seconds> sets the
 # sample rate (default 0.1). engine-doctrine/CRAFT/RECREATION.md
-study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> instead scores a recreation against its reference, beat by beat.
+#
+# make study REF=<reference.mp4> SEE=1: let an agent SEE the reference cheaply, before studying it by
+# hand. Writes cuts/holds/beats/ease/OCR + a few 3x3 frame grids an agent reads with Read, and one
+# index.md naming them. quality/refs/<name>/see/ when REF sits in quality/refs/, scratch otherwise
+# (OUT=<dir> to force one); FRAMES=<n> sets the frame budget (default 12). harness/media/see.mjs
+#
+# make study REF=<reference.mp4> SHOT=<from>-<to>: a DENSE strip of one time window of the reference
+# (3x3 grids, timestamps on tiles) plus that window's motion curve every 0.5s. FPS=<n> sets the sample
+# rate (default 10). harness/media/see.mjs --shot
+#
+# make study REF=<reference.mp4> COMPARE=<draft.mp4>: reference vs draft AT THE SAME TIMESTAMPS: side-
+# by-side grids (reference top, draft bottom, every 0.25s) and a per-0.5s motion-energy table marking
+# "too still" where the draft is under half the reference. FROM=<s> TO=<s> narrows the window.
+# harness/media/see.mjs --compare
+#
+# make study REF=<fragment.html> PROBE=1 AT=<s> SEL=<css>: box, opacity, computed transform/filter, and
+# every active animation's current progress, for every element matching SEL at one instant. No render.
+# harness/media/see.mjs --probe
+#
+# make study REF=<fragment.html> LOOK=<s,s,...> [COMPARE=<reference.mp4>]: a still per time, gridded;
+# paired against the reference at the same timestamps when COMPARE names one. For checking the settled
+# look BEFORE touching motion. harness/media/see.mjs --look
+#
+# make study REF=<fragment.html> LAYOUT=<s,s,...> [D=<film.json>]: clipped/overflowing text, text
+# overlapping text, elements off the frame, and two opaque full-frame shots visible at once, read off
+# the DOM at each time. D=<film.json> also records a `layout` receipt for post-draft.mjs.
+# harness/media/see.mjs --layout
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference; SEE=1 REF=<video> sees it cheaply; SHOT=<from>-<to> REF=<video> is a dense strip; COMPARE=<draft.mp4> REF=<video> checks a draft's motion against it; PROBE=1 REF=<html> AT=<s> SEL=<css> reads one element's box/animation state; LOOK=<s,s,...> REF=<html> stills at key times (COMPARE=<mp4> pairs them against the reference); LAYOUT=<s,s,...> REF=<html> flags clipped/off-frame/overlapping text and stacked opaque shots.
 	@if [ -n "$(MATCH)" ]; then \
 	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
+	elif [ -n "$(SEE)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) $(if $(FRAMES),--frames $(FRAMES)); \
+	elif [ -n "$(SHOT)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --shot $(SHOT) $(if $(FPS),--fps $(FPS)); \
+	elif [ -n "$(PROBE)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --probe --at $(AT) --sel "$(SEL)"; \
+	elif [ -n "$(LOOK)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --look --times $(LOOK) $(if $(COMPARE),--ref $(COMPARE)); \
+	elif [ -n "$(LAYOUT)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --layout --times $(LAYOUT) $(if $(D),--film $(D)); \
+	elif [ -n "$(COMPARE)" ]; then \
+	  node harness/media/see.mjs $(REF) $(OUT) --compare $(COMPARE) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(D),--film $(D)); \
 	else \
 	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
 	fi
@@ -353,8 +393,13 @@ preview: ## [dev] render a single hand-written fragment (or a captured component
 stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>, or no D= for the roster, or Q="…" before a film exists)
 	@node quality/gates/stage.mjs $(D) $(if $(Q),--q "$(Q)") $(if $(JSON),--json,)
 
-next: ## [preflight] RUN the one command the stage names, then stop (D=<film>)
+next: ## [preflight] RUN the one command the stage names, then stop (D=<film>, or PAGE=<html> REF=<mp4> for a bare page's required-motion-match, no film needed; FROM=/TO= windows a half-size draft, FINAL=1 checks the full render)
+ifdef PAGE
+	@node quality/gates/anim-traps.mjs $(PAGE)
+	@node harness/media/see.mjs $(PAGE) --dom --ref $(REF) $(if $(D),--film $(D),) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(FINAL),--final)
+else
 	@node quality/gates/next.mjs $(D)
+endif
 
 # `make legacy` (the ratchet census/adopt/stamp) is RETIRED. quality/gates/legacy-manifest.json and the
 # author-check.mjs ratchet engine that read it are gone: quality/gates/legacy-fold.mjs folded every row
@@ -429,9 +474,12 @@ install-hooks: ## [maintenance] activate the version-controlled git hooks (pre-p
 	git config merge.vawe-generated.driver 'harness/dev/merge-generated.sh %O %A %B %P'
 	@echo "✓ git hooks active (.githooks):"
 	@echo "    commit-msg  refuses an assistant attribution trailer as it is written"
+	@echo "    pre-commit  em dashes, generated-file drift, bench-fast ratchets, word-action, scoped to this commit's files; warns on the wrong worktree branch"
 	@echo "    pre-push    push-guard (attribution + force-added ignored files) then the framework gates"
 	@echo "    post-merge  regenerates a generated file .gitattributes marked merge=vawe-generated"
+	@echo "    post-checkout  a linked worktree (even one made with plain \`git worktree add\`) gets its untracked library, fonts and node_modules link"
 	@echo "✓ merge.vawe-generated.driver registered (.gitattributes marks the owned paths)"
+
 
 # clean, author-check: `make dev-tool X=clean` / `make dev-tool X=author-check D=<file>`.
 
@@ -471,6 +519,7 @@ e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site
 
 judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>] [STRUCT=1] [RUNS=A,B] [VERDICT_JSON=<f> RUN=<id>] [COMPARE="a.json b.json"])
 	@$(if $(COMPARE),node quality/gates/judge.mjs --compare $(COMPARE),node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,) $(if $(filter 1,$(STRUCT)),--struct) $(if $(RUNS),--runs $(RUNS)) $(if $(VERDICT_JSON),--verdict-json $(VERDICT_JSON) --run $(RUN)))
+	@echo "  (judge is synchronous, it already returned above; do not poll or sleep for it)"
 
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────
 # renderFrame(n) is a pure function of n, so a simulation cannot run inside it: frame 412 exists only

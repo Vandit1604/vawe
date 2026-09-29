@@ -21,6 +21,7 @@ import puppeteer from "puppeteer";
 
 const PORT = 3100 + (process.pid % 400);
 const BASE = `http://localhost:${PORT}`;
+// A hang anywhere in a test fails at 90 s with a timeout, not after 17 min (measured under make e2e).
 const BOOT_MS = 20000;
 
 let server, browser;
@@ -41,7 +42,7 @@ async function open(setup) {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 1000 });
   if (setup) await setup(page);
-  await page.goto(`${BASE}/editor`, { waitUntil: "networkidle0" });
+  await page.goto(`${BASE}/editor`, { waitUntil: "load", timeout: 90000 });
   return page;
 }
 
@@ -77,7 +78,7 @@ after(async () => {
   server?.kill("SIGTERM");
 });
 
-test("the page renders and the starter scene boots the real engine", async () => {
+test("the page renders and the starter scene boots the real engine", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   const booted = await page
@@ -91,7 +92,7 @@ test("the page renders and the starter scene boots the real engine", async () =>
   await page.close();
 });
 
-test("a scene loads, plays and seeks", async () => {
+test("a scene loads, plays and seeks", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   await page.select("#ed-scene", "showcase-type");
@@ -119,7 +120,7 @@ test("a scene loads, plays and seeks", async () => {
   await page.close();
 });
 
-test("a scene using build-time sugar boots directly, no separate expand step", async () => {
+test("a scene using build-time sugar boots directly, no separate expand step", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   // saas-hero-launch is SHIPPED in the picker, and it AUTHORS four `"type":"block"` layers. It boots
@@ -141,12 +142,12 @@ test("a scene using build-time sugar boots directly, no separate expand step", a
   await page.close();
 });
 
-test("a broken scene shows the engine's own refusal, not a blank stage", async () => {
+test("a broken scene shows the engine's own refusal, not a blank stage", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   await page.click(".ed-cm .cm-content");
   await page.keyboard.down("Meta"); await page.keyboard.press("a"); await page.keyboard.up("Meta");
-  // Valid JSON the ENGINE rejects (bg is required), so this exercises the boot handshake rather
+  // Valid JSON the ENGINE rejects (no layers, no theme), so this exercises the boot handshake rather
   // than the local parser. Pasted, not typed: CodeMirror's bracket matching plus a fast keystroke
   // stream can leave a stray auto-inserted `}` or `]` mid-document, corrupting the very JSON this
   // test asserts on.
@@ -158,7 +159,7 @@ test("a broken scene shows the engine's own refusal, not a blank stage", async (
   }, '{"module":"scene","aspect":"16:9","duration":2,"layers":[]}');
   await page.waitForSelector(".ed-problem", { timeout: BOOT_MS });
   const text = await problem(page);
-  assert.match(text, /bg is required/, "the engine's own words never reached the page");
+  assert.match(text, /layers has 0 item/, "the engine's own words never reached the page");
   // The message names two faults on two lines. It was being collapsed into one paragraph and then
   // cut off, so the newline is the assertion.
   assert.match(text, /layers has 0 item\(s\), short of the 1 required/);
@@ -166,7 +167,7 @@ test("a broken scene shows the engine's own refusal, not a blank stage", async (
   await page.close();
 });
 
-test("a scene that 404s names the file", async () => {
+test("a scene that 404s names the file", { timeout: 90000 }, async () => {
   const page = await open(async (p) => {
     await p.setRequestInterception(true);
     p.on("request", (r) => (r.url().endsWith("/scenes/hero-site.json")
@@ -180,7 +181,29 @@ test("a scene that 404s names the file", async () => {
   await page.close();
 });
 
-test("every control is reachable by keyboard, and the code pane can be left", async () => {
+test("an asset that never answers still names itself, boot does not hang forever", { timeout: 90000 }, async () => {
+  // Regression for the class of bug this suite could not previously catch: a request that neither
+  // resolves nor rejects (dropped, not refused) leaves an awaited promise in core/engine/boot.js
+  // pending forever, and neither __engineReady nor __engineError is ever set — the same shape as the
+  // brew-launch snap-scenes timeout and this file's own 17-minute hang under load. Simulated here by
+  // intercepting the theme fetch and never calling respond/continue/abort on it, which is exactly
+  // what a stalled connection to a dead host looks like from the page's side.
+  const page = await open(async (p) => {
+    await p.setRequestInterception(true);
+    p.on("request", (r) => { if (!r.url().endsWith("/themes/vawe.json")) r.continue(); });
+  });
+  await settled(page);
+  await page.select("#ed-scene", "hero-site");
+  await page.waitForFunction(
+    () => document.querySelector(".sp-frame")?.contentWindow?.__engineError,
+    { timeout: 55000, polling: 500 },
+  );
+  const err = await page.evaluate(() => document.querySelector(".sp-frame").contentWindow.__engineError);
+  assert.match(err, /boot timed out/, "a dropped request must still resolve to a named __engineError");
+  await page.close();
+});
+
+test("every control is reachable by keyboard, and the code pane can be left", { timeout: 90000 }, async () => {
   const page = await open();
   await settled(page);
   await page.focus("#ed-scene");

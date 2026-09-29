@@ -125,7 +125,7 @@ and mix; it holds no opinion about what a film looks like.</p>
 <span class="m">lib-test</span> parses it out of the doc. BUILD runs once at boot. FRAME is
 <span class="m">renderFrame(n)</span>, top to bottom.</p>
 <pre><b>build</b>   measure → becomes → childOffsets
-<b>frame</b>   drawBg → driveClips → driveSceneUnits → resolveBoxes → <b>runTracks</b>
+<b>frame</b>   drawBg → driveClips → driveBeatUnits → resolveBoxes → <b>runTracks</b>
         → drawCaptions → drawCameraAndCut → drawStings → drawSeams → seekAll
 </pre>
 <p><code>resolveBoxes</code> runs before any track, so <code>scene.boxOf(id)</code> is authored
@@ -199,7 +199,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   Order-dependent by construction.</p>
   <p><code>clipStyleAt</code> now returns <code>transform: "none"</code> unconditionally, before the
   resting keys and the composed style, so any animation that does write a transform still wins.</p>
-  <div class="ev"><b>evidence</b> · turning the idle default on quarantined <span class="m">linear-agents</span>
+  <div class="ev"><b>evidence</b> · turning the idle default on a quarantined film
   at scale 0.9897 forwards, 0.9694 backwards. The bug predated the idle; the idle gave it a second voice.
   <br><b>fix</b> · <span class="m">core/timeline/clips.js</span>, one frozen constant, two spread sites.</div>
 </div>
@@ -281,7 +281,7 @@ resort: if the bad value has a write site, the refusal goes there and the class 
   <strong>28%</strong> sit on a longer span across 22 films, which is the real question; and
   <strong>58%</strong> carry a named curve.</p>
   <p>No code change, deliberately. <code>linear-motion</code> is already a ratcheted code, so the
-  blocking case is covered, and <code>higgsfield-recreation</code> is in that 28% on purpose: its
+  blocking case is covered, and a continuous-action recreation is in that 28% on purpose: its
   interior keys are linear because the surge and give-up of a real hand is what makes the pan read as
   somebody's. A gate here would manufacture defects.</p>
 </div>

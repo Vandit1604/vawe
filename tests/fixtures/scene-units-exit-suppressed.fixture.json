@@ -1,0 +1,16 @@
+{
+ "$schema": "../../films/scene/schema.json",
+ "module": "scene",
+ "theme": "default",
+ "aspect": "16:9",
+ "duration": 4,
+ "produced": false,
+ "bg": [{ "preset": "plain" }],
+ "cuts": [{ "t": 2, "style": "fade", "dur": 0.4 }],
+ "layers": [
+  { "id": "beatA", "type": "text", "text": "beat one", "x": 200, "y": 400, "size": 64,
+    "start": 0, "duration": 1.6, "out": "blur", "exitDur": 0.3 },
+  { "id": "beatB", "type": "text", "text": "beat two", "x": 200, "y": 400, "size": 64,
+    "start": 2, "duration": 2 }
+ ]
+}

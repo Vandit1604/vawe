@@ -14,8 +14,10 @@ import { expandTheme, isTokenFile } from '../theme/roles.js';
 import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
 import { validateAll } from '../validate/validate.mjs';
-import { produceBaseline, bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, bakeTextSizeRoles } from './produce.js';
-import { resolveFinishLayers, bakeDepthOfField } from './finish.js';
+import { bakeCameraMove, bakeCursorCarry, bakeDepth, bakeFocus, applyBgDefault } from './produce.js';
+import { bakeDepthOfField } from './finish.js';
+import { runProducePass } from './pipeline.js';
+import { lowerScene } from '../transitions/lower.js';
 
 // Every layer at every depth, for the survived-sugar check below. Local because it is two lines and
 // exists only to prove a bake ran; the render's own walks are elsewhere and read more than the type.
@@ -23,6 +25,7 @@ const flatDepth = (ls) => (ls || []).flatMap((L) => (L && typeof L === 'object')
   ? [L, ...flatDepth(L.children), ...flatDepth(L.layers)] : []);
 import { assertKeyHandles } from '../timeline/sequence.js';
 import { bakeTimeRemap } from '../timeline/time.js';
+import { applyDefaultFills } from '../timeline/clips.js';
 import { loadBeatGrid } from '../beats/index.js';
 import { safeArea, PLACEMENT, COMPOSITION_MARGIN, CAPTION_SKINS, CAPTION_LINES, captionSkin, frameOf, reportBounds, boundsCheckOn, resolveAnchorPoint } from '../layout/safe.js';
 import { loadRegistered, auditFonts, assertFamilies } from './fonts.js';
@@ -66,9 +69,15 @@ export const PROPS = {
 // `size` is the layer's declared extent on this axis, 0 when unset. `est` is the same thing with a
 // text-height fallback, used ONLY by the far edges (right/bottom): with size 0 they would place the
 // layer's near edge on the far safe line and hang the whole layer outside it.
+// OPTICAL_Y: the one number "the optical centre" means in this engine, ~46% down rather than the
+// geometric 50%, because a frame centred at the exact middle reads as sitting slightly low (the eye
+// weighs the lower half more). Shared by the `optical` keyword below and applyLoneTextCenter, so a
+// second copy of 0.46 never has the chance to drift from this one.
+const OPTICAL_Y = 0.46;
+
 function coordKeyword(v, dim, size, lo, hi, est) {
   return v === 'center' ? (dim - size) / 2
-    : v === 'optical' ? dim * 0.46 - size / 2
+    : v === 'optical' ? dim * OPTICAL_Y - size / 2
     : v === 'third1' ? dim / 3 - size / 2
     : v === 'third2' ? (2 * dim) / 3 - size / 2
     : (v === 'left' || v === 'top') ? lo
@@ -149,7 +158,32 @@ function applyAnchorPoint(L, hEst) {
   if (L.y != null && fy) L.y = Math.round(L.y - fy * (typeof L.h === 'number' ? L.h : hEst));
 }
 
+// LONE TEXT LAYER, CENTRED WITHOUT BEING ASKED: a scene with exactly one AUTHORED top-level layer,
+// itself a text/count layer naming no position at all, used to land its top-left corner at the page's
+// own flat fallback (films/scene/scene.js: `L.x ?? 60`, `L.y ?? 240`), a corner nobody chose (MISTAKES:
+// small type parked off-centre reads as a debug frame). It gets a real width (the safe box's own, so it
+// agrees with `pin:"stage"`) and `anchorPoint:"center"`, so its BOX, not just its corner, lands on the
+// frame's optical centre, the same point `pin:"center"` already resolves to (OPTICAL_Y above). An
+// author who names ANY of x/y/pin/col/anchorPoint keeps exactly what they wrote; this only fills the
+// hole a hurried one-layer scene left.
+// `_finish` layers (core/engine/finish.js) are already sitting in `data.layers` by the time this runs
+// (resolveFinishLayers runs before resolveCoords), so "lone" is judged against what the AUTHOR wrote,
+// never against the grade's own synthetic bloom/vignette layers.
+function applyLoneTextCenter(data, W, H, safe) {
+  const top = (data.layers || []).filter((L) => isObj(L) && !L._finish);
+  if (top.length !== 1) return;
+  const [L] = top;
+  if (L.type !== 'text' && L.type !== 'count') return;
+  if (L.x != null || L.y != null || L.pin || L.col != null || L.anchorPoint != null) return;
+  L.w = L.w ?? Math.round(safe.x1 - safe.x0);
+  L.align = L.align ?? 'center';
+  L.anchorPoint = 'center';
+  L.x = Math.round(W / 2);
+  L.y = Math.round(H * OPTICAL_Y);
+}
+
 function resolveLayerCoords(data, W, H, safe, inset, PIN) {
+  applyLoneTextCenter(data, W, H, safe);
   for (const L of flattenLayers(data.layers)) {
     applyLayerPin(L, PIN, W, safe);
     applyLayerCol(L, safe, inset);
@@ -546,12 +580,21 @@ function checkNoSurvivingDepth(data) {
     throw new Error(`\`depth\` survived bakeDepth on a ${L.type || 'text'} layer, it would render as nothing`);
 }
 
-// Theme, token refs, look and every produce-time bake, in the order resolveCoords and
-// produceBaseline need them (theme before resolveCoords, camera baked before depth/focus).
+// Theme, token refs, look, lowerScene + the shared produced-baseline pass (core/engine/pipeline.js),
+// then resolveCoords and every remaining produce-time bake (camera baked before depth/focus).
+// resolveCoords runs AFTER the shared pass, not before it: it is browser-only (needs a real frame
+// size) and Node's loadScene never resolves coordinates either, so both paths now decide cuts/
+// anticipate/size-roles/finish against the SAME (unresolved-coordinate) scene.
 async function resolveThemeAndBake(data, frame, width, height, safe) {
   const rawTheme = await fetchThemeFile(data.theme);
   const theme = await resolveTheme(rawTheme); // taste: palette/gradient/fonts/motion
   const tokenValues = await resolveThemeTokenValues(rawTheme);
+  // Lower `transitions[]` into `cuts`/`seams`/`stings` BEFORE resolving token refs and running the
+  // produced baseline below (core/engine/pipeline.js), the SAME order core/engine/expand.js loadScene
+  // runs for every Node gate. Used to run later, inside films/scene/scene.js build(), which is AFTER
+  // this whole function: a transitions-only scene then looked cut-less to produceBaseline and got a
+  // baseline cut injected on top of its own (engine-doctrine/MISTAKES.md).
+  lowerScene(data);
   Object.assign(data, resolveTokenRefs(data, tokenValues));
   const look = resolveLook(theme, { isLightBg, portrait: height > width }); // the whole-film default (engine-doctrine/CRAFT/THEME-LOOK.md)
   // A scene may override just the surface: `data.look.surface`, checked by the same lookErrors() the
@@ -559,10 +602,11 @@ async function resolveThemeAndBake(data, frame, width, height, safe) {
   // key already gets.
   const surfaceSpec = (isObj(data.look) && 'surface' in data.look) ? data.look.surface : look.surface;
   const surfaceLook = resolveSurfaceLook(surfaceSpec);
-  bakeTextSizeRoles(data, look);
-  resolveFinishLayers(data, width, height); // `finish` sugar → real layers, before they get baked like any other
+  // bakeTextSizeRoles + resolveFinishLayers + produceBaseline: the SAME shared pass loadScene runs,
+  // in the SAME order, before resolveCoords, which is browser-only (needs a real frame size) and
+  // therefore stays outside the shared pass rather than before it.
+  runProducePass(data, theme, frame, look);
   resolveCoords(data, width, height, safe, frame); // relative coords (%, center, edge, pin) → px
-  produceBaseline(data, theme, frame, look);
   if (data.cameraMove) throw new Error('cameraMove survived produceBaseline, it would render as nothing');
   bakeDepth(data);
   bakeFocus(data);
@@ -681,14 +725,27 @@ function checkWebglLive() {
     + `resampled layer takes one each), or split the beats so they do not co-exist.`);
 }
 
+// BOOT_TIMEOUT_MS bounds the whole boot body, not any one await in it, so it is the one place that
+// answers "why did neither __engineReady nor __engineError ever get set". Every step above this line
+// throws or resolves; nothing did until this existed: a captured component's own `document.fonts.ready`
+// (loadThemeFonts) can sit behind a real requestAnimationFrame, and Chrome throttles or fully withholds
+// rAF on a backgrounded/occluded tab, which many concurrent headless renders reliably produce
+// (measured: quality/gates/snap-scenes.mjs on brew-launch, and site/test/editor.test.mjs under load).
+// Native window.setTimeout still fires there (installVirtualClock keeps timers native through boot,
+// see its own comment), so a plain setTimeout race is the one thing not itself at risk of the same
+// stall. `boot(build)` is the ONE caller every render page and every test goes through, so a fix here
+// is a fix for all of them, not a timeout added at each call site.
+const BOOT_TIMEOUT_MS = 45000;
+
 export async function boot(build) {
   const params = new URLSearchParams(location.search);
   const dataUrl = params.get('data');
   const fps = Number(params.get('fps')) || FPS;
-  try {
+  const bootBody = async () => {
     await loadRegisteredFontsBestEffort();
     if (!dataUrl) throw new Error('no ?data= in the scene URL, nothing names the JSON to render');
     const data = await fetchJson(dataUrl, 'scene data');
+    applyBgDefault(data); // a bare scene with no `bg` gets the theme's own animated backdrop, before validation sees the gap
     await validateSceneData(data);
     const { frame, width, height, safe, aspectKey } = resolveRenderFrame(data, params);
     const theme = await resolveThemeAndBake(data, frame, width, height, safe);
@@ -698,6 +755,9 @@ export async function boot(build) {
     const beats = await loadBeatGrid(data, fetchJson);
     const vclock = installVirtualClock(); // before build(): scene closures see only virtual time
     const scene = build(data, fps, theme, { width, height, aspect: aspectKey, safe, frame, beats });
+    // every fragment's animations exist in the DOM now (build() is done); apply the fill:both default
+    // ONCE, before the first frame, never per frame (core/timeline/clips.js applyDefaultFills).
+    applyDefaultFills();
     await bakeSceneSeams(scene);
     if (params.get('debug') === 'safe') document.querySelector('.stage')?.classList.add('debug-safe');
     wireEngine(scene, fps, width, height, vclock, data);
@@ -707,8 +767,21 @@ export async function boot(build) {
     // and chromedp observes __engineReady in rAF-polling mode while rAF is still native.
     window.__engineReady = true;
     window.__engine.renderFrame(0);
+  };
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(
+      `boot timed out after ${BOOT_TIMEOUT_MS}ms: an awaited step never resolved or rejected `
+      + `(a hung fetch, a font load, or a requestAnimationFrame withheld from a backgrounded/`
+      + `contended tab). Neither __engineReady nor __engineError would otherwise be set.`,
+    )), BOOT_TIMEOUT_MS);
+  });
+  try {
+    await Promise.race([bootBody(), timeout]);
   } catch (e) {
     window.__engineError = String(e && e.stack ? e.stack : e);
     document.title = 'ENGINE_ERROR';
+  } finally {
+    clearTimeout(timer);
   }
 }

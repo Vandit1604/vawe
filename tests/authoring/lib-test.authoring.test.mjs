@@ -164,7 +164,7 @@ test('lib-test: authoring', async () => {
 // must be a zero-byte diff, in every formatting style the library actually uses. Everything else about
 // the editor can be redone; silently reformatting 104 scenes cannot be undone from a diff.
 {
-  for (const name of ['higgsfield-recreation', 'showcase', 'ledgerline-neon', 'demo-interactions']) {
+  for (const name of ['continuous-action-recreation', 'camera-move-fixture', 'ledgerline-neon', 'demo-interactions']) {
     const f = path.join(repoRoot, 'tests/fixtures/films', `${name}.json`);
     if (!fs.existsSync(f)) continue;
     const src = fs.readFileSync(f, 'utf8');
@@ -191,7 +191,7 @@ test('lib-test: authoring', async () => {
       ok(`patch-motion one key = a small diff (${name}, ${churn} lines)`, churn <= 8);
     }
   }
-  const hf = path.join(repoRoot, 'tests/fixtures/films/higgsfield-recreation.json');
+  const hf = path.join(repoRoot, 'tests/fixtures/films/continuous-action-recreation.json');
   if (fs.existsSync(hf)) {
     const src = fs.readFileSync(hf, 'utf8'), d = JSON.parse(src);
     const btn = d.layers.findIndex((l) => l.id === 'btn');
@@ -330,7 +330,7 @@ test('lib-test: authoring', async () => {
   {
     const from = { id: 'word', type: 'text', x: 300, y: 420, start: 0, duration: 3, becomes: 'card' };
     const to = { id: 'card', type: 'rect', x: 660, y: 340, w: 600, h: 400, start: 3, duration: 4 };
-    const scene = { duration: 8, sceneUnits: false, cuts: [{ t: 3, style: 'none' }], layers: [from, to] };
+    const scene = { duration: 8, cuts: [{ t: 3, style: 'none' }], layers: [from, to] };
     resolveBecomes(scene, (L) => (L === from ? { w: 780, h: 187 } : null));
     ok('a hand-authored becomes handover is measured too', to.motion[0].scale === +Math.max(780 / 600, 187 / 400).toFixed(3));
   }
@@ -397,16 +397,19 @@ test('lib-test: authoring', async () => {
   // word `<style>` in an author's note made STYLE_BLOCK span from the NOTE to the first real
   // `</style>`, so the fragment's whole stylesheet and the opening tag of its root element were
   // swallowed into one `@scope {…}` block. The panel rendered as unstyled text and nothing said a word.
-  const { sanitizeHtml, timeCssUsed, stripComments } = await import('../../core/type/sanitize-html.js');
+  const { sanitizeHtml, unseekableCssUsed, stripComments } = await import('../../core/type/sanitize-html.js');
   const noted = '<!-- write a <style> block, never a transition: it renders as a dead still -->'
     + '<style>.g{color:red}</style><div class="g">x</div>';
   ok('a comment naming <style> does not swallow the real stylesheet',
     scopeStyles(sanitizeHtml(noted)) === '<style>@scope {.g{color:red}}</style><div class="g">x</div>');
   ok('a comment naming <script> does not swallow the markup after it',
     sanitizeHtml('<!-- no <script> here --><div>x</div>') === '<div>x</div>');
-  ok('a comment explaining the transition ban is not a transition',
-    timeCssUsed('<!-- never write transition: .3s --><div style="color:red"></div>') === null);
-  ok('a real transition is still refused', timeCssUsed('<div style="transition:opacity .3s"></div>') === 'transition');
+  ok('a comment explaining the scroll-timeline ban is not a scroll-timeline',
+    unseekableCssUsed('<!-- never write animation-timeline: scroll() --><div style="color:red"></div>') === null);
+  ok('a real transition is now allowed, seekAll(t) makes it deterministic',
+    unseekableCssUsed('<div style="transition:opacity .3s"></div>') === null);
+  ok('a scroll-linked timeline is still refused, no seek reaches it',
+    unseekableCssUsed('<div style="animation-timeline: scroll(root)"></div>') === 'animation-timeline');
   ok('stripComments leaves markup carrying no comment alone', stripComments('<b>x</b>') === '<b>x</b>');
 }
 

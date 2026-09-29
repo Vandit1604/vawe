@@ -639,6 +639,12 @@ function onDarkOf(theme, inkAt, L, midT) {
 // MISTAKES #28, #79, #388). `trackingFor` is a RAMP, not a decision; the decision is here.
 function trackingCssOf({ theme, trackingFor, onDark }, L, midT) {
   // An explicit `tracking`/`ls` always wins: everything below is a DEFAULT, never an override.
+  // A bare number is a common author slip for "-0.04em": adapt it to em rather than hand
+  // `letterSpacing` an invalid CSS value that silently drops (safeguards adapt, not block).
+  if (typeof L.tracking === 'number') {
+    console.log(`adapted tracking-unit: ${L.id || L.type || 'layer'} tracking ${L.tracking} -> ${L.tracking}em`);
+    return `${L.tracking}em`;
+  }
   if (L.tracking != null) return L.tracking;
   if (L.ls != null) return L.ls;
   const size = L.size ?? 96;

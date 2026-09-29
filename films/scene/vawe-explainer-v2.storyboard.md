@@ -6,7 +6,7 @@ format: 1920x1080
 theme: "themes/vawe.json"
 duration: 22s
 angle: "The file is the film. No dashboard, no timeline: the scene file writes itself, its reach builds as rows, one real frame shows at three canvases, and the payoff lands last."
-threads: "a CONTINUOUS OBJECT: the accent rule that rides every cut on a hand-keyed track (acrossBeats under sceneUnits), travelling right through the build and back for the close + a bookend: the hook asks where the video is, the payoff answers: it is the file"
+threads: "a CONTINUOUS OBJECT: the accent rule that rides every cut on a hand-keyed track (acrossBeats), travelling right through the build and back for the close + a bookend: the hook asks where the video is, the payoff answers: it is the file"
 spectacle: "beat 5 (wordBlast) · 'One JSON.' oversized, arriving on the punch cut after the three-canvas picture. Every other beat stays restrained: type and chips on a turning light field."
 not: "no dashboard, no cursor clicking a UI, no gradient hero, no stock photos, no VO, no Inter, no centered slide deck, no emoji, no invented numbers"
 craft:

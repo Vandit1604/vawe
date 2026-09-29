@@ -11,7 +11,7 @@
 // `SHAPES` from here; nothing about the CLI or its flags changed.
 //
 // NOTHING HERE IS INVENTED. Every shape is the normalised measurement of a real film in this repo. `pan`
-// is the scroll rhythm of higgsfield-recreation beat 2, whose per-segment speed runs 1.03, 1.35, 1.29,
+// is the scroll rhythm of a continuous-action recreation's beat 2, whose per-segment speed runs 1.03, 1.35, 1.29,
 // 0.75, 0.59 of the average: the page surges and then gives up, which is what makes it read as somebody's
 // hand rather than as an animation of a page. `blast` is brew's four-key punctuation. Both would be
 // wrong if smoothed.
@@ -25,7 +25,7 @@ import { defineRegistry } from '../registry/registry.js';
 
 const r3 = (v) => +Number(v).toFixed(3);
 
-// The scroll rhythm measured off `higgsfield-recreation` beat 2, normalised: [fraction of the pan's
+// The scroll rhythm measured off the continuous-action recreation's beat 2, normalised: [fraction of the pan's
 // duration, fraction of its travel]. Moved here (from blueprints/beats-track.mjs) beside the shape that
 // consumes it: it is a bare literal array with no dependency of its own, and leaving it in blueprints/
 // would have made this core/ file import a blueprint to build its own vocabulary, exactly the load-bearing
