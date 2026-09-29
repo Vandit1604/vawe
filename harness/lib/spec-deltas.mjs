@@ -100,7 +100,8 @@ function timingParts(c, ref, page, re, pe) {
   const parts = [];
   const gapMs = (landT(pe, page) - landT(re, ref)) * 1000, gapF = (gapMs / 1000) * page.fps;
   const fitMs = ((re.land ? re.land.errFrames / ref.fps : 0) + (pe.land ? pe.land.errFrames / page.fps : 0)) * 1000;
-  const grading = grade(gapMs, Math.max(1000 / page.fps * LAND_FRAMES, allow(ref, page, 'landMs'), fitMs));
+  const tail = (re.fit && re.fit.kind === 'approach') || (pe.fit && pe.fit.kind === 'approach');
+  const grading = grade(gapMs, Math.max(1000 / page.fps * LAND_FRAMES, allow(ref, page, tail ? 'landMsTail' : 'landMs'), fitMs));
   if (grading !== 'none') parts.push(part('timing', Math.abs(gapF) * 2, `lands f${c.frame(page, landT(pe, page) * page.fps)}, ref f${c.frame(ref, landT(re, ref) * ref.fps)} -> ${Math.round(Math.abs(gapF))} frames ${sign(gapF, 'late', 'early')}`));
   if (pe.axis === re.axis && ['x', 'y'].includes(pe.axis)) {
     const kp = kPart(c, re, pe);

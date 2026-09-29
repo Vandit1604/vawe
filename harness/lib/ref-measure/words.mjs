@@ -133,6 +133,15 @@ export function refineWordTimes(V, apps, W, fps, windowS = 0.5) {
 
 const overlapsX = (a, b) => Math.min(a.x + a.w / 2, b.x + b.w / 2) - Math.max(a.x - a.w / 2, b.x - b.w / 2) > 0.5 * Math.min(a.w, b.w);
 
+// A word's box is as tall as its own letters: an ascender or capital reaches 0.75 of the font size above
+// the baseline, a word of only x-height letters 0.55, a descender adds 0.21. Measured on Helvetica bold;
+// the ratio between two fonts differs by a few percent, the ratio between two words does not.
+const ASCENDER = /[A-Zbdfhklt0-9]/, DESCENDER = /[gjpqy,;]/;
+export function fontPxOf(text, boxH) {
+  const up = ASCENDER.test(text) ? 0.75 : 0.55, down = DESCENDER.test(text) ? 0.21 : 0;
+  return boxH / (up + down);
+}
+
 /** Appearances -> [{ index, text, y, t0, t1, stagger, stepS, words[] }], words in reveal order. */
 export function buildLines(apps, fps) {
   const items = apps.map((a) => ({ a, box: restBox(a) })).sort((p, r) => p.a.t0 - r.a.t0 || p.box.x - r.box.x);
@@ -153,8 +162,34 @@ export function buildLines(apps, fps) {
     const stag = stagger(byTime, fps);
     const inX = [...l.items].sort((p, r) => p.box.x - r.box.x);
     return { index: i + 1, text: inX.map((o) => o.a.text).join(' '), y: r1(l.y), h: r1(l.h), t0: r3(l.t0), t1: r3(l.t1), ...stag,
-      words: byTime.map((o) => ({ word: o.a.text, line: i + 1, t0: r3(o.a.t0), t1: r3(o.a.t1), x: r1(o.box.x), y: r1(o.box.y), w: r1(o.box.w), h: r1(o.box.h) })) };
+      words: byTime.map((o) => ({ word: o.a.text, line: i + 1, t0: r3(o.a.t0), t1: r3(o.a.t1), x: r1(o.box.x), y: r1(o.box.y), w: r1(o.box.w), h: r1(o.box.h),
+        fontPx: r1(fontPxOf(o.a.text, o.box.h)), color: o.a.color || null })) };
   });
+}
+
+const hexOf = (c) => `#${c.map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
+
+/** The colour of a word's ink at rest: the commonest colour among the box's pixels far from the box's own ground. */
+export function inkColor(V, a, W, fps) {
+  const k = V.w / W, b = restBox(a);
+  const f = Math.min(V.n - 1, Math.round(((a.t0 + a.t1) / 2) * fps));
+  const px = [];
+  for (let y = Math.max(0, Math.floor((b.y - b.h / 2) * k)); y <= Math.min(V.h - 1, Math.ceil((b.y + b.h / 2) * k)); y++)
+    for (let x = Math.max(0, Math.floor((b.x - b.w / 2) * k)); x <= Math.min(V.w - 1, Math.ceil((b.x + b.w / 2) * k)); x++) {
+      const o = (f * V.w * V.h + y * V.w + x) * 3;
+      px.push([V.rgb[o], V.rgb[o + 1], V.rgb[o + 2]]);
+    }
+  if (!px.length) return null;
+  const bin = (p) => p.map((v) => v >> 4).join(',');
+  const count = new Map();
+  for (const p of px) count.set(bin(p), (count.get(bin(p)) || 0) + 1);
+  const ground = px.find((p) => bin(p) === [...count.entries()].sort((x, y) => y[1] - x[1])[0][0]);
+  const far = px.filter((p) => Math.abs(p[0] - ground[0]) + Math.abs(p[1] - ground[1]) + Math.abs(p[2] - ground[2]) > 150);
+  if (far.length < 4) return null;
+  const inks = new Map();
+  for (const p of far) { const key = bin(p); (inks.get(key) || inks.set(key, []).get(key)).push(p); }
+  const best = [...inks.values()].sort((x, y) => y.length - x.length)[0];
+  return hexOf([0, 1, 2].map((i) => best.reduce((s, p) => s + p[i], 0) / best.length));
 }
 
 function stagger(byTime, fps) {
