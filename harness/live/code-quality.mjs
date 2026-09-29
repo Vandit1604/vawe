@@ -58,7 +58,8 @@ process.stdin.on('end', () => {
   if (!fs.existsSync(file)) process.exit(0);
   const top = checkoutOf(file);
   const rel = path.relative(top, file);
-  if (rel.startsWith('..') || rel.startsWith('site/') || rel.includes('node_modules')) process.exit(0);
+  // A film page is authored work judged by its frames, not framework code judged by its shape.
+  if (rel.startsWith('..') || rel.startsWith('site/') || rel.startsWith('films/') || rel.includes('node_modules')) process.exit(0);
 
   const found = lintContent(rel, fs.readFileSync(file, 'utf8'));
   if (!found.length) process.exit(0);
