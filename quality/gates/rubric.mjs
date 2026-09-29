@@ -114,7 +114,17 @@ and what is moving. Say which side is better and by how much. A difference the r
 a defect unless the film's own intent explains it.
 ` : '');
 
-export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge', findings = [], reference = null, measuredSource }) {
+// harness/media/see.mjs --measure wrote these: the page read from its DOM, the reference from its pixels.
+const deltasSection = (deltas) => (deltas ? `## Measured deltas (numbers are settled facts)
+Code measured everything below on both sides. Do NOT re-measure it by eye and do not argue with a number.
+Your eyes are for taste, composition, hierarchy and brand. The one exception is a line marked
+"confirm by eye": look at the frame it names and say what you see. A fix you write for a measured line
+uses the number already given.
+
+${deltas.replace(/^# .*\n+/, '').replace(/^## /gm, '### ')}
+` : '');
+
+export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge', findings = [], reference = null, measuredSource, deltas = '' }) {
   return `# Judge sheet, ${name} (${frames} key frames, ${landscape ? 'landscape' : 'portrait'})
 
 READ \`${dir}/sheet.png\` and score EACH labeled frame against the rubric below. Be adversarial:
@@ -124,6 +134,7 @@ your job is to catch what the static gates can't SEE. Do NOT rationalize a flaw 
 ${houseStyleFor(brand)}
 
 ${measuredSection(findings, measuredSource)}
+${deltasSection(deltas)}
 ${referenceSection(reference)}
 ## Craft rubric: for EACH dimension, write the evidence FIRST, then the score
 For every dimension below, on every frame: name what you actually SEE (a timestamp/beat, the exact
@@ -168,7 +179,7 @@ full-resolution stills in real time order, or off \`probe-frame\` numbers, never
 // rubric is not a verdict, it's a coin with a thumb on it. `run` names which of the (at least two,
 // independent) judges is answering; `--compare` in judge.mjs then flags any criterion where the two
 // runs disagree by more than 2 points.
-export function structuredRubric({ name, subject, frames, landscape, dir, run, outFile, reference = null }) {
+export function structuredRubric({ name, subject, frames, landscape, dir, run, outFile, reference = null, deltas = '' }) {
   const criteria = structuredCriteria();
   const look = criteria.filter((c) => c.axis === 'look');
   const motion = criteria.filter((c) => c.axis === 'motion');
@@ -179,6 +190,7 @@ READ \`${dir}/sheet.png\`. Score EVERY criterion below. A score with no evidence
 recorded: \`node quality/gates/judge.mjs\` checks each entry has a non-empty \`evidence\` string and a
 \`t\` (seconds) before it writes anything down.
 
+${deltasSection(deltas)}
 ${referenceSection(reference)}
 ${section('LOOK (score this pass; static, per-frame)', look)}
 ${section('MOTION (score from what adjacent frames imply; write CANNOT_TELL in evidence if a still cannot answer it)', motion)}

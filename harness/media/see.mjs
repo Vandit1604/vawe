@@ -8,6 +8,8 @@
 //   node harness/media/see.mjs <html> --layout --times <s,...> [--film <film.json>]  · make study REF=<html> LAYOUT=<s,...>
 //   node harness/media/see.mjs <video|page.html> --phone | --strip <t> | --loop   · make critique PAGE=<html>
 //     (the critique views, harness/media/see-views.mjs: phone contact sheet, 12-frame strip, loop seam)
+//   node harness/media/see.mjs <page.html> [outDir] --measure [--ref <mp4>]  · make next PAGE= REF=, make critique PAGE= [REF=]
+//     (page from its DOM, reference from its pixels, numeric deltas in deltas.md; no --ref: page self-checks)
 //
 // --probe/--look/--layout exist because agents kept writing their own throwaway browser probe scripts
 // to debug a fragment (one stalled twice doing it), never made a still before touching motion (0 of 7
