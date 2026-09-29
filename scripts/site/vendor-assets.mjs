@@ -23,7 +23,7 @@ let copied = 0;
 let drift = 0;
 for (const tree of TREES) {
   const from = path.join(root, tree);
-  if (!fs.existsSync(from)) { console.error(`✗ missing ${tree}. Run: make gen X=fonts (fonts) or npm install (gsap).`); process.exit(1); }
+  if (!fs.existsSync(from)) { console.error(`✗ missing ${tree}. Run: node generators/media/fonts.mjs (fonts) or npm install (gsap).`); process.exit(1); }
   for (const f of walk(from)) {
     const rel = path.relative(root, f);
     if (SKIP(rel)) continue;

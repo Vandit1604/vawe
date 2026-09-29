@@ -329,7 +329,7 @@ export function run() {
 
   const recipes = makeRecipes();
   const badRecipes = recipes.filter((r) => !fs.existsSync(path.join(ROOT, r.script)));
-  const badSelfRefs = selfRefs();
+  const badSelfRefs = ONLY.length ? [] : selfRefs();
 
   const key = (o) => `${o.rel}:${o.line}:${o.target || o.ref}`;
   const dedupe = (a) => [...new Map(a.map((o) => [key(o), o])).values()];
