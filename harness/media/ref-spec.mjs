@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // harness/media/ref-spec.mjs: reference video -> SPEC.md + spec.json, the measured numbers an agent
-// rebuilds a film from. `make spec REF=<mp4>`. ffmpeg only (tesseract only with --ocr).
+// rebuilds a film from. `bin/vawe spec <mp4>`. ffmpeg only (tesseract only with --ocr).
 //
 //   node harness/media/ref-spec.mjs <ref.mp4> [--out dir] [--fps 29.97] [--elements 6] [--ocr] [--no-audio]
 //
