@@ -1,78 +1,50 @@
 ---
-when: "\"let's make a video\", before opening any JSON: which deliverable is this?"
-answers: "the priority-ordered deliverable table, how to read one route file instead of all of them, and where the per-deliverable intake questions live"
+when: "\"let's make a video\", before opening any file: which film type is this, and which prompt template and skill does it take?"
+answers: "the film-type table (nine types, first matching row wins), the prompts/ template and skill each one takes, and how to resolve the common ambiguities"
 group: crosscutting
 ---
 
-# ROUTING: which deliverable is this, before you plan or write JSON
+# ROUTING: which film type is this
 
-## AGENT SUMMARY
+A request maps to one film type. Match the table top down; the first row that fits wins. Match the
+FILM the request wants, not a word it happens to use. Then copy that row's template from `prompts/`
+into the session and load its skill. Every template stops before code at least once; honour the stop.
 
-- A request maps to exactly one deliverable in `engine-doctrine/CRAFT/routes/`. Match the priority table below,
-  top row that fits wins; match the DELIVERABLE the request wants, not a word it happens to use.
-- Read ONLY the matched route file. Each is ~50 lines: Input / Output / Trigger / Intake / which
-  blueprints and CRAFT docs to load next. Do not read every route file to decide; the table below is
-  enough to pick one, and the intake questions live in the file, not here.
-- `node harness/author/route.mjs "<what the user asked, plain english>"` runs this same table by
-  keyword match and prints the matched deliverable plus its intake questions. Use it before
-  `vawe-video-planning`'s interview, or when unsure which route file to open.
-- This table decides the DELIVERABLE. It does not replace the planning contract: `vawe-video-planning`
-  (or `AUTHORING-WALKTHROUGH.md` by hand) still runs the brief -> lock sheet -> JSON chain for whichever
-  deliverable this table names, and nothing renders before that lock sheet is agreed.
+## The film-type table
 
-## Why a table, not one long doctrine file
+| # | film type | the request | template (`prompts/`) | skill |
+|---|---|---|---|---|
+| 1 | reference rebuild | a reference mp4 must be matched: its light, pacing, type, curves | `reference-rebuild.md` | `vawe-reference` |
+| 2 | brand launch | market or show a real product, company or site from a URL, its own kit, real captures | `brand-launch-from-url.md` | `vawe-page` |
+| 3 | UI morph | one element becomes 8 to 12 UI states on a beat grid and loops | `ui-morph-loop.md` | `vawe-page` |
+| 4 | story or explainer | explain a topic, an article or data with invented visuals, nothing sold | `story-explainer.md` | `vawe-page` |
+| 5 | music video | a song exists; every cut on a downbeat, one spectacle at the drop | `music-video-beat-synced.md` | `vawe-page` |
+| 6 | long form | over 60 s, or more than one session or agent: brief, storyboard, guide, chapters | `directors-brief-long-form.md` | `vawe-page` |
+| 7 | app or game capture | a mechanism as an explorable model, then a scripted tour of it | `interactive-lab-capture.md` | `vawe-page` |
+| 8 | showreel | no brief: a taste probe, or learn the agent's defaults and then ban them | `showreel-one-liner.md` | `vawe-page` |
+| 9 | sting | a short unnarrated motion unit under 10 s: a logo reveal, a stat hit, a moving title | `beat-sheet.md` (one row per beat) | `vawe-continuous-action`, then `vawe-page` |
 
-`AGENTS.md` already carries every deliverable's doctrine, spread across its launch-video rules, the
-recreation section, and the demo/specimen section. That is complete but not routable: an agent reads
-the whole file to find the three sentences that apply to today's request. This table is the index:
-route once from a small table, read one small file, leave. Nothing here duplicates `AGENTS.md`; every route file points back at the CRAFT doc that
-already owns the doctrine.
+Every type then goes through the same loop: stills, draft, a fresh critique (`vawe-critique`,
+`critique-pass.md`), fix the named seconds, final. Under 15 s most types are one continuous action
+(`skills/vawe-continuous-action/SKILL.md`). A client brief with rights and claims to check takes
+`production-brief-acceptance.md` before any row. A sprite loop takes `pixel-art-sprite.md`.
 
-## The route table (priority order: first matching row wins)
+## Resolve the common ambiguities
 
-| Priority | Request | Route file | Type skill |
-|---|---|---|---|
-| 1 | Recreate a specific reference film or website's exact look, with no product of ours to sell | [`routes/recreation.md`](routes/recreation.md) | `vawe-type` (`reference/recreation.md`) |
-| 2 | Market or showcase a real product, company, or site from a URL or site-specific brief | [`routes/launch-video.md`](routes/launch-video.md) | `vawe-type` (`reference/launch.md`) |
-| 3 | Explain a topic, article, or data with invented visuals and no product/site capture | [`routes/explainer.md`](routes/explainer.md) | `vawe-type` (`reference/explainer.md`) |
-| 4 | A short, explicitly unnarrated, motion-first unit, typically under 10s (sting, stat hit, moving title) | [`routes/motion-graphic.md`](routes/motion-graphic.md) | `vawe-type` (`reference/sting.md`) |
-| 5 | Prove one mechanism, effect, or blueprint works; not a shippable film | [`routes/demo.md`](routes/demo.md) | `vawe-type` (`reference/demo.md`) |
+- A request that names a site but sells nothing (no product, no CTA) is a reference rebuild, not a
+  brand launch: the reference is the subject there, a product is the subject here.
+- A short sting cut from a captured site (a 6 s logo reveal for a real brand) is still a sting when
+  both hold: under 10 s and motion is the message. "Make a video from this site" with no length is a
+  brand launch.
+- Data with a real product behind it is a brand launch when the ask is to market it; an explainer
+  only when nothing is sold.
+- A song plus a product is a music video: the song owns the cuts, the product fills the frames.
+- Two rows fit: the shorter film wins.
+- Nothing fits: `beat-sheet.md`, then `vawe-page`, and say in the brief which row it almost was.
 
-Before finalizing the route, read the matched file's Trigger line. If the request does not satisfy it,
-keep going down the table instead of forcing the match. Each row's type skill is a PLAYBOOK (the spine,
-the blueprints to reach for, the rules that matter most, a worked example), kept as one page under
-`vawe-type/reference/`: load it after the route file, before writing JSON. A sixth type,
-`reference/talking-head.md`, is not in this priority table (a narrated presenter video is not one of
-the five deliverables above); reach it directly on request wording ("narrated", "voiceover",
-"presenter", "talking head").
+## The old JSON scene format (until the delete-json wave lands)
 
-**The route picks the deliverable; the DURATION picks the shape.** Every type's reference page states
-which shape it takes at which length, right under its own `## The spine` heading: under
-`CONTINUOUS_ACTION_MAX_S` (`harness/author/type-spines.mjs`, 15s) most types are ONE CONTINUOUS ACTION
-(`skills/vawe-continuous-action/SKILL.md`), not the multi-beat spine the route file's Output section
-describes for a longer film. `talking-head` and `recreation` are the two exceptions and say so on their
-own page. Each `vawe-type/reference/<type>.md` names its beat spine and its continuous-action
-threshold, so the storyboard is written to the right shape by reading the page, not from memory.
-
-## Resolve common ambiguities
-
-- A request that names a site but wants to sell nothing (no product, no CTA) is `recreation`, not
-  `launch-video`: the reference IS the subject there, a product is the subject here.
-- A short sting cut FROM a captured site (e.g. a 6s logo reveal for a real brand) is still
-  `motion-graphic` when length and "unnarrated, motion is the message" both hold; a generic "make a
-  video from this site" with no length constraint is `launch-video`.
-- Data with a real company or product behind it still routes to `launch-video` if the ask is to market
-  that product; route to `explainer` only when nothing is being sold.
-- None of the five rows fit: the deliverable is still a `scene` JSON either way (this engine has one
-  module). Fall back to `AGENTS.md`'s full planning chain directly, starting at
-  `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`.
-
-## How to read one route file
-
-Each file under `routes/` has the same five sections, in this order: **Input** (what you're handed),
-**Output** (what ships, and its length band), **Trigger** (the sentence that must be true for this
-route to apply), **Intake** (the must-ask questions specific to this deliverable, feeding
-`vawe-video-planning`'s lock sheet), **Blueprint family + docs** (which skill/CRAFT doc/blueprint to
-load next). Read that one file. The intake questions there are additive to the five brief lines every
-deliverable shares (SUBJECT / DATA / PAYOFF / AUDIENCE / FEELING, `AGENTS.md` "THE BRIEF"), never a
-replacement for them.
+A `films/scene/<name>.json` film still routes through `routes/` (`recreation.md`, `launch-video.md`,
+`explainer.md`, `motion-graphic.md`, `demo.md`) and the type playbooks in `vawe-type`, and is
+written with `vawe-scene-authoring`, `vawe-name-the-effect` and `vawe-video-planning`. Do not start
+a new film in that format.
