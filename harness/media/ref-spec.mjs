@@ -17,6 +17,7 @@ import { detectCuts } from './shot-detect.mjs';
 import { readWav } from './wav-read.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
+import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
 
 const GRID_W = 320;
 const DIFF_THR = 6;
@@ -208,7 +209,8 @@ function blobShift(A, B, w, h, blob) {
     return n > 4 ? s / n + 0.02 * (Math.abs(vx) + Math.abs(vy)) : Infinity;
   };
   let best = { vx: 0, vy: 0, c: sad(0, 0, 1) };
-  for (let vy = -24; vy <= 24; vy += 2) for (let vx = -24; vx <= 24; vx += 2) {
+  const R = Math.min(72, Math.max(24, 1.6 * (blob.x1 - blob.x0), 1.6 * (blob.y1 - blob.y0)));
+  for (let vy = -R; vy <= R; vy += 2) for (let vx = -R; vx <= R; vx += 2) {
     const c = sad(vx, vy, 2);
     if (c < best.c) best = { vx, vy, c };
   }
@@ -244,20 +246,32 @@ function trackShot(V, f0, f1, cams, maxTracks) {
     const still = cam.s === 1 && cam.dx === 0 && cam.dy === 0;
     const B = V.frame(f);
     const A = still ? V.frame(f - 1) : warp(V.frame(f - 1), B, w, h, cam);
+    const pairs = [], cands = [];
     for (const b of findBlobs(A, B, w, h)) {
       const { vx, vy } = blobShift(A, B, w, h, b);
       const bw = b.x1 - b.x0 + 1, bh = b.y1 - b.y0 + 1;
       const mx = (b.x0 + b.x1) / 2, my = (b.y0 + b.y1) / 2;
-      const pt = { f, x: mx + vx / 2, y: my + vy / 2, vx, vy, w: Math.max(2, bw - Math.abs(vx)), h: Math.max(2, bh - Math.abs(vy)), area: b.area };
-      let hit = null, hitD = Infinity;
+      // Overlapping old and new boxes make one blob (union of both); a jump longer than the box makes two blobs, the new one at its own centre.
+      const union = { f, x: mx + vx / 2, y: my + vy / 2, vx, vy, w: Math.max(2, bw - Math.abs(vx)), h: Math.max(2, bh - Math.abs(vy)), area: b.area };
+      const whole = { f, x: mx, y: my, vx, vy, w: bw, h: bh, area: b.area };
+      const ci = cands.push(union.w >= 3 && union.h >= 3 ? union : whole) - 1;
       for (const t of tracks) {
         const last = t.pts[t.pts.length - 1];
-        if (last.f !== f - 1 || t.taken === f) continue;
-        const d = Math.hypot(pt.x - (last.x + last.vx), pt.y - (last.y + last.vy));
-        if (d < Math.max(12, 1.2 * Math.max(bw, bh)) && d < hitD) { hit = t; hitD = d; }
+        if (last.f !== f - 1) continue;
+        for (const pt of [union, whole]) {
+          const d = Math.hypot(pt.x - (last.x + last.vx), pt.y - (last.y + last.vy));
+          const dw = Math.abs(pt.w - last.w) + Math.abs(pt.h - last.h);
+          if (d < Math.max(12, 1.2 * Math.max(bw, bh)) && dw <= 0.35 * (last.w + last.h)) pairs.push({ t, ci, pt, score: d + 1.5 * dw });
+        }
       }
-      if (hit) { hit.pts.push(pt); hit.taken = f; } else tracks.push({ pts: [pt], taken: f });
     }
+    const usedTrack = new Set(), usedBlob = new Set();
+    for (const p of pairs.sort((a, b) => a.score - b.score)) {
+      if (usedTrack.has(p.t) || usedBlob.has(p.ci)) continue;
+      p.t.pts.push(p.pt);
+      usedTrack.add(p.t); usedBlob.add(p.ci);
+    }
+    cands.forEach((pt, ci) => { if (!usedBlob.has(ci)) tracks.push({ pts: [pt] }); });
   }
   const scored = tracks.filter((t) => t.pts.length >= 3).map((t) => {
     const travel = t.pts.reduce((s, p) => s + Math.hypot(p.vx, p.vy), 0);
@@ -282,20 +296,21 @@ function modalColor(V, f, cx, cy, bw, bh) {
   return top ? hex(top[0]) : null;
 }
 
-function analyseTrack(track, V, fps, sc) {
-  const pts = track.pts;
+function analyseTrack(track, V, fps, sc, cameraStill) {
+  const refined = cameraStill ? refineTrack(V, track.pts) : null;
+  const pts = refined ? refined.pts : track.pts;
   const dx = pts[pts.length - 1].x - (pts[0].x - pts[0].vx), dy = pts[pts.length - 1].y - (pts[0].y - pts[0].vy);
   const axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
   const v = (p) => (axis === 'x' ? p.vx : p.vy);
   const pos = pts.map((p) => p[axis]);
-  const p0 = pos[0] - v(pts[0]), p1 = pos[pos.length - 1], D = p1 - p0;
+  const p0 = refined && refined.before ? refined.before[axis] : pos[0] - v(pts[0]), p1 = pos[pos.length - 1], D = p1 - p0;
   const speeds = pts.map((p) => Math.hypot(p.vx, p.vy) * sc);
   const peak = Math.max(...speeds);
   const moving = speeds.filter((s) => s >= 0.05 * peak).length;
   const out = { f0: pts[0].f, f1: pts[pts.length - 1].f, axis, frames: pts.length, movingFrames: moving,
     from: [r1(pts[0].x * sc), r1(pts[0].y * sc)], to: [r1(pts[pts.length - 1].x * sc), r1(pts[pts.length - 1].y * sc)],
     size: [r1(median(pts.map((p) => p.w)) * sc), r1(median(pts.map((p) => p.h)) * sc)], peakSpeed: r1(peak), overshoot: null, fit: null };
-  Object.assign(out, summariseMove(pos, p0, p1, fps, sc));
+  Object.assign(out, summariseMove(pos, p0, p1, fps, sc, { f0: pts[0].f }));
   const last = pts[pts.length - 1];
   out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
   const travel = Math.abs(D) * sc;
@@ -486,7 +501,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
     console.error(`  shot ${i + 1}: frames ${f0}-${f1 - 1}`);
     const tracks = trackShot(V, f0, f1, cams, maxElements);
     const elements = tracks.map((t, j) => {
-      const e = analyseTrack(t, V, fps, sc);
+      const e = analyseTrack(t, V, fps, sc, cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0));
       const travel = Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]);
       return { id: `${i + 1}.${j + 1}`, ...e, big: travel >= 0.03 * W || e.blur != null };
     });
