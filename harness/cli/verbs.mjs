@@ -90,9 +90,10 @@ export const VERBS = [
       { name: 'step', type: 'number', default: 0.1, help: 'seconds between samples' },
       { name: 'min', type: 'number', default: 0.5, help: 'exit 1 when any second falls below this SSIM' },
       { name: 'out', type: 'path', default: 'out/coverage-<ours>.png', help: 'sheet of the 6 worst moments' },
+      { name: 'text', type: 'bool', help: 'check the on-screen words instead of SSIM: every reference row present in yours within 0.25 s; exit 1 when a row is missing' },
     ],
     example: 'vawe coverage out/my-launch.mp4 --ref refs/ad.mp4 --min 0.6',
-    build: (v, [ours]) => [{ script: 'harness/media/coverage.mjs', args: [ours, ...opt('--ref', v.ref), ...opt('--step', v.step), ...opt('--min', v.min), ...opt('--out', v.out)] }],
+    build: (v, [ours]) => [{ script: 'harness/media/coverage.mjs', args: [ours, ...opt('--ref', v.ref), ...opt('--step', v.step), ...opt('--min', v.min), ...opt('--out', v.out), ...(v.text ? ['--text'] : [])] }],
     next: () => 'look at the sheet, then vawe compare --page at the worst seconds',
   },
   {
