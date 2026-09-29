@@ -4,7 +4,7 @@
 //
 //   node harness/media/ref-spec.mjs <ref.mp4> [--out dir] [--fps 29.97] [--elements 6] [--ocr] [--no-audio]
 //
-// Reuses: shot-detect.mjs detectCuts (cuts), core/beats/detect.js (audio onsets, tempo, beat grid),
+// Reuses: ref-measure/transition.mjs (cuts and how each one changes the picture), core/beats/detect.js (audio onsets, tempo, beat grid),
 // core/motion/springs.js approach()/spring() (the curves an arrival is fitted to), see.mjs ocrWords.
 // Every frame is decoded at 320px wide; positions and sizes are reported in reference pixels.
 import fs from 'node:fs';
@@ -13,10 +13,15 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { probeSize } from '../lib/frame-forensics.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
-import { detectCuts } from './shot-detect.mjs';
 import { readWav } from './wav-read.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
+import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
+import { findTransitions } from '../lib/ref-measure/transition.mjs';
+import { measureLayout } from '../lib/ref-measure/layout.mjs';
+import { transitionRow, easingLines, layoutLines, audioRow } from '../lib/ref-measure/spec-lines.mjs';
+import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
+import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 
 const GRID_W = 320;
 const DIFF_THR = 6;
@@ -49,32 +54,9 @@ function decode(video, fps, dir, W, H) {
   return { w, h, n, rgb: buf, gray, frame: (i) => gray.subarray(i * w * h, (i + 1) * w * h) };
 }
 
-// ── cuts ─────────────────────────────────────────────────────────────────────────────────────────
-function frameDiffs(V) {
-  const d = new Float64Array(V.n);
-  for (let i = 1; i < V.n; i++) {
-    const a = V.frame(i - 1), b = V.frame(i);
-    let s = 0;
-    for (let k = 0; k < a.length; k += 3) s += Math.abs(a[k] - b[k]);
-    d[i] = s / (a.length / 3);
-  }
-  return d;
-}
-
-function findCuts(video, V, fps, scratchDir) {
-  const { cuts } = detectCuts(video, scratchDir, 0.3, 0.2);
-  const diffs = frameDiffs(V);
-  const sorted = [...diffs].sort((a, b) => a - b);
-  const median = Math.max(sorted[Math.floor(sorted.length / 2)], 0.05);
-  const frames = [];
-  for (const c of cuts) {
-    const f0 = Math.round(c.t * fps);
-    let best = Math.max(1, f0 - 2);
-    for (let f = Math.max(1, f0 - 2); f <= Math.min(V.n - 1, f0 + 2); f++) if (diffs[f] > diffs[best]) best = f;
-    if (!frames.some((x) => x.frame === best))
-      frames.push({ frame: best, t: r3(best / fps), score: r3(c.score), spike: r1(diffs[best] / median) });
-  }
-  return frames.sort((a, b) => a.frame - b.frame);
+// ── cuts: every shot change, classified, in ref-measure/transition.mjs ─────────────────────────────
+function findCuts(V, fps) {
+  return findTransitions(V).map((t) => ({ frame: t.endFrame, t: r3(t.endFrame / fps), spike: t.spike, transition: { ...t, startT: r3(t.startFrame / fps) } }));
 }
 
 // ── camera: global zoom + pan between two frames ─────────────────────────────────────────────────
@@ -208,7 +190,8 @@ function blobShift(A, B, w, h, blob) {
     return n > 4 ? s / n + 0.02 * (Math.abs(vx) + Math.abs(vy)) : Infinity;
   };
   let best = { vx: 0, vy: 0, c: sad(0, 0, 1) };
-  for (let vy = -24; vy <= 24; vy += 2) for (let vx = -24; vx <= 24; vx += 2) {
+  const R = Math.min(72, Math.max(24, 1.6 * (blob.x1 - blob.x0), 1.6 * (blob.y1 - blob.y0)));
+  for (let vy = -R; vy <= R; vy += 2) for (let vx = -R; vx <= R; vx += 2) {
     const c = sad(vx, vy, 2);
     if (c < best.c) best = { vx, vy, c };
   }
@@ -244,20 +227,32 @@ function trackShot(V, f0, f1, cams, maxTracks) {
     const still = cam.s === 1 && cam.dx === 0 && cam.dy === 0;
     const B = V.frame(f);
     const A = still ? V.frame(f - 1) : warp(V.frame(f - 1), B, w, h, cam);
+    const pairs = [], cands = [];
     for (const b of findBlobs(A, B, w, h)) {
       const { vx, vy } = blobShift(A, B, w, h, b);
       const bw = b.x1 - b.x0 + 1, bh = b.y1 - b.y0 + 1;
       const mx = (b.x0 + b.x1) / 2, my = (b.y0 + b.y1) / 2;
-      const pt = { f, x: mx + vx / 2, y: my + vy / 2, vx, vy, w: Math.max(2, bw - Math.abs(vx)), h: Math.max(2, bh - Math.abs(vy)), area: b.area };
-      let hit = null, hitD = Infinity;
+      // Overlapping old and new boxes make one blob (union of both); a jump longer than the box makes two blobs, the new one at its own centre.
+      const union = { f, x: mx + vx / 2, y: my + vy / 2, vx, vy, w: Math.max(2, bw - Math.abs(vx)), h: Math.max(2, bh - Math.abs(vy)), area: b.area };
+      const whole = { f, x: mx, y: my, vx, vy, w: bw, h: bh, area: b.area };
+      const ci = cands.push(union.w >= 3 && union.h >= 3 ? union : whole) - 1;
       for (const t of tracks) {
         const last = t.pts[t.pts.length - 1];
-        if (last.f !== f - 1 || t.taken === f) continue;
-        const d = Math.hypot(pt.x - (last.x + last.vx), pt.y - (last.y + last.vy));
-        if (d < Math.max(12, 1.2 * Math.max(bw, bh)) && d < hitD) { hit = t; hitD = d; }
+        if (last.f !== f - 1) continue;
+        for (const pt of [union, whole]) {
+          const d = Math.hypot(pt.x - (last.x + last.vx), pt.y - (last.y + last.vy));
+          const dw = Math.abs(pt.w - last.w) + Math.abs(pt.h - last.h);
+          if (d < Math.max(12, 1.2 * Math.max(bw, bh)) && dw <= 0.35 * (last.w + last.h)) pairs.push({ t, ci, pt, score: d + 1.5 * dw });
+        }
       }
-      if (hit) { hit.pts.push(pt); hit.taken = f; } else tracks.push({ pts: [pt], taken: f });
     }
+    const usedTrack = new Set(), usedBlob = new Set();
+    for (const p of pairs.sort((a, b) => a.score - b.score)) {
+      if (usedTrack.has(p.t) || usedBlob.has(p.ci)) continue;
+      p.t.pts.push(p.pt);
+      usedTrack.add(p.t); usedBlob.add(p.ci);
+    }
+    cands.forEach((pt, ci) => { if (!usedBlob.has(ci)) tracks.push({ pts: [pt] }); });
   }
   const scored = tracks.filter((t) => t.pts.length >= 3).map((t) => {
     const travel = t.pts.reduce((s, p) => s + Math.hypot(p.vx, p.vy), 0);
@@ -282,20 +277,31 @@ function modalColor(V, f, cx, cy, bw, bh) {
   return top ? hex(top[0]) : null;
 }
 
-function analyseTrack(track, V, fps, sc) {
-  const pts = track.pts;
+// One coordinate per frame from where the element sat still before the move to where it rests after it.
+function positionSeries(refined, pts, axis) {
+  const lead = refined ? refined.lead : [], tail = refined ? refined.tail : [];
+  if (!lead.length) {
+    const pos = [...pts, ...tail].map((p) => p[axis]);
+    return { pos, p0: pos[0] - (axis === 'x' ? pts[0].vx : pts[0].vy), f0: pts[0].f };
+  }
+  const seq = [...lead, ...pts, ...tail];
+  return { pos: seq.slice(1).map((p) => p[axis]), p0: seq[0][axis], f0: seq[1].f };
+}
+
+function analyseTrack(track, V, fps, sc, span) {
+  const refined = span.still ? refineTrack(V, track.pts, span) : null;
+  const pts = refined ? refined.pts : track.pts;
   const dx = pts[pts.length - 1].x - (pts[0].x - pts[0].vx), dy = pts[pts.length - 1].y - (pts[0].y - pts[0].vy);
   const axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
-  const v = (p) => (axis === 'x' ? p.vx : p.vy);
-  const pos = pts.map((p) => p[axis]);
-  const p0 = pos[0] - v(pts[0]), p1 = pos[pos.length - 1], D = p1 - p0;
+  const { pos, p0, f0 } = positionSeries(refined, pts, axis), p1 = pos[pos.length - 1], D = p1 - p0;
   const speeds = pts.map((p) => Math.hypot(p.vx, p.vy) * sc);
   const peak = Math.max(...speeds);
   const moving = speeds.filter((s) => s >= 0.05 * peak).length;
   const out = { f0: pts[0].f, f1: pts[pts.length - 1].f, axis, frames: pts.length, movingFrames: moving,
     from: [r1(pts[0].x * sc), r1(pts[0].y * sc)], to: [r1(pts[pts.length - 1].x * sc), r1(pts[pts.length - 1].y * sc)],
     size: [r1(median(pts.map((p) => p.w)) * sc), r1(median(pts.map((p) => p.h)) * sc)], peakSpeed: r1(peak), overshoot: null, fit: null };
-  Object.assign(out, summariseMove(pos, p0, p1, fps, sc));
+  Object.assign(out, summariseMove(pos, p0, p1, fps, sc, { f0 }));
+  out.shutter = refined ? estimateShutter(V, pts, axis) : null;
   const last = pts[pts.length - 1];
   out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
   const travel = Math.abs(D) * sc;
@@ -373,6 +379,7 @@ function analyseAudio(video, dir, fps, dur) {
     const t = (i * hop + win / 2) / sampleRate;
     if (isMax && (!hits.length || t - hits[hits.length - 1].t >= 0.06)) hits.push({ t: r3(t), frame: Math.round(t * fps), strength: r3(env[i] / max) });
   }
+  attackTimes(mono, sampleRate, hits.map((h) => h.t)).forEach((a, i) => Object.assign(hits[i], { attack: r3(a.attack), attackFrame: r1(a.attack * fps), errMs: a.errMs }));
   const tempo = estimateTempo(env, hopSeconds), phase = estimatePhase(env, tempo.periodFrames);
   const beats = beatGrid(tempo.periodFrames, phase, hopSeconds, dur);
   return { hits, bpm: r1(tempo.bpm), confidence: r1(tempo.confidence), framesPerBeat: tempo.bpm ? r1((60 / tempo.bpm) * fps) : 0, beats,
@@ -419,12 +426,13 @@ function shotSection(s, fps) {
   if (c.big) L.push('', tableRows(c.rows, [['f', 'f'], ['zoom cum', 'zoomCum'], ['dzoom', 'dz'], ['pan x px', 'panX'], ['pan y px', 'panY'], ['dx', 'dx'], ['dy', 'dy']], 40));
   if (!s.elements.length) L.push('elements: none tracked');
   for (const e of s.elements) {
-    const fit = e.fit ? `; ${e.fit.kind} k=${e.fit.k}${e.fit.d ? ` d=${e.fit.d}` : ''} (rmse ${e.fit.rmsePx} px, other ${e.fit.otherRmsePx})` : '';
     const over = e.overshoot != null ? `; overshoot x${e.overshoot}` : '';
     const blur = e.blur ? `; blur f${e.blur.f0}-${e.blur.f1} dir ${e.blur.dir} min sharp ${e.blur.minSharp}` : '';
-    L.push('', `### E${e.id}: f${e.f0}-${e.f1}, (${e.from}) -> (${e.to}) px, size ${e.size[0]}x${e.size[1]}, ${e.movingFrames} moving f, peak ${e.peakSpeed} px/f${over}${fit}${blur}`);
+    L.push('', `### E${e.id}: f${e.f0}-${e.f1}, (${e.from}) -> (${e.to}) px, size ${e.size[0]}x${e.size[1]}, ${e.movingFrames} moving f, peak ${e.peakSpeed} px/f${over}${blur}`);
+    L.push(...easingLines(e, fps).map((x) => `- ${x}`));
     if (e.big) L.push('', tableRows(e.rows, [['f', 'f'], ['x', 'x'], ['y', 'y'], ['w', 'w'], ['h', 'h'], ['vx', 'vx'], ['vy', 'vy'], ['sharp', 'sharp'], ['blur', 'blurDir']]));
   }
+  L.push(...layoutLines(s).map((x, i) => (i ? x : `\n${x}`)));
   if (s.text.length) L.push('', 'text: ' + s.text.map((t) => `"${t.text}" f${t.f0}-${t.f1} box ${t.boxHeightPx} px (font ~${t.fontPxApprox} px)`).join('; '));
   if (s.hits.length) L.push('', `audio hits (frame:strength): ${s.hits.map((h) => `${h.frame}:${h.strength}`).join(' ')}`);
   return L.join('\n');
@@ -437,14 +445,16 @@ function renderSpec(spec) {
     'Measured by harness/media/ref-spec.mjs. Frames are 0-based. Positions are element centres in reference px. `x`/`y` and sizes are measured, never eyeballed;',
     'camera pan is how far the content moves (positive = right/down), zoom above 1 = push in. Element numbers are the change region between frames, tracked after camera compensation.', '',
     KEEP_CHANGE, '## Cuts', '',
-    tableRows(spec.cuts.map((c, i) => ({ n: i + 1, frame: c.frame, t: c.t, spike: c.spike, hit: c.hitLead ?? '', beat: c.beatLead ?? '' })),
-      [['#', 'n'], ['frame', 'frame'], ['t s', 't'], ['diff spike x median', 'spike'], ['audio hit lead f', 'hit'], ['beat lead f', 'beat']], 80), '',
+    tableRows(spec.cuts.map((c, i) => transitionRow(c, i + 1)),
+      [['#', 'n'], ['type', 'type'], ['dir', 'dir'], ['frames', 'frames'], ['at frames', 'span'], ['conf', 'conf'], ['evidence', 'evidence'], ['audio hit lead f', 'hit'], ['beat lead f', 'beat']], 80), '',
+    'frames = steps the change takes (a hard cut is 1; a 6-frame crossfade is 6). at frames = first changed frame to first fully new frame. The shot cut point in spec.json is the last of them.',
     'lead = frames the sound comes before the cut (positive), within 0.3 s.', ''];
   if (spec.audio) {
     const a = spec.audio;
-    L.push('## Audio', '', `${a.bpm} BPM (confidence ${a.confidence}; below 1.6 is weak), ${a.framesPerBeat} frames per beat, ${a.hits.length} hits, times accurate to about 12 ms.`, '',
+    L.push('## Audio', '', `${a.bpm} BPM (confidence ${a.confidence}; below 1.6 is weak), ${a.framesPerBeat} frames per beat, ${a.hits.length} hits.`,
+      'Place a cue on `attack` (where the sound starts), not on `peak` (the loudest change, later, on the body of the hit).', '',
       `beat frames: ${a.beatFrames.slice(0, 48).join(' ')}${a.beatFrames.length > 48 ? ' ...' : ''}`, '',
-      tableRows(a.hits, [['t s', 't'], ['frame', 'frame'], ['strength', 'strength']], 60), '');
+      tableRows(a.hits.map(audioRow), [['attack s', 'attack'], ['attack f', 'attackFrame'], ['err ms', 'errMs'], ['peak s', 't'], ['peak f', 'frame'], ['strength', 'strength'], ['note', 'note']], 60), '');
   } else L.push('## Audio', '', 'no audio stream.', '');
   for (const s of spec.shots) L.push(shotSection(s, spec.fps), '');
   return L.join('\n');
@@ -461,15 +471,15 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   console.error(`ref-spec: decoding ${path.basename(video)} at ${fps} fps`);
   const V = decode(video, fps, dir, W, H);
   const sc = W / V.w;
-  const cuts = findCuts(video, V, fps, dir);
-  const bounds = [0, ...cuts.map((c) => c.frame), V.n];
+  const cuts = findCuts(V, fps);
+  const spans = cuts.reduce((acc, c, i) => { acc[i].f1 = c.transition.startFrame; acc.push({ f0: c.frame, f1: V.n }); return acc; }, [{ f0: 0, f1: V.n }]);
 
   const cams = [{ s: 1, dx: 0, dy: 0 }];
   let prev = halfRes(V.frame(0), V.w, V.h);
-  const isCut = new Set(cuts.map((c) => c.frame));
+  const inCut = (f) => cuts.some((c) => f >= c.transition.startFrame && f <= c.frame);
   for (let f = 1; f < V.n; f++) {
     const cur = halfRes(V.frame(f), V.w, V.h);
-    cams.push(isCut.has(f) ? { s: 1, dx: 0, dy: 0 } : estimateCamera(prev, cur, V.w >> 1, V.h >> 1));
+    cams.push(inCut(f) ? { s: 1, dx: 0, dy: 0 } : estimateCamera(prev, cur, V.w >> 1, V.h >> 1));
     prev = cur;
     if (f % 200 === 0) console.error(`  camera ${f}/${V.n}`);
   }
@@ -480,16 +490,17 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   const text = ocr ? await analyseText(video, dir, W, H, fps) : [];
 
   const shots = [];
-  for (let i = 0; i < bounds.length - 1; i++) {
-    const f0 = bounds[i], f1 = bounds[i + 1];
+  for (let i = 0; i < spans.length; i++) {
+    const { f0, f1 } = spans[i];
     if (f1 - f0 < 1) continue;
     console.error(`  shot ${i + 1}: frames ${f0}-${f1 - 1}`);
     const tracks = trackShot(V, f0, f1, cams, maxElements);
     const elements = tracks.map((t, j) => {
-      const e = analyseTrack(t, V, fps, sc);
+      const e = analyseTrack(t, V, fps, sc, { f0, f1, still: cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0) });
       const travel = Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]);
+      if (e.frames <= 4 && travel < 3 && !e.blur) return null;
       return { id: `${i + 1}.${j + 1}`, ...e, big: travel >= 0.03 * W || e.blur != null };
-    });
+    }).filter(Boolean);
     let zc = 1, px = 0, py = 0;
     const camRows = [];
     for (let f = f0 + 1; f < f1; f++) {
@@ -503,7 +514,8 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
       palette: palette(V, f0, f1),
       camera: { zoomTotal: r3(zc), panTotalPx: [r1(px), r1(py)], peakZoomPerFrame: r3(peakZ), peakPanPxPerFrame: r1(peakP), big,
         rows: camRows.filter((r) => Math.abs(r.dz) > 0.0015 || Math.hypot(r.dx, r.dy) > 0.5) },
-      elements, text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
+      elements, layout: { frame: f1 - 1, ...measureLayout({ w: V.w, h: V.h, rgb: V.rgb.subarray((f1 - 1) * V.w * V.h * 3, f1 * V.w * V.h * 3) }) },
+      text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
   }
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,

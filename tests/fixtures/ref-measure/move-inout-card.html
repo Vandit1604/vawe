@@ -1,0 +1,15 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="2.4">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#f1f1ee;overflow:hidden}
+#c{position:absolute;left:35vw;top:8vh;width:30vw;height:26vh;background:#fff;border-radius:1.2vw;box-shadow:0 0 0 2px #d0d0ca;padding:2vw;box-sizing:border-box}
+#c b{display:block;height:2.4vh;background:#1d3557;margin-bottom:1.6vh;width:60%}
+#c i{display:block;height:1.4vh;background:#8d99ae;margin-bottom:1.1vh;width:92%}
+#c i:nth-child(3){width:78%}#c i:nth-child(4){width:85%}
+</style>
+</head><body><div id="c"><b></b><i></i><i></i><i></i></div>
+<script>
+// truth: vertical translateY 0 -> 50vh, start 0.6 s, duration 0.9 s (ends 1.5 s), cubic-bezier(0.65, 0, 0.35, 1)
+document.getElementById('c').animate([{ transform: 'translateY(0)' }, { transform: 'translateY(50vh)' }],
+  { delay: 600, duration: 900, easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fill: 'both' });
+</script></body></html>

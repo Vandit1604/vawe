@@ -1,0 +1,13 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="2">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#101820;overflow:hidden}
+#b{position:absolute;left:10vw;top:38vh;width:14vw;height:24vh;background:#ffd400}</style>
+</head><body><div id="b"></div>
+<script>
+// truth: translateX 0 -> 50vw from 0.5 s, approach k=0.15 per 30 fps frame (share of remaining distance)
+window.seek = (t) => {
+  const f = Math.max(0, (t - 0.5) * 30);
+  document.getElementById('b').style.transform = `translateX(${50 * (1 - Math.pow(0.85, f))}vw)`;
+};
+</script></body></html>

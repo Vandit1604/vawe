@@ -1,0 +1,40 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#000;overflow:hidden}
+.s{position:absolute;inset:0;overflow:hidden}
+.s i{position:absolute;display:block}
+#a{background:#1b2a41}#a .p{left:12vw;top:20vh;width:30vw;height:60vh;background:#e63946}#a .q{left:60vw;top:60vh;width:25vw;height:15vh;background:#f1faee}
+#b{background:#f1faee}#b .p{left:55vw;top:15vh;width:30vw;height:30vh;background:#1d3557}#b .q{left:10vw;top:65vh;width:70vw;height:12vh;background:#e63946}
+#c{background:#2a9d8f}#c .p{left:20vw;top:30vh;width:20vw;height:40vh;background:#264653}#c .q{left:50vw;top:10vh;width:35vw;height:20vh;background:#e9c46a}
+#d{background:#f4a261}#d .p{left:10vw;top:10vh;width:18vw;height:80vh;background:#264653}#d .q{left:40vw;top:50vh;width:45vw;height:25vh;background:#fff}
+#e{background:#6d597a}#e .p{left:30vw;top:25vh;width:40vw;height:50vh;background:#eaac8b}#e .q{left:5vw;top:5vh;width:15vw;height:15vh;background:#355070}
+#f{background:#0b132b}#f .p{left:30vw;top:25vh;width:40vw;height:50vh;background:#5bc0be}
+</style>
+</head><body>
+<div class="s" id="a"><i class="p"></i><i class="q"></i></div>
+<div class="s" id="b"><i class="p"></i><i class="q"></i></div>
+<div class="s" id="c"><i class="p"></i><i class="q"></i></div>
+<div class="s" id="d"><i class="p"></i><i class="q"></i></div>
+<div class="s" id="e"><i class="p"></i><i class="q"></i></div>
+<div class="s" id="f"><i class="p"></i></div>
+<script>
+// truth at 30 fps: hard cut A->B at 1.0 s; linear crossfade B->C 2.0-2.2 s (6 frames);
+// left-to-right wipe C->D 3.0-3.3 s (9 frames); push D->E leftward 4.0-4.3 s (9 frames), E rests to 5.0 s; hard cut E->F at 5.0 s where F keeps the big shape of E (a match cut).
+const $ = (id) => document.getElementById(id);
+window.seek = (t) => {
+  const vis = (id, on) => { $(id).style.visibility = on ? 'visible' : 'hidden'; };
+  vis('a', t < 1.0);
+  vis('b', t >= 1.0 && t < 2.2);
+  vis('c', t >= 2.0 && t < 3.3);
+  vis('d', t >= 3.0 && t < 4.3);
+  vis('e', t >= 4.0 && t < 5.0);
+  vis('f', t >= 5.0);
+  $('c').style.opacity = Math.min(1, Math.max(0, (t - 2.0) / 0.2));
+  const w = Math.min(1, Math.max(0, (t - 3.0) / 0.3));
+  const p = Math.min(1, Math.max(0, (t - 4.0) / 0.3));
+  $('d').style.transform = t >= 4.0 ? `translateX(${-100 * p}vw)` : 'none';
+  $('d').style.clipPath = t >= 4.0 ? 'none' : `inset(0 ${100 * (1 - w)}% 0 0)`;
+  $('e').style.transform = `translateX(${100 * (1 - p)}vw)`;
+};
+</script></body></html>
