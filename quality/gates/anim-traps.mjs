@@ -1,8 +1,9 @@
-// quality/gates/anim-traps.mjs: the six traps a seeked CSS/Web Animation can fall into, none of
+// quality/gates/anim-traps.mjs: the seven traps a seeked CSS/Web Animation can fall into, none of
 // which throw and none of which a browser warns about. The first five are ported from the csskit
 // prototype's checker (scratchpad, /private/tmp/.../csskit/render.mjs) into the engine's own gate
-// shape: it boots the REAL render page (films/scene/scene.html) so it reads exactly the animations
-// `seekAll(t)` will drive, never a synthetic re-parse of the JSON.
+// shape: on a `module:scene` file it boots the REAL render page (films/scene/scene.html) so it reads
+// exactly the animations `seekAll(t)` will drive, never a synthetic re-parse of the JSON; on a bare
+// `.html` page (a recreation not yet wired into any scene) it loads that page directly instead.
 //
 // A bare HTML page (harness/media/render-page.mjs's own render target, a hand-written vawe.onFrame +
 // plain three.js page) hits a DIFFERENT five traps: a live clock instead of the t argument, unseeded
@@ -22,12 +23,17 @@
 //   6. ONE EASING ACROSS 3+ KEYFRAMES: `element.animate()`'s top-level `easing` stretches over the
 //      WHOLE effect unless each keyframe carries its own, so a multi-stop move (settle, hold, exit)
 //      times every segment off one curve and a held middle segment can read as frozen or land shifted.
+//   7. A LATER ANIMATION OVERRIDES AN EARLIER ONE: two animations on one element share a property and
+//      their ACTIVE windows genuinely overlap (both playing at once), so the later-registered one wins
+//      the WHOLE overlap regardless of either side's fill. A per-letter or per-word animation added
+//      after a timing-sheet row on the same property silently freezes or erases that row.
 //
 // SEVERITY: REPORTS, not BLOCKS, the same house rule paints-nothing and every other author-side gate
 // follows (engine-doctrine/TASTE.md, "One process, two severities"). `--strict` promotes a finding to a
-// failing exit code. Waiver: {"authoring":{"allow":["anim-traps"],"_why":{"anim-traps":"…"}}}.
+// failing exit code. Waiver (scene mode only): {"authoring":{"allow":["anim-traps"],"_why":{"anim-traps":"…"}}}.
 //
 //   node quality/gates/anim-traps.mjs <scene.json> [--strict]
+//   node quality/gates/anim-traps.mjs <page.html> [--strict]  (a bare recreation page, no scene yet)
 //   node quality/gates/anim-traps.mjs                 (census: every films/scene/*.json)
 //   make check GATE=anim-traps [D=scene.json] [STRICT=1]
 import fs from 'node:fs';
@@ -35,9 +41,10 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import puppeteer from 'puppeteer';
 import { sceneTiming } from './scene-timing.mjs';
-import { fillCollisionPairs, animatedProps, reachesBack } from '../../core/timeline/clips.js';
+import { fillCollisionPairs, activeOverlapPairs, animatedProps, reachesBack } from '../../core/timeline/clips.js';
 import { population, SCENE_DIR } from '../../harness/lib/census.mjs';
 import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
+import { openPreview } from '../../harness/media/preview-server.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
@@ -172,6 +179,22 @@ function pageTraps(src, add) {
     add('page draws WebGL but registers no onFrame hook', 'script', 'call vawe.onFrame((t) => { renderer.render(scene, camera); }) so the render clock actually redraws the canvas each frame; otherwise the capture reads whatever the canvas happened to hold from page load');
 }
 
+// trap 7: a later-created animation on the same element+property genuinely OVERLAPS an earlier one's
+// ACTIVE window (both playing at once), not merely its fill. WAAPI composites later-registered
+// animations on top for the whole overlap regardless of fill:forwards on either side, so a per-letter
+// or per-word animation registered after a timing-sheet row on the same property silently freezes or
+// erases that row for as long as both are active. `activeOverlapPairs` (core/timeline/clips.js) is the
+// one definition of "these two overlap", so this trap and any future engine behaviour around it read
+// the same pairs.
+function activeOverlap(add) {
+  for (const { a, b, props, overlapMs } of activeOverlapPairs()) {
+    const el = a.effect.target;
+    add(`"${labelOf(a)}" and "${labelOf(b)}" both write ${props.join(',')} while both are ACTIVELY playing (${Math.round(overlapMs)}ms overlap)`,
+      el.tagName.toLowerCase(),
+      'the later-registered animation wins for the whole overlap regardless of fill: merge both into one keyframe list, or order/stagger them so their active windows never overlap, or set an explicit composite');
+  }
+}
+
 function checkTraps(durMs) {
   const findings = [];
   const add = (what, where, fix) => findings.push({ what, where, fix });
@@ -181,15 +204,16 @@ function checkTraps(durMs) {
   badSelector(add);
   delayPastEnd(add, durMs);
   unevenSegmentEasing(add);
+  activeOverlap(add);
   return findings;
 }
 
-// page.evaluate(checkTraps, durMs) would send ONLY checkTraps.toString(): the six trap functions it
-// calls are not in its closure, so the browser would throw ReferenceError on the first one. Bundling
-// every function's own source into one string and running it through `new Function` inside the page
-// keeps each Node-side function small and independently readable while still executing as one whole
-// in the browser, which is where document.getAnimations() and the stylesheets actually live.
-export const TRAP_BUNDLE = [animatedProps, reachesBack, fillCollisionPairs, labelOf, fillCollisions, missingEndKeyframe, varInShorthand, badSelector, delayPastEnd, unevenSegmentEasing, checkTraps]
+// page.evaluate(checkTraps, durMs) would send ONLY checkTraps.toString(): the trap functions it calls
+// are not in its closure, so the browser would throw ReferenceError on the first one. Bundling every
+// function's own source into one string and running it through `new Function` inside the page keeps
+// each Node-side function small and independently readable while still executing as one whole in the
+// browser, which is where document.getAnimations() and the stylesheets actually live.
+export const TRAP_BUNDLE = [animatedProps, reachesBack, fillCollisionPairs, activeOverlapPairs, labelOf, fillCollisions, missingEndKeyframe, varInShorthand, badSelector, delayPastEnd, unevenSegmentEasing, activeOverlap, checkTraps]
   .map((fn) => fn.toString()).join('\n');
 export async function runTrapChecker(page, durMs) {
   return page.evaluate((src, ms) => new Function('durMs', `${src}\nreturn checkTraps(durMs);`)(ms), TRAP_BUNDLE, durMs);
@@ -219,17 +243,31 @@ async function checkScene(browser, port, absFile) {
   } finally { await page.close(); }
 }
 
-// A bare page (harness/media/render-page.mjs's own render target) instead of a scene.json: no browser
-// needed, this reads the file's own text. Waivable through the SAME `authoring.allow` + `_why` mechanism
-// render-page.mjs's assertFinalReady already reads out of `#authoring` in the page, never a second one.
-function checkPage(absFile) {
+// A bare recreation page (films/recreations/<name>/page.html, no scene.json wrapping it yet) never has
+// a `module:scene` file to boot through scene.html, so checkScene's `skip: 'not module:scene'` silently
+// swallowed it: a real run lost 12 minutes to timing-sheet rows a later per-letter animation had frozen
+// out, and no gate ever said so because it never ran on the page at all. This loads the page directly
+// (openPreview, the same loader `--dom`/`--look`/`--layout` already use) instead of scene.html's boot,
+// so a page authored before it is wired into any film still gets every trap checked.
+async function checkPage(absFile) {
   const relFile = path.relative(repoRoot, absFile);
-  const src = fs.readFileSync(absFile, 'utf8');
-  const findings = [];
-  pageTraps(src, (what, where, fix) => findings.push({ what, where, fix }));
-  const { allow = [], _why = {} } = pageAuthoring(absFile);
-  const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps');
-  return { file: relFile, findings, waived };
+  const { page, url, close } = await openPreview(absFile, { width: 1920, height: 1080 });
+  try {
+    await page.goto(url, { waitUntil: 'load' });
+    const durMs = await page.evaluate(() => {
+      const meta = document.querySelector('meta[name="duration"]');
+      if (meta) return Number(meta.content) * 1000;
+      return document.getAnimations().reduce((m, a) => {
+        const t = a.effect.getComputedTiming();
+        return Math.max(m, (t.delay || 0) + (t.duration || 0) * (t.iterations === Infinity ? 1 : (t.iterations || 1)));
+      }, 0);
+    });
+    const findings = await runTrapChecker(page, durMs);
+    pageTraps(fs.readFileSync(absFile, 'utf8'), (what, where, fix) => findings.push({ what, where, fix }));
+    const { allow = [], _why = {} } = pageAuthoring(absFile);
+    const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps');
+    return { file: relFile, findings, waived };
+  } finally { await close(); }
 }
 
 function reportFindings(r) {
@@ -263,13 +301,10 @@ async function reportCensus(browser, port) {
 }
 
 async function runCli() {
-  // A bare page needs no browser or file server: `checkPage` reads its own source. Scene JSON still
-  // boots the real render page, since its traps (fill collisions, a dead selector) are facts about the
-  // live DOM the CSS produces, not about the JSON text.
-  if (file && file.endsWith('.html')) {
+  if (file && /\.html?$/i.test(file)) {
     const abs = path.resolve(file);
     if (!fs.existsSync(abs)) { console.error(`✗ no such page: ${file}`); process.exit(2); }
-    printResult(checkPage(abs));
+    printResult(await checkPage(abs));
     f.emit();
     process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
   }
