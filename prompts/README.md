@@ -16,8 +16,8 @@ and licence. Every template targets the vawe page contract:
 - `<audio src data-at data-gain data-fade-out>` for files, `<audio data-synth="<voice>" data-at>`
   for the synth voices in `core/audio/kit.mjs` (pluck, chime, sparkle, droplet, bloom, success,
   ready, whoosh, riser, drop, impact, swell, braam); never played live, mixed offline at -14 LUFS;
-- `make dev PAGE=` (draft), `make ship PAGE=` (final), `make next PAGE= REF=` (match a reference),
-  `make judge` (threshold 7, two fresh runs);
+- `bin/vawe dev <page>` (draft), `bin/vawe ship <page>` (final), `bin/vawe critique <page> --ref <mp4>` (match a reference),
+  `bin/vawe judge` (threshold 7, two fresh runs);
 - helpers in `core/motion/springs.js`: `spring`, `track`, `approach`, `kf`, `springLinear`, `rng`.
 
 ## Index
@@ -27,7 +27,7 @@ and licence. Every template targets the vawe page contract:
 | [showreel-one-liner](showreel-one-liner.md) | no brief; a taste probe; learn the agent's defaults, then ban them | 15 s | awesome-ai-motion cases by @stephanlivera, @ajith_io, @VincentWei93 (third-party text; own template) |
 | [brand-launch-from-url](brand-launch-from-url.md) | a real product from a URL, its own kit, real captures only | 15 to 40 s | twoclipping ad brief (third-party; own template), athemeroy playbook s.3 (CC BY 4.0), Movez (pattern) |
 | [ui-morph-loop](ui-morph-loop.md) | one element becomes 8 to 12 UI states and loops, on a beat grid | 12 to 16 s | twoclipping morph brief (third-party; own template) |
-| [reference-rebuild](reference-rebuild.md) | a reference mp4 must be matched: SPEC.md, KEEP/CHANGE, rebuild, `make next` | the reference's | notdwd (pattern), `quality/refs/LOOP.md` (ours) |
+| [reference-rebuild](reference-rebuild.md) | a reference mp4 must be matched: SPEC.md, KEEP/CHANGE, rebuild, `bin/vawe critique --ref` | the reference's | notdwd (pattern), `skills/vawe-reference/SKILL.md` (ours) |
 | [directors-brief-long-form](directors-brief-long-form.md) | over 60 s, or more than one session or agent: BRIEF, STORYBOARD, GUIDE, chapters | 1 to 6 min | PDoomVideo (ISC in package.json, pattern), ClaudeAnimationBase (MIT), Austerlitz (no licence, pattern), Movez (pattern) |
 | [critique-pass](critique-pass.md) | a draft exists; fresh critic, default reject, four views, frame-locked if a reference exists | one pass | notdwd and Movez (pattern), `engine-doctrine/JUDGE.md` (ours), ClaudeAnimationBase (MIT) |
 | [story-explainer](story-explainer.md) | explain a topic with invented visuals: facts list first, narration timeline | 30 s to 3 min | athemeroy playbook s.2 (CC BY 4.0), Ror Fly and dotey requests (pattern) |
@@ -49,11 +49,11 @@ not copied. Every file's `source:` line records this per template.
 ## How to use one
 
 1. Pick the row. If two fit, the shorter film wins; under 15 s most types are one continuous action
-   (`skills/vawe-continuous-action/SKILL.md`).
+  .
 2. Copy the template block into the session. Fill the `<inputs>` by asking; never guess an asset.
 3. Every template stops before code at least once. Honour the stop: the beat grid, the facts list or
    the SPEC is what the owner reads.
-4. Draft with `make dev PAGE= DRAFT=1`, then run `critique-pass.md` as a fresh agent.
+4. Draft with `bin/vawe dev <page>`, then run `critique-pass.md` as a fresh agent.
 
 The findings that chose these twelve, and the six golden films to build from them:
 [FINDINGS.md](FINDINGS.md).

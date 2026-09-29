@@ -16,7 +16,7 @@ const lum = ({ r, g, b }) => (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 const sat = ({ r, g, b }) => { const mx = Math.max(r, g, b), mn = Math.min(r, g, b); return mx === 0 ? 0 : (mx - mn) / mx; };
 
 // eyedrop(files) → { light, avgLum, bg, text, accents, top, cols } (hex strings). The one pixel-histogram
-// pass, shared by the CLI below and `make kit` (scripts/brand/kit.mjs), so a themed manifest and a
+// pass, shared by the CLI below and `node scripts/brand/kit.mjs` (scripts/brand/kit.mjs), so a themed manifest and a
 // human eyedrop read the same numbers.
 export async function eyedrop(files) {
   const uris = files.map((f) => `data:image/${f.match(/jpe?g$/i) ? 'jpeg' : 'png'};base64,` + fs.readFileSync(f).toString('base64'));
@@ -75,7 +75,7 @@ export async function eyedrop(files) {
 }
 
 // writeSwatch(path, { light, bg, text, accents, cols }) → a swatch card PNG, the same one the CLI below
-// writes to /tmp/palette.png. Split out so `make kit` can drop it beside kit.json without a second render.
+// writes to /tmp/palette.png. Split out so `node scripts/brand/kit.mjs` can drop it beside kit.json without a second render.
 export async function writeSwatch(outPath, { light, bg, text, accents, cols }) {
   const sw = cols.map((c) => `<div style="flex:1;background:${hex(c)}"></div>`).join('');
   const html = `<body style="margin:0"><div style="display:flex;height:120px;width:1280px">${sw}</div>

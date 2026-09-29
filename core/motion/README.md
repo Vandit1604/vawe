@@ -55,3 +55,7 @@ const [r, g, b] = kf(f, TINT);
 - `indicator(t, stops, width)`: `{left, right}` for a moving highlight; the leading edge is stiffer.
 - `swapAlpha(t, tIn, tOut)`: text in a morphing box enters after the morph starts, leaves before the next.
 - `rng(seed)` mulberry32; `noise1(x, seed)` smooth noise in [-1, 1] for drift; `loopT(t, dur)` wraps t.
+
+## Render it
+
+`bin/vawe dev <page> --from s --to s` renders a half-size draft of the seconds you are working on.

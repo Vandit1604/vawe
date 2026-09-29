@@ -4,9 +4,9 @@
 // sections.mjs still crawls and screenshots, palette.mjs's eyedrop() still does the pixel histogram,
 // localize-assets.mjs's download() still does the one verified fetch.
 //
-//   node scripts/brand/kit.mjs <url> <name>            ·  make kit URL=https://linear.app NAME=linear
-//   node scripts/brand/kit.mjs <url> <name> --init      ·  make kit URL=... NAME=... INIT=1
-//     --init also checks the checkout is ready to render (make doctor) before spending a capture.
+//   node scripts/brand/kit.mjs <url> <name>
+//   node scripts/brand/kit.mjs <url> <name> --init
+//     --init also checks the checkout is ready to render (node scripts/vendor-gsap.mjs --check) before spending a capture.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';

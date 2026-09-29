@@ -2,14 +2,14 @@
 // harness/media/match.mjs: REFERENCE MATCHING for a recreation. Where content-check.mjs asks "is this
 // act as RICH as the reference's", this asks "does this beat MOVE the way the reference moves": a
 // dense frame-by-frame strip (reference row over render row), a difference overlay and a mean SSIM,
-// per beat, ranked worst-to-best in match.md. `make study REF=<video> D=<render.mp4> MATCH=1`.
-// D may be a rendered mp4 (a page render): beats are then the shots in spec.json next to REF (`make spec`).
+// per beat, ranked worst-to-best in match.md. `node harness/media/match.mjs <ref.mp4> <render.mp4>`.
+// D may be a rendered mp4 (a page render): beats are then the shots in spec.json next to REF (`bin/vawe spec`).
 //
 // `LIGHT=1` adds one more column: a per-beat light-map ΔE (harness/lib/light-map.mjs), the LOW-
 // FREQUENCY brightness and colour a beat reads at a glance, which SSIM and the colour ΔE below both
 // miss.
 //
-// BEATS, NEVER INVENTED: the shots in spec.json next to REF (`make spec`) if it exists, else scene
+// BEATS, NEVER INVENTED: the shots in spec.json next to REF (`bin/vawe spec`) if it exists, else scene
 // cuts detected IN THE REFERENCE (ffmpeg select=gt(scene,0.3), shot-detect.mjs's own detectCuts).
 // Both timelines are assumed to share one clock: this compares a recreation against the reference it
 // was built to match, not two unrelated films.
@@ -24,11 +24,7 @@ import { lightMap, lightMapDistance } from '../lib/light-map.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
-// `make study REF=<x> D=<y> MATCH=1` is the DOCUMENTED invocation (engine-doctrine/CRAFT/RECREATION.md),
-// and an agent that copies it verbatim into `node harness/media/match.mjs` (skipping `make`, common when
-// debugging or scripting) passes `REF=<x>` and `D=<y>` as literal argv tokens, not `make` variables: an
-// earlier agent hit exactly this and reported the flags "mismatched". Accepted here too, so the one line
-// the doc teaches works both ways instead of only through `make`.
+// `REF=<x> D=<y>` argv tokens are still accepted: older docs taught that spelling.
 const KV = Object.fromEntries(argv.filter((a) => /^[A-Z_]+=/.test(a)).map((a) => { const i = a.indexOf('='); return [a.slice(0, i), a.slice(i + 1)]; }));
 const flag = (n, envKey, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : ((envKey && (KV[envKey] || process.env[envKey])) || d); };
 const positional = argv.filter((a, i) => !a.startsWith('--') && !/^[A-Z_]+=/.test(a) && !(argv[i - 1] || '').startsWith('--'));
@@ -36,8 +32,7 @@ const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
 const REF = KV.REF || positional[0] || process.env.REF;
 const FILM = KV.D || positional[1] || process.env.D;
-if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<render.mp4> MATCH=1  '
-  + '(or: node harness/media/match.mjs <ref.mp4> <render.mp4>)');
+if (!REF || !FILM) die('usage: node harness/media/match.mjs <ref.mp4> <render.mp4> [--step s] [--light]');
 if (!fs.existsSync(REF)) die(`no such reference video: ${REF}`);
 
 const STEP = Number(flag('--step', 'STEP', 0.1));   // dense strip: one sample every 0.1s, per the spec

@@ -13,8 +13,9 @@ timeline, no editor, no private format: the page is the film, and the same page 
 bytes in any frame order.
 
 ```bash
-make dev  PAGE=films/hello/page.html     # half size, 30 fps, silent: the draft
-make ship PAGE=films/hello/page.html     # full size, 60 fps, subframe blur, audio: the final
+bin/vawe new hello                         # films/hello/page.html, a valid starter
+bin/vawe dev  films/hello/page.html        # half size, 30 fps, silent: the draft
+bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, audio: the final
 ```
 
 ![vawe demo](engine-doctrine/media/vawe-demo.gif)
@@ -50,17 +51,14 @@ rules an agent reads are `AGENTS.md`.
 
 ## Install
 
-**From source**: Node 18+, ffmpeg, a Chrome or Chromium, and Go 1.26+ (`make dev` still builds
-the old JSON renderer until that format is deleted).
+**From source**: Node 18+, ffmpeg and a Chrome or Chromium.
 
 ```bash
 npm install
-make dev PAGE=films/<name>/page.html
+bin/vawe dev films/<name>/page.html
 ```
 
-**Docker** (`Dockerfile.cli`) still wraps the old JSON CLI; a page-film image lands with the
-delete-json wave. The image pins its base images by digest and Chrome and ffmpeg by exact version.
-It does not pin the GPU, so rasterised output can still differ between hosts.
+Output can differ between hosts that rasterise on a different GPU or Chrome version.
 
 ## The loop
 
@@ -69,12 +67,12 @@ brief or reference -> stills -> draft -> critique in a FRESH session -> fix the 
 ```
 
 ```bash
-make dev      PAGE=films/<name>/page.html [FROM= TO=]       # draft; the hardest 2 to 4 s first
-make critique PAGE=films/<name>/page.html [REF=<mp4>]       # sheet, strip, phone, loop + page checks
-make ship     PAGE=films/<name>/page.html [ASPECT=all]      # final
-make next     PAGE=films/<name>/page.html REF=<mp4>         # match a reference, loop until it passes
-make stage                                                  # where is this film, and the one next command
+bin/vawe dev      films/<name>/page.html [--from s --to s]   # draft; the hardest 2 to 4 s first
+bin/vawe critique films/<name>/page.html [--ref <mp4>]       # sheet, strip, phone, loop + page checks; a ref is matched
+bin/vawe ship     films/<name>/page.html [--aspect all]      # final
 ```
+
+A hook (`harness/live/stage-say.mjs`) names the next command for the film you edited last.
 
 The critique is run by a session that did not write the page, rejects by default, and names every
 finding as shot + frame + fix (`skills/vawe-critique/SKILL.md`). A reference is matched through
@@ -86,7 +84,7 @@ type: `prompts/README.md`; the router: `engine-doctrine/CRAFT/ROUTING.md`.
 Every frame is a pure function of its seek time: no wall clock, no state carried between frames, no
 unseeded random. That is what lets the renderer capture frames on several browser pages at once,
 blur from fractional subframes, and re-render only the seconds a critique named.
-`make check GATE=anim-traps D=<page>` finds the seven ways a seeked CSS animation silently breaks.
+`bin/vawe check anim-traps <page>` finds the seven ways a seeked CSS animation silently breaks.
 
 ## Architecture
 
@@ -110,8 +108,10 @@ blur from fractional subframes, and re-render only the seconds a critique named.
 core/motion/       springs.js (spring, track, approach, kf, springLinear, rng, noise1), curves.js
 core/engine/       page-clock.js (the virtual clock), page-api.js (vawe.onFrame, three.js helpers)
 core/audio/        kit.mjs: the synth voices
-harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views)
-quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · rung.mjs · doc-map.mjs
+bin/vawe:          the one command: new dev ship critique spec studio check e2e test judge
+harness/cli/       the verb table and argument parser behind it
+harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views) · ref-spec.mjs
+quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · doc-refs.mjs
 prompts/           one template per film type, with source and licence
 skills/            vawe-page · vawe-critique · vawe-reference (loaded on demand)
 engine-doctrine/   RULES/ (readable-hold, speed-bands, banned-defaults) · CRAFT/ · JUDGE.md
@@ -119,14 +119,11 @@ films/             <name>/page.html per film
 out/               rendered mp4s (gitignored)
 ```
 
-The old JSON scene format (`films/scene/*.json`, the Go renderer under `renderer/`) is being
-deleted. Do not start a new film in it.
-
 ## Docs
 
 New here and want to author? `QUICKSTART.md` (a blank page to a rendered film in one page), then
 `AGENTS.md` (the house rules). Then `prompts/README.md`, `core/motion/README.md`, and
-`engine-doctrine/JUDGE.md` (how a film is scored). `make help` prints the fast path.
+`engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
 
 ## Status and license
 

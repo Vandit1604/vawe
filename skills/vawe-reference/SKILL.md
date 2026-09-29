@@ -1,6 +1,6 @@
 ---
 name: vawe-reference
-description: "Match a reference film with a vawe page: make spec REF= writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then make next PAGE= REF= loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
+description: "Match a reference film with a vawe page: bin/vawe spec writes SPEC.md frame by frame, every line is marked KEEP or CHANGE, the page is rebuilt light first, then bin/vawe critique --ref loops until the match passes. Load when a reference mp4 must be matched, not merely echoed."
 effort: high
 ---
 
@@ -13,11 +13,11 @@ References are in-house and never published. Length is the reference's length, n
 ## 1. Start and study
 
 ```bash
-make dev-tool X=new TYPE=recreation NAME=<name> REF=quality/refs/<ref>/source.mp4
-make spec REF=quality/refs/<ref>/source.mp4
+bin/vawe new <name> --ref quality/refs/<ref>/source.mp4   # page starter plus SPEC.md
+bin/vawe spec quality/refs/<ref>/source.mp4               # SPEC.md alone, to re-measure
 ```
 
-`make spec` writes `quality/refs/<ref>/SPEC.md` with the measured cut list and, at every cut and hold:
+`bin/vawe spec` writes `quality/refs/<ref>/SPEC.md` with the measured cut list and, at every cut and hold:
 
 - t in seconds and the frame's job in five words;
 - the light map: background colour, key direction, contrast band;
@@ -52,16 +52,16 @@ literal in the page: a `@keyframes` stop, an `element.animate` keyframe, or a `[
 ## 4. The match loop
 
 ```bash
-make next PAGE=films/<name>/page.html REF=quality/refs/<ref>/source.mp4 [FROM= TO=] [FINAL=1]
+bin/vawe critique films/<name>/page.html --ref quality/refs/<ref>/source.mp4 [--from s --to s] [--final]
 ```
 
 It compares the draft to the reference at the same timestamps and prints a match score. Loop until
-the score passes. Three passes without progress: stop and report; do not keep going. `make ship`
+the score passes. Three passes without progress: stop and report; do not keep going. `bin/vawe ship`
 refuses a final render until this loop has passed for the page's current content.
 
 ## 5. The frame-locked critique
 
-Hand the draft to a fresh session (`vawe-critique`) with `REF=`. Anything the draft added that the
+Hand the draft to a fresh session (`vawe-critique`) with `--ref`. Anything the draft added that the
 reference does not have, and no CHANGE line names, is a rejection. Two fresh judges at 7 or above
 close a beat, never the agent that wrote the fix.
 
@@ -71,7 +71,7 @@ close a beat, never the agent that wrote the fix.
   the motion.
 - Trust the cut list, not the sheet: a reference can run twice the pace a contact sheet suggests.
 - Scene detection catches hard cuts only; a crossfade boundary wants an eye check.
-- `make next` scores the match, not taste. The critique is a separate step.
+- `critique --ref` scores the match, not taste. The critique is a separate step.
 
 Prompt text for the three stops: `prompts/reference-rebuild.md`. The loop's doctrine:
 `engine-doctrine/CRAFT/RECREATION.md`.

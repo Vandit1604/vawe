@@ -45,8 +45,7 @@ Column meanings:
 
 Each row becomes a block in `page.html`: an element or a shot function, and a keyframe stop or
 `[[f, v]]` table with the row's start and dur as literals. The studio edits those literals in place,
-so the table and the page agree by construction. `make storyboard-check` reads the table.
-
+so the table and the page agree by construction.
 ## Gotchas
 
 - A row with two focal actions is two rows.
