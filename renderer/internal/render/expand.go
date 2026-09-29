@@ -41,7 +41,11 @@ import (
 // file) need those layers to already exist. Missing this key was the exact silent no-op the doctrine
 // warns about: `edits[]` resolved fine in a unit test and then failed at render with "unknown
 // reference" the first time it was the ONLY sugar in a scene.
-var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"|"tempo"\s*:|"edits"\s*:`)
+// `content` ({{key}} placeholders in layer text/html/src, core/engine/expand.js resolveContentSlots)
+// rides the same trip: the browser boot page never resolves it either (films/scene/scene.js only
+// lowers transitions), so a scene using only a `content` map, with no block/beat/comp/recipes/voice/
+// tempo/edits sugar, rendered its literal `{{key}}` text until this line named it too.
+var sugarType = regexp.MustCompile(`"type"\s*:\s*"(block|beat|comp)"|"recipes"\s*:|"voice"\s*:\s*"|"tempo"\s*:|"edits"\s*:|"content"\s*:`)
 
 func hasSugar(raw []byte) bool { return sugarType.Match(raw) }
 
