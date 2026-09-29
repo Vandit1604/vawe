@@ -1,43 +1,23 @@
-# The marketing site + live editor. Build context is the REPO ROOT, not site/: the site vendors the
-# render engine (core/, themes/, films/scene/scene.html, fonts) into its public/ at build time via
-# scripts/site/site-engine.mjs, so the editor can run the real renderFrame(n) in the browser.
+# The marketing site + live editor. Build context is the REPO ROOT, not site/. The browser engine the
+# editor runs is a frozen, committed copy under site/public (core, themes, films/scene, vendor); only the
+# faces and gsap, which cannot be committed, are copied in at build time by scripts/site/vendor-assets.mjs.
 #
 #   docker build -t vawe-site .
 #   docker run -p 3000:3000 vawe-site
 FROM node:22-alpine AS builder
+# The workdir is /src, not /repo, on purpose. The deploy host held a BuildKit cache entry for the
+# `WORKDIR /repo` layer whose backing overlay directory had been pruned away, so committing ANY child
+# layer onto it failed with "failed to stat active key during commit". Renaming the workdir re-keys the
+# parent. `docker builder prune -af` on the host is the actual cure.
 WORKDIR /src
 
-# --- engine sources the site vendors (see scripts/site/site-engine.mjs COPY list) ---
-# The workdir above is /src, not /repo, on purpose. The deploy host held a BuildKit cache entry for
-# the `WORKDIR /repo` layer whose backing overlay directory had been pruned away, so committing ANY
-# child layer onto it failed with "failed to stat active key during commit" and a snapshot ID that
-# was byte-identical on every build, even under --no-cache. Re-keying the children (reordering these
-# COPYs) did nothing because the broken parent was still reached; renaming the workdir is what
-# re-keys the parent. `docker builder prune -af` on the host is the actual cure.
-COPY themes ./themes
-COPY core ./core
-# blocks/ AND assets/geo/, because scripts/site/site-engine.mjs vendors both into site/public and
-# REFUSES the build without them ("missing blocks"). This is the failure that took three days of live
-# 404s to notice: the site image copied core/ and not blocks/, so /blocklib/index.mjs was never there,
-# every block family vanished from /playground, and the page still answered 200. blocks/geo.mjs also
-# reads ../assets/geo at module scope, so the maps take the whole registry down without it.
-COPY blocks ./blocks
-COPY assets/geo ./assets/geo
-# The whole scene directory, not just the page: scene.html loads scene.js and scene.css, and shipping
-# only the page put a dead engine in production behind a 200.
-COPY films/scene ./films/scene
-COPY assets/icons ./assets/icons
+# assets/vendor holds the committed bonus gsap plugins; gsap.min.js joins it from the npm install below.
 COPY assets/vendor ./assets/vendor
 COPY scripts ./scripts
 # generators/ bakes the standing assets (fonts here); the RUN below needs it in the image
 COPY generators ./generators
-# Only the marks the playable scenes reference survive .dockerignore's negations here (144K of
-# brands' 59M); site-engine.mjs ships exactly those and fails the build if one is missing.
-COPY assets/brands ./assets/brands
-# assets/plinth is NOT copied. It was, until 2026-09-10, when "stop tracking generated media and
-# per-brand demo art" untracked it: a COPY of a gitignored directory is not a missing file at build
-# time, it is a hard failure, and every deploy since has died on this exact line while the old
-# container kept serving. The rule this encodes: only COPY a path git actually carries.
+# The rule this encodes: only COPY a path git actually carries. A COPY of a gitignored directory is a
+# hard failure at build time, not a missing file.
 
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none, and
 # boot() blocks on document.fonts for every registered face, so the editor would hang without them.
@@ -73,7 +53,7 @@ WORKDIR /src/site
 RUN npm ci
 
 COPY site/ ./
-# `prebuild` runs ../scripts/site/site-engine.mjs → vendors the engine into public/
+# `prebuild` runs ../scripts/site/vendor-assets.mjs, which copies the faces and gsap into public/assets/
 # BUILD TO `.next`, DO NOT RENAME AFTERWARDS. `site/package.json`'s build script pins
 # NEXT_DIST_DIR=.next-build so a running `next dev` and a `next build` do not fight over `.next`
 # locally. Nothing runs `next dev` in this image, so the pin has no job here and two attempts to

@@ -1,7 +1,7 @@
 // quality/gates/site-build-check.mjs: run the site's REAL build steps locally before they can fail
 // silently on the deploy host.
 //
-//   node quality/gates/site-build-check.mjs [range]     ·   make site X=deploy-check
+//   node quality/gates/site-build-check.mjs [range]
 //
 // WHY. vawe.dev was dead for ten days (2026-09-06 to 2026-09-16) behind three stacked breaks, and every
 // one would have shown up the moment someone ran the site's own build commands:
@@ -18,8 +18,8 @@
 // inputs; this file closes the remaining gap by running the real commands instead of parsing them.
 //
 // WHAT RUNS, AND WHY EACH ONE MADE THE CUT:
-//   - scripts/site/site-engine.mjs   the site's own `prebuild`. Vendors the engine into site/public and
-//                                    REFUSES on a missing asset (engine-doctrine class of break 1). ~0.5s.
+//   - scripts/site/vendor-assets.mjs the site's own `prebuild`. Copies the fonts and gsap into site/public and
+//                                    REFUSES on a missing tree. ~0.5s.
 //   - generators/media/fonts.mjs     the exact command the Dockerfile RUNs after the lock COPY. Skips
 //                                    files already on disk, so a repeat run is near-instant (~0.05s
 //                                    measured here); it is the lock file's existence and hash match that
@@ -38,7 +38,7 @@
 // way a maintained list would.
 //
 // HOW IT DEGRADES. `site/node_modules` will not exist in a fresh clone or a freshly created worktree,
-// and this check cannot run `tsc` (or trust `site-engine.mjs`'s d3 resolution) without it. It refuses
+// and this check cannot run `tsc` without it. It refuses
 // to pass silently: it prints that it was SKIPPED and names the fix (`npm ci` in site/), and exits 0,
 // because a missing local install is an environment gap, not a code defect this push introduced.
 import fs from 'node:fs';
@@ -66,7 +66,7 @@ for (const line of dockerfile) {
 }
 
 const range = process.argv[2];
-let changed = null; // null = "check unconditionally" (manual `make site X=deploy-check`)
+let changed = null; // null = "check unconditionally" (manual `node quality/gates/site-build-check.mjs`)
 if (range) {
   changed = execFileSync('git', ['diff', '--name-only', range], { cwd: ROOT, encoding: 'utf8' })
     .split('\n').filter(Boolean);
@@ -84,7 +84,7 @@ if (!triggered) {
 if (!fs.existsSync(path.join(ROOT, 'site', 'node_modules'))) {
   console.log('~ deploy-check: SKIPPED, site/ dependencies are not installed here.');
   console.log('  This push touches the site build and was NOT verified. Run `npm ci` in site/, then');
-  console.log('  `make site X=deploy-check`, before you push for real.');
+  console.log('  `node quality/gates/site-build-check.mjs`, before you push for real.');
   f.warn('deploy-check-skipped', 'site/node_modules missing, site build not verified locally');
   f.emit();
   process.exit(0);
@@ -106,7 +106,7 @@ const run = (label, cmd, args, cwd) => {
 console.log('▶ deploy-check: running the site\'s real build steps (touched: '
   + [...triggers].filter(touches).join(', ') + ')');
 
-const ok = run('site-engine (prebuild)', 'node', ['scripts/site/site-engine.mjs'], ROOT)
+const ok = run('vendor-assets (prebuild)', 'node', ['scripts/site/vendor-assets.mjs'], ROOT)
   && run('fonts lock + verify', 'node', ['generators/media/fonts.mjs'], ROOT)
   && run('tsc --noEmit', 'npx', ['tsc', '--noEmit', '-p', '.'], path.join(ROOT, 'site'));
 

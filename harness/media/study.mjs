@@ -3,8 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { drawtext } from '../author/sheets.mjs';
-import { ffmpegOrDie } from '../lib/scratch.mjs';
+import { drawtext, ffmpegOrDie } from '../lib/scratch.mjs';
 import { measureSpan } from './content.mjs';
 import { clusterCuts, detectCuts, detectSeams, detectPans, detectCrossfades, frameSeries, mergeJoints, motionDeltaSeries } from './shot-detect.mjs';
 

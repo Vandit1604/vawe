@@ -9,15 +9,7 @@ const json = () => (env.JSON ? ['--json'] : []);
 // Reference-material tools that are read far less often than `make study`/`make sections`/`make ref`
 // (kept real: they are typed constantly, mid-workflow). Same fold-shape as gen-tool.mjs/site-tool.mjs.
 export const TOOLS = {
-  'brandspec': () => ['scripts/brand/brandspec.mjs', env.URL],
-  'census': () => ['harness/lib/census.mjs'],
-  'claims': () => ['harness/author/claims.mjs'],
-  'grammar': () => ['harness/author/grammar.mjs', ...(env.DOC ? ['--doc'] : (env.N ? [env.N] : []))],
-  'lookbook': () => ['scripts/brand/lookbook.mjs', env.URL, env.NAME],
-  'measure': () => ['harness/author/measure-motion.mjs', env.VIDEO, env.FROM, env.TO, env.EXPECT],
-  'mine': () => ['harness/author/mine.mjs', ...json()],
   'palette': () => ['scripts/brand/palette.mjs', env.IMG],
-  'transitions': () => ['quality/gates/transitions-catalog.mjs', env.D, ...json()],
 };
 
 export function run(name) {

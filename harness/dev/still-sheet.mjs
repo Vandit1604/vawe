@@ -5,7 +5,7 @@
 // judge or `conform.mjs` can read a position/size/colour change frame-to-frame, and at native
 // resolution so nothing is lost to the downscale (JUDGE.md: "motion claims from same-scale stills").
 //
-//   node harness/dev/still-sheet.mjs D=<film.json> [RATE=0.25]
+//   node harness/dev/still-sheet.mjs D=<render.mp4> [RATE=0.25]
 //
 // Reuses frameTile/tileGrid (quality/gates/tile.mjs), the one owner for "extract + label + composite a
 // video frame" every other sheet in this repo already goes through. Chunked into groups of 6 so a
@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { frameTile, tileGrid, gradeable, renderOf, baseOf } from '../../quality/gates/tile.mjs';
+import { frameTile, tileGrid, baseOf } from '../../quality/gates/tile.mjs';
 import { writeReceipt } from '../lib/receipt.mjs';
 import { scratch } from '../lib/scratch.mjs';
 
@@ -30,11 +30,9 @@ function ffprobe(args) {
 }
 
 export function stillSheet(filmArg, rate = 0.25) {
-  const filmPath = path.resolve(filmArg);
-  if (!fs.existsSync(filmPath)) throw new Error(`no such film: ${filmArg}`);
-  const mp4 = renderOf(filmPath);
-  const ready = gradeable(filmPath, mp4);
-  if (!ready.ok) throw new Error(`${ready.why}. fix: ${ready.fix}`);
+  const mp4 = path.resolve(filmArg);
+  if (!fs.existsSync(mp4)) throw new Error(`no such render: ${filmArg}`);
+  if (!/\.(mp4|mov|webm)$/i.test(mp4)) throw new Error(`${filmArg} is not a video: render the page first (make dev PAGE=...)`);
 
   const dur = parseFloat(ffprobe(['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', mp4]));
   const [w, h] = ffprobe(['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', mp4])
@@ -65,18 +63,18 @@ export function stillSheet(filmArg, rate = 0.25) {
     `${times.length} full-res still(s) at ${rate}s intervals over ${dur.toFixed(1)}s, in ${sheets.length} sheet(s) of up to ${PER_SHEET}.`,
     'Each grid tile is a SEPARATE frame, at native resolution, not the same frame moving: read a motion',
     'claim (a rise, a draw-on, a hold) off the sequence of tiles, or get the exact number from',
-    '`node harness/dev/probe-frame.mjs`.', ''];
+    '`make study PROBE=1 REF=<page.html> AT=<s> SEL=<css>`.', ''];
   for (const s of sheets) lines.push(`- ${path.relative(process.cwd(), s.path)}  (${s.t0.toFixed(2)}s - ${s.t1.toFixed(2)}s)`);
   fs.writeFileSync(indexPath, lines.join('\n') + '\n');
 
-  writeReceipt('still-sheet', filmPath, { sheets: sheets.map((s) => s.path), index: indexPath, at: new Date().toISOString().slice(0, 10) });
+  writeReceipt('still-sheet', mp4, { sheets: sheets.map((s) => s.path), index: indexPath, at: new Date().toISOString().slice(0, 10) });
   return { sheets, index: indexPath, dur, count: times.length };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const D = readArg('D') || process.argv.slice(2).find((a) => !a.includes('=') && !a.startsWith('--'));
   const RATE = parseFloat(readArg('RATE') || '0.25');
-  if (!D) { console.error('usage: node harness/dev/still-sheet.mjs D=<film.json> [RATE=0.25]'); process.exit(2); }
+  if (!D) { console.error('usage: node harness/dev/still-sheet.mjs D=<render.mp4> [RATE=0.25]'); process.exit(2); }
   let result;
   try { result = stillSheet(D, RATE); }
   catch (e) { console.error(`✗ ${e.message}`); process.exit(2); }

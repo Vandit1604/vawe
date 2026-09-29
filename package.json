@@ -5,21 +5,12 @@
   "description": "Deterministic motion-graphics engine: one self-describing JSON in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
   "scripts": {
     "setup:audio": "node harness/media/gen-audio.mjs",
-    "verify": "node quality/gates/run.js",
-    "look": "node harness/author/preview.mjs",
-    "prepublishOnly": "node harness/dev/pack-check.mjs",
-    "pack-check": "node harness/dev/pack-check.mjs",
     "postinstall": "node scripts/vendor-gsap.mjs"
   },
-  "//": "Rendering is the Go service: `make render M=<format>` / `make all` (see Makefile).",
   "//gsap-note": "Pinned exact (not ^): scripts/vendor-gsap.mjs copies node_modules/gsap/dist/gsap.min.js to assets/vendor/gsap.min.js on every install (postinstall above), because GSAP's Standard license does not clearly allow redistributing the built file, so it is never committed (assets/vendor/README.md, .gitignore).",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "d3-geo": "^3.1.1",
-    "gsap": "3.13.0",
-    "zod": "^4.4.3"
+    "gsap": "3.13.0"
   },
-  "//d3-geo-note": "SHIPPED, not dev-only: blocks/index.mjs (in the package) eagerly imports every block factory, including blocks/geo.mjs, which bare-imports d3-geo (core/engine/expand.js:10). harness/author/expand-blocks.mjs, the Node-side expander cli/vawe.mjs shells out to for every render, therefore needs d3-geo present even for a scene with no geo block. Devdependency until 2026-09-22: broke the very first `npx vawe` render with ERR_MODULE_NOT_FOUND.",
   "devDependencies": {
     "acorn": "^8.18.0",
     "fontkit": "^2.0.4",
@@ -28,10 +19,7 @@
     "three": "^0.185.1",
     "wawoff2": "^2.0.1"
   },
-  "//puppeteer-note": "REPO-DEV ONLY, and it must stay here. Its postinstall downloads a full Chrome UNCONDITIONALLY: measured 473MB and 29s on a fast connection, minutes on a normal one, against a 16.3MB package. It used to sit in `dependencies`, so every `npm i vawe` paid that. Nothing the package SHIPS needs it: the browser is launched by chromedp from the Go side (internal/scene/scene.go), which finds a system Chrome on its own, and cli/vawe.mjs only ever asked puppeteer for a PATH STRING it never launched. The 41 repo tools that do need it (gates, beats, reveal) run from a checkout, where devDependencies are installed. optionalDependencies would NOT have fixed this - npm installs those by default too, so the download would still happen.",
-  "bin": {
-    "vawe": "cli/vawe.mjs"
-  },
+  "//puppeteer-note": "Puppeteer drives Chrome for every page render and check (harness/media/render-page.mjs). Its postinstall downloads a full Chrome; CI jobs that open no browser set PUPPETEER_SKIP_DOWNLOAD=1.",
   "engines": {
     "node": ">=18"
   },
@@ -47,32 +35,12 @@
     "deterministic",
     "ffmpeg",
     "headless-chrome",
-    "mp4"
-  ],
-  "files": [
-    "cli/",
-    "core/",
-    "blocks/",
-    "themes/",
-    "films/scene/scene.html",
-    "films/scene/scene.js",
-    "films/scene/props.js",
-    "films/scene/scene.css",
-    "assets/vendor/",
-    "assets/geo/",
-    "recipes/",
-    "films/scene/schema.json",
-    "films/scene/sample.json",
-    "harness/author/expand-blocks.mjs",
-    "harness/media/clip-audio.mjs",
-    "generators/media/fonts.mjs",
-    "generators/media/voice-cue.mjs",
-    "assets/fonts/",
-    "bin/",
-    "NOTICE"
+    "mp4",
+    "html"
   ],
   "optionalDependencies": {
     "ffmpeg-static": "^5.2.0"
   },
-  "//oxlint-note": "Code-quality enforcement: complexity, function length, nesting depth. Rust, so a whole-repo sweep runs in under a second and a single-file check is instant. That speed is what lets it run on every file WRITE (harness/live/code-quality.mjs) rather than only at push, which is the difference between a rule that shapes code and a rule that scolds after the fact. A comment key must stay at the ROOT of this file: npm parses every key inside devDependencies as a package name, and a `//name` entry there breaks `npm install` outright."
+  "//oxlint-note": "Code-quality enforcement: complexity, function length, nesting depth. Rust, so a whole-repo sweep runs in under a second and a single-file check is instant. That speed is what lets it run on every file WRITE (harness/live/code-quality.mjs) rather than only at push, which is the difference between a rule that shapes code and a rule that scolds after the fact. A comment key must stay at the ROOT of this file: npm parses every key inside devDependencies as a package name, and a `//name` entry there breaks `npm install` outright.",
+  "private": true
 }
