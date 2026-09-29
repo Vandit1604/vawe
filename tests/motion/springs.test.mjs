@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { spring, approach, springLinear, springDuration, track, SPRINGS } from './springs.js';
+import { spring, approach, springLinear, springDuration, track, SPRINGS } from '../../core/motion/springs.js';
 
 test('every preset spring starts at 0 and settles to 1', () => {
   for (const { k, d } of Object.values(SPRINGS)) {
