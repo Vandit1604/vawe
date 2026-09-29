@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
+import { openFile } from '../lib/open-file.mjs';
 import { CUES, renderCue, normalize, encodeWav, SR } from '../../core/audio/kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -123,7 +123,7 @@ console.log(`\\n  Judge them, hit Copy verdicts, and paste into ${VERDICTS}.`);
 console.log('  That file is the input a voicing pass needs and has never had: without it,');
 console.log('  "the sounds are bad" is one sentence covering twenty different sounds.\\n');
 
-if (process.argv.includes('--open')) execFileSync('open', [path.join(OUT, 'index.html')]);
+if (process.argv.includes('--open')) openFile(path.join(OUT, 'index.html'));
 
 function measure(x, slices = 8) {
   const n = x.length, per = Math.floor(n / slices);

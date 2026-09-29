@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
+import { openFile } from '../lib/open-file.mjs';
 import { CUES, renderCue, normalize, encodeWav } from '../../core/audio/kit.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -269,4 +269,4 @@ paint();
 
 console.log(`\n  ${made.length} variants across ${names.length} cues → out/sound-vary/index.html`);
 console.log('  Variant 0 of each is the shipped voicing, as a control.\n');
-if (process.argv.includes('--open')) execFileSync('open', [path.join(OUT, 'index.html')]);
+if (process.argv.includes('--open')) openFile(path.join(OUT, 'index.html'));

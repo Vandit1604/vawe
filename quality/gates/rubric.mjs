@@ -11,6 +11,7 @@
 // That is the failure `similarity.mjs` exists to catch, so the A/B loop must not manufacture it.
 import fs from 'node:fs';
 import path from 'node:path';
+import { scratchBase } from '../../harness/lib/scratch.mjs';
 import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
 
 export function houseStyleFor(brand) {
@@ -124,7 +125,7 @@ uses the number already given.
 ${deltas.replace(/^# .*\n+/, '').replace(/^## /gm, '### ')}
 ` : '');
 
-export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge', findings = [], reference = null, measuredSource, deltas = '' }) {
+export function craftRubric({ name, frames, landscape, brand, dir = path.join(scratchBase(), 'judge'), findings = [], reference = null, measuredSource, deltas = '' }) {
   return `# Judge sheet, ${name} (${frames} key frames, ${landscape ? 'landscape' : 'portrait'})
 
 READ \`${dir}/sheet.png\` and score EACH labeled frame against the rubric below. Be adversarial:
@@ -271,13 +272,13 @@ if (import.meta.url === `file://${process.argv[1]}` && process.argv.includes('--
   if (!DIMENSIONS.some((d) => /Ground continuity/.test(d))) {
     console.error('rubric must carry a Ground continuity dimension'); process.exit(1);
   }
-  const sheet = craftRubric({ name: 'x.mp4', frames: 3, landscape: true, dir: '/tmp/judge' });
+  const sheet = craftRubric({ name: 'x.mp4', frames: 3, landscape: true });
   if (!/Ground continuity/.test(sheet)) { console.error('craftRubric output must include Ground continuity'); process.exit(1); }
 
   // abRubric drops indices 3/4 (brand/asset fidelity) unless a brand is named. Appending the new
   // dimension at the END must not shift those indices: this is the case that would silently break if
   // a future edit inserted the new dimension in the middle instead of appending it.
-  const noBrand = abRubric({ rows: 2, landscape: true, dir: '/tmp/judge' });
+  const noBrand = abRubric({ rows: 2, landscape: true, dir: scratchBase() });
   if (/Brand fidelity/.test(noBrand) || /Asset fidelity/.test(noBrand)) {
     console.error('abRubric with no brand must still drop Brand/Asset fidelity'); process.exit(1);
   }

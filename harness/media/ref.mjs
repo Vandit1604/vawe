@@ -28,7 +28,7 @@ const known = () => {
 
 for (const url of urls) {
   console.log(`\n  ${url}`);
-  const page = spawnSync('curl', ['-sL', '-A', UA, url], { encoding: 'utf8', maxBuffer: 1 << 28 }).stdout || '';
+  const page = await fetch(url, { headers: { 'User-Agent': UA } }).then((r) => r.text()).catch(() => '');
   const mp4s = [...new Set([...page.matchAll(/https:\/\/[\w.-]*pinimg\.com\/[^"'\\ ]+?\.mp4/g)].map((m) => m[0]))];
   if (!mp4s.length) {
     console.log(`  ✗ no mp4 on that page. It may be an image pin, or the markup changed.`);
@@ -38,7 +38,10 @@ for (const url of urls) {
   const id = (/\/pin\/(\d+)/.exec(url) || [])[1] || String(Date.now());
   const name = NAME_ARG || `pin-${id}`;
   const dest = path.join(REFS, `${name}.mp4`);
-  spawnSync('curl', ['-sL', '-o', dest, best], { encoding: 'utf8' });
+  try {
+    const res = await fetch(best, { headers: { 'User-Agent': UA } });
+    if (res.ok) fs.writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
+  } catch { /* the size check below reports a failed download */ }
   if (!fs.existsSync(dest) || fs.statSync(dest).size < 1024) { console.log(`  ✗ download produced nothing usable`); fs.rmSync(dest, { force: true }); continue; }
 
   const h = sha(dest);

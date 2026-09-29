@@ -44,12 +44,22 @@ function listFiles(p) {
   return out;
 }
 
+// Shell-style glob, one segment at a time: * and ** match within one segment, and a leading dot
+// is never matched by a wildcard. Returns base-relative paths, directories included.
 function expand(pattern, base) {
-  let out;
-  try {
-    out = execFileSync('bash', ['-c', `cd ${JSON.stringify(base)} && eval ls -d ${pattern} 2>/dev/null`], { encoding: 'utf8' });
-  } catch { return []; }
-  return out.split('\n').filter(Boolean);
+  let found = [''];
+  for (const seg of pattern.split('/').filter(Boolean)) {
+    const re = seg.includes('*')
+      ? new RegExp(`^${seg.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*+/g, '.*')}$`)
+      : null;
+    found = found.flatMap((dir) => {
+      if (!re) return fs.existsSync(path.join(base, dir, seg)) ? [path.join(dir, seg)] : [];
+      let names;
+      try { names = fs.readdirSync(path.join(base, dir)); } catch { return []; }
+      return names.filter((n) => re.test(n) && !n.startsWith('.')).sort().map((n) => path.join(dir, n));
+    });
+  }
+  return found.filter(Boolean);
 }
 
 function loadInclude() {

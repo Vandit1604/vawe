@@ -17,7 +17,7 @@ function chromeChildrenOf(pid) {
   } catch { return []; }
 }
 
-test('SIGTERM to a launchPage() caller closes its Chrome child', { timeout: 30000 }, async () => {
+test('SIGTERM to a launchPage() caller closes its Chrome child', { timeout: 30000, skip: process.platform === 'win32' && 'needs pgrep' }, async () => {
   const script = `
     import { launchPage } from '${path.join(repoRoot, 'harness/lib/render-harness.mjs')}';
     const { page } = await launchPage({ width: 320, height: 240 });
