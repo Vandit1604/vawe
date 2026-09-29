@@ -107,10 +107,15 @@ and the caption track. Render: bin/vawe ship films/<name>/page.html. Then read e
 boundary: both sides of each cut, and the motif hand-off. Then prompts/critique-pass.md.
 ```
 
-## Inputs to ask for
+## Questions
 
-The material (a song, a script, a paper, a battle), the audience, the length, what must stay exact
-(names, lyrics, dates), the music file or the narration plan.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **Material**: the song, script, paper or event the film is made from? Default: the pages of `site/app/` in their nav order. Why: BRIEF.md and the cast are read out of it.
+2. **Audience**: who watches, and the one thing they should feel at the end? Default: an engineer who has used one video tool; "I can make this myself". Why: the arc is built backwards from that feeling.
+3. **Length**: seconds, and how many chapters? Default: 90 s in three chapters of 30 s. Why: one chapter is one session and one agent; the count is the budget.
+4. **Exact**: what must stay exact (names, lyrics, dates, strings)? Default: every quoted string, copied from the material. Why: a chapter agent cannot ask; it needs the list.
+5. **Sound**: the music file with its BPM and offset, or the narration plan? Default: no music; captions only, chapter starts on the storyboard's times. Why: the timeline is derived from the beat grid or the word timings, never guessed.
 
 ## Gotchas
 

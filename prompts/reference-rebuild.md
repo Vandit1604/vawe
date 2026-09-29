@@ -59,10 +59,15 @@ combined >= 0.70, then stop and ask for the critique pass (prompts/critique-pass
 Three passes without progress: stop and report, do not keep going.
 ```
 
-## Inputs to ask for
+## Questions
 
-The reference file, what stays private (references are in-house and are never published), the
-strings and captures that replace the reference's content, the brand kit.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **Reference**: the mp4 to match? Default: `quality/refs/kinetic-promo/source.mp4`. Why: the SPEC comes from it, frame by frame.
+2. **Privacy**: does the film stay private with its reference? Default: private; references are in-house and never published. Why: it decides where the film lives (`films/recreations/` is ignored by git).
+3. **Content**: the strings and captures that replace the reference's? Default: vawe's own strings and captures from `site/app/`. Why: every CHANGE line needs its replacement before the rebuild.
+4. **Kit**: the brand kit? Default: `themes/vawe.css`. Why: every colour on a CHANGE line comes from it.
+5. **Threshold**: the match score that ends the loop? Default: 0.70 combined, then the frame-locked critique. Why: three passes without progress stop the loop; a number says when it is done.
 
 ## Gotchas
 

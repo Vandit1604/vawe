@@ -57,10 +57,15 @@ Fix the top three findings, re-render, re-run the critic fresh. Stop when the cr
 two consecutive rounds fix nothing the critic scores higher. Never mark a PASS yourself; it is
 written by the critic's run (`bin/vawe judge`).
 
-## Inputs to ask for
+## Questions
 
-The rendered file, the brief, the reference (if any), and the previous critique (so the critic can
-check that the findings were fixed, not moved).
+Ask in this order; the first changes the verdict most. A skipped question takes its default; never wait.
+
+1. **Render**: the mp4 to grade? Default: `out/<name>-draft.mp4`, the last draft. Why: the critic grades pixels, never the page source.
+2. **Brief**: the brief or the one-line promise? Default: `films/<name>/brief.md`. Why: value is scored against what the film promised.
+3. **Reference**: a reference mp4, or none? Default: none. Why: with one the pass is frame-locked at five shared timestamps.
+4. **Previous**: the last critique, if any? Default: none; this is the first round. Why: the critic checks that findings were fixed, not moved.
+5. **Judges**: how many fresh runs before a beat closes? Default: two, A and B. Why: one judge is an opinion.
 
 ## Gotchas
 

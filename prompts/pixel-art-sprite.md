@@ -17,7 +17,8 @@ palette, a state machine, and pose parameters quantised to the grid.
 ```
 <inputs>
 Ask me for: the character in one line, the four states of its loop (idle, charge, act, recover), the
-logical resolution (128x96 by default), the palette size (about 24 colours), and the canvas.
+logical resolution (128x96 by default), the palette size (about 24 colours), and the canvas. If I
+skip one, take the default from the Questions section and go on.
 </inputs>
 
 <rendering>
@@ -60,9 +61,15 @@ polished 16-bit sprite, not vector shapes scaled down.
 </quality>
 ```
 
-## Inputs to ask for
+## Questions
 
-Character, states, resolution, palette size, canvas.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **Character**: who or what, in one line? Default: a hooded wizard with a staff. Why: the silhouette decides the rig, the rim light and the scene.
+2. **States**: the four states of the loop? Default: idle, charge, act, recover. Why: the state machine is the animation; a state with no visible change is dead.
+3. **Resolution**: the logical canvas? Default: 128x96. Why: it fixes the integer scale (11x into 1080) and the grid every pose snaps to.
+4. **Palette**: how many colours, and which accent? Default: 24 colours, accent `#8fc0ff`. Why: every pixel comes from the palette and the studio edits it as a custom property.
+5. **Canvas**: the aspect? Default: 16:9. Why: the letterbox arithmetic depends on it.
 
 ## Gotchas
 

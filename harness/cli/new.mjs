@@ -1,4 +1,6 @@
 // `vawe new <name>`: writes films/<name>/page.html (a valid starter) and films/<name>/brief.md.
+// brief.md takes the template's question bank with every default filled in and marked unanswered,
+// then the template's tagged sections (direction, structure, build, gotchas, start) as headings.
 import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
@@ -29,9 +31,54 @@ export const STARTER = `<!doctype html>
 </html>
 `;
 
-function inputsSection(templatePath) {
-  const section = fs.readFileSync(templatePath, 'utf8').split(/^## /m).find((s) => s.startsWith('Inputs'));
-  return section ? section.split('\n').slice(1).join('\n').trim() : '(the template has no inputs section: write the promise, the moments and the platform)';
+export const UNANSWERED = '[unanswered: default taken]';
+
+const QUESTION = /^\*\*(.+?)\*\*:\s+(.+?)\s+Default:\s+(.+?)\s+Why:\s+(.+)$/;
+
+// A question bank is the template's `## Questions` list: `N. **key**: question Default: value Why: reason`,
+// one item per line or wrapped onto indented lines. Returns [] when the template has no bank.
+export function parseQuestions(markdown) {
+  const section = markdown.split(/^## /m).find((s) => s.startsWith('Questions'));
+  if (!section) return [];
+  const items = [];
+  for (const line of section.split('\n').slice(1)) {
+    const start = line.match(/^\d+\.\s+(.*)$/);
+    if (start) items.push(start[1]);
+    else if (/^\s+\S/.test(line) && items.length) items[items.length - 1] += ' ' + line.trim();
+  }
+  return items.map((item) => {
+    const m = item.match(QUESTION);
+    if (!m) throw new UsageError(`question is not "**key**: question Default: value Why: reason": ${item}`);
+    return { key: m[1], question: m[2], default: m[3].replace(/\.$/, ''), why: m[4] };
+  });
+}
+
+// The template's tagged sections in file order (<direction> ... </direction>), the inputs tag excluded.
+export function parseSections(markdown) {
+  const sections = [];
+  for (const m of markdown.matchAll(/^<([a-z]+)>\n([\s\S]*?)^<\/\1>/gm)) {
+    if (m[1] !== 'inputs') sections.push({ name: m[1], body: m[2].trim() });
+  }
+  return sections;
+}
+
+export function formatQuestions(questions) {
+  if (!questions.length) return 'the template has no question bank; write the promise, the moments and the platform';
+  const lines = ['questions, in the order they change the film; a skipped one takes its default:'];
+  questions.forEach((q, i) => {
+    lines.push(`${i + 1}. ${q.key}: ${q.question}`, `   default: ${q.default}`, `   why: ${q.why}`);
+  });
+  return lines.join('\n');
+}
+
+function briefText(name, templateRel, questions, sections) {
+  const inputs = questions.length
+    ? questions.map((q) => `- ${q.key}: ${q.default} ${UNANSWERED}`).join('\n')
+    : '- the template has no question bank: write the promise, the moments and the platform';
+  const rest = sections.length
+    ? sections.map((s) => `## ${s.name[0].toUpperCase()}${s.name.slice(1)}\n\n${s.body.replaceAll('<name>', name)}`).join('\n\n')
+    : `## Direction\n\nThe template is written as prompts, not tagged sections: read ${templateRel}.`;
+  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${rest}\n\n## First draft\n\nbin/vawe dev films/${name}/page.html\n`;
 }
 
 export function newFilm(name, { from, root }) {
@@ -39,8 +86,11 @@ export function newFilm(name, { from, root }) {
   const dir = path.join(root, 'films', name);
   if (fs.existsSync(path.join(dir, 'page.html'))) throw new UsageError(`${path.relative(root, dir)}/page.html already exists`);
   const template = from ? path.resolve(from) : path.join(root, 'prompts', 'brand-launch-from-url.md');
+  const markdown = fs.readFileSync(template, 'utf8');
+  const questions = parseQuestions(markdown);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, 'page.html'), STARTER);
-  fs.writeFileSync(path.join(dir, 'brief.md'), `# ${name}: brief\n\nTemplate: ${path.relative(root, template)}\n\n## Inputs\n\n${inputsSection(template)}\n`);
+  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown)));
+  console.log(formatQuestions(questions));
   return `films/${name}/page.html`;
 }
