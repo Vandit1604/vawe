@@ -398,7 +398,7 @@ function cutLeads(cuts, audio, fps) {
 
 // ── text (optional) ──────────────────────────────────────────────────────────────────────────────
 async function analyseText(video, dir, W, H, fps) {
-  const { ocrWords } = await import('./see.mjs');
+  const { ocrWords } = await import('./see/ocr.mjs');
   return ocrWords(video, dir, 4, 60, 3).map((w) => ({ text: w.text, f0: Math.round(w.tIn * fps), f1: Math.round(w.tOut * fps),
     boxHeightPx: r1(w.box.hFrac * H), fontPxApprox: r1((w.box.hFrac * H) / 0.8), cxPx: r1(w.box.cxFrac * W), cyPx: r1(w.box.cyFrac * H) }));
 }

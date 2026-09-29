@@ -27,8 +27,11 @@ export function parseTesseractTsv(tsv, minConf, minLen, frameW, frameH) {
 export function ocrOneFrame(src, base, minConf, minLen, frameW, frameH) {
   // One retry: a non-zero exit right after ffmpeg wrote the frame is cheaper to retry once than to
   // silently read as "no text in this frame" (the failure mode before this: an empty tsv either way).
-  let r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
-  if (r.status !== 0) r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
+  // Leptonica 1.86 rewrites any path under /tmp to its own temp dir and then finds no file: pass the
+  // real path (/private/tmp on macOS), or every frame reads as "no text" with no error.
+  const args = [fs.realpathSync(src), path.join(fs.realpathSync(path.dirname(base)), path.basename(base)), '--psm', '11', 'tsv'];
+  let r = spawnSync('tesseract', args, { encoding: 'utf8' });
+  if (r.status !== 0) r = spawnSync('tesseract', args, { encoding: 'utf8' });
   const tsv = fs.existsSync(`${base}.tsv`) ? fs.readFileSync(`${base}.tsv`, 'utf8') : '';
   return parseTesseractTsv(tsv, minConf, minLen, frameW, frameH);
 }
