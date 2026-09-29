@@ -1,100 +1,107 @@
-# AGENTS.md: authoring videos for this engine
+# AGENTS.md: house rules for vawe
 
-Canonical, tool-neutral doctrine for the vawe video engine: the same for Claude Code, Cursor, Codex,
-or a human with no agent. A Claude Code mechanism (a hook, the Skill tool, a vendored skill) carries a
-neutral note. `CLAUDE.md` only points here.
+vawe is the framework for agent-native motion graphics: one HTML page in, one film out. Write the
+page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js). This file adds only
+what you would get wrong on your own.
 
-This repo turns **one self-describing JSON → one rendered video** (60fps mp4 final, 30fps with
-`--draft`, `renderer/cmd/render/main.go:30`; five canvases, `core/layout/safe.js:35`: `16:9` `9:16`
-`1:1` `4:5` `4:3`, an unnamed ratio fit to the long edge at 1920). Exactly **one module: `scene`**, an
-open canvas of **24 layer types** (`ls core/layers/`) plus camera · transitions · captions.
+## The page contract  `[live: harness/media/render-page.mjs]`
 
-The settled frame is HTML. Animate it with `parts`, `motion` and `vars`, or standard CSS
-animations and `element.animate()`, which the clock seeks each frame (details: `vawe-scene-authoring`).
+- A film is `films/<name>/page.html` plus its own assets folder, relative paths only.
+- `<meta name="duration" content="12.4">` in seconds. Optional `<meta name="fps">` is your frame-table
+  rate; the render rate is separate (60 final, 30 draft) and frames are fractional.
+- Time is the seek, never the clock: CSS `@keyframes` / `element.animate()` (the renderer sets
+  `currentTime`), or `window.seek(t)` in seconds painting frame t as a pure function, or both.
+  No timers, no state between frames, no unseeded random: a virtual clock
+  (`core/engine/page-clock.js`) owns `Date`, `requestAnimationFrame`, timers and `Math.random`.
+- Aspect: `<html data-aspect="16:9">`, `--vw`/`--vh` on `:root` and `window.vawe` are set before your
+  scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
+- Audio is `<audio>` tags, never played live, mixed offline to -14 LUFS: `src` + `data-at` (s),
+  `data-gain` (dB), `data-fade-out`; `loop` is the music bed; `data-synth="whoosh"` picks a voice
+  from `core/audio/kit.mjs`; `data-role="vo"` ducks the bed.
+- Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
+  custom property); the studio edits those literals in place.
+- `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
+  one big moment; put quiet before it. One focal point per frame.
+- Springs, keyframe tables, seeded noise: `core/motion/springs.js` (`core/motion/README.md`).
 
-## THE SEVEN STAGES, IN ORDER  `[live: harness/live/stage-say.mjs]`
+## The loop  `[live: harness/live/stage-say.mjs]`
 
-`make stage D=<film>` reads the repo, so it can never disagree with it, and says which stage a film
-is in and the one next command; `make next D=<film>` runs that step.
+Brief or reference -> stills -> draft -> critique in a fresh session -> fix only the affected
+seconds -> final. The hook says which stage a film is at; `make stage` re-reads it from disk.
 
 | # | stage | the command |
 |---|---|---|
-| 1 | brief | `make quiz NAME= URL=` |
-| 2 | plan | `make ideate` → write the storyboard → `make storyboard-check` |
-| 3 | design | `make preview` → `make dev-tool X=design-spec` → `make studio D=` |
-| 4 | assemble | `make assemble D=` writes the scene JSON |
-| 5 | direct | `make look LOOKS=1` (look review before motion) → `make dev-tool X=critics D= DECIDERS=1` |
-| 6 | render | `make ship D=` |
-| 7 | judge | `node harness/dev/verify.mjs D=` → `make judge D= [STRUCT=1 RUNS=A,B]` (double-run) → **vawe-audit** composes one verdict; **vawe-review-loop** owns the fix loop; a PASS is never self-recorded |
+| 1 | type | `engine-doctrine/CRAFT/ROUTING.md` names the `prompts/` template; copy it, fill its inputs |
+| 2 | stills | the five frames that define the look, before any motion |
+| 3 | draft | `make dev PAGE=films/<name>/page.html [FROM= TO=]` (half size, 30 fps, silent) |
+| 4 | critique | `make critique PAGE= [REF=]` in a session that did not write the page (`vawe-critique`) |
+| 5 | fix | re-render only the seconds the critique named: `make dev PAGE= FROM= TO=` |
+| 6 | final | `make ship PAGE= [ASPECT=all]` (60 fps, blur, audio) |
 
-No sign-off step: the draft render at the design stage (`make dev DRAFT=1`, no plan needed) is where
-the owner looks and redirects, before a full render is spent.
+Recreating a reference: `make dev-tool X=new TYPE=recreation NAME= REF=` starts it, `make spec REF=`
+writes SPEC.md, mark every line KEEP or CHANGE, rebuild, then loop `make next PAGE= REF=` until it
+passes (`vawe-reference`); never `make ship` before that loop passes.
 
-**No templates**: compose from `engine-doctrine/PRIMITIVES.md` and real captured assets; `make assemble`
-writes the scene JSON, `make ship` renders it. Reflecting a brand: `make kit URL= INIT=1` builds
-colours, fonts and a favicon from the site's own colours only, in one command.
+Over 60 seconds or more than one session: one guide read first, one chapter file per agent
+(`prompts/directors-brief-long-form.md`). Skills: `vawe-page` (write), `vawe-critique` (look),
+`vawe-reference` (match), `vawe-audit` (compose the verdict from two judge runs).
 
-Recreating a reference: `make dev-tool X=new TYPE=recreation NAME= REF=`, then loop
-`make next PAGE= REF=` until it passes (never `make ship`).
+## Motion rules that are not your defaults  `[eye]`
 
-## Where to look  `[ref: make help]`
+- Arrive fast, land soft: `approach(f, from, to, k)`, k 0.12 to 0.19 (share of the remaining
+  distance closed per frame), not `ease-out` on everything.
+- Exits run faster and shorter than entrances.
+- Stagger siblings 30 to 80 ms; never let a group land on one frame.
+- Blur follows motion: a moving thing may blur, a still thing never does.
+- Text holds `words x 0.6 s`, floor 1.2 s (`engine-doctrine/RULES/readable-hold.md`). Fix a fast read
+  with a hold, never a slower move.
+- The slowest beat is at least 3x the fastest (`engine-doctrine/RULES/speed-bands.md`).
+- Cut on the beat, or two frames early. A declared hold is allowed and is not dead air.
+- Adjacent transitions change axis or direction.
 
-`make help` prints the fast path; `make list` prints every target by phase. Six sub-tools route by
-name (X=<name>): `gen site study-tool dev-tool media check GATE=<name>`. `make arsenal Q="…"` searches
-every effect and block before you hand-build one (`harness/live/arsenal-nudge.mjs` nudges this at save).
+## Banned first-draft defaults  `[eye]`
 
-Eject a block into its own literal layers: `make dev-tool X=add BLOCK= D=`. Tune one layer's motion
-live: `make tune D= ID=`. One page with the frame grid, verify and judge together:
-`node harness/author/review-server.mjs D=`.
+You will reach for each of these; do the other thing (`engine-doctrine/RULES/banned-defaults.md`).
 
-Claude Code loads a skill on demand; `make stage`/`make next` name the one the open stage wants, with
-a `read:` line for everyone else. Load `vawe-scene-authoring` before writing any layer. Everyone else
-reads `engine-doctrine/CRAFT/ROUTING.md`, which maps a request to its film type and `vawe-type` skill.
-Hand-writing HTML, or fixing "looks AI": `taste-skill`, then `impeccable`.
+- A centred title on a gradient. Compose off-centre, on a real surface.
+- Everything fades in. One entrance per beat, and make it a move.
+- Corner labels and frame borders. Nothing decorates the edge.
+- Glow on UI text or chrome, particle bursts, RGB split, camera shake, bouncy overshoot.
+- A crossfade as the only transition. Cut, wipe on the motion, or match on a shape.
+- Fake product UI. A capture of the real thing, or nothing.
+- A random gradient, gradient text, cyan to purple, Inter or Space Grotesk with no brand reason.
+- Two things fighting for attention. One focal point, one accent colour.
+- An em dash on screen (the validator rejects it). A first-frame hook over 12 words.
 
-## Built-in rules  `[built: core/validate/validate.mjs:74]`
+## Waivers  `[live: harness/media/render-page.mjs]`
 
-- No em-dashes (U+2014) on screen: the validator rejects them.
-- First-frame hook ≤ ~12 words, front-load the strong word, ≤ 1 emoji.
-- `{"preset": "black"}` (`core/backgrounds/presets.js:118`) is solid `#000000`, no grain, unlike every
-  other dark preset, which carries a tint or wash.
-- Author a boundary through `transitions[]` only: `cuts`/`stings`/`seams` are its lowered internal
-  form, and the validator refuses them written directly.
-- Name the effect before building it, don't approximate by eye (Claude Code: `vawe-name-the-effect`).
+A rule broken for cause is declared in the page with its reason, nowhere else; no `_why`, no waiver.
+Checks advise; only determinism and a missing reason refuse.
 
-## Waivers  `[gated: quality/gates/author-check.mjs]`
-
-`make check GATE=<name>` advises with zero consequence; `author-check` blocks the structural steps
-only with `STRICT=1`. The old look-or-move TASTE gates were deleted, not demoted
-(`engine-doctrine/TASTE.md`). `authoring.allow` + `_why` is the one waiver mechanism: a rule broken
-for cause. A waiver with no `_why` blocks:
-
-```json
-"authoring": { "allow": ["dead-air"], "_why": { "dead-air": "the held frame IS the beat" } }
+```html
+<script type="application/json" id="authoring">
+  {"allow": ["dead-air"], "_why": {"dead-air": "the held wordmark IS the last beat"}}
+</script>
 ```
 
-## Changing the engine, not a film?  `[live: harness/live/craft-live.mjs]`
+## Changing the engine, not a film  `[live: harness/live/craft-live.mjs]`
 
-**Every effect composes; none is a special case.** A new look is a combination of things the engine
-already owns (a unit, a clock, an order, a property, an exit), never a private code path with its own
-timing or colour ramp. If one half has no owner, add the owner, not the effect. A new primitive ships
-with its words too: 2+ `aka` phrases and a `blurb` naming its real default, enforced by
-`make check GATE=word-action`. Five rules govern any change to `core/`, `internal/`, a gate, or the capture path:
-`engine-doctrine/CRAFT/ENGINE-CHANGES.md`.
+Every effect composes; none is a special case: a new look combines things the engine already owns,
+never a private code path. A new primitive ships with 2+ `aka` phrases and a `blurb`
+(`make check GATE=word-action`). Rules: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`.
 
 ## Testing: end to end first  `[ref: make e2e]`
 
-Never write unit tests after the code. Write down every way a system can fail, then test end to end:
-`make e2e` runs six checks in one command (snapshot digests, renderFrame purity, a real MCP-drafted
-scene, the browser engine, the whole authoring ladder) and leaves one artefact,
-`quality/runs/e2e/<timestamp>/report.md`. Excuse a known-broken tracked scene by name in
-`quality/baselines/e2e-known-broken.json`, never by loosening what counts as a pass.
-
-Push: `make dev-tool X=verify-batch`, then `git push`.
+List every way it can fail, then `make e2e` (report in `quality/runs/e2e/<timestamp>/`). A unit test
+only for what a render cannot show. Push: `make dev-tool X=verify-batch`, then `git push`.
 
 ## Comments  `[eye]`
 
-Keep a comment only when it holds a fact the code cannot show: an exported function's contract
-(units, ranges, side effects), a source or measured number (`make check GATE=provenance` reads these),
-an outside quirk (Chrome, ffmpeg, a timeout), or a guard that looks safe to delete, with its
-`MISTAKES #`. Never history, never a restatement of the next line. A stale comment is a bug.
+Only a fact the code cannot show: a contract (units, ranges, side effects), a measured number with
+its source, an outside quirk, or a guard that looks safe to delete. Never history or restatement.
+A stale comment is a bug.
+
+## Where to look  `[ref: make help]`
+
+`prompts/README.md` (a template per film type), `core/motion/README.md`, `make help`,
+`make arsenal Q="…"` (search before you build), `engine-doctrine/JUDGE.md` (how a film is scored).
