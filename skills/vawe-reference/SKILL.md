@@ -15,9 +15,15 @@ References are in-house and never published. Length is the reference's length, n
 ```bash
 bin/vawe new <name> --ref quality/refs/<ref>/source.mp4   # page starter plus SPEC.md
 bin/vawe spec quality/refs/<ref>/source.mp4               # SPEC.md alone, to re-measure
-bin/vawe compare out/<name>-draft-2-6.mp4 --ref quality/refs/<ref>/source.mp4 --from 2 --at 2.5,3.1,4
+bin/vawe compare --page films/<name>/page.html --ref quality/refs/<ref>/source.mp4 --at 2.5,3.1,4
                                                           # reference | yours at the same exact seconds
+bin/vawe coverage out/<name>.mp4 --ref quality/refs/<ref>/source.mp4 --min 0.5
+                                                          # SSIM per second, the 6 worst moments as a sheet
 ```
+
+`compare --page` is the check loop: it seeks the page and screenshots 3 or 4 frames in about 4 s. Never
+render a whole range to look at a few frames. `compare <draft.mp4> --from` still works for an existing render.
+`coverage` is the done check for a recreation: render once, run it, and fix the seconds it lists below `--min`.
 
 SPEC.md's "On-screen text" table lists every line on screen every 0.25 s for the whole film. Walk it row
 by row before you call a rebuild done: a word the table has and your page lacks is a missed section.
