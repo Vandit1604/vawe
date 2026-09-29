@@ -437,8 +437,12 @@ storyboard-check: ## [preflight] The storyboard-as-PROPOSAL gate: a one-sentence
 # stage. That writes a motion keyframe into the scene at that frame, surgically, the file's hand
 # formatting survives and a save that changes nothing is a zero-byte diff (harness/author/patch-motion.mjs).
 # `undo` walks back through the session. engine-doctrine/CRAFT/KEYED-MOTION.md is what you are authoring toward.
-studio: ## [dev] LIVE scrubbable preview (no mp4 render). Its `plan` state shows the storyboard with every beat's real fragment live in it.
+studio: ## [dev] LIVE scrubbable preview (no mp4 render). PAGE=<page.html> [PORT=]: the human layer for a page film (drag keys, edit literals in place). D=<scene.json>: the JSON studio.
+ifdef PAGE
+	node studio/page-server.mjs $(PAGE)
+else
 	node studio/server.mjs $(D)
+endif
 
 # make tune D=films/scene/<file>.json ID=<layer id>[,<id>...] [PORT=8801]: LIVE per-layer motion tuning.
 # Opens the frame range around that layer with a control per motion-key property (and per `vars`
