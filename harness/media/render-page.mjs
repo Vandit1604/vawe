@@ -325,10 +325,9 @@ async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) 
     if (e.code === 'ERR_MODULE_NOT_FOUND') die(`${pagePath} has <audio> elements but harness/media/page-audio.mjs is missing: ${e.message}`);
     throw e;
   }
-  const specs = await audio.readPageAudio(page);
-  const loudness = readPageMeta(pagePath, 'loudness');
+  const { specs, loudness } = await audio.readPageAudio(page, { pagePath });
   const muxed = `${out}.mux-${process.pid}.mp4`;
-  await audio.mixAndMux({ specs, duration, video, out: muxed, loudness: loudness == null ? undefined : Number(loudness) });
+  await audio.mixAndMux({ specs, duration, video, out: muxed, loudness });
   fs.renameSync(muxed, out);
   return true;
 }

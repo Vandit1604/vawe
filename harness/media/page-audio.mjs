@@ -1,6 +1,6 @@
 // harness/media/page-audio.mjs: offline audio for page films. A page holds plain <audio> elements
 // (never played live); this reads them and mixes ONE ffmpeg graph onto the rendered video.
-//   <audio src="music.mp3" data-at="0" data-gain="-3" data-fade-out="0.4" data-role="music"></audio>
+//   <audio src="music.mp3" loop data-at="0" data-gain="-3" data-fade-out="0.4"></audio>   (loop = the music bed)
 //   <audio data-synth="whoosh" data-at="2.4" data-gain="-6"></audio>   (voices: core/audio/kit.mjs CUES)
 //   <audio src="vo.wav" data-role="vo"></audio>                        (ducks music -18 dB while it plays)
 //   <meta name="loudness" content="-14">
@@ -17,7 +17,6 @@ const RATE = 48000;
 const VO_DUCK_DB = -18;
 const DUCK_ATTACK = 0.05;
 const DUCK_RELEASE = 0.3;
-const LONG_TRACK_SECONDS = 3;
 
 function run(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -52,7 +51,7 @@ export async function readPageAudio(page, { pagePath } = {}) {
       src: el.getAttribute('src') || el.querySelector('source')?.getAttribute('src') || null,
       synth: el.dataset.synth || null,
       at: num(el, 'at', 0), gain: num(el, 'gain', 0), fadeIn: num(el, 'fadeIn', 0), fadeOut: num(el, 'fadeOut', 0),
-      trim: num(el, 'trim', 0), duck: num(el, 'duck', null), role: el.dataset.role || null,
+      trim: num(el, 'trim', 0), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
     }));
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
     return { tracks, loudness: Number.isFinite(meta) ? meta : -14, url: location.href };
@@ -67,18 +66,8 @@ export async function readPageAudio(page, { pagePath } = {}) {
     if (!fs.existsSync(file)) throw new Error(`page-audio: <audio src="${src}"> resolved to ${file}, which does not exist`);
     return { ...t, src: file };
   });
-  markLongestAsMusic(specs);
   for (const s of specs) s.role ||= 'sfx';
   return { specs, loudness: raw.loudness };
-}
-
-function markLongestAsMusic(specs) {
-  if (specs.some((s) => s.role === 'music')) return;
-  const files = specs.filter((s) => s.src && !s.role);
-  if (!files.length) return;
-  const lens = new Map(files.map((s) => [s, probeSeconds(s.src)]));
-  const longest = files.reduce((a, b) => (lens.get(b) > lens.get(a) ? b : a));
-  if (lens.get(longest) >= LONG_TRACK_SECONDS) longest.role = 'music';
 }
 
 function materialise(spec, tmp, i) {

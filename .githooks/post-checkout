@@ -17,20 +17,7 @@ MAIN="$(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2; 
 [ -n "$MAIN" ] && [ -n "$WT" ] || exit 0
 [ "$WT" = "$MAIN" ] && exit 0   # the main checkout is the source of the library, never its destination
 
-# Read-only links, same choice worktree.sh makes and for the same reason: node_modules and
-# site/node_modules are shared stores, and a concurrent install through two worktrees is the
-# corruption case, not a benefit of a private copy.
-for d in node_modules site/node_modules; do
-  if [ ! -e "$WT/$d" ] && [ ! -L "$WT/$d" ] && [ -d "$MAIN/$d" ]; then
-    ln -sfn "$MAIN/$d" "$WT/$d"
-  fi
-done
-if [ ! -e "$WT/bin/vawe" ] && [ ! -L "$WT/bin/vawe" ] && [ -f "$MAIN/bin/vawe" ]; then
-  mkdir -p "$WT/bin" && ln -sf "$MAIN/bin/vawe" "$WT/bin/vawe"
-fi
-if [ ! -e "$WT/.vawe-data" ] && [ ! -L "$WT/.vawe-data" ] && [ -d "$MAIN/.vawe-data" ]; then
-  ln -sfn "$MAIN/.vawe-data" "$WT/.vawe-data"
-fi
+sh "$WT/harness/dev/link-shared.sh"
 
 # The untracked, per-file library (films/scene/*.json, assets/fonts, assets/brands, ...), driven from
 # .worktreeinclude, not a second hand-kept list: same script worktree.sh calls, so there is exactly one
