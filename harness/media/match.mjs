@@ -7,23 +7,19 @@
 //
 // `LIGHT=1` adds one more column: a per-beat light-map ΔE (harness/lib/light-map.mjs), the LOW-
 // FREQUENCY brightness and colour a beat reads at a glance, which SSIM and the colour ΔE below both
-// miss (a mostly-black render against a reference that reads several times brighter can still score
-// fine on structure and on one averaged colour). A beat that scores badly there is a candidate for
-// `harness/media/light-fit.mjs`, which fits a replacement background off the same light map.
+// miss.
 //
-// BEATS, NEVER INVENTED (same reasoning as content-check.mjs): the film's own storyboard beats if
-// `<film>.storyboard.md` exists, else scene cuts detected IN THE REFERENCE (ffmpeg select=gt(scene,0.3),
-// shot-detect.mjs's own detectCuts: the same detector `make study` uses). Both timelines are assumed to
-// share one clock: this compares a recreation against the reference it was built to match, not two
-// unrelated films.
+// BEATS, NEVER INVENTED: the shots in spec.json next to REF (`make spec`) if it exists, else scene
+// cuts detected IN THE REFERENCE (ffmpeg select=gt(scene,0.3), shot-detect.mjs's own detectCuts).
+// Both timelines are assumed to share one clock: this compares a recreation against the reference it
+// was built to match, not two unrelated films.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { requireTool, probeSize, probeFps } from '../lib/frame-forensics.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
-import { sampleFrames, tileGrid, blendDiff, ssimOf, gradeable, meanColorOf, labDeltaE } from '../../quality/gates/tile.mjs';
-import { actsFromStoryboard, findStoryboard } from '../../quality/gates/content-check.mjs';
+import { sampleFrames, tileGrid, blendDiff, ssimOf, meanColorOf, labDeltaE } from '../../quality/gates/tile.mjs';
 import { lightMap, lightMapDistance } from '../lib/light-map.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -40,8 +36,8 @@ const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
 const REF = KV.REF || positional[0] || process.env.REF;
 const FILM = KV.D || positional[1] || process.env.D;
-if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<film.json|render.mp4> MATCH=1  '
-  + '(or: node harness/media/match.mjs <ref.mp4> <film.json|render.mp4>)');
+if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<render.mp4> MATCH=1  '
+  + '(or: node harness/media/match.mjs <ref.mp4> <render.mp4>)');
 if (!fs.existsSync(REF)) die(`no such reference video: ${REF}`);
 
 const STEP = Number(flag('--step', 'STEP', 0.1));   // dense strip: one sample every 0.1s, per the spec
@@ -50,41 +46,21 @@ const LIGHT = !!flag('--light', 'LIGHT', null);   // add each beat's light-map �
 requireTool('ffmpeg');
 requireTool('ffprobe');
 
-const filmPath = path.resolve(ROOT, FILM);
-if (!fs.existsSync(filmPath)) die(`no such film: ${FILM}`);
-const slug = path.basename(filmPath).replace(/\.(json|mp4|mov|webm)$/i, '');
-const isVideo = /\.(mp4|mov|webm)$/i.test(filmPath);
-const g = isVideo ? { ok: true, mp4: filmPath } : gradeable(filmPath);
-// A DRAFT RENDER (`make dev`, 30fps) writes the SAME out/<slug>.mp4 a full `make video`/`make ship`
-// does (renderOf names one path for both), so `gradeable`'s own freshness check already accepts either:
-// it only refuses when the JSON is newer than whatever is there. The one thing it never did was say
-// WHICH render it scored, so a fresh draft and a fresh final looked identical in the report; a friction
-// this caused was an agent believing a draft was silently refused when it had in fact been scored.
-if (!g.ok) die(`${g.why}. ${g.fix}, or \`make dev D=${FILM} --draft\` for a quick pass.`);
-const mp4 = g.mp4;
+const mp4 = path.resolve(ROOT, FILM);
+if (!fs.existsSync(mp4)) die(`no such render: ${FILM}`);
+if (!/\.(mp4|mov|webm)$/i.test(mp4)) die(`${FILM} is not a video: render the page first (make dev PAGE=...)`);
+const slug = path.basename(mp4).replace(/\.(mp4|mov|webm)$/i, '');
 
 const { width: W, height: H } = probeSize(mp4);
 const fps = probeFps(mp4);
 const renderKind = fps && fps <= 31 ? 'draft (--draft, ~30fps)' : 'final (~60fps)';
 if (!W || !H) die(`${mp4} has no readable video stream.`);
 
-// ── beats: the film's own storyboard first, the reference's own detected cuts otherwise ────────────
-const sbPath = isVideo ? null : findStoryboard(filmPath, slug, ROOT);
-let beats = sbPath ? actsFromStoryboard(fs.readFileSync(sbPath, 'utf8')) : null;
-let beatsSource = sbPath ? `storyboard beats (${path.relative(ROOT, sbPath)})` : null;
-
-// A storyboard that EXISTS but names no usable beat (a shape the parser does not read, or beats with
-// no start/end) used to fall through to cut-detection with no word said about it: the report read
-// "scene cut(s) detected in the reference" as if no storyboard had ever been written, and an author
-// who had in fact written one had no way to learn it went unread.
-if (sbPath && (!beats || !beats.length)) {
-  console.log(`  ⚠ ${path.relative(ROOT, sbPath)} exists but named no usable beat (no \`## Beat N:\` `
-    + 'heading and no beat table this parser reads), falling back to scene cuts detected in the reference.');
-}
-
-// A page render has no storyboard: use the shots ref-spec.mjs already measured next to the reference.
+// ── beats: the shots ref-spec.mjs measured next to the reference, else the reference's own detected cuts ──
+let beats = null;
+let beatsSource = null;
 const specPath = path.join(path.dirname(path.resolve(REF)), 'spec.json');
-if (isVideo && fs.existsSync(specPath)) {
+if (fs.existsSync(specPath)) {
   const spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
   beats = spec.shots.map((s) => ({ start: s.t0, end: s.t1, label: `shot ${s.index}, frames ${s.f0}-${s.f1 - 1}` }));
   beatsSource = `${beats.length} shot(s) from ${path.relative(ROOT, specPath)}`;
@@ -102,7 +78,7 @@ if (!beats || !beats.length) {
     .filter((b) => b.end - b.start > 0.05);
   beatsSource = `${cuts.length} scene cut(s) detected in the reference (select=gt(scene,0.3))`;
 }
-if (!beats.length) die('no beats: no storyboard and no detectable scene cuts in the reference.');
+if (!beats.length) die('no beats: no spec.json and no detectable scene cuts in the reference.');
 
 const OUT_DIR = flag('--out', null, path.join(ROOT, 'out', 'match', slug));
 fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -184,8 +160,7 @@ const lines = [
     '_light ΔE (harness/lib/light-map.mjs): mean Lab distance between a 16x9 low-frequency light map of',
     'the reference and of the render, one representative frame per beat. Catches what the two scores',
     'above cannot: a render that is mostly black against a reference that reads several times brighter',
-    'can still score well on structure and on a single averaged colour. `harness/media/light-fit.mjs`',
-    'fits a replacement background for a beat that scores badly here._'] : []),
+    'can still score well on structure and on a single averaged colour._'] : []),
 ];
 const mdPath = path.join(OUT_DIR, 'match.md');
 fs.writeFileSync(mdPath, `${lines.join('\n')}\n`);

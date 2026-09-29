@@ -14,8 +14,7 @@ import crypto from 'node:crypto';
 import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { beatsOf, evenSamples } from './beats-of.mjs';
-import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable } from './tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable, evenSamples } from './tile.mjs';
 import { readPageMeta } from '../../harness/media/render-page.mjs';
 import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { craftRubric, structuredRubric } from './rubric.mjs';
@@ -276,16 +275,13 @@ const dims = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '
 const landscape = dims[0] >= dims[1];
 const { tw: TW, th: TH } = tileBox(landscape);
 
-// KEY frames: the film's own storyboard beat table when it has one (harness/author/storyboard-parse.mjs),
-// else the layer-start clustering fallback (beats-of.mjs). `inp` is the scene JSON path when `scene` is
-// set, so the storyboard beside it (`<file>.storyboard.md`) is checked first.
 // A page has no beat table: eight even samples, plus the moment of its declared spectacle.
 const pageSamples = () => {
   const s = Number(readPageMeta(inp, 'spectacle'));
   const even = evenSamples(dur, 8);
   return Number.isFinite(s) ? [...even, { i: even.length, start: s, t: s + 0.2, label: 'spectacle' }].sort((a, b) => a.t - b.t) : even;
 };
-const mids = scene ? beatsOf(scene, dur, inp) : isPage ? pageSamples() : evenSamples(dur);
+const mids = isPage ? pageSamples() : evenSamples(dur);
 
 // Per-scene directory. It used to be a bare /tmp/judge wiped on every run, so judging a second film
 // destroyed the first, which makes comparing two cuts, the entire point of a judging campaign, impossible.
