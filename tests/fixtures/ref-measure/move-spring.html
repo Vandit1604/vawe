@@ -1,0 +1,11 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="2.4">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#101820;overflow:hidden}
+#b{position:absolute;left:10vw;top:38vh;width:14vw;height:24vh;background:#ffd400}</style>
+</head><body><div id="b"></div>
+<script>
+// truth: translateX 0 -> 50vw, start 0.5 s, spring k=300 d=14 (overshoot 1.249), duration 0.89 s
+document.getElementById('b').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(50vw)' }],
+  { delay: 500, duration: 890, fill: 'both', easing: 'linear(0, 0.0663, 0.2325, 0.451, 0.6802, 0.8884, 1.0549, 1.1699, 1.2327, 1.2494, 1.2302, 1.1871, 1.1319, 1.0749, 1.0237, 0.9832, 0.9557, 0.9411, 0.9379, 0.9433, 0.9544, 0.9683, 0.9825, 0.9951, 1.0049, 1.0115, 1.0149, 1.0155, 1.014, 1.0111, 1.0076, 1.0041, 1.001, 0.9986, 0.997, 0.9963, 0.9962, 0.9966, 0.9973, 0.9982, 1)' });
+</script></body></html>

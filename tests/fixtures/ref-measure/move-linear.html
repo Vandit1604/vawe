@@ -1,0 +1,11 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="2">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#101820;overflow:hidden}
+#b{position:absolute;left:10vw;top:38vh;width:14vw;height:24vh;background:#ffd400}</style>
+</head><body><div id="b"></div>
+<script>
+// truth: translateX 0 -> 50vw, start 0.5 s, end 1.2 s, linear
+document.getElementById('b').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(50vw)' }],
+  { delay: 500, duration: 700, easing: 'linear', fill: 'both' });
+</script></body></html>
