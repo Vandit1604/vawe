@@ -13,7 +13,7 @@ const EXAMPLES = [
   { name: 'looks', teaches: 'one held subject, one grade changing per beat; composite looks' },
   { name: 'ransom-intro', teaches: 'cutout ransom type, per-character treatment' },
   { name: 'gradient-showcase', teaches: 'a framed window with a changing background; image + ken' },
-  { name: 'linear-launch', teaches: 'a full launch film: hook, build, proof, payoff, CTA' },
+  { name: 'saas-hero-launch', teaches: 'a full launch film: hook, build, proof, payoff, CTA' },
   { name: 'threadcite-open', teaches: 'a numbered how-it-works sequence with staggered cards' },
 ];
 

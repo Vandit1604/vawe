@@ -138,7 +138,7 @@ for (const l of layers) {
 //
 // COUNTED AGAINST THE FRAME THE CAMERA IS IN, not the canvas box at the origin. A film whose transition IS
 // the camera lays its beats out at stations across a canvas much larger than the frame, so "alive in this
-// window" and "on screen together" are different sets. linear-journey (five stations on 5760x2160, zero
+// window" and "on screen together" are different sets. A station-travel film (five stations on 5760x2160, zero
 // cuts) reported 10 and 11 elements at 14.5s and 19.7s by summing the station arriving with the one still
 // fading out two stations away; the eye sees one station and about five things. Both findings were false.
 // No camera, or a camera rotated at this instant, and cameraView returns null, then this is the old count.

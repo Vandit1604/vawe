@@ -13,7 +13,7 @@ codes: beat-holds-still, beats-held-open, beats-wrapped-as-units, held-through-t
 - `[ref]`: this is a REGISTER, not a gate, nothing here blocks (opt in for a hero beat or a recreation). Related gate codes enforced elsewhere: `beat-holds-still`, `beats-held-open`, `beats-wrapped-as-units`, `held-through-the-change`, `junction-is-static`, `no-authored-motion`.
 - Checkable action: is every move two keys and a curve, or is a mechanical motion faking as a glide? Run the checklist below.
 
-`films/scene/higgsfield-recreation.json` is cited across this repo as the exemplar, and everything
+The higgsfield reference (`higgsfield.mp4`) is cited across this repo as the exemplar, and everything
 written about it so far is about its **grammar**: one object, on screen from the first frame, and every
 cut is that object changing state ([`../../skills/vawe-continuous-action/SKILL.md`](../../skills/vawe-continuous-action/SKILL.md)).
 That is the *what*. This file is the *how*. The motion mechanics that make it read as a product film

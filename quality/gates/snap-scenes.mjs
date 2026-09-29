@@ -30,7 +30,7 @@ import { SCENE_DIR } from './paths.mjs';
 // ONE shared signature definition (capture + diff), also used by scene-snap.mjs. See snap-signature.mjs
 // for what each field is for, including clip-path (wipes) and the bg canvas fingerprint.
 import { captureSig, diffSig, primeFrames, fontState, sha, loadDigest, digestEntry, mergeDigest, writeDigest } from './snap-signature.mjs';
-import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
+import { serveRepo, waitForEngine, bootPathFor, trackBrowser } from '../../harness/lib/render-harness.mjs';
 import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 
@@ -93,12 +93,12 @@ const { server, port } = await serveRepo();
 // protocolTimeout above the 180000ms default: a shared CI runner can leave one heavy scene's
 // captureSig() evaluate() short of that under load, which reads as a scene regression when it is
 // only the runner being slower that minute.
-const launch = () => puppeteer.launch({ headless: true, protocolTimeout: 300000, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
+const launch = async () => trackBrowser(await puppeteer.launch({ headless: true, protocolTimeout: 300000, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] }));
 let browser = await launch();
 
 // RECYCLE THE BROWSER. This sweep used to drive all ~100 scenes through ONE browser, and that made it
 // report regressions that had not happened: across two back-to-back runs of the identical tree, three
-// scenes moved between `identical` and `changed` (showcase-intro by 9 findings, linear-launch by 238,
+// scenes moved between `identical` and `changed` (showcase-intro by 9 findings, one launch film by 238,
 // example-kinetic-type.beatsync by 17, the last of those as `cam.opacity: 1 → 0.002`). Every one of them
 // is stable when snapshotted ON ITS OWN, repeatedly. The variable was never the scene: it was how much
 // the browser had already done. A long-lived Chrome under accumulating memory pressure evicts decoded

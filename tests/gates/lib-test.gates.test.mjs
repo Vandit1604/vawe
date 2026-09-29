@@ -174,7 +174,7 @@ test('lib-test: gates', async () => {
 
 
 // ---------------------------------------------------------------------------------------------------
-// SCENE UNITS: which layers the beat wrapper carries through the cut (engine-doctrine/MISTAKES.md #555).
+// BEAT UNITS: which layers the beat wrapper carries through the cut (engine-doctrine/MISTAKES.md #555).
 //
 // The wrapper owns the exit slide, so a layer it carries loses its own exit and lives to the end of the
 // cut window. Applied to EVERY layer of the beat, a beat that is a whole act paints its entire history
@@ -183,29 +183,29 @@ test('lib-test: gates', async () => {
 // baseline is what proves the two still agree in the DOM.
 {
   const { sceneTiming } = await import('../../quality/gates/scene-timing.mjs');
-  const scene = (layers) => ({ module: 'scene', duration: 12, sceneUnits: true,
+  const scene = (layers) => ({ module: 'scene', duration: 12,
     cuts: [{ t: 6, style: 'slide', dur: 0.6 }], bg: [{ t: 0, preset: 'plain' }], layers });
   const held = (layers, i) => { const T = sceneTiming(scene(layers)); return T.unitEnd(T.scene.layers[i]); };
   const L = (start, duration, extra = {}) => ({ type: 'text', text: 'x', size: 80, start, duration, ...extra });
 
-  ok('sceneUnits: the beat\'s last state rides the wrapper out, so it lives to the end of the cut window',
+  ok('beat units: the beat\'s last state rides the wrapper out, so it lives to the end of the cut window',
     held([L(0, 6)], 0) === 6.6);
-  ok('sceneUnits: a layer SUPERSEDED inside its beat keeps its authored window and is not resurrected',
+  ok('beat units: a layer SUPERSEDED inside its beat keeps its authored window and is not resurrected',
     held([L(0, 3), L(3, 3)], 0) === null && held([L(0, 3), L(3, 3)], 1) === 6.6);
-  ok('sceneUnits: three sequential lines in one beat leave only the third on screen at the cut',
+  ok('beat units: three sequential lines in one beat leave only the third on screen at the cut',
     (() => { const ls = [L(0, 2), L(2, 2), L(4, 2)];
       return held(ls, 0) === null && held(ls, 1) === null && held(ls, 2) === 6.6; })());
   // The reason the fix moves ONE scene and not fifteen. A line that lands a beat early and waits for the
   // cut in silence was never replaced, so the wrapper still carries it: a strict on-screen-at-the-cut
   // test would drop it and slide an empty beat out, which is a regression in every showcase scene.
-  ok('sceneUnits: a deliberate hold (nothing starts after it ends) still rides the wrapper out',
+  ok('beat units: a deliberate hold (nothing starts after it ends) still rides the wrapper out',
     held([L(0, 5.5)], 0) === 6.6);
-  ok('sceneUnits: supersession is measured against when a layer ENDS, so an overlapping pair both ride out',
+  ok('beat units: supersession is measured against when a layer ENDS, so an overlapping pair both ride out',
     (() => { const ls = [L(0, 6), L(1, 5)]; return held(ls, 0) === 6.6 && held(ls, 1) === 6.6; })());
   // float noise: 17.4 + 2.7 lands on 20.099999999999998, and a cut at 20.1 must not read that as gone.
-  ok('sceneUnits: a layer ending ON its cut is current, float noise included',
+  ok('beat units: a layer ending ON its cut is current, float noise included',
     held([L(0, 2), L(2, 4.0000000000001)], 1) === 6.6);
-  ok('sceneUnits: `acrossBeats` still opts a layer out of the wrapper entirely',
+  ok('beat units: `acrossBeats` still opts a layer out of the wrapper entirely',
     held([L(0, 2, { acrossBeats: true }), L(2, 4)], 0) === null);
 }
 
@@ -379,6 +379,29 @@ test('lib-test: gates', async () => {
     (() => { try { return JSON.stringify(JSON.parse(fs.readFileSync(cleanOut, 'utf8'))) === '[]'; } catch { return false; } })());
 
   fs.rmSync(dir, { recursive: true, force: true });
+}
+
+// ---- scene-units-exit-suppressed: an authored exit that the beat wrapper silently owns instead ------
+//
+// Beat wrapping forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
+// cut (films/scene/scene.js setLayerTiming), so an authored `out` on that layer never plays and nothing
+// used to say so. tests/fixtures/scene-units-exit-suppressed.fixture.json: two beats, cuts present, the
+// first beat's layer authors `out:"blur"` and is current when its beat cuts.
+{
+  const fixture = path.join(repoRoot, 'tests/fixtures/scene-units-exit-suppressed.fixture.json');
+  const gate = path.join(repoRoot, 'quality/gates/beat-check.mjs');
+  const res = spawnSync('node', [gate, fixture, '--json'], { encoding: 'utf8', cwd: repoRoot });
+  let recs = null;
+  try { recs = JSON.parse(res.stdout); } catch { recs = null; }
+  ok('scene-units-exit-suppressed: fires on a beat-wrapped layer with an authored exit',
+    Array.isArray(recs) && recs.some((r) => r.code === 'scene-units-exit-suppressed' && r.severity === 'warn'));
+  const finding = recs && recs.find((r) => r.code === 'scene-units-exit-suppressed');
+  ok('scene-units-exit-suppressed: names the affected layer and its authored `out`',
+    finding && /"beat one"/.test(finding.summary) && /out:"blur"/.test(finding.summary));
+
+  // The layer past the cut (`beatB`) never carries this finding: it has no authored `out` at all.
+  ok('scene-units-exit-suppressed: does not fire on a layer with no authored exit',
+    !/beatB|beat two/.test(finding.summary));
 }
 
 
@@ -784,6 +807,72 @@ test('lib-test: gates', async () => {
   } finally {
     process.chdir(cwd);
     fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// UNIT: harness/lib/judge-self-record.mjs. A subagent launched via the Agent tool for a fresh judge
+// (engine-doctrine/JUDGE.md: "the PASS is not the author's to self-record") can inherit the SAME
+// CLAUDE_CODE_SESSION_ID as the agent that rendered the cut, since env vars propagate to a spawned
+// child by default. Session alone used to be the whole self-record test, so that inherited session
+// refused the one PASS the guard exists to allow. A subagent also shares CLAUDE_PID, so the judge brief
+// sets VAWE_AGENT, which runlog.mjs agentId() prefers.
+// tests/fixtures/motion-absolute-time.fixture.json's own bug (bug 1) motivated reading a real repro log
+// before fixing; this fix's own repro is quality/runs (sting-raw.log): "judge.mjs refuses to record" a
+// PASS from a fresh judge subagent sharing the authoring session.
+{
+  const { appendRun, runsPathFor } = await import('../../harness/lib/runlog.mjs');
+  const { selfRecordCheck } = await import('../../harness/lib/judge-self-record.mjs');
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'judge-self-record-'));
+  const film = path.join(tmpDir, '_judge-self-record.json');
+  const cwd = process.cwd();
+  process.chdir(tmpDir);
+  const priorSession = process.env.CLAUDE_CODE_SESSION_ID;
+  const priorAgent = process.env.CLAUDE_PID;
+  const priorTag = process.env.VAWE_AGENT;
+  try {
+    // The authoring agent renders: session S, agent (PID) A.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'A';
+    appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
+
+    // THE BUG: a fresh judge subagent, same session S and same PID A, tagged VAWE_AGENT=B, is accepted.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.VAWE_AGENT = 'B';
+    let r = selfRecordCheck(film);
+    ok('judge-self-record: a VAWE_AGENT-tagged judge in the SAME session and process is not self-recorded',
+      r.selfRecorded === false);
+    delete process.env.VAWE_AGENT;
+
+    // THE GUARD STILL WORKS: the exact same agent (same session, same PID) trying to pass its own
+    // render is still refused.
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    process.env.CLAUDE_PID = 'A';
+    r = selfRecordCheck(film);
+    ok('judge-self-record: the SAME agent in the same session is refused as self-recorded',
+      r.selfRecorded === true);
+
+    // A different session entirely (an unrelated run) is never self-recorded, regardless of PID.
+    process.env.CLAUDE_CODE_SESSION_ID = 'T';
+    process.env.CLAUDE_PID = 'A';
+    r = selfRecordCheck(film);
+    ok('judge-self-record: a different session is not self-recorded',
+      r.selfRecorded === false);
+
+    // NO WEAKENING: outside Claude Code (no CLAUDE_PID on either side) the guard still falls back to
+    // session alone, exactly as it always did.
+    delete process.env.CLAUDE_PID;
+    fs.rmSync(runsPathFor(film));
+    process.env.CLAUDE_CODE_SESSION_ID = 'S';
+    appendRun(film, { cmd: 'ship', render: { file: 'out/x.mp4', frames: 10, fps: 30, ms: 300 } });
+    r = selfRecordCheck(film);
+    ok('judge-self-record: with no agent id on either side, session equality alone still refuses',
+      r.selfRecorded === true);
+  } finally {
+    process.chdir(cwd);
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+    if (priorSession === undefined) delete process.env.CLAUDE_CODE_SESSION_ID; else process.env.CLAUDE_CODE_SESSION_ID = priorSession;
+    if (priorAgent === undefined) delete process.env.CLAUDE_PID; else process.env.CLAUDE_PID = priorAgent;
+    if (priorTag === undefined) delete process.env.VAWE_AGENT; else process.env.VAWE_AGENT = priorTag;
   }
 }
 

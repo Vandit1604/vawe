@@ -29,15 +29,15 @@ function run(rel, content = '', { strict = false } = {}) {
 }
 
 // THE FIXTURE IS BUILT, NOT BORROWED. These cases need a stable film whose plan and fragments exist, and
-// a real film's storyboard can be re-planned at any time: leaning on vawe-oblique broke a case the day
+// a real film's storyboard can be re-planned at any time: leaning on a real film broke a case the day
 // it was rewritten. So the fixture is written under tests/fixtures/films/ (VAWE_FILMS_DIR points the
 // hook there for this run) and removed again afterwards.
 const SB = `${FILMS_DIR}/stage-gate-fixture.storyboard.md`;
 const FILM = `${FILMS_DIR}/stage-gate-fixture.json`;
 const FRAG = `${FILMS_DIR}/_stage-gate-fixture.hook.html`;
 // A second fragment on the SAME fixture film, named with the other convention (film-part, dash) so
-// the naming-convention test does not have to borrow a real film off the roster: `hinge`, the fixture's
-// old borrowed dash-convention example, never had a tracked storyboard, so it denied on `no-storyboard`
+// the naming-convention test does not have to borrow a real film off the roster: the fixture's
+// old borrowed dash-convention example never had a tracked storyboard, so it denied on `no-storyboard`
 // the moment it stopped existing on the machine that wrote the test.
 const FRAG2 = `${FILMS_DIR}/_stage-gate-fixture-alt.html`;
 const abs = (rel) => path.join(ROOT, rel);

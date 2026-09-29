@@ -64,6 +64,7 @@ const EXCLUDE = [
 const EXCLUDE_SUFFIX = [
   ['.storyboard.md', 'a per-video artifact, not guidance'],
   ['.design.md', 'a per-film design declaration read by design-drift, not guidance'],
+  ['/beats.md', 'a per-reference measured beat list the reference loop edits, data not guidance'],
   ['.treatment.md', 'a per-video artifact, not guidance'],
   ['.lock.md', 'a per-video artifact, not guidance: the frozen spec one film was authored from'],
   ['.brief.md', 'a per-video artifact, not guidance: the five-line brief one film was authored from'],
@@ -107,7 +108,7 @@ const CRAFT_ALSO = [{
   label: '[`vawe-continuous-action`](../../skills/vawe-continuous-action/SKILL.md) (skill)',
   group: 'crosscutting',
   when: 'planning a short product film (≤ ~15s) whose subject really is one thing changing, pick it from FILM-STRUCTURE.md first, it is one device of about eighteen',
-  answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make dev-tool X=intent` already eat. Worked from `higgsfield.mp4` + `films/scene/higgsfield-recreation.json`.',
+  answers: 'the continuous-object spine (one object transforms across every cut) · diegetic vs decorative motion · the measured 5-second budget · the storyboard shape `storyboard-check` + `make dev-tool X=intent` already eat. Worked from `higgsfield.mp4` and a recreation of it.',
 }];
 
 const GROUPS = [

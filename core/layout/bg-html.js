@@ -8,18 +8,21 @@
 // escape hatch, with the engine's contracts kept intact.
 //
 // DETERMINISM, which is the whole question for a hand-authored backdrop. A frame here is SEEKED, not
-// played, across 8 parallel workers, so nothing may depend on elapsed wall-clock. That rules out CSS
-// transition and animation, which core/tokens.css already disables engine-wide.
+// played, across 8 parallel workers, so nothing may depend on elapsed wall-clock. CSS transition and
+// animation both used to be ruled out by that; they are not any more, because `seekAll(t)`
+// (core/timeline/clips.js) pauses and seeks every one of them, every frame, so wall-clock CSS became
+// seeked CSS instead of forbidden CSS.
 //
-// What replaces them: `--t` (seconds into the video) and `--p` (0→1 across this bg's own window),
-// written onto the element every frame and usable anywhere calc() is, transforms, gradient angles,
-// colour mixes, offsets:
+// `--t` (seconds into the video) and `--p` (0→1 across this bg's own window) are still written onto
+// the element every frame and usable anywhere calc() is, transforms, gradient angles, colour mixes,
+// offsets:
 //   transform: rotate(calc(var(--t) * 12deg));
 //   background: radial-gradient(40% 30% at calc(20% + var(--p) * 60%) 50%, …);
-// Both are pure functions of t, so the same frame number always paints the same pixels.
+// Both are pure functions of t, so the same frame number always paints the same pixels; an
+// `@keyframes`/`element.animate()` animation is now an equally valid way to write the same thing.
 //
-// A CSS animation here would not error, it would silently render a still, so the authoring gate
-// rejects it by name and points at `--t` (timeCssUsed() in core/sanitize-html.js).
+// What is STILL refused: a timeline source no seek reaches, `animation-timeline: scroll()`/`view()`,
+// which the authoring gate rejects by name (unseekableCssUsed() in core/type/sanitize-html.js).
 import { sanitizeHtml, scopeStyles, htmlSource } from '../type/sanitize-html.js';
 
 // createBgHtml(root, windows) → a controller, or null when no window is hand-authored.
@@ -54,8 +57,8 @@ export function createBgHtml(root, windows, table) {
     // against it rendered a still. engine-doctrine/MISTAKES.md #353.
     frame(t, active, filmDur) {
       // EVERY element is written EVERY frame, including the inactive ones. An early return that leaves
-      // a stale display/opacity on a window we are no longer in is precisely the glow×sceneUnits bug
-      // (MISTAKES #152): pixels that depend on which frames were rendered before this one.
+      // a stale display/opacity on a window we are no longer in is precisely the glow x beat-unit
+      // extension bug (MISTAKES #152): pixels that depend on which frames were rendered before this one.
       for (const [w, el] of els) {
         const on = w === active;
         el.style.display = on ? 'block' : 'none';

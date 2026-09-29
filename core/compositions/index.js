@@ -19,6 +19,7 @@
 // (the layer is not in the document yet at build() time, scene.js appends AFTER renderer.build).
 
 import { defineRegistry } from '../registry/registry.js';
+import { timeline, timelineFromScript } from '../motion/timeline.js';
 const NS = 'http://www.w3.org/2000/svg';
 
 // small helpers kept local: a comp reaches for these, nothing global.
@@ -238,7 +239,71 @@ function commaSplit(ctx) {
   animateCommaRules(gsap, start, R, HOLD, dom, rules);
 }
 
-export const COMPOSITIONS = { pipelineFlow, commaSplit };
+// ---- timelineDemo ----------------------------------------------------------------------------------
+// The `core/motion/timeline.js` twin of pipelineFlow/commaSplit above: a hand-authored timeline built on
+// the platform's own `element.animate()` instead of GSAP, for a comp whose choreography is a plain
+// sequence of enter/hold/exit moves and does not need GSAP's own feature set. Same determinism contract:
+// build() constructs static DOM and starts already-playing Web Animations (delay offset by `ctx.start`),
+// and `seekAll(t)` (core/timeline/clips.js) already pauses+seeks every `document.getAnimations()` entry,
+// so this needs no GSAP-specific seek path at all.
+//   props: { labels:[string,string,string], accent?:cssColor }
+function timelineDemo(ctx) {
+  const { el, start } = ctx;
+  const labels = (Array.isArray(ctx.labels) && ctx.labels.length ? ctx.labels : ['ONE', 'TWO', 'THREE']).map(String);
+  const accent = ctx.accent || 'var(--accent)';
+  const bars = labels.map((label, i) => {
+    const bar = document.createElement('div');
+    bar.textContent = label;
+    bar.style.cssText = `position:absolute;left:0;top:${i * 90}px;padding:18px 32px;border-radius:12px;`
+      + `background:${accent};color:#fff;font:700 32px var(--font-sans);opacity:0;transform:translateX(-60px)`;
+    el.appendChild(bar);
+    return bar;
+  });
+  // settle in (its own ease-out), HOLD in place, exit (its own ease-in): four keyframes with per-
+  // keyframe easings on the first three stops, exactly what anim-traps' unevenSegmentEasing trap asks
+  // for instead of one top-level easing stretched across every stop.
+  const keyframes = [
+    { opacity: 0, transform: 'translateX(-60px)', easing: 'ease-out' },
+    { opacity: 1, transform: 'translateX(0px)', offset: 0.5, easing: 'linear' },
+    { opacity: 1, transform: 'translateX(0px)', offset: 0.82, easing: 'ease-in' },
+    { opacity: 0, transform: 'translateX(40px)' },
+  ];
+  timeline().stagger(bars, keyframes, { duration: 1.6, easing: 'linear', at: start }, 0.25);
+}
+
+// ---- timelineSheet ---------------------------------------------------------------------------------
+// The EDITABLE-SHEET half of core/motion/timeline.js: the choreography lives as plain ROWS in a
+// `<script type="application/json">` block inside this comp's own DOM (sanitizeHtml keeps that one
+// script type, core/type/sanitize-html.js), not in this function. Moving one dot's timing is editing
+// one row's `at`/`to`, never touching this file. `timelineFromScript` reads the block back and runs it
+// through the same builder every other comp here uses.
+//   props: { rows?: the row array (defaults to a 3-dot sweep if omitted) }
+function timelineSheet(ctx) {
+  const { el, start } = ctx;
+  // three rows drive the SAME `.dot` elements in sequence: enter, sweep, exit. Each defaults to
+  // fill:'forwards' (core/motion/timeline.js's runRows), so a row holds only AFTER its own end and
+  // never reaches backward over the row ahead of it on the same property (anim-traps' fill-collision
+  // trap would catch that; a time-ordered sheet like this one never trips it).
+  const rows = Array.isArray(ctx.rows) && ctx.rows.length ? ctx.rows : [
+    { el: '.dot', at: start, dur: 0.5, from: { x: 0, y: 0, opacity: 0 }, to: { x: 0, y: 0, opacity: 1 }, ease: 'ease-out' },
+    { el: '.dot', at: start + 0.5, dur: 1.2, to: { x: 460, y: 0 }, ease: 'ease-in-out', stagger: 0.15 },
+    { el: '.dot', at: '+=0.2', dur: 0.4, to: { opacity: 0 }, ease: 'ease-in' },
+  ];
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.style.cssText = `position:absolute;left:0;top:${i * 50}px;width:28px;height:28px;border-radius:50%;background:var(--accent, #2563eb);opacity:0`;
+    el.appendChild(dot);
+  }
+  const sheet = document.createElement('script');
+  sheet.type = 'application/json';
+  sheet.id = 'timing';
+  sheet.textContent = JSON.stringify(rows);
+  el.appendChild(sheet);
+  timelineFromScript(el, 'timing');
+}
+
+export const COMPOSITIONS = { pipelineFlow, commaSplit, timelineDemo, timelineSheet };
 
 // COMPOSITION_BLURBS: one line per comp, next to the registry (the `blurb` pattern of
 // blocks/catalog.mjs). Consumed by the generated docs table and by any catalog/MCP surface; a key with
@@ -246,6 +311,8 @@ export const COMPOSITIONS = { pipelineFlow, commaSplit };
 export const COMPOSITION_BLURBS = {
   pipelineFlow: 'staged pipeline: cards pop in, connectors draw, a token travels each link, a check draws on (one hand-authored timeline)',
   commaSplit: 'a delimited line pulls itself apart into a table: each comma flies to the gutter, shrinks to a point, and a column rule grows out of that same point, so the delimiter visibly becomes the structure',
+  timelineDemo: 'labelled bars settle in, hold, exit, staggered by core/motion/timeline.js on plain element.animate() instead of GSAP',
+  timelineSheet: 'a sweep of dots choreographed by an editable `<script type="application/json">` row sheet inside this comp, read back by timelineFromScript, never by hand-editing this file',
 };
 
 // The registry, and with it the catalogue section that used to be hand-listed in
@@ -255,6 +322,8 @@ export const COMPOSITION_BLURBS = {
 const COMPOSITION_AKA = {
   pipelineFlow: ['pipeline diagram', 'flow chart animation', 'cards and connectors'],
   commaSplit: ['comma separated values animation', 'delimited line to table'],
+  timelineDemo: ['web animations timeline', 'staggered bars', 'element.animate sequence'],
+  timelineSheet: ['editable timing sheet', 'json row timeline', 'data-driven element.animate'],
 };
 
 export const COMPOSITION_REGISTRY = defineRegistry('composition', COMPOSITIONS, { slot: 'comp', blurbs: COMPOSITION_BLURBS, aka: COMPOSITION_AKA,

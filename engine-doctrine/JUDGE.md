@@ -102,6 +102,15 @@ Bad, filler that the linter refuses:
 - `hierarchy is good` (same failure under a different criterion's name)
 - `looks fine (composition)` (echoes the criterion label back as its own content)
 
+**A contact sheet's grid position means nothing.** Each tile is a separate, independent frame laid out
+left to right, top to bottom for reading convenience only; a tile's row and column carry no time or
+motion information. Comparing an element's position between two tiles in different rows is not
+comparing two moments, it is comparing two unrelated layouts, and calling the difference a "jump" is a
+false positive. The same misread runs the other way: a device that is deliberately visible across
+several tiles (a persistent caret, a repeated icon) is intended motion, not a "ghost". Any claim about
+motion or position must come from same-scale, full-resolution stills read in their real time order, or
+from `probe-frame` numbers, never from where a tile sits in the sheet.
+
 **One page for all of it**: `node harness/author/review-server.mjs D=<file> [REF=<ref.mp4>] [PORT=8802]`,
 served like `make tune`. It shows a frame grid per beat with a time slider, the reference side by side
 when `REF` is given, the verify block, and whatever structured judge JSON already exists for this cut,
@@ -145,7 +154,8 @@ a measured bias, not a lapse, and it is why hinge-v1 (a slideshow) was recorded 
 made it. The `--verdict PASS` that gates `ledger-add` must be corroborated by a SEPARATE critic: hand
 `/tmp/judge/<name>/sheet.png` and the rubric to a fresh subagent that did not author the film (the
 fidelity and beat critics in [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md)) and record PASS only when that
-independent eye agrees. This costs nothing but one dispatch and it removes the one bias no rubric can.
+independent eye agrees. The judge records with `VAWE_AGENT=<its-name>` set: a subagent shares the
+author's session and process id, so the tag is the only thing that tells them apart. This costs nothing but one dispatch and it removes the one bias no rubric can.
 
 For the harder question, whether an edit HELPED, you need a blind A/B judge: two cuts, paired
 beat by beat, arms hidden, three judges. **No such judge exists today.** `make ab`, `make ab-record` and

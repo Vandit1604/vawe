@@ -75,7 +75,6 @@ const scene = {
   theme,
   aspect: '16:9',
   duration: dur,
-  sceneUnits: true,
   audio: { silent: true, _why: 'theme-sheet: a look reference, not a film' },
   bg,
   transitions,

@@ -302,7 +302,7 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
 {
   // cutWrites is DERIVED from the presentations, so it must agree with what each one visibly does.
   ok('cutWrites: blur writes a filter and nothing else in solo', [...cutWrites('blur', { solo: true })].join() === 'filter');
-  ok('cutWrites: blur also fades under sceneUnits', cutWrites('blur').has('opacity') && cutWrites('blur').has('filter'));
+  ok('cutWrites: blur also fades under beat units', cutWrites('blur').has('opacity') && cutWrites('blur').has('filter'));
   ok('cutWrites: slide never writes a filter', !cutWrites('slide', { solo: true }).has('filter'));
   ok('cutWrites: a mask style collapses onto one channel name', cutWrites('softwipe').has('maskImage')
     && !cutWrites('softwipe').has('WebkitMaskImage'));
@@ -327,18 +327,23 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
 
   // THE REPORTED BUG, as a test: a glass layer under a filter-writing cut must refuse, and the
   // refusal must name the layer, the capability and a way out. engine-doctrine/MISTAKES.md #542.
-  const glassScene = { cuts: [{ t: 8.2, style: 'blur', dur: 0.34 }], sceneUnits: false,
+  const glassScene = { cuts: [{ t: 8.2, style: 'blur', dur: 0.34 }],
     layers: [{ id: 'lens', type: 'html', glass: 'refract', start: 0.35, duration: 10.8 }] };
   let msg = '';
   try { checkCuts(glassScene); } catch (e) { msg = e.message; }
   ok('ancestor-kills refuses blur-cut over a glass layer', msg.length > 0);
   ok('the refusal names the layer', msg.includes('"lens"'));
   ok('the refusal names the conflicting thing', msg.includes('blur') && msg.includes('filter'));
-  ok('the refusal names a way out', msg.includes('slide'));
-  ok('the refusal never offers a style that has the same defect', !/\(([^)]*)\)/.test(msg) || !msg.split('(')[1].split(')')[0].split(', ').some((k) => cutWrites(k, { solo: true }).has('filter')));
-  // a cut that writes no filter is fine over the same layer
-  ok('a transform-only cut over glass is allowed',
-    (() => { try { checkCuts({ ...glassScene, cuts: [{ t: 8.2, style: 'slide', dur: 0.34 }] }); return true; } catch { return false; } })());
+  // Every real transition crossfades its two beats, so under beat-unit wrapping every moving style
+  // writes opacity on the ancestor and takes the backdrop away for its window; `none` (no transition at
+  // all) is the one way out left, and the refusal must say so rather than offer a style with the same defect.
+  ok('the refusal names a way out', msg.includes('none'));
+  ok('the refusal never offers a style that has the same defect', !/\(([^)]*)\)/.test(msg) || !msg.split('(')[1].split(')')[0].split(', ').some((k) => cutWrites(k).has('filter')));
+  // the real way out for a moving cut: mark the glass layer `acrossBeats` so it attaches to the camera
+  // instead of the beat wrapper the cut styles, exactly the fix `films/scene/vawe-glass-hero.json` shipped with.
+  ok('a glass layer marked acrossBeats is exempt from the wrapper the cut styles', (() => {
+    try { checkCuts({ ...glassScene, layers: [{ ...glassScene.layers[0], acrossBeats: true }] }); return true; } catch { return false; }
+  })());
   // and a cut OUTSIDE the layer's window is fine, whatever it writes
   ok('a blur cut outside the layer window is allowed',
     (() => { try { checkCuts({ ...glassScene, cuts: [{ t: 20, style: 'blur', dur: 0.34 }] }); return true; } catch { return false; } })());
@@ -1936,12 +1941,6 @@ ok('gradient tolerates a stops array shorter than colors (even fallback, no cras
 
   const choreo = produceBaseline({ ...base(), layers: [{ type: 'text', text: 'x', motion: [{ t: 0, x: 0 }, { t: 2, x: 50 }] }] }, {});
   ok('produce: a choreographed scene gets no camera', choreo.camera === undefined && choreo.cameraMove === undefined);
-
-  const off = produceBaseline({ ...base(), produced: false }, {});
-  ok('produce: "produced": false stays camera-free', off.camera === undefined);
-  const offSugar = produceBaseline({ ...base(), produced: false, cameraMove: { move: 'slowPush', dur: 4 } }, {});
-  ok('produce: "produced": false still BAKES the author\'s own sugar (never ignores a written field)',
-    offSugar.cameraMove === undefined && Array.isArray(offSugar.camera) && offSugar.camera.length > 1);
 
   let msg = '';
   try { produceBaseline({ ...base(), camera: [{ t: 0, s: 1 }], cameraMove: { move: 'slowPush' } }, {}); } catch (e) { msg = e.message; }

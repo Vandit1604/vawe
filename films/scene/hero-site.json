@@ -3,7 +3,6 @@
   "aspect": "16:9",
   "theme": "vawe",
   "duration": 7.6,
-  "sceneUnits": false,
   "audio": {
     "silent": true
   },
@@ -94,6 +93,7 @@
       "duration": 7.25,
       "anim": "fade",
       "enterDur": 0.5,
+      "acrossBeats": true,
       "src": "films/scene/_hero-site-card.html"
     }
   ],

@@ -117,6 +117,7 @@ for (const r of report) {
   const mark = r.entries.length ? '✗' : '✓';
   console.log(`  ${mark} ${r.kind.padEnd(28)} total=${String(r.total).padStart(3)} `
     + `meeting=${String(r.meeting).padStart(3)} missing=${String(r.entries.length).padStart(3)}`);
+  for (const e of r.entries) console.log(`      - ${e.name}${e.wantsWords ? ' (needs aka words)' : ''}${e.wantsAction ? ' (needs a blurb)' : ''}`);
 }
 if (unreadable.length) console.log(`\n  ~ ${unreadable.length} module(s) could not be imported in node, so their exports are unchecked: ${unreadable.join(', ')}`);
 

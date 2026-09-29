@@ -1,8 +1,8 @@
 // node --test tests/gates/stage.test.mjs
 //
 // Every one of the seven stages, derived by stageOf() from fixture films this file builds and removes
-// itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film,
-// vawe-oblique, as a fixture, and it broke the day that film's own state moved on (the state it
+// itself. THIS MATTERS: harness/live/test/stage-gate.test.mjs used to borrow a real film as a fixture,
+// and it broke the day that film's own state moved on (the state it
 // needed to test stopped existing). The fix there, and the rule here, is the same: never borrow a real
 // film's CURRENT state as a fixture, because a real film's state is the one thing this repo promises
 // will keep changing.
@@ -10,19 +10,26 @@
 // Fixtures live under tests/fixtures/films/ (VAWE_FILMS_DIR points stageOf there for this run, never
 // films/scene/, which is real film content this suite must not depend on) with a `stagetest-` prefix,
 // and `after()` deletes every one of them whether a test passed or not.
+import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test, { after } from 'node:test';
 import assert from 'node:assert';
-import { stageOf } from '../../quality/gates/stage.mjs';
-import { firstCommand } from '../../quality/gates/next.mjs';
 import { writeReceipt, receiptPath } from '../../harness/lib/receipt.mjs';
 
 // stageOf/lookBlock/firstCommand's own path resolution reads VAWE_FILMS_DIR (default films/scene/,
 // real film content this suite must not depend on); this file's fixtures live at tests/fixtures/films/
-// instead. Set before stage.mjs/next.mjs are imported below, since they may read it at module scope.
+// instead. VAWE_STATE_DIR keeps stage.mjs's gate-verdict cache (a real file under the repo's shared
+// .vawe-data/) private to this run too: two suites calling stageOf() at once used to race on it,
+// non-atomic read-then-write, last writer's entries winning. Both are set, and stage.mjs/next.mjs
+// dynamically imported, BEFORE either module resolves its own module-scope path constants: a static
+// import at the top of this file runs before any later line regardless of where it sits in the file,
+// so setting these env vars after a static import would be too late for anything read at module scope.
 process.env.VAWE_FILMS_DIR = 'tests/fixtures/films';
+process.env.VAWE_STATE_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'stage-test-'));
+const { stageOf } = await import('../../quality/gates/stage.mjs');
+const { firstCommand } = await import('../../quality/gates/next.mjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SCENES = path.join(ROOT, 'tests/fixtures/films');
@@ -30,7 +37,10 @@ const abs = (rel) => path.join(SCENES, rel);
 
 const written = [];
 function write(rel, content) { fs.writeFileSync(abs(rel), content); written.push(abs(rel)); }
-after(() => { for (const f of written) { try { fs.unlinkSync(f); } catch { /* already gone */ } } });
+after(() => {
+  for (const f of written) { try { fs.unlinkSync(f); } catch { /* already gone */ } }
+  try { fs.rmSync(process.env.VAWE_STATE_DIR, { recursive: true, force: true }); } catch { /* already gone */ }
+});
 
 // `plan.done` (quality/gates/stage.mjs) needs a fresh plan-judge receipt, not a passing
 // storyboard-check alone (every stage past `plan` used to be reachable by structure alone). A fixture

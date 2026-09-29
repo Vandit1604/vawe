@@ -91,7 +91,7 @@ export function validateData(schema, data) {
   errors.push(...staggerErrors(data || {})); // a stagger object names three dials, in both slots that take one
   errors.push(...countEaseErrors(data || {})); // a counter must never overshoot its own value
   errors.push(...bgErrors(data || {}));     // each bg window names one backdrop, and can be rendered purely
-  errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same dead-CSS trap
+  errors.push(...htmlLayerErrors(data || {})); // hand-authored layers hit the same unseekable-timeline check
   errors.push(...cssErrors(data || {}));    // css passthrough must not name a prop the engine rewrites every frame
   errors.push(...captionErrors(data || {})); // a caption the renderer would silently never draw
   errors.push(...idleErrors(data || {}, IDLE)); // a scaling idle re-rasterises glyphs every frame

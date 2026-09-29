@@ -12,8 +12,8 @@ A cut, a sting and a seam are all LOCAL: they own a window around a boundary. Th
 GLOBAL, and it does not reset at a cut. That is the whole device. Lay the beats out as STATIONS on a canvas
 larger than the frame, then let `travel` visit them. The transition is the flight, and there is no cut at all.
 
-Two films here are built this way, and they are the reference: `linear-journey.json` (a 3x2 station grid on
-5760x2160, 12 camera keys, **zero** cuts) and `playhead.json` (16s, 20 keys, `s` climbing 1 → 2.66 while `x`
+Two films here were built this way, and they are the reference: a 3x2 station grid on
+5760x2160, 12 camera keys, **zero** cuts, and `playhead.json` (16s, 20 keys, `s` climbing 1 → 2.66 while `x`
 travels 656 → -848). Both hand-typed their keyframes because `travel` did not exist. Do not copy that.
 
 **Pair it with depth or it is a slide, not a move.** Every layer sits at z = 0 unless you say otherwise, and

@@ -910,7 +910,7 @@ async function preflight() {
     // THE MAKE PANE'S OWN IFRAME, loaded exactly as it is (same URL page.mjs writes into shell.html):
     // `/__sheet?kind=frames` (harness/author/preview.mjs) turned out NOT to be this check, it renders
     // past an invalid scene where the live iframe does not, which is how the bug this preflight exists
-    // to catch (pin-recreation opening onto a raw `boot()` stack trace) slipped past an earlier draft
+    // to catch (a since-removed film opening onto a raw `boot()` stack trace) slipped past an earlier draft
     // of this same check. A crash or a hang here is always a FAIL. `__engineError` is a fail too,
     // UNLESS the film is pre-assemble, where it is the expected, correct shape of an unbuilt film
     // (no scene.json exists yet) and gets NAMED rather than counted as green.
@@ -964,7 +964,7 @@ async function preflight() {
   // "safe to share" is a claim that whoever opens this link sees the real film, not an explanation of
   // its absence. A NOTE means some pane cannot show real content yet (a pre-assemble film has no scene
   // to sheet or scrub), which is a true and honest thing to say, but it is not the same claim as "safe
-  // to share" and must never be printed as one (pin-recreation: the acceptance test
+  // to share" and must never be printed as one (a since-removed film: the acceptance test
   // this preflight has to pass).
   if (failed.length) {
     console.log(`  ⚠ studio preflight: ${results.length - failed.length - notes.length}/${results.length} ok, fix before sharing this link`);

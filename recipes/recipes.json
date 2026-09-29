@@ -247,7 +247,7 @@
         "note": "cursor arrives over the install button at 0.8s into its own path, clicks 0.15s later"
       },
       {
-        "ref": "example-product-promo",
+        "ref": "a since-removed product-promo example",
         "t": 6.2,
         "note": "same shape: arrives at 0.8s, clicks at 0.95s, 0.15s after arrival"
       },
@@ -285,7 +285,7 @@
       "clickDelay": {
         "default": 0.15,
         "unit": "s",
-        "note": "gap from arrival to click: measured 0.15s (brew-native, example-product-promo), 0.163s (vawe-flow-2), 0.2s (preface-launch), 0s (the worked demo). 0.15s is the plurality"
+        "note": "gap from arrival to click: measured 0.15s (brew-native, a since-removed product-promo example), 0.163s (vawe-flow-2), 0.2s (preface-launch), 0s (the worked demo). 0.15s is the plurality"
       },
       "style": {
         "default": "hand",

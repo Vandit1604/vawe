@@ -9,16 +9,16 @@ import { buildMorph } from '/core/motion/morph.js';
 import { GSAP_REGISTRY } from '/core/engine/gsap-effects.js';
 import { ransomStyle } from '/core/type/ransom.js';
 import { capUnitWins, capShape, wordU, lineU, CAP_STYLES, CAP_STYLE_REGISTRY } from '/core/type/captions.js';
-import { renderBg, bgPreset, applyBgOver, bgPaletteFrom } from '/core/backgrounds/index.js';
+import { renderBg, bgPreset, applyBgOver, bgPaletteFrom, applyCssClipPath } from '/core/backgrounds/index.js';
 import { expandThemeRotation } from '/core/backgrounds/theme-rotation.js';
 import { createBgHtml } from '/core/layout/bg-html.js';
 import { htmlSource } from '/core/type/sanitize-html.js';
-import { cutStyle, soloCutStyle, SOLO_BLIND, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts/index.js';
+import { cutStyle, PRESENTATIONS as CUT_PRESENTATIONS, TIMINGS as CUT_TIMINGS } from '/core/cuts/index.js';
 import { IDENT as CUT_IDENT } from '/core/cuts/index.js';
 import { checkCuts } from '/core/fx/ancestor-kills.js';
 import { createShaderOverlay, SHADER_FX } from '/core/stings/index.js';
 import { createSeamCompositor, SEAM_FX, stageToCanvas, isBlankRaster } from '/core/timeline/seams.js';
-import { lowerScene, checkStingColor } from '/core/transitions/lower.js';
+import { checkStingColor } from '/core/transitions/lower.js';
 import { glowRGB } from '/core/looks/filters.js';
 import { bindBeats, describeBind } from '/core/beats/index.js';
 import { CUT_CUE, SEAM_CUE } from '/core/audio/cues.js';
@@ -159,14 +159,16 @@ function resolveAnchors(data) {
 }
 
 boot((data, fps, theme, canvas) => {
-  // lower the unified `transitions` surface into the raw cuts/stings/seams fields BEFORE any parse
-  // below reads them. Pure + idempotent; a scene without the unified key is untouched. Kept here (top
-  // of the callback) so every parser sees the lowered form.
+  // `transitions[]` is ALREADY lowered into the raw cuts/stings/seams fields by the time this
+  // callback runs: core/engine/boot.js's resolveThemeAndBake calls lowerScene before the produced
+  // baseline (core/engine/pipeline.js), the same order core/engine/expand.js loadScene runs for every
+  // Node gate, so both paths inject cuts against the SAME already-lowered scene. Calling
+  // lowerScene a second time here would be a no-op (it deletes `data.transitions` on the way out) but
+  // is not needed: one call site, one owner.
   //
   // block/beat/comp sugar is NOT expanded here: this file never imports core/engine/expand.js, on purpose
   // (core/engine/expand.js's own banner says why, and internal/render/expand.go is where that expansion
   // actually happens for this render path, server-side, before the page ever fetches this JSON).
-  data = lowerScene(data);
   // Snap the film's joints to the track's pulse, if the scene named a grid. AFTER lowering (a cut
   // written as `transitions` has no `t` until then) and BEFORE anything reads a cut time, the bg
   // windows bound to `cut@n` below therefore follow the snapped joint rather than the written one.
@@ -339,31 +341,20 @@ boot((data, fps, theme, canvas) => {
     })
     .sort((a, b) => +a.t - +b.t);
 
-  // ---- SCENE UNITS (opt-in): beats that transition as WHOLE units (A slides out, B slides in) ----
-  // The default `cuts` transform the whole `cam` at once (a camera bump). With `sceneUnits:true` each
-  // BEAT (the interval between cut times) becomes its own wrapper, and a boundary moves the OUTGOING
+  // ---- BEAT UNITS: beats transition as WHOLE units (A slides out, B slides in) ----
+  // Each BEAT (the interval between cut times) is its own wrapper, and a boundary moves the OUTGOING
   // wrapper (exit) against the INCOMING wrapper (enter) as separate units, a real scene swap, not a
   // pile of independent layer fades. Reuses the cutStyle PRESENTATIONS (slide/push/slideBlur/…), pure in
-  // n. STRICTLY OPT-IN: without the flag, layers attach flat to `cam` exactly as before (snap-identical).
-  const sceneUnits = data.sceneUnits === true && sceneCuts.length > 0;
-  // Without sceneUnits a cut drives ONE root (drawCameraAndCut), so it can only transition through
-  // transform/filter. The visibility channels are pinned open or the frame empties. A style whose
-  // whole transition IS a visibility channel would therefore be silently inert here, so refuse it.
-  if (!sceneUnits) for (const cu of sceneCuts) {
-    if (!SOLO_BLIND.has(cu.style)) continue;
-    throw new Error(`cut style "${cu.style}" at t=${cu.t} transitions only by fading/masking, which a `
-      + `whole-frame cut cannot do (there is nothing underneath, the frame would go empty). Either set `
-      + `"sceneUnits": true so the two beats cross-fade as units, or use a style that moves: `
-      + `${Object.keys(CUT_PRESENTATIONS).filter((k) => !SOLO_BLIND.has(k)).join(', ')}.`);
-  }
+  // n. A film with no cuts has no beats to wrap, so layers attach flat to `cam` exactly as before.
+  const beatUnits = sceneCuts.length > 0;
   // A cut styles an ANCESTOR of every layer, and some ancestor styles silently disable what a
   // descendant can do: a `filter` makes the element a backdrop root, so a `glass` layer under it
   // samples nothing and stops being glass, for exactly the length of the cut. core/ancestor-kills.js
   // owns which property takes which capability away; this is the one place the film is checked
   // against it. engine-doctrine/MISTAKES.md #542.
-  checkCuts({ cuts: sceneCuts, layers: data.layers || [], sceneUnits: data.sceneUnits === true });
+  checkCuts({ cuts: sceneCuts, layers: data.layers || [] });
   const beatBounds = [], beatWrap = [];
-  if (sceneUnits) {
+  if (beatUnits) {
     const ts = [...new Set(sceneCuts.map((c) => +c.t))].sort((a, b) => a - b);
     const edges = [0, ...ts];
     for (let i = 0; i < edges.length; i++) {
@@ -390,7 +381,7 @@ boot((data, fps, theme, canvas) => {
   // is `track ?? array index`, so a spine paints ABOVE beat content by default. Author `"track": -1` to
   // put it behind. Said out loud because a silent stacking change is worse than a documented one.
   const beatIndexOf = (L) => {
-    if (!sceneUnits || L.acrossBeats === true) return null;
+    if (!beatUnits || L.acrossBeats === true) return null;
     const s = L.start ?? 0;
     for (let i = 0; i < beatBounds.length; i++) if (s >= beatBounds[i].start && s < beatBounds[i].end) return i;
     return beatBounds.length - 1;
@@ -636,7 +627,7 @@ boot((data, fps, theme, canvas) => {
     // NO DEFAULT FADE-OUT. BASE_EXIT used to apply to every layer that named no `out`, so a layer
     // authored to simply END held nothing: it faded for its last ~0.26s whether or not anyone asked
     // for that fade, one more hand quietly writing this layer's life. An exit is now authored (`out`,
-    // with or without `exitDur`) or it comes from the beat's transition (sceneUnits, below, or a
+    // with or without `exitDur`) or it comes from the beat's transition (the beat unit below, or a
     // cut/seam/sting at the joint); a layer that states neither holds to its own end and simply stops
     // being drawn there. `exitDur` alone (no `out`) still opts into the OLD calm in-place fade
     // (clipStyleAt's default when `out` is absent), so that spelling keeps working unchanged.
@@ -646,7 +637,7 @@ boot((data, fps, theme, canvas) => {
     // alive through the wrapper's exit window, or it would vanish mid-slide. Non-last beats only (the
     // last beat has no exit cut), and only the layers that are still the beat's CURRENT STATE
     // (beatIsCurrent above). The incoming ENTER stays per-layer, so contents still stagger in.
-    if (sceneUnits) {
+    if (beatUnits) {
       const bi = beatIndexOf(L);
       if (bi != null && bi < beatBounds.length - 1 && beatIsCurrent(L, bi, beatBounds[bi].end)) {
         const be = beatBounds[bi].end;                    // this beat's exit cut time
@@ -1192,8 +1183,8 @@ const boxOf = (id) => boxes.get(id) || null;
   // to the frame while the world crosses it.
   // KNOWN INTERACTION, named because it is invisible until it bites. `opacity < 1`, `filter` and a clip
   // are GROUPING properties: they flatten the element they sit on, 3D context and all. A cut writes
-  // exactly those, onto `#cam` (whole-frame) or onto a beat wrapper (`sceneUnits`), which is where the
-  // rig lives. So for the few frames a fading or blurring cut is mid-flight, a tilted frame loses its
+  // exactly those, onto the beat wrapper, which is where the rig lives. So for the few frames a fading
+  // or blurring cut is mid-flight, a tilted frame loses its
   // depth and pops back. It is steady-state-safe (the identity reset writes `none`/`1`), and no shipped
   // scene both tilts and cuts. Pair depth with a cut that only TRANSLATES, or accept the pop. The fix,
   // when a film needs both, is to split the rig onto an element of its own between `#cam` and the
@@ -1310,43 +1301,63 @@ const boxOf = (id) => boxes.get(id) || null;
   // side of it on that SAME curve and duration, so both readings of "a joint" (an explicit `from`/`to`
   // that happens to land on a cut time, and a window bound to the joint by bindWindowsToJunctions with
   // no from/to of its own) behave alike: both are just two windows meeting at the cut's `t`.
-  // The window itself differs by mode, and this mirrors that rather than inventing a third: sceneUnits
-  // swaps the two beat wrappers over [ct, ct+dur) (driveSceneUnits below, default 0.4); the plain
-  // camera-level cut is CENTRED on ct, [ct-dur/2, ct+dur/2) (drawCameraAndCut below, default 0.36). A
-  // bg blend on the wrong window would drift out of sync with the transition the viewer is watching.
+  // The window the beats swap over is [ct, ct+dur) (driveBeatUnits below, default 0.4). A bg blend on
+  // the wrong window would drift out of sync with the transition the viewer is watching.
   // p is not just the eased TIMING curve: a presentation shapes its OWN opacity on top of it
   // (`punch`'s exit is `1 - T(raw)^2`, `fade`'s is linear in `T(raw)`), so a bg blend driven by
   // T(raw) alone drifted from what the wrapper actually shows, worst on the shaped presentations
   // (seam-forensics "split seam ... jumps 2.7 ... while the transition is still dissolving the
-  // layers on top of it", a punch cut). `cutStyle` IS the wrapper's own function (driveSceneUnits
+  // layers on top of it", a punch cut). `cutStyle` IS the wrapper's own function (driveBeatUnits
   // below calls it with these same args), so asking it for the incoming beat's OWN opacity at this
   // progress reads its exact curve instead of re-deriving an approximation of it a second time. A
   // presentation that reveals through a MASK rather than opacity (wipe/iris/blinds/…) holds opacity
   // at '1' throughout, which would read as "already fully in": those fall back to the eased timing,
   // a reasonable dissolve in place of a shape this canvas cannot draw a clip-path reveal of anyway.
+  // paintIncomingBgReveal(ctx, w, h, incomingCv, cut): the three ways the incoming bg window can show
+  // through the outgoing one already painted on `ctx`, picked by what bgCutAt found for this cut.
+  // `cut.clip`: a real clipPath string → clip and paint fully opaque, the actual reveal shape, no
+  // blend. `'unclippable'` → a maskImage-only style with no hard region to clip to: cut at the fx's
+  // own midpoint rather than a continuing alpha blend, so a pale tint between two saturated colours
+  // never paints. Neither → the ordinary alpha crossfade, an authored dissolve doing exactly that.
+  function paintIncomingBgReveal(ctx, w, h, incomingCv, cut) {
+    if (cut.clip === 'unclippable') { if (cut.p >= 0.5) ctx.drawImage(incomingCv, 0, 0); return; }
+    if (cut.clip) { ctx.save(); applyCssClipPath(ctx, w, h, cut.clip); ctx.drawImage(incomingCv, 0, 0); ctx.restore(); return; }
+    ctx.save(); ctx.globalAlpha = cut.p; ctx.drawImage(incomingCv, 0, 0); ctx.restore();
+  }
+
+  // beatBgReveal(cu, raw): the reveal-shape half of bgCutAt's job, split out so bgCutAt itself
+  // stays a plain window-search loop. driveBeatUnits (below) reveals the INCOMING beat wrapper
+  // through cutStyle's `enter` phase at this same raw progress, `cutStyle(cu.style, { exit: 0, enter:
+  // p }, o)`; that is where a masking style's clipPath/maskImage actually lives, every masking
+  // presentation's own `exit` is a plain opacity fade (core/cuts/presentations.js: wipe/iris/clock/
+  // barn/letterbox/blinds/softwipe/softiris all write clip/mask only on `enter`). Reading `exit` used
+  // to check the one phase that never carries it, so `masked` was never true and every bg switch fell
+  // back to the alpha blend below regardless of the author's own cut style (MISTAKES: the pale
+  // intermediate tint on a white-to-cobalt bg change under `wipe`).
+  function beatBgReveal(cu, raw, fallbackP) {
+    const opts = { timing: cu.timing, dir: cu.dir, dist: cu.dist ?? W, cx: cu.cx, cy: cu.cy };
+    const enterStyle = cutStyle(cu.style, { exit: 0, enter: raw }, opts);
+    if (enterStyle.clipPath === 'none' && enterStyle.maskImage === 'none') {
+      const exitStyle = cutStyle(cu.style, { exit: raw, enter: 1 }, opts);
+      const p = exitStyle.opacity != null ? clamp01(1 - parseFloat(exitStyle.opacity)) : fallbackP;
+      return { p, clip: null };
+    }
+    // a hard-edged clip (inset/circle/polygon) becomes a real canvas reveal in drawBg; a maskImage-only
+    // style (a feathered gradient band: softwipe/softiris/blinds) has no hard region to clip to, so
+    // `clip` reads 'unclippable' and drawBg cuts at the midpoint instead.
+    return { p: fallbackP, clip: enterStyle.clipPath !== 'none' ? enterStyle.clipPath : 'unclippable' };
+  }
+
   const bgCutAt = (t) => {
     for (const cu of sceneCuts) {
       const ct = +cu.t;
-      const from = sceneUnits ? ct : ct - (cu.dur ?? 0.36) / 2;
-      const dur = sceneUnits ? (cu.dur ?? 0.4) : (cu.dur ?? 0.36);
-      if (t >= from && t < from + dur) {
-        const raw = clamp01((t - from) / dur);
-        const T = cu.timing == null ? CUT_TIMINGS.smooth : CUT_TIMINGS[cu.timing];
-        let p = T(raw);
-        if (sceneUnits) {
-          const opts = { timing: cu.timing, dir: cu.dir, dist: cu.dist ?? W, cx: cu.cx, cy: cu.cy };
-          // The OUTGOING wrapper's own exit opacity is the signal: as it clears (fades toward 0),
-          // more of the field behind it is what the viewer is actually seeing change, so the bg
-          // reveals the incoming window at the complement of that same curve. `enter`'s opacity was
-          // tried first and read WORSE (a punch's enter ramps `clamp01(p*1.5)`, reaching full before
-          // its own exit has cleared, so the bg would have switched while the outgoing card was
-          // still half-visible on top of it).
-          const exitStyle = cutStyle(cu.style, { exit: raw, enter: 1 }, opts);
-          const masked = exitStyle.clipPath !== 'none' || exitStyle.maskImage !== 'none';
-          if (!masked && exitStyle.opacity != null) p = clamp01(1 - parseFloat(exitStyle.opacity));
-        }
-        return { ct: from, dur, p };
-      }
+      const from = ct;
+      const dur = cu.dur ?? 0.4;
+      if (t < from || t >= from + dur) continue;
+      const raw = clamp01((t - from) / dur);
+      const T = cu.timing == null ? CUT_TIMINGS.smooth : CUT_TIMINGS[cu.timing];
+      const { p, clip } = beatBgReveal(cu, raw, T(raw));
+      return { ct: from, dur, p, clip };
     }
     return null;
   };
@@ -1383,11 +1394,10 @@ const boxOf = (id) => boxes.get(id) || null;
     // cross-fades a preset window into an html one, those stale pixels become visible.
     if (authored) { ctx.clearRect(0, 0, W, H); return; }
     if (blending) {
-      const p = cut.p;
       renderBg(ctx, W, H, t, before.spec);       // the outgoing field, opaque, on the real canvas
       if (!bgBlendCv) { bgBlendCv = document.createElement('canvas'); bgBlendCv.width = W; bgBlendCv.height = H; }
       renderBg(bgBlendCv.getContext('2d'), W, H, t, after.spec); // the incoming field, off-screen
-      ctx.save(); ctx.globalAlpha = p; ctx.drawImage(bgBlendCv, 0, 0); ctx.restore();
+      paintIncomingBgReveal(ctx, W, H, bgBlendCv, cut);
     } else {
       renderBg(ctx, W, H, t, w.spec);
     }
@@ -1415,7 +1425,7 @@ const boxOf = (id) => boxes.get(id) || null;
     const t = f / fps;
     drawBg(t);
     driveClips(CLIPS, t); // declarative clip timing + enter/exit + z-order
-    driveSceneUnits(t); // move whole-beat wrappers across a cut (sceneUnits), no-op otherwise
+    driveBeatUnits(t); // move whole-beat wrappers across a cut, no-op when the film has none
     // EVERY exposed value for this frame, before ANY layer's frame() runs, see resolveExposed. Run
     // BEFORE resolveBoxes: a `cursor` layer's box folds in its own exposed path offset (see
     // resolveBoxes), and that value must already exist when resolveBoxes reads it. Safe because
@@ -1580,10 +1590,10 @@ const boxOf = (id) => boxes.get(id) || null;
     } else { capEl.style.opacity = '0'; capEl.__key = null; }
   }
 
-  // drawCameraAndCut: the global camera transform, plus any SCENE CUT (a transition between beats
-  // applied to the camera root so the whole beat moves as one). cutStyle ALWAYS returns the full
-  // style set (identity in steady state) so a cut property can never stick into a later frame,
-  // whatever order frames render in. See MISTAKES #29 (the top-level `cuts` array was once inert).
+  // drawCameraAndCut: the global camera transform. A scene cut transitions the per-beat WRAPPERS
+  // (driveBeatUnits), never the camera root, so this only ever resets the cam's own cut-adjacent
+  // channels to identity (cutS below is always the identity style) and applies the rig/flat transform.
+  // See MISTAKES #29 (the top-level `cuts` array was once inert).
   function drawCameraAndCut(t, c) {
     // THE RIG. The translate is written LAST in the list, so it is applied to points AFTER the
     // orientation: x/y stay a screen-space slide and the dolly runs along the camera's own view axis
@@ -1598,32 +1608,17 @@ const boxOf = (id) => boxes.get(id) || null;
       // FLAT: nothing in this frame leaves the canvas plane, so the projection IS this affine map.
       camTf = `scale(${c.s.toFixed(4)}) translate(${c.x.toFixed(2)}px, ${c.y.toFixed(2)}px)`;
     }
-    let cutS = null;
-    // sceneUnits mode drives the transition on the per-beat WRAPPERS (driveSceneUnits), not the whole
-    // cam, so skip the cam-level cut entirely and let the wrappers swap the two beats as units.
-    if (!sceneUnits) for (const cu of sceneCuts) {
-      const half = (cu.dur ?? 0.36) / 2, ct = +cu.t;   // `dur` is the TOTAL window, split around t
-      if (t <= ct - half || t >= ct + half) continue;
-      const o = { timing: cu.timing, dir: cu.dir, dist: cu.dist, cx: cu.cx, cy: cu.cy };
-      // SOLO: one root carries the whole frame, so exit-then-enter must not touch opacity/clip/mask.
-      // Sequencing those two halves on a single element blanks the frame at the midpoint. soloCutStyle
-      // keeps the transform/filter character (a punch still punches) and holds visibility open.
-      cutS = t < ct
-        ? soloCutStyle(cu.style, { exit: (t - (ct - half)) / half, enter: 1 }, o)   // beat leaving
-        : soloCutStyle(cu.style, { exit: 0, enter: (t - ct) / half }, o);            // beat arriving
-      break;
-    }
-    if (!cutS) cutS = cutStyle('fade', { enter: 1, exit: 0 }, {}); // full identity reset
+    const cutS = cutStyle('fade', { enter: 1, exit: 0 }, {}); // full identity reset
     const { transform: cutTf, ...cutRest } = cutS;
     Object.assign(cam.style, cutRest);
     cam.style.transform = [camTf, cutTf && cutTf !== 'none' ? cutTf : ''].filter(Boolean).join(' ') || 'none';
   }
 
-  // driveSceneUnits, move each BEAT WRAPPER as one unit across a cut boundary: the outgoing beat plays
+  // driveBeatUnits, move each BEAT WRAPPER as one unit across a cut boundary: the outgoing beat plays
   // the cut's EXIT, the incoming beat its ENTER, using the same cutStyle vocabulary. A real A-out/B-in
-  // scene swap (vs the cam-level bump). Pure in t (cutStyle is closed-form). No-op unless sceneUnits.
-  function driveSceneUnits(t) {
-    if (!sceneUnits) return;
+  // scene swap. Pure in t (cutStyle is closed-form). No-op when the film has no cuts (beatWrap/sceneCuts
+  // are both empty).
+  function driveBeatUnits(t) {
     // steady state: identity + fully visible (each beat's own layers handle their in-window visibility)
     // Reset from CUT_IDENT, never from a hand-listed subset. This line used to name four channels and
     // cutStyle writes ten, so a `softwipe`/`blinds`/`softiris` cut left its MASK on the wrapper for

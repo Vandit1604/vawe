@@ -17,6 +17,12 @@ import { spawnSync } from 'node:child_process';
 import { stageOf, ROOT } from './stage.mjs';
 import { computeFeatures } from './craft-checklist.mjs';
 import { rulesFor, briefLine } from '../../harness/lib/craft-rules.mjs';
+import { postDraftStep } from './post-draft.mjs';
+
+// `render`/`judge` are the two AGENTS.md stages after `direct`: a draft exists (or is perpetually
+// re-judged, `judge`'s own `done: false`). Inside them the finer post-draft loop (draft -> still sheet
+// -> conform -> verify -> two fresh judges -> ship) is the real order, not stage.mjs's single line.
+const POST_DRAFT_STAGES = new Set(['render', 'judge']);
 
 /** Rule briefs for this film's stage/features. Never breaks the caller: a nudge, not a gate. */
 function printRuleBriefs(st) {
@@ -38,10 +44,20 @@ function main() {
   if (!arg) { console.error('usage: make next D=films/scene/<film>.json'); process.exit(2); }
 
   const st = stageOf(arg);
-  const cmd = firstCommand(st.next);
-  console.log(`\n  ${st.name} is at ${st.stage.toUpperCase()}. Running:\n  ${cmd}\n`);
+  let cmd, brief;
+  if (POST_DRAFT_STAGES.has(st.stage)) {
+    const pd = postDraftStep(arg);
+    cmd = firstCommand(pd.next);
+    brief = pd.brief;
+    console.log(`\n  ${st.name} is at ${st.stage.toUpperCase()} · post-draft step: ${pd.step.toUpperCase()}${pd.done ? ' (ready to ship)' : ''}. Running:\n  ${cmd}\n`);
+    console.log(`  why: ${pd.why}\n`);
+  } else {
+    cmd = firstCommand(st.next);
+    console.log(`\n  ${st.name} is at ${st.stage.toUpperCase()}. Running:\n  ${cmd}\n`);
+  }
   if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}\n`);
   if (st.craftDocs.length) console.log(`  read: ${st.craftDocs.join(', ')}\n`);
+  if (brief) console.log(`${brief}\n`);
   printRuleBriefs(st);
   const [bin, ...args] = cmd.split(/\s+/);
   const res = spawnSync(bin, args, { cwd: ROOT, stdio: 'inherit' });

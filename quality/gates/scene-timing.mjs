@@ -1,8 +1,8 @@
 // quality/gates/scene-timing.mjs: ONE model of when a scene's layers are actually on screen.
 //
 // A scene JSON does not say when its layers are visible. `start` + `duration` are what the AUTHOR wrote;
-// the renderer then rewrites them. core/engine/produce.js turns `sceneUnits` on for any cut film that is not
-// already choreographed, and films/scene/scene.js (setLayerTiming) then REPLACES the duration of each
+// the renderer then rewrites them. Every beat a film's `cuts` create is always its own unit, and
+// films/scene/scene.js (setLayerTiming) then REPLACES the duration of each
 // non-last-beat layer that is still the beat's CURRENT STATE with the run to `beatEnd + cutDur`, so the
 // beat wrapper can slide the whole beat out as one unit. A gate that reads the raw fields sees holes the
 // render does not have, and misses ones it does. beat-check learned that the expensive way
@@ -20,7 +20,7 @@
 //   T.allSpans     // the same for every top-level layer, blackouts and specks included
 //   T.duration     // declared, else last end + a beat, the renderer's own rule
 //   T.cutTimes     // sorted times of every real (style !== 'none') cut
-//   T.sceneUnits   // whether the engine will wrap beats as units
+//   T.beatUnits    // whether the film has cuts, so the engine wraps beats as units
 //   T.edges        // [0, ...cutTimes], the start of each beat
 //   T.cutDurAt(t)  // the cut window that closes the beat at t
 //   T.unitCut(L)   // the cut that closes this layer's beat (null when the wrapper leaves it alone)
@@ -174,7 +174,7 @@ export function boxOf(L, root = ROOT) {
 //
 // `view` is WHERE THE FRAME IS, from cameraView(). Without it the frame is the canvas box at the origin,
 // which is where the camera stands on frame 0 and nowhere else: on a film that travels between stations
-// (linear-journey lays five of them across 5760x2160) a station that FILLS the screen scored 0, because
+// (a station-travel film lays five of them across 5760x2160) a station that FILLS the screen scored 0, because
 // every one of its pixels is off-canvas at the origin. Pass a view and both halves move with the camera.
 // The clip and the denominator, so the share stays "how much of what the viewer sees is this layer".
 // Absent or null it is the old canvas-box answer, byte for byte.
@@ -254,11 +254,10 @@ export function sceneTiming(input) {
   const cutTimes = [...new Set((Array.isArray(d.cuts) ? d.cuts : [])
     .filter((c) => c && typeof c === 'object' && c.style && c.style !== 'none' && num(c.t, null) !== null)
     .map((c) => num(c.t, 0)))].sort((a, b) => a - b);
+  const beatUnits = cutTimes.length > 0;
   const choreographed = layers.some(function has(L) {
     return L && typeof L === 'object' && ((Array.isArray(L.motion) && L.motion.length > 1) || (L.children || []).some(has));
   });
-  const sceneUnits = d.sceneUnits === true
-    || (d.sceneUnits == null && d.produced !== false && cutTimes.length > 0 && !choreographed);
   // the cut window that closes beat i, matching scene.js's `dur ?? 0.4`.
   const cutDurAt = (t) => {
     const c = (Array.isArray(d.cuts) ? d.cuts : []).find((x) => x && num(x.t, null) === t);
@@ -285,7 +284,7 @@ export function sceneTiming(input) {
     return true;
   };
   const unitCut = (L) => {
-    if (!sceneUnits || !cutTimes.length) return null;
+    if (!beatUnits) return null;
     // `acrossBeats` opts a layer out of the wrapper (films/scene/scene.js beatIndexOf), so the engine
     // leaves its authored window alone. Modelling it as truncated would make every gate that reasons
     // about time deny the existence of the one thing they ask for.
@@ -521,7 +520,7 @@ export function sceneTiming(input) {
   // surface, not the rendered one; this is the same scene with the sugar already expanded.
   return {
     scene: d, layers, content, spans, contentSpans, allSpans, duration, lastEnd, cutTimes, cutDurAt, edges,
-    sceneUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
+    beatUnits, choreographed, unitCut, unitEnd, canvas: [CANVAS_W, CANVAS_H],
     lives, beatMotion, beatMotionAt, handoffs, cameraStillHeldAt, cameraLegSpans,
   };
 }

@@ -76,7 +76,6 @@
  "cameraMove": {
   "move": "slowPush"
  },
- "sceneUnits": true,
  "layers": [
   {
    "type": "text",

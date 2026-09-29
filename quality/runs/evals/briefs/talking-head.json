@@ -23,7 +23,6 @@
  ],
  "cameraMove": { "move": "slowPush" },
  "spectacle": { "at": 10.6, "of": "citation-chip", "device": "flash", "why": "the citation resolving inside the document IS the film's argument (a citation you can check, not a summary); every other beat stays quiet so this one pop reads as the payoff" },
- "sceneUnits": true,
  "layers": [
   { "type": "html", "id": "presenter-plate-a", "x": 280, "y": 250, "w": 520, "h": 520, "start": 0, "duration": 9.0, "out": "defocus", "exitDur": 0.35,
     "html": "<style>.plate{position:relative;width:520px;height:520px}.plate-ring{position:absolute;inset:0;border-radius:50%;background:var(--line)}.plate-inset{position:absolute;inset:35px;border-radius:50%;background:var(--bg)}.plate-core{position:absolute;top:190px;left:190px;width:140px;height:140px;border-radius:50%;background:var(--accent)}</style><div class=\"plate\"><div data-plate class=\"plate-ring\"><div class=\"plate-inset\"></div></div><div data-core class=\"plate-core\"></div></div>",

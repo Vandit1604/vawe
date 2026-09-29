@@ -12,7 +12,7 @@ import { coverScale, isFullBleedPlane } from './overscan.js';
 // threw away the blur that makes its fastest moves read, which is the opposite of what the author
 // asked for and nothing would have said a word (engine-doctrine/MISTAKES.md #204).
 const AUTO_BLUR_FLOOR_PER_SEC = 480;
-// The DEFAULT shutter, and only the default. higgsfield-recreation's own hand-picked value for its
+// The DEFAULT shutter, and only the default. A continuous-action recreation's own hand-picked value for its
 // fastest layer, which is 0.16 of the frame, about a 58 degree shutter angle in a camera's units.
 // A scene sets its own with a top-level `shutter` in DEGREES (180 is the film standard, 360 is double
 // the smear, 0 turns the automatic half off), and that is the whole of item 6 in

@@ -623,7 +623,7 @@ export function isCausedTrigger(raw) {
   return !TRIGGER_SEQUENCE.test(s);
 }
 
-// Evidence, not a guess: higgsfield-recreation.json (engine-doctrine/MISTAKES.md's reference film) stages its three key events roughly 30ms and 150ms apart (3.07s, 3.10s, 3.25s); 0.05s sits at the small end of that range on purpose.
+// Evidence, not a guess: a continuous-action recreation (engine-doctrine/MISTAKES.md's reference film) stages its three key events roughly 30ms and 150ms apart (3.07s, 3.10s, 3.25s); 0.05s sits at the small end of that range on purpose.
 export const STAGE_S = 0.05;
 
 /**

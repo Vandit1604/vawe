@@ -29,6 +29,9 @@ import { probeMany } from './probe-frame.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { storyboardPathFor } from '../../quality/gates/craft-checklist.mjs';
 import { parseStoryboard } from '../author/storyboard-parse.mjs';
+import { renderOf, gradeable } from '../../quality/gates/tile.mjs';
+import { computeEnergy, HOLD_FLOOR } from '../media/see.mjs';
+import { writeReceipt } from '../lib/receipt.mjs';
 
 function readArg(key) {
   const pref = `${key}=`;
@@ -115,7 +118,7 @@ const near = (a, b, tol) => Math.abs(a - b) <= tol;
 // Every timestamp any claim needs to look at, so probeMany boots ONE page for the whole film rather
 // than one per claim. `hold` needs a dense scan across the whole duration; every other claim needs at
 // most two or three points, each named by the claim itself.
-function planSamples(claims, scene, dur) {
+function planSamples(claims, scene, dur, holdSource) {
   const at = new Map(); // t (rounded) -> Set(id)
   const need = (t, id) => {
     const key = Math.round(t * 1000) / 1000;
@@ -150,7 +153,9 @@ function planSamples(claims, scene, dur) {
         const hi = Math.min(hiA, hiB);
         if (hi > lo) { const t = Math.min(dur - EPS, (lo + hi) / 2); need(t, c.a); need(t, c.b); }
       }
-    } else if (c.kind === 'hold') {
+    } else if (c.kind === 'hold' && holdSource.mode === 'dom') {
+      // A dense per-id DOM scan is only the fallback: when a fresh render exists, judgeHold reads the
+      // rendered mp4's own motion energy instead (see.mjs's computeEnergy) and none of this is needed.
       const step = 0.2;
       for (let t = 0; t < dur; t += step) for (const id of allIds) need(Math.min(dur - EPS, t), id);
     }
@@ -233,7 +238,26 @@ function judgeOverlap(c, index, scene, dur) {
   return { ...c, pass: !overlaps, t, measured: overlaps, boxA: bA, boxB: bB };
 }
 
-function judgeHold(c, index, scene, dur) {
+// Reads the RENDERED mp4's own motion energy (harness/media/see.mjs's computeEnergy, the same series
+// its own `holds` detector runs on), never an authored motion track. A track can exist (`idle: drift`)
+// and still produce no visible pixels changing; only the video answers "is this actually moving".
+function judgeHoldFromVideo(c, mp4) {
+  const energy = computeEnergy(mp4);
+  let worst = { run: 0, at: 0 };
+  let cur = null;
+  for (const p of energy) {
+    if (p.v <= HOLD_FLOOR) { if (cur) cur.t1 = p.t; else cur = { t0: p.t, t1: p.t }; }
+    else { if (cur && cur.t1 - cur.t0 > worst.run) worst = { run: cur.t1 - cur.t0, at: cur.t0 }; cur = null; }
+  }
+  if (cur && cur.t1 - cur.t0 > worst.run) worst = { run: cur.t1 - cur.t0, at: cur.t0 };
+  const pass = worst.run <= c.maxHold + EPS;
+  return { ...c, pass, worstId: null, worstRun: worst.run, worstAt: worst.at, source: 'video' };
+}
+
+// Fallback when there is no fresh render to measure (e.g. a fixture with no rendered mp4): the old
+// authored-box check, which can only ever answer "did this layer's DOM box stop changing", not "did
+// the picture stop moving".
+function judgeHoldFromDom(c, index, scene, dur) {
   const step = 0.2;
   const ids = [];
   (function walk(layers) { for (const L of layers || []) { if (L?.id) ids.push(L.id); walk(L.children); } })(scene.layers);
@@ -252,7 +276,29 @@ function judgeHold(c, index, scene, dur) {
     if (run > worst.run) worst = { id, run, at: runStart };
   }
   const pass = worst.run <= c.maxHold + EPS;
-  return { ...c, pass, worstId: worst.id, worstRun: worst.run, worstAt: worst.at };
+  return { ...c, pass, worstId: worst.id, worstRun: worst.run, worstAt: worst.at, source: 'dom (no render found)' };
+}
+
+function judgeHold(c, index, scene, dur, holdSource) {
+  if (holdSource.mode === 'video') return judgeHoldFromVideo(c, holdSource.mp4);
+  return judgeHoldFromDom(c, index, scene, dur);
+}
+
+// FIX HINTS, kept next to the claim parsers/printers above rather than in a second file: the JSON
+// pattern that satisfies each failed claim, not just the fact that it failed. `r` is the judged result
+// (same shape judgeCopy/judgeWeight/... returns), so a hint can read whatever it measured.
+const HINTS = {
+  copy: (r) => `set the layer's \`text\` to exactly "${r.expected}" (rendered: ${r.measured === null ? 'nothing, check the layer exists at this time' : `"${r.measured}"`})`,
+  weight: (r) => `give the layer a \`weight\` motion key spanning ${r.from}->${r.to} across ${r.t0}-${r.t1}s, e.g. "motion": [{"t": ${r.t0}, "weight": ${r.from}}, {"t": ${r.t1}, "weight": ${r.to}}]`,
+  draw: (r) => `the svg needs \`"draw": {"to": ${r.t}}\` (or an earlier \`start\`) so the stroke reads fully drawn by ${r.t.toFixed(2)}s; measured only ${r.measured == null ? 'no stroke path' : `${(r.measured * 100).toFixed(0)}%`}`,
+  exit: (r) => `name the span and push it: \`"exitDur"\` long enough that a motionPath \`up\` (or \`"anim": "rise"\`) actually clears 8px+ before ${r.t.toFixed(2)}s, opacity held (not faded) until the last third of the exit`,
+  overlap: (r) => `stagger \`${r.a}\` and \`${r.b}\` so their on-screen windows don't coincide, or shift one layer's \`x\`/\`y\` so the boxes clear`,
+  hold: (r) => `name the span holding still (starts @${r.worstAt.toFixed(2)}s${r.worstId ? ` on "${r.worstId}"` : ''}) and give it a visible push there: an earlier next entrance, a camera move, or idle motion; ceiling is ${r.maxHold}s`,
+};
+
+function hintFor(r) {
+  const h = HINTS[r.kind];
+  return h ? h(r) : null;
 }
 
 export async function conform(filmArg, briefArg) {
@@ -264,14 +310,23 @@ export async function conform(filmArg, briefArg) {
   const { text, source } = claimsText(filmPath, briefArg);
   const { claims, leftover } = extractClaims(text);
 
+  const mp4 = renderOf(filmPath);
+  const g = gradeable(filmPath, mp4);
+  const holdSource = g.ok ? { mode: 'video', mp4: g.mp4 } : { mode: 'dom', why: g.why };
+
   const lines = [`=== CONFORM: ${path.basename(filmPath)} ===`];
   lines.push(`claims source: ${source || '(none: no storyboard beats, no .brief.md, no --brief given)'}`);
   lines.push(`${claims.length} checkable claim(s), ${leftover.length} judge-only leftover(s)`);
+  if (claims.some((c) => c.kind === 'hold'))
+    lines.push(holdSource.mode === 'video' ? `hold claims read motion from ${mp4}` : `hold claims: no fresh render (${holdSource.why}), falling back to authored DOM boxes`);
 
   let results = [];
   if (claims.length) {
-    const requests = planSamples(claims, scene, dur);
-    const reports = await probeMany(filmPath, requests);
+    const requests = planSamples(claims, scene, dur, holdSource);
+    // A DOM sample needs the render-server + headless page; a video-mode `hold` needs neither. Skip the
+    // boot entirely when nothing asked for a DOM sample, so a hold-only conform on a fresh render never
+    // needs the scene to be a loadable page (or even to exist under the server's own roots).
+    const reports = requests.length ? await probeMany(filmPath, requests) : [];
     const index = new Map(reports.map((r) => [Math.round(r.viewerT * 1000) / 1000, r]));
 
     results = claims.map((c) => {
@@ -280,7 +335,7 @@ export async function conform(filmArg, briefArg) {
       if (c.kind === 'draw') return judgeDraw(c, index, dur);
       if (c.kind === 'exit') return judgeExit(c, index, scene, dur);
       if (c.kind === 'overlap') return judgeOverlap(c, index, scene, dur);
-      if (c.kind === 'hold') return judgeHold(c, index, scene, dur);
+      if (c.kind === 'hold') return judgeHold(c, index, scene, dur, holdSource);
       return { ...c, pass: null, note: 'unhandled claim kind' };
     });
 
@@ -291,7 +346,8 @@ export async function conform(filmArg, briefArg) {
       else if (r.kind === 'draw') lines.push(`[${mark}] draw ${r.id} by ${r.t.toFixed(2)}s: measured ${r.measured == null ? 'n/a (no stroke path found)' : `${(r.measured * 100).toFixed(0)}% drawn`}`);
       else if (r.kind === 'exit') lines.push(`[${mark}] exit ${r.id} up by ${r.t.toFixed(2)}s: rose ${r.measured == null ? 'n/a' : `${r.measured.toFixed(1)}px`} from ${r.t0.toFixed(2)}s to ${r.t1.toFixed(2)}s${r.wasVisible ? '' : ' (not visible at window start)'}`);
       else if (r.kind === 'overlap') lines.push(`[${mark}] overlap ${r.a} !x ${r.b}: ${r.note || `${r.measured ? 'DO overlap' : 'clear'} @${r.t.toFixed(2)}s`}`);
-      else if (r.kind === 'hold') lines.push(`[${mark}] hold max ${r.maxHold}s: longest static run ${r.worstRun.toFixed(1)}s on "${r.worstId}" starting @${r.worstAt.toFixed(2)}s`);
+      else if (r.kind === 'hold') lines.push(`[${mark}] hold max ${r.maxHold}s: longest static run ${r.worstRun.toFixed(1)}s${r.worstId ? ` on "${r.worstId}"` : ''} starting @${r.worstAt.toFixed(2)}s (${r.source})`);
+      if (r.pass === false) { const hint = hintFor(r); if (hint) lines.push(`        fix: ${hint}`); }
     }
   }
 
@@ -307,7 +363,12 @@ export async function conform(filmArg, briefArg) {
   const outPath = scratch('conform', `${path.basename(filmPath, '.json')}.claims.json`);
   fs.writeFileSync(outPath, JSON.stringify(claimsJson, null, 2));
 
-  return { text: lines.join('\n'), ok: failed.length === 0, results, leftover, claimsJsonPath: outPath };
+  const ok = failed.length === 0;
+  // A receipt, same shape as every other stage's (harness/lib/receipt.mjs): so `make ship` and
+  // `make next` can ask "did brief conformance already run, fresh, and pass" without re-running it.
+  writeReceipt('conform', filmPath, { ok, failedCount: failed.length, claimCount: claims.length, at: new Date().toISOString().slice(0, 10) });
+
+  return { text: lines.join('\n'), ok, results, leftover, claimsJsonPath: outPath };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

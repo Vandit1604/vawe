@@ -2,32 +2,6 @@
   "note": "The flagship example registry. `make site X=gallery` reads this to build a hover-to-play showcase from the rendered videos. Each entry: the scene source, the rendered video in out/, and gallery metadata. Add a row when you ship a new flagship example (example-*.json).",
   "examples": [
     {
-      "source": "example-product-promo.json",
-      "video": "example-product-promo.beatsync.mp4",
-      "title": "Product Promo",
-      "description": "Dark Linear-style SaaS reel: a gradient hook, a typed prompt with a cursor click, feature cards that snap in staggered, a 2.5M counter, cut to a lo-fi beat.",
-      "aspect": "16:9",
-      "orientation": "landscape",
-      "duration": 17.5,
-      "category": "Product",
-      "bestFor": "A product launch or feature announcement.",
-      "tags": ["snap", "cards", "count", "typing", "cut-to-beat", "dark"],
-      "poster": 1.0
-    },
-    {
-      "source": "example-swiss-grid.json",
-      "video": "example-swiss-grid.mp4",
-      "title": "Swiss Grid",
-      "description": "Light editorial layout: huge left-aligned grotesk, a grid motif that pops in, tabular stats. Restraint and scale contrast over motion.",
-      "aspect": "16:9",
-      "orientation": "landscape",
-      "duration": 15.5,
-      "category": "Editorial",
-      "bestFor": "A brand statement, manifesto, or data story.",
-      "tags": ["swiss", "grid", "stats", "left-aligned", "light"],
-      "poster": 1.6
-    },
-    {
       "source": "example-kinetic-type.json",
       "video": "example-kinetic-type.beatsync.mp4",
       "title": "Kinetic Type",

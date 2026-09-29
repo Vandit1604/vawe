@@ -1,0 +1,44 @@
+#!/bin/sh
+# post-checkout: a linked worktree made by plain `git worktree add` (rather than
+# harness/dev/worktree.sh) checks out TRACKED files only, so it starts with no scene library, no
+# fonts, no brand images, no node_modules, and the failure is SILENT: a gate walks 40 scenes instead
+# of 149 and reports a confident green (worktree.sh's own header names this in full; this hook exists
+# because worktree.sh is not the only way a worktree gets made, and any tool calling `git worktree add`
+# directly bypasses it).
+#
+# Runs on every checkout in every worktree, so it must stay near-instant and silent when there is
+# nothing to do: sync-worktree.mjs hash-diffs before it copies anything, and every symlink check below
+# only touches disk when the target is missing. Never blocks the checkout: an error here is reported,
+# not raised, because a stale library is this hook's problem, a failed checkout is git's.
+set -u
+
+WT="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
+MAIN="$(git worktree list --porcelain 2>/dev/null | awk '/^worktree /{print $2; exit}')"
+[ -n "$MAIN" ] && [ -n "$WT" ] || exit 0
+[ "$WT" = "$MAIN" ] && exit 0   # the main checkout is the source of the library, never its destination
+
+# Read-only links, same choice worktree.sh makes and for the same reason: node_modules and
+# site/node_modules are shared stores, and a concurrent install through two worktrees is the
+# corruption case, not a benefit of a private copy.
+for d in node_modules site/node_modules; do
+  if [ ! -e "$WT/$d" ] && [ ! -L "$WT/$d" ] && [ -d "$MAIN/$d" ]; then
+    ln -sfn "$MAIN/$d" "$WT/$d"
+  fi
+done
+if [ ! -e "$WT/bin/vawe" ] && [ ! -L "$WT/bin/vawe" ] && [ -f "$MAIN/bin/vawe" ]; then
+  mkdir -p "$WT/bin" && ln -sf "$MAIN/bin/vawe" "$WT/bin/vawe"
+fi
+if [ ! -e "$WT/.vawe-data" ] && [ ! -L "$WT/.vawe-data" ] && [ -d "$MAIN/.vawe-data" ]; then
+  ln -sfn "$MAIN/.vawe-data" "$WT/.vawe-data"
+fi
+
+# The untracked, per-file library (films/scene/*.json, assets/fonts, assets/brands, ...), driven from
+# .worktreeinclude, not a second hand-kept list: same script worktree.sh calls, so there is exactly one
+# implementation of "what a worktree needs" (engine-doctrine/MISTAKES.md #450).
+[ -f "$WT/harness/dev/sync-worktree.mjs" ] || exit 0
+out="$(node "$WT/harness/dev/sync-worktree.mjs" "$WT" 2>&1)"; rc=$?
+case "$out" in
+  *'(0 updated · '*' local edits kept · 0 conflicts)') [ "$rc" = 0 ] || echo "$out" >&2 ;;  # nothing to report
+  *) echo "post-checkout: syncing this worktree's untracked library"; echo "$out" ;;
+esac
+exit 0

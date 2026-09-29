@@ -210,7 +210,7 @@ not: "the defaults this film refuses, in your own words"
   Two MORE fields ride the same edge, both optional and both trailing after a `/`: `/rot:<deg>` (the
   object's rotation at that edge) and `/op:<0-1>` (its opacity), e.g.
   `object_out: center@40x26/rot:15/op:0.4`. This is a POSE, not just a spot: the film this repo holds up
-  as its best (higgsfield-recreation) has an object that holds a constant bbox area while it travels
+  as its best (a continuous-action recreation) has an object that holds a constant bbox area while it travels
   (already `w`x`h`), spins into its fastest frame and rights itself on landing (`rot`), and fades its
   label out as it goes (`op`). `make assemble` keys all four (x, y, w, h, rot, opacity are all properties
   `layers[].motion[]` already takes) into the SAME motion track the plain position form always built, so
@@ -328,7 +328,7 @@ not: "the defaults this film refuses, in your own words"
   and, for every junction that passes it, INSERTS a small stagger of real time before the next beat
   (0.05s, resolved to its own real second, not carved out of either beat's planned duration) instead of
   firing every junction at the flat absolute second every junction used to, regardless of cause. 0.05s is
-  evidence, not a guess: higgsfield-recreation stages its own three key events roughly 30ms and 150ms
+  evidence, not a guess: a continuous-action recreation stages its own three key events roughly 30ms and 150ms
   apart. An UNSTATED junction is left exactly as it was: staging a cause the storyboard never wrote down
   would be inventing one, not reading one off it. (`layers[].start` also legally accepts a live relative
   reference, `"otherId.end+0.5"`, same for `transitions[].at` and `cameraMove[].start`; resolved to a

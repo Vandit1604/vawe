@@ -6,7 +6,7 @@
 // Nothing in this repo did this. `storyboard-check` grades the plan against itself; `critique` and
 // `eye-trace` read the scene JSON after assembly; `make preview` judges one fragment with no idea which
 // beat it serves. So a storyboard could describe one picture while its fragment drew another, and every
-// gate stayed green: beat 3 of vawe-oblique planned `blueprint: terminalReveal`, described "a white
+// gate stayed green: beat 3 of a since-removed film planned `blueprint: terminalReveal`, described "a white
 // pill bar with a round cobalt run button" in its own `picture:` line, and shipped an AI chat input
 // into a film about a command line (engine-doctrine/MISTAKES.md #596).
 //
@@ -153,7 +153,7 @@ if (scene && sb.object && !beatLocatesObject) {
 // (engine-doctrine/CRAFT/FILM-STRUCTURE.md, `vawe-continuous-action`'s own "do not use it for a manifesto"). What
 // this fires on is narrower: a plan that names an `object:`, a thing that should TRAVEL, and then
 // never locates it in a single beat, so the claim and the frames disagree. A film
-// that locates the object per beat (vawe-oblique's own device: the same prop, described as changing
+// that locates the object per beat (a since-removed film's own device: the same prop, described as changing
 // state at each cut, drawn fresh inside each full-bleed fragment) is answering the claim the narrative
 // way and must not be flagged for choosing that over a positioned cross-beat layer.
 if (scene && claimsContinuity && !beatLocatesObject) {

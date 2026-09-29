@@ -61,6 +61,13 @@ function applyDraw(el, p, draw, { fillIn, fill, stroke, strokeWidth }) {
 
 // resample BOTH shapes to equal point counts ONCE (build-time DOM read), align by best rotation, and
 // stash the arrays. From here morphD(u) is pure, no per-frame getPointAtLength.
+//
+// bestRotation is a CLOSED-shape search: it looks for the ordering offset that best lines up two rings
+// that have no canonical start point. An OPEN path (a line, a wave) already has one, its own two ends,
+// so sliding its points around that ring twists the correspondence instead of fixing it, and a straight
+// line morphing into a wave crosses itself into a blob. Gated on the same `morph.closed` an author
+// already opts out with for `pointsToD`'s trailing `Z` (svg.js frame(), default true): a scene that
+// declares `closed:false` is declaring the shape open, so this must agree rather than run regardless.
 function applyMorph(el, svg, p, morph) {
   const n = morph.points ?? 180;
   const tmp = document.createElementNS(SVGNS, 'path');
@@ -69,7 +76,7 @@ function applyMorph(el, svg, p, morph) {
   const from = resamplePath(p, n);
   const to = resamplePath(tmp, n);
   svg.removeChild(tmp);
-  const k = bestRotation(from, to);
+  const k = morph.closed === false ? 0 : bestRotation(from, to);
   el.__morph = { from, to: rotatePoints(to, k), rawTo: morph.to };
 }
 

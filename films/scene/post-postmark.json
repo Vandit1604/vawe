@@ -4,7 +4,6 @@
   "aspect": "16:9",
   "destination": "web",
   "duration": 24,
-  "sceneUnits": true,
   "profile": "stripe",
   "cameraMove": {
     "move": "slowPush"

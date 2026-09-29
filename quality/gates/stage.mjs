@@ -81,7 +81,10 @@ const fingerprint = (file) => {
   }).join('|');
 };
 
-const CACHE = path.join(ROOT, '.vawe-data/stage-gate-cache.json');
+// VAWE_STATE_DIR (harness/live/stage-say.mjs's own var) lets a test keep its own cache: two test
+// files calling stageOf() concurrently used to race on this one shared file, non-atomic read then
+// write, last writer's entries winning and the other's silently dropped.
+const CACHE = path.join(process.env.VAWE_STATE_DIR || path.join(ROOT, '.vawe-data'), 'stage-gate-cache.json');
 const readCache = () => { try { return JSON.parse(fs.readFileSync(CACHE, 'utf8')); } catch { return {}; } };
 
 const gatePasses = (script, file) => {
@@ -108,6 +111,19 @@ function craftDocsForFilm(scene, sbSrc, briefPath) {
   const briefSrc = fs.existsSync(briefPath) ? fs.readFileSync(briefPath, 'utf8') : '';
   const type = filmType(`${briefSrc}\n${sbSrc}`);
   return craftDocsFor({ type, features: sceneFeatures(scene) });
+}
+
+// ADVISORY, never a block (a rendered film has more motion work ahead than this can see). A film
+// whose layers already carry `motion` but whose scene has never had a look receipt written
+// (harness/author/preview.mjs's `make look LOOKS=1`, or one written against an older version of this
+// same scene) skipped the still-before-motion order both traces in the scorecard missed.
+export function lookAdviceFor(scene, sceneExists, scenePath, base) {
+  const hasMotion = !!(scene && Array.isArray(scene.layers)
+    && scene.layers.some((l) => l && Array.isArray(l.motion) && l.motion.length));
+  const lookReceipt = sceneExists ? readReceipt('look', scenePath) : { exists: false, stale: false };
+  if (!hasMotion || (lookReceipt.exists && !lookReceipt.stale)) return null;
+  return '  tip: this film has motion and no reviewed styleframes on record: `make look D='
+    + `${base}.json LOOKS=1\` before more motion work.`;
 }
 
 // The stages, in order. Each names the ONE command that moves the film out of it. `done` is asked in
@@ -166,12 +182,15 @@ export function stageOf(arg) {
       next: `make judge D=${p.base}.json, then make dev-tool X=ledger D=${p.base}.json` },
   ];
   const at = S.find((s) => !s.done) || S[S.length - 1];
+  const lookAdvice = lookAdviceFor(scene, sceneExists, p.scene, p.base);
+
   // The skill(s) claiming this stage, read off skills/*/SKILL.md's own `stage:` frontmatter
   // (harness/lib/skill-stages.mjs), never a second hand-kept table.
   return { ...p, stage: at.id, why: at.why, next: at.next, order: S.map((s) => s.id),
     skills: skillsForStage(at.id),
     craftDocs: craftDocsForFilm(scene, sbSrc, p.brief),
-    approved: approved || null, fragments: [...new Set(fragments)], missingFrags, layers, sbExists, sceneExists };
+    approved: approved || null, fragments: [...new Set(fragments)], missingFrags, layers, sbExists, sceneExists,
+    lookAdvice };
 }
 
 /**
@@ -381,6 +400,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`  do:  ${st.next}`);
   if (st.skills.length) console.log(`  skill: ${st.skills.join(', ')}`);
   if (st.craftDocs.length) console.log(`  read: ${st.craftDocs.join(', ')}`);
+  if (st.lookAdvice) console.log(st.lookAdvice);
   console.log('');
   if (look) {
     console.log(`  LOOK (frames now, not after render):`);

@@ -61,7 +61,7 @@ const OPACITY_FLOOR = 0.01; // below this a layer is DECLARED invisible right no
 
 
 // Per top-level layer, the engine-corrected [start,end]: the same rewrite scene.js does for a
-// sceneUnits beat wrapper (a non-last-beat layer runs to `beatEnd + cutDur`, not its authored duration).
+// beat wrapper (a non-last-beat layer runs to `beatEnd + cutDur`, not its authored duration).
 // Sampled at the midpoint so entrance/exit ramps sit behind it, mirroring beat-check's own reasoning for
 // a "settled" frame, just applied per layer instead of per beat.
 function layerTimes(sceneJson) {

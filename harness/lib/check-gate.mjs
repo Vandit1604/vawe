@@ -18,6 +18,7 @@ const valFlag = (name, f) => (env[name] ? [f, env[name]] : []);
 
 // name -> the script + args; keep alphabetical, this is the only place the list is kept.
 export const GATES = {
+  'anim-traps': () => ['quality/gates/anim-traps.mjs', ...words('D'), ...flag1('STRICT', '--strict')],
   'arsenal-check': () => ['quality/gates/arsenal-check.mjs', ...json()],
   'asset-check': () => ['quality/gates/asset-check.mjs', ...words('D'), ...flag('STRICT', '--strict'), ...json()],
   'audio-check': () => ['quality/gates/audio-check.mjs', ...(env.D ? words('D') : ['--all']), ...flag1('STRICT', '--strict')],
@@ -110,8 +111,20 @@ export function run(name) {
   }
   const [script, ...args] = build();
   const exe = script.endsWith('.sh') ? 'sh' : process.execPath;
-  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { stdio: 'inherit', cwd: ROOT });
-  return r.status ?? 1;
+  // Node's default 1 MiB capture limit killed gates with long output and hid the cause.
+  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { encoding: 'utf8', cwd: ROOT, maxBuffer: 256 * 1024 * 1024 });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  const status = r.status ?? 1;
+  // Every gate prints its own ✓/✗ lines, but a failure could scroll off above the exit code.
+  // One summary line, always last, so a failure is never buried under passing checks.
+  if (!env.JSON) {
+    const failing = `${r.stdout || ''}${r.stderr || ''}`.split('\n').filter((l) => l.includes('✗'));
+    console.log(status === 0
+      ? `✓ ${name}: passed`
+      : `✗ ${name}: ${failing.length || 1} failed: ${(failing[0] || (r.error ? `could not run: ${r.error.message}` : `exited ${status}`)).trim()}`);
+  }
+  return status;
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

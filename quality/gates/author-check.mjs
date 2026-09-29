@@ -139,7 +139,7 @@ function resolveStoryboard(sceneFile, sceneJson) {
 const CONTENT_TYPES = new Set(['text', 'image', 'svg', 'html', 'component', 'count', 'doc',
   'lottie', 'video', 'board', 'canvas', 'clip', 'group', 'composition']);
 // A film cut into beats where NOTHING is choreographed and NOTHING crosses a junction is a slideshow,
-// whatever else is true of it. `higgsfield-recreation` keys 6 of its 8 layers and cuts zero times,
+// whatever else is true of it. A continuous-action recreation keys 6 of its 8 layers and cuts zero times,
 // `brew-launch-act1` keys 4 and punctuates with camera fx; the library median is 0 keyed layers. It
 // asks only whether the author choreographed ANYTHING: one keyed track, or one layer that survives a
 // junction via `becomes`, `follow` or `acrossBeats`. One is enough.

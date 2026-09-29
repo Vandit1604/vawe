@@ -33,16 +33,18 @@ import { fileURLToPath } from 'node:url';
 import * as B from '../../blocks/index.mjs';
 import { CATALOG } from '../../blocks/catalog.mjs';
 import { bakeCameraMove } from './produce.js';
+import { runProducePass } from './pipeline.js';
 import { applyHtmlPartsSugar } from '../motion/parts.js';
 import { frameOf } from '../layout/safe.js';
 import { lowerScene } from '../transitions/lower.js';
 import { expandRecipes } from '../../recipes/expand.mjs';
 import { resolveTempo } from './tempo.js';
 import { resolveRelativeTimes } from '../timeline/relative-time.js';
-import { isTokenFile } from '../theme/roles.js';
+import { isTokenFile, expandTheme } from '../theme/roles.js';
 import { resolveTokens } from '../theme/tokens.js';
 import { resolveTokenRefs } from '../theme/refs.js';
-import { parseColor, colorAlpha } from '../color/engine.js';
+import { resolveLook } from '../registry/theme-contract.js';
+import { parseColor, colorAlpha, isLightBg } from '../color/engine.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -262,38 +264,55 @@ export function expandScene(data, aspectKey = '') {
   return data;
 }
 
-// loadScene(data): THE loader every Node consumer of a scene JSON calls (a gate, a script). Expands
-// build-time sugar BEFORE lowering the unified transitions surface, so a beat/block emitting its own
-// `transition` sugar is normalised too. films/scene/scene.js (the render page) does not call this:
-// see the file banner for why, and internal/render/expand.go for where the same expansion happens for
-// that path instead.
-// DO NOT call core/engine/produce.js's produceBaseline (or any other defaults pass) from here. It was
-// tried and reverted: engine-doctrine/MISTAKES.md #157 records that wiring the produced baseline into the gates
-// masked the exact conditions they test (a gate checking "no camera was injected" can no longer see
-// that once loadScene injects one first). A gate coaches on what the author WROTE; the engine fills
-// the baseline only on the render path, at core/engine/boot.js. Two different jobs, read the same
-// source file, never the same derived one.
-// tokenValuesFor(themeSpec): the Node-side twin of core/engine/boot.js `resolveThemeTokenValues`. A
-// string spec reads `themes/<name>.json` off disk (this file is Node-only from here down, see the
-// header: expandScene itself stays fs-free, loadScene does not need to); an inline theme object is used
-// as-is. Not a token file (the retired shape, or no theme at all) resolves no tokens, same posture as
-// the browser side: a scene with no `{ref}` sugar behaves exactly as before.
-function tokenValuesFor(themeSpec) {
-  let raw;
+// rawThemeFor(themeSpec) -> the raw theme JSON, or null when there is none to resolve (no theme
+// declared, or a named theme file that doesn't exist). A string spec reads `themes/<name>.json` off
+// disk (this file is Node-only from here down, see the header: expandScene itself stays fs-free,
+// loadScene does not need to); an inline theme object is used as-is. Shared by tokenValuesFor and
+// resolveThemeNode below, so a theme name resolves off disk in exactly one place.
+function rawThemeFor(themeSpec) {
   if (typeof themeSpec === 'string' && themeSpec) {
     const p = path.join(ROOT, 'themes', `${themeSpec}.json`);
-    if (!fs.existsSync(p)) return new Map();
-    raw = JSON.parse(fs.readFileSync(p, 'utf8'));
-  } else if (themeSpec && typeof themeSpec === 'object') {
-    raw = themeSpec;
-  } else {
-    return new Map();
+    if (!fs.existsSync(p)) return null;
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
   }
-  if (!isTokenFile(raw)) return new Map();
+  if (themeSpec && typeof themeSpec === 'object') return themeSpec;
+  return null;
+}
+
+// tokenValuesFor(themeSpec): the Node-side twin of core/engine/boot.js `resolveThemeTokenValues`. Not
+// a token file (the retired shape, or no theme at all) resolves no tokens, same posture as the browser
+// side: a scene with no `{ref}` sugar behaves exactly as before.
+function tokenValuesFor(themeSpec) {
+  const raw = rawThemeFor(themeSpec);
+  if (!raw || !isTokenFile(raw)) return new Map();
   return resolveTokens(raw.tokens || {}, { parseColor, colorAlpha }).values;
 }
 
+// resolveThemeNode(themeSpec) -> the expanded theme object (core/theme/roles.js expandTheme), the
+// Node-side twin of core/engine/boot.js `resolveTheme`, or null when no valid theme resolves (no
+// `data.theme`, an unknown theme file, or the retired palette/type/gradient shape). A scene with no
+// usable theme gets no produced baseline here rather than a Node-only throw a scene that still renders
+// fine in the browser (where `data.theme` is required) would never hit: the same absent-only posture
+// tokenValuesFor already has.
+function resolveThemeNode(themeSpec) {
+  const raw = rawThemeFor(themeSpec);
+  if (!raw || !isTokenFile(raw)) return null;
+  try { return expandTheme(raw, { parseColor, colorAlpha }); } catch { return null; }
+}
+
+// loadScene(data): THE loader every Node consumer of a scene JSON calls (a gate, a script). It runs
+// load, expand, lower, resolve token refs, then produce (core/engine/pipeline.js `runProducePass`),
+// the same order as the render path, so a gate checks exactly the scene that renders. films/scene/
+// scene.js (the render page) does not call this loader itself: see the file banner for why, and
+// internal/render/expand.go for where the same block/beat/comp expansion happens for that path
+// instead, server-side, before either path runs the shared pass below.
 export function loadScene(data) {
   const expanded = lowerScene(expandScene(data));
-  return resolveTokenRefs(expanded, tokenValuesFor(expanded.theme));
+  const tokenValues = tokenValuesFor(expanded.theme);
+  const withTokens = resolveTokenRefs(expanded, tokenValues);
+  const theme = resolveThemeNode(withTokens.theme);
+  if (!theme) return withTokens; // no theme to produce a baseline against
+  const frame = frameOf(withTokens, '');
+  const look = resolveLook(theme, { isLightBg, portrait: frame.H > frame.W });
+  return runProducePass(withTokens, theme, frame, look);
 }

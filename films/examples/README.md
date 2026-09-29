@@ -1,3 +1,9 @@
+---
+when: "starting a new film from a proven worked scene, or adding a frozen gold example"
+answers: "which frozen examples exist under films/examples, what each one demonstrates, and how make dev-tool X=new copies one"
+group: process
+---
+
 # films/examples: frozen gold examples
 
 Tracked, worked scenes that pass every brief-conformance claim (`node harness/dev/conform.mjs`) and
@@ -11,3 +17,5 @@ these means editing `content`, not the layers.
   fly-off on real `motionPath` arcs with `autoOrient`, an axis weight ramp (kinetic `weight` preset),
   an SVG trim draw-on (`draw`), an idle `drift` standing in for a hand-keyed wiggle, and a scene-level
   `rise` cut for the upward exit onto a clean solid-accent end frame.
+
+

@@ -394,7 +394,7 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
   })();
   // midMove only knows the enter/exit ramps the DOM records; a hand-keyed `motion` track leaves no
   // trace on the element, so a layer crossing the frame read as SETTLED (six of eight frame-bounds
-  // failures were this). Do not re-derive from the JSON: `sceneUnits` reparents layers into per-beat
+  // failures were this). Do not re-derive from the JSON: a cut film reparents layers into per-beat
   // wrappers, so document order is not authoring order. Ask the render instead: renderFrame(n) is pure
   // in n (core/engine/boot.js), so stepping ahead, measuring, and stepping back is side-effect free.
   //
@@ -441,7 +441,7 @@ function frameContext(n, SAFE, MIN_GAP, CUTS, OVERLAYS, CAPBAND) {
 
 // Undoes the ZOOM only, about the viewport centre; the camera's translation must stay, since a
 // travelling shot parks the stage at a station and the screen box there is what the viewer sees.
-// linear-journey pans across a 5500px stage, and undoing the translation too reported sixteen
+// a station-travel film pans across a 5500px stage, and undoing the translation too reported sixteen
 // findings about layers that were centred on screen.
 const unCam = (b, ctx) => ctx.camScale
   ? { left: ctx.CX + (b.left - ctx.CX) / ctx.camScale.sx, right: ctx.CX + (b.right - ctx.CX) / ctx.camScale.sx,

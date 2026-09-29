@@ -5,7 +5,7 @@
     "kind": "enter",
     "blurb": "a line types itself in at a fixed rate, holds, then un-types at roughly twice the type rate; it never fades, the caret is the only decoration",
     "sources": [
-      { "ref": "higgsfield-recreation", "note": "the exemplar, cited in prose only, no shot or timestamp given" }
+      { "ref": "continuous-action-recreation", "note": "the exemplar, cited in prose only, no shot or timestamp given" }
     ],
     "slots": { "at": "seconds: when typing starts", "target": "layer id" },
     "params": {
@@ -19,7 +19,7 @@
     "kind": "seam",
     "blurb": "one object becomes the next: on a single progress variable, width/height shrink, corner radius grows from square to round on a cubic curve, and the label opacity falls away early on a squared term",
     "sources": [
-      { "ref": "higgsfield-recreation", "note": "the exemplar, cited in prose only, no shot or timestamp given" }
+      { "ref": "continuous-action-recreation", "note": "the exemplar, cited in prose only, no shot or timestamp given" }
     ],
     "slots": { "at": "seconds: when the morph starts", "over": "seconds: how long it runs", "target": "layer id" },
     "params": {
@@ -67,7 +67,7 @@
     "kind": "camera",
     "blurb": "a surface wider than the frame drifts into place then pans on an irregular multi-key linear track, riders welded to the same track by copying its deltas and time-shifting by the rider's own start",
     "sources": [
-      { "ref": "higgsfield-recreation", "shot": 2, "note": "films/scene/higgsfield-recreation.json beat 2" }
+      { "ref": "continuous-action-recreation", "shot": 2, "note": "beat 2" }
     ],
     "slots": { "surface": "layer id", "riders": "[layer id, ...]?" },
     "params": {
@@ -83,7 +83,7 @@
     "kind": "enter",
     "blurb": "a stroked ring replays another layer's path one beat late, growing and fading as it goes, supplying motion during a slow morph without competing with the subject for attention",
     "sources": [
-      { "ref": "higgsfield-recreation", "shot": 4, "note": "films/scene/higgsfield-recreation.json beat 4, the generate button becoming a dot" }
+      { "ref": "continuous-action-recreation", "shot": 4, "note": "beat 4, the generate button becoming a dot" }
     ],
     "slots": { "path": "the source layer's motion track", "delay": "seconds behind the source" },
     "params": {
@@ -99,7 +99,7 @@
     "kind": "camera",
     "blurb": "a surface taller than the frame scrolls under a static tilt while the frame stays put; stops are absolute section offsets, every scroll shares one ease, held at each stop before the next begins",
     "sources": [
-      { "ref": "higgsfield-recreation", "note": "generalised from the exemplar; engine-doctrine/CRAFT/KEYED-MOTION.md carries the measurements" }
+      { "ref": "continuous-action-recreation", "note": "generalised from the exemplar; engine-doctrine/CRAFT/KEYED-MOTION.md carries the measurements" }
     ],
     "slots": { "surface": "layer id", "stops": "[pixels, ...] absolute offsets from content origin" },
     "params": {

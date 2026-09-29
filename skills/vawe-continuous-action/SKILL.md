@@ -15,8 +15,8 @@ The engine can build anything. What it cannot do is plan something great from a 
 "make a 5s launch film for an AI image tool", an agent writes a competent slideshow: hook card,
 feature card, logo card. Every gate passes. Nobody watches it twice.
 
-The reference in this repo (`higgsfield.mp4`, first 5 seconds, recreated in
-`films/scene/higgsfield-recreation.json`) is not a sequence of beats. **It is one continuous action.**
+The reference in this repo (`higgsfield.mp4`, first 5 seconds)
+is not a sequence of beats. **It is one continuous action.**
 You type a prompt. You press generate. The generate button itself becomes the loading dot. One object
 is on screen from the first frame to the last and every cut is that object changing state.
 

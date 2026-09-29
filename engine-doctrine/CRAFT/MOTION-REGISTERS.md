@@ -19,8 +19,8 @@ codes: effect-soup
   transformation/morph, camera/viewport, physics-driven, time remapping (§3).
 - Cut rate has a real accepted metric (average shot length, the Cinemetrics corpus). "Is this motion
   good" does not. Frame-difference detects dead frames; it cannot judge direction (§4).
-- `make arsenal SHAPE=`'s five shapes are measured off two films IN THIS REPO (higgsfield-recreation and
-  brew-launch-act1), never off an external reference (§5).
+- `make arsenal SHAPE=`'s five shapes are measured off two films IN THIS REPO (a continuous-action
+  recreation and brew-launch-act1), never off an external reference (§5).
 
 This is a research doc, not a rule page: it exists to hold the sourced argument so the correction to
 `DIRECTION.md` and `TASTE-RULES.md` does not float free of its evidence. An unsourced number here
@@ -53,11 +53,11 @@ Beat-synced editing in music-video and promo work cuts and moves ON the beat for
 design, because the rhythm IS the structure, not a texture applied to three moments. And the
 title-sequence tradition this repo already argues from, Saul Bass's continuous kinetic sequences and
 Kyle Cooper's *Se7en* main title, holds a viewer's attention through unbroken motion across an entire
-sequence with no still beat at all. `engine-doctrine/CRAFT/DIRECTION.md` §1 already cites `higgsfield-recreation`
-as hand-keying 75% of its 8 layers with zero cuts; that film IS this register, and grading it against a
+sequence with no still beat at all. `engine-doctrine/CRAFT/DIRECTION.md` §1 already cites a continuous-action
+recreation as hand-keying 75% of its 8 layers with zero cuts; that film IS this register, and grading it against a
 one-loud-moment rule would mark its whole identity as a violation.
 
-**Both films this repo argues from sit in the second group.** `higgsfield-recreation` (6 of 8 layers
+**Both films this repo argues from sit in the second group.** The continuous-action recreation (6 of 8 layers
 hand-keyed, zero cuts) and `brew-launch-act1` (a continuous camera push across five inverted backdrop
 windows) are launch/hype promos, not UI explainers. Measuring them against a UI restraint rule is
 comparing a title sequence to a settings dialog and marking the title sequence over-designed.
@@ -67,7 +67,7 @@ comparing a title sequence to a settings dialog and marking the title sequence o
 | Register | Motion is | Restraint rule | Named examples |
 |---|---|---|---|
 | UI-adjacent / quiet explainer | a cost the viewer pays for legibility | one loud moment, everything else quiet; NN/g and Apple HIG apply directly | `vawe-type` (`reference/explainer.md`, `reference/talking-head.md`) |
-| Kinetic typography / hype / launch promo / continuous title | the content itself | sustained motion across the whole runtime is correct; a still beat is the cost | `vawe-type` (`reference/launch.md`, `reference/sting.md`), `higgsfield-recreation`, `brew-launch-act1` |
+| Kinetic typography / hype / launch promo / continuous title | the content itself | sustained motion across the whole runtime is correct; a still beat is the cost | `vawe-type` (`reference/launch.md`, `reference/sting.md`), a continuous-action recreation, `brew-launch-act1` |
 
 **This does not repeal `effect-soup`, `monotone-timing` or the rest of `make dev-tool X=direct`.** Those gates
 measure whether motion VARIES (different eases, different durations, different directions), and
@@ -190,11 +190,11 @@ to a field with no accepted quality metric, not a workaround for one this repo h
 `harness/author/track.mjs` emits a hand-keyed `motion` track from one of five shapes
 (`pan`/`blast`/`drift`/`enter`/`exit`). Its own header states the source plainly:
 
-> `higgsfield-recreation` carries a keyed track on 6 of its 8 layers... higgsfield beat 2, whose
+> a continuous-action recreation carries a keyed track on 6 of its 8 layers... its beat 2, whose
 > per-segment speed runs 1.03, 1.35, 1.29, 0.75, 0.62... brew's punctuation leaves by growing THROUGH
 > the frame.
 
-Every shape is measured off `higgsfield-recreation` and `brew-launch-act1`, the two films IN THIS
+Every shape is measured off the continuous-action recreation and `brew-launch-act1`, the two films IN THIS
 REPO, never off an external reference video or a named outside brand. `engine-doctrine/CRAFT/HTML-FRAGMENTS.md`'s
 "measured off a real film" (§3, the `motion` track paragraph) is consistent with this, if read
 alongside the two films it names one paragraph earlier; nothing found in this pass states the false

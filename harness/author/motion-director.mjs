@@ -148,9 +148,9 @@ function tellContinuity(d, layers, beats) {
   const truncated = layers.filter((l) => wouldTravel(l) && !survives(l));
   const metrics = { continuity: travelers.length };
   if (travelers.length === 0 && truncated.length && !layers.some((l) => l.acrossBeats === true))
-    return { metrics, findings: [warn('continuity', `${truncated.length} layer(s) travel on paper but sceneUnits truncates each to its own beat, so none survives a cut. Mark the spine "acrossBeats":true (direction-floor blocks this as no-continuous-object).`)] };
-  if (travelers.length === 0 && d.sceneUnits !== true)
-    return { metrics, findings: [warn('continuity', `no element travels across a cut (no motion track, nothing spans a beat). Reads as a slideshow (TASTE-RULES: continuity). Or set "sceneUnits":true so each beat slides in/out as one unit.`)] };
+    return { metrics, findings: [warn('continuity', `${truncated.length} layer(s) travel on paper but the beat unit truncates each to its own beat, so none survives a cut. Mark the spine "acrossBeats":true (direction-floor blocks this as no-continuous-object).`)] };
+  if (travelers.length === 0)
+    return { metrics, findings: [warn('continuity', 'no element travels across a cut (no motion track, nothing spans a beat). Reads as a slideshow (TASTE-RULES: continuity).')] };
   return { metrics, findings: [] };
 }
 

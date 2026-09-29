@@ -22,7 +22,7 @@ export const PROPS = {
 // original meaning) OR a map keyed by channel name, with `'*'` as the map's own default.
 //
 // WHY. One ease was computed for ALL channels, so a layer wanting width on one curve and radius on
-// another had nowhere to put the second. higgsfield-recreation.json layer 4 morphs a rounded rect into a
+// another had nowhere to put the second. A continuous-action recreation's layer 4 morphs a rounded rect into a
 // pill and needed exactly that, so its author drove a LINEAR 0→1 and hand-wrote the easing as polynomials
 // inside CSS: `calc(392px - (var(--p)*0.35 + var(--p)*var(--p)*0.65) * 205px)` for width against
 // `calc(30px + var(--p)*var(--p)*var(--p) * 900px)` for the radius. That is a workaround, and by this

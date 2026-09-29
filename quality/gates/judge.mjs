@@ -15,7 +15,8 @@ import { beatsOf, evenSamples } from './beats-of.mjs';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
 import { craftRubric, structuredRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
-import { appendRun, readRuns } from '../../harness/lib/runlog.mjs';
+import { appendRun } from '../../harness/lib/runlog.mjs';
+import { selfRecordCheck } from '../../harness/lib/judge-self-record.mjs';
 import { JUDGE_CODES, isJudgeCode, parseFix } from '../../harness/lib/judge-codes.mjs';
 import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
 import { lintCriteriaSet } from '../../harness/lib/evidence-lint.mjs';
@@ -126,17 +127,14 @@ if (verdictArg) {
     process.exit(1);
   }
   // The judge is meant for a SEPARATE agent (engine-doctrine/JUDGE.md: "the PASS is not the author's
-  // to self-record"). The one signal the harness actually has for "which agent" is the Claude Code
-  // session id (runlog.mjs stamps every run with it). If the session recording this PASS is the same
-  // one that produced the render being judged, refuse: a FIX still records, since only PASS claims the
+  // to self-record"), refused by AGENT, not merely by session: see selfRecordCheck above for why a
+  // shared session does not mean a shared agent. A FIX still records, since only PASS claims the
   // independent eye agreed.
   if (v === 'PASS') {
-    const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
-    const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
-    const authorSession = authorRun && authorRun.session;
-    if (thisSession && authorSession && thisSession === authorSession) {
-      console.error(`✗ refused: this PASS would be self-recorded. Session ${thisSession} both rendered ${path.basename(mp4)} and is now trying to pass it. Hand ${sheet} and its rubric to a fresh agent/session that did not author this film, and record PASS from there.`);
-      f.fail('judge-self-recorded', 'a PASS was attempted by the same session that rendered this cut', { fix: 'record PASS from a separate agent/session' });
+    const { selfRecorded, thisSession } = selfRecordCheck(inp);
+    if (selfRecorded) {
+      console.error(`✗ refused: this PASS would be self-recorded. Session ${thisSession} both rendered ${path.basename(mp4)} and is now trying to pass it. Hand ${sheet} and its rubric to a fresh agent that did not author this film, and have it record PASS with VAWE_AGENT=<its-name> set (a subagent shares this session and process id).`);
+      f.fail('judge-self-recorded', 'a PASS was attempted by the same agent that rendered this cut', { fix: 'record PASS from a separate agent' });
       process.exit(1);
     }
   }
@@ -215,6 +213,16 @@ if (verdictJsonArg) {
     f.fail('judge-struct-incomplete', `${missing.length} criterion/criteria missing evidence`, { missing });
     process.exit(1);
   }
+  // `overall`: this judge's own holistic 1-10 read of the cut, never averaged with the other judge's
+  // (engine-doctrine/JUDGE.md still refuses to aggregate PER-DIMENSION scores across judges; this is a
+  // single judge's own number, compared independently against the other run's own number). `make ship`
+  // requires both of the two latest fresh structured runs at 7 or above (harness/lib/judge-consensus.mjs).
+  const overall = payload.overall;
+  if (typeof overall !== 'number' || !Number.isInteger(overall) || overall < 1 || overall > 10) {
+    console.error('✗ refused: "overall" must be an integer 1-10, this judge\'s own holistic score.');
+    f.fail('judge-struct-incomplete', '"overall" missing or out of range 1-10');
+    process.exit(1);
+  }
   // Non-empty is not the same as specific: "beat 1: readability looks fine" clears the check above and
   // says nothing a fix could act on. lintCriteriaSet asks each entry to name a real element/text plus a
   // position/size/colour/motion/timing observation, forbids echoing the criterion's own name, checks a
@@ -234,19 +242,17 @@ if (verdictJsonArg) {
   const v = String(payload.verdict || '').toUpperCase();
   if (v !== 'PASS' && v !== 'FIX') { console.error('the JSON\'s "verdict" must be PASS or FIX'); process.exit(2); }
   if (v === 'PASS') {
-    const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
-    const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
-    const authorSession = authorRun && authorRun.session;
-    if (thisSession && authorSession && thisSession === authorSession) {
+    const { selfRecorded, thisSession } = selfRecordCheck(inp);
+    if (selfRecorded) {
       console.error(`✗ refused: this PASS would be self-recorded (session ${thisSession} both rendered and is judging ${path.basename(mp4)}).`);
-      f.fail('judge-self-recorded', 'a PASS was attempted by the same session that rendered this cut');
+      f.fail('judge-self-recorded', 'a PASS was attempted by the same agent that rendered this cut');
       process.exit(1);
     }
   }
   const stage = `judge-struct-${String(run).replace(/[^A-Za-z0-9_-]/g, '')}`;
-  writeReceipt(stage, inp, { run, verdict: v, criteria: payload.criteria, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
-  appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, file: verdictJsonArg } });
-  console.log(`  ✓ structured verdict recorded: run ${run}, ${v}. Every criterion carries evidence.`);
+  writeReceipt(stage, inp, { run, verdict: v, overall, criteria: payload.criteria, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
+  appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, overall, file: verdictJsonArg } });
+  console.log(`  ✓ structured verdict recorded: run ${run}, ${v}, overall ${overall}/10. Every criterion carries evidence.`);
   process.exit(0);
 }
 
