@@ -3,6 +3,10 @@
 // A pure function of decoded gray frames; the blob tracker only supplies the first guess (about 1 px
 // off), this pass gets it to a fraction of a pixel, which is what a landing frame is read from.
 
+const MISS = 0.6;
+const REST_SEARCH = 40;
+const REST_STEP = 0.12;
+
 const bilinear = (g, w, x, y) => {
   const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0, i = y0 * w + x0;
   return g[i] * (1 - fx) * (1 - fy) + g[i + 1] * fx * (1 - fy) + g[i + w] * (1 - fx) * fy + g[i + w + 1] * fx * fy;
@@ -41,22 +45,54 @@ function locate(T, g, w, h, gx, gy) {
   return { x: T.ex + best.dx, y: T.ey + best.dy, miss: best.v / Math.max(1, T.contrast) };
 }
 
+// Follow the element frame by frame away from `from` (dir -1 back, +1 forward) until it stops moving:
+// the rest position before or after the tracked move, where a slow ease leaves the blob tracker blind.
+function walkToRest(at, from, dir, span, guess) {
+  const out = [];
+  let prev = guess, still = 0;
+  for (let f = from + dir; f >= span.f0 && f < span.f1 && out.length < REST_SEARCH; f += dir) {
+    const m = at(f, prev.x, prev.y);
+    if (m.miss >= MISS) break;
+    still = Math.hypot(m.x - prev.x, m.y - prev.y) < REST_STEP ? still + 1 : 0;
+    out.push({ f, x: m.x, y: m.y });
+    prev = m;
+    if (still >= 2) break;
+  }
+  return out;
+}
+
+// The latest point whose size is the track's usual size and which is nearly still: a clean look at the element.
+function restingLook(pts) {
+  const med = (k) => [...pts.map((p) => p[k])].sort((a, b) => a - b)[pts.length >> 1];
+  const mw = med('w'), mh = med('h');
+  const clean = (p) => Math.abs(p.w - mw) <= 0.2 * mw && Math.abs(p.h - mh) <= 0.2 * mh && Math.hypot(p.vx, p.vy) < 3;
+  return [...pts].reverse().find(clean) || pts[pts.length - 1];
+}
+
 /**
- * V: { w, h, frame(i) -> gray }. pts: tracked points { f, x, y, w, h } in grid px. Returns { pts, before }:
- * pts with x/y replaced by the sub-pixel match (a point that matches badly keeps its tracked value), and
- * before = the position one frame ahead of pts[0], or null. Returns null when the element is too near an edge.
+ * V: { w, h, frame(i) -> gray }. pts: tracked points { f, x, y, w, h } in grid px. span: { f0, f1 } the shot's
+ * frames. Returns { pts, lead, tail } or null when the element is too near the frame edge to match.
+ * pts: the tracked points with x/y replaced by the sub-pixel match (a poor match keeps its tracked value).
+ * lead: positions in the frames before pts[0], oldest first, ending where the element sat still.
+ * tail: positions in the frames after the last point, ending where it came to rest.
  */
-export function refineTrack(V, pts) {
-  const last = pts[pts.length - 1];
-  const T = makeTemplate(V.frame(last.f), V.w, V.h, last.x, last.y, last.w, last.h);
+export function refineTrack(V, pts, span) {
+  const last = pts[pts.length - 1], first = pts[0];
+  const anchor = restingLook(pts);
+  const T = makeTemplate(V.frame(anchor.f), V.w, V.h, anchor.x, anchor.y, anchor.w, anchor.h);
   if (!T) return null;
   const at = (f, gx, gy) => locate(T, V.frame(f), V.w, V.h, gx, gy);
-  const out = pts.map((p) => {
-    if (p === last) return p;
-    const m = at(p.f, p.x, p.y);
-    return m.miss < 0.6 ? { ...p, x: m.x, y: m.y } : p;
-  });
-  const first = pts[0];
-  const prev = first.f > 0 ? at(first.f - 1, first.x - first.vx, first.y - first.vy) : null;
-  return { pts: out, before: prev && prev.miss < 0.6 ? { x: prev.x, y: prev.y } : null };
+  const out = [];
+  for (const p of pts) {
+    if (p === anchor) { out.push(p); continue; }
+    const prev = out[out.length - 1], before = out[out.length - 2];
+    const guesses = [{ x: p.x, y: p.y }];
+    if (prev) guesses.push({ x: prev.x + (before ? prev.x - before.x : 0), y: prev.y + (before ? prev.y - before.y : 0) });
+    const m = guesses.map((g) => at(p.f, g.x, g.y)).reduce((a, b) => (b.miss < a.miss ? b : a));
+    out.push(m.miss < MISS ? { ...p, x: m.x, y: m.y } : p);
+  }
+  const lead = walkToRest(at, first.f, -1, span, { x: first.x - first.vx, y: first.y - first.vy }).reverse();
+  const end = out[out.length - 1];
+  const tail = walkToRest(at, last.f, 1, span, { x: end.x, y: end.y });
+  return { pts: out, lead, tail };
 }

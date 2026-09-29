@@ -16,7 +16,7 @@ const paramText = (p) => Object.entries(p).map(([k, v]) => `${k}=${v}`).join(' '
 export function easingLines(e, fps) {
   if (!e.easing) return [];
   const { easing, start, land } = e, travel = Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]);
-  const weak = easing.r2 < 0.98 || land.errFrames > 1 || easing.rmsePx > 0.03 * travel;
+  const weak = easing.r2 < 0.98 || land.errFrames > 1 || easing.rmsePx > 0.03 * travel || easing.points < 6 || easing.atLimit;
   const L = [`easing ${easing.class} ${paramText(easing.params)}: rmse ${easing.rmsePx} px, r2 ${easing.r2}, runner-up ${easing.runnerUp.class} ${easing.runnerUp.rmsePx} px`,
     `css (${easing.durMs} ms): ${easing.css}`,
     `starts f${start.frame} (${start.t} s); at rest (within 0.5 px) f${land.frame} (${land.t} s), plus or minus ${land.errFrames} f${weak ? `; ${eye(land.frame)}` : ''}`];
