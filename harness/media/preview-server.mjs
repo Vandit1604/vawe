@@ -87,7 +87,7 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, args 
       // browser itself. Closing only the page and never disconnecting left the connection's open socket
       // holding the process alive well past the render finishing (a real hang this file was measured
       // against: a windowed draft's own log line printed, then nothing exited for ~30s).
-      return { page, url, persistent: true, close: async () => { await page.close(); shared.browser.disconnect(); } };
+      return { page, url, persistent: true, close: async () => { await page.close().catch(() => {}); shared.browser.disconnect(); } };
     }
   }
   const root = pageRoot(abs);
