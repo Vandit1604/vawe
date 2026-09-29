@@ -325,12 +325,54 @@ export function buildRenderSpec(m, file) {
     cuts, audio: { hits, source: 'dom' }, spectacle: m.spectacle, rootPalette, shots };
 }
 
-export async function renderSpec({ page, outDir, aspect }) {
+// ── names: the DOM says WHICH element a pixel-measured box is, never how it moves ───────────────────
+const NAME_MIN_IOU = 0.3;
+
+function sourceLine(lines, t) {
+  const find = (re) => { const i = lines.findIndex((l) => re.test(l)); return i >= 0 ? i + 1 : null; };
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (t.id) return find(new RegExp(`id=["']${esc(t.id)}["']`));
+  if (t.cls) return find(new RegExp(`class=["'][^"']*\\b${esc(t.cls.split('.')[0])}\\b`));
+  return t.text ? find(new RegExp(esc(t.text.slice(0, 20)))) : null;
+}
+
+/** m from measurePage -> { at(t, { cx, cy, w, h }) } with a box as fractions of the frame; -> { label, line } or null. */
+export function domNamer(m, pagePath) {
+  const lines = fs.readFileSync(pagePath, 'utf8').split('\n');
+  const W = m.frame.width, H = m.frame.height;
+  return { at(t, box) {
+    const f = Math.max(0, Math.min(m.n - 1, Math.round(t * m.fps)));
+    let best = null;
+    m.table.forEach((el, id) => {
+      const r = m.frames[f][id];
+      if (!r || el.tag === 'html' || el.tag === 'body' || r[5] < MIN_OPACITY) return;
+      const [, cx, cy, w, h] = r;
+      const ix = Math.min(cx + w / 2, (box.cx + box.w / 2) * W) - Math.max(cx - w / 2, (box.cx - box.w / 2) * W);
+      const iy = Math.min(cy + h / 2, (box.cy + box.h / 2) * H) - Math.max(cy - h / 2, (box.cy - box.h / 2) * H);
+      if (ix <= 0 || iy <= 0) return;
+      const iou = (ix * iy) / (w * h + box.w * W * box.h * H - ix * iy);
+      if (!best || iou > best.iou) best = { iou, el };
+    });
+    if (!best || best.iou < NAME_MIN_IOU) return null;
+    return { label: label(best.el), line: sourceLine(lines, best.el), text: best.el.text.slice(0, 24) };
+  } };
+}
+
+/** Puts `name` on every tracked element and layout box of a pixel spec of the page's render. */
+export function attachNames(spec, namer) {
+  const W = spec.media.width, H = spec.media.height;
+  for (const s of spec.shots) {
+    for (const e of s.elements) e.name = namer.at((e.land ? e.land.t : e.f1 / spec.fps), { cx: e.to[0] / W, cy: e.to[1] / H, w: e.size[0] / W, h: e.size[1] / H });
+    if (s.layout) for (const b of s.layout.boxes) b.name = namer.at(s.layout.frame / spec.fps, { cx: b.x + b.w / 2, cy: b.y + b.h / 2, w: b.w, h: b.h });
+  }
+}
+
+export async function renderSpec({ page, outDir, aspect, withNames = false }) {
   const m = await measurePage(page, { aspect });
   const spec = buildRenderSpec(m, page);
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'render-spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
-  return spec;
+  return withNames ? { spec, namer: domNamer(m, page) } : spec;
 }
 
 async function main() {
