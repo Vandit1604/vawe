@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ffmpegOrDie, drawtext } from '../../lib/scratch.mjs';
 import { detectCuts } from '../shot-detect.mjs';
+import { trackWords } from '../../lib/ref-measure/words.mjs';
 import { EASINGS } from '../../../core/motion/easings.js';
 import { computeEnergy, defaultOutDir, die, edgeMean, ENERGY_HZ, findHolds, HOLD_FLOOR, HOLD_MIN, pngDims, probeVideo, ROOT, tileInGrids, writeJsonAtomic } from './core.mjs';
 
@@ -10,15 +11,16 @@ import { computeEnergy, defaultOutDir, die, edgeMean, ENERGY_HZ, findHolds, HOLD
 // tesseract's own tsv -> [{text, box}], box a FRACTION of the frame this tsv was run on. Pulled out of
 // ocrWords so the adaptive per-timestamp tracker below (wordTracks) runs the exact same parse on a
 // single extracted frame, never a second hand-rolled tsv reader that could drift from this one.
-export function parseTesseractTsv(tsv, minConf, minLen, frameW, frameH) {
+export function parseTesseractTsv(tsv, minConf, minLen, frameW, frameH, alnum = false) {
   const words = [];
   for (const line of tsv.split('\n').slice(1)) {
     const cols = line.split('\t');
     if (cols.length < 12) continue;
     const conf = Number(cols[10]), text = (cols[11] || '').trim();
-    if (conf >= minConf && text.length >= minLen && /[a-zA-Z]/.test(text)) {
+    if (conf >= minConf && text.length >= minLen && (alnum ? /[a-zA-Z0-9]/ : /[a-zA-Z]/).test(text)) {
       const left = Number(cols[6]), top = Number(cols[7]), w = Number(cols[8]), h = Number(cols[9]);
-      words.push({ text, box: { hFrac: h / frameH, wFrac: w / frameW, cxFrac: (left + w / 2) / frameW, cyFrac: (top + h / 2) / frameH } });
+      words.push({ text, conf, px: { cx: left + w / 2, cy: top + h / 2, w, h },
+        box: { hFrac: h / frameH, wFrac: w / frameW, cxFrac: (left + w / 2) / frameW, cyFrac: (top + h / 2) / frameH } });
     }
   }
   return words;
@@ -58,33 +60,20 @@ export function ocrWords(video, outDir, ocrFps, minConf, minLen) {
     return { t, words: ocrOneFrame(src, base, minConf, minLen, frameW, frameH) };
   });
   fs.rmSync(ocrDir, { recursive: true, force: true });
-  // A word "seen" is one that persists >= 2 consecutive samples; tIn/tOut are that run's first/last
-  // sample, `box` its average geometry (kept for callers that only want one number, e.g. the beat
-  // table), `samples` the raw {t, box} list a matched-moment lookup needs.
-  const seenAt = new Map();   // text -> [{t, box}, ...]
-  for (const f of perFrame) for (const w of f.words) {
-    if (!seenAt.has(w.text)) seenAt.set(w.text, []);
-    seenAt.get(w.text).push({ t: f.t, box: w.box });
-  }
+  // One entry per APPEARANCE (words/tracker in lib/ref-measure/words.mjs): a repeated word keeps every
+  // appearance and two copies on screen at once stay two. tIn/tOut are the first/last sample, `box` its
+  // average geometry (a FRACTION of the frame, for callers that want one number), `samples` the raw
+  // {t, box} list a matched-moment lookup needs.
   const avgBox = (boxes) => ({
     hFrac: boxes.reduce((s, b) => s + b.hFrac, 0) / boxes.length,
     wFrac: boxes.reduce((s, b) => s + b.wFrac, 0) / boxes.length,
     cxFrac: boxes.reduce((s, b) => s + b.cxFrac, 0) / boxes.length,
     cyFrac: boxes.reduce((s, b) => s + b.cyFrac, 0) / boxes.length,
   });
-  const words = [];
-  for (const [text, occ] of seenAt) {
-    occ.sort((a, b) => a.t - b.t);
-    let runStart = occ[0].t, prev = occ[0].t, run = [occ[0]];
-    for (let i = 1; i <= occ.length; i++) {
-      const o = occ[i];
-      if (o && o.t - prev <= 1 / ocrFps + 0.01) { run.push(o); prev = o.t; continue; }
-      if (run.length >= 2) words.push({ text, tIn: Number(runStart.toFixed(2)), tOut: Number(run[run.length - 1].t.toFixed(2)),
-        box: avgBox(run.map((r) => r.box)), samples: run });
-      if (o) { runStart = o.t; prev = o.t; run = [o]; }
-    }
-  }
-  return words.sort((a, b) => a.tIn - b.tIn);
+  const sampled = perFrame.map((f) => ({ t: f.t, words: f.words.map((w) => ({ text: w.text, conf: w.conf, ...w.px, box: w.box })) }));
+  return trackWords(sampled, ocrFps).filter((a) => a.samples.length >= 2)
+    .map((a) => ({ text: a.text, tIn: Number(a.t0.toFixed(2)), tOut: Number(a.t1.toFixed(2)),
+      box: avgBox(a.samples.map((s) => s.box)), samples: a.samples.map((s) => ({ t: s.t, box: s.box })) }));
 }
 export function easeProgressCurve(vals) {
   const cum = [];
