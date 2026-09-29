@@ -43,6 +43,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { RENDER_ARGS } from '../lib/render-harness.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
+import { seekTo, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, sceneDims } from '../../core/layout/safe.js';
 import { openPreview } from './preview-server.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
@@ -84,46 +85,16 @@ export function readPageMeta(pagePath, name) {
   return null;
 }
 
-// Runs in the page before any page script: the frame facts a page lays out against. documentElement does not exist yet at this point, so its attributes wait for the parser.
-function installPageFrame({ aspect, width, height }) {
-  const vawe = window.vawe || (window.vawe = {});
-  Object.assign(vawe, { aspect, width, height });
-  Object.defineProperty(vawe, 'fps', {
-    configurable: true,
-    get() { const m = document.querySelector('meta[name="fps"]'); return m ? Number(m.content) : undefined; },
-  });
-  const apply = () => {
-    const root = document.documentElement;
-    root.dataset.aspect = aspect;
-    root.style.setProperty('--vw', `${width}px`);
-    root.style.setProperty('--vh', `${height}px`);
-  };
-  if (document.documentElement) { apply(); return; }
-  new MutationObserver((_, obs) => { if (document.documentElement) { obs.disconnect(); apply(); } })
-    .observe(document, { childList: true });
-}
-
 async function openPage(pagePath, frame) {
   const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS });
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});`);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageSeek = ${seekTo};`);
   return opened;
 }
 
-// Same adapter interface core/timeline/seek.js's seekAll owns for a scene-module page, by hand for a
-// bare authored page: set the virtual clock, call window.seek(t) if the page paints as a function of
-// time, seek every CSS/WAAPI/SMIL animation to `ms`, then call every `vawe.onFrame(fn)` hook
-// (core/engine/page-api.js) with film time in SECONDS, awaited, so a hook that decodes a texture or
-// builds three.js geometry lazily settles before the screenshot below fires.
+// The seek itself is core/engine/page-seek.js seekTo, installed as window.__pageSeek so the studio runs the
+// same code. Here it is followed by settle(), which only a screenshot needs.
 async function seekAll(page, ms) {
-  await page.evaluate(async (t) => {
-    if (window.__pageClock) window.__pageClock.set(t / 1000);
-    if (typeof window.seek === 'function') await window.seek(t / 1000);
-    for (const a of document.getAnimations()) { a.pause(); a.currentTime = t; }
-    document.querySelectorAll('svg').forEach((svg) => {
-      if (typeof svg.pauseAnimations === 'function') { try { svg.pauseAnimations(); svg.setCurrentTime(t / 1000); } catch { /* best-effort */ } }
-    });
-    for (const fn of window.__vaweFrameHooks || []) await fn(t / 1000);
-  }, ms);
+  await page.evaluate((t) => window.__pageSeek(t / 1000), ms);
   await settle(page);
 }
 
