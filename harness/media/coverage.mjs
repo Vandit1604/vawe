@@ -102,9 +102,10 @@ export function textCoverage(refRows, ourRows) {
   return result;
 }
 
-function textMain(ours, ref) {
+async function textMain(ours, ref) {
   const work = scratch('coverage-text');
-  const cov = textCoverage(textTimeline(ref, work, TEXT_FPS), textTimeline(ours, work, TEXT_FPS));
+  const [refRuns, ourRuns] = await Promise.all([textTimeline(ref, work, TEXT_FPS), textTimeline(ours, work, TEXT_FPS)]);
+  const cov = textCoverage(refRuns, ourRuns);
   const at = (r) => `${r.t0.toFixed(2)}s`.padStart(7);
   console.log(`text rows in the reference: ${cov.ok.length} on time, ${cov.shifted.length} shifted, ${cov.missing.length} missing, ${cov.persistent.length} persistent word(s)`);
   if (cov.refOnly.length) console.log(`  PERSISTENT in the reference only (a corner label yours lacks?): ${cov.refOnly.join(' ')}`);
