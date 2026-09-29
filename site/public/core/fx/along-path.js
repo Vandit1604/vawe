@@ -1,0 +1,154 @@
+// core/fx/along-path.js: TYPE SET ON A CURVE, and travelling along it.
+//
+//   "modifiers": [{ "alongPath": { "curve": "arc", "w": 900, "h": 260 } }]
+//   "modifiers": [{ "alongPath": { "curve": "wave", "from": -20, "to": 120, "dur": 3 } }]
+//
+// The engine could already fly a whole LAYER along a path (`motionPath`), and it could lay chars
+// around a circle (`circleText`). It could not set a line of type on an arbitrary curve, which is the
+// general case the circle is one point of: a headline riding over a product shot, a caption bending
+// under a mark, a word crawling round a bend. There was no substitute, only a different effect.
+//
+// WHY A MODIFIER AND NOT A PRESET. A preset maps a per-unit progress to a STYLE, and the units are
+// spans in the flow. No style makes a span follow a curve. This has to REBUILD the layer as SVG, and
+// rebuilding the DOM once at build time and driving one attribute per frame is exactly the two-pass
+// shape core/fx exists for. Nor a layer type: the thing being curved is text that already has a
+// colour, a face, a size and a clock; a `curvedText` layer would restate all four.
+//
+// NO MEASUREMENT, EVER. The box is declared (`w`/`h`) and the viewBox matches it one-to-one, so a user
+// unit is a pixel and the inherited `font-size` lands at the size the layer asked for. `startOffset`
+// is a PERCENTAGE of the path, which the browser resolves, so nothing here calls getTotalLength() and
+// nothing depends on when the fonts finished loading.
+//
+// PURITY. build() restructures once; frame() writes one attribute on the element this file created,
+// never on the layer, so the composition-order contract in core/fx/index.js holds.
+
+import { clamp01, resolveEasing } from '../motion/motion.js';
+import { CURVES, CURVE_NAMES as NAMES } from '../motion/path-curves.js';
+
+const KEYS = ['curve', 'd', 'w', 'h', 'from', 'to', 'dur', 'delay', 'ease', 'anchor'];
+const MARK = 'data-along-path';
+
+// The named curves live in core/motion/path-curves.js: one catalog, two consumers (a textPath here,
+// MotionPathPlugin flying a whole layer in the LAYER-scope `move:` "path" scope, harness/lib/contract.mjs).
+
+function validateShape(s, spec) {
+  if (!s || typeof s !== 'object' || Array.isArray(s))
+    throw new Error(`alongPath: expected a curve name or an object like { "curve": "arc", "w": 900 } `
+      + `, got ${JSON.stringify(spec)}. Keys: ${KEYS.join(', ')}.`);
+  for (const k of Object.keys(s))
+    if (!KEYS.includes(k)) throw new Error(`alongPath: unknown key "${k}", known: ${KEYS.join(', ')}.`);
+}
+
+function resolveBox(s) {
+  const w = s.w == null ? 900 : s.w, h = s.h == null ? 260 : s.h;
+  if (!Number.isFinite(w) || w <= 0 || !Number.isFinite(h) || h <= 0)
+    throw new Error(`alongPath: "w" and "h" are the box the curve is drawn in, in pixels; got ${w}x${h}`);
+  return { w, h };
+}
+
+function resolvePathD(s, w, h) {
+  let d = s.d;
+  if (d == null) {
+    const curve = s.curve == null ? 'arc' : s.curve;
+    if (!CURVES[curve])
+      throw new Error(`alongPath: unknown curve "${curve}", known: ${NAMES.join(', ')}. `
+        + `Pass \`d\` instead to set your own path, in a ${w}x${h} box.`);
+    return CURVES[curve](w, h);
+  }
+  if (typeof d !== 'string' || !d.trim())
+    throw new Error(`alongPath: "d" is an SVG path string; got ${JSON.stringify(d)}`);
+  return d;
+}
+
+// Both default to the middle, so the line simply SITS on the curve and travels only when asked. A
+// default drift would move every headline an author only wanted bent.
+function resolveTiming(s) {
+  const from = s.from == null ? 50 : s.from, to = s.to == null ? from : s.to;
+  const dur = s.dur == null ? 2 : s.dur, delay = s.delay == null ? 0 : s.delay;
+  if (![from, to, dur, delay].every(Number.isFinite) || dur <= 0 || delay < 0)
+    throw new Error(`alongPath: "from"/"to" are percentages along the path, "dur"/"delay" seconds; `
+      + `got from=${from} to=${to} dur=${dur} delay=${delay}`);
+  return { from, to, dur, delay };
+}
+
+function resolveAnchor(s) {
+  const anchor = s.anchor == null ? 'middle' : s.anchor;
+  if (!['start', 'middle', 'end'].includes(anchor))
+    throw new Error(`alongPath: "anchor" is "start", "middle" or "end", which end of the line sits at `
+      + `the offset. Got ${JSON.stringify(anchor)}.`);
+  return anchor;
+}
+
+function resolve(spec) {
+  const s = typeof spec === 'string' ? { curve: spec } : spec;
+  validateShape(s, spec);
+  const { w, h } = resolveBox(s);
+  const d = resolvePathD(s, w, h);
+  const { from, to, dur, delay } = resolveTiming(s);
+  const anchor = resolveAnchor(s);
+  return { d, w, h, from, to, dur, delay, ease: s.ease || 'easeInOutCubic', anchor };
+}
+
+const NS = 'http://www.w3.org/2000/svg';
+
+export function build(kit, el, L, spec) {
+  const { d, w, h, from, anchor } = resolve(spec);
+  if (L.split)
+    throw new Error(`alongPath: this layer also sets \`split: "${L.split}"\`, and the splitter runs `
+      + `AFTER this and would wrap HTML spans inside the SVG, which renders nothing. Drop \`split\`, `
+      + `the curve is the treatment, or put the kinetic line in a layer of its own.`);
+  const words = el.textContent.trim();
+  if (!words)
+    throw new Error(`alongPath: the layer has no text to set on the curve. Give it \`text\`, or apply `
+      + `the modifier to the layer that carries the words.`);
+  // An id unique to this layer: two curved layers in one frame would otherwise share a path and the
+  // second `href` would resolve to the first one's shape.
+  const id = `ap-${L.id || L.type || 'x'}-${Math.abs(hash(words + d))}`;
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute(MARK, '1');
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.setAttribute('width', String(w));
+  svg.setAttribute('height', String(h));
+  svg.style.overflow = 'visible';
+  const defs = document.createElementNS(NS, 'defs');
+  const path = document.createElementNS(NS, 'path');
+  path.setAttribute('id', id);
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  defs.appendChild(path);
+  const text = document.createElementNS(NS, 'text');
+  // currentColor, so the layer's own ink, including the per-window automatic ink core/layers/util.js
+  // resolves, reaches the glyphs. A fill of its own would override a colour the engine just decided.
+  text.setAttribute('fill', 'currentColor');
+  text.setAttribute('text-anchor', anchor);
+  const tp = document.createElementNS(NS, 'textPath');
+  tp.setAttribute('href', `#${id}`);
+  tp.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${id}`);
+  tp.setAttribute('startOffset', `${from}%`);
+  tp.textContent = words;
+  text.appendChild(tp);
+  svg.appendChild(defs);
+  svg.appendChild(text);
+  el.textContent = '';
+  el.appendChild(svg);
+}
+
+// FNV-1a. Deterministic, and only ever used to make an element id unique, never to vary a look.
+function hash(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h | 0;
+}
+
+// NOT WIRED YET, recorded so the next author finds the gap rather than the symptom: `p`'s position
+// along the curve (CURVES[curve], evaluable without measuring anything) is the same shape core/layers/
+// index.js `expose` wants, and belongs on it once something needs to know where the glyph actually
+// sits, the way core/layers/text.js exposes its caret.
+export function frame(kit, el, L, t, scene, spec) {
+  const { from, to, dur, delay, ease } = resolve(spec);
+  if (from === to) return;                 // a line that only bends writes nothing per frame
+  const tp = el.querySelector(`[${MARK}] textPath`);
+  if (!tp) return;
+  const p = resolveEasing(ease)(clamp01((t - (L.start ?? 0) - delay) / dur));
+  tp.setAttribute('startOffset', `${(from + (to - from) * p).toFixed(3)}%`);
+}

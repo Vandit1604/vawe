@@ -2,7 +2,7 @@
   "name": "vawe",
   "version": "2.0.0",
   "type": "module",
-  "description": "The framework for agent-native motion graphics: a film is one HTML page, seeked frame by frame in Chrome and encoded with ffmpeg.",
+  "description": "Deterministic motion-graphics engine: one self-describing JSON in, one video out. Renders frame-by-frame in Chrome, encodes with ffmpeg.",
   "scripts": {
     "setup:audio": "node harness/media/gen-audio.mjs",
     "postinstall": "node scripts/vendor-gsap.mjs"

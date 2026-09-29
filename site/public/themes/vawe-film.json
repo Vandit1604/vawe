@@ -1,0 +1,216 @@
+{
+  "name": "vawe-film",
+  "note": "The vawe brand, tuned for FILM. themes/vawe.json mirrors the real landing page and must keep doing that: Anybody is the site's actual face and changing it there would make the theme lie about the brand (engine-doctrine/MISTAKES.md, the Space Grotesk correction). A film has different needs from a web page and this is where they live.\nTHREE CHANGES, EACH FOR A REASON A STILL FRAME CAN SHOW.\n1. FACES: Geist and Geist Mono, a matched pair. A film about a scene file alternates statements and code every other beat, and two unrelated families make that alternation read as two design systems. Geist also holds up at 220px, which Anybody's default width does not.\n2. SURFACES GAIN TONE: bg #f4f6fa against surface #ffffff. On the site both are white and a card is separated by a border. In a film a border is a hairline nobody sees at 30fps, so separation has to come from depth, and depth needs two different tones to exist between. It is also why a glass shine was invisible in this film: a white highlight on a white plate has nothing to catch.\n3. A MOVING BACKDROP BY DEFAULT: the site is a flat white page and correctly so; a flat white FILM is a slideshow, and `direction-floor` says so as `no-bg-motion`.",
+  "motion": {
+    "easing": "easeOutExpo",
+    "bounce": 0.08,
+    "settle": 0.5,
+    "enter": 36,
+    "durationScale": 0.88,
+    "stagger": 0.045,
+    "exitRatio": 0.4,
+    "_exitRatio": "the fastest of the seven: this engine is about determinism and speed, and its own theme already runs durationScale 0.88. Asymmetric timing: an entrance is an introduction, an exit is over (engine-doctrine/CRAFT/MOTION-STANDARDS.md)."
+  },
+  "look": {
+    "backdrop": [
+      "paper",
+      "ink",
+      "dotmatrix",
+      "deep",
+      "accent"
+    ],
+    "scale": {
+      "hook": 96,
+      "headline": 66,
+      "body": 38,
+      "caption": 24
+    },
+    "layout": {
+      "anchor": "left",
+      "margin": 160
+    },
+    "marks": {
+      "logo": "site/public/assets/favicon.svg",
+      "endCardSize": 160,
+      "headlineSize": 108
+    },
+    "cuts": {
+      "default": "fade",
+      "accent": "cinematicZoom"
+    },
+    "field": {
+      "grain": 0,
+      "vignette": 0
+    },
+    "bgDefault": {
+      "preset": "plain"
+    },
+    "bgPalette": {
+      "accent": "37,99,235",
+      "tint": "180,190,205",
+      "tint2": "205,214,226",
+      "dotLight": "150,163,182",
+      "paperBase": [
+        "#ffffff",
+        "#f6f8fb"
+      ],
+      "softBase": [
+        "#f8fafc",
+        "#eef2f8"
+      ],
+      "accentBase": [
+        "#eef3ff",
+        "#f8fafc"
+      ],
+      "inkBase": [
+        "#0f1620",
+        "#0a0f16"
+      ],
+      "border": "#e7eaf0",
+      "dark": [
+        "#0f1620",
+        "#0a0f16"
+      ],
+      "darkMesh": [
+        "#141d2a",
+        "#0a0f16"
+      ],
+      "deep": [
+        "#0f1620",
+        "#080c12"
+      ],
+      "light": [
+        "#ffffff",
+        "#f6f8fb"
+      ],
+      "ink": [
+        "#0f1620",
+        "#0a0f16"
+      ],
+      "paper": "#ffffff"
+    },
+    "surface": "cinematic"
+  },
+  "tokens": {
+    "color": {
+      "bg": {
+        "$type": "color",
+        "$value": "#f4f6fa"
+      },
+      "bg2": {
+        "$type": "color",
+        "$value": "#eef2f8"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "surface2": {
+        "$type": "color",
+        "$value": "#f7f9fc"
+      },
+      "line": {
+        "$type": "color",
+        "$value": "#e3e8f0"
+      },
+      "lineStrong": {
+        "$type": "color",
+        "$value": "#ced6e2"
+      },
+      "text": {
+        "$type": "color",
+        "$value": "#0f1620"
+      },
+      "text2": {
+        "$type": "color",
+        "$value": "#454f5e"
+      },
+      "dim": {
+        "$type": "color",
+        "$value": "#697182"
+      },
+      "accent": {
+        "$type": "color",
+        "$value": "#2563eb"
+      },
+      "accentDim": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.10)"
+      },
+      "accentGlow": {
+        "$type": "color",
+        "$value": "rgba(37,99,235,0.30)"
+      },
+      "up": {
+        "$type": "color",
+        "$value": "#2f7d55"
+      },
+      "down": {
+        "$type": "color",
+        "$value": "#a3282d"
+      },
+      "ink": {
+        "$type": "color",
+        "$value": "#0f1620"
+      }
+    },
+    "font": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "serif": {
+        "$type": "fontFamily",
+        "$value": "Geist"
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      },
+      "num": {
+        "$type": "fontFamily",
+        "$value": "Geist Mono"
+      }
+    },
+    "gradient": {
+      "stop0": {
+        "$type": "color",
+        "$value": "#ffffff"
+      },
+      "stop1": {
+        "$type": "color",
+        "$value": "#f8fafc"
+      },
+      "stop2": {
+        "$type": "color",
+        "$value": "#f1f4f9"
+      }
+    }
+  },
+  "roles": {
+    "ground": "{color.bg}",
+    "bg2": "{color.bg2}",
+    "surface": "{color.surface}",
+    "surface2": "{color.surface2}",
+    "line": "{color.line}",
+    "lineStrong": "{color.lineStrong}",
+    "text": "{color.text}",
+    "text2": "{color.text2}",
+    "dim": "{color.dim}",
+    "accent": "{color.accent}",
+    "accentDim": "{color.accentDim}",
+    "accentGlow": "{color.accentGlow}",
+    "up": "{color.up}",
+    "down": "{color.down}",
+    "ink": "{color.ink}",
+    "font.sans": "{font.sans}",
+    "font.serif": "{font.serif}",
+    "font.mono": "{font.mono}",
+    "font.num": "{font.num}",
+    "gradient": [
+      "{gradient.stop0}",
+      "{gradient.stop1}",
+      "{gradient.stop2}"
+    ]
+  }
+}

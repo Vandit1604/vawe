@@ -1,0 +1,700 @@
+// core/produce.js, PRODUCE THE BASELINE. THE RULE: the engine may FILL a value the author left blank
+// (and must log what it filled), but it may NEVER ADD STRUCTURE the author did not write: no invented
+// cut, no boundary, no mode switch, no motion on a layer that named none. A film's beats, its camera,
+// its wind-ups are creative decisions, and a decision this file guesses at is a decision the author
+// never made and cannot find by reading their own JSON.
+//
+// This used to inject a cut list, turn beat-unit transitions on as an opt-in mode, and add a wind-up to
+// entrances the author never asked for (engine-doctrine/MISTAKES.md #157, "force rich-by-default at
+// the engine"). That additive-baseline posture is retired: a film with no boundary now renders with no
+// boundary, and an entrance the author wrote plays exactly as written. Beat-unit transitions are no
+// longer a mode either: every beat a film's cuts create is always its own unit.
+// `produced: false` used to opt a scene out of that injection; there is nothing left to opt out of, so
+// the field is gone from the schema, every tracked film, and prop-probe's fixtures.
+//
+// NO AUTO CAMERA (unchanged, still true): this pass never invents a cameraMove. `bakeCameraMove` below
+// only resolves the sugar the author DID write (`data.cameraMove`) into real keyframes; an absent one
+// stays absent.
+//
+// THE BACKGROUND ITSELF IS STILL DECIDED BY THE THEME, NEVER GUESSED HERE. A bare scene with no `bg`
+// at all gets the SAME opt-in sugar an author already has one line away: `bg:[{use:"theme"}]`
+// (core/backgrounds/theme-rotation.js, films/scene/scene.js), the brand's own authored, ALREADY-ANIMATED
+// backdrop (owner rule: backgrounds move), never a flat fill this pass would have to invent. This is a
+// BLANK-FILLER, not structure: every author already reaches for it, one line away. See applyBgDefault
+// below, called before validation so the required check never fires on a defaulted scene, and logged so
+// an author can find the fill by reading the render log, not just the JSON.
+//
+// Determinism: it only mutates the scene DATA once, before the first frame, renderFrame(n) stays pure.
+// Applies to the `scene` module only. Pure JS → runs in the browser AND in node gates, so the gates
+// evaluate the SAME scene the renderer does (core/engine/pipeline.js).
+
+import { buildCameraMove, followCamera } from '../camera-moves/index.js';
+import { resolveCameraTarget } from '../camera-moves/resolve-target.js';
+import { span, hold } from '../camera-moves/units.js';
+import { resolveCameraMove } from '../registry/vocab.js';
+import { nearMisses } from '../registry/registry.js';
+import { sceneDims } from '../layout/safe.js';
+import { depthZ } from '../fx/plane.js';
+// Light-versus-dark is ONE question with ONE answer (core/motion.js isLightBg), in linear light.
+// This file used to weight the gamma-encoded channels against 140/255, which agrees with the correct
+// maths on every neutral and disagrees on 5.8% of the sRGB cube, all of it saturated.
+
+// resolveTextSize(value, scale, where) → a number. `size: "headline"` names a ROLE in `look.scale`
+// (hook/headline/body/caption, core/registry/theme-contract.js LOOK_SCALE_KEYS) rather than a raw px
+// count the author has to look up. Copies the refusal shape `resolveJunction`
+// (core/timeline/junctions.js) already uses for "cut@1": an unknown name throws and names every role
+// the theme actually defines, instead of silently landing on the hardcoded 96 the five `size ?? 96`
+// sites in core/layers/text.js used to fall back to (a mistyped "headine" drew body-sized and no error
+// said why). No new `role` field: the string already sitting in `size` IS the role.
+export function resolveTextSize(value, scale, where = 'size') {
+  if (value == null || typeof value === 'number') return value;
+  if (typeof value !== 'string' || !scale || typeof scale[value] !== 'number') {
+    const known = scale ? Object.keys(scale).filter((k) => typeof scale[k] === 'number') : [];
+    throw new Error(`${where}: "${value}" is not a size role this theme's look.scale defines. Known `
+      + `roles: ${known.length ? known.join(', ') : 'none (this theme carries no look.scale)'}.`);
+  }
+  return scale[value];
+}
+
+// bakeTextSizeRoles(data, look): lower every layer's `size: "<role>"` to the theme's real px number.
+// Walks the WHOLE tree including group children: a role written inside a group is still a role.
+//
+// CRITICAL ORDERING, and it is why this is a separate exported bake rather than a line inside
+// produceBaseline: resolveCoords (core/engine/boot.js) reads `L.size` DIRECTLY to estimate a text
+// layer's height for a bottom pin ("hEst"), and produceBaseline itself runs AFTER resolveCoords
+// (boot.js calls resolveCoords then produceBaseline, in that order). A string size reaching that
+// arithmetic becomes NaN with no error. boot.js calls this one line earlier, between resolving `look`
+// and calling resolveCoords, the one gap the existing ordering leaves for it.
+// AUTO_ROLE_ORDER: a text/count layer that names NO size at all (not even a role string) used to fall
+// through to text.js's TEXT_SIZE_DEFAULT (96px, a debug-frame size on a 1920 canvas: MISTAKES, agent-
+// authored films kept shipping small type on empty grounds). Rather than a second fixed number, it gets
+// the theme's own role scale, positionally: the first text/count layer encountered reads as the film's
+// hook, the second as its headline/subline, anything after as body. Order, not a new field, because a
+// hurried scene already implies the roles by which layer comes first.
+const AUTO_ROLE_ORDER = ['hook', 'headline', 'body', 'caption'];
+
+export function bakeTextSizeRoles(data, look) {
+  const scale = look && look.scale;
+  let autoIndex = 0;
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    const isTextish = L.type === 'text' || L.type === 'count';
+    if (typeof L.size === 'string') L.size = resolveTextSize(L.size, scale, `layer "${L.id || L.type || 'text'}" size`);
+    else if (L.size == null && isTextish && scale) {
+      const role = AUTO_ROLE_ORDER[Math.min(autoIndex, AUTO_ROLE_ORDER.length - 1)];
+      if (typeof scale[role] === 'number') {
+        L.size = scale[role];
+        console.log(`filled: layer "${L.id || L.type}" named no size, positionally reads as "${role}" (${L.size}px)`);
+      }
+    }
+    if (isTextish) autoIndex++;
+    walk(L.children);
+  } };
+  walk(data && data.layers);
+  return data;
+}
+
+// applyBgDefault(data): a scene that names NO `bg` at all (never authored the key, or authored an
+// empty array) gets the theme's own backdrop, `bg:[{use:"theme"}]`, the SAME opt-in sugar an author
+// already reaches for one line away. Called from boot.js before schema validation, so the schema's
+// own `bg.required` check (films/scene/schema.json) never has to see the gap. AN AUTHORED, non-empty
+// `bg` is left completely untouched: this only fills the hole a hurried scene left, never overrides
+// a real decision.
+export function applyBgDefault(data) {
+  if (!data || typeof data !== 'object') return data;
+  if (data.module && data.module !== 'scene') return data;
+  if (!Array.isArray(data.bg) || data.bg.length === 0) {
+    data.bg = [{ use: 'theme' }];
+    console.log('filled: no `bg` declared, filled with the theme\'s own animated backdrop (bg:[{use:"theme"}])');
+  }
+  return data;
+}
+
+// produceBaseline(data, frame): the fill-only pass. `theme`/`look` no longer read here (the injections
+// that used them are gone); kept as the third/fourth positional params so core/engine/pipeline.js and
+// callers elsewhere do not need a second call shape.
+export function produceBaseline(data, _theme, frame, _look) {
+  if (!data || typeof data !== 'object') return data;
+  if (data.module && data.module !== 'scene') return data;   // scene module only
+  bakeCameraMove(data, frame);
+  return data;
+}
+
+// THE ONE FUNNEL. `cameraMove` is sugar; nothing at render time reads it (films/scene/scene.js reads
+// `data.camera`). It used to be resolved only by harness/author/expand-blocks.mjs, at AUTHOR time, so
+// a camera move written and never expanded was written and never once read: a static scene rendered
+// identically at frame 2 and frame 170. Resolving it HERE, on the one path every render goes through,
+// means the field cannot be written and ignored again.
+// `frame` is the ONE frame object (core/safe.js frameOf), and passing it is not optional politeness.
+// Without it this fell back to `sceneDims(data)`, which reads `data.aspect` from the scene and CANNOT
+// see the `?aspect=`/`--aspect` override that boot has already resolved. So rendering a 16:9 scene at
+// 9:16 centred every diveIn/travel/workspaceZoomOut against 1920x1080 on a 1080x1920 canvas: a silent
+// mis-centre of hundreds of pixels per axis, which is the exact failure core/camera-moves.js's
+// "it needs the frame it centres in" refusal exists to prevent. The frame is built at boot.js before
+// this is called; take it from there, and fall back only for callers that have no frame at all.
+// bindCursorCamera(spec, data): `{ move: "followCursor", cursor: "<layer id>" }` -> the same spec with
+// the named cursor layer's OWN path, clicks, base and start filled in.
+//
+// THE POINT OF THE WHOLE FEATURE IS HERE. A cursor layer already states where the pointer goes and when
+// it presses. Before this, an author who wanted the camera to go there too typed those coordinates a
+// second time into `diveIn` and kept the two copies in step by eye. Now the path is the single owner
+// and the camera is derived from it, so the two cannot disagree.
+//
+// IT RUNS INSIDE bakeCameraMove, on the ONE funnel every render goes through, for the reason that funnel
+// exists (engine-doctrine/MISTAKES.md #424): a binding resolved anywhere else is a field an author can write and
+// nothing can read. core/boot.js already throws on a `cameraMove` that survives to render, so a scene
+// reaching a frame with this unresolved is impossible rather than silent.
+//
+// EVERY REFUSAL NAMES THE LAYER AND SAYS WHAT TO DO INSTEAD, because "invalid" is worse than the silence
+// it replaces. The one it does not raise itself is the scene that also declares its own `camera`:
+// bakeCameraMove refuses that for every move at once, three lines below.
+function findCursorLayer(data, cursorId) {
+  const cursors = [];
+  let hit = null;
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.type === 'cursor') cursors.push(L);
+    if (!hit && L.id === cursorId) hit = L;
+    walk(L.children); walk(L.layers);
+  } };
+  walk(data.layers);
+  const menu = cursors.length ? cursors.map((L) => JSON.stringify(L.id ?? '(no id)')).join(', ') : 'none';
+  if (!hit)
+    throw new Error(`cameraMove "followCursor" names a layer "${cursorId}" that this scene does not have.`
+      + ` Its cursor layers are: ${menu}. Give the pointer an \`id\` and name that one.`);
+  if (hit.type !== 'cursor')
+    throw new Error(`cameraMove "followCursor" names "${cursorId}", which is a ${hit.type || 'text'} layer.`
+      + ` Only a \`cursor\` layer carries the \`path\` and \`clicks\` this move reads (this scene's cursors:`
+      + ` ${menu}). To push toward a fixed point on any other layer, use \`diveIn\` with its tx/ty.`);
+  return hit;
+}
+
+function validateCursorMoveSpec(spec, hit) {
+  if (!Array.isArray(hit.path) || !hit.path.length)
+    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`path\`, so`
+      + ' there is nowhere to follow. Give the pointer `"path": [{t,x,y}, ...]`, or drop the sugar and'
+      + ' hand-key `diveIn` at the point you mean.');
+  if (!Array.isArray(hit.clicks) || !hit.clicks.length)
+    throw new Error(`cameraMove "followCursor" follows cursor "${spec.cursor}", which declares no \`clicks\`.`
+      + ' The move IS the arrival at a press, so with none there is no moment to arrive at. Add'
+      + ' `"clicks": [t]`, or use `travel`/`panFollow` to ride the pointer without one.');
+  if (spec.start != null)
+    throw new Error(`cameraMove "followCursor" takes its "start" from cursor "${spec.cursor}" (${hit.start ?? 0}s),`
+      + ' because the click times are on that layer\'s own clock. A second start here would slide the'
+      + ' camera off the presses it was derived from. Move the cursor layer instead.');
+}
+
+// The base the path is measured from. core/layers/cursor.js anchors a pathed pointer at (0,0) when the
+// author gives it no x/y. A RELATIVE COORDINATE IS REFUSED AND NOT GUESSED: this bake runs before
+// resolveCoords, so "center" or "40%" is still a string here and would aim the camera at NaN.
+function resolveCursorBase(spec, hit) {
+  const base = [hit.x ?? 0, hit.y ?? 0];
+  for (const [i, k] of [[0, 'x'], [1, 'y']]) {
+    if (!Number.isFinite(base[i]))
+      throw new Error(`cameraMove "followCursor" reads the base position of cursor "${spec.cursor}", and its`
+        + ` "${k}" is ${JSON.stringify(base[i])}. The camera bakes before relative coordinates resolve, so a`
+        + ' cursor it follows states its base in absolute stage px, or omits x/y entirely (which anchors the'
+        + ' path at 0,0, the same default the pointer itself uses).');
+  }
+  return base;
+}
+
+function bindCursorCamera(spec, data) {
+  if (!spec || typeof spec !== 'object') return spec;
+  const move = spec.move ? resolveCameraMove(spec.move) : null;
+  if (move !== 'followCursor') {
+    if (spec.cursor != null)
+      throw new Error(`cameraMove "${spec.move}" carries a "cursor" (${JSON.stringify(spec.cursor)}), and only`
+        + ' "followCursor" derives its keys from a pointer. Every other move would drop the field and fly'
+        + ' somewhere nobody authored. Use `"move": "followCursor"`, or take the cursor off this spec.');
+    return spec;
+  }
+  if (spec.cursor == null)
+    throw new Error('cameraMove "followCursor" needs `"cursor": "<layer id>"`, the id of the cursor layer'
+      + ' whose path the camera follows. The move exists so the pointer stays the ONLY place that path is'
+      + ' written, and without the id there is nothing to derive from.');
+  const hit = findCursorLayer(data, spec.cursor);
+  validateCursorMoveSpec(spec, hit);
+  const base = resolveCursorBase(spec, hit);
+  const { cursor: _named, ...rest } = spec;
+  return { ...rest, path: hit.path, clicks: hit.clicks, base, start: hit.start ?? 0 };
+}
+
+// bindFollowCamera(spec, data): `{ move: "follow", id: "<layer>", margin, to }` -> the validated
+// descriptor stored on `data.cameraFollow`. Two refusals live here rather than in follow.js itself,
+// because both need the FULL layer tree, which a pure (params) generator never sees:
+//
+//   UNKNOWN ID, by name, with near-miss hints, the same shape validate.mjs already gives a bad
+//   `panWith` (validate.mjs:83-89): list every id the scene actually has and, where one is close,
+//   name it, instead of a bare "no such layer".
+//
+//   THE CHAIN. `follow` (core/tracks/follow.js) pins a LAYER to another's box resolved BEFORE any
+//   track runs, so a layer that itself carries `follow` reports its UNPINNED position; that file
+//   refuses being asked to chain through one for exactly that reason. The camera reads boxes through
+//   the identical accessor (`scene.boxOf`), so pointing it at a layer that is itself pinned would read
+//   that same stale, unpinned box in silence. Refused here rather than let it render a technically
+//   legal but quietly wrong shot.
+function bindFollowCamera(spec, data) {
+  const { move: _m, ...params } = spec;
+  const ids = [];
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (typeof L.id === 'string') ids.push(L.id);
+    walk(L.children);
+  } };
+  walk(data.layers);
+  if (!ids.includes(params.id)) {
+    const near = nearMisses(String(params.id), ids);
+    throw new Error(`cameraMove "followLayer": no layer with id ${JSON.stringify(params.id)}.`
+      + `${near.length ? ` Did you mean ${near.map((n) => `"${n}"`).join(', ')}?` : ''} `
+      + `Known ids: ${ids.length ? ids.join(', ') : '(this scene has none)'}.`);
+  }
+  const target = (() => { let hit = null; const find = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.id === params.id) { hit = L; return; }
+    find(L.children);
+  } }; find(data.layers); return hit; })();
+  if (target && target.follow)
+    throw new Error(`cameraMove "followLayer": "${params.id}" is itself following "${target.follow.id}". `
+      + `A box is resolved before any track runs, so "${params.id}" would report its UNPINNED `
+      + `position and the camera would track a place nothing is on screen. Point the camera at `
+      + `"${target.follow.id}" directly, or give "${params.id}" the motion instead of a pin.`);
+  return followCamera(params);
+}
+
+// findLayerById(layers, id): the one small tree-walk every "resolve a target by id" caller in this file
+// already does its own copy of (bindFollowCamera above, bindCursorCamera's `hit` walk). Pulled out once
+// here for the newest caller, resolveElementTarget, so a fourth copy does not join the first three.
+//
+// A `layout: 'free'` group's own x/y is the group's stage position, and its children's x/y are the
+// child's own offset INSIDE the group (core/layers/util.js addGroupChild), never added back. Every
+// caller here reads `.x`/`.y` off the returned layer as if it were stage space, which was true for a
+// top-level layer and silently wrong for a nested one: the camera would frame the child's offset from
+// (0,0) instead of the child's real place on stage. Accumulated here, in the one walk, rather than a
+// second lookup: dx/dy sum every ancestor free-group's own x/y on the way down, and the returned layer
+// carries the absolute x/y a caller already expects. Flex/grid children have no meaningful x/y to begin
+// with (they flow), so this only ever changes the answer for the `free` case it fixes.
+function findLayerById(layers, id, dx = 0, dy = 0) {
+  for (const L of layers || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (L.id === id) return (dx || dy) ? { ...L, x: (L.x || 0) + dx, y: (L.y || 0) + dy } : L;
+    const isFreeGroup = L.type === 'group' && L.layout === 'free';
+    const hit = findLayerById(L.children, id, isFreeGroup ? dx + (L.x || 0) : dx, isFreeGroup ? dy + (L.y || 0) : dy);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// A layer's DECLARED size, before any render exists: `w`/`h`, or `size` for the layers that only take
+// one number (a cursor dot, a progress ring). This is deliberately the SAME tier boxOf's own comment
+// (quality/gates/scene-timing.mjs) calls "explicit"/"size", not a re-derivation of it: core/ cannot
+// import quality/gates (that would point the dependency the wrong way, engine depending on its own
+// gate), so the handful of lines are read here directly rather than invented differently.
+function declaredLayerSize(L) {
+  if (Number.isFinite(L.w) && Number.isFinite(L.h)) return { w: L.w, h: L.h };
+  if (Number.isFinite(L.size)) return { w: L.size, h: L.size };
+  return null;
+}
+
+// resolveElementTarget(data, sel, who): `target: "#id"` -> { tx, ty, w, h }, the box a diveIn or a
+// travel station centres on instead of a hand-typed tx/ty. Resolved from the layer's own AUTHORED
+// geometry (no live DOM exists at bake time, see the module header), so it needs a numeric x/y and a
+// declared w/h/size; anything a track only produces at render (`becomes`, a `[data-part]` child of a
+// component) is out of reach here and refused by name rather than guessed.
+function resolveElementTarget(data, sel, who) {
+  const m = /^#([\w-]+)$/.exec(String(sel ?? ''));
+  if (!m) {
+    const dataPart = '[data-part="..."]';
+    throw new Error(`cameraMove ${who}: "target" must be "#<layer id>"; got ${JSON.stringify(sel)}. `
+      + `A ${dataPart} selector needs a live render to measure and cannot be resolved before it.`);
+  }
+  const id = m[1];
+  const L = findLayerById(data.layers, id);
+  if (!L) {
+    const ids = []; (function walk(ls) { for (const x of ls || []) { if (x?.id) ids.push(x.id); walk(x.children); } })(data.layers);
+    throw new Error(`cameraMove ${who}: no layer with id ${JSON.stringify(id)}. Known ids: ${ids.join(', ') || '(this scene has none)'}.`);
+  }
+  const size = declaredLayerSize(L);
+  if (!size)
+    throw new Error(`cameraMove ${who}: target "#${id}" (a ${L.type || 'text'} layer) declares no numeric `
+      + `w/h or size, so its box cannot be measured before render. Give it explicit "w"/"h" (or "size"), `
+      + `or hand-key tx/ty/targetW/targetH yourself.`);
+  if (!Number.isFinite(L.x) || !Number.isFinite(L.y))
+    throw new Error(`cameraMove ${who}: target "#${id}" has non-numeric x/y (${JSON.stringify({ x: L.x, y: L.y })}). `
+      + `Resolve its position to plain numbers before naming it as a camera target.`);
+  return { id, w: size.w, h: size.h, cx: L.x + size.w / 2, cy: L.y + size.h / 2 };
+}
+
+// resolveCaretLayer(data, sel): `caret: "#id"` -> the typing text layer it names, checked the same way
+// resolveElementTarget checks a plain target (numeric x/y required), plus the one thing only a typing
+// station needs: a `typing` prop, since there is no reveal to follow without one.
+function resolveCaretLayer(data, sel) {
+  const m = /^#([\w-]+)$/.exec(String(sel ?? ''));
+  if (!m) throw new Error(`travel station "caret" must be "#<layer id>"; got ${JSON.stringify(sel)}.`);
+  const id = m[1];
+  const L = findLayerById(data.layers, id);
+  if (!L) {
+    const ids = []; (function walk(ls) { for (const x of ls || []) { if (x?.id) ids.push(x.id); walk(x.children); } })(data.layers);
+    throw new Error(`travel station "caret": no layer with id ${JSON.stringify(id)}. Known ids: ${ids.join(', ') || '(this scene has none)'}.`);
+  }
+  if (!L.typing)
+    throw new Error(`travel station "caret": target "#${id}" (a ${L.type || 'text'} layer) has no `
+      + `"typing" prop, so there is no typed reveal for the camera to follow. Give it "typing": true (or a cps number).`);
+  if (!Number.isFinite(L.x) || !Number.isFinite(L.y))
+    throw new Error(`travel station "caret": target "#${id}" has non-numeric x/y (${JSON.stringify({ x: L.x, y: L.y })}).`);
+  return { id, L };
+}
+
+// resolveCaretStations(data, stations, start, dims): CAMERA FOLLOWS TYPING, the moving twin of
+// resolveElementTarget's still box. A station `{caret: "#id"}` names a `text` layer with `typing` and
+// expands to TWO real stations: arrive pushed in as typing begins, then pan to the caret's end as
+// typing finishes. Timing comes from the layer's own start/typing(cps)/text length, never authored, so
+// retiming the text retimes the camera with it (the owner's complaint: hand-keyed tx/ty went stale the
+// moment the line was reworded). One `t` accumulator, kept in the same shape travel() itself advances
+// (span/hold from camera-moves/units.js), so a caret station's arrival lands on the real clock instead
+// of a second, drifting notion of "when we get there".
+// caretFramePose({x, lineW, cxFull, cxEnd, s, canvasW}): the two tx values a caret pair frames on, at
+// a shared scale `s`. FRAME_MARGIN is the fraction of the zoomed view kept clear at each edge, so a
+// character never sits flush against the crop; `viewW` is that view's width in WORLD px (screen /s).
+// Station 1 puts the line's START just inside the LEFT margin (room for the caret to travel right).
+// Station 2 CENTRES the whole line when it fits the view (chasing the caret here would only crop the
+// head for no reason, engine-doctrine/MISTAKES.md #618 fix-up); only a line too wide to show whole is worth
+// cropping the head of, and even then the caret's end is clamped inside the right margin, not flush.
+function caretFramePose({ x, lineW, cxFull, cxEnd, s, canvasW }) {
+  const FRAME_MARGIN = 0.08;
+  const viewW = canvasW / s;
+  const halfInset = (0.5 - FRAME_MARGIN) * viewW;
+  const fits = lineW <= viewW * (1 - 2 * FRAME_MARGIN);
+  return { txStart: x + halfInset, txEnd: fits ? cxFull : cxEnd - halfInset };
+}
+
+function resolveCaretStations(data, stations, start, dims) {
+  if (!Array.isArray(stations) || !stations.some((st) => st && st.caret != null)) return stations;
+  const [W] = dims;
+  const out = [];
+  let t = start;
+  stations.forEach((st, i) => {
+    if (st && st.caret != null) {
+      if (i === 0)
+        throw new Error('travel station 0 "caret" has no flight into it to time against; name a real '
+          + 'tx/ty/target station first, or start the film already pushed in.');
+      const { id, L } = resolveCaretLayer(data, st.caret);
+      const size = Number.isFinite(L.size) ? L.size : 96; // mirrors TEXT_SIZE_DEFAULT, core/layers/text.js
+      const full = L.text || '';
+      // ponytail: tags stripped by regex, not a real HTML text-content walk (no DOM at bake time); fine
+      // for a plain or single-accent typed line, wrong for nested markup. Upgrade if that ever ships.
+      const visLen = full.replace(/<[^>]*>/g, '').length;
+      const cps = L.typing === true ? 24 : L.typing;
+      if (!(cps > 0)) throw new Error(`travel station ${i} "caret": text layer "#${id}" has no positive "typing" cps.`);
+      // ponytail: a fixed advance-width ratio per font family, not a measured glyph width (no live DOM
+      // at bake time). Give the layer an explicit "w" for an exact box when this estimate is off.
+      const advance = L.font === 'mono' ? 0.6 : 0.55;
+      const lineW = Number.isFinite(L.w) ? L.w : visLen * size * advance;
+      const cy = L.y + size / 2, cxFull = L.x + lineW / 2, cxEnd = L.x + lineW;
+      const typingDur = visLen / cps;
+      const desiredS = (0.6 * W) / lineW; // default push: the line fills ~60% of frame width
+      const { s } = resolveCameraTarget({ w: lineW, h: size * 1.3, cx: cxFull, cy },
+        { margin: st.margin, to: st.s ?? desiredS, canvasW: dims[0], canvasH: dims[1] });
+      const { txStart, txEnd } = caretFramePose({ x: L.x, lineW, cxFull, cxEnd, s, canvasW: dims[0] });
+      const arriveDur = (L.start ?? 0) - t;
+      if (!(arriveDur > 0))
+        throw new Error(`travel station ${i} "caret": text layer "#${id}" starts typing at `
+          + `${L.start ?? 0}s, at or before the camera can arrive (already at ${t.toFixed(2)}s). `
+          + `Give the preceding station less dur/dwell, or start "${id}" later.`);
+      out.push({ tx: txStart, ty: cy, s, dur: arriveDur });
+      t += arriveDur;
+      const panStation = { tx: txEnd, ty: cy, s, dur: typingDur };
+      out.push(panStation);
+      t += typingDur;
+      if (st.dwell != null) { t += hold('travel', `station ${i} "dwell"`, st.dwell); panStation.dwell = st.dwell; }
+      return;
+    }
+    if (i > 0) t += span('travel', `station ${i} "dur"`, st?.dur ?? 0.8);
+    if (st?.dwell != null) t += hold('travel', `station ${i} "dwell"`, st.dwell);
+    out.push(st);
+  });
+  return out;
+}
+
+// resolveTargetSpecs(data, specs, dims): the CAMERA BY ELEMENT feature. A diveIn's own `target`, or any
+// travel station's, resolves against the layer tree ONCE, here, before buildCameraMove ever sees the
+// spec: tx/ty/(to) are filled in from the measured box and `target`/`margin` are gone by the time
+// core/camera-moves/dive-in.js or travel.js run, so neither module needs to know this sugar exists.
+// Printed once per resolution, at the move's (or station's arrival) own clock, so the number stays
+// inspectable in the same output an author already reads (author-check / expand-blocks).
+function resolveTargetSpecs(data, specs, dims) {
+  const [W, H] = dims;
+  for (const spec of specs) {
+    if (!spec || typeof spec !== 'object') continue;
+    if (spec.target != null) {
+      // Raw tx/ty WIN when both are given (COMMON RULES: "raw tx/ty/s still work and win"): the target
+      // is then just dropped rather than resolved, silently, because a written tx/ty is the more
+      // specific instruction. Either way `target`/`margin` must not survive to buildCameraMove, which
+      // validates every diveIn/travel param against the generator's own signature and neither is one.
+      if (spec.tx == null && spec.ty == null) {
+        const box = resolveElementTarget(data, spec.target, `"${spec.move}"`);
+        const { tx, ty, s } = resolveCameraTarget(box, { margin: spec.margin, to: spec.to, canvasW: W, canvasH: H });
+        spec.tx = tx; spec.ty = ty; spec.to = s; spec.targetW = box.w; spec.targetH = box.h;
+        const at = (spec.start ?? 0) + (spec.dur ?? 1.6);
+        console.log(`resolved camera target #${box.id} at ${at}s -> tx ${tx.toFixed(1)} ty ${ty.toFixed(1)} s ${s.toFixed(3)}`);
+      }
+      delete spec.target; delete spec.margin;
+    }
+    if (Array.isArray(spec.stations)) {
+      spec.stations = resolveCaretStations(data, spec.stations, spec.start ?? 0, dims);
+      let t = spec.start ?? 0;
+      spec.stations.forEach((st, i) => {
+        if (i > 0) t += st?.dur ?? 0.8;
+        if (!st || st.target == null) return;
+        if (st.tx == null && st.ty == null) {
+          const box = resolveElementTarget(data, st.target, 'travel station');
+          const { tx, ty, s } = resolveCameraTarget(box, { margin: st.margin, to: st.s, canvasW: W, canvasH: H });
+          st.tx = tx; st.ty = ty; if (st.s == null) st.s = s;
+          console.log(`resolved camera target #${box.id} at ${t}s -> tx ${tx.toFixed(1)} ty ${ty.toFixed(1)} s ${s.toFixed(3)}`);
+        }
+        delete st.target; delete st.margin;
+      });
+    }
+  }
+}
+
+// `follow` cannot become a keyframe array (the target's live box does not exist until resolveBoxes(t)
+// runs, per frame), so it resolves onto its own field, `data.cameraFollow`, rather than one leg among
+// others. Returns true when this spec set was a followLayer move (data already mutated / returned).
+function bakeFollowLayerCamera(data, specs) {
+  if (!specs.some((s) => s && resolveCameraMove(s.move) === 'followLayer')) return false;
+  if (specs.length > 1)
+    throw new Error('cameraMove "followLayer" tracks a live layer box at RENDER time, not at build time '
+      + 'like every other move, so it is not a keyframe array a second leg can be spliced into. '
+      + 'Give the scene one `cameraMove: {move:"followLayer", id:"<layer>"}` with nothing else in the list.');
+  if (data.cameraFollow)
+    throw new Error('scene declares BOTH `cameraFollow` and `cameraMove: {move:"followLayer"}`, one would'
+      + ' silently overwrite the other. Keep one.');
+  data.cameraFollow = bindFollowCamera(specs[0], data);
+  delete data.cameraMove;
+  return true;
+}
+
+// A window is read off the spec's OWN built keyframes (min/max `t`), never assumed from `start`/`dur`
+// alone: not every move keys a flat span. `hold` emits ZERO keyframes on purpose and falls back to
+// the spec's own start/dur, the seconds assemble.mjs windowed it to.
+function cameraWindowsOf(built) {
+  return built.map(({ spec, kf }) => {
+    if (!kf.length) return { move: spec.move, from: spec.start ?? 0, to: (spec.start ?? 0) + (spec.dur ?? 0) };
+    const ts = kf.map((k) => k.t);
+    return { move: spec.move, from: Math.min(...ts), to: Math.max(...ts) };
+  });
+}
+
+// CROSS-SEAM CAMERA: a move naming the beats it spans (`beats: ["b1","b2"]`) is reported, never
+// blocked, when its baked window runs outside them: likely a stale declaration (a beat retimed, or
+// the move extended), but the render is not wrong because of it.
+function reportCrossSeamCamera(data, built, windows) {
+  if (!(Array.isArray(data.beats) && data.beats.length)) return;
+  const beatById = Object.fromEntries(data.beats.filter((b) => b && b.id).map((b) => [b.id, b]));
+  built.forEach(({ spec }, i) => {
+    if (!Array.isArray(spec.beats) || !spec.beats.length) return;
+    const named = spec.beats.map((id) => beatById[id]).filter(Boolean);
+    if (!named.length) return;
+    const spanFrom = Math.min(...named.map((b) => b.start ?? 0));
+    const spanTo = Math.max(...named.map((b) => (b.start ?? 0) + (b.duration ?? 0)));
+    const w = windows[i];
+    if (w.from < spanFrom - 1e-6 || w.to > spanTo + 1e-6) {
+      console.warn(`cameraMove "${w.move}" declares beats [${spec.beats.join(', ')}] `
+        + `(${spanFrom}s-${spanTo}s) but its resolved window is ${w.from}s-${w.to}s, which runs outside `
+        + `them. Add the beat it actually reaches to the \`beats\` list, or retime the move to fit.`);
+    }
+  });
+}
+
+// Strict overlap, not touch: two specs sharing an endpoint is ordinary editing grammar and must stay
+// legal. `cameraAt` concatenates every spec's keyframes and reads them assuming ascending time, so an
+// overlap does not blend, it corrupts the read.
+function checkNoCameraOverlap(windows) {
+  for (let i = 0; i < windows.length; i++) {
+    for (let j = i + 1; j < windows.length; j++) {
+      const a = windows[i], b = windows[j];
+      if (a.from < b.to && b.from < a.to) {
+        throw new Error(`cameraMove: "${a.move}" (${a.from}s-${a.to}s) and "${b.move}" (${b.from}s-${b.to}s) `
+          + `overlap. Two camera specs cannot race the same seconds, whichever mechanism wrote them (a `
+          + `hand-authored cameraMove, a beat's own camera:, a camera-kind recipe): the engine concatenates `
+          + `every spec's keyframes into one flat array and reads it assuming ascending time, so an overlap `
+          + `does not blend, it corrupts the read. Retime one, or combine them into a single continuous move.`);
+      }
+    }
+  }
+}
+
+export function bakeCameraMove(data, frame) {
+  if (!data || !data.cameraMove) return data;
+  const specs = Array.isArray(data.cameraMove) ? data.cameraMove : [data.cameraMove];
+  if (Array.isArray(data.camera) && data.camera.length)
+    throw new Error('scene declares BOTH `camera` keyframes and `cameraMove` sugar, one would silently'
+      + ' overwrite the other. Keep one: the sugar, or the keys it builds.');
+  if (bakeFollowLayerCamera(data, specs)) return data;
+
+  // sceneDims so a move that centres a point centres it in the REAL canvas. CAMERA BY ELEMENT resolves
+  // before anything else touches the spec, so bindCursorCamera and buildCameraMove below still see
+  // only the coordinates they always have.
+  const dims = (frame && frame.W > 0 && frame.H > 0) ? [frame.W, frame.H] : sceneDims(data);
+  resolveTargetSpecs(data, specs, dims);
+  // `beats` (cross-seam camera) is this funnel's own field, stripped before buildCameraMove sees the
+  // spec, the same way `target`/`cursor` are resolved and consumed above.
+  const built = specs.map((s) => { const { beats: _beats, ...rest } = s; return { spec: s, kf: buildCameraMove(bindCursorCamera(rest, data), dims) }; });
+
+  const windows = cameraWindowsOf(built);
+  reportCrossSeamCamera(data, built, windows);
+  checkNoCameraOverlap(windows);
+  // SORTED BY START, NOT TRUSTED IN ARRAY ORDER: `cameraAt` walks the flat array assuming it is
+  // already ascending in time, and a recipe's leg can be appended out of time order.
+  const order = built.map((_, i) => i).sort((i, j) => windows[i].from - windows[j].from);
+  data.camera = order.flatMap((i) => built[i].kf);
+  delete data.cameraMove;
+  return data;
+}
+
+// bakeCursorCarry(data): `carry: [{ from, to, id }]` on a `cursor` layer -> the real mechanism, a
+// `follow` written onto the DRAGGED layer, pinned to the cursor's own id for exactly the [from, to]
+// window. Same shape as bakeCameraMove above and the same reason: a cursor already knows the one thing
+// a drag needs (where the pointer is), so the dragged layer states WHEN it is grabbed and nothing else,
+// instead of an author hand-copying the pointer's path into a second layer's motion track and
+// re-copying it every time the drag is retimed.
+//
+// NOT A SECOND FOLLOWER: this reuses core/tracks/follow.js's own per-frame pin (`dx`/`dy` fixed at 0,
+// i.e. the dragged layer's centre sits exactly on the cursor's point), windowed by the `from`/`to` that
+// file's `follow` spec now accepts. `from`/`to` on `carry` are on the CURSOR's OWN clock (matching
+// `clicks`/`snapTo`, both keyed the same way on this layer), so they are shifted here by the cursor's
+// `start` before landing in `follow`, which reads the film's absolute clock.
+//
+// EVERY REFUSAL NAMES THE LAYER: an unknown target id, a target already pinned to something else, or a
+// carry entry missing a field is refused HERE, at boot, rather than rendering a drag that silently
+// grabs the wrong thing or nothing at all.
+export function bakeCursorCarry(data) {
+  const byId = new Map();
+  const cursors = [];
+  const walk = (ls) => { for (const L of ls || []) {
+    if (!L || typeof L !== 'object') continue;
+    if (typeof L.id === 'string') byId.set(L.id, L);
+    if (L.type === 'cursor' && L.carry) cursors.push(L);
+    walk(L.children); walk(L.layers);
+  } };
+  walk(data.layers);
+  for (const cur of cursors) {
+    if (!cur.id)
+      throw new Error('a `cursor` layer with `carry` needs its own `id`, the thing the dragged layer '
+        + 'pins to. Give the cursor an id and name it.');
+    if (!Array.isArray(cur.carry))
+      throw new Error(`cursor "${cur.id}" carry must be an array of {from, to, id}, `
+        + `got ${JSON.stringify(cur.carry)}.`);
+    const base = cur.start ?? 0;
+    for (const entry of cur.carry) {
+      if (!entry || typeof entry !== 'object' || typeof entry.id !== 'string'
+        || typeof entry.from !== 'number' || typeof entry.to !== 'number')
+        throw new Error(`cursor "${cur.id}" carry entry must be {from:<number>, to:<number>, `
+          + `id:"<layer>"}, got ${JSON.stringify(entry)}.`);
+      const target = byId.get(entry.id);
+      if (!target)
+        throw new Error(`cursor "${cur.id}" carry names layer "${entry.id}", which this scene does not `
+          + `have. Known ids: ${byId.size ? [...byId.keys()].join(', ') : '(this scene has none)'}.`);
+      if (target.follow)
+        throw new Error(`cursor "${cur.id}" carry names "${entry.id}", which already declares its own `
+          + '`follow`. A layer cannot be pinned to two things at once: drop one of them.');
+      target.follow = { id: cur.id, dx: 0, dy: 0, from: base + entry.from, to: base + entry.to };
+    }
+  }
+  return data;
+}
+
+// bakeDepth(data): `depth` sugar -> the real `plane` modifier, resolved against THIS film's lens.
+//
+// The same shape as bakeCameraMove above and for the same reason: a field written by an author and read
+// by nothing at render time is the failure this whole path exists to make impossible. Nothing downstream
+// knows the word `depth`; core/fx/plane.js reads `modifiers: [{ plane: { z } }]`, so the sugar either
+// becomes that here or core/boot.js throws.
+//
+// THE LENS IS THE CAMERA'S, so it is read here rather than guessed per layer. A name is a fraction of it
+// (core/fx/plane.js), which is what makes "back" mean the same distance under a 900px lens and a 1600px
+// one. `p` is keyable, so a film that ramps its lens has more than one; the FIRST key is used, because a
+// depth is a place a layer stands and not something that moves when the lens does, and the alternative
+// is a layer whose z changes mid-shot for a reason nobody wrote down.
+//
+// A GROUP CHILD IS REFUSED HERE, not left to the modifier. core/fx/plane.js already refuses one, with a
+// good message (a group is a flat parent, so the child would be projected by nothing: put the plane on
+// the GROUP). Lowering it and letting that fire would work, but the error would name `plane` at a layer
+// whose author wrote `depth`, and an error that names a word the author did not type is half an error.
+const LENS_DEFAULT = 1600;
+
+// bakeFocus: a camera keyframe may name its focus with a DEPTH NAME rather than a number, because an
+// author who placed a layer on `front` should be able to focus on `front` without looking up what that
+// resolved to. Resolved here, at boot, beside the depth bake that resolves the other half of the same
+// vocabulary: one place knows the lens, one place turns names into distances, and a name that survives
+// to render is impossible rather than silently ignored.
+export function bakeFocus(data) {
+  const cam = Array.isArray(data && data.camera) ? data.camera : null;
+  if (!cam) return data;
+  const lens = (cam.find((k) => k && typeof k.p === 'number')?.p) || LENS_DEFAULT;
+  for (const k of cam) {
+    if (!k || k.f == null || typeof k.f === 'number') continue;
+    k.f = depthZ(k.f, lens);   // an unknown name throws here, by name, with the menu
+  }
+  return data;
+}
+
+export function bakeDepth(data) {
+  const cam = Array.isArray(data && data.camera) ? data.camera : null;
+  const lens = (cam && cam.find((k) => k && typeof k.p === 'number')?.p) || LENS_DEFAULT;
+  const walk = (ls, inGroup) => {
+    for (const L of ls || []) {
+      if (!L || typeof L !== 'object') continue;
+      if (L.depth != null) {
+        if (inGroup) throw new Error(`a group child (${L.id ? `"${L.id}"` : `a ${L.type || 'text'}`}) sets `
+          + `\`depth\`. A group is its own flat parent, so a child standing behind it would be projected by `
+          + `nothing and drawn at exactly the size and place it already has. Put the \`depth\` on the GROUP: `
+          + `the whole composed card then stands at that distance and its children ride it.`);
+        const z = depthZ(L.depth, lens);
+        if (z === 0) throw new Error(`\`depth\` resolved to z 0, which is the picture plane every layer is `
+          + `already on. Drop the prop rather than declaring the distance you are already at.`);
+        // `hold: true` is what makes `depth` the multiplane vocabulary rather than a raw distance: the
+        // layer keeps the size it was laid out at and the depth shows up as a different RATE OF TRAVEL
+        // under the camera, which is the one arithmetic step every AE multiplane tool automates and the
+        // one we used to print in an error message. The raw primitive still does not hold: write
+        // `modifiers: [{ plane: { z } }]` for that.
+        (L.modifiers || (L.modifiers = [])).push({ plane: { z, hold: true } });
+        delete L.depth;
+      }
+      walk(L.children, true);
+      walk(L.layers, inGroup);
+    }
+  };
+  walk(data && data.layers, false);
+
+  // ONCE ANYTHING HAS DEPTH, `track` STOPS BEING THE ANSWER, and nothing used to say so. A depth puts
+  // the layer in a real 3D rig, where occlusion is decided by DISTANCE, so a layer standing toward the
+  // eye covers a layer at the picture plane no matter how high that layer's `track` is.
+  //
+  // It cost a real debugging session: a subject at z +180 with track 4 covered the payoff at track 6 for
+  // two full seconds. Every gate was green, the DOM reported the covered layer at opacity 1 with its
+  // text present, and it was invisible. Found by looking at a frame, which is the expensive way.
+  //
+  // A WARNING AND NOT A THROW, deliberately. Standing something in front of the frame is a legitimate
+  // composition and the engine cannot know whether the layer underneath was meant to be seen. What it
+  // can know is that the author wrote a `track` which is now being ignored, and that is worth saying out
+  // loud on the run that introduces it rather than after a render nobody can explain.
+  const top = (data && data.layers) || [];
+  const trackOf = (L, i) => (typeof L.track === 'number' ? L.track : i);
+  const near = top.map((L, i) => ({ L, i, z: (L.modifiers || []).find((m) => m && m.plane)?.plane?.z }))
+    .filter((r) => typeof r.z === 'number' && r.z > 0);
+  for (const n of near)
+    for (let i = 0; i < top.length; i++) {
+      const other = top[i];
+      if (other === n.L) continue;
+      const flat = !(other.modifiers || []).some((m) => m && m.plane);
+      if (flat && trackOf(other, i) > trackOf(n.L, n.i))
+        console.warn(`depth beats track: "${n.L.id || n.L.type || 'a layer'}" stands ${n.z}px toward the `
+          + `camera, so it is drawn IN FRONT of "${other.id || other.type || 'a layer'}" even though that `
+          + `layer's track (${trackOf(other, i)}) is higher (${trackOf(n.L, n.i)}). Once anything in the `
+          + `frame has depth, track orders only the layers sharing a plane. Give both the same depth, or `
+          + `drop it from the one in front.`);
+    }
+  return data;
+}
