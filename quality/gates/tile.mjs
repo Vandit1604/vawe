@@ -197,3 +197,11 @@ export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
   }
   return { ok: true, mp4 };
 }
+
+/** n evenly spaced sample times across a duration, each labelled with its time. */
+export function evenSamples(duration, n = 6) {
+  return Array.from({ length: n }, (_, i) => {
+    const t = (duration * (i + 0.5)) / n;
+    return { i, start: t, t, label: `@${t.toFixed(1)}s` };
+  });
+}

@@ -8,7 +8,7 @@
 // slice instead of the whole page. --final renders the way `make ship` does: full size, 60 fps, the
 // whole page from 0, blur up to 3, and the page's <audio> elements mixed in (harness/media/page-audio.mjs).
 // The canvas is the page's <meta name="aspect"> (else 16:9), overridden by --aspect; `all` renders every
-// aspect to its own file. Sizes come from core/layout/safe.js ASPECTS, halved for a draft.
+// aspect to its own file. Sizes come from core/layout/aspects.js ASPECTS, halved for a draft.
 //
 // The page is seeked, never played. Before any page script runs, core/engine/page-clock.js replaces Date,
 // performance.now, requestAnimationFrame, setTimeout/setInterval and Math.random with functions of the
@@ -44,7 +44,7 @@ import { spawnSync } from 'node:child_process';
 import { RENDER_ARGS } from '../lib/render-harness.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, installPageFrame } from '../../core/engine/page-seek.js';
-import { ASPECTS, sceneDims } from '../../core/layout/safe.js';
+import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
 import { openPreview } from './preview-server.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
@@ -275,12 +275,12 @@ function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
 }
 
 // The canvas a page renders at: --aspect, else the page's own <meta name="aspect">, else 16:9. Pixel
-// sizes come from core/layout/safe.js (long edge 1920 where the table says so), halved for a draft;
+// sizes come from core/layout/aspects.js (long edge 1920 where the table says so), halved for a draft;
 // explicit w/h win. Returns { aspect, width, height }.
 export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
   const name = aspect || readPageMeta(pagePath, 'aspect') || '16:9';
   if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) die(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
-  const [fw, fh] = sceneDims({}, name);
+  const [fw, fh] = aspectDims(name);
   const k = final ? 1 : 0.5;
   return { aspect: name, width: w || Math.round(fw * k), height: h || Math.round(fh * k) };
 }

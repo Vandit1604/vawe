@@ -25,3 +25,6 @@ export function ffmpegOrDie(args, out, what = 'ffmpeg') {
   if (out && !fs.existsSync(out)) throw new Error(`${what}: ffmpeg reported success but wrote no ${out}`);
   return r;
 }
+
+/** Make a string safe for ffmpeg's drawtext: a colon or quote ends the filter argument, so strip them. */
+export const drawtext = (s, max = 46) => String(s).replace(/[^\w @.,%·/+-]/g, ' ').slice(0, max);

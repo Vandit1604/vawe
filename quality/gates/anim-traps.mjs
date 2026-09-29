@@ -1,14 +1,7 @@
-// quality/gates/anim-traps.mjs: the seven traps a seeked CSS/Web Animation can fall into, none of
-// which throw and none of which a browser warns about. The first five are ported from the csskit
-// prototype's checker (scratchpad, /private/tmp/.../csskit/render.mjs) into the engine's own gate
-// shape: on a `module:scene` file it boots the REAL render page (films/scene/scene.html) so it reads
-// exactly the animations `seekAll(t)` will drive, never a synthetic re-parse of the JSON; on a bare
-// `.html` page (a recreation not yet wired into any scene) it loads that page directly instead.
-//
-// A bare HTML page (harness/media/render-page.mjs's own render target, a hand-written vawe.onFrame +
-// plain three.js page) hits a DIFFERENT five traps: a live clock instead of the t argument, unseeded
-// Math.random, a WebGLRenderer that can't be captured, a canvas nobody redraws. `<name>.html` on the
-// command line runs those instead of the six DOM traps above, off the page's own source text.
+// quality/gates/anim-traps.mjs: the traps a seeked CSS/Web Animation can fall into, none of which
+// throw and none of which a browser warns about. It loads the page (harness/media/preview-server.mjs),
+// reads the animations `seekAll(t)` will drive, and also greps the page source for live-clock, unseeded
+// Math.random and WebGL capture mistakes.
 //
 //   1. FILL COLLISION: two animations on one element write the same property with overlapping fill
 //      windows, so the later one's `backwards` fill covers the earlier one's held end state for all
@@ -28,24 +21,15 @@
 //      the WHOLE overlap regardless of either side's fill. A per-letter or per-word animation added
 //      after a timing-sheet row on the same property silently freezes or erases that row.
 //
-// SEVERITY: REPORTS, not BLOCKS, the same house rule paints-nothing and every other author-side gate
-// follows (engine-doctrine/TASTE.md, "One process, two severities"). `--strict` promotes a finding to a
-// failing exit code. Waiver (scene mode only): {"authoring":{"allow":["anim-traps"],"_why":{"anim-traps":"…"}}}.
+// SEVERITY: REPORTS, not BLOCKS. `--strict` promotes a finding to a failing exit code. Waiver: a page
+// declares it through pageAuthoring (harness/lib/motion-stamp.mjs), with a stated reason.
 //
-//   node quality/gates/anim-traps.mjs <scene.json> [--strict]
-//   node quality/gates/anim-traps.mjs <page.html> [--strict]  (a bare recreation page, no scene yet)
-//   node quality/gates/anim-traps.mjs                 (census: every films/scene/*.json)
-//   make check GATE=anim-traps [D=scene.json] [STRICT=1]
+//   node quality/gates/anim-traps.mjs <page.html> [--strict]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import puppeteer from 'puppeteer';
-import { sceneTiming } from './scene-timing.mjs';
-import { fillCollisionPairs, activeOverlapPairs, animatedProps, reachesBack } from '../../core/timeline/clips.js';
-import { population, SCENE_DIR } from '../../harness/lib/census.mjs';
-import { serveRepo, waitForEngine, bootPathFor } from '../../harness/lib/render-harness.mjs';
+import { fillCollisionPairs, activeOverlapPairs, animatedProps, reachesBack } from '../../core/timeline/anim-pairs.js';
 import { openPreview } from '../../harness/media/preview-server.mjs';
-import { loadScene } from '../../core/engine/expand.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../../harness/lib/waivers.mjs';
@@ -223,36 +207,6 @@ export async function runTrapChecker(page, durMs) {
   return page.evaluate((src, ms) => new Function('durMs', `${src}\nreturn checkTraps(durMs);`)(ms), TRAP_BUNDLE, durMs);
 }
 
-async function checkScene(browser, port, absFile) {
-  const relFile = path.relative(repoRoot, absFile);
-  let scene;
-  try { scene = JSON.parse(fs.readFileSync(absFile, 'utf8')); }
-  catch (e) { return { file: relFile, error: `not valid JSON: ${e.message}` }; }
-  if (scene.module !== 'scene') return { file: relFile, skip: 'not module:scene' };
-
-  const allow = new Set((scene.authoring && Array.isArray(scene.authoring.allow)) ? scene.authoring.allow : []);
-  const why = (scene.authoring && (scene.authoring._why || scene.authoring.why)) || {};
-  const waived = allow.has('anim-traps') && typeof why['anim-traps'] === 'string' && why['anim-traps'].trim().length >= 12;
-
-  const durMs = sceneTiming(scene).duration * 1000;
-  const raw = fs.readFileSync(absFile, 'utf8');
-  const bootRel = bootPathFor(repoRoot, raw, loadScene(structuredClone(scene)), relFile);
-  const page = await browser.newPage();
-  try {
-    await page.goto(`http://127.0.0.1:${port}/films/scene/scene.html?data=/${bootRel}&fps=30`, { waitUntil: 'load' });
-    const boot = await waitForEngine(page, { throwOnTimeout: false });
-    if (boot) return { file: relFile, error: `boot: ${boot}` };
-    const findings = await runTrapChecker(page, durMs);
-    return { file: relFile, findings, waived };
-  } finally { await page.close(); }
-}
-
-// A bare recreation page (films/recreations/<name>/page.html, no scene.json wrapping it yet) never has
-// a `module:scene` file to boot through scene.html, so checkScene's `skip: 'not module:scene'` silently
-// swallowed it: a real run lost 12 minutes to timing-sheet rows a later per-letter animation had frozen
-// out, and no gate ever said so because it never ran on the page at all. This loads the page directly
-// (openPreview, the same loader `--dom`/`--look`/`--layout` already use) instead of scene.html's boot,
-// so a page authored before it is wired into any film still gets every trap checked.
 async function checkPage(absFile) {
   const relFile = path.relative(repoRoot, absFile);
   const { page, url, close } = await openPreview(absFile, { width: 1920, height: 1080 });
@@ -292,37 +246,11 @@ function printResult(r) {
     : '\n  Waive a deliberate case with {"authoring":{"allow":["anim-traps"],"_why":{"anim-traps":"…"}}}.\n');
 }
 
-async function reportCensus(browser, port) {
-  const files = population('anim-traps', { filter: (fn) => !/intent|schema\.json$/.test(fn), quiet: true })
-    .names.map((fn) => `${SCENE_DIR}/${fn}`);
-  let scenesWithFindings = 0;
-  for (const sceneFile of files) {
-    const r = await checkScene(browser, port, path.join(repoRoot, sceneFile));
-    if (r.skip || r.error) { if (r.error) console.log(`  ✗ ${r.file}: ${r.error}`); continue; }
-    if (r.findings.length) { scenesWithFindings++; console.log(`  ${r.file}: ${r.findings.length} trap(s)${r.waived ? ' (waived)' : ''}`); reportFindings(r); }
-  }
-  console.log(`\n  anim-traps census · ${files.length} scenes checked · ${scenesWithFindings} with findings\n`);
-}
-
 async function runCli() {
-  if (file && /\.html?$/i.test(file)) {
-    const abs = path.resolve(file);
-    if (!fs.existsSync(abs)) { console.error(`✗ no such page: ${file}`); process.exit(2); }
-    printResult(await checkPage(abs));
-    f.emit();
-    process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
-  }
-  const { server, port } = await serveRepo();
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'] });
-  if (file) {
-    const abs = path.resolve(file);
-    if (!fs.existsSync(abs)) { console.error(`✗ no such scene: ${file}`); await browser.close(); server.close(); process.exit(2); }
-    printResult(await checkScene(browser, port, abs));
-  } else {
-    await reportCensus(browser, port);
-  }
-  await browser.close();
-  server.close();
+  if (!file || !/\.html?$/i.test(file)) { console.error('usage: node quality/gates/anim-traps.mjs <page.html> [--strict]'); process.exit(2); }
+  const abs = path.resolve(file);
+  if (!fs.existsSync(abs)) { console.error(`✗ no such page: ${file}`); process.exit(2); }
+  printResult(await checkPage(abs));
   f.emit();
   process.exit(f.records.some((r) => r.severity === 'error') ? 1 : 0);
 }
