@@ -1,0 +1,154 @@
+{
+ "generated": "2026-09-29",
+ "render": {
+  "fps": 60,
+  "w": 960,
+  "h": 540
+ },
+ "fixtures": [
+  "audio-click",
+  "layout-grid",
+  "move-approach",
+  "move-bezier",
+  "move-blur",
+  "move-inout-card",
+  "move-linear",
+  "move-overshoot",
+  "move-spring",
+  "text-blur",
+  "text-stagger",
+  "transitions"
+ ],
+ "measures": {
+  "attackMs": {
+   "n": 3,
+   "p50": 0,
+   "p90": 1,
+   "bias": 0,
+   "mustDetect": 40,
+   "ok": true
+  },
+  "layoutFrac": {
+   "n": 7,
+   "p50": 0.004,
+   "p90": 0.007,
+   "bias": 0.004,
+   "mustDetect": 0.02,
+   "ok": true
+  },
+  "paletteDE": {
+   "n": 4,
+   "p50": 0.898,
+   "p90": 0.909,
+   "bias": 0.898,
+   "mustDetect": 6,
+   "ok": true
+  },
+  "posFrac": {
+   "n": 7,
+   "p50": 0.003,
+   "p90": 0.004,
+   "bias": 0.003,
+   "mustDetect": 0.03,
+   "ok": true
+  },
+  "sizeFrac": {
+   "n": 7,
+   "p50": 0.011,
+   "p90": 0.045,
+   "bias": 0.011,
+   "mustDetect": 0.1,
+   "ok": true
+  },
+  "startMs": {
+   "n": 7,
+   "p50": 0,
+   "p90": 8,
+   "bias": 0,
+   "mustDetect": 33.333,
+   "ok": true
+  },
+  "landMsTail": {
+   "n": 4,
+   "p50": 11,
+   "p90": 304,
+   "bias": 6,
+   "mustDetect": 33.333,
+   "ok": false
+  },
+  "overshoot": {
+   "n": 7,
+   "p50": 0,
+   "p90": 0.001,
+   "bias": 0,
+   "mustDetect": 0.02,
+   "ok": true
+  },
+  "landMs": {
+   "n": 3,
+   "p50": 1,
+   "p90": 14,
+   "bias": 1,
+   "mustDetect": 33.333,
+   "ok": true
+  },
+  "wordT0Ms": {
+   "n": 18,
+   "p50": 17,
+   "p90": 33,
+   "bias": 17,
+   "mustDetect": 33.333,
+   "ok": true
+  },
+  "textSizeFrac": {
+   "n": 18,
+   "p50": 0.029,
+   "p90": 0.049,
+   "bias": 0.029,
+   "mustDetect": 0.12,
+   "ok": true
+  },
+  "textPosFrac": {
+   "n": 18,
+   "p50": 0.003,
+   "p90": 0.01,
+   "bias": 0.003,
+   "mustDetect": 0.03,
+   "ok": true
+  },
+  "cutMs": {
+   "n": 10,
+   "p50": 0,
+   "p90": 17,
+   "bias": 0,
+   "mustDetect": 33.333,
+   "ok": true
+  },
+  "sizeFracBlur": {
+   "n": 1,
+   "p50": 0.011,
+   "p90": 0.011,
+   "bias": 0.011,
+   "mustDetect": 0.1,
+   "ok": true
+  }
+ },
+ "accuracy": {
+  "elementFound": {
+   "hit": 7,
+   "n": 7
+  },
+  "easingClass": {
+   "hit": 7,
+   "n": 7
+  },
+  "stagger": {
+   "hit": 5,
+   "n": 5
+  },
+  "transitionType": {
+   "hit": 5,
+   "n": 5
+  }
+ }
+}

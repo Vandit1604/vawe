@@ -19,13 +19,16 @@ import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
 import { findTransitions } from '../lib/ref-measure/transition.mjs';
 import { measureLayout } from '../lib/ref-measure/layout.mjs';
-import { transitionRow, easingLines, layoutLines, audioRow } from '../lib/ref-measure/spec-lines.mjs';
+import { transitionRow, easingLines, layoutLines, audioRow, errorLines } from '../lib/ref-measure/spec-lines.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
 import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
+import { trackWords, refineWordTimes, buildLines, restBox, fontPxOf, inkColor } from '../lib/ref-measure/words.mjs';
+import { loadErrors } from '../lib/ref-measure/error-table.mjs';
 
 const GRID_W = 320;
 const DIFF_THR = 6;
 const MAX_FRAMES = 2400;
+const MAX_TRACK_GAP = 4;
 const die = (m) => { console.error(`✗ ${m}`); process.exit(2); };
 const hex = (rgb) => `#${[rgb >> 16, (rgb >> 8) & 255, rgb & 255].map((c) => c.toString(16).padStart(2, '0')).join('')}`;
 
@@ -238,9 +241,10 @@ function trackShot(V, f0, f1, cams, maxTracks) {
       const ci = cands.push(union.w >= 3 && union.h >= 3 ? union : whole) - 1;
       for (const t of tracks) {
         const last = t.pts[t.pts.length - 1];
-        if (last.f !== f - 1) continue;
+        if (f - last.f > MAX_TRACK_GAP) continue;
+        const coast = f - last.f === 1 ? 1 : 0;
         for (const pt of [union, whole]) {
-          const d = Math.hypot(pt.x - (last.x + last.vx), pt.y - (last.y + last.vy));
+          const d = Math.hypot(pt.x - (last.x + coast * last.vx), pt.y - (last.y + coast * last.vy));
           const dw = Math.abs(pt.w - last.w) + Math.abs(pt.h - last.h);
           if (d < Math.max(12, 1.2 * Math.max(bw, bh)) && dw <= 0.35 * (last.w + last.h)) pairs.push({ t, ci, pt, score: d + 1.5 * dw });
         }
@@ -249,6 +253,8 @@ function trackShot(V, f0, f1, cams, maxTracks) {
     const usedTrack = new Set(), usedBlob = new Set();
     for (const p of pairs.sort((a, b) => a.score - b.score)) {
       if (usedTrack.has(p.t) || usedBlob.has(p.ci)) continue;
+      const last = p.t.pts[p.t.pts.length - 1];
+      for (let g = last.f + 1; g < f; g++) p.t.pts.push({ ...last, f: g, vx: 0, vy: 0 });
       p.t.pts.push(p.pt);
       usedTrack.add(p.t); usedBlob.add(p.ci);
     }
@@ -275,6 +281,28 @@ function modalColor(V, f, cx, cy, bw, bh) {
   }
   const top = [...count.entries()].sort((a, b) => b[1] - a[1])[0];
   return top ? hex(top[0]) : null;
+}
+
+// The box of the flat colour region around (cx, cy) in frame f: an element's true size at rest, free of the
+// blur and edge smear a change region carries. Null when the colour is not a solid fill (text, a photo).
+const FILL_DIST = 20;
+const SOLID_SHARE = 0.85;
+function restRegion(V, f, cx, cy, colour) {
+  if (!colour) return null;
+  const want = [parseInt(colour.slice(1, 3), 16), parseInt(colour.slice(3, 5), 16), parseInt(colour.slice(5, 7), 16)];
+  const base = f * V.w * V.h * 3, near = (i) => Math.abs(V.rgb[base + i * 3] - want[0]) + Math.abs(V.rgb[base + i * 3 + 1] - want[1]) + Math.abs(V.rgb[base + i * 3 + 2] - want[2]) <= FILL_DIST;
+  const sx = Math.round(cx), sy = Math.round(cy);
+  if (sx < 0 || sy < 0 || sx >= V.w || sy >= V.h || !near(sy * V.w + sx)) return null;
+  const seen = new Uint8Array(V.w * V.h), stack = [sy * V.w + sx];
+  let x0 = sx, x1 = sx, y0 = sy, y1 = sy, area = 0;
+  seen[stack[0]] = 1;
+  while (stack.length) {
+    const i = stack.pop(), x = i % V.w, y = (i / V.w) | 0;
+    area++; x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+    if (area > 0.6 * V.w * V.h) return null;
+    for (const j of [x > 0 ? i - 1 : -1, x < V.w - 1 ? i + 1 : -1, y > 0 ? i - V.w : -1, y < V.h - 1 ? i + V.w : -1]) if (j >= 0 && !seen[j] && near(j)) { seen[j] = 1; stack.push(j); }
+  }
+  return { w: x1 - x0 + 3, h: y1 - y0 + 3, area };
 }
 
 // One coordinate per frame from where the element sat still before the move to where it rests after it.
@@ -304,6 +332,10 @@ function analyseTrack(track, V, fps, sc, span) {
   out.shutter = refined ? estimateShutter(V, pts, axis) : null;
   const last = pts[pts.length - 1];
   out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
+  const rest = restRegion(V, Math.min(V.n - 1, last.f + 1), last.x, last.y, out.color);
+  out.solid = Boolean(rest) && rest.area > 0.4 * last.w * last.h && rest.area < 2.5 * last.w * last.h
+    && fillShare(V, Math.min(V.n - 1, last.f + 1), { x: (last.x - rest.w / 2) / V.w, y: (last.y - rest.h / 2) / V.h, w: rest.w / V.w, h: rest.h / V.h }, out.color) >= SOLID_SHARE;
+  if (out.solid) out.size = [r1(rest.w * sc), r1(rest.h * sc)];
   const travel = Math.abs(D) * sc;
   out.confidence = pts.length >= 5 && (!out.fit || out.fit.rmsePx <= 0.08 * travel) ? 'high' : 'low';
   const energies = pts.map((p) => edgeEnergy(V.frame(p.f), V.w, V.h, p.x, p.y, p.w, p.h));
@@ -318,6 +350,30 @@ function analyseTrack(track, V, fps, sc, span) {
   out.blur = blurred.length ? { f0: blurred[0].f, f1: blurred[blurred.length - 1].f, frames: blurred.length,
     minSharp: Math.min(...blurred.map((r) => r.sharp)), dir: mode(blurred.map((r) => r.blurDir)) } : null;
   return out;
+}
+
+// The resting layout of frame f, each box with the colour most of its middle shares (its fill).
+function shotLayout(V, f) {
+  const layout = measureLayout({ w: V.w, h: V.h, rgb: V.rgb.subarray(f * V.w * V.h * 3, (f + 1) * V.w * V.h * 3) });
+  const boxes = layout.boxes.map((b) => {
+    const color = modalColor(V, f, (b.x + b.w / 2) * V.w, (b.y + b.h / 2) * V.h, b.w * V.w, b.h * V.h);
+    return { ...b, color, fill: r3(fillShare(V, f, b, color)) };
+  });
+  return { frame: f, ...layout, boxes };
+}
+
+// The share of a box (fractions of the frame) that is one flat colour: near 1 for a card or a bar, low for a line of text, a glow or a photo.
+function fillShare(V, f, b, colour) {
+  if (!colour) return 0;
+  const want = [1, 3, 5].map((i) => parseInt(colour.slice(i, i + 2), 16));
+  const x0 = Math.floor(b.x * V.w), x1 = Math.min(V.w, Math.ceil((b.x + b.w) * V.w)), y0 = Math.floor(b.y * V.h), y1 = Math.min(V.h, Math.ceil((b.y + b.h) * V.h));
+  let hit = 0, n = 0;
+  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+    const o = (f * V.w * V.h + y * V.w + x) * 3;
+    if (Math.abs(V.rgb[o] - want[0]) + Math.abs(V.rgb[o + 1] - want[1]) + Math.abs(V.rgb[o + 2] - want[2]) <= FILL_DIST) hit++;
+    n++;
+  }
+  return n ? hit / n : 0;
 }
 
 // ── palette: k-means, deterministic (farthest-point start), reported as the exact modal pixel per cluster ──
@@ -396,11 +452,19 @@ function cutLeads(cuts, audio, fps) {
   });
 }
 
-// ── text (optional) ──────────────────────────────────────────────────────────────────────────────
-async function analyseText(video, dir, W, H, fps) {
-  const { ocrWords } = await import('./see/ocr.mjs');
-  return ocrWords(video, dir, 4, 60, 3).map((w) => ({ text: w.text, f0: Math.round(w.tIn * fps), f1: Math.round(w.tOut * fps),
-    boxHeightPx: r1(w.box.hFrac * H), fontPxApprox: r1((w.box.hFrac * H) / 0.8), cxPx: r1(w.box.cxFrac * W), cyPx: r1(w.box.cyFrac * H) }));
+// ── text (optional): one tesseract pass, read as runs, word appearances and lines ─────────────────
+const TEXT_FPS = 8;
+async function analyseText(video, dir, V, W, H, fps) {
+  const { sampleText, textRuns } = await import('./see/text-timeline.mjs');
+  const samples = await sampleText(video, dir, { sampleFps: TEXT_FPS, width: W, height: H });
+  const apps = refineWordTimes(V, trackWords(samples, TEXT_FPS), W, fps).map((a) => ({ ...a, color: inkColor(V, a, W, fps) }));
+  const lines = buildLines(apps, fps);
+  const words = apps.map((a) => {
+    const b = restBox(a);
+    return { text: a.text, f0: Math.round(a.t0 * fps), f1: Math.round(a.t1 * fps), boxHeightPx: r1(b.h), boxWidthPx: r1(b.w),
+      fontPxApprox: r1(fontPxOf(a.text, b.h)), cxPx: r1(b.x), cyPx: r1(b.y) };
+  });
+  return { runs: textRuns(samples), lines, words };
 }
 
 // ── SPEC.md ──────────────────────────────────────────────────────────────────────────────────────
@@ -418,7 +482,7 @@ const tableRows = (rows, cols, cap = 30) => {
   return `${head}\n${body}${rows.length > cap ? `\n| ... ${rows.length - cap} more rows in spec.json |` : ''}`;
 };
 
-function shotSection(s, fps) {
+function shotSection(s, fps, err) {
   const L = [`## Shot ${s.index}: frames ${s.f0}-${s.f1 - 1} (${s.frames} f, ${r1(s.frames / fps * 100) / 100} s)`, ''];
   L.push(`palette: ${s.palette.map((p) => `${p.hex} ${Math.round(p.share * 100)}%`).join(', ')}`);
   const c = s.camera;
@@ -429,13 +493,26 @@ function shotSection(s, fps) {
     const over = e.overshoot != null ? `; overshoot x${e.overshoot}` : '';
     const blur = e.blur ? `; blur f${e.blur.f0}-${e.blur.f1} dir ${e.blur.dir} min sharp ${e.blur.minSharp}` : '';
     L.push('', `### E${e.id}: f${e.f0}-${e.f1}, (${e.from}) -> (${e.to}) px, size ${e.size[0]}x${e.size[1]}, ${e.movingFrames} moving f, peak ${e.peakSpeed} px/f${over}${blur}`);
-    L.push(...easingLines(e, fps).map((x) => `- ${x}`));
+    L.push(...easingLines(e, fps, err).map((x) => `- ${x}`));
     if (e.big) L.push('', tableRows(e.rows, [['f', 'f'], ['x', 'x'], ['y', 'y'], ['w', 'w'], ['h', 'h'], ['vx', 'vx'], ['vy', 'vy'], ['sharp', 'sharp'], ['blur', 'blurDir']]));
   }
-  L.push(...layoutLines(s).map((x, i) => (i ? x : `\n${x}`)));
+  L.push(...layoutLines(s, err).map((x, i) => (i ? x : `\n${x}`)));
   if (s.text.length) L.push('', 'text: ' + s.text.map((t) => `"${t.text}" f${t.f0}-${t.f1} box ${t.boxHeightPx} px (font ~${t.fontPxApprox} px)`).join('; '));
   if (s.hits.length) L.push('', `audio hits (frame:strength): ${s.hits.map((h) => `${h.frame}:${h.strength}`).join(' ')}`);
   return L.join('\n');
+}
+
+function wordLines(lines, fps) {
+  const L = ['## Words by line (reveal order)', '',
+    'One row per appearance of a word, so a repeated word keeps every appearance. t0 is the first frame the word shows (pixels, plus or minus 1 frame); x, y are the box centre and h the box height AT REST, in reference px.', ''];
+  for (const l of lines.slice(0, 60)) {
+    const step = l.stagger === 'single' || l.stagger === 'all-at-once' ? '' : `, ${Math.round(l.stepS * 1000)} ms between words`;
+    L.push(`### Line ${l.index}: "${l.text}" (y ${l.y} px, ${l.t0}-${l.t1} s), stagger ${l.stagger}${step}`, '',
+      tableRows(l.words.map((w, i) => ({ n: i + 1, word: w.word, t0: w.t0, f0: Math.round(w.t0 * fps), t1: w.t1, x: w.x, y: w.y, h: w.h })),
+        [['#', 'n'], ['word', 'word'], ['t0 s', 't0'], ['t0 f', 'f0'], ['t1 s', 't1'], ['x', 'x'], ['y', 'y'], ['h', 'h']], 40), '');
+  }
+  if (lines.length > 60) L.push(`${lines.length - 60} more lines in spec.json`, '');
+  return L;
 }
 
 function renderSpec(spec) {
@@ -456,13 +533,15 @@ function renderSpec(spec) {
       `beat frames: ${a.beatFrames.slice(0, 48).join(' ')}${a.beatFrames.length > 48 ? ' ...' : ''}`, '',
       tableRows(a.hits.map(audioRow), [['attack s', 'attack'], ['attack f', 'attackFrame'], ['err ms', 'errMs'], ['peak s', 't'], ['peak f', 'frame'], ['strength', 'strength'], ['note', 'note']], 60), '');
   } else L.push('## Audio', '', 'no audio stream.', '');
+  if (spec.textLines && spec.textLines.length) L.push(...wordLines(spec.textLines, spec.fps));
   if (spec.textRuns) L.push('## On-screen text (every 0.25 s, whole film)', '', 'Every row must exist in the rebuild at its time. OCR spelling can be off; the timing and the line breaks are right.', '', tableRows(spec.textRuns.map((r) => ({ from: r.t0.toFixed(2), to: r.t1.toFixed(2), text: r.text || '(no text)' })), [['from s', 'from'], ['to s', 'to'], ['text (lines split by /)', 'text']], 400), '');
-  for (const s of spec.shots) L.push(shotSection(s, spec.fps), '');
+  for (const s of spec.shots) L.push(shotSection(s, spec.fps, spec.err), '');
+  L.push(...errorLines(spec.err, spec.errCalibrated));
   return L.join('\n');
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────────────────────────
-export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false, audio = true }) {
+export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false, audio = true, calibrating = false }) {
   const { width: W, height: H, duration } = probeSize(video);
   if (!W || !H) die(`${video} has no readable video stream`);
   const nativeFps = probeRate(video);
@@ -488,8 +567,8 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   const aud = audio ? analyseAudio(video, dir, fps, V.n / fps) : null;
   const leads = cutLeads(cuts, aud, fps);
   cuts.forEach((c, i) => Object.assign(c, leads[i]));
-  const text = ocr ? await analyseText(video, dir, W, H, fps) : [];
-  const textRuns = ocr ? (await import('./see/text-timeline.mjs')).textTimeline(video, dir) : null;
+  const read = ocr ? await analyseText(video, dir, V, W, H, fps) : { runs: null, lines: [], words: [] };
+  const text = read.words, textRuns = read.runs;
 
   const shots = [];
   for (let i = 0; i < spans.length; i++) {
@@ -516,12 +595,13 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
       palette: palette(V, f0, f1),
       camera: { zoomTotal: r3(zc), panTotalPx: [r1(px), r1(py)], peakZoomPerFrame: r3(peakZ), peakPanPxPerFrame: r1(peakP), big,
         rows: camRows.filter((r) => Math.abs(r.dz) > 0.0015 || Math.hypot(r.dx, r.dy) > 0.5) },
-      elements, layout: { frame: f1 - 1, ...measureLayout({ w: V.w, h: V.h, rgb: V.rgb.subarray((f1 - 1) * V.w * V.h * 3, f1 * V.w * V.h * 3) }) },
+      elements, layout: shotLayout(V, f1 - 1),
       text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
   }
+  const errors = calibrating ? loadErrors('/nonexistent') : loadErrors();
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
-    cuts, audio: aud, shots, ocr, textRuns };
+    cuts, audio: aud, shots, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
   fs.writeFileSync(path.join(outDir, 'SPEC.md'), `${renderSpec(spec)}\n`);
