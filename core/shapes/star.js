@@ -36,7 +36,7 @@ function centreShade(unit, frontZ, strength) {
   return shade;
 }
 
-export function createStar(canvas, { depth = 0.08, bevel = 0.02, look = 'glass', tint } = {}) {
+export function createStar(canvas, { depth = 0.08, bevel = 0.02, look = 'glass', tint, shade } = {}) {
   const spec = LOOKS[look];
   if (!spec) throw new Error(`createStar: unknown look "${look}", one of: ${Object.keys(LOOKS).join(', ')}`);
   const w = canvas.width, h = canvas.height;
@@ -55,14 +55,14 @@ export function createStar(canvas, { depth = 0.08, bevel = 0.02, look = 'glass',
   const mesh = new THREE.Mesh(geometry, material);
   geometry.computeBoundingBox();
   const unit = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
-  mesh.add(centreShade(unit, geometry.boundingBox.max.z, spec.shade));
+  mesh.add(centreShade(unit, geometry.boundingBox.max.z, shade ?? spec.shade));
   scene.add(mesh);
 
-  function draw({ x = w / 2, y = h / 2, size = 0, spin = 0, tilt = 0, opacity = 1, blur = 0 } = {}) {
+  function draw({ x = w / 2, y = h / 2, size = 0, spin = 0, tilt = 0, roll = 0, opacity = 1, blur = 0 } = {}) {
     mesh.visible = size > 0 && opacity > 0;
     mesh.position.set(x - w / 2, h / 2 - y, 0);
     mesh.scale.setScalar(size / unit);
-    mesh.rotation.set(tilt, spin, 0);
+    mesh.rotation.set(tilt, spin, roll);
     canvas.style.opacity = String(opacity);
     canvas.style.filter = blur > 0 ? `blur(${blur}px)` : 'none';
     renderer.render(scene, camera);
