@@ -286,6 +286,7 @@ function modalColor(V, f, cx, cy, bw, bh) {
 // The box of the flat colour region around (cx, cy) in frame f: an element's true size at rest, free of the
 // blur and edge smear a change region carries. Null when the colour is not a solid fill (text, a photo).
 const FILL_DIST = 20;
+const SOLID_SHARE = 0.85;
 function restRegion(V, f, cx, cy, colour) {
   if (!colour) return null;
   const want = [parseInt(colour.slice(1, 3), 16), parseInt(colour.slice(3, 5), 16), parseInt(colour.slice(5, 7), 16)];
@@ -332,7 +333,9 @@ function analyseTrack(track, V, fps, sc, span) {
   const last = pts[pts.length - 1];
   out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
   const rest = restRegion(V, Math.min(V.n - 1, last.f + 1), last.x, last.y, out.color);
-  if (rest && rest.area > 0.4 * last.w * last.h && rest.area < 2.5 * last.w * last.h) out.size = [r1(rest.w * sc), r1(rest.h * sc)];
+  out.solid = Boolean(rest) && rest.area > 0.4 * last.w * last.h && rest.area < 2.5 * last.w * last.h
+    && fillShare(V, Math.min(V.n - 1, last.f + 1), { x: (last.x - rest.w / 2) / V.w, y: (last.y - rest.h / 2) / V.h, w: rest.w / V.w, h: rest.h / V.h }, out.color) >= SOLID_SHARE;
+  if (out.solid) out.size = [r1(rest.w * sc), r1(rest.h * sc)];
   const travel = Math.abs(D) * sc;
   out.confidence = pts.length >= 5 && (!out.fit || out.fit.rmsePx <= 0.08 * travel) ? 'high' : 'low';
   const energies = pts.map((p) => edgeEnergy(V.frame(p.f), V.w, V.h, p.x, p.y, p.w, p.h));
@@ -352,8 +355,25 @@ function analyseTrack(track, V, fps, sc, span) {
 // The resting layout of frame f, each box with the colour most of its middle shares (its fill).
 function shotLayout(V, f) {
   const layout = measureLayout({ w: V.w, h: V.h, rgb: V.rgb.subarray(f * V.w * V.h * 3, (f + 1) * V.w * V.h * 3) });
-  const boxes = layout.boxes.map((b) => ({ ...b, color: modalColor(V, f, (b.x + b.w / 2) * V.w, (b.y + b.h / 2) * V.h, b.w * V.w, b.h * V.h) }));
+  const boxes = layout.boxes.map((b) => {
+    const color = modalColor(V, f, (b.x + b.w / 2) * V.w, (b.y + b.h / 2) * V.h, b.w * V.w, b.h * V.h);
+    return { ...b, color, fill: r3(fillShare(V, f, b, color)) };
+  });
   return { frame: f, ...layout, boxes };
+}
+
+// The share of a box (fractions of the frame) that is one flat colour: near 1 for a card or a bar, low for a line of text, a glow or a photo.
+function fillShare(V, f, b, colour) {
+  if (!colour) return 0;
+  const want = [1, 3, 5].map((i) => parseInt(colour.slice(i, i + 2), 16));
+  const x0 = Math.floor(b.x * V.w), x1 = Math.min(V.w, Math.ceil((b.x + b.w) * V.w)), y0 = Math.floor(b.y * V.h), y1 = Math.min(V.h, Math.ceil((b.y + b.h) * V.h));
+  let hit = 0, n = 0;
+  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+    const o = (f * V.w * V.h + y * V.w + x) * 3;
+    if (Math.abs(V.rgb[o] - want[0]) + Math.abs(V.rgb[o + 1] - want[1]) + Math.abs(V.rgb[o + 2] - want[2]) <= FILL_DIST) hit++;
+    n++;
+  }
+  return n ? hit / n : 0;
 }
 
 // ── palette: k-means, deterministic (farthest-point start), reported as the exact modal pixel per cluster ──
