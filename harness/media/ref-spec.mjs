@@ -18,6 +18,8 @@ import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../cor
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
 import { findTransitions } from '../lib/ref-measure/transition.mjs';
+import { measureLayout } from '../lib/ref-measure/layout.mjs';
+import { transitionRow, easingLines, layoutLines, audioRow } from '../lib/ref-measure/spec-lines.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
 import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 
@@ -415,12 +417,13 @@ function shotSection(s, fps) {
   if (c.big) L.push('', tableRows(c.rows, [['f', 'f'], ['zoom cum', 'zoomCum'], ['dzoom', 'dz'], ['pan x px', 'panX'], ['pan y px', 'panY'], ['dx', 'dx'], ['dy', 'dy']], 40));
   if (!s.elements.length) L.push('elements: none tracked');
   for (const e of s.elements) {
-    const fit = e.fit ? `; ${e.fit.kind} k=${e.fit.k}${e.fit.d ? ` d=${e.fit.d}` : ''} (rmse ${e.fit.rmsePx} px, other ${e.fit.otherRmsePx})` : '';
     const over = e.overshoot != null ? `; overshoot x${e.overshoot}` : '';
     const blur = e.blur ? `; blur f${e.blur.f0}-${e.blur.f1} dir ${e.blur.dir} min sharp ${e.blur.minSharp}` : '';
-    L.push('', `### E${e.id}: f${e.f0}-${e.f1}, (${e.from}) -> (${e.to}) px, size ${e.size[0]}x${e.size[1]}, ${e.movingFrames} moving f, peak ${e.peakSpeed} px/f${over}${fit}${blur}`);
+    L.push('', `### E${e.id}: f${e.f0}-${e.f1}, (${e.from}) -> (${e.to}) px, size ${e.size[0]}x${e.size[1]}, ${e.movingFrames} moving f, peak ${e.peakSpeed} px/f${over}${blur}`);
+    L.push(...easingLines(e, fps).map((x) => `- ${x}`));
     if (e.big) L.push('', tableRows(e.rows, [['f', 'f'], ['x', 'x'], ['y', 'y'], ['w', 'w'], ['h', 'h'], ['vx', 'vx'], ['vy', 'vy'], ['sharp', 'sharp'], ['blur', 'blurDir']]));
   }
+  L.push(...layoutLines(s).map((x, i) => (i ? x : `\n${x}`)));
   if (s.text.length) L.push('', 'text: ' + s.text.map((t) => `"${t.text}" f${t.f0}-${t.f1} box ${t.boxHeightPx} px (font ~${t.fontPxApprox} px)`).join('; '));
   if (s.hits.length) L.push('', `audio hits (frame:strength): ${s.hits.map((h) => `${h.frame}:${h.strength}`).join(' ')}`);
   return L.join('\n');
@@ -433,14 +436,16 @@ function renderSpec(spec) {
     'Measured by harness/media/ref-spec.mjs. Frames are 0-based. Positions are element centres in reference px. `x`/`y` and sizes are measured, never eyeballed;',
     'camera pan is how far the content moves (positive = right/down), zoom above 1 = push in. Element numbers are the change region between frames, tracked after camera compensation.', '',
     KEEP_CHANGE, '## Cuts', '',
-    tableRows(spec.cuts.map((c, i) => ({ n: i + 1, frame: c.frame, t: c.t, spike: c.spike, hit: c.hitLead ?? '', beat: c.beatLead ?? '' })),
-      [['#', 'n'], ['frame', 'frame'], ['t s', 't'], ['diff spike x median', 'spike'], ['audio hit lead f', 'hit'], ['beat lead f', 'beat']], 80), '',
+    tableRows(spec.cuts.map((c, i) => transitionRow(c, i + 1)),
+      [['#', 'n'], ['type', 'type'], ['dir', 'dir'], ['frames', 'frames'], ['at frames', 'span'], ['conf', 'conf'], ['evidence', 'evidence'], ['audio hit lead f', 'hit'], ['beat lead f', 'beat']], 80), '',
+    'frames = steps the change takes (a hard cut is 1; a 6-frame crossfade is 6). at frames = first changed frame to first fully new frame. The shot cut point in spec.json is the last of them.',
     'lead = frames the sound comes before the cut (positive), within 0.3 s.', ''];
   if (spec.audio) {
     const a = spec.audio;
-    L.push('## Audio', '', `${a.bpm} BPM (confidence ${a.confidence}; below 1.6 is weak), ${a.framesPerBeat} frames per beat, ${a.hits.length} hits, times accurate to about 12 ms.`, '',
+    L.push('## Audio', '', `${a.bpm} BPM (confidence ${a.confidence}; below 1.6 is weak), ${a.framesPerBeat} frames per beat, ${a.hits.length} hits.`,
+      'Place a cue on `attack` (where the sound starts), not on `peak` (the loudest change, later, on the body of the hit).', '',
       `beat frames: ${a.beatFrames.slice(0, 48).join(' ')}${a.beatFrames.length > 48 ? ' ...' : ''}`, '',
-      tableRows(a.hits, [['t s', 't'], ['frame', 'frame'], ['strength', 'strength']], 60), '');
+      tableRows(a.hits.map(audioRow), [['attack s', 'attack'], ['attack f', 'attackFrame'], ['err ms', 'errMs'], ['peak s', 't'], ['peak f', 'frame'], ['strength', 'strength'], ['note', 'note']], 60), '');
   } else L.push('## Audio', '', 'no audio stream.', '');
   for (const s of spec.shots) L.push(shotSection(s, spec.fps), '');
   return L.join('\n');
@@ -499,7 +504,8 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
       palette: palette(V, f0, f1),
       camera: { zoomTotal: r3(zc), panTotalPx: [r1(px), r1(py)], peakZoomPerFrame: r3(peakZ), peakPanPxPerFrame: r1(peakP), big,
         rows: camRows.filter((r) => Math.abs(r.dz) > 0.0015 || Math.hypot(r.dx, r.dy) > 0.5) },
-      elements, text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
+      elements, layout: { frame: f1 - 1, ...measureLayout({ w: V.w, h: V.h, rgb: V.rgb.subarray((f1 - 1) * V.w * V.h * 3, f1 * V.w * V.h * 3) }) },
+      text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
   }
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
