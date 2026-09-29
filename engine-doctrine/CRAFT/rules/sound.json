@@ -64,7 +64,7 @@
     "category": "sound",
     "stage": "direct",
     "applies": "hasAudio",
-    "check": null,
+    "check": "quiet-before-spectacle",
     "adapt": null,
     "brief": "cut everything one beat before the reveal, then land the impact into the vacuum",
     "doc": "engine-doctrine/CRAFT/SOUND.md#5-silence-used-on-purpose"
