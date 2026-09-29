@@ -44,6 +44,7 @@ import { spawnSync } from 'node:child_process';
 import { RENDER_ARGS } from '../lib/render-harness.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { ASPECTS, sceneDims } from '../../core/layout/safe.js';
+import { appendRun } from '../lib/runlog.mjs';
 import { openPreview } from './preview-server.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
@@ -396,6 +397,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const mixed = wantAudio && await muxPageAudio(page, pagePath, { video: tmpOut, out: outPath, duration: dur, explicit: opts.audio === true });
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
+    appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
     return { frames, subframes: totalSub, captureMs, encodeMs, dur, audio: Boolean(mixed) };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });

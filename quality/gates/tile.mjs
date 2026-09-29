@@ -152,6 +152,17 @@ export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 export const renderOf = (scenePath) =>
   path.join('out', `${path.basename(scenePath).replace(/\.(expanded\.)?json$/, '')}.mp4`);
 
+// pageRenderOf(pageHtml) -> the mp4 render-page.mjs writes for a page: the final render when it is
+// newer than the draft, else the draft (harness/media/render-page.mjs defaultOut names both).
+export const pageRenderOf = (pagePath) => {
+  const abs = path.resolve(pagePath);
+  const base = path.basename(abs, '.html');
+  const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
+  const final = path.join('out', `${name}.mp4`), draft = path.join('out', `${name}-draft.mp4`);
+  const mtime = (p) => (fs.existsSync(p) ? fs.statSync(p).mtimeMs : -1);
+  return mtime(final) >= mtime(draft) ? final : draft;
+};
+
 // EXISTS IS NOT FRESH, and the comment above stops one step short of its own lesson. Resolving the
 // right NAME was half the bug: the other half is that `out/x.mp4` can be the right name for a film the
 // author has since rewritten, and every consumer of this path checks only `existsSync`. So an author
@@ -175,13 +186,14 @@ const ago = (ms) => {
 };
 
 export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
-  if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix: `make video D=${scenePath}` };
-  if (!scenePath.endsWith('.json')) return { ok: true, mp4 };
+  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `make video D=${scenePath}`;
+  if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix };
+  if (!/\.(json|html)$/.test(scenePath)) return { ok: true, mp4 };
   const src = fs.statSync(scenePath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
   if (src > out) {
     return { ok: false, mp4,
       why: `${mp4} is ${ago(src - out)} older than ${scenePath}. It is a render of a film you have since edited`,
-      fix: `make video D=${scenePath}` };
+      fix };
   }
   return { ok: true, mp4 };
 }
