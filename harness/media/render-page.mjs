@@ -71,6 +71,10 @@ const PAGE_ARGS = [...RENDER_ARGS, '--disable-gpu-compositing'];
 // measured to need it.
 const CAPTURE_WORKERS = Math.min(4, Math.max(2, os.cpus().length >= 4 ? 4 : 2));
 
+// A page with several WebGL canvases slows down over a long run until one CDP call times out; a fresh
+// page every 300 subframes keeps it fast, and a seek is a pure function of time so the pixels do not change.
+const RECYCLE_SUBFRAMES = 300;
+
 const die = (msg, code = 1) => { console.error(`✗ ${msg}`); process.exit(code); };
 
 // Page meta the renderer needs before the page loads (its canvas, its authoring rate), read from the
@@ -212,10 +216,17 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     if (lo < hi) shards.push([lo, hi]);
   }
   await Promise.all(shards.map(async ([lo, hi]) => {
-    const { page, url, close } = await openPage(pagePath, frame);
+    let opened = null;
+    let sinceOpen = 0;
     try {
-      await page.goto(url, { waitUntil: 'load' });
       for (let i = lo; i < hi; i++) {
+        if (opened && sinceOpen >= RECYCLE_SUBFRAMES) { await opened.close(); opened = null; }
+        if (!opened) {
+          opened = await openPage(pagePath, frame);
+          await opened.page.goto(opened.url, { waitUntil: 'load' });
+          sinceOpen = 0;
+        }
+        const { page } = opened;
         const baseMs = from * 1000 + (i / fps) * 1000;
         const k = kArr[i];
         for (let j = 0; j < k; j++) {
@@ -224,8 +235,9 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
           await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`) });
           onSubframe();
         }
+        sinceOpen += k;
       }
-    } finally { await close(); }
+    } finally { if (opened) await opened.close(); }
   }));
 }
 

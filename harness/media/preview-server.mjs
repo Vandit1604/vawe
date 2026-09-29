@@ -9,10 +9,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
-import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS } from '../lib/render-harness.mjs';
+import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 // One daemon per checkout: a shared state file made a worktree render pages from another checkout's root.
@@ -51,10 +51,19 @@ async function connectShared() {
   }
   try {
     const { default: puppeteer } = await import('puppeteer');
-    const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint });
+    const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS });
     touch();
     return { browser, port: state.port };
   } catch { return null; }
+}
+
+// A page's `../../core/...` imports and assets resolve against its own checkout, so serve from that
+// checkout's top level; only a page in no repo is served from its own folder.
+function pageRoot(abs) {
+  const dir = path.dirname(abs);
+  try {
+    return execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: dir, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || dir;
+  } catch { return dir; }
 }
 
 /**
@@ -81,10 +90,10 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, args 
       return { page, url, persistent: true, close: async () => { await page.close(); shared.browser.disconnect(); } };
     }
   }
-  const root = path.dirname(abs);
+  const root = pageRoot(abs);
   const { close: closeServer, port } = await serveRepo({ root });
   const { page, close: closePage } = await launchPage({ width, height, args });
-  const url = `http://127.0.0.1:${port}/${path.basename(abs)}`;
+  const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}`;
   return { page, url, persistent: false, close: async () => { await closePage(); closeServer(); } };
 }
 
@@ -96,7 +105,7 @@ async function daemonMain() {
   // GPU-accelerated renderer outright on this machine at ~150+ round trips (render-page.mjs's own file
   // banner), and the narrower flag keeps that fix while leaving WebGL (a bare page's own `three.js`,
   // core/engine/page-api.js) able to create a context at all, which the broader `--disable-gpu` cannot.
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: [...RENDER_ARGS, '--disable-gpu-compositing'] }));
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: [...RENDER_ARGS, '--disable-gpu-compositing'], protocolTimeout: PROTOCOL_TIMEOUT_MS }));
   fs.writeFileSync(STATE_FILE, JSON.stringify({ pid: process.pid, port, wsEndpoint: browser.wsEndpoint() }));
 
   const shutdown = async () => {
