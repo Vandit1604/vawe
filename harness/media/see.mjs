@@ -121,10 +121,39 @@ function pngDims(file) {
   return { width: Number(m.width) || 640, height: Number(m.height) || 360 };
 }
 
+// tesseract's own tsv -> [{text, box}], box a FRACTION of the frame this tsv was run on. Pulled out of
+// ocrWords so the adaptive per-timestamp tracker below (wordTracks) runs the exact same parse on a
+// single extracted frame, never a second hand-rolled tsv reader that could drift from this one.
+function parseTesseractTsv(tsv, minConf, minLen, frameW, frameH) {
+  const words = [];
+  for (const line of tsv.split('\n').slice(1)) {
+    const cols = line.split('\t');
+    if (cols.length < 12) continue;
+    const conf = Number(cols[10]), text = (cols[11] || '').trim();
+    if (conf >= minConf && text.length >= minLen && /[a-zA-Z]/.test(text)) {
+      const left = Number(cols[6]), top = Number(cols[7]), w = Number(cols[8]), h = Number(cols[9]);
+      words.push({ text, box: { hFrac: h / frameH, wFrac: w / frameW, cxFrac: (left + w / 2) / frameW, cyFrac: (top + h / 2) / frameH } });
+    }
+  }
+  return words;
+}
+
+function ocrOneFrame(src, base, minConf, minLen, frameW, frameH) {
+  // One retry: a non-zero exit right after ffmpeg wrote the frame is cheaper to retry once than to
+  // silently read as "no text in this frame" (the failure mode before this: an empty tsv either way).
+  let r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
+  if (r.status !== 0) r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
+  const tsv = fs.existsSync(`${base}.tsv`) ? fs.readFileSync(`${base}.tsv`, 'utf8') : '';
+  return parseTesseractTsv(tsv, minConf, minLen, frameW, frameH);
+}
+
 // ── OCR: tesseract on downscaled frames at ocrFps, psm 11 (sparse text, no layout) ─────────────────
 // Each surviving word also carries `box`: its own average height/width/centre as a FRACTION of the
 // frame, the input the type-scale/placement check (textScaleCheck below) needs to say a headline reads
-// smaller or sits lower than the reference, not just that different words were seen.
+// smaller or sits lower than the reference, not just that different words were seen. `samples` keeps
+// every raw {t, box} the run was built from (not only the averaged `box`): a word that grows or moves
+// while it is on screen needs its box AT A GIVEN MOMENT, not one number smeared across its whole run
+// (textScaleCheck below reads `samples`, never the averaged `box`, for exactly this reason).
 export function ocrWords(video, outDir, ocrFps, minConf, minLen) {
   const ocrDir = path.join(outDir, '.ocr');
   fs.mkdirSync(ocrDir, { recursive: true });
@@ -137,26 +166,12 @@ export function ocrWords(video, outDir, ocrFps, minConf, minLen) {
     const t = i / ocrFps;
     const base = path.join(ocrDir, `f_${String(i + 1).padStart(5, '0')}`);
     const src = path.join(ocrDir, f);
-    // One retry: a non-zero exit right after ffmpeg wrote the frame is cheaper to retry once than to
-    // silently read as "no text in this frame" (the failure mode before this: an empty tsv either way).
-    let r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
-    if (r.status !== 0) r = spawnSync('tesseract', [src, base, '--psm', '11', 'tsv'], { encoding: 'utf8' });
-    const tsv = fs.existsSync(`${base}.tsv`) ? fs.readFileSync(`${base}.tsv`, 'utf8') : '';
-    const words = [];
-    for (const line of tsv.split('\n').slice(1)) {
-      const cols = line.split('\t');
-      if (cols.length < 12) continue;
-      const conf = Number(cols[10]), text = (cols[11] || '').trim();
-      if (conf >= minConf && text.length >= minLen && /[a-zA-Z]/.test(text)) {
-        const left = Number(cols[6]), top = Number(cols[7]), w = Number(cols[8]), h = Number(cols[9]);
-        words.push({ text, box: { hFrac: h / frameH, wFrac: w / frameW, cxFrac: (left + w / 2) / frameW, cyFrac: (top + h / 2) / frameH } });
-      }
-    }
-    return { t, words };
+    return { t, words: ocrOneFrame(src, base, minConf, minLen, frameW, frameH) };
   });
   fs.rmSync(ocrDir, { recursive: true, force: true });
-  // A word "seen" is one that persists >= 2 consecutive samples; tIn is the first of that run, box is
-  // that run's own average geometry.
+  // A word "seen" is one that persists >= 2 consecutive samples; tIn/tOut are that run's first/last
+  // sample, `box` its average geometry (kept for callers that only want one number, e.g. the beat
+  // table), `samples` the raw {t, box} list a matched-moment lookup needs.
   const seenAt = new Map();   // text -> [{t, box}, ...]
   for (const f of perFrame) for (const w of f.words) {
     if (!seenAt.has(w.text)) seenAt.set(w.text, []);
@@ -171,12 +186,13 @@ export function ocrWords(video, outDir, ocrFps, minConf, minLen) {
   const words = [];
   for (const [text, occ] of seenAt) {
     occ.sort((a, b) => a.t - b.t);
-    let runStart = occ[0].t, prev = occ[0].t, runBoxes = [occ[0].box];
+    let runStart = occ[0].t, prev = occ[0].t, run = [occ[0]];
     for (let i = 1; i <= occ.length; i++) {
       const o = occ[i];
-      if (o && o.t - prev <= 1 / ocrFps + 0.01) { runBoxes.push(o.box); prev = o.t; continue; }
-      if (runBoxes.length >= 2) words.push({ text, tIn: Number(runStart.toFixed(2)), box: avgBox(runBoxes) });
-      if (o) { runStart = o.t; prev = o.t; runBoxes = [o.box]; }
+      if (o && o.t - prev <= 1 / ocrFps + 0.01) { run.push(o); prev = o.t; continue; }
+      if (run.length >= 2) words.push({ text, tIn: Number(runStart.toFixed(2)), tOut: Number(run[run.length - 1].t.toFixed(2)),
+        box: avgBox(run.map((r) => r.box)), samples: run });
+      if (o) { runStart = o.t; prev = o.t; run = [o]; }
     }
   }
   return words.sort((a, b) => a.tIn - b.tIn);
@@ -461,7 +477,7 @@ function buildCompareGrids(ref, draft, outDir, window, dims) {
   return gridPaths;
 }
 
-function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
+function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg, words = false) {
   const refP = probeVideo(refPath);
   const draftP = probeVideo(draftPath);
   const from = fromArg != null ? fromArg : 0;
@@ -528,22 +544,27 @@ function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg) {
     console.log('  next: draft matches the reference\'s motion in every window; proceed to the next post-draft step.');
   }
 
+  // `--words` (opt-in: adaptive OCR is not free): the per-word entrance/highlight/exit/star check, on
+  // the SAME two clips this function already has open, never a third render.
+  const wordsOk = words ? runWordEventCompare(refPath, draftPath, outDir, from, clampedTo, `${path.basename(refPath)} vs ${path.basename(draftPath)}`) : true;
+
   // `--film` records this run against the FILM's own hash (harness/lib/receipt.mjs), the same receipt
   // shape conform.mjs/verify.mjs already write, so quality/gates/post-draft.mjs can read one fresh/stale
   // answer instead of re-running ffmpeg itself.
+  const overallOk = ok && wordsOk;
   if (filmArg) {
     writeReceipt('motion-compare', filmArg, {
-      ok, tooStillCount: tooStillWindows.length, tooBusyCount: tooBusyWindows.length,
+      ok: overallOk, tooStillCount: tooStillWindows.length, tooBusyCount: tooBusyWindows.length,
       tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
       tooBusyWindows: tooBusyWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
-      peakRatio, exitRatio, ref: refPath, draft: draftPath, from, to: clampedTo,
+      peakRatio, exitRatio, ref: refPath, draft: draftPath, from, to: clampedTo, wordsOk,
     });
   }
   // Reports, does not block by default (this repo's own house rule: a gate blocks only with --strict
   // or through a specific caller that opts in, e.g. --film for post-draft.mjs's own required-motion
   // step, or runRequiredMotionMatch below for a bare-page check with no film to gate). `ok` is
   // returned so a caller that DOES want to refuse (no film/scene wrapping it) can.
-  return { ok, tooStillWindows, tooBusyWindows, peakRatio, exitRatio };
+  return { ok: overallOk, tooStillWindows, tooBusyWindows, peakRatio, exitRatio, wordsOk };
 }
 
 // Write-then-rename: a reader that opens `file` either sees the old content or the whole new one,
@@ -911,7 +932,7 @@ async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
     // Unlike a bare `--compare` (report-only, this repo's own house rule), a bare-page check has no
     // film/post-draft step wrapping it to refuse the ship on its behalf, so THIS is the one place that
     // must actually fail the process: a recreation agent running this standalone needs a non-zero exit.
-    const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg);
+    const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg, opts.words);
     const textOk = await runTextScaleCheck(htmlPath, refWindow, outDirRoot, { from, windowDur: to - from, w: opts.w, h: opts.h });
     if (!ok || !textOk) process.exitCode = 1;
     else {
@@ -993,14 +1014,36 @@ function textScaleHint(row) {
   return `${row.t0.toFixed(1)}-${row.t1.toFixed(1)}s: reference text ${refPct}% of frame height centred; yours ${filmPct}%${vDir}.`;
 }
 
+// The sample nearest a given instant, from a word's `samples` list (or its single averaged `box` when
+// no per-sample list exists, e.g. an older sheet or a hand-built test fixture): the one lookup every
+// window below uses, so "closest sample" is defined once, not re-picked per caller.
+function boxAtMoment(word, t) {
+  if (!word.samples || !word.samples.length) return word.box;
+  let best = word.samples[0];
+  for (const s of word.samples) if (Math.abs(s.t - t) < Math.abs(best.t - t)) best = s;
+  return best.box;
+}
+
 // textScaleCheck(refWords, filmBoxesByWindow, windows) -> {rows, mismatched, ok}. `refWords` is
-// ocrWords()'s own return (each word carries `tIn` and a `box`); `filmBoxesByWindow` maps each window's
-// `t0` to the DOM text boxes sampled at that window's midpoint. Pure and framework-free on purpose, so
-// a test can prove it against literal boxes with no browser and no OCR.
+// ocrWords()'s own return (each word carries `tIn`/`tOut` and `samples`); `filmBoxesByWindow` maps each
+// window's `t0` to the DOM text boxes sampled at that window's midpoint.
+//
+// A word is compared in EVERY window it is visible during (`tIn <= t1 && tOut >= t0`), each time at the
+// SAMPLE NEAREST THAT WINDOW'S OWN MIDPOINT, the same instant the film side was sampled at
+// (runTextScaleCheck seeks the page to `(t0+t1)/2` before reading its DOM box). Comparing a word's box
+// AVERAGED OVER ITS WHOLE ON-SCREEN RUN against the film's box AT ONE INSTANT is a unit mismatch, not a
+// bug in the film: a headline that grows from 0 to full size over 1s averages to roughly HALF its
+// settled height, so a film that renders it correctly at full size reads as "too big" the moment its own
+// run has finished growing. Matching moments, not averaging spans, is the fix.
+//
+// Pure and framework-free on purpose, so a test can prove it against literal boxes with no browser and
+// no OCR.
 export function textScaleCheck(refWords, filmBoxesByWindow, windows) {
   const rows = [];
   for (const w of windows) {
-    const refBox = biggestBox(refWords.filter((word) => word.tIn >= w.t0 && word.tIn < w.t1).map((word) => word.box));
+    const tMid = (w.t0 + w.t1) / 2;
+    const visible = refWords.filter((word) => word.tIn <= w.t1 && (word.tOut ?? word.tIn) >= w.t0);
+    const refBox = biggestBox(visible.map((word) => boxAtMoment(word, tMid)));
     const filmBox = biggestBox(filmBoxesByWindow.get(w.t0) || []);
     if (!refBox || !filmBox) continue;
     const hDiff = Math.abs(filmBox.hFrac - refBox.hFrac) / Math.max(refBox.hFrac, 1e-6);
@@ -1045,6 +1088,318 @@ async function runTextScaleCheck(htmlPath, refWindowPath, outDirRoot, { from, wi
     console.log('\n  ✓ text scale and placement matches the reference in every checked window.');
   }
   return result.ok;
+}
+
+// ── word events: what a beat table's one line ("words build, hold, fade") cannot say: WHERE each word
+// came from, WHEN it settled, whether a highlight travelled across them, and whether a small spinning
+// region (a star) was there at all. Runs OCR on BOTH the reference video and a rendered film video,
+// never DOM-vs-video (this file's own runRequiredMotionMatch note already lost a session mixing a
+// DOM's px/s against a video's pixel-diff energy; two OCR passes on two real renders keeps the units
+// the same on both sides).
+
+// Adaptive sample times: dense (native frame rate) while the picture is changing, one sample per hold,
+// built from this file's OWN motionDeltaSeries/findHolds/HOLD_FLOOR rather than a second motion signal
+// (a perceptual hash would say the same thing, slower, and this repo already owns a frame-diff signal).
+// Capped to a minimum gap so a long, constantly-changing span still costs a bounded number of tesseract
+// calls, not one per native frame.
+const WORD_SAMPLE_MIN_GAP = 0.1;
+export function adaptiveSampleTimes(video, from, to) {
+  const series = motionDeltaSeries(video).filter((p) => p.t >= from && p.t < to);
+  if (!series.length) return [from];
+  const holds = findHolds(series, HOLD_FLOOR, HOLD_MIN);
+  const changing = series.filter((p) => p.v > HOLD_FLOOR).map((p) => p.t);
+  const holdMids = holds.map((h) => (h.t0 + h.t1) / 2);
+  const candidates = [...new Set([from, ...changing, ...holdMids, Math.max(from, to - 0.03)])].sort((a, b) => a - b);
+  const picked = [];
+  for (const t of candidates) if (!picked.length || t - picked[picked.length - 1] >= WORD_SAMPLE_MIN_GAP) picked.push(t);
+  return picked;
+}
+
+// Native resolution, no downscale: unlike ocrWords' bulk fps-extract (every frame of a whole video,
+// where 640px keeps tesseract cheap over hundreds of frames), this only ever pulls the handful of
+// stills adaptiveSampleTimes picked, so there is no cost reason to shrink them first, and every reason
+// not to: a half-size 960x540 draft render downscaled AGAIN to 640 wide loses exactly the glyph detail
+// OCR needs on its own smaller text.
+function extractStillFrame(video, t, outPath) {
+  ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', video, '-frames:v', '1', outPath],
+    outPath, `word-event frame @${t.toFixed(2)}s`);
+}
+
+// A frame's mean colour inside one word's box, via ffmpeg's own area-averaging scale filter (a crop
+// scaled down to 1x1 IS the crop's average colour): no image-decoding dependency, one subprocess call.
+function cropMeanColor(framePath, box, frameW, frameH) {
+  const w = Math.max(1, Math.min(frameW, Math.round(box.wFrac * frameW)));
+  const h = Math.max(1, Math.min(frameH, Math.round(box.hFrac * frameH)));
+  const x = Math.max(0, Math.min(frameW - w, Math.round((box.cxFrac * frameW) - w / 2)));
+  const y = Math.max(0, Math.min(frameH - h, Math.round((box.cyFrac * frameH) - h / 2)));
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', framePath, '-vf', `crop=${w}:${h}:${x}:${y},scale=1:1:flags=area`,
+    '-frames:v', '1', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], { encoding: 'buffer' });
+  return r.stdout && r.stdout.length >= 3 ? { r: r.stdout[0], g: r.stdout[1], b: r.stdout[2] } : null;
+}
+
+// Named, not raw RGB: a travelling highlight in this reference is a blue/white swap, and naming it is
+// what lets compareWordEvents say "never changes" in plain words instead of printing three numbers.
+function colorName(c) {
+  if (!c) return 'unknown';
+  if (c.b - c.r > 20 && c.b > 110) return 'blue';
+  if (c.r > 190 && c.g > 190 && c.b > 190) return 'white';
+  return 'other';
+}
+
+function grayBuffer(framePath, w, h) {
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', framePath, '-vf', `scale=${w}:${h},format=gray`, '-f', 'rawvideo', '-'],
+    { encoding: 'buffer' });
+  return r.stdout && r.stdout.length >= w * h ? r.stdout : null;
+}
+
+function centreDist(a, b) { return Math.hypot(a.cxFrac - b.cxFrac, a.cyFrac - b.cyFrac); }
+
+// Which way a word travelled, in words a person reads, not a signed pixel delta.
+function dirFrom(fromBox, toBox) {
+  const dx = fromBox.cxFrac - toBox.cxFrac, dy = fromBox.cyFrac - toBox.cyFrac;
+  if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 'the right' : 'the left';
+  return dy > 0 ? 'below' : 'above';
+}
+
+const SETTLE_FRAC = 0.02; // centre movement (frame fraction) between samples below which a word counts as stopped
+const MOVE_FRAC = 0.08;   // centre movement above which an entrance/exit reads as "moved", not "in place"
+const WORD_TRACK_GAP = 0.6; // a text run absent this long before the same word reappears is a second,
+                             // separate appearance (a reused hero word), never one continuous track
+
+function buildWordTrack(occ) {
+  let settledIdx = occ.length - 1;
+  for (let i = 0; i < occ.length; i++) {
+    let stillRest = true;
+    for (let j = i + 1; j < occ.length; j++) if (centreDist(occ[j].box, occ[j - 1].box) >= SETTLE_FRAC) { stillRest = false; break; }
+    if (stillRest) { settledIdx = i; break; }
+  }
+  const enter = occ[0], settled = occ[settledIdx], last = occ[occ.length - 1];
+  const enterDist = centreDist(enter.box, settled.box);
+  const tail = occ[Math.max(settledIdx, occ.length - 3)];
+  const exitDist = centreDist(tail.box, last.box);
+  return {
+    text: occ[0].text,
+    tIn: Number(occ[0].t.toFixed(2)), tSettled: Number(settled.t.toFixed(2)), tOut: Number(last.t.toFixed(2)),
+    movedIn: enterDist >= MOVE_FRAC, enterDir: enterDist >= MOVE_FRAC ? dirFrom(enter.box, settled.box) : null,
+    movedOut: exitDist >= MOVE_FRAC,
+    sizeIn: Number(enter.box.hFrac.toFixed(3)), sizeSettled: Number(settled.box.hFrac.toFixed(3)),
+    colors: occ.map((o) => ({ t: Number(o.t.toFixed(2)), name: o.color })).filter((c) => c.name && c.name !== 'unknown'),
+  };
+}
+
+// Groups one word's raw per-frame sightings (matched by TEXT, case-insensitive) into tracks, splitting
+// on a gap over WORD_TRACK_GAP so a reused hero word (on screen twice, far apart) becomes two tracks.
+function trackWords(perFrame) {
+  const byKey = new Map();
+  for (const f of perFrame) for (const w of f.words) {
+    const key = w.text.toLowerCase();
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push({ t: f.t, box: w.box, color: w.color, text: w.text });
+  }
+  const tracks = [];
+  for (const occAll0 of byKey.values()) {
+    const occAll = occAll0.sort((a, b) => a.t - b.t);
+    let run = [occAll[0]];
+    for (let i = 1; i < occAll.length; i++) {
+      if (occAll[i].t - occAll[i - 1].t > WORD_TRACK_GAP) { tracks.push(buildWordTrack(run)); run = []; }
+      run.push(occAll[i]);
+    }
+    tracks.push(buildWordTrack(run));
+  }
+  return tracks.sort((a, b) => a.tIn - b.tIn);
+}
+
+// ── non-text moving regions: a frame-diff bounding box with any OCR word box MASKED OUT first, so a
+// scattering headline never gets read as "a moving region" twice over. A region whose WIDTH oscillates
+// (narrows edge-on, widens face-on) reports a half-turn period: the spacing between successive width
+// minima, the one number a spinning star needs and nothing else in this file measures.
+const REGION_SCALE_W = 128, REGION_SCALE_H = 72;
+const REGION_DIFF_THRESHOLD = 24; // 0-255 gray delta, comfortably above encoder noise
+const REGION_MIN_PIXELS = 6;      // a scattered handful of hot pixels is noise, not a region
+const REGION_JUMP = 0.25;         // centroid jump (frame fraction) between samples that starts a new region track
+
+function maskBoxes(buf, w, h, boxes) {
+  const masked = Buffer.from(buf);
+  for (const box of boxes) {
+    const bw = Math.round(box.wFrac * w) + 2, bh = Math.round(box.hFrac * h) + 2;
+    const bx = Math.max(0, Math.round((box.cxFrac * w) - bw / 2)), by = Math.max(0, Math.round((box.cyFrac * h) - bh / 2));
+    for (let y = by; y < Math.min(h, by + bh); y++) for (let x = bx; x < Math.min(w, bx + bw); x++) masked[(y * w) + x] = 0;
+  }
+  return masked;
+}
+
+function diffBBox(a, b, w, h) {
+  let minX = w, minY = h, maxX = -1, maxY = -1, count = 0;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = (y * w) + x;
+      if (Math.abs(a[i] - b[i]) >= REGION_DIFF_THRESHOLD) {
+        count++;
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (count < REGION_MIN_PIXELS) return null;
+  return { cxFrac: (minX + maxX) / 2 / w, cyFrac: (minY + maxY) / 2 / h,
+    wFrac: (maxX - minX + 1) / w, hFrac: (maxY - minY + 1) / h, area: count / (w * h) };
+}
+
+function buildRegionTrack(samples) {
+  const widths = samples.map((s) => s.box.wFrac);
+  const minimaT = [];
+  for (let i = 1; i < widths.length - 1; i++) if (widths[i] < widths[i - 1] && widths[i] < widths[i + 1]) minimaT.push(samples[i].t);
+  const gaps = minimaT.slice(1).map((t, i) => t - minimaT[i]);
+  const halfTurn = gaps.length ? Number((gaps.reduce((a, b) => a + b, 0) / gaps.length).toFixed(2)) : null;
+  return {
+    tIn: Number(samples[0].t.toFixed(2)), tOut: Number(samples[samples.length - 1].t.toFixed(2)),
+    area: Number((samples.reduce((s, x) => s + x.box.area, 0) / samples.length).toFixed(3)), halfTurn,
+  };
+}
+
+function trackRegions(frameFiles, times, wordBoxesByTime) {
+  const grays = frameFiles.map((f) => grayBuffer(f, REGION_SCALE_W, REGION_SCALE_H));
+  const boxSeries = [];
+  for (let i = 1; i < times.length; i++) {
+    const a = grays[i - 1], b = grays[i];
+    if (!a || !b) continue;
+    const boxesHere = [...(wordBoxesByTime.get(times[i - 1]) || []), ...(wordBoxesByTime.get(times[i]) || [])];
+    const ma = maskBoxes(a, REGION_SCALE_W, REGION_SCALE_H, boxesHere);
+    const mb = maskBoxes(b, REGION_SCALE_W, REGION_SCALE_H, boxesHere);
+    const bbox = diffBBox(ma, mb, REGION_SCALE_W, REGION_SCALE_H);
+    if (bbox) boxSeries.push({ t: (times[i - 1] + times[i]) / 2, box: bbox });
+  }
+  const tracks = [];
+  let run = [];
+  for (const s of boxSeries) {
+    if (run.length && centreDist(run[run.length - 1].box, s.box) > REGION_JUMP) { tracks.push(run); run = []; }
+    run.push(s);
+  }
+  if (run.length) tracks.push(run);
+  return tracks.filter((r) => r.length >= 2).map(buildRegionTrack);
+}
+
+// Extracts a still + OCR + per-word colour at every adaptive sample time, then tracks words and non-text
+// regions across them. `outDir` gets a `.word-events` scratch folder, removed before returning.
+export function wordEventTracks(video, from, to, outDir) {
+  // Clamped to the FILE's own probed duration, not the caller's window end: a windowed clip is cut to
+  // ~`to` seconds by ffmpeg's own encoder rounding, so a candidate time sitting right at the caller's
+  // `to` can land a hair past the last real frame and make `-ss` return nothing.
+  const dur = probeVideo(video).dur;
+  const times = adaptiveSampleTimes(video, from, to).map((t) => Math.min(t, dur - 0.05));
+  const workDir = path.join(outDir, '.word-events');
+  fs.mkdirSync(workDir, { recursive: true });
+  const frameFiles = times.map((t, i) => {
+    const p = path.join(workDir, `f_${i}.png`);
+    extractStillFrame(video, t, p);
+    return p;
+  });
+  const { width: frameW, height: frameH } = pngDims(frameFiles[0]);
+  const perFrame = times.map((t, i) => {
+    const base = path.join(workDir, `f_${i}`);
+    const words = ocrOneFrame(frameFiles[i], base, 60, 3, frameW, frameH)
+      .map((w) => ({ ...w, color: colorName(cropMeanColor(frameFiles[i], w.box, frameW, frameH)) }));
+    return { t, words };
+  });
+  const wordBoxesByTime = new Map(perFrame.map((f) => [f.t, f.words.map((w) => w.box)]));
+  const words = trackWords(perFrame);
+  const regions = trackRegions(frameFiles, times, wordBoxesByTime);
+  fs.rmSync(workDir, { recursive: true, force: true });
+  return { words, regions, from, to };
+}
+
+const ENTER_TIME_TOL = 0.3; // seconds; timing hints below this are noise, not a real beat mismatch
+const HALF_TURN_TOL = 0.1;  // seconds; a star's own half-turn period only worth reporting past this gap
+
+// Pairs reference and film words by TEXT (case-insensitive), in temporal order: the nth reference
+// occurrence of a word pairs with the nth not-yet-used film occurrence closest to it in time, so two
+// repeats of the same word (e.g. "text" used twice) pair the earlier with the earlier.
+function pairWords(refWords, filmWords) {
+  const byKey = new Map();
+  for (const w of filmWords) { const k = w.text.toLowerCase(); if (!byKey.has(k)) byKey.set(k, []); byKey.get(k).push(w); }
+  const used = new Set();
+  return refWords.map((rw) => {
+    const bucket = (byKey.get(rw.text.toLowerCase()) || []).filter((fw) => !used.has(fw));
+    if (!bucket.length) return { ref: rw, film: null };
+    let best = bucket[0];
+    for (const fw of bucket) if (Math.abs(fw.tIn - rw.tIn) < Math.abs(best.tIn - rw.tIn)) best = fw;
+    used.add(best);
+    return { ref: rw, film: best };
+  });
+}
+
+// Contiguous 'blue' stretches per word: the raw material for "does the highlight travel word to word,
+// or does it never change" (compareWordEvents below), sorted so the FIRST entry is whichever word the
+// highlight visits first.
+function highlightSpans(words) {
+  const spans = [];
+  for (const w of words) {
+    let start = null;
+    for (const c of w.colors) {
+      if (c.name === 'blue' && start == null) start = c.t;
+      if (c.name !== 'blue' && start != null) { spans.push({ text: w.text, t0: start, t1: c.t }); start = null; }
+    }
+    if (start != null) spans.push({ text: w.text, t0: start, t1: w.colors[w.colors.length - 1].t });
+  }
+  return spans.sort((a, b) => a.t0 - b.t0);
+}
+
+// The one comparator: reference word/region tracks vs a film's, in plain numbers, worst first. Pure and
+// framework-free (no ffmpeg, no OCR call inside it), so a test proves it against literal tracks.
+export function compareWordEvents(ref, film) {
+  const diffs = [];
+  for (const { ref: rw, film: fw } of pairWords(ref.words, film.words)) {
+    if (!fw) { diffs.push({ sev: 2, text: `'${rw.text}': present in the reference at ${rw.tIn.toFixed(2)}s, missing from yours.` }); continue; }
+    if (rw.movedIn !== fw.movedIn) {
+      diffs.push({ sev: 2, text: rw.movedIn
+        ? `'${rw.text}': reference enters from ${rw.enterDir} at ${rw.tIn.toFixed(2)}s and settles at ${rw.tSettled.toFixed(2)}s; yours appears in place at ${fw.tIn.toFixed(2)}s.`
+        : `'${rw.text}': reference appears in place at ${rw.tIn.toFixed(2)}s; yours enters from ${fw.enterDir} and settles at ${fw.tSettled.toFixed(2)}s.` });
+    } else if (rw.movedIn && Math.abs(rw.tSettled - fw.tSettled) > ENTER_TIME_TOL) {
+      diffs.push({ sev: 1, text: `'${rw.text}': reference settles at ${rw.tSettled.toFixed(2)}s; yours settles at ${fw.tSettled.toFixed(2)}s.` });
+    }
+    if (rw.movedOut !== fw.movedOut) {
+      diffs.push({ sev: 2, text: `'${rw.text}' exit: reference ${rw.movedOut ? 'moves away' : 'fades in place'} by ${rw.tOut.toFixed(2)}s; `
+        + `yours ${fw.movedOut ? 'moves away' : 'fades in place'}.` });
+    }
+  }
+
+  const refSpans = highlightSpans(ref.words), filmSpans = highlightSpans(film.words);
+  const refHitWords = new Set(refSpans.map((s) => s.text)), filmHitWords = new Set(filmSpans.map((s) => s.text));
+  if (refHitWords.size > 1 && filmHitWords.size <= 1) {
+    diffs.push({ sev: 2, text: `highlight: reference colour moves word to word ${refSpans[0].t0.toFixed(2)}-`
+      + `${refSpans[refSpans.length - 1].t1.toFixed(2)}s; yours never changes.` });
+  } else if (refHitWords.size > 1 && filmHitWords.size > 1 && Math.abs(refSpans[0].t0 - filmSpans[0].t0) > ENTER_TIME_TOL) {
+    diffs.push({ sev: 1, text: `highlight: reference starts travelling at ${refSpans[0].t0.toFixed(2)}s; yours at ${filmSpans[0].t0.toFixed(2)}s.` });
+  }
+
+  const refRegions = ref.regions || [], filmRegions = film.regions || [];
+  if (refRegions.length && !filmRegions.length) {
+    for (const r of refRegions) diffs.push({ sev: 2, text: `star: reference shows a spinning region ${r.tIn.toFixed(2)}-`
+      + `${r.tOut.toFixed(2)}s${r.halfTurn ? ` (half-turn ${r.halfTurn.toFixed(2)}s)` : ''}; yours has none.` });
+  } else {
+    for (let i = 0; i < Math.min(refRegions.length, filmRegions.length); i++) {
+      const r = refRegions[i], f = filmRegions[i];
+      if (r.halfTurn && f.halfTurn && Math.abs(r.halfTurn - f.halfTurn) > HALF_TURN_TOL)
+        diffs.push({ sev: 1, text: `star: reference half-turn ${r.halfTurn.toFixed(2)}s, yours ${f.halfTurn.toFixed(2)}s.` });
+    }
+  }
+
+  diffs.sort((a, b) => b.sev - a.sev);
+  return { diffs: diffs.map((d) => d.text), ok: diffs.length === 0 };
+}
+
+// Runs wordEventTracks on both sides and prints compareWordEvents' verdict. Shared by --word-events
+// (video vs video) and --dom --ref --words (a rendered page vs its reference, reusing the SAME two mp4s
+// runCompare already built rather than rendering a third).
+function runWordEventCompare(refVideo, filmVideo, outDir, from, to, label) {
+  const refTracks = wordEventTracks(refVideo, from, to, outDir);
+  const filmTracks = wordEventTracks(filmVideo, from, to, outDir);
+  const { diffs, ok } = compareWordEvents(refTracks, filmTracks);
+  console.log(`\n  WORD EVENTS · ${label}, ${from.toFixed(2)}-${to.toFixed(2)}s\n`);
+  if (!diffs.length) console.log('  ✓ no per-word differences against the reference.');
+  else for (const d of diffs) console.log(`  - ${d}`);
+  writeJsonAtomic(path.join(outDir, 'word-events.json'), { from, to, ref: refTracks, film: filmTracks, diffs, ok });
+  return ok;
 }
 
 // Every animation paused at one shared `currentTime`: the same seek --dom already relies on
@@ -1341,9 +1696,10 @@ async function main() {
   const video = positional[0];
 
   if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
-    + '| --shot <from>-<to> [--fps N] [--page <html>] | --compare <draft.mp4> [--from s --to s] '
+    + '| --shot <from>-<to> [--fps N] [--page <html>] | --compare <draft.mp4> [--from s --to s] [--words] '
     + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] '
-    + '[--ref <mp4> [--film <f.json>] [--final] [--w N --h N] [--blur N]] '
+    + '[--ref <mp4> [--film <f.json>] [--final] [--w N --h N] [--blur N] [--words]] '
+    + '| --word-events <film.mp4> [--from s --to s] '
     + '| --sheet-check <ref.json> <film.json> [--film <f.json>] '
     + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...> [--film <f.json>]');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
@@ -1361,9 +1717,27 @@ async function main() {
   if (shotSpec) return dispatchShot(video, positional, shotSpec, flag);
 
   const compareArg = flag('--compare', null);
-  if (compareArg) return dispatchCompare(video, positional, compareArg, flag);
+  if (compareArg) return dispatchCompare(video, positional, compareArg, flag, argv);
+
+  const wordEventsArg = flag('--word-events', null);
+  if (wordEventsArg) return dispatchWordEvents(video, positional, wordEventsArg, flag);
 
   return runFullFlow(video, positional, flag);
+}
+
+// `see.mjs <ref.mp4> --word-events <film.mp4> [--from s --to s]`: the standalone entry point for the
+// per-word entrance/highlight/exit/star check, video vs video, no page render involved (that path is
+// `--dom --ref ... --words`, which reuses this same runWordEventCompare on its own two rendered mp4s).
+function dispatchWordEvents(video, positional, filmVideo, flag) {
+  if (!fs.existsSync(filmVideo)) die(`no such --word-events file: ${filmVideo}`);
+  const refP = probeVideo(video), filmP = probeVideo(filmVideo);
+  const from = Number(flag('--from', 0));
+  const to = flag('--to', null) != null ? Number(flag('--to', null)) : Math.min(refP.dur, filmP.dur);
+  if (!(to > from)) die(`--word-events: bad window ${from}-${to}`);
+  const outDir = path.resolve(positional[1] || defaultOutDir(video));
+  fs.mkdirSync(outDir, { recursive: true });
+  const ok = runWordEventCompare(video, filmVideo, outDir, from, to, `${path.basename(video)} vs ${path.basename(filmVideo)}`);
+  if (!ok) process.exitCode = 1;
 }
 
 function dispatchProbe(video, positional, flag) {
@@ -1414,7 +1788,7 @@ function dispatchDom(video, positional, flag, argv) {
     from: fromArg, to: toArg != null ? Number(toArg) : null, fps: domFps, w, h, blur, final,
     ids: idsArg ? idsArg.split(',') : null,
   };
-  if (refArg) return runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null) });
+  if (refArg) return runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null), words: argv.includes('--words') });
   return runDom(video, outDirRoot, opts);
 }
 
@@ -1428,13 +1802,14 @@ function dispatchShot(video, positional, shotSpec, flag) {
   return runShot(video, outDirRoot, from, to, fps);
 }
 
-function dispatchCompare(video, positional, compareArg, flag) {
+function dispatchCompare(video, positional, compareArg, flag, argv) {
   if (!fs.existsSync(compareArg)) die(`no such draft file: ${compareArg}`);
   const fromArg = flag('--from', null);
   const toArg = flag('--to', null);
   const filmArg = flag('--film', null);
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
-  return runCompare(video, compareArg, outDirRoot, fromArg != null ? Number(fromArg) : null, toArg != null ? Number(toArg) : null, filmArg);
+  return runCompare(video, compareArg, outDirRoot, fromArg != null ? Number(fromArg) : null, toArg != null ? Number(toArg) : null,
+    filmArg, argv.includes('--words'));
 }
 
 function runFullFlow(video, positional, flag) {

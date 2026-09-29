@@ -345,8 +345,9 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 #
 # make study REF=<reference.mp4> COMPARE=<draft.mp4>: reference vs draft AT THE SAME TIMESTAMPS: side-
 # by-side grids (reference top, draft bottom, every 0.25s) and a per-0.5s motion-energy table marking
-# "too still" where the draft is under half the reference. FROM=<s> TO=<s> narrows the window.
-# harness/media/see.mjs --compare
+# "too still" where the draft is under half the reference. FROM=<s> TO=<s> narrows the window. WORDS=1
+# adds the per-word entrance/highlight/exit/star check (adaptive OCR on both clips, opt-in: not free).
+# harness/media/see.mjs --compare [--words]
 #
 # make study REF=<fragment.html> PROBE=1 AT=<s> SEL=<css>: box, opacity, computed transform/filter, and
 # every active animation's current progress, for every element matching SEL at one instant. No render.
@@ -374,7 +375,7 @@ study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<
 	elif [ -n "$(LAYOUT)" ]; then \
 	  node harness/media/see.mjs $(REF) $(OUT) --layout --times $(LAYOUT) $(if $(D),--film $(D)); \
 	elif [ -n "$(COMPARE)" ]; then \
-	  node harness/media/see.mjs $(REF) $(OUT) --compare $(COMPARE) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(D),--film $(D)); \
+	  node harness/media/see.mjs $(REF) $(OUT) --compare $(COMPARE) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(D),--film $(D)) $(if $(WORDS),--words); \
 	else \
 	  node harness/media/study.mjs $(VIDEO) $(NAME) $(if $(THRESH),--threshold $(THRESH)) $(if $(STRIPS),--strips $(STRIPS)) $(if $(STRIPFPS),--strip-fps $(STRIPFPS)); \
 	fi
@@ -393,10 +394,10 @@ preview: ## [dev] render a single hand-written fragment (or a captured component
 stage: ## [preflight] WHERE IS THIS FILM: the stage it is in and the ONE next command (D=<film>, or no D= for the roster, or Q="…" before a film exists)
 	@node quality/gates/stage.mjs $(D) $(if $(Q),--q "$(Q)") $(if $(JSON),--json,)
 
-next: ## [preflight] RUN the one command the stage names, then stop (D=<film>, or PAGE=<html> REF=<mp4> for a bare page's required-motion-match, no film needed; FROM=/TO= windows a half-size draft, FINAL=1 checks the full render)
+next: ## [preflight] RUN the one command the stage names, then stop (D=<film>, or PAGE=<html> REF=<mp4> for a bare page's required-motion-match, no film needed; FROM=/TO= windows a half-size draft, FINAL=1 checks the full render, WORDS=1 adds the per-word entrance/highlight/exit/star check)
 ifdef PAGE
 	@node quality/gates/anim-traps.mjs $(PAGE)
-	@node harness/media/see.mjs $(PAGE) --dom --ref $(REF) $(if $(D),--film $(D),) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(FINAL),--final)
+	@node harness/media/see.mjs $(PAGE) --dom --ref $(REF) $(if $(D),--film $(D),) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(FINAL),--final) $(if $(WORDS),--words)
 else
 	@node quality/gates/next.mjs $(D)
 endif
