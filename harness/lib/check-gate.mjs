@@ -1,55 +1,39 @@
+// `vawe check <name> [args]`: runs one gate. This table is the only list of gates; the args after the
+// name go to the gate script unchanged (a page path, --json, --stamp).
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { closest } from '../cli/parse.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const env = process.env;
-const json = () => (env.JSON ? ['--json'] : []);
-const stamp = () => (env.STAMP ? ['--stamp'] : []);
-const write = () => (env.WRITE ? ['--write'] : []);
-const list = () => (env.LIST ? ['--list'] : []);
-// A make recipe expands $(D) etc. through the shell, which word-splits an unquoted, possibly
-// multi-file value (`impeccable D=<file...>`). spawnSync here takes an argv array with no shell, so
-// this does the same split by hand instead of passing one file list as a single mangled argument.
-const words = (name) => (env[name] ? env[name].trim().split(/\s+/) : []);
-const flag = (name, f) => (env[name] ? [f] : []);
-const flag1 = (name, f) => (env[name] === '1' ? [f] : []);
-const valFlag = (name, f) => (env[name] ? [f, env[name]] : []);
 
-// name -> the script + args; keep alphabetical, this is the only place the list is kept.
 export const GATES = {
-  'anim-traps': () => ['quality/gates/anim-traps.mjs', ...words('D'), ...flag1('STRICT', '--strict')],
-  'code-quality': () => ['quality/gates/code-quality.mjs', ...(env.TOP ? ['--top'] : []), ...write(), ...json()],
-  'dead-branch': () => ['quality/gates/dead-branch.mjs', ...json()],
-  'doc-refs': () => ['quality/gates/doc-refs.mjs', ...json()],
-  'mistakes-check': () => ['quality/gates/mistakes-dupes.mjs', ...json()],
-  'no-emdash': () => ['harness/dev/no-emdash.mjs'],
-  'provenance': () => ['quality/gates/threshold-provenance.mjs', ...list(), ...stamp(), ...json()],
-  'rule-length': () => ['quality/gates/rule-length.mjs', ...list(), ...stamp(), ...json()],
-  'seo-surface': () => ['quality/gates/seo-surface.mjs', ...json()],
-  'skill-reach': () => ['quality/gates/skill-reach.mjs', ...json()],
-  'impeccable': () => ['skills/impeccable/scripts/detect.mjs', '--json', ...words('D')],
-  'page-check': () => ['quality/gates/page-check.mjs', ...words('PAGE'), ...valFlag('REF', '--ref')],
-  'pace-from-vo': () => ['harness/media/pace-from-vo.mjs'],
-  'study-check': () => ['quality/gates/study-check.mjs', ...words('NAME')],
+  'anim-traps': 'quality/gates/anim-traps.mjs',
+  'code-quality': 'quality/gates/code-quality.mjs',
+  'doc-refs': 'quality/gates/doc-refs.mjs',
+  'impeccable': 'skills/impeccable/scripts/detect.mjs',
+  'mistakes-check': 'quality/gates/mistakes-dupes.mjs',
+  'no-emdash': 'harness/dev/no-emdash.mjs',
+  'page-check': 'quality/gates/page-check.mjs',
+  'provenance': 'quality/gates/threshold-provenance.mjs',
+  'rule-length': 'quality/gates/rule-length.mjs',
+  'seo-surface': 'quality/gates/seo-surface.mjs',
+  'skill-reach': 'quality/gates/skill-reach.mjs',
 };
 
-export function run(name) {
-  const build = GATES[name];
-  if (!build) {
-    console.error(`✗ make check GATE=${name}: no such gate. Known gates:\n  ${Object.keys(GATES).sort().join(' ')}`);
+export function run(name, args = []) {
+  const script = GATES[name];
+  if (!script) {
+    const guess = closest(name, Object.keys(GATES));
+    console.error(`vawe check: unknown gate ${name}; valid: ${Object.keys(GATES).join(' ')}${guess ? `; did you mean ${guess}?` : ''}`);
     return 2;
   }
-  const [script, ...args] = build();
-  const exe = script.endsWith('.sh') ? 'sh' : process.execPath;
   // Node's default 1 MiB capture limit killed gates with long output and hid the cause.
-  const r = spawnSync(exe, [path.join(ROOT, script), ...args], { encoding: 'utf8', cwd: ROOT, maxBuffer: 256 * 1024 * 1024 });
+  const r = spawnSync(process.execPath, [path.join(ROOT, script), ...args], { encoding: 'utf8', cwd: ROOT, maxBuffer: 256 * 1024 * 1024 });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
   const status = r.status ?? 1;
-  // Every gate prints its own ✓/✗ lines, but a failure could scroll off above the exit code.
-  // One summary line, always last, so a failure is never buried under passing checks.
-  if (!env.JSON) {
+  if (!args.includes('--json')) {
     const failing = `${r.stdout || ''}${r.stderr || ''}`.split('\n').filter((l) => l.includes('✗'));
     console.log(status === 0
       ? `✓ ${name}: passed`
@@ -59,7 +43,10 @@ export function run(name) {
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const name = process.argv[2];
-  if (!name) { console.error(`usage: make check GATE=<name>. Known gates:\n  ${Object.keys(GATES).sort().join(' ')}`); process.exit(2); }
-  process.exit(run(name));
+  const [name, ...args] = process.argv.slice(2);
+  if (!name) {
+    console.log(`gates: ${Object.keys(GATES).join(' ')}`);
+    process.exit(0);
+  }
+  process.exit(run(name, args));
 }

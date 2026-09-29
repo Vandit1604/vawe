@@ -1,6 +1,6 @@
 #!/bin/sh
 # Link the main checkout's shared stores into a linked worktree: node_modules, site/node_modules,
-# bin/vawe, .vawe-data. Read-only links, never copies (a concurrent install through two worktrees
+# .vawe-data. Read-only links, never copies (a concurrent install through two worktrees
 # corrupts the store). Silent and near-instant when there is nothing to do. The Claude Code worktree
 # tool does not fire post-checkout, so pre-commit calls this too.
 set -u
@@ -13,7 +13,4 @@ for d in node_modules site/node_modules .vawe-data; do
     ln -sfn "$MAIN/$d" "$WT/$d"
   fi
 done
-if [ ! -e "$WT/bin/vawe" ] && [ ! -L "$WT/bin/vawe" ] && [ -f "$MAIN/bin/vawe" ]; then
-  mkdir -p "$WT/bin" && ln -sf "$MAIN/bin/vawe" "$WT/bin/vawe"
-fi
 exit 0

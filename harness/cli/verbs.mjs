@@ -1,0 +1,113 @@
+// The verb table for bin/vawe. Each verb names the script it forwards to and the one command to run next.
+// build() returns the steps to run in order; a step is { script, args, env }.
+import path from 'node:path';
+
+const pageName = (page) => {
+  const base = path.basename(page, '.html');
+  return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
+};
+const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
+
+const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
+const ASPECT = 'one of 16:9 9:16 1:1 4:5 4:3';
+
+export const VERBS = [
+  {
+    name: 'new', summary: 'start a film: films/<name>/page.html and brief.md',
+    positional: [{ name: 'name', required: true, help: 'film name, lowercase with dashes' }],
+    flags: [{ name: 'from', type: 'path', default: 'prompts/brand-launch-from-url.md', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' }],
+    example: 'vawe new my-launch --from prompts/story-explainer.md',
+    local: 'new',
+  },
+  {
+    name: 'dev', summary: 'draft render: half size, 30 fps, silent',
+    positional: [PAGE],
+    flags: [
+      { name: 'from', type: 'number', help: 'start second' },
+      { name: 'to', type: 'number', help: 'end second' },
+      { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
+      { name: 'audio', type: 'bool', help: 'mix the audio tags into the draft' },
+      { name: 'out', type: 'path', default: 'out/<name>-draft.mp4', help: 'output file' },
+    ],
+    example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
+    build: (v, [page]) => [{ script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] }],
+    next: (v, [page]) => `vawe critique ${page}`,
+  },
+  {
+    name: 'ship', summary: 'final render: 60 fps, subframe blur, audio mixed',
+    positional: [PAGE],
+    flags: [
+      { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
+      { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
+    ],
+    example: 'vawe ship films/my-launch/page.html --aspect all',
+    build: (v, [page]) => [{ script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), '--final', ...opt('--aspect', v.aspect)] }],
+    next: (v, [page]) => `vawe judge out/${pageName(page)}.mp4`,
+  },
+  {
+    name: 'critique', summary: 'phone sheet, strip, loop seam, measured deltas and page-check to look at',
+    positional: [PAGE],
+    flags: [
+      { name: 'ref', type: 'path', help: 'reference mp4 to measure against', kind: 'file' },
+      { name: 'at', type: 'string', default: 'auto', help: 'seconds for the strip, or auto' },
+    ],
+    example: 'vawe critique films/my-launch/page.html --ref refs/ad.mp4 --at 4.2',
+    build: (v, [page]) => [
+      { script: 'harness/media/see.mjs', args: [page, '--phone', '--strip', v.at || 'auto', '--loop'] },
+      { script: 'harness/media/see.mjs', args: [page, '--measure', ...opt('--ref', v.ref)] },
+      { script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)] },
+    ],
+    next: (v, [page]) => `look at the sheets above, then in a fresh session: VAWE_AGENT=judge-${pageName(page)} vawe judge ${page}${v.ref ? ` --ref ${v.ref}` : ''}`,
+  },
+  {
+    name: 'spec', summary: 'measure a reference mp4 into SPEC.md and spec.json',
+    positional: [{ name: 'ref.mp4', required: true, kind: 'file', help: 'the reference film' }],
+    flags: [
+      { name: 'out', type: 'path', default: 'next to the reference', help: 'output directory' },
+      { name: 'ocr', type: 'bool', help: 'add text boxes (needs tesseract)' },
+      { name: 'fps', type: 'number', default: 'the video rate', help: 'frame rate for the tables' },
+      { name: 'elements', type: 'number', default: 6, help: 'moving elements to track' },
+    ],
+    example: 'vawe spec refs/ad.mp4 --ocr',
+    build: (v, [ref]) => [{ script: 'harness/media/ref-spec.mjs', args: [ref, ...opt('--out', v.out), ...opt('--fps', v.fps), ...opt('--elements', v.elements), ...(v.ocr ? ['--ocr'] : [])] }],
+    next: () => 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild',
+  },
+  {
+    name: 'studio', summary: 'live scrubbable preview; edits the page literals in place',
+    positional: [PAGE],
+    flags: [{ name: 'port', type: 'number', default: 8799, help: 'http port' }],
+    example: 'vawe studio films/my-launch/page.html --port 8800',
+    build: (v, [page]) => [{ script: 'studio/page-server.mjs', args: [page], env: v.port ? { PORT: String(v.port) } : {} }],
+  },
+  {
+    name: 'check', summary: 'run one gate by name; bare lists the gates',
+    positional: [{ name: 'name', help: 'gate name, then that gate\'s own args' }],
+    flags: [], raw: true,
+    example: 'vawe check anim-traps films/my-launch/page.html',
+    build: (v, args) => [{ script: 'harness/lib/check-gate.mjs', args }],
+  },
+  {
+    name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
+    positional: [], flags: [],
+    example: 'vawe e2e',
+    build: () => [{ script: 'harness/dev/e2e.mjs', args: [] }],
+  },
+  {
+    name: 'test', summary: 'run every tests/**/*.test.mjs with node --test',
+    positional: [], flags: [],
+    example: 'vawe test',
+    build: () => [{ node: ['--test', 'tests/**/*.test.mjs'] }],
+  },
+  {
+    name: 'judge', summary: 'prepare key frames and the rubric for a fresh session to score',
+    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'a page or a rendered mp4' }],
+    flags: [
+      { name: 'ref', type: 'path', help: 'reference mp4', kind: 'file' },
+      { name: 'struct', type: 'bool', help: 'add the structure pass' },
+      { name: 'runs', type: 'string', help: 'double-run labels, for example A,B' },
+    ],
+    example: 'vawe judge out/my-launch.mp4 --struct --runs A,B',
+    build: (v, [input]) => [{ script: 'quality/gates/judge.mjs', args: [input, ...opt('--ref', v.ref), ...(v.struct ? ['--struct'] : []), ...opt('--runs', v.runs)] }],
+    next: () => 'judge returns at once; do not poll for it',
+  },
+];

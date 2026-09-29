@@ -13,8 +13,9 @@ assets/fonts/*.woff2
 assets/fonts/*.woff
 .DS_Store
 
-# go
-bin/
+# bin/vawe is the tracked CLI; anything else in bin/ is a local build
+bin/*
+!bin/vawe
 
 # verify + previews (generated output). out/ itself is covered wholesale above; these two live
 # outside out/.
