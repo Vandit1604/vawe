@@ -2,7 +2,7 @@
 //   node tests/dev/recreation-new.test.mjs
 //
 // Proves harness/dev/recreation-new.mjs (make dev-tool X=new TYPE=recreation) writes a working
-// page.html (correct duration, a timeline that actually runs) plus a `see` pass on the reference, and
+// page.html (correct duration, an animation that actually runs) plus a `see` pass on the reference, and
 // prints exactly one next step, against the repo's own site/public/assets/sample.mp4 fixture.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,8 +29,9 @@ try {
   assert(fs.existsSync(pagePath), 'page.html was not written');
   const html = fs.readFileSync(pagePath, 'utf8');
   assert(/<meta name="duration" content="7\.6/.test(html), `duration meta should read ~7.6s: ${html}`);
-  assert(/timelineFromScript/.test(html), 'page should drive its timing sheet through timelineFromScript');
-  assert(/--i/.test(html), 'page should split its hero text into letters keyed by --i');
+  assert(!/timelineFromScript|id="timing"/.test(html), 'starter must not carry the private timing block');
+  assert(/@keyframes/.test(html), 'page should animate through plain @keyframes literals');
+  assert(fs.existsSync(path.join(outDir, 'SPEC.md')), 'ref-spec did not write SPEC.md');
 
   assert(fs.existsSync(path.join(outDir, 'see', 'index.md')), 'see pass did not write index.md');
 
@@ -43,13 +44,11 @@ try {
   await new Promise((r) => setTimeout(r, 200));
   const info = await page.evaluate(() => ({
     animations: document.getAnimations().length,
-    letters: document.querySelectorAll('.letter').length,
   }));
   await browser.close();
   close();
   assert(errors.length === 0, `page.html threw: ${errors.join('; ')}`);
-  assert(info.animations > 0, 'the timing sheet produced no animations');
-  assert(info.letters > 0, 'the hero text was not split into letters');
+  assert(info.animations > 0, 'the page produced no animations');
 
   console.log('ok - recreation-new.mjs writes a working starter and one next step');
 } finally {
