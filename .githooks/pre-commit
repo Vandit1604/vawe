@@ -13,6 +13,8 @@
 # Bypass with `git commit --no-verify` when you know better.
 set -u
 
+[ -f harness/dev/link-shared.sh ] && sh harness/dev/link-shared.sh
+
 staged="$(git diff --cached --name-only --diff-filter=ACMR)"
 [ -z "$staged" ] && exit 0
 
