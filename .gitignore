@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 # out/ is the scratch directory every author tool writes to (renders, mixes, logs, sound-vary specs,
 # the gallery build): every file in it is regenerable, none is source. `out/**/*.<ext>` rules used to
 # list this out file-extension by file-extension and still missed `.m4a` (12 files reached main that
