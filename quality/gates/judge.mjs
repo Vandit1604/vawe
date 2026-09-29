@@ -322,8 +322,19 @@ let measured = [];
 if (scene) measured = [...runFindings('quality/audit.mjs', [inp]), ...runFindings('quality/gates/sweep-static.mjs', [inp])];
 else if (isPage && !process.argv.includes('--no-measure')) measured = runFindings('quality/gates/page-check.mjs', [inp, ...(ref ? ['--ref', ref] : [])]);
 
+// Numbers about the page's own timing, size and colour (against the reference when there is one), measured
+// by code on both sides so the judge does not eyeball them. Same channel as the findings above: a child process.
+let deltas = '';
+if (isPage && !process.argv.includes('--no-measure')) {
+  const out = path.join(dir, 'measured');
+  spawnSync(process.execPath, [path.join(repoRoot, 'harness/media/see.mjs'), inp, out, '--measure', ...(ref ? ['--ref', ref] : [])], { encoding: 'utf8' });
+  const file = path.join(out, 'deltas.md');
+  if (fs.existsSync(file)) deltas = fs.readFileSync(file, 'utf8');
+  else console.error('  ! see.mjs --measure wrote no deltas.md: the judge gets no measured deltas');
+}
+
 fs.writeFileSync(`${dir}/rubric.md`, craftRubric({
-  name: path.basename(mp4), frames: tiles.length, landscape, brand, dir, findings: measured,
+  name: path.basename(mp4), frames: tiles.length, landscape, brand, dir, findings: measured, deltas,
   reference: ref && path.relative(repoRoot, ref), measuredSource: measuredBy,
 }));
 
@@ -338,7 +349,7 @@ if (process.argv.includes('--struct')) {
     const outFile = `${dir}/verdicts/${run}.json`;
     fs.writeFileSync(`${dir}/structured-${run}.md`, structuredRubric({
       name: path.basename(mp4), subject: inp, frames: tiles.length, landscape, dir, run, outFile,
-      reference: ref && path.relative(repoRoot, ref),
+      reference: ref && path.relative(repoRoot, ref), deltas,
     }));
   }
   console.log(`  → structured: ${runs.map((r) => `${dir}/structured-${r}.md`).join(', ')} `
