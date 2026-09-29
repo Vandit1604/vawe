@@ -9,6 +9,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { readPageMeta } from './render-page.mjs';
 import { sampleFrames, tileGrid, blendDiff, meanColorOf, ssimOf } from '../../quality/gates/tile.mjs';
 
 export function probe(video) {
@@ -108,4 +109,10 @@ export function describeLoop(r) {
         : 'seam reads like an ordinary frame step';
   return `last-vs-first pixel diff ${fmt(r.seamPct)} (ssim ${r.seamSsim == null ? 'n/a' : r.seamSsim.toFixed(3)}); `
     + `typical step in the last 0.5 s ${fmt(r.tailPct)}: ${verdict}`;
+}
+
+/** The moment worth a strip when the caller names none: the page's spectacle, else the middle of the film. */
+export function autoStripTime(input, video) {
+  const spectacle = input.endsWith('.html') ? Number(readPageMeta(input, 'spectacle')) : NaN;
+  return Number.isFinite(spectacle) ? spectacle : +(probe(video).dur / 2).toFixed(2);
 }
