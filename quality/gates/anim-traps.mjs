@@ -172,6 +172,10 @@ function pageTraps(src, add) {
     add('page reads Date.now()', 'script', 'use the t argument vawe.onFrame((t) => {...}) already hands you');
   if (has(/\bMath\.random\s*\(/))
     add('page calls unseeded Math.random()', 'script', 'seed a small PRNG (the same rng(seed) shape core/surfaces/three-fx.js uses) so the same seed rebuilds the identical scene across render orders and re-renders');
+  if (has(/\bset(?:Timeout|Interval)\s*\(/))
+    add('page uses setTimeout/setInterval', 'script', 'the render clock fires a timer only when a seek passes its due time, so a timer that starts motion or changes state lands on the frame after its delay, never mid-frame: put the change in a keyframe table or an element.animate() delay, or compute it from t in window.seek(t)');
+  if (has(/(^|[\s;{"'])transition(-property)?\s*:\s*(?!none\b)[^;}]*/m))
+    add('page uses a CSS transition for motion', 'style', 'a transition starts from a class or style change and runs on its own start time, so a seek cannot place it at t: use @keyframes or element.animate() (both are seeked), or set the value directly from t in window.seek(t)');
   const webgl = has(/WebGLRenderer/);
   if (webgl && !has(/preserveDrawingBuffer/))
     add('a WebGLRenderer is built without preserveDrawingBuffer', 'script', 'pass {preserveDrawingBuffer:true}, or the capture (a screenshot taken after the draw call) can read a blank/cleared buffer depending on the browser\'s own swap timing');

@@ -2,7 +2,7 @@
 // harness/media/render-page.mjs and preview-server.mjs serve (never a scene-JSON film: scene.js drives
 // its own layers directly and never imports this file). Importing this ONE module gives such a page:
 //
-//   vawe.onFrame((t) => { ... })   registers a per-frame hook; the same list core/timeline/clips.js's
+//   vawe.onFrame((t) => { ... })   registers a per-frame hook; the same list core/timeline/seek.js's
 //                                  seekAll(t) already calls for a scene-module page, so a scene layer
 //                                  and a hand-written page share ONE hook mechanism, not two.
 //   vawe.value(row, t)             samples a timing-sheet row ({at,dur,from,to,ease}, core/motion/
@@ -16,7 +16,7 @@
 // reattached to the existing `window.vawe` global core/motion/timeline.js's own bottom line already
 // populates (`timeline`/`timelineFromScript`). A second global would be the exact drift
 // engine-doctrine/CRAFT/ENGINE-CHANGES.md warns against ("one fact, one owner").
-import { onFrame } from '../timeline/clips.js';
+import { onFrame } from '../timeline/seek.js';
 import { studio, extrude, material } from '../surfaces/three-fx.js';
 import { interpolate, resolveEasing, cubicBezier } from '../motion/motion.js';
 
@@ -35,4 +35,4 @@ export function value(row, t) {
 // Guarded the same way core/motion/timeline.js's own bottom line already is: importable in Node
 // (so tooling that walks every core/ module, e.g. `make check GATE=word-action`, does not choke on it)
 // even though the assignment itself only means anything in a browser page.
-if (typeof window !== 'undefined') Object.assign(window.vawe || (window.vawe = {}), { onFrame, value, three: { studio, extrude, material } });
+if (typeof window !== 'undefined') Object.assign(window.vawe || (window.vawe = {}), { onFrame, value, clock: window.__pageClock, three: { studio, extrude, material } });
