@@ -277,21 +277,30 @@ function modalColor(V, f, cx, cy, bw, bh) {
   return top ? hex(top[0]) : null;
 }
 
-function analyseTrack(track, V, fps, sc, cameraStill) {
-  const refined = cameraStill ? refineTrack(V, track.pts) : null;
+// One coordinate per frame from where the element sat still before the move to where it rests after it.
+function positionSeries(refined, pts, axis) {
+  const lead = refined ? refined.lead : [], tail = refined ? refined.tail : [];
+  if (!lead.length) {
+    const pos = [...pts, ...tail].map((p) => p[axis]);
+    return { pos, p0: pos[0] - (axis === 'x' ? pts[0].vx : pts[0].vy), f0: pts[0].f };
+  }
+  const seq = [...lead, ...pts, ...tail];
+  return { pos: seq.slice(1).map((p) => p[axis]), p0: seq[0][axis], f0: seq[1].f };
+}
+
+function analyseTrack(track, V, fps, sc, span) {
+  const refined = span.still ? refineTrack(V, track.pts, span) : null;
   const pts = refined ? refined.pts : track.pts;
   const dx = pts[pts.length - 1].x - (pts[0].x - pts[0].vx), dy = pts[pts.length - 1].y - (pts[0].y - pts[0].vy);
   const axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
-  const v = (p) => (axis === 'x' ? p.vx : p.vy);
-  const pos = pts.map((p) => p[axis]);
-  const p0 = refined && refined.before ? refined.before[axis] : pos[0] - v(pts[0]), p1 = pos[pos.length - 1], D = p1 - p0;
+  const { pos, p0, f0 } = positionSeries(refined, pts, axis), p1 = pos[pos.length - 1], D = p1 - p0;
   const speeds = pts.map((p) => Math.hypot(p.vx, p.vy) * sc);
   const peak = Math.max(...speeds);
   const moving = speeds.filter((s) => s >= 0.05 * peak).length;
   const out = { f0: pts[0].f, f1: pts[pts.length - 1].f, axis, frames: pts.length, movingFrames: moving,
     from: [r1(pts[0].x * sc), r1(pts[0].y * sc)], to: [r1(pts[pts.length - 1].x * sc), r1(pts[pts.length - 1].y * sc)],
     size: [r1(median(pts.map((p) => p.w)) * sc), r1(median(pts.map((p) => p.h)) * sc)], peakSpeed: r1(peak), overshoot: null, fit: null };
-  Object.assign(out, summariseMove(pos, p0, p1, fps, sc, { f0: pts[0].f }));
+  Object.assign(out, summariseMove(pos, p0, p1, fps, sc, { f0 }));
   out.shutter = refined ? estimateShutter(V, pts, axis) : null;
   const last = pts[pts.length - 1];
   out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
@@ -487,10 +496,11 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
     console.error(`  shot ${i + 1}: frames ${f0}-${f1 - 1}`);
     const tracks = trackShot(V, f0, f1, cams, maxElements);
     const elements = tracks.map((t, j) => {
-      const e = analyseTrack(t, V, fps, sc, cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0));
+      const e = analyseTrack(t, V, fps, sc, { f0, f1, still: cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0) });
       const travel = Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]);
+      if (e.frames <= 4 && travel < 3 && !e.blur) return null;
       return { id: `${i + 1}.${j + 1}`, ...e, big: travel >= 0.03 * W || e.blur != null };
-    });
+    }).filter(Boolean);
     let zc = 1, px = 0, py = 0;
     const camRows = [];
     for (let f = f0 + 1; f < f1; f++) {

@@ -139,6 +139,14 @@ function cssFor(cls, params, fps) {
   return { css: `linear(${pts.join(', ')})`, durMs: Math.round((frames / fps) * 1000) };
 }
 
+// A parameter pinned to the edge of its search range means the pixels do not pin it down.
+const limitHit = (cls, params) => params.some((v, j) => {
+  if (j === 0) return false;
+  const { lo, hi } = CLASSES[cls], edge = cls === 'bezier' && j >= 2 && j <= 5;
+  if (edge && (j === 2 || j === 4)) return false;
+  return edge ? v >= 2.4 || v <= -0.9 : v <= lo[j] + 1e-6 || v >= hi[j] - 1e-6;
+});
+
 const PARAM_OUT = {
   linear: (p, fps) => ({ durMs: Math.round((p[1] / fps) * 1000) }),
   approach: (p) => ({ k: r3(p[1]) }),
@@ -182,7 +190,7 @@ export function summariseMove(pos, p0, p1, fps, sc, opts = {}) {
   const errFrames = Math.max(timeError(win, n), ...spread.map((l) => Math.abs(l - landF)));
   const { css, durMs } = cssFor(win.cls, win.params, fps);
   return { overshoot, fit: legacy,
-    easing: { class: win.cls, css, durMs, params: PARAM_OUT[win.cls](win.params, fps), r2: r3(sst > 0 ? 1 - win.sse / sst : 0), rmsePx: r2(win.rmse),
+    easing: { class: win.cls, css, durMs, params: PARAM_OUT[win.cls](win.params, fps), r2: r3(sst > 0 ? 1 - win.sse / sst : 0), rmsePx: r2(win.rmse), points: n, atLimit: limitHit(win.cls, win.params),
       runnerUp: { class: runner.cls, rmsePx: r2(runner.rmse) } },
     start: { t: r3(win.params[0] / fps), frame: r2(win.params[0]) },
     land: { t: r3(landF / fps), frame: r2(landF), errFrames: r2(errFrames) } };

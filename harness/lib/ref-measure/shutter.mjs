@@ -6,6 +6,7 @@
 
 const MIN_TRAVEL = 4;
 const RAMP = 0.8;
+const MAX_ANGLE = 400;
 
 function profile(g, V, pt, axis, half) {
   const { w, h } = V, cx = pt.x, cy = pt.y;
@@ -48,7 +49,8 @@ function edgeWidths(g, V, pt, axis) {
 
 /**
  * pts: refined track points { f, x, y, w, h } in grid px (w, h the element's own size); axis: 'x' or 'y'.
- * Returns { angleDeg, errDeg, frames } or null when the element moves too little or too rarely to tell.
+ * Returns { angleDeg, errDeg, frames } or null when the element moves too little or too rarely to tell, or when its edges are not clean steps
+ * (a measured angle above 400 degrees cannot be a shutter: the shutter never stays open longer than the frame).
  */
 export function estimateShutter(V, pts, axis) {
   const rest = pts[pts.length - 1], w0 = edgeWidths(V.frame(rest.f), V, rest, axis);
@@ -60,10 +62,11 @@ export function estimateShutter(V, pts, axis) {
     const wm = edgeWidths(V.frame(pts[i].f), V, pts[i], axis);
     if (wm == null) continue;
     const blur = Math.sqrt(Math.max(0, wm * wm - w0 * w0)) / RAMP;
-    angles.push(Math.min(720, (blur / travel) * 360)); travels.push(travel);
+    angles.push((blur / travel) * 360); travels.push(travel);
   }
   if (angles.length < 2) return null;
   const sorted = [...angles].sort((x, y) => x - y), med = sorted[sorted.length >> 1];
+  if (med > MAX_ANGLE) return null;
   const mad = [...angles.map((a) => Math.abs(a - med))].sort((x, y) => x - y)[angles.length >> 1];
   const meanTravel = travels.reduce((s, t) => s + t, 0) / travels.length;
   return { angleDeg: Math.round(med), errDeg: Math.round(Math.max(1.5 * mad, (0.7 / meanTravel) * 360)), frames: angles.length };
