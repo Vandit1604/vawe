@@ -55,4 +55,29 @@ const windows = [{ t0: 0, t1: 0.5 }, { t0: 0.5, t1: 1.0 }];
   console.log(`✓ see-text-scale.test.mjs: the ${Math.round(TEXT_SCALE_TOLERANCE * 100)}% threshold is a real edge, not a guess`);
 }
 
+// ── the actual bug this file's own header note describes: "reference 6% of frame height, yours 9%" on
+// a page whose text is VISIBLY SMALLER. A word growing from 0 to full size over its whole run averaged
+// to well under its settled size; comparing that average against the film's one instant read as a false
+// "reference is smaller" mismatch. Fixed by comparing each window at its OWN midpoint, from `samples`,
+// never the run-averaged `box`. ─────────────────────────────────────────────────────────────────────
+{
+  // A headline that grows 0.10 -> 0.30 frame-height over four samples (0.0-0.3s), then holds at 0.30
+  // through 1.0s: its run average is ~0.23, well under its true settled 0.30, the exact gap that once
+  // read as a false shrink.
+  const samples = [
+    { t: 0.0, box: { hFrac: 0.10, wFrac: 0.20, cxFrac: 0.5, cyFrac: 0.5 } },
+    { t: 0.1, box: { hFrac: 0.18, wFrac: 0.28, cxFrac: 0.5, cyFrac: 0.5 } },
+    { t: 0.2, box: { hFrac: 0.26, wFrac: 0.36, cxFrac: 0.5, cyFrac: 0.5 } },
+    { t: 0.3, box: { hFrac: 0.30, wFrac: 0.40, cxFrac: 0.5, cyFrac: 0.5 } },
+    { t: 0.9, box: { hFrac: 0.30, wFrac: 0.40, cxFrac: 0.5, cyFrac: 0.5 } },
+  ];
+  const refWords = [{ text: 'GROWS', tIn: 0.0, tOut: 0.9, box: { hFrac: 0.23, wFrac: 0.328, cxFrac: 0.5, cyFrac: 0.5 }, samples }];
+  // Film renders it correctly settled at 0.30 the whole second window (0.5-1.0s midpoint 0.75s).
+  const filmBoxes = new Map([[0.5, [{ text: 'GROWS', hFrac: 0.30, wFrac: 0.40, cxFrac: 0.5, cyFrac: 0.5 }]]]);
+  const r = textScaleCheck(refWords, filmBoxes, windows);
+  assert(r.rows.length === 1, `expected one comparable window (the settled one), got ${r.rows.length}`);
+  assert(r.ok === true, `expected the settled window to match at its own moment, got ${JSON.stringify(r.mismatched)}`);
+  console.log('✓ see-text-scale.test.mjs: a growing word compares at its window\'s own moment, not its run average');
+}
+
 console.log('see-text-scale.test.mjs: ok');
