@@ -1700,6 +1700,7 @@ async function main() {
 
   if (!video) die('usage: node harness/media/see.mjs <video> [outDir] [--frames N] '
     + '| --shot <from>-<to> [--fps N] [--page <html>] | --compare <draft.mp4> [--from s --to s] [--words] '
+    + '| <page.html> [outDir] --measure [--ref <mp4>] (numeric deltas both sides, or self-checks) '
     + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] '
     + '[--ref <mp4> [--film <f.json>] [--final] [--w N --h N] [--blur N] [--words]] '
     + '| --word-events <film.mp4> [--from s --to s] '
@@ -1715,6 +1716,7 @@ async function main() {
   if (argv.includes('--probe')) return dispatchProbe(video, positional, flag);
   if (argv.includes('--look')) return dispatchLook(video, positional, flag);
   if (argv.includes('--layout')) return dispatchLayout(video, positional, flag);
+  if (argv.includes('--measure')) return dispatchMeasure(video, positional, flag);
   if (argv.includes('--dom')) return dispatchDom(video, positional, flag, argv);
 
   const shotSpec = flag('--shot', null);
@@ -1771,7 +1773,52 @@ function dispatchLayout(video, positional, flag) {
   return runLayout(video, times, outDir, filmArg);
 }
 
-function dispatchDom(video, positional, flag, argv) {
+// ── --measure: both sides measured with code, so the eye only judges taste. The page is read from its DOM
+// frame by frame (render-spec.mjs), the reference from its pixels (ref-spec.mjs), and
+// harness/lib/spec-deltas.mjs turns the two specs into numeric deltas. Writes render-spec.json,
+// ref-spec/spec.json, deltas.json and deltas.md into outDirRoot. With no reference it prints the page's self-checks.
+async function referenceSpec(refPath, outDirRoot, fps) {
+  const dir = path.join(outDirRoot, 'ref-spec');
+  const file = path.join(dir, 'spec.json');
+  const ocr = !spawnSync('tesseract', ['-version'], { encoding: 'utf8' }).error;
+  if (fs.existsSync(file) && fs.statSync(file).mtimeMs > fs.statSync(refPath).mtimeMs) {
+    const cached = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (cached.fps === fps && cached.ocr === ocr) return cached;
+  }
+  const { refSpec } = await import('./ref-spec.mjs');
+  return refSpec({ video: path.resolve(refPath), outDir: dir, fps, ocr });
+}
+
+export async function runMeasure(htmlPath, refPath, outDirRoot) {
+  if (refPath && !fs.existsSync(refPath)) die(`no such --ref file: ${refPath}`);
+  const { renderSpec } = await import('./render-spec.mjs');
+  const { compareSpecs, selfChecks, deltasMarkdown, deltaLine } = await import('../lib/spec-deltas.mjs');
+  fs.mkdirSync(outDirRoot, { recursive: true });
+  const page = await renderSpec({ page: path.resolve(htmlPath), outDir: outDirRoot });
+  const checks = selfChecks(page);
+  const result = refPath ? compareSpecs(await referenceSpec(refPath, outDirRoot, page.fps), page) : null;
+  const args = { pageName: path.basename(htmlPath), refName: refPath && path.basename(refPath), result, checks, page };
+  fs.writeFileSync(path.join(outDirRoot, 'deltas.md'), deltasMarkdown(args));
+  writeJsonAtomic(path.join(outDirRoot, 'deltas.json'), { page: args.pageName, ref: args.refName, deltas: result ? result.deltas : [], notes: result ? result.notes : [], checks });
+  const rel = path.relative(process.cwd(), path.join(outDirRoot, 'deltas.md'));
+  if (result) {
+    const eye = result.deltas.filter((d) => d.confidence === 'low').length;
+    console.log(`\n  measured deltas: ${result.deltas.length} (${eye} to confirm by eye), worst first`);
+    result.deltas.slice(0, 12).forEach((d, i) => console.log(`  ${i + 1}. ${deltaLine(d)}`));
+    if (result.deltas.length > 12) console.log(`  ... ${result.deltas.length - 12} more in ${rel}`);
+    result.notes.forEach((n) => console.log(`  note: ${n}`));
+  }
+  console.log(`\n  page self-checks: ${checks.length}`);
+  checks.forEach((c) => console.log(`  - ${c.code}: ${c.summary}${c.at ? ` [${c.at}]` : ''}. Fix: ${c.fix}`));
+  console.log(`\n  ✓ ${rel}, render-spec.json, deltas.json`);
+}
+
+function dispatchMeasure(video, positional, flag) {
+  if (!video.endsWith('.html')) die('--measure reads a page: node harness/media/see.mjs <page.html> [outDir] --measure [--ref <ref.mp4>]');
+  return runMeasure(video, flag('--ref', null), path.resolve(positional[1] || defaultOutDir(video)));
+}
+
+async function dispatchDom(video, positional, flag, argv) {
   const fromArg = Number(flag('--from', 0));
   const toArg = flag('--to', null);
   const domFps = Number(flag('--dom-fps', 30));
@@ -1792,7 +1839,11 @@ function dispatchDom(video, positional, flag, argv) {
     from: fromArg, to: toArg != null ? Number(toArg) : null, fps: domFps, w, h, blur, final,
     ids: idsArg ? idsArg.split(',') : null,
   };
-  if (refArg) return runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null), words: argv.includes('--words') });
+  if (refArg) {
+    await runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null), words: argv.includes('--words') });
+    if (!argv.includes('--no-measure')) await runMeasure(video, refArg, outDirRoot);
+    return;
+  }
   return runDom(video, outDirRoot, opts);
 }
 
