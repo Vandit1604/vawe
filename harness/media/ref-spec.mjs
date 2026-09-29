@@ -456,6 +456,7 @@ function renderSpec(spec) {
       `beat frames: ${a.beatFrames.slice(0, 48).join(' ')}${a.beatFrames.length > 48 ? ' ...' : ''}`, '',
       tableRows(a.hits.map(audioRow), [['attack s', 'attack'], ['attack f', 'attackFrame'], ['err ms', 'errMs'], ['peak s', 't'], ['peak f', 'frame'], ['strength', 'strength'], ['note', 'note']], 60), '');
   } else L.push('## Audio', '', 'no audio stream.', '');
+  if (spec.textRuns) L.push('## On-screen text (every 0.25 s, whole film)', '', 'Every row must exist in the rebuild at its time. OCR spelling can be off; the timing and the line breaks are right.', '', tableRows(spec.textRuns.map((r) => ({ from: r.t0.toFixed(2), to: r.t1.toFixed(2), text: r.text || '(no text)' })), [['from s', 'from'], ['to s', 'to'], ['text (lines split by /)', 'text']], 400), '');
   for (const s of spec.shots) L.push(shotSection(s, spec.fps), '');
   return L.join('\n');
 }
@@ -488,6 +489,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   const leads = cutLeads(cuts, aud, fps);
   cuts.forEach((c, i) => Object.assign(c, leads[i]));
   const text = ocr ? await analyseText(video, dir, W, H, fps) : [];
+  const textRuns = ocr ? (await import('./see/text-timeline.mjs')).textTimeline(video, dir) : null;
 
   const shots = [];
   for (let i = 0; i < spans.length; i++) {
@@ -519,7 +521,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
   }
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
-    cuts, audio: aud, shots, ocr };
+    cuts, audio: aud, shots, ocr, textRuns };
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
   fs.writeFileSync(path.join(outDir, 'SPEC.md'), `${renderSpec(spec)}\n`);

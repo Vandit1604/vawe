@@ -15,7 +15,12 @@ References are in-house and never published. Length is the reference's length, n
 ```bash
 bin/vawe new <name> --ref quality/refs/<ref>/source.mp4   # page starter plus SPEC.md
 bin/vawe spec quality/refs/<ref>/source.mp4               # SPEC.md alone, to re-measure
+bin/vawe compare out/<name>-draft-2-6.mp4 --ref quality/refs/<ref>/source.mp4 --from 2 --at 2.5,3.1,4
+                                                          # reference | yours at the same exact seconds
 ```
+
+SPEC.md's "On-screen text" table lists every line on screen every 0.25 s for the whole film. Walk it row
+by row before you call a rebuild done: a word the table has and your page lacks is a missed section.
 
 `bin/vawe spec` writes `quality/refs/<ref>/SPEC.md` with the measured cut list and, at every cut and hold:
 

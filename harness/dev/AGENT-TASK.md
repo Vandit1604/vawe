@@ -16,7 +16,7 @@ RULES (read first):
 3. You own ONLY: <files or folders>. Do not touch <files another agent owns>.
 4. Commits: plain message, one logical step each, no AI attribution, no Co-Authored-By, never
    --no-verify, no em dash (U+2014) anywhere. Comments only for facts the code cannot show.
-5. Scratch files go in /tmp/claude-501/<topic>/. Return the report as text. Never write it to
+5. Scratch files go ONLY in your own /tmp/claude-501/<your-topic>/, never the session scratchpad or another agent's folder; draft renders take --out out/<your-topic>-*.mp4 when two agents render one film. Return the report as text. Never write it to
    FINDINGS.md or REPORT.md.
 
 CONTEXT: <one paragraph: what the task changes and why>

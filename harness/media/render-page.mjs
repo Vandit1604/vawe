@@ -394,11 +394,12 @@ export function assertFinalReady(pagePath) {
     + `"_why":{"${code}":"…"}}</script> in the page.`);
 }
 
-export function defaultOut(pagePath, { aspect, suffixAspect, final }) {
+export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to = null }) {
   const abs = path.resolve(pagePath);
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
-  return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}.mp4`);
+  const range = !final && (from > 0 || to != null) ? `-${from}-${to ?? 'end'}` : '';
+  return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
 async function main() {
@@ -431,7 +432,7 @@ async function main() {
       audio: argv.includes('--audio') ? true : undefined,
     };
     const frame = resolveFrame(pagePath, opts);
-    const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final });
+    const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
     const r = await renderPage(pagePath, outPath, opts);
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.width}x${frame.height} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
