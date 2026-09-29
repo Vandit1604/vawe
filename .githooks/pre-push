@@ -24,7 +24,7 @@ done
 
 node harness/dev/no-emdash.mjs || exit 1
 node quality/gates/doc-refs.mjs | grep -E '^⚠' >&2
-node harness/dev/bench.mjs fast 2>&1 | grep -E '⚠|warn' >&2
+node harness/dev/bench.mjs fast 2>&1 | grep -E 'grew' >&2
 node harness/dev/e2e.mjs || { echo "pre-push blocked: e2e failed." >&2; exit 1; }
 node harness/dev/ci-status.mjs || true
 exit 0
