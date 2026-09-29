@@ -88,7 +88,7 @@ function runOneRender(outPath) {
     throw new Error(`bench render failed: ${err.stderr || err.message}`);
   }
   const ms = Date.now() - t0;
-  const m = /(\d+)\s+frames/.exec(stdout);
+  const m = /(\d+) frame\(s\)/.exec(stdout);
   const frames = m ? Number(m[1]) : null;
   return { ms, frames };
 }
