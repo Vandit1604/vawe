@@ -1,12 +1,13 @@
 // image that was never written (engine-doctrine/MISTAKES.md #254).
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 /** The base every review artifact lives under. CLAUDE_JOB_DIR keeps concurrent agents from reading
- *  each other's sheets; without it this is plain /tmp, which is what the docs and Makefile promise. */
+ *  each other's sheets; without it this is the OS temp dir (real path), which is what the docs and Makefile promise. */
 export const scratchBase = () =>
-  process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : '/tmp';
+  process.env.CLAUDE_JOB_DIR ? path.join(process.env.CLAUDE_JOB_DIR, 'tmp') : fs.realpathSync(os.tmpdir());
 
 /** Resolve a path under the scratch base and guarantee its parent directory exists. Callers pass path
  *  segments; the last one may be a file. Returns the absolute path. */

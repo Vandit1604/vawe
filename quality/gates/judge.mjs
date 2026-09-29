@@ -2,7 +2,7 @@
 // composition or asset fidelity; this preps exactly what a vision model must look at + the criteria, and the
 // agent-in-the-loop scores it. It renders the KEY frames (each beat's mid + hook + CTA) into one labeled
 // sheet and writes the rubric (the brand house-style + the craft rubric (11 dimensions + 2 checks) + a verdict template). The
-// AGENT then reads /tmp/judge/sheet.png against /tmp/judge/rubric.md and returns a PASS/FIX verdict.
+// AGENT then reads judge/<name>/sheet.png against judge/<name>/rubric.md (under the scratch base) and returns a PASS/FIX verdict.
 //
 // Usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>] [--no-measure]
 //        vawe judge <file> [VS=<brand>] [REF=<ref.mp4>]
@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
+import { scratchBase } from '../../harness/lib/scratch.mjs';
 import { fileURLToPath } from 'node:url';
 import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable, evenSamples } from './tile.mjs';
 import { readPageMeta } from '../../harness/media/render-page.mjs';
@@ -283,9 +284,9 @@ const pageSamples = () => {
 };
 const mids = isPage ? pageSamples() : evenSamples(dur);
 
-// Per-scene directory. It used to be a bare /tmp/judge wiped on every run, so judging a second film
+// Per-scene directory. A bare shared judge dir wiped on every run made judging a second film
 // destroyed the first, which makes comparing two cuts, the entire point of a judging campaign, impossible.
-const dir = path.join('/tmp/judge', baseOf(mp4));
+const dir = path.join(scratchBase(), 'judge', baseOf(mp4));
 fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
 const fps = (() => { const [n, d] = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=avg_frame_rate', '-of', 'csv=p=0', mp4]).toString().trim().split('/').map(Number); return n / (d || 1) || 30; })();
 const refDur = ref ? parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', ref]).toString().trim()) : 0;

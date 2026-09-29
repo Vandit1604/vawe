@@ -9,15 +9,16 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { scratch } from '../../harness/lib/scratch.mjs';
 import { frameTile, tileGrid, renderOf, gradeable } from './tile.mjs';
 
 const args = process.argv.slice(2);
 const at = (() => { const i = args.indexOf('--at'); return i >= 0 ? args[i + 1] : '3'; })();
-const out = (() => { const i = args.indexOf('--out'); return i >= 0 ? args[i + 1] : '/tmp/compare.png'; })();
+const out = (() => { const i = args.indexOf('--out'); return i >= 0 ? args[i + 1] : scratch('compare.png'); })();
 const inputs = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--at' && args[i - 1] !== '--out');
 if (inputs.length < 2) { console.error('need ≥2 inputs. usage: compare.mjs a.json b.json [--at 3] [--out sheet.png]'); process.exit(2); }
 
-const tmp = '/tmp/_cmp'; fs.mkdirSync(tmp, { recursive: true });
+const tmp = scratch('_cmp');
 const TW = 620, TH = 349;
 const tiles = [];
 

@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { openFile } from '../harness/lib/open-file.mjs';
 import { serveRepo, REPO_ROOT } from '../harness/lib/render-harness.mjs';
 import { installPageClock } from '../core/engine/page-clock.js';
 import { installPageFrame } from '../core/engine/page-seek.js';
@@ -141,7 +142,4 @@ server.on('error', (e) => { console.error(e.message); process.exit(1); });
 
 const url = `http://127.0.0.1:${PORT}/studio`;
 console.log(`\n  vawe studio (page): ${pageRel}\n    open  ${url}\n    Ctrl-C to stop.\n`);
-if (!process.env.NOOPEN) {
-  const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'start' : 'xdg-open';
-  try { spawn(cmd, [url], { stdio: 'ignore', detached: true }).unref(); } catch { /* the printed URL is enough */ }
-}
+if (!process.env.NOOPEN) openFile(url);
