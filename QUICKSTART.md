@@ -9,6 +9,11 @@ group: process
 vawe turns one HTML page into one rendered mp4. You write the page; the renderer seeks it frame by
 frame and mixes its audio offline. No templates, no UI, no private format.
 
+## Setup
+
+Run `npm install`, then `bin/vawe doctor`. It checks Node, ffmpeg, Chrome and the other tools and
+prints the install line for your system for each one that is missing.
+
 ## The model, in two sentences
 
 A film is `films/<name>/page.html` plus its own `assets/` folder, and time is the seek: CSS

@@ -123,6 +123,13 @@ export const VERBS = [
     build: (v, args) => [{ script: 'harness/lib/check-gate.mjs', args }],
   },
   {
+    name: 'doctor', summary: 'check node, ffmpeg, Chrome and the other tools; print the install line for each missing one',
+    positional: [],
+    flags: [{ name: 'quiet', type: 'bool', help: 'print only problems' }],
+    example: 'vawe doctor',
+    build: (v) => [{ script: 'harness/dev/doctor.mjs', args: v.quiet ? ['--quiet'] : [] }],
+  },
+  {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
     positional: [], flags: [],
     example: 'vawe e2e',

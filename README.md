@@ -51,12 +51,16 @@ rules an agent reads are `AGENTS.md`.
 
 ## Install
 
-**From source**: Node 18+, ffmpeg and a Chrome or Chromium.
+**From source**: Node 22+, git, ffmpeg (with libx264 and drawtext) and tesseract (optional, for OCR).
 
 ```bash
 npm install
+bin/vawe doctor
 bin/vawe dev films/<name>/page.html
 ```
+
+`bin/vawe doctor` checks each tool and prints the install line for your system (macOS, Linux or
+Windows) for any that is missing. It exits 1 only when a required tool is missing.
 
 Output can differ between hosts that rasterise on a different GPU or Chrome version.
 
