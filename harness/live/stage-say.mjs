@@ -4,23 +4,16 @@
 //   node harness/live/stage-say.mjs [--reset]
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const RECENT_MS = 3 * 60 * 60 * 1000;
 const mtime = (p) => { try { return fs.statSync(p).mtimeMs; } catch { return 0; } };
 
+// A checkout rewrites mtimes, so only a page git sees as changed or new counts as being worked on.
 function pages(root) {
-  const out = [];
-  const walk = (dir, depth) => {
-    let entries = [];
-    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
-    for (const e of entries) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory() && depth < 2) walk(p, depth + 1);
-      else if (e.name === 'page.html') out.push(p);
-    }
-  };
-  walk(path.join(root, 'films'), 0);
-  return out;
+  const r = spawnSync('git', ['status', '--porcelain', '--untracked-files=all', '--', 'films'], { cwd: root, encoding: 'utf8' });
+  return (r.stdout || '').split('\n').map((l) => l.slice(3).trim())
+    .filter((p) => p.endsWith('/page.html')).map((p) => path.join(root, p));
 }
 
 export function nextStep(page, root = process.cwd()) {
