@@ -21,8 +21,8 @@ star.draw({ x: 960, y: 540, size: 400, spin: 0.5, tilt: 0.3, opacity: 1, blur: 0
 - `canvas`: set `width` and `height` first (for example 1920 x 1080). Stack one canvas per star.
 - `depth`, `bevel`: thickness and edge round, in units where the star is 2 wide. Thin is the default.
 - `look`: `glass` (pale, translucent), `chrome` (grey metal), `iridescent` (lavender with a thin-film sheen). Each has a soft dark centre.
-- `tint`: a hex colour that replaces the look's own.
-- `draw({ x, y, size, spin, tilt, opacity, blur })`: `x`, `y` are the centre in canvas px, `size` is the full width in px (0 hides it), `spin` and `tilt` are radians about y and x, `blur` is CSS px.
+- `tint`: a hex colour that replaces the look's own. `shade`: 0 to 1, how dark the centre is (default per look).
+- `draw({ x, y, size, spin, tilt, roll, opacity, blur })`: `x`, `y` are the centre in canvas px, `size` is the full width in px (0 hides it), `spin`, `tilt` and `roll` are radians about y, x and z, `blur` is CSS px.
 - `mesh`: the three.js mesh, for material dials such as `mesh.material.roughness`.
 
 `draw` poses the star from its arguments only. Call it once per seek.
