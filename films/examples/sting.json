@@ -1,0 +1,108 @@
+{
+  "module": "scene",
+  "note": "GOLD EXAMPLE v3: a motion-graphic-sting type (skills/vawe-type-sting), replacing a bland one-fade sting after two judge passes scored it 4/10 for flat transitions and no turning word. Borrows the reference kinetic promo's grammar (never its copy): a word sequence turns through the frame (json types on, in. flips in 3D, motion scales through behind its own oversized low-contrast ghost, out. resolves out of a blur whip), a hard value flip to a white beat and back punctuates the sequence, then a glass wave mark (three.js svgExtrude, glass material) turns under a moving camera push while the ground breathes cobalt-tinted light at its edges, landing on the wordmark and tagline as the ground turns cobalt. `content` carries every brand word; edit it, not the layers, to reskin. This is deliberately a multi-move sting, past the type's usual one-move ceiling: the owner asked for a busier film than that doctrine defaults to, so the ceiling is waived by brief, not missed by accident.",
+  "theme": "vawe",
+  "aspect": "16:9",
+  "duration": 6.0,
+  "energy": "brand",
+  "cameraBlur": true,
+  "shutter": 180,
+  "authoring": { "allow": ["no-storyboard", "no-preflight", "contrast", "contrast-soft", "weak-headline", "bottom-heavy"], "_why": {
+    "no-storyboard": "a sting this short is one planned sequence with no beats to plan against; the brief above is the whole plan",
+    "no-preflight": "this is the frozen gold example, not a film in progress",
+    "contrast": "w3ghost is a deliberately low-contrast oversized watermark word (the scale-contrast device); raising it to 7:1 would erase the ghost it is meant to be",
+    "contrast-soft": "same device, the softer read of the same intentional ghost word",
+    "weak-headline": "the ghost word is not the headline the reader is meant to read, w3motion in front of it is",
+    "bottom-heavy": "the three.js glass mark fills the top of the lockup frame; the audit's text-only heuristic cannot see a canvas layer, so it reads the composition as emptier above than it is"
+  } },
+  "audio": { "silent": true },
+  "content": {
+    "w1": "json",
+    "w2": "in.",
+    "w3": "motion",
+    "w4": "out.",
+    "brand": "vawe",
+    "tagline": "motion from data"
+  },
+  "bg": [
+    { "t": 0, "preset": "aurora", "opts": { "grain": 0.06 } },
+    { "t": 1.75, "base": { "kind": "solid", "color": "#ffffff" }, "fx": [ { "type": "grain", "alpha": 0.05, "fps": 30 } ] },
+    { "t": 2.15, "preset": "aurora", "opts": { "grain": 0.06 } },
+    { "t": 4.6, "base": { "kind": "solid", "color": "#2563eb" }, "fx": [ { "type": "grain", "alpha": 0.06, "fps": 30 } ] }
+  ],
+  "transitions": [
+    { "at": 1.75, "fx": "wipe", "dir": "down", "dur": 0.25, "timing": "out", "_why": "the value flip: dark to white" },
+    { "at": 2.15, "fx": "wipe", "dir": "right", "dur": 0.25, "timing": "out", "_why": "back to dark, axis changed from the flip in" },
+    { "at": 4.6, "fx": "wipe", "dir": "down", "dur": 0.3, "timing": "out", "_why": "the brand lockup: ground turns cobalt" }
+  ],
+  "sceneUnits": true,
+  "layers": [
+    { "id": "w1json", "type": "text", "text": "{{w1}}", "font": "mono", "size": 88, "weight": 500,
+      "color": "#eef2f8", "align": "center", "x": 660, "y": 495, "w": 600, "h": 100,
+      "split": "char", "preset": "type", "stagger": { "from": "typewriter", "cps": 26 }, "each": 0.1,
+      "start": 0, "duration": 0.65, "anim": "none", "out": "fade", "exitDur": 0.15
+    },
+    { "id": "w2in", "type": "text", "text": "{{w2}}", "font": "sans", "size": 140, "weight": 800,
+      "color": "#eef2f8", "align": "center", "x": 660, "y": 470, "w": 600, "h": 150,
+      "split": "char", "preset": "flip", "each": 0.5, "stagger": 0.05,
+      "start": 0.55, "duration": 0.55, "anim": "none", "out": "fade", "exitDur": 0.15
+    },
+    { "id": "w3ghost", "type": "text", "text": "{{w1}}", "font": "mono", "size": 420, "weight": 200,
+      "color": "var(--dim)", "align": "center", "x": 460, "y": 260, "w": 1000, "h": 520,
+      "preset": "scale", "presetOpts": { "from": 1.3 },
+      "start": 1.0, "duration": 0.65, "anim": "none", "out": "fade", "exitDur": 0.2
+    },
+    { "id": "w3motion", "type": "text", "text": "{{w3}}", "font": "sans", "size": 130, "weight": 800,
+      "color": "#eef2f8", "align": "center", "x": 660, "y": 495, "w": 600, "h": 150,
+      "split": "char", "preset": "scale", "presetOpts": { "from": 0.4 }, "each": 1.0, "stagger": 0.04,
+      "start": 1.0, "duration": 0.65, "anim": "none", "out": "fade", "exitDur": 0.15
+    },
+    { "id": "w4out", "type": "text", "text": "{{w4}}", "font": "sans", "size": 140, "weight": 800,
+      "color": "var(--accent)", "align": "center", "x": 660, "y": 470, "w": 600, "h": 150,
+      "split": "char", "preset": "blur", "each": 0.4, "stagger": 0.02,
+      "start": 1.35, "duration": 0.9, "anim": "none", "out": "fade", "exitDur": 0.2
+    },
+    { "id": "waveGlass", "type": "three", "three": "object",
+      "colors": ["#dbe8ff", "#8fc0ff", "#2563eb", "#0b1220"],
+      "geometry": { "kind": "svgExtrude", "path": "M1 12 Q7 1 12 12 Q17 23 23 12 Q29 1 34 12 Q39 23 46 4", "scale": 0.05, "depth": 0.3, "bevelSize": 0.09, "bevelThickness": 0.09, "bevelSegments": 8 },
+      "material": { "preset": "glass", "ior": 1.5, "roughness": 0.05 },
+      "objectMotion": [
+        { "t": 0, "rotY": 0 },
+        { "t": 3.8, "rotY": 480 }
+      ],
+      "dolly": 4.2,
+      "x": 660, "y": 120, "w": 600, "h": 600,
+      "start": 1.95, "duration": 4.05, "anim": "fade", "enterDur": 0.55, "out": "none", "acrossBeats": true
+    },
+    { "id": "wordHeavy", "type": "text", "text": "{{brand}}", "font": "sans", "size": 240, "weight": 800,
+      "color": "var(--text)", "align": "center", "x": 360, "y": 700, "w": 1200, "h": 200, "tracking": "-0.04em",
+      "split": "char", "preset": "scale", "presetOpts": { "from": 0.3 }, "axis": { "wght": [300, 800] },
+      "each": 1.2, "stagger": 0.04,
+      "start": 4.3, "duration": 1.7, "anim": "none", "out": "none",
+      "idle": "drift", "acrossBeats": true
+    },
+    { "id": "tagline", "type": "text", "text": "{{tagline}}", "font": "sans", "size": 34, "weight": 500,
+      "color": "#dbe6ff", "align": "center", "x": 660, "y": 860, "w": 600,
+      "anim": "rise", "enterDur": 0.5, "start": 4.9, "duration": 1.1, "out": "none"
+    }
+  ],
+  "camera": [
+    { "t": 0, "x": 0, "s": 1.0 },
+    { "t": 0.25, "x": 75, "s": 1.01 },
+    { "t": 0.5, "x": -70, "s": 1.015 },
+    { "t": 0.75, "x": 85, "s": 1.02 },
+    { "t": 0.9, "x": 40, "s": 1.03 },
+    { "t": 1.2, "x": -35, "s": 1.04 },
+    { "t": 1.5, "x": 30, "s": 1.05 },
+    { "t": 1.75, "x": -20, "s": 1.06 },
+    { "t": 2.15, "x": 25, "s": 1.08 },
+    { "t": 2.6, "x": -15, "s": 1.11 },
+    { "t": 3.0, "x": 60, "s": 1.15 },
+    { "t": 3.5, "x": -10, "s": 1.20 },
+    { "t": 4.0, "x": 80, "s": 1.26 },
+    { "t": 4.6, "x": 40, "s": 1.33 },
+    { "t": 5.0, "x": 100, "s": 1.38 },
+    { "t": 5.5, "x": 70, "s": 1.44 },
+    { "t": 6.0, "x": 140, "s": 1.5 }
+  ]
+}
