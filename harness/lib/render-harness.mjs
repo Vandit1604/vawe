@@ -83,10 +83,13 @@ export function trackBrowser(browser) {
   return browser;
 }
 
+// Puppeteer's default is 180 s per protocol call; a heavy WebGL frame late in a long render can exceed it.
+export const PROTOCOL_TIMEOUT_MS = 30 * 60 * 1000;
+
 /** launchPage({ width, height, scale, args }) → { browser, page, close } */
 export async function launchPage({ width, height, scale = 1, args = RENDER_ARGS } = {}) {
   const { default: puppeteer } = await import('puppeteer');
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args }));
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args, protocolTimeout: PROTOCOL_TIMEOUT_MS }));
   const page = await browser.newPage();
   await page.setViewport({ width, height, deviceScaleFactor: scale });
   return { browser, page, close: () => browser.close() };
