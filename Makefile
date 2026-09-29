@@ -11,7 +11,7 @@
 # calls the target up to date and never runs it. `blueprints/` shadowed `make blueprints` this way.
 .PHONY: stage next quiz ideate kit storyboard-check preview dev dev-range look probe-frame tune studio \
   assemble check ship judge arsenal regen doctor test e2e study bench-fast install-hooks verify-batch \
-  build build-all render all gen site study-tool dev-tool media video sections ref list help
+  build build-all render all gen site study-tool dev-tool media video sections ref spec list help
 
 # make doctor: is the checkout ready to render? Today: is gsap vendored (assets/vendor/gsap.min.js,
 # gitignored, written by the root "postinstall" script). Prints the fix command rather than failing
@@ -304,6 +304,15 @@ endif
 
 # make frame: one exact frame of the film, `make dev-tool X=frame D=<file.json> N=<n or b<beat>>`.
 
+# make spec REF=<reference.mp4> [OUT=<dir>] [FPS=29.97] [ELEMENTS=6] [OCR=1]: reverse-engineer a reference
+# into SPEC.md + spec.json next to it: cuts by frame number, per shot the camera zoom/pan per frame, moving
+# elements tracked per frame (position, size, frames per move, overshoot, arrival curve as approach k or
+# spring k/d), blur timing and direction, hex palette, every sound hit and the beat grid, and a pre-filled
+# KEEP/CHANGE block. ffmpeg only; OCR=1 adds text boxes (needs tesseract). harness/media/ref-spec.mjs
+spec: ## [study] REF=<reference.mp4>: measure it into SPEC.md (cuts, per-frame moves, camera, blur, palette, sound hits, KEEP/CHANGE) an agent rebuilds frame for frame.
+	@test -n "$(REF)" || { echo "usage: make spec REF=<reference.mp4> [OUT=<dir>] [FPS=29.97] [ELEMENTS=6] [OCR=1]"; exit 1; }
+	node harness/media/ref-spec.mjs $(REF) $(if $(OUT),--out $(OUT)) $(if $(FPS),--fps $(FPS)) $(if $(ELEMENTS),--elements $(ELEMENTS)) $(if $(OCR),--ocr)
+
 # make ref URL=<pin or video url> [NAME=x]: fetch a reference film and study it in one step. The file
 # lands in refs/ (gitignored); the committed artefact is grammar/<name>.json.
 ref: ## [study] fetch a reference film and study it in one step.
@@ -369,7 +378,7 @@ kit: ## [study] sections + palette + favicon in one command → assets/brands/<b
 # overlapping text, elements off the frame, and two opaque full-frame shots visible at once, read off
 # the DOM at each time. D=<film.json> also records a `layout` receipt for post-draft.mjs.
 # harness/media/see.mjs --layout
-study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json> scores a recreation against its reference; SEE=1 REF=<video> sees it cheaply; SHOT=<from>-<to> REF=<video> is a dense strip; COMPARE=<draft.mp4> REF=<video> checks a draft's motion against it; PROBE=1 REF=<html> AT=<s> SEL=<css> reads one element's box/animation state; LOOK=<s,s,...> REF=<html> stills at key times (COMPARE=<mp4> pairs them against the reference); LAYOUT=<s,s,...> REF=<html> flags clipped/off-frame/overlapping text and stacked opaque shots.
+study: ## [study] the film-side twin of `make sections`. MATCH=1 REF=<video> D=<film.json or render.mp4> scores a recreation against its reference; SEE=1 REF=<video> sees it cheaply; SHOT=<from>-<to> REF=<video> is a dense strip; COMPARE=<draft.mp4> REF=<video> checks a draft's motion against it; PROBE=1 REF=<html> AT=<s> SEL=<css> reads one element's box/animation state; LOOK=<s,s,...> REF=<html> stills at key times (COMPARE=<mp4> pairs them against the reference); LAYOUT=<s,s,...> REF=<html> flags clipped/off-frame/overlapping text and stacked opaque shots.
 	@if [ -n "$(MATCH)" ]; then \
 	  node harness/media/match.mjs $(REF) $(D) $(if $(STEP),--step $(STEP)); \
 	elif [ -n "$(SEE)" ]; then \

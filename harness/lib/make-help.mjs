@@ -20,7 +20,7 @@ const PHASE_NAMES = new Set(PHASES.map(([p]) => p));
 
 // `make help`'s fast path only, brief to rendered film, the stage table's own order (AGENTS.md "THE EIGHT STAGES"); `make list` still prints all 200+, this is the twelve an agent needs first.
 export const FAST_PATH = [
-  'stage', 'next', 'quiz', 'ideate', 'studio', 'preview', 'dev',
+  'stage', 'next', 'quiz', 'ideate', 'spec', 'studio', 'preview', 'dev',
   'probe-frame', 'check', 'ship', 'judge', 'arsenal', 'regen',
 ];
 
