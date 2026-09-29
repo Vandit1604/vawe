@@ -17,9 +17,9 @@
 // sets the clock, calls window.seek(t) when the page defines it, then seeks CSS/WAAPI/SMIL animations and
 // vawe.onFrame hooks, then waits for fonts, image decode and two real paints before the screenshot.
 //
-// Capture is split across up to CAPTURE_WORKERS pages on the shared browser (harness/media/
-// preview-server.mjs), each seeking+screenshotting a contiguous slice of output frames; every subframe
-// is a pure function of its seek time, so which worker captures it never affects the pixels. When
+// Capture is split into fixed 60-frame slices, `--workers` of them at once (default min(4, cpus-1)), each on
+// its own page of the shared browser (harness/media/preview-server.mjs); the speed pass below runs the same
+// way. Slice boundaries do not depend on the worker count, so the pixels never do either. When
 // blur > 1, a per-frame speed pass decides how many subframes that frame actually needs: a still frame
 // gets 1, a fast one gets up to `blur`. The pass reads paused-animation bounding-box deltas (no
 // screenshots); a page driven by window.seek or onFrame hooks, or with no animations, has no boxes to
@@ -67,13 +67,17 @@ import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 // the flag the comment above actually describes fixes both: the crash stays fixed, WebGL starts working.
 const PAGE_ARGS = [...RENDER_ARGS, '--disable-gpu-compositing'];
 
-// ponytail: fixed bound rather than a profiled-per-machine number; raise if a faster capture is
-// measured to need it.
-const CAPTURE_WORKERS = Math.min(4, Math.max(2, os.cpus().length >= 4 ? 4 : 2));
+const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
 
 // A page with several WebGL canvases slows down over a long run until one CDP call times out; a fresh
 // page every 300 subframes keeps it fast, and a seek is a pure function of time so the pixels do not change.
 const RECYCLE_SUBFRAMES = 300;
+
+// A page keeps raster state between seeks: the first frame on a fresh page differs from the same frame
+// reached by seeking on (a sparse SSIM 0.99997 drift on gradient text). So the slice boundaries are fixed
+// by this constant, never by the worker count, and each slice starts on its own fresh page: the pixels
+// are then identical for any --workers.
+const SLICE_FRAMES = 60;
 
 const die = (msg, code = 1) => { console.error(`✗ ${msg}`); process.exit(code); };
 
@@ -155,13 +159,12 @@ const PIXEL_W = 64;
 // Mean absolute luma difference (0-255) between consecutive frames downscaled to PIXEL_W wide, one
 // low-quality screenshot per frame. An estimate of "how much of the picture moved", enough to tell a
 // held frame from a fast one, decoded inside the page so the renderer needs no image library.
-async function frameSpeedsFromPixels(page, frames, fps, from) {
-  const speeds = [];
-  let prev = null;
-  for (let i = 0; i <= frames; i++) {
+async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers) {
+  const speeds = new Array(frames);
+  const lumaAt = async (page, i) => {
     await seekAll(page, from * 1000 + (i / fps) * 1000);
     const shot = await page.screenshot({ type: 'jpeg', quality: 40, encoding: 'base64' });
-    const luma = await page.evaluate(async (b64, w) => {
+    return page.evaluate(async (b64, w) => {
       const blob = await (await fetch(`data:image/jpeg;base64,${b64}`)).blob();
       const bmp = await createImageBitmap(blob);
       const h = Math.max(1, Math.round((bmp.height / bmp.width) * w));
@@ -172,21 +175,24 @@ async function frameSpeedsFromPixels(page, frames, fps, from) {
       for (let k = 0; k < px.length; k += 4) out.push(0.299 * px[k] + 0.587 * px[k + 1] + 0.114 * px[k + 2]);
       return out;
     }, shot, PIXEL_W);
-    if (prev) {
-      let sum = 0;
-      for (let k = 0; k < luma.length; k++) sum += Math.abs(luma[k] - prev[k]);
-      speeds.push(sum / luma.length);
-    }
-    prev = luma;
-  }
+  };
+  await runShards(pagePath, frame, frames, workers, async (page, i, local) => {
+    local.prev ??= await lumaAt(page, i);
+    const next = await lumaAt(page, i + 1);
+    let sum = 0;
+    for (let k = 0; k < next.length; k++) sum += Math.abs(next[k] - local.prev[k]);
+    speeds[i] = sum / next.length;
+    local.prev = next;
+    return 2;
+  });
   return speeds;
 }
 
 // Returns bucketed subframe counts per output frame.
-async function frameSubframes(page, frames, fps, from, blur) {
+async function frameSubframes(page, pagePath, frame, frames, fps, from, blur, workers) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
   if (boxes) return clampSegments(bucketize(boxes, blur, BOX_BANDS));
-  return clampSegments(bucketize(await frameSpeedsFromPixels(page, frames, fps, from), blur, PIXEL_BANDS));
+  return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers), blur, PIXEL_BANDS));
 }
 
 // 3 levels only (still / half / full blur): keeps the ffmpeg filter graph's segment count bounded by
@@ -207,15 +213,14 @@ function clampSegments(kArr, cap = 200) {
   return kArr.map(() => maxK);
 }
 
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, onSubframe) {
-  const shardCount = Math.min(CAPTURE_WORKERS, Math.max(1, frames));
-  const shardSize = Math.ceil(frames / shardCount);
-  const shards = [];
-  for (let s = 0; s < shardCount; s++) {
-    const lo = s * shardSize, hi = Math.min(frames, lo + shardSize);
-    if (lo < hi) shards.push([lo, hi]);
-  }
-  await Promise.all(shards.map(async ([lo, hi]) => {
+// Runs work(page, i, local) for every frame 0..frames-1 in fixed SLICE_FRAMES slices, `workers` slices at
+// a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state.
+async function runShards(pagePath, frame, frames, workers, work) {
+  const slices = [];
+  for (let lo = 0; lo < frames; lo += SLICE_FRAMES) slices.push([lo, Math.min(frames, lo + SLICE_FRAMES)]);
+  let next = 0;
+  const runSlice = async ([lo, hi]) => {
+    const local = {};
     let opened = null;
     let sinceOpen = 0;
     try {
@@ -226,19 +231,26 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
           await opened.page.goto(opened.url, { waitUntil: 'load' });
           sinceOpen = 0;
         }
-        const { page } = opened;
-        const baseMs = from * 1000 + (i / fps) * 1000;
-        const k = kArr[i];
-        for (let j = 0; j < k; j++) {
-          await seekAll(page, baseMs + (j / k) * (1000 / fps));
-          const idx = subframeStart[i] + j;
-          await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`) });
-          onSubframe();
-        }
-        sinceOpen += k;
+        sinceOpen += await work(opened.page, i, local);
       }
     } finally { if (opened) await opened.close(); }
-  }));
+  };
+  const lane = async () => { while (next < slices.length) await runSlice(slices[next++]); };
+  await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, lane));
+}
+
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe) {
+  await runShards(pagePath, frame, frames, workers, async (page, i) => {
+    const baseMs = from * 1000 + (i / fps) * 1000;
+    const k = kArr[i];
+    for (let j = 0; j < k; j++) {
+      await seekAll(page, baseMs + (j / k) * (1000 / fps));
+      const idx = subframeStart[i] + j;
+      await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`) });
+      onSubframe();
+    }
+    return k;
+  });
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -352,18 +364,21 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
-    const kArr = blur > 1 ? await frameSubframes(page, frames, fps, from, blur) : Array(frames).fill(1);
+    const workers = opts.workers || defaultWorkers();
+    const tPre = Date.now();
+    const kArr = blur > 1 ? await frameSubframes(page, pagePath, frame, frames, fps, from, blur, workers) : Array(frames).fill(1);
     const subframeStart = new Array(frames + 1);
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
     const totalSub = subframeStart[frames];
 
     const t0 = Date.now();
+    const prepassMs = t0 - tPre;
     let doneSub = 0;
     const tick = progress ? setInterval(() => {
       process.stdout.write(`\r  capturing ${doneSub}/${totalSub} subframe(s)...`);
     }, 1000) : null;
-    await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, () => { doneSub++; });
+    await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, () => { doneSub++; });
     if (tick) { clearInterval(tick); process.stdout.write(`\r${' '.repeat(40)}\r`); }
     const captureMs = Date.now() - t0;
 
@@ -383,7 +398,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
-    return { frames, subframes: totalSub, captureMs, encodeMs, dur, audio: Boolean(mixed) };
+    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed) };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
@@ -419,12 +434,12 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (name, d) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : d; };
-  const valueFlags = new Set(['--aspect', '--fps', '--from', '--dur', '--to', '--blur', '--w', '--h']);
+  const valueFlags = new Set(['--aspect', '--fps', '--from', '--dur', '--to', '--blur', '--w', '--h', '--workers']);
   const positional = argv.filter((a, i) => !a.startsWith('--') && !valueFlags.has(argv[i - 1]));
   const [pagePath, outArg] = positional;
   if (!pagePath) {
     die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N] '
-      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--audio]', 2);
+      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   const final = argv.includes('--final');
@@ -443,6 +458,7 @@ async function main() {
       fps: Number(flag('--fps', final ? 60 : 30)),
       w: flag('--w', null) && Number(flag('--w', null)), h: flag('--h', null) && Number(flag('--h', null)),
       blur: Number(flag('--blur', final ? 3 : 1)), from, durArg, progress: final,
+      workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
     };
     const frame = resolveFrame(pagePath, opts);
@@ -451,7 +467,7 @@ async function main() {
     const r = await renderPage(pagePath, outPath, opts);
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.width}x${frame.height} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}, `
-      + `capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
+      + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
   }
 }
 
