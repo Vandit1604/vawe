@@ -8,7 +8,7 @@ const STAR_D = `M0,${-TIP} Q${WAIST},${-WAIST} ${TIP},0 Q${WAIST},${WAIST} 0,${T
   + `Q${-WAIST},${WAIST} ${-TIP},0 Q${-WAIST},${-WAIST} 0,${-TIP} Z`;
 
 const LOOKS = {
-  glass: { preset: 'glass', tint: '#eef0f8', shade: 0.55, opts: { transmission: 0, transparent: true, opacity: 0.82, metalness: 0.1, roughness: 0.18, clearcoat: 1, iridescence: 0.7, envMapIntensity: 1.1 } },
+  glass: { preset: 'glass', tint: '#eef0f8', shade: 0.55, room: ['#ffffff', '#d4d4d8'], opts: { transmission: 0, transparent: true, opacity: 0.82, metalness: 0.1, roughness: 0.18, clearcoat: 1, iridescence: 0.7, envMapIntensity: 1.1 } },
   chrome: { preset: 'chrome', tint: '#c9cad2', shade: 0.4, opts: { metalness: 0.6, roughness: 0.3, envMapIntensity: 0.9 } },
   iridescent: { preset: 'iridescent', tint: '#c4b4ff', shade: 0.45, opts: { metalness: 0.5, roughness: 0.3, envMapIntensity: 0.9, iridescenceThicknessRange: [250, 900] } },
 };
@@ -46,7 +46,8 @@ export function createStar(canvas, { depth = 0.08, bevel = 0.02, look = 'glass',
   renderer.setClearColor(0x000000, 0);
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-w / 2, w / 2, h / 2, -h / 2, -2000, 2000);
-  window.vawe.three.studio(renderer, scene, null, 'metal');
+  // The metal room's default wall is blue (#9fb6ff); glass on a white page needs a neutral room.
+  window.vawe.three.studio(renderer, scene, spec.room || null, 'metal');
   scene.background = null;
 
   const geometry = window.vawe.three.extrude(STAR_D, { depth, bevel });
