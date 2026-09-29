@@ -1,8 +1,9 @@
 # AGENTS.md: house rules for vawe
 
 vawe is the framework for agent-native motion graphics: one HTML page in, one film out. Write the
-page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js). This file adds only
-what you would get wrong on your own. One command runs everything: `bin/vawe --help`
+page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js): you never learn a
+private format, and if something you would naturally write fails, that is a framework bug to report.
+This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`
 (`bin/vawe <verb> --help` lists flags; a wrong flag exits 2 with the valid ones). Start with
 `bin/vawe new <name>`: it writes `films/<name>/page.html` (a valid starter) and `brief.md`.
 `films/examples/three-star/page.html` is a worked page.

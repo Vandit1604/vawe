@@ -3,6 +3,11 @@
 Paste this block at the top of a task for a framework agent, then fill the three blanks. Nothing
 else is needed: `AGENTS.md` and `engine-doctrine/CRAFT/ENGINE-CHANGES.md` hold the rest.
 
+Size the task before you write it: ONE build step per agent. Every call re-sends the whole context,
+so cost grows with steps times calls: a six-step agent used 106 M input tokens and 48 minutes, a
+one-step agent 3 to 4 M and 3 to 7 minutes. Split a plan into one agent per step, in parallel where
+the files do not overlap.
+
 ```
 RULES (read first):
 1. Create and change files with the Write and Edit tools only. No `cat > file <<EOF`, no python or

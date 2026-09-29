@@ -10,6 +10,19 @@ A film is one HTML page (`AGENTS.md`). This file is for the code that renders, m
 Run `bin/vawe e2e` (about 4 s) before and after every change. Framework agents follow
 `harness/dev/AGENT-TASK.md`.
 
+## The goal every change serves
+
+Agent experience first: an agent builds great films with what it already knows (HTML, CSS,
+@keyframes, element.animate, SVG, canvas, three.js, a normal shell) and never learns a private format.
+Test a change by one question: what would an agent write unprompted, and does this make that work?
+
+- Change the environment, never forbid the habit: if an agent's natural command fails, make it work
+  (tools via `bin/vawe doctor`, how agents are launched), do not add a rule or hook against it.
+- Give the tool the agent reaches for: agents built their own frame compare until `vawe compare` existed.
+- Measure with traces (`node harness/dev/trace-review.mjs`), not impressions: minutes, failed calls,
+  input tokens. Keep tasks small; one six-step agent used 106 M input tokens, a one-step agent 3 M.
+- Numbers come from code (`vawe spec`), taste from the eye (`vawe compare`, a fresh judge).
+
 ## Who owns what
 
 | Concern | Owner | What it decides |
