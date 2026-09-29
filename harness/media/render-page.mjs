@@ -267,10 +267,12 @@ function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
       + `select='not(mod(n+1\\,${seg.k}))',setpts=N/${fps}/TB[${label}]`;
   });
   const joins = segments.map((_, idx) => `[s${idx}]`).join('');
-  const filterComplex = `${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0[outv]`;
+  // Each segment restarts its pts, so a 1-frame segment carries no duration and the next one overlaps
+  // it; re-stamp after the concat and never let -r rate-convert, or ffmpeg drops the overlapped frames.
+  const filterComplex = `${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB[outv]`;
   const args = ['-y', '-v', 'error', '-framerate', String(fps), '-i', seq,
     '-filter_complex', filterComplex, '-map', '[outv]',
-    '-r', String(fps), ...x264Args(final), tmpOut];
+    '-fps_mode', 'passthrough', ...x264Args(final), tmpOut];
   return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
 }
 
