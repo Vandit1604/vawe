@@ -6,6 +6,7 @@ import { writeReceipt } from '../../lib/receipt.mjs';
 import { bucketMean, computeEnergy, describeRatio, die, edgeMean, findHolds, HOLD_FLOOR, HOLD_MIN, longestHold, probeVideo, ROOT, stackImages, tileInGrids, timeRange, writeJsonAtomic } from './core.mjs';
 import { renderGrids } from './ocr.mjs';
 import { runWordEventCompare } from './words.mjs';
+import { compareFrames } from '../compare-frames.mjs';
 
 
 // ── --shot <from>-<to>: a dense strip of ONE window, plus its motion curve ──────────────────────────
@@ -309,14 +310,18 @@ export function runSheetCheck(refFile, filmFile, filmArg) {
   }
   if (!ok) process.exitCode = 1;
 }
-// ── --measure: both sides measured with code, so the eye only judges taste. The page is read from its DOM
-// frame by frame (render-spec.mjs), the reference from its pixels (ref-spec.mjs), and
+// ── --measure: one instrument for both sides. The reference mp4 and a render of the page are both read by
+// ref-spec.mjs, so every number comes from the same pixel code and a delta is a real difference. The page's
+// DOM (render-spec.mjs) only NAMES things (`#id`, page.html line) and feeds the page self-checks.
 // harness/lib/spec-deltas.mjs turns the two specs into numeric deltas. Writes render-spec.json,
-// ref-spec/spec.json, deltas.json and deltas.md into outDirRoot. With no reference it prints the page's self-checks.
+// ref-spec/spec.json, page-spec/spec.json, deltas.json, deltas.md and sheets/ (frames side by side for
+// every low-confidence line) into outDirRoot. With no reference it prints the page's self-checks.
+const hasTesseract = () => !spawnSync('tesseract', ['-version'], { encoding: 'utf8' }).error;
+
 export async function referenceSpec(refPath, outDirRoot, fps) {
   const dir = path.join(outDirRoot, 'ref-spec');
   const file = path.join(dir, 'spec.json');
-  const ocr = !spawnSync('tesseract', ['-version'], { encoding: 'utf8' }).error;
+  const ocr = hasTesseract();
   if (fs.existsSync(file) && fs.statSync(file).mtimeMs > fs.statSync(refPath).mtimeMs) {
     const cached = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (cached.fps === fps && cached.ocr === ocr) return cached;
@@ -325,17 +330,49 @@ export async function referenceSpec(refPath, outDirRoot, fps) {
   return refSpec({ video: path.resolve(refPath), outDir: dir, fps, ocr });
 }
 
+// The page rendered at the reference's pixel size when the aspects agree, so both mp4s go through the same decode.
+export async function pageSpec(htmlPath, refSpecOut, outDirRoot, fps) {
+  const { renderPage, readPageMeta } = await import('../render-page.mjs');
+  const { refSpec } = await import('../ref-spec.mjs');
+  const mp4 = path.join(outDirRoot, 'page-render.mp4');
+  const [aw, ah] = (readPageMeta(htmlPath, 'aspect') || '16:9').split(':').map(Number);
+  const sameShape = Math.abs(aw / ah - refSpecOut.media.width / refSpecOut.media.height) < 0.02;
+  const size = sameShape ? { w: refSpecOut.media.width, h: refSpecOut.media.height } : {};
+  await renderPage(htmlPath, mp4, { fps, audio: fs.readFileSync(htmlPath, 'utf8').includes('<audio') || undefined, ...size });
+  const spec = await refSpec({ video: mp4, outDir: path.join(outDirRoot, 'page-spec'), fps, ocr: refSpecOut.ocr });
+  return { mp4, spec };
+}
+
+const SHEET_LIMIT = 10;
+
+function writeSheets(result, mp4, refPath, outDirRoot, lastT) {
+  const dir = path.join(outDirRoot, 'sheets');
+  fs.mkdirSync(dir, { recursive: true });
+  result.deltas.filter((d) => d.confidence === 'low').slice(0, SHEET_LIMIT).forEach((d, i) => {
+    const times = [...new Set([d.refT, d.t].map((t) => Math.round(Math.min(Math.max(t, 0), lastT) * 100) / 100))];
+    d.sheet = path.relative(process.cwd(), compareFrames({ ours: mp4, ref: refPath, times, out: path.join(dir, `delta-${i + 1}.png`) }));
+  });
+}
+
 export async function runMeasure(htmlPath, refPath, outDirRoot) {
   if (refPath && !fs.existsSync(refPath)) die(`no such --ref file: ${refPath}`);
-  const { renderSpec } = await import('../render-spec.mjs');
+  const { renderSpec, attachNames } = await import('../render-spec.mjs');
   const { compareSpecs, selfChecks, deltasMarkdown, deltaLine } = await import('../../lib/spec-deltas.mjs');
   fs.mkdirSync(outDirRoot, { recursive: true });
-  const page = await renderSpec({ page: path.resolve(htmlPath), outDir: outDirRoot });
+  const { spec: page, namer } = await renderSpec({ page: path.resolve(htmlPath), outDir: outDirRoot, withNames: true });
   const checks = selfChecks(page);
-  const result = refPath ? compareSpecs(await referenceSpec(refPath, outDirRoot, page.fps), page) : null;
+  let result = null, mp4 = null;
+  if (refPath) {
+    const ref = await referenceSpec(refPath, outDirRoot, page.fps);
+    const rendered = await pageSpec(path.resolve(htmlPath), ref, outDirRoot, page.fps);
+    mp4 = rendered.mp4;
+    attachNames(rendered.spec, namer);
+    result = compareSpecs(ref, rendered.spec);
+    writeSheets(result, mp4, refPath, outDirRoot, Math.min(ref.duration, rendered.spec.duration) - 2 / page.fps);
+  }
   const args = { pageName: path.basename(htmlPath), refName: refPath && path.basename(refPath), result, checks, page };
   fs.writeFileSync(path.join(outDirRoot, 'deltas.md'), deltasMarkdown(args));
-  writeJsonAtomic(path.join(outDirRoot, 'deltas.json'), { page: args.pageName, ref: args.refName, deltas: result ? result.deltas : [], notes: result ? result.notes : [], checks });
+  writeJsonAtomic(path.join(outDirRoot, 'deltas.json'), { page: args.pageName, ref: args.refName, axes: result ? result.axes : [], deltas: result ? result.deltas : [], notes: result ? result.notes : [], checks });
   const rel = path.relative(process.cwd(), path.join(outDirRoot, 'deltas.md'));
   if (result) {
     const eye = result.deltas.filter((d) => d.confidence === 'low').length;
@@ -343,6 +380,7 @@ export async function runMeasure(htmlPath, refPath, outDirRoot) {
     result.deltas.slice(0, 12).forEach((d, i) => console.log(`  ${i + 1}. ${deltaLine(d)}`));
     if (result.deltas.length > 12) console.log(`  ... ${result.deltas.length - 12} more in ${rel}`);
     result.notes.forEach((n) => console.log(`  note: ${n}`));
+    console.log(`\n  starter score per axis: ${result.axes.map((a) => `${a.axis} ${a.score}`).join(', ')}`);
   }
   console.log(`\n  page self-checks: ${checks.length}`);
   checks.forEach((c) => console.log(`  - ${c.code}: ${c.summary}${c.at ? ` [${c.at}]` : ''}. Fix: ${c.fix}`));
