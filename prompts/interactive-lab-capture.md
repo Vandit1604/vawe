@@ -40,10 +40,15 @@ Sound: <audio data-synth="pluck"> at each state change; "swell" under the reveal
 <meta name="duration">; render with bin/vawe dev films/<name>/page.html.
 ```
 
-## Inputs to ask for
+## Questions
 
-The mechanism, the source it must be right against, the three things a viewer should be able to
-explain, the tour order.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **Mechanism**: what does the lab model? Default: a camera lens with aperture, focus distance and subject distance. Why: the lab is the asset; every control and readout follows from it.
+2. **Source**: the formula or reference the readouts must agree with? Default: the thin-lens equation, depth of field in metres, the blur circle in pixels. Why: a wrong model is a wrong film; the readouts are checked before a frame is drawn.
+3. **Takeaways**: the three things a viewer should be able to explain afterwards? Default: what the aperture does to depth of field, why focus distance moves the sharp band, why the blur circle grows. Why: one tour row per takeaway, each with the readout in its caption.
+4. **Tour**: the order of states, or the controls to sweep? Default: one control at a time from its minimum to its maximum, then all three together. Why: the [[t, state]] table is the film.
+5. **Length and canvas**: seconds and aspect? Default: 30 s, 16:9. Why: the lab has no length; the tour does.
 
 ## Gotchas
 
