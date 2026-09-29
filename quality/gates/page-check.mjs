@@ -1,7 +1,7 @@
 // quality/gates/page-check.mjs: what a rendered PAGE film measures, so the eye only judges what a number cannot.
 //
 //   node quality/gates/page-check.mjs <page.html|render.mp4> [--ref <ref.mp4>] [--lead <frames>] [--skip text,audio,live,cuts]
-//   make critique PAGE=<page.html> [REF=<ref.mp4>]      (make next PAGE= runs it after the see pass)
+//   vawe critique <page.html> [REF=<ref.mp4>]      (vawe critique runs it after the see pass)
 //
 // Advisory only (owner rule: safeguards adapt, not block): every finding names a time, a frame and the
 // fix, and the exit code is always 0. Given a page, it renders a draft (with the page's audio mixed) or
@@ -319,7 +319,7 @@ function checkCues(ctx) {
   const cues = ctx.audioTags.filter(isCue);
   if (!cues.length) return;
   if (!ctx.envelope) {
-    ctx.notes.push(`${cues.length} <audio data-at> cue(s) but the render has no audio track: render with the audio mixed (make critique does)`);
+    ctx.notes.push(`${cues.length} <audio data-at> cue(s) but the render has no audio track: render with the audio mixed (vawe critique does)`);
     return;
   }
   const onsets = onsetsOf(ctx.envelope);

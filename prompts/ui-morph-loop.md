@@ -49,7 +49,7 @@ beat, what the cursor does, what the sound is. Show me that grid before code.
    release it springs back from wherever it was.
 5. Sounds: <audio data-synth="pluck" data-at="<beat>"> for a click, "chime" for a success, "droplet"
    for a toggle. Place each by its measured peak, not its file start.
-6. Render one frame per beat before the full render: make dev PAGE=… DRAFT=1. Fix anything off the
+6. Render one frame per beat before the full render: bin/vawe dev <page>. Fix anything off the
    grid, cramped or hard to read.
 </build>
 

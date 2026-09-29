@@ -8,13 +8,15 @@
 // existed: this is an optimization, never a second way to load a page.
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
 import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS } from '../lib/render-harness.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
-const STATE_FILE = scratch('preview-server', 'state.json');
+// One daemon per checkout: a shared state file made a worktree render pages from another checkout's root.
+const STATE_FILE = scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}.json`);
 const IDLE_MS = 5 * 60 * 1000;
 
 function readState() {

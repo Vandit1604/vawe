@@ -53,7 +53,7 @@ wordmark, then a fade to black on the last downbeat.
    Keep the effects under the music (data-gain="-8").
 5. Real footage, if any: extract clips to frame sequences with ffmpeg and swap <img src> per frame in
    seek(t); await the decode before returning.
-6. Render one frame per beat first (make dev PAGE=… DRAFT=1). Fix anything off the grid.
+6. Render one frame per beat first (bin/vawe dev <page>). Fix anything off the grid.
 </build>
 
 <gotchas>

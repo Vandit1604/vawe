@@ -50,7 +50,7 @@ is a word boundary from the timings file, not a guess. Show me the list before c
 4. Captions: one <p> per line, timed with the same table as the narration. No em dash on screen.
 5. Sound: <audio data-synth="pluck"> on each label, "success" on a completed build, "swell" under a
    reveal. Narration: <audio src="vo.mp3" data-at="0">; music under it at data-gain="-12".
-6. Draft, then read the sheet: make dev PAGE=films/<name>/page.html DRAFT=1.
+6. Draft, then read the sheet: bin/vawe dev films/<name>/page.html.
 </build>
 
 <gotchas>
@@ -67,8 +67,7 @@ Ask me for the inputs, write the facts list, stop. Then the scene list, stop. Th
 ## Variant: a process from empty to complete
 
 One container, one continuous fill (a glass, a build log, a render queue). Every ingredient is
-labelled as it enters, with its measure. Under 15 seconds this is one continuous action
-(`skills/vawe-continuous-action/SKILL.md`). Pattern from Ror Fly's cocktail-recipe request.
+labelled as it enters, with its measure. Under 15 seconds this is one continuous action. Pattern from Ror Fly's cocktail-recipe request.
 
 ## Inputs to ask for
 

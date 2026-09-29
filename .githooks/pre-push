@@ -1,82 +1,30 @@
 #!/bin/sh
-# Pre-push gate: block a push if the framework health checks fail. Ratchets and doc references warn, they do not block.
-# Bypass with `git push --no-verify` when you know better.
-#
-# Installed via `make install-hooks` (sets core.hooksPath to .githooks).
+# pre-push: the pre-commit checks over the whole tree, then e2e (about 4 s). Ratchets and doc references
+# warn, they do not block. Bypass with `git push --no-verify` when you know better.
+# Installed by `make install-hooks`.
 
-# push-guard runs FIRST and reads the refs git hands this hook on stdin, so it checks exactly what is
-# about to reach the remote. It is first because the two rules it holds are about publication rather
-# than quality: a wrong gate result costs a re-run, an attribution trailer or a force-added binary in a
-# public repo costs a history rewrite. Both have already happened once.
-#
-# It scans the whole pushed RANGE rather than the working tree, because the incident arrived by MERGE:
-# the commit was authored in an agent's worktree, where this machine's commit-msg hook may not have run
-# at all, and reached main through the lead.
-#
-# deploy-check runs in the same loop, on the same range, for the same reason push-guard does: it needs
-# to know what is actually about to reach the remote, not what the working tree happens to hold. It is
-# quality/gates/site-build-check.mjs: it runs the site's real build (site-engine, the fonts generator,
-# tsc --noEmit) and costs about 3 seconds, but ONLY when the pushed range actually touches something the
-# site build reads (derived from the Dockerfile's own COPY lines). A push that never touches the site
-# pays nothing. This is the local half of the ten-day vawe.dev outage: three stacked build breaks that
-# every local check passed, because none of them ran the build.
-#
-# An ABSOLUTE core.hooksPath survives a `git worktree` move or a repo re-clone at a new path, so this
-# pre-push keeps running from wherever it was FIRST installed, stale and pointed at a checkout that may
-# no longer exist. `make install-hooks` sets it relative (.githooks); warn, don't block, on the way out.
 hooks_path="$(git config core.hooksPath 2>/dev/null || true)"
 case "$hooks_path" in
   /*) echo "! core.hooksPath is absolute ($hooks_path); it will not follow this worktree. Run: make install-hooks" >&2 ;;
 esac
 
-# A stamp from `make verify-batch` (.vawe-data/verified/<sha>, gitignored, one per verified commit)
-# means the full tier already ran for this exact tip, outside pre-push, with no push connection
-# depending on it staying open for 40 minutes. It is reported here, not silently trusted: a VAWE_FULL=1
-# push still re-runs the full tier below regardless of any stamp, because that is what asking for it
-# explicitly means.
+# push-guard reads the refs git hands this hook on stdin and scans the whole pushed range for an
+# assistant attribution or a force-added ignored file. The site build check runs only when the range
+# touches something the site build reads.
 while read -r _local_ref local_sha _remote_ref remote_sha; do
-  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue   # a branch deletion
+  [ "$local_sha" = "0000000000000000000000000000000000000000" ] && continue
   if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
-    range="$local_sha"                     # a new branch: every commit it carries is new to the remote
+    range="$local_sha"
   else
     range="$remote_sha..$local_sha"
   fi
-  if [ -z "$VAWE_FULL" ]; then
-    msg="$(. harness/dev/verify-tiers.sh && stamp_message_for "$local_sha")"
-    [ -n "$msg" ] && echo "✓ $local_sha $msg"
-  fi
-  if ! node harness/dev/push-guard.mjs "$range"; then
-    echo "✗ pre-push blocked by push-guard. These are house rules, not style checks." >&2
-    exit 1
-  fi
-  if ! node quality/gates/site-build-check.mjs "$range"; then
-    echo "✗ pre-push blocked: the site would not have built. Fix it, or --no-verify to override." >&2
-    exit 1
-  fi
+  node harness/dev/push-guard.mjs "$range" || { echo "pre-push blocked by push-guard." >&2; exit 1; }
+  node quality/gates/site-build-check.mjs "$range" || { echo "pre-push blocked: the site would not have built." >&2; exit 1; }
 done
 
-# Two tiers, defined once in harness/dev/verify-tiers.sh (also sourced by `make dev-tool X=verify-batch`), so the
-# gate lists cannot drift into two different ideas of "full" between this hook and that command.
-. harness/dev/verify-tiers.sh
-if [ -n "$VAWE_FULL" ]; then
-  echo "▶ pre-push: FULL tier (make test + every gate)"
-  if ! run_full_tier; then
-    echo "✗ pre-push blocked: the full tier failed." >&2
-    exit 1
-  fi
-else
-  echo "▶ pre-push: fast tier (static gates only; VAWE_FULL=1 git push runs the tests too, or run \`make verify-batch\` first)"
-  make bench-fast || exit 1
-  for g in $FAST; do
-    if ! make check GATE="$g"; then
-      echo "✗ pre-push blocked: framework check ($g) failed." >&2
-      exit 1
-    fi
-  done
-fi
-echo "✓ pre-push: framework healthy"
-
-# ci-status is informational only, never a gate: it reports the LAST CI run (this push has no run yet)
-# so a red gates.yml is visible right here instead of discovered by nobody looking. One API call, never
-# polled. See harness/dev/ci-status.mjs for why this exists (CI was red for four runs, unnoticed).
+node harness/dev/no-emdash.mjs || exit 1
+node quality/gates/doc-refs.mjs | grep -E '^⚠' >&2
+node harness/dev/bench.mjs fast 2>&1 | grep -E 'grew' >&2
+node harness/dev/e2e.mjs || { echo "pre-push blocked: e2e failed." >&2; exit 1; }
 node harness/dev/ci-status.mjs || true
+exit 0

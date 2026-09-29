@@ -5,7 +5,7 @@
 // AGENT then reads /tmp/judge/sheet.png against /tmp/judge/rubric.md and returns a PASS/FIX verdict.
 //
 // Usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>] [--no-measure]
-//        make judge D=<file> [VS=<brand>] [REF=<ref.mp4>]
+//        vawe judge <file> [VS=<brand>] [REF=<ref.mp4>]
 // A page film (films/<name>/page.html) is judged from its render in out/. A reference (--ref, or the page's
 // reference.json) makes the sheet frame-locked pairs: reference left, film right.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -124,7 +124,7 @@ if (verdictArg) {
   const prep = readReceipt('judge', inp);
   const sheet = prep.exists && prep.receipt && prep.receipt.sheet;
   if (!prep.exists || prep.stale || !sheet || !fs.existsSync(sheet)) {
-    console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`make judge D=${inp}\` first to render the key frames, LOOK at them against the rubric, then record the verdict.`);
+    console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`vawe judge ${inp}\` first to render the key frames, LOOK at them against the rubric, then record the verdict.`);
     process.exit(1);
   }
   // The prep receipt's own render hash must still match `out/<name>.mp4` on disk RIGHT NOW: the scene
@@ -133,7 +133,7 @@ if (verdictArg) {
   // be recorded against a sheet made from a video that is no longer the one sitting in out/.
   const renderHash = renderHashOf(mp4);
   if (!renderHash || prep.receipt.renderHash !== renderHash) {
-    console.error(`✗ ${mp4} has changed since the sheet was made (its content no longer matches). Re-run \`make judge D=${inp}\` first.`);
+    console.error(`✗ ${mp4} has changed since the sheet was made (its content no longer matches). Re-run \`vawe judge ${inp}\` first.`);
     process.exit(1);
   }
   // The judge is meant for a SEPARATE agent (engine-doctrine/JUDGE.md: "the PASS is not the author's
@@ -180,7 +180,7 @@ if (verdictArg) {
     ? ` (${fixRecords.map((r) => `${r.code}@${r.beat}`).join(', ')})`
     : (fixesProse ? ` (${fixesProse})` : '');
   console.log(v === 'PASS'
-    ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (make dev-tool X=ledger-add D=${inp}).`
+    ? `  ✓ judge verdict recorded: PASS. The eye is satisfied, this cut is done (record it with the judge run).`
     : `  ✓ judge verdict recorded: FIX${fixSummary}. Fix it, re-render, and re-judge before shipping. The loop is not done until the eye stops finding fixes.`);
   process.exit(0);
 }
@@ -203,12 +203,12 @@ if (verdictJsonArg) {
   const prep = readReceipt('judge', inp);
   const sheet = prep.exists && prep.receipt && prep.receipt.sheet;
   if (!prep.exists || prep.stale || !sheet || !fs.existsSync(sheet)) {
-    console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`make judge D=${inp} STRUCT=1\` first.`);
+    console.error(`✗ no sheet to judge${prep.exists && prep.stale ? ' for this cut (the prep is for an older edit)' : ''}. Run \`vawe judge ${inp} --struct\` first.`);
     process.exit(1);
   }
   const renderHash = renderHashOf(mp4);
   if (!renderHash || prep.receipt.renderHash !== renderHash) {
-    console.error(`✗ ${mp4} has changed since the sheet was made. Re-run \`make judge D=${inp} STRUCT=1\` first.`);
+    console.error(`✗ ${mp4} has changed since the sheet was made. Re-run \`vawe judge ${inp} --struct\` first.`);
     process.exit(1);
   }
 
@@ -225,7 +225,7 @@ if (verdictJsonArg) {
   }
   // `overall`: this judge's own holistic 1-10 read of the cut, never averaged with the other judge's
   // (engine-doctrine/JUDGE.md still refuses to aggregate PER-DIMENSION scores across judges; this is a
-  // single judge's own number, compared independently against the other run's own number). `make ship`
+  // single judge's own number, compared independently against the other run's own number). `vawe ship`
   // requires both of the two latest fresh structured runs at 7 or above (harness/lib/judge-consensus.mjs).
   const overall = payload.overall;
   if (typeof overall !== 'number' || !Number.isInteger(overall) || overall < 1 || overall > 10) {
@@ -301,7 +301,7 @@ tileGrid(tiles, { cols: landscape ? 2 : (ref ? 4 : 3), tw: TW, th: TH, out: `${d
 
 // MEASURED FINDINGS, HANDED TO THE EYE. quality/audit.mjs measures 18 kinds of pixel defect (overlap,
 // clipped text, off-frame, low contrast, ...) against these SAME rendered frames, and
-// sweep-static.mjs measures whether the pixels ever move; `make ship` already pays for both and neither
+// sweep-static.mjs measures whether the pixels ever move; `vawe ship` already pays for both and neither
 // one's output ever reached this rubric, so the agent scored against a blank card next to findings a
 // script had already made (one real overlap shipped this way). Reuse VAWE_FINDINGS_OUT, the channel
 // every gate already writes structured records to (harness/lib/findings.mjs), rather than re-parsing

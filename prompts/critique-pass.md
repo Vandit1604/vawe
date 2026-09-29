@@ -23,7 +23,7 @@ Default verdict is REJECT. The film passes only if you cannot find a reason to r
 kind. Do not fill in what the film meant to do; grade what is on screen.
 
 Look at these four views, in this order, and write one line per finding under each:
-1. CONTACT SHEET: make judge PAGE=films/<name>/page.html writes the sheet. Every frame on it: is the
+1. CONTACT SHEET: bin/vawe judge films/<name>/page.html writes the sheet. Every frame on it: is the
    focal point obvious in under a second? Is the hierarchy right? Anything cramped, overlapping,
    or unreadable at phone size?
 2. STRIP: node harness/media/see.mjs films/<name>/page.html --look --times <every cut, both sides>.
@@ -35,7 +35,7 @@ Look at these four views, in this order, and write one line per finding under ea
    to read.
 
 If there is a reference: FRAME-LOCKED. Pull the same five timestamps from the reference and the
-draft (make study REF=<ref> COMPARE=<draft.mp4>). For each pair write: light (same or not), type
+draft (node harness/media/see.mjs <ref> --compare <draft.mp4>). For each pair write: light (same or not), type
 scale (same or not), the curve of the one thing that moves (same or not), and what the draft added
 that the reference did not have. Anything added without a KEEP/CHANGE line is a rejection.
 
@@ -55,7 +55,7 @@ End with exactly one of:
 
 Fix the top three findings, re-render, re-run the critic fresh. Stop when the critic passes, or when
 two consecutive rounds fix nothing the critic scores higher. Never mark a PASS yourself; it is
-written by the critic's run, and `vawe-audit` composes the verdict.
+written by the critic's run (`bin/vawe judge`).
 
 ## Inputs to ask for
 
@@ -67,7 +67,7 @@ check that the findings were fixed, not moved).
 - Producing a sheet is not looking at one. The critic must write a line per frame, or it did not
   look.
 - A judge that sees the authoring session grades the effort. A fresh one grades the film.
-- Two judges, A and B (`make judge STRUCT=1 RUNS=A,B`), before a beat closes. One judge is an
+- Two judges, A and B (`bin/vawe judge <page> --struct --runs A,B`), before a beat closes. One judge is an
   opinion.
 - The critic proposes the fix as a file and line; the author decides. A critique with no fix is a
   complaint.
@@ -75,6 +75,6 @@ check that the findings were fixed, not moved).
 source: the fresh default-reject critic from notdwd's reference-rebuild prompts and the
 contact/strip/phone/loop views from the Movez course's critique pass (both owner-shared articles,
 not redistributable, pattern only); the seven dimensions and the two-judge rule are vawe's own
-(`engine-doctrine/JUDGE.md`, `skills/vawe-review-loop/SKILL.md`); the "look at first, middle, last
+(`engine-doctrine/JUDGE.md`); the "look at first, middle, last
 and both sides of every cut" loop is the shape of ClaudeAnimationBase's review step
 (https://github.com/JohnHeibel/ClaudeAnimationBase, MIT, John Heibel).

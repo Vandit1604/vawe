@@ -1,6 +1,6 @@
 ---
 when: "a real product or site from a URL is the subject and only its own kit and real captures may appear"
-answers: "the six-section launch brief (inputs, direction, structure, build, gotchas, start) targeting one page.html with make kit assets"
+answers: "the six-section launch brief (inputs, direction, structure, build, gotchas, start) targeting one page.html with kit assets"
 group: reference
 ---
 
@@ -9,15 +9,14 @@ group: reference
 **Use when** a real product, company or site is the subject and the film must show it as it is:
 its own colours, its own type, its own screens. Never invented UI.
 
-**Length:** 15 to 40 seconds. Under 15 seconds, use one continuous action
-(`skills/vawe-continuous-action/SKILL.md`).
+**Length:** 15 to 40 seconds. Under 15 seconds, use one continuous action.
 
 ## The template
 
 ```
 <inputs>
 Ask me for: the site URL, the one-line promise, 3 to 5 moments in the product worth showing, the
-platform (16:9 or 9:16), and a song or "no music". Then run `make kit URL=<url> INIT=1`: it writes
+platform (16:9 or 9:16), and a song or "no music". Then run `node scripts/brand/kit.mjs <url> <name> --init`: it writes
 assets/brands/<brand>/kit.json with the site's own palette, fonts and favicon. Use nothing else.
 </inputs>
 
@@ -44,7 +43,7 @@ surface; a stat you can source; the wordmark. End on the wordmark, still, for 1.
    comment next to the <img>.
 4. Audio is <audio data-at="…"> elements, never played live. UI hits: <audio data-synth="pluck">
    or "chime" at the beat. Music: <audio src="music.mp3" data-at="0" data-gain="-3" data-fade-out="0.4">.
-5. Draft before polish: make dev PAGE=films/<name>/page.html DRAFT=1. Read the sheet. Fix what is
+5. Draft before polish: bin/vawe dev films/<name>/page.html. Read the sheet. Fix what is
    cramped, overlapping or unreadable before any motion work.
 </build>
 
@@ -68,7 +67,7 @@ customer name)? If yes, get the source before the beat list.
 
 ## Gotchas
 
-- `make kit` builds the kit from the site's own colours only. Do not "improve" the palette.
+- `scripts/brand/kit.mjs` builds the kit from the site's own colours only. Do not "improve" the palette.
 - Density is information per frame: show the product working, not slogans on black.
 - A launch film's logo is prominent early and late, not only at the end.
 - Adjacent transitions change axis or direction (house rule). Three slide-lefts in a row read as a
@@ -77,7 +76,7 @@ customer name)? If yes, get the source before the beat list.
 ## Worked example (vawe)
 
 URL `site/app/` (local), promise "Write a scene. Get a film.", moments: the editor diff, the same
-scene on five canvases, frame 412 rendered twice, `make ship`. Kit: `themes/vawe.json` (white first,
+scene on five canvases, frame 412 rendered twice, `bin/vawe ship`. Kit: `themes/vawe.css` (white first,
 cobalt `#2563eb`, Anybody + JetBrains Mono).
 
 source: pattern from twoclipping's "Beat-Synced Product Motion Ad" brief,

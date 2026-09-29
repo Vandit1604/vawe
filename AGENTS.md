@@ -2,7 +2,10 @@
 
 vawe is the framework for agent-native motion graphics: one HTML page in, one film out. Write the
 page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js). This file adds only
-what you would get wrong on your own.
+what you would get wrong on your own. One command runs everything: `bin/vawe --help`
+(`bin/vawe <verb> --help` lists flags; a wrong flag exits 2 with the valid ones). Start with
+`bin/vawe new <name>`: it writes `films/<name>/page.html` (a valid starter) and `brief.md`.
+`films/examples/three-star/page.html` is a worked page.
 
 ## The page contract  `[live: harness/media/render-page.mjs]`
 
@@ -13,8 +16,8 @@ what you would get wrong on your own.
   `currentTime`), or `window.seek(t)` in seconds painting frame t as a pure function, or both.
   No timers, no state between frames, no unseeded random: a virtual clock
   (`core/engine/page-clock.js`) owns `Date`, `requestAnimationFrame`, timers and `Math.random`.
-- Aspect: `<html data-aspect="16:9">`, `--vw`/`--vh` on `:root` and `window.vawe` are set before your
-  scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
+- Aspect: `<html data-aspect="16:9">`, `--vw`/`--vh` (px lengths) on `:root` and `window.vawe` are set
+  before your scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Audio is `<audio>` tags, never played live, mixed offline to -14 LUFS: `src` + `data-at` (s),
   `data-gain` (dB), `data-fade-out`; `loop` is the music bed; `data-synth="whoosh"` picks a voice
   from `core/audio/kit.mjs`; `data-role="vo"` ducks the bed.
@@ -31,20 +34,21 @@ seconds -> final. A hook names the next command for the page film you edited las
 
 | # | stage | the command |
 |---|---|---|
-| 1 | type | `engine-doctrine/CRAFT/ROUTING.md` names the `prompts/` template; copy it, fill its inputs |
+| 1 | type | `engine-doctrine/CRAFT/ROUTING.md` names the `prompts/` template; `bin/vawe new <name> --from prompts/<t>.md` |
 | 2 | stills | the five frames that define the look, before any motion |
-| 3 | draft | `make dev PAGE=films/<name>/page.html [FROM= TO=]` (half size, 30 fps, silent) |
-| 4 | critique | `make critique PAGE= [REF=]` in a session that did not write the page (`vawe-critique`) |
-| 5 | fix | re-render only the seconds the critique named: `make dev PAGE= FROM= TO=` |
-| 6 | final | `make ship PAGE= [ASPECT=all]` (60 fps, blur, audio) |
+| 3 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
+| 4 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
+| 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
+| 6 | final | `bin/vawe ship <page> [--aspect all]` (60 fps, blur, audio) |
 
-Recreating a reference: `make dev-tool X=new TYPE=recreation NAME= REF=` starts it, `make spec REF=`
-writes SPEC.md, mark every line KEEP or CHANGE, rebuild, then loop `make next PAGE= REF=` until it
-passes (`vawe-reference`); never `make ship` before that loop passes.
+Recreating a reference: `bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md; mark every line KEEP
+or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until it passes
+(`vawe-reference`). `ship` refuses until that loop passes.
 
-Over 60 seconds or more than one session: one guide read first, one chapter file per agent
+Over 60 seconds or more than one session: one chapter file per agent
 (`prompts/directors-brief-long-form.md`). Skills: `vawe-page` (write), `vawe-critique` (look),
-`vawe-reference` (match), `vawe-audit` (compose the verdict from two judge runs).
+`vawe-reference` (match). Score with `bin/vawe judge <page|mp4> --runs A,B` in a fresh session; a
+PASS is never self-recorded.
 
 ## Motion rules that are not your defaults  `[eye]`
 
@@ -77,23 +81,13 @@ You will reach for each of these; do the other thing (`engine-doctrine/RULES/ban
 
 A rule broken for cause is declared in the page with its reason, nowhere else; no `_why`, no waiver.
 Checks advise; only determinism and a missing reason refuse.
+`<script type="application/json" id="authoring">{"allow": ["dead-air"], "_why": {"dead-air": "the held wordmark IS the last beat"}}</script>`
 
-```html
-<script type="application/json" id="authoring">
-  {"allow": ["dead-air"], "_why": {"dead-air": "the held wordmark IS the last beat"}}
-</script>
-```
+## Changing the engine, not a film  `[ref: engine-doctrine/CRAFT/ENGINE-CHANGES.md]`
 
-## Changing the engine, not a film  `[live: harness/live/craft-live.mjs]`
-
-Every effect composes; none is a special case: a new look combines things the engine already owns,
-never a private code path. A new primitive ships with 2+ `aka` phrases and a `blurb`
-(`make check GATE=word-action`). Rules: `engine-doctrine/CRAFT/ENGINE-CHANGES.md`.
-
-## Testing: end to end first  `[ref: make e2e]`
-
-List every way it can fail, then `make e2e` (report in `quality/runs/e2e/<timestamp>/`). A unit test
-only for what a render cannot show. Push: `make dev-tool X=verify-batch`, then `git push`.
+Every effect composes; none is a special case. Test end to end: list every way it can fail, then
+`bin/vawe e2e` (about 4 s). A unit test only for what a render cannot show. Framework agents:
+`harness/dev/AGENT-TASK.md`. The pre-push hook runs e2e.
 
 ## Comments  `[eye]`
 
@@ -101,7 +95,5 @@ Only a fact the code cannot show: a contract (units, ranges, side effects), a me
 its source, an outside quirk, or a guard that looks safe to delete. Never history or restatement.
 A stale comment is a bug.
 
-## Where to look  `[ref: make help]`
-
-`prompts/README.md` (a template per film type), `core/motion/README.md`, `make help`,
-`engine-doctrine/JUDGE.md` (how a film is scored).
+Where to look: `prompts/README.md` (a template per film type), `core/motion/README.md`,
+`engine-doctrine/JUDGE.md` (how a film is scored), `harness/README.md` (every script and its owner).
