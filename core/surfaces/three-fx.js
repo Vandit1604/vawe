@@ -26,7 +26,7 @@ import { LONLAT } from './globe-dots.js';
 // `object`'s camera/object pose reads the SAME keyframe sampler and easing every other layer's `motion`
 // track reads (core/tracks/motion.js reads it too), so a person who already knows how to key a rect's
 // x/y/scale keys a glass shield's orbit the identical way. Not a second interpolation rule.
-import { motionAt } from '../timeline/sequence.js';
+import { motionAt } from '../timeline/pose-track.js';
 // The dials a three scene reads OFF THE LAYER (it is handed the whole layer, named `LL` where `L` is
 // taken). Declared here because this is where they are read; core/surfaces/three.js merges them.
 export const PROPS = { three: {}, seed: {}, count: {}, size: {}, pointSize: {}, bodyColor: {}, dolly: {},
