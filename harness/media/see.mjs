@@ -920,10 +920,11 @@ async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts) {
   const tmpMp4 = path.join(outDir, `.page-render-${process.pid}.mp4`);
   const refWindow = windowed ? path.join(outDir, `.ref-window-${process.pid}.mp4`) : refPath;
   try {
-    const { renderPage } = await import('./render-page.mjs');
+    const { renderPage, readPageMeta } = await import('./render-page.mjs');
+    const authoringFps = Number(readPageMeta(htmlPath, 'fps')) || 30;
     if (opts.final) console.log(`  rendering FINAL ${htmlPath} (foreground, one pass)...`);
     await renderPage(htmlPath, tmpMp4, {
-      fps: 30, w: opts.w, h: opts.h, blur: opts.blur, from, durArg: to - from, progress: opts.final,
+      fps: authoringFps, w: opts.w, h: opts.h, blur: opts.blur, from, durArg: to - from, progress: opts.final,
     });
     if (windowed) {
       ffmpegOrDie(['-v', 'error', '-y', '-i', refPath, '-ss', String(from), '-to', String(to),
