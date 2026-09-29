@@ -1,0 +1,190 @@
+{
+ "page": "page.html",
+ "ref": "reference.mp4",
+ "axes": [
+  {
+   "axis": "timing",
+   "score": 13,
+   "worst": "S1 element 1.6: lands f149, ref f95 -> 54 frames late | #1e2930 vs #0d171f (dE 9) | size 358x28 vs ref 262x30"
+  },
+  {
+   "axis": "layout",
+   "score": 43,
+   "worst": "S1 element 1.3: curve approach vs ref spring (k 213 d 19.4) | size 314x34 vs ref 80x27"
+  },
+  {
+   "axis": "colour",
+   "score": 64,
+   "worst": "S1 span.w: lands f23, ref f33 -> 10 frames early | spring k 2000 d 40 vs k 36 d 8.5 -> stiffer, more damped | overshoot x1.14 vs x1.00 | #ffffff vs #d1dbd8 (dE 14)"
+  },
+  {
+   "axis": "text",
+   "score": 86,
+   "worst": "T2 \"Simple systems always scale\": stagger mixed vs ref right-to-left | \"systems\" 36 f off against the line's own offset"
+  },
+  {
+   "axis": "transitions",
+   "score": 100,
+   "worst": ""
+  },
+  {
+   "axis": "audio",
+   "score": 100,
+   "worst": ""
+  }
+ ],
+ "deltas": [
+  {
+   "kind": "element",
+   "shot": 1,
+   "hurt": 116.7,
+   "parts": [
+    {
+     "axis": "timing",
+     "hurt": 108.46000000000002,
+     "text": "lands f149, ref f95 -> 54 frames late"
+    },
+    {
+     "axis": "colour",
+     "hurt": 4.392452714945893,
+     "text": "#1e2930 vs #0d171f (dE 9)"
+    },
+    {
+     "axis": "layout",
+     "hurt": 3.878994370287683,
+     "text": "size 358x28 vs ref 262x30"
+    }
+   ],
+   "confidence": "low",
+   "frame": 149,
+   "refFrame": 95,
+   "line": "S1 element 1.6: lands f149, ref f95 -> 54 frames late | #1e2930 vs #0d171f (dE 9) | size 358x28 vs ref 262x30",
+   "t": 4.966666666666667,
+   "refT": 3.1666666666666665,
+   "sheet": "tests/fixtures/recreation-worked/round-trip/sheets/delta-1.png"
+  },
+  {
+   "kind": "element",
+   "shot": 1,
+   "hurt": 81.3,
+   "parts": [
+    {
+     "axis": "timing",
+     "hurt": 19.860000000000003,
+     "text": "lands f23, ref f33 -> 10 frames early"
+    },
+    {
+     "axis": "timing",
+     "hurt": 40.01406816868778,
+     "text": "spring k 2000 d 40 vs k 36 d 8.5 -> stiffer, more damped"
+    },
+    {
+     "axis": "timing",
+     "hurt": 14.399999999999991,
+     "text": "overshoot x1.14 vs x1.00"
+    },
+    {
+     "axis": "colour",
+     "hurt": 6.986186285616176,
+     "text": "#ffffff vs #d1dbd8 (dE 14)"
+    }
+   ],
+   "confidence": "low",
+   "frame": 23,
+   "refFrame": 33,
+   "line": "S1 span.w: lands f23, ref f33 -> 10 frames early | spring k 2000 d 40 vs k 36 d 8.5 -> stiffer, more damped | overshoot x1.14 vs x1.00 | #ffffff vs #d1dbd8 (dE 14)",
+   "t": 0.7666666666666667,
+   "refT": 1.1,
+   "sheet": "tests/fixtures/recreation-worked/round-trip/sheets/delta-2.png"
+  },
+  {
+   "kind": "element",
+   "shot": 1,
+   "hurt": 38.7,
+   "parts": [
+    {
+     "axis": "timing",
+     "hurt": 2,
+     "text": "curve approach vs ref spring (k 213 d 19.4)"
+    },
+    {
+     "axis": "layout",
+     "hurt": 36.69582695591481,
+     "text": "size 314x34 vs ref 80x27"
+    }
+   ],
+   "confidence": "low",
+   "frame": 95,
+   "refFrame": 96,
+   "line": "S1 element 1.3: curve approach vs ref spring (k 213 d 19.4) | size 314x34 vs ref 80x27",
+   "t": 3.1666666666666665,
+   "refT": 3.2,
+   "sheet": "tests/fixtures/recreation-worked/round-trip/sheets/delta-3.png"
+  },
+  {
+   "kind": "missing",
+   "axis": "timing",
+   "shot": 1,
+   "hurt": 8,
+   "confidence": "low",
+   "frame": 30,
+   "refFrame": 30,
+   "line": "S1: ref moves something 216x36 px to (421, 64), f20-f30; no page move matches",
+   "t": 1,
+   "refT": 1,
+   "sheet": "tests/fixtures/recreation-worked/round-trip/sheets/delta-4.png"
+  },
+  {
+   "kind": "element",
+   "shot": 1,
+   "hurt": 5.4,
+   "parts": [
+    {
+     "axis": "colour",
+     "hurt": 5.405016610461618,
+     "text": "#ffffff vs #dfebe0 (dE 11)"
+    }
+   ],
+   "confidence": "low",
+   "frame": 66,
+   "refFrame": 66,
+   "line": "S1 span.w: #ffffff vs #dfebe0 (dE 11)",
+   "t": 2.2,
+   "refT": 2.2,
+   "sheet": "tests/fixtures/recreation-worked/round-trip/sheets/delta-5.png"
+  },
+  {
+   "kind": "text",
+   "axis": "text",
+   "shot": 0,
+   "hurt": 5,
+   "parts": [
+    {
+     "axis": "text",
+     "hurt": 4,
+     "text": "stagger mixed vs ref right-to-left"
+    },
+    {
+     "axis": "text",
+     "hurt": 1,
+     "text": "\"systems\" 36 f off against the line's own offset"
+    }
+   ],
+   "confidence": "high",
+   "frame": 47,
+   "refFrame": 46,
+   "line": "T2 \"Simple systems always scale\": stagger mixed vs ref right-to-left | \"systems\" 36 f off against the line's own offset",
+   "t": 1.5666666666666667,
+   "refT": 1.5333333333333334
+  }
+ ],
+ "notes": [],
+ "checks": [
+  {
+   "code": "text-moves-before-hold",
+   "summary": "S1 \"Good ideas Good ideas\" is still for 1.67s and needs 2.40s",
+   "at": "f97 (3.23s)",
+   "fix": "delay the exit to 5.63s, or start the text earlier."
+  }
+ ]
+}

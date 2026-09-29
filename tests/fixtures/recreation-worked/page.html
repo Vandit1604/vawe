@@ -1,0 +1,132 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="5"> <!-- measured -->
+<meta name="fps" content="30"> <!-- measured -->
+<meta name="aspect" content="16:9"> <!-- measured -->
+<style>
+@font-face { font-family: "Starter"; src: url("../../../assets/fonts/Geist.woff2") format("woff2"); font-weight: 100 900; font-display: swap; } /* default: a guess, GUIDE.md lists candidates */
+:root {
+  --font: "Starter", sans-serif; /* default */
+  --c1: #0d171f; /* measured ±dE 1, 99% of the film */
+  --c2: #ffffff; /* measured ±dE 1, 7% of the film */
+  --c3: #dae2d9; /* measured ±dE 1, 2% of the film */
+  --c4: #7d8889; /* measured ±dE 1, 1% of the film */
+  --c5: #2e373d; /* measured ±dE 1, 1% of the film */
+  --c6: #d1dbd8; /* measured ±dE 1, 1% of the film */
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--c1); }
+#stage { position: absolute; inset: 0; overflow: hidden; }
+.chapter { position: absolute; inset: 0; overflow: hidden; }
+.shot[hidden] { display: none; }
+</style>
+</head>
+<body>
+<!-- recreation-worked: starter written by `vawe new --ref reference.mp4`. Read GUIDE.md and SPEC.md next to this file. A literal ends with
+     its error (measured ±N) or "default" (yours to decide). Keep the timing, change the brand. Loop: `vawe critique page.html --ref reference.mp4`. -->
+<div id="stage"></div>
+<!-- the reference has no audio stream -->
+<script type="module">
+await document.fonts.load('700 100px Starter').catch(() => {});
+const SHOTS = [
+  { id: 's1' /* default */, show: [0 /* measured ±1f */, 5 /* measured ±1f */], bg: 'var(--c1)' /* measured ±dE 1 */,
+    transition: null /* the first shot */,
+    boxes: [
+    ],
+    moves: [
+    ],
+    words: [
+      { text: 'Good' /* measured OCR, spelling may be off */, at: 0.5 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 23.75 /* measured ±1% */, y: 17.03 /* measured ±1% */, size: 9.25 /* measured ±5% */, w: 12.81 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: null /* default */ },
+      { text: 'motion' /* measured OCR, spelling may be off */, at: 0.667 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 39.77 /* measured ±1% */, y: 17.08 /* measured ±1% */, size: 9.25 /* measured ±5% */, w: 16.41 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: null /* default */ },
+      { text: 'design' /* measured OCR, spelling may be off */, at: 0.833 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 57.34 /* measured ±1% */, y: 17.92 /* measured ±1% */, size: 9.25 /* measured ±5% */, w: 15.94 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: -33.33 /* measured ±1% */, dy: 0 /* measured ±1% */, at: 0.771 /* measured ±1f */, ms: 231 /* measured ±1f */, ease: 'linear' /* measured ±1f */ } },
+      { text: 'travels' /* measured OCR, spelling may be off */, at: 0.967 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 74.66 /* measured ±1% */, y: 17.08 /* measured ±1% */, size: 9.25 /* measured ±5% */, w: 16.17 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: -50.77 /* measured ±1% */, dy: 0.83 /* measured ±1% */, at: 0.665 /* measured ±1f */, ms: 421 /* measured ±1f */, ease: 'linear' /* measured ±1f */ } },
+      { text: 'scale' /* measured OCR, spelling may be off */, at: 1.533 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 78.28 /* measured ±1% */, y: 47.08 /* measured ±1% */, size: 9.11 /* measured ±5% */, w: 12.5 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: null /* default */ },
+      { text: 'always' /* measured OCR, spelling may be off */, at: 1.733 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 62.58 /* measured ±1% */, y: 47.92 /* measured ±1% */, size: 9.11 /* measured ±5% */, w: 16.41 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: -33.33 /* measured ±1% */, dy: 0 /* measured ±1% */, at: 0.771 /* measured ±1f */, ms: 231 /* measured ±1f */, ease: 'linear' /* measured ±1f */ } },
+      { text: 'systems' /* measured OCR, spelling may be off */, at: 1.933 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 43.13 /* measured ±1% */, y: 48.14 /* measured ±1% */, size: 9.11 /* measured ±5% */, w: 20 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: 7.03 /* measured ±1% */, dy: 0.42 /* measured ±1% */, at: 3.101 /* measured ±1f */, ms: 67 /* measured ±1f */, ease: 'cubic-bezier(1, -0.55, 0.06, 1)' /* measured ±1f */ } },
+      { text: 'Simple' /* measured OCR, spelling may be off */, at: 2.133 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 23.8 /* measured ±1% */, y: 47.86 /* measured ±1% */, size: 9.11 /* measured ±5% */, w: 16.33 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: 54.53 /* measured ±1% */, dy: 0.69 /* measured ±1% */, at: 1.65 /* measured ±1f */, ms: 559 /* measured ±1f */, ease: 'linear' /* measured ±1f */ } },
+      { text: 'Good' /* measured OCR, spelling may be off */, at: 3.033 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 28.91 /* measured ±1% */, y: 77.03 /* measured ±1% */, size: 9.44 /* measured ±5% */, w: 12.81 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: 7.03 /* measured ±1% */, dy: 0.42 /* measured ±1% */, at: 3.101 /* measured ±1f */, ms: 67 /* measured ±1f */, ease: 'cubic-bezier(1, -0.55, 0.06, 1)' /* measured ±1f */ } },
+      { text: 'ideas' /* measured OCR, spelling may be off */, at: 3.033 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 43.13 /* measured ±1% */, y: 77.08 /* measured ±1% */, size: 9.44 /* measured ±5% */, w: 12.5 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: 0 /* measured ±1% */, dy: 0.42 /* measured ±1% */, at: 2.8 /* measured ±1f */, ms: 533 /* measured ±1f */, ease: 'linear(0, 0.168, 0.308, 0.424, 0.521, 0.601, 0.668, 0.724, 0.77, 0.809, 0.841, 0.868, 0.89, 0.908, 0.924, 0.937, 0.947, 0.956, 0.964, 0.97, 0.975, 0.979, 0.983, 0.985, 0.988, 0.99, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 0.998, 0.998, 0.999, 0.999, 0.999, 0.999, 1)' /* measured ±1f */ } },
+      { text: 'Good' /* measured OCR, spelling may be off */, at: 3.033 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 57.03 /* measured ±1% */, y: 77.03 /* measured ±1% */, size: 9.44 /* measured ±5% */, w: 12.81 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: 0 /* measured ±1% */, dy: 0.42 /* measured ±1% */, at: 2.8 /* measured ±1f */, ms: 533 /* measured ±1f */, ease: 'linear(0, 0.168, 0.308, 0.424, 0.521, 0.601, 0.668, 0.724, 0.77, 0.809, 0.841, 0.868, 0.89, 0.908, 0.924, 0.937, 0.947, 0.956, 0.964, 0.97, 0.975, 0.979, 0.983, 0.985, 0.988, 0.99, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.997, 0.998, 0.998, 0.998, 0.999, 0.999, 0.999, 0.999, 1)' /* measured ±1f */ } },
+      { text: 'ideas' /* measured OCR, spelling may be off */, at: 3.033 /* measured ±1f */, out: 4.875 /* measured ±1f */, x: 71.25 /* measured ±1% */, y: 77.08 /* measured ±1% */, size: 9.44 /* measured ±5% */, w: 12.5 /* measured ±5% */, color: 'var(--c2)' /* measured ±dE 1 */, move: { dx: -0.16 /* measured ±1% */, dy: 1.53 /* measured ±1% */, at: 3.032 /* measured ±1f */, ms: 169 /* measured ±1f */, ease: 'linear' /* measured ±1f */ } },
+    ],
+  },
+];
+
+const REVEAL_MS = 200; /* default */
+const REVEAL_EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)'; /* default */
+const REVEAL_RISE_VH = 1.5; /* default */
+const EXIT_MS = 100; /* default */
+const FIT_WIDTH = false; /* default: true scales each word to its measured width, useful once the font matches */
+const FONT = 'var(--font)'; /* default */
+const WEIGHT = 700; /* default */
+const TRACKING = '-0.02em'; /* default */
+
+const el = (tag, parent, css, cls) => {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  e.style.cssText = css;
+  parent.appendChild(e);
+  return e;
+};
+const at = (ms) => Math.max(0, ms);
+const vw = (pct) => 'calc(var(--vw) * ' + pct / 100 + ')';
+const vh = (pct) => 'calc(var(--vh) * ' + pct / 100 + ')';
+
+function addWord(sec, w) {
+  const span = el('span', sec, 'position:absolute;left:' + w.x + '%;top:' + w.y + '%;translate:-50% -50%;white-space:nowrap;opacity:0;color:' + w.color
+    + ';font:' + WEIGHT + ' ' + vh(w.size) + ' ' + FONT + ';letter-spacing:' + TRACKING, 'w');
+  span.textContent = w.text;
+  if (FIT_WIDTH) {
+    const now = span.getBoundingClientRect().width;
+    if (now > 0) span.style.fontSize = vh((w.size * (w.w * window.innerWidth / 100)) / now);
+  }
+  const m = w.move;
+  const rise = m ? 'none' : 'translateY(' + vh(REVEAL_RISE_VH) + ')';
+  span.animate([{ opacity: 0, transform: rise }, { opacity: 1, transform: 'none' }],
+    { delay: at(w.at * 1000), duration: REVEAL_MS, easing: REVEAL_EASE, fill: 'both' });
+  if (m) span.animate([{ transform: 'translate(' + vw(m.dx) + ', ' + vh(m.dy) + ')' }, { transform: 'none' }],
+    { delay: at(m.at * 1000), duration: m.ms, easing: m.ease, fill: 'both' });
+  if (w.out != null) span.animate([{ opacity: 1 }, { opacity: 0 }], { delay: at(w.out * 1000), duration: EXIT_MS, easing: 'linear', fill: 'forwards' });
+}
+
+function addBox(sec, b) {
+  el('div', sec, 'position:absolute;left:' + b.x + '%;top:' + b.y + '%;width:' + b.w + '%;height:' + b.h + '%;background:' + b.color);
+}
+
+function addMove(sec, m) {
+  const box = el('div', sec, 'position:absolute;left:' + m.x + '%;top:' + m.y + '%;width:' + m.w + '%;height:' + m.h + '%;background:' + m.color);
+  const from = 'translate(' + vw(m.dx) + ', ' + vh(m.dy) + ')';
+  const blur = (px) => (m.blur ? 'blur(' + px + 'px)' : 'none');
+  box.animate([{ transform: from, filter: blur(m.blur) }, { transform: 'none', filter: blur(0) }],
+    { delay: at(m.at * 1000), duration: m.ms, easing: m.ease, fill: 'both' });
+}
+
+const WIPE = { right: 'inset(0 100% 0 0)', left: 'inset(0 0 0 100%)', down: 'inset(0 0 100% 0)', up: 'inset(100% 0 0 0)' };
+
+function addTransition(sec, tr) {
+  if (!tr || tr.type === 'cut') return;
+  const from = tr.type === 'wipe' ? { clipPath: WIPE[tr.dir] || WIPE.right } : { opacity: 0 };
+  const to = tr.type === 'wipe' ? { clipPath: 'inset(0 0 0 0)' } : { opacity: 1 };
+  sec.animate([from, to], { delay: at(tr.at * 1000), duration: tr.ms, easing: 'linear', fill: 'both' });
+}
+
+function buildShots(root, shots) {
+  const built = shots.map((s) => {
+    const sec = el('section', root, 'position:absolute;inset:0;overflow:hidden;background:' + s.bg, 'shot');
+    s.boxes.forEach((b) => addBox(sec, b));
+    s.moves.forEach((m) => addMove(sec, m));
+    s.words.forEach((w) => addWord(sec, w));
+    addTransition(sec, s.transition);
+    return { sec, s };
+  });
+  return { seek(t) { for (const b of built) b.sec.hidden = !(t >= b.s.show[0] && t < b.s.show[1]); } };
+}
+
+const scene = buildShots(document.getElementById('stage'), SHOTS);
+window.seek = (t) => scene.seek(t);
+window.seek(0);
+</script>
+</body>
+</html>
