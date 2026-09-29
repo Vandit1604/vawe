@@ -1,0 +1,47 @@
+<!doctype html><html lang=en><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=theme-color content="#16151a"><title>vawe studio · {{TITLE}}</title>
+<link rel=icon href="data:,"><link rel=stylesheet href=/studio/ui/studio.css><link rel=stylesheet href=/studio/ui/page-studio.css>
+</head><body>
+ <header id=top>
+  <svg class=mark viewBox="0 0 32 32" aria-hidden=true><rect width=32 height=32 rx=8 /><path d="M7 13c2.2 0 2.2 6 4.5 6s2.2-6 4.5-6 2.2 6 4.5 6 2.3-6 4.5-6"/></svg>
+  <b id=pagepath>{{TITLE}}</b>
+  <div class=seg id=aspects role=group aria-label=aspect></div>
+  <span class=sp></span>
+  <button id=undo disabled title="Undo (Cmd/Ctrl-Z)">Undo</button>
+  <button id=critique title="make critique PAGE= (or make next)">Critique</button>
+  <button id=draft title="make dev PAGE=">Draft render</button>
+  <button id=final class=primary title="make ship PAGE=">Final render</button>
+ </header>
+
+ <main id=main>
+  <section id=work>
+   <div id=stage><div id=frame><iframe id=sc title="page preview"></iframe></div></div>
+   <div id=bar>
+    <button id=prev class=ib aria-label="previous frame" title="Previous frame (left)"><svg class=solid viewBox="0 0 20 20"><rect x=4 y=4.5 width=2 height=11 rx=.8 /><path d="M15.5 4.8v10.4L7.5 10z"/></svg></button>
+    <button id=play class="ib big" aria-label=play title="Play (space)"><svg class=solid viewBox="0 0 20 20"><path d="M6 3.8v12.4L16 10z"/></svg></button>
+    <button id=next class=ib aria-label="next frame" title="Next frame (right)"><svg class=solid viewBox="0 0 20 20"><rect x=14 y=4.5 width=2 height=11 rx=.8 /><path d="M4.5 4.8v10.4l8-5.2z"/></svg></button>
+    <span id=read></span>
+    <span class=sp></span>
+    <button id=zout class=ib aria-label="zoom out" title="Zoom out"><svg viewBox="0 0 20 20"><path d="M5 10h10"/></svg></button>
+    <button id=zin class=ib aria-label="zoom in" title="Zoom in"><svg viewBox="0 0 20 20"><path d="M10 5v10M5 10h10"/></svg></button>
+   </div>
+   <div id=tl><div id=lanes tabindex=0 role=group aria-label=Timeline><div id=ruler></div><div id=rows></div><div id=ph></div></div></div>
+  </section>
+
+  <aside id=rail>
+   <nav id=tabs class=seg role=tablist>
+    <button data-tab=key aria-pressed=true>Key</button><button data-tab=vars aria-pressed=false>Vars</button><button data-tab=text aria-pressed=false>Text</button><button data-tab=chat aria-pressed=false>Chat</button><button data-tab=job aria-pressed=false>Job</button>
+   </nav>
+   <section id=tab-key class=tabbody></section>
+   <section id=tab-vars class=tabbody hidden></section>
+   <section id=tab-text class=tabbody hidden></section>
+   <section id=tab-chat class=tabbody hidden>
+    <div id=chatlog role=log aria-live=polite></div>
+    <textarea id=chatinput rows=2 placeholder="ask for a change to this page, in words"></textarea>
+    <div class=chatactions><button id=chatnew>New chat</button><span class=sp></span><button id=chatstop hidden>Stop</button><button id=chatsend class=primary>Send</button></div>
+   </section>
+   <section id=tab-job class=tabbody hidden><p id=jobcmd class=note>No render started.</p><pre id=joblog></pre></section>
+   <p id=say role=status></p>
+  </aside>
+ </main>
+<script type=module src=/studio/ui/page-studio.js></script>
+</body></html>
