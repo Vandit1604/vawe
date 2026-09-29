@@ -1,6 +1,5 @@
-// harness/dev/recreation-new.mjs: the recreation starter. `make dev-tool X=new TYPE=recreation
-// NAME=<name> REF=<ref.mp4>` writes films/recreations/<name>/page.html (a real page: see
-// engine-doctrine/CRAFT/RECREATION.md for the JSON loop), a SPEC.md of measured numbers for the
+// harness/dev/recreation-new.mjs: the recreation starter, run by `vawe new <name> --ref <ref.mp4>`
+// (env TYPE, NAME, REF). Writes films/recreations/<name>/page.html, a SPEC.md of measured numbers for the
 // reference (harness/media/ref-spec.mjs) and a `see` pass, so the first file an agent opens points at
 // the reference's own cuts, moves, palette and sound hits, never a blank page.
 import fs from 'node:fs';
@@ -22,7 +21,7 @@ const PAGE_HTML = (name, refBase, duration, fps) => `<!-- films/recreations/${na
      Read SPEC.md next to this file first: cuts, per-frame moves, palette, sound hits, KEEP/CHANGE block.
      Own words, own images, own icons only. Keep the reference's timing, cuts, camera and easing; change the brand.
      Numbers live as literals: @keyframes stops, element.animate() keyframes, or a [[frame, value]] table in seek(t).
-     Loop: \`make next PAGE=page.html REF=${refBase}\` until it passes, then the final render. -->
+     Loop: \`vawe critique page.html --ref ${refBase}\` until it passes, then the final render. -->
 <!doctype html>
 <html>
 <head>
@@ -54,7 +53,7 @@ function main() {
   if (type !== 'recreation') die(`unknown TYPE=${type}. Only TYPE=recreation is built.`);
   const name = env.NAME;
   const ref = env.REF;
-  if (!name || !ref) die('usage: make dev-tool X=new TYPE=recreation NAME=<name> REF=<ref.mp4>');
+  if (!name || !ref) die('usage: vawe new <name> --ref <ref.mp4>');
   const refAbs = path.resolve(ref);
   if (!fs.existsSync(refAbs)) die(`no such reference file: ${ref}`);
 
@@ -80,7 +79,7 @@ function main() {
 
   const relPage = path.relative(ROOT, pagePath);
   console.log(`\nSPEC: ${path.relative(ROOT, path.join(outDir, 'SPEC.md'))} (edit its KEEP/CHANGE block)`);
-  console.log(`make next PAGE=${relPage} REF=${ref}`);
+  console.log(`vawe critique ${relPage} --ref ${ref}`);
   return 0;
 }
 

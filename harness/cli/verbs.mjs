@@ -15,9 +15,12 @@ export const VERBS = [
   {
     name: 'new', summary: 'start a film: films/<name>/page.html and brief.md',
     positional: [{ name: 'name', required: true, help: 'film name, lowercase with dashes' }],
-    flags: [{ name: 'from', type: 'path', default: 'prompts/brand-launch-from-url.md', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' }],
+    flags: [
+      { name: 'from', type: 'path', default: 'prompts/brand-launch-from-url.md', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
+      { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
+    ],
     example: 'vawe new my-launch --from prompts/story-explainer.md',
-    local: 'new',
+    build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref } }] : null),
   },
   {
     name: 'dev', summary: 'draft render: half size, 30 fps, silent',
@@ -53,8 +56,10 @@ export const VERBS = [
     ],
     example: 'vawe critique films/my-launch/page.html --ref refs/ad.mp4 --at 4.2',
     build: (v, [page]) => [
+      { script: 'quality/gates/anim-traps.mjs', args: [page] },
       { script: 'harness/media/see.mjs', args: [page, '--phone', '--strip', v.at || 'auto', '--loop'] },
       { script: 'harness/media/see.mjs', args: [page, '--measure', ...opt('--ref', v.ref)] },
+      ...(v.ref ? [{ script: 'harness/media/see.mjs', args: [page, '--dom', '--ref', v.ref] }] : []),
       { script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)] },
     ],
     next: (v, [page]) => `look at the sheets above, then in a fresh session: VAWE_AGENT=judge-${pageName(page)} vawe judge ${page}${v.ref ? ` --ref ${v.ref}` : ''}`,

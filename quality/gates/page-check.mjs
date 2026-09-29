@@ -1,7 +1,7 @@
 // quality/gates/page-check.mjs: what a rendered PAGE film measures, so the eye only judges what a number cannot.
 //
 //   node quality/gates/page-check.mjs <page.html|render.mp4> [--ref <ref.mp4>] [--lead <frames>] [--skip text,audio,live,cuts]
-//   make critique PAGE=<page.html> [REF=<ref.mp4>]      (make next PAGE= runs it after the see pass)
+//   vawe critique <page.html> [REF=<ref.mp4>]      (make next PAGE= runs it after the see pass)
 //
 // Advisory only (owner rule: safeguards adapt, not block): every finding names a time, a frame and the
 // fix, and the exit code is always 0. Given a page, it renders a draft (with the page's audio mixed) or

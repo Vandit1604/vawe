@@ -22,9 +22,9 @@ export function nextStep(page, root = process.cwd()) {
   const t = mtime(page);
   const draft = mtime(path.join(root, 'out', `${name}-draft.mp4`));
   const final = mtime(path.join(root, 'out', `${name}.mp4`));
-  if (draft < t && final < t) return { name, next: `make dev PAGE=${rel}`, why: 'the page changed after its last draft' };
-  if (final < t) return { name, next: `make critique PAGE=${rel}`, why: 'a draft exists; critique it in a fresh session, fix the named seconds, then make ship' };
-  return { name, next: `make critique PAGE=${rel}`, why: 'the final is rendered; a fresh session judges it' };
+  if (draft < t && final < t) return { name, next: `bin/vawe dev ${rel}`, why: 'the page changed after its last draft' };
+  if (final < t) return { name, next: `bin/vawe critique ${rel}`, why: 'a draft exists; critique it in a fresh session, fix the named seconds, then bin/vawe ship' };
+  return { name, next: `bin/vawe critique ${rel}`, why: 'the final is rendered; a fresh session judges it' };
 }
 
 function main() {

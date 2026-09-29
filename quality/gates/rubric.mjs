@@ -209,7 +209,7 @@ ${criteria.map((c) => `    "${c.code}": {"score": 1-5, "evidence": "<quoted visu
 \`\`\`
 Every \`evidence\` string must name what you actually SEE (a timestamp/beat, the exact element, the
 exact defect), never a bare number. \`overall\` is YOUR OWN holistic 1-10 read of this cut, never
-averaged with the other judge's: \`make ship\` requires both independent judges at 7 or above.
+averaged with the other judge's: \`vawe ship\` requires both independent judges at 7 or above.
 \`fixes\` is the top 5, ranked, each with all five fields; a FIX verdict with an empty list is
 incomplete. The default is reject: pass only when you cannot find the reason the film is not ready. Then
 record it:

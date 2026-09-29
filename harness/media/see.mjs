@@ -6,9 +6,9 @@
 //   node harness/media/see.mjs <html> --probe --at <s> --sel <css>     · make study REF=<html> PROBE=1 AT=<s> SEL=<css>
 //   node harness/media/see.mjs <html> --look --times <s,...> [--ref <mp4>]  · make study REF=<html> LOOK=<s,...> [COMPARE=<mp4>]
 //   node harness/media/see.mjs <html> --layout --times <s,...> [--film <film.json>]  · make study REF=<html> LAYOUT=<s,...>
-//   node harness/media/see.mjs <video|page.html> --phone | --strip <t> | --loop   · make critique PAGE=<html>
+//   node harness/media/see.mjs <video|page.html> --phone | --strip <t> | --loop   · vawe critique <html>
 //     (the critique views, harness/media/see-views.mjs: phone contact sheet, 12-frame strip, loop seam)
-//   node harness/media/see.mjs <page.html> [outDir] --measure [--ref <mp4>]  · make next PAGE= REF=, make critique PAGE= [REF=]
+//   node harness/media/see.mjs <page.html> [outDir] --measure [--ref <mp4>]  · vawe critique <page> --ref <mp4>, vawe critique  [REF=]
 //     (page from its DOM, reference from its pixels, numeric deltas in deltas.md; no --ref: page self-checks)
 //
 // --probe/--look/--layout exist because agents kept writing their own throwaway browser probe scripts
@@ -894,9 +894,9 @@ async function runDom(htmlPath, outDirRoot, opts) {
 // iteration speed, not full-length fidelity). The reference is cut to the SAME window before compare
 // (`runCompare`'s own from/to assumes both sides start at the same origin; the page render starts its
 // mp4 at 0 regardless of `from`, so the reference is re-cut to 0-relative too, never left absolute).
-// `--final` ignores any window and renders full length, matching what `make ship` will actually cut.
+// `--final` ignores any window and renders full length, matching what `vawe ship` will actually cut.
 // A --final pass's own render already IS the shippable cut (full size, full length, real blur): the
-// path this persists to once every check passes, next to the page, so `make next PAGE= REF= FINAL=1`
+// path this persists to once every check passes, next to the page, so `vawe critique <page> --ref <mp4> FINAL=1`
 // is both the check and the one render an agent would otherwise run again by hand right after.
 function finalOutputFor(htmlPath) {
   const base = path.basename(htmlPath).replace(/\.[^.]+$/, '');
@@ -1826,10 +1826,10 @@ async function dispatchDom(video, positional, flag, argv) {
   const idsArg = flag('--ids', null);
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
   // `--dom --ref <mp4>`: required-motion-match on a bare page, no scene.json, no draft render
-  // (`make next PAGE=<html> REF=<mp4>`, item 2 of this file's own required-motion-match doctrine). This
+  // (`vawe critique <html> --ref <mp4>`, item 2 of this file's own required-motion-match doctrine). This
   // is the one branch that renders the page through render-page.mjs, the real cost measured on this
   // repo (~57s for a 5s window at full size with blur), so it alone defaults to a half-size draft;
-  // --final renders the way `make ship` does (full size, full length, motion blur), for the one check
+  // --final renders the way `vawe ship` does (full size, full length, motion blur), for the one check
   // that must match the actual shipped cut rather than a fast iteration draft.
   const refArg = flag('--ref', null);
   const final = argv.includes('--final');
@@ -1875,7 +1875,7 @@ function dispatchShot(video, positional, shotSpec, flag) {
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
   const pageArg = flag('--page', null);
   if (pageArg) console.log(`\n  next: node harness/media/see.mjs ${pageArg} --dom --ref ${video} --from ${from} --to ${to}`
-    + `  (or: make next PAGE=${pageArg} REF=${video})`);
+    + `  (or: vawe critique ${pageArg} --ref ${video})`);
   return runShot(video, outDirRoot, from, to, fps);
 }
 

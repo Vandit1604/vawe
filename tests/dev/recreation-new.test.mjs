@@ -22,7 +22,7 @@ try {
     encoding: 'utf8',
     env: { ...process.env, TYPE: 'recreation', NAME, REF },
   });
-  assert(new RegExp(`make next PAGE=films/recreations/${NAME}/page.html REF=${REF}`).test(stdout),
+  assert(new RegExp(`vawe critique films/recreations/${NAME}/page.html --ref ${REF}`).test(stdout),
     `expected the one next-step line: ${stdout}`);
 
   const pagePath = path.join(outDir, 'page.html');

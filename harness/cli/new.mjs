@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
 
-const STARTER = `<!doctype html>
+export const STARTER = `<!doctype html>
 <html data-aspect="16:9">
 <head>
 <meta charset="utf-8">

@@ -35,6 +35,8 @@ import path from 'node:path';
 import cp from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { VERBS } from '../../harness/cli/verbs.mjs';
+import { GATES } from '../../harness/lib/check-gate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -54,7 +56,8 @@ const EXCLUDED = [
 const listed = (glob) => cp.execSync(`git ls-files --cached --others --exclude-standard '${glob}'`, { cwd: ROOT })
   .toString().trim().split('\n').filter(Boolean).filter((f) => !EXCLUDED.some(([p]) => f.startsWith(p)));
 
-const docs = () => listed('*.md');
+const ONLY = process.argv.slice(2).filter((a) => a.endsWith('.md'));
+const docs = () => (ONLY.length ? ONLY : listed('*.md'));
 
 // THE TRACKED SET: what a fresh clone actually has. A cited path can exist on the author's own disk
 // and still be gitignored or simply never `git add`ed, and the recent curation untracked several films
@@ -163,6 +166,17 @@ function targetsIn(text) {
   const found = [];
   for (const m of text.matchAll(/\bmake\s+([a-z][a-z0-9-]*)\b/g)) found.push(m[1]);
   return found;
+}
+
+// `vawe dev <page>` names a verb; `vawe check <gate>` names a gate. Both come from the CLI's own tables.
+const VERB_NAMES = new Set(VERBS.map((v) => v.name));
+function vawesIn(text) {
+  const bad = [];
+  for (const m of text.matchAll(/\bvawe\s+([a-z][a-z0-9-]*)(?:\s+([a-z][a-z0-9-]*))?/g)) {
+    if (!VERB_NAMES.has(m[1])) { bad.push(`vawe ${m[1]}`); continue; }
+    if (m[1] === 'check' && m[2] && !GATES[m[2]] && !/^(?:name|gate)$/.test(m[2])) bad.push(`vawe check ${m[2]}`);
+  }
+  return bad;
 }
 
 // WHAT A CITED PATH HAS TO LOOK LIKE BEFORE THIS GATE WILL JUDGE IT. Three filters, each one paid
@@ -301,6 +315,9 @@ export function run() {
       for (const p of pathsIn(text, roots)) {
         if (!waived.has(p)) checkPath(p, rel, line, text.trim().slice(0, 90));
       }
+      for (const v of vawesIn(text)) {
+        if (!waived.has(v)) badTargets.push({ rel, line, target: v, text: text.trim().slice(0, 90), vawe: true });
+      }
     }
     src.split('\n').forEach((line, i) => {
       for (const p of linkPathsIn(line, roots)) {
@@ -335,9 +352,10 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   }
   if (!r.badTargets.length) console.log('✓ every `make <target>` the docs name exists in the Makefile');
   for (const b of r.badTargets) {
-    console.log(`   ✗ ${b.rel}:${b.line}  \`make ${b.target}\`: no such Makefile target`);
+    const what = b.vawe ? `\`${b.target}\`: no such verb or gate` : `\`make ${b.target}\`: no such Makefile target`;
+    console.log(`   ✗ ${b.rel}:${b.line}  ${what}`);
     console.log(`       ${b.text}`);
-    f.fail('doc-refs-target', `${b.rel}:${b.line}  \`make ${b.target}\`: no such Makefile target`,
+    f.fail('doc-refs-target', `${b.rel}:${b.line}  ${what}`,
       { at: `${b.rel}:${b.line}` });
   }
   if (!r.badSelfRefs.length) console.log('✓ every `node <script>` a source file prints or documents exists');
@@ -356,9 +374,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     f.fail('doc-refs-path', `${b.rel}:${b.line}  ${b.ref}: no such file or directory`,
       { at: `${b.rel}:${b.line}` });
   }
-  const n = r.badTargets.length + r.badPaths.length + r.badRecipes.length + r.badSelfRefs.length;
+  const n = r.badTargets.length + r.badPaths.length + (ONLY.length ? 0 : r.badRecipes.length + r.badSelfRefs.length);
   if (!n) process.exit(0);
   console.log(`\n⚠ ${n} reference(s) the docs name and the repo does not have.`);
   console.log('  An author reads a doc as an instruction. Correct the doc, or build the thing it promises.');
-  process.exit(0);
+  process.exit(ONLY.length ? 1 : 0);
 }
