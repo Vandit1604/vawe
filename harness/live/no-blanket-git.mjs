@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import path from 'node:path';
 const BANNED = [
   [/^git\s+add\s+(-A|--all|\.(?:\s|$))/, 'a blanket stage of the whole tree',
    'stage explicit paths instead. With several agents in one tree, a blanket stage cannot tell your work from theirs.'],
@@ -22,11 +21,8 @@ let raw = '';
 process.stdin.on('data', (d) => { raw += d; });
 process.stdin.on('end', () => {
   let cmd = '';
-  let cwd = '';
   try {
-    const payload = JSON.parse(raw);
-    cmd = (payload.tool_input || {}).command || '';
-    cwd = payload.cwd || '';
+    cmd = (JSON.parse(raw).tool_input || {}).command || '';
   } catch (e) {
     process.stderr.write('BLOCKED: no-blanket-git could not parse the PreToolUse payload it was given, so '
       + `it cannot tell whether this command is one of the four it refuses. JSON.parse failed: ${e.message}.\n\n`
@@ -34,13 +30,6 @@ process.stdin.on('end', () => {
     process.exit(2);
   }
   const parts = commandsIn(cmd);
-  // The agent sandbox refuses a command that starts by cd-ing into the directory it already runs in.
-  const cdTo = /^cd\s+(\S+)$/.exec(parts[0] || '');
-  if (cdTo && cwd && path.resolve(cwd, cdTo[1].replace(/^['"]|['"]$/g, '')) === path.resolve(cwd) && parts.length > 1) {
-    process.stderr.write(`BLOCKED: a cd into the directory you are already in (${cwd})\n\n`
-      + 'Drop the `cd ...;` prefix and run the rest of the command as it is; use paths relative to that directory.\n');
-    process.exit(2);
-  }
   for (const [re, name, why] of BANNED) {
     if (parts.some((p) => re.test(p))) {
       process.stderr.write(`BLOCKED: ${name}\n\n${why}\n\n`
