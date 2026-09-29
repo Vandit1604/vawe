@@ -207,8 +207,8 @@ function reportFast(stamp) {
   const prior = loadRatchet();
 
   console.log(`\n── bench · fast (deterministic, warns when a count grows)\n`);
-  console.log(`  read-load   ${rl.words} word(s) / ~${rl.tokens} token(s)  (CLAUDE.md + AGENTS.md)`);
-  console.log(`  fast-path   ${fp.commands} command(s) brief -> first draft render (${fp.commandList.join(', ')}), ${fp.makefileTargets} Makefile target(s)`);
+  console.log(`  read-load   ${rl.words} word(s) / ~${rl.tokens} token(s)  (CLAUDE.md + AGENTS.md + vawe-page + the vawe new starter)`);
+  console.log(`  fast-path   ${fp.commands} command(s) brief -> first draft render (${fp.commandList.join(', ')}), ${fp.makefileTargets} verb(s)`);
 
   if (stamp) {
     saveRatchet({ readLoad: { words: rl.words, tokens: rl.tokens }, fastPath: { commands: fp.commands, makefileTargets: fp.makefileTargets } });

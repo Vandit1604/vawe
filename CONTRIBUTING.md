@@ -21,36 +21,36 @@ licence.
 
 ```bash
 npm install
-make build          # fetches the free fonts, then builds bin/vawe
-./bin/vawe films/scene/sample.json      # → out/sample.mp4
+bin/vawe new hello                       # films/hello/page.html and brief.md
+bin/vawe dev films/hello/page.html       # -> out/hello-draft.mp4
+bin/vawe --help                          # every verb; bin/vawe <verb> --help lists its flags
 ```
-
-If a font is missing the engine refuses to render and names the fix. That is deliberate: a browser
-paints a fallback face silently, so an unchecked family renders a plausible frame in the wrong
-typeface.
 
 ## The one rule that explains most of the codebase
 
-**`renderFrame(n)` is a pure function of `n`.** The same frame number must produce the same pixels
-regardless of what was rendered before it, because frames are captured across six parallel workers.
-Anything that breaks that is a bug even if it looks right. `make check GATE=probe` and
-`node quality/gates/probe-purity.mjs scene` check it.
+**A frame is a pure function of the seek time `t`.** The same `t` must produce the same pixels
+regardless of what was rendered before it, because frames are captured across parallel workers.
+Anything that breaks that is a bug even if it looks right. `tests/media/render-page-determinism.test.mjs`
+checks it.
 
 ## Before you open a PR
 
 ```bash
-make test                              # the whole test suite (tests/**/*.test.mjs + go test)
-node core/validate/validate.mjs                 # every scene still validates
-node quality/gates/code-quality.mjs    # nothing got more tangled
+bin/vawe e2e                           # page tests plus a draft of every film, about 4 s
+bin/vawe test                          # the whole test suite (tests/**/*.test.mjs)
+bin/vawe check code-quality            # nothing got more tangled
 ```
 
-The last one is a **ratchet, not a threshold**. The repo has known complexity debt recorded in
-`quality/baselines/code-quality-baseline.json`; the gate fails only if your change makes a file worse than that
-line. Fixing something and running `make check GATE=code-quality WRITE=1` lowers the line permanently.
+`make install-hooks` turns on the pre-commit hook (no em dash, `node --check`, doc references) and the
+pre-push hook (the same, plus e2e).
 
-If you touch a **gate**, run it over the whole scene library before and after and diff the results. The
-only acceptable outcomes are "no scene changed" or "these N changed, and here is why each was a false
-positive". One scene going from pass to fail is a regression until proven otherwise. This rule exists
+The last check is a **ratchet, not a threshold**. The repo has known complexity debt recorded in
+`quality/baselines/code-quality-baseline.json`; the gate fails only if your change makes a file worse than that
+line. Fixing something and running `bin/vawe check code-quality --write` lowers the line permanently.
+
+If you touch a **gate**, run it over every film before and after and diff the results. The
+only acceptable outcomes are "no film changed" or "these N changed, and here is why each was a false
+positive". One film going from pass to fail is a regression until proven otherwise. This rule exists
 because a gate that measures the wrong thing does not merely miss defects, it manufactures them, and
 the author pays by deforming good work until a number moves.
 

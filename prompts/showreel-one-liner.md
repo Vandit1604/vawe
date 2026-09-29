@@ -65,7 +65,7 @@ None. If the person offers a subject, take variant 4.
 
 ## After the first draft
 
-`make dev PAGE=films/<name>/page.html DRAFT=1`, look at the sheet, then run
+`bin/vawe dev films/<name>/page.html`, look at the sheet, then run
 `prompts/critique-pass.md` with no reference.
 
 source: https://github.com/guanmo-ai/awesome-ai-motion (cases 2103315922098470926 by @stephanlivera,

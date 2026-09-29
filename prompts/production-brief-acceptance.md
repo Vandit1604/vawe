@@ -44,7 +44,7 @@ what must stay exact, and three gates with a named reviewer. Fill it before the 
 
 ## Acceptance gates (record the result and the reviewer at each)
 1. Storyboard and key frames: the required frames and states, strings and assets checked. Result:
-2. The hardest 2 to 4 seconds: render that window first (make dev PAGE= FROM= TO=). Check adjacent
+2. The hardest 2 to 4 seconds: render that window first (bin/vawe dev <page> --from s --to s). Check adjacent
    frames, occlusion and contact, speed, seek-order repeatability (render two frames out of order and
    diff), audio and caption sync. Result:
 3. The whole film: watch and listen to all of it. Duration, fps, aspect, exact strings, levels,

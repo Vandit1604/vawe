@@ -37,7 +37,7 @@ the viewer learns there. window.seek(t) interpolates the table with kf(t, table,
 core/motion/springs.js and calls render(). A ghost cursor shows which control "moves" (a hand, not a
 label). Captions: one line per row, under 12 words, with the readout's value in it.
 Sound: <audio data-synth="pluck"> at each state change; "swell" under the reveal.
-<meta name="duration">; render with make dev PAGE=films/<name>/page.html DRAFT=1.
+<meta name="duration">; render with bin/vawe dev films/<name>/page.html.
 ```
 
 ## Inputs to ask for

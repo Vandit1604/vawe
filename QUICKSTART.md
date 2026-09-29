@@ -18,11 +18,14 @@ a pure function of t. `<meta name="duration">` sets the length; everything else 
 ## Before you write the page
 
 Read `AGENTS.md` first: the contract, the loop, and the motion rules that are not your defaults.
-Then pick the film type in `engine-doctrine/CRAFT/ROUTING.md` and copy its `prompts/` template.
-Every template stops before code at least once (a beat table, a facts list or a SPEC); honour the
-stop. If your tool loads skills, load `vawe-page` before the first line.
+Then pick the film type in `engine-doctrine/CRAFT/ROUTING.md` and start it with
+`bin/vawe new <name> --from prompts/<template>.md`. Every template stops before code at least once
+(a beat table, a facts list or a SPEC); honour the stop. If your tool loads skills, load `vawe-page`
+before the first line. `bin/vawe --help` lists every command.
 
 ## Your first page
+
+`bin/vawe new hello` writes a starter like this one:
 
 ```html
 <!doctype html>
@@ -45,18 +48,18 @@ the entrance; the text holds still long enough to read; the cue lands with the m
 ## The loop
 
 ```bash
-make dev      PAGE=films/hello/page.html              # draft: half size, 30 fps, silent
-make dev      PAGE=films/hello/page.html FROM=2 TO=4  # only the seconds you are working on
-make critique PAGE=films/hello/page.html              # in a FRESH session: sheet, strip, phone, loop
-make ship     PAGE=films/hello/page.html ASPECT=all   # final: 60 fps, blur, audio, every aspect
+bin/vawe dev      films/hello/page.html                      # draft: half size, 30 fps, silent
+bin/vawe dev      films/hello/page.html --from 2 --to 4      # only the seconds you are working on
+bin/vawe critique films/hello/page.html                      # in a FRESH session: sheet, strip, phone, loop
+bin/vawe ship     films/hello/page.html --aspect all         # final: 60 fps, blur, audio, every aspect
 ```
 
 Draft the hardest two to four seconds first. Hand the draft to a session that did not write it
 (`vawe-critique`); it rejects by default and names shot, frame and fix. Fix the top five, re-render
 only those seconds, critique again. A PASS is written by the critic, never by you.
 
-Matching a reference: `make spec REF=<mp4>` writes SPEC.md, mark every line KEEP or CHANGE, rebuild,
-then `make next PAGE= REF=` until it passes (`vawe-reference`).
+Matching a reference: `bin/vawe spec <mp4>` writes SPEC.md, mark every line KEEP or CHANGE, rebuild,
+then `bin/vawe critique <page> --ref <mp4>` until it passes (`vawe-reference`).
 
 ## Hard rules for day one
 
@@ -67,7 +70,6 @@ then `make next PAGE= REF=` until it passes (`vawe-reference`).
 - Exits faster than entrances. Arrive fast, land soft. One entrance per beat, not a fade on all.
 - Text holds `words x 0.6 s`, floor 1.2 s. Add a hold; never slow the move.
 - A rule broken on purpose is declared in the page with a `_why` (`AGENTS.md`, Waivers).
-- Search before you build: `make arsenal Q="what you mean, in plain English"`.
 
 ## Where to go next
 

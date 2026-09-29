@@ -1,6 +1,6 @@
 ---
 name: vawe-critique
-description: "Look at a rendered page film and say what is wrong, as a fresh session that did not write it: the phone, strip and loop views, make critique PAGE=, page-check, the default-reject judge that names shot, frame and fix, the top five, and re-rendering only the affected seconds. Load after any draft render, before any fix."
+description: "Look at a rendered page film and say what is wrong, as a fresh session that did not write it: the phone, strip and loop views, bin/vawe critique, page-check, the default-reject judge that names shot, frame and fix, the top five, and re-rendering only the affected seconds. Load after any draft render, before any fix."
 effort: high
 ---
 
@@ -13,7 +13,7 @@ cannot find a reason to reject it. Grade what is on screen, not what the film me
 ## The views, in this order
 
 ```bash
-make critique PAGE=films/<name>/page.html [REF=quality/refs/<ref>/source.mp4]
+bin/vawe critique films/<name>/page.html [--ref quality/refs/<ref>/source.mp4]
 ```
 
 It writes the sheet, the strip, the phone view and the loop pair, and runs the page checks. Then
@@ -28,7 +28,7 @@ look, and write one line per finding under each view:
 4. **Loop or end**: t=0 beside t=duration. A loop is pixel-identical; an end holds long enough to
    read.
 5. **Checks**: `quality/gates/page-check.mjs` findings (readable hold, hook length, em dash, message
-   and spectacle meta, aspect layout) and `make check GATE=anim-traps D=<page>`.
+   and spectacle meta, aspect layout) and `bin/vawe check anim-traps <page>`.
 
 With a reference: frame-locked. Pull the same five timestamps from both. For each pair write light,
 type scale, and the curve of the one thing that moves: same or not. Anything the draft added without
@@ -38,7 +38,7 @@ a KEEP/CHANGE line is a rejection (`vawe-reference`).
 
 Score the seven dimensions of `engine-doctrine/JUDGE.md` (readability, hierarchy, composition, brand
 fidelity, asset fidelity, produced-not-generated, value), 1 to 10. Threshold 7 on every one. Two
-runs, A and B, before a beat closes; one judge is an opinion. `vawe-audit` composes the verdict; a
+runs, A and B, before a beat closes; one judge is an opinion: `bin/vawe judge <page> --struct --runs A,B`. A
 PASS is never self-recorded.
 
 Name every default you recognise; each is a rejection: a particle burst, a bouncy spring, a glow, a
@@ -69,7 +69,7 @@ decides.
 ## After the critique (the author)
 
 - Fix the top five. Re-render only the seconds they name:
-  `make dev PAGE=films/<name>/page.html FROM=<s> TO=<s>`.
+  `bin/vawe dev films/<name>/page.html --from <s> --to <s>`.
 - Then a fresh critique again. Stop when it passes, or when two rounds in a row fix nothing the
   critic scores higher. Hand back with the last critique attached.
 - Findings are fixed, not moved: the next critic gets the previous report and checks.

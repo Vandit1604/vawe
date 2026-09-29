@@ -1,6 +1,6 @@
 ---
 when: "a reference mp4 must be matched, not merely echoed"
-answers: "the three prompts: frame-by-frame SPEC.md, KEEP/CHANGE, the rebuild loop on make next PAGE= REF="
+answers: "the three prompts: frame-by-frame SPEC.md, KEEP/CHANGE, the rebuild loop on bin/vawe critique <page> --ref <mp4>"
 group: reference
 ---
 
@@ -18,7 +18,7 @@ that is the director's brief.
 
 ```
 Reference: quality/refs/<ref>/source.mp4. Do not write any code yet.
-1. make study REF=quality/refs/<ref>/source.mp4 SEE=1. Read index.md and every grid it wrote.
+1. node harness/media/see.mjs quality/refs/<ref>/source.mp4. Read index.md and every grid it wrote.
 2. node harness/dev/ref-cutlist.mjs REF=<ref> for the measured cut list. Never eyeball cuts off a sheet.
 3. Write quality/refs/<ref>/SPEC.md, frame by frame at every cut and every hold:
    - t (s), the frame's job in five words, the light map (bg colour, key direction, contrast band),
@@ -53,7 +53,7 @@ the camera and depth of field, then the type, then the detail (house order for r
 Every KEEP line is a number in the page: a @keyframes stop, an element.animate keyframe or a
 [[f, v]] table in seek(t). Use approach(f, from, to, k) from core/motion/springs.js with the k you
 measured. Then:
-  make next PAGE=films/<name>/page.html REF=quality/refs/<ref>/source.mp4
+  bin/vawe critique films/<name>/page.html --ref quality/refs/<ref>/source.mp4
 It compares the draft to the reference at the same timestamps and prints a match score. Loop until
 combined >= 0.70, then stop and ask for the critique pass (prompts/critique-pass.md, frame-locked).
 Three passes without progress: stop and report, do not keep going.
@@ -67,14 +67,14 @@ strings and captures that replace the reference's content, the brand kit.
 ## Gotchas
 
 - The stills before the motion: a wrong background makes every later score wrong for a reason that
-  is not the motion (`quality/refs/LOOP.md`).
+  is not the motion (`skills/vawe-reference/SKILL.md`).
 - Scene detection catches hard cuts only; a crossfade boundary still wants an eye check.
 - A reference can run 2x the pace a contact sheet suggests. Trust the cut list, not the sheet.
-- `make next PAGE= REF=` scores the match; it does not judge taste. Two fresh judges at 8/10 close a
+- `bin/vawe critique <page> --ref <mp4>` scores the match; it does not judge taste. Two fresh judges at 8/10 close a
   beat, never the agent that wrote the fix.
 
 source: pattern from notdwd's reference-rebuild prompts (frame-by-frame SPEC.md, KEEP/CHANGE, the
 12 to 19 percent approach rule, five stills, a fresh default-reject critic), an owner-shared
 article, not redistributable, so this is our own text in that shape; the study and loop steps are
-vawe's own (`quality/refs/LOOP.md`, `harness/media/see.mjs`). The light-first order is the house
+vawe's own (`skills/vawe-reference/SKILL.md`, `harness/media/see.mjs`). The light-first order is the house
 rule for recreations.

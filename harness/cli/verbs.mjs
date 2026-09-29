@@ -53,13 +53,17 @@ export const VERBS = [
     flags: [
       { name: 'ref', type: 'path', help: 'reference mp4 to measure against', kind: 'file' },
       { name: 'at', type: 'string', default: 'auto', help: 'seconds for the strip, or auto' },
+      { name: 'from', type: 'number', help: 'with --ref: match only from this second' },
+      { name: 'to', type: 'number', help: 'with --ref: match only to this second' },
+      { name: 'final', type: 'bool', help: 'with --ref: match the full-size render; a pass unlocks vawe ship' },
     ],
     example: 'vawe critique films/my-launch/page.html --ref refs/ad.mp4 --at 4.2',
     build: (v, [page]) => [
       { script: 'quality/gates/anim-traps.mjs', args: [page] },
       { script: 'harness/media/see.mjs', args: [page, '--phone', '--strip', v.at || 'auto', '--loop'] },
-      { script: 'harness/media/see.mjs', args: [page, '--measure', ...opt('--ref', v.ref)] },
-      ...(v.ref ? [{ script: 'harness/media/see.mjs', args: [page, '--dom', '--ref', v.ref] }] : []),
+      v.ref
+        ? { script: 'harness/media/see.mjs', args: [page, '--dom', '--ref', v.ref, ...opt('--from', v.from), ...opt('--to', v.to), ...(v.final ? ['--final'] : [])] }
+        : { script: 'harness/media/see.mjs', args: [page, '--measure'] },
       { script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)] },
     ],
     next: (v, [page]) => `look at the sheets above, then in a fresh session: VAWE_AGENT=judge-${pageName(page)} vawe judge ${page}${v.ref ? ` --ref ${v.ref}` : ''}`,

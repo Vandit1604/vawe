@@ -50,7 +50,7 @@ Stop. I read the three files before any chapter is built.
 
 ## How a chapter works
 - One chapter is one file, ch/NN-<slug>.html. It has its own <meta name="duration"> and renders alone
-  with make dev PAGE=films/<name>/ch/NN-<slug>.html.
+  with bin/vawe dev films/<name>/ch/NN-<slug>.html.
 - Time is the seek: window.seek(t) with t in CHAPTER seconds (0 at the chapter's start), or CSS
   @keyframes and element.animate() that the renderer seeks. Every frame is a pure function of t: no
   timers, no carried state, no Math.random (use rng(seed) from core/motion/springs.js, seeded per
@@ -78,7 +78,7 @@ Stop. I read the three files before any chapter is built.
 - Speed bands: the slowest beat in the chapter is at least 3x the fastest.
 
 ## The check loop (run it every pass)
-1. make dev PAGE=ch/NN-<slug>.html DRAFT=1 and read the sheet: first, middle and last frame of every
+1. bin/vawe dev ch/NN-<slug>.html and read the sheet: first, middle and last frame of every
    shot, and both sides of every cut.
 2. node harness/media/see.mjs ch/NN-<slug>.html --look --times <s,s,s> for the stills that matter.
 3. Fix what is cramped, unreadable or off the beat. Then the next pass.
@@ -103,7 +103,7 @@ bug you saw in a shared file.
 ```
 Mount every chapter in films/<name>/page.html at its STORYBOARD start time; the film page's
 window.seek(t) calls the active chapter's seek(t - start). Add <audio src="music.mp3" data-at="0">
-and the caption track. Render: make ship PAGE=films/<name>/page.html. Then read every chapter
+and the caption track. Render: bin/vawe ship films/<name>/page.html. Then read every chapter
 boundary: both sides of each cut, and the motif hand-off. Then prompts/critique-pass.md.
 ```
 

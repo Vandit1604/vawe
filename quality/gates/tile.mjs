@@ -166,7 +166,7 @@ export const pageRenderOf = (pagePath) => {
 // EXISTS IS NOT FRESH, and the comment above stops one step short of its own lesson. Resolving the
 // right NAME was half the bug: the other half is that `out/x.mp4` can be the right name for a film the
 // author has since rewritten, and every consumer of this path checks only `existsSync`. So an author
-// edits a scene, runs `make judge`, and is handed a verdict about a video that no longer exists. There
+// edits a scene, runs `vawe judge`, and is handed a verdict about a video that no longer exists. There
 // is no error, because nothing is wrong with the file: it is simply the previous answer.
 //
 // Named `gradeable` rather than folded into `renderOf`, because `renderOf` is also the right function
@@ -186,7 +186,7 @@ const ago = (ms) => {
 };
 
 export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
-  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `make video D=${scenePath}`;
+  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `node harness/media/render-page.mjs ${scenePath}`;
   if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix };
   if (!/\.(json|html)$/.test(scenePath)) return { ok: true, mp4 };
   const src = fs.statSync(scenePath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
