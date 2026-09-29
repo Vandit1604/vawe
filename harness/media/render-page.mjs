@@ -103,7 +103,7 @@ function installPageFrame({ aspect, width, height }) {
     .observe(document, { childList: true });
 }
 
-async function openPage(pagePath, frame) {
+export async function openPage(pagePath, frame) {
   const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS });
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});`);
   return opened;
@@ -114,7 +114,7 @@ async function openPage(pagePath, frame) {
 // time, seek every CSS/WAAPI/SMIL animation to `ms`, then call every `vawe.onFrame(fn)` hook
 // (core/engine/page-api.js) with film time in SECONDS, awaited, so a hook that decodes a texture or
 // builds three.js geometry lazily settles before the screenshot below fires.
-async function seekAll(page, ms) {
+export async function seekAll(page, ms) {
   await page.evaluate(async (t) => {
     if (window.__pageClock) window.__pageClock.set(t / 1000);
     if (typeof window.seek === 'function') await window.seek(t / 1000);
@@ -129,7 +129,7 @@ async function seekAll(page, ms) {
 
 // A screenshot must never catch a half-painted frame: fonts loaded, images decoded, and two real paints
 // after the seek. The real rAF is raced against a real timer because a background tab can starve rAF.
-async function settle(page) {
+export async function settle(page) {
   await page.evaluate(async () => {
     const real = window.__pageClock ? window.__pageClock.real : { raf: requestAnimationFrame.bind(window), setTimeout: setTimeout.bind(window), clearTimeout: clearTimeout.bind(window) };
     const paint = () => new Promise((resolve) => {
@@ -421,7 +421,7 @@ export function assertFinalReady(pagePath) {
     + `"_why":{"${code}":"…"}}</script> in the page.`);
 }
 
-function defaultOut(pagePath, { aspect, suffixAspect, final }) {
+export function defaultOut(pagePath, { aspect, suffixAspect, final }) {
   const abs = path.resolve(pagePath);
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;

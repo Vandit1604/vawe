@@ -35,6 +35,31 @@ export function frameTile(src, t, out, { tw, th, label } = {}) {
 export function tileGrid(tiles, { cols = 3, tw, th, gap = 2, out }) {
   if (!tiles.length) throw new Error('tileGrid: no tiles');
   const W = tw + gap * 2, H = th + gap * 2;
+  const rowsN = Math.ceil(tiles.length / cols);
+  // One xstack over 30+ inputs desaturates its second half (quality/refs/kinetic-promo/friction.jsonl),
+  // so each row is stacked alone and the rows are joined with vstack.
+  if (rowsN === 1 || tiles.length <= 12) return stackOnce(tiles, { cols, tw, th, gap, out });
+  const dir = fs.mkdtempSync(path.join(path.dirname(path.resolve(out)), '.rows-'));
+  try {
+    const rowFiles = [];
+    for (let r = 0; r < rowsN; r++) {
+      const row = path.join(dir, `row${r}.png`);
+      stackOnce(tiles.slice(r * cols, (r + 1) * cols), { cols, tw, th, gap, out: row });
+      rowFiles.push(row);
+    }
+    const rowW = cols * W;
+    const padded = rowFiles.map((_, i) => `[${i}:v]pad=${rowW}:${H}:0:0:white[r${i}]`).join(';');
+    const chain = rowFiles.map((_, i) => `[r${i}]`).join('');
+    const filter = rowFiles.length === 1 ? `${padded};[r0]null` : `${padded};${chain}vstack=inputs=${rowFiles.length}`;
+    ff(['-y', ...rowFiles.flatMap((f) => ['-i', f]), '-filter_complex', filter, out]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  return out;
+}
+
+function stackOnce(tiles, { cols, tw, th, gap, out }) {
+  const W = tw + gap * 2, H = th + gap * 2;
   const pads = tiles.map((_, i) => `[${i}:v]pad=${W}:${H}:${gap}:${gap}:white[p${i}]`).join(';');
   const chain = tiles.map((_, i) => `[p${i}]`).join('');
   const filter = tiles.length === 1
@@ -52,13 +77,15 @@ export function tileGrid(tiles, { cols = 3, tw, th, gap = 2, out }) {
 // with the span's length, not with the sample count.
 export function sampleFrames(video, span, outPrefix, size = {}) {
   const { t0, len, n } = span;
-  const { tw, th } = size;
+  const { tw, th, stamp } = size;
   fs.mkdirSync(path.dirname(outPrefix), { recursive: true });
   const dur = Math.max(0.05, len);
   const fps = n / dur;
-  const vf = tw && th
+  let vf = tw && th
     ? `fps=${fps},scale=${tw}:${th}:force_original_aspect_ratio=decrease,pad=${tw}:${th}:(ow-iw)/2:(oh-ih)/2:white`
     : `fps=${fps}`;
+  // `stamp` is a drawtext expansion such as `f%{eif\:n+12\:d}`, burned into every extracted frame.
+  if (stamp) vf += `,drawtext=text='${stamp}':x=6:y=6:fontsize=${Math.max(14, Math.round((tw || 360) / 20))}:fontcolor=black:box=1:boxcolor=white@0.85:boxborderw=4`;
   ff(['-y', '-ss', Number(t0).toFixed(3), '-t', dur.toFixed(3), '-i', video, '-vf', vf, '-frames:v', String(n), `${outPrefix}_%04d.png`]);
   return Array.from({ length: n }, (_, i) => `${outPrefix}_${String(i + 1).padStart(4, '0')}.png`)
     .filter((f) => fs.existsSync(f));
