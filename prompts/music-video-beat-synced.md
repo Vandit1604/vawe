@@ -18,6 +18,7 @@ reel with music.
 <inputs>
 Ask me for: the song file and its licence, the window to use (start to end in seconds), the subject
 (lyrics, a product with real captures, an abstract), the canvas (9:16 for a reel), and one accent.
+If I skip one, take the default from the Questions section and go on.
 </inputs>
 
 <grid>
@@ -74,9 +75,17 @@ The subject is the words. One line per bar, the stressed syllable on the downbea
 colour or motion device that points at the one word that matters (house rule: every device directs
 the eye and names its target). The karaoke band owns the bottom of the frame; nothing else enters it.
 
-## Inputs to ask for
+## Questions
 
-Song and licence, window, subject, canvas, accent. If real clips: the files and their licence.
+Ask in this order; the first changes the film most. A skipped question takes its default; never wait.
+
+1. **Song**: the file and its licence? Default: a royalty-free 120 BPM track in `assets/audio/` with its licence file beside it. Why: every cut lands on the measured grid of this file; no song, no film.
+2. **Window**: which seconds of the song, start to end? Default: the first 20 s (10 bars at 120 BPM), from the first downbeat. Why: the length is a count of bars, and the drop has to fall inside the window.
+3. **Subject**: lyrics, a product with real captures, or an abstract? Default: the product, real captures only. Why: it decides what the drop opens into.
+4. **Canvas**: 9:16 for a reel, or 16:9? Default: 9:16. Why: a reel is vertical; the karaoke band and the captures are laid out for one column.
+5. **Accent**: one colour, as hex? Default: ice blue `#8fc0ff` on charcoal. Why: the bars before the drop stay one colour; the drop's world adds the accent.
+
+If real clips exist: the files and their licence go in the rights table.
 
 ## Gotchas
 

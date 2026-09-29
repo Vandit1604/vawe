@@ -41,6 +41,15 @@ Column meanings:
   its frame.
 - **out**: the transition to the next row. Adjacent rows change axis or direction.
 
+## Questions
+
+Ask in this order; the first changes the table most. A skipped question takes its default; never wait.
+
+1. **Length**: the total seconds, and about how many rows? Default: 15 s, 6 rows. Why: the sum of dur is the duration meta; a longer film than the rows has a dead tail.
+2. **Grid**: a beat grid (BPM and offset) or free timing? Default: free; cuts follow the picture. Why: with a grid every start is a beat, or two frames before one.
+3. **Exposure**: ones or twos? Default: ones. Why: UI is on ones; a drawn look is on twos, and the column is per row.
+4. **Cues**: synth voices or sound files? Default: synth voices from `core/audio/kit.mjs`. Why: cues come from the picture and are placed 30 ms early either way.
+
 ## From the table to the page
 
 Each row becomes a block in `page.html`: an element or a shot function, and a keyframe stop or
