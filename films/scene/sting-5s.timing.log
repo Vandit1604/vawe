@@ -1,0 +1,10 @@
+step,start_wallclock,uptime_load
+read_docs,1790454520, 1:58  up 17 days,  1:17, 4 users, load averages: 2.32 2.94 5.34
+scaffold_start,1790454532, 1:58  up 17 days,  1:17, 4 users, load averages: 2.11 2.88 5.29
+dev_draft_start,1790454679, 2:01  up 17 days,  1:20, 4 users, load averages: 2.45 2.73 4.85
+first_draft_ok,1790454751, 2:02  up 17 days,  1:21, 4 users, load averages: 3.67 3.06 4.80
+verify_start,1790454786, 2:03  up 17 days,  1:22, 4 users, load averages: 4.51 3.38 4.84
+judge_start,1790454868, 2:04  up 17 days,  1:23, 4 users, load averages: 5.08 3.77 4.85
+judges_done,1790454966, 2:06  up 17 days,  1:25, 4 users, load averages: 3.84 3.86 4.78
+final_render_start,1790454982, 2:06  up 17 days,  1:25, 4 users, load averages: 3.96 3.89 4.77
+final_render_done,1790455116, 2:08  up 17 days,  1:27, 4 users, load averages: 5.70 4.61 4.93
