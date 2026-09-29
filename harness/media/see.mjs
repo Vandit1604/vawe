@@ -6,6 +6,8 @@
 //   node harness/media/see.mjs <html> --probe --at <s> --sel <css>     · make study REF=<html> PROBE=1 AT=<s> SEL=<css>
 //   node harness/media/see.mjs <html> --look --times <s,...> [--ref <mp4>]  · make study REF=<html> LOOK=<s,...> [COMPARE=<mp4>]
 //   node harness/media/see.mjs <html> --layout --times <s,...> [--film <film.json>]  · make study REF=<html> LAYOUT=<s,...>
+//   node harness/media/see.mjs <video|page.html> --phone | --strip <t> | --loop   · make critique PAGE=<html>
+//     (the critique views, harness/media/see-views.mjs: phone contact sheet, 12-frame strip, loop seam)
 //
 // --probe/--look/--layout exist because agents kept writing their own throwaway browser probe scripts
 // to debug a fragment (one stalled twice doing it), never made a still before touching motion (0 of 7
@@ -1709,6 +1711,7 @@ async function main() {
       die(`${bin} is not on PATH. see.mjs needs ffmpeg (and tesseract for the full flow); install and re-run.`);
   }
 
+  if (['--phone', '--strip', '--loop'].some((v) => argv.includes(v))) return dispatchViews(video, positional, flag, argv);
   if (argv.includes('--probe')) return dispatchProbe(video, positional, flag);
   if (argv.includes('--look')) return dispatchLook(video, positional, flag);
   if (argv.includes('--layout')) return dispatchLayout(video, positional, flag);
@@ -1791,6 +1794,27 @@ function dispatchDom(video, positional, flag, argv) {
   };
   if (refArg) return runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null), words: argv.includes('--words') });
   return runDom(video, outDirRoot, opts);
+}
+
+async function dispatchViews(input, positional, flag, argv) {
+  const views = await import('./see-views.mjs');
+  const video = await views.videoFor(input);
+  const outDir = path.resolve(positional[1] || defaultOutDir(input));
+  const rel = (p) => path.relative(process.cwd(), p);
+  if (argv.includes('--phone')) {
+    const r = views.phoneSheet(video, outDir);
+    console.log(`✓ phone sheet, ${r.frames} frame(s) at 360 px, 1 fps: LOOK at ${rel(r.sheet)}`);
+  }
+  let stripAt = flag('--strip', null);
+  if (stripAt === 'auto') stripAt = views.autoStripTime(input, video);
+  if (stripAt != null) {
+    const r = views.stripSheet(video, Number(stripAt), outDir);
+    console.log(`✓ strip, 12 frames from f${r.firstFrame} at ${r.fps} fps around ${stripAt}s: LOOK at ${rel(r.sheet)}`);
+  }
+  if (argv.includes('--loop')) {
+    const r = views.loopSeam(video, outDir);
+    console.log(`✓ loop seam: LOOK at ${rel(r.sheet)}\n  ${views.describeLoop(r)}`);
+  }
 }
 
 function dispatchShot(video, positional, shotSpec, flag) {

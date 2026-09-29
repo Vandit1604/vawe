@@ -30,13 +30,13 @@
 // FAIL (under --strict only): cue-not-heard.  WARN always: onset-not-declared.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { loadScene } from '../../core/engine/expand.js';
 import { CUT_CUE, SEAM_CUE } from '../../core/audio/cues.js';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { gradeable } from './tile.mjs';
 import { requireTool } from '../../harness/lib/frame-forensics.mjs';
+import { decodeMono, envelopeOf, onsetsOf } from '../../harness/lib/audio-onsets.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -86,50 +86,18 @@ function declaredCues(d) {
 }
 const cues = declaredCues(data);
 
-// ---- one decode: mono PCM, low rate, plenty for a 150ms tolerance --------------------------------
+// ---- one decode, one envelope, one onset pass (harness/lib/audio-onsets.mjs) ----------------------
 requireTool('ffmpeg');
-const SR = 8000;
-const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vn', '-ac', '1', '-ar', String(SR), '-f', 'f32le', '-'],
-  { maxBuffer: 1 << 29 });
-if (r.status !== 0 || !r.stdout || r.stdout.length < SR * 4) {
+const { samples, error: decodeError } = decodeMono(mp4);
+if (!samples) {
   if (!cues.length) { console.log(`✓ audio-render-check · no declared cues, and ${mp4} carries no readable audio track (nothing to check)`); f.emit(); process.exit(0); }
-  f.fail('render-audio-unreadable', `${mp4} carries no readable audio track (ffmpeg: ${(r.stderr || '').trim().split('\n')[0] || 'no output'}), but the scene declares ${cues.length} cue(s)`,
+  f.fail('render-audio-unreadable', `${mp4} carries no readable audio track (ffmpeg: ${decodeError}), but the scene declares ${cues.length} cue(s)`,
     { at: mp4, fix: 're-render (`make video D=' + dataArg + '`) and confirm the mux step is not silently dropping the audio stream.' });
   f.emit();
   console.error(`✗ audio-render-check: ${f.count} finding(s).`);
   process.exit(strict ? 1 : 0);
 }
-const samples = new Float32Array(r.stdout.buffer, r.stdout.byteOffset, Math.floor(r.stdout.length / 4));
-
-// ---- loudness envelope + onsets, ONE pass over the samples ---------------------------------------
-// 20ms window, 10ms hop: fine enough to place an onset inside the 150ms tolerance with room to spare,
-// coarse enough that a single pass over an 8kHz stream costs nothing (a 22s film is ~2200 windows).
-const WIN = Math.round(SR * 0.02), HOP = Math.round(SR * 0.01);
-const dbFloor = -60;
-const rmsDb = (start) => {
-  let sum = 0;
-  for (let i = start; i < start + WIN && i < samples.length; i++) sum += samples[i] * samples[i];
-  const rms = Math.sqrt(sum / WIN);
-  return rms > 0 ? 20 * Math.log10(rms) : dbFloor;
-};
-const envelope = [];
-for (let s = 0; s + WIN <= samples.length; s += HOP) envelope.push({ t: s / SR, db: rmsDb(s) });
-
-// Onset: this window's loudness jumps ONSET_DB over the trailing 300ms floor (the quietest window in
-// that span), and clears an absolute noise floor so silence-to-silence jitter never counts. Merge
-// onsets inside MERGE_S into the first one, the same "one event, one timestamp" merge buildSfx itself
-// does for simultaneous cues.
-const TRAIL_WIN = Math.round(0.3 / (HOP / SR));
-const ONSET_DB = 8, NOISE_FLOOR_DB = -45, MERGE_S = 0.1;
-const onsets = [];
-for (let i = 0; i < envelope.length; i++) {
-  if (envelope[i].db < NOISE_FLOOR_DB) continue;
-  let floor = envelope[i].db;
-  for (let k = Math.max(0, i - TRAIL_WIN); k < i; k++) floor = Math.min(floor, envelope[k].db);
-  if (envelope[i].db - floor >= ONSET_DB) {
-    if (!onsets.length || envelope[i].t - onsets[onsets.length - 1].t > MERGE_S) onsets.push({ t: envelope[i].t, db: envelope[i].db });
-  }
-}
+const onsets = onsetsOf(envelopeOf(samples));
 
 // ---- match, both directions -----------------------------------------------------------------------
 const TOL_S = 0.15;

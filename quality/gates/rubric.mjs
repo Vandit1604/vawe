@@ -73,13 +73,13 @@ const numbered = (list) => list.map((d, i) => `${i + 1}. ${d}`).join('\n');
 // finding here is a FACT about the frames, not a lead to re-verify by squinting. Grouped by severity so
 // a HARD (ship-blocking) finding cannot hide among warnings, and a waived one still shows, the same
 // "still printed, tagged, and counted separately" rule audit.mjs itself holds for a waiver.
-function measuredSection(findings) {
+function measuredSection(findings, source = 'quality/audit.mjs + sweep-static.mjs') {
   if (!findings.length) {
-    return `## Measured findings (quality/audit.mjs + sweep-static.mjs)\nNone. Both scripts ran against this render and found nothing to report.\n`;
+    return `## Measured findings (${source})\nNone. The scripts ran against this render and found nothing to report.\n`;
   }
   const line = (r) => `- \`${r.code}\` [${r.severity === 'error' ? 'HARD' : r.severity.toUpperCase()}]` +
-    `${r.waived ? ' (waived)' : ''}: ${r.summary}`;
-  return `## Measured findings (quality/audit.mjs + sweep-static.mjs)
+    `${r.waived ? ' (waived)' : ''}: ${r.summary}${r.at ? ` [${r.at}]` : ''}${r.fix ? ` Fix: ${r.fix}` : ''}`;
+  return `## Measured findings (${source})
 These were measured on the rendered pixels, not guessed. Treat each as true unless the frame you are
 looking at plainly disagrees; a waived one is a known, deliberate exception, not a bug to re-report.
 
@@ -87,7 +87,34 @@ ${findings.map(line).join('\n')}
 `;
 }
 
-export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge', findings = [] }) {
+// What a fix must look like, and the default. The score threshold stays at 7 (owner rule, see
+// harness/lib/judge-consensus.mjs); this section only makes a finding something an author can act on.
+const FIX_SHAPE = `## Name every problem as a fix an author can apply
+For each problem write ONE entry with all five parts. A finding missing a part is not a finding.
+1. **Where**: the shot and the frame number (the sheet labels carry both), e.g. "shot 3, f44".
+2. **What is wrong**: what you SEE, one sentence.
+3. **Why it looks worse**: the effect on the viewer, and against the reference when there is one.
+4. **The exact fix**: a number and a direction, e.g. "the card lands 6 frames early, delay it to f44";
+   never "improve the timing".
+5. **Confidence**: sure, or CANNOT TELL from these frames.
+
+End with the **top 5 fixes**, ranked by how much each raises the film. Fewer than five is fine when
+fewer are real.
+
+## The default is reject
+You are asked to REJECT unless the film earns a pass. Look for the reason it is not ready, and pass only
+when you cannot find one. A pass needs an \`overall\` of 7 or more out of 10 and no fix in your top list
+that a viewer would notice at first watch. "Renders fine" is not a pass.
+`;
+
+const referenceSection = (reference) => (reference ? `## The reference
+Every tile pair is frame-locked: LEFT is the REFERENCE (\`${reference}\`), RIGHT is the film, both at the
+same time. Grade the film by how far it is from the reference at that frame: layout, type, colour, light,
+and what is moving. Say which side is better and by how much. A difference the reference does not have is
+a defect unless the film's own intent explains it.
+` : '');
+
+export function craftRubric({ name, frames, landscape, brand, dir = '/tmp/judge', findings = [], reference = null, measuredSource }) {
   return `# Judge sheet, ${name} (${frames} key frames, ${landscape ? 'landscape' : 'portrait'})
 
 READ \`${dir}/sheet.png\` and score EACH labeled frame against the rubric below. Be adversarial:
@@ -96,7 +123,8 @@ your job is to catch what the static gates can't SEE. Do NOT rationalize a flaw 
 ## The brand's house style (the scoring key)
 ${houseStyleFor(brand)}
 
-${measuredSection(findings)}
+${measuredSection(findings, measuredSource)}
+${referenceSection(reference)}
 ## Craft rubric: for EACH dimension, write the evidence FIRST, then the score
 For every dimension below, on every frame: name what you actually SEE (a timestamp/beat, the exact
 element, the exact defect) before you write the 1-5 score. A score with no evidence line above it is
@@ -107,13 +135,12 @@ ${numbered(DIMENSIONS)}
 ## Checks: yes/no, with the evidence that answers it
 ${numbered(CHECKS)}
 
+${FIX_SHAPE}
 ## Return this verdict (structured)
 - **Per frame, per dimension:** evidence first (timestamp/beat + what you see), then the score.
-- **Per frame:** \`beat N, <worst dimension>: <the issue> → <the fix>\` (only frames with a real problem).
+- **The fixes**, in the five-part shape above, then the top 5.
 - **Worst frame overall** + why.
-- **Verdict:** \`PASS\` only if every frame clears every dimension and both checks. Otherwise \`FIX\` + the
-  prioritized list.
-Rule: if your eye catches it, it's a FIX. "Renders fine" is not PASS.
+- **Verdict:** \`PASS\` only when the default-reject test above is met. Otherwise \`FIX\` + the ranked list.
 
 ## You may say you cannot tell, and you must when it is true
 A still cannot carry every dimension. Speed, direction, easing and whether a background is alive are
@@ -141,7 +168,7 @@ full-resolution stills in real time order, or off \`probe-frame\` numbers, never
 // rubric is not a verdict, it's a coin with a thumb on it. `run` names which of the (at least two,
 // independent) judges is answering; `--compare` in judge.mjs then flags any criterion where the two
 // runs disagree by more than 2 points.
-export function structuredRubric({ name, subject, frames, landscape, dir, run, outFile }) {
+export function structuredRubric({ name, subject, frames, landscape, dir, run, outFile, reference = null }) {
   const criteria = structuredCriteria();
   const look = criteria.filter((c) => c.axis === 'look');
   const motion = criteria.filter((c) => c.axis === 'motion');
@@ -152,6 +179,7 @@ READ \`${dir}/sheet.png\`. Score EVERY criterion below. A score with no evidence
 recorded: \`node quality/gates/judge.mjs\` checks each entry has a non-empty \`evidence\` string and a
 \`t\` (seconds) before it writes anything down.
 
+${referenceSection(reference)}
 ${section('LOOK (score this pass; static, per-frame)', look)}
 ${section('MOTION (score from what adjacent frames imply; write CANNOT_TELL in evidence if a still cannot answer it)', motion)}
 
@@ -163,12 +191,15 @@ ${section('MOTION (score from what adjacent frames imply; write CANNOT_TELL in e
 ${criteria.map((c) => `    "${c.code}": {"score": 1-5, "evidence": "<quoted visual observation>", "t": <seconds>}`).join(',\n')}
   },
   "overall": 1-10,
-  "verdict": "PASS|FIX"
+  "verdict": "PASS|FIX",
+  "fixes": [{"shot": 3, "frame": 44, "wrong": "<what you see>", "why": "<why it looks worse>", "fix": "<number and direction>"}]
 }
 \`\`\`
 Every \`evidence\` string must name what you actually SEE (a timestamp/beat, the exact element, the
 exact defect), never a bare number. \`overall\` is YOUR OWN holistic 1-10 read of this cut, never
-averaged with the other judge's: \`make ship\` requires both independent judges at 7 or above. Then
+averaged with the other judge's: \`make ship\` requires both independent judges at 7 or above.
+\`fixes\` is the top 5, ranked, each with all five fields; a FIX verdict with an empty list is
+incomplete. The default is reject: pass only when you cannot find the reason the film is not ready. Then
 record it:
 \`node quality/gates/judge.mjs ${subject} --verdict-json ${outFile} --run ${run}\`
 `;

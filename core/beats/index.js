@@ -134,8 +134,10 @@ function gridFor(snap, ctx) {
 function snapMark(j, kind, centre, ctx) {
   if (j.snap === false) return;                       // the author meant this time
   const grid = gridFor(typeof j.snap === 'string' ? j.snap : null, ctx);
-  const to = snapToBeat(centre, grid, ctx.maxShift);
-  if (to === centre) { ctx.held.push(`${kind}@${centre}`); return; }
+  const target = centre + ctx.lead;
+  const beat = snapToBeat(target, grid, ctx.maxShift);
+  if (beat === target) { ctx.held.push(`${kind}@${centre}`); return; }
+  const to = +(beat - ctx.lead).toFixed(3);
   const delta = to - centre;
   j.t = +(j.t + delta).toFixed(3);
   ctx.shifts.push({ kind, at: centre, delta });
@@ -167,8 +169,9 @@ function snapStings(data, grid, ctx) {
   }
 }
 
-export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT, altGrids = null) {
-  const ctx = { grid, altGrids, maxShift, moved: [], held: [], shifts: [] };
+// `lead` is seconds: a joint lands that long BEFORE the beat, so the cut is on screen when the hit sounds.
+export function snapJoints(data, grid, maxShift = DEFAULT_MAX_SHIFT, altGrids = null, lead = 0) {
+  const ctx = { grid, altGrids, maxShift, lead, moved: [], held: [], shifts: [] };
   for (const c of data.cuts || []) if (c && typeof c.t === 'number') snapMark(c, 'cut', c.t, ctx);
   for (const s of data.seams || []) {
     if (!s || typeof s.t !== 'number') continue;
@@ -238,7 +241,8 @@ export function bindBeats(data, sidecar) {
   const barGrid = Array.isArray(sidecar.downbeats) && sidecar.downbeats.length
     ? unrollGrid(sidecar.downbeats, period, dur) : null;
   const pinned = resolveGridPins(data, fineGrid);
-  const { moved, held } = snapJoints(data, grid, maxShift, { fine: fineGrid, bar: barGrid });
+  const lead = (Number(cfg.lead) || 0) / (Number(data.fps) || 30);
+  const { moved, held } = snapJoints(data, grid, maxShift, { fine: fineGrid, bar: barGrid }, lead);
   return { unit, bpm: sidecar.bpm, confidence: conf, maxShift, moved, held, pinned };
 }
 
