@@ -409,7 +409,7 @@ const KEEP_CHANGE = `## KEEP / CHANGE (edit this before rebuilding)
 KEEP (copy from the numbers below, frame for frame): timing, cuts, camera, easing, positions, blur, transitions.
 CHANGE (make your own): brand, logo, colours, fonts, copy, product screens, faces, platform UI.
 
-Add or remove items per film. A KEEP item is checked with \`make study REF=<ref.mp4> D=<page render.mp4> MATCH=1\`.
+Add or remove items per film. A KEEP item is checked with \`bin/vawe critique <page.html> --ref <ref.mp4>\`.
 `;
 
 const tableRows = (rows, cols, cap = 30) => {
