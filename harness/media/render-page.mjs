@@ -217,7 +217,7 @@ function clampSegments(kArr, cap = 200) {
 // a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state.
 // A slice whose browser or page dies is restarted once from its first frame (returns the restarted
 // slices as "lo-hi s" strings); a second death exits 2. `clock` is { fps, from } and only names the time range.
-const LOST_PAGE = /Connection closed|Target closed|Session closed|Protocol error|timed out|timeout/i;
+const LOST_PAGE = /Connection closed|Target closed|No target with given id|Session closed|Protocol error|timed out|timeout/i;
 
 async function runShards(pagePath, frame, frames, workers, work, clock) {
   const slices = [];
@@ -231,7 +231,7 @@ async function runShards(pagePath, frame, frames, workers, work, clock) {
     let sinceOpen = 0;
     try {
       for (let i = lo; i < hi; i++) {
-        if (opened && sinceOpen >= RECYCLE_SUBFRAMES) { await opened.close(); opened = null; }
+        if (opened && sinceOpen >= RECYCLE_SUBFRAMES) { await opened.close().catch(() => {}); opened = null; }
         if (!opened) {
           opened = await openPage(pagePath, frame);
           await opened.page.goto(opened.url, { waitUntil: 'load' });
