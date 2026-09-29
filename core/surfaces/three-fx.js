@@ -206,7 +206,7 @@ function glassEnvironment(renderer, colors) {
 // reflective metal body never goes near-black) or 'glass' (`glassEnvironment()`'s mostly-dark room, so
 // a transmissive body has somewhere to go dark and one tight hot patch to catch). Both rooms share the
 // same four-light rig; only `scene.environment` (the room a punctual light can't fake) differs. Exported
-// as `studio` for `vawe.three.studio(renderer, scene, kind)` (core/runtime/vawe-frame.mjs), the same
+// as `studio` for `vawe.three.studio(renderer, scene, kind)` (core/engine/page-api.js), the same
 // function `createThreeLayer` below already calls for every declarative `three` layer: one lighting rig,
 // two consumers, never a second copy tuned separately and drifting from this one.
 export function studio(renderer, scene, colors, kind = 'metal') {
