@@ -406,6 +406,7 @@ next: ## [preflight] RUN the one command the stage names, then stop (D=<film>, o
 ifdef PAGE
 	@node quality/gates/anim-traps.mjs $(PAGE)
 	@node harness/media/see.mjs $(PAGE) --dom --ref $(REF) $(if $(D),--film $(D),) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(FINAL),--final) $(if $(WORDS),--words)
+	@node quality/gates/page-check.mjs $(PAGE) $(if $(REF),--ref $(REF))
 else
 	@node quality/gates/next.mjs $(D)
 endif
@@ -526,8 +527,16 @@ e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site
 
 # no-judge, compare, expand, house-style, direct, scrub: `make dev-tool X=<name>`.
 
-judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<file> [VS=<brand>] [STRUCT=1] [RUNS=A,B] [VERDICT_JSON=<f> RUN=<id>] [COMPARE="a.json b.json"])
-	@$(if $(COMPARE),node quality/gates/judge.mjs --compare $(COMPARE),node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(JSON),--json,) $(if $(filter 1,$(STRUCT)),--struct) $(if $(RUNS),--runs $(RUNS)) $(if $(VERDICT_JSON),--verdict-json $(VERDICT_JSON) --run $(RUN)))
+critique: ## [judge] the critique loop for a page film: phone sheet, strip, loop seam and page-check to LOOK at, then the judge command for a fresh session (PAGE=<html> [REF=<mp4>] [AT=<s>])
+	@test -n "$(PAGE)" || { echo "usage: make critique PAGE=films/<name>/page.html [REF=<ref.mp4>] [AT=<seconds>]"; exit 2; }
+	@node harness/media/see.mjs $(PAGE) --phone --strip $(or $(AT),auto) --loop
+	@node quality/gates/page-check.mjs $(PAGE) $(if $(REF),--ref $(REF))
+	@echo ""
+	@echo "  LOOK at the sheets printed above first. Then, in a FRESH session (never the author):"
+	@echo "    VAWE_AGENT=judge-$(notdir $(patsubst %/,%,$(dir $(PAGE)))) make judge D=$(PAGE) STRUCT=1 $(if $(REF),REF=$(REF))"
+
+judge: ## [judge] vision gate: prep key frames + rubric for the agent to score (D=<scene.json|page.html|mp4> [VS=<brand>] [REF=<ref.mp4>] [STRUCT=1] [RUNS=A,B] [VERDICT_JSON=<f> RUN=<id>] [COMPARE="a.json b.json"])
+	@$(if $(COMPARE),node quality/gates/judge.mjs --compare $(COMPARE),node quality/gates/judge.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(REF),--ref $(REF)) $(if $(JSON),--json,) $(if $(filter 1,$(STRUCT)),--struct) $(if $(RUNS),--runs $(RUNS)) $(if $(VERDICT_JSON),--verdict-json $(VERDICT_JSON) --run $(RUN)))
 	@echo "  (judge is synchronous, it already returned above; do not poll or sleep for it)"
 
 # ── Tier B: stateful simulation, baked offline ────────────────────────────────────────────────────

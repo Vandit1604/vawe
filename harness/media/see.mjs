@@ -1805,7 +1805,8 @@ async function dispatchViews(input, positional, flag, argv) {
     const r = views.phoneSheet(video, outDir);
     console.log(`✓ phone sheet, ${r.frames} frame(s) at 360 px, 1 fps: LOOK at ${rel(r.sheet)}`);
   }
-  const stripAt = flag('--strip', null);
+  let stripAt = flag('--strip', null);
+  if (stripAt === 'auto') stripAt = views.autoStripTime(input, video);
   if (stripAt != null) {
     const r = views.stripSheet(video, Number(stripAt), outDir);
     console.log(`✓ strip, 12 frames from f${r.firstFrame} at ${r.fps} fps around ${stripAt}s: LOOK at ${rel(r.sheet)}`);
