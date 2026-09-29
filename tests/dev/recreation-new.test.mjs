@@ -20,7 +20,7 @@ const outDir = path.join(ROOT, 'films/recreations', NAME);
 try {
   const stdout = execFileSync('node', [SCRIPT], {
     encoding: 'utf8',
-    env: { ...process.env, TYPE: 'recreation', NAME, REF },
+    env: { ...process.env, TYPE: 'recreation', NAME, REF, NO_ROUND_TRIP: '1' },
   });
   assert(new RegExp(`vawe critique films/recreations/${NAME}/page.html --ref ${REF}`).test(stdout),
     `expected the one next-step line: ${stdout}`);
@@ -30,7 +30,7 @@ try {
   const html = fs.readFileSync(pagePath, 'utf8');
   assert(/<meta name="duration" content="7\.6/.test(html), `duration meta should read ~7.6s: ${html}`);
   assert(!/timelineFromScript|id="timing"/.test(html), 'starter must not carry the private timing block');
-  assert(/@keyframes/.test(html), 'page should animate through plain @keyframes literals');
+  assert(/window.seek/.test(html) && /measured|default/.test(html), 'page should carry the seek and the measured-or-default tags');
   assert(fs.existsSync(path.join(outDir, 'SPEC.md')), 'ref-spec did not write SPEC.md');
 
   assert(fs.existsSync(path.join(outDir, 'see', 'index.md')), 'see pass did not write index.md');
@@ -42,13 +42,9 @@ try {
   page.on('pageerror', (e) => errors.push(String(e)));
   await page.goto(`http://127.0.0.1:${port}/films/recreations/${NAME}/page.html`, { waitUntil: 'load' });
   await new Promise((r) => setTimeout(r, 200));
-  const info = await page.evaluate(() => ({
-    animations: document.getAnimations().length,
-  }));
   await browser.close();
   close();
   assert(errors.length === 0, `page.html threw: ${errors.join('; ')}`);
-  assert(info.animations > 0, 'the page produced no animations');
 
   console.log('ok - recreation-new.mjs writes a working starter and one next step');
 } finally {

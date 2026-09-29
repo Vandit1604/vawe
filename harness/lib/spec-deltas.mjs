@@ -302,13 +302,21 @@ function audioDeltas(ref, page) {
 
 const AXES = ['timing', 'layout', 'colour', 'text', 'transitions', 'audio'];
 
-// One number per axis: 100 minus the hurt of its deltas, floor 0, and the worst line of that axis.
+// One number per axis: 100 with no delta, 50 when the hurt of the axis's deltas adds up to HALF_HURT
+// (about ten frames of lateness), falling toward 0 without ever reaching it; and the worst line of the axis.
+const HALF_HURT = 30;
 export function axisScores(deltas) {
   return AXES.map((axis) => {
     const mine = deltas.flatMap((d) => (d.parts ? d.parts.filter((p) => p.axis === axis).map((p) => ({ hurt: p.hurt, d })) : d.axis === axis ? [{ hurt: d.hurt, d }] : []));
     const worst = mine.sort((a, b) => b.hurt - a.hurt)[0];
-    return { axis, score: Math.max(0, Math.round(100 - mine.reduce((s, m) => s + m.hurt, 0))), worst: worst ? worst.d.line : '' };
+    return { axis, score: Math.round((100 * HALF_HURT) / (HALF_HURT + mine.reduce((s, m) => s + m.hurt, 0))), worst: worst ? worst.d.line : '' };
   });
+}
+
+// A short tracked move on a word around when the word appears is the word fading in; the text deltas already judge it. A long one is a real move and stays.
+function onAWord(spec, e) {
+  if (Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]) >= 0.03 * spec.media.width) return false;
+  return (spec.textLines || []).some((l) => l.words.some((w) => Math.hypot(w.x - e.to[0], w.y - e.to[1]) < 0.6 * Math.max(e.size[0], e.size[1], w.h) && Math.abs(w.t0 - landT(e, spec)) < 1.5));
 }
 
 export function compareSpecs(ref, page) {
@@ -320,8 +328,8 @@ export function compareSpecs(ref, page) {
   for (let i = 0; i < shots; i++) {
     const rs = ref.shots[i], ps = page.shots[i], n = i + 1;
     const { out, lostRef, extraPage } = pairElements(c, ref, page, rs, ps);
-    for (const p of out) { const d = elementDelta(c, ref, page, n, p.re, p.pe); if (d) deltas.push(d); }
-    for (const re of lostRef) {
+    for (const p of out.filter((x) => !(onAWord(ref, x.re) && onAWord(page, x.pe)))) { const d = elementDelta(c, ref, page, n, p.re, p.pe); if (d) deltas.push(d); }
+    for (const re of lostRef.filter((e) => !onAWord(ref, e))) {
       const at = c.frame(ref, landT(re, ref) * ref.fps);
       deltas.push({ kind: 'missing', axis: 'timing', shot: n, hurt: 8, confidence: 'low', frame: at, refFrame: at,
         line: `S${n}: ref moves something ${Math.round(re.size[0] * c.k)}x${Math.round(re.size[1] * c.k)} px to (${Math.round(re.to[0] * c.k)}, ${Math.round(re.to[1] * c.k)}), f${c.frame(ref, re.f0)}-f${at}; no page move matches` });

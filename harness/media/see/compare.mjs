@@ -345,11 +345,11 @@ export async function pageSpec(htmlPath, refSpecOut, outDirRoot, fps) {
 
 const SHEET_LIMIT = 10;
 
-function writeSheets(result, mp4, refPath, outDirRoot) {
+function writeSheets(result, mp4, refPath, outDirRoot, lastT) {
   const dir = path.join(outDirRoot, 'sheets');
   fs.mkdirSync(dir, { recursive: true });
   result.deltas.filter((d) => d.confidence === 'low').slice(0, SHEET_LIMIT).forEach((d, i) => {
-    const times = [...new Set([d.refT, d.t].map((t) => Math.round(t * 100) / 100))];
+    const times = [...new Set([d.refT, d.t].map((t) => Math.round(Math.min(Math.max(t, 0), lastT) * 100) / 100))];
     d.sheet = path.relative(process.cwd(), compareFrames({ ours: mp4, ref: refPath, times, out: path.join(dir, `delta-${i + 1}.png`) }));
   });
 }
@@ -368,7 +368,7 @@ export async function runMeasure(htmlPath, refPath, outDirRoot) {
     mp4 = rendered.mp4;
     attachNames(rendered.spec, namer);
     result = compareSpecs(ref, rendered.spec);
-    writeSheets(result, mp4, refPath, outDirRoot);
+    writeSheets(result, mp4, refPath, outDirRoot, Math.min(ref.duration, rendered.spec.duration) - 2 / page.fps);
   }
   const args = { pageName: path.basename(htmlPath), refName: refPath && path.basename(refPath), result, checks, page };
   fs.writeFileSync(path.join(outDirRoot, 'deltas.md'), deltasMarkdown(args));
