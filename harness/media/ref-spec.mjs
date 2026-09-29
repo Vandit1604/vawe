@@ -16,14 +16,12 @@ import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
 import { readWav } from './wav-read.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
-import { approach, spring } from '../../core/motion/springs.js';
+import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 
 const GRID_W = 320;
 const DIFF_THR = 6;
 const MAX_FRAMES = 2400;
 const die = (m) => { console.error(`✗ ${m}`); process.exit(2); };
-const r1 = (v) => Math.round(v * 10) / 10;
-const r3 = (v) => Math.round(v * 1000) / 1000;
 const hex = (rgb) => `#${[rgb >> 16, (rgb >> 8) & 255, rgb & 255].map((c) => c.toString(16).padStart(2, '0')).join('')}`;
 
 function probeRate(video) {
@@ -270,24 +268,18 @@ function trackShot(V, f0, f1, cams, maxTracks) {
 }
 
 // ── one element's move: overshoot, arrival curve, blur ───────────────────────────────────────────
-function fitApproach(p, p0, p1, sc) {
-  let best = null;
-  for (let k = 0.04; k <= 0.5; k += 0.005) for (const sh of [-1, -0.5, 0, 0.5, 1]) {
-    let sse = 0;
-    p.forEach((v, i) => { const e = (approach(i + 1 - sh, p0, p1, k) - v) * sc; sse += e * e; });
-    if (!best || sse < best.sse) best = { kind: 'approach', k: r3(k), shift: sh, sse };
+// The colour most pixels in the middle of the element's box share: its fill, not its edges or text.
+function modalColor(V, f, cx, cy, bw, bh) {
+  const x0 = Math.max(0, Math.round(cx - bw * 0.3)), x1 = Math.min(V.w - 1, Math.round(cx + bw * 0.3));
+  const y0 = Math.max(0, Math.round(cy - bh * 0.3)), y1 = Math.min(V.h - 1, Math.round(cy + bh * 0.3));
+  const count = new Map();
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
+    const o = (f * V.w * V.h + y * V.w + x) * 3;
+    const key = (V.rgb[o] << 16) | (V.rgb[o + 1] << 8) | V.rgb[o + 2];
+    count.set(key, (count.get(key) || 0) + 1);
   }
-  return { ...best, rmse: r1(Math.sqrt(best.sse / p.length)) };
-}
-
-function fitSpring(p, p0, p1, fps, sc) {
-  let best = null;
-  for (let k = 40; k <= 1600; k *= 1.25) for (let d = 6; d <= 70; d += 4) for (const sh of [-1, -0.5, 0, 0.5, 1]) {
-    let sse = 0;
-    p.forEach((v, i) => { const e = (p0 + (p1 - p0) * spring((i + 1 - sh) / fps, k, d) - v) * sc; sse += e * e; });
-    if (!best || sse < best.sse) best = { kind: 'spring', k: Math.round(k), d, shift: sh, sse };
-  }
-  return { ...best, rmse: r1(Math.sqrt(best.sse / p.length)) };
+  const top = [...count.entries()].sort((a, b) => b[1] - a[1])[0];
+  return top ? hex(top[0]) : null;
 }
 
 function analyseTrack(track, V, fps, sc) {
@@ -303,18 +295,11 @@ function analyseTrack(track, V, fps, sc) {
   const out = { f0: pts[0].f, f1: pts[pts.length - 1].f, axis, frames: pts.length, movingFrames: moving,
     from: [r1(pts[0].x * sc), r1(pts[0].y * sc)], to: [r1(pts[pts.length - 1].x * sc), r1(pts[pts.length - 1].y * sc)],
     size: [r1(median(pts.map((p) => p.w)) * sc), r1(median(pts.map((p) => p.h)) * sc)], peakSpeed: r1(peak), overshoot: null, fit: null };
-  const travelled = Math.abs(D) * sc;
-  if (travelled >= 4 && pts.length >= 4) {
-    const dir = Math.sign(D);
-    const maxEx = Math.max(...pos.map((v2) => (v2 - p0) * dir));
-    out.overshoot = r3(maxEx / Math.abs(D));
-    const a = fitApproach(pos, p0, p1, sc);
-    const s = fitSpring(pos, p0, p1, fps, sc);
-    const useSpring = out.overshoot > 1.03 || (a.rmse > 0.06 * travelled && s.rmse < a.rmse);
-    const pick = useSpring ? s : a;
-    out.fit = { kind: pick.kind, k: pick.k, ...(pick.d ? { d: pick.d } : {}), shiftFrames: pick.shift, rmsePx: pick.rmse,
-      otherRmsePx: (useSpring ? a : s).rmse };
-  }
+  Object.assign(out, summariseMove(pos, p0, p1, fps, sc));
+  const last = pts[pts.length - 1];
+  out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
+  const travel = Math.abs(D) * sc;
+  out.confidence = pts.length >= 5 && (!out.fit || out.fit.rmsePx <= 0.08 * travel) ? 'high' : 'low';
   const energies = pts.map((p) => edgeEnergy(V.frame(p.f), V.w, V.h, p.x, p.y, p.w, p.h));
   const mx = Math.max(...energies.map((e) => e.ex), 1e-6), my = Math.max(...energies.map((e) => e.ey), 1e-6);
   out.rows = pts.map((p, i) => {
@@ -328,9 +313,6 @@ function analyseTrack(track, V, fps, sc) {
     minSharp: Math.min(...blurred.map((r) => r.sharp)), dir: mode(blurred.map((r) => r.blurDir)) } : null;
   return out;
 }
-
-const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
-const mode = (a) => { const c = {}; for (const x of a) c[x] = (c[x] || 0) + 1; return Object.entries(c).sort((x, y) => y[1] - x[1])[0][0]; };
 
 // ── palette: k-means, deterministic (farthest-point start), reported as the exact modal pixel per cluster ──
 function palette(V, f0, f1, k = 5) {
@@ -525,7 +507,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
   }
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
-    cuts, audio: aud, shots };
+    cuts, audio: aud, shots, ocr };
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
   fs.writeFileSync(path.join(outDir, 'SPEC.md'), `${renderSpec(spec)}\n`);
