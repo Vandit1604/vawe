@@ -2,7 +2,8 @@
 // harness/media/match.mjs: REFERENCE MATCHING for a recreation. Where content-check.mjs asks "is this
 // act as RICH as the reference's", this asks "does this beat MOVE the way the reference moves": a
 // dense frame-by-frame strip (reference row over render row), a difference overlay and a mean SSIM,
-// per beat, ranked worst-to-best in match.md. `make study REF=<video> D=<film.json> MATCH=1`.
+// per beat, ranked worst-to-best in match.md. `make study REF=<video> D=<film.json|render.mp4> MATCH=1`.
+// D may be a rendered mp4 (a page render): beats are then the shots in spec.json next to REF (`make spec`).
 //
 // `LIGHT=1` adds one more column: a per-beat light-map ΔE (harness/lib/light-map.mjs), the LOW-
 // FREQUENCY brightness and colour a beat reads at a glance, which SSIM and the colour ΔE below both
@@ -39,8 +40,8 @@ const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
 const REF = KV.REF || positional[0] || process.env.REF;
 const FILM = KV.D || positional[1] || process.env.D;
-if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<film.json> MATCH=1  '
-  + '(or: node harness/media/match.mjs <ref.mp4> <film.json>)');
+if (!REF || !FILM) die('usage: make study REF=<reference.mp4> D=<film.json|render.mp4> MATCH=1  '
+  + '(or: node harness/media/match.mjs <ref.mp4> <film.json|render.mp4>)');
 if (!fs.existsSync(REF)) die(`no such reference video: ${REF}`);
 
 const STEP = Number(flag('--step', 'STEP', 0.1));   // dense strip: one sample every 0.1s, per the spec
@@ -51,8 +52,9 @@ requireTool('ffprobe');
 
 const filmPath = path.resolve(ROOT, FILM);
 if (!fs.existsSync(filmPath)) die(`no such film: ${FILM}`);
-const slug = path.basename(filmPath).replace(/\.json$/, '');
-const g = gradeable(filmPath);
+const slug = path.basename(filmPath).replace(/\.(json|mp4|mov|webm)$/i, '');
+const isVideo = /\.(mp4|mov|webm)$/i.test(filmPath);
+const g = isVideo ? { ok: true, mp4: filmPath } : gradeable(filmPath);
 // A DRAFT RENDER (`make dev`, 30fps) writes the SAME out/<slug>.mp4 a full `make video`/`make ship`
 // does (renderOf names one path for both), so `gradeable`'s own freshness check already accepts either:
 // it only refuses when the JSON is newer than whatever is there. The one thing it never did was say
@@ -67,7 +69,7 @@ const renderKind = fps && fps <= 31 ? 'draft (--draft, ~30fps)' : 'final (~60fps
 if (!W || !H) die(`${mp4} has no readable video stream.`);
 
 // ── beats: the film's own storyboard first, the reference's own detected cuts otherwise ────────────
-const sbPath = findStoryboard(filmPath, slug, ROOT);
+const sbPath = isVideo ? null : findStoryboard(filmPath, slug, ROOT);
 let beats = sbPath ? actsFromStoryboard(fs.readFileSync(sbPath, 'utf8')) : null;
 let beatsSource = sbPath ? `storyboard beats (${path.relative(ROOT, sbPath)})` : null;
 
@@ -78,6 +80,14 @@ let beatsSource = sbPath ? `storyboard beats (${path.relative(ROOT, sbPath)})` :
 if (sbPath && (!beats || !beats.length)) {
   console.log(`  ⚠ ${path.relative(ROOT, sbPath)} exists but named no usable beat (no \`## Beat N:\` `
     + 'heading and no beat table this parser reads), falling back to scene cuts detected in the reference.');
+}
+
+// A page render has no storyboard: use the shots ref-spec.mjs already measured next to the reference.
+const specPath = path.join(path.dirname(path.resolve(REF)), 'spec.json');
+if (isVideo && fs.existsSync(specPath)) {
+  const spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
+  beats = spec.shots.map((s) => ({ start: s.t0, end: s.t1, label: `shot ${s.index}, frames ${s.f0}-${s.f1 - 1}` }));
+  beatsSource = `${beats.length} shot(s) from ${path.relative(ROOT, specPath)}`;
 }
 
 if (!beats || !beats.length) {
