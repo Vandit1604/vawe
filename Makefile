@@ -75,8 +75,11 @@ video: build ## [ship] one self-describing JSON → out/<name>.mp4 Runs the mand
 # gets one written from its brief (or a one-line title from its own name) before the render below runs.
 # No storyboard required. This is the one-command path to a first preview (AGENTS.md "no sign-off
 # step"); a real plan still goes through the seven stages when there is one to go through.
-dev: build ## [dev] THE ITERATION LOOP. DRAFT=1|NEW=<name>: bootstrap a first scene, no plan needed. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice.
+dev: build ## [dev] THE ITERATION LOOP. DRAFT=1|NEW=<name>: bootstrap a first scene, no plan needed. BEAT=/JOIN=/FROM=&TO=/GROUP=: only that slice. PAGE=<page.html> [ASPECT=] [FROM= TO=]: half-size draft of a page film.
 	$(eval D := $(if $(strip $(NEW)),films/scene/$(NEW).json,$(D)))
+ifdef PAGE
+	node harness/media/render-page.mjs $(PAGE) $(if $(OUT),$(OUT)) $(if $(ASPECT),--aspect $(ASPECT)) $(if $(FROM),--from $(FROM)) $(if $(TO),--to $(TO)) $(if $(AUDIO),--audio)
+else
 ifneq ($(strip $(GROUP)),)
 	@g=$$(node harness/dev/group-only.mjs "$(D)" "$(GROUP)") && $(MAKE) --no-print-directory dev D=$$g WORKERS=$(WORKERS) NOSHEETS=1
 else
@@ -98,6 +101,7 @@ else
 	fi
 	@echo "" && echo "  next: make check D=$(D)  (every gate, zero consequence)  ·  make ship D=$(D)  (when it's ready)"
 	@node harness/author/arsenal.mjs --for $(D) 2>/dev/null || true
+endif
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)) || echo "  ! contact sheets failed; the render above is fine. Re-run: node harness/author/sheets.mjs $(D)")
 endif
 endif
@@ -229,7 +233,10 @@ media: ## [dev] capture, generation and audio/video processing tools, routed by 
 # `./bin/vawe --aspect` renders one mp4 PER listed ratio and does not understand "all" itself). The
 # seam check is the same `quality/gates/seams.mjs` `make seam-check` calls, no longer a step to
 # remember: flash, empty stage, ghost, resurrection and split seam, all in one pass.
-ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics
+ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit ASPECT=all -> seams -> forensics. PAGE=<page.html> [ASPECT=all]: final 60 fps render of a page film.
+ifdef PAGE
+	node harness/media/render-page.mjs $(PAGE) $(if $(OUT),$(OUT)) --final $(if $(ASPECT),--aspect $(ASPECT))
+else
 	@echo "  (if you backgrounded this: check with \`make dev-tool X=ship-status D=$(D)\`, do not sleep)"
 	@$(if $(D),node harness/lib/ensure-preflight.mjs $(D),)
 	RUNLOG_CMD=ship node harness/lib/run-author-check.mjs $(D) $(if $(VS),--vs $(VS)) $(if $(filter 1,$(TASTE)),--taste) $(if $(filter 1,$(STRICT)),--strict)
@@ -251,6 +258,7 @@ ship: build ## [ship] preflight (if needed) -> author-check -> render -> audit A
 	@node quality/gates/audio-render-check.mjs $(D) $(if $(filter 1,$(STRICT)),--strict)
 	@$(if $(NOSHEETS),echo "  · contact sheets skipped (NOSHEETS=1)",node harness/author/sheets.mjs $(D) $(if $(VS),--vs $(VS)) || echo "  ! contact sheets failed; the render above is fine. Re-run: node harness/author/sheets.mjs $(D)")
 	@node quality/gates/ledger.mjs judged $(D)
+endif
 
 # make list / make help: every target, grouped by the ten-phase spine, with its one-line help. Reads
 # the Makefile itself (harness/lib/make-help.mjs), so it cannot drift from the real target list the

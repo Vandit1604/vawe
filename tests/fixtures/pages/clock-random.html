@@ -1,0 +1,15 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="0.5">
+<style>*{margin:0}html,body{background:#000}canvas{display:block;width:100vw;height:100vh}</style>
+</head><body><canvas id="c" width="320" height="180"></canvas>
+<script>
+const ctx = document.getElementById('c').getContext('2d');
+window.seek = () => {
+  const hue = Math.round(Date.now() / 2) % 360;
+  ctx.fillStyle = `hsl(${hue} 60% 20%)`;
+  ctx.fillRect(0, 0, 320, 180);
+  ctx.fillStyle = '#fff';
+  for (let i = 0; i < 40; i++) ctx.fillRect(Math.random() * 310, Math.random() * 170, 6, 6);
+  ctx.fillRect(performance.now() / 4, 0, 4, 180);
+};
+</script></body></html>
