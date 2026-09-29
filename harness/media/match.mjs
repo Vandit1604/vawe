@@ -2,7 +2,7 @@
 // harness/media/match.mjs: REFERENCE MATCHING for a recreation. Where content-check.mjs asks "is this
 // act as RICH as the reference's", this asks "does this beat MOVE the way the reference moves": a
 // dense frame-by-frame strip (reference row over render row), a difference overlay and a mean SSIM,
-// per beat, ranked worst-to-best in match.md. `make study REF=<video> D=<film.json|render.mp4> MATCH=1`.
+// per beat, ranked worst-to-best in match.md. `make study REF=<video> D=<render.mp4> MATCH=1`.
 // D may be a rendered mp4 (a page render): beats are then the shots in spec.json next to REF (`make spec`).
 //
 // `LIGHT=1` adds one more column: a per-beat light-map ΔE (harness/lib/light-map.mjs), the LOW-
