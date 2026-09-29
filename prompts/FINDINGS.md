@@ -135,3 +135,11 @@ MIT: awesome-ai-motion (repo only; prompts third-party), ClaudeAnimationBase, cl
 Apache 2.0: HyperFrames. CC BY 4.0: awesome-opus-5-5-videos. ISC in package.json only: PDoomVideo.
 No licence: Battle-of-Austerlitz-Film. Remotion licence (not OSI): Remotion skills. Owner-shared
 articles (twoclipping, notdwd, Movez): not redistributable. Nothing verbatim from the last four.
+
+<!-- doc-refs-allow: scripts/sound.mjs · a file in the external claude-animation-skill repo, not this one -->
+<!-- doc-refs-allow: films/golden-morph/page.html · a golden film this list proposes; built later -->
+<!-- doc-refs-allow: films/golden-reel/page.html · a golden film this list proposes; built later -->
+<!-- doc-refs-allow: films/golden-launch/page.html · a golden film this list proposes; built later -->
+<!-- doc-refs-allow: films/golden-rebuild/page.html · a golden film this list proposes; built later -->
+<!-- doc-refs-allow: films/golden-beat/page.html · a golden film this list proposes; built later -->
+<!-- doc-refs-allow: films/golden-explainer/page.html · a golden film this list proposes; built later -->
