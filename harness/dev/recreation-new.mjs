@@ -1,9 +1,8 @@
 // harness/dev/recreation-new.mjs: the recreation starter. `make dev-tool X=new TYPE=recreation
-// NAME=<name> REF=<ref.mp4>` writes films/recreations/<name>/page.html (a real page, not a scene JSON:
-// see engine-doctrine/CRAFT/RECREATION.md for that other loop) plus a `see` pass on the reference, so
-// the very first file an agent opens already carries the reference's own dense shots and motion
-// budget, never a blank page. Reuses see.mjs's own CLI (no second reference-reading path) and
-// core/motion/timeline.js's timeline sheet (no second motion mechanism).
+// NAME=<name> REF=<ref.mp4>` writes films/recreations/<name>/page.html (a real page: see
+// engine-doctrine/CRAFT/RECREATION.md for the JSON loop), a SPEC.md of measured numbers for the
+// reference (harness/media/ref-spec.mjs) and a `see` pass, so the first file an agent opens points at
+// the reference's own cuts, moves, palette and sound hits, never a blank page.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -19,42 +18,32 @@ function ffprobeDuration(video) {
   return dur > 0 ? dur : 10;
 }
 
-const PAGE_HTML = (name, refBase, duration) => `<!-- films/recreations/${name}/page.html: recreation starter for ${refBase}.
-     Own words, own images, own icons only. Match only the reference's motion, timing, layout and light.
+const PAGE_HTML = (name, refBase, duration, fps) => `<!-- films/recreations/${name}/page.html: recreation starter for ${refBase}.
+     Read SPEC.md next to this file first: cuts, per-frame moves, palette, sound hits, KEEP/CHANGE block.
+     Own words, own images, own icons only. Keep the reference's timing, cuts, camera and easing; change the brand.
+     Numbers live as literals: @keyframes stops, element.animate() keyframes, or a [[frame, value]] table in seek(t).
      Loop: \`make next PAGE=page.html REF=${refBase}\` until it passes, then the final render. -->
 <!doctype html>
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="${duration.toFixed(2)}">
+<meta name="duration" content="${duration.toFixed(3)}">
+<meta name="fps" content="${fps}">
 <style>
 @font-face { font-family: "Anybody"; src: url("../../../assets/fonts/Anybody.woff2") format("woff2");
              font-weight: 100 900; font-stretch: 50% 150%; font-display: swap; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0a0a0a; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0a; }
 body { font-family: "Anybody", sans-serif; color: #f5f5f5; display: flex; align-items: center; justify-content: center; }
-.hero { font-size: 96px; font-weight: 700; letter-spacing: -0.02em; opacity: 0; }
-.hero .letter { display: inline-block; opacity: 0; transform: translateY(24px); }
+.hero { font-size: 5vw; font-weight: 700; letter-spacing: -0.02em; animation: hero-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
-<h1 class="hero" id="hero">recreate me</h1>
-
-<script type="application/json" id="timing">
-[
-  { "el": "#hero", "from": { "opacity": 0 }, "to": { "opacity": 1 }, "at": 0, "dur": 0.01 },
-  { "el": "#hero .letter", "from": { "opacity": 0, "transform": "translateY(24px)" },
-    "to": { "opacity": 1, "transform": "translateY(0px)" }, "at": 0.1, "dur": 0.4, "stagger": 0.03 }
-]
-</script>
-
-<script type="module">
-import { timelineFromScript } from "/core/motion/timeline.js";
-const hero = document.getElementById("hero");
-hero.innerHTML = [...hero.textContent].map((ch, i) =>
-  \`<span class="letter" style="--i:\${i}">\${ch === " " ? "&nbsp;" : ch}</span>\`).join("");
-timelineFromScript(document);
-</script>
+<h1 class="hero">recreate me</h1>
 </body>
 </html>
 `;
@@ -75,7 +64,11 @@ function main() {
 
   const duration = ffprobeDuration(refAbs);
   const pagePath = path.join(outDir, 'page.html');
-  fs.writeFileSync(pagePath, PAGE_HTML(name, path.basename(ref), duration));
+  const spec = spawnSync(process.execPath, [path.join(ROOT, 'harness/media/ref-spec.mjs'), refAbs, '--out', outDir],
+    { stdio: 'inherit', cwd: ROOT });
+  if (spec.status) die(`ref-spec.mjs failed on ${ref}`);
+  const fps = JSON.parse(fs.readFileSync(path.join(outDir, 'spec.json'), 'utf8')).fps;
+  fs.writeFileSync(pagePath, PAGE_HTML(name, path.basename(ref), duration, fps));
   // reference.json: the folder's own declaration that this page is a recreation of `ref`, read by
   // render-page.mjs to refuse a FINAL render until the required motion check has passed.
   fs.writeFileSync(path.join(outDir, 'reference.json'), JSON.stringify({ ref: path.relative(ROOT, refAbs) }, null, 1) + '\n');
@@ -86,7 +79,8 @@ function main() {
   if (r.status) die(`see.mjs failed on ${ref}`);
 
   const relPage = path.relative(ROOT, pagePath);
-  console.log(`\nmake next PAGE=${relPage} REF=${ref}`);
+  console.log(`\nSPEC: ${path.relative(ROOT, path.join(outDir, 'SPEC.md'))} (edit its KEEP/CHANGE block)`);
+  console.log(`make next PAGE=${relPage} REF=${ref}`);
   return 0;
 }
 
