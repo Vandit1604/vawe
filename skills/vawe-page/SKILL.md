@@ -36,7 +36,9 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 1. Pick the film type in `engine-doctrine/CRAFT/ROUTING.md`; `bin/vawe new <name> --from prompts/<t>.md`.
 2. Write the beat table (`prompts/beat-sheet.md`): time, message, the one thing that moves, the cue.
 3. Make the five stills that define the look. Fix cramped, overlapping or unreadable before motion.
-4. `bin/vawe dev <page> --from s --to s` on the hardest 2 to 4 seconds first.
+4. Check frames with `bin/vawe compare --page <page> --ref <ref.mp4> --at s,s,s` (about 4 s for 4 frames).
+   Never render a whole range to look at a few frames. `bin/vawe dev <page> --from s --to s` is for motion.
+   A recreation is done when `bin/vawe coverage <film.mp4> --ref <ref.mp4>` exits 0.
 5. Hand the draft to a fresh session: `vawe-critique`.
 
 ## The ten mistakes a first draft makes
