@@ -1,0 +1,7 @@
+<!-- The canonical vawe wave. ONE path, shared by the site header, the favicon and the video, so the
+     mark stops drifting (there were two different curves and three accent colours: lime, cobalt,
+     ice-blue). stroke=currentColor so the surface decides: cobalt on white, white on cobalt/ink.
+     pathLength is stamped at build time by splitText(el,'path') for the `draw` preset. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 24" fill="none">
+  <path d="M1 12 Q7 1 12 12 T23 12 T34 12 T46 4" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

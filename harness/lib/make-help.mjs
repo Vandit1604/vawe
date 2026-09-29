@@ -5,23 +5,19 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 export const PHASES = [
-  ['preflight', 'the decisions that belong BEFORE the JSON'],
-  ['dev', 'the iteration loop: author and look at a scene'],
-  ['check', 'gate a scene, zero or blocking consequence'],
+  ['dev', 'the iteration loop: author a page film and look at it'],
+  ['check', 'gate a page film or the repo'],
   ['ship', 'render for real'],
   ['judge', 'the eye, mandatory post-render'],
-  ['ledger', 'cross-video memory: has this look shipped before'],
-  ['study', 'reference material and the film-history record'],
-  ['engine', 'the render engine and its vocabulary, not one film'],
-  ['site', 'what vawe.dev publishes'],
+  ['study', 'reference material: measure a reference, capture a brand'],
+  ['engine', 'the render engine and its asset bakers, not one film'],
   ['maintenance', "the repo's own health, not any one film"],
 ];
 const PHASE_NAMES = new Set(PHASES.map(([p]) => p));
 
-// `make help`'s fast path only, brief to rendered film, the stage table's own order (AGENTS.md "THE EIGHT STAGES"); `make list` still prints all 200+, this is the twelve an agent needs first.
+// `make help`'s fast path: a page film from reference to shipped mp4, in order.
 export const FAST_PATH = [
-  'stage', 'next', 'quiz', 'ideate', 'spec', 'studio', 'preview', 'dev',
-  'probe-frame', 'check', 'ship', 'judge', 'arsenal', 'regen',
+  'spec', 'studio', 'dev', 'next', 'critique', 'judge', 'ship', 'study', 'kit', 'check', 'e2e',
 ];
 
 const TARGET_RE = /^([A-Za-z][A-Za-z0-9_.-]*)\s*:(?!=)(.*)$/;
@@ -44,15 +40,15 @@ export function collectTargets(makefilePath = path.join(repoRoot, 'Makefile')) {
   return targets;
 }
 
-// Every phase named on a target must be one of the ten declared above: a typo'd phase is as silent a failure as no phase at all, and would otherwise just print under its own heading forever.
+// Every phase named on a target must be one of those declared above: a typo'd phase is as silent a failure as no phase at all, and would otherwise just print under its own heading forever.
 export function untagged(targets = collectTargets()) {
   return targets.filter((t) => !t.phase || !PHASE_NAMES.has(t.phase));
 }
 
 export function printFast(targets = collectTargets()) {
   const byName = new Map(targets.map((t) => [t.name, t]));
-  console.log('\n  make <target> [ARGS...]  ·  the fast path, brief to rendered film:\n');
-  console.log('  first preview of a brand-new name, no plan yet? make dev D=<file> DRAFT=1\n');
+  console.log('\n  make <target> [ARGS...]  ·  the fast path, reference to rendered film:\n');
+  console.log('  a film is one page: films/<name>/page.html. Every render target takes PAGE=<page.html>.\n');
   for (const name of FAST_PATH) {
     const t = byName.get(name);
     console.log(`    ${name.padEnd(14)} ${t ? (t.help || '') : '(missing from Makefile)'}`);

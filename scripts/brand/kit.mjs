@@ -6,8 +6,7 @@
 //
 //   node scripts/brand/kit.mjs <url> <name>            ·  make kit URL=https://linear.app NAME=linear
 //   node scripts/brand/kit.mjs <url> <name> --init      ·  make kit URL=... NAME=... INIT=1
-//     --init also runs `make doctor` and writes the stage-1 brief skeleton (films/scene/<name>.brief.md),
-//     so one command takes a fresh film from nothing to "answer the quiz next" (AGENTS.md stage 1).
+//     --init also checks the checkout is ready to render (make doctor) before spending a capture.
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -73,31 +72,4 @@ fs.writeFileSync(path.join(dir, 'kit.json'), JSON.stringify(kit, null, 2) + '\n'
 console.log(`\n✓ kit → ${path.relative(ROOT, dir)}/kit.json`);
 console.log(`  ${kit.sections.count} sections · ${p.light ? 'LIGHT' : 'DARK'}-first · bg ${p.bg} · text ${p.text} · accents ${p.accents.join(' ')}${favicon ? ` · favicon ${favicon}` : ''}`);
 
-if (init) {
-  // Stage 1 brief skeleton (AGENTS.md "brief"): the five lines a person still owes, not the storyboard
-  // itself (`make quiz`/`make dev-tool X=quiz-apply` write that, from real answers, not a guess).
-  const briefPath = path.join(ROOT, 'films/scene', `${name}.brief.md`);
-  fs.mkdirSync(path.dirname(briefPath), { recursive: true });
-  const brief = [
-    `# Brief: ${name}`,
-    '',
-    `Captured from ${url} (assets/brands/${name}/kit.json). The five lines below are what \`make quiz\``,
-    'still needs answered; nothing here is invented.',
-    '',
-    '```',
-    'SUBJECT   <fill: the product or moment this film is about>',
-    'DATA      <fill: any real number/claim this film can back, or "none needed">',
-    'PAYOFF    <fill: the one thing the viewer takes away>',
-    'AUDIENCE  <fill: who this is for, role and context>',
-    'FEELING   <fill: three words for the register>',
-    '```',
-    '',
-    `next: make quiz NAME=${name} URL=${url}`,
-    '',
-  ].join('\n');
-  fs.writeFileSync(briefPath, brief);
-  console.log(`\n✓ brief skeleton → ${path.relative(ROOT, briefPath)}`);
-  console.log(`\nnext: make quiz NAME=${name} URL=${url}`);
-} else {
-  console.log('  → author themes/<name>.json from these, then CONFIRM with make dev-tool X=beats VS=<name>.');
-}
+console.log(`  next: write films/${name}/page.html with these colours and fonts, then make dev PAGE=films/${name}/page.html`);

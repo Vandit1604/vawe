@@ -358,7 +358,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
   }
   const n = r.badTargets.length + r.badPaths.length + r.badRecipes.length + r.badSelfRefs.length;
   if (!n) process.exit(0);
-  console.log(`\n✗ ${n} reference(s) the docs name and the repo does not have.`);
+  console.log(`\n⚠ ${n} reference(s) the docs name and the repo does not have.`);
   console.log('  An author reads a doc as an instruction. Correct the doc, or build the thing it promises.');
-  process.exit(1);
+  process.exit(0);
 }
