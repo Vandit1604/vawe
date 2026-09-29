@@ -1,0 +1,27 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="4">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#f1f1ee;overflow:hidden}
+.l{position:absolute;left:0;width:100vw;text-align:center;font:800 12vh Helvetica,Arial,sans-serif;color:#1d3557;white-space:nowrap}
+.l span{display:inline-block;margin:0 0.6vw;opacity:0}
+#l1{top:20vh}#l2{top:56vh}
+</style>
+</head><body>
+<div class="l" id="l1"></div><div class="l" id="l2"></div>
+<script>
+// truth (font 12vh = 130 px at 1080): every word blurs in (blur 14 px to 0, opacity 0 to 1) over 0.3 s.
+// line 1 "Motion follows meaning", left-to-right, first word 0.40 s, 0.10 s between words.
+// line 2 "Good timing reads", left-to-right, first word 1.60 s, 0.30 s between words.
+const rows = [['l1', ['Motion', 'follows', 'meaning'], (i) => 0.4 + 0.1 * i],
+  ['l2', ['Good', 'timing', 'reads'], (i) => 1.6 + 0.3 * i]];
+for (const [id, words, at] of rows) {
+  const el = document.getElementById(id);
+  words.forEach((w, i) => {
+    const s = document.createElement('span');
+    s.textContent = w;
+    el.appendChild(s);
+    s.animate([{ opacity: 0, filter: 'blur(14px)' }, { opacity: 1, filter: 'blur(0px)' }],
+      { delay: at(i) * 1000, duration: 300, easing: 'ease-out', fill: 'both' });
+  });
+}
+</script></body></html>

@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="2.4">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#101820;overflow:hidden}
+#b{position:absolute;left:10vw;top:38vh;width:14vw;height:24vh;background:#ffd400}</style>
+</head><body><div id="b"></div>
+<script>
+// truth: translateX 0 -> 50vw, start 0.5 s, end 1.2 s, cubic-bezier(0.2, 0.8, 0.2, 1), and a blur of 12 px that
+// falls to 0 with the same easing: the box is wider than 14vw while it moves and exactly 14vw at rest.
+document.getElementById('b').animate([{ transform: 'translateX(0)', filter: 'blur(12px)' }, { transform: 'translateX(50vw)', filter: 'blur(0px)' }],
+  { delay: 500, duration: 700, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', fill: 'both' });
+</script></body></html>
