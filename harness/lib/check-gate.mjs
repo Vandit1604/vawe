@@ -60,6 +60,6 @@ export function run(name) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const name = process.argv[2];
-  if (!name) { console.error('usage: node harness/lib/check-gate.mjs <gate-name>   ·   make check GATE=<name>'); process.exit(2); }
+  if (!name) { console.error(`usage: make check GATE=<name>. Known gates:\n  ${Object.keys(GATES).sort().join(' ')}`); process.exit(2); }
   process.exit(run(name));
 }
