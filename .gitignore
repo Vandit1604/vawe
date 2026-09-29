@@ -339,3 +339,6 @@ assets/higgsfield/
 assets/edit-montage/
 
 /.git-scene-check-base/
+
+# recreations of the owner's in-house references (their text, audio and look): private, never committed
+films/recreations/
