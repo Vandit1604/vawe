@@ -4,7 +4,10 @@
 // sheet and writes the rubric (the brand house-style + the craft rubric (11 dimensions + 2 checks) + a verdict template). The
 // AGENT then reads /tmp/judge/sheet.png against /tmp/judge/rubric.md and returns a PASS/FIX verdict.
 //
-// Usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]   ·   make judge D=<file> [VS=<brand>]
+// Usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>] [--no-measure]
+//        make judge D=<file> [VS=<brand>] [REF=<ref.mp4>]
+// A page film (films/<name>/page.html) is judged from its render in out/. A reference (--ref, or the page's
+// reference.json) makes the sheet frame-locked pairs: reference left, film right.
 import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
@@ -12,7 +15,9 @@ import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { beatsOf, evenSamples } from './beats-of.mjs';
-import { frameTile, tileGrid, tileBox, baseOf, renderOf, gradeable } from './tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable } from './tile.mjs';
+import { readPageMeta } from '../../harness/media/render-page.mjs';
+import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { craftRubric, structuredRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 import { appendRun } from '../../harness/lib/runlog.mjs';
@@ -73,16 +78,19 @@ if (compareIdx >= 0) {
 
 const inp = process.argv[2];
 if (!inp) {
-  console.error('usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]');
-  f.fail('judge-usage', 'usage: node quality/gates/judge.mjs <scene.json|mp4> [--vs <brand>]');
+  console.error('usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>]');
+  f.fail('judge-usage', 'usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>]');
   process.exit(2);
 }
 
 // resolve the rendered mp4 (from a scene JSON → out/<name>.mp4, or a direct mp4) + the scene for beats.
 let mp4 = inp, scene = null;
+const isPage = inp.endsWith('.html');
 if (inp.endsWith('.json')) {
   scene = JSON.parse(fs.readFileSync(inp, 'utf8'));
   mp4 = renderOf(inp);
+} else if (isPage) {
+  mp4 = pageRenderOf(inp);
 }
 // A STALE RENDER IS THE ANSWER TO THE PREVIOUS QUESTION, and it grades clean. `gradeable` asks both
 // halves: is there a video, and was it made after the film was last edited.
@@ -92,6 +100,9 @@ if (!ready.ok) {
   f.fail('judge-not-ready', ready.why, { fix: ready.fix });
   process.exit(1);
 }
+const declaredRef = isPage ? referenceFor(inp) : null;
+const ref = arg('--ref', null) || (declaredRef ? path.resolve(repoRoot, declaredRef) : null);
+if (ref && !fs.existsSync(ref)) { console.error(`✗ no such reference: ${ref}`); process.exit(2); }
 const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');
 
 // RECORD THE VERDICT (taste loop, phase 1+4). The prep run below produces the sheet and writes a
@@ -250,7 +261,11 @@ if (verdictJsonArg) {
     }
   }
   const stage = `judge-struct-${String(run).replace(/[^A-Za-z0-9_-]/g, '')}`;
-  writeReceipt(stage, inp, { run, verdict: v, overall, criteria: payload.criteria, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
+  const fixes = Array.isArray(payload.fixes) ? payload.fixes.slice(0, 5) : [];
+  if (v === 'FIX' && !fixes.some((x) => x && x.fix)) {
+    console.error('  note: a FIX verdict should carry "fixes": each with shot, frame, wrong, why and the exact fix. None recorded.');
+  }
+  writeReceipt(stage, inp, { run, verdict: v, overall, criteria: payload.criteria, fixes, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
   appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, overall, file: verdictJsonArg } });
   console.log(`  ✓ structured verdict recorded: run ${run}, ${v}, overall ${overall}/10. Every criterion carries evidence.`);
   process.exit(0);
@@ -264,15 +279,29 @@ const { tw: TW, th: TH } = tileBox(landscape);
 // KEY frames: the film's own storyboard beat table when it has one (harness/author/storyboard-parse.mjs),
 // else the layer-start clustering fallback (beats-of.mjs). `inp` is the scene JSON path when `scene` is
 // set, so the storyboard beside it (`<file>.storyboard.md`) is checked first.
-const mids = scene ? beatsOf(scene, dur, inp) : evenSamples(dur);
+// A page has no beat table: eight even samples, plus the moment of its declared spectacle.
+const pageSamples = () => {
+  const s = Number(readPageMeta(inp, 'spectacle'));
+  const even = evenSamples(dur, 8);
+  return Number.isFinite(s) ? [...even, { i: even.length, start: s, t: s + 0.2, label: 'spectacle' }].sort((a, b) => a.t - b.t) : even;
+};
+const mids = scene ? beatsOf(scene, dur, inp) : isPage ? pageSamples() : evenSamples(dur);
 
 // Per-scene directory. It used to be a bare /tmp/judge wiped on every run, so judging a second film
 // destroyed the first, which makes comparing two cuts, the entire point of a judging campaign, impossible.
 const dir = path.join('/tmp/judge', baseOf(mp4));
 fs.rmSync(dir, { recursive: true, force: true }); fs.mkdirSync(dir, { recursive: true });
-const tiles = mids.map((m, i) => frameTile(mp4, m.t, path.join(dir, `f${String(i).padStart(2, '0')}.png`),
-  { tw: TW, th: TH, label: m.label }));
-tileGrid(tiles, { cols: landscape ? 2 : 3, tw: TW, th: TH, out: `${dir}/sheet.png` });
+const fps = (() => { const [n, d] = execFileSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=avg_frame_rate', '-of', 'csv=p=0', mp4]).toString().trim().split('/').map(Number); return n / (d || 1) || 30; })();
+const refDur = ref ? parseFloat(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nk=1:nw=1', ref]).toString().trim()) : 0;
+const tileAt = (m, i) => {
+  const id = String(i).padStart(2, '0');
+  const label = `${m.label} f${Math.round(m.t * fps)}`;
+  const film = frameTile(mp4, m.t, path.join(dir, `f${id}.png`), { tw: TW, th: TH, label: ref ? `FILM ${label}` : label });
+  if (!ref) return [film];
+  return [frameTile(ref, Math.min(m.t, refDur - 0.05), path.join(dir, `r${id}.png`), { tw: TW, th: TH, label: `REF ${label}` }), film];
+};
+const tiles = mids.flatMap(tileAt);
+tileGrid(tiles, { cols: landscape ? 2 : (ref ? 4 : 3), tw: TW, th: TH, out: `${dir}/sheet.png` });
 
 // MEASURED FINDINGS, HANDED TO THE EYE. quality/audit.mjs measures 18 kinds of pixel defect (overlap,
 // clipped text, off-frame, low contrast, ...) against these SAME rendered frames, and
@@ -288,12 +317,14 @@ const runFindings = (script, args) => {
     { encoding: 'utf8', env: { ...process.env, VAWE_FINDINGS_OUT: out } });
   return readFindings(out) || [];
 };
-const measured = scene
-  ? [...runFindings('quality/audit.mjs', [inp]), ...runFindings('quality/gates/sweep-static.mjs', [inp])]
-  : [];
+const measuredBy = isPage ? 'quality/gates/page-check.mjs' : 'quality/audit.mjs + sweep-static.mjs';
+let measured = [];
+if (scene) measured = [...runFindings('quality/audit.mjs', [inp]), ...runFindings('quality/gates/sweep-static.mjs', [inp])];
+else if (isPage && !process.argv.includes('--no-measure')) measured = runFindings('quality/gates/page-check.mjs', [inp, ...(ref ? ['--ref', ref] : [])]);
 
 fs.writeFileSync(`${dir}/rubric.md`, craftRubric({
   name: path.basename(mp4), frames: tiles.length, landscape, brand, dir, findings: measured,
+  reference: ref && path.relative(repoRoot, ref), measuredSource: measuredBy,
 }));
 
 // --struct: also write a STRUCTURED rubric per independent run (--runs A,B by default), whose
@@ -307,6 +338,7 @@ if (process.argv.includes('--struct')) {
     const outFile = `${dir}/verdicts/${run}.json`;
     fs.writeFileSync(`${dir}/structured-${run}.md`, structuredRubric({
       name: path.basename(mp4), subject: inp, frames: tiles.length, landscape, dir, run, outFile,
+      reference: ref && path.relative(repoRoot, ref),
     }));
   }
   console.log(`  → structured: ${runs.map((r) => `${dir}/structured-${r}.md`).join(', ')} `
@@ -316,7 +348,8 @@ if (process.argv.includes('--struct')) {
 console.log(`\n  judge · ${path.basename(mp4)} · ${tiles.length} key frames · brand: ${brand || '(none)'}`);
 console.log(`  → sheet:  ${dir}/sheet.png`);
 console.log(`  → rubric: ${dir}/rubric.md  (house-style + 11 craft dimensions + 2 checks + verdict template)`);
-console.log(`  → measured: ${measured.length} finding(s) from audit.mjs + sweep-static.mjs, folded into the rubric`);
+console.log(`  → measured: ${measured.length} finding(s) from ${measuredBy}, folded into the rubric`);
+if (ref) console.log(`  → reference: ${ref}, tiles are frame-locked pairs (REF left, FILM right)`);
 console.log(`\n  AGENT: Read ${dir}/sheet.png AGAINST the rubric, score each frame per dimension, return PASS/FIX + fixes.`);
 // Same contract as the beats receipt: producing the sheet for THIS scene content is the checkable
 // proxy for having looked at it. Editing the scene withdraws it, which is the whole point. renderHash

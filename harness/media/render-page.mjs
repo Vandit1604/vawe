@@ -45,6 +45,7 @@ import { RENDER_ARGS } from '../lib/render-harness.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, sceneDims } from '../../core/layout/safe.js';
+import { appendRun } from '../lib/runlog.mjs';
 import { openPreview } from './preview-server.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
@@ -85,7 +86,7 @@ export function readPageMeta(pagePath, name) {
   return null;
 }
 
-async function openPage(pagePath, frame) {
+export async function openPage(pagePath, frame) {
   const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS });
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageSeek = ${seekTo};`);
   return opened;
@@ -93,14 +94,14 @@ async function openPage(pagePath, frame) {
 
 // The seek itself is core/engine/page-seek.js seekTo, installed as window.__pageSeek so the studio runs the
 // same code. Here it is followed by settle(), which only a screenshot needs.
-async function seekAll(page, ms) {
+export async function seekAll(page, ms) {
   await page.evaluate((t) => window.__pageSeek(t / 1000), ms);
   await settle(page);
 }
 
 // A screenshot must never catch a half-painted frame: fonts loaded, images decoded, and two real paints
 // after the seek. The real rAF is raced against a real timer because a background tab can starve rAF.
-async function settle(page) {
+export async function settle(page) {
   await page.evaluate(async () => {
     const real = window.__pageClock ? window.__pageClock.real : { raf: requestAnimationFrame.bind(window), setTimeout: setTimeout.bind(window), clearTimeout: clearTimeout.bind(window) };
     const paint = () => new Promise((resolve) => {
@@ -367,6 +368,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const mixed = wantAudio && await muxPageAudio(page, pagePath, { video: tmpOut, out: outPath, duration: dur, explicit: opts.audio === true });
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
+    appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
     return { frames, subframes: totalSub, captureMs, encodeMs, dur, audio: Boolean(mixed) };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -392,7 +394,7 @@ export function assertFinalReady(pagePath) {
     + `"_why":{"${code}":"…"}}</script> in the page.`);
 }
 
-function defaultOut(pagePath, { aspect, suffixAspect, final }) {
+export function defaultOut(pagePath, { aspect, suffixAspect, final }) {
   const abs = path.resolve(pagePath);
   const base = path.basename(abs, '.html');
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;

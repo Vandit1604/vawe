@@ -11,10 +11,16 @@ function gitInfo() {
   } catch { return { git: null, dirty: false }; }
 }
 
-/** out/<film-basename>.runs.jsonl for a scene path or bare film name. */
+/** A film's key: its file name, or its folder name for a page (films/<name>/page.html). */
+export function filmKeyOf(film) {
+  const name = path.basename(String(film));
+  if (name === 'page.html') return path.basename(path.dirname(path.resolve(String(film))));
+  return name.replace(/\.json$/, '');
+}
+
+/** out/<film-key>.runs.jsonl for a scene path, a page path or a bare film name. */
 export function runsPathFor(film) {
-  const base = path.basename(String(film)).replace(/\.json$/, '');
-  return path.join('out', `${base}.runs.jsonl`);
+  return path.join('out', `${filmKeyOf(film)}.runs.jsonl`);
 }
 
 /** appendRun(film, record): write one JSON line. Missing fields default to their empty shape. */

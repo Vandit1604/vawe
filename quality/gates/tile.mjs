@@ -35,6 +35,31 @@ export function frameTile(src, t, out, { tw, th, label } = {}) {
 export function tileGrid(tiles, { cols = 3, tw, th, gap = 2, out }) {
   if (!tiles.length) throw new Error('tileGrid: no tiles');
   const W = tw + gap * 2, H = th + gap * 2;
+  const rowsN = Math.ceil(tiles.length / cols);
+  // One xstack over 30+ inputs desaturates its second half (quality/refs/kinetic-promo/friction.jsonl),
+  // so each row is stacked alone and the rows are joined with vstack.
+  if (rowsN === 1 || tiles.length <= 12) return stackOnce(tiles, { cols, tw, th, gap, out });
+  const dir = fs.mkdtempSync(path.join(path.dirname(path.resolve(out)), '.rows-'));
+  try {
+    const rowFiles = [];
+    for (let r = 0; r < rowsN; r++) {
+      const row = path.join(dir, `row${r}.png`);
+      stackOnce(tiles.slice(r * cols, (r + 1) * cols), { cols, tw, th, gap, out: row });
+      rowFiles.push(row);
+    }
+    const rowW = cols * W;
+    const padded = rowFiles.map((_, i) => `[${i}:v]pad=${rowW}:${H}:0:0:white[r${i}]`).join(';');
+    const chain = rowFiles.map((_, i) => `[r${i}]`).join('');
+    const filter = rowFiles.length === 1 ? `${padded};[r0]null` : `${padded};${chain}vstack=inputs=${rowFiles.length}`;
+    ff(['-y', ...rowFiles.flatMap((f) => ['-i', f]), '-filter_complex', filter, out]);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  return out;
+}
+
+function stackOnce(tiles, { cols, tw, th, gap, out }) {
+  const W = tw + gap * 2, H = th + gap * 2;
   const pads = tiles.map((_, i) => `[${i}:v]pad=${W}:${H}:${gap}:${gap}:white[p${i}]`).join(';');
   const chain = tiles.map((_, i) => `[p${i}]`).join('');
   const filter = tiles.length === 1
@@ -52,13 +77,15 @@ export function tileGrid(tiles, { cols = 3, tw, th, gap = 2, out }) {
 // with the span's length, not with the sample count.
 export function sampleFrames(video, span, outPrefix, size = {}) {
   const { t0, len, n } = span;
-  const { tw, th } = size;
+  const { tw, th, stamp } = size;
   fs.mkdirSync(path.dirname(outPrefix), { recursive: true });
   const dur = Math.max(0.05, len);
   const fps = n / dur;
-  const vf = tw && th
+  let vf = tw && th
     ? `fps=${fps},scale=${tw}:${th}:force_original_aspect_ratio=decrease,pad=${tw}:${th}:(ow-iw)/2:(oh-ih)/2:white`
     : `fps=${fps}`;
+  // `stamp` is a drawtext expansion such as `f%{eif\:n+12\:d}`, burned into every extracted frame.
+  if (stamp) vf += `,drawtext=text='${stamp}':x=6:y=6:fontsize=${Math.max(14, Math.round((tw || 360) / 20))}:fontcolor=black:box=1:boxcolor=white@0.85:boxborderw=4`;
   ff(['-y', '-ss', Number(t0).toFixed(3), '-t', dur.toFixed(3), '-i', video, '-vf', vf, '-frames:v', String(n), `${outPrefix}_%04d.png`]);
   return Array.from({ length: n }, (_, i) => `${outPrefix}_${String(i + 1).padStart(4, '0')}.png`)
     .filter((f) => fs.existsSync(f));
@@ -125,6 +152,17 @@ export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 export const renderOf = (scenePath) =>
   path.join('out', `${path.basename(scenePath).replace(/\.(expanded\.)?json$/, '')}.mp4`);
 
+// pageRenderOf(pageHtml) -> the mp4 render-page.mjs writes for a page: the final render when it is
+// newer than the draft, else the draft (harness/media/render-page.mjs defaultOut names both).
+export const pageRenderOf = (pagePath) => {
+  const abs = path.resolve(pagePath);
+  const base = path.basename(abs, '.html');
+  const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
+  const final = path.join('out', `${name}.mp4`), draft = path.join('out', `${name}-draft.mp4`);
+  const mtime = (p) => (fs.existsSync(p) ? fs.statSync(p).mtimeMs : -1);
+  return mtime(final) >= mtime(draft) ? final : draft;
+};
+
 // EXISTS IS NOT FRESH, and the comment above stops one step short of its own lesson. Resolving the
 // right NAME was half the bug: the other half is that `out/x.mp4` can be the right name for a film the
 // author has since rewritten, and every consumer of this path checks only `existsSync`. So an author
@@ -148,13 +186,14 @@ const ago = (ms) => {
 };
 
 export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
-  if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix: `make video D=${scenePath}` };
-  if (!scenePath.endsWith('.json')) return { ok: true, mp4 };
+  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `make video D=${scenePath}`;
+  if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix };
+  if (!/\.(json|html)$/.test(scenePath)) return { ok: true, mp4 };
   const src = fs.statSync(scenePath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
   if (src > out) {
     return { ok: false, mp4,
       why: `${mp4} is ${ago(src - out)} older than ${scenePath}. It is a render of a film you have since edited`,
-      fix: `make video D=${scenePath}` };
+      fix };
   }
   return { ok: true, mp4 };
 }

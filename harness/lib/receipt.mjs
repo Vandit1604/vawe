@@ -2,13 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { filmKeyOf } from './runlog.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 const LEGACY = { beats: path.join(ROOT, 'quality', 'runs', 'beats-seen') };
 export const dirFor = (stage) => LEGACY[stage] || path.join(ROOT, 'quality', 'baselines', 'approved', stage);
 
-const keyOf = (subject) => path.basename(subject).replace(/\.(json|md|markdown)$/i, '');
+const keyOf = (subject) => filmKeyOf(subject).replace(/\.(md|markdown)$/i, '');
 export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf(subject)}.json`);
 
 /** The `.html` fragment paths a scene JSON names (`{"type":"html","src":…}` layers, any depth, plus
