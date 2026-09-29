@@ -18,6 +18,8 @@ import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../cor
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
 import { findTransitions } from '../lib/ref-measure/transition.mjs';
+import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
+import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 
 const GRID_W = 320;
 const DIFF_THR = 6;
@@ -288,6 +290,7 @@ function analyseTrack(track, V, fps, sc, cameraStill) {
     from: [r1(pts[0].x * sc), r1(pts[0].y * sc)], to: [r1(pts[pts.length - 1].x * sc), r1(pts[pts.length - 1].y * sc)],
     size: [r1(median(pts.map((p) => p.w)) * sc), r1(median(pts.map((p) => p.h)) * sc)], peakSpeed: r1(peak), overshoot: null, fit: null };
   Object.assign(out, summariseMove(pos, p0, p1, fps, sc, { f0: pts[0].f }));
+  out.shutter = refined ? estimateShutter(V, pts, axis) : null;
   const last = pts[pts.length - 1];
   out.color = modalColor(V, last.f, last.x, last.y, last.w, last.h);
   const travel = Math.abs(D) * sc;
@@ -365,6 +368,7 @@ function analyseAudio(video, dir, fps, dur) {
     const t = (i * hop + win / 2) / sampleRate;
     if (isMax && (!hits.length || t - hits[hits.length - 1].t >= 0.06)) hits.push({ t: r3(t), frame: Math.round(t * fps), strength: r3(env[i] / max) });
   }
+  attackTimes(mono, sampleRate, hits.map((h) => h.t)).forEach((a, i) => Object.assign(hits[i], { attack: r3(a.attack), attackFrame: r1(a.attack * fps), errMs: a.errMs }));
   const tempo = estimateTempo(env, hopSeconds), phase = estimatePhase(env, tempo.periodFrames);
   const beats = beatGrid(tempo.periodFrames, phase, hopSeconds, dur);
   return { hits, bpm: r1(tempo.bpm), confidence: r1(tempo.confidence), framesPerBeat: tempo.bpm ? r1((60 / tempo.bpm) * fps) : 0, beats,
