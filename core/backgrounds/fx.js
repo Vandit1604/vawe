@@ -79,6 +79,14 @@ export function particles(ctx, w, h, t, o = {}) {
   for (const p of pos) { ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(${color},${p.a})`; ctx.fill(); }
 }
 
+// The bare "r,g,b" triplet aurora/liquid/softwash blobs store their colour as, ahead of the actual
+// CSS grammar parseColor reads: exported so core/validate/backgrounds.mjs can grade a `color`/`blobs[].color`
+// value at VALIDATE time by the same rule this file converts it by, rather than a second regex.
+export const isColorLike = (input) => {
+  const s = String(input ?? '').trim();
+  return /^\d+\s*,\s*\d+\s*,\s*\d+$/.test(s) || !!parseColor(s);
+};
+
 // aurora's blobs land inside a bare `rgba(${color},a)` template, so `color` must already be an
 // "r,g,b" string; a hex value there used to reach canvas addColorStop as `rgba(#3b82f6,a)` and throw.
 // This accepts any colour parseColor reads (hex, rgb()/rgba()) and converts it, logging the swap so
