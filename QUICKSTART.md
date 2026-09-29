@@ -1,56 +1,78 @@
 ---
-when: you have never authored a video here and want the model and the loop in one page
-answers: the JSON and HTML split, the build-render-ship loop, and the hard rules for day one
+when: you have never authored a film here and want the model and the loop in one page
+answers: the page contract in one example, the draft-critique-final loop, and the hard rules for day one
 group: process
 ---
 
 # Quickstart
 
-Vawe turns one self-describing JSON file into one rendered mp4 video. Feed it a scene, it
-renders the video. No templates, no UI: you write the JSON, the engine draws it.
+vawe turns one HTML page into one rendered mp4. You write the page; the renderer seeks it frame by
+frame and mixes its audio offline. No templates, no UI, no private format.
 
 ## The model, in two sentences
 
-The JSON owns everything that changes over time: layout, timing, motion, cuts, camera,
-composition, audio. An `html` layer owns the look of one bespoke picture, and its markup
-belongs in its own `.html` file referenced by `src`, not typed inline in the JSON, once it
-is long enough to want reading or diffing. That split is the default authoring shape: pick
-the JSON for structure, pick HTML for a hand-drawn look.
+A film is `films/<name>/page.html` plus its own `assets/` folder, and time is the seek: CSS
+`@keyframes` and `element.animate()` are paused and driven, or `window.seek(t)` paints frame t as
+a pure function of t. `<meta name="duration">` sets the length; everything else is web platform.
 
-## Before you write any JSON
+## Before you write the page
 
-Read `AGENTS.md` at the repo root first. It holds the full rules and the
-skill router. (`CLAUDE.md` is a shim that loads it, so Claude Code picks it up automatically.) If you are about to make a video from a brief, load the `vawe-video-planning`
-skill before you open a file: lock the plan, then author. Do not try ideas inside the JSON.
+Read `AGENTS.md` first: the contract, the loop, and the motion rules that are not your defaults.
+Then pick the film type in `engine-doctrine/CRAFT/ROUTING.md` and copy its `prompts/` template.
+Every template stops before code at least once (a beat table, a facts list or a SPEC); honour the
+stop. If your tool loads skills, load `vawe-page` before the first line.
+
+## Your first page
+
+```html
+<!doctype html>
+<meta name="duration" content="5">
+<meta name="message" content="hello, film">
+<style>
+  body { margin: 0; background: #f4f6fb; color: #0b0d12; font: 700 calc(var(--vh) * 0.1) system-ui; }
+  h1 { position: absolute; left: 8%; top: 42%; margin: 0;
+       animation: in 0.5s cubic-bezier(.2,.9,.2,1) 0.3s both, out 0.25s ease-in 4.4s both; }
+  @keyframes in  { from { transform: translateY(0.6em); opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes out { to { transform: translateY(-0.4em); opacity: 0 } }
+</style>
+<h1>hello, film</h1>
+<audio data-synth="pluck" data-at="0.3" data-gain="-6"></audio>
+```
+
+Note the shape the rules ask for: the entrance is a move, not only a fade; the exit is shorter than
+the entrance; the text holds still long enough to read; the cue lands with the move.
 
 ## The loop
 
 ```bash
-make list                        # show the scene module + its schema and sample file
-make dev D=path/to/video.json    # build, draft-render, and open the video. No gates.
-make check D=path/to/video.json  # run every gate. Report findings. Block nothing.
-make ship D=path/to/video.json   # the real ladder: check, render, audit, seams.
+make dev      PAGE=films/hello/page.html              # draft: half size, 30 fps, silent
+make dev      PAGE=films/hello/page.html FROM=2 TO=4  # only the seconds you are working on
+make critique PAGE=films/hello/page.html              # in a FRESH session: sheet, strip, phone, loop
+make ship     PAGE=films/hello/page.html ASPECT=all   # final: 60 fps, blur, audio, every aspect
 ```
 
-Every video JSON starts with `"module": "scene"` and lives at `films/scene/<topic>.json`.
-Read `films/scene/sample.json` and one shipped video first, as references, never as a
-structure to copy. Compose your own layers from the vocabulary in `engine-doctrine/PRIMITIVES.md`.
+Draft the hardest two to four seconds first. Hand the draft to a session that did not write it
+(`vawe-critique`); it rejects by default and names shot, frame and fix. Fix the top five, re-render
+only those seconds, critique again. A PASS is written by the critic, never by you.
+
+Matching a reference: `make spec REF=<mp4>` writes SPEC.md, mark every line KEEP or CHANGE, rebuild,
+then `make next PAGE= REF=` until it passes (`vawe-reference`).
 
 ## Hard rules for day one
 
-- `bg` is required, and it must move. A still backdrop is a choice you must be able to defend.
-- Black means `{"preset": "black"}`. That is `#000000`, not a dark tint.
-- No em-dashes in on-screen text. Use a comma, a period, or `·`.
-- The first-frame hook is 12 words or fewer, and it does not spoil the payoff.
-- Prefer a real captured asset (`make media X=assets`, `make media X=capture`) over an emoji or a stock image.
-- Hand-key the motion you want. Do not just name a preset: write the track
-  (`make arsenal SHAPE=pan|blast|drift|enter|exit` gives you a starting shape).
-- Name the effect before you build it. Search `make arsenal Q="what you mean, in plain
-  English"` before you invent a technique by hand.
+- No live clock, no state between frames, no unseeded random. Frame 400 never needs frame 399.
+- Lay out with `--vw`/`--vh` and `[data-aspect]`, never fixed pixels for one aspect.
+- Bundle fonts in `assets/`; never load one from the network.
+- No em dash on screen. The first-frame hook is 12 words or fewer.
+- Exits faster than entrances. Arrive fast, land soft. One entrance per beat, not a fade on all.
+- Text holds `words x 0.6 s`, floor 1.2 s. Add a hold; never slow the move.
+- A rule broken on purpose is declared in the page with a `_why` (`AGENTS.md`, Waivers).
+- Search before you build: `make arsenal Q="what you mean, in plain English"`.
 
 ## Where to go next
 
-- `AGENTS.md`, the full doctrine and the skill router.
-- `engine-doctrine/PRIMITIVES.md`, the layer and effect vocabulary.
-- `engine-doctrine/TASTE.md`, the quality system: house style, composition, motion, story spine.
-- `engine-doctrine/CRAFT/`, deep dives on one topic each (HTML fragments, sound, film structure, and more).
+- `AGENTS.md`: the house rules.
+- `skills/vawe-page/SKILL.md`: the contract and the ten mistakes a first draft makes.
+- `core/motion/README.md`: springs, keyframe tables, seeded noise.
+- `prompts/README.md`: one template per film type; `engine-doctrine/CRAFT/ROUTING.md` picks it.
+- `engine-doctrine/RULES/`: readable-hold, speed-bands, banned-defaults.
