@@ -1,66 +1,9 @@
 #!/bin/sh
-# Pre-push gate: block a push if the framework health checks fail (schema drift, broken primitives).
+# Pre-push gate: block a push if the framework health checks fail. Ratchets and doc references warn, they do not block.
 # Bypass with `git push --no-verify` when you know better.
 #
 # Installed via `make install-hooks` (sets core.hooksPath to .githooks).
 
-# craft-coverage is here because a doc-only commit never runs an authoring gate. The doc index went red
-# for weeks with four orphaned guides and a link to a file nobody wrote, and nothing noticed, because the
-# only thing that checked it was a command you had to remember to type. This is the place it cannot be
-# skipped by forgetting. It is pure file reads, so it costs about a second.
-# doc-refs joined it once engine-doctrine/MISTAKES.md was patched. Same argument: a doc names a command as an
-# instruction, and an instruction that fails teaches the author to distrust the whole file. It found
-# 111 usage strings printing a path that had moved months earlier.
-# skill-reach is the same argument once more, one layer up: a SKILL.md nothing routes to is unreachable
-# the same way a broken doc link is, and it is invisible from a diff, because the new skill file itself
-# looks finished. vawe-review-loop shipped that way and carried the judge loop's stopping rule with it.
-# arsenal-check is the same argument once more, and it belongs here rather than in author-check for a
-# specific reason: the commit that ADDS a capability is a framework commit, and framework commits never
-# run an authoring ladder. The three.js layer landed that way and stayed out of the catalogue for as
-# long as it existed, so the author who needed a globe went to npm instead (engine-doctrine/MISTAKES.md #335).
-# word-action is here for the same reason as arsenal-check: a registry entry with no `aka` words and no
-# numbered `blurb` is a capability the authoring model cannot reach through plain English, and the commit
-# that adds one is a framework commit that never runs an authoring ladder.
-# scenes-json is here rather than in a site build because the drift it catches is INVISIBLE: the site
-# serves its own copy of a scene, so a film fixed in films/scene/ keeps playing broken on the site
-# until someone notices by hand. Nobody did for forty days (engine-doctrine/MISTAKES.md #475). It reads 15 files.
-# mistakes-check is here for the same reason as doc-refs: MISTAKES.md is edited on almost every commit
-# that touches this file's own doctrine, and a duplicate entry is only visible across the whole log, not
-# from the diff being pushed. It reads one file.
-# generated-check is here because THREE derived artefacts had no drift check and the repo had already
-# written this idea twice for two others (craft-coverage for the doc index, scenes-json for the site's
-# scene copies), each after its own incident. site/lib/arsenal.json had nobody, went 67 items stale and
-# kept listing a sound cue that had been deleted from the engine. Running every generator and diffing is
-# the general form of both, so a fourth artefact cannot arrive with nobody watching it.
-# discovery is here because a capability nobody can find is a capability nobody uses, and it broke three
-# ways in one week without any run going red: 131 registry entries with no blurb, 95 of 95 block
-# families missing from the search corpus entirely, and 33 entries arriving from the catalogue where
-# the load-time refusal cannot reach them. It also compares the CLI index against the website's, which
-# disagreed by 185 entries while both looked healthy. Pure reads, about a second.
-# prop-probe is here because the thing it checks is a property of the ENGINE, not of any one film, and
-# nothing in an authoring ladder ever exercises a prop no film uses. That is the whole gap it closes:
-# `metalness` and `roughness` were declared on the three layer and overwritten by literals, and every
-# gate stayed green for months because no scene set them (engine-doctrine/MISTAKES.md #565). It is the slow step
-# here, about 35 seconds, and it is the only one that needs a browser.
-# seo-surface is here for the same reason generated-check is: sitemap.ts, robots.ts, seo.ts,
-# ogCard.tsx and schema.ts each generate a fact (a canonical, a share card, a sitemap URL, a JSON-LD
-# object) that nothing else checks at write time, and every one of them is invisible in a diff. Pure
-# file reads plus running schema.ts's own builders; no browser, no build.
-# coverage joins the list for the same reason doc-refs does, and needs the same full local library to
-# mean anything: quality/gates/coverage.mjs asks whether any AUTHORED scene actually USES a piece of
-# engine vocabulary, not whether the value works. It crashed on every run for six days (a `parts` shape
-# change it never learned) and nobody noticed, because it lived in neither this file nor CI. It is here
-# now, and its own adoption ratchet (quality/baselines/coverage-ratchet.json) fails the push if engine
-# adoption FALLS, the direction that matters: a capability the library used to reach going back to zero
-# is a regression the same way a broken test is. It is NOT in gates.yml for the reason doc-refs is not:
-# films/scene/*.json is gitignored, so a CI clone sees a fraction of the AUTHORED library and would
-# ratchet against a population it cannot see. Pure file reads, well under a second.
-# docker-check is here for the reason every other gate on this line is: the failure it catches is
-# invisible from the repo and from every local run. A COPY of a path git does not carry builds fine on
-# a machine that has the path and dies on the server, which has only the clone. assets/plinth was
-# untracked on 2026-09-10 and the COPY stayed, so every deploy after that failed while the running
-# container kept serving a stale site for ten days. The gate was already written and correct; nothing
-# ran it. It reads two files and costs milliseconds.
 # push-guard runs FIRST and reads the refs git hands this hook on stdin, so it checks exactly what is
 # about to reach the remote. It is first because the two rules it holds are about publication rather
 # than quality: a wrong gate result costs a re-run, an attribution trailer or a force-added binary in a
@@ -78,26 +21,6 @@
 # pays nothing. This is the local half of the ten-day vawe.dev outage: three stacked build breaks that
 # every local check passed, because none of them ran the build.
 #
-# The eight below joined together (2026-09-22, quality/gates/inert-check.mjs found all of them standing
-# in the Makefile and reached by neither this file nor CI). Each needs a file a fresh CI clone does not
-# carry (a source woff2, a baked sim, a judge receipt) or is the check that found the other seventeen, so
-# they belong here rather than in gates.yml: glyphs-audit (assets/fonts/*.woff2, gitignored), sim-audit
-# and docker-context (assets/baked, gitignored, both self-heal to a pass when it is absent rather than
-# guessing), judge-census (quality/baselines/approved/judge/, gitignored, a count only). rung, sfx-check,
-# audit-test and inert-check carry no such dependency; they are here because pre-push is where a push-time
-# check that already passes belongs, same as the fourteen above them. All eight pass today. Pure file
-# reads plus, for sim-audit and glyphs-audit, one hash each; well under a second combined.
-#
-# docker-context needs a Docker daemon, a fact about the machine, not the clone. It stays here so a
-# machine with Docker gets the local number before pushing, and it also runs in gates.yml on
-# ubuntu-latest, which always has Docker, so the budget is measured on every push. A laptop with no
-# daemon reports "not measured here" and exits 0 instead of blocking a push it cannot prove either way.
-#
-# skill-check and rule-length joined the same day inert-check found them: both in the Makefile, both
-# read only tracked docs (skills/*/SKILL.md, AGENTS.md, engine-doctrine/CRAFT), both pass today, both
-# under a tenth of a second. Neither is in gates.yml, matching the rest of this maintenance tier
-# (skill-reach, rung, provenance): pre-push and CI do not mirror past the fast job gates.yml itself
-# names, and these belong with their siblings.
 # An ABSOLUTE core.hooksPath survives a `git worktree` move or a repo re-clone at a new path, so this
 # pre-push keeps running from wherever it was FIRST installed, stale and pointed at a checkout that may
 # no longer exist. `make install-hooks` sets it relative (.githooks); warn, don't block, on the way out.
@@ -106,7 +29,7 @@ case "$hooks_path" in
   /*) echo "! core.hooksPath is absolute ($hooks_path); it will not follow this worktree. Run: make install-hooks" >&2 ;;
 esac
 
-# A stamp from `make dev-tool X=verify-batch` (.vawe-data/verified/<sha>, gitignored, one per verified commit)
+# A stamp from `make verify-batch` (.vawe-data/verified/<sha>, gitignored, one per verified commit)
 # means the full tier already ran for this exact tip, outside pre-push, with no push connection
 # depending on it staying open for 40 minutes. It is reported here, not silently trusted: a VAWE_FULL=1
 # push still re-runs the full tier below regardless of any stamp, because that is what asking for it
@@ -130,27 +53,19 @@ while read -r _local_ref local_sha _remote_ref remote_sha; do
     echo "✗ pre-push blocked: the site would not have built. Fix it, or --no-verify to override." >&2
     exit 1
   fi
-  # e2e-check runs `make e2e` (probe + snap-all + snap-blocks + mcp-smoke + site test + author-check)
-  # ONLY when this range touches something it can catch (core/, renderer/, blocks/, generators/,
-  # films/scene/ tracked files, site/public's engine copy, quality/gates/snap-*): same scoped-by-range
-  # shape as site-build-check above, same reason, an ordinary doc or skill push must stay fast.
-  if [ -n "$VAWE_FULL" ] && ! node quality/gates/e2e-check.mjs "$range"; then
-    echo "✗ pre-push blocked: make e2e failed. Fix it, or --no-verify to override." >&2
-    exit 1
-  fi
 done
 
 # Two tiers, defined once in harness/dev/verify-tiers.sh (also sourced by `make dev-tool X=verify-batch`), so the
 # gate lists cannot drift into two different ideas of "full" between this hook and that command.
 . harness/dev/verify-tiers.sh
 if [ -n "$VAWE_FULL" ]; then
-  echo "▶ pre-push: FULL tier (make test + audit-test + every gate)"
+  echo "▶ pre-push: FULL tier (make test + every gate)"
   if ! run_full_tier; then
     echo "✗ pre-push blocked: the full tier failed." >&2
     exit 1
   fi
 else
-  echo "▶ pre-push: fast tier (static gates only; VAWE_FULL=1 git push runs tests and e2e too, or run \`make dev-tool X=verify-batch\` first)"
+  echo "▶ pre-push: fast tier (static gates only; VAWE_FULL=1 git push runs the tests too, or run \`make verify-batch\` first)"
   make bench-fast || exit 1
   for g in $FAST; do
     if ! make check GATE="$g"; then

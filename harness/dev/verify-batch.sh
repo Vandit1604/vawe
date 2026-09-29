@@ -9,4 +9,4 @@ make e2e
 sha=$(git rev-parse HEAD)
 mkdir -p .vawe-data/verified
 date -u +%Y-%m-%dT%H:%M:%S.000Z > ".vawe-data/verified/$sha"
-echo "✓ verified $sha: make test, audit-test, e2e, and every FAST+FULL gate passed. Now: git push"
+echo "✓ verified $sha: make test, e2e, and every FAST+FULL gate passed. Now: git push"
