@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 
 const BIG_RESULT = 8000;
-const BLOCK_RE = /BLOCKED|pre-commit blocked|hook error/i;
+const BLOCK_RE = /^[✗!]? ?pre-(commit|push) blocked|hook (error|blocked)|blocked by (a |the )?hook|^make: \*\*\* \[[a-z-]+\] Error/im;
 
 const toolText = (content) => (typeof content === 'string' ? content
   : Array.isArray(content) ? content.map((c) => c.text ?? '').join('\n') : '');
