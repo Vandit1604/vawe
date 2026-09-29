@@ -4,7 +4,7 @@
 //
 //   node harness/media/ref-spec.mjs <ref.mp4> [--out dir] [--fps 29.97] [--elements 6] [--ocr] [--no-audio]
 //
-// Reuses: shot-detect.mjs detectCuts (cuts), core/beats/detect.js (audio onsets, tempo, beat grid),
+// Reuses: ref-measure/transition.mjs (cuts and how each one changes the picture), core/beats/detect.js (audio onsets, tempo, beat grid),
 // core/motion/springs.js approach()/spring() (the curves an arrival is fitted to), see.mjs ocrWords.
 // Every frame is decoded at 320px wide; positions and sizes are reported in reference pixels.
 import fs from 'node:fs';
@@ -13,11 +13,11 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { probeSize } from '../lib/frame-forensics.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
-import { detectCuts } from './shot-detect.mjs';
 import { readWav } from './wav-read.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
+import { findTransitions } from '../lib/ref-measure/transition.mjs';
 
 const GRID_W = 320;
 const DIFF_THR = 6;
@@ -50,32 +50,9 @@ function decode(video, fps, dir, W, H) {
   return { w, h, n, rgb: buf, gray, frame: (i) => gray.subarray(i * w * h, (i + 1) * w * h) };
 }
 
-// ── cuts ─────────────────────────────────────────────────────────────────────────────────────────
-function frameDiffs(V) {
-  const d = new Float64Array(V.n);
-  for (let i = 1; i < V.n; i++) {
-    const a = V.frame(i - 1), b = V.frame(i);
-    let s = 0;
-    for (let k = 0; k < a.length; k += 3) s += Math.abs(a[k] - b[k]);
-    d[i] = s / (a.length / 3);
-  }
-  return d;
-}
-
-function findCuts(video, V, fps, scratchDir) {
-  const { cuts } = detectCuts(video, scratchDir, 0.3, 0.2);
-  const diffs = frameDiffs(V);
-  const sorted = [...diffs].sort((a, b) => a - b);
-  const median = Math.max(sorted[Math.floor(sorted.length / 2)], 0.05);
-  const frames = [];
-  for (const c of cuts) {
-    const f0 = Math.round(c.t * fps);
-    let best = Math.max(1, f0 - 2);
-    for (let f = Math.max(1, f0 - 2); f <= Math.min(V.n - 1, f0 + 2); f++) if (diffs[f] > diffs[best]) best = f;
-    if (!frames.some((x) => x.frame === best))
-      frames.push({ frame: best, t: r3(best / fps), score: r3(c.score), spike: r1(diffs[best] / median) });
-  }
-  return frames.sort((a, b) => a.frame - b.frame);
+// ── cuts: every shot change, classified, in ref-measure/transition.mjs ─────────────────────────────
+function findCuts(V, fps) {
+  return findTransitions(V).map((t) => ({ frame: t.endFrame, t: r3(t.endFrame / fps), spike: t.spike, transition: { ...t, startT: r3(t.startFrame / fps) } }));
 }
 
 // ── camera: global zoom + pan between two frames ─────────────────────────────────────────────────
@@ -476,15 +453,15 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   console.error(`ref-spec: decoding ${path.basename(video)} at ${fps} fps`);
   const V = decode(video, fps, dir, W, H);
   const sc = W / V.w;
-  const cuts = findCuts(video, V, fps, dir);
-  const bounds = [0, ...cuts.map((c) => c.frame), V.n];
+  const cuts = findCuts(V, fps);
+  const spans = cuts.reduce((acc, c, i) => { acc[i].f1 = c.transition.startFrame; acc.push({ f0: c.frame, f1: V.n }); return acc; }, [{ f0: 0, f1: V.n }]);
 
   const cams = [{ s: 1, dx: 0, dy: 0 }];
   let prev = halfRes(V.frame(0), V.w, V.h);
-  const isCut = new Set(cuts.map((c) => c.frame));
+  const inCut = (f) => cuts.some((c) => f >= c.transition.startFrame && f <= c.frame);
   for (let f = 1; f < V.n; f++) {
     const cur = halfRes(V.frame(f), V.w, V.h);
-    cams.push(isCut.has(f) ? { s: 1, dx: 0, dy: 0 } : estimateCamera(prev, cur, V.w >> 1, V.h >> 1));
+    cams.push(inCut(f) ? { s: 1, dx: 0, dy: 0 } : estimateCamera(prev, cur, V.w >> 1, V.h >> 1));
     prev = cur;
     if (f % 200 === 0) console.error(`  camera ${f}/${V.n}`);
   }
@@ -495,8 +472,8 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   const text = ocr ? await analyseText(video, dir, W, H, fps) : [];
 
   const shots = [];
-  for (let i = 0; i < bounds.length - 1; i++) {
-    const f0 = bounds[i], f1 = bounds[i + 1];
+  for (let i = 0; i < spans.length; i++) {
+    const { f0, f1 } = spans[i];
     if (f1 - f0 < 1) continue;
     console.error(`  shot ${i + 1}: frames ${f0}-${f1 - 1}`);
     const tracks = trackShot(V, f0, f1, cams, maxElements);
