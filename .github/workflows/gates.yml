@@ -1,17 +1,7 @@
 name: framework gates
 
-# The same gates .githooks/pre-push runs, minus doc-refs. There is no CI-only list: the point is
-# that a push blocked here is a push that would have been blocked on the developer's machine.
-#
-# doc-refs is DELIBERATELY ABSENT, and this is not a softened gate. films/scene/*.json is gitignored
-# (see .gitignore: "Video/data instances are NOT the framework"), so a clone carries 40 of the 146
-# scenes this tree holds. doc-refs resolves every repo path the docs cite, and 20 of those paths are
-# scene files that no clone will ever have. Measured on a fresh clone of HEAD: 22 findings, 20 of them
-# gitignored scene content. A job that reports 20 phantom findings on every run teaches everyone to
-# ignore it. It keeps its teeth in pre-push, where the author has the content on disk.
-#
-# Runtime: about a minute, nearly all of it checkout and npm ci. The gates themselves are file reads
-# and finish in under half a second.
+# The same static gates .githooks/pre-push runs. A film is one HTML page; the e2e job renders every
+# page film and fixture page at half size and checks each mp4.
 
 on:
   push:
@@ -25,161 +15,42 @@ concurrency:
 
 jobs:
   fast-gates:
-    name: schema-check + test + craft-coverage + arsenal-check + discovery + generated-check
+    name: static gates
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      # No gate in this job opens a browser, so the 150MB Chromium that puppeteer's postinstall would
-      # fetch is pure wall-clock. The browser jobs install it and cache it.
       PUPPETEER_SKIP_DOWNLOAD: "1"
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Full history: harness/author/recency.mjs reads `git log --before=N.days` to compute registry
-          # newness. A shallow checkout has no history, so two newness tests fail on CI while passing
-          # on a full local clone. scene-check.yml does this for the same reason.
-          fetch-depth: 0
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - run: npm ci
-
-      # site-counts, unused, feature-audit and lint-test joined 2026-09-22 (inert-check.mjs found all
-      # four standing in the Makefile, reached by neither this file nor pre-push). None reads anything
-      # films/scene keeps gitignored: site-counts checks the site's own copy against the registries,
-      # unused and feature-audit always exit 0 (a coaching report, never a blocker), lint-test is fixture
-      # regressions on the committed sample.json. All four pass today.
-      - name: framework gates
+      - name: gates
         run: |
-          make test
-          for g in schema-check craft-coverage arsenal-check discovery generated-check output-contract seo-surface site-counts unused feature-audit lint-test; do
+          for g in no-emdash mistakes-check provenance rule-length skill-reach seo-surface docker-context; do
             make check GATE="$g"
           done
 
-      # docker-context stays in .githooks/pre-push too (a laptop with Docker still wants the local
-      # number before pushing), but what it needs is a Docker daemon, a fact about the MACHINE, not
-      # about what a clone carries, so unlike doc-refs it belongs in both places rather than only one:
-      # ubuntu-latest always has Docker, so this is where the budget gets measured for real on every
-      # push, even from a machine with no daemon (quality/gates/docker-context.mjs now reports "not
-      # measured here" and exits 0 there instead of blocking).
-      - name: docker build context budget
-        run: make check GATE=docker-context
-
-      # Five more inert-check found the same day, all failing on their FIRST real run: report-tier, not a
-      # wall. Wiring and fixing are different jobs; blocking the push on findings nobody has looked at
-      # yet just teaches everyone to reach for --no-verify. blocks-audit, dead-branch and docs-drift have
-      # no ratchet to fail against, only a fixed rule; silent-check the same, plus it reads films/scene,
-      # partial in a CI clone; code-quality already HAS a ratchet (quality/baselines/code-quality-baseline.json)
-      # and is 87 file/rule pairs worse than it today, a real regression this step surfaces without
-      # silently re-baselining it (that needs a human to run `make check GATE=code-quality WRITE=1` and say so).
-      - name: report-tier gates (found failing today, not yet blocking)
-        if: always()
-        run: |
-          for g in blocks-audit dead-branch docs-drift silent-check code-quality; do
-            make check GATE="$g" || true
-          done
-
-      # Structured, readable failures. This step is the pass/fail authority's SIDECAR, not the authority:
-      # it runs `if: always()`, writes to the job Summary and an artifact, and never sets the job status
-      # (the `make` step above does). So it cannot mask a real exit code (engine-doctrine/MISTAKES.md #401).
-      - name: findings summary (json)
-        if: always()
-        run: |
-          mkdir -p /tmp/findings
-          # The findings-based gates emit a JSON array under --json (empty [] when clean).
-          for g in discovery arsenal-check generated-check craft-coverage output-contract seo-surface; do
-            node "quality/gates/$g.mjs" --json > "/tmp/findings/$g.json" 2>/dev/null || true
-          done
-          node -e '
-            const fs = require("fs"), d = "/tmp/findings";
-            const out = {};
-            for (const f of fs.readdirSync(d)) {
-              const k = f.replace(/\.json$/, "");
-              try { out[k] = JSON.parse(fs.readFileSync(`${d}/${f}`, "utf8")); } catch { out[k] = []; }
-            }
-            fs.writeFileSync("findings.json", JSON.stringify(out, null, 2));
-            const total = Object.values(out).reduce((n, a) => n + (Array.isArray(a) ? a.length : 0), 0);
-            console.log(`findings.json written, ${total} finding(s) across ${Object.keys(out).length} gate(s)`);
-          '
-          # the test suite is a test runner (no --json): surface its REAL failures, minus the
-          # rung-fixture noise (the rung block deliberately injects bad tags to prove the gate catches them).
-          libfail=$(node --test "tests/**/*.test.mjs" 2>&1 \
-            | grep -E "✗|not ok|[0-9]+ failed" \
-            | grep -viE "no-such-gate|no-such-code|untagged: THE BACKGROUND|up from|held up by prose|does not emit|decoration|claim an owner|catalogued by hand" \
-            || true)
-          {
-            echo "## Framework gate findings"
-            echo
-            echo "### Gate findings (JSON)"
-            echo '```json'
-            cat findings.json
-            echo '```'
-            echo "### test suite"
-            echo '```'
-            echo "${libfail:-all assertions passed}"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: upload findings.json
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gate-findings
-          path: findings.json
-          if-no-files-found: ignore
-
-  # e2e: `make e2e` (harness/dev/e2e.mjs, AGENTS.md "Testing: end to end first"). The six checks that
-  # already existed and nothing ran together: probe, snap-all, snap-blocks, mcp-smoke, the site's
-  # real-browser test, author-check. Same reason scene-check.yml opens a browser here: every one of the
-  # first three launches puppeteer's OWN Chromium (no executablePath given anywhere in quality/gates/),
-  # never the google-chrome ubuntu-latest ships, so the postinstall download is real work, cached below.
-  #
-  # THE FONT-STATE TRAP, AND WHY IT DOES NOT BITE HERE. A snap baseline is only valid inside one font
-  # state (quality/gates/snap-signature.mjs fontState()), and it used to hash every file it found under
-  # assets/fonts/ (plus assets/fonts/local/, paid per-developer faces no runner ever has). Neither
-  # directory is reproducible: a dev worktree collects leftover faces `make gen X=fonts` never fetched, so even
-  # two laptops running the identical `make gen X=fonts` disagreed. A runner therefore computed a font-state
-  # hash nothing could match, and the committed digest read as stale-font on every scene: a clean clone
-  # that "compared nothing" and never noticed, because it still got *a* hash, just never the right one.
-  # Fixed at the root: fontState() now hashes the LOCKED FACE LIST (harness/media/fonts.lock.json), never
-  # a directory listing, so `make gen X=fonts` reproduces the exact same hash on any machine. No tracked theme
-  # needs an unlocked face today; if one starts to, it is named in quality/baselines/e2e-known-broken.json
-  # like any other scene a clean clone cannot render, not pretended away.
   e2e:
-    name: e2e (probe + snap-all + snap-blocks + mcp-smoke + site test + author-check)
+    name: e2e (page tests + draft renders of every page film)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      PUPPETEER_SKIP_DOWNLOAD: "" # this job DOES open a browser; do not inherit fast-gates' skip
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-
       - uses: actions/cache@v4
         with:
           path: ~/.cache/puppeteer
           key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
       - run: npm ci
-      - run: npm ci
-        working-directory: site
-
       - name: fetch the locked faces
         run: make gen X=fonts
-
       - run: make e2e
-
-      - name: report
-        if: always()
-        run: cat quality/runs/e2e/latest.json 2>/dev/null || echo "no report written"
-
       - name: upload e2e report
         if: always()
         uses: actions/upload-artifact@v4
