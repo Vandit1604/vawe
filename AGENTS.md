@@ -27,7 +27,7 @@ what you would get wrong on your own.
 ## The loop  `[live: harness/live/stage-say.mjs]`
 
 Brief or reference -> stills -> draft -> critique in a fresh session -> fix only the affected
-seconds -> final. The hook says which stage a film is at; `make stage` re-reads it from disk.
+seconds -> final. A hook names the next command for the page film you edited last.
 
 | # | stage | the command |
 |---|---|---|
@@ -104,4 +104,4 @@ A stale comment is a bug.
 ## Where to look  `[ref: make help]`
 
 `prompts/README.md` (a template per film type), `core/motion/README.md`, `make help`,
-`make arsenal Q="…"` (search before you build), `engine-doctrine/JUDGE.md` (how a film is scored).
+`engine-doctrine/JUDGE.md` (how a film is scored).
