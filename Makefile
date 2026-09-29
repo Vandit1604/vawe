@@ -540,9 +540,10 @@ e2e: ## [check] THE E2E SUITE: probe + snap-all + snap-blocks + mcp-smoke + site
 
 # no-judge, compare, expand, house-style, direct, scrub: `make dev-tool X=<name>`.
 
-critique: ## [judge] the critique loop for a page film: phone sheet, strip, loop seam and page-check to LOOK at, then the judge command for a fresh session (PAGE=<html> [REF=<mp4>] [AT=<s>])
+critique: ## [judge] the critique loop for a page film: phone sheet, strip, loop seam to LOOK at, measured deltas against REF (or self-checks) and page-check, then the judge command for a fresh session (PAGE=<html> [REF=<mp4>] [AT=<s>])
 	@test -n "$(PAGE)" || { echo "usage: make critique PAGE=films/<name>/page.html [REF=<ref.mp4>] [AT=<seconds>]"; exit 2; }
 	@node harness/media/see.mjs $(PAGE) --phone --strip $(or $(AT),auto) --loop
+	@node harness/media/see.mjs $(PAGE) --measure $(if $(REF),--ref $(REF))
 	@node quality/gates/page-check.mjs $(PAGE) $(if $(REF),--ref $(REF))
 	@echo ""
 	@echo "  LOOK at the sheets printed above first. Then, in a FRESH session (never the author):"
