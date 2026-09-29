@@ -21,6 +21,8 @@ const idAt = argv.indexOf('--id');
 const explicitId = idAt >= 0 ? argv[idAt + 1] : null;
 const rest = argv.filter((a, i) => a !== '--id' && argv[i - 1] !== '--id');
 
+const audioTag = (name) => `<audio src="../../assets/music/${name}.wav" data-role="music" data-at="0" data-gain="-6" data-fade-out="0.5"></audio>`;
+
 async function idsForGenre(g) {
   const res = await fetch(`https://mixkit.co/free-stock-music/${g}/`, { headers: UA });
   if (!res.ok) throw new Error(`genre "${g}" -> HTTP ${res.status}`);
@@ -63,6 +65,7 @@ if (argv.includes('--pack')) {
     catch (e) { console.error(`  ✗ ${t.name}: ${e.message}`); process.exitCode = 1; }
   }
   console.log(`  → assets/music/{${PACK.map((t) => t.name).join(',')}}.wav   credits → assets/music/credits.json`);
+  for (const t of PACK) console.log(`  ${audioTag(t.name)}`);
   console.log(`  ⚠ licence NOT verified programmatically (${LICENCE}), confirm before publishing commercially.`);
 } else {
   const genre = explicitId ? null : (rest[0] || 'ambient');
@@ -70,5 +73,6 @@ if (argv.includes('--pack')) {
   const name = (explicitId ? rest[0] : rest[2]) || 'track';
   await fetchTrack({ genre, rank, id: explicitId, name });
   console.log(`  → assets/music/${name}.wav   credits → assets/music/credits.json`);
+  console.log(`  ${audioTag(name)}`);
   console.log(`  ⚠ licence NOT verified programmatically (${LICENCE}), confirm before publishing commercially.`);
 }
