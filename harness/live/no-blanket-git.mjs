@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import path from 'node:path';
 const BANNED = [
   [/^git\s+add\s+(-A|--all|\.(?:\s|$))/, 'a blanket stage of the whole tree',
    'stage explicit paths instead. With several agents in one tree, a blanket stage cannot tell your work from theirs.'],
@@ -10,14 +11,7 @@ const BANNED = [
    'this destroys uncommitted work repo-wide with no recovery. If you must, name paths: git checkout HEAD -- <path>.'],
 ];
 
-const SHELL_FORMS = [
-  [/^(for|while|until)\b/, 'a shell loop',
-   'run the commands one per call, or write a small .mjs in your scratch folder and run it.'],
-  [/^sed\s+(?:\S+\s+)*?(?:-[A-Za-z]*i\S*|--in-place\S*)(?:\s|$)/, 'sed -i',
-   'use the Edit tool; macOS sed and GNU sed disagree on -i.'],
-];
-
-const commandsIn =(cmd) => cmd
+const commandsIn = (cmd) => cmd
   .replace(/<<-?\s*['"]?(\w+)['"]?[\s\S]*?^\s*\1\s*$/gm, ' ')  // heredoc bodies
   .replace(/'[^']*'/g, "''")                                   // single-quoted literals
   .replace(/"[^"]*"/g, '""')                                   // double-quoted literals
@@ -40,17 +34,12 @@ process.stdin.on('end', () => {
     process.exit(2);
   }
   const parts = commandsIn(cmd);
-  // The agent sandbox refuses a multi-part command that starts with cd; a lone cd stays allowed.
-  if (/^cd(\s|$)/.test(parts[0] || '') && parts.length > 1) {
-    process.stderr.write(`BLOCKED: a command that starts with cd (${cwd || 'cwd unknown'})\n\n`
-      + 'Drop the `cd ...;` prefix and use absolute or repo-relative paths.\n');
+  // The agent sandbox refuses a command that starts by cd-ing into the directory it already runs in.
+  const cdTo = /^cd\s+(\S+)$/.exec(parts[0] || '');
+  if (cdTo && cwd && path.resolve(cwd, cdTo[1].replace(/^['"]|['"]$/g, '')) === path.resolve(cwd) && parts.length > 1) {
+    process.stderr.write(`BLOCKED: a cd into the directory you are already in (${cwd})\n\n`
+      + 'Drop the `cd ...;` prefix and run the rest of the command as it is; use paths relative to that directory.\n');
     process.exit(2);
-  }
-  for (const [re, name, fix] of SHELL_FORMS) {
-    if (parts.some((p) => re.test(p))) {
-      process.stderr.write(`BLOCKED: ${name}\n\n${fix}\n`);
-      process.exit(2);
-    }
   }
   for (const [re, name, why] of BANNED) {
     if (parts.some((p) => re.test(p))) {

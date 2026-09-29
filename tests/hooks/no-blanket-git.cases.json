@@ -16,18 +16,5 @@
   ["echo \"never run git reset --hard\"", false, "banned form inside a double-quoted string"],
   ["grep -n 'git stash' engine-doctrine/MISTAKES.md", false, "banned form as a grep pattern"],
   ["git checkout main", false, "checkout a branch, not the tree"],
-  ["git reset --soft HEAD~1", false, "soft reset"],
-
-  ["for f in a b; do echo $f; done", true, "for loop"],
-  ["ls; while true; do sleep 1; done", true, "while loop after a separator"],
-  ["sed -i 's/a/b/' x.txt", true, "sed -i"],
-  ["sed -i.bak 's/a/b/' x.txt", true, "sed -i with suffix"],
-  ["cd /tmp && ls", true, "cd into another dir at the start"],
-  ["cd src; make", true, "cd relative at the start"],
-  ["cd src", false, "a lone cd"],
-  ["sed -n '1,5p' x.txt", false, "sed without -i"],
-  ["echo \"for x in y; do z; done\"", false, "loop inside a double-quoted string"],
-  ["git commit -m 'sed -i and for loops are refused'", false, "loop words in a commit message"],
-  ["git status && cd src", false, "cd not at the start"],
-  ["git log --format=%h", false, "git subcommand"]
+  ["git reset --soft HEAD~1", false, "soft reset"]
 ]
