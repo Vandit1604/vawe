@@ -76,3 +76,5 @@ decides.
 
 Template with the full prompt text: `prompts/critique-pass.md`. Judge dimensions:
 `engine-doctrine/JUDGE.md`.
+
+<!-- doc-refs-allow: films/x/page.html · an example path in a sample judge line -->

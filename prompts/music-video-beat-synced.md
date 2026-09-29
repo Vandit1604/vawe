@@ -92,3 +92,5 @@ the "cues from the picture, 30 ms early" and synthesised-cue table from
 https://github.com/buildwithhanif/claude-animation-skill (MIT, Hanif, `scripts/sound.mjs`,
 `references/sound.md`); the lyric mapping from PDoomVideo's STORYBOARD.md
 (https://github.com/JohnHeibel/PDoomVideo, ISC in package.json only, pattern only).
+
+<!-- doc-refs-allow: scripts/sound.mjs · a file in the external claude-animation-skill repo, not this one -->
