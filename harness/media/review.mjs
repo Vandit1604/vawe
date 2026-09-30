@@ -8,10 +8,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { scratch, drawtext } from '../lib/scratch.mjs';
-import { sampleText, clippedGlyphs, timingRows, shortHolds, holdsBeyondRef } from '../lib/text-timing.mjs';
+import { sampleText, clippedGlyphs, timingRows, shortHolds, holdsBeyondRef, leastSeen } from '../lib/text-timing.mjs';
 import { textTimeline } from './see/text-timeline.mjs';
 import { clipMessage } from '../../quality/gates/page-check.mjs';
-import { frameMotion, startJumps, earlyStops, frozenInside, secondSsim, collateralChange, changedSpan, FPS } from './motion-curve.mjs';
+import { frameMotion, startJumps, earlyStops, frozenInside, secondSsim, collateralChange, changedSpan, collectMoves, repeatedMove, FPS } from './motion-curve.mjs';
 import { coverage } from './coverage.mjs';
 import { probe } from './see-views.mjs';
 import { readPageMeta } from './render-page.mjs';
@@ -67,10 +67,11 @@ async function textPass(ctx) {
   try {
     await opened.page.goto(opened.url, { waitUntil: 'load' });
     await settle(opened.page);
+    const moves = await opened.page.evaluate(collectMoves);
     const samples = await sampleText(opened.page, ctx.dur, ctx.step);
     const clipped = clippedGlyphs(samples);
     for (const [k, c] of clipped.slice(0, SHEET_ROWS).entries()) c.crop = await cropOf(opened, c, path.join(ctx.work, `crop-${k}.png`));
-    return { samples, clipped };
+    return { samples, clipped, moves };
   } finally { await opened.close(); }
 }
 
@@ -197,6 +198,14 @@ export function writeSheet(list, ctx, out) {
   return fs.existsSync(out) ? out : null;
 }
 
+/** A suggestion, never a failure: the least seen text line and the most repeated move. -> [line] ; empty while an error stands. */
+export function cutLines(findings, { samples, moves }, step) {
+  if (findings.some((f) => f.severity === 'error')) return [];
+  const seen = leastSeen(samples, step), move = repeatedMove(moves);
+  const parts = [seen && `the least seen text, "${seen.text}" (${seen.seconds.toFixed(1)} s on screen)`, move && `the most repeated move, ${move.name} (${move.count} times)`].filter(Boolean);
+  return ['Cut: remove one element and one move, then review again' + (parts.length ? `: ${parts.join('; ')}` : '')];
+}
+
 /** Compare this render with the one the last review saw. -> { line, diff } ; the render is saved for the next review. */
 export function sheetDiff(ctx, sheetOut) {
   const last = sheetOut.replace(/\.png$/, '.last.mp4'), diff = sheetOut.replace(/\.png$/, '.diff.png');
@@ -217,7 +226,7 @@ export function sheetDiff(ctx, sheetOut) {
   return result;
 }
 
-export function reportLines(list, { sheet, timing, table, changed }) {
+export function reportLines(list, { sheet, timing, table, changed, cut = [] }) {
   const n = (s) => list.filter((f) => f.severity === s).length;
   const lines = [`${list.length} finding(s): ${n('error')} error, ${n('warn')} warn, ${n('info')} info`];
   list.slice(0, SHOWN).forEach((f, i) => {
@@ -232,6 +241,7 @@ export function reportLines(list, { sheet, timing, table, changed }) {
   if (changed) lines.push(changed.line, ...(changed.diff ? [`before and after, the most changed frame: ${changed.diff}`] : []));
   const top = list.find((f) => f.severity !== 'info');
   lines.push(top ? `Fix first: f${top.frame} (${top.t.toFixed(2)}s): ${top.fix}` : 'Fix first: nothing measured is wrong. The eye still judges what a number cannot.');
+  lines.push(...cut);
   return lines;
 }
 
@@ -254,9 +264,10 @@ export async function review({ page, ref, final = false, text = false, out }) {
   if (fs.existsSync(sheetOut)) fs.copyFileSync(sheetOut, sheetOut.replace(/\.png$/, '.prev.png'));
   const sheet = writeSheet(findings, ctx, sheetOut);
   const changed = sheetDiff(ctx, sheetOut);
+  const cut = cutLines(findings, await ctx.sampled, ctx.step);
   const timing = timingRows((await ctx.sampled).samples, ctx.step, dur);
-  fs.writeFileSync(path.resolve('out', `${paths.name}-review.json`), JSON.stringify({ findings, timing, sheet, changed }, null, 1));
-  return { findings, timing, sheet, changed, video: paths.video, ms: Date.now() - t0, reused: render.reused };
+  fs.writeFileSync(path.resolve('out', `${paths.name}-review.json`), JSON.stringify({ findings, timing, sheet, changed, cut }, null, 1));
+  return { findings, timing, sheet, changed, cut, video: paths.video, ms: Date.now() - t0, reused: render.reused };
 }
 
 async function main() {
@@ -265,7 +276,7 @@ async function main() {
   const page = argv.find((a, i) => !a.startsWith('--') && !['--ref', '--out'].includes(argv[i - 1]));
   if (!page) die('usage: review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--out sheet.png]');
   const r = await review({ page, ref: flag('--ref'), final: argv.includes('--final'), text: argv.includes('--text'), out: flag('--out') });
-  console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table'), changed: r.changed }).join('\n'));
+  console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table'), changed: r.changed, cut: r.cut }).join('\n'));
   console.log(`(${(r.ms / 1000).toFixed(1)} s${r.reused ? ', draft reused' : ''}; data: out/${path.basename(r.video, '.mp4')}-review.json)`);
 }
 
