@@ -4,35 +4,33 @@
 <meta charset="utf-8">
 <meta name="duration" content="2">
 <title>move: count up</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --surface: #201f26; --line: rgba(255,255,255,0.09); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
-
-  .card { width: 132vh; padding: 5vh 6vh 5.6vh; border-radius: 3vh; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3vh 8vh rgba(0,0,0,0.35); }
-  .label { font: 600 4.6vh/1 'Archivo', sans-serif; color: var(--dim); }
-  .num { display: flex; align-items: center; margin-top: 2.6vh; font: 800 23vh/1 'Archivo', sans-serif; letter-spacing: -0.03em; }
-  .num .sym { margin-right: 0.04em; line-height: 1.16em; }
+  .card { width: calc(var(--u) * 124); padding: calc(var(--u) * 5.6) calc(var(--u) * 6.4) calc(var(--u) * 6); }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .label { font: 600 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .period { font: 500 var(--t-small)/1 var(--sans); color: var(--faint); }
+  .num { display: flex; align-items: center; margin-top: var(--s3); font: 800 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.045em; }
+  .num .sym { margin-right: 0.04em; line-height: 1.16em; color: var(--muted); font-weight: 600; }
   .num .sep { width: 0.26em; text-align: center; line-height: 1.16em; }
   .cell { position: relative; width: 0.62em; height: 1.16em; overflow: hidden;
           -webkit-mask-image: linear-gradient(#0000, #000 14%, #000 86%, #0000); mask-image: linear-gradient(#0000, #000 14%, #000 86%, #0000); }
   .strip { display: flex; flex-direction: column; will-change: transform; }
   .strip i { display: block; height: 1.16em; line-height: 1.16em; text-align: center; font-style: normal; }
-  .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 4vh; }
-  .chip { display: inline-flex; align-items: center; gap: 1.2vh; padding: 1.8vh 2.6vh; border-radius: 999px; background: rgba(10,135,255,0.16); color: #58b0ff; font: 700 4.4vh/1 'Archivo', sans-serif; }
-  .chip svg { width: 4vh; height: 4vh; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-  .spark { width: 44vh; height: 12vh; overflow: visible; }
+  .foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--s4); }
+  .delta { gap: var(--s1); padding: calc(var(--u) * 1.6) calc(var(--u) * 2.6) calc(var(--u) * 1.6) calc(var(--u) * 2); font-size: var(--t-body); }
+  .delta .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); stroke-width: 2; }
+  .spark { width: calc(var(--u) * 44); height: calc(var(--u) * 12); overflow: visible; }
   .spark path { fill: none; stroke: rgba(255,255,255,0.5); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position: absolute"><defs id="defs"></defs></svg>
 <div class="card">
-  <div class="label">Monthly revenue</div>
+  <div class="top"><div class="label">Monthly revenue</div><div class="period">Sep 1 to Sep 30</div></div>
   <div class="num" id="num"><span class="sym">$</span></div>
   <div class="foot">
-    <div class="chip"><svg viewBox="0 0 24 24"><path class="up" d="M12 19V6M6 11l6-6 6 6"/></svg>12.4% vs August</div>
+    <div class="pill up delta"><svg class="icon" viewBox="0 0 24 24"><path class="up" d="M12 19V6M6 11l6-6 6 6"/></svg>12.4% vs August</div>
     <svg class="spark" viewBox="0 0 100 28"><path d="M0 24 L9 21 L18 22 L27 16 L36 18 L45 12 L54 14 L63 8 L72 10 L81 5 L90 6 L100 1"/></svg>
   </div>
 </div>
@@ -66,7 +64,7 @@ let d = 0;
   });
   d++;
 });
-q('.chip').animate([{ translate: '-3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: 1050, easing: settle, fill: 'both' });
+q('.delta').animate([{ translate: '-3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: 1050, easing: settle, fill: 'both' });
 q('.up').animate([{ translate: '0 0' }, { translate: '0 -2px', offset: 0.5 }, { translate: '0 0' }], { duration: 500, delay: 1500, easing: settle, fill: 'both' });
 const line = q('.spark path'), len = line.getTotalLength();
 line.style.strokeDasharray = len;

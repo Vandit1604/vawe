@@ -5,21 +5,17 @@
 <meta name="duration" content="1.8">
 <meta name="blank" content="0-0.05">
 <title>move: cta pop</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-content: center; justify-items: start; gap: 6vh; padding-left: 14vw; font-family: 'Archivo', sans-serif; color: var(--ink); }
-  h1 { margin: 0; font: 800 13vh/1.02 'Archivo', sans-serif; letter-spacing: -0.04em; }
-  .cta { display: inline-flex; align-items: center; gap: 2.4vh; padding: 3.8vh 6vh 3.8vh 7vh; border-radius: 999px; background: var(--accent);
-         font: 700 8.4vh/1 'Archivo', sans-serif; letter-spacing: -0.01em; color: #fff; transform-origin: 0 50%; opacity: 0; }
-  .cta svg { width: 7.4vh; height: 7.4vh; }
-  .cta path { fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  body { place-content: center; justify-items: start; gap: var(--s5); padding-left: 14vw; }
+  h1 { margin: 0; font: 800 calc(var(--u) * 14)/1.02 var(--sans); letter-spacing: -0.045em; }
+  .cta { gap: var(--s2); padding: calc(var(--u) * 3.4) calc(var(--u) * 5.4) calc(var(--u) * 3.4) calc(var(--u) * 6.4); border-radius: 999px; font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.015em; transform-origin: 0 50%; opacity: 0; }
+  .cta .icon { width: calc(var(--u) * 6); height: calc(var(--u) * 6); stroke: #fff; stroke-width: 2.4; }
 </style>
 </head>
 <body>
 <h1>Your first film<br>is one page away.</h1>
-<div class="cta"><span>Start free</span><svg viewBox="0 0 24 24"><path class="arrow" d="M4 12 H19 M13 6 L19 12 L13 18"/></svg></div>
+<div class="btn primary cta"><span>Start free</span><svg class="icon" viewBox="0 0 24 24"><path class="arrow" d="M4 12 H19 M13 6 L19 12 L13 18"/></svg></div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const pop = curveToLinear(CURVES.overshoot), settle = curveToLinear(CURVES.expoOut);

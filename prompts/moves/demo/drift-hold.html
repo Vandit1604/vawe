@@ -4,22 +4,19 @@
 <meta charset="utf-8">
 <meta name="duration" content="2">
 <title>move: drift hold</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { position: relative; font: 600 3.6vh/1 'Archivo', sans-serif; color: var(--ink); }
-
-  .bg { position: absolute; inset: -6%; background: radial-gradient(#4d4c59 0.2vh, transparent 0.26vh) 0 0 / 4.4vh 4.4vh; }
-  .type { position: absolute; left: 12vw; top: 30vh; }
-  .type h1 { margin: 0; font-size: 20vh; font-weight: 700; letter-spacing: -0.045em; line-height: 1; }
-  .type p { margin: 3vh 0 0 0.6vw; font-size: 4vh; font-weight: 500; color: var(--dim); }
-  .rule { position: absolute; left: 12.4vw; top: 66vh; width: 22vw; height: 0.8vh; border-radius: 1vh; background: var(--accent); }
+  body { display: block; position: relative; }
+  .bg { position: absolute; inset: -6%; background: radial-gradient(#3a3941 calc(var(--u) * 0.2), transparent calc(var(--u) * 0.26)) 0 0 / calc(var(--u) * 4.4) calc(var(--u) * 4.4); }
+  .type { position: absolute; left: 11vw; top: 27vh; }
+  .type h1 { margin: 0; font: 700 calc(var(--u) * 21)/0.98 var(--sans); letter-spacing: -0.055em; }
+  .type p { margin: var(--s4) 0 0 0.6vw; font: 500 var(--t-lead)/1.2 var(--sans); color: var(--muted); }
+  .rule { position: absolute; left: 11.6vw; top: 22vh; width: 22vw; height: calc(var(--u) * 0.9); border-radius: 999px; background: var(--accent); }
 </style>
 </head>
 <body>
 <div class="bg"></div>
-<div class="type"><h1>Held, not frozen.</h1><p>the camera never stops, it only slows down</p></div>
+<div class="type"><h1>Held, not<br>frozen.</h1><p>The camera never stops. It only slows down.</p></div>
 <div class="rule"></div>
 <script type="module">
 import '/core/engine/page-api.js';

@@ -4,13 +4,12 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
 <title>move: split-flap resolve</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --tile: #26252d; --ink: #fff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 800 22vh/1 'Archivo', sans-serif; color: var(--ink); text-transform: uppercase; }
+  :root { --tile: var(--raised); }
+  body { font: 800 calc(var(--u) * 22)/1 var(--sans); text-transform: uppercase; }
   h1 { margin: 0; font: inherit; display: flex; gap: 0.07em; }
-  .tile { position: relative; width: 0.72em; height: 1.1em; perspective: 3em; }
+  .tile { position: relative; width: 0.72em; height: 1.1em; perspective: 3em; border-radius: 0.09em; box-shadow: 0 0.03em 0.08em rgba(0, 0, 0, 0.45); }
   .half { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; background: var(--tile); opacity: 0; backface-visibility: hidden; }
   .half.top { top: 0; border-radius: 0.09em 0.09em 0 0; transform-origin: 50% 100%; }
   .half.bot { bottom: 0; border-radius: 0 0 0.09em 0.09em; transform-origin: 50% 0; }

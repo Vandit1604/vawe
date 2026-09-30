@@ -7,14 +7,14 @@ the shape mid-frame at peak speed exactly on the cut, which is what hides the cu
 
 ```css
 .scene { position: absolute; inset: 0; }
-.after { animation-name: cut; animation-duration: 1s; animation-timing-function: linear; animation-fill-mode: both; }
+.after { background: var(--ink); color: var(--ground); animation-name: cut; animation-duration: 1s; animation-timing-function: linear; animation-fill-mode: both; }
 @keyframes cut { 0%, 49.9% { opacity: 0; } 50%, 100% { opacity: 1; } }
 
-.ball { position: absolute; top: 40vh; left: -12vh; width: 12vh; height: 12vh; border-radius: 50%;
+.ball { position: absolute; top: calc(var(--u) * 38); left: calc(var(--u) * -14); width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: 50%; background: var(--accent);
         animation-name: travel, flip; animation-duration: 1s, 1s;
         animation-timing-function: var(--through), linear; animation-fill-mode: both, both; }
 @keyframes travel { to { translate: 118vw 0; } }
-@keyframes flip { 0%, 49.9% { background: var(--accent); } 50%, 100% { background: var(--paper); } }
+@keyframes flip { 0%, 49.9% { background: var(--accent); } 50%, 100% { background: var(--ground); } }
 ```
 
 ```html

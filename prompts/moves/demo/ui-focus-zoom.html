@@ -4,32 +4,32 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.3">
 <title>move: ui focus zoom</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --card: #22212a; --line: #33323d; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { position: relative; font: 500 2.8vh/1 'Archivo', sans-serif; color: var(--ink); }
-
+  body { display: block; position: relative; }
   .world { position: absolute; inset: 0; transform-origin: 0 0; }
-  .win { position: absolute; left: 10vw; top: 12vh; width: 80vw; height: 76vh; background: var(--card); border-radius: 2vh; padding: 5vh 3vw; box-sizing: border-box; }
-  .win h2 { margin: 0 0 4vh; font-size: 3.4vh; font-weight: 700; }
-  .row { display: grid; grid-template-columns: 1fr 12vw 20vw 8vw; align-items: center; height: 9vh; border-top: 1px solid var(--line); color: var(--dim); }
-  .row b { color: var(--ink); font-weight: 600; }
-  .row.head { height: 5vh; border: 0; font-size: 2.2vh; }
-  .pill { justify-self: start; padding: 1.2vh 1.4vw; border-radius: 3vh; background: #0a87ff22; color: var(--accent); font-weight: 700; }
+  .win { position: absolute; left: 9vw; top: 16vh; width: 82vw; height: 68vh; padding: calc(var(--u) * 4.6) calc(var(--u) * 5); border-radius: calc(var(--u) * 3.2); }
+  .bar { display: flex; align-items: center; justify-content: space-between; }
+  .bar h2 { margin: 0; font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.025em; }
+  .bar .small { color: var(--muted); }
+  .row { display: grid; grid-template-columns: 1fr 12vw 22vw 8vw; align-items: center; height: calc(var(--u) * 11.4); border-top: 1px solid var(--line); color: var(--muted); font: 500 var(--t-body)/1 var(--sans); }
+  .row b { display: flex; align-items: center; gap: var(--s2); color: var(--ink); font-weight: 600; }
+  .row b .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); color: var(--muted); }
+  .row.head { height: calc(var(--u) * 7); margin-top: var(--s3); border-top: 0; font-size: var(--t-small); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); }
   .row .t { text-align: right; }
-  .cursor { position: absolute; width: 3.2vh; height: 3.2vh; }
+  .pill { justify-self: start; padding: calc(var(--u) * 1.3) calc(var(--u) * 2.6); font-size: var(--t-body); }
+  .cursor { position: absolute; width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }
 </style>
 </head>
 <body>
 <div class="world">
-  <div class="win">
-    <h2>Renders</h2>
+  <div class="win card">
+    <div class="bar"><h2>Renders</h2><span class="small">4 films, 6 outputs</span></div>
     <div class="row head"><span>film</span><span>aspect</span><span>status</span><span class="t">time</span></div>
-    <div class="row"><b>launch</b><span>16:9</span><span><span class="pill">Shipped</span></span><span class="t">41 s</span></div>
-    <div class="row"><b>launch</b><span>9:16</span><span>Rendering, 64%</span><span class="t">27 s</span></div>
-    <div class="row"><b>changelog</b><span>1:1</span><span>Queued</span><span class="t">-</span></div>
-    <div class="row"><b>teaser</b><span>4:5</span><span>Queued</span><span class="t">-</span></div>
+    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>launch</b><span>16:9</span><span><span class="pill up">Shipped</span></span><span class="t">41 s</span></div>
+    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>launch</b><span>9:16</span><span>Rendering, 64%</span><span class="t">27 s</span></div>
+    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>changelog</b><span>1:1</span><span>Queued</span><span class="t">-</span></div>
+    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>teaser</b><span>4:5</span><span>Queued</span><span class="t">-</span></div>
   </div>
   <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z" fill="#fff" stroke="#16151a" stroke-width="1.6" stroke-linejoin="round"/></svg>
 </div>

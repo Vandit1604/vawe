@@ -4,24 +4,31 @@
 <meta charset="utf-8">
 <meta name="duration" content="1">
 <title>move: clip expand from a point</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --paper: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --x: 22%; --y: 74%; }
-  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
-  body { position: relative; font: 700 10vh/1 system-ui, sans-serif; }
+  :root { --x: 22%; --y: 74%; }
+  body { position: relative; display: block; }
 
-  /* the dot marks the point; the panel grows out of that same point, so the eye is already there */
-  .dot { position: absolute; left: var(--x); top: var(--y); width: 2vh; height: 2vh; margin: -1vh 0 0 -1vh;
-         border-radius: 50%; background: var(--accent); }
-  .panel { position: absolute; inset: 0; display: grid; place-items: center; background: var(--accent); color: #fff;
+  .thumb { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; display: grid; place-items: center; width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; background: var(--accent); }
+  .thumb .icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); margin-left: 0.5%; fill: #fff; stroke: #fff; stroke-width: 1.5; }
+
+  .panel { position: absolute; inset: 0; display: grid; align-content: center; justify-items: start; gap: var(--s3); padding-left: 14vw; background: var(--raised);
            clip-path: circle(0% at var(--x) var(--y));
            animation-name: expand; animation-duration: 0.8s; animation-delay: 0.15s;
            animation-timing-function: var(--settle); animation-fill-mode: both; }
+  .panel .pill { background: var(--ground); font-size: var(--t-body); padding: calc(var(--u) * 1.2) calc(var(--u) * 2.4); }
+  .panel h1 { margin: 0; font: 700 calc(var(--u) * 12)/1.04 var(--sans); letter-spacing: -0.04em; }
+  .panel p { margin: 0; font: 500 var(--t-lead)/1.25 var(--sans); color: var(--muted); }
   @keyframes expand { to { clip-path: circle(140% at var(--x) var(--y)); } }
 </style>
 </head>
 <body>
-<div class="dot"></div>
-<div class="panel">one point, one panel</div>
+<div class="thumb"><svg class="icon" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z"/></svg></div>
+<div class="panel">
+  <span class="pill">Chapter 2 of 5</span>
+  <h1>From brief<br>to first cut</h1>
+  <p>Six stills, one draft, 41 seconds to render.</p>
+</div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));

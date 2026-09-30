@@ -4,25 +4,21 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.8">
 <title>move: thanks sweep</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
   @property --p { syntax: '<percentage>'; inherits: true; initial-value: 0%; }
-  :root { --ground: #16151a; --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
-
-  .drift { display: grid; justify-items: start; gap: 2.6vh; }
+  .drift { display: grid; justify-items: start; gap: var(--s3); }
   .sweep { position: relative; --p: 0%; }
   .sweep .t { display: block; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) - 9%), transparent var(--p)); mask-image: linear-gradient(90deg, #000 calc(var(--p) - 9%), transparent var(--p)); }
-  .big .t { font: 800 13vh/1.05 'Archivo', sans-serif; letter-spacing: -0.04em; }
-  .small .t { font: 500 7.6vh/1.2 'Archivo', sans-serif; color: var(--dim); letter-spacing: -0.01em; }
-  .bar { position: absolute; top: 8%; bottom: 8%; left: var(--p); width: 0.9vh; margin-left: -0.45vh; border-radius: 1vh; background: var(--accent); }
+  .big .t { font: 800 calc(var(--u) * 14)/1.08 var(--sans); letter-spacing: -0.045em; }
+  .sub .t { font: 500 var(--t-head)/1.2 var(--sans); color: var(--muted); letter-spacing: -0.015em; }
+  .bar { position: absolute; top: 8%; bottom: 8%; left: var(--p); width: calc(var(--u) * 1); margin-left: calc(var(--u) * -0.5); border-radius: var(--u); background: var(--accent); }
 </style>
 </head>
 <body>
 <div class="drift">
   <div class="sweep big"><span class="t">Thanks for watching.</span><i class="bar"></i></div>
-  <div class="sweep small"><span class="t">See you on the next one.</span></div>
+  <div class="sweep sub"><span class="t">Next film: the changelog, Oct 14.</span></div>
 </div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

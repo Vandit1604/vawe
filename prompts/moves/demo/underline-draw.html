@@ -4,12 +4,9 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
 <title>move: underline draw</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 700 12vh/1.2 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
-  p { margin: 0; text-align: center; }
+  p { margin: 0; text-align: center; font: 700 calc(var(--u) * 13)/1.2 var(--sans); letter-spacing: -0.04em; }
 
   .key { position: relative; display: inline-block; }
   /* below the descender line (0.3em under the baseline), so the g and y are never struck through */
@@ -22,7 +19,7 @@
 </style>
 </head>
 <body>
-<p>Design that gets<br><span class="key">noticed<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path pathLength="1" d="M4 12 C 70 5, 190 4, 296 9"/></svg></span></p>
+<p>Launch films that get<br><span class="key">noticed<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path pathLength="1" d="M4 12 C 70 5, 190 4, 296 9"/></svg></span></p>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 document.documentElement.style.setProperty('--draw', curveToLinear(CURVES.expoOut));

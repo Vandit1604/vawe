@@ -4,23 +4,20 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
 <title>move: chain beats</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { position: relative; font: 700 12vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.03em; }
+  body { position: relative; display: block; }
 
   /* one element, three jobs: a dot, then a bar, then the rule under the headline */
-  .row { position: absolute; left: 14vw; top: 50vh; height: 10vh; display: flex; align-items: flex-end; }
-  .chip { width: 5vh; height: 5vh; border-radius: 999px; background: var(--accent); overflow: hidden; white-space: nowrap;
-          display: flex; align-items: center; padding-left: 3vh; box-sizing: border-box;
-          font: 600 3.4vh/1 'Archivo', sans-serif; letter-spacing: 0; }
-  .win { position: absolute; left: 14vw; top: 36vh; height: 22vh; overflow: hidden; }
-  h1 { margin: 0; font-size: 12vh; line-height: 22vh; white-space: nowrap; }
+  .row { position: absolute; left: 14vw; top: 50vh; height: calc(var(--u) * 10); display: flex; align-items: flex-end; }
+  .chip { display: flex; align-items: center; width: calc(var(--u) * 5); height: calc(var(--u) * 5); padding-left: var(--s3); border-radius: 999px; background: var(--accent); overflow: hidden; white-space: nowrap;
+          font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+  .win { position: absolute; left: 14vw; top: calc(var(--u) * 36); height: calc(var(--u) * 22); overflow: hidden; }
+  h1 { margin: 0; font-size: calc(var(--u) * 12); line-height: calc(var(--u) * 22); white-space: nowrap; }
 </style>
 </head>
 <body>
-<div class="win"><h1>Shipped in 41 s</h1></div>
+<div class="win"><h1 class="title">Shipped in 41 s</h1></div>
 <div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

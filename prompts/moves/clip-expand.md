@@ -7,7 +7,7 @@ Demo: [demo/clip-expand.html](demo/clip-expand.html).
 
 ```css
 :root { --x: 22%; --y: 74%; }
-.dot { position: absolute; left: var(--x); top: var(--y); width: 2vh; height: 2vh; margin: -1vh 0 0 -1vh;
+.thumb { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; width: 11vh; height: 11vh;
        border-radius: 50%; background: var(--accent); }
 .panel { position: absolute; inset: 0; clip-path: circle(0% at var(--x) var(--y));
          animation-name: expand; animation-duration: 0.8s; animation-delay: var(--beat-2);
@@ -16,8 +16,8 @@ Demo: [demo/clip-expand.html](demo/clip-expand.html).
 ```
 
 ```html
-<div class="dot"></div>
-<div class="panel">one point, one panel</div>
+<div class="thumb">...play icon...</div>
+<div class="panel">...chapter title...</div>
 <script type="module">
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));

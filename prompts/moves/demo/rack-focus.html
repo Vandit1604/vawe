@@ -4,23 +4,21 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
 <title>move: rack focus</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { position: relative; font: 600 3.4vh/1 'Archivo', sans-serif; color: var(--ink); }
-
+  body { display: block; position: relative; }
   .far, .near { position: absolute; inset: 0; }
-  .lights i { position: absolute; width: 3.4vh; height: 3.4vh; border-radius: 50%; background: #c9d8ff; }
-  .card { position: absolute; left: 50vw; top: 26vh; width: 36vw; height: 44vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 2.6vw; box-sizing: border-box; }
-  .card h2 { margin: 0 0 3vh; font-size: 3.2vh; color: var(--dim); font-weight: 600; }
-  .card b { display: block; font-size: 15vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
-  .card p { margin: 3vh 0 0; color: var(--accent); font-size: 3.4vh; }
-  .near h1 { position: absolute; left: 8vw; top: 42vh; margin: 0; font-size: 36vh; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+  .lights i { position: absolute; width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); border-radius: 50%; background: #c9d8ff; }
+  .card { position: absolute; left: 50vw; top: 28vh; width: 38vw; height: 44vh; padding: calc(var(--u) * 5); }
+  .card .k { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); letter-spacing: -0.02em; }
+  .card .k .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }
+  .card b { display: block; margin-top: calc(var(--u) * 4); font: 700 calc(var(--u) * 16)/0.9 var(--sans); letter-spacing: -0.055em; }
+  .card .pill { margin-top: calc(var(--u) * 4); }
+  .near h1 { position: absolute; left: 7vw; top: 38vh; margin: 0; font: 800 calc(var(--u) * 36)/1 var(--sans); letter-spacing: -0.06em; }
 </style>
 </head>
 <body>
-<div class="far"><div class="lights"></div><div class="card"><h2>launch-16x9</h2><b>41 s</b><p>shipped</p></div></div>
+<div class="far"><div class="lights"></div><div class="card"><div class="k"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>launch-16x9</div><b>41 s</b><span class="pill up">Shipped</span></div></div>
 <div class="near"><h1>Draft</h1></div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

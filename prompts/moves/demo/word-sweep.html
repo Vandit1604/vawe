@@ -4,17 +4,15 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.5">
 <title>move: word colour sweep</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --dim: #5c5b63; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; padding: 0 8vw; font: 600 11vh/1.15 'Archivo', sans-serif; color: var(--dim); letter-spacing: -0.02em; text-align: center; }
-  h1 { margin: 0; }
+  body { padding: 0 8vw; text-align: center; }
+  h1 { margin: 0; font: 700 calc(var(--u) * 11)/1.12 var(--sans); letter-spacing: -0.035em; color: var(--faint); }
   h1 span { display: inline-block; white-space: pre; }
 </style>
 </head>
 <body>
-<h1>every device directs the eye</h1>
+<h1>ship films people actually watch</h1>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const h1 = document.querySelector('h1');
@@ -23,7 +21,7 @@ const words = h1.textContent.split(' ').map((w, i, a) =>
 h1.replaceChildren(...words);
 const settle = curveToLinear(CURVES.expoOut);
 const css = getComputedStyle(document.documentElement);
-const dim = css.getPropertyValue('--dim'), ink = css.getPropertyValue('--ink'), accent = css.getPropertyValue('--accent');
+const dim = css.getPropertyValue('--faint'), ink = css.getPropertyValue('--ink'), accent = css.getPropertyValue('--accent');
 // 140 ms per word is faster than reading (about 250 ms), so the sweep leads the eye instead of following it
 const beat = 150, step = 140;
 words.forEach((s, i) => {

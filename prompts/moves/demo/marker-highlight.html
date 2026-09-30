@@ -4,15 +4,12 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
 <title>move: marker highlight</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
   @property --p { syntax: '<number>'; inherits: false; initial-value: -12; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 700 10vh/1.25 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
-  p { margin: 0; text-align: center; }
+  p { margin: 0; text-align: center; font: 700 calc(var(--u) * 10)/1.25 var(--sans); letter-spacing: -0.03em; }
 
-  .hl { position: relative; display: inline-block; white-space: nowrap; }
+  .hl { position: relative; display: inline-block; white-space: nowrap; margin: 0 0.16em; }
   /* one wipe box holds the bar and a dark copy of the text, so the colour flips exactly at the bar's edge */
   .wipe { position: absolute; inset: 0; --e: 8;
           clip-path: polygon(-50% -50%, calc(var(--p) * 1% + var(--e) * 1%) -50%, calc(var(--p) * 1%) 150%, -50% 150%);

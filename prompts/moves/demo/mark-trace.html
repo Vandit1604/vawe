@@ -4,11 +4,9 @@
 <meta charset="utf-8">
 <meta name="duration" content="2">
 <title>move: mark trace</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; }
-  svg { width: 56vh; height: 56vh; overflow: visible; }
+  svg { width: calc(var(--u) * 56); height: calc(var(--u) * 56); overflow: visible; }
   path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
   .ink { stroke: var(--ink); stroke-width: 2.5; }
   .run { stroke: var(--accent); stroke-width: 9; stroke-dasharray: 0.2 1; stroke-dashoffset: 0.2; opacity: 0; }

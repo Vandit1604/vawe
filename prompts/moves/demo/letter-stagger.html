@@ -5,15 +5,14 @@
 <meta name="duration" content="1">
 <meta name="blank" content="0-0.1">
 <title>move: per-letter stagger</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --paper: #f4f1ea; --ink: #14161a; }
-  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
-  body { display: grid; place-items: center; font: 700 16vh/1 system-ui, sans-serif; color: var(--ink); }
+  h1 { margin: 0; }
   h1 span { display: inline-block; white-space: pre; }
 </style>
 </head>
 <body>
-<h1>staggered</h1>
+<h1 class="hero">staggered</h1>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const h1 = document.querySelector('h1');
