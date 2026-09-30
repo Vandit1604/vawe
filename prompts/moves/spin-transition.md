@@ -33,6 +33,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; the roll is the seam, and the film keeps its one whoosh for a whip.
+
 Show one copy when the frame is still. Stacked translucent copies that are rotated fall on Chromium's
 256 px compositor tiles, and on a flat light ground the tile seams show as a faint vertical band. Each
 copy picks its own shot by its own time, so copies either side of the cut mix A and B, which is what a

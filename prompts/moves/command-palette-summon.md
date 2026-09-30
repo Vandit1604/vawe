@@ -25,6 +25,8 @@ chosen.animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { dur
 palette.animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 180, delay: at.exit, easing: leave, fill: 'forwards' });
 ```
 
+Sound: pluck at 1.34 s into the move, when Enter presses the chosen row (default gain); no tick per key.
+
 Give each row a fixed height and `overflow: hidden` so the collapse is exact. Keys 150 ms apart read
 as a fast, real typist; under 100 ms reads as a paste. The caret sits inside the typed text, so it
 moves with each letter; keep it solid, since a blink never lets the frame settle. The highlight

@@ -22,6 +22,8 @@ title.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 420, easing: curveToLi
 grid.animate([{ scale: 1 }, { scale: 1.025 }], { duration: 1600, easing: 'linear', fill: 'both' });   // keeps the full grid alive
 ```
 
+Sound: droplet at 0.14 s into the move, when the first tiles leave the title (default gain); no tick per tile.
+
 70 ms per tile keeps the neighbours of one tile 30 to 80 ms apart (the stagger band) and puts the
 farthest corner, about 5.7 tiles out, at 0.54 s. Under 40 ms the wave lands as one block; over 100
 ms the far corner arrives after the viewer has read the title. The opacity runs 120 ms, far shorter

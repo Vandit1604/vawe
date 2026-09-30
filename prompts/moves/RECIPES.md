@@ -1,17 +1,20 @@
 ---
 when: "you plan a short film of a common shape (a sting, a launch, a type line) and want a chain of built moves that joins, not a list of moves"
-answers: "four chains of existing moves with a beat table, why each chain holds, and the traps at each seam"
+answers: "eight chains of existing moves (three per 5 s sting, one per family) with a beat table, why each chain holds, and the traps at each seam"
 group: reference
 ---
 
 # prompts/moves/RECIPES.md: chains of moves for common short films
+
+A recipe is one proven path, not the film. The direction you picked decides the film, so pick the
+recipe from your direction's family (type-led, object- or product-led, graphic- or colour-led), and change at least two moves to make it yours.
 
 Each recipe joins moves from [README.md](README.md). Times are film seconds. The sound column uses
 each move's own `Sound:` line: `<audio data-synth="<voice>" data-at="<s>">`, no `data-gain`. A snippet's
 delays start at 0, so add the beat start to each one; name each beat once (`--beat-2: 1.60s`).
 Measure every rect with the layout at rest, before any `vawe.onFrame` sets a transform.
 
-## 1. Brand sting, 5 s, rich colour
+## 1. Brand sting, 5 s, graphic- or colour-led: rich colour (thread: the name)
 
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|
@@ -32,7 +35,52 @@ Traps:
 - Put the tagline inside logo-sting's `.drift`, so it rides the push (a still line under a moving lockup breaks rule 4).
 - Set the push duration to the time left (2.55 s), or it stops early and the tail freezes.
 
-## 2. Product sting, 5 s, real UI
+## 2. Brand sting, 5 s, type-led (thread: a rhythm)
+
+One pulse every 0.48 s (125 bpm): 0.48, 0.96, 1.44, 1.92 and on. Every landing and every cut is on it.
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [tracking-collapse](tracking-collapse.md) (converge 1.44 s) | "KILN" is sharp on the pulse at 0.48 and tracked tight at 1.44 | bloom 0.00 |
+| 1.62 | [slice-shift](slice-shift.md) | the bands tear on the pulse at 1.92; the line waits under them, "Kiln" as its first word | none |
+| 2.40 | [word-swap-slot](word-swap-slot.md) (segs 480/480/480) | "Kiln fires [cups / tiles / yours]": the values land on 2.88, 3.36 and 3.84 | pluck 3.84 |
+| 3.54 | [outline-fill](outline-fill.md), fill only | "yours" is an outline; the accent floods it from the baseline on the pulse at 4.32 | bloom 4.24 |
+| 4.40 | [drift-hold](drift-hold.md) | the line drifts to 5.00 | none |
+
+Why it works: the pulse is the thread, so the eye expects each change a beat before it comes. The
+name returns as the line's subject, not as a lockup after a tagline. Seams change axis: the tear
+runs in x, the slot rolls in y, the flood is colour in place. The converge (1.44 s) is 3x a slot
+roll (0.48 s). One accent, on one word, at the end.
+
+Traps:
+- word-swap-slot's own segs (380/380/650) miss the pulse. At 480 each, its `Sound:` time moves to the last landing, 1.44 s into the move.
+- tracking-collapse starts at opacity 0 and blur; start the sharpen at 0, so frame 0.1 already shows the letters (rule 1).
+- Lay out the line under the bands before they move, with "Kiln" on the name's baseline and left edge, so the tear reads as the sentence arriving around the name.
+- Build "yours" in the slot with its outline and fill spans from the start, and run only the fill half of outline-fill; its rise would fight the slot's roll.
+- Pad the slot window 0.35 em (its own clip) so the roll never cuts the "y" of "yours" (rule 7).
+
+## 3. Brand sting, 5 s, object-led (thread: one tile)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [grid-stagger-wave](grid-stagger-wave.md) | the mark tile sits at the left third from frame 0; the studio's work rings out from it by 1.06 | droplet 0.14 |
+| 0.85 | [crash-zoom](crash-zoom.md) (hit at 1.40) | the camera slams onto the mark tile at 1.53; the tile is 2.6x, in the centre | pluck 1.53 |
+| 2.10 | [grid-tile-flip](grid-tile-flip.md) | the frame is a wall of tiles the size of the zoomed mark; it turns to the name's ground | none |
+| 3.00 | [wordmark-cascade](wordmark-cascade.md) | "tessera" falls onto the rail; the full stop is the mark tile and lands last | droplet 3.55 |
+| 4.20 | [drift-hold](drift-hold.md) | the rail run ends at 4.85; the lockup drifts to 5.00 | none |
+
+Why it works: one tile carries the film. It is the source of the wave, the target of the zoom, the
+unit of the wall and the full stop. Seams change axis: a scale in, then a turn on y, then a fall.
+The grid push (1.6 s) is 12x the crash push (0.13 s). The rail run is the film's one stock device.
+
+Traps:
+- Make the mark tile W / 8 / 2.6 (about 92 px at 1920 wide), so at 2.6x it is exactly one tile of the 8 x 5 wall.
+- crash-zoom holds 16 copies of the world; start the wave's WAAPI on every copy with the same delays, or the copies disagree and ghost.
+- The eye is at the centre after the zoom, so start the flip wave at the centre tile, not the bottom-left corner (rule 10).
+- Draw the full stop as the tile at x-height size in the accent; it is the one accent in the last frames.
+- The tiles in the wave are the studio's real work, never stock shapes: an empty grid is a template.
+
+## 4. Product sting, 5 s, product-led: real UI (thread: the product mark)
 
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|
@@ -50,7 +98,50 @@ Traps:
 - Hand-off: during the pull back the mark in the slot lives inside `world`. At 2.90 the world is at scale 1, so hide it and show the travelling mark on the same pixel.
 - Put ui-strip-away's WAAPI on children of `world`. Pull-back rewrites `world.style.transform` on every frame.
 
-## 3. Launch, 15 s: hook, two features, proof, end
+## 5. Product sting, 5 s, type-led (thread: a type line)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [command-palette-summon](command-palette-summon.md), no exit | the real app dims, the palette drops at 0.15, "rep" types, Enter lights "Run report" at 1.34 | pluck 1.34 |
+| 1.40 | [type-fill-transition](type-fill-transition.md) | the camera dives into the "o" of "report" in the lit row; its ink is shot B's ground at 2.37 | none |
+| 2.37 | [mask-rise](mask-rise.md) | "Ledger reports: 3 hours" rises on the new ground | none |
+| 2.80 | [strikethrough-replace](strikethrough-replace.md) | "3 hours" is struck at 3.06; "3 min" rises from 3.30 and reads by 3.90 | pluck 3.30 |
+| 3.90 | [drift-hold](drift-hold.md) | the line drifts to 5.00 | none |
+
+Why it works: one word carries the film. "report" is the typed query, the chosen row, the letter
+the camera enters and the first word of the claim. The claim is a change the viewer sees made, not
+a slogan. Seams change axis: a dive in z, then a rise in y. The dive (1.0 s) is 4.5x a row collapse
+(0.22 s).
+
+Traps:
+- The palette is the product's own: a capture, or its DOM rebuilt from the product's CSS. Rows are real command names, never invented ones.
+- Drop the palette's exit. The dive leaves through the palette, and an exit would remove the letter the camera enters.
+- type-fill-transition sums `offsetLeft` to the world; the row sits several levels deep, so add each offset parent up to `world`.
+- The lit row's label is on-accent ink, so shot B's ground is that ink: read it with `getComputedStyle`. Put the accent on "3 min" only.
+- The old value reads for about 0.45 s before the strike; it only has to be seen. The new line then holds 1.1 s to the end.
+
+## 6. Product sting, 5 s, graphic- or colour-led (thread: a colour)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.30 | [success-check](success-check.md) | the real checkout's accent pay button takes the press at 0.50; the check circle lands at 1.24 | chime 1.24 |
+| 1.20 | [shape-morph-wipe](shape-morph-wipe.md) | the accent circle grows from 1.60, widens into a card and past the frame by 2.45 | none |
+| 2.00 | [count-up](count-up.md) | on the accent ground, "1.8 s to paid" settles at 2.80 | chime 2.80 |
+| 3.20 | [liquid-wipe](liquid-wipe.md) | the dark ground floods in from the left from 3.45; the name waits in the left third | none |
+| 4.40 | [drift-hold](drift-hold.md) | the name, its full stop in the accent, drifts to 5.00 | none |
+
+Why it works: the accent is the thread. It is the button, then the check circle, then the ground,
+then the name's full stop. The frame shows the real checkout from frame 0. Seams change axis: a
+growth from one point, then a flood in x. A liquid row (up to 1.1 s) is 6.9x the label's exit (0.16 s).
+
+Traps:
+- A capture cannot morph. Rebuild only the button as live DOM from the product's CSS, on the capture's exact pixels; never a guessed style.
+- Measure the circle's rect at rest (the button's height), not mid-spring, and hide the ring before the mask passes it.
+- The accent ground is full frame from about 2.3 to 3.8 s. Keep it under 2 s (rule 2), and set the number in on-accent ink with no accent chip.
+- Shot A is the accent, so the liquid's accent rim is invisible on it: drop the rim, and let the accent return only as the full stop.
+- Put the name in the left third. The flood comes from the left, so the name reads from about 3.8 s and holds 1.2 s.
+
+## 7. Launch, 15 s: hook, two features, proof, end
 
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|
@@ -78,7 +169,7 @@ Traps:
 - Exit the count-up's container. The strips own `translate`, and a `from` on the exit fills backwards over the roll.
 - Run the rail bar in ink, not accent, or it fights the button's accent.
 
-## 4. Kinetic type line, 6 s
+## 8. Kinetic type line, 6 s
 
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|

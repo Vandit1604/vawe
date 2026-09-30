@@ -22,6 +22,8 @@ const goo = (t, lead) => {      // an SVG image used as a CSS mask: bars + round
 vawe.onFrame((t) => { shotB.style.maskImage = goo(t, 0); rim.style.maskImage = goo(t, W * 0.07); });   // rim: an accent full-frame div under B
 ```
 
+Sound: none; the flood is soft and wet to the eye, and a cue on it is a whoosh on every cut.
+
 Stack three layers: shot A, the accent rim, shot B; the last two carry the mask. Rows that start
 apart (a 0.22 s seeded lag, 0.85 to 1.1 s each) give the lumps; rows that start together give a
 straight wipe. The alpha contrast (x24 - 10) is what makes the blur read as liquid and not as a soft

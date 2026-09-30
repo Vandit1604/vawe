@@ -30,6 +30,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: pluck at 0.68 s into the move, the frame the push stops at 2.6x (default gain); never an impact, since the overshoot is the hit.
+
 Keep the push between 0.1 and 0.15 s: past 0.2 s it reads as an ordinary push-in. Eight copies show
 as separate ghosts at this speed; sixteen blend into streaks. Measure the target's rect once at load.
 The detail must be live type or vector, since it is seen at 2.6x for the rest of the shot; a small
