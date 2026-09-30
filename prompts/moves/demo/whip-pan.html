@@ -1,0 +1,66 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.2">
+<title>move: whip pan</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { font: 600 3.6vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .strip { position: absolute; top: 0; left: 0; width: 200vw; height: 100vh; filter: url(#motion); }
+  .shot { position: absolute; top: 0; width: 100vw; height: 100vh; }
+  .shot.b { left: 100vw; }
+  .card { position: absolute; left: 24vw; top: 20vh; width: 52vw; height: 60vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 4vw; box-sizing: border-box; }
+  .card h2 { margin: 0 0 4vh; font-size: 3.4vh; font-weight: 600; color: var(--dim); }
+  .row { display: grid; grid-template-columns: 16vw 1fr 5vw; align-items: center; gap: 2vw; margin-bottom: 4.4vh; }
+  .track { height: 1.2vh; border-radius: 1vh; background: #33323d; overflow: hidden; }
+  .fill { height: 100%; width: 100%; background: var(--accent); transform-origin: left; }
+  .row span:last-child { color: var(--dim); text-align: right; }
+  .big { font-size: 22vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin-top: 3vh; }
+  .big small { white-space: nowrap; font-size: 6vh; color: var(--dim); letter-spacing: -0.02em; margin-left: 1vw; }
+  .ok { color: var(--accent); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position: absolute"><filter id="motion" x="-10%" width="120%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
+<div class="strip">
+  <section class="shot a">
+    <div class="card"><h2>render queue</h2>
+      <div class="row"><span>launch-16x9</span><div class="track"><div class="fill" style="--p:.92"></div></div><span>92%</span></div>
+      <div class="row"><span>launch-9x16</span><div class="track"><div class="fill" style="--p:.64"></div></div><span>64%</span></div>
+      <div class="row"><span>launch-1x1</span><div class="track"><div class="fill" style="--p:.31"></div></div><span>31%</span></div>
+    </div>
+  </section>
+  <section class="shot b">
+    <div class="card"><h2 class="ok">shipped</h2>
+      <div class="big">41<small>seconds, 60 fps</small></div>
+    </div>
+  </section>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const E = CURVES.expoOut;
+// ease in on the first half, expo out on the second: the pan is at full speed at the midpoint
+const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+const strip = document.querySelector('.strip'), blur = document.getElementById('mb');
+const t0 = 0.3, dur = 0.5, travel = window.innerWidth;
+strip.animate([{ translate: '0 0' }, { translate: `${-travel}px 0` }],
+  { duration: dur * 1000, delay: t0 * 1000, easing: curveToLinear(whip), fill: 'both' });
+// shot A is alive before the pan, shot B lands soft after it
+document.querySelectorAll('.shot.a .fill').forEach((f) => f.animate(
+  [{ transform: 'scaleX(calc(var(--p) - 0.08))' }, { transform: 'scaleX(var(--p))' }], { duration: 1000, easing: curveToLinear(E), fill: 'both' }));
+document.querySelector('.shot.b .card').animate([{ translate: '2vw 0' }, { translate: '0 0' }],
+  { duration: 700, delay: (t0 + dur * 0.5) * 1000, easing: curveToLinear(E), fill: 'both' });
+vawe.onFrame((t) => {
+  const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
+  const slope = (whip(Math.min(1, u + du)) - whip(Math.min(1, u))) / du;
+  const pxPerFrame = (slope / dur) * travel / 60;
+  blur.setAttribute('stdDeviation', `${(u > 0 && u < 1 ? pxPerFrame * 0.4 : 0).toFixed(2)} 0`);
+});
+</script>
+</body>
+</html>

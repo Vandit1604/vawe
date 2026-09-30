@@ -1,0 +1,43 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: push in</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 600 3.6vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .bg { position: absolute; inset: -10%; background: radial-gradient(#4d4c59 0.2vh, transparent 0.26vh) 0 0 / 4.4vh 4.4vh; transform-origin: 34% 50%; }
+  .world { position: absolute; inset: 0; transform-origin: 34vw 46vh; }
+  .card { position: absolute; left: 14vw; top: 20vh; width: 62vw; height: 60vh; background: var(--card); border-radius: 2.4vh; padding: 6vh 4vw; box-sizing: border-box; }
+  .card h2 { margin: 0; font-size: 3.4vh; font-weight: 600; color: var(--dim); }
+  .num { margin-top: 3vh; font-size: 24vh; font-weight: 700; letter-spacing: -0.05em; line-height: 1; }
+  .num small { font-size: 7vh; font-weight: 600; color: var(--dim); letter-spacing: -0.02em; margin-left: 1vw; }
+  .meta { position: absolute; right: 4vw; top: 6vh; color: var(--accent); }
+  .bars { position: absolute; left: 4vw; right: 4vw; bottom: 6vh; display: flex; gap: 1.2vw; align-items: flex-end; height: 11vh; }
+  .bars i { flex: 1; background: #33323d; border-radius: 0.8vh; }
+  .bars i:last-child { background: var(--accent); }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="world">
+  <div class="card"><h2>launch-16x9</h2><span class="meta">live</span>
+    <div class="num">41<small>seconds</small></div>
+    <div class="bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:45%"></i><i style="height:66%"></i><i style="height:58%"></i><i style="height:80%"></i><i style="height:100%"></i></div>
+  </div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+// half constant speed, half expoOut: the camera keeps moving to the last frame and still lands soft
+const push = curveToLinear((u) => 0.5 * u + 0.5 * CURVES.expoOut(u));
+const opts = { duration: 2000, easing: push, fill: 'both' };
+// the subject scales further than the ground behind it, so the two layers separate as the camera closes in
+document.querySelector('.world').animate([{ scale: 1 }, { scale: 1.2 }], opts);
+document.querySelector('.bg').animate([{ scale: 1 }, { scale: 1.05 }], opts);
+</script>
+</body>
+</html>

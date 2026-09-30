@@ -1,0 +1,46 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.4">
+<title>move: rack focus</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 600 3.4vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .far, .near { position: absolute; inset: 0; }
+  .lights i { position: absolute; width: 3.4vh; height: 3.4vh; border-radius: 50%; background: #c9d8ff; }
+  .card { position: absolute; left: 50vw; top: 26vh; width: 36vw; height: 44vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 2.6vw; box-sizing: border-box; }
+  .card h2 { margin: 0 0 3vh; font-size: 3.2vh; color: var(--dim); font-weight: 600; }
+  .card b { display: block; font-size: 15vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+  .card p { margin: 3vh 0 0; color: var(--accent); font-size: 3.4vh; }
+  .near h1 { position: absolute; left: 8vw; top: 42vh; margin: 0; font-size: 36vh; font-weight: 800; letter-spacing: -0.05em; line-height: 1; }
+</style>
+</head>
+<body>
+<div class="far"><div class="lights"></div><div class="card"><h2>launch-16x9</h2><b>41 s</b><p>shipped</p></div></div>
+<div class="near"><h1>Draft</h1></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { rng } from '/core/motion/springs.js';
+const E = CURVES.expoOut;
+const pull = curveToLinear((u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1)));
+const far = document.querySelector('.far'), near = document.querySelector('.near'), lights = document.querySelector('.lights');
+const rand = rng(11);
+for (let i = 0; i < 16; i++) {
+  const dot = document.createElement('i');
+  dot.style.left = `${rand() * 96}vw`; dot.style.top = `${rand() * 90}vh`; dot.style.opacity = (0.35 + rand() * 0.6).toFixed(2);
+  lights.appendChild(dot);
+}
+const beat = { duration: 700, delay: 550, easing: pull, fill: 'both' };
+near.animate([{ filter: 'blur(0px)' }, { filter: 'blur(1.9vh)' }], beat);
+far.animate([{ filter: 'blur(1.9vh)' }, { filter: 'blur(0px)' }], beat);
+// focus breathing: the lens changes its field of view a little as focus moves, the far plane grows and the near one shrinks
+far.animate([{ scale: 1.015 }, { scale: 1 }], beat);
+near.animate([{ scale: 1 }, { scale: 0.985 }], beat);
+near.animate([{ opacity: 1 }, { opacity: 0.55 }], beat);
+</script>
+</body>
+</html>

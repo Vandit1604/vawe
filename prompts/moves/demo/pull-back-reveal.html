@@ -1,0 +1,55 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.8">
+<title>move: pull back reveal</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --line: #33323d; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 600 3.4vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .bg { position: absolute; left: -300vw; top: -300vh; width: 700vw; height: 700vh; transform-origin: 300vw 300vh; background: radial-gradient(#4d4c59 0.2vh, transparent 0.26vh) 0 0 / 4.4vh 4.4vh; }
+  .world { position: absolute; inset: 0; transform-origin: 0 0; }
+  .card { position: absolute; left: 20vw; top: 22vh; width: 60vw; height: 56vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 3vw; box-sizing: border-box; }
+  .status { display: flex; align-items: center; gap: 1.2vw; color: var(--dim); font-size: 3.2vh; }
+  .dot { width: 2.4vh; height: 2.4vh; border-radius: 50%; background: var(--accent); }
+  .card h1 { margin: 5vh 0 0; font-size: 15vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+  .card p { margin: 2.4vh 0 0; font-size: 3.6vh; font-weight: 500; color: var(--dim); }
+  .meta { position: absolute; left: 3vw; right: 3vw; bottom: 4.6vh; display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 3vh; color: var(--dim); font-size: 3vh; }
+  .meta b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="world">
+  <div class="card">
+    <div class="status"><i class="dot"></i>live now</div>
+    <h1>Shipped.</h1>
+    <p>launch-16x9 reached 3 aspect ratios in 41 seconds</p>
+    <div class="meta"><span><b>60</b> fps</span><span><b>1080p</b></span><span><b>-14</b> LUFS</span></div>
+  </div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { CURVES } from '/core/motion/springs.js';
+const world = document.querySelector('.world'), bg = document.querySelector('.bg');
+const r = document.querySelector('.dot').getBoundingClientRect();
+const W = window.innerWidth, H = window.innerHeight;
+const d = { x: r.left + r.width / 2, y: r.top + r.height / 2 }, c = { x: W / 2, y: H / 2 };
+const s0 = 9, t0 = 0.1, dur = 1.6;
+// most of the pull-back is expoOut (fast, then soft); a linear share keeps the last second alive
+const ease = (u) => 0.3 * u + 0.7 * CURVES.expoOut(u);
+vawe.onFrame((t) => {
+  const u = Math.min(1, Math.max(0, (t - t0) / dur)), p = ease(u);
+  // zoom is multiplicative, so scale runs on a log path: equal steps read as equal speed
+  const s = Math.exp(Math.log(s0) * (1 - p));
+  const cam = { x: d.x + (c.x - d.x) * p, y: d.y + (c.y - d.y) * p };   // the dot is centred at the start and the card is centred at the end
+  world.style.transform = `translate(${c.x - s * cam.x}px, ${c.y - s * cam.y}px) scale(${s})`;
+  const sb = Math.pow(s, 0.55);                                        // the ground moves less, so it reads as far behind
+  bg.style.transform = `translate(${c.x - sb * cam.x}px, ${c.y - sb * cam.y}px) scale(${sb})`;
+});
+</script>
+</body>
+</html>

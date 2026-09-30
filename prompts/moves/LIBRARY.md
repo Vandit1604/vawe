@@ -30,14 +30,14 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 
 | move | use it for | reference | status |
 |---|---|---|---|
-| chain-beats | overlap beats and carry one object through a whole film: the next move starts at 60-70% of the previous one, and one element hands off into the next (a dot becomes a sun, then a light sweep) | a fresh judge found a 5 s sting that ran dot, then arch, then name, then line, one after another, and read as a template | to build |
+| chain-beats | overlap beats and carry one object through a whole film: the next move starts at 60-70% of the previous one, and one element hands off into the next (a dot becomes a sun, then a light sweep) | a fresh judge found a 5 s sting that ran dot, then arch, then name, then line, one after another, and read as a template | built |
 | cut-on-motion | a moving shape carries the eye across a hard cut | owner-approved clip | built |
 | push-blur | a panel pushes in with a blur that follows its speed | owner-approved clip | built |
 | exit-fast | leave faster and shorter than the entrance | owner rule: exits faster than entrances | built |
-| iris-wipe | a circular reveal from the point the eye is on | to be captured | to build |
-| whip-pan | a fast sideways blur that hides the cut | to be captured | to build |
-| match-cut | a shape in shot A becomes the same shape in shot B | to be captured | to build |
-| flash-cut | a one or two frame flash on a beat | to be captured | to build |
+| iris-wipe | a circular reveal from the point the eye is on | to be captured | built |
+| whip-pan | a fast sideways blur that hides the cut | to be captured | built |
+| match-cut | a shape in shot A becomes the same shape in shot B | to be captured | built |
+| flash-cut | a one or two frame flash on a beat | to be captured | built |
 
 ## 3. Point the eye
 
@@ -48,19 +48,19 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | marker-highlight | a highlighter bar wipes behind a phrase and the text flips dark | HyperFrames marker-highlight, green promo, 6 s | built |
 | underline-draw | a line draws under the key word, fast in and slow out | to be captured | built |
 | bracket-callout | corner brackets snap onto a word or a UI part | to be captured | built |
-| spotlight-dim | the frame dims around one target | to be captured | to build |
+| spotlight-dim | the frame dims around one target | to be captured | built |
 
 ## 4. Move the camera
 
 | move | use it for | reference | status |
 |---|---|---|---|
-| push-in | a slow scale toward the subject over a beat | to be captured | to build |
-| ui-focus-zoom | zoom onto one part of a captured UI | to be captured | to build |
-| caret-follow | the camera tracks the typing caret | vawe-flow-2 terminal | to build |
-| pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | to build |
-| parallax-dive | layers at different depths move at different speeds | to be captured | to build |
-| drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | to build |
-| rack-focus | focus moves from one layer to another | to be captured | to build |
+| push-in | a slow scale toward the subject over a beat | to be captured | built |
+| ui-focus-zoom | zoom onto one part of a captured UI | to be captured | built |
+| caret-follow | the camera tracks the typing caret | vawe-flow-2 terminal | built |
+| pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | built |
+| parallax-dive | layers at different depths move at different speeds | to be captured | built |
+| drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | built |
+| rack-focus | focus moves from one layer to another | to be captured | built |
 
 ## 5. End a film
 
