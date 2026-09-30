@@ -51,13 +51,25 @@ No move is built yet. See [LIBRARY.md](LIBRARY.md).
 
 ## End a film
 
-No move is built yet. See [LIBRARY.md](LIBRARY.md).
+| move | use when | snippet | clip |
+|---|---|---|---|
+| logo sting | a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame | [logo-sting.md](logo-sting.md) | [logo-sting.mp4](logo-sting.mp4) |
+| wordmark cascade | the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail | [wordmark-cascade.md](wordmark-cascade.md) | [wordmark-cascade.mp4](wordmark-cascade.mp4) |
+| mark trace | a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark | [mark-trace.md](mark-trace.md) | [mark-trace.mp4](mark-trace.mp4) |
+| calm lockup | the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats | [calm-lockup.md](calm-lockup.md) | [calm-lockup.mp4](calm-lockup.mp4) |
+| cta pop | the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click | [cta-pop.md](cta-pop.md) | [cta-pop.mp4](cta-pop.mp4) |
+| thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
 
 ## Product moments
 
 | move | use when | snippet | clip |
 |---|---|---|---|
 | clip expand | a panel or capture grows out of one point the eye is already on | [clip-expand.md](clip-expand.md) | [clip-expand.mp4](clip-expand.mp4) |
+| cursor click | a cursor travels a bowed path to a control, the control lights and dips on the press, the label rolls to its result, the cursor leaves | [cursor-click.md](cursor-click.md) | [cursor-click.mp4](cursor-click.mp4) |
+| count up | a number is the proof: each digit is a wheel that rolls to its value with speed blur, then a delta chip and a sparkline | [count-up.md](count-up.md) | [count-up.mp4](count-up.mp4) |
+| card assemble | a UI card builds: the shell lands, then each part arrives from the side of its slot, the accent action last | [card-assemble.md](card-assemble.md) | [card-assemble.mp4](card-assemble.mp4) |
+| notification pop | a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came | [notification-pop.md](notification-pop.md) | [notification-pop.mp4](notification-pop.mp4) |
+| chart build | gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it | [chart-build.md](chart-build.md) | [chart-build.mp4](chart-build.mp4) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
