@@ -17,7 +17,7 @@ const DATA = path.join(root, 'site', 'lib', 'moves.json');
 const LLMS = path.join(root, 'site', 'public', 'llms.txt');
 const REPO_BLOB = 'https://github.com/Vandit1604/vawe/blob/main/prompts/moves/';
 const SITE = 'https://vawe.dev';
-const NOT_MOVES = new Set(['README.md', 'GROUPS.md', 'LIBRARY.md', 'RECIPES.md']);
+const NOT_MOVES = new Set(['README.md', 'GROUPS.md', 'LIBRARY.md', 'RECIPES.md', 'LOOKS.md']);
 const DEFAULT_LOOK = 'vawe';
 
 const read = (p) => fs.readFileSync(p, 'utf8');
