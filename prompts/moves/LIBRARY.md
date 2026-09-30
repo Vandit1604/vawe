@@ -30,7 +30,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 
 | move | use it for | reference | status |
 |---|---|---|---|
-| chain-beats | overlap beats and carry one object through a whole film: the next move starts at 60-70% of the previous one, and one element hands off into the next (a dot becomes a sun, then a light sweep) | a fresh judge found a 5 s sting that ran dot, then arch, then name, then line, one after another, and read as a template | to build |
+| chain-beats | overlap beats and carry one object through a whole film: the next move starts at 60-70% of the previous one, and one element hands off into the next (a dot becomes a sun, then a light sweep) | a fresh judge found a 5 s sting that ran dot, then arch, then name, then line, one after another, and read as a template | built |
 | cut-on-motion | a moving shape carries the eye across a hard cut | owner-approved clip | built |
 | push-blur | a panel pushes in with a blur that follows its speed | owner-approved clip | built |
 | exit-fast | leave faster and shorter than the entrance | owner rule: exits faster than entrances | built |
