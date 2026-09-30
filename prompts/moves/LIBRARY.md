@@ -59,7 +59,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | caret-follow | the camera tracks the typing caret | vawe-flow-2 terminal | built |
 | pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | built |
 | parallax-dive | layers at different depths move at different speeds | to be captured | built |
-| drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | to build |
+| drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | built |
 | rack-focus | focus moves from one layer to another | to be captured | built |
 
 ## 5. End a film
