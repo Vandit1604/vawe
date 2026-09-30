@@ -97,6 +97,22 @@ export function springLinear(k = 170, d = 26, samples = 40) {
   return `linear(${pts.join(', ')})`;
 }
 
+// Any easing fn(u) on [0, 1] as an exact CSS linear() string: never approximate a curve with
+// cubic-bezier. fn may be a curves.js name. Samples are evenly spaced; 40 is smooth to 1/1000.
+export function curveToLinear(fn, samples = 40) {
+  const e = resolveEase(fn);
+  const pts = [];
+  for (let i = 0; i <= samples; i++) pts.push(String(Math.round(e(i / samples) * 10000) / 10000));
+  return `linear(${pts.join(', ')})`;
+}
+
+// Named curves for curveToLinear. expoOut matches approach(k = 0.15) settling over 40 frames.
+export const CURVES = {
+  expoOut: (u) => (1 - Math.pow(0.85, u * 40)) / (1 - Math.pow(0.85, 40)),
+  spring: (u) => (u >= 1 ? 1 : spring(u * springDuration(), 170, 26)),
+  overshoot: (u) => (u >= 1 ? 1 : spring(u * springDuration(260, 14), 260, 14)),
+};
+
 // mulberry32: returns a function giving uniform numbers in [0, 1). Same seed, same sequence.
 export function rng(seed = 1) {
   let a = seed >>> 0;
