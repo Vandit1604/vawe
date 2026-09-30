@@ -57,8 +57,9 @@ import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-sta
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
 import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes } from '../lib/motion-lint.mjs';
-import { sampleBoxTracks, maxStepDeltas, lintTimes } from '../lib/box-track.mjs';
+import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
+import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
@@ -121,14 +122,14 @@ export async function settle(page) {
   });
 }
 
-// Per-output-frame displacement in px, no screenshots: the largest paused-animation target bounding-box
-// move or resize between consecutive frame times, over every animated element. A pure function of the page's own
+// Per-output-frame displacement in px, no screenshots: the largest paused-animation target edge travel
+// (move, resize, turn or inset clip) between consecutive frame times, over every animated element. A pure function of the page's own
 // animation timing, so it is as deterministic as the capture itself. Returns null when the page has
 // nothing to measure this way (window.seek, onFrame hooks, or no animations at all).
 async function frameSpeedsFromBoxes(page, frames, fps, from) {
   if (await page.evaluate(isScripted) || !(await page.evaluate(() => document.getAnimations().length))) return null;
   const times = Array.from({ length: frames + 1 }, (_, i) => from + i / fps);
-  return maxStepDeltas((await sampleBoxTracks(page, times, 'animated')).tracks);
+  return edgeTravelDeltas((await sampleBoxTracks(page, times, 'animated')).tracks);
 }
 
 const isScripted = () => typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length > 0;

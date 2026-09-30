@@ -1,7 +1,10 @@
 // Element bounding boxes over film time, read with the page's own seek and no screenshots. One sampler
 // serves the render's speed pass (the animated targets) and the motion lint of a page that paints in
 // window.seek or vawe.onFrame (every element). A box is [x, y, w, h, opacity, own opacity]; the two
-// opacities are only read for 'visible', where opacity is the product up the ancestor chain.
+// opacities are only read for 'visible', where opacity is the product up the ancestor chain. An 'animated'
+// box also carries its turn and inset() clip (harness/lib/edge-travel.mjs).
+
+import { turnAndClip } from './edge-travel.mjs';
 
 // Runs inside the page (page.evaluate serialises it), so it references nothing outside its own body.
 export async function trackBoxes(times, scope) {
@@ -19,7 +22,7 @@ export async function trackBoxes(times, scope) {
     await window.__pageSeek(t);
     els.forEach((el, i) => {
       const r = el.getBoundingClientRect();
-      tracks[i].push(scope === 'animated' ? [r.x, r.y, r.width, r.height] : [r.x, r.y, r.width, r.height, alpha(el), own(el)]);
+      tracks[i].push(scope === 'animated' ? [r.x, r.y, r.width, r.height, ...window.__turnAndClip(el, r)] : [r.x, r.y, r.width, r.height, alpha(el), own(el)]);
     });
   }
   const label = (el) => {
@@ -35,7 +38,8 @@ export async function trackBoxes(times, scope) {
 }
 
 /** Box tracks at `times` (seconds) for 'animated' (animation targets) or 'visible' (every element). */
-export function sampleBoxTracks(page, times, scope) {
+export async function sampleBoxTracks(page, times, scope) {
+  await page.evaluate(`window.__turnAndClip = ${turnAndClip}`);
   return page.evaluate(trackBoxes, times, scope);
 }
 
