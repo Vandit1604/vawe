@@ -1,0 +1,28 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1">
+<meta name="blank" content="0-0.12">
+<title>move: mask rise</title>
+<style>
+  :root { --paper: #f4f1ea; --ink: #14161a; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  body { display: grid; place-items: center; font: 700 16vh/1 system-ui, sans-serif; color: var(--ink); }
+
+  /* the mask box is taller than the line: 0.25em below for descenders (g, y, p), 0.1em above for accents */
+  .mask { overflow: hidden; padding: 0.1em 0 0.25em; margin: -0.1em 0 -0.25em; }
+  .mask > span { display: block; translate: 0 118%;
+                 animation-name: rise; animation-duration: 0.7s; animation-delay: 0.1s;
+                 animation-timing-function: var(--settle); animation-fill-mode: both; }
+  @keyframes rise { to { translate: 0 0; } }
+</style>
+</head>
+<body>
+<h1 class="mask"><span>typography</span></h1>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+</script>
+</body>
+</html>

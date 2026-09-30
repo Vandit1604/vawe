@@ -1,0 +1,30 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1">
+<title>move: clip expand from a point</title>
+<style>
+  :root { --paper: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --x: 22%; --y: 74%; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  body { position: relative; font: 700 10vh/1 system-ui, sans-serif; }
+
+  /* the dot marks the point; the panel grows out of that same point, so the eye is already there */
+  .dot { position: absolute; left: var(--x); top: var(--y); width: 2vh; height: 2vh; margin: -1vh 0 0 -1vh;
+         border-radius: 50%; background: var(--accent); }
+  .panel { position: absolute; inset: 0; display: grid; place-items: center; background: var(--accent); color: #fff;
+           clip-path: circle(0% at var(--x) var(--y));
+           animation-name: expand; animation-duration: 0.8s; animation-delay: 0.15s;
+           animation-timing-function: var(--settle); animation-fill-mode: both; }
+  @keyframes expand { to { clip-path: circle(140% at var(--x) var(--y)); } }
+</style>
+</head>
+<body>
+<div class="dot"></div>
+<div class="panel">one point, one panel</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+</script>
+</body>
+</html>
