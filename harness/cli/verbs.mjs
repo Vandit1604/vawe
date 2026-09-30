@@ -185,6 +185,18 @@ export const VERBS = [
     next: () => 'look at a clip in prompts/moves/ before you commit it',
   },
   {
+    name: 'fonts', summary: 'the free font faces, one line each, with the file to copy into films/<name>/assets/',
+    positional: [], flags: [],
+    example: 'vawe fonts',
+    build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts'] }],
+  },
+  {
+    name: 'sounds', summary: 'the synth voices for <audio data-synth>, one line each, with default gain and length',
+    positional: [], flags: [],
+    example: 'vawe sounds',
+    build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['sounds'] }],
+  },
+  {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
     positional: [], flags: [],
     example: 'vawe e2e',

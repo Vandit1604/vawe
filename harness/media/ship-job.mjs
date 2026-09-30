@@ -61,7 +61,7 @@ function startJob(page, renderArgs) {
 function runJob(id) {
   const job = readJob(id);
   const fd = fs.openSync(job.log, 'a');
-  const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final'], { stdio: ['ignore', fd, fd] });
+  const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final', '--progress'], { stdio: ['ignore', fd, fd] });
   writeJob({ ...job, status: 'running', pid: process.pid });
   child.on('close', (code) => {
     if (code !== 0) return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
@@ -117,11 +117,18 @@ function progressLine(job, text) {
   return `job ${job.id}: running, ${done}/${total} subframes (${Math.round((100 * done) / total)}%), ${clock(elapsed)} in, about ${eta} left, then encode`;
 }
 
+const LINE_CAP = 240;
+
+function errorLines(text) {
+  const lines = text.split(/[\r\n]+/).map((l) => l.trim()).filter((l) => l && !l.includes('capturing '));
+  const errors = lines.filter((l) => /^✗|error|failed/i.test(l));
+  return (errors.length ? errors : lines).slice(-4).map((l) => (l.length > LINE_CAP ? `${l.slice(0, LINE_CAP)}...` : l));
+}
+
 function finalLines(job, text) {
   if (job.status === 'done') return doneLines(job);
   if (job.status === 'cancelled') return [`job ${job.id}: cancelled, a newer job for the same page replaced it`];
-  const tail = text.split(/[\r\n]+/).filter((l) => l.trim() && !l.includes('capturing ')).slice(-6);
-  return [`job ${job.id}: failed (exit ${job.exit}) after ${clock(job.endedAt - job.startedAt)}`, ...tail, `log: ${job.log}`];
+  return [`job ${job.id}: failed (exit ${job.exit}) after ${clock(job.endedAt - job.startedAt)}`, ...errorLines(text), `full log: ${job.log}`];
 }
 
 function newestJobFor(page) {

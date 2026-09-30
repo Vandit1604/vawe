@@ -649,7 +649,7 @@ async function main() {
       aspect, final,
       fps: Number(flag('--fps', final ? 60 : 30)),
       w: flag('--w', null) && Number(flag('--w', null)), h: flag('--h', null) && Number(flag('--h', null)),
-      blur: Number(flag('--blur', final ? 16 : 1)), from, durArg, progress: final,
+      blur: Number(flag('--blur', final ? 16 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
       probe: !final && from === 0 && durArg == null,

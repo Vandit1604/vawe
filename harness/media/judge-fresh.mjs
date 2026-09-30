@@ -10,6 +10,7 @@ import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems } from '../lib/directions.mjs';
+import { reportLines } from '../lib/judge-report.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
@@ -193,15 +194,6 @@ function finish(ev, raw, ms) {
   return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
-function report(r) {
-  const lines = [`judge --fresh (${r.stage}): ${r.verdict}`, Object.entries(r.scores).map(([k, v]) => `${k} ${v}`).join(', ') + (r.worlds != null ? `; worlds ${r.worlds}` : '')];
-  for (const d of r.directions || []) lines.push(`${d.id} ${d.score}: ${d.note ?? ''}`);
-  if (r.strongest) lines.push(`strongest: ${r.strongest}, ${r.reason ?? 'no reason given'}`);
-  for (const x of r.fixes) lines.push(`- ${x.axis} ${x.score}${x.at != null ? ` at ${x.at}` : ''}: ${x.fix}`);
-  lines.push(`Fix first: ${r.fixFirst ?? 'nothing'}`, r.verdict);
-  return lines.join('\n');
-}
-
 const input = process.argv[2];
 if (!input || input.startsWith('--')) die('usage: vawe judge --fresh <page.html | film.mp4 | sheet.png> [--brief brief.md] [--stage stills|draft|final]', 2);
 if (!fs.existsSync(input)) die(`no such file: ${input}`, 2);
@@ -224,5 +216,5 @@ const result = finish(ev, raw, Date.now() - t0);
 const file = path.resolve('out', `${ev.name}.judge.json`);
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, JSON.stringify(result, null, 1));
-console.log(`${report(result)}\n(${(result.ms / 1000).toFixed(0)} s, ${path.relative(process.cwd(), file)})`);
+console.log(reportLines(result, path.relative(process.cwd(), file)).join('\n'));
 process.exit(0);

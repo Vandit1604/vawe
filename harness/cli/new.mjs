@@ -213,7 +213,7 @@ function briefText(name, templateRel, questions, sections, answers) {
   const rest = sections.length
     ? sections.map((s) => `## ${s.name[0].toUpperCase()}${s.name.slice(1)}\n\n${s.body.replaceAll('<name>', name)}`).join('\n\n')
     : `## Direction\n\nThe template is written as prompts, not tagged sections: read ${templateRel}.`;
-  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\nMoves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
+  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\nTaste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
 }
 
 function readAnswers({ length, aspect, title }) {
@@ -243,7 +243,7 @@ export function newFilmLines(name, { page, route }) {
     lines.push(`template: ${route.template} (${route.type}: ${route.why})`);
     lines.push(`another film type: delete films/${name}, then bin/vawe new ${name} --from prompts/<template>.md (rows in ${ROUTING}) or --request "<the ask>" --length <s>`);
   }
-  return [...lines, '', ...tasteLines('concept'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
+  return [...lines, '', 'rules for authors: engine-doctrine/TASTE-CARD-DIGEST.md (2 KB); the full card is engine-doctrine/TASTE-CARD.md', '', ...tasteLines('concept'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
 }
 
 /** Writes the film folder; returns { page, route } (route is null when --from chose the template). */
