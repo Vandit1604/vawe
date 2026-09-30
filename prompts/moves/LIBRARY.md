@@ -26,6 +26,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | word-swap-slot | one masked word in a held sentence rolls through 3 or 4 values and lands | HyperFrames kinetic-type-swap | built |
 | blur-word-cascade | copy resolves word by word from blur, no hard mask | to be captured | built |
 | text-as-mask | huge type is a window onto a product shot or a rich image made in CSS or SVG | video-shotcraft opening/text-as-mask; HyperFrames texture-mask-text | built |
+| outline-fill | big type arrives as an outline and fills with colour on the beat | video-shotcraft typography/outline-word-fill; HyperFrames outline-draw | built |
 
 ## 2. Change between shots
 
