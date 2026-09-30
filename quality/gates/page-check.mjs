@@ -17,6 +17,7 @@
 //   cut-off-beat             a detected cut is early or late against the music beat grid
 //   cut-off-reference        a cut is early or late against the reference video
 //   text-low-contrast        on-screen text under WCAG contrast against its own background
+//   text-clipped             glyph ink sticks out of an overflow, clip-path or mask box by more than 2 px while still
 //   font-fallback            text painted in a family with no loaded @font-face
 //   loop-seam                <meta name="loop" content="true">: the last frame does not flow into the first
 import fs from 'node:fs';
@@ -32,6 +33,7 @@ import { readPageMeta } from '../../harness/media/render-page.mjs';
 import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { decodeMono, envelopeOf, onsetsOf, meanDb } from '../../harness/lib/audio-onsets.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
+import { sampleText, clippedGlyphs } from '../../harness/lib/text-timing.mjs';
 import { contrastRatio, ensureContrast } from '../../core/color/index.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -284,6 +286,22 @@ async function checkLive(ctx) {
   fontFindings(rows, ctx.fps, ctx.f);
 }
 
+export function clipMessage(c) {
+  return `"${c.text}" sticks out of its ${c.kind} box by ${c.px.toFixed(0)} px at the ${c.side}: the glyphs are cut`;
+}
+
+async function checkClipped(ctx) {
+  const { openPage, settle, resolveFrame } = await import('../../harness/media/render-page.mjs');
+  const opened = await openPage(ctx.page, resolveFrame(ctx.page, {}));
+  try {
+    await opened.page.goto(opened.url, { waitUntil: 'load' });
+    await settle(opened.page);
+    for (const c of clippedGlyphs(await sampleText(opened.page, ctx.dur, 0.1))) {
+      ctx.f.warn('text-clipped', clipMessage(c), { at: fmtT(c.t, ctx.fps), fix: `grow the ${c.kind} box by ${Math.ceil(c.px)} px on the ${c.side}, or raise the line-height so the glyphs fit.` });
+    }
+  } finally { await opened.close(); }
+}
+
 function checkDeadStops(ctx) {
   for (const d of detectDeadStops(ctx.series, ctx.cutTimes)) {
     ctx.f.warn('dead-stop', `motion drops from ${d.from.toFixed(1)} to ${d.to.toFixed(1)} in one frame: a fast move stops dead`,
@@ -447,7 +465,7 @@ async function main() {
   if (!skip.has('cuts') && ctx.cutTimes.length) checkCutsAgainstBeats(ctx);
   if (!skip.has('cuts') && ctx.ref && fs.existsSync(ctx.ref)) checkReference(ctx);
   if (!skip.has('text')) checkText(ctx);
-  if (!skip.has('live') && page) await checkLive(ctx);
+  if (!skip.has('live') && page) { await checkLive(ctx); await checkClipped(ctx); }
   else if (!page) ctx.notes.push('contrast, fonts, audio cues and meta checks need the page: pass page.html, or render to out/<film>.mp4 with films/<film>/page.html beside it');
   if (page && readPageMeta(page, 'loop') === 'true') checkLoop(ctx);
 
