@@ -56,7 +56,7 @@ function framedPage(aspect) {
 // ---- actions: the same vawe verbs an agent runs ------------------------------------------------------
 const ACTIONS = {
   draft: (aspect) => ['dev', pageRel, ...(aspect ? ['--aspect', aspect] : [])],
-  final: () => ['ship', pageRel],
+  final: () => ['ship', pageRel, '--wait'],
   critique: () => ['critique', pageRel],
 };
 let job = null;
