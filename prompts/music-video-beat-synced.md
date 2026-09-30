@@ -49,9 +49,10 @@ wordmark, then a fade to black on the last downbeat.
    sum of springs (track(t, keys, k, d) from core/motion/springs.js).
 3. Music: <audio src="song.mp3" data-at="0" data-gain="-3" data-fade-out="0.4">. It is never played
    live; the renderer mixes it offline and normalises the master to -14 LUFS.
-4. Hits: <audio data-synth="impact" data-at="<beat>"> on the drop, "pluck" on UI beats, "riser" for
-   the two bars before the drop, "whoosh" on a whip. Place each by its measured peak, 30 ms early.
-   Keep the effects under the music (data-gain="-8").
+4. Cues: the song carries the hits, so the picture adds almost nothing. Soft ticks
+   (<audio data-synth="pluck" data-at="<beat>" data-gain="-28">) on a few UI beats and one "swell"
+   (-24 dB) ending on the drop. Place each by its measured peak, 30 ms early. Name each beat once in
+   CSS (--beat-3: 5.42s) and read it from every delay in that beat.
 5. Real footage, if any: extract clips to frame sequences with ffmpeg and swap <img src> per frame in
    seek(t); await the decode before returning.
 6. Render one frame per beat first (bin/vawe dev <page>). Fix anything off the grid.

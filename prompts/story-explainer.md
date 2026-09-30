@@ -49,8 +49,9 @@ is a word boundary from the timings file, not a guess. Show me the list before c
 3. Numbers count with a [[f, v]] table and kf(t, table, ease) from core/motion/springs.js, so the
    count is a pure function of time.
 4. Captions: one <p> per line, timed with the same table as the narration. No em dash on screen.
-5. Sound: <audio data-synth="pluck"> on each label, "success" on a completed build, "swell" under a
-   reveal. Narration: <audio src="vo.mp3" data-at="0">; music under it at data-gain="-12".
+5. Sound: a soft tick (<audio data-synth="pluck" data-gain="-28">) on the labels that matter, not
+   every one; one "swell" (-24 dB) under the reveal. Narration: <audio src="vo.mp3" data-at="0">;
+   music under it at data-gain="-12".
 6. Draft, then read the sheet: bin/vawe dev films/<name>/page.html.
 </build>
 

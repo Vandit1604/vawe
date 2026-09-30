@@ -377,6 +377,19 @@ export const CUES = {
 };
 
 /**
+ * Default mix gain (dB) per voice, applied by harness/media/page-audio.mjs when an <audio> tag has no
+ * data-gain. A cue is normalised to -2 dBFS before this, so these are close to its peak level under
+ * a bed at -3. UI cues sit at -26 and swells at -22: felt, not noticed. The weight voices default to
+ * -18 so even the loudest suggestion is not a hit; data-gain raises any of them on purpose.
+ */
+export const DEFAULT_GAIN_DB = {
+  pluck: -26, chime: -26, sparkle: -26, droplet: -26, bloom: -26, success: -26, ready: -26,
+  whoosh: -22, riser: -22, swell: -22,
+  impact: -18, drop: -18, braam: -18,
+};
+for (const name of Object.keys(CUES)) if (!(name in DEFAULT_GAIN_DB)) throw new Error(`audio: voice "${name}" has no DEFAULT_GAIN_DB entry`);
+
+/**
  * Music bed: a seamless ambient loop built from a chord, a slow tremolo and an optional pulse.
  * Every partial is snapped to an integer number of cycles over the loop so the seam is inaudible.
  * Parameterized so a brand's bed is numbers, not a downloaded track.

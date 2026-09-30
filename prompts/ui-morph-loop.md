@@ -47,8 +47,9 @@ beat, what the cursor does, what the sound is. Show me that grid before code.
    trailing one. Same for the toggle knob.
 4. Drags are direct manipulation: while the cursor is held, the value comes from its position; on
    release it springs back from wherever it was.
-5. Sounds: <audio data-synth="pluck" data-at="<beat>"> for a click, "chime" for a success, "droplet"
-   for a toggle. Place each by its measured peak, not its file start.
+5. Sounds: a soft tick (<audio data-synth="pluck" data-at="<beat>" data-gain="-28">) for a click,
+   "droplet" (-28 dB) for a toggle, nothing on most states. Place each by its measured peak, not its
+   file start. Name each beat once in CSS (--beat-4: 3.6s) and read it from every delay in that beat.
 6. Render one frame per beat before the full render: bin/vawe dev <page>. Fix anything off the
    grid, cramped or hard to read.
 </build>
