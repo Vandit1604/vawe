@@ -26,7 +26,7 @@ const CUE_SPREAD_DB = 6;
 const BED_LUFS = -14;
 const BED_PEAK_DB = -1;
 const CUE_ONLY_LUFS = -20;
-const CUE_ONLY_PEAK_DB = -6;
+const CUE_ONLY_PEAK_DB = -9;
 
 function run(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -154,14 +154,14 @@ function lastJson(stderr) {
 }
 
 /**
- * masterTarget({ specs, explicit, truePeak, mixLufs }) -> { loudness, truePeak, why }. Pure.
- * An explicit loudness (meta or caller) wins; else a bed or voice masters to -14 LUFS; else the mix is
- * never raised: min(-20, mixLufs).
+ * masterTarget({ specs, explicit, truePeak }) -> { loudness, truePeak, why }. Pure.
+ * An explicit loudness (meta or caller) wins; else a bed or voice masters to -14 LUFS; else a cue-only film
+ * masters to -20 LUFS, -9 dBTP (loudnorm allows TP from -9 to 0).
  */
-export function masterTarget({ specs, explicit, truePeak, mixLufs }) {
+export function masterTarget({ specs, explicit, truePeak }) {
   if (explicit !== null) return { loudness: explicit, truePeak: truePeak ?? BED_PEAK_DB, why: 'explicit loudness' };
   if (specs.some((s) => s.role === 'music' || s.role === 'vo')) return { loudness: BED_LUFS, truePeak: truePeak ?? BED_PEAK_DB, why: 'film has a music bed or voice' };
-  return { loudness: Math.min(CUE_ONLY_LUFS, mixLufs), truePeak: truePeak ?? CUE_ONLY_PEAK_DB, why: 'cue-only film, never raised' };
+  return { loudness: CUE_ONLY_LUFS, truePeak: truePeak ?? CUE_ONLY_PEAK_DB, why: 'cue-only film: -20 LUFS, felt not noticed' };
 }
 
 function measureMix(mixWav, target) {
@@ -195,7 +195,7 @@ export async function mixAndMux({ specs, duration, video, out, loudness = null, 
     run('ffmpeg', ['-y', '-loglevel', 'error', ...tracks.flatMap((t) => ['-i', t.file]), '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_f32le', mixWav]);
 
     const first = measureMix(mixWav, { loudness: BED_LUFS, truePeak: BED_PEAK_DB });
-    const chosen = masterTarget({ specs, explicit: loudness, truePeak, mixLufs: parseFloat(first.input_i) > -70 ? parseFloat(first.input_i) : CUE_ONLY_LUFS });
+    const chosen = masterTarget({ specs, explicit: loudness, truePeak });
     console.log(`page-audio: master ${chosen.loudness} LUFS, ${chosen.truePeak} dBTP (${chosen.why}; mix was ${first.input_i} LUFS)`);
     const target = `I=${chosen.loudness}:TP=${chosen.truePeak}:LRA=11`;
     const p1 = chosen.loudness === BED_LUFS && chosen.truePeak === BED_PEAK_DB ? first : measureMix(mixWav, chosen);

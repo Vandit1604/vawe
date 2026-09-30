@@ -49,7 +49,7 @@ const ebur = (file) => {
   return { I: parseFloat(s.match(/I:\s+(-?[\d.]+) LUFS/)[1]), peak: parseFloat(s.match(/Peak:\s+(-?[\d.]+) dBFS/)[1]) };
 };
 
-test('a cue-only film with quiet cues is never raised, and an explicit loudness still wins', async () => {
+test('a cue-only film masters to about -20 LUFS under a -9 dBTP cap, and an explicit loudness still wins', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'page-audio-quiet-'));
   try {
     const video = path.join(dir, 'silent.mp4');
@@ -62,8 +62,8 @@ test('a cue-only film with quiet cues is never raised, and an explicit loudness 
     await mixAndMux({ specs, duration: 5, video, out: loud, loudness: -14 });
     const a = ebur(auto), l = ebur(loud);
     console.log(`cue-only auto ${a.I} LUFS peak ${a.peak}; explicit -14: ${l.I} LUFS peak ${l.peak}`);
-    assert.ok(a.I <= -20.5, `cue-only master ${a.I} LUFS was raised`);
-    assert.ok(a.peak <= -6, `cue-only peak ${a.peak} dBFS is above -6`);
+    assert.ok(Math.abs(a.I + 20) <= 1.5, `cue-only master ${a.I} LUFS is not about -20`);
+    assert.ok(a.peak <= -8.5, `cue-only peak ${a.peak} dBFS is above -9`);
     assert.ok(l.I > a.I + 5, `explicit -14 gave ${l.I} LUFS, auto gave ${a.I}`);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
