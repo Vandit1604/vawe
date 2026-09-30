@@ -85,3 +85,4 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | notification-pop | a notification drops in and settles | to be captured | built |
 | chart-build | a chart draws its bars or line in sequence | to be captured | built |
 | before-after-wipe | a scan line reveals the after state over the before state | video-shotcraft data/before-after-slider-scrub; HyperFrames before-after-wipe | built |
+| skeleton-reveal | grey loading blocks shimmer, then resolve into real content one region at a time | video-shotcraft ui-entrance/skeleton-reveal; HyperFrames skeleton-reveal | built |
