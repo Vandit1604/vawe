@@ -15,10 +15,12 @@ import { useEffect, useRef } from "react";
  */
 export function Clip({
   src,
+  webm,
   poster,
   className,
 }: {
   src: string;
+  webm?: string;
   poster?: string;
   className?: string;
 }) {
@@ -66,16 +68,28 @@ export function Clip({
     };
   }, []);
 
+  // With reduced motion the clip holds its poster until a tap, and a second tap stops it.
+  const tap = () => {
+    const v = ref.current;
+    if (!v || !window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (v.paused) void v.play().catch(() => {});
+    else v.pause();
+  };
+
   return (
     <video
       ref={ref}
-      src={src}
+      src={webm ? undefined : src}
       poster={poster}
       className={className}
+      onClick={tap}
       loop
       muted
       playsInline
       preload="none"
-    />
+    >
+      {webm ? <source src={webm} type="video/webm" /> : null}
+      {webm ? <source src={src} type="video/mp4" /> : null}
+    </video>
   );
 }

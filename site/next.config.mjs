@@ -37,13 +37,13 @@ const nextConfig = {
         destination: "https://vawe.dev/:path*",
         permanent: true,
       },
-      // The JSON engine's pages are gone. /arsenal and the older URLs it absorbed wait for the planned
-      // /moves gallery, so they are temporary; the rest are permanent. :path* also matches the bare route.
-      { source: "/arsenal/:path*", destination: "/", permanent: false },
-      { source: "/blocks/:path*", destination: "/", permanent: false },
-      { source: "/showcase/effects/:path*", destination: "/", permanent: false },
-      { source: "/showcase/type", destination: "/", permanent: false },
-      { source: "/type", destination: "/", permanent: false },
+      // The JSON engine's pages are gone. /arsenal and the older URLs it absorbed land on /moves; the
+      // rest go home. :path* also matches the bare route.
+      { source: "/arsenal/:path*", destination: "/moves", permanent: true },
+      { source: "/blocks/:path*", destination: "/moves", permanent: true },
+      { source: "/showcase/effects/:path*", destination: "/moves", permanent: true },
+      { source: "/showcase/type", destination: "/moves", permanent: true },
+      { source: "/type", destination: "/moves", permanent: true },
       { source: "/editor/:path*", destination: "/", permanent: true },
       { source: "/playground/:path*", destination: "/", permanent: true },
       { source: "/json-to-video", destination: "/", permanent: true },

@@ -7,6 +7,7 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [Home](https://vawe.dev/): Write a web page, get a film. Rendered films, how a page becomes a film, and questions.
 - [features](https://vawe.dev/features): The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.
 - [showcase](https://vawe.dev/showcase): Films rendered by vawe, and one film rendered to three canvases.
+- [moves](https://vawe.dev/moves): Proven motion moves, each a 1 to 2 s clip and one markdown file an agent copies. Every move file is listed under Moves below.
 - [determinism](https://vawe.dev/determinism): A page seeked, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true and how it checks it.
 - [ai-agents](https://vawe.dev/ai-agents): An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges the result.
 - [remotion-alternatives](https://vawe.dev/remotion-alternatives): "Remotion alternative" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what Vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.
@@ -17,3 +18,77 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 
 ## Docs
 - [Docs](https://vawe.dev/docs): the documentation site.
+
+## Moves
+Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.
+
+- [Mask rise](https://vawe.dev/moves/mask-rise.md): a line of type enters from under an invisible edge; the mask box is tall enough for descenders
+- [Tracking collapse](https://vawe.dev/moves/tracking-collapse.md): a title or wordmark arrives: letters converge from wide tracking while the word sharpens
+- [Caret typing](https://vawe.dev/moves/caret-typing.md): a command, a prompt, a name typed in; the caret moves with each character then becomes the next element
+- [Per-letter stagger](https://vawe.dev/moves/letter-stagger.md): a word lands letter by letter, 45 ms apart, on one exact curve
+- [Scale punch](https://vawe.dev/moves/scale-punch.md): the hero word hits from 1.4x and recoils on the overshoot curve; a full stop pops after it
+- [Split-flap resolve](https://vawe.dev/moves/flap-resolve.md): a name or number is decided: each letter is a tile that flips through seeded glyphs on a hinge and locks left to right
+- [Word swap slot](https://vawe.dev/moves/word-swap-slot.md): one word in a held sentence rolls through 3 or 4 values and lands; the sentence reflows its width
+- [Blur word cascade](https://vawe.dev/moves/blur-word-cascade.md): copy resolves word by word from blur with a slight rise; no mask, so nothing cuts a descender
+- [Text as mask](https://vawe.dev/moves/text-as-mask.md): the type is a window onto a rich picture: the frame opens tight on image, pulls back to the title, and the layers keep moving inside the fixed letters
+- [Outline fill](https://vawe.dev/moves/outline-fill.md): one hero word arrives as an outline, letter by letter, then an accent floods each letter from its baseline on the beat
+- [Strikethrough replace](https://vawe.dev/moves/strikethrough-replace.md): an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character
+- [Grid stagger wave](https://vawe.dev/moves/grid-stagger-wave.md): a title arrives with many things around it: a grid of tiles enters in a wave by distance from the title, 70 ms per tile, each tile pushed out from the source on a spring
+- [Cut on motion](https://vawe.dev/moves/cut-on-motion.md): a moving shape carries the eye across a hard cut into a new scene
+- [Push with directional blur](https://vawe.dev/moves/push-blur.md): a panel pushes in with a directional blur that follows its speed, set per frame
+- [Exits faster than entrances](https://vawe.dev/moves/exit-fast.md): the pair every beat needs: arrive fast and land soft, leave faster and shorter
+- [Chain beats](https://vawe.dev/moves/chain-beats.md): beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule)
+- [Whip pan](https://vawe.dev/moves/whip-pan.md): the next shot is to the side: a fast sideways pan with a blur that follows its speed hides the seam
+- [Match cut](https://vawe.dev/moves/match-cut.md): one shape crosses a scene change at the same place, size and angle and changes meaning (spinner ring, finished ring)
+- [Iris wipe](https://vawe.dev/moves/iris-wipe.md): a circle closes on the click or mark the eye is on and uncovers the next scene
+- [Flash cut](https://vawe.dev/moves/flash-cut.md): a hard cut on a beat: a three-frame white peak hides the cut and the new shot settles from overexposed
+- [Stack cover](https://vawe.dev/moves/stack-cover.md): the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap
+- [Split reveal](https://vawe.dev/moves/split-reveal.md): the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear
+- [Slice shift](https://vawe.dev/moves/slice-shift.md): horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot
+- [Type fill transition](https://vawe.dev/moves/type-fill-transition.md): a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground
+- [Colour block wipe](https://vawe.dev/moves/color-block-wipe.md): a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind
+- [Zoom through](https://vawe.dev/moves/zoom-through.md): the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures
+- [Speed ramp freeze](https://vawe.dev/moves/speed-ramp-freeze.md): a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur
+- [Liquid wipe](https://vawe.dev/moves/liquid-wipe.md): a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot
+- [Grid tile flip](https://vawe.dev/moves/grid-tile-flip.md): a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back
+- [Luma matte dissolve](https://vawe.dev/moves/luma-matte-dissolve.md): the next shot arrives through its own brightness: an SVG luminance matte with a falling threshold shows its bright areas first, then midtones, and its dark ground last
+- [Smear stretch](https://vawe.dev/moves/smear-stretch.md): an elastic cut: shot A's content stretches into streaks on an ease-in, the cut lands at the peak, and shot B snaps back from the streak on an under-damped spring, thinning and bulging like rubber
+- [Shape morph wipe](https://vawe.dev/moves/shape-morph-wipe.md): the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame
+- [Spin transition](https://vawe.dev/moves/spin-transition.md): a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures
+- [Word colour sweep](https://vawe.dev/moves/word-sweep.md): the accent runs word by word in reading order and stays on the target word
+- [Weight morph](https://vawe.dev/moves/weight-morph.md): one word gets heavier on a real variable-font axis; the glyphs reshape, nothing is scaled
+- [Marker highlight](https://vawe.dev/moves/marker-highlight.md): a highlighter bar wipes behind one phrase and the text flips dark for contrast
+- [Underline draw](https://vawe.dev/moves/underline-draw.md): a line draws under the key word, left to right, fast in and slow out
+- [Bracket callout](https://vawe.dev/moves/bracket-callout.md): corner brackets fly in and snap onto a word or a UI part with a small overshoot
+- [Spotlight dim](https://vawe.dev/moves/spotlight-dim.md): the frame dims around one target: a hole closes from the full frame onto it and its shadow is the dim
+- [Push in](https://vawe.dev/moves/push-in.md): a slow scale toward the subject over a beat; the ground scales less so the layers separate
+- [UI focus zoom](https://vawe.dev/moves/ui-focus-zoom.md): zoom onto one part of a captured UI: the cursor lands, then one translate and one scale put the part in the middle
+- [Caret follow](https://vawe.dev/moves/caret-follow.md): the camera trails the typing caret on a soft spring, so a long line stays readable at close range
+- [Pull back reveal](https://vawe.dev/moves/pull-back-reveal.md): open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even
+- [Parallax dive](https://vawe.dev/moves/parallax-dive.md): the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves
+- [Rack focus](https://vawe.dev/moves/rack-focus.md): focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs
+- [Drift hold](https://vawe.dev/moves/drift-hold.md): a very slow seeded drift per layer so a quiet frame never sits dead
+- [Pan stations](https://vawe.dev/moves/pan-stations.md): several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them
+- [Crash zoom](https://vawe.dev/moves/crash-zoom.md): one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil
+- [Logo sting](https://vawe.dev/moves/logo-sting.md): a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame
+- [Wordmark cascade](https://vawe.dev/moves/wordmark-cascade.md): the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail
+- [Mark trace](https://vawe.dev/moves/mark-trace.md): a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark
+- [Calm lockup](https://vawe.dev/moves/calm-lockup.md): the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats
+- [CTA pop](https://vawe.dev/moves/cta-pop.md): the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click
+- [Thanks sweep](https://vawe.dev/moves/thanks-sweep.md): a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts
+- [UI strip away](https://vawe.dev/moves/ui-strip-away.md): the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup
+- [Logo wall](https://vawe.dev/moves/logo-wall.md): the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land
+- [Clip expand from a point](https://vawe.dev/moves/clip-expand.md): a panel or capture grows out of one point the eye is already on
+- [Cursor click](https://vawe.dev/moves/cursor-click.md): a cursor travels a bowed path to a control, the control lights and dips on the press, the label rolls to its result, the cursor leaves
+- [Count up](https://vawe.dev/moves/count-up.md): a number is the proof: each digit is a wheel that rolls to its value with speed blur, then a delta chip and a sparkline
+- [Card assemble](https://vawe.dev/moves/card-assemble.md): a UI card builds: the shell lands, then each part arrives from the side of its slot, the accent action last
+- [Notification pop](https://vawe.dev/moves/notification-pop.md): a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came
+- [Chart build](https://vawe.dev/moves/chart-build.md): gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it
+- [Before and after wipe](https://vawe.dev/moves/before-after-wipe.md): the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve
+- [Skeleton reveal](https://vawe.dev/moves/skeleton-reveal.md): grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart
+- [AI stream response](https://vawe.dev/moves/ai-stream-response.md): a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk
+- [Overwhelm collapse](https://vawe.dev/moves/overwhelm-collapse.md): the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens
+- [Success check](https://vawe.dev/moves/success-check.md): a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it
+- [Integration hub](https://vawe.dev/moves/integration-hub.md): the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub
+- [Device tilt stage](https://vawe.dev/moves/device-tilt-stage.md): the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle
+- [Command palette summon](https://vawe.dev/moves/command-palette-summon.md): the keyboard-first beat: the app dims, a Cmd+K palette drops in on a spring, a query types, non-matching rows collapse to zero height, Enter presses the chosen row and the palette leaves fast

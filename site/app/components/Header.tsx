@@ -11,6 +11,7 @@ export function WaveGlyph({ className = "glyph" }: { className?: string }) {
 // Ordered by what a visitor came for: the films first, then what the engine decides.
 const NAV = [
   { href: "/showcase", label: "Films", key: "showcase" },
+  { href: "/moves", label: "Moves", key: "moves" },
   { href: "/features", label: "Features", key: "features" },
 ];
 
