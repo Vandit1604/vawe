@@ -168,6 +168,14 @@ export const VERBS = [
     build: (v) => [{ script: 'harness/dev/doctor.mjs', args: [...(v.quiet ? ['--quiet'] : []), ...(v.json ? ['--json'] : [])] }],
   },
   {
+    name: 'moves', summary: 'render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4 (640 px, 60 fps) in parallel; flags stale clips',
+    positional: [],
+    flags: [{ name: 'only', type: 'string', help: 'render one move by name, for example weight-morph' }],
+    example: 'vawe moves --only weight-morph',
+    build: (v) => [{ script: 'harness/media/render-moves.mjs', args: opt('--only', v.only) }],
+    next: () => 'look at a clip in prompts/moves/ before you commit it',
+  },
+  {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
     positional: [], flags: [],
     example: 'vawe e2e',
