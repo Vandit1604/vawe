@@ -1,0 +1,76 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: integration hub</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .wires { position: absolute; inset: 0; width: 100vw; height: 100vh; overflow: visible; }
+  .wires line { stroke: var(--bar); stroke-width: calc(var(--u) * 0.28); stroke-linecap: round; }
+  .wires circle { fill: var(--accent); }
+  .tool, .hub { position: absolute; left: 0; top: 0; --size: calc(var(--u) * 12); margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2); }
+  .tool .icon { width: calc(var(--u) * 6); height: calc(var(--u) * 6); stroke-width: 1.8; }
+  .hub { --size: calc(var(--u) * 20); border-radius: calc(var(--u) * 5.4); }
+  .hub .icon { width: calc(var(--u) * 11); height: calc(var(--u) * 11); stroke-width: 2.2; }
+  .name { position: absolute; left: 50vw; top: calc(50vh + var(--u) * 14.5); translate: -50% 0; font: 700 var(--t-lead)/1 var(--sans); letter-spacing: -0.02em; }
+</style>
+</head>
+<body>
+<svg class="wires"></svg>
+<div class="chip accent-fill hub"><svg class="icon" viewBox="0 0 24 24"><path d="M4 15c2.5 0 3-6 5.5-6s3 6 5.5 6 3-6 5-6"/></svg></div>
+<div class="name">Relay</div>
+<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M5 9l7-5 7 5M5 15l7-5 7 5M5 21l7-5 7 5"/></svg></div>
+<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg></div>
+<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/></svg></div>
+<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M6 20V11M12 20V4M18 20v-6"/></svg></div>
+<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 16L16 8"/></svg></div>
+<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h5l2-6 2 12 2-6h5"/></svg></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { CURVES } from '/core/motion/springs.js';
+const E = CURVES.expoOut, W = innerWidth, H = innerHeight, cx = W / 2, cy = H / 2;
+const clamp = (u) => Math.min(1, Math.max(0, u));
+const R = 0.36 * H, FLY = 0.62, STAGGER = 0.05, T0 = 0.05, WIRE = 0.95, WIRE_DUR = 0.22;
+const tools = [...document.querySelectorAll('.tool')], hub = document.querySelector('.hub');
+const svg = document.querySelector('.wires'), NS = 'http://www.w3.org/2000/svg';
+// each tool lands on the ring at angle a; it starts past the frame edge on the same bearing, and the path bows sideways
+const plan = tools.map((el, i) => {
+  const a = -Math.PI / 2 + (i * 2 * Math.PI) / tools.length + Math.PI / 6;   // no wire points straight down through the name
+  const end = { x: cx + 1.5 * R * Math.cos(a), y: cy + R * Math.sin(a) };
+  const far = 1.25 * Math.max(W, H) / 2;
+  const start = { x: cx + far * 1.3 * Math.cos(a + 0.5), y: cy + far * Math.sin(a + 0.5) };
+  const bend = { x: cx + 2.1 * R * Math.cos(a - 0.35), y: cy + 1.4 * R * Math.sin(a - 0.35) };
+  const line = document.createElementNS(NS, 'line'), dot = document.createElementNS(NS, 'circle');
+  dot.setAttribute('r', (0.011 * H).toFixed(2));
+  svg.append(line, dot);
+  return { el, end, start, bend, line, dot, at: T0 + i * STAGGER, spin: (i % 2 ? 1 : -1) * 40 };
+});
+const quad = (p, q, r, u) => (1 - u) * (1 - u) * p + 2 * (1 - u) * u * q + u * u * r;
+vawe.onFrame((t) => {
+  const drift = 0.018 * t;                        // the whole map turns a little, so the held frame is never dead
+  const hs = 0.94 + 0.06 * E(clamp(t / 0.5)) + 0.05 * Math.sin(Math.PI * clamp((t - 1.38) / 0.22));
+  hub.style.transform = `translate(${cx}px, ${cy}px) scale(${hs.toFixed(4)})`;
+  for (const p of plan) {
+    const u = E(clamp((t - p.at) / FLY));
+    const c = Math.cos(drift), s = Math.sin(drift);
+    const ex = cx + (p.end.x - cx) * c - (p.end.y - cy) * s, ey = cy + (p.end.x - cx) * s + (p.end.y - cy) * c;
+    const x = quad(p.start.x, p.bend.x, ex, u), y = quad(p.start.y, p.bend.y, ey, u);
+    p.el.style.transform = `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${(p.spin * (1 - u)).toFixed(2)}deg)`;
+    // every wire draws in the same frames, from the tool toward the hub: one gesture, not six
+    const w = E(clamp((t - WIRE) / WIRE_DUR));
+    const d = Math.hypot(ex - cx, ey - cy), k0 = (0.115 * H) / d, k1 = 1 - (0.07 * H) / d;   // wire ends clear the hub and the chip
+    const lx = (k) => ex + (cx - ex) * (1 - k), ly = (k) => ey + (cy - ey) * (1 - k);
+    p.line.setAttribute('x1', lx(k1)); p.line.setAttribute('y1', ly(k1));
+    p.line.setAttribute('x2', lx(k1 - (k1 - k0) * w)); p.line.setAttribute('y2', ly(k1 - (k1 - k0) * w));
+    // a pulse rides each wire into the hub, then repeats
+    const ph = ((t - WIRE - WIRE_DUR - 0.02 * plan.indexOf(p)) / 0.5 + 1) % 1, on = t > WIRE + WIRE_DUR;
+    const kk = k1 - (k1 - k0) * ph;
+    p.dot.setAttribute('cx', lx(kk)); p.dot.setAttribute('cy', ly(kk));
+    p.dot.style.opacity = on ? Math.sin(Math.PI * ph).toFixed(3) : 0;
+  }
+});
+</script>
+</body>
+</html>

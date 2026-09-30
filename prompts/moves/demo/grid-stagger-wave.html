@@ -1,0 +1,56 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="brutal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<title>move: grid stagger wave</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .grid { position: absolute; inset: 0; padding: calc(var(--u) * 4); display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(4, 1fr); gap: calc(var(--u) * 2.2); }
+  .tile { display: grid; place-items: center; background: var(--surface); box-shadow: var(--ring), calc(var(--u) * 0.9) calc(var(--u) * 0.9) 0 #000; }
+  .tile .icon { width: calc(var(--u) * 8); height: calc(var(--u) * 8); stroke-width: 2.2; color: var(--ink); }
+  .title { grid-column: 2 / span 3; grid-row: 2 / span 2; place-items: end start; padding: var(--s3); background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge), var(--lift); }
+  .title b { font: 800 calc(var(--u) * 8.2)/0.95 var(--sans); letter-spacing: -0.04em; }
+</style>
+</head>
+<body>
+<div class="grid">
+  <div class="tile title"><b>Plugs into<br>everything.</b></div>
+</div>
+<template id="glyphs">
+  <svg class="icon" viewBox="0 0 24 24"><path d="M5 9l7-5 7 5M5 15l7-5 7 5M5 21l7-5 7 5"/></svg>
+  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>
+  <svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/></svg>
+  <svg class="icon" viewBox="0 0 24 24"><path d="M6 20V11M12 20V4M18 20v-6"/></svg>
+  <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 16L16 8"/></svg>
+  <svg class="icon" viewBox="0 0 24 24"><path d="M4 12h5l2-6 2 12 2-6h5"/></svg>
+  <svg class="icon" viewBox="0 0 24 24"><path d="M4 18L12 5l8 13z"/><path d="M9 14h6"/></svg>
+</template>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const grid = document.querySelector('.grid'), glyphs = [...document.getElementById('glyphs').content.children];
+const COLS = 8, ROWS = 4, src = { c: 2.5, r: 1.5 };   // the wave starts at the title tile's centre, in tile units
+const inTitle = (c, r) => c >= 1 && c <= 3 && r >= 1 && r <= 2;
+const settle = curveToLinear(CURVES.spring), fast = curveToLinear(CURVES.expoOut);
+const STEP = 70, T0 = 140;                                // ms per tile of distance: the wave front speed
+let n = 0;
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  if (inTitle(c, r)) continue;
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.style.gridArea = `${r + 1} / ${c + 1}`;
+  tile.append(glyphs[(n++ * 3) % glyphs.length].cloneNode(true));
+  grid.append(tile);
+  const dx = c - src.c, dy = r - src.r, d = Math.hypot(dx, dy);
+  // each tile starts pulled 30 percent of a tile toward the source and is pushed out by the front
+  tile.animate([{ translate: `${(-dx / d) * 30}% ${(-dy / d) * 30}%`, scale: 0.55 }, { translate: '0 0', scale: 1 }],
+    { duration: 520, delay: T0 + d * STEP, easing: settle, fill: 'both' });
+  tile.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: T0 + d * STEP, easing: 'linear', fill: 'both' });
+}
+const title = document.querySelector('.title');
+title.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 420, easing: fast, fill: 'both' });
+grid.animate([{ scale: 1 }, { scale: 1.025 }], { duration: 1600, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>

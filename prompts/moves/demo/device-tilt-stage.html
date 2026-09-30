@@ -1,0 +1,74 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="night">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: device tilt stage</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .stage { position: absolute; inset: 0; perspective: 150vh; perspective-origin: 50% 30%; }
+  .shadow { position: absolute; left: 50%; top: 78vh; width: 110vh; height: 9vh; margin-left: -55vh; border-radius: 50%; background: radial-gradient(closest-side, rgba(3, 1, 12, 0.7), rgba(3, 1, 12, 0)); }
+  .device { position: absolute; left: 50%; top: -5vh; width: 92vh; margin-left: -46vh; transform-style: preserve-3d; transform-origin: 50% 100%; }
+  .lid { position: relative; height: 58vh; padding: 1.6vh; border-radius: 2.2vh 2.2vh 0.6vh 0.6vh; background: #0b0917; box-shadow: inset 0 0 0 0.25vh #3a3456; transform-origin: 50% 100%; transform: rotateX(8deg); transform-style: preserve-3d; }
+  .screen { position: relative; height: 100%; overflow: hidden; border-radius: 1vh; background: var(--ground); display: grid; grid-template-columns: 17vh 1fr; }
+  .gloss { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(112deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.1) 47%, rgba(255, 255, 255, 0.03) 53%, rgba(255, 255, 255, 0) 60%) 0 0 / 300% 100% no-repeat; }
+  .base { position: absolute; left: -4vh; right: -4vh; top: 100%; height: 54vh; transform-origin: 50% 0; transform: rotateX(90deg); border-radius: 0 0 2.4vh 2.4vh; background: linear-gradient(180deg, #3b3560, #2a2547); box-shadow: inset 0 0 0 0.25vh #4a4470; }
+  .base .keys { position: absolute; left: 9vh; right: 9vh; top: 5vh; height: 28vh; border-radius: 1vh; background: repeating-linear-gradient(180deg, transparent 0 4.9vh, #2a2547 4.9vh 5.6vh), repeating-linear-gradient(90deg, #1a1630 0 5.2vh, #2a2547 5.2vh 5.9vh); }
+  .base .pad { position: absolute; left: 50%; width: 30vh; margin-left: -15vh; top: 36vh; height: 14vh; border-radius: 1.4vh; background: #332d55; box-shadow: inset 0 0 0 0.2vh #4a4470; }
+  nav { padding: 3vh 2vh; background: var(--surface); display: flex; flex-direction: column; gap: 1.6vh; }
+  nav i { display: block; height: 2vh; border-radius: 1vh; background: var(--raised); }
+  nav i.on { background: color-mix(in srgb, var(--accent) 70%, transparent); width: 70%; }
+  main { padding: 3.4vh 3.6vh; display: flex; flex-direction: column; gap: 2.6vh; }
+  main h1 { margin: 0; font: 700 5vh/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
+  .row { display: flex; gap: 2vh; flex: 1; }
+  .tile { flex: 1; border-radius: 1.4vh; background: var(--surface); box-shadow: var(--ring); padding: 1.8vh; display: flex; flex-direction: column; justify-content: flex-end; font: 600 2.6vh/1 var(--mono); color: var(--muted); }
+  .tile .thumb { flex: 1; margin-bottom: 1.6vh; border-radius: 0.8vh; background: linear-gradient(150deg, #3a2a6e, #1f1840); }
+  .tile.hot .thumb { background: linear-gradient(150deg, var(--accent), #b0602a); }
+  .bar { height: 1.2vh; border-radius: 1vh; background: var(--raised); overflow: hidden; }
+  .bar b { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; }
+  .meta { display: flex; justify-content: space-between; font: 600 2.6vh/1 var(--mono); color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="shadow"></div>
+  <div class="device">
+    <div class="lid"><div class="screen">
+      <nav><i class="on"></i><i></i><i style="width: 80%"></i><i style="width: 60%"></i></nav>
+      <main>
+        <h1>Launch film</h1>
+        <div class="row"><div class="tile hot"><div class="thumb"></div>16:9</div><div class="tile"><div class="thumb"></div>9:16</div><div class="tile"><div class="thumb"></div>1:1</div></div>
+        <div class="meta"><span>Rendering 3 aspects</span><span class="pct">72%</span></div>
+        <div class="bar"><b></b></div>
+      </main>
+      <div class="gloss"></div>
+    </div></div>
+    <div class="base"><div class="keys"></div><div class="pad"></div></div>
+  </div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { CURVES } from '/core/motion/springs.js';
+const S = CURVES.spring, clamp = (u) => Math.min(1, Math.max(0, u));
+const device = document.querySelector('.device'), gloss = document.querySelector('.gloss');
+const shadow = document.querySelector('.shadow'), fill = document.querySelector('.bar b'), pct = document.querySelector('.pct');
+const t0 = 0.05, dur = 1.45;
+const from = { y: 30, rx: -62, ry: -38, rz: 5, s: 0.62 }, to = { y: 0, rx: -16, ry: -8, rz: 0, s: 0.74 };   // y in vh, angles in degrees
+const lerp = (a, b, u) => a + (b - a) * u;
+vawe.onFrame((t) => {
+  const u = S(clamp((t - t0) / dur));
+  const float = Math.sin(t * 2.4) * 0.5 * clamp((t - 1.2) / 0.4);   // a slow bob and turn once it has landed
+  const y = lerp(from.y, to.y, u) + float, rx = lerp(from.rx, to.rx, u), ry = lerp(from.ry, to.ry, u) + float * 1.2;
+  device.style.transform = `translateY(${y}vh) rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${lerp(from.rz, to.rz, u)}deg) scale(${lerp(from.s, to.s, u)})`;
+  // the reflection slides across the glass as the lid turns: it is tied to the angle, not to time
+  gloss.style.backgroundPosition = `${(20 + (ry - from.ry) * 2.2).toFixed(2)}% 0`;
+  shadow.style.transform = `scale(${(0.7 + 0.3 * u).toFixed(3)}, ${(0.6 + 0.4 * u).toFixed(3)})`;
+  shadow.style.opacity = (0.4 + 0.6 * u).toFixed(3);
+  const p = 0.52 + 0.3 * clamp(t / 2);
+  fill.style.transform = `scaleX(${p.toFixed(4)})`;
+  pct.textContent = `${Math.round(p * 100)}%`;
+});
+</script>
+</body>
+</html>
