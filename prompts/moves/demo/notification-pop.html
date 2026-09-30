@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="field">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="2">
@@ -9,7 +9,7 @@
 <style>
   .note { display: flex; align-items: center; gap: var(--s3); width: calc(var(--u) * 150); padding: calc(var(--u) * 2.8); padding-right: var(--s4); border-radius: calc(var(--u) * 4.8); transform-origin: 50% 0; opacity: 0; }
   .note .chip { --size: calc(var(--u) * 13); border-radius: calc(var(--u) * 2); }
-  .note .icon { width: calc(var(--u) * 7); height: calc(var(--u) * 7); stroke: #fff; stroke-width: 2; }
+  .note .icon { width: calc(var(--u) * 7); height: calc(var(--u) * 7); stroke: var(--on-accent); stroke-width: 2; }
   .text { flex: 1; min-width: 0; }
   .title { font: 650 var(--t-lead)/1.15 var(--sans); letter-spacing: -0.015em; }
   .sub { margin-top: calc(var(--u) * 0.7); font: 500 var(--t-body)/1.25 var(--sans); color: var(--muted); }

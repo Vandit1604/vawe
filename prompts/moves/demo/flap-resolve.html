@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="vawe">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
@@ -18,7 +18,7 @@
   .glyph { position: absolute; left: 0; width: 100%; height: 200%; display: grid; place-items: center; font-size: 0.8em; }
   .bot .glyph { top: -100%; }
   .shade { position: absolute; inset: 0; background: #000; opacity: 0; }
-  .tile::after { content: ''; position: absolute; z-index: 9; left: 0; right: 0; top: calc(50% - 0.008em); height: 0.016em; background: #0c0b0f; }
+  .tile::after { content: ''; position: absolute; z-index: 9; left: 0; right: 0; top: calc(50% - 0.008em); height: 0.016em; background: var(--ground); }
 </style>
 </head>
 <body>

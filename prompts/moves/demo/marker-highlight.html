@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="paper">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
@@ -16,7 +16,7 @@
           animation-name: sweep; animation-duration: 0.55s; animation-delay: 0.3s;
           animation-timing-function: var(--sweep); animation-fill-mode: both; }
   .bar { position: absolute; inset: 0.14em -0.16em 0.02em; background: var(--accent); border-radius: 0.2em; transform: skewX(-7deg); }
-  .dark { position: absolute; inset: 0; color: var(--ground); }
+  .dark { position: absolute; inset: 0; color: var(--on-accent); }
   @keyframes sweep { to { --p: 112; } }
 </style>
 </head>

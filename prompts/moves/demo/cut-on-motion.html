@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="brutal">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1">
@@ -12,8 +12,8 @@
   .scene .lead { font-family: var(--mono); letter-spacing: -0.02em; }
   .before .lead { color: var(--muted); }
   /* the cut is a step at 50%: the scene under the shape changes, the shape does not stop */
-  .after { background: var(--ink); color: var(--ground); animation-name: cut; animation-duration: 1s; animation-timing-function: linear; animation-fill-mode: both; }
-  .after .lead { color: #6b6a72; }
+  .after { background: var(--paper); color: var(--paper-ink); animation-name: cut; animation-duration: 1s; animation-timing-function: linear; animation-fill-mode: both; }
+  .after .lead { color: var(--paper-muted); }
   @keyframes cut { 0%, 49.9% { opacity: 0; } 50%, 100% { opacity: 1; } }
 
   /* one shape, one path across both scenes; only its colour flips at the cut */
@@ -22,7 +22,7 @@
           animation-fill-mode: both, both; }
   /* a symmetric curve puts the shape mid-frame at peak speed exactly on the cut */
   @keyframes travel { to { translate: 118vw 0; } }
-  @keyframes flip { 0%, 49.9% { background: var(--accent); } 50%, 100% { background: var(--ground); } }
+  @keyframes flip { 0%, 49.9% { background: var(--accent); } 50%, 100% { background: var(--paper-ink); } }
 </style>
 </head>
 <body>

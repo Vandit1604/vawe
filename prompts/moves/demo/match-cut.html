@@ -1,25 +1,24 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="swiss">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.25">
 <title>move: match cut</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --paper: #ecebf1; }
   body { position: relative; display: block; }
 
   .shot { position: absolute; inset: 0; }
-  .b { background: var(--paper); color: var(--ground); opacity: 0; }
+  .b { background: var(--paper); color: var(--paper-ink); opacity: 0; }
   /* the same ring in both shots: same centre, radius, stroke and angle; only the ground and the meaning change */
   .ring { position: absolute; left: 33vw; top: 50vh; width: calc(var(--u) * 44); height: calc(var(--u) * 44); margin: calc(var(--u) * -22) 0 0 calc(var(--u) * -22); overflow: visible; }
   .ring circle { fill: none; stroke-width: 9; stroke-linecap: round; }
-  .a .ring circle { stroke: var(--ink); }
-  .b .ring circle { stroke: var(--ground); }
+  .a .ring circle { stroke: var(--accent); }
+  .b .ring circle { stroke: var(--accent); }
   .label { position: absolute; left: 33vw; top: 50vh; translate: -50% -50%; font: 700 calc(var(--u) * 11)/1 var(--sans); letter-spacing: -0.045em; }
   .side { position: absolute; left: 58vw; top: calc(var(--u) * 41); }
   .side h2 { margin: 0 0 var(--s2); font: 700 var(--t-title)/1 var(--sans); letter-spacing: -0.035em; }
-  .side p { margin: 0; font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.03em; color: #6b6a72; }
+  .side p { margin: 0; font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.03em; color: var(--paper-muted); }
   .a .side p { color: var(--muted); }
 </style>
 </head>

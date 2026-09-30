@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="night">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.1">
@@ -13,7 +13,7 @@
   .tile b { display: block; font: 700 calc(var(--u) * 14)/1 var(--sans); letter-spacing: -0.045em; }
   .t1 { left: 14vw; top: calc(var(--u) * 14); } .t2 { left: 51vw; top: calc(var(--u) * 14); } .t3 { left: 14vw; top: calc(var(--u) * 52); } .t4 { left: 51vw; top: calc(var(--u) * 52); }
   /* the hole is the spotlight: its shadow is the dim, so nothing but the target is left lit */
-  .hole { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; border-radius: 0; box-shadow: 0 0 0 100vmax rgba(10, 9, 13, 0.8); pointer-events: none; }
+  .hole { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; border-radius: 0; box-shadow: 0 0 0 100vmax var(--dim); pointer-events: none; }
 </style>
 </head>
 <body>
