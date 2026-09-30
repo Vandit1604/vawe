@@ -13,7 +13,6 @@ const out = path.join(os.tmpdir(), `invariants-${process.pid}.mp4`);
 const render = (page) => spawnSync(process.execPath, ['harness/media/render-page.mjs', page, out], { encoding: 'utf8' });
 
 const FAILS = [
-  ['invariants/invariant-blank-bad.html', /^✗ frames \d+-\d+ .* blank; declare it with <meta name="blank"/],
   ['invariants/invariant-audio-bad.html', /^✗ <audio> at 0.5 s: data-synth="key" is not a voice/],
   ['invariants/invariant-audio-missing.html', /^✗ <audio> at 0.2 s: src="missing.wav" .* does not exist/],
   ['invariants/invariant-font-bad.html', /^✗ font Nope failed to load/],
@@ -28,6 +27,12 @@ for (const [page, line] of FAILS) {
     assert.equal(r.stderr.trim().split('\n').length, 1);
   });
 }
+
+test('a blank run in the middle renders and advises with the range to declare', () => {
+  const r = render(path.join(dir, 'invariants/invariant-blank-bad.html'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stderr, /~ frames \d+-\d+ .* blank; declare it with <meta name="blank"/);
+});
 
 for (const page of ['invariant-blank-ok.html', 'invariant-assert-ok.html']) {
   test(`${page} renders`, () => {

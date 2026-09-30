@@ -549,7 +549,10 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       die(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
     const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
-    if (late.length) { fs.rmSync(tmpOut, { force: true }); throw new InvariantError(late); }
+    // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
+    const broken = late.filter((l) => !l.includes(' blank;'));
+    if (broken.length) { fs.rmSync(tmpOut, { force: true }); throw new InvariantError(broken); }
+    for (const l of late) if (l.includes(' blank;')) console.error(`  ~ ${l}`);
     const mixed = wantAudio && await muxPageAudio(page, pagePath, { video: tmpOut, out: outPath, duration: dur, explicit: opts.audio === true });
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
