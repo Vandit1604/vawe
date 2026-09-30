@@ -292,3 +292,40 @@ if (import.meta.url === `file://${process.argv[1]}` && process.argv.includes('--
   console.log('    and appending it did not shift the brand/asset-fidelity exclusion in abRubric');
   process.exit(0);
 }
+
+export const FRESH_AXES = {
+  film: [
+    ['hook', 'the first second gives one clear, strong thing to look at'],
+    ['motion', 'curves, continuity between moves, overlap; nothing snaps or stops dead'],
+    ['scenes', 'the world turns every 1 to 2 beats; count the distinct worlds and say the number'],
+    ['type', 'faces, scale contrast, spacing, hierarchy, reading time'],
+    ['colour', 'palette discipline, light, contrast, one accent used with intent'],
+    ['sound', 'final only: the loudness line, peaks, sound that marks the beats (score 0 when the stage is not final)'],
+    ['pace', 'density per frame and rhythm; readable holds, no dead air'],
+    ['expensive', 'looks made by a person with taste, not assembled from a template'],
+  ],
+  stills: [
+    ['concept', 'one idea, said in one glance, different from the other directions'],
+    ['focal', 'one clear focal point and eye path'],
+    ['colour', 'palette discipline and light'],
+    ['type', 'faces, scale, hierarchy'],
+    ['template', 'distance from a generic template (10 = unmistakably its own)'],
+  ],
+};
+
+/** The scoring instructions for a fresh judge. `stage` is stills, draft or final. */
+export function freshRubric({ stage }) {
+  const axes = FRESH_AXES[stage === 'stills' ? 'stills' : 'film'];
+  const list = axes.map(([k, d]) => `- ${k}: ${d}`).join('\n');
+  return `Score each axis 1 to 10. Default to reject: 8 is good work, 10 is rare, and a score under 8 needs a fix.
+The reader must be able to check every score, so name the moment you looked at.
+Axes:
+${list}
+
+Return ONLY one JSON object, no prose around it:
+{"scores":{${axes.map(([k]) => `"${k}":n`).join(',')}},
+ "worlds":n or null,
+ "fixes":[{"axis":"...","score":n,"at":"seconds like 1.4, or the frame name for stills","fix":"ONE concrete change an author can make in one edit"}],
+ "fixFirst":"the one fix with the most effect"}
+Add one entry to "fixes" for every axis scored under 8, and none for the others.`;
+}
