@@ -1,18 +1,11 @@
 /* THE LANDING PAGE (site/IDENTITY.md): the split hero, then scrolling sections in studio panels.
-   The hero plays a move clip from /moves (components/HeroSplit.tsx). */
+   The hero plays the three.js example film from /hero (components/HeroSplit.tsx). */
 
 /* ===== SPLIT HERO ======================================================================== */
 .hs{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:48px;align-items:center;padding:40px 0 24px}
 .hs h1{font-size:clamp(2.2rem,4.2vw,3.6rem);font-weight:800;letter-spacing:-.03em;line-height:1.02;text-wrap:balance}
 .hs-sub{color:var(--ink-2);font-size:17px;line-height:1.55;margin-top:16px;max-width:42ch;text-wrap:pretty}
 .hs-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
-.hs-list{list-style:none;margin-top:32px}
-.hs-list button{width:100%;display:flex;justify-content:space-between;gap:12px;padding:10px 0;border:0;border-top:1px solid var(--line);
-  background:none;color:var(--muted);font:inherit;text-align:left;cursor:pointer;transition:color .15s ease}
-.hs-list button:hover,.hs-list button[aria-current="true"]{color:var(--ink)}
-.hs-list-title{font-family:var(--font-title);font-weight:500;font-size:13px}
-.hs-list button[aria-current="true"] .hs-list-title::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
-  background:var(--accent);margin-right:10px;vertical-align:2px}
 .hs-stage{padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .hs-view{position:relative;aspect-ratio:16/9;background:#000;border-radius:var(--r-in);overflow:hidden}
 .hs-screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
@@ -27,7 +20,7 @@
 @media (max-width:900px){
   .hs{grid-template-columns:1fr;gap:24px;padding-top:24px}
   .hs-copy{display:contents}
-  .hs h1{order:1} .hs-sub{order:2;margin-top:-12px} .hs-actions{order:3;margin-top:0} .hs-stage{order:4} .hs-list{order:5;margin-top:0}
+  .hs h1{order:1} .hs-sub{order:2;margin-top:-12px} .hs-actions{order:3;margin-top:0} .hs-stage{order:4}
 }
 
 .ls-wide{grid-column:1 / -1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 32px;align-items:center}
