@@ -1,8 +1,9 @@
 // Pure text and decisions for ship jobs: no I/O, no clock. harness/media/ship-job.mjs feeds it.
 import path from 'node:path';
 import { tasteLines } from './taste-steps.mjs';
+import { STILL_SEC, undeclaredStills, stillText } from './still-limit.mjs';
 
-export const LIMITS = { staticSec: 1, worldSec: 2, blankSec: 0.3, blankEdgeSec: 0.5, maxProblems: 3 };
+export const LIMITS = { staticSec: STILL_SEC, worldSec: 2, blankSec: 0.3, blankEdgeSec: 0.5, maxProblems: 3 };
 const SAMPLE_FPS = 10;
 
 export const samePage = (a, b) => path.resolve(a) === path.resolve(b);
@@ -30,11 +31,11 @@ export function blankRuns(feats, isFlat, limits = LIMITS) {
   return runs;
 }
 
-/** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns. */
-export function problemsOf(stats, blanks, limits = LIMITS) {
+/** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns, `authoring` the page's #authoring waivers. */
+export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}) {
   const found = [];
   for (const r of blanks) found.push({ len: r.b - r.a, text: `blank frame ${r.a.toFixed(1)}-${r.b.toFixed(1)} s` });
-  for (const r of stats.static) if (r.len > limits.staticSec) found.push({ len: r.len, text: `static window ${r.a}-${r.b} s (${r.len} s)` });
+  for (const r of undeclaredStills(stats.static, authoring, limits.staticSec)) found.push({ len: r.len, text: stillText(r, limits.staticSec) });
   const edges = [0, ...stats.turns.map((t) => t.t), stats.duration];
   for (let i = 1; i < edges.length; i++) {
     const len = edges[i] - edges[i - 1];

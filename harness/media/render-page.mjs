@@ -609,7 +609,7 @@ function motionAdvice(pagePath, motion) {
 
 function printDraftCheck(mp4, pagePath, { probe, level, motion, advice: blanks }) {
   let video = [];
-  try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
+  try { video = videoProblems(mp4, pageAuthoring(pagePath)); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
   const problems = mergeProblems(video, textProblems(probe.samples, probe));
   const brief = readBrief(pagePath);
   const sound = soundLine(level);

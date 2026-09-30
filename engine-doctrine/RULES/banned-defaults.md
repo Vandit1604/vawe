@@ -41,7 +41,7 @@ with no direction. Each row names the default and what to do instead.
 | the same direction on adjacent transitions | change axis or direction at every seam |
 | particle bursts, shockwave rings, RGB split, camera shake, lens flares | the subject itself moving |
 | a group landing on one frame | a stagger of 30 to 80 ms |
-| dead time nobody declared | a declared hold (`"allow": ["dead-air"]` with a `_why`, see AGENTS.md "Waivers") |
+| dead time nobody declared | a declared hold (`"allow": ["dead-air@2.1-3.4"]` for those seconds, or a bare `"dead-air"` for the film, with a `_why`, see AGENTS.md "Waivers"); the draft names any whole-frame still over 0.5 s outside one |
 
 ## The escape valve
 
