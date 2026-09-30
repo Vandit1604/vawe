@@ -49,6 +49,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | zoom-through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | HyperFrames zoom-through-transition, video-shotcraft transition-travel, School of Motion infinite zoom | built |
 | speed-ramp-freeze | a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur | HyperFrames beat-freeze-cut and freeze-frame-dressing, video-shotcraft rhythm/speed-ramp-freeze | built |
 | liquid-wipe | a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot | HyperFrames liquid and blob transitions, SVG goo filter (Lucas Bebber), After Effects liquid transitions | built |
+| grid-tile-flip | a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back | HyperFrames flip-grid and tile transitions, After Effects card wipe, video-shotcraft ui-entrance/wall-reveal-moves | built |
 
 ## 3. Point the eye
 
