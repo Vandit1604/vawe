@@ -17,6 +17,8 @@ const FAILS = [
   ['invariants/invariant-audio-missing.html', /^error: <audio> at 0.2 s: src="missing.wav" .* does not exist/],
   ['invariants/invariant-font-bad.html', /^error: font Nope failed to load/],
   ['invariants/invariant-assert-bad.html', /^error: assert at 0.5 s failed: headline says Bye/],
+  ['invariants/invariant-script-bad.html', /^error: \S+invariant-script-bad\.html: \S+no-such-module\.js: HTTP 404$/],
+  ['invariants/invariant-throw-bad.html', /^error: \S+invariant-throw-bad\.html: \S+: camera rig missing$/],
   ['invariants/brief-drift/page.html', /^error: brief: 5 s 16:9; page: 1 s 16:9$/],
 ];
 for (const [page, line] of FAILS) {

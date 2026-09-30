@@ -59,6 +59,7 @@ import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
 import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, maxStepDeltas, lintTimes } from '../lib/box-track.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
+import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
 
@@ -490,6 +491,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const wantAudio = opts.audio ?? (final && from === 0 && durArg == null);
   if (opts.audio && from > 0) die('--audio needs a render from 0: the mix has no offset');
   const { page, url, close } = await openPage(pagePath, frame);
+  const scriptErrors = watchPageErrors(page);
   const tmpDir = `${outPath}.frames-${process.pid}`;
   fs.rmSync(tmpDir, { recursive: true, force: true });
   fs.mkdirSync(tmpDir, { recursive: true });
@@ -500,7 +502,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
       throw e;
     }
-    const early = [...await fontProblems(page), ...await audioProblems(page, pagePath), ...await assertProblems(page)];
+    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page), ...await audioProblems(page, pagePath), ...await assertProblems(page)];
     if (early.length) throw new InvariantError(early);
 
     const totalDur = await page.evaluate(() => {
