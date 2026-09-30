@@ -1,23 +1,17 @@
 ---
-when: writing or changing repo maintenance tooling: a gate driver, a capture tool for one film, a
-  brand-reflection script, a git hook
-answers: "what scripts/ is: repo maintenance and gates, split into brand/ (site reflection: palette, sections, lookbook), hooks/ (git hook library), site/ (docs/marketing-site build helpers)"
+when: writing or changing repo maintenance tooling: a brand-capture script or a site build helper
+answers: "what scripts/ is: brand/ (capture a site into a kit: palette, sections, photos), site/ (build helpers for the marketing site) and vendor-gsap.mjs"
 group: process
 ---
 
 # scripts/
 
-Repo maintenance, distinct from `generators/` (bakes standing assets) and `harness/` (per-film
-authoring tools and live hooks). `brand/` holds the site-reflection pipeline (`sections.mjs`,
-`palette.mjs`, `house-style.mjs`, `lookbook.mjs`, `theme-remix.mjs`) that `node scripts/brand/kit.mjs`
-and `node scripts/brand/palette.mjs` call. `hooks/` is the git-hook library (`library.mjs`). `site/` builds artifacts the
-marketing/docs site consumes (`arsenal-json.mjs`, `blocks-catalog.mjs`, `motion-numbers-catalog.mjs`,
-`rules-build.mjs`).
+Repo maintenance, distinct from `generators/` (bakes standing assets) and `harness/` (film-authoring
+tools and hooks).
 
-Read by: `node scripts/<path>` runs, and git itself for `hooks/`.
-
-The one doc: `harness/README.md` lists the brand tools (`scripts/brand/kit.mjs`) for the brand-reflection
-path. Checked by: whichever gate wraps the script.
-
-Look first: `scripts/brand/` if reflecting a website, `scripts/site/` if changing a generated doc or
-catalog the site consumes.
+- `brand/`: reflects a website into `assets/brands/<name>/`. `node scripts/brand/kit.mjs <url> <name>`
+  runs the steps in one go and writes `kit.json` (palette, fonts, favicon, section captures).
+  The steps run alone: `sections.mjs`, `palette.mjs`, `photos.mjs`, `localize-assets.mjs`.
+- `site/`: builds what the marketing site consumes (`og-image.mjs`, `vendor-assets.mjs`,
+  `dev-all.mjs`).
+- `vendor-gsap.mjs`: copies `gsap.min.js` from `node_modules` into `assets/vendor/` on `npm install`.

@@ -62,8 +62,8 @@ The plain line needs none. Ask these only to choose the second run; a skipped qu
 
 - Read the first frame before anything else. The validator rejects an em dash on screen and a hook
   over 12 words.
-- A 15 second reel with no held frame is a wall of motion. Declare the holds
-  (`"authoring": {"allow": ["dead-air"], "_why": {...}}`) or shorten the film.
+- A 15 second reel with no quiet beat is a wall of motion. Put quiet before the one big moment, or
+  declare a hold with a waiver (`AGENTS.md`, Waivers).
 - Exits run faster than entrances (house rule). A reel that ignores this reads as a template.
 - Check the speed bands (`engine-doctrine/RULES/speed-bands.md`): the slowest beat is at least 3x the
   fastest.

@@ -24,7 +24,7 @@ section and go on.
 <direction>
 Dribbble-level UI motion. One shape, never cut: every state is the same element morphing its size,
 radius and colour while its content swaps with a short blur. A cursor drives every change with real
-clicks and drags. Light warm-grey field, black and white components, one clean UI sans (Anybody for
+clicks and drags. Light warm-grey field, black and white components, one clean UI sans (Archivo for
 vawe). Springs everywhere, a tiny overshoot at most. The camera zooms so each state fills the frame.
 The last frame is the first frame, cursor position and velocity included.
 Banned: bouncy easing, particle bursts, glows, gradients on UI chrome, mismatched icon strokes, dead
@@ -73,7 +73,7 @@ Ask in this order; the first changes the film most. A skipped question takes its
 2. **Accent**: black and white only, or one accent (hex)? Default: black and white on warm grey `#efece6`, no accent. Why: one accent per frame is the house rule; a second colour is a second focal point.
 3. **Music**: a song at about 120 BPM with its licence, or synth only? Default: synth only, on a 120 BPM grid. Why: the grid is the structure; a real song moves the drop.
 4. **Canvas**: 1:1, 16:9 or 9:16? Default: 1:1. Why: a morph reads best square, and the camera zoom fills the frame per state.
-5. **Type**: which UI sans? Default: Anybody (vawe's own). Why: one clean sans with tight tracking; a face with no brand reason is a banned default.
+5. **Type**: which UI sans? Default: Archivo (vawe's own). Why: one clean sans with tight tracking; a face with no brand reason is a banned default.
 
 ## Gotchas
 

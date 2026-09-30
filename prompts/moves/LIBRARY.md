@@ -23,8 +23,8 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | letter-stagger | a word lands letter by letter on one curve | owner-approved clip | built |
 | scale-punch | the hero word hits from 1.4x and recoils | owner-approved clip | built |
 | flap-resolve | a name or number is decided on a split-flap board | Solari board | built |
-| word-swap-slot | one masked word in a held sentence rolls through 3 or 4 values and lands | HyperFrames kinetic-type-swap | to build |
-| blur-word-cascade | copy resolves word by word from blur, no hard mask | to be captured | to build |
+| word-swap-slot | one masked word in a held sentence rolls through 3 or 4 values and lands | HyperFrames kinetic-type-swap | built |
+| blur-word-cascade | copy resolves word by word from blur, no hard mask | to be captured | built |
 
 ## 2. Change between shots
 
@@ -59,7 +59,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | caret-follow | the camera tracks the typing caret | vawe-flow-2 terminal | to build |
 | pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | to build |
 | parallax-dive | layers at different depths move at different speeds | to be captured | to build |
-| drift-hold | a very slow drift on a held frame so it never sits dead | to be captured | to build |
+| drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | to build |
 | rack-focus | focus moves from one layer to another | to be captured | to build |
 
 ## 5. End a film
@@ -70,7 +70,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | cta-pop | the call to action pops in with one accent | to be captured | to build |
 | mark-trace | the logo mark draws itself as a line | to be captured | to build |
 | thanks-sweep | a closing line sweeps across | to be captured | to build |
-| calm-lockup | logo and line settle and hold, quiet | to be captured | to build |
+| calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | to build |
 | logo-sting | a short animated logo hit | to be captured | to build |
 
 ## 6. Product moments

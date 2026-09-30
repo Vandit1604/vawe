@@ -11,36 +11,23 @@ start. Every template in `prompts/` has that shape, and `bin/vawe new <name> --f
 turns one into `films/<name>/brief.md`. This file says what goes in each section, what the corpus
 says about it, and one example in our own words.
 
-## The evidence, and its size
+## The evidence
 
-Counted 2026-09-30 over the 128 creator prompts in awesome-ai-motion (355 cases; 52 prompts are the
-author's own text, 76 are the curator's summary), split at the top quartile by bookmarks (32 against
-96). Median prompt: 16 words. Only 13 prompts run 60 words or more.
+Counted over 128 creator prompts in awesome-ai-motion (355 cases), split at the top quartile by
+bookmarks. The median prompt is 16 words. Length does not predict reception (Spearman 0.15 with
+bookmarks): eight of the top ten are under 60 words.
 
-| feature | top quartile | rest | authors' own text only (13 vs 39) |
-|---|---|---|---|
-| a genre or reference anchor | 37.5% | 16.7% | 61.5% vs 23.1% |
-| numbers (fps, s, px, BPM, hex) | 34.4% | 30.2% | 61.5% vs 41.0% |
-| a named ban list | 9.4% | 5.2% | 23.1% vs 10.3% |
-| a stop before code | 6.2% | 1.0% | 15.4% vs 2.6% |
-| asset rules (real, owned) | 6.2% | 3.1% | too few to split |
-| stills before the render | 6.2% | 3.1% | too few to split |
-| questions with defaults | 0% | 0% | 0% |
-
-Read it plainly. The anchor is the one feature that holds on bookmarks, on likes and on the
-authors'-own subset. Numbers, bans and a stop lean the same way but rest on 3 to 5 prompts each.
-Length does not predict reception (Spearman 0.15 with bookmarks): eight of the top ten are under
-60 words, and the single most bookmarked prompt is 474 words with every feature in the table. Nobody
-in the corpus asks questions with defaults; that idea comes from the two owner-shared briefs and from
-HyperFrames' intent interview, not from engagement data. The awesome-opus-5-5 dataset (168 cases)
-shows only five prompts, so it cannot test length; its playbook asks for a storyboard, then a sample
-render, then the full render, and its production brief fixes fps, duration and aspect up front.
+- A genre or reference anchor is the one feature that holds: 37.5% of the top quartile against
+  16.7% of the rest, and 61.5% against 23.1% in the authors' own text.
+- Numbers, a named ban list and a stop before code lean the same way but rest on 3 to 5 prompts each.
+- Nobody in the corpus asks questions with defaults. That rule comes from two owner-shared briefs
+  and from the intent interview in HyperFrames, not from engagement data.
 
 ## The six sections
 
 **1. Inputs: five questions, each with a default.** Ask the five things that change the film most,
-in that order. Every question carries a default, so a skipped question never blocks the agent (the
-owner removed approval stages). The default is a real value, never "ask again".
+in that order. Every question carries a default, so a skipped question never blocks the agent.
+The default is a real value, never "ask again".
 Example: "Music: a licensed song, or synth cues only? Default: synth cues. Why: a song sets the beat
 grid; without one the cuts follow the picture."
 
@@ -59,7 +46,7 @@ capture. Bar 3, the drop: a circle opens out of the button into the dark scene."
 
 **4. Build: the page contract, in the agent's own vocabulary.** One `page.html`, `<meta
 name="duration">`, time is the seek (CSS keyframes, `element.animate()`, or a pure `seek(t)`), audio
-as `<audio data-at>` tags mixed offline at -14 LUFS, every tunable number a literal in the page.
+as `<audio data-at>` tags mixed offline, every tunable number a literal in the page.
 Example: "Every style is computed from t inside `window.seek(t)`. Springs are sums of closed-form
 steps from `core/motion/springs.js`. Captures live in `films/<name>/assets/` with the source URL."
 
@@ -103,9 +90,7 @@ for the hook and the loop seam, director's for the middle.
 
 ## Sources
 
-The counts are from `awesome-ai-motion` (`cases.json`, `prompts/*.txt`, MIT for the repo; creator
-texts are third-party and were studied for structure only) and `awesome-opus-5-5-videos`
-(`data/`, `docs/prompt-playbook.zh-CN.md`, `docs/production-brief.md`, CC BY 4.0, athemeroy). The
-question-with-default rule is from two owner-shared briefs and from the intent interview in the
-HyperFrames skills, https://github.com/heygen-com/hyperframes (Apache 2.0, pattern only). The scripts that
-counted live outside the repo; rerun them before quoting a new number.
+Counts: `awesome-ai-motion` (MIT for the repo; creator texts are third-party and were studied for
+structure only) and `awesome-opus-5-5-videos` (CC BY 4.0, athemeroy). The question-with-default rule:
+two owner-shared briefs and the HyperFrames intent interview (https://github.com/heygen-com/hyperframes,
+Apache 2.0, pattern only).

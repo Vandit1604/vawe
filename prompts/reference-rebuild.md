@@ -39,7 +39,7 @@ Stop and show me SPEC.md.
 ```
 Read SPEC.md. For every line, write KEEP or CHANGE and one reason.
 KEEP: anything the reference does that we want exactly (light, pacing, curves, type scale).
-CHANGE: the content (our strings, our captures, our brand from themes/<brand>.json), anything the
+CHANGE: the content (our strings, our captures, our brand from its kit), anything the
 reference does that breaks a house rule (an em dash on screen, a hook over 12 words, an exit slower
 than its entrance, two adjacent transitions in one direction), and anything measured off the grid.
 Nothing is silent: an unmarked line is a bug. Stop and show me the KEEP/CHANGE list.
@@ -55,7 +55,8 @@ Every KEEP line is a number in the page: a @keyframes stop, an element.animate k
 measured. Then:
   bin/vawe critique films/<name>/page.html --ref quality/refs/<ref>/source.mp4
 It compares the draft to the reference at the same timestamps and prints a match score. Loop until
-combined >= 0.70, then stop and ask for the critique pass (prompts/critique-pass.md, frame-locked).
+combined >= 0.70. Then run bin/vawe coverage out/<name>.mp4 --ref <ref.mp4> and fix the seconds it lists
+below its floor. Then stop and ask for the critique pass (prompts/critique-pass.md, frame-locked).
 Three passes without progress: stop and report, do not keep going.
 ```
 
