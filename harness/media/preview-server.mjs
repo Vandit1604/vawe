@@ -66,8 +66,39 @@ function pageRoot(abs) {
   } catch { return dir; }
 }
 
+// Size and mtime of every file under the dirs: any edit to the page folder or to core/ changes it.
+export function treeSignature(dirs) {
+  const h = createHash('sha1');
+  const walk = (dir) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+      if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) walk(p);
+      else { const st = fs.statSync(p); h.update(`${p}:${st.size}:${st.mtimeMs};`); }
+    }
+  };
+  for (const d of dirs) if (fs.existsSync(d)) walk(d);
+  return h.digest('hex');
+}
+
+const WARM_TABS = 3;
+
+// A warm tab is one this function left open on a page url, marked with window.__warmSig. A tab whose
+// signature is stale reloads; the oldest tabs past WARM_TABS close.
+async function takeWarmPage(browser, url, sig) {
+  const warm = [];
+  for (const p of await browser.pages()) if (await p.evaluate(() => Boolean(window.__warmSig)).catch(() => false)) warm.push(p);
+  for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url) await p.close().catch(() => {});
+  const found = warm.find((p) => !p.isClosed() && p.url() === url);
+  const reused = Boolean(found) && (await found.evaluate(() => window.__warmSig)) === sig;
+  if (found && !reused) await found.close().catch(() => {});
+  return { page: reused ? found : await browser.newPage(), reused };
+}
+
 /**
  * openPreview(pagePath, { width, height, args }) -> { page, url, persistent, close }.
+ * With `warm`, the page stays open after close() and the next call on the same url and unchanged files
+ * gets it back with `reused: true`; the caller runs `markWarm()` once the page has loaded.
  * `url` is already the right one to `page.goto()`: relative to the shared daemon's REPO_ROOT server
  * when the shared browser is live and `pagePath` is inside the repo, a fresh per-call server otherwise
  * (a scratch/tmp fixture outside the repo, or the daemon not running). `close()` releases only what
@@ -75,14 +106,16 @@ function pageRoot(abs) {
  * RENDER_ARGS) only affects the fallback launch: the shared browser is always launched with PAGE_ARGS,
  * the one flag a rapid screenshot loop (render-page.mjs) needs and a single still never does.
  */
-export async function openPreview(pagePath, { width = 1920, height = 1080, args = RENDER_ARGS } = {}) {
+export async function openPreview(pagePath, { width = 1920, height = 1080, args = RENDER_ARGS, warm = false } = {}) {
   const abs = path.resolve(pagePath);
   if (insideRoot(REPO_ROOT, abs)) {
     const shared = await connectShared();
     if (shared) {
-      const page = await shared.browser.newPage();
-      await page.setViewport({ width, height, deviceScaleFactor: 1 });
       const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}`;
+      const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) : '';
+      const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
+      await page.setViewport({ width, height, deviceScaleFactor: 1 });
+      if (warm) return { page, url, persistent: true, reused, markWarm: () => page.evaluate((v) => { window.__warmSig = v; }, sig), close: async () => shared.browser.disconnect() };
       // `disconnect()`, never `close()`: this call's own CDP connection to the shared browser, not the
       // browser itself. Closing only the page and never disconnecting left the connection's open socket
       // holding the process alive well past the render finishing (a real hang this file was measured
