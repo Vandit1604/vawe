@@ -18,6 +18,9 @@ export const VERBS = [
     flags: [
       { name: 'from', type: 'path', default: 'prompts/brand-launch-from-url.md', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
       { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
+      { name: 'length', type: 'number', help: 'film length in seconds: written to brief.md and the page duration meta' },
+      { name: 'aspect', type: 'string', help: `${ASPECT}: written to brief.md and the page aspect meta` },
+      { name: 'title', type: 'string', help: 'the starter headline: written to brief.md and the page' },
       { name: 'score', type: 'bool', help: 'with --ref: also render the starter and score it against the reference (slow)' },
     ],
     example: 'vawe new my-launch --from prompts/story-explainer.md',

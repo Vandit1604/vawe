@@ -32,4 +32,12 @@ export function value(row, t) {
 // Guarded the same way core/motion/timeline.js's own bottom line already is: importable in Node
 // (so tooling that walks every core/ module, e.g. `make check GATE=word-action`, does not choke on it)
 // even though the assignment itself only means anything in a browser page.
-if (typeof window !== 'undefined') Object.assign(window.vawe || (window.vawe = {}), { onFrame, value, clock: window.__pageClock, three: { studio, extrude, material } });
+/**
+ * vawe.assert(t, fn, message): a check the renderer runs after seeking to `t` seconds, at `vawe dev` and
+ * `vawe ship`. A falsy or throwing fn fails the render (exit 2) with the time and `message`.
+ */
+export function assert(t, fn, message) {
+  (window.__vaweAsserts ||= []).push({ t, fn, message });
+}
+
+if (typeof window !== 'undefined') Object.assign(window.vawe || (window.vawe = {}), { onFrame, value, assert, clock: window.__pageClock, three: { studio, extrude, material } });
