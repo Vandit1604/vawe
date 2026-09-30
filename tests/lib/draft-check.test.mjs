@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sampleTimes, textProblems, soundLine, mergeProblems, draftCheckLines } from '../../harness/lib/draft-check.mjs';
+import { sampleTimes, textProblems, soundLine, mergeProblems, draftCheckLines , briefLine } from '../../harness/lib/draft-check.mjs';
 
 const at = (t, ...lines) => ({ t, lines: lines.map(([text, fontPx]) => ({ text, fontPx })) });
 const dim = { step: 0.5, frameH: 540 };
@@ -52,4 +52,10 @@ test('mergeProblems: alternates the two lists and stops at 4', () => {
 test('draftCheckLines: clean, or problems then the instruction', () => {
   assert.deepEqual(draftCheckLines([], null), ['draft check: no problems found']);
   assert.deepEqual(draftCheckLines(['a'], 'sound: x'), ['draft check:', '  a', '  sound: x', 'fix the draft check first']);
+});
+
+test('the brief line names a missing brief and a template brief, and stays quiet on a written one', () => {
+  assert.match(briefLine(null), /no brief.md/);
+  assert.match(briefLine('- a [unanswered: default taken]\n- b [unanswered: default taken]\n- c [unanswered: default taken]'), /template defaults/);
+  assert.equal(briefLine('- Subject: a made-up brand\n- Length: 5 s'), null);
 });

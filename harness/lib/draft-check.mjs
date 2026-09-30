@@ -68,10 +68,20 @@ export function mergeProblems(video, text, max = RULES.maxProblems) {
   return out.slice(0, max);
 }
 
-/** The printed lines. `problems` and `sound` are strings (sound may be null). */
-export function draftCheckLines(problems, sound) {
-  const lines = problems.length === 0 ? ['draft check: no problems found'] : ['draft check:', ...problems.map((p) => `  ${p}`)];
-  if (sound) lines.push(`  ${sound}`);
-  if (problems.length || sound) lines.push('fix the draft check first');
+/** The brief line when the judge would score against no brief or the template's defaults, else null. */
+export function briefLine(text) {
+  if (text === null) return 'brief: no brief.md next to the page; write the request there so the judge scores what was asked';
+  if (isTemplateBrief(text)) return 'brief: brief.md still holds the template defaults; write the request in it so the judge scores what was asked';
+  return null;
+}
+
+export const isTemplateBrief = (text) => (text.match(/\[unanswered/g) || []).length >= 3;
+
+/** The printed lines. `problems` are strings; `sound` and `brief` may be null. */
+export function draftCheckLines(problems, sound, brief = null) {
+  const extra = [sound, brief].filter(Boolean);
+  const lines = problems.length === 0 && !extra.length ? ['draft check: no problems found'] : ['draft check:', ...problems.map((p) => `  ${p}`)];
+  for (const l of extra) lines.push(`  ${l}`);
+  if (problems.length || extra.length) lines.push('fix the draft check first');
   return lines;
 }

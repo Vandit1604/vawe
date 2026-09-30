@@ -50,7 +50,7 @@ import { appendRun } from '../lib/runlog.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, videoProblems } from './draft-check.mjs';
-import { textProblems, soundLine, mergeProblems, draftCheckLines } from '../lib/draft-check.mjs';
+import { textProblems, soundLine, briefLine, mergeProblems, draftCheckLines } from '../lib/draft-check.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 
@@ -591,11 +591,15 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
-function printDraftCheck(mp4, { probe, level }) {
+function readBrief(pagePath) {
+  try { return fs.readFileSync(path.join(path.dirname(path.resolve(pagePath)), 'brief.md'), 'utf8'); } catch { return null; }
+}
+
+function printDraftCheck(mp4, pagePath, { probe, level }) {
   let video = [];
   try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
   const problems = mergeProblems(video, textProblems(probe.samples, probe));
-  console.log(draftCheckLines(problems, soundLine(level)).join('\n'));
+  console.log(draftCheckLines(problems, soundLine(level), briefLine(readBrief(pagePath))).join('\n'));
 }
 
 function printDraftSheet(mp4, { fps, from }) {
@@ -650,7 +654,7 @@ async function main() {
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
     if (!final) printDraftSheet(outPath, opts);
-    if (r.probe) printDraftCheck(outPath, r);
+    if (r.probe) printDraftCheck(outPath, pagePath, r);
   }
 }
 
