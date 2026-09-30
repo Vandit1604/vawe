@@ -1,0 +1,125 @@
+/* ===== /moves · the gallery ============================================================= */
+.mv-bar{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;margin-top:32px;padding:14px 0;
+  border-bottom:1px solid var(--line);background:var(--bg)}
+@media (min-width:761px){ .mv-bar{position:sticky;top:0;z-index:var(--z-sticky)} }
+
+.mv-find{position:relative;display:flex;align-items:center;flex:1 1 240px;max-width:360px}
+.mv-find svg{position:absolute;left:11px;width:15px;height:15px;pointer-events:none;
+  fill:none;stroke:var(--muted);stroke-width:1.5;stroke-linecap:round}
+.mv-find input,.mv-select select{font:400 14px/1.2 inherit;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line-2);border-radius:8px;min-height:36px;
+  transition:border-color .15s ease,box-shadow .15s ease}
+.mv-find input{width:100%;padding:8px 12px 8px 34px}
+.mv-find input::placeholder{color:var(--muted)}
+.mv-find input::-webkit-search-cancel-button{display:none}
+.mv-find input:focus-visible,.mv-select select:focus-visible{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+
+.mv-select{display:flex;align-items:center;gap:8px}
+.mv-select select{appearance:none;padding:8px 30px 8px 10px;max-width:220px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%2397969b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:12px}
+
+.mv-row{display:flex;align-items:center;gap:8px 16px;width:100%}
+.mv-groups{display:flex;flex-wrap:wrap;gap:2px;flex:1 1 auto;min-width:0}
+.mv-groups button{font:500 13px/1 inherit;color:var(--ink-2);background:transparent;border:0;border-radius:8px;
+  padding:0 11px;min-height:32px;cursor:pointer;transition:background-color .15s ease,color .15s ease,scale .12s cubic-bezier(.2,0,0,1)}
+.mv-groups button:hover{background:var(--raised);color:var(--ink)}
+.mv-groups button:active{scale:.96}
+.mv-groups button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600}
+.mv-groups button:focus-visible,.mv-play:focus-visible,.mv-copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mv-count{margin-left:auto}
+
+.mv-grid{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px}
+/* content-visibility skips layout and paint for the cards far below the fold; the size is one card. */
+.mv-card{position:relative;overflow:hidden;content-visibility:auto;contain-intrinsic-size:auto 330px;
+  transition:box-shadow .15s ease}
+.mv-card:hover{box-shadow:0 0 0 1px var(--line-2)}
+.mv-card:has(a:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.mv-media{position:relative;aspect-ratio:16/9;background:var(--bg);border-bottom:1px solid var(--line)}
+.mv-media img,.mv-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.mv-media video{opacity:0;transition:opacity .15s ease}
+.mv-media video[data-on]{opacity:1}
+.mv-play{position:absolute;right:10px;bottom:10px;z-index:var(--z-badge);font:600 13px/1 inherit;color:var(--ink);
+  background:var(--raised);border:0;border-radius:8px;padding:0 12px;min-height:32px;cursor:pointer;
+  transition:background-color .15s ease}
+.mv-play:hover{background:var(--raised-2)}
+.mv-cap{padding:14px 16px 16px}
+.mv-title{font-family:var(--font-title);font-weight:500;font-size:15px;line-height:1.25;letter-spacing:-.01em}
+.mv-title a{outline:none}
+.mv-title a::after{content:"";position:absolute;inset:0;z-index:var(--z-raise)}
+.mv-use{color:var(--muted);font-size:14px;line-height:1.45;margin-top:6px;text-wrap:pretty;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mv-meta{margin-top:10px}
+.mv-empty{margin-top:20px;padding:28px;border:1px solid var(--line);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;color:var(--ink-2)}
+
+@media (max-width:900px){ .mv-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:640px){
+  .mv-grid{grid-template-columns:minmax(0,1fr)}
+  .mv-find{max-width:none;flex-basis:100%}
+  /* One scrolling line of groups instead of three wrapped ones, so the first clip stays near the fold. */
+  .mv-groups{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .mv-groups button,.mv-play{flex:none;min-height:44px}
+  .mv-select{flex:1 1 40%}
+  .mv-select select{flex:1;max-width:none;width:100%}
+}
+
+/* ===== /moves/[name] · one move ========================================================= */
+.mvd{max-width:1040px;margin:0 auto}
+.mvd-head .kicker a{color:var(--muted);transition:color .15s ease}
+.mvd-head .kicker a:hover{color:var(--ink)}
+.mvd-meta{display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap;margin-top:16px}
+.mvd-raw{color:var(--accent);text-transform:none;letter-spacing:0;font-size:13px}
+.mvd-raw:hover{text-decoration:underline;text-underline-offset:3px}
+.mvd-clip{margin-top:28px;overflow:hidden}
+.mvd-clip video{display:block;width:100%;aspect-ratio:16/9;background:var(--bg)}
+.mvd-tap{display:none;padding:10px 16px}
+@media (prefers-reduced-motion:reduce){ .mvd-tap{display:block} .mvd-clip video{cursor:pointer} }
+
+.mvd-doc{margin-top:40px;color:var(--ink-2);font-size:16px;line-height:1.65}
+.mvd-doc > p,.mvd-doc > ul,.mvd-doc > ol{max-width:66ch;text-wrap:pretty}
+.mvd-doc > * + *{margin-top:16px}
+.mvd-doc h2{font-size:clamp(1.3rem,2.2vw,1.6rem);font-weight:800;letter-spacing:-.02em;line-height:1.15;color:var(--ink);
+  margin-top:44px;text-wrap:balance}
+.mvd-doc strong{color:var(--ink);font-weight:600}
+.mvd-doc a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
+.mvd-doc a:hover{text-decoration-color:currentColor}
+.mvd-doc ul,.mvd-doc ol{padding-left:1.25em}
+.mvd-doc li + li{margin-top:8px}
+.mvd-doc :not(pre) > code{font-family:var(--font-mono),monospace;font-size:.86em;color:var(--ink);
+  background:var(--surface-2);padding:1px 5px;border-radius:var(--r-in)}
+.mvd-doc .mv-sound{padding:12px 0;border-block:1px solid var(--line);color:var(--ink)}
+
+.mv-code{background:var(--surface);border-radius:var(--r);box-shadow:var(--ring);overflow:hidden}
+.mvd-doc > .mv-code{margin-top:24px}
+.mv-code-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 8px 6px 16px;
+  border-bottom:1px solid var(--line);font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted)}
+.mv-copy{font:600 12px/1 var(--font-sans),system-ui,sans-serif;color:var(--ink);background:var(--raised);border:0;
+  border-radius:8px;padding:0 12px;min-height:28px;min-width:64px;cursor:pointer;
+  transition:background-color .15s ease,scale .12s cubic-bezier(.2,0,0,1)}
+.mv-copy:hover{background:var(--raised-2)}
+.mv-copy:active{scale:.96}
+.mv-code pre{margin:0;padding:16px;overflow-x:auto;font-family:var(--font-mono),monospace;font-size:13px;line-height:1.65;
+  color:var(--muted);tab-size:2}
+/* Tone and weight carry the syntax: DESIGN.md keeps colour for the accent and the lanes. */
+.tk-k{color:var(--ink);font-weight:600}
+.tk-f,.tk-n{color:var(--ink)}
+.tk-p,.tk-s{color:var(--ink-2)}
+.tk-c{color:var(--muted);font-style:italic}
+
+.mvd-related{margin-top:80px;padding-top:28px;border-top:1px solid var(--line)}
+.mvd-related h2{font-size:clamp(1.5rem,2.6vw,2rem);font-weight:800;letter-spacing:-.025em;line-height:1.05}
+.mvd-row{margin-top:24px}
+.mvd-row .meta a{color:var(--muted);transition:color .15s ease}
+.mvd-row .meta a:hover{color:var(--ink)}
+.mvd-rel{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:10px}
+.mvd-rel li{position:relative;overflow:hidden;transition:box-shadow .15s ease}
+.mvd-rel li:hover{box-shadow:0 0 0 1px var(--line-2)}
+.mvd-rel li:has(a:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.mvd-rel img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-bottom:1px solid var(--line)}
+.mvd-rel a{display:block;padding:10px 12px;font-family:var(--font-title);font-weight:500;font-size:13px;outline:none}
+.mvd-rel a::after{content:"";position:absolute;inset:0}
+@media (max-width:900px){ .mvd-rel{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:640px){ .mvd-rel{grid-template-columns:repeat(2,minmax(0,1fr))} }
