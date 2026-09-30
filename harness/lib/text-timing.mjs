@@ -6,6 +6,8 @@ const READ_FLOOR = 1.2;
 const CLIP_TOL_PX = 2;
 const CLIP_MIN_SAMPLES = 2;
 const MOVE_TOL_PX = 0.5;
+const REF_HOLD_TOL = 0.1;    // a recreation keeps the reference's own hold to within this many seconds
+const REF_START_NEAR = 0.5;  // a reference run counts as the same line when it starts this close
 
 /** Runs in the page: one record per visible text node, with its ink box, opacity, blur and clipping boxes. */
 export function collectTextNodes() {
@@ -173,6 +175,16 @@ export function timingRows(samples, step, dur) {
 /** Holds shorter than the reading time. A line still on screen when the film ends is not judged. Pure. */
 export function shortHolds(rows) {
   return rows.filter((r) => !r.endsFilm && r.hold < r.need - 1e-6);
+}
+
+/**
+ * The short holds that the reference does not have too. A recreation copies the reference's timing, so a
+ * hold within `tol` s of a reference text run that starts near it is the reference's own. Pure.
+ * refRuns: [{ t0, t1 }] from the reference's text timeline sampled every `refStep` s.
+ */
+export function holdsBeyondRef(rows, refRuns, refStep, tol = REF_HOLD_TOL) {
+  const matches = (r) => refRuns.some((x) => Math.abs(x.t0 - r.readable) <= REF_START_NEAR && Math.abs(x.t1 + refStep - x.t0 - r.hold) <= tol + 1e-6);
+  return rows.filter((r) => !matches(r));
 }
 
 const same = (a, b) => Math.abs(a.x - b.x) < MOVE_TOL_PX && Math.abs(a.y - b.y) < MOVE_TOL_PX && Math.abs(a.w - b.w) < MOVE_TOL_PX && Math.abs(a.h - b.h) < MOVE_TOL_PX;

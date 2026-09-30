@@ -8,7 +8,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { scratch, drawtext } from '../lib/scratch.mjs';
-import { sampleText, clippedGlyphs, timingRows, shortHolds } from '../lib/text-timing.mjs';
+import { sampleText, clippedGlyphs, timingRows, shortHolds, holdsBeyondRef } from '../lib/text-timing.mjs';
+import { textTimeline } from './see/text-timeline.mjs';
 import { clipMessage } from '../../quality/gates/page-check.mjs';
 import { frameMotion, startJumps, earlyStops, frozenInside, secondSsim, collateralChange, FPS } from './motion-curve.mjs';
 import { coverage } from './coverage.mjs';
@@ -20,6 +21,7 @@ const SHEET_ROWS = 6;
 const SHOWN = 20;
 const TILE_W = 480, TILE_H = 270;
 const CROP_PAD = 16;
+const REF_TEXT_FPS = 10;
 const die = (m) => { console.error(`✗ ${m}`); process.exit(2); };
 const frameOf = (t) => Math.round(t * FPS);
 const finding = (severity, t, what, fix, extra = {}) => ({ severity, t, frame: frameOf(t), what, fix, ...extra });
@@ -87,11 +89,22 @@ const clipPart = async (ctx) => groupClips((await ctx.sampled).clipped).map((c) 
   c.sizeShare >= 0.15 ? 'error' : 'warn', c.t, `${clipMessage(c)}${c.count > 1 ? ` (${c.count} text runs in this box)` : ''}`,
   `grow the ${c.kind} box by ${Math.ceil(c.px)} px on the ${c.side}, or raise the line-height so the glyphs fit`, { crop: c.crop }));
 
+async function referenceHolds(ctx) {
+  try { return { runs: await textTimeline(ctx.ref, ctx.work, REF_TEXT_FPS) }; } catch (e) { return { why: String(e.message).split('\n')[0] }; }
+}
+
 async function timingPart(ctx) {
-  return shortHolds(timingRows((await ctx.sampled).samples, ctx.step, ctx.dur)).map((r) => finding(
+  let holds = shortHolds(timingRows((await ctx.sampled).samples, ctx.step, ctx.dur));
+  const notes = [];
+  if (ctx.ref) {
+    const ref = await referenceHolds(ctx);
+    if (ref.runs) holds = holdsBeyondRef(holds, ref.runs, 1 / REF_TEXT_FPS);
+    else { holds = []; notes.push(finding('info', 0, `reading holds not checked: the reference text timeline is not available (${ref.why})`, 'none: install tesseract, or read the holds against the reference by eye')); }
+  }
+  return [...notes, ...holds.map((r) => finding(
     r.hold < r.need * 0.6 ? 'error' : 'warn', r.readable,
     `"${r.text}" (${r.words} word${r.words > 1 ? 's' : ''}) is readable ${r.hold.toFixed(2)} s, from ${r.readable.toFixed(1)} s to ${r.leave.toFixed(1)} s, and needs ${r.need.toFixed(1)} s`,
-    `hold it ${(r.need - r.hold).toFixed(1)} s longer: move its exit to ${(r.readable + r.need).toFixed(1)} s`));
+    `hold it ${(r.need - r.hold).toFixed(1)} s longer: move its exit to ${(r.readable + r.need).toFixed(1)} s`))];
 }
 
 const changeText = (x, label) => `${label} at f${x.frame}${x.frames ? ` for ${x.frames} frame(s)` : ''}, motion ${x.mag.toFixed(1)}`;
