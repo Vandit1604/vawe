@@ -99,6 +99,9 @@ For each problem write ONE entry with all five parts. A finding missing a part i
    never "improve the timing".
 5. **Confidence**: sure, or CANNOT TELL from these frames.
 
+**Every fail names a time stamp in seconds and one concrete fix.** A fail with no time stamp, or with a
+fix that is not a number and a direction, does not count.
+
 End with the **top 5 fixes**, ranked by how much each raises the film. Fewer than five is fine when
 fewer are real.
 
@@ -152,7 +155,8 @@ ${FIX_SHAPE}
 - **Per frame, per dimension:** evidence first (timestamp/beat + what you see), then the score.
 - **The fixes**, in the five-part shape above, then the top 5.
 - **Worst frame overall** + why.
-- **Verdict:** \`PASS\` only when the default-reject test above is met. Otherwise \`FIX\` + the ranked list.
+- **Verdict:** \`PASS\` only when the default-reject test above is met. Otherwise \`FIX\` + the ranked list, each fix with its time stamp. Record it with
+  \`--verdict FIX --at <seconds> --top-fix "<the top fix>"\` (or \`--verdict PASS\`): that writes out/<film>.judge.json.
 
 ## You may say you cannot tell, and you must when it is true
 A still cannot carry every dimension. Speed, direction, easing and whether a background is alive are
@@ -205,13 +209,13 @@ ${criteria.map((c) => `    "${c.code}": {"score": 1-5, "evidence": "<quoted visu
   },
   "overall": 1-10,
   "verdict": "PASS|FIX",
-  "fixes": [{"shot": 3, "frame": 44, "wrong": "<what you see>", "why": "<why it looks worse>", "fix": "<number and direction>"}]
+  "fixes": [{"t": 1.47, "shot": 3, "frame": 44, "wrong": "<what you see>", "why": "<why it looks worse>", "fix": "<number and direction>"}]
 }
 \`\`\`
 Every \`evidence\` string must name what you actually SEE (a timestamp/beat, the exact element, the
 exact defect), never a bare number. \`overall\` is YOUR OWN holistic 1-10 read of this cut, never
 averaged with the other judge's: \`vawe ship\` requires both independent judges at 7 or above.
-\`fixes\` is the top 5, ranked, each with all five fields; a FIX verdict with an empty list is
+\`fixes\` is the top 5, ranked, each with all five fields and a \`t\` in seconds; a FIX verdict with an empty list is
 incomplete. The default is reject: pass only when you cannot find the reason the film is not ready. Then
 record it:
 \`node quality/gates/judge.mjs ${subject} --verdict-json ${outFile} --run ${run}\`
