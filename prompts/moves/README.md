@@ -41,6 +41,7 @@ This index lists the built ones, in the same groups.
 | iris wipe | a circle closes on the click or mark the eye is on and uncovers the next scene | [iris-wipe.md](iris-wipe.md) | [iris-wipe.mp4](iris-wipe.mp4) |
 | flash cut | a hard cut on a beat: a three-frame white peak hides the cut and the new shot settles from overexposed | [flash-cut.md](flash-cut.md) | [flash-cut.mp4](flash-cut.mp4) |
 | stack cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | [stack-cover.md](stack-cover.md) | [stack-cover.mp4](stack-cover.mp4) |
+| split reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | [split-reveal.md](split-reveal.md) | [split-reveal.mp4](split-reveal.mp4) |
 
 ## Point the eye
 
@@ -92,6 +93,7 @@ This index lists the built ones, in the same groups.
 | job | moves |
 |---|---|
 | cover the old shot with a new panel | [stack-cover](stack-cover.md) |
+| open one shot onto the next | [split-reveal](split-reveal.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
