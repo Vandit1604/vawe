@@ -56,6 +56,7 @@ This index lists the built ones, in the same groups.
 | move | use when | snippet | clip |
 |---|---|---|---|
 | push in | a slow scale toward the subject over a beat; the ground scales less so the layers separate | [push-in.md](push-in.md) | [push-in.mp4](push-in.mp4) |
+| UI focus zoom | zoom onto one part of a captured UI: the cursor lands, then one translate and one scale put the part in the middle | [ui-focus-zoom.md](ui-focus-zoom.md) | [ui-focus-zoom.mp4](ui-focus-zoom.mp4) |
 
 ## End a film
 

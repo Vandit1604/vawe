@@ -1,0 +1,52 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.3">
+<title>move: ui focus zoom</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --line: #33323d; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 500 2.8vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .world { position: absolute; inset: 0; transform-origin: 0 0; }
+  .win { position: absolute; left: 10vw; top: 12vh; width: 80vw; height: 76vh; background: var(--card); border-radius: 2vh; padding: 5vh 3vw; box-sizing: border-box; }
+  .win h2 { margin: 0 0 4vh; font-size: 3.4vh; font-weight: 700; }
+  .row { display: grid; grid-template-columns: 1fr 12vw 20vw 8vw; align-items: center; height: 9vh; border-top: 1px solid var(--line); color: var(--dim); }
+  .row b { color: var(--ink); font-weight: 600; }
+  .row.head { height: 5vh; border: 0; font-size: 2.2vh; }
+  .pill { justify-self: start; padding: 1.2vh 1.4vw; border-radius: 3vh; background: #0a87ff22; color: var(--accent); font-weight: 700; }
+  .row .t { text-align: right; }
+  .cursor { position: absolute; width: 3.2vh; height: 3.2vh; }
+</style>
+</head>
+<body>
+<div class="world">
+  <div class="win">
+    <h2>Renders</h2>
+    <div class="row head"><span>film</span><span>aspect</span><span>status</span><span class="t">time</span></div>
+    <div class="row"><b>launch</b><span>16:9</span><span><span class="pill">Shipped</span></span><span class="t">41 s</span></div>
+    <div class="row"><b>launch</b><span>9:16</span><span>Rendering, 64%</span><span class="t">27 s</span></div>
+    <div class="row"><b>changelog</b><span>1:1</span><span>Queued</span><span class="t">-</span></div>
+    <div class="row"><b>teaser</b><span>4:5</span><span>Queued</span><span class="t">-</span></div>
+  </div>
+  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z" fill="#fff" stroke="#16151a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const world = document.querySelector('.world');
+const r = document.querySelector('.pill').getBoundingClientRect();
+const W = window.innerWidth, H = window.innerHeight;
+const cur = document.querySelector('.cursor');
+cur.style.left = `${r.left + r.width * 0.72}px`; cur.style.top = `${r.top + r.height * 0.55}px`;   // the cursor lands on the target before the camera moves
+const s = (0.36 * W) / r.width;                          // the target fills 36% of the frame width
+const tx = W * 0.5 - s * (r.left + r.width / 2), ty = H * 0.5 - s * (r.top + r.height / 2);
+cur.animate([{ translate: '-16vw 12vh' }, { translate: '0 0' }],
+  { duration: 500, delay: 50, easing: curveToLinear(CURVES.expoOut), fill: 'both' });
+// the camera is one translate and one scale on the same curve: the target's centre travels straight to the middle of the frame
+world.animate([{ translate: '0 0', scale: 1 }, { translate: `${tx}px ${ty}px`, scale: s }],
+  { duration: 1000, delay: 550, easing: curveToLinear(CURVES.spring), fill: 'both' });
+</script>
+</body>
+</html>
