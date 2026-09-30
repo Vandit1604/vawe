@@ -3,22 +3,16 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { REPO_URL } from "./Header";
 
-// THE LANDING HERO: a move clip playing beside the list of moves, one click to switch.
+// THE LANDING HERO: the three.js example film (films/examples/three-star) beside the pitch.
 
-export type HeroMove = { name: string; title: string; group: string };
+const FILM_SOURCE = `${REPO_URL}/blob/main/films/examples/three-star/page.html`;
 
-export function HeroSplit({ moves }: { moves: HeroMove[] }) {
-  const [idx, setIdx] = useState(0);
+export function HeroSplit() {
   const [playing, setPlaying] = useState(true);
-  const [still, setStill] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
-  const move = moves[idx];
 
   useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setStill(true);
-      setPlaying(false);
-    }
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) setPlaying(false);
   }, []);
 
   useEffect(() => {
@@ -26,7 +20,7 @@ export function HeroSplit({ moves }: { moves: HeroMove[] }) {
     if (!v) return;
     if (playing) void v.play().catch(() => setPlaying(false));
     else v.pause();
-  }, [playing, move.name]);
+  }, [playing]);
 
   return (
     <section className="hs" id="intro">
@@ -40,32 +34,23 @@ export function HeroSplit({ moves }: { moves: HeroMove[] }) {
           <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
           <Link className="btn btn-ghost" href="/moves">See the moves</Link>
         </div>
-        <ol className="hs-list" aria-label="Moves">
-          {moves.map((m, i) => (
-            <li key={m.name}>
-              <button type="button" aria-current={i === idx ? "true" : undefined} onClick={() => { setIdx(i); if (!still) setPlaying(true); }}>
-                <span className="hs-list-title">{m.title}</span>
-                <span className="meta">{m.group}</span>
-              </button>
-            </li>
-          ))}
-        </ol>
       </div>
 
       <div className="panel hs-stage">
         <div className="hs-view">
           <video
             ref={video}
-            key={move.name}
             className="hs-screen"
-            src={`/moves/${move.name}.mp4`}
-            poster={`/moves/${move.name}.hd.webp`}
+            poster="/hero/three-star.webp"
             muted
             loop
             playsInline
             preload="metadata"
-            aria-label={`${move.title}, a move rendered by vawe`}
-          />
+            aria-label="A three.js star turning, a page film rendered by vawe"
+          >
+            <source src="/hero/three-star.webm" type="video/webm" />
+            <source src="/hero/three-star.mp4" type="video/mp4" />
+          </video>
         </div>
         <div className="hs-now">
           <button className="hs-play" type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "Pause" : "Play"}>
@@ -75,8 +60,8 @@ export function HeroSplit({ moves }: { moves: HeroMove[] }) {
               <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
             )}
           </button>
-          <span className="hs-now-title">{move.title}</span>
-          <Link className="hs-now-link" href={`/moves/${move.name}`} prefetch={false}>Open the move</Link>
+          <span className="hs-now-title">three.js, one page</span>
+          <a className="hs-now-link" href={FILM_SOURCE}>Read the page</a>
         </div>
       </div>
     </section>

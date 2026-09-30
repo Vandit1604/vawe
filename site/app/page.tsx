@@ -3,11 +3,10 @@ import { HeroSplit } from "./components/HeroSplit";
 import { SectionStrip } from "./components/SectionStrip";
 import { Footer } from "./components/Footer";
 import { ProofHash, ProofAspect } from "./components/proofs";
-import { groupLabel, moveByName } from "../lib/moves";
 import { organizationSchema, websiteSchema, softwareApplicationSchema, jsonLdScript } from "../lib/schema";
 import "./landing.css";
 
-/* THE LANDING PAGE (site/IDENTITY.md). Rendered move clips first; then how it works, what a page film
+/* THE LANDING PAGE (site/IDENTITY.md). The three.js example film first; then how it works, what a page film
  * looks like, what you get, and questions. The proofs are drawings whose geometry is the claim.
  */
 
@@ -29,13 +28,8 @@ const PAGE_TEXT = `<!doctype html>
 </style>
 <h1>One page. One film.</h1>`;
 
-const HERO_MOVES = ["cursor-click", "text-as-mask", "pull-back-reveal", "parallax-dive", "ai-stream-response", "logo-sting"]
-  .map(moveByName)
-  .filter((m) => m !== null)
-  .map((m) => ({ name: m.name, title: m.title, group: groupLabel(m.group) }));
-
 const SECTIONS = [
-  { id: "intro", label: "Moves" },
+  { id: "intro", label: "Film" },
   { id: "how", label: "How" },
   { id: "page", label: "Page" },
   { id: "perks", label: "Perks" },
@@ -62,7 +56,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareApplicationSchema())} />
       <Header />
       <main className="wrap" id="content" tabIndex={-1}>
-        <HeroSplit moves={HERO_MOVES} />
+        <HeroSplit />
 
         <section className="ls" id="how">
           <h2>Write a page. Get a film.</h2>
