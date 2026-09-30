@@ -6,6 +6,7 @@ node_modules
 # `!out/.gitkeep` keeps the directory present in a fresh clone.
 out/
 !out/.gitkeep
+.vawe/
 assets/*.mp3
 # no font binary ships from this repo, paid or not (NOTICE): woff2 already covered above,
 # a bare .woff (e.g. a paid Klim face used locally for fidelity) is the same rule, same directory.
