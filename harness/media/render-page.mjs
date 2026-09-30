@@ -386,6 +386,9 @@ export function probeFrames(file) {
 
 const secs = (t) => String(+t.toFixed(2));
 
+// An entrance from opacity 0, or an exit to the ground, leaves a few empty frames at the ends; that is motion, not a bug.
+const EDGE_BLANK_SEC = 0.25;
+
 export function frameProblems(blank, { frames, fps, from, declared }) {
   const problems = [];
   if (blank.length !== frames) problems.push(`the encode has ${blank.length} frame(s), expected ${frames} (round(duration x fps))`);
@@ -396,6 +399,8 @@ export function frameProblems(blank, { frames, fps, from, declared }) {
     let j = i;
     while (j + 1 < blank.length && blank[j + 1] && !declaredAt(j + 1)) j++;
     const t0 = from + i / fps, t1 = from + j / fps;
+    const atEdge = i === 0 || j === blank.length - 1;
+    if (atEdge && (j - i + 1) / fps <= EDGE_BLANK_SEC) { i = j; continue; }
     const what = i === j ? `frame ${i} (${secs(t0)} s)` : `frames ${i}-${j} (${secs(t0)}-${secs(t1)} s)`;
     problems.push(`${what} blank; declare it with <meta name="blank" content="${secs(t0)}-${secs(t1 + 1 / fps)}"> if intended`);
     i = j;

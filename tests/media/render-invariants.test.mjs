@@ -13,7 +13,7 @@ const out = path.join(os.tmpdir(), `invariants-${process.pid}.mp4`);
 const render = (page) => spawnSync(process.execPath, ['harness/media/render-page.mjs', page, out], { encoding: 'utf8' });
 
 const FAILS = [
-  ['invariants/invariant-blank-bad.html', /^✗ frames 0-1 .* blank; declare it with <meta name="blank"/],
+  ['invariants/invariant-blank-bad.html', /^✗ frames \d+-\d+ .* blank; declare it with <meta name="blank"/],
   ['invariants/invariant-audio-bad.html', /^✗ <audio> at 0.5 s: data-synth="key" is not a voice/],
   ['invariants/invariant-audio-missing.html', /^✗ <audio> at 0.2 s: src="missing.wav" .* does not exist/],
   ['invariants/invariant-font-bad.html', /^✗ font Nope failed to load/],
@@ -46,4 +46,11 @@ test('a blank frame outside a declared range is named with the range to declare'
   assert.deepEqual(frameProblems(blank, { frames: 60, fps: 30, from: 0, declared: [] }),
     ['frames 45-47 (1.5-1.57 s) blank; declare it with <meta name="blank" content="1.5-1.6"> if intended']);
   assert.deepEqual(frameProblems(blank, { frames: 60, fps: 30, from: 0, declared: [[1.5, 1.6]] }), []);
+});
+
+test('a short blank run at either end is an entrance or an exit, a long one is named', () => {
+  const edges = Array.from({ length: 60 }, (_, i) => i < 5 || i > 56);
+  assert.deepEqual(frameProblems(edges, { frames: 60, fps: 30, from: 0, declared: [] }), []);
+  const long = Array.from({ length: 60 }, (_, i) => i < 12);
+  assert.equal(frameProblems(long, { frames: 60, fps: 30, from: 0, declared: [] }).length, 1);
 });
