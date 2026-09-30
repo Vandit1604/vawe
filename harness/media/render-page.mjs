@@ -6,7 +6,8 @@
 //
 // Default is a DRAFT: half size, 30 fps, no blur, silent, and --from/--to windows the render to one
 // slice instead of the whole page. --final renders the way `vawe ship` does: full size, 60 fps, the
-// whole page from 0, up to 32 subframes of motion blur a frame, and the page's <audio> elements mixed in (harness/media/page-audio.mjs).
+// whole page from 0, up to 32 subframes of motion blur a frame, and the page's <audio> elements mixed in (harness/media/page-audio.mjs);
+// it writes the master and, beside it, a small web copy (<name>.web.mp4). --profile prints the cost table.
 // The canvas is the page's <meta name="aspect"> (else 16:9), overridden by --aspect; `all` renders every
 // aspect to its own file. The CSS viewport is always the aspect's full size (core/layout/aspects.js ASPECTS),
 // so a draft lays out exactly like the final; a draft only captures at device scale 0.5.
