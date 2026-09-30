@@ -136,7 +136,6 @@ async function prepare(input, stage) {
 function buildPrompt(ev, brief) {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
-    fs.existsSync(path.join(repoRoot, 'engine-doctrine/OWNER-VERDICTS.md')) && `Owner verdicts, past calls to respect (Read it): ${path.join(repoRoot, 'engine-doctrine/OWNER-VERDICTS.md')}`,
     process.env.VAWE_TASTE_CARD && `Taste card of the owner (Read it): ${path.resolve(process.env.VAWE_TASTE_CARD)}`,
   ].filter(Boolean);
   const kind = ev.stage === 'stills' ? 'still directions for a film' : `a ${ev.stage} cut of a film`;

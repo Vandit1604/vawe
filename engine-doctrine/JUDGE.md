@@ -1,222 +1,79 @@
 ---
 when: the render is done and something must actually LOOK at it
-answers: the 7 scoring dimensions · the verdict contract · why the static gates cannot replace this
+answers: "what `bin/vawe judge` does · the axes a fresh judge scores · the verdict contract · why the PASS is never the author's to record"
 group: process
-codes: judge-not-ready, no-judge
+codes: judge-not-ready
 ---
 
-# The vision judge: the gate that SEES
+# The vision judge: the check that SEES
 
-## AGENT SUMMARY
+The static checks read the page and the render numbers. None of them can see whether a headline is
+centred by accident, an underline sits under its word, or a frame looks expensive. The judge is the
+check that looks. It reads rendered key frames against a rubric. It advises: it never blocks a render.
 
-- `make judge` is the only gate that SEES: static gates read the DOM/JSON, this reads the rendered
-  key frames against the brand's house-style and a 7-dimension craft rubric.
-- Score each frame 1-5 on all 7 dimensions; `PASS` only if every frame clears every dimension,
-  otherwise `FIX` + a prioritized list.
-- Enforced by `[eye]`: nothing but the agent's own look, run on the near-final cut after the static
-  ladder is green. `make ship` now refuses to finish without a fresh receipt for the film it just
-  rendered (see "The receipt, and the ratchet that reads it" below): the eye is invited by `make dev`,
-  required by `make ship`.
-- Checkable action: if your eye catches a flaw, it's a FIX. Never rationalize a flaw you notice.
-- Run `node harness/dev/conform.mjs D=<file>` BEFORE this: brief conformance (exact copy, a weight ramp
-  in its window, a stroke drawing on, an exit's direction, a caption clearing a mark, a max hold) is a
-  measured fact, not craft, and belongs to engine data, never to the judge's eye.
-
-`validate`/`critique`/`slop`/`audit` are **static**: they read the DOM/JSON. None can see whether the
-mascot is faithful, the headline is centered, or an underline hits its word. That needs an eye. `make judge`
-is that gate: it preps the key frames + the brand's house-style + a craft rubric, and the **agent-in-the-loop
-scores them**. (It leverages the vision model already authoring, no API key, no cost beyond one read.)
+## Commands
 
 ```bash
-make judge D=films/scene/<file>.json VS=<brand>     # after a near-final render
+bin/vawe judge out/<name>.mp4 [--ref ref.mp4] [--struct] [--runs A,B]   # prepare the sheet and rubric
+bin/vawe judge --fresh films/<name>/page.html --brief films/<name>/brief.md [--stage stills|draft|final]
+bin/vawe judge <page|mp4> --verdict PASS|FIX [--at <s> --top-fix "<fix>"] [--fix <code>@<beat> ...]
 ```
 
-It writes, into a directory named after the film so judging a second one does not destroy the first:
-- **`/tmp/judge/<name>/sheet.png`**: one labeled key frame per beat (each beat's representative moment + hook + CTA).
-- **`/tmp/judge/<name>/rubric.md`**: the brand `house-style.md` (the scoring key) + the 7 craft dimensions + a verdict template.
+- **Prepare** writes a key-frame sheet and `rubric.md` under the scratch base. A fresh session reads the sheet against the rubric. With `--ref`, every tile is frame-locked: reference left, film right.
+- **`--fresh`** scores now with a separate headless Claude session that has the Read tool only (about 30 s). It returns one JSON object and writes `out/<name>.judge.json`. It advises and never blocks.
+- **`--verdict`** records the verdict against the exact render. It refuses a stale render, a missing sheet, and a PASS recorded by the agent that rendered the film.
+- **`--struct --runs A,B`** writes one rubric per run, scored by two independent judges on the 12 criteria in `harness/lib/judge-codes.mjs`. Every criterion needs `{score, evidence, t}`, and the evidence must name a concrete observation (`harness/lib/evidence-lint.mjs`). `node quality/gates/judge.mjs --compare A.json B.json` flags any criterion where the runs differ by more than 2 points.
 
-Then the agent **reads the sheet against the rubric** and returns a structured verdict.
+## The fresh judge
 
-## The full loop: look, then motion, then conform, then verify, then two fresh judges
+The judge starts from reject. It scores each axis 1 to 10: 8 is good work, 10 is rare, and a score
+under 8 needs a fix. It names the moment it looked at, and every fix is one concrete change an author
+can make in one edit.
 
-One agent scoring its own film PASS is not the only failure this file guards against. A single vision
-judge repeats its own rating on the same clip only about two times in three (Video-Bench), so one
-judging pass, by one agent, is a coin with a thumb on it, not a verdict. Five pieces close that, run in
-this order:
+| Film axes | What it asks |
+|---|---|
+| hook | the first second gives one clear, strong thing to look at |
+| motion | curves, continuity, overlap; nothing snaps or stops dead |
+| scenes | the world turns every 1 to 2 beats; count the distinct worlds |
+| type | faces, scale contrast, spacing, hierarchy, reading time |
+| colour | palette discipline, light, contrast, one accent used with intent |
+| sound | final stage only. Subtle cues that mark the beats, and a mix left as written (near -20 LUFS with default gains), score well. Do not ask for -14 LUFS or louder hits unless the brief asks. |
+| pace | density per frame and rhythm; readable holds, no dead air |
+| expensive | looks made by a person with taste, not assembled from a template |
 
-1. **Look review, before any motion work.** `make look D=<file> LOOKS=1` renders one styleframe per
-   beat AT ITS HOLD (light, colour, type, camera; no render needed, a live-page grab like the rest of
-   `make look`) and tiles them into `/tmp/preview_scene_looks.png`. Studios review the LOOK on
-   styleframes before a single frame of motion is built; this is that pass. It samples the same beat
-   model `make judge` does (`quality/gates/beats-of.mjs`), so a look approved here and a judge run
-   later never disagree about where a beat starts.
-2. **Motion review, separately**, once the look passes: `make dev-tool X=critics D=<file> DECIDERS=1`
-   (the motion director) and `make judge D=<file> STRUCT=1` (below), whose MOTION axis is scored on
-   its own.
-3. **`node harness/dev/conform.mjs D=<file> [--brief "…"]`: did it do what the brief said, before either
-   verify or the judges run.** A real test film's misses were almost never craft, they were brief
-   conformance: wrong copy, a weight ramp that never runs in its declared window, a stroke that never
-   draws on, an `out` that fades instead of moving in its stated direction, a caption sitting on a mark
-   it was supposed to clear, a static hold past its stated ceiling. `conform.mjs` extracts every
-   CHECKABLE claim from the storyboard's beats, a sibling `.brief.md`, or `--brief` text, and answers
-   each from `harness/dev/probe-frame.mjs`'s engine data (rendered text, font weight, box position over
-   time, svg draw progress), never from a judge's eye: PASS/FAIL with the measured value and timestamp.
-   A claim it cannot measure is printed JUDGE-ONLY, for step 5 below to weigh instead of silently
-   dropping it. Paste its block before verify's, same discipline as verify's own.
-4. **`node harness/dev/verify.mjs D=<file> [REF=<ref.mp4>]`: hard numbers, no eye.** Paste the printed
-   block VERBATIM before any judging happens (the discipline HyperFrames enforces with `w2h-verify.mjs`:
-   an agent skips a required step unless the raw numeric output is put in front of it, not summarized).
-   It reports frame coverage (beats inspected vs the film's real length), exposure range per beat, the
-   light-map distance to a reference when `REF` is given (mean CIE76 ΔE, reusing `harness/media/match.mjs`'s
-   own colour-distance code), beat timing against the storyboard, asset use (referenced vs present on
-   disk), a count of text clipped at the frame edge (`quality/audit.mjs`'s own findings, not
-   re-detected), and a blank-seam count (`quality/gates/seams.mjs`'s own findings). It exits non-zero
-   ONLY on an objective failure: no render, or a referenced asset missing on disk. Everything else is a
-   measurement for the eye to weigh, never a verdict the script hands down itself.
-5. **Two independent structured judges.** `make judge D=<file> STRUCT=1` writes a rubric PER RUN
-   (`/tmp/judge/<name>/structured-A.md`, `structured-B.md`) whose required answer is JSON, one entry
-   per criterion, `{score, evidence, t}`, split into **LOOK** (light, colour, type, camera, composition)
-   and **MOTION** (timing, easing, transitions, continuity), scored as separate axes
-   (`harness/lib/judge-axes.mjs`). A criterion with no evidence is refused, not recorded:
-   `node quality/gates/judge.mjs <file> --verdict-json <run>.json --run A` checks every criterion for a
-   real `evidence` string and a `t` before it writes anything down. Run it again from a second, fresh
-   agent/session with `--run B`, then
-   `node quality/gates/judge.mjs --compare <A>.json <B>.json` flags any criterion where the two runs
-   disagree by more than 2 points, so a real disagreement gets a third opinion instead of averaging
-   itself away.
-
-**Evidence must be specific, not filler.** A non-empty `evidence` string is not the same as a real
-observation: `{"score": 2, "evidence": "readability looks fine"}` passed the old check and recorded
-nothing anyone could act on. `harness/lib/evidence-lint.mjs` refuses it before `--verdict-json`
-writes anything: name a concrete visual observation (an element or text, plus one of position, size,
-colour, motion or timing), never just echo the criterion's own name, agree in sign (a score of 1-2
-needs a named defect), and never repeat the identical string across two criteria in one verdict.
-
-Good, real observations:
-- `the CTA button sits 40px left of centre, off its grid column` (element + position)
-- `headline text fades in 0.3s late against the beat 2 @1.4s hold` (element + timing)
-- `the background is washed out grey where the house style calls for cobalt` (element + colour)
-
-Bad, filler that the linter refuses:
-- `readability looks fine` (no element, no property, just the verdict restated)
-- `hierarchy is good` (same failure under a different criterion's name)
-- `looks fine (composition)` (echoes the criterion label back as its own content)
-
-**A contact sheet's grid position means nothing.** Each tile is a separate, independent frame laid out
-left to right, top to bottom for reading convenience only; a tile's row and column carry no time or
-motion information. Comparing an element's position between two tiles in different rows is not
-comparing two moments, it is comparing two unrelated layouts, and calling the difference a "jump" is a
-false positive. The same misread runs the other way: a device that is deliberately visible across
-several tiles (a persistent caret, a repeated icon) is intended motion, not a "ghost". Any claim about
-motion or position must come from same-scale, full-resolution stills read in their real time order, or
-from `probe-frame` numbers, never from where a tile sits in the sheet.
-
-**One page for all of it**: `node harness/author/review-server.mjs D=<file> [REF=<ref.mp4>] [PORT=8802]`,
-served like `make tune`. It shows a frame grid per beat with a time slider, the reference side by side
-when `REF` is given, the verify block, and whatever structured judge JSON already exists for this cut,
-so nobody has to open four tools to review one render. `--screenshot <out.png>` takes one headless shot
-and exits, for a non-interactive check.
-
-## The 7 dimensions (score each frame 1-5, name the issue + the fix)
-1. **Readability**: legible at size, sufficient contrast.
-2. **Hierarchy**: one clear focal; the eye knows where to land.
-3. **Composition**: centered/aligned/on-thirds ON PURPOSE. Off-center-by-accident, mis-anchored
-   annotations, floating elements = fail. (The argus first-pass class of bug.)
-4. **Brand fidelity**: house-style dominance, ONLY brand colours, the real face, signature details present,
-   NEVERs absent.
-5. **Asset fidelity**: real captured assets, never a recreated-from-memory lookalike.
-6. **Produced-not-generated**: crafted density, not a word on empty space.
-7. **Value**: the frame earns its place.
+Stills axes: concept, focal, colour, type, template (distance from a generic template). The rubric
+text is `FRESH_AXES` in `quality/gates/rubric.mjs`. Keep this table and that text in step.
 
 ## The verdict contract
-- **Per frame, for the human reading it:** `beat N, <worst dimension>: <issue> → <fix>` (only frames
-  with a real problem). Keep saying this; it is how a person understands what the eye caught.
-- **Per frame, for the machine reading it:** `--fix <code>@<beat>`, repeated once per finding, passed to
-  `make judge D=<file> --verdict FIX`. `<code>` is one of the seven dimension codes in
-  `harness/lib/judge-codes.mjs` (the one place they are defined, so this list is not restated here):
-  `readability`, `hierarchy`, `composition`, `brand-fidelity`, `asset-fidelity`, `produced-not-generated`,
-  `value`. `<beat>` is the beat number already printed on the sheet (`beat N`). A code outside the seven
-  is refused, naming all seven; the free-text `--fixes "<prose>"` form still works for one release and
-  prints a line naming `--fix` as its replacement.
-- **Worst frame overall** + why.
-- **`PASS`** only if every frame clears every dimension; otherwise **`FIX`** + a prioritized list, given
-  as both the sentence and the `--fix` codes above.
-- **Rule: if your eye catches it, it's a FIX.** "Renders fine / passes the static gates" is not PASS. Do NOT
-  rationalize a flaw you notice. That is the exact failure the judge exists to prevent (see MISTAKES.md #15).
 
-## What this judge cannot do: tell you whether an edit HELPED
+- Per frame, for a person: `beat N, <worst dimension>: <issue> -> <fix>`, only for frames with a real problem.
+- Per finding, for the machine: `--fix <code>@<beat>`, repeated. An unknown code is refused and the valid codes are listed.
+- A FIX names one time stamp and one concrete fix (`--at`, `--top-fix`). A fix with no time stamp, or one that is not a number and a direction, does not count.
+- PASS only when every frame clears every dimension. If your eye catches a flaw, it is a FIX. "Renders fine" is not a PASS.
+- No score is averaged across judges. A 1-5 per criterion is one judge's reason. Averaging invents a precision no judge claimed.
 
-It sees one film, and the agent running it knows which version it just authored. Both limits are fatal to
-the question "is this better than what I had".
+## Reading a contact sheet
 
-**So the PASS is not the author's to self-record.** A judge scoring a film it wrote inflates the score,
-a measured bias, not a lapse, and it is why hinge-v1 (a slideshow) was recorded PASS by the agent that
-made it. The `--verdict PASS` that gates `ledger-add` must be corroborated by a SEPARATE critic: hand
-`/tmp/judge/<name>/sheet.png` and the rubric to a fresh subagent that did not author the film (the
-fidelity and beat critics in [`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md)) and record PASS only when that
-independent eye agrees. The judge records with `VAWE_AGENT=<its-name>` set: a subagent shares the
-author's session and process id, so the tag is the only thing that tells them apart. This costs nothing but one dispatch and it removes the one bias no rubric can.
+Each tile is a separate frame. Grid position carries no time or motion information. Comparing an
+element between two tiles in different rows is comparing two unrelated layouts, and calling the
+difference a "jump" is a false positive. A device visible across several tiles (a caret, a repeated
+icon) is intended motion, not a ghost. Claim motion or position only from same-scale, full-resolution
+stills in real time order, or from measured numbers.
 
-For the harder question, whether an edit HELPED, you need a blind A/B judge: two cuts, paired
-beat by beat, arms hidden, three judges. **No such judge exists today.** `make ab`, `make ab-record` and
-`CRAFT/AB-JUDGE.md` were removed on 2026-08-05 (`cc2dfc2`), along with five other tools that had never
-been the reason a video looked better. Until one is built again, tile the two renders with `make dev-tool X=compare`
-and judge them by eye, knowing you know which arm is which.
+## The PASS is not the author's to self-record
 
-<!-- doc-refs-allow: CRAFT/AB-JUDGE.md · named here only to record that this file was built and then cut -->
-<!-- doc-refs-allow: make ab · named here only to record that this target was built and then cut -->
-<!-- doc-refs-allow: make ab-record · named here only to record that this target was built and then cut -->
+A judge scoring a film it wrote inflates the score. That is a measured bias, and it is why a slideshow
+was once recorded PASS by the agent that made it. Hand the sheet and rubric to a fresh session that did
+not author the film, and record PASS only when that eye agrees. A subagent shares the author's session
+and process id, so run the judge with `VAWE_AGENT=<its-name>`: the tag is the only thing that tells the
+two apart (`harness/lib/judge-self-record.mjs`).
 
-**N reduces variance, not bias.** Three judges drawn from one model share their blind spots, so a 3-0
-there is weaker evidence than the arithmetic suggests, and it is not certainty. The only real control is
-the position-swap re-run: if the winner follows the arm it is real, if it follows the position it is void.
+Three judges drawn from one model share their blind spots, so a 3-0 is weaker evidence than it looks.
+The real control is a position swap: if the winner follows the arm, it is real. If it follows the
+position, it is void. Nothing here answers "did this edit help": tile the two renders side by side
+and judge by eye, knowing which arm is which.
 
-For the same reason no score in this file is aggregated anywhere. A 1-5 per dimension is a judge's
-*reason*, uncalibrated between judges; averaging them across judges invents a precision none of them
-claimed. That was right, and it stays right.
+## What the judge cannot see
 
-## The receipt, and the ratchet that reads it
-
-`node quality/gates/judge.mjs <file> --verdict PASS|FIX` is what actually records that the eye ran.
-It writes `quality/baselines/approved/judge/<name>.json`: the scene's own content hash (via
-`harness/lib/receipt.mjs`, so editing the scene withdraws it), a sha256 of the RENDERED mp4's own
-bytes (`renderHash`, so a re-render invalidates it even if the scene JSON never changed), the verdict,
-and the date. A receipt is valid only when both hashes still match what is on disk right now.
-
-`make dev-tool X=no-judge` (`node quality/gates/ledger.mjs unjudged`) counts rendered films (an `out/<name>.mp4`
-exists) with no valid receipt, against a ratchet at `quality/baselines/no-judge-ratchet.json` that may
-only fall. This CORPUS scan is deliberately NOT wired into CI: both `films/scene/*.json` content and
-`out/*.mp4` are gitignored, so a thin checkout would report a number about itself, not the library (the
-same reason `doc-refs` stays out of CI). Run it on demand, or from `.githooks/pre-push` once an author
-wants it enforced there. `--stamp` lowers the ceiling after judging a batch.
-
-`ledger.mjs` also has a SINGLE-FILM mode (`node quality/gates/ledger.mjs judged <scene.json>`, no
-flags), and `make ship` calls exactly that as its last step. It was opt-in until 2026-09: `make ship` only ever
-echoed a suggestion to run `make judge`, and the corpus ratchet measured the result: 121 rendered films
-with no receipt against 1 that had one. Opt-in lost the eye 121 times out of 122, so the decision
-reversed. `make ship` now refuses to finish without a fresh receipt for the film it just rendered, and
-names the exact `make judge D=<file>` command plus which condition failed (no receipt at all, the
-scene changed since, or the mp4 changed since). There is no flag to skip it, only the missing artefact:
-a `FIX` verdict still ships, because this only asks whether the eye ran, exactly as the corpus ratchet
-already does. `make dev` and `make check` are untouched and stay completely ungated.
-
-## Where it sits
-Required by `make ship`, on the near-final cut, after the static ladder is green. It catches what the
-others structurally can't; on the argus film it flagged a stat with a dropped unit and a scattered beat
-that `critique` (0 findings) and `slop` (clean) both missed.
-
-**What this judge cannot see: whether a film is a TEMPLATE.** A frame can score well on all 7 dimensions
-and still be the same shape as the last twenty; "produced-not-generated" asks whether each frame earns
-its place, not whether the film reached past the five families every other film already reaches for.
-That comparison needs the library, not one film's frames, so it lives before the render, in
-`direction-floor.mjs` (`library-top5-only`, `uniform-cadence`; `engine-doctrine/TASTE.md`). Neither check assigns a
-score: they report an absence against a measured bar and name what to reach for instead. A judge PASS
-still says nothing about sameness across the library; that is `direction-floor`'s question, not this
-gate's.
-
-## Provenance
-
-**Do not re-add:** the claim that a blind A/B judge was never built. It shipped (`05a5123`,
-2026-07-29) and was removed (`cc2dfc2`, 2026-08-05); this file and
-[`CRAFT/SUBAGENTS.md`](CRAFT/SUBAGENTS.md) once described the removal as if it had never existed,
-which turns a decision into an oversight.
+A frame can score well on every axis and still be the same shape as the last twenty films. Sameness
+across a library needs the library, not one film's frames. A judge PASS says nothing about it.

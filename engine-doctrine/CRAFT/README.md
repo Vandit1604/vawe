@@ -134,6 +134,5 @@ _The whole-repo map, including everything outside CRAFT, is [`../INDEX.md`](../I
 - [`../DESIGN-DATABASE.md`](../DESIGN-DATABASE.md) = *what techniques exist* (the catalog).
 - [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md) = *how it moves* (motion rules + gates).
 - [`../MISTAKES.md`](../MISTAKES.md) = *what went wrong before* (mistake → fix log).
-- [`../SAFEGUARDS.md`](../SAFEGUARDS.md) = *which failing checks adapt to the film's own context, and which stay hard* (guard index).
 - `skills/{taste-skill,impeccable}` = *enforcement* (the anti-slop detector + dials). CRAFT tells
   you what to do; impeccable checks you did it. Reach past what impeccable flags using these guides.

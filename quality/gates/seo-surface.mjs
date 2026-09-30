@@ -21,8 +21,8 @@
 //   4. every JSON-LD builder in site/lib/schema.ts parses and carries the fields its schema.org type
 //      requires
 //
-// WHAT THIS CANNOT SEE, STATED RATHER THAN LEFT SILENT (engine-doctrine/SAFEGUARDS.md,
-// quality/gates/silent-fallback.mjs). This never runs `next build` or fetches a live sitemap.xml: it
+// WHAT THIS CANNOT SEE, STATED RATHER THAN LEFT SILENT
+// (quality/gates/silent-fallback.mjs). This never runs `next build` or fetches a live sitemap.xml: it
 // is a STATIC read, the same shape as quality/gates/generated-check.mjs. So it cannot catch a page
 // that calls pageMetadata() but throws before returning, a metadata export next.js silently drops for
 // a framework reason, or a bug in sitemap.ts's OWN loop body that still imports the right files and
