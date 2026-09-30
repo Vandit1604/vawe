@@ -15,6 +15,10 @@
   .a .k { font: 500 var(--t-body)/1 var(--mono); color: var(--muted); }
   .a b { font: 700 calc(var(--u) * 20)/1 var(--sans); letter-spacing: -0.045em; }
   .a .pill { align-self: flex-start; }
+  .a .top { display: flex; align-items: center; justify-content: space-between; }
+  .a .avatars { --size: calc(var(--u) * 9); }
+  .a .foot { display: flex; align-items: center; justify-content: space-between; }
+  .a .foot span { font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
   .b { background: var(--paper); color: var(--paper-ink); }
   .b h2 { position: absolute; right: 10vw; top: calc(var(--u) * 28); margin: 0; text-align: right; font: 700 calc(var(--u) * 20)/0.95 var(--sans); letter-spacing: -0.05em; }
   .b p { position: absolute; right: 10vw; top: calc(var(--u) * 70); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--paper-muted); }
@@ -23,7 +27,7 @@
 </head>
 <body>
 <template id="shots">
-  <div class="shot a"><div class="card"><span class="k">Q3 renders</span><b>12,480</b><span class="pill up">+38% on Q2</span></div></div>
+  <div class="shot a"><div class="card"><div class="top"><span class="k">Q3 renders</span><div class="avatars"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg" alt=""></div></div></div><b>12,480</b><div class="foot"><span class="pill up">+38% on Q2</span><span>14 editors</span></div></div></div>
   <div class="shot b"><h2>Next:<br>Q4 <i>plan</i></h2><p>3 launches, 1 pipeline</p></div>
 </template>
 <div id="layers"></div>

@@ -18,6 +18,8 @@
   .head .real, .head .sk-layer { align-items: center; gap: var(--s3); }
   .head .real { display: flex; }
   .avatar { --size: calc(var(--u) * 11); }
+  .avatar.store { border-radius: var(--r-chip); background: var(--ink); color: var(--surface); box-shadow: none; }
+  .avatar.store .logo-mark { width: calc(var(--u) * 6); height: calc(var(--u) * 6); }
   .name { font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.025em; }
   .sub { margin-top: calc(var(--u) * 0.8); font: 500 var(--t-small)/1.2 var(--sans); color: var(--muted); }
   .grow { flex: 1; }
@@ -49,8 +51,8 @@
 <body>
 <div class="card">
   <div class="reg head">
-    <div class="real"><div class="avatar">FC</div><div><div class="name">Fern &amp; Co.</div><div class="sub">Store since 2019 &middot; Portland, OR</div></div><div class="grow"></div><div class="pill up">Live</div></div>
-    <div class="sk-layer" style="align-items:center;gap:var(--s3)"><i class="sk round" style="width:calc(var(--u)*11);height:calc(var(--u)*11)"></i><div><i class="sk" style="display:block;width:calc(var(--u)*34);height:calc(var(--u)*5.2)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*1.6);width:calc(var(--u)*46);height:calc(var(--u)*3)"></i></div><div class="grow"></div><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*6);border-radius:999px"></i></div>
+    <div class="real"><div class="avatar store" data-logo="tidewell"></div><div><div class="name">Tidewell Goods</div><div class="sub">Ceramics and linen &middot; Portland, OR</div></div><div class="grow"></div><div class="pill up">Live</div></div>
+    <div class="sk-layer" style="align-items:center;gap:var(--s3)"><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*11);border-radius:var(--r-chip)"></i><div><i class="sk" style="display:block;width:calc(var(--u)*34);height:calc(var(--u)*5.2)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*1.6);width:calc(var(--u)*46);height:calc(var(--u)*3)"></i></div><div class="grow"></div><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*6);border-radius:999px"></i></div>
   </div>
   <div class="reg stats">
     <div class="real">
@@ -71,9 +73,9 @@
     </div>
     <div class="reg list">
       <div class="real">
-        <div class="row"><div class="avatar">MH</div><div class="who">Maren Holt<span>#4821</span></div><b>$84.00</b></div>
-        <div class="row"><div class="avatar">DO</div><div class="who">Dev Ortiz<span>#4820</span></div><b>$212.50</b></div>
-        <div class="row"><div class="avatar">LP</div><div class="who">Lin Park<span>#4819</span></div><b>$46.00</b></div>
+        <div class="row"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg" alt=""></div><div class="who">Maren Holt<span>#4821</span></div><b>$84.00</b></div>
+        <div class="row"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg" alt=""></div><div class="who">Dev Ortiz<span>#4820</span></div><b>$212.50</b></div>
+        <div class="row"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg" alt=""></div><div class="who">Lin Park<span>#4819</span></div><b>$46.00</b></div>
       </div>
       <div class="sk-layer">
         <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*20);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*9);height:calc(var(--u)*3)"></i></div>
@@ -85,6 +87,7 @@
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
 const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];

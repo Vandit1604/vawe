@@ -8,11 +8,13 @@
 <style>
   body { position: relative; display: block; }
   .shot { position: absolute; inset: 0; }
-  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 20); width: 46vw; height: calc(var(--u) * 60); }
+  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 20); width: 46vw; }
   .a h2 { margin: 0 0 var(--s4); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
   .row { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) 0; border-top: 1px solid var(--line); font: 600 var(--t-lead)/1 var(--sans); letter-spacing: -0.02em; }
-  .row .chip { --size: calc(var(--u) * 8); }
-  .row span { margin-left: auto; font: 500 var(--t-body)/1 var(--mono); color: var(--muted); }
+  .row .thumb { flex: none; width: calc(var(--u) * 12); height: calc(var(--u) * 8); border-radius: var(--r-chip); }
+  .row .pill { margin-left: auto; font-family: var(--sans); }
+  .row small { white-space: nowrap; font: 500 var(--t-small)/1 var(--mono); color: var(--faint); letter-spacing: -0.02em; }
+  .row b { display: grid; gap: calc(var(--u) * 1.2); font-weight: 600; }
   .dim { position: absolute; inset: 0; background: #14103a; opacity: 0; }
   .b { left: calc(var(--u) * -4.4); width: calc(100vw + var(--u) * 4.4); }
   .body { position: absolute; inset: 0; filter: url(#motion); }
@@ -23,21 +25,23 @@
   .b .kicker { margin-bottom: var(--s3); font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
   .b .hero { font-size: calc(var(--u) * 26); letter-spacing: -0.05em; }
   .b .url { margin-top: var(--s4); display: inline-flex; }
+  .b .film { position: absolute; right: 7vw; top: calc(var(--u) * 16); width: 36vw; height: calc(var(--u) * 68); box-shadow: var(--shadow-hero); border-radius: var(--r-card); }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position: absolute"><filter id="motion" x="-30%" width="160%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
 <section class="shot a" id="a">
   <div class="card"><h2>render queue</h2>
-    <div class="row"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></div>launch-16x9<span>done</span></div>
-    <div class="row"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></div>launch-9x16<span>done</span></div>
-    <div class="row"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></div>launch-1x1<span>done</span></div>
+    <div class="row"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg"><b>launch-16x9<small>1920 x 1080</small></b><span class="pill up">Done</span></div>
+    <div class="row"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/shore.jpg"><b>launch-9x16<small>1080 x 1920</small></b><span class="pill up">Done</span></div>
+    <div class="row"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/loft.jpg"><b>launch-1x1<small>1080 x 1080</small></b><span class="pill">Queued</span></div>
   </div>
   <div class="dim" id="dim"></div>
 </section>
 <section class="shot b" id="b">
   <div class="cast" id="cast"></div>
   <div class="body"><div class="sheet"></div>
+  <div class="film"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg"></div>
   <div class="copy"><div class="kicker">step 3 of 3</div><div class="hero">Live</div><div class="pill up url">vawe.dev/launch</div></div></div>
 </section>
 <script type="module">

@@ -16,6 +16,10 @@
   .b .in { position: absolute; inset: 0; }
   .b h1 { position: absolute; left: 9vw; top: calc(var(--u) * 26); margin: 0; font: 700 calc(var(--u) * 26)/1 var(--sans); letter-spacing: -0.05em; }
   .b p { position: absolute; left: 9.6vw; top: calc(var(--u) * 58); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--paper-muted); }
+  .b figure { position: absolute; left: 52vw; top: calc(var(--u) * 24); width: 39vw; margin: 0; }
+  .b figure img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-card); outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px; box-shadow: 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(9, 13, 10, 0.12), 0 calc(var(--u) * 3) calc(var(--u) * 8) calc(var(--u) * -2) rgba(9, 13, 10, 0.22); }
+  .b figcaption { display: flex; justify-content: space-between; margin-top: var(--s2); font: 500 var(--t-small)/1 var(--mono); color: var(--paper-muted); }
+  .b figcaption b { color: var(--paper-ink); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -23,7 +27,7 @@
   rendering 16:9 ...... done
   rendering 9:16 ...... done
 <b><span class="dot"></span>live</b></pre></div>
-<div class="shot b"><div class="in"><h1>Live.</h1><p>vawe.dev/launch</p></div></div>
+<div class="shot b"><div class="in"><h1>Live.</h1><p>vawe.dev/launch</p><figure><img src="/prompts/moves/demo/assets/photos/harbour.jpg" alt=""><figcaption><b>launch.mp4</b><span>0:41, 60 fps</span></figcaption></figure></div></div>
 <script type="module">
 import '/core/engine/page-api.js';
 import { CURVES } from '/core/motion/springs.js';

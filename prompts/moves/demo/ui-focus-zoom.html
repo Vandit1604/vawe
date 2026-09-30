@@ -14,7 +14,8 @@
   .bar .small { color: var(--muted); }
   .row { display: grid; grid-template-columns: 1fr 12vw 22vw 8vw; align-items: center; height: calc(var(--u) * 11.4); border-top: 1px solid var(--line); color: var(--muted); font: 500 var(--t-body)/1 var(--sans); }
   .row b { display: flex; align-items: center; gap: var(--s2); color: var(--ink); font-weight: 600; }
-  .row b .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); color: var(--muted); }
+  .row b .thumb { flex: none; width: calc(var(--u) * 10.4); height: calc(var(--u) * 6.4); border-radius: calc(var(--u) * 1.2); }
+  .row b small { font: 500 var(--t-small)/1 var(--mono); letter-spacing: -0.02em; color: var(--faint); }
   .row.head { height: calc(var(--u) * 7); margin-top: var(--s3); border-top: 0; font-size: var(--t-small); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--faint); }
   .row .t { text-align: right; }
   .pill { justify-self: start; padding: calc(var(--u) * 1.3) calc(var(--u) * 2.6); font-size: var(--t-body); }
@@ -25,12 +26,12 @@
 <body>
 <div class="world">
   <div class="win card">
-    <div class="bar"><h2>Renders</h2><span class="small">4 films, 6 outputs</span></div>
+    <div class="bar"><h2>Renders</h2><span class="small">Fernbank Studio, 4 films, 6 outputs</span></div>
     <div class="row head"><span>film</span><span>aspect</span><span>status</span><span class="t">time</span></div>
-    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>launch</b><span>16:9</span><span><span class="pill up">Shipped</span></span><span class="t">41 s</span></div>
-    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>launch</b><span>9:16</span><span>Rendering, 64%</span><span class="t">27 s</span></div>
-    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>changelog</b><span>1:1</span><span>Queued</span><span class="t">-</span></div>
-    <div class="row"><b><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>teaser</b><span>4:5</span><span>Queued</span><span class="t">-</span></div>
+    <div class="row"><b><img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg">launch <small>v12</small></b><span>16:9</span><span><span class="pill up">Shipped</span></span><span class="t">41 s</span></div>
+    <div class="row"><b><img class="photo thumb" src="/prompts/moves/demo/assets/photos/shore.jpg">launch <small>v12</small></b><span>9:16</span><span>Rendering, 64%</span><span class="t">27 s</span></div>
+    <div class="row"><b><img class="photo thumb" src="/prompts/moves/demo/assets/photos/loft.jpg">changelog <small>v3</small></b><span>1:1</span><span>Queued</span><span class="t">-</span></div>
+    <div class="row"><b><img class="photo thumb" src="/prompts/moves/demo/assets/photos/ridge.jpg">teaser <small>v1</small></b><span>4:5</span><span>Queued</span><span class="t">-</span></div>
   </div>
   <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z"/></svg>
 </div>

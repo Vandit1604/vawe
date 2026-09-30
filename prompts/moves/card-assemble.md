@@ -8,7 +8,7 @@ parts start 80 ms apart, the rule draws, and the accent button lands last on a s
 
 ```html
 <div class="card">
-  <div class="avatar part" data-from="-14vh 0">AR</div>
+  <div class="avatar part" data-from="-14vh 0">...logo...</div>
   <div class="amount part" data-from="14vh 0">$4,280</div>
   <div class="rule part"></div>
   <div class="item part" data-from="0 9vh">...</div>

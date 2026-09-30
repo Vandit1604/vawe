@@ -9,7 +9,8 @@
 <style>
   body { position: relative; display: block; }
   .junk { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: var(--s2); padding: calc(var(--u) * 1.6) calc(var(--u) * 2.4); background: var(--surface); box-shadow: var(--ring), var(--lift); font: 700 var(--t-small)/1.1 var(--sans); white-space: nowrap; will-change: transform; }
-  .junk .dot { width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); border-radius: 50%; background: var(--c, var(--accent)); box-shadow: inset 0 0 0 calc(var(--u) * 0.3) #000; flex: none; }
+  .junk .dot { display: grid; place-items: center; width: calc(var(--u) * 4.2); height: calc(var(--u) * 4.2); background: var(--c, var(--accent)); color: #fff; box-shadow: inset 0 0 0 calc(var(--u) * 0.3) #000; flex: none; }
+  .junk .dot .logo-mark { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); }
   .junk.tag { padding: calc(var(--u) * 1) calc(var(--u) * 2); border-radius: 999px; }
   .junk.flag { padding: calc(var(--u) * 1.2) calc(var(--u) * 2); background: var(--accent); color: var(--on-accent); }
   .clean { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); background: var(--surface); box-shadow: var(--ring), var(--lift); margin: calc(var(--u) * -9) 0 0 calc(var(--u) * -34); width: calc(var(--u) * 68); height: calc(var(--u) * 18); opacity: 0; }
@@ -24,6 +25,8 @@
 <div class="clean"><div class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><b>Inbox zero</b><span>12 apps, one feed</span></div></div>
 <script type="module">
 import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+import { mark } from '/prompts/moves/demo/assets/logos.js';
+const apps = ['relay', 'kestrel', 'parcel', 'mosaic', 'halcyon', 'orbital', 'quarry', 'lumen', 'tidewell', 'ardent', 'northwind'];
 const pop = curveToLinear(CURVES.overshoot), suck = curveToLinear((u) => u * u * u), settle = curveToLinear(CURVES.expoOut);
 const W = innerWidth, H = innerHeight, rand = rng(7);
 const items = [
@@ -42,7 +45,7 @@ let at = 120;          // ms; the gap shrinks with every item, so the flood spee
 items.forEach(([label, c], i) => {
   const el = Object.assign(document.createElement('div'), { className: `junk ${kinds[i % 4]}` });
   el.style.setProperty('--c', c);
-  el.innerHTML = kinds[i % 4] === 'flag' ? label : `<i class="dot"></i>${label}`;
+  el.innerHTML = kinds[i % 4] === 'flag' ? label : `<i class="dot">${mark(apps[i % apps.length])}</i>${label}`;
   pile.append(el);
   const w = el.offsetWidth, h = el.offsetHeight;
   const x = (0.02 + rand() * 0.9) * W - w * 0.2, y = (0.04 + rand() * 0.84) * H, rot = (rand() - 0.5) * 16;

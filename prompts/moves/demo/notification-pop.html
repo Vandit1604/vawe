@@ -13,14 +13,15 @@
   .text { flex: 1; min-width: 0; }
   .title { font: 650 var(--t-lead)/1.15 var(--sans); letter-spacing: -0.015em; }
   .sub { margin-top: calc(var(--u) * 0.7); font: 500 var(--t-body)/1.25 var(--sans); color: var(--muted); }
+  .thumb { flex: none; width: calc(var(--u) * 21); aspect-ratio: 16 / 9; height: auto; border-radius: calc(var(--u) * 2); }
   .when { align-self: flex-start; padding-top: var(--s1); font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
 </style>
 </head>
 <body>
 <div class="note card">
   <div class="chip accent-fill app"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
-  <div class="text"><div class="title">Render finished</div><div class="sub">launch-film.mp4, 12.4 s at 60 fps</div></div>
-  <div class="when">now</div>
+  <div class="text"><div class="title">Render finished</div><div class="sub">meadow-launch.mp4, 12.4 s at 60 fps</div></div>
+  <img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""><div class="when">now</div>
 </div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

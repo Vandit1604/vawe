@@ -11,8 +11,8 @@
   h1 { margin: 0; font: inherit; display: flex; gap: 0.07em; }
   .tile { position: relative; width: 0.72em; height: 1.1em; perspective: 3em; border-radius: 0.09em; box-shadow: 0 0.03em 0.08em rgba(0, 0, 0, 0.45); }
   .half { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; background: var(--tile); opacity: 0; backface-visibility: hidden; }
-  .half.top { top: 0; border-radius: 0.09em 0.09em 0 0; transform-origin: 50% 100%; }
-  .half.bot { bottom: 0; border-radius: 0 0 0.09em 0.09em; transform-origin: 50% 0; }
+  .half.top { top: 0; border-radius: 0.09em 0.09em 0 0; transform-origin: 50% 100%; background: linear-gradient(#34333b, var(--tile)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07); }
+  .half.bot { bottom: 0; border-radius: 0 0 0.09em 0.09em; transform-origin: 50% 0; background: linear-gradient(var(--tile), #25242a); }
   .half.flap { z-index: 5; }
   .half.first { opacity: 1; }
   .glyph { position: absolute; left: 0; width: 100%; height: 200%; display: grid; place-items: center; font-size: 0.8em; }
