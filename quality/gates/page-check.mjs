@@ -17,7 +17,7 @@
 //   cut-off-beat             a detected cut is early or late against the music beat grid
 //   cut-off-reference        a cut is early or late against the reference video
 //   text-low-contrast        on-screen text under WCAG contrast against its own background
-//   text-clipped             glyph ink sticks out of an overflow, clip-path or mask box by more than 2 px while still
+//   text-clipped             glyph ink sticks out of an overflow, clip-path or mask box by more than 2 px once the line is 80% revealed, moving or not
 //   font-fallback            text painted in a family with no loaded @font-face
 //   loop-seam                <meta name="loop" content="true">: the last frame does not flow into the first
 import fs from 'node:fs';

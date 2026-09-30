@@ -4,8 +4,8 @@
 const READ_PER_WORD = 0.6;   // engine-doctrine/RULES/readable-hold.md: words x 0.6 s, no hold under 1.2 s
 const READ_FLOOR = 1.2;
 const CLIP_TOL_PX = 2;
-const CLIP_MIN_SAMPLES = 2;
-const MOVE_TOL_PX = 0.5;
+const CLIP_REVEALED = 0.8;   // a line this far revealed is judged on its clipping edge, moving or not
+const SOFT_MASK_ALPHA = 0.2; // a gradient mask under this opacity at the ink's bottom edge fades text by design
 const REF_HOLD_TOL = 0.1;    // a recreation keeps the reference's own hold to within this many seconds
 const REF_START_NEAR = 0.5;  // a reference run counts as the same line when it starts this close
 
@@ -28,6 +28,17 @@ export function collectTextNodes() {
     const [top, right, bottom, left] = order.map((i, k) => px(vals[i], k % 2 ? r.width : r.height));
     return { x: r.left + left, y: r.top + top, w: r.width - left - right, h: r.height - top - bottom };
   };
+  // A vertical linear-gradient mask is soft when its bottom edge is nearly transparent; any other gradient is judged soft.
+  const softBottom = (mask) => {
+    const m = /^linear-gradient\(([^)]*(?:\([^)]*\)[^)]*)*)\)/.exec(mask);
+    if (!m) return true;
+    const alphas = (m[1].match(/rgba?\([^)]*\)/g) || []).map((c) => { const p = c.match(/[\d.]+/g); return p.length > 3 ? Number(p[3]) : 1; });
+    const dir = m[1].split(',')[0].trim();
+    const up = dir === 'to top' || /^(0|360)deg$/.test(dir);
+    const down = !/^(to |-?[\d.]+deg)/.test(dir) || dir === 'to bottom' || dir === '180deg';
+    if (!alphas.length || !(up || down)) return true;
+    return alphas[up ? 0 : alphas.length - 1] < SOFT_MASK_ALPHA;
+  };
   const clipsOf = (el) => {
     const out = [];
     for (let e = el; e && e !== document.body && e !== document.documentElement; e = e.parentElement) {
@@ -35,8 +46,7 @@ export function collectTextNodes() {
       if (/hidden|clip|scroll|auto/.test(cs.overflowX + cs.overflowY)) out.push({ kind: 'overflow', ...rect(r) });
       if (cs.clipPath && cs.clipPath !== 'none') { const b = insetBox(r, cs.clipPath); if (b) out.push({ kind: 'clip-path', ...b }); }
       const mask = cs.maskImage || cs.webkitMaskImage;
-      // a gradient mask fades text by design; only an image mask has a hard box
-      if (mask && mask !== 'none' && !mask.includes('gradient')) out.push({ kind: 'mask', ...rect(r) });
+      if (mask && mask !== 'none' && !(mask.includes('gradient') && softBottom(mask))) out.push({ kind: 'mask', ...rect(r) });
     }
     return out;
   };
@@ -202,8 +212,6 @@ export function leastSeen(samples, step) {
   return least ? { text: least.text, seconds: least.seconds } : null;
 }
 
-const same = (a, b) => Math.abs(a.x - b.x) < MOVE_TOL_PX && Math.abs(a.y - b.y) < MOVE_TOL_PX && Math.abs(a.w - b.w) < MOVE_TOL_PX && Math.abs(a.h - b.h) < MOVE_TOL_PX;
-
 function overshoot(n) {
   let worst = null;
   for (const c of n.clips) {
@@ -215,29 +223,24 @@ function overshoot(n) {
 }
 
 /**
- * Text whose ink sticks out of a clipping box by more than 2 px while it is opaque and still, for at
- * least two samples in a row with its clip box still too: a reveal (text sliding through a mask, or a wipe) is not a cut. Pure.
- * -> [{ t, id, text, px, side, kind, box, ink, sizeShare }] one per text node, at its first clipped sample.
+ * Text cut by a hard clipping edge: at some sample where the line is at least 80% revealed and opaque, its
+ * ink sticks out of an overflow, clip-path or mask box by more than 2 px, and at no such sample is it clean.
+ * Movement does not excuse it. A reveal that ends whole (a wipe that uncovers every glyph) has a clean
+ * sample and is not a cut. Pure.
+ * -> [{ t, id, text, px, side, kind, box, ink, sizeShare }] one per text node, at its least-cut sample.
  */
 export function clippedGlyphs(samples) {
-  const found = new Map();
-  const previous = new Map();
-  const previousBox = new Map();
-  const streak = new Map();
+  const cut = new Map();
+  const clean = new Set();
   for (const s of samples) {
     for (const n of s.nodes) {
-      const still = previous.has(n.id) && same(previous.get(n.id), n.ink);
-      previous.set(n.id, n.ink);
-      const o0 = n.opacity >= 0.5 && still ? overshoot(n) : null;
-      const o = o0 && previousBox.get(n.id) && same(previousBox.get(n.id), o0.box) ? o0 : null;
-      previousBox.set(n.id, o0 ? o0.box : null);
-      streak.set(n.id, o ? (streak.get(n.id) || 0) + 1 : 0);
-      if (o && streak.get(n.id) >= CLIP_MIN_SAMPLES && !found.has(n.id)) {
-        found.set(n.id, { t: s.t, id: n.id, text: n.text, ...o, ink: n.ink, sizeShare: o.px / n.ink.h });
-      }
+      if (n.opacity < 0.5 || shownShare(n) < CLIP_REVEALED) continue;
+      const o = overshoot(n);
+      if (!o) clean.add(n.id);
+      else if (!cut.has(n.id) || o.px < cut.get(n.id).px) cut.set(n.id, { t: s.t, id: n.id, text: n.text, ...o, ink: n.ink, sizeShare: o.px / n.ink.h });
     }
   }
-  return [...found.values()];
+  return [...cut.values()].filter((c) => !clean.has(c.id));
 }
 
 /** Drive an open page (render-page.mjs openPage, already loaded and settled) through the film. -> samples. */
