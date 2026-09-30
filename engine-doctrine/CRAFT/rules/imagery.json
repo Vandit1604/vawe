@@ -68,25 +68,5 @@
   "adapt": null,
   "brief": "A mark reads as the brand, next to the title and on the end card",
   "doc": "engine-doctrine/RULES/logo-prominence.md"
- },
- {
-  "id": "imagery.svg-inline",
-  "category": "imagery",
-  "stage": "design",
-  "applies": "always",
-  "check": null,
-  "adapt": null,
-  "brief": "An svg layer is inline geometry, not a file reference",
-  "doc": "engine-doctrine/RULES/svg-inline.md"
- },
- {
-  "id": "imagery.no-css-clock",
-  "category": "imagery",
-  "stage": "design",
-  "applies": "hasHtml",
-  "check": null,
-  "adapt": null,
-  "brief": "The engine owns the clock: no CSS animation, transition, opacity, or filter",
-  "doc": "engine-doctrine/RULES/no-css-clock.md"
  }
 ]
