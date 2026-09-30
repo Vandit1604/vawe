@@ -258,14 +258,14 @@ test for any new critic. Flag `copy` as the one that fails it.
 **Observable.** Per-critic survival rate: of the findings each critic returns, how many does the main
 thread's own look confirm? The book predicts `copy` is lowest. Worth having before changing the roster.
 
-### 8. SUBAGENT-BUDGET.md is missing the number that reframes its own argument
+### 8. SUBAGENTS.md (the cost section) is missing the number that reframes its own argument
 
 **Book (ch10).** Anthropic's multi-agent research system "consumes about 15x the tokens of a normal
 conversation, and **token usage alone explains about 80% of the performance difference**." Alongside
 it, Tran and Kiela (2026): a single agent matched or beat five multi-agent architectures on multi-hop
 reasoning at an equal thinking-token budget, unless context utilisation was degraded past a point.
 
-**Here.** `engine-doctrine/CRAFT/SUBAGENT-BUDGET.md` records the 87-agent, 5,656,316-token run and argues from
+**Here.** `engine-doctrine/CRAFT/SUBAGENTS.md (the cost section)` records the 87-agent, 5,656,316-token run and argues from
 COST. The 80% figure changes the argument's shape: the fan-out's gain may be mostly the spend, not the
 topology, so the control that was never run is "one agent, same budget".
 
@@ -303,7 +303,7 @@ than no gate because it manufactures confidence", and behind actually deleting `
 three). Ch7 supplies the ordering rule the repo arrived at by pain: "**when Agent performance drops,
 check the evaluation system first, then the Agent**", listing verifier bugs and drifting test cases as
 things that "look identical to model degradation" in the headline number. The contrast-gate episode in
-`SUBAGENT-BUDGET.md` (33 reported failures; the first one examined was a button 0.067 seconds into a
+`SUBAGENTS.md (the cost section)` (33 reported failures; the first one examined was a button 0.067 seconds into a
 fade) is that rule, learned locally.
 
 **A gate that invents findings is the same defect as a gate that misses them.** Ch1 names it: **false
@@ -340,7 +340,7 @@ only on final state: of 704 published tau-squared-bench baseline runs with a com
 requirement, 240 failed, 162 failed the communication check, and **80, a third of all failures, had
 correct environment state and a wrong report**. Its detection method is fact-anchor comparison, walk
 the agent's statements against the tool return values and take the first divergence.
-`engine-doctrine/CRAFT/SUBAGENT-BUDGET.md` reached the same place from a real incident: "WAIT ON THE EXPECTED
+`engine-doctrine/CRAFT/SUBAGENTS.md (the cost section)` reached the same place from a real incident: "WAIT ON THE EXPECTED
 FILE EXISTING ON DISK, never on the harness's completion notification. An agent can report success and
 have delivered nothing", and "re-run the gate yourself, in the main tree, after copying anything back
 ... Two of them did not match." The repo has the rule; ch7 supplies the frequency, which is high
@@ -398,10 +398,10 @@ machinery.
 
 **Worktree per agent.** Ch10's failure mode one splits concurrency conflicts into simple (same file)
 and semantic (cross-file logical contradiction) and prescribes working-copy isolation. That is how
-fan-outs run here, and `SUBAGENT-BUDGET.md` records the trap the book does not mention: films are
+fan-outs run here, and `SUBAGENTS.md (the cost section)` records the trap the book does not mention: films are
 gitignored, so a worktree fan-out over scenes merges cleanly and brings back nothing (#377).
 
-**One agent for sequential work.** `SUBAGENT-BUDGET.md` rule 8 cites five blog posts. Ch10 cites Tran
+**One agent for sequential work.** `SUBAGENTS.md (the cost section)` rule 8 cites five blog posts. Ch10 cites Tran
 and Kiela (2026) measuring it at an equal token budget across five multi-agent architectures.
 
 ## REJECT
@@ -444,7 +444,7 @@ plumbing we do not have.
 
 **Shared-forum multi-agent search (ch10).** Anthropic's 2026 result, 45 agents on a shared forum
 finding 266 vulnerabilities with 27M tokens against 21 with 6.5M for independent parallel agents, is a
-large real effect and contradicts `SUBAGENT-BUDGET.md` rule 5 on its face. It does not transfer. The
+large real effect and contradicts `SUBAGENTS.md (the cost section)` rule 5 on its face. It does not transfer. The
 gain there comes from agents dividing and de-duplicating an unbounded search frontier. A six-critic
 panel judging one rendered film has no frontier: each critic asks a different question about the same
 fixed artifact, and a shared channel would only let them anchor on each other, which is ch10's own

@@ -34,7 +34,7 @@ The task is fixed in the script and starts both arms from identical bytes:
 > --name heatread --fx thermalBlur`, then extend that JSON to about 14 seconds across three moments.
 > Do not render. Do not edit any other file. Then clear `quality/gates/author-check.mjs`.
 
-The scaffold is the constant. [`../CRAFT/SPECIMEN.md`](../CRAFT/SPECIMEN.md) fixes what it writes, so
+The scaffold is the constant. The removed demo scaffold fixed what it writes, so
 everything the agent ADDS on top of it is the measurement.
 
 ## Why this section
@@ -93,7 +93,7 @@ than none, because it manufactures confidence. So the limits are stated before a
 - **The same model authored both, in one session, and knew it was being measured.** That confound
   cannot be removed by this design.
 - **The two arms shared everything except the section.** They shared the user's global `CLAUDE.md`, the
-  same repo, and the same `engine-doctrine/`. `engine-doctrine/CRAFT/SPECIMEN.md` states the unbound-window rule too, and the
+  same repo, and the same `engine-doctrine/`. the removed demo scaffold stated the unbound-window rule too, and the
   scaffold prints a pointer to it on stderr, so the ablated arm still had a route to the rule and simply
   did not take it. A section removed from `CLAUDE.md` is not a rule removed from the repo.
 - **The archetype pre-supplies the behaviour.** `make dev-tool X=demo` writes two unbound windows before the agent
