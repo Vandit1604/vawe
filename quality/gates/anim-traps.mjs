@@ -73,7 +73,7 @@ function missingEndKeyframe(add) {
     if (!a.effect || !a.effect.getKeyframes) continue;
     const kfs = a.effect.getKeyframes();
     if (kfs.length && kfs[kfs.length - 1].offset !== 1 && kfs[kfs.length - 1].offset != null)
-      add(`animation on ${labelOf(a)} has no keyframe at offset 1`, a.effect.target && a.effect.target.tagName, 'add an explicit offset:1 keyframe so the end value is defined, not interpolated off the last authored one');
+      add(`animation on ${labelOf(a)} has no keyframe at offset 1`, a.effect.target && a.effect.target.tagName, 'add an explicit offset:1 keyframe: without it the browser adds one at the element\'s un-animated value, so the move slides back after the last authored stop');
   }
 }
 
