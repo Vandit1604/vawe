@@ -1,0 +1,95 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="night">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: AI stream response</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  .chat { width: calc(var(--u) * 120); height: calc(var(--u) * 78); display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+  .bar { display: flex; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); box-shadow: 0 1px 0 var(--line); font: 700 var(--t-body)/1 var(--sans); letter-spacing: -0.02em; }
+  .bar .chip { --size: calc(var(--u) * 6.6); border-radius: calc(var(--u) * 1.8); }
+  .bar .chip .icon { width: calc(var(--u) * 3.8); height: calc(var(--u) * 3.8); }
+  .bar .pill { margin-left: auto; color: var(--muted); }
+  .thread { flex: 1; padding: var(--s4); display: flex; flex-direction: column; gap: var(--s4); min-height: 0; }
+  .user { align-self: flex-end; max-width: 70%; padding: calc(var(--u) * 2.4) var(--s3); border-radius: var(--r-chip); border-bottom-right-radius: calc(var(--u) * 0.8); background: var(--raised); box-shadow: var(--ring); font: 500 var(--t-body)/1.25 var(--sans); }
+  .ai { position: relative; display: flex; gap: var(--s3); }
+  .ai .chip { --size: calc(var(--u) * 8); margin-top: calc(var(--u) * 0.4); }
+  .ai .chip .icon { width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); }
+  .body { position: relative; flex: 1; min-height: calc(var(--u) * 16); }
+  .answer { font: 500 calc(var(--u) * 5.2)/1.32 var(--sans); letter-spacing: -0.01em; }
+  .answer b { font-weight: 700; color: var(--accent); }
+  .chunk { display: inline; }
+  .caret { position: relative; display: inline-block; width: 0; }
+  .caret::after { content: ''; position: absolute; left: 0.12em; bottom: -0.16em; width: 0.5em; height: 1.05em; border-radius: 0.12em; background: var(--accent); }
+  .dots { position: absolute; left: 0; top: calc(var(--u) * 2); display: flex; gap: calc(var(--u) * 1.4); }
+  .dots i { width: calc(var(--u) * 2.2); height: calc(var(--u) * 2.2); border-radius: 50%; background: var(--ink); }
+  .src { display: flex; gap: var(--s2); margin-top: var(--s3); }
+  .src .pill { font-size: calc(var(--u) * 3.2); color: var(--muted); }
+  .composer { margin: 0 var(--s3) var(--s3); display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 12); padding: 0 var(--s2) 0 var(--s3); border-radius: var(--r-chip); background: var(--raised); box-shadow: var(--ring); font: 500 var(--t-body)/1 var(--sans); }
+  .field { flex: 1; display: flex; align-items: center; white-space: nowrap; }
+  .ph { color: var(--faint); position: absolute; }
+  .type { position: relative; display: inline-flex; align-items: center; }
+  .cur { width: calc(var(--u) * 0.4); height: calc(var(--u) * 5.4); margin-left: calc(var(--u) * 0.3); background: var(--accent); }
+  .send { --size: calc(var(--u) * 8); }
+  .send .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); stroke-width: 2; }
+</style>
+</head>
+<body>
+<div class="chat card">
+  <div class="bar"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1z"/></svg></div>Compass<span class="pill">Q3 billing</span></div>
+  <div class="thread">
+    <div class="user">Why did churn drop in Q3?</div>
+    <div class="ai"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1z"/></svg></div>
+      <div class="body"><div class="dots"><i></i><i></i><i></i></div><div class="answer"></div>
+        <div class="src"><span class="pill">Billing, Q3</span><span class="pill">Cohorts</span></div></div></div>
+  </div>
+  <div class="composer"><div class="field"><span class="ph">Ask about your data</span><span class="type"><span class="typed"></span><i class="cur"></i></span></div><div class="chip accent-fill send"><svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></div></div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+
+// typed prompt: the text is a pure function of t
+const prompt = q('.user').textContent, typeAt = 0.05, perChar = 0.016, sendAt = 0.5;
+const typed = q('.typed'), cur = q('.cur'), ph = q('.ph');
+vawe.onFrame((t) => {
+  const n = Math.min(prompt.length, Math.max(0, Math.floor((t - typeAt) / perChar)));
+  typed.textContent = t >= sendAt ? '' : prompt.slice(0, n);
+  ph.style.visibility = n === 0 && t < sendAt ? 'visible' : 'hidden';
+  cur.style.visibility = t < sendAt + 0.12 ? 'visible' : 'hidden';
+});
+const user = q('.user'), composer = q('.composer');
+user.animate([{ opacity: 0, translate: `0 ${composer.getBoundingClientRect().top - user.getBoundingClientRect().top}px`, scale: 0.96 }, { opacity: 1, translate: '0 0', scale: 1 }],
+  { duration: 420, delay: sendAt * 1000, easing: settle, fill: 'both' });
+q('.send').animate([{ scale: 1 }, { scale: 0.9, offset: 0.4 }, { scale: 1 }], { duration: 200, delay: (sendAt - 0.08) * 1000, easing: settle, fill: 'both' });
+
+// working indicator: the avatar arrives, three dots wave, then the answer starts on the dots' spot
+const ai = q('.ai'), streamAt = 0.95;
+ai.animate([{ opacity: 0, translate: '0 1.4vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 640, easing: settle, fill: 'both' });
+all('.dots i').forEach((d, i) => d.animate([{ translate: '0 0' }, { translate: '0 -1.1vh', offset: 0.35 }, { translate: '0 0' }], { duration: 420, delay: 680 + i * 100, iterations: 2, easing: settle, fill: 'both' }));
+q('.dots').animate([{ opacity: 0 }], { duration: 110, delay: streamAt * 1000 - 30, easing: accelerate, fill: 'both' });
+
+// the answer streams in chunks of 1 to 3 words, 55 to 110 ms apart, drawn from a seeded rng
+const words = 'Churn fell to <b>2.1%</b> in Q3, down from 3.4%. Annual plans drove most of the drop.'.split(' ');
+const r = rng(7), chunks = [];
+for (let i = 0; i < words.length;) { const n = 1 + Math.floor(r() * 3); chunks.push(words.slice(i, i + n).join(' ')); i += n; }
+const answer = q('.answer');
+let t = streamAt * 1000;
+const starts = chunks.map((c) => { const s = t; t += 55 + r() * 55; return s; });
+chunks.forEach((c, i) => {
+  const el = Object.assign(document.createElement('span'), { className: 'chunk', innerHTML: c + (i < chunks.length - 1 ? ' ' : '') });
+  const caret = Object.assign(document.createElement('span'), { className: 'caret' });
+  answer.append(el, caret);
+  const end = i < chunks.length - 1 ? starts[i + 1] : starts[i] + 260;
+  el.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 150, delay: starts[i], easing: settle, fill: 'both' });
+  caret.animate([{ opacity: 0 }, { opacity: 1, offset: 0.001 }, { opacity: 1, offset: 0.999 }, { opacity: 0 }], { duration: end - starts[i], delay: starts[i], fill: 'both' });
+});
+const done = t;
+all('.src .pill').forEach((p, i) => p.animate([{ opacity: 0, translate: '0 1vh' }, { opacity: 1, translate: '0 0' }], { duration: 380, delay: done + 60 + i * 60, easing: settle, fill: 'both' }));
+q('.chat').animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>

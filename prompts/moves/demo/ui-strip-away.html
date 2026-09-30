@@ -1,0 +1,117 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: UI strip away</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .app { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: calc(var(--u) * 150); height: calc(var(--u) * 84); display: grid; grid-template-columns: calc(var(--u) * 29) 1fr; grid-template-rows: calc(var(--u) * 11) 1fr;
+         border-radius: var(--r-card); background: var(--ground); box-shadow: var(--shadow-card); }
+  .side { grid-row: 1 / 3; padding: var(--s3) var(--s2); background: var(--surface); border-radius: var(--r-card) 0 0 var(--r-card); box-shadow: 1px 0 0 var(--line); }
+  .brand { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 6.4); margin: 0 var(--s1) var(--s4); font: 700 calc(var(--u) * 3.9)/1 var(--sans); letter-spacing: -0.02em; white-space: nowrap; }
+  .brand .slot { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); flex: none; }
+  .nav { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 7.4); padding: 0 var(--s2); border-radius: var(--r-chip); color: var(--muted); font: 500 var(--t-small)/1 var(--sans); }
+  .nav .icon { width: calc(var(--u) * 4.2); height: calc(var(--u) * 4.2); }
+  .nav.on { background: var(--raised); color: var(--ink); box-shadow: var(--ring); }
+  .top { display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s3); box-shadow: 0 1px 0 var(--line); }
+  .search { display: flex; align-items: center; gap: var(--s2); width: calc(var(--u) * 46); height: calc(var(--u) * 6.6); padding: 0 var(--s2); border-radius: var(--r-chip); background: var(--surface); box-shadow: var(--ring); color: var(--faint); font: 500 var(--t-small)/1 var(--sans); }
+  .search .icon { width: calc(var(--u) * 3.8); height: calc(var(--u) * 3.8); }
+  .top .grow { flex: 1; }
+  .top .avatar { --size: calc(var(--u) * 6); }
+  .main { display: grid; grid-template-columns: 1.25fr 1fr; grid-template-rows: calc(var(--u) * 23) 1fr; gap: var(--s3); padding: var(--s3); min-height: 0; }
+  .kpis { grid-column: 1 / 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s3); }
+  .app .card { padding: var(--s3); border-radius: var(--r-chip); background: var(--surface); }
+  .k .label { color: var(--muted); font: 500 var(--t-small)/1 var(--sans); white-space: nowrap; }
+  .k .val { margin: calc(var(--u) * 1.6) 0 calc(var(--u) * 1.8); font: 700 calc(var(--u) * 6.8)/1 var(--sans); letter-spacing: -0.035em; }
+  .chart .head { display: flex; justify-content: space-between; align-items: center; font: 600 var(--t-small)/1 var(--sans); }
+  .chart svg { display: block; width: 100%; height: calc(var(--u) * 24); margin-top: var(--s2); overflow: visible; }
+  .rows { display: flex; flex-direction: column; margin-top: var(--s1); }
+  .row { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 8); font: 500 var(--t-small)/1 var(--sans); box-shadow: 0 -1px 0 var(--line); }
+  .row:first-child { box-shadow: none; }
+  .row .avatar { --size: calc(var(--u) * 5); font-size: calc(var(--u) * 1.9); }
+  .row .who { flex: 1; white-space: nowrap; }
+  .row b { font-weight: 600; }
+  .toast { position: absolute; right: calc(var(--u) * 5); bottom: calc(var(--u) * -3.5); display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3) var(--s2) var(--s2); border-radius: var(--r-chip); background: var(--raised); box-shadow: var(--shadow-card); font: 600 var(--t-small)/1.2 var(--sans); }
+  .toast .muted { font-weight: 500; }
+
+  .lockup { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; align-items: center; gap: calc(var(--u) * 4.6); }
+  .mark { position: relative; width: calc(var(--u) * 24); height: calc(var(--u) * 24); border-radius: 24%; background: var(--accent); box-shadow: var(--accent-edge), 0 calc(var(--u) * 2) calc(var(--u) * 6) rgba(0, 0, 0, 0.4); flex: none; z-index: 3; }
+  .mark svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mark path { fill: none; stroke: var(--on-accent); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+  .word { font: 700 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.045em; clip-path: inset(-0.3em 100% -0.3em 0); }
+  .tag { margin-top: var(--s2); font: 500 var(--t-lead)/1.1 var(--sans); color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="side">
+    <div class="brand"><div class="slot"></div><span>Meridian</span></div>
+    <div class="nav on"><svg class="icon" viewBox="0 0 24 24"><path d="M4 13h6V4H4zM14 20h6v-9h-6zM14 8h6V4h-6zM4 20h6v-3H4z"/></svg>Overview</div>
+    <div class="nav"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg>Payments</div>
+    <div class="nav"><svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5M16 5.5a3 3 0 010 5.6M18 14.5c1.6.7 2.6 2.2 3 4.5"/></svg>Customers</div>
+    <div class="nav"><svg class="icon" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>Reports</div>
+    <div class="nav"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>Settings</div>
+  </div>
+  <div class="top peel" data-to="0 -9">
+    <div class="search"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Search payments</div>
+    <div class="grow"></div>
+    <div class="pill">Last 30 days</div>
+    <div class="avatar">MK</div>
+  </div>
+  <div class="main">
+    <div class="kpis">
+      <div class="card k peel" data-to="-5 -5"><div class="label">Net revenue</div><div class="val">$482,910</div><div class="pill up">+12.4%</div></div>
+      <div class="card k peel" data-to="0 -7"><div class="label">Active customers</div><div class="val">8,214</div><div class="pill up">+3.1%</div></div>
+      <div class="card k peel" data-to="5 -5"><div class="label">Refund rate</div><div class="val">0.8%</div><div class="pill up">-0.2%</div></div>
+    </div>
+    <div class="card chart peel" data-to="-6 6">
+      <div class="head"><span>Revenue</span><span class="muted">Daily</span></div>
+      <svg viewBox="0 0 400 120" preserveAspectRatio="none"><defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a87ff" stop-opacity="0.28"/><stop offset="1" stop-color="#0a87ff" stop-opacity="0"/></linearGradient></defs>
+        <path d="M0 92 C30 86 50 70 80 74 C110 78 130 56 160 52 C190 48 210 64 240 46 C270 28 300 40 330 24 C360 10 380 16 400 8 L400 120 L0 120Z" fill="url(#fill)"/>
+        <path d="M0 92 C30 86 50 70 80 74 C110 78 130 56 160 52 C190 48 210 64 240 46 C270 28 300 40 330 24 C360 10 380 16 400 8" fill="none" stroke="#0a87ff" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>
+    </div>
+    <div class="card peel" data-to="6 6">
+      <div class="head" style="font:600 var(--t-small)/1 var(--sans)">Recent payments</div>
+      <div class="rows">
+        <div class="row"><div class="avatar">AR</div><span class="who">Acme Robotics</span><b>$4,280</b></div>
+        <div class="row"><div class="avatar">NL</div><span class="who">Northlight</span><b>$1,940</b></div>
+        <div class="row"><div class="avatar">KS</div><span class="who">Kestrel Sports</span><b>$760</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="toast peel" data-to="6 4"><div class="chip accent-fill" style="--size: calc(var(--u) * 6)"><svg class="icon bold" style="width:calc(var(--u)*3.4);height:calc(var(--u)*3.4)" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div>Payout sent<div class="muted">$12,480 to Chase 4821</div></div></div>
+</div>
+<div class="lockup">
+  <div class="mark"><svg viewBox="0 0 100 100"><path d="M24 70V32L50 56L76 32V70"/></svg></div>
+  <div><div class="word">Meridian</div><div class="tag">Revenue, live.</div></div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+const q = (s) => document.querySelector(s);
+const peel = [...document.querySelectorAll('.peel')];
+
+// top layer first: the toast, then the widgets outward from the centre, then the frame, then the window
+const order = [q('.toast'), ...peel.filter((el) => el.classList.contains('card')), q('.top')];
+order.forEach((el, i) => {
+  const [x, y] = el.dataset.to.split(' ');
+  const at = el.classList.contains('toast') ? 50 : 150 + i * 45;
+  el.animate([{ opacity: 1, translate: '0 0', scale: 1, filter: 'blur(0px)' }, { opacity: 0, translate: `${x}vh ${y}vh`, scale: 1.03, filter: 'blur(7px)' }],
+    { duration: 300, delay: at, easing: accelerate, fill: 'both' });
+});
+q('.side').animate([{ opacity: 1, translate: '0 0', filter: 'blur(0px)' }, { opacity: 0, translate: '-12vh 0', filter: 'blur(7px)' }], { duration: 300, delay: 400, easing: accelerate, fill: 'both' });
+q('.app').animate([{ opacity: 1, scale: 1, filter: 'blur(0px)' }, { opacity: 0, scale: 1.03, filter: 'blur(6px)' }], { duration: 260, delay: 520, easing: accelerate, fill: 'both' });
+
+// the sidebar mark is the same mark that ends the film: it travels from its slot to the lockup
+const mark = q('.mark'), from = q('.slot').getBoundingClientRect(), to = mark.getBoundingClientRect();
+mark.animate([{ translate: `${from.x + from.width / 2 - to.x - to.width / 2}px ${from.y + from.height / 2 - to.y - to.height / 2}px`, scale: from.width / to.width }, { translate: '0 0', scale: 1 }],
+  { duration: 700, delay: 300, easing: settle, fill: 'both' });
+q('.word').animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)', translate: '-4vh 0' }, { clipPath: 'inset(-0.3em -0.3em -0.3em 0)', translate: '0 0' }], { duration: 600, delay: 750, easing: settle, fill: 'both' });
+q('.tag').animate([{ opacity: 0, translate: '0 2vh', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 600, delay: 900, easing: settle, fill: 'both' });
+q('.lockup').animate([{ scale: 1 }, { scale: 1.035 }], { duration: 2000, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>
