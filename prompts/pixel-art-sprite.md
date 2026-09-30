@@ -6,6 +6,8 @@ group: reference
 
 # Pixel-art sprite: a strict canvas spec
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** the look is a 16-bit sprite: a character, a loop, a game moment. The strongest
 "canvas as a pure function" prompt in the ecosystem is this shape: a logical resolution, a fixed
 palette, a state machine, and pose parameters quantised to the grid.

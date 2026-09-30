@@ -6,6 +6,8 @@ group: reference
 
 # UI morph: one shape, a seamless loop
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** the film is one element that becomes eight to twelve UI states and returns to the
 first, on a beat grid, with a cursor driving every change. The most bookmarked prompt in the
 motion-from-code ecosystem (19,303 bookmarks at the time of the snapshot) has this shape.

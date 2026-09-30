@@ -55,6 +55,7 @@ import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, videoProblems } from './draft-check.mjs';
 import { textProblems, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
 import { directionsLines } from '../lib/directions.mjs';
+import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived } from '../lib/waivers.mjs';
 import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
@@ -737,7 +738,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions],
+    lines: [...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions, ...recipeEchoLines(brief)],
   };
 }
 

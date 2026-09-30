@@ -6,6 +6,8 @@ group: reference
 
 # Music video or beat-synced ad
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** a song exists and the picture must land on it: every cut on a downbeat, every hit on a
 beat, the drop as the one big moment. Works for a lyric video, a product ad on a track, a motion
 reel with music.

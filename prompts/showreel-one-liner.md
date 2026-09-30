@@ -6,6 +6,8 @@ group: reference
 
 # Showreel one-liner (and the anti-contagion variants)
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** you want to see what the agent does with no direction: a 15 second reel, a first
 draft to react to, a taste probe for a new model or a new house rule. Also the cheapest way to
 learn what an agent's defaults are, so you can ban them.

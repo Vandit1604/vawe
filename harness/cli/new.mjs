@@ -1,7 +1,9 @@
 // `vawe new <name>`: writes films/<name>/page.html (a valid starter), films/<name>/directions.html
 // (three key frames side by side) and films/<name>/brief.md. brief.md takes the template's question
-// bank with every default filled in and marked unanswered, a Directions section (three slots from three
-// families, a picked line), then the template's tagged sections as headings.
+// bank with every default filled in and marked unanswered, then the measured-brief sections in the order of
+// prompts/ANATOMY.md (harness/lib/measured-brief.mjs), a Directions section (three slots from three families,
+// a picked line) after Task, and the template's own tagged sections: a section named like a skeleton section
+// puts its text above that one's fields (so a table ends its section), the others follow as headings.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -11,6 +13,7 @@ import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
+import { measuredSections, DEFAULT_LENGTH, GUESS } from '../lib/measured-brief.mjs';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -172,7 +175,7 @@ export function starterFace(name = '') {
 
 export const STARTER = starterPage({});
 
-export function starterPage({ length = 4, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
+export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
     .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family)
     .replaceAll('{{beat2}}', String(+(length * 0.5).toFixed(2))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
@@ -230,15 +233,23 @@ function inputLines(questions, answers) {
 
 const recipeLine = (recipe) => `chain to start from: ${RECIPES}, "## ${recipe.heading}" (${recipe.why}); copy it, then change two moves`;
 
-function briefText(name, templateRel, questions, sections, answers, recipe = null) {
+const SKELETON = [['task', 'Task'], ['directions'], ['look', 'Look'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
+
+const heading = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
+
+function briefText(name, templateRel, questions, sections, answers, measured, recipe = null) {
   const lines = inputLines(questions, answers);
   const inputs = questions.length || lines.length
     ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
-  const rest = sections.length
-    ? sections.map((s) => `## ${s.name[0].toUpperCase()}${s.name.slice(1)}\n\n${s.body.replaceAll('<name>', name)}`).join('\n\n')
-    : `## Direction\n\nThe template is written as prompts, not tagged sections: read ${templateRel}.`;
-  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
+  const own = Object.fromEntries(sections.map((s) => [s.name, s.body.replaceAll('<name>', name)]));
+  const skeleton = SKELETON.filter(([key]) => key === 'directions' || measured.sections[key]).map(([key, title]) => (
+    key === 'directions' ? directionsText(name) : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
+  const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))
+    .map((s) => `## ${heading(s.name)}\n\n${own[s.name]}`);
+  const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
+  const head = `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default. Replace each ${GUESS} with a measured value or your own choice.\n\n## Inputs\n\n${inputs}`;
+  return [head, ...skeleton, ...rest, tail].join('\n\n');
 }
 
 function readAnswers({ length, aspect, title }) {
@@ -263,8 +274,9 @@ function copyFace(root, dir, face) {
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
 
-export function newFilmLines(name, { page, route, title }) {
+export function newFilmLines(name, { page, route, title, guesses = [] }) {
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
+  if (guesses.length) lines.push(`guessed, each marked "${GUESS}" in brief.md: ${guesses.join(', ')}`);
   if (route) {
     lines.push(`template: ${route.template} (${route.type}: ${route.why})`);
     if (route.recipe) lines.push(recipeLine(route.recipe));
@@ -297,7 +309,9 @@ export function newFilm(name, { from, root, length, aspect, title, request }) {
   if (length !== undefined) answers.length = `${length} s`;
   if (aspect !== undefined) answers.aspect = aspect;
   if (title !== undefined) answers.title = title;
-  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown), answers, route?.recipe));
+  const sections = parseSections(markdown);
+  const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap') });
+  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe));
   console.log(formatQuestions(questions));
-  return { page: `films/${name}/page.html`, route, title };
+  return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses };
 }
