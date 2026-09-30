@@ -1,30 +1,15 @@
 ---
-when: "about to write a new ambient shader, gradient, easing curve, noise function, SVG filter, texture, or plate footage, before writing one from scratch"
-answers: "which external libraries are checked, MIT-clean and worth compiling from · which are non-commercial or unlicensed and study-only · how to wire a compiled shader into core/surfaces/shaders-ambient.js without breaking the registry"
+when: "about to write a new gradient, easing curve, noise function, SVG filter, palette or plate footage, before writing one from scratch"
+answers: "which external libraries and asset sources are MIT-clean or free to ship, and which are study-only"
 group: reference
 ---
 
 # External sources: search before you build
 
-The rule this repo already applies to its own code (`AGENTS.md`, "finish the diagnosis before you
-design the fix") extends outward here. Before writing a new shader, gradient, easing curve, or
-texture, search whether the effect already exists, free to use, outside this repo.
-
-## Why this exists
-
-This engine ships 23 ambient shaders (`core/surfaces/shaders-ambient.js:29`). 18 have never been used
-in a film. None can produce the light-ray look a reference needed, and we spent a day discovering that
-[Radiant](https://github.com/pbakaus/radiant), 106 MIT-licensed shaders, held it already: `aurora-curtain`,
-`aurora-veil`, `diamond-caustics`, `flow-field`, `chromatic-bloom`, none of which this engine's
-registry currently has a name for. Compiling before building costs an hour. Discovering the gap after
-a day of hand-rolling costs a day.
-
-## How to read this table
-
-Three columns matter most: licence, attribution, and ship status. **Verified** means the licence text
-was opened, not inferred from a badge. **UNCLEAR** means the terms could not be pinned down; that is a
-real answer, and the entry is marked study-only until someone opens the actual file. Nothing below was
-recorded from a README claim alone.
+**Verified** means the licence text was opened, not inferred from a badge. **UNCLEAR** means the
+terms could not be pinned down, so the entry is study-only until someone opens the actual file.
+Never compile code from a study-only source into a shipped film. Read the technique and
+reimplement the idea.
 
 ## Safe to ship: permissive licence, verified
 
@@ -40,7 +25,7 @@ recorded from a README claim alone.
 | Open Color | [github.com/yeun/open-color](https://github.com/yeun/open-color) | MIT (heeyeun, LICENSE read directly) | copyright notice kept in redistributed source | 13 hues x 10 shades | a smaller, simpler alternative to Radix when a film wants flat Material-era colour, not scale-based contrast | no dark-mode pairing built in, unlike Radix |
 | Tailwind CSS default palette | [github.com/tailwindlabs/tailwindcss](https://github.com/tailwindlabs/tailwindcss) | MIT (Tailwind Labs, LICENSE read directly) | copyright notice kept in redistributed source | 22 hues x 11 shades | the most widely recognized web colour vocabulary; useful when a reflected brand already uses it | it is a build tool's default palette, not a designed system; treat as raw data, not taste |
 | uiGradients | [github.com/ghosh/uiGradients](https://github.com/ghosh/uiGradients) | MIT (per repo README license link, LICENSE.md) | copyright notice kept in redistributed source | ~180 named two/three-stop CSS gradients | a fast check against before hand-tuning a gradient wash's stop colours | flat linear stops only, no mesh/blob geometry; does not replace `flow`/`aurora`'s blob math |
-| Poly Haven | [polyhaven.com](https://polyhaven.com/license) | CC0 (public domain, verified on the license page) | none required, appreciated | thousands of HDRIs, PBR textures, and 3D models | environment plates and real-world textures (grain, fabric, concrete) this engine's shaders currently simulate rather than sample | large binary assets; this repo captures real assets via `make media X=capture`/`make media X=assets`, never a bare download, so this is a source to route through that pipeline, not to hotlink |
+| Poly Haven | [polyhaven.com](https://polyhaven.com/license) | CC0 (public domain, verified on the license page) | none required, appreciated | thousands of HDRIs, PBR textures, and 3D models | environment plates and real-world textures (grain, fabric, concrete) this engine's shaders currently simulate rather than sample | large binary assets; this repo captures real assets from the source site, never a bare download, so this is a source to route through that pipeline, not to hotlink |
 
 ## Attribution required, but free to ship
 
@@ -71,32 +56,4 @@ for reading technique and naming an effect before reimplementing its idea indepe
 - **CSS Gradient (cssgradient.io) and similar single-purpose gradient pickers**: tools, not asset collections; nothing to cite a licence against.
 - **GSAP's easing set**: GSAP itself moved to a no-charge licence in 2024, but that licence governs the GSAP *library*, not a standalone data table of easing curves; out of scope here since it is a runtime dependency decision, not a reference source.
 
-## Bringing a compiled shader into this engine
 
-Appending one name to `AMBIENT_SHADERS` in `core/surfaces/shaders-ambient.js:29` is the only entry
-point; the object's key order is the wire format (`core/surfaces/shaders-ambient.js:23`), because the
-index of a name is the `u_fx` value the fragment shader branches on. A new shader is always **appended
-at the end**, never inserted, or every scene already written that references a later index silently
-points at the wrong effect.
-
-The shader must be pure in `(time, seed)`. `renderFrame(n)` derives every frame from the frame number
-alone (`core/surfaces/shaders-ambient.js:4`), so a ported shader may read `u_time` and `u_seed` but
-must not depend on real wall-clock time, randomness outside the seed, or any per-session state.
-
-Strip `u_mouse` or any pointer-following uniform. A render has no pointer: Radiant and most Shadertoy
-ports drive parallax or highlight position off mouse coordinates, and that input has no meaning outside
-a live canvas. Replace it with a slow deterministic drift driven by `u_time`, the same pattern every
-existing member of `AMBIENT_SHADERS` already uses.
-
-A new name needs `node quality/gates/schema-drift.mjs --write`, then a check of both places the
-name has to land: `schema.layerProps.byType.shader` (the prop-name vocabulary, generated from
-`core/registry/props.js`) and `films/scene/schema.json`'s `fields.layers.item.shader` enum (the
-author-facing list `--write` regenerates from `AMBIENT_FX`). The gate refuses a write that would drop
-an existing name; it does not refuse one that forgets to add a new one, so read the diff.
-
-## What still has no external answer
-
-No source found here settles what makes a shader look "premium" rather than "noise soup"; that
-judgement is this engine's own (`core/surfaces/shaders-ambient.js:7-11`, the BEAUTY RECIPE comment).
-Radiant and LYGIA supply raw material, not the palette and frequency discipline the engine already
-enforces; a ported shader still needs a pass through that recipe, not just a compile.
