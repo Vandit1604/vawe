@@ -49,7 +49,28 @@ export function collectTextNodes() {
     return { opacity, blur };
   };
   const PHRASE_WORDS = 6;
-  const lineOf = (e) => e.textContent.replace(/\s+/g, ' ').trim();
+  const layoutBox = (el) => {
+    let x = 0, y = 0;
+    for (let p = el; p; p = p.offsetParent) { x += p.offsetLeft; y += p.offsetTop; }
+    return { left: x, right: x + el.offsetWidth, top: y };
+  };
+  // Text a reader sees: letters or words in separate spans join into one word unless a visual gap
+  // (layout offsets, so a transform mid-animation does not fake one) or a new line separates them.
+  const lineOf = (e) => {
+    const walk = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+    let out = '', prev = null, n;
+    while ((n = walk.nextNode())) {
+      const el = n.parentElement;
+      if (!el || ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(el.tagName) || !n.textContent.trim()) continue;
+      const own = el.childNodes.length === 1 && el !== e ? layoutBox(el) : null;
+      const sized = parseFloat(getComputedStyle(el).fontSize);
+      const apart = prev && own && (Math.abs(own.top - prev.top) > sized * 0.5 || own.left - prev.right > sized * 0.15);
+      const spaced = /\s$/.test(out) || /^\s/.test(n.textContent);
+      out += (apart && !spaced ? ' ' : '') + n.textContent;
+      prev = own;
+    }
+    return out.replace(/\s+/g, ' ').trim();
+  };
   const wordsOf = (e) => lineOf(e).split(' ').length;
   // The unit a viewer reads: the block, and a lone word (or a letter of one) joins its short phrase.
   const blockOf = (el) => {
