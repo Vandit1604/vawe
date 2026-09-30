@@ -1,108 +1,62 @@
 ---
 title: Quickstart
-description: Build the binary, render the sample video, and write your first scene from scratch.
+description: Install, write the starter page, and render a draft.
 icon: Rocket
 ---
 
-## What you need first
+## Setup
 
-Go, a Chrome or Chromium install, ffmpeg on your path, and Node. Vawe is a Go binary that drives
-headless Chrome and pipes frames to ffmpeg.
+Run `npm install`, then `bin/vawe doctor`. It checks Node, ffmpeg, Chrome and the other tools. For each tool that is missing, it prints the install line.
+
+## Start a film
 
 ```bash
-npm install
+bin/vawe new hello
 ```
 
-<Callout>
-`make build` and a plain render work without this, because the font fetcher uses only Node built-ins.
-**Everything else does not.** The contact sheets, the live preview and every quality gate drive a real
-browser through puppeteer, which lives in `node_modules`. Run it once and forget it.
+This writes `films/hello/page.html` (a valid starter) and `brief.md`. Flags such as `--length`, `--aspect` and `--title` set the starter values. Run `bin/vawe new --help` for the list.
+
+The starter page has this shape:
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<meta name="duration" content="5">
+<meta name="message" content="hello, film">
+<style>
+  body { margin: 0; background: #f4f6fb; color: #0b0d12; font: 700 calc(var(--vh) * 0.1) system-ui; }
+  h1 { position: absolute; left: 8%; top: 42%; margin: 0;
+       animation: in 0.5s cubic-bezier(.2,.9,.2,1) 0.3s both, out 0.25s ease-in 4.4s both; }
+  @keyframes in  { from { transform: translateY(0.6em); opacity: 0 } to { transform: none; opacity: 1 } }
+  @keyframes out { to { transform: translateY(-0.4em); opacity: 0 } }
+</style>
+<h1>hello, film</h1>
+<audio data-synth="pluck" data-at="0.3" data-gain="-6"></audio>
+```
+
+The entrance is a move, not only a fade. The exit is shorter than the entrance. The cue lands with the move.
+
+## The loop
+
+```bash
+bin/vawe dev      films/hello/page.html                  # draft: half size, 30 fps, silent
+bin/vawe dev      films/hello/page.html --from 2 --to 4  # only the seconds you work on
+bin/vawe critique films/hello/page.html                  # in a fresh session
+bin/vawe ship     films/hello/page.html                  # final: 60 fps, blur, audio
+```
+
+Draft the hardest two to four seconds first. Give the draft to a session that did not write the page. It names the shot, the frame and the fix. Fix the worst items, render only those seconds again, and critique again.
+
+`bin/vawe ship` runs in the background. Run `bin/vawe ship --status --wait` to wait for the result.
+
+<Callout title="No em dashes on screen">
+On-screen copy cannot contain an em dash. The validator rejects it. Use a comma, a period or a middot.
 </Callout>
 
-## Build the engine
-
-```bash
-make build
-# downloads the free fonts, then: go build -o bin/vawe ./cmd/render
-```
-
-This produces `bin/vawe`. The `make build` step also runs `make fonts`, which pulls the typefaces into `assets/fonts/` (they are fetched, never committed).
-
-## Render the sample
-
-```bash
-make list                        # show the scene module + its schema and sample
-./bin/vawe films/scene/sample.json
-# → out/sample.mp4
-```
-
-Or through make, which is the same thing with a friendlier name:
-
-```bash
-make video D=films/scene/sample.json
-```
-
-Add `--draft` for a fast render with no film grain while you iterate:
-
-```bash
-./bin/vawe films/scene/sample.json --draft
-```
-
-## Write your first scene
-
-Every scene is a JSON file that starts with `"module": "scene"`. Save new videos as `films/scene/<topic>.json`. Here is a complete, minimal one:
-
-```json title="films/scene/hello.json"
-{
-  "module": "scene",
-  "orientation": "landscape",
-  "theme": "vawe",
-  "duration": 4,
-  "audio": { "silent": true },
-  "layers": [
-    {
-      "type": "text",
-      "text": "One JSON, <b>one video.</b>",
-      "size": 120,
-      "pin": "center",
-      "split": "word",
-      "preset": "up",
-      "each": 0.4,
-      "stagger": 0.06,
-      "start": 0.3
-    }
-  ]
-}
-```
-
-Render it:
-
-```bash
-make video D=films/scene/hello.json
-```
-
-You just wrote a scene with one [text layer](/docs/layers#text) that splits its headline into words and rises each one into place, staggered in reading order. The `theme` sets the palette, fonts, and motion personality; `pin: "center"` places the layer in the middle of whatever aspect you render.
-
-<Callout title="No em-dashes">
-On-screen copy cannot contain em-dashes. The [validator](/docs/quality-gates#validate) rejects them. Use a comma, a period, or a middot instead. This keeps typography honest across fonts that render the dash inconsistently.
-</Callout>
-
-## The authoring loop
-
-Once you have a scene, the rhythm is: render, look, fix, repeat.
-
-```bash
-make video D=films/scene/hello.json     # render
-make look M=scene                          # storyboard the key frames
-make audit                                 # overlap, contrast, safe-zone
-```
-
-Every check has its own page in [Quality gates](/docs/quality-gates). Nothing here needs to run for a video to render, but they are how you catch a murky frame before you ship it.
-
-## Next steps
+## Next
 
 <Cards>
-  <Card title="The scene file" href="/docs/the-scene" description="Every top-level field, from duration to camera to stings." />
-  <Card title="Layer reference" href="/docs/layers" description="Text, image, rect, count, group, and the rest." />
-  <Card title="The CLI and make targets" href="/docs/cli" description="Flags, the make wrappers, and what each one does." />
+  <Card title="The page" href="/docs/the-page" description="What a page must contain." />
+  <Card title="CLI" href="/docs/cli" description="Every verb and its flags." />
+  <Card title="Motion" href="/docs/motion" description="Springs, tables and moves to copy." />
 </Cards>

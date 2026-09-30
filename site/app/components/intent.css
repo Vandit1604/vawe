@@ -13,7 +13,7 @@
   font-weight:800;text-wrap:balance;max-width:20ch}
 /* The measure sits on the element carrying the type: `ch` resolves against its own font size. */
 .isec p{color:var(--ink-2);font-size:1.02rem;line-height:1.65;margin-top:14px;max-width:60ch}
-.isec p code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);
+.isec p code,.iend .lead code{font-family:var(--font-mono),monospace;font-size:.92em;background:var(--raised);
   border-radius:var(--r-in);padding:1px 6px;color:var(--ink)}
 /* Inside a panel the proof is a recessed well, not a second raised card. */
 .isec-art > .codeblock{margin:0;max-width:none;box-shadow:none}
@@ -23,7 +23,14 @@
 .ifilms{margin-top:48px}
 .ifilms > h2{font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.05;letter-spacing:-.025em;font-weight:800}
 .ifilms > p{color:var(--muted);margin-top:10px;max-width:60ch}
-.ifilms .fgrid{margin-top:20px}
+.imoves{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:20px}
+.imoves li{position:relative;overflow:hidden;transition:box-shadow .15s ease}
+.imoves li:hover{box-shadow:0 0 0 1px var(--line-2)}
+.imoves li:has(a:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.imoves video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--bg);border-bottom:1px solid var(--line)}
+.imoves a{display:block;padding:10px 12px;font-family:var(--font-title);font-weight:500;font-size:13px;outline:none}
+.imoves a::after{content:"";position:absolute;inset:0}
+@media (max-width:900px){ .imoves{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .ifilms + .isec{margin-top:48px}
 
 /* The page's own next step, and the cross-links between the content pages. */

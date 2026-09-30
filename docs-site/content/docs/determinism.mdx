@@ -1,42 +1,38 @@
 ---
 title: Determinism
-description: Why renderFrame(n) is a pure function of the frame number, what that buys you, and how the engine proves it.
+description: Why a frame is a function of the seek time, what the virtual clock owns, and how to check your page.
 icon: Fingerprint
 ---
 
-Vawe is a deterministic motion-graphics engine, and this is the property the whole engine is built around: the same JSON renders byte-identical frames every time, in any order, on any machine. It is not an accident of implementation. It is enforced.
+The same page must give the same frames on every run. The renderer does not wait for your page to play. It seeks to a time `t`, takes a picture, and moves on. Frame 400 never needs frame 399.
 
-## renderFrame(n) is pure
+## What the virtual clock owns
 
-`renderFrame(n)` depends only on `n`. A virtual clock is installed before the first frame renders, and it coerces every source of ambient state to frame time: `Date` and `Date.now()` return the current frame's timestamp rather than the wall clock, `requestAnimationFrame` and `setTimeout` fire against frame time, and `Math.random` is seeded, so a "random" scatter is the same scatter on every render. There is no reading of the real clock and no unseeded randomness anywhere in a scene, which is what lets a headless Chrome tab seek straight to any frame and get the correct picture on the first try. A value that looks random, like the particle positions in a shader sting, comes from a hash of a seed and the frame, so it is reproducible down to the pixel, on the machine that authored it and on any machine that renders it again.
+The renderer installs a virtual clock (`core/engine/page-clock.js`) before any page script runs. It replaces these:
 
-## What determinism buys you
+| API | What the page sees |
+|---|---|
+| `Date`, `performance.now` | film time in milliseconds |
+| `requestAnimationFrame` | callbacks run once per seek, with film time |
+| `setTimeout`, `setInterval` | fire when the seek passes their due time, in due order |
+| `Math.random` | a seeded generator, reseeded from `t` on every seek: same `t`, same sequence |
 
-**Parallel rendering.** Because frame 900 does not depend on frames 1 through 899, the engine can open several headless Chrome tabs and have each one seek straight to its assigned frames. That is why a long video renders quickly.
+Then the renderer seeks in this order (`core/engine/page-seek.js`): set the clock, call `window.seek(t)` if it exists, seek every CSS and Web Animation and every SVG animation, then run every `vawe.onFrame` hook.
 
-**Reproducibility.** Ship a JSON and anyone gets the same mp4. Re-render months later and nothing drifts.
+## What to write
 
-**Diff-able output.** Two renders of the same scene are identical, so a refactor that should not change the picture can be proven not to, frame by frame.
+- Drive motion from the seek: `@keyframes`, `element.animate()` or `window.seek(t)`.
+- Compute each frame from `t` alone. Do not write `x += dx`.
+- Do not use a live clock, such as a `requestAnimationFrame` loop that keeps its own time.
+- For a value that must look random, seed it per element. `core/motion/springs.js` exports `rng(seed)` and `noise1(x, seed)`.
+- Bundle every font in `films/<name>/assets/` and load it with `@font-face`. The renderer waits for `document.fonts`, not for the network.
 
-## The animation contract
-
-Only four CSS properties are ever animated on a visible move: `transform`, `opacity`, `clip-path`, and `filter`. Layout properties are never animated. This keeps motion smooth and, combined with the virtual clock, keeps every frame a clean function of its number.
-
-## How it is proved
-
-Two gates guard determinism, and you can run them yourself.
-
-**`make probe`** renders a sample of frames in scrambled order and diffs the DOM signature of each against a reference render in normal order. If any frame differs, purity is broken and the probe fails.
-
-```bash
-make probe M=scene
-```
-
-**`make snap`** captures a per-frame DOM signature (bounding box, transform, opacity, font, text) without rendering a video. Baseline it before a refactor, run it after, and it tells you exactly which frames changed.
+## Check it
 
 ```bash
-make snap M=scene SAVE=1   # baseline
-make snap M=scene          # compare against the baseline
+bin/vawe check anim-traps films/<name>/page.html
 ```
 
-Both live alongside the other checks in [Quality gates](/docs/quality-gates). If you are changing engine internals rather than authoring a video, `make probe` is the check that catches a determinism regression.
+The `anim-traps` gate loads the page, reads the animations the seek will drive, and searches the source for a live clock, an unseeded `Math.random` and WebGL capture mistakes. It also finds seven traps that never throw an error. See [When it looks wrong](/docs/troubleshooting).
+
+`bin/vawe e2e` runs the page tests and a parallel half-size draft of every film.

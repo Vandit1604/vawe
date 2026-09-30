@@ -1,0 +1,65 @@
+---
+title: The page
+description: The page contract. One HTML file, a duration, a seek, relative assets.
+icon: FileCode
+---
+
+A film is `films/<name>/page.html` plus its own assets folder. Every path in the page is relative.
+
+## The contract
+
+- `<meta name="duration" content="12.4">` sets the length in seconds.
+- Optional `<meta name="fps">` is the rate of your frame tables. The render rate is separate: 60 for a final, 30 for a draft. Frames can be fractional.
+- Time is the seek. Use CSS `@keyframes` or `element.animate()` (the renderer sets `currentTime`), or `window.seek(t)` in seconds that paints frame `t` as a pure function of `t`. Use both if you like.
+- No timers, no state between frames, no unseeded random. See [Determinism](/docs/determinism).
+- The renderer sets `<html data-aspect="16:9">`, and `--vw` and `--vh` (pixel lengths) on `:root`, and `window.vawe`, before your scripts run. See [Aspect ratios](/docs/aspect-ratios).
+- Audio is `<audio>` tags, mixed offline. See [Audio](/docs/audio).
+- Every tunable number is a literal in the page: a `[[f, v]]` table, a keyframe stop or a `:root` custom property. `bin/vawe studio <page>` edits these literals in place.
+- `<meta name="message">` holds the one thing to remember. `<meta name="spectacle">` holds the second of the one big moment. Put quiet before it. Keep one focal point per frame.
+
+## A complete page
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<meta name="message" content="one page in">
+<style>
+  body { margin: 0; background: #16151a; color: #fff; font: 700 calc(var(--vh) * 0.1) system-ui; }
+  h1 { position: absolute; left: 8%; top: 38%; margin: 0; }
+  #bar { position: absolute; left: 8%; top: 62%; width: 40%; height: calc(var(--vh) * 0.012);
+         background: #0a87ff; transform-origin: left; transform: scaleX(0); }
+</style>
+<h1 id="word">One page in</h1>
+<div id="bar"></div>
+<script>
+  document.getElementById('word').animate(
+    [{ transform: 'translateY(0.5em)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+    { duration: 500, delay: 300, easing: 'ease-out', fill: 'both' });
+
+  window.seek = (t) => {
+    const p = Math.min(1, Math.max(0, (t - 0.6) / 1.2));
+    document.getElementById('bar').style.transform = `scaleX(${1 - (1 - p) ** 3})`;
+  };
+</script>
+```
+
+The heading moves on a Web Animation. The bar moves in `window.seek(t)`. Both are pure functions of time, so frame 400 never needs frame 399.
+
+A worked page with three.js is `films/examples/three-star/page.html`.
+
+## Structure it with the loop
+
+A page starts from a template: `bin/vawe new <name> --from prompts/<template>.md`. See [Prompting](/docs/prompting).
+
+## Waivers
+
+A rule broken for cause is declared in the page, with its reason, and nowhere else. A waiver with no reason does not count.
+
+```html
+<script type="application/json" id="authoring">
+{"allow": ["dead-air"], "_why": {"dead-air": "the held wordmark IS the last beat"}}
+</script>
+```
+
+Checks advise. Only determinism and a missing reason refuse.

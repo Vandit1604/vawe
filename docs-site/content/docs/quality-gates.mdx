@@ -1,80 +1,44 @@
 ---
 title: Quality gates
-description: The ladder of checks a video climbs before it ships, from schema validation to a vision gate that scores the rendered frames.
+description: The checks you can run by name, and the ones that advise.
 icon: ShieldCheck
 ---
 
-A static engine can produce a technically correct, visually generic video. The gates are the system that fights that. None of them need to run for a video to render, but together they are how you catch a broken frame, a repeated design, or a slop tell before you ship.
-
-They form a ladder. Early gates are cheap and mechanical; later gates look at the rendered pixels.
-
-## validate
+A gate is a script in `quality/gates/`. Run one by name:
 
 ```bash
-make validate D=films/scene/my.json
+bin/vawe check                              # list the gates
+bin/vawe check anim-traps films/<name>/page.html
 ```
 
-Schema conformance, no em-dashes in on-screen copy, inline theme keys resolved, and no un-expanded [blocks or comps](/docs/blocks). The same validator runs at boot before the first frame, so a scene that fails here never renders.
+The gates are: `anim-traps`, `code-quality`, `dead-branch`, `doc-refs`, `impeccable`, `no-emdash`, `page-check`, `provenance`, `rule-length`, `seo-surface`, `site-build-check`, `skill-reach` and `threshold-provenance`.
 
-## critique
+Checks advise. Only determinism and a missing waiver reason refuse. A rule broken for cause is declared in the page. See [The page](/docs/the-page#waivers).
 
-```bash
-make critique D=films/scene/my.json
-```
+## Gates for a film
 
-{/* site-counts-allow: "22 shader stings" is a made-up on-screen claim in an example, not a count of the registry */}
-The value gate. It flags beats that occupy time without earning it: placeholder words, unbacked claims (copy that says "22 shader stings" with no shader in the scene), static lists that should be animated, stings too fast to perceive, and thin or lonely beats. The test for every frame is simple: if you cut it, what does the viewer lose?
+**`anim-traps`** finds the traps of a seeked CSS or Web Animation that never throw an error: fill collisions, a missing end keyframe, `var()` in the `animation` shorthand, a selector that matches nothing, a delay past the end, one easing across three or more keyframes, and a later animation that overrides an earlier one. It also searches the source for a live clock and an unseeded `Math.random`. It reports. `--strict` turns a finding into a failing exit code. See [When it looks wrong](/docs/troubleshooting).
 
-## slop
+**`page-check`** measures what a rendered page film shows, so your eye judges only what a number cannot. The exit code is always 0. Findings include:
 
-```bash
-make slop D=films/scene/my.json
-```
+- `dead-stop`: a fast move that stops within one frame
+- `text-unreadable-hold`: words that leave before they were still long enough to read
+- `quiet-before-spectacle`: the 0.4 s before `<meta name="spectacle">` is not quiet
+- `cue-not-heard`, `cue-onset-drift`, `sound-off-hit`: audio cues that do not land
+- `cut-off-beat`, `cut-off-reference`: a cut early or late against the beat grid or the reference
+- `text-low-contrast`, `text-clipped`, `font-fallback`: text that is hard to read or in the wrong face
+- `loop-seam`: with `<meta name="loop" content="true">`, the last frame does not flow into the first
 
-An anti-slop detector. It renders the real DOM at a frame and runs a 41-rule check for the usual tells: overused fonts, purple and blue gradients, cards inside cards, centered-by-default layouts. No language model, just rules. Reach past anything it flags.
+`bin/vawe critique <page>` runs it.
 
-## audit
+**`no-emdash`** scans for an em dash, which the project never allows.
 
-```bash
-make audit M=scene
-```
+## Gates for the repo
 
-Layout and accessibility: overlap, clipped text, overflow, safe-zone violations, and WCAG contrast on every layer marked `critical`. It writes an overlay to `/tmp/audit/<fmt>.png` so you can see exactly what it caught.
+`code-quality`, `dead-branch`, `doc-refs`, `rule-length`, `seo-surface`, `site-build-check`, `skill-reach`, `provenance` and `threshold-provenance` check the repository itself, not a film. A film author does not need them.
 
-## beats
+## The order
 
-```bash
-make beats D=films/scene/my.json VS=<brand>
-```
+While you write: `bin/vawe dev <page>`, then `anim-traps`. Then `bin/vawe critique <page>` in a fresh session. Before the final: `bin/vawe ship <page>` renders, checks the final and runs a fresh judge. A judge pass is never recorded by the author.
 
-The first, middle, and last frame of every beat on one sheet. With `VS=<brand>` it stacks each beat beside its source section, which is the [fidelity check](/docs/brand-reflection#the-fidelity-gate) that a reflected video reads as the same brand as the site.
-
-## judge
-
-```bash
-make judge D=films/scene/my.json VS=<brand>
-```
-
-The vision gate. It renders the key frames of every beat into one labeled sheet and writes a rubric: the brand's house style plus seven craft dimensions (readability, hierarchy, composition, brand fidelity, asset fidelity, produced-not-generated, and value). Then a vision model reads the sheet against the rubric and returns a pass or fix verdict. It catches what the mechanical gates cannot see: a mis-anchored underline, a muddy frame, a lookalike asset. A pass means every frame clears every dimension.
-
-## ledger
-
-```bash
-make ledger D=films/scene/my.json         # check
-make ledger-add D=films/scene/my.json     # log after shipping
-```
-
-Cross-video sameness memory. It fails if a design repeats one you have already shipped. Fix by changing at least two of the cut family, the beat structure, or the layout archetype. Once the draft render looks right, `ledger-add` records it so future videos are checked against it.
-
-## Determinism and refactor gates
-
-Three checks guard the engine itself rather than a single video:
-
-- **`make probe`** renders frames in scrambled order and proves they are byte-identical. See [Determinism](/docs/determinism).
-- **`make snap`** diffs a per-frame DOM signature so a refactor can prove it did not change the picture.
-- **`make lib-test`** runs pure-JS assertions on the motion primitives with no browser.
-- **`make motion`** checks the animation-over-time contract: the final frame holds, reveals are monotonic, payoffs settle before they exit, counters are sane, and typing completes.
-
-## The order to run them
-
-While authoring: `validate`, then `slop` and `beats` to catch problems early. Before rendering the final: `critique`. After rendering: `audit`, then `judge` for the real quality read, then `ledger` to make sure it is not a repeat. `make review` bundles `lib-test`, `audit`, and a master sheet into one quick health snapshot.
+Green checks do not mean the film is good. Look at the frames. See [Reading your film](/docs/reading-your-film).

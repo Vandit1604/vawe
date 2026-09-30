@@ -4,9 +4,8 @@
 A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The renderer seeks it frame by frame under a virtual clock and encodes an mp4. Source and the page contract: https://github.com/Vandit1604/vawe (AGENTS.md).
 
 ## Site
-- [Home](https://vawe.dev/): Write a web page, get a film. Rendered films, how a page becomes a film, and questions.
+- [Home](https://vawe.dev/): Write a web page, get a film. Move clips rendered by vawe, how a page becomes a film, and questions.
 - [features](https://vawe.dev/features): The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.
-- [showcase](https://vawe.dev/showcase): Films rendered by vawe, and one film rendered to three canvases.
 - [moves](https://vawe.dev/moves): Proven motion moves, each a 1 to 2 s clip and one markdown file an agent copies. Every move file is listed under Moves below.
 - [determinism](https://vawe.dev/determinism): A page seeked, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true and how it checks it.
 - [ai-agents](https://vawe.dev/ai-agents): An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges the result.
@@ -14,7 +13,6 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [when-determinism-matters](https://vawe.dev/when-determinism-matters): Byte-identical rendering is a real property, not a universal one. When it decides which engine to pick, and when a human editing a timeline by eye makes it beside the point.
 - [hyperframes-alternatives](https://vawe.dev/hyperframes-alternatives): HyperFrames is HeyGen's self-hosted, Apache-2.0, agent-facing rendering engine, the closest peer Vawe has. Both compose from HTML, timed and made deterministic in different ways. Read 2026-09-19.
 - [launch-video](https://vawe.dev/launch-video): How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site's own palette and type.
-- [product-tour-video](https://vawe.dev/product-tour-video): A chaptered product tour or feature-update video: three chapters, a continuous progress rail, one tracked issue carried through.
 
 ## Docs
 - [Docs](https://vawe.dev/docs): the documentation site.

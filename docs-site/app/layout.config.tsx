@@ -28,7 +28,6 @@ export const baseOptions: BaseLayoutProps = {
   // the docs actually wants to go next, and they resolve because the site serves this app.
   links: [
     { text: 'Docs', url: '/docs', active: 'nested-url' },
-    { text: 'Editor', url: '/editor' },
-    { text: 'Showcase', url: '/showcase' },
+    { text: 'Moves', url: '/moves' },
   ],
 };

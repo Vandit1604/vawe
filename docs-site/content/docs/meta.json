@@ -6,16 +6,12 @@
     "quickstart",
     "prompting",
     "---Concepts---",
-    "the-scene",
-    "layers",
+    "the-page",
     "determinism",
-    "---Motion and vocabulary---",
+    "---Motion---",
     "motion",
-    "camera",
     "recipes",
-    "blocks",
-    "---Look and feel---",
-    "themes",
+    "---Look and sound---",
     "backgrounds-and-images",
     "audio",
     "aspect-ratios",
@@ -25,7 +21,6 @@
     "---Workflow---",
     "cli",
     "brand-reflection",
-    "quality-gates",
-    "mcp"
+    "quality-gates"
   ]
 }

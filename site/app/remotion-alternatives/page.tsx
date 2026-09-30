@@ -196,7 +196,7 @@ paid "Company License":
               </a>
             </div>
             <div className="irelated">
-              <a href="/determinism">Why the same scene always renders the same bytes</a>
+              <a href="/determinism">Why the same page always renders the same frames</a>
               <a href="/ai-agents">How an agent writes and checks a film</a>
               <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
             </div>

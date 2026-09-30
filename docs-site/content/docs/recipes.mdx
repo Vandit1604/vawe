@@ -1,61 +1,35 @@
 ---
 title: Recipes
-description: Motion measured off a real reference video, applied to your own layers by id through the top-level recipes array.
+description: Chains of built moves for common short films, with the beat table and the traps at each seam.
 icon: BookOpen
 ---
 
-A recipe is one thing a real film does, measured frame by frame off that film, and written so any scene can reuse it: how one act hands off to the next, how the camera moves through a moment, how a line of text arrives on screen. The measurement lives in `recipes/recipes.json`; every entry names the reference clip and the exact second it came from.
+A single move is easy to copy. A film needs moves that join. `prompts/moves/RECIPES.md` chains the built moves into four short films:
 
-A recipe owns motion and structure only. It never owns your layers, your copy, or your colours: you write those yourself, then point a recipe at the layer ids you already gave them.
-
-## Using one
-
-Add a `recipes` array at the scene's root, one line per moment:
-
-```json
-{
-  "recipes": [
-    { "recipe": "flow-seam", "at": 1.9, "out": "window", "in": "tagline", "ground": ["g1", "g2"] },
-    { "recipe": "window-dolly", "from": 0, "to": 1.9, "target": "window" },
-    { "recipe": "word-by-word", "at": 1.9, "layer": "tagline" }
-  ]
-}
-```
-
-Then expand the scene before rendering, the same step blocks go through:
-
-```bash
-make expand D=films/scene/my-video.json
-```
-
-The expander turns each line into the engine's own named capability on the layers or camera you already declared: nothing new reaches the renderer, so the render stays exactly as deterministic as one you hand-authored.
-
-## The five shipped recipes
-
-| Recipe | Kind | Does |
+| Film | Length | Chain |
 |---|---|---|
-| `flow-seam` | seam | One act leaves on an axis, a frame of empty ground, the next act arrives on the same axis. |
-| `window-dolly` | camera | A camera push toward a named layer, timed to a boundary. |
-| `word-by-word` | enter | A line of text arrives one word at a time in reading order. |
-| `object-wipe` | seam | An outgoing layer wipes off as the incoming one wipes on, sharing one directional sweep. |
-| `colour-wipe` | seam | A flat colour sweeps across the frame to carry one beat into the next. |
+| Brand sting, rich colour | 5 s | `text-as-mask`, `color-block-wipe`, `logo-sting`, `blur-word-cascade` |
+| Product sting, real UI | 5 s | `pull-back-reveal`, `cursor-click`, `ui-strip-away`, a lockup push |
+| Launch: hook, two features, proof, end | 15 s | `caret-typing`, `clip-expand`, `cursor-click`, `whip-pan`, `skeleton-reveal`, `zoom-through`, `count-up`, `wordmark-cascade`, `cta-pop` |
+| Kinetic type line | 6 s | `letter-stagger`, `cut-on-motion`, `scale-punch`, `weight-morph`, `drift-hold` |
 
-## What a recipe compiles to
+Each recipe has a beat table: the time, the move, what carries into the next beat, and the sound cue. After the table come the reason the chain holds and the traps at each seam.
 
-A recipe never invents its own motion language. Each `kind` writes into a specific part of the engine you can also write by hand:
+## Why a chain holds
 
-| kind | writes | example |
-|---|---|---|
-| `seam` | plain `motion` keyframes on the outgoing and incoming layers, computed from their own boxes and the canvas | `flow-seam` |
-| `camera` | a [`cameraMove`](/docs/camera) leg | `window-dolly` |
-| `enter` | a text layer's own split-text sugar (`split`, `preset`) | `word-by-word` |
+The recipes share three habits.
 
-Because of that, a recipe can refuse. If the reference genuinely does something the engine has no name for yet, the recipe says so instead of faking it with something close enough. That refusal is useful: it points at a real gap in the engine rather than hiding it behind an approximation.
+- One element carries through the film. A name, a dot or a cursor moves from beat to beat.
+- Each seam changes axis or direction. Scale out, then x, then a scale land, then y.
+- The slowest beat is at least 3 times the fastest.
 
-## Recipes can stack
+## Use one
 
-Order matters when two recipes touch the same layer. A `flow-seam` line whose incoming layer already carries a `word-by-word` split from an earlier line skips the whole-layer slide it would otherwise write, because the split already owns how the layer arrives; the seam only decides when it starts. Put the line that sets `split` first, and a later line always wins any field both would write.
+1. Copy the moves from `prompts/moves/`. Each move has a snippet and a clip.
+2. A snippet's delays start at 0. Add the beat start to each one.
+3. Measure every rectangle with the layout at rest, before any `vawe.onFrame` hook sets a transform.
+4. Add the sound cue named in the table as `<audio data-synth="<voice>" data-at="<s>">`, with no `data-gain`.
 
-## When to reach for a recipe instead of hand-authoring
+Read the traps before you copy a chain. For example, in the brand sting the first shot needs its own ground, or the second shot shows through before the block covers it.
 
-Reach for a recipe when you want a film to move the way a specific real film moves, not the way you imagine it should. A recipe is measured off actual frames, so it carries timing a person would otherwise have to guess and re-guess by eye. Hand-author when no recipe covers the moment, or when `make arsenal Q="…"` turns up a named engine capability that already does exactly what you need without indirection.
+See [Motion](/docs/motion) for the rules the chains follow.

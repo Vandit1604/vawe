@@ -1,73 +1,46 @@
 ---
-title: Audio and captions
-description: The Go PCM mixer, automatic sound design derived from a scene's own cuts and stings, the reusable SFX library, and burned-in captions.
+title: Audio
+description: Audio tags in the page, synth voices, and the offline mix.
 icon: Volume2
 ---
 
-Audio is a separate track. A Go PCM mixer builds the full bed in memory (music, sound effects, voiceover), writes a WAV, and ffmpeg muxes it onto the video. Because it never touches `renderFrame`, adding audio leaves every frame byte-identical.
+Audio is `<audio>` tags in the page. The renderer never plays them live. It reads them and mixes one ffmpeg graph onto the video (`harness/media/page-audio.mjs`).
 
-## The audio object
-
-```json
-{ "audio": { "silent": true } }
+```html
+<audio src="assets/music.mp3" loop data-at="0" data-gain="-3" data-fade-out="0.4"></audio>
+<audio data-synth="pluck" data-at="0.85" data-gain="-8"></audio>
+<audio data-synth="swell" data-at="1.66" data-gain="-6"></audio>
+<audio src="assets/vo.wav" data-role="vo" data-at="1.0"></audio>
 ```
 
-The `audio` object takes `music`, `sting`, `vo`, `musicGain`, and `silent`. While you author, `silent: true` is common: it skips music and sound entirely. The mixer runs at 44100 Hz, loops music under the video, ducks it under a voiceover, and applies a soft limiter.
+| Attribute | Meaning |
+|---|---|
+| `src` | an audio file, relative to the page |
+| `data-synth` | a synth voice from `core/audio/kit.mjs`, in place of `src` |
+| `data-at` | start time in seconds |
+| `data-gain` | gain in dB. Without it, a synth voice takes its soft default |
+| `data-fade-out` | fade-out length in seconds |
+| `loop` | marks the music bed |
+| `data-role="vo"` | a voiceover. It ducks the bed by 18 dB while it plays |
 
-## Automatic sound design
+## Synth voices
 
-The most useful mode derives sound cues from the scene's own timing:
+`pluck`, `chime`, `sparkle`, `droplet`, `bloom`, `success`, `ready`, `whoosh`, `riser`, `swell`, `impact`, `drop`, `braam`.
 
-```json
-{ "audio": { "auto": true } }
-```
+Each voice is synthesized from parameters with a seeded generator, so a cue gives the same bytes on every machine. Default gains: UI cues (`pluck`, `chime`, `sparkle`, `droplet`, `bloom`, `success`, `ready`) -6 dB, `whoosh`, `riser` and `swell` -4 dB, and the weight voices `impact`, `drop` and `braam` -2 dB.
 
-With `auto`, the scene reads its own layers and stings and places effects deterministically:
+## The mix
 
-- a **`whoosh`** on every cut, at the cutting layer's `start`
-- a **`reveal`** on every sting, at the sting's `t`
+The mix is as written. It sums the cues at their gains. It does not normalise. At the default gains, a film lands near -20 LUFS. A safety limiter at -1 dBTP never raises a level. Add `<meta name="loudness" content="-14">` to normalise to a delivery target.
 
-Cue times are a pure function of the JSON, so audio stays reproducible and frames stay snap-identical. You get a scored video without hand-placing a single sound.
+## Taste
 
-## The SFX library
+Sound is felt, not noticed. A few soft ticks and one swell beat many hits. Cue the first and the last key word, not every word. Use `impact`, `braam` or `drop` only when the brief asks for weight. The mix warns when one cue peaks more than 6 dB above the median cue.
 
-Every sound is **synthesized from parameters**, not downloaded. The cue library is
-[Cuelume](https://cuelume-site.pages.dev) v0.1.2 (MIT), ported verbatim: 14 interaction cues, each a
-small spec (noise or a tone, a filter, an envelope) that `renderCue` walks sample by sample at 44.1kHz
-with a seeded PRNG for the noise. Same spec, same seed, same bytes, on any machine, with no licence
-obligation and no network.
+Name each beat once in CSS (`--beat-2: 1.85s`) and read it in every delay of that beat. One edit then moves the beat.
 
-```bash
-make audio        # bake every cue into assets/sfx/ (additive; --force to re-bake)
-make check GATE=sfx-check    # is each cue the SHAPE its role claims?
-```
+## Check it
 
-The cues: `chime`, `sparkle`, `droplet`, `bloom`, `whisper`, `tick`, `press`, `release`, `toggle`,
-`success`, `error`, `page`, `loading`, `ready`. `whoosh` and `reveal` are the engine's own role names
-(they alias `whisper` and `chime`), which is what the automatic mode reaches for. Nothing is committed;
-`assets/sfx/` is gitignored and self-heals from `make audio`.
+`bin/vawe critique <page>` runs `page-check`. It reports a cue with no onset in the rendered audio (`cue-not-heard`), a cue more than two frames from its `data-at` (`cue-onset-drift`), and a cue off the cut it belongs to (`sound-off-hit`).
 
-Do not hand-edit the specs in `core/audio-kit.mjs`. They were hand-ported once and drifted from the
-real library on 7 of 14 cues, which is a difference you hear and cannot debug from the JSON.
-
-### Typing
-
-A `typing` layer emits one `press` per revealed character automatically. `core/layers/text.js` reveals
-character *i* at `start + (i+1)/cps`, so the cue is that same expression — change the copy or the
-speed and the clicks follow. Variation comes from dynamics (a deterministic ±12% gain per index),
-because a real keyboard varies in force, not in identity. `keyClicks: false` silences it; `keyGain`
-sets the level.
-
-`make check GATE=sfx-check` exists because a downloaded file named `click` was once **19.6 seconds** long and the
-typing stacked it into a drone. It decodes each WAV and measures how long the signal is actually
-audible (not how long the file is), then holds it to a cap derived from the cue's role.
-
-## Captions
-
-Auto-time a script into burned-in subtitles:
-
-```bash
-make captions D=films/scene/my-video.json TEXT="your script here"
-```
-
-Each caption's duration is proportional to its word count, computed deterministically, and written into the scene's `captions` array. Pair it with `"captionMode": "pop"` for the muted-social look, where words punch in one at a time. The three modes are `sentence`, `word`, and `pop`.
+To draft with sound, add `--audio`: `bin/vawe dev <page> --audio`. A draft is silent by default.

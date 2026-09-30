@@ -1,16 +1,18 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FILMS, filmPoster, filmSrc } from "./films";
 import { REPO_URL } from "./Header";
 
-// THE LANDING HERO: a rendered film playing beside the list of films, one click to switch.
+// THE LANDING HERO: a move clip playing beside the list of moves, one click to switch.
 
-export function HeroSplit() {
+export type HeroMove = { name: string; title: string; group: string };
+
+export function HeroSplit({ moves }: { moves: HeroMove[] }) {
   const [idx, setIdx] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [still, setStill] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
-  const film = FILMS[idx];
+  const move = moves[idx];
 
   useEffect(() => {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -24,7 +26,7 @@ export function HeroSplit() {
     if (!v) return;
     if (playing) void v.play().catch(() => setPlaying(false));
     else v.pause();
-  }, [playing, film.id]);
+  }, [playing, move.name]);
 
   return (
     <section className="hs" id="intro">
@@ -36,13 +38,14 @@ export function HeroSplit() {
         </p>
         <div className="hs-actions">
           <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
-          <a className="btn btn-ghost" href="/showcase">See the films</a>
+          <Link className="btn btn-ghost" href="/moves">See the moves</Link>
         </div>
-        <ol className="hs-list" aria-label="Films">
-          {FILMS.map((f, i) => (
-            <li key={f.id}>
+        <ol className="hs-list" aria-label="Moves">
+          {moves.map((m, i) => (
+            <li key={m.name}>
               <button type="button" aria-current={i === idx ? "true" : undefined} onClick={() => { setIdx(i); if (!still) setPlaying(true); }}>
-                <span className="hs-list-title">{f.title}</span>
+                <span className="hs-list-title">{m.title}</span>
+                <span className="meta">{m.group}</span>
               </button>
             </li>
           ))}
@@ -53,15 +56,15 @@ export function HeroSplit() {
         <div className="hs-view">
           <video
             ref={video}
-            key={film.id}
+            key={move.name}
             className="hs-screen"
-            src={filmSrc(film.id)}
-            poster={filmPoster(film.id)}
+            src={`/moves/${move.name}.mp4`}
+            poster={`/moves/${move.name}.hd.webp`}
             muted
             loop
             playsInline
             preload="metadata"
-            aria-label={`${film.title}, rendered by vawe`}
+            aria-label={`${move.title}, a move rendered by vawe`}
           />
         </div>
         <div className="hs-now">
@@ -72,7 +75,8 @@ export function HeroSplit() {
               <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.5v9l7.5-4.5z" fill="currentColor" /></svg>
             )}
           </button>
-          <span className="hs-now-title">{film.title}</span>
+          <span className="hs-now-title">{move.title}</span>
+          <Link className="hs-now-link" href={`/moves/${move.name}`} prefetch={false}>Open the move</Link>
         </div>
       </div>
     </section>

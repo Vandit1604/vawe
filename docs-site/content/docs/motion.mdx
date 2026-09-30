@@ -1,89 +1,78 @@
 ---
 title: Motion
-description: The kinetic typography presets, cut presentations, and shader stings, plus how each brand moves in its own personality.
+description: Springs, keyframe tables, the motion rules, and the moves to copy.
 icon: Wind
 ---
 
-Motion in Vawe is a vocabulary, not a set of sliders. You pick a named preset for how text enters, a named presentation for how one beat cuts to the next, and an optional named sting to cover a hard boundary. Each is a pure function of frame time, so it renders the same every time.
+Motion in a page is plain web motion: CSS, Web Animations, or a `window.seek(t)` function. `core/motion/springs.js` adds pure math for it: functions of time, no state, no `Math.random`, no dependencies. `core/motion/README.md` is the reference.
 
-The craft rules behind these choices (timing as voice, ease out on entrances, one hero motion per beat) live in the repo at `docs/MOTION-CRAFT.md`. This page is the catalog.
-
-## Kinetic typography
-
-Split a headline into units with `split` (`char`, `word`, or `line`), then animate each unit with `preset`. Units enter in reading order, staggered, and settle exactly at rest with a gentle overshoot.
-
-The kinetic presets (`node -e "import('./core/type/type.js').then(m=>console.log(m.PRESETS.length))"` for the count):
-
-`up` · `down` · `type` · `scale` · `blur` · `bounce` · `slide` · `wave` (looping) · `flip` · `fall` · `elastic` · `skew` · `focus` · `decode` (scramble then resolve) · `tilt` · `stretch` · `gradient` (colour sweep) · `highlight` (marker band) · `underline` · `shadow` (poster lift) · `riseClip` (rise from a baseline clip) · `draw` (an SVG stroke drawing itself on) · `chroma` (RGB-split that settles crisp) · `swing` (pendulum from a pivot) · `unfold` (a 3D unfold to flat)
-
-```json
-{
-  "type": "text",
-  "text": "Then it holds, deterministic.",
-  "split": "word",
-  "preset": "riseClip",
-  "each": 0.5,
-  "stagger": 0.05
-}
+```js
+import { spring, track, approach, kf, springLinear, springDuration, curveToLinear, CURVES, SPRINGS, rng, noise1 } from '../../core/motion/springs.js';
 ```
 
-Per-preset knobs go in `presetOpts`, for example `gradient` takes `{c1, c2}`, `highlight` and `underline` take `{color}`, `blur` and `focus` take `{px}`, `tilt` takes `{deg}`, and `wave` takes `{amp, phase}`. If a headline wraps past five lines, the engine auto-shrinks it so it never overflows.
+## A spring as an easing
 
-## Cuts and transitions
+The renderer seeks `document.getAnimations()`, so a native animation needs no `seek`.
 
-A `cut` is how a layer enters by moving the frame, used at beat boundaries. Set it on the layer:
-
-```json
-{ "type": "component", "src": "hero.json", "cut": "whip", "cutTiming": "snappy", "dir": "left" }
+```js
+const { k, d } = SPRINGS.snappy;
+el.animate([{ transform: 'translateY(40px)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+  { duration: springDuration(k, d) * 1000, easing: springLinear(k, d), fill: 'both', delay: 600 });
 ```
 
-There are **25 named presentations** (plus `none`):
+Do not fit a `cubic-bezier()` by hand. It starts too hard and stops too early. Use `curveToLinear(fn)` to turn any curve into an exact CSS `linear()` easing. `CURVES` holds `expoOut`, `spring` and `overshoot`.
 
-`fade` · `slide` · `whip` · `punch` · `wipe` · `iris` · `clock` · `flip` · `rise` · `blur` · `zoom` · `cube` · `barn` · `softwipe` · `softiris` · `squeeze` · `roll` · `letterbox` · `drop` · `jitter` · `blinds` · `skewWhip` · `spin` · `collapse` · `riseBlur`
+Spring presets in `SPRINGS`: `snappy` for UI and leading edges, `default`, `heavy` for big type and logos, `playful` for visible overshoot.
 
-Each cut takes a **timing** (`cutTiming`, default `smooth`): `linear`, `smooth`, `out`, `snappy`, `pop`, `rush`, `brake`, `ramp`. Directional cuts take `dir` (`left`, `right`, `up`, `down`), and `iris` / `softiris` take a centre with `cx` and `cy`.
+## A canvas in `window.seek(t)`
 
-<Callout title="Pick a cut you can actually see">
-A transition the viewer cannot perceive at its real size and duration is not a feature. Fast `blinds` slats read as a flicker, not blinds. When in doubt use a cut that reads clearly (a `wipe`, `iris`, or `whip`) at the duration you are giving it.
-</Callout>
-
-## Shader stings
-
-A sting is a brief WebGL effect that covers a cut at a boundary. Set it in the top-level `stings` array, keyed to a moment `t`:
-
-```json
-{ "stings": [{ "t": 6.0, "fx": "glitch", "dur": 0.5, "seed": 7 }] }
+```js
+window.seek = (t) => {
+  const x = track(t, [[0, 100], [1.2, 640], [2.4, 280]], 170, 26);  // one spring per target change
+  const zoom = approach(t * 30, 1, 1.35, 0.15);                    // frame number, 15% of the gap per frame
+  ctx.setTransform(zoom, 0, 0, zoom, 0, 0);
+  ctx.fillRect(x, 200, 80, 80);
+};
 ```
 
-The full set (`node -e "import('./core/stings/index.js').then(m=>console.log(m.SHADER_FX.length))"` for the count). Fourteen native: `flash` · `burn` · `leak` · `grain` · `dissolve` · `ink` · `glitch` · `streak` · `pixel` · `confetti` · `ripple` · `scan` · `warp` · `bokeh`. Eight shape wipes from gl-transitions: `wipe` · `circle` · `blinds` · `squares` · `pinwheel` · `doors` · `polka` · `swirl`. Plus eleven warp and chromatic effects: `crossWarp` · `domainWarp` · `sdfIris` · `vortex` · `ridgedBurn` · `lens` · `thermal` · `whipPan` · `chromaticSplit` · `dispersion` · `gridPixelateWipe` (a pixel-block curtain that sweeps the cut).
+## A `[[f, v]]` table with `kf`
 
-Each takes `dur` (0.3 to 3 seconds) and a `seed`. `color` tints the effect by luminance, `intensity` scales its strength, and `leak` accepts up to four colours in `colors`. Because a sting is keyed on `(progress, seed)` only, it is seek-safe and byte-reproducible.
+Tunable numbers stay as literals so the studio can edit them. Values can be arrays, for colours.
 
-Reach for a sting to cover a hard background jump at an act break, or a `flash` to punctuate a reveal.
-
-## Ambient shaders
-
-Separate from stings, a `shader` layer paints a continuous WebGL field for the whole beat, pure in local time. There are **27 ambient shader looks** in two roles. Fields **behind** content (low track, low intensity): `flow`, `aurora`, `plasma`, `drift`, `mist`, `matrixDecode` (digital rain), `nebula`, `gateWeave`, `domainWarp`, `voronoi`, `metaballs`, `bands`, `godRays`, `curlSmoke`, `chromaticBloom` (luminous colour orbs), `auroraCurtain` (vertical curtain lines), `auroraVeil` (northern-lights ribbons), and `laserLabyrinth` (volumetric light cones). Overlay looks **on top** of content (high track, intensity ~0.6 to 0.9): `vhs`, `crt`, `filmGrain`, `lightLeak`, `dotCrawl`, plus a distortion-styled set `barrel`, `heatShimmer`, `ripple`, `kaleidoscope`. Tune with `speed`, `intensity`, `colors`, and `seed`. Use it as atmosphere, not decoration; do not stack two.
-
-## Composite looks
-
-A **look** is a named cinematic grade applied to any layer or group with `filter`. Where a sting covers a moment and an ambient shader fills a beat, a look colours the content itself: a stack of colour, glow, texture, and vignette passes resolved to CSS. There are **31 composite looks**: `neon` · `dreamyHaze` · `halationFilm` · `angelic` · `hologram` · `glitchGlow` · `vhs` · `super8` · `crt` · `filmNoir` · `fadedPolaroid` · `nostalgia` · `cyberpunk` · `nightVision` · `thermal` · `lomo` · `droneCinematic` · `vintageAnamorphic` · `impact` · `timeFreeze` · `glassWarp` · `heatWarp` · `melt` · `watercolor` · `dreamSequence` · `rippleGlass` · `emboss` · `letterpress` · `chrome` · `edgeGlow` · `fatten`.
-
-```json
-{ "type": "group", "filter": "neon", "children": [ /* ... */ ] }
+```js
+const ROT = [[0, 0], [24, 90], [60, 90], [84, 0]];
+const TINT = [[0, [20, 20, 30]], [60, [40, 90, 255]]];
+const f = t * 30;
+el.style.rotate = `${kf(f, ROT, 'easeInOutCubic')}deg`;
+const [r, g, b] = kf(f, TINT);
 ```
 
-A strength rides on the name (`"neon:0.6"`), and `lookOpts` overrides properties (many looks default their colour to the brand accent, so a look reskins per theme). `strength` works on every look; the other knobs (`color`, `color2`, `colors`, `grain`, `vignette`) depend on the passes that look is built from, and one it cannot apply is refused with a message rather than ignored. Reach for one look per beat, on real content, never as decoration on empty space.
+## Rules that are not your defaults
 
-## Motion personality per theme
+- Arrive fast, land soft. Use `approach(f, from, to, k)` with k 0.12 to 0.19, not `ease-out` on everything.
+- Exits run faster and shorter than entrances.
+- Stagger siblings 30 to 80 ms. Never let a group land on one frame.
+- Blur follows motion. A moving thing may blur. A still thing never does.
+- Text holds `words x 0.6 s`, with a floor of 1.2 s. Fix a fast read with a hold, never with a slower move.
+- The slowest beat is at least 3 times the fastest.
+- Cut on the beat, or two frames early.
+- Adjacent transitions change axis or direction.
 
-The same primitives move differently for different brands, because each [theme](/docs/themes) carries a `motion` block: `easing`, `bounce`, `settle`, `enter`, `durationScale`, and `stagger`. A punchy brand snaps with a short settle and tight stagger; a calm brand dissolves with a long settle and no bounce. Leaving motion at defaults is shared DNA across brands, so set it.
+The rules live in `engine-doctrine/RULES/` (`readable-hold.md`, `speed-bands.md`, `banned-defaults.md`). `engine-doctrine/TASTE-CARD.md` holds the 15 rules and 5 anti-patterns the judge scores against.
 
-The motion director can choose cuts and stings for you from a theme's personality:
+## Moves to copy
 
-```bash
-make direct D=films/scene/my-video.json          # dry run, prints picks
-make direct D=films/scene/my-video.json WRITE=1  # apply them
-```
+`prompts/moves/README.md` lists proven moves, grouped by job. Each move is a short CSS and Web Animations snippet with a one-second clip. Choose from the clip, copy the snippet, and keep its numbers. A few examples:
 
-It covers hard background jumps with a sting, whips only when the background does not change, and rotates one cut family so a video does not repeat the same move.
+| Job | Moves |
+|---|---|
+| land a title, soft | `tracking-collapse`, `mask-rise`, `blur-word-cascade` |
+| type a command | `caret-typing`, `caret-follow` |
+| change between shots | `cut-on-motion`, `whip-pan`, `zoom-through`, `color-block-wipe` |
+| move the camera | `push-in`, `pull-back-reveal`, `parallax-dive`, `rack-focus`, `drift-hold` |
+| show a click | `cursor-click`, `notification-pop` |
+| prove a number | `count-up`, `chart-build` |
+
+The gallery is on the [moves page](/moves). `bin/vawe moves` renders the clips again when a demo changes.
+
+To draft only the seconds you work on, run `bin/vawe dev <page> --from s --to s`.
