@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // One command, one report, one picture sheet: what to fix in a page film, worst first.
-//   node harness/media/review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--out sheet.png]
+//   node harness/media/review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--judge] [--out sheet.png]
 // Draft by default (half size, 30 fps): an up-to-date draft is reused, else it is rendered and the old
 // one kept as out/<name>-draft.prev.mp4. Each part is a function (ctx) -> findings
 // { severity, t, frame, what, fix, crop? }; the report sorts them by severity, then time.
@@ -206,6 +206,25 @@ export function cutLines(findings, { samples, moves }, step) {
   return ['Cut: remove one element and one move, then review again' + (parts.length ? `: ${parts.join('; ')}` : '')];
 }
 
+/** The latest `vawe judge` result for this page, as one header line. */
+export function judgeLine(name, page) {
+  const file = path.resolve('out', `${name}.judge.json`);
+  if (!fs.existsSync(file)) return 'judge: no judge yet';
+  const j = JSON.parse(fs.readFileSync(file, 'utf8'));
+  const stale = fs.statSync(file).mtimeMs < fs.statSync(page).mtimeMs ? ' (older than the page)' : '';
+  return `judge: ${j.pass ? 'pass' : 'fail'}${j.time != null ? ` at ${j.time} s` : ''}${j.topFix ? `, top fix: ${j.topFix}` : ''}${stale}`;
+}
+
+/** Prepare the default-reject judge; the fresh session that scores it needs the printed command. */
+export function judgeHandoff(page, ref, name) {
+  const args = ['quality/gates/judge.mjs', page, ...(ref ? ['--ref', ref] : [])];
+  const r = spawnSync(process.execPath, args, { encoding: 'utf8', cwd: path.resolve(import.meta.dirname, '../..') });
+  if (r.status !== 0) return [`judge not prepared: ${String(r.stderr || r.stdout).trim().split('\n')[0]}`];
+  const who = `VAWE_AGENT=judge-${name}`;
+  return [`judge prepared. In a fresh session, read the sheet and rubric, then record:`,
+    `  ${who} bin/vawe judge ${page} --verdict FIX --at <seconds> --top-fix "<one fix>"   (or --verdict PASS)`];
+}
+
 /** Compare this render with the one the last review saw. -> { line, diff } ; the render is saved for the next review. */
 export function sheetDiff(ctx, sheetOut) {
   const last = sheetOut.replace(/\.png$/, '.last.mp4'), diff = sheetOut.replace(/\.png$/, '.diff.png');
@@ -226,9 +245,9 @@ export function sheetDiff(ctx, sheetOut) {
   return result;
 }
 
-export function reportLines(list, { sheet, timing, table, changed, cut = [] }) {
+export function reportLines(list, { sheet, timing, table, changed, cut = [], header, handoff = [] }) {
   const n = (s) => list.filter((f) => f.severity === s).length;
-  const lines = [`${list.length} finding(s): ${n('error')} error, ${n('warn')} warn, ${n('info')} info`];
+  const lines = [...(header ? [header] : []), `${list.length} finding(s): ${n('error')} error, ${n('warn')} warn, ${n('info')} info`];
   list.slice(0, SHOWN).forEach((f, i) => {
     lines.push(`${String(i + 1).padStart(2)}. [${f.severity}] f${f.frame} (${f.t.toFixed(2)}s) ${f.what}`, `      fix: ${f.fix}${f.crop ? `\n      crop: ${f.crop}` : ''}`);
   });
@@ -241,12 +260,12 @@ export function reportLines(list, { sheet, timing, table, changed, cut = [] }) {
   if (changed) lines.push(changed.line, ...(changed.diff ? [`before and after, the most changed frame: ${changed.diff}`] : []));
   const top = list.find((f) => f.severity !== 'info');
   lines.push(top ? `Fix first: f${top.frame} (${top.t.toFixed(2)}s): ${top.fix}` : 'Fix first: nothing measured is wrong. The eye still judges what a number cannot.');
-  lines.push(...cut);
+  lines.push(...cut, ...handoff);
   return lines;
 }
 
 /** review({ page, ref, final, text, out }) -> { findings, timing, sheet, video, ms, reused }. Throws on a bad input. */
-export async function review({ page, ref, final = false, text = false, out }) {
+export async function review({ page, ref, final = false, text = false, out, judge = false }) {
   if (!fs.existsSync(page)) throw new Error(`no such file: ${page}`);
   if (ref && !fs.existsSync(ref)) throw new Error(`no such reference: ${ref}`);
   const t0 = Date.now();
@@ -264,19 +283,21 @@ export async function review({ page, ref, final = false, text = false, out }) {
   if (fs.existsSync(sheetOut)) fs.copyFileSync(sheetOut, sheetOut.replace(/\.png$/, '.prev.png'));
   const sheet = writeSheet(findings, ctx, sheetOut);
   const changed = sheetDiff(ctx, sheetOut);
+  const header = judgeLine(paths.name, page);
+  const handoff = judge ? judgeHandoff(page, ref, paths.name) : [];
   const cut = cutLines(findings, await ctx.sampled, ctx.step);
   const timing = timingRows((await ctx.sampled).samples, ctx.step, dur);
-  fs.writeFileSync(path.resolve('out', `${paths.name}-review.json`), JSON.stringify({ findings, timing, sheet, changed, cut }, null, 1));
-  return { findings, timing, sheet, changed, cut, video: paths.video, ms: Date.now() - t0, reused: render.reused };
+  fs.writeFileSync(path.resolve('out', `${paths.name}-review.json`), JSON.stringify({ findings, timing, sheet, changed, cut, header }, null, 1));
+  return { findings, timing, sheet, changed, cut, header, handoff, video: paths.video, ms: Date.now() - t0, reused: render.reused };
 }
 
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
   const page = argv.find((a, i) => !a.startsWith('--') && !['--ref', '--out'].includes(argv[i - 1]));
-  if (!page) die('usage: review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--out sheet.png]');
-  const r = await review({ page, ref: flag('--ref'), final: argv.includes('--final'), text: argv.includes('--text'), out: flag('--out') });
-  console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table'), changed: r.changed, cut: r.cut }).join('\n'));
+  if (!page) die('usage: review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--judge] [--out sheet.png]');
+  const r = await review({ page, ref: flag('--ref'), final: argv.includes('--final'), text: argv.includes('--text'), out: flag('--out'), judge: argv.includes('--judge') });
+  console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table'), changed: r.changed, cut: r.cut, header: r.header, handoff: r.handoff }).join('\n'));
   console.log(`(${(r.ms / 1000).toFixed(1)} s${r.reused ? ', draft reused' : ''}; data: out/${path.basename(r.video, '.mp4')}-review.json)`);
 }
 
