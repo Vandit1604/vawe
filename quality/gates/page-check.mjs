@@ -315,7 +315,7 @@ function checkSpectacle(ctx) {
   const q = quietBefore(ctx.series, ctx.envelope, spectacle);
   const at = fmtT(spectacle - QUIET_WINDOW, fps);
   if (!q.motionQuiet) {
-    f.warn('quiet-before-spectacle', `the ${QUIET_WINDOW}s before the spectacle moves at ${q.pre.toFixed(2)} (the hit itself ${q.hit.toFixed(2)}): the picture does not go quiet first`,
+    f.warn('quiet-before-spectacle', `in the ${QUIET_WINDOW}s before the spectacle the picture changes ${q.pre.toFixed(2)} luma per frame (the hit itself ${q.hit.toFixed(2)}): it does not go quiet first`,
       { at, fix: `hold the frame still from ${(spectacle - QUIET_WINDOW).toFixed(2)}s to ${spectacle.toFixed(2)}s, then hit.` });
   }
   if (q.audioMeasured && !q.audioQuiet) {
