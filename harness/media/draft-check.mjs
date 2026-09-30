@@ -35,18 +35,18 @@ function visibleLines() {
     range.selectNodeContents(node);
     const r = range.getBoundingClientRect();
     const inside = r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight;
-    if (opacity > 0.5 && inside) out.push({ text, fontPx: parseFloat(cs.fontSize) * scale, box: [r.x, r.y, r.width, r.height], color: cs.color });
+    if (opacity > 0.5 && inside) out.push({ text, fontPx: parseFloat(cs.fontSize) * scale, box: [r.x, r.y, r.width, r.height], color: cs.color, opacity });
   }
   return out;
 }
 
-/** Seek to each sample time and list the visible text. `seek(ms)` is the renderer's seek. */
-export async function sampleText(page, dur, seek) {
+/** Seek to each sample time and list the visible text. `seek(ms)` is the renderer's seek; `shots(page)` adds pixels. */
+export async function sampleText(page, dur, seek, shots = null) {
   const { step, times } = sampleTimes(dur);
   const samples = [];
   for (const t of times) {
     await seek(t * 1000);
-    samples.push({ t, lines: await page.evaluate(visibleLines) });
+    samples.push({ t, lines: await page.evaluate(visibleLines), ...(shots ? { shots: await shots(page) } : {}) });
   }
   return { samples, step, frameH: await page.evaluate(() => innerHeight) };
 }
