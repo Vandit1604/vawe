@@ -38,6 +38,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | whip-pan | a fast sideways blur that hides the cut | to be captured | built |
 | match-cut | a shape in shot A becomes the same shape in shot B | to be captured | built |
 | flash-cut | a one or two frame flash on a beat | to be captured | built |
+| stack-cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | HyperFrames stack and card transitions, Apple keynote slide push | built |
 
 ## 3. Point the eye
 
