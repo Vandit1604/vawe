@@ -1,0 +1,61 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.9">
+<meta name="blank" content="0-0.05">
+<title>move: card assemble</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --surface: #201f26; --raised: #2c2b35; --line: rgba(255,255,255,0.09); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
+
+  .card { width: 128vh; padding: 5vh 6vh 5.4vh; border-radius: 3vh; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3vh 8vh rgba(0,0,0,0.35); opacity: 0; }
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .who { display: flex; align-items: center; gap: 3vh; }
+  .avatar { width: 10.4vh; height: 10.4vh; border-radius: 50%; background: var(--raised); display: grid; place-items: center; font: 700 4.4vh/1 'Archivo', sans-serif; }
+  .name { font: 700 5.6vh/1.1 'Archivo', sans-serif; letter-spacing: -0.02em; }
+  .sub { margin-top: 0.8vh; font: 500 3.9vh/1.2 'Archivo', sans-serif; color: var(--dim); }
+  .amount { font: 800 8.6vh/1 'Archivo', sans-serif; letter-spacing: -0.03em; }
+  .rule { height: 1px; margin: 4.4vh 0 1vh; background: var(--line); transform-origin: 0 50%; }
+  .item { display: flex; justify-content: space-between; padding: 2.4vh 0; font: 500 4.4vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .item b { font-weight: 600; color: var(--ink); }
+  .pay { display: inline-flex; align-items: center; gap: 1.6vh; margin-top: 2.4vh; padding: 3vh 5vh; border-radius: 1.8vh; background: var(--accent); font: 700 4.8vh/1 'Archivo', sans-serif; }
+  .pay svg { width: 4.4vh; height: 4.4vh; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .part { opacity: 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="top">
+    <div class="who"><div class="avatar part" data-from="-14vh 0">AR</div><div class="part" data-from="-12vh 0"><div class="name">Acme Robotics</div><div class="sub">Invoice 2041, due Oct 14</div></div></div>
+    <div class="amount part" data-from="14vh 0">$4,280</div>
+  </div>
+  <div class="rule part" data-from="0 0"></div>
+  <div class="item part" data-from="0 9vh"><span>Motion design, 12 h</span><b>$2,880</b></div>
+  <div class="item part" data-from="0 9vh"><span>Sound design and mix</span><b>$1,400</b></div>
+  <div class="pay part" data-from="0 12vh"><span>Pay invoice</span><svg viewBox="0 0 24 24"><path class="arrow" d="M4 12 H19 M13 6 L19 12 L13 18"/></svg></div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), land = curveToLinear(CURVES.spring);
+const q = (s) => document.querySelector(s);
+const card = q('.card');
+// the shell lands first, so the parts have something to arrive onto
+card.animate([{ scale: 0.96, translate: '0 3vh' }, { scale: 1, translate: '0 0' }], { duration: 650, easing: settle, fill: 'both' });
+card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
+// each part travels in from the side its slot is on, 80 ms after the last; the rule draws instead of moving
+[...document.querySelectorAll('.part')].forEach((el, i) => {
+  const at = 350 + i * 80;
+  if (el.classList.contains('rule')) {
+    el.animate([{ opacity: 1, scale: '0 1' }, { opacity: 1, scale: '1 1' }], { duration: 600, delay: at, easing: settle, fill: 'both' });
+    return;
+  }
+  el.animate([{ opacity: 0, translate: el.dataset.from, filter: 'blur(6px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }],
+    { duration: 900, delay: at, easing: el.classList.contains('pay') ? land : settle, fill: 'both' });
+});
+q('.arrow').animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }], { duration: 400, delay: 1520, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>

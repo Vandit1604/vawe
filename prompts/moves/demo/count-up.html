@@ -1,0 +1,76 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: count up</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --surface: #201f26; --line: rgba(255,255,255,0.09); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
+
+  .card { width: 132vh; padding: 5vh 6vh 5.6vh; border-radius: 3vh; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3vh 8vh rgba(0,0,0,0.35); }
+  .label { font: 600 4.6vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .num { display: flex; align-items: center; margin-top: 2.6vh; font: 800 23vh/1 'Archivo', sans-serif; letter-spacing: -0.03em; }
+  .num .sym { margin-right: 0.04em; line-height: 1.16em; }
+  .num .sep { width: 0.26em; text-align: center; line-height: 1.16em; }
+  .cell { position: relative; width: 0.62em; height: 1.16em; overflow: hidden;
+          -webkit-mask-image: linear-gradient(#0000, #000 14%, #000 86%, #0000); mask-image: linear-gradient(#0000, #000 14%, #000 86%, #0000); }
+  .strip { display: flex; flex-direction: column; will-change: transform; }
+  .strip i { display: block; height: 1.16em; line-height: 1.16em; text-align: center; font-style: normal; }
+  .foot { display: flex; align-items: center; justify-content: space-between; margin-top: 4vh; }
+  .chip { display: inline-flex; align-items: center; gap: 1.2vh; padding: 1.8vh 2.6vh; border-radius: 999px; background: rgba(10,135,255,0.16); color: #58b0ff; font: 700 4.4vh/1 'Archivo', sans-serif; }
+  .chip svg { width: 4vh; height: 4vh; fill: none; stroke: currentColor; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .spark { width: 44vh; height: 12vh; overflow: visible; }
+  .spark path { fill: none; stroke: rgba(255,255,255,0.5); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position: absolute"><defs id="defs"></defs></svg>
+<div class="card">
+  <div class="label">Monthly revenue</div>
+  <div class="num" id="num"><span class="sym">$</span></div>
+  <div class="foot">
+    <div class="chip"><svg viewBox="0 0 24 24"><path class="up" d="M12 19V6M6 11l6-6 6 6"/></svg>12.4% vs August</div>
+    <svg class="spark" viewBox="0 0 100 28"><path d="M0 24 L9 21 L18 22 L27 16 L36 18 L45 12 L54 14 L63 8 L72 10 L81 5 L90 6 L100 1"/></svg>
+  </div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), glide = curveToLinear((u) => u * u * (3 - 2 * u));
+const value = '48,290';
+const loops = [1, 1, 2, 2, 3];   // the digits on the right spin further, so they are still rolling when the left ones have landed
+let d = 0;
+[...value].forEach((ch) => {
+  if (ch === ',') { q('#num').append(Object.assign(document.createElement('span'), { className: 'sep', textContent: ',' })); return; }
+  const n = loops[d];
+  const cell = document.createElement('span'), strip = document.createElement('span');
+  cell.className = 'cell'; strip.className = 'strip';
+  strip.append(...Array.from({ length: 10 * (n + 1) }, (_, k) => Object.assign(document.createElement('i'), { textContent: k % 10 })));
+  cell.append(strip); q('#num').append(cell);
+  const steps = n * 10 + Number(ch);
+  const t0 = 0.1 + d * 0.045, dur = 1.15, id = `mb${d}`;
+  strip.animate([{ translate: '0 0' }, { translate: `0 ${-steps * 1.16}em` }], { duration: dur * 1000, delay: t0 * 1000, easing: settle, fill: 'both' });
+  // SVG filters cannot be keyframed: each column's vertical blur follows its own speed, half a frame of travel, y only
+  const f = document.createElementNS('http://www.w3.org/2000/svg', 'filter'), g = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+  f.id = id; f.setAttribute('y', '-20%'); f.setAttribute('height', '140%'); f.append(g); q('#defs').append(f);
+  strip.style.filter = `url(#${id})`;
+  const travel = steps * 1.16 * parseFloat(getComputedStyle(strip).fontSize);
+  vawe.onFrame((t) => {
+    const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
+    const slope = (CURVES.expoOut(Math.min(1, u + du)) - CURVES.expoOut(u)) / du;
+    g.setAttribute('stdDeviation', `0 ${(u > 0 && u < 1 ? (slope / dur) * travel / 60 * 0.5 : 0).toFixed(2)}`);
+  });
+  d++;
+});
+q('.chip').animate([{ translate: '-3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: 1050, easing: settle, fill: 'both' });
+q('.up').animate([{ translate: '0 0' }, { translate: '0 -2px', offset: 0.5 }, { translate: '0 0' }], { duration: 500, delay: 1500, easing: settle, fill: 'both' });
+const line = q('.spark path'), len = line.getTotalLength();
+line.style.strokeDasharray = len;
+line.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 1500, delay: 400, easing: glide, fill: 'both' });
+</script>
+</body>
+</html>

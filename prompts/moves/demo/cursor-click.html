@@ -1,0 +1,69 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: cursor click</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --surface: #201f26; --raised: #2c2b35; --line: rgba(255,255,255,0.09); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
+
+  .card { zoom: 1.3; width: 92vh; padding: 5vh 5.4vh 4.6vh; border-radius: 3vh; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3vh 8vh rgba(0,0,0,0.35); }
+  .head { display: flex; align-items: center; gap: 3vh; }
+  .icon { width: 10vh; height: 10vh; border-radius: 2.4vh; background: var(--raised); display: grid; place-items: center; }
+  .icon svg { width: 5vh; height: 5vh; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { margin: 0; font: 700 6.4vh/1.1 'Archivo', sans-serif; letter-spacing: -0.02em; }
+  .meta { margin: 0.8vh 0 0; font: 500 4vh/1.2 'Archivo', sans-serif; color: var(--dim); }
+  .rule { height: 1px; margin: 4.4vh 0 4vh; background: var(--line); }
+  .row { display: flex; justify-content: space-between; align-items: center; }
+  .row span { font: 500 4vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .btn { position: relative; display: grid; place-items: center; min-width: 30vh; padding: 2.8vh 4vh; border-radius: 1.8vh; background: var(--raised); font: 700 4.8vh/1 'Archivo', sans-serif; overflow: hidden; }
+  .btn .l { grid-area: 1 / 1; display: flex; align-items: center; gap: 1.4vh; white-space: nowrap; }
+  .btn .l.done { opacity: 0; }
+  .btn .l.done svg { width: 4.6vh; height: 4.6vh; fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+
+  .cur { position: absolute; left: 0; top: 0; }
+  .cur .y { will-change: transform; }
+  .cur svg { display: block; width: 6.4vh; height: 6.4vh; transform-origin: 0 0; overflow: visible; }
+  .cur path { fill: #fff; stroke: #16151a; stroke-width: 1.4; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <div class="icon"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg></div>
+    <div><h1>Q3 launch report</h1><p class="meta">Updated 2 min ago, 14 pages</p></div>
+  </div>
+  <div class="rule"></div>
+  <div class="row"><span>PDF, 2.4 MB</span>
+    <div class="btn"><span class="l idle">Export PDF</span><span class="l done"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Exported</span></div>
+  </div>
+</div>
+<div class="cur"><div class="x"><div class="y"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div></div></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), smooth = curveToLinear((u) => u * u * (3 - 2 * u)), leave = curveToLinear((u) => u * u * u);
+const W = innerWidth, H = innerHeight, b = q('.btn').getBoundingClientRect();
+const from = { x: W * 0.16, y: H * 0.9 }, to = { x: b.left + b.width * 0.86, y: b.top + b.height * 0.72 };
+const at = { go: 200, dur: 760, press: 1080, release: 1190 };
+
+// x settles on expoOut while y follows a smoothstep, so the path bows like a hand, not a straight rail
+q('.x').animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: at.dur, delay: at.go, easing: settle, fill: 'both' });
+q('.y').animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: at.dur, delay: at.go, easing: smooth, fill: 'both' });
+// hover as the cursor arrives, then the press: the cursor dips 14 percent, the button dips 3 percent and turns accent
+q('.btn').animate([{ background: '#2c2b35' }, { background: '#3a3945' }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
+q('.cur svg').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: at.press, easing: settle, fill: 'both' });
+q('.btn').animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: at.press, easing: settle, fill: 'both' });
+q('.btn').animate([{ background: '#3a3945' }, { background: '#0a87ff' }], { duration: 120, delay: at.press, easing: 'linear', fill: 'forwards' });
+// the result: the label rolls up and the confirmed state rolls in
+q('.idle').animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: at.release, easing: settle, fill: 'both' });
+q('.done').animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.release + 40, easing: settle, fill: 'both' });
+// the cursor leaves faster than it came, accelerating out of the frame
+q('.x').animate([{ translate: `${to.x}px 0` }, { translate: `${W * 1.06}px 0` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });
+q('.y').animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${H * 0.86}px` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });
+</script>
+</body>
+</html>

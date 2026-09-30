@@ -1,0 +1,69 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<meta name="blank" content="0-0.05">
+<title>move: chart build</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --surface: #201f26; --line: rgba(255,255,255,0.09); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; --bar: rgba(255,255,255,0.28); }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
+
+  .card { width: 138vh; padding: 5vh 6vh 4.6vh; border-radius: 3vh; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3vh 8vh rgba(0,0,0,0.35); opacity: 0; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; }
+  .title { font: 700 5.2vh/1 'Archivo', sans-serif; letter-spacing: -0.02em; }
+  .range { font: 500 3.8vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .plot { position: relative; height: 46vh; margin: 4.4vh 0 0 7.6vh; }
+  .grid { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); transform-origin: 0 50%; }
+  .grid span { position: absolute; left: -7.6vh; top: -2vh; width: 5.6vh; text-align: right; font: 500 3.4vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .cols { position: absolute; inset: 0; display: flex; align-items: stretch; }
+  .col { position: relative; flex: 1; display: flex; justify-content: center; align-items: flex-end; }
+  .bar { position: relative; width: 62%; height: 0%; border-radius: 1.2vh 1.2vh 0 0; background: var(--bar); }
+  .mo { position: absolute; top: 100%; margin-top: 1.8vh; font: 500 3.6vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .tag { position: absolute; left: 50%; bottom: 100%; margin-bottom: 1.6vh; translate: -50% 0; padding: 1.4vh 2.2vh; border-radius: 1.2vh; background: var(--ink); color: #16151a; font: 800 4.4vh/1 'Archivo', sans-serif; white-space: nowrap; opacity: 0; transform-origin: 50% 100%; }
+  .tag::after { content: ''; position: absolute; left: 50%; top: 100%; margin-left: -1vh; border: 1vh solid transparent; border-top-color: var(--ink); border-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head"><div class="title">Weekly active users</div><div class="range">Mar to Sep</div></div>
+  <div class="plot" id="plot"></div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);
+const data = [['Mar', 12.4], ['Apr', 14.1], ['May', 13.8], ['Jun', 17.2], ['Jul', 19.5], ['Aug', 22.3], ['Sep', 26.8]];
+const max = 40, plot = q('#plot');
+
+[0, 10, 20, 30, 40].forEach((v) => {
+  const g = Object.assign(document.createElement('div'), { className: 'grid' });
+  g.style.top = `${100 - (v / max) * 100}%`;
+  g.innerHTML = `<span>${v === 0 ? '0' : v + 'k'}</span>`;
+  plot.append(g);
+  g.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 500, delay: 60 + (v / 10) * 40, easing: settle, fill: 'both' });
+});
+const cols = Object.assign(document.createElement('div'), { className: 'cols' });
+plot.append(cols);
+const bars = data.map(([m, v], i) => {
+  const col = Object.assign(document.createElement('div'), { className: 'col' });
+  const bar = Object.assign(document.createElement('div'), { className: 'bar' });
+  const mo = Object.assign(document.createElement('div'), { className: 'mo', textContent: m });
+  col.append(bar, mo); cols.append(col);
+  // 70 ms between bars: inside the 30 to 80 ms band, and each rises on the same exponential
+  bar.animate([{ height: '0%' }, { height: `${(v / max) * 100}%` }], { duration: 800, delay: 260 + i * 70, easing: settle, fill: 'both' });
+  mo.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 260 + i * 70, easing: 'linear', fill: 'both' });
+  return { bar, col, v };
+});
+const last = bars[bars.length - 1];
+// the one accent: the newest bar turns on after the others have landed, and its value tag pops on the bar
+last.bar.animate([{ background: 'rgba(255,255,255,0.28)' }, { background: '#0a87ff' }], { duration: 240, delay: 1250, easing: 'linear', fill: 'both' });
+const tag = Object.assign(document.createElement('div'), { className: 'tag', textContent: '26.8k' });
+last.bar.append(tag);
+tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, translate: '-50% 0', opacity: 1 }], { duration: 650, delay: 1350, easing: pop, fill: 'both' });
+q('.card').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>

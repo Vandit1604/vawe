@@ -1,0 +1,44 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.9">
+<title>move: wordmark cascade</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; }
+  .stage { position: relative; }
+  h1 { margin: 0; font: 800 26vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.04em; white-space: pre; }
+  h1 span { display: inline-block; }
+  h1 .dot { color: var(--accent); }
+  .rail { position: absolute; left: 0; right: 0; height: 1.3vh; margin-top: 1.2vh; background: rgba(255,255,255,0.2); overflow: hidden; transform-origin: 0 50%; }
+  .run { position: absolute; top: 0; bottom: 0; left: 0; width: 22%; background: var(--accent); translate: -100% 0; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <h1><span>v</span><span>a</span><span>w</span><span>e</span><span class="dot">.</span><i class="base" style="display:inline-block;width:0;height:0"></i></h1>
+  <div class="rail"><div class="run"></div></div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), fall = curveToLinear(CURVES.spring), glide = curveToLinear((u) => u * u * (3 - 2 * u));
+const stage = q('.stage'), rail = q('.rail');
+const base = q('.base').getBoundingClientRect().top - stage.getBoundingClientRect().top;
+rail.style.top = `${base}px`;
+
+// each gap is shorter than the last, so the word falls faster as it goes: 90, 70, 55, 45 ms
+const at = [100, 190, 260, 315, 360];
+[...document.querySelectorAll('h1 span')].forEach((s, i) => {
+  s.animate([{ translate: '0 -0.85em', filter: 'blur(10px)' }, { translate: '0 0', filter: 'blur(0px)' }],
+    { duration: 620, delay: at[i], easing: fall, fill: 'both' });
+  s.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, delay: at[i], easing: 'linear', fill: 'both' });
+});
+rail.animate([{ scale: '0.35 1', opacity: 0.5 }, { scale: '1 1', opacity: 1 }], { duration: 500, easing: settle, fill: 'both' });
+q('.run').animate([{ translate: '-100% 0' }, { translate: '560% 0' }], { duration: 800, delay: 1050, easing: glide, fill: 'both' });
+</script>
+</body>
+</html>
