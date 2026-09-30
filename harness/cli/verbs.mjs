@@ -101,6 +101,20 @@ export const VERBS = [
     next: () => 'look at the sheet, then vawe compare --page at the worst seconds',
   },
   {
+    name: 'review', summary: 'one report, one sheet: clipped glyphs, text timing, motion, coverage, worst first',
+    positional: [PAGE],
+    flags: [
+      { name: 'ref', type: 'path', help: 'reference mp4: compare motion and run coverage', kind: 'file' },
+      { name: 'final', type: 'bool', help: 'review the full-size 60 fps render instead of the half-size draft' },
+      { name: 'text', type: 'bool', help: 'with --ref: also check the on-screen words against the reference (slow)' },
+      { name: 'table', type: 'bool', help: 'print the text timing table (it is always written to out/<name>-review.json)' },
+      { name: 'out', type: 'path', default: 'out/review-<name>.png', help: 'the picture sheet of the 6 worst findings' },
+    ],
+    example: 'vawe review films/my-launch/page.html --ref refs/ad.mp4',
+    build: (v, [page]) => [{ script: 'harness/media/review.mjs', args: [page, ...opt('--ref', v.ref), ...(v.final ? ['--final'] : []), ...(v.text ? ['--text'] : []), ...(v.table ? ['--table'] : []), ...opt('--out', v.out)] }],
+    next: (v, [page]) => `fix the line marked "Fix first", then vawe review ${page} again`,
+  },
+  {
     name: 'spec', summary: 'measure a reference mp4 into SPEC.md and spec.json',
     positional: [{ name: 'ref.mp4', required: true, kind: 'file', help: 'the reference film' }],
     flags: [
