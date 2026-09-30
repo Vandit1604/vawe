@@ -28,11 +28,10 @@ The numbers behind the spines, one rule per file: `engine-doctrine/RULES/INDEX.m
 | Composition | How do I fill a frame so it reads produced? | `CRAFT/DENSITY.md` (hero, support, metadata) |
 | Motion | How should it move? | `MOTION-CRAFT.md` (10 rules), `DESIGN-DATABASE.md` (numbers) |
 | Direction | Why does it read amateur when every layer renders fine? | `CRAFT/DIRECTION.md` (pacing, restraint, story placement, each rule sourced) |
-| Film structure | What holds this film together across its cuts? | `CRAFT/FILM-STRUCTURE.md`, `CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md` |
+| Film structure | What holds this film together across its cuts? | `CRAFT/FILM-STRUCTURE.md` |
 | Story | Why these beats, in this order? | `CRAFT/STORY.md` (hook, suspense, payoff; never spoil) |
 
-Never made a film from a blank page? Follow `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md`. It
-carries one film from a blank page to shipped.
+Never made a film from a blank page? Follow the loop in `AGENTS.md`.
 
 Every design decision must trace to the brand's real site, not to your defaults. Take colours from
 the real pixels, judge dominance by looking, and copy the brand's own words. Two brands differ because
