@@ -4,7 +4,9 @@
 //   <audio data-synth="whoosh" data-at="2.4"></audio>   (voices: core/audio/kit.mjs CUES; no data-gain
 //                                                        takes the voice's DEFAULT_GAIN_DB, -26 for a UI cue)
 //   <audio src="vo.wav" data-role="vo"></audio>          (ducks music -18 dB while it plays)
-//   <meta name="loudness" content="-14">
+//   <meta name="loudness" content="-14">   (wins over the default below)
+// Master: -14 LUFS / -1 dBTP with a music bed or a voice. A cue-only film is never raised: it masters to
+// the lower of -20 LUFS and its own mix loudness, with a -6 dBTP peak ceiling.
 // A cue that peaks more than 6 dB above the median cue is warned about, never refused.
 // CLI: node harness/media/page-audio.mjs <page.html> <video.mp4> <out.mp4>
 import fs from 'node:fs';
@@ -21,6 +23,10 @@ const DUCK_ATTACK = 0.05;
 const DUCK_RELEASE = 0.3;
 const CUE_CEILING = 0.8;
 const CUE_SPREAD_DB = 6;
+const BED_LUFS = -14;
+const BED_PEAK_DB = -1;
+const CUE_ONLY_LUFS = -20;
+const CUE_ONLY_PEAK_DB = -6;
 
 function run(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -43,7 +49,7 @@ function toFilePath(rawSrc, pageUrl, pagePath) {
 }
 
 /**
- * readPageAudio(page, { pagePath }?) -> { specs, loudness }
+ * readPageAudio(page, { pagePath }?) -> { specs, loudness }  (loudness: the <meta name="loudness"> value, or null)
  * `page` is a puppeteer Page on a loaded film. `pagePath` (the page's file) makes src resolution exact;
  * without it a src resolves against the repo root that the preview server serves.
  * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, duck (dB or null), role }
@@ -58,7 +64,7 @@ export async function readPageAudio(page, { pagePath } = {}) {
       trim: num(el, 'trim', 0), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
     }));
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
-    return { tracks, loudness: Number.isFinite(meta) ? meta : -14, url: location.href };
+    return { tracks, loudness: Number.isFinite(meta) ? meta : null, url: location.href };
   });
   const problems = [];
   const specs = raw.tracks.map(({ src, ...t }) => {
@@ -148,12 +154,27 @@ function lastJson(stderr) {
 }
 
 /**
- * mixAndMux({ specs, duration, video, out, loudness = -14, truePeak = -1 }) -> { out, measured: { I, TP }, warnings }
- * `measured` is the loudness of the audio track as written into `out`. With no specs, `out` is the
+ * masterTarget({ specs, explicit, truePeak, mixLufs }) -> { loudness, truePeak, why }. Pure.
+ * An explicit loudness (meta or caller) wins; else a bed or voice masters to -14 LUFS; else the mix is
+ * never raised: min(-20, mixLufs).
+ */
+export function masterTarget({ specs, explicit, truePeak, mixLufs }) {
+  if (explicit !== null) return { loudness: explicit, truePeak: truePeak ?? BED_PEAK_DB, why: 'explicit loudness' };
+  if (specs.some((s) => s.role === 'music' || s.role === 'vo')) return { loudness: BED_LUFS, truePeak: truePeak ?? BED_PEAK_DB, why: 'film has a music bed or voice' };
+  return { loudness: Math.min(CUE_ONLY_LUFS, mixLufs), truePeak: truePeak ?? CUE_ONLY_PEAK_DB, why: 'cue-only film, never raised' };
+}
+
+function measureMix(mixWav, target) {
+  return lastJson(run('ffmpeg', ['-hide_banner', '-nostats', '-i', mixWav, '-af', `loudnorm=I=${target.loudness}:TP=${target.truePeak}:LRA=11:print_format=json`, '-f', 'null', '-']));
+}
+
+/**
+ * mixAndMux({ specs, duration, video, out, loudness = null, truePeak = null }) -> { out, measured: { I, TP }, warnings }
+ * `loudness`/`truePeak` set the master; null picks them by masterTarget. `measured` is the loudness of the audio track as written into `out`. With no specs, `out` is the
  * video copied with no audio track and `measured` is null. `warnings` (cueSpreadWarnings) are printed
  * to stderr and never fail the mix.
  */
-export async function mixAndMux({ specs, duration, video, out, loudness = -14, truePeak = -1 }) {
+export async function mixAndMux({ specs, duration, video, out, loudness = null, truePeak = null }) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-audio-'));
   const tmpOut = `${out}.tmp-${process.pid}.mp4`;
   try {
@@ -173,8 +194,11 @@ export async function mixAndMux({ specs, duration, video, out, loudness = -14, t
     const mixWav = path.join(tmp, 'mix.wav');
     run('ffmpeg', ['-y', '-loglevel', 'error', ...tracks.flatMap((t) => ['-i', t.file]), '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_f32le', mixWav]);
 
-    const target = `I=${loudness}:TP=${truePeak}:LRA=11`;
-    const p1 = lastJson(run('ffmpeg', ['-hide_banner', '-nostats', '-i', mixWav, '-af', `loudnorm=${target}:print_format=json`, '-f', 'null', '-']));
+    const first = measureMix(mixWav, { loudness: BED_LUFS, truePeak: BED_PEAK_DB });
+    const chosen = masterTarget({ specs, explicit: loudness, truePeak, mixLufs: parseFloat(first.input_i) > -70 ? parseFloat(first.input_i) : CUE_ONLY_LUFS });
+    console.log(`page-audio: master ${chosen.loudness} LUFS, ${chosen.truePeak} dBTP (${chosen.why}; mix was ${first.input_i} LUFS)`);
+    const target = `I=${chosen.loudness}:TP=${chosen.truePeak}:LRA=11`;
+    const p1 = chosen.loudness === BED_LUFS && chosen.truePeak === BED_PEAK_DB ? first : measureMix(mixWav, chosen);
     const silent = !(parseFloat(p1.input_i) > -70);
     const measuredArgs = `measured_I=${p1.input_i}:measured_TP=${p1.input_tp}:measured_LRA=${p1.input_lra}:measured_thresh=${p1.input_thresh}:offset=${p1.target_offset}`;
     const af = silent ? `aresample=${RATE}` : `loudnorm=${target}:${measuredArgs}:linear=true:print_format=json,aresample=${RATE}`;
