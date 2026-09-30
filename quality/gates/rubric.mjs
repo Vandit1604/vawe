@@ -325,7 +325,7 @@ ${list}
 Return ONLY one JSON object, no prose around it:
 {"scores":{${axes.map(([k]) => `"${k}":n`).join(',')}},
  "worlds":n or null,
- "fixes":[{"axis":"...","score":n,"at":"seconds like 1.4, or the frame name for stills","fix":"ONE concrete change an author can make in one edit"}],
+ "fixes":[{"axis":"...","score":n,"at":"seconds like 1.4, or the frame name for stills","fix":"ONE concrete change an author can make in one edit","what":"the one thing it changes, 2 to 4 words","now":"its measured value on the frames now","want":"the value to reach"}],
  "fixFirst":"the one fix with the most effect"}
 Add one entry to "fixes" for every axis scored under 8, and none for the others.`;
 }

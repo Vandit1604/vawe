@@ -1,6 +1,8 @@
 // The judge ledger: every fix a fresh judge asks for gets an id and stays in out/<name>.judge.json. The
 // next judge of the film marks each open one fixed, partly or still before it adds new ones, and says
-// why when a new fix reverses an old one. Pure: harness/media/judge-fresh.mjs reads and writes the file.
+// why when a new fix reverses an old one. Each fix names what it changes, its value now and the value it
+// wants, so the next judge starts from numbers, and a target the judges move back and forth over three
+// rounds prints a stop line. Pure: harness/media/judge-fresh.mjs reads and writes the file.
 
 export const MARKS = ['fixed', 'partly', 'still'];
 
@@ -15,12 +17,41 @@ export function previousItems(prev) {
 
 export const openItems = (items) => items.filter((i) => i.status !== 'fixed');
 
+const whatKey = (what) => String(what || '').toLowerCase().replace(/[^a-z0-9%.]+/g, ' ').trim();
+
+/** Every item that names a value, grouped by what it changes, oldest first: [{ what, items }]. */
+export function targetHistory(items) {
+  const groups = new Map();
+  for (const i of items) {
+    const key = whatKey(i.what);
+    if (!key || !i.want) continue;
+    if (!groups.has(key)) groups.set(key, { what: i.what, items: [] });
+    groups.get(key).items.push(i);
+  }
+  return [...groups.values()];
+}
+
+const numberIn = (v) => { const m = /-?\d+(\.\d+)?/.exec(String(v)); return m ? Number(m[0]) : null; };
+
+/** True when three or more asked values for one target change direction (85, 40, 85) or return to an earlier value. */
+export function movesBackAndForth(wants) {
+  if (wants.length < 3) return false;
+  const nums = wants.map(numberIn);
+  if (nums.every((n) => n !== null)) {
+    const steps = nums.slice(1).map((n, k) => Math.sign(n - nums[k])).filter(Boolean);
+    return steps.some((d, k) => k > 0 && d !== steps[k - 1]);
+  }
+  const keys = wants.map(whatKey);
+  return keys.some((v, k) => k > 1 && keys.slice(0, k - 1).includes(v) && keys[k - 1] !== v);
+}
+
 /** The prompt lines for the open items, or '' when there are none. */
-export function ledgerPrompt(open) {
+export function ledgerPrompt(open, all = open) {
   if (!open.length) return '';
+  const asked = targetHistory(all).map((g) => `- ${g.what}: ${g.items.map((i) => `${i.id} now ${i.now ?? '?'}, asked ${i.want}`).join('; ')}`);
   return `Ledger: the last judge of this film asked for these fixes.
 ${open.map((i) => `- ${i.id} (${i.axis}${i.at != null ? ` at ${i.at}` : ''}): ${i.fix}`).join('\n')}
-First mark each one: add "ledger":[{"id":"${open[0].id}","status":"fixed, partly or still"}, ...] to the JSON. Then give fixes only for what is new; for an axis whose item is still open, write "fix":"${open[0].id}" (its id). A fix that undoes an item above needs "reverses":"<id>" and "why":"<one reason>".`;
+${asked.length ? `Values asked so far; measure the same "what" on the frames and reuse its words:\n${asked.join('\n')}\n` : ''}First mark each one: add "ledger":[{"id":"${open[0].id}","status":"fixed, partly or still"}, ...] to the JSON. Then give fixes only for what is new; for an axis whose item is still open, write "fix":"${open[0].id}" (its id). A fix that undoes an item above needs "reverses":"<id>" and "why":"<one reason>".`;
 }
 
 function refersTo(fix, open) {
@@ -49,7 +80,7 @@ export function mergeLedger(prev, raw, fixes) {
     const old = refersTo(f.fix, open);
     if (old) return { ...f, fix: `${old.id}: ${old.fix}` };
     const given = (raw.fixes || []).find((x) => x.axis === f.axis) || {};
-    const item = { id: `f${++n}`, axis: f.axis, at: f.at, fix: f.fix, status: 'new' };
+    const item = { id: `f${++n}`, axis: f.axis, at: f.at, fix: f.fix, status: 'new', ...(given.what ? { what: given.what, now: given.now ?? null, want: given.want ?? null } : {}) };
     if (given.reverses) Object.assign(item, { reverses: given.reverses, why: given.why || null });
     fresh.push(item);
     return { ...f, fix: `${item.id}: ${f.fix}` };
@@ -58,11 +89,20 @@ export function mergeLedger(prev, raw, fixes) {
   return { items: [...carried, ...fresh], fixes: shown, counts, reversals: fresh.filter((i) => i.reverses) };
 }
 
-/** The compact line: "ledger: 3 fixed, 1 partly, 1 still; 2 new", and one line per reversal. */
-export function ledgerLines({ counts, reversals }) {
+/** One stop line per target the judges moved back and forth over three or more rounds. */
+export function flipFlopLines(items) {
+  return targetHistory(items).filter((g) => movesBackAndForth(g.items.map((i) => i.want))).map((g) => {
+    const last = g.items[g.items.length - 1];
+    return `stop: keep ${g.what} at its current value${last.now ? ` (${last.now})` : ''}; the judge varies on this item (asked ${g.items.map((i) => i.want).join(', ')} over ${g.items.length} rounds)`;
+  });
+}
+
+/** The compact line: "ledger: 3 fixed, 1 partly, 1 still; 2 new", one line per reversal, one per flip-flop. */
+export function ledgerLines({ counts, reversals, items = [] }) {
   const unmarked = counts.unmarked ? `, ${counts.unmarked} unmarked` : '';
   return [
     `ledger: ${counts.fixed} fixed, ${counts.partly} partly, ${counts.still} still${unmarked}; ${counts.new} new`,
     ...reversals.map((r) => `reverses ${r.reverses}: ${r.why || 'no reason given; treat the old fix as standing'}`),
+    ...flipFlopLines(items),
   ];
 }
