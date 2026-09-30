@@ -160,9 +160,20 @@ export const VERBS = [
   {
     name: 'doctor', summary: 'check node, ffmpeg, Chrome and the other tools; print the install line for each missing one',
     positional: [],
-    flags: [{ name: 'quiet', type: 'bool', help: 'print only problems' }],
-    example: 'vawe doctor',
-    build: (v) => [{ script: 'harness/dev/doctor.mjs', args: v.quiet ? ['--quiet'] : [] }],
+    flags: [
+      { name: 'quiet', type: 'bool', help: 'print only problems and write .vawe/doctor.json' },
+      { name: 'json', type: 'bool', help: 'print [{tool, required, ok, version, fix}] instead of text' },
+    ],
+    example: 'vawe doctor --json',
+    build: (v) => [{ script: 'harness/dev/doctor.mjs', args: [...(v.quiet ? ['--quiet'] : []), ...(v.json ? ['--json'] : [])] }],
+  },
+  {
+    name: 'moves', summary: 'render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4 (640 px, 60 fps) in parallel; flags stale clips',
+    positional: [],
+    flags: [{ name: 'only', type: 'string', help: 'render one move by name, for example weight-morph' }],
+    example: 'vawe moves --only weight-morph',
+    build: (v) => [{ script: 'harness/media/render-moves.mjs', args: opt('--only', v.only) }],
+    next: () => 'look at a clip in prompts/moves/ before you commit it',
   },
   {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
