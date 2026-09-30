@@ -8,7 +8,8 @@
 // slice instead of the whole page. --final renders the way `vawe ship` does: full size, 60 fps, the
 // whole page from 0, blur up to 3, and the page's <audio> elements mixed in (harness/media/page-audio.mjs).
 // The canvas is the page's <meta name="aspect"> (else 16:9), overridden by --aspect; `all` renders every
-// aspect to its own file. Sizes come from core/layout/aspects.js ASPECTS, halved for a draft.
+// aspect to its own file. The CSS viewport is always the aspect's full size (core/layout/aspects.js ASPECTS),
+// so a draft lays out exactly like the final; a draft only captures at device scale 0.5.
 //
 // The page is seeked, never played. Before any page script runs, core/engine/page-clock.js replaces Date,
 // performance.now, requestAnimationFrame, setTimeout/setInterval and Math.random with functions of the
@@ -84,7 +85,7 @@ export function readPageMeta(pagePath, name) {
 }
 
 export async function openPage(pagePath, frame, { warm = false } = {}) {
-  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS, warm });
+  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, args: PAGE_ARGS, warm });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
@@ -157,7 +158,7 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
   const speeds = new Array(frames);
   const lumaAt = async (page, i) => {
     await seekAll(page, from * 1000 + (i / fps) * 1000);
-    const shot = await page.screenshot({ type: 'jpeg', quality: 40, encoding: 'base64', clip: { x: 0, y: 0, width: frame.width, height: frame.height, scale: PIXEL_W / frame.width } });
+    const shot = await page.screenshot({ type: 'jpeg', quality: 40, encoding: 'base64', clip: { x: 0, y: 0, width: frame.width, height: frame.height, scale: PIXEL_W / (frame.width * frame.scale) } });
     return page.evaluate(async (b64, w) => {
       const blob = await (await fetch(`data:image/jpeg;base64,${b64}`)).blob();
       const bmp = await createImageBitmap(blob);
@@ -198,7 +199,7 @@ async function frameSubframes(page, job) {
 // Returns bucketed subframe counts per output frame.
 async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
-  if (boxes) return clampSegments(boxes.map((px) => subframesForTravel(px, blur)));
+  if (boxes) return clampSegments(boxes.map((px) => subframesForTravel(px * frame.scale, blur)));
   return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers), blur, PIXEL_BANDS));
 }
 
@@ -449,15 +450,18 @@ export function briefProblems(pagePath) {
   return [`brief: ${wantLength > 0 ? wantLength : haveLength} s ${wantAspect || haveAspect}; page: ${haveLength} s ${haveAspect}`];
 }
 
-// The canvas a page renders at: --aspect, else the page's own <meta name="aspect">, else 16:9. Pixel
-// sizes come from core/layout/aspects.js (long edge 1920 where the table says so), halved for a draft;
-// explicit w/h win. Returns { aspect, width, height }.
+// The canvas a page renders at: --aspect, else the page's own <meta name="aspect">, else 16:9. width and
+// height are the CSS viewport, always the aspect's full size from core/layout/aspects.js, so px values lay
+// out the same in a draft and a final; scale is the device scale of the capture (0.5 draft, 1 final).
+// w/h set the output size: scale = w / full width (else h / full height), CSS size = output / scale.
+// Returns { aspect, width, height, scale }; the output is width x height times scale.
 export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
   const name = aspect || readPageMeta(pagePath, 'aspect') || '16:9';
   if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) die(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
   const [fw, fh] = aspectDims(name);
-  const k = final ? 1 : 0.5;
-  return { aspect: name, width: w || Math.round(fw * k), height: h || Math.round(fh * k) };
+  const scale = w ? w / fw : h ? h / fh : final ? 1 : 0.5;
+  const outW = w || Math.round(fw * scale), outH = h || Math.round(fh * scale);
+  return { aspect: name, width: Math.round(outW / scale), height: Math.round(outH / scale), scale };
 }
 
 // The page's <audio> elements are read from the live page and mixed offline, never played
@@ -481,8 +485,8 @@ async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) 
 
 /**
  * renderPage(pagePath, outPath, opts) -> { frames, subframes, captureMs, encodeMs, dur }.
- * opts: aspect (the page's <meta name="aspect">, else 16:9), w/h (override the aspect's pixel size),
- * final (false: half size, ultrafast x264), audio (final: mix the page's <audio> elements in; a draft
+ * opts: aspect (the page's <meta name="aspect">, else 16:9), w/h (the output pixel size; see resolveFrame),
+ * final (false: half-size capture of the same layout, ultrafast x264), audio (final: mix the page's <audio> elements in; a draft
  * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
  * frame gets what its fastest move needs, a still frame 1), from (0, seconds into the page's own timeline the
  * render starts at), durArg (seconds rendered from `from`; defaults to the page's own <meta
@@ -658,7 +662,7 @@ async function main() {
       for (const p of e.problems) console.error(`✗ ${p}`);
       process.exit(2);
     });
-    console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.width}x${frame.height} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
+    console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
     if (!final) printDraftSheet(outPath, opts);
