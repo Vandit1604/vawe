@@ -17,8 +17,7 @@
   .row { position: absolute; left: calc(var(--u) * -20); top: 0; height: 100%; width: max-content; display: flex; will-change: transform; }
   .track { flex: none; display: flex; height: 100%; }
   .logo { flex: none; width: calc(var(--u) * 38); height: 100%; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6); border-right: 1px solid var(--line); color: var(--ink); }
-  .logo svg { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-  .logo svg .f { fill: currentColor; stroke: none; }
+  .logo .logo-mark { width: calc(var(--u) * 5.8); height: calc(var(--u) * 5.8); }
   .logo b { font-size: calc(var(--u) * 5.2); line-height: 1; white-space: nowrap; }
 </style>
 </head>
@@ -28,24 +27,12 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { mark, wordmark } from '/prompts/moves/demo/assets/logos.js';
 const settle = curveToLinear(CURVES.expoOut), E = CURVES.expoOut;
 const W = innerWidth, H = innerHeight, u = H / 100;
-// invented brands only: a mark (24 x 24 viewBox) and a wordmark in a face that fits it
-const brands = [
-  ['Northwind', '<path d="M12 3.5l8.5 16h-17z"/><path d="M12 10l3.6 6.5H8.4z" class="f"/>', "700 var(--t) 'Geist'", '-0.03em'],
-  ['halcyon', '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6" class="f"/>', "400 var(--t) 'Instrument Serif'", '0'],
-  ['FERNBANK', '<path d="M6 20V10M12 20V4M18 20v-7"/>', "600 calc(var(--t) * 0.68) 'Unbounded'", '0.02em'],
-  ['kestrel', '<path d="M3 8l9 6 9-6M3 14l9 6 9-6"/>', "500 calc(var(--t) * 0.9) 'JetBrains Mono'", '-0.04em'],
-  ['Orbital', '<ellipse cx="12" cy="12" rx="9.5" ry="4.2" transform="rotate(-24 12 12)"/><circle cx="12" cy="12" r="2.4" class="f"/>', "800 var(--t) 'Archivo'", '-0.03em'],
-  ['Lumen&Co', '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>', "700 var(--t) 'Geist'", '-0.02em'],
-  ['Quarry', '<path d="M4 4h16v10l-6 6H4z"/>', "800 var(--t) 'Archivo'", '0.02em'],
-  ['tidewell', '<path d="M2.5 9c3-3.2 5 3.2 8 0s5 3.2 8 0M2.5 15c3-3.2 5 3.2 8 0s5 3.2 8 0"/>', "400 var(--t) 'Instrument Serif'", '0'],
-  ['PARCEL', '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/>', "500 calc(var(--t) * 0.84) 'Geist Mono'", '0.04em'],
-  ['Mosaic', '<rect x="4" y="4" width="7" height="7" class="f"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7" class="f"/>', "700 var(--t) 'Plus Jakarta Sans'", '-0.03em'],
-  ['ardent', '<path d="M12 2.5l7.5 9.5-7.5 9.5L4.5 12z"/>', "600 var(--t) 'Manrope'", '-0.02em'],
-  ['Vantage', '<path d="M3.5 5l8.5 14.5L20.5 5"/>', "700 var(--t) 'Bricolage Grotesque'", '-0.03em'],
-];
-const logo = ([name, mark, font, track]) => `<div class="logo"><svg viewBox="0 0 24 24">${mark}</svg><b style="font:${font.replace('var(--t)', `${(u * 5.2).toFixed(1)}px`)};letter-spacing:${track}">${name}</b></div>`;
+// invented brands from the shared set; a wide or mono face sets smaller so every wordmark has one optical size
+const brands = [['northwind', 1], ['halcyon', 1.08], ['fernbank', 0.66], ['kestrel', 0.88], ['orbital', 1], ['lumen', 1], ['quarry', 1], ['tidewell', 1.08], ['parcel', 0.82], ['mosaic', 1], ['ardent', 1], ['vantage', 1]];
+const logo = ([name, size]) => `<div class="logo">${mark(name)}${wordmark(name).replace('style="', `style="font-size:${(u * 5.2 * size).toFixed(1)}px;`)}</div>`;
 const wall = document.getElementById('wall');
 const rows = [0, 1, 2].map((r) => {
   const set = Array.from({ length: 12 }, (_, i) => brands[(i + r * 4) % 12]);
