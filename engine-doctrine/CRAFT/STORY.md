@@ -1,163 +1,86 @@
 ---
 when: deciding the beats and their order
-answers: "the spine · beat-role→persuasion→feeling · named spines + timing · scene budget · product→beats"
+answers: "the spine, beat role to persuasion to feeling, named spines with timing, scene budget, product material to beats"
 group: story
-codes: hook-emoji, hook-length, hook-weak-opener, jargon, no-spectacle-nominated, no-storyboard, plan-has-no-spans, plan-overruns-render, restated-headline, spectacle-beat-unnamed, spectacle-in-wrong-beat, spectacle-not-built, unplanned-junction, vague-quantifier, message-too-long, missing-frontmatter-field, partial-timeline
 ---
 
 # STORY: why these beats, in this order, doing what
 
-## AGENT SUMMARY
-
-- Never spoil the payoff: pose the question in the hook, close it with the best fact at 80-90% of
-  runtime. Every beat declares a persuasion move and a feeling arc, or it fails the value gate and gets
-  cut. Spine: Hook -> Build -> Proof -> Payoff -> CTA.
-- Enforced by the value gate in `vawe-video-planning` and the required per-beat fields in
-  `TASTE-RULES.md`; codes: `hook-emoji`, `hook-length`, `hook-weak-opener`, `jargon`,
-  `no-spectacle-nominated`, `restated-headline`, `spectacle-beat-unnamed`, `spectacle-in-wrong-beat`,
-  `spectacle-not-built`, `vague-quantifier`.
-- Checkable action: does every beat declare a persuasion and a feeling, and does the best fact land last?
-
-The four other spines answer how a frame looks, fills, moves, and sounds. This one answers the
-question that comes first: **what beats, in what order, and what each one is DOING to the viewer.**
-A video with perfect type and motion still fails if the beats are in the wrong order or none of them
-earns its time. This is the story-spine layer, and until now it lived stranded in the stale
-`DESIGN-DATABASE.md` and half-said inside the planning skill. This is its home.
-
-Its companions: [`TASTE-RULES.md`](TASTE-RULES.md) names the *feeling* a beat targets;
-[`SELECTION.md`](SELECTION.md) turns a beat's intent into the transition/font/effect; [`SOUND.md`](SOUND.md)
-says what it should sound like; [`DENSITY.md`](DENSITY.md) says how full the frame should be. STORY comes
-first and hands off to all four.
-
----
+Type, colour, motion and sound answer how a frame looks and moves. This page answers what comes first:
+which beats, in what order, and what each one does to the viewer. A film with perfect type and motion
+still fails if the beats are in the wrong order or none earns its time.
 
 ## The prime rule
 
-> **Never spoil the payoff. Pose the question in the first 3 seconds, answer it last.**
+> Never spoil the payoff. Pose the question in the first 3 seconds, answer it last.
 
-**You will put the best number in the hook, because it is the best number.** That spends the film's only
-open loop in its first three seconds and leaves the payoff with nothing to land. The hook TEASES the
-number; the number lands last.
+You will put the best number in the hook, because it is the best number. That spends the film's only
+open loop in three seconds and leaves the payoff nothing to land. The hook teases the number. The
+number lands last. A beat with no job in opening, sustaining or closing that loop is time being spent:
+cut it.
 
-Every video is one open loop. The hook opens it; the best, most counterintuitive fact closes it at the
-end. A beat that has no job in opening, sustaining, or closing that loop is not a beat, it is time
-being spent. Cut it. (This is the value gate in `vawe-video-planning` and the required per-beat fields
-in TASTE-RULES.)
+## The spine
 
----
+Hook, Build, Proof, Payoff, CTA. Every named structure below fills these five.
 
-## The spine every framework maps onto
+- Hook: lands in the first 3 s, front-loads the strong word, opens a loop. Tease the best stat.
+- Build: one idea per beat. How it works is at most 3 steps, one per beat.
+- Proof: a real artifact (a live UI capture, a true stat, a customer), not a claim in a box.
+- Payoff: the shocker, at 80 to 90% of runtime. The climax holds longest.
+- CTA: the shortest scene (3 to 5 s), one action. Do not fade the payoff out, and do not freeze it:
+  the world keeps moving under the end card.
 
-**Hook → Build → Proof → Payoff → CTA.** Any named structure below is just a way to fill these five.
+## Beat role, persuasion, feeling
 
-- **Hook** lands in the first 3s, front-loads the strong word, opens a loop. Never the best stat, tease it.
-- **Build** carries one idea per beat. How-it-works is at most 3 steps, one per beat.
-- **Proof** is a real artifact: a live UI capture, a true stat, a customer. Not a claim in a box.
-- **Payoff** is the shocker, placed at **80–90% of runtime**. The climax holds the longest.
-- **CTA** is the **shortest** scene (3–5s), one action, held on a still frame (never fade the payoff).
+Every beat declares a persuasion move and a feeling arc (`TASTE-RULES.md`). This table says which fit
+which role, so you pick a coherent chain. A beat that names neither has no job.
 
----
-
-## Beat role → persuasion → feeling (the layering lookup)
-
-This is the table the other docs point back to. Every beat in the lock sheet declares a **persuasion**
-(the rhetorical move) and a **feeling** (the emotion arc), TASTE-RULES makes those required fields.
-This says which ones fit which role, so you pick a coherent chain instead of guessing per beat.
-
-| Beat role | Persuasion move | Feeling arc | Hands off to |
+| role | persuasion | feeling | notes |
 |---|---|---|---|
-| **Hook** | open loop · pattern interrupt · negative contrast | curiosity → tension | SELECTION: notice-the-cut · SOUND: silent or one cue |
-| **Problem / tension** | pain agitation · status-quo cost | recognition → unease | TASTE: slow hold, `easeInOutSine` · DENSITY: lean |
-| **Build / how** | inevitability · mechanism reveal | unease → understanding | SELECTION: hard cuts, one family · DENSITY: hero+support |
-| **Proof / stats** | social proof · demonstration | doubt → belief | DENSITY: hero+support+metadata · SOUND: one `chime` on the number |
-| **Feature (FAB)** | future pacing (feature→benefit) | interest → desire | SELECTION: `weightShift` emphasis |
-| **Payoff / climax** | the shocker · negative contrast resolved | tension → payoff | SELECTION: the ONE sting/look · SOUND: the earned `success` |
-| **CTA / close** | risk reversal · single next step | desire → decision | TASTE: held frame, `exitDur:0` · SOUND: silence |
+| hook | open loop, pattern interrupt, negative contrast | curiosity to tension | notice the cut; silent or one cue |
+| problem | pain agitation, cost of the status quo | recognition to unease | slow hold, lean frame |
+| build | inevitability, mechanism reveal | unease to understanding | hard cuts, one family |
+| proof | social proof, demonstration | doubt to belief | hero plus support; one soft cue on the number |
+| feature | future pacing (feature to benefit) | interest to desire | emphasis by weight |
+| payoff | the shocker, contrast resolved | tension to payoff | the one big effect; the earned cue |
+| CTA | risk reversal, one next step | desire to decision | quiet |
 
-Read a row left to right and you have a beat that persuades, feels, and cuts as one thing. A chain of
-rows in spine order is a storyboard. If a beat can name neither a persuasion nor a feeling, it fails
-the value gate.
+## Choose a spine (30 s / 60 s)
 
----
-
-## Choose a spine: named frameworks with beat timing (30s / 60s)
-
-Pick by what the viewer already knows and how they should feel. Each maps onto Hook→…→CTA.
-
-| Spine | Reach for it when | Beats (30s / 60s) |
+| spine | reach for it when | beats |
 |---|---|---|
-| **PAS** (problem-aware) | the viewer feels the pain already | Problem 0–6/0–10 · Agitate 6–14/10–28 · Solution 14–26/28–52 · CTA 26–30/52–60 |
-| **AIDA** (unaware launch) | a cold audience, a new category | Attention 0–2/0–3 · Interest 2–8/3–18 · Desire 8–25/18–52 · Action 25–30/52–60 |
-| **Hook · Story · Offer** | a personal or founder voice | Hook 0–3 · Story 3–22/3–48 · Offer 22–30/48–60 |
-| **Golden Circle** (why-first) | a premium or mission brand | Why 0–8/0–15 · How 8–20/15–40 · What+CTA 20–30/40–60 |
-| **Before · After · Bridge** | a clear transformation | Before(hook) · After(payoff) · Bridge(product)+CTA |
+| PAS | the viewer already feels the pain | Problem 0-6 / 0-10, Agitate 6-14 / 10-28, Solution 14-26 / 28-52, CTA 26-30 / 52-60 |
+| AIDA | a cold audience, a new category | Attention 0-2 / 0-3, Interest 2-8 / 3-18, Desire 8-25 / 18-52, Action 25-30 / 52-60 |
+| Hook, Story, Offer | a personal or founder voice | Hook 0-3, Story 3-22 / 3-48, Offer 22-30 / 48-60 |
+| Golden Circle | a premium or mission brand | Why 0-8 / 0-15, How 8-20 / 15-40, What and CTA 20-30 / 40-60 |
+| Before, After, Bridge | a clear transformation | Before (hook), After (payoff), Bridge (product) and CTA |
 
-**FAB** is a reusable proof block *inside* Build, not a whole spine: feature (~1.5s) → what it does
-(~1.5s) → the benefit (~2s). Chain 2–4, cut any with weak differentiation.
+FAB (feature, what it does, benefit; about 1.5, 1.5 and 2 s) is a proof block inside Build, not a spine.
+Chain two to four and cut any with weak differentiation. Profiles pair with spines (`SELECTION.md`):
+a24 and apple suit Golden Circle, nike and duolingo suit AIDA, linear and vercel suit PAS.
 
-The named **reference profiles** in [`SELECTION.md`](SELECTION.md) pair naturally with spines: `a24`
-and `apple` suit Golden Circle (why-first, restraint); `nike` and `duolingo` suit AIDA/BAB
-(attention-first, energetic); `linear`/`vercel` suit PAS (problem-aware, technical).
+## Scene budget and pacing
 
----
+- 30 s is 5 to 7 scenes (3 to 6 s each). 60 s is 8 to 12 scenes (4 to 7 s). A new beat every 5 to 7 s.
+- Vary scene length. Accelerate toward the climax, then hold it longer than anything else. Uniform
+  length is the story form of monotone timing.
+- Value arc: dark, a light "how it works" break, a dark climax. Value is the strongest variety lever:
+  change three or more of layout, scale, value, ground, hue and motion between neighbours.
+- Pacing character: calm, cascade, punchy. Hook and vision beats breathe. The payoff snaps.
+- Brand tempo sets the count: confident and premium is slow with few scenes, playful is fast with many.
 
-## Scene budget and the pacing arc
+## Product material to beats
 
-- **30s → 5–7 scenes** (~3–6s each) · **60s → 8–12 scenes** (~4–7s). A new beat every 5–7s.
-- **Vary scene length.** Accelerate toward the climax, then **hold the climax a beat longer** than
-  anything else. Uniform scene length is the story equivalent of the monotone-timing failure.
-- **Value arc** as the pacing spine: dark → a light "how it works" break → dark climax. Value is the
-  strongest variety lever (change ≥3 of layout/scale/value/bg/hue/motion between neighbours).
-- **Pacing character:** calm → cascade → punchy. The hook and vision beats breathe; the payoff snaps.
+Tagline to hook. The pain to the problem beat. How it works to build (one step per beat, at most 3).
+Features to FAB blocks (2 to 4). The best stat to the payoff, with lesser stats earlier as proof. The
+transformation to the payoff. The CTA to the end, one action. Material that maps to no beat does not go
+in: a launch film is not an inventory.
 
-Brand DNA (`dna/<name>.json`) sets the pacing: *tempo* → scene count and clip length; *personality* →
-easing and plain-vs-busy; confident/premium → slow, few scenes; playful/energetic → fast, many scenes.
+## Strip the payoff bare
 
----
+Decorate transitions and low-copy vibe beats (hook, CTA). A beat whose whole job is to make one thing
+land stays plain. Negative space is the silent character (40 to 60% empty on a lean beat). `DENSITY.md`
+states the same rule from the composition side.
 
-## Product material → beats (the mapping)
-
-Turn what you have into where it goes:
-
-- **tagline → hook** (front-load the strong word, open the loop)
-- **the pain → problem beat**
-- **how it works → build** (one step per beat, **max 3**)
-- **features → FAB blocks** (2–4, cut low-differentiation ones)
-- **the best stat → payoff** (save the shocker; put lesser stats earlier as proof)
-- **the transformation → payoff**
-- **the CTA → the end**, one action
-
-If a piece of material maps to no beat, it does not go in the video. A launch film is not an inventory.
-
----
-
-## Per-beat recipe (role → the rest of the stack)
-
-The starting recipe for each role. These are defaults to depart from with intent, not a template.
-The actual transition/density/sound come from the linked docs, chosen by the brand.
-
-| Beat role | Background | Layout | Value | Motion character |
-|---|---|---|---|---|
-| Hook / cold-open | vibe texture (hook is allowed to be busy) | centred or left macro | dark | slow build, staggered word-rise |
-| Name / brand reveal | brand glow | centred, logo + word | dark | mask reveal + one spring |
-| Problem / tension | plain, spacious | centred statement | dark | slow, minimal, hold |
-| How it works | plain (a light value break) | card flow + connectors | **light** | staggered card pops, lines draw |
-| Proof / stats | plain (strip it bare) | full-bleed number | dark | count-up, rise-in |
-| Emotional / vision | soft texture | centred serif | dark | very slow, grain-forward |
-| CTA / close | brand glow | centred, logo + url | dark | logo settles, url last, then hold |
-
-**Strip the payoff bare.** Decorate transitions and low-copy vibe beats (hook, CTA); a beat whose whole
-job is to make one thing land stays plain. Negative space is the silent character (40–60% empty). This
-is the same rule DENSITY states from the composition side: the exception for a lean beat is the
-deliberate hook or end card.
-
----
-
-## What this replaces
-
-The narrative content formerly in `DESIGN-DATABASE.md` §9 and §15 lives here now; that file keeps only
-the technique catalog (backgrounds, easing curves, microinteractions, focus treatments). If the two
-ever disagree, STORY is the story authority and DESIGN-DATABASE is the technique authority.
-
-*Sources: StudioBinder, Boords, Sinek (Golden Circle), the AIDA/PAS/BAB copywriting canon, retention
-data (OpusClip/Cloudinary), Tubik on negative space.*
+Sources: StudioBinder, Boords, Sinek (Golden Circle), the AIDA, PAS and BAB copywriting canon, retention
+data (OpusClip, Cloudinary), Tubik on negative space.

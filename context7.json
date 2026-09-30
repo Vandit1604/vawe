@@ -26,7 +26,6 @@
   "excludeFiles": [
     "engine-doctrine/MISTAKES.md",
     "engine-doctrine/EFFECTS.md",
-    "engine-doctrine/CRAFT/PARITY-AUDIT.md",
     "engine-doctrine/CRAFT/BLOCKS-HTML-STATUS.md"
   ],
   "rules": [

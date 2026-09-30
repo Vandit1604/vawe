@@ -24,7 +24,7 @@ beat's duration, and no two layers moving independently in the same beat share o
 | `slow` | 0.6s | `DURATION.slow` (core/registry/vocab.js) |
 | `luxurious` | 1.2s | `DURATION.luxurious` (core/registry/vocab.js) |
 
-Full word list with the "when": `engine-doctrine/CRAFT/VOCABULARY.md#duration`.
+Source: `core/registry/vocab.js`.
 <!-- /GENERATED:motion-numbers -->
 
 | band | duration |

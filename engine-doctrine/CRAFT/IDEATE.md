@@ -10,7 +10,7 @@ Stage 1.5 in AGENTS.md's eight stages: between **brief** (what the film is about
 beat table). It writes ONE human-readable file, the film prompt: the film described act by act, in
 plain words, what is on screen, how it enters and leaves, the ground and its colour, the camera, the
 pace, and which recipe (`recipes/README.md`) each joint uses. The owner reads it, edits it by hand,
-and only then does the agent write it up into a storyboard (engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md).
+and only then does the agent write it up into a storyboard.
 `harness/author/ideate.mjs` writes the prompt;
 `make ideate` is the front door.
 
@@ -39,7 +39,7 @@ make ideate ASK=1 NAME=<film> IDEA="a quick sting for a dev tool called Loom, da
 Prints the question payload (`ideate-ask.mjs`, see "Asking for detail" below): a plain 4-act default
 shape when no `--ref` is given, or the reference's own measured act count and joint axes when `REF=<ref>`
 is added too. The agent answers the questions, then writes the storyboard by hand
-(`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md`) from what it learned: no intermediate file to fill.
+from what it learned: no intermediate file to fill.
 
 ## What it cannot measure, and the `<look:>` convention
 
