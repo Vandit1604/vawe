@@ -72,7 +72,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | thanks-sweep | a closing line sweeps across | to be captured | built |
 | calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | built |
 | logo-sting | a short animated logo hit | to be captured | built |
-| ui-strip-away | the product UI peels back layer by layer until only the logo and line remain | HyperFrames-style layer peel; video-shotcraft outro/ui-strip-away-outro | built |
+| ui-strip-away | the product UI peels back layer by layer until only the logo and line remain | video-shotcraft outro/ui-strip-away-outro | built |
 
 ## 6. Product moments
 
@@ -84,3 +84,4 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | count-up | a number counts to its value | to be captured | built |
 | notification-pop | a notification drops in and settles | to be captured | built |
 | chart-build | a chart draws its bars or line in sequence | to be captured | built |
+| before-after-wipe | a scan line reveals the after state over the before state | video-shotcraft data/before-after-slider-scrub; HyperFrames before-after-wipe | built |
