@@ -72,6 +72,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | thanks-sweep | a closing line sweeps across | to be captured | built |
 | calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | built |
 | logo-sting | a short animated logo hit | to be captured | built |
+| ui-strip-away | the product UI peels back layer by layer until only the logo and line remain | HyperFrames-style layer peel; video-shotcraft outro/ui-strip-away-outro | built |
 
 ## 6. Product moments
 

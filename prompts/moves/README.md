@@ -15,6 +15,12 @@ Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a
 [LIBRARY.md](LIBRARY.md) lists every approved move in six groups, including the ones still to build.
 This index lists the built ones, in the same groups.
 
+## Pick by job
+
+| job | moves |
+|---|---|
+| hand the product to the brand at the end | [ui strip away](ui-strip-away.md) |
+
 ## Reveal a title
 
 | move | use when | snippet | clip |
@@ -74,6 +80,7 @@ This index lists the built ones, in the same groups.
 | calm lockup | the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats | [calm-lockup.md](calm-lockup.md) | [calm-lockup.mp4](calm-lockup.mp4) |
 | cta pop | the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click | [cta-pop.md](cta-pop.md) | [cta-pop.mp4](cta-pop.mp4) |
 | thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
+| UI strip away | the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup | [ui-strip-away.md](ui-strip-away.md) | [ui-strip-away.mp4](ui-strip-away.mp4) |
 
 ## Product moments
 
