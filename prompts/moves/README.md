@@ -35,6 +35,7 @@ This index lists the built ones, in the same groups.
 | push with blur | a panel pushes in with a directional blur that follows its speed, set per frame | [push-blur.md](push-blur.md) | [push-blur.mp4](push-blur.mp4) |
 | exit fast | the pair every beat needs: arrive fast and land soft, leave faster and shorter | [exit-fast.md](exit-fast.md) | [exit-fast.mp4](exit-fast.mp4) |
 | chain beats | beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule) | [chain-beats.md](chain-beats.md) | [chain-beats.mp4](chain-beats.mp4) |
+| whip pan | the next shot is to the side: a fast sideways pan with a blur that follows its speed hides the seam | [whip-pan.md](whip-pan.md) | [whip-pan.mp4](whip-pan.mp4) |
 
 ## Point the eye
 

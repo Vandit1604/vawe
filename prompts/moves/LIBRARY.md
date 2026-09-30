@@ -35,7 +35,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | push-blur | a panel pushes in with a blur that follows its speed | owner-approved clip | built |
 | exit-fast | leave faster and shorter than the entrance | owner rule: exits faster than entrances | built |
 | iris-wipe | a circular reveal from the point the eye is on | to be captured | to build |
-| whip-pan | a fast sideways blur that hides the cut | to be captured | to build |
+| whip-pan | a fast sideways blur that hides the cut | to be captured | built |
 | match-cut | a shape in shot A becomes the same shape in shot B | to be captured | to build |
 | flash-cut | a one or two frame flash on a beat | to be captured | to build |
 
