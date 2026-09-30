@@ -51,12 +51,14 @@ import { appendRun } from '../lib/runlog.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, videoProblems } from './draft-check.mjs';
-import { textProblems, soundLine, briefLine, mergeProblems, draftCheckLines } from '../lib/draft-check.mjs';
+import { textProblems, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
-import { runMotionCollector, motionLint, unwaived, lintLines } from '../lib/motion-lint.mjs';
+import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes } from '../lib/motion-lint.mjs';
+import { sampleBoxTracks, maxStepDeltas, lintTimes } from '../lib/box-track.mjs';
+import { adviceBlock, errorLine } from '../lib/advice.mjs';
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
 
@@ -70,7 +72,7 @@ const RECYCLE_SUBFRAMES = 300;
 // are then identical for any --workers.
 const SLICE_FRAMES = 60;
 
-const die = (msg, code = 1) => { console.error(`✗ ${msg}`); process.exit(code); };
+const die = (msg, code = 1) => { console.error(errorLine(msg)); process.exit(code); };
 
 // Page meta the renderer needs before the page loads (its canvas, its authoring rate), read from the
 // file so the viewport is right before any page script runs.
@@ -123,31 +125,19 @@ export async function settle(page) {
 // animation timing, so it is as deterministic as the capture itself. Returns null when the page has
 // nothing to measure this way (window.seek, onFrame hooks, or no animations at all).
 async function frameSpeedsFromBoxes(page, frames, fps, from) {
-  return page.evaluate((frameCount, fpsArg, fromArg) => {
-    if (typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length || !document.getAnimations().length) return null;
-    function seek(ms) { for (const a of document.getAnimations()) { a.pause(); a.currentTime = ms; } }
-    const speeds = [];
-    let prev = null;
-    for (let i = 0; i <= frameCount; i++) {
-      seek(fromArg * 1000 + (i / fpsArg) * 1000);
-      const boxes = document.getAnimations().map((a) => {
-        const t = a.effect && a.effect.target;
-        if (!t || !t.getBoundingClientRect) return null;
-        const r = t.getBoundingClientRect();
-        return { x: r.x, y: r.y, w: r.width, h: r.height };
-      });
-      if (prev) {
-        let d = 0;
-        for (let j = 0; j < boxes.length; j++) {
-          const a = boxes[j], b = prev[j];
-          if (a && b) d = Math.max(d, Math.hypot(a.x - b.x, a.y - b.y), Math.abs(a.w - b.w), Math.abs(a.h - b.h));
-        }
-        speeds.push(d);
-      }
-      prev = boxes;
-    }
-    return speeds;
-  }, frames, fps, from);
+  if (await page.evaluate(isScripted) || !(await page.evaluate(() => document.getAnimations().length))) return null;
+  const times = Array.from({ length: frames + 1 }, (_, i) => from + i / fps);
+  return maxStepDeltas((await sampleBoxTracks(page, times, 'animated')).tracks);
+}
+
+const isScripted = () => typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length > 0;
+
+// A page that paints in window.seek or onFrame hooks has no animation records; its element boxes over
+// time stand in for them. Call it after runMotionCollector, which must see the animations before any seek.
+async function collectPageMotion(page, dur) {
+  const motion = await runMotionCollector(page);
+  if (!motion.scripted) return motion;
+  return { ...motion, boxes: await sampleBoxTracks(page, lintTimes(dur), 'visible') };
 }
 
 const PIXEL_W = 64;
@@ -346,7 +336,7 @@ export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
 }
 
 // Render invariants. Each check returns one line per problem; renderPage throws them together as an
-// InvariantError and the CLI prints `✗ <line>` for each and exits 2. An intended exception is declared
+// InvariantError and the CLI prints `error: <line>` for each and exits 2. An intended exception is declared
 // on the page: <meta name="blank" content="0-0.4, 4.8-5"> (or data-blank on <html>) for empty frames.
 export class InvariantError extends Error {
   constructor(problems) { super(problems.join('\n')); this.problems = problems; }
@@ -521,7 +511,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
     if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
-    const motion = opts.probe ? await runMotionCollector(page) : null;
+    const motion = opts.probe ? await collectPageMotion(page, dur) : null;
     const probe = opts.probe ? await sampleText(page, dur, (ms) => seekAll(page, ms)) : null;
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
@@ -560,13 +550,13 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
     if (broken.length) { fs.rmSync(tmpOut, { force: true }); throw new InvariantError(broken); }
-    for (const l of late) if (l.includes(' blank;')) console.error(`  ~ ${l}`);
+    const advice = late.filter((l) => l.includes(' blank;'));
     const mixed = wantAudio && await muxPageAudio(page, pagePath, { video: tmpOut, out: outPath, duration: dur, explicit: opts.audio === true });
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
     const level = opts.probe && !mixed ? await mixLevel(page, pagePath, dur) : null;
-    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion };
+    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion, advice };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
@@ -603,22 +593,26 @@ function readBrief(pagePath) {
   try { return fs.readFileSync(path.join(path.dirname(path.resolve(pagePath)), 'brief.md'), 'utf8'); } catch { return null; }
 }
 
-function printMotionLint(pagePath, motion) {
-  const lines = lintLines(unwaived(motionLint(motion), pageAuthoring(pagePath)));
-  console.log(lines.length ? ['motion lint (advice; waive a line with its code in authoring.allow and a _why):', ...lines.map((l) => `- ${l}`)].join('\n') : 'motion lint: clean');
+function motionAdvice(pagePath, motion) {
+  const boxes = motion.boxes;
+  const records = boxes ? [...motion.records, ...recordsFromBoxes(boxes)] : motion.records;
+  const lines = lintLines(unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath)));
+  const out = lines.length ? [...lines, 'waive a rule line with its code in authoring.allow and a _why'] : [];
+  if (boxes?.canvas) out.push(`motion lint read element boxes over time; the motion inside ${boxes.canvas} canvas (2D or WebGL) is out of its scope`);
+  return out;
 }
 
-function printDraftCheck(mp4, pagePath, { probe, level, motion }) {
+function printDraftCheck(mp4, pagePath, { probe, level, motion, advice: blanks }) {
   let video = [];
   try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
   const problems = mergeProblems(video, textProblems(probe.samples, probe));
   const brief = readBrief(pagePath);
   const sound = soundLine(level);
-  console.log(draftCheckLines(problems, sound, briefLine(brief)).join('\n'));
-  printMotionLint(pagePath, motion);
-  for (const line of directionsLines(brief, path.relative(process.cwd(), path.dirname(path.resolve(pagePath))))) console.log(line);
+  const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
+  const advice = [...blanks, ...draftAdvice(problems, sound, briefLine(brief)), ...motionAdvice(pagePath, motion), ...directionsLines(brief, dir)];
+  console.log(draftCheckLines(advice).join('\n'));
   const taste = ['', ...draftTasteLines([...problems, sound].filter(Boolean))];
-  if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
+  if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
   console.log(taste.join('\n'));
 }
 
@@ -641,7 +635,7 @@ async function main() {
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   const drift = briefProblems(pagePath);
-  if (drift.length) { for (const p of drift) console.error(p); process.exit(2); }
+  if (drift.length) { for (const p of drift) console.error(errorLine(p)); process.exit(2); }
   const final = argv.includes('--final');
   if (final) assertFinalReady(pagePath);
   const from = final ? 0 : Number(flag('--from', 0));
@@ -667,7 +661,7 @@ async function main() {
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
     const r = await renderPage(pagePath, outPath, opts).catch((e) => {
       if (!(e instanceof InvariantError)) throw e;
-      for (const p of e.problems) console.error(`✗ ${p}`);
+      for (const p of e.problems) console.error(errorLine(p));
       process.exit(2);
     });
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
@@ -675,6 +669,7 @@ async function main() {
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
     if (!final) printDraftSheet(outPath, opts);
     if (r.probe) printDraftCheck(outPath, pagePath, r);
+    else if (r.advice.length) console.log(adviceBlock(r.advice).join('\n'));
   }
 }
 

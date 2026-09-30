@@ -20,3 +20,8 @@ test('the report is the verdict, one score line, the three worst fixes and the f
   assert.equal(lines.at(-1), 'full report: out/x.judge.json');
   assert.equal(lines.length, 6);
 });
+
+test('the ledger lines follow the score line', () => {
+  const lines = reportLines({ ...result, ledger: ['ledger: 1 fixed, 0 partly, 0 still; 2 new'] }, 'out/x.judge.json');
+  assert.equal(lines[2], 'ledger: 1 fixed, 0 partly, 0 still; 2 new');
+});

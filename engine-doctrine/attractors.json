@@ -1,0 +1,12 @@
+{
+ "names": {
+  "card": "the name Vesper or a similar light-poetry name",
+  "words": ["vesper", "luma", "lumen", "lumina", "luminara", "lumière", "aurora", "aura", "aurelia", "lux", "lucent", "lucid", "nova", "halo", "solace", "sol", "solara", "solis", "eos", "helios", "astra", "stella", "celeste", "zenith", "radiance", "gleam", "glimmer", "ember", "eclipse", "prism", "noctis"],
+  "fix": "name it after what the product does or a concrete thing it owns (a place, a tool, a material), not light poetry"
+ },
+ "shapes": {
+  "cards": ["A glowing circle, orb or disc as the hero", "A dusk sun or a crescent"],
+  "words": ["glowing circle", "circle", "orb", "disc", "disk", "sphere", "sun", "sunrise", "sunset", "dusk sun", "crescent", "eclipse", "halo", "ring", "glow", "banded sun", "banded", "synthwave"],
+  "fix": "carry it on type, a real object or a colour field; keep the shape only if the direction says why it is the idea, and give it a light source and a surface"
+ }
+}
