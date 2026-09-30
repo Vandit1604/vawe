@@ -109,7 +109,7 @@ films/scene/*.expanded.json
 # a generator with no consumer, which is the "not reproducible from the repo" case this section exists
 # to prevent. The RENDERED instance (films/scene/_batch/) stays ignored, because that is content.
 !films/scene/gh-wrapped.template.json
-# The camera-blur A/B. Not a film: it is the fixture `engine-doctrine/MISTAKES.md` #552 and the effects
+# The camera-blur A/B. Not a film: it is the fixture the effects
 # catalogue both cite, a whip pan across two depth planes plus one layer that counter-pans, so
 # the smear and the cancellation can be re-rendered rather than taken on trust. An untracked
 # fixture leaves both references naming a file a clean clone does not have.

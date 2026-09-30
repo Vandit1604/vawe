@@ -1,4 +1,4 @@
-// calls every other file "unreadable" (engine-doctrine/MISTAKES.md #56).
+// calls every other file "unreadable".
 import fs from 'node:fs';
 
 /** readWav(path) → { sampleRate, channels, bits, frames, mono: Float64Array } (mono = channel mean) */

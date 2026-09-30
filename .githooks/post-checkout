@@ -21,7 +21,7 @@ sh "$WT/harness/dev/link-shared.sh"
 
 # The untracked, per-file library (films/scene/*.json, assets/fonts, assets/brands, ...), driven from
 # .worktreeinclude, not a second hand-kept list: same script worktree.sh calls, so there is exactly one
-# implementation of "what a worktree needs" (engine-doctrine/MISTAKES.md #450).
+# implementation of "what a worktree needs".
 [ -f "$WT/harness/dev/sync-worktree.mjs" ] || exit 0
 out="$(node "$WT/harness/dev/sync-worktree.mjs" "$WT" 2>&1)"; rc=$?
 case "$out" in

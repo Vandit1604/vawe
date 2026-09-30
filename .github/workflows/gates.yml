@@ -29,7 +29,7 @@ jobs:
       - run: npm ci
       - name: gates
         run: |
-          for g in no-emdash mistakes-check provenance rule-length skill-reach seo-surface; do
+          for g in no-emdash provenance rule-length skill-reach seo-surface; do
             node bin/vawe check "$g"
           done
 

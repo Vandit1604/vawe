@@ -13,8 +13,8 @@ ad-hoc text. The contract lives in `harness/lib/findings.mjs`.
 2. **Prose is rendered from the record**, one tight line per finding. There is one place that states the
    fact, so prose and JSON cannot drift.
 3. **`--json` emits the records and nothing else on stdout.** Headers, counts and advice go to stderr.
-   The exit code is the same in both modes. (`engine-doctrine/MISTAKES.md` #401: a human line printed
-   after the JSON made it unparseable.)
+   The exit code is the same in both modes. A human line printed
+   after the JSON makes it unparseable.
 4. **The rationale lives in a code comment, not in runtime output.** At runtime a reader wants what is
    wrong, where (`at`), how to fix it (`fix`) and the one doc that settles it (`doc`).
 

@@ -74,7 +74,7 @@ export async function uploadFile(localPath) {
   return url;
 }
 
-// Read back the body, not just the status: a CDN can answer 200 with an HTML/JSON error page for an expired asset, so `download` also requires a magic-number match before writing (engine-doctrine/MISTAKES.md #446).
+// Read back the body, not just the status: a CDN can answer 200 with an HTML/JSON error page for an expired asset, so `download` also requires a magic-number match before writing.
 const MAGIC = [ // enough of each container to tell media from an error page
   [[0xff, 0xd8, 0xff], 'jpeg'], [[0x89, 0x50, 0x4e, 0x47], 'png'], [[0x47, 0x49, 0x46], 'gif'],
   [[0x52, 0x49, 0x46, 0x46], 'riff/webp/wav'], [[0x49, 0x44, 0x33], 'mp3'], [[0xff, 0xfb], 'mp3'],

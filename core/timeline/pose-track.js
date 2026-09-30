@@ -61,7 +61,7 @@ const hermite = (p0, p1, m0, m1, h, u) => {
 /**
  * The finite-difference tangent of `prop` at key `i`, in units per second. Zero at either end.
  * Fritsch-Carlson clamped: without it a camera `travel` with an s:1.08 -> s:1 -> s:1 tail dipped below
- * every authored station's scale between two equal keys (MISTAKES #626), because the raw chordal
+ * every authored station's scale between two equal keys, because the raw chordal
  * tangent carried velocity in from the unequal segment behind it. Zeroed at a local extremum, else
  * scaled so the Hermite curve on neither neighbouring segment can leave that segment's own [min, max].
  */
@@ -132,7 +132,7 @@ function propEaseCurve(aEase, bEase, prop) {
 // scale finishes after position, rotation settles a beat later). Measured before it was built: 138 of
 // 283 motion tracks in the library key position and scale/rot/opacity together, so the case is common.
 //
-// Adds no second interpretation rule (MISTAKES #563): the track is read exactly as before, only the
+// Adds no second interpretation rule: the track is read exactly as before, only the
 // clock differs per property, and a shifted pure function is still pure.
 //
 // Spelled like `varsDelay` deliberately: core/tracks/vars.js already solved per-channel timing for CSS

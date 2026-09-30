@@ -1205,8 +1205,7 @@ export function createThreeLayer(w, h, L, colors) {
   // `pose(t)`, entirely off that track, so the layer's box never moves and that sampler always reads
   // zero. The fast rise this scene poses is therefore invisible to the shared blur, and the fix is NOT
   // to teach the shared sampler about a three scene's internal state (that is core/tracks/motion.js and
-  // core/fx/ghost.js's one shared owner, and a second one reading the same fact is the exact drift
-  // MISTAKES #423 already logged against). Instead: `motionBlur` samples pose() at a few offsets around t,
+  // core/fx/ghost.js's one shared owner, and a second one reading the same fact is the exact drift). Instead: `motionBlur` samples pose() at a few offsets around t,
   // inside its own exposure window, and composites them translucently, the same shutter-accumulation
   // idea `smear()` approximates with a CSS filter, done for real because here the geometry is real.
   // Still pure in t: every tap is pose(t + offset), a fresh render with no memory of any other frame.

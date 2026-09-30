@@ -10,7 +10,6 @@ group: reference
 - `RULES/`: one atomic rule per file. Start at `RULES/INDEX.md`.
 - `TASTE.md`: the one law and the value tests. `MOTION-CRAFT.md`: the motion rules. `DESIGN-DATABASE.md`: motion and style numbers.
 - `JUDGE.md`: how `bin/vawe judge` scores a film.
-- `MISTAKES.md`: numbered lessons. Code and docs cite an entry as `MISTAKES.md #N`.
 - `RESEARCH/`: outside sources for timing numbers and open-source assets. `ASSET-SOURCES.md`: which footage, sound and music sites allow redistribution.
 
 `design/` and `media/` hold pictures and HTML explainers, not doctrine.

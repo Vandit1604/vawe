@@ -1,4 +1,4 @@
-// THE CLASS HAS ALREADY BITTEN, AND IT IS RECORDED. engine-doctrine/MISTAKES.md #401: motion-audit --json printed
+// THE CLASS HAS ALREADY BITTEN: motion-audit --json printed
 import fs from 'node:fs';
 
 const GLYPH = { error: '✗', warn: '~', info: '·' };
@@ -83,7 +83,7 @@ export function gateFindings(opts = {}) {
  * be a silent loss dressed up as a contract. What it must NOT do is print that object with console.log,
  * because this module has already pointed stdout at stderr; and it must claim the payload, or the exit
  * flush would append a second document to the same stream. That is exactly the two-writers-one-stdout
- * shape of engine-doctrine/MISTAKES.md #401, so there is one door and this is it.
+ * shape of that bug, so there is one door and this is it.
  */
 export function emitJson(value) {
   emitted = true;

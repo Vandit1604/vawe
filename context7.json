@@ -23,7 +23,6 @@
     "engine-doctrine/RESEARCH"
   ],
   "excludeFiles": [
-    "engine-doctrine/MISTAKES.md",
     "engine-doctrine/EFFECTS.md",
     "engine-doctrine/CRAFT/BLOCKS-HTML-STATUS.md"
   ],

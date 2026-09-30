@@ -188,7 +188,7 @@ if (verdictArg) {
   const resultFile = writeJudgeResult(mp4, { verdict: v, pass: v === 'PASS', time: time == null ? null : Number(time), topFix, renderHash });
   console.log(`  judge result: ${resultFile}`);
   // Logged here, and only here: this is the agent's actual verdict, written down after the eye looked,
-  // never a verdict the prep step invents for itself (engine-doctrine/MISTAKES.md, judge PASS is never self-recorded).
+  // never a verdict the prep step invents for itself (a judge PASS is never self-recorded).
   appendRun(inp, { cmd: 'judge', judge: { verdict: v, file: sheet } });
   const fixSummary = fixRecords.length
     ? ` (${fixRecords.map((r) => `${r.code}@${r.beat}`).join(', ')})`

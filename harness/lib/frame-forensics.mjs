@@ -151,7 +151,7 @@ export function gridStatsAt(mp4, frameIdx) {
  * THE OUTSIDE REFERENCE WALKS rather than sampling a fixed ±6 frames. An empty stretch measured at
  * 0.2-0.3s already reaches a fixed ±6-frame sample at 30fps, so a fixed offset would land the "outside"
  * reference INSIDE the empty stretch and compare emptiness to itself, never firing (measured on the
- * exemplar this closes, engine-doctrine/MISTAKES.md#144). So this walks further out, one frame at a
+ * exemplar this closes). So this walks further out, one frame at a
  * time, until it finds real structure (spread > 0.06) or gives up at a 2s cap.
  *
  * THE DROP MUST OUTLAST ONE FRAME. A 32x18 grid can read spread near zero on a frame that is a hard

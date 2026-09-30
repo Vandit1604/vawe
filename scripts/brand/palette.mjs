@@ -65,7 +65,6 @@ export async function eyedrop(files) {
   // near-white, or it is a shadow or a highlight), and candidates rank by vividness weighted by presence
   // rather than by presence alone, so a small vivid colour beats a large dull one. Good design uses
   // accents sparingly, so the old ranking failed hardest on exactly the brands worth reflecting
-  // (engine-doctrine/MISTAKES.md #207).
   const accents = cols
     .filter((c) => sat(c) > 0.4 && lum(c) > 0.12 && lum(c) < 0.95 && c.c > result.total * 0.0002)
     .sort((a, b) => (sat(b) * Math.sqrt(b.c)) - (sat(a) * Math.sqrt(a.c)))

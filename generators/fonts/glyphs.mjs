@@ -17,8 +17,7 @@
 // WHY fontkit AND NOT opentype.js: every face in assets/fonts/ is a VARIABLE font, and opentype.js
 // reads only the default master. Anybody's default master is wght=100, Thin. Extracting it would
 // have produced a real-looking file that renders the brand headline in a hairline weight, i.e. the
-// silent-substitution failure this repo has been burned by before (MISTAKES: the wrong font shipped
-// because nothing said it had been swapped). fontkit applies gvar deltas, so we bake the weight we
+// silent-substitution failure this repo has been burned by before. fontkit applies gvar deltas, so we bake the weight we
 // actually asked for. fontkit cannot read woff2's cmap directly, hence wawoff2 in front of it.
 import fs from 'node:fs';
 import path from 'node:path';
