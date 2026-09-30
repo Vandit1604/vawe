@@ -151,7 +151,7 @@ function buildPrompt(ev, brief) {
   const kind = ev.stage === 'stills' ? 'three still directions for a film' : `a ${ev.stage} cut of a film`;
   return `You are a fresh taste judge. You did not make this work and you own no part of it. You judge ${kind} from the evidence files below.
 Use only the Read tool: open the image files and look at them before you score. Do not guess from file names.
-${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key frame at full size. The sheet is a grid of separate frames: its tiling and repeated tiles are the sheet, never an echo or a repeat in the film; confirm any defect on a full-size key frame before you name it.'}
+${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key frame at full size. The sheet is a grid of separate frames; confirm any defect you see on it (an echo, a repeat, a small copy of the frame) on a full-size key frame before you name it.'}
 
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}
