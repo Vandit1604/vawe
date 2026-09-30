@@ -41,7 +41,7 @@ Read `engine-doctrine/TASTE-CARD.md` before the stills: 15 rules and 5 anti-patt
 | 3 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 4 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
-| 6 | final | `bin/vawe ship <page> [--aspect all]` (60 fps, blur, audio) |
+| 6 | final | `bin/vawe ship <page>` renders (60 fps, motion blur, audio), checks the final and runs a fresh judge; `bin/vawe ship --status <page> --wait` gives the verdict. Fix what it names and ship again, at most 3 rounds, until PASS |
 
 Recreating a reference: `bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md; mark every line KEEP
 or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until it passes

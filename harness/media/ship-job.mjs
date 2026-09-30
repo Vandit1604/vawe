@@ -6,8 +6,9 @@
 //
 // A job is two files in the scratch folder, <id>.json (state) and <id>.log (the render's own output). The
 // detached `run` process owns the state file: it starts render-page.mjs --final, then records how it ended and,
-// on success, the result of the cheap final check (scene-stats plus a blank-frame scan).
-// A new job for a page cancels the running job for the same page.
+// on success, the result of the cheap final check (scene-stats plus a blank-frame scan) and of a fresh
+// judge on the final (harness/media/judge-fresh.mjs, about 30 s; VAWE_SHIP_JUDGE=0 skips it).
+// A new job for a page cancels the running job for the same page. `status <page>` reports that page's newest job.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
@@ -21,6 +22,7 @@ const WAIT_CAP_MS = 100_000;
 
 const SELF = fileURLToPath(import.meta.url);
 const RENDER = path.join(path.dirname(SELF), 'render-page.mjs');
+const JUDGE = path.join(path.dirname(SELF), 'judge-fresh.mjs');
 const jobsDir = () => scratch('ship-jobs');
 const stateFile = (id) => path.join(jobsDir(), `${id}.json`);
 const readJob = (id) => JSON.parse(fs.readFileSync(stateFile(id), 'utf8'));
@@ -49,10 +51,11 @@ function startJob(page, renderArgs) {
   const name = path.basename(defaultOut(page, { aspect: '16:9', final: true }), '.mp4');
   const id = `${name}-${Date.now().toString(36)}`;
   const log = path.join(jobsDir(), `${id}.log`);
-  writeJob({ id, page, args: renderArgs, log, status: 'starting', startedAt: Date.now() });
+  writeJob({ id, page, args: renderArgs, log, status: 'starting', startedAt: Date.now(), judge: process.env.VAWE_SHIP_JUDGE !== '0' });
   spawn(process.execPath, [SELF, 'run', id], { detached: true, stdio: 'ignore' }).unref();
   console.log(`job ${id} started: final render of ${page} in the background`);
   console.log(`log: ${log}`);
+  console.log(`status: bin/vawe ship --status ${page} --wait`);
 }
 
 function runJob(id) {
@@ -61,10 +64,28 @@ function runJob(id) {
   const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final'], { stdio: ['ignore', fd, fd] });
   writeJob({ ...job, status: 'running', pid: process.pid });
   child.on('close', (code) => {
-    const ended = { ...readJob(id), status: code === 0 ? 'done' : 'failed', exit: code, endedAt: Date.now() };
-    writeJob(code === 0 ? { ...ended, ...finalCheck(outputsOf(logText(job))) } : ended);
+    if (code !== 0) return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
+    const checked = { ...readJob(id), ...finalCheck(outputsOf(logText(job))) };
+    if (!checked.judge || !checked.outputs.length) return writeJob({ ...checked, status: 'done', endedAt: Date.now() });
+    writeJob({ ...checked, status: 'judging' });
+    judgeFinal(checked, (verdict) => writeJob({ ...readJob(id), status: 'done', verdict, endedAt: Date.now() }));
   });
 }
+
+function judgeFinal(job, done) {
+  const brief = path.join(path.dirname(job.page), 'brief.md');
+  const args = [JUDGE, job.outputs[0], '--stage', 'final', ...(fs.existsSync(brief) ? ['--brief', brief] : [])];
+  const child = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'] });
+  let out = '';
+  child.stdout.on('data', (d) => { out += d; });
+  child.stderr.on('data', (d) => { out += d; });
+  child.on('close', (code) => done(verdictLines(out, code)));
+}
+
+const verdictLines = (text, code) => {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim() && !/^(next:|PASS$|FIX$)/.test(l.trim()));
+  return code === 0 ? lines : [`judge failed (exit ${code})`, ...lines.slice(-3)];
+};
 
 const outputsOf = (text) => text.split(/[\r\n]+/).filter((l) => l.startsWith('✓ ')).map((l) => l.slice(2).split(':')[0]);
 
@@ -106,21 +127,29 @@ function finalLines(job, text) {
   return [`job ${job.id}: failed (exit ${job.exit}) after ${clock(job.endedAt - job.startedAt)}`, ...tail, `log: ${job.log}`];
 }
 
+function newestJobFor(page) {
+  const jobs = allJobs().filter((j) => samePage(j.page, page)).sort((a, b) => b.startedAt - a.startedAt);
+  return jobs[0]?.id;
+}
+
+const resolveTarget = (arg) => (arg && fs.existsSync(arg) && arg.endsWith('.html') ? newestJobFor(arg) : arg) || newestJob();
+
 function statusOf(id) {
-  const target = id || newestJob();
+  const target = resolveTarget(id);
   if (!target) die('no ship job yet: start one with vawe ship <page>');
   if (!fs.existsSync(stateFile(target))) die(`no such job: ${target}`);
   const job = readJob(target);
   const text = logText(job);
   if (['done', 'failed', 'cancelled'].includes(job.status)) return finalLines(job, text);
   if (job.status === 'running' && !pidAlive(job.pid)) return [`job ${job.id}: the render process died without a result`, `log: ${job.log}`];
+  if (job.status === 'judging') return [`job ${job.id}: rendered; a fresh judge is scoring the final (about 30 s)`];
   return [progressLine(job, text), `log: ${job.log}`];
 }
 
 const isOver = (id) => ['done', 'failed', 'cancelled'].includes(readJob(id).status) || (readJob(id).status === 'running' && !pidAlive(readJob(id).pid));
 
 async function waitThenStatus(id) {
-  const target = id || newestJob();
+  const target = resolveTarget(id);
   const until = Date.now() + WAIT_CAP_MS;
   while (target && fs.existsSync(stateFile(target)) && !isOver(target) && Date.now() < until) await new Promise((r) => setTimeout(r, 2000));
   console.log(statusOf(target).join('\n'));

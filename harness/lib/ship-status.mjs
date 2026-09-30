@@ -52,6 +52,10 @@ export function doneLines(job) {
     lines.push(`final check: ${problems.length} problem${problems.length > 1 ? 's' : ''}, look at these seconds`);
     for (const p of problems.slice(0, LIMITS.maxProblems)) lines.push(`  ${p}`);
   }
-  if (job.outputs?.length) lines.push(`next: bin/vawe judge ${job.outputs[0]} --fresh`);
+  for (const v of job.verdict || []) lines.push(v);
+  if (!job.outputs?.length) return lines;
+  if (!job.verdict) lines.push(`next: bin/vawe judge ${job.outputs[0]} --fresh`);
+  else if (/: PASS/.test(job.verdict[0] || '')) lines.push('next: the judge passed it; show the owner');
+  else lines.push(`next: fix what the judge and the final check name, worst first, then bin/vawe ship ${job.page} again (at most 3 rounds)`);
   return lines;
 }
