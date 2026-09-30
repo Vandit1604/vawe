@@ -6,6 +6,8 @@ focus pulls, the near layer melts and the far one resolves. Pinpoint lights behi
 when out of focus and snap to points when in it, which is what sells a lens. Clip:
 [rack-focus.mp4](rack-focus.mp4). Demo: [demo/rack-focus.html](demo/rack-focus.html).
 
+Use once per film: the lights that swell into discs is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+
 ```js
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 const E = CURVES.expoOut;

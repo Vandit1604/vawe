@@ -89,7 +89,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | cut on motion | a moving shape carries the eye across a hard cut into a new scene | [cut-on-motion.md](cut-on-motion.md) | [cut-on-motion.mp4](cut-on-motion.mp4) |
 | push with blur | a panel pushes in with a directional blur that follows its speed, set per frame | [push-blur.md](push-blur.md) | [push-blur.mp4](push-blur.mp4) |
 | exit fast | the pair every beat needs: arrive fast and land soft, leave faster and shorter | [exit-fast.md](exit-fast.md) | [exit-fast.mp4](exit-fast.mp4) |
-| chain beats | beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule) | [chain-beats.md](chain-beats.md) | [chain-beats.mp4](chain-beats.mp4) |
+| chain beats | beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule); use once per film | [chain-beats.md](chain-beats.md) | [chain-beats.mp4](chain-beats.mp4) |
 | whip pan | the next shot is to the side: a fast sideways pan with a blur that follows its speed hides the seam | [whip-pan.md](whip-pan.md) | [whip-pan.mp4](whip-pan.mp4) |
 | match cut | one shape crosses a scene change at the same place, size and angle and changes meaning (spinner ring, finished ring) | [match-cut.md](match-cut.md) | [match-cut.mp4](match-cut.mp4) |
 | iris wipe | a circle closes on the click or mark the eye is on and uncovers the next scene | [iris-wipe.md](iris-wipe.md) | [iris-wipe.mp4](iris-wipe.mp4) |
@@ -128,7 +128,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | caret follow | the camera trails the typing caret on a soft spring, so a long line stays readable at close range | [caret-follow.md](caret-follow.md) | [caret-follow.mp4](caret-follow.mp4) |
 | pull back reveal | open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even | [pull-back-reveal.md](pull-back-reveal.md) | [pull-back-reveal.mp4](pull-back-reveal.mp4) |
 | parallax dive | the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves | [parallax-dive.md](parallax-dive.md) | [parallax-dive.mp4](parallax-dive.mp4) |
-| rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
+| rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs; use once per film | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
 | drift hold | a very slow seeded drift per layer so a quiet frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
 | pan stations | several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them | [pan-stations.md](pan-stations.md) | [pan-stations.mp4](pan-stations.mp4) |
 | crash zoom | one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil | [crash-zoom.md](crash-zoom.md) | [crash-zoom.mp4](crash-zoom.mp4) |
@@ -137,12 +137,12 @@ One row per job, best move first. Every built move is in this table; the group t
 
 | move | use when | snippet | clip |
 |---|---|---|---|
-| logo sting | a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame | [logo-sting.md](logo-sting.md) | [logo-sting.mp4](logo-sting.mp4) |
-| wordmark cascade | the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail | [wordmark-cascade.md](wordmark-cascade.md) | [wordmark-cascade.mp4](wordmark-cascade.mp4) |
-| mark trace | a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark | [mark-trace.md](mark-trace.md) | [mark-trace.mp4](mark-trace.mp4) |
-| calm lockup | the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats | [calm-lockup.md](calm-lockup.md) | [calm-lockup.mp4](calm-lockup.mp4) |
+| logo sting | a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame; use once per film | [logo-sting.md](logo-sting.md) | [logo-sting.mp4](logo-sting.mp4) |
+| wordmark cascade | the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail; use once per film | [wordmark-cascade.md](wordmark-cascade.md) | [wordmark-cascade.mp4](wordmark-cascade.mp4) |
+| mark trace | a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark; use once per film | [mark-trace.md](mark-trace.md) | [mark-trace.mp4](mark-trace.mp4) |
+| calm lockup | the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats; use once per film | [calm-lockup.md](calm-lockup.md) | [calm-lockup.mp4](calm-lockup.mp4) |
 | cta pop | the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click | [cta-pop.md](cta-pop.md) | [cta-pop.mp4](cta-pop.mp4) |
-| thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
+| thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts; use once per film | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
 | UI strip away | the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup | [ui-strip-away.md](ui-strip-away.md) | [ui-strip-away.mp4](ui-strip-away.mp4) |
 | logo wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | [logo-wall.md](logo-wall.md) | [logo-wall.mp4](logo-wall.mp4) |
 
@@ -157,7 +157,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | notification pop | a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came | [notification-pop.md](notification-pop.md) | [notification-pop.mp4](notification-pop.mp4) |
 | chart build | gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it | [chart-build.md](chart-build.md) | [chart-build.mp4](chart-build.mp4) |
 | before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
-| skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
+| skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart; use once per film | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
 | AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
 | overwhelm collapse | the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens | [overwhelm-collapse.md](overwhelm-collapse.md) | [overwhelm-collapse.mp4](overwhelm-collapse.mp4) |
 | success check | a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it | [success-check.md](success-check.md) | [success-check.mp4](success-check.mp4) |

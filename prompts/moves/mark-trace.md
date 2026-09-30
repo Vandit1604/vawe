@@ -5,6 +5,8 @@ mark with an accent dot on its leading end; the line then thickens to the final 
 sinks into it, and an accent bar runs the finished mark to the last frame. Clip:
 [mark-trace.mp4](mark-trace.mp4). Demo: [demo/mark-trace.html](demo/mark-trace.html).
 
+Use once per film: the accent bar is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+
 ```html
 <svg viewBox="0 0 100 100">
   <path class="ink" d="M12 24 L34 78 L50 38 L66 78 L88 24"/>

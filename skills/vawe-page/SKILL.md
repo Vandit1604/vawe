@@ -14,8 +14,8 @@ The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start wi
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->
 <meta name="spectacle" content="6.2">        <!-- the second of the one big moment -->
 <audio src="assets/music.mp3" loop data-at="0" data-gain="-3" data-fade-out="0.4"></audio>
-<audio data-synth="pluck" data-at="0.85" data-gain="-8"></audio>   <!-- a soft tick on one key word -->
-<audio data-synth="swell" data-at="1.66" data-gain="-6"></audio>   <!-- one swell, ends on the cut -->
+<audio data-synth="pluck" data-at="0.85"></audio>   <!-- a quiet tick on one key word, default gain -->
+<audio data-synth="swell" data-at="1.66"></audio>   <!-- the one soft swell, ends on the cut -->
 <audio src="assets/vo.wav" data-role="vo" data-at="1.0"></audio>
 ```
 

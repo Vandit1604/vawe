@@ -6,6 +6,8 @@ a bar, the bar closes to the rule under the headline, and the headline rises out
 object carries the film, so the beats read as one gesture, not a list. Clip:
 [chain-beats.mp4](chain-beats.mp4). Demo: [demo/chain-beats.html](demo/chain-beats.html).
 
+Use once per film: the bar and the rule is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+
 ```html
 <div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>
 <script type="module">
