@@ -1,0 +1,99 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.8">
+<title>move: panel live sync</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .stage { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: calc(var(--u) * 150); height: calc(var(--u) * 64); display: grid; grid-template-columns: 1fr calc(var(--u) * 42); gap: var(--s3); }
+  .page { position: relative; display: grid; place-content: center; justify-items: start; gap: var(--s3); padding: 0 var(--s5); overflow: hidden;
+          background: radial-gradient(circle, var(--dot) 1px, transparent 1.6px) 0 0 / calc(var(--u) * 2.4) calc(var(--u) * 2.4) var(--surface); }
+  .page .title { max-width: 14em; }
+  .target { font: 700 var(--t-lead)/1 var(--sans); letter-spacing: -0.015em; background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge); white-space: nowrap;
+            outline: calc(var(--u) * 0.3) dashed var(--ink); outline-offset: calc(var(--u) * 1.1); margin-top: var(--s2); }
+  .panel { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s3); background: var(--raised); }
+  .panel h3 { margin: 0 0 var(--s1); font: 600 var(--t-body)/1 var(--sans); }
+  .panel h3 small { margin-left: var(--s2); font: 500 var(--t-small)/1 var(--mono); color: var(--muted); }
+  .field { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 9.4); padding: 0 var(--s3); border-radius: var(--r-chip); background: var(--surface); box-shadow: var(--ring); }
+  .field b { font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
+  .field span { font: 600 var(--t-small)/1 var(--mono); text-align: right; }
+  .cur { position: absolute; left: 0; top: 0; z-index: 5; }
+  .cur svg { display: block; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); transform-origin: 0 0; overflow: visible; }
+  .cur path { fill: var(--cursor); stroke: var(--cursor-edge); stroke-width: 1.4; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="page card">
+    <div class="eyebrow">Halcyon Studio</div>
+    <div class="title">Films that render themselves</div>
+    <div class="target btn">Start free trial</div>
+  </div>
+  <div class="panel card">
+    <h3>Button<small>#cta</small></h3>
+    <div class="field" data-k="rot"><b>Rotate</b><span>0 deg</span></div>
+    <div class="field" data-k="rad"><b>Radius</b><span>14 px</span></div>
+    <div class="field" data-k="pad"><b>Padding</b><span>24 px</span></div>
+  </div>
+</div>
+<div class="cur"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
+const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);
+const smooth = (u) => u * u * (3 - 2 * u), clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (a, b, u) => a + (b - a) * u;
+const seg = (t, a, b, f = smooth) => f(clamp((t - a) / (b - a)));
+
+const W = innerWidth, H = innerHeight, fields = Object.fromEntries(qa('.field').map((f) => [f.dataset.k, f]));
+const pt = (f) => { const r = f.getBoundingClientRect(); return [r.left + r.width * 0.7, r.top + r.height * 0.62]; };
+const drag = 0.07 * W;
+// one gesture per beat: glide to a field, press, scrub right, release; the values below hold between beats
+const beats = [
+  { k: 'rot', glide: [0.35, 0.8], press: 0.86, scrub: [0.9, 1.45], release: 1.55 },
+  { k: 'rad', glide: [1.55, 1.9], press: 1.95, scrub: [2.0, 2.55], release: 2.65 },
+  { k: 'pad', glide: [2.65, 3.0], press: 3.05, scrub: [3.1, 3.6], release: 3.7 },
+];
+const value = (t, k) => { const b = beats.find((x) => x.k === k), u = seg(t, ...b.scrub); return { rot: lerp(0, -9, u), rad: lerp(14, 58, u), pad: lerp(24, 46, u) }[k]; };
+const held = (t, k) => value(t, k);
+
+// the cursor is a pure function of t: glide on a smoothstep, then ride the scrub
+const cursorAt = (t) => {
+  let p = [W * 0.52, H * 1.04];
+  for (const b of beats) {
+    const a = pt(fields[b.k]), g = seg(t, ...b.glide), s = seg(t, ...b.scrub);
+    p = [lerp(p[0], a[0], g) + drag * s * (t >= b.glide[1] ? 1 : 0), lerp(p[1], a[1], g)];
+    if (t < b.release) return p;
+    p = [a[0] + drag, a[1]];
+  }
+  return p;
+};
+
+q('.page').animate([{ translate: '0 2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 420, delay: 60, easing: settle, fill: 'both' });
+q('.panel').animate([{ translate: '3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 480, delay: 160, easing: pop, fill: 'both' });
+
+vawe.onFrame((t) => {
+  const rot = held(t, 'rot'), rad = held(t, 'rad'), pad = held(t, 'pad');
+  // the control and the target change in the same frame, from the same three numbers
+  const u = (px) => `calc(var(--u) * ${(px / 10.8).toFixed(3)})`;
+  const btn = q('.target');
+  btn.style.rotate = `${rot.toFixed(2)}deg`;
+  btn.style.borderRadius = u(rad);
+  btn.style.padding = `${u(pad * 0.5)} ${u(pad)}`;
+  fields.rot.lastChild.textContent = `${Math.round(rot)} deg`;
+  fields.rad.lastChild.textContent = `${Math.round(rad)} px`;
+  fields.pad.lastChild.textContent = `${Math.round(pad)} px`;
+  for (const b of beats) {
+    const on = t >= b.press && t < b.release, f = fields[b.k];
+    f.style.boxShadow = on ? '0 0 0 calc(var(--u) * 0.35) var(--accent)' : '';
+    f.firstChild.style.color = on ? 'var(--ink)' : '';
+  }
+  const [x, y] = cursorAt(t), down = beats.some((b) => t >= b.press && t < b.release);
+  q('.cur').style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
+  q('.cur svg').style.scale = down ? 0.86 : 1;
+});
+</script>
+</body>
+</html>

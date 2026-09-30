@@ -1,0 +1,85 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="daylight">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.2">
+<title>move: agent progress</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  :root { --done: #0d7a4a; }
+  .run { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: calc(var(--u) * 96); padding: 0; overflow: hidden; }
+  .top { display: flex; align-items: center; gap: var(--s3); height: calc(var(--u) * 14); padding: 0 var(--s4); }
+  .spin { width: calc(var(--u) * 6); height: calc(var(--u) * 6); color: var(--accent); flex: none; }
+  .spin .track { stroke: var(--dot); }
+  .status { position: relative; flex: 1; height: var(--t-lead); font: 600 var(--t-lead)/1 var(--sans); letter-spacing: -0.02em; }
+  .status span { position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; }
+  .count { font: 500 var(--t-small)/1 var(--mono); color: var(--muted); position: relative; width: calc(var(--u) * 14); height: var(--t-small); }
+  .count span { position: absolute; right: 0; top: 0; opacity: 0; }
+  .bar { height: calc(var(--u) * 0.7); background: var(--dot); }
+  .bar i { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0.04); }
+  ul { list-style: none; margin: 0; padding: var(--s2) var(--s3) var(--s3); }
+  .row { display: flex; align-items: center; gap: var(--s3); height: calc(var(--u) * 12.5); padding: 0 var(--s2); border-radius: var(--r-chip); }
+  .badge { position: relative; flex: none; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); }
+  .badge > * { position: absolute; inset: 0; }
+  .num { display: grid; place-items: center; border-radius: 50%; box-shadow: inset 0 0 0 calc(var(--u) * 0.35) var(--faint); font: 600 var(--t-small)/1 var(--mono); color: var(--muted); }
+  .live .num { box-shadow: none; }
+  .done { border-radius: 50%; background: var(--done); display: grid; place-items: center; opacity: 0; scale: 0.4; color: #fff; }
+  .done svg { width: 62%; height: 62%; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
+  .arc { width: 100%; height: 100%; fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; }
+  .lab { position: relative; font: 600 var(--t-body)/1 var(--sans); letter-spacing: -0.015em; }
+  .lab i { position: absolute; left: 0; right: 0; top: 54%; height: calc(var(--u) * 0.35); background: var(--muted); transform-origin: 0 50%; transform: scaleX(0); }
+  .meta { margin-left: auto; font: 500 var(--t-small)/1 var(--mono); color: var(--muted); font-style: normal; }
+</style>
+</head>
+<body>
+<div class="run card">
+  <div class="top">
+    <svg class="spin icon bold" viewBox="0 0 24 24"><circle class="track" cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>
+    <div class="status"><span>Reading the repo</span><span>Running the tests</span><span>Writing the fix</span></div>
+    <div class="count"><span>0 of 4</span><span>1 of 4</span><span>2 of 4</span><span>3 of 4</span></div>
+  </div>
+  <div class="bar"><i></i></div>
+  <ul>
+    <li class="row"><span class="badge"><b class="num">1</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Read the failing test<i></i></span><em class="meta">3 files</em></li>
+    <li class="row"><span class="badge"><b class="num">2</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Trace the null cursor<i></i></span><em class="meta">14 files</em></li>
+    <li class="row"><span class="badge"><b class="num">3</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Patch the queue reader<i></i></span><em class="meta">2 edits</em></li>
+    <li class="row live"><span class="badge"><b class="num">4</b><svg class="arc" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 1 7.8 13.5"/></svg></span><span class="lab">Run the full suite</span><em class="meta">312 tests</em></li>
+  </ul>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);
+const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
+const opt = { fill: 'both' };
+const at = { card: 80, rows: 420, checks: [1250, 1800, 2350], swaps: [420, 1250, 2000] };   // ms
+
+q('.run').animate([{ translate: '-50% -46%', scale: 0.94, opacity: 0 }, { opacity: 1, offset: 0.3 }, { translate: '-50% -50%', scale: 1, opacity: 1 }], { duration: 560, delay: at.card, easing: pop, ...opt });
+qa('.row').forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: settle, ...opt }));
+
+// the machine works: both arcs turn for the whole clip and the bar advances with each check
+q('.spin').animate([{ rotate: '0deg' }, { rotate: '900deg' }], { duration: 3200, easing: 'linear', ...opt });
+q('.badge .arc').animate([{ rotate: '0deg' }, { rotate: '1080deg' }], { duration: 3200, easing: 'linear', ...opt });
+const steps = [0.04, 0.3, 0.55, 0.78];
+at.checks.forEach((k, i) => q('.bar i').animate([{ transform: `scaleX(${steps[i]})` }, { transform: `scaleX(${steps[i + 1]})` }], { duration: 420, delay: k, easing: settle, fill: 'forwards' }));
+
+// a slot swaps whole states: the old one leaves in 120 ms, the new one rises in 260 ms
+const slot = (els, times) => els.forEach((el, i) => {
+  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: times[i], easing: settle, ...opt });
+  if (times[i + 1] !== undefined) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 120, delay: times[i + 1] - 120, easing: leave, fill: 'forwards' });
+});
+slot(qa('.status span'), at.swaps);
+slot(qa('.count span'), [at.rows, ...at.checks]);
+
+// a check lands: the numbered outline flips to a solid circle, the tick draws, the label strikes and dims
+at.checks.forEach((k, i) => {
+  const row = qa('.row')[i], done = row.querySelector('.done'), lab = row.querySelector('.lab');
+  row.querySelector('.num').animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 120, delay: k, easing: leave, fill: 'forwards' });
+  done.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1.12, offset: 0.6 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: pop, fill: 'forwards' });
+  done.querySelector('path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: settle, fill: 'forwards' });
+  lab.querySelector('i').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: settle, fill: 'forwards' });
+  lab.animate([{ color: 'var(--ink)' }, { color: 'var(--muted)' }], { duration: 300, delay: k + 60, easing: 'linear', fill: 'forwards' });
+});
+q('.row.live').animate([{ background: 'transparent' }, { background: 'var(--raised)' }], { duration: 240, delay: at.checks[2], easing: settle, ...opt });
+</script>
+</body>
+</html>

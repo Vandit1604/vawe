@@ -1,0 +1,50 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="dusk">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.6">
+<title>move: light leak transition</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .shot { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--s3); padding: 0 calc(var(--u) * 14); }
+  .shot.b { background: linear-gradient(160deg, #3a2470 0%, #5a2a66 55%, #7a3a66 100%); opacity: 0; }
+  .shot .eyebrow { color: var(--muted); }
+  .shot .title { font-size: calc(var(--u) * 15); }
+  .leak, .wash { position: absolute; pointer-events: none; mix-blend-mode: screen; opacity: 0; }
+  .leak { inset: -25% -30%;
+    background:
+      radial-gradient(38% 52% at 18% 52%, #ffc45c 0%, rgba(255, 150, 60, 0.8) 34%, rgba(255, 96, 80, 0) 74%),
+      radial-gradient(30% 40% at 42% 26%, #ff7a6b 0%, rgba(255, 90, 120, 0) 72%),
+      radial-gradient(42% 56% at 34% 88%, #ffd98a 0%, rgba(255, 160, 70, 0) 72%); }
+  .wash { inset: 0; background: radial-gradient(120% 130% at 24% 50%, rgba(255, 214, 140, 0.96) 0%, rgba(255, 150, 84, 0.78) 55%, rgba(255, 96, 96, 0.5) 100%); }
+</style>
+</head>
+<body>
+<div class="shot a"><div class="eyebrow">Monday</div><div class="title">Draft the film</div></div>
+<div class="shot b"><div class="eyebrow">Friday</div><div class="title">Ship <span class="em">it</span></div></div>
+<div class="wash"></div>
+<div class="leak"></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), ramp = curveToLinear((u) => u * u);
+const at = { leak: 450, dur: 1500, peak: 0.4 };
+const cut = at.leak + at.dur * at.peak;   // ms: the cut sits on the peak, so the flare covers it
+
+// the flare ramps up on an ease-in and dies on an exponential tail, so the rise is slow and the fall is quick
+const swell = (amp) => [{ opacity: 0, easing: ramp }, { opacity: amp, offset: at.peak, easing: settle }, { opacity: 0 }];
+q('.wash').animate(swell(0.95), { duration: at.dur, delay: at.leak, fill: 'both' });
+q('.leak').animate(swell(1), { duration: at.dur, delay: at.leak, fill: 'both' });
+// the light travels across the frame while it swells, at a different speed from the wash
+q('.leak').animate([{ translate: '-22% 4%', scale: 0.85, rotate: '-6deg' }, { translate: '16% -3%', scale: 1.35, rotate: '5deg' }], { duration: at.dur, delay: at.leak, easing: curveToLinear((u) => u * u * (3 - 2 * u)), fill: 'both' });
+
+// the old shot sinks into the light, the cut lands on the peak, the new shot climbs out of it
+q('.shot.a').animate([{ opacity: 1 }, { opacity: 0.12 }], { duration: 420, delay: cut - 420, easing: ramp, fill: 'both' });
+q('.shot.a').animate([{ opacity: 0.12 }, { opacity: 0 }], { duration: 1, delay: cut, fill: 'forwards' });
+q('.shot.b').animate([{ opacity: 0.12 }, { opacity: 1 }], { duration: 560, delay: cut, easing: settle, fill: 'both' });
+// the new shot settles as the light leaves
+q('.shot.b .title').animate([{ translate: '0 1.6vh' }, { translate: '0 0' }], { duration: 700, delay: cut, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>
