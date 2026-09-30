@@ -10,7 +10,7 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { ffmpegOrDie } from '../../lib/scratch.mjs';
 import { parseTesseractTsv } from './ocr.mjs';
-import { trackWords, norm } from '../../lib/ref-measure/words.mjs';
+import { trackWords, norm, assertWordsRead } from '../../lib/ref-measure/words.mjs';
 
 const OCR_W = 1280;
 const POOL = 4;
@@ -31,7 +31,10 @@ function run(cmd, args) {
 
 async function tesseract(img, base, psm = 11) {
   const args = [img, base, '--psm', String(psm), 'tsv'];
-  if ((await run('tesseract', args)) !== 0) await run('tesseract', args);
+  let code = await run('tesseract', args);
+  if (code !== 0) code = await run('tesseract', args);
+  if (code === -1) throw new Error('tesseract is not installed or not on PATH: install it (brew install tesseract) or skip OCR with --no-ocr');
+  if (code !== 0) throw new Error(`tesseract exited ${code} on ${path.basename(img)}: run it by hand on that frame to see why`);
 }
 
 async function pool(items, fn) {
@@ -53,6 +56,14 @@ function readPgm(file) {
     p = q;
   }
   return { w: Number(tok[1]), h: Number(tok[2]), px: b.subarray(p + 1) };
+}
+
+// A frame with visible content: its grey levels spread over more than noise.
+const CONTENT_STDDEV = 12;
+function hasContent(g) {
+  let n = 0, sum = 0, sq = 0;
+  for (let i = 0; i < g.px.length; i += 16) { const v = g.px[i]; n++; sum += v; sq += v * v; }
+  return n > 0 && Math.sqrt(Math.max(0, sq / n - (sum / n) ** 2)) > CONTENT_STDDEV;
 }
 
 // Laplacian variance over the squared contrast: blur lowers it, a plain fade does not.
@@ -155,14 +166,17 @@ export async function sampleText(video, workDir, { sampleFps = 8, width, height 
       const g = readPgm(path.join(dir, f));
       const words = all.filter((w) => w.conf >= WORD_CONF && /[a-zA-Z0-9]/.test(w.text))
         .map((w, wi) => Object.assign(w, { id: i * 1000 + wi, sharp: sharpness(g, w.px), ...w.px }));
-      return { t: i / sampleFps, all, words };
+      return { t: i / sampleFps, all, words, content: hasContent(g) };
     });
     await rereadSharpest(dir, files, raw, sampleFps);
-    return raw.map((s) => ({
+    const samples = raw.map((s) => ({
       t: s.t,
       words: s.words.map((w) => ({ id: w.id, text: w.text, conf: w.conf, sharp: w.sharp, ...scalePx(w.px, k) })),
       lines: linesOf(s.all),
+      content: s.content,
     }));
+    assertWordsRead(samples, sampleFps);
+    return samples;
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
