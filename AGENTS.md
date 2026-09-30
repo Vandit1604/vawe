@@ -32,6 +32,7 @@ This file adds only what you would get wrong on your own. One command runs every
 
 Brief or reference -> stills -> draft -> critique in a fresh session -> fix only the affected
 seconds -> final. A hook names the next command for the page film you edited last.
+Read `engine-doctrine/TASTE-CARD.md` before the stills: 15 rules and 5 anti-patterns, and the judge scores against it.
 
 | # | stage | the command |
 |---|---|---|
