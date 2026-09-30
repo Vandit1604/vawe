@@ -73,14 +73,53 @@ export function trackWords(samples, fps) {
       if (!usedW.has(wi)) tracks.push({ key: norm(w.text), last: i, samples: [{ t: s.t, ...w }] });
     });
   });
-  return tracks
+  const apps = tracks
     .filter(keepTrack)
     .map((tr) => {
       const seen = tr.samples;
-      const text = seen.reduce((b, s) => (s.conf > b.conf ? s : b)).text;
+      const top = Math.max(1e-9, ...seen.map((s) => s.sharp || 0));
+      const score = (s) => s.conf * (0.25 + 0.75 * ((s.sharp || 0) / top));
+      const text = seen.reduce((b, s) => (score(s) > score(b) ? s : b)).text;
       return { text, t0: seen[0].t, t1: seen[seen.length - 1].t, samples: seen };
-    })
-    .sort((a, b) => a.t0 - b.t0 || a.samples[0].cx - b.samples[0].cx);
+    });
+  return dropFragments(mergeDuplicates(apps)).sort((a, b) => a.t0 - b.t0 || a.samples[0].cx - b.samples[0].cx);
+}
+
+const boxOf = (a) => { const b = restBox(a); return { x0: b.x - b.w / 2, x1: b.x + b.w / 2, y0: b.y - b.h / 2, y1: b.y + b.h / 2, h: b.h }; };
+const overlapLen = (a0, a1, b0, b1) => Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+const overlapsTime = (a, b) => overlapLen(a.t0, a.t1, b.t0, b.t1) >= 0.5 * Math.max(1e-9, Math.min(a.t1 - a.t0, b.t1 - b.t0));
+
+// Two tracks with the same text on the same box at the same time are one word read twice.
+function mergeDuplicates(apps) {
+  const out = [];
+  for (const a of apps) {
+    const ba = boxOf(a);
+    const twin = out.find((o) => norm(o.text) === norm(a.text) && overlapsTime(o, a) && (() => {
+      const bo = boxOf(o);
+      return overlapLen(ba.x0, ba.x1, bo.x0, bo.x1) >= 0.5 * Math.min(ba.x1 - ba.x0, bo.x1 - bo.x0)
+        && overlapLen(ba.y0, ba.y1, bo.y0, bo.y1) >= 0.5 * Math.min(ba.h, bo.h);
+    })());
+    if (!twin) { out.push(a); continue; }
+    twin.samples = [...twin.samples, ...a.samples].sort((p, r) => p.t - r.t);
+    twin.t0 = twin.samples[0].t;
+    twin.t1 = twin.samples[twin.samples.length - 1].t;
+  }
+  return out;
+}
+
+// A piece of a longer word is not a word: a cut-off read ("yle" beside "Style", "re expens" over
+// "expensive") whose letters lie inside a longer read of the same place, at the same time.
+const areaShare = (a, b) => overlapLen(a.x0, a.x1, b.x0, b.x1) * overlapLen(a.y0, a.y1, b.y0, b.y1) / Math.max(1e-9, (a.x1 - a.x0) * (a.y1 - a.y0));
+const pieceOf = (a, b) => String(a.text).split(/\s+/).map(norm).filter(Boolean).some((tok) => tok.length >= 3 && norm(b.text).includes(tok) && norm(b.text).length > tok.length);
+function dropFragments(apps) {
+  return apps.filter((a) => {
+    const ba = boxOf(a);
+    return !apps.some((b) => {
+      if (b === a || b.samples.length < a.samples.length || a.t0 - b.t1 > 0.3 || b.t0 - a.t1 > 0.3 || !pieceOf(a, b)) return false;
+      const bb = boxOf(b), grow = 0.15 * (bb.x1 - bb.x0);
+      return areaShare(ba, { ...bb, x0: bb.x0 - grow, x1: bb.x1 + grow }) >= 0.5;
+    });
+  });
 }
 
 // The box at rest: a low quantile of width and height, because blur only ever grows a box.
@@ -90,10 +129,17 @@ export function restBox(appearance) {
     x: median(s.map((x) => x.cx)), y: median(s.map((x) => x.cy)) };
 }
 
+const ENERGY_SHARE = 0.1;
+const TRAVEL = 0.5;
+
 /**
- * Snap each appearance's t0 and t1 to the pixels. d(f) is the mean gray distance of the word's box
- * from the box at the rest frame. Before the word arrives d is large and falls as it fades or wipes
- * in: t0 is the first frame where it has fallen below 85% of its early value. t1 mirrors it.
+ * Snap each appearance's t0 and t1 to the pixels. Two cues, the earlier t0 and the later t1 win.
+ * Distance cue: d(f) is the mean gray distance of the word's box from the box at the rest frame; it
+ * falls as the word fades or wipes in (t0: first frame below 98% of its early value, t1 mirrors it).
+ * Ink cue: e(f) is the edge energy of the box widened by half its width each side, so a word that
+ * slides or scales in is seen on its way, not only where it rests. t0 is the first frame from which e
+ * stays above 10% of the way from its quiet level to its rest level, t1 the first frame where it
+ * falls below that and stays for the next frame (the word is gone). A word that never leaves keeps the distance cue.
  * V: { w, h, frame(i), n }, W the reference width in px, fps the decode rate. Error: one decode frame.
  */
 export function refineWordTimes(V, apps, W, fps, windowS = 0.5) {
@@ -109,6 +155,17 @@ export function refineWordTimes(V, apps, W, fps, windowS = 0.5) {
       let s = 0, n = 0;
       for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) { s += Math.abs(g[y * V.w + x] - rest[y * V.w + x]); n++; }
       return n ? s / n : 0;
+    };
+    const wx = Math.round(TRAVEL * (x1 - x0));
+    const ex0 = Math.max(1, x0 - wx), ex1 = Math.min(V.w - 2, x1 + wx), ey0 = Math.max(1, y0), ey1 = Math.min(V.h - 2, y1);
+    const ink = (f) => {
+      const g = V.frame(f);
+      let s = 0;
+      for (let y = ey0; y <= ey1; y++) for (let x = ex0; x <= ex1; x++) {
+        const i = y * V.w + x;
+        s += Math.abs(g[i + 1] - g[i - 1]) + Math.abs(g[i + V.w] - g[i - V.w]);
+      }
+      return s;
     };
     const win = Math.round(windowS * fps);
     const inF = Math.round(a.t0 * fps), outF = Math.round(a.t1 * fps);
@@ -126,6 +183,22 @@ export function refineWordTimes(V, apps, W, fps, windowS = 0.5) {
       let f = Math.max(restF, outF - win);
       while (f < to && dist(f) < (1 - ONSET) * late) f++;
       t1 = f / fps;
+    }
+    const eRest = ink(restF), eIn = Array.from({ length: inF - from + 1 }, (_, i) => ink(from + i));
+    const quietIn = Math.min(...eIn);
+    if (eRest - quietIn > 0.2 * eRest) {
+      const thr = quietIn + ENERGY_SHARE * (eRest - quietIn);
+      let f = inF;
+      while (f > from && eIn[f - 1 - from] > thr) f--;
+      t0 = Math.min(t0, f / fps);
+    }
+    const eOut = Array.from({ length: to - outF + 1 }, (_, i) => ink(outF + i));
+    const quietOut = Math.min(...eOut);
+    if (quietOut < 0.6 * eRest) {
+      const thr = quietOut + ENERGY_SHARE * (eRest - quietOut);
+      let f = 0;
+      while (f < eOut.length - 1 && !(eOut[f] <= thr && eOut[f + 1] <= thr)) f++;
+      t1 = Math.max(t1, (outF + f) / fps);
     }
     return { ...a, t0: r3(Math.min(t0, a.t0)), t1: r3(t1), refined: true };
   });
