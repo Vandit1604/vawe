@@ -28,7 +28,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
 | land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
-| decide a name or number on screen | [flap-resolve](flap-resolve.md), [word-swap-slot](word-swap-slot.md) |
+| decide a name or number on screen | [flap-resolve](flap-resolve.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |
 | point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md) |
 | change what a word means | [weight-morph](weight-morph.md) |
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
@@ -64,6 +64,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | blur word cascade | copy resolves word by word from blur with a slight rise; no mask, so nothing cuts a descender | [blur-word-cascade.md](blur-word-cascade.md) | [blur-word-cascade.mp4](blur-word-cascade.mp4) |
 | text as mask | the type is a window onto a rich picture: the frame opens tight on image, pulls back to the title, and the layers keep moving inside the fixed letters | [text-as-mask.md](text-as-mask.md) | [text-as-mask.mp4](text-as-mask.mp4) |
 | outline fill | one hero word arrives as an outline, letter by letter, then an accent floods each letter from its baseline on the beat | [outline-fill.md](outline-fill.md) | [outline-fill.mp4](outline-fill.mp4) |
+| strikethrough replace | an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character | [strikethrough-replace.md](strikethrough-replace.md) | [strikethrough-replace.mp4](strikethrough-replace.mp4) |
 
 ## Change between shots
 
