@@ -173,11 +173,14 @@ export const VERBS = [
     build: (v) => [{ script: 'harness/dev/doctor.mjs', args: [...(v.quiet ? ['--quiet'] : []), ...(v.json ? ['--json'] : [])] }],
   },
   {
-    name: 'moves', summary: 'render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4 (640 px, 60 fps) in parallel; flags stale clips',
+    name: 'moves', summary: 'render the stale prompts/moves/demo/<move>.html clips to prompts/moves/<move>.mp4 (640 px, 60 fps) in parallel; a clip is stale when its demo, demo.css or a core/ import changed',
     positional: [],
-    flags: [{ name: 'only', type: 'string', help: 'render one move by name, for example weight-morph' }],
+    flags: [
+      { name: 'only', type: 'string', help: 'render one move by name, for example weight-morph, even when current' },
+      { name: 'all', type: 'bool', help: 'render every clip, stale or not' },
+    ],
     example: 'vawe moves --only weight-morph',
-    build: (v) => [{ script: 'harness/media/render-moves.mjs', args: opt('--only', v.only) }],
+    build: (v) => [{ script: 'harness/media/render-moves.mjs', args: [...opt('--only', v.only), ...(v.all ? ['--all'] : [])] }],
     next: () => 'look at a clip in prompts/moves/ before you commit it',
   },
   {

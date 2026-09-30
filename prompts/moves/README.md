@@ -17,20 +17,37 @@ This index lists the built ones, in the same groups.
 
 ## Pick by job
 
+One row per job, best move first. Every built move is in this table; the group tables below carry the clips.
+
 | job | moves |
 |---|---|
-| hand the product to the brand at the end | [ui strip away](ui-strip-away.md) |
-| prove a change with a picture | [before after wipe](before-after-wipe.md) |
-| show a real UI arriving, not popping in | [skeleton reveal](skeleton-reveal.md) |
-| show an AI product answering | [AI stream response](ai-stream-response.md) |
-| put the picture inside the name | [text as mask](text-as-mask.md) |
-| land one hero word on the beat | [outline fill](outline-fill.md) |
-| cover the old shot with a new panel | [stack-cover](stack-cover.md) |
-| open one shot onto the next | [split-reveal](split-reveal.md) |
-| tear one shot off to show the next | [slice-shift](slice-shift.md) |
-| grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
-| carry a cut on a brand colour | [color-block-wipe](color-block-wipe.md) |
-| enter the next shot through a part of this one | [zoom-through](zoom-through.md) |
+| open on a detail, answer with the whole | [pull-back-reveal](pull-back-reveal.md) |
+| open on the brand in under 2 s | [logo-sting](logo-sting.md) |
+| arrive by flying into a scene | [parallax-dive](parallax-dive.md) |
+| land a title or wordmark, soft | [tracking-collapse](tracking-collapse.md), [mask-rise](mask-rise.md), [blur-word-cascade](blur-word-cascade.md) |
+| type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
+| land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md) |
+| put a picture inside the name | [text-as-mask](text-as-mask.md) |
+| decide a name or number on screen | [flap-resolve](flap-resolve.md), [word-swap-slot](word-swap-slot.md) |
+| point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md) |
+| change what a word means | [weight-morph](weight-morph.md) |
+| point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
+| change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md) |
+| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md) |
+| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md) |
+| change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md) |
+| run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
+| lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
+| keep a quiet frame alive | [drift-hold](drift-hold.md) |
+| show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md) |
+| show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md) |
+| show an AI product answering | [ai-stream-response](ai-stream-response.md) |
+| prove a number | [count-up](count-up.md), [chart-build](chart-build.md) |
+| prove a change with a picture | [before-after-wipe](before-after-wipe.md) |
+| end on the brand | [wordmark-cascade](wordmark-cascade.md), [logo-sting](logo-sting.md), [mark-trace](mark-trace.md) |
+| end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
+| end on an action | [cta-pop](cta-pop.md) |
+| hand the product to the brand | [ui-strip-away](ui-strip-away.md) |
 
 ## Reveal a title
 
@@ -115,7 +132,7 @@ This index lists the built ones, in the same groups.
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
 | AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
 
-Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
+`bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`). `--only <move>` forces one clip, `--all` forces every clip.
 
 Two rules the snippets already obey, so keep them when you adapt one: an exit keyframe has no
 `from` (a `from` fills backwards over the entrance and hides it), and `var()` never goes inside the
