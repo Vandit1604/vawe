@@ -181,7 +181,7 @@ assets/ransom-src/*
 !assets/ransom-src/README.md
 
 # MCP server working data (records, scenes, drafts, exports)
-.vawe-data/
+.vawe-data
 
 # the baked draft watermark sheet (make watermark)
 assets/watermark/
