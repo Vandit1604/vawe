@@ -1,0 +1,35 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="signal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.8">
+<title>move: shape trace morph</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  main { display: grid; justify-items: center; gap: var(--s3); }
+  svg { width: calc(var(--u) * 40); height: calc(var(--u) * 40); overflow: visible; }
+  path { fill: var(--accent); fill-opacity: 0; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1 2; stroke-dashoffset: 1; }
+  .name { margin: 0; font: 700 var(--t-head)/1 var(--head); letter-spacing: 0.04em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<main>
+  <svg viewBox="0 0 100 100"><path id="shape" pathLength="1" d="M50 10 L84 30 L84 70 L50 90 L16 70 L16 30 Z"/></svg>
+  <p class="name" id="name">Arcwell</p>
+</main>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { enter } from '/core/motion/presets.js';
+const smooth = (u) => u * u * (3 - 2 * u);
+const glide = curveToLinear(smooth), settle = curveToLinear(CURVES.expoOut), spring = curveToLinear(CURVES.spring);
+const shape = document.getElementById('shape');
+// both paths have 1 M, 5 L and 1 Z: the morph interpolates matching commands
+const BOLT = 'M58 8 L22 54 L44 54 L38 92 L80 40 L56 40 Z';
+shape.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 900, delay: 100, easing: glide, fill: 'both' });
+shape.animate([{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 380, delay: 760, easing: settle, fill: 'both' });
+shape.animate([{ d: 'path("M50 10 L84 30 L84 70 L50 90 L16 70 L16 30 Z")', stroke: 'var(--ink)' }, { d: `path("${BOLT}")`, stroke: 'var(--accent)' }],
+  { duration: 800, delay: 1050, easing: spring, fill: 'both' });
+enter(document.getElementById('name'), { at: 1.75, band: 'professional', from: '0 0.4em' });
+</script>
+</body>
+</html>
