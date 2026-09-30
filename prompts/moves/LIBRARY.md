@@ -48,6 +48,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | color-block-wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | HyperFrames colorama-wipe and directional-wipe, video-shotcraft color-block-step-wipe | built |
 | zoom-through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | HyperFrames zoom-through-transition, video-shotcraft transition-travel, School of Motion infinite zoom | built |
 | smear-stretch | an elastic smear stretches the frame into the cut | After Effects stretch transition packs and the animator's smear frame; HyperFrames rubber-band-bumper, motion-blur | built |
+| shape-morph-wipe | a mask shape morphs, for example circle to rounded rectangle, as it grows onto the next shot | HyperFrames svg-mask-reveal, morph-swap, modal-morph; video-shotcraft transition/shot-transitions (F, mask-wipe) | built |
 
 ## 3. Point the eye
 
