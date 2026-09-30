@@ -16,15 +16,19 @@
   .card p { margin: var(--s3) 0 0; font: 500 var(--t-lead)/1.25 var(--sans); color: var(--muted); max-width: 40ch; }
   .meta { position: absolute; left: calc(var(--u) * 5.6); right: calc(var(--u) * 5.6); bottom: calc(var(--u) * 4.6); display: flex; justify-content: space-between; padding-top: var(--s3); box-shadow: 0 -1px 0 var(--line); color: var(--muted); font: 500 var(--t-body)/1 var(--sans); }
   .meta b { color: var(--ink); font-weight: 600; }
+  .thumb { position: absolute; right: calc(var(--u) * 5.6); top: calc(var(--u) * 5); width: calc(var(--u) * 28); height: calc(var(--u) * 15.75); border-radius: calc(var(--r-card) - var(--u) * 2); box-shadow: var(--stack); }
+  .thumb .photo { border-radius: inherit; }
+  .thumb span { position: absolute; right: calc(var(--u) * 1.4); bottom: calc(var(--u) * 1.4); padding: calc(var(--u) * 0.7) calc(var(--u) * 1.2); border-radius: calc(var(--u) * 1); background: rgba(10, 9, 13, 0.72); font: 600 calc(var(--u) * 2.6)/1 var(--mono); letter-spacing: -0.02em; }
 </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="world">
   <div class="card">
+    <div class="thumb"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""><span>0:41</span></div>
     <div class="status"><i class="dot"></i>Live now</div>
     <h1>Shipped.</h1>
-    <p>launch-16x9 reached 3 aspect ratios in 41 seconds</p>
+    <p>launch-16x9 rendered 3 aspect ratios in 41 seconds</p>
     <div class="meta"><span><b>60</b> fps</span><span><b>1080p</b></span><span><b>-14</b> LUFS</span></div>
   </div>
 </div>

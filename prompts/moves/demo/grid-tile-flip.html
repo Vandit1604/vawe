@@ -23,12 +23,15 @@
   .bar { position: absolute; left: 7.4vw; top: calc(var(--u) * 72); width: calc(var(--u) * 62); height: calc(var(--u) * 2.2); background: var(--line); }
   .bar i { display: block; width: 62%; height: 100%; background: var(--accent); }
   .tick { position: absolute; left: 7.4vw; top: calc(var(--u) * 68); width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+  .thumb { position: absolute; left: 60vw; top: calc(var(--u) * 50); width: 33vw; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--r-card); outline: 1px solid rgba(255, 255, 255, 0.1); outline-offset: -1px; }
+  .a .thumb { opacity: 0.28; filter: grayscale(1); }
+  .b .thumb { outline-color: rgba(0, 0, 0, 0.1); box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(9, 13, 10, 0.18); }
   .tick svg { width: 60%; height: 60%; fill: none; stroke: var(--on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-<template id="a"><div class="shot a"><div class="big">build<i>_</i></div><div class="line">$ vawe ship film.html</div><div class="bar"><i></i></div></div></template>
-<template id="b"><div class="shot b"><div class="big">shipped</div><div class="line">film.mp4, 12.4 s, 60 fps</div><div class="tick"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.6"/></svg></div></div></template>
+<template id="a"><div class="shot a"><div class="big">build<i>_</i></div><div class="line">$ vawe ship film.html</div><div class="bar"><i></i></div><img class="thumb" src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></div></template>
+<template id="b"><div class="shot b"><div class="big">shipped</div><div class="line">film.mp4, 12.4 s, 60 fps</div><div class="tick"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.6"/></svg></div><img class="thumb" src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></div></template>
 <div class="grid" id="grid"></div>
 <script type="module">
 import { springLinear, springDuration, curveToLinear } from '/core/motion/springs.js';
