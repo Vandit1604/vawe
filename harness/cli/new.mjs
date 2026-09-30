@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { UsageError } from './parse.mjs';
-import { pickTemplate, readRouting, ROUTING } from './route.mjs';
+import { pickTemplate, readRouting, ROUTING, pickRecipe, readRecipes, RECIPES } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
@@ -228,7 +228,9 @@ function inputLines(questions, answers) {
   return [...extra, ...lines];
 }
 
-function briefText(name, templateRel, questions, sections, answers) {
+const recipeLine = (recipe) => `chain to start from: ${RECIPES}, "## ${recipe.heading}" (${recipe.why}); copy it, then change two moves`;
+
+function briefText(name, templateRel, questions, sections, answers, recipe = null) {
   const lines = inputLines(questions, answers);
   const inputs = questions.length || lines.length
     ? lines.join('\n')
@@ -236,7 +238,7 @@ function briefText(name, templateRel, questions, sections, answers) {
   const rest = sections.length
     ? sections.map((s) => `## ${s.name[0].toUpperCase()}${s.name.slice(1)}\n\n${s.body.replaceAll('<name>', name)}`).join('\n\n')
     : `## Direction\n\nThe template is written as prompts, not tagged sections: read ${templateRel}.`;
-  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\nTaste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
+  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
 }
 
 function readAnswers({ length, aspect, title }) {
@@ -248,7 +250,8 @@ function readAnswers({ length, aspect, title }) {
 function chooseTemplate(root, { from, request, name, title, length }) {
   if (from) return { template: path.resolve(from), route: null };
   const route = pickTemplate({ request, name, title, length }, readRouting(root));
-  return { template: path.join(root, route.template), route };
+  const recipe = pickRecipe({ request, name, title, length }, readRecipes(root));
+  return { template: path.join(root, route.template), route: recipe ? { ...route, recipe } : route };
 }
 
 // The starter's face goes into the film's own assets folder: a film carries its files.
@@ -264,6 +267,7 @@ export function newFilmLines(name, { page, route, title }) {
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
   if (route) {
     lines.push(`template: ${route.template} (${route.type}: ${route.why})`);
+    if (route.recipe) lines.push(recipeLine(route.recipe));
     lines.push(`another film type: delete films/${name}, then bin/vawe new ${name} --from prompts/<template>.md (rows in ${ROUTING}) or --request "<the ask>" --length <s>`);
   }
   const advice = [
@@ -293,7 +297,7 @@ export function newFilm(name, { from, root, length, aspect, title, request }) {
   if (length !== undefined) answers.length = `${length} s`;
   if (aspect !== undefined) answers.aspect = aspect;
   if (title !== undefined) answers.title = title;
-  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown), answers));
+  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown), answers, route?.recipe));
   console.log(formatQuestions(questions));
   return { page: `films/${name}/page.html`, route, title };
 }
