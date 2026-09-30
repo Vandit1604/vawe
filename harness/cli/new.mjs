@@ -9,7 +9,8 @@ import { UsageError } from './parse.mjs';
 import { pickTemplate, readRouting, ROUTING } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
-import { FAMILIES, FIELDS } from '../lib/directions.mjs';
+import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
+import { adviceBlock } from '../lib/advice.mjs';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -259,13 +260,18 @@ function copyFace(root, dir, face) {
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
 
-export function newFilmLines(name, { page, route }) {
+export function newFilmLines(name, { page, route, title }) {
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
   if (route) {
     lines.push(`template: ${route.template} (${route.type}: ${route.why})`);
     lines.push(`another film type: delete films/${name}, then bin/vawe new ${name} --from prompts/<template>.md (rows in ${ROUTING}) or --request "<the ask>" --length <s>`);
   }
-  return [...lines, '', 'rules for authors: engine-doctrine/TASTE-CARD-DIGEST.md (2 KB); the full card is engine-doctrine/TASTE-CARD.md', '', ...tasteLines('concept'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
+  const advice = [
+    `directions: films/${name}/directions.html holds one starter still per family (type, object, graphic); fill the three slots in brief.md, then pick one`,
+    ...brandAdvice(`${name} ${title ?? ''}`),
+  ];
+  return [...lines, '', 'rules for authors: engine-doctrine/TASTE-CARD-DIGEST.md (2 KB); the full card is engine-doctrine/TASTE-CARD.md', '', ...tasteLines('concept'), '',
+    ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
 }
 
 /** Writes the film folder; returns { page, route } (route is null when --from chose the template). */
@@ -289,6 +295,5 @@ export function newFilm(name, { from, root, length, aspect, title, request }) {
   if (title !== undefined) answers.title = title;
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown), answers));
   console.log(formatQuestions(questions));
-  console.log(`directions: films/${name}/directions.html holds one starter still per family (type, object, graphic); fill the three slots in brief.md, then pick one`);
-  return { page: `films/${name}/page.html`, route };
+  return { page: `films/${name}/page.html`, route, title };
 }

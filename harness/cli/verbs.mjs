@@ -42,9 +42,13 @@ export const VERBS = [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
       { name: 'audio', type: 'bool', help: 'mix the audio tags into the draft' },
       { name: 'out', type: 'path', default: 'out/<name>-draft.mp4, or out/<name>-draft-<from>-<to>.mp4 for a range', help: 'output file' },
+      { name: 'no-judge', type: 'bool', help: 'skip the stills judge that dev runs on the three directions, once per change of directions.html or their brief lines (about 25 s)' },
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
-    build: (v, [page]) => [{ script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] }],
+    build: (v, [page]) => [
+      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] },
+      ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
+    ],
     next: (v, [page]) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft --brief ${path.join(path.dirname(page), 'brief.md')} (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`,
   },
   {

@@ -20,7 +20,7 @@ bin/vawe judge <page|mp4> --verdict PASS|FIX [--at <s> --top-fix "<fix>"] [--fix
 ```
 
 - **Prepare** writes a key-frame sheet and `rubric.md` under the scratch base. A fresh session reads the sheet against the rubric. With `--ref`, every tile is frame-locked: reference left, film right.
-- **`--fresh`** scores now with a separate headless Claude session that has the Read tool only (about 30 s). It returns one JSON object and writes `out/<name>.judge.json`. It advises and never blocks.
+- **`--fresh`** scores now with a separate headless Claude session that has the Read tool only (about 30 s). It returns one JSON object and writes `out/<name>.judge.json` (`out/<name>.stills.json` for `--stage stills`). Each fix gets an id in a ledger: the next judge of the film marks every open fix fixed, partly or still before it adds new ones, and names the old fix a new one reverses, with a reason (`harness/lib/judge-ledger.mjs`). `bin/vawe dev` runs the stills judge itself once per change of `directions.html` (`--no-judge` skips it). It advises and never blocks.
 - **`--verdict`** records the verdict against the exact render. It refuses a stale render, a missing sheet, and a PASS recorded by the agent that rendered the film.
 - **`--struct --runs A,B`** writes one rubric per run, scored by two independent judges on the 12 criteria in `harness/lib/judge-codes.mjs`. Every criterion needs `{score, evidence, t}`, and the evidence must name a concrete observation (`harness/lib/evidence-lint.mjs`). `node quality/gates/judge.mjs --compare A.json B.json` flags any criterion where the runs differ by more than 2 points.
 

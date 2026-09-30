@@ -1,5 +1,7 @@
-// The motion lint: five advice lines on how a page's Web Animations move, each with its taste card
-// rule, the second and one fix. collectMotion runs in the page; everything else is pure over its records.
+// The motion lint: five advice lines on how a page moves, each with its taste card rule, the second and
+// one fix. collectMotion runs in the page and reads Web Animations; recordsFromBoxes infers the same
+// records from element boxes over time (harness/lib/box-track.mjs) for a page that paints in window.seek
+// or vawe.onFrame. Everything else is pure over the records.
 import { isWaivedBy, hasReason } from './waivers.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
 
@@ -139,6 +141,89 @@ export function oneBand(records, { scripted = false } = {}) {
   return [{ code: 'one-band', rule: 8, at: Math.min(...timed.map((r) => r.delay)),
     what: `all ${timed.length} timed moves sit in the ${band} band (${BANDS[band].join(' to ')} s)`,
     fix: 'give the hero gravity or cinematic and a payoff energy: the slowest beat at least 3x the fastest' }];
+}
+
+// Box noise under these is no motion: sub-pixel layout jitter and colour-rounding of opacity.
+const STILL_PX = 0.25;
+const STILL_ALPHA = 0.005;
+const SEEN = 0.05;
+const LINEAR_CV = 0.15;
+
+const boxMoved = (a, b, px = STILL_PX) => Math.abs(a[0] - b[0]) > px || Math.abs(a[1] - b[1]) > px || Math.abs(a[2] - b[2]) > px || Math.abs(a[3] - b[3]) > px;
+
+/** The element's own motion: its box in its parent's frame (the parent's move and scale undone) and its own opacity. */
+function ownTrack(track, parentTrack) {
+  if (!parentTrack) return track.map((b) => b.slice(0, 5));
+  const [w0, h0] = [parentTrack[0][2], parentTrack[0][3]];
+  return track.map((b, k) => {
+    const [px, py, pw, ph] = parentTrack[k];
+    const sx = w0 > 0 && pw > 0 ? w0 / pw : 1, sy = h0 > 0 && ph > 0 ? h0 / ph : 1;
+    return [(b[0] - px) * sx, (b[1] - py) * sy, b[2] * sx, b[3] * sy, b[5]];
+  });
+}
+
+/** Runs of changing samples as [first step, last step], one quiet step allowed inside a run. */
+function activeRuns(track) {
+  const runs = [];
+  for (let k = 1; k < track.length; k++) {
+    const moving = boxMoved(track[k], track[k - 1]) || Math.abs(track[k][4] - track[k - 1][4]) > STILL_ALPHA;
+    if (!moving) continue;
+    const last = runs.at(-1);
+    if (last && k - last[1] <= 2) last[1] = k; else runs.push([k, k]);
+  }
+  return runs;
+}
+
+function stepSpeeds(track, a, b) {
+  const out = [];
+  for (let k = a; k <= b; k++) {
+    const [p, q] = [track[k - 1], track[k]];
+    const px = Math.max(Math.hypot(q[0] - p[0], q[1] - p[1]), Math.abs(q[2] - p[2]), Math.abs(q[3] - p[3]));
+    out.push(px > STILL_PX ? px : Math.abs(q[4] - p[4]) * 100);
+  }
+  return out;
+}
+
+/** Constant speed through the run's middle: the coefficient of variation of its inner steps is small. */
+function looksLinear(speeds) {
+  const inner = speeds.slice(1, -1);
+  if (inner.length < 4) return false;
+  const mean = inner.reduce((x, y) => x + y, 0) / inner.length;
+  const sd = Math.sqrt(inner.reduce((x, y) => x + (y - mean) ** 2, 0) / inner.length);
+  return mean > 0 && sd / mean < LINEAR_CV;
+}
+
+function inFrame(b, { width, height }) {
+  return b[2] > 0 && b[3] > 0 && b[0] < width && b[1] < height && b[0] + b[2] > 0 && b[1] + b[3] > 0 && b[4] > SEEN;
+}
+
+function runRecord(boxes, i, own, [a, b]) {
+  const track = boxes.tracks[i];
+  const [s, e] = [own[a - 1], own[b]];
+  const moved = boxMoved(s, e, 1);
+  const fade = Math.abs(e[4] - s[4]) > SEEN;
+  const [before, after] = [inFrame(track[a - 1], boxes), inFrame(track[b], boxes)];
+  const linear = looksLinear(stepSpeeds(own, a, b));
+  return {
+    target: i, label: boxes.labels[i], id: !before && after ? 'enter' : before && !after ? 'leave' : '',
+    props: [...(moved ? ['transform'] : []), ...(fade ? ['opacity'] : [])],
+    delay: boxes.times[a - 1], duration: boxes.times[b] - boxes.times[a - 1],
+    easing: linear ? 'linear' : 'inferred', kfEasings: [linear ? 'linear' : 'inferred'],
+    opacity: fade ? [s[4], e[4]] : null,
+    from: moved ? `translate(${(s[0] - e[0]).toFixed(1)}px, ${(s[1] - e[1]).toFixed(1)}px)` : '',
+    fullFrame: Math.max(track[a - 1][2] * track[a - 1][3], track[b][2] * track[b][3]) >= 0.6 * boxes.area,
+  };
+}
+
+/** Motion records inferred from box tracks: one per run of an element's own change; riding its parent is not its own. */
+export function recordsFromBoxes(boxes) {
+  const out = [];
+  boxes.tracks.forEach((track, i) => {
+    if (track.length < 2 || !track.some((b) => inFrame(b, boxes))) return;
+    const own = ownTrack(track, boxes.tracks[boxes.parent[i]]);
+    for (const run of activeRuns(own)) out.push(runRecord(boxes, i, own, run));
+  });
+  return out.filter((r) => r.props.length);
 }
 
 /** Every lint finding, in time order. */

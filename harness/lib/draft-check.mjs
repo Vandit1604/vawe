@@ -1,6 +1,7 @@
 // Pure decisions for the draft check that `bin/vawe dev` prints after a full-length draft: text size
 // (taste card rule 9), sound level, and the merge with the ship problems. No I/O, no clock.
 // harness/media/draft-check.mjs feeds it.
+import { adviceBlock } from './advice.mjs';
 
 export const RULES = { capFrac: 0.06, capOfFont: 0.7, holdSec: 0.5, maxProblems: 4, lufsLow: -24, lufsHigh: -16 };
 
@@ -82,11 +83,12 @@ export function isTemplateBrief(text) {
   return inputs.every((l) => l.includes('[unanswered'));
 }
 
-/** The printed lines. `problems` are strings; `sound` and `brief` may be null. */
-export function draftCheckLines(problems, sound, brief = null) {
-  const extra = [sound, brief].filter(Boolean);
-  const lines = problems.length === 0 && !extra.length ? ['draft check: no problems found'] : ['draft check:', ...problems.map((p) => `  ${p}`)];
-  for (const l of extra) lines.push(`  ${l}`);
-  if (problems.length || extra.length) lines.push('fix the draft check first');
-  return lines;
+/** The advice a draft check gives: its problems, then the sound and brief lines when present. */
+export function draftAdvice(problems, sound = null, brief = null) {
+  return [...problems, sound, brief].filter(Boolean);
+}
+
+/** The printed block for every advice line of a draft: a clean line, or each line as advice and the end line. */
+export function draftCheckLines(advice) {
+  return advice.length ? ['draft check:', ...adviceBlock(advice)] : ['draft check: no problems found'];
 }

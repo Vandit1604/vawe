@@ -1,5 +1,6 @@
 // Pure parsing and the range check for the Directions section of a film's brief.md: three slots
 // (### A, ### B, ### C) of `- field: value` lines, and a `picked:` line. No I/O. Advice only.
+import ATTRACTORS from '../../engine-doctrine/attractors.json' with { type: 'json' };
 
 export const FIELDS = ['family', 'sentence', 'key frame', 'palette', 'typeface', 'move', 'thread'];
 
@@ -9,7 +10,17 @@ export const FAMILIES = {
   graphic: { label: 'graphic-led', hint: 'shape, colour field, rhythm', words: /\b(graphic|shape|colou?r|field|rhythm|geometr\w*|pattern)/ },
 };
 
-const ATTRACTOR = /\b(circles?|orbs?|suns?|sunrise|sunset|rings?|glow\w*|halos?|discs?|disks?|spheres?)\b/;
+export { ATTRACTORS };
+
+const wordsRe = (words) => new RegExp(`(?<![\\p{L}])(${[...words].sort((a, b) => b.length - a.length).join('|')})s?(?![\\p{L}])`, 'giu');
+const ATTRACTOR = wordsRe(ATTRACTORS.shapes.words);
+const NAME = wordsRe(ATTRACTORS.names.words);
+
+/** The attractor words in `text`, longest first, a word inside a longer match left out. */
+export function attractorWords(text = '', re = ATTRACTOR) {
+  const found = [...String(text).toLowerCase().matchAll(re)].map((m) => m[1]);
+  return [...new Set(found)].filter((w, _, all) => !all.some((o) => o !== w && o.includes(w)));
+}
 
 const HUE_WORDS = [
   ['red', /\b(red|vermilion|crimson|scarlet|brick|rust)\b/],
@@ -118,19 +129,45 @@ export function rangeProblems(slots) {
   const filled = slots.filter(isFilled);
   const out = [];
   for (let i = 0; i < filled.length; i++) for (let j = i + 1; j < filled.length; j++) out.push(...pairProblems(filled[i], filled[j]));
-  const lit = filled.filter((s) => ATTRACTOR.test(heroText(s)));
+  const lit = filled.filter((s) => attractorWords(heroText(s)).length);
   const ids = lit.map((s) => s.id);
   if (lit.length > 1) out.push(`${ids.slice(0, -1).join(', ')} and ${ids.at(-1)} carry the film on a circle, orb, sun, ring or glow; keep at most one, rebuild the others on type, a real object or a colour field`);
+  return out;
+}
+
+const BRAND_LINE = /^\s*-\s*(?:brand(?: name)?|name|title)\s*:\s*(.+)$/gim;
+
+const quote = (ws) => ws.map((n) => `"${n}"`).join(', ');
+
+/** Advice when a brand or film name is a light-poetry attractor name, else nothing. */
+export function brandAdvice(text) {
+  const names = attractorWords(text, NAME);
+  return names.length ? [`attractor: the brand name ${quote(names)} is a light-poetry name (card Attractors); fix: ${ATTRACTORS.names.fix}`] : [];
+}
+
+/** Attractor names in the brief's brand, name or title lines and in each direction's lead name; attractor hero shapes in each filled direction (card Attractors). */
+export function attractorProblems(brief, slots = parseDirections(brief).slots) {
+  const out = [];
+  const brand = [...String(brief ?? '').matchAll(BRAND_LINE)].map((m) => m[1]).filter((v) => !v.includes('[unanswered')).join(' ');
+  const names = attractorWords(brand, NAME);
+  out.push(...brandAdvice(brand));
+  for (const s of slots.filter(isFilled)) {
+    const text = `${s.fields.sentence} ${s.fields['key frame']} ${s.fields.thread ?? ''}`;
+    const own = attractorWords(s.fields.sentence.split(/[,:;]/)[0], NAME).filter((n) => !names.includes(n));
+    if (own.length) out.push(`attractor: direction ${s.id} is named ${quote(own)}, a light-poetry name (card Attractors); fix: ${ATTRACTORS.names.fix}`);
+    const shapes = attractorWords(text);
+    if (shapes.length) out.push(`attractor: direction ${s.id}'s hero is ${quote(shapes)} (card Attractors: ${ATTRACTORS.shapes.cards.join('; ').toLowerCase()}); fix: ${ATTRACTORS.shapes.fix}`);
+  }
   return out;
 }
 
 /** The lines `vawe dev` prints under the draft check. `dir` is the film folder as the user types it. */
 export function directionsLines(brief, dir) {
   if (brief == null) return [];
-  const judge = `bin/vawe judge ${dir}/directions.html --fresh --stage stills --brief ${dir}/brief.md scores the three`;
   const { slots, picked } = parseDirections(brief);
-  if (slots.filter(isFilled).length < 3) return [`directions: empty; fill three from different families in brief.md, then \`picked:\` with a reason (${judge})`];
+  const attract = attractorProblems(brief, slots);
+  if (slots.filter(isFilled).length < 3) return [...attract, `directions: empty; fill three from different families in brief.md and their key frames in ${dir}/directions.html, then \`picked:\` with a reason; the next bin/vawe dev scores the three`];
   const range = rangeProblems(slots).map((p) => `directions: ${p}`);
-  if (!picked?.id || !picked.reason) return [...range, `directions: no \`picked:\` with a reason in brief.md; write \`picked: B, because ...\` (${judge})`];
-  return range;
+  if (!picked?.id || !picked.reason) return [...range, ...attract, 'directions: no `picked:` with a reason in brief.md; write `picked: B, because ...` after reading the stills judge'];
+  return [...range, ...attract];
 }
