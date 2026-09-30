@@ -19,8 +19,46 @@ const WORDS = [
   ['story or explainer', /\b(explain\w*|story|article|tutorial|how it works)\b/],
   ['app or game capture', /\b(game|lab|interactive|simulation)\b/],
   ['showreel', /\b(showreel|reel|taste probe)\b/],
-  ['brand launch', /(https?:\/\/|\bwww\.|\b(launch|promo|product|saas|landing page|website|site)\b)/],
+  ['brand launch', /(https?:\/\/|\bwww\.|\b(launch|promo|product|saas|landing page|website|site|ai demo|product demo|demo video|feature tour|walkthrough|proof film|case study)\b)/],
 ];
+
+// RECIPES.md "Complete videos": one chain per 20 to 30 s film, found by its heading number.
+export const RECIPES = 'prompts/moves/RECIPES.md';
+const RECIPE_MIN_S = 20;
+const RECIPE_MAX_S = 30;
+const RECIPE_WORDS = [
+  [13, /\b(manifesto|kinetic type|kinetic typography|typographic)\b/],
+  [12, /\b(proof|testimonials?|case study|results|metrics)\b/],
+  [11, /\b(feature tour|tour|walkthrough|walk-through|features)\b/],
+  [10, /\b(ai|agent|assistant|copilot|chatbot|llm)\b/],
+  [14, /\b(brand reveal|reveal|rebrand|brand film|identity)\b/],
+  [9, /\b(problem|pain|before and after|launch)\b/],
+];
+
+/** { number: heading } from the RECIPES.md chain headings ("## 10. AI product demo, 22 s (thread: ...)"). */
+export function recipeTable(markdown) {
+  const rows = {};
+  for (const m of markdown.matchAll(/^## (\d+)\. (.+)$/gm)) rows[m[1]] = `${m[1]}. ${m[2]}`;
+  return rows;
+}
+
+/** The chain a 20 to 30 s request starts from: { heading, why }, or null. Throws when RECIPES.md lacks the row. */
+export function pickRecipe({ request = '', name = '', title = '', length } = {}, recipes) {
+  if (!(length >= RECIPE_MIN_S && length <= RECIPE_MAX_S)) return null;
+  const text = [request, name.replace(/-/g, ' '), title].join(' ').toLowerCase();
+  for (const [n, re] of RECIPE_WORDS) {
+    const m = re.exec(text);
+    if (!m) continue;
+    if (!recipes[n]) throw new Error(`${RECIPES} has no "## ${n}." chain; chains: ${Object.keys(recipes).join(', ')}`);
+    return { heading: recipes[n], why: `${length} s and the request says "${m[0]}"` };
+  }
+  return null;
+}
+
+/** The RECIPES.md chain headings read from the repo at `root`. */
+export function readRecipes(root) {
+  return recipeTable(fs.readFileSync(path.join(root, RECIPES), 'utf8'));
+}
 
 /** { type: template } from the ROUTING.md film-type table. */
 export function routingTable(markdown) {
