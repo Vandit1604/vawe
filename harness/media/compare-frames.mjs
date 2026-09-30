@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // Reference and render frames at the SAME exact seconds, side by side, one row per time, in one PNG.
+//   node harness/media/compare-frames.mjs --page <page.html> --at 1,2,3   (no --ref: your frames only, labelled, 3 per row)
 //   node harness/media/compare-frames.mjs <ours.mp4> --ref <ref.mp4> --at 2.5,3.1 [--from <s>] [--out file.png]
 // --at is film seconds; --from is the film second where ours starts (a --from/--to draft).
 // Each frame is an accurate seek (-ss after -i), never an fps=N,tile sheet: those drift about 0.1 s.
@@ -38,12 +39,33 @@ async function sheet({ ref, times, out, oursAt }) {
   return out;
 }
 
+async function framesOnly({ times, out, oursAt }) {
+  const dir = fs.mkdtempSync(path.join(fs.realpathSync(path.dirname(out)), '.cmp-'));
+  try {
+    const pngs = [];
+    for (const [i, t] of times.entries()) pngs.push(await oursAt(t, i, dir));
+    tile(pngs, out);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+  return out;
+}
+
 export async function compareFrames({ ours, ref, times, out, from = 0 }) {
   return sheet({ ref, times, out, oursAt: (t, i, dir) => {
     const png = path.join(dir, `o${i}.png`);
     grab(ours, t - from, png, t);
     return png;
   } });
+}
+
+// No reference: the frames alone, labelled with time, tiled up to 3 per row.
+function tile(pngs, out) {
+  const cols = Math.min(pngs.length, 3), rows = Math.ceil(pngs.length / cols);
+  const seq = path.join(path.dirname(pngs[0]), 't%d.png');
+  pngs.forEach((p, i) => fs.copyFileSync(p, seq.replace('%d', i + 1)));
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', '1', '-i', seq, '-vf', `tile=${cols}x${rows}`, '-frames:v', '1', out]);
+  if (r.status !== 0) die(`tile failed: ${String(r.stderr || '').trim()}`);
 }
 
 // Page mode: seek the page with the renderer's own functions and screenshot at draft (half) size,
@@ -54,13 +76,14 @@ export async function comparePage({ page: pagePath, ref, times, out }) {
   try {
     await opened.page.goto(opened.url, { waitUntil: 'load' });
     await settle(opened.page);
-    return await sheet({ ref, times, out, oursAt: async (t, i, dir) => {
+    const oursAt = async (t, i, dir) => {
       await seekAll(opened.page, t * 1000);
       const shot = path.join(dir, `${path.basename(pagePath, '.html')}.png`), png = path.join(dir, `o${i}.png`);
       await opened.page.screenshot({ path: shot });
       grab(shot, 0, png, t);
       return png;
-    } });
+    };
+    return ref ? await sheet({ ref, times, out, oursAt }) : await framesOnly({ times, out, oursAt });
   } finally {
     await opened.close();
   }
@@ -73,14 +96,14 @@ async function main() {
   const ours = argv.find((a, i) => !a.startsWith('--') && !['--ref', '--at', '--out', '--from', '--page'].includes(argv[i - 1]));
   const ref = flag('--ref');
   const times = String(flag('--at') || '').split(',').map(Number).filter((t) => Number.isFinite(t));
-  if (!(page || ours) || !ref || !times.length) die('usage: compare-frames.mjs <ours.mp4> | --page <page.html> --ref <ref.mp4> --at 2.5,3.1 [--out file.png]');
-  for (const f of [page || ours, ref]) if (!fs.existsSync(f)) die(`no such file: ${f}`);
+  if (!(page || ours) || (!ref && !page) || !times.length) die('usage: compare-frames.mjs <ours.mp4> | --page <page.html> [--ref <ref.mp4>] --at 2.5,3.1 [--out file.png]');
+  for (const f of [page || ours, ref].filter(Boolean)) if (!fs.existsSync(f)) die(`no such file: ${f}`);
   const source = page || ours;
   const out = path.resolve(flag('--out') || path.join('out', `compare-${path.basename(source, path.extname(source))}.png`));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   if (page) await comparePage({ page, ref, times, out });
   else await compareFrames({ ours, ref, times, out, from: Number(flag('--from')) || 0 });
-  console.log(`✓ ${path.relative(process.cwd(), out)}: reference left, yours right, ${times.length} row(s) at ${times.join(', ')} s`);
+  console.log(ref ? `✓ ${path.relative(process.cwd(), out)}: reference left, yours right, ${times.length} row(s) at ${times.join(', ')} s` : `✓ ${path.relative(process.cwd(), out)}: your frames at ${times.join(', ')} s`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => die(e.stack || String(e)));
