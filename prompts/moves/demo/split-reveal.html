@@ -1,0 +1,62 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="night">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<title>move: split reveal</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .shot { position: absolute; inset: 0; }
+  .a h1 { position: absolute; left: 11vw; top: calc(var(--u) * 27); margin: 0; font: 700 calc(var(--u) * 24)/1 var(--display); letter-spacing: -0.05em; }
+  .a p { position: absolute; left: 11.4vw; top: calc(var(--u) * 58); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--muted); letter-spacing: -0.03em; }
+  .a .pill { position: absolute; left: 11.4vw; top: calc(var(--u) * 70); }
+  .b { background: var(--paper); color: var(--paper-ink); overflow: hidden; }
+  .b .in { position: absolute; inset: 0; }
+  .b h1 { position: absolute; left: 11vw; top: calc(var(--u) * 27); margin: 0; font: 700 calc(var(--u) * 24)/1 var(--display); letter-spacing: -0.05em; }
+  .b h1 i { display: inline-block; width: calc(var(--u) * 5); height: calc(var(--u) * 5); margin-left: var(--s2); border-radius: 50%; background: var(--accent); }
+  .b p { position: absolute; left: 11.4vw; top: calc(var(--u) * 58); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--paper-muted); letter-spacing: -0.03em; }
+  .veil { position: absolute; inset: 0; background: #0a0620; }
+  .door { position: absolute; top: 0; bottom: 0; width: 50vw; filter: url(#motion); }
+  .door.l { left: 0; }
+  .door.r { right: 0; }
+  .clip { position: absolute; inset: 0; overflow: hidden; background: var(--ground); }
+  .clip .shot { width: 100vw; }
+  .door.r .clip .shot { left: -50vw; }
+  .edge { position: absolute; top: 0; bottom: 0; width: 10vw; pointer-events: none; }
+  .door.l .edge { left: 100%; background: linear-gradient(to right, rgba(10, 6, 32, 0.6) 0%, rgba(10, 6, 32, 0.26) 22%, rgba(10, 6, 32, 0.08) 55%, rgba(10, 6, 32, 0) 100%); }
+  .door.r .edge { right: 100%; background: linear-gradient(to left, rgba(10, 6, 32, 0.6) 0%, rgba(10, 6, 32, 0.26) 22%, rgba(10, 6, 32, 0.08) 55%, rgba(10, 6, 32, 0) 100%); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position: absolute"><filter id="motion" x="-30%" width="160%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
+<section class="shot b"><div class="in"><h1>Shipped<i></i></h1><p>vawe.dev/launch</p></div><div class="veil"></div></section>
+<template id="a"><section class="shot a"><h1>Render</h1><p>3 aspects, 60 fps</p><div class="pill up">queued</div></section></template>
+<div class="door l"><div class="clip"></div><div class="edge"></div></div>
+<div class="door r"><div class="clip"></div><div class="edge"></div></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const E = CURVES.expoOut;
+const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+const open = (u) => 0.4 * u + 0.6 * whip(u);   // a linear share keeps the doors moving through the middle
+const W = window.innerWidth, t0 = 0.35, dur = 0.85, far = 0.62;   // far: doors plus the shadow cast beside them must clear the frame
+const tpl = document.getElementById('a');
+document.querySelectorAll('.door .clip').forEach((c) => c.append(tpl.content.cloneNode(true)));
+// each door carries the whole of shot A and shows its own half, so the seam is invisible until they part
+const timing = { duration: dur * 1000, delay: t0 * 1000, easing: curveToLinear(open), fill: 'both' };
+document.querySelector('.door.l').animate([{ translate: '0 0' }, { translate: `${-W * far}px 0` }], timing);
+document.querySelector('.door.r').animate([{ translate: '0 0' }, { translate: `${W * far}px 0` }], timing);
+// the gap starts dark and lights as the doors clear; shot B settles from 1.12 to 1
+document.querySelector('.veil').animate([{ opacity: 0.85 }, { opacity: 0.8, offset: 0.4 }, { opacity: 0 }], { duration: dur * 1000, delay: t0 * 1000, easing: curveToLinear(open), fill: 'both' });
+document.querySelector('.b .in').animate([{ scale: 1.12 }, { scale: 1 }], { duration: 1100, delay: t0 * 1000, easing: curveToLinear(E), fill: 'both' });
+const blur = document.getElementById('mb');
+vawe.onFrame((t) => {
+  const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
+  const slope = (open(Math.min(1, u + du)) - open(u)) / du;
+  const pxPerFrame = (slope / dur) * W * far / 60;
+  blur.setAttribute('stdDeviation', `${(u > 0 && u < 1 ? pxPerFrame * 0.2 : 0).toFixed(2)} 0`);
+});
+</script>
+</body>
+</html>

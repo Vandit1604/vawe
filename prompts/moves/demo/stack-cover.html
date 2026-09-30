@@ -1,0 +1,66 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="soft">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<title>move: stack cover</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .shot { position: absolute; inset: 0; }
+  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 20); width: 46vw; height: calc(var(--u) * 60); }
+  .a h2 { margin: 0 0 var(--s4); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
+  .row { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) 0; border-top: 1px solid var(--line); font: 600 var(--t-lead)/1 var(--sans); letter-spacing: -0.02em; }
+  .row .chip { --size: calc(var(--u) * 8); }
+  .row span { margin-left: auto; font: 500 var(--t-body)/1 var(--mono); color: var(--muted); }
+  .dim { position: absolute; inset: 0; background: #14103a; opacity: 0; }
+  .b { left: calc(var(--u) * -4.4); width: calc(100vw + var(--u) * 4.4); }
+  .body { position: absolute; inset: 0; filter: url(#motion); }
+  .b .sheet { position: absolute; inset: 0; background: var(--surface); border-radius: var(--r-card) 0 0 var(--r-card); }
+  .cast { position: absolute; top: 0; bottom: 0; right: 100%; width: 34vw; transform-origin: right; pointer-events: none;
+          background: linear-gradient(to left, rgba(20, 16, 70, 0.34) 0%, rgba(20, 16, 70, 0.2) 14%, rgba(20, 16, 70, 0.1) 38%, rgba(20, 16, 70, 0.035) 68%, rgba(20, 16, 70, 0) 100%); }
+  .b .copy { position: absolute; left: calc(var(--u) * 4.4 + 14vw); top: calc(var(--u) * 24); }
+  .b .kicker { margin-bottom: var(--s3); font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
+  .b .hero { font-size: calc(var(--u) * 26); letter-spacing: -0.05em; }
+  .b .url { margin-top: var(--s4); display: inline-flex; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position: absolute"><filter id="motion" x="-30%" width="160%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
+<section class="shot a" id="a">
+  <div class="card"><h2>render queue</h2>
+    <div class="row"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></div>launch-16x9<span>done</span></div>
+    <div class="row"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></div>launch-9x16<span>done</span></div>
+    <div class="row"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12l4.5 4.5L19 7"/></svg></div>launch-1x1<span>done</span></div>
+  </div>
+  <div class="dim" id="dim"></div>
+</section>
+<section class="shot b" id="b">
+  <div class="cast" id="cast"></div>
+  <div class="body"><div class="sheet"></div>
+  <div class="copy"><div class="kicker">step 3 of 3</div><div class="hero">Live</div><div class="pill up url">vawe.dev/launch</div></div></div>
+</section>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const E = CURVES.expoOut, ease = curveToLinear(E);
+const W = window.innerWidth, t0 = 0.2, dur = 1.0, far = 0.24;   // A travels 24 percent of B's distance: that gap is the parallax
+const opt = { duration: dur * 1000, delay: t0 * 1000, easing: ease, fill: 'both' };
+document.getElementById('b').animate([{ translate: `${W}px 0` }, { translate: '0 0' }], opt);
+document.getElementById('a').animate([{ translate: '0 0', scale: 1 }, { translate: `${-W * far}px 0`, scale: 0.96 }], opt);
+document.getElementById('dim').animate([{ opacity: 0 }, { opacity: 0.4 }], opt);
+// the shadow grows with the overlap: wider and darker as B covers more of A
+document.getElementById('cast').animate([{ opacity: 0.25, scale: '0.35 1' }, { opacity: 1, scale: '1 1' }], opt);
+// the copy rides the sheet and lags it slightly, so the sheet reads as a surface with things on it
+[...document.querySelector('.b .copy').children].forEach((el, i) => el.animate([{ translate: `${9 + i * 3}vw 0` }, { translate: '0 0' }],
+  { duration: 1100, delay: (t0 + 0.05) * 1000, easing: ease, fill: 'both' }));
+const blur = document.getElementById('mb');
+vawe.onFrame((t) => {
+  const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
+  const slope = (E(Math.min(1, u + du)) - E(u)) / du;
+  const pxPerFrame = (slope / dur) * W / 60;
+  blur.setAttribute('stdDeviation', `${(u > 0 && u < 1 ? pxPerFrame * 0.25 : 0).toFixed(2)} 0`);
+});
+</script>
+</body>
+</html>
