@@ -4,20 +4,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { UsageError } from './parse.mjs';
+import { ASPECTS } from '../../core/layout/aspects.js';
 
-export const STARTER = `<!doctype html>
-<html data-aspect="16:9">
+const STARTER_TEMPLATE = `<!doctype html>
+<html data-aspect="{{aspect}}">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="4">
+<meta name="duration" content="{{length}}">
+<meta name="aspect" content="{{aspect}}">
+<meta name="blank" content="0-0.4, {{blankEnd}}-{{length}}">
 <meta name="message" content="one thing to remember">
+<title>{{title}}</title>
 <style>
   :root { --bg: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --enter: 0.5s; --exit: 0.3s; }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
   body { box-sizing: border-box; display: grid; align-content: end; padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); }
   h1 { margin: 0; color: var(--ink); font: 700 calc(var(--vh) * 0.11)/1 system-ui, sans-serif;
        animation-name: land, leave; animation-duration: var(--enter), var(--exit);
-       animation-delay: 0.4s, 3.4s; animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1), ease-in;
+       animation-delay: 0.4s, {{exit}}s; animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1), ease-in;
        animation-fill-mode: both; }
   /* arrive fast, land soft; the exit is shorter than the entrance */
   @keyframes land { from { transform: translateY(12%); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -26,10 +30,17 @@ export const STARTER = `<!doctype html>
 </style>
 </head>
 <body>
-<h1>Say the one thing</h1>
+<h1>{{title}}</h1>
 </body>
 </html>
 `;
+
+export const STARTER = starterPage({});
+
+export function starterPage({ length = 4, aspect = '16:9', title = 'Say the one thing' }) {
+  return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
+    .replaceAll('{{blankEnd}}', String(Math.max(0.5, +(length - 0.3).toFixed(2)))).replaceAll('{{exit}}', String(Math.max(0.5, +(length - 0.6).toFixed(2)))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
+}
 
 export const UNANSWERED = '[unanswered: default taken]';
 
@@ -71,9 +82,20 @@ export function formatQuestions(questions) {
   return lines.join('\n');
 }
 
-function briefText(name, templateRel, questions, sections) {
-  const inputs = questions.length
-    ? questions.map((q) => `- ${q.key}: ${q.default} ${UNANSWERED}`).join('\n')
+// Answers given as flags go in as answered lines, never as a default with the unanswered marker.
+function inputLines(questions, answers) {
+  const given = { ...answers };
+  if (answers.length || answers.aspect) given.platform = [answers.aspect, answers.length].filter(Boolean).join(', ');
+  const lines = questions.map((q) => (given[q.key.toLowerCase()] ? `- ${q.key}: ${given[q.key.toLowerCase()]}` : `- ${q.key}: ${q.default} ${UNANSWERED}`));
+  const known = new Set(questions.map((q) => q.key.toLowerCase()));
+  const extra = Object.entries(answers).filter(([k]) => !known.has(k)).map(([k, v]) => `- ${k}: ${v}`);
+  return [...extra, ...lines];
+}
+
+function briefText(name, templateRel, questions, sections, answers) {
+  const lines = inputLines(questions, answers);
+  const inputs = questions.length || lines.length
+    ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
   const rest = sections.length
     ? sections.map((s) => `## ${s.name[0].toUpperCase()}${s.name.slice(1)}\n\n${s.body.replaceAll('<name>', name)}`).join('\n\n')
@@ -81,7 +103,14 @@ function briefText(name, templateRel, questions, sections) {
   return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${rest}\n\n## First draft\n\nbin/vawe dev films/${name}/page.html\n`;
 }
 
-export function newFilm(name, { from, root }) {
+function readAnswers({ length, aspect, title }) {
+  if (length !== undefined && !(length > 0)) throw new UsageError(`--length must be a number of seconds above 0, got ${length}`);
+  if (aspect !== undefined && !ASPECTS[aspect] && !/^\d+:\d+$/.test(aspect)) throw new UsageError(`--aspect "${aspect}" must be one of ${Object.keys(ASPECTS).join(' ')} or a W:H ratio`);
+  return { length, aspect, title };
+}
+
+export function newFilm(name, { from, root, length, aspect, title }) {
+  const page = readAnswers({ length, aspect, title });
   if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) throw new UsageError(`film name "${name}" must be lowercase letters, digits and dashes`);
   const dir = path.join(root, 'films', name);
   if (fs.existsSync(path.join(dir, 'page.html'))) throw new UsageError(`${path.relative(root, dir)}/page.html already exists`);
@@ -89,8 +118,12 @@ export function newFilm(name, { from, root }) {
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, 'page.html'), STARTER);
-  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown)));
+  fs.writeFileSync(path.join(dir, 'page.html'), starterPage(Object.fromEntries(Object.entries(page).filter(([, v]) => v !== undefined))));
+  const answers = {};
+  if (length !== undefined) answers.length = `${length} s`;
+  if (aspect !== undefined) answers.aspect = aspect;
+  if (title !== undefined) answers.title = title;
+  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown), answers));
   console.log(formatQuestions(questions));
   return `films/${name}/page.html`;
 }

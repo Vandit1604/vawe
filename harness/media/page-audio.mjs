@@ -56,16 +56,19 @@ export async function readPageAudio(page, { pagePath } = {}) {
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
     return { tracks, loudness: Number.isFinite(meta) ? meta : -14, url: location.href };
   });
+  const problems = [];
   const specs = raw.tracks.map(({ src, ...t }) => {
+    const where = `<audio> at ${t.at} s`;
     if (t.synth) {
-      if (!CUES[t.synth]) throw new Error(`page-audio: data-synth="${t.synth}" is not a voice. Voices: ${Object.keys(CUES).join(' ')}`);
+      if (!CUES[t.synth]) problems.push(`${where}: data-synth="${t.synth}" is not a voice. Voices: ${Object.keys(CUES).join(' ')}`);
       return t;
     }
-    if (!src) throw new Error('page-audio: an <audio> element needs src or data-synth');
+    if (!src) { problems.push(`${where}: an <audio> element needs src or data-synth`); return t; }
     const file = toFilePath(src, raw.url, pagePath);
-    if (!fs.existsSync(file)) throw new Error(`page-audio: <audio src="${src}"> resolved to ${file}, which does not exist`);
+    if (!fs.existsSync(file)) problems.push(`${where}: src="${src}" resolved to ${file}, which does not exist`);
     return { ...t, src: file };
   });
+  if (problems.length) throw new Error(problems.join('\n'), { cause: { problems } });
   for (const s of specs) s.role ||= 'sfx';
   return { specs, loudness: raw.loudness };
 }
