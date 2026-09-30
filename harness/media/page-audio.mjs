@@ -167,6 +167,29 @@ function normaliseFilter(mixWav, loudness) {
   return `loudnorm=I=${loudness}:TP=${PEAK_LIMIT_DB}:LRA=11:${measured}:linear=true,aresample=${RATE}`;
 }
 
+/** Mix the specs into `<tmp>/mix.wav` as written (no limiter, no normalising). Returns the wav path and the cue-spread warnings. */
+function writeMix(specs, duration, tmp) {
+  const tracks = specs.map((spec, i) => ({ spec, ...materialise(spec, tmp, i) }));
+  const windows = duckWindows(tracks, duration);
+  const chains = tracks.map((t, i) => trackChain(t, i, duration, windows));
+  const labels = tracks.map((_, i) => `[a${i}]`).join('');
+  const graph = `${chains.join(';')};${labels}amix=inputs=${tracks.length}:normalize=0:duration=longest:dropout_transition=0,apad,atrim=end=${f(duration)}[mix]`;
+  const mixWav = path.join(tmp, 'mix.wav');
+  run('ffmpeg', ['-y', '-loglevel', 'error', ...tracks.flatMap((t) => ['-i', t.file]), '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_f32le', mixWav]);
+  return { warnings: cueSpreadWarnings(tracks), mixWav };
+}
+
+/** Integrated loudness in LUFS of the mix as written, with no video and no encode; null when there are no specs. */
+export function measureMixLevel({ specs, duration }) {
+  if (!specs.length) return null;
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-audio-'));
+  try {
+    return measureFile(writeMix(specs, duration, tmp).mixWav).I;
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+}
+
 /**
  * mixAndMux({ specs, duration, video, out, loudness = null }) -> { out, measured: { I, TP }, warnings }
  * The audio track is the mix as written plus a -1 dBTP limiter; `loudness` (LUFS) opts in to normalising
@@ -184,16 +207,8 @@ export async function mixAndMux({ specs, duration, video, out, loudness = null }
       fs.renameSync(tmpOut, out);
       return { out, measured: null, warnings: [] };
     }
-    const tracks = specs.map((spec, i) => ({ spec, ...materialise(spec, tmp, i) }));
-    const warnings = cueSpreadWarnings(tracks);
+    const { warnings, mixWav } = writeMix(specs, duration, tmp);
     for (const w of warnings) console.warn(`page-audio: ${w}`);
-    const windows = duckWindows(tracks, duration);
-    const chains = tracks.map((t, i) => trackChain(t, i, duration, windows));
-    const labels = tracks.map((_, i) => `[a${i}]`).join('');
-    const graph = `${chains.join(';')};${labels}amix=inputs=${tracks.length}:normalize=0:duration=longest:dropout_transition=0,apad,atrim=end=${f(duration)}[mix]`;
-    const mixWav = path.join(tmp, 'mix.wav');
-    run('ffmpeg', ['-y', '-loglevel', 'error', ...tracks.flatMap((t) => ['-i', t.file]), '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_f32le', mixWav]);
-
     const af = loudness === null ? `${LIMITER},aresample=${RATE}` : `${normaliseFilter(mixWav, loudness)},${LIMITER}`;
     run('ffmpeg', ['-y', '-hide_banner', '-nostats', '-i', video, '-i', mixWav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-af', af,
       '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', tmpOut]);

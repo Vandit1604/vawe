@@ -15,8 +15,8 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
 import { defaultOut } from './render-page.mjs';
-import { readFeatures, summarize } from './scene-stats.mjs';
-import { samePage, blankRuns, isFlat, problemsOf, doneLines } from '../lib/ship-status.mjs';
+import { videoProblems } from './draft-check.mjs';
+import { samePage, doneLines } from '../lib/ship-status.mjs';
 
 const WAIT_CAP_MS = 100_000;
 
@@ -91,10 +91,7 @@ const outputsOf = (text) => text.split(/[\r\n]+/).filter((l) => l.startsWith('âœ
 
 function finalCheck(outputs) {
   try {
-    const problems = outputs.flatMap((mp4) => {
-      const feats = readFeatures(mp4);
-      return problemsOf(summarize(feats), blankRuns(feats, isFlat)).map((p) => (outputs.length > 1 ? `${path.basename(mp4)}: ${p}` : p));
-    });
+    const problems = outputs.flatMap((mp4) => videoProblems(mp4).map((p) => (outputs.length > 1 ? `${path.basename(mp4)}: ${p}` : p)));
     return { outputs, problems };
   } catch (e) {
     return { outputs, problems: [], checkError: e.message };

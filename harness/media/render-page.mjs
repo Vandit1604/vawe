@@ -49,6 +49,8 @@ import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
+import { sampleText, videoProblems } from './draft-check.mjs';
+import { textProblems, soundLine, mergeProblems, draftCheckLines } from '../lib/draft-check.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 
@@ -361,6 +363,15 @@ async function audioProblems(page, pagePath) {
   return [];
 }
 
+// Null when the page has no <audio> or sets <meta name="loudness"> (the delivery is then normalised, so
+// the as-written level is not the result).
+async function mixLevel(page, pagePath, duration) {
+  if (!(await page.evaluate(() => document.querySelector('audio') !== null))) return null;
+  const { readPageAudio, measureMixLevel } = await import('./page-audio.mjs');
+  const { specs, loudness } = await readPageAudio(page, { pagePath });
+  return loudness === null ? measureMixLevel({ specs, duration }) : null;
+}
+
 async function assertProblems(page) {
   const count = await page.evaluate(() => (window.__vaweAsserts || []).length);
   const problems = [];
@@ -503,6 +514,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
     if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
+    const probe = opts.probe ? await sampleText(page, dur, (ms) => seekAll(page, ms)) : null;
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
@@ -542,7 +554,8 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
-    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted };
+    const level = opts.probe && !mixed ? await mixLevel(page, pagePath, dur) : null;
+    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
@@ -573,6 +586,13 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   const name = base === 'page' ? path.basename(path.dirname(abs)) : base;
   const range = !final && (from > 0 || to != null) ? `-${from}-${to ?? 'end'}` : '';
   return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
+}
+
+function printDraftCheck(mp4, { probe, level }) {
+  let video = [];
+  try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
+  const problems = mergeProblems(video, textProblems(probe.samples, probe));
+  console.log(draftCheckLines(problems, soundLine(level)).join('\n'));
 }
 
 function printDraftSheet(mp4, { fps, from }) {
@@ -613,6 +633,7 @@ async function main() {
       blur: Number(flag('--blur', final ? 16 : 1)), from, durArg, progress: final,
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
+      probe: !final && from === 0 && durArg == null,
     };
     const frame = resolveFrame(pagePath, opts);
     const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
@@ -626,6 +647,7 @@ async function main() {
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
     if (!final) printDraftSheet(outPath, opts);
+    if (r.probe) printDraftCheck(outPath, r);
   }
 }
 
