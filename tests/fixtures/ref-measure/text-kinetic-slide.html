@@ -1,0 +1,29 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:linear-gradient(120deg,#12233a,#3a1f4d);overflow:hidden;height:100vh}
+.l{position:absolute;left:0;width:100vw;text-align:center;font:800 11vh Helvetica,Arial,sans-serif;color:#fff4d6;white-space:nowrap}
+.l span{display:inline-block;margin:0 1vw;opacity:1}
+#l1{top:18vh}#l2{top:52vh}
+</style>
+</head><body>
+<div class="l" id="l1"></div><div class="l" id="l2"></div>
+<script>
+// truth: each word slides in from the left (-12vw to 0), blurs (24 px to 0) and scales 1.5 to 1 over 0.6 s with ease-out, holds, then slides out to the right and blurs over 0.3 s.
+// line 1 "Kinetic words never sit still", first word 0.40 s, 0.25 s between words, all leave at 4.0 s (gone at 4.3 s).
+// line 2 "Read them anyway", first word 1.20 s, 0.30 s between words, all leave at 4.4 s (gone at 4.7 s).
+const rows = [['l1', ['Kinetic', 'words', 'never', 'sit', 'still'], (i) => 0.4 + 0.25 * i, 4.0],
+  ['l2', ['Read', 'them', 'anyway'], (i) => 1.2 + 0.3 * i, 4.4]];
+for (const [id, words, at, out] of rows) {
+  const el = document.getElementById(id);
+  words.forEach((w, i) => {
+    const s = document.createElement('span');
+    s.textContent = w;
+    el.appendChild(s);
+    s.animate([{ opacity: 0, filter: 'blur(24px)', transform: 'translateX(-12vw) scale(1.5)' }, { opacity: 1, filter: 'blur(0px)', transform: 'none' }],
+      { delay: at(i) * 1000, duration: 600, easing: 'cubic-bezier(0.2,0.7,0.2,1)', fill: 'backwards' });
+    s.animate([{ opacity: 1, filter: 'blur(0px)', transform: 'none' }, { opacity: 0, filter: 'blur(18px)', transform: 'translateX(14vw)' }],
+      { delay: out * 1000, duration: 300, easing: 'ease-in', fill: 'forwards' });
+  });
+}
+</script></body></html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="aspect" content="16:9">
+<style>*{margin:0}html,body{background:#f2efe6;overflow:hidden;height:100vh}
+.w{position:absolute;left:0;width:100vw;text-align:center;font:900 16vh Helvetica,Arial,sans-serif;white-space:nowrap;top:36vh;opacity:0}
+#f{position:absolute;left:4vw;bottom:5vh;font:600 3.4vh Helvetica,Arial,sans-serif;color:#555}
+</style>
+</head><body>
+<div id="f">Brand studio, all rights reserved</div>
+<script>
+// truth: one word at a time, centred. It scales 3 to 1 and changes colour red to navy over 0.4 s (fast ease-out), rests, then scales to 0.6 and fades over 0.2 s.
+// "Bold" 0.50-1.90 s, "ideas" 2.00-3.40 s, "deserve" 3.50-4.90 s, "motion" 5.00-6.00 s. The small footer is on the whole time.
+const words = [['Bold', 0.5, 1.9], ['ideas', 2.0, 3.4], ['deserve', 3.5, 4.9], ['motion', 5.0, 6.0]];
+for (const [text, t0, t1] of words) {
+  const el = document.createElement('div');
+  el.className = 'w';
+  el.textContent = text;
+  document.body.appendChild(el);
+  el.animate([{ opacity: 0, color: '#e63946', transform: 'scale(3)' }, { opacity: 1, color: '#1d3557', transform: 'scale(1)' }],
+    { delay: t0 * 1000, duration: 400, easing: 'cubic-bezier(0.1,0.8,0.2,1)', fill: 'both' });
+  el.animate([{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(0.6)' }],
+    { delay: (t1 - 0.2) * 1000, duration: 200, easing: 'ease-in', fill: 'forwards' });
+}
+</script></body></html>
