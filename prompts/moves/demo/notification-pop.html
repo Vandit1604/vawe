@@ -1,0 +1,46 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<meta name="blank" content="0-0.05">
+<title>move: notification pop</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --surface: #26252d; --line: rgba(255,255,255,0.1); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
+
+  .note { zoom: 1.25; display: flex; align-items: center; gap: 3.2vh; width: 104vh; padding: 3.6vh 4vh; border-radius: 4vh; background: var(--surface); border: 1px solid var(--line);
+          box-shadow: 0 3vh 9vh rgba(0,0,0,0.45); transform-origin: 50% 0; opacity: 0; }
+  .app { flex: none; width: 11vh; height: 11vh; border-radius: 2.8vh; background: var(--accent); display: grid; place-items: center; }
+  .app svg { width: 100%; height: 100%; }
+  .app path { fill: none; stroke: #fff; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+  .text { flex: 1; min-width: 0; }
+  .title { font: 700 5.2vh/1.15 'Archivo', sans-serif; letter-spacing: -0.01em; }
+  .body { margin-top: 0.6vh; font: 500 4.2vh/1.25 'Archivo', sans-serif; color: var(--dim); }
+  .when { align-self: flex-start; font: 500 3.6vh/1 'Archivo', sans-serif; color: var(--dim); }
+</style>
+</head>
+<body>
+<div class="note">
+  <div class="app"><svg viewBox="0 0 100 100"><path d="M22 32 L36 70 L50 44 L64 70 L78 32"/></svg></div>
+  <div class="text"><div class="title">Render finished</div><div class="body">launch-film.mp4, 12.4 s at 60 fps</div></div>
+  <div class="when">now</div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);
+const q = (s) => document.querySelector(s);
+const note = q('.note');
+// the banner drops from above the frame and dips just past its slot before it settles; the width closes from 92 percent, so it lands as an object, not a slide
+note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: drop, fill: 'both' });
+note.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
+// contents follow the shell: the icon pops first, the text resolves 80 ms after it
+q('.app').animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: drop, fill: 'both' });
+[['.text', 280], ['.when', 340]].forEach(([s, at]) => q(s).animate([{ translate: '0 1.4vh', opacity: 0, filter: 'blur(4px)' }, { translate: '0 0', opacity: 1, filter: 'blur(0px)' }], { duration: 420, delay: at, easing: settle, fill: 'both' }));
+// the exit is shorter than the entrance and accelerates: 260 ms, cubic in, and it ends on the last frame
+note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: leave, fill: 'forwards' });
+</script>
+</body>
+</html>
