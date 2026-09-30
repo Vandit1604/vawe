@@ -18,6 +18,12 @@ export function isWaivedBy(allow, code, at) {
   return (allow || []).some((e) => waiverCovers(e, code, at));
 }
 
+/** Is a finding of `code` (at instance `at`, optional) waived by a bare or scoped entry that has its _why? */
+export function isWaived({ allow = [], _why = {} } = {}, code, at = null) {
+  const entry = allow.find((e) => e === code || (at !== null && e === `${code}@${at}`));
+  return Boolean(entry && hasReason(_why, entry));
+}
+
 // THE ONE BAR FOR "HAS A REASON" (AGENTS.md: "a waiver with no `_why` blocks"); waiver-drift.mjs used to check `_why` with its own ad hoc logic, so this is the one predicate both author-check.mjs and waiver-drift.mjs call now.
 export const MIN_REASON_LEN = 12;
 

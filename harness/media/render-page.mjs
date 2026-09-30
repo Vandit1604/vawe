@@ -56,7 +56,7 @@ import { sampleText, videoProblems } from './draft-check.mjs';
 import { textProblems, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
-import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
+import { isWaivedBy, hasReason, isWaived } from '../lib/waivers.mjs';
 import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
 import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
@@ -616,8 +616,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
     if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
-    const motion = opts.probe ? await collectPageMotion(page, dur) : null;
-    const probe = opts.probe ? await sampleText(page, dur, (ms) => seekAll(page, ms), shownAndHidden) : null;
+    const { motion = null, probe = null } = opts.probe ? await probePage(page, dur) : {};
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
@@ -715,20 +714,41 @@ function motionAdvice(pagePath, motion) {
   const boxes = motion.boxes;
   const records = boxes ? [...motion.records, ...recordsFromBoxes(boxes)] : motion.records;
   const lines = lintLines(unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath)));
-  const out = lines.length ? [...lines, 'waive a rule line with its code in authoring.allow and a _why'] : [];
+  if (!lines.length) return [];
+  const out = [...lines, 'waive a rule line with its code in authoring.allow and a _why'];
   if (boxes?.canvas) out.push(`motion lint read element boxes over time; the motion inside ${boxes.canvas} canvas (2D or WebGL) is out of its scope`);
   return out;
+}
+
+/** The live page's motion records and text samples (with pixels for contrast): what the draft check reads besides the video. */
+export async function probePage(page, dur) {
+  const motion = await collectPageMotion(page, dur);
+  const probe = await sampleText(page, dur, (ms) => seekAll(page, ms), shownAndHidden);
+  return { motion, probe };
+}
+
+/** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
+export function pageAdvice(pagePath, { probe, motion }) {
+  const authoring = pageAuthoring(pagePath);
+  const brief = readBrief(pagePath);
+  const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
+  const contrast = isWaived(authoring, 'text-low-contrast') ? [] : draftContrastLines(probe.samples);
+  const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor')));
+  return {
+    text: textProblems(probe.samples, probe),
+    brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
+    lines: [...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions],
+  };
 }
 
 function printDraftCheck(mp4, pagePath, { probe, level, motion, advice: blanks }) {
   let video = [];
   try { video = videoProblems(mp4, pageAuthoring(pagePath)); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
-  const problems = mergeProblems(video, textProblems(probe.samples, probe));
-  const brief = readBrief(pagePath);
+  const page = pageAdvice(pagePath, { probe, motion });
+  const problems = mergeProblems(video, page.text);
   const sound = soundLine(level?.I ?? null);
   const peak = peakLine(level?.TP ?? null);
-  const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
-  const advice = [...blanks, ...draftAdvice(problems, sound, briefLine(brief)), ...[peak].filter(Boolean), ...textCollisionLines(probe.samples), ...draftContrastLines(probe.samples), ...motionAdvice(pagePath, motion), ...directionsLines(brief, dir)];
+  const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...page.lines];
   console.log(draftCheckLines(advice).join('\n'));
   const taste = ['', ...draftTasteLines([...problems, sound, peak].filter(Boolean))];
   if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
