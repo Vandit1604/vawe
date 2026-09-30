@@ -33,7 +33,7 @@ floors, flashing backgrounds, bouncy easing, a feature the product does not have
 Write the beat list first, with a timestamp per beat, one message per beat, and the real capture that
 proves it. Hook: the promise, word by word, first frame under 12 words. Then one move per beat: the
 hook word becomes the product; a cursor does one real thing; the key output, big; the second
-surface; a stat you can source; the wordmark. End on the wordmark, still, for 1.5 seconds.
+surface; a stat you can source; the wordmark. The last beat keeps the world moving: no still tail.
 </structure>
 
 <build>
@@ -51,8 +51,7 @@ surface; a stat you can source; the wordmark. End on the wordmark, still, for 1.
 </build>
 
 <gotchas>
-The brand's accent on its dark surface may fail contrast (vawe's cobalt on charcoal is about 2.5:1;
-the kit says which pair to use). A capture scaled below 0.6 loses its type; crop instead. Never set
+The brand's accent on its dark surface may fail contrast (the kit says which pair to use). A capture scaled below 0.6 loses its type; crop instead. Never set
 opacity or filter on a preserve-3d element; fade its wrapper. A feature you did not see on the site is
 a feature you must not show.
 </gotchas>
@@ -86,13 +85,12 @@ A claim that needs a source (a number, a customer name) gets its source before t
 ## Worked example (vawe)
 
 URL `site/app/` (local), promise "Write a scene. Get a film.", moments: the editor diff, the same
-scene on five canvases, frame 412 rendered twice, `bin/vawe ship`. Kit: `themes/vawe.css` (white first,
-cobalt `#2563eb`, Anybody + JetBrains Mono).
+scene on five canvases, frame 412 rendered twice, `bin/vawe ship`. Kit: `themes/vawe.css`. The vawe
+brand is a dark ground `#16151a`, white, the accent `#0a87ff` sparingly, Archivo / Unbounded / JetBrains Mono.
 
 source: pattern from twoclipping's "Beat-Synced Product Motion Ad" brief,
-https://x.com/twoclipping/status/2102554209166000267 (via
-https://github.com/guanmo-ai/awesome-ai-motion, case 2102554209166000267), third-party text, not
-redistributable, so this is our own template in the same six-section shape; the "real assets only,
+https://x.com/twoclipping/status/2102554209166000267 (third-party text, so this is our own template
+in the same six-section shape); the "real assets only,
 list what was reused" rule is adapted from the CC BY 4.0 playbook at
 https://github.com/athemeroy/awesome-opus-5-5-videos/blob/main/docs/prompt-playbook.zh-CN.md
 (section 3) by athemeroy; and from the Movez course's brand prompt (owner-shared article, not

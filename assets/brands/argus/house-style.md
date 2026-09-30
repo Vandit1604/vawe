@@ -1,17 +1,13 @@
 # House style: argus
 
-> The persisted **Design Read** for argus. The planning skill reads this FIRST so taste isn't
-> re-derived each video and every render stays on-brand. The measured block is auto-filled from
-> `themes/argus.json` (regenerate with `make dev-tool X=house-style NAME=argus`); the judgment
-> lines below are yours to sharpen from the site study (`make sections`/`make study-tool X=lookbook`).
+> The persisted Design Read for argus. `bin/vawe judge` reads this file as the scoring key for brand
+> fidelity, so keep it short and declarative.
 
 ## Measured facts
-<!-- MEASURED:START (auto-filled from themes/argus.json, safe to regenerate) -->
 - **Dominance:** light-first (bg `#ffffff`, luma 1.00)
 - **Faces:** sans `Archivo` · serif `Archivo` · mono `JetBrains Mono`
 - **Palette (use ONLY these):** bg `#ffffff` · text `#16181d` · accent `#4772f5` · up `#1a9e57` · down `#e5484d`
-- **Motion:** easing `easeOutExpo` · settle 0.4 · stagger 0.04 · bounce 0.08 · enter 34 → calm (long settle)
-<!-- MEASURED:END -->
+- **Motion:** easing `easeOutExpo` · settle 0.4 · stagger 0.04 · bounce 0.08
 
 ## Identity
 - **References it borrows from:** Linear (clean technical restraint) + indie-playful (the pixel mascot, marker underline) + X-native.

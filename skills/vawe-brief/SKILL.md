@@ -8,7 +8,7 @@ effort: medium
 
 A better film comes from a better prompt, and a better prompt comes from asking the right five
 questions. This skill runs that interview and writes the brief. It never waits: a skipped question
-takes the template's default (the owner removed approval stages).
+takes the template's default.
 
 ## 1. Pick the template
 

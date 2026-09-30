@@ -1,22 +1,19 @@
 ---
-when: implementing or changing a motion primitive, layer type, background, transition or any other
-  named engine capability
-answers: "what core/ is: the JS motion/layout/effect library renderFrame(n) reads; one subfolder per capability family"
+when: implementing or changing a motion primitive, an audio voice, a layout helper or any other named engine capability
+answers: "what core/ is: the JS library pages and the renderer read, one subfolder per capability family"
 group: engine
 ---
 
 # core/
 
-The engine's own vocabulary: one subfolder per capability family (`layers/` the layer types `ls core/layers/` lists,
-`kinetic/` text presets, `camera-moves/`, `transitions/`, `backgrounds/`, `type/`, `color/`, `layout/`,
-`audio/`, and more). Every effect in the engine composes from what is here; nothing bypasses it with a
-private code path (`AGENTS.md`, "EVERY EFFECT COMPOSES; NONE IS A SPECIAL CASE").
+The engine's vocabulary, one subfolder per capability family: `motion/` (springs, keyframe tables,
+seeded noise: `core/motion/README.md`), `engine/` (the virtual clock `page-clock.js`, the seek
+`page-seek.js`, `page-api.js`), `audio/` (the synth voices in `kit.mjs`), `layout/` (aspects),
+`color/`, `beats/` (beat detection), `three/` and `surfaces/` (three.js helpers), `timeline/` and
+`registry/`. Every effect composes from what is here; nothing bypasses it with a private code path
+(`AGENTS.md`, "Changing the engine, not a film").
 
-Read by: the renderer, which calls `renderFrame(n)` and expects a pure function of `n` with no
-Date/random; and any agent naming an effect before building it.
+A frame is a pure function of the seek time: no `Date`, no unseeded random, no state between frames.
+`bin/vawe check anim-traps <page>` and `tests/media/render-page-determinism.test.mjs` guard that.
 
-The one doc: `AGENTS.md` for the composition rule, `engine-doctrine/CODEMAPS/ARCHITECTURE.md` for the
-system map. Checked by: `make check GATE=probe` (structural purity), `make check GATE=canvas-purity` (pixel purity for
-canvas/shader layers), `core/validate/validate.mjs` (the built-in rules run on every scene).
-
-Look first: `engine-doctrine/CODEMAPS/ARCHITECTURE.md`, then the subfolder matching the capability.
+Look first: `ls core/`, then the subfolder matching the capability.

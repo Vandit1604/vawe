@@ -13,7 +13,7 @@ agent will paint it. A music video, a documentary, a history film, a multi-part 
 
 ## The shape
 
-Three files, then one page per chapter, then one page that plays them in order.
+Three files, then one page per chapter, then one join.
 
 ```
 films/<name>/
@@ -22,7 +22,6 @@ films/<name>/
   GUIDE.md            the rules every chapter agent reads first (below)
   ch/01-<slug>.html   one chapter, one page, its own <meta name="duration">
   ch/02-<slug>.html
-  page.html           the film: mounts each chapter's page at its start time, owns the music and captions
 ```
 
 ## Prompt 1: the brief (one session, the director)
@@ -33,8 +32,7 @@ Read the material at <path or URL>. Then write films/<name>/BRIEF.md:
 - The arc in five lines, each a chapter: its name, its time window, its one job, its palette, its
   motif (the object or move that ties the chapter to the next).
 - The cast: every recurring character or object, drawn once, with the expressions or states it needs.
-- The music: the file, its BPM and offset (measure it: node harness/dev/ref-cutlist.mjs or a beat
-  grid from the file), or "no music, narration timings from <tts timings file>".
+- The music: the file, its BPM and offset (measure it: `node harness/media/beatmap.mjs <file.wav>`), or "no music, narration timings from <tts timings file>".
 - What ties it together: one sentence.
 Then write STORYBOARD.md: per chapter, a table of time | line or beat | shot | out. Every shot is
 1.4 to 4 seconds and has ONE focal action. "Out" names the transition to the next shot. Every
@@ -56,7 +54,7 @@ Stop. I read the three files before any chapter is built.
   timers, no carried state, no Math.random (use rng(seed) from core/motion/springs.js, seeded per
   element so a still element does not boil).
 - A shot paints the whole frame, background included. Cuts land on the shot's start time.
-- Only edit your own chapter file. Shared files (page.html, GUIDE.md, STORYBOARD.md, the cast page)
+- Only edit your own chapter file. Shared files (GUIDE.md, STORYBOARD.md, the cast page)
   are read-only. Need a helper the cast lacks? Write it privately in your chapter. Found a bug in a
   shared file? Report it in your final message; do not fix it.
 
@@ -64,7 +62,7 @@ Stop. I read the three files before any chapter is built.
 - The frame is --vw x --vh (the renderer sets them). Everything lays out with CSS; never crop.
 - The caption band covers the bottom <n> percent whenever a line is showing. Keep faces and the
   focal action above it.
-- The paper (or field) is under every frame already; the film page adds grain and vignette.
+- The paper (or field) is part of every chapter: each chapter paints it itself, from the palette in GUIDE.md.
 
 ## The look (fill from BRIEF.md)
 - Palette: <the chapter's colours by name>. No pure black and no pure white: use ink and cream.
@@ -101,10 +99,9 @@ bug you saw in a shared file.
 ## Prompt 3: the assembly (the director, one session)
 
 ```
-Mount every chapter in films/<name>/page.html at its STORYBOARD start time; the film page's
-window.seek(t) calls the active chapter's seek(t - start). Add <audio src="music.mp3" data-at="0">
-and the caption track. Render: bin/vawe ship films/<name>/page.html. Then read every chapter
-boundary: both sides of each cut, and the motif hand-off. Then prompts/critique-pass.md.
+Render each chapter with bin/vawe ship films/<name>/ch/NN-<slug>.html, join the mp4s in STORYBOARD
+order with ffmpeg (concat), and lay the music and captions over the joined film. Then read every
+chapter boundary: both sides of each cut, and the motif hand-off. Then prompts/critique-pass.md.
 ```
 
 ## Questions

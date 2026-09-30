@@ -10,7 +10,7 @@ group: reference
 than the author signs it off. It is the paperwork that a prompt alone skips: inputs and rights,
 what must stay exact, and three gates with a named reviewer. Fill it before the storyboard.
 
-**Length:** one page. It travels with the film as `films/<name>/BRIEF.md`.
+**Length:** one page. It travels with the film as `films/<name>/production-brief.md`.
 
 ## The template
 
@@ -79,8 +79,6 @@ The rest of the brief is filled as the film is made.
 - "Made with an agent" does not mean the music, the fonts or the captures cost nothing. The rights
   table is the film's provenance.
 - A number on screen that nobody sourced is a defect, not a design choice.
-- This brief and the storyboard are per-film artefacts (`.brief.md`, `.storyboard.md`), not
-  doctrine; the doc index excludes them by suffix.
 
 source: adapted, with changes for the vawe page contract, from the CC BY 4.0 "Copyable video
 production brief" by athemeroy,
