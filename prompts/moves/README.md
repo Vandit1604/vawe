@@ -34,7 +34,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
 | change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [smear-stretch](smear-stretch.md) |
 | change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md) |
-| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md) |
+| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [shape-morph-wipe](shape-morph-wipe.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
@@ -88,6 +88,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | colour block wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | [color-block-wipe.md](color-block-wipe.md) | [color-block-wipe.mp4](color-block-wipe.mp4) |
 | zoom through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | [zoom-through.md](zoom-through.md) | [zoom-through.mp4](zoom-through.mp4) |
 | smear stretch | an elastic cut: shot A's content stretches into streaks on an ease-in, the cut lands at the peak, and shot B snaps back from the streak on an under-damped spring, thinning and bulging like rubber | [smear-stretch.md](smear-stretch.md) | [smear-stretch.mp4](smear-stretch.mp4) |
+| shape morph wipe | the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame | [shape-morph-wipe.md](shape-morph-wipe.md) | [shape-morph-wipe.mp4](shape-morph-wipe.mp4) |
 
 ## Point the eye
 
@@ -165,7 +166,7 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe, command palette summon |
 | night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response, device tilt stage |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask, grid stagger wave |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow |
+| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow, shape morph wipe |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
 
