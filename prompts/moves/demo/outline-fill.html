@@ -1,0 +1,40 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="field">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: outline fill</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .word { transform-origin: 0 50%; position: absolute; left: calc(var(--u) * 9); top: 50%; translate: 0 -50%; display: flex; font: 800 calc(var(--u) * 42)/1 var(--sans); letter-spacing: -0.045em; text-transform: uppercase; }
+  .ch { position: relative; display: block; }
+  .ch i { display: block; font-style: normal; }
+  .o { filter: url(#ring); }
+  .f { position: absolute; inset: 0; color: var(--accent); clip-path: inset(110% -0.1em -0.3em -0.1em); }
+  .sub { position: absolute; left: 8.6vw; bottom: calc(var(--u) * 12); font: 500 var(--t-lead)/1.1 var(--sans); color: var(--muted); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position: absolute"><filter id="ring" x="-8%" y="-8%" width="116%" height="116%"><feMorphology in="SourceAlpha" operator="dilate" radius="3" result="grown"/><feComposite in="grown" in2="SourceAlpha" operator="out" result="ring"/><feFlood id="ink" flood-color="#fff"/><feComposite in2="ring" operator="in"/></filter></svg>
+<div class="word"></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut);
+// the outline is the ring a dilate leaves around the solid glyph, so a variable font's overlapping contours draw no inner lines
+document.querySelector('feMorphology').setAttribute('radius', (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) * 0.0055).toFixed(2));
+const word = document.querySelector('.word');
+[...'Faster'].forEach((c, i) => {
+  const ch = document.createElement('span');
+  ch.className = 'ch';
+  ch.innerHTML = `<i class="o">${c}</i><i class="f">${c}</i>`;
+  word.append(ch);
+  // the outline arrives first, letter by letter; the fill floods each letter from its baseline on the beat, 35 ms apart
+  ch.animate([{ opacity: 0, translate: '0 5vh' }, { opacity: 1, translate: '0 0' }], { duration: 650, delay: 40 + i * 45, easing: settle, fill: 'both' });
+  ch.querySelector('.f').animate([{ clipPath: 'inset(110% -0.1em -0.3em -0.1em)' }, { clipPath: 'inset(-0.3em -0.1em -0.3em -0.1em)' }], { duration: 480, delay: 780 + i * 35, easing: settle, fill: 'both' });
+});
+word.animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>

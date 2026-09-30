@@ -25,6 +25,8 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | flap-resolve | a name or number is decided on a split-flap board | Solari board | built |
 | word-swap-slot | one masked word in a held sentence rolls through 3 or 4 values and lands | HyperFrames kinetic-type-swap | built |
 | blur-word-cascade | copy resolves word by word from blur, no hard mask | to be captured | built |
+| text-as-mask | huge type is a window onto a product shot or a rich image made in CSS or SVG | video-shotcraft opening/text-as-mask; HyperFrames texture-mask-text | built |
+| outline-fill | big type arrives as an outline and fills with colour on the beat | video-shotcraft typography/outline-word-fill; HyperFrames outline-draw | built |
 
 ## 2. Change between shots
 
@@ -78,6 +80,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | thanks-sweep | a closing line sweeps across | to be captured | built |
 | calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | built |
 | logo-sting | a short animated logo hit | to be captured | built |
+| ui-strip-away | the product UI peels back layer by layer until only the logo and line remain | video-shotcraft outro/ui-strip-away-outro | built |
 
 ## 6. Product moments
 
@@ -89,3 +92,6 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | count-up | a number counts to its value | to be captured | built |
 | notification-pop | a notification drops in and settles | to be captured | built |
 | chart-build | a chart draws its bars or line in sequence | to be captured | built |
+| before-after-wipe | a scan line reveals the after state over the before state | video-shotcraft data/before-after-slider-scrub; HyperFrames before-after-wipe | built |
+| skeleton-reveal | grey loading blocks shimmer, then resolve into real content one region at a time | video-shotcraft ui-entrance/skeleton-reveal; HyperFrames skeleton-reveal | built |
+| ai-stream-response | an answer streams in chunk by chunk under a typed prompt, with a working indicator first | video-shotcraft interaction/ai-stream-response; HyperFrames streaming-text, typed-prompt, typing-indicator | built |

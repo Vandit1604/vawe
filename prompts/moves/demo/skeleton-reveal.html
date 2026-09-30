@@ -1,0 +1,112 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="swiss">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: skeleton reveal</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  .card { width: calc(var(--u) * 138); padding: calc(var(--u) * 5.4) calc(var(--u) * 6); display: flex; flex-direction: column; gap: calc(var(--u) * 5); box-shadow: 0 0 0 calc(var(--u) * 0.2) var(--edge); }
+  .reg { display: grid; }
+  .reg > * { grid-area: 1 / 1; }
+  .sk-layer { display: flex; }
+  .sk { position: relative; overflow: hidden; flex: none; border-radius: calc(var(--u) * 0.6); background: var(--hover); }
+  .sk .band { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--u) * 26); background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.85) 50%, transparent); }
+  .round { border-radius: 50%; }
+  .pill.up { color: var(--accent); background: transparent; box-shadow: inset 0 0 0 1px var(--accent); }
+
+  .head .real, .head .sk-layer { align-items: center; gap: var(--s3); }
+  .head .real { display: flex; }
+  .avatar { --size: calc(var(--u) * 11); }
+  .name { font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.025em; }
+  .sub { margin-top: calc(var(--u) * 0.8); font: 500 var(--t-small)/1.2 var(--sans); color: var(--muted); }
+  .grow { flex: 1; }
+  .pill { font-size: var(--t-small); padding: calc(var(--u) * 1.4) calc(var(--u) * 2.4); }
+
+  .stats .real, .stats .sk-layer { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s4); }
+  .stat { border-top: 1px solid var(--edge); padding-top: var(--s2); }
+  .stat .label { font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
+  .stat .val { margin-top: var(--s1); font: 700 calc(var(--u) * 9)/1.05 var(--sans); letter-spacing: -0.04em; }
+  .sk-stat { padding-top: var(--s2); border-top: 1px solid transparent; }
+
+  .low { display: grid; grid-template-columns: 1.15fr 1fr; gap: calc(var(--u) * 6); }
+  .chart .real { display: flex; flex-direction: column; }
+  .chart .label { font: 600 var(--t-small)/1 var(--sans); }
+  .bars { display: flex; align-items: flex-end; gap: calc(var(--u) * 1.6); height: calc(var(--u) * 21); margin-top: var(--s2); }
+  .bar { flex: 1; transform-origin: 50% 100%; background: var(--ink); }
+  .bar:last-child { background: var(--accent); }
+  .chart .sk-layer { flex-direction: column; }
+  .list .real { display: flex; flex-direction: column; }
+  .row { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 9); font: 500 var(--t-small)/1.15 var(--sans); border-bottom: 1px solid var(--line); }
+  .row .avatar { --size: calc(var(--u) * 5.4); font-size: calc(var(--u) * 2); }
+  .row .who { flex: 1; }
+  .row .who span { display: block; color: var(--muted); font-size: calc(var(--u) * 3); }
+  .row b { font-weight: 600; }
+  .list .sk-layer { flex-direction: column; }
+  .sk-row { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 9); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="reg head">
+    <div class="real"><div class="avatar">FC</div><div><div class="name">Fern &amp; Co.</div><div class="sub">Store since 2019 &middot; Portland, OR</div></div><div class="grow"></div><div class="pill up">Live</div></div>
+    <div class="sk-layer" style="align-items:center;gap:var(--s3)"><i class="sk round" style="width:calc(var(--u)*11);height:calc(var(--u)*11)"></i><div><i class="sk" style="display:block;width:calc(var(--u)*34);height:calc(var(--u)*5.2)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*1.6);width:calc(var(--u)*46);height:calc(var(--u)*3)"></i></div><div class="grow"></div><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*6);border-radius:999px"></i></div>
+  </div>
+  <div class="reg stats">
+    <div class="real">
+      <div class="stat"><div class="label">Orders today</div><div class="val">142</div></div>
+      <div class="stat"><div class="label">Revenue</div><div class="val">$9,418</div></div>
+      <div class="stat"><div class="label">Conversion</div><div class="val">3.6%</div></div>
+    </div>
+    <div class="sk-layer">
+      <div class="sk-stat"><i class="sk" style="display:block;width:calc(var(--u)*20);height:calc(var(--u)*3)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*2);width:calc(var(--u)*30);height:calc(var(--u)*7.4)"></i></div>
+      <div class="sk-stat"><i class="sk" style="display:block;width:calc(var(--u)*16);height:calc(var(--u)*3)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*2);width:calc(var(--u)*34);height:calc(var(--u)*7.4)"></i></div>
+      <div class="sk-stat"><i class="sk" style="display:block;width:calc(var(--u)*18);height:calc(var(--u)*3)"></i><i class="sk" style="display:block;margin-top:calc(var(--u)*2);width:calc(var(--u)*26);height:calc(var(--u)*7.4)"></i></div>
+    </div>
+  </div>
+  <div class="low">
+    <div class="reg chart">
+      <div class="real"><div class="label">Sales this week</div><div class="bars"><i class="bar" style="height:38%"></i><i class="bar" style="height:52%"></i><i class="bar" style="height:44%"></i><i class="bar" style="height:68%"></i><i class="bar" style="height:60%"></i><i class="bar" style="height:82%"></i><i class="bar" style="height:100%"></i></div></div>
+      <div class="sk-layer"><div style="width:100%"><i class="sk" style="display:block;width:calc(var(--u)*26);height:calc(var(--u)*3)"></i><div style="display:flex;align-items:flex-end;gap:calc(var(--u)*1.6);height:calc(var(--u)*21);margin-top:var(--s2)"><i class="sk" style="flex:1;height:38%"></i><i class="sk" style="flex:1;height:52%"></i><i class="sk" style="flex:1;height:44%"></i><i class="sk" style="flex:1;height:68%"></i><i class="sk" style="flex:1;height:60%"></i><i class="sk" style="flex:1;height:82%"></i><i class="sk" style="flex:1;height:100%"></i></div></div></div>
+    </div>
+    <div class="reg list">
+      <div class="real">
+        <div class="row"><div class="avatar">MH</div><div class="who">Maren Holt<span>#4821</span></div><b>$84.00</b></div>
+        <div class="row"><div class="avatar">DO</div><div class="who">Dev Ortiz<span>#4820</span></div><b>$212.50</b></div>
+        <div class="row"><div class="avatar">LP</div><div class="who">Lin Park<span>#4819</span></div><b>$46.00</b></div>
+      </div>
+      <div class="sk-layer">
+        <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*20);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*9);height:calc(var(--u)*3)"></i></div>
+        <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*16);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*11);height:calc(var(--u)*3)"></i></div>
+        <div class="sk-row"><i class="sk round" style="width:calc(var(--u)*5.4);height:calc(var(--u)*5.4)"></i><div style="flex:1"><i class="sk" style="display:block;width:calc(var(--u)*18);height:calc(var(--u)*3)"></i></div><i class="sk" style="width:calc(var(--u)*8);height:calc(var(--u)*3)"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
+const card = q('.card'), cardBox = card.getBoundingClientRect();
+
+// one band crosses the whole card: each block plays the same sweep shifted by its own left edge, so the blocks read as one light
+all('.sk').forEach((sk) => {
+  const band = Object.assign(document.createElement('i'), { className: 'band' });
+  sk.append(band);
+  const left = sk.getBoundingClientRect().left - cardBox.left, w = band.getBoundingClientRect().width;
+  band.animate([{ translate: `${-w - left}px 0` }, { translate: `${cardBox.width - left}px 0` }], { duration: 850, iterations: 2, easing: 'linear', fill: 'both' });
+});
+
+// regions resolve one after another, 200 ms apart; the skeleton leaves faster than the content arrives
+const at = { '.head': 600, '.stats': 800, '.chart': 1000, '.list': 1200 };
+Object.entries(at).forEach(([sel, t]) => {
+  const reg = q(sel), real = reg.querySelector('.real'), sk = reg.querySelector('.sk-layer');
+  real.animate([{ opacity: 0, translate: '0 1.4vh', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 480, delay: t, easing: settle, fill: 'both' });
+  sk.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: t, easing: accelerate, fill: 'both' });
+});
+all('.bar').forEach((b, i) => b.animate([{ scale: '1 0.55' }, { scale: '1 1' }], { duration: 600, delay: 1000 + i * 45, easing: settle, fill: 'both', composite: 'replace' }));
+card.animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>
