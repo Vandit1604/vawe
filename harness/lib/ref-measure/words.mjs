@@ -42,12 +42,26 @@ const ONSET = 0.98;
 const q = (a, p) => [...a].sort((x, y) => x - y)[Math.min(a.length - 1, Math.floor(a.length * p))];
 
 /**
+ * Throws when samples that carry `content: true` (a frame with visible content) yielded no word at all:
+ * that is a broken OCR run, not a silent film. Samples without a `content` flag are never judged.
+ */
+export function assertWordsRead(samples, sampleFps) {
+  const seen = samples.filter((s) => s.content).length;
+  if (!seen || samples.some((s) => s.words.length)) return;
+  throw new Error(`OCR read 0 words in ${samples.length} sample(s) at ${sampleFps} per second, and ${seen} of them show content. `
+    + 'Likely causes: tesseract cannot read the frames (check the path and run `tesseract --version`), '
+    + 'the text is too small or too stylised at the OCR width, the sample rate misses the text, '
+    + 'or the video has no text (skip OCR with --no-ocr).');
+}
+
+/**
  * samples: [{ t, words: [{ text, conf, cx, cy, w, h }] }] in one length unit (reference px).
  * A word joins the open track of the same text whose last box is nearest, within 3 box heights or one
  * width; a track survives one missed sample (OCR flicker). A single-sample track is kept only when
  * the read was strong, since a lone weak read is usually noise.
  */
 export function trackWords(samples, fps) {
+  assertWordsRead(samples, fps);
   const tracks = [];
   samples.forEach((s, i) => {
     const pairs = [];
