@@ -27,6 +27,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | blur-word-cascade | copy resolves word by word from blur, no hard mask | to be captured | built |
 | text-as-mask | huge type is a window onto a product shot or a rich image made in CSS or SVG | video-shotcraft opening/text-as-mask; HyperFrames texture-mask-text | built |
 | outline-fill | big type arrives as an outline and fills with colour on the beat | video-shotcraft typography/outline-word-fill; HyperFrames outline-draw | built |
+| grid-stagger-wave | a grid of tiles, logos or cards enters in a wave by distance from one point | HyperFrames stagger-lattice, dynamic-grid; video-shotcraft ui-entrance/radial-wave, wall-reveal-moves | built |
 
 ## 2. Change between shots
 
