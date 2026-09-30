@@ -24,6 +24,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: droplet at 0.75 s into the move, on the contact of the hit frame (default gain); nothing on the snap.
+
 Fall on `y = -drop * (1 - (p / touch)^2)` (gravity in story time), squash between the touch and the
 hit, rebound on an ease-out of `p - hit`. The ramp is 0.4 s and the hold 0.25 s: a shorter hold
 reads as a stutter, a longer one as a dropped frame. The blur is measured in real time, so it

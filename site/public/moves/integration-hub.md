@@ -30,6 +30,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: droplet at 1.17 s into the move, when every wire is drawn and the first pulses ride in (default gain); no tick per tool.
+
 The start point sits half a radian off the landing bearing and the bend point off the other side,
 so each path is an S that swings in; straight rays read as a starburst. `expoOut` lands them soft,
 and the small counter-rotation that unwinds on landing is what makes them feel thrown. Keep wires

@@ -35,7 +35,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Cut on motion](https://vawe.dev/moves/cut-on-motion.md): a moving shape carries the eye across a hard cut into a new scene
 - [Push with directional blur](https://vawe.dev/moves/push-blur.md): a panel pushes in with a directional blur that follows its speed, set per frame
 - [Exits faster than entrances](https://vawe.dev/moves/exit-fast.md): the pair every beat needs: arrive fast and land soft, leave faster and shorter
-- [Chain beats](https://vawe.dev/moves/chain-beats.md): beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule)
+- [Chain beats](https://vawe.dev/moves/chain-beats.md): beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule); use once per film
 - [Whip pan](https://vawe.dev/moves/whip-pan.md): the next shot is to the side: a fast sideways pan with a blur that follows its speed hides the seam
 - [Match cut](https://vawe.dev/moves/match-cut.md): one shape crosses a scene change at the same place, size and angle and changes meaning (spinner ring, finished ring)
 - [Iris wipe](https://vawe.dev/moves/iris-wipe.md): a circle closes on the click or mark the eye is on and uncovers the next scene
@@ -64,16 +64,16 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Caret follow](https://vawe.dev/moves/caret-follow.md): the camera trails the typing caret on a soft spring, so a long line stays readable at close range
 - [Pull back reveal](https://vawe.dev/moves/pull-back-reveal.md): open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even
 - [Parallax dive](https://vawe.dev/moves/parallax-dive.md): the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves
-- [Rack focus](https://vawe.dev/moves/rack-focus.md): focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs
+- [Rack focus](https://vawe.dev/moves/rack-focus.md): focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs; use once per film
 - [Drift hold](https://vawe.dev/moves/drift-hold.md): the line holds still while only the ground drifts, so a held frame never sits dead
 - [Pan stations](https://vawe.dev/moves/pan-stations.md): several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them
 - [Crash zoom](https://vawe.dev/moves/crash-zoom.md): one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil
-- [Logo sting](https://vawe.dev/moves/logo-sting.md): a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame
-- [Wordmark cascade](https://vawe.dev/moves/wordmark-cascade.md): the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail
-- [Mark trace](https://vawe.dev/moves/mark-trace.md): a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark
-- [Calm lockup](https://vawe.dev/moves/calm-lockup.md): the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats
+- [Logo sting](https://vawe.dev/moves/logo-sting.md): a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame; use once per film
+- [Wordmark cascade](https://vawe.dev/moves/wordmark-cascade.md): the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail; use once per film
+- [Mark trace](https://vawe.dev/moves/mark-trace.md): a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark; use once per film
+- [Calm lockup](https://vawe.dev/moves/calm-lockup.md): the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats; use once per film
 - [CTA pop](https://vawe.dev/moves/cta-pop.md): the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click
-- [Thanks sweep](https://vawe.dev/moves/thanks-sweep.md): a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts
+- [Thanks sweep](https://vawe.dev/moves/thanks-sweep.md): a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts; use once per film
 - [UI strip away](https://vawe.dev/moves/ui-strip-away.md): the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup
 - [Logo wall](https://vawe.dev/moves/logo-wall.md): the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land
 - [Clip expand from a point](https://vawe.dev/moves/clip-expand.md): a panel or capture grows out of one point the eye is already on
@@ -83,7 +83,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Notification pop](https://vawe.dev/moves/notification-pop.md): a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came
 - [Chart build](https://vawe.dev/moves/chart-build.md): gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it
 - [Before and after wipe](https://vawe.dev/moves/before-after-wipe.md): the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve
-- [Skeleton reveal](https://vawe.dev/moves/skeleton-reveal.md): grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart
+- [Skeleton reveal](https://vawe.dev/moves/skeleton-reveal.md): grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart; use once per film
 - [AI stream response](https://vawe.dev/moves/ai-stream-response.md): a typed prompt is sent up into the thread, a status line shines, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk
 - [Overwhelm collapse](https://vawe.dev/moves/overwhelm-collapse.md): the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens
 - [Success check](https://vawe.dev/moves/success-check.md): a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it
