@@ -5,8 +5,8 @@
 //                                                        takes the voice's DEFAULT_GAIN_DB, -26 for a UI cue)
 //   <audio src="vo.wav" data-role="vo"></audio>          (ducks music -18 dB while it plays)
 //   <meta name="loudness" content="-14">   (wins over the default below)
-// Master: -14 LUFS / -1 dBTP with a music bed or a voice. A cue-only film is never raised: it masters to
-// the lower of -20 LUFS and its own mix loudness, with a -6 dBTP peak ceiling.
+// The mix is as written: the sum of the cues at their gains, nothing raised or lowered. Only a -1 dBTP
+// safety limiter runs, and it never raises a level. <meta name="loudness"> opts in to normalising to it.
 // A cue that peaks more than 6 dB above the median cue is warned about, never refused.
 // CLI: node harness/media/page-audio.mjs <page.html> <video.mp4> <out.mp4>
 import fs from 'node:fs';
@@ -23,10 +23,8 @@ const DUCK_ATTACK = 0.05;
 const DUCK_RELEASE = 0.3;
 const CUE_CEILING = 0.8;
 const CUE_SPREAD_DB = 6;
-const BED_LUFS = -14;
-const BED_PEAK_DB = -1;
-const CUE_ONLY_LUFS = -20;
-const CUE_ONLY_PEAK_DB = -9;
+const PEAK_LIMIT_DB = -1;
+const LIMITER_DB = -1.5;
 
 function run(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -89,7 +87,7 @@ function probePeakDb(file) {
   return m ? parseFloat(m[1]) : 0;
 }
 
-// peakDb is the cue's loudest sample after data-gain, in dBFS, before the master loudnorm.
+// peakDb is the cue's loudest sample after data-gain, in dBFS, before the limiter.
 function materialise(spec, tmp, i) {
   if (spec.src) return { file: spec.src, seconds: probeSeconds(spec.src), peakDb: probePeakDb(spec.src) + spec.gain };
   const samples = normalize(renderCue(CUES[spec.synth]), CUE_CEILING);
@@ -153,28 +151,30 @@ function lastJson(stderr) {
   return JSON.parse(m[m.length - 1]);
 }
 
-/**
- * masterTarget({ specs, explicit, truePeak }) -> { loudness, truePeak, why }. Pure.
- * An explicit loudness (meta or caller) wins; else a bed or voice masters to -14 LUFS; else a cue-only film
- * masters to -20 LUFS, -9 dBTP (loudnorm allows TP from -9 to 0).
- */
-export function masterTarget({ specs, explicit, truePeak }) {
-  if (explicit !== null) return { loudness: explicit, truePeak: truePeak ?? BED_PEAK_DB, why: 'explicit loudness' };
-  if (specs.some((s) => s.role === 'music' || s.role === 'vo')) return { loudness: BED_LUFS, truePeak: truePeak ?? BED_PEAK_DB, why: 'film has a music bed or voice' };
-  return { loudness: CUE_ONLY_LUFS, truePeak: truePeak ?? CUE_ONLY_PEAK_DB, why: 'cue-only film: -20 LUFS, felt not noticed' };
+function measureFile(file) {
+  const err = run('ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-vn', '-af', 'ebur128=peak=true', '-f', 'null', '-']);
+  const summary = err.slice(err.lastIndexOf('Summary:'));
+  return { I: parseFloat(summary.match(/I:\s+(-?[\d.]+) LUFS/)[1]), TP: parseFloat(summary.match(/Peak:\s+(-?[\d.]+) dBFS/)[1]) };
 }
 
-function measureMix(mixWav, target) {
-  return lastJson(run('ffmpeg', ['-hide_banner', '-nostats', '-i', mixWav, '-af', `loudnorm=I=${target.loudness}:TP=${target.truePeak}:LRA=11:print_format=json`, '-f', 'null', '-']));
+// The limiter lowers peaks above LIMITER_DB and passes everything below it untouched.
+const LIMITER = `alimiter=limit=${f(10 ** (LIMITER_DB / 20))}:level=false`;
+
+function normaliseFilter(mixWav, loudness) {
+  const p1 = lastJson(run('ffmpeg', ['-hide_banner', '-nostats', '-i', mixWav, '-af', `loudnorm=I=${loudness}:TP=${PEAK_LIMIT_DB}:LRA=11:print_format=json`, '-f', 'null', '-']));
+  if (!(parseFloat(p1.input_i) > -70)) return `aresample=${RATE}`;
+  const measured = `measured_I=${p1.input_i}:measured_TP=${p1.input_tp}:measured_LRA=${p1.input_lra}:measured_thresh=${p1.input_thresh}:offset=${p1.target_offset}`;
+  return `loudnorm=I=${loudness}:TP=${PEAK_LIMIT_DB}:LRA=11:${measured}:linear=true,aresample=${RATE}`;
 }
 
 /**
- * mixAndMux({ specs, duration, video, out, loudness = null, truePeak = null }) -> { out, measured: { I, TP }, warnings }
- * `loudness`/`truePeak` set the master; null picks them by masterTarget. `measured` is the loudness of the audio track as written into `out`. With no specs, `out` is the
- * video copied with no audio track and `measured` is null. `warnings` (cueSpreadWarnings) are printed
- * to stderr and never fail the mix.
+ * mixAndMux({ specs, duration, video, out, loudness = null }) -> { out, measured: { I, TP }, warnings }
+ * The audio track is the mix as written plus a -1 dBTP limiter; `loudness` (LUFS) opts in to normalising
+ * to it. `measured` is the loudness of the audio track as written into `out`, and one line prints it.
+ * With no specs, `out` is the video copied with no audio track and `measured` is null. `warnings`
+ * (cueSpreadWarnings) are printed to stderr and never fail the mix.
  */
-export async function mixAndMux({ specs, duration, video, out, loudness = null, truePeak = null }) {
+export async function mixAndMux({ specs, duration, video, out, loudness = null }) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-audio-'));
   const tmpOut = `${out}.tmp-${process.pid}.mp4`;
   try {
@@ -194,18 +194,12 @@ export async function mixAndMux({ specs, duration, video, out, loudness = null, 
     const mixWav = path.join(tmp, 'mix.wav');
     run('ffmpeg', ['-y', '-loglevel', 'error', ...tracks.flatMap((t) => ['-i', t.file]), '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_f32le', mixWav]);
 
-    const first = measureMix(mixWav, { loudness: BED_LUFS, truePeak: BED_PEAK_DB });
-    const chosen = masterTarget({ specs, explicit: loudness, truePeak });
-    console.log(`page-audio: master ${chosen.loudness} LUFS, ${chosen.truePeak} dBTP (${chosen.why}; mix was ${first.input_i} LUFS)`);
-    const target = `I=${chosen.loudness}:TP=${chosen.truePeak}:LRA=11`;
-    const p1 = chosen.loudness === BED_LUFS && chosen.truePeak === BED_PEAK_DB ? first : measureMix(mixWav, chosen);
-    const silent = !(parseFloat(p1.input_i) > -70);
-    const measuredArgs = `measured_I=${p1.input_i}:measured_TP=${p1.input_tp}:measured_LRA=${p1.input_lra}:measured_thresh=${p1.input_thresh}:offset=${p1.target_offset}`;
-    const af = silent ? `aresample=${RATE}` : `loudnorm=${target}:${measuredArgs}:linear=true:print_format=json,aresample=${RATE}`;
-    const err = run('ffmpeg', ['-y', '-hide_banner', '-nostats', '-i', video, '-i', mixWav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-af', af,
+    const af = loudness === null ? `${LIMITER},aresample=${RATE}` : `${normaliseFilter(mixWav, loudness)},${LIMITER}`;
+    run('ffmpeg', ['-y', '-hide_banner', '-nostats', '-i', video, '-i', mixWav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-af', af,
       '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', tmpOut]);
     fs.renameSync(tmpOut, out);
-    const measured = silent ? { I: parseFloat(p1.input_i), TP: parseFloat(p1.input_tp) } : (({ output_i, output_tp }) => ({ I: parseFloat(output_i), TP: parseFloat(output_tp) }))(lastJson(err));
+    const measured = measureFile(out);
+    console.log(`page-audio: ${loudness === null ? 'mix as written' : `normalised to ${loudness} LUFS`}: ${measured.I.toFixed(1)} LUFS, ${measured.TP.toFixed(1)} dBTP`);
     return { out, measured, warnings };
   } finally {
     fs.rmSync(tmpOut, { force: true });
