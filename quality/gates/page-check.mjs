@@ -34,7 +34,7 @@ import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { decodeMono, envelopeOf, onsetsOf, meanDb } from '../../harness/lib/audio-onsets.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { sampleText, clippedGlyphs } from '../../harness/lib/text-timing.mjs';
-import { contrastRatio, ensureContrast } from '../../core/color/index.js';
+import { lowContrast, passingColour, hexOf, shownAndHidden } from '../../harness/lib/text-contrast.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -132,9 +132,6 @@ function pageFor(input) {
   return fs.existsSync(guess) ? guess : null;
 }
 
-const rawRgb = (png) => spawnSync('ffmpeg', ['-v', 'error', '-f', 'image2pipe', '-i', '-', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
-  { input: png, maxBuffer: 1 << 28 }).stdout;
-
 async function liveSamples(page, times, frame) {
   const { openPage, seekAll } = await import('../../harness/media/render-page.mjs');
   const opened = await openPage(page, frame);
@@ -144,10 +141,7 @@ async function liveSamples(page, times, frame) {
     for (const t of times) {
       await seekAll(opened.page, t * 1000);
       const dom = await opened.page.evaluate(collectText);
-      const shown = rawRgb(await opened.page.screenshot({ type: 'png' }));
-      const hide = await opened.page.addStyleTag({ content: '*{color:transparent!important;text-shadow:none!important;-webkit-text-stroke:0!important;caret-color:transparent!important}' });
-      const raw = rawRgb(await opened.page.screenshot({ type: 'png' }));
-      await hide.evaluate((el) => el.remove());
+      const { shown, raw } = await shownAndHidden(opened.page);
       rows.push({ t, ...dom, raw, shown });
     }
   } finally { await opened.close(); }
@@ -190,68 +184,12 @@ function collectText() {
   return { vh, items, faces };
 }
 
-const parseRgb = (s) => { const m = /rgba?\(([^)]+)\)/.exec(s); if (!m) return null; const p = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return { r: p[0], g: p[1], b: p[2], a: p[3] == null ? 1 : p[3] }; };
 const GENERIC = new Set(['serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui', 'ui-sans-serif', 'ui-serif', 'ui-monospace', '-apple-system', 'blinkmacsystemfont', 'emoji', 'math']);
 
-function bgAround(raw, w, h, it) {
-  const x0 = Math.max(0, Math.floor(it.x)), y0 = Math.max(0, Math.floor(it.y));
-  const x1 = Math.min(w, Math.ceil(it.x + it.w)), y1 = Math.min(h, Math.ceil(it.y + it.h));
-  let r = 0, g = 0, b = 0, n = 0;
-  for (let y = y0; y < y1; y += 2) for (let x = x0; x < x1; x += 2) { const i = (y * w + x) * 3; r += raw[i]; g += raw[i + 1]; b += raw[i + 2]; n++; }
-  return n ? { r: r / n, g: g / n, b: b / n } : null;
-}
-
-// A text run the page reports but never paints (clipped, covered, or still off its mask) changes no pixel
-// when its colour is hidden, so it has no contrast to measure.
-const PAINT_DELTA = 24;
-const PAINT_MIN_PIXELS = 3;
-function isPainted(row, frame, it) {
-  const x0 = Math.max(0, Math.floor(it.x)), y0 = Math.max(0, Math.floor(it.y));
-  const x1 = Math.min(frame.width, Math.ceil(it.x + it.w)), y1 = Math.min(frame.height, Math.ceil(it.y + it.h));
-  let changed = 0;
-  for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
-    const i = (y * frame.width + x) * 3;
-    if (Math.max(Math.abs(row.shown[i] - row.raw[i]), Math.abs(row.shown[i + 1] - row.raw[i + 1]), Math.abs(row.shown[i + 2] - row.raw[i + 2])) > PAINT_DELTA && ++changed >= PAINT_MIN_PIXELS) return true;
-  }
-  return false;
-}
-
-const hexOf = (c) => `#${[c.r, c.g, c.b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('')}`;
-
-// One text run against the frame with its own text hidden: the ratio the viewer gets, alpha included.
-function contrastOf(row, frame, it) {
-  const fg = parseRgb(it.color), bg = bgAround(row.raw, frame.width, frame.height, it);
-  if (!fg || !bg) return null;
-  const a = fg.a * it.opacity;
-  const eff = { r: fg.r * a + bg.r * (1 - a), g: fg.g * a + bg.g * (1 - a), b: fg.b * a + bg.b * (1 - a) };
-  const large = it.size >= 0.022 * row.vh || (it.size >= 0.017 * row.vh && Number(it.weight) >= 700);
-  const need = large ? 3 : 4.5;
-  return { ratio: contrastRatio(hexOf(eff), hexOf(bg)), need, fg: eff, bg };
-}
-
 function contrastFindings(rows, frame, fps, f) {
-  const seen = new Map();
-  for (const row of rows) {
-    if (!row.raw || !row.shown || row.raw.length < frame.width * frame.height * 3 || row.shown.length !== row.raw.length) continue;
-    for (const it of row.items) {
-      if (!isPainted(row, frame, it)) continue;
-      const c = contrastOf(row, frame, it);
-      if (!c) continue;
-      const rec = seen.get(it.text) || { seen: 0, fails: 0, worst: null };
-      rec.seen++;
-      if (c.ratio < c.need) {
-        rec.fails++;
-        if (!rec.worst || c.ratio < rec.worst.ratio) rec.worst = { ...c, t: row.t };
-      }
-      seen.set(it.text, rec);
-    }
-  }
-  for (const [text, rec] of seen) {
-    const persistent = rec.fails >= 2 || (rec.seen === 1 && rec.fails === 1);
-    if (!persistent) continue;
-    const w = rec.worst;
-    f.warn('text-low-contrast', `"${text}" reads ${w.ratio.toFixed(1)}:1 against its background (needs ${w.need}:1), failing in ${rec.fails} of ${rec.seen} sample(s)`,
-      { at: fmtT(w.t, fps), fix: `text colour ${hexOf(w.fg)} on ${hexOf(w.bg)}: use ${ensureContrast(hexOf(w.fg), hexOf(w.bg), { min: w.need })}, or lift the background behind it.` });
+  for (const w of lowContrast(rows, frame)) {
+    f.warn('text-low-contrast', `"${w.text}" reads ${w.ratio.toFixed(1)}:1 against its background (needs ${w.need}:1), failing in ${w.fails} of ${w.seen} sample(s)`,
+      { at: fmtT(w.t, fps), fix: `text colour ${hexOf(w.fg)} on ${hexOf(w.bg)}: use ${passingColour(w)}, or lift the background behind it.` });
   }
 }
 
