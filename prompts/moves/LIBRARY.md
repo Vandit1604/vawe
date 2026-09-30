@@ -42,6 +42,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | split-reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | HyperFrames split and curtain-reveal transitions | built |
 | slice-shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | HyperFrames slice and shutter transitions, broadcast glitch-free slice wipes | built |
 | type-fill-transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | HyperFrames text-mask transitions, kinetic-type reels | built |
+| color-block-wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | HyperFrames colorama-wipe and directional-wipe, video-shotcraft color-block-step-wipe | built |
 
 ## 3. Point the eye
 

@@ -44,6 +44,7 @@ This index lists the built ones, in the same groups.
 | split reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | [split-reveal.md](split-reveal.md) | [split-reveal.mp4](split-reveal.mp4) |
 | slice shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | [slice-shift.md](slice-shift.md) | [slice-shift.mp4](slice-shift.mp4) |
 | type fill transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | [type-fill-transition.md](type-fill-transition.md) | [type-fill-transition.mp4](type-fill-transition.mp4) |
+| colour block wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | [color-block-wipe.md](color-block-wipe.md) | [color-block-wipe.mp4](color-block-wipe.mp4) |
 
 ## Point the eye
 
@@ -98,6 +99,7 @@ This index lists the built ones, in the same groups.
 | open one shot onto the next | [split-reveal](split-reveal.md) |
 | tear one shot off to show the next | [slice-shift](slice-shift.md) |
 | grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
+| carry a cut on a brand colour | [color-block-wipe](color-block-wipe.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
