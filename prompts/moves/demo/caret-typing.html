@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="terminal">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1">
@@ -14,12 +14,14 @@
   .text { overflow: hidden; white-space: nowrap; width: 0;
           animation-name: type; animation-duration: 0.5s; animation-delay: 0.05s;
           animation-timing-function: steps(9, end); animation-fill-mode: both; }
-  .caret { width: 0.08em; height: 1em; margin-left: 0.06em; background: var(--accent);
-           animation-name: become; animation-duration: 0.35s; animation-delay: 0.6s;
-           animation-timing-function: var(--settle); animation-fill-mode: both; }
+  .caret { position: relative; width: 0.08em; height: 1em; margin-left: 0.06em; background: var(--accent);
+           animation-name: spread, drop; animation-duration: 0.35s, 0.16s; animation-delay: 0.6s, 0.6s;
+           animation-timing-function: var(--settle), var(--settle); animation-fill-mode: both, both; }
   @keyframes type { to { width: 9ch; } }
   /* the caret becomes the rule under the word: no new element enters, the one on screen changes job */
-  @keyframes become { to { width: 9ch; height: 0.12em; translate: calc(-9ch - 0.06em) 0.64em; } }
+  /* the drop is shorter than the spread: the bar is a thin rule below the baseline before it widens, so it never crosses the letters */
+  @keyframes drop { to { height: 0.12em; top: 0.64em; } }
+  @keyframes spread { to { width: 9ch; translate: calc(-9ch - 0.06em) 0; } }
 </style>
 </head>
 <body>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="swiss">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1">
@@ -7,8 +7,8 @@
 <title>move: tracking collapse</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  /* 9u, not the usual 18: the word is 1.8x its settled width at the first frame, and it has to fit then */
-  h1 { margin: 0; font: 500 calc(var(--u) * 9)/1 var(--sans); text-transform: uppercase;
+  /* 14u, not the usual 18: the word is 1.8x its settled width at the first frame, and it has to fit then */
+  h1 { margin: 0; font: 600 calc(var(--u) * 14)/1 var(--sans); text-transform: uppercase;
        white-space: nowrap; letter-spacing: 0.35em; text-indent: 0.35em; opacity: 0; filter: blur(0.06em);
        animation-name: converge, sharpen; animation-duration: 0.9s, 0.5s; animation-delay: 0.1s, 0.1s;
        animation-timing-function: var(--settle), var(--settle); animation-fill-mode: both, both; }
