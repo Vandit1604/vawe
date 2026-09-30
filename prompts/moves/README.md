@@ -20,6 +20,7 @@ This index lists the built ones, in the same groups.
 | job | moves |
 |---|---|
 | hand the product to the brand at the end | [ui strip away](ui-strip-away.md) |
+| prove a change with a picture | [before after wipe](before-after-wipe.md) |
 
 ## Reveal a title
 
@@ -92,6 +93,7 @@ This index lists the built ones, in the same groups.
 | card assemble | a UI card builds: the shell lands, then each part arrives from the side of its slot, the accent action last | [card-assemble.md](card-assemble.md) | [card-assemble.mp4](card-assemble.mp4) |
 | notification pop | a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came | [notification-pop.md](notification-pop.md) | [notification-pop.mp4](notification-pop.mp4) |
 | chart build | gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it | [chart-build.md](chart-build.md) | [chart-build.mp4](chart-build.mp4) |
+| before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
