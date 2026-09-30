@@ -15,19 +15,19 @@
   .app nav .ws { display: flex; align-items: center; height: calc(var(--px) * 32); margin: 0 0 calc(var(--px) * 12) calc(var(--px) * 6); font-size: calc(var(--px) * 15); color: var(--ink); }
   .app nav span { display: flex; align-items: center; justify-content: space-between; height: calc(var(--px) * 30); padding: 0 calc(var(--px) * 10); border-radius: calc(var(--px) * 6); }
   .app nav span.on { background: var(--surface); color: var(--ink); box-shadow: var(--ring); }
-  .app nav span i { font-style: normal; font-size: calc(var(--px) * 12); color: var(--faint); }
-  .app nav .label { height: calc(var(--px) * 28); margin-top: calc(var(--px) * 14); font-size: calc(var(--px) * 12); color: var(--faint); }
+  .app nav span i { font-style: normal; font-size: calc(var(--px) * 12); color: var(--muted); }
+  .app nav .label { height: calc(var(--px) * 28); margin-top: calc(var(--px) * 14); font-size: calc(var(--px) * 12); color: var(--muted); }
   .app main { display: flex; flex-direction: column; min-width: 0; }
   .app header { display: flex; align-items: center; gap: calc(var(--px) * 10); height: calc(var(--px) * 52); padding: 0 calc(var(--px) * 24); box-shadow: 0 1px 0 var(--line); font: 600 calc(var(--px) * 14)/1 var(--sans); }
-  .app header small { font: 500 calc(var(--px) * 13)/1 var(--sans); color: var(--faint); }
+  .app header small { font: 500 calc(var(--px) * 13)/1 var(--sans); color: var(--muted); }
   .app header .k { margin-left: auto; }
   .group { display: flex; align-items: center; gap: calc(var(--px) * 8); height: calc(var(--px) * 36); padding: 0 calc(var(--px) * 24); background: var(--raised); font: 600 calc(var(--px) * 13)/1 var(--sans); }
-  .group i { font-style: normal; font-weight: 500; color: var(--faint); }
+  .group i { font-style: normal; font-weight: 500; color: var(--muted); }
   .issue { display: flex; align-items: center; gap: calc(var(--px) * 14); height: calc(var(--px) * 44); padding: 0 calc(var(--px) * 24); box-shadow: 0 1px 0 var(--line); font: 500 calc(var(--px) * 13)/1 var(--sans); }
-  .issue > span { width: calc(var(--px) * 64); color: var(--faint); font: 500 calc(var(--px) * 12)/1 var(--mono); }
+  .issue > span { width: calc(var(--px) * 64); color: var(--muted); font: 500 calc(var(--px) * 12)/1 var(--mono); }
   .status { margin-left: auto; padding: calc(var(--px) * 4) calc(var(--px) * 8); font-size: calc(var(--px) * 12); font-style: normal; gap: 0; }
   .issue .avatar { --size: calc(var(--px) * 22); }
-  .dim { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
+  .dim { position: absolute; inset: 0; background: var(--dim); opacity: 0; }
 
   kbd { display: inline-grid; place-items: center; min-width: calc(var(--px) * 20); height: calc(var(--px) * 20); padding: 0 calc(var(--px) * 5); border-radius: calc(var(--px) * 5); background: var(--raised); box-shadow: var(--ring); font: 500 calc(var(--px) * 11)/1 var(--mono); color: var(--muted); }
 
@@ -35,16 +35,16 @@
   .palette { position: absolute; left: 50%; top: calc(var(--px) * 196); width: calc(var(--px) * 640); margin-left: calc(var(--px) * -320); padding: 0; overflow: hidden; border-radius: calc(var(--px) * 14); }
   .query { display: flex; align-items: center; gap: calc(var(--px) * 12); height: calc(var(--px) * 56); padding: 0 calc(var(--px) * 18); font: 400 calc(var(--px) * 17)/1 var(--sans); letter-spacing: -0.01em; }
   .query .icon { width: calc(var(--px) * 18); height: calc(var(--px) * 18); color: var(--muted); }
-  .query .ph { color: var(--faint); }
+  .query .ph { color: var(--muted); }
   .typed { display: flex; align-items: center; }
   .caret { width: calc(var(--px) * 1.5); height: calc(var(--px) * 20); margin-left: calc(var(--px) * 1); background: var(--accent); border-radius: 1px; }
   .list { padding: calc(var(--px) * 8); }
-  .list .label { display: flex; align-items: center; height: calc(var(--px) * 28); padding: 0 calc(var(--px) * 10); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--faint); }
+  .list .label { display: flex; align-items: center; height: calc(var(--px) * 28); padding: 0 calc(var(--px) * 10); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--muted); }
   .opt { height: calc(var(--px) * 44); overflow: hidden; }
   .opt > div { height: calc(var(--px) * 44); display: flex; align-items: center; gap: calc(var(--px) * 12); padding: 0 calc(var(--px) * 10); border-radius: calc(var(--px) * 8); font: 500 calc(var(--px) * 14)/1 var(--sans); }
   .opt .icon { width: calc(var(--px) * 16); height: calc(var(--px) * 16); color: var(--muted); }
   .opt .keys { display: flex; gap: calc(var(--px) * 4); margin-left: auto; }
-  .foot { display: flex; align-items: center; gap: calc(var(--px) * 16); height: calc(var(--px) * 40); padding: 0 calc(var(--px) * 16); box-shadow: 0 -1px 0 var(--line); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--faint); }
+  .foot { display: flex; align-items: center; gap: calc(var(--px) * 16); height: calc(var(--px) * 40); padding: 0 calc(var(--px) * 16); box-shadow: 0 -1px 0 var(--line); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--muted); }
   .foot span { display: flex; align-items: center; gap: calc(var(--px) * 6); }
   .foot span:first-child { margin-right: auto; }
 </style>
@@ -105,7 +105,7 @@ const at = { dim: 120, drop: 150, rows: 220, keys: [780, 930, 1080], enter: 1340
 const opt = { fill: 'both' };
 
 // the app steps back, the palette drops in from above and settles
-q('.dim').animate([{ opacity: 0 }, { opacity: 0.28 }], { duration: 220, delay: at.dim, easing: settle, ...opt });
+q('.dim').animate([{ opacity: 0 }, { opacity: 0.55 }], { duration: 220, delay: at.dim, easing: settle, ...opt });
 q('.app').animate([{ scale: 1 }, { scale: 0.985 }], { duration: 400, delay: at.dim, easing: settle, ...opt });
 q('.palette').animate([{ translate: '0 -4vh', opacity: 0 }, { opacity: 1, offset: 0.25 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: at.drop, easing: drop, ...opt });
 // rows rise in 40 ms apart
@@ -127,7 +127,7 @@ rows[1].animate([{ background: 'transparent' }, { background: css('--raised') }]
 rows[1].animate([{ background: css('--raised'), color: css('--ink') }, { background: css('--accent'), color: css('--on-accent') }], { duration: 90, delay: at.enter, easing: 'linear', fill: 'forwards' });
 rows[1].animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { duration: 240, delay: at.enter, easing: settle, fill: 'both' });
 q('.palette').animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 180, delay: at.exit, easing: leave, fill: 'forwards' });
-q('.dim').animate([{ opacity: 0.28 }, { opacity: 0 }], { duration: 300, delay: at.exit + 60, easing: settle, fill: 'forwards' });
+q('.dim').animate([{ opacity: 0.55 }, { opacity: 0 }], { duration: 300, delay: at.exit + 60, easing: settle, fill: 'forwards' });
 q('.app').animate([{ scale: 0.985 }, { scale: 1 }], { duration: 400, delay: at.exit + 60, easing: settle, fill: 'forwards' });
 </script>
 </body>
