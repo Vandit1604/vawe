@@ -48,6 +48,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
 | end on an action | [cta-pop](cta-pop.md) |
 | hand the product to the brand | [ui-strip-away](ui-strip-away.md) |
+| show the problem, then the fix | [overwhelm-collapse](overwhelm-collapse.md) |
 
 ## Reveal a title
 
@@ -131,6 +132,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
 | AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
+| overwhelm collapse | the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens | [overwhelm-collapse.md](overwhelm-collapse.md) | [overwhelm-collapse.mp4](overwhelm-collapse.mp4) |
 
 `bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`). `--only <move>` forces one clip, `--all` forces every clip.
 
