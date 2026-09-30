@@ -1,103 +1,75 @@
 ---
-when: choosing image vs gradient, treating a photo, icons, or fetching a brand mark
-answers: the visual ladder · where a real asset comes from · treatment→intent · licensing · icon choice
+when: choosing an image, a gradient or an icon, treating a photo, or fetching a brand mark
+answers: the visual ladder · where a real asset comes from · treatment by intent · licensing · icon choice
 group: look
-applies-when: hasImages
-confirm: "where did each image come from, and what treatment earned it its place?"
 ---
 
-# IMAGERY & ICONS: choosing and treating visuals
+# IMAGERY and icons: choosing and treating visuals
 
-## AGENT SUMMARY
+The highest-taste image source is a captured real product UI. Everything below is for when you need another
+visual. An untreated stock photo is worse than none. Where each image came from and what treatment earned its
+place should be answerable for every image.
 
-- Prefer the lightest real visual: captured real UI (`make media X=capture`) first, a raw stock photo last.
-  Treat every image (edge-fade, `ken`, clip-to-shape, scrim, grade) so it feels intentional, and
-  fetch logos through `make media X=assets` (or `curl -f`), never a bare `curl -o`.
-- Enforced by the beats fidelity gate (untreated/off-brand images fail it) and `make check GATE=audit`
-  (flags tiny logos below ~5% of frame height).
-- Checkable action: where did each image come from, and what treatment earned it its place?
+## 1. Sources, in order
 
-The highest-taste image source is **captured real product UI** (`make media X=capture`). Everything below is for when you
-need another visual. An untreated stock photo is worse than none.
+1. **A capture of the real UI.** The highest-taste source. Never a fake or mocked-up screen.
+2. **Free, openly licensed images.** Brand logos, flags (`flagcdn.com/<iso2>.svg`), CC0 or CC-BY photos.
+   CC-BY needs a visible credit.
+3. **Drawn icons and inline SVG.**
+4. **Generated images.** Treat and grade them like any other: generated is not exempt from taste.
+5. **Emoji.** A last resort, or a deliberate hero-scale subject.
 
-## 0. Always prefer a real image. Where one comes from, in order
-
-1. **Captured real UI**: `make media X=capture` (a live component) is the highest-taste source.
-2. **Free/openly-licensed images**: brand logos, flags `flagcdn.com/<iso2>.svg` → `assets/flags/`;
-   CC0/CC-BY photos via `make media X=photos` (attribution auto-recorded; CC-BY needs visible credit).
-3. **Drawn icons**: `svgIcon(name)`. 4. **Generated cards**: `make media X=assets`. 5. **Emoji**: last resort.
-
-**Use `make media X=assets` for logos, and if you curl one by hand, use `-f`.** `curl -o` writes the response
-body whatever the status is, and Simple Icons removes marks on trademark request, so a bare curl can
-404 and leave a **zero-byte .svg** on disk. The file then exists, passes every path check, and renders
-as an invisible hole. `harness/media/assets.mjs`'s `tryFetch` gets this right: it requires 200, a
-minimum size AND a literal `<svg` before it writes, which is why `make media X=assets` is the answer and a
-bare curl is not:
+**Fetch logos with `curl -f`.** `curl -o` writes the body whatever the status. Simple Icons removes marks on
+trademark request, so a bare curl can 404 and leave a zero-byte `.svg` that passes every path check and renders
+as an invisible hole. Require a 200 and a literal `<svg` before you keep the file:
 
 ```bash
 curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>
 ```
 
-## 1. Use the lightest visual that carries the meaning
-Ladder, lightest first. Go heavier only if it adds meaning, not decoration:
+## 2. The lightest visual that carries the meaning
 
-**nothing / solid field  →  gradient  →  generated card (`make media X=assets`)  →  captured real UI  →  illustration  →  photo**
+Ladder, lightest first. Go heavier only when it adds meaning:
 
-A clean gradient beats a mismatched photo. If a beat reads fine on a plain field, don't add an image.
+nothing or a solid field, a gradient, a generated card, a captured real UI, an illustration, a photo.
 
-## 2. Treat every image so it feels intentional
+A clean gradient beats a mismatched photo. If a beat reads fine on a plain field, add no image.
 
-> **Never embed a raw flat image. Every image must have motion treatment.** There are five treatments,
-> and this engine supports all five: a perspective tilt (camera `rx`/`ry`, `three:"uiParallax"`), a slow
-> Ken Burns zoom (`ken`), a device frame (clip + `radius`), a floating extracted element at another
-> depth, and a scroll reveal (`recordedPan`). You will drop the screenshot in flat and move on. The `ken`
-> row below is this rule in our own words, and it is the DEFAULT for a reason.
+## 3. Treat every image
 
-A raw, untreated, off-brand photo reads as slop and fails the beats fidelity gate. Pick the treatment by what the
-image needs to DO, not by habit:
+A raw flat image reads as a dropped screenshot. Pick the treatment by what the image must do:
 
-| The image needs to… | Treatment | Note |
-|---|---|---|
-| sit in the frame without a hard rectangle edge | **`edgeFade`** | dissolve L+R edges into the bg; set `edgeFadeColor` to the bg on dark scenes |
-| not be static (a held still) | **`ken`** | slow Ken-Burns zoom (3–8%); the default so nothing sits dead |
-| read as a UI card / product, not a photo | **clip to a shape** + `radius` | a card, not a raw rectangle |
-| carry text on top and stay legible | **scrim** | a 40–60% dark overlay under the type |
-| belong to the brand's colours | **duotone / grade to the palette** | pull the accent from the brand (see [COLOR.md](COLOR.md)) |
-| feel like one film, not a scrapbook | **one grading recipe across the whole piece** | same duotone/grain/crop logic everywhere, or it fragments |
+| The image needs to | Treatment |
+|---|---|
+| sit in the frame without a hard rectangle edge | fade the edges into the ground (a `mask-image` gradient) |
+| not be static | a slow Ken Burns push, 3 to 8 % |
+| read as a UI card or product, not a photo | clip to a rounded shape, give it a device or card frame |
+| carry text on top and stay legible | a scrim: a 40 to 60 % dark overlay under the type |
+| belong to the brand's colours | duotone or a grade to the palette |
+| feel like one film, not a scrapbook | one grading recipe across the whole piece |
 
-Reach for the **lightest** treatment that does the job (a clip + ken is enough for most UI captures); stack more
-only when the image genuinely needs it. An over-graded image is as off as a raw one.
+Other treatments: a perspective tilt, a floating extracted element at another depth, a scroll reveal. Use
+the lightest treatment that does the job. An over-graded image is as off as a raw one. A held still is right
+when the pattern is "hold the picture, move the type" (`GRAMMAR.md`).
 
-## 3. Licensing, what's safe vs what triggers a claim
-- **Safe:** CC0 / public-domain photos (`make media X=photos` records attribution; CC-BY needs a visible credit), your own
-  assets, and **brand logos used nominatively** as trademarks (`cdn.simpleicons.org/<slug>/<hex>`).
-- **Never embed copyrighted material** into a published video (it triggers Content ID claims): movie/TV
-  posters, album covers, film stills, news photos, paid stock without a license, copyrighted music.
-  **Capture the real product UI instead.**
-- **Fetching stock footage or photos from a new site?** Check it against
-  [`../ASSET-SOURCES.md`](../ASSET-SOURCES.md) first: SHIPPABLE sources may be committed, LOCAL ONLY
-  sources may only be fetched fresh onto disk, never redistributed inside this repo.
+## 4. Licensing
 
-## 4. Icons
-- **Brand marks → simple-icons**, fetched with `make media X=assets` (or the `curl -f` form in §0) → `assets/icons/`.
-  Whenever a company/product/tool is *named*, show its mark. Text-only lists of named things are a missed layer.
-- **UI / action icons → one line set** (Lucide/Feather, in `assets/icons/ui/`, MIT). Draw with `svgIcon(name)`.
-- **Never mix icon families**: one stroke set, one weight; match stroke weight to the text weight next to it.
-- **Mono by default;** colour only for authentic brand logos. Keep a light variant (`#f3f3f0`) for dark bgs and a
-  `-dark` variant (`#0e0e0d`) for light bgs. A mono logo the same value as the bg is invisible (see [../MISTAKES.md](../MISTAKES.md) #7).
-- **Size on the spacing scale** and optically balance (a circle looks smaller than a square of the same box); a
-  logo reads at ~7% of frame height, never below ~5% (`make check GATE=audit` flags tiny images).
+- **Safe:** CC0 and public-domain photos, your own assets, and brand logos used nominatively.
+- **Never embed copyrighted material in a published video** (it triggers Content ID claims): posters, album
+  covers, film stills, news photos, paid stock without a licence, copyrighted music. Capture the real
+  product UI instead.
+- Check a new stock source against `../ASSET-SOURCES.md`: shippable sources may be committed, local-only
+  sources may only be fetched onto disk, never redistributed inside the repo.
 
-## 5. Generated imagery (kie.ai)
-`make media X=gen-image Q="…" NAME=<name>` → a normal `image` layer; `make media X=gen-video`/`gen-clip` → a deterministic `clip`
-layer. Still treat generated stills (grade/edge-fade/ken) and match them to the palette, generated ≠ exempt from taste.
+## 5. Icons
 
-## Provenance
+- **Brand marks:** simple-icons. Whenever a company or tool is named, show its mark. A text-only list of
+  named things is a missed layer.
+- **UI and action icons:** one line set (Lucide or Feather, MIT). Never mix icon families: one stroke set,
+  one weight, matched to the text beside it.
+- **Mono by default,** colour only for authentic brand logos. Keep a light variant for dark grounds and a
+  dark variant for light grounds. A mono logo the same value as the ground is invisible.
+- **Size by optical balance.** A circle looks smaller than a square of the same box. A logo reads at about
+  7 % of frame height and never below about 5 %.
 
-**Do not re-add:** a bare `curl -o` for fetching a logo. It zero-byted two shipped assets
-(`assets/icons/amazon.svg` among them), breaking three scenes silently, before `core/engine/boot.js` learned
-to refuse an asset that never loaded. Use `make media X=assets` or `curl -f`.
-
-**Sources:** Refactoring UI (working with images, scrims/overlap); Creative Commons licensing; simple-icons /
-Lucide system guidance; this repo's [../MISTAKES.md](../MISTAKES.md) (untasteful-image, logo-value); this
-doc's own mandatory image treatment rule above.
+Sources: Refactoring UI (images, scrims); Creative Commons; simple-icons and Lucide guidance.

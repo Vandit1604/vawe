@@ -86,7 +86,7 @@ ffmpeg -i ... -vf "fps=30,scale=92:52,format=gray" -f rawvideo g.raw
 | dead stills (frame difference at or near 0.00) | 9, each 0.3s to 1.1s |
 | longest still | **1.08s, the final frame (18.70s to 19.78s)** |
 
-Compare `engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md`: the other reference cut every 1.52s. This one
+Compare `engine-doctrine/CRAFT/FILM-STRUCTURE.md`: the other reference cut every 1.52s. This one
 changes state every 1.41s. **The cadence is the same; the mechanism is not.** Our films sit at 2.5-4s a
 beat, which is half the rate either reference runs, and neither of them gets there by cutting more.
 
@@ -207,7 +207,7 @@ holds still and the backdrop also holds still, that is the failure the rule name
 
 ## 7. The continuity thread
 
-`engine-doctrine/CRAFT/CONTINUITY-WITHOUT-AN-OBJECT.md` asks for the register, not just the presence. This film runs
+`engine-doctrine/CRAFT/FILM-STRUCTURE.md` asks for the register, not just the presence. This film runs
 **four threads at once**, and three of them are threads our gate can actually see.
 
 ### a. One continuous space, travelled by a camera (the primary thread)
@@ -248,7 +248,7 @@ frame. A gate looking for a prop that survives a junction and changes would find
 A state change every **1.41s**, and hard stops between them. Consistent from 0.2s to 18.7s.
 
 **Conclusion: this film is far more continuous than a contact sheet suggests, and its one hard cut is a
-jump cut inside a single continuous object.** The correction that `CONTINUITY-WITHOUT-AN-OBJECT.md`
+jump cut inside a single continuous object.** The correction that `FILM-STRUCTURE.md`
 records for the last reference applies here too, and harder.
 
 ## 8. What the engine cannot currently do

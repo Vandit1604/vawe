@@ -529,7 +529,7 @@ Each style carries **three** word states, and a viewer must be able to tell all 
 single frame: what is coming, what is being said, and what has already been said. A style with only
 two states is a progress bar with no memory. Pick by the channel you want the caption to speak in. The
 eight below are the ones worth choosing between deliberately; `CAP_STYLES` (`core/type/captions.js:57`)
-carries nineteen, and [`CAPTIONS.md`](CAPTIONS.md) lists them all.
+carries nineteen, and `core/type/captions.js` lists them all.
 
 | Style | The channel | Reach for it when |
 |---|---|---|
