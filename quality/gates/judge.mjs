@@ -6,6 +6,7 @@
 //
 // Usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>] [--no-measure]
 //        vawe judge <file> [VS=<brand>] [REF=<ref.mp4>]
+//        vawe judge <file> --verdict PASS|FIX [--at <seconds>] [--top-fix "<fix>"]   writes out/<film>.judge.json
 // A page film (films/<name>/page.html) is judged from its render in out/. A reference (--ref, or the page's
 // reference.json) makes the sheet frame-locked pairs: reference left, film right.
 import { execFileSync, spawnSync } from 'node:child_process';
@@ -35,6 +36,14 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 // before. Missing/unreadable mp4 hashes to null rather than throwing: the caller already refused a
 // missing render via `gradeable` before this ever runs.
 const renderHashOf = (file) => { try { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); } catch { return null; } };
+
+// out/<film>.judge.json: the latest verdict, one small file `vawe review` reads back into its header.
+function writeJudgeResult(mp4, result) {
+  const file = path.resolve('out', `${baseOf(mp4).replace(/-draft$/, '')}.judge.json`);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify({ ...result, recorded: new Date().toISOString().slice(0, 10) }, null, 1));
+  return file;
+}
 
 // judge.mjs is a PREP step, not a pass/fail check: its product is a rendered sheet + rubric for the
 // agent to score, so there is nothing to emit under --json when it succeeds. The one real finding is
@@ -174,6 +183,10 @@ if (verdictArg) {
     verdict: v, fixes: fixRecords.length ? fixRecords : fixesProse, sheet, renderHash, mp4,
     at: new Date().toISOString().slice(0, 10),
   });
+  const time = arg('--at', null), topFix = arg('--top-fix', null);
+  if (v === 'FIX' && (time == null || !topFix)) console.error('  note: a FIX names one time stamp and one concrete fix: --at <seconds> --top-fix "<the fix>". Neither was fully given.');
+  const resultFile = writeJudgeResult(mp4, { verdict: v, pass: v === 'PASS', time: time == null ? null : Number(time), topFix, renderHash });
+  console.log(`  judge result: ${resultFile}`);
   // Logged here, and only here: this is the agent's actual verdict, written down after the eye looked,
   // never a verdict the prep step invents for itself (engine-doctrine/MISTAKES.md, judge PASS is never self-recorded).
   appendRun(inp, { cmd: 'judge', judge: { verdict: v, file: sheet } });
@@ -267,6 +280,9 @@ if (verdictJsonArg) {
   }
   writeReceipt(stage, inp, { run, verdict: v, overall, criteria: payload.criteria, fixes, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
   appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, overall, file: verdictJsonArg } });
+  const first = fixes.find((x) => x && x.fix);
+  const time = first && [first.t, first.time, first.at].find((x) => typeof x === 'number');
+  writeJudgeResult(mp4, { verdict: v, pass: v === 'PASS', time: time ?? null, topFix: first ? first.fix : null, overall, run, renderHash });
   console.log(`  ✓ structured verdict recorded: run ${run}, ${v}, overall ${overall}/10. Every criterion carries evidence.`);
   process.exit(0);
 }

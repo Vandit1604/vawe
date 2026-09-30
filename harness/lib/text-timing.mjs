@@ -6,6 +6,8 @@ const READ_FLOOR = 1.2;
 const CLIP_TOL_PX = 2;
 const CLIP_MIN_SAMPLES = 2;
 const MOVE_TOL_PX = 0.5;
+const REF_HOLD_TOL = 0.1;    // a recreation keeps the reference's own hold to within this many seconds
+const REF_START_NEAR = 0.5;  // a reference run counts as the same line when it starts this close
 
 /** Runs in the page: one record per visible text node, with its ink box, opacity, blur and clipping boxes. */
 export function collectTextNodes() {
@@ -49,7 +51,28 @@ export function collectTextNodes() {
     return { opacity, blur };
   };
   const PHRASE_WORDS = 6;
-  const lineOf = (e) => e.textContent.replace(/\s+/g, ' ').trim();
+  const layoutBox = (el) => {
+    let x = 0, y = 0;
+    for (let p = el; p; p = p.offsetParent) { x += p.offsetLeft; y += p.offsetTop; }
+    return { left: x, right: x + el.offsetWidth, top: y };
+  };
+  // Text a reader sees: letters or words in separate spans join into one word unless a visual gap
+  // (layout offsets, so a transform mid-animation does not fake one) or a new line separates them.
+  const lineOf = (e) => {
+    const walk = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+    let out = '', prev = null, n;
+    while ((n = walk.nextNode())) {
+      const el = n.parentElement;
+      if (!el || ['SCRIPT', 'STYLE', 'NOSCRIPT'].includes(el.tagName) || !n.textContent.trim()) continue;
+      const own = el.childNodes.length === 1 && el !== e ? layoutBox(el) : null;
+      const sized = parseFloat(getComputedStyle(el).fontSize);
+      const apart = prev && own && (Math.abs(own.top - prev.top) > sized * 0.5 || own.left - prev.right > sized * 0.15);
+      const spaced = /\s$/.test(out) || /^\s/.test(n.textContent);
+      out += (apart && !spaced ? ' ' : '') + n.textContent;
+      prev = own;
+    }
+    return out.replace(/\s+/g, ' ').trim();
+  };
   const wordsOf = (e) => lineOf(e).split(' ').length;
   // The unit a viewer reads: the block, and a lone word (or a letter of one) joins its short phrase.
   const blockOf = (el) => {
@@ -152,6 +175,31 @@ export function timingRows(samples, step, dur) {
 /** Holds shorter than the reading time. A line still on screen when the film ends is not judged. Pure. */
 export function shortHolds(rows) {
   return rows.filter((r) => !r.endsFilm && r.hold < r.need - 1e-6);
+}
+
+/**
+ * The short holds that the reference does not have too. A recreation copies the reference's timing, so a
+ * hold within `tol` s of a reference text run that starts near it is the reference's own. Pure.
+ * refRuns: [{ t0, t1 }] from the reference's text timeline sampled every `refStep` s.
+ */
+export function holdsBeyondRef(rows, refRuns, refStep, tol = REF_HOLD_TOL) {
+  const matches = (r) => refRuns.some((x) => Math.abs(x.t0 - r.readable) <= REF_START_NEAR && Math.abs(x.t1 + refStep - x.t0 - r.hold) <= tol + 1e-6);
+  return rows.filter((r) => !matches(r));
+}
+
+/** The text line with the least screen time x ink area over the film. Pure. -> { text, seconds } | null */
+export function leastSeen(samples, step) {
+  const seen = new Map();
+  for (const s of samples) {
+    for (const n of s.nodes.filter(isVisible)) {
+      const g = seen.get(n.group) || { text: n.line, weight: 0, seconds: 0, counted: new Set() };
+      g.weight += n.ink.w * n.ink.h * step * shownShare(n);
+      if (!g.counted.has(s.t)) { g.counted.add(s.t); g.seconds += step; }
+      seen.set(n.group, g);
+    }
+  }
+  const least = [...seen.values()].sort((a, b) => a.weight - b.weight)[0];
+  return least ? { text: least.text, seconds: least.seconds } : null;
 }
 
 const same = (a, b) => Math.abs(a.x - b.x) < MOVE_TOL_PX && Math.abs(a.y - b.y) < MOVE_TOL_PX && Math.abs(a.w - b.w) < MOVE_TOL_PX && Math.abs(a.h - b.h) < MOVE_TOL_PX;

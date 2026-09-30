@@ -102,6 +102,34 @@ export function collateralChange(seconds) {
   return { edit, collateral: runs.filter((r) => r !== edit) };
 }
 
+/** First and last changed second between two renders, and the worst one. Pure. -> { from, to, worst } | null */
+export function changedSpan(seconds) {
+  const changed = seconds.filter((x) => x.ssim < CHANGED_SSIM);
+  if (!changed.length) return null;
+  const worst = changed.reduce((m, x) => (x.ssim < m.ssim ? x : m));
+  return { from: changed[0].s, to: changed[changed.length - 1].s + 1, worst: worst.s };
+}
+
+/** Runs in the page: every animation as { props, ms }. */
+export function collectMoves() {
+  const skip = ['offset', 'easing', 'composite', 'computedOffset'];
+  return document.getAnimations().map((a) => ({
+    props: [...new Set(a.effect.getKeyframes().flatMap((k) => Object.keys(k)).filter((p) => !skip.includes(p)))].sort(),
+    ms: Number(a.effect.getComputedTiming().duration),
+  })).filter((m) => m.props.length && Number.isFinite(m.ms));
+}
+
+/** The move (same properties, same duration) the page uses most, when it uses one at least twice. Pure. -> { name, count } | null */
+export function repeatedMove(moves) {
+  const counts = new Map();
+  for (const m of moves) {
+    const name = `${m.props.join(' + ')} over ${(m.ms / 1000).toFixed(2)} s`;
+    counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  const [name, count] = [...counts.entries()].sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1))[0] || [];
+  return count >= 2 ? { name, count } : null;
+}
+
 async function main() {
   const [oursPath, refPath] = process.argv.slice(2);
   if (!oursPath || ![oursPath, refPath].filter(Boolean).every((f) => fs.existsSync(f))) {
