@@ -33,7 +33,7 @@ camera.position.set(0, 0, 4);
 // The tuned lighting rig core/surfaces/three-fx.js already builds for the declarative `object`/`three`
 // layer types, reused here rather than four lights re-hand-tuned: 'metal' picks the bright softbox
 // room an iridescent/metal body wants (the glass room is mostly dark, tuned for transmission instead).
-vawe.three.studio(renderer, scene, 'metal');
+vawe.three.studio(renderer, scene, { kind: 'metal' });
 
 // A plain rounded four-point star, extruded from its own SVG path (M/L/Q only): the same parser
 // core/surfaces/three-fx.js's declarative `object` layer already reads for `geometry.kind:"svgExtrude"`.

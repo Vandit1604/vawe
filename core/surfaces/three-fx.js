@@ -206,10 +206,11 @@ function glassEnvironment(renderer, colors) {
 // reflective metal body never goes near-black) or 'glass' (`glassEnvironment()`'s mostly-dark room, so
 // a transmissive body has somewhere to go dark and one tight hot patch to catch). Both rooms share the
 // same four-light rig; only `scene.environment` (the room a punctual light can't fake) differs. Exported
-// as `studio` for `vawe.three.studio(renderer, scene, kind)` (core/engine/page-api.js), the same
+// as `studio` for `vawe.three.studio(renderer, scene, { colors, kind })` or `(renderer, scene, 'glass')` (core/engine/page-api.js), the same
 // function `createThreeLayer` below already calls for every declarative `three` layer: one lighting rig,
 // two consumers, never a second copy tuned separately and drifting from this one.
-export function studio(renderer, scene, colors, kind = 'metal') {
+export function studio(renderer, scene, opts = {}) {
+  const { colors, kind = 'metal' } = typeof opts === 'string' ? { kind: opts } : opts;
   const ambient = new (T().AmbientLight)(0xffffff, 0.55); scene.add(ambient);
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
   const fill = new (T().DirectionalLight)(hex(colors?.[1], '#9fb6ff'), 0.9); fill.position.set(-5, 2, 3); scene.add(fill);
@@ -1409,7 +1410,7 @@ export function createThreeLayer(w, h, L, colors) {
   const scene = new (T().Scene)();
   const camera = new (T().PerspectiveCamera)(L.fov ?? 35, w / h, 0.1, 100);
   camera.position.set(0, 0, L.dolly ?? 5.2);
-  studio(renderer, scene, colors);
+  studio(renderer, scene, { colors });
   applyObjectEnvironment(renderer, scene, L.env);
 
   const make = SCENES[L.three];
