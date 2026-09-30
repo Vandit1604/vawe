@@ -42,8 +42,8 @@ export const VERBS = [
     next: (v, [page]) => `vawe critique ${page}`,
   },
   {
-    name: 'ship', summary: 'final render: 60 fps, subframe blur, audio mixed; runs in the background',
-    positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, a job id (default: the newest job)' }],
+    name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background',
+    positional: [{ name: 'page|job', help: 'films/<name>/page.html; with --status, that page or a job id (default: the newest job)' }],
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
@@ -59,9 +59,9 @@ export const VERBS = [
       return [{ script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
-      if (v.status) return 'vawe ship --status --wait (waits up to 100 s; repeat until it says done), then vawe judge <the output file> --fresh';
+      if (v.status) return 'repeat vawe ship --status <page> --wait (up to 100 s each) until it says done; the result includes the judge';
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
-      return 'rendering in the background; check with `bin/vawe ship --status`, keep working meanwhile';
+      return `rendering in the background: bin/vawe ship --status ${page} --wait`;
     },
   },
   {
