@@ -11,7 +11,7 @@ import { scratch, drawtext } from '../lib/scratch.mjs';
 import { sampleText, clippedGlyphs, timingRows, shortHolds, holdsBeyondRef } from '../lib/text-timing.mjs';
 import { textTimeline } from './see/text-timeline.mjs';
 import { clipMessage } from '../../quality/gates/page-check.mjs';
-import { frameMotion, startJumps, earlyStops, frozenInside, secondSsim, collateralChange, FPS } from './motion-curve.mjs';
+import { frameMotion, startJumps, earlyStops, frozenInside, secondSsim, collateralChange, changedSpan, FPS } from './motion-curve.mjs';
 import { coverage } from './coverage.mjs';
 import { probe } from './see-views.mjs';
 import { readPageMeta } from './render-page.mjs';
@@ -197,7 +197,27 @@ export function writeSheet(list, ctx, out) {
   return fs.existsSync(out) ? out : null;
 }
 
-export function reportLines(list, { sheet, timing, table }) {
+/** Compare this render with the one the last review saw. -> { line, diff } ; the render is saved for the next review. */
+export function sheetDiff(ctx, sheetOut) {
+  const last = sheetOut.replace(/\.png$/, '.last.mp4'), diff = sheetOut.replace(/\.png$/, '.diff.png');
+  const result = { line: 'changed since last review: no earlier review to compare', diff: null };
+  if (fs.existsSync(last)) {
+    try {
+      const span = changedSpan(secondSsim(ctx.video, last));
+      if (!span) result.line = 'changed since last review: nothing';
+      else {
+        const t = Math.min(span.worst + 0.5, ctx.dur - 0.05);
+        const args = [tile(last, t, 'before', path.join(ctx.work, 'd0.png')), tile(ctx.video, t, 'after', path.join(ctx.work, 'd1.png'))].flatMap((p) => ['-i', p]);
+        spawnSync('ffmpeg', ['-v', 'error', '-y', ...args, '-filter_complex', 'hstack=inputs=2', diff]);
+        Object.assign(result, { line: `changed since last review: seconds ${span.from}-${span.to}`, diff: fs.existsSync(diff) ? diff : null });
+      }
+    } catch (e) { result.line = `changed since last review: not measured (${String(e.message).split('\n')[0]})`; }
+  }
+  fs.copyFileSync(ctx.video, last);
+  return result;
+}
+
+export function reportLines(list, { sheet, timing, table, changed }) {
   const n = (s) => list.filter((f) => f.severity === s).length;
   const lines = [`${list.length} finding(s): ${n('error')} error, ${n('warn')} warn, ${n('info')} info`];
   list.slice(0, SHOWN).forEach((f, i) => {
@@ -209,6 +229,7 @@ export function reportLines(list, { sheet, timing, table }) {
     for (const r of timing) lines.push(`  f${frameOf(r.readable)} ${r.enter.toFixed(2)} ${r.readable.toFixed(2)} ${r.leave.toFixed(2)} ${r.hold.toFixed(2)}/${r.need.toFixed(1)}${r.endsFilm ? ' (to end)' : ''}  "${r.text}"`);
   }
   if (sheet) lines.push(`sheet: ${sheet}`);
+  if (changed) lines.push(changed.line, ...(changed.diff ? [`before and after, the most changed frame: ${changed.diff}`] : []));
   const top = list.find((f) => f.severity !== 'info');
   lines.push(top ? `Fix first: f${top.frame} (${top.t.toFixed(2)}s): ${top.fix}` : 'Fix first: nothing measured is wrong. The eye still judges what a number cannot.');
   return lines;
@@ -229,10 +250,13 @@ export async function review({ page, ref, final = false, text = false, out }) {
   ctx.sampled = textPass(ctx);
   const render = await rendering;
   const findings = sortFindings((await Promise.all(PARTS.map((p) => p(ctx)))).flat());
-  const sheet = writeSheet(findings, ctx, out || path.resolve('out', `review-${paths.name}.png`));
+  const sheetOut = out || path.resolve('out', `review-${paths.name}.png`);
+  if (fs.existsSync(sheetOut)) fs.copyFileSync(sheetOut, sheetOut.replace(/\.png$/, '.prev.png'));
+  const sheet = writeSheet(findings, ctx, sheetOut);
+  const changed = sheetDiff(ctx, sheetOut);
   const timing = timingRows((await ctx.sampled).samples, ctx.step, dur);
-  fs.writeFileSync(path.resolve('out', `${paths.name}-review.json`), JSON.stringify({ findings, timing, sheet }, null, 1));
-  return { findings, timing, sheet, video: paths.video, ms: Date.now() - t0, reused: render.reused };
+  fs.writeFileSync(path.resolve('out', `${paths.name}-review.json`), JSON.stringify({ findings, timing, sheet, changed }, null, 1));
+  return { findings, timing, sheet, changed, video: paths.video, ms: Date.now() - t0, reused: render.reused };
 }
 
 async function main() {
@@ -241,7 +265,7 @@ async function main() {
   const page = argv.find((a, i) => !a.startsWith('--') && !['--ref', '--out'].includes(argv[i - 1]));
   if (!page) die('usage: review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--out sheet.png]');
   const r = await review({ page, ref: flag('--ref'), final: argv.includes('--final'), text: argv.includes('--text'), out: flag('--out') });
-  console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table') }).join('\n'));
+  console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table'), changed: r.changed }).join('\n'));
   console.log(`(${(r.ms / 1000).toFixed(1)} s${r.reused ? ', draft reused' : ''}; data: out/${path.basename(r.video, '.mp4')}-review.json)`);
 }
 
