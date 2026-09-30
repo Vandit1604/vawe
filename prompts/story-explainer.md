@@ -6,6 +6,8 @@ group: reference
 
 # Story or explainer: facts first, invented visuals, a narration timeline
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** the film explains a topic, a paper, a process or a history, with visuals the agent
 invents and no product capture. Route 3 in `engine-doctrine/CRAFT/ROUTING.md`. The longest median
 preview in the Opus 5.5 dataset (102 s) belongs to this type, so plan the length.

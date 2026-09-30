@@ -1,6 +1,6 @@
 ---
 name: vawe-brief
-description: "Turn a film request into films/<name>/brief.md: pick the prompts/ template, ask its five questions in order, take the default for any skipped answer, write the brief in the six-section anatomy, and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
+description: "Turn a film request into films/<name>/brief.md: pick the prompts/ template, ask its five questions in order, take the default for any skipped answer, write the brief in the measured anatomy, and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
 effort: medium
 ---
 
@@ -25,7 +25,7 @@ bin/vawe new <name> --from prompts/<t>.md
 
 It prints the template's question bank (five questions, each with its default and its reason, in
 the order they change the film) and writes `films/<name>/brief.md` with every default filled in and
-marked `[unanswered: default taken]`.
+marked `[unanswered: default taken]`, and the measured-brief sections with guesses marked `(guess: change me)`.
 
 ## 3. Ask the bank
 
@@ -35,17 +35,17 @@ delete the marker. Never reopen a question; a wrong default is fixed at the crit
 
 ## 4. Write the brief
 
-`brief.md` already has the anatomy's shape (`prompts/ANATOMY.md`): inputs, direction, structure,
-build, gotchas, start. Fill in what only this film knows:
+`brief.md` already has the measured brief's shape (`prompts/ANATOMY.md`): task, directions, look, spec,
+acceptance, gates, pitfalls, deliver. Every field the request did not answer holds a guess marked
+`(guess: change me)`. Replace each guess with a number:
 
-- **direction**: the genre or reference anchor in the first line (the one feature the corpus rewards),
-  then the numbers (hex, fraction of frame height, seconds per beat), then the ban list.
-- **structure**: the beat table (`prompts/beat-sheet.md`), cuts on the beat or two frames early.
-- **gotchas**: keep the template's; add the ones this film's assets create.
-- **start**: name the stills (three to five times in seconds) to show before the full render.
+- **look**: hex for ground, ink and accent, typeface and weight, cap height as a percent of frame height.
+- **spec**: the Shots, Words and Objects tables (times in seconds, positions as a percent of the frame).
+  Start a 20 to 30 s film from a RECIPES.md chain, and turn its `invent` row into the film's own moment.
+- **acceptance**: pre-filled; keep the rows, fill the measured value after each draft.
 
-Decide the pole (`prompts/ANATOMY.md`, "The two poles"): a number that already exists is written
-down; a number that does not is left to the draft and caught at the critique.
+A director's brief (a music video, a story) may leave the tables to the first draft; it keeps task,
+acceptance and gates (`prompts/ANATOMY.md`, "When a director's brief wins").
 
 ## 5. Name the first draft
 

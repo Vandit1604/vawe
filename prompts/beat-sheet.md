@@ -1,6 +1,6 @@
 ---
 when: "any film over one beat is about to be built"
-answers: "the shot table (start, dur, what the viewer notices, action to end state, camera, exposure, sound cue, out) and how its rows become page literals"
+answers: "the Task line and the Shots, Words and Objects tables (fixed columns, seconds, percent of frame) and how their rows become page literals"
 group: reference
 ---
 
@@ -15,18 +15,39 @@ planned. This is the table, and the one-line prompt that asks for it.
 ## The prompt
 
 ```
-Before any code, write films/<name>/beats.md as the table below, one row per shot. Every row has one
-focal action and an end state I can picture. The slowest row is at least 3x the fastest. Exits are
-shorter than entrances. Something happens in every row. Then build from it; never wait for a reply.
+<task>
+One line: what the film is, who sees it, the message, and the spectacle second (the one big moment,
+with 1.5 s of quiet before it).
+</task>
+
+<spec>
+Before any code, fill the three Spec tables in films/<name>/brief.md: Shots, Words, Objects. One
+Shots row per shot. Every row has one focal action and an end state I can picture. The slowest row is
+at least 3x the fastest. Exits are shorter than entrances. Something happens in every row. Give every
+Words and Objects row its times in seconds. Then build from the tables; never wait for a reply.
+</spec>
 ```
 
-## The table
+## The tables
+
+The shape is fixed, so a program can read it (`prompts/ANATOMY.md`):
 
 ```markdown
-| # | start | dur | the viewer notices | action, to its end state | camera | exposure | sound cue (t) | out |
+### Shots
+| id | start s | end s | the viewer notices | move in | move out | camera |
+|---|---|---|---|---|---|---|
+| s1 | 0.00 | 2.00 | the promise, four words | words land on beats 1 to 4, settle | hard cut on 2.00 | static |
+| s2 | 2.00 | 4.40 | the word "film" is now the product | the word's box grows into the capture, content swaps with a 120 ms blur | match cut | push 4 percent |
+
+### Words
+| text | shot | appear s | settle s | cap % | x % | y % | weight | colour |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 0.00 | 1.6 | the promise, four words | words land on beats 1 to 4, settle | static | ones | quiet tick on the first and last word (pluck at its default gain, 0.00, 1.50) | hard cut on 2.00 |
-| 2 | 2.00 | 2.4 | the word "film" is now the product | the word's box grows into the capture, content swaps with a 120 ms blur | push 4 percent | ones | one soft swell that ends on the cut (default gain, ends 1.97) | match cut |
+| One page in | s1 | 0.00 | 0.60 | 10 | 7 | 60 | 700 | #14161a |
+
+### Objects
+| id | selector | shot | in s | settle s | out s |
+|---|---|---|---|---|---|
+| capture | .capture | s2 | 2.00 | 2.60 | 4.40 |
 ```
 
 The page names each row's start once, as a custom property every delay in that row reads, so one
@@ -46,35 +67,33 @@ Sound is felt, not noticed (taste card rule 13): quiet ticks at their default ga
 Column meanings:
 - **the viewer notices**: what the eye lands on first. One thing. If you cannot name it, the shot
   has no focal point.
-- **action, to its end state**: the change and where it ends. An end state you can picture is one
-  you can check on the sheet.
+- **move in**, **move out**: the change and where it ends, and the transition to the next row.
+  Adjacent rows change axis or direction. An end state you can picture is one you can check.
 - **camera**: static, push, pull, whip, tilt. One camera language per film.
-- **exposure**: ones (every frame), twos (every second frame), or hold. A hand-drawn look is on
-  twos; UI is on ones. Write `hold` only with a `dead-air` waiver and its reason.
-- **sound cue (t)**: the synth voice or file, at the picture's time. A contact lands 30 ms before
-  its frame.
-- **out**: the transition to the next row. Adjacent rows change axis or direction.
+- **x %, y %**: the text box's left and top edges, as a percent of the frame from its top left.
+- Exposure and sound cues are not columns: write them as page literals. Exposure is ones (UI) or twos
+  (a drawn look); a cue lands 30 ms before its frame.
 
 ## Questions
 
 Ask in this order; the first changes the table most. A skipped question takes its default; never wait.
 
-1. **Length**: the total seconds, and about how many rows? Default: 15 s, 6 rows. Why: the sum of dur is the duration meta; a longer film than the rows has a dead tail.
+1. **Length**: the total seconds, and about how many rows? Default: 15 s, 6 rows. Why: the last end s is the duration meta; a longer film than the rows has a dead tail.
 2. **Grid**: a beat grid (BPM and offset) or free timing? Default: free; cuts follow the picture. Why: with a grid every start is a beat, or two frames before one.
-3. **Exposure**: ones or twos? Default: ones. Why: UI is on ones; a drawn look is on twos, and the column is per row.
+3. **Exposure**: ones or twos? Default: ones. Why: UI is on ones; a drawn look is on twos.
 4. **Cues**: synth voices or sound files? Default: synth voices from `core/audio/kit.mjs`. Why: cues come from the picture and are placed 30 ms early either way.
 
 ## From the table to the page
 
 Each row becomes a block in `page.html`: an element or a shot function, and a keyframe stop or
-`[[f, v]]` table with the row's start and dur as literals. The studio edits those literals in place,
+`[[f, v]]` table with the row's start and end as literals. The studio edits those literals in place,
 so the table and the page agree by construction.
 ## Gotchas
 
 - A row with two focal actions is two rows.
 - A row longer than 4 seconds with one action is a hold wearing an action's clothes. Split it or
   waive it.
-- The sum of dur is the duration meta. If the film is longer than the rows, the tail is dead.
+- The last end s is the duration meta. If the film is longer than the rows, the tail is dead.
 - Sound cues come from the picture; you write them when you write the action, not after the render.
 
 source: the column set is adapted from Hanif's `templates/beat-sheet.md` in
