@@ -17,7 +17,11 @@ and licence. How to build a prompt from scratch, with the corpus counts behind e
   `window.seek(t)` in seconds as a pure function of `t`;
 - `<audio src data-at data-gain data-fade-out>` for files, `<audio data-synth="<voice>" data-at>`
   for the synth voices in `core/audio/kit.mjs` (pluck, chime, sparkle, droplet, bloom, success,
-  ready, whoosh, riser, drop, impact, swell, braam); never played live, mixed offline at -14 LUFS;
+  ready, whoosh, riser, drop, impact, swell, braam); never played live, mixed offline at -14 LUFS.
+  No `data-gain` takes the voice's soft default (`DEFAULT_GAIN_DB`: UI cues -26, swells -22);
+  a few soft ticks and one swell beat many hits;
+- moves to copy (caret typing, mask rise, clip expand, stagger, cut on motion, push with blur,
+  fast exit), each with a 1 s clip: [moves/README.md](moves/README.md);
 - `bin/vawe dev <page>` (draft), `bin/vawe ship <page>` (final), `bin/vawe critique <page> --ref <mp4>` (match a reference),
   `bin/vawe judge` (threshold 7, two fresh runs);
 - helpers in `core/motion/springs.js`: `spring`, `track`, `approach`, `kf`, `springLinear`, `rng`.
