@@ -51,7 +51,7 @@ function main(argv) {
     const steps = verb.build ? verb.build(values, positional) : null;
     if (!steps) {
       const page = newFilm(positional[0], { from: values.from, root: ROOT, length: values.length, aspect: values.aspect, title: values.title });
-      return console.log(`wrote ${page} and films/${positional[0]}/brief.md\nnext: fill brief.md, then vawe dev ${page}`);
+      return console.log(`wrote ${page} and films/${positional[0]}/brief.md\nnext: read engine-doctrine/TASTE-CARD.md, fill brief.md, then vawe dev ${page}`);
     }
     for (const step of steps) {
       const code = runStep(step);

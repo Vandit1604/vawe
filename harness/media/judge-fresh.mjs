@@ -3,7 +3,7 @@
 // deterministically, then asks a separate headless Claude session (Read tool only) to score it.
 //   node harness/media/judge-fresh.mjs <page.html | film.mp4 | sheet.png> [--brief brief.md] [--stage stills|draft|final]
 // Advises, never blocks: exit 0 with a verdict either way. Exit 2 when the claude CLI is missing.
-// Env: VAWE_TASTE_CARD (a path the judge reads), VAWE_JUDGE_TIMEOUT (seconds, default 240).
+// Env: VAWE_TASTE_CARD (overrides the taste card the judge reads, default engine-doctrine/TASTE-CARD.md), VAWE_JUDGE_TIMEOUT (seconds, default 240).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -18,6 +18,7 @@ const TILE_W = 288;
 const KEY_FRAMES = 6;
 const KEY_GAP_S = 0.4;
 const PASS_AT = 8;
+const TASTE_CARD = path.join(repoRoot, 'engine-doctrine', 'TASTE-CARD.md');
 const FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/System/Library/Fonts/Helvetica.ttc', '/Library/Fonts/Arial.ttf'].find(fs.existsSync);
 
 const die = (m, code = 1) => { console.error(`vawe judge --fresh: ${m}`); process.exit(code); };
@@ -136,7 +137,7 @@ async function prepare(input, stage) {
 function buildPrompt(ev, brief) {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
-    process.env.VAWE_TASTE_CARD && `Taste card of the owner (Read it): ${path.resolve(process.env.VAWE_TASTE_CARD)}`,
+    `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix.`,
   ].filter(Boolean);
   const kind = ev.stage === 'stills' ? 'still directions for a film' : `a ${ev.stage} cut of a film`;
   return `You are a fresh taste judge. You did not make this work and you own no part of it. You judge ${kind} from the evidence files below.

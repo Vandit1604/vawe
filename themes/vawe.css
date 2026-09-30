@@ -1,33 +1,25 @@
 /* The vawe brand as CSS custom properties, taken from the real site (site/app/globals.css, layout.tsx).
-   White-first with one cobalt accent. Import it in a page and use var(--vawe-*). */
+   Dark ground, white ink, one blue accent used sparingly. Import it in a page and use var(--vawe-*).
+   Archivo and JetBrains Mono are declared in core/tokens.css. Unbounded has no file in assets/fonts. */
 :root {
-  --vawe-bg: #ffffff;
-  --vawe-bg2: #f6f8fb;
-  --vawe-surface: #ffffff;
-  --vawe-surface2: #f6f8fb;
-  --vawe-line: #e7eaf0;
-  --vawe-line-strong: #d7dce4;
-  --vawe-text: #0f1620;
-  --vawe-text2: #454f5e;
-  --vawe-dim: #697182;
-  --vawe-accent: #2563eb;
-  --vawe-accent-dim: rgba(37, 99, 235, 0.10);
-  --vawe-accent-glow: rgba(37, 99, 235, 0.30);
-  --vawe-up: #2f7d55;
-  --vawe-down: #a3282d;
-  --vawe-ink: #0f1620;
+  --vawe-bg: #16151a;
+  --vawe-surface: #212025;
+  --vawe-surface2: #27262c;
+  --vawe-raised: #2f2e35;
+  --vawe-line: rgba(255, 255, 255, 0.07);
+  --vawe-line-strong: rgba(255, 255, 255, 0.13);
+  --vawe-ink: #ffffff;
+  --vawe-ink2: #d8d8da;
+  --vawe-muted: #97969b;
+  --vawe-accent: #0a87ff;
+  --vawe-accent-hover: #3a9dff;
+  --vawe-accent-ink: #16151a;
+  --vawe-accent-soft: rgba(10, 135, 255, 0.16);
 
-  --vawe-code-bg: #0f1620;
-  --vawe-code-bg2: #0a0f16;
-  --vawe-accent-on-dark: #8fc0ff;
-
-  --vawe-grad-0: #ffffff;
-  --vawe-grad-1: #f8fafc;
-  --vawe-grad-2: #f1f4f9;
-
-  --vawe-font-sans: "Anybody", system-ui, sans-serif;
+  --vawe-font-sans: "Archivo", system-ui, sans-serif;
+  --vawe-font-title: "Unbounded", "Archivo", system-ui, sans-serif;
   --vawe-font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --vawe-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --vawe-ease: cubic-bezier(0.23, 1, 0.32, 1);
   --vawe-exit-ratio: 0.4;
 }
