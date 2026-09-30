@@ -6,63 +6,103 @@
 <title>move: before and after wipe</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  .card { position: relative; width: calc(var(--u) * 132); height: calc(var(--u) * 66); padding: 0; overflow: hidden; }
-  .state { position: absolute; inset: 0; padding: var(--s4) calc(var(--u) * 5.6); display: flex; flex-direction: column; }
-  .after { background: var(--surface); }
-  .head { display: flex; align-items: center; gap: var(--s2); font: 600 var(--t-small)/1 var(--sans); color: var(--muted); }
-  .head b { color: var(--ink); font-weight: 700; }
-  .svc { display: grid; place-items: center; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); border-radius: calc(var(--u) * 1.6); background: var(--raised); color: var(--ink); box-shadow: var(--ring); }
+  .card { position: relative; width: calc(var(--u) * 136); height: calc(var(--u) * 74); padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+
+  /* the header is shared and never wiped: only what changed sits under the scan */
+  .top { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 12); padding: 0 calc(var(--u) * 4.4); box-shadow: 0 1px 0 var(--line); font: 600 var(--t-small)/1 var(--sans); color: var(--muted); }
+  .top b { color: var(--ink); font-weight: 700; letter-spacing: -0.01em; }
+  .svc { display: grid; place-items: center; width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: calc(var(--u) * 1.5); background: var(--raised); color: var(--ink); box-shadow: var(--ring); }
   .svc .logo-mark { width: 62%; height: 62%; }
-  .head .pill { margin-left: auto; }
-  .read { display: flex; align-items: baseline; gap: var(--s2); margin-top: calc(var(--u) * 2.6); }
-  .num { font: 800 calc(var(--u) * 16)/1 var(--sans); letter-spacing: -0.05em; }
+  .top .range { margin-left: auto; font-weight: 500; color: var(--faint); }
+
+  .stage { position: relative; flex: 1; }
+  .state { position: absolute; inset: 0; padding: calc(var(--u) * 3.6) calc(var(--u) * 4.4) calc(var(--u) * 3); display: flex; flex-direction: column; background: var(--surface); }
+  .tag { position: absolute; top: calc(var(--u) * 3.6); display: inline-flex; align-items: center; gap: calc(var(--u) * 1); height: calc(var(--u) * 5); padding: 0 calc(var(--u) * 1.8); border-radius: 999px; font: 700 calc(var(--u) * 2.9)/1 var(--sans); letter-spacing: 0.06em; text-transform: uppercase; }
+  .tag i { font: 500 calc(var(--u) * 2.9)/1 var(--mono); letter-spacing: 0; text-transform: none; font-style: normal; opacity: 0.7; }
+  .before .tag { right: calc(var(--u) * 4.4); background: var(--raised); color: var(--muted); box-shadow: var(--ring); }
+  .after .tag { right: calc(var(--u) * 4.4); background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge); }
+
+  .read { display: flex; align-items: flex-end; gap: calc(var(--u) * 6); }
+  .big { display: flex; align-items: baseline; gap: calc(var(--u) * 1.2); }
+  .num { font: 800 calc(var(--u) * 15)/0.9 var(--sans); letter-spacing: -0.05em; }
   .unit { font: 600 var(--t-lead)/1 var(--sans); color: var(--muted); }
-  .chart { flex: 1; min-height: 0; margin-top: var(--s2); }
-  .chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
-  .after .pill.up { color: var(--accent); }
-  .slo { position: absolute; right: 0; top: 56%; }
-  .before .num { color: var(--faint); }
-  .before .pill { color: var(--muted); }
-  .scan { position: absolute; top: 0; bottom: 0; left: 0; width: calc(var(--u) * 0.5); background: var(--accent); }
-  .trail { position: absolute; top: 0; bottom: 0; right: 100%; width: calc(var(--u) * 14); background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 16%, transparent)); }
-  .grip { position: absolute; top: 50%; left: 50%; translate: -50% -50%; width: calc(var(--u) * 7); height: calc(var(--u) * 7); border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; box-shadow: var(--accent-edge), 0 calc(var(--u) * 0.6) calc(var(--u) * 1.6) rgba(60, 50, 160, 0.3); }
-  .grip .icon { width: calc(var(--u) * 4); height: calc(var(--u) * 4); stroke-width: 2; }
+  .before .num { color: var(--muted); }
+  .stat { display: flex; flex-direction: column; gap: calc(var(--u) * 1.2); padding-bottom: calc(var(--u) * 0.6); }
+  .stat span { font: 500 calc(var(--u) * 3.1)/1 var(--sans); color: var(--faint); }
+  .stat b { font: 700 calc(var(--u) * 4.6)/1 var(--sans); letter-spacing: -0.02em; }
+  .before .stat b { color: var(--muted); }
+  .delta { align-self: center; margin-left: calc(var(--u) * -3); }
+
+  .chart { position: relative; flex: 1; min-height: 0; margin-top: calc(var(--u) * 3.4); }
+  .plot { position: absolute; inset: 0 0 calc(var(--u) * 5) 0; }
+  .plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .slo { position: absolute; right: 0; top: 80%; translate: 0 -50%; font: 600 calc(var(--u) * 2.8)/1 var(--sans); color: var(--muted); background: var(--surface); padding-left: calc(var(--u) * 1); }
+  .days { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; font: 500 calc(var(--u) * 2.8)/1 var(--sans); color: var(--faint); }
+
+  /* the divider: a 2 px accent hairline and a white grip with a ring, like a real compare slider */
+  .scan { position: absolute; top: 0; bottom: 0; left: 0; width: 0; }
+  .scan::before { content: ''; position: absolute; top: 0; bottom: 0; left: calc(var(--u) * -0.2); width: calc(var(--u) * 0.4); background: var(--accent); }
+  .grip { position: absolute; top: 50%; left: 0; translate: -50% -50%; width: calc(var(--u) * 6.4); height: calc(var(--u) * 10); border-radius: 999px; background: var(--surface); color: var(--accent); display: grid; place-items: center;
+          box-shadow: 0 0 0 calc(var(--u) * 0.4) var(--accent), 0 calc(var(--u) * 0.8) calc(var(--u) * 2.4) rgba(60, 50, 160, 0.28); }
+  .grip .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); stroke-width: 2; }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="state before">
-    <div class="head"><span class="svc" data-logo="parcel"></span><b>checkout-api</b> v4.2, eu-west<span class="pill">p95 latency</span></div>
-    <div class="read"><span class="num">812</span><span class="unit">ms</span></div>
-    <div class="chart" style="position:relative"><span class="slo small muted">SLO 200 ms</span><svg viewBox="0 0 400 100" preserveAspectRatio="none">
-      <line x1="0" y1="72" x2="400" y2="72" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="5 6" vector-effect="non-scaling-stroke"/>
-      <path d="M0 40 L24 22 L44 60 L70 14 L96 52 L120 8 L150 46 L176 18 L204 58 L232 12 L262 44 L290 6 L320 50 L352 20 L376 42 L400 10" fill="none" stroke="var(--faint)" stroke-width="3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg></div>
+  <div class="top"><span class="svc" data-logo="parcel"></span><b>checkout-api</b>p95 latency, eu-west<span class="range">Last 7 days</span></div>
+  <div class="stage">
+    <div class="state before">
+      <span class="tag">Before <i>v4.2</i></span>
+      <div class="read"><div class="big"><span class="num">812</span><span class="unit">ms</span></div>
+        <div class="stat"><span>Error rate</span><b>2.4%</b></div><div class="stat"><span>Throughput</span><b>1.2k rps</b></div></div>
+      <div class="chart"><div class="plot"><svg viewBox="0 0 600 100" preserveAspectRatio="none"></svg><span class="slo">SLO 200 ms</span></div>
+        <div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
+    </div>
+    <div class="state after">
+      <span class="tag">After <i>v4.3</i></span>
+      <div class="read"><div class="big"><span class="num accent">96</span><span class="unit">ms</span></div>
+        <div class="stat"><span>Error rate</span><b>0.1%</b></div><div class="stat"><span>Throughput</span><b>4.8k rps</b></div><span class="pill up delta">-88% p95</span></div>
+      <div class="chart"><div class="plot"><svg viewBox="0 0 600 100" preserveAspectRatio="none"></svg><span class="slo">SLO 200 ms</span></div>
+        <div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div></div>
+    </div>
+    <div class="scan"><div class="grip"><svg class="icon" viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg></div></div>
   </div>
-  <div class="state after">
-    <div class="head"><span class="svc" data-logo="parcel"></span><b>checkout-api</b> v4.3, eu-west<span class="pill up">-88%</span></div>
-    <div class="read"><span class="num accent">96</span><span class="unit">ms</span></div>
-    <div class="chart" style="position:relative"><span class="slo small muted">SLO 200 ms</span><svg viewBox="0 0 400 100" preserveAspectRatio="none">
-      <line x1="0" y1="72" x2="400" y2="72" stroke="var(--faint)" stroke-width="1.5" stroke-dasharray="5 6" vector-effect="non-scaling-stroke"/>
-      <path d="M0 86 C60 84 90 88 140 85 C190 82 230 87 280 84 C330 82 370 86 400 84" fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></div>
-  </div>
-  <div class="scan"><div class="trail"></div><div class="grip"><svg class="icon" viewBox="0 0 24 24"><path d="M9 7l-5 5 5 5M15 7l5 5-5 5"/></svg></div></div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
+
+// seven days of p95 samples on a 0 to 1000 ms axis, from a seeded rng so every render draws the same week
+const series = (seed, base, spread, spikes) => {
+  const r = rng(seed);
+  return Array.from({ length: 57 }, (_, i) => base + (r() - 0.5) * spread + (i % 8 === 3 ? spikes * r() : 0));
+};
+const y = (ms) => 100 - ms / 10, slo = y(200);   // 80: .slo's top: 80% sits on it
+const draw = (svg, values, stroke, fillTop) => {
+  const pts = values.map((v, i) => `${(i * 600 / (values.length - 1)).toFixed(1)} ${y(v).toFixed(1)}`);
+  const id = `g${fillTop.replace(/\W/g, '')}`;
+  svg.innerHTML = `<defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${fillTop}" stop-opacity="0.22"/><stop offset="1" stop-color="${fillTop}" stop-opacity="0"/></linearGradient></defs>`
+    + [25, 50, 75].map((g) => `<line x1="0" y1="${g}" x2="600" y2="${g}" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>`).join('')
+    + `<line x1="0" y1="${slo}" x2="600" y2="${slo}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 5" vector-effect="non-scaling-stroke"/>`
+    + `<path d="M${pts.join(' L')} L600 100 L0 100 Z" fill="url(#${id})"/>`
+    + `<path d="M${pts.join(' L')}" fill="none" stroke="${stroke}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+};
+draw(q('.before svg'), series(3, 760, 160, 180), 'var(--faint)', '#8f92b5');
+draw(q('.after svg'), series(4, 96, 22, 30), 'var(--accent)', '#5b3df0');
+
 const E = CURVES.expoOut, accelerate = curveToLinear((u) => u * u * u);
 const scan = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
-const W = q('.card').getBoundingClientRect().width, at = 300, dur = 900;
+const W = q('.stage').getBoundingClientRect().width, at = 300, dur = 900;
 
 q('.after').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: curveToLinear(scan), fill: 'both' });
 q('.scan').animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: curveToLinear(scan), fill: 'both' });
-// the line leaves faster than it came, on the move it was already making
+// the divider leaves faster than it came, on the move it was already making
 q('.scan').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, delay: at - 60, easing: 'linear', fill: 'both' });
 q('.scan').animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: accelerate, fill: 'both' });
-q('.after .pill').animate([{ scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 400, delay: at + dur - 120, easing: curveToLinear(E), fill: 'both' });
-q('.card').animate([{ scale: 1 }, { scale: 1.035 }], { duration: 2000, easing: 'linear', fill: 'both' });
+q('.after .delta').animate([{ scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 400, delay: at + dur - 120, easing: curveToLinear(E), fill: 'both' });
+q('.card').animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: 'linear', fill: 'both' });
 </script>
 </body>
 </html>
