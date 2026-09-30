@@ -1,0 +1,47 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: mark trace</title>
+<style>
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; }
+  svg { width: 56vh; height: 56vh; overflow: visible; }
+  path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .ink { stroke: var(--ink); stroke-width: 2.5; }
+  .run { stroke: var(--accent); stroke-width: 9; stroke-dasharray: 0.2 1; stroke-dashoffset: 0.2; opacity: 0; }
+  .tip { fill: var(--accent); transform-box: fill-box; transform-origin: center; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 100 100">
+  <path class="ink" d="M12 24 L34 78 L50 38 L66 78 L88 24"/>
+  <path class="run" pathLength="1" d="M12 24 L34 78 L50 38 L66 78 L88 24"/>
+  <circle class="tip" r="4" cx="12" cy="24"/>
+</svg>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const smooth = (u) => u * u * (3 - 2 * u);
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), glide = curveToLinear(smooth);
+const ink = q('.ink'), tip = q('.tip');
+const len = ink.getTotalLength();
+ink.style.strokeDasharray = len;
+const t0 = 0.08, dur = 0.9;   // even speed with soft ends: a trace that rushes and then waits reads as a wipe
+
+// line and tip read one function per frame, so the tip is always on the line's leading end
+vawe.onFrame((t) => {
+  const u = Math.min(1, Math.max(0, (t - t0) / dur));
+  const p = ink.getPointAtLength(smooth(u) * len);
+  ink.style.strokeDashoffset = ((1 - smooth(u)) * len).toFixed(2);
+  tip.setAttribute('cx', p.x.toFixed(2)); tip.setAttribute('cy', p.y.toFixed(2));
+});
+tip.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4 }], { duration: 220, delay: 980, easing: settle, fill: 'both' });
+ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 420, delay: 950, easing: settle, fill: 'both' });
+q('.run').animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffset: -1 }], { duration: 750, delay: 1250, easing: glide, fill: 'both' });
+</script>
+</body>
+</html>
