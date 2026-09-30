@@ -77,8 +77,9 @@ export function readPageMeta(pagePath, name) {
   return null;
 }
 
-export async function openPage(pagePath, frame) {
-  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS });
+export async function openPage(pagePath, frame, { warm = false } = {}) {
+  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS, warm });
+  if (opened.reused) return opened;
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};`);
   return opened;
 }

@@ -64,26 +64,45 @@ function tile(pngs, out) {
   const cols = Math.min(pngs.length, 3), rows = Math.ceil(pngs.length / cols);
   const seq = path.join(path.dirname(pngs[0]), 't%d.png');
   pngs.forEach((p, i) => fs.copyFileSync(p, seq.replace('%d', i + 1)));
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', '1', '-i', seq, '-vf', `tile=${cols}x${rows}`, '-frames:v', '1', out]);
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-y', '-framerate', '1', '-i', seq, '-vf', `scale=-2:${ROW_H},tile=${cols}x${rows}`, '-frames:v', '1', out]);
   if (r.status !== 0) die(`tile failed: ${String(r.stderr || '').trim()}`);
 }
+
+const labelOn = (text) => {
+  const el = document.createElement('div');
+  el.id = '__cmp-label';
+  el.textContent = text;
+  el.style.cssText = 'position:fixed;left:12px;top:12px;z-index:2147483647;font:44px/1.2 monospace;color:#fff;background:rgba(0,0,0,.6);padding:2px 10px';
+  document.documentElement.appendChild(el);
+};
+const labelOff = () => document.getElementById('__cmp-label')?.remove();
 
 // Page mode: seek the page with the renderer's own functions and screenshot at draft (half) size,
 // so a look at a few frames costs one page load, not a range render.
 export async function comparePage({ page: pagePath, ref, times, out }) {
   const { openPage, seekAll, resolveFrame, settle } = await import('./render-page.mjs');
-  const opened = await openPage(pagePath, resolveFrame(pagePath));
+  const opened = await openPage(pagePath, resolveFrame(pagePath), { warm: true });
   try {
-    await opened.page.goto(opened.url, { waitUntil: 'load' });
-    await settle(opened.page);
-    const oursAt = async (t, i, dir) => {
+    if (!opened.reused) {
+      await opened.page.goto(opened.url, { waitUntil: 'load' });
+      await settle(opened.page);
+      await opened.markWarm?.();
+    }
+    const shoot = async (t, file) => {
       await seekAll(opened.page, t * 1000);
-      const shot = path.join(dir, `${path.basename(pagePath, '.html')}.png`), png = path.join(dir, `o${i}.png`);
-      await opened.page.screenshot({ path: shot });
-      grab(shot, 0, png, t);
+      await opened.page.screenshot({ path: file });
+      return file;
+    };
+    const labelled = async (t, i, dir) => {
+      await opened.page.evaluate(labelOn, `${t}s`);
+      try { return await shoot(t, path.join(dir, `o${i}.png`)); } finally { await opened.page.evaluate(labelOff); }
+    };
+    const withRef = async (t, i, dir) => {
+      const png = path.join(dir, `o${i}.png`);
+      grab(await shoot(t, path.join(dir, `s${i}.png`)), 0, png, t);
       return png;
     };
-    return ref ? await sheet({ ref, times, out, oursAt }) : await framesOnly({ times, out, oursAt });
+    return ref ? await sheet({ ref, times, out, oursAt: withRef }) : await framesOnly({ times, out, oursAt: labelled });
   } finally {
     await opened.close();
   }
