@@ -26,3 +26,5 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 
 For a rectangular reveal use `inset()` with the same origin: `clip-path: inset(26% 78% 74% 22%)` to
 `inset(0)`. A circle reads as a burst, an inset as a window opening.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

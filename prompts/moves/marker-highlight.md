@@ -40,3 +40,5 @@ Ship the <span class="hl">launch film<span class="wipe"><span class="bar"></span
 Animating `color` and `width` separately. The text turns dark before or after the bar reaches it, and
 the frame in the middle of the wipe shows white text on the ground next to dark text on nothing. Put
 the dark copy inside the wipe box so one clip drives both.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

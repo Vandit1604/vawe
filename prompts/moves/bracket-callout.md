@@ -37,3 +37,5 @@ percent past the box (toward the target's centre) and comes back.
 Scaling one bordered box down onto the target. The stroke shrinks with the scale, the corner radius
 distorts, and the four sides are visible the whole way. Move four separate corners instead: strokes
 stay one width and only the corners travel.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

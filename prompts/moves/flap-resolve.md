@@ -49,3 +49,5 @@ Rotating the whole glyph (or a whole tile) is a card flip, not a split flap. It 
 the glyph turns as one piece instead of two halves, no `perspective` means `rotateX` only squashes
 the flap, and no shade means the turning flap has no light. Build the four layers, clip each half,
 and animate the halves.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

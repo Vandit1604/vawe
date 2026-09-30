@@ -26,3 +26,5 @@ vawe.onFrame((t) => {
 
 The filter region (`x="-30%" width="160%"`) is wider than the panel so the blur is not clipped at its
 edges. For a vertical push swap the two `stdDeviation` numbers and the translate axis.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

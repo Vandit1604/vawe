@@ -32,3 +32,5 @@ arrival is an exponential (fast in, soft landing); the press dip is 14 percent o
 percent on the button, and it lasts 230 ms. The exit is a cubic ease-in over 380 ms, half the time
 of the entrance and accelerating, so the last frames are the cursor leaving. The accent is used
 once, on the pressed result.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

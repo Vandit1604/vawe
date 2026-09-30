@@ -32,3 +32,5 @@ distance by 0.46 of the duration, so "65 percent of the beat" is 0.3 of `dur`. S
 beat on the same property needs a keyframe with no `from` and `fill: 'forwards'`; a `from` fills
 backwards over the earlier beat and wipes it. Hand off the element, not the idea: if beat B brings a
 new object, the chain is broken.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

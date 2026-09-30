@@ -32,3 +32,5 @@ line.innerHTML = line.textContent.split(' ').map((t, i) => `<span class="w" styl
 Hiding each word under a mask box. That is [mask-rise.md](mask-rise.md): a hard edge, and every
 descender needs padding. This move is for soft copy. Also never blur a word that is not moving: at
 rest the filter is `blur(0)`, so the `to` keyframe must set it, and `fill-mode: both` holds it.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -33,3 +33,5 @@ so it settles and does not arrive. Opposite drifts on the two lights read as dep
 radial gradients that end at zero alpha, so there is no edge to band; the 5 percent grain hides
 the steps in the dark. The line is 7.6vh, cap height above 5 percent. Never freeze the lockup: the
 drift is what separates this from a held logo.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

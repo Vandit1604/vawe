@@ -26,4 +26,6 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 `letter-spacing` adds its gap after the last letter too, so a centred word drifts left as it
 collapses; `text-indent` of the same value, animated with it, cancels that. The blur clears in 0.5 s
 while the tracking runs 0.9 s: the word is readable before it is still. Size the word for its first
-frame (1.8x the settled width at 0.35em), not its last: the demo runs 9vh where a plain title runs 16.
+frame (1.8x the settled width at 0.35em), not its last: the demo runs 14vh where a plain title runs 16.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

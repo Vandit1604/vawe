@@ -26,3 +26,5 @@ One frame up (0.04 of 420 ms), about three frames held, then a long tail: the fa
 read as light and not as a white slide. Held for 6 frames or more it is a strobe. Use it once or
 twice a film, on the strongest beats only; a flash on every cut is a tell. Give shot A a little
 motion up to the flash (the card drifts 2 vw) so the last frame before it is not a still.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
