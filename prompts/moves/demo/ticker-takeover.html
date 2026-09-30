@@ -8,12 +8,12 @@
 <style>
   body { display: block; }
   .group { position: absolute; left: calc(var(--u) * 10); top: 50%; translate: 0 -50%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); transform-origin: 100% 50%; }
-  .lead { font: 800 calc(var(--u) * 9)/1 var(--head); letter-spacing: -0.03em; white-space: nowrap; min-height: 1em; }
+  .lead { font: 800 var(--t-title)/1 var(--head); letter-spacing: -0.03em; white-space: nowrap; min-height: 1em; }
   .caret { display: inline-block; width: 0.42em; height: 0.82em; margin-left: 0.08em; background: var(--ink); vertical-align: -0.04em; }
-  .slot { position: relative; height: calc(var(--u) * 16); width: calc(var(--u) * 64); overflow: hidden; padding: 0 var(--s3); background: var(--surface); box-shadow: var(--ring), var(--lift); }
-  .slot span { position: absolute; left: var(--s3); top: 0; height: 100%; display: flex; align-items: center; font: 800 calc(var(--u) * 9)/1 var(--head); letter-spacing: -0.03em; white-space: nowrap; color: var(--accent); opacity: 0; }
+  .slot { position: relative; height: calc(var(--u) * 18); width: calc(var(--u) * 80); overflow: hidden; padding: 0 var(--s3); background: var(--surface); box-shadow: var(--ring), var(--lift); }
+  .slot span { position: absolute; left: var(--s3); top: 0; height: 100%; display: flex; align-items: center; font: 800 var(--t-title)/1 var(--head); letter-spacing: -0.03em; white-space: nowrap; color: var(--accent); opacity: 0; }
   .hero { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: calc(var(--u) * 78); height: calc(var(--u) * 44); background: var(--accent); color: var(--on-accent); box-shadow: var(--ring), var(--lift); filter: url(#streak); }
-  .hero b { font: 800 calc(var(--u) * 17)/1 var(--head); letter-spacing: -0.04em; }
+  .hero b { font: 800 var(--t-hero)/1 var(--head); letter-spacing: -0.04em; }
   .hero i { position: absolute; left: var(--s3); top: var(--s3); font: 700 var(--t-small)/1 var(--mono); font-style: normal; letter-spacing: 0.04em; text-transform: uppercase; }
 </style>
 </head>
