@@ -10,7 +10,10 @@
   .shot { position: absolute; inset: 0; }
   .a { background: var(--ground); }
   .a .card { position: absolute; left: 9vw; top: calc(var(--u) * 20); width: 50vw; padding: var(--s5); }
-  .a h2 { margin: 0 0 var(--s4); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
+  .a h2 { margin: 0 0 var(--s3); font: 600 var(--t-body)/1 var(--sans); letter-spacing: -0.005em; color: var(--muted); }
+  .a .who { display: flex; align-items: center; gap: var(--s2); margin-top: var(--s4); font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .a .avatar { --size: calc(var(--u) * 8); }
+  .b .still { position: absolute; left: 64vw; top: calc(var(--u) * 26); width: 29vw; aspect-ratio: 16 / 9; margin: 0; border-radius: var(--r-card); box-shadow: var(--shadow-hero); }
   .a .big { font: 700 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.045em; }
   .a .big small { margin-left: 1vw; font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); letter-spacing: -0.01em; }
   .b { background: var(--paper); color: var(--paper-ink); overflow: hidden; }
@@ -27,8 +30,8 @@
 </head>
 <body>
 <svg width="0" height="0" style="position: absolute"><filter id="motion" x="-10%" width="120%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
-<section class="shot b"><div class="in"><h1>Shipped</h1><p>vawe.dev/launch</p></div></section>
-<section class="shot a" id="a"><div class="card"><h2>renders this week</h2><div class="big">128<small>films</small></div></div></section>
+<section class="shot b"><div class="in"><h1>Shipped</h1><figure class="still"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""></figure><p>vawe.dev/launch</p></div></section>
+<section class="shot a" id="a"><div class="card"><h2>Renders this week</h2><div class="big">128<small>films</small></div><div class="who"><div class="avatars"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg" alt=""></div></div><span>by 4 editors</span></div></div></section>
 <div class="blocks"><div class="blk trail" id="trail"><div class="face"></div></div><div class="blk lead" id="lead"><div class="face"></div><div class="mark">vawe</div></div></div>
 <script type="module">
 import '/core/engine/page-api.js';

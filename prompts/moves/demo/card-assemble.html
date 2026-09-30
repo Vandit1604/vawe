@@ -10,7 +10,8 @@
   .card { width: calc(var(--u) * 150); padding: calc(var(--u) * 5.6) calc(var(--u) * 6.4) calc(var(--u) * 6.4); opacity: 0; }
   .top { display: flex; align-items: center; justify-content: space-between; }
   .who { display: flex; align-items: center; gap: var(--s3); }
-  .avatar { --size: calc(var(--u) * 12); }
+  .avatar { --size: calc(var(--u) * 12); background: var(--ink); color: var(--surface); box-shadow: none; }
+  .avatar .logo-mark { width: 52%; height: 52%; }
   .name { font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.02em; }
   .sub { margin-top: var(--s1); font: 500 var(--t-body)/1.2 var(--sans); color: var(--muted); }
   .amount { font: 800 calc(var(--u) * 10.6)/1 var(--sans); letter-spacing: -0.045em; }
@@ -25,15 +26,16 @@
 <body>
 <div class="card">
   <div class="top">
-    <div class="who"><div class="avatar part" data-from="-14vh 0">AR</div><div class="part" data-from="-12vh 0"><div class="name">Acme Robotics</div><div class="sub">Invoice 2041, due Oct 14</div></div></div>
+    <div class="who"><div class="avatar part" data-from="-14vh 0" data-logo="fernbank"></div><div class="part" data-from="-12vh 0"><div class="name">Fernbank Studio</div><div class="sub">Invoice 2041, due Oct 14</div></div></div>
     <div class="amount part" data-from="14vh 0">$4,280</div>
   </div>
   <div class="rule divider part" data-from="0 0"></div>
-  <div class="item part" data-from="0 9vh"><span>Motion design, 12 h</span><b>$2,880</b></div>
+  <div class="item part" data-from="0 9vh"><span>Launch film, three aspects</span><b>$2,880</b></div>
   <div class="item part" data-from="0 9vh"><span>Sound design and mix</span><b>$1,400</b></div>
   <div class="pay btn primary part" data-from="0 12vh"><span>Pay invoice</span><svg class="icon" viewBox="0 0 24 24"><path class="arrow" d="M4 12 H19 M13 6 L19 12 L13 18"/></svg></div>
 </div>
 <script type="module">
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), land = curveToLinear(CURVES.spring);
 const q = (s) => document.querySelector(s);
