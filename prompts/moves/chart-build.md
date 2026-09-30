@@ -23,6 +23,8 @@ tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, t
 </script>
 ```
 
+Sound: droplet at 1.35 s into the move, when the value tag pops on the accent bar (default gain); no tick per bar.
+
 The bars animate `height`, not `scaleY`, so the rounded top is never squashed on the way up. The
 70 ms gap is inside the 30 to 80 ms band and reads as a left-to-right sweep. The data is real
 looking and rising (12.4k to 26.8k, monthly), and the axis labels are on the chart, because a chart

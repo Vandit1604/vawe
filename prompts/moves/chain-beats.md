@@ -26,6 +26,8 @@ run(document.querySelector('h1'), [{ translate: '0 105%' }, { translate: '0 0' }
 </script>
 ```
 
+Sound: bloom at 0.62 s into the move, so its soft peak meets the headline rising out of the rule at 0.67 s (default gain); one cue for the whole chain.
+
 The overlap is measured on what the eye sees, not on the duration: `expoOut` covers 95 percent of its
 distance by 0.46 of the duration, so "65 percent of the beat" is 0.3 of `dur`. Start the next beat at
 100 percent and the dot sits still for 0.2 s, which is the template feel this move removes. A later

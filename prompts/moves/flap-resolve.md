@@ -30,6 +30,8 @@ on(rise, [{ opacity: 1, transform: 'rotateX(90deg)' }, { opacity: 1, transform: 
 on(rise.lastChild, [{ opacity: 0.6 }, { opacity: 0 }], at + mid, mid, 'ease-out');
 ```
 
+Sound: pluck at 0.80 s after the first flip, when the last tile locks (default gain); no tick per flip.
+
 ## The numbers that make it look real
 
 - `perspective: 3em` on the tile (the tile is 0.72em by 1.1em). Wider values look flat.

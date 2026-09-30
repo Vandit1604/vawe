@@ -30,6 +30,8 @@ vawe.onFrame((t) => {   // SVG filters cannot be keyframed: blur y by half a fra
 </script>
 ```
 
+Sound: chime at 0.80 s into the move, when the last wheel reads as settled (default gain); no tick per digit.
+
 `travel` is `steps * 1.16 * fontSize` in px. Wheels start 45 ms apart, inside the 30 to 80 ms band, so the
 group never lands on one frame. The wheels are not a font trick: a plain text counter shifts
 width as digits change and reads as a glitch, and the wheel keeps every column fixed. The soft

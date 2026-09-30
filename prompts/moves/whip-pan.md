@@ -26,6 +26,8 @@ vawe.onFrame((t) => {
 </script>
 ```
 
+Sound: whoosh at 0.27 s into the move, so its pass point (about 0.28 s into the cue) meets the fastest frame at 0.55 s (default gain); one whip per film.
+
 The curve is `expoOut` mirrored: slow start, full speed at 50 percent, soft landing. At 0.5 s the
 peak is about a fifth of the screen width per frame, so a blur of 0.4 of that (x only) turns text into
 a streak without turning the frame to grey. Under 0.35 s the pan reads as a cut; over 0.7 s it reads

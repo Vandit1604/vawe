@@ -24,6 +24,8 @@ drift.animate([{ translate: '0 0' }, { translate: '-2.4vw 0' }], { duration: 180
 </script>
 ```
 
+Sound: bloom at 0.00 s into the move, as the mask edge starts across the line (default gain).
+
 The mask edge and the bar read the same `--p`, so the bar is on the edge in every frame. The edge
 is a 9 percent gradient, not a hard clip, so no letter is sliced. The bar fades at offset 0.3 to
 0.42 because the exponential curve reaches the end of the text at about a third of the time; a

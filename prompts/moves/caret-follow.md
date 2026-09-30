@@ -24,6 +24,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: pluck at 0.23 s into the move (the first character) and at the last value in `at` (the last character) (default gain); never one per character.
+
 The stiffness is the feel: `track(t, keys, 90, 20)` trails by about 0.2 s (2 x damping ratio / natural frequency). At `k` 170 the camera
 locks to every letter and shakes; under 60 it drifts behind the text. The caret rests at two thirds
 of the width so the eye reads the last 15 or so characters. The `min()` stops the camera from showing

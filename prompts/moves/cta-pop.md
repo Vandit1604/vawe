@@ -24,6 +24,8 @@ cta.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 100, delay: 300, easin
 </script>
 ```
 
+Sound: droplet at 0.45 s into the move, when the button crosses its full size on the overshoot (default gain).
+
 The start scale is 0.86, never 0 (taste rule 5). The recoil of the overshoot curve is the pop; use
 it on this one element only, since a second bouncy thing in the frame turns the beat into a toy.
 The button is 8.4vh type in one solid colour with no glow, so the label stays readable when it

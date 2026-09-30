@@ -35,6 +35,8 @@ run.animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffs
 </script>
 ```
 
+Sound: droplet at 0.95 s into the move, when the line thickens and the tip sinks into it (default gain).
+
 The trace is a smoothstep at 0.9 s: even speed with soft ends. An exponential curve draws the whole
 mark in 0.4 s and then waits, which reads as a wipe. The tip is set from the same function as the
 line, so it never drifts off the leading end (rule 4: a mark rides its parent). Dashes on the

@@ -26,6 +26,8 @@ run.animate([{ translate: '-100% 0' }, { translate: '450% 0' }], { duration: 800
 </script>
 ```
 
+Sound: droplet at 0.55 s into the move, when the accent full stop lands on the rail (default gain); no tick per letter.
+
 The gaps run 90, 70, 55, 45 ms: inside the 30 to 80 ms band except the first, which is the hook.
 The letters blur only while they fall and are sharp on landing. The rail is on screen from frame 0
 so the first frame has a subject. The bar on the rail is the last-frame motion; a landed wordmark

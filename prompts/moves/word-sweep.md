@@ -26,6 +26,8 @@ words.forEach((s, i) => {
 </script>
 ```
 
+Sound: none; the colour points the eye without a sound.
+
 Three colours, in this order: `--dim` (#5c5b63 on #16151a, readable but quiet), `--ink` for what has
 been read, `--accent` for one word at a time. The target is the only word that stays accent. A step
 slower than 250 ms follows the reader instead of leading; a step under 100 ms is a flicker. For a

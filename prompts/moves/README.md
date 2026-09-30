@@ -6,6 +6,10 @@ group: reference
 
 # prompts/moves/: proven moves to copy
 
+[RECIPES.md](RECIPES.md) joins these moves into four short films (a brand sting, a product sting, a
+15 s launch, a kinetic type line), with the beat table, the sound cues and the traps at each seam.
+Each move file has a `Sound:` line under its snippet: the voice and the second to cue it, or none.
+
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from
 the clip, not the name. Copy the snippet into the page; the numbers are the ones that read well.
 Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a hand-fitted

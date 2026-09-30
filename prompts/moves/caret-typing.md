@@ -27,7 +27,6 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 </script>
 ```
 
-Sound: one soft tick (`data-synth="pluck"`, no data-gain) on the first character and one on the
-last, not one per character.
+Sound: pluck at --beat-1 (the first character) and at --beat-1 + 0.5 s (the last character) (default gain); never one per character.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

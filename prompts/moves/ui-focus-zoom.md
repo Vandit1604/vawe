@@ -20,6 +20,8 @@ world.animate([{ translate: '0 0', scale: 1 }, { translate: `${tx}px ${ty}px`, s
   { duration: 1000, delay: 550, easing: curveToLinear(CURVES.spring), fill: 'both' });
 ```
 
+Sound: none; the cursor landing is the cue's job in cursor-click, and the zoom itself is silent.
+
 The individual `translate` and `scale` properties apply as translate then scale from the origin, so
 `p -> t + s * p` and the target lands exactly on the frame centre. Measure the rect once at load,
 never per frame. Start the camera 50 ms after the cursor lands, so the eye is on the target when the

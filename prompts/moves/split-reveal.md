@@ -20,6 +20,8 @@ shotB.animate([{ scale: 1.12 }, { scale: 1 }], { duration: 1100, delay: 350, eas
 // door blur: stdDeviation = 0.2 x one frame's travel, x only, set in vawe.onFrame as in push-blur
 ```
 
+Sound: none; the light in the gap is the event, and it stays quiet.
+
 The doors travel 62 percent of the width, not 50: the shadow beside each door must also leave the
 frame, or a grey band stays on screen after the move. Keep the veil dark until the gap is wide
 (the 0.4 offset), or B is lit before it is uncovered and the gap reads as a hole. A linear share in

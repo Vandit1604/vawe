@@ -23,6 +23,8 @@ chunks.forEach((el, i) => {
 });
 ```
 
+Sound: pluck at 0.50 s into the move, when the prompt bubble leaves the composer (default gain); no tick per chunk.
+
 Text streams in uneven chunks, not letters: real models emit tokens in bursts, and a letter-by-letter
 type reads as the prompt again. The gaps come from `rng`, never `Math.random`. The caret is an
 inline zero-width box with an absolute bar, so it never moves the text. The wave runs on the indicator

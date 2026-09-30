@@ -24,6 +24,8 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 </script>
 ```
 
+Sound: bloom at --beat-2, as the circle opens from the point; its slow attack follows the growth (default gain).
+
 For a rectangular reveal use `inset()` with the same origin: `clip-path: inset(26% 78% 74% 22%)` to
 `inset(0)`. A circle reads as a burst, an inset as a window opening.
 

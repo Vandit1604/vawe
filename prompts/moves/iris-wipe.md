@@ -17,6 +17,8 @@ shotA.animate([{ clipPath: `circle(${R}px at ${at})` }, { clipPath: `circle(0px 
 shotB.animate([{ scale: 1.1 }, { scale: 1 }], { duration: 1100, delay: 550, easing: curveToLinear(E), fill: 'both' });
 ```
 
+Sound: none; the click that closes the iris carries the cue.
+
 Use pixels in the keyframes: a `var()` inside a `clip-path` keyframe does not interpolate, it flips
 at 50 percent. Start the radius at the farthest corner, not the diagonal, or the first tenth of a
 second closes outside the frame. An accelerating-only curve spends all its travel in the last 0.1 s

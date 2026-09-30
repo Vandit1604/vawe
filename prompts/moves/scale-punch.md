@@ -27,6 +27,8 @@ document.documentElement.style.setProperty('--recoil', curveToLinear(CURVES.over
 </script>
 ```
 
+Sound: pluck at --beat-1 + 0.20 s, the frame the word crosses scale 1.0 (default gain); the full stop at +0.22 s shares the cue.
+
 Opacity runs 0.12 s, linear: the word is solid while it is still large, so the eye sees a mass
 arriving, not a ghost. The full stop pops 0.22 s after the word on the same curve: the second hit
 sells the first. Cut the sound on the frame the scale crosses 1.0 (about 0.2 s in), not on the beat

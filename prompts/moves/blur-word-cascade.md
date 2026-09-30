@@ -18,6 +18,8 @@ line.innerHTML = line.textContent.split(' ').map((t, i) => `<span class="w" styl
 // --soft: curveToLinear(CURVES.expoOut)
 ```
 
+Sound: none; soft copy resolving from blur has no event to mark.
+
 ## The numbers that make it look expensive
 
 - 90 ms between words, 0.8 s per word. Each word is still softening when the third one after it

@@ -25,6 +25,8 @@ word.animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)' }, { clipPath: 'inset(-0
 </script>
 ```
 
+Sound: chime at 0.75 s into the move, when the word opens beside the landed mark (default gain); nothing on the layers leaving.
+
 The mark is one element: it sits in the sidebar slot at frame 0 and is already in its lockup place, so
 the travel is a start offset and scale that ease to zero (a FLIP), and the eye follows one object
 from product to brand. Layers leave outward from the middle, 45 ms apart, 300 ms each on a cubic

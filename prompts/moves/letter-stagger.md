@@ -21,6 +21,8 @@ letters.forEach((s, i) => s.animate(
 </script>
 ```
 
+Sound: pluck at 0.10 s into the move, with the first letter (default gain); the stagger is the rhythm, so no tick per letter.
+
 `white-space: pre` keeps the spaces as letters. For a heavier word use `CURVES.spring` and a 0.4em
 travel; for a headline of several words stagger the words, not the letters.
 

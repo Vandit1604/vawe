@@ -25,6 +25,8 @@ note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity:
 </script>
 ```
 
+Sound: droplet at 0.20 s into the move, when the icon pops inside the banner (default gain).
+
 The overshoot curve dips the banner a few percent past its slot and back: that is the pop, and it
 is the only bouncy thing in the frame. The exit is 260 ms against a 700 ms entrance, cubic in,
 travelling upward the way it came, and it ends on the last frame, so the clip never ends on a

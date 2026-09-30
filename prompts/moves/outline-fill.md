@@ -22,6 +22,8 @@ chars.forEach((ch, i) => {
 </script>
 ```
 
+Sound: bloom at 0.70 s into the move, so its slow peak meets the accent flood at 0.78 s (default gain).
+
 Draw the outline as a dilated ring around the solid glyph, not with `-webkit-text-stroke`: a
 variable font's glyphs are built from overlapping shapes and a text stroke draws every overlap as an
 inner line. The ring sits outside the glyph, so the fill lands exactly inside it. Set the dilate radius

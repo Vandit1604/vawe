@@ -22,6 +22,8 @@ col.animate(at.map((o, i) => ({ offset: o, translate: `0 ${-i * 1.7}em`, easing:
 slot.animate(at.map((o, i) => ({ offset: o, width: `${w[i]}em`, easing: easing[i] })), opts);
 ```
 
+Sound: pluck at 1.15 s into the move, when the last word lands (default gain); no tick per value.
+
 Each word is measured with a `Range` after `await document.fonts.load(...)`, so the width in `em` is
 exact. `<span>` in the slot holds a zero-width space so the slot has a baseline.
 

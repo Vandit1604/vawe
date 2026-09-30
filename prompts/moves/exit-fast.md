@@ -24,6 +24,8 @@ root.setProperty('--accelerate', curveToLinear((u) => u * u * u));
 </script>
 ```
 
+Sound: none; the entrance carries the beat's cue, and an exit is never scored.
+
 Name the beat once (`--beat-1`, `--beat-1-out`) and read it from every delay in that beat, so one
 edit moves the whole beat. Declare the empty frames after the exit in `<meta name="blank">`.
 

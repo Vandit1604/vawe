@@ -26,6 +26,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; the dive is space, and a whoosh on it reads as a cheap trailer.
+
 A layer at depth `z` is drawn at `P / (P - z - travel)` of its size, `P` being the perspective (80 vh),
 so a layer with `z + travel` near 80 vh fills the frame: fade the near layers out before that, as the
 last line does. Put every depth in vh, not px, or the scene changes with the aspect. Give the camera a

@@ -22,6 +22,8 @@ hole.animate([
 target.animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: settle, fill: 'both' });
 ```
 
+Sound: none; the dim points the eye without a sound.
+
 The hole closes from the whole frame, so the dim arrives as the light narrows and never fades in as
 a flat veil. Match the hole radius to the target radius plus its padding (3 vh + 0.6 vh here) or a
 lit corner shows. Keep the dim at 0.75 to 0.85: lower and the rest still competes, higher and the

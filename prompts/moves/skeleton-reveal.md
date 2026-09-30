@@ -25,6 +25,8 @@ Object.entries({ '.head': 600, '.stats': 800, '.chart': 1000, '.list': 1200 }).f
 </script>
 ```
 
+Sound: pluck at 0.60 s (the first region resolves) and at 1.20 s (the last region) into the move (default gain); nothing on the shimmer.
+
 Each region is a one-cell grid holding the real content and its skeleton layer, so the two share
 one box and nothing shifts when they swap. The blocks match the content (a round one for an avatar,
 bars at the chart's own heights), which is what makes it read as this product loading. Each block

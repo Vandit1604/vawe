@@ -21,6 +21,8 @@ shotB.animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1000, delay: 450, eas
 // one SVG feGaussianBlur per band, stdDeviation = 0.3 x that band's travel per frame, x only, set in vawe.onFrame as in push-blur
 ```
 
+Sound: none; the tear is fast and visual, and a cue on it is a whoosh on every cut.
+
 Seven bands at a 42 ms stagger is the range that reads as a tear; three or four look like blinds and
 twelve look like a glitch. The bands leave on an accelerating curve (they exit, so they get faster,
 never slower). Use `rng`, never `Math.random`, so a re-render is identical. A band that starts
