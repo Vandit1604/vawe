@@ -86,3 +86,4 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | chart-build | a chart draws its bars or line in sequence | to be captured | built |
 | before-after-wipe | a scan line reveals the after state over the before state | video-shotcraft data/before-after-slider-scrub; HyperFrames before-after-wipe | built |
 | skeleton-reveal | grey loading blocks shimmer, then resolve into real content one region at a time | video-shotcraft ui-entrance/skeleton-reveal; HyperFrames skeleton-reveal | built |
+| ai-stream-response | an answer streams in chunk by chunk under a typed prompt, with a working indicator first | video-shotcraft interaction/ai-stream-response; HyperFrames streaming-text, typed-prompt, typing-indicator | built |

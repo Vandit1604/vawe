@@ -22,6 +22,7 @@ This index lists the built ones, in the same groups.
 | hand the product to the brand at the end | [ui strip away](ui-strip-away.md) |
 | prove a change with a picture | [before after wipe](before-after-wipe.md) |
 | show a real UI arriving, not popping in | [skeleton reveal](skeleton-reveal.md) |
+| show an AI product answering | [AI stream response](ai-stream-response.md) |
 
 ## Reveal a title
 
@@ -96,6 +97,7 @@ This index lists the built ones, in the same groups.
 | chart build | gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it | [chart-build.md](chart-build.md) | [chart-build.mp4](chart-build.mp4) |
 | before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
+| AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
