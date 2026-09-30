@@ -22,7 +22,7 @@ If I skip one, take the default from the Questions section and go on.
 </inputs>
 
 <grid>
-Measure the song. Write films/<name>/beats.json: BPM, the offset of the first downbeat, energy per
+Measure the song. Write films/<name>/beats.md: BPM, the offset of the first downbeat, energy per
 bar, and the drop's time. Calibrate the grid to the real kick hits, not the tempo tag. Start the
 film on a downbeat. Show me the grid as a bar table before any code: bar | start | energy | what
 happens.
@@ -39,7 +39,7 @@ particle burst, lens flare, a bouncy easing, a "hold" longer than one bar with n
 <structure>
 Bar 1: the hook lands word by word on the beats. Bar 2: a hook word becomes the subject. The drop:
 one shape opens into the second world. Then one move per bar to the end: <list them>. Last bar: the
-wordmark, then a fade to black on the last downbeat.
+wordmark, with the world still moving to the last downbeat.
 </structure>
 
 <build>
@@ -48,7 +48,7 @@ wordmark, then a fade to black on the last downbeat.
    No CSS transitions, no timers, no state between frames. A value that changes on many beats is a
    sum of springs (track(t, keys, k, d) from core/motion/springs.js).
 3. Music: <audio src="song.mp3" data-at="0" data-gain="-3" data-fade-out="0.4">. It is never played
-   live; the renderer mixes it offline and normalises the master to -14 LUFS.
+   live; the renderer mixes it offline as written.
 4. Cues: the song carries the hits, so the picture adds almost nothing. Soft ticks
    (<audio data-synth="pluck" data-at="<beat>" data-gain="-8">) on a few UI beats and one "swell"
    (-6 dB) ending on the drop. Place each by its measured peak, 30 ms early. Name each beat once in
@@ -60,8 +60,7 @@ wordmark, then a fade to black on the last downbeat.
 
 <gotchas>
 Never set opacity or filter on a preserve-3d element; fade its wrapper. Measure element positions at
-runtime for a match cut. A lyric line longer than the bar it sits in cannot be read; split it. The
-loudness meta is optional; the default master is -14 LUFS, true peak -1 dBTP.
+runtime for a match cut. A lyric line longer than the bar it sits in cannot be read; split it. `<meta name="loudness" content="-14">` is optional and opts in to normalising.
 </gotchas>
 
 <start>
@@ -93,7 +92,7 @@ If real clips exist: the files and their licence go in the rights table.
 - A tempo tag is not a beat grid. Measure.
 - The kick and the visual hit must land within 20 ms. Check three hits on the strip.
 - The one spectacle is one. A film with three drops has none.
-- Under 15 seconds, this is a sting, not a music video; see `routes/motion-graphic.md`.
+- Under 15 seconds, this is a sting, not a music video; see `engine-doctrine/CRAFT/routes/motion-graphic.md`.
 
 source: pattern from twoclipping's "Beat-Synced Product Motion Ad" brief
 https://x.com/twoclipping/status/2102554209166000267 (via

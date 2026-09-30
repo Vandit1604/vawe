@@ -73,5 +73,5 @@ marketing page ships from here, in any form.
 
 ## Reporting something
 
-Open an issue with the scene JSON that reproduces it, or the exact command and its output. If you
+Open an issue with the `page.html` that reproduces it, or the exact command and its output. If you
 believe an asset is misattributed, say so and it will be removed.

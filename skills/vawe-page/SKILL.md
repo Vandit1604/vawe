@@ -33,9 +33,9 @@ What you write is what you hear: no normalising, default gains land near -20 LUF
 
 ## Moves to copy
 
-`prompts/moves/README.md`: seven proven moves as CSS and WAAPI snippets with a 1 s clip each (caret
-typing, mask rise, clip expand, per-letter stagger, cut on motion, push with directional blur, fast
-exit). Copy one; do not approximate it by eye.
+`prompts/moves/README.md`: the proven moves, grouped by job (reveal a title, change between shots,
+point the eye, product moments), each a CSS and WAAPI snippet with a 1 s clip. Copy one; do not
+approximate it by eye.
 
 ## Springs and tables
 

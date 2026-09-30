@@ -10,7 +10,7 @@ The live scrubbable preview for one page film: a static server that serves the p
 clock installed, a scrub bar, and in-place editing of the page's tunable literals.
 
 ```
-make studio PAGE=films/<name>/page.html [PORT=8799]
+bin/vawe studio films/<name>/page.html [--port 8799]
 ```
 
 Open the printed URL, leave it running (Ctrl-C to stop). The page is seeked, never played, by the
@@ -26,9 +26,6 @@ studio/
   ui/
     page-studio.html  the markup
     page-studio.css   the styling
-    page-studio.js    the browser code: scrubbing, the timeline, the write-back
-    page-model.js     the literal model the UI edits
-    page-edit.js      the edit requests sent back to the server
 ```
 
 A tunable is a literal in the page: a `[[f, v], ...]` table, a `@keyframes` stop, an
