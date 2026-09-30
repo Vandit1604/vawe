@@ -164,7 +164,7 @@ export function format(s) {
   return lines.join('\n');
 }
 
-function probeSize(video) {
+export function probeSize(video) {
   const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'csv=p=0', video], { encoding: 'utf8' });
   const [w, h] = r.stdout.trim().split(',').map(Number);
   if (!w || !h) throw new Error(`scene-stats: cannot read size of ${video}: ${r.stderr.trim()}`);
