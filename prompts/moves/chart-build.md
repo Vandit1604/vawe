@@ -29,3 +29,5 @@ looking and rising (12.4k to 26.8k, monthly), and the axis labels are on the cha
 without units is a decoration. The tag is white on the dark card, not accent, so the bar keeps the
 one accent. Turn the last bar on after the others land: a bar that is bright from its first frame
 draws the eye before there is a trend to read.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

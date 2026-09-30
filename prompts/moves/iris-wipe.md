@@ -22,3 +22,5 @@ at 50 percent. Start the radius at the farthest corner, not the diagonal, or the
 second closes outside the frame. An accelerating-only curve spends all its travel in the last 0.1 s
 and reads as a snap; ease in, peak at the midpoint, close soft. Let the cursor press first (the button
 dips to 0.95) so the wipe has a cause. Put the point where the cursor tip is, not the centre of the frame.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -32,3 +32,5 @@ a streak without turning the frame to grey. Under 0.35 s the pan reads as a cut;
 as a slow pan and the streak is gone. Let shot A keep moving until the pan starts (the bars here
 still fill) and let shot B land with a small settle of its own. Change axis at the next seam: after a
 whip to the left, do not whip left again.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

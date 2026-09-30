@@ -36,3 +36,5 @@ width as digits change and reads as a glitch, and the wheel keeps every column f
 mask on the cell edges is what makes a passing digit look like it rolls off, not like it is cut.
 Commas and the currency sign are static, so the eye tracks only the digits. The chip and the
 sparkline are the last-frame motion; the number is the only bright thing until it lands.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

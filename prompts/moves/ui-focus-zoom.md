@@ -26,3 +26,5 @@ never per frame. Start the camera 50 ms after the cursor lands, so the eye is on
 move begins. A scale of 2.5 to 4 reads as a zoom; past 5 the capture goes soft. `CURVES.spring`
 gives a fast start and a small settle; use `expoOut` for a calmer film. Cut back out on the next
 beat, never zoom back on a mirror curve.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

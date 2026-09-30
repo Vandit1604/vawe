@@ -23,3 +23,5 @@ moment the lens is between planes, and it must be brief (0.7 s in all). The curv
 lands soft, like a hand on a focus ring. Blur is a state here, not motion blur: the layers hold
 still and only the focus moves. Keep the blur radius in vh (1.9 vh) so it scales with the frame. The
 1.5 percent scale change is focus breathing; more than 3 percent looks like a zoom.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -28,3 +28,5 @@ every layer its own seed and amplitude; the headline moves least and the ground 
 depth. Travel of 1 to 2 vh and 1 to 2 percent scale over the hold is visible in motion and invisible
 as a "move". A drift over 3 vh is a pan and pulls the eye off the text. It never blurs. Use it under
 a held line, not as a substitute for a beat: the hold still needs its own words-times-0.6 s.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -23,3 +23,5 @@ letters.forEach((s, i) => s.animate(
 
 `white-space: pre` keeps the spaces as letters. For a heavier word use `CURVES.spring` and a 0.4em
 travel; for a headline of several words stagger the words, not the letters.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

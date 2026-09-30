@@ -27,3 +27,5 @@ a flat veil. Match the hole radius to the target radius plus its padding (3 vh +
 lit corner shows. Keep the dim at 0.75 to 0.85: lower and the rest still competes, higher and the
 context is lost. A padding over 1.5 vh reads as a frame border, which is banned. Use `calc()` with
 literal lengths in the keyframes; `var()` in a keyframe does not interpolate.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
