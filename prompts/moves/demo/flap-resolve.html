@@ -2,41 +2,70 @@
 <html data-aspect="16:9">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="1.2">
+<meta name="duration" content="1.4">
 <title>move: split-flap resolve</title>
 <style>
   @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  :root { --ground: #16151a; --tile: #26252d; --ink: #fff; }
   html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 700 16vh/1 'Archivo', sans-serif; color: var(--ink); text-transform: uppercase; }
-  h1 { margin: 0; display: flex; gap: 0.04em; }
-  /* each cell is one glyph tall and clips a column of glyphs; steps() flips through them and stops on the last, the real letter */
-  .cell { overflow: hidden; height: 1em; }
-  .cell span { display: block; width: max-content; height: 1em; margin: 0 auto; }
+  body { display: grid; place-items: center; font: 800 22vh/1 'Archivo', sans-serif; color: var(--ink); text-transform: uppercase; }
+  h1 { margin: 0; font: inherit; display: flex; gap: 0.07em; }
+  .tile { position: relative; width: 0.72em; height: 1.1em; perspective: 3em; }
+  .half { position: absolute; left: 0; width: 100%; height: 50%; overflow: hidden; background: var(--tile); opacity: 0; backface-visibility: hidden; }
+  .half.top { top: 0; border-radius: 0.09em 0.09em 0 0; transform-origin: 50% 100%; }
+  .half.bot { bottom: 0; border-radius: 0 0 0.09em 0.09em; transform-origin: 50% 0; }
+  .half.flap { z-index: 5; }
+  .half.first { opacity: 1; }
+  .glyph { position: absolute; left: 0; width: 100%; height: 200%; display: grid; place-items: center; font-size: 0.8em; }
+  .bot .glyph { top: -100%; }
+  .shade { position: absolute; inset: 0; background: #000; opacity: 0; }
+  .tile::after { content: ''; position: absolute; z-index: 9; left: 0; right: 0; top: calc(50% - 0.008em); height: 0.016em; background: #0c0b0f; }
 </style>
 </head>
 <body>
-<h1>Resolve</h1>
+<h1 aria-label="Resolve"></h1>
 <script type="module">
 import { rng } from '/core/motion/springs.js';
-const h1 = document.querySelector('h1'), pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', flips = 8;
-const rand = rng(7);
-const cells = [...h1.textContent].map((ch) => {
-  const cell = document.createElement('div'), col = document.createElement('div');
-  cell.className = 'cell';
-  for (let i = 0; i < flips; i++) col.append(Object.assign(document.createElement('span'), { textContent: pool[Math.floor(rand() * pool.length)] }));
-  col.append(Object.assign(document.createElement('span'), { textContent: ch }));
-  cell.append(col);
-  return cell;
+const word = 'RESOLVE', pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', flips = 6, flip = 68, stagger = 68, t0 = 120;
+const rand = rng(11);
+const h1 = document.querySelector('h1');
+
+// one half: the same glyph clipped to the top or bottom, so a glyph is never cut sideways
+const half = (side, ch, extra = '') => {
+  const el = document.createElement('div');
+  el.className = `half ${side} ${extra}`;
+  el.innerHTML = `<div class="glyph">${ch}</div><div class="shade"></div>`;
+  return el;
+};
+const on = (el, keys, delay, duration, easing = 'linear') => el.animate(keys, { delay, duration, easing, fill: 'forwards' });
+
+[...word].forEach((final, i) => {
+  const chars = [' '];
+  for (let k = 1; k < flips; k++) {
+    let c;
+    do c = pool[Math.floor(rand() * pool.length)]; while (c === chars[k - 1] || c === final);
+    chars.push(c);
+  }
+  chars.push(final);
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.append(half('top', chars[0], 'first'), half('bot', chars[0], 'first'));
+  const start = t0 + i * stagger;
+  for (let k = 0; k < flips; k++) {
+    const at = start + k * flip, mid = flip / 2;
+    const top = half('top', chars[k + 1]), fall = half('top', chars[k], 'flap'), rise = half('bot', chars[k + 1], 'flap');
+    tile.append(top, fall, rise);
+    // the next glyph's top half is revealed behind the falling flap from the start of the flip
+    on(top, [{ opacity: 1 }, { opacity: 1 }], at, flip);
+    // top half of the old glyph falls on the hinge (accelerates like gravity), then goes edge-on
+    on(fall, [{ opacity: 1, transform: 'rotateX(0deg)' }, { opacity: 1, transform: 'rotateX(-90deg)', offset: 0.999 }, { opacity: 0, transform: 'rotateX(-90deg)' }], at, mid, 'cubic-bezier(0.55, 0, 1, 0.6)');
+    on(fall.lastChild, [{ opacity: 0 }, { opacity: 0.6 }], at, mid, 'ease-in');
+    // the back of the flap carries the next glyph's bottom half and swings 90 to 0, snapping shut
+    on(rise, [{ opacity: 1, transform: 'rotateX(90deg)' }, { opacity: 1, transform: 'rotateX(0deg)' }], at + mid, mid, 'cubic-bezier(0.2, 0.7, 0.4, 1)');
+    on(rise.lastChild, [{ opacity: 0.6 }, { opacity: 0 }], at + mid, mid, 'ease-out');
+  }
+  h1.append(tile);
 });
-h1.replaceChildren(...cells);
-// the cell keeps the final glyph's width, so the word does not breathe while wider glyphs flip past
-cells.forEach((cell) => { cell.style.width = `${cell.firstChild.lastChild.getBoundingClientRect().width}px`; });
-// 55 ms per flip is one real flap board; 60 ms between cells resolves the word left to right
-cells.forEach((cell, i) => cell.firstChild.animate(
-  [{ translate: '0 0' }, { translate: `0 -${flips}em` }],
-  { duration: flips * 55, delay: 100 + i * 60, easing: `steps(${flips}, end)`, fill: 'both' },
-));
 </script>
 </body>
 </html>
