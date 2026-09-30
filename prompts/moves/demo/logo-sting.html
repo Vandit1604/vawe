@@ -1,0 +1,46 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.8">
+<meta name="blank" content="0-0.07">
+<title>move: logo sting</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; --mark: 26vh; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 800 21vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.04em; }
+
+  .drift { display: grid; place-items: center; }
+  .lockup { display: flex; align-items: center; gap: 0.2em; }
+  .mark { position: relative; width: var(--mark); height: var(--mark); border-radius: 22%; overflow: hidden; background: var(--accent); opacity: 0; scale: 0.9; z-index: 1; }
+  .mark svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .mark path { fill: none; stroke: #fff; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+  .sheen { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,0.5) 50%, transparent 62%); translate: -130% 0; }
+  .word { display: block; clip-path: inset(-0.3em 100% -0.3em 0); }
+</style>
+</head>
+<body>
+<div class="drift"><div class="lockup">
+  <div class="mark"><svg viewBox="0 0 100 100"><path d="M22 32 L36 70 L50 44 L64 70 L78 32"/></svg><div class="sheen"></div></div>
+  <span class="word">vawe</span>
+</div></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), land = curveToLinear(CURVES.overshoot);
+const q = (s) => document.querySelector(s);
+const word = q('.word'), lockup = q('.lockup'), mark = q('.mark');
+const w = word.getBoundingClientRect().width, gap = parseFloat(getComputedStyle(lockup).gap);
+const shift = (w + gap) / 2;   // the mark starts centred, then the lockup re-centres as the word opens
+
+mark.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 550, delay: 60, easing: land, fill: 'both' });
+mark.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 110, delay: 60, easing: 'linear', fill: 'both' });
+q('.sheen').animate([{ translate: '-130% 0' }, { translate: '130% 0' }], { duration: 650, delay: 380, easing: settle, fill: 'both' });
+lockup.animate([{ translate: `${shift}px 0` }, { translate: '0 0' }], { duration: 650, delay: 520, easing: settle, fill: 'both' });
+word.animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)', translate: `-${w * 0.35}px 0` }, { clipPath: 'inset(-0.3em -0.3em -0.3em 0)', translate: '0 0' }],
+  { duration: 650, delay: 520, easing: settle, fill: 'both' });
+// a slow push keeps the settled lockup alive to the last frame
+q('.drift').animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1800, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>

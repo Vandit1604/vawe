@@ -66,20 +66,20 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 
 | move | use it for | reference | status |
 |---|---|---|---|
-| wordmark-cascade | the name arrives letter by letter as the last beat | to be captured | to build |
-| cta-pop | the call to action pops in with one accent | to be captured | to build |
-| mark-trace | the logo mark draws itself as a line | to be captured | to build |
-| thanks-sweep | a closing line sweeps across | to be captured | to build |
-| calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | to build |
-| logo-sting | a short animated logo hit | to be captured | to build |
+| wordmark-cascade | the name arrives letter by letter as the last beat | to be captured | built |
+| cta-pop | the call to action pops in with one accent | to be captured | built |
+| mark-trace | the logo mark draws itself as a line | to be captured | built |
+| thanks-sweep | a closing line sweeps across | to be captured | built |
+| calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | built |
+| logo-sting | a short animated logo hit | to be captured | built |
 
 ## 6. Product moments
 
 | move | use it for | reference | status |
 |---|---|---|---|
 | clip-expand | a panel or capture grows out of one point | owner-approved clip | built |
-| cursor-click | a cursor travels to a control and clicks it | to be captured | to build |
-| card-assemble | a UI card builds from its parts | to be captured | to build |
-| count-up | a number counts to its value | to be captured | to build |
-| notification-pop | a notification drops in and settles | to be captured | to build |
-| chart-build | a chart draws its bars or line in sequence | to be captured | to build |
+| cursor-click | a cursor travels to a control and clicks it | to be captured | built |
+| card-assemble | a UI card builds from its parts | to be captured | built |
+| count-up | a number counts to its value | to be captured | built |
+| notification-pop | a notification drops in and settles | to be captured | built |
+| chart-build | a chart draws its bars or line in sequence | to be captured | built |
