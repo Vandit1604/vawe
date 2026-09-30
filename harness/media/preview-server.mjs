@@ -12,7 +12,7 @@ import { createHash } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
-import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
+import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS, PAGE_ARGS, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 // One daemon per checkout: a shared state file made a worktree render pages from another checkout's root.
@@ -72,7 +72,7 @@ function pageRoot(abs) {
  * when the shared browser is live and `pagePath` is inside the repo, a fresh per-call server otherwise
  * (a scratch/tmp fixture outside the repo, or the daemon not running). `close()` releases only what
  * THIS call opened: its own page when persistent, the whole server+browser otherwise. `args` (default
- * RENDER_ARGS) only affects the fallback launch: the shared browser is always launched --disable-gpu,
+ * RENDER_ARGS) only affects the fallback launch: the shared browser is always launched with PAGE_ARGS,
  * the one flag a rapid screenshot loop (render-page.mjs) needs and a single still never does.
  */
 export async function openPreview(pagePath, { width = 1920, height = 1080, args = RENDER_ARGS } = {}) {
@@ -100,12 +100,7 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, args 
 async function daemonMain() {
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
-  // `--disable-gpu-compositing`, same as render-page.mjs's own PAGE_ARGS and the same reason: this
-  // browser is shared with a window draft's rapid seek+screenshot loop too, which crashed the
-  // GPU-accelerated renderer outright on this machine at ~150+ round trips (render-page.mjs's own file
-  // banner), and the narrower flag keeps that fix while leaving WebGL (a bare page's own `three.js`,
-  // core/engine/page-api.js) able to create a context at all, which the broader `--disable-gpu` cannot.
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: [...RENDER_ARGS, '--disable-gpu-compositing'], protocolTimeout: PROTOCOL_TIMEOUT_MS }));
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: PAGE_ARGS, protocolTimeout: PROTOCOL_TIMEOUT_MS }));
   fs.writeFileSync(STATE_FILE, JSON.stringify({ pid: process.pid, port, wsEndpoint: browser.wsEndpoint() }));
 
   const shutdown = async () => {
