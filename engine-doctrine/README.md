@@ -1,20 +1,16 @@
 ---
 when: you cannot find the doctrine you need from AGENTS.md's routing table alone
-answers: "what engine-doctrine/ is: the ~120-file doctrine corpus (craft rules, mistakes log, codemaps, rules index), indexed not memorised"
+answers: "what engine-doctrine/ holds: craft rules, atomic rules, taste, motion, judging, references"
 group: reference
 ---
 
 # engine-doctrine/
 
-The doctrine corpus: craft rules (`CRAFT/`), the enforced-vocabulary rulebook (`RULES/`), the mistake
-log and bug records (`BUGS/`, design notes under `DESIGN-NOTES/`), system maps (`CODEMAPS/`), and
-research notes (`RESEARCH/`), plus top-level references like `EFFECTS.md` and `TASTE.md`.
+- `CRAFT/`: craft guides. Start at `CRAFT/README.md` and `CRAFT/ROUTING.md`.
+- `RULES/`: one atomic rule per file. Start at `RULES/INDEX.md`.
+- `TASTE.md`: the one law and the value tests. `MOTION-CRAFT.md`: the motion rules. `DESIGN-DATABASE.md`: motion and style numbers.
+- `JUDGE.md`: how `bin/vawe judge` scores a film.
+- `MISTAKES.md`: numbered lessons. Code and docs cite an entry as `MISTAKES.md #N`.
+- `RESEARCH/`: outside sources for timing numbers and open-source assets. `ASSET-SOURCES.md`: which footage, sound and music sites allow redistribution.
 
-Read by: a human or agent authoring or judging a film, routed here from `AGENTS.md` rather than by
-browsing; `media/` and `design/` also feed generated views.
-
-The one doc: `engine-doctrine/INDEX.md`, the generated repo-wide map (every file carries its own
-`when`/`answers`/`group` frontmatter, which is what generates it). Checked by: `make site X=doc-index`
-(regenerates the index) and `make check GATE=craft-coverage` (keeps it honest).
-
-Look first: `engine-doctrine/INDEX.md`.
+`design/` and `media/` hold pictures and HTML explainers, not doctrine.

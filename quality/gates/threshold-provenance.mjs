@@ -24,7 +24,7 @@
 // FILM passes or fails, so none of them need a citation. They decide how the gate LOOKS at the film, not
 // what it demands of it. `FORMULA` below is that list, one entry per name, each with the one-line
 // reason it is not a quality bar, found and hand-checked during the audit this gate enforces
-// (engine-doctrine/RESEARCH/THRESHOLD-PROVENANCE-AUDIT.md). A name reaches this list by being read, not
+// during the audit. A name reaches this list by being read, not
 // by looking short or boring; `SPECTACLE_MIN_BOUNDARIES` and `CAMERA_COVERAGE_FLOOR` look exactly as
 // small and boring and are NOT on it, because both decide a verdict and both are tuned off this
 // library's own films, which is the finding the audit exists to surface.
@@ -88,7 +88,7 @@ function isNumericish(expr) {
 }
 
 // A citation is a URL, or a name from one of the four legitimate categories
-// (engine-doctrine/RESEARCH/THRESHOLD-PROVENANCE-AUDIT.md #principle): perception, the medium, a named
+// (the provenance principle): perception, the medium, a named
 // published/craft source, or "reference"/"sample" language pointing at an EXTERNAL measured bank.
 // "our own films", "this library", "percentile" are deliberately absent: the plan's whole point is that
 // those name the defect, not the fix.
