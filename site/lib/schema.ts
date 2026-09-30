@@ -1,6 +1,6 @@
 // THE ONE OWNER OF STRUCTURED DATA. Every JSON-LD object the site emits is built here, from real
-// data already in the repo (package.json's licence and repo URL, site/lib/films.json's real
-// durations, the same REPO_URL the header links to), never a hand-typed literal. Pages import the
+// data already in the repo (package.json's licence and repo URL, the same REPO_URL the header
+// links to), never a hand-typed literal. Pages import the
 // builder they need; nothing pastes a JSON-LD blob of its own.
 //
 // Two schema.org types are deliberately absent, and this comment is the record of why:
@@ -84,30 +84,21 @@ export function breadcrumbSchema(items: BreadcrumbItem[]) {
   };
 }
 
-// duration as ISO 8601 (schema.org's required format for VideoObject.duration), built from the
-// same `seconds` films.json already carries for the showcase page's own captions.
+// duration as ISO 8601 (schema.org's required format for VideoObject.duration).
 function isoDuration(seconds: number): string {
   const s = Math.round(seconds);
   return `PT${s}S`;
 }
 
-// VideoObject, built ONLY from what films.json + the public asset directory genuinely hold: a real
-// mp4 (contentUrl), a real poster jpg (thumbnailUrl), a real measured duration and a real publish
-// date.
-//
-// `uploadDate` IS SET, and the reasoning is worth keeping because it was nearly left out. Google
-// lists it as required for video rich-result eligibility, so omitting it forfeits the one rich
-// result a video product should have. The date is the commit that ADDED the mp4, captured at
-// generate time by scripts/site/films-json.mjs. That is not a build artefact: the file is only in
-// the repo because someone published it, and the day they did is the day it went public. A film
-// with no such date carries no `uploadDate` rather than a guessed one, because a fabricated date in
-// a machine-readable field is worse than an absent one.
+// VideoObject for a film in public/assets/films: a real mp4 (contentUrl), its poster (thumbnailUrl)
+// and a measured duration. `uploadDate` is required for video rich results; a film with no known
+// publish date carries none rather than a guessed one.
 export function videoObjectSchema(film: { slug: string; brand: string; seconds: number; published?: string }) {
   return {
     "@context": "https://schema.org",
     "@type": "VideoObject",
     name: `${film.brand}, rendered by Vawe`,
-    description: `A ${film.brand} film rendered by Vawe from a single JSON scene file.`,
+    description: `A ${film.brand} film rendered by Vawe.`,
     thumbnailUrl: `${SITE_URL}/assets/films/${film.slug}.jpg`,
     contentUrl: `${SITE_URL}/assets/films/${film.slug}.mp4`,
     duration: isoDuration(film.seconds),

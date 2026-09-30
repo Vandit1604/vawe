@@ -8,13 +8,10 @@ export function WaveGlyph({ className = "glyph" }: { className?: string }) {
   );
 }
 
-// Ordered by what a visitor came for: the films first, then the two in-browser tools, then the
-// catalogue. Features lives in the footer, where the full route table already lists it.
+// Ordered by what a visitor came for: the films first, then what the engine decides.
 const NAV = [
   { href: "/showcase", label: "Films", key: "showcase" },
-  { href: "/editor", label: "Editor", key: "editor" },
-  { href: "/playground", label: "Playground", key: "playground" },
-  { href: "/arsenal", label: "Arsenal", key: "arsenal" },
+  { href: "/features", label: "Features", key: "features" },
 ];
 
 // The docs are a separate fumadocs app (docs-site/) served at /docs via a rewrite in

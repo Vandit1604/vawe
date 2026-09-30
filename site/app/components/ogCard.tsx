@@ -13,7 +13,7 @@ import { ImageResponse } from "next/og";
 // needed Python and fonttools inside a node:22-alpine image to ever rebuild. Fontsource's
 // non-variable packages publish exactly these three instances as .woff, so generators/media/fonts.mjs
 // now fetches them like every other face, hash-locked, into the gitignored assets/fonts/, and
-// scripts/site/site-engine.mjs vendors that whole directory into site/public/assets/fonts. Nothing is
+// scripts/site/vendor-assets.mjs copies that whole directory into site/public/assets/fonts. Nothing is
 // converted, nothing is redistributed, and the Dockerfile already runs that generator before the site
 // builds.
 
@@ -200,9 +200,8 @@ export function renderOgCard(opts: { tag: string; title: string; description: st
   );
 }
 
-// The seven plain routes (features, arsenal, arsenal/type, playground, playground/[name], editor,
-// showcase) have no still or snippet to show, so their opengraph-image.tsx files are three lines
-// each: call this with the same title/description their page.tsx already carries.
+// A route with no still or snippet to show calls this with the same title/description its page.tsx
+// already carries.
 export async function staticOgImage(opts: { tag: string; title: string; description: string; path: string }) {
   const fonts = await loadOgFonts();
   return new ImageResponse(renderOgCard({ ...opts, panel: null }), { ...OG_SIZE, fonts });

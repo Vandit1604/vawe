@@ -8,7 +8,7 @@ export default function Image() {
     tag: "features",
     title: "Vawe · features",
     description:
-      "The decisions the engine makes for you: a clock that refuses wall time, a motion director that picks every cut, and a gate ladder that rejects correct-but-generic output.",
+      "The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.",
     path: "/features",
   });
 }

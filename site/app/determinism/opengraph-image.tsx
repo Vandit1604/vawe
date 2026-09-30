@@ -8,7 +8,7 @@ export default function Image() {
     tag: "determinism",
     title: "Vawe · deterministic video rendering",
     description:
-      "renderFrame(n) is a pure function of n: same JSON, byte-identical frames, any order, any machine, proven by two gates on every scene.",
+      "A page seeked, never played: a virtual clock, the same frames on every render in any order, and a test that renders twice and compares.",
     path: "/determinism",
   });
 }

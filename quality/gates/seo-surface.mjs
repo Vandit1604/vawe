@@ -16,8 +16,8 @@
 //
 //   1. every route under site/app/ that renders a page has a canonical
 //   2. every detail route (every route but home) has its own opengraph-image.tsx
-//   3. the sitemap (site/lib/site-pages.json + effects.json + blocks.json, the same three files
-//      site/app/sitemap.ts reads) matches the real routes and registries
+//   3. the sitemap (site/lib/site-pages.json, the file site/app/sitemap.ts reads) matches the real
+//      routes
 //   4. every JSON-LD builder in site/lib/schema.ts parses and carries the fields its schema.org type
 //      requires
 //
@@ -62,7 +62,7 @@ function findPageFiles(dir) {
 const pageFiles = findPageFiles(SITE_APP).sort();
 const HOME = path.join(SITE_APP, 'page.tsx');
 
-// Route path relative to site/app: site/app/arsenal/type/page.tsx -> /arsenal/type, home -> /
+// Route path relative to site/app: site/app/launch-video/page.tsx -> /launch-video, home -> /
 const routePathOf = (pageFile) => {
   const r = path.relative(SITE_APP, path.dirname(pageFile)).split(path.sep).join('/');
   return r === '' ? '/' : `/${r}`;
@@ -114,10 +114,9 @@ for (const p of pageFiles) {
   }
 }
 
-// ===== 3. the sitemap matches the registries ====================================================
+// ===== 3. the sitemap matches the routes =========================================================
 {
   const pagesJson = JSON.parse(read(path.join(SITE_LIB, 'site-pages.json')));
-  const sitemapSrc = read(path.join(SITE_APP, 'sitemap.ts'));
 
   // 3a. hand-written routes: every static (non-dynamic) page.tsx directory but home must appear in
   // site-pages.json's `routes`, and every entry there must have a real page behind it.
@@ -130,7 +129,7 @@ for (const p of pageFiles) {
     if (!listedRoutePaths.has(r)) {
       f.fail('seo-sitemap-missing-route', `${r} has a page.tsx but no entry in site-pages.json, so the sitemap never lists it`, {
         at: 'site/lib/site-pages.json',
-        fix: `add ${r} to ROUTES in scripts/site/site-pages.mjs, then node scripts/site/site-pages.mjs`,
+        fix: `add ${r} to site/lib/site-pages.json`,
       });
     }
   }
@@ -138,7 +137,7 @@ for (const p of pageFiles) {
     if (!staticRoutePaths.has(r)) {
       f.fail('seo-sitemap-phantom-route', `${r} is listed in site-pages.json but no page.tsx renders it`, {
         at: 'site/lib/site-pages.json',
-        fix: `remove ${r} from ROUTES in scripts/site/site-pages.mjs (or restore the page), then node scripts/site/site-pages.mjs`,
+        fix: `remove ${r} from site/lib/site-pages.json (or restore the page)`,
       });
     }
   }
@@ -160,7 +159,7 @@ for (const p of pageFiles) {
       if (!listedDocPaths.has(p)) {
         f.fail('seo-sitemap-missing-route', `${p} is a real docs page but is missing from site-pages.json`, {
           at: 'site/lib/site-pages.json',
-          fix: 'node scripts/site/site-pages.mjs (site-pages.json is stale; generated-check.mjs also catches this)',
+          fix: 'update the docs list in site/lib/site-pages.json',
         });
       }
     }
@@ -168,42 +167,12 @@ for (const p of pageFiles) {
       if (!expectedDocPaths.has(p)) {
         f.fail('seo-sitemap-phantom-route', `${p} is listed in site-pages.json but no docs/*.mdx backs it`, {
           at: 'site/lib/site-pages.json',
-          fix: 'node scripts/site/site-pages.mjs (site-pages.json is stale; generated-check.mjs also catches this)',
+          fix: 'update the docs list in site/lib/site-pages.json',
         });
       }
     }
   }
 
-  // 3c. dynamic detail routes: the sitemap and each detail page's generateStaticParams must read the
-  // SAME registry file, or the two can silently diverge (the sitemap lists pages that 404, or omits
-  // pages that exist). Checked by import path, not by running Next: see the file header for the gap.
-  const DETAIL_ROUTES = [
-    { dir: 'arsenal/[name]', registry: 'blocks.json' },
-    { dir: 'arsenal/effects/[stem]', registry: 'effects.json' },
-  ];
-  for (const { dir, registry } of DETAIL_ROUTES) {
-    const pageFile = path.join(SITE_APP, dir, 'page.tsx');
-    if (!fs.existsSync(pageFile)) {
-      f.fail('seo-sitemap-missing-route', `expected detail route site/app/${dir}/page.tsx does not exist`, {
-        at: `site/app/${dir}`,
-        fix: 'restore the route, or update this gate\'s DETAIL_ROUTES if the route was deliberately renamed/removed',
-      });
-      continue;
-    }
-    const pageSrc = read(pageFile);
-    if (!pageSrc.includes(`lib/${registry}`)) {
-      f.fail('seo-sitemap-registry-mismatch', `site/app/${dir}/page.tsx no longer imports lib/${registry}`, {
-        at: `site/app/${dir}/page.tsx`,
-        fix: `keep the page's generateStaticParams reading site/lib/${registry}, the same file sitemap.ts reads, or update both together`,
-      });
-    }
-    if (!sitemapSrc.includes(`lib/${registry}`)) {
-      f.fail('seo-sitemap-registry-mismatch', `site/app/sitemap.ts no longer imports lib/${registry}`, {
-        at: 'site/app/sitemap.ts',
-        fix: `sitemap.ts must read site/lib/${registry}, the same file site/app/${dir}/page.tsx reads`,
-      });
-    }
-  }
 }
 
 // ===== 4. every JSON-LD builder parses and carries its required fields =========================
@@ -237,7 +206,7 @@ const out = {};
 out.organization = m.organizationSchema();
 out.website = m.websiteSchema();
 out.softwareApplication = m.softwareApplicationSchema();
-out.breadcrumb = m.breadcrumbSchema([{ name: 'Arsenal', url: '/arsenal' }, { name: 'card', url: '/arsenal/card' }]);
+out.breadcrumb = m.breadcrumbSchema([{ name: 'Films', url: '/showcase' }, { name: 'probe', url: '/showcase/probe' }]);
 out.video = m.videoObjectSchema({ slug: 'probe-film', brand: 'Probe', seconds: 12.4, published: '2026-01-01' });
 process.stdout.write(JSON.stringify(out));
 `;

@@ -1,5 +1,4 @@
 import { Header } from "../components/Header";
-import { Clip } from "../components/Clip";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
@@ -7,44 +6,29 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Vawe · features",
   description:
-    "The decisions the engine makes for you: a clock that refuses wall time, a motion director that picks every cut, and a gate ladder that rejects correct-but-generic output.",
+    "The decisions the engine makes for you: a virtual clock that refuses wall time, motion blur that follows the motion, and a loop that judges a film in a fresh session.",
   path: "/features",
 });
 
-/* /features · WHAT THE ENGINE DECIDES.
- *
- * This was eight cards over eight detail routes, and six of the eight said a second time what a
- * better surface already says. blocks, kinetic type, cuts and shader stings were prose summaries
- * of registries /arsenal now indexes item by item with a search box. determinism and any-aspect
- * were prose summaries of the two proofs on the landing page, where one of them is a live engine
- * the reader can break on purpose. A card that describes a page the visitor could be standing on
- * is not depth, it is a detour.
- *
- * Two more things made the detail route indefensible rather than merely redundant. Six of its
- * eight pages ended on "Read the docs →" pointing into github.com/Vandit1604/vawe, which was a
- * private repo at the time: the site was carrying a decision and contradicting it on the same visit.
- * The repo went public on 2026-09-16 and the header now links it, but that only removes one of the
- * reasons below; the detail route stays cut on the others. And the sound-design page
- * closed on "Unmute the clip to hear it" over a file with no audio stream in it. Every mp4 on this
- * site is video-only, and components/Clip.tsx hardcodes `muted` with no controls, so that sentence
- * asked the reader to do something the page cannot do.
- *
- * What survived the cut is the part nothing else on the site says: the engine makes choices. The
- * clock refuses wall time whether you remember to or not, a director picks the cuts, and a gate
- * ladder throws work back. That is the honest depth the landing skips, and it is three sections,
- * not eight.
+/* /features · WHAT THE ENGINE DECIDES. Three things a page author does not pass as settings. Every
+ * claim reads off a file cited in its section: core/engine/page-clock.js, harness/media/render-page.mjs,
+ * harness/cli/verbs.mjs and the repo AGENTS.md.
  */
 
-// Mono, dark pane, literal strings. Same syntax spans the block already carried, kept as-is.
-const PURITY = `<span class="a">renderFrame</span><span class="p">(</span><span class="k">n</span><span class="p">)</span>  <span class="s">// pure in n</span>
-<span class="p">&rarr;</span> same bytes, any order
-<span class="p">&rarr;</span> <span class="a">make check GATE=probe</span>  <span class="s">// verifies it</span>`;
+// Mono, dark pane, literal strings.
+const PURITY = `<span class="a">seek</span><span class="p">(</span><span class="k">t</span><span class="p">)</span>  <span class="s">// pure in t</span>
+<span class="p">&rarr;</span> same picture, any order
+<span class="p">&rarr;</span> <span class="a">bin/vawe e2e</span>  <span class="s">// renders twice, compares</span>`;
 
-const LADDER = `<span class="a">make check GATE=validate</span>     <span class="s">// schema, no em-dash</span>
-<span class="a">make check GATE=critique</span>     <span class="s">// value of each beat</span>
-<span class="a">make check GATE=designspec-check</span> <span class="s">// palette + font lock</span>
-<span class="a">make check GATE=audit</span>        <span class="s">// contrast · overlap</span>
-<span class="a">make judge</span>        <span class="s">// vision gate</span>`;
+const BLUR = `<span class="a">still frame</span>   <span class="p">&rarr;</span> 1 subframe
+<span class="a">fast move</span>     <span class="p">&rarr;</span> up to 3, blended
+<span class="a">bin/vawe ship</span> <span class="s">// 60 fps, blur, audio</span>`;
+
+const LADDER = `<span class="a">bin/vawe dev</span>       <span class="s">// draft + draft check</span>
+<span class="a">bin/vawe critique</span>  <span class="s">// sheet, strip, deltas</span>
+<span class="a">bin/vawe review</span>    <span class="s">// clipped glyphs, timing</span>
+<span class="a">bin/vawe judge</span>     <span class="s">// a fresh session scores</span>
+<span class="a">bin/vawe ship</span>      <span class="s">// final + fresh judge</span>`;
 
 export default function Features() {
   return (
@@ -54,7 +38,7 @@ export default function Features() {
         <div className="ls ls-top">
           <h1>What the engine decides.</h1>
           <p className="ls-sub">
-            Three decisions you do not pass as settings. They make the output reproducible, shaped,
+            Three decisions you do not pass as settings. They make the output reproducible, smooth,
             and still worth watching.
           </p>
 
@@ -62,20 +46,19 @@ export default function Features() {
             <div className="isec-text">
             <h2>The clock refuses wall time.</h2>
             <p>
-              A frame is seeked, not played. <code>Date</code>, <code>requestAnimationFrame</code>{" "}
-              and <code>Math.random</code> are coerced to frame time at boot, so there is no wall
-              clock to read and nothing un-seeded to draw from. Anything that reaches for real time
-              is refused by name before a pixel is drawn.
+              A frame is seeked, not played. Before any script on the page runs,{" "}
+              <code>Date</code>, <code>performance.now</code>, <code>requestAnimationFrame</code>,
+              the timers and <code>Math.random</code> are replaced with functions of the seek time,
+              so there is no wall clock to read and nothing unseeded to draw from.
             </p>
             <p>
-              So <code>renderFrame(n)</code> is pure in n, and frame 412 comes out the same whether
-              it renders first or last. That is what lets one film shard across parallel browser
-              tabs and what makes two renders of a scene diff-able.{" "}
-              <code>make check GATE=probe</code> renders sampled frames in scrambled order and diffs the DOM,
-              which tests the property rather than restating it.{" "}
-              <a className="ilink" href="/determinism">How that proof works, in full →</a>
+              So the picture at time t is the same whether it renders first or last. That is what
+              lets the renderer split a film into fixed slices and capture several at once on one
+              browser, and what makes two renders of a page comparable. The end-to-end test renders
+              fixture pages twice and compares the decoded frame hashes.{" "}
+              <a className="ilink" href="/determinism">How that works, in full →</a>
             </p>
-            <span className="tag">guarded by make check GATE=probe</span>
+            <span className="tag">core/engine/page-clock.js</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">
@@ -87,32 +70,25 @@ export default function Features() {
 
           <section className="isec">
             <div className="isec-text">
-            <h2>A director picks every cut.</h2>
+            <h2>Blur follows the motion.</h2>
             <p>
-              You do not choose a transition per beat. A motion director reads the brand&apos;s
-              motion personality and picks one per junction: it covers a hard background jump with
-              a sting, and whips only where the background does not change. One cut family per
-              film, so a film reads as a grammar and not as a sampler.
+              You do not set motion blur per element. For the final render, a speed pass measures
+              how far things move in each frame: a still frame gets one sample, and a fast one gets
+              enough subframes to blend into one streak. A moving thing blurs; a still thing never
+              does.
             </p>
             <p>
-              Type obeys the same director. A headline splits by word or by character and each unit
-              enters in reading order, left to right and top to bottom, rising from its own
-              baseline and settling before it exits. Every cut the director places is also a sound
-              cue: a mixer puts a whoosh under each cut and a reveal under each sting, at times
-              derived from the same JSON.
+              Sound is decided offline too. <code>&lt;audio&gt;</code> tags are never played live:
+              the final render mixes them at their <code>data-at</code> times, and a voice-over
+              track ducks the music bed under it.
             </p>
-            <span className="tag">cuts → whoosh · stings → reveal</span>
+            <span className="tag">harness/media/render-page.mjs</span>
             </div>
             <div className="isec-art">
-              <div className="demo-media">
-                <Clip src="/assets/showcase/cuts.mp4" poster="/assets/showcase/cuts.jpg" />
+              <div className="codeblock">
+                <div className="lbl">blur</div>
+                <pre className="code" dangerouslySetInnerHTML={{ __html: BLUR }} />
               </div>
-              {/* Say what the page cannot show rather than inviting an action that fails. The
-                  previous version of this section ended on "Unmute the clip to hear it". */}
-              <p className="fnote">
-                The clips on this site are exported without an audio track, so the score is the one
-                thing here you have to render to hear.
-              </p>
             </div>
           </section>
 
@@ -120,22 +96,22 @@ export default function Features() {
             <div className="isec-text">
             <h2>Correct is not good enough.</h2>
             <p>
-              Any static engine makes technically correct video. Making it worth watching is the
-              hard half, so a film climbs a ladder before it ships: the schema and the copy rules,
-              then a critique of whether each beat earns its seconds, then a lock on the
-              theme&apos;s palette and fonts, then contrast, overlap and safe zones, and last a
-              vision gate that looks at the rendered frames and scores composition and fidelity.
+              Any engine can render technically correct video. Making it worth watching is the hard
+              half, so a film goes through a loop before it ships: a draft check names static
+              windows, blank runs, small text and a mix that is too quiet or too loud; a critique
+              runs in a session that did not write the page; and a judge in a fresh session scores
+              the key frames. A pass is never self-recorded.
             </p>
             <p>
-              A rung can be waived, and a waiver has to state its reason in the scene file or the
-              build stops. That one sentence is the whole mechanism: it turns a reflex back into a
+              A rule can be waived, and the waiver has to state its reason in the page or the render
+              refuses. That one sentence is the whole mechanism: it turns a reflex back into a
               decision.
             </p>
-            <span className="tag">validate → judge</span>
+            <span className="tag">dev → ship</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">
-                <div className="lbl">the ladder</div>
+                <div className="lbl">the loop</div>
                 <pre className="code" dangerouslySetInnerHTML={{ __html: LADDER }} />
               </div>
             </div>
@@ -143,7 +119,7 @@ export default function Features() {
 
         </div>
       </main>
-      <Footer bookend note="one open canvas of primitives" active="/features" />
+      <Footer bookend active="/features" />
     </div>
   );
 }

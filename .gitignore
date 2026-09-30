@@ -166,10 +166,8 @@ assets/music.wav
 # redistributing the built file. The 3 bonus plugin files stay committed (see assets/vendor/README.md).
 assets/vendor/gsap.min.js
 
-# The web player's engine (site/public/{core,themes,films,vendor}, assets/icons, the scene brand marks)
-# is a FROZEN, committed copy of the last JSON engine (git tag json-final). What stays generated is
-# what cannot be committed: fonts (fetched by generators/media/fonts.mjs) and gsap (vendored on install),
-# copied in by scripts/site/vendor-assets.mjs.
+# The site's generated assets: fonts (fetched by generators/media/fonts.mjs) and gsap (vendored on
+# install), copied in by scripts/site/vendor-assets.mjs.
 site/public/assets/fonts/
 site/public/assets/vendor/
 
@@ -247,18 +245,6 @@ site/public/assets/films/*
 !site/public/assets/films/product-feature-tour.mp4
 !site/public/assets/films/product-feature-tour.jpg
 
-# Site scene sources (what "view source" opens and the editor loads): same allowlist.
-site/public/scenes/*
-!site/public/scenes/argus-launch.json
-!site/public/scenes/preface-launch.json
-!site/public/scenes/plinth-ad.json
-!site/public/scenes/threadcite-open.json
-!site/public/scenes/ditherkit.json
-!site/public/scenes/hero-site.json
-!site/public/scenes/looks.json
-!site/public/scenes/showcase-*.json
-!site/public/scenes/saas-hero-launch.json
-!site/public/scenes/product-feature-tour.json
 
 # Brand-recreation themes: a palette is not a protected work, but a theme that recreates a real
 # company's look is a statement this repo does not need to publish. A theme declares itself as one
@@ -306,11 +292,6 @@ assets/gradients/
 films/scene/_ransom-intro-page.html
 assets/ransom/
 
-# site/public/blocklib/: `make previews` / `make arsenal PRESETS=1` regenerate every mp4/png on demand
-# (engine-doctrine/CRAFT/BLUEPRINTS.md, engine-doctrine/CRAFT/SELECTION.md), the same rule as out/**/*.mp4 above: a video
-# instance is not the framework. The manifests (index.json) ARE committed, same as scenes-json's split.
-site/public/blocklib/**/*.mp4
-site/public/blocklib/**/*.png
 !films/scene/post-*.json
 !films/scene/post-*.storyboard.md
 !films/scene/post-*.html

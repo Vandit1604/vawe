@@ -1,48 +1,35 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useSceneEngine } from "./useSceneEngine";
-import { useStageFit } from "./useStageFit";
-import { FILMS } from "./films";
-import { clock, type Scene } from "./scene-clips";
+import { FILMS, filmPoster, filmSrc } from "./films";
 
-// One engine at a time: a card shows its film's still (scripts/site/film-posters.mjs) at rest and
-// boots the live film while hovered. A click opens the film large and centred over a darkened page.
+// A card shows its film's still at rest and plays the rendered mp4 while a mouse hovers it. A click
+// opens the film large, with controls, over a darkened page.
 
-type Film = { id: string; title: string; aspect: string };
+type Film = { id: string; title: string };
 
-function FilmCard({ id, title, active, onActive, onOpen }: {
-  id: string; title: string; active: boolean; onActive: (on: boolean) => void; onOpen: (f: Film) => void;
-}) {
-  const [scene, setScene] = useState<Scene | null>(null);
+const reducedMotion = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  useEffect(() => {
-    fetch(`/scenes/${id}.json`).then((r) => r.json()).then(setScene).catch(() => {});
-  }, [id]);
+function FilmCard({ film, onOpen }: { film: Film; onOpen: (f: Film) => void }) {
+  const video = useRef<HTMLVideoElement>(null);
 
-  const { hostRef, meta, booting } = useSceneEngine({
-    dataUrl: active ? `/scenes/${id}.json` : null,
-    aspect: scene?.aspect ?? "16:9",
-    title: `${title}, rendered live`,
-    playing: active,
-  });
-  useStageFit(hostRef, meta);
-  const showFilm = active && meta && !booting;
+  const hover = (on: boolean) => {
+    const v = video.current;
+    if (!v) return;
+    if (on && !reducedMotion()) void v.play().catch(() => {});
+    else v.pause();
+  };
 
   return (
     <figure
-      className={`panel fc${active ? " on" : ""}`}
-      onPointerEnter={(e) => e.pointerType === "mouse" && onActive(true)}
-      onPointerLeave={(e) => e.pointerType === "mouse" && onActive(false)}
+      className="panel fc"
+      onPointerEnter={(e) => e.pointerType === "mouse" && hover(true)}
+      onPointerLeave={(e) => e.pointerType === "mouse" && hover(false)}
     >
-      <button className="fc-stage" type="button" aria-haspopup="dialog" aria-label={`Play ${title}`} onClick={() => onOpen({ id, title, aspect: scene?.aspect ?? "16:9" })}>
-        <span className="fc-screen" ref={hostRef} />
-        <img className="fc-poster" src={`/assets/film-posters/${id}.jpg`} alt="" hidden={!!showFilm} loading="lazy" decoding="async" />
-        {active && booting ? <span className="fc-note meta">starting the engine</span> : null}
+      <button className="fc-stage" type="button" aria-haspopup="dialog" aria-label={`Play ${film.title}`} onClick={() => onOpen(film)}>
+        <video ref={video} className="fc-poster" src={filmSrc(film.id)} poster={filmPoster(film.id)} muted loop playsInline preload="none" />
       </button>
       <figcaption className="fc-cap">
-        <span className="fc-title">{title}</span>
-        <span className="meta">{scene ? `${clock(scene.duration)} · ${scene.layers.length} layers` : ""}</span>
-        <a className="fc-open" href={`/editor?scene=${id}`}>Open in the editor</a>
+        <span className="fc-title">{film.title}</span>
       </figcaption>
     </figure>
   );
@@ -58,15 +45,6 @@ function FilmFocus({ film, onClose }: { film: Film | null; onClose: () => void }
     if (!film && d.open) d.close();
   }, [film]);
 
-  const { hostRef, meta, booting } = useSceneEngine({
-    dataUrl: film ? `/scenes/${film.id}.json` : null,
-    aspect: film?.aspect ?? "16:9",
-    title: film ? `${film.title}, rendered live` : "film",
-    playing: !!film,
-  });
-  useStageFit(hostRef, meta);
-  const ready = !!film && !!meta && !booting;
-
   return (
     <dialog
       ref={dialog}
@@ -76,12 +54,21 @@ function FilmFocus({ film, onClose }: { film: Film | null; onClose: () => void }
       onClick={(e) => { if (e.target === e.currentTarget) dialog.current?.close(); }}
     >
       <div className="ffocus-stage">
-        <span className="fc-screen" ref={hostRef} />
-        {film ? <img className="fc-poster" src={`/assets/film-posters/${film.id}.jpg`} alt="" hidden={ready} /> : null}
+        {film ? (
+          <video
+            key={film.id}
+            className="fc-poster"
+            src={filmSrc(film.id)}
+            poster={filmPoster(film.id)}
+            muted
+            playsInline
+            controls
+            autoPlay={!reducedMotion()}
+          />
+        ) : null}
       </div>
       <div className="ffocus-bar">
         <span className="fc-title">{film?.title}</span>
-        {film ? <a className="fc-open" href={`/editor?scene=${film.id}`}>Open in the editor</a> : null}
         <button className="btn btn-ghost ffocus-close" type="button" onClick={() => dialog.current?.close()}>Close</button>
       </div>
     </dialog>
@@ -89,22 +76,12 @@ function FilmFocus({ film, onClose }: { film: Film | null; onClose: () => void }
 }
 
 export function FilmGrid({ ids }: { ids?: string[] }) {
-  const [active, setActive] = useState<string | null>(null);
   const [open, setOpen] = useState<Film | null>(null);
   const films = ids ? FILMS.filter((f) => ids.includes(f.id)) : FILMS;
   return (
     <>
       <div className={`fgrid${films.length === 1 ? " one" : ""}`}>
-        {films.map((f) => (
-          <FilmCard
-            key={f.id}
-            id={f.id}
-            title={f.title}
-            active={active === f.id && !open}
-            onActive={(on) => setActive((cur) => (on ? f.id : cur === f.id ? null : cur))}
-            onOpen={setOpen}
-          />
-        ))}
+        {films.map((f) => <FilmCard key={f.id} film={f} onOpen={setOpen} />)}
       </div>
       <FilmFocus film={open} onClose={() => setOpen(null)} />
     </>

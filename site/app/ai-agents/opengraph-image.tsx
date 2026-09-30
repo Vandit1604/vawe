@@ -8,7 +8,7 @@ export default function Image() {
     tag: "for agents",
     title: "Vawe · video rendering for AI agents",
     description:
-      "An MCP server an agent calls directly: free watermarked drafts, one paid export, a file server that default-denies everything a render does not need.",
+      "An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges it.",
     path: "/ai-agents",
   });
 }

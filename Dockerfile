@@ -1,6 +1,5 @@
-# The marketing site + live editor. Build context is the REPO ROOT, not site/. The browser engine the
-# editor runs is a frozen, committed copy under site/public (core, themes, films/scene, vendor); only the
-# faces and gsap, which cannot be committed, are copied in at build time by scripts/site/vendor-assets.mjs.
+# The marketing site. Build context is the REPO ROOT, not site/. The faces and gsap, which cannot be
+# committed, are copied into site/public at build time by scripts/site/vendor-assets.mjs.
 #
 #   docker build -t vawe-site .
 #   docker run -p 3000:3000 vawe-site
@@ -20,7 +19,7 @@ COPY generators ./generators
 # hard failure at build time, not a missing file.
 
 # Font binaries are deliberately NOT committed (redistribution), so a clean checkout has none, and
-# boot() blocks on document.fonts for every registered face, so the editor would hang without them.
+# the social cards (site/app/components/ogCard.tsx) render with them.
 # fonts.mjs uses only node builtins, hence no install needed here.
 #
 # It reads exactly two repo paths: assets/fonts (which it writes) and this lock, which it refuses to
@@ -45,7 +44,7 @@ COPY package.json ./package.json
 # The root lockfile too, ONLY so gsap can be vendored: `npm ci --omit=dev` here installs the runtime
 # dependencies (gsap among them), whose postinstall (scripts/vendor-gsap.mjs) writes
 # assets/vendor/gsap.min.js. It is never committed (license, see assets/vendor/README.md), so a build
-# context without this step ships a site whose fx/morph/parts/comp layers render unanimated.
+# context without this step has no gsap to copy. No site page loads gsap since the JSON engine left.
 COPY package-lock.json ./package-lock.json
 RUN npm ci --omit=dev && rm -rf node_modules
 COPY site/package.json site/package-lock.json ./site/

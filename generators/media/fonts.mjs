@@ -49,7 +49,7 @@ const FONTS = [
   // "no font binary ships from this repo, paid or not" (.gitignore:10). Fontsource's non-variable
   // packages already publish exactly these instances as .woff, so they are fetched here like every
   // other face, land in the gitignored assets/fonts/, and are vendored into the site by
-  // scripts/site/site-engine.mjs. Nothing is converted and nothing is committed.
+  // scripts/site/vendor-assets.mjs. Nothing is converted and nothing is committed.
   ['JetBrainsMono-400.woff',        '@fontsource/jetbrains-mono',              '5.3.0', 'jetbrains-mono-latin-400-normal.woff',        'OFL 1.1'],
   ['Archivo-800.woff',              '@fontsource/archivo',                     '5.3.0', 'archivo-latin-800-normal.woff',               'OFL 1.1'],
   ['Archivo-400.woff',              '@fontsource/archivo',                     '5.3.0', 'archivo-latin-400-normal.woff',               'OFL 1.1'],

@@ -8,7 +8,7 @@ export default function Image() {
     tag: "showcase",
     title: "Vawe · showcase",
     description:
-      "What the engine made: one scene cropped to three canvases today, with baseline launch films on the way, each one a JSON file you can open in the editor.",
+      "Films rendered by vawe, and one film rendered to three canvases.",
     path: "/showcase",
   });
 }

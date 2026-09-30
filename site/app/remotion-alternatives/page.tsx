@@ -1,8 +1,6 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import effects from "../../lib/effects.json";
-import blocks from "../../lib/blocks.json";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
@@ -19,12 +17,7 @@ export const metadata = pageMetadata({
  * research earned: every claim about another project below is read off that project's own
  * license, docs or pricing page, cited with the URL and the date read. No claim characterizes a
  * competitor's code quality, output quality or reliability, because none of that was verified.
- * The two vawe counts on this page (effects, blocks) import the live registries rather than
- * typing a number, per site/CLAUDE.md's "the numbers on this site are never typed."
  */
-
-const EFFECT_TOTAL = effects.total;
-const BLOCK_TOTAL = Array.isArray(blocks) ? blocks.length : Object.keys(blocks).length;
 
 export default function RemotionAlternatives() {
   return (
@@ -52,7 +45,7 @@ export default function RemotionAlternatives() {
                 request over HTTPS and hand back a rendered file: no server to run, no Chrome to
                 manage, billed by the minute or by credits. <strong>Self-hosted rendering
                 engines</strong> (Remotion, HyperFrames, Vawe) are code you run: a composition
-                language, a headless-browser render step, output you own end to end. A team
+                format, a headless-browser render step, output you own end to end. A team
                 choosing between JSON2Video and Vawe is not really choosing an alternative, it is
                 choosing whether to run infrastructure at all.
               </p>
@@ -97,11 +90,10 @@ paid "Company License":
               <h2>Vawe: Apache-2.0, no employee count.</h2>
               <p>
                 Vawe ships under the Apache License, Version 2.0, the same file at the root of
-                this repo. There is no company-size clause and no paid tier in the engine itself:
-                the renderer, the 24 layer types, and the effect and block registries are all in
-                the license&apos;s scope. The only paid step anywhere in this project is the
-                optional hosted MCP export (see <code>/ai-agents</code>), and that is a hosted
-                convenience on top of a free engine, not a gate on the engine.
+                this repo. There is no company-size clause and no paid tier: the renderer, the
+                command line, the motion helpers and the skills are all in the license&apos;s scope.
+                A film is one HTML page, written with CSS, Web Animations, SVG, canvas or three.js,
+                so there is no framework to learn before the first render.
               </p>
               <span className="cite">LICENSE · package.json &quot;license&quot;: &quot;Apache-2.0&quot;</span>
             </div>
@@ -115,15 +107,11 @@ paid "Company License":
                 no requirement to use HeyGen&apos;s cloud, per its own repository. It composes from
                 HTML, CSS and GSAP rather than React, and states the same pitch Vawe does: built
                 for an agent to write, not a human to click through a timeline. It is a genuine
-                peer to Vawe on licensing terms, and this page does not claim otherwise. Where they
-                differ is what ships inside: Vawe&apos;s registries currently hold {EFFECT_TOTAL} named
-                effects and {BLOCK_TOTAL} composable blocks, and its MCP server (<code>mcp/server.mjs</code>)
-                is a running integration a caller can install and smoke-test today, not a claim in
-                a README.
+                peer to Vawe on licensing terms, and this page does not claim otherwise. The closer
+                comparison between the two has its own page.
               </p>
               <span className="cite">
-                github.com/heygen-com/hyperframes · read 2026-09-19 · site/lib/effects.json,
-                site/lib/blocks.json, mcp/server.mjs
+                github.com/heygen-com/hyperframes · read 2026-09-19
               </span>
             </div>
           </section>
@@ -175,8 +163,8 @@ paid "Company License":
                     <td>Vawe</td>
                     <td>Apache-2.0, no size clause</td>
                     <td>yes</td>
-                    <td>scene JSON, 24 layer types</td>
-                    <td>MCP server, running (<code>mcp/</code>)</td>
+                    <td>one HTML page: CSS, Web Animations, SVG, canvas, three.js</td>
+                    <td>CLI and skills (<code>bin/vawe</code>, <code>skills/</code>)</td>
                   </tr>
                   <tr>
                     <td>Remotion</td>
@@ -203,15 +191,14 @@ paid "Company License":
               </table>
             </div>
             <div className="hero-cta">
-              <a className="btn btn-primary" href="/json-to-video">
-                Read the scene JSON itself <span className="arw">→</span>
+              <a className="btn btn-primary" href="/hyperframes-alternatives">
+                Vawe vs HyperFrames <span className="arw">→</span>
               </a>
             </div>
             <div className="irelated">
               <a href="/determinism">Why the same scene always renders the same bytes</a>
-              <a href="/ai-agents">The MCP server, and why exports are the only paid call</a>
+              <a href="/ai-agents">How an agent writes and checks a film</a>
               <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
-              <a href="/hyperframes-alternatives">Vawe vs HyperFrames, the closer comparison</a>
             </div>
           </section>
         </main>

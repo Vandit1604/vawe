@@ -6,30 +6,24 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Vawe · deterministic video rendering",
   description:
-    "renderFrame(n) is a pure function of n: the same scene JSON produces byte-identical frames on any machine, in any order. How Vawe proves it, and why that lets a long render split across parallel browser tabs.",
+    "A Vawe film is a page seeked to each frame's time, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true, how it checks it, and why that lets a render split into parallel slices.",
   path: "/determinism",
 });
 
-/* /determinism · one of three intent pages this SEO pass is allowed to add (site/AGENTS.md quiz
- * brief: THE THREE INTENTS). vawe already answers "why is my render nondeterministic" nowhere a
- * search engine can find, and the property is the engine's central, verifiable claim: HyperFrames
- * and Remotion both carry a dedicated page on this exact concept. This page states only what the
- * repo runs and cites the file, per the task's second bar: it would still be worth reading with
- * search deleted, because it explains a real engineering decision (a virtual clock, two order-
- * scrambling gates) that a reader can go verify.
- *
- * No competitor is named. The task rules that out unless a weakness is independently verified,
- * and describing vawe's own mechanism is the whole point of the page anyway.
+/* /determinism · the intent page for "why is my render nondeterministic". It states only what the
+ * repo runs and cites the file: core/engine/page-clock.js, harness/media/render-page.mjs and
+ * tests/media/render-page-determinism.test.mjs. No competitor is named.
  */
 
-const PROBE = `render(n) -> signature A
-render(FAR-AWAY frame)   // dirty any hidden state
-render(n) -> signature B
-assert A === B`;
+const CLOCK = `Date, performance.now   film time in ms
+requestAnimationFrame   flushed once per seek
+setTimeout/setInterval  fire when t passes them
+Math.random             reseeded from t`;
 
-const SNAP = `render frames ascending  -> signature
-render frames descending -> signature
-assert both signatures match`;
+const TEST = `render page -> frame hashes A
+render page -> frame hashes B
+assert A === B
+assert frames differ over t`;
 
 export default function Determinism() {
   return (
@@ -38,11 +32,12 @@ export default function Determinism() {
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
-            <h1>Same JSON in. Same bytes out.</h1>
+            <h1>Same page in. Same frames out.</h1>
             <p>
-              A Vawe render is a pure function of the frame number. Ask for frame 412 twice, on two
-              machines, in any order, and it comes back byte-identical. That is not a tuning goal,
-              it is enforced at boot and checked by two gates on every scene the engine ships.
+              A Vawe film is an HTML page that the renderer seeks to each frame&apos;s time. Ask for
+              the frame at 4.2 seconds twice, in any order, and it comes back the same. That is not
+              a tuning goal: the clock is replaced before the page runs, and a test renders pages
+              twice and compares every frame.
             </p>
           </section>
 
@@ -50,82 +45,62 @@ export default function Determinism() {
             <div className="isec-text">
               <h2>The clock is fake, on purpose.</h2>
               <p>
-                Before the first frame renders, a virtual clock replaces every source of ambient
-                state. <code>Date.now()</code> returns the current frame&apos;s timestamp, not the
-                wall clock; <code>requestAnimationFrame</code> and <code>setTimeout</code> fire
-                against frame time; <code>Math.random</code> is seeded, so a scatter that looks
-                random is the same scatter on every render. Nothing in a scene can read real time or
-                draw from unseeded entropy, so <code>renderFrame(n)</code> depends on nothing but
-                <code>n</code>.
+                Before any script on the page runs, a virtual clock replaces every source of ambient
+                state. <code>Date</code> and <code>performance.now</code> return film time, not the
+                wall clock; <code>requestAnimationFrame</code> callbacks flush once per seek, and
+                timers fire when the seek passes their due time. <code>Math.random</code> is
+                reseeded from the seek time, so a scatter that looks random is the same scatter on
+                every render.
               </p>
               <p>
-                The build contract is explicit about it: a format exposes
-                <code>{" "}build(data, fps, theme) -&gt; {"{"} fps, duration, stings, sfx, renderFrame(n) {"}"}</code>,
-                and every comment around that function in the boot code repeats the same rule:
-                <code>renderFrame</code> stays pure in <code>n</code> and never touches async.
+                The page itself is seeked, never played: the renderer sets the clock, calls{" "}
+                <code>window.seek(t)</code> when the page defines one, then seeks every CSS and Web
+                Animation to t before the screenshot. Ordinary code that reads the time keeps
+                working, and still paints a pure function of t.
               </p>
-              <span className="cite">core/engine/boot.js:402, :623</span>
+              <span className="cite">core/engine/page-clock.js · harness/media/render-page.mjs</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">
-                <div className="lbl">the invariant</div>
-                <pre className="code">renderFrame(n) is pure in n
-{"->"} frame 412 renders the same
-   first, last, or on its own</pre>
+                <div className="lbl">page-clock.js</div>
+                <pre className="code">{CLOCK}</pre>
               </div>
             </div>
           </section>
 
           <section className="isec">
             <div className="isec-text">
-              <h2>A scrambler proves it, not a claim.</h2>
+              <h2>A test proves it, not a claim.</h2>
               <p>
-                <code>quality/gates/probe-purity.mjs</code> renders a sampled frame <code>n</code>,
-                then deliberately renders a far-away frame to dirty any state a scene might be
-                hiding, then renders <code>n</code> again. It records a DOM signature at each pass
-                (visible text, transform, opacity, colour, filter, clip-path) rather than a raw
-                screenshot, because that is what the browser actually painted and it is immune to
-                GPU antialiasing noise. The two signatures must match exactly.
+                <code>tests/media/render-page-determinism.test.mjs</code> renders two fixture pages
+                twice each and compares the decoded frame hashes. One page paints from{" "}
+                <code>window.seek(t)</code> on a canvas; the other reads <code>Date.now</code>,{" "}
+                <code>performance.now</code> and <code>Math.random</code> directly. Both renders
+                must match frame for frame, and the frames must differ over time, so a page that
+                froze would fail too. <code>bin/vawe e2e</code> runs it.
               </p>
-              <p>
-                It compares against a reference tab that only ever seeks forward, never backward,
-                because a tab that has replayed a later frame can carry stale state the scrambler
-                alone would not catch. It is a real bug this gate found and fixed.
-              </p>
-              <span className="cite">quality/gates/probe-purity.mjs · make check GATE=probe</span>
+              <span className="cite">tests/media/render-page-determinism.test.mjs · harness/dev/e2e.mjs</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">
-                <div className="lbl">probe-purity.mjs</div>
-                <pre className="code">{PROBE}</pre>
+                <div className="lbl">the test</div>
+                <pre className="code">{TEST}</pre>
               </div>
             </div>
           </section>
 
           <section className="isec">
             <div className="isec-text">
-              <h2>The whole library is swept, not one scene.</h2>
+              <h2>Parallel slices, the same pixels.</h2>
               <p>
-                <code>quality/gates/snap-scenes.mjs</code> renders every shipped scene&apos;s sampled
-                frames ascending, then descending, and diffs the two runs. A scene whose signature
-                moves when the order changes has state leaking across frames, and it is quarantined
-                out of the baselined set rather than shipped quietly wrong. For everything that
-                passes, the same pass saves a regression baseline keyed by scene name, so a future
-                refactor either leaves the picture untouched or shows exactly what moved.
+                Because the frame at t depends on nothing before it, the renderer splits a film into
+                fixed 60-frame slices and captures several at once, each on its own fresh page of
+                one shared browser. The slice size is a constant, never the worker count: a page
+                keeps raster state between seeks, so a frame reached by seeking can differ in the
+                last decimal place from the same frame on a fresh page. Fixing the boundaries makes
+                the pixels identical for any number of workers.
               </p>
-              <p>
-                Purity is also why a render is fast. Because frame 900 depends on nothing before it,
-                the Go renderer opens several tabs on one browser and lets each seek straight to its
-                assigned frames, capped at six tabs sharing one GPU process, tuned down from eight
-                after raster starvation corrupted frames under load.
-              </p>
-              <span className="cite">quality/gates/snap-scenes.mjs · renderer/cmd/render/main.go</span>
-            </div>
-            <div className="isec-art">
-              <div className="codeblock">
-                <div className="lbl">snap-scenes.mjs</div>
-                <pre className="code">{SNAP}</pre>
-              </div>
+              <span className="cite">harness/media/render-page.mjs, SLICE_FRAMES</span>
             </div>
           </section>
 
@@ -133,31 +108,29 @@ export default function Determinism() {
             <div className="isec-text">
               <h2>60fps final, 30fps for a fast look.</h2>
               <p>
-                One JSON file (<code>{"{"} "module": "scene" {"}"}</code>) becomes one mp4: 60fps by
-                default, or 30fps with <code>--draft</code> for a quick check before the real
-                render. The frame rate is the one knob that changes; determinism is not a mode you
-                opt into, every render goes through the same virtual clock.
+                One page becomes one mp4: <code>bin/vawe ship</code> renders 60fps at full size with
+                motion blur and audio, and <code>bin/vawe dev</code> renders a half-size, 30fps,
+                silent draft for a quick check. Frames are seeked at fractional times, so the render
+                rate is independent of the page. Determinism is not a mode you opt into: every render
+                goes through the same virtual clock.
               </p>
-              <span className="cite">renderer/cmd/render/main.go:30 · films/scene/sample.json:3</span>
+              <span className="cite">harness/cli/verbs.mjs · harness/media/render-page.mjs</span>
             </div>
           </section>
 
           <section className="iend">
-            <h2 className="h2">What one JSON file actually contains.</h2>
+            <h2 className="h2">When this property decides which engine to pick.</h2>
             <p className="lead">
-              A scene is 24 layer types over five named canvases, validated before it ever reaches a
-              browser. That structure is the next page.
+              Byte-identical output matters most where nobody looks at every frame.
             </p>
             <div className="hero-cta">
-              <a className="btn btn-primary" href="/json-to-video">
-                Read JSON to video <span className="arw">→</span>
+              <a className="btn btn-primary" href="/when-determinism-matters">
+                When determinism matters <span className="arw">→</span>
               </a>
             </div>
             <div className="irelated">
-              <a href="/ai-agents">How an agent writes the JSON</a>
-              <a href="/docs/determinism">The technical reference in the docs</a>
-              <a href="/editor">Break a render on purpose, in the editor</a>
-              <a href="/when-determinism-matters">When this property is the reason to pick an engine</a>
+              <a href="/ai-agents">How an agent writes the page</a>
+              <a href="/features">What else the engine decides</a>
             </div>
           </section>
         </main>

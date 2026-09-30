@@ -11,8 +11,7 @@ import type { MetadataRoute } from "next";
  * the audience. They are not listed individually: a per-bot allowlist is a list that goes stale every
  * time a new crawler ships, and the honest stance here is "all of it, to everyone".
  *
- * The two disallows are not content. /api is machinery, and /deck.html is a pitch deck that exists at
- * a fixed URL for sharing, not a page anyone should reach from a search result.
+ * The one disallow is not content: /api is machinery.
  *
  * NO `host` FIELD. Google's robots.txt parser recognizes exactly four rules: user-agent, disallow,
  * allow, sitemap (developers.google.com/search/docs/crawling-indexing/robots/create-robots-txt,
@@ -22,7 +21,7 @@ import type { MetadataRoute } from "next";
  */
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/", "/deck.html"] }],
+    rules: [{ userAgent: "*", allow: "/", disallow: ["/api/"] }],
     sitemap: "https://vawe.dev/sitemap.xml",
   };
 }

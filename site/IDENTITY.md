@@ -3,6 +3,9 @@
 Status: direction locked 2026-09-25 with the owner. Not shipped. `DESIGN.md` still describes the
 white and cobalt site that is live; it changes only when this direction is built.
 
+2026-09-30: the JSON engine left the site. The hero and film cards now play rendered mp4s, so the
+live layer timeline and the scene file tab below describe the direction as it was first built.
+
 ## Positioning
 
 vawe.dev is a screening room for films an engine made. It feels like browsing reels in an editing

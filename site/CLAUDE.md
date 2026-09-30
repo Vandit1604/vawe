@@ -30,17 +30,16 @@ for a marketing site answers none of that map's questions. This file is how you 
    already read UNRECORDED because nobody wrote it down and the session ended. Tokens survive in the
    CSS; the reasoning only survives if you type it.
 
-## Where the craft bar is
+## Where the craft bar was
 
-`app/arsenal/arsenal.css` and `app/arsenal/Arsenal.tsx`. Hairlines for structure, ONE elevation step
-and only on hover, mono for anything literal and sans for prose. Its comments explain each choice.
-Match that register or beat it.
+`app/arsenal/` set it: hairlines for structure, ONE elevation step and only on hover, mono for
+anything literal and sans for prose. The route left with the JSON engine; read `arsenal.css` at the
+tag `arsenal-final` and match that register.
 
-## The numbers on this site are never typed
+## Routes and the sitemap
 
-`quality/gates/site-counts.mjs` fails a hardcoded count and has caught one twice. Every figure in
-copy or in a comment is read from a registry through `site/lib/*.json`, which is generated. Do not
-hand-edit those files; run the generator.
+`site/lib/site-pages.json` lists every route; the footer nav and `app/sitemap.ts` both read it, and
+`bin/vawe check seo-surface` fails when it and `app/` disagree. Edit it by hand when you add a page.
 
 ## Known gaps, so you do not rediscover them
 

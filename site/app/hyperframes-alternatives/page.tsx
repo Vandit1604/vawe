@@ -1,15 +1,12 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
-import MCP from "../../lib/mcp-tools.json";
-import effects from "../../lib/effects.json";
-import blocks from "../../lib/blocks.json";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
   title: "Vawe · HyperFrames alternatives, one real comparison",
   description:
-    "HyperFrames is HeyGen's self-hosted, Apache-2.0, agent-facing rendering engine, the closest peer Vawe has. Same license, same headless-Chrome shape, different composition language and a different way of enforcing determinism. Read 2026-09-19.",
+    "HyperFrames is HeyGen's self-hosted, Apache-2.0, agent-facing rendering engine, the closest peer Vawe has. Same license, same headless-Chrome shape, both compose from HTML, with a different way of timing it and of enforcing determinism. Read 2026-09-19.",
   path: "/hyperframes-alternatives",
 });
 
@@ -31,9 +28,6 @@ export const metadata = pageMetadata({
  * characterize either project's code quality, output quality, or reliability, per the same rule
  * /remotion-alternatives holds. Vawe claims are cited to the file that proves them.
  */
-
-const EFFECT_TOTAL = effects.total;
-const BLOCK_TOTAL = Array.isArray(blocks) ? blocks.length : Object.keys(blocks).length;
 
 export default function HyperframesAlternatives() {
   return (
@@ -76,20 +70,21 @@ export default function HyperframesAlternatives() {
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Two different things to write.</h2>
+              <h2>Both write HTML, timed two different ways.</h2>
               <p>
                 HyperFrames composes from HTML with data attributes for timing, animated by GSAP, CSS,
                 Lottie, Three.js, Anime.js or the Web Animations API, per its README: &quot;Define a
-                video as HTML. Add data attributes for timing and tracks.&quot; Vawe composes from one
-                JSON document: a scene with an open canvas of 24 layer types (<code>core/layers/</code>),
-                plus camera, transitions and captions, with no HTML timeline of its own to hand-author
-                (an <code>html</code> layer is one picture inside that canvas, not the whole
-                composition). An agent targeting HyperFrames is writing and timing markup; an agent
-                targeting Vawe is writing structured JSON a validator checks before a frame renders.
-                Neither shape is being called better here, they are genuinely different inputs.
+                video as HTML. Add data attributes for timing and tracks.&quot; A Vawe film is also one
+                HTML page, and it carries no timing attributes of its own: the page declares a
+                duration in a <code>&lt;meta&gt;</code> tag, and time comes from ordinary CSS{" "}
+                <code>@keyframes</code> and <code>element.animate()</code>, which the renderer seeks,
+                or from a <code>window.seek(t)</code> function that paints the frame at t. Neither
+                shape is being called better here: one adds a timing vocabulary to the page, the other
+                reads the timing the web platform already has.
               </p>
               <span className="cite">
-                github.com/heygen-com/hyperframes README · read 2026-09-19 · AGENTS.md, `ls core/layers/`
+                github.com/heygen-com/hyperframes README · read 2026-09-19 · AGENTS.md, &quot;The page
+                contract&quot; (this repo)
               </span>
             </div>
           </section>
@@ -105,58 +100,56 @@ export default function HyperframesAlternatives() {
                 or system timers permitted,&quot; and &quot;<code>Math.random()</code> without a seed
                 gives a different frame every run,&quot; meaning code that calls those APIs directly is
                 the thing the composition is not supposed to do. Vawe takes the other mechanism: it
-                does not forbid those calls, it intercepts them. <code>core/engine/boot.js</code>
-                replaces <code>Date.now</code>, <code>performance.now</code>, <code>Math.random</code>
-                and <code>requestAnimationFrame</code> with versions that are pure functions of the
-                current frame number, reseeded on every frame (<code>core/engine/boot.js:355-374</code>),
-                so ordinary code that calls them keeps working and still renders byte-identically. Both
+                does not forbid those calls, it intercepts them. Before any page script runs,{" "}
+                <code>core/engine/page-clock.js</code> replaces <code>Date</code>,{" "}
+                <code>performance.now</code>, <code>requestAnimationFrame</code>, the timers and{" "}
+                <code>Math.random</code> with versions that are pure functions of the seek time,
+                with the random sequence reseeded on every seek, so ordinary code that calls them keeps working and still renders byte-identically. Both
                 reach the same guarantee; one reaches it by disallowing the call, the other by rewriting
                 what the call returns.
               </p>
               <span className="cite">
                 hyperframes.heygen.com/concepts/determinism · read 2026-09-19 ·
-                core/engine/boot.js:355-374 (this repo)
+                core/engine/page-clock.js (this repo)
               </span>
             </div>
           </section>
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Agent integration: skills and a CLI, or one MCP server.</h2>
+              <h2>Agent integration: skills and a CLI on both sides.</h2>
               <p>
                 HyperFrames ships 21 skills an agent loads on demand (a router skill plus creation
                 workflows and domain skills, installed with <code>npx skills add heygen-com/hyperframes</code>),
                 paired with a non-interactive CLI: <code>npx hyperframes init</code>,{" "}
-                <code>preview</code>, <code>render</code>. Vawe ships an MCP server with {MCP.count} tools
-                (<code>vawe_guide</code>, <code>vawe_draft</code>, <code>vawe_export</code>,{" "}
-                <code>vawe_status</code>) that a calling model invokes directly inside the conversation,
-                no separate CLI install step for the agent side (<code>mcp/server.mjs</code>). Both are
-                real, running integrations rather than a claim in a README; they just hand the agent a
-                different surface, a skill-and-CLI pair versus a tool-call protocol.
+                <code>preview</code>, <code>render</code>. Vawe has the same shape: one command,{" "}
+                <code>bin/vawe</code> (<code>new</code>, <code>dev</code>, <code>critique</code>,{" "}
+                <code>ship</code>, <code>judge</code>), and a small set of skills in the repo
+                (<code>vawe-brief</code>, <code>vawe-page</code>, <code>vawe-critique</code>,{" "}
+                <code>vawe-reference</code>). Where Vawe differs is the review step: a film is
+                critiqued and judged by a fresh session that did not write it, and a pass is never
+                self-recorded.
               </p>
               <span className="cite">
-                github.com/heygen-com/hyperframes README · read 2026-09-19 · mcp/server.mjs (this repo)
+                github.com/heygen-com/hyperframes README · read 2026-09-19 · harness/cli/verbs.mjs,
+                skills/, AGENTS.md (this repo)
               </span>
             </div>
           </section>
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Registries and hosted rendering: both name an optional paid step.</h2>
+              <h2>Hosted rendering: one names an optional paid step.</h2>
               <p>
                 HyperFrames&apos; README mentions a HeyGen-hosted cloud render command and an optional
                 AWS Lambda path for distributed rendering, alongside a template gallery it says holds
                 &quot;15+ design templates&quot; browsable at hyperframes.dev/design; it publishes no
-                price for either. Vawe has no hosted API and no template library by design: its
-                registries are {EFFECT_TOTAL} named effects and {BLOCK_TOTAL} composable blocks
-                (<code>site/lib/effects.json</code>, <code>site/lib/blocks.json</code>) that a scene
-                composes from directly, and the one paid step anywhere in the project is the hosted MCP
-                export, a convenience layered on a free engine rather than a gate on it. Neither
-                project&apos;s hosted-rendering price is public, so neither is stated here.
+                price for either. Vawe has no hosted API and no paid step: it renders on your machine,
+                and its starting points are the film templates in <code>prompts/</code>. HyperFrames&apos;
+                hosted-rendering price is not public, so it is not stated here.
               </p>
               <span className="cite">
-                github.com/heygen-com/hyperframes README · read 2026-09-19 · site/lib/effects.json,
-                site/lib/blocks.json, mcp/pricing.mjs (this repo)
+                github.com/heygen-com/hyperframes README · read 2026-09-19 · prompts/ (this repo)
               </span>
             </div>
           </section>
@@ -192,9 +185,9 @@ export default function HyperframesAlternatives() {
                   <tr>
                     <td>Vawe</td>
                     <td>Apache-2.0, no size clause</td>
-                    <td>scene JSON, 24 layer types</td>
-                    <td>coerces Date.now/rAF/Math.random into pure functions of the frame</td>
-                    <td>MCP server, {MCP.count} tools (<code>mcp/</code>)</td>
+                    <td>one HTML page, timed by CSS, Web Animations or <code>seek(t)</code></td>
+                    <td>coerces Date/rAF/timers/Math.random into pure functions of the seek time</td>
+                    <td>CLI + skills, judged by a fresh session</td>
                   </tr>
                   <tr>
                     <td>HyperFrames</td>
@@ -214,7 +207,7 @@ export default function HyperframesAlternatives() {
             <div className="irelated">
               <a href="/remotion-alternatives">Remotion alternatives, categorized</a>
               <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
-              <a href="/ai-agents">The MCP server, and why exports are the only paid call</a>
+              <a href="/ai-agents">How an agent writes and checks a film</a>
             </div>
           </section>
         </main>

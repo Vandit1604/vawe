@@ -1,4 +1,4 @@
-import { Header } from "../components/Header";
+import { Header, REPO_URL } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { FilmGrid } from "../components/FilmGrid";
 import { pageMetadata } from "../components/seo";
@@ -7,13 +7,13 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Vawe · launch video",
   description:
-    "How Vawe builds a product launch video: real captured UI, not invented mockups, on the six-beat spine the engine's own doctrine defines.",
+    "How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site's own palette and type.",
   path: "/launch-video",
 });
 
-/* /launch-video · a use-case page built from engine-doctrine/CRAFT/ROUTING.md's route table. Someone
- * searching "product launch video" names a JOB, not this engine's vocabulary, so the page answers in
- * that wording, and proves the spine with launch films played live from their scene files.
+/* /launch-video · a use-case page built from engine-doctrine/CRAFT/ROUTING.md's film-type table.
+ * Someone searching "product launch video" names a JOB, not this engine's vocabulary, so the page
+ * answers in that wording, and shows rendered launch films.
  */
 
 export default function LaunchVideo() {
@@ -36,66 +36,64 @@ export default function LaunchVideo() {
             <div className="isec-text">
               <h2>The route: market a real product, from a URL.</h2>
               <p>
-                The engine&apos;s own routing table sends any request to &quot;market or showcase a
-                real product, company, or site from a URL or site-specific brief&quot; to the
-                launch-video route, ahead of an explainer, a sting, or a demo. That is the second
-                highest-priority row in the table, below only a recreation with no product to sell.
+                The engine&apos;s own routing table sends a request to &quot;market or show a real
+                product, company or site from a URL&quot; to the brand-launch template, ahead of an
+                explainer, a UI morph or a music video. Only a reference rebuild, where a film must
+                match an existing video, ranks above it.
               </p>
-              <span className="cite">engine-doctrine/CRAFT/ROUTING.md, priority row 2</span>
+              <span className="cite">engine-doctrine/CRAFT/ROUTING.md, row 2</span>
             </div>
           </section>
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Six beats, past fifteen seconds.</h2>
+              <h2>One message per beat, 15 to 40 seconds.</h2>
               <p>
-                Past the engine&apos;s continuous-action threshold, a launch film takes a fixed
-                spine: hook, then the captured UI itself, then feature proof, then a payoff stat,
-                then the brand lockup, then the call to action. The payoff lands right before the
-                brand beat on purpose, because a stat after the logo reads as an afterthought.
+                The beat list comes first, each beat with a timestamp, one message and the real
+                capture that proves it. The hook is the promise, under 12 words on the first frame.
+                Then one move per beat: the hook word becomes the product, a cursor does one real
+                thing, the key output lands big, then a second surface, a stat you can source, and
+                the wordmark. Under 15 seconds, a launch film is one continuous action instead.
               </p>
-              <span className="cite">skills/vawe-type-launch/SKILL.md</span>
+              <span className="cite">prompts/brand-launch-from-url.md</span>
             </div>
           </section>
 
           <section className="ifilms">
-            <h2>Launch films, played live.</h2>
-            <p>Each one is a scene file your browser renders as you watch. Hover a film to play it, click to watch it large, or open its JSON in the editor.</p>
+            <h2>Launch films.</h2>
+            <p>Rendered by vawe. Hover a film to play it, or click to watch it large.</p>
             <FilmGrid ids={["argus-launch", "saas-hero-launch"]} />
           </section>
 
           <section className="isec">
             <div className="isec-text">
-              <h2>What the engine will not let a launch film skip.</h2>
+              <h2>What a launch film may not invent.</h2>
               <p>
-                Five standing rules run on every save of a launch film: captured UI instead of a
-                hand-drawn dashboard, one continuous object that survives every cut, a backdrop that
-                changes tone beat to beat, a real beat for the logo instead of a bullet beside a
-                headline, and an exit that leaves the direction it entered from. Crawl every page of
-                the real site, not just the homepage: the feature worth showing is often one click
-                past the hero.
+                Every screen in the film is a capture of the real site or app, cropped, never a
+                placeholder card. The palette, fonts and favicon come from a kit read off the site
+                itself, and nothing else is used. A feature you did not see on the site is a feature
+                the film must not show, so crawl past the homepage: the feature worth showing is
+                often one click past the hero.
               </p>
-              <span className="cite">AGENTS.md, &quot;Stage 4, design&quot;</span>
+              <span className="cite">prompts/brand-launch-from-url.md · scripts/brand/kit.mjs</span>
             </div>
           </section>
 
           <section className="iend">
             <h2 className="h2">More than one feature to walk through.</h2>
             <p className="lead">
-              A single product with one hero feature takes the fixed six-beat spine above. A
-              product with three features worth a beat each takes a different shape: chapters,
-              not one continuous run.
+              A single product with one hero feature takes the beat list above. A product with
+              three features worth a beat each takes a different shape: chapters, not one
+              continuous run.
             </p>
             <div className="hero-cta">
-              <a className="btn btn-primary" href="/editor">
-                Try the editor <span className="arw">→</span>
+              <a className="btn btn-primary" href={REPO_URL}>
+                Start a launch film <span className="arw">→</span>
               </a>
             </div>
             <div className="irelated">
               <a href="/product-tour-video">A chaptered product tour, three features in one film</a>
-              <a href="/showcase">Every finished film, open in the editor</a>
-              <a href="/docs/brand-reflection">The capture-first workflow, in the docs</a>
-              <a href="/arsenal">Every layer, effect and preset, searchable</a>
+              <a href="/showcase">Every finished film</a>
             </div>
           </section>
         </main>
