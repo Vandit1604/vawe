@@ -32,18 +32,18 @@ One row per job, best move first. Every built move is in this table; the group t
 | type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
 | land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
-| decide a name or number on screen | [flap-resolve](flap-resolve.md), [word-swap-slot](word-swap-slot.md) |
+| decide a name or number on screen | [flap-resolve](flap-resolve.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |
 | point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md) |
 | change what a word means | [weight-morph](weight-morph.md) |
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
-| change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md) |
-| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md) |
-| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md) |
-| change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md) |
+| change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [speed-ramp-freeze](speed-ramp-freeze.md) |
+| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md) |
+| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md) |
+| change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
 | keep a quiet frame alive | [drift-hold](drift-hold.md) |
-| show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md) |
+| show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md) |
 | show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md) |
 | show an AI product answering | [ai-stream-response](ai-stream-response.md) |
 | prove a number | [count-up](count-up.md), [chart-build](chart-build.md) |
@@ -52,6 +52,8 @@ One row per job, best move first. Every built move is in this table; the group t
 | end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
 | end on an action | [cta-pop](cta-pop.md) |
 | hand the product to the brand | [ui-strip-away](ui-strip-away.md) |
+| prove it with customers | [logo-wall](logo-wall.md) |
+| show the problem, then the fix | [overwhelm-collapse](overwhelm-collapse.md) |
 
 ## Reveal a title
 
@@ -67,6 +69,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | blur word cascade | copy resolves word by word from blur with a slight rise; no mask, so nothing cuts a descender | [blur-word-cascade.md](blur-word-cascade.md) | [blur-word-cascade.mp4](blur-word-cascade.mp4) |
 | text as mask | the type is a window onto a rich picture: the frame opens tight on image, pulls back to the title, and the layers keep moving inside the fixed letters | [text-as-mask.md](text-as-mask.md) | [text-as-mask.mp4](text-as-mask.mp4) |
 | outline fill | one hero word arrives as an outline, letter by letter, then an accent floods each letter from its baseline on the beat | [outline-fill.md](outline-fill.md) | [outline-fill.mp4](outline-fill.mp4) |
+| strikethrough replace | an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character | [strikethrough-replace.md](strikethrough-replace.md) | [strikethrough-replace.mp4](strikethrough-replace.mp4) |
 
 ## Change between shots
 
@@ -86,6 +89,10 @@ One row per job, best move first. Every built move is in this table; the group t
 | type fill transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | [type-fill-transition.md](type-fill-transition.md) | [type-fill-transition.mp4](type-fill-transition.mp4) |
 | colour block wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | [color-block-wipe.md](color-block-wipe.md) | [color-block-wipe.mp4](color-block-wipe.mp4) |
 | zoom through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | [zoom-through.md](zoom-through.md) | [zoom-through.mp4](zoom-through.mp4) |
+| speed ramp freeze | a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur | [speed-ramp-freeze.md](speed-ramp-freeze.md) | [speed-ramp-freeze.mp4](speed-ramp-freeze.mp4) |
+| liquid wipe | a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot | [liquid-wipe.md](liquid-wipe.md) | [liquid-wipe.mp4](liquid-wipe.mp4) |
+| grid tile flip | a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back | [grid-tile-flip.md](grid-tile-flip.md) | [grid-tile-flip.mp4](grid-tile-flip.mp4) |
+| luma matte dissolve | the next shot arrives through its own brightness: an SVG luminance matte with a falling threshold shows its bright areas first, then midtones, and its dark ground last | [luma-matte-dissolve.md](luma-matte-dissolve.md) | [luma-matte-dissolve.mp4](luma-matte-dissolve.mp4) |
 
 ## Point the eye
 
@@ -121,6 +128,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | cta pop | the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click | [cta-pop.md](cta-pop.md) | [cta-pop.mp4](cta-pop.mp4) |
 | thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
 | UI strip away | the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup | [ui-strip-away.md](ui-strip-away.md) | [ui-strip-away.mp4](ui-strip-away.mp4) |
+| logo wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | [logo-wall.md](logo-wall.md) | [logo-wall.mp4](logo-wall.mp4) |
 
 ## Product moments
 
@@ -135,6 +143,8 @@ One row per job, best move first. Every built move is in this table; the group t
 | before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
 | AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
+| overwhelm collapse | the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens | [overwhelm-collapse.md](overwhelm-collapse.md) | [overwhelm-collapse.mp4](overwhelm-collapse.mp4) |
+| success check | a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it | [success-check.md](success-check.md) | [success-check.mp4](success-check.mp4) |
 
 `bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`). `--only <move>` forces one clip, `--all` forces every clip.
 
@@ -151,14 +161,14 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | flap resolve, weight morph, iris wipe, pull back reveal, logo sting, count up, ui strip away |
-| paper | warm editorial: cream ground, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | mask rise, exit fast, marker highlight, drift hold, thanks sweep, card assemble |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop, outline fill |
-| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal |
-| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe |
-| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response |
-| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow |
+| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | flap resolve, weight morph, iris wipe, pull back reveal, logo sting, count up, ui strip away, speed ramp freeze |
+| paper | warm editorial: cream ground, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | mask rise, exit fast, marker highlight, drift hold, thanks sweep, card assemble, strikethrough replace |
+| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop, outline fill, liquid wipe |
+| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal, logo wall |
+| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe, success check |
+| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response, luma matte dissolve |
+| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask, overwhelm collapse |
+| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow, grid tile flip |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
 

@@ -1,0 +1,62 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.4">
+<title>move: grid tile flip</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  html, body { background: #010302; }
+  body { display: block; position: relative; overflow: hidden; }
+  .grid { position: absolute; inset: 0; perspective: 1400px; perspective-origin: 50% 50%; }
+  .tile { position: absolute; transform-style: preserve-3d; }
+  .face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .face.back { transform: rotateY(180deg); }
+  .face .sh { position: absolute; inset: 0; background: #000; opacity: 0; }
+  .shot { position: absolute; }
+  .a { background: var(--ground); color: var(--ink); }
+  .b { background: var(--paper); color: var(--paper-ink); }
+  .big { position: absolute; left: 7vw; top: calc(var(--u) * 20); font: 700 calc(var(--u) * 27)/1 var(--mono); letter-spacing: -0.06em; }
+  .a .big i { font-style: normal; color: var(--accent); }
+  .line { position: absolute; left: 7.4vw; top: calc(var(--u) * 56); font: 500 var(--t-lead)/1 var(--mono); color: var(--muted); }
+  .b .line { color: var(--paper-muted); }
+  .bar { position: absolute; left: 7.4vw; top: calc(var(--u) * 72); width: calc(var(--u) * 62); height: calc(var(--u) * 2.2); background: var(--line); }
+  .bar i { display: block; width: 62%; height: 100%; background: var(--accent); }
+  .tick { position: absolute; left: 7.4vw; top: calc(var(--u) * 68); width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; background: var(--accent); display: grid; place-items: center; }
+  .tick svg { width: 60%; height: 60%; fill: none; stroke: var(--on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<template id="a"><div class="shot a"><div class="big">build<i>_</i></div><div class="line">$ vawe ship film.html</div><div class="bar"><i></i></div></div></template>
+<template id="b"><div class="shot b"><div class="big">shipped</div><div class="line">film.mp4, 12.4 s, 60 fps</div><div class="tick"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.6"/></svg></div></div></template>
+<div class="grid" id="grid"></div>
+<script type="module">
+import { springLinear, springDuration, curveToLinear } from '/core/motion/springs.js';
+const W = innerWidth, H = innerHeight, COLS = 8, ROWS = 5, tw = W / COLS, th = H / ROWS;
+const K = 150, D = 22, flip = springLinear(K, D), dur = springDuration(K, D) * 1000;
+const t0 = 220, step = 58;                                    // ms: the wave crosses the grid in about 0.5 s
+const tplA = document.getElementById('a').content, tplB = document.getElementById('b').content;
+const grid = document.getElementById('grid');
+const face = (tpl, cls, c, r) => {
+  const f = Object.assign(document.createElement('div'), { className: `face ${cls}` });
+  const s = tpl.firstElementChild.cloneNode(true);
+  Object.assign(s.style, { left: `${-c * tw}px`, top: `${-r * th}px`, width: `${W}px`, height: `${H}px` });
+  f.append(s, Object.assign(document.createElement('div'), { className: 'sh' }));
+  return f;
+};
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const tile = Object.assign(document.createElement('div'), { className: 'tile' });
+  Object.assign(tile.style, { left: `${c * tw}px`, top: `${r * th}px`, width: `${tw + 1}px`, height: `${th + 1}px` });
+  const front = face(tplA, 'front', c, r), back = face(tplB, 'back', c, r);
+  tile.append(front, back);
+  grid.append(tile);
+  const d = Math.hypot(c, (ROWS - 1 - r) * 1.15), delay = t0 + d * step;   // the wave starts in the bottom-left corner
+  // 90 degrees at half progress: the tile is edge-on at its darkest and its highest
+  tile.animate([{ transform: 'translateZ(0) rotateY(0deg)' }, { transform: 'translateZ(90px) rotateY(90deg)', offset: 0.5 }, { transform: 'translateZ(0) rotateY(180deg)' }],
+    { duration: dur, delay, easing: flip, fill: 'both' });
+  for (const f of [front, back]) f.lastElementChild.animate([{ opacity: 0 }, { opacity: 0.7, offset: 0.5 }, { opacity: 0 }], { duration: dur, delay, easing: flip, fill: 'both' });
+}
+grid.animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1400, easing: 'linear', fill: 'both' });
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="field">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.4">
+<title>move: liquid wipe</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .shot { position: absolute; inset: 0; }
+  .a h1 { position: absolute; left: 8vw; top: calc(var(--u) * 24); margin: 0; font: 800 calc(var(--u) * 34)/1 var(--sans); letter-spacing: -0.05em; }
+  .a p { position: absolute; left: 8.6vw; top: calc(var(--u) * 66); margin: 0; font: 600 var(--t-lead)/1.15 var(--sans); }
+  .b { background: var(--paper); color: var(--paper-ink); }
+  .b h1 { position: absolute; left: 8vw; top: calc(var(--u) * 24); margin: 0; font: 800 calc(var(--u) * 34)/1 var(--sans); letter-spacing: -0.05em; }
+  .b h1 i { display: inline-block; width: calc(var(--u) * 6); height: calc(var(--u) * 6); margin-left: var(--s2); border-radius: 50%; background: var(--ground); }
+  .b p { position: absolute; left: 8.6vw; top: calc(var(--u) * 66); margin: 0; font: 600 var(--t-lead)/1.15 var(--sans); color: var(--paper-muted); }
+  .b .in { mask: none; }
+  .rim { background: var(--accent); }
+  .shot, .rim { -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+</style>
+</head>
+<body>
+<section class="shot a"><h1>Draft</h1><p>v0.9, internal build</p></section>
+<div class="shot rim"></div>
+<section class="shot b"><div class="shot in"><h1>Live<i></i></h1><p>vawe.dev/launch</p></div></section>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), E = (u) => 1 - (1 - u) ** 2.4;   // the flood: quick off the mark, still moving through the middle
+const W = innerWidth, H = innerHeight, N = 8, rh = H / N, R = rh * 0.8, rand = rng(5);
+const t0 = 0.25, blur = rh * 0.42;
+// each row is a bar with a round head; the goo filter (blur, then a hard alpha contrast) fuses neighbours into one wet edge
+const rows = Array.from({ length: N }, (_, i) => ({ y: (i + 0.5) * rh, lag: rand() * 0.22, dur: 0.85 + rand() * 0.25 }));
+const prog = (row, t) => Math.min(1, Math.max(0, (t - t0 - row.lag) / row.dur));
+const front = (row, t) => -R - 3 * blur + (W + 2 * R + 6 * blur + W * 0.14) * E(prog(row, t));
+const goo = (t, lead) => {
+  const shapes = rows.map((row) => { const x = front(row, t) + lead * Math.min(1, prog(row, t) * 6); return `<rect x="-20" y="${row.y - rh * 0.85}" width="${Math.max(0, x + 20)}" height="${rh * 1.7}"/><circle cx="${x}" cy="${row.y}" r="${R}"/>`; }).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><filter id="g" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="${blur}"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 24 -10"/></filter><g fill="#fff" filter="url(#g)">${shapes}</g></svg>`;
+  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+};
+const rim = document.querySelector('.rim'), b = document.querySelector('.b'), a = document.querySelector('.a');
+vawe.onFrame((t) => {
+  b.style.maskImage = b.style.webkitMaskImage = goo(t, 0);
+  rim.style.maskImage = rim.style.webkitMaskImage = goo(t, W * 0.07);     // the accent edge leads shot B by 7 percent of the width
+});
+a.animate([{ translate: '0 0' }, { translate: '-6vw 0' }], { duration: 1000, delay: t0 * 1000, easing: settle, fill: 'both' });
+b.querySelector('.in').animate([{ scale: 1.08 }, { scale: 1 }], { duration: 1100, delay: 450, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>
