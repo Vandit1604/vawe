@@ -40,6 +40,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | flash-cut | a one or two frame flash on a beat | to be captured | built |
 | stack-cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | HyperFrames stack and card transitions, Apple keynote slide push | built |
 | split-reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | HyperFrames split and curtain-reveal transitions | built |
+| slice-shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | HyperFrames slice and shutter transitions, broadcast glitch-free slice wipes | built |
 
 ## 3. Point the eye
 
