@@ -16,7 +16,7 @@ group: reference
 - Radius steps `--r0`..`--r6` (0, 0.5, 1, 2, 3, 4.6, 6 u). A look picks `--r-chip` and `--r-card` from them.
 - Line weights: hair 1 px, rule 0.25 u, heavy 0.45 u. Depth: ring, stack, lift, hero. A look changes only the colour and which step it uses.
 - Colour roles: ground, surface, raised, hover (a visible ladder), ink, muted, accent, on-accent, plus the `--paper` pair for a cut.
-- Contrast: ink, muted, on-accent and paper text pass 4.5:1; accent as text passes 3:1 (large type only). `node prompts/moves/demo/contrast.mjs` checks all ten.
+- Contrast: ink, muted, on-accent and paper text pass 4.5:1; accent as text passes 3:1 (large type only). `--faint` is for dots, rules and icons, never for text. `node prompts/moves/demo/contrast.mjs` checks all ten.
 - Faces are in `generators/media/fonts.mjs` with a locked version (`harness/media/fonts.lock.json`).
 
 ## The ten looks
@@ -42,3 +42,8 @@ group: reference
 4. A physical move (plates, flaps, tilts) takes chrome; a typed stream takes terminal.
 
 The assignment is the `data-look` on each `demo/*.html`; the README looks table lists the clips per look.
+
+## Skills used in the design pass
+
+Used: `jakubkrehel/better-typography` (measure, balanced wraps, smart truncation with an ellipsis, tabular figures), `jakubkrehel/better-ui` (concentric radius, optical alignment, scrims that dim), `ibelick/baseline-ui` (spacing and hierarchy review only).
+Rejected: better-typography's 16 px body floor and `font-synthesis: none` (a film sets its own sizes), baseline-ui's no-gradient and no-letter-spacing rules (looks set both), and every hover, press and hit-area rule (a film has no input).

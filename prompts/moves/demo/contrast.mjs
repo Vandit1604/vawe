@@ -11,7 +11,8 @@ const tokensOf = (body) => Object.fromEntries([...body.matchAll(/--([a-z-]+):\s*
 const root = tokensOf(css.match(/:root \{([\s\S]*?)\n\}/)[1]);
 const looks = [...css.matchAll(/html\[data-look="([a-z]+)"\] \{([\s\S]*?)\n\}/g)].map((m) => [m[1], { ...root, ...tokensOf(m[2]) }]);
 
-const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const full = (hex) => (hex.length === 4 ? `#${[...hex.slice(1)].map((c) => c + c).join('')}` : hex);
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(full(hex).slice(i, i + 2), 16));
 const lum = (hex) => {
   const [r, g, b] = rgb(hex).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -36,7 +37,7 @@ for (const [name, t] of looks) {
     ['accent/ground (large)', get('accent'), get('ground'), 3],
     ['accent/surface (large)', get('accent'), get('surface'), 3],
   ];
-  const bad = pairs.filter(([, a, b, min]) => ratio(a, b) < min);
+  const bad = pairs.filter(([, a, b, min]) => !(ratio(a, b) >= min));
   failed += bad.length;
   console.log(`${name.padEnd(9)} ${pairs.map(([n, a, b]) => `${n} ${ratio(a, b).toFixed(1)}`).join('  ')}`);
   for (const [n, a, b, min] of bad) console.log(`  FAIL ${n} ${ratio(a, b).toFixed(2)} < ${min}`);

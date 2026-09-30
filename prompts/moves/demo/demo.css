@@ -216,7 +216,7 @@ html[data-look="swiss"] {
   --ink: #0b0b0b; --muted: #55554f; --faint: #8b8b84; --accent: #d40500; --on-accent: #fff;
   --line: rgba(11, 11, 11, 0.2); --edge: rgba(11, 11, 11, 0.85); --dot: #c9c8c0; --bar: rgba(11, 11, 11, 0.16);
   --dim: rgba(11, 11, 11, 0.8); --cursor: #0b0b0b; --cursor-edge: #fff;
-  --paper: #0b0b0b; --paper-ink: #f2f1ec; --paper-muted: #a4a49c; --star: #d40500; --up-ink: #d40500;
+  --paper: #0b0b0b; --paper-ink: #f2f1ec; --paper-muted: #a4a49c; --star: #d40500; --up-ink: #c40400;
   --sans: 'Geist', sans-serif; --display: 'Geist', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
   --head-weight: 700; --head-track: -0.04em;
   --label: 'Geist Mono', ui-monospace, monospace; --label-case: uppercase; --label-track: 0.08em;
