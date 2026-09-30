@@ -9,7 +9,8 @@ group: reference
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from
 the clip, not the name. Copy the snippet into the page; the numbers are the ones that read well.
 Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a hand-fitted
-`cubic-bezier()`. The demo page each clip was rendered from is in `demo/`.
+`cubic-bezier()`. The demo page each clip was rendered from is in `demo/`. Every demo links `demo/demo.css`
+(tokens, type scale as a share of frame height, the UI card look); the snippets name its classes, so copy the ones you use.
 
 [LIBRARY.md](LIBRARY.md) lists every approved move in six groups, including the ones still to build.
 This index lists the built ones, in the same groups.
@@ -90,3 +91,6 @@ Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 Two rules the snippets already obey, so keep them when you adapt one: an exit keyframe has no
 `from` (a `from` fills backwards over the entrance and hides it), and `var()` never goes inside the
 `animation` shorthand (write the longhands; Chromium drops the whole declaration otherwise).
+
+The demo look was polished with two ui-skills: `jakubkrehel/better-ui` (concentric radius, layered shadow over border for depth, optical alignment, tabular numbers, icon stroke matched to text weight) and `emilkowalski/animate` (only to check the approved motion, nothing rewritten).
+Rejected from them: their default UI sizes and 300 ms duration caps (film type needs a 6 percent cap height and holds), the 0.96 press scale and blur-in icon values as global rules (each move keeps its own tuned numbers), and reduced-motion and hit-area advice (a film has no input).
