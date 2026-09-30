@@ -23,6 +23,7 @@ This index lists the built ones, in the same groups.
 | prove a change with a picture | [before after wipe](before-after-wipe.md) |
 | show a real UI arriving, not popping in | [skeleton reveal](skeleton-reveal.md) |
 | show an AI product answering | [AI stream response](ai-stream-response.md) |
+| put the picture inside the name | [text as mask](text-as-mask.md) |
 
 ## Reveal a title
 
@@ -36,6 +37,7 @@ This index lists the built ones, in the same groups.
 | split-flap resolve | a name or number is decided: each letter is a tile that flips through seeded glyphs on a hinge and locks left to right | [flap-resolve.md](flap-resolve.md) | [flap-resolve.mp4](flap-resolve.mp4) |
 | word swap slot | one word in a held sentence rolls through 3 or 4 values and lands; the sentence reflows its width | [word-swap-slot.md](word-swap-slot.md) | [word-swap-slot.mp4](word-swap-slot.mp4) |
 | blur word cascade | copy resolves word by word from blur with a slight rise; no mask, so nothing cuts a descender | [blur-word-cascade.md](blur-word-cascade.md) | [blur-word-cascade.mp4](blur-word-cascade.mp4) |
+| text as mask | the type is a window onto a rich picture: the frame opens tight on image, pulls back to the title, and the layers keep moving inside the fixed letters | [text-as-mask.md](text-as-mask.md) | [text-as-mask.mp4](text-as-mask.mp4) |
 
 ## Change between shots
 
