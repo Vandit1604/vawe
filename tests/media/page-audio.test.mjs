@@ -42,3 +42,30 @@ test('two synth cues land at data-at and the master sits at -14 LUFS', async () 
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
+
+const ebur = (file) => {
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-af', 'ebur128=peak=true', '-f', 'null', '-'], { encoding: 'utf8' });
+  const s = r.stderr.slice(r.stderr.lastIndexOf('Summary:'));
+  return { I: parseFloat(s.match(/I:\s+(-?[\d.]+) LUFS/)[1]), peak: parseFloat(s.match(/Peak:\s+(-?[\d.]+) dBFS/)[1]) };
+};
+
+test('a cue-only film masters to about -20 LUFS under a -9 dBTP cap, and an explicit loudness still wins', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'page-audio-quiet-'));
+  try {
+    const video = path.join(dir, 'silent.mp4');
+    const mk = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'color=c=black:s=64x64:r=30:d=5', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', video]);
+    assert.equal(mk.status, 0, String(mk.stderr));
+    const cue = (synth, at, gain) => ({ synth, at, gain, fadeIn: 0, fadeOut: 0, trim: 0, duck: null, role: 'sfx' });
+    const specs = [cue('droplet', 0.3, -30), cue('swell', 0.7, -36), cue('bloom', 1.7, -30), cue('pluck', 2.4, -32)];
+    const auto = path.join(dir, 'auto.mp4'), loud = path.join(dir, 'loud.mp4');
+    await mixAndMux({ specs, duration: 5, video, out: auto });
+    await mixAndMux({ specs, duration: 5, video, out: loud, loudness: -14 });
+    const a = ebur(auto), l = ebur(loud);
+    console.log(`cue-only auto ${a.I} LUFS peak ${a.peak}; explicit -14: ${l.I} LUFS peak ${l.peak}`);
+    assert.ok(Math.abs(a.I + 20) <= 1.5, `cue-only master ${a.I} LUFS is not about -20`);
+    assert.ok(a.peak <= -8.5, `cue-only peak ${a.peak} dBFS is above -9`);
+    assert.ok(l.I > a.I + 5, `explicit -14 gave ${l.I} LUFS, auto gave ${a.I}`);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
