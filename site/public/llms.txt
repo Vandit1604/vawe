@@ -65,7 +65,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Pull back reveal](https://vawe.dev/moves/pull-back-reveal.md): open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even
 - [Parallax dive](https://vawe.dev/moves/parallax-dive.md): the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves
 - [Rack focus](https://vawe.dev/moves/rack-focus.md): focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs
-- [Drift hold](https://vawe.dev/moves/drift-hold.md): a very slow seeded drift per layer so a quiet frame never sits dead
+- [Drift hold](https://vawe.dev/moves/drift-hold.md): the line holds still while only the ground drifts, so a held frame never sits dead
 - [Pan stations](https://vawe.dev/moves/pan-stations.md): several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them
 - [Crash zoom](https://vawe.dev/moves/crash-zoom.md): one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil
 - [Logo sting](https://vawe.dev/moves/logo-sting.md): a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame
@@ -84,7 +84,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Chart build](https://vawe.dev/moves/chart-build.md): gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it
 - [Before and after wipe](https://vawe.dev/moves/before-after-wipe.md): the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve
 - [Skeleton reveal](https://vawe.dev/moves/skeleton-reveal.md): grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart
-- [AI stream response](https://vawe.dev/moves/ai-stream-response.md): a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk
+- [AI stream response](https://vawe.dev/moves/ai-stream-response.md): a typed prompt is sent up into the thread, a status line shines, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk
 - [Overwhelm collapse](https://vawe.dev/moves/overwhelm-collapse.md): the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens
 - [Success check](https://vawe.dev/moves/success-check.md): a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it
 - [Integration hub](https://vawe.dev/moves/integration-hub.md): the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub

@@ -7,7 +7,10 @@ object carries the film, so the beats read as one gesture, not a list. Clip:
 [chain-beats.mp4](chain-beats.mp4). Demo: [demo/chain-beats.html](demo/chain-beats.html).
 
 ```html
-<div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>
+<div class="stack">                         <!-- position: absolute, so it shrinks to the headline's width -->
+  <div class="win"><h1>Shipped in 41 s</h1></div>   <!-- overflow: hidden; the headline rises out of its bottom edge -->
+  <div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>   <!-- align-items: flex-start -->
+</div>
 <script type="module">
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut);
@@ -20,9 +23,9 @@ const run = (el, frames, beat, fill = 'both') =>
   el.animate(frames, { duration: beat.dur, delay: beat.at, easing: settle, fill });
 
 run(chip, [{ translate: '-9vw 0' }, { translate: '0 0' }], A);                                      // the dot lands
-run(chip, [{ width: '5vh', height: '5vh' }, { width: '72vw', height: '10vh' }], B);                 // the dot becomes a bar
-run(chip, [{ height: '0.6vh' }], C, 'forwards');                                                    // the bar becomes the rule
-run(document.querySelector('h1'), [{ translate: '0 105%' }, { translate: '0 0' }], { at: C.at + 80, dur: 1300 });
+run(chip, [{ width: '5vh', height: '5vh' }, { width: '100%', height: '10vh' }], B);                 // the dot becomes a bar as wide as the headline
+run(chip, [{ height: '0.6vh' }], C, 'forwards');                                                    // the bar closes up to its top edge: the rule
+run(document.querySelector('h1'), [{ translate: '0 101%' }, { translate: '0 0' }], { at: C.at + 80, dur: 1300 });
 </script>
 ```
 
@@ -32,7 +35,9 @@ The overlap is measured on what the eye sees, not on the duration: `expoOut` cov
 distance by 0.46 of the duration, so "65 percent of the beat" is 0.3 of `dur`. Start the next beat at
 100 percent and the dot sits still for 0.2 s, which is the template feel this move removes. A later
 beat on the same property needs a keyframe with no `from` and `fill: 'forwards'`; a `from` fills
-backwards over the earlier beat and wipes it. Hand off the element, not the idea: if beat B brings a
+backwards over the earlier beat and wipes it. The rule must end where the headline starts: the bar
+takes `100%` of a box that shrinks to the headline, closes toward its top edge, and the headline's
+window sits right above it, so the text is hidden until it rises out of the line. Hand off the element, not the idea: if beat B brings a
 new object, the chain is broken.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
