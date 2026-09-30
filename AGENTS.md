@@ -66,7 +66,7 @@ PASS is never self-recorded.
 
 ## Banned first-draft defaults  `[eye]`
 
-You will reach for each of these; do the other thing (`engine-doctrine/RULES/banned-defaults.md`).
+You will reach for each of these; do the other thing (`engine-doctrine/RULES/banned-defaults.md`). A brief or `OWNER-VERDICTS.md` that asks for one overrides the ban.
 
 - A centred title on a gradient. Compose off-centre, on a real surface.
 - Everything fades in. One entrance per beat, and make it a move.

@@ -93,6 +93,6 @@ first-frame hook is 12 words or fewer. Waivers (`<script id="authoring">`) are i
 ## Commands
 
 `bin/vawe dev <page> [--aspect --from --to --audio]`: half size, 30 fps, silent.
-`bin/vawe ship <page> [--aspect all]`: 60 fps, subframe blur, audio mixed.
+`bin/vawe ship <page> [--aspect all]`: 60 fps, subframe blur, audio mixed. It runs in the background: check with `bin/vawe ship --status` and keep working; never use `--wait` inside an agent tool call (it hits the 120 s timeout).
 `bin/vawe critique <page> [--ref mp4]`: the fresh look (`vawe-critique`; with `--ref`, `vawe-reference`).
 Templates: `prompts/README.md`. Long films: `prompts/directors-brief-long-form.md`.

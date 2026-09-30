@@ -61,7 +61,7 @@ export const VERBS = [
     next: (v, [page]) => {
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
       if (v.status) return 'vawe ship --status again in 30 s or more; when it says done, vawe judge <the output file>';
-      return 'vawe ship --status (a render takes minutes: do not poll faster than every 30 s, and do not sleep-loop)';
+      return 'rendering in the background; check with `bin/vawe ship --status`, keep working meanwhile';
     },
   },
   {

@@ -7,10 +7,12 @@ group: look
 ---
 # Ban gradient text, cyan/purple, identical card grids, and Inter by default
 
+An explicit request in the brief, or a line in the owner-verdicts file (OWNER-VERDICTS.md, where it exists), overrides a banned default. The ban is about unasked defaults: if the owner asked for glow or a gradient, use it and do not decide alone.
+
 These are the tells that read as generated rather than designed, because they are what a model reaches
 for with no direction. A rule that names the default it replaces fires; a rule that states a virtue
 does not. So every row says what you will reach for, and what to do instead.
-`make check GATE=designspec-check` catches the deterministic look rows; the critique
+The design-spec check catches the deterministic look rows; the critique
 (`skills/vawe-critique/SKILL.md`) names the motion rows on the rendered film.
 
 ## Look
@@ -21,7 +23,7 @@ does not. So every row says what you will reach for, and what to do instead.
 | a cyan/purple gradient, or any random gradient | the brand's own surface, or a real capture |
 | an identical-weight card grid | one card at full weight, the rest smaller or later |
 | everything centred, equal weight | one focal point off-centre, one accent colour per frame |
-| Inter or Space Grotesk with no brand reason | the kit's face (`make kit URL=`) |
+| Inter or Space Grotesk with no brand reason | the brand kit face |
 | pure `#000`/`#fff` when the brief did not say black | the kit's dark or light surface |
 | a centred title on a gradient | the title on a real surface, a capture, or white space |
 | corner labels and frame borders | nothing decorates the edge |
