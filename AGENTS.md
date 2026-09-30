@@ -6,7 +6,7 @@ private format, and if something you would naturally write fails, that is a fram
 This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`
 (`bin/vawe <verb> --help` lists flags; a wrong flag exits 2 with the valid ones). Start with
 `bin/vawe new <name> --request "<the ask>"`: it picks the template and writes `films/<name>/page.html`
-(a valid starter) and `brief.md`. `films/examples/three-star/page.html` shows structure, not a look.
+(a valid starter) and `brief.md`. `films/examples/three-star/page.html` shows structure, not a look. `films/examples/colour-sting/` is a judged-PASS, owner-approved 5 s colour-led sting (brief, directions, page): study how it moves, then make your own direction.
 
 ## The page contract  `[live: harness/media/render-page.mjs]`
 

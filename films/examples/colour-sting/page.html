@@ -1,0 +1,363 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="5">
+<meta name="aspect" content="16:9">
+<meta name="message" content="onsen turns up the colour">
+<meta name="spectacle" content="2.0">
+<title>Onsen</title>
+<script type="importmap">{"imports":{"three":"../../../assets/vendor/three.module.min.js"}}</script>
+<style>
+  @font-face { font-family: "Unbounded"; src: url("../../../assets/fonts/Unbounded.woff2") format("woff2"); font-weight: 200 900; }
+
+  :root {
+    /* the four beats: every delay in the page reads one of these */
+    --beat-1: 0s;     /* cold: the ring turns in close on ultramarine */
+    --beat-2: 0.7s;   /* the turn cut: magenta, the ring rushes the lens with the name waiting in its hole */
+    --beat-3: 2.0s;   /* through the hole: vermilion, the ring flies back and lands as the o of onsen */
+    --beat-4: 2.75s;  /* match cut on the landing: the amber room, the line opens out, the accent runs to colour */
+    --beat-5: 4.35s;  /* the dial at full: the heat front closes, the world turns red and the ink turns cream */
+
+    --ink: #fff3e3;
+    --room: #1a0907;
+    --deep: #2a0710;
+    --accent: #2536ff;   /* the cold end of the ring: the one colour that stands clear of amber */
+  }
+  html, body { margin: 0; height: 100%; overflow: clip; background: var(--room); }   /* clip, not hidden: a hidden box can still be scrolled by the renderer when the glow overflows */
+
+  /* each ground is lit from the ring: --lx, --ly, --lr follow it every frame. farthest-corner, so no gradient ends inside the frame */
+  .world { position: absolute; inset: 0; --at: circle farthest-corner at var(--lx, 50%) var(--ly, 50%); }
+  .w1 { background: radial-gradient(var(--at), #4254ff 0, #1826cc calc(var(--lr) * 0.5), #0b1170 100%); }
+  .w2 { background: radial-gradient(var(--at), #ff5aa8 0, #e0197a calc(var(--lr) * 0.6), #a30d57 100%); }
+  .w3 { background: radial-gradient(circle farthest-corner at var(--sx) var(--sy), #ffb347 0, #ff4a1f calc(var(--vh) * var(--heat3)), #d4320f calc(var(--vh) * var(--heat3) * 2.6), #b8260c 100%); }   /* --heat3 grows after the landing, into the amber cut */
+  /* the last turn of the world: the hotspot travels from the ring to "colour" (--hx, --hy) and the heat closes in from every edge */
+  .w4 { background: radial-gradient(circle farthest-corner at var(--hx) var(--hy), #ffd35c 0, #ffb52e calc(var(--lr) * 0.7), #f39212 calc(var(--lr) * 1.8), #d8640a 100%); }
+  .w5 { background: radial-gradient(circle farthest-corner at var(--lx) var(--ly), #ff8a3a 0, #f0400f calc(var(--lr) * 1.2), #a8160a 100%); }
+  /* the heat front: vermilion closes in from the edges on one amber hotspot that rides from the ring to "colour" (--hx, --hy) */
+  .heat { position: absolute; inset: 0;
+          background: radial-gradient(circle calc(var(--vh) * var(--heat-r, 3)) at var(--hx) var(--hy), transparent 50%, #ff4a1f 100%); }
+
+  /* the ring's own light on the ground: placed on the ring every frame */
+  .glow { position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 50%;
+          translate: -50% -50%; mix-blend-mode: screen; pointer-events: none;
+          background: radial-gradient(circle, var(--glow-color, #fff) 0%, transparent 68%); }
+
+  .camera { position: absolute; inset: 0; transform-origin: var(--sx) var(--sy); }   /* the push closes on the ring */
+  #gl, #lens { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .lockup { position: absolute; left: calc(var(--vw) * 0.1); top: calc(var(--vh) * 0.26);
+            color: var(--ink); font-family: "Unbounded", sans-serif; }
+  .word { width: max-content; margin: 0; font-weight: 400; font-size: calc(var(--vh) * 0.29); line-height: 1.1;
+          letter-spacing: 0; white-space: nowrap; }
+  .word .slot { color: transparent; position: relative; }
+  .word .slot i { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
+  /* the ring sends the line out: it opens rightward from the ring's edge on a feathered mask (the word reveal of
+     prompts/moves/logo-sting.md), so no letter is cut flat and none overlaps another */
+  .line { mask-image: linear-gradient(90deg, #000 45%, transparent 55%); mask-size: 250% 100%; mask-repeat: no-repeat;
+          width: max-content; margin: calc(var(--vh) * 0.03) 0 0; font-weight: 400; font-size: calc(var(--vh) * 0.115);
+          line-height: 1.1; letter-spacing: -0.01em; }
+  .w { display: inline-block; font-weight: 300; }   /* light: cream on red reads a weight heavier */
+  .line em.w { font-style: normal; font-weight: 600; }
+  /* the word the film is about is the heaviest in its line */
+
+  .grain { position: absolute; inset: 0; opacity: 0.12; background-size: 256px 256px; mix-blend-mode: overlay; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="world w1"></div>
+<div class="world w2"></div>
+<div class="world w3"></div>
+<div class="world w4"></div>
+<div class="heat"></div>
+<div class="world w5"></div>
+<div class="glow"></div>
+
+<div class="camera">
+  <div class="lockup">
+    <h1 class="word"><span class="slot"><i></i>o</span><span class="rest">nsen</span></h1>
+    <p class="line"><span class="w" style="--i:0">Turn</span> <span class="w" style="--i:1">up</span> <span class="w" style="--i:2">the</span> <em class="w" style="--i:3">colour</em></p>
+  </div>
+</div>
+<canvas id="lens"></canvas>
+<canvas id="gl"></canvas>
+<div class="grain"></div>
+
+<audio data-synth="droplet" data-at="0.02" data-gain="-7"></audio>
+<audio data-synth="droplet" data-at="0.7" data-gain="-7"></audio>
+<audio data-synth="swell" data-at="1.1" data-gain="-5.5"></audio>
+<audio data-synth="bloom" data-at="2.75" data-gain="-6.5"></audio>
+<audio data-synth="droplet" data-at="4.35" data-gain="-7"></audio>
+
+<script type="module">
+import * as THREE from 'three';
+import '../../../core/engine/page-api.js';
+window.THREE = THREE;   // vawe.three.studio reads the global
+import { kf, curveToLinear, CURVES, rng } from '../../../core/motion/springs.js';
+
+const root = document.documentElement;
+const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue(`--beat-${n}`));
+const B1 = beat(1), B2 = beat(2), B3 = beat(3), B4 = beat(4), B5 = beat(5);
+const TAIL = B4;   // the last turn of the world starts on the cut into amber
+const LIT = 3.9;   // the light and the accent reach "colour"
+const PUSH_AT = B3 + 0.45;   // the push starts as the ring lands, so the match cut falls on a moving lockup
+const settle = curveToLinear(CURVES.expoOut);
+root.style.setProperty('--settle', settle);
+
+const expoOut = CURVES.expoOut;
+const easeIn = (u) => u * u;
+const cubicOut = (u) => 1 - (1 - u) ** 3;
+const inOut = (u) => (u < 0.5 ? 4 * u ** 3 : 1 - (2 - 2 * u) ** 3 / 2);
+const landing = (u) => 0.5 * inOut(u) + 0.5 * expoOut(u);   // leaves the lens without a jump, settles long
+const pullBack = (u) => 0.3 * u + 0.7 * expoOut(u);
+const pushCurve = (u) => 0.85 * u + 0.15 * expoOut(u);   // mostly constant speed, so the last second still moves
+const PUSH = 0.2, PUNCH = 0.12;
+// the camera: a steady 20% push on the ring from the landing, and one more 12% on the red world, so the last beat moves; 1.34x in all keeps the name inside the frame
+const zoomAt = (t) => (1 + PUSH * pushCurve(Math.min(1, Math.max(0, (t - PUSH_AT) / (5 - PUSH_AT)))))
+  * (1 + PUNCH * pushCurve(Math.min(1, Math.max(0, (t - B5) / (5 - B5)))));
+
+// Hard cuts between worlds (prompts/moves/match-cut.md): each ground appears in one millisecond on its beat.
+const cutIn = (sel, at) => document.querySelector(sel).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: at * 1000, fill: 'both' });
+cutIn('.w2', B2);
+cutIn('.w4', B4);
+cutIn('.w5', B5);
+// the ink flips with each ground: --ink on vermilion, --deep on amber, --ink again on red (a later animation wins once it starts)
+document.querySelector('.lockup').animate([{ color: '#fff3e3' }, { color: '#2a0710' }], { duration: 1, delay: B4 * 1000, fill: 'both' });
+document.querySelector('.lockup').animate([{ color: '#fff3e3' }], { duration: 1, delay: B5 * 1000, fill: 'forwards' });
+
+// ---------- the ring: the o of the name as a glossy tube whose colour runs cold to hot around it, the dial of the brand ----------
+const W = innerWidth, H = innerHeight;
+const canvas = document.getElementById('gl');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(2, 2880 / W));   // supersampled, so the ring is as crisp as the type beside it; capped so a 1080p frame paints well inside the renderer's 250 ms paint guard
+renderer.setSize(W, H, false);
+renderer.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+const FOV = 30, CAM_Z = 10;
+const camera = new THREE.PerspectiveCamera(FOV, W / H, 0.05, 100);
+camera.position.set(0, 0, CAM_Z);
+camera.updateMatrixWorld();   // the iris projects through the camera before the first render
+vawe.three.studio(renderer, scene, { kind: 'glass', colors: ['#ffb36b', '#ff2b8c', '#3a0b1a', '#07030a'] });
+
+function dialTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 4;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 1024, 0);
+  // cold on one side, hot on the other, and back: a loop with no join anywhere on the ring
+  [[0, '#2536ff'], [0.12, '#6a2dff'], [0.25, '#ff2b8c'], [0.38, '#ff4a1f'], [0.5, '#ffc24a'], [0.62, '#ff4a1f'], [0.75, '#ff2b8c'], [0.88, '#6a2dff'], [1, '#2536ff']]
+    .forEach(([o, col]) => grad.addColorStop(o, col));
+  g.fillStyle = grad; g.fillRect(0, 0, 1024, 4);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = THREE.RepeatWrapping;   // the dial turns by sliding the colours round the tube
+  return tex;
+}
+
+// Unbounded 400's o, measured at 1000 px: 690 wide, 594 tall, stem 130. The tube is the stem (x1.15: a round
+// tube reads thinner than a flat stem) and the path is a superellipse of that width, so the ring is the letter.
+const O_ASPECT = 690 / 594, O_POWER = 2.6;
+const STEM = 1.15 * 130 / 594;
+const TUBE = STEM / (1 - STEM);        // tube radius when the path is 1 tall: 2 * TUBE / (2 + 2 * TUBE) = stem / height
+const HALF_W = O_ASPECT * (1 + TUBE) - TUBE;
+const superellipse = (u, a, b) => {
+  const c = Math.cos(2 * Math.PI * u), s = Math.sin(2 * Math.PI * u), k = 2 / O_POWER;
+  return [a * Math.sign(c) * Math.abs(c) ** k, b * Math.sign(s) * Math.abs(s) ** k];
+};
+class OPath extends THREE.Curve {
+  getPoint(u, target = new THREE.Vector3()) { const [x, y] = superellipse(u, HALF_W, 1); return target.set(x, y, 0); }
+}
+const dial = dialTexture();
+const ring = new THREE.Mesh(
+  new THREE.TubeGeometry(new OPath(), 512, TUBE, 96, true),   // dense enough that no facet shows in a highlight
+  new THREE.MeshPhysicalMaterial({ map: dial, emissiveMap: dial, emissive: 0xffffff, emissiveIntensity: 0.2,
+    roughness: 0.2, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.16 }),   // rough enough that highlights are soft bands, never patches
+);
+const cameraEl = document.querySelector('.camera');
+const holder = new THREE.Group();   // where the ring is
+const aim = new THREE.Group();      // turns the ring to face the lens, so perspective never reads as a tilt
+holder.add(aim);
+aim.add(ring);
+scene.add(holder);
+
+// px per world unit at distance 1 from the lens
+const focal = H / (2 * Math.tan((FOV / 2) * Math.PI / 180));
+const toScreen = (x, y, z) => ({ x: W / 2 + x * focal / (CAM_Z - z), y: H / 2 - y * focal / (CAM_Z - z) });
+
+// where the o of the name sits, in frame heights from the centre: the ring takes the glyph's place
+const word = document.querySelector('.word'), lockup = document.querySelector('.lockup');
+function slot() {
+  const slotEl = word.querySelector('.slot'), base = slotEl.querySelector('i');
+  const ctx = document.createElement('canvas').getContext('2d');
+  ctx.font = getComputedStyle(word).font;
+  const m = ctx.measureText('o');
+  const em = parseFloat(getComputedStyle(word).fontSize);
+  const cx = lockup.offsetLeft + slotEl.offsetLeft + (m.actualBoundingBoxRight - m.actualBoundingBoxLeft) / 2 - 0.03 * em;   // opens the o-n gap to the n-s gap
+  const cy = lockup.offsetTop + slotEl.offsetTop + base.offsetTop - (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2;
+  const glyphH = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+  return { u: (cx - W / 2) / H, v: (cy - H / 2) / H, s: (glyphH / 2) / (focal / CAM_Z) / (1 + TUBE) };
+}
+
+// a quadratic arc through a control point, so the fly-back swings wide of the word it is about to join
+const arc = (a, c, b, e) => a.map((_, i) => (1 - e) ** 2 * a[i] + 2 * (1 - e) * e * c[i] + e ** 2 * b[i]);
+
+// The ring's path is written where the eye sees it: [u, v] in frame heights from the centre (v down),
+// and its distance from the lens. Every row is a [seconds, value] table: edit a literal, the move follows.
+function pose(t) {
+  const o = slot();
+  const R = B2 + 0.4;          // the rush toward the lens starts here
+  const L = B3 + 0.75;         // the ring lands in the o
+  const NAME = [(lockup.offsetLeft + word.offsetWidth / 2 - W / 2) / H, o.v];   // the window centres on the name as it fills the frame
+  const [u, v] = t < B3
+    ? kf(t, [[B1 + 0.1, [0.42, 0.06]], [B1 + 0.5, [0.16, -0.01]], [B2, [0.13, -0.02]], [R, [-0.36, -0.1]], [B3, NAME]],
+      [pullBack, 'linear', expoOut, inOut])
+    : arc(NAME, [-0.75, 0.3], [o.u, o.v], landing(Math.min(1, (t - B3) / (L - B3))));
+  // distance runs on a log path (prompts/moves/pull-back-reveal.md): every frame changes the ring's size by the same share.
+  // At 2.2 from the lens the tube covers every corner of the frame, so the next world can take the whole frame unseen.
+  const dist = Math.exp(kf(t, [[B1 + 0.1, 3.6], [B1 + 0.5, 7], [B2, 7], [R, 8], [B3, 2.2], [L, CAM_Z]]
+    .map(([at, d]) => [at, Math.log(d)]), [pullBack, 'linear', expoOut, inOut, landing]));
+  const s = kf(t, [[B3, 1], [L, o.s]], cubicOut);
+  // turn: 70 degrees exactly on beat 2, face-on (PI) before the rush
+  const turn = kf(t, [[B1 + 0.15, 0.15], [B2, 1.2], [R, Math.PI], [B3, Math.PI - 0.3], [L, Math.PI], [LIT - 0.25, Math.PI], [LIT, Math.PI + 0.44], [LIT + 0.3, Math.PI]],
+    [easeIn, expoOut, inOut, inOut, 'linear', inOut, inOut]);   // 70 degrees on the cut (a slit, never a flat pill); a 25 degree nod of the mark as the accent lands
+  const tilt = kf(t, [[B1, 0.55], [B2, 0.25], [R, 0], [B3, 0.18], [L, 0]], [expoOut, expoOut, inOut, inOut]);   // off square at the lens, so the bore of the tube shows
+  // the dial: the colours run round inside the tube as the film heats up, and make one full turn in the tail
+  const spin = kf(t, [[B1, -0.05], [B2, 0], [B3, 0.6], [TAIL, 0.72], [4.1, 1.6], [4.9, 2.1], [5, 2.12]], ['linear', 'linear', 'linear', inOut, inOut, 'linear']);   // the hot end faces the lens on the edge-on cut; a turn, then half a turn, in the tail
+  const face = kf(t, [[B3 + 0.2, 0], [L, 1]], inOut);   // faces the lens only as a letter; at the lens, perspective shows the bore
+  return { x: u * H * dist / focal, y: -v * H * dist / focal, z: CAM_Z - dist, s, turn, tilt, spin, face, slot: o };
+}
+
+// the next world, with the name already waiting in it, shows through the hole as the ring comes at the lens (the spectacle)
+const w3 = document.querySelector('.w3');
+const HOLE = Array.from({ length: 72 }, (_, i) => superellipse(i / 72, HALF_W - TUBE, 1 - TUBE));
+function iris(t) {
+  const shut = 'circle(0px at 50% 50%)';
+  if (t < B2 + 0.3) { w3.style.clipPath = lockup.style.clipPath = shut; return; }
+  if (t >= B3) { w3.style.clipPath = lockup.style.clipPath = 'none'; return; }
+  const pts = HOLE.map(([x, y]) => ring.localToWorld(new THREE.Vector3(x, y, 0)).project(camera))
+    .map((q) => [(q.x + 1) / 2 * W, (1 - q.y) / 2 * H]);
+  const polygon = (dx, dy) => `polygon(${pts.map(([x, y]) => `${(x - dx).toFixed(1)}px ${(y - dy).toFixed(1)}px`).join(', ')})`;
+  w3.style.clipPath = polygon(0, 0);
+  lockup.style.clipPath = polygon(lockup.offsetLeft, lockup.offsetTop);
+}
+
+const glow = document.querySelector('.glow');
+const GLOW = [[B1, '#4a5cff'], [B2, '#ff4fa0'], [B3, '#ff7a3a'], [B4, '#ffd27a']];
+function light(t, p) {
+  const c = toScreen(p.x, p.y, p.z);
+  const r = (1 + TUBE) * p.s * focal / (CAM_Z - p.z);
+  root.style.setProperty('--lx', `${c.x.toFixed(1)}px`);
+  root.style.setProperty('--ly', `${c.y.toFixed(1)}px`);
+  root.style.setProperty('--sx', `${(W / 2 + p.slot.u * H).toFixed(1)}px`);
+  root.style.setProperty('--sy', `${(H / 2 + p.slot.v * H).toFixed(1)}px`);
+  root.style.setProperty('--heat3', kf(t, [[B3 + 0.5, 0.3], [B4, 0.75]], easeIn).toFixed(3));
+  root.style.setProperty('--heat-r', kf(t, [[3.4, 2.6], [B5, 0.2]], easeIn).toFixed(3));   // the heat front closes, faster and faster, until the red world takes the frame on beat 5
+  root.style.setProperty('--lr', `${Math.min(H * 1.2, Math.max(H * 0.45, r * 3)).toFixed(1)}px`);
+  // the last turn of the world: the hotspot leaves the ring and travels under the line to the word it is about
+  const k = inOut(Math.min(1, Math.max(0, (t - (LIT - 0.6)) / 0.6)));
+  const em = line.querySelector('em');
+  const zoom = zoomAt(t);
+  const sx = W / 2 + p.slot.u * H, sy = H / 2 + p.slot.v * H;
+  const tx = sx + (lockup.offsetLeft + line.offsetLeft + em.offsetLeft + em.offsetWidth / 2 - sx) * zoom;
+  const ty = sy + (lockup.offsetTop + line.offsetTop + line.offsetHeight / 2 - sy) * zoom;
+  root.style.setProperty('--hx', `${(c.x + (tx - c.x) * k).toFixed(1)}px`);
+  root.style.setProperty('--hy', `${(c.y + (ty - c.y) * k).toFixed(1)}px`);
+  const size = Math.min(H * 1.1, r * 3.2);
+  glow.style.left = `${c.x}px`; glow.style.top = `${c.y}px`;
+  glow.style.width = glow.style.height = `${size}px`;
+  glow.style.setProperty('--glow-color', GLOW.filter(([at]) => t >= at).pop()[1]);
+  glow.style.opacity = t >= B4 ? 0 : 0.4;   // in the amber room the ground carries the light, and no halo softens the letter
+}
+
+// the line is set to 0.95 of the name's width: the name leads, and the line keeps a 6% cap height
+const line = document.querySelector('.line'), words = [...line.querySelectorAll('.w')];
+// and its first glyph starts on the ring's outer left edge, so the lockup has one left edge
+const inkLeft = (el, ch) => {
+  const ctx = document.createElement('canvas').getContext('2d');
+  ctx.font = getComputedStyle(el).font;
+  return -ctx.measureText(ch).actualBoundingBoxLeft;   // the glyph's left side bearing, px
+};
+function fitLine() {
+  line.style.fontSize = '';
+  line.style.fontSize = `${parseFloat(getComputedStyle(line).fontSize) * 0.95 * word.offsetWidth / line.offsetWidth}px`;
+  const ringLeft = inkLeft(word, 'o') - 0.03 * parseFloat(getComputedStyle(word).fontSize);
+  line.style.marginLeft = `${(ringLeft - inkLeft(line, 'T')).toFixed(1)}px`;
+}
+
+// A lens cannot focus on the ring once it is this close. The rim nearest the lens goes soft while the
+// inner rim and the world in the hole stay sharp: a blurred copy of the ring, under the sharp render,
+// shows outside the tube's centre line.
+const lensCopy = document.getElementById('lens');
+lensCopy.width = W; lensCopy.height = H;
+const lensCtx = lensCopy.getContext('2d');
+function lens(t, p, dist) {
+  const soft = Math.min(0.03 * H, Math.max(0, (3.6 - dist) * 0.018 * H));
+  lensCtx.clearRect(0, 0, W, H);
+  if (soft === 0) {
+    canvas.style.maskImage = 'none';
+    // once the ring is a letter it sits on the ground (a tight warm contact shadow) and spills its own
+    // colours, faintly, on the ground and the n beside it; the spill is a copy, so it turns with the dial
+    const letter = t > B3 + 0.4;
+    canvas.style.filter = letter ? `drop-shadow(0 ${(0.006 * H).toFixed(1)}px ${(0.004 * H).toFixed(1)}px rgba(150, 45, 0, 0.35))` : 'none';
+    lensCopy.style.opacity = letter ? 0.6 : 0;
+    lensCopy.style.maskImage = 'none';
+    lensCopy.style.mixBlendMode = 'screen';
+    lensCopy.style.filter = `blur(${(0.05 * H).toFixed(1)}px)`;
+    if (letter) lensCtx.drawImage(canvas, 0, 0.01 * H, W, H);
+    return;
+  }
+  canvas.style.filter = 'none';
+  lensCopy.style.mixBlendMode = 'normal';
+  const c = toScreen(p.x, p.y, p.z), k = p.s * focal / dist;
+  const edge = `ellipse ${(HALF_W * k).toFixed(1)}px ${k.toFixed(1)}px at ${c.x.toFixed(1)}px ${c.y.toFixed(1)}px`;
+  lensCtx.drawImage(canvas, 0, 0, W, H);
+  lensCopy.style.opacity = 1;
+  lensCopy.style.filter = `blur(${soft.toFixed(2)}px)`;
+  lensCopy.style.maskImage = `radial-gradient(${edge}, transparent 55%, #000 80%)`;   // opaque wherever the sharp render fades, so nothing behind shows through the tube
+  canvas.style.maskImage = `radial-gradient(${edge}, #000 80%, transparent 105%)`;
+}
+
+vawe.onFrame((t) => {
+  fitLine();
+  const p = pose(t), dist = CAM_Z - p.z;
+  holder.position.set(p.x, p.y, p.z);
+  holder.scale.setScalar(p.s * zoomAt(t));   // the push, in 3D, so the ring re-renders sharp
+  cameraEl.style.scale = zoomAt(t);   // push in (prompts/moves/push-in.md), closing on the ring to the last frame
+  aim.rotation.set(p.face * Math.atan2(p.y, dist), p.face * Math.atan2(-p.x, dist), 0, 'YXZ');
+  ring.rotation.set(p.tilt, p.turn, 0, 'YXZ');
+  dial.offset.x = p.spin;
+  ring.material.emissiveIntensity = kf(t, [[B1, 0.15], [B4, 0.3], [5, 0.38]], 'linear');
+  scene.updateMatrixWorld();
+  iris(t);
+  light(t, p);
+  renderer.render(scene, camera);
+  lens(t, p, dist);
+});
+
+// word colour sweep (prompts/moves/word-sweep.md): with the light, the accent runs word by word and stays on "colour"
+const ink = (name) => getComputedStyle(root).getPropertyValue(name).trim();   // literal colours: a var() in a keyframe flips instead of blending
+const step = 140;   // ms; faster than reading, so the sweep leads the eye
+words.forEach((w, i) => {
+  const last = i === words.length - 1;
+  const from = ink(last ? '--accent' : '--deep');   // "colour" wears the accent from its first frame; the sweep leads the eye to it
+  w.animate([{ color: from, easing: settle }, { color: ink('--accent'), offset: 0.12 },
+    { color: ink('--accent'), offset: 0.32, easing: settle }, { color: ink(last ? '--accent' : '--deep') }],
+    { duration: 700, delay: (LIT - 0.13) * 1000 - (words.length - 1 - i) * step, easing: 'linear', fill: 'both' });   // one curve per segment, so the hold is a hold
+});
+
+line.animate([{ maskPosition: '100% 0', translate: '-0.8em 0' }, { maskPosition: '0% 0', translate: '0 0' }],
+  { duration: 650, delay: (B4 + 0.05) * 1000, easing: settle, fill: 'both' });
+
+// on the red world the line turns cream and "colour" takes the ring's hot end, amber
+words.forEach((w, i) => w.animate([{ color: i === words.length - 1 ? '#ffc24a' : ink('--ink') }], { duration: 1, delay: B5 * 1000, fill: 'forwards' }));
+
+// seeded grain at 1:1 pixels, 12 percent overlay, so the gradients do not band
+const tile = document.createElement('canvas');
+tile.width = tile.height = 256;
+const g = tile.getContext('2d'), img = g.createImageData(256, 256), rand = rng(7);
+for (let i = 0; i < img.data.length; i += 4) { const v = rand() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = v; img.data[i + 3] = 255; }
+g.putImageData(img, 0, 0);
+document.querySelector('.grain').style.backgroundImage = `url(${tile.toDataURL()})`;
+</script>
+</body>
+</html>
