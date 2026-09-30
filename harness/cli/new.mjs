@@ -9,7 +9,8 @@ import { UsageError } from './parse.mjs';
 import { pickTemplate, readRouting, ROUTING } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
-import { FAMILIES, FIELDS } from '../lib/directions.mjs';
+import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
+import { adviceBlock } from '../lib/advice.mjs';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -28,26 +29,48 @@ const STARTER_TEMPLATE = `<!doctype html>
   world turns: a new element, cut or ground every 1 to 2 s (rule 2) -->
 <style>
   @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
-  :root { --bg: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --beat-1: 0s; --beat-2: {{exit}}s; --enter: 0.6s; --exit: 0.35s; }
+  :root { --bg: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --beat-1: 0s; --beat-2: {{beat2}}s; }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
-  body { box-sizing: border-box; display: grid; align-items: start; align-content: end; padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); }
-  h1 { margin: 0; color: var(--ink); font: 700 calc(var(--vh) * 0.11)/1 "{{family}}", sans-serif;
-       animation-name: land, leave; animation-duration: var(--enter), var(--exit);
-       animation-delay: var(--beat-1), var(--beat-2); animation-timing-function: var(--ease-land), var(--ease-leave);
-       animation-fill-mode: both; }
-  @keyframes land { from { transform: translateY(12%); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes leave { to { opacity: 0; transform: translateY(-6%); } }
+  .world { position: absolute; inset: 0; box-sizing: border-box; display: grid; align-content: end; gap: calc(var(--vh) * 0.03);
+           padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); font-family: "{{family}}", sans-serif; }
+  .w1 { background: var(--bg); color: var(--ink); }
+  .w2 { background: var(--ink); color: var(--bg); }
+  h1 { margin: 0; font-size: calc(var(--vh) * 0.14); font-weight: 700; line-height: 1; }
+  .line { margin: 0; font-size: calc(var(--vh) * 0.09); }
+  .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
+  .facts em { font-style: normal; color: var(--accent); }
   [data-aspect="9:16"] h1 { font-size: calc(var(--vw) * 0.13); }
 </style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const root = document.documentElement.style;
-root.setProperty('--ease-land', curveToLinear(CURVES.expoOut));
-root.setProperty('--ease-leave', curveToLinear('easeInCubic'));
+// core/motion/README.md: enter, leave, stagger and layer carry the house motion; change the options, keep the calls
+import { curveToLinear } from '../../core/motion/springs.js';
+import { layer, leave, stagger, LAND } from '../../core/motion/presets.js';
+const root = document.documentElement;
+const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
+const end = parseFloat(document.querySelector('meta[name="duration"]').content);
+const $ = (s) => document.querySelector(s);
+
+layer($('h1'), $('.line'), { at: beat(1), band: 'professional' });
+leave($('.line'), { end: beat(2) - 0.06 });
+leave($('h1'), { end: beat(2) });
+
+const turn = $('.w2');
+turn.animate([{ clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0)' }], { delay: (beat(2) - 0.06) * 1000, duration: 300, easing: LAND, fill: 'both' });
+stagger(document.querySelectorAll('.facts li'), { at: beat(2), band: 'energy', from: '0.6em 0' });
+
+const drift = curveToLinear('easeInOutSine');
+$('.w1').animate([{ scale: 1 }, { scale: 1.05 }], { duration: beat(2) * 1000, easing: drift, fill: 'both' });
+turn.animate([{ scale: 1 }, { scale: 1.04 }], { delay: beat(2) * 1000, duration: (end - beat(2)) * 1000, easing: drift, fill: 'both' });
 </script>
 </head>
 <body>
-<h1>{{title}}</h1>
+<main class="world w1">
+  <h1>{{title}}</h1>
+  <p class="line">one line that backs it up</p>
+</main>
+<section class="world w2">
+  <ul class="facts"><li>first fact</li><li>second fact</li><li>the <em>one</em> that matters</li></ul>
+</section>
 </body>
 </html>
 `;
@@ -152,7 +175,7 @@ export const STARTER = starterPage({});
 export function starterPage({ length = 4, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
     .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family)
-    .replaceAll('{{exit}}', String(Math.max(0.5, +(length - 0.6).toFixed(2)))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
+    .replaceAll('{{beat2}}', String(+(length * 0.5).toFixed(2))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
 
 export const UNANSWERED = '[unanswered: default taken]';
@@ -213,7 +236,7 @@ function briefText(name, templateRel, questions, sections, answers) {
   const rest = sections.length
     ? sections.map((s) => `## ${s.name[0].toUpperCase()}${s.name.slice(1)}\n\n${s.body.replaceAll('<name>', name)}`).join('\n\n')
     : `## Direction\n\nThe template is written as prompts, not tagged sections: read ${templateRel}.`;
-  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\nMoves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
+  return `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default.\n\n## Inputs\n\n${inputs}\n\n${directionsText(name)}\n\n${rest}\n\n## First draft\n\nTaste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
 }
 
 function readAnswers({ length, aspect, title }) {
@@ -237,13 +260,18 @@ function copyFace(root, dir, face) {
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
 
-export function newFilmLines(name, { page, route }) {
+export function newFilmLines(name, { page, route, title }) {
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
   if (route) {
     lines.push(`template: ${route.template} (${route.type}: ${route.why})`);
     lines.push(`another film type: delete films/${name}, then bin/vawe new ${name} --from prompts/<template>.md (rows in ${ROUTING}) or --request "<the ask>" --length <s>`);
   }
-  return [...lines, '', ...tasteLines('concept'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
+  const advice = [
+    `directions: films/${name}/directions.html holds one starter still per family (type, object, graphic); fill the three slots in brief.md, then pick one`,
+    ...brandAdvice(`${name} ${title ?? ''}`),
+  ];
+  return [...lines, '', 'rules for authors: engine-doctrine/TASTE-CARD-DIGEST.md (2 KB); the full card is engine-doctrine/TASTE-CARD.md', '', ...tasteLines('concept'), '',
+    ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
 }
 
 /** Writes the film folder; returns { page, route } (route is null when --from chose the template). */
@@ -267,6 +295,5 @@ export function newFilm(name, { from, root, length, aspect, title, request }) {
   if (title !== undefined) answers.title = title;
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, parseSections(markdown), answers));
   console.log(formatQuestions(questions));
-  console.log(`directions: films/${name}/directions.html holds one starter still per family (type, object, graphic); fill the three slots in brief.md, then pick one`);
-  return { page: `films/${name}/page.html`, route };
+  return { page: `films/${name}/page.html`, route, title };
 }

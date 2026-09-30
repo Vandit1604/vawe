@@ -13,11 +13,13 @@ const out = path.join(os.tmpdir(), `invariants-${process.pid}.mp4`);
 const render = (page) => spawnSync(process.execPath, ['harness/media/render-page.mjs', page, out], { encoding: 'utf8' });
 
 const FAILS = [
-  ['invariants/invariant-audio-bad.html', /^✗ <audio> at 0.5 s: data-synth="key" is not a voice/],
-  ['invariants/invariant-audio-missing.html', /^✗ <audio> at 0.2 s: src="missing.wav" .* does not exist/],
-  ['invariants/invariant-font-bad.html', /^✗ font Nope failed to load/],
-  ['invariants/invariant-assert-bad.html', /^✗ assert at 0.5 s failed: headline says Bye/],
-  ['invariants/brief-drift/page.html', /^brief: 5 s 16:9; page: 1 s 16:9$/],
+  ['invariants/invariant-audio-bad.html', /^error: <audio> at 0.5 s: data-synth="key" is not a voice/],
+  ['invariants/invariant-audio-missing.html', /^error: <audio> at 0.2 s: src="missing.wav" .* does not exist/],
+  ['invariants/invariant-font-bad.html', /^error: font Nope failed to load/],
+  ['invariants/invariant-assert-bad.html', /^error: assert at 0.5 s failed: headline says Bye/],
+  ['invariants/invariant-script-bad.html', /^error: \S+invariant-script-bad\.html: \S+no-such-module\.js: HTTP 404$/],
+  ['invariants/invariant-throw-bad.html', /^error: \S+invariant-throw-bad\.html: \S+: camera rig missing$/],
+  ['invariants/brief-drift/page.html', /^error: brief: 5 s 16:9; page: 1 s 16:9$/],
 ];
 for (const [page, line] of FAILS) {
   test(`${page} exits 2 with one line`, () => {
@@ -31,7 +33,8 @@ for (const [page, line] of FAILS) {
 test('a blank run in the middle renders and advises with the range to declare', () => {
   const r = render(path.join(dir, 'invariants/invariant-blank-bad.html'));
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stderr, /~ frames \d+-\d+ .* blank; declare it with <meta name="blank"/);
+  assert.match(r.stdout, /^advice: frames \d+-\d+ .* blank; declare it with <meta name="blank"/m);
+  assert.match(r.stdout, /^\(advice only: the render continued\)$/m);
 });
 
 for (const page of ['invariant-blank-ok.html', 'invariant-assert-ok.html']) {

@@ -39,6 +39,10 @@ approximate it by eye.
 
 ## Springs and tables
 
+Start every entrance, exit and group from `core/motion/presets.js` (`enter`, `leave`, `stagger`,
+`layer`, `BANDS`): they land on real curves, exit at 0.6 of the entrance and stagger 30 to 80 ms,
+and the `bin/vawe dev` motion lint names each move that breaks those rules.
+
 ```js
 import { spring, track, approach, kf, springLinear, springDuration, SPRINGS, rng } from '../../core/motion/springs.js';
 el.animate([...], { duration: springDuration(k, d) * 1000, easing: springLinear(k, d), fill: 'both' });

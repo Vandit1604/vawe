@@ -3,13 +3,17 @@
 // deterministically, then asks a separate headless Claude session (Read tool only) to score it.
 //   node harness/media/judge-fresh.mjs <page.html | film.mp4 | sheet.png> [--brief brief.md] [--stage stills|draft|final]
 // Advises, never blocks: exit 0 with a verdict either way. Exit 2 when the claude CLI is missing.
+// Writes out/<name>.judge.json with the fix ledger (harness/lib/judge-ledger.mjs), or out/<name>.stills.json for stills.
 // Env: VAWE_TASTE_CARD (overrides the taste card the judge reads, default engine-doctrine/TASTE-CARD.md), VAWE_JUDGE_TIMEOUT (seconds, default 240).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
-import { parseDirections, rangeProblems } from '../lib/directions.mjs';
+import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
+import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
+import { adviceBlock } from '../lib/advice.mjs';
+import { reportLines } from '../lib/judge-report.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
@@ -143,7 +147,7 @@ Name the strongest with one reason. Then score the axes below for the strongest 
 const STILLS_JSON = `
 Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"one short line"},{"id":"B",...},{"id":"C",...}], "strongest":"A, B or C", "reason":"one sentence".`;
 
-function buildPrompt(ev, brief) {
+function buildPrompt(ev, brief, ledger = '') {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
     `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
@@ -156,7 +160,7 @@ ${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key fr
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}
 ${optional.length ? `\n${optional.map((o) => `- ${o}`).join('\n')}\n` : ''}
-${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : ''}`;
+${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : ''}${ledger ? `\n\n${ledger}` : ''}`;
 }
 
 function extractJson(text) {
@@ -193,15 +197,6 @@ function finish(ev, raw, ms) {
   return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
-function report(r) {
-  const lines = [`judge --fresh (${r.stage}): ${r.verdict}`, Object.entries(r.scores).map(([k, v]) => `${k} ${v}`).join(', ') + (r.worlds != null ? `; worlds ${r.worlds}` : '')];
-  for (const d of r.directions || []) lines.push(`${d.id} ${d.score}: ${d.note ?? ''}`);
-  if (r.strongest) lines.push(`strongest: ${r.strongest}, ${r.reason ?? 'no reason given'}`);
-  for (const x of r.fixes) lines.push(`- ${x.axis} ${x.score}${x.at != null ? ` at ${x.at}` : ''}: ${x.fix}`);
-  lines.push(`Fix first: ${r.fixFirst ?? 'nothing'}`, r.verdict);
-  return lines.join('\n');
-}
-
 const input = process.argv[2];
 if (!input || input.startsWith('--')) die('usage: vawe judge --fresh <page.html | film.mp4 | sheet.png> [--brief brief.md] [--stage stills|draft|final]', 2);
 if (!fs.existsSync(input)) die(`no such file: ${input}`, 2);
@@ -215,14 +210,27 @@ const ext = path.extname(input).toLowerCase();
 const stage = arg('--stage') || (ext === '.mp4' ? 'final' : ext === '.png' || ext === '.jpg' ? 'stills' : 'draft');
 if (!['stills', 'draft', 'final'].includes(stage)) die(`--stage is stills, draft or final, not "${stage}"`, 2);
 
-if (stage === 'stills' && briefArg) for (const p of rangeProblems(parseDirections(fs.readFileSync(briefArg, 'utf8')).slots)) console.log(`range: ${p}`);
+if (stage === 'stills' && briefArg) {
+  const text = fs.readFileSync(briefArg, 'utf8');
+  const lines = adviceBlock([...rangeProblems(parseDirections(text).slots), ...attractorProblems(text)], '(advice only: the judge ran)');
+  if (lines.length) console.log(lines.join('\n'));
+}
+
+function readJson(file) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
+}
 
 const t0 = Date.now();
 const ev = await prepare(input, stage);
-const { verdict: raw } = runJudge(buildPrompt(ev, brief), ev);
+const file = path.resolve('out', `${ev.name}.${stage === 'stills' ? 'stills' : 'judge'}.json`);
+const prevItems = stage === 'stills' ? [] : previousItems(readJson(file));
+const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(prevItems))), ev);
 const result = finish(ev, raw, Date.now() - t0);
-const file = path.resolve('out', `${ev.name}.judge.json`);
+if (stage !== 'stills') {
+  const led = mergeLedger(prevItems, raw, result.fixes);
+  Object.assign(result, { fixes: led.fixes, items: led.items, ledger: ledgerLines(led) });
+}
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, JSON.stringify(result, null, 1));
-console.log(`${report(result)}\n(${(result.ms / 1000).toFixed(0)} s, ${path.relative(process.cwd(), file)})`);
+console.log(reportLines(result, path.relative(process.cwd(), file)).join('\n'));
 process.exit(0);

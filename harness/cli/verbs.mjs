@@ -42,9 +42,13 @@ export const VERBS = [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
       { name: 'audio', type: 'bool', help: 'mix the audio tags into the draft' },
       { name: 'out', type: 'path', default: 'out/<name>-draft.mp4, or out/<name>-draft-<from>-<to>.mp4 for a range', help: 'output file' },
+      { name: 'no-judge', type: 'bool', help: 'skip the stills judge that dev runs on the three directions, once per change of directions.html or their brief lines (about 25 s)' },
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
-    build: (v, [page]) => [{ script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] }],
+    build: (v, [page]) => [
+      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] },
+      ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
+    ],
     next: (v, [page]) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft --brief ${path.join(path.dirname(page), 'brief.md')} (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`,
   },
   {
@@ -55,12 +59,13 @@ export const VERBS = [
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
       { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait at most 100 s for the background job' },
       { name: 'status', type: 'bool', help: 'print the progress or the result of a background render' },
+      { name: 'profile', type: 'bool', help: 'print a cost table: frames, subframes, screenshots, capture and encode seconds, the 5 costliest seconds' },
     ],
     example: 'vawe ship films/my-launch/page.html --aspect all   (then: vawe ship --status --wait)',
     build: (v, [page]) => {
       if (v.status) return [{ script: 'harness/media/ship-job.mjs', args: ['status', ...(page ? [page] : []), ...(v.wait ? ['--wait'] : [])] }];
       if (!page) throw new UsageError('missing <page>; usage: vawe ship <page> [flags]  or  vawe ship --status [job]');
-      const args = [page, ...(v.out ? [v.out] : [])];
+      const args = [page, ...(v.out ? [v.out] : []), ...(v.profile ? ['--profile'] : [])];
       if (v.wait) return [{ script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
       return [{ script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
@@ -183,6 +188,18 @@ export const VERBS = [
     example: 'vawe moves --only weight-morph',
     build: (v) => [{ script: 'harness/media/render-moves.mjs', args: [...opt('--only', v.only), ...(v.all ? ['--all'] : [])] }],
     next: () => 'look at a clip in prompts/moves/ before you commit it',
+  },
+  {
+    name: 'fonts', summary: 'the free font faces, one line each, with the file to copy into films/<name>/assets/',
+    positional: [], flags: [],
+    example: 'vawe fonts',
+    build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts'] }],
+  },
+  {
+    name: 'sounds', summary: 'the synth voices for <audio data-synth>, one line each, with default gain and length',
+    positional: [], flags: [],
+    example: 'vawe sounds',
+    build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['sounds'] }],
   },
   {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',

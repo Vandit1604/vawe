@@ -18,3 +18,9 @@ test('the step between subframes stays small until the cap', () => {
   assert.equal(subframesForTravel(400, 16), 16);
   assert.equal(subframesForTravel(400, 3), 3);
 });
+
+test('an edge at 181 px a frame gets 32 subframes when the cap allows it', () => {
+  assert.equal(subframesForTravel(181, 16), 16);
+  assert.equal(subframesForTravel(181, 32), 32);
+  assert.ok((181 * SHUTTER) / 32 <= 3);
+});

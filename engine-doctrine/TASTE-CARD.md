@@ -39,6 +39,7 @@ kinetic-promo film, `quality/refs/kinetic-promo/beats.md`) and **doc** (`engine-
 
 First drafts fall into these. Each is fine only when the direction chose it on purpose and says why;
 as a default it is the tell (rule 14). Seen in 8 agent films of 2026-09-30: all 8 had one glowing circle.
+The range check in `bin/vawe dev` reads the names and shapes it flags from `engine-doctrine/attractors.json`.
 
 - A glowing circle, orb or disc as the hero, above all a flat disc with no light source.
 - A dusk sun or a crescent; the name Vesper or a similar light-poetry name.
