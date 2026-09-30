@@ -1,0 +1,45 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.6">
+<title>move: light leak transition</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .shot { position: absolute; inset: 0; display: grid; place-items: center; }
+  .shot.b { opacity: 0; }
+  .ui { display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); width: calc(var(--u) * 92); padding: var(--s5); }
+  .ui .title { font-size: var(--t-title); }
+  .tags { display: flex; gap: var(--s2); margin-top: var(--s1); }
+  .leak { position: absolute; pointer-events: none; mix-blend-mode: screen; opacity: 0; }
+  .l1 { inset: -40% -30%; background: radial-gradient(40% 55% at 38% 50%, #ffb14a 0%, rgba(255, 120, 40, 0.75) 40%, rgba(255, 80, 30, 0) 75%); }
+  .l2 { inset: -40% -30%; background: radial-gradient(28% 42% at 62% 40%, #ff6a4a 0%, rgba(255, 70, 70, 0.6) 45%, rgba(255, 70, 70, 0) 75%); }
+  .l3 { inset: -40% -30%; background: radial-gradient(50% 36% at 50% 72%, #ffe3a6 0%, rgba(255, 190, 110, 0.55) 45%, rgba(255, 170, 90, 0) 75%); }
+</style>
+</head>
+<body>
+<div class="shot a"><div class="ui card"><div class="eyebrow">Monday</div><div class="title">Draft the film</div><div class="tags"><span class="pill">3 scenes</span><span class="pill">0:12</span></div></div></div>
+<div class="shot b"><div class="ui card"><div class="eyebrow">Friday</div><div class="title">Ship <span class="accent">it</span></div><div class="tags"><span class="pill up">Live</span><span class="pill">2.4k views</span></div></div></div>
+<div class="leak l1"></div><div class="leak l2"></div><div class="leak l3"></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut), ramp = curveToLinear((u) => u * u), smooth = curveToLinear((u) => u * u * (3 - 2 * u));
+const cut = 1080;   // ms: the peak of the layers; nothing else is visible here
+
+// each layer rises slowly on its own clock and falls faster: start, rise, fall in ms
+const layers = { '.l1': [600, 480, 300, 1, [-18, 4, 14, -2]], '.l2': [680, 400, 280, 0.9, [20, -6, -16, 6]], '.l3': [640, 440, 360, 0.85, [-6, 10, 8, -10]] };
+for (const [sel, [t0, rise, fall, amp, [x0, y0, x1, y1]]] of Object.entries(layers)) {
+  const dur = rise + fall, peak = rise / dur;
+  q(sel).animate([{ opacity: 0, easing: ramp }, { opacity: amp, offset: peak, easing: settle }, { opacity: 0 }], { duration: dur, delay: t0, fill: 'both' });
+  q(sel).animate([{ translate: `${x0}% ${y0}%`, scale: 0.8 }, { translate: `${x1}% ${y1}%`, scale: 1.3 }], { duration: dur, delay: t0, easing: smooth, fill: 'both' });
+}
+
+// the old shot sinks into the light, the cut lands on the peak, the new shot climbs out as the light leaves
+q('.shot.a').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: cut - 400, easing: ramp, fill: 'both' });
+q('.shot.b').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: cut, easing: settle, fill: 'both' });
+q('.shot.b .ui').animate([{ translate: '0 1.6vh', scale: 0.985 }, { translate: '0 0', scale: 1 }], { duration: 700, delay: cut, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>

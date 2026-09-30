@@ -24,6 +24,10 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | outline fill | one hero word arrives as an outline, letter by letter, then an accent floods each letter from its baseline on the beat | [outline-fill.md](outline-fill.md) | [outline-fill.mp4](outline-fill.mp4) |
 | strikethrough replace | an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character | [strikethrough-replace.md](strikethrough-replace.md) | [strikethrough-replace.mp4](strikethrough-replace.mp4) |
 | grid stagger wave | a title arrives with many things around it: a grid of tiles enters in a wave by distance from the title, 70 ms per tile, each tile pushed out from the source on a spring | [grid-stagger-wave.md](grid-stagger-wave.md) | [grid-stagger-wave.mp4](grid-stagger-wave.mp4) |
+| text scramble decode | a name or codename is revealed as a lookup: a mono line of seeded wrong glyphs locks left to right, each fresh letter flashes accent, then a verified line appears under it | [text-scramble-decode.md](text-scramble-decode.md) | [text-scramble-decode.mp4](text-scramble-decode.mp4) |
+| ticker takeover | a line with a cycling word is replaced by the answer: the word rolls through three values, then the hero crashes in on a long slide and its edge pushes the whole text group out of the frame | [ticker-takeover.md](ticker-takeover.md) | [ticker-takeover.mp4](ticker-takeover.mp4) |
+| anchor cycle | one phrase stays pinned while a tape beside it is hard-cut through eight words, slow then fast, and holds on the last; a brand lockup then drops in under the still anchor | [anchor-cycle.md](anchor-cycle.md) | [anchor-cycle.mp4](anchor-cycle.mp4) |
+| lower third | a person is on screen: an accent rule grows, a plate wipes open, the name rises from a mask and the role follows, then the card leaves faster than it came | [lower-third.md](lower-third.md) | [lower-third.mp4](lower-third.mp4) |
 
 ## Change between shots
 
@@ -50,6 +54,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | smear stretch | an elastic cut: shot A's content stretches into streaks on an ease-in, the cut lands at the peak, and shot B snaps back from the streak on an under-damped spring, thinning and bulging like rubber | [smear-stretch.md](smear-stretch.md) | [smear-stretch.mp4](smear-stretch.mp4) |
 | shape morph wipe | the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame | [shape-morph-wipe.md](shape-morph-wipe.md) | [shape-morph-wipe.mp4](shape-morph-wipe.mp4) |
 | spin transition | a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures | [spin-transition.md](spin-transition.md) | [spin-transition.mp4](spin-transition.mp4) |
+| light leak transition | two shots meet through warmth: three generated warm layers swell over a dark UI on their own clocks, the cut lands on the peak, and the new shot climbs out as they fall faster; no image asset | [light-leak-transition.md](light-leak-transition.md) | [light-leak-transition.mp4](light-leak-transition.mp4) |
 
 ## Point the eye
 
@@ -88,6 +93,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts; use once per film | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
 | UI strip away | the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup | [ui-strip-away.md](ui-strip-away.md) | [ui-strip-away.mp4](ui-strip-away.mp4) |
 | logo wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | [logo-wall.md](logo-wall.md) | [logo-wall.mp4](logo-wall.mp4) |
+| CTA morph press | the close moves from brand to action: one plate changes shape into a button on one spring, a cursor arrives on a bowed path and presses, and the button shows a confirmed state | [cta-morph-press.md](cta-morph-press.md) | [cta-morph-press.mp4](cta-morph-press.mp4) |
 
 ## Product moments
 
@@ -107,6 +113,8 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | integration hub | the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub | [integration-hub.md](integration-hub.md) | [integration-hub.mp4](integration-hub.mp4) |
 | device tilt stage | the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle | [device-tilt-stage.md](device-tilt-stage.md) | [device-tilt-stage.mp4](device-tilt-stage.mp4) |
 | command palette summon | the keyboard-first beat: the app dims, a Cmd+K palette drops in on a spring, a query types, non-matching rows collapse to zero height, Enter presses the chosen row and the palette leaves fast | [command-palette-summon.md](command-palette-summon.md) | [command-palette-summon.mp4](command-palette-summon.mp4) |
+| agent progress | an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list | [agent-progress.md](agent-progress.md) | [agent-progress.mp4](agent-progress.mp4) |
+| panel live sync | an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames | [panel-live-sync.md](panel-live-sync.md) | [panel-live-sync.mp4](panel-live-sync.mp4) |
 
 `bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`). `--only <move>` forces one clip, `--all` forces every clip.
 
@@ -123,16 +131,16 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, pull back reveal, success check, ui strip away, zoom through |
-| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | before after wipe, bracket callout, cursor click, logo wall, push blur, smear stretch, ui focus zoom |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub |
+| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through, light leak transition |
+| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, push blur, smear stretch, ui focus zoom |
+| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode |
 | swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph |
-| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
+| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
 | dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
-| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, type fill transition, underline draw, wordmark cascade |
-| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | crash zoom, flash cut, letter stagger, outline fill, slice shift, word sweep |
+| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade |
+| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, letter stagger, outline fill, slice shift, word sweep |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid wipe, notification pop, parallax dive, whip pan |
-| chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
+| chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
 
