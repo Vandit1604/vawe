@@ -45,8 +45,8 @@ title, not the whole article, so a count is a floor and never a ceiling. Treat t
 direction, and re-derive any figure you intend to quote.
 
 **Read this beside the two files that already did this work.**
-[`AFTER-EFFECTS-TECHNIQUES.md`](AFTER-EFFECTS-TECHNIQUES.md) carries 26 named recipes with a HAVE/PARTLY/LACK
-verdict each; [`AE-TECHNIQUES.md`](AE-TECHNIQUES.md) carries 12 studied from one channel. Rows below that
+[`AFTER-EFFECTS-TECHNIQUES.md`](AFTER-EFFECTS-TECHNIQUES.md) carries the named recipes and the
+studied techniques, with their numbers. Rows below that
 those files already settle are marked and not re-argued. My survey disagrees with them in one place, noted
 at row 6.
 
@@ -72,7 +72,7 @@ at row 6.
 | 14 | **Motion blur (180 shutter)** | 3 | anything fast smears along its travel | automatic above 480 px/s here; the film's angle is `shutter` | **SHIPPED** | Settled by recipes #4 |
 | 15 | **Gradient wipe reveal** | 2 | a feathered band, not a hard edge, uncovers the next beat | the band is 20% of the travel wide (`core/cuts/presentations.js:130`) | **SHIPPED** | `softwipe`, and `softiris` for the circular form (`core/cuts/presentations.js:130`, `:135`) |
 | 16 | **Text exploder** | 2 | letters fly in from scattered positions and land | dist 220, spin 65 degrees, shuffle 0.4, 6px travel blur (`core/kinetic/presets.js:318`) | **SHIPPED, different name** | `assemble`. Do not build "exploder": it exists |
-| 17 | **Whip pan / velocity-hidden cut** | 2 | the frame smears sideways and lands on the next shot | influence 75 both sides (`AE-TECHNIQUES.md` §1) | **SHIPPED** | `whip`, `skewWhip` cuts; `whipPan` sting. Recipes #13 |
+| 17 | **Whip pan / velocity-hidden cut** | 2 | the frame smears sideways and lands on the next shot | influence 75 both sides (`AFTER-EFFECTS-TECHNIQUES.md`, velocity-hidden cut) | **SHIPPED** | `whip`, `skewWhip` cuts; `whipPan` sting. Recipes #13 |
 | 18 | **Counter roll-up** | 2 | a number climbs on screen, digits rolling | none published | **SHIPPED** | `count` layer, `"roll": true`: an odometer mode, one wheel per digit (`core/layers/count.js`) |
 | 19 | **Proximity hover** | 1 | elements swell or lift as the pointer passes near them | none published | **MISSING** | The falloff maths already exists: `sphere` in `core/motion/effector.js:43` computes a radial weight. It is driven by an item index, not by a cursor position |
 | 20 | **Figma to AE layer import** | 1 | a design file becomes animatable layers without redrawing | vendor claims one click, layer for layer | **N/A, different architecture** | We do not import a design file; `make media X=capture` and the `component` layer take the LIVE surface instead, which is a better source than a design file. Nothing to build |

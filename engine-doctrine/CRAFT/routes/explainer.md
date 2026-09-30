@@ -26,8 +26,7 @@ group: crosscutting
 ## Blueprint family + docs
 
 - Load skill `vawe-video-planning`, non-site branch, then follow
-  `engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md` end to end (its worked example is exactly this deliverable: a
-  20s explainer on password cracking).
+  the loop in `AGENTS.md` end to end.
 - `STORY.md` for the spine and the held pace band; `SHOW-DONT-TELL.md` so a claim renders as a real
   graphic, not only type.
 - Blueprints: `statReveal` for the payoff, `chipGrid`/`cardCascade` for supporting points.

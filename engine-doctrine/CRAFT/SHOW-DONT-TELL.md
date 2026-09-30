@@ -123,8 +123,8 @@ and defended. It is not an answer to "I could not think of one".
   what the film actually draws.
 - **Captured UI**: `make media X=capture` on the live product, previewed standalone with `make preview`.
 - **Recipes** (`make arsenal Q="…"`): count-ups, cascades, camera moves already measured off a real film.
-- **Bespoke SVG**: [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) for a diagram no block covers, including
-  draw-on and morph.
+- **Bespoke SVG**: inline SVG for a diagram no block covers, with draw-on
+  and morph (`AFTER-EFFECTS-TECHNIQUES.md`).
 - **Photos and logos**: [IMAGERY.md](IMAGERY.md) for sourcing, treatment and licensing. Never embed
   copyrighted stills.
 
