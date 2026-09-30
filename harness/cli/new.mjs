@@ -18,7 +18,7 @@ const STARTER_TEMPLATE = `<!doctype html>
 <style>
   :root { --bg: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --enter: 0.5s; --exit: 0.3s; }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
-  body { box-sizing: border-box; display: grid; align-content: end; padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); }
+  body { box-sizing: border-box; display: grid; align-items: start; align-content: end; padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); }
   h1 { margin: 0; color: var(--ink); font: 700 calc(var(--vh) * 0.11)/1 system-ui, sans-serif;
        animation-name: land, leave; animation-duration: var(--enter), var(--exit);
        animation-delay: 0.4s, {{exit}}s; animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1), ease-in;
@@ -46,9 +46,9 @@ const DIRECTIONS_TEMPLATE = `<!doctype html>
 <style>
   :root { --paper: #e9e6df; --ink: #14161a; }
   html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
-  body { box-sizing: border-box; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2vw;
+  body { box-sizing: border-box; display: grid; align-items: start; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2vw;
          padding: 8vh 4vw; align-content: center; font: 400 2.4vh/1.4 system-ui, sans-serif; color: var(--ink); }
-  figure { margin: 0; display: grid; gap: 2vh; }
+  figure { margin: 0; display: grid; grid-template-rows: auto 1fr; align-content: start; gap: 2vh; min-width: 0; }
   .frame { aspect-ratio: {{ratio}}; position: relative; overflow: hidden; container-type: inline-size; }
   figcaption b { display: block; }
   .a .frame { background: #f4f1ea; color: #14161a; }
