@@ -36,7 +36,7 @@ seconds -> final. A hook names the next command for the page film you edited las
 | # | stage | the command |
 |---|---|---|
 | 1 | type | `engine-doctrine/CRAFT/ROUTING.md` names the `prompts/` template; `bin/vawe new <name> --from prompts/<t>.md` |
-| 2 | stills | the five frames that define the look, before any motion |
+| 2 | stills | three directions in `brief.md`, their key frames side by side in `directions.html`; pick one, then the five frames that define the look |
 | 3 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 4 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
@@ -96,5 +96,5 @@ Only a fact the code cannot show: a contract (units, ranges, side effects), a me
 its source, an outside quirk, or a guard that looks safe to delete. Never history or restatement.
 A stale comment is a bug.
 
-Where to look: `prompts/README.md` (a template per film type), `core/motion/README.md`,
-`engine-doctrine/JUDGE.md` (how a film is scored), `harness/README.md` (every script and its owner).
+Where to look: `prompts/README.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
+with clips), `core/motion/README.md`, `engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script).
