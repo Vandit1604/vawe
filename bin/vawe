@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
 import { VERBS } from '../harness/cli/verbs.mjs';
-import { newFilm } from '../harness/cli/new.mjs';
+import { newFilm, newFilmLines } from '../harness/cli/new.mjs';
 import { doctorHintFromFile } from '../harness/lib/doctor-hint.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -50,8 +50,8 @@ function main(argv) {
     requireFiles(verb, values, positional);
     const steps = verb.build ? verb.build(values, positional) : null;
     if (!steps) {
-      const page = newFilm(positional[0], { from: values.from, root: ROOT, length: values.length, aspect: values.aspect, title: values.title });
-      return console.log(`wrote ${page} and films/${positional[0]}/brief.md\nnext: read engine-doctrine/TASTE-CARD.md, fill brief.md, then vawe dev ${page}`);
+      const made = newFilm(positional[0], { from: values.from, root: ROOT, length: values.length, aspect: values.aspect, title: values.title, request: values.request });
+      return console.log(newFilmLines(positional[0], made).join('\n'));
     }
     for (const step of steps) {
       const code = runStep(step);
