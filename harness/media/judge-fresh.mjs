@@ -146,12 +146,12 @@ Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"on
 function buildPrompt(ev, brief) {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
-    `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix.`,
+    `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
   ].filter(Boolean);
   const kind = ev.stage === 'stills' ? 'three still directions for a film' : `a ${ev.stage} cut of a film`;
   return `You are a fresh taste judge. You did not make this work and you own no part of it. You judge ${kind} from the evidence files below.
 Use only the Read tool: open the image files and look at them before you score. Do not guess from file names.
-${ev.stage === 'stills' ? STILLS_TASK :'Open the sheet first, then every key frame at full size.'}
+${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key frame at full size. The sheet is a grid of separate frames: its tiling and repeated tiles are the sheet, never an echo or a repeat in the film; confirm any defect on a full-size key frame before you name it.'}
 
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}

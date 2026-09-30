@@ -75,7 +75,12 @@ export function briefLine(text) {
   return null;
 }
 
-export const isTemplateBrief = (text) => (text.match(/\[unanswered/g) || []).length >= 3;
+// A brief is still the template when no input line was answered; a few kept defaults (music, voices) are answers too.
+export function isTemplateBrief(text) {
+  const inputs = (text.split(/^## /m).find((sec) => /^Inputs\b/.test(sec)) || '').split('\n').filter((l) => /^\s*-\s/.test(l));
+  if (!inputs.length) return (text.match(/\[unanswered/g) || []).length >= 3;
+  return inputs.every((l) => l.includes('[unanswered'));
+}
 
 /** The printed lines. `problems` are strings; `sound` and `brief` may be null. */
 export function draftCheckLines(problems, sound, brief = null) {
