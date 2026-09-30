@@ -17,6 +17,7 @@ group: reference
 - Line weights: hair 1 px, rule 0.25 u, heavy 0.45 u. Depth: ring, stack, lift, hero. A look changes only the colour and which step it uses.
 - Colour roles: ground, surface, raised, hover (a visible ladder), ink, muted, accent, on-accent, plus the `--paper` pair for a cut.
 - Contrast: ink, muted, on-accent and paper text pass 4.5:1; accent as text passes 3:1 (large type only). `--faint` is for dots, rules and icons, never for text. `node prompts/moves/demo/contrast.mjs` checks all ten.
+- `.chip` is a fixed square (`--size`, default 11 u) for an icon or a letter; a label that grows with its text is a pill of your own, not a `.chip`.
 - Faces are in `generators/media/fonts.mjs` with a locked version (`harness/media/fonts.lock.json`).
 
 ## The ten looks

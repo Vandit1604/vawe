@@ -98,6 +98,7 @@ const [r, g, b] = kf(f, TINT);
 - `indicator(t, stops, width)`: `{left, right}` for a moving highlight; the leading edge is stiffer.
 - `swapAlpha(t, tIn, tOut)`: text in a morphing box enters after the morph starts, leaves before the next.
 - `curveToLinear(fn)` turns any curve into an exact CSS `linear()` easing; `CURVES` holds `expoOut`, `spring`, `overshoot`.
+  It returns a string for `easing:`, so calling it in `vawe.onFrame` throws; there call `CURVES.expoOut(p)`.
 - `rng(seed)` mulberry32; `noise1(x, seed)` smooth noise in [-1, 1] for drift; `loopT(t, dur)` wraps t.
 
 ## Render it
