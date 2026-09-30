@@ -58,6 +58,33 @@ stop: extend the owner above. Two ways to say one thing is a fork, and the fork 
    commit body (`bin/vawe dev` on the same page). Determinism first: the same frame is the same
    pixels in any order (`tests/media/render-page-determinism.test.mjs`).
 
+## Engineering rules
+
+Code the next agent can read once and change safely. The code-quality hook
+(`harness/live/code-quality.mjs`) enforces the numbers on every edit; the rest is review.
+
+- **One function, one job.** A function that decodes, measures and writes is three functions. Hook
+  limits: 60 lines per function, 6 parameters, depth 4; a file over about 400 lines is split by concern.
+- **A pure core, I/O at the edges.** Measuring, fitting and scoring are pure functions of their inputs;
+  the browser, ffmpeg, tesseract and the file system are called from a thin outer layer. A library
+  function throws; only a CLI `main()` prints and exits.
+- **Deterministic.** Same input, same output: no wall clock, no unseeded random, no dependence on
+  file order. A number a film depends on comes from code, never from a model's estimate.
+- **Loosely coupled, plugin-like.** A new check, measure, verb or film type is a new file in its
+  folder, found by name (`quality/gates/`, `prompts/`); editing a central list is the exception. A
+  library never imports a gate or a CLI; there are no import cycles.
+- **No hidden state.** No mutable module-level variables when a return value can carry the state.
+- **One way to say one thing.** Reuse `harness/cli/parse.mjs`, one `die`, one launch-flag list
+  (`PAGE_ARGS`). A second copy is a fork, and forks drift.
+- **Comments only for facts the code cannot show:** a limit, a measured number, an outside quirk.
+
+## A bug is closed when a check catches it
+
+Every bug found in a film or a trace gets one line in `engine-doctrine/MISTAKES.md`: the signal that
+showed it, the root cause, and the check that now catches it (a render invariant, a never-silent
+error, a page-check rule, a `vawe.assert`). A bug with no check is still open, because the next
+agent will meet it again.
+
 ## Adding a check
 
 Prefer a refusal at the source (the renderer, the parser) over a gate. When a gate is right:

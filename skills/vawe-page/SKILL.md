@@ -28,6 +28,16 @@ const zoom = approach(t * 30, 1, 1.35, 0.15);          // 15 percent of the gap 
 const rot = kf(t * 30, [[0, 0], [24, 90], [60, 90]], 'easeInOutCubic');
 ```
 
+Never approximate a curve with `cubic-bezier()`: a hand-fitted bezier starts too hard and stops too
+early, and the motion reads jerky. Turn the real curve into an exact CSS easing with
+`curveToLinear(fn)` (presets in `CURVES`: `expoOut`, `spring`, `overshoot`), and use it in CSS or WAAPI:
+
+```js
+import { curveToLinear, CURVES } from '../../core/motion/springs.js';
+el.animate([{ translate: '0 40px' }, { translate: '0 0' }], { duration: 700, easing: curveToLinear(CURVES.expoOut), fill: 'both', delay: 1200 });
+document.documentElement.style.setProperty('--ease-settle', curveToLinear(CURVES.expoOut)); // CSS: animation-timing-function: var(--ease-settle)
+```
+
 `SPRINGS.snappy` for leading edges, `heavy` for big type and logos, `playful` only when the brief
 asks for overshoot. Full reference: `core/motion/README.md`.
 

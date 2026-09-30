@@ -10,7 +10,7 @@ group: engine
 `curves.js` holds the easings it uses by name (`easeOutCubic`, `easeInOutQuart`, ...).
 
 ```js
-import { spring, track, approach, kf, springLinear, springDuration, SPRINGS, rng, noise1 } from '../../core/motion/springs.js';
+import { spring, track, approach, kf, springLinear, springDuration, curveToLinear, CURVES, SPRINGS, rng, noise1 } from '../../core/motion/springs.js';
 ```
 
 ## 1. CSS and WAAPI: a spring as an easing
