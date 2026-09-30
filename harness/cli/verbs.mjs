@@ -44,7 +44,7 @@ export const VERBS = [
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [{ script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] }],
-    next: (v, [page]) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`,
+    next: (v, [page]) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft --brief ${path.join(path.dirname(page), 'brief.md')} (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`,
   },
   {
     name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background',
