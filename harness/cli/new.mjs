@@ -80,7 +80,7 @@ a URL), one sentence each on why it is good. Budget, change it if the film needs
 2 colours, 1 typeface, 1 signature move, 1 sound.
 
 Put the three key frames as stills in films/${name}/directions.html (one column each), then look at
-them together (one still, about 1 s): node harness/media/see.mjs films/${name}/directions.html --look --times 0 out/${name}-directions
+them together (one still, about 1 s): bin/vawe compare --page films/${name}/directions.html --at 0 --out out/${name}-directions.png
 
 Pick one, then write the film.
 
