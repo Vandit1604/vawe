@@ -93,7 +93,7 @@ If real clips exist: the files and their licence go in the rights table.
 - A tempo tag is not a beat grid. Measure.
 - The kick and the visual hit must land within 20 ms. Check three hits on the strip.
 - The one spectacle is one. A film with three drops has none.
-- Under 15 seconds, this is a sting, not a music video; see `routes/motion-graphic.md`.
+- Under 15 seconds, this is a sting, not a music video; see `beat-sheet.md`.
 
 source: pattern from twoclipping's "Beat-Synced Product Motion Ad" brief
 https://x.com/twoclipping/status/2102554209166000267 (via

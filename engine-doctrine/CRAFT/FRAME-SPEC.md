@@ -1,6 +1,6 @@
 ---
 when: starting a video, lock the contract BEFORE the JSON
-answers: "the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA. Fill-in template: `STORYBOARD-TEMPLATE.md` (gate: `make storyboard-check`)."
+answers: "the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA."
 group: look
 ---
 
@@ -9,8 +9,7 @@ group: look
 ## AGENT SUMMARY
 
 - Lock TWO artifacts before writing any layer: the design-system spec (Part 1: colour ROLES not
-  hexes, type by role, a negative list) and the beat-by-beat storyboard (Part 2, fill
-  [STORYBOARD-TEMPLATE.md](STORYBOARD-TEMPLATE.md)).
+  hexes, type by role, a negative list) and the beat-by-beat storyboard (Part 2).
 - Weight each on-screen cue into the back ~50% of its beat (build 0-30% / breathe 30-70% / resolve
   70-100%); never dump everything in the first 30% (slideshow) or fake life with independent drift
   during a hold (screensaver).

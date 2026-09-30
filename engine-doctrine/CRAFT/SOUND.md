@@ -1,860 +1,146 @@
 ---
-when: the film has no sound, or you are about to ship it mute
-answers: "sound as STRUCTURE (J-cut · L-cut · sync points · the pre-impact drop) · how to write a sound bridge (audio.bridges) · sound design vs music · how well any of it is evidenced · what we may legally put under a commercial film · the engine's audio block and commands"
+when: the film has no sound, you are about to ship it mute, or you are placing a cue or a music bed
+answers: "how to place subtle cues with <audio data-synth>; the 13 voices and their pitfalls; sound bridges, sync points, silence; what music we may legally put under a film"
 group: crosscutting
-routes: music-bed
-codes: silent-by-omission, silence-without-a-reason, audio-block-produces-nothing, cues-have-no-sound, cue-missing, bed-unresolved, bed-missing, bed-provenance-unknown, bed-licence-unverified, bed-muted, sfx-shape, quiet-before-spectacle
 ---
 
-# SOUND: the structural register we have not been using
+# SOUND: place cues on purpose, and give the film a texture
 
-## Two questions, two stages: INTENT at the storyboard, CUES at DIRECT
+Sound is the default, not silence. A film must still read with the sound off (feed autoplay is muted),
+but a film that works silent and has sound beats the same film mute. Silence is a device: say why in the
+brief. Mute by habit closes a quarter of the ways a short film can hold together: the sound bridge and
+music-led structure are aural.
 
-Sound splits into a question a person answers once, early, and a hundred small ones an author answers
-later, looking at the picture. Conflating the two is what pushed sound out of the plan entirely; keeping
-them apart is what lets it back in without re-freezing it.
+## The mechanism
 
-**Intent, at the storyboard (stage 2, plan).** Does this film have sound at all, and what is meant to
-carry it, a bed, cue-scored junctions, a bridge, VO, or a stated silence? This is a single line of
-PROSE next to the beat table, the same register as `arc` or `not:`, not a structured field validated
-against a registry: "sound carries the films seam" or "silent by design, autoplays muted in-feed" is
-enough to answer it. It belongs at the plan for the same reason `NOT` does: naming the intent before
-building is what stops an author reaching `render` having never once decided whether the film is meant
-to be heard. It is **not** part of what a person looks at first: the picture is what draws the eye
-before anyone has to have an opinion on sound's specifics, and this line commits to nothing that would
-block that look. A storyboard's `craft:` map still carries no required `sound:` entry (`craft-checklist.mjs`'s
-`applies-when: always` line for it is gone on purpose, see below), and this intent line is not
-re-adding that requirement: it is a planning habit, not a gate.
+Audio is `<audio>` tags in the page, never played live, mixed offline by `harness/media/page-audio.mjs`
+(the contract is in `AGENTS.md`).
 
-**Per-cue choices, at DIRECT (stage 6).** Which baked cue plays on which junction, whether a bridge
-crosses which cut, the bed's gain and duck, all of it is decided once the cut reads, against the real
-timeline, the way `harness/lib/craft-rules.mjs`'s `STAGE_CATEGORY_ORDER` already places `sound` in
-`direct` (after motion and transitions). The real gate is `make check GATE=audio-check D=<file>`, wired into
-`make check`/`make ship` (stage 7, before render), and it checks the SCENE directly, never the
-storyboard: a storyboard's stated intent is never itself validated, only the built film is.
-
-A storyboard written before this change may still carry a `craft.sound:` line, or none at all. Leave a
-`craft.sound:` line as-is: nothing reads it any more, and deleting it from every old storyboard would be
-a larger diff than the fact is worth. Adding the new intent line to an old storyboard is optional, never backfilled: `make storyboard-check`
-does not require it on the existing corpus.
-
-## Hear it before you commit it: `make studio` state 5
-
-Every other DIRECT decision is made by looking; sound used to be the one made by reading a cue's name
-in this doc and finding out what it sounds like at render. `make studio D=<file>`, then press `5`
-(or the Sound icon), lists every cue that will play, in time order, DERIVED the same way `buildSfx`
-derives them (cuts, seams, stings, the keystroke train, `audio.tactile`, and any hand-placed
-`audio.cues[]`), not just the ones written by hand. Each row names what happens at that instant, plays
-the cue that is currently chosen, and offers every baked cue as an auditionable alternative; clicking
-a row's time seeks the preview to that frame, so the sound is heard against the picture it lands on.
-Choosing an alternative writes it into the scene like any other studio edit (undo still works). See
-`studio/README.md`.
-
-## AGENT SUMMARY
-
-- Sound is the default, not silence. Give every film sound (`make gen X=audio` + `make media X=audio-bed
-  D=<file> WRITE=1`); ship mute only with a stated reason (`"audio":{"silent":true,"_why":"…"}`).
-  A film must still read with the sound off.
-- Enforced by `make check GATE=audio-check` (codes: `silent-by-omission`, `silence-without-a-reason`,
-  `audio-block-produces-nothing`, `cues-have-no-sound`, `cue-missing`, `bed-unresolved`,
-  `bed-missing`, `bed-provenance-unknown`, `bed-licence-unverified`, `bed-muted`).
-- Checkable action: does this film carry sound, or is the silence a stated decision?
-
-A derived or declared cue still needs a baked file under `assets/sfx/`; an empty pack resolves every
-cue to silence while the gate still reads the film as sounded (`cues-have-no-sound`). Run `make gen X=audio`
-before shipping.
-
-**`audio.auto`, the cue-derivation flag §4 describes, is now a DEFAULT, not an opt-in**
-(`films/scene/scene.js`, `buildSfx`): a scene's own cuts, stings and seams score themselves
-automatically unless it says `audio.auto: false`. Measured across `films/scene/` before and after
-that flip: scenes that resolve at least one cue went from **18 to 68**. Run `make check GATE=audio-check` to see
-the live census; it is the first thing this document is for.
-
-What is still true, and still the open problem, is the MUSIC BED: **116 of the 184 scenes in
-`films/scene/` declare `audio.silent:true` and only 34 of those say why, and 19 name no `audio` block at
-all, so they are silent with nobody having decided that.** Not the mute-by-reflex problem
-this section originally measured, cue derivation now closes most of it for free, but the bed. Sound is
-still the default the doctrine argues for; silence is still a device with a reason you write down; the
-work left is picking beds, not deriving cues.
-
-The reason is not that a bed makes a film nicer. It is that
-[`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) sorts the ways a short film can be held together into four
-families, and one of them: the sound bridge, music-led structure, the unfinished sentence, is
-**verbal and aural**. Shipping mute does not cost us polish. It closes a quarter of the structural
-vocabulary, and it closed it silently, by habit, with no decision anywhere.
-
-> **The honest caveat, up front.** Most of what follows is craft doctrine, not measurement. §7 says
-> exactly how well evidenced each claim is, and the best-known controlled study on perceived quality
-> points *against* the slogan everyone quotes. Read §7 before you cite any of this at anybody.
-
----
-
-## 0. The 90% case: give the film sound, in four commands
-
-Most films need none of the theory below. They need a bed under the type and cues on the beats that
-earn one. Do this, in order, before reading further:
-
-```bash
-make gen X=audio                       # bake every cue + music bed, no network, deterministic (core/audio/kit.mjs)
-make media X=audio-bed D=<file> WRITE=1  # resolve "audio.music":"auto" in the scene to a concrete bed
-make check GATE=audio-check D=<file>        # is the result a decision or an omission? read what it prints
-make video D=<file>               # renders with the mux; listen to out/<file>.mp4
+```html
+<audio src="assets/bed.mp3" loop data-at="0" data-gain="-14" data-fade-out="1.2"></audio>  <!-- loop = the music bed -->
+<audio data-synth="pluck" data-at="2.4"></audio>                                            <!-- a synthesized cue -->
+<audio data-synth="impact" data-at="7.8" data-gain="-4"></audio>
+<audio src="assets/vo.wav" data-role="vo" data-at="0.5"></audio>                            <!-- ducks the bed -18 dB -->
 ```
 
-Write `"audio": { "music": "auto" }` in the scene (or name a bed directly, `"music": "lofi"`) before the
-first command. `make media X=audio-bed` picks the bed from the scene's `profile`, and it MUST run before
-render: the render binary has no JS pre-pass, so an unresolved `"auto"` reaching the mixer is read as a
-filename and plays silence (`§6` below has the full trap). Five profiles (`apple`, `linear`, `vercel`,
-`a24`, `bloomberg`) still resolve `"auto"` to nothing, so on those, name a bed by hand or fetch a real
-track: `make gen X=music GENRE=ambient NAME=<film>` (Mixkit free stock, the one step here that touches the
-network; confirm its licence before commercial release, `§7`).
+- Attributes: `data-at` (s), `data-gain` (dB), `data-fade-in`, `data-fade-out`, `data-trim`,
+  `data-duck` (dB), `data-role`. An unknown voice or a missing file fails the render with the list.
+- The mix is as written: the sum of the cues at their gains. Nothing is raised or lowered. A
+  -1 dBTP limiter never raises a level. `<meta name="loudness" content="-14">` opts in to normalising.
+- A cue that peaks more than 6 dB above the median cue draws a warning, never a refusal.
+- Default gains (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`) are -6 dB for soft voices, -4 for whoosh,
+  riser and swell, -2 for impact, drop and braam. Four soft cues plus one swell land near -20 LUFS.
+- Keep cues subtle: the starters write `data-gain="-8"` on a pluck. Time a cue to the page's own beat
+  number, the same literal the CSS or `seek` uses, so a retimed beat moves both.
+- Two cues in one frame, or a cue louder than the bed's texture, read as a mistake. Listen to
+  the render (`bin/vawe ship`), do not trust the numbers.
 
-**When silence is genuinely right,** it is because the destination autoplays muted in-feed and every
-beat reads without sound, not because nobody got to it. Say so in the scene:
+## The 13 voices (`CUES` in `core/audio/kit.mjs`)
 
-```json
-"audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries the whole beat" }
-```
+All synthesized from parameters, seeded and deterministic: no files, no licence, nothing to 404.
+Every kept voice has zero noise layers. Ten noise-based UI cues were cut after a listening pass because
+filtered white noise reads as cheap.
 
-`audio-check` blocks (`STRICT=1`) on `silent:true` with no `_why`. A missing `_why` is the tell that
-the silence was never decided, only defaulted to.
+| voice | family | use it for | pitfall |
+|---|---|---|---|
+| `pluck` | accent | a small thing landing: a counter digit, a minor element | loud and repeated reads as a machine gun |
+| `chime` | accent | a light confirmation for a small positive event | |
+| `sparkle` | accent | a bright four-note flourish for a decorative reveal | |
+| `droplet` | accent | one discrete arrival | |
+| `bloom` | confirm | something gently arriving or expanding into view | |
+| `success` | confirm | a completed, positive event (three notes up) | |
+| `ready` | confirm | something is now available or armed | |
+| `whoosh` | transition | an object or camera really crossing the frame | it sweeps up then down so the pass has an inflection |
+| `riser` | riser | tension building into a beat; time it to END on the beat | leave the frame after it quiet |
+| `drop` | impact | a half-second sub-down that lands ON a cut | not a fast 808 knock |
+| `impact` | impact | a collision, a slam into place | it layers body, transient and a 1 to 3 kHz mid |
+| `swell` | weight | a reverse-cymbal move that stops dead on the cut it introduces | no tail, so the collapse lands within about 90 ms |
+| `braam` | weight | low sustained weight for a serious moment | dates a piece to trailers of the 2010s; use rarely |
 
----
+A cue is honest only if it names something the viewer sees happen. A `pluck` with nothing landing on
+screen is a lie: cut it. Voices are for rendering; to audition, `node harness/dev/sound-lab.mjs`.
 
-## 1. The prime rule
+## What each sound says, and where it belongs
 
-A film must read with the sound off: feed autoplay is muted, so type that only makes sense over a
-voice fails for most of its audience. That is binding.
-
-It does not follow that the film should ship mute. A film that works silent AND has sound is
-strictly better than the same film mute. Sound is the default; silence is a device with a reason
-you write down.
-
-**You will ship it mute and never notice you decided anything.** Most of this library did exactly that,
-and the census above says how many of them wrote down why. Silence closes a whole quarter of the
-structural vocabulary, including the sound bridge, which is a continuous object the picture never has to
-carry.
-
-> **Give every film sound. If it is better mute, say so in one line and mean it.**
->
-> ```jsonc
-> "audio": { "silent": true, "_why": "autoplays muted in-feed; the type carries the whole read alone" }
-> ```
-
-`make check GATE=audio-check D=<file>` enforces the sentence, the same way `authoring._why` enforces a reason on
-a rule waiver, and for the same reason: the cost of one sentence is what turns a reflex back into a
-decision. Nothing judges whether the reason is good. Nothing can. It only has to be written.
-
----
-
-## 2. The sound bridge, the device this whole file exists for
-
-A **sound bridge** is audio carrying across a picture change. It has two forms, named for the shape
-they cut on a timeline.
-
-- **J-cut: the audio leads.** The next scene's sound starts *before* its picture.
-  Wikipedia's definition: "the audio from a following scene overlaps the picture from the preceding
-  scene, so that the audio portion of the later scene starts playing before its picture as a lead-in
-  to the visual cut." Also called an *audio advance* or *audio lead*.
-  <https://en.wikipedia.org/wiki/J_cut>
-- **L-cut: the picture leads.** The previous scene's sound runs *under* the new picture. "the audio
-  from the preceding scene overlaps the picture from the following scene, so that the audio cuts after
-  the picture." <https://en.wikipedia.org/wiki/L_cut>
-
-StudioBinder compresses it to one line worth memorising: "In a J-cut, new audio plays over old video.
-In an L-cut, old audio plays over new video."
-<https://www.studiobinder.com/blog/what-is-a-j-cut/> ·
-<https://www.studiobinder.com/blog/what-is-a-sound-bridge-definition/>
-
-**What each does to a cut.** A J-cut hides the cut by moving the ear first: by the time the picture
-changes, the viewer is already in the new space, so the cut arrives as confirmation instead of
-surprise. An L-cut hides it the other way: the new picture arrives while the old feeling is still
-sounding, so two shots read as one continuous beat. The trade framing is that a J-cut "builds
-anticipation for an incoming visual" and an L-cut "holds the viewer in an emotional beat."
-<https://www.soundstripe.com/blogs/a-video-editors-guide-to-j-cuts-and-l-cuts>
-
-*Sourcing note:* that perceptual explanation is craft consensus repeated across the trade blogs. No
-textbook passage stating the mechanism in those terms was found. Treat it as doctrine, not as finding.
-
-**Named examples practitioners actually cite.** *Whiplash*: the drum roll starts the film before any
-picture has earned it. *Saving Private Ryan*, Spielberg bridges gunfire into rainfall, one continuous
-texture reinterpreted by a new image. Also *Good Will Hunting*, *Blue Valentine*, *Kill Bill Vol. 1*,
-*Star Wars: Episode V*, *Better Call Saul* (an L-cut holding on a reaction).
-<https://www.filmsupply.com/articles/j-cut-vs-l-cut/>
-
-**Why this matters here specifically.** This repo's standing rule bans the slideshow: a short film must
-carry a continuous object across its cuts, and `direction-floor` blocks on `no-continuous-object`.
-Every answer we have reached for so far is visual. A prop that survives a cut, a camera that travels,
-a match cut. **A sound bridge is a continuous object too, and it is the one kind that costs the picture
-nothing.** A film whose beats are visually unrelated is still held together if one texture runs under
-all of them and changes across the junctions. That is the register we have not been using, because we
-have been shipping mute, and, until `audio.bridges` landed, because the engine could not express it.
-
-Know the limit honestly: `direction-floor` cannot see it. The gate reads layers, so a film held
-together purely by sound will still trip `no-continuous-object` and need a waiver. Write the waiver
-and name the bridge in the `_why`.
-
-### How to write one
-
-A bridge names a **junction**, never a timestamp. The film already knows where it turns, and those
-times move whenever a beat is retimed; `t: 4.37` written by hand goes wrong silently on the next edit.
-
-```jsonc
-"audio": {
-  "bridges": [
-    // J-cut: the room tone of shot 3 arrives 0.8s before shot 3 does.
-    { "bridge": "j", "at": "cut@1", "sound": "tense", "lead": 0.8, "fade": 0.4, "duck": 0.2 },
-    // L-cut: the last shot's texture runs 1.2s under the new picture.
-    { "bridge": "l", "at": "seam@0", "sound": "lofi", "lag": 1.2 }
-  ]
-}
-```
-
-| Field | Meaning |
-|---|---|
-| `bridge` | `"j"` the audio leads · `"l"` the picture leads |
-| `at` | `cut@N` · `seam@N` · `sting@N` · `junction@N` (all kinds merged), counted in TIME order |
-| `sound` | a bed name (`"tense"`), a synthesized cue name (`"loading"`), or a path to a .wav. Looped to fill the span |
-| `lead` | J only, required: seconds of sound before the picture cuts |
-| `lag` | L only, required: seconds the sound keeps running after it |
-| `span` | how long the sound holds on its OWN side. Default: to the neighbouring junction, or the edge of the film |
-| `fade` | equal-power crossfade at both ends, default 0.35s. A bridge never butts |
-| `gain` · `duck` | bridge level (0.5), and the floor the MUSIC bed drops to underneath it (1 = no duck) |
-
-`duck` is what makes the join a *cross* rather than a stack: the bed dips on the same curve the bridge
-rises on. Without it the two simply add.
-
-**It fails loudly, on purpose.** A junction the film does not have names every junction it does have.
-A `lead` that reaches back past the previous junction is refused rather than clipped, because a bridge
-leaning over two shots is not the device. A `sound` that is not on disk fails the render, a film whose
-continuity is carried by a texture that never plays is not a quieter film, it is a different one.
-
-Resolved by `core/audio/bridges.js` (in the browser, where the junctions live) into spans of seconds;
-mixed by `renderer/internal/audio/audio.go`, which never has to know what a cut is.
-
----
-
-## 3. Sync points, which frame lands on which beat
-
-Michel Chion's *Audio-Vision* supplies the two terms worth having. A **point of synchronization** is
-where a sound event and an image event meet and fuse. The fusion is **synchresis**, "a blend of the
-words synchronism and synthesis," which he defines as "the forging of an immediate and necessary
-relationship between something one sees and something one hears."
-<http://csmt.uchicago.edu/annotations/CHION.HTM> ·
-<https://cup.columbia.edu/book/audio-vision-sound-on-screen/9780231185899/>
-
-The practical consequence is the one nobody expects: **synchresis is promiscuous.** Chion's example is
-that for a shot of a hammer, any one of a hundred sounds will do. You are not hunting the correct
-sound. You are choosing which of many acceptable sounds you want the picture read through. That is a
-directorial decision, not a library search.
-
-**Animate to the track, or cut the track to the animation?** Both, and the split is production order.
-
-- **Track first** when the piece is rhythm-driven and the track is locked early; the animation's pacing
-  is then mapped onto the music's shifts in tempo and intensity.
-  <https://www.epidemicsound.com/blog/animation-music-and-processes/>
-- **Picture first** is the traditional studio order: animate, approve, lock picture, then lay music and
-  effects to it. <https://runner.studio/blog/this-is-the-workflow-every-motion-design-studio-uses/>
-
-For a 10 to 40 second product film the sources converge on track-first: lock the track, mark both the
-audio and the visual key moments, design against the markers.
-<https://www.beepboopbops.com/music-and-motion-graphics-workflow/>
-
-**We have this both ways already, and should use the second one more.**
-
-```bash
-make media X=beatmap MUSIC=assets/music/lofi.wav        # detect tempo + the beat grid; reports confidence
-make media X=beatsync D=<scene.json> MUSIC=… WRITE=1    # snap the scene's cuts and seams ONTO that grid
-make media X=spectrum MUSIC=… FPS=30                    # per-frame band energy → a layer can react in pure n
-```
-
-`beatmap` reports low confidence on an ambient pad and says so, which is the correct answer rather than
-a fabricated grid. `beatsync` is the picture-follows-track direction and it is deterministic and
-idempotent; four scenes in the library carry a `.beatsync.json` and it is the most under-used tool we
-own. It no longer decides anything itself: since #457 it reads the grid and calls `core/beats/index.js`,
-so the preview and the render answer "which beat does this joint land on" the same way.
-
-### The scene can now NAME its grid, and the engine snaps the joints itself
-
-`beatsync` writes a second file. The original scene keeps the times the author wrote, the derivative
-carries the snapped ones, and the two drift the moment anybody edits either. So a scene may instead
-DECLARE the grid and let the engine bind the joints at boot, on the one path every render goes through:
-
-```json
-"audio": {
-  "music": "beat",
-  "beatSync": true
-}
-```
-
-`true` takes the sidecar `make media X=beatmap` wrote beside the bed (`assets/music/beat.beats.json`). The
-object form sets the three knobs: `grid` (an explicit `.beats.json`), `maxShift` (how far a joint may
-travel, default 0.12s) and `bar` (snap to downbeats instead of every beat).
-
-**What snaps.** Cuts snap their time. Seams snap the CENTRE of their blend, because a blend is felt in
-the middle of its window, so a seam wrapped around an already-snapped cut stays wrapped. Stings do NOT
-snap: a sting is punctuation hung off a junction, and an author offsets one from its cut on purpose.
-Beat boundaries and `cut@n` backdrop windows need nothing, because they are derived from the cuts and
-follow for free.
-
-**What refuses.** A joint further than `maxShift` from any beat keeps the time the author wrote, and
-the run says which ones did. That refusal is the good part: dragging a cut a third of a second onto a
-beat destroys the timing somebody meant. To keep one exact time inside a bound film, write
-`"snap": false` on that cut or seam.
-
-**What fails loudly.** A named grid that is missing, empty, or scored below confidence 1.6 stops the
-render and names the file and `make media X=beatmap`. A film that asks to be beat-matched and quietly renders
-unmatched is the bug this replaces, not a softer version of it.
-
-A short bed loops to fill the film, so the grid is unrolled across the runtime (`warm` is 8 seconds;
-its beats recur every 8 seconds). Everything happens once, before the first frame, so `renderFrame(n)`
-never sees a grid. `core/beats/index.js`.
-
-> **One thing decides which beat a joint lands on, and it is `core/beats/index.js`.** The CLI calls the
-> same `snapJoints`, so both use the same 0.12s tolerance, both snap cuts by their time and seams by
-> their centre, and neither touches a sting. The CLI held a second opinion until #457: half a beat
-> capped at 0.18s, which above 60 BPM is wider than the gap between beats, so nothing was ever left
-> alone; and it moved stings, collapsing an offset the author meant. It also snapped `transitions[].at`
-> before the lowering pass, so a junction written that way was snapped by its start rather than its
-> centre. What still differs is only WHEN and WHERE: the declaration binds at boot and writes nothing,
-> the CLI writes `<scene>.beatsync.json`. Prefer the declaration, and keep the CLI for the preview and
-> for a film that wants the snapped times written down where a human can edit them.
-
-**Hit points and tempo maps.** In scoring practice you lock the hit points first and then choose the
-BPM that puts a downbeat exactly on each target frame. Carl Stalling shifted tempo several times inside
-a ten-second Looney Tunes gag to do it.
-<https://store.fortecomposeracademy.com/view/courses/film-scoring-for-beginners/72373-scoring-to-picture/206849-24-micky-mousing-hit-points-and-shift-points>
-Directly portable: if the logo lands at 24:15, pick the tempo that puts a beat there rather than nudging
-the logo.
-
-**Mickey-mousing, and why it is an insult.** Synchronising music beat-for-beat to on-screen action,
-named for the Disney shorts and usually dated to *Steamboat Willie* (1928).
-<https://en.wikipedia.org/wiki/Mickey_Mousing> · <https://www.studiobinder.com/blog/mickey-mousing/>
-It went pejorative for a reason that generalises: saturation. "wall-to-wall mickey mousing quickly turns
-into unwanted noise," and "the audience will eventually stop noticing the clever hits if every moment
-[is] packed with them." <https://tvtropes.org/pmwiki/pmwiki.php/Main/MickeyMousing>
-
-> **A sync point is a scarce resource. One or two per short film, spent on the moments you want
-> believed.** This is the audio form of the `effect-soup` ceiling, and it fails the same way.
-
-**On the beat, or a few frames before it?** The argument for cutting early is that the eye needs time to
-find the new subject, so the *visual event* should be finished by the beat, which means it starts
-before it. Anticipation rather than simultaneity. The trade writing also warns that rigid beat-cutting
-"can easily become quite hard visually and predictable."
-
-*Sourcing note:* those lines come from LBBOnline's "More than Just Cutting to the Beat," which returned
-HTTP 403 and was read through a search index rather than directly.
-<https://lbbonline.com/news/more-than-just-cutting-to-the-beat-the-nuance-of-editing-music-videos>
-The reasoning is coherent, the citation is second-hand. Do not quote it as verified.
-
----
-
-## 4. Sound design is not music
-
-Music sets register. Sound design does work the picture cannot do alone. The vocabulary, and where each
-belongs in a short piece:
-
-| Element | What it says | Where it belongs |
+| element | says | belongs |
 |---|---|---|
-| **whoosh / swish** | *something travelled* | on a layer that really crosses the frame; length matches the move |
-| **impact / hit** | *something arrived and stopped* | on a hard stop in the motion, never on an ease-out |
-| **riser / build** | *something is coming* | the only element about frames you have not shown yet |
-| **sub-drop / LFE** | *scale* | a reveal you want to feel large; felt more than heard |
-| **braam** | *2010s trailer* | avoid: it now dates a piece to a decade of fashion |
-| **UI tick / click** | *this interface is real and being operated* | the highest-value sound in a product film |
-| **foley** | *a person is present* | handling, cloth, a hand entering frame |
-| **room tone** | *this frame is a place* | under everything, as glue |
-
-Sources: <https://blog.prosoundeffects.com/sound-effects-terms-explained-part-1> ·
-<https://www.krotosaudio.com/trailer-sound-design-tips-tricks/> ·
-<https://en.wikipedia.org/wiki/Foley_(sound_design)> · braam provenance and its disputed authorship:
-<https://en.wikipedia.org/wiki/BRAAAM>
-
-**The UI tick deserves the emphasis.** It is *diegetic*: it asserts that the interface on screen is real
-and that somebody is operating it. That is precisely the claim a product film wants made, and it is the
-one sound that cannot be accused of decoration. Our whole cue library is built for this, see §6.
-
-**Why a whoosh on every transition is amateurish.** No authoritative essay makes this argument; the
-practitioner comment is scattered ("A whoosh should connect motion, not announce that you pulled a free
-pack full of whooshes," <https://blog.lunabloomai.com/video-sound-effects-2/>). The strong version has
-to be borrowed from mickey-mousing: **a whoosh on every transition makes every transition equally
-important, which means none of them are.** It is mickey-mousing applied to editorial structure instead
-of to on-screen action, and it dies of the same saturation.
-
-This was the argument against shipping `audio.auto:true`: draft it to hear the shape of an edit, then
-replace it with two or three hand-placed cues. **The default was flipped anyway** (`films/scene/scene.js`),
-because the alternative measured worse: four films in five were shipping with NO cue on ANY junction,
-which is the same amateurish sameness this section warns about, just silent instead of loud. Two things
-soften the objection rather than answer it outright: the cue is not one `whoosh`, `CUT_CUE`/`SEAM_CUE`
-(core/audio/cues.js) voice a punch, a wipe, an iris and a whip differently, so a derived cue is not the
-"everything sounds the same" failure a single default sound would be; and an author-placed cue still
-wins over a derived one at the same joint, so hand-placing two or three cues on the beats that matter
-still reads as intentional, it is layered ON the default, not instead of it. What is NOT answered:
-scoring EVERY junction is still, structurally, a cue on every cut, and that is still worth trimming to
-the beats that earn one on a film anyone is actually shipping. `audio.auto: false` opts a film back out.
-
----
-
-## 5. Silence, used on purpose
-
-Silence works by contrast and by forcing attention: the audience feels "the soundtrack disappearing
-beneath them, forcing them to focus on the moment, often before the audio punches back in abruptly for
-a knock-out blow." <https://www.lafilm.edu/blog/cinematic-silence/> PremiumBeat frames it as control
-rather than absence: "The clever use of silence can help you guide your audience's reaction to your
-film." <https://www.premiumbeat.com/blog/importance-silence-filmmaking-projects/>
-
-**The production note that matters most for a 15-second film:** true digital silence reads as a fault,
-not a choice. Editors "must protect the integrity of silence while balancing it with other audio
-elements, including carefully mixing silence with subtle ambient sound or drones to avoid dead air that
-feels unnatural." <https://www.lafilm.edu/blog/cinematic-silence/>
-
-That is the sharpest argument against `silent:true` as a habit. **A film that drops to nothing sounds
-broken; a film that drops to a held tone sounds deliberate.** Ours drop to nothing 90 times.
-
-Named examples: *Saving Private Ryan* (everything drops out as Miller stumbles, miming shell shock),
-*The Graduate* (Benjamin in the pool), *No Country for Old Men* (no score at all, so violence lands
-unbuffered), *Fellowship of the Ring* (cries removed to deepen the impact).
-
-The transferable pattern for short form is the **pre-impact drop**: cut everything one beat before the
-reveal, then land the impact into the vacuum. A riser, then nothing, then a hit. It is the *Saving
-Private Ryan* mechanic at 15-second scale, and it is the single highest-value thing sound can do for a
-product film's payoff beat.
-
----
-
-## 6. The mechanism, what this engine can actually do
-
-Everything above is *what*; this is *how*. It all lives in the scene's top-level `audio` block
-(`films/scene/schema.json`), and the Go mixer (`renderer/internal/audio/audio.go`) builds the whole track in
-memory before ffmpeg muxes it.
-
-```jsonc
-"audio": {
-  "music":     "auto" | "lofi" | "assets/music/lofi.wav",  // a bed name, a path, or the sentinel
-  "musicGain":  0.4,                      // 0..1, sits UNDER the type
-  "musicFade": { "in": 1.0, "out": 1.5 }, // seconds; never a hard cut
-  "musicDuck":  0.15,                     // floor the bed ducks to under VO
-  "loudness":  -14,                       // LUFS target at the mux (socials)
-  "auto":       true,                     // DRAFT ONLY: score every cut + sting automatically (§4)
-  "bridges":  [{ "bridge": "j", "at": "cut@1", "sound": "tense", "lead": 0.8 }],  // J/L-cuts (§2)
-  "cues":     [{ "t": "installLine.end+0.1", "name": "chime", "gain": 0.6 }],
-  "sfxGain":    0.8,                      // master over every cue, authored and derived
-  "vo":        "voice.wav",
-  "voWords":   "voice.words.json",        // [{w,t}] → make media X=vo-captions builds timed captions
-  "spectrum":  "assets/music/x.spectrum.json",
-  "silent":     false,                    // + "_why" if true (§1)
-  "_why":      "…"
-}
-```
-
-**The cues** (`CUES` in `core/audio/kit.mjs:270`, baked by `make gen X=audio`): `pluck · chime · sparkle ·
-droplet · bloom · success · ready · whoosh · riser · drop · impact · swell · braam`. Thirteen, because
-ten were removed after a listening pass: every cue that was kept has zero noise layers, and the chance
-of rejection rose with the noise-layer count (`core/audio/kit.mjs:196`,
-`quality/baselines/sound-verdicts.json`). They are **synthesized from parameters**, noise, a biquad, an
-envelope, seeded and deterministic, so they carry no licence at all and same params always give same
-bytes. That is a genuinely good property and it is worth keeping.
-
-A cue is honest only when it names something the viewer SEES happen. A `pluck` with nothing landing on
-screen is a lie; cut it.
-
-**Name the moment, never copy its number.** A cue that marks something inside a beat, the install line
-landing, the counter finishing, the mark settling, is about a LAYER, not a timestamp. `"t": 3.8935` is
-a snapshot of where that layer happened to sit when you typed it; direction moves layers constantly, and
-nothing marks the cue stale when they do. `vawe-flow-2` shipped with two cues 1118ms and 765ms early
-this exact way. Write `"t": "installLine.end+0.1"` instead: any string a layer `start` field accepts
-(`core/timeline/relative-time.js`) also works here, bare `id` = that layer's start, `id.end` = start
-plus its `duration`, an optional `+`/`-` offset for "a beat after it lands." The film keeps sounding
-right when the layer moves, because the cue is now pinned to the same thing you are. A cue with
-nothing to reference (an intro sting before any layer lands, a beat that owns no `id`) stays a plain
-number; that is not the gap.
-
-**A cue may synthesize its own sound instead of naming a baked one**: `{"t":1,"voice":"chime","params":{"freq":800}}`
-in place of `name`. `voice` picks a live entry in `core/audio/kit.mjs`'s `CUES` table (the same synth
-`make gen X=audio` bakes the static cues from), and `params` retunes it: `freq` (Hz, rescales every tone
-layer so the voice's own intervals hold), `gain`, `attack`, `decay` (a multiplier, 1 = unchanged), and
-`seed`. It exists for the case a fixed baked cue cannot cover: a beat that wants THIS voice at a pitch
-or a length none of the static roles ship. `generators/media/voice-cue.mjs` bakes it on demand into
-`assets/sfx/`, keyed by a hash of `(voice, params)`, so two cues with the same voice and params always
-hit the same cached file and never re-synthesize; a name or a voice that does not resolve is refused at
-validation, not dropped to silence. One `name` OR one `voice` per cue, never both.
-
-**A cue is heard OVER the bed, and the mixer guarantees it.** A cue is causal, it says the button was
-pressed, the row landed, the thing arrived, and a bed is atmosphere. When atmosphere covers causality
-the film stops explaining itself, so a cue's table gain is a floor, not a level: `renderer/internal/audio/audio.go`
-raises it until the cue's loudest 50ms sits 6dB over the bed in that same 50ms, and never lowers it.
-Three things follow, and they are the whole contract:
-
-- **An authored `gain` wins, untouched.** Write `{"t":3.2,"name":"chime","gain":0.2}` and the cue mixes
-  at 0.2. Keystrokes are authored this way too (`keyGain`), which is why a typed line stays a whisper
-  instead of machine-gunning over the music.
-- **`sfxGain` still scales everything**, after the lift. A scene-wide trim keeps its meaning.
-- **The lift is capped, and a cap that binds SAYS SO on stderr.** A click carries a peak many times its
-  own RMS, so matching a loud bed would send it through the limiter and squash the mix. The mixer warns
-  by name and time: read it as *the bed is too loud for this cue*, and lower `musicGain` or pick a cue
-  with more body.
-
-A film with no bed, or a cue landing where the bed has ducked, mixes exactly as it always did.
-
-**A film cannot end on a silent hold today**, and it is worth knowing before you plan one.
-`musicFade.out` ramps the bed to zero AT `duration`, never before it; nothing says "cut the bed N
-seconds early". The nearest existing mechanism is a sting on the last mark, micro-silence ramps the bed
-to nothing over the 0.3s before every sting, but that couples the audio tail to a visual device, so it
-is a workaround rather than the dial.
-
-**The commands:**
-
-| Command | What it does |
-|---|---|
-| `make check GATE=audio-check [D=…] [STRICT=1]` | the sound gate (§1). No `D` prints the library census |
-| `make gen X=audio` | bake every synthesized cue from parameters |
-| `make gen X=music-pack` / `make gen X=music GENRE=… NAME=…` | fetch real beds → `assets/music/` (§8) |
-| `make media X=audio-bed D=… WRITE=1` | resolve `music:"auto"` to a concrete bed from the profile |
-| `make media X=beatmap MUSIC=…` | detect tempo + beat grid, with a confidence report |
-| `"audio":{"beatSync":true}` | the scene names the grid; the engine snaps cuts and seams at boot (core/beats/index.js). A joint's own `transitions[].at` can also PIN to a beat by index, `"beat:12"` (bare, 0-based, no `.start`/`.end`, distinct from a structural `data.beats[]` id), and `snap:"beat"`/`"bar"`/`"downbeat"` overrides which pulse THAT ONE joint nudges to, regardless of `beatSync.bar`'s own default |
-| `make media X=beatsync D=… MUSIC=… WRITE=1` | the author-time twin: same policy, writes `<scene>.beatsync.json` |
-| `make media X=spectrum MUSIC=…` | per-frame band energy for audio-reactive layers |
-| `make check GATE=sfx-check` | is each effect the SHAPE its role claims (MISTAKES #51) |
-| `make media X=tts` · `make media X=vo-captions D=…` | narration, and karaoke captions from its word timings |
-| `make check GATE=pace-from-vo VO=….words.json` | propose beat timings that land reveals on the voice |
-
-### Caption styles: eight of the nineteen, and what each one uses to say "here"
-
-`"captionStyle": "<name>"` layers a word-timed treatment on the pop caption layout. The words come
-from `capWords()` (`core/type/captions.js`): the author's own `words:[{t0,t1}]` when a line carries them,
-otherwise windows distributed by word length, which reads as speech and needs no timing file. Every
-style is a pure function of one word's progress, so a cold seek and a warm one paint the same frame.
-
-Each style carries **three** word states, and a viewer must be able to tell all three apart in a
-single frame: what is coming, what is being said, and what has already been said. A style with only
-two states is a progress bar with no memory. Pick by the channel you want the caption to speak in. The
-eight below are the ones worth choosing between deliberately; `CAP_STYLES` (`core/type/captions.js:57`)
-carries nineteen, and [`CAPTIONS.md`](CAPTIONS.md) lists them all.
-
-| Style | The channel | Reach for it when |
-|---|---|---|
-| `highlight` | a marker band behind the word | you want the loudest possible read trail |
-| `pillKaraoke` | a pill that fills left to right | the film is playful and the line is short |
-| `weightShift` | type weight, 600 to 700 to 800 | the film is typographic and nothing else should move |
-| `clipWipe` | a line-level accent wipe | the whole line is one thought, not six words |
-| `neonEdge` | light only, never ink | the film is dark and the accent should glow rather than print |
-| `kineticSlam` | size, landing at 1.22 | one word per beat, and the cut is on the word |
-| `underlineDraw` | a 4px rule under the ink | you want a read trail that costs the text no contrast |
-| `readerFocus` | depth: three inks, three scales | a long narrated line, where the eye needs steering, quietly |
-
-**Contrast is not negotiable and it is why these look the way they do.** An inactive word dims by a
-colour mix toward the theme background, **never by opacity**, and the whole line sits on a 78%
-background plate, so the ratio is computed against a known backdrop instead of unknown video. Both
-rules were written after this repo shipped sub-4.5:1 captions. The darkest palette in `themes/` puts
-the dimmest state at 4.8:1, which clears AA with room to spare.
-
-**Know the gap before you trust a green audit.** `make check GATE=audit` grades elements marked
-`data-layer=critical`, and a caption is not a layer, so **the audit has never measured a caption's
-contrast**. `lib-test` proves each style keeps three distinct states and never reaches for opacity;
-the ratio itself is arithmetic over the theme palette. Neither is a picture. Read a frame.
-
-**The band.** `captionBand()` (`core/layout/safe.js`) describes the strip a caption paints, and the audit
-warns when other content lands there. No style may make that strip taller than the skin it declares,
-so every value that could grow the line is bounded to the `styled` plate's own 14px padding: the
-`neonEdge` halo stops at 14px and the `kineticSlam` overshoot stops at 1.22, which at 64px adds 7px
-a side. A style that wants more has to move the band first, and moving the band moves every scene.
-
-**The trap, in bold, because it has bitten twice.** `music:"auto"` is resolved at **authoring** time by
-`core/audio/select.js`. The render binary has no JS pre-pass, so an unresolved `"auto"` reaching the
-mixer is read as a filename, matches nothing, and plays **silence**. Always
-`make media X=audio-bed D=<file> WRITE=1`. `make check GATE=validate` and `make check GATE=audio-check` both warn; heed them.
-
-**A second trap, currently live.** `core/audio/select.js` maps five of its eight profiles (`apple`,
-`linear`, `vercel`, `a24`, `bloomberg`) to `bed: null`, and an absent or unknown profile also yields
-silence. So `music:"auto"` on most films still resolves to *nothing* (open work, §9).
-
----
-
-## 7. How well evidenced is any of this?
-
-Plainly: **the structural claims above are craft doctrine, not measurement, and the best-known
-controlled study points the other way.** This section exists so nobody cites §1-§5 as science.
-
-**Audiovisual fusion is real, and pre-conscious.** The McGurk effect, audio /ba/ plus visual /ga/ is
-*heard* as /da/: is one of the most replicated findings in perception, cited over 4,800 times since
-McGurk & MacDonald, "Hearing lips and seeing voices," *Nature* 264(5588), 746-748, 1976.
-<https://en.wikipedia.org/wiki/McGurk_effect> · 40-year retrospective:
-<https://pubmed.ncbi.nlm.nih.gov/31264593/>
-This establishes that Chion's *synchresis* is a real perceptual mechanism rather than a metaphor. It
-does **not** establish that adding sound makes video look better or perform better. Anyone citing
-McGurk for that is overreaching.
-
-**The strongest evidence FOR sound as more than decoration comes from VR.** "On the Relative Importance
-of Visual and Spatial Audio Rendering on VR Immersion," *Frontiers in Signal Processing*, 2022.
-<https://www.frontiersin.org/journals/signal-processing/articles/10.3389/frsip.2022.904866/full>
-N=17 trained listeners, three audio conditions crossed with three video resolutions (0.5 / 1.5 / 2.5 MP
-per eye), 18 scenes. The line worth having: "the full auralisation scene with 20% video resolution and
-the HTB-only scene with 100% video resolution received almost identical mean scores (5.79 and 5.76,
-respectively)." Adding room acoustics bought back as much perceived immersion as **five times the
-pixels**. Limits are serious: N=17, all trained expert listeners aged 18-25, a head-mounted display,
-spatial audio specifically, and *immersion* is neither perceived production quality nor ad performance.
-
-**The best-known controlled study on perceived quality contradicts the slogan.** Beerends & De Caluwe,
-"The Influence of Video Quality on Perceived Audio Quality and Vice Versa," *JAES* 47(5), 355-362, 1999.
-<https://www.aes.org/e-lib/browse.cfm?elib=12105> Video quality shifted *perceived audio* quality by
-about 1.2 points on a nine-point scale; audio quality shifted *perceived video* quality by only about
-0.2. It concluded that video quality dominates overall perceived audiovisual quality. Read that
-carefully: **good pictures make sound seem better far more than good sound makes pictures seem better.**
-Limits: 1999 telecoms codec degradation, a fidelity-rating task rather than an engagement or preference
-task. It measures fidelity judgements, not craft. The same asymmetry replicates for music video:
-<https://www.dhi.ac.uk/openbook/chapter/ICMEM2015-Hammerschmidt>
-
-**"Sound is half the picture", who says it, and how sound is the attribution.** The version with a real
-citation is George Lucas: "Sound is half the experience of seeing a film. That's why I have been
-bothered by the poor sound re-production in many theaters and most homes," cited to "In the Action With
-'Star Wars' Sound," *The New York Times*, 3 May 1992. <https://en.wikiquote.org/wiki/George_Lucas>
-*Caveat:* the citation was verified as specific and dated; the NYT article itself could not be opened.
-
-The version everybody actually quotes ("Sound is 50 percent of the moviegoing experience") is repeated
-by *Variety*, the Motion Picture Editors Guild's own *Local 695* magazine, and the Academy's account,
-and **not one of them gives a date or a venue.** Treat it as a widely repeated paraphrase, not a verbatim
-quote. <https://www.local695.com/magazine/from-the-editors-19/>
-
-The claim does carry institutional weight: Lucas's dissatisfaction with theatre playback after *Star
-Wars* is what produced THX in 1982. <https://en.wikipedia.org/wiki/THX>
-
-**Better voices for our purposes.** David Lynch: "Films are 50 percent visual and 50 percent sound.
-Sometimes sound even overplays the visual." And on room tone, which is the most useful thing said here
-for a motion designer: it is "the sound that you hear when there's silence, in between words or
-sentences," and "in this seemingly kind of quiet sound, some feelings can be brought in, and a certain
-kind of picture of a bigger world can be made." <http://www.thecityofabsurdity.com/quotecollection/sound.html>
-
-Walter Murch, in his foreword to *Audio-Vision*, makes the developmental argument: "We begin to hear
-before we are born, four and a half months after conception," and for the next four and a half months
-"Sound rules as solitary Queen of our senses." His point is not sentimental, hearing is the older and
-more continuously trained sense, so audiences audit sound for plausibility more harshly and more
-unconsciously than they audit pictures. *Caveat:* verified only through indexed excerpts; the full
-foreword could not be retrieved.
-
-**Sonic-branding effectiveness numbers: do not cite these.** The circulated figures, Ipsos's "3.44x
-more effective," "8.53x more likely to appear in top-performing ads," Mastercard's "77% more
-trustworthy": are vendor and agency publications with no disclosed sample, control condition or
-confound handling. The 3.44x and 8.53x describe *association with high-performing ads*, which is
-correlation, and high-performing ads have bigger budgets, which also buys sound. The one serious
-academic treatment is Spence & Keller, "Sonic branding: A narrative review at the intersection of art
-and science," *Psychology & Marketing*, 2024 <https://onlinelibrary.wiley.com/doi/full/10.1002/mar.21995>,
-and note that it is a *narrative review*, not a meta-analysis, whose own framing concedes that demand
-for evidence currently exceeds supply.
-
-**Sound-on versus sound-off ad testing is contradictory and all of it is vendor-published.** One side
-claims muted video reaches "up to 30% higher completion rates"; the other claims audio makes ads "67%
-more engaging." Both cannot be findings. **No independent randomised test of identical creative with and
-without sound was found.**
-
-**What could not be found at all**, and this is itself a result. No writing on sound structure from
-Motionographer, School of Motion, Ben Marriott or Andrew Kramer surfaced. The motion-design field has
-essentially not written about this, which is part of why we drifted into shipping mute without noticing.
-
-> **The summary to carry.** Fusion is real (McGurk). Audio buys immersion at a rate comparable to large
-> increases in resolution, in one small expert-listener VR study. The only well-known controlled study of
-> perceived *quality* found the picture drives audio judgements far more than the reverse. And the
-> marketing numbers are advertising. **Add sound because it opens a structural register, not because a
-> study says it scores better. No study says that.**
-
----
-
-## 8. Licensing, what we may actually put under a commercial film
-
-`CLAUDE.md` is absolute about visual assets: never embed copyrighted material into a published video.
-**That applies to music with more force than to anything else**, because music is the one asset class
-with an automated global enforcement system pointed at it. A wrong image gets a takedown if somebody
-notices. A wrong track gets a Content ID claim automatically, on upload, every time.
-
-### What we use today, and it is fine
-
-Our beds come from **Mixkit's free tier**, which permits "commercial projects (YouTube videos, social
-media marketing, online ads, music videos) and personal projects. No attribution required."
-<https://mixkit.co/llm-info/> · <https://mixkit.co/license/>
-
-Excluded: CDs, DVDs, video games, TV and radio broadcast. Also forbidden: remixing a track, registering
-it as your own, and redistributing the file without substantially altering it.
-
-Two consequences, both already true of this repo and both important:
-
-- **The files must stay untracked.** `assets/music/` is gitignored. Committing it would publish the
-  tracks as standalone downloadable files, which the licence forbids. See `assets/README-LICENCE.md`.
-- **Our sound EFFECTS have no licence question at all, by default.** They are synthesized from
-  parameters by `make gen X=audio`, not downloaded. That is a real and underrated advantage; keep it. A real
-  sample is an optional OVERRIDE of one cue, never a replacement of the fallback: `make gen X=sfx-pack`
-  fetches a CC0, shippable-by-licence pack, `make gen X=sfx-local DIR=<path>` maps sounds you already
-  downloaded by hand. Every source's licence, and which may be committed vs. kept local-only, is in
-  [`../ASSET-SOURCES.md`](../ASSET-SOURCES.md).
-
-### The four categories, and the one that eats people
-
-| Category | What it means | Safe for a client product film? |
-|---|---|---|
-| **Subscription royalty-free** (Artlist, Epidemic Sound, Musicbed, Soundstripe, Uppbeat, Marmoset) | you pay a period fee, not a fee per broadcast | yes, **while the subscription is live**, read the trap below |
-| **CC0 / public domain** | all rights waived worldwide | yes. The safest paid-nothing option, but CC0 gives freedom, never a warranty |
-| **CC-BY** | free, **attribution required**, commercial and adaptation both permitted | yes, if the credit really goes in the description permanently. Note the no-endorsement clause: you may not imply the composer backs the client's product |
-| **CC-NC or CC-ND** | non-commercial, or no derivatives | **no, and ND is absolute**, see below |
-| **Sync licence** (Musicbed, Marmoset) | negotiated per project, media, territory and term | yes, and it is the only one that comes with a warranty and indemnity |
-
-"Royalty-free" is a **pricing** model, not a rights model. It means no *per-use* royalty. It says
-nothing about who owns the copyright, what uses are permitted, or how long the grant lasts. Musicbed is
-the clarifying counter-example: its catalogue is explicitly **rights-managed, not royalty-free**, and
-priced per project by your client's headcount and predicted reach.
-
-### ND is the rule nobody knows, and it is decisive
-
-**Syncing music to moving image is *always* a derivative work under Creative Commons.** Not arguably.
-By definition, in the licence text itself: CC BY-ND 4.0 §1:
-
-> "For purposes of this Public License, where the Licensed Material is a musical work, performance, or
-> sound recording, **Adapted Material is always produced where the Licensed Material is synched in
-> timed relation with a moving image.**"
-> <https://creativecommons.org/licenses/by-nd/4.0/legalcode.en>
-
-CC's FAQ restates it: this holds "**whether or not it would be considered so under applicable law**."
-
-So **every ND track is unusable in every film we publish**, commercial or not, edited or not. Playing an
-ND track untouched under picture still creates Adapted Material, and ND forbids sharing adaptations.
-This is the most-missed rule in free-music sourcing, and it is missed because ND tracks are routinely
-labelled "commercial use allowed", which they are, for redistributing the *audio*. Never for a film.
-
-**NC is nearly as blunt.** CC defines NonCommercial as use "primarily intended for or directed toward
-commercial advantage or monetary compensation", and adds the part people assume saves them: "**CC's
-definition does not turn on the type of user:** if you are a nonprofit or charitable organization, your
-use of an NC-licensed work could still run afoul of the NC restriction." CC then declines to draw the
-line for you: "**CC cannot advise you on what is and is not commercial use**"
-<https://creativecommons.org/faq/>. A paid client product film is the paradigm case. CC's own refusal to
-define the boundary is itself the reason not to gamble on it.
-
-**Practical filter for any CC source: CC0 and CC BY only.** CC BY-SA works but is viral, so the whole
-film goes BY-SA. Everything else is out.
-
-### If we ever buy a subscription
-
-The perpetuity clause is the most misunderstood term in the industry, and the honest summary is that
-**the licence on a published film survives cancellation, but your ability to defend it does not.**
-
-| Vendor | The trap in its own paperwork |
-|---|---|
-| **Musicbed** | **Early cancellation voids licences already issued.** The 12-month term must complete or "any licenses issued under the subscription [become] null and void", cancel in month 7 and delivered client films retroactively become unlicensed. Separately, §3: "paid media rights are **not** granted in perpetuity"; you get archival rights to leave the film where it is, not to keep running it as an ad |
-| **Artlist** | Perpetual, but frozen to "**the same media**". A re-cut, a new platform or a re-upload is a new project. Publication must occur *during* the term, so a finished-but-unpublished film loses cover. Clearlist closes at expiry |
-| **Epidemic Sound** | Licence persists, but safelisting requires an active subscription and must happen **before posting**. Creator tier **cannot be used for brand work at all**; Pro is the client-work tier |
-| **Soundstripe** | Projects perpetual, but if you did not List a project before cancelling you can never do so without re-subscribing. Business is limited to a **single designated market area**, which a public website breaks |
-| **Uppbeat** | Published work survives; safelist protection covers only videos uploaded during the paid term |
-
-**Two vendor contradictions worth naming, because they mean the marketing cannot be relied on:**
-
-- **Musicbed's FAQ says credit is optional** ("You are not required to credit the artist or Musicbed").
-  Its binding terms §2(xiii) *require* credit per the License Details, and §9 sets **$10,000 liquidated
-  damages** for failing to. Read the License Details, not the FAQ.
-- **Soundstripe's help centre says Pro may not promote a brand, product or service.** Its Terms of Use
-  apply that restriction only to Personal, and its own plan table sells Pro for "advertising". Both
-  cannot be true. Get it in writing before relying on it.
-
-*Verification note:* **Epidemic Sound's actual licence contracts could not be reached**, the terms
-routes 404 and the policy page renders an empty shell. Everything above for Epidemic comes from its
-marketing and help centre, not the contract. Given that Soundstripe's marketing and contract
-demonstrably disagree, assume Epidemic's may too. Prices were also unverifiable for several vendors and
-are deliberately omitted here; they move, and they geo-localise.
-
-**Two eligibility gates that would catch a studio:** Artlist pushes any **agency**, or any company over
-**50 employees**, to Max Business. Epidemic pushes agencies and production companies over **$5M
-turnover** to Enterprise.
-
-### Content ID: claims are normal, even when you are correct
-
-This is the part everyone gets wrong. Every one of these platforms registers its catalogue *into*
-Content ID, so **a claim on correctly licensed music is the expected outcome, not an anomaly**. Artlist
-concedes claims arrive "even when content is licensed correctly". Musicbed's SyncID is explicitly
-**reactive**: "SyncID does not prevent you from getting a content claim ... As soon as you receive an
-email from YouTube that your video has a claim, SyncID is already working." Soundstripe admits its own
-process "may still accidentally and incorrectly interpret your use ... to be unlicensed."
-
-**Whitelists attach to a channel, not to a film.** So a track clean on our channel gets claimed the
-moment the same film goes up on a **client's** channel, which is exactly what a product film is for.
-Artlist and Epidemic both handle this with per-video client invite links valid 30 days; Soundstripe uses
-per-video clearance codes. Treat safelisting the destination channel as a **delivery checklist item**.
-
-There is documented enforcement against holders of a valid competing licence: an Adobe forum thread
-records Artlist Content ID claims against users who licensed the same track legitimately from Adobe
-Stock, with appeals citing a valid Adobe licence number **rejected**, and Adobe refunding the asset.
-<https://community.adobe.com/t5/stock-discussions/content-id-claim-from-artlist-ltd/m-p/14485916/highlight/true>
-
-### The free end, ranked honestly
-
-- **Pixabay is the strongest free option.** One site-wide licence granted by Pixabay itself, not
-  per-track CC: "irrevocable, worldwide, perpetual ... for **commercial or non-commercial purposes**",
-  no attribution required <https://pixabay.com/service/license-summary/>. Because it is irrevocable,
-  nothing published is at risk later, and every download ships a **License Certificate** to fight claims
-  with. The catch is the inverse of a paid library: content is warranted **"AS IS", no warranty**, and
-  **you indemnify Pixabay**. Claims still happen and disputes take up to 30 days, unmonetised.
-- **Freesound (SFX)**: filter to **Free Cultural Works approved**, i.e. CC0 and CC BY only. Two traps:
-  the legacy **Sampling+** licence specifically bans commercial advertising ("You can't make a track
-  with Sampling+ samples to sell a car") and is **not** caught by an "avoid NC" habit; and when layering
-  sounds, **the strictest input licence governs the output**.
-- **YouTube Audio Library: do not let it leave YouTube.** Google grants no off-platform rights and
-  says plainly it "can't give legal guidance ... off the platform". Every permissive sentence scopes
-  itself to "videos uploaded to YouTube". Only the CC-licensed subset travels, and it travels on the
-  artist's CC BY terms, so the attribution comes with it. Treat off-YouTube use as unlicensed.
-- **Free Music Archive and ccMixter are directories, not licensors**, and neither warrants anything.
-  FMA says so itself: "FMA cannot license original work to you for commercial, private, or other use."
-  Licence differs per track and includes NC and ND, so **you must read the licence on every single
-  track**. ccMixter's terms go further than the CC deed and forbid using a track "to advertise or
-  promote anything other than the work you create from it", which is a problem for a client ad even on
-  a CC BY track. Also treat the widely repeated "$5/month FMA plan" as **false**; no FMA page confirms
-  it.
-
-### AI-generated music: no, and the reason is not the one you expect
-
-The training-data litigation is real and partly unresolved (Sony still litigating against Udio; UMG and
-Sony against Suno). But the decisive problem is ownership. The US Copyright Office's *Copyright and
-Artificial Intelligence, Part 2: Copyrightability* (29 Jan 2025)
-<https://www.copyright.gov/ai/Copyright-and-Artificial-Intelligence-Part-2-Copyrightability-Report.pdf>
-concludes that **material generated purely by entering prompts is not copyrightable**, however elaborate
-the prompt.
-
-So if the bed is purely prompt-generated, **nobody owns it, not us, not the vendor, not the client.**
-Suno's own terms say the quiet part: it assigns "all of its right, title and interest" and then adds
-"**Suno makes no representation or warranty to you that any copyright will vest in any Output.**" It
-assigns a possibly empty set. Soundraw and Mubert retain ownership outright and grant only a use
-licence, and both **prohibit Content ID registration**.
-
-Confine AI music to internal comps, pitch boards and animatics. Never a client deliverable.
-
-### The rule for this repo
-
-> Record the source and the licence in `assets/music/credits.json` **before** the track goes under a
-> film. `make check GATE=audio-check` warns `bed-provenance-unknown` when there is no entry and
-> `bed-licence-unverified` when nobody has read the terms. A track whose licence nobody can produce is
-> not usable, however good it sounds.
-
----
-
-## 9. Open work
-
-1. **`core/audio/select.js` still maps most profiles to nothing.** Five of eight profiles map to
-   `bed: null`, and an unknown profile yields silence, so `music:"auto"` mostly resolves to nothing.
-   Deliberately left this way rather than guessed at: a scene with no `profile` at all is left silent on
-   purpose too (`resolveAudio` only defaults `music` to `"auto"` when a `profile` is present), because
-   picking a bed with nothing to go on is not a default, it is a guess (engine-doctrine/MISTAKES.md #159 in the
-   audio domain). It should still map every profile to *something* before "sound by default" is real
-   for MUSIC; cue derivation (item 2, below) already is.
-2. **RESOLVED: `audio.auto` is now the engine default, not an opt-in.** `films/scene/scene.js`
-   (`buildSfx`) derives a cue for every cut, sting and seam unless a scene says `audio.auto: false`.
-   Measured before/after: scenes that resolve at least one cue went from 18 to 68. §4 records the
-   mickey-mousing objection to this and why it was overridden anyway, plus what the objection still
-   gets right. `quality/gates/audio-check.mjs` reads the same fact (`hasScoredJunction`, via the same
-   `lowerScene`) so its census counts what the engine will actually render, not what a scene declared.
-3. **`direction-floor` still cannot see a bridge as a continuous object.** `audio.bridges` (§2) authors
-   J-cuts and L-cuts, but a film held together by sound alone still trips `no-continuous-object` and
-   needs a waiver. Teaching the gate to read `audio.bridges` is the next piece: it would have to reason
-   about junctions rather than layers.
-4. **`assets/music/` is gitignored and untracked.** A fresh clone has no beds, so every film naming one
-   renders silent with only a warning. Sound cannot be a true default until the default asset exists.
-
-## Provenance
-
-**Do not re-add:** "silence is the default" as house doctrine. It traced to a real engine bug, the
-mixer once auto-discovered any `assets/music.wav` and put it under everything; making music opt-in
-(`renderer/internal/audio/audio.go`) was the right fix for that bug, but the silence-by-default rule that grew
-from it outlived the bug and is wrong. §1 states the corrected rule: sound is the default, silence is
-a stated device.
+| whoosh | something travelled | on a layer that really crosses the frame, length matching the move |
+| impact | something arrived and stopped | on a hard stop, never on an ease-out |
+| riser | something is coming | the only sound about frames you have not shown yet |
+| sub-drop | scale | a reveal you want to feel large |
+| UI tick, click | this interface is real and being operated | the highest-value sound in a product film, and the one that is never decoration |
+| foley | a person is present | handling, cloth, a hand entering frame |
+| room tone | this frame is a place | under everything, as glue |
+
+A whoosh on every transition makes every transition equally important, so none is. That is
+mickey-mousing applied to editing. Score the two or three seams that earn it.
+
+## Sync points are scarce
+
+Chion's synchresis: a sound and an image that meet fuse into one event, and almost any of many sounds
+will do. You are not hunting the correct sound, you are choosing what the picture is read through.
+Spend one or two hard sync points per short film on the moments you want believed. Wall-to-wall hits
+turn into noise and the audience stops noticing them.
+
+- Track first (lock the track, mark audio and visual key moments, design against the markers) for a 10 to
+  40 s product film. Cut on the beat, or two frames early: the eye needs time to find the new subject.
+- Find the grid with `node harness/media/beatmap.mjs <track.wav>`. It reports low confidence on an
+  ambient pad and says so, which is the right answer. Then put the cut times on that grid.
+- If the logo lands at 24:15, pick the tempo that puts a beat there. Do not nudge the logo.
+
+## The sound bridge
+
+A sound bridge is audio crossing a picture change, and it is a continuous object that costs the
+picture nothing. A film whose beats are visually unrelated stays whole if one texture runs under all
+of them and changes at the junctions.
+
+- J-cut: the next scene's audio starts before its picture. The cut arrives as confirmation, not surprise.
+  In the page: start the next scene's `<audio data-at>` 0.4 to 0.8 s before the cut, with `data-fade-in`.
+- L-cut: the previous scene's audio runs under the new picture, so two shots read as one beat. Set the
+  old sound's length past the cut with `data-fade-out`.
+- Fade both ends (an equal-power crossfade of about 0.35 s). A bridge never butts.
+- Examples people cite: Whiplash (the drum roll starts the film), Saving Private Ryan (gunfire into rain).
+
+## Silence, on purpose
+
+True digital silence reads as a fault. A film that drops to nothing sounds broken. A film that drops
+to a held tone sounds deliberate. The pattern for short form is the pre-impact drop: cut everything one
+beat before the reveal, then land the impact into the vacuum (riser, nothing, hit). It is the single
+highest-value thing sound does for a payoff beat. Set `data-fade-out` on the bed to shape the tail, and
+keep a tone under the drop: do not cut the bed to nothing.
+
+## How well evidenced is this?
+
+Mostly craft doctrine, not measurement. Do not cite it as science.
+
+- Audio-visual fusion is real (McGurk 1976). That does not show that sound makes video perform better.
+- One small VR study (N=17 trained listeners) found room acoustics bought as much perceived immersion as
+  five times the pixels. Limits: expert listeners, spatial audio, immersion is not ad performance.
+- The best-known controlled quality study (Beerends and De Caluwe, JAES 1999) found picture quality moves
+  perceived audio quality about six times more than the reverse. Good pictures make sound seem better.
+- Sonic-branding multipliers ("3.44x more effective") and sound-on versus sound-off ad results are vendor
+  publications with no disclosed method. Never quote them. No independent randomised test was found.
+- So add sound because it opens a structural register, not because a study says it scores better.
+
+## Licensing: what may go under a film
+
+Music is the one asset class with automated global enforcement. A wrong image gets a takedown if someone
+notices. A wrong track gets a Content ID claim on upload.
+
+- Our voices are synthesized, so they have no licence question. Keep it that way.
+- Only CC0 and CC BY are safe from Creative Commons. CC BY needs the credit kept in the description.
+- Never use CC ND: syncing music to moving image is always Adapted Material in the licence text
+  itself, so no ND track can go in any film. CC NC is unsafe for client or paid work.
+- Pixabay is the strongest free source (a site-wide, irrevocable, commercial licence; keep the
+  certificate). Mixkit's free tier permits commercial use, no attribution, no redistribution of the
+  file. The YouTube Audio Library is YouTube only. Free Music Archive and ccMixter are directories, not
+  licensors: read the licence on every track.
+- Subscription libraries (Artlist, Epidemic, Musicbed, Soundstripe) each have a trap in their own
+  terms: cancellation, "same media" limits, or agency tiers. Read the contract before buying, not the
+  FAQ, and add the destination channel to the safelist before posting. A claim on correctly licensed
+  music is the expected outcome, not an anomaly.
+- AI-generated music is not copyrightable when purely prompt-made (US Copyright Office, Jan 2025), so
+  nobody owns it and vendors may forbid Content ID registration. Use it for internal animatics only.
+- `assets/music/` is gitignored: committing a Mixkit file would publish it as a standalone download,
+  which the licence forbids. Record the source and licence of every bed in `assets/music/credits.json`
+  before it goes under a film. A track whose licence nobody can produce is not usable.
