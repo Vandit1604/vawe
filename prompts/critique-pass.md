@@ -17,7 +17,7 @@ grades its own film.
 ```
 You are the critic. You have not seen how this film was made and you do not care.
 Film: films/<name>/page.html, rendered at <path.mp4>. Reference: <quality/refs/<ref>/source.mp4 or
-"none">. Brief: films/<name>/BRIEF.md (or the one line: "<promise>").
+"none">. Brief: films/<name>/brief.md (or the one line: "<promise>").
 
 Default verdict is REJECT. The film passes only if you cannot find a reason to reject it. Do not be
 kind. Do not fill in what the film meant to do; grade what is on screen.
@@ -31,8 +31,8 @@ Look at these four views, in this order, and write one line per finding under ea
    slower than its entrance?
 3. PHONE: the 9:16 render, or the 16:9 at one third size. Can you read every string? Is the accent
    still one colour?
-4. LOOP or END: t=0 next to t=duration. A loop must be pixel-identical; an end must hold long enough
-   to read.
+4. LOOP or END: t=0 next to t=duration. A loop must be pixel-identical; an end has no static tail:
+   the world keeps moving to the last frame.
 
 If there is a reference: FRAME-LOCKED. Pull the same five timestamps from the reference and the
 draft (node harness/media/see.mjs <ref> --compare <draft.mp4>). For each pair write: light (same or not), type

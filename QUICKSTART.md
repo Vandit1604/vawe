@@ -7,7 +7,7 @@ group: process
 # Quickstart
 
 vawe turns one HTML page into one rendered mp4. You write the page; the renderer seeks it frame by
-frame and mixes its audio offline. No templates, no UI, no private format.
+frame and mixes its audio offline. No timeline, no editor, no private format.
 
 ## Setup
 
@@ -30,7 +30,8 @@ before the first line. `bin/vawe --help` lists every command.
 
 ## Your first page
 
-`bin/vawe new hello` writes a starter like this one:
+`bin/vawe new hello` writes `films/hello/page.html`, `directions.html` and `brief.md`. The starter
+page has this shape (here with a cue added):
 
 ```html
 <!doctype html>
@@ -64,7 +65,8 @@ Draft the hardest two to four seconds first. Hand the draft to a session that di
 only those seconds, critique again. A PASS is written by the critic, never by you.
 
 Matching a reference: `bin/vawe spec <mp4>` writes SPEC.md, mark every line KEEP or CHANGE, rebuild,
-then `bin/vawe critique <page> --ref <mp4>` until it passes (`vawe-reference`).
+then `bin/vawe critique <page> --ref <mp4>` until it passes, and `bin/vawe coverage <film.mp4> --ref <mp4>`
+lists the seconds that still differ (`vawe-reference`).
 
 ## Hard rules for day one
 
@@ -82,4 +84,5 @@ then `bin/vawe critique <page> --ref <mp4>` until it passes (`vawe-reference`).
 - `skills/vawe-page/SKILL.md`: the contract and the ten mistakes a first draft makes.
 - `core/motion/README.md`: springs, keyframe tables, seeded noise.
 - `prompts/README.md`: one template per film type; `engine-doctrine/CRAFT/ROUTING.md` picks it.
+- `prompts/moves/README.md`: moves to copy, each with a 1 s clip.
 - `engine-doctrine/RULES/`: readable-hold, speed-bands, banned-defaults.

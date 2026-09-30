@@ -41,9 +41,10 @@ bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, a
 - Before any page script runs the renderer installs a virtual clock (`Date`, `performance.now`,
   `requestAnimationFrame`, timers and a seeded `Math.random` all follow the seek) and sets
   `<html data-aspect>`, `--vw`/`--vh` and `window.vawe` so one page lays out for
-  `16:9 9:16 1:1 4:5 4:3` (`ASPECT=all` renders every one).
+  `16:9 9:16 1:1 4:5 4:3` (`bin/vawe ship <page> --aspect all` renders every one).
 - Audio is `<audio>` tags with `data-at`, `data-gain`, `data-fade-out`; `loop` is the music bed;
-  `data-synth` picks a voice from `core/audio/kit.mjs`. Mixed offline to -14 LUFS.
+  `data-synth` picks a voice from `core/audio/kit.mjs`. Mixed offline as written; `<meta name="loudness">`
+  opts in to a target.
 - Springs, keyframe tables and seeded noise: `core/motion/springs.js` (`core/motion/README.md`).
 
 The whole contract, and the mistakes a first draft makes, is `skills/vawe-page/SKILL.md`. The house
@@ -112,12 +113,13 @@ blur from fractional subframes, and re-render only the seconds a critique named.
 core/motion/       springs.js (spring, track, approach, kf, springLinear, rng, noise1), curves.js
 core/engine/       page-clock.js (the virtual clock), page-api.js (vawe.onFrame, three.js helpers)
 core/audio/        kit.mjs: the synth voices
-bin/vawe:          the one command: new dev ship critique spec studio check e2e test judge
+bin/vawe:          the one command (`bin/vawe --help`): new dev ship critique compare coverage review spec
+                   studio check doctor moves e2e test judge
 harness/cli/       the verb table and argument parser behind it
-harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views) · ref-spec.mjs
+harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views) · ref-spec.mjs · review.mjs
 quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · doc-refs.mjs
-prompts/           one template per film type, with source and licence
-skills/            vawe-page · vawe-critique · vawe-reference (loaded on demand)
+prompts/           one template per film type, and prompts/moves/ (moves to copy, with clips)
+skills/            vawe-brief · vawe-page · vawe-critique · vawe-reference (loaded on demand)
 engine-doctrine/   RULES/ (readable-hold, speed-bands, banned-defaults) · CRAFT/ · JUDGE.md
 films/             <name>/page.html per film
 out/               rendered mp4s (gitignored)
@@ -126,8 +128,8 @@ out/               rendered mp4s (gitignored)
 ## Docs
 
 New here and want to author? `QUICKSTART.md` (a blank page to a rendered film in one page), then
-`AGENTS.md` (the house rules). Then `prompts/README.md`, `core/motion/README.md`, and
-`engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
+`AGENTS.md` (the house rules). Then `prompts/README.md`, `prompts/moves/README.md`,
+`core/motion/README.md`, and `engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
 
 ## Status and license
 
