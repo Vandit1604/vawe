@@ -6,8 +6,8 @@ group: reference
 
 # prompts/moves/: proven moves to copy
 
-[RECIPES.md](RECIPES.md) joins these moves into eight short films (three brand stings and three product
-stings, one per direction family, a 15 s launch, a kinetic type line), with the beat table, the sound cues and the traps at each seam.
+[RECIPES.md](RECIPES.md) joins these moves into fourteen films (three brand stings and three product
+stings, one per direction family, a 15 s launch, a kinetic type line, and six complete videos of 20 to 30 s: problem to fix, AI demo, feature tour, proof, manifesto, brand reveal), with the beat table, the sound cues and the traps at each seam.
 Each move file has a `Sound:` line under its snippet: the voice and the second to cue it, or none.
 
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from

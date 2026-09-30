@@ -31,5 +31,6 @@ locks to every letter and shakes; under 60 it drifts behind the text. The caret 
 of the width so the eye reads the last 15 or so characters. The `min()` stops the camera from showing
 the empty ground left of the window at the start. Every input is a function of `t`, so the frame
 does not depend on the last one. Blink only after the typing ends, so the tail is alive.
+A typo or a backspace is a lower `n` in the same table (a `[t, text]` state list, latest state with `t` passed), never a mutated string.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
