@@ -29,7 +29,7 @@ Test a change by one question: what would an agent write unprompted, and does th
 |---|---|---|
 | Time | `harness/media/render-page.mjs`, `core/engine/page-clock.js`, `core/engine/page-seek.js` | render-page walks the frames and sets the seek; page-clock replaces `Date`, `performance.now`, `requestAnimationFrame`, timers and `Math.random` before any page script runs; page-seek pauses every animation, sets `currentTime`, calls `window.seek(t)` and sets aspect, `--vw`, `--vh` |
 | Page API | `core/engine/page-api.js` | `window.vawe`, the three.js helpers a page imports |
-| Audio | `harness/media/page-audio.mjs`, `core/audio/kit.mjs` | reads `<audio>` tags, mixes offline to -14 LUFS, synth voices by `data-synth`; nothing plays live |
+| Audio | `harness/media/page-audio.mjs`, `core/audio/kit.mjs` | reads `<audio>` tags, mixes offline as written (`<meta name="loudness">` opts in to a target), synth voices by `data-synth`; nothing plays live |
 | Reference measure | `harness/media/ref-spec.mjs` (pixels), `harness/media/render-spec.mjs` (DOM), `harness/lib/spec-deltas.mjs` (the diff) | SPEC.md, spec.json, deltas.md; `bin/vawe spec` and `critique --ref` call them |
 | Views | `harness/media/see.mjs` and `harness/media/see/*.mjs`, `harness/media/see-views.mjs` | grids, probe, look, layout, word events, phone sheet, strip, loop seam |
 | Checks | `quality/gates/page-check.mjs`, `anim-traps.mjs`, `judge.mjs` | advise; only determinism and a missing waiver reason refuse |
