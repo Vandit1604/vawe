@@ -54,7 +54,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | smear stretch | an elastic cut: shot A's content stretches into streaks on an ease-in, the cut lands at the peak, and shot B snaps back from the streak on an under-damped spring, thinning and bulging like rubber | [smear-stretch.md](smear-stretch.md) | [smear-stretch.mp4](smear-stretch.mp4) |
 | shape morph wipe | the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame | [shape-morph-wipe.md](shape-morph-wipe.md) | [shape-morph-wipe.mp4](shape-morph-wipe.mp4) |
 | spin transition | a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures | [spin-transition.md](spin-transition.md) | [spin-transition.mp4](spin-transition.mp4) |
-| light leak transition | two shots meet through warmth: a generated flare swells on an ease-in, the cut lands on its peak, and the new shot climbs out of the fast exponential tail; no image asset | [light-leak-transition.md](light-leak-transition.md) | [light-leak-transition.mp4](light-leak-transition.mp4) |
+| light leak transition | two shots meet through warmth: three generated warm layers swell over a dark UI on their own clocks, the cut lands on the peak, and the new shot climbs out as they fall faster; no image asset | [light-leak-transition.md](light-leak-transition.md) | [light-leak-transition.mp4](light-leak-transition.mp4) |
 
 ## Point the eye
 
@@ -131,12 +131,12 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through |
+| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through, light leak transition |
 | daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, push blur, smear stretch, ui focus zoom |
 | terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode |
 | swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph |
 | paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
-| dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, light leak transition, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
+| dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade |
 | signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, letter stagger, outline fill, slice shift, word sweep |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid wipe, notification pop, parallax dive, whip pan |
