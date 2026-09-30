@@ -187,6 +187,21 @@ export function holdsBeyondRef(rows, refRuns, refStep, tol = REF_HOLD_TOL) {
   return rows.filter((r) => !matches(r));
 }
 
+/** The text line with the least screen time x ink area over the film. Pure. -> { text, seconds } | null */
+export function leastSeen(samples, step) {
+  const seen = new Map();
+  for (const s of samples) {
+    for (const n of s.nodes.filter(isVisible)) {
+      const g = seen.get(n.group) || { text: n.line, weight: 0, seconds: 0, counted: new Set() };
+      g.weight += n.ink.w * n.ink.h * step * shownShare(n);
+      if (!g.counted.has(s.t)) { g.counted.add(s.t); g.seconds += step; }
+      seen.set(n.group, g);
+    }
+  }
+  const least = [...seen.values()].sort((a, b) => a.weight - b.weight)[0];
+  return least ? { text: least.text, seconds: least.seconds } : null;
+}
+
 const same = (a, b) => Math.abs(a.x - b.x) < MOVE_TOL_PX && Math.abs(a.y - b.y) < MOVE_TOL_PX && Math.abs(a.w - b.w) < MOVE_TOL_PX && Math.abs(a.h - b.h) < MOVE_TOL_PX;
 
 function overshoot(n) {
