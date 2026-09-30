@@ -82,12 +82,15 @@ export function treeSignature(dirs) {
 }
 
 const WARM_TABS = 3;
+export const WARM_HASH = '#vawe-warm';
 
-// A warm tab is one this function left open on a page url, marked with window.__warmSig. A tab whose
-// signature is stale reloads; the oldest tabs past WARM_TABS close.
-async function takeWarmPage(browser, url, sig) {
-  const warm = [];
-  for (const p of await browser.pages()) if (await p.evaluate(() => Boolean(window.__warmSig)).catch(() => false)) warm.push(p);
+// A warm tab is one this function left open on a page url ending in WARM_HASH, marked with
+// window.__warmSig. A tab whose signature is stale reloads; the oldest tabs past WARM_TABS close.
+// Never browser.pages(): it attaches a page (and puppeteer's 800x600 default viewport) to every tab,
+// including another process's render tab mid-capture, which then shoots frames laid out at the wrong size.
+export async function takeWarmPage(browser, url, sig) {
+  const tabs = browser.targets().filter((t) => t.type() === 'page' && t.url().endsWith(WARM_HASH));
+  const warm = (await Promise.all(tabs.map((t) => t.page().catch(() => null)))).filter(Boolean);
   for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url) await p.close().catch(() => {});
   const found = warm.find((p) => !p.isClosed() && p.url() === url);
   const reused = Boolean(found) && (await found.evaluate(() => window.__warmSig)) === sig;
@@ -112,7 +115,7 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   if (insideRoot(REPO_ROOT, abs)) {
     const shared = await connectShared();
     if (shared) {
-      const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}`;
+      const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}${warm ? WARM_HASH : ''}`;
       const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) : '';
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
       await page.setViewport({ width, height, deviceScaleFactor: scale });
