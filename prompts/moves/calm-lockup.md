@@ -5,6 +5,8 @@ keeps moving. Nothing lands hard. The brand settles over 1 s with a blur that cl
 follows 140 ms later, and two soft lights drift behind a lockup that floats 2 percent larger over
 the clip. Clip: [calm-lockup.mp4](calm-lockup.mp4). Demo: [demo/calm-lockup.html](demo/calm-lockup.html).
 
+Use once per film: the drifting lights is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+
 ```html
 <div class="light l1"></div><div class="light l2"></div>
 <div class="lockup"><div class="brand">...mark and name...</div><p class="line">One page in. One film out.</p></div>

@@ -278,7 +278,8 @@ function fontFindings(rows, fps, f) {
 
 async function checkLive(ctx) {
   const { resolveFrame } = await import('../../harness/media/render-page.mjs');
-  const frame = resolveFrame(ctx.page, {});
+  // Device scale 1: the screenshot buffers are indexed by the page's CSS coordinates.
+  const frame = resolveFrame(ctx.page, { final: true });
   const times = Array.from({ length: 8 }, (_, i) => +(ctx.dur * (i + 0.5) / 8).toFixed(3));
   if (Number.isFinite(ctx.spectacle)) times.push(ctx.spectacle + 0.3);
   const rows = await liveSamples(ctx.page, times, frame);

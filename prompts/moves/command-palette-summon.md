@@ -35,6 +35,8 @@ chosen.animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { dur
 palette.animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 180, delay: at.exit, easing: leave, fill: 'forwards' });
 ```
 
+Sound: pluck at 1.34 s into the move, when Enter presses the chosen row (default gain); no tick per key.
+
 Size the app and the palette in one product unit, never in the film's type scale: a palette in
 film sizes comes out as wide as the page with 50 px rows, and nobody has seen that product. At
 1080p the palette is a third of the frame, the way it is on a real screen; fill the page behind it

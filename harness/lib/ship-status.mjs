@@ -1,5 +1,6 @@
 // Pure text and decisions for ship jobs: no I/O, no clock. harness/media/ship-job.mjs feeds it.
 import path from 'node:path';
+import { tasteLines } from './taste-steps.mjs';
 
 export const LIMITS = { staticSec: 1, worldSec: 2, blankSec: 0.3, blankEdgeSec: 0.5, maxProblems: 3 };
 const SAMPLE_FPS = 10;
@@ -52,6 +53,7 @@ export function doneLines(job) {
     lines.push(`final check: ${problems.length} problem${problems.length > 1 ? 's' : ''}, look at these seconds`);
     for (const p of problems.slice(0, LIMITS.maxProblems)) lines.push(`  ${p}`);
   }
+  if (job.outputs?.length) lines.push(...tasteLines('preship'));
   for (const v of job.verdict || []) lines.push(v);
   if (!job.outputs?.length) return lines;
   if (!job.verdict) lines.push(`next: bin/vawe judge ${job.outputs[0]} --fresh`);

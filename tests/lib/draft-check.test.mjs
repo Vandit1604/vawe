@@ -59,3 +59,10 @@ test('the brief line names a missing brief and a template brief, and stays quiet
   assert.match(briefLine('- a [unanswered: default taken]\n- b [unanswered: default taken]\n- c [unanswered: default taken]'), /template defaults/);
   assert.equal(briefLine('- Subject: a made-up brand\n- Length: 5 s'), null);
 });
+
+test('a brief with answered inputs and a few kept defaults is not the template', () => {
+  const answered = '## Inputs\n\n- Subject: a made-up brand\n- Length: 5 s\n- Music: synth cues [unanswered: default taken]\n\n## Sound\n- a [unanswered: default taken]\n- b [unanswered: default taken]\n';
+  assert.equal(briefLine(answered), null);
+  const template = '## Inputs\n\n- URL: x [unanswered: default taken]\n- Promise: y [unanswered: default taken]\n';
+  assert.match(briefLine(template), /template defaults/);
+});

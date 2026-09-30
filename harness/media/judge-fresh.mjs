@@ -9,6 +9,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
+import { parseDirections, rangeProblems } from '../lib/directions.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
@@ -135,20 +136,27 @@ async function prepare(input, stage) {
   return { name, stage, files: [sheet.file, ...keys.map((k) => k.file)], notes, dir };
 }
 
+const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
+Score each direction 1 to 10 for how well its one frame would carry the film the brief asks for, and how far it is from a template.
+Name the strongest with one reason. Then score the axes below for the strongest direction only.`;
+
+const STILLS_JSON = `
+Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"one short line"},{"id":"B",...},{"id":"C",...}], "strongest":"A, B or C", "reason":"one sentence".`;
+
 function buildPrompt(ev, brief) {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
-    `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix.`,
+    `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
   ].filter(Boolean);
-  const kind = ev.stage === 'stills' ? 'still directions for a film' : `a ${ev.stage} cut of a film`;
+  const kind = ev.stage === 'stills' ? 'three still directions for a film' : `a ${ev.stage} cut of a film`;
   return `You are a fresh taste judge. You did not make this work and you own no part of it. You judge ${kind} from the evidence files below.
 Use only the Read tool: open the image files and look at them before you score. Do not guess from file names.
-${ev.stage === 'stills' ? 'The image may show several directions side by side: score the strongest and name the direction you mean.' : 'Open the sheet first, then every key frame at full size.'}
+${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key frame at full size. The sheet is a grid of separate frames; confirm any defect you see on it (an echo, a repeat, a small copy of the frame) on a full-size key frame before you name it.'}
 
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}
 ${optional.length ? `\n${optional.map((o) => `- ${o}`).join('\n')}\n` : ''}
-${freshRubric({ stage: ev.stage })}`;
+${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : ''}`;
 }
 
 function extractJson(text) {
@@ -182,11 +190,13 @@ function finish(ev, raw, ms) {
   const pass = low.length === 0;
   const first = raw.fixFirst || fixes[0]?.fix || null;
   const time = fixes.map((x) => parseFloat(x.at)).find((t) => Number.isFinite(t)) ?? null;
-  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ms, recorded: new Date().toISOString().slice(0, 10) };
+  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
 function report(r) {
   const lines = [`judge --fresh (${r.stage}): ${r.verdict}`, Object.entries(r.scores).map(([k, v]) => `${k} ${v}`).join(', ') + (r.worlds != null ? `; worlds ${r.worlds}` : '')];
+  for (const d of r.directions || []) lines.push(`${d.id} ${d.score}: ${d.note ?? ''}`);
+  if (r.strongest) lines.push(`strongest: ${r.strongest}, ${r.reason ?? 'no reason given'}`);
   for (const x of r.fixes) lines.push(`- ${x.axis} ${x.score}${x.at != null ? ` at ${x.at}` : ''}: ${x.fix}`);
   lines.push(`Fix first: ${r.fixFirst ?? 'nothing'}`, r.verdict);
   return lines.join('\n');
@@ -204,6 +214,8 @@ const brief = templateBrief ? null : briefArg;
 const ext = path.extname(input).toLowerCase();
 const stage = arg('--stage') || (ext === '.mp4' ? 'final' : ext === '.png' || ext === '.jpg' ? 'stills' : 'draft');
 if (!['stills', 'draft', 'final'].includes(stage)) die(`--stage is stills, draft or final, not "${stage}"`, 2);
+
+if (stage === 'stills' && briefArg) for (const p of rangeProblems(parseDirections(fs.readFileSync(briefArg, 'utf8')).slots)) console.log(`range: ${p}`);
 
 const t0 = Date.now();
 const ev = await prepare(input, stage);
