@@ -22,7 +22,8 @@ export const VERBS = [
     name: 'new', summary: 'start a film: films/<name>/page.html and brief.md',
     positional: [{ name: 'name', required: true, help: 'film name, lowercase with dashes' }],
     flags: [
-      { name: 'from', type: 'path', default: 'prompts/brand-launch-from-url.md', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
+      { name: 'from', type: 'path', default: 'the engine-doctrine/CRAFT/ROUTING.md row that --request, the name and --length point at; a sting when none does', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
+      { name: 'request', type: 'string', help: 'the ask in its own words: picks the template when --from is absent, and goes into brief.md' },
       { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
       { name: 'length', type: 'number', help: 'film length in seconds: written to brief.md and the page duration meta' },
       { name: 'aspect', type: 'string', help: `${ASPECT}: written to brief.md and the page aspect meta` },

@@ -23,6 +23,8 @@ for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
 grid.animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1400, easing: 'linear', fill: 'both' });   // the wall pushes in the whole time
 ```
 
+Sound: none; the wave of flips is the seam, and a cue on it is a whoosh on every cut.
+
 Tiles are 1 px larger than their cell: without the overlap, hairline seams show on the settled
 shot. The ground behind the wall is near black, so the gaps at edge-on read as depth, not as
 holes. Eight columns and five rows put a tile near the size of a letter, so the wave slices the type

@@ -5,6 +5,8 @@ curve, one light band crosses it, then the word opens out from behind the mark w
 re-centres. A slow push runs to the last frame, so the lockup is never frozen. Clip:
 [logo-sting.mp4](logo-sting.mp4). Demo: [demo/logo-sting.html](demo/logo-sting.html).
 
+Use once per film: the sheen band is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+
 ```html
 <div class="drift"><div class="lockup">
   <div class="mark"><svg viewBox="0 0 100 100"><path d="M22 32 L36 70 L50 44 L64 70 L78 32"/></svg><div class="sheen"></div></div>

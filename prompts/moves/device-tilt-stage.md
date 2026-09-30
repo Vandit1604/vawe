@@ -29,6 +29,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: bloom at 0.05 s into the move, as the device starts to rise (default gain); nothing on the settle or the bob.
+
 A negative `rotateX` on the device is a camera above the laptop: the deck comes toward the viewer
 and down. A positive one flips the deck up over the screen. Start at least 40 degrees from the rest
 pose or the turn reads as a wobble; rest a little off face-on (-16 and -8) so the deck stays visible.

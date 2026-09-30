@@ -29,6 +29,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; the shape grows from a dot the eye is already on, and the new shot's own entrance takes the cue.
+
 `inset(... round r)` is one clip shape that is a circle when the box is square and r is half its
 side, and a card when r is small, so one property carries the whole morph. Start from a shape at
 least 4 percent of the frame high, or the first third is invisible. The new shot's content moves

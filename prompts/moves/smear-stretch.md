@@ -28,6 +28,8 @@ vawe.onFrame((t) => {
 </script>
 ```
 
+Sound: none; the streak already says speed, and the film keeps its one whoosh for a whip.
+
 Stretch the content, never the shot's ground: a ground squashed below full width shows a gap at the
 edge. The two origins are opposite (A anchored at its left, B at its right), so the streak runs one way
 through the cut. A peak of 8 to 10x turns type into clean streaks; under 5x it reads as a distorted

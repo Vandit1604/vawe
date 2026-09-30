@@ -82,12 +82,15 @@ export function treeSignature(dirs) {
 }
 
 const WARM_TABS = 3;
+export const WARM_HASH = '#vawe-warm';
 
-// A warm tab is one this function left open on a page url, marked with window.__warmSig. A tab whose
-// signature is stale reloads; the oldest tabs past WARM_TABS close.
-async function takeWarmPage(browser, url, sig) {
-  const warm = [];
-  for (const p of await browser.pages()) if (await p.evaluate(() => Boolean(window.__warmSig)).catch(() => false)) warm.push(p);
+// A warm tab is one this function left open on a page url ending in WARM_HASH, marked with
+// window.__warmSig. A tab whose signature is stale reloads; the oldest tabs past WARM_TABS close.
+// Never browser.pages(): it attaches a page (and puppeteer's 800x600 default viewport) to every tab,
+// including another process's render tab mid-capture, which then shoots frames laid out at the wrong size.
+export async function takeWarmPage(browser, url, sig) {
+  const tabs = browser.targets().filter((t) => t.type() === 'page' && t.url().endsWith(WARM_HASH));
+  const warm = (await Promise.all(tabs.map((t) => t.page().catch(() => null)))).filter(Boolean);
   for (const p of warm.slice(0, Math.max(0, warm.length - WARM_TABS + 1))) if (p.url() !== url) await p.close().catch(() => {});
   const found = warm.find((p) => !p.isClosed() && p.url() === url);
   const reused = Boolean(found) && (await found.evaluate(() => window.__warmSig)) === sig;
@@ -96,7 +99,8 @@ async function takeWarmPage(browser, url, sig) {
 }
 
 /**
- * openPreview(pagePath, { width, height, args }) -> { page, url, persistent, close }.
+ * openPreview(pagePath, { width, height, scale, args }) -> { page, url, persistent, close }.
+ * width/height are the CSS viewport; scale is the device scale a screenshot is taken at.
  * With `warm`, the page stays open after close() and the next call on the same url and unchanged files
  * gets it back with `reused: true`; the caller runs `markWarm()` once the page has loaded.
  * `url` is already the right one to `page.goto()`: relative to the shared daemon's REPO_ROOT server
@@ -106,15 +110,15 @@ async function takeWarmPage(browser, url, sig) {
  * RENDER_ARGS) only affects the fallback launch: the shared browser is always launched with PAGE_ARGS,
  * the one flag a rapid screenshot loop (render-page.mjs) needs and a single still never does.
  */
-export async function openPreview(pagePath, { width = 1920, height = 1080, args = RENDER_ARGS, warm = false } = {}) {
+export async function openPreview(pagePath, { width = 1920, height = 1080, scale = 1, args = RENDER_ARGS, warm = false } = {}) {
   const abs = path.resolve(pagePath);
   if (insideRoot(REPO_ROOT, abs)) {
     const shared = await connectShared();
     if (shared) {
-      const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}`;
+      const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}${warm ? WARM_HASH : ''}`;
       const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) : '';
       const { page, reused } = warm ? await takeWarmPage(shared.browser, url, sig) : { page: await shared.browser.newPage(), reused: false };
-      await page.setViewport({ width, height, deviceScaleFactor: 1 });
+      await page.setViewport({ width, height, deviceScaleFactor: scale });
       if (warm) return { page, url, persistent: true, reused, markWarm: () => page.evaluate((v) => { window.__warmSig = v; }, sig), close: async () => shared.browser.disconnect() };
       // `disconnect()`, never `close()`: this call's own CDP connection to the shared browser, not the
       // browser itself. Closing only the page and never disconnecting left the connection's open socket
@@ -125,7 +129,7 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, args 
   }
   const root = pageRoot(abs);
   const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width, height, args });
+  const { page, close: closePage } = await launchPage({ width, height, scale, args });
   const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}`;
   return { page, url, persistent: false, close: async () => { await closePage(); closeServer(); } };
 }
