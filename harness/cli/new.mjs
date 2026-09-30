@@ -4,6 +4,7 @@
 // families, a picked line), then the template's tagged sections as headings.
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { UsageError } from './parse.mjs';
 import { pickTemplate, readRouting, ROUTING } from './route.mjs';
 import { tasteLines } from '../lib/taste-steps.mjs';
@@ -230,7 +231,8 @@ function chooseTemplate(root, { from, request, name, title, length }) {
 // The starter's face goes into the film's own assets folder: a film carries its files.
 function copyFace(root, dir, face) {
   const src = path.join(root, 'assets', 'fonts', face.font);
-  if (!fs.existsSync(src)) throw new UsageError(`${path.relative(root, src)} is missing; fetch the bundled faces: node generators/media/fonts.mjs`);
+  if (!fs.existsSync(src)) spawnSync(process.execPath, [path.join(root, 'generators', 'media', 'fonts.mjs')], { cwd: root, stdio: 'inherit' });
+  if (!fs.existsSync(src)) throw new UsageError(`${path.relative(root, src)} is missing and the fetch failed; run: node generators/media/fonts.mjs`);
   fs.mkdirSync(path.join(dir, 'assets'), { recursive: true });
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
