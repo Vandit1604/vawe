@@ -5,9 +5,9 @@ import { blankRuns, isFlat, problemsOf } from '../lib/ship-status.mjs';
 import { sampleTimes } from '../lib/draft-check.mjs';
 
 /** Static windows, held worlds and blank runs of one video, worst first. Throws when ffmpeg fails. */
-export function videoProblems(mp4) {
+export function videoProblems(mp4, authoring = {}) {
   const feats = readFeatures(mp4);
-  return problemsOf(summarize(feats), blankRuns(feats, isFlat));
+  return problemsOf(summarize(feats), blankRuns(feats, isFlat), undefined, authoring);
 }
 
 // Runs inside the page: one { text, fontPx } per visible text node. fontPx includes ancestor transform scale.

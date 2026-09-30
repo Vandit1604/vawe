@@ -11,7 +11,7 @@ test('samePage: relative and absolute spellings of one page match', () => {
 
 test('problemsOf: worst first, seconds named, small things ignored', () => {
   const out = problemsOf(stats({ duration: 10, turns: [{ t: 6.5 }], static: [{ a: 1, b: 2.5, len: 1.5 }, { a: 8, b: 8.5, len: 0.5 }] }), [{ a: 4, b: 4.4 }]);
-  assert.deepEqual(out, ['world held 0.0-6.5 s (6.5 s)', 'world held 6.5-10.0 s (3.5 s)', 'static window 1-2.5 s (1.5 s)', 'blank frame 4.0-4.4 s']);
+  assert.deepEqual(out, ['world held 0.0-6.5 s (6.5 s)', 'world held 6.5-10.0 s (3.5 s)', 'static window 1-2.5 s (1.5 s, limit 0.5 s): keep one thing moving (a slow drift on the ground or the hero), or declare the hold with "dead-air@1-2.5" in authoring.allow and a _why', 'blank frame 4.0-4.4 s']);
 });
 
 test('problemsOf: a clean film has none', () => {

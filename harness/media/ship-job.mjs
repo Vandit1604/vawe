@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
 import { defaultOut } from './render-page.mjs';
 import { videoProblems } from './draft-check.mjs';
+import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { samePage, doneLines } from '../lib/ship-status.mjs';
 
 const WAIT_CAP_MS = 100_000;
@@ -65,7 +66,7 @@ function runJob(id) {
   writeJob({ ...job, status: 'running', pid: process.pid });
   child.on('close', (code) => {
     if (code !== 0) return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
-    const checked = { ...readJob(id), ...finalCheck(outputsOf(logText(job))) };
+    const checked = { ...readJob(id), ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
     if (!checked.judge || !checked.outputs.length) return writeJob({ ...checked, status: 'done', endedAt: Date.now() });
     writeJob({ ...checked, status: 'judging' });
     judgeFinal(checked, (verdict) => writeJob({ ...readJob(id), status: 'done', verdict, endedAt: Date.now() }));
@@ -89,9 +90,9 @@ const verdictLines = (text, code) => {
 
 const outputsOf = (text) => text.split(/[\r\n]+/).filter((l) => l.startsWith('✓ ')).map((l) => l.slice(2).split(':')[0]);
 
-function finalCheck(outputs) {
+function finalCheck(outputs, authoring) {
   try {
-    const problems = outputs.flatMap((mp4) => videoProblems(mp4).map((p) => (outputs.length > 1 ? `${path.basename(mp4)}: ${p}` : p)));
+    const problems = outputs.flatMap((mp4) => videoProblems(mp4, authoring).map((p) => (outputs.length > 1 ? `${path.basename(mp4)}: ${p}` : p)));
     return { outputs, problems };
   } catch (e) {
     return { outputs, problems: [], checkError: e.message };
