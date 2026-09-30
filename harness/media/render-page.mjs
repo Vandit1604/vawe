@@ -167,10 +167,12 @@ const PIXEL_W = 64;
 // Mean absolute luma difference (0-255) between consecutive frames downscaled to PIXEL_W wide, one
 // low-quality screenshot per frame. An estimate of "how much of the picture moved", enough to tell a
 // held frame from a fast one, decoded inside the page so the renderer needs no image library.
-async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers) {
+async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers, stallMs) {
   const speeds = new Array(frames);
-  const lumaAt = async (page, i) => {
+  const lumaAt = async (page, i, mark) => {
+    mark('seek');
     await seekAll(page, from * 1000 + (i / fps) * 1000);
+    mark('speed screenshot');
     const shot = await page.screenshot({ type: 'jpeg', quality: 40, encoding: 'base64', clip: { x: 0, y: 0, width: frame.width, height: frame.height, scale: PIXEL_W / (frame.width * frame.scale) } });
     return page.evaluate(async (b64, w) => {
       const blob = await (await fetch(`data:image/jpeg;base64,${b64}`)).blob();
@@ -184,15 +186,15 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
       return out;
     }, shot, PIXEL_W);
   };
-  await runShards(pagePath, frame, frames, workers, async (page, i, local) => {
-    local.prev ??= await lumaAt(page, i);
-    const next = await lumaAt(page, i + 1);
+  await runShards(pagePath, frame, frames, workers, async (page, i, local, mark) => {
+    local.prev ??= await lumaAt(page, i, mark);
+    const next = await lumaAt(page, i + 1, mark);
     let sum = 0;
     for (let k = 0; k < next.length; k++) sum += Math.abs(next[k] - local.prev[k]);
     speeds[i] = sum / next.length;
     local.prev = next;
     return 2;
-  }, { fps, from });
+  }, { fps, from }, stallMs);
   return speeds;
 }
 
@@ -210,10 +212,10 @@ async function frameSubframes(page, job) {
 }
 
 // Returns bucketed subframe counts per output frame.
-export async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) {
+export async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs }) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
   if (boxes) return clampSegments(boxes.map((px) => subframesForTravel(px * frame.scale, blur)));
-  return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers), blur, PIXEL_BANDS));
+  return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers, stallMs), blur, PIXEL_BANDS));
 }
 
 // A fast move blended from too few subframes shows as separate copies of the object (3 ghosts at 3
@@ -245,46 +247,79 @@ function clampSegments(kArr, cap = 200) {
   return kArr.map(() => maxK);
 }
 
-// Runs work(page, i, local) for every frame 0..frames-1 in fixed SLICE_FRAMES slices, `workers` slices at
-// a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state.
-// A slice whose browser or page dies is restarted once from its first frame (returns the restarted
-// slices as "lo-hi s" strings); a second death exits 2. `clock` is { fps, from } and only names the time range.
+// Runs work(page, i, local, mark) for every frame 0..frames-1 in fixed SLICE_FRAMES slices, `workers` slices at
+// a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state;
+// work calls mark('<step>') before each await so a stall can name it.
+// A slice whose browser or page dies, or that makes no progress for `stallMs`, is restarted once from its first
+// frame (returns the restarted slices as "lo-hi s" strings); a second death exits 2, a second stall throws.
+// `clock` is { fps, from } and only names the time range.
 const LOST_PAGE = /Connection closed|Target closed|No target with given id|Session closed|Protocol error|timed out|timeout/i;
 
-async function runShards(pagePath, frame, frames, workers, work, clock) {
+// Measured slowest step: 0.38 s (a colour-sting draft screenshot); awaitFonts gives up at 10 s. A step at 60 s
+// is stuck, and the 30 min CDP protocol timeout would fire far too late.
+export const STALL_MS = 60000;
+
+class StallError extends Error {}
+
+async function runShards(pagePath, frame, frames, workers, work, clock, stallMs = STALL_MS) {
   const slices = [];
   for (let lo = 0; lo < frames; lo += SLICE_FRAMES) slices.push([lo, Math.min(frames, lo + SLICE_FRAMES)]);
   const restarted = [];
   let next = 0;
   const range = ([lo, hi]) => `${(clock.from + lo / clock.fps).toFixed(2)}-${(clock.from + hi / clock.fps).toFixed(2)}s`;
-  const runSliceOnce = async ([lo, hi]) => {
-    const local = {};
-    let opened = null;
-    let sinceOpen = 0;
-    try {
-      for (let i = lo; i < hi; i++) {
-        if (opened && sinceOpen >= RECYCLE_SUBFRAMES) { await opened.close().catch(() => {}); opened = null; }
-        if (!opened) {
-          opened = await openPage(pagePath, frame);
-          await opened.page.goto(opened.url, { waitUntil: 'load' });
-          sinceOpen = 0;
+  const runSliceOnce = async ([lo, hi], worker) => {
+    const at = { frame: lo, step: 'open page', since: Date.now(), stuck: false, opened: null };
+    const mark = (step, i = at.frame) => {
+      if (at.stuck) throw new StallError('abandoned after a stall');
+      Object.assign(at, { step, frame: i, since: Date.now() });
+    };
+    const loop = (async () => {
+      const local = {};
+      let sinceOpen = 0;
+      try {
+        for (let i = lo; i < hi; i++) {
+          if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await at.opened.close().catch(() => {}); at.opened = null; }
+          if (!at.opened) {
+            mark('open page', i);
+            at.opened = await openPage(pagePath, frame);
+            mark('load page', i);
+            await at.opened.page.goto(at.opened.url, { waitUntil: 'load' });
+            sinceOpen = 0;
+          }
+          mark('frame', i);
+          sinceOpen += await work(at.opened.page, i, local, (step) => mark(step, i));
         }
-        sinceOpen += await work(opened.page, i, local);
-      }
-    } finally { if (opened) await opened.close().catch(() => {}); }
+      } finally { if (at.opened) await at.opened.close().catch(() => {}); }
+    })();
+    let timer;
+    const stalled = new Promise((_, reject) => {
+      timer = setInterval(() => {
+        const idle = Date.now() - at.since;
+        if (idle < stallMs) return;
+        at.stuck = true;
+        if (at.opened) at.opened.close().catch(() => {});
+        const t = (clock.from + at.frame / clock.fps).toFixed(2);
+        reject(new StallError(`render stalled: worker ${worker}, frame ${at.frame} (${t} s), in ${at.step} for ${(idle / 1000).toFixed(0)} s`));
+      }, Math.min(1000, stallMs / 4));
+    });
+    loop.catch(() => {});
+    try { await Promise.race([loop, stalled]); } finally { clearInterval(timer); }
   };
-  const runSlice = async (slice) => {
-    try { await runSliceOnce(slice); } catch (e) {
-      if (!LOST_PAGE.test(String(e && e.message))) throw e;
+  const runSlice = async (slice, worker) => {
+    try { await runSliceOnce(slice, worker); } catch (e) {
+      const stall = e instanceof StallError;
+      if (!stall && !LOST_PAGE.test(String(e && e.message))) throw e;
+      if (stall) console.error(`${e.message}; restarting slice ${range(slice)} once`);
       restarted.push(range(slice));
-      try { await runSliceOnce(slice); } catch (e2) {
+      try { await runSliceOnce(slice, worker); } catch (e2) {
+        if (e2 instanceof StallError) throw new InvariantError([`${e2.message}, the second time on slice ${range(slice)}: the page never finished that step (a window.seek or onFrame hook that never resolves, a font or image that never loads), or the browser is starved`]);
         if (!LOST_PAGE.test(String(e2 && e2.message))) throw e2;
         die(`slice ${slice[0]}-${slice[1]} (${range(slice)}) lost its page twice: another process closed the shared browser, or the page crashed (${e2.message})`, 2);
       }
     }
   };
-  const lane = async () => { while (next < slices.length) await runSlice(slices[next++]); };
-  await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, lane));
+  const lane = async (worker) => { while (next < slices.length) await runSlice(slices[next++], worker); };
+  await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1)));
   return restarted;
 }
 
@@ -298,25 +333,29 @@ const stillKey = () => {
 };
 
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe) {
-  return runShards(pagePath, frame, frames, workers, async (page, i, local) => {
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, stallMs) {
+  return runShards(pagePath, frame, frames, workers, async (page, i, local, mark) => {
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
       const file = path.join(tmpDir, `f${String(subframeStart[i] + j).padStart(6, '0')}.png`);
+      mark('seek');
       await page.evaluate((t) => window.__pageSeek(t / 1000), baseMs + (j / k) * SHUTTER * (1000 / fps));
+      mark('still key');
       const key = await page.evaluate(stillKey);
       const reused = key !== null && key === local.key;
       if (reused) fs.linkSync(local.file, file);
       else {
+        mark('settle (fonts, image decode, two paints)');
         await settle(page);
+        mark('screenshot');
         await page.screenshot({ path: file, type: 'png', optimizeForSpeed: true });
       }
       Object.assign(local, { key, file });
       onSubframe(i, reused);
     }
     return k;
-  }, { fps, from });
+  }, { fps, from }, stallMs);
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -546,7 +585,7 @@ async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) 
  * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
  * frame gets what its fastest move needs, a still frame 1), from (0, seconds into the page's own timeline the
  * render starts at), durArg (seconds rendered from `from`; defaults to the page's own <meta
- * name="duration"> minus `from`), progress (false; prints a single overwriting capture-progress line).
+ * name="duration"> minus `from`), progress (false; prints a single overwriting capture-progress line), stallMs (STALL_MS; no progress this long restarts a slice).
  */
 export async function renderPage(pagePath, outPath, opts = {}) {
   const { fps = 30, blur = 1, durArg = null, from = 0, progress = false, final = false } = opts;
@@ -584,7 +623,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
 
     const workers = opts.workers || defaultWorkers();
     const tPre = Date.now();
-    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) : Array(frames).fill(1);
+    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs }) : Array(frames).fill(1);
     const subframeStart = new Array(frames + 1);
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
@@ -597,7 +636,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const tick = progress ? setInterval(() => {
       process.stdout.write(`\r  capturing ${doneSub}/${totalSub} subframe(s)...`);
     }, 1000) : null;
-    const restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; });
+    const restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, opts.stallMs);
     if (tick) { clearInterval(tick); process.stdout.write(`\r${' '.repeat(40)}\r`); }
     const captureMs = Date.now() - t0;
 
