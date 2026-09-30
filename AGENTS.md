@@ -58,7 +58,8 @@ PASS is never self-recorded.
 - Judges name template devices: light beams, lens streaks, sheen bands, accent bars, rule lines. One per film.
 - The same seam move twice reads as a template, even in another direction. Change the move.
 - A crossfade between two busy frames goes grey and muddy. Cut, or wipe on the motion.
-- First drafts score about 6/10 on motion: one move per beat at one speed. Overlap a slower second move.
+- First drafts score about 6/10 on motion: one move per beat at one speed. Move with
+  `core/motion/presets.js` (`enter`, `leave`, `stagger`, `layer`, `BANDS`), as the starter does.
 - Agents read the card once and forget it: read the lines each command prints before the next edit.
 - Also banned unless the brief asks: a centred title on a gradient, corner labels, glow on UI text,
   particles, camera shake, gradient text, fake product UI, an em dash on screen, a hook over 12 words.

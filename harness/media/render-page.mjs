@@ -56,6 +56,7 @@ import { directionsLines } from '../lib/directions.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
+import { runMotionCollector, motionLint, unwaived, lintLines } from '../lib/motion-lint.mjs';
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
 
@@ -520,6 +521,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
     if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
+    const motion = opts.probe ? await runMotionCollector(page) : null;
     const probe = opts.probe ? await sampleText(page, dur, (ms) => seekAll(page, ms)) : null;
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
@@ -564,7 +566,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     else fs.renameSync(tmpOut, outPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
     const level = opts.probe && !mixed ? await mixLevel(page, pagePath, dur) : null;
-    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level };
+    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
@@ -601,13 +603,19 @@ function readBrief(pagePath) {
   try { return fs.readFileSync(path.join(path.dirname(path.resolve(pagePath)), 'brief.md'), 'utf8'); } catch { return null; }
 }
 
-function printDraftCheck(mp4, pagePath, { probe, level }) {
+function printMotionLint(pagePath, motion) {
+  const lines = lintLines(unwaived(motionLint(motion), pageAuthoring(pagePath)));
+  console.log(lines.length ? ['motion lint (advice; waive a line with its code in authoring.allow and a _why):', ...lines.map((l) => `- ${l}`)].join('\n') : 'motion lint: clean');
+}
+
+function printDraftCheck(mp4, pagePath, { probe, level, motion }) {
   let video = [];
   try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
   const problems = mergeProblems(video, textProblems(probe.samples, probe));
   const brief = readBrief(pagePath);
   const sound = soundLine(level);
   console.log(draftCheckLines(problems, sound, briefLine(brief)).join('\n'));
+  printMotionLint(pagePath, motion);
   for (const line of directionsLines(brief, path.relative(process.cwd(), path.dirname(path.resolve(pagePath))))) console.log(line);
   const taste = ['', ...draftTasteLines([...problems, sound].filter(Boolean))];
   if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
