@@ -21,7 +21,7 @@ This file adds only what you would get wrong on your own. One command runs every
   before your scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Audio is `<audio>` tags, mixed offline as written (about -20 LUFS at default gains): `src` + `data-at`
   (s), `data-gain` (dB), `data-fade-out`; `loop` is the music bed; `data-synth="pluck"` picks a voice
-  (`bin/vawe sounds` lists them; `bin/vawe fonts` lists the free faces); `data-role="vo"` ducks the bed.
+  (`bin/vawe sounds`, `bin/vawe fonts` list them); `data-role="vo"` ducks the bed.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
 - `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
@@ -29,8 +29,8 @@ This file adds only what you would get wrong on your own. One command runs every
 
 ## The loop  `[live: harness/live/stage-say.mjs]`
 
-Read `engine-doctrine/TASTE-CARD-DIGEST.md` first (15 rules, one line each). Each command prints the taste rules for its step; the full card (`engine-doctrine/TASTE-CARD.md`) is what the judge
-scores against, and the place for depth. A hook names the next command for the page film you edited last.
+Read `engine-doctrine/TASTE-CARD-DIGEST.md` first. Each command prints the taste rules for its step. The
+judge scores the full `engine-doctrine/TASTE-CARD.md`. A hook names the next command for the page film you edited last.
 
 | # | stage | the command |
 |---|---|---|
@@ -74,6 +74,6 @@ Checks advise; only determinism and a missing reason refuse.
 Every effect composes; none is a special case. Run `bin/vawe e2e` (about 4 s) before and after.
 Framework agents: `harness/dev/AGENT-TASK.md`. Comments hold only a fact the code cannot show.
 
-Where to look: `prompts/README.md` (a template per film type), `prompts/moves/README.md` (index of moves to copy; group tables in `GROUPS.md`,
+Where to look: `prompts/README.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
 with clips; `prompts/moves/RECIPES.md` chains them), `core/motion/README.md` (springs, curves, noise),
 `engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script).
