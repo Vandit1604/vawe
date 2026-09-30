@@ -1,0 +1,39 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.1">
+<title>move: spotlight dim</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 600 3.4vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .tile { position: absolute; width: 35vw; height: 34vh; background: var(--card); border-radius: 2vh; padding: 4vh 2.4vw; box-sizing: border-box; }
+  .tile h2 { margin: 0 0 3vh; font-size: 3vh; color: var(--dim); font-weight: 600; }
+  .tile b { display: block; font-size: 11vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+  .t1 { left: 14vw; top: 14vh; } .t2 { left: 51vw; top: 14vh; } .t3 { left: 14vw; top: 52vh; } .t4 { left: 51vw; top: 52vh; }
+  /* the hole is the spotlight: its shadow is the dim, so nothing but the target is left lit */
+  .hole { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; border-radius: 0; box-shadow: 0 0 0 100vmax rgba(10, 9, 13, 0.8); pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="tile t1"><h2>renders today</h2><b>128</b></div>
+<div class="tile t2"><h2>median render</h2><b>41 s</b></div>
+<div class="tile t3"><h2>uptime, 30 days</h2><b>99.98%</b></div>
+<div class="tile t4"><h2>queue</h2><b>3</b></div>
+<div class="hole"></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut);
+const pad = '0.6vh';
+document.querySelector('.hole').animate([
+  { left: '0px', top: '0px', width: '100vw', height: '100vh', borderRadius: '0px' },
+  { left: `calc(14vw - ${pad})`, top: `calc(52vh - ${pad})`, width: `calc(35vw + 2 * ${pad})`, height: `calc(34vh + 2 * ${pad})`, borderRadius: '2.6vh' }],
+  { duration: 800, delay: 150, easing: settle, fill: 'both' });
+// the lit tile leans in a little, on the same curve
+document.querySelector('.t3').animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>
