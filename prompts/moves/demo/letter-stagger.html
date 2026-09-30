@@ -1,0 +1,30 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1">
+<meta name="blank" content="0-0.1">
+<title>move: per-letter stagger</title>
+<style>
+  :root { --paper: #f4f1ea; --ink: #14161a; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  body { display: grid; place-items: center; font: 700 16vh/1 system-ui, sans-serif; color: var(--ink); }
+  h1 span { display: inline-block; white-space: pre; }
+</style>
+</head>
+<body>
+<h1>staggered</h1>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const h1 = document.querySelector('h1');
+const letters = [...h1.textContent].map((ch) => Object.assign(document.createElement('span'), { textContent: ch }));
+h1.replaceChildren(...letters);
+const settle = curveToLinear(CURVES.expoOut);
+// 45 ms per letter: inside the 30 to 80 ms band, so the group never lands on one frame
+letters.forEach((s, i) => s.animate(
+  [{ translate: '0 0.6em', opacity: 0 }, { translate: '0 0', opacity: 1 }],
+  { duration: 550, delay: 100 + i * 45, easing: settle, fill: 'both' },
+));
+</script>
+</body>
+</html>
