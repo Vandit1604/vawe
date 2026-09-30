@@ -45,6 +45,7 @@ This index lists the built ones, in the same groups.
 | slice shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | [slice-shift.md](slice-shift.md) | [slice-shift.mp4](slice-shift.mp4) |
 | type fill transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | [type-fill-transition.md](type-fill-transition.md) | [type-fill-transition.mp4](type-fill-transition.mp4) |
 | colour block wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | [color-block-wipe.md](color-block-wipe.md) | [color-block-wipe.mp4](color-block-wipe.mp4) |
+| zoom through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | [zoom-through.md](zoom-through.md) | [zoom-through.mp4](zoom-through.mp4) |
 
 ## Point the eye
 
@@ -100,6 +101,7 @@ This index lists the built ones, in the same groups.
 | tear one shot off to show the next | [slice-shift](slice-shift.md) |
 | grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
 | carry a cut on a brand colour | [color-block-wipe](color-block-wipe.md) |
+| enter the next shot through a part of this one | [zoom-through](zoom-through.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
