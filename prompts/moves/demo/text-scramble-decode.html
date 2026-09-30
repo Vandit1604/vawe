@@ -1,0 +1,60 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<title>move: text scramble decode</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .shell { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: calc(var(--u) * 132); display: flex; flex-direction: column; gap: var(--s3); padding: var(--s5) var(--s5) var(--s4); }
+  .bar { display: flex; align-items: center; justify-content: space-between; font: 500 var(--t-small)/1 var(--mono); color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
+  .line { display: flex; align-items: baseline; gap: var(--s3); font: 800 calc(var(--u) * 11)/1.05 var(--mono); letter-spacing: -0.02em; white-space: pre; }
+  .line b { color: var(--accent); font-weight: 800; }
+  .name span { display: inline-block; color: var(--muted); }
+  .status { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--mono); color: var(--ink); height: var(--t-body); }
+  .status .icon { color: var(--accent); width: calc(var(--u) * 5); height: calc(var(--u) * 5); }
+  .status .icon path { stroke-dasharray: 24; stroke-dashoffset: 24; }
+</style>
+</head>
+<body>
+<div class="shell card">
+  <div class="bar"><span>operator lookup</span><span class="clock">decoding</span></div>
+  <div class="line"><b>&gt;_</b><span class="name"></span></div>
+  <div class="status"><svg class="icon bold" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2 9.3-9.4"/></svg><span>identity verified</span></div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s);
+const settle = curveToLinear(CURVES.expoOut);
+const TARGET = 'NOOR HALVORSEN', GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#$%&*+<>?/=', FPS = 24, SEED = 41;
+const start = 0.4, gap = 0.1, flash = 0.14;
+
+const name = q('.name');
+name.innerHTML = [...TARGET].map(() => '<span></span>').join('');
+const cells = [...name.children];
+// each letter locks at its own time, left to right, with a seeded wobble of up to 40 ms
+const lockAt = [...TARGET].map((_, i) => start + i * gap + rng(SEED + i)() * 0.04);
+// the glyph on show is a hash of (letter, 24 fps step), never Math.random, so a seek to any t shows the same string
+const glyph = (i, step) => { const r = rng(Math.imul(i + 1, 0x9e3779b1) ^ Math.imul(step + 1, 0x85ebca6b))(); return GLYPHS[Math.floor(r * GLYPHS.length)]; };
+const DONE = start + (TARGET.length - 1) * gap + 0.08;
+
+q('.shell').animate([{ translate: '-50% -46%', opacity: 0 }, { translate: '-50% -50%', opacity: 1 }], { duration: 420, delay: 60, easing: settle, fill: 'both' });
+q('.status').animate([{ translate: '0 1.2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 320, delay: DONE * 1000 + 160, easing: settle, fill: 'both' });
+q('.status path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 280, delay: DONE * 1000 + 260, easing: settle, fill: 'both' });
+
+vawe.onFrame((t) => {
+  const step = Math.floor(t * FPS);
+  cells.forEach((c, i) => {
+    const ch = TARGET[i], since = t - lockAt[i];
+    if (ch === ' ') { c.textContent = ' '; return; }
+    const locked = since >= 0;
+    c.textContent = locked ? ch : glyph(i, step);
+    c.style.color = !locked ? '' : since < flash ? 'var(--accent)' : 'var(--ink)';
+  });
+  q('.clock').textContent = t < DONE ? 'decoding' : 'locked';
+});
+</script>
+</body>
+</html>

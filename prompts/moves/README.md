@@ -32,12 +32,12 @@ One row per job, best move first. Every built move is in this table.
 | type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
 | land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
-| decide a name or number on screen | [flap-resolve](flap-resolve.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |
+| decide a name or number on screen | [flap-resolve](flap-resolve.md), [text-scramble-decode](text-scramble-decode.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |
 | point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md) |
 | change what a word means | [weight-morph](weight-morph.md) |
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
 | change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [speed-ramp-freeze](speed-ramp-freeze.md), [smear-stretch](smear-stretch.md) |
-| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md) |
+| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md), [light-leak-transition](light-leak-transition.md) |
 | change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md), [spin-transition](spin-transition.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
@@ -46,11 +46,13 @@ One row per job, best move first. Every built move is in this table.
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md), [command-palette-summon](command-palette-summon.md) |
 | show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md), [device-tilt-stage](device-tilt-stage.md) |
 | show an AI product answering | [ai-stream-response](ai-stream-response.md) |
+| show an AI agent doing several steps | [agent-progress](agent-progress.md) |
+| show an edit and its result in one frame | [panel-live-sync](panel-live-sync.md) |
 | prove a number | [count-up](count-up.md), [chart-build](chart-build.md) |
 | prove a change with a picture | [before-after-wipe](before-after-wipe.md) |
 | end on the brand | [wordmark-cascade](wordmark-cascade.md), [logo-sting](logo-sting.md), [mark-trace](mark-trace.md) |
 | end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
-| end on an action | [cta-pop](cta-pop.md) |
+| end on an action | [cta-pop](cta-pop.md), [cta-morph-press](cta-morph-press.md) |
 | hand the product to the brand | [ui-strip-away](ui-strip-away.md) |
 | prove it with customers | [logo-wall](logo-wall.md) |
 | show the problem, then the fix | [overwhelm-collapse](overwhelm-collapse.md) |
@@ -58,6 +60,9 @@ One row per job, best move first. Every built move is in this table.
 | make many things read as one gesture | [grid-stagger-wave](grid-stagger-wave.md) |
 | tour several features in one space | [pan-stations](pan-stations.md) |
 | hit one detail on a beat | [crash-zoom](crash-zoom.md) |
+| replace a line with the answer, by impact | [ticker-takeover](ticker-takeover.md) |
+| say it works for everyone while the brand stays still | [anchor-cycle](anchor-cycle.md) |
+| name the person on screen | [lower-third](lower-third.md) |
 
 ## Groups
 

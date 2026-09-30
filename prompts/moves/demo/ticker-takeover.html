@@ -1,0 +1,66 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="brutal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<title>move: ticker takeover</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .group { position: absolute; left: calc(var(--u) * 10); top: 50%; translate: 0 -50%; display: flex; flex-direction: column; align-items: flex-start; gap: var(--s3); transform-origin: 100% 50%; }
+  .lead { font: 800 calc(var(--u) * 9)/1 var(--head); letter-spacing: -0.03em; white-space: nowrap; min-height: 1em; }
+  .caret { display: inline-block; width: 0.42em; height: 0.82em; margin-left: 0.08em; background: var(--ink); vertical-align: -0.04em; }
+  .slot { position: relative; height: calc(var(--u) * 16); width: calc(var(--u) * 64); overflow: hidden; padding: 0 var(--s3); background: var(--surface); box-shadow: var(--ring), var(--lift); }
+  .slot span { position: absolute; left: var(--s3); top: 0; height: 100%; display: flex; align-items: center; font: 800 calc(var(--u) * 9)/1 var(--head); letter-spacing: -0.03em; white-space: nowrap; color: var(--accent); opacity: 0; }
+  .hero { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid; place-items: center; width: calc(var(--u) * 78); height: calc(var(--u) * 44); background: var(--accent); color: var(--on-accent); box-shadow: var(--ring), var(--lift); filter: url(#streak); }
+  .hero b { font: 800 calc(var(--u) * 17)/1 var(--head); letter-spacing: -0.04em; }
+  .hero i { position: absolute; left: var(--s3); top: var(--s3); font: 700 var(--t-small)/1 var(--mono); font-style: normal; letter-spacing: 0.04em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><filter id="streak" x="-40%" y="-10%" width="180%" height="120%"><feGaussianBlur id="streak-blur" stdDeviation="0 0"/></filter></svg>
+<div class="group">
+  <div class="lead"><span class="typed"></span><span class="caret"></span></div>
+  <div class="slot"><span>spreadsheet</span><span>doc thread</span><span>chat app</span></div>
+</div>
+<div class="hero"><i>Meet</i><b>Plinth</b></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
+const settle = curveToLinear(CURVES.expoOut), leave = curveToLinear((u) => u * u * u);
+const clamp = (u) => Math.min(1, Math.max(0, u));
+const W = innerWidth, unit = innerHeight / 100, LEAD = 'Your work lives in a';
+const group = q('.group'), hero = q('.hero'), blur = q('#streak-blur');
+q('.typed').textContent = LEAD;
+const groupRight = group.getBoundingClientRect().right, heroW = hero.getBoundingClientRect().width;
+const at = { type: [0.15, 0.95], words: [1.0, 1.5, 2.0], hit: 2.4, settle: 1.0 };   // seconds
+
+// the slot rolls like a ticker: the old word leaves up in 140 ms, the next rises in 300 ms
+qa('.slot span').forEach((w, i) => {
+  const t0 = at.words[i] * 1000, t1 = at.words[i + 1] * 1000;
+  w.animate([{ opacity: 0, translate: '0 70%' }, { opacity: 1, translate: '0 0' }], { duration: 300, delay: t0, easing: settle, fill: 'both' });
+  if (t1) w.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 -70%' }], { duration: 140, delay: t1 - 140, easing: leave, fill: 'forwards' });
+});
+q('.slot').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: at.words[0] * 1000 - 1, fill: 'both' });
+
+// one pure function of t: the hero crashes in, the text group is pushed by its left edge, then carries on out of the frame
+vawe.onFrame((t) => {
+  const n = Math.round(LEAD.length * clamp((t - at.type[0]) / (at.type[1] - at.type[0])));
+  q('.typed').textContent = LEAD.slice(0, n);
+  q('.caret').style.opacity = t < at.words[0] ? 1 : 0;
+
+  const u = clamp((t - at.hit) / at.settle), p = CURVES.expoOut(u);
+  const x0 = W / 2 + heroW / 2, heroX = x0 * (1 - p);
+  hero.style.translate = `calc(-50% + ${heroX.toFixed(1)}px) -50%`;
+  hero.style.visibility = t < at.hit ? 'hidden' : 'visible';
+  blur.setAttribute('stdDeviation', `${(unit * 5 * Math.max(0, 1 - u * 3.2) ** 2).toFixed(2)} 0`);
+
+  const heroLeft = W / 2 - heroW / 2 + heroX, follow = Math.min(0, heroLeft - groupRight - unit * 2);
+  const carry = -W * 0.9 * (1 - (1 - clamp((t - at.hit - 0.17) / 1.2)) ** 2);
+  const x = t < at.hit ? 0 : Math.min(follow, carry);
+  group.style.transform = `translateX(${x.toFixed(1)}px) rotate(${(-4 * clamp(-x / (W * 0.4))).toFixed(2)}deg)`;
+});
+</script>
+</body>
+</html>
