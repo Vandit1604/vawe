@@ -40,7 +40,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
 | keep a quiet frame alive | [drift-hold](drift-hold.md) |
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md) |
-| show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md) |
+| show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md), [device-tilt-stage](device-tilt-stage.md) |
 | show an AI product answering | [ai-stream-response](ai-stream-response.md) |
 | prove a number | [count-up](count-up.md), [chart-build](chart-build.md) |
 | prove a change with a picture | [before-after-wipe](before-after-wipe.md) |
@@ -133,6 +133,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
 | AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
 | integration hub | the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub | [integration-hub.md](integration-hub.md) | [integration-hub.mp4](integration-hub.mp4) |
+| device tilt stage | the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle | [device-tilt-stage.md](device-tilt-stage.md) | [device-tilt-stage.mp4](device-tilt-stage.mp4) |
 
 `bin/vawe moves` renders only the clips whose demo, `demo/demo.css` or imported `core/` files changed (hashes in `clips.lock.json`). `--only <move>` forces one clip, `--all` forces every clip.
 
@@ -154,7 +155,7 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop, outline fill |
 | swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal |
 | soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe |
-| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response |
+| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response, device tilt stage |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask |
 | terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow |
 
