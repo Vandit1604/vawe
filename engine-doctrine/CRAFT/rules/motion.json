@@ -97,7 +97,7 @@
     "check": null,
     "adapt": null,
     "brief": "Animate its children piece by piece with parts (bars grow, then the line draws, then the dots pop), never as one block.",
-    "doc": "engine-doctrine/CRAFT/AUTHOR-THE-FRAME.md"
+    "doc": "engine-doctrine/CRAFT/DENSITY.md"
   },
   {
     "id": "motion.pick-register-first",

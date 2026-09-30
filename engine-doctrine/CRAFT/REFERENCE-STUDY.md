@@ -41,8 +41,8 @@ extracting them from ANY reference and mapping them to our primitives. Study a r
 studies a cut: measure it, name what it does, reproduce the intent. Add what you learn here so the next
 video starts ahead.
 
-> First tool: **`make study-tool X=measure`** ([MEASURE.md](MEASURE.md)) turns "a slide with some easing" into
-> `0.43s, easeOutSine`. Numbers, not vibes. Second tool: a filmstrip (`ffmpeg fps=… tile=…`) to SEE the
+> First tool: **`bin/vawe spec`** turns "a slide with some easing" into measured
+> durations and curves. Numbers, not vibes. Second tool: a filmstrip (`ffmpeg fps=… tile=…`) to SEE the
 > beats. Everything below was extracted from the Brew launch film this way.
 
 ## The pipeline: how to study any reference
@@ -229,7 +229,7 @@ caps it: authors just don't reach that far by habit).
   engine-enforced ceiling (shipped films already reach 400); push it further, or push the `camera` in on
   the beat, when a hero word needs to fill more of the frame than habit usually gives it.
 - The measurement tool's low-contrast + blur-in-place limits (a light word on a same-hue bg defeats the
-  corner-median background) are documented in [MEASURE.md](MEASURE.md), a future OpenCV/optical-flow
+  corner-median background) are a known limit of the measurement, a future OpenCV/optical-flow
   upgrade would fix them.
 
 ## Reference feel → our primitive (the map)

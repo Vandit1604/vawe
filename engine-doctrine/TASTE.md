@@ -58,7 +58,7 @@ covers all three: here's where each lives.
 | **Continuous action** | *Why does my plan read as three unrelated cards?* | [`vawe-continuous-action`](../skills/vawe-continuous-action/SKILL.md) · ONE of those devices, worked end to end: one object that transforms across every cut. Diegetic motion (the product doing its job), the measured 5-second budget, and the anti-slop checks you run before a frame renders. Worked from `higgsfield.mp4`. Right for a single-subject product film; wrong for a manifesto or an anthology. |
 | **Story-spine** | *Why these beats, in this order?* | [`CRAFT/STORY.md`](CRAFT/STORY.md). The spine, beat-role→persuasion→feeling, named spines + timing (hook → suspense → payoff; never spoil; build to a shocker). The [`vawe-video-planning`](../skills/vawe-video-planning/SKILL.md) skill applies it. |
 
-> **Never authored one from scratch (no brand site)?** Follow [`CRAFT/AUTHORING-WALKTHROUGH.md`](CRAFT/AUTHORING-WALKTHROUGH.md):
+> **Never authored one from scratch (no brand site)?** Follow the loop in `AGENTS.md`:
 > the one narrative that carries a single video from a blank page to shipped, chaining the whole
 > arsenal in the order you actually use it. It's the front-to-back companion to the reference docs below.
 

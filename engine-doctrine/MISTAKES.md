@@ -587,7 +587,7 @@ holds: none
 holds: none
 
 ## 141. no from-scratch "author a good video" walkthrough existed, so a blank page regressed to priors
-`engine-doctrine/CRAFT/AUTHORING-WALKTHROUGH.md` ,  the one front-to-back narrative, chaining the arsenal in use-order (manufacture the four things → lock sheet → JSON in layering order → `make dev-tool X=author-check`...
+`AUTHORING-WALKTHROUGH.md` (since removed; `AGENTS.md` holds the loop) ,  the one front-to-back narrative, chaining the arsenal in use-order (manufacture the four things → lock sheet → JSON in layering order → `make dev-tool X=author-check`...
 holds: none
 
 ## 142. `make check GATE=inspect` silently passed when no `.intent.json` sidecar existed

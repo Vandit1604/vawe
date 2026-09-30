@@ -3,9 +3,7 @@
 > **New here? Start at [`../TASTE.md`](../TASTE.md)**. The front door that ties the spines together.
 > CRAFT is where each decision actually gets made.
 >
-> **Never authored from scratch? Read [`AUTHORING-WALKTHROUGH.md`](AUTHORING-WALKTHROUGH.md) first**,
-> the one narrative that carries a single video from a blank page to shipped, chaining every guide below
-> in order. And [`DIRECTION.md`](DIRECTION.md) is the cross-cutting spine (pacing · restraint · story
+> **Never authored from scratch? Follow the loop in [`AGENTS.md`](../../AGENTS.md) first.** And [`DIRECTION.md`](DIRECTION.md) is the cross-cutting spine (pacing · restraint · story
 > placement) these decisions all serve.
 >
 > **Writing the storyboard itself?** [`STORYBOARD-TEMPLATE.md`](STORYBOARD-TEMPLATE.md) is the fill-in
@@ -35,7 +33,7 @@ the downstream choices for you.
 | 5 | **How full each frame is**: produced, not a slide | [DENSITY.md](DENSITY.md) | hero + support + metadata on the content beats |
 | 5b | **Whether the frame SHOWS or only tells** | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | a quantity, proportion or real surface drawn as a graphic, not set in type |
 | [STUDIO-DESIGN.md](STUDIO-DESIGN.md) | you are about to add a feature to `make studio`, or you want to know why a feature the other video editors have is deliberately absent here | what comparable video-editor studios really do (interaction model, timeline, refresh loop, assets) · a COPY / REJECT table with a reason per row · a ranked build list for `studio/server.mjs` with costs · the three to build first |
-| 5c | **What holds the film together across its cuts** | [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | a thread that is a sentence, a match cut or a rhythm, not only a resizing prop |
+| 5c | **What holds the film together across its cuts** | [FILM-STRUCTURE.md](FILM-STRUCTURE.md) | a thread that is a sentence, a match cut or a rhythm, not only a resizing prop |
 | 6 | **The restraint pass**: cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
 | 7 | **The sound**: sound by default, silence only with a stated reason | [SOUND.md](SOUND.md) | a film held together aurally, and a licence we can produce |
 
@@ -60,17 +58,12 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [AUTHORING-WALKTHROUGH.md](AUTHORING-WALKTHROUGH.md) | authoring a whole video, especially with no brand site | the single narrative: spine → manufacture the four things → lock sheet → JSON → the mandatory ladder → judge → ship |
-| [CAPTIONS.md](CAPTIONS.md) | adding burnt-in captions, or shipping to a phone feed (tiktok / reels / shorts) | caption timing (words, vo-captions), the safe strip per destination, captionMode vs captionStyle |
 | [COMMAND-OUTPUT.md](COMMAND-OUTPUT.md) | you are writing or changing a command that reports something (a gate, a check, an audit) | the one output contract every reporting command follows, tight prose by default and --json for structure |
-| [CONTINUITY-WITHOUT-AN-OBJECT.md](CONTINUITY-WITHOUT-AN-OBJECT.md) | the film must hold together and its subject is NOT one object that transforms | the threads that are not a travelling prop: a sentence completed across cuts, a match cut on shape or motion, a rhythm, a camera that keeps travelling · how each satisfies the continuity floor |
 | [DIRECTION.md](DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
-| [DISCOVERY.md](DISCOVERY.md) | you are about to author and want to reach past the default slice into the full vocabulary | how to use the whole palette (the layer types `ls core/layers/` lists, plus the effect arsenal `make regen` owns the count of, blueprints, cuts): the always-visible primer, the search, the gap report, and the name-three-reject-the-first discipline; and why the search stays token-overlap, not embeddings |
 | [ENGINE-CHANGES.md](ENGINE-CHANGES.md) | you are changing the ENGINE rather than authoring a film: a gate, a layer type, a registry, the capture path, or anything under core/ and internal/ | why a gate is the LAST resort and where a refusal belongs instead · how sugar must fail loudly rather than no-op · the three primitives that let you add a thing without touching everything · how to price a change that touches the capture path · the framework harvest, and how to classify a problem as framework, gate gap or authoring |
 | [FILM-STRUCTURE.md](FILM-STRUCTURE.md) | "what holds this film together across its cuts" | the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last |
 | [GRAMMAR.md](GRAMMAR.md) | before authoring, or when a film reads flat and you cannot say why | what films that read well actually MEASURE: shot length, motion, whether the ground turns, and what carries across a cut |
 | [KEYED-MOTION.md](KEYED-MOTION.md) | a film has the right structure and still feels amateur, or a recreation drifts where the original snaps | how the exemplar actually MOVES, as numbers from its JSON: dense keys with linear between them · layers sharing one pan · `--p` carrying what position cannot · traced timings · diegetic exits. A register you choose, not a floor, and deliberately ungated |
-| [MOTION-TRACE.md](MOTION-TRACE.md) | judging or proving a layer's motion without rendering or watching the video, checking a claimed wind-up/pulse/beat-timing against real numbers | per-layer moving/held spans, peak velocity, peak area change (a wind-up/scale pulse), monotonic vs oscillating shape |
 | [PER-SCENE-FANOUT.md](PER-SCENE-FANOUT.md) | "one agent per scene, writing HTML" or "why do my three fragments not read as one film" | the lock-step-before-fan-out chain: stagekit, contract, scenes, assemble, and when it is overkill |
 | [PITCH.md](PITCH.md) | the brief is unformed, "make a video about X" with no locked angle yet | diverge before you converge: five concepts sampled wide, an anti-median probability gate, a silhouette check, the three-line pitch format, how the chosen angle becomes the storyboard's spine |
 | [REF-together-chat.md](REF-together-chat.md) | "what does a film we admire actually measure" | a frame-by-frame study of one product film: shot timings, palette dominance by pixel count, what holds it together |
@@ -95,8 +88,6 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [IDEATE.md](IDEATE.md) | turning a reference video or a raw idea into a film, before any storyboard or JSON exists | what `make ideate` writes, the two ways to run it, and how to fill what it cannot measure |
-| [MEASURE.md](MEASURE.md) | you need a transition's REAL numbers (a reference to reproduce, or to verify our own render) | `make study-tool X=measure` · per-frame tracking → nearest engine preset + residual · what frames can't reveal · self-verification loop |
 | [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this"), or reflecting a real WEBSITE section by section | the ordered loop: measure → capture → build (cinematic) → score → beat-sync → verify · one beat per section, in the site's order · the honest 1:1 ceiling |
 | [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn/copy why | the study pipeline (measure → catalog → map) · the 12 premium-feel habits · reference-feel→primitive map |
 | [SELECTION.md](SELECTION.md) | picking the transition/font/look/sting for a feeling, or picking between whole directions | intent→effect (cited) · complete look/sting coverage · 8 named reference profiles · how `make dev-tool X=concept` forces a round off the median |
@@ -108,7 +99,6 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [AUTHOR-THE-FRAME.md](AUTHOR-THE-FRAME.md) | a beat needs a bespoke SVG/HTML dataviz or diagram | authoring a bespoke inline-SVG beat · the `window.__timelines` seek bridge · the per-child-choreography gap |
 | [BLOCKS-HTML-STATUS.md](BLOCKS-HTML-STATUS.md) | you are about to convert another blocks/*.mjs family to html output, or wondering why one family still returns native layers | which factories are already html, and which are deliberately native, with the reason |
 | [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
 | [EYE-TRACE.md](EYE-TRACE.md) | a cut moves the subject across the frame | where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports |
@@ -138,10 +128,7 @@ seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-
 
 | Guide | Load it when you are… | Answers |
 |---|---|---|
-| [AE-TECHNIQUES.md](AE-TECHNIQUES.md) | you want a motion-design technique one practitioner states the dials for, and the engine word for it | 12 techniques studied from one After Effects channel · the ordered recipe and the step nobody guesses · the values that practitioner states, which are settings and not standards · where each one lands in this engine · default or per-film option |
 | [AFTER-EFFECTS-TECHNIQUES.md](AFTER-EFFECTS-TECHNIQUES.md) | you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one) | 26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (26 HAVE, 0 PARTLY, 0 LACK as of 2026-09-23) · what is left and where it would live |
-| [EDITING.md](EDITING.md) | you want autocomplete or inline errors while typing a scene JSON, in an editor | the .vscode/settings.json json.schemas mapping · the per-scene $schema pointer convention · what real field-level autocomplete needs · the follow-up that would fix it |
-| [FROM-GSAP.md](FROM-GSAP.md) | you know GSAP and want the vawe JSON that does the same thing | 17 side-by-side pairs, a GSAP tween/timeline/stagger/ease/motionPath/wiggle/loop/trim/matte next to the vawe field or JSON that does the same job, and why the shape differs (renderFrame(n) has no wall clock and no callbacks) |
 | [LAUNCH-REFERENCE.md](LAUNCH-REFERENCE.md) | you are about to author a launch/product film and want a real bar for what 'great' looks like, not a memory of it | 6 launch sites as links only, each with 2-3 named moves mapped to the vawe mechanism that makes them |
 | [PRIMITIVES-VOCABULARY.md](PRIMITIVES-VOCABULARY.md) | you want to see every primitive the engine has, the plain words that find it, and the sentence that says what it does | the full word-action listing every defineRegistry registry carries, grouped by registry, graded the same way make check GATE=word-action grades it |
 | [SAAS-MOTION-DEMAND.md](SAAS-MOTION-DEMAND.md) | you are about to build a new effect and want to know whether SaaS product films actually use it | 20 effects ranked by how many independent sources name them · the numbers each source states · SHIPPED/PARTLY/MISSING against this engine · a three-item build queue · what purity forbids |

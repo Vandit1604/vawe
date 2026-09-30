@@ -37,9 +37,9 @@ the [`../MISTAKES.md`](../MISTAKES.md) numbers in the margin are the receipts.
   the **exit**: does it scale UP + blur to leave (a dolly-out)? a **zoomed crop of the text**: flat
   fill or a GRADIENT / colour-wave? For OUR renders, [`make dev-tool X=reveal`](../../harness/author/reveal.mjs)
   does this automatically per beat.
-- **Measure the signature motion.** `make study-tool X=measure VIDEO=ref.mp4 FROM=… TO=…` → duration + nearest
-  engine preset ([MEASURE.md](MEASURE.md)). A tight fit is an authorable number; a loose fit means it
-  is not one tween (typing, two stacked tweens, a mask), re-author by intent.
+- **Measure the signature motion.** measure the duration and curve from the frames (`bin/vawe spec`, `bin/vawe compare`), never guess
+  them. A number that fits one eased tween is authorable; a loose fit means it is not one tween (typing, two
+  stacked tweens, a mask), so re-author by intent.
 - **Read the dominance by LOOKING, and know site ≠ film.** A brand's live site and its launch film can
   disagree: brew.new's *site* is dark-first, but its launch *film* rides cream product surfaces, so the
   film is cream-dominant. Sample the reference's own frames (`ffmpeg scale=1:1` per timestamp → a
