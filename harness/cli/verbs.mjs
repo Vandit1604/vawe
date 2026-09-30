@@ -47,20 +47,20 @@ export const VERBS = [
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
-      { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background' },
+      { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait at most 100 s for the background job' },
       { name: 'status', type: 'bool', help: 'print the progress or the result of a background render' },
     ],
-    example: 'vawe ship films/my-launch/page.html --aspect all   (then: vawe ship --status)',
+    example: 'vawe ship films/my-launch/page.html --aspect all   (then: vawe ship --status --wait)',
     build: (v, [page]) => {
-      if (v.status) return [{ script: 'harness/media/ship-job.mjs', args: ['status', ...(page ? [page] : [])] }];
+      if (v.status) return [{ script: 'harness/media/ship-job.mjs', args: ['status', ...(page ? [page] : []), ...(v.wait ? ['--wait'] : [])] }];
       if (!page) throw new UsageError('missing <page>; usage: vawe ship <page> [flags]  or  vawe ship --status [job]');
       const args = [page, ...(v.out ? [v.out] : [])];
       if (v.wait) return [{ script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
       return [{ script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
+      if (v.status) return 'vawe ship --status --wait (waits up to 100 s; repeat until it says done), then vawe judge <the output file> --fresh';
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
-      if (v.status) return 'vawe ship --status again in 30 s or more; when it says done, vawe judge <the output file>';
       return 'rendering in the background; check with `bin/vawe ship --status`, keep working meanwhile';
     },
   },
