@@ -61,6 +61,7 @@ import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
+import { draftContrastLines } from '../lib/text-contrast.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
@@ -613,7 +614,7 @@ function printDraftCheck(mp4, pagePath, { probe, level, motion, advice: blanks }
   const brief = readBrief(pagePath);
   const sound = soundLine(level);
   const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
-  const advice = [...blanks, ...draftAdvice(problems, sound, briefLine(brief)), ...textCollisionLines(probe.samples), ...motionAdvice(pagePath, motion), ...directionsLines(brief, dir)];
+  const advice = [...blanks, ...draftAdvice(problems, sound, briefLine(brief)), ...textCollisionLines(probe.samples), ...draftContrastLines(mp4, probe), ...motionAdvice(pagePath, motion), ...directionsLines(brief, dir)];
   console.log(draftCheckLines(advice).join('\n'));
   const taste = ['', ...draftTasteLines([...problems, sound].filter(Boolean))];
   if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
