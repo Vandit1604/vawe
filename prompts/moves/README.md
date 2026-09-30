@@ -180,23 +180,18 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | flap resolve, weight morph, iris wipe, pull back reveal, logo sting, count up, ui strip away, speed ramp freeze |
-| paper | warm editorial: cream ground, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | mask rise, exit fast, marker highlight, drift hold, thanks sweep, card assemble, strikethrough replace |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop, outline fill, liquid wipe |
-| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal, logo wall |
-| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe, success check |
-| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response, luma matte dissolve |
-| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask, overwhelm collapse |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow, grid tile flip |
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | flap resolve, weight morph, iris wipe, pull back reveal, logo sting, count up, ui strip away, integration hub, spin transition |
-| paper | warm editorial: cream ground, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | mask rise, exit fast, marker highlight, drift hold, thanks sweep, card assemble, pan stations |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop, outline fill, smear stretch |
-| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal, crash zoom |
-| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe, command palette summon |
-| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response, device tilt stage |
-| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask, grid stagger wave |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow, shape morph wipe |
+| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | count up, flap resolve, integration hub, iris wipe, logo sting, pull back reveal, speed ramp freeze, spin transition, ui strip away, weight morph, zoom through |
+| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | card assemble, drift hold, exit fast, marker highlight, mask rise, pan stations, strikethrough replace, thanks sweep |
+| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, letter stagger, liquid wipe, notification pop, outline fill, parallax dive, smear stretch, whip pan, word sweep |
+| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | chart build, crash zoom, logo wall, mark trace, match cut, push in, skeleton reveal, slice shift, tracking collapse, underline draw |
+| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | before after wipe, bracket callout, command palette summon, cursor click, push blur, stack cover, success check, ui focus zoom, word swap slot |
+| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | ai stream response, blur word cascade, calm lockup, clip expand, device tilt stage, flash cut, luma matte dissolve, rack focus, split reveal, spotlight dim |
+| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, grid stagger wave, overwhelm collapse, scale punch, text as mask, type fill transition, wordmark cascade |
+| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret follow, caret typing, chain beats, grid tile flip, shape morph wipe |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
 
 The looks were shaped with `leonxlnx/soft-skill` (premium type, nested depth, soft diffuse shadow, grain on gradients). Rejected from it: its banned-font list (Inter and Helvetica are not why a film looks cheap), the nav, scroll and hover rules (a film has no input), the 2rem squircle radius as a default (each look sets its own), and `backdrop-blur` (a film draws no glass).
+
+The second pass (logos, photos, product data) used `pbakaus/typeset` (roles split by size, weight and tone; tabular figures), then `mengto/beautiful-shadows` (the `--stack` depth: six shadows with negative spread), then `jakubkrehel/make-interfaces-feel-better` as the review (pure black or white image hairline, concentric radius, optical alignment). Rejected: typeset's 16 px body floor and live-mode params, fully neutral shadows on paper and soft (their warm and violet throw is the look), and press scale, hit areas and hover states (a film has no input).
+Shared assets live in `demo/assets/`: `logos.js` (sixteen invented brands, mark plus wordmark, never a real company) and `photos/` (CC0 only, sources in `photos/credits.json`); reuse them before you draw a new one.
