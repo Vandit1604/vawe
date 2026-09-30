@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { preload } from "react-dom";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 import { Clip } from "../../components/Clip";
@@ -31,7 +30,6 @@ export default async function MovePage({ params }: Params) {
   const move = moveByName((await params).name);
   if (!move) notFound();
   const files = clip(move.name);
-  preload(files.posterHd, { as: "image", fetchPriority: "high" });
   const rows = JOBS.filter((j) => j.moves.includes(move.name))
     .map((j) => ({ ...j, others: j.moves.filter((n) => n !== move.name).map(moveByName).filter((m) => m !== null) }))
     .filter((j) => j.others.length);
@@ -57,7 +55,10 @@ export default async function MovePage({ params }: Params) {
           </header>
 
           <figure className="mvd-clip panel">
-            <Clip src={files.mp4} poster={files.posterHd} />
+            <div className="mvd-stage">
+              <img src={files.posterHd} alt="" width={1280} height={720} fetchPriority="high" decoding="async" />
+              <Clip src={files.mp4} />
+            </div>
             <figcaption className="mvd-tap meta">Tap the clip to play it.</figcaption>
           </figure>
 
