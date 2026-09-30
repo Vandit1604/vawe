@@ -60,11 +60,24 @@
   --r-chip: calc(var(--u) * 2);
   --r-card: calc(var(--u) * 4.4);
 
-  /* elevation is layered shadow: a 1px ring for the edge, a tight contact shadow, a wide soft one */
+  /* elevation is a 1px ring plus a stack of shadows that double in offset and blur, each with a
+     negative spread so the soft ones never bleed past the sides; --sh is the shadow colour, --sa scales its alpha */
+  --sh: 0 0 0; --sa: 3.2;
   --ring: 0 0 0 1px var(--edge);
-  --lift: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(0, 0, 0, 0.25), 0 calc(var(--u) * 3) calc(var(--u) * 11) rgba(0, 0, 0, 0.4);
+  --stack:
+    0 calc(var(--u) * 0.1) calc(var(--u) * 0.2) rgb(var(--sh) / calc(var(--sa) * 0.06)),
+    0 calc(var(--u) * 0.3) calc(var(--u) * 0.5) calc(var(--u) * -0.15) rgb(var(--sh) / calc(var(--sa) * 0.06)),
+    0 calc(var(--u) * 0.8) calc(var(--u) * 1.2) calc(var(--u) * -0.4) rgb(var(--sh) / calc(var(--sa) * 0.06)),
+    0 calc(var(--u) * 1.8) calc(var(--u) * 2.6) calc(var(--u) * -0.9) rgb(var(--sh) / calc(var(--sa) * 0.06)),
+    0 calc(var(--u) * 3.8) calc(var(--u) * 5.4) calc(var(--u) * -1.9) rgb(var(--sh) / calc(var(--sa) * 0.07)),
+    0 calc(var(--u) * 7.6) calc(var(--u) * 11) calc(var(--u) * -3.8) rgb(var(--sh) / calc(var(--sa) * 0.08));
+  --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--stack);
   --shadow-card: var(--ring), var(--lift);
+  /* hero media and devices: the same stack, then one long, faint throw */
+  --shadow-hero: var(--ring), var(--stack), 0 calc(var(--u) * 14) calc(var(--u) * 22) calc(var(--u) * -6) rgb(var(--sh) / calc(var(--sa) * 0.1));
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  /* a photo gets a hairline inside its edge so a light or dark image never melts into the ground */
+  --img-edge: rgba(255, 255, 255, 0.1);
 }
 
 * { box-sizing: border-box; }
@@ -83,6 +96,7 @@ body {
 .lead  { font: 500 var(--t-lead)/1.25 var(--sans); letter-spacing: -0.01em; }
 .body  { font: 500 var(--t-body)/1.3 var(--sans); }
 .small { font: 500 var(--t-small)/1.25 var(--sans); }
+.eyebrow { font: 600 var(--t-small)/1.2 var(--sans); letter-spacing: 0.005em; color: var(--muted); }
 .muted { color: var(--muted); }
 .mono  { font-family: var(--mono); font-weight: 500; letter-spacing: -0.02em; }
 .display { font-family: var(--display); font-weight: 600; letter-spacing: -0.04em; }
@@ -107,6 +121,19 @@ body {
 .pill { display: inline-flex; align-items: center; gap: var(--s1); padding: calc(var(--u) * 0.9) calc(var(--u) * 1.8); border-radius: 999px; background: var(--raised); box-shadow: var(--ring); font: 600 var(--t-small)/1 var(--sans); }
 .pill.up { color: var(--up-ink, var(--accent)); background: color-mix(in srgb, var(--accent) 14%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 26%, transparent); }
 
+/* images from demo/assets/photos: cover the box, keep the look's radius, hairline edge inside */
+.photo { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: var(--r-card); outline: 1px solid var(--img-edge); outline-offset: -1px; }
+.avatar > img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; outline: 1px solid var(--img-edge); outline-offset: -1px; }
+/* overlapping faces: each ring is the surface colour, so the cut between them reads as a gap */
+.avatars { display: flex; }
+.avatars .avatar { box-shadow: 0 0 0 calc(var(--u) * 0.5) var(--surface); }
+.avatars .avatar + .avatar { margin-left: calc(var(--size, calc(var(--u) * 11)) * -0.28); }
+
+/* invented brands from demo/assets/logos.js: the mark sits on the cap height of its wordmark */
+.logo-mark { display: block; flex: none; width: 1.08em; height: 1.08em; }
+.logo-lockup { display: inline-flex; align-items: center; gap: 0.3em; line-height: 1; white-space: nowrap; }
+.logo-lockup .logo-word { font-size: 1em; line-height: 1; }
+
 /* ---- looks: each is a full token set. Type sizes, spacing and every class above stay the same. ---- */
 
 /* paper: warm editorial, a serif display on cream, one vermilion; --u is 12 percent larger because Instrument Serif sets small */
@@ -119,8 +146,14 @@ html[data-look="paper"] {
   --paper: #1c1915; --paper-ink: #f3ecdd; --paper-muted: #a89f8e; --star: #b23417;
   --sans: 'Instrument Serif', 'Times New Roman', serif; --display: 'Instrument Serif', serif; --mono: 'Courier Prime', ui-monospace, monospace;
   --r-chip: calc(var(--u) * 1); --r-card: calc(var(--u) * 1.6);
-  --lift: 0 calc(var(--u) * 0.3) calc(var(--u) * 0.8) rgba(60, 40, 10, 0.1), 0 calc(var(--u) * 2.6) calc(var(--u) * 8) rgba(60, 40, 10, 0.14);
+  --sh: 70 45 15; --sa: 1.25; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: 0 0 0 0 transparent;
+}
+
+/* paper carries a fine print grain, darker than the ground, so the cream reads as stock and not as a flat fill */
+html[data-look="paper"]::after {
+  content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.05; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
 }
 
 /* field: one saturated green ground, white type, one lemon accent */
@@ -132,7 +165,7 @@ html[data-look="field"] {
   --paper: #fff; --paper-ink: #0b2a1d; --paper-muted: #3f6b57; --star: #ffe14d;
   --sans: 'Bricolage Grotesque', sans-serif; --display: 'Bricolage Grotesque', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
   --r-chip: calc(var(--u) * 2.2); --r-card: calc(var(--u) * 4.6);
-  --lift: 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(0, 30, 18, 0.25), 0 calc(var(--u) * 3) calc(var(--u) * 10) rgba(0, 30, 18, 0.32);
+  --sh: 0 32 20; --sa: 2.6; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--stack); --img-edge: rgba(255, 255, 255, 0.12);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.35);
   --up-ink: #fff;
 }
@@ -146,7 +179,7 @@ html[data-look="swiss"] {
   --paper: #0b0b0b; --paper-ink: #f2f1ec; --paper-muted: #a4a49c; --star: #d40500;
   --sans: 'Geist', sans-serif; --display: 'Geist', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
   --r-chip: calc(var(--u) * 0.5); --r-card: calc(var(--u) * 0.8);
-  --lift: 0 0 0 0 transparent;
+  --lift: 0 0 0 0 transparent; --shadow-hero: var(--ring); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: 0 0 0 0 transparent;
 }
 
@@ -159,7 +192,7 @@ html[data-look="soft"] {
   --paper: #fff; --paper-ink: #1f2140; --paper-muted: #5d6088; --star: #5b3df0;
   --sans: 'Plus Jakarta Sans', sans-serif; --display: 'Plus Jakarta Sans', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
   --r-chip: calc(var(--u) * 3); --r-card: calc(var(--u) * 6);
-  --lift: 0 calc(var(--u) * 0.4) calc(var(--u) * 1.2) rgba(60, 50, 160, 0.06), 0 calc(var(--u) * 4) calc(var(--u) * 14) rgba(60, 50, 160, 0.14);
+  --sh: 60 50 160; --sa: 1.5; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
@@ -173,7 +206,7 @@ html[data-look="night"] {
   --paper: #f3eefc; --paper-ink: #120e2a; --paper-muted: #5f5885; --star: #ffd9a0;
   --sans: 'Manrope', sans-serif; --display: 'Unbounded', 'Manrope', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
   --r-chip: calc(var(--u) * 2.2); --r-card: calc(var(--u) * 4.6);
-  --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(5, 2, 20, 0.35), 0 calc(var(--u) * 3) calc(var(--u) * 12) rgba(5, 2, 20, 0.5);
+  --sh: 5 2 20; --sa: 3.8; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.07), var(--stack);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 html[data-look="night"]::after {
@@ -191,7 +224,7 @@ html[data-look="brutal"] {
   --sans: 'Anybody', sans-serif; --display: 'Anybody', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
   --r-chip: 0px; --r-card: 0px;
   --ring: 0 0 0 calc(var(--u) * 0.45) #000;
-  --lift: calc(var(--u) * 1.6) calc(var(--u) * 1.6) 0 #000;
+  --lift: calc(var(--u) * 1.6) calc(var(--u) * 1.6) 0 #000; --shadow-hero: var(--ring), var(--lift); --img-edge: #000;
   --accent-edge: 0 0 0 calc(var(--u) * 0.4) #000;
   --up-ink: #1a2bff;
 }
@@ -206,7 +239,7 @@ html[data-look="terminal"] {
   --paper: #e5f4ea; --paper-ink: #090d0a; --paper-muted: #4c6354; --star: #4ade80;
   --sans: 'JetBrains Mono', ui-monospace, monospace; --display: 'JetBrains Mono', ui-monospace, monospace; --mono: 'JetBrains Mono', ui-monospace, monospace;
   --r-chip: calc(var(--u) * 0.8); --r-card: calc(var(--u) * 1.6);
-  --lift: 0 calc(var(--u) * 0.4) calc(var(--u) * 1) rgba(0, 0, 0, 0.4), 0 calc(var(--u) * 3) calc(var(--u) * 11) rgba(0, 0, 0, 0.5);
+  --sa: 4; --lift: var(--stack); --img-edge: rgba(255, 255, 255, 0.1);
   --accent-edge: 0 0 0 0 transparent;
 }
 
