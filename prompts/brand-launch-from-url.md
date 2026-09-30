@@ -34,6 +34,7 @@ Write the beat list first, with a timestamp per beat, one message per beat, and 
 proves it. Hook: the promise, word by word, first frame under 12 words. Then one move per beat: the
 hook word becomes the product; a cursor does one real thing; the key output, big; the second
 surface; a stat you can source; the wordmark. The last beat keeps the world moving: no still tail.
+For 20 to 30 s, start from a chain in `prompts/moves/RECIPES.md` (Complete videos), and change two moves.
 </structure>
 
 <build>

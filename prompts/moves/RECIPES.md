@@ -1,6 +1,6 @@
 ---
-when: "you plan a short film of a common shape (a sting, a launch, a type line) and want a chain of built moves that joins, not a list of moves"
-answers: "eight chains of existing moves (three per 5 s sting, one per family) with a beat table, why each chain holds, and the traps at each seam"
+when: "you plan a film of a common shape (a sting, a launch, a type line, a 20 to 30 s product, proof or brand film) and want a chain of built moves that joins, not a list of moves"
+answers: "fourteen chains of existing moves (eight short films, then six complete videos of 20 to 30 s) with a beat table, why each chain holds, and the traps at each seam"
 group: reference
 ---
 
@@ -189,3 +189,162 @@ Traps:
 - The punch starts at 1.4x, so read the dot's slot with `offsetLeft`/`offsetTop` (they ignore transforms).
 - After the ball lands, swap it for the inline dot. The morph reflows the line, and only an inline dot rides it.
 - The drift goes on the ground behind the line, never on the h1: a drifting line reads as a move, not a hold.
+
+# Complete videos, 20 to 30 s
+
+Same rules as above, at film length. Each film shows the product or the idea working in its middle,
+holds every read at 1.2 s or more, and has one spectacle second with about 1.5 s of quiet before it
+(no sound, no travel, only a drift). Exits run 0.22 s; entrances run 0.6 s or more. Adjacent seams
+change axis or direction. Stock devices (accent bar, sheen band, drifting lights) appear once per
+film. The beat times are a plan: re-time them to the copy's reading time (words x 0.6 s from 4 words up, else 1.2 s; `harness/lib/read-hold.mjs`).
+
+## 9. Problem to fix launch, 21 s (thread: one card)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [overwhelm-collapse](overwhelm-collapse.md) | 26 real notices flood and collapse; the one clean card opens at 1.61 and its claim reads to 3.40 | bloom 1.61 |
+| 3.40 | [card-assemble](card-assemble.md) | the clean card is the shell; the parts build in from the left, right and below; the button lands at 4.40 | droplet 4.40 |
+| 6.20 | [cursor-click](cursor-click.md) | the press at 7.28 fixes the mess; the accent done state reads to 8.80 | pluck 7.28 |
+| 8.80 | [exit-fast](exit-fast.md) | the card leaves left in 0.22 s | none |
+| 9.10 | [count-up](count-up.md) | "3.2 h saved a week" settles at 9.90 (spectacle); chip and sparkline to 10.60 | chime 9.90 |
+| 11.80 | [logo-wall](logo-wall.md) | lanes land under the settled number from 11.80; the wall drifts to 15.00 | none |
+| 15.00 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | wall and number leave up; the name falls onto the rail at 15.30, full stop at 15.85 | droplet 15.85 |
+| 16.90 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) | the button pops at 17.20, the arrow leans at 18.00 and 18.40; the line drifts to 21.00 | droplet 17.35 |
+
+Why it works: the problem is the flood and the fix is one card, so the contrast is the story and the
+card is the thread (clean element, shell, pressed state). Seams change axis: radial in, then x and y
+parts, a bowed cursor path, an x exit, a y roll, x lanes, a y exit, a y fall, a scale pop. The
+slowest move (card build, 1.0 s) is 4.5x an exit. The quiet before the spectacle is the done-state hold.
+
+Traps:
+- Put items in the flood at frame 0 (rule 1) and accelerate the gaps; the flood is the only busy stretch, so the fix has to read calm.
+- The clean element is the card-assemble shell at its final rect. Start the parts after it settles, or the card shows twice.
+- The flood items are the product's real notice types, the wall logos are invented marks. Never real brands.
+- count-up: the number is the one accent on the dark ground, so the chip drops its accent (one accent per frame).
+- logo-wall keeps the number's accent; its `Sound: none` holds. Exit the count-up's container, not its wheels.
+- Run the rail bar in ink, not accent, or it fights the button.
+- cursor-click exits down; the card then leaves left. Two exits in the same direction read as one.
+
+## 10. AI product demo, 22 s (thread: the accent figure)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [caret-typing](caret-typing.md) | "Ask your ledger." types; the caret drops into the rule at 0.95; the line reads to 1.80 | pluck 0.05, 0.55 |
+| 1.80 | [clip-expand](clip-expand.md) | the real window (empty composer) opens from the rule's end point and rests by 2.80 | bloom 1.80 |
+| 3.20 | [ai-stream-response](ai-stream-response.md) | the prompt leaves the composer at 3.70; "Margin rose 2.1% in Q3." streams and is settled by 8.00; it reads to 11.00 | pluck 3.70 |
+| 11.00 | [clip-expand](clip-expand.md), inset | a window opens from the "2.1%" figure: the real report; it reads to 14.10 (quiet) | bloom 11.00 |
+| 14.10 | [success-check](success-check.md) | the press on "Send to team" at 14.30; the circle lands at 15.04 (spectacle); done reads to 16.40 | chime 15.04 |
+| 16.40 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | the window leaves left; the name falls onto the rail at 16.70, its full stop at 17.25 | droplet 17.25 |
+| 18.20 | [drift-hold](drift-hold.md) | the lockup drifts to 22.00 | none |
+
+Why it works: a prompt becomes an answer, the answer becomes a deliverable and the deliverable is
+sent, so the film is the whole round trip. The accent figure is the thread (answer, chip, the report's
+headline number, the check circle, the full stop). Seams: x (typing), radial, y (send and stream),
+an inset window, a scale land, an x exit, a y fall. The expand (1.0 s) is 4.5x the exit.
+
+Traps:
+- Use one window for clip-expand and ai-stream-response: same pixels at 2.80 and at 3.20, or the swap shows.
+- ai-stream-response streams in chunks from `rng`; keep the answer to 5 words (3 s to read, words x 0.6). The figure is the only accent.
+- Measure the "2.1%" chip's rect after the stream settles and set `--x`/`--y` from it. Use `inset()`, since a report is a window, not a burst.
+- The report is a real capture or the product's DOM, never a drawn chart. A capture cannot morph: rebuild only the button as live DOM for success-check, and select it by its button (`.pay path`).
+- Keep the report still for 2 s before the press. That is the quiet before the spectacle; nothing but a drift runs there.
+- The rail bar runs in ink. The circle's accent is already the film's last bright thing.
+
+## 11. Feature tour, 20 s (thread: the camera's one canvas)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [pan-stations](pan-stations.md) + [cursor-click](cursor-click.md) | station 1 is a real capture at frame 0; the press at 1.48 reads done to 3.50 | pluck 1.48 |
+| 3.60 | pan 1, right | station 2 arrives at 4.02, its node lights | pluck 4.02 |
+| 4.02 | [card-assemble](card-assemble.md) | station 2's card builds (button at 5.02); it holds to 7.50 | droplet 5.02 |
+| 7.60 | pan 2, diagonal up | station 3 arrives at 8.02 | pluck 8.02 |
+| 8.60 | [cursor-click](cursor-click.md) | press at 9.68; done reads to 11.50 | pluck 9.68 |
+| 11.60 | pan 3, down | station 4 arrives at 12.02; 1.4 s of quiet | pluck 12.02 |
+| 13.40 | [ui-focus-zoom](ui-focus-zoom.md) | the cursor lands on the status at 13.40; the camera scales from 13.45 (spectacle); the status holds to 16.30 | none |
+| 16.40 | [exit-fast](exit-fast.md), [calm-lockup](calm-lockup.md) | the world leaves up in 0.22 s; the brand settles from 16.70, the line at 16.84 | bloom 16.76 |
+| 18.00 | [drift-hold](drift-hold.md) | the lockup floats to 20.00 | none |
+
+Why it works: one canvas, so four features read as one product and not four slides. The rail and the
+lit nodes say where the camera has been. Seams change direction on every pan (right, up-right, down),
+then a z dive, then a y exit. The lockup's settle (1.0 s) is 4.5x the exit (0.22 s).
+
+Traps:
+- card-assemble is added at station 2 so two clicks do not sit side by side. A third click beside them would be a template.
+- Exit the cursor down before each pan (it is gone by 2.50 and by 10.80). A cursor in the world streaks with the pan.
+- pan-stations and ui-focus-zoom both move the world. Drive both from one camera state (`translate`, `scale`) in one `vawe.onFrame`, and read station 4's rect with `offsetLeft`/`offsetTop`, never mid-pan.
+- Hold each station for words x 0.6 s, at least 1.2 s, and drift the camera through the hold so it is never a still.
+- ui-focus-zoom needs a target with no glyph under it (a status pill). Cut out on the next beat; never zoom back on a mirror curve.
+- calm-lockup's lights are the film's one stock device. Lay the lockup on the ground the status colour sits on, so the zoom's last frame and the lockup share a ground.
+
+## 12. Proof film, 20 s (thread: one number)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [count-up](count-up.md) | "26,800 renders a month" is on screen at frame 0, settles at 0.80; chip and sparkline to 1.55; it reads to 3.80 | chime 0.80 |
+| 3.80 | [exit-fast](exit-fast.md) | the number leaves left in 0.22 s | none |
+| 4.05 | [chart-build](chart-build.md) | the bars rise to the same 26.8k; 1.35 s of silence, then the last bar turns accent (spectacle); it reads to 8.60 | droplet 5.40 |
+| 8.60 | [exit-fast](exit-fast.md) | the chart leaves down | none |
+| 8.85 | [logo-wall](logo-wall.md) | lanes land under "212 studios" by 9.90; the wall drifts to 13.60 | none |
+| 13.60 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | wall and line leave up; the name falls at 13.85, its full stop at 14.40 | droplet 14.40 |
+| 16.20 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) | the button pops at 16.50, the arrow leans at 17.30 and 17.70; the line drifts to 20.00 | droplet 16.65 |
+
+Why it works: the number is the claim, the chart is its proof and the wall says who counts it. The
+same figure (26.8k) is the roll, the last bar and the sparkline's end point, so each beat confirms the
+last. Seams change axis: a y roll, an x exit, y bars, a y exit, x lanes, a y exit, a y fall, a scale
+pop. The wall (1.1 s) is 5x an exit. Only four sound cues, so the film stays quiet.
+
+Traps:
+- Use one unit and one data set. The chart axis and the number share units, and the sparkline ends where the last bar ends.
+- The accent is the number, then the last bar, then the wall's line, then the button. No frame has two: the chart's tag is white, the chip drops its accent.
+- The wall is invented marks at one visual weight, one ink. The accent stays on the line above it.
+- Exit the wall with its line as one container. Exit the count-up's container, not the wheels.
+- The chart holds 3.2 s: axis labels and a title are words, and they read at words / 3 s. Drift the card so the hold is never a still.
+- Run the rail bar in ink, not accent, or it fights the button.
+
+## 13. Kinetic type manifesto, 20 s (thread: one sentence)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [blur-word-cascade](blur-word-cascade.md) | "Every tool wants its own format." resolves; line 2 "You know HTML." follows at 2.40; both read to 5.80 | none |
+| 6.00 | [word-swap-slot](word-swap-slot.md) (segs 480/480/480) | hard cut to the inverted ground; "We write pages that feel [fast / loud / clean / alive]" sits 0.30 s, rolls, lands at 7.74; it reads to 11.40 | pluck 7.74 |
+| 11.40 | [exit-fast](exit-fast.md) | the line leaves left in 0.22 s | none |
+| 11.60 | [scale-punch](scale-punch.md) | "One page in." is already on the ground; "film" of "One film out." hits at 12.30 (spectacle), full stop at 12.52; it reads to 15.40 | pluck 12.50 |
+| 15.40 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | the line leaves up; the name falls at 15.70, its full stop at 16.25 | droplet 16.25 |
+| 17.60 | [drift-hold](drift-hold.md) | the lockup drifts to 20.00 | none |
+
+Why it works: one argument in four beats (the problem, the values, the claim, the name), and each beat
+has its own engine, so the type never repeats a trick. The soft open is the quiet before the hit. The
+seams change axis: a soft in-place resolve, a cut, a y slot roll, an x exit, a scale punch, a y exit,
+a y fall. The cascade's word (0.8 s) is 3.6x the punch's dot (0.22 s).
+
+Traps:
+- Frame 0 needs a subject: the first word starts to resolve at 0.00, not after a beat of empty ground.
+- The claim is the one line with an accent: "film" in the punch, or the last slot word, never both. Give the slot's last word the accent only if the punch word stays ink.
+- word-swap-slot's own segs miss a beat grid. At 480 each the `Sound:` time moves to the last landing.
+- Set the punch's line 1 ("One page in.") in quiet ink before the hit, or the word punches into an empty ground. Read the dot's slot with `offsetLeft`.
+- Line 1 of A is 6 words (3.6 s at words x 0.6) and B is 6 words: hold both that long. Add hold, never slow the move.
+- Do not punch a second word. The same hit twice makes the film read as a template.
+
+## 14. Brand reveal, 20 s (thread: the accent, then the mark)
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [pull-back-reveal](pull-back-reveal.md) (dur 0.8 s) | tight on the mark in the sidebar of a real capture; pulls back to the app, which reads to 3.00 | bloom 0.10 |
+| 3.00 | [cursor-click](cursor-click.md) | the press at 4.08; the accent done state reads to 6.40; the cursor leaves down by 4.90 | pluck 4.08 |
+| 6.40 | [exit-fast](exit-fast.md), [count-up](count-up.md) | the app leaves left; "1.8 s to paid" settles at 7.50; chip to 8.25; it reads to 10.20 | chime 7.50 |
+| 10.20 | [exit-fast](exit-fast.md), [mark-trace](mark-trace.md) | the number leaves up; the line draws the mark from 10.50, thickens at 11.45 (spectacle); the mark reads to 12.90 | droplet 11.45 |
+| 12.90 | [logo-sting](logo-sting.md), word half only | the word opens from behind the mark at 13.42; the lockup re-centres by 14.30; the push runs to 20.00 | chime 13.42 |
+| 14.60 | [blur-word-cascade](blur-word-cascade.md) | the tagline resolves inside the lockup's `.drift` and reads from 15.90 to 20.00 | none |
+
+Why it works: the film shows the product do one real thing, proves it with one number, then the mark
+draws itself and becomes the name. The accent is the thread (the mark's dot at frame 0, the pressed
+state, the number, the trace tip, the name's full stop). Seams: a z pull back, a bowed diagonal, an x
+exit, a y roll, a y exit, a draw in place, an x opening word, a y rise.
+
+Traps:
+- Three moves make 9 s, not 20, so cursor-click, count-up and blur-word-cascade are added to give the reveal a real middle. Cut them and the film is a sting.
+- mark-trace draws the mark and logo-sting lands one. Take only logo-sting's word opening and its push. Drop its sheen band: mark-trace's accent bar is the film's one stock device.
+- The ground is never empty: the drift runs under the exits, and mark-trace's line is on screen within 0.3 s of the number leaving.
+- Put the tagline inside logo-sting's `.drift`, so it rides the push. Set the push duration to the time left (7.1 s), or the tail freezes.
+- The capture is pixels: cut in a second capture of the done state at the press. Never draw a button over it.
+- The mark at frame 0 and the traced mark are the same path at the same size, so the thread reads.
