@@ -103,6 +103,15 @@ export function perSampleChange(feats) {
   return out;
 }
 
+/** Change of each sample against the one `span` samples back (0.3 s): a small or slow move that stays under
+ *  staticFrac between neighbours still adds up over half a second, and a viewer sees it move. */
+export function windowChange(feats, span = STATIC_SPAN) {
+  const out = [0];
+  for (let i = 1; i < feats.length; i++) out.push(changedFraction(feats[Math.max(0, i - span)], feats[i]));
+  return out;
+}
+const STATIC_SPAN = 3;
+
 /** Static time: a sample interval is quiet when under `staticFrac` of pixels changed; a run counts from 0.3 s. */
 export function staticRuns(change, t = T) {
   const runs = [];
@@ -132,7 +141,7 @@ export function summarize(feats, t = T) {
   const dur = feats.length / SAMPLE_FPS;
   const turns = findTurns(feats, t);
   const change = perSampleChange(feats);
-  const runs = staticRuns(change, t);
+  const runs = staticRuns(windowChange(feats), t);
   const events = findEvents(change, t);
   const worlds = turns.length + 1;
   return {
