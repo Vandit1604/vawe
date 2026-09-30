@@ -82,6 +82,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | built |
 | logo-sting | a short animated logo hit | to be captured | built |
 | ui-strip-away | the product UI peels back layer by layer until only the logo and line remain | video-shotcraft outro/ui-strip-away-outro | built |
+| logo-wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | HyperFrames logo-wall and trust-strip, proof-logo-chain blueprint | built |
 
 ## 6. Product moments
 

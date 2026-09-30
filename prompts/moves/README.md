@@ -48,6 +48,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
 | end on an action | [cta-pop](cta-pop.md) |
 | hand the product to the brand | [ui-strip-away](ui-strip-away.md) |
+| prove it with customers | [logo-wall](logo-wall.md) |
 | show the problem, then the fix | [overwhelm-collapse](overwhelm-collapse.md) |
 
 ## Reveal a title
@@ -119,6 +120,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | cta pop | the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click | [cta-pop.md](cta-pop.md) | [cta-pop.mp4](cta-pop.mp4) |
 | thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
 | UI strip away | the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup | [ui-strip-away.md](ui-strip-away.md) | [ui-strip-away.mp4](ui-strip-away.mp4) |
+| logo wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | [logo-wall.md](logo-wall.md) | [logo-wall.mp4](logo-wall.mp4) |
 
 ## Product moments
 
