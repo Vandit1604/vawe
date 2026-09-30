@@ -6,57 +6,95 @@
 <title>move: command palette summon</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  body { display: block; }
-  .app { position: absolute; inset: 6vh 5vw; display: grid; grid-template-columns: 22vw 1fr; overflow: hidden; padding: 0; }
-  .app nav { padding: var(--s4) var(--s3); background: var(--raised); display: flex; flex-direction: column; gap: var(--s2); font: 600 var(--t-small)/1 var(--sans); color: var(--muted); }
-  .app nav .ws { margin-bottom: var(--s2); font-size: calc(var(--u) * 4.6); color: var(--ink); }
-  .app nav span { display: flex; justify-content: space-between; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.6); margin: 0 calc(var(--u) * -1.6); border-radius: var(--r-chip); }
+  /* product sizes: --px is one CSS pixel of a 1080 px tall screen, so every number below is a real product value */
+  :root { --px: calc(var(--vh) / 1080); }
+  body { display: block; font-size: calc(var(--px) * 14); }
+
+  .app { position: absolute; inset: calc(var(--px) * 64) calc(var(--px) * 112); display: grid; grid-template-columns: calc(var(--px) * 240) 1fr; overflow: hidden; padding: 0; border-radius: calc(var(--px) * 14); }
+  .app nav { padding: calc(var(--px) * 14) calc(var(--px) * 12); background: var(--raised); display: flex; flex-direction: column; gap: calc(var(--px) * 2); font: 500 calc(var(--px) * 13)/1 var(--sans); color: var(--muted); }
+  .app nav .ws { display: flex; align-items: center; height: calc(var(--px) * 32); margin: 0 0 calc(var(--px) * 12) calc(var(--px) * 6); font-size: calc(var(--px) * 15); color: var(--ink); }
+  .app nav span { display: flex; align-items: center; justify-content: space-between; height: calc(var(--px) * 30); padding: 0 calc(var(--px) * 10); border-radius: calc(var(--px) * 6); }
   .app nav span.on { background: var(--surface); color: var(--ink); box-shadow: var(--ring); }
-  .app nav span i { font-style: normal; color: var(--faint); }
-  .app main { padding: var(--s4) var(--s4); }
-  .app h2 { display: flex; align-items: baseline; gap: var(--s2); margin: 0 0 var(--s3); font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.025em; }
-  .app h2 small { font: 500 var(--t-small)/1 var(--sans); letter-spacing: 0; color: var(--faint); }
-  .issue { display: flex; gap: var(--s2); align-items: center; padding: calc(var(--u) * 2.2) 0; border-top: 1px solid var(--line); font: 500 var(--t-small)/1 var(--sans); }
-  .issue > span { color: var(--faint); font-family: var(--mono); }
-  .status { margin-left: auto; font-style: normal; }
-  .issue .avatar { --size: calc(var(--u) * 5.4); }
+  .app nav span i { font-style: normal; font-size: calc(var(--px) * 12); color: var(--faint); }
+  .app nav .label { height: calc(var(--px) * 28); margin-top: calc(var(--px) * 14); font-size: calc(var(--px) * 12); color: var(--faint); }
+  .app main { display: flex; flex-direction: column; min-width: 0; }
+  .app header { display: flex; align-items: center; gap: calc(var(--px) * 10); height: calc(var(--px) * 52); padding: 0 calc(var(--px) * 24); box-shadow: 0 1px 0 var(--line); font: 600 calc(var(--px) * 14)/1 var(--sans); }
+  .app header small { font: 500 calc(var(--px) * 13)/1 var(--sans); color: var(--faint); }
+  .app header .k { margin-left: auto; }
+  .group { display: flex; align-items: center; gap: calc(var(--px) * 8); height: calc(var(--px) * 36); padding: 0 calc(var(--px) * 24); background: var(--raised); font: 600 calc(var(--px) * 13)/1 var(--sans); }
+  .group i { font-style: normal; font-weight: 500; color: var(--faint); }
+  .issue { display: flex; align-items: center; gap: calc(var(--px) * 14); height: calc(var(--px) * 44); padding: 0 calc(var(--px) * 24); box-shadow: 0 1px 0 var(--line); font: 500 calc(var(--px) * 13)/1 var(--sans); }
+  .issue > span { width: calc(var(--px) * 64); color: var(--faint); font: 500 calc(var(--px) * 12)/1 var(--mono); }
+  .status { margin-left: auto; padding: calc(var(--px) * 4) calc(var(--px) * 8); font-size: calc(var(--px) * 12); font-style: normal; gap: 0; }
+  .issue .avatar { --size: calc(var(--px) * 22); }
   .dim { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
 
-  .palette { position: absolute; left: 50%; top: 13vh; width: 60vw; margin-left: -30vw; padding: 0; overflow: hidden; }
-  .query { display: flex; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); font: 500 var(--t-lead)/1 var(--sans); }
-  .query .icon { width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); color: var(--muted); }
+  kbd { display: inline-grid; place-items: center; min-width: calc(var(--px) * 20); height: calc(var(--px) * 20); padding: 0 calc(var(--px) * 5); border-radius: calc(var(--px) * 5); background: var(--raised); box-shadow: var(--ring); font: 500 calc(var(--px) * 11)/1 var(--mono); color: var(--muted); }
+
+  /* the palette: 640 wide, 56 tall input, 44 tall rows, 8 of list padding, as in Linear, Raycast and Vercel */
+  .palette { position: absolute; left: 50%; top: calc(var(--px) * 196); width: calc(var(--px) * 640); margin-left: calc(var(--px) * -320); padding: 0; overflow: hidden; border-radius: calc(var(--px) * 14); }
+  .query { display: flex; align-items: center; gap: calc(var(--px) * 12); height: calc(var(--px) * 56); padding: 0 calc(var(--px) * 18); font: 400 calc(var(--px) * 17)/1 var(--sans); letter-spacing: -0.01em; }
+  .query .icon { width: calc(var(--px) * 18); height: calc(var(--px) * 18); color: var(--muted); }
   .query .ph { color: var(--faint); }
   .typed { display: flex; align-items: center; }
-  .caret { width: calc(var(--u) * 0.45); height: calc(var(--u) * 6.4); margin-left: calc(var(--u) * 0.5); background: var(--accent); border-radius: 1px; }
-  .list { padding: var(--s1); }
-  .opt { height: calc(var(--u) * 8.4); overflow: hidden; }
-  .opt > div { height: calc(var(--u) * 8.4); display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s3); border-radius: var(--r-chip); font: 600 var(--t-body)/1 var(--sans); }
-  .opt .icon { width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); color: var(--muted); }
-  .opt kbd { margin-left: auto; font: 600 var(--t-small)/1 var(--mono); color: var(--faint); }
-  .opt.sel > div { background: var(--raised); }
+  .caret { width: calc(var(--px) * 1.5); height: calc(var(--px) * 20); margin-left: calc(var(--px) * 1); background: var(--accent); border-radius: 1px; }
+  .list { padding: calc(var(--px) * 8); }
+  .list .label { display: flex; align-items: center; height: calc(var(--px) * 28); padding: 0 calc(var(--px) * 10); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--faint); }
+  .opt { height: calc(var(--px) * 44); overflow: hidden; }
+  .opt > div { height: calc(var(--px) * 44); display: flex; align-items: center; gap: calc(var(--px) * 12); padding: 0 calc(var(--px) * 10); border-radius: calc(var(--px) * 8); font: 500 calc(var(--px) * 14)/1 var(--sans); }
+  .opt .icon { width: calc(var(--px) * 16); height: calc(var(--px) * 16); color: var(--muted); }
+  .opt .keys { display: flex; gap: calc(var(--px) * 4); margin-left: auto; }
+  .foot { display: flex; align-items: center; gap: calc(var(--px) * 16); height: calc(var(--px) * 40); padding: 0 calc(var(--px) * 16); box-shadow: 0 -1px 0 var(--line); font: 500 calc(var(--px) * 12)/1 var(--sans); color: var(--faint); }
+  .foot span { display: flex; align-items: center; gap: calc(var(--px) * 6); }
+  .foot span:first-child { margin-right: auto; }
 </style>
 </head>
 <body>
 <div class="app card">
-  <nav><b class="ws" data-logo="relay" data-lockup></b><span>Inbox<i>6</i></span><span class="on">My issues<i>4</i></span><span>Projects<i>12</i></span></nav>
-  <main><h2>My issues<small>Sprint 31</small></h2>
-    <div class="issue"><span>REL-214</span>Render queue stalls on 9:16<em class="pill status">In progress</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg"></div></div>
-    <div class="issue"><span>REL-209</span>Caption timing drifts after cut<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg"></div></div>
+  <nav>
+    <b class="ws" data-logo="relay" data-lockup></b>
+    <span>Inbox<i>6</i></span><span class="on">My issues<i>4</i></span><span>Views</span>
+    <span class="label">Workspace</span>
+    <span>Projects<i>12</i></span><span>Cycles</span><span>Releases</span>
+  </nav>
+  <main>
+    <header>My issues<small>Sprint 31</small><kbd class="k">⌘K</kbd></header>
+    <div class="group">In progress<i>2</i></div>
+    <div class="issue"><span>REL-214</span>Render queue stalls on 9:16 exports<em class="pill status">In progress</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg"></div></div>
+    <div class="issue"><span>REL-212</span>Waveform lags the playhead on long clips<em class="pill status">In progress</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-ridge.jpg"></div></div>
+    <div class="group">Todo<i>5</i></div>
+    <div class="issue"><span>REL-209</span>Caption timing drifts after a cut<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg"></div></div>
+    <div class="issue"><span>REL-207</span>Preset picker loses focus on Escape<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-loft.jpg"></div></div>
     <div class="issue"><span>REL-201</span>Export PDF cover page<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div></div>
+    <div class="issue"><span>REL-199</span>Batch rename for scenes<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg"></div></div>
+    <div class="issue"><span>REL-196</span>Audio bed ducks too late under voice<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg"></div></div>
+    <div class="group">Done<i>1</i></div>
     <div class="issue"><span>REL-198</span>Launch film, final mix<em class="pill up status">Ready</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg"></div></div>
+    <div class="group">Backlog<i>9</i></div>
+    <div class="issue"><span>REL-195</span>Dark mode for the studio timeline<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg"></div></div>
+    <div class="issue"><span>REL-193</span>Keyboard shortcut to nudge a keyframe<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div></div>
+    <div class="issue"><span>REL-190</span>Share link opens on the last frame<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-ridge.jpg"></div></div>
+    <div class="issue"><span>REL-188</span>Font picker shows only installed faces<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-loft.jpg"></div></div>
+    <div class="issue"><span>REL-184</span>Render log is cut at 500 lines<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg"></div></div>
+    <div class="issue"><span>REL-181</span>Snap the playhead to beat markers<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg"></div></div>
+    <div class="issue"><span>REL-177</span>Import a brand kit from a URL<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg"></div></div>
+    <div class="issue"><span>REL-172</span>Loudness meter in the mixer<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div></div>
+    <div class="issue"><span>REL-170</span>Duplicate a scene with its audio<em class="pill status">Backlog</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-ridge.jpg"></div></div>
   </main>
   <div class="dim"></div>
 </div>
 <div class="palette card">
-  <div class="query"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span class="typed"><span>d</span><span>e</span><span>p</span><span class="caret"></span></span><span class="ph">Type a command</span></div>
+  <div class="query"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span class="typed"><span>d</span><span>e</span><span>p</span><span class="caret"></span></span><span class="ph">Type a command or search</span></div>
   <div class="divider"></div>
   <div class="list">
-    <div class="opt" data-out="0.78"><div><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Create issue<kbd>C</kbd></div></div>
-    <div class="opt" data-sel><div><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h12M13 7l5 5-5 5"/></svg>Deploy to production<kbd>D P</kbd></div></div>
-    <div class="opt" data-out="0.78"><div><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Open settings<kbd>G S</kbd></div></div>
-    <div class="opt"><div><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9h16"/></svg>Deploy preview<kbd>D V</kbd></div></div>
-    <div class="opt" data-out="0.93"><div><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Search docs<kbd>/</kbd></div></div>
+    <div class="label">Suggestions</div>
+    <div class="opt" data-out="0.78"><div><svg class="icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Create issue<span class="keys"><kbd>C</kbd></span></div></div>
+    <div class="opt" data-sel><div><svg class="icon" viewBox="0 0 24 24"><path d="M5 12h12M13 7l5 5-5 5"/></svg>Deploy to production<span class="keys"><kbd>D</kbd><kbd>P</kbd></span></div></div>
+    <div class="opt" data-out="0.78"><div><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>Open settings<span class="keys"><kbd>G</kbd><kbd>S</kbd></span></div></div>
+    <div class="opt"><div><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M4 9h16"/></svg>Deploy preview<span class="keys"><kbd>D</kbd><kbd>V</kbd></span></div></div>
+    <div class="opt" data-out="0.93"><div><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>Search docs<span class="keys"><kbd>/</kbd></span></div></div>
   </div>
+  <div class="foot"><span><b class="ws" data-logo="relay"></b></span><span>Open<kbd>↵</kbd></span><span>Navigate<kbd>↑</kbd><kbd>↓</kbd></span></div>
 </div>
 <script type="module">
 import '/prompts/moves/demo/assets/logos.js';
@@ -70,7 +108,7 @@ const opt = { fill: 'both' };
 q('.dim').animate([{ opacity: 0 }, { opacity: 0.28 }], { duration: 220, delay: at.dim, easing: settle, ...opt });
 q('.app').animate([{ scale: 1 }, { scale: 0.985 }], { duration: 400, delay: at.dim, easing: settle, ...opt });
 q('.palette').animate([{ translate: '0 -4vh', opacity: 0 }, { opacity: 1, offset: 0.25 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: at.drop, easing: drop, ...opt });
-// rows rise in 50 ms apart
+// rows rise in 40 ms apart
 qa('.opt > div').forEach((r, i) => r.animate([{ translate: '0 1.6vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 360, delay: at.rows + i * 40, easing: settle, ...opt }));
 
 // three keys: each one types a character and collapses the rows that stop matching
@@ -79,7 +117,7 @@ qa('.typed > span:not(.caret)').forEach((c, i) => show(c, at.keys[i]));
 q('.ph').animate([{ display: 'inline' }, { display: 'none' }], { duration: 1, delay: at.keys[0] - 1, fill: 'both' });
 qa('.opt[data-out]').forEach((o) => {
   const k = Number(o.dataset.out) * 1000;
-  o.animate([{ height: 'calc(var(--u) * 8.4)', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 220, delay: k, easing: settle, ...opt });
+  o.animate([{ height: 'calc(var(--px) * 44)', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 220, delay: k, easing: settle, ...opt });
 });
 // the highlight sits on the first row, then on the first match once "Create issue" is gone
 const rows = qa('.opt > div'), css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();

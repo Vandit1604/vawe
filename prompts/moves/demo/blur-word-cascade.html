@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9" data-look="night">
+<html data-aspect="16:9" data-look="swiss">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.6">
@@ -7,13 +7,16 @@
 <title>move: blur word cascade</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  p { margin: 0; width: 78vw; text-align: center; font: 700 calc(var(--u) * 10)/1.15 var(--sans); letter-spacing: -0.035em; text-wrap: balance; }
+  @font-face { font-family: 'Instrument Serif'; font-style: italic; font-display: block; src: url('/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
+  body { display: block; position: relative; }
+  p { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; margin: 0; width: 78vw; font: 600 calc(var(--u) * 16)/1.02 var(--sans); letter-spacing: -0.052em; text-wrap: balance; }
 
   /* no mask and no clip: each word resolves in place, so nothing can cut a descender */
   .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
        animation-name: resolve; animation-duration: 0.8s; animation-delay: calc(0.12s + var(--i) * 0.09s);
        animation-timing-function: var(--soft); animation-fill-mode: both; }
-  .w.hot { color: var(--accent); }
+  /* the word that carries the line changes face, not colour; 1.14em matches the serif's x-height to the grotesk's, and /0.9 keeps the line box at 1.02 */
+  .w.hot { font: italic 400 1.14em/0.9 'Instrument Serif', serif; letter-spacing: -0.02em; }
   /* opacity finishes before the blur does, so a word is readable while it is still soft */
   @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
 </style>

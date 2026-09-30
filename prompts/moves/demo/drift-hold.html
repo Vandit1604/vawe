@@ -6,30 +6,28 @@
 <title>move: drift hold</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
+  @font-face { font-family: 'Instrument Serif'; font-style: italic; font-display: block; src: url('/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
   body { display: block; position: relative; }
-  .bg { position: absolute; inset: -6%; background: radial-gradient(var(--dot) calc(var(--u) * 0.2), transparent calc(var(--u) * 0.26)) 0 0 / calc(var(--u) * 4.4) calc(var(--u) * 4.4); }
-  .print { position: absolute; left: 75vw; top: 20vh; width: 21vw; height: 62vh; margin: 0; box-shadow: var(--shadow-hero); border-radius: var(--r-card); }
-  .print img { object-position: 40% 30%; }
-  .type { position: absolute; left: 11vw; top: 27vh; }
-  .type h1 { margin: 0; font: 700 calc(var(--u) * 21)/0.98 var(--sans); letter-spacing: -0.055em; }
-  .type p { margin: var(--s4) 0 0 0.6vw; font: 500 var(--t-lead)/1.2 var(--sans); color: var(--muted); }
-  .rule { position: absolute; left: 11.6vw; top: 22vh; width: 22vw; height: calc(var(--u) * 0.9); border-radius: 999px; background: var(--accent); }
+  .ground { position: absolute; inset: -8%; background: radial-gradient(var(--dot) calc(var(--u) * 0.22), transparent calc(var(--u) * 0.28)) 0 0 / calc(var(--u) * 4.4) calc(var(--u) * 4.4); }
+  .light { position: absolute; left: -20vw; top: -30vh; width: 90vw; height: 110vh; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 250, 238, 0.85), rgba(255, 250, 238, 0)); }
+  .line { position: absolute; left: 11vw; top: 50vh; translate: 0 -50%; margin: 0; font: 400 calc(var(--u) * 17)/1 var(--sans); letter-spacing: -0.02em; white-space: nowrap; }
+  .line em { color: var(--accent); }
 </style>
 </head>
 <body>
-<div class="bg"><figure class="print"><img class="photo" src="/prompts/moves/demo/assets/photos/bust.jpg" alt=""></figure></div>
-<div class="type"><h1>Held, not<br>frozen.</h1><p>The camera never stops. It only slows down.</p></div>
-<div class="rule"></div>
+<div class="ground"></div>
+<div class="light"></div>
+<h1 class="line">Held, not <em>frozen.</em></h1>
 <script type="module">
 import '/core/engine/page-api.js';
 import { noise1 } from '/core/motion/springs.js';
-const bg = document.querySelector('.bg'), type = document.querySelector('.type'), rule = document.querySelector('.rule');
+const ground = document.querySelector('.ground'), light = document.querySelector('.light');
+// only the ground moves; the line has no transform at all
 const layers = [
-  { el: bg,   seed: 1, amp: 2.2, grow: 0.012 },   // vh of travel, and share of scale gained over the hold
-  { el: type, seed: 2, amp: 1.0, grow: 0.022 },
-  { el: rule, seed: 3, amp: 1.6, grow: 0.022 },
+  { el: ground, seed: 1, amp: 1.6, grow: 0.03 },   // vh of travel, and share of scale gained over the 2 s hold
+  { el: light,  seed: 2, amp: 5,   grow: 0.06 },
 ];
-const rate = 0.8;   // noise steps per second: one new drift direction about every 1.2 s
+const rate = 0.5;   // noise steps per second: one new drift direction every 2 s, so it reads as a breath
 vawe.onFrame((t) => {
   const vh = window.innerHeight / 100;
   layers.forEach(({ el, seed, amp, grow }) => {

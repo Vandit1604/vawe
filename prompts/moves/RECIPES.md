@@ -86,7 +86,7 @@ Traps:
 | 1.90 | [cut-on-motion](cut-on-motion.md) | the full stop leaves the line as the ball; the ground inverts at 2.40 | none |
 | 2.45 | [scale-punch](scale-punch.md) | "One film out" hits; the ball lands as its full stop at 2.67 | pluck 2.65 |
 | 4.00 | [weight-morph](weight-morph.md) (1.1 s) | "out" thickens from 200 to 900 | bloom 4.00 |
-| 5.10 | [drift-hold](drift-hold.md) | the line drifts to 6.00 | none |
+| 5.10 | [drift-hold](drift-hold.md) | the line holds still; only the ground drifts to 6.00 | none |
 
 Why it works: one dot carries the line (a full stop, then a ball across the cut, then a full stop).
 The cut changes the ground and the axis (letters rise in y, the ball runs in x, the punch is a scale).
@@ -97,4 +97,4 @@ Traps:
 - Drop cut-on-motion's `flip`: the dot stays accent on both grounds, so check its contrast on each.
 - The punch starts at 1.4x, so read the dot's slot with `offsetLeft`/`offsetTop` (they ignore transforms).
 - After the ball lands, swap it for the inline dot. The morph reflows the line, and only an inline dot rides it.
-- The punch owns `scale` on the h1 and the drift owns `transform`. They compose, so never set both on one property.
+- The drift goes on the ground behind the line, never on the h1: a drifting line reads as a move, not a hold.

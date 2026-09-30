@@ -42,7 +42,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
-| keep a quiet frame alive | [drift-hold](drift-hold.md) |
+| hold a line still to read, the ground alive | [drift-hold](drift-hold.md) |
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md) |
 | show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md) |
 | change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [smear-stretch](smear-stretch.md) |
@@ -129,7 +129,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | pull back reveal | open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even | [pull-back-reveal.md](pull-back-reveal.md) | [pull-back-reveal.mp4](pull-back-reveal.mp4) |
 | parallax dive | the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves | [parallax-dive.md](parallax-dive.md) | [parallax-dive.mp4](parallax-dive.mp4) |
 | rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
-| drift hold | a very slow seeded drift per layer so a quiet frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
+| drift hold | the line holds still while only the ground drifts, so a held frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
 | pan stations | several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them | [pan-stations.md](pan-stations.md) | [pan-stations.mp4](pan-stations.mp4) |
 | crash zoom | one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil | [crash-zoom.md](crash-zoom.md) | [crash-zoom.mp4](crash-zoom.mp4) |
 
@@ -158,7 +158,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | chart build | gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it | [chart-build.md](chart-build.md) | [chart-build.mp4](chart-build.mp4) |
 | before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
-| AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
+| AI stream response | a typed prompt is sent up into the thread, a status line shines, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
 | overwhelm collapse | the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens | [overwhelm-collapse.md](overwhelm-collapse.md) | [overwhelm-collapse.mp4](overwhelm-collapse.mp4) |
 | success check | a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it | [success-check.md](success-check.md) | [success-check.mp4](success-check.mp4) |
 | integration hub | the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub | [integration-hub.md](integration-hub.md) | [integration-hub.mp4](integration-hub.mp4) |
