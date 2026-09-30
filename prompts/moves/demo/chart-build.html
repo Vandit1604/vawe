@@ -10,6 +10,8 @@
   .card { width: calc(var(--u) * 158); padding: calc(var(--u) * 5.2) calc(var(--u) * 6.4) calc(var(--u) * 5.4); opacity: 0; }
   .head { display: flex; align-items: baseline; justify-content: space-between; }
   .title { font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.02em; }
+  .title { display: flex; align-items: center; gap: calc(var(--u) * 2); }
+  .title .logo-mark { width: 0.86em; height: 0.86em; }
   .range { font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
   .plot { position: relative; height: calc(var(--u) * 46); margin: calc(var(--u) * 5.6) 0 calc(var(--u) * 6) calc(var(--u) * 9); }
   .grid { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); transform-origin: 0 50%; }
@@ -24,11 +26,12 @@
 </head>
 <body>
 <div class="card">
-  <div class="head"><div class="title">Weekly active users</div><div class="range">Mar to Sep</div></div>
+  <div class="head"><div class="title"><i data-logo="orbital"></i>Weekly active users</div><div class="range">Mar to Sep 2026</div></div>
   <div class="plot" id="plot"></div>
 </div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import '/prompts/moves/demo/assets/logos.js';
 const q = (s) => document.querySelector(s);
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);

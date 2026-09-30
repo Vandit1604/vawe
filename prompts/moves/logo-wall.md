@@ -11,7 +11,7 @@ so the wall reads as different companies and not as one font repeated. Clip:
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), run = 190 * u;      // u = 1 percent of the frame height
 // lane markup: .lane (overflow hidden) > .row (absolute, left -20u) > .track (flex, 2 x 12 cells of 38u)
-// a cell is an inline SVG mark (24 x 24 viewBox, stroke 2, currentColor) plus a wordmark; invented brands only
+// a cell is an inline SVG mark (24 x 24 viewBox, filled, currentColor) plus a wordmark; invented brands only (demo/assets/logos.js)
 lanes.forEach((row, i) => {
   const dir = i % 2 ? 1 : -1, delay = 150 + i * 110;                // lanes alternate, 110 ms apart
   row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: 1300, delay, easing: settle, fill: 'both' });
@@ -23,8 +23,8 @@ lanes.forEach((row, i) => {
 Three lanes at 110 ms apart tear the wall in as one gesture; one lane reads as a ticker, five as
 a screen saver. The blur ends before the logos can be read, which is right: the eye should read
 the count, not the names. The drift (6 percent of the height over the whole clip) keeps the wall alive
-after the landing. Never use a real brand: draw invented marks as inline SVG, one weight and one
-stroke width for all of them, and give each wordmark its own face and case. Keep the ink one colour;
+after the landing. Never use a real brand: draw invented marks as inline SVG at one visual
+weight, and give each wordmark its own face and case. Keep the ink one colour;
 the accent belongs to the number in the line above.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

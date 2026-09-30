@@ -9,7 +9,7 @@
   body { display: block; }
   .grid { position: absolute; inset: 0; padding: calc(var(--u) * 4); display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(4, 1fr); gap: calc(var(--u) * 2.2); }
   .tile { display: grid; place-items: center; background: var(--surface); box-shadow: var(--ring), calc(var(--u) * 0.9) calc(var(--u) * 0.9) 0 #000; }
-  .tile .icon { width: calc(var(--u) * 8); height: calc(var(--u) * 8); stroke-width: 2.2; color: var(--ink); }
+  .tile .logo-mark { width: calc(var(--u) * 7.4); height: calc(var(--u) * 7.4); color: var(--ink); }
   .title { grid-column: 2 / span 3; grid-row: 2 / span 2; place-items: end start; padding: var(--s3); background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge), var(--lift); }
   .title b { font: 800 calc(var(--u) * 8.2)/0.95 var(--sans); letter-spacing: -0.04em; }
 </style>
@@ -18,18 +18,13 @@
 <div class="grid">
   <div class="tile title"><b>Plugs into<br>everything.</b></div>
 </div>
-<template id="glyphs">
-  <svg class="icon" viewBox="0 0 24 24"><path d="M5 9l7-5 7 5M5 15l7-5 7 5M5 21l7-5 7 5"/></svg>
-  <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg>
-  <svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/></svg>
-  <svg class="icon" viewBox="0 0 24 24"><path d="M6 20V11M12 20V4M18 20v-6"/></svg>
-  <svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 16L16 8"/></svg>
-  <svg class="icon" viewBox="0 0 24 24"><path d="M4 12h5l2-6 2 12 2-6h5"/></svg>
-  <svg class="icon" viewBox="0 0 24 24"><path d="M4 18L12 5l8 13z"/><path d="M9 14h6"/></svg>
-</template>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const grid = document.querySelector('.grid'), glyphs = [...document.getElementById('glyphs').content.children];
+import { mark } from '/prompts/moves/demo/assets/logos.js';
+const grid = document.querySelector('.grid');
+const glyphs = ['kestrel', 'halcyon', 'parcel', 'fernbank', 'mosaic', 'lumen', 'northwind', 'orbital', 'quarry', 'tidewell', 'ardent', 'vantage', 'compass', 'aster'].map((name) => {
+  const t = document.createElement('template'); t.innerHTML = mark(name); return t.content.firstElementChild;
+});
 const COLS = 8, ROWS = 4, src = { c: 2.5, r: 1.5 };   // the wave starts at the title tile's centre, in tile units
 const inTitle = (c, r) => c >= 1 && c <= 3 && r >= 1 && r <= 2;
 const settle = curveToLinear(CURVES.spring), fast = curveToLinear(CURVES.expoOut);

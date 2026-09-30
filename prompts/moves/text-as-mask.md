@@ -10,8 +10,8 @@ Clip: [text-as-mask.mp4](text-as-mask.mp4). Demo: [demo/text-as-mask.html](demo/
 .title { font: 900 33vh/0.86 var(--sans); font-stretch: 125%; text-transform: uppercase; white-space: nowrap;
          color: transparent; -webkit-background-clip: text; background-clip: text; background-repeat: no-repeat;
          filter: drop-shadow(1.3vh 1.3vh 0 #000);
-         background-image: url(near-ridge.svg), url(far-ridge.svg), radial-gradient(circle, #fffbe0 0 24%, #ffd25e 27% 40%, transparent 70%),
-                           radial-gradient(ellipse 60% 70% at 62% 70%, rgba(255,120,60,.9), transparent 72%), linear-gradient(180deg, #2a1c86, #8b2fb0 34%, #ff5c7c 62%, #ffb04a 90%);
+         background-image: url(near-ridge.svg), url(far-ridge.svg), radial-gradient(circle, #fff6dc 0 24%, #ffcf70 27% 40%, transparent 70%),
+                           radial-gradient(ellipse 60% 70% at 62% 70%, rgba(255,140,60,.85), transparent 72%), linear-gradient(180deg, #1d2b4f, #6b4a6e 30%, #d9704a 60%, #f6b35a 88%);
          background-size: 150% 34%, 130% 48%, 46% 92%, 100% 100%, 100% 100%; }
 ```
 
