@@ -27,6 +27,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | blur-word-cascade | copy resolves word by word from blur, no hard mask | to be captured | built |
 | text-as-mask | huge type is a window onto a product shot or a rich image made in CSS or SVG | video-shotcraft opening/text-as-mask; HyperFrames texture-mask-text | built |
 | outline-fill | big type arrives as an outline and fills with colour on the beat | video-shotcraft typography/outline-word-fill; HyperFrames outline-draw | built |
+| strikethrough-replace | an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character | HyperFrames strikethrough-replace and text-state-swap, video-shotcraft typography/pill-slot-cycle | built |
 
 ## 2. Change between shots
 
@@ -46,6 +47,10 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | type-fill-transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | HyperFrames text-mask transitions, kinetic-type reels | built |
 | color-block-wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | HyperFrames colorama-wipe and directional-wipe, video-shotcraft color-block-step-wipe | built |
 | zoom-through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | HyperFrames zoom-through-transition, video-shotcraft transition-travel, School of Motion infinite zoom | built |
+| speed-ramp-freeze | a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur | HyperFrames beat-freeze-cut and freeze-frame-dressing, video-shotcraft rhythm/speed-ramp-freeze | built |
+| liquid-wipe | a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot | HyperFrames liquid and blob transitions, SVG goo filter (Lucas Bebber), After Effects liquid transitions | built |
+| grid-tile-flip | a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back | HyperFrames flip-grid and tile transitions, After Effects card wipe, video-shotcraft ui-entrance/wall-reveal-moves | built |
+| luma-matte-dissolve | the next shot arrives through its own brightness: an SVG luminance matte with a falling threshold shows its bright areas first, then midtones, and its dark ground last | After Effects luma matte and Set Matte, HyperFrames luma-wipe and threshold transitions | built |
 
 ## 3. Point the eye
 
@@ -81,6 +86,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | calm-lockup | logo and line settle while the world keeps moving, quiet | to be captured | built |
 | logo-sting | a short animated logo hit | to be captured | built |
 | ui-strip-away | the product UI peels back layer by layer until only the logo and line remain | video-shotcraft outro/ui-strip-away-outro | built |
+| logo-wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | HyperFrames logo-wall and trust-strip, proof-logo-chain blueprint | built |
 
 ## 6. Product moments
 
@@ -95,3 +101,5 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | before-after-wipe | a scan line reveals the after state over the before state | video-shotcraft data/before-after-slider-scrub; HyperFrames before-after-wipe | built |
 | skeleton-reveal | grey loading blocks shimmer, then resolve into real content one region at a time | video-shotcraft ui-entrance/skeleton-reveal; HyperFrames skeleton-reveal | built |
 | ai-stream-response | an answer streams in chunk by chunk under a typed prompt, with a working indicator first | video-shotcraft interaction/ai-stream-response; HyperFrames streaming-text, typed-prompt, typing-indicator | built |
+| overwhelm-collapse | the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens | HyperFrames overwhelm-surround and notification-pileup, video-shotcraft rhythm-interrupt-moves | built |
+| success-check | a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it | HyperFrames success-check, press-ripple and spring-pop, video-shotcraft effects/impact-feedback | built |

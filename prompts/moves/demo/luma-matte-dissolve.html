@@ -1,0 +1,48 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="night">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.5">
+<title>move: luma matte dissolve</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .shot { position: absolute; inset: 0; }
+  .a h1 { position: absolute; left: 8vw; top: calc(var(--u) * 22); margin: 0; font: 800 calc(var(--u) * 15)/1.02 var(--sans); letter-spacing: -0.04em; }
+  .a .stack { position: absolute; right: 8vw; top: calc(var(--u) * 16); width: calc(var(--u) * 62); display: flex; flex-direction: column; gap: var(--s2); }
+  .a .row { display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); border-radius: var(--r-chip); background: var(--surface); box-shadow: var(--shadow-card); font: 600 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .a .row i { width: calc(var(--u) * 4); height: calc(var(--u) * 4); border-radius: 50%; background: var(--raised); flex: none; }
+  .b { background: #07051a; }
+  .b .bloom { position: absolute; inset: 0; background: radial-gradient(circle at 70% 42%, #fff 0, #fff 4.5%, #ffe2b0 6.5%, #ffb547 15%, rgba(255, 181, 71, 0.38) 32%, rgba(255, 181, 71, 0.08) 52%, rgba(255, 181, 71, 0) 68%); }
+  .b .rim { position: absolute; left: 70vw; top: calc(var(--u) * 42); width: calc(var(--u) * 46); height: calc(var(--u) * 46); margin: calc(var(--u) * -23) 0 0 calc(var(--u) * -23); border-radius: 50%; box-shadow: inset 0 0 0 calc(var(--u) * 0.35) rgba(255, 255, 255, 0.55); }
+  .b h1 { position: absolute; left: 8vw; bottom: calc(var(--u) * 12); margin: 0; font: 800 calc(var(--u) * 14)/1.02 var(--sans); letter-spacing: -0.04em; color: #fff; }
+  .b h1 span { color: #ffb547; }
+</style>
+</head>
+<body>
+<section class="shot a"><h1>12 tabs,<br>open.</h1><div class="stack"><div class="row"><i></i>Inbox, 48 unread</div><div class="row"><i></i>Docs, edited 2 h ago</div><div class="row"><i></i>Board, 9 blocked</div><div class="row"><i></i>Calendar, 6 today</div></div></section>
+<section class="shot b" id="b"><div class="in shot"><div class="bloom"></div><div class="rim"></div><h1>One place<br>for <span>all</span> of it.</h1></div></section>
+<svg width="0" height="0" style="position:absolute"><filter id="luma" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+  <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="L"/>
+  <feComponentTransfer in="L" result="M"><feFuncA id="ramp" type="linear" slope="8" intercept="-8"/></feComponentTransfer>
+  <feComposite in="SourceGraphic" in2="M" operator="in"/>
+</filter></svg>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut);
+const S = 8, t0 = 0.3, dur = 1.0;                       // S: how many luminance steps the edge is soft over (1/S wide)
+const sweep = (u) => 1 - (1 - u) ** 1.7;               // quick to start, and the dark ground still arrives before the end
+const ramp = document.getElementById('ramp'), b = document.getElementById('b');
+b.style.filter = 'url(#luma)';
+// the threshold falls from above white (nothing shows) to below black (everything shows): pixels appear brightest first
+vawe.onFrame((t) => {
+  const u = Math.min(1, Math.max(0, (t - t0) / dur)), th = 1 + 1 / S - (1 + 2 / S + 0.02) * sweep(u);
+  ramp.setAttribute('slope', S);
+  ramp.setAttribute('intercept', (-S * th).toFixed(4));
+});
+document.querySelector('.a').animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0.55 }], { duration: 1000, delay: t0 * 1000, easing: settle, fill: 'both' });
+b.querySelector('.in').animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1200, delay: 250, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>

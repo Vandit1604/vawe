@@ -1,0 +1,41 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="paper">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<title>move: strikethrough replace</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .kicker { position: absolute; left: 10vw; top: calc(var(--u) * 27); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); letter-spacing: 0; }
+  .row { position: absolute; left: 10vw; top: calc(var(--u) * 36); display: flex; align-items: baseline; gap: calc(var(--u) * 5); white-space: nowrap; }
+  .old { position: relative; display: inline-block; font: 400 calc(var(--u) * 27)/1.1 var(--sans); letter-spacing: -0.02em; transform-origin: 0 82%; }
+  .strike { position: absolute; left: -4%; right: -4%; top: 56%; height: calc(var(--u) * 1.5); margin-top: calc(var(--u) * -0.75); background: var(--accent); transform-origin: 0 50%; rotate: -3deg; }
+  .new { display: inline-flex; font: 400 calc(var(--u) * 40)/1.1 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
+  .mask { display: inline-block; overflow: hidden; padding: 0.22em 0.03em 0.22em; margin: -0.22em 0; }
+  .mask i { display: inline-block; font-style: normal; }
+  .per { align-self: flex-end; margin-bottom: calc(var(--u) * 5); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="kicker">per seat, billed yearly</div>
+<div class="row">
+  <div class="old">$49<span class="strike"></span></div>
+  <div class="new"><span class="mask"><i>$</i></span><span class="mask"><i>1</i></span><span class="mask"><i>9</i></span></div>
+  <div class="per">/ month</div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut);
+const q = (s) => document.querySelector(s);
+// 1 the strike: 240 ms, drawn from the left, on the curve that leads with speed
+q('.strike').animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 240, delay: 260, easing: settle, fill: 'both' });
+// 2 the old value gives way: it dims and drops to 0.7 the moment the line passes it
+q('.old').animate([{ color: 'var(--ink)', scale: 1 }, { color: 'var(--faint)', scale: 0.7 }], { duration: 380, delay: 380, easing: settle, fill: 'both' });
+// 3 the new value writes in beside it: one mask per character, 70 ms apart, each rising from under its edge
+document.querySelectorAll('.mask i').forEach((el, i) => el.animate([{ translate: '0 130%' }, { translate: '0 0' }], { duration: 520, delay: 500 + i * 70, easing: settle, fill: 'both' }));
+q('.per').animate([{ opacity: 0, translate: '0 1.2vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 840, easing: settle, fill: 'both' });
+q('.row').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 900, delay: 700, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>

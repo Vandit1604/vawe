@@ -1,0 +1,79 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="swiss">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<meta name="blank" content="0-0.05">
+<title>move: logo wall</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .lede { position: absolute; left: 6vw; top: calc(var(--u) * 9); font: 700 calc(var(--u) * 10.5)/1 var(--sans); letter-spacing: -0.045em; }
+  .lede span { display: block; overflow: hidden; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+  .lede i { display: block; font-style: normal; }
+  .lede .n { color: var(--accent); }
+  .wall { position: absolute; left: 0; right: 0; top: calc(var(--u) * 42); border-top: 1px solid var(--ink); }
+  .lane { position: relative; height: calc(var(--u) * 17); border-bottom: 1px solid var(--line); overflow: hidden; }
+  .row { position: absolute; left: calc(var(--u) * -20); top: 0; height: 100%; width: max-content; display: flex; will-change: transform; }
+  .track { flex: none; display: flex; height: 100%; }
+  .logo { flex: none; width: calc(var(--u) * 38); height: 100%; display: flex; align-items: center; justify-content: center; gap: calc(var(--u) * 1.6); border-right: 1px solid var(--line); color: var(--ink); }
+  .logo svg { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .logo svg .f { fill: currentColor; stroke: none; }
+  .logo b { font-size: calc(var(--u) * 5.2); line-height: 1; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="lede"><span><i>Trusted by</i></span><span><i><em class="n" style="font-style:normal">4,200</em> teams.</i></span></div>
+<div class="wall" id="wall"></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), E = CURVES.expoOut;
+const W = innerWidth, H = innerHeight, u = H / 100;
+// invented brands only: a mark (24 x 24 viewBox) and a wordmark in a face that fits it
+const brands = [
+  ['Northwind', '<path d="M12 3.5l8.5 16h-17z"/><path d="M12 10l3.6 6.5H8.4z" class="f"/>', "700 var(--t) 'Geist'", '-0.03em'],
+  ['halcyon', '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6" class="f"/>', "400 var(--t) 'Instrument Serif'", '0'],
+  ['FERNBANK', '<path d="M6 20V10M12 20V4M18 20v-7"/>', "600 calc(var(--t) * 0.68) 'Unbounded'", '0.02em'],
+  ['kestrel', '<path d="M3 8l9 6 9-6M3 14l9 6 9-6"/>', "500 calc(var(--t) * 0.9) 'JetBrains Mono'", '-0.04em'],
+  ['Orbital', '<ellipse cx="12" cy="12" rx="9.5" ry="4.2" transform="rotate(-24 12 12)"/><circle cx="12" cy="12" r="2.4" class="f"/>', "800 var(--t) 'Archivo'", '-0.03em'],
+  ['Lumen&Co', '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>', "700 var(--t) 'Geist'", '-0.02em'],
+  ['Quarry', '<path d="M4 4h16v10l-6 6H4z"/>', "800 var(--t) 'Archivo'", '0.02em'],
+  ['tidewell', '<path d="M2.5 9c3-3.2 5 3.2 8 0s5 3.2 8 0M2.5 15c3-3.2 5 3.2 8 0s5 3.2 8 0"/>', "400 var(--t) 'Instrument Serif'", '0'],
+  ['PARCEL', '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/>', "500 calc(var(--t) * 0.84) 'Geist Mono'", '0.04em'],
+  ['Mosaic', '<rect x="4" y="4" width="7" height="7" class="f"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7" class="f"/>', "700 var(--t) 'Plus Jakarta Sans'", '-0.03em'],
+  ['ardent', '<path d="M12 2.5l7.5 9.5-7.5 9.5L4.5 12z"/>', "600 var(--t) 'Manrope'", '-0.02em'],
+  ['Vantage', '<path d="M3.5 5l8.5 14.5L20.5 5"/>', "700 var(--t) 'Bricolage Grotesque'", '-0.03em'],
+];
+const logo = ([name, mark, font, track]) => `<div class="logo"><svg viewBox="0 0 24 24">${mark}</svg><b style="font:${font.replace('var(--t)', `${(u * 5.2).toFixed(1)}px`)};letter-spacing:${track}">${name}</b></div>`;
+const wall = document.getElementById('wall');
+const rows = [0, 1, 2].map((r) => {
+  const set = Array.from({ length: 12 }, (_, i) => brands[(i + r * 4) % 12]);
+  const lane = Object.assign(document.createElement('div'), { className: 'lane' });
+  lane.innerHTML = `<div class="row"><div class="track">${set.concat(set).map(logo).join('')}</div></div>`;
+  wall.append(lane);
+  return lane.firstElementChild;
+});
+const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+svg.setAttribute('width', 0); svg.setAttribute('height', 0); svg.style.position = 'absolute';
+svg.innerHTML = rows.map((_, i) => `<filter id="lb${i}" x="-10%" width="120%" y="0" height="100%"><feGaussianBlur id="lg${i}" stdDeviation="0 0"/></filter>`).join('');
+document.body.append(svg);
+const arrive = 1300, stagger = 110, run = 190 * u;      // px each row travels while it arrives
+const plan = rows.map((row, i) => {
+  const dir = i % 2 ? 1 : -1, delay = 150 + i * stagger;
+  row.style.filter = `url(#lb${i})`;
+  row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: arrive, delay, easing: settle, fill: 'both' });
+  // after it lands the row never stops: a slow linear drift, so the last frame still moves
+  row.firstElementChild.animate([{ translate: '0 0' }, { translate: `${dir * 6 * u}px 0` }], { duration: 2000, easing: 'linear', fill: 'both' });
+  return { blur: document.getElementById(`lg${i}`), delay: delay / 1000, run };
+});
+vawe.onFrame((t) => plan.forEach((p) => {
+  const x = (t - p.delay) / (arrive / 1000), du = 1 / 240;
+  const slope = x > 0 && x < 1 ? (E(Math.min(1, x + du)) - E(x)) / du : 0;
+  p.blur.setAttribute('stdDeviation', `${(slope * p.run / (arrive / 1000) / 60 * 0.3).toFixed(2)} 0`);
+}));
+const lede = [...document.querySelectorAll('.lede i')];
+lede.forEach((el, i) => el.animate([{ translate: '0 110%' }, { translate: '0 0' }], { duration: 640, delay: 80 + i * 90, easing: settle, fill: 'both' }));
+</script>
+</body>
+</html>

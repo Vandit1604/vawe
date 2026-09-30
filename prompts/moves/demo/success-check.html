@@ -1,0 +1,55 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="soft">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<meta name="blank" content="0-0.05">
+<title>move: success check</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  .checkout { width: calc(var(--u) * 92); display: flex; flex-direction: column; gap: var(--s3); }
+  .head-row { display: flex; align-items: center; gap: var(--s2); }
+  .head-row .chip { --size: calc(var(--u) * 9); }
+  .head-row .name { font: 700 var(--t-body)/1.1 var(--sans); }
+  .head-row .name small { display: block; margin-top: calc(var(--u) * 0.5); font: 500 var(--t-small)/1.1 var(--sans); color: var(--muted); }
+  .price { font: 800 calc(var(--u) * 12)/1 var(--sans); letter-spacing: -0.04em; }
+  .price small { font: 600 var(--t-body)/1 var(--sans); letter-spacing: 0; color: var(--muted); margin-left: var(--s1); }
+  .slot { position: relative; height: calc(var(--u) * 13); display: flex; justify-content: center; }
+  .pay { position: relative; width: 100%; height: 100%; padding: 0; overflow: visible; }
+  .pay .label { position: absolute; inset: 0; display: grid; place-items: center; }
+  .pay svg { position: absolute; inset: 0; margin: auto; width: calc(var(--u) * 7.4); height: calc(var(--u) * 7.4); fill: none; stroke: var(--on-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .ring { position: absolute; top: 0; left: 50%; width: calc(var(--u) * 13); height: calc(var(--u) * 13); margin-left: calc(var(--u) * -6.5); border-radius: 50%; border: calc(var(--u) * 0.7) solid var(--accent); opacity: 0; }
+  .done { height: calc(var(--u) * 5); text-align: center; font: 700 var(--t-body)/1 var(--sans); color: var(--accent); opacity: 0; }
+</style>
+</head>
+<body>
+<div class="checkout card">
+  <div class="head-row"><div class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></div><div class="name">Pro plan<small>billed monthly</small></div></div>
+  <div class="price">$19<small>/ month</small></div>
+  <div class="slot">
+    <div class="ring"></div>
+    <div class="btn primary pay"><span class="label">Pay $19</span><svg viewBox="0 0 24 24"><path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M5.5 12.5l4.2 4.2L18.5 7.6"/></svg></div>
+  </div>
+  <div class="done">Payment received</div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), press = curveToLinear(CURVES.spring);
+const q = (s) => document.querySelector(s);
+const btn = q('.pay'), W = btn.offsetWidth, Hh = btn.offsetHeight;
+const T = { press: 200, morph: 280, draw: 600, land: 940 };   // ms
+// 1 the press: the whole button dips to 0.96 and comes back on the spring
+btn.animate([{ scale: 1 }, { scale: 0.96, offset: 0.3 }, { scale: 1 }], { duration: 300, delay: T.press, easing: press, fill: 'both' });
+// 2 it resolves: width closes to the height and the radius follows, so the rectangle becomes its own circle
+btn.animate([{ width: `${W}px`, borderRadius: getComputedStyle(btn).borderRadius }, { width: `${Hh}px`, borderRadius: `${Hh / 2}px` }], { duration: 420, delay: T.morph, easing: settle, fill: 'both' });
+q('.label').animate([{ opacity: 1, scale: 1, filter: 'blur(0px)' }, { opacity: 0, scale: 0.6, filter: 'blur(3px)' }], { duration: 160, delay: T.morph, easing: 'ease-out', fill: 'both' });
+// 3 the check draws: pathLength 1, one dash, the short stroke first because the path turns at its corner
+q('.pay path').animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 360, delay: T.draw, easing: settle, fill: 'both' });
+// 4 it lands: a small press spring on the finished circle and one ring that leaves it
+btn.animate([{ scale: 1 }, { scale: 0.93, offset: 0.16 }, { scale: 1 }], { duration: 620, delay: T.land, easing: pop, fill: 'both' });
+q('.ring').animate([{ opacity: 0.9, scale: 1 }, { opacity: 0, scale: 2.3 }], { duration: 640, delay: T.land + 40, easing: settle, fill: 'both' });
+q('.done').animate([{ opacity: 0, translate: '0 1.6vh', filter: 'blur(3px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 520, delay: T.land + 120, easing: settle, fill: 'both' });
+q('.checkout').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 1000, delay: 500, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>
