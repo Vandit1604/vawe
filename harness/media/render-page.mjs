@@ -21,14 +21,13 @@
 // its own page of the shared browser (harness/media/preview-server.mjs); the speed pass below runs the same
 // way. Slice boundaries do not depend on the worker count, so the pixels never do either. When
 // blur > 1, a per-frame speed pass decides how many subframes that frame actually needs: a still frame
-// gets 1, a fast one gets up to `blur`. The pass reads paused-animation bounding-box deltas (no
+// gets 1, a fast one enough subframes to blend into one streak, at most `blur`. The pass reads paused-animation bounding-box deltas (no
 // screenshots); a page driven by window.seek or onFrame hooks, or with no animations, has no boxes to
 // read, so it falls back to a mean pixel difference between downscaled frames.
-// This is bucketed to 3 levels (1, half, full) and run-length-encoded before capture, both so a real
-// render stays close to its old subframe count in the common case and so the ffmpeg filter graph below
-// (one trim+tmix+select+concat chain per motion-regime segment, still ONE ffmpeg process) never grows
-// past a few dozen segments; a pathological frame-by-frame alternation collapses back to a uniform
-// max-blur capture (`clampSegments`) rather than building an unbounded graph.
+// Counts are powers of two and run-length-encoded before capture, so the ffmpeg filter graph below
+// (one trim+tmix+select+concat chain per motion-regime segment, still ONE ffmpeg process) stays at a
+// few dozen segments; a pathological frame-by-frame alternation collapses back to a uniform max-blur
+// capture (`clampSegments`) rather than building an unbounded graph.
 //
 // Replaces the scratchpad csskit prototype (render.mjs --blur), which wrote a 0-byte mp4 and exited
 // silently under load: it spawned ONE ffmpeg process PER FRAME to blend that frame's subframes
@@ -113,8 +112,8 @@ export async function settle(page) {
   });
 }
 
-// Per-output-frame displacement, no screenshots: paused-animation target bounding-box delta between
-// consecutive frame times, summed across every animated element. A pure function of the page's own
+// Per-output-frame displacement in px, no screenshots: the largest paused-animation target bounding-box
+// move or resize between consecutive frame times, over every animated element. A pure function of the page's own
 // animation timing, so it is as deterministic as the capture itself. Returns null when the page has
 // nothing to measure this way (window.seek, onFrame hooks, or no animations at all).
 async function frameSpeedsFromBoxes(page, frames, fps, from) {
@@ -129,12 +128,13 @@ async function frameSpeedsFromBoxes(page, frames, fps, from) {
         const t = a.effect && a.effect.target;
         if (!t || !t.getBoundingClientRect) return null;
         const r = t.getBoundingClientRect();
-        return { x: r.x, y: r.y };
+        return { x: r.x, y: r.y, w: r.width, h: r.height };
       });
       if (prev) {
         let d = 0;
         for (let j = 0; j < boxes.length; j++) {
-          if (boxes[j] && prev[j]) d += Math.hypot(boxes[j].x - prev[j].x, boxes[j].y - prev[j].y);
+          const a = boxes[j], b = prev[j];
+          if (a && b) d = Math.max(d, Math.hypot(a.x - b.x, a.y - b.y), Math.abs(a.w - b.w), Math.abs(a.h - b.h));
         }
         speeds.push(d);
       }
@@ -194,18 +194,27 @@ async function frameSubframes(page, job) {
 // Returns bucketed subframe counts per output frame.
 async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
-  if (boxes) return clampSegments(bucketize(boxes, blur, BOX_BANDS));
+  if (boxes) return clampSegments(boxes.map((px) => subframesForTravel(px, blur)));
   return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers), blur, PIXEL_BANDS));
 }
 
-// 3 levels only (still / half / full blur): keeps the ffmpeg filter graph's segment count bounded by
-// the number of times the page's motion changes REGIME, not by frame count. A band is [still below,
-// half below]: pixels of box travel per frame, or mean luma difference for the pixel estimate.
-const BOX_BANDS = [1, 6];
+// A fast move blended from too few subframes shows as separate copies of the object (3 ghosts at 3
+// subframes); enough subframes that neighbours sit at most STEP_PX apart read as one smooth streak.
+// SHUTTER is the share of the frame interval the blur spans (0.5 = a film camera's 180 degree shutter).
+// Counts are powers of two so the ffmpeg graph's segment count follows motion regimes, not frames.
+export const SHUTTER = 0.5;
+const STEP_PX = 3;
+export function subframesForTravel(px, cap) {
+  let k = 1;
+  while (k < cap && (px * SHUTTER) / k > STEP_PX) k = Math.min(cap, k * 2);
+  return k;
+}
+
+// The pixel estimate cannot measure travel: mean luma difference bands [still below, fast from].
 const PIXEL_BANDS = [0.15, 1.5];
-function bucketize(speeds, blur, [still, half]) {
-  const mid = Math.max(1, Math.round(blur / 2));
-  return speeds.map((s) => (s < still ? 1 : s < half ? mid : blur));
+function bucketize(speeds, blur, [still, fast]) {
+  const mid = Math.min(blur, 4);
+  return speeds.map((s) => (s < still ? 1 : s < fast ? mid : blur));
 }
 
 function clampSegments(kArr, cap = 200) {
@@ -264,7 +273,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
-      await seekAll(page, baseMs + (j / k) * (1000 / fps));
+      await seekAll(page, baseMs + (j / k) * SHUTTER * (1000 / fps));
       const idx = subframeStart[i] + j;
       await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`), type: 'png', optimizeForSpeed: true });
       onSubframe();
@@ -446,8 +455,8 @@ async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) 
  * renderPage(pagePath, outPath, opts) -> { frames, subframes, captureMs, encodeMs, dur }.
  * opts: aspect (the page's <meta name="aspect">, else 16:9), w/h (override the aspect's pixel size),
  * final (false: half size, ultrafast x264), audio (final: mix the page's <audio> elements in; a draft
- * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; a still
- * frame always gets 1 regardless of this setting), from (0, seconds into the page's own timeline the
+ * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
+ * frame gets what its fastest move needs, a still frame 1), from (0, seconds into the page's own timeline the
  * render starts at), durArg (seconds rendered from `from`; defaults to the page's own <meta
  * name="duration"> minus `from`), progress (false; prints a single overwriting capture-progress line).
  */
@@ -586,7 +595,7 @@ async function main() {
       aspect, final,
       fps: Number(flag('--fps', final ? 60 : 30)),
       w: flag('--w', null) && Number(flag('--w', null)), h: flag('--h', null) && Number(flag('--h', null)),
-      blur: Number(flag('--blur', final ? 3 : 1)), from, durArg, progress: final,
+      blur: Number(flag('--blur', final ? 16 : 1)), from, durArg, progress: final,
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
     };
