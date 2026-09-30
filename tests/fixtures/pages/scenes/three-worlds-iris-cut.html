@@ -1,0 +1,23 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="aspect" content="16:9">
+<style>
+*{margin:0}html,body{background:#c8321e;overflow:hidden}
+.w{position:absolute;inset:0}
+#a{background:#c8321e}
+#b{background:#1e3fc8}
+#c{background:#f2e6c9}
+.dot{position:absolute;border-radius:50%}
+</style>
+</head><body>
+<div class="w" id="a"><div class="dot" style="left:10vw;top:20vh;width:18vw;height:32vw;background:#ffd0c8"></div></div>
+<div class="w" id="b"><div class="dot" style="left:60vw;top:55vh;width:30vw;height:30vw;background:#9fd0ff"></div></div>
+<div class="w" id="c"><div class="dot" style="left:35vw;top:5vh;width:10vw;height:80vh;border-radius:0;background:#101010"></div></div>
+<script>
+const b = document.getElementById('b'), c = document.getElementById('c');
+window.seek = (t) => {
+  const r = Math.min(1, Math.max(0, (t - 1.8) / 0.6));
+  b.style.clipPath = `circle(${r * 75}vw at 50% 50%)`;
+  c.style.display = t >= 4 ? 'block' : 'none';
+};
+</script></body></html>
