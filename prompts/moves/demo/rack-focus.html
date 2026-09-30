@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="night">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
@@ -8,7 +8,7 @@
 <style>
   body { display: block; position: relative; }
   .far, .near { position: absolute; inset: 0; }
-  .lights i { position: absolute; width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); border-radius: 50%; background: #c9d8ff; }
+  .lights i { position: absolute; width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); border-radius: 50%; background: var(--star); }
   .card { position: absolute; left: 50vw; top: 28vh; width: 38vw; height: 44vh; padding: calc(var(--u) * 5); }
   .card .k { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); letter-spacing: -0.02em; }
   .card .k .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }

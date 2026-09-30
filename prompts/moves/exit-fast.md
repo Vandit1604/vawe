@@ -26,3 +26,5 @@ root.setProperty('--accelerate', curveToLinear((u) => u * u * u));
 
 Name the beat once (`--beat-1`, `--beat-1-out`) and read it from every delay in that beat, so one
 edit moves the whole beat. Declare the empty frames after the exit in `<meta name="blank">`.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

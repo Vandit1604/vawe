@@ -30,3 +30,5 @@ Three colours, in this order: `--dim` (#5c5b63 on #16151a, readable but quiet), 
 been read, `--accent` for one word at a time. The target is the only word that stays accent. A step
 slower than 250 ms follows the reader instead of leading; a step under 100 ms is a flicker. For a
 target in the middle of the line, sweep to it and stop: the words after it stay dim.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="soft">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1">
@@ -10,10 +10,10 @@
   .under { position: absolute; left: 7vw; bottom: calc(var(--u) * 11); }
   .under .kicker { margin-bottom: var(--s2); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); letter-spacing: -0.02em; }
   .panel { position: absolute; top: calc(var(--u) * 10); left: 46vw; width: 48vw; height: calc(var(--u) * 80); display: flex; flex-direction: column; justify-content: flex-end; gap: var(--s2);
-           padding: var(--s5); border-radius: var(--r-card); background: var(--accent); color: #fff; filter: url(#motion);
+           padding: var(--s5); border-radius: var(--r-card); background: var(--accent); color: var(--on-accent); filter: url(#motion);
            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22); }
   .panel .title { font-size: calc(var(--u) * 13); }
-  .panel .lead { color: rgba(255, 255, 255, 0.78); }
+  .panel .lead { color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
 </style>
 </head>
 <body>

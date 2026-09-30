@@ -30,3 +30,5 @@ The gaps run 90, 70, 55, 45 ms: inside the 30 to 80 ms band except the first, wh
 The letters blur only while they fall and are sharp on landing. The rail is on screen from frame 0
 so the first frame has a subject. The bar on the rail is the last-frame motion; a landed wordmark
 held still is what the taste card bans. Use `CURVES.spring` (a small overshoot), not `overshoot`.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

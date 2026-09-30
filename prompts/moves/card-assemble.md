@@ -34,3 +34,5 @@ lands, so a still part is never soft. The parts are 900 ms long because the trav
 a shorter run makes it a pop. The rule is a `scale: 0 1` draw with `transform-origin: 0 50%`. Use
 real content (a name, a due date, amounts that add up), never lorem ipsum, and keep the accent
 for the one action.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -94,3 +94,22 @@ Two rules the snippets already obey, so keep them when you adapt one: an exit ke
 
 The demo look was polished with two ui-skills: `jakubkrehel/better-ui` (concentric radius, layered shadow over border for depth, optical alignment, tabular numbers, icon stroke matched to text weight) and `emilkowalski/animate` (only to check the approved motion, nothing rewritten).
 Rejected from them: their default UI sizes and 300 ms duration caps (film type needs a 6 percent cap height and holds), the 0.96 press scale and blur-in icon values as global rules (each move keeps its own tuned numbers), and reduced-motion and hit-area advice (a film has no input).
+
+## Looks
+
+A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper">`). The look is a full token set in `demo/demo.css` (ground, surface, ink, muted, accent, line, fonts, radius, shadow); no class or timing changes. The snippets stay neutral. No look is a house style: pick the one that shows your move best, and let the film keep one look per scene.
+
+| look | what it is | fonts | accent | clips that use it |
+|---|---|---|---|---|
+| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | flap resolve, weight morph, iris wipe, pull back reveal, logo sting, count up |
+| paper | warm editorial: cream ground, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | mask rise, exit fast, marker highlight, drift hold, thanks sweep, card assemble |
+| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop |
+| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build |
+| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click |
+| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand |
+| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade |
+| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret typing, chain beats, caret follow |
+
+Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
+
+The looks were shaped with `leonxlnx/soft-skill` (premium type, nested depth, soft diffuse shadow, grain on gradients). Rejected from it: its banned-font list (Inter and Helvetica are not why a film looks cheap), the nav, scroll and hover rules (a film has no input), the 2rem squircle radius as a default (each look sets its own), and `backdrop-blur` (a film draws no glass).

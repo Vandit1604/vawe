@@ -34,3 +34,5 @@ length is, so the same two lines work for any path.
 Placing the line at the baseline. It strikes through descenders (g, y, p). `top: 100%` on a
 `line-height: 1.2` box puts it below them. Also: `preserveAspectRatio="none"` stretches the stroke
 with the box. For a very long word, draw the SVG at real pixel size instead.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

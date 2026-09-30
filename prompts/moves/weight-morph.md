@@ -27,3 +27,5 @@ Start at 200, not 100: a hairline at 100 vanishes against a dark ground and the 
 as empty. Tighten `letter-spacing` with the weight (heavy type wants less air) so the word grows
 denser, not only wider. The `@font-face` must declare the range `100 900`; with a single weight
 the browser synthesises bold and nothing morphs.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

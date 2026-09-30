@@ -29,3 +29,5 @@ the card arrives. The ground layer needs a box much larger than the frame (here 
 `transform-origin` at the frame origin, or its edge shows at 9x. Hold the tight frame 0.1 s, not
 longer: the detail must be a hook, not a still. The tight frame needs one clear subject and nothing
 half-cropped beside it.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

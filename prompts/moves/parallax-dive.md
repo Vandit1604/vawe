@@ -31,3 +31,5 @@ so a layer with `z + travel` near 80 vh fills the frame: fade the near layers ou
 last line does. Put every depth in vh, not px, or the scene changes with the aspect. Give the camera a
 sideways drift of a few vw so the parallax shows in two axes. Keep the title the only large bright
 thing; the cards are context and stay dim. No blur is needed, the speed differences carry the depth.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

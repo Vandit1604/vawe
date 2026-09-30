@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="vawe">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="2">
@@ -21,7 +21,7 @@
   .delta { gap: var(--s1); padding: calc(var(--u) * 1.6) calc(var(--u) * 2.6) calc(var(--u) * 1.6) calc(var(--u) * 2); font-size: var(--t-body); }
   .delta .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); stroke-width: 2; }
   .spark { width: calc(var(--u) * 44); height: calc(var(--u) * 12); overflow: visible; }
-  .spark path { fill: none; stroke: rgba(255,255,255,0.5); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .spark path { fill: none; stroke: color-mix(in srgb, var(--ink) 50%, transparent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 </head>
 <body>

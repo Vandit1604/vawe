@@ -40,3 +40,5 @@ mark in 0.4 s and then waits, which reads as a wipe. The tip is set from the sam
 line, so it never drifts off the leading end (rule 4: a mark rides its parent). Dashes on the
 `.ink` path use its real length, not `pathLength`, so the tip and the line agree. The thin-to-thick
 step is what turns a drawn line into a logo. Keep the accent bar under 25 percent of the path.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

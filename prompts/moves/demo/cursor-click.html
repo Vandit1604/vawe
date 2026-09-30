@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="soft">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="2">
@@ -19,12 +19,13 @@
   .btn { position: relative; display: grid; place-items: center; min-width: calc(var(--u) * 38); padding: calc(var(--u) * 3) calc(var(--u) * 4.6); font-size: var(--t-lead); overflow: hidden; }
   .btn .l { grid-area: 1 / 1; display: flex; align-items: center; gap: var(--s2); white-space: nowrap; }
   .btn .l.done { opacity: 0; }
-  .btn .l.done .icon { width: calc(var(--u) * 5.4); height: calc(var(--u) * 5.4); stroke: #fff; stroke-width: 2.2; }
+  .btn .l.done .icon { width: calc(var(--u) * 5.4); height: calc(var(--u) * 5.4); stroke: currentColor; stroke-width: 2.2; }
+  .btn .l.done { color: var(--on-accent); }
 
   .cur { position: absolute; left: 0; top: 0; }
   .cur .y { will-change: transform; }
   .cur svg { display: block; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); transform-origin: 0 0; overflow: visible; }
-  .cur path { fill: #fff; stroke: var(--ground); stroke-width: 1.4; stroke-linejoin: round; }
+  .cur path { fill: var(--cursor); stroke: var(--cursor-edge); stroke-width: 1.4; stroke-linejoin: round; }
 </style>
 </head>
 <body>
@@ -42,6 +43,7 @@
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const settle = curveToLinear(CURVES.expoOut), smooth = curveToLinear((u) => u * u * (3 - 2 * u)), leave = curveToLinear((u) => u * u * u);
 const W = innerWidth, H = innerHeight, b = q('.btn').getBoundingClientRect();
 const from = { x: W * 0.16, y: H * 0.9 }, to = { x: b.left + b.width * 0.86, y: b.top + b.height * 0.72 };
@@ -51,10 +53,10 @@ const at = { go: 200, dur: 760, press: 1080, release: 1190 };
 q('.x').animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: at.dur, delay: at.go, easing: settle, fill: 'both' });
 q('.y').animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: at.dur, delay: at.go, easing: smooth, fill: 'both' });
 // hover as the cursor arrives, then the press: the cursor dips 14 percent, the button dips 3 percent and turns accent
-q('.btn').animate([{ background: '#2b2a31' }, { background: '#37363e' }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
+q('.btn').animate([{ background: css('--raised') }, { background: css('--hover') }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
 q('.cur svg').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: at.press, easing: settle, fill: 'both' });
 q('.btn').animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: at.press, easing: settle, fill: 'both' });
-q('.btn').animate([{ background: '#37363e' }, { background: '#0a87ff' }], { duration: 120, delay: at.press, easing: 'linear', fill: 'forwards' });
+q('.btn').animate([{ background: css('--hover') }, { background: css('--accent') }], { duration: 120, delay: at.press, easing: 'linear', fill: 'forwards' });
 // the result: the label rolls up and the confirmed state rolls in
 q('.idle').animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: at.release, easing: settle, fill: 'both' });
 q('.done').animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.release + 40, easing: settle, fill: 'both' });

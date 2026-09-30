@@ -1,12 +1,12 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="vawe">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.6">
 <title>move: iris wipe</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --paper: #ecebf1; --x: 66vw; --y: 63vh; }
+  :root { --x: 66vw; --y: 63vh; }
   body { position: relative; display: block; }
 
   .shot { position: absolute; inset: 0; }
@@ -14,10 +14,11 @@
   .b h1 i { display: inline-block; width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); margin-left: var(--s1); border-radius: 50%; background: var(--accent); }
   .b p { position: absolute; left: 12.4vw; top: calc(var(--u) * 58); margin: 0; font: 500 var(--t-lead)/1 var(--mono); letter-spacing: -0.03em; color: var(--muted); }
   /* the iris: shot A is clipped to a circle that closes on the button, shot B waits underneath */
-  .a { background: var(--paper); color: var(--ground); clip-path: circle(150vmax at var(--x) var(--y)); }
+  .a { background: var(--paper); color: var(--paper-ink); clip-path: circle(150vmax at var(--x) var(--y)); }
   .a h2 { position: absolute; left: 12vw; top: calc(var(--u) * 27); margin: 0; font: 700 var(--t-title)/1 var(--sans); letter-spacing: -0.035em; }
-  .a span { position: absolute; left: 12.2vw; top: calc(var(--u) * 42); font: 500 var(--t-lead)/1 var(--sans); color: #6b6a72; }
-  .btn { position: absolute; left: 50vw; top: calc(var(--u) * 55); width: 24vw; height: calc(var(--u) * 15); border-radius: 999px; background: var(--ground); color: var(--ink); font-size: var(--t-lead); box-shadow: 0 calc(var(--u) * 1.2) calc(var(--u) * 3) rgba(22, 21, 26, 0.25); }
+  .a span { position: absolute; left: 12.2vw; top: calc(var(--u) * 42); font: 500 var(--t-lead)/1 var(--sans); color: var(--paper-muted); }
+  .btn { position: absolute; left: 50vw; top: calc(var(--u) * 55); width: 24vw; height: calc(var(--u) * 15); border-radius: 999px; background: var(--paper-ink); color: var(--paper); font-size: var(--t-lead); box-shadow: 0 calc(var(--u) * 1.2) calc(var(--u) * 3) rgba(22, 21, 26, 0.25); }
+  .cursor path { fill: var(--paper); stroke: var(--paper-ink); stroke-width: 1.6; stroke-linejoin: round; }
   .cursor { position: absolute; left: 66vw; top: 63vh; margin: -0.3vh 0 0 -0.5vh; width: calc(var(--u) * 5); height: calc(var(--u) * 5); }
 </style>
 </head>
@@ -26,7 +27,7 @@
 <section class="shot a">
   <h2>Ready to publish</h2><span>3 aspect ratios, 60 fps</span>
   <div class="btn">Publish</div>
-  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z" fill="#fff" stroke="#16151a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z"/></svg>
 </section>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
