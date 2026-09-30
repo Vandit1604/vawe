@@ -18,9 +18,10 @@ export const VERBS = [
     flags: [
       { name: 'from', type: 'path', default: 'prompts/brand-launch-from-url.md', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
       { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
+      { name: 'score', type: 'bool', help: 'with --ref: also render the starter and score it against the reference (slow)' },
     ],
     example: 'vawe new my-launch --from prompts/story-explainer.md',
-    build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref } }] : null),
+    build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref, ...(v.score ? { SCORE: '1' } : {}) } }] : null),
   },
   {
     name: 'dev', summary: 'draft render: half size, 30 fps, silent',
@@ -104,9 +105,11 @@ export const VERBS = [
       { name: 'no-ocr', type: 'bool', help: 'skip the text timeline (OCR runs by default when tesseract is installed)' },
       { name: 'fps', type: 'number', default: 'the video rate', help: 'frame rate for the tables' },
       { name: 'elements', type: 'number', default: 6, help: 'moving elements to track' },
+      { name: 'fast', type: 'bool', help: 'half the analysis width and OCR samples, for iteration' },
+      { name: 'no-cache', type: 'bool', help: 'measure again even if this reference and code were measured before' },
     ],
     example: 'vawe spec refs/ad.mp4',
-    build: (v, [ref]) => [{ script: 'harness/media/ref-spec.mjs', args: [ref, ...opt('--out', v.out), ...opt('--fps', v.fps), ...opt('--elements', v.elements), ...(v['no-ocr'] ? [] : ['--ocr'])] }],
+    build: (v, [ref]) => [{ script: 'harness/media/ref-spec.mjs', args: [ref, ...opt('--out', v.out), ...opt('--fps', v.fps), ...opt('--elements', v.elements), ...(v['no-ocr'] ? [] : ['--ocr']), ...(v.fast ? ['--fast'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }],
     next: () => 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild',
   },
   {
