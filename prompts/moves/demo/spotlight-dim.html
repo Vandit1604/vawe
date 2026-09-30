@@ -11,16 +11,17 @@
   .tile { position: absolute; width: 35vw; height: calc(var(--u) * 34); padding: var(--s4) var(--s4); border-radius: calc(var(--u) * 3); background: var(--surface); box-shadow: var(--shadow-card); }
   .tile h2 { margin: 0 0 var(--s3); font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
   .tile b { display: block; font: 700 calc(var(--u) * 14)/1 var(--sans); letter-spacing: -0.045em; }
+  .tile p { margin: var(--s1) 0 0; font: 500 var(--t-small)/1.2 var(--sans); color: var(--faint); }
   .t1 { left: 14vw; top: calc(var(--u) * 14); } .t2 { left: 51vw; top: calc(var(--u) * 14); } .t3 { left: 14vw; top: calc(var(--u) * 52); } .t4 { left: 51vw; top: calc(var(--u) * 52); }
   /* the hole is the spotlight: its shadow is the dim, so nothing but the target is left lit */
   .hole { position: absolute; left: 0; top: 0; width: 100vw; height: 100vh; border-radius: 0; box-shadow: 0 0 0 100vmax var(--dim); pointer-events: none; }
 </style>
 </head>
 <body>
-<div class="tile t1"><h2>Renders today</h2><b>128</b></div>
-<div class="tile t2"><h2>Median render</h2><b>41 s</b></div>
-<div class="tile t3"><h2>Uptime, 30 days</h2><b>99.98%</b></div>
-<div class="tile t4"><h2>In queue</h2><b>3</b></div>
+<div class="tile t1"><h2>Renders today</h2><b>128</b><p>14 since 9:00</p></div>
+<div class="tile t2"><h2>Median render</h2><b>41 s</b><p>Last 7 days</p></div>
+<div class="tile t3"><h2>Uptime, 30 days</h2><b>99.98%</b><p>One incident, 4 min</p></div>
+<div class="tile t4"><h2>In queue</h2><b>3</b><p>Next starts in 12 s</p></div>
 <div class="hole"></div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
