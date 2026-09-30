@@ -7,6 +7,11 @@ const pageName = (page) => {
   const base = path.basename(page, '.html');
   return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
 };
+// Mirrors defaultOut in harness/media/render-page.mjs for a draft.
+const draftOut = (page, { from, to }) => {
+  const range = (from > 0 || to != null) ? `-${from ?? 0}-${to ?? 'end'}` : '';
+  return `out/${pageName(page)}-draft${range}.mp4`;
+};
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
@@ -39,7 +44,7 @@ export const VERBS = [
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [{ script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] }],
-    next: (v, [page]) => `vawe critique ${page}`,
+    next: (v, [page]) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`,
   },
   {
     name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background',

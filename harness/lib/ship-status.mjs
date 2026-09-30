@@ -56,6 +56,6 @@ export function doneLines(job) {
   if (!job.outputs?.length) return lines;
   if (!job.verdict) lines.push(`next: bin/vawe judge ${job.outputs[0]} --fresh`);
   else if (/: PASS/.test(job.verdict[0] || '')) lines.push('next: the judge passed it; show the owner');
-  else lines.push(`next: fix what the judge and the final check name, worst first, then bin/vawe ship ${job.page} again (at most 3 rounds)`);
+  else lines.push(`next: fix what the judge and the final check name, worst first, on drafts (bin/vawe dev, then bin/vawe judge <draft> --fresh), then bin/vawe ship ${job.page} again`);
   return lines;
 }
