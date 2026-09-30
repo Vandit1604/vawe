@@ -93,7 +93,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | thanks sweep | a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts; use once per film | [thanks-sweep.md](thanks-sweep.md) | [thanks-sweep.mp4](thanks-sweep.mp4) |
 | UI strip away | the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup | [ui-strip-away.md](ui-strip-away.md) | [ui-strip-away.mp4](ui-strip-away.mp4) |
 | logo wall | the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land | [logo-wall.md](logo-wall.md) | [logo-wall.mp4](logo-wall.mp4) |
-| CTA morph press | the close moves from brand to action: the plate condenses at its own centre into a smaller button, a cursor lands a click off centre, and both compress together with a ripple | [cta-morph-press.md](cta-morph-press.md) | [cta-morph-press.mp4](cta-morph-press.mp4) |
+| CTA morph press | the close moves from brand to action: one plate changes shape into a button on one spring, a cursor arrives on a bowed path and presses, and the button shows a confirmed state | [cta-morph-press.md](cta-morph-press.md) | [cta-morph-press.mp4](cta-morph-press.mp4) |
 
 ## Product moments
 

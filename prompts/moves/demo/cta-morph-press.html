@@ -2,47 +2,75 @@
 <html data-aspect="16:9" data-look="chrome">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="3.4">
+<meta name="duration" content="4">
 <title>move: cta morph press</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { display: block; }
-  .at { position: absolute; left: 50%; top: 50%; transform-origin: 50% 50%; translate: -50% -50%; }
-  .plate { display: flex; align-items: center; justify-content: center; width: calc(var(--u) * 74); height: calc(var(--u) * 34); padding: 0; font-size: calc(var(--u) * 11); }
-  .plate .logo-lockup { font-size: calc(var(--u) * 11); }
-  .cta { position: relative; overflow: hidden; padding: calc(var(--u) * 3.6) calc(var(--u) * 9); font-size: calc(var(--u) * 7); border-radius: var(--r-card); }
-  .ripple { position: absolute; left: calc(50% + var(--u) * 5); top: calc(50% + var(--u) * 1.6); width: calc(var(--u) * 14); height: calc(var(--u) * 14); margin: calc(var(--u) * -7) 0 0 calc(var(--u) * -7); border-radius: 50%; background: #fff; opacity: 0; }
-  .cur { position: absolute; left: 0; top: 0; z-index: 5; }
+  .morph { position: absolute; left: 50%; top: 50%; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-card); }
+  .lbl { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: var(--s2); white-space: nowrap; }
+  .lbl.plate { font-size: calc(var(--u) * 11); }
+  .lbl.go, .lbl.ok { font: 800 var(--t-head)/1 var(--head); letter-spacing: var(--head-track); text-transform: var(--head-case); color: var(--on-accent); opacity: 0; }
+  .lbl.ok { color: var(--paper-ink); }
+  .lbl.ok .icon { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); stroke-width: 3; }
+  .cur { position: absolute; left: 0; top: 0; z-index: 5; opacity: 0; }
   .cur svg { display: block; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); transform-origin: 0 0; overflow: visible; }
   .cur path { fill: var(--cursor); stroke: var(--cursor-edge); stroke-width: 1.4; stroke-linejoin: round; }
 </style>
 </head>
 <body>
-<div class="at mark"><div class="plate card"><span data-logo="orbital" data-lockup></span></div></div>
-<div class="at press"><div class="btn primary cta">Start free<i class="ripple"></i></div></div>
-<div class="cur"><div class="x"><div class="y"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div></div></div>
+<div class="morph">
+  <div class="lbl plate"><span data-logo="orbital" data-lockup></span></div>
+  <div class="lbl go">Start free</div>
+  <div class="lbl ok"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2 9.3-9.4"/></svg>You're in</div>
+</div>
+<div class="cur"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
 <script type="module">
+import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { spring, CURVES } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), smooth = curveToLinear((u) => u * u * (3 - 2 * u)), leave = curveToLinear((u) => u * u * u);
-const W = innerWidth, H = innerHeight, unit = H / 100;
-const at = { mark: 100, morph: 900, go: 1250, dur: 850, press: 2350, release: 2480 };   // ms
-const from = { x: W * 0.9, y: H * 1.06 }, to = { x: W / 2 + unit * 5, y: H / 2 + unit * 1.6 };
+const clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (a, b, u) => a + (b - a) * u, smooth = (u) => u * u * (3 - 2 * u);
+const seg = (t, a, b, f = smooth) => f(clamp((t - a) / (b - a)));
+const W = innerWidth, H = innerHeight, u = H / 100;
+const at = { plate: 0.1, morph: 0.9, go: 1.25, arrive: 2.25, down: 2.35, release: 2.5, leave: 3.05 };   // seconds
+const plate = { w: u * 80, h: u * 36, r: parseFloat(getComputedStyle(q('.morph')).borderRadius) || 0 };
+const button = { w: u * 66, h: u * 17, r: u * 8.5 };
+const target = [W / 2 + u * 9, H / 2 + u * 2.4], start = [W * 0.9, H * 1.06], bow = [W * 0.86, H * 0.58];
+const mix = (a, b, p) => `color-mix(in srgb, ${a} ${(100 - p * 100).toFixed(1)}%, ${b})`;
+const at2 = (a, c, b, s) => [(1 - s) ** 2 * a[0] + 2 * (1 - s) * s * c[0] + s * s * b[0], (1 - s) ** 2 * a[1] + 2 * (1 - s) * s * c[1] + s * s * b[1]];
 
-q('.mark').animate([{ scale: 0.97, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 420, delay: at.mark, easing: settle, fill: 'both' });
-// the mark and the button share one centre: the mark shrinks and leaves in 340 ms as the button grows into the same place
-q('.mark').animate([{ scale: 1, opacity: 1 }, { scale: 0.55, opacity: 0 }], { duration: 340, delay: at.morph, easing: leave, fill: 'forwards' });
-q('.press').animate([{ scale: 0.55, opacity: 0 }, { opacity: 1, offset: 0.3 }, { scale: 1, opacity: 1 }], { duration: 560, delay: at.morph + 120, easing: pop, fill: 'both' });
+vawe.onFrame((t) => {
+  const morph = q('.morph');
+  // one spring drives width, height and radius, so the plate is the button at every frame between
+  const m = spring(t - at.morph, 70, 12);
+  const enter = seg(t, at.plate, at.plate + 0.42, CURVES.expoOut);
+  const pressed = seg(t, at.down, at.down + 0.09) - spring(t - at.release, 300, 13);
+  const s = 1 - pressed * 0.04;
+  morph.style.width = `${lerp(plate.w, button.w, m).toFixed(2)}px`;
+  morph.style.height = `${lerp(plate.h, button.h, m).toFixed(2)}px`;
+  morph.style.borderRadius = `${Math.max(0, lerp(plate.r, button.r, m)).toFixed(2)}px`;
+  morph.style.translate = `-50% -50%`;
+  morph.style.scale = `${(lerp(0.97, 1, enter) * s).toFixed(4)}`;
+  morph.style.opacity = enter;
+  const c = seg(t, at.release, at.release + 0.22);
+  morph.style.background = mix(mix('var(--surface)', 'var(--accent)', seg(t, at.morph + 0.2, at.morph + 0.6)), 'var(--paper)', c);
 
-// the cursor arrives on a decelerating bow and lands a few pixels off the centre
-q('.x').animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: at.dur, delay: at.go, easing: settle, fill: 'both' });
-q('.y').animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: at.dur, delay: at.go, easing: smooth, fill: 'both' });
+  q('.lbl.plate').style.opacity = 1 - seg(t, at.morph, at.morph + 0.3);
+  q('.lbl.go').style.opacity = seg(t, at.morph + 0.5, at.morph + 0.8) * (1 - seg(t, at.release, at.release + 0.1));
+  q('.lbl.ok').style.opacity = seg(t, at.release + 0.1, at.release + 0.28);
+  q('.lbl.ok').style.translate = `0 ${((1 - c) * u * 1.2).toFixed(2)}px`;
+  q('.lbl.ok .icon path').style.strokeDasharray = 24;
+  q('.lbl.ok .icon path').style.strokeDashoffset = 24 * (1 - seg(t, at.release + 0.08, at.release + 0.36, CURVES.expoOut));
 
-// the press: cursor and button compress together, release together, and a ripple leaves the press point
-q('.cur svg').animate([{ scale: 1 }, { scale: 0.84, offset: 0.5 }, { scale: 1 }], { duration: 260, delay: at.press, easing: settle, fill: 'both' });
-q('.cta').animate([{ scale: 1 }, { scale: 0.94, offset: 0.5 }, { scale: 1 }], { duration: 260, delay: at.press, easing: settle, fill: 'both' });
-q('.ripple').animate([{ opacity: 0.4, scale: 0.2 }, { opacity: 0, scale: 4 }], { duration: 620, delay: at.press, easing: settle, fill: 'both' });
+  // the cursor rides a quadratic bow and decelerates onto the label; the dip and the release follow the button
+  const arrive = at2(start, bow, target, seg(t, at.go, at.arrive, CURVES.expoOut));
+  const away = seg(t, at.leave, at.leave + 0.35);
+  const cur = q('.cur');
+  cur.style.translate = `${(arrive[0] + away * u * 4).toFixed(1)}px ${(arrive[1] + pressed * u * 0.9 + away * u * 5).toFixed(1)}px`;
+  cur.style.opacity = seg(t, at.go, at.go + 0.15) * (1 - away);
+  cur.firstElementChild.style.scale = 1 - pressed * 0.16;
+});
 </script>
 </body>
 </html>
