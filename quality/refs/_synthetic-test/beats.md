@@ -1,6 +1,6 @@
 # beats: _synthetic-test
 
-Fixture reference for `harness/dev/ref-beat.mjs` end-to-end testing. Not a real brand film.
+Fixture reference for end-to-end tests. Not a real brand film.
 
 ## Beat 1: full clip
 

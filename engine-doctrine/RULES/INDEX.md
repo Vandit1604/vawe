@@ -40,4 +40,3 @@ below. The page contract itself (seek, clock, aspect) is in `AGENTS.md`.
 | [`no-jolt`](no-jolt.md) | a layer or the camera changes speed between frames | reports: `bin/vawe check page-check` |
 | [`blur-out-dense`](blur-out-dense.md) | exiting a face, card, or dense grid | eye |
 
-The phone-feed safe strips for captions are in `engine-doctrine/CRAFT/CAPTIONS.md`.
