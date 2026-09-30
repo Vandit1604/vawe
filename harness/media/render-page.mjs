@@ -51,6 +51,7 @@ import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, videoProblems } from './draft-check.mjs';
 import { textProblems, soundLine, briefLine, mergeProblems, draftCheckLines } from '../lib/draft-check.mjs';
+import { directionsLines } from '../lib/directions.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 
@@ -599,7 +600,9 @@ function printDraftCheck(mp4, pagePath, { probe, level }) {
   let video = [];
   try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
   const problems = mergeProblems(video, textProblems(probe.samples, probe));
-  console.log(draftCheckLines(problems, soundLine(level), briefLine(readBrief(pagePath))).join('\n'));
+  const brief = readBrief(pagePath);
+  console.log(draftCheckLines(problems, soundLine(level), briefLine(brief)).join('\n'));
+  for (const line of directionsLines(brief, path.relative(process.cwd(), path.dirname(path.resolve(pagePath))))) console.log(line);
 }
 
 function printDraftSheet(mp4, { fps, from }) {
