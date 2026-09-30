@@ -7,13 +7,37 @@
 // function of time, seek every CSS/WAAPI/SMIL animation, then call every vawe.onFrame hook (awaited, so a
 // hook that decodes a texture or builds three.js geometry settles before a screenshot).
 export async function seekTo(t, win = window) {
+  if (win.__pageFonts) await win.__pageFonts();
   if (win.__pageClock) win.__pageClock.set(t);
   if (typeof win.seek === 'function') await win.seek(t);
+  if (win.__pageFonts) await win.__pageFonts();
   for (const a of win.document.getAnimations()) { a.pause(); a.currentTime = t * 1000; }
   win.document.querySelectorAll('svg').forEach((svg) => {
     if (typeof svg.pauseAnimations === 'function') { try { svg.pauseAnimations(); svg.setCurrentTime(t); } catch { /* best-effort */ } }
   });
   for (const fn of win.__vaweFrameHooks || []) await fn(t);
+}
+
+// Resolve when every FontFace in document.fonts has finished loading, including faces whose load starts
+// while waiting. A face still loading after `timeoutMs` rejects naming its family. The real timer is used
+// because the virtual clock owns setTimeout. Injected via toString(), so it references nothing outside its body.
+export async function awaitFonts(timeoutMs = 10000) {
+  const fonts = document.fonts;
+  const setReal = window.__pageClock ? window.__pageClock.real.setTimeout : setTimeout.bind(window);
+  const clearReal = window.__pageClock ? window.__pageClock.real.clearTimeout : clearTimeout.bind(window);
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    await fonts.ready;
+    const loading = [...fonts].filter((f) => f.status === 'loading');
+    if (!loading.length) return;
+    const names = loading.map((f) => f.family).join(', ');
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setReal(() => reject(new Error(`font still loading after ${timeoutMs} ms: ${names}`)), Math.max(0, deadline - Date.now()));
+    });
+    const loaded = Promise.all(loading.map((f) => f.loaded.catch(() => { throw new Error(`font failed to load: ${f.family}`); })));
+    try { await Promise.race([loaded, timeout]); } finally { clearReal(timer); }
+  }
 }
 
 // Runs in the page before any page script: the frame facts a page lays out against. documentElement does not exist yet at this point, so its attributes wait for the parser.
