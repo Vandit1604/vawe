@@ -1,0 +1,57 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="field">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.7">
+<title>move: color block wipe</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { position: relative; display: block; }
+  .shot { position: absolute; inset: 0; }
+  .a { background: var(--ground); }
+  .a .card { position: absolute; left: 9vw; top: calc(var(--u) * 20); width: 50vw; padding: var(--s5); }
+  .a h2 { margin: 0 0 var(--s4); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
+  .a .big { font: 700 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.045em; }
+  .a .big small { margin-left: 1vw; font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); letter-spacing: -0.01em; }
+  .b { background: var(--paper); color: var(--paper-ink); overflow: hidden; }
+  .b .in { position: absolute; inset: 0; }
+  .b h1 { position: absolute; left: 9vw; top: calc(var(--u) * 26); margin: 0; font: 700 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.05em; }
+  .b p { position: absolute; left: 9.6vw; top: calc(var(--u) * 58); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--paper-muted); letter-spacing: -0.03em; }
+  .blocks { position: absolute; inset: 0; filter: url(#motion); }
+  .blk { position: absolute; top: -2vh; bottom: -2vh; left: 0; width: 130vw; }
+  .blk .face { position: absolute; inset: 0; transform: skewX(-9deg); }
+  .blk.lead .face { background: var(--accent); }
+  .blk.trail .face { background: var(--surface); }
+  .blk .mark { position: absolute; left: 24vw; top: 50%; translate: 0 -50%; font: 800 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.05em; color: var(--on-accent); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position: absolute"><filter id="motion" x="-10%" width="120%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
+<section class="shot b"><div class="in"><h1>Shipped</h1><p>vawe.dev/launch</p></div></section>
+<section class="shot a" id="a"><div class="card"><h2>renders this week</h2><div class="big">128<small>films</small></div></div></section>
+<div class="blocks"><div class="blk trail" id="trail"><div class="face"></div></div><div class="blk lead" id="lead"><div class="face"></div><div class="mark">vawe</div></div></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const E = CURVES.expoOut, W = window.innerWidth;
+const tIn = 0.3, dIn = 0.36, hold = 0.04, dOut = 0.42, lag = 0.08;   // s; the trailing block follows the lead by 80 ms, in and out
+const from = -1.3 * W, cover = -0.16 * W, to = 1.05 * W;            // px of translate; at `cover` the lead fills the frame, skew included
+const pos = (t) => {
+  if (t <= tIn) return from;
+  if (t < tIn + dIn) return from + (cover - from) * E((t - tIn) / dIn);   // arrive fast, land soft
+  const u = (t - tIn - dIn - hold) / dOut;
+  return u <= 0 ? cover : cover + (to - cover) * (0.3 * Math.min(1, u) + 0.7 * (1 - E(1 - Math.min(1, u))));   // slow off the mark, fastest leaving
+};
+const lead = document.getElementById('lead'), trail = document.getElementById('trail'), blur = document.getElementById('mb'), a = document.getElementById('a');
+const tSwap = tIn + dIn;
+vawe.onFrame((t) => {
+  lead.style.transform = `translateX(${pos(t)}px)`;
+  trail.style.transform = `translateX(${pos(t - lag)}px)`;
+  a.style.visibility = t >= tSwap + 0.03 ? 'hidden' : 'visible';   // the lead fills the frame here, so the swap is invisible
+  const v = Math.abs(pos(t + 1 / 120) - pos(t - 1 / 120)) * 60;   // px per second
+  blur.setAttribute('stdDeviation', `${(v / 60 * 0.3).toFixed(2)} 0`);
+});
+document.querySelector('.b .in').animate([{ scale: 1.06 }, { scale: 1 }], { duration: 1000, delay: (tSwap + 0.1) * 1000, easing: curveToLinear(E), fill: 'both' });
+</script>
+</body>
+</html>

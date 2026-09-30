@@ -40,6 +40,12 @@ This index lists the built ones, in the same groups.
 | match cut | one shape crosses a scene change at the same place, size and angle and changes meaning (spinner ring, finished ring) | [match-cut.md](match-cut.md) | [match-cut.mp4](match-cut.mp4) |
 | iris wipe | a circle closes on the click or mark the eye is on and uncovers the next scene | [iris-wipe.md](iris-wipe.md) | [iris-wipe.mp4](iris-wipe.mp4) |
 | flash cut | a hard cut on a beat: a three-frame white peak hides the cut and the new shot settles from overexposed | [flash-cut.md](flash-cut.md) | [flash-cut.mp4](flash-cut.mp4) |
+| stack cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | [stack-cover.md](stack-cover.md) | [stack-cover.mp4](stack-cover.mp4) |
+| split reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | [split-reveal.md](split-reveal.md) | [split-reveal.mp4](split-reveal.mp4) |
+| slice shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | [slice-shift.md](slice-shift.md) | [slice-shift.mp4](slice-shift.mp4) |
+| type fill transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | [type-fill-transition.md](type-fill-transition.md) | [type-fill-transition.mp4](type-fill-transition.mp4) |
+| colour block wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | [color-block-wipe.md](color-block-wipe.md) | [color-block-wipe.mp4](color-block-wipe.mp4) |
+| zoom through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | [zoom-through.md](zoom-through.md) | [zoom-through.mp4](zoom-through.mp4) |
 
 ## Point the eye
 
@@ -85,6 +91,17 @@ This index lists the built ones, in the same groups.
 | card assemble | a UI card builds: the shell lands, then each part arrives from the side of its slot, the accent action last | [card-assemble.md](card-assemble.md) | [card-assemble.mp4](card-assemble.mp4) |
 | notification pop | a banner drops in on the overshoot curve, icon then text, holds a second and leaves faster than it came | [notification-pop.md](notification-pop.md) | [notification-pop.mp4](notification-pop.mp4) |
 | chart build | gridlines draw, bars rise in sequence, the newest bar turns accent and its value tag pops on it | [chart-build.md](chart-build.md) | [chart-build.mp4](chart-build.mp4) |
+
+## Pick by job
+
+| job | moves |
+|---|---|
+| cover the old shot with a new panel | [stack-cover](stack-cover.md) |
+| open one shot onto the next | [split-reveal](split-reveal.md) |
+| tear one shot off to show the next | [slice-shift](slice-shift.md) |
+| grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
+| carry a cut on a brand colour | [color-block-wipe](color-block-wipe.md) |
+| enter the next shot through a part of this one | [zoom-through](zoom-through.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 

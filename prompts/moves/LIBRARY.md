@@ -38,6 +38,12 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | whip-pan | a fast sideways blur that hides the cut | to be captured | built |
 | match-cut | a shape in shot A becomes the same shape in shot B | to be captured | built |
 | flash-cut | a one or two frame flash on a beat | to be captured | built |
+| stack-cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | HyperFrames stack and card transitions, Apple keynote slide push | built |
+| split-reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | HyperFrames split and curtain-reveal transitions | built |
+| slice-shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | HyperFrames slice and shutter transitions, broadcast glitch-free slice wipes | built |
+| type-fill-transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | HyperFrames text-mask transitions, kinetic-type reels | built |
+| color-block-wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | HyperFrames colorama-wipe and directional-wipe, video-shotcraft color-block-step-wipe | built |
+| zoom-through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | HyperFrames zoom-through-transition, video-shotcraft transition-travel, School of Motion infinite zoom | built |
 
 ## 3. Point the eye
 
