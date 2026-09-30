@@ -43,7 +43,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { RENDER_ARGS } from '../lib/render-harness.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
-import { seekTo, installPageFrame } from '../../core/engine/page-seek.js';
+import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
 import { openPreview } from './preview-server.mjs';
@@ -96,7 +96,7 @@ export function readPageMeta(pagePath, name) {
 
 export async function openPage(pagePath, frame) {
   const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS });
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageSeek = ${seekTo};`);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};`);
   return opened;
 }
 
@@ -116,7 +116,7 @@ export async function settle(page) {
       const guard = real.setTimeout(resolve, 250);
       real.raf(() => { real.clearTimeout(guard); resolve(); });
     });
-    await document.fonts.ready;
+    await window.__pageFonts();
     await Promise.all([...document.images].map((img) => img.decode().catch(() => {})));
     await paint();
     await paint();
