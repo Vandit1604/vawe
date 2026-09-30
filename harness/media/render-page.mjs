@@ -294,20 +294,24 @@ function x264Args(final) {
 // 8-bit yuv420p bands a dark gradient into visible rings; a faint fixed-seed temporal noise before the
 // encode dithers them away (the final only, so draft pixels stay comparable). Strength 2 did not survive
 // x264's smoothing on a test gradient; 4 with -tune film did.
+// Chromium saves some frames as RGBA (mix-blend-mode, for one); a pixel-format change mid-sequence makes
+// ffmpeg rebuild the filter graph, which resets the trims and drops frames. Keep one graph, one format.
+const ONE_FORMAT_IN = ['-reinit_filter', '0'];
+
 const DITHER = 'noise=alls=4:allf=t:all_seed=7';
 
-function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
+export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
   const seq = path.join(tmpDir, 'f%06d.png');
   const uniform = new Set(kArr).size <= 1;
   const blur = kArr[0] || 1;
   if (uniform) {
     const args = blur > 1
-      ? ['-y', '-v', 'error', '-framerate', String(fps * blur), '-i', seq,
-        '-vf', `tmix=frames=${blur}:weights='${Array(blur).fill('1').join(' ')}',`
+      ? ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps * blur), '-i', seq,
+        '-vf', `format=rgb24,tmix=frames=${blur}:weights='${Array(blur).fill('1').join(' ')}',`
           + `select='not(mod(n+1\\,${blur}))',setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}`,
         '-r', String(fps), ...x264Args(final), tmpOut]
-      : ['-y', '-v', 'error', '-framerate', String(fps), '-i', seq,
-        ...(final ? ['-vf', DITHER] : []), ...x264Args(final), tmpOut];
+      : ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps), '-i', seq,
+        '-vf', final ? `format=rgb24,${DITHER}` : 'format=rgb24', ...x264Args(final), tmpOut];
     return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
   }
 
@@ -319,16 +323,17 @@ function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
   const filters = segments.map((seg, idx) => {
     const s = subframeStart[seg.start], e = subframeStart[seg.end];
     const label = `s${idx}`;
-    if (seg.k === 1) return `[0:v]trim=start_frame=${s}:end_frame=${e},setpts=N/${fps}/TB[${label}]`;
+    if (seg.k === 1) return `[in${idx}]trim=start_frame=${s}:end_frame=${e},setpts=N/${fps}/TB[${label}]`;
     const weights = Array(seg.k).fill('1').join(' ');
-    return `[0:v]trim=start_frame=${s}:end_frame=${e},tmix=frames=${seg.k}:weights='${weights}',`
+    return `[in${idx}]trim=start_frame=${s}:end_frame=${e},tmix=frames=${seg.k}:weights='${weights}',`
       + `select='not(mod(n+1\\,${seg.k}))',setpts=N/${fps}/TB[${label}]`;
   });
   const joins = segments.map((_, idx) => `[s${idx}]`).join('');
   // Each segment restarts its pts, so a 1-frame segment carries no duration and the next one overlaps
   // it; re-stamp after the concat and never let -r rate-convert, or ffmpeg drops the overlapped frames.
-  const filterComplex = `${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}[outv]`;
-  const args = ['-y', '-v', 'error', '-framerate', String(fps), '-i', seq,
+  const split = `[0:v]format=rgb24,split=${segments.length}${segments.map((_, idx) => `[in${idx}]`).join('')}`;
+  const filterComplex = `${split};${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}[outv]`;
+  const args = ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps), '-i', seq,
     '-filter_complex', filterComplex, '-map', '[outv]',
     '-fps_mode', 'passthrough', ...x264Args(final), tmpOut];
   return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
