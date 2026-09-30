@@ -1,6 +1,6 @@
 /* The vawe brand as CSS custom properties, taken from the real site (site/app/globals.css, layout.tsx).
    Dark ground, white ink, one blue accent used sparingly. Import it in a page and use var(--vawe-*).
-   Archivo and JetBrains Mono are declared in core/tokens.css. Unbounded has no file in assets/fonts. */
+   Archivo, Unbounded and JetBrains Mono are declared in core/tokens.css. */
 :root {
   --vawe-bg: #16151a;
   --vawe-surface: #212025;

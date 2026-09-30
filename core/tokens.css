@@ -117,6 +117,8 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
        url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
 /* Archivo (OFL, Google Fonts): argushq.cc's real display face (headline weight 300, tight tracking). */
 @font-face { font-family: 'Archivo'; font-weight: 300 700; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+/* Unbounded (OFL, Google Fonts via @fontsource-variable/unbounded, latin): vawe.dev's title face. */
+@font-face { font-family: 'Unbounded'; font-weight: 200 900; font-display: block; src: url('/assets/fonts/Unbounded.woff2') format('woff2'); }
 /* Tiempos Headline + Modern Era (Klim / Colophon, licensed): Hinge's own faces, captured from
    hinge.co for a LOCAL capability test only. Manual like Sohne above, not Fontsource-locked, so
    fonts.lock.json does not know about either family. Not fetched by `make fonts`; not for public
