@@ -53,6 +53,7 @@ import { sampleText, videoProblems } from './draft-check.mjs';
 import { textProblems, soundLine, briefLine, mergeProblems, draftCheckLines } from '../lib/draft-check.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
+import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
 
@@ -599,7 +600,11 @@ function printDraftCheck(mp4, pagePath, { probe, level }) {
   let video = [];
   try { video = videoProblems(mp4); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
   const problems = mergeProblems(video, textProblems(probe.samples, probe));
-  console.log(draftCheckLines(problems, soundLine(level), briefLine(readBrief(pagePath))).join('\n'));
+  const sound = soundLine(level);
+  console.log(draftCheckLines(problems, sound, briefLine(readBrief(pagePath))).join('\n'));
+  const taste = ['', ...draftTasteLines([...problems, sound].filter(Boolean))];
+  if (/<audio\b/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
+  console.log(taste.join('\n'));
 }
 
 function printDraftSheet(mp4, { fps, from }) {
