@@ -25,8 +25,8 @@ shorter than entrances. Something happens in every row. Stop and show me the tab
 ```markdown
 | # | start | dur | the viewer notices | action, to its end state | camera | exposure | sound cue (t) | out |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 0.00 | 1.6 | the promise, four words | words land on beats 1 to 4, settle | static | ones | soft tick on the first and last word (pluck, -28 dB, 0.00, 1.50) | hard cut on 2.00 |
-| 2 | 2.00 | 2.4 | the word "film" is now the product | the word's box grows into the capture, content swaps with a 120 ms blur | push 4 percent | ones | one swell into the cut (-24 dB, ends 1.97) | match cut |
+| 1 | 0.00 | 1.6 | the promise, four words | words land on beats 1 to 4, settle | static | ones | soft tick on the first and last word (pluck, -8 dB, 0.00, 1.50) | hard cut on 2.00 |
+| 2 | 2.00 | 2.4 | the word "film" is now the product | the word's box grows into the capture, content swaps with a 120 ms blur | push 4 percent | ones | one swell into the cut (-6 dB, ends 1.97) | match cut |
 ```
 
 The page names each row's start once, as a custom property every delay in that row reads, so one
@@ -36,9 +36,9 @@ edit moves the whole beat:
 <style>:root { --beat-1: 0s; --beat-2: 2s; }
 .word { animation-delay: calc(var(--beat-1) + 0.5s); }
 .capture { animation-delay: var(--beat-2); }</style>
-<audio data-synth="pluck" data-at="0.00" data-gain="-28"></audio>
-<audio data-synth="pluck" data-at="1.50" data-gain="-28"></audio>
-<audio data-synth="swell" data-at="1.24" data-gain="-24"></audio>
+<audio data-synth="pluck" data-at="0.00" data-gain="-8"></audio>
+<audio data-synth="pluck" data-at="1.50" data-gain="-8"></audio>
+<audio data-synth="swell" data-at="1.24" data-gain="-6"></audio>
 ```
 
 Sound is felt, not noticed: a few soft ticks and one swell beat a hit on every word.

@@ -52,7 +52,7 @@ light from the accent on the character, brightest during ACT.
 <build>
 One page: films/<name>/page.html, <meta name="duration">. window.seek(t) computes the state from t,
 draws the logical canvas, blits. The loop's last frame equals its first. Sound:
-one "swell" (data-gain="-24") ending on ACT and a soft tick (pluck, -28 dB) on the landing frame.
+one "swell" (data-gain="-6") ending on ACT and a soft tick (pluck, -8 dB) on the landing frame.
 </build>
 
 <quality>

@@ -43,8 +43,8 @@ surface; a stat you can source; the wordmark. End on the wordmark, still, for 1.
 3. Captures live in films/<name>/assets/. Each capture is a real screenshot with its source URL in a
    comment next to the <img>.
 4. Audio is <audio data-at="…"> elements, never played live. Soft ticks on a few key moments:
-   <audio data-synth="pluck" data-at="1.85" data-gain="-28"> (the same number the CSS --beat-2
-   holds; every delay in that beat reads it), and one swell (-24 dB) into the big cut. Music: <audio src="music.mp3" data-at="0"
+   <audio data-synth="pluck" data-at="1.85" data-gain="-8"> (the same number the CSS --beat-2
+   holds; every delay in that beat reads it), and one swell (-6 dB) into the big cut. Music: <audio src="music.mp3" data-at="0"
    data-gain="-3" data-fade-out="0.4">. Sound is felt, not noticed.
 5. Draft before polish: bin/vawe dev films/<name>/page.html. Read the sheet. Fix what is
    cramped, overlapping or unreadable before any motion work.
