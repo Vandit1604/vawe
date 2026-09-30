@@ -1,19 +1,22 @@
 # Drift hold
 
-**Use when** a quiet frame must stay on screen (a headline read, a lockup, a pause before the big
-moment) and a frozen frame would look dead. Each layer drifts on its own seeded noise and grows a
-little, at different amplitudes, so no two layers ever move together. The eye reads a camera that is
-alive, not an animation. Clip: [drift-hold.mp4](drift-hold.mp4). Demo: [demo/drift-hold.html](demo/drift-hold.html).
+**Use when** one line must sit still on screen long enough to read, and a frozen frame would look
+dead. The line never moves; only the ground behind it drifts, slowly, like a breath. The contrast
+between the still type and the living ground is the whole move. Clip:
+[drift-hold.mp4](drift-hold.mp4). Demo: [demo/drift-hold.html](demo/drift-hold.html).
 
-```js
+```html
+<div class="ground"></div>                         <!-- inset: -8%, a dot grid or a texture -->
+<div class="light"></div>                          <!-- one soft radial patch, lighter than the ground -->
+<h1 class="line">Held, not <em>frozen.</em></h1>   <!-- no transform, ever -->
+<script type="module">
 import '../../core/engine/page-api.js';
 import { noise1 } from '../../core/motion/springs.js';
 const layers = [
-  { el: bg,   seed: 1, amp: 2.2, grow: 0.012 },   // vh of travel, share of scale gained over 2 s
-  { el: type, seed: 2, amp: 1.0, grow: 0.022 },
-  { el: rule, seed: 3, amp: 1.6, grow: 0.022 },
+  { el: ground, seed: 1, amp: 1.6, grow: 0.03 },   // vh of travel, share of scale gained over 2 s
+  { el: light,  seed: 2, amp: 5,   grow: 0.06 },
 ];
-const rate = 0.8;                                  // noise steps per second: a new direction about every 1.2 s
+const rate = 0.5;                                  // noise steps per second: a new direction every 2 s
 vawe.onFrame((t) => {
   const vh = innerHeight / 100;
   layers.forEach(({ el, seed, amp, grow }) => {
@@ -21,14 +24,16 @@ vawe.onFrame((t) => {
     el.style.transform = `translate(${x}px, ${y}px) scale(${1 + grow * t / 2})`;
   });
 });
+</script>
 ```
 
 Sound: none; a hold is quiet, and the quiet before the spectacle is the point.
 
-`noise1` is seeded, so frame `t` is the same on every render and depends on no earlier frame. Give
-every layer its own seed and amplitude; the headline moves least and the ground most, which reads as
-depth. Travel of 1 to 2 vh and 1 to 2 percent scale over the hold is visible in motion and invisible
-as a "move". A drift over 3 vh is a pan and pulls the eye off the text. It never blurs. Use it under
-a held line, not as a substitute for a beat: the hold still needs its own words-times-0.6 s.
+`noise1` is seeded, so frame `t` is the same on every render and depends on no earlier frame. Put
+the drift only on layers behind the text: the moment the line itself drifts, the eye reads a move
+and not a hold. The grid travels 1 to 2 vh; the light patch may travel more because its edge is
+soft. Keep the patch within a few percent of the ground's lightness, so it reads as light and not
+as a shape. It never blurs. Use it under a held line, not as a substitute for a beat: the hold
+still needs its own words-times-0.6 s.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
