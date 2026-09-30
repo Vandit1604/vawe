@@ -160,6 +160,23 @@ async function coveragePart(ctx) {
 
 export const PARTS = [clipPart, timingPart, motionPart, coveragePart];
 
+const partName = (part) => part.name.replace(/Part$/, '');
+const ranParts = (ref) => PARTS.filter((p) => p !== coveragePart || ref).map(partName);
+
+// A file in quality/gates/ that `vawe check` cannot load would never run and never say so.
+function gateProblems(dir) {
+  return fs.readdirSync(dir).flatMap((f) => {
+    if (!f.endsWith('.mjs')) return [`${f} is not a .mjs file, so vawe check never finds it`];
+    const r = spawnSync(process.execPath, ['--check', path.join(dir, f)], { encoding: 'utf8' });
+    return r.status === 0 ? [] : [`${f} does not parse: ${(r.stderr || '').split('\n').find((l) => /Error/.test(l)) || 'node --check failed'}`];
+  });
+}
+
+export function checksLines(ref, gateDir = path.resolve(import.meta.dirname, '../../quality/gates')) {
+  const ran = ranParts(ref);
+  return [`ran ${ran.length} checks: ${ran.join(', ')}`, ...gateProblems(gateDir).map((p) => `warn: quality/gates/${p}`)];
+}
+
 export function sortFindings(list) {
   return [...list].sort((x, y) => RANK[x.severity] - RANK[y.severity] || x.t - y.t);
 }
@@ -296,8 +313,10 @@ async function main() {
   const flag = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : undefined; };
   const page = argv.find((a, i) => !a.startsWith('--') && !['--ref', '--out'].includes(argv[i - 1]));
   if (!page) die('usage: review.mjs <page.html> [--ref <ref.mp4>] [--final] [--text] [--table] [--judge] [--out sheet.png]');
-  const r = await review({ page, ref: flag('--ref'), final: argv.includes('--final'), text: argv.includes('--text'), out: flag('--out'), judge: argv.includes('--judge') });
+  const ref = flag('--ref');
+  const r = await review({ page, ref, final: argv.includes('--final'), text: argv.includes('--text'), out: flag('--out'), judge: argv.includes('--judge') });
   console.log(reportLines(r.findings, { sheet: r.sheet, timing: r.timing, table: argv.includes('--table'), changed: r.changed, cut: r.cut, header: r.header, handoff: r.handoff }).join('\n'));
+  console.log(checksLines(ref).join('\n'));
   console.log(`(${(r.ms / 1000).toFixed(1)} s${r.reused ? ', draft reused' : ''}; data: out/${path.basename(r.video, '.mp4')}-review.json)`);
 }
 
