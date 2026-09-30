@@ -48,7 +48,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | marker-highlight | a highlighter bar wipes behind a phrase and the text flips dark | HyperFrames marker-highlight, green promo, 6 s | built |
 | underline-draw | a line draws under the key word, fast in and slow out | to be captured | built |
 | bracket-callout | corner brackets snap onto a word or a UI part | to be captured | built |
-| spotlight-dim | the frame dims around one target | to be captured | to build |
+| spotlight-dim | the frame dims around one target | to be captured | built |
 
 ## 4. Move the camera
 
