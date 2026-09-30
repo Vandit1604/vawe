@@ -678,7 +678,7 @@ where they turn into our film.
 
 Storyboard fields these feed: \`pace:\`, \`threads:\`/\`object:\`, \`spectacle:\`, \`color:\` (the field line,
 not a swatch).
-See \`engine-doctrine/CRAFT/STORYBOARD-TEMPLATE.md\` and \`engine-doctrine/CRAFT/REFERENCE-STUDY.md\`.
+See \`engine-doctrine/CRAFT/REFERENCE-STUDY.md\`.
 
 ## Write recipe candidates
 

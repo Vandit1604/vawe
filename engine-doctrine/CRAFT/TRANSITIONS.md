@@ -1,477 +1,180 @@
 ---
-when: "choosing the CUT between two beats (you can't say why a transition is there)"
-answers: "the transition taxonomy (type→meaning) · Murch's Rule of Six · continuity vs montage · the per-seam decision procedure"
+when: "choosing the cut between two beats (you cannot say why a transition is there)"
+answers: "the transition taxonomy (type, meaning), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles"
 group: story
-routes: transitions
-codes: crossfade-mud, cut-families, cut-velocity, dead-final-frame, seam-flash, seam-ghost, seam-resurrection, seam-split, seam-unread, unclassified-transition, transition-unreasoned, boundary-uncovered, transition-reason-mismatch, covered-move, seam-axis-repeat
-applies-when: hasBoundaries
-confirm: "does each cut serve the relationship between its two beats, chosen by theory not habit?"
 ---
 
 # TRANSITIONS: choosing the seam by theory, not habit
 
-## AGENT SUMMARY
-
-- Choose each seam by the relationship and feeling between its two beats (Murch's Rule of Six:
-  emotion 51%), never by habit. Default to a hard cut; earn ONE primary transition for ~60-70% of
-  cuts plus 1-2 bolder accents reserved for the payoff.
-- Enforced by `make dev-tool X=direct` (`cut-families`: 3+ families fails) and `make check GATE=critique`
-  (`crossfade-mud`, `cut-velocity`, `dead-final-frame`, `no-transition`, `flat-seams`).
-- Checkable action: does each cut serve the relationship between its two beats, chosen by theory
-  not habit?
-
-A transition is the **seam between two beats**. Every school of editing agrees on one thing: the seam
-is *grammar*, not decoration: it means something, and the meaning must be **chosen**, not defaulted.
-The failure this doc exists to kill is picking one effect (a blur, a dissolve) and spraying it on every
-cut: that is not "smooth," it is a seam that says nothing, ten times.
-
-> **A film with no authored joint at all no longer stays jointless.** `produceBaseline`
-> (`core/engine/produce.js`) infers likely beat boundaries from the gap between beat-layer starts
-> (`inferCuts`, `core/timeline/junctions.js`), absent-only: a film that already declares a cut, a seam,
-> or a `motion` track is untouched (engine-doctrine/MISTAKES.md #578). Write real `transitions[]` to override
-> either of these passes.
->
-> **The STYLE at each inferred joint is content-aware, not content-blind.** `inferCuts` only knows the
-> gap; `chooseCutStyles`/`classifyJoint` (same file) read the RELATIONSHIP at each joint (does a layer
-> survive it via `becomes`/`acrossBeats`/a straddling window, do the outgoing and incoming boxes
-> overlap, does the medium or the backdrop change, is a layer still moving) and RULE OUT what that
-> relationship makes dishonest. The engine never picks a look, the same line drawn at MISTAKES #159
-> (it once picked the BACKGROUND, and nobody designed one again): it narrows the theme's own two named
-> cuts (`look.cuts.default`/`accent`) plus the doctrine's hard-cut default down to the ones a survivor
-> or an overlap didn't rule out, then chooses among what remains by the signals above (a moving layer
-> or a medium change earns the default; a backdrop turn earns the accent, spent once per film). A joint
-> with no relationship crossing it lands on the hard cut, `engine-doctrine/CRAFT/TRANSITIONS.md`'s own default for
-> most cuts, not a fade spent on every single one. Each choice keeps its reason on the cut (`_why`), for
-> a gate that later disagrees.
-
-[`SELECTION.md`](SELECTION.md) lists intent→effect across every family in one line each; **this is the
-deep dive for the cut**: the theory and the decision procedure. Read it when you cannot say *why* a
-given transition is there.
-
-> **The inventory (what exists) is `core/transitions/catalog.js`, run `make study-tool X=transitions`.** It catalogs
-> every transition across the four mechanisms (`anim` per-layer · `cut` one root · `sting` overlay ·
-> `seam` two-scene), marks the basics, and is derived from the source registries so it can't drift.
-> This doc is the *decision* layer; that catalog is the *inventory*. The basic two-scene transitions
-> (`seam` fx `slide · push · uncover · wipe · dissolve`, all dir-aware) are the fundamentals every tool
-> has, rendered as real blends of both beats. Reach for those before the expressive shaders.
->
-> **SEE it before you author it: `make media X=transition-preview FX=<name> [MECH=…] [DIR=…] [TIMING=…]`** renders a
-> canned two-beat A→B scene through one transition as a labelled filmstrip (`/tmp/transition-preview.png`).
-> The labels are eased progress, so `TIMING=linear` vs `smooth` shows as *where the motion bunches*.
->
-> **MEASURE a real one: `make study-tool X=measure VIDEO=… FROM=… TO=…`** reads a transition's actual duration + easing
-> from a video and names the **nearest engine preset** (a reference to reproduce, or `EXPECT=<preset>` to
-> verify our OWN render matches what we authored). Measure with `bin/vawe spec`.
->
-> **Easing is half the feel.** Both a `cut` and a `seam` shape their progress through `timing` (the
-> `TIMINGS` curves in core/cuts/index.js: `smooth`/`out`/`snappy`/`pop`/`rush`/`brake`/`ramp`/`linear`).
-> Seams default to `smooth` (ease-in-out): a transition that MOVES content at constant speed reads
-> mechanical; ease-in-out gives it velocity (accelerate, then settle). Use `linear` only for a
-> deliberately flat sweep. Match the curve to the beat: entrances decelerate, exits/whips accelerate.
-
-## One surface to author them: the unified `transitions`
-
-The four mechanisms are the *machinery*; you rarely pick one by hand. Author a **boundary** transition
-(between two beats) through one top-level array and let the engine route it
-(core/transitions/lower.js), driven by the same catalog:
-
-```json
-"transitions": [{ "at": 9.7, "fx": "whipPan", "dur": 0.6, "dir": "left", "timing": "snappy" }]
-```
-
-`fx` picks the mechanism: seam-only names (`whipPan`/`crossWarp`/`cinematicZoom`) → a two-scene
-**seam**; `whip`/`punch`/`zoom` → a root **cut**; `glitch`/`chromaticSplit` → a **sting** overlay.
-The **ambiguous basics** (`fade`/`slide`/`wipe`/`dissolve`/`push`/`uncover`) resolve to a cheap root
-**cut** by default; add `"mech": "seam"` to upgrade to the real GPU blend of both beats.
-
-This lowers to the raw `cuts`/`stings`/`seams` fields at load, so everything above (easing, direction,
-the decision procedure) applies unchanged. `transitions` is now the ONLY authored form: the raw fields
-are the INTERNAL shape it lowers to, and a scene that still authors `cuts`/`stings`/`seams` directly is
-refused at `make check GATE=validate` with a pointer to `harness/author/migrate-junctions.mjs`, which converts an
-old scene automatically. An `fx` that names nothing, or a layer-only anim used as a boundary (`pop`), is
-rejected at validate with the catalog, never silently coerced.
-
-A layer's own entrance/exit is `anim`/`out` directly (`engine-doctrine/PRIMITIVES.md`), not a second sugar over
-the same two fields: a `transition: { in, out, dir, dur }` shorthand used to live here too and was
-removed for measuring zero users across the library while duplicating `anim`/`out` exactly.
-
----
-
-## The easy palette: seven transitions that stay varied without thinking
-
-The theory below is the *why*. This is the *menu*: seven transitions that cover almost every launch film,
-ordered cheapest-first, each with the one thing it says and a copy-paste snippet. **Vary the seam by
-MEANING, not by reaching for a new effect** (that is the amateur tell). A whole film is usually one
-primary from this list on ~60-70% of cuts, plus ONE bolder accent reserved for the payoff. Pick the
-primary by the film's personality; pick each accent by what that one seam has to say.
-
-| # | Seam | Say it when | Snippet (30fps) |
-|---|---|---|---|
-| 1 | **Hard cut** | the two beats are one thought (the default, most cuts) | *(no `transitions` entry: place beats back-to-back, overlap ~2-4f so the stage never empties)* |
-| 2 | **Directional slide / push** | a NEW place, same energy: carry the eye one way | `{ "at": 5, "fx": "push", "mech": "seam", "dir": "left", "dur": 0.5, "timing": "ramp" }` |
-| 3 | **Cross-dissolve** | time passing, or a gentle link between two images | `{ "at": 5, "fx": "fade", "mech": "seam", "dur": 0.5, "timing": "smooth" }` |
-| 4 | **Whip pan** | frantic "meanwhile"; hide the cut inside motion blur | `{ "at": 5, "fx": "whipPan", "dir": "left", "dur": 0.45, "timing": "ramp" }` |
-| 5 | **Cinematic zoom** | push into a detail, or a calm reveal at the hero beat | `{ "at": 5, "fx": "cinematicZoom", "dur": 0.55, "timing": "ramp" }` |
-| 6 | **Squeeze** (a speed ramp you can SEE) | a fast, kinetic pivot: the frame smear-stretches through the cut | `{ "at": 5, "fx": "squeeze", "dir": "left", "dur": 0.4, "timing": "ramp" }` |
-| 7 | **Shared-element morph** | the SAME object takes its next role (highest craft) | *(no seam: a persistent layer with a `motion` track that repositions/resizes across the cut, see* The motion-design layer *below)* |
-
-Direction is a real lever for #2, #4 and #6: a beat that entered from the right should leave to the left
-(one continuous travel per seam, never enter-and-retreat). Rotate through 1-2-3 for the body and spend
-a bolder one ONCE, and a film already feels edited, not sprayed.
-
-### Speed is the anti-repetition lever
-
-**The transition is the verb, the timing is the adverb.** The `fx` says *what* crosses the cut; the
-`timing` says *how fast, and with what weight*. A transition with no speed profile reads FLAT, and a film
-whose seams all ride the same gentle curve feels repetitive however many effects it uses. So **the motion
-seams above carry `timing:"ramp"`, not `"smooth"`** (and a bare motion fx through the `transitions` sugar
-now defaults to `ramp`, `core/transitions/lower.js`). `ramp` is the editor's slow-fast-slow speed ramp
-(`core/motion/motion.js` `speedRamp`): it eases in, races through the middle, and settles, which is what makes a
-whip or a zoom feel *thrown* rather than slid. Vary the VELOCITY across a film, not only the effect. The
-speed dial (every curve is a named member of `TIMINGS`, `core/cuts/index.js`):
-
-| timing | curve | reach for it on |
-|---|---|---|
-| **ramp** | slow-fast-slow | whips, zooms, squeezes, any thrown/kinetic seam (the default for motion fx) |
-| **rush** | accelerate away | an EXIT: the beat leaves faster than it left rest |
-| **brake** | decelerate in | an ENTRANCE: the beat arrives slower than it set off |
-| **pop** | overshoot then settle | a spring-y arrival with life: a chip, a badge, a UI element landing |
-| **spring** | overshoot-and-settle spring | a badge/chip/number LANDING with physical life, a bouncy product reveal |
-| **snappy** | decisive, no overshoot | a punchy cut that lands and stops |
-| **smooth** | gentle ease-in-out | a calm blend (a cross-dissolve, a fade), where a ramp would fight the mood |
-| **linear** | flat, constant speed | a deliberately mechanical sweep; rarely what you want |
-
-`make dev-tool X=direct` warns (`flat-seams`) when a film has two or more boundaries and every one rides a gentle
-curve with no speed ramp anywhere. It never blocks; it is the nudge to spend one ramp.
-
-### One word for the whole film: `energy`
-
-Naming a `timing` on every cut is how you set velocity per beat. Setting it ONCE for the whole film is
-`energy`, a single top-level word. AE motion design gives a piece one velocity personality: a calm brand
-film and a hype launch reel do not accelerate the same way. `energy` is that personality, and it fills
-the `timing` of every cut and seam that names none.
-
-```json
-{ "module": "scene", "energy": "brand", "transitions": [ ... ] }
-```
-
-| energy | the film's default curve | reach for it on |
-|---|---|---|
-| **calm** | `out` (decelerate in) | premium, editorial, a film with room to breathe |
-| **brand** | `ramp` (the house speed ramp) | the default to reach for: directed and confident |
-| **hype** | `snappy` (lands and stops) | product drops, announcements, launch-reel energy |
-| **tense** | `rush` (accelerate away) | urgency, countdowns, a film that will not sit still |
-
-It is a DEFAULT, never an override: an explicit `timing` on any transition still wins. A film that
-names no `energy` is untouched, so nothing re-times silently. `core/transitions/energy.js`.
-
-### Two more seam knobs: `feather` and an angled `dir`
-
-Beyond `timing`, a `mech:"seam"` takes two shape knobs (both optional, both static, so determinism is
-unchanged):
-
-- **`feather`** (0..0.2): the softness of the edge on the edge-based seams (`wipe`, `irisRound`,
-  `clockWipe`, `barnDoor`, `blindsWipe`, `burnThrough`, `lumaWipe`). A hard edge reads as a slide deck;
-  a soft one reads graded, this is the single biggest cheap-vs-premium tell. Omit it for each unit's
-  own baked default; set `feather: 0.12` for a soft band, `feather: 0` for a crisp line.
-- **`dir` as an angle**: `dir` still takes `left|right|up|down`, but a **number of degrees** (0=right,
-  90=up) sweeps a `wipe`/`barnDoor`/`blindsWipe` at any angle, not just the four cardinals.
-
-```json
-{ "at": 5, "fx": "wipe", "mech": "seam", "dir": 35, "feather": 0.12, "timing": "ramp" }
-```
-
-> **Studied and deliberately not built (yet).** One well-known model separates a transition into an
-> orthogonal *presentation* (`{draw, props}`) times a *timing* (`{getProgress, getDurationInFrames}`),
-> and carries a physics **spring** whose duration is *measured* from its damping/stiffness, not
-> specified, with an overlap model that mounts and blends two LIVE scenes. Vawe blends two BAKED stills
-> instead, the same seam architecture as any shader-transition system. Our named-curve dial above is a
-> nicer author surface than a raw ease string, and `pop` already gives a spring-like overshoot.
-> **`spring`** closes the shape gap: it is the house damped-harmonic-oscillator easing
-> (`core/motion/motion.js` `easeOutSpring`, the same math behind `easeOutSettle`/`easeOutSnap`) fixed at
-> one tasteful bounce/settle rather than exposed as a per-call `{damping, stiffness}` API. A genuinely
-> *parameterized* spring, where an author dials the bounce and duration per transition, stays out until
-> a film needs an arrival this fixed curve cannot fake. Recorded here so the next author inherits the
-> decision, not the re-investigation.
-
-> **Align the beats to the seam, or a `mech:"seam"` transition dissolves nothing.** A seam blends the
-> frame just BEFORE `at` against the frame just AFTER. If both beats are still on screen across `at`
-> (the outgoing text never left, the incoming text already arrived), the seam crossfades two nearly
-> identical stages and the copy MUSHES into an unreadable double. So the outgoing beat must END at `at`
-> (let the seam be its exit: `"out": "none", "exitDur": 0`) and the incoming beat must START at `at`.
-> No gate catches this (both layers are legitimately present, and a persistent morph element SHOULD
-> span the cut); it is an authoring discipline the eye and `make judge` verify.
-
-### Concrete durations at 30fps
-
-Frames, because "0.5s" hides that it is 15 frames. Round to the frame; a seam is felt, not measured.
-
-| Transition | Frames @30fps | Seconds | Note |
-|---|---|---|---|
-| Match-on-action overlap | 2-5f | 0.06-0.16s | the shared movement carries the eye; the blend is almost nothing |
-| Whip pan | 8-12f | 0.27-0.40s | fast AND blurred, or it reads as a slow slide |
-| Quick dissolve | 12-15f | 0.40-0.50s | the workhorse soft cut |
-| Standard seam (slide/push/dissolve) | 15-30f | 0.50-1.00s | the body-of-the-film default |
-| Cinematic zoom | 15-25f | 0.50-0.85s | slower settles calmer |
-| Fade to black (act break) | 20-40f | 0.66-1.33s | a real pause; earn it |
-| UI hand-off (element to element) | ≤9f | ≤300ms | ease-out; keep interface motion snappy (Emil Kowalski) |
-
-### Station-to-station: the launch-film transition with no cut
-
-The Apple move: instead of cutting between product shots, the camera FLIES through one continuous space,
-dwelling on each feature in turn. There is no seam because there is no cut, the flight IS the transition,
-and the whole film reads as one world rather than a stack of slides. Reach for it when the beats are
-PLACES with a spatial logic (a dashboard, then a panel inside it, then a detail), not unrelated claims.
-
-```json
-"cameraMove": { "move": "travel", "stations": [
-  { "tx": 960, "ty": 540, "s": 1 },                      // station 0: where the flight begins (wide)
-  { "tx": 620, "ty": 400, "s": 1.6, "dur": 1.2, "dwell": 1.0 },   // fly in, hold on feature A
-  { "tx": 1300, "ty": 720, "s": 1.8, "dur": 1.0, "dwell": 1.0 }   // glide to feature B, settle
-] }
-```
-
-`tx`/`ty` are the STAGE point to centre; `s` the zoom; `dur` the flight INTO a station; `dwell` the hold
-once there. Station 0 is the start, so it has no `dur`. Interiors run linear on purpose (an eased curve
-at each stop would zero velocity and break one flight into N hops, MISTAKES #128). This is a
-`choreographed`-adjacent scene: it carries no per-beat `cuts`, so it never triggers scene-unit swaps.
-
----
+A transition is the seam between two beats. It is grammar, not decoration: it means something, and the
+meaning must be chosen, not defaulted. The failure this page exists to stop is picking one effect (a
+blur, a dissolve) and spraying it on every cut. That is not "smooth". It is a seam that says nothing,
+ten times. `SELECTION.md` lists intent to choice in one line each. This is the deep dive for the cut.
 
 ## The prime rule
 
-> **A transition must serve the RELATIONSHIP between the two beats AND the FEELING across the seam.
-> If it serves neither, it is a hard cut.**
+> A transition must serve the relationship between the two beats and the feeling across the seam. If it
+> serves neither, it is a hard cut.
 
-The hard cut is the default and the overwhelming majority of professional edits. You *earn* anything
-more by naming what it does. "It looks smoother" is not a reason, it is the blur-spam tell.
-
-> **You crossfade everything. Use hard cuts for disruption and register shifts.** Borrowed verbatim from
-> the reference notes, which also state what each seam MEANS in three lines: *"Crossfade = this continues. Hard cut = wake up / disruption. Slow
-> dissolve = drift with me."* That is the taxonomy below in three words, and it names the exact wrong
-> move: reaching for the soft one because it is soft.
-
----
+The hard cut is the default and the great majority of professional edits. You earn anything more by
+naming what it does. "It looks smoother" is not a reason. It is the blur-spam tell. Crossfade means
+"this continues". Hard cut means "wake up" or disruption. Slow dissolve means "drift with me". You
+crossfade everything: use hard cuts for disruption and register shifts.
 
 ## Emotion first: Walter Murch's Rule of Six
 
-Murch (*In the Blink of an Eye*) ranks what a cut must serve, by weight:
+Murch (*In the Blink of an Eye*) ranks what a cut serves, by weight:
 
-| # | Criterion | Weight | What it asks |
+| # | criterion | weight | asks |
 |---|---|---|---|
-| 1 | **Emotion** | **51%** | Does the cut serve what the audience should FEEL? |
-| 2 | Story | 23% | Does it advance the narrative? |
-| 3 | Rhythm | 10% | Is it the right moment "musically"? |
-| 4 | Eye-trace | 7% | Does it respect where the viewer is already looking? |
-| 5 | 2D plane / screen direction | 5% | Does it honor the 180° axis? |
-| 6 | 3D spatial continuity | 4% | Is the physical space consistent? |
+| 1 | emotion | 51% | does the cut serve what the audience should feel? |
+| 2 | story | 23% | does it advance the narrative? |
+| 3 | rhythm | 10% | is it the right moment, musically? |
+| 4 | eye-trace | 7% | does it respect where the viewer already looks? |
+| 5 | 2D plane, screen direction | 5% | does it honour the 180 degree axis? |
+| 6 | 3D spatial continuity | 4% | is the physical space consistent? |
 
-**Emotion outranks the other five combined.** The surrender order: never give up emotion for story,
-story for rhythm, rhythm for eye-trace, eye-trace for planarity, planarity for spatial continuity. A
-cut that breaks screen-direction but nails the feeling is **correct**. Naive systems optimize the
-bottom 9% (geometry) and ignore the top 51% (feeling), do the opposite.
+Emotion outranks the other five combined. Never give up emotion for story, story for rhythm, and so on
+down. A cut that breaks screen direction and nails the feeling is correct. Cut where the audience would
+blink: on the completed idea, not mid-thought. That is why a typed line finishes before the seam and a
+beat lands before it leaves.
 
-**"Cut where the audience would blink."** A blink marks the completion of a thought; it is a mental
-cut. The true edit point is a *cognitive/emotional boundary*, not a visual one. In our terms: cut on
-the beat's completed idea, not mid-thought (this is why a typed line must finish before the seam, and
-why a beat must land before it leaves).
+## Invisible or expressive
 
----
+Continuity (Hollywood): the cut is invisible. Match on action, motivated cuts, J and L cuts, a
+shared-element morph. Most seams live here. Montage (Eisenstein): the cut is shown, because meaning is
+made in the collision (the Kuleshov effect: the same face reads as hunger or grief by what it is cut
+against). Dissolve, graphic match, smash cut. Ask: should this seam disappear or speak?
 
-## Invisible or expressive: the routing question
+## The taxonomy: type, meaning, when
 
-Two opposed schools, and which one you are in decides everything:
-
-- **Continuity (Hollywood):** the cut should be **invisible**. Match-on-action, motivated cuts, the
-  transition vanishes so the story flows. Reach for a hard cut, a match cut, a J/L cut, a shared-element
-  morph. *Most seams live here.*
-- **Montage (Eisenstein):** the cut should be **shown**, because meaning is created in the *collision*
-  (the Kuleshov effect: the same face reads as hunger, grief, or love by what it's cut against). Reach
-  for a dissolve, a graphic match, a smash cut, the seam is the argument.
-
-Ask: should this seam **disappear** (serve the flow) or **speak** (create a meaning the two beats don't
-hold alone)? That single question routes the whole choice.
-
----
-
-## The transition taxonomy: type · meaning · when · our vocabulary
-
-Each transition SIGNIFIES something. Reach for it when you want to say that thing, and map it to what
-the engine actually does (a layer `cut`/`out`, a sting overlay, a Seam D two-scene composite, a
-`motion` travel track, or audio timing).
-
-| Transition | Signifies / feeling | Reach for it when | In this engine |
+| transition | signifies | reach for it when | in a page |
 |---|---|---|---|
-| **Hard cut** | nothing: invisible, respects momentum | the default; two beats are one continuous thought | back-to-back beats, overlap so no dip (MISTAKES #123) |
-| **Cross-dissolve** | passage of time · a connection · gentleness | link two images, soften, show time passing | soft `cut`/`out` (`fade`/`blur`), or Seam D `crossWarp` |
-| **Fade to black** | a beginning or an ending · an act break · closure | open/close the film or a major section | `fade` to `bg`, held; Seam D `flashWhite` (to white = dreamlike) |
-| **Wipe** | playful · deliberate · artificial (shows the seam) | an energetic location/time change | cut `wipe`; sting `wipe`/`doors`/`blinds` |
-| **Iris** | focus · vintage · isolate a subject | spotlight one thing, a storybook wink | cut `iris`; sting `sdfIris`; Seam D `sdfIris` (masked reveal) |
-| **Match cut (graphic)** | "these two things are the same" · a rhyme | bridge scenes by a visual/compositional rhyme | author it: same framing/shape across a hard cut |
-| **Match cut (on action)** | seamless · energy carried through | cut on a movement so the eye rides it past the seam | a `motion` track that continues across the cut |
-| **Match cut (conceptual)** | wit · a thematic argument | a word/idea in A pays off in B | author copy + timing across a hard cut |
-| **Smash cut** | shock · jolt · comedy or terror | end on maximum tonal contrast; wake from a dream | hard cut + a hard content/bg contrast (+ optional `flash`) |
-| **Whip pan** | frantic energy · momentum · "meanwhile" | a kinetic change; hide the cut in motion blur | sting `whipPan`; Seam D `whipPan` (smears BOTH beats) |
-| **J-cut** (audio leads) | anticipation: pulls the viewer forward | lead into what's coming; make it feel inevitable | start the next beat's audio cue / bed BEFORE its visual |
-| **L-cut** (audio lingers) | continuity · a held emotion | hold a tone/voice while the image moves on | let a cue / VO / bed run OVER the next beat's entrance |
-| **Invisible / hidden cut** | immersion · unbroken flow | fake a one-take; hide the seam entirely | cover the cut with a full-bleed element or a whip at peak |
-| **Camera travel** | one world · the beats are PLACES, not claims | the content has a spatial logic worth walking | `cameraMove:{move:"travel", stations:[…]}`. The transition IS the flight, and there is no cut |
-| **Morph / shared-element** | magic · same identity across states | a thing becomes its next role (the highest-craft cut) | a persistent layer with a `motion` track that repositions/resizes |
-| **Jump cut** | disjunction · urgency · restlessness | compress time; deliberately call attention | a hard cut within the same framing (use sparingly) |
-| **Ripple dissolve** | dreamlike time displacement | present → flashback (reads dated) | sting `ripple` over a dissolve |
+| hard cut | nothing, invisible | the default; two beats are one thought | back-to-back beats; overlap 2 to 5 frames so the stage never empties |
+| cross-dissolve | time passing, a link, gentleness | soften, link two images | opacity blend of both beats |
+| fade to black | an ending, an act break | open or close the film or a major section | fade to the ground, a real pause; earn it |
+| wipe | playful, deliberate, shows the seam | an energetic change of place or time | `clip-path` mask, a soft edge (feather) |
+| iris | focus, vintage, isolate | spotlight one thing | circular `clip-path` |
+| match cut, graphic | "these two are the same" | bridge scenes by a visual rhyme | same framing or shape across a hard cut |
+| match cut, on action | seamless, energy carried | cut on a movement so the eye rides it past the seam | a shape on one path across both scenes (`prompts/moves/cut-on-motion.md`) |
+| match cut, conceptual | wit | a word in A pays off in B | copy and timing across a hard cut |
+| smash cut | shock, jolt | end on maximum tonal contrast | hard cut plus a hard content or ground contrast |
+| whip pan | frantic energy, "meanwhile" | a kinetic change; hide the cut in blur | fast translate with directional blur on both beats |
+| push, slide | a new place, same energy | carry the eye one way | translate both beats together, one direction per seam |
+| zoom, punch | product focus, a calm reveal | push into a detail | scale up through the cut |
+| squeeze | a fast pivot | a speed ramp you can see | smear-stretch through the cut |
+| J-cut | anticipation | lead into what is coming | next beat's audio starts before its picture (`SOUND.md`) |
+| L-cut | a held emotion | hold a tone while the image moves on | audio runs over the next entrance |
+| shared-element morph | magic, same identity | a thing becomes its next role (highest craft) | one persistent element repositions and resizes across the cut |
+| camera travel | one world, beats are places | the content has a spatial logic worth walking | the transition is the flight; no cut (below) |
+| jump cut | urgency, restlessness | compress time on purpose | hard cut in the same framing; sparingly |
 
----
+## The decision procedure: run it at every seam
 
-## The decision procedure: the algorithm to run at every seam
+1. Does this seam need to exist? If two beats flow as one thought, use the invisible default: hard cut,
+   match on action, or a shared-element morph. Most seams stop here.
+2. What must the viewer feel across it? Continuity is a cut. Time or gentleness is a dissolve. Closure
+   is a fade. Shock is a smash. Anticipation is a J-cut. Lingering is an L-cut.
+3. Invisible or expressive?
+4. What is the relationship? Same object, new state: morph. Same action: match on action. Rhyme: match
+   cut. Time: dissolve. Act boundary: fade. Tonal opposition: smash. New place with energy: whip or wipe.
+5. What does the seam mean? A change of time, place or perspective justifies a visible transition.
+   Nothing to signify: cut.
+6. Lead or linger with sound? This is where "smooth" comes from in pro work.
+7. Eye-trace and velocity: cut where the eye already is. Keep direction and speed across the seam (exit
+   accelerating, enter decelerating through a shared blur).
+8. Rhythm: accelerate into a climax, then hold the payoff. Cut on the beat when there is a bed, or
+   two frames early.
+9. Restraint check: is this the one primary (60 to 70% of cuts) or one of two or three earned accents?
+   One cut family per film. Adjacent transitions change axis or direction: two back-to-back seams that
+   both push left read as a stutter.
 
-This is the thought process. Run it in order; stop when the transition is chosen.
-
-1. **Does this seam need to exist at all?** If the two beats flow as one thought, use the invisible
-   default (hard cut / match-on-action / shared-element morph). *Most seams stop here.*
-2. **What must the viewer FEEL across it?** (Murch 51%.) The feeling picks the family before any
-   mechanic: continuity→cut · time/gentleness→dissolve · closure→fade · shock→smash · anticipation→J-cut
-   · lingering→L-cut.
-3. **Invisible or expressive?** Continuity → hide the seam. Meaning-by-juxtaposition → show it.
-4. **What is the RELATIONSHIP between the two beats?** same object new state → shared-element morph ·
-   same action → match-on-action · visual/thematic rhyme → match cut · time → dissolve · act boundary →
-   fade · tonal opposition → smash · new place with energy → whip/wipe.
-5. **What does the SEAM itself mean?** A change in *time, place, or perspective* justifies a visible
-   transition. Nothing to signify → cut (the editor's default rule).
-6. **Lead or linger with sound?** Pull forward → J-cut (audio early). Hold the departing emotion →
-   L-cut (audio over). This is where "smooth" actually comes from in pro work.
-7. **Eye-trace + velocity.** Cut where the eye already is; preserve direction and speed across the seam
-   (velocity-matched: exit accelerating, enter decelerating through a shared blur).
-8. **Rhythm.** Set beat durations for tension: accelerate into a climax, then HOLD the payoff. Cut on
-   the music beat when there's a bed (`make media X=beatmap`).
-9. **Restraint check.** Is this the ONE primary (60-70% of cuts) or one of 2-3 earned accents? One cut
-   family. If every seam is flashy, revert to the invisible default.
-
-The meta-rule again: if a seam can't answer (1)-(5) with a real relationship or feeling, it is a **hard
-cut**. That is the rule that stops effect-spam in both directions, monotone AND soup.
-
----
+If a seam cannot answer 1 to 5 with a real relationship or feeling, it is a hard cut. That rule stops
+effect-spam in both directions, monotone and soup.
 
 ## Restraint: the invisible cut dominates
 
-- **Straight cuts are the meat; dissolves/fades/wipes are seasoning.** You can cut an entire film with
-  nothing but hard cuts. A different showy transition every seam is the amateur tell, "flashy
-  transitions carry a weak narrative."
-- **One primary + sparse accents.** Pick one transition for ~60-70% of cuts; reserve your boldest
-  accent for the hero/payoff; make the outro the simplest. (This is the fix for blur-on-everything: the
-  blur wasn't wrong as a *primary*: it was wrong as the *only* thing, with no earned accents.)
-- **Only transition on purpose**: to mark a change in time, place, or perspective. Otherwise it is
-  noisy decoration.
+Straight cuts are the meat. Dissolves, fades and wipes are seasoning. You can cut a whole film with
+hard cuts. A different showy transition on every seam is the amateur tell. Pick one primary for 60 to
+70% of cuts. Save the boldest accent for the payoff. Make the outro the simplest. Blur was not wrong as
+a primary: it was wrong as the only thing, with no earned accents. Transition only to mark a change of
+time, place or perspective.
 
----
+## Speed is the anti-repetition lever
 
-## The motion-design layer (UI / kinetic transitions)
+The transition is the verb and the timing is the adverb. A seam with no speed profile reads flat, and a
+film whose seams all ride one gentle curve feels repetitive however many effects it uses. Vary the
+velocity across the film, not only the effect.
 
-Same grammar, applied to elements not shots:
+| profile | curve | reach for it on |
+|---|---|---|
+| ramp | slow, fast, slow | whips, zooms, squeezes, any thrown seam (the default for motion) |
+| rush | accelerate away | an exit: the beat leaves faster than it arrived |
+| brake | decelerate in | an entrance: the beat arrives slower than it set off |
+| pop, spring | overshoot then settle | a chip, badge or UI element landing (rare) |
+| snappy | decisive, no overshoot | a punchy cut that lands and stops |
+| smooth | gentle ease in and out | a calm dissolve or fade, where a ramp would fight the mood |
+| linear | constant speed | a deliberately mechanical sweep; rarely what you want |
 
-- **Shared-element / container transform = match-on-action.** Morph one element into its next role so
-  the two read as the SAME object (a headline shrinks into a label; a card slides to its next mark). In
-  this engine that is a persistent layer + a `motion` track, the highest-craft continuity we have.
-- **Easing by role** (Emil Kowalski): entering/exiting → `ease-out` · moving/morphing → `ease-in-out` ·
-  hover/colour → `ease` · constant → `linear`. Springs for interruptible motion (they preserve velocity
-  across the "cut"). Keep UI transitions under ~300ms.
-- **Diegetic beats non-diegetic.** Motion that emerges from a real trigger (a whip, a touch point, a
-  shared element) reads as honest and continuous; a generic fade imposed on top reads as stock. Prefer
-  the transition that arises from the content.
-- **Choreography** (Material): one focal point, share only the most important element across the seam,
-  one directional path, stagger secondary entrances ~60ms, never fire a group simultaneously.
+In a page, write a ramp as a `linear()` easing from `curveToLinear` (`core/motion/springs.js`), or a
+`[[f, v]]` table in `seek(t)`. A whole film gets one velocity personality: calm decelerates in, brand
+uses ramps, hype is snappy, tense rushes. An explicit curve on one seam still wins.
 
----
+## Durations at 30 fps
 
-## What the gate enforces (`make dev-tool X=direct` + `make check GATE=critique`)
+Round to the frame. A seam is felt, not measured.
 
-Doctrine carries the taste; the gates backstop the source-decidable subset:
+| transition | frames | seconds | note |
+|---|---|---|---|
+| match on action overlap | 2 to 5 | 0.06 to 0.16 | the shared movement carries the eye |
+| whip pan | 8 to 12 | 0.27 to 0.40 | fast and blurred, or it reads as a slow slide |
+| quick dissolve | 12 to 15 | 0.40 to 0.50 | the workhorse soft cut |
+| standard slide, push, dissolve | 15 to 30 | 0.50 to 1.00 | the body default |
+| cinematic zoom | 15 to 25 | 0.50 to 0.85 | slower settles calmer |
+| fade to black (act break) | 20 to 40 | 0.66 to 1.33 | a real pause |
+| UI hand-off, element to element | 9 or fewer | 300 ms or less | ease out; keep interface motion snappy |
 
-- **one cut family** per film; ≥3 families = FAIL (`make dev-tool X=direct`).
-- **adjacent seams vary axis or direction**: two authored transitions back to back that both carry the
-  same cardinal `dir` (both `left`, both `down`, …) read as a stutter, one push in one direction
-  repeated. `make dev-tool X=direct` warns (`seam-axis-repeat`) and names the two timestamps; switch the axis
-  (x to y) or flip the direction the way `example-madera` does.
-- **the frame must not go empty across a joint**: `make check GATE=seam-check` reads the rendered mp4 at every
-  boundary for a luminance dip, and now measures how long content takes to reappear once it dips
-  (`seam-flash`, MISTAKES #144). A one-frame dip is a flash; several frames of measured emptiness is
-  the outgoing beat leaving before the incoming one arrives, named with both beats and the fix. It also
-  checks a second, colour-blind statistic from the same decode: the spread of grey across a small grid
-  collapsing toward flat (`seam-empty`). A blank frame on a WHITE ground never dips, it only drains, so
-  the luma check alone missed it; spread catches an empty stage whatever colour it is empty in.
-- **the earned seam**: `make dev-tool X=direct` suggests ONE two-scene seam at the payoff boundary (the transition
-  into the longest-held beat), matched to the brand personality (punchy → whipPan, calm → cinematicZoom),
-  and applies it on `WRITE=1`. Everything else stays an invisible cut. This is the restraint rule made
-  operational: straight cuts are the meat, the seam is the one seasoning reserved for the hero.
-- **no transition-dip**: the stage never goes empty between beats; the transition IS the exit
-  (`make check GATE=critique`, rule `transition-dip`).
-- **no typing/reveal cut off**: a time-based reveal completes before its seam (`make check GATE=critique`,
-  `typing-cutoff`, MISTAKES #122).
-- **restraint**: a primary used on ~all cuts (monotone) or accents with no earned reason are judgment
-  calls the planning skill and `make judge` review; the vision judge scores whether each seam reads.
+Soft edges are the cheap-versus-premium tell: a hard wipe edge reads as a slide deck, a feathered one
+reads graded. A wipe can sweep at any angle, not only the four cardinals.
 
-## Seam forensics: three defects the flash check can't see
+## Align the beats to the seam
 
-`quality/gates/seams.mjs` reads the rendered mp4 for a whole-frame luminance flash at every
-boundary. Three real defects on `quality/runs/evals/briefs/demo.json` survived it because none of them touch
-the frame's overall brightness: a redraw local to one corner, a fade that keeps going past its own
-window, and a background that steps instead of blending while the layers on top of it dissolve.
-`node quality/gates/seams.mjs <scene.json>` reads the same rendered pixels, but inside the
-authored BOX of one layer, or the strip outside every layer's box, rather than the frame as a whole.
+A blend seam mixes the frame just before the cut with the frame just after. If both beats are on screen
+across the cut (the outgoing text never left, the incoming text already arrived), the seam crossfades two
+nearly identical stages and the copy mushes into an unreadable double. The outgoing beat must end at
+the seam, and the incoming beat must start at it. A persistent morph element is the exception and should
+span the cut. Check with the eye: `bin/vawe critique` reads the loop seam and measured deltas.
 
-### Seam forensics ghost
+The frame must not go empty across a joint either. A one-frame luminance dip is a flash. Several frames
+of emptiness mean the outgoing beat left before the incoming one arrived. A blank frame on a white
+ground never dips, it only drains, so look at the frames, not only the luminance.
 
-An outgoing layer still visible, fading, several frames past the transition's own declared `dur`. The
-box is the outgoing layer's authored `{x,y,w,h}`; the signature is a mean colour DIFFERENCE (against a
-fully-settled reference frame) that is still elevated one frame after `dur` ends and has mostly decayed
-ten frames later. A layer that is simply dark or busy there reads flat at both samples and never trips
-it; only a DECAYING reading does. Blind spot: a layer whose own content legitimately keeps changing in
-that box past `dur` (a counter still ticking, a loop still playing) reads the same as a ghost.
+A full-bleed layer above a moving layer must not start mid-move and hide it before it plays: that reads
+as a hard cut nobody authored. Start the cover after the move ends, or raise the mover.
 
-### Seam forensics resurrection
+## Station to station: the launch-film transition with no cut
 
-A layer redrawn after its own authored end. The baseline is the frame just before the layer first
-draws (never `end+1f`: on the defect this gate exists for, the redraw starts at `end+1f`, so that frame
-is already wrong as a "clean" reference). The probe is one frame before every boundary that falls
-outside the layer's own crossfade window. A `cursor` layer places by an absolute `path`, not `x/y`, so
-it carries no authored box; it is always checked against the canvas ORIGIN corner instead, because that
-is where this exact defect drew (engine-doctrine/MISTAKES.md candidate, not yet logged: a stale render state
-falling back to `(0,0)` instead of staying unmounted). Blind spot: a later beat legitimately reusing the
-same screen region reads identically to a resurrection; the gate excludes a probe when another layer's
-own box (or an active `group`, for a beat-blueprint child whose box the engine lays out at render time
-rather than in the authored JSON) plausibly covers the same area, but a beat that reuses the space
-without any group wrapper is not caught by that exclusion.
+The Apple move: instead of cutting between product shots, the camera flies through one continuous space
+and dwells on each feature in turn. There is no seam because there is no cut. The film reads as one
+world, not a stack of slides. Reach for it when the beats are places with a spatial logic (a dashboard,
+then a panel inside it, then a detail), not unrelated claims. Each station has a point to centre, a
+zoom, a flight time into it and a dwell. Use a linear ease on interior legs: an eased curve at each stop
+zeroes velocity and breaks one flight into N hops.
 
-### Seam forensics split seam
+## The motion-design layer (elements, not shots)
 
-The field, a strip of pixels outside every authored layer box (the bottom margin), should move in small,
-roughly even steps across a transition's own window. One step several times the size of the rest is a
-hard background swap disguised inside a soft layer dissolve. Blind spot: a scene with real content
-placed in that margin reads its own motion here instead of the field's.
+- Shared element (container transform) is match on action. A headline shrinks into a label. A card slides
+  to its next mark. It is the highest-craft continuity we have.
+- Easing by role (Emil Kowalski): entering and exiting is ease out, moving and morphing is ease in and
+  out, hover and colour is plain ease, constant is linear. Springs suit interruptible motion because they
+  keep velocity. Keep UI transitions under about 300 ms.
+- Diegetic beats non-diegetic. Motion that emerges from a real trigger (a whip, a touch point, a shared
+  element) reads honest. A generic fade laid on top reads as stock. Prefer the transition that arises
+  from the content.
+- Choreography (Material): one focal point, share only the most important element across the seam, one
+  directional path, stagger secondary entrances about 60 ms, never fire a group at once.
 
-### Seam forensics tuning
-
-Thresholds are read off real pixel measurements on `out/demo.mp4` (today's engine, before the three
-defects above were fixed), not guessed: a ghost's decay floor and ratio, a resurrection's edge-reading
-delta, and a split seam's step floor. `quality/gates/seams.mjs`'s own header constants
-(`GHOST_FLOOR`, `GHOST_RATIO`, `RES_FLOOR`, `SPLIT_FLOOR`) are the one place they are written; re-measure
-them the same way (crop the box, `blend=difference` or `edgedetect=mode=colormix`, `scale=1:1`) before
-moving them, on a scene with and without the defect in question, the same way this file's numbers were
-found.
-
-### Track decides stacking; array order breaks a tie
-
-`track` sets which layer paints on top (`core/timeline/clips.js` writes zIndex off `data-track`,
-`films/scene/scene.js:550` sets `data-track` to `L.track ?? idx`). Two layers on the same track tie,
-and the tie breaks by their order in `layers[]`: the one written later draws on top.
-A full-bleed layer above must not start mid-move and hide it before it plays, or it reads as a hard cut
-nobody authored. `quality/gates/covered-move.mjs` (`make check GATE=covered-move D=<file>`) reports
-this, always report-only: it cannot tell a deliberate cover from an accident, only name the collision
-and its fix (start the coverer after the move ends, or move the mover to a higher track).
-
-## Provenance
-
-**Sources:** StudioBinder (transition types · Murch's Rule of Six · match cuts · Soviet montage);
-Adobe / MasterClass (J/L cuts · continuity editing); Eisenstein / Kuleshov (montage); Murch, *In the
-Blink of an Eye* (Rule of Six, the blink); Fiveable / Avid (rhythm & pacing); Material Design &
-Apple HIG (motion choreography, shared-element); Thomas & Johnston, *The Illusion of Life* (12
-principles); Emil Kowalski, animations.dev (easing/spring).
+Sources: StudioBinder (transition types, Rule of Six, match cuts, Soviet montage); Adobe and MasterClass
+(J and L cuts, continuity editing); Eisenstein and Kuleshov (montage); Murch, *In the Blink of an Eye*;
+Material Design and Apple HIG (choreography, shared element); Thomas and Johnston, *The Illusion of
+Life*; Emil Kowalski, animations.dev.
