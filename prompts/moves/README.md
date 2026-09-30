@@ -42,6 +42,7 @@ This index lists the built ones, in the same groups.
 | flash cut | a hard cut on a beat: a three-frame white peak hides the cut and the new shot settles from overexposed | [flash-cut.md](flash-cut.md) | [flash-cut.mp4](flash-cut.mp4) |
 | stack cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | [stack-cover.md](stack-cover.md) | [stack-cover.mp4](stack-cover.mp4) |
 | split reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | [split-reveal.md](split-reveal.md) | [split-reveal.mp4](split-reveal.mp4) |
+| slice shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | [slice-shift.md](slice-shift.md) | [slice-shift.mp4](slice-shift.mp4) |
 
 ## Point the eye
 
@@ -94,6 +95,7 @@ This index lists the built ones, in the same groups.
 |---|---|
 | cover the old shot with a new panel | [stack-cover](stack-cover.md) |
 | open one shot onto the next | [split-reveal](split-reveal.md) |
+| tear one shot off to show the next | [slice-shift](slice-shift.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
