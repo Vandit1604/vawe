@@ -41,12 +41,14 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { PAGE_ARGS } from '../lib/render-harness.mjs';
+import { createHash } from 'node:crypto';
+import { PAGE_ARGS, REPO_ROOT } from '../lib/render-harness.mjs';
+import { scratch } from '../lib/scratch.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
-import { openPreview } from './preview-server.mjs';
+import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
@@ -81,6 +83,9 @@ export function readPageMeta(pagePath, name) {
 export async function openPage(pagePath, frame, { warm = false } = {}) {
   const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, args: PAGE_ARGS, warm });
   if (opened.reused) return opened;
+  // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
+  // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
+  await (await opened.page.createCDPSession()).send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};`);
   return opened;
 }
@@ -148,7 +153,7 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
   const speeds = new Array(frames);
   const lumaAt = async (page, i) => {
     await seekAll(page, from * 1000 + (i / fps) * 1000);
-    const shot = await page.screenshot({ type: 'jpeg', quality: 40, encoding: 'base64' });
+    const shot = await page.screenshot({ type: 'jpeg', quality: 40, encoding: 'base64', clip: { x: 0, y: 0, width: frame.width, height: frame.height, scale: PIXEL_W / frame.width } });
     return page.evaluate(async (b64, w) => {
       const blob = await (await fetch(`data:image/jpeg;base64,${b64}`)).blob();
       const bmp = await createImageBitmap(blob);
@@ -173,8 +178,21 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
   return speeds;
 }
 
+// The pass is a pure function of the page folder, core/ and the render settings, so a second ship of an
+// unchanged page reads its answer from the scratch folder.
+async function frameSubframes(page, job) {
+  const { pagePath, frame, frames, fps, from, blur } = job;
+  const files = [path.dirname(path.resolve(pagePath)), path.join(REPO_ROOT, 'core')];
+  const key = createHash('sha1').update(JSON.stringify([treeSignature(files), path.resolve(pagePath), frame, frames, fps, from, blur])).digest('hex').slice(0, 16);
+  const cacheFile = scratch('render-prepass', `${key}.json`);
+  try { return JSON.parse(fs.readFileSync(cacheFile, 'utf8')); } catch { /* not cached yet */ }
+  const kArr = await measureSubframes(page, job);
+  fs.writeFileSync(cacheFile, JSON.stringify(kArr));
+  return kArr;
+}
+
 // Returns bucketed subframe counts per output frame.
-async function frameSubframes(page, pagePath, frame, frames, fps, from, blur, workers) {
+async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
   if (boxes) return clampSegments(bucketize(boxes, blur, BOX_BANDS));
   return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers), blur, PIXEL_BANDS));
@@ -248,7 +266,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     for (let j = 0; j < k; j++) {
       await seekAll(page, baseMs + (j / k) * (1000 / fps));
       const idx = subframeStart[i] + j;
-      await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`) });
+      await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`), type: 'png', optimizeForSpeed: true });
       onSubframe();
     }
     return k;
@@ -466,7 +484,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
 
     const workers = opts.workers || defaultWorkers();
     const tPre = Date.now();
-    const kArr = blur > 1 ? await frameSubframes(page, pagePath, frame, frames, fps, from, blur, workers) : Array(frames).fill(1);
+    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) : Array(frames).fill(1);
     const subframeStart = new Array(frames + 1);
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
