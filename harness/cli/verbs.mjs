@@ -59,12 +59,13 @@ export const VERBS = [
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
       { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait at most 100 s for the background job' },
       { name: 'status', type: 'bool', help: 'print the progress or the result of a background render' },
+      { name: 'profile', type: 'bool', help: 'print a cost table: frames, subframes, screenshots, capture and encode seconds, the 5 costliest seconds' },
     ],
     example: 'vawe ship films/my-launch/page.html --aspect all   (then: vawe ship --status --wait)',
     build: (v, [page]) => {
       if (v.status) return [{ script: 'harness/media/ship-job.mjs', args: ['status', ...(page ? [page] : []), ...(v.wait ? ['--wait'] : [])] }];
       if (!page) throw new UsageError('missing <page>; usage: vawe ship <page> [flags]  or  vawe ship --status [job]');
-      const args = [page, ...(v.out ? [v.out] : [])];
+      const args = [page, ...(v.out ? [v.out] : []), ...(v.profile ? ['--profile'] : [])];
       if (v.wait) return [{ script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
       return [{ script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },

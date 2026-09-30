@@ -1,5 +1,5 @@
 // How far the fastest visible edge of an animated element moves between two samples. A box row is
-// [x, y, w, h, angleDeg, clipTop, clipRight, clipBottom, clipLeft] in screen px (box-track 'animated').
+// [x, y, w, h, angleDeg, clipTop, clipRight, clipBottom, clipLeft, loops] in screen px (box-track 'animated').
 
 /** Runs inside the page: the element's own turn and its inset() clip in screen px, for a box of r. */
 export function turnAndClip(el, r) {
@@ -33,13 +33,21 @@ export function edgeTravel(a, b) {
   return Math.max(slide, sweep);
 }
 
+// A looping animation jumps back a whole period when it wraps; that jump is a teleport, not motion, so a
+// step across a wrap (row[9], the loop count, changes) takes the element's travel from the step before.
+const wraps = (a, b) => (a[9] ?? 0) !== (b[9] ?? 0);
+
 /** Per step, the largest edge travel of any element between two samples, in CSS px. Pure. */
 export function edgeTravelDeltas(tracks) {
   const steps = Math.max(0, ...tracks.map((t) => t.length)) - 1;
   const out = [];
   for (let k = 1; k <= steps; k++) {
     let d = 0;
-    for (const t of tracks) if (t[k] && t[k - 1]) d = Math.max(d, edgeTravel(t[k - 1], t[k]));
+    for (const t of tracks) {
+      if (!t[k] || !t[k - 1]) continue;
+      if (!wraps(t[k - 1], t[k])) d = Math.max(d, edgeTravel(t[k - 1], t[k]));
+      else if (k >= 2 && !wraps(t[k - 2], t[k - 1])) d = Math.max(d, edgeTravel(t[k - 2], t[k - 1]));
+    }
     out.push(d);
   }
   return out;
