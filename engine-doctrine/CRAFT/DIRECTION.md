@@ -1,410 +1,117 @@
 ---
-when: it "reads amateur" though every layer renders fine
-answers: "the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it"
+when: a film reads amateur though every element renders fine
+answers: "the direction spine: Disney's principles for type and graphics · Murch's Rule of Six · pacing · restraint · story placement · the eye path · a pre-ship checklist"
 group: crosscutting
-codes: pace-not-chosen, pace-not-kept, pacing, archetype-repeat, no-peak, preset-monotony, never-adopted, similarity-same, similarity-close, eye-missing, eye-unresolved, eye-device-untargeted, eye-competing-focal-points
-applies-when: always
-confirm: "where is the restraint, and what does the spectacle beat earn against it?"
 ---
 
 # DIRECTION: the spine that turns effects into a directed film
 
-## AGENT SUMMARY
+The engine can do almost anything, so an author reaches for more and ships "lots of effects" instead of
+a directed piece. This file states pacing, restraint and story placement as principles from the craft's
+literature, each with a translation into a page. Every rule is `[eye]`: no check can see it. Judge it
+with `bin/vawe critique` in a fresh session and your own eyes. If your eye catches a flaw, fix it
+(`../JUDGE.md`).
 
-- Direct every beat with the spine below: ease every start/stop with intent, vary timing and rhythm, keep restraint (one motion idea per beat, effects as seasoning), and place beats hook -> build -> payoff.
-- Enforced by `[gated]` direct checks (codes: `pace`, `pace-not-chosen`, `pace-not-kept`, `pacing`, plus `effect-soup`, `monotone-timing`, `dead-final-frame`, `enter-and-retreat`, `linear-motion`, `cut-families`, `continuity`) and by `[eye]` + `make judge` where no static gate can see the call.
-- Checkable action: where is the restraint, and what does the spectacle beat earn against it?
+The mechanics of which curve and which cut live in `../MOTION-CRAFT.md`. Register-dependence of restraint
+is in `MOTION-REGISTERS.md`. Read that first for a kinetic or hype film.
 
-The engine can do almost anything. That is the problem: with every primitive available, an author
-reaches for *more* and ships "lots of effects" instead of a directed piece. This file is the missing
-spine (**pacing, restraint, and story placement**) stated as principles from the craft's real
-literature, each with a checkable translation into a scene JSON. It is the answer to *"why does this
-read as amateur when every layer renders fine?"*
+## 1. First principles of motion (Disney's twelve, the ones type and graphics obey)
 
-Every rule is tagged:
-- **`[gated]`**: a gate catches it mechanically (named in the rule). Run `make dev-tool X=author-check D=<file>`.
-- **`[eye]`**: no static gate can see it; only `make judge` + your own eye. If your eye catches it,
-  it is a FIX, never a rationalization ([`../JUDGE.md`](../JUDGE.md)).
-
-> This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md), and it is the
-> *why*. The mechanics of *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md),
-> the copy-paste JSON in [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md), and the accusing version of
-> §1 and §2 in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails", which forbids by name the defaults an
-> author here reaches for: one ease everywhere, one duration everywhere, one entrance direction
-> everywhere, everything starting at t=0, entrances slower than exits. Read the guardrails first; read
-> this when you need to know why they are the guardrails.
-
-> **The fastest way to obey all of this: compose from [`recipes/`](../../recipes/README.md)**,
-> directed motion measured off a real film, so you start from directed motion instead of a blank
-> `rise`+`fade`. **The two-sided guard:** `effect-soup` (in `make dev-tool X=direct`) is the ceiling, too much,
-> undirected; the **ambition floor** (a retired gate, doctrine below) was the floor, too plain, a
-> slideshow, and its hardest checks (`no-continuous-object` among them) used to block on every
-> `make dev-tool X=author-check` run, not only under `TASTE=1`. A directed video sits between them.
-
-## 1. First principles of motion (Disney's 12, only the ones type/graphics obey)
-
-| Principle | One line | JSON translation | Tag |
-|---|---|---|---|
-| **Slow in / slow out** | Nothing STARTS or STOPS instantly. | A move from rest to rest eases: entrances decelerate (ease-out), exits accelerate (ease-in). A constant rate is right where there is no rest to ease, so `ease:"linear"` is CORRECT for a pan, a scroll, a marquee, a progress ring, a spinner and an ambient drift. | `[gated]` direct: `linear-motion` (warns, never blocks) |
-| **Timing** | Frame count = weight and meaning. | A title (heavy) enters slower (0.5-0.7s) than a caption (0.25-0.4s). Never one global duration. | `[gated]` direct: `monotone-timing` (warns, never blocks) |
-| **Spacing** | How distance spreads across frames is the ease's texture. | Prefer overshoot/settle (`snap`, `easeOutBack`, `spring`) over flat ramps for entrances. | `[eye]` |
-| **Anticipation** | A small opposite wind-up readies the eye. | Before a hero scale-up, dip ~2-4% (or nudge back ~8px) for ~4 frames. Hero moments only. | `[eye]` |
-| **Follow-through / overlap** | Parts don't stop at once; they trail and stagger. | THREE mechanisms, at three scopes, and this row named only the weakest. Between SIBLINGS: stagger 60-120ms, never one frame. Between LAYERS: `modifiers:[{lag:"card"}]`, which carries the leader's offset late and overruns its stop. Within ONE layer: `motionDelay:{scale:0.08,rot:0.12}`, so scale finishes after position, which is Williams' successive breaking of joints and the thing 138 of 283 motion tracks could not say. Overshoot-and-settle on arrival (~5-10% past) is arrival, not follow-through. | `[eye]` (stagger partly in `motion-audit`) |
-| **Staging** | One clear idea per shot; one focal point. | One headline-scale message per beat; everything else subordinate in size/opacity/motion. | `[eye]` + `[gated]` critique: `scattered-beat` |
-| **Secondary action** | A supporting motion that never competes. | At most one quiet secondary motion per beat (bg drift, glow, cursor), lower-contrast, offset in time. | `[eye]` |
-| **Exaggeration** | Push the key beat past literal so it reads at a glance. | On the payoff, push scale and hold longer than "correct"; keep the rest restrained so it reads. | `[eye]` |
-| **Appeal** | Clear, charismatic, uncluttered. | Committed face, real brand colour, generous negative space, strong scale contrast. Murk/overlap kills it. | `[gated]` `make check GATE=audit` + `designspec` (slop was retired in 2026-08) |
-
-### Straight-ahead, solid drawing, squash and arcs in this engine
-
-*Straight-ahead*, as a PROCESS, cannot exist here: `renderFrame(n)` is a pure function of the frame
-number, so nothing can be discovered by drawing in order, and that purity is the engine's founding rule.
-But the distinction the principle actually draws is between motion planned as POSES and motion that
-emerges from a RULE, and this engine has both. Pose-to-pose is the `motion` track. Straight-ahead is
-everything computed per frame from local time with no keys at all: a `shader` or `raymarch` surface, the
-`effector` track (one travelling point, every child reacting to its distance), an `idle`, and any
-hand-written fragment driving geometry off `var(--t)`. Reach for the second when the motion is a
-behaviour rather than a path, and note that the two compose: `parts` can bring a grid in pose-to-pose and
-an effector can then wash across it.
-
-*Solid drawing* is weight, volume and consistent dimension, and the engine expresses all three: the
-`depth` registry and `modifiers` (`plane`, `tilt`, `kick`) put a layer in space rather than on a plane,
-`three` scenes carry real geometry with a light, and `track` keyed over time lets one thing pass BEHIND
-another mid-shot. What has no form here is the draughtsmanship half: nobody is drawing a figure, so
-"does the volume hold as it turns" is a question about a `three` scene, not about your linework.
-
-*Squash-and-stretch and arcs* both apply here, per [AFTER-EFFECTS-TECHNIQUES.md](AFTER-EFFECTS-TECHNIQUES.md):
-
-| Principle | Here | How |
+| Principle | One line | On a page |
 |---|---|---|
-| **Squash and stretch** | **shipped** | the `squash` modifier, scaling non-uniformly off the layer's own velocity with the reciprocal kept, so it deforms rather than zooming. Wrong for anything with a rigid identity: a logo that squashes is a damaged logo |
-| **Arcs** | **shipped, with one limit** | `ease: "through"` rounds the corner AT an interior key, so a polyline of keys becomes a curve: a three-key apex turns 22 degrees where `linear` turns 66 (`core/timeline/sequence.js:349`). It cannot bow a TWO-key segment, which is what AE's spatial bezier does. For that, `motionPath` (`core/timeline/motion-ir.js`, `core/motion/path-curves.js`), a different mechanism on a different clock that cannot combine with a keyed track |
+| Slow in, slow out | Nothing starts or stops instantly. | Entrances decelerate, exits accelerate. A constant rate is right where there is no rest to ease: a pan, a scroll, a marquee, a progress ring, an ambient drift. |
+| Timing | Frame count is weight and meaning. | A heavy title enters slower (0.5 to 0.7 s) than a caption (0.25 to 0.4 s). Never one global duration. |
+| Spacing | Where distance falls across frames is the ease's texture. | Arrive fast, land soft (`approach`, a critically damped spring) over a flat ramp. Bouncy overshoot is a banned default (`AGENTS.md`). |
+| Anticipation | A small opposite wind-up readies the eye. | Before a hero scale-up, dip 2 to 4 % for about 4 frames. Hero moments only. |
+| Follow-through, overlap | Parts trail and stagger. | Siblings: stagger 60 to 120 ms, never one frame. Layers: a child lags its parent 1 to 3 frames and overruns the stop. Within one element: scale finishes after position. |
+| Staging | One idea per shot, one focal point. | One headline-scale message per beat, the rest subordinate in size, opacity and motion. |
+| Secondary action | A support that never competes. | At most one quiet secondary motion per beat (background drift, glow), lower contrast, offset in time. |
+| Exaggeration | Push the key beat past literal. | On the payoff, push scale and hold longer than correct. Keep the rest restrained so it reads. |
+| Appeal | Clear, charismatic, uncluttered. | A committed face, real brand colour, generous negative space, strong scale contrast. |
 
-## Directing the eye: every device names its target
+Squash and stretch: scale non-uniformly along the travel with the reciprocal on the other axis, so volume
+holds. Wrong for a logo or text (`AFTER-EFFECTS-TECHNIQUES.md`). Arcs: bow a travel over about 100 px.
+Straight-ahead motion (a shader, `seek(t)` math, a noise field) suits behaviour; pose-to-pose keyframes suit
+a path. They compose.
 
-A colour flash, a word-by-word reveal, a camera push, a cursor, contrast, size, a blur-to-sharp focus
-pull, all of them exist for the same reason: to point the viewer's attention somewhere. Per-word colour
-is not decoration on top of the words, it is how the eye is walked through a phrase to its key word.
-The plan has to say where each device points, or the device is a guess wearing a decision's clothes.
+Sources: Thomas and Johnston, The Illusion of Life (1981); Shaw, Design for Motion (2020); School of Motion,
+"12 Principles for Motion Design".
 
-- **One landing per moment.** Google's own choreography guide states the rule under this whole engine's
-  motion system: *"Maintain a clear focal point during transitions by carefully selecting the number and
-  type of elements shared across the transitions"* (Material, quoted in full in
-  [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md#layering-life-and-handoffs)). Two devices pulling toward two
-  different places in one beat is not two ideas, it is no read at all: state which pulls first.
-- **The order of pulls is planned.** Cursor or motion moves before colour or size settles the eye,
-  because a moving thing recruits attention before a static contrast does (the same primary-before-
-  secondary ordering `MOTION-CRAFT.md`'s "Layering, life and handoffs" already states for WHAT moves;
-  this is the same ordering applied to WHERE the eye is pulled).
-- **Per-word colour walks the eye, it never just decorates.** A colour flash on every word with no
-  destination is wallpaper; a colour flash that walks in reading order to the key word is direction. The
-  test is the same one §3 already applies to a layer's motion: say out loud what the colour is FOR, in
-  one clause. "It walks the eye to launch film" passes. "It's on-brand" does not.
-- **Measured, not asserted, when a human/agent judge does the measuring.** Where the eye actually is at a
-  cut (Murch's Rule of Six, §2 above, the 7% eye-trace term) and where the measured primary motion region
-  ends against what the plan's `eye:` line said would be there were both gate-scored once
-  (`eye-trace.mjs`, `choreo.mjs`); both were TASTE gates and are retired (`engine-doctrine/SAFEGUARDS.md`).
-  Read the frame or the render, never guess.
+## 2. Directing the eye: every device names its target
 
-Storyboard grammar: a film names its whole journey once, `attention:` in the frontmatter (one sentence:
-the path the eye travels across the film); a beat names its own leg, `eye: <where it starts> -> <what
-pulls it, naming the device> -> <where it lands>` (`harness/lib/contract.mjs parseEyeLine`). WARN only
-(`quality/gates/storyboard-check.mjs`): a beat with motion and no `eye:` line, a device named in the
-beat's own fields that the `eye:` line never targets, and two devices in one `eye:` line pulling to
-different landings with no stated order.
+A colour flash, a word-by-word reveal, a camera push, a cursor, contrast, size, a blur-to-sharp focus pull:
+each exists to point attention somewhere. The plan says where each device points, or the device is a guess.
 
-## 2. Editing & pacing, rhythm is the direction
+- **One landing per moment.** Two devices pulling to two places in one beat is no read at all. State which
+  pulls first. (Material choreography: keep a clear focal point through a transition.)
+- **The order of pulls is planned.** Motion recruits attention before a static contrast does, so the cursor
+  or move goes first and colour or size settles it.
+- **Per-word colour walks the eye.** A flash on every word with no destination is wallpaper. A flash that
+  walks in reading order to the key word is direction. Say what the colour is for in one clause: "it walks
+  the eye to the product name" passes, "it is on brand" does not.
+- **State the eye path.** Where the eye starts, what pulls it (name the device), where it lands, per beat.
+  `EYE-TRACE.md` has the rules for cuts.
 
-**One global speed dial**: a scene-level `tempo` (1 = unchanged, 0.85 = 15% slower) scales every
-authored time at once, resolved in `core/engine/tempo.js`. Preview it with `make check GATE=pace D=<file>
-TEMPO=<n>` before committing. It is a global correction, not a substitute for the per-beat rhythm
-variety below; footage and the audio bed keep their own native rate regardless of tempo.
+## 3. Editing and pacing: rhythm is the direction
 
-- **The Rule of Six**. A cut serves, in priority: **emotion (51%) · story (23%) · rhythm (10%) ·
-  eye-trace (7%) · screen plane (5%) · spatial continuity (4%)**. Emotion dominates; spatial logic is
-  nearly worthless. → Cut/transition to serve the feeling and the beat first. When a move and the
-  meaning fight, keep the meaning. `[eye]` The 7% item was MEASURED, report-only, by a since-retired
-  gate; see [`EYE-TRACE.md`](EYE-TRACE.md) for the doctrine a judge now applies by hand.
-- **Cut on motion / the blink**: the eye accepts a cut on a movement or a natural attention-blink. →
-  Change beats on an action (a word lands, a count finishes), never in a dead hold. `[eye]`
-- **Rhythm variety**: uniform beat lengths deaden. → Alternate short punchy beats (0.8-1.5s) with
-  longer breathing beats (2-3s); the payoff is the longest. `[gated]` direct: `pacing`, `monotone-timing`
-- **The hold between moves**: motion needs stillness to read; a beat where everything moves is chaos.
-  → After a layer settles, hold it still ≥0.4-0.6s before the next move. Every beat has a resting
-  state where the copy is fully legible. `[eye]` (+ `make check GATE=audit` reads legibility)
-- **Accelerate toward the climax**: tighten cutting through the build, then release on the payoff. →
-  Shorten beats through the middle; the final held frame is the release. `[gated]` direct: `dead-final-frame`
+- **Rule of Six (Murch).** A cut serves, in priority: emotion 51 %, story 23 %, rhythm 10 %, eye-trace 7 %,
+  screen plane 5 %, spatial continuity 4 %. Serve the feeling and the beat first. When a move and the
+  meaning fight, keep the meaning. Sacrifice from the bottom.
+- **Cut on the beat, or two frames early**, on an action (a word lands, a count finishes), never in a dead hold.
+- **Vary the rhythm.** Alternate short punchy beats (0.8 to 1.5 s) with breathing beats (2 to 3 s). The
+  payoff is the longest (`../RULES/speed-bands.md`).
+- **The hold between moves.** Motion needs stillness to read. After an element settles, give it 0.4 to
+  0.6 s before the next move. Every beat has a resting state where the copy is fully legible, and the world
+  keeps moving there.
+- **Accelerate toward the climax.** Tighten cutting through the build, release on the payoff.
+- **Read the shape of the energy, not only its height.** Bruce Block, The Visual Story: a film's visual
+  intensity should establish its rules, escalate through the conflict and resolve against what was
+  established. A film whose loudest frame sits in the middle ends twice. Judge the curve by eye. A
+  threshold would flag every film that chose a quiet ending.
 
-**Look at the shape, do not only feel it.** The rule above is a judgement and until now it had nothing
-to look at. `node quality/gates/motion-split.mjs <scene.json>` now prints the film's energy over time as
-a sparkline of the LAYERS alone, with the cuts and seams ruled under the column they land in:
+## 4. Restraint: the biggest amateur versus pro tell
 
-```
-  THE FILM'S ENERGY OVER TIME · 54 samples of the layers, the ground removed
+- **One motion idea per beat.** A dolly, or a colour wave, or a stagger, not all three.
+- **Two properties on one element make one claim.** Slide up plus fade is "arriving". Rise plus rotate is
+  arriving and tumbling: two claims about one object, and the viewer's reconciling reads as amateur. Say what
+  the element is doing in one clause. If it needs an "and" between unrelated verbs, drop one.
+- **Effects are seasoning.** Two or three earned moments per film. Content and proof beats stay clean.
+- **One cut family per film.** Rotate inside a family (soft, motion, shape, spatial). Mixing families
+  announces edits.
+- **Continuity over slideshow.** Something carries across each cut (`FILM-STRUCTURE.md`).
+- **Paired directional exits.** A layer that enters from one side exits the opposite side, in one direction
+  of travel. Enter-and-retreat is the tell.
+- **Blur out when moving would fight the content.** Faces, cards and dense grids leave through focus, not
+  through space. Sliding 50 elements is chaos.
+- **Name three, reject the first.** Before you pick a beat's technique, name three ways to do it and reject
+  the first: it is the median. "How could this beat show its claim: a capture, the real data, a counter that
+  ticks, a hand-keyed reveal?" The first answer is rise plus fade. The third is usually the film. A
+  post-trained model returns its safe default unless asked to diverge.
 
-    ▁▂▂▃▂▁▁▁▁▁▁▂▁▆▃▃▂▁▁▁▁▁▁▁▂▁▂▁█▅▂▁▁▂▁▂▁▁▆▂▂▂▁▂▁▂▁▁▂▁▂▁▁▂
-                  │             │         │
-    0s                                               10.8s   │ cut or seam · sting
-```
+## 5. Story placement
 
-The source is Bruce Block, *The Visual Story*: a film's visual intensity should establish the visual
-rules, escalate through the conflict, and resolve against what was established. So read the SHAPE, not
-the height. A film whose loudest frame sits in its middle ends twice, and the sample above is one:
-its peak is at 5.6s of 10.8s and everything after it is quieter than the beat before. The ground is
-removed on purpose, because a backdrop that churns for the whole runtime flatters the curve exactly as
-much as a moving subject does.
+- **Hook, build, payoff.** Beat 1 poses, the middle escalates, the last beat pays off.
+- **Open loop.** An unanswered question holds attention. The hook withholds the answer and the payoff pays it.
+- **Never spoil the payoff.** The most counterintuitive number is the last beat.
+- **Front-load the strong element.** The first 3 s decide whether they stay. First frame 12 words or fewer,
+  strongest word first.
+- **Build to a shocker.** Order the middle by rising surprise.
+- **Tension and release.** The payoff gets the longest hold and the biggest scale.
+- **Honesty.** On-screen copy is literally true and the hook's promise is paid. Real numbers only.
+- **Value test.** Every beat earns its time or is cut.
 
-**Nothing scores this and nothing will.** A film can be right and fall: a quiet ending is a choice, and
-a threshold on this curve would manufacture a finding on every film that made it. Two gates here have
-been deleted for measuring a proxy for a judgement ([`../TASTE.md`](../TASTE.md)), and the printer says
-so in its own comments so the next author does not add the teeth back.
+Sources: McKee, Story (1997); Snyder, Save the Cat; Loewenstein, The Psychology of Curiosity (1994);
+Ogilvy on Advertising; Murch, In the Blink of an Eye (2001); Reisz and Millar, The Technique of Film Editing.
 
-## 3. Restraint, the single biggest amateur-vs-pro tell, and it has TWO answers
+## 6. Pre-ship checklist
 
-**Read [`MOTION-REGISTERS.md`](MOTION-REGISTERS.md) before applying anything below.** The rules in
-this section were stated as universal and are not: they are correct for the UI-adjacent / quiet
-explainer register, where motion is a cost the viewer pays for legibility (NN/g, Apple's HIG), and
-backwards for kinetic typography, hype/launch promos and continuous title sequences, where sustained
-motion IS the content and stillness is the cost (kinetic-typography practice, beat-synced editing, the
-Saul Bass / Kyle Cooper title-sequence tradition). **Both films this file argues from,
-a continuous-action recreation and `brew-launch-act1`, sit in the second register**, so read their numbers in
-§1 above as evidence for sustained motion, not as an exception to a quiet-by-default rule. Pick the
-register from `harness/author/type-spines.mjs`'s `register` field (`kinetic` or `quiet`) before judging
-a beat against the list below; a `kinetic`-register film with every beat moving differently is directed,
-not effect soup, and a `quiet`-register film held to the same density is undirected.
-
-- **One motion idea per beat.** A dolly, OR a colour-wave, OR a stagger, not all three. Stacking them
-  is maximalism that reads as a demo reel, not a film. `[gated]` direct: `effect-soup`
-- **Two properties on one layer must make ONE claim.** This is the finer cut of the rule above, and it
-  is about a single element rather than a beat. *"A confirmation that slides up AND fades in reads as one
-  idea: this is arriving. A sheet that rises AND rotates makes two unrelated claims about one object."*
-  Rise plus fade is arriving. Rise plus rotate is arriving and also tumbling, which is two things the
-  viewer has to reconcile about one object, and the reconciling is what reads as amateur.
-  The test is a sentence: say out loud what the layer is doing, in one clause. If the clause needs an
-  "and" joining two unrelated verbs, drop one. `slide-up` + `fade` passes. `slide-up` + `spin` does not.
-  **No gate can hold this** and none should try: whether two properties say the same thing is a semantic
-  judgement, and a gate that guessed would manufacture findings on every deliberate exception. It is
-  yours, and it costs one sentence to check.
-  Borrowed from a reference system whose films measurably read better than ours (`../MISTAKES.md`).
-- **Effects are seasoning, not wallpaper.** 2-3 earned moments across a film, not a texture on every
-  beat. Content/proof beats stay clean so the content reads. `[gated]` direct: `effect-soup`
-- **One cut family per film.** Rotate *within* a family (soft/motion/shape/spatial); mixing families
-  announces edits. `[gated]` direct: `cut-families` (≥3 = FAIL)
-- **Continuity over slideshow.** Something should carry across a cut so the beats connect instead of
-  clicking past. A layer spanning the boundary is one way; a match cut, a motif, a held cut rate or an
-  unfinished sentence are others, and none of them is a lesser answer ([`FILM-STRUCTURE.md`](FILM-STRUCTURE.md)).
-  `[gated]` direct: `continuity`, which sees only the first kind.
-- **Paired directional exits.** A layer that enters from a side exits the *opposite* side, one
-  continuous direction of travel. Enter-and-retreat (in from right, out to right) is the tell.
-  `[gated]` direct: `enter-and-retreat`
-- **Blur out when moving would fight the content.** Faces, cards, dense grids leave through focus
-  (`out:"defocus"`), not through space; sliding 50 elements is chaos. `[eye]`
-
-## 4. Story placement, the beats, in the right order
-
-The applied spine lives in [`STORY.md`](STORY.md); §"Provenance" below carries its sources and laws.
-
-- **Hook → build → payoff.** Every film is setup, escalation, release. Beat 1 poses; the middle
-  escalates; the last beat pays off. `[eye]`
-- **Open loop / curiosity gap.** An unanswered question holds attention. The hook withholds the
-  number/answer; it lands only at the end. `[eye]`
-- **Never spoil the payoff.** The most counterintuitive fact/number is the LAST beat; nothing earlier
-  states it. `[eye]`
-- **Front-load the strong element.** The first ~3s decide whether they stay. First frame ≤ ~12 words,
-  strongest word first, ≤1 emoji. `[gated]` validate (hook length) + `[eye]`
-- **Build to a shocker.** Order the middle by increasing surprise; the "no way" moment is final. `[eye]`
-- **Tension and release.** The payoff gets the longest hold and biggest scale, the release the build
-  earned. `[gated]` direct: `dead-final-frame` + `[eye]`
-- **Honesty / earned attention.** On-screen copy must be literally true; the hook's promise must be
-  paid. Real, accurate numbers only. `[gated]` critique: `unbacked-claim`/`false-claim` + `[eye]`
-- **Value test.** Every beat earns its time, or it is cut. `[eye]`
-
-## 5. The pro-vs-amateur checklist (run this before shipping)
-
-Each is concrete. `[gated]` ones are in `make dev-tool X=author-check`; `[eye]` ones are yours + `make judge`.
-
-1. **A move that starts and stops eases at both ends.** A move with no rest to ease (a pan, a scroll, a spinner, a drift) runs at a constant rate on purpose, and curving it is the defect. The gate reads the whole RUN, not the key: entered or left in motion, or spaced so the keys already decelerate, and it stays quiet. `[gated]` `linear-motion`
-2. **No uniform tempo.** Durations and stagger vary with intent. `[gated]` `monotone-timing`, `pacing`
-3. **Overshoot-and-settle in ~0.2-0.3s on entrances.** Flat ease-out reads as a stock template. `[eye]`
-4. **One hero + one tiny caption** (scale contrast ~5-8x), not three medium lines. `[eye]`
-5. **Hold on the payoff**: the final reveal gets the longest still hold. `[gated]` `dead-final-frame`
-6. **Enter and exit in one continuous direction.** `[gated]` `enter-and-retreat`
-7. **A resting state exists**, not everything moves at once; the copy is still long enough to read. `[eye]`
-8. **Exits accelerate, entrances decelerate.** (The engine bakes this into the clip driver; don't fight it.) `[gated]` `linear-motion`
-8a. **A constant rate is a decision, not a lapse.** `linear` is 41% of the eases in this library because the pan, the scroll and the progress ring are all constant by nature. Say which one yours is, then leave it flat.
-9. **Blur/defocus out** when sliding would fight faces/cards/grids. `[eye]`
-10. **One motion idea per beat**: effects are 2-3 earned moments. `[gated]` `effect-soup`
-
----
-
-## Reading `make dev-tool X=direct`: every finding carries a census
-
-Sixteen checks run in `harness/author/motion-director.mjs`; only two of them (`profile`, `cut-families`)
-can fail, the rest warn. Re-run the census before quoting a trip rate here, the library's scene count
-moves and a stale percentage reads as false precision.
-
-The rules did not change. What each finding now carries is two numbers.
-
-```
-~ [effect-soup] an effect on 10/13 beats ...
-    library: 6 of 135 films trip this. On its measure: yours an effect on 77% of beats,
-    the median of 134 films an effect on 0% of beats, and 4 films sit further out than yours.
-```
-
-The first number puts the RULE on trial. A code six films trip is a rule with teeth; a code fifty-two
-films trip is a rule the library has quietly voted on, and `waiver-drift.mjs` makes exactly this
-argument about waivers. The second number puts the FILM on a scale. An author told their tempo spread
-is 1.17x against a median of 1.91x, with five films flatter, knows what to do with the finding. An
-author told "uniform tempo reads as monotone" for the hundredth time does not.
-
-**Findings print most unusual first.** The order used to be whichever check happened to run first, so a
-code half the library trips could sit above the one finding worth acting on. The sort key is how far out
-this film is on that rule's own measure, or, for a rule with no scale, how few films trip it. Ties break
-on the code name, so two runs print the same report.
-
-### The census sets no target, and that is the point
-
-A census that became a target would push every film toward one rhythm, which is a worse library and not
-a better one. Three things keep it from doing that.
-
-- **It only annotates findings that already fired.** It cannot create one and it cannot clear one. Every
-  threshold sits exactly where it sat. A film that trips nothing is told nothing, so a clean film feels
-  no pull toward the median.
-- **It reports a position, never an aim.** "Five films are flatter than yours" is a fact about where you
-  stand. No line in the report says to move.
-- **The median is described as what has been made here.** Half this library is debt the same documents
-  say not to copy. The number is evidence about the rule, not a mark to hit.
-
-This is the same reasoning that keeps `pace-check`'s floor at the library's tenth percentile instead of
-its median: the aim is to catch a film that is asleep, not to make every film move at one speed.
-
-### The library view
-
-`node harness/author/motion-director.mjs` with no file prints the census on its own: how often each code
-fires, and the p10, median and p90 of the measure behind it. Use it to argue about a rule. It reaches no
-verdict and exits 0.
-
-## The ambition floor: neither soup nor slideshow (`direction-floor.mjs`, RETIRED)
-
-**RETIRED 2026-09, not demoted.** `direction-floor.mjs` was a TASTE gate under the OBJECTIVE/TASTE split
-(`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a film moves, never whether it was
-broken, so it was deleted rather than kept report-only. Its numbers are doctrine now, for a human or an
-agent judge to hold a film to by eye, not a script to enforce:
-
-- **plain-slideshow.** A film with no kinetic typography, no camera move, no transitions AND a motion
-  vocabulary under 2 distinct techniques reads as a slideshow outright. Short of that: 4+ headlines where
-  85%+ just fade/rise with no kinetic reveal is the plain-authoring tell on its own.
-- **low-vocab.** Fewer than 3 distinct motion techniques in play (kinetic type, camera, transitions,
-  count-ups, ken push, a cursor demo, a custom motion track, a `composition` beat) leaves range unused.
-- **sparse-beats.** Past 8s of runtime, a boundary roughly every 3.5s is the floor (`ceil(duration / 3.5)`
-  beats): a 12s film needs about 4 beats, and two or three cards held for twelve seconds is a slideshow by
-  length, not a film.
-- **feature-poverty.** The engine holds about 15 expressive families; past 8s, a film should reach for
-  `min(6, 3 + floor(duration / 8))` of them. Reaching for three of the five things every other film already
-  leans on clears the count and is still a template (the "same shape as the last twenty" check, scored
-  against the library's own `libraryProfile()`, never a fixed list).
-- **flat-seams.** Every boundary riding one gentle speed (`smooth`/`linear`/`out`, no ramp/rush/brake) reads
-  same-y however many effects are used: vary the boundary's VELOCITY, not just its effect
-  (`engine-doctrine/CRAFT/TRANSITIONS.md`, the speed dial).
-
-None of this blocks a build any more. `make judge` and a human/agent eye are where a plain-slideshow film
-now gets caught, the same way `TASTE.md` already argues craft has to be judged, not metered.
-
-## no-continuous-object (and its inferred twin, RETIRED alongside direction-floor.mjs)
-
-**RETIRED 2026-09.** This device lived in `direction-floor.mjs`, the same TASTE gate as the ambition floor
-above, and was deleted with it (`engine-doctrine/SAFEGUARDS.md`). It no longer runs anywhere; the doctrine
-below is kept as a design device to reach for, not a check anything enforces.
-
-**Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of
-about eighteen that hold a short film together, it is the cheapest of them, and in Murch's own ranking it is
-the 4% item, the one he says to sacrifice first. It used to **block on every `make dev-tool X=author-check` run**,
-`TASTE=1` or not; a film exempt from it needed a waiver with a `_why`, never a flag. Reach for it when the
-film's CONTENT is continuous, which is a single-subject
-product film, a process shown end to end, or a demo where the UI is the subject. On a manifesto, a vignette
-anthology, a comparison built on its junctions, or a metric-cut list film it is wrong by construction.
-
-What it measures: one content layer that both spans a cut and CHANGES across it. Pose either side of the
-boundary is read with the engine's own pure functions, so a static watermark riding the cut buys nothing.
-
-A layer whose internal clock the gate cannot read is assumed to transform, because a gate must not invent a
-failure out of something it cannot see. A layer the engine confines to its own beat is not a candidate at
-all (see `beats-wrapped-as-units` below).
-
-**Used to block when the gate ran; no gate runs it now.**
-
-`no-continuous-object-inferred` was the same test where the author declared no cuts at all. An island
-boundary is a moment where at least two content layers leave and at least two unrelated ones arrive, and the
-layers standing through it do not outnumber either side. It existed because three films authored on one brief
-declared zero cuts between them, so the blocking tell evaluated none of them, including a textbook slideshow
-(MISTAKES #163). It used to **warn**, and block under `STRICT=1`: failing a build over a boundary the author
-never wrote is a bad error to be wrong about, and the threshold that separates the exemplar from the
-slideshow is a single integer validated against four films.
-
-**What neither tell can see.** Both measure that a prop survives a junction and moves. Neither can tell a
-card that travels from a card that BECOMES the next thing, which is the actual grammar. Two of the A/B films
-pass on that technicality. Neither can see a motif, a bookend, a metric cut rate or an unfinished sentence at
-all, and a film held by those is properly structured and fails here every time.
-
-A layer the engine confines to its own beat is not a candidate at all: see below.
-
-## beats-wrapped-as-units (always on, in `make check GATE=beat-check`)
-
-Not a taste rule. Every cut film wraps its beats as units (not a mode: there is no flag to turn this off), and
-`films/scene/scene.js` rewrites every non-last-beat layer to end with its own beat so the
-wrapper can slide the beat out as one block. A layer authored across a cut is **truncated at it**, silently.
-`make check GATE=beat-check` names every layer the wrapping actually shortens and by how much. Mark the one layer that
-should carry the film `"acrossBeats": true` and it attaches to the camera instead of its beat, keeping its
-authored window. It **warns** (blocks under `STRICT=1`): truncation is a fact about the render, and whether
-it is a defect depends on whether you meant the layer to live past the cut.
-
-## beats-held-open (always on, in `make check GATE=beat-check`)
-
-The same rewrite read the other way. `setLayerTiming` **replaces** the authored duration; it does not keep
-the shorter of the two. So a layer written to leave at 2.0s inside a beat that runs to 9.4s stays on screen
-for the whole beat, and the frame holds content the JSON says has already gone. Carrying a layer through its
-own beat's cut window is the wrapper's job and is never reported; what is reported is the excess, measured
-against the same 0.4s this gate calls the line where a held frame stops reading as a breath. Same two
-answers as above: write `duration` to say what you meant, or mark the layer `"acrossBeats": true` to keep
-the authored window (it then fades out on its own instead of sliding with the beat). It **warns**.
-
-## scene-units-exit-suppressed (always on, in `make check GATE=beat-check`)
-
-The same wrapping also forces a non-last-beat layer's own `exitDur` to 0 and hands its exit to the beat's
-cut instead (`films/scene/scene.js` `setLayerTiming`), so an authored `out` on that layer silently never
-plays; `make check GATE=beat-check` names every layer this happens to, and `"acrossBeats": true` is the
-same way out. It **warns**.
-
-## Provenance
-
-**Do not re-add:** a claim that straight-ahead action, solid drawing, squash-and-stretch or arcs have no
-form in this engine. §1 states the live mechanism for each (the `squash` modifier, `ease:"through"`,
-`motionPath`, the `effector`/`shader`/`raymarch`/`idle` tracks, the `depth`/`modifiers`/`three`/`track`
-family).
-
-**Per-section sourcing**, moved here from the top of each numbered section above:
-
-- §1 First principles of motion. Source: **Thomas & Johnston, _The Illusion of Life: Disney Animation_
-  (1981)**, the 12 principles; motion-graphics adaptation from **Austin Shaw, _Design for Motion_
-  (2020)** and **School of Motion, "12 Principles for Motion Design."**
-- §2 Editing & pacing. Source: **Walter Murch, _In the Blink of an Eye_ (2001)**; edit-rhythm from
-  **Reisz & Millar, _The Technique of Film Editing_.**
-- §3 Restraint. Source: **School of Motion; Shaw ("less, but better")**; enforced locally in
-  [`TASTE-RULES.md`](TASTE-RULES.md).
-- §4 Story placement. Source: **McKee, _Story_ (1997)** (setup/turn/payoff, rising action,
-  tension/release); **Snyder, _Save the Cat!_** (hook-first, escalation); **Loewenstein, "The
-  Psychology of Curiosity" (1994)** (the open loop); **Ogilvy, _Ogilvy on Advertising_** (front-load,
-  honesty).
-
-**Full bibliography**, gathered from every "Source:" line above:
-
-- Thomas & Johnston (_The Illusion of Life: Disney Animation_ (1981)) the 12 principles.
-- Walter Murch (_In the Blink of an Eye_ (2001)) the Rule of Six, cut-on-motion, emotion-first.
-- Austin Shaw (_Design for Motion_ (2020)) the motion-graphics adaptation, type-in-motion.
-- Jon Krasner (_Motion Graphic Design: Applied History and Aesthetics_) negative space, holds.
-- School of Motion ("12 Principles for Motion Design") the practitioner translation.
-- Google Material Design (Motion guidelines) asymmetric easing, duration-by-distance.
-- Robert McKee (_Story_ (1997)) setup/turn/payoff, rising action, tension & release.
-- Blake Snyder (_Save the Cat!_) hook-first, escalation.
-- George Loewenstein ("The Psychology of Curiosity" (1994)) the open loop / curiosity gap.
-- David Ogilvy (_Ogilvy on Advertising_) front-loading the strong element, honesty.
+1. A move that starts and stops eases at both ends. A pan, scroll or drift stays constant on purpose.
+2. Durations and stagger vary with intent.
+3. Entrances arrive fast and land soft in 0.2 to 0.3 s. A flat `ease-out` on everything reads as a stock template.
+4. One hero and one tiny caption (scale contrast 5 to 8x), not three medium lines.
+5. The payoff gets the longest hold.
+6. Each layer enters and exits in one continuous direction.
+7. A resting state exists and the copy is on screen long enough to read.
+8. Exits are faster than entrances.
+9. Dense content leaves through blur.
+10. One motion idea per beat, two or three earned effects per film.
