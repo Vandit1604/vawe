@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="duration" content="1">
 <title>move: caret typing</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --paper: #f4f1ea; --ink: #14161a; --accent: #2b5cff; }
-  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
-  body { display: grid; align-content: center; padding-left: 12vw; font: 500 12vh/1 ui-monospace, Menlo, monospace; color: var(--ink); }
+  .line { display: flex; align-items: center; gap: 0.6em; font: 500 calc(var(--u) * 12)/1 var(--mono); letter-spacing: -0.02em; }
+  .prompt { color: var(--faint); }
 
   /* the caret is the next flex item, so it moves with every character the text reveals */
   .type { display: inline-flex; align-items: center; }
@@ -23,7 +23,7 @@
 </style>
 </head>
 <body>
-<div class="type"><span class="text">vawe ship</span><span class="caret"></span></div>
+<div class="line"><span class="prompt">$</span><div class="type"><span class="text">vawe ship</span><span class="caret"></span></div></div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));

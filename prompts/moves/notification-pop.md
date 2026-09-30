@@ -7,12 +7,12 @@ about a second so the text can be read, then leaves faster than it came. Clip:
 [notification-pop.mp4](notification-pop.mp4). Demo: [demo/notification-pop.html](demo/notification-pop.html).
 
 ```html
-<div class="note">
-  <div class="app">...icon...</div>
-  <div class="text"><div class="title">Render finished</div><div class="body">launch-film.mp4, 12.4 s at 60 fps</div></div>
+<div class="note card">
+  <div class="chip accent-fill app">...icon...</div>
+  <div class="text"><div class="title">Render finished</div><div class="sub">launch-film.mp4, 12.4 s at 60 fps</div></div>
   <div class="when">now</div>
 </div>
-<style>.note { transform-origin: 50% 0; opacity: 0; box-shadow: 0 3vh 9vh rgba(0,0,0,0.45); }</style>
+<style>.note { transform-origin: 50% 0; opacity: 0; }</style>
 <script type="module">
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);

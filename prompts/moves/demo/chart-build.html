@@ -5,25 +5,22 @@
 <meta name="duration" content="2">
 <meta name="blank" content="0-0.05">
 <title>move: chart build</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --surface: #201f26; --line: rgba(255,255,255,0.09); --ink: #fff; --dim: #a9a8b2; --accent: #0a87ff; --bar: rgba(255,255,255,0.28); }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font-family: 'Archivo', sans-serif; color: var(--ink); }
-
-  .card { width: 138vh; padding: 5vh 6vh 4.6vh; border-radius: 3vh; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 3vh 8vh rgba(0,0,0,0.35); opacity: 0; }
+  :root { --bar: rgba(255,255,255,0.28); }
+  .card { width: calc(var(--u) * 158); padding: calc(var(--u) * 5.2) calc(var(--u) * 6.4) calc(var(--u) * 5.4); opacity: 0; }
   .head { display: flex; align-items: baseline; justify-content: space-between; }
-  .title { font: 700 5.2vh/1 'Archivo', sans-serif; letter-spacing: -0.02em; }
-  .range { font: 500 3.8vh/1 'Archivo', sans-serif; color: var(--dim); }
-  .plot { position: relative; height: 46vh; margin: 4.4vh 0 0 7.6vh; }
+  .title { font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.02em; }
+  .range { font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .plot { position: relative; height: calc(var(--u) * 46); margin: calc(var(--u) * 5.6) 0 calc(var(--u) * 6) calc(var(--u) * 9); }
   .grid { position: absolute; left: 0; right: 0; height: 1px; background: var(--line); transform-origin: 0 50%; }
-  .grid span { position: absolute; left: -7.6vh; top: -2vh; width: 5.6vh; text-align: right; font: 500 3.4vh/1 'Archivo', sans-serif; color: var(--dim); }
+  .grid span { position: absolute; left: calc(var(--u) * -9); top: calc(var(--u) * -2.2); width: calc(var(--u) * 7); text-align: right; font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
   .cols { position: absolute; inset: 0; display: flex; align-items: stretch; }
   .col { position: relative; flex: 1; display: flex; justify-content: center; align-items: flex-end; }
-  .bar { position: relative; width: 62%; height: 0%; border-radius: 1.2vh 1.2vh 0 0; background: var(--bar); }
-  .mo { position: absolute; top: 100%; margin-top: 1.8vh; font: 500 3.6vh/1 'Archivo', sans-serif; color: var(--dim); }
-  .tag { position: absolute; left: 50%; bottom: 100%; margin-bottom: 1.6vh; translate: -50% 0; padding: 1.4vh 2.2vh; border-radius: 1.2vh; background: var(--ink); color: #16151a; font: 800 4.4vh/1 'Archivo', sans-serif; white-space: nowrap; opacity: 0; transform-origin: 50% 100%; }
-  .tag::after { content: ''; position: absolute; left: 50%; top: 100%; margin-left: -1vh; border: 1vh solid transparent; border-top-color: var(--ink); border-bottom: 0; }
+  .bar { position: relative; width: 56%; height: 0%; border-radius: var(--r-chip) var(--r-chip) 0 0; background: var(--bar); }
+  .mo { position: absolute; top: 100%; margin-top: var(--s2); font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
+  .tag { position: absolute; left: 50%; bottom: 100%; margin-bottom: var(--s2); translate: -50% 0; padding: calc(var(--u) * 1.4) calc(var(--u) * 2.4); border-radius: var(--r-chip); background: var(--ink); color: var(--ground); font: 700 var(--t-body)/1 var(--sans); letter-spacing: -0.01em; white-space: nowrap; opacity: 0; transform-origin: 50% 100%; box-shadow: 0 calc(var(--u) * 1) calc(var(--u) * 3) rgba(0,0,0,0.35); }
+  .tag::after { content: ''; position: absolute; left: 50%; top: 100%; margin-left: calc(var(--u) * -1); border: calc(var(--u) * 1) solid transparent; border-top-color: var(--ink); border-bottom: 0; }
 </style>
 </head>
 <body>

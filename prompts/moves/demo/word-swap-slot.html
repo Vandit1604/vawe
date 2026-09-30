@@ -4,11 +4,10 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.8">
 <title>move: word swap slot</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; --row: 1.7; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 700 11vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+  :root { --row: 1.7; }
+  body { font: 700 calc(var(--u) * 11)/1 var(--sans); letter-spacing: -0.03em; }
   p { margin: 0; white-space: nowrap; }
 
   /* the window is exactly one row tall (1.7em), so descenders fit and the next word only shows mid-roll */

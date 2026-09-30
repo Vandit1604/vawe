@@ -4,20 +4,17 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.8">
 <title>move: pull back reveal</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --card: #22212a; --line: #33323d; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { position: relative; font: 600 3.4vh/1 'Archivo', sans-serif; color: var(--ink); }
-
-  .bg { position: absolute; left: -300vw; top: -300vh; width: 700vw; height: 700vh; transform-origin: 300vw 300vh; background: radial-gradient(#4d4c59 0.2vh, transparent 0.26vh) 0 0 / 4.4vh 4.4vh; }
+  body { display: block; position: relative; }
+  .bg { position: absolute; left: -300vw; top: -300vh; width: 700vw; height: 700vh; transform-origin: 300vw 300vh; background: radial-gradient(#3a3941 calc(var(--u) * 0.2), transparent calc(var(--u) * 0.26)) 0 0 / calc(var(--u) * 4.4) calc(var(--u) * 4.4); }
   .world { position: absolute; inset: 0; transform-origin: 0 0; }
-  .card { position: absolute; left: 20vw; top: 22vh; width: 60vw; height: 56vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 3vw; box-sizing: border-box; }
-  .status { display: flex; align-items: center; gap: 1.2vw; color: var(--dim); font-size: 3.2vh; }
-  .dot { width: 2.4vh; height: 2.4vh; border-radius: 50%; background: var(--accent); }
-  .card h1 { margin: 5vh 0 0; font-size: 15vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
-  .card p { margin: 2.4vh 0 0; font-size: 3.6vh; font-weight: 500; color: var(--dim); }
-  .meta { position: absolute; left: 3vw; right: 3vw; bottom: 4.6vh; display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 3vh; color: var(--dim); font-size: 3vh; }
+  .card { position: absolute; left: 20vw; top: 16vh; width: 60vw; height: 68vh; padding: calc(var(--u) * 5) calc(var(--u) * 5.6); }
+  .status { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .dot { width: calc(var(--u) * 2.4); height: calc(var(--u) * 2.4); border-radius: 50%; background: var(--accent); }
+  .card h1 { margin: calc(var(--u) * 4) 0 0; font: 700 calc(var(--u) * 16)/1 var(--sans); letter-spacing: -0.055em; }
+  .card p { margin: var(--s3) 0 0; font: 500 var(--t-lead)/1.25 var(--sans); color: var(--muted); max-width: 40ch; }
+  .meta { position: absolute; left: calc(var(--u) * 5.6); right: calc(var(--u) * 5.6); bottom: calc(var(--u) * 4.6); display: flex; justify-content: space-between; padding-top: var(--s3); box-shadow: 0 -1px 0 var(--line); color: var(--muted); font: 500 var(--t-body)/1 var(--sans); }
   .meta b { color: var(--ink); font-weight: 600; }
 </style>
 </head>
@@ -25,7 +22,7 @@
 <div class="bg"></div>
 <div class="world">
   <div class="card">
-    <div class="status"><i class="dot"></i>live now</div>
+    <div class="status"><i class="dot"></i>Live now</div>
     <h1>Shipped.</h1>
     <p>launch-16x9 reached 3 aspect ratios in 41 seconds</p>
     <div class="meta"><span><b>60</b> fps</span><span><b>1080p</b></span><span><b>-14</b> LUFS</span></div>

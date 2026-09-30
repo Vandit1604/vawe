@@ -4,24 +4,21 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.2">
 <title>move: whip pan</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { font: 600 3.6vh/1 'Archivo', sans-serif; color: var(--ink); }
+  body { display: block; }
 
   .strip { position: absolute; top: 0; left: 0; width: 200vw; height: 100vh; filter: url(#motion); }
   .shot { position: absolute; top: 0; width: 100vw; height: 100vh; }
   .shot.b { left: 100vw; }
-  .card { position: absolute; left: 24vw; top: 20vh; width: 52vw; height: 60vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 4vw; box-sizing: border-box; }
-  .card h2 { margin: 0 0 4vh; font-size: 3.4vh; font-weight: 600; color: var(--dim); }
-  .row { display: grid; grid-template-columns: 16vw 1fr 5vw; align-items: center; gap: 2vw; margin-bottom: 4.4vh; }
-  .track { height: 1.2vh; border-radius: 1vh; background: #33323d; overflow: hidden; }
-  .fill { height: 100%; width: 100%; background: var(--accent); transform-origin: left; }
-  .row span:last-child { color: var(--dim); text-align: right; }
-  .big { font-size: 22vh; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin-top: 3vh; }
-  .big small { white-space: nowrap; font-size: 6vh; color: var(--dim); letter-spacing: -0.02em; margin-left: 1vw; }
-  .ok { color: var(--accent); }
+  .card { position: absolute; left: 22vw; top: calc(var(--u) * 25); width: 56vw; height: calc(var(--u) * 50); padding: var(--s5) var(--s5); }
+  .card h2 { margin: 0 0 var(--s4); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
+  .row { display: grid; grid-template-columns: 21vw 1fr 6vw; align-items: center; gap: 2vw; margin-bottom: var(--s4); font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.03em; }
+  .track { height: calc(var(--u) * 1.4); border-radius: 999px; background: var(--raised); overflow: hidden; }
+  .fill { height: 100%; width: 100%; border-radius: 999px; background: var(--accent); transform-origin: left; }
+  .row span:last-child { color: var(--muted); text-align: right; }
+  .big { margin-top: var(--s2); font: 700 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.045em; }
+  .big small { white-space: nowrap; margin-left: 1vw; font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); letter-spacing: -0.01em; }
 </style>
 </head>
 <body>
@@ -35,7 +32,7 @@
     </div>
   </section>
   <section class="shot b">
-    <div class="card"><h2 class="ok">shipped</h2>
+    <div class="card"><h2 class="accent">shipped</h2>
       <div class="big">41<small>seconds, 60 fps</small></div>
     </div>
   </section>

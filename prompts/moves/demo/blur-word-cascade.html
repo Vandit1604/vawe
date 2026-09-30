@@ -5,12 +5,9 @@
 <meta name="duration" content="1.6">
 <meta name="blank" content="0-0.13">
 <title>move: blur word cascade</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 700 10vh/1.2 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
-  p { margin: 0; width: 78vw; text-align: center; }
+  p { margin: 0; width: 78vw; text-align: center; font: 700 calc(var(--u) * 10)/1.15 var(--sans); letter-spacing: -0.035em; text-wrap: balance; }
 
   /* no mask and no clip: each word resolves in place, so nothing can cut a descender */
   .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;

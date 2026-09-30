@@ -7,7 +7,7 @@ the settled word still looks clipped. Clip: [mask-rise.mp4](mask-rise.mp4). Demo
 [demo/mask-rise.html](demo/mask-rise.html).
 
 ```css
-.mask { overflow: hidden; padding: 0.1em 0 0.25em; margin: -0.1em 0 -0.25em; }
+.mask { overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
 .mask > span { display: block; translate: 0 118%;
                animation-name: rise; animation-duration: 0.7s; animation-delay: var(--beat-1);
                animation-timing-function: var(--settle); animation-fill-mode: both; }

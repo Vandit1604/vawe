@@ -15,10 +15,10 @@ const b = btn.getBoundingClientRect();
 const from = { x: innerWidth * 0.16, y: innerHeight * 0.9 }, to = { x: b.left + b.width * 0.86, y: b.top + b.height * 0.72 };
 x.animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: 760, delay: 200, easing: settle, fill: 'both' });
 y.animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: 760, delay: 200, easing: smooth, fill: 'both' });
-btn.animate([{ background: '#2c2b35' }, { background: '#3a3945' }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
+btn.animate([{ background: '#2b2a31' }, { background: '#37363e' }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
 curSvg.animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: 1080, easing: settle, fill: 'both' });   // transform-origin: 0 0, the tip
 btn.animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: 1080, easing: settle, fill: 'both' });
-btn.animate([{ background: '#3a3945' }, { background: '#0a87ff' }], { duration: 120, delay: 1080, easing: 'linear', fill: 'forwards' });
+btn.animate([{ background: '#37363e' }, { background: '#0a87ff' }], { duration: 120, delay: 1080, easing: 'linear', fill: 'forwards' });
 idle.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: 1190, easing: settle, fill: 'both' });
 done.animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: 1230, easing: settle, fill: 'both' });
 x.animate([{ translate: `${to.x}px 0` }, { translate: `${innerWidth * 1.06}px 0` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });

@@ -4,26 +4,24 @@
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
 <title>move: bracket callout</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { display: grid; place-items: center; font: 600 7vh/1 'Archivo', sans-serif; color: var(--ink); }
-
-  .card { width: 88vh; padding: 7vh; border-radius: 3.4vh; background: #201f27; box-shadow: 0 0 0 1px #ffffff14; }
-  .card h2 { margin: 0 0 5vh; font-size: 5.4vh; font-weight: 500; color: #ffffff99; }
+  .card { width: calc(var(--u) * 122); padding: var(--s5); }
+  .card h2 { margin: 0 0 var(--s4); font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); }
   .row { display: flex; align-items: center; justify-content: space-between; }
-  .metric { font-size: 13vh; font-weight: 800; letter-spacing: -0.03em; }
+  .metric { display: flex; align-items: baseline; gap: var(--s2); font: 700 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.045em; }
+  .metric small { font: 500 var(--t-body)/1 var(--sans); letter-spacing: 0; color: var(--muted); }
 
   /* the target keeps its own box; the frame is drawn around it, 0.5em out */
-  .target { position: relative; display: inline-block; padding: 2.2vh 4.2vh; border-radius: 2vh; background: #ffffff14; font-size: 5.6vh; }
-  .frame { position: absolute; inset: -1.3vh; pointer-events: none; --far: 13vh; --arm: 3.4vh; }
+  .target { position: relative; display: inline-flex; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); border-radius: var(--r-chip); background: var(--raised); font: 600 var(--t-lead)/1 var(--sans); }
+  .target .icon { width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); }
+  .frame { position: absolute; inset: calc(var(--u) * -1.6); pointer-events: none; --far: calc(var(--u) * 13); --arm: calc(var(--u) * 3.6); --w: calc(var(--u) * 0.7); --rad: calc(var(--u) * 0.8); }
   .c { position: absolute; width: var(--arm); height: var(--arm); border: 0 solid var(--accent); opacity: 0;
        animation-duration: 0.55s; animation-delay: 0.35s; animation-timing-function: var(--land); animation-fill-mode: both; }
-  .tl { left: 0; top: 0; border-width: 0.7vh 0 0 0.7vh; border-top-left-radius: 0.6vh; animation-name: tl; }
-  .tr { right: 0; top: 0; border-width: 0.7vh 0.7vh 0 0; border-top-right-radius: 0.6vh; animation-name: tr; }
-  .bl { left: 0; bottom: 0; border-width: 0 0 0.7vh 0.7vh; border-bottom-left-radius: 0.6vh; animation-name: bl; }
-  .br { right: 0; bottom: 0; border-width: 0 0.7vh 0.7vh 0; border-bottom-right-radius: 0.6vh; animation-name: br; }
+  .tl { left: 0; top: 0; border-width: var(--w) 0 0 var(--w); border-top-left-radius: var(--rad); animation-name: tl; }
+  .tr { right: 0; top: 0; border-width: var(--w) var(--w) 0 0; border-top-right-radius: var(--rad); animation-name: tr; }
+  .bl { left: 0; bottom: 0; border-width: 0 0 var(--w) var(--w); border-bottom-left-radius: var(--rad); animation-name: bl; }
+  .br { right: 0; bottom: 0; border-width: 0 var(--w) var(--w) 0; border-bottom-right-radius: var(--rad); animation-name: br; }
   /* the landing curve overshoots past 1, so each corner dips a little inside the box before it settles */
   @keyframes tl { from { translate: calc(var(--far) * -1) calc(var(--far) * -1); opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
   @keyframes tr { from { translate: var(--far) calc(var(--far) * -1); opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
@@ -33,8 +31,8 @@
 </head>
 <body>
 <div class="card">
-  <h2>This week</h2>
-  <div class="row"><span class="metric">2.4k</span><span class="target">Export<span class="frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></span></span></div>
+  <h2>Renders this week</h2>
+  <div class="row"><span class="metric">2.4k<small>+18%</small></span><span class="target"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>Export<span class="frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></span></span></div>
 </div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

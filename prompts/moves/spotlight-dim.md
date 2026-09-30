@@ -17,13 +17,13 @@ const settle = curveToLinear(CURVES.expoOut);
 const pad = '0.6vh';
 hole.animate([
   { left: '0px', top: '0px', width: '100vw', height: '100vh', borderRadius: '0px' },
-  { left: `calc(14vw - ${pad})`, top: `calc(52vh - ${pad})`, width: `calc(35vw + 2 * ${pad})`, height: `calc(34vh + 2 * ${pad})`, borderRadius: '2.6vh' }],
+  { left: `calc(14vw - ${pad})`, top: `calc(52vh - ${pad})`, width: `calc(35vw + 2 * ${pad})`, height: `calc(34vh + 2 * ${pad})`, borderRadius: '3.6vh' }],
   { duration: 800, delay: 150, easing: settle, fill: 'both' });
 target.animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: settle, fill: 'both' });
 ```
 
 The hole closes from the whole frame, so the dim arrives as the light narrows and never fades in as
-a flat veil. Match the hole radius to the target radius plus its padding (2 vh + 0.6 vh here) or a
+a flat veil. Match the hole radius to the target radius plus its padding (3 vh + 0.6 vh here) or a
 lit corner shows. Keep the dim at 0.75 to 0.85: lower and the rest still competes, higher and the
 context is lost. A padding over 1.5 vh reads as a frame border, which is banned. Use `calc()` with
 literal lengths in the keyframes; `var()` in a keyframe does not interpolate.

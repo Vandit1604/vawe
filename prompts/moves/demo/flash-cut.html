@@ -5,25 +5,24 @@
 <meta name="duration" content="1">
 <meta name="blank" content="0.52-0.58">
 <title>move: flash cut</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
-  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
-  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  body { position: relative; font: 700 4vh/1 'Archivo', sans-serif; color: var(--ink); }
+  body { position: relative; display: block; }
 
   .shot { position: absolute; inset: 0; }
   .b { opacity: 0; }
-  .a .card { position: absolute; left: 14vw; top: 26vh; width: 46vw; height: 48vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 3.4vw; box-sizing: border-box; }
-  .a h2 { margin: 0 0 3vh; font-size: 3.4vh; color: var(--dim); font-weight: 600; }
-  .a p { margin: 0; font-size: 9vh; letter-spacing: -0.03em; }
-  .b h1 { position: absolute; left: 14vw; top: 30vh; margin: 0; font-size: 26vh; letter-spacing: -0.05em; line-height: 1; }
+  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 24); width: 56vw; padding: var(--s5); }
+  .a h2 { margin: 0 0 var(--s3); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
+  .a p { margin: 0; font: 700 var(--t-title)/1.05 var(--sans); letter-spacing: -0.035em; }
+  .a .meta { margin-top: var(--s4); display: flex; gap: var(--s2); }
+  .b h1 { position: absolute; left: 14vw; top: calc(var(--u) * 28); margin: 0; font: 700 calc(var(--u) * 26)/1 var(--sans); letter-spacing: -0.06em; }
   .b h1 i { color: var(--accent); font-style: normal; }
-  .b p { position: absolute; left: 14.4vw; top: 64vh; margin: 0; font-size: 4vh; font-weight: 500; color: var(--dim); }
+  .b p { position: absolute; left: 14.4vw; top: calc(var(--u) * 62); margin: 0; font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); }
   .flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
 </style>
 </head>
 <body>
-<section class="shot a"><div class="card"><h2>draft</h2><p>Almost ready to ship</p></div></section>
+<section class="shot a"><div class="card"><h2>draft 7 of 7</h2><p>Almost ready to ship</p><div class="meta"><span class="pill">12.4 s</span><span class="pill">3 aspects</span></div></div></section>
 <section class="shot b"><h1>Ship<i>.</i></h1><p>one page in, one film out</p></section>
 <div class="flash"></div>
 <script type="module">
