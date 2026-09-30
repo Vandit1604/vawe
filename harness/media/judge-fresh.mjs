@@ -224,7 +224,7 @@ const t0 = Date.now();
 const ev = await prepare(input, stage);
 const file = path.resolve('out', `${ev.name}.${stage === 'stills' ? 'stills' : 'judge'}.json`);
 const prevItems = stage === 'stills' ? [] : previousItems(readJson(file));
-const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(prevItems))), ev);
+const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(prevItems), prevItems)), ev);
 const result = finish(ev, raw, Date.now() - t0);
 if (stage !== 'stills') {
   const led = mergeLedger(prevItems, raw, result.fixes);

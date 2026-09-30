@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../../harness/lib/judge-ledger.mjs';
+import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines, movesBackAndForth } from '../../harness/lib/judge-ledger.mjs';
 
 const round1 = {
   fixes: [
@@ -43,4 +43,31 @@ test('a fixed item is closed: the next round does not show or count it', () => {
   const led = mergeLedger([{ id: 'f1', axis: 'type', fix: 'x', status: 'fixed' }, { id: 'f2', axis: 'pace', fix: 'y', status: 'still' }], { ledger: [{ id: 'f2', status: 'fixed' }] }, []);
   assert.deepEqual(openItems(led.items), []);
   assert.equal(ledgerLines(led)[0], 'ledger: 1 fixed, 0 partly, 0 still; 0 new');
+});
+
+test('each new fix keeps what it changes, its value now and the value asked; the prompt lists them', () => {
+  const raw = { fixes: [{ axis: 'hook', fix: 'start the crest low', what: 'crest start height', now: '40% of the height', want: '85% of the height' }] };
+  const led = mergeLedger([], raw, [{ axis: 'hook', score: 7, at: 0.1, fix: 'start the crest low' }]);
+  assert.deepEqual(led.items[0], { id: 'f1', axis: 'hook', at: 0.1, fix: 'start the crest low', status: 'new', what: 'crest start height', now: '40% of the height', want: '85% of the height' });
+  const prompt = ledgerPrompt(openItems(led.items), led.items);
+  assert.match(prompt, /- crest start height: f1 now 40% of the height, asked 85% of the height/);
+});
+
+test('a target asked back and forth over three rounds prints one stop line; a steady one does not', () => {
+  const round = (prev, want, now) => mergeLedger(prev, { ledger: openItems(prev).map((i) => ({ id: i.id, status: 'fixed' })), fixes: [{ axis: 'hook', fix: `crest at ${want}`, what: 'Crest start height', now, want }] },
+    [{ axis: 'hook', score: 7, at: 0.1, fix: `crest at ${want}` }]);
+  const r1 = round([], '85%', '40%');
+  const r2 = round(r1.items, '40%', '85%');
+  assert.deepEqual(ledgerLines(r2).slice(1), []);
+  const r3 = round(r2.items, '85%', '40%');
+  assert.deepEqual(ledgerLines(r3).slice(1), ['stop: keep Crest start height at its current value (40%); the judge varies on this item (asked 85%, 40%, 85% over 3 rounds)']);
+  const steady = round(round(round([], '6%', '5%').items, '6.5%', '6%').items, '7%', '6.5%');
+  assert.deepEqual(ledgerLines(steady).slice(1), []);
+});
+
+test('back and forth: numbers change direction, words return to an earlier value', () => {
+  assert.equal(movesBackAndForth(['85%', '40%', '30%']), false);
+  assert.equal(movesBackAndForth(['85%', '40%', '30%', '85%']), true);
+  assert.equal(movesBackAndForth(['longer hold', 'bigger tagline', 'longer hold']), true);
+  assert.equal(movesBackAndForth(['a', 'b']), false);
 });
