@@ -96,3 +96,4 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | skeleton-reveal | grey loading blocks shimmer, then resolve into real content one region at a time | video-shotcraft ui-entrance/skeleton-reveal; HyperFrames skeleton-reveal | built |
 | ai-stream-response | an answer streams in chunk by chunk under a typed prompt, with a working indicator first | video-shotcraft interaction/ai-stream-response; HyperFrames streaming-text, typed-prompt, typing-indicator | built |
 | integration-hub | logos or icons fly in from the edges and converge on a central product mark, then connect in one beat | HyperFrames constellation-hub, locked-nucleus-orbit; video-shotcraft ui-entrance/integration-hub-map | built |
+| device-tilt-stage | the product UI sits in a laptop or phone frame that tilts in 3D and settles | HyperFrames device-frame-stage, browser-device-stage, parallax-device-dive; Apple keynote product films | built |
