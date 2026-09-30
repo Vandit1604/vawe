@@ -41,6 +41,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | stack-cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | HyperFrames stack and card transitions, Apple keynote slide push | built |
 | split-reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | HyperFrames split and curtain-reveal transitions | built |
 | slice-shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | HyperFrames slice and shutter transitions, broadcast glitch-free slice wipes | built |
+| type-fill-transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | HyperFrames text-mask transitions, kinetic-type reels | built |
 
 ## 3. Point the eye
 

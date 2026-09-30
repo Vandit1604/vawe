@@ -43,6 +43,7 @@ This index lists the built ones, in the same groups.
 | stack cover | the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap | [stack-cover.md](stack-cover.md) | [stack-cover.mp4](stack-cover.mp4) |
 | split reveal | the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear | [split-reveal.md](split-reveal.md) | [split-reveal.mp4](split-reveal.mp4) |
 | slice shift | horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot | [slice-shift.md](slice-shift.md) | [slice-shift.mp4](slice-shift.mp4) |
+| type fill transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | [type-fill-transition.md](type-fill-transition.md) | [type-fill-transition.mp4](type-fill-transition.mp4) |
 
 ## Point the eye
 
@@ -96,6 +97,7 @@ This index lists the built ones, in the same groups.
 | cover the old shot with a new panel | [stack-cover](stack-cover.md) |
 | open one shot onto the next | [split-reveal](split-reveal.md) |
 | tear one shot off to show the next | [slice-shift](slice-shift.md) |
+| grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
