@@ -20,6 +20,8 @@ lanes.forEach((row, i) => {
 });
 ```
 
+Sound: none; the eye reads the count, and the number in the line above carries the beat's cue.
+
 Three lanes at 110 ms apart tear the wall in as one gesture; one lane reads as a ticker, five as
 a screen saver. The blur ends before the logos can be read, which is right: the eye should read
 the count, not the names. The drift (6 percent of the height over the whole clip) keeps the wall alive

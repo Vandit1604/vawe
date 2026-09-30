@@ -27,6 +27,8 @@ clean.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration
 clean.animate([{ translate: '0 0' }, { translate: '0 -1.2vh' }], { duration: 700, delay: 1610, easing: settle, fill: 'both' });
 ```
 
+Sound: bloom at 1.61 s into the move, when the clean element opens (default gain); nothing on the flood or the collapse.
+
 Twenty or more items is the range where the frame reads as noise; under twelve it reads as a list.
 The collapse starts with the outer items (they have the longest path), lasts 300 ms on a cubic-in
 curve and blurs in proportion to distance, so the pull reads as speed. The clean element opens 70 ms

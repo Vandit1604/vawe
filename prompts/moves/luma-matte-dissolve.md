@@ -26,6 +26,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; the next shot arrives through its own light, and a soft cut stays soft.
+
 The threshold starts above white plus one edge width and ends below black minus one edge width, so
 the first frame shows nothing and the last shows everything, with no pop. Shot B needs a spread of
 brightness to read: a white subject, a mid-tone falloff and a dark ground. A flat, evenly lit shot

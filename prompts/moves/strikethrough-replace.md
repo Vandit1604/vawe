@@ -19,6 +19,8 @@ chars.forEach((el, i) => el.animate([{ translate: '0 130%' }, { translate: '0 0'
   { duration: 520, delay: 500 + i * 70, easing: settle, fill: 'both' }));
 ```
 
+Sound: pluck at 0.50 s into the move, when the first character of the new value rises (default gain); nothing on the strike.
+
 The strike takes 240 ms and the new value starts 240 ms after it does, so the old value is judged
 before the new one appears. The new value is larger than the old one (1.5x) and full ink: the
 rejected value is quieter, not just crossed out. Use `expoOut` for the characters, not an

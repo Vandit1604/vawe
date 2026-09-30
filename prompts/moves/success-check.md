@@ -22,6 +22,8 @@ btn.animate([{ scale: 1 }, { scale: 0.93, offset: 0.16 }, { scale: 1 }], { durat
 ring.animate([{ opacity: 0.9, scale: 1 }, { opacity: 0, scale: 2.3 }], { duration: 640, delay: T.land + 40, easing: settle, fill: 'both' });
 ```
 
+Sound: chime at 0.94 s into the move, when the circle lands and the ring leaves it (default gain); nothing on the press.
+
 The check is a stroke of two segments (the short leg, then the long one) on one dash, so it draws
 with one curve and reads as a pen stroke. The stroke width matches the text weight beside it (3 at
 this size). The button starts closing while the press is still returning: waiting for the press to
