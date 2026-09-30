@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { display: block; position: relative; }
+  .plan { position: absolute; left: 10vw; top: calc(var(--u) * 18); font-size: calc(var(--u) * 6.4); color: var(--ink); }
   .kicker { position: absolute; left: 10vw; top: calc(var(--u) * 27); font: 500 var(--t-body)/1 var(--mono); color: var(--muted); letter-spacing: 0; }
   .row { position: absolute; left: 10vw; top: calc(var(--u) * 36); display: flex; align-items: baseline; gap: calc(var(--u) * 5); white-space: nowrap; }
   .old { position: relative; display: inline-block; font: 400 calc(var(--u) * 27)/1.1 var(--sans); letter-spacing: -0.02em; transform-origin: 0 82%; }
@@ -18,13 +19,15 @@
 </style>
 </head>
 <body>
-<div class="kicker">per seat, billed yearly</div>
+<div class="plan" data-logo="halcyon" data-lockup></div>
+<div class="kicker">Studio plan, per seat, billed yearly</div>
 <div class="row">
   <div class="old">$49<span class="strike"></span></div>
   <div class="new"><span class="mask"><i>$</i></span><span class="mask"><i>1</i></span><span class="mask"><i>9</i></span></div>
   <div class="per">/ month</div>
 </div>
 <script type="module">
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut);
 const q = (s) => document.querySelector(s);

@@ -12,13 +12,15 @@
   .sweep .t { display: block; white-space: nowrap; -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--p) - 9%), transparent var(--p)); mask-image: linear-gradient(90deg, #000 calc(var(--p) - 9%), transparent var(--p)); }
   .big .t { font: 800 calc(var(--u) * 14)/1.08 var(--sans); letter-spacing: -0.045em; }
   .sub .t { font: 500 var(--t-head)/1.2 var(--sans); color: var(--muted); letter-spacing: -0.015em; }
+  .sub .t { display: flex; align-items: center; gap: var(--s3); }
+  .thumb { flex: none; width: calc(var(--u) * 17); aspect-ratio: 16 / 9; height: auto; border-radius: var(--r-chip); }
   .bar { position: absolute; top: 8%; bottom: 8%; left: var(--p); width: calc(var(--u) * 1); margin-left: calc(var(--u) * -0.5); border-radius: var(--u); background: var(--accent); }
 </style>
 </head>
 <body>
 <div class="drift">
   <div class="sweep big"><span class="t">Thanks for watching.</span><i class="bar"></i></div>
-  <div class="sweep sub"><span class="t">Next film: the changelog, Oct 14.</span></div>
+  <div class="sweep sub"><span class="t"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/ridge.jpg" alt="">Next film: the changelog, Oct 14.</span></div>
 </div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

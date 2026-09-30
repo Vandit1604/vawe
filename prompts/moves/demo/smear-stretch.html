@@ -17,12 +17,15 @@
   .a .bar { position: absolute; left: 9.4vw; top: calc(var(--u) * 64); width: 36vw; height: calc(var(--u) * 5); border-radius: 999px; background: var(--accent); }
   .a .note { position: absolute; left: 9.4vw; top: calc(var(--u) * 73); font: 600 var(--t-body)/1 var(--mono); color: var(--muted); }
   .b .word { left: auto; right: 9vw; }
-  .b .tag { position: absolute; right: 9.4vw; top: calc(var(--u) * 64); padding: calc(var(--u) * 1.8) calc(var(--u) * 3.2); border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 700 var(--t-body)/1 var(--sans); }
+  .b .meta { position: absolute; right: 9.4vw; top: calc(var(--u) * 63); display: flex; align-items: center; gap: var(--s3); }
+  .b .avatar { --size: calc(var(--u) * 9); }
+  .b .avatars .avatar { box-shadow: 0 0 0 calc(var(--u) * 0.5) var(--paper); }
+  .b .tag { padding: calc(var(--u) * 1.8) calc(var(--u) * 3.2); border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 700 var(--t-body)/1 var(--sans); }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position: absolute"><filter id="smear" x="-5%" width="110%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
-<div class="shot b"><div class="fg"><div class="word">Final</div><div class="tag">Approved</div></div></div>
+<div class="shot b"><div class="fg"><div class="word">Final</div><div class="meta"><div class="avatars"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg" alt=""></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg" alt=""></div></div><div class="tag">Approved</div></div></div></div>
 <div class="shot a"><div class="fg"><div class="word">Draft</div><div class="bar"></div><div class="note">cut 3 of 4</div></div></div>
 <script type="module">
 import '/core/engine/page-api.js';
