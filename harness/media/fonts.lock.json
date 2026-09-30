@@ -78,6 +78,13 @@
       "bytes": 34928,
       "sha256": "8f704806dbedeaaeca334b11ec348bc3ac3a439d6431544b3afb54f534ee4967"
     },
+    "Unbounded.woff2": {
+      "pkg": "@fontsource-variable/unbounded",
+      "version": "5.3.0",
+      "file": "unbounded-latin-wght-normal.woff2",
+      "bytes": 50904,
+      "sha256": "22f9b928aa3928a896340422b54d690fbb5875c30eae4c106f029c61f2289fd6"
+    },
     "Caveat.woff2": {
       "pkg": "@fontsource-variable/caveat",
       "version": "5.3.0",

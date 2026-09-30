@@ -57,6 +57,7 @@ const FONTS = [
   ['HankenGrotesk.woff2',           '@fontsource-variable/hanken-grotesk',      '5.3.0', 'hanken-grotesk-latin-wght-normal.woff2',      'OFL 1.1'],
   ['BricolageGrotesque.woff2',      '@fontsource-variable/bricolage-grotesque', '5.3.0', 'bricolage-grotesque-latin-wght-normal.woff2', 'OFL 1.1'],
   ['Archivo.woff2',                 '@fontsource-variable/archivo',             '5.3.0', 'archivo-latin-wght-normal.woff2',             'OFL 1.1'],
+  ['Unbounded.woff2',               '@fontsource-variable/unbounded',             '5.3.0', 'unbounded-latin-wght-normal.woff2',             'OFL 1.1'],
   ['Caveat.woff2',                  '@fontsource-variable/caveat',              '5.3.0', 'caveat-latin-wght-normal.woff2',              'OFL 1.1'],
   ['space-500.woff2',               '@fontsource/space-grotesk',                '5.3.0', 'space-grotesk-latin-500-normal.woff2',        'OFL 1.1'],
   ['space-700.woff2',               '@fontsource/space-grotesk',                '5.3.0', 'space-grotesk-latin-700-normal.woff2',        'OFL 1.1'],
