@@ -19,7 +19,7 @@ This file adds only what you would get wrong on your own. One command runs every
   (`core/engine/page-clock.js`) owns `Date`, `requestAnimationFrame`, timers and `Math.random`.
 - Aspect: `<html data-aspect="16:9">`, `--vw`/`--vh` (px lengths) on `:root` and `window.vawe` are set
   before your scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
-- Audio is `<audio>` tags, never played live, mixed offline to -14 LUFS: `src` + `data-at` (s),
+- Audio is `<audio>` tags, never played live, mixed offline as written (no normalising, about -20 LUFS at default gains; `<meta name="loudness" content="-14">` opts in to a delivery target): `src` + `data-at` (s),
   `data-gain` (dB), `data-fade-out`; `loop` is the music bed; `data-synth="whoosh"` picks a voice
   from `core/audio/kit.mjs`; `data-role="vo"` ducks the bed.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
