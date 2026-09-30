@@ -69,11 +69,4 @@ One table per group, with a use-when line and a clip for each move, in [GROUPS.m
 - [Move the camera](GROUPS.md#move-the-camera): push, pan, dive, rack focus.
 - [End a film](GROUPS.md#end-a-film): the last second, quiet or with an action.
 - [Product moments](GROUPS.md#product-moments): a click, a card, a number, a real UI arriving.
-- [Looks](GROUPS.md#looks): the eight demo looks and their tokens.
-
-## Looks notes
-
-The looks were shaped with `leonxlnx/soft-skill` (premium type, nested depth, soft diffuse shadow, grain on gradients). Rejected from it: its banned-font list (Inter and Helvetica are not why a film looks cheap), the nav, scroll and hover rules (a film has no input), the 2rem squircle radius as a default (each look sets its own), and `backdrop-blur` (a film draws no glass).
-
-The second pass (logos, photos, product data) used `pbakaus/typeset` (roles split by size, weight and tone; tabular figures), then `mengto/beautiful-shadows` (the `--stack` depth: six shadows with negative spread), then `jakubkrehel/make-interfaces-feel-better` as the review (pure black or white image hairline, concentric radius, optical alignment). Rejected: typeset's 16 px body floor and live-mode params, fully neutral shadows on paper and soft (their warm and violet throw is the look), and press scale, hit areas and hover states (a film has no input).
-Shared assets live in `demo/assets/`: `logos.js` (sixteen invented brands, mark plus wordmark, never a real company) and `photos/` (CC0 only, sources in `photos/credits.json`); reuse them before you draw a new one.
+- [Looks](GROUPS.md#looks): the ten demo looks and their tokens.
