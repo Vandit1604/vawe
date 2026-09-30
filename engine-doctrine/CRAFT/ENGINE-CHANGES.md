@@ -65,7 +65,7 @@ Prefer a refusal at the source (the renderer, the parser) over a gate. When a ga
 - Name what you measured, where (the second, the element), and the one next command.
 - Adapt instead of block: read the film's context and clamp, tolerate or reclassify. Hard refusals
   are for determinism, a missing waiver reason and data loss.
-- Register it in `harness/lib/check-gate.mjs` (the one table), so `bin/vawe check <name>` runs it.
+- Put it in `quality/gates/<name>.mjs`: `bin/vawe check <name>` finds it by file name (`harness/lib/check-gate.mjs`).
 - Test it end to end: write down every way it can fail, then `bin/vawe e2e`. A unit test only for
   what a render cannot show.
 

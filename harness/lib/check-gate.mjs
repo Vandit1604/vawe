@@ -1,25 +1,30 @@
-// `vawe check <name> [args]`: runs one gate. This table is the only list of gates; the args after the
-// name go to the gate script unchanged (a page path, --json, --stamp).
+// `vawe check <name> [args]`: runs one gate. A gate is a script in quality/gates/, named by its
+// file name; the args after the name go to the script unchanged (a page path, --json, --stamp).
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { closest } from '../cli/parse.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
+const GATE_DIR = 'quality/gates';
 
-export const GATES = {
-  'anim-traps': 'quality/gates/anim-traps.mjs',
-  'code-quality': 'quality/gates/code-quality.mjs',
-  'doc-refs': 'quality/gates/doc-refs.mjs',
+// Files in quality/gates/ that other tools import or run under their own verb; they are not gates.
+const NOT_GATES = new Set(['compare', 'judge', 'rubric']);
+
+// Names that differ from the file, and the scripts that live outside quality/gates/.
+const ALIASES = {
   'impeccable': 'skills/impeccable/scripts/detect.mjs',
-  'mistakes-check': 'quality/gates/mistakes-dupes.mjs',
+  'mistakes-check': `${GATE_DIR}/mistakes-dupes.mjs`,
   'no-emdash': 'harness/dev/no-emdash.mjs',
-  'page-check': 'quality/gates/page-check.mjs',
-  'provenance': 'quality/gates/threshold-provenance.mjs',
-  'rule-length': 'quality/gates/rule-length.mjs',
-  'seo-surface': 'quality/gates/seo-surface.mjs',
-  'skill-reach': 'quality/gates/skill-reach.mjs',
+  'provenance': `${GATE_DIR}/threshold-provenance.mjs`,
 };
+
+const discovered = fs.readdirSync(path.join(ROOT, GATE_DIR))
+  .filter((f) => f.endsWith('.mjs') && !NOT_GATES.has(f.slice(0, -4)))
+  .map((f) => [f.slice(0, -4), `${GATE_DIR}/${f}`]);
+
+export const GATES = Object.fromEntries([...discovered, ...Object.entries(ALIASES)].sort(([a], [b]) => a.localeCompare(b)));
 
 export function run(name, args = []) {
   const script = GATES[name];
