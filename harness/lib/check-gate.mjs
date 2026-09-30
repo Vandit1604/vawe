@@ -15,7 +15,6 @@ const NOT_GATES = new Set(['compare', 'judge', 'rubric']);
 // Names that differ from the file, and the scripts that live outside quality/gates/.
 const ALIASES = {
   'impeccable': 'skills/impeccable/scripts/detect.mjs',
-  'mistakes-check': `${GATE_DIR}/mistakes-dupes.mjs`,
   'no-emdash': 'harness/dev/no-emdash.mjs',
   'provenance': `${GATE_DIR}/threshold-provenance.mjs`,
 };

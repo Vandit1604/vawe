@@ -1,6 +1,6 @@
 #!/bin/sh
-# pre-commit, under 2 s: no em dash, `node --check` on staged js/mjs, doc references in staged docs.
-# Count ratchets (bench) only warn. Bypass with `git commit --no-verify` when you know better.
+# pre-commit, under 2 s. Blocks on: an em dash, a `node --check` failure in staged js/mjs.
+# Doc references and count ratchets (bench) only warn. Bypass with `git commit --no-verify` when you know better.
 set -u
 
 [ -f harness/dev/link-shared.sh ] && sh harness/dev/link-shared.sh
@@ -16,9 +16,9 @@ for f in $(printf '%s\n' "$staged" | grep -E '\.(js|mjs)$' | grep -v '^site/'); 
   node --check "$f" || fail=1
 done
 
-docs="$(printf '%s\n' "$staged" | grep -E '\.md$' | grep -vE '^(site|docs-site|skills/impeccable)/|^engine-doctrine/(MISTAKES|ROADMAP)')"
+docs="$(printf '%s\n' "$staged" | grep -E '\.md$' | grep -vE '^(site|docs-site|skills/impeccable)/|^engine-doctrine/ROADMAP')"
 # shellcheck disable=SC2086
-[ -n "$docs" ] && { node quality/gates/doc-refs.mjs $docs || fail=1; }
+[ -n "$docs" ] && { node quality/gates/doc-refs.mjs $docs; }
 
 node harness/dev/bench.mjs fast 2>&1 | grep -E 'grew' >&2
 

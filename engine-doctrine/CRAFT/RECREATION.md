@@ -65,5 +65,5 @@ sloppy, on the beat it reads directed. Copy the reference audio when you have it
 
 Two things bound 1:1: the display font (match it with the closest bundled face, do not pretend) and
 proprietary source assets (a capture of the live UI closes most of the gap). Everything else is
-reproducible. When the reference does something no primitive covers, that is a framework finding: log it
-in `engine-doctrine/MISTAKES.md`, do not approximate it.
+reproducible. When the reference does something no primitive covers, that is a framework finding: report
+it, do not approximate it.

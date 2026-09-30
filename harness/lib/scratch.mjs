@@ -1,4 +1,4 @@
-// image that was never written (engine-doctrine/MISTAKES.md #254).
+// image that was never written.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const BANNED = [
-  [/^git\s+add\s+(-A|--all|\.(?:\s|$))/, 'a blanket stage of the whole tree',
+  [/^git\s+add\s+(?:(?:-A|--all)(?:\s+\.(?=\s|$))?|\.(?=\s|$))\s*(?:[12]?>.*)?$/, 'a blanket stage of the whole tree',
    'stage explicit paths instead. With several agents in one tree, a blanket stage cannot tell your work from theirs.'],
   [/^git\s+stash\b(?!\s+list)/, 'shelving the whole working tree',
    'it takes everything dirty, including files another agent is mid-edit. Commit your own paths instead.'],
@@ -34,7 +34,7 @@ process.stdin.on('end', () => {
     if (parts.some((p) => re.test(p))) {
       process.stderr.write(`BLOCKED: ${name}\n\n${why}\n\n`
         + 'Refused by harness/live/no-blanket-git.mjs, because this command has already caused real\n'
-        + 'data loss in this repo with several agents sharing one tree. See engine-doctrine/MISTAKES.md.\n');
+        + 'data loss in this repo with several agents sharing one tree.\n');
       process.exit(2);
     }
   }

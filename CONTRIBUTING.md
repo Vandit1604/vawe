@@ -7,8 +7,7 @@ group: project
 # Contributing to Vawe
 
 Thanks for looking. This file is short because the repo explains itself: `AGENTS.md` is the authoring
-doctrine (tool-neutral; `CLAUDE.md` is a shim that loads it), `engine-doctrine/README.md` maps the other documents, and `engine-doctrine/MISTAKES.md` is the log of what has
-already gone wrong and why the guard exists.
+doctrine (tool-neutral; `CLAUDE.md` is a shim that loads it) and `engine-doctrine/README.md` maps the other documents.
 
 ## Licence, first, so nobody wastes an afternoon
 
@@ -60,7 +59,7 @@ the author pays by deforming good work until a number moves.
   render, across the whole library, or by a human. `AGENTS.md` has the full test, and two gates have
   been deleted here for measuring the wrong thing.
 - **A second way to say something the code can already say.** Two mechanisms for one fact is the drift
-  that produces most of the bugs in `engine-doctrine/MISTAKES.md`.
+  that produces most of the bugs here.
 - **Sugar that silently does nothing.** An input the engine accepts and then ignores must either work
   or fail loudly by name.
 - **Em dashes in on-screen text.** The validator rejects them.

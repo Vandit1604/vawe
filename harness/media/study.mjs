@@ -84,7 +84,7 @@ if (argv.includes('--selftest')) {
 
 if (!VIDEO) die('usage: node harness/media/study.mjs <video> [name] [--threshold 0.3]');
 if (!fs.existsSync(VIDEO)) die(`no such file: ${VIDEO}`);
-// A missing tool is not a clean result. seam-snap reported one for months (engine-doctrine/MISTAKES.md), so this
+// A missing tool is not a clean result. seam-snap reported one for months, so this
 // refuses at the entry point and names the binary rather than producing an empty study.
 for (const bin of ['ffprobe', 'ffmpeg']) {
   if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error) {
@@ -343,8 +343,7 @@ const { joints, conflicts } = mergeJoints([
 ], MIN_SHOT);
 const detected = joints.length > 0;
 // NO SILENT FALLBACK. A film with no detected joint is ONE SHOT, stated as such, never an invented
-// equal-slice sample dressed up as a cut list (the deleted behaviour: engine-doctrine/MISTAKES.md and the OWNER
-// note that removed it). The reason is printed in `note` below and in study.md/the console report.
+// equal-slice sample dressed up as a cut list (the deleted behaviour, removed by an OWNER note). The reason is printed in `note` below and in study.md/the console report.
 const bounds = detected ? [0, ...joints.map((j) => j.t)] : [0];
 const shots = bounds.map((t0, i) => {
   const j = i === 0 ? null : joints[i - 1];
@@ -394,7 +393,7 @@ function stackImages(files, out, axis, padW, padH, what) {
 
 // ── contact sheet: one row per shot, frames chosen by EVENT (see above), not by position ─────────
 // Same shape as make dev-tool X=beats, and for the same reason: the middle of a shot is the frame that hides the
-// entrance, which is exactly what a study is looking for (engine-doctrine/CRAFT/REFERENCE-STUDY.md, MISTAKES #124).
+// entrance, which is exactly what a study is looking for (engine-doctrine/CRAFT/REFERENCE-STUDY.md).
 const frames = path.join(dir, 'frames');
 fs.mkdirSync(frames, { recursive: true });
 const tileW = 300, tileH = Math.round((tileW * height) / width);

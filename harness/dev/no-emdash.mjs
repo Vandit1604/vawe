@@ -1,4 +1,4 @@
-// The engine broke its own no-em-dash rule 7,345 times before this check existed (engine-doctrine/MISTAKES.md #511).
+// The engine broke its own no-em-dash rule 7,345 times before this check existed.
 import { execSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -17,8 +17,6 @@ export const EXCLUDE = [
   (f) => f.startsWith('site/') || f.startsWith('docs-site/'),
   (f) => f.startsWith('assets/vendor/') || f.includes('/vendor/') || f.includes('node_modules/'),
 ];
-
-const MISTAKES = 'engine-doctrine/MISTAKES.md';
 
 // Only run the CLI scan when this file is the entrypoint: harness/live's write-time twin imports EM and EXCLUDE above and must not pay for a repo-wide git grep just to reuse the matcher.
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
@@ -47,5 +45,5 @@ if (isMain) {
       + 'period, or parentheses, or split the sentence. The choice is per site, not one character swap.');
     process.exit(1);
   }
-  console.log(`no-emdash: clean (${MISTAKES} included, every allowlisted path is vendored, none is debt)`);
+  console.log(`no-emdash: clean (every allowlisted path is vendored, none is debt)`);
 }

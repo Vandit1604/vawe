@@ -6,7 +6,7 @@
 // to a condition that was always true. Between them the cascade the block exists for was unreachable,
 // and NO render gate could ever catch it: the output was valid, deterministic and wrong-by-omission.
 // That is a linter's job, and this repo has one dependency and intends to keep it that way, so this is
-// the cheap half done honestly rather than a linter added for one rule (engine-doctrine/MISTAKES.md #82).
+// the cheap half done honestly rather than a linter added for one rule.
 //
 // WHAT IT CATCHES:
 //   1. SYNTACTIC, `cond ? X : X`, both arms textually identical after normalising space.
@@ -18,7 +18,7 @@
 // where the condition is invariant only after propagating a non-constant expression through another
 // binding. That needs a real dataflow engine over a real AST; this repo has one dependency and intends
 // to keep it. Stated rather than implied, because a gate whose limits are unwritten gets trusted past
-// them (engine-doctrine/MISTAKES.md #82).
+// them.
 //
 // THE MEASUREMENT UNDERNEATH RULE 2, stated because a gate's blind spot is never in the rule it
 // states: "never mentioned again" is decided by counting word-boundary occurrences of the identifier
@@ -70,7 +70,7 @@ const balanced = (s) => (s.match(/'/g) || []).length % 2 === 0 && (s.match(/"/g)
 
 // Excluded BY REASON, never by convenience. Both files QUOTE the patterns this gate hunts, one to
 // document them, one to inject them as fixtures, so both would be flagged for text that is a
-// quotation, not a defect (MISTAKES #85). The same two exclusions cover the dataflow rules below,
+// quotation, not a defect. The same two exclusions cover the dataflow rules below,
 // for the same reason: gate-mutation injects an unused binding and a constant condition on purpose.
 const EXCLUDED = (fp) => fp.endsWith(path.join('gates', 'dead-branch.mjs')) || fp.endsWith(path.join('gates', 'gate-mutation.mjs'));
 

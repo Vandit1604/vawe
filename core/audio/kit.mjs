@@ -99,7 +99,7 @@ function noiseSample(filt, noiseGen, L, f0Filt, i, t) {
 
 // glide + detune are frequency-domain; integrate phase so a sweep stays continuous.
 // `?? ` not `|| `: a glideTime of 0 means SNAP to the target, and `|| 0.1` turned that into a
-// 100ms slide. Same falsy-zero class as the opacity bug (engine-doctrine/MISTAKES.md #193), and the very
+// 100ms slide. Same falsy-zero class as the opacity bug, and the very
 // next line already had it right for `peak`.
 function toneSample(L, phase, t) {
   let f = L.frequency || 440;
@@ -203,7 +203,7 @@ export function wavDuration(samples) { return samples.length / SR; }
 // They were previously hand-ported and had DRIFTED: 7 of the 14 differed from the real library
 // (success was a whole different interval) and `page` and `loading` were missing entirely. That drift
 // is why they were described as sounding bad. They were an impression of Cuelume, not Cuelume
-// (engine-doctrine/MISTAKES.md #58). Do not hand-edit these; re-extract from the library if it versions up.
+// Do not hand-edit these; re-extract from the library if it versions up.
 // TEN CUES WERE REMOVED AFTER A LISTENING PASS, and the reason is measurable rather than a matter of
 // taste. All twenty were baked and judged by ear (quality/baselines/sound-verdicts.json, via
 // `node harness/dev/sound-lab.mjs`), and sorting the verdicts against their own specs found one clean

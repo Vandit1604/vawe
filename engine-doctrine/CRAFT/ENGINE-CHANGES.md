@@ -80,10 +80,9 @@ Code the next agent can read once and change safely. The code-quality hook
 
 ## A bug is closed when a check catches it
 
-Every bug found in a film or a trace gets one line in `engine-doctrine/MISTAKES.md`: the signal that
-showed it, the root cause, and the check that now catches it (a render invariant, a never-silent
-error, a page-check rule, a `vawe.assert`). A bug with no check is still open, because the next
-agent will meet it again.
+The check is the record, not a log entry. Close a bug with a check that catches it (a render
+invariant, a never-silent error, a page-check rule, a `vawe.assert`). A bug with no check is still
+open, because the next agent will meet it again.
 
 ## Adding a check
 
@@ -106,5 +105,4 @@ tool with `node <path>` and list it in `harness/README.md`.
 ## After a render
 
 Classify every friction point as an engine bug, a gate gap or an authoring choice. Fix the engine ones
-and log them in `engine-doctrine/MISTAKES.md` with the incident, so the next author meets the rule with
-its evidence. Measurements outrank doctrine: change or remove a rule when data shows it helps films.
+with a check that catches them. Measurements outrank doctrine: change or remove a rule when data shows it helps films.

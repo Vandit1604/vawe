@@ -389,7 +389,7 @@ export const gsapEase = (e, fallback, where = '') => {
 
 // resolveEasing: an easing name or a function -> a pure easing function.
 // Absent -> easeOutCubic. A wrong name -> throw, not warn-and-substitute: a typo like
-// `ease:"eastOutQuart"` still rendered the wrong curve under a warning nobody reads (MISTAKES #367).
+// `ease:"eastOutQuart"` still rendered the wrong curve under a warning nobody reads.
 export const resolveEasing = (e) => {
   if (typeof e === 'function') return e;
   if (e == null || e === '') return easeOutCubic;

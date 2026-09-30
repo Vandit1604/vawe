@@ -1,7 +1,7 @@
 // A time-capped scene command (perl -e 'alarm ...' exec) SIGTERMs the node process and used to leave
 // Chrome running behind it, because a killed process never reaches its own browser.close(). This
 // spawns a real child process that launches a page through launchPage, sends it SIGTERM, and asserts
-// the Chrome it started is gone afterwards (MISTAKES: leftover headless Chrome).
+// the Chrome it started is gone afterwards.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawn, execSync } from 'node:child_process';
