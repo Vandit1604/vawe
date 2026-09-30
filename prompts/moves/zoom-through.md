@@ -28,6 +28,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; the dive carries the eye, and the next shot's own entrance takes the cue.
+
 The part must be a plain solid colour with no glyph: a play triangle covers the frame in white before
 the disc fills it. Its size sets `SWAP`: a disc of radius r covers the frame corner at about
 corner / r; swap just above that or the corners pop. Shot B must have the same ground as the part.

@@ -26,6 +26,8 @@ y.animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${innerHeight * 0.86}px
 </script>
 ```
 
+Sound: pluck at 1.08 s into the move, on the press (default gain); nothing on the travel or the exit.
+
 The cursor tip is the origin of the arrow path, so the translate is the point that clicks. Aim at
 the lower right of the button, not its centre, or the pointer sits on the label and hides it. The
 arrival is an exponential (fast in, soft landing); the press dip is 14 percent on the cursor and 3

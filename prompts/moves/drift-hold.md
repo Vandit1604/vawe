@@ -23,6 +23,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; a hold is quiet, and the quiet before the spectacle is the point.
+
 `noise1` is seeded, so frame `t` is the same on every render and depends on no earlier frame. Give
 every layer its own seed and amplitude; the headline moves least and the ground most, which reads as
 depth. Travel of 1 to 2 vh and 1 to 2 percent scale over the hold is visible in motion and invisible

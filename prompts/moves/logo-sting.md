@@ -30,6 +30,8 @@ drift.animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1800, easing: 'linea
 </script>
 ```
 
+Sound: chime at 0.52 s into the move, when the word opens from behind the mark; its second note at +0.09 s rides the reveal (default gain).
+
 The sheen starts before the word (0.38 s against 0.52 s), so the eye is on the mark when it lands
 and follows the light into the word. Opacity runs 110 ms linear because the overshoot curve would
 dip it. The clip box is padded 0.3 em above and below so no glyph is cut. The 4.5 percent push over

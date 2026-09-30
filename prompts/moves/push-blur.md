@@ -24,6 +24,8 @@ vawe.onFrame((t) => {
 </script>
 ```
 
+Sound: none; the blur already says speed, and the film keeps its one whoosh for a whip.
+
 The filter region (`x="-30%" width="160%"`) is wider than the panel so the blur is not clipped at its
 edges. For a vertical push swap the two `stdDeviation` numbers and the translate axis.
 

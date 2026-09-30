@@ -22,6 +22,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: bloom at 0.10 s into the move, when the pull back leaves the detail, so the film has sound from its first beat (default gain).
+
 Interpolating `scale` linearly from 9 to 1 spends its first frames at a speed the eye cannot follow
 and its last ones crawling; the log path keeps each frame the same percentage larger. The camera
 centre moves from the detail to the frame centre on the same `p`, so the detail leaves the middle as

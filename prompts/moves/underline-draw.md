@@ -18,6 +18,8 @@ Demo: [demo/underline-draw.html](demo/underline-draw.html).
 <span class="key">noticed<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path pathLength="1" d="M4 12 C 70 5, 190 4, 296 9"/></svg></span>
 ```
 
+Sound: none; the line points at a word the viewer is already reading.
+
 `--draw` is `curveToLinear(CURVES.expoOut)`. `pathLength="1"` lets the dash be 1 whatever the real
 length is, so the same two lines work for any path.
 

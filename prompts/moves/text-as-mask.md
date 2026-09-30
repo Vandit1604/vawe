@@ -28,6 +28,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: bloom at 0.05 s into the move, with the pull back from the picture (default gain).
+
 The type is fixed and the picture moves under it, so the letters read as a window and not as a
 filled shape. Layers move at different speeds (near ridge 22 percent, far ridge 12, the sun rises
 out of the far ridge), which is parallax inside the glyphs. Use the heaviest weight and a wide

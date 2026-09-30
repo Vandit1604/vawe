@@ -23,6 +23,8 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 </script>
 ```
 
+Sound: bloom at --beat-1; its low, slow body matches the word getting heavier (default gain).
+
 Start at 200, not 100: a hairline at 100 vanishes against a dark ground and the first frames read
 as empty. Tighten `letter-spacing` with the weight (heavy type wants less air) so the word grows
 denser, not only wider. The `@font-face` must declare the range `100 900`; with a single weight

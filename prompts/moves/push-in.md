@@ -19,6 +19,8 @@ document.querySelector('.world').animate([{ scale: 1 }, { scale: 1.2 }], opts);
 document.querySelector('.bg').animate([{ scale: 1 }, { scale: 1.05 }], opts);
 ```
 
+Sound: none; a camera lean is felt, never heard.
+
 Push 8 to 20 percent over the beat. Under 5 percent the eye reads a mistake, not a move; over 30
 percent it is a punch-in and needs a faster curve. Pure `expoOut` stops the move in the first
 second, so the second half of a 2 s beat sits dead; the linear half keeps it alive. Push toward the

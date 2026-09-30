@@ -23,6 +23,8 @@ scan.animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: a
 </script>
 ```
 
+Sound: bloom at 1.00 s into the move, so its slow peak meets the scan line clearing the card at about 1.15 s (default gain).
+
 The clip and the line run the same curve over the same width, so the line is always on the edge of
 the after state. The curve is the iris curve: a soft start, a fast middle, a soft landing, so the
 eye has time to read the before and again the after. The line fades in just before it moves and

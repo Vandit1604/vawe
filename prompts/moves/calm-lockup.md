@@ -28,6 +28,8 @@ q('.lockup').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2000, easing: 
 </script>
 ```
 
+Sound: bloom at 0.06 s into the move, with the brand entrance; its 0.14 s attack matches the slow settle (default gain).
+
 This is the gravity band (0.5 to 0.8 s and up): the entrance is long and small, 2.2vh of travel,
 so it settles and does not arrive. Opposite drifts on the two lights read as depth. The lights are
 radial gradients that end at zero alpha, so there is no edge to band; the 5 percent grain hides

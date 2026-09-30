@@ -23,6 +23,8 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 </script>
 ```
 
+Sound: bloom at --beat-1; its 0.14 s attack follows the blur clearing over 0.5 s (default gain).
+
 `letter-spacing` adds its gap after the last letter too, so a centred word drifts left as it
 collapses; `text-indent` of the same value, animated with it, cancels that. The blur clears in 0.5 s
 while the tracking runs 0.9 s: the word is readable before it is still. Size the word for its first

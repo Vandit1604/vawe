@@ -28,6 +28,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: none; the block is loud enough to the eye, and the film keeps its one swell for a stronger cut.
+
 Position is a pure function of `t`, so the blur reads the same curve and never disagrees with the
 move. Shot A needs its own ground (`background: var(--ground)`) or shot B shows through at the start.
 Put something on the block while it covers the frame (the wordmark), or the render refuses the flat

@@ -25,6 +25,8 @@ one `clip-path` reveals both, so every letter turns dark at the exact pixel the 
 Ship the <span class="hl">launch film<span class="wipe"><span class="bar"></span><span class="dark">launch film</span></span></span>
 ```
 
+Sound: none; the bar points at a word the viewer is already reading.
+
 `--sweep` is `curveToLinear(CURVES.expoOut)`, set on `:root` as in [mask-rise.md](mask-rise.md).
 
 ## The numbers that make it look expensive

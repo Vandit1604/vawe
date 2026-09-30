@@ -22,6 +22,8 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 </script>
 ```
 
+Sound: none; a line rising into place is a read, not an event.
+
 For two or three lines, one `.mask` per line and a 60 ms step in `animation-delay` between them.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

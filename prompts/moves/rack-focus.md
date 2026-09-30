@@ -18,6 +18,8 @@ near.animate([{ scale: 1 }, { scale: 0.985 }], beat);
 near.animate([{ opacity: 1 }, { opacity: 0.55 }], beat);    // the defocused layer also steps back
 ```
 
+Sound: none; a focus pull is felt, never heard.
+
 Both blurs run on the same curve, so at the midpoint the two layers are equally soft: that is the
 moment the lens is between planes, and it must be brief (0.7 s in all). The curve eases in, peaks and
 lands soft, like a hand on a focus ring. Blur is a state here, not motion blur: the layers hold

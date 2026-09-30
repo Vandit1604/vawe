@@ -98,4 +98,4 @@ its source, an outside quirk, or a guard that looks safe to delete. Never histor
 A stale comment is a bug.
 
 Where to look: `prompts/README.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
-with clips), `core/motion/README.md`, `engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script).
+with clips; `prompts/moves/RECIPES.md` chains them into short films), `core/motion/README.md`, `engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script).

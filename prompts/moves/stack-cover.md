@@ -18,6 +18,8 @@ copy.animate([{ translate: '9vw 0' }, { translate: '0 0' }], { ...opt, duration:
 // blur only the sheet body (not the cast): stdDeviation = 0.25 x one frame's travel, x only, set in vawe.onFrame as in push-blur
 ```
 
+Sound: none; a soft cut stays soft.
+
 The `cast` is a 34 vw wide gradient that falls off in 5 stops (0.34 to 0 alpha), not a `box-shadow`: a
 box-shadow cannot grow with progress. Keep it outside the blurred element or the blur turns it to bands.
 Make the sheet 4.4 percent wider than the frame and start it that far left, so its rounded leading

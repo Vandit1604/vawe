@@ -26,6 +26,8 @@ vawe.onFrame((t) => {
 // shot B's lines rise from a mask at t0 + dur * COVER, as in mask-rise
 ```
 
+Sound: none; the letter filling the frame is the cut, and the film keeps its one swell for a stronger one.
+
 Pick a letter with one solid stem; an `o` or `a` puts the counter in the middle of the frame. Set
 `COVER` by looking at the frames: it is the moment the frame is one flat colour, and shot B's text
 must start rising there, or the clip has a blank beat (the render refuses a flat run over 0.1 s).

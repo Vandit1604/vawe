@@ -22,6 +22,8 @@ document.querySelector('.b circle').animate([{ strokeDasharray: '28 72' }, { str
 </script>
 ```
 
+Sound: chime at 0.53 s into the move, two frames after the cut, as the spinner becomes the finished ring (default gain).
+
 Three things must match across the cut: position, size and angle. The ring gets one `rotate` track
 applied to both copies, so the angle cannot jump; the arc length (28 of 100) is the same in both.
 The speed matches too: the linear turn is 440 degrees a second, and the `expoOut` tail is sized so

@@ -22,6 +22,8 @@ shotB.animate([{ filter: 'brightness(2.4)', scale: 1.06 }, { filter: 'brightness
 <meta name="blank" content="0.52-0.58">   <!-- the renderer flags an all-white frame; declare it -->
 ```
 
+Sound: swell at -0.20 s into the move, 0.72 s before the cut at 0.52 s, so it stops dead on the cut (default gain); this is the film's one swell, so use it on one flash only.
+
 One frame up (0.04 of 420 ms), about three frames held, then a long tail: the fall is what makes it
 read as light and not as a white slide. Held for 6 frames or more it is a strobe. Use it once or
 twice a film, on the strongest beats only; a flash on every cut is a tell. Give shot A a little

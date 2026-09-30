@@ -27,6 +27,8 @@ document.documentElement.style.setProperty('--through', curveToLinear((u) => u *
 </script>
 ```
 
+Sound: pluck at 0.53 s into the move, two frames after the cut at 0.50 s (default gain).
+
 The shape can be a word, a card edge or a cursor; what matters is that its path does not stop at the
 cut. Put the cut two frames before the sound cue, never after it.
 

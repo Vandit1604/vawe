@@ -28,6 +28,8 @@ parts.forEach((el, i) => {
 </script>
 ```
 
+Sound: droplet at 1.00 s into the move, when the pay button (the last part) lands (default gain); no tick per part.
+
 Each part has an origin the eye can name, so the build explains the card: the person on the left,
 the money on the right, the rest stacking up from below. The blur is 6 px and clears as the part
 lands, so a still part is never soft. The parts are 900 ms long because the travel is 9 to 14vh;
