@@ -25,6 +25,12 @@ This index lists the built ones, in the same groups.
 | show an AI product answering | [AI stream response](ai-stream-response.md) |
 | put the picture inside the name | [text as mask](text-as-mask.md) |
 | land one hero word on the beat | [outline fill](outline-fill.md) |
+| cover the old shot with a new panel | [stack-cover](stack-cover.md) |
+| open one shot onto the next | [split-reveal](split-reveal.md) |
+| tear one shot off to show the next | [slice-shift](slice-shift.md) |
+| grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
+| carry a cut on a brand colour | [color-block-wipe](color-block-wipe.md) |
+| enter the next shot through a part of this one | [zoom-through](zoom-through.md) |
 
 ## Reveal a title
 
@@ -108,17 +114,6 @@ This index lists the built ones, in the same groups.
 | before after wipe | the claim is a change: one card in two states, and a scan line carries the after state (accent, real numbers) over the grey before on the iris curve | [before-after-wipe.md](before-after-wipe.md) | [before-after-wipe.mp4](before-after-wipe.mp4) |
 | skeleton reveal | grey blocks in the shape of the content shimmer under one moving light, then each region resolves into real content, 200 ms apart | [skeleton-reveal.md](skeleton-reveal.md) | [skeleton-reveal.mp4](skeleton-reveal.mp4) |
 | AI stream response | a typed prompt is sent up into the thread, three dots work, then the answer streams in 1 to 3 word chunks with a caret on the newest chunk | [ai-stream-response.md](ai-stream-response.md) | [ai-stream-response.mp4](ai-stream-response.mp4) |
-
-## Pick by job
-
-| job | moves |
-|---|---|
-| cover the old shot with a new panel | [stack-cover](stack-cover.md) |
-| open one shot onto the next | [split-reveal](split-reveal.md) |
-| tear one shot off to show the next | [slice-shift](slice-shift.md) |
-| grow the next shot out of a word | [type-fill-transition](type-fill-transition.md) |
-| carry a cut on a brand colour | [color-block-wipe](color-block-wipe.md) |
-| enter the next shot through a part of this one | [zoom-through](zoom-through.md) |
 
 Re-render a clip after editing its demo: `bin/vawe moves --only <move>`.
 
