@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { parseDirections, rangeProblems, directionsLines, hueFamilies, typefaceKey, sameMove, familyOf } from '../../harness/lib/directions.mjs';
+import { parseDirections, rangeProblems, directionsLines, hueFamilies, typefaceKey, sameMove, familyOf, attractorProblems, attractorWords, ATTRACTORS } from '../../harness/lib/directions.mjs';
 import { newFilm } from '../../harness/cli/new.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
@@ -59,10 +59,31 @@ test('the pieces: hue families ignore neutrals, faces drop weights, moves compar
 });
 
 test('directionsLines: empty, filled without a pick, filled and picked', () => {
-  assert.match(directionsLines(brief([slot('A', { family: 'type' })]), 'films/x')[0], /^directions: empty; fill three .*films\/x\/directions.html --fresh --stage stills/);
+  assert.match(directionsLines(brief([slot('A', { family: 'type' })]), 'films/x')[0], /^directions: empty; fill three .*films\/x\/directions.html.*the next bin\/vawe dev scores the three/);
   assert.match(directionsLines(brief(RANGED, ''), 'films/x')[0], /no `picked:` with a reason/);
   assert.deepEqual(directionsLines(brief(RANGED), 'films/x'), []);
   assert.deepEqual(directionsLines(null, 'films/x'), []);
+});
+
+test('attractors: a light-poetry brand name and a disc hero are advice with the fix; a ranged brief is clean', () => {
+  const sonnet = `# x: brief\n\n## Inputs\n\n- brand: Vesper\n\n${brief([
+    slot('A', { family: 'graphic', sentence: 'Vesper at dusk: a banded disc sinks behind the name', 'key frame': 'a synthwave sun over the wordmark', thread: 'the disc' }),
+    RANGED[1], RANGED[2],
+  ])}`;
+  const out = attractorProblems(sonnet);
+  assert.equal(out.length, 2, out.join('\n'));
+  assert.match(out[0], /^attractor: the brand name "vesper" is a light-poetry name .*; fix: name it after what the product does/);
+  assert.match(out[1], /^attractor: direction A's hero is "banded", "disc", "synthwave", "sun" .*; fix: carry it on type, a real object or a colour field/);
+  assert.deepEqual(attractorProblems(brief(RANGED)), []);
+  assert.ok(directionsLines(sonnet, 'films/x').some((l) => l.startsWith('attractor: the brand name')));
+  assert.deepEqual(attractorWords('a string during the bring'), []);
+});
+
+test('the attractor data quotes the card, so the list and the card cannot drift', () => {
+  const card = fs.readFileSync(path.join(ROOT, 'engine-doctrine/TASTE-CARD.md'), 'utf8');
+  const section = card.split('## Attractors')[1].split('\n## ')[0];
+  for (const quote of [ATTRACTORS.names.card, ...ATTRACTORS.shapes.cards]) assert.ok(section.includes(quote), quote);
+  assert.ok(ATTRACTORS.names.words.includes('vesper'));
 });
 
 test('vawe new writes three empty family slots, a picked line and three starter stills', () => {

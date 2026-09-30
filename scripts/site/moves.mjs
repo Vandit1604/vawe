@@ -17,7 +17,7 @@ const DATA = path.join(root, 'site', 'lib', 'moves.json');
 const LLMS = path.join(root, 'site', 'public', 'llms.txt');
 const REPO_BLOB = 'https://github.com/Vandit1604/vawe/blob/main/prompts/moves/';
 const SITE = 'https://vawe.dev';
-const NOT_MOVES = new Set(['README.md', 'LIBRARY.md', 'RECIPES.md']);
+const NOT_MOVES = new Set(['README.md', 'GROUPS.md', 'LIBRARY.md', 'RECIPES.md']);
 const DEFAULT_LOOK = 'vawe';
 
 const read = (p) => fs.readFileSync(p, 'utf8');
@@ -26,14 +26,14 @@ const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const plain = (md) => md.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').replace(/[*`]/g, '').replace(/\s+/g, ' ').trim();
 
-// ---- README: the group tables and the pick-by-job rows -------------------------------------------
+// ---- README (pick by job) and GROUPS (the group tables) and the pick-by-job rows -------------------------------------------
 function readIndex() {
   const groups = [];
   const groupOf = new Map();
   const shortUse = new Map();
   const jobs = new Map();
   let section = null;
-  for (const line of read(path.join(SRC, 'README.md')).split('\n')) {
+  for (const line of ['README.md', 'GROUPS.md'].flatMap((f) => read(path.join(SRC, f)).split('\n'))) {
     const h = line.match(/^## (.+)/);
     if (h) { section = h[1].trim(); continue; }
     if (!line.startsWith('|') || /^\|\s*-/.test(line)) continue;

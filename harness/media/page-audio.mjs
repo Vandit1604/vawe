@@ -179,12 +179,12 @@ function writeMix(specs, duration, tmp) {
   return { warnings: cueSpreadWarnings(tracks), mixWav };
 }
 
-/** Integrated loudness in LUFS of the mix as written, with no video and no encode; null when there are no specs. */
+/** { I, TP }: integrated LUFS and true peak dBFS of the mix as written, before the limiter; null when there are no specs. */
 export function measureMixLevel({ specs, duration }) {
   if (!specs.length) return null;
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-audio-'));
   try {
-    return measureFile(writeMix(specs, duration, tmp).mixWav).I;
+    return measureFile(writeMix(specs, duration, tmp).mixWav);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

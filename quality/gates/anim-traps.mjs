@@ -21,6 +21,8 @@
 //      the WHOLE overlap regardless of either side's fill. A per-letter or per-word animation added
 //      after a timing-sheet row on the same property silently freezes or erases that row.
 //
+// It also prints the motion lint (harness/lib/motion-lint.mjs), advice lines with no exit code.
+//
 // SEVERITY: REPORTS, not BLOCKS. `--strict` promotes a finding to a failing exit code. Waiver: a page
 // declares it through pageAuthoring (harness/lib/motion-stamp.mjs), with a stated reason.
 //
@@ -33,6 +35,7 @@ import { openPreview } from '../../harness/media/preview-server.mjs';
 import { gateFindings } from '../../harness/lib/findings.mjs';
 import { pageAuthoring } from '../../harness/lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../../harness/lib/waivers.mjs';
+import { runMotionCollector, motionLint, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const argv = process.argv.slice(2);
@@ -220,11 +223,13 @@ async function checkPage(absFile) {
         return Math.max(m, (t.delay || 0) + (t.duration || 0) * (t.iterations === Infinity ? 1 : (t.iterations || 1)));
       }, 0);
     });
+    const motion = await runMotionCollector(page);
     const findings = await runTrapChecker(page, durMs);
     pageTraps(fs.readFileSync(absFile, 'utf8'), (what, where, fix) => findings.push({ what, where, fix }));
-    const { allow = [], _why = {} } = pageAuthoring(absFile);
+    const authoring = pageAuthoring(absFile);
+    const { allow = [], _why = {} } = authoring;
     const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps');
-    return { file: relFile, findings, waived };
+    return { file: relFile, findings, waived, motion: lintLines(unwaived(motionLint(motion), authoring)) };
   } finally { await close(); }
 }
 
@@ -234,10 +239,15 @@ function reportFindings(r) {
     summary: `${t.what} | ${t.where} | fix: ${t.fix}`, at: `${r.file}: ${t.where}`, scene: r.file, waived: r.waived });
 }
 
+function printMotion(lines) {
+  console.log(lines.length ? `  motion lint (advice; waive a line with its code in authoring.allow and a _why):\n${lines.map((l) => `  - ${l}`).join('\n')}` : '  motion lint: clean');
+}
+
 function printResult(r) {
   console.log(`\n  anim-traps · ${r.file}`);
   if (r.skip) { console.log(`  · ${r.skip}\n`); return; }
   if (r.error) { console.log(`  ✗ ${r.error}\n`); return; }
+  printMotion(r.motion);
   if (!r.findings.length) { console.log('  ✓ clean, no trap matched\n'); return; }
   for (const t of r.findings) console.log(`  - ${t.what} | ${t.where} | fix: ${t.fix}`);
   reportFindings(r);

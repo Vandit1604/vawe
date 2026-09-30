@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sampleTimes, textProblems, soundLine, mergeProblems, draftCheckLines , briefLine } from '../../harness/lib/draft-check.mjs';
+import { sampleTimes, textProblems, soundLine, mergeProblems, draftCheckLines, draftAdvice, briefLine } from '../../harness/lib/draft-check.mjs';
 
 const at = (t, ...lines) => ({ t, lines: lines.map(([text, fontPx]) => ({ text, fontPx })) });
 const dim = { step: 0.5, frameH: 540 };
@@ -49,9 +49,9 @@ test('mergeProblems: alternates the two lists and stops at 4', () => {
   assert.deepEqual(mergeProblems([], ['t1']), ['t1']);
 });
 
-test('draftCheckLines: clean, or problems then the instruction', () => {
-  assert.deepEqual(draftCheckLines([], null), ['draft check: no problems found']);
-  assert.deepEqual(draftCheckLines(['a'], 'sound: x'), ['draft check:', '  a', '  sound: x', 'fix the draft check first']);
+test('draftCheckLines: clean, or each line as advice and an end line that says the render went on', () => {
+  assert.deepEqual(draftCheckLines(draftAdvice([], null)), ['draft check: no problems found']);
+  assert.deepEqual(draftCheckLines(draftAdvice(['a'], 'sound: x')), ['draft check:', 'advice: a', 'advice: sound: x', '(advice only: the render continued)']);
 });
 
 test('the brief line names a missing brief and a template brief, and stays quiet on a written one', () => {

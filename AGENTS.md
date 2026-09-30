@@ -6,7 +6,7 @@ private format, and if something you would naturally write fails, that is a fram
 This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`
 (`bin/vawe <verb> --help` lists flags; a wrong flag exits 2 with the valid ones). Start with
 `bin/vawe new <name> --request "<the ask>"`: it picks the template and writes `films/<name>/page.html`
-(a valid starter) and `brief.md`. `films/examples/three-star/page.html` shows structure, not a look.
+(a valid starter) and `brief.md`. `films/examples/three-star/page.html` shows structure, not a look. `films/examples/colour-sting/` is a judged-PASS, owner-approved 5 s colour-led sting (brief, directions, page): study how it moves, then make your own direction.
 
 ## The page contract  `[live: harness/media/render-page.mjs]`
 
@@ -21,7 +21,7 @@ This file adds only what you would get wrong on your own. One command runs every
   before your scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Audio is `<audio>` tags, mixed offline as written (about -20 LUFS at default gains): `src` + `data-at`
   (s), `data-gain` (dB), `data-fade-out`; `loop` is the music bed; `data-synth="pluck"` picks a voice
-  from `core/audio/kit.mjs`; `data-role="vo"` ducks the bed.
+  (`bin/vawe sounds`, `bin/vawe fonts` list them); `data-role="vo"` ducks the bed.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
 - `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
@@ -29,8 +29,8 @@ This file adds only what you would get wrong on your own. One command runs every
 
 ## The loop  `[live: harness/live/stage-say.mjs]`
 
-Each command prints the taste rules for its step (`engine-doctrine/TASTE-CARD.md`, which the judge
-scores against). A hook names the next command for the page film you edited last.
+Read `engine-doctrine/TASTE-CARD-DIGEST.md` first. Each command prints the taste rules for its step. The
+judge scores the full `engine-doctrine/TASTE-CARD.md`. A hook names the next command for the page film you edited last.
 
 | # | stage | the command |
 |---|---|---|
@@ -58,7 +58,8 @@ PASS is never self-recorded.
 - Judges name template devices: light beams, lens streaks, sheen bands, accent bars, rule lines. One per film.
 - The same seam move twice reads as a template, even in another direction. Change the move.
 - A crossfade between two busy frames goes grey and muddy. Cut, or wipe on the motion.
-- First drafts score about 6/10 on motion: one move per beat at one speed. Overlap a slower second move.
+- First drafts score about 6/10 on motion: one move per beat at one speed. Move with
+  `core/motion/presets.js` (`enter`, `leave`, `stagger`, `layer`, `BANDS`), as the starter does.
 - Agents read the card once and forget it: read the lines each command prints before the next edit.
 - Also banned unless the brief asks: a centred title on a gradient, corner labels, glow on UI text,
   particles, camera shake, gradient text, fake product UI, an em dash on screen, a hook over 12 words.

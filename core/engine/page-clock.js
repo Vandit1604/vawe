@@ -11,6 +11,8 @@
 // engine. A page is seeked in fractional seconds (subframe blur, 59.94 masters), so this keys on t.
 // installPageClock serializes with toString(), so it must not reference anything outside its body.
 // The real timers stay reachable as window.__pageClock.real for the renderer's own paint barrier.
+// pending() counts the rAF callbacks and timers still waiting: at 0, time can change the page only
+// through its animations, which lets the renderer reuse a capture when their state repeats.
 export function installPageClock() {
   if (typeof window === 'undefined' || window.__pageClock) return;
   const real = {
@@ -67,6 +69,7 @@ export function installPageClock() {
       for (const cb of q) cb(ms);
     },
     now: () => ms,
+    pending: () => rafQ.size + timers.size,
     real,
   };
 }
