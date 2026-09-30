@@ -21,7 +21,7 @@ rows lose their height, so the list squeezes shut under the query; a fade would 
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.spring), leave = curveToLinear((u) => u * u * u);
 const at = { dim: 120, drop: 150, rows: 220, keys: [780, 930, 1080], enter: 1340, exit: 1560 };   // ms
-dim.animate([{ opacity: 0 }, { opacity: 0.28 }], { duration: 220, delay: at.dim, easing: settle, fill: 'both' });
+dim.animate([{ opacity: 0 }, { opacity: 0.55 }], { duration: 220, delay: at.dim, easing: settle, fill: 'both' });
 palette.animate([{ translate: '0 -4vh', opacity: 0 }, { opacity: 1, offset: 0.25 }, { translate: '0 0', opacity: 1 }],
   { duration: 520, delay: at.drop, easing: drop, fill: 'both' });
 rows.forEach((r, i) => r.animate([{ translate: '0 1.6vh', opacity: 0 }, { translate: '0 0', opacity: 1 }],
