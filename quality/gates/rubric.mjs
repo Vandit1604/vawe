@@ -25,7 +25,7 @@ const DIMENSIONS = [
   '**Hierarchy**: ONE clear focal point; the eye knows where to land first.',
   '**Composition**: centered/aligned/on-thirds ON PURPOSE. Off-center-by-accident, mis-anchored\n   annotations (an underline not under its word), floating elements = FAIL. (This is the argus-pass class.)',
   '**Brand fidelity**, matches the house style: dominance, ONLY brand colours, the real face, the\n   SIGNATURE DETAILS present, the NEVERs absent.',
-  '**Asset fidelity**: real captured assets (logos/mascots/UI), never a recreated-from-memory lookalike.',
+  '**Asset fidelity**: for a real brand or product, real captured assets (logos/mascots/UI), never a recreated-from-memory lookalike. An invented brand has no capture: its own mark and world are the asset, so never ask for one.',
   // DIMENSION 6 USED TO READ "crafted density; not a word-on-empty-space slide", which instructs the
   // judge to score density UP. That is length bias written into the rubric: a judge already leans that
   // way by default, scoring the longer, busier answer higher whether or not it is better. And CLAUDE.md

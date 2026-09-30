@@ -287,9 +287,14 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
 // type and gradients clean. Draft is ultrafast.
 function x264Args(final) {
   return final
-    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'medium', '-crf', '16', '-movflags', '+faststart']
+    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'medium', '-crf', '16', '-tune', 'film', '-movflags', '+faststart']
     : ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'ultrafast', '-crf', '20', '-movflags', '+faststart'];
 }
+
+// 8-bit yuv420p bands a dark gradient into visible rings; a faint fixed-seed temporal noise before the
+// encode dithers them away (the final only, so draft pixels stay comparable). Strength 2 did not survive
+// x264's smoothing on a test gradient; 4 with -tune film did.
+const DITHER = 'noise=alls=4:allf=t:all_seed=7';
 
 function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
   const seq = path.join(tmpDir, 'f%06d.png');
@@ -299,10 +304,10 @@ function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
     const args = blur > 1
       ? ['-y', '-v', 'error', '-framerate', String(fps * blur), '-i', seq,
         '-vf', `tmix=frames=${blur}:weights='${Array(blur).fill('1').join(' ')}',`
-          + `select='not(mod(n+1\\,${blur}))',setpts=N/${fps}/TB`,
+          + `select='not(mod(n+1\\,${blur}))',setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}`,
         '-r', String(fps), ...x264Args(final), tmpOut]
       : ['-y', '-v', 'error', '-framerate', String(fps), '-i', seq,
-        ...x264Args(final), tmpOut];
+        ...(final ? ['-vf', DITHER] : []), ...x264Args(final), tmpOut];
     return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
   }
 
@@ -322,7 +327,7 @@ function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
   const joins = segments.map((_, idx) => `[s${idx}]`).join('');
   // Each segment restarts its pts, so a 1-frame segment carries no duration and the next one overlaps
   // it; re-stamp after the concat and never let -r rate-convert, or ffmpeg drops the overlapped frames.
-  const filterComplex = `${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB[outv]`;
+  const filterComplex = `${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}[outv]`;
   const args = ['-y', '-v', 'error', '-framerate', String(fps), '-i', seq,
     '-filter_complex', filterComplex, '-map', '[outv]',
     '-fps_mode', 'passthrough', ...x264Args(final), tmpOut];

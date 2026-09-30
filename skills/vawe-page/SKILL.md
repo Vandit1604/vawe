@@ -96,6 +96,6 @@ first-frame hook is 12 words or fewer. Waivers (`<script id="authoring">`) are i
 ## Commands
 
 `bin/vawe dev <page> [--aspect --from --to --audio]`: half size, 30 fps, silent.
-`bin/vawe ship <page> [--aspect all]`: 60 fps, motion blur, audio mixed, then a final check and a fresh judge (about 30 s). It runs in the background: `bin/vawe ship --status <page> --wait` waits at most 100 s (under the 120 s tool timeout); repeat until it says done. The result is the verdict with rule numbers and seconds: fix them, worst first, and ship again, at most 3 rounds. A second ship of the same page cancels the first. Never use `ship --wait` (the foreground render) inside an agent tool call: it hits the timeout.
+`bin/vawe ship <page> [--aspect all]`: 60 fps, motion blur, audio mixed, then a final check and a fresh judge (about 30 s). It runs in the background: `bin/vawe ship --status <page> --wait` waits at most 100 s (under the 120 s tool timeout); repeat until it says done. The result is the verdict with rule numbers and seconds: fix them, worst first, on drafts (`bin/vawe dev`, then `bin/vawe judge <draft mp4> --fresh`, about 1 to 2 min a round) until PASS, then ship once more. A second ship of the same page cancels the first. Never use `ship --wait` (the foreground render) inside an agent tool call: it hits the timeout.
 `bin/vawe critique <page> [--ref mp4]`: the fresh look (`vawe-critique`; with `--ref`, `vawe-reference`).
 Templates: `prompts/README.md`. Long films: `prompts/directors-brief-long-form.md`.
