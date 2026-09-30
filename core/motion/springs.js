@@ -99,11 +99,42 @@ export function springLinear(k = 170, d = 26, samples = 40) {
 
 // Any easing fn(u) on [0, 1] as an exact CSS linear() string: never approximate a curve with
 // cubic-bezier. fn may be a curves.js name. Samples are evenly spaced; 40 is smooth to 1/1000.
-export function curveToLinear(fn, samples = 40) {
+// Throws when fn(0) is not 0, fn(1) is not 1 (both within 1e-3) or a sample is NaN. Options: a
+// sample count, or { samples, tolerance }: with a tolerance the sample count doubles until the largest gap between the curve and the straight
+// line between two samples (measured at each midpoint) is under tolerance.
+export function curveToLinear(fn, options = {}) {
+  const { samples = 40, tolerance } = typeof options === 'number' ? { samples: options } : options;
   const e = resolveEase(fn);
+  checkEnds(e);
+  let n = samples;
+  while (tolerance && n < MAX_SAMPLES && maxInterpolationError(e, n) >= tolerance) n *= 2;
   const pts = [];
-  for (let i = 0; i <= samples; i++) pts.push(String(Math.round(e(i / samples) * 10000) / 10000));
+  for (let i = 0; i <= n; i++) pts.push(String(Math.round(sampleAt(e, i, n) * 10000) / 10000));
   return `linear(${pts.join(', ')})`;
+}
+
+const END_TOLERANCE = 1e-3;
+const MAX_SAMPLES = 1280;
+
+function sampleAt(e, i, n) {
+  const v = e(i / n);
+  if (Number.isNaN(v)) throw new Error(`curveToLinear: fn(${i / n}) is NaN at sample ${i} of ${n}`);
+  return v;
+}
+
+function checkEnds(e) {
+  const start = e(0), end = e(1);
+  if (Math.abs(start) > END_TOLERANCE) throw new Error(`curveToLinear: fn(0)=${start}, expected 0: the animation would start off its first value`);
+  if (Math.abs(end - 1) > END_TOLERANCE) throw new Error(`curveToLinear: fn(1)=${end}, expected 1: the animation would end ${end < 1 ? 'short' : 'past its last value'}`);
+}
+
+function maxInterpolationError(e, n) {
+  let worst = 0;
+  for (let i = 0; i < n; i++) {
+    const mid = sampleAt(e, i + 0.5, n);
+    worst = Math.max(worst, Math.abs(mid - (sampleAt(e, i, n) + sampleAt(e, i + 1, n)) / 2));
+  }
+  return worst;
 }
 
 // Named curves for curveToLinear. expoOut matches approach(k = 0.15) settling over 40 frames.
