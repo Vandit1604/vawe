@@ -1,15 +1,5 @@
 [
   {
-    "id": "motion.anticipate-default",
-    "category": "motion",
-    "stage": "direct",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "A directional entrance winds up on its own; `anticipate: false` turns it off",
-    "doc": "engine-doctrine/RULES/anticipate-default.md"
-  },
-  {
     "id": "motion.blur-out-dense",
     "category": "motion",
     "stage": "direct",
@@ -48,26 +38,6 @@
     "adapt": null,
     "brief": "Nothing arrives at t=0",
     "doc": "engine-doctrine/RULES/first-arrival.md"
-  },
-  {
-    "id": "motion.handover-glide",
-    "category": "motion",
-    "stage": "direct",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "A becomes handover glides 0.8 to 1.0 seconds, or it reads as a cut",
-    "doc": "engine-doctrine/RULES/handover-glide.md"
-  },
-  {
-    "id": "motion.motion-offsets",
-    "category": "motion",
-    "stage": "direct",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "Motion x/y are offsets on the base position, never absolute coordinates",
-    "doc": "engine-doctrine/RULES/motion-offsets.md"
   },
   {
     "id": "motion.paired-directional-exit",

@@ -70,16 +70,6 @@
     "doc": "engine-doctrine/CRAFT/HTML-FRAGMENTS.md#the-stage-kit-a-foundation-not-a-reset"
   },
   {
-    "id": "layout.state-the-canvas",
-    "category": "layout",
-    "stage": "design",
-    "applies": "always",
-    "check": null,
-    "adapt": null,
-    "brief": "State the canvas, or the film renders portrait",
-    "doc": "engine-doctrine/RULES/state-the-canvas.md"
-  },
-  {
     "id": "layout.video-scale",
     "category": "layout",
     "stage": "design",
