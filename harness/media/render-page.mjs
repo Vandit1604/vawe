@@ -47,6 +47,7 @@ import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-see
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
 import { openPreview } from './preview-server.mjs';
+import { writeDraftSheet } from './draft-sheet.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
 
@@ -532,6 +533,13 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
+function printDraftSheet(mp4, { fps, from }) {
+  try {
+    const { out, frames, fastest } = writeDraftSheet({ video: mp4, out: mp4.replace(/\.mp4$/, '.png'), fps, from });
+    console.log(`  look: ${out} (frames at ${frames.join(', ')} s; fastest motion at ${fastest} s)`);
+  } catch (e) { console.error(`  no key-frame sheet: ${e.message}`); }
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (name, d) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : d; };
@@ -575,6 +583,7 @@ async function main() {
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.width}x${frame.height} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
+    if (!final) printDraftSheet(outPath, opts);
   }
 }
 

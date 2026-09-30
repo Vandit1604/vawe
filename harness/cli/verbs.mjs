@@ -27,7 +27,7 @@ export const VERBS = [
     build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref, ...(v.score ? { SCORE: '1' } : {}) } }] : null),
   },
   {
-    name: 'dev', summary: 'draft render: half size, 30 fps, silent',
+    name: 'dev', summary: 'draft render: half size, 30 fps, silent; also writes a key-frame sheet PNG next to it',
     positional: [PAGE],
     flags: [
       { name: 'from', type: 'number', help: 'start second' },
