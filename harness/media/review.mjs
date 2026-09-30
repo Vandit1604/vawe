@@ -158,7 +158,25 @@ async function coveragePart(ctx) {
   return ctx.withText ? [...rows, ...textCoverageFindings(ctx)] : rows;
 }
 
-export const PARTS = [clipPart, timingPart, motionPart, coveragePart];
+const QUIET_LUFS = -30, LOUD_LUFS = -12, TYPICAL_LUFS = -20;
+
+/** loudnessFinding(lufs) -> a warn when the written mix is quieter than -30 or louder than -12 LUFS, else null. */
+export function loudnessFinding(lufs) {
+  if (lufs >= QUIET_LUFS && lufs <= LOUD_LUFS) return null;
+  const n = Math.abs(Math.round(TYPICAL_LUFS - lufs));
+  const quiet = lufs < QUIET_LUFS;
+  return finding('warn', 0, `the mix is ${quiet ? 'quiet' : 'loud'}: ${lufs.toFixed(1)} LUFS as written, outside ${QUIET_LUFS} to ${LOUD_LUFS}`,
+    `${quiet ? 'raise' : 'lower'} every data-gain by ${n} dB`);
+}
+
+function loudnessPart(ctx) {
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-nostats', '-i', ctx.video, '-vn', '-af', 'ebur128', '-f', 'null', '-'], { encoding: 'utf8' });
+  const m = r.stderr.slice(r.stderr.lastIndexOf('Summary:')).match(/I:\s+(-?[\d.]+) LUFS/);
+  const found = m && parseFloat(m[1]) > -70 ? loudnessFinding(parseFloat(m[1])) : null;
+  return found ? [found] : [];
+}
+
+export const PARTS = [clipPart, timingPart, motionPart, coveragePart, loudnessPart];
 
 const partName = (part) => part.name.replace(/Part$/, '');
 const ranParts = (ref) => PARTS.filter((p) => p !== coveragePart || ref).map(partName);
