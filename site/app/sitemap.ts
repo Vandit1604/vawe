@@ -1,126 +1,20 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { MetadataRoute } from "next";
 import pages from "../lib/site-pages.json";
-import effects from "../lib/effects.json";
-import blocks from "../lib/blocks.json";
 
-/* site/app/sitemap.ts — every URL vawe.dev serves, generated from the same files the pages are.
- *
- * WHAT THIS FIXES, measured on 2026-09-19: vawe.dev/sitemap.xml returned 404 while the site was
- * already serving a crawlable detail page per effect and per block plus 7 routes and 17 docs
- * pages. Every one of them had no discovery path. A search for what vawe does returned the GitHub
- * repo and not the site: the README was doing the ranking.
- *
- * READ FROM THE REGISTRIES, NEVER A HAND-KEPT LIST. effects.json and blocks.json are the same two
- * files the detail pages' own generateStaticParams read, so this cannot list a page that does not
- * exist or miss one that does. A hand-written XML file of 879 URLs is stale the day it is written.
- *
- * ALL 694 EFFECTS ARE HERE, including the 362 whose `noPreview` flag means they cannot play a live
- * animation. That flag was checked before this file was written, because submitting near-empty pages
- * teaches Google a site is thin and that judgement lands site-wide, not per URL. It is not a thinness
- * flag: all 694 carry an authoring snippet (median 112 bytes for the static ones against 120 for the
- * live ones) and all 694 carry a description (median 95 characters against 90). Zero of either group
- * lack one. "Static only" means the effect cannot be animated in a preview, not that the page is empty.
- *
- * The docs URLs come from site-pages.json rather than from docs-site/ directly: see that generator's
- * header for why (the Dockerfile builds this app before docs-site exists in the image).
+/* site/app/sitemap.ts: every URL vawe.dev serves, read from lib/site-pages.json, the same file the
+ * footer nav reads, so the sitemap cannot list a route the footer does not.
  */
 
 const BASE = "https://vawe.dev";
 
-type EffectsIndex = { list: { id: string; entries: { stem: string }[] }[] };
-type Block = { name: string; category?: string };
-
-// Google's image sitemap extension (image:loc per url) is for images a crawler might otherwise
-// miss, which describes these: every effect/block still is drawn from a registry into a client
-// grid (Arsenal.tsx) rather than sitting in static markup. Only list a file that is actually on
-// disk, the same rule effects/[stem]/page.tsx's own hasStill() already applies to the still shown
-// on the page itself, so the sitemap never claims an image no page has.
-const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "../public");
-const stillFor = (stem: string) =>
-  fs.existsSync(path.join(PUBLIC_DIR, "assets/effects", `${stem}.jpg`))
-    ? `${BASE}/assets/effects/${stem}.jpg`
-    : null;
-const blockImageFor = (name: string) =>
-  fs.existsSync(path.join(PUBLIC_DIR, "assets/blocks", `${name}.png`))
-    ? `${BASE}/assets/blocks/${name}.png`
-    : null;
-
-// One timestamp for the whole file. A per-URL mtime would claim these pages change independently,
-// and they do not: they are all regenerated together from the registries by one build.
+// One timestamp for the whole file: the pages are all rebuilt together by one build.
 const built = new Date();
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const entries: MetadataRoute.Sitemap = [];
-
-  for (const r of [...pages.routes, ...pages.docs]) {
-    entries.push({
-      url: `${BASE}${r.path}`,
-      lastModified: built,
-      changeFrequency: r.changeFrequency as MetadataRoute.Sitemap[number]["changeFrequency"],
-      priority: r.priority,
-    });
-  }
-
-  for (const family of (effects as EffectsIndex).list) {
-    for (const entry of family.entries) {
-      const still = stillFor(entry.stem);
-      entries.push({
-        url: `${BASE}/arsenal/effects/${entry.stem}`,
-        lastModified: built,
-        changeFrequency: "monthly",
-        priority: 0.6,
-        ...(still ? { images: [still] } : {}),
-      });
-    }
-  }
-
-  // The 58 family hubs. Same registry, same loop shape as the leaves above, keyed on the family
-  // instead of the entry. Without these the hubs exist and nothing can find them, which is the exact
-  // defect this whole file was written to fix: 879 real pages with no discovery path.
-  for (const family of (effects as EffectsIndex).list) {
-    entries.push({
-      url: `${BASE}/arsenal/effects/family/${family.id}`,
-      lastModified: built,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    });
-  }
-
-  for (const block of blocks as Block[]) {
-    const img = blockImageFor(block.name);
-    entries.push({
-      url: `${BASE}/arsenal/${block.name}`,
-      lastModified: built,
-      changeFrequency: "monthly",
-      priority: 0.6,
-      ...(img ? { images: [img] } : {}),
-    });
-  }
-
-  // The block category hubs, the block twin of the 58 family hubs above: same registry, same loop
-  // shape, keyed on the category name instead of the family id.
-  //
-  // A CATEGORY OF ONE IS SKIPPED, because no page is generated for it. `Camera` holds a single block
-  // and its hub was 47 words that restated the leaf, so /arsenal links that category straight to the
-  // block instead. A sitemap listing a URL with no page behind it is the thing this file was written
-  // to make impossible, so the rule has to be the same rule in both places.
-  const blockCount = new Map<string, number>();
-  for (const b of blocks as Block[]) {
-    const c = b.category ?? "Core";
-    blockCount.set(c, (blockCount.get(c) ?? 0) + 1);
-  }
-  for (const [category, n] of blockCount) {
-    if (n < 2) continue;
-    entries.push({
-      url: `${BASE}/arsenal/category/${category.toLowerCase()}`,
-      lastModified: built,
-      changeFrequency: "monthly",
-      priority: 0.7,
-    });
-  }
-
-  return entries;
+  return [...pages.routes, ...pages.docs].map((r) => ({
+    url: `${BASE}${r.path}`,
+    lastModified: built,
+    changeFrequency: r.changeFrequency as MetadataRoute.Sitemap[number]["changeFrequency"],
+    priority: r.priority,
+  }));
 }

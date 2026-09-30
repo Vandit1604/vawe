@@ -22,46 +22,11 @@
       "label": "Showcase"
     },
     {
-      "path": "/arsenal",
-      "priority": 0.8,
-      "changeFrequency": "weekly",
-      "group": "product",
-      "label": "Arsenal"
-    },
-    {
-      "path": "/arsenal/type",
-      "priority": 0.7,
-      "changeFrequency": "monthly",
-      "group": "product",
-      "label": "Arsenal by type"
-    },
-    {
-      "path": "/playground",
-      "priority": 0.7,
-      "changeFrequency": "monthly",
-      "group": "product",
-      "label": "Playground"
-    },
-    {
-      "path": "/editor",
-      "priority": 0.7,
-      "changeFrequency": "monthly",
-      "group": "product",
-      "label": "Editor"
-    },
-    {
       "path": "/determinism",
       "priority": 0.7,
       "changeFrequency": "monthly",
       "group": "topic",
       "label": "Determinism"
-    },
-    {
-      "path": "/json-to-video",
-      "priority": 0.7,
-      "changeFrequency": "monthly",
-      "group": "topic",
-      "label": "JSON to video"
     },
     {
       "path": "/ai-agents",
@@ -209,7 +174,7 @@
     }
   ],
   "counts": {
-    "routes": 15,
+    "routes": 10,
     "docs": 20
   }
 }

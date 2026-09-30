@@ -4,9 +4,8 @@ import sitePages from "../../lib/site-pages.json";
 
 type Route = { path: string; group?: string; label?: string };
 
-// One owner for the grouping: scripts/site/site-pages.mjs assigns `group` and `label` to every
-// route, site-pages.json is its generated output, and this is the only place that reads it into a
-// nav. Adding a route means editing the generator, never adding a link here by hand.
+// One owner for the grouping: lib/site-pages.json assigns `group` and `label` to every route, and
+// this is the only place that reads it into a nav. Adding a route means adding it there, never here.
 const ROUTES = (sitePages.routes as Route[]).filter((r): r is Required<Route> => Boolean(r.group && r.label));
 
 const NAV_GROUPS: { title: string; group: string }[] = [
@@ -54,15 +53,15 @@ function FooterNav({ active }: { active?: string }) {
 
 /* ONE FOOTER ON EVERY PAGE: a studio panel holding the generated route groups, and a meta line.
  * `bookend` adds the closing call to action above it, on the pages that end a journey. */
-export function Footer({ note = "one JSON, one video", bookend = false, active }: { note?: string; bookend?: boolean; active?: string }) {
+export function Footer({ note = "one page, one film", bookend = false, active }: { note?: string; bookend?: boolean; active?: string }) {
   return (
     <footer className="wrap foot">
       {bookend && (
         <div className="panel foot-cta-panel">
-          <p className="foot-cta">Compose a scene. Render it. Ship it.</p>
+          <p className="foot-cta">Write a page. Render it. Ship it.</p>
           <div className="foot-act">
-            <a className="btn btn-primary" href="/editor">Try the editor</a>
-            <a className="btn btn-ghost" href={REPO_URL}>Read the source</a>
+            <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
+            <a className="btn btn-ghost" href="/showcase">See the films</a>
           </div>
         </div>
       )}

@@ -38,8 +38,8 @@ export default function WhenDeterminismMatters() {
             <div className="isec-text">
               <h2>It matters when nobody looks at every frame.</h2>
               <p>
-                An agent approves a watermarked draft and expects the paid export to be the exact
-                same pixels minus the watermark, not a re-render that might drift. A thousand
+                An agent approves a draft and expects the final render to show the same moments,
+                not a re-render that might drift. A thousand
                 personalized ad variants from one template need the shared background to be
                 identical across all of them, or the &quot;shared&quot; part is a lie. A render
                 split across parallel machines to finish faster only produces one correct video if
@@ -47,7 +47,6 @@ export default function WhenDeterminismMatters() {
                 three cases, nobody is scrubbing a timeline to catch a difference by eye, so the
                 guarantee has to be structural.
               </p>
-              <span className="cite">/ai-agents · &quot;what an agent approves in draft is exactly what it gets on export&quot;</span>
             </div>
           </section>
 
@@ -101,8 +100,8 @@ export default function WhenDeterminismMatters() {
           <section className="iend">
             <h2 className="h2">How Vawe enforces it.</h2>
             <p className="lead">
-              A virtual clock and two gates that scramble frame order to prove nothing is hiding
-              state.
+              A virtual clock the page runs under, and a test that renders every fixture twice and
+              compares the frames.
             </p>
             <div className="hero-cta">
               <a className="btn btn-primary" href="/determinism">
@@ -110,10 +109,9 @@ export default function WhenDeterminismMatters() {
               </a>
             </div>
             <div className="irelated">
-              <a href="/json-to-video">What the scene JSON actually contains</a>
               <a href="/remotion-alternatives">Remotion alternatives, categorized</a>
               <a href="/hyperframes-alternatives">Vawe vs HyperFrames, the closer comparison</a>
-              <a href="/ai-agents">Why drafts are free and exports are not</a>
+              <a href="/ai-agents">How an agent writes and checks a film</a>
             </div>
           </section>
         </main>

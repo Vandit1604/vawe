@@ -8,7 +8,7 @@ export default function Image() {
     tag: "product tour video",
     title: "Vawe · product tour video",
     description:
-      "A chaptered product tour or feature-update video, built as one JSON file: three chapters, a continuous progress rail, one tracked issue carried through.",
+      "A chaptered product tour or feature-update video: three chapters, a continuous progress rail, one tracked issue carried through.",
     path: "/product-tour-video",
   });
 }

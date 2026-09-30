@@ -1,4 +1,4 @@
-import { Header } from "../components/Header";
+import { Header, REPO_URL } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { FilmGrid } from "../components/FilmGrid";
 import { pageMetadata } from "../components/seo";
@@ -7,13 +7,11 @@ import "../components/intent.css";
 export const metadata = pageMetadata({
   title: "Vawe · product tour video",
   description:
-    "A chaptered product tour or feature-update video, built as one JSON file: three chapters, a continuous progress rail, one tracked issue carried through.",
+    "A chaptered product tour or feature-update video: three chapters, a continuous progress rail, one tracked issue carried through.",
   path: "/product-tour-video",
 });
 
-/* /product-tour-video · the chaptered shape of a launch video, proved by product-feature-tour played
- * live from its scene file.
- */
+/* /product-tour-video · the chaptered shape of a launch video, shown by the rendered product-feature-tour. */
 
 export default function ProductTourVideo() {
   return (
@@ -31,8 +29,8 @@ export default function ProductTourVideo() {
           </section>
 
           <section className="ifilms">
-            <h2>A chaptered tour, played live.</h2>
-            <p>Three chapters, one progress rail, one tracked issue. Your browser renders it from its scene file. Hover to play it, or click to watch it large.</p>
+            <h2>A chaptered tour.</h2>
+            <p>Three chapters, one progress rail, one tracked issue. Hover to play it, or click to watch it large.</p>
             <FilmGrid ids={["product-feature-tour"]} />
           </section>
 
@@ -42,29 +40,27 @@ export default function ProductTourVideo() {
               <p>
                 A product tour is not a sixth deliverable in the engine&apos;s own routing table: it
                 still routes as a launch video, because the ask is the same one the table names,
-                &quot;market or showcase a real product,&quot; just with three features to carry
-                instead of one. What changes is the spine inside that route, chapters instead of a
-                fixed six beats, chosen because the brief needed more than one proof point.
+                &quot;market or show a real product,&quot; just with three features to carry
+                instead of one. What changes is the spine inside that route, chapters instead of one
+                run of beats, chosen because the brief needed more than one proof point.
               </p>
-              <span className="cite">engine-doctrine/CRAFT/ROUTING.md, priority row 2</span>
+              <span className="cite">engine-doctrine/CRAFT/ROUTING.md, row 2</span>
             </div>
           </section>
 
           <section className="iend">
             <h2 className="h2">One feature, not three.</h2>
             <p className="lead">
-              A single product with one hero feature takes the fixed six-beat launch spine instead
-              of chapters.
+              A single product with one hero feature takes the launch beat list instead of chapters.
             </p>
             <div className="hero-cta">
-              <a className="btn btn-primary" href="/editor">
-                Try the editor <span className="arw">→</span>
+              <a className="btn btn-primary" href={REPO_URL}>
+                Start a product tour <span className="arw">→</span>
               </a>
             </div>
             <div className="irelated">
-              <a href="/launch-video">A single-product launch video, six fixed beats</a>
-              <a href="/showcase">Every finished film, open in the editor</a>
-              <a href="/arsenal">Every layer, effect and preset, searchable</a>
+              <a href="/launch-video">A single-product launch video, one message per beat</a>
+              <a href="/showcase">Every finished film</a>
             </div>
           </section>
         </main>

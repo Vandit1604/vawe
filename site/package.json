@@ -11,18 +11,9 @@
     "lint": "next lint",
     "dev:docs": "npm --prefix ../docs-site run dev -- -p 3001",
     "dev:all": "node ../scripts/site/dev-all.mjs",
-    "//build": "Builds into .next-build so a production build cannot corrupt the dev server's .next. Set via NEXT_DIST_DIR + next.config.mjs, because --distDir is not a CLI flag in Next 15.",
-    "test": "node --test --test-concurrency=1 test/*.test.mjs",
-    "//test": "One dev server, one browser, no GPU and no encode. puppeteer resolves from the repo root, where it is already a devDependency."
+    "//build": "Builds into .next-build so a production build cannot corrupt the dev server's .next. Set via NEXT_DIST_DIR + next.config.mjs, because --distDir is not a CLI flag in Next 15."
   },
   "dependencies": {
-    "@codemirror/commands": "^6.10.4",
-    "@codemirror/lang-json": "^6.0.2",
-    "@codemirror/language": "^6.12.4",
-    "@codemirror/state": "^6.7.1",
-    "@codemirror/view": "^6.43.6",
-    "@lezer/highlight": "^1.2.3",
-    "d3-geo": "^3.1.1",
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

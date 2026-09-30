@@ -2,9 +2,7 @@
  *
  * Each claim gets a diagram drawn for THAT claim, never a shared shape: determinism is one frame
  * hashing the same from two different render orders, any-aspect is one source fanning out to four
- * ratios. The variance is the argument. A third diagram (a prompt becoming a contract) was cut
- * with the claim it illustrated: the hero above it already shows JSON, live and editable, so a
- * drawing of JSON was the page saying the same thing twice and drawing it worse the second time.
+ * ratios. The variance is the argument.
  *
  * They are SVG rather than boxes of styled text so the geometry can carry meaning: in the aspect
  * diagram the rectangles' widths ARE the ratios (one shared height times 16/9, 9/16, 1/1, 4/5),
@@ -90,10 +88,9 @@ export function ProofHash() {
    quietly failing.
 
    The bus is LABELLED with what does the work, because an unlabelled fan claims the ratios arrive
-   for free. They do not: pin/col/% resolve per canvas, and absolute x/w is pixels tuned to one
-   ratio. The label is the difference between "one source becomes four" (true of the engine) and
-   "any scene becomes four" (true only of a scene composed relatively). Measured, not hedged: of the
-   ten real scenes in this repo, exactly one survives a change of ratio. */
+   for free. They do not: the renderer sets data-aspect and --vw/--vh before the page runs, and the
+   page's own CSS lays it out per canvas. A page that hardcodes pixels for one ratio does not
+   survive a change of ratio. */
 const RATIOS = [
   { label: "16:9", dim: "1920×1080", r: 16 / 9 },
   { label: "9:16", dim: "1080×1920", r: 9 / 16 },
@@ -127,11 +124,11 @@ export function ProofAspect() {
   return (
     <svg className="dg" viewBox={VB} role="img" aria-hidden="true">
       <rect className="dg-chip" x="212" y="4" width="96" height="28" rx="7" />
-      <text className="dg-chiptx" x="260" y="22" textAnchor="middle">scene.json</text>
+      <text className="dg-chiptx" x="260" y="22" textAnchor="middle">page.html</text>
       {/* The payload, not a caption: these are what travel down the bus and resolve per canvas. An
           unlabelled source would let the fan below imply the ratios are free. */}
-      <text className="dg-dim" x="260" y="46" textAnchor="middle">pin · col · %</text>
-      <text className="dg-lab" x="260" y="64" textAnchor="middle">resolve per canvas · one pass</text>
+      <text className="dg-dim" x="260" y="46" textAnchor="middle">--vw · --vh · data-aspect</text>
+      <text className="dg-lab" x="260" y="64" textAnchor="middle">laid out by CSS per canvas</text>
 
       {/* A drop, a bus, four drops. Curving from the chip to each centre made the four paths cross
           each other right where they left it, which read as tangle rather than fan-out. */}
@@ -144,9 +141,9 @@ export function ProofAspect() {
       {cells.map((c) => (
         <g key={c.label}>
           <rect className="dg-frame" x={c.x} y={FRAME_TOP} width={c.w} height={H} rx="7" />
-          {/* the same mark in every frame, sized to ITS width: the engine recomposes a scene per
-              aspect (pin, relative coords), it does not crop one master. Empty outlines would have
-              shown four ratios and left "one scene" as a caption to take on faith. */}
+          {/* the same mark in every frame, sized to ITS width: the page lays itself out per
+              aspect, it does not crop one master. Empty outlines would have
+              shown four ratios and left "one page" as a caption to take on faith. */}
           <path className="dg-wave" d={WAVE} transform={waveAt(c.cx, FRAME_TOP + H / 2, c.w * 0.56)} />
           <text className="dg-lab is-on" x={c.cx} y={FRAME_TOP + H + 24} textAnchor="middle">{c.label}</text>
           <text className="dg-dim" x={c.cx} y={FRAME_TOP + H + 42} textAnchor="middle">{c.dim}</text>

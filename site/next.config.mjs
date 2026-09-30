@@ -20,9 +20,6 @@ const nextConfig = {
   outputFileTracingRoot: import.meta.dirname,
   // Docker: emit a self-contained server so the runtime image carries no dev deps.
   output: "standalone",
-  // THE CONSOLIDATION: /blocks, /showcase/effects and /type were three indexes over one library.
-  // They are now one page, /arsenal, and every old URL still resolves. 308s, because these moved
-  // for good and each one was linked from outside the app — a 404 is a worse answer than a hop.
   async redirects() {
     return [
       // www.vawe.dev and vawe.dev both served 200 with no redirect between them, so Google split
@@ -40,32 +37,27 @@ const nextConfig = {
         destination: "https://vawe.dev/:path*",
         permanent: true,
       },
-      { source: "/blocks", destination: "/arsenal", permanent: true },
-      { source: "/blocks/:name", destination: "/arsenal/:name", permanent: true },
-      // The effects index is gone as a page: /arsenal indexes blocks and effects together, so the
-      // nearest true destination is that index already narrowed to effects.
-      { source: "/showcase/effects", destination: "/arsenal?kind=effect", permanent: true },
-      { source: "/arsenal/effects", destination: "/arsenal?kind=effect", permanent: true },
-      { source: "/showcase/effects/:stem", destination: "/arsenal/effects/:stem", permanent: true },
-      // /type already redirected to /showcase/type; both now point at the specimens' new home
-      // rather than chaining one redirect through another.
-      { source: "/type", destination: "/arsenal/type", permanent: true },
-      { source: "/showcase/type", destination: "/arsenal/type", permanent: true },
+      // The JSON engine's pages are gone. /arsenal and the older URLs it absorbed wait for the planned
+      // /moves gallery, so they are temporary; the rest are permanent. :path* also matches the bare route.
+      { source: "/arsenal/:path*", destination: "/", permanent: false },
+      { source: "/blocks/:path*", destination: "/", permanent: false },
+      { source: "/showcase/effects/:path*", destination: "/", permanent: false },
+      { source: "/showcase/type", destination: "/", permanent: false },
+      { source: "/type", destination: "/", permanent: false },
+      { source: "/editor/:path*", destination: "/", permanent: true },
+      { source: "/playground/:path*", destination: "/", permanent: true },
+      { source: "/json-to-video", destination: "/", permanent: true },
+      { source: "/deck", destination: "/", permanent: true },
+      { source: "/deck.html", destination: "/", permanent: true },
+      { source: "/vawe-rules.md", destination: "/", permanent: true },
       // THE FEATURES FOLD: eight feature detail pages became three sections on /features itself.
-      // Six of the eight described a registry /arsenal now indexes in full or a proof the landing
-      // page runs live, and every one of them ended on a docs link into a private repo. The index
-      // survived because the three mechanisms left are said nowhere else; the per-slug route did
-      // not. Wildcarded, because the slugs were content and a new one must not 404 either.
-      // The route's own social card lives under /features too, so it is excluded from the catch-all.
+      // Wildcarded, because the slugs were content and a new one must not 404 either. The route's
+      // own social card lives under /features too, so it is excluded from the catch-all.
       { source: "/features/:slug((?!opengraph-image$).+)", destination: "/features", permanent: true },
     ];
   },
   async rewrites() {
     return [
-      // the animation explainer: one source (engine-doctrine/animation.html), published here by
-      // `make site X=deck`. A rewrite rather than a page route, because it is a self-contained
-      // file that also has to open straight from disk in the repo.
-      { source: "/deck", destination: "/deck.html" },
       // the docs pages (fumadocs already routes these at /docs in its own app)
       { source: "/docs", destination: `${DOCS_ORIGIN}/docs` },
       { source: "/docs/:path*", destination: `${DOCS_ORIGIN}/docs/:path*` },

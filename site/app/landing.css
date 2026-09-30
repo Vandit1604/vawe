@@ -1,6 +1,5 @@
 /* THE LANDING PAGE (site/IDENTITY.md): the split hero, then scrolling sections in studio panels.
-   The hero plays a film with the live engine (components/HeroSplit.tsx); the lane colours on its
-   timeline come from core/layers/kinds.js through site/lib/layer-kinds.json. */
+   The hero plays a rendered film (components/HeroSplit.tsx). */
 
 /* ===== SPLIT HERO ======================================================================== */
 .hs{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:48px;align-items:center;padding:40px 0 24px}
@@ -15,36 +14,14 @@
 .hs-list button[aria-current="true"] .hs-list-title::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
   background:var(--accent);margin-right:10px;vertical-align:2px}
 .hs-stage{padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.hs-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
-.hs-tabs{display:flex;gap:2px;background:var(--bg);border-radius:8px;padding:3px}
-.hs-tabs button{font:inherit;font-weight:500;font-size:13px;color:var(--muted);background:none;border:0;padding:4px 11px;border-radius:5px;cursor:pointer}
-.hs-tabs button[aria-pressed="true"]{background:var(--raised);color:var(--ink)}
 .hs-view{position:relative;aspect-ratio:16/9;background:#000;border-radius:var(--r-in);overflow:hidden}
-.hs-screen{position:absolute;inset:0;overflow:hidden}
-.hs-screen .sp-frame{position:absolute;top:0;left:0;width:var(--sp-w);height:var(--sp-h);border:0;display:block;
-  transform-origin:0 0;transform:scale(var(--sp-scale)) translate(var(--sp-x),var(--sp-y))}
-.hs-scene{position:absolute;inset:0;overflow:auto;padding:12px 0;background:var(--bg);font-family:var(--font-mono),monospace;
-  font-size:12px;line-height:1.8;color:var(--muted)}
-.hs-scene div{padding:0 14px;white-space:pre;border-left:2px solid transparent}
-.hs-scene .live{color:var(--ink);border-left-color:var(--accent)}
-.hs-scene .sel{background:rgba(255,255,255,.07)}
-.hs-booting{position:absolute;left:12px;bottom:10px}
+.hs-screen{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .hs-now{display:flex;align-items:center;gap:12px}
 .hs-play{width:30px;height:30px;border-radius:50%;border:0;background:var(--raised);color:var(--ink);display:grid;place-items:center;cursor:pointer;
   transition:scale .12s cubic-bezier(.2,0,0,1)}
 .hs-play:active{scale:.96}
-.hs-play:disabled{opacity:.5;cursor:default}
 .hs-play svg{margin-left:1px}
 .hs-now-title{font-family:var(--font-title);font-weight:500;font-size:13px;margin-right:auto}
-.hs-tl{position:relative;padding-bottom:2px}
-.hs-lane{display:grid;grid-template-columns:64px 1fr;align-items:start;margin-top:4px}
-.hs-lane .meta{line-height:calc(var(--rows,1) * 8px + 2px);font-size:11px}
-.hs-track{position:relative;height:calc(var(--rows,1) * 8px + 2px);background:var(--surface-2);border-radius:3px}
-.hs-bar{position:absolute;height:6px;border:0;padding:0;border-radius:2px;min-width:3px;cursor:pointer;opacity:.5;background:var(--lane);
-  transition:opacity .15s ease}
-.hs-bar:hover,.hs-bar.on{opacity:1}
-.hs-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);pointer-events:none;
-  left:calc(64px + (100% - 64px) * var(--p))}
 @media (max-width:900px){
   .hs{grid-template-columns:1fr;gap:24px;padding-top:24px}
   .hs-copy{display:contents}
@@ -101,30 +78,6 @@
 /* dashed, and behind the frames: the fan is the relationship, not a thing in its own right */
 .dg-fan{fill:none;stroke:var(--accent);stroke-width:1.2;stroke-dasharray:3 3;opacity:.55}
 
-/* ===== THE ARSENAL WALL ===================================================================
-   Real rendered previews, one frame each, read as a wall of NAMES. The names are the point: a
-   vocabulary you compose from only reads as a vocabulary when you can see how much of it there is.
-   No cards and no hover lift; the tiles are a specimen sheet, not a set of controls, and the one
-   control in the section is the link in its head. */
-/* Fixed column counts, not auto-fill: see the WALL comment in page.tsx. Five and three both divide
-   the fifteen families that ship a preview, so no breakpoint strands a tile alone on a last row. */
-.fxwall{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:26px}
-.fx{min-width:0}
-/* height:auto is load-bearing. The <img> carries width/height attributes, which Chrome applies as
-   presentational hints, and the mapped `height:180px` beat the aspect-ratio here: every tile was
-   180px tall at every viewport, so a 640x360 frame was cropped to a portrait sliver. It is worst on
-   a phone (102x180) but it was never right on a desktop either (209x180). */
-.fx img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;background:var(--bg-2);
-  border:1px solid var(--line);border-radius:8px}
-.fx figcaption{display:block;margin-top:7px;font-family:var(--font-mono),monospace;font-size:12px;
-  color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.fx .fxfam{display:block;color:var(--muted);font-size:12px;margin-top:1px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:900px){ .fxwall{grid-template-columns:repeat(3,minmax(0,1fr))} }
-/* Two, not three. At 390px three columns gave each tile 102px, which is a 57px-tall frame under a
-   family name truncated to "ambient shader f". A specimen you cannot read is not a specimen. */
-@media (max-width:560px){ .fxwall{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} }
-
 /* ===== MOBILE: TOUCH TARGETS AND THE SMALLEST TEXT ==========================================
  * Measured on the live site in a real browser rather than guessed at. Two findings, both real,
  * neither visible on a desktop pass:
@@ -143,7 +96,7 @@
 @media (max-width:760px){
   /* The vertical padding is what earns the height; `inline-flex` is what lets padding apply to an
      inline link at all, which is why the raw font-size fix alone would not have moved these. */
-  .lead a, .gal-head a, .hm-cta a, a.srcopen, a.mark{
+  .lead a, .gal-head a, .hm-cta a, a.mark{
     display:inline-flex; align-items:center; min-height:44px;
   }
   /* Prose, not chrome. The hero editor's mono panes keep their own scale on purpose. */
