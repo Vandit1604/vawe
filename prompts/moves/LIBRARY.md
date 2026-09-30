@@ -54,7 +54,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 
 | move | use it for | reference | status |
 |---|---|---|---|
-| push-in | a slow scale toward the subject over a beat | to be captured | to build |
+| push-in | a slow scale toward the subject over a beat | to be captured | built |
 | ui-focus-zoom | zoom onto one part of a captured UI | to be captured | to build |
 | caret-follow | the camera tracks the typing caret | vawe-flow-2 terminal | to build |
 | pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | to build |

@@ -52,7 +52,9 @@ This index lists the built ones, in the same groups.
 
 ## Move the camera
 
-No move is built yet. See [LIBRARY.md](LIBRARY.md).
+| move | use when | snippet | clip |
+|---|---|---|---|
+| push in | a slow scale toward the subject over a beat; the ground scales less so the layers separate | [push-in.md](push-in.md) | [push-in.mp4](push-in.mp4) |
 
 ## End a film
 
