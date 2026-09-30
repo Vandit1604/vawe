@@ -89,6 +89,7 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 10. A layout in fixed pixels for 16:9. Use `--vw`/`--vh`, container units and `[data-aspect]`
     selectors, then draft `--aspect 9:16` once before the final.
 
+Shell on macOS: `sed -i` needs an empty suffix (`sed -i '' 's/a/b/' file`); the Edit tool or a short python script avoids it. Never `sleep` to wait for a render: `bin/vawe ship --status <page> --wait` blocks up to 100 s and returns.
 Also: `fill: both` (or `backwards`) on an animation with a delay shows its first keyframe from frame 0, so a late glint or scene is on screen early; use `forwards` unless it should sit there before it starts.
 Also: `--vw` and `--vh` hold a unit (`1920px`), so write `calc(var(--vh) * 0.11)`, never `* 0.11px`;
 a capture scaled below 0.6 loses its type, crop instead; an em dash on screen fails the validator; the
