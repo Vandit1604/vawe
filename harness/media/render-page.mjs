@@ -2,11 +2,11 @@
 // mp4, with an optional N-subframe motion blur blended into each output frame.
 //
 //   node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N]
-//     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--audio]
+//     [--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--final] [--audio] [--profile]
 //
 // Default is a DRAFT: half size, 30 fps, no blur, silent, and --from/--to windows the render to one
 // slice instead of the whole page. --final renders the way `vawe ship` does: full size, 60 fps, the
-// whole page from 0, blur up to 3, and the page's <audio> elements mixed in (harness/media/page-audio.mjs).
+// whole page from 0, up to 32 subframes of motion blur a frame, and the page's <audio> elements mixed in (harness/media/page-audio.mjs).
 // The canvas is the page's <meta name="aspect"> (else 16:9), overridden by --aspect; `all` renders every
 // aspect to its own file. The CSS viewport is always the aspect's full size (core/layout/aspects.js ASPECTS),
 // so a draft lays out exactly like the final; a draft only captures at device scale 0.5.
@@ -18,7 +18,8 @@
 // sets the clock, calls window.seek(t) when the page defines it, then seeks CSS/WAAPI/SMIL animations and
 // vawe.onFrame hooks, then waits for fonts, image decode and two real paints before the screenshot.
 //
-// Capture is split into fixed 60-frame slices, `--workers` of them at once (default min(4, cpus-1)), each on
+// Capture is split into fixed 60-frame slices, `--workers` of them at once (default VAWE_WORKERS, else 2 while
+// another render runs, else min(4, cpus-1)), each on
 // its own page of the shared browser (harness/media/preview-server.mjs); the speed pass below runs the same
 // way. Slice boundaries do not depend on the worker count, so the pixels never do either. When
 // blur > 1, a per-frame speed pass decides how many subframes that frame actually needs: a still frame
@@ -65,7 +66,22 @@ import { draftContrastLines, shownAndHidden } from '../lib/text-contrast.mjs';
 import { peakLine } from '../lib/peak-limit.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 
-const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
+// A laptop running two renders at 4 workers each overheats and throttles; the second render starts cool.
+const COOL_WORKERS = 2;
+
+function otherRenderRunning() {
+  const ps = spawnSync('ps', ['-Ao', 'pid=,command='], { encoding: 'utf8' });
+  return (ps.stdout || '').split('\n').some((line) => {
+    const [pid, ...cmd] = line.trim().split(/\s+/);
+    return Number(pid) !== process.pid && cmd.join(' ').includes('render-page.mjs');
+  });
+}
+
+export function defaultWorkers(env = process.env, busy = otherRenderRunning) {
+  if (Number(env.VAWE_WORKERS) > 0) return Number(env.VAWE_WORKERS);
+  if (busy()) return COOL_WORKERS;
+  return Math.max(1, Math.min(4, os.cpus().length - 1));
+}
 
 // A page with several WebGL canvases slows down over a long run until one CDP call times out; a fresh
 // page every 300 subframes keeps it fast, and a seek is a pure function of time so the pixels do not change.
@@ -193,7 +209,7 @@ async function frameSubframes(page, job) {
 }
 
 // Returns bucketed subframe counts per output frame.
-async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) {
+export async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers }) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
   if (boxes) return clampSegments(boxes.map((px) => subframesForTravel(px * frame.scale, blur)));
   return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers), blur, PIXEL_BANDS));
@@ -211,11 +227,13 @@ export function subframesForTravel(px, cap) {
   return k;
 }
 
-// The pixel estimate cannot measure travel: mean luma difference bands [still below, fast from].
+// The pixel estimate cannot measure travel: mean luma difference bands [still below, fast from]. It cannot
+// tell a frame that needs 32 subframes from one that needs 16, so its fast band stops at 16 (a measured 5 s
+// three.js film: 4,017 subframes at 16, 7,805 at 32).
 const PIXEL_BANDS = [0.15, 1.5];
 function bucketize(speeds, blur, [still, fast]) {
-  const mid = Math.min(blur, 4);
-  return speeds.map((s) => (s < still ? 1 : s < fast ? mid : blur));
+  const mid = Math.min(blur, 4), top = Math.min(blur, 16);
+  return speeds.map((s) => (s < still ? 1 : s < fast ? mid : top));
 }
 
 function clampSegments(kArr, cap = 200) {
@@ -269,15 +287,32 @@ async function runShards(pagePath, frame, frames, workers, work, clock) {
   return restarted;
 }
 
+// Runs inside the page after a seek: a key for everything time can change, or null when time can reach
+// the pixels some other way (window.seek, onFrame hooks, pending clock callbacks, canvas, video, SMIL).
+// Two subframes with the same key paint the same pixels, so the second reuses the first capture.
+const stillKey = () => {
+  if (typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length || window.__pageClock?.pending?.()) return null;
+  if (document.querySelector('canvas, video, iframe, animate, animateTransform, animateMotion, set')) return null;
+  return JSON.stringify(document.getAnimations().map((a) => { const c = a.effect.getComputedTiming(); return [c.progress, c.currentIteration]; }));
+};
+
+// A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
 async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe) {
-  return runShards(pagePath, frame, frames, workers, async (page, i) => {
+  return runShards(pagePath, frame, frames, workers, async (page, i, local) => {
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
-      await seekAll(page, baseMs + (j / k) * SHUTTER * (1000 / fps));
-      const idx = subframeStart[i] + j;
-      await page.screenshot({ path: path.join(tmpDir, `f${String(idx).padStart(6, '0')}.png`), type: 'png', optimizeForSpeed: true });
-      onSubframe();
+      const file = path.join(tmpDir, `f${String(subframeStart[i] + j).padStart(6, '0')}.png`);
+      await page.evaluate((t) => window.__pageSeek(t / 1000), baseMs + (j / k) * SHUTTER * (1000 / fps));
+      const key = await page.evaluate(stillKey);
+      const reused = key !== null && key === local.key;
+      if (reused) fs.linkSync(local.file, file);
+      else {
+        await settle(page);
+        await page.screenshot({ path: file, type: 'png', optimizeForSpeed: true });
+      }
+      Object.assign(local, { key, file });
+      onSubframe(i, reused);
     }
     return k;
   }, { fps, from });
@@ -285,37 +320,29 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
 // encode.go), except CRF 16 where encode.go uses 20: a page is captured lossless and CRF 16 keeps thin
-// type and gradients clean. Draft is ultrafast.
+// type and gradients clean. Draft is ultrafast. aq-mode=3 spends bits on dark flat areas, where 8-bit bands.
 function x264Args(final) {
   return final
-    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'medium', '-crf', '16', '-tune', 'film', '-movflags', '+faststart']
+    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'medium', '-crf', '16', '-x264-params', 'aq-mode=3', '-movflags', '+faststart']
     : ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'ultrafast', '-crf', '20', '-movflags', '+faststart'];
 }
 
+// The web copy: AV1 10-bit needs no dither, since 10 bits do not band. Measured on a 1080p dark ramp and
+// two 5 s films: 1.7 and 3.6 MB, and the ramp's longest flat run 20 px (lossless 14, undithered 8-bit 98).
+// An 8-bit x264 copy at that size bands (CRF 22: 121 px).
+const WEB_ARGS = ['-c:v', 'libsvtav1', '-pix_fmt', 'yuv420p10le', '-crf', '30', '-preset', '8', '-svtav1-params', 'lp=2', '-movflags', '+faststart'];
+
 // 8-bit yuv420p bands a dark gradient into visible rings; a faint fixed-seed temporal noise before the
-// encode dithers them away (the final only, so draft pixels stay comparable). Strength 2 did not survive
-// x264's smoothing on a test gradient; 4 with -tune film did.
+// master encode dithers them away (the final only, so draft pixels stay comparable). Measured on a dark
+// ramp: strength 3 with aq-mode=3 leaves a 20 px longest flat run at half the size of strength 4 with -tune film.
 // Chromium saves some frames as RGBA (mix-blend-mode, for one); a pixel-format change mid-sequence makes
 // ffmpeg rebuild the filter graph, which resets the trims and drops frames. Keep one graph, one format.
 const ONE_FORMAT_IN = ['-reinit_filter', '0'];
 
-const DITHER = 'noise=alls=4:allf=t:all_seed=7';
+const DITHER = 'noise=alls=3:allf=t:all_seed=7';
 
-export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
-  const seq = path.join(tmpDir, 'f%06d.png');
-  const uniform = new Set(kArr).size <= 1;
-  const blur = kArr[0] || 1;
-  if (uniform) {
-    const args = blur > 1
-      ? ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps * blur), '-i', seq,
-        '-vf', `format=rgb24,tmix=frames=${blur}:weights='${Array(blur).fill('1').join(' ')}',`
-          + `select='not(mod(n+1\\,${blur}))',setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}`,
-        '-r', String(fps), ...x264Args(final), tmpOut]
-      : ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps), '-i', seq,
-        '-vf', final ? `format=rgb24,${DITHER}` : 'format=rgb24', ...x264Args(final), tmpOut];
-    return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
-  }
-
+// One trim+tmix+select chain per run of equal subframe counts, concatenated to [blend].
+function blendGraph(kArr, subframeStart, fps) {
   const segments = [];
   let segStart = 0;
   for (let i = 1; i <= kArr.length; i++) {
@@ -333,11 +360,43 @@ export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
   // Each segment restarts its pts, so a 1-frame segment carries no duration and the next one overlaps
   // it; re-stamp after the concat and never let -r rate-convert, or ffmpeg drops the overlapped frames.
   const split = `[0:v]format=rgb24,split=${segments.length}${segments.map((_, idx) => `[in${idx}]`).join('')}`;
-  const filterComplex = `${split};${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB${final ? `,${DITHER}` : ''}[outv]`;
+  return `${split};${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB[blend]`;
+}
+
+// One ffmpeg pass: the master to tmpOut and, when webOut is given, the web copy from the same blend.
+export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final, webOut = null) {
+  const seq = path.join(tmpDir, 'f%06d.png');
+  const master = final ? `,${DITHER}` : '';
+  const outputs = webOut
+    ? `;[blend]split=2[m][w];[m]null${master}[outv];[w]format=yuv420p10le[web]`
+    : `;[blend]null${master}[outv]`;
   const args = ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps), '-i', seq,
-    '-filter_complex', filterComplex, '-map', '[outv]',
-    '-fps_mode', 'passthrough', ...x264Args(final), tmpOut];
+    '-filter_complex', blendGraph(kArr, subframeStart, fps) + outputs,
+    '-map', '[outv]', '-fps_mode', 'passthrough', ...x264Args(final), tmpOut,
+    ...(webOut ? ['-map', '[web]', '-fps_mode', 'passthrough', ...WEB_ARGS, webOut] : [])];
   return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
+}
+
+// The cost table `--profile` prints. Subframes and screenshots per film second are a pure function of the
+// page and the settings; capture seconds are the measured total shared out by screenshots.
+export function costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs }) {
+  const shots = kArr.map((k, i) => k - reused[i]);
+  const allShots = shots.reduce((a, b) => a + b, 0);
+  const seconds = [];
+  kArr.forEach((k, i) => {
+    const s = Math.floor(from + i / fps);
+    seconds[s] ??= { s, frames: 0, subframes: 0, shots: 0 };
+    seconds[s].frames++; seconds[s].subframes += k; seconds[s].shots += shots[i];
+  });
+  const cost = (row) => (allShots ? (captureMs / 1000) * (row.shots / allShots) : 0).toFixed(1);
+  const top = seconds.filter(Boolean).sort((a, b) => b.shots - a.shots || a.s - b.s).slice(0, 5);
+  const sub = kArr.reduce((a, b) => a + b, 0);
+  return [
+    `cost: ${kArr.length} frames, ${sub} subframes, ${allShots} screenshots (${sub - allShots} reused), max ${Math.max(1, ...kArr)} subframes a frame`,
+    `      prepass ${(prepassMs / 1000).toFixed(1)} s, capture ${(captureMs / 1000).toFixed(1)} s (${allShots ? (captureMs / allShots).toFixed(0) : 0} ms a screenshot), encode ${(encodeMs / 1000).toFixed(1)} s`,
+    '  second  frames  subframes  screenshots  capture s',
+    ...top.map((r) => `  ${`${r.s}-${r.s + 1}`.padEnd(6)}  ${String(r.frames).padStart(6)}  ${String(r.subframes).padStart(9)}  ${String(r.shots).padStart(11)}  ${cost(r).padStart(9)}`),
+  ];
 }
 
 // Render invariants. Each check returns one line per problem; renderPage throws them together as an
@@ -533,19 +592,23 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const t0 = Date.now();
     const prepassMs = t0 - tPre;
     let doneSub = 0;
+    const reused = new Array(frames).fill(0);
     const tick = progress ? setInterval(() => {
       process.stdout.write(`\r  capturing ${doneSub}/${totalSub} subframe(s)...`);
     }, 1000) : null;
-    const restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, () => { doneSub++; });
+    const restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; });
     if (tick) { clearInterval(tick); process.stdout.write(`\r${' '.repeat(40)}\r`); }
     const captureMs = Date.now() - t0;
 
     const tmpOut = `${outPath}.tmp-${process.pid}.mp4`;
+    const webPath = final ? webOut(outPath) : null;
+    const tmpWeb = webPath && `${webPath}.tmp-${process.pid}.mp4`;
     const t1 = Date.now();
-    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final);
+    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final, tmpWeb);
     const encodeMs = Date.now() - t1;
     if (res.status !== 0 || res.error) {
       fs.rmSync(tmpOut, { force: true });
+      if (tmpWeb) fs.rmSync(tmpWeb, { force: true });
       die(`ffmpeg encode failed (${res.error ? res.error.message : `exit ${res.status}`}):\n`
         + `${(res.stderr || '').trim().split('\n').slice(-15).join('\n')}`);
     }
@@ -555,14 +618,20 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
-    if (broken.length) { fs.rmSync(tmpOut, { force: true }); throw new InvariantError(broken); }
+    if (broken.length) { for (const f of [tmpOut, tmpWeb].filter(Boolean)) fs.rmSync(f, { force: true }); throw new InvariantError(broken); }
     const advice = late.filter((l) => l.includes(' blank;'));
-    const mixed = wantAudio && await muxPageAudio(page, pagePath, { video: tmpOut, out: outPath, duration: dur, explicit: opts.audio === true });
-    if (mixed) fs.rmSync(tmpOut, { force: true });
-    else fs.renameSync(tmpOut, outPath);
+    const place = async (video, out) => {
+      const mixed = wantAudio && await muxPageAudio(page, pagePath, { video, out, duration: dur, explicit: opts.audio === true });
+      if (mixed) fs.rmSync(video, { force: true });
+      else fs.renameSync(video, out);
+      return mixed;
+    };
+    const mixed = await place(tmpOut, outPath);
+    if (tmpWeb) await place(tmpWeb, webPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
     const level = opts.probe && !mixed ? await mixLevel(page, pagePath, dur) : null;
-    return { frames, subframes: totalSub, prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion, advice };
+    const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
+    return { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion, advice, profile, web: webPath };
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
@@ -586,6 +655,9 @@ export function assertFinalReady(pagePath) {
     + `Waivable only via <script type="application/json" id="authoring">{"allow":["${code}"],`
     + `"_why":{"${code}":"…"}}</script> in the page.`);
 }
+
+// A final writes two files: the master (x264, dithered) and next to it a small web copy (AV1 10-bit).
+export const webOut = (outPath) => outPath.replace(/(\.mp4)?$/, '.web.mp4');
 
 export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to = null }) {
   const abs = path.resolve(pagePath);
@@ -638,7 +710,7 @@ async function main() {
   const [pagePath, outArg] = positional;
   if (!pagePath) {
     die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N] '
-      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio]', 2);
+      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio] [--profile]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   const drift = briefProblems(pagePath);
@@ -658,7 +730,7 @@ async function main() {
       aspect, final,
       fps: Number(flag('--fps', final ? 60 : 30)),
       w: flag('--w', null) && Number(flag('--w', null)), h: flag('--h', null) && Number(flag('--h', null)),
-      blur: Number(flag('--blur', final ? 16 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
+      blur: Number(flag('--blur', final ? 32 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
       probe: !final && from === 0 && durArg == null,
@@ -674,9 +746,11 @@ async function main() {
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
+    if (r.web) console.log(`  web copy: ${r.web} (${(fs.statSync(r.web).size / 1e6).toFixed(1)} MB; master ${(fs.statSync(outPath).size / 1e6).toFixed(1)} MB)`);
     if (!final) printDraftSheet(outPath, opts);
     if (r.probe) printDraftCheck(outPath, pagePath, r);
     else if (r.advice.length) console.log(adviceBlock(r.advice).join('\n'));
+    if (argv.includes('--profile')) console.log(r.profile.join('\n'));
   }
 }
 

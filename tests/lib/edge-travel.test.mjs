@@ -26,3 +26,8 @@ test('a turn across 360 degrees counts the short way round', () => {
 test('edgeTravelDeltas takes the fastest element per step', () => {
   assert.deepEqual(edgeTravelDeltas([[[0, 0, 10, 10, 0], [3, 4, 10, 10, 0]], [[0, 0, 10, 10, 0], [0, 0, 10, 10, 0]]]), [5]);
 });
+
+test('a loop wrap is not travel: the step takes the element speed from the step before', () => {
+  const track = [[0, 0, 10, 10, 0, 0, 0, 0, 0, 0], [5, 0, 10, 10, 0, 0, 0, 0, 0, 0], [10, 0, 10, 10, 0, 0, 0, 0, 0, 0], [-520, 0, 10, 10, 0, 0, 0, 0, 0, 1]];
+  assert.deepEqual(edgeTravelDeltas([track]), [5, 5, 5]);
+});

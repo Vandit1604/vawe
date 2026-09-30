@@ -2,7 +2,8 @@
 // serves the render's speed pass (the animated targets) and the motion lint of a page that paints in
 // window.seek or vawe.onFrame (every element). A box is [x, y, w, h, opacity, own opacity]; the two
 // opacities are only read for 'visible', where opacity is the product up the ancestor chain. An 'animated'
-// box also carries its turn and inset() clip (harness/lib/edge-travel.mjs).
+// box also carries its turn and inset() clip (harness/lib/edge-travel.mjs), then the loop count of the
+// animations on it and its ancestors.
 
 import { turnAndClip } from './edge-travel.mjs';
 
@@ -18,11 +19,16 @@ export async function trackBoxes(times, scope) {
   const own = (el) => { const cs = getComputedStyle(el); return cs.visibility === 'hidden' || cs.display === 'none' ? 0 : Number(cs.opacity); };
   const alpha = (el) => { let o = 1; for (let p = el; p && p.nodeType === 1 && o > 0; p = p.parentElement) o *= own(p); return o; };
   const tracks = els.map(() => []);
+  const loopsOf = (el) => {
+    let n = 0;
+    for (let p = el; p && p.nodeType === 1; p = p.parentElement) for (const a of p.getAnimations()) n += a.effect.getComputedTiming().currentIteration || 0;
+    return n;
+  };
   for (const t of times) {
     await window.__pageSeek(t);
     els.forEach((el, i) => {
       const r = el.getBoundingClientRect();
-      tracks[i].push(scope === 'animated' ? [r.x, r.y, r.width, r.height, ...window.__turnAndClip(el, r)] : [r.x, r.y, r.width, r.height, alpha(el), own(el)]);
+      tracks[i].push(scope === 'animated' ? [r.x, r.y, r.width, r.height, ...window.__turnAndClip(el, r), loopsOf(el)] : [r.x, r.y, r.width, r.height, alpha(el), own(el)]);
     });
   }
   const label = (el) => {
