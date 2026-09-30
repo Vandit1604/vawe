@@ -28,6 +28,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | text-as-mask | huge type is a window onto a product shot or a rich image made in CSS or SVG | video-shotcraft opening/text-as-mask; HyperFrames texture-mask-text | built |
 | outline-fill | big type arrives as an outline and fills with colour on the beat | video-shotcraft typography/outline-word-fill; HyperFrames outline-draw | built |
 | strikethrough-replace | an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character | HyperFrames strikethrough-replace and text-state-swap, video-shotcraft typography/pill-slot-cycle | built |
+| grid-stagger-wave | a grid of tiles, logos or cards enters in a wave by distance from one point | HyperFrames stagger-lattice, dynamic-grid; video-shotcraft ui-entrance/radial-wave, wall-reveal-moves | built |
 
 ## 2. Change between shots
 
@@ -51,6 +52,9 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | liquid-wipe | a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot | HyperFrames liquid and blob transitions, SVG goo filter (Lucas Bebber), After Effects liquid transitions | built |
 | grid-tile-flip | a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back | HyperFrames flip-grid and tile transitions, After Effects card wipe, video-shotcraft ui-entrance/wall-reveal-moves | built |
 | luma-matte-dissolve | the next shot arrives through its own brightness: an SVG luminance matte with a falling threshold shows its bright areas first, then midtones, and its dark ground last | After Effects luma matte and Set Matte, HyperFrames luma-wipe and threshold transitions | built |
+| smear-stretch | an elastic smear stretches the frame into the cut | After Effects stretch transition packs and the animator's smear frame; HyperFrames rubber-band-bumper, motion-blur | built |
+| shape-morph-wipe | a mask shape morphs, for example circle to rounded rectangle, as it grows onto the next shot | HyperFrames svg-mask-reveal, morph-swap, modal-morph; video-shotcraft transition/shot-transitions (F, mask-wipe) | built |
+| spin-transition | a 90 degree roll with rotational blur carries the cut | Premiere and After Effects spin transitions (Film Impact Impact Spin); video-shotcraft transition/shot-transitions (whip family) | built |
 
 ## 3. Point the eye
 
@@ -74,6 +78,8 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | parallax-dive | layers at different depths move at different speeds | to be captured | built |
 | drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | built |
 | rack-focus | focus moves from one layer to another | to be captured | built |
+| pan-stations | one wide canvas; the camera pans between several stations and holds at each | HyperFrames pan-stations component and spatial-pan-stations blueprint | built |
+| crash-zoom | a very fast push at a detail on a beat, with blur that follows speed | video-shotcraft camera/crash-zoom-punch; HyperFrames cinematic-zoom | built |
 
 ## 5. End a film
 
@@ -103,3 +109,6 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | ai-stream-response | an answer streams in chunk by chunk under a typed prompt, with a working indicator first | video-shotcraft interaction/ai-stream-response; HyperFrames streaming-text, typed-prompt, typing-indicator | built |
 | overwhelm-collapse | the problem turns to the fix: 26 cards, chips and notifications flood the frame on a shrinking gap, then a fast cubic-in collapse pulls them into one point and one clean element opens | HyperFrames overwhelm-surround and notification-pileup, video-shotcraft rhythm-interrupt-moves | built |
 | success-check | a button resolves into a drawn check: the press dips, the width closes to a circle, the check draws on one dash, the circle lands on a small spring and one ring leaves it | HyperFrames success-check, press-ripple and spring-pop, video-shotcraft effects/impact-feedback | built |
+| integration-hub | logos or icons fly in from the edges and converge on a central product mark, then connect in one beat | HyperFrames constellation-hub, locked-nucleus-orbit; video-shotcraft ui-entrance/integration-hub-map | built |
+| device-tilt-stage | the product UI sits in a laptop or phone frame that tilts in 3D and settles | HyperFrames device-frame-stage, browser-device-stage, parallax-device-dive; Apple keynote product films | built |
+| command-palette-summon | a Cmd+K palette drops in, a query types, the list filters, a row is chosen | video-shotcraft interaction/command-palette-summon, type-and-filter; HyperFrames cursor-context-menu; Linear and Raycast launch films | built |

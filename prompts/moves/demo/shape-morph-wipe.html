@@ -1,0 +1,56 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.5">
+<title>move: shape morph wipe</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .shot { position: absolute; inset: 0; }
+  .a { transform-origin: 30% 60%; }
+  .a pre { position: absolute; left: 9vw; top: calc(var(--u) * 24); margin: 0; font: 500 var(--t-lead)/1.6 var(--mono); color: var(--muted); }
+  .a pre b { color: var(--ink); font-weight: 600; }
+  .dot { display: inline-block; width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); margin-right: calc(var(--u) * 1.6); border-radius: 50%; background: var(--accent); vertical-align: -0.1em; }
+  .b { background: var(--paper); color: var(--paper-ink); }
+  .b .in { position: absolute; inset: 0; }
+  .b h1 { position: absolute; left: 9vw; top: calc(var(--u) * 26); margin: 0; font: 700 calc(var(--u) * 26)/1 var(--sans); letter-spacing: -0.05em; }
+  .b p { position: absolute; left: 9.6vw; top: calc(var(--u) * 58); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--paper-muted); }
+</style>
+</head>
+<body>
+<div class="shot a"><pre><b>$ vawe ship launch</b>
+  rendering 16:9 ...... done
+  rendering 9:16 ...... done
+<b><span class="dot"></span>live</b></pre></div>
+<div class="shot b"><div class="in"><h1>Live.</h1><p>vawe.dev/launch</p></div></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { CURVES } from '/core/motion/springs.js';
+const W = innerWidth, H = innerHeight, clamp = (u) => Math.min(1, Math.max(0, u));
+const a = document.querySelector('.a'), b = document.querySelector('.b'), inner = b.querySelector('.in');
+const r = document.querySelector('.dot').getBoundingClientRect();
+const o = { x: r.left + r.width / 2, y: r.top + r.height / 2, d: r.width };   // the mask is born as the status dot
+const T0 = 0.4, DUR = 0.85, PAD = 0.04 * H;                                   // the box ends PAD past every edge so no corner shows shot A
+const E = CURVES.expoOut;
+// ease into the grow, fast through the middle, soft onto the frame
+const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+const grow = (u) => 0.35 * u + 0.65 * whip(u);
+const lerp = (p, q, u) => p + (q - p) * u;
+vawe.onFrame((t) => {
+  const u = clamp((t - T0) / DUR), g = grow(u);
+  const h = lerp(o.d, H + 2 * PAD, g);                                   // a circle of diameter h grows first
+  const w = h + (W - H) * grow(clamp((u - 0.3) / 0.7));                 // then it widens into the frame's shape
+  const cx = lerp(o.x, W / 2, g), cy = lerp(o.y, H / 2, g);
+  // the shape stays round for the first third, then squares off to a card corner
+  const round = lerp(1, 0.07, E(clamp((u - 0.35) / 0.55)));
+  const rad = (Math.min(w, h) / 2) * round;
+  b.style.visibility = t < T0 ? 'hidden' : 'visible';
+  b.style.clipPath = `inset(${cy - h / 2}px ${W - cx - w / 2}px ${H - cy - h / 2}px ${cx - w / 2}px round ${rad}px)`;
+  inner.style.transform = `scale(${lerp(1.12, 1, E(u)) - 0.012 * Math.max(0, t - T0 - DUR)})`;
+  a.style.transform = `scale(${lerp(1, 0.94, g)})`;
+  a.style.opacity = lerp(1, 0.5, g).toFixed(3);
+});
+</script>
+</body>
+</html>
