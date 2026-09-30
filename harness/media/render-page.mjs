@@ -317,6 +317,98 @@ function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
   return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
 }
 
+// Render invariants. Each check returns one line per problem; renderPage throws them together as an
+// InvariantError and the CLI prints `✗ <line>` for each and exits 2. An intended exception is declared
+// on the page: <meta name="blank" content="0-0.4, 4.8-5"> (or data-blank on <html>) for empty frames.
+export class InvariantError extends Error {
+  constructor(problems) { super(problems.join('\n')); this.problems = problems; }
+}
+
+const BLANK_RANGE_MAX = 6;
+const BLANK_PROBE_WIDTH = 480;
+
+async function fontProblems(page) {
+  const bad = await page.evaluate(() => [...new Set([...document.fonts].filter((f) => f.status === 'error').map((f) => f.family))]);
+  return bad.map((family) => `font ${family} failed to load: fix its src or remove the @font-face`);
+}
+
+async function audioProblems(page, pagePath) {
+  if (!(await page.evaluate(() => document.querySelector('audio') !== null))) return [];
+  const { readPageAudio } = await import('./page-audio.mjs');
+  try { await readPageAudio(page, { pagePath }); } catch (e) { return String(e.message).split('\n'); }
+  return [];
+}
+
+async function assertProblems(page) {
+  const count = await page.evaluate(() => (window.__vaweAsserts || []).length);
+  const problems = [];
+  for (let i = 0; i < count; i++) {
+    const r = await page.evaluate(async (k) => {
+      const a = window.__vaweAsserts[k];
+      await window.__pageSeek(a.t);
+      try { return (await a.fn()) ? null : `assert at ${a.t} s failed: ${a.message}`; } catch (e) { return `assert at ${a.t} s threw (${e.message}): ${a.message}`; }
+    }, i);
+    if (r) problems.push(r);
+  }
+  return problems;
+}
+
+export function parseBlankRanges(html) {
+  const tag = (html.match(/<meta\b[^>]*\bname\s*=\s*["']blank["'][^>]*>/i) || [''])[0];
+  const raw = [tag.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1], html.match(/<html\b[^>]*\bdata-blank\s*=\s*["']([^"']*)["']/i)?.[1]].filter(Boolean).join(',');
+  return raw.split(',').map((r) => r.trim().match(/^([\d.]+)\s*-\s*([\d.]+)$/)).filter(Boolean).map((m) => [Number(m[1]), Number(m[2])]);
+}
+
+// One ffmpeg pass over the encode: per frame, whether its luma and chroma are near-uniform.
+export function probeFrames(file) {
+  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', file, '-vf', `scale=${BLANK_PROBE_WIDTH}:-2:flags=area,signalstats,metadata=print:file=-`, '-f', 'null', '-'],
+    { encoding: 'utf8', maxBuffer: 1024 * 1024 * 256 });
+  const stats = [];
+  for (const line of (r.stdout || '').split('\n')) {
+    if (line.startsWith('frame:')) stats.push({});
+    const m = line.match(/^lavfi\.signalstats\.([YUV](?:MIN|MAX))=(\d+)/);
+    if (m && stats.length) stats[stats.length - 1][m[1]] = Number(m[2]);
+  }
+  return stats.map((f) => Math.max(f.YMAX - f.YMIN, f.UMAX - f.UMIN, f.VMAX - f.VMIN) <= BLANK_RANGE_MAX);
+}
+
+const secs = (t) => String(+t.toFixed(2));
+
+export function frameProblems(blank, { frames, fps, from, declared }) {
+  const problems = [];
+  if (blank.length !== frames) problems.push(`the encode has ${blank.length} frame(s), expected ${frames} (round(duration x fps))`);
+  const half = 0.5 / fps;
+  const declaredAt = (i) => { const t = from + i / fps; return declared.some(([a, b]) => t >= a - half && t <= b + half); };
+  for (let i = 0; i < blank.length; i++) {
+    if (!blank[i] || declaredAt(i)) continue;
+    let j = i;
+    while (j + 1 < blank.length && blank[j + 1] && !declaredAt(j + 1)) j++;
+    const t0 = from + i / fps, t1 = from + j / fps;
+    const what = i === j ? `frame ${i} (${secs(t0)} s)` : `frames ${i}-${j} (${secs(t0)}-${secs(t1)} s)`;
+    problems.push(`${what} blank; declare it with <meta name="blank" content="${secs(t0)}-${secs(t1 + 1 / fps)}"> if intended`);
+    i = j;
+  }
+  return problems;
+}
+
+// The brief.md next to a page states the length and aspect the film was asked for; a page that drifted
+// from them fails before any frame is drawn. Only answered lines count (`- length: 5 s`, `- aspect: 16:9`).
+export function briefProblems(pagePath) {
+  const briefPath = path.join(path.dirname(path.resolve(pagePath)), 'brief.md');
+  if (!fs.existsSync(briefPath)) return [];
+  const brief = fs.readFileSync(briefPath, 'utf8');
+  const answered = (key) => brief.match(new RegExp(`^- ${key}:\\s*([^\\n]*)$`, 'im'))?.[1];
+  const line = (key) => { const v = answered(key); return v && !v.includes('[unanswered') ? v : null; };
+  const wantLength = Number(line('length')?.match(/^([\d.]+)\s*s\b/)?.[1]);
+  const wantAspect = line('aspect')?.match(/^\d+:\d+/)?.[0];
+  const haveLength = Number(readPageMeta(pagePath, 'duration'));
+  const haveAspect = readPageMeta(pagePath, 'aspect') || '16:9';
+  const lengthDrift = wantLength > 0 && haveLength !== wantLength;
+  const aspectDrift = wantAspect && haveAspect !== wantAspect;
+  if (!lengthDrift && !aspectDrift) return [];
+  return [`brief: ${wantLength > 0 ? wantLength : haveLength} s ${wantAspect || haveAspect}; page: ${haveLength} s ${haveAspect}`];
+}
+
 // The canvas a page renders at: --aspect, else the page's own <meta name="aspect">, else 16:9. Pixel
 // sizes come from core/layout/aspects.js (long edge 1920 where the table says so), halved for a draft;
 // explicit w/h win. Returns { aspect, width, height }.
@@ -368,7 +460,13 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   fs.mkdirSync(tmpDir, { recursive: true });
   try {
     await page.goto(url, { waitUntil: 'load' });
-    await settle(page);
+    try { await settle(page); } catch (e) {
+      const msg = String(e.message).replace(/^.*?Error: /, '');
+      if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
+      throw e;
+    }
+    const early = [...await fontProblems(page), ...await audioProblems(page, pagePath), ...await assertProblems(page)];
+    if (early.length) throw new InvariantError(early);
 
     const totalDur = await page.evaluate(() => {
       const m = document.querySelector('meta[name="duration"]');
@@ -411,6 +509,8 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
       die(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
+    const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
+    if (late.length) { fs.rmSync(tmpOut, { force: true }); throw new InvariantError(late); }
     const mixed = wantAudio && await muxPageAudio(page, pagePath, { video: tmpOut, out: outPath, duration: dur, explicit: opts.audio === true });
     if (mixed) fs.rmSync(tmpOut, { force: true });
     else fs.renameSync(tmpOut, outPath);
@@ -459,6 +559,8 @@ async function main() {
       + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
+  const drift = briefProblems(pagePath);
+  if (drift.length) { for (const p of drift) console.error(p); process.exit(2); }
   const final = argv.includes('--final');
   if (final) assertFinalReady(pagePath);
   const from = final ? 0 : Number(flag('--from', 0));
@@ -481,7 +583,11 @@ async function main() {
     const frame = resolveFrame(pagePath, opts);
     const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
-    const r = await renderPage(pagePath, outPath, opts);
+    const r = await renderPage(pagePath, outPath, opts).catch((e) => {
+      if (!(e instanceof InvariantError)) throw e;
+      for (const p of e.problems) console.error(`✗ ${p}`);
+      process.exit(2);
+    });
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${frame.width}x${frame.height} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
       + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
       + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
