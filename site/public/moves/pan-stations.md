@@ -29,6 +29,8 @@ vawe.onFrame((t) => {
 });
 ```
 
+Sound: pluck at 0.92 s and at 1.62 s into the move, when each node lights on the camera's arrival (default gain); nothing on the pans.
+
 A pan of 0.42 s over one frame width is fast enough to feel like one space and slow enough to stay
 readable mid-pan; under 0.3 s it becomes a whip pan. Step the stations up and down a little so the
 pans are not one flat rail, and let the camera drift slowly through the holds so a held station is

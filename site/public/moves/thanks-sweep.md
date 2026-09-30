@@ -6,6 +6,8 @@ on the same sweep. The bar leaves the moment the edge passes the last letter, an
 drift carries the finished lines to the last frame. Clip: [thanks-sweep.mp4](thanks-sweep.mp4).
 Demo: [demo/thanks-sweep.html](demo/thanks-sweep.html).
 
+Use once per film: the accent bar is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+
 ```html
 <div class="sweep big"><span class="t">Thanks for watching.</span><i class="bar"></i></div>
 <style>
