@@ -8,11 +8,11 @@
 <style>
   body { display: block; }
   .shot { position: absolute; inset: 0; background: url("/prompts/moves/demo/assets/photos/reading.jpg") 62% 50% / cover; transform-origin: 70% 50%; }
-  .third { position: absolute; left: calc(var(--u) * 9); bottom: calc(var(--u) * 11); display: flex; align-items: stretch; }
-  .rule { width: calc(var(--u) * 1.3); background: var(--accent); transform-origin: 50% 100%; }
-  .plate { display: flex; flex-direction: column; gap: calc(var(--u) * 1.6); padding: calc(var(--u) * 3.2) calc(var(--u) * 6) calc(var(--u) * 3.6) calc(var(--u) * 4.4); background: var(--surface); box-shadow: var(--stack); }
+  .third { position: absolute; left: var(--s5); bottom: calc(var(--s5) + var(--s2)); display: flex; align-items: stretch; }
+  .rule { width: var(--s1); background: var(--accent); transform-origin: 50% 100%; }
+  .plate { display: flex; flex-direction: column; gap: var(--s1); padding: var(--s3) var(--s5) var(--s3) var(--s4); background: var(--surface); box-shadow: var(--stack); }
   .mask { overflow: hidden; padding: 0.06em 0 0.14em; margin: -0.06em 0 -0.14em; }
-  .name { display: block; font: 400 calc(var(--u) * 10.5)/1 var(--head); letter-spacing: -0.02em; white-space: nowrap; }
+  .name { display: block; font: 400 var(--t-title)/1 var(--head); letter-spacing: -0.02em; white-space: nowrap; }
   .role { display: block; font: 600 var(--t-small)/1.1 var(--label); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 </style>
 </head>
@@ -28,9 +28,9 @@
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut), leave = curveToLinear((u) => u * u * u);
+const settle = curveToLinear(CURVES.expoOut);
 const opt = { fill: 'both' };
-const at = { rule: 420, plate: 520, name: 760, role: 900, exit: 2600 };   // ms
+const at = { rule: 420, plate: 520, name: 760, role: 900 };   // ms
 
 // the shot keeps drifting under the card, so the frame is alive while the name holds
 q('.shot').animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: 'linear', ...opt });
@@ -40,12 +40,6 @@ q('.rule').animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { d
 q('.plate').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: settle, ...opt });
 q('.name').animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: settle, ...opt });
 q('.role').animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: settle, ...opt });
-
-// out: the text drops first, then the plate closes toward the rule in 260 ms, faster than it opened
-q('.name').animate([{ translate: '0 0' }, { translate: '0 105%' }], { duration: 160, delay: at.exit, easing: leave, fill: 'forwards' });
-q('.role').animate([{ translate: '0 0' }, { translate: '0 120%' }], { duration: 160, delay: at.exit + 40, easing: leave, fill: 'forwards' });
-q('.plate').animate([{ clipPath: 'inset(0 0% 0 0)' }, { clipPath: 'inset(0 100% 0 0)' }], { duration: 260, delay: at.exit + 120, easing: leave, fill: 'forwards' });
-q('.rule').animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: 240, delay: at.exit + 260, easing: leave, fill: 'forwards' });
 </script>
 </body>
 </html>

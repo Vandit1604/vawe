@@ -13,7 +13,7 @@
   .page .title { max-width: 14em; }
   .target { font: 700 var(--t-lead)/1 var(--sans); letter-spacing: -0.015em; background: var(--accent); color: var(--on-accent); box-shadow: var(--accent-edge); white-space: nowrap;
             outline: calc(var(--u) * 0.3) dashed var(--ink); outline-offset: calc(var(--u) * 1.1); margin-top: var(--s2); }
-  .panel { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s3); background: var(--raised); }
+  .panel { align-self: center; display: flex; flex-direction: column; gap: var(--s2); padding: var(--s3); background: var(--raised); }
   .panel h3 { margin: 0 0 var(--s1); font: 600 var(--t-body)/1 var(--sans); }
   .panel h3 small { margin-left: var(--s2); font: 500 var(--t-small)/1 var(--mono); color: var(--muted); }
   .field { display: flex; align-items: center; justify-content: space-between; height: calc(var(--u) * 9.4); padding: 0 var(--s3); border-radius: var(--r-chip); background: var(--surface); box-shadow: var(--ring); }
@@ -48,7 +48,7 @@ const smooth = (u) => u * u * (3 - 2 * u), clamp = (u) => Math.min(1, Math.max(0
 const seg = (t, a, b, f = smooth) => f(clamp((t - a) / (b - a)));
 
 const W = innerWidth, H = innerHeight, fields = Object.fromEntries(qa('.field').map((f) => [f.dataset.k, f]));
-const pt = (f) => { const r = f.getBoundingClientRect(); return [r.left + r.width * 0.7, r.top + r.height * 0.62]; };
+const pt = (f) => { const r = f.getBoundingClientRect(); return [r.left + r.width * 0.5, r.top + r.height * 0.86]; };
 const drag = 0.07 * W;
 // one gesture per beat: glide to a field, press, scrub right, release; the values below hold between beats
 const beats = [

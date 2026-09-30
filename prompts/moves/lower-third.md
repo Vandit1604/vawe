@@ -26,7 +26,7 @@ plate.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' 
 name.animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: settle, fill: 'both' });
 role.animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: settle, fill: 'both' });
 
-// out: text first (160 ms), then the plate closes toward the rule in 260 ms, then the rule drops; no `from` fill over the entrance
+// out, left off the clip so it ends on the held card: text first (160 ms), then the plate closes toward the rule in 260 ms, then the rule drops; no `from` fill over the entrance
 name.animate([{ translate: '0 0' }, { translate: '0 105%' }], { duration: 160, delay: at.exit, easing: leave, fill: 'forwards' });
 role.animate([{ translate: '0 0' }, { translate: '0 120%' }], { duration: 160, delay: at.exit + 40, easing: leave, fill: 'forwards' });
 plate.animate([{ clipPath: 'inset(0 0% 0 0)' }, { clipPath: 'inset(0 100% 0 0)' }], { duration: 260, delay: at.exit + 120, easing: leave, fill: 'forwards' });

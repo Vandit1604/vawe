@@ -25,7 +25,9 @@
   .live .num { box-shadow: none; }
   .done { border-radius: 50%; background: var(--done); display: grid; place-items: center; opacity: 0; scale: 0.4; color: #fff; }
   .done svg { width: 62%; height: 62%; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 24; stroke-dashoffset: 24; }
-  .arc { width: 100%; height: 100%; fill: none; stroke: var(--accent); stroke-width: 2.6; stroke-linecap: round; }
+  .arc { width: 100%; height: 100%; fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+  .arc .track { stroke: var(--dot); }
+  .live .num { font-size: calc(var(--u) * 3); }
   .lab { position: relative; font: 600 var(--t-body)/1 var(--sans); letter-spacing: -0.015em; }
   .lab i { position: absolute; left: 0; right: 0; top: 54%; height: calc(var(--u) * 0.35); background: var(--muted); transform-origin: 0 50%; transform: scaleX(0); }
   .meta { margin-left: auto; font: 500 var(--t-small)/1 var(--mono); color: var(--muted); font-style: normal; }
@@ -43,7 +45,7 @@
     <li class="row"><span class="badge"><b class="num">1</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Read the failing test<i></i></span><em class="meta">3 files</em></li>
     <li class="row"><span class="badge"><b class="num">2</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Trace the null cursor<i></i></span><em class="meta">14 files</em></li>
     <li class="row"><span class="badge"><b class="num">3</b><b class="done"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2 8.8-9.4"/></svg></b></span><span class="lab">Patch the queue reader<i></i></span><em class="meta">2 edits</em></li>
-    <li class="row live"><span class="badge"><b class="num">4</b><svg class="arc" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 1 7.8 13.5"/></svg></span><span class="lab">Run the full suite</span><em class="meta">312 tests</em></li>
+    <li class="row live"><span class="badge"><b class="num">4</b><svg class="arc" viewBox="0 0 24 24"><circle class="track" cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 1-9 9"/></svg></span><span class="lab">Run the full suite</span><em class="meta">312 tests</em></li>
   </ul>
 </div>
 <script type="module">
