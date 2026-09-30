@@ -148,6 +148,7 @@ html[data-look="paper"] {
   --r-chip: calc(var(--u) * 1); --r-card: calc(var(--u) * 1.6);
   --sh: 70 45 15; --sa: 1.25; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: 0 0 0 0 transparent;
+  --up-ink: var(--accent);
 }
 
 /* paper carries a fine print grain, darker than the ground, so the cream reads as stock and not as a flat fill */
@@ -181,6 +182,7 @@ html[data-look="swiss"] {
   --r-chip: calc(var(--u) * 0.5); --r-card: calc(var(--u) * 0.8);
   --lift: 0 0 0 0 transparent; --shadow-hero: var(--ring); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: 0 0 0 0 transparent;
+  --up-ink: var(--accent);
 }
 
 /* soft: pastel product UI, big radii, wide diffuse shadow, one violet */
@@ -194,6 +196,7 @@ html[data-look="soft"] {
   --r-chip: calc(var(--u) * 3); --r-card: calc(var(--u) * 6);
   --sh: 60 50 160; --sa: 1.5; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --up-ink: var(--accent);
 }
 
 /* night: deep indigo to plum with fine grain, one amber */
@@ -208,6 +211,7 @@ html[data-look="night"] {
   --r-chip: calc(var(--u) * 2.2); --r-card: calc(var(--u) * 4.6);
   --sh: 5 2 20; --sa: 3.8; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.07), var(--stack);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  --up-ink: var(--accent);
 }
 html[data-look="night"]::after {
   content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.06; mix-blend-mode: screen;
@@ -241,5 +245,6 @@ html[data-look="terminal"] {
   --r-chip: calc(var(--u) * 0.8); --r-card: calc(var(--u) * 1.6);
   --sa: 4; --lift: var(--stack); --img-edge: rgba(255, 255, 255, 0.1);
   --accent-edge: 0 0 0 0 transparent;
+  --up-ink: var(--accent);
 }
 
