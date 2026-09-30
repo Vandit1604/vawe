@@ -1,6 +1,6 @@
 import { Header, REPO_URL } from "../components/Header";
 import { Footer } from "../components/Footer";
-import { FilmGrid } from "../components/FilmGrid";
+import { MoveClips } from "../components/MoveClips";
 import { pageMetadata } from "../components/seo";
 import "../components/intent.css";
 
@@ -13,7 +13,7 @@ export const metadata = pageMetadata({
 
 /* /launch-video · a use-case page built from engine-doctrine/CRAFT/ROUTING.md's film-type table.
  * Someone searching "product launch video" names a JOB, not this engine's vocabulary, so the page
- * answers in that wording, and shows rendered launch films.
+ * answers in that wording, and shows the moves a launch film is built from.
  */
 
 export default function LaunchVideo() {
@@ -60,9 +60,9 @@ export default function LaunchVideo() {
           </section>
 
           <section className="ifilms">
-            <h2>Launch films.</h2>
-            <p>Rendered by vawe. Hover a film to play it, or click to watch it large.</p>
-            <FilmGrid ids={["argus-launch", "saas-hero-launch"]} />
+            <h2>The moves a launch film is built from.</h2>
+            <p>A click doing its job, a zoom to one part of the UI, a number proved, the product handed to the brand. Open a move for its snippet and notes.</p>
+            <MoveClips names={["cursor-click", "ui-focus-zoom", "count-up", "ui-strip-away"]} />
           </section>
 
           <section className="isec">
@@ -80,11 +80,10 @@ export default function LaunchVideo() {
           </section>
 
           <section className="iend">
-            <h2 className="h2">More than one feature to walk through.</h2>
+            <h2 className="h2">Start from the launch template.</h2>
             <p className="lead">
-              A single product with one hero feature takes the beat list above. A product with
-              three features worth a beat each takes a different shape: chapters, not one
-              continuous run.
+              <code>bin/vawe new</code> starts from the brand-launch template unless you name
+              another: a starter page and a brief whose questions each carry a default.
             </p>
             <div className="hero-cta">
               <a className="btn btn-primary" href={REPO_URL}>
@@ -92,8 +91,8 @@ export default function LaunchVideo() {
               </a>
             </div>
             <div className="irelated">
-              <a href="/product-tour-video">A chaptered product tour, three features in one film</a>
-              <a href="/showcase">Every finished film</a>
+              <a href="/moves">Every move, with its clip</a>
+              <a href="/ai-agents">Let an agent write the film</a>
             </div>
           </section>
         </main>

@@ -1,5 +1,0 @@
-/* ===== /showcase · the ratio trio ======================================== */
-.sc-ratios{margin-top:36px;padding:24px}
-.sc-ratios .trio .ar{border:0;background:var(--bg)}
-
-@media (max-width:640px){ .sc-ratios{padding:14px} }

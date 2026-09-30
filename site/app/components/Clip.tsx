@@ -9,7 +9,7 @@ import { useEffect, useRef } from "react";
  *      should be. A <video> that never plays already shows its poster: that IS the static-frame
  *      alternative, and it costs nothing because the posters are generated.
  *   2. Cost. `preload="none"` plus an IntersectionObserver means a clip fetches and decodes only
- *      while it is actually on screen. /showcase was holding 12 decode pipelines open at once.
+ *      while it is actually on screen, so a page of clips does not hold a decoder for each one.
  *
  * The two collapse into one rule: play only when motion is welcome AND the clip is visible.
  */

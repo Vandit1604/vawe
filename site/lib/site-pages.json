@@ -15,13 +15,6 @@
       "label": "Features"
     },
     {
-      "path": "/showcase",
-      "priority": 0.9,
-      "changeFrequency": "weekly",
-      "group": "product",
-      "label": "Showcase"
-    },
-    {
       "path": "/moves",
       "priority": 0.9,
       "changeFrequency": "weekly",
@@ -69,16 +62,14 @@
       "changeFrequency": "monthly",
       "group": "job",
       "label": "Launch video"
-    },
-    {
-      "path": "/product-tour-video",
-      "priority": 0.7,
-      "changeFrequency": "monthly",
-      "group": "job",
-      "label": "Product tour video"
     }
   ],
   "docs": [
+    {
+      "path": "/docs",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
     {
       "path": "/docs/aspect-ratios",
       "priority": 0.8,
@@ -95,17 +86,7 @@
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/blocks",
-      "priority": 0.8,
-      "changeFrequency": "monthly"
-    },
-    {
       "path": "/docs/brand-reflection",
-      "priority": 0.8,
-      "changeFrequency": "monthly"
-    },
-    {
-      "path": "/docs/camera",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -116,21 +97,6 @@
     },
     {
       "path": "/docs/determinism",
-      "priority": 0.8,
-      "changeFrequency": "monthly"
-    },
-    {
-      "path": "/docs",
-      "priority": 0.8,
-      "changeFrequency": "monthly"
-    },
-    {
-      "path": "/docs/layers",
-      "priority": 0.8,
-      "changeFrequency": "monthly"
-    },
-    {
-      "path": "/docs/mcp",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -165,12 +131,7 @@
       "changeFrequency": "monthly"
     },
     {
-      "path": "/docs/the-scene",
-      "priority": 0.8,
-      "changeFrequency": "monthly"
-    },
-    {
-      "path": "/docs/themes",
+      "path": "/docs/the-page",
       "priority": 0.8,
       "changeFrequency": "monthly"
     },
@@ -181,7 +142,7 @@
     }
   ],
   "counts": {
-    "routes": 11,
-    "docs": 20
+    "routes": 9,
+    "docs": 15
   }
 }

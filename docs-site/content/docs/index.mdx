@@ -1,66 +1,44 @@
 ---
 title: Introduction
-description: Vawe turns one self-describing JSON file into one rendered video, deterministically. Here is what that means and why it is built this way.
+description: Vawe is a framework for agent-native motion graphics. One HTML page in, one film out.
 icon: Sparkles
 ---
 
-Vawe is a deterministic motion-graphics engine: it renders video from JSON, reading a single, self-describing file with no timeline, no editor, and no dragging clips around. This is what it means to generate video programmatically here: the JSON is the whole input and the mp4 is a build artifact of it, never the other way round. A scene JSON names its layers, a camera, a theme, and a duration, and that file is the only source of truth; the mp4 is a build artifact you can delete and regenerate at any time. The render itself is deterministic: `renderFrame(n)` is a pure function of the frame number, so the same JSON always produces byte-identical pixels no matter what order the frames render in or which machine renders them. A Go service drives headless Chrome through `chromedp`, seeking `renderFrame(n)` frame by frame across parallel tabs and capturing each as a PNG, then `ffmpeg` stitches the sequence into an H.264 mp4. You describe the scene once, and the engine draws every one of those frames.
+Vawe turns one HTML page into one film. You write the page in what you already know: HTML, CSS, Web Animations, SVG, canvas, three.js. There is no private format to learn. If something you would naturally write fails, that is a framework bug.
+
+The renderer does not play the page. It seeks the page to a time, takes a picture, and moves to the next time. Then it mixes the audio offline and writes an mp4.
 
 ```bash
-./bin/vawe films/scene/sample.json
-# → out/sample.mp4
+bin/vawe new hello        # writes films/hello/page.html and brief.md
+bin/vawe dev films/hello/page.html
+# draft: out/hello-draft.mp4
 ```
 
-That is the whole loop.
+## Two ideas
 
-## What makes it different
+**A film is a page.** It is `films/<name>/page.html` plus its own `assets/` folder. A `<meta name="duration">` sets the length. Read [The page](/docs/the-page) for the whole contract.
 
-Two ideas do most of the work.
+**Time is the seek, never the clock.** Every frame is a function of the time `t`. A virtual clock owns `Date`, `requestAnimationFrame`, timers and `Math.random`, so the same page gives the same frames on every run. Read [Determinism](/docs/determinism).
 
-**Everything is one open canvas.** There is exactly one module, `scene`, and it is a vocabulary of composable primitives: text, images, captured UI, charts, cards, cursors, shaders, backgrounds, cuts, and stings. There are no templates to pour data into. You compose each video from the [layer vocabulary](/docs/layers), the same way you would compose a page out of HTML elements.
+## The loop
 
-**Every frame is a pure function of its number.** `renderFrame(n)` depends only on `n`. A virtual clock coerces `Date`, `requestAnimationFrame`, timers, and `Math.random` to frame time, so there is no wall clock and no unseeded randomness anywhere. The same JSON produces byte-identical frames no matter what order they render in. That is what lets frames shard across parallel headless Chrome tabs, and it is what makes a video reproducible and diff-able. Read more in [Determinism](/docs/determinism).
-
-## How a render actually works
-
-`./bin/vawe` is a headless video renderer CLI: it opens no window, and the same command runs the same way on a laptop or inside CI.
-
-```text
-data.json
-  → cmd/render (Go)
-  → chromedp: N headless Chrome tabs, each seeks renderFrame(n) → PNG
-  → internal/encode: ffmpeg stitches the PNG sequence → H.264, adds film grain
-  → internal/audio: a Go PCM mixer builds music + sound effects + voiceover
-  → out/<name>.mp4
-```
-
-The output is a 30fps H.264 mp4 with AAC audio, in portrait (1080×1920), landscape (1920×1080), or square. One source can render [every aspect ratio in a single pass](/docs/aspect-ratios).
-
-## Read these in order, or jump to your gap
+Brief or reference, then stills, then a draft, then a critique in a fresh session, then a fix of only the seconds the critique names, then the final.
 
 | If you want to | Read |
 |---|---|
-| get a video out of it in ten minutes | [Quickstart](/docs/quickstart) |
-| **describe a film and let an agent build it** | [**Prompting**](/docs/prompting) |
-| understand what the JSON actually is | [The scene file](/docs/the-scene), [Layers](/docs/layers) |
-| know why the same input always gives the same bytes | [Determinism](/docs/determinism) |
-| make it move well rather than merely move | [Motion](/docs/motion), [Blocks](/docs/blocks) |
-| make it look like your brand | [Themes](/docs/themes), [Brand reflection](/docs/brand-reflection) |
-| ship it without shipping something broken | [Quality gates](/docs/quality-gates) |
-| **judge whether it is any good** | [**Reading your own film**](/docs/reading-your-film) |
-| work out why it came out wrong | [When it looks wrong](/docs/troubleshooting) |
-
-Most people never hand-write a scene file. If that is you, **Prompting** is the page that matters and
-the rest is reference you can reach for when a render surprises you.
-
-## Where to go next
+| render a film in ten minutes | [Quickstart](/docs/quickstart) |
+| describe a film and let an agent build it | [Prompting](/docs/prompting) |
+| know what a page must contain | [The page](/docs/the-page) |
+| make it move well | [Motion](/docs/motion), [Recipes](/docs/recipes) |
+| set the look, the sound and the aspect | [Backgrounds and images](/docs/backgrounds-and-images), [Audio](/docs/audio), [Aspect ratios](/docs/aspect-ratios) |
+| judge whether it is any good | [Reading your film](/docs/reading-your-film) |
+| find out why it came out wrong | [When it looks wrong](/docs/troubleshooting) |
+| match a real brand | [Brand reflection](/docs/brand-reflection) |
+| see every command | [CLI](/docs/cli), [Quality gates](/docs/quality-gates) |
 
 <Cards>
-  <Card title="Prompting" href="/docs/prompting" description="The five line brief, and what to leave to the agent." />
-  <Card title="Quickstart" href="/docs/quickstart" description="Install, render the sample, and write your first scene." />
-  <Card title="The scene file" href="/docs/the-scene" description="The top-level fields every JSON scene is built from." />
-  <Card title="Layer reference" href="/docs/layers" description="Every layer type and the fields it accepts." />
-  <Card title="Motion" href="/docs/motion" description="Kinetic type presets, cuts, and shader stings." />
+  <Card title="Quickstart" href="/docs/quickstart" description="Install, write the starter page, render a draft." />
+  <Card title="The page" href="/docs/the-page" description="The page contract: duration, seek, aspect, audio." />
+  <Card title="Prompting" href="/docs/prompting" description="The five questions, and what to leave to the agent." />
+  <Card title="Motion" href="/docs/motion" description="Springs, keyframe tables and the moves to copy." />
 </Cards>
-
-These docs describe what the engine does today, drawn straight from the code. Everything on these pages runs in the [editor](/editor) on the same engine, so you can try a page's example without installing anything.

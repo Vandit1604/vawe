@@ -206,8 +206,7 @@ const out = {};
 out.organization = m.organizationSchema();
 out.website = m.websiteSchema();
 out.softwareApplication = m.softwareApplicationSchema();
-out.breadcrumb = m.breadcrumbSchema([{ name: 'Films', url: '/showcase' }, { name: 'probe', url: '/showcase/probe' }]);
-out.video = m.videoObjectSchema({ slug: 'probe-film', brand: 'Probe', seconds: 12.4, published: '2026-01-01' });
+out.breadcrumb = m.breadcrumbSchema([{ name: 'Moves', url: '/moves' }, { name: 'probe', url: '/moves/probe' }]);
 process.stdout.write(JSON.stringify(out));
 `;
     fs.writeFileSync(runnerFile, runner);
@@ -242,7 +241,6 @@ process.stdout.write(JSON.stringify(out));
           website: ['@type', 'name', 'url'],
           softwareApplication: ['@type', 'name', 'url', 'applicationCategory', 'offers'],
           breadcrumb: ['@type', 'itemListElement'],
-          video: ['@type', 'name', 'description', 'thumbnailUrl', 'contentUrl', 'duration'],
         };
         for (const [key, fields] of Object.entries(REQUIRED)) {
           const obj = objs[key];

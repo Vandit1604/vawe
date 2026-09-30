@@ -1,110 +1,56 @@
 ---
 title: Backgrounds and images
-description: The background presets tied to the brand palette, and how to bring real assets (captures, logos, photos, icons) into a scene.
+description: The ground is CSS, canvas or three.js. Real images come first, and every image gets a treatment.
 icon: Image
 ---
 
-## Backgrounds
+A page has no built-in backgrounds. The ground is whatever you can draw on a web page: a flat CSS colour, a CSS gradient, an SVG, a canvas, a three.js scene. Images are `<img>` tags. Keep every file in `films/<name>/assets/` and use relative paths.
 
-The backdrop is painted by the top-level `bg` array in windows of time. Each window names one backdrop, and every preset reads the brand palette, so the same preset looks different for every theme.
+## The ground
 
-```json
-{ "bg": [{ "preset": "soft", "from": 0, "to": 6 }] }
-```
+- A flat ground from the brand kit beats a random gradient. The banned defaults are gradient text, a cyan to purple gradient, and pure `#000` or `#fff` the brief did not ask for (`engine-doctrine/RULES/banned-defaults.md`).
+- A gradient the brief asks for is fine. Keep it clean: no banding rings, no straight edge inside a glow.
+- Keep a quiet frame alive. The move `drift-hold` (`prompts/moves/`) drifts a held frame so it does not freeze.
+- Compose off-centre on a real surface, not a centred title on a gradient. `engine-doctrine/CRAFT/SURFACES.md` covers surfaces and the visual styles.
 
-`bg` is **required**. The engine used to pick one for you (a light brand got `dotmatrix`, a dark one `aurora`), which left the largest area of the frame as the single design decision no author ever made. Choose a preset, or say `[{ "preset": "plain" }]` for a deliberately flat field.
+Animate a ground the same way as anything else: from the seek. See [The page](/docs/the-page).
 
-There are 23 presets:
-
-`paper` · `paperShapes` · `paperDots` · `soft` · `accent` · `ink` · `dotmatrix` · `aurora` · `mesh` · `constellation` · `spotlight` · `brandglow` · `plain` · `accentPlain` · `shapes` · `deep` · `dark` · `black` · `metallic` · `metallicSheen` · `gradientWash` · `blobs` · `liquid` · `gradient`
-
-The newest five all read the brand accent:
-
-- `metallic` — a dramatic dark backdrop: a curtain of vertical light rods with a **shimmer** sweeping across (brushed metal / a lit equaliser).
-- `metallicSheen` — the same rods, darker and grainier, with a **diagonal light sweep** raking across.
-- `gradientWash` — a **mesh gradient**: one saturated pool bleeding off a corner into white (light, premium).
-- `blobs` — smaller, well-separated gradient **blobs** over a technical grid (light, airy, open).
-- `liquid` — slow **folds of the accent against true black**, the "liquid light" backdrop. It owns the frame: put quiet type on it and nothing else. Renders a low-res warped field and scales it up, so the softness is an honest interpolation rather than a blur pass.
-- `gradient`: an **agent-controlled** gradient: your own hex `colors`, `angle` and `stops` (linear/radial/conic), or a named `opts.recipe` from `core/gradient-recipes.js`. FLAT by default; `opts.kind: "mesh"` routes the same colours through `blobs`'s moving wash instead. This is the runtime-generated replacement for the old baked JPG gradient pack: it renders from text, not from 1000 committed images.
-
-<Callout title="A pattern is a seasoning, not the wallpaper">
-The backdrop should exist on the real site. A plain, flat brand gets a plain field (`plain`, `paper`, `accentPlain`), never invented dots or shapes. Even when a site is textured, use a patterned preset on at most a beat or two, never throughout. Content beats stay plain so the content reads.
-</Callout>
-
-Each preset varies by `seed` (defaulting to a hash of the theme and preset name), so the same preset differs across brands. A theme can also author its own backdrop and a video pulls it in with `{ "use": "theme" }`. See [Themes](/docs/themes#using-the-brands-backdrop).
-
-### Hand-authoring one
-
-The preset vocabulary is good and it is finite. When a backdrop falls outside it, most often when you are reflecting a real site whose hero background is hand-written CSS, write the CSS instead of adding a preset:
-
-```json
-{ "bg": [{
-  "html": "<style>.fan i{transform:rotate(calc(var(--t) * 12deg))}</style><div class=\"fan\"><i></i></div>",
-  "tone": "light"
-}] }
-```
-
-`tone` says whether your backdrop is light or dark. It is required, because the engine cannot read lightness out of your CSS, and without it a layer that sets no `color` falls back to the theme's ink and can land white-on-white.
-
-Animate it with two custom properties the engine writes onto the element every frame, both usable inside `calc()`:
-
-- `var(--t)` — seconds into the video.
-- `var(--p)` — 0 to 1 across this window's own span.
-
-<Callout type="warn" title="CSS animation and transition do not run">
-A frame here is seeked, not played, across eight parallel workers, so nothing may depend on elapsed wall-clock. `core/tokens.css` disables both engine-wide. A CSS animation would not error, it would render a dead still, so the validator rejects `animation`, `@keyframes` and `transition` by name and points you at `var(--t)`. The same applies to the `html` layer.
-</Callout>
-
-Markup is sanitised the same way as the `html` layer (`core/type/sanitize-html.js`): scripts and embedding elements are stripped, and so is any URL that leaves the fragment. A worked example lives in `films/scene/example-html-bg.json`.
+Fonts load from `@font-face` files in `assets/`, never from the network. See [When it looks wrong](/docs/troubleshooting).
 
 ## Images, in order of preference
 
-Always prefer a real image. The order that produces the best result:
+`engine-doctrine/CRAFT/IMAGERY.md` holds the ladder:
 
-1. **Captured real UI**, via `make capture`. A live `component` fragment is the highest-taste source: real logos, gradients, and copy come for free. See [Brand reflection](/docs/brand-reflection).
-2. **Free and openly-licensed images.** Brand logos from `cdn.simpleicons.org`, flags from `flagcdn.com`, and CC0 or CC-BY photos via `make photos` (attribution is recorded automatically).
-3. **Drawn icons** with `svgIcon(name)`. Sixteen are built in: `file`, `check`, `shield`, `bolt`, `dollar`, `link`, `cube`, `agent`, `braces`, `globe`, `arrowRight`, `spark`, `plug`, `clock`, `layers`.
-4. **Generated topic cards** via `make assets`.
-5. **Emoji**, as a last resort.
+1. A capture of the real UI. Never a fake or mocked-up screen.
+2. Free, openly licensed images: brand logos, flags, CC0 or CC-BY photos. CC-BY needs a visible credit.
+3. Drawn icons and inline SVG.
+4. Generated images, treated like any other.
+5. Emoji, as a last resort.
 
-<Callout type="warn" title="Never embed copyrighted media">
-Movie posters, album covers, film stills, news photos, and paid stock trigger Content ID claims. Capture the real product UI instead.
-</Callout>
+Use the lightest visual that carries the meaning. A clean gradient beats a mismatched photo, and a beat that reads on a plain field needs no image.
 
-## Fetching assets
+Fetch a logo with `curl -f`. Plain `curl -o` writes the body whatever the status, and a 404 leaves a zero-byte `.svg` that renders as an invisible hole.
 
 ```bash
-make assets D=films/scene/my-video.json          # dry run: list missing icons
-make assets D=films/scene/my-video.json WRITE=1  # fetch them
+curl -fsS https://cdn.simpleicons.org/<slug> -o <dest> || rm -f <dest>
 ```
 
-`make assets` fills gaps: a country becomes a flag, a brand becomes a logo, anything else becomes a generated topic card. For photos:
+For photos, `node scripts/brand/photos.mjs "<query>" <brand> [--n 4] [--license cc0,pdm,by]` uses Openverse and records each license and author in `credits.json`.
 
-```bash
-make photos Q="mountain sunrise" NAME=hero N=4
-```
+## Treat every image
 
-Openverse CC0, public-domain, and CC-BY photos are downloaded with attribution written to `credits.json`. Use them in a clipped `image` layer with `ken`.
+A raw flat image reads as a dropped screenshot.
 
-## Image treatments
+| The image needs to | Treatment |
+|---|---|
+| sit in the frame without a hard edge | fade the edges with a `mask-image` gradient |
+| not be static | a slow push, 3 to 8 percent |
+| read as a UI card or product | clip to a rounded shape, add a card or device frame |
+| carry text and stay legible | a 40 to 60 percent dark scrim under the type |
+| belong to the brand | a duotone or grade to the palette |
 
-A still with no treatment reads as slop. Give every image one:
+A capture scaled below 0.6 loses its type. Crop instead.
 
-- **`ken`** is a slow Ken Burns push, capped at 8% travel, that never reverses.
-- **`edgeFade`** dissolves the left and right edges into the background. Set `edgeFadeColor` to your background on dark scenes.
-- **`radius`** rounds the corners into a card; **`reflect`** adds a floor reflection.
-- **`canvasFx`** runs a per-pixel Canvas pass over the image. There are **8**: `halftone`, `dither`, `mosaic`, `stipple`, `ascii`, `edgeDetect`, `crosshatch`, and `pixelSort` (sort bright spans by luminance for a glitch smear). Name it directly or pass `{ fx, cell, ink, paper, seed }`. It bakes **once at build** into a static image, so the frame stays pure. Stylized presets (`blueprint`, `comic`, `risograph`, `sketch`, `matrix`, `newsprint`) expand to a tuned pass.
+## Licensing
 
-```json
-{ "type": "image", "src": "hero.png", "canvasFx": { "fx": "halftone", "cell": 8 } }
-```
-
-## Video and generated media
-
-Turn any mp4 into a deterministic frame sequence for a `clip` layer:
-
-```bash
-make gen-clip IN=source.mp4 NAME=demo
-```
-
-This extracts frames plus a manifest with no external service. AI image and video generation (`make gen-image`, `make gen-video`) is also available when a `KIE_API_KEY` is set.
+Never embed copyrighted material in a published film: posters, album covers, film stills, news photos, paid stock without a licence, copyrighted music. Capture the real product UI instead.

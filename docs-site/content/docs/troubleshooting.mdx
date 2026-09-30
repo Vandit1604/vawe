@@ -1,130 +1,61 @@
 ---
 title: When it looks wrong
-description: Symptom to cause, for the failures that actually repeat. Most of these are the engine accepting something and then quietly not doing it, which is the hardest kind to debug from the outside.
+description: Symptom to cause, for the failures that repeat. Most of them do not throw an error.
 icon: Wrench
 ---
 
-Every entry here comes from something that really went wrong and is written down in the repo's mistake
-log. The pattern worth internalising: **the worst failures are silent.** The engine takes your input,
-does something else, and renders a plausible frame. That is why so much of this engine refuses loudly
-now, and why the refusals name the fix.
+The worst failures are silent. The browser accepts your input, does something else, and renders a plausible frame. Run `bin/vawe check anim-traps films/<name>/page.html` first. It finds the traps below that it can see.
 
-## The render will not start
+## It moves wrong, or not at all
 
-<Callout type="error">
-The render refuses, naming the layer and the block, and tells you to run `make expand`.
-</Callout>
+**A live clock.** `Date.now()` or a `requestAnimationFrame` loop instead of `t`. The frame must be a function of the seek. See [Determinism](/docs/determinism).
 
-`block`, `beat` and `comp` are authoring sugar, not layer types. They become real layers at build time.
+**State between frames** (`x += dx`). Frame 400 must not need frame 399.
 
-```bash
-make expand D=films/scene/<film>.json     # writes <film>.expanded.json
-./bin/vawe films/scene/<film>.expanded.json
-```
+**`Math.random()` on a still element, so it boils.** Use `rng(seed)` from `core/motion/springs.js` and seed it per element.
 
-This fails loudly on purpose. Expansion imports every block factory, which has no business running on
-every render, so the build step is real rather than hidden.
+**`var()` inside the `animation` shorthand.** This Chromium drops the whole declaration, with no error and no animation. Write the longhands.
 
-<Callout type="error">
-The render refuses, naming every font family whose file never loaded, and tells you to run `make fonts`.
-</Callout>
+**No end keyframe.** A `@keyframes` rule with no `100%` or `to` has no defined value after it ends, and the element can slide back. A Web Animations keyframe list needs an `offset: 1` stop.
 
-Fonts are fetched, never committed. On a fresh clone, run `make build`, which fetches them first.
+**A selector that matches nothing.** An `:nth-child` also resets its count in every parent, so it hits one position in every repeated group.
 
-The engine refuses rather than rendering, and that is deliberate: **a browser does not complain about a
-font it cannot load. It paints a generic and says nothing.** An unchecked family renders a completely
-plausible frame in the wrong typeface, and you find out later, from someone else.
+**A delay past the end of the film.** It never plays one frame.
 
-## It renders, but something is not there
+**Two animations on one element write the same property.** The later one wins the whole overlap, or its `backwards` fill covers the earlier one's end state for all time.
 
-**A layer stays on screen for the whole film.** A layer with no `duration` renders for the entire
-runtime. Give it `start` and `duration`, or `track: 0` if it really is a backdrop.
+**One easing across three or more keyframes.** The top-level `easing` of `element.animate()` stretches over the whole effect. Give each keyframe its own easing.
 
-**A layer is invisible and no error appeared.** Check its asset actually exists. An icon fetched with a
-bare `curl` that 404s leaves a **zero-byte file on disk**, which passes every path check and renders as
-a hole. Use `make assets`, which requires a 200, a minimum size and a literal `<svg` before it writes.
+**A late move shows at frame 0.** `fill: both` or `backwards` on an animation with a delay shows its first keyframe from the start. Use `forwards` unless the element should sit there before it starts.
 
-**A hand-written HTML fragment does not move.** `transition` and `animation` are disabled engine-wide
-and refused at boot, because a frame is rendered by seeking, not by playing, and CSS animation cannot be
-seeked. Drive geometry from `var(--t)` in a `calc()`, or better, use `parts`: a CSS selector into your
-own markup that gives every matched element an engine-driven, seeked entrance with a stagger.
+**Opacity or a filter on a `preserve-3d` element flattens it.** Fade its wrapper.
 
-**Two HTML layers fight and the later one wins.** An `html` layer's `<style>` block lands in the
-*document*, not the layer, so two fragments sharing class names collide and the last one silently wins.
-Namespace your classes (`.hero-`, `.panel-`) until this is fixed at the root.
+## It renders, but it looks off
 
-## It renders in the wrong place
+**Type in the wrong face.** A browser does not complain about a font it cannot load. It paints a generic face. Bundle the face in `films/<name>/assets/` and load it with `@font-face`. The renderer waits for `document.fonts` and stops with the family name when a face fails to load. `page-check` reports `font-fallback`.
 
-**Text lands left-edge-on-centre.** `pin` centres a *box*. A text layer with no `w` has a zero-width
-box, so pinning centres the box and the text runs off to one side. Set `w` (for example `"88%"`) and
-`align`.
+**Type is tiny or the layout breaks at another aspect.** `--vw` and `--vh` hold a unit. Write `calc(var(--vh) * 0.11)`, never `* 0.11px`. Draft `--aspect 9:16` once. See [Aspect ratios](/docs/aspect-ratios).
 
-**`dx` / `dy` do nothing.** They only apply together with `anchor`.
+**A capture has lost its type.** A capture scaled below 0.6 loses its type. Crop instead.
 
-**It looks right at 16:9 and wrong everywhere else.** A scene passes at its own aspect and can be broken
-at every other one. Audit each canvas you intend to ship:
+**Text leaves before it can be read.** Text holds `words x 0.6 s`, with a floor of 1.2 s. Add a hold. Do not slow the move.
 
-```bash
-make audit M=<file> ASPECT=16:9,9:16,1:1,4:5
-```
+**A reveal cuts the glyphs.** `page-check` reports `text-clipped`. Pad the clip box below the baseline and above the cap height.
 
-**Captions sit under the platform's own chrome.** The safe area is not a property of the shape. 9:16 for
-a website hero and 9:16 for TikTok are the same canvas, but TikTok paints a rail down one side and
-captions across the bottom. Declare where it is going:
+## The check refused it
 
-```json
-{ "destination": "tiktok" }
-```
+**An em dash on screen.** The validator rejects it. Use a comma, a period or a middot.
 
-## The validator rejected it
+**A waiver with no reason.** A rule broken for cause is declared in the page with a `_why`. See [The page](/docs/the-page#waivers).
 
-**An em dash in on-screen text.** Rejected outright. Use a comma, a period, or a middot.
-
-**A waiver with no reason.** A gate waiver must carry a written `_why` of at least twelve characters:
-
-```json
-"authoring": {
-  "allow": ["dead-air"],
-  "_why": { "dead-air": "the held frame IS the beat: the room empties and nothing replaces it" }
-}
-```
-
-Nothing judges whether the reason is good. The cost of one sentence is the entire mechanism, because
-that cost is what turns a reflex back into a decision.
-
-## The film and its source disagree
-
-**The shipped mp4 does not match the scene.** A film is stale the moment its scene moves on, and a
-duration check cannot see it. Run:
-
-```bash
-node scripts/site/films-json.mjs
-```
-
-It reports `film-orphan` (the film cannot be reproduced from this scene), `film-stale` (the scene
-changed since the render) and `film-silent` (the scene names sound and the track is digital silence).
-All three shipped here at once before this existed.
-
-## Something exported differently than it previewed
-
-An image copied or downloaded from the playground is rasterised through an SVG `foreignObject`, and two
-things do not survive that trip:
-
-- **`backdrop-filter`** does not composite. It samples a backdrop, and there is no page in there. Filter
-  the picture itself instead.
-- **`vw` units** resolve against the SVG's own width rather than the browser viewport, so type comes out
-  a different size. Use container units and declare a `container-type`.
-
-Both were real, both were silent, and both were found only by rendering the two paths side by side and
-looking.
+**`ship` refuses a recreation.** Run `bin/vawe critique <page> --ref <ref.mp4>` until it passes.
 
 ## Still stuck
 
-Run `bin/vawe --help` for the verbs and `bin/vawe check --help` for the gates. Each gate names the
-failure it catches.
+Run `bin/vawe --help` for the verbs and `bin/vawe check` for the gates. Run `bin/vawe doctor` to check the tools.
 
 <Cards>
-  <Card title="Reading your own film" href="/docs/reading-your-film" description="The six ways to put frames in front of you." />
-  <Card title="Quality gates" href="/docs/quality-gates" description="What each gate checks and which findings block." />
-  <Card title="Determinism" href="/docs/determinism" description="Why a frame must be a pure function of its number." />
+  <Card title="Reading your own film" href="/docs/reading-your-film" description="How to look at a draft." />
+  <Card title="Quality gates" href="/docs/quality-gates" description="What each gate checks." />
+  <Card title="Determinism" href="/docs/determinism" description="Why a frame is a function of the seek." />
 </Cards>

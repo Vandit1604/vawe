@@ -1,5 +1,5 @@
 /* THE LANDING PAGE (site/IDENTITY.md): the split hero, then scrolling sections in studio panels.
-   The hero plays a rendered film (components/HeroSplit.tsx). */
+   The hero plays a move clip from /moves (components/HeroSplit.tsx). */
 
 /* ===== SPLIT HERO ======================================================================== */
 .hs{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.4fr);gap:48px;align-items:center;padding:40px 0 24px}
@@ -22,6 +22,8 @@
 .hs-play:active{scale:.96}
 .hs-play svg{margin-left:1px}
 .hs-now-title{font-family:var(--font-title);font-weight:500;font-size:13px;margin-right:auto}
+.hs-now-link{font-size:13px;color:var(--accent);padding:6px 4px}
+.hs-now-link:hover{text-decoration:underline;text-underline-offset:3px}
 @media (max-width:900px){
   .hs{grid-template-columns:1fr;gap:24px;padding-top:24px}
   .hs-copy{display:contents}

@@ -84,28 +84,6 @@ export function breadcrumbSchema(items: BreadcrumbItem[]) {
   };
 }
 
-// duration as ISO 8601 (schema.org's required format for VideoObject.duration).
-function isoDuration(seconds: number): string {
-  const s = Math.round(seconds);
-  return `PT${s}S`;
-}
-
-// VideoObject for a film in public/assets/films: a real mp4 (contentUrl), its poster (thumbnailUrl)
-// and a measured duration. `uploadDate` is required for video rich results; a film with no known
-// publish date carries none rather than a guessed one.
-export function videoObjectSchema(film: { slug: string; brand: string; seconds: number; published?: string }) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "VideoObject",
-    name: `${film.brand}, rendered by Vawe`,
-    description: `A ${film.brand} film rendered by Vawe.`,
-    thumbnailUrl: `${SITE_URL}/assets/films/${film.slug}.jpg`,
-    contentUrl: `${SITE_URL}/assets/films/${film.slug}.mp4`,
-    duration: isoDuration(film.seconds),
-    ...(film.published ? { uploadDate: film.published } : {}),
-  };
-}
-
 // A page renders this with dangerouslySetInnerHTML, same reason the import map in layout.tsx does:
 // JSON-LD must be literal script text, and JSON.stringify's output is already escaped for </script>
 // injection risk is nil here because every input is repo data, not user input.

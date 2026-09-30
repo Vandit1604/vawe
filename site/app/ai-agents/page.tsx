@@ -120,7 +120,7 @@ export default function AiAgents() {
             </div>
             <div className="irelated">
               <a href={REPO_URL}>The source, on GitHub</a>
-              <a href="/showcase">Films rendered by vawe</a>
+              <a href="/moves">Moves to copy, each with its clip</a>
             </div>
           </section>
         </main>

@@ -61,7 +61,7 @@ export function Footer({ note = "one page, one film", bookend = false, active }:
           <p className="foot-cta">Write a page. Render it. Ship it.</p>
           <div className="foot-act">
             <a className="btn btn-primary" href={REPO_URL}>Get started on GitHub</a>
-            <a className="btn btn-ghost" href="/showcase">See the films</a>
+            <a className="btn btn-ghost" href="/moves">See the moves</a>
           </div>
         </div>
       )}
