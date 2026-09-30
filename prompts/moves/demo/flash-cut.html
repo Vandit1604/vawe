@@ -1,0 +1,46 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1">
+<meta name="blank" content="0.52-0.58">
+<title>move: flash cut</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 700 4vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .shot { position: absolute; inset: 0; }
+  .b { opacity: 0; }
+  .a .card { position: absolute; left: 14vw; top: 26vh; width: 46vw; height: 48vh; background: var(--card); border-radius: 2.4vh; padding: 5vh 3.4vw; box-sizing: border-box; }
+  .a h2 { margin: 0 0 3vh; font-size: 3.4vh; color: var(--dim); font-weight: 600; }
+  .a p { margin: 0; font-size: 9vh; letter-spacing: -0.03em; }
+  .b h1 { position: absolute; left: 14vw; top: 30vh; margin: 0; font-size: 26vh; letter-spacing: -0.05em; line-height: 1; }
+  .b h1 i { color: var(--accent); font-style: normal; }
+  .b p { position: absolute; left: 14.4vw; top: 64vh; margin: 0; font-size: 4vh; font-weight: 500; color: var(--dim); }
+  .flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+</style>
+</head>
+<body>
+<section class="shot a"><div class="card"><h2>draft</h2><p>Almost ready to ship</p></div></section>
+<section class="shot b"><h1>Ship<i>.</i></h1><p>one page in, one film out</p></section>
+<div class="flash"></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut);
+const beat = 500;   // ms; the flash peaks on the beat and the cut lands inside the peak
+const cutAt = beat + 20;
+// one frame up, about three at full white, then a decay like an exposure: fast, then a long tail
+document.querySelector('.flash').animate(
+  [{ opacity: 0 }, { opacity: 1, offset: 0.04 }, { opacity: 1, offset: 0.16, easing: settle }, { opacity: 0 }],
+  { duration: 420, delay: beat, fill: 'both' });
+document.querySelector('.b').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: cutAt, fill: 'both' });
+document.querySelector('.a').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1, delay: cutAt, fill: 'both' });
+document.querySelector('.a .card').animate([{ translate: '0 0' }, { translate: '-2vw 0' }], { duration: cutAt, fill: 'both' });
+// B is overexposed at the cut and settles to its true exposure with the flash
+document.querySelector('.b').animate([{ filter: 'brightness(2.4)', scale: 1.06 }, { filter: 'brightness(1)', scale: 1 }],
+  { duration: 700, delay: cutAt, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<title>move: iris wipe</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --paper: #ecebf1; --dark: #16151a; --dim: #8b8a94; --accent: #0a87ff; --x: 66vw; --y: 63vh; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 700 4vh/1 'Archivo', sans-serif; }
+
+  .shot { position: absolute; inset: 0; }
+  .b { color: var(--ink); }
+  .b h1 { position: absolute; left: 12vw; top: 34vh; margin: 0; font-size: 20vh; font-weight: 700; letter-spacing: -0.04em; }
+  .b h1 i { display: inline-block; width: 4.4vh; height: 4.4vh; border-radius: 50%; background: var(--accent); margin-left: 1.4vh; }
+  .b p { position: absolute; left: 12.4vw; top: 62vh; margin: 0; font-size: 4vh; font-weight: 500; color: var(--dim); }
+  /* the iris: shot A is clipped to a circle that closes on the button, shot B waits underneath */
+  .a { background: var(--paper); color: var(--dark); clip-path: circle(150vmax at var(--x) var(--y)); }
+  .a h2 { position: absolute; left: 12vw; top: 30vh; margin: 0; font-size: 9vh; letter-spacing: -0.03em; }
+  .a span { position: absolute; left: 12.2vw; top: 46vh; font-size: 3.8vh; font-weight: 500; color: #6d6b78; }
+  .btn { position: absolute; left: 50vw; top: 55vh; width: 24vw; height: 14vh; border-radius: 7vh; background: var(--dark); color: var(--ink); display: grid; place-items: center; font-size: 4.6vh; }
+  .cursor { position: absolute; left: 66vw; top: 63vh; margin: -0.3vh 0 0 -0.5vh; width: 4vh; height: 4vh; }
+</style>
+</head>
+<body>
+<section class="shot b"><h1>Live<i></i></h1><p>vawe.dev/launch</p></section>
+<section class="shot a">
+  <h2>Ready to publish</h2><span>3 aspect ratios, 60 fps</span>
+  <div class="btn">Publish</div>
+  <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z" fill="#fff" stroke="#16151a" stroke-width="1.6" stroke-linejoin="round"/></svg>
+</section>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const E = CURVES.expoOut;
+const settle = curveToLinear(E);
+const px = 0.66 * window.innerWidth, py = 0.63 * window.innerHeight;
+const R = Math.hypot(px, py);   // to the farthest corner, so no travel is spent outside the frame
+const at = `${px}px ${py}px`;   // px, not var(): a var() in a keyframe does not interpolate
+const a = document.querySelector('.a'), b = document.querySelector('.b');
+const close = { at: 550, dur: 650 };
+document.querySelector('.cursor').animate([{ translate: '-24vw 16vh' }, { translate: '0 0' }], { duration: 500, delay: 50, easing: settle, fill: 'both' });
+document.querySelector('.btn').animate([{ scale: 1 }, { scale: 0.95, offset: 0.4 }, { scale: 1 }], { duration: 220, delay: 480, easing: settle, fill: 'both' });
+// ease in, fastest at the midpoint, soft close on the button; an accelerating-only curve spends its whole travel in the last 0.1 s
+a.animate([{ clipPath: `circle(${R}px at ${at})` }, { clipPath: `circle(0px at ${at})` }],
+  { duration: close.dur, delay: close.at, easing: curveToLinear((u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1))), fill: 'both' });
+b.animate([{ scale: 1.1 }, { scale: 1 }], { duration: 1100, delay: close.at, easing: settle, fill: 'both' });
+</script>
+</body>
+</html>

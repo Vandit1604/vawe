@@ -1,0 +1,43 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.4">
+<title>move: chain beats</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { position: relative; font: 700 12vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.03em; }
+
+  /* one element, three jobs: a dot, then a bar, then the rule under the headline */
+  .row { position: absolute; left: 14vw; top: 50vh; height: 10vh; display: flex; align-items: flex-end; }
+  .chip { width: 5vh; height: 5vh; border-radius: 999px; background: var(--accent); overflow: hidden; white-space: nowrap;
+          display: flex; align-items: center; padding-left: 3vh; box-sizing: border-box;
+          font: 600 3.4vh/1 'Archivo', sans-serif; letter-spacing: 0; }
+  .win { position: absolute; left: 14vw; top: 36vh; height: 22vh; overflow: hidden; }
+  h1 { margin: 0; font-size: 12vh; line-height: 22vh; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="win"><h1>Shipped in 41 s</h1></div>
+<div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const settle = curveToLinear(CURVES.expoOut);
+const chip = document.querySelector('.chip'), label = chip.querySelector('.label'), h1 = document.querySelector('h1');
+const next = (beat) => beat.at + beat.dur * 0.3;   // expoOut reads as done at 0.46 of its duration; 0.3 is 65% of that
+const A = { at: 50, dur: 800 };
+const B = { at: next(A), dur: 1000 };
+const C = { at: next(B), dur: 1500 };
+const run = (el, frames, beat, fill = 'both') => el.animate(frames, { duration: beat.dur, delay: beat.at, easing: settle, fill });
+
+run(chip, [{ translate: '-9vw 0' }, { translate: '0 0' }], A);
+run(chip, [{ width: '5vh', height: '5vh' }, { width: '72vw', height: '10vh' }], B);
+run(chip, [{ height: '0.6vh' }], C, 'forwards');   // no from: a from would fill backwards over beat B
+label.animate([{ opacity: 0 }, { opacity: 1, offset: 0.3 }], { duration: B.dur, delay: B.at, fill: 'both' });
+label.animate([{ opacity: 0, translate: '0 -1vh' }], { duration: 160, delay: C.at, easing: settle, fill: 'forwards' });
+run(h1, [{ translate: '0 105%' }, { translate: '0 0' }], { at: C.at + 80, dur: 1300 });
+</script>
+</body>
+</html>
