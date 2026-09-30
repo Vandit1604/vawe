@@ -1,5 +1,5 @@
 // harness/lib/light-map.mjs: a LOW-FREQUENCY LIGHT MAP, the brightness/colour a beat reads at a
-// glance before any detail is legible. SSIM and the colour ΔE in quality/gates/tile.mjs both judge one
+// glance before any detail is legible. SSIM and the colour ΔE in harness/lib/tile.mjs both judge one
 // frame at a time; this judges the frame's LIGHT, which is why a recreation can score fine on both and
 // still look wrong: a reference that reads 4-8x brighter with a diagonal field of light, matched by a
 // render that is mostly black with a small glow, is a light-map failure neither existing measure sees.
@@ -14,7 +14,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { probeSize } from './frame-forensics.mjs';
-import { labDeltaE } from '../../quality/gates/tile.mjs';
+import { labDeltaE } from './tile.mjs';
 import { srgbToLinear, linearToSrgb } from '../../core/color/linear.js';
 
 function rawFrame(source, t) {

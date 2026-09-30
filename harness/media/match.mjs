@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { requireTool, probeSize, probeFps } from '../lib/frame-forensics.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { detectCuts } from './shot-detect.mjs';
-import { sampleFrames, tileGrid, blendDiff, ssimOf, meanColorOf, labDeltaE } from '../../quality/gates/tile.mjs';
+import { sampleFrames, tileGrid, blendDiff, ssimOf, meanColorOf, labDeltaE } from '../lib/tile.mjs';
 import { lightMap, lightMapDistance } from '../lib/light-map.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');

@@ -1,4 +1,4 @@
-// quality/gates/tile.mjs: lay PNG tiles into one contact sheet.
+// harness/lib/tile.mjs: lay PNG tiles into one contact sheet.
 //
 // The xstack + pad + fill=white graph was written twice (compare.mjs, judge.mjs) with small differences
 // that were accidents rather than decisions. One implementation, so a sheet from one tool reads the same

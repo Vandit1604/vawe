@@ -5,12 +5,12 @@
 //   loopSeam(video, outDir)            last 0.5 s then first 0.5 s, plus the first-vs-last pixel diff
 //
 // Wired into `node harness/media/see.mjs <video|page.html> --phone | --strip <t> | --loop`. Every view
-// tiles with quality/gates/tile.mjs, the one owner of the sheet graph.
+// tiles with harness/lib/tile.mjs, the one owner of the sheet graph.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { readPageMeta } from './render-page.mjs';
-import { sampleFrames, tileGrid, blendDiff, meanColorOf, ssimOf } from '../../quality/gates/tile.mjs';
+import { sampleFrames, tileGrid, blendDiff, meanColorOf, ssimOf } from '../lib/tile.mjs';
 
 export function probe(video) {
   const r = spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries',

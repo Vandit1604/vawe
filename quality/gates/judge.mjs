@@ -15,7 +15,7 @@ import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
 import { fileURLToPath } from 'node:url';
-import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable, evenSamples } from './tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable, evenSamples } from '../../harness/lib/tile.mjs';
 import { readPageMeta } from '../../harness/media/render-page.mjs';
 import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { craftRubric, structuredRubric } from './rubric.mjs';

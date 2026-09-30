@@ -15,7 +15,7 @@
 // one under twice that is `low`: the line says "confirm by eye" and names the frame and a sheet.
 import { deltaE } from './color-delta.mjs';
 import { norm } from './ref-measure/words.mjs';
-import { readHoldProblems } from '../../quality/gates/page-check.mjs';
+import { readHoldProblems } from './read-hold.mjs';
 
 const MATCH_MAX_COST = 3;
 const LAND_FRAMES = 1;
