@@ -26,17 +26,23 @@ export async function awaitFonts(timeoutMs = 10000) {
   const setReal = window.__pageClock ? window.__pageClock.real.setTimeout : setTimeout.bind(window);
   const clearReal = window.__pageClock ? window.__pageClock.real.clearTimeout : clearTimeout.bind(window);
   const deadline = Date.now() + timeoutMs;
+  const loadingNow = () => [...fonts].filter((f) => f.status === 'loading');
   for (;;) {
-    await fonts.ready;
-    const loading = [...fonts].filter((f) => f.status === 'loading');
-    if (!loading.length) return;
-    const names = loading.map((f) => f.family).join(', ');
     let timer;
     const timeout = new Promise((_, reject) => {
-      timer = setReal(() => reject(new Error(`font still loading after ${timeoutMs} ms: ${names}`)), Math.max(0, deadline - Date.now()));
+      timer = setReal(() => reject(new Error(`font still loading after ${timeoutMs} ms: ${loadingNow().map((f) => f.family).join(', ')}`)), Math.max(0, deadline - Date.now()));
     });
-    const loaded = Promise.all(loading.map((f) => f.loaded.catch(() => { throw new Error(`font failed to load: ${f.family}`); })));
-    try { await Promise.race([loaded, timeout]); } finally { clearReal(timer); }
+    // fonts.ready itself never resolves while a face's file never arrives, so it races the deadline too.
+    const loaded = (async () => {
+      await fonts.ready;
+      const loading = loadingNow();
+      await Promise.all(loading.map((f) => f.loaded.catch(() => { throw new Error(`font failed to load: ${f.family}`); })));
+      return loading.length === 0;
+    })();
+    loaded.catch(() => {});
+    let done;
+    try { done = await Promise.race([loaded, timeout]); } finally { clearReal(timer); }
+    if (done) return;
   }
 }
 
