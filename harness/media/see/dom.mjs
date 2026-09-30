@@ -223,7 +223,7 @@ export async function runRequiredMotionMatch(htmlPath, refPath, outDirRoot, opts
     // Unlike a bare `--compare` (report-only, this repo's own house rule), a bare-page check has no
     // film/post-draft step wrapping it to refuse the ship on its behalf, so THIS is the one place that
     // must actually fail the process: a recreation agent running this standalone needs a non-zero exit.
-    const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.filmArg, opts.words);
+    const { ok } = runCompare(refWindow, tmpMp4, outDirRoot, 0, to - from, opts.words);
     const textOk = await runTextScaleCheck(htmlPath, refWindow, outDirRoot, { from, windowDur: to - from, w: opts.w, h: opts.h });
     if (!ok || !textOk) process.exitCode = 1;
     else {

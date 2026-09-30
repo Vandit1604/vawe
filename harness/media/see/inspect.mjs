@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ffmpegOrDie, drawtext } from '../../lib/scratch.mjs';
-import { writeReceipt } from '../../lib/receipt.mjs';
 import { openPreview } from '../preview-server.mjs';
 import { die, ROOT, stackImages, tileInGrids, writeJsonAtomic } from './core.mjs';
 
@@ -214,7 +213,7 @@ export async function domLayoutFindings(page) {
   });
 }
 
-export async function runLayout(htmlPath, times, outDir, filmArg) {
+export async function runLayout(htmlPath, times, outDir) {
   const { page, url, close } = await openPreview(htmlPath, { width: 1920, height: 1080 });
   fs.mkdirSync(outDir, { recursive: true });
   try {
@@ -236,7 +235,5 @@ export async function runLayout(htmlPath, times, outDir, filmArg) {
     for (const p of perTime)
       console.log(`  t=${p.t}s: ${p.findings.length} fault(s)${p.findings.length ? ` -> ${p.findings.map((f) => f.kind).join(', ')}` : ''}`);
     console.log(`\n  ✓ wrote ${path.relative(ROOT, path.join(outDir, 'layout.md'))}`);
-
-    if (filmArg) writeReceipt('layout', filmArg, { ok: total === 0, faultCount: total, html: htmlPath, times });
   } finally { await close(); }
 }

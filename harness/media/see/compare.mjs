@@ -2,7 +2,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ffmpegOrDie, drawtext } from '../../lib/scratch.mjs';
-import { writeReceipt } from '../../lib/receipt.mjs';
 import { bucketMean, computeEnergy, describeRatio, die, edgeMean, findHolds, HOLD_FLOOR, HOLD_MIN, longestHold, probeVideo, ROOT, stackImages, tileInGrids, timeRange, writeJsonAtomic } from './core.mjs';
 import { renderGrids } from './ocr.mjs';
 import { runWordEventCompare } from './words.mjs';
@@ -78,7 +77,7 @@ export function buildCompareGrids(ref, draft, outDir, window, dims) {
   return gridPaths;
 }
 
-export function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmArg, words = false) {
+export function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, words = false) {
   const refP = probeVideo(refPath);
   const draftP = probeVideo(draftPath);
   const from = fromArg != null ? fromArg : 0;
@@ -149,22 +148,9 @@ export function runCompare(refPath, draftPath, outDirRoot, fromArg, toArg, filmA
   // the SAME two clips this function already has open, never a third render.
   const wordsOk = words ? runWordEventCompare(refPath, draftPath, outDir, from, clampedTo, `${path.basename(refPath)} vs ${path.basename(draftPath)}`) : true;
 
-  // `--film` records this run against the FILM's own hash (harness/lib/receipt.mjs), the same receipt
-  // shape conform.mjs/verify.mjs already write, so quality/gates/post-draft.mjs can read one fresh/stale
-  // answer instead of re-running ffmpeg itself.
   const overallOk = ok && wordsOk;
-  if (filmArg) {
-    writeReceipt('motion-compare', filmArg, {
-      ok: overallOk, tooStillCount: tooStillWindows.length, tooBusyCount: tooBusyWindows.length,
-      tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
-      tooBusyWindows: tooBusyWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
-      peakRatio, exitRatio, ref: refPath, draft: draftPath, from, to: clampedTo, wordsOk,
-    });
-  }
-  // Reports, does not block by default (this repo's own house rule: a gate blocks only with --strict
-  // or through a specific caller that opts in, e.g. --film for post-draft.mjs's own required-motion
-  // step, or runRequiredMotionMatch below for a bare-page check with no film to gate). `ok` is
-  // returned so a caller that DOES want to refuse (no film/scene wrapping it) can.
+  // Reports, does not block by default (a gate blocks only with --strict or through a caller that
+  // opts in, e.g. runRequiredMotionMatch below). `ok` is returned so that caller can refuse.
   return { ok: overallOk, tooStillWindows, tooBusyWindows, peakRatio, exitRatio, wordsOk };
 }
 // Required-motion-match thresholds: a BAND, not a floor alone. Under HALF the reference reads
@@ -290,7 +276,7 @@ export function printSheetCheck(result, refLabel, filmLabel) {
   return ok;
 }
 
-export function runSheetCheck(refFile, filmFile, filmArg) {
+export function runSheetCheck(refFile, filmFile) {
   if (!fs.existsSync(refFile)) die(`no such file: ${refFile}`);
   if (!fs.existsSync(filmFile)) die(`no such file: ${filmFile}`);
   const refSheet = JSON.parse(fs.readFileSync(refFile, 'utf8'));
@@ -300,14 +286,6 @@ export function runSheetCheck(refFile, filmFile, filmArg) {
   if (!rows.length) die(`no overlapping curve windows between ${refFile} and ${filmFile} (missing "curve"?)`);
   printSheetCheck(result, path.basename(refFile), path.basename(filmFile));
 
-  if (filmArg) {
-    writeReceipt('motion-match', filmArg, {
-      ok, tooStillCount: tooStillWindows.length, tooBusyCount: tooBusyWindows.length,
-      tooStillWindows: tooStillWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
-      tooBusyWindows: tooBusyWindows.map((r) => ({ t0: r.t0, t1: r.t1, hint: r.hint })),
-      peakRatio, exitRatio, ref: refFile, film: filmFile,
-    });
-  }
   if (!ok) process.exitCode = 1;
 }
 // ── --measure: one instrument for both sides. The reference mp4 and a render of the page are both read by

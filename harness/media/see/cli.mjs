@@ -18,8 +18,8 @@ export async function main() {
   if (argv.includes('--sheet-check')) {
     const [refFile, filmFile] = positional;
     if (!refFile || !filmFile)
-      die('usage: node harness/media/see.mjs --sheet-check <ref-sheet.json> <film-sheet.json> [--film <film.json>]');
-    return runSheetCheck(refFile, filmFile, flag('--film', null));
+      die('usage: node harness/media/see.mjs --sheet-check <ref-sheet.json> <film-sheet.json>');
+    return runSheetCheck(refFile, filmFile);
   }
 
   const video = positional[0];
@@ -28,10 +28,10 @@ export async function main() {
     + '| --shot <from>-<to> [--fps N] [--page <html>] | --compare <draft.mp4> [--from s --to s] [--words] '
     + '| <page.html> [outDir] --measure [--ref <mp4>] (numeric deltas both sides, or self-checks) '
     + '| --dom [<html>] [--from s --to s] [--dom-fps N] [--ids a,b,c] '
-    + '[--ref <mp4> [--film <f.json>] [--final] [--w N --h N] [--blur N] [--words]] '
+    + '[--ref <mp4> [--final] [--w N --h N] [--blur N] [--words]] '
     + '| --word-events <film.mp4> [--from s --to s] '
-    + '| --sheet-check <ref.json> <film.json> [--film <f.json>] '
-    + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...> [--film <f.json>]');
+    + '| --sheet-check <ref.json> <film.json> '
+    + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...>');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   for (const bin of ['ffprobe', 'ffmpeg']) {
     if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
@@ -92,11 +92,10 @@ export function dispatchLook(video, positional, flag) {
 
 export function dispatchLayout(video, positional, flag) {
   const timesArg = flag('--times', null);
-  if (!timesArg) die('usage: node harness/media/see.mjs <html> --layout --times <s,s,...> [--film <film.json>]');
+  if (!timesArg) die('usage: node harness/media/see.mjs <html> --layout --times <s,s,...>');
   const times = timesArg.split(',').map(Number);
-  const filmArg = flag('--film', null);
   const outDir = path.join(path.resolve(positional[1] || defaultOutDir(video)), 'layout');
-  return runLayout(video, times, outDir, filmArg);
+  return runLayout(video, times, outDir);
 }
 
 export function dispatchMeasure(video, positional, flag) {
@@ -126,7 +125,7 @@ export async function dispatchDom(video, positional, flag, argv) {
     ids: idsArg ? idsArg.split(',') : null,
   };
   if (refArg) {
-    await runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, filmArg: flag('--film', null), words: argv.includes('--words') });
+    await runRequiredMotionMatch(video, refArg, outDirRoot, { ...opts, words: argv.includes('--words') });
     if (!argv.includes('--no-measure')) await runMeasure(video, refArg, outDirRoot);
     return;
   }
@@ -168,8 +167,7 @@ export function dispatchCompare(video, positional, compareArg, flag, argv) {
   if (!fs.existsSync(compareArg)) die(`no such draft file: ${compareArg}`);
   const fromArg = flag('--from', null);
   const toArg = flag('--to', null);
-  const filmArg = flag('--film', null);
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
   return runCompare(video, compareArg, outDirRoot, fromArg != null ? Number(fromArg) : null, toArg != null ? Number(toArg) : null,
-    filmArg, argv.includes('--words'));
+    argv.includes('--words'));
 }
