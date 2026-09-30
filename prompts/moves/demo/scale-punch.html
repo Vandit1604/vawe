@@ -1,0 +1,33 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1">
+<meta name="blank" content="0-0.1">
+<title>move: scale punch</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 800 20vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.04em; }
+
+  /* the word lands from 1.4x on the overshoot curve, so it dips to 0.97 and comes back: the recoil is what reads as impact */
+  h1 { margin: 0; scale: 1.4; opacity: 0;
+       animation-name: punch, appear; animation-duration: 0.55s, 0.12s; animation-delay: 0.1s, 0.1s;
+       animation-timing-function: var(--recoil), linear; animation-fill-mode: both, both; }
+  @keyframes punch { to { scale: 1; } }
+  @keyframes appear { to { opacity: 1; } }
+  .dot { display: inline-block; width: 0.16em; height: 0.16em; margin-left: 0.06em; border-radius: 50%; background: var(--accent);
+         scale: 0; animation-name: pop; animation-duration: 0.35s; animation-delay: 0.32s;
+         animation-timing-function: var(--recoil); animation-fill-mode: both; }
+  @keyframes pop { to { scale: 1; } }
+</style>
+</head>
+<body>
+<h1>punch<span class="dot"></span></h1>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--recoil', curveToLinear(CURVES.overshoot));
+</script>
+</body>
+</html>

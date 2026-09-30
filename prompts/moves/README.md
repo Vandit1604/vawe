@@ -1,6 +1,6 @@
 ---
 when: "you are about to write a text or panel entrance, a transition, an exit, or a typing effect, and want the proven version instead of your first idea"
-answers: "seven moves as CSS and WAAPI snippets an agent copies, each with its curve from curveToLinear and a 1 s clip"
+answers: "twelve moves as CSS and WAAPI snippets an agent copies, each with its curve from curveToLinear and a 1 s clip"
 group: reference
 ---
 
@@ -20,6 +20,11 @@ Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a
 | cut on motion | a moving shape carries the eye across a hard cut into a new scene | [cut-on-motion.md](cut-on-motion.md) | [cut-on-motion.mp4](cut-on-motion.mp4) |
 | push with blur | a panel pushes in with a directional blur that follows its speed, set per frame | [push-blur.md](push-blur.md) | [push-blur.mp4](push-blur.mp4) |
 | exit fast | the pair every beat needs: arrive fast and land soft, leave faster and shorter | [exit-fast.md](exit-fast.md) | [exit-fast.mp4](exit-fast.mp4) |
+| weight morph | one word gets heavier on a real variable-font axis; the glyphs reshape, nothing is scaled | [weight-morph.md](weight-morph.md) | [weight-morph.mp4](weight-morph.mp4) |
+| tracking collapse | a title or wordmark arrives: letters converge from wide tracking while the word sharpens | [tracking-collapse.md](tracking-collapse.md) | [tracking-collapse.mp4](tracking-collapse.mp4) |
+| scale punch | the hero word hits from 1.4x and recoils on the overshoot curve; a full stop pops after it | [scale-punch.md](scale-punch.md) | [scale-punch.mp4](scale-punch.mp4) |
+| word colour sweep | the accent runs word by word in reading order and stays on the target word | [word-sweep.md](word-sweep.md) | [word-sweep.mp4](word-sweep.mp4) |
+| split-flap resolve | a name or number is decided: each letter flips through a seeded column and locks left to right | [flap-resolve.md](flap-resolve.md) | [flap-resolve.mp4](flap-resolve.mp4) |
 
 Re-render a clip after editing its demo:
 `node harness/media/render-page.mjs prompts/moves/demo/<move>.html prompts/moves/<move>.mp4 --w 640 --h 360`.

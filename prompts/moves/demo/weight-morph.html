@@ -1,0 +1,31 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.2">
+<title>move: weight morph</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 200 18vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+
+  /* a real axis: Archivo carries wght 100 to 900, so the glyphs reshape instead of a fake bold via stroke */
+  h1 { margin: 0; font-weight: 200;
+       animation-name: thicken; animation-duration: 0.9s; animation-delay: 0.15s;
+       animation-timing-function: var(--settle); animation-fill-mode: both; }
+  @keyframes thicken { to { font-weight: 900; letter-spacing: -0.04em; } }
+  .rule { width: 0; height: 0.6vh; background: var(--accent); margin-top: 2vh;
+          animation-name: draw; animation-duration: 0.5s; animation-delay: 0.45s;
+          animation-timing-function: var(--settle); animation-fill-mode: both; }
+  @keyframes draw { to { width: 22vw; } }
+</style>
+</head>
+<body>
+<div><h1>weight</h1><div class="rule"></div></div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+</script>
+</body>
+</html>
