@@ -14,12 +14,13 @@
            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22); }
   .panel .title { font-size: calc(var(--u) * 13); }
   .panel .lead { color: color-mix(in srgb, var(--on-accent) 80%, transparent); }
+  .panel .still { position: absolute; left: var(--s2); right: var(--s2); top: var(--s2); height: 50%; width: calc(100% - var(--s2) * 2); border-radius: calc(var(--r-card) - var(--s2)); --img-edge: rgba(255, 255, 255, 0.14); }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position: absolute"><filter id="motion" x="-30%" width="160%"><feGaussianBlur id="mb" stdDeviation="0 0"/></filter></svg>
 <div class="under"><div class="kicker">step 2 of 3</div><div class="title">Preview</div></div>
-<div class="panel"><div class="title">Publish</div><div class="lead">Ships in 3 aspects</div></div>
+<div class="panel"><img class="photo still" src="/prompts/moves/demo/assets/photos/meadow.jpg"><div class="title">Publish</div><div class="lead">Ships in 3 aspects</div></div>
 <script type="module">
 import '/core/engine/page-api.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';

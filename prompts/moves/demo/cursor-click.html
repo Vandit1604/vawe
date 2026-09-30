@@ -9,13 +9,15 @@
   body { position: relative; }
   .card { width: calc(var(--u) * 128); padding: calc(var(--u) * 5.6) calc(var(--u) * 6) calc(var(--u) * 5.6); }
   .head { display: flex; align-items: center; gap: var(--s3); }
-  .file { --size: calc(var(--u) * 13); }
-  .file .icon { width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); }
-  h1 { margin: 0; font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.02em; }
+  .file { position: relative; flex: none; width: calc(var(--u) * 12); height: calc(var(--u) * 15.6); border-radius: var(--r-chip); overflow: hidden; background: var(--surface); box-shadow: var(--ring), var(--stack); }
+  .file img { height: 62%; border-radius: 0; }
+  .file .logo-mark { position: absolute; left: calc(var(--u) * 1.4); bottom: calc(var(--u) * 1.3); width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); color: var(--ink); }
+  h1 { margin: 0; font: 700 var(--t-head)/1.1 var(--sans); letter-spacing: -0.025em; }
   .meta { margin: var(--s1) 0 0; font: 500 var(--t-body)/1.2 var(--sans); color: var(--muted); }
   .rule { margin: calc(var(--u) * 5) 0 calc(var(--u) * 4.4); }
   .row { display: flex; justify-content: space-between; align-items: center; }
-  .row span { font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .who { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .who .avatar { --size: calc(var(--u) * 7.4); }
   .btn { position: relative; display: grid; place-items: center; min-width: calc(var(--u) * 38); padding: calc(var(--u) * 3) calc(var(--u) * 4.6); font-size: var(--t-lead); overflow: hidden; }
   .btn .l { grid-area: 1 / 1; display: flex; align-items: center; gap: var(--s2); white-space: nowrap; }
   .btn .l.done { opacity: 0; }
@@ -31,16 +33,17 @@
 <body>
 <div class="card">
   <div class="head">
-    <div class="chip file"><svg class="icon" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 17h6"/></svg></div>
-    <div><h1>Q3 launch report</h1><p class="meta">Updated 2 min ago, 14 pages</p></div>
+    <div class="file"><img class="photo" src="/prompts/moves/demo/assets/photos/ridge.jpg"><span data-logo="northwind"></span></div>
+    <div><h1>Q3 launch report</h1><p class="meta">Northwind, 14 pages, edited 2 min ago</p></div>
   </div>
   <div class="rule divider"></div>
-  <div class="row"><span>PDF, 2.4 MB</span>
+  <div class="row"><div class="who"><div class="avatars"><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-loft.jpg"></div><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg"></div></div>3 reviewers</div>
     <div class="btn"><span class="l idle">Export PDF</span><span class="l done"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Exported</span></div>
   </div>
 </div>
 <div class="cur"><div class="x"><div class="y"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div></div></div>
 <script type="module">
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();

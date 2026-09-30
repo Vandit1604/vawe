@@ -9,7 +9,13 @@
 <style>
   .checkout { width: calc(var(--u) * 92); display: flex; flex-direction: column; gap: var(--s3); }
   .head-row { display: flex; align-items: center; gap: var(--s2); }
-  .head-row .chip { --size: calc(var(--u) * 9); }
+  .head-row .chip { --size: calc(var(--u) * 9); color: var(--ink); }
+  .head-row .chip .logo-mark { width: 58%; height: 58%; }
+  .head-row .seats { margin-left: auto; white-space: nowrap; }
+  .card-row { display: flex; align-items: center; gap: var(--s2); padding: calc(var(--u) * 2) var(--s2); border-radius: var(--r-chip); background: var(--raised); font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
+  .card-row b { font-weight: 600; color: var(--ink); }
+  .card-row .mono { margin-left: auto; }
+  .card-row svg { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
   .head-row .name { font: 700 var(--t-body)/1.1 var(--sans); }
   .head-row .name small { display: block; margin-top: calc(var(--u) * 0.5); font: 500 var(--t-small)/1.1 var(--sans); color: var(--muted); }
   .price { font: 800 calc(var(--u) * 12)/1 var(--sans); letter-spacing: -0.04em; }
@@ -24,8 +30,9 @@
 </head>
 <body>
 <div class="checkout card">
-  <div class="head-row"><div class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg></div><div class="name">Pro plan<small>billed monthly</small></div></div>
+  <div class="head-row"><div class="chip" data-logo="mosaic"></div><div class="name">Mosaic Pro<small>Billed monthly</small></div><span class="pill seats">1 seat</span></div>
   <div class="price">$19<small>/ month</small></div>
+  <div class="card-row"><svg viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg><b>Card</b>ending 4417<span class="mono">08/28</span></div>
   <div class="slot">
     <div class="ring"></div>
     <div class="btn primary pay"><span class="label">Pay $19</span><svg viewBox="0 0 24 24"><path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M5.5 12.5l4.2 4.2L18.5 7.6"/></svg></div>
@@ -33,6 +40,7 @@
   <div class="done">Payment received</div>
 </div>
 <script type="module">
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), press = curveToLinear(CURVES.spring);
 const q = (s) => document.querySelector(s);

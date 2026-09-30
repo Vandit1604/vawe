@@ -11,7 +11,10 @@
   .a h1 { position: absolute; left: 8vw; top: calc(var(--u) * 22); margin: 0; font: 800 calc(var(--u) * 15)/1.02 var(--sans); letter-spacing: -0.04em; }
   .a .stack { position: absolute; right: 8vw; top: calc(var(--u) * 16); width: calc(var(--u) * 62); display: flex; flex-direction: column; gap: var(--s2); }
   .a .row { display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3); border-radius: var(--r-chip); background: var(--surface); box-shadow: var(--shadow-card); font: 600 var(--t-body)/1 var(--sans); color: var(--muted); }
-  .a .row i { width: calc(var(--u) * 4); height: calc(var(--u) * 4); border-radius: 50%; background: var(--raised); flex: none; }
+  .a .row i { display: grid; place-items: center; width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); border-radius: calc(var(--r-chip) - var(--s2) / 2); background: var(--raised); box-shadow: var(--ring); color: var(--ink); flex: none; }
+  .a .row i .logo-mark { width: 60%; height: 60%; }
+  .a .row b { color: var(--ink); font-weight: 700; }
+  .a .row em { margin-left: auto; font: 600 var(--t-small)/1 var(--mono); font-style: normal; color: var(--faint); }
   .b { background: #07051a; }
   .b .bloom { position: absolute; inset: 0; background: radial-gradient(circle at 70% 42%, #fff 0, #fff 4.5%, #ffe2b0 6.5%, #ffb547 15%, rgba(255, 181, 71, 0.38) 32%, rgba(255, 181, 71, 0.08) 52%, rgba(255, 181, 71, 0) 68%); }
   .b .rim { position: absolute; left: 70vw; top: calc(var(--u) * 42); width: calc(var(--u) * 46); height: calc(var(--u) * 46); margin: calc(var(--u) * -23) 0 0 calc(var(--u) * -23); border-radius: 50%; box-shadow: inset 0 0 0 calc(var(--u) * 0.35) rgba(255, 255, 255, 0.55); }
@@ -20,7 +23,7 @@
 </style>
 </head>
 <body>
-<section class="shot a"><h1>12 tabs,<br>open.</h1><div class="stack"><div class="row"><i></i>Inbox, 48 unread</div><div class="row"><i></i>Docs, edited 2 h ago</div><div class="row"><i></i>Board, 9 blocked</div><div class="row"><i></i>Calendar, 6 today</div></div></section>
+<section class="shot a"><h1>12 tabs,<br>open.</h1><div class="stack"><div class="row"><i data-logo="relay"></i><b>Inbox</b><em>48</em></div><div class="row"><i data-logo="kestrel"></i><b>Docs</b><em>edited 2 h</em></div><div class="row"><i data-logo="mosaic"></i><b>Board</b><em>9 blocked</em></div><div class="row"><i data-logo="aster"></i><b>Calendar</b><em>6 today</em></div></div></section>
 <section class="shot b" id="b"><div class="in shot"><div class="bloom"></div><div class="rim"></div><h1>One place<br>for <span>all</span> of it.</h1></div></section>
 <svg width="0" height="0" style="position:absolute"><filter id="luma" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
   <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.2126 0.7152 0.0722 0 0" result="L"/>
@@ -29,6 +32,7 @@
 </filter></svg>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut);
 const S = 8, t0 = 0.3, dur = 1.0;                       // S: how many luminance steps the edge is soft over (1/S wide)

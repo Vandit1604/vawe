@@ -9,12 +9,17 @@
   body { display: block; }
   .app { position: absolute; inset: 6vh 5vw; display: grid; grid-template-columns: 22vw 1fr; overflow: hidden; padding: 0; }
   .app nav { padding: var(--s4) var(--s3); background: var(--raised); display: flex; flex-direction: column; gap: var(--s2); font: 600 var(--t-small)/1 var(--sans); color: var(--muted); }
-  .app nav b { color: var(--ink); }
+  .app nav .ws { margin-bottom: var(--s2); font-size: calc(var(--u) * 4.6); color: var(--ink); }
+  .app nav span { display: flex; justify-content: space-between; padding: calc(var(--u) * 1.2) calc(var(--u) * 1.6); margin: 0 calc(var(--u) * -1.6); border-radius: var(--r-chip); }
+  .app nav span.on { background: var(--surface); color: var(--ink); box-shadow: var(--ring); }
+  .app nav span i { font-style: normal; color: var(--faint); }
   .app main { padding: var(--s4) var(--s4); }
-  .app h2 { margin: 0 0 var(--s3); font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.02em; }
+  .app h2 { display: flex; align-items: baseline; gap: var(--s2); margin: 0 0 var(--s3); font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.025em; }
+  .app h2 small { font: 500 var(--t-small)/1 var(--sans); letter-spacing: 0; color: var(--faint); }
   .issue { display: flex; gap: var(--s2); align-items: center; padding: calc(var(--u) * 2.2) 0; border-top: 1px solid var(--line); font: 500 var(--t-small)/1 var(--sans); }
-  .issue span { color: var(--faint); font-family: var(--mono); }
-  .status { margin-left: auto; }
+  .issue > span { color: var(--faint); font-family: var(--mono); }
+  .status { margin-left: auto; font-style: normal; }
+  .issue .avatar { --size: calc(var(--u) * 5.4); }
   .dim { position: absolute; inset: 0; background: var(--ink); opacity: 0; }
 
   .palette { position: absolute; left: 50%; top: 13vh; width: 60vw; margin-left: -30vw; padding: 0; overflow: hidden; }
@@ -33,12 +38,12 @@
 </head>
 <body>
 <div class="app card">
-  <nav><b>Relay</b><span>Inbox</span><span>My issues</span><span>Projects</span></nav>
-  <main><h2>My issues</h2>
-    <div class="issue"><span>REL-214</span>Render queue stalls on 9:16<em class="pill status">In progress</em></div>
-    <div class="issue"><span>REL-209</span>Caption timing drifts after cut<em class="pill status">Todo</em></div>
-    <div class="issue"><span>REL-201</span>Export PDF cover page<em class="pill status">Todo</em></div>
-    <div class="issue"><span>REL-198</span>Launch film, final mix<em class="pill up status">Ready</em></div>
+  <nav><b class="ws" data-logo="relay" data-lockup></b><span>Inbox<i>6</i></span><span class="on">My issues<i>4</i></span><span>Projects<i>12</i></span></nav>
+  <main><h2>My issues<small>Sprint 31</small></h2>
+    <div class="issue"><span>REL-214</span>Render queue stalls on 9:16<em class="pill status">In progress</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-bust.jpg"></div></div>
+    <div class="issue"><span>REL-209</span>Caption timing drifts after cut<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg"></div></div>
+    <div class="issue"><span>REL-201</span>Export PDF cover page<em class="pill status">Todo</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div></div>
+    <div class="issue"><span>REL-198</span>Launch film, final mix<em class="pill up status">Ready</em><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-meadow.jpg"></div></div>
   </main>
   <div class="dim"></div>
 </div>
@@ -54,6 +59,7 @@
   </div>
 </div>
 <script type="module">
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.spring), leave = curveToLinear((u) => u * u * u);
 const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
