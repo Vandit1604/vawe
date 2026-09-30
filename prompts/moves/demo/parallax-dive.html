@@ -1,0 +1,51 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: parallax dive</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --card: #22212a; --ink: #fff; --dim: #8b8a94; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { font: 600 3vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .stage { position: absolute; inset: 0; perspective: 80vh; perspective-origin: 50% 50%; }
+  .rig { position: absolute; inset: 0; transform-style: preserve-3d; }
+  /* every layer sits at its own depth (z, in vh); the camera is the rig moving toward us */
+  .layer { position: absolute; left: 50%; top: 50%; translate: calc(var(--x) * 1vw - 50%) calc(var(--y) * 1vh - 50%); transform: translateZ(calc(var(--z) * 1vh)); }
+  .far { --x: 0; --y: 0; --z: -240; width: 600vw; height: 600vh; background: radial-gradient(#4d4c59 0.7vh, transparent 0.8vh) 0 0 / 14vh 14vh; }
+  .card { width: 40vh; height: 24vh; background: var(--card); border-radius: 1.6vh; padding: 3vh 2.6vh; font-size: 3.4vh; box-sizing: border-box; color: var(--dim); }
+  .card b { display: block; margin-top: 1.6vh; font-size: 8vh; color: var(--ink); letter-spacing: -0.03em; }
+  .slab { width: 70vh; height: 44vh; background: #2b2a35; border-radius: 3vh; }
+  .title { --x: 0; --y: 0; --z: -120; white-space: nowrap; font-size: 22vh; font-weight: 700; letter-spacing: -0.045em; }
+  .title i { color: var(--accent); font-style: normal; }
+</style>
+</head>
+<body>
+<div class="stage"><div class="rig">
+  <div class="layer far"></div>
+  <div class="layer card" style="--x:-40; --y:-26; --z:-100">renders<b>128</b></div>
+  <div class="layer card" style="--x:38; --y:24; --z:-100">median<b>41 s</b></div>
+  <div class="layer card" style="--x:-30; --y:30; --z:-170">fps<b>60</b></div>
+  <div class="layer card" style="--x:32; --y:-32; --z:-170">ratios<b>3</b></div>
+  <div class="layer title">Dive in<i>.</i></div>
+  <div class="layer slab near" style="--x:-58; --y:-28; --z:30"></div>
+  <div class="layer slab near" style="--x:56; --y:30; --z:30"></div>
+</div></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { CURVES } from '/core/motion/springs.js';
+const rig = document.querySelector('.rig'), near = [...document.querySelectorAll('.near')];
+const t0 = 0.1, dur = 1.8, dive = 120;   // dive is the camera travel in vh: the title starts 120 vh deep and ends at z 0
+const ease = (u) => 0.35 * u + 0.65 * CURVES.expoOut(u);
+vawe.onFrame((t) => {
+  const p = ease(Math.min(1, Math.max(0, (t - t0) / dur)));
+  const vh = window.innerHeight / 100;
+  rig.style.transform = `translate3d(${(-3 * p).toFixed(3) * vh * 0.5625}px, 0, ${(dive * p * vh).toFixed(2)}px)`;
+  // a slab that reaches the camera fades out before it can cover the frame
+  near.forEach((n) => { n.style.opacity = Math.min(1, Math.max(0, (52 - dive * p) / 22)).toFixed(3); });
+});
+</script>
+</body>
+</html>

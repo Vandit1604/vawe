@@ -58,7 +58,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | ui-focus-zoom | zoom onto one part of a captured UI | to be captured | built |
 | caret-follow | the camera tracks the typing caret | vawe-flow-2 terminal | built |
 | pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | built |
-| parallax-dive | layers at different depths move at different speeds | to be captured | to build |
+| parallax-dive | layers at different depths move at different speeds | to be captured | built |
 | drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | to build |
 | rack-focus | focus moves from one layer to another | to be captured | to build |
 
