@@ -1,5 +1,5 @@
 // Build the /moves gallery's data from prompts/moves: one JSON file the site imports at build time,
-// the raw move markdown served as text, the moves section of llms.txt, and (with --clips) small web
+// the raw move markdown served as text, the moves section of llms.txt, and (with --clips) the web
 // copies of each clip.
 //
 //   node scripts/site/moves.mjs            data, raw .md and llms.txt (pure node, runs in prebuild)
@@ -216,16 +216,21 @@ function readMove(file, index) {
 }
 
 // ---- clips ------------------------------------------------------------------------------------------
-// Sources are 640x360 at 60 fps. At these settings a 2 s clip lands near 70 KB (VP9) and 80 KB (H.264),
-// measured on pull-back-reveal, the largest source (996 KB).
+// One source per move, rendered by `bin/vawe moves` at 1280x720 60 fps. The move page plays the H.264
+// copy at full size; the gallery grid plays a 640 px VP9 copy over a 640 px poster.
+const CLIP_FILES = ['mp4', 'webm', 'webp', 'hd.webp'];
+
 function encodeClip(name) {
   const src = path.join(SRC, `${name}.mp4`);
   const out = (ext) => path.join(OUT_DIR, `${name}.${ext}`);
   const ff = (args) => execFileSync('ffmpeg', ['-v', 'error', '-y', ...args], { stdio: 'inherit' });
-  ff(['-i', src, '-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '28', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out('mp4')]);
-  ff(['-i', src, '-an', '-c:v', 'libvpx-vp9', '-crf', '48', '-b:v', '0', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '2', out('webm')]);
+  const small = ['-vf', 'scale=640:-2:flags=lanczos'];
+  ff(['-i', src, '-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '22', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out('mp4')]);
+  ff(['-i', src, '-an', ...small, '-c:v', 'libvpx-vp9', '-crf', '44', '-b:v', '0', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '2', out('webm')]);
   const dur = Number(execFileSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', src]).toString());
-  ff(['-ss', String(Math.max(0, dur - 0.25)), '-i', src, '-frames:v', '1', '-c:v', 'libwebp', '-quality', '62', out('webp')]);
+  const last = ['-ss', String(Math.max(0, dur - 0.25)), '-i', src, '-frames:v', '1', '-c:v', 'libwebp'];
+  ff([...last, ...small, '-quality', '62', out('webp')]);
+  ff([...last, '-quality', '72', out('hd.webp')]);
 }
 
 // ---- llms.txt: the moves section is regenerated, the rest is hand-written ---------------------------
@@ -268,7 +273,7 @@ let encoded = 0;
 for (const m of moves) {
   fs.copyFileSync(path.join(SRC, `${m.name}.md`), path.join(OUT_DIR, `${m.name}.md`));
   if (!m.clipHash) continue;
-  const have = ['mp4', 'webm', 'webp'].every((e) => fs.existsSync(path.join(OUT_DIR, `${m.name}.${e}`)));
+  const have = CLIP_FILES.every((e) => fs.existsSync(path.join(OUT_DIR, `${m.name}.${e}`)));
   const fresh = have && encodedHash.get(m.name) === m.clipHash;
   if (fresh) continue;
   if (!withClips) {

@@ -30,9 +30,11 @@ export const groupLabel = (id: string | null) => GROUPS.find((g) => g.id === id)
 
 export const toCard = ({ name, title, group, look, use, jobs }: Move): MoveCard => ({ name, title, group, look, use, jobs });
 
+// mp4 and posterHd are 1280x720 for the move page; webm and poster are the 640 px grid copies.
 export const clip = (name: string) => ({
   mp4: `/moves/${name}.mp4`,
   webm: `/moves/${name}.webm`,
   poster: `/moves/${name}.webp`,
+  posterHd: `/moves/${name}.hd.webp`,
   md: `/moves/${name}.md`,
 });

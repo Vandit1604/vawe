@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4: 640 px wide, 60 fps, the
+// Render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4: 1280 px wide, 60 fps, the
 // demo's own duration. Renders only stale clips (source hash differs from clips.lock.json); --all or --only forces.
 // Runs a few renders at once.
 //   node harness/media/render-moves.mjs [--only <name>] [--all]
@@ -13,7 +13,7 @@ import { resolveFrame } from './render-page.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const MOVES = path.join(ROOT, 'prompts', 'moves');
-const CLIP_WIDTH = 640;
+const CLIP_WIDTH = 1280;
 const CLIP_FPS = 60;
 const WORKERS_PER_RENDER = 2;
 const PARALLEL = Math.max(1, Math.min(4, Math.floor(os.cpus().length / 2)));
@@ -33,11 +33,11 @@ function importedFiles(file, seen = new Set()) {
   return seen;
 }
 
-/** Hash of the demo page, demo.css and every core/ file the page imports. */
+/** Hash of the clip size and rate, the demo page, demo.css and every core/ file the page imports. */
 export function sourceHash(name) {
   const demo = path.join(MOVES, 'demo', `${name}.html`);
   const files = [demo, path.join(MOVES, 'demo', 'demo.css'), ...[...importedFiles(demo)].filter((f) => f !== demo).sort()];
-  const h = crypto.createHash('sha256');
+  const h = crypto.createHash('sha256').update(`${CLIP_WIDTH}w ${CLIP_FPS}fps`);
   for (const f of files) h.update(path.relative(ROOT, f)).update(fs.readFileSync(f));
   return h.digest('hex').slice(0, 16);
 }
@@ -48,7 +48,7 @@ const writeLock = (lock) => fs.writeFileSync(LOCK, `${JSON.stringify(Object.from
 /** Why the clip must be rendered again, or '' when its sources match the recorded hash. */
 export function staleReason(name, lock) {
   if (!fs.existsSync(path.join(MOVES, `${name}.mp4`))) return 'no clip yet';
-  return lock[name] === sourceHash(name) ? '' : 'demo, demo.css or a core/ import changed';
+  return lock[name] === sourceHash(name) ? '' : 'the clip size, demo, demo.css or a core/ import changed';
 }
 
 function renderArgs(name) {
