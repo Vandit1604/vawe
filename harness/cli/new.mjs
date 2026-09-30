@@ -12,6 +12,7 @@ const STARTER_TEMPLATE = `<!doctype html>
 <meta charset="utf-8">
 <meta name="duration" content="{{length}}">
 <meta name="aspect" content="{{aspect}}">
+<meta name="blank" content="0-0.4, {{blankEnd}}-{{length}}">
 <meta name="message" content="one thing to remember">
 <title>{{title}}</title>
 <style>
@@ -38,7 +39,7 @@ export const STARTER = starterPage({});
 
 export function starterPage({ length = 4, aspect = '16:9', title = 'Say the one thing' }) {
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
-    .replaceAll('{{exit}}', String(Math.max(0.5, +(length - 0.6).toFixed(2)))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
+    .replaceAll('{{blankEnd}}', String(Math.max(0.5, +(length - 0.3).toFixed(2)))).replaceAll('{{exit}}', String(Math.max(0.5, +(length - 0.6).toFixed(2)))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
 
 export const UNANSWERED = '[unanswered: default taken]';
