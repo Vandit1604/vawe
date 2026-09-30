@@ -1,0 +1,33 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.6">
+<meta name="blank" content="0-0.13">
+<title>move: blur word cascade</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 700 10vh/1.2 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+  p { margin: 0; width: 78vw; text-align: center; }
+
+  /* no mask and no clip: each word resolves in place, so nothing can cut a descender */
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation-name: resolve; animation-duration: 0.8s; animation-delay: calc(0.12s + var(--i) * 0.09s);
+       animation-timing-function: var(--soft); animation-fill-mode: both; }
+  .w.hot { color: var(--accent); }
+  /* opacity finishes before the blur does, so a word is readable while it is still soft */
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
+</style>
+</head>
+<body>
+<p id="line">Motion that reads like it was designed by hand</p>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const line = document.getElementById('line');
+line.innerHTML = line.textContent.split(' ').map((t, i) => `<span class="w${t === 'hand' ? ' hot' : ''}" style="--i:${i}">${t}</span>`).join(' ');
+</script>
+</body>
+</html>
