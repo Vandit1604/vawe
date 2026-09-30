@@ -26,7 +26,7 @@ const STARTER_TEMPLATE = `<!doctype html>
        animation-fill-mode: both; }
   /* arrive fast, land soft; the exit is shorter than the entrance */
   @keyframes land { from { transform: translateY(12%); opacity: 0; } to { transform: none; opacity: 1; } }
-  @keyframes leave { from { opacity: 1; } to { opacity: 0; transform: translateY(-6%); } }
+  @keyframes leave { to { opacity: 0; transform: translateY(-6%); } }
   [data-aspect="9:16"] h1 { font-size: calc(var(--vw) * 0.13); }
 </style>
 </head>
