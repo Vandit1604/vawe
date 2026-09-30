@@ -1,0 +1,30 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1">
+<meta name="blank" content="0-0.06, 0.94-1">
+<title>move: exits faster than entrances</title>
+<style>
+  :root { --paper: #f4f1ea; --ink: #14161a; }
+  html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
+  body { display: grid; place-items: center; font: 700 14vh/1 system-ui, sans-serif; color: var(--ink); }
+
+  /* in: 0.55 s, arrives fast and lands soft. out: 0.22 s, accelerates, travels less. The exit is under half the entrance. */
+  h1 { animation-name: land, leave; animation-duration: 0.55s, 0.22s; animation-delay: 0.05s, 0.72s;
+       animation-timing-function: var(--settle), var(--accelerate); animation-fill-mode: both, both; }
+  @keyframes land { from { translate: 0 12vh; opacity: 0; } to { translate: 0 0; opacity: 1; } }
+  /* no `from` on the exit: a from keyframe would fill backwards over the entrance and hide it */
+  @keyframes leave { to { translate: 0 -5vh; opacity: 0; } }
+</style>
+</head>
+<body>
+<h1>in, then out</h1>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+const root = document.documentElement.style;
+root.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.setProperty('--accelerate', curveToLinear((u) => u * u * u));
+</script>
+</body>
+</html>
