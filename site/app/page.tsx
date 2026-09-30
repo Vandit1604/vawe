@@ -29,7 +29,7 @@ const PAGE_TEXT = `<!doctype html>
 </style>
 <h1>One page. One film.</h1>`;
 
-const HERO_MOVES = ["pull-back-reveal", "cursor-click", "text-as-mask", "parallax-dive", "ai-stream-response", "logo-sting"]
+const HERO_MOVES = ["cursor-click", "text-as-mask", "pull-back-reveal", "parallax-dive", "ai-stream-response", "logo-sting"]
   .map(moveByName)
   .filter((m) => m !== null)
   .map((m) => ({ name: m.name, title: m.title, group: groupLabel(m.group) }));

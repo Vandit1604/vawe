@@ -37,6 +37,7 @@ export function Clip({
       io?.disconnect();
       io = null;
       v.pause();
+      v.removeAttribute("data-on");
       // Drop the buffer and return to the poster frame.
       v.removeAttribute("preload");
       v.currentTime = 0;
@@ -83,6 +84,7 @@ export function Clip({
       poster={poster}
       className={className}
       onClick={tap}
+      onPlaying={(e) => e.currentTarget.setAttribute("data-on", "")}
       loop
       muted
       playsInline
