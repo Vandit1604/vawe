@@ -70,6 +70,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | parallax-dive | layers at different depths move at different speeds | to be captured | built |
 | drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | built |
 | rack-focus | focus moves from one layer to another | to be captured | built |
+| pan-stations | one wide canvas; the camera pans between several stations and holds at each | HyperFrames pan-stations component and spatial-pan-stations blueprint | built |
 
 ## 5. End a film
 
