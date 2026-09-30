@@ -51,6 +51,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | show the product works with other tools | [integration-hub](integration-hub.md) |
 | make many things read as one gesture | [grid-stagger-wave](grid-stagger-wave.md) |
 | tour several features in one space | [pan-stations](pan-stations.md) |
+| hit one detail on a beat | [crash-zoom](crash-zoom.md) |
 
 ## Reveal a title
 
@@ -110,6 +111,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
 | drift hold | a very slow seeded drift per layer so a quiet frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
 | pan stations | several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them | [pan-stations.md](pan-stations.md) | [pan-stations.mp4](pan-stations.mp4) |
+| crash zoom | one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil | [crash-zoom.md](crash-zoom.md) | [crash-zoom.mp4](crash-zoom.mp4) |
 
 ## End a film
 
@@ -158,7 +160,7 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | flap resolve, weight morph, iris wipe, pull back reveal, logo sting, count up, ui strip away, integration hub |
 | paper | warm editorial: cream ground, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | mask rise, exit fast, marker highlight, drift hold, thanks sweep, card assemble, pan stations |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | letter stagger, whip pan, word sweep, parallax dive, cta pop, notification pop, outline fill |
-| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal |
+| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | tracking collapse, match cut, underline draw, push in, mark trace, chart build, skeleton reveal, crash zoom |
 | soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | word swap slot, push blur, bracket callout, ui focus zoom, cursor click, before after wipe, command palette summon |
 | night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | blur word cascade, flash cut, spotlight dim, rack focus, calm lockup, clip expand, ai stream response, device tilt stage |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | scale punch, cut on motion, wordmark cascade, text as mask, grid stagger wave |
