@@ -2,9 +2,8 @@
 // (env TYPE, NAME, REF, OUT_ROOT, NO_ROUND_TRIP). Measures the reference (harness/media/ref-spec.mjs),
 // turns the numbers into a starter (harness/media/spec-to-page.mjs) and writes
 // films/recreations/<name>/{page.html, GUIDE.md, TEXT.md, SPEC.md, spec.json, audio.m4a, reference.json, see/},
-// plus build.js and one chapter-N.js per group of shots when the film is long. Then it renders the starter
-// and scores it against the reference on six axes (a round trip), so the first thing an agent reads
-// is where the starter is already right and where it is not.
+// plus build.js and one chapter-N.js per group of shots when the film is long. With env SCORE (`--score`)
+// it also renders the starter and scores it against the reference on six axes (a round trip).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -82,10 +81,10 @@ async function main() {
   if (r.status) die(`see.mjs failed on ${ref}`);
 
   const pagePath = path.join(outDir, 'page.html');
-  if (!env.NO_ROUND_TRIP) await roundTrip(pagePath, refAbs, outDir);
+  if (env.SCORE && !env.NO_ROUND_TRIP) await roundTrip(pagePath, refAbs, outDir);
   const relPage = path.relative(ROOT, pagePath);
   console.log(`\nGUIDE: ${path.relative(ROOT, path.join(outDir, 'GUIDE.md'))}; SPEC: ${path.relative(ROOT, path.join(outDir, 'SPEC.md'))} (edit its KEEP/CHANGE block)`);
-  console.log(`vawe critique ${relPage} --ref ${ref}`);
+  console.log(`${env.SCORE ? '' : 'score the starter: '}vawe critique ${relPage} --ref ${ref}`);
   return 0;
 }
 

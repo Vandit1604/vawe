@@ -7,6 +7,7 @@
 // Reuses: ref-measure/transition.mjs (cuts and how each one changes the picture), core/beats/detect.js (audio onsets, tempo, beat grid),
 // core/motion/springs.js approach()/spring() (the curves an arrival is fitted to), see.mjs ocrWords.
 // Every frame is decoded at 320px wide; positions and sizes are reported in reference pixels.
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -39,8 +40,10 @@ function probeRate(video) {
   return m ? +m[1] / (m[2] ? +m[2] : 1) : 30;
 }
 
-function decode(video, fps, dir, W, H) {
-  const w = GRID_W, h = 2 * Math.round((GRID_W * H) / W / 2);
+const FAST_GRID_W = 160;
+
+function decode(video, fps, dir, W, H, gridW = GRID_W) {
+  const w = gridW, h = 2 * Math.round((gridW * H) / W / 2);
   const raw = path.join(dir, 'frames.rgb');
   ffmpegOrDie(['-v', 'error', '-y', '-i', video, '-an', '-vf', `fps=${fps},scale=${w}:${h}`,
     '-f', 'rawvideo', '-pix_fmt', 'rgb24', raw], raw, 'frame decode');
@@ -454,10 +457,11 @@ function cutLeads(cuts, audio, fps) {
 
 // ── text (optional): one tesseract pass, read as runs, word appearances and lines ─────────────────
 const TEXT_FPS = 8;
-async function analyseText(video, dir, V, W, H, fps) {
+const FAST_TEXT_FPS = 4;
+async function analyseText(video, dir, V, W, H, fps, textFps = TEXT_FPS) {
   const { sampleText, textRuns } = await import('./see/text-timeline.mjs');
-  const samples = await sampleText(video, dir, { sampleFps: TEXT_FPS, width: W, height: H });
-  const apps = refineWordTimes(V, trackWords(samples, TEXT_FPS), W, fps).map((a) => ({ ...a, color: inkColor(V, a, W, fps) }));
+  const samples = await sampleText(video, dir, { sampleFps: textFps, width: W, height: H });
+  const apps = refineWordTimes(V, trackWords(samples, textFps), W, fps).map((a) => ({ ...a, color: inkColor(V, a, W, fps) }));
   const lines = buildLines(apps, fps);
   const words = apps.map((a) => {
     const b = restBox(a);
@@ -518,6 +522,7 @@ function wordLines(lines, fps) {
 function renderSpec(spec) {
   const m = spec.media;
   const L = [`# SPEC: ${path.basename(m.file)}`, '',
+    ...(spec.fast ? ['**Fast mode**: measured at half the analysis width and half the OCR samples. Use it to iterate; run without --fast for final numbers.', ''] : []),
     `${m.width}x${m.height} · ${m.nativeFps} fps native, analysed at ${spec.fps} fps · ${spec.frames} frames · ${r1(spec.duration * 100) / 100} s · ${spec.shots.length} shots`,
     'Measured by harness/media/ref-spec.mjs. Frames are 0-based. Positions are element centres in reference px. `x`/`y` and sizes are measured, never eyeballed;',
     'camera pan is how far the content moves (positive = right/down), zoom above 1 = push in. Element numbers are the change region between frames, tracked after camera compensation.', '',
@@ -541,7 +546,39 @@ function renderSpec(spec) {
 }
 
 // ── main ─────────────────────────────────────────────────────────────────────────────────────────
-export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false, audio = true, calibrating = false }) {
+const MEASURING_CODE = ['harness/media/ref-spec.mjs', 'harness/lib/move-fit.mjs', 'harness/media/see/text-timeline.mjs'];
+const CODE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+
+function measuringCodeHash() {
+  const files = [...MEASURING_CODE, ...fs.readdirSync(path.join(CODE_ROOT, 'harness/lib/ref-measure')).sort().map((f) => `harness/lib/ref-measure/${f}`)];
+  const h = crypto.createHash('sha1');
+  for (const f of files) h.update(f).update(fs.readFileSync(path.join(CODE_ROOT, f)));
+  return h.digest('hex');
+}
+
+function cacheDir(video, opts) {
+  const st = fs.statSync(video);
+  const key = crypto.createHash('sha1').update(JSON.stringify([path.resolve(video), st.size, st.mtimeMs, opts, measuringCodeHash()])).digest('hex');
+  return scratch('ref-spec-cache', key);
+}
+
+export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false, audio = true, calibrating = false, fast = false, cache = true }) {
+  const cached = path.join(cacheDir(video, { fps, maxElements, ocr, audio, calibrating, fast }));
+  if (cache && fs.existsSync(path.join(cached, 'spec.json'))) {
+    fs.mkdirSync(outDir, { recursive: true });
+    for (const f of ['spec.json', 'SPEC.md']) fs.copyFileSync(path.join(cached, f), path.join(outDir, f));
+    console.error('ref-spec: (cached)');
+    return JSON.parse(fs.readFileSync(path.join(cached, 'spec.json'), 'utf8'));
+  }
+  const spec = await measureRef({ video, outDir, fps, maxElements, ocr, audio, calibrating, fast });
+  if (cache) {
+    fs.mkdirSync(cached, { recursive: true });
+    for (const f of ['spec.json', 'SPEC.md']) fs.copyFileSync(path.join(outDir, f), path.join(cached, f));
+  }
+  return spec;
+}
+
+async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibrating, fast }) {
   const { width: W, height: H, duration } = probeSize(video);
   if (!W || !H) die(`${video} has no readable video stream`);
   const nativeFps = probeRate(video);
@@ -549,7 +586,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   const dir = scratch('ref-spec', path.basename(video, path.extname(video)));
   fs.mkdirSync(dir, { recursive: true });
   console.error(`ref-spec: decoding ${path.basename(video)} at ${fps} fps`);
-  const V = decode(video, fps, dir, W, H);
+  const V = decode(video, fps, dir, W, H, fast ? FAST_GRID_W : GRID_W);
   const sc = W / V.w;
   const cuts = findCuts(V, fps);
   const spans = cuts.reduce((acc, c, i) => { acc[i].f1 = c.transition.startFrame; acc.push({ f0: c.frame, f1: V.n }); return acc; }, [{ f0: 0, f1: V.n }]);
@@ -567,7 +604,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   const aud = audio ? analyseAudio(video, dir, fps, V.n / fps) : null;
   const leads = cutLeads(cuts, aud, fps);
   cuts.forEach((c, i) => Object.assign(c, leads[i]));
-  const read = ocr ? await analyseText(video, dir, V, W, H, fps) : { runs: null, lines: [], words: [] };
+  const read = ocr ? await analyseText(video, dir, V, W, H, fps, fast ? FAST_TEXT_FPS : TEXT_FPS) : { runs: null, lines: [], words: [] };
   const text = read.words, textRuns = read.runs;
 
   const shots = [];
@@ -601,7 +638,7 @@ export async function refSpec({ video, outDir, fps, maxElements = 6, ocr = false
   }
   const errors = calibrating ? loadErrors('/nonexistent') : loadErrors();
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
-    cuts, audio: aud, shots, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
+    fast, cuts, audio: aud, shots, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
   fs.writeFileSync(path.join(outDir, 'SPEC.md'), `${renderSpec(spec)}\n`);
@@ -613,11 +650,12 @@ async function main() {
   const argv = process.argv.slice(2);
   const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : d; };
   const video = argv.find((a, i) => !a.startsWith('--') && !(argv[i - 1] || '').match(/^--(out|fps|elements)$/));
-  if (!video) die('usage: node harness/media/ref-spec.mjs <ref.mp4> [--out dir] [--fps 29.97] [--elements 6] [--ocr] [--no-audio]');
+  if (!video) die('usage: node harness/media/ref-spec.mjs <ref.mp4> [--out dir] [--fps 29.97] [--elements 6] [--ocr] [--no-audio] [--fast] [--no-cache]');
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   const outDir = path.resolve(flag('--out', path.dirname(path.resolve(video))));
   const spec = await refSpec({ video: path.resolve(video), outDir, fps: Number(flag('--fps', 0)) || 0, maxElements: Number(flag('--elements', 6)),
-    ocr: argv.includes('--ocr'), audio: !argv.includes('--no-audio') });
+    ocr: argv.includes('--ocr'), audio: !argv.includes('--no-audio'),
+    fast: argv.includes('--fast'), cache: !argv.includes('--no-cache') });
   console.log(`✓ ref-spec: ${spec.shots.length} shot(s), ${spec.cuts.length} cut(s) -> ${path.join(outDir, 'SPEC.md')}`);
 }
 
