@@ -12,7 +12,7 @@ import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut);
 // .strike: an absolute bar, left -4% right -4% of the old value, top 56%, 1.5 percent of the frame tall, rotate -3deg, origin left
 strike.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 240, delay: 260, easing: settle, fill: 'both' });
-old.animate([{ color: 'var(--ink)', scale: 1 }, { color: 'var(--faint)', scale: 0.7 }],
+old.animate([{ color: 'var(--ink)', scale: 1 }, { color: 'var(--muted)', scale: 0.7 }],
   { duration: 380, delay: 380, easing: settle, fill: 'both' });          // starts 120 ms into the strike
 // the new value: one overflow-hidden mask per character (padding .22em top and bottom, margin -.22em), glyph inside
 chars.forEach((el, i) => el.animate([{ translate: '0 130%' }, { translate: '0 0' }],
