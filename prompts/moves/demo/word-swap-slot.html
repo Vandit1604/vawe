@@ -1,0 +1,44 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.8">
+<title>move: word swap slot</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; --row: 1.7; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 700 11vh/1 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+  p { margin: 0; white-space: nowrap; }
+
+  /* the window is exactly one row tall (1.7em), so descenders fit and the next word only shows mid-roll */
+  .slot { position: relative; display: inline-block; vertical-align: baseline; clip-path: inset(-0.35em -0.1em -0.35em -0.1em); }
+  .col { position: absolute; left: 0; top: -0.35em; }
+  .col b { display: block; height: calc(var(--row) * 1em); line-height: calc(var(--row) * 1em); font-weight: inherit; }
+  .col b:last-child { color: var(--accent); }
+</style>
+</head>
+<body>
+<p>We make films that feel <span class="slot"><span class="col"><b>fast</b><b>loud</b><b>clean</b><b>alive</b></span>&#8203;</span></p>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+await document.fonts.load('700 1em Archivo');
+const slot = document.querySelector('.slot'), col = slot.firstElementChild, words = [...col.children];
+const px = parseFloat(getComputedStyle(slot).fontSize);
+const w = words.map((b) => { const r = document.createRange(); r.selectNodeContents(b); return r.getBoundingClientRect().width / px; });
+const row = 1.7, t0 = 200, seg = [380, 380, 650];
+const total = seg.reduce((a, b) => a + b, 0);
+const land = curveToLinear(CURVES.overshoot);
+const at = [0, ...seg.map((_, i) => seg.slice(0, i + 1).reduce((a, b) => a + b, 0) / total)];
+slot.style.width = `${w[0]}em`;
+const opts = { delay: t0, duration: total, fill: 'both', easing: 'linear' };
+// every segment carries its own easing: two rolls that dwell then snap, then a soft landing on the last word
+const easing = ['cubic-bezier(0.8, 0, 0.2, 1)', 'cubic-bezier(0.8, 0, 0.2, 1)', land];
+col.animate(at.map((o, i) => ({ offset: o, translate: `0 ${-i * row}em`, easing: easing[i] })), opts);
+// the width follows the same rolls, so the sentence reflows while the word moves
+slot.animate(at.map((o, i) => ({ offset: o, width: `${w[i]}em`, easing: easing[i] })), opts);
+// a vertical smear at the fastest moment of each roll
+col.animate([{ filter: 'blur(0)' }, ...at.slice(0, 3).flatMap((o, i) => [{ offset: o + (at[i + 1] - o) * 0.45, filter: i < 2 ? 'blur(0.05em)' : 'blur(0.03em)' }, { offset: at[i + 1] * 0.999, filter: 'blur(0)' }]), { filter: 'blur(0)' }], { delay: t0, duration: total, fill: 'both' });
+</script>
+</body>
+</html>
