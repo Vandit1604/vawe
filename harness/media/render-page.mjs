@@ -41,7 +41,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { RENDER_ARGS } from '../lib/render-harness.mjs';
+import { PAGE_ARGS } from '../lib/render-harness.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
@@ -49,23 +49,6 @@ import { appendRun } from '../lib/runlog.mjs';
 import { openPreview } from './preview-server.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason } from '../lib/waivers.mjs';
-
-// A run of ~150+ rapid seek+screenshot round trips crashed the GPU-accelerated headless renderer
-// outright ("Execution context was destroyed", no page error, no console output) on this machine;
-// the same run never crashed once GPU compositing was off. Only this tool adds it (`RENDER_ARGS` is
-// shared by every other headless caller in the repo, none of which screenshots in this volume).
-//
-// `--disable-gpu-compositing`, NOT the broader `--disable-gpu`: the fix this comment names is GPU
-// COMPOSITING (Chrome reusing a rasterised tile across rapid seeks, ENGINE-CHANGES.md's own "speed is a
-// property you can lose without noticing"), and `--disable-gpu` also tears down the GPU process
-// SwiftShader needs, so a bare page's `new THREE.WebGLRenderer(...)` (core/engine/page-api.js) failed
-// outright ("Could not create a WebGL context") the moment a page tried to use one, with no scene ever
-// having exercised this path before (a `three` scene layer boots via films/scene/scene.html, a
-// different launch in preview-server.mjs's own shared daemon, never through here). Measured on this
-// machine (harness/dev/_webgl-flags-scratch.mjs, since deleted): `--disable-gpu` fails WebGL context
-// creation outright; `--disable-gpu-compositing` creates one same as no GPU flag at all. Narrowing to
-// the flag the comment above actually describes fixes both: the crash stays fixed, WebGL starts working.
-const PAGE_ARGS = [...RENDER_ARGS, '--disable-gpu-compositing'];
 
 const defaultWorkers = () => Math.max(1, Math.min(4, os.cpus().length - 1));
 
