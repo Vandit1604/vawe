@@ -14,19 +14,22 @@ The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start wi
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->
 <meta name="spectacle" content="6.2">        <!-- the second of the one big moment -->
 <audio src="assets/music.mp3" loop data-at="0" data-gain="-3" data-fade-out="0.4"></audio>
-<audio data-synth="pluck" data-at="0.85" data-gain="-28"></audio>   <!-- a soft tick on one key word -->
-<audio data-synth="swell" data-at="1.66" data-gain="-24"></audio>   <!-- one swell, ends on the cut -->
+<audio data-synth="pluck" data-at="0.85" data-gain="-8"></audio>   <!-- a soft tick on one key word -->
+<audio data-synth="swell" data-at="1.66" data-gain="-6"></audio>   <!-- one swell, ends on the cut -->
 <audio src="assets/vo.wav" data-role="vo" data-at="1.0"></audio>
 ```
 
 ## Sound is felt, not noticed
 
 A few soft key ticks and one swell beat many hits. Leave `data-gain` off and a voice takes its soft
-default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`: UI cues -26 dB, whoosh/riser/swell -22, the
-weight voices impact/drop/braam -18). Reach for impact, braam or drop only when the brief asks for
+default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the
+weight voices impact/drop/braam -2). Reach for impact, braam or drop only when the brief asks for
 weight. Not every word gets a tick: cue the first and the last. The mix warns when one cue peaks more
 than 6 dB above the median cue, with the `data-gain` change that fixes it. Name each beat once in
 CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat.
+
+What you write is what you hear: no normalising, default gains land near -20 LUFS, and
+`<meta name="loudness" content="-14">` opts in to a delivery target. `node harness/media/review.mjs <page> --final` warns outside -30 to -12 LUFS.
 
 ## Moves to copy
 
