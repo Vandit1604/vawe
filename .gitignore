@@ -340,3 +340,5 @@ assets/edit-montage/
 
 # recreations of the owner's in-house references (their text, audio and look): private, never committed
 films/recreations/
+# draft key-frame sheets that bin/vawe moves leaves next to each clip
+prompts/moves/*.png
