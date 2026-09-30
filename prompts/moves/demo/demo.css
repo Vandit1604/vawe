@@ -1,32 +1,37 @@
-/* Shared look of the move demos. Link it, then add only what the move itself needs.
-   Sizes are a share of frame height: --u is 1 percent of it, so 5 * var(--u) is 5 percent.
-   The tokens in :root are the vawe look. Eight looks override them as html[data-look="name"] at the
-   end of this file; a demo picks one on its <html> tag and every class below follows. */
+/* Shared look of the move demos: ONE design system, ten expressions. Link it, then add only what the move needs.
+   Foundation (:root): type scale, spacing, radius steps, line weights, shadow recipe and one 12-column grid, all as a
+   share of frame height (--u is 1 percent of it). A look (html[data-look="name"], end of file) changes colour, faces,
+   which radius and line steps it picks, and its depth; it never changes a size or a class. Rules: prompts/moves/LOOKS.md.
+   Check the contrast of every look with: node prompts/moves/demo/contrast.mjs */
 @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
 @font-face { font-family: 'Unbounded'; font-weight: 200 900; font-display: block; src: url('/assets/fonts/Unbounded.woff2') format('woff2'); }
 @font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
 @font-face { font-family: 'Instrument Serif'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InstrumentSerif-Regular.woff2') format('woff2'); }
-@font-face { font-family: 'Courier Prime'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/CourierPrime.woff2') format('woff2'); }
 @font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/BricolageGrotesque.woff2') format('woff2'); }
 @font-face { font-family: 'Geist'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Geist.woff2') format('woff2'); }
 @font-face { font-family: 'Geist Mono'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/GeistMono.woff2') format('woff2'); }
 @font-face { font-family: 'Plus Jakarta Sans'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/PlusJakartaSans.woff2') format('woff2'); }
 @font-face { font-family: 'Manrope'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/Manrope.woff2') format('woff2'); }
 @font-face { font-family: 'Anybody'; font-weight: 100 900; font-stretch: 75% 125%; font-display: block; src: url('/assets/fonts/Anybody.woff2') format('woff2'); }
+@font-face { font-family: 'Big Shoulders'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/BigShoulders.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
+@font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: block; src: url('/assets/fonts/InstrumentSerif-Italic.woff2') format('woff2'); }
 
 :root {
   --u: calc(var(--vh) / 100);
 
+  /* colour roles. A look sets all of them. */
   --ground: #16151a;
   --surface: #212025;
   --raised: #2b2a31;
   --hover: #37363e;
   --ink: #fff;
-  --muted: #97969b;
+  --muted: #9b9aa1;
   --faint: #5f5e65;
   --accent: #0a87ff;
+  --on-accent: #06101f;
   --line: rgba(255, 255, 255, 0.08);
-  --on-accent: #fff;
   --edge: rgba(255, 255, 255, 0.07);
   --dot: #3a3941;
   --bar: rgba(255, 255, 255, 0.28);
@@ -38,32 +43,60 @@
   --paper-muted: #6b6a72;
   --star: #c9d8ff;
   --up-ink: #6cb6ff;
+  --tile-alt: var(--raised);
 
+  /* faces: --sans is text, --head is hero, title and head, --label is eyebrows, --display is wordmarks, --em-face is one emphasis word */
   --sans: 'Archivo', sans-serif;
   --display: 'Unbounded', 'Archivo', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --head: var(--sans);
+  --head-weight: 700;
+  --head-track: -0.03em;
+  --head-case: none;
+  --hk: 1;
+  --label: var(--sans);
+  --label-case: none;
+  --label-track: 0.005em;
+  --em-face: var(--sans);
+  --em-style: normal;
 
-  --t-hero: calc(var(--u) * 18);
-  --t-title: calc(var(--u) * 11);
-  --t-head: calc(var(--u) * 7.6);
+  /* type scale: six sizes, each a share of frame height; --hk scales the three headline sizes for a face that sets small */
+  --t-hero: calc(var(--u) * 18 * var(--hk));
+  --t-title: calc(var(--u) * 11 * var(--hk));
+  --t-head: calc(var(--u) * 7.6 * var(--hk));
   --t-lead: calc(var(--u) * 6);
   --t-body: calc(var(--u) * 4.8);
   --t-small: calc(var(--u) * 3.8);
 
+  /* spacing scale, and the one grid: 12 columns, margin --s5, gutter --s3 */
   --s1: calc(var(--u) * 1.2);
   --s2: calc(var(--u) * 2.4);
   --s3: calc(var(--u) * 3.6);
   --s4: calc(var(--u) * 5);
   --s5: calc(var(--u) * 7);
+  --margin: var(--s5);
+  --gutter: var(--s3);
 
-  /* outer radius = inner radius + the padding between them: a chip inset --s2 in a card has --r-chip, the card has --r-card */
-  --r-chip: calc(var(--u) * 2);
-  --r-card: calc(var(--u) * 4.4);
+  /* radius steps; a look picks one for chips and one for cards. Outer radius = inner radius + the padding between them. */
+  --r0: 0px;
+  --r1: calc(var(--u) * 0.5);
+  --r2: calc(var(--u) * 1);
+  --r3: calc(var(--u) * 2);
+  --r4: calc(var(--u) * 3);
+  --r5: calc(var(--u) * 4.6);
+  --r6: calc(var(--u) * 6);
+  --r-chip: var(--r3);
+  --r-card: var(--r5);
 
-  /* elevation is a 1px ring plus a stack of shadows that double in offset and blur, each with a
-     negative spread so the soft ones never bleed past the sides; --sh is the shadow colour, --sa scales its alpha */
+  /* line weights: hair, rule, heavy */
+  --w-hair: 1px;
+  --w-rule: calc(var(--u) * 0.25);
+  --w-heavy: calc(var(--u) * 0.45);
+
+  /* elevation steps: ring (a hairline), stack (six shadows that double in offset and blur, negative spread),
+     lift (stack plus a top highlight), hero (stack plus one long faint throw). --sh is the shadow colour, --sa scales alpha. */
   --sh: 0 0 0; --sa: 3.2;
-  --ring: 0 0 0 1px var(--edge);
+  --ring: 0 0 0 var(--w-hair) var(--edge);
   --stack:
     0 calc(var(--u) * 0.1) calc(var(--u) * 0.2) rgb(var(--sh) / calc(var(--sa) * 0.06)),
     0 calc(var(--u) * 0.3) calc(var(--u) * 0.5) calc(var(--u) * -0.15) rgb(var(--sh) / calc(var(--sa) * 0.06)),
@@ -73,10 +106,8 @@
     0 calc(var(--u) * 7.6) calc(var(--u) * 11) calc(var(--u) * -3.8) rgb(var(--sh) / calc(var(--sa) * 0.08));
   --lift: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--stack);
   --shadow-card: var(--ring), var(--lift);
-  /* hero media and devices: the same stack, then one long, faint throw */
   --shadow-hero: var(--ring), var(--stack), 0 calc(var(--u) * 14) calc(var(--u) * 22) calc(var(--u) * -6) rgb(var(--sh) / calc(var(--sa) * 0.1));
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  /* a photo gets a hairline inside its edge so a light or dark image never melts into the ground */
   --img-edge: rgba(255, 255, 255, 0.1);
 }
 
@@ -90,17 +121,19 @@ body {
 }
 
 /* type roles */
-.hero  { font: 700 var(--t-hero)/1.02 var(--sans); letter-spacing: -0.035em; text-wrap: balance; }
-.title { font: 700 var(--t-title)/1.06 var(--sans); letter-spacing: -0.03em; text-wrap: balance; }
-.head  { font: 700 var(--t-head)/1.12 var(--sans); letter-spacing: -0.02em; }
+.hero  { font: var(--head-weight) var(--t-hero)/1.02 var(--head); letter-spacing: calc(var(--head-track) - 0.005em); text-transform: var(--head-case); text-wrap: balance; }
+.title { font: var(--head-weight) var(--t-title)/1.06 var(--head); letter-spacing: var(--head-track); text-transform: var(--head-case); text-wrap: balance; }
+.head  { font: var(--head-weight) var(--t-head)/1.12 var(--head); letter-spacing: calc(var(--head-track) + 0.01em); text-transform: var(--head-case); }
 .lead  { font: 500 var(--t-lead)/1.25 var(--sans); letter-spacing: -0.01em; }
 .body  { font: 500 var(--t-body)/1.3 var(--sans); }
 .small { font: 500 var(--t-small)/1.25 var(--sans); }
-.eyebrow { font: 600 var(--t-small)/1.2 var(--sans); letter-spacing: 0.005em; color: var(--muted); }
+.eyebrow { font: 600 var(--t-small)/1.2 var(--label); letter-spacing: var(--label-track); text-transform: var(--label-case); color: var(--muted); }
 .muted { color: var(--muted); }
 .mono  { font-family: var(--mono); font-weight: 500; letter-spacing: -0.02em; }
 .display { font-family: var(--display); font-weight: 600; letter-spacing: -0.04em; }
 .accent { color: var(--accent); }
+.em { font-family: var(--em-face); font-style: var(--em-style); }
+.grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--gutter); padding-inline: var(--margin); }
 
 /* the UI card: surface, concentric radius, ring plus layered shadow */
 .card { padding: var(--s4); border-radius: var(--r-card); background: var(--surface); box-shadow: var(--shadow-card); }
@@ -134,117 +167,155 @@ body {
 .logo-lockup { display: inline-flex; align-items: center; gap: 0.3em; line-height: 1; white-space: nowrap; }
 .logo-lockup .logo-word { font-size: 1em; line-height: 1; }
 
-/* ---- looks: each is a full token set. Type sizes, spacing and every class above stay the same. ---- */
+/* ---- looks: ten token sets on the one foundation above. Sizes, spacing and every class stay the same. ---- */
 
-/* paper: warm editorial, a serif display on cream, one vermilion; --u is 12 percent larger because Instrument Serif sets small */
-html[data-look="paper"] {
-  --u: calc(var(--vh) / 100 * 1.12);
-  --ground: #efe8db; --surface: #f8f3e9; --raised: #e5dccb; --hover: #d9cfba;
-  --ink: #1c1915; --muted: #665d4f; --faint: #8f8574; --accent: #b23417; --on-accent: #fff7ec;
-  --line: rgba(28, 25, 21, 0.16); --edge: rgba(28, 25, 21, 0.1); --dot: #d4c9b3; --bar: rgba(28, 25, 21, 0.22);
-  --dim: rgba(28, 25, 21, 0.78); --cursor: #1c1915; --cursor-edge: #f8f3e9;
-  --paper: #1c1915; --paper-ink: #f3ecdd; --paper-muted: #a89f8e; --star: #b23417;
-  --sans: 'Instrument Serif', 'Times New Roman', serif; --display: 'Instrument Serif', serif; --mono: 'Courier Prime', ui-monospace, monospace;
-  --r-chip: calc(var(--u) * 1); --r-card: calc(var(--u) * 1.6);
-  --sh: 70 45 15; --sa: 1.25; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
-  --accent-edge: 0 0 0 0 transparent;
-  --up-ink: var(--accent);
+/* vawe, the default: cool near-black, a surface ladder, one cobalt. Dark ink on the accent, since white on #0a87ff is 3.6:1. */
+html[data-look="vawe"] {
+  --ground: #16151a; --surface: #212025; --raised: #2b2a31; --hover: #37363e;
+  --ink: #fff; --muted: #9b9aa1; --faint: #5f5e65; --accent: #0a87ff; --on-accent: #06101f; --up-ink: #6cb6ff;
+  --display: 'Unbounded', 'Archivo', sans-serif;
 }
 
-/* paper carries a fine print grain, darker than the ground, so the cream reads as stock and not as a flat fill */
+/* paper: warm editorial. A serif for headlines only, a humanist sans for text, one brick orange, a warm soft shadow. */
+html[data-look="paper"] {
+  --hk: 1.12;
+  --ground: #f3ede1; --surface: #fbf8f0; --raised: #e8dfcd; --hover: #ddd2bb;
+  --ink: #1c1915; --muted: #665d4f; --faint: #8f8574; --accent: #b23417; --on-accent: #fff7ec;
+  --line: rgba(28, 25, 21, 0.16); --edge: rgba(28, 25, 21, 0.1); --dot: #d4c9b3; --bar: rgba(28, 25, 21, 0.22);
+  --dim: rgba(28, 25, 21, 0.78); --cursor: #1c1915; --cursor-edge: #fbf8f0;
+  --paper: #1c1915; --paper-ink: #f3ecdd; --paper-muted: #a89f8e; --star: #b23417; --up-ink: #b23417;
+  --sans: 'Hanken Grotesk', sans-serif; --display: 'Instrument Serif', serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --head: 'Instrument Serif', 'Times New Roman', serif; --head-weight: 400; --head-track: -0.02em;
+  --em-face: 'Instrument Serif', serif; --em-style: italic;
+  --r-chip: var(--r2); --r-card: var(--r3);
+  --sh: 60 40 10; --sa: 1.25; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
+  --accent-edge: 0 0 0 0 transparent;
+}
+/* paper carries a fine print grain, darker than the ground, so the cream reads as stock */
 html[data-look="paper"]::after {
   content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.05; mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='11' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.08  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
 }
 
-/* field: one saturated green ground, white type, one lemon accent */
+/* field: one saturated green ground, white type, one lemon accent. Depth is a darker and a lighter tint of the ground. */
 html[data-look="field"] {
   --ground: #0d7a52; --surface: #096847; --raised: #0f8058; --hover: #159068;
-  --ink: #fff; --muted: #ecf9f3; --faint: #a6d9c3; --accent: #ffe14d; --on-accent: #0b2a1d;
+  --ink: #fff; --muted: #eefaf4; --faint: #a6d9c3; --accent: #ffe14d; --on-accent: #0b2a1d;
   --line: rgba(255, 255, 255, 0.2); --edge: rgba(255, 255, 255, 0.14); --dot: #2b9a70; --bar: rgba(255, 255, 255, 0.4);
   --dim: rgba(4, 40, 26, 0.82); --cursor: #fff; --cursor-edge: #0b2a1d;
-  --paper: #fff; --paper-ink: #0b2a1d; --paper-muted: #3f6b57; --star: #ffe14d;
-  --sans: 'Bricolage Grotesque', sans-serif; --display: 'Bricolage Grotesque', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --r-chip: calc(var(--u) * 2.2); --r-card: calc(var(--u) * 4.6);
+  --paper: #fff; --paper-ink: #0b2a1d; --paper-muted: #3f6b57; --star: #ffe14d; --up-ink: #fff;
+  --sans: 'Bricolage Grotesque', sans-serif; --display: 'Bricolage Grotesque', sans-serif; --head-weight: 800; --head-track: -0.035em;
+  --r-chip: var(--r3); --r-card: var(--r5);
   --sh: 0 32 20; --sa: 2.6; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--stack); --img-edge: rgba(255, 255, 255, 0.12);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  --up-ink: #fff;
 }
 
-/* swiss: off-white, hairlines, one red, no shadow */
+/* swiss: warm off-white, black hairlines, tight radius, one red. Type is the structure; labels are tracked mono capitals. */
 html[data-look="swiss"] {
   --ground: #f2f1ec; --surface: #fff; --raised: #e6e5df; --hover: #d9d8d1;
   --ink: #0b0b0b; --muted: #55554f; --faint: #8b8b84; --accent: #d40500; --on-accent: #fff;
   --line: rgba(11, 11, 11, 0.2); --edge: rgba(11, 11, 11, 0.85); --dot: #c9c8c0; --bar: rgba(11, 11, 11, 0.16);
   --dim: rgba(11, 11, 11, 0.8); --cursor: #0b0b0b; --cursor-edge: #fff;
-  --paper: #0b0b0b; --paper-ink: #f2f1ec; --paper-muted: #a4a49c; --star: #d40500;
+  --paper: #0b0b0b; --paper-ink: #f2f1ec; --paper-muted: #a4a49c; --star: #d40500; --up-ink: #d40500;
   --sans: 'Geist', sans-serif; --display: 'Geist', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
-  --r-chip: calc(var(--u) * 0.5); --r-card: calc(var(--u) * 0.8);
+  --head-weight: 700; --head-track: -0.04em;
+  --label: 'Geist Mono', ui-monospace, monospace; --label-case: uppercase; --label-track: 0.08em;
+  --r-chip: var(--r1); --r-card: var(--r2);
   --lift: 0 0 0 0 transparent; --shadow-hero: var(--ring); --img-edge: rgba(0, 0, 0, 0.1);
   --accent-edge: 0 0 0 0 transparent;
-  --up-ink: var(--accent);
 }
 
-/* soft: pastel product UI, big radii, wide diffuse shadow, one violet */
-html[data-look="soft"] {
-  --ground: #e6e8fb; --surface: #fff; --raised: #eef0fd; --hover: #dfe2f8;
-  --ink: #1f2140; --muted: #5d6088; --faint: #8f92b5; --accent: #5b3df0; --on-accent: #fff;
-  --line: rgba(31, 33, 64, 0.1); --edge: rgba(91, 61, 240, 0.08); --dot: #cfd3f2; --bar: rgba(91, 61, 240, 0.2);
-  --dim: rgba(31, 33, 64, 0.72); --cursor: #1f2140; --cursor-edge: #fff;
-  --paper: #fff; --paper-ink: #1f2140; --paper-muted: #5d6088; --star: #5b3df0;
-  --sans: 'Plus Jakarta Sans', sans-serif; --display: 'Plus Jakarta Sans', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --r-chip: calc(var(--u) * 3); --r-card: calc(var(--u) * 6);
-  --sh: 60 50 160; --sa: 1.5; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.1);
+/* daylight: a cold white-blue product UI. Navy ink, one indigo, blue-tinted layered shadow, a light display weight. */
+html[data-look="daylight"] {
+  --ground: #f4f6fa; --surface: #fff; --raised: #e9edf5; --hover: #dde3ef;
+  --ink: #0f2033; --muted: #58687d; --faint: #8b98aa; --accent: #4f3df0; --on-accent: #fff;
+  --line: rgba(15, 32, 51, 0.1); --edge: rgba(15, 32, 51, 0.08); --dot: #d3dae8; --bar: rgba(15, 32, 51, 0.2);
+  --dim: rgba(15, 32, 51, 0.72); --cursor: #0f2033; --cursor-edge: #fff;
+  --paper: #fff; --paper-ink: #0f2033; --paper-muted: #58687d; --star: #4f3df0; --up-ink: #4f3df0;
+  --sans: 'Inter', sans-serif; --display: 'Inter', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --head-weight: 600; --head-track: -0.04em;
+  --r-chip: var(--r4); --r-card: var(--r5);
+  --sh: 15 40 80; --sa: 1.6; --lift: var(--stack); --img-edge: rgba(0, 0, 0, 0.08);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  --up-ink: var(--accent);
 }
 
-/* night: deep indigo to plum with fine grain, one amber */
-html[data-look="night"] {
+/* dusk: indigo to plum with 6 percent grain, one amber, one italic serif word (class .em). */
+html[data-look="dusk"] {
   --ground: #120e2a; --surface: #1b1638; --raised: #262048; --hover: #312a5a;
   --backdrop: radial-gradient(120vmax 90vmax at 18% 8%, #2a1d55 0%, rgba(42, 29, 85, 0) 60%), linear-gradient(165deg, #150f33 0%, #120e2a 55%, #1d0f2b 100%);
   --ink: #f6f2ff; --muted: #b0a9d0; --faint: #7d76a3; --accent: #ffb547; --on-accent: #1c1230;
   --line: rgba(246, 242, 255, 0.12); --edge: rgba(246, 242, 255, 0.09); --dot: #35305e; --bar: rgba(246, 242, 255, 0.28);
   --dim: rgba(8, 5, 22, 0.8); --cursor: #fff; --cursor-edge: #120e2a;
-  --paper: #f3eefc; --paper-ink: #120e2a; --paper-muted: #5f5885; --star: #ffd9a0;
-  --sans: 'Manrope', sans-serif; --display: 'Unbounded', 'Manrope', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --r-chip: calc(var(--u) * 2.2); --r-card: calc(var(--u) * 4.6);
+  --paper: #f3eefc; --paper-ink: #120e2a; --paper-muted: #5f5885; --star: #ffd9a0; --up-ink: #ffb547;
+  --sans: 'Manrope', sans-serif; --display: 'Manrope', sans-serif; --head-weight: 700; --head-track: -0.035em;
+  --em-face: 'Instrument Serif', serif; --em-style: italic;
+  --r-chip: var(--r3); --r-card: var(--r5);
   --sh: 5 2 20; --sa: 3.8; --lift: inset 0 1px 0 rgba(255, 255, 255, 0.07), var(--stack);
   --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  --up-ink: var(--accent);
 }
-html[data-look="night"]::after {
+html[data-look="dusk"]::after {
   content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.06; mix-blend-mode: screen;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>");
 }
 
-/* brutal: acid yellow, thick black borders, hard offset shadow, a heavy wide grotesk, one blue */
+/* brutal: acid yellow, thick black borders, hard offset shadow, a heavy wide grotesk, one blue. */
 html[data-look="brutal"] {
   --ground: #ffe600; --surface: #fff; --raised: #fff7a8; --hover: #fff;
   --ink: #000; --muted: #2b2900; --faint: #6b6500; --accent: #1a2bff; --on-accent: #fff;
   --line: #000; --edge: #000; --dot: #e0c900; --bar: rgba(0, 0, 0, 0.18);
   --dim: rgba(0, 0, 0, 0.82); --cursor: #000; --cursor-edge: #fff;
-  --paper: #000; --paper-ink: #ffe600; --paper-muted: #d6c400; --star: #1a2bff;
+  --paper: #000; --paper-ink: #ffe600; --paper-muted: #d6c400; --star: #1a2bff; --up-ink: #1a2bff;
   --sans: 'Anybody', sans-serif; --display: 'Anybody', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
-  --r-chip: 0px; --r-card: 0px;
-  --ring: 0 0 0 calc(var(--u) * 0.45) #000;
+  --head-weight: 800; --head-track: -0.03em;
+  --r-chip: var(--r0); --r-card: var(--r0);
+  --ring: 0 0 0 var(--w-heavy) #000;
   --lift: calc(var(--u) * 1.6) calc(var(--u) * 1.6) 0 #000; --shadow-hero: var(--ring), var(--lift); --img-edge: #000;
-  --accent-edge: 0 0 0 calc(var(--u) * 0.4) #000;
-  --up-ink: #1a2bff;
+  --accent-edge: 0 0 0 var(--w-heavy) #000;
 }
 html[data-look="brutal"] body { font-stretch: 112%; }
 
-/* terminal: near-black green, one mono face for everything, one phosphor green, no glow */
+/* terminal: near-black green, one mono face, one phosphor green, hairline rows, no glow. */
 html[data-look="terminal"] {
   --ground: #090d0a; --surface: #101812; --raised: #17231b; --hover: #223328;
   --ink: #e5f4ea; --muted: #8ea597; --faint: #5f7566; --accent: #4ade80; --on-accent: #04120a;
   --line: rgba(120, 255, 170, 0.14); --edge: rgba(120, 255, 170, 0.14); --dot: #1d2b21; --bar: rgba(229, 244, 234, 0.26);
   --dim: rgba(3, 6, 4, 0.82); --cursor: #e5f4ea; --cursor-edge: #090d0a;
-  --paper: #e5f4ea; --paper-ink: #090d0a; --paper-muted: #4c6354; --star: #4ade80;
+  --paper: #e5f4ea; --paper-ink: #090d0a; --paper-muted: #4c6354; --star: #4ade80; --up-ink: #4ade80;
   --sans: 'JetBrains Mono', ui-monospace, monospace; --display: 'JetBrains Mono', ui-monospace, monospace; --mono: 'JetBrains Mono', ui-monospace, monospace;
-  --r-chip: calc(var(--u) * 0.8); --r-card: calc(var(--u) * 1.6);
+  --head-weight: 800; --head-track: -0.05em;
+  --r-chip: calc(var(--u) * 0.8); --r-card: var(--r2);
   --sa: 4; --lift: var(--stack); --img-edge: rgba(255, 255, 255, 0.1);
   --accent-edge: 0 0 0 0 transparent;
-  --up-ink: var(--accent);
 }
 
+/* signal: a loud dark editorial page. Huge condensed capitals, mint tiles, tracked mono labels, pill cards on a hairline, no shadow. */
+html[data-look="signal"] {
+  --ground: #131313; --surface: #1f1f1f; --raised: #2b2b2b; --hover: #383838;
+  --ink: #fff; --muted: #a0a0a0; --faint: #666; --accent: #46f0c4; --on-accent: #131313; --tile-alt: #7a3cff;
+  --line: rgba(255, 255, 255, 0.22); --edge: rgba(255, 255, 255, 0.22); --dot: #3a3a3a; --bar: rgba(255, 255, 255, 0.3);
+  --dim: rgba(8, 8, 8, 0.84); --cursor: #fff; --cursor-edge: #131313;
+  --paper: #fff; --paper-ink: #131313; --paper-muted: #555; --star: #46f0c4; --up-ink: #46f0c4;
+  --sans: 'Hanken Grotesk', sans-serif; --display: 'Big Shoulders', 'Anybody', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --head: 'Big Shoulders', 'Anybody', sans-serif; --head-weight: 800; --head-track: -0.01em; --head-case: uppercase; --hk: 1.1;
+  --label: 'Geist Mono', ui-monospace, monospace; --label-case: uppercase; --label-track: 0.1em;
+  --r-chip: var(--r3); --r-card: var(--r6);
+  --lift: 0 0 0 0 transparent; --shadow-hero: var(--ring); --img-edge: rgba(255, 255, 255, 0.14);
+  --accent-edge: 0 0 0 0 transparent;
+}
+
+/* chrome: periwinkle metal, bevelled plates, one burnt orange, a halftone dot ground. The look for physical objects. */
+html[data-look="chrome"] {
+  --ground: #aab7dd; --surface: #eef1fa; --raised: #c8d1ea; --hover: #b9c4e3;
+  --ink: #141a3a; --muted: #2f3860; --faint: #5a6596; --accent: #b3360a; --on-accent: #fff;
+  --line: rgba(61, 79, 151, 0.6); --edge: rgba(61, 79, 151, 0.6); --dot: #8d9bcb; --bar: rgba(20, 26, 58, 0.3);
+  --dim: rgba(20, 26, 58, 0.78); --cursor: #141a3a; --cursor-edge: #eef1fa;
+  --paper: #141a3a; --paper-ink: #eef1fa; --paper-muted: #a9b4dc; --star: #b3360a; --up-ink: #8f2a06;
+  --sans: 'Archivo', sans-serif; --display: 'Archivo', sans-serif; --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --head-weight: 800; --head-track: -0.03em; --head-case: uppercase;
+  --r-chip: var(--r2); --r-card: var(--r3);
+  --ring: 0 0 0 var(--w-hair) #3d4f97;
+  --lift: inset 0 1px 0 #fff, inset 0 -1px 0 rgba(20, 26, 58, 0.3), 0 calc(var(--u) * 0.4) 0 #3d4f97, 0 calc(var(--u) * 1.2) calc(var(--u) * 3) rgba(20, 26, 58, 0.25);
+  --shadow-hero: var(--ring), var(--lift); --img-edge: rgba(20, 26, 58, 0.25);
+  --backdrop: radial-gradient(circle, rgba(61, 79, 151, 0.2) 1px, transparent 1.6px) 0 0 / calc(var(--u) * 1.6) calc(var(--u) * 1.6) #aab7dd;
+  --accent-edge: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}

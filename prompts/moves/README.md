@@ -180,14 +180,18 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | count up, flap resolve, integration hub, iris wipe, logo sting, pull back reveal, speed ramp freeze, spin transition, ui strip away, weight morph, zoom through |
-| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Courier Prime | vermilion | card assemble, drift hold, exit fast, marker highlight, mask rise, pan stations, strikethrough replace, thanks sweep |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, letter stagger, liquid wipe, notification pop, outline fill, parallax dive, smear stretch, whip pan, word sweep |
-| swiss | off-white, black hairlines instead of shadow, tight radius | Geist, Geist Mono | red | chart build, crash zoom, logo wall, mark trace, match cut, push in, skeleton reveal, slice shift, tracking collapse, underline draw |
-| soft | pastel product UI: lavender ground, white cards, wide diffuse shadow | Plus Jakarta Sans | violet | before after wipe, bracket callout, command palette summon, cursor click, push blur, stack cover, success check, ui focus zoom, word swap slot |
-| night | deep indigo to plum gradient with 6 percent grain | Manrope, Unbounded | amber | ai stream response, blur word cascade, calm lockup, clip expand, device tilt stage, flash cut, luma matte dissolve, rack focus, split reveal, spotlight dim |
-| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, grid stagger wave, overwhelm collapse, scale punch, text as mask, type fill transition, wordmark cascade |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | caret follow, caret typing, chain beats, grid tile flip, shape morph wipe |
+| vawe (default) | the dark brand: #16151a ground, a visible surface ladder, dark ink on the cobalt | Archivo, Unbounded, JetBrains Mono | cobalt #0a87ff | command palette summon, iris wipe, logo sting, pan stations, pull back reveal, success check, ui strip away, zoom through |
+| paper | warm editorial: cream with print grain, a serif for headlines only, a sans for text, warm soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
+| field | one saturated green ground, white type, depth from darker and lighter green tints | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid wipe, notification pop, parallax dive, whip pan |
+| swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph |
+| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow, light display weight | Inter, Geist Mono | indigo | before after wipe, bracket callout, cursor click, logo wall, push blur, smear stretch, ui focus zoom |
+| dusk | indigo to plum gradient with 6 percent grain, one italic serif word (.em) | Manrope, Instrument Serif italic | amber | calm lockup, clip expand, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
+| brutal | acid yellow, thick black borders, hard offset shadow, heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, type fill transition, underline draw, wordmark cascade |
+| terminal | near-black green, one mono face, hairline rows, no glow | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub |
+| signal | loud dark editorial: condensed capitals, pill cards on a hairline, tracked mono labels | Big Shoulders, Hanken Grotesk, Geist Mono | mint #46f0c4 | crash zoom, flash cut, letter stagger, outline fill, slice shift, word sweep |
+| chrome | periwinkle metal, bevelled plates, halftone dot ground; the look for physical objects | Archivo, JetBrains Mono | burnt orange | card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
+
+The foundation, each look in one line and the rule for assigning looks are in [LOOKS.md](LOOKS.md). Check contrast with `node prompts/moves/demo/contrast.mjs`.
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
 

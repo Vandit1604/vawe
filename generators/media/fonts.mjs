@@ -66,6 +66,7 @@ const FONTS = [
   // Anybody = the vawe landing page's real sans. Manrope + Fraunces = tpot.cc's real pair.
   ['Anybody.woff2',                 '@fontsource-variable/anybody',             '5.3.0', 'anybody-latin-wght-normal.woff2',             'OFL 1.1'],
   ['Manrope.woff2',                 '@fontsource-variable/manrope',             '5.3.0', 'manrope-latin-wght-normal.woff2',             'OFL 1.1'],
+  ['BigShoulders.woff2',            '@fontsource-variable/big-shoulders',       '5.3.0', 'big-shoulders-latin-wght-normal.woff2',       'OFL 1.1'],
   ['Fraunces.woff2',                '@fontsource-variable/fraunces',            '5.3.0', 'fraunces-latin-wght-normal.woff2',            'OFL 1.1'],
 ];
 
