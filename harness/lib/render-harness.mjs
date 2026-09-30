@@ -43,6 +43,10 @@ export async function serveRepo({ root = REPO_ROOT, port = 0, route = null } = {
 // The flags a deterministic capture needs: no sandbox (CI), no scrollbars over the canvas, and a device scale the caller owns rather than the host's display.
 export const RENDER_ARGS = ['--no-sandbox', '--hide-scrollbars', '--force-device-scale-factor=1'];
 
+// RENDER_ARGS plus GPU compositing off: ~150+ rapid seek+screenshot round trips crash the GPU
+// compositor, while `--disable-gpu` (broader) would make WebGL context creation fail.
+export const PAGE_ARGS = [...RENDER_ARGS, '--disable-gpu-compositing'];
+
 // A time-capped scene command (`perl -e 'alarm ...' exec`) SIGTERMs this process and leaves Chrome
 // behind, because puppeteer's browser.close() runs on the way out only if something calls it; a killed
 // node process never gets there. Tracked here once, so every caller that launches through this file (or
