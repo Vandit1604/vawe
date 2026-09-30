@@ -11,23 +11,24 @@
   .world { position: absolute; inset: 0; transform-origin: 34vw 46vh; }
   .card { position: absolute; left: 14vw; top: 16vh; width: 62vw; height: 68vh; padding: calc(var(--u) * 5.4) calc(var(--u) * 5.6); }
   .top { display: flex; align-items: center; gap: var(--s3); }
-  .top .chip { --size: calc(var(--u) * 8); }
-  .top .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }
+  .top .thumb { flex: none; width: calc(var(--u) * 14.2); height: calc(var(--u) * 8); }
+  .top .thumb .photo { border-radius: var(--r-chip); }
   .top .name { font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
   .top .pill { margin-left: auto; }
   .num { margin-top: calc(var(--u) * 3.6); font: 700 calc(var(--u) * 24)/0.9 var(--sans); letter-spacing: -0.055em; }
   .num small { margin-left: var(--s2); font: 600 var(--t-head)/1 var(--sans); letter-spacing: -0.02em; color: var(--muted); }
   .cap { margin-top: var(--s2); font: 500 var(--t-body)/1.2 var(--sans); color: var(--muted); }
   .bars { position: absolute; left: calc(var(--u) * 5.6); right: calc(var(--u) * 5.6); bottom: calc(var(--u) * 5.4); display: flex; gap: var(--s2); align-items: flex-end; height: calc(var(--u) * 15); }
-  .bars i { flex: 1; background: var(--raised); border-radius: calc(var(--u) * 0.8); box-shadow: var(--ring); }
-  .bars i:last-child { background: var(--accent); box-shadow: none; }
+  .top .pill.up { color: var(--accent); }
+  .bars i { flex: 1; background: var(--bar); border-radius: var(--r-chip) var(--r-chip) 0 0; }
+  .bars i:last-child { background: var(--accent); }
 </style>
 </head>
 <body>
 <div class="bg"></div>
 <div class="world">
   <div class="card">
-    <div class="top"><div class="chip"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg></div><span class="name">launch-16x9</span><span class="pill up">Live</span></div>
+    <div class="top"><div class="thumb"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""></div><span class="name">launch-16x9</span><span class="pill up">Live</span></div>
     <div class="num">41<small>seconds</small></div>
     <div class="cap">Median render time, last 7 films</div>
     <div class="bars"><i style="height:38%"></i><i style="height:52%"></i><i style="height:45%"></i><i style="height:66%"></i><i style="height:58%"></i><i style="height:80%"></i><i style="height:100%"></i></div>

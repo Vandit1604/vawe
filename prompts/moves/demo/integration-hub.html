@@ -11,24 +11,28 @@
   .wires line { stroke: var(--bar); stroke-width: calc(var(--u) * 0.28); stroke-linecap: round; }
   .wires circle { fill: var(--accent); }
   .tool, .hub { position: absolute; left: 0; top: 0; --size: calc(var(--u) * 12); margin: calc(var(--size) / -2) 0 0 calc(var(--size) / -2); }
-  .tool .icon { width: calc(var(--u) * 6); height: calc(var(--u) * 6); stroke-width: 1.8; }
-  .hub { --size: calc(var(--u) * 20); border-radius: calc(var(--u) * 5.4); }
-  .hub .icon { width: calc(var(--u) * 11); height: calc(var(--u) * 11); stroke-width: 2.2; }
-  .name { position: absolute; left: 50vw; top: calc(50vh + var(--u) * 14.5); translate: -50% 0; font: 700 var(--t-lead)/1 var(--sans); letter-spacing: -0.02em; }
+  .tool { color: var(--ink); background: var(--surface); box-shadow: var(--shadow-card); }
+  .tool .logo-mark { width: calc(var(--u) * 5.6); height: calc(var(--u) * 5.6); }
+  .hub { --size: calc(var(--u) * 20); border-radius: calc(var(--u) * 5.4); box-shadow: var(--accent-edge), var(--stack); }
+  .hub .logo-mark { width: calc(var(--u) * 10); height: calc(var(--u) * 10); translate: calc(var(--u) * 0.4) 0; }
+  .name { position: absolute; left: 50vw; top: calc(50vh + var(--u) * 14.5); translate: -50% 0; display: grid; justify-items: center; gap: calc(var(--u) * 1.4); }
+  .name b { font: 700 var(--t-lead)/1 'Geist', var(--sans); letter-spacing: -0.035em; }
+  .name span { font: 500 var(--t-small)/1 var(--sans); color: var(--muted); white-space: nowrap; }
 </style>
 </head>
 <body>
 <svg class="wires"></svg>
-<div class="chip accent-fill hub"><svg class="icon" viewBox="0 0 24 24"><path d="M4 15c2.5 0 3-6 5.5-6s3 6 5.5 6 3-6 5-6"/></svg></div>
-<div class="name">Relay</div>
-<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M5 9l7-5 7 5M5 15l7-5 7 5M5 21l7-5 7 5"/></svg></div>
-<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/></svg></div>
-<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z"/></svg></div>
-<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M6 20V11M12 20V4M18 20v-6"/></svg></div>
-<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 16L16 8"/></svg></div>
-<div class="chip tool"><svg class="icon" viewBox="0 0 24 24"><path d="M4 12h5l2-6 2 12 2-6h5"/></svg></div>
+<div class="chip accent-fill hub" data-logo="relay"></div>
+<div class="name"><b>Relay</b><span>6 sources, one feed</span></div>
+<div class="chip tool" data-logo="kestrel"></div>
+<div class="chip tool" data-logo="halcyon"></div>
+<div class="chip tool" data-logo="parcel"></div>
+<div class="chip tool" data-logo="fernbank"></div>
+<div class="chip tool" data-logo="mosaic"></div>
+<div class="chip tool" data-logo="lumen"></div>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { CURVES } from '/core/motion/springs.js';
 const E = CURVES.expoOut, W = innerWidth, H = innerHeight, cx = W / 2, cy = H / 2;
 const clamp = (u) => Math.min(1, Math.max(0, u));

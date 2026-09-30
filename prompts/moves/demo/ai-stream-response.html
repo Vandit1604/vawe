@@ -9,13 +9,16 @@
   .chat { width: calc(var(--u) * 120); height: calc(var(--u) * 78); display: flex; flex-direction: column; padding: 0; overflow: hidden; }
   .bar { display: flex; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); box-shadow: 0 1px 0 var(--line); font: 700 var(--t-body)/1 var(--sans); letter-spacing: -0.02em; }
   .bar .chip { --size: calc(var(--u) * 6.6); border-radius: calc(var(--u) * 1.8); }
-  .bar .chip .icon { width: calc(var(--u) * 3.8); height: calc(var(--u) * 3.8); }
+  .bar .chip .logo-mark { width: 60%; height: 60%; }
+  .bar .pill { font-weight: 500; }
+  .bar .avatar { --size: calc(var(--u) * 6.6); }
   .bar .pill { margin-left: auto; color: var(--muted); }
+  .bar small { font: 500 var(--t-small)/1 var(--sans); letter-spacing: 0; color: var(--faint); }
   .thread { flex: 1; padding: var(--s4); display: flex; flex-direction: column; gap: var(--s4); min-height: 0; }
   .user { align-self: flex-end; max-width: 70%; padding: calc(var(--u) * 2.4) var(--s3); border-radius: var(--r-chip); border-bottom-right-radius: calc(var(--u) * 0.8); background: var(--raised); box-shadow: var(--ring); font: 500 var(--t-body)/1.25 var(--sans); }
   .ai { position: relative; display: flex; gap: var(--s3); }
   .ai .chip { --size: calc(var(--u) * 8); margin-top: calc(var(--u) * 0.4); }
-  .ai .chip .icon { width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); }
+  .ai .chip .logo-mark { width: 58%; height: 58%; }
   .body { position: relative; flex: 1; min-height: calc(var(--u) * 16); }
   .answer { font: 500 calc(var(--u) * 5.2)/1.32 var(--sans); letter-spacing: -0.01em; }
   .answer b { font-weight: 700; color: var(--accent); }
@@ -37,17 +40,18 @@
 </head>
 <body>
 <div class="chat card">
-  <div class="bar"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1z"/></svg></div>Compass<span class="pill">Q3 billing</span></div>
+  <div class="bar"><div class="chip" data-logo="compass"></div>Compass<small>Analyst</small><span class="pill">Q3 billing</span><div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-david.jpg"></div></div>
   <div class="thread">
     <div class="user">Why did churn drop in Q3?</div>
-    <div class="ai"><div class="chip accent-fill"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 3l2.1 5.9L20 11l-5.9 2.1L12 19l-2.1-5.9L4 11l5.9-2.1z"/></svg></div>
+    <div class="ai"><div class="chip accent-fill" data-logo="compass"></div>
       <div class="body"><div class="dots"><i></i><i></i><i></i></div><div class="answer"></div>
-        <div class="src"><span class="pill">Billing, Q3</span><span class="pill">Cohorts</span></div></div></div>
+        <div class="src"><span class="pill">invoices_q3.csv</span><span class="pill">Cohort report, Sep</span></div></div></div>
   </div>
   <div class="composer"><div class="field"><span class="ph">Ask about your data</span><span class="type"><span class="typed"></span><i class="cur"></i></span></div><div class="chip accent-fill send"><svg class="icon" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></div></div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
 const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];

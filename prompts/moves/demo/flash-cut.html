@@ -11,10 +11,12 @@
 
   .shot { position: absolute; inset: 0; }
   .b { opacity: 0; }
-  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 24); width: 56vw; padding: var(--s5); }
+  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 24); width: 66vw; padding: var(--s5); }
   .a h2 { margin: 0 0 var(--s3); font: 600 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; color: var(--muted); }
   .a p { margin: 0; font: 700 var(--t-title)/1.05 var(--sans); letter-spacing: -0.035em; }
   .a .meta { margin-top: var(--s4); display: flex; gap: var(--s2); }
+  .a .card { display: grid; grid-template-columns: 1fr calc(var(--u) * 26); gap: var(--s4); align-items: center; }
+  .a .still { height: calc(var(--u) * 32); border-radius: calc(var(--r-card) - var(--s2)); }
   .b h1 { position: absolute; left: 14vw; top: calc(var(--u) * 28); margin: 0; font: 700 calc(var(--u) * 26)/1 var(--sans); letter-spacing: -0.06em; }
   .b h1 i { color: var(--accent); font-style: normal; }
   .b p { position: absolute; left: 14.4vw; top: calc(var(--u) * 62); margin: 0; font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); }
@@ -22,7 +24,7 @@
 </style>
 </head>
 <body>
-<section class="shot a"><div class="card"><h2>draft 7 of 7</h2><p>Almost ready to ship</p><div class="meta"><span class="pill">12.4 s</span><span class="pill">3 aspects</span></div></div></section>
+<section class="shot a"><div class="card"><div><h2>draft 7 of 7</h2><p>Almost ready to ship</p><div class="meta"><span class="pill">12.4 s</span><span class="pill">3 aspects</span></div></div><img class="photo still" src="/prompts/moves/demo/assets/photos/shore.jpg"></div></section>
 <section class="shot b"><h1>Ship<i>.</i></h1><p>one page in, one film out</p></section>
 <div class="flash"></div>
 <script type="module">

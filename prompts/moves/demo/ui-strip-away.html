@@ -30,7 +30,9 @@
   .rows { display: flex; flex-direction: column; margin-top: var(--s1); }
   .row { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 8); font: 500 var(--t-small)/1 var(--sans); box-shadow: 0 -1px 0 var(--line); }
   .row:first-child { box-shadow: none; }
-  .row .avatar { --size: calc(var(--u) * 5); font-size: calc(var(--u) * 1.9); }
+  .row .chip { --size: calc(var(--u) * 5); color: var(--ink); }
+  .row .logo-mark { width: calc(var(--u) * 2.8); height: calc(var(--u) * 2.8); }
+  .row small { color: var(--muted); font-weight: 500; margin-right: var(--s2); font-size: inherit; }
   .row .who { flex: 1; white-space: nowrap; }
   .row b { font-weight: 600; }
   .toast { position: absolute; right: calc(var(--u) * 5); bottom: calc(var(--u) * -3.5); display: flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s3) var(--s2) var(--s2); border-radius: var(--r-chip); background: var(--raised); box-shadow: var(--shadow-card); font: 600 var(--t-small)/1.2 var(--sans); }
@@ -38,8 +40,8 @@
 
   .lockup { position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: flex; align-items: center; gap: calc(var(--u) * 4.6); }
   .mark { position: relative; width: calc(var(--u) * 24); height: calc(var(--u) * 24); border-radius: 24%; background: var(--accent); box-shadow: var(--accent-edge), 0 calc(var(--u) * 2) calc(var(--u) * 6) rgba(0, 0, 0, 0.4); flex: none; z-index: 3; }
-  .mark svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .mark path { fill: none; stroke: var(--on-accent); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+  .mark { display: grid; place-items: center; color: var(--on-accent); }
+  .mark .logo-mark { width: 56%; height: 56%; }
   .word { font: 700 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.045em; clip-path: inset(-0.3em 100% -0.3em 0); }
   .tag { margin-top: var(--s2); font: 500 var(--t-lead)/1.1 var(--sans); color: var(--muted); }
 </style>
@@ -58,7 +60,7 @@
     <div class="search"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Search payments</div>
     <div class="grow"></div>
     <div class="pill">Last 30 days</div>
-    <div class="avatar">MK</div>
+    <div class="avatar"><img src="/prompts/moves/demo/assets/photos/av-shore.jpg" alt=""></div>
   </div>
   <div class="main">
     <div class="kpis">
@@ -75,20 +77,21 @@
     <div class="card peel" data-to="6 6">
       <div class="head" style="font:600 var(--t-small)/1 var(--sans)">Recent payments</div>
       <div class="rows">
-        <div class="row"><div class="avatar">AR</div><span class="who">Acme Robotics</span><b>$4,280</b></div>
-        <div class="row"><div class="avatar">NL</div><span class="who">Northlight</span><b>$1,940</b></div>
-        <div class="row"><div class="avatar">KS</div><span class="who">Kestrel Sports</span><b>$760</b></div>
+        <div class="row"><div class="chip" data-logo="fernbank"></div><span class="who">Fernbank</span><small>2m</small><b>$4,280</b></div>
+        <div class="row"><div class="chip" data-logo="northwind"></div><span class="who">Northwind</span><small>9m</small><b>$1,940</b></div>
+        <div class="row"><div class="chip" data-logo="kestrel"></div><span class="who">Kestrel</span><small>14m</small><b>$760</b></div>
       </div>
     </div>
   </div>
   <div class="toast peel" data-to="6 4"><div class="chip accent-fill" style="--size: calc(var(--u) * 6)"><svg class="icon bold" style="width:calc(var(--u)*3.4);height:calc(var(--u)*3.4)" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div>Payout sent<div class="muted">$12,480 to Chase 4821</div></div></div>
 </div>
 <div class="lockup">
-  <div class="mark"><svg viewBox="0 0 100 100"><path d="M24 70V32L50 56L76 32V70"/></svg></div>
+  <div class="mark" data-logo="meridian"></div>
   <div><div class="word">Meridian</div><div class="tag">Revenue, live.</div></div>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
 const q = (s) => document.querySelector(s);

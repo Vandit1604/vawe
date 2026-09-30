@@ -7,10 +7,13 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   .card { width: calc(var(--u) * 122); padding: var(--s5); }
-  .card h2 { margin: 0 0 var(--s4); font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); }
+  .card h2 { display: flex; align-items: center; gap: var(--s2); margin: 0 0 var(--s4); font: 600 var(--t-body)/1 var(--sans); color: var(--muted); }
+  .card h2 .ws { display: flex; align-items: center; gap: calc(var(--u) * 1.4); color: var(--ink); font-weight: 700; letter-spacing: -0.02em; }
+  .card h2 .ws .logo-mark { width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); }
+  .card h2 .ws::after { content: ""; width: 1px; height: 1em; margin-left: var(--s1); background: var(--line); }
   .row { display: flex; align-items: center; justify-content: space-between; }
   .metric { display: flex; align-items: baseline; gap: var(--s2); font: 700 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.045em; }
-  .metric small { font: 500 var(--t-body)/1 var(--sans); letter-spacing: 0; color: var(--muted); }
+  .metric small { font: 600 var(--t-body)/1 var(--sans); letter-spacing: 0; color: var(--muted); white-space: nowrap; }
 
   /* the target keeps its own box; the frame is drawn around it, 0.5em out */
   .target { position: relative; display: inline-flex; align-items: center; gap: var(--s2); padding: var(--s3) var(--s4); border-radius: var(--r-chip); background: var(--raised); font: 600 var(--t-lead)/1 var(--sans); }
@@ -31,10 +34,11 @@
 </head>
 <body>
 <div class="card">
-  <h2>Renders this week</h2>
-  <div class="row"><span class="metric">2.4k<small>+18%</small></span><span class="target"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>Export<span class="frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></span></span></div>
+  <h2><span class="ws"><span data-logo="orbital"></span>Orbital</span>Renders this week</h2>
+  <div class="row"><span class="metric">2,418<small>+18%</small></span><span class="target"><svg class="icon bold" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14"/></svg>Export<span class="frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></span></span></div>
 </div>
 <script type="module">
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 document.documentElement.style.setProperty('--land', curveToLinear(CURVES.overshoot));
 </script>

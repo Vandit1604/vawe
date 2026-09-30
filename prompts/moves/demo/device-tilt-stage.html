@@ -17,14 +17,16 @@
   .base .keys { position: absolute; left: 9vh; right: 9vh; top: 5vh; height: 28vh; border-radius: 1vh; background: repeating-linear-gradient(180deg, transparent 0 4.9vh, #2a2547 4.9vh 5.6vh), repeating-linear-gradient(90deg, #1a1630 0 5.2vh, #2a2547 5.2vh 5.9vh); }
   .base .pad { position: absolute; left: 50%; width: 30vh; margin-left: -15vh; top: 36vh; height: 14vh; border-radius: 1.4vh; background: #332d55; box-shadow: inset 0 0 0 0.2vh #4a4470; }
   nav { padding: 3vh 2vh; background: var(--surface); display: flex; flex-direction: column; gap: 1.6vh; }
+  nav .ws { display: flex; align-items: center; gap: 0.8vh; margin-bottom: 1.4vh; font: 700 2.4vh/1 var(--sans); letter-spacing: -0.02em; color: var(--ink); }
+  nav .ws .logo-mark { width: 3.6vh; height: 3.6vh; }
   nav i { display: block; height: 2vh; border-radius: 1vh; background: var(--raised); }
   nav i.on { background: color-mix(in srgb, var(--accent) 70%, transparent); width: 70%; }
   main { padding: 3.4vh 3.6vh; display: flex; flex-direction: column; gap: 2.6vh; }
   main h1 { margin: 0; font: 700 5vh/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
   .row { display: flex; gap: 2vh; flex: 1; }
   .tile { flex: 1; border-radius: 1.4vh; background: var(--surface); box-shadow: var(--ring); padding: 1.8vh; display: flex; flex-direction: column; justify-content: flex-end; font: 600 2.6vh/1 var(--mono); color: var(--muted); }
-  .tile .thumb { flex: 1; margin-bottom: 1.6vh; border-radius: 0.8vh; background: linear-gradient(150deg, #3a2a6e, #1f1840); }
-  .tile.hot .thumb { background: linear-gradient(150deg, var(--accent), #b0602a); }
+  .tile .thumb { flex: 1; min-height: 0; margin-bottom: 1.6vh; border-radius: 0.8vh; }
+  .tile.hot { box-shadow: 0 0 0 0.3vh var(--accent); color: var(--ink); }
   .bar { height: 1.2vh; border-radius: 1vh; background: var(--raised); overflow: hidden; }
   .bar b { display: block; height: 100%; width: 100%; background: var(--accent); transform-origin: 0 50%; }
   .meta { display: flex; justify-content: space-between; font: 600 2.6vh/1 var(--mono); color: var(--muted); }
@@ -35,10 +37,10 @@
   <div class="shadow"></div>
   <div class="device">
     <div class="lid"><div class="screen">
-      <nav><i class="on"></i><i></i><i style="width: 80%"></i><i style="width: 60%"></i></nav>
+      <nav><span class="ws" data-logo="fernbank"></span><i class="on"></i><i></i><i style="width: 80%"></i><i style="width: 60%"></i></nav>
       <main>
         <h1>Launch film</h1>
-        <div class="row"><div class="tile hot"><div class="thumb"></div>16:9</div><div class="tile"><div class="thumb"></div>9:16</div><div class="tile"><div class="thumb"></div>1:1</div></div>
+        <div class="row"><div class="tile hot"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg">16:9</div><div class="tile"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/shore.jpg">9:16</div><div class="tile"><img class="photo thumb" src="/prompts/moves/demo/assets/photos/loft.jpg">1:1</div></div>
         <div class="meta"><span>Rendering 3 aspects</span><span class="pct">72%</span></div>
         <div class="bar"><b></b></div>
       </main>
@@ -49,6 +51,7 @@
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { CURVES } from '/core/motion/springs.js';
 const S = CURVES.spring, clamp = (u) => Math.min(1, Math.max(0, u));
 const device = document.querySelector('.device'), gloss = document.querySelector('.gloss');

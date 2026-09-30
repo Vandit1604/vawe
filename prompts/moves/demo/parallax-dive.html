@@ -17,6 +17,8 @@
   .tile .k .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }
   .tile b { display: block; margin-top: calc(var(--u) * 2.4); font: 700 calc(var(--u) * 9.6)/1 var(--sans); letter-spacing: -0.045em; }
   .slab { width: 70vh; height: 44vh; background: var(--raised); border-radius: calc(var(--u) * 4.4); box-shadow: var(--shadow-card); }
+  .tile.pic { padding: 0; overflow: hidden; }
+  .tile.pic .cap { position: absolute; left: calc(var(--u) * 1.6); bottom: calc(var(--u) * 1.6); padding: calc(var(--u) * 0.9) calc(var(--u) * 1.6); border-radius: 999px; background: rgba(4, 40, 26, 0.72); font: 600 var(--t-small)/1 var(--sans); }
   .title { --x: 0; --y: 0; --z: -120; white-space: nowrap; font: 700 calc(var(--u) * 22)/1 var(--sans); letter-spacing: -0.05em; }
   .title i { color: var(--accent); font-style: normal; }
 </style>
@@ -26,8 +28,8 @@
   <div class="layer far"></div>
   <div class="layer tile card" style="--x:-40; --y:-26; --z:-100"><span class="k"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M10 9.5v5l4.2-2.5z"/></svg>Renders</span><b>128</b></div>
   <div class="layer tile card" style="--x:38; --y:24; --z:-100"><span class="k"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 8.5V13l3 2M9.5 3h5"/></svg>Median time</span><b>41 s</b></div>
-  <div class="layer tile card" style="--x:-30; --y:30; --z:-170"><span class="k"><svg class="icon" viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>Frame rate</span><b>60</b></div>
-  <div class="layer tile card" style="--x:32; --y:-32; --z:-170"><span class="k"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><path d="M8 3v4M16 17v4"/></svg>Aspect ratios</span><b>3</b></div>
+  <div class="layer tile card pic" style="--x:-30; --y:30; --z:-170"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""><span class="cap">16:9, 12.4 s</span></div>
+  <div class="layer tile card pic" style="--x:32; --y:-32; --z:-170"><img class="photo" src="/prompts/moves/demo/assets/photos/ridge.jpg" alt=""><span class="cap">9:16, 12.4 s</span></div>
   <div class="layer title">Dive in<i>.</i></div>
   <div class="layer slab near" style="--x:-58; --y:-28; --z:30"></div>
   <div class="layer slab near" style="--x:56; --y:30; --z:30"></div>

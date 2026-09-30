@@ -8,8 +8,12 @@
 <style>
   .card { width: calc(var(--u) * 124); padding: calc(var(--u) * 5.6) calc(var(--u) * 6.4) calc(var(--u) * 6); }
   .top { display: flex; align-items: center; justify-content: space-between; }
-  .label { font: 600 var(--t-body)/1 var(--sans); color: var(--muted); }
-  .period { font: 500 var(--t-small)/1 var(--sans); color: var(--faint); }
+  .acct { display: flex; align-items: center; gap: var(--s2); }
+  .acct .chip { --size: calc(var(--u) * 8.4); color: var(--ink); }
+  .acct .logo-mark { width: calc(var(--u) * 4.6); height: calc(var(--u) * 4.6); }
+  .label { font: 600 var(--t-body)/1 var(--sans); color: var(--ink); }
+  .who { margin-top: calc(var(--u) * 1.2); font: 500 var(--t-small)/1 var(--sans); color: var(--muted); }
+  .period { font-weight: 500; color: var(--muted); }
   .num { display: flex; align-items: center; margin-top: var(--s3); font: 800 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.045em; }
   .num .sym { margin-right: 0.04em; line-height: 1.16em; color: var(--muted); font-weight: 600; }
   .num .sep { width: 0.26em; text-align: center; line-height: 1.16em; }
@@ -27,7 +31,7 @@
 <body>
 <svg width="0" height="0" style="position: absolute"><defs id="defs"></defs></svg>
 <div class="card">
-  <div class="top"><div class="label">Monthly revenue</div><div class="period">Sep 1 to Sep 30</div></div>
+  <div class="top"><div class="acct"><div class="chip" data-logo="mosaic"></div><div><div class="label">Monthly revenue</div><div class="who">Mosaic, all plans</div></div></div><div class="pill period">September</div></div>
   <div class="num" id="num"><span class="sym">$</span></div>
   <div class="foot">
     <div class="pill up delta"><svg class="icon" viewBox="0 0 24 24"><path class="up" d="M12 19V6M6 11l6-6 6 6"/></svg>12.4% vs August</div>
@@ -36,6 +40,7 @@
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import '/prompts/moves/demo/assets/logos.js';
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
 const settle = curveToLinear(CURVES.expoOut), glide = curveToLinear((u) => u * u * (3 - 2 * u));
