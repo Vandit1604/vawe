@@ -47,6 +47,7 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | type-fill-transition | a word scales into one letter until its stem is the whole frame; that colour is the next shot's ground | HyperFrames text-mask transitions, kinetic-type reels | built |
 | color-block-wipe | a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind | HyperFrames colorama-wipe and directional-wipe, video-shotcraft color-block-step-wipe | built |
 | zoom-through | the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures | HyperFrames zoom-through-transition, video-shotcraft transition-travel, School of Motion infinite zoom | built |
+| speed-ramp-freeze | a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur | HyperFrames beat-freeze-cut and freeze-frame-dressing, video-shotcraft rhythm/speed-ramp-freeze | built |
 
 ## 3. Point the eye
 

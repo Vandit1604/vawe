@@ -1,0 +1,60 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.5">
+<title>move: speed ramp freeze</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; overflow: hidden; }
+  .world { position: absolute; inset: 0; transform-origin: 50% 78%; }
+  .floor { position: absolute; left: 20vw; right: 20vw; top: 78vh; height: 2px; background: var(--ink); opacity: 0.9; }
+  .shadow { position: absolute; left: 50%; top: 78vh; width: calc(var(--u) * 20); height: calc(var(--u) * 2.4); margin: calc(var(--u) * -1.2) 0 0 calc(var(--u) * -10); border-radius: 50%; background: #000; }
+  .ring { position: absolute; left: 50%; top: 78vh; width: calc(var(--u) * 14); height: calc(var(--u) * 14); margin: calc(var(--u) * -7) 0 0 calc(var(--u) * -7); border-radius: 50%; border: calc(var(--u) * 0.7) solid var(--ink); opacity: 0; }
+  .ball { position: absolute; left: 50%; top: 78vh; width: calc(var(--u) * 18); height: calc(var(--u) * 18); margin: calc(var(--u) * -18) 0 0 calc(var(--u) * -9); border-radius: 50%; transform-origin: 50% 100%;
+    background: radial-gradient(circle at 34% 30%, #55b2ff 0%, var(--accent) 46%, #0561bd 100%); box-shadow: inset 0 calc(var(--u) * -0.8) calc(var(--u) * 1.6) rgba(0, 0, 0, 0.25); }
+</style>
+</head>
+<body>
+<div class="world">
+  <div class="floor"></div>
+  <div class="shadow"></div>
+  <div class="ring"></div>
+  <div class="ball" id="ballfx"></div>
+</div>
+<svg width="0" height="0" style="position:absolute"><filter id="vb" x="-20%" width="140%" y="-60%" height="220%"><feGaussianBlur id="vbs" stdDeviation="0 0"/></filter></svg>
+<script type="module">
+import '/core/engine/page-api.js';
+const H = innerHeight, u = H / 100, q = (s) => document.querySelector(s);
+const smooth = (x) => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+// the time remap: speed s(t) is 1, ramps to 0.03 (a near freeze, never dead) over 0.4 s, holds 0.25 s, then snaps to 3.5 and settles back to 1
+const T = { ramp: 0.35, rampLen: 0.4, hold: 0.75, snap: 1.0 }, FREEZE = 0.03;
+const speed = (t) => t < T.hold ? 1 - (1 - FREEZE) * smooth((t - T.ramp) / T.rampLen) : t < T.snap ? FREEZE : 1 + 2.5 * Math.exp(-(t - T.snap) / 0.1);
+const DT = 1 / 240, tau = [0];
+for (let i = 1; i <= 2 * 240; i++) tau.push(tau[i - 1] + speed(i * DT) * DT);
+const tauAt = (t) => { const x = Math.max(0, t) / DT, i = Math.min(tau.length - 2, Math.floor(x)); return tau[i] + (tau[i + 1] - tau[i]) * (x - i); };
+const HIT = tauAt(T.snap), TOUCH = HIT - 0.06, DROP = 80 * u, RISE = 56 * u, LIFT = 1.1;   // story time: TOUCH the ball meets the floor, HIT the deepest squash (the frozen frame)
+const state = (t) => {
+  const p = tauAt(t), c = p - HIT;
+  const y = p < TOUCH ? -DROP * (1 - (p / TOUCH) ** 2) : c < 0 ? 0 : -RISE * (1 - (1 - Math.min(1, c / LIFT)) ** 2);
+  const sq = c < 0 ? smooth((p - TOUCH) / (HIT - TOUCH)) : c < 0.1 ? 1 - 1.25 * smooth(c / 0.1) : -0.25 * (1 - smooth((c - 0.1) / 0.2));
+  return { y, sq, c };
+};
+const ball = q('.ball'), shadow = q('.shadow'), ring = q('.ring'), world = q('.world'), blur = document.getElementById('vbs');
+ball.style.filter = 'url(#vb)';
+vawe.onFrame((t) => {
+  const s = state(t), prev = state(t - 1 / 120), next = state(t + 1 / 120);
+  ball.style.transform = `translateY(${s.y.toFixed(2)}px) scale(${(1 + 0.32 * s.sq).toFixed(4)}, ${(1 - 0.36 * s.sq).toFixed(4)})`;
+  const dy = Math.abs(next.y - prev.y) / 2;                       // px per frame at 60 fps
+  blur.setAttribute('stdDeviation', `0 ${Math.min(26, dy * 0.3).toFixed(2)}`);
+  const h = Math.min(1, Math.abs(s.y) / (60 * u));
+  shadow.style.opacity = (0.5 * (1 - h)).toFixed(3);
+  shadow.style.transform = `scaleX(${(1 - 0.5 * h + 0.25 * Math.max(0, s.sq)).toFixed(3)})`;
+  const r = Math.max(0, s.c + 0.05);                              // the ring starts a hair before contact and runs on story time
+  ring.style.opacity = s.c > -0.05 ? Math.max(0, 0.9 - r * 4.2).toFixed(3) : 0;
+  ring.style.transform = `scale(${(0.9 + r * 13).toFixed(3)}, ${(0.25 + r * 3.2).toFixed(3)})`;
+  world.style.transform = `scale(${(1 + 0.06 * Math.min(1, Math.max(0, 1 - speed(t)))).toFixed(4)})`;
+});
+</script>
+</body>
+</html>
