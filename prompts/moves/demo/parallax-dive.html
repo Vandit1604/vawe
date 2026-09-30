@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="field">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="2">
@@ -11,7 +11,7 @@
   .rig { position: absolute; inset: 0; transform-style: preserve-3d; }
   /* every layer sits at its own depth (z, in vh); the camera is the rig moving toward us */
   .layer { position: absolute; left: 50%; top: 50%; translate: calc(var(--x) * 1vw - 50%) calc(var(--y) * 1vh - 50%); transform: translateZ(calc(var(--z) * 1vh)); }
-  .far { --x: 0; --y: 0; --z: -240; width: 600vw; height: 600vh; background: radial-gradient(#3a3941 calc(var(--u) * 0.7), transparent calc(var(--u) * 0.8)) 0 0 / calc(var(--u) * 14) calc(var(--u) * 14); }
+  .far { --x: 0; --y: 0; --z: -240; width: 600vw; height: 600vh; background: radial-gradient(var(--dot) calc(var(--u) * 0.7), transparent calc(var(--u) * 0.8)) 0 0 / calc(var(--u) * 14) calc(var(--u) * 14); }
   .tile { width: 44vh; height: 27vh; padding: calc(var(--u) * 3) calc(var(--u) * 3.2); }
   .tile .k { display: flex; align-items: center; gap: var(--s2); font: 500 var(--t-body)/1 var(--sans); color: var(--muted); }
   .tile .k .icon { width: calc(var(--u) * 4.4); height: calc(var(--u) * 4.4); }

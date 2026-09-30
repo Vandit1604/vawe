@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="night">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1">
@@ -10,7 +10,7 @@
   body { position: relative; display: block; }
 
   .thumb { position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; display: grid; place-items: center; width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%; background: var(--accent); }
-  .thumb .icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); margin-left: 0.5%; fill: #fff; stroke: #fff; stroke-width: 1.5; }
+  .thumb .icon { width: calc(var(--u) * 5); height: calc(var(--u) * 5); margin-left: 0.5%; fill: var(--on-accent); stroke: var(--on-accent); stroke-width: 1.5; }
 
   .panel { position: absolute; inset: 0; display: grid; align-content: center; justify-items: start; gap: var(--s3); padding-left: 14vw; background: var(--raised);
            clip-path: circle(0% at var(--x) var(--y));

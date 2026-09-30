@@ -27,3 +27,5 @@ applied to both copies, so the angle cannot jump; the arc length (28 of 100) is 
 The speed matches too: the linear turn is 440 degrees a second, and the `expoOut` tail is sized so
 its first frame moves as fast (distance x 6.5 / duration). Change only what the shot means (ground,
 colour, the words). Put the cut on a beat, and start B's new elements 60 ms after it, never on it.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

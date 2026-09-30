@@ -30,3 +30,5 @@ is the only bouncy thing in the frame. The exit is 260 ms against a 700 ms entra
 travelling upward the way it came, and it ends on the last frame, so the clip never ends on a
 still. Write the text the way the product would: a file name, a length, a rate. Never a message that
 only fills space. If the film keeps the banner on screen, replace the exit with a slow drift.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

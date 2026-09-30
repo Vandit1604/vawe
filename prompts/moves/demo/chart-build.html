@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="swiss">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="2">
@@ -7,7 +7,6 @@
 <title>move: chart build</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  :root { --bar: rgba(255,255,255,0.28); }
   .card { width: calc(var(--u) * 158); padding: calc(var(--u) * 5.2) calc(var(--u) * 6.4) calc(var(--u) * 5.4); opacity: 0; }
   .head { display: flex; align-items: baseline; justify-content: space-between; }
   .title { font: 700 var(--t-head)/1 var(--sans); letter-spacing: -0.02em; }
@@ -31,6 +30,7 @@
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const q = (s) => document.querySelector(s);
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);
 const data = [['Mar', 12.4], ['Apr', 14.1], ['May', 13.8], ['Jun', 17.2], ['Jul', 19.5], ['Aug', 22.3], ['Sep', 26.8]];
 const max = 40, plot = q('#plot');
@@ -56,7 +56,7 @@ const bars = data.map(([m, v], i) => {
 });
 const last = bars[bars.length - 1];
 // the one accent: the newest bar turns on after the others have landed, and its value tag pops on the bar
-last.bar.animate([{ background: 'rgba(255,255,255,0.28)' }, { background: '#0a87ff' }], { duration: 240, delay: 1250, easing: 'linear', fill: 'both' });
+last.bar.animate([{ background: css('--bar') }, { background: css('--accent') }], { duration: 240, delay: 1250, easing: 'linear', fill: 'both' });
 const tag = Object.assign(document.createElement('div'), { className: 'tag', textContent: '26.8k' });
 last.bar.append(tag);
 tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, translate: '-50% 0', opacity: 1 }], { duration: 650, delay: 1350, easing: pop, fill: 'both' });

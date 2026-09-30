@@ -35,3 +35,5 @@ and follows the light into the word. Opacity runs 110 ms linear because the over
 dip it. The clip box is padded 0.3 em above and below so no glyph is cut. The 4.5 percent push over
 the whole clip is the last-frame motion; without it the tail reads as a still. The light is on the
 mark only, never on the text.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

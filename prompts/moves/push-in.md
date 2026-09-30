@@ -24,3 +24,5 @@ percent it is a punch-in and needs a faster curve. Pure `expoOut` stops the move
 second, so the second half of a 2 s beat sits dead; the linear half keeps it alive. Push toward the
 thing the beat is about, and end the push on the beat's last frame or a cut, never in a hold.
 Never blur a push: the subject is the sharpest thing in frame.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

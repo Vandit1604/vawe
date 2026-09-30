@@ -29,3 +29,5 @@ document.documentElement.style.setProperty('--through', curveToLinear((u) => u *
 
 The shape can be a word, a card edge or a cursor; what matters is that its path does not stop at the
 cut. Put the cut two frames before the sound cue, never after it.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

@@ -30,3 +30,5 @@ is a 9 percent gradient, not a hard clip, so no letter is sliced. The bar fades 
 bar left at the end points at nothing (taste rule 4). The last keyframe needs its own
 `opacity: 0`; without it the browser adds an implicit end frame that brings the bar back. Put the
 bar on one line only: two bars are two focal points.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

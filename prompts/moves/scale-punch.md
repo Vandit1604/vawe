@@ -31,3 +31,5 @@ Opacity runs 0.12 s, linear: the word is solid while it is still large, so the e
 arriving, not a ghost. The full stop pops 0.22 s after the word on the same curve: the second hit
 sells the first. Cut the sound on the frame the scale crosses 1.0 (about 0.2 s in), not on the beat
 start. Never put this on more than one word in a beat.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

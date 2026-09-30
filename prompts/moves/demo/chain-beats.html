@@ -1,5 +1,5 @@
 <!doctype html>
-<html data-aspect="16:9">
+<html data-aspect="16:9" data-look="terminal">
 <head>
 <meta charset="utf-8">
 <meta name="duration" content="1.4">
@@ -10,7 +10,7 @@
 
   /* one element, three jobs: a dot, then a bar, then the rule under the headline */
   .row { position: absolute; left: 14vw; top: 50vh; height: calc(var(--u) * 10); display: flex; align-items: flex-end; }
-  .chip { display: flex; align-items: center; width: calc(var(--u) * 5); height: calc(var(--u) * 5); padding-left: var(--s3); border-radius: 999px; background: var(--accent); overflow: hidden; white-space: nowrap;
+  .chip { display: flex; align-items: center; width: calc(var(--u) * 5); height: calc(var(--u) * 5); padding-left: var(--s3); border-radius: 999px; background: var(--accent); color: var(--on-accent); overflow: hidden; white-space: nowrap;
           font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22); }
   .win { position: absolute; left: 14vw; top: calc(var(--u) * 36); height: calc(var(--u) * 22); overflow: hidden; }
   h1 { margin: 0; font-size: calc(var(--u) * 12); line-height: calc(var(--u) * 22); white-space: nowrap; }

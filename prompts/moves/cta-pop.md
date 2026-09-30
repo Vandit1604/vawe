@@ -29,3 +29,5 @@ it on this one element only, since a second bouncy thing in the frame turns the 
 The button is 8.4vh type in one solid colour with no glow, so the label stays readable when it
 lands. The arrow moves 4 units in a 24-unit box; more than that reads as a wiggle, less is lost at
 640 px. Give the pop 300 ms of head start so the line is read before the button asks for a click.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

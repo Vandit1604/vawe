@@ -10,11 +10,13 @@ under the word), so nothing new enters. Monospace type makes `ch` exact. Clip:
 .text { overflow: hidden; white-space: nowrap; width: 0;
         animation-name: type; animation-duration: 0.5s; animation-delay: var(--beat-1);
         animation-timing-function: steps(9, end); animation-fill-mode: both; }   /* 9 = characters */
-.caret { width: 0.08em; height: 1em; margin-left: 0.06em; background: var(--accent);
-         animation-name: become; animation-duration: 0.35s; animation-delay: calc(var(--beat-1) + 0.55s);
-         animation-timing-function: var(--settle); animation-fill-mode: both; }
+.caret { position: relative; width: 0.08em; height: 1em; margin-left: 0.06em; background: var(--accent);
+         animation-name: spread, drop; animation-duration: 0.35s, 0.16s;
+         animation-delay: calc(var(--beat-1) + 0.55s), calc(var(--beat-1) + 0.55s);
+         animation-timing-function: var(--settle), var(--settle); animation-fill-mode: both, both; }
 @keyframes type { to { width: 9ch; } }
-@keyframes become { to { width: 9ch; height: 0.12em; translate: calc(-9ch - 0.06em) 0.64em; } }
+@keyframes drop { to { height: 0.12em; top: 0.64em; } }               /* first: thin and below the letters */
+@keyframes spread { to { width: 9ch; translate: calc(-9ch - 0.06em) 0; } }
 ```
 
 ```html
@@ -27,3 +29,5 @@ document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expo
 
 Sound: one soft tick (`data-synth="pluck"`, no data-gain) on the first character and one on the
 last, not one per character.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

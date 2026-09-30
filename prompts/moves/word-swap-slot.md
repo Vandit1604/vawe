@@ -41,3 +41,5 @@ Using `overflow: hidden` on the slot. It moves the baseline to the bottom edge o
 descenders. Use `clip-path: inset()` with a window as tall as one row (1.7em) and rows spaced by the
 same 1.7em, so the neighbour is never visible at rest and no glyph is cut. And never swap the text
 in place with a cross-fade: the roll is the whole move.
+
+Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
