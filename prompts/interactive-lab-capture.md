@@ -36,8 +36,8 @@ Write the tour as a [[t, state]] table: at each t the state the lab should show,
 the viewer learns there. window.seek(t) interpolates the table with kf(t, table, ease) from
 core/motion/springs.js and calls render(). A ghost cursor shows which control "moves" (a hand, not a
 label). Captions: one line per row, under 12 words, with the readout's value in it.
-Sound: a soft tick (<audio data-synth="pluck" data-gain="-28">) at a few state changes, not all; one
-"swell" (-24 dB) under the reveal.
+Sound: a soft tick (<audio data-synth="pluck" data-gain="-8">) at a few state changes, not all; one
+"swell" (-6 dB) under the reveal.
 <meta name="duration">; render with bin/vawe dev films/<name>/page.html.
 ```
 
