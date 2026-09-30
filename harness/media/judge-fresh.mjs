@@ -11,16 +11,14 @@ import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
+import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
-const SHEET_FPS = 5;
 const SHEET_COLS = 10;
-const SHEET_MAX_FRAMES = 150;
-const TILE_W = 288;
 const KEY_FRAMES = 6;
 const KEY_GAP_S = 0.4;
 const PASS_AT = 8;
@@ -65,7 +63,7 @@ async function draftOf(page, name) {
 }
 
 function contactSheet(video, dur, dir) {
-  const fps = Math.min(SHEET_FPS, SHEET_MAX_FRAMES / dur);
+  const fps = sheetFps(dur);
   const rows = Math.ceil(dur * fps / SHEET_COLS);
   const label = `drawtext=${FONT ? `fontfile=${FONT}:` : ''}text='%{pts\\:flt}s':x=4:y=4:fontsize=20:fontcolor=white:box=1:boxcolor=black@0.7`;
   const out = path.join(dir, 'sheet.png');
