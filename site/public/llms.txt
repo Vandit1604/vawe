@@ -32,6 +32,10 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Outline fill](https://vawe.dev/moves/outline-fill.md): one hero word arrives as an outline, letter by letter, then an accent floods each letter from its baseline on the beat
 - [Strikethrough replace](https://vawe.dev/moves/strikethrough-replace.md): an old word or price is struck through by a tilted line drawn left to right, it dims and shrinks, and the new value rises in beside it character by character
 - [Grid stagger wave](https://vawe.dev/moves/grid-stagger-wave.md): a title arrives with many things around it: a grid of tiles enters in a wave by distance from the title, 70 ms per tile, each tile pushed out from the source on a spring
+- [Text scramble decode](https://vawe.dev/moves/text-scramble-decode.md): a name or codename is revealed as a lookup: a mono line of seeded wrong glyphs locks left to right, each fresh letter flashes accent, then a verified line appears under it
+- [Ticker takeover](https://vawe.dev/moves/ticker-takeover.md): a line with a cycling word is replaced by the answer: the word rolls through three values, then the hero crashes in on a long slide and its edge pushes the whole text group out of the frame
+- [Anchor cycle](https://vawe.dev/moves/anchor-cycle.md): one phrase stays pinned while a tape beside it is hard-cut through eight words, slow then fast, and holds on the last; a brand lockup then drops in under the still anchor
+- [Lower third](https://vawe.dev/moves/lower-third.md): a person is on screen: an accent rule grows, a plate wipes open, the name rises from a mask and the role follows, then the card leaves faster than it came
 - [Cut on motion](https://vawe.dev/moves/cut-on-motion.md): a moving shape carries the eye across a hard cut into a new scene
 - [Push with directional blur](https://vawe.dev/moves/push-blur.md): a panel pushes in with a directional blur that follows its speed, set per frame
 - [Exits faster than entrances](https://vawe.dev/moves/exit-fast.md): the pair every beat needs: arrive fast and land soft, leave faster and shorter
@@ -53,6 +57,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Smear stretch](https://vawe.dev/moves/smear-stretch.md): an elastic cut: shot A's content stretches into streaks on an ease-in, the cut lands at the peak, and shot B snaps back from the streak on an under-damped spring, thinning and bulging like rubber
 - [Shape morph wipe](https://vawe.dev/moves/shape-morph-wipe.md): the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame
 - [Spin transition](https://vawe.dev/moves/spin-transition.md): a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures
+- [Light leak transition](https://vawe.dev/moves/light-leak-transition.md): two shots meet through warmth: three generated warm layers swell over a dark UI on their own clocks, the cut lands on the peak, and the new shot climbs out as they fall faster; no image asset
 - [Word colour sweep](https://vawe.dev/moves/word-sweep.md): the accent runs word by word in reading order and stays on the target word
 - [Weight morph](https://vawe.dev/moves/weight-morph.md): one word gets heavier on a real variable-font axis; the glyphs reshape, nothing is scaled
 - [Marker highlight](https://vawe.dev/moves/marker-highlight.md): a highlighter bar wipes behind one phrase and the text flips dark for contrast
@@ -76,6 +81,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Thanks sweep](https://vawe.dev/moves/thanks-sweep.md): a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts; use once per film
 - [UI strip away](https://vawe.dev/moves/ui-strip-away.md): the last beat hands the product to the brand: the UI leaves layer by layer, top layer first, while the sidebar mark travels to the middle and becomes the lockup
 - [Logo wall](https://vawe.dev/moves/logo-wall.md): the proof beat before the call to action: three lanes of hairline cells with invented logos slide in from alternate sides on a stagger, blurred to their speed, and keep drifting after they land
+- [CTA morph press](https://vawe.dev/moves/cta-morph-press.md): the close moves from brand to action: one plate changes shape into a button on one spring, a cursor arrives on a bowed path and presses, and the button shows a confirmed state
 - [Clip expand from a point](https://vawe.dev/moves/clip-expand.md): a panel or capture grows out of one point the eye is already on
 - [Cursor click](https://vawe.dev/moves/cursor-click.md): a cursor travels a bowed path to a control, the control lights and dips on the press, the label rolls to its result, the cursor leaves
 - [Count up](https://vawe.dev/moves/count-up.md): a number is the proof: each digit is a wheel that rolls to its value with speed blur, then a delta chip and a sparkline
@@ -90,3 +96,5 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Integration hub](https://vawe.dev/moves/integration-hub.md): the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub
 - [Device tilt stage](https://vawe.dev/moves/device-tilt-stage.md): the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle
 - [Command palette summon](https://vawe.dev/moves/command-palette-summon.md): the keyboard-first beat: the app dims, a Cmd+K palette drops in on a spring, a query types, non-matching rows collapse to zero height, Enter presses the chosen row and the palette leaves fast
+- [Agent progress](https://vawe.dev/moves/agent-progress.md): an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list
+- [Panel live sync](https://vawe.dev/moves/panel-live-sync.md): an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames
