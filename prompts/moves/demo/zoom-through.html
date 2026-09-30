@@ -14,17 +14,19 @@
   .layer.in-b { background: var(--accent); }
   .layer.in-b .a { display: none; }
   .layer.in-b .bs, .layer.in-disc .bs { display: block; }
-  .a .card { position: absolute; left: 12vw; top: calc(var(--u) * 22); width: 76vw; height: calc(var(--u) * 56); }
+  .a .card { position: absolute; left: 12vw; top: calc(var(--u) * 22); width: 76vw; height: calc(var(--u) * 56); overflow: hidden; box-shadow: var(--shadow-hero); }
+  .a .card .photo { position: absolute; inset: 0; border-radius: 0; outline: 0; }
+  .a .card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(10, 9, 13, 0.82) 0%, rgba(10, 9, 13, 0.5) 42%, rgba(10, 9, 13, 0.05) 75%); }
+  .a .card > :not(.photo) { z-index: 1; }
   .a h2 { position: absolute; left: var(--s5); top: var(--s5); margin: 0; font: 700 var(--t-title)/1.06 var(--sans); letter-spacing: -0.03em; }
-  .a .meta { position: absolute; left: var(--s5); bottom: var(--s5); font: 500 var(--t-body)/1.3 var(--mono); color: var(--muted); }
-  .a .pill { position: absolute; left: var(--s5); top: calc(var(--u) * 30); }
-  .disc { position: absolute; left: 66vw; top: 50vh; width: calc(var(--u) * 24); height: calc(var(--u) * 24); margin: calc(var(--u) * -12) 0 0 calc(var(--u) * -12); border-radius: 50%; background: var(--accent); box-shadow: 0 calc(var(--u) * 1.2) calc(var(--u) * 4) rgba(10, 135, 255, 0.35); }
-  .bs .hero { position: absolute; left: 9vw; top: calc(var(--u) * 28); font: 800 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.05em; color: var(--on-accent); }
+  .a .meta { position: absolute; left: var(--s5); bottom: var(--s5); font: 500 var(--t-body)/1.3 var(--mono); color: rgba(255, 255, 255, 0.78); }
+  .a .pill { position: absolute; left: var(--s5); top: calc(var(--u) * 30); background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); color: #fff; }
+  .disc { position: absolute; left: 66vw; top: 50vh; width: calc(var(--u) * 24); height: calc(var(--u) * 24); margin: calc(var(--u) * -12) 0 0 calc(var(--u) * -12); border-radius: 50%; background: var(--accent); box-shadow: var(--accent-edge), var(--stack); }  .bs .hero { position: absolute; left: 9vw; top: calc(var(--u) * 28); font: 800 calc(var(--u) * 24)/1 var(--sans); letter-spacing: -0.05em; color: var(--on-accent); }
   .bs .sub { position: absolute; left: 9.6vw; top: calc(var(--u) * 60); font: 500 var(--t-lead)/1 var(--mono); color: var(--on-accent); }
 </style>
 </head>
 <body>
-<template id="a"><div class="a"><div class="card"><h2>Launch film</h2><div class="pill up">3 aspects</div><div class="meta">0:41  60 fps</div></div><div class="disc"></div></div></template>
+<template id="a"><div class="a"><div class="card"><img class="photo" src="/prompts/moves/demo/assets/photos/ridge.jpg" alt=""><h2>Launch film</h2><div class="pill">3 aspects</div><div class="meta">0:41  60 fps</div></div><div class="disc"></div></div></template>
 <template id="b"><div class="bs"><div class="hero">Live</div><div class="sub">vawe.dev/launch</div></div></template>
 <div id="layers"></div>
 <script type="module">
