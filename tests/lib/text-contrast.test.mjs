@@ -17,7 +17,7 @@ test('an accent word on an amber flood is named in the draft with its ratio and 
   const samples = [4, 4.5].map((t) => ({ t, lines: [line('through', 'rgb(179, 36, 10)')], shots: shots(amber, burnt) }));
   const [l, ...rest] = draftContrastLines(samples);
   assert.equal(rest.length, 0);
-  assert.match(l, /^text "through" at 4.00 s reads 3.1:1 on the pixels behind it \(#b3240a on #ff9a26, needs 4.5:1\): use #\w{6}, or change the ground behind it$/);
+  assert.match(l, /^text "through" at 4.00 s reads 3.1:1 on the pixels behind it \(#b3240a on #ff9a26, needs 4.5:1\): use #\w{6}, or change the ground behind it, or waive "text-low-contrast" with a _why$/);
 });
 
 test('dark ink on amber passes', () => {

@@ -97,5 +97,5 @@ export function draftContrastLines(samples) {
   const rows = probeRows(samples);
   if (!rows.length) return [];
   const frame = { width: samples.find((s) => s.shots).shots.width, height: samples.find((s) => s.shots).shots.height };
-  return lowContrast(rows, frame, DRAFT_MIN_RATIO).map((c) => `text "${c.text}" at ${c.t.toFixed(2)} s reads ${c.ratio.toFixed(1)}:1 on the pixels behind it (${hexOf(c.fg)} on ${hexOf(c.bg)}, needs ${c.need}:1): use ${passingColour(c)}, or change the ground behind it`);
+  return lowContrast(rows, frame, DRAFT_MIN_RATIO).map((c) => `text "${c.text}" at ${c.t.toFixed(2)} s reads ${c.ratio.toFixed(1)}:1 on the pixels behind it (${hexOf(c.fg)} on ${hexOf(c.bg)}, needs ${c.need}:1): use ${passingColour(c)}, or change the ground behind it, or waive "text-low-contrast" with a _why`);
 }

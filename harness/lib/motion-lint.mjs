@@ -2,7 +2,7 @@
 // one fix. collectMotion runs in the page and reads Web Animations; recordsFromBoxes infers the same
 // records from element boxes over time (harness/lib/box-track.mjs) for a page that paints in window.seek
 // or vawe.onFrame. Everything else is pure over the records.
-import { isWaivedBy, hasReason } from './waivers.mjs';
+import { isWaived } from './waivers.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
 
 // motionRecord and collectMotion run inside the page (runMotionCollector bundles their source), so
@@ -233,12 +233,8 @@ export function motionLint({ records, scripted }) {
 }
 
 /** Drops a finding the page waives: authoring.allow holds its code, or code@<second to 2 places>, with a _why. */
-export function unwaived(findings, { allow = [], _why = {} } = {}) {
-  return findings.filter((f) => {
-    const scoped = `${f.code}@${s2(f.at)}`;
-    const entry = allow.find((e) => e === f.code || e === scoped);
-    return !(entry && isWaivedBy(allow, f.code, s2(f.at)) && hasReason(_why, entry));
-  });
+export function unwaived(findings, authoring = {}) {
+  return findings.filter((f) => !isWaived(authoring, f.code, s2(f.at)));
 }
 
 /** One printed line per finding. */
