@@ -8,17 +8,20 @@
 <style>
   body { position: relative; display: block; }
 
-  /* one element, three jobs: a dot, then a bar, then the rule under the headline */
-  .row { position: absolute; left: 14vw; top: 50vh; height: calc(var(--u) * 10); display: flex; align-items: flex-end; }
+  /* one element, three jobs: a dot, then a bar, then the rule the headline rises out of */
+  .stack { position: absolute; left: 14vw; top: 36vh; }
+  .win { overflow: hidden; }
+  .win .title { margin: 0; font-size: calc(var(--u) * 12); line-height: 1.2; white-space: nowrap; }
+  .row { height: calc(var(--u) * 10); margin-top: calc(var(--u) * 1.2); display: flex; align-items: flex-start; }
   .chip { display: flex; align-items: center; width: calc(var(--u) * 5); height: calc(var(--u) * 5); padding-left: var(--s3); border-radius: 999px; background: var(--accent); color: var(--on-accent); overflow: hidden; white-space: nowrap;
           font: 500 var(--t-body)/1 var(--mono); letter-spacing: -0.02em; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22); }
-  .win { position: absolute; left: 14vw; top: calc(var(--u) * 36); height: calc(var(--u) * 22); overflow: hidden; }
-  h1 { margin: 0; font-size: calc(var(--u) * 12); line-height: calc(var(--u) * 22); white-space: nowrap; }
 </style>
 </head>
 <body>
-<div class="win"><h1 class="title">Shipped in 41 s</h1></div>
-<div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>
+<div class="stack">
+  <div class="win"><h1 class="title">Shipped in 41 s</h1></div>
+  <div class="row"><div class="chip"><span class="label">vawe ship films/launch</span></div></div>
+</div>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 const settle = curveToLinear(CURVES.expoOut);
@@ -30,11 +33,11 @@ const C = { at: next(B), dur: 1500 };
 const run = (el, frames, beat, fill = 'both') => el.animate(frames, { duration: beat.dur, delay: beat.at, easing: settle, fill });
 
 run(chip, [{ translate: '-9vw 0' }, { translate: '0 0' }], A);
-run(chip, [{ width: '5vh', height: '5vh' }, { width: '72vw', height: '10vh' }], B);
+run(chip, [{ width: '5vh', height: '5vh' }, { width: '100%', height: '10vh' }], B);   // 100% of .stack, which shrinks to the headline's width
 run(chip, [{ height: '0.6vh' }], C, 'forwards');   // no from: a from would fill backwards over beat B
 label.animate([{ opacity: 0 }, { opacity: 1, offset: 0.3 }], { duration: B.dur, delay: B.at, fill: 'both' });
 label.animate([{ opacity: 0, translate: '0 -1vh' }], { duration: 160, delay: C.at, easing: settle, fill: 'forwards' });
-run(h1, [{ translate: '0 105%' }, { translate: '0 0' }], { at: C.at + 80, dur: 1300 });
+run(h1, [{ translate: '0 101%' }, { translate: '0 0' }], { at: C.at + 80, dur: 1300 });
 </script>
 </body>
 </html>
