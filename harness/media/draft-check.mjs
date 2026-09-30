@@ -35,7 +35,7 @@ function visibleLines() {
     range.selectNodeContents(node);
     const r = range.getBoundingClientRect();
     const inside = r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight;
-    if (opacity > 0.5 && inside) out.push({ text, fontPx: parseFloat(cs.fontSize) * scale });
+    if (opacity > 0.5 && inside) out.push({ text, fontPx: parseFloat(cs.fontSize) * scale, box: [r.x, r.y, r.width, r.height], color: cs.color });
   }
   return out;
 }
