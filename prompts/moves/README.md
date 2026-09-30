@@ -33,7 +33,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | change what a word means | [weight-morph](weight-morph.md) |
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
 | change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [speed-ramp-freeze](speed-ramp-freeze.md) |
-| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md) |
+| change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md) |
 | change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
@@ -88,6 +88,7 @@ One row per job, best move first. Every built move is in this table; the group t
 | speed ramp freeze | a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur | [speed-ramp-freeze.md](speed-ramp-freeze.md) | [speed-ramp-freeze.mp4](speed-ramp-freeze.mp4) |
 | liquid wipe | a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot | [liquid-wipe.md](liquid-wipe.md) | [liquid-wipe.mp4](liquid-wipe.mp4) |
 | grid tile flip | a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back | [grid-tile-flip.md](grid-tile-flip.md) | [grid-tile-flip.mp4](grid-tile-flip.mp4) |
+| luma matte dissolve | the next shot arrives through its own brightness: an SVG luminance matte with a falling threshold shows its bright areas first, then midtones, and its dark ground last | [luma-matte-dissolve.md](luma-matte-dissolve.md) | [luma-matte-dissolve.mp4](luma-matte-dissolve.mp4) |
 
 ## Point the eye
 
