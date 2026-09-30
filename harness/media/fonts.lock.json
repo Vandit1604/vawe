@@ -140,6 +140,13 @@
       "file": "fraunces-latin-wght-normal.woff2",
       "bytes": 36620,
       "sha256": "7f9d191d999336d3b9790afa72e1358e50a13b06d4f289341e92a311967a80f9"
+    },
+    "BigShoulders.woff2": {
+      "pkg": "@fontsource-variable/big-shoulders",
+      "version": "5.3.0",
+      "file": "big-shoulders-latin-wght-normal.woff2",
+      "bytes": 36524,
+      "sha256": "b0cb3d2f6c96bce799a1f8d9f67eae447d84e2da14d592de186f2ede1c038d50"
     }
   }
 }
