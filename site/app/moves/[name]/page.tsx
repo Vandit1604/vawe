@@ -31,7 +31,7 @@ export default async function MovePage({ params }: Params) {
   const move = moveByName((await params).name);
   if (!move) notFound();
   const files = clip(move.name);
-  preload(files.poster, { as: "image", fetchPriority: "high" });
+  preload(files.posterHd, { as: "image", fetchPriority: "high" });
   const rows = JOBS.filter((j) => j.moves.includes(move.name))
     .map((j) => ({ ...j, others: j.moves.filter((n) => n !== move.name).map(moveByName).filter((m) => m !== null) }))
     .filter((j) => j.others.length);
@@ -57,7 +57,7 @@ export default async function MovePage({ params }: Params) {
           </header>
 
           <figure className="mvd-clip panel">
-            <Clip src={files.mp4} webm={files.webm} poster={files.poster} />
+            <Clip src={files.mp4} poster={files.posterHd} />
             <figcaption className="mvd-tap meta">Tap the clip to play it.</figcaption>
           </figure>
 
