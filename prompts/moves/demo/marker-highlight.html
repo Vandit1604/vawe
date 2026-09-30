@@ -1,0 +1,33 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.4">
+<title>move: marker highlight</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  @property --p { syntax: '<number>'; inherits: false; initial-value: -12; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 700 10vh/1.25 'Archivo', sans-serif; color: var(--ink); letter-spacing: -0.02em; }
+  p { margin: 0; text-align: center; }
+
+  .hl { position: relative; display: inline-block; white-space: nowrap; }
+  /* one wipe box holds the bar and a dark copy of the text, so the colour flips exactly at the bar's edge */
+  .wipe { position: absolute; inset: 0; --e: 8;
+          clip-path: polygon(-50% -50%, calc(var(--p) * 1% + var(--e) * 1%) -50%, calc(var(--p) * 1%) 150%, -50% 150%);
+          animation-name: sweep; animation-duration: 0.55s; animation-delay: 0.3s;
+          animation-timing-function: var(--sweep); animation-fill-mode: both; }
+  .bar { position: absolute; inset: 0.14em -0.16em 0.02em; background: var(--accent); border-radius: 0.2em; transform: skewX(-7deg); }
+  .dark { position: absolute; inset: 0; color: var(--ground); }
+  @keyframes sweep { to { --p: 112; } }
+</style>
+</head>
+<body>
+<p>Ship the <span class="hl">launch film<span class="wipe"><span class="bar"></span><span class="dark">launch film</span></span></span><br>before the meeting</p>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--sweep', curveToLinear(CURVES.expoOut));
+</script>
+</body>
+</html>

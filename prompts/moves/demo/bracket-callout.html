@@ -1,0 +1,44 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="1.4">
+<title>move: bracket callout</title>
+<style>
+  @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
+  :root { --ground: #16151a; --ink: #fff; --accent: #0a87ff; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
+  body { display: grid; place-items: center; font: 600 7vh/1 'Archivo', sans-serif; color: var(--ink); }
+
+  .card { width: 88vh; padding: 7vh; border-radius: 3.4vh; background: #201f27; box-shadow: 0 0 0 1px #ffffff14; }
+  .card h2 { margin: 0 0 5vh; font-size: 5.4vh; font-weight: 500; color: #ffffff99; }
+  .row { display: flex; align-items: center; justify-content: space-between; }
+  .metric { font-size: 13vh; font-weight: 800; letter-spacing: -0.03em; }
+
+  /* the target keeps its own box; the frame is drawn around it, 0.5em out */
+  .target { position: relative; display: inline-block; padding: 2.2vh 4.2vh; border-radius: 2vh; background: #ffffff14; font-size: 5.6vh; }
+  .frame { position: absolute; inset: -1.3vh; pointer-events: none; --far: 13vh; --arm: 3.4vh; }
+  .c { position: absolute; width: var(--arm); height: var(--arm); border: 0 solid var(--accent); opacity: 0;
+       animation-duration: 0.55s; animation-delay: 0.35s; animation-timing-function: var(--land); animation-fill-mode: both; }
+  .tl { left: 0; top: 0; border-width: 0.7vh 0 0 0.7vh; border-top-left-radius: 0.6vh; animation-name: tl; }
+  .tr { right: 0; top: 0; border-width: 0.7vh 0.7vh 0 0; border-top-right-radius: 0.6vh; animation-name: tr; }
+  .bl { left: 0; bottom: 0; border-width: 0 0 0.7vh 0.7vh; border-bottom-left-radius: 0.6vh; animation-name: bl; }
+  .br { right: 0; bottom: 0; border-width: 0 0.7vh 0.7vh 0; border-bottom-right-radius: 0.6vh; animation-name: br; }
+  /* the landing curve overshoots past 1, so each corner dips a little inside the box before it settles */
+  @keyframes tl { from { translate: calc(var(--far) * -1) calc(var(--far) * -1); opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
+  @keyframes tr { from { translate: var(--far) calc(var(--far) * -1); opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
+  @keyframes bl { from { translate: calc(var(--far) * -1) var(--far); opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
+  @keyframes br { from { translate: var(--far) var(--far); opacity: 0; } 12% { opacity: 1; } to { translate: 0 0; opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>This week</h2>
+  <div class="row"><span class="metric">2.4k</span><span class="target">Export<span class="frame"><i class="c tl"></i><i class="c tr"></i><i class="c bl"></i><i class="c br"></i></span></span></div>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+document.documentElement.style.setProperty('--land', curveToLinear(CURVES.overshoot));
+</script>
+</body>
+</html>
