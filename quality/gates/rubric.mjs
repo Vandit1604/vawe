@@ -38,7 +38,7 @@ const DIMENSIONS = [
   // Every dimension above grades ONE frame. A ground flip only exists BETWEEN two frames: a beat that
   // whites out then blacks out reads fine on each still in isolation. ground-arc.mjs used to measure
   // this pre-render (is a flip DECLARED against the scene's own schedule); it was a TASTE gate and was
-  // retired (engine-doctrine/SAFEGUARDS.md). Its measurement lives on in harness/lib/ground-flip.mjs
+  // retired. Its measurement lives on in harness/lib/ground-flip.mjs
   // for the OBJECTIVE plan-vs-render check; whether the CUT ITSELF reads as a jarring flash across the
   // sheet needs an eye on the sequence, which is what this dimension asks for now, alone.
   '**Ground continuity**: where the background changes light/dark between adjacent frames, is it a\n'
@@ -300,7 +300,7 @@ export const FRESH_AXES = {
     ['scenes', 'the world turns every 1 to 2 beats; count the distinct worlds and say the number'],
     ['type', 'faces, scale contrast, spacing, hierarchy, reading time'],
     ['colour', 'palette discipline, light, contrast, one accent used with intent'],
-    ['sound', 'final only: the loudness line, peaks, sound that marks the beats (score 0 when the stage is not final)'],
+    ['sound', 'final only: subtle cues that mark the beats, with the mix left as written (near -20 LUFS scores well; do not ask for -14 LUFS or more hits unless the brief asks). Score 0 when the stage is not final'],
     ['pace', 'density per frame and rhythm; readable holds, no dead air'],
     ['expensive', 'looks made by a person with taste, not assembled from a template'],
   ],

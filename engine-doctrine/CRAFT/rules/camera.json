@@ -57,6 +57,6 @@
     "check": "edge-reveal",
     "adapt": null,
     "brief": "edge-check reports a full-bleed layer that stops covering the frame while it is on screen",
-    "doc": "engine-doctrine/SAFEGUARDS.md#edge-reveal-what-overscan-does-not-catch"
+    "doc": "engine-doctrine/CRAFT/MOTION-STANDARDS.md"
   }
 ]

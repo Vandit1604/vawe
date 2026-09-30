@@ -8,7 +8,7 @@ codes: camera-aimed-at-nothing
 # Eye-trace: where the viewer is looking when you cut
 
 **`eye-trace.mjs` is RETIRED, not demoted.** It was a TASTE gate under the OBJECTIVE/TASTE
-split (`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a cut reads to the eye, never
+split: it graded HOW a cut reads to the eye, never
 whether a film was broken, so it was deleted rather than kept report-only.
 
 Everything below is the doctrine it measured, for a human or an agent judge to hold a cut to by eye now.

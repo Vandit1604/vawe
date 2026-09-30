@@ -28,7 +28,7 @@ Every rule is tagged:
 
 > This is the **Motion** and **Story-spine** doctrine from [`../TASTE.md`](../TASTE.md), and it is the
 > *why*. The mechanics of *which curve / which cut* live in [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md),
-> the copy-paste JSON in [`../MOTION-SNIPPETS.md`](../MOTION-SNIPPETS.md), and the accusing version of
+> the numbers in [`../DESIGN-DATABASE.md`](../DESIGN-DATABASE.md), and the accusing version of
 > §1 and §2 in [`TASTE-RULES.md`](TASTE-RULES.md) § "Guardrails", which forbids by name the defaults an
 > author here reaches for: one ease everywhere, one duration everywhere, one entrance direction
 > everywhere, everything starting at t=0, entrances slower than exits. Read the guardrails first; read
@@ -103,7 +103,7 @@ The plan has to say where each device points, or the device is a guess wearing a
 - **Measured, not asserted, when a human/agent judge does the measuring.** Where the eye actually is at a
   cut (Murch's Rule of Six, §2 above, the 7% eye-trace term) and where the measured primary motion region
   ends against what the plan's `eye:` line said would be there were both gate-scored once
-  (`eye-trace.mjs`, `choreo.mjs`); both were TASTE gates and are retired (`engine-doctrine/SAFEGUARDS.md`).
+  (`eye-trace.mjs`, `choreo.mjs`); both were TASTE gates and are retired.
   Read the frame or the render, never guess.
 
 Storyboard grammar: a film names its whole journey once, `attention:` in the frontmatter (one sentence:
@@ -286,8 +286,7 @@ verdict and exits 0.
 
 ## The ambition floor: neither soup nor slideshow (`direction-floor.mjs`, RETIRED)
 
-**RETIRED 2026-09, not demoted.** `direction-floor.mjs` was a TASTE gate under the OBJECTIVE/TASTE split
-(`engine-doctrine/SAFEGUARDS.md`, "OBJECTIVE vs TASTE"): it graded HOW a film moves, never whether it was
+**RETIRED 2026-09, not demoted.** `direction-floor.mjs` was a TASTE gate under the OBJECTIVE/TASTE split: it graded HOW a film moves, never whether it was
 broken, so it was deleted rather than kept report-only. Its numbers are doctrine now, for a human or an
 agent judge to hold a film to by eye, not a script to enforce:
 
@@ -313,7 +312,7 @@ now gets caught, the same way `TASTE.md` already argues craft has to be judged, 
 ## no-continuous-object (and its inferred twin, RETIRED alongside direction-floor.mjs)
 
 **RETIRED 2026-09.** This device lived in `direction-floor.mjs`, the same TASTE gate as the ambition floor
-above, and was deleted with it (`engine-doctrine/SAFEGUARDS.md`). It no longer runs anywhere; the doctrine
+above, and was deleted with it. It no longer runs anywhere; the doctrine
 below is kept as a design device to reach for, not a check anything enforces.
 
 **Read [`FILM-STRUCTURE.md`](FILM-STRUCTURE.md) before you reach for this rule.** It is one device out of

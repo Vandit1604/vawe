@@ -198,7 +198,7 @@ gate generalised that single sample into a floor for every film under 15 seconds
 The sample was a good one. A five-second product film with one subject and one process is exactly the case
 the transforming-object device was made for. The generalisation is the problem.
 
-**What the gate measured**, before it was retired (a TASTE gate, `engine-doctrine/SAFEGUARDS.md`).
+**What the gate measured**, before it was retired (a TASTE gate).
 `continuity()` walked each boundary,
 finds layers visible on both sides, and keeps only those whose pose differs across it. That is spatial
 persistence plus a state change. In Murch's ranking it is item six, the 4% item. **Our only blocking
