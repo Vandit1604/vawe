@@ -12,7 +12,7 @@ const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => 
 // send: the bubble rises from the composer's own position
 user.animate([{ opacity: 0, translate: `0 ${composer.getBoundingClientRect().top - user.getBoundingClientRect().top}px`, scale: 0.96 }, { opacity: 1, translate: '0 0', scale: 1 }],
   { duration: 420, delay: 500, easing: settle, fill: 'both' });
-// working: a status line in faint text with an ink shine (background-clip: text) swept once, then gone
+// working: a status line in muted text with an ink shine (background-clip: text) swept once, then gone
 status.animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }], { duration: 700, delay: 640, easing: 'linear', fill: 'both' });
 status.animate([{ opacity: 0 }], { duration: 110, delay: 970, easing: accelerate, fill: 'both' });
 // stream: chunks of 1 to 3 words, 55 to 110 ms apart from a seeded rng; the caret shows only between one chunk and the next
