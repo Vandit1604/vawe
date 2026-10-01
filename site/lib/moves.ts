@@ -4,6 +4,7 @@ import data from "./moves.json";
 // is about 380 KB, so a client component gets a MoveCard list, never this module's MOVES.
 
 export type Move = {
+  duration: number | null;
   name: string;
   title: string;
   group: string | null;
