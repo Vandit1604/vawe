@@ -30,6 +30,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | lower third | a person is on screen: an accent rule grows, a plate wipes open, the name rises from a mask and the role follows, then the card leaves faster than it came | [lower-third.md](lower-third.md) | [lower-third.mp4](lower-third.mp4) |
 | liquid displace | a title arrives bent by moving water and settles to sharp type: an SVG turbulence map drives a displacement that drains to zero by 1.15 s, then the type holds still and readable | [liquid-displace.md](liquid-displace.md) | [liquid-displace.mp4](liquid-displace.mp4) |
 | echo trail | one element flies in and stops on a beat: five time-offset copies of it trail with falling opacity, then fold into the lead on the hit frame while it squashes and recoils | [echo-trail.md](echo-trail.md) | [echo-trail.mp4](echo-trail.mp4) |
+| caption karaoke | a spoken line runs as captions: the word being said lifts to full ink and one soft pill glides word to word on a [[t, wordIndex]] speech table | [caption-karaoke.md](caption-karaoke.md) | [caption-karaoke.mp4](caption-karaoke.mp4) |
 
 ## Change between shots
 
@@ -140,15 +141,10 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode |
 | swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph |
 | paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
-| dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
+| dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot, caption karaoke |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade |
-<<<<<<< HEAD
-| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, slice shift, word sweep |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid wipe, notification pop, parallax dive, whip pan |
-=======
-| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, letter stagger, outline fill, shape trace morph, slice shift, word sweep |
+| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan |
->>>>>>> origin/main
 | chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
