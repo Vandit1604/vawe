@@ -49,6 +49,15 @@ export function parseBriefTables(text) {
   return { shots: table(lines, 'Shots'), words: table(lines, 'Words'), objects: table(lines, 'Objects'), acceptance: table(lines, 'Acceptance') };
 }
 
+const GUESS = '(guess: change me)';
+const settled = (rows, key) => rows.filter((r) => !String(r[key]).includes(GUESS));
+
+/** The tables without the rows `vawe new` wrote as template guesses (the guess mark in the first cell), and how many it dropped per table. Pure. */
+export function dropGuesses({ shots, words, objects, acceptance }) {
+  const set = { shots: settled(shots, 'id'), words: settled(words, 'text'), objects: settled(objects, 'id'), acceptance };
+  return { set, guessed: { shots: shots.length - set.shots.length, words: words.length - set.words.length, objects: objects.length - set.objects.length } };
+}
+
 /** The text of the brief.md next to a page, or null when there is none. */
 export function readBrief(pagePath) {
   try { return fs.readFileSync(path.join(path.dirname(path.resolve(pagePath)), 'brief.md'), 'utf8'); } catch { return null; }

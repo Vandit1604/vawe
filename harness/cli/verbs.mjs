@@ -12,6 +12,7 @@ const draftOut = (page, { from, to }) => {
   const range = (from > 0 || to != null) ? `-${from ?? 0}-${to ?? 'end'}` : '';
   return `out/${pageName(page)}-draft${range}.mp4`;
 };
+const devNext = (v, page) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft --brief ${path.join(path.dirname(page), 'brief.md')} (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`;
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
@@ -46,14 +47,18 @@ export const VERBS = [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: ASPECT },
       { name: 'audio', type: 'bool', help: 'mix the audio tags into the draft' },
       { name: 'out', type: 'path', default: 'out/<name>-draft.mp4, or out/<name>-draft-<from>-<to>.mp4 for a range', help: 'output file' },
+      { name: 'fast', type: 'bool', help: 'run only the fast checks (page errors, text size and collisions, still windows, tail tiles, smoothness, motion lint on declared animations)' },
+      { name: 'full', type: 'bool', help: 'also run the ship-tier checks: per-frame box motion lint, object tracks, loudness and peak' },
+      { name: 'taste', type: 'bool', help: 'also print the taste lines (they are always in out/<name>.dev.md)' },
       { name: 'no-judge', type: 'bool', help: 'skip the stills judge that dev runs on the three directions, once per change of directions.html or their brief lines (about 25 s)' },
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [
-      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : [])] },
+      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : []), '--next', devNext(v, page)] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
     ],
-    next: (v, [page]) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft --brief ${path.join(path.dirname(page), 'brief.md')} (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`,
+    next: devNext,
+    nextInline: true,
   },
   {
     name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background',

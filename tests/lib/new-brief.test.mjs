@@ -181,3 +181,28 @@ test('--defaults keeps the guesses and names the details it guessed', () => {
   assert.ok(newFilmLines('zz', made).some((l) => l.startsWith('--defaults: details guessed, not asked: subject, message')));
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+test('a length in the request is the length of the brief and of the page', () => {
+  const root = sandbox();
+  runNew(root, { request: 'a 6 s sting for Argus', defaults: true });
+  assert.match(briefOf(root), /^- length: 6 s$/im);
+  assert.match(fs.readFileSync(path.join(root, 'films/zz/page.html'), 'utf8'), /name="duration" content="6"/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('with no length anywhere, the page takes the template default length the brief states', () => {
+  const root = sandbox();
+  runNew(root, { request: 'a film for Argus', defaults: true });
+  const stated = Number(/^- length: (\d+(?:\.\d+)?) s/im.exec(briefOf(root))?.[1]);
+  assert.ok(stated > 0);
+  assert.match(fs.readFileSync(path.join(root, 'films/zz/page.html'), 'utf8'), new RegExp(`name="duration" content="${stated}"`));
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('plain questions and --questions-json ask the same details', () => {
+  const root = sandbox();
+  const asked = runNew(root, { request: 'a launch film for Argus' }).asked.map((d) => d.key);
+  const headers = questionsJson('zz', { request: 'a launch film for Argus' }).calls.flatMap((c) => c.questions.map((q) => q.header.toLowerCase()));
+  assert.deepEqual(headers, asked);
+  fs.rmSync(root, { recursive: true, force: true });
+});
