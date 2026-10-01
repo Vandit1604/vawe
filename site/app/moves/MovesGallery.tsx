@@ -10,28 +10,38 @@ const PLAY_RATIO = 0.5;
 // The first row's posters are the largest paint on load, so they skip lazy loading.
 const FIRST_ROW = 3;
 
-type Filters = { q: string; group: string; look: string; job: string };
-const EMPTY: Filters = { q: "", group: "", look: "", job: "" };
-const KEYS = Object.keys(EMPTY) as (keyof Filters)[];
+type Facets = { group: string[]; look: string[]; job: string[] };
+type Filters = Facets & { q: string };
+type FacetKey = keyof Facets;
+const EMPTY: Filters = { q: "", group: [], look: [], job: [] };
+const FACETS: FacetKey[] = ["group", "look", "job"];
+
+const list = (v: string | null) => (v ? v.split(",").filter(Boolean) : []);
 
 function readUrl(): Filters {
   const p = new URLSearchParams(window.location.search);
-  return { q: p.get("q") ?? "", group: p.get("group") ?? "", look: p.get("look") ?? "", job: p.get("job") ?? "" };
+  return { q: p.get("q") ?? "", group: list(p.get("group")), look: list(p.get("look")), job: list(p.get("job")) };
 }
 
 function writeUrl(f: Filters) {
   const p = new URLSearchParams();
-  for (const k of KEYS) if (f[k]) p.set(k, f[k]);
-  const qs = p.toString();
+  if (f.q) p.set("q", f.q);
+  for (const k of FACETS) if (f[k].length) p.set(k, f[k].join(","));
+  const qs = p.toString().replace(/%2C/g, ",");
   window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
 }
 
-function matches(m: MoveCard, f: Filters, jobText: Map<string, string>) {
-  if (f.group && m.group !== f.group) return false;
-  if (f.look && m.look !== f.look) return false;
-  if (f.job && !m.jobs.includes(f.job)) return false;
+const valuesOf = (m: MoveCard, k: FacetKey) => (k === "group" ? [m.group ?? ""] : k === "look" ? [m.look] : m.jobs);
+
+// OR inside one facet, AND across facets. `skip` leaves one facet out, so its options can show the
+// count they would add.
+function matches(m: MoveCard, f: Filters, skip?: FacetKey) {
+  for (const k of FACETS) {
+    if (k === skip || !f[k].length) continue;
+    if (!valuesOf(m, k).some((v) => f[k].includes(v))) return false;
+  }
   if (!f.q) return true;
-  const hay = `${m.name} ${m.title} ${m.use} ${m.jobs.map((j) => jobText.get(j)).join(" ")}`.toLowerCase();
+  const hay = `${m.name} ${m.title} ${m.use}`.toLowerCase();
   return f.q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
 }
 
@@ -88,7 +98,7 @@ const Card = memo(function Card({
         </h2>
         <p className="mv-use">{move.use}</p>
         <p className="meta mv-meta">
-          {groupLabel} · {move.look}
+          {groupLabel}, {move.look}
         </p>
       </div>
     </li>
@@ -107,21 +117,31 @@ export function MovesGallery({
   jobs: Facet[];
 }) {
   const [filters, setFilters] = useState<Filters>(EMPTY);
+  const [panelOpen, setPanelOpen] = useState(false);
   const [live, setLive] = useState<string[]>([]);
   const [reduced, setReduced] = useState(false);
   const grid = useRef<HTMLUListElement>(null);
 
   const groupText = useMemo(() => new Map(groups.map((g) => [g.id, g.label])), [groups]);
-  const jobText = useMemo(() => new Map(jobs.map((j) => [j.id, j.label])), [jobs]);
-  const shown = useMemo(() => moves.filter((m) => matches(m, filters, jobText)), [moves, filters, jobText]);
+  const shown = useMemo(() => moves.filter((m) => matches(m, filters)), [moves, filters]);
+  const counts = useMemo(() => {
+    const out = {} as Record<FacetKey, Map<string, number>>;
+    for (const k of FACETS) {
+      const c = new Map<string, number>();
+      for (const m of moves) if (matches(m, filters, k)) for (const v of valuesOf(m, k)) c.set(v, (c.get(v) ?? 0) + 1);
+      out[k] = c;
+    }
+    return out;
+  }, [moves, filters]);
 
   useEffect(() => setFilters(readUrl()), []);
 
-  const update = (patch: Partial<Filters>) => {
-    const next = { ...filters, ...patch };
+  const update = (next: Filters) => {
     setFilters(next);
     writeUrl(next);
   };
+  const toggleValue = (k: FacetKey, v: string) =>
+    update({ ...filters, [k]: filters[k].includes(v) ? filters[k].filter((x) => x !== v) : [...filters[k], v] });
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -165,87 +185,101 @@ export function MovesGallery({
   );
 
   const liveSet = new Set(live);
-  const active = KEYS.some((k) => filters[k]);
+  const picked = FACETS.reduce((n, k) => n + filters[k].length, 0);
+  const active = picked > 0 || filters.q !== "";
+
+  const options: { key: FacetKey; legend: string; items: Facet[]; fold?: boolean }[] = [
+    { key: "group", legend: "Job group", items: groups },
+    { key: "look", legend: "Look", items: looks.map((l) => ({ id: l, label: l })) },
+    { key: "job", legend: "Pick by job", items: jobs, fold: true },
+  ];
 
   return (
     <>
-      <div className="mv-bar" role="search">
+      <div className="mv-top" role="search">
         <label className="mv-find">
-          <span className="sr-only">Search moves by name or job</span>
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <circle cx="7" cy="7" r="4.5" />
-            <path d="M10.5 10.5 14 14" />
-          </svg>
+          <span className="sr-only">Search moves by name or when line</span>
           <input
             type="search"
-            placeholder="Search by name or job"
+            placeholder="Search name or when to use"
             value={filters.q}
-            onChange={(e) => update({ q: e.target.value })}
+            onChange={(e) => update({ ...filters, q: e.target.value })}
           />
         </label>
-        <label className="mv-select">
-          <span className="meta">Job</span>
-          <select value={filters.job} onChange={(e) => update({ job: e.target.value })}>
-            <option value="">Any job</option>
-            {jobs.map((j) => (
-              <option key={j.id} value={j.id}>
-                {j.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="mv-select">
-          <span className="meta">Look</span>
-          <select value={filters.look} onChange={(e) => update({ look: e.target.value })}>
-            <option value="">Any look</option>
-            {looks.map((l) => (
-              <option key={l} value={l}>
-                {l}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="mv-row">
-        <div className="mv-groups" role="group" aria-label="Group">
-          <button type="button" aria-pressed={!filters.group} onClick={() => update({ group: "" })}>
-            All
-          </button>
-          {groups.map((g) => (
-            <button key={g.id} type="button" aria-pressed={filters.group === g.id} onClick={() => update({ group: g.id })}>
-              {g.label}
-            </button>
-          ))}
-        </div>
-        <p className="meta mv-count" aria-live="polite">
-          {shown.length} of {moves.length} moves
+        <button
+          type="button"
+          className="mv-fold"
+          aria-expanded={panelOpen}
+          aria-controls="mv-filters"
+          onClick={() => setPanelOpen(!panelOpen)}
+        >
+          Filters{picked ? ` (${picked})` : ""}
+        </button>
+        <p className="meta mv-count" role="status">
+          {shown.length} {shown.length === 1 ? "move" : "moves"}
         </p>
-        </div>
       </div>
 
-      {shown.length ? (
-        <ul className="mv-grid" ref={grid}>
-          {shown.map((m, i) => (
-            <Card
-              key={m.name}
-              move={m}
-              first={i < FIRST_ROW}
-              groupLabel={groupText.get(m.group ?? "") ?? ""}
-              live={liveSet.has(m.name)}
-              reduced={reduced}
-              onToggle={toggle}
-            />
-          ))}
-        </ul>
-      ) : (
-        <div className="mv-empty">
-          <p>No move matches these filters.</p>
-          {active ? (
+      <div className="mv-layout">
+        <form className="mv-filters" id="mv-filters" data-open={panelOpen || undefined} onSubmit={(e) => e.preventDefault()}>
+          {options.map(({ key, legend, items, fold }) => {
+            const body = (
+              <ul>
+                {items.map((it) => {
+                  const n = counts[key].get(it.id) ?? 0;
+                  const on = filters[key].includes(it.id);
+                  return (
+                    <li key={it.id}>
+                      <label className={on || n ? "" : "is-zero"}>
+                        <input type="checkbox" checked={on} onChange={() => toggleValue(key, it.id)} />
+                        <span>{it.label}</span>
+                        <span className="mv-n">{n}</span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            );
+            return fold ? (
+              <details key={key} open={filters[key].length > 0 || undefined}>
+                <summary>{legend}{filters[key].length ? ` (${filters[key].length})` : ""}</summary>
+                {body}
+              </details>
+            ) : (
+              <fieldset key={key}>
+                <legend>{legend}</legend>
+                {body}
+              </fieldset>
+            );
+          })}
+          <button type="button" className="mv-clear" disabled={!active} onClick={() => update(EMPTY)}>
+            Clear filters
+          </button>
+        </form>
+
+        {shown.length ? (
+          <ul className="mv-grid" ref={grid}>
+            {shown.map((m, i) => (
+              <Card
+                key={m.name}
+                move={m}
+                first={i < FIRST_ROW}
+                groupLabel={groupText.get(m.group ?? "") ?? ""}
+                live={liveSet.has(m.name)}
+                reduced={reduced}
+                onToggle={toggle}
+              />
+            ))}
+          </ul>
+        ) : (
+          <div className="mv-empty">
+            <p>No move matches these filters.</p>
             <button type="button" className="btn btn-ghost" onClick={() => update(EMPTY)}>
               Clear filters
             </button>
-          ) : null}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </>
   );
 }

@@ -1,6 +1,6 @@
 // Build the /moves gallery's data from prompts/moves: one JSON file the site imports at build time,
 // the raw move markdown served as text, the moves section of llms.txt, and (with --clips) the web
-// copies of each clip.
+// copies of each clip, and public/moves/index.json (the same data, filterable by an agent).
 //
 //   node scripts/site/moves.mjs            data, raw .md and llms.txt (pure node, runs in prebuild)
 //   node scripts/site/moves.mjs --clips    also encode any clip whose source changed (needs ffmpeg)
@@ -15,6 +15,7 @@ const SRC = path.join(root, 'prompts', 'moves');
 const OUT_DIR = path.join(root, 'site', 'public', 'moves');
 const DATA = path.join(root, 'site', 'lib', 'moves.json');
 const LLMS = path.join(root, 'site', 'public', 'llms.txt');
+const INDEX = path.join(OUT_DIR, 'index.json');
 const REPO_BLOB = 'https://github.com/Vandit1604/vawe/blob/main/prompts/moves/';
 const SITE = 'https://vawe.dev';
 const NOT_MOVES = new Set(['README.md', 'GROUPS.md', 'LIBRARY.md', 'RECIPES.md', 'LOOKS.md']);
@@ -189,6 +190,17 @@ function renderMarkdown(md) {
   return html.join('\n');
 }
 
+// Seconds, from the mvhd box of an mp4 (the move clips are plain H.264, so no ffprobe in prebuild).
+function mp4Seconds(file) {
+  const b = fs.readFileSync(file);
+  const at = b.indexOf('mvhd');
+  if (at === -1) return null;
+  const v1 = b[at + 4] === 1;
+  const scale = b.readUInt32BE(at + (v1 ? 24 : 16));
+  const units = v1 ? Number(b.readBigUInt64BE(at + 28)) : b.readUInt32BE(at + 20);
+  return scale ? Math.round((units / scale) * 100) / 100 : null;
+}
+
 // ---- one move -------------------------------------------------------------------------------------
 function readMove(file, index) {
   const name = file.replace(/\.md$/, '');
@@ -211,6 +223,7 @@ function readMove(file, index) {
     sound: sound ? plain(sound) : null,
     snippet: md.match(/^```\w*\n([\s\S]*?)^```/m)?.[1].trimEnd() ?? '',
     clipHash: fs.existsSync(clip) ? hashFile(clip) : null,
+    duration: fs.existsSync(clip) ? mp4Seconds(clip) : null,
     html: renderMarkdown(md),
   };
 }
@@ -236,10 +249,32 @@ function encodeClip(name) {
 // ---- llms.txt: the moves section is regenerated, the rest is hand-written ---------------------------
 function llmsSection(moves) {
   const lines = moves.map((m) => `- [${m.title}](${SITE}/moves/${m.name}.md): ${m.use}`);
-  return `## Moves\nEach move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is ${SITE}/moves.\n\n${lines.join('\n')}\n`;
+  return `## Moves
+Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is ${SITE}/moves.
+To filter: fetch ${SITE}/moves/index.json. Top-level groups, looks and jobs list the ids. Each move has group, look, jobs, use (the when line), clip, md and duration.
+A human link filters the same way: ${SITE}/moves?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
+
+${lines.join('\n')}
+`;
 }
 
-function writeLlms(moves) {
+function writeIndex(moves, data) {
+  const out = moves.map((m) => ({
+    name: m.name,
+    title: m.title,
+    group: m.group,
+    look: m.look,
+    jobs: m.jobs,
+    use: m.use,
+    clip: `${SITE}/moves/${m.name}.mp4`,
+    md: `${SITE}/moves/${m.name}.md`,
+    page: `${SITE}/moves/${m.name}`,
+    duration: m.duration,
+  }));
+  fs.writeFileSync(INDEX, `${JSON.stringify({ site: SITE, groups: data.groups, looks: data.looks, jobs: data.jobs.map(({ id, label }) => ({ id, label })), moves: out }, null, 1)}\n`);
+}
+
+function writeLlms(moves, data) {
   const text = read(LLMS);
   const section = llmsSection(moves);
   const start = text.indexOf('## Moves\n');
@@ -286,6 +321,8 @@ for (const m of moves) {
 }
 
 const looks = [...new Set(moves.map((m) => m.look))].sort((a, b) => (a === DEFAULT_LOOK ? -1 : b === DEFAULT_LOOK ? 1 : a.localeCompare(b)));
-fs.writeFileSync(DATA, `${JSON.stringify({ groups: index.groups, looks, jobs: index.jobs, moves }, null, 1)}\n`);
-writeLlms(moves);
+const data = { groups: index.groups, looks, jobs: index.jobs, moves };
+fs.writeFileSync(DATA, `${JSON.stringify(data, null, 1)}\n`);
+writeIndex(moves, data);
+writeLlms(moves, data);
 console.log(`✓ ${moves.length} moves -> site/lib/moves.json, site/public/moves${withClips ? ` (${encoded} clip(s) encoded)` : ''}`);
