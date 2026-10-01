@@ -48,7 +48,7 @@ export function parseArgs(verb, argv) {
     }
     if (flag.type === 'bool') { values[name] = true; continue; }
     const raw = inline !== undefined ? inline : argv[++i];
-    values[name] = coerce(flag, raw);
+    values[name] = flag.repeat ? [...(values[name] || []), coerce(flag, raw)] : coerce(flag, raw);
   }
   const needed = (verb.positional || []).filter((p) => p.required);
   if (positional.length < needed.length) throw new UsageError(`missing <${needed[positional.length].name}>; usage: ${usageLine(verb)}`);

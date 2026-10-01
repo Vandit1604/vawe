@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { newFilm, newFilmLines } from '../../harness/cli/new.mjs';
+import { newFilm, newFilmLines, readDetails } from '../../harness/cli/new.mjs';
 import { parseDirections, directionsLines } from '../../harness/lib/directions.mjs';
-import { ACCEPTANCE, GUESS } from '../../harness/lib/measured-brief.mjs';
+import { ACCEPTANCE, GUESS, DETAIL_KEYS } from '../../harness/lib/measured-brief.mjs';
 import { briefLine } from '../../harness/lib/draft-check.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
@@ -19,7 +19,7 @@ function briefFor(template, options = {}) {
   const log = console.log;
   console.log = () => {};
   let made;
-  try { made = newFilm('zz', { root, from: path.join(root, 'prompts', template), ...options }); } finally { console.log = log; }
+  try { made = newFilm('zz', { root, from: path.join(root, 'prompts', template), defaults: true, ...options }); } finally { console.log = log; }
   const text = fs.readFileSync(path.join(root, 'films/zz/brief.md'), 'utf8');
   fs.rmSync(root, { recursive: true, force: true });
   return { text, made };
@@ -85,4 +85,77 @@ test('a reference template adds Keep and swap between Look and Spec', () => {
   const found = headings(text);
   assert.ok(found.indexOf('Look') < found.indexOf('Keep and swap') && found.indexOf('Keep and swap') < found.indexOf('Spec'));
   assert.ok(made.guesses.includes('keep and swap'));
+});
+
+function sandbox() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-ask-'));
+  fs.mkdirSync(path.join(root, 'prompts'));
+  fs.copyFileSync(path.join(ROOT, 'prompts/beat-sheet.md'), path.join(root, 'prompts/beat-sheet.md'));
+  fs.mkdirSync(path.join(root, 'assets'));
+  fs.symlinkSync(path.join(ROOT, 'assets/fonts'), path.join(root, 'assets/fonts'));
+  return root;
+}
+
+function runNew(root, options) {
+  const log = console.log;
+  console.log = () => {};
+  try { return newFilm('zz', { root, from: path.join(root, 'prompts/beat-sheet.md'), ...options }); } finally { console.log = log; }
+}
+
+const briefOf = (root) => fs.readFileSync(path.join(root, 'films/zz/brief.md'), 'utf8');
+
+const FULL = 'a launch film for Argus, a log search tool for on-call engineers. The message: find the bug in seconds. '
+  + 'Show the dashboard and the result count. Style: dark mode, one red accent, a monospace font';
+
+test('a thin request asks the unanswered details, in order, and writes nothing', () => {
+  const root = sandbox();
+  const made = runNew(root, { request: 'a launch film for Argus' });
+  assert.deepEqual(made.asked.map((d) => d.key), DETAIL_KEYS);
+  assert.equal(fs.existsSync(path.join(root, 'films')), false);
+  const lines = newFilmLines('zz', made);
+  assert.equal(lines[0], 'vawe new: 8 details needed before a good brief');
+  assert.ok(lines.some((l) => l.startsWith('1. subject: ')));
+  assert.ok(lines.some((l) => l.includes('why: ')) && lines.some((l) => l.includes('example: ')));
+  assert.ok(lines.some((l) => l.startsWith('  bin/vawe new zz --request "a launch film for Argus"') && l.endsWith('--answers <file>')));
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('a full request writes the brief with no guess marker on an answered field', () => {
+  const root = sandbox();
+  const made = runNew(root, { request: FULL });
+  assert.equal(made.asked, undefined);
+  const text = briefOf(root);
+  for (const key of ['what', 'for', 'message', 'show']) assert.match(text, new RegExp(`^- ${key}: (?!.*guess: change me).+$`, 'm'));
+  assert.match(text, /^- look: named in what$/m);
+  assert.ok(!made.guesses.includes('what') && !made.guesses.includes('for') && !made.guesses.includes('message'));
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('--detail and --answers fill the fields, and an unanswered optional detail does not stop the run', () => {
+  const root = sandbox();
+  const file = path.join(root, 'answers.md');
+  fs.writeFileSync(file, '# answers\n\n- subject: Argus, log search for on-call engineers\n2. message: find the bug in seconds, big moment at 4 s\nshow: the result list\nlook: dark, red accent\n');
+  const details = readDetails({ answers: file, detail: ['look=light ground, serif', 'format=12 s, 9:16'] });
+  assert.equal(details.look, 'light ground, serif');
+  const made = runNew(root, { request: 'launch film', details });
+  assert.equal(made.asked, undefined);
+  const text = briefOf(root);
+  assert.match(text, /^- what: Argus, log search for on-call engineers$/m);
+  assert.match(text, /^- for: named in what$/m);
+  assert.match(text, /^- message: find the bug in seconds, big moment at 4 s$/m);
+  assert.match(text, /^- spectacle: 4 s$/m);
+  assert.match(text, /^- show: the result list$/m);
+  assert.match(text, /^- look: light ground, serif$/m);
+  assert.match(fs.readFileSync(path.join(root, 'films/zz/page.html'), 'utf8'), /name="duration" content="12"[\s\S]*name="aspect" content="9:16"/);
+  assert.throws(() => readDetails({ detail: ['color=red'] }), /not a detail/);
+  fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('--defaults keeps the guesses and names the details it guessed', () => {
+  const root = sandbox();
+  const made = runNew(root, { request: 'a launch film for Argus', defaults: true });
+  assert.match(briefOf(root), /^- message: .+ \(guess: change me\)$/m);
+  assert.deepEqual(made.defaulted, DETAIL_KEYS);
+  assert.ok(newFilmLines('zz', made).some((l) => l.startsWith('--defaults: details guessed, not asked: subject, message')));
+  fs.rmSync(root, { recursive: true, force: true });
 });

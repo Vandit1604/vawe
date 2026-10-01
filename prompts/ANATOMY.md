@@ -36,6 +36,12 @@ Our own traces, not the corpus of other people's prompts:
 The template's five questions, each with a default. The draft check reads this section and compares
 `length` and `aspect` with the page. Answers: briefs judged as template defaults (trace study 1, speed 8).
 
+Before it writes anything, `bin/vawe new` asks for the details a good brief needs, most film-changing
+first: subject, message, show, look (required), then format, family, assets, ending. The list, with each
+question, reason and example, is `DETAILS` in `harness/lib/measured-brief.mjs`. A request that already
+answers a detail skips it. Answers go in with `--answers <file>` or `--detail key=value`; `--defaults`
+(unattended runs) guesses instead. The owner's rule: ask for the details, never approve a finished plan.
+
 ### 1. TASK
 
 One line each: what the film is, who sees it, the message, the spectacle second (the one big moment,

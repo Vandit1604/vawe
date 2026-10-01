@@ -13,7 +13,7 @@ import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
-import { measuredSections, DEFAULT_LENGTH, GUESS } from '../lib/measured-brief.mjs';
+import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails } from '../lib/measured-brief.mjs';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -258,6 +258,50 @@ function readAnswers({ length, aspect, title }) {
   return { length, aspect, title };
 }
 
+const DETAIL_LINE = /^\s*(?:[-*]\s+|\d+\.\s+)?([a-z]+)\s*:\s*(.+?)\s*$/;
+
+function checkKey(key, where) {
+  if (!DETAIL_KEYS.includes(key)) throw new UsageError(`${where}: "${key}" is not a detail; valid: ${DETAIL_KEYS.join(' ')}`);
+}
+
+/** The details from an --answers file (markdown or `key: value` lines) and repeated --detail key=value. */
+export function readDetails({ answers, detail = [] }) {
+  const details = {};
+  if (answers) {
+    for (const line of fs.readFileSync(answers, 'utf8').split('\n')) {
+      const m = line.match(DETAIL_LINE);
+      if (m && DETAIL_KEYS.includes(m[1])) details[m[1]] = m[2];
+    }
+  }
+  for (const item of [detail].flat()) {
+    const [key, ...value] = item.split('=');
+    checkKey(key, '--detail');
+    if (!value.length || !value.join('=').trim()) throw new UsageError(`--detail needs key=value, got "${item}"`);
+    details[key] = value.join('=').trim();
+  }
+  return details;
+}
+
+// A length in seconds and an aspect written inside the format answer; flags win over it.
+function formatFrom(text = '') {
+  const s = text.match(/(\d+(?:\.\d+)?)\s*(?:s|sec|secs|seconds?)\b/);
+  const a = text.match(/\b(\d+:\d+)\b/);
+  return { length: s ? Number(s[1]) : undefined, aspect: a && (ASPECTS[a[1]] || /^\d+:\d+$/.test(a[1])) ? a[1] : undefined };
+}
+
+export function askLines(name, request, from, open) {
+  const lines = [`vawe new: ${open.length} details needed before a good brief`, '',
+    'Nothing is written yet. Answer these, most film-changing first. Skip an optional one to take a guess.', ''];
+  open.forEach((d, i) => {
+    lines.push(`${i + 1}. ${d.key}${d.required ? '' : ' (optional)'}: ${d.question}`, `   why: ${d.why}`, `   example: ${d.example}`);
+  });
+  const base = `bin/vawe new ${name} --request ${JSON.stringify(request ?? '<the ask>')}${from ? ` --from ${from}` : ''}`;
+  lines.push('', 'Put the answers in a file, one `key: value` line each, then run:', `  ${base} --answers <file>`,
+    'or give each one on the command line:', `  ${base} --detail ${open[0].key}="..." --detail ${open[1]?.key ?? open[0].key}="..."`,
+    'For an unattended run that guesses instead, add --defaults.');
+  return lines;
+}
+
 function chooseTemplate(root, { from, request, name, title, length }) {
   if (from) return { template: path.resolve(from), route: null };
   const route = pickTemplate({ request, name, title, length }, readRouting(root));
@@ -274,8 +318,10 @@ function copyFace(root, dir, face) {
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
 
-export function newFilmLines(name, { page, route, title, guesses = [] }) {
+export function newFilmLines(name, { page, route, title, guesses = [], asked, request, from, defaulted = [] }) {
+  if (asked) return askLines(name, request, from, asked);
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
+  if (defaulted.length) lines.push(`--defaults: details guessed, not asked: ${defaulted.join(', ')}`);
   if (guesses.length) lines.push(`guessed, each marked "${GUESS}" in brief.md: ${guesses.join(', ')}`);
   if (route) {
     lines.push(`template: ${route.template} (${route.type}: ${route.why})`);
@@ -290,12 +336,21 @@ export function newFilmLines(name, { page, route, title, guesses = [] }) {
     ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
 }
 
-/** Writes the film folder; returns { page, route } (route is null when --from chose the template). */
-export function newFilm(name, { from, root, length, aspect, title, request }) {
-  const page = readAnswers({ length, aspect, title });
+/**
+ * Writes the film folder; returns { page, route } (route is null when --from chose the template).
+ * When a required detail is unanswered and `defaults` is off it writes nothing and returns { asked }.
+ */
+export function newFilm(name, { from, root, length, aspect, title, request, details = {}, defaults = false }) {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) throw new UsageError(`film name "${name}" must be lowercase letters, digits and dashes`);
   const dir = path.join(root, 'films', name);
   if (fs.existsSync(path.join(dir, 'page.html'))) throw new UsageError(`${path.relative(root, dir)}/page.html already exists`);
+  const format = formatFrom(details.format);
+  length ??= format.length;
+  aspect ??= format.aspect;
+  const page = readAnswers({ length, aspect, title });
+  const answered = answeredDetails({ request, given: details, length, aspect });
+  const open = unansweredDetails(answered);
+  if (!defaults && open.some((d) => d.required)) return { asked: open, request, from };
   const { template, route } = chooseTemplate(root, { from, request, name, title, length });
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
@@ -310,8 +365,8 @@ export function newFilm(name, { from, root, length, aspect, title, request }) {
   if (aspect !== undefined) answers.aspect = aspect;
   if (title !== undefined) answers.title = title;
   const sections = parseSections(markdown);
-  const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap') });
+  const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe));
   console.log(formatQuestions(questions));
-  return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses };
+  return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [] };
 }
