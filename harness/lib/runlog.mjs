@@ -19,7 +19,7 @@ function gitInfo() {
 export function filmKeyOf(film) {
   const name = path.basename(String(film));
   if (name === 'page.html') return path.basename(path.dirname(path.resolve(String(film))));
-  return name.replace(/\.json$/, '');
+  return name.replace(/\.(json|mp4|webm)$/, '').replace(/\.web$/, '').replace(/-draft(-[\d.]+-[\d.]+)?$/, '');
 }
 
 /** out/<film-key>.runs.jsonl for a scene path, a page path or a bare film name. */
