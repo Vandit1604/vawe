@@ -13,20 +13,22 @@ brief. It is not an approval stage: never ask a person to approve a finished pla
 ## 0. Ask for the details
 
 ```bash
-bin/vawe new <name> --request "<the ask>"
+bin/vawe new <name> --request "<the ask>" --questions-json
 ```
 
-When a required detail (subject, message, show, look) is missing, this writes nothing and prints the
-open questions, each with its reason and an example. The list is `DETAILS` in
-`harness/lib/measured-brief.mjs`; do not keep a copy. Send the person ONE message with only those
-questions, and wait for the answers. Put the answers in a file, one `key: value` line each, and run:
+This writes nothing. It prints the open details as `calls`, each call at most 4 questions in the shape of
+the AskUserQuestion tool (required details first). The list is `DETAILS` in
+`harness/lib/measured-brief.mjs`; do not keep a copy. Call AskUserQuestion once per call, in order, with
+that call's `questions` as given. Map each answer (the chosen label without "(Recommended)", or the
+"Other" text) to a `key: value` line in an answers file, the key being the header in lower case. Then run
+the `answer_with` command:
 
 ```bash
 bin/vawe new <name> --request "<the ask>" --answers <file>
 ```
 
-If the person says "you decide", or no person is there (hill-climb, CI), run the same command with
-`--defaults`: it guesses each open detail and names which.
+If the person answers "you decide", or no person is there (hill-climb, CI), run `bin/vawe new` with
+`--defaults` instead: it guesses each open detail and names which.
 
 ## 1. Pick the template
 

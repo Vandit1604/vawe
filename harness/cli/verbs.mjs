@@ -27,6 +27,7 @@ export const VERBS = [
       { name: 'answers', type: 'path', help: 'a markdown or `key: value` file with the details the request leaves open (subject, message, show, look, format, family, assets, ending)', kind: 'file' },
       { name: 'detail', type: 'string', repeat: true, help: 'one answer as key=value, repeatable; same keys as --answers' },
       { name: 'defaults', type: 'bool', help: 'unattended run: guess every open detail, marked (guess: change me), instead of printing the questions' },
+      { name: 'questions-json', type: 'bool', help: 'print the open details as AskUserQuestion calls (JSON, at most 4 questions each) and write nothing' },
       { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
       { name: 'length', type: 'number', help: 'film length in seconds: written to brief.md and the page duration meta' },
       { name: 'aspect', type: 'string', help: `${ASPECT}: written to brief.md and the page aspect meta` },
