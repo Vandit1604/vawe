@@ -7,43 +7,70 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { display: block; position: relative; }
-  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 62vw; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; }
   .copy .title { margin: 0; font-size: calc(var(--u) * 17); line-height: 1.04; }
-  .copy .title .accent { color: var(--accent); }
   .copy .lead { margin: var(--s4) 0 0; max-width: 28em; color: var(--ink); text-wrap: pretty; }
+
+  /* the mask box is taller than the line: 0.25em below for descenders, 0.1em above for accents */
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
+  @keyframes rise { to { translate: 0 0; } }
+
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
 </style>
 </head>
 <body>
 <main class="copy">
-  <h1 class="title">A ground that <span class="accent">moves.</span></h1>
-  <p class="lead">Four soft lights on slow seeded paths, blended in one shader.</p>
+  <h1 class="title"><span class="mask" style="--i:0"><span>A ground</span></span><span class="mask" style="--i:1"><span>that moves.</span></span></h1>
+  <p class="lead" id="lead">Four soft lights swirl on seeded paths, then merge into the accent.</p>
 </main>
 <script type="module">
 import '/core/engine/page-api.js';
 import { shaderField } from '/core/surfaces/shader-field.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
 
-const tokens = getComputedStyle(document.documentElement);
+const root = document.documentElement;
+root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const lead = document.getElementById('lead');
+lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+
+const tokens = getComputedStyle(root);
 const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
 
+// The pools orbit with a different period each; at MERGE (s) they pull to one point on the right
+// and every pool turns from violet to the look's accent.
 const frag = `
 uniform vec3 u_ground, u_a, u_b;
+const float MERGE = 1.5, MERGED = 2.6;
 float hash(float n) { return fract(sin(n * 12.9898 + u_seed * 78.233) * 43758.5453); }
-float vnoise(float x) { float i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f); return mix(hash(i), hash(i + 1.0), f); }
-vec2 wander(float k, vec2 home, float amp) {
-  float s = u_time * 0.45 + k * 19.7;
-  return home + amp * 2.0 * vec2(vnoise(s) - 0.5, vnoise(s + 41.3) - 0.5);
+vec2 orbit(float k, vec2 home, vec2 amp, float speed) {
+  float a = u_time * speed + hash(k) * 6.2832;
+  return home + amp * vec2(cos(a), sin(a * 0.8 + k));
 }
 float pool(vec2 p, vec2 c, float r) { vec2 d = (p - c) / r; return exp(-dot(d, d)); }
 vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }
 void main() {
   float aspect = u_res.x / u_res.y;
   vec2 p = gl_FragCoord.xy / u_res.y;
-  vec3 ground = lin(u_ground), a = lin(u_a), b = lin(u_b), ab = mix(a, b, 0.5);
+  float m = smoothstep(MERGE, MERGED, u_time);
+  vec2 goal = vec2(0.84 * aspect, 0.5);
+  vec3 ground = lin(u_ground), a = lin(u_a), b = lin(u_b);
   vec3 col = ground;
-  col = mix(col, a,  0.85 * pool(p, wander(0.0, vec2(0.30 * aspect, 0.22), 0.14), 0.62));
-  col = mix(col, a,  0.58 * pool(p, wander(1.0, vec2(0.82 * aspect, 0.86), 0.12), 0.50));
-  col = mix(col, ab, 0.38 * pool(p, wander(2.0, vec2(0.68 * aspect, 1.04), 0.08), 0.30));
-  col = mix(col, b,  0.26 * pool(p, wander(3.0, vec2(0.86 * aspect, 0.26), 0.12), 0.42));
+  vec3 hueA = mix(a, b, m);
+  vec3 hueB = mix(a, b, m);
+  vec2 c0 = mix(orbit(0.0, vec2(0.40 * aspect, 0.30), vec2(0.34 * aspect, 0.30), 2.10), goal + vec2(-0.10, 0.12), m);
+  vec2 c1 = mix(orbit(1.0, vec2(0.74 * aspect, 0.74), vec2(0.26 * aspect, 0.26), 1.70), goal + vec2(0.08, -0.10), m);
+  vec2 c2 = mix(orbit(2.0, vec2(0.60 * aspect, 0.50), vec2(0.30 * aspect, 0.34), 2.40), goal + vec2(0.0, 0.0), m);
+  vec2 c3 = mix(orbit(3.0, vec2(0.62 * aspect, 0.28), vec2(0.32 * aspect, 0.28), 1.45), goal + vec2(0.12, 0.14), m);
+  col = mix(col, hueA, 0.85 * pool(p, c0, mix(0.50, 0.40, m)));
+  col = mix(col, hueA, 0.70 * pool(p, c1, mix(0.46, 0.38, m)));
+  col = mix(col, hueB, 0.44 * pool(p, c2, mix(0.36, 0.34, m)));
+  col = mix(col, b,    0.30 * pool(p, c3, mix(0.40, 0.36, m)));
+  float keep = 1.0 - 0.75 * smoothstep(0.80 * aspect, 0.60 * aspect, p.x);   // the copy sits left: the lights fade out behind it
+  col = mix(ground, col, keep);
   col = pow(col, vec3(1.0 / 2.2));
   float g = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
   gl_FragColor = vec4(col + g * 0.035, 1.0);
