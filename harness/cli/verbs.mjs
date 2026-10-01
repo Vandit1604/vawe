@@ -24,6 +24,9 @@ export const VERBS = [
     flags: [
       { name: 'from', type: 'path', default: 'the engine-doctrine/CRAFT/ROUTING.md row that --request, the name and --length point at; a sting when none does', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
       { name: 'request', type: 'string', help: 'the ask in its own words: picks the template when --from is absent, and goes into brief.md' },
+      { name: 'answers', type: 'path', help: 'a markdown or `key: value` file with the details the request leaves open (subject, message, show, look, format, family, assets, ending)', kind: 'file' },
+      { name: 'detail', type: 'string', repeat: true, help: 'one answer as key=value, repeatable; same keys as --answers' },
+      { name: 'defaults', type: 'bool', help: 'unattended run: guess every open detail, marked (guess: change me), instead of printing the questions' },
       { name: 'ref', type: 'path', help: 'recreate this reference mp4: writes films/recreations/<name> with SPEC.md', kind: 'file' },
       { name: 'length', type: 'number', help: 'film length in seconds: written to brief.md and the page duration meta' },
       { name: 'aspect', type: 'string', help: `${ASPECT}: written to brief.md and the page aspect meta` },

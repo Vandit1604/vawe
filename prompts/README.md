@@ -51,13 +51,15 @@ only: the templates are our own text in the same shape.
 ## How to use one
 
 1. Pick the row. If two fit, the shorter film wins; under 15 s most types are one continuous action.
-2. `bin/vawe new <name> --from prompts/<t>.md` prints the template's questions with their defaults
+2. `bin/vawe new <name> --request "<the ask>"` first prints the details it needs (subject, message, show,
+   look, then format, family, assets, ending) and writes nothing; rerun it with `--answers <file>` or
+   `--detail key=value`, or add `--defaults` to guess. Then it prints the template's questions with their defaults
    and writes `films/<name>/brief.md` with the defaults filled in, each marked
    `[unanswered: default taken]`, and the measured-brief sections (Task, Look, Spec, Acceptance, Gates,
    Pitfalls, Deliver) with every field it could not answer marked `(guess: change me)`. Ask the bank in one message; a skipped answer keeps its default.
    The agent side of this is the `vawe-brief` skill (`skills/vawe-brief/SKILL.md`; everyone else
    reads `ANATOMY.md`).
-3. Fill the brief's Spec tables before the page (the shape is in [ANATOMY.md](ANATOMY.md)). Never wait for
+3. Fill the brief's Spec tables before the page (the shape is in [ANATOMY.md](ANATOMY.md)). After the details are in, never wait for
    a reply: take the guess marked `(guess: change me)` and go on.
 4. Draft with `bin/vawe dev <page>` until every Acceptance row is green, then run `critique-pass.md` as a
    fresh agent. The taste rules are in `engine-doctrine/TASTE-CARD-DIGEST.md` and in the lines `dev` prints.

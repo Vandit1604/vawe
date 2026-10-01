@@ -94,7 +94,7 @@ test('vawe new writes three empty family slots, a picked line and three starter 
   fs.symlinkSync(path.join(ROOT, 'assets/fonts'), path.join(root, 'assets/fonts'));
   const log = console.log;
   console.log = () => {};
-  try { newFilm('zz', { root, from: path.join(root, 'prompts/brand-launch-from-url.md') }); } finally { console.log = log; }
+  try { newFilm('zz', { root, from: path.join(root, 'prompts/brand-launch-from-url.md'), defaults: true }); } finally { console.log = log; }
   const text = fs.readFileSync(path.join(root, 'films/zz/brief.md'), 'utf8');
   const d = parseDirections(text);
   assert.deepEqual(d.slots.map((s) => familyOf(s.fields.family)), ['type', 'object', 'graphic']);

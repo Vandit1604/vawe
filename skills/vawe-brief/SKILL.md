@@ -1,14 +1,32 @@
 ---
 name: vawe-brief
-description: "Turn a film request into films/<name>/brief.md: pick the prompts/ template, ask its five questions in order, take the default for any skipped answer, write the brief in the measured anatomy, and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
+description: "Turn a film request into films/<name>/brief.md: ask the person for the details that make a good film (subject, message, what to show, look), then write the brief in the measured anatomy and name the first draft command. Load when a person asks for a film and no brief.md exists yet."
 effort: medium
 ---
 
 # vawe-brief: the interview, then the brief
 
-A better film comes from a better prompt, and a better prompt comes from asking the right five
-questions. This skill runs that interview and writes the brief. It never waits: a skipped question
-takes the template's default.
+A better film comes from a better prompt, and a better prompt comes from asking the person for the
+details a thin request leaves out. This skill runs that interview once, at the start, and writes the
+brief. It is not an approval stage: never ask a person to approve a finished plan.
+
+## 0. Ask for the details
+
+```bash
+bin/vawe new <name> --request "<the ask>"
+```
+
+When a required detail (subject, message, show, look) is missing, this writes nothing and prints the
+open questions, each with its reason and an example. The list is `DETAILS` in
+`harness/lib/measured-brief.mjs`; do not keep a copy. Send the person ONE message with only those
+questions, and wait for the answers. Put the answers in a file, one `key: value` line each, and run:
+
+```bash
+bin/vawe new <name> --request "<the ask>" --answers <file>
+```
+
+If the person says "you decide", or no person is there (hill-climb, CI), run the same command with
+`--defaults`: it guesses each open detail and names which.
 
 ## 1. Pick the template
 
@@ -20,17 +38,16 @@ rules of thumb: a real product from a URL is `brand-launch-from-url`; a song tha
 ## 2. Start the film
 
 ```bash
-bin/vawe new <name> --from prompts/<t>.md
+bin/vawe new <name> --from prompts/<t>.md --answers <file>
 ```
 
 It prints the template's question bank (five questions, each with its default and its reason, in
 the order they change the film) and writes `films/<name>/brief.md` with every default filled in and
 marked `[unanswered: default taken]`, and the measured-brief sections with guesses marked `(guess: change me)`.
 
-## 3. Ask the bank
+## 3. Template questions
 
-Ask the questions as printed, in one message, defaults shown. Do not add questions. When the answer
-arrives, or the person says "go", replace each marker with the answer or keep the default and
+The template's bank is for what step 0 did not cover. Do not ask it again: take each default. Replace each marker with the answer or keep the default and
 delete the marker. Never reopen a question; a wrong default is fixed at the critique.
 
 ## 4. Write the brief
@@ -61,6 +78,6 @@ Then load `vawe-page` to write the page, and `vawe-critique` in a fresh session 
 
 - A default is a real value, never "ask again". If a template default does not fit, say the value
   you took and why, in the brief.
-- Five questions at most. The sixth is the draft.
+- Ask each unanswered detail once, in one message. The next step is the draft, not a second round.
 - A brief with no anchor in its direction reads as a template; name the genre or the reference.
 - `films/<name>/brief.md` is a per-film artefact, not doctrine.
