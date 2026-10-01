@@ -20,6 +20,7 @@
 import * as THREE from 'three';
 window.THREE = THREE;
 import '/core/engine/page-api.js';
+import { EASE } from '/core/motion/presets.js';
 
 const canvas = document.getElementById('gl');
 const w = window.innerWidth, h = window.innerHeight;
@@ -51,7 +52,7 @@ scene.add(star);
 // clock that drives the star: no second timing system for the one word on screen.
 document.getElementById('word').animate(
   [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0px)' }],
-  { duration: 500, delay: 200, fill: 'both', easing: 'ease-out' },
+  { duration: 500, delay: 200, fill: 'both', easing: EASE.land },
 );
 
 // SPIN_RATE: a half-turn (PI rad) every 0.3s, so the star's flat face is EDGE-ON (rotation.y == PI/2

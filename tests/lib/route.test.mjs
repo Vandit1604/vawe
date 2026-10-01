@@ -58,7 +58,7 @@ test('an unknown request takes the motion-graphic row and says so', () => {
 test('the starter uses exact curves, a bundled face and beat properties', () => {
   const page = starterPage({ face: starterFace('zz-demo') });
   assert.doesNotMatch(page, /cubic-bezier|system-ui/);
-  assert.match(page, /curveToLinear/);
+  assert.match(page, /EASE\.land/);
   assert.match(page, /@font-face \{ font-family: "[^"]+"; src: url\("assets\/[A-Za-z]+\.woff2"\)/);
   assert.match(page, /--beat-1: 0s; --beat-2:/);
 });
