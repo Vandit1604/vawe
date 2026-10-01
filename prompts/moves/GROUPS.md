@@ -61,6 +61,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | shape morph wipe | the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame | [shape-morph-wipe.md](shape-morph-wipe.md) | [shape-morph-wipe.mp4](shape-morph-wipe.mp4) |
 | spin transition | a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures | [spin-transition.md](spin-transition.md) | [spin-transition.mp4](spin-transition.mp4) |
 | light leak transition | two shots meet through warmth: three generated warm layers swell over a dark UI on their own clocks, the cut lands on the peak, and the new shot climbs out as they fall faster; no image asset | [light-leak-transition.md](light-leak-transition.md) | [light-leak-transition.mp4](light-leak-transition.mp4) |
+| type match cut | one word grows in shot A and holds its place while the frame cuts around it; in shot B the same node is part of a new line | [type-match-cut.md](type-match-cut.md) | [type-match-cut.mp4](type-match-cut.mp4) |
 
 ## Point the eye
 
@@ -148,7 +149,7 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot, caption karaoke |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade, variable weight wave |
 | signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep, text on path |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan |
+| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan, type match cut |
 | chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
