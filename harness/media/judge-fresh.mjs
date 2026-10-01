@@ -9,6 +9,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { scratch } from '../lib/scratch.mjs';
+import { appendRun } from '../lib/runlog.mjs';
+import { judgeEvent } from '../lib/run-events.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
 import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
@@ -250,10 +252,9 @@ const file = path.resolve('out', `${ev.name}.${stage === 'stills' ? 'stills' : '
 const prevItems = stage === 'stills' ? [] : previousItems(readJson(file));
 const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(prevItems), prevItems)), ev);
 const result = finish(ev, raw, Date.now() - t0);
-if (stage !== 'stills') {
-  const led = mergeLedger(prevItems, raw, result.fixes);
-  Object.assign(result, { fixes: led.fixes, items: led.items, ledger: ledgerLines(led) });
-}
+const led = stage === 'stills' ? null : mergeLedger(prevItems, raw, result.fixes);
+if (led) Object.assign(result, { fixes: led.fixes, items: led.items, ledger: ledgerLines(led) });
+appendRun(ev.name, judgeEvent({ stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, ledger: led?.counts, seconds: result.ms / 1000 }));
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, JSON.stringify(result, null, 1));
 console.log(reportLines(result, path.relative(process.cwd(), file)).join('\n'));

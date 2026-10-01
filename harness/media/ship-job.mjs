@@ -4,20 +4,22 @@
 //   node harness/media/ship-job.mjs status [job] [--wait]                  progress, or the result (default: newest job);
 //                                                                          --wait blocks until the job ends or 100 s pass
 //
-// A job is two files in the scratch folder, <id>.json (state) and <id>.log (the render's own output). The
+// A job is two files in out/ship-jobs, <id>.json (state) and <id>.log (the render's own output); the id starts with the film name. The
 // detached `run` process owns the state file: it starts render-page.mjs --final, then records how it ended and,
 // on success, the result of the cheap final check (scene-stats plus a blank-frame scan) and of a fresh
-// judge on the final (harness/media/judge-fresh.mjs, about 30 s; VAWE_SHIP_JUDGE=0 skips it).
+// judge on the final (harness/media/judge-fresh.mjs, about 30 s; VAWE_SHIP_JUDGE=0 skips it). The job writes the
+// `ship` event of out/<film>.runs.jsonl when it ends, so the render runs with --job and logs nothing itself.
 // A new job for a page cancels the running job for the same page. `status <page>` reports that page's newest job.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { scratch } from '../lib/scratch.mjs';
 import { defaultOut } from './render-page.mjs';
 import { videoProblems } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
-import { samePage, doneLines } from '../lib/ship-status.mjs';
+import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath } from '../lib/ship-status.mjs';
+import { appendRun } from '../lib/runlog.mjs';
+import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance } from './acceptance-run.mjs';
 
 const WAIT_CAP_MS = 100_000;
@@ -25,7 +27,7 @@ const WAIT_CAP_MS = 100_000;
 const SELF = fileURLToPath(import.meta.url);
 const RENDER = path.join(path.dirname(SELF), 'render-page.mjs');
 const JUDGE = path.join(path.dirname(SELF), 'judge-fresh.mjs');
-const jobsDir = () => scratch('ship-jobs');
+const jobsDir = () => { fs.mkdirSync(SHIP_JOBS_DIR, { recursive: true }); return path.resolve(SHIP_JOBS_DIR); };
 const stateFile = (id) => path.join(jobsDir(), `${id}.json`);
 const readJob = (id) => JSON.parse(fs.readFileSync(stateFile(id), 'utf8'));
 const writeJob = (job) => fs.writeFileSync(stateFile(job.id), JSON.stringify(job));
@@ -52,7 +54,7 @@ function startJob(page, renderArgs) {
   cancelRunning(page);
   const name = path.basename(defaultOut(page, { aspect: '16:9', final: true }), '.mp4');
   const id = `${name}-${Date.now().toString(36)}`;
-  const log = path.join(jobsDir(), `${id}.log`);
+  const log = path.resolve(jobLogPath(id));
   writeJob({ id, page, args: renderArgs, log, status: 'starting', startedAt: Date.now(), judge: process.env.VAWE_SHIP_JUDGE !== '0' });
   spawn(process.execPath, [SELF, 'run', id], { detached: true, stdio: 'ignore' }).unref();
   console.log(`job ${id} started: final render of ${page} in the background`);
@@ -63,11 +65,15 @@ function startJob(page, renderArgs) {
 function runJob(id) {
   const job = readJob(id);
   const fd = fs.openSync(job.log, 'a');
-  const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final', '--progress'], { stdio: ['ignore', fd, fd] });
+  const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final', '--progress', '--job'], { stdio: ['ignore', fd, fd] });
   writeJob({ ...job, status: 'running', pid: process.pid });
   child.on('close', (code) => {
-    if (code !== 0) return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
-    const checked = { ...readJob(id), ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
+    const renderMs = Date.now() - job.startedAt;
+    if (code !== 0) {
+      appendRun(job.page, shipEvent({ verdict: 'failed', renderS: renderMs / 1000 }));
+      return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
+    }
+    const checked = { ...readJob(id), renderMs, ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
     if (!checked.judge || !checked.outputs.length) return finishJob(id, checked);
     writeJob({ ...checked, status: 'judging' });
     judgeFinal(checked, (verdict) => finishJob(id, { ...readJob(id), verdict }));
@@ -76,7 +82,9 @@ function runJob(id) {
 
 async function finishJob(id, job) {
   const acceptance = job.outputs.length ? await finalAcceptance(job).then((a) => ({ acceptance: a }), (e) => ({ acceptanceError: e.message })) : {};
-  writeJob({ ...job, ...acceptance, status: 'done', endedAt: Date.now() });
+  const done = { ...job, ...acceptance, status: 'done', endedAt: Date.now() };
+  appendRun(job.page, shipEvent({ verdict: shipVerdict(done), renderS: job.renderMs / 1000, acceptance: done.acceptance?.counts }));
+  writeJob(done);
 }
 
 function judgeFinal(job, done) {

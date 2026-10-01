@@ -19,17 +19,19 @@ export function createChecks({ pagePath, mode = 'draft', cache = true }) {
   const stored = cache ? readJson(file) : {};
   const kept = {};
   const spent = new Map();
+  const outcome = new Map();
   let signature = null;
   const sign = () => (signature ??= treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core'), path.join(REPO_ROOT, 'harness/lib'), path.join(REPO_ROOT, 'harness/media')]));
 
   const run = async (check, fn, settings = null) => {
     if (!runsIn(check, mode)) return undefined;
     const key = createHash('sha1').update(JSON.stringify([sign(), check, settings])).digest('hex').slice(0, 16);
-    if (stored[check]?.key === key) { kept[check] = stored[check]; spent.set(check, 0); return stored[check].value; }
+    if (stored[check]?.key === key) { kept[check] = stored[check]; spent.set(check, 0); outcome.set(check, 'hit'); return stored[check].value; }
     const t0 = Date.now();
     const value = JSON.parse(JSON.stringify((await fn()) ?? null));
     spent.set(check, (spent.get(check) ?? 0) + Date.now() - t0);
     kept[check] = { key, value };
+    outcome.set(check, 'miss');
     return value;
   };
 
@@ -44,6 +46,7 @@ export function createChecks({ pagePath, mode = 'draft', cache = true }) {
     mode,
     save: () => { if (cache) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(kept)); } },
     seconds: () => [...spent].map(([check, ms]) => [check, ms / 1000]),
+    cache: () => ({ hit: [...outcome.values()].filter((o) => o === 'hit').length, miss: [...outcome.values()].filter((o) => o === 'miss').length }),
   };
 }
 

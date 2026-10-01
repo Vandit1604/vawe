@@ -341,7 +341,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
 }
 
 /**
- * Writes the film folder; returns { page, route } (route is null when --from chose the template).
+ * Writes the film folder; returns { page, route, template, length, answered } (route is null when --from chose the template).
  * When a required detail is unanswered and `defaults` is off it writes nothing and returns { asked }.
  */
 export function newFilm(name, { from, root, length, aspect, title, request, details = {}, defaults = false }) {
@@ -372,5 +372,5 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const sections = parseSections(markdown);
   const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe));
-  return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [] };
+  return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length, answered: [...answered] };
 }

@@ -132,6 +132,13 @@ export function buildRows(brief, m, { objects = false, carry = [], mode = 'full'
 
 const greens = (rows) => rows.filter((r) => r.status === 'ok').length;
 
+/** { green, measured, red }: the green rows, the rows measured (not "not measured"), and the names of the red ones. Pure. */
+export const acceptanceCounts = (rows) => ({
+  green: greens(rows),
+  measured: rows.filter((r) => r.status !== 'not measured').length,
+  red: rows.filter((r) => r.status === 'advice').map((r) => r.metric),
+});
+
 /** The history entry for one run, and the file with it appended (the last HISTORY_KEEP kept). Pure. */
 export function withHistory(file, rows, { stage, caps = null, spec = null, at }) {
   const entry = { at, stage, green: greens(rows), total: rows.length, unmeasured: rows.filter((r) => r.status === 'not measured').length, rows, ...(caps ? { caps } : {}), ...(spec ? { spec } : {}) };
@@ -152,8 +159,8 @@ export const redLine = (r) => `  ${r.metric}: ${r.measured}${r.detail[0] ? ` (${
 
 /** The one summary line of a draft: green of measured (a row that is not measured or not set is in neither count), the trend and the extras. Pure. */
 export function summaryLine(rows, was, extras = []) {
-  const measured = rows.filter((r) => r.status !== 'not measured').length;
-  return ['acceptance: ' + `${greens(rows)} of ${measured} green${was === null ? '' : ` (was ${was})`}`, ...extras].join(' · ');
+  const { green, measured } = acceptanceCounts(rows);
+  return ['acceptance: ' + `${green} of ${measured} green${was === null ? '' : ` (was ${was})`}`, ...extras].join(' · ');
 }
 
 /** Every row, green or not, as markdown table lines with each row's detail under it. Pure. */

@@ -8,6 +8,7 @@
 // slice instead of the whole page. --final renders the way `vawe ship` does: full size, 60 fps, the
 // whole page from 0, up to 32 subframes of motion blur a frame, and the page's <audio> elements mixed in (harness/media/page-audio.mjs);
 // it writes the master and, beside it, a small web copy (<name>.web.mp4). --profile prints the cost table.
+// A final logs a `ship` event in out/<film>.runs.jsonl; --job (the ship job, harness/media/ship-job.mjs) leaves that to the job.
 // The canvas is the page's <meta name="aspect"> (else 16:9), overridden by --aspect; `all` renders every
 // aspect to its own file. The CSS viewport is always the aspect's full size (core/layout/aspects.js ASPECTS),
 // so a draft lays out exactly like the final; a draft only captures at device scale 0.5.
@@ -50,6 +51,7 @@ import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
+import { devEvent, shipEvent } from '../lib/run-events.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
@@ -666,7 +668,6 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     };
     const mixed = await place(tmpOut, outPath);
     if (tmpWeb) await place(tmpWeb, webPath);
-    appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
     const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(page, pagePath, dur)) : null;
     const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
     return { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion, advice, profile, web: webPath };
@@ -803,6 +804,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds() });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
+  appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
   console.log([timing, look, ...report.red, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
@@ -853,7 +855,10 @@ async function main() {
       + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`);
     if (r.web) console.log(`  web copy: ${r.web} (${(fs.statSync(r.web).size / 1e6).toFixed(1)} MB; master ${(fs.statSync(outPath).size / 1e6).toFixed(1)} MB)`);
     if (!final) await printDraft(outPath, pagePath, r, { checks: opts.checks, taste: argv.includes('--taste'), next: flag('--next', null), opts, from });
-    else if (r.advice.length) console.log(adviceBlock(r.advice).join('\n'));
+    else {
+      if (!argv.includes('--job')) appendRun(pagePath, shipEvent({ verdict: null, renderS: (r.prepassMs + r.captureMs + r.encodeMs) / 1000 }));
+      if (r.advice.length) console.log(adviceBlock(r.advice).join('\n'));
+    }
     if (argv.includes('--profile')) console.log(r.profile.join('\n'));
   }
 }

@@ -7,20 +7,21 @@
 // Session alone cannot answer "which agent": a subagent launched via the Agent tool (the fresh judge
 // this guard exists to allow, engine-doctrine/JUDGE.md, "the PASS is not the author's to self-record")
 // can inherit the SAME `CLAUDE_CODE_SESSION_ID` as the agent that authored the render, because env vars
-// propagate to a spawned child by default (harness/lib/runlog.mjs stamps every run with both). Refusing
-// on session alone then refuses the one PASS this guard exists to allow.
+// propagate to a spawned child by default (harness/lib/runlog.mjs stamps every run with both).
+// Refusing on session alone then refuses the one PASS this guard exists to allow.
 //
-// `agent` is harness/lib/runlog.mjs agentId(): an Agent-tool subagent shares the session AND CLAUDE_PID
-// with its parent, so a fresh judge runs with VAWE_AGENT=<name>. Refused only when session and agent
-// both match; a side with no agent falls back to the session-only test.
-import { readRuns, agentId } from './runlog.mjs';
+// A fresh judge runs with VAWE_AGENT=<name> (runlog.mjs namedAgent). Refused only when session and
+// agent both match; a side with no name falls back to the session-only test.
+import { readRuns, agentId, namedAgent } from './runlog.mjs';
+
+const AUTHORING = new Set(['dev', 'ship']);
 
 export function selfRecordCheck(inp) {
   const thisSession = process.env.CLAUDE_CODE_SESSION_ID || null;
-  const thisAgent = agentId();
-  const authorRun = readRuns(inp).slice().reverse().find((r) => r.render);
+  const thisAgent = namedAgent(agentId());
+  const authorRun = readRuns(inp).slice().reverse().find((r) => AUTHORING.has(r.cmd) || r.render);
   const authorSession = authorRun && authorRun.session;
-  const authorAgent = authorRun && authorRun.agent;
+  const authorAgent = namedAgent(authorRun?.agent);
   const sameSession = !!(thisSession && authorSession && thisSession === authorSession);
   const sameAgent = !thisAgent || !authorAgent || thisAgent === authorAgent;
   return { selfRecorded: sameSession && sameAgent, thisSession, authorSession };
