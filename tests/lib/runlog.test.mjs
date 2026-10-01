@@ -137,3 +137,8 @@ test('readAllRuns lists every <film>.runs.jsonl and drops a corrupt line', () =>
     assert.deepEqual(readAllRuns('out').map((f) => [f.film, f.runs.length]), [['a', 1], ['b', 1]]);
   });
 });
+
+test('filmKeyOf: a draft, a windowed draft, a final and its web copy all key to the film', async () => {
+  const { filmKeyOf } = await import('../../harness/lib/runlog.mjs');
+  for (const f of ['out/x-draft.mp4', 'out/x-draft-2-6.5.mp4', 'out/x.mp4', 'out/x.web.mp4', 'films/x/page.html', 'x-draft']) assert.equal(filmKeyOf(f), 'x', f);
+});
