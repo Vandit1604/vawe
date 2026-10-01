@@ -2,34 +2,60 @@
 <html data-aspect="16:9" data-look="signal">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="2.8">
+<meta name="duration" content="3.2">
 <title>move: shape trace morph</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   main { display: grid; justify-items: center; gap: var(--s3); }
   svg { width: calc(var(--u) * 40); height: calc(var(--u) * 40); overflow: visible; }
-  path { fill: var(--accent); fill-opacity: 0; stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1 2; stroke-dashoffset: 1; }
+  #route { fill: var(--accent); fill-opacity: 0; stroke: var(--ink); stroke-width: 0.7; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 1 2; stroke-dashoffset: 1; }
+  #twin { fill: var(--accent); opacity: 0; }
+  .stop { fill: var(--ink); opacity: 0; }
   .name { margin: 0; font: 700 var(--t-head)/1 var(--head); letter-spacing: 0.04em; text-transform: uppercase; }
+  .tag { margin: 0; color: var(--muted); }
 </style>
 </head>
 <body>
 <main>
-  <svg viewBox="0 0 100 100"><path id="shape" pathLength="1" d="M50 10 L84 30 L84 70 L50 90 L16 70 L16 30 Z"/></svg>
-  <p class="name" id="name">Arcwell</p>
+  <svg viewBox="0 0 24 24">
+    <path id="twin" d="M10.2 5H15l7 7-7 7h-4.8l7-7z"/>
+    <path id="route" pathLength="1" d="M2.5 19 L9.5 12 L3.5 6 L10 5.5 L15 11 L8 19 Z"/>
+  </svg>
+  <p class="name" id="name">Relay</p>
+  <p class="tag lead" id="tag">Every stop, one feed</p>
 </main>
 <script type="module">
 import { curveToLinear, CURVES } from '/core/motion/springs.js';
 import { enter } from '/core/motion/presets.js';
 const smooth = (u) => u * u * (3 - 2 * u);
 const glide = curveToLinear(smooth), settle = curveToLinear(CURVES.expoOut), spring = curveToLinear(CURVES.spring);
-const shape = document.getElementById('shape');
-// both paths have 1 M, 5 L and 1 Z: the morph interpolates matching commands
-const BOLT = 'M58 8 L22 54 L44 54 L38 92 L80 40 L56 40 Z';
-shape.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 900, delay: 100, easing: glide, fill: 'both' });
-shape.animate([{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 380, delay: 760, easing: settle, fill: 'both' });
-shape.animate([{ d: 'path("M50 10 L84 30 L84 70 L50 90 L16 70 L16 30 Z")', stroke: 'var(--ink)' }, { d: `path("${BOLT}")`, stroke: 'var(--accent)' }],
-  { duration: 800, delay: 1050, easing: spring, fill: 'both' });
-enter(document.getElementById('name'), { at: 1.75, band: 'professional', from: '0 0.4em' });
+const route = document.getElementById('route'), twin = document.getElementById('twin');
+// the route is a delivery line with five stops; the first chevron of the Relay mark has the same 1 M, 5 L and 1 Z
+const ROUTE = 'M2.5 19 L9.5 12 L3.5 6 L10 5.5 L15 11 L8 19 Z';
+const CHEVRON = 'M2.5 19 L9.5 12 L2.5 5 L7.3 5 L14.3 12 L7.3 19 Z';
+const RETURN = 0.113;   // the closing Z is 11% of the length: the dash stops short so the route reads open
+const TRACE = { at: 100, dur: 900 }, MORPH = 1050;
+route.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: RETURN }], { duration: TRACE.dur, delay: TRACE.at, easing: glide, fill: 'both' });
+// a stop dot appears as the stroke reaches its corner
+const pts = [[2.5, 19], [9.5, 12], [3.5, 6], [10, 5.5], [15, 11], [8, 19]];
+const cum = pts.map((p, i) => pts.slice(1, i + 1).reduce((s, q, j) => s + Math.hypot(q[0] - pts[j][0], q[1] - pts[j][1]), 0));
+const total = cum[5] + Math.hypot(pts[5][0] - pts[0][0], pts[5][1] - pts[0][1]);
+pts.slice(0, 6).forEach(([x, y], i) => {
+  const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  dot.setAttribute('class', 'stop'); dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 0.95);
+  route.before(dot);
+  const at = TRACE.at + TRACE.dur * (cum[i] / total) * 0.9;
+  dot.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 160, delay: at, fill: 'both', easing: settle });
+  dot.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: MORPH, fill: 'forwards' });
+  dot.style.transformBox = 'fill-box'; dot.style.transformOrigin = 'center';
+});
+route.animate([{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 380, delay: MORPH, easing: settle, fill: 'both' });
+route.animate([{ d: `path("${ROUTE}")`, stroke: 'var(--ink)', strokeDashoffset: RETURN }, { d: `path("${CHEVRON}")`, stroke: 'var(--accent)', strokeDashoffset: 0 }],
+  { duration: 800, delay: MORPH, easing: spring, fill: 'forwards' });
+// the second chevron hands off from the first, the Relay mark complete at about 2.1 s
+twin.animate([{ opacity: 0, translate: '-7.7px 0' }, { opacity: 0.45, translate: '0 0' }], { duration: 520, delay: 1650, easing: settle, fill: 'both' });
+enter(document.getElementById('name'), { at: 2.05, band: 'professional', from: '0 0.4em', blur: 10 });
+enter(document.getElementById('tag'), { at: 2.3, band: 'professional', from: '0 0.4em' });
 </script>
 </body>
 </html>
