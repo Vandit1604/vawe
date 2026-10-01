@@ -81,7 +81,6 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs; use once per film | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
 | drift hold | the line holds still while only the ground drifts, so a held frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
 | gradient mesh field | a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1 | [gradient-mesh-field.md](gradient-mesh-field.md) | [gradient-mesh-field.mp4](gradient-mesh-field.mp4) |
-| photo parallax 2.5D | one photo cut into far, subject and near CSS 3D layers; a slow push and a small drift move each layer by its depth, with no gaps at the cuts | [photo-parallax-2.5d.md](photo-parallax-2.5d.md) | [photo-parallax-2.5d.mp4](photo-parallax-2.5d.mp4) |
 | pan stations | several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them | [pan-stations.md](pan-stations.md) | [pan-stations.mp4](pan-stations.mp4) |
 | crash zoom | one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil | [crash-zoom.md](crash-zoom.md) | [crash-zoom.mp4](crash-zoom.mp4) |
 

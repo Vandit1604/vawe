@@ -43,7 +43,6 @@ One row per job, best move first. Every built move is in this table.
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
 | hold a line still to read, the ground alive | [drift-hold](drift-hold.md), [gradient-mesh-field](gradient-mesh-field.md) |
-| bring a still photo to life with depth | [photo-parallax-2.5d](photo-parallax-2.5d.md) |
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md), [command-palette-summon](command-palette-summon.md) |
 | show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md), [device-tilt-stage](device-tilt-stage.md) |
 | show an AI product answering | [ai-stream-response](ai-stream-response.md) |
