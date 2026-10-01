@@ -30,11 +30,10 @@
   <div class="plot" id="plot"></div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 import '/prompts/moves/demo/assets/logos.js';
 const q = (s) => document.querySelector(s);
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);
 const data = [['Mar', 12.4], ['Apr', 14.1], ['May', 13.8], ['Jun', 17.2], ['Jul', 19.5], ['Aug', 22.3], ['Sep', 26.8]];
 const max = 40, plot = q('#plot');
 
@@ -43,7 +42,7 @@ const max = 40, plot = q('#plot');
   g.style.top = `${100 - (v / max) * 100}%`;
   g.innerHTML = `<span>${v === 0 ? '0' : v + 'k'}</span>`;
   plot.append(g);
-  g.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 500, delay: 60 + (v / 10) * 40, easing: settle, fill: 'both' });
+  g.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 500, delay: 60 + (v / 10) * 40, easing: EASE.land, fill: 'both' });
 });
 const cols = Object.assign(document.createElement('div'), { className: 'cols' });
 plot.append(cols);
@@ -53,7 +52,7 @@ const bars = data.map(([m, v], i) => {
   const mo = Object.assign(document.createElement('div'), { className: 'mo', textContent: m });
   col.append(bar, mo); cols.append(col);
   // 70 ms between bars: inside the 30 to 80 ms band, and each rises on the same exponential
-  bar.animate([{ height: '0%' }, { height: `${(v / max) * 100}%` }], { duration: 800, delay: 260 + i * 70, easing: settle, fill: 'both' });
+  bar.animate([{ height: '0%' }, { height: `${(v / max) * 100}%` }], { duration: 800, delay: 260 + i * 70, easing: EASE.land, fill: 'both' });
   mo.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: 260 + i * 70, easing: 'linear', fill: 'both' });
   return { bar, col, v };
 });
@@ -62,7 +61,7 @@ const last = bars[bars.length - 1];
 last.bar.animate([{ background: css('--bar') }, { background: css('--accent') }], { duration: 240, delay: 1250, easing: 'linear', fill: 'both' });
 const tag = Object.assign(document.createElement('div'), { className: 'tag', textContent: '26.8k' });
 last.bar.append(tag);
-tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, translate: '-50% 0', opacity: 1 }], { duration: 650, delay: 1350, easing: pop, fill: 'both' });
+tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, translate: '-50% 0', opacity: 1 }], { duration: 650, delay: 1350, easing: EASE.pop, fill: 'both' });
 q('.card').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
 </script>
 </body>

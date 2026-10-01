@@ -35,15 +35,15 @@
 <div class="blocks"><div class="blk trail" id="trail"><div class="face"></div></div><div class="blk lead" id="lead"><div class="face"></div><div class="mark">vawe</div></div></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const E = CURVES.expoOut, W = window.innerWidth;
+import { EASE, easeFn } from '/core/motion/presets.js';
+const E = easeFn('land'), W = window.innerWidth;
 const tIn = 0.3, dIn = 0.36, hold = 0.04, dOut = 0.42, lag = 0.08;   // s; the trailing block follows the lead by 80 ms, in and out
 const from = -1.3 * W, cover = -0.16 * W, to = 1.05 * W;            // px of translate; at `cover` the lead fills the frame, skew included
 const pos = (t) => {
   if (t <= tIn) return from;
   if (t < tIn + dIn) return from + (cover - from) * E((t - tIn) / dIn);   // arrive fast, land soft
   const u = (t - tIn - dIn - hold) / dOut;
-  return u <= 0 ? cover : cover + (to - cover) * (0.3 * Math.min(1, u) + 0.7 * (1 - E(1 - Math.min(1, u))));   // slow off the mark, fastest leaving
+  return u <= 0 ? cover : cover + (to - cover) * easeFn('launch')(Math.min(1, u));   // slow off the mark, fastest leaving
 };
 const lead = document.getElementById('lead'), trail = document.getElementById('trail'), blur = document.getElementById('mb'), a = document.getElementById('a');
 const tSwap = tIn + dIn;
@@ -54,7 +54,7 @@ vawe.onFrame((t) => {
   const v = Math.abs(pos(t + 1 / 120) - pos(t - 1 / 120)) * 60;   // px per second
   blur.setAttribute('stdDeviation', `${(v / 60 * 0.3).toFixed(2)} 0`);
 });
-document.querySelector('.b .in').animate([{ scale: 1.06 }, { scale: 1 }], { duration: 1000, delay: (tSwap + 0.1) * 1000, easing: curveToLinear(E), fill: 'both' });
+document.querySelector('.b .in').animate([{ scale: 1.06 }, { scale: 1 }], { duration: 1000, delay: (tSwap + 0.1) * 1000, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

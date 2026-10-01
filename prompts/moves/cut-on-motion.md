@@ -22,8 +22,8 @@ the shape mid-frame at peak speed exactly on the cut, which is what hides the cu
 <div class="scene after">after</div>
 <div class="ball"></div>
 <script type="module">
-import { curveToLinear } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--through', curveToLinear((u) => u * u * (3 - 2 * u)));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--through', EASE.swap);
 </script>
 ```
 
