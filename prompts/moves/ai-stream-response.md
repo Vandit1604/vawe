@@ -7,19 +7,19 @@ chips and actions follow. The status leaves and the first chunk starts on its sp
 [ai-stream-response.mp4](ai-stream-response.mp4). Demo: [demo/ai-stream-response.html](demo/ai-stream-response.html).
 
 ```js
-import { curveToLinear, CURVES, rng } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+import { rng } from '../../core/motion/springs.js';
+import { EASE } from '../../core/motion/presets.js';
 // send: the bubble rises from the composer's own position
 user.animate([{ opacity: 0, translate: `0 ${composer.getBoundingClientRect().top - user.getBoundingClientRect().top}px`, scale: 0.96 }, { opacity: 1, translate: '0 0', scale: 1 }],
-  { duration: 420, delay: 500, easing: settle, fill: 'both' });
+  { duration: 420, delay: 500, easing: EASE.land, fill: 'both' });
 // working: a status line in muted text with an ink shine (background-clip: text) swept once, then gone
 status.animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }], { duration: 700, delay: 640, easing: 'linear', fill: 'both' });
-status.animate([{ opacity: 0 }], { duration: 110, delay: 970, easing: accelerate, fill: 'both' });
+status.animate([{ opacity: 0 }], { duration: 110, delay: 970, easing: EASE.launch, fill: 'both' });
 // stream: chunks of 1 to 3 words, 55 to 110 ms apart from a seeded rng; the caret shows only between one chunk and the next
 const r = rng(7); let t = 1000;
 chunks.forEach((el, i) => {
   const start = t; t += 55 + r() * 55;
-  el.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 150, delay: start, easing: settle, fill: 'both' });
+  el.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 150, delay: start, easing: EASE.land, fill: 'both' });
   el.nextElementSibling.animate([{ opacity: 0 }, { opacity: 1, offset: 0.001 }, { opacity: 1, offset: 0.999 }, { opacity: 0 }], { duration: t - start, delay: start, fill: 'both' });
 });
 ```

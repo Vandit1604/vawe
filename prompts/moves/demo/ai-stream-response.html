@@ -116,8 +116,8 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+import { rng } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s), all = (s) => [...document.querySelectorAll(s)];
 
 // typed prompt: the text is a pure function of t
@@ -130,16 +130,16 @@ vawe.onFrame((t) => {
   cur.style.visibility = t < sendAt + 0.12 ? 'visible' : 'hidden';
 });
 const user = q('.user'), composer = q('.composer');
-q('.hello').animate([{ opacity: 1 }, { opacity: 0, translate: '0 -1vh' }], { duration: 140, delay: sendAt * 1000 - 120, easing: accelerate, fill: 'both' });
+q('.hello').animate([{ opacity: 1 }, { opacity: 0, translate: '0 -1vh' }], { duration: 140, delay: sendAt * 1000 - 120, easing: EASE.launch, fill: 'both' });
 user.animate([{ opacity: 0, translate: `0 ${composer.getBoundingClientRect().top - user.getBoundingClientRect().top}px`, scale: 0.96 }, { opacity: 1, translate: '0 0', scale: 1 }],
-  { duration: 420, delay: sendAt * 1000, easing: settle, fill: 'both' });
-q('.send').animate([{ scale: 1 }, { scale: 0.96, offset: 0.4 }, { scale: 1 }], { duration: 200, delay: (sendAt - 0.08) * 1000, easing: settle, fill: 'both' });
+  { duration: 420, delay: sendAt * 1000, easing: EASE.land, fill: 'both' });
+q('.send').animate([{ scale: 1 }, { scale: 0.96, offset: 0.4 }, { scale: 1 }], { duration: 200, delay: (sendAt - 0.08) * 1000, easing: EASE.land, fill: 'both' });
 
 // working state: the mark arrives, the status line shines once, then the answer starts on its spot
 const ai = q('.ai'), streamAt = 1.0;
-ai.animate([{ opacity: 0, translate: '0 1.4vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 640, easing: settle, fill: 'both' });
+ai.animate([{ opacity: 0, translate: '0 1.4vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 640, easing: EASE.land, fill: 'both' });
 q('.status').animate([{ backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0' }], { duration: 700, delay: 640, easing: 'linear', fill: 'both' });
-q('.status').animate([{ opacity: 0 }], { duration: 110, delay: streamAt * 1000 - 30, easing: accelerate, fill: 'both' });
+q('.status').animate([{ opacity: 0 }], { duration: 110, delay: streamAt * 1000 - 30, easing: EASE.launch, fill: 'both' });
 
 // the answer streams in chunks of 1 to 3 words, 55 to 110 ms apart, drawn from a seeded rng
 const words = 'Churn fell to <b>2.1%</b> in Q3, down from 3.4% in Q2. Annual plans drove most of the drop: 38% of new accounts chose them.'.split(' ');
@@ -153,12 +153,12 @@ chunks.forEach((c, i) => {
   const caret = Object.assign(document.createElement('span'), { className: 'caret' });
   answer.append(el, caret);
   const end = i < chunks.length - 1 ? starts[i + 1] : starts[i] + 260;
-  el.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 150, delay: starts[i], easing: settle, fill: 'both' });
+  el.animate([{ opacity: 0, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)' }], { duration: 150, delay: starts[i], easing: EASE.land, fill: 'both' });
   caret.animate([{ opacity: 0 }, { opacity: 1, offset: 0.001 }, { opacity: 1, offset: 0.999 }, { opacity: 0 }], { duration: end - starts[i], delay: starts[i], fill: 'both' });
 });
 const done = t;
-all('.src span, .acts span').forEach((p, i) => p.animate([{ opacity: 0, translate: '0 0.8vh' }, { opacity: 1, translate: '0 0' }], { duration: 380, delay: done + 40 + i * 50, easing: settle, fill: 'both' }));
-q('.win').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2400, easing: 'linear', fill: 'both' });
+all('.src span, .acts span').forEach((p, i) => p.animate([{ opacity: 0, translate: '0 0.8vh' }, { opacity: 1, translate: '0 0' }], { duration: 380, delay: done + 40 + i * 50, easing: EASE.land, fill: 'both' }));
+q('.win').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2400, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

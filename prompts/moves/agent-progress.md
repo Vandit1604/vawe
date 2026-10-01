@@ -16,22 +16,21 @@ Demo: [demo/agent-progress.html](demo/agent-progress.html).
 ```
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);
+import { EASE } from '../../core/motion/presets.js';
 const at = { rows: 420, checks: [1250, 1800, 2350], swaps: [420, 1250, 2000] };   // ms
-rows.forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: settle, fill: 'both' }));
+rows.forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: EASE.land, fill: 'both' }));
 spin.animate([{ rotate: '0deg' }, { rotate: '900deg' }], { duration: 3200, easing: 'linear', fill: 'both' });   // finite, never infinite
 // a slot swaps whole states: the old one leaves in 120 ms, the next rises in 260 ms
 slot.forEach((el, i) => {
-  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: at.swaps[i], easing: settle, fill: 'both' });
-  if (at.swaps[i + 1]) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 120, delay: at.swaps[i + 1] - 120, easing: leave, fill: 'forwards' });
+  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: at.swaps[i], easing: EASE.land, fill: 'both' });
+  if (at.swaps[i + 1]) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 120, delay: at.swaps[i + 1] - 120, easing: EASE.launch, fill: 'forwards' });
 });
 // a check lands: outline out, circle pops with overshoot, tick draws, label strikes and dims
 at.checks.forEach((k, i) => {
-  num[i].animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 120, delay: k, easing: leave, fill: 'forwards' });
-  done[i].animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1.12, offset: 0.6 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: pop, fill: 'forwards' });
-  tick[i].animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: settle, fill: 'forwards' });
-  strike[i].animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: settle, fill: 'forwards' });
+  num[i].animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 120, delay: k, easing: EASE.launch, fill: 'forwards' });
+  done[i].animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: EASE.pop, fill: 'forwards' });
+  tick[i].animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: EASE.land, fill: 'forwards' });
+  strike[i].animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: EASE.land, fill: 'forwards' });
 });
 ```
 

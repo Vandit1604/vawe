@@ -73,6 +73,7 @@ work uses, as CSS `linear()` strings, built with `curveToLinear(handleCurve(out,
 | `carry` | easyEase | fling | still fast at the key, into a cut | HyperFrames carousels (6 to 11x in) |
 | `leave` | easyEase | long | a decelerating exit | 76% of tuned Lottie exits end ease then hang |
 | `launch` | easyEase | fling | an accelerating exit (default of `leave`: exits run shorter and speed up) | owner rule; Lottie shows no exit above 1.5x |
+| `pop` | fling | overshoot at speed -1.5 | a pop that passes its mark by about 15 per cent and settles back (CTA, notification, check) | the `overshoot` handle's own blurb: a deeper speed is an authored choice (-0.4 passes by 2 per cent, too little to see) |
 
 `keys(el, prop, [[t, value, handle?], ...])` is an After Effects key table. Times are seconds, a handle
 shapes both sides of its key (or `{ in, out }` one each), and each segment gets the `linear()` of the

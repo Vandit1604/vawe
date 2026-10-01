@@ -18,7 +18,7 @@
 <body>
 <p class="cap" id="cap"><span class="pill-bg" id="pill"></span>Captions that follow the voice, one word at a time</p>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 import { enter, leave } from '/core/motion/presets.js';
 
 const END = 3.4;
@@ -33,7 +33,6 @@ words.forEach((t, i) => { cap.insertAdjacentHTML('beforeend', `<span class="w">$
 const spans = [...cap.querySelectorAll('.w')];
 const css = getComputedStyle(document.documentElement);
 const MUTED = css.getPropertyValue('--muted').trim(), INK = css.getPropertyValue('--ink').trim();
-const LAND = curveToLinear(CURVES.expoOut);
 await document.fonts.ready;
 
 const box = (el) => {
@@ -48,7 +47,7 @@ leave(cap, { end: END });
 const frames = [{ offset: 0, ...at(box(spans[0])), easing: 'linear' }];
 SPOKEN.forEach(([t, i], n) => {
   if (n === 0) return;
-  frames.push({ offset: t / END, ...at(box(spans[SPOKEN[n - 1][1]])), easing: LAND });
+  frames.push({ offset: t / END, ...at(box(spans[SPOKEN[n - 1][1]])), easing: EASE.land });
   frames.push({ offset: (t + GLIDE) / END, ...at(box(spans[i])), easing: 'linear' });
 });
 frames.push({ offset: 1, ...at(box(spans[SPOKEN.at(-1)[1]])) });
@@ -60,8 +59,8 @@ SPOKEN.forEach(([t, i], n) => {
   const lead = 0.04, rise = 0.1, dur = next ? next - t + lead + 0.12 : 0.3;
   const up = { color: INK, translate: '0 -0.05em' }, down = { color: MUTED, translate: '0 0' };
   const keys = next
-    ? [{ offset: 0, ...down, easing: LAND }, { offset: (lead + rise) / dur, ...up, easing: 'linear' }, { offset: (next - t + lead) / dur, ...up, easing: LAND }, { offset: 1, ...down }]
-    : [{ offset: 0, ...down, easing: LAND }, { offset: 1, ...up }];
+    ? [{ offset: 0, ...down, easing: EASE.land }, { offset: (lead + rise) / dur, ...up, easing: 'linear' }, { offset: (next - t + lead) / dur, ...up, easing: EASE.land }, { offset: 1, ...down }]
+    : [{ offset: 0, ...down, easing: EASE.land }, { offset: 1, ...up }];
   spans[i].animate(keys, { delay: (t - lead) * 1000, duration: dur * 1000, easing: 'linear', fill: 'both' });
 });
 </script>

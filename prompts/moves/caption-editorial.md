@@ -18,10 +18,10 @@ const CUTS = [[0.1, 1.6], [1.65, 3.6]];
 caps.forEach((cap, c) => {
   const [on, off] = CUTS[c];
   [...cap.querySelectorAll('.line > span')].forEach((s, i) => {
-    s.animate([{ translate: '0 135%' }, { translate: '0 0' }], { delay: (on + i * 0.07) * 1000, duration: 420, easing: LAND, fill: 'both' });
-    if (c < CUTS.length - 1) s.animate([{ translate: '0 0' }, { translate: '0 -135%' }], { delay: (off - 0.22 + i * 0.04) * 1000, duration: 220, easing: LAUNCH, fill: 'forwards' });
+    s.animate([{ translate: '0 135%' }, { translate: '0 0' }], { delay: (on + i * 0.07) * 1000, duration: 420, easing: EASE.land, fill: 'both' });
+    if (c < CUTS.length - 1) s.animate([{ translate: '0 0' }, { translate: '0 -135%' }], { delay: (off - 0.22 + i * 0.04) * 1000, duration: 220, easing: EASE.launch, fill: 'forwards' });
   });
-});   // LAND: curveToLinear(CURVES.expoOut), LAUNCH: curveToLinear('easeInCubic')
+});
 ```
 
 Sound: none; a soft tick at each cut-in second if the film wants the replace marked.

@@ -28,6 +28,7 @@ export const EASE_HANDLES = {
   carry: ['easyEase', 'fling'],
   leave: ['easyEase', 'long'],
   launch: ['easyEase', 'fling'],
+  pop: ['fling', { influence: 35, speed: -1.5 }],
 };
 
 const LINEAR_TOLERANCE = 0.002;

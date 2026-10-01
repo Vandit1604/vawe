@@ -36,24 +36,23 @@
 </div>
 <script type="module">
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), land = curveToLinear(CURVES.spring);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 const card = q('.card');
 // the shell lands first, so the parts have something to arrive onto
-card.animate([{ scale: 0.96, translate: '0 3vh' }, { scale: 1, translate: '0 0' }], { duration: 650, easing: settle, fill: 'both' });
+card.animate([{ scale: 0.96, translate: '0 3vh' }, { scale: 1, translate: '0 0' }], { duration: 650, easing: EASE.land, fill: 'both' });
 card.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
 // each part travels in from the side its slot is on, 80 ms after the last; the rule draws instead of moving
 [...document.querySelectorAll('.part')].forEach((el, i) => {
   const at = 350 + i * 80;
   if (el.classList.contains('rule')) {
-    el.animate([{ opacity: 1, scale: '0 1' }, { opacity: 1, scale: '1 1' }], { duration: 600, delay: at, easing: settle, fill: 'both' });
+    el.animate([{ opacity: 1, scale: '0 1' }, { opacity: 1, scale: '1 1' }], { duration: 600, delay: at, easing: EASE.land, fill: 'both' });
     return;
   }
   el.animate([{ opacity: 0, translate: el.dataset.from, filter: 'blur(6px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }],
-    { duration: 900, delay: at, easing: el.classList.contains('pay') ? land : settle, fill: 'both' });
+    { duration: 900, delay: at, easing: el.classList.contains('pay') ? EASE.pop : EASE.land, fill: 'both' });
 });
-q('.arrow').animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }], { duration: 400, delay: 1520, easing: settle, fill: 'both' });
+q('.arrow').animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }], { duration: 400, delay: 1520, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>
