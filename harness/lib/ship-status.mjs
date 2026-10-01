@@ -56,9 +56,15 @@ export function doneLines(job) {
   }
   if (job.outputs?.length) lines.push(...tasteLines('preship'));
   for (const v of job.verdict || []) lines.push(v);
+  if (job.acceptanceError) lines.push(`acceptance skipped: ${job.acceptanceError}`);
+  else if (job.acceptance) lines.push(...job.acceptance.lines);
   if (!job.outputs?.length) return lines;
+  const judged = /: PASS/.test(job.verdict?.[0] || '');
+  const missed = job.acceptance?.allGreen === false;
+  if (job.verdict) lines.push(`ship verdict: ${judged && !missed ? 'PASS' : 'FIX'} (the judge ${judged ? 'passed' : 'did not pass'}; ${missed ? 'an acceptance row missed' : 'every measured acceptance row is green'})`);
   if (!job.verdict) lines.push(`next: bin/vawe judge ${job.outputs[0]} --fresh`);
-  else if (/: PASS/.test(job.verdict[0] || '')) lines.push('next: the judge passed it; show the owner');
+  else if (judged && !missed) lines.push('next: show the owner');
+  else if (judged) lines.push(`next: fix the acceptance rows above on drafts (bin/vawe dev), then bin/vawe ship ${job.page} again`);
   else lines.push(`next: fix what the judge and the final check name, worst first, on drafts (bin/vawe dev, then bin/vawe judge <draft> --fresh), then bin/vawe ship ${job.page} again`);
   return lines;
 }
