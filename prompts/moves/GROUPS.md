@@ -80,6 +80,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | parallax dive | the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves | [parallax-dive.md](parallax-dive.md) | [parallax-dive.mp4](parallax-dive.mp4) |
 | rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs; use once per film | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
 | drift hold | the line holds still while only the ground drifts, so a held frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
+| gradient mesh field | a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1 | [gradient-mesh-field.md](gradient-mesh-field.md) | [gradient-mesh-field.mp4](gradient-mesh-field.mp4) |
 | pan stations | several steps or features as one continuous place: the camera pans between stations on one wide canvas and holds at each, a rail and a parallax dot grid carrying the space between them | [pan-stations.md](pan-stations.md) | [pan-stations.mp4](pan-stations.mp4) |
 | crash zoom | one detail hits on a beat: a 0.13 s ease-in slam to 2.6x with real zoom blur from 16 stacked exposures, a 5 percent overshoot and a short recoil | [crash-zoom.md](crash-zoom.md) | [crash-zoom.mp4](crash-zoom.mp4) |
 
@@ -135,14 +136,19 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
 | vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through, light leak transition |
-| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, push blur, smear stretch, ui focus zoom |
+| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, photo parallax 2.5d, push blur, smear stretch, ui focus zoom |
 | terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode |
 | swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph |
 | paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
 | dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade |
+<<<<<<< HEAD
+| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, slice shift, word sweep |
+| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid wipe, notification pop, parallax dive, whip pan |
+=======
 | signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, letter stagger, outline fill, shape trace morph, slice shift, word sweep |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan |
+>>>>>>> origin/main
 | chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
