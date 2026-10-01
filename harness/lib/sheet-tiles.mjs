@@ -28,10 +28,22 @@ export function tileRuns(diffs, fps) {
   return runs;
 }
 
+const heldBy = (authoring) => {
+  const holds = declaredHolds(authoring);
+  return (r) => holds.some(([a, b]) => a <= r.a + 1e-9 && r.b <= b + 1e-9);
+};
+
+/** The tiles in the near-identical run that reaches the end of the sheet, 0 for none or a declared hold. Pure. */
+export function tailTiles(diffs, fps, authoring = {}) {
+  const held = heldBy(authoring);
+  const lastTile = +(diffs.length / fps).toFixed(2);
+  const run = tileRuns(diffs, fps).find((r) => r.b === lastTile && !held(r));
+  return run ? run.tiles : 0;
+}
+
 /** The problem lines for the sheet's runs: over RUN_TILES anywhere, over TAIL_TILES at the end. Pure. */
 export function tileProblems(diffs, fps, authoring = {}) {
-  const holds = declaredHolds(authoring);
-  const held = (r) => holds.some(([a, b]) => a <= r.a + 1e-9 && r.b <= b + 1e-9);
+  const held = heldBy(authoring);
   const lastTile = +(diffs.length / fps).toFixed(2);
   const lines = [];
   for (const r of tileRuns(diffs, fps)) {

@@ -39,6 +39,19 @@ test('doneLines: at most 3 problems and the judge command', () => {
   assert.equal(lines.at(-1), 'next: bin/vawe judge out/x.mp4 --fresh');
 });
 
+test('doneLines: the ship verdict is PASS only when the judge passes and no measured acceptance row missed', () => {
+  const base = { id: 'x', page: 'p.html', startedAt: 0, endedAt: 1000, outputs: ['o.mp4'], problems: [], verdict: ['judge --fresh (final): PASS'] };
+  const table = (allGreen) => ({ lines: ['acceptance: 15 of 16 green'], allGreen });
+  const pass = doneLines({ ...base, acceptance: table(true) }).join('\n');
+  assert.match(pass, /acceptance: 15 of 16 green/);
+  assert.match(pass, /ship verdict: PASS/);
+  const missed = doneLines({ ...base, acceptance: table(false) }).join('\n');
+  assert.match(missed, /ship verdict: FIX \(the judge passed; an acceptance row missed\)/);
+  assert.match(missed, /next: fix the acceptance rows above/);
+  assert.match(doneLines({ ...base, verdict: ['judge --fresh (final): FIX'], acceptance: table(true) }).join('\n'), /ship verdict: FIX \(the judge did not pass/);
+  assert.match(doneLines({ ...base, acceptanceError: 'no ffmpeg' }).join('\n'), /acceptance skipped: no ffmpeg/);
+});
+
 test('doneLines: no problems and a skipped check are said plainly', () => {
   assert.match(doneLines({ id: 'x', startedAt: 0, endedAt: 1000, outputs: ['o.mp4'], problems: [] }).join('\n'), /no problems found/);
   assert.match(doneLines({ id: 'x', startedAt: 0, endedAt: 1000, outputs: ['o.mp4'], problems: [], checkError: 'boom' }).join('\n'), /check skipped: boom/);

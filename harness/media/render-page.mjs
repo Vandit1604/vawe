@@ -52,7 +52,9 @@ import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
-import { sampleText, videoProblems } from './draft-check.mjs';
+import { sampleText, sampleSpec, videoProblems } from './draft-check.mjs';
+import { parseBriefTables, readBrief } from '../lib/brief-tables.mjs';
+import { draftAcceptance } from './acceptance-run.mjs';
 import { textProblems, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
@@ -616,7 +618,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
     if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
-    const { motion = null, probe = null } = opts.probe ? await probePage(page, dur) : {};
+    const { motion = null, probe = null } = opts.probe ? await probePage(page, dur, pagePath) : {};
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
@@ -706,24 +708,25 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
-function readBrief(pagePath) {
-  try { return fs.readFileSync(path.join(path.dirname(path.resolve(pagePath)), 'brief.md'), 'utf8'); } catch { return null; }
+function motionFindings(pagePath, motion) {
+  const boxes = motion.boxes;
+  const records = boxes ? [...motion.records, ...recordsFromBoxes(boxes)] : motion.records;
+  return unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath));
 }
 
 function motionAdvice(pagePath, motion) {
-  const boxes = motion.boxes;
-  const records = boxes ? [...motion.records, ...recordsFromBoxes(boxes)] : motion.records;
-  const lines = lintLines(unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath)));
+  const lines = lintLines(motionFindings(pagePath, motion));
   if (!lines.length) return [];
   const out = [...lines, 'waive a rule line with its code in authoring.allow and a _why'];
-  if (boxes?.canvas) out.push(`motion lint read element boxes over time; the motion inside ${boxes.canvas} canvas (2D or WebGL) is out of its scope`);
+  if (motion.boxes?.canvas) out.push(`motion lint read element boxes over time; the motion inside ${motion.boxes.canvas} canvas (2D or WebGL) is out of its scope`);
   return out;
 }
 
 /** The live page's motion records and text samples (with pixels for contrast): what the draft check reads besides the video. */
-export async function probePage(page, dur) {
+export async function probePage(page, dur, pagePath) {
   const motion = await collectPageMotion(page, dur);
   const probe = await sampleText(page, dur, (ms) => seekAll(page, ms), shownAndHidden);
+  probe.spec = await sampleSpec(page, parseBriefTables(readBrief(pagePath)), (ms) => seekAll(page, ms));
   return { motion, probe };
 }
 
@@ -753,6 +756,7 @@ function printDraftCheck(mp4, pagePath, { probe, level, motion, advice: blanks }
   const taste = ['', ...draftTasteLines([...problems, sound, peak].filter(Boolean))];
   if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
   console.log(taste.join('\n'));
+  console.log(draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion) }).join('\n'));
 }
 
 function printDraftSheet(mp4, { fps, from }) {

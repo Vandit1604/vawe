@@ -5,6 +5,8 @@ import { readFeatures, summarize, probeSize } from './scene-stats.mjs';
 import { blankRuns, isFlat, problemsOf } from '../lib/ship-status.mjs';
 import { sampleTimes } from '../lib/draft-check.mjs';
 import { sheetFps, tileProblems, TILE_W } from '../lib/sheet-tiles.mjs';
+import { specTimes } from '../lib/spec-conformance.mjs';
+import { sampleBoxTracks } from '../lib/box-track.mjs';
 
 /** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. Throws when ffmpeg fails. */
 export function videoProblems(mp4, authoring = {}) {
@@ -70,4 +72,18 @@ export async function sampleText(page, dur, seek, shots = null) {
     samples.push({ t, lines: await page.evaluate(visibleLines), ...(shots ? { shots: await shots(page) } : {}) });
   }
   return { samples, step, frameH: await page.evaluate(() => innerHeight) };
+}
+
+/** The brief's SPEC tables read off the live page: the text at each word's times and the boxes of each object's selector. Null when the tables name neither. */
+export async function sampleSpec(page, tables, seek) {
+  if (!tables.words.length && !tables.objects.length) return null;
+  const times = specTimes(tables);
+  const samples = [];
+  for (const t of times.text) {
+    await seek(t * 1000);
+    samples.push({ t, lines: await page.evaluate(visibleLines) });
+  }
+  const boxes = tables.objects.length ? await sampleBoxTracks(page, times.boxes, { selectors: tables.objects.map((o) => o.selector) }) : null;
+  const [frameW, frameH] = await page.evaluate(() => [innerWidth, innerHeight]);
+  return { samples, boxes, frameW, frameH };
 }
