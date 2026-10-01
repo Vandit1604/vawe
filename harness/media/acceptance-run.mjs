@@ -2,15 +2,14 @@
 // (harness/lib/acceptance.mjs) and keeps the history in out/<name>.acceptance.json.
 import fs from 'node:fs';
 import path from 'node:path';
-import { frameMotion, FPS } from './motion-curve.mjs';
-import { readFeatures, summarize } from './scene-stats.mjs';
-import { sheetTileDiffs } from './draft-check.mjs';
-import { parseBriefTables, readBrief } from '../lib/brief-tables.mjs';
+import { FPS } from './motion-curve.mjs';
+import { summarize } from './scene-stats.mjs';
+import { readVideo } from './draft-check.mjs';
+import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
 import { smoothness, hardJumps } from '../lib/smoothness.mjs';
 import { undeclaredStills } from '../lib/still-limit.mjs';
 import { tailTiles } from '../lib/sheet-tiles.mjs';
 import { heldTextRuns } from '../lib/draft-check.mjs';
-import { draftLowContrast } from '../lib/text-contrast.mjs';
 import { textCollisions } from '../lib/text-collision.mjs';
 import { readHoldProblems, readHoldUnmeasured, probeTracks } from '../lib/read-hold.mjs';
 import { wordChecks, cutChecks, skippedWords, measuredSpec } from '../lib/spec-conformance.mjs';
@@ -25,11 +24,9 @@ function readJson(file) {
   try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return null; }
 }
 
-/** What the video alone tells: smoothness, still windows, tail tiles and the hard jumps' times. Throws when ffmpeg fails. */
-function videoMeasures(mp4, authoring, shots) {
-  const diffs = frameMotion(mp4);
-  const stats = summarize(readFeatures(mp4));
-  const tiles = sheetTileDiffs(mp4);
+/** What the video alone tells: smoothness, still windows, tail tiles and the hard jumps' times, from one read of the video. */
+export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots) {
+  const stats = summarize(feats);
   const cuts = shots.slice(1).map((s) => s.start).filter((t) => typeof t === 'number');
   return {
     smooth: smoothness(diffs, { fps: FPS, cuts, turns: stats.turns.map((t) => t.t) }),
@@ -47,7 +44,7 @@ function pageMeasures({ probe, findings, authoring }, tables) {
   const tracks = probeTracks(probe.samples, probe, tables.words);
   return {
     caps: heldTextRuns(probe.samples, probe).map((r) => ({ text: r.key, cap: r.cap * 100, t: r.t, ...(r.chrome ? { chrome: true } : {}) })),
-    contrast: isWaived(authoring, 'text-low-contrast') ? [] : draftLowContrast(probe.samples),
+    contrast: isWaived(authoring, 'text-low-contrast') ? [] : probe.contrast,
     collisions: textCollisions(probe.samples),
     readHold: readHoldProblems(tracks),
     readHoldUnmeasured: readHoldUnmeasured(tracks),
@@ -71,20 +68,23 @@ function record(name, rows, stage, caps = null, spec = null) {
   const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, at: new Date().toISOString() });
   fs.mkdirSync(path.dirname(outFile(name, 'acceptance')), { recursive: true });
   fs.writeFileSync(outFile(name, 'acceptance'), JSON.stringify(file, null, 1));
-  return tableLines(rows, was);
+  return was;
 }
 
-/** The acceptance table lines for a full-length draft. `findings` are the page's motion-lint findings. */
-export function draftAcceptance({ mp4, pagePath, probe, level, findings }) {
-  const tables = parseBriefTables(readBrief(pagePath));
+/**
+ * The acceptance rows of a full-length draft: { rows, was, sync }. `findings` are the page's motion-lint findings,
+ * `video` the draft video's measures (videoMeasures, null when it could not be read), `mode` the draft's tier mode.
+ * Table rows that `vawe new` wrote as template guesses are left out of the spec checks and show "not set".
+ */
+export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, mode }) {
+  const { set, guessed } = dropGuesses(parseBriefTables(readBrief(pagePath)));
   const authoring = pageAuthoring(pagePath);
   const name = nameOf(mp4);
-  let video = {};
-  try { video = videoMeasures(mp4, authoring, tables.shots); } catch (e) { console.error(`  acceptance: video not read: ${e.message}`); }
-  const page = pageMeasures({ probe, findings, authoring }, tables);
-  const m = { ...video, ...page, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
-  const lines = record(name, buildRows(tables.acceptance, m, { objects: tables.objects.length > 0 }), 'draft', page.caps, page.measuredSpec);
-  return ['acceptance:', ...lines, syncLine([...(page.appear ?? []), ...(page.objects ?? [])], pagePath)].filter(Boolean);
+  const page = pageMeasures({ probe, findings, authoring }, set);
+  const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
+  const rows = buildRows(set.acceptance, m, { objects: set.objects.length > 0, mode });
+  const was = record(name, rows, 'draft', page.caps, page.measuredSpec);
+  return { rows, was, sync: syncLine([...(page.appear ?? []), ...(page.objects ?? [])], pagePath) };
 }
 
 async function finalLevel(mp4) {
@@ -101,9 +101,9 @@ export async function finalAcceptance({ page, outputs }) {
   const name = nameOf(mp4);
   const history = readJson(outFile(name, 'acceptance'))?.history ?? [];
   const level = await finalLevel(mp4);
-  const m = { ...videoMeasures(mp4, pageAuthoring(page), tables.shots), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
+  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(tables.acceptance, m, { objects: tables.objects.length > 0, carry: history.at(-1)?.rows ?? [] });
-  return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...record(name, rows, 'final')], allGreen: allMeasuredGreen(rows) };
+  return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows) };
 }
 
 /** The measured text sizes of the last draft, [{ text, cap, t }] with cap in % of frame height, for the judge. Product chrome is not a line to read, so it is left out. */

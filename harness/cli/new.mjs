@@ -212,15 +212,6 @@ export function parseSections(markdown) {
   return sections;
 }
 
-export function formatQuestions(questions) {
-  if (!questions.length) return 'the template has no question bank; write the promise, the moments and the platform';
-  const lines = ['questions, in the order they change the film; a skipped one takes its default:'];
-  questions.forEach((q, i) => {
-    lines.push(`${i + 1}. ${q.key}: ${q.question}`, `   default: ${q.default}`, `   why: ${q.why}`);
-  });
-  return lines.join('\n');
-}
-
 // Answers given as flags go in as answered lines, never as a default with the unanswered marker.
 function inputLines(questions, answers) {
   const given = { ...answers };
@@ -252,10 +243,9 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
   return [head, ...skeleton, ...rest, tail].join('\n\n');
 }
 
-function readAnswers({ length, aspect, title }) {
+function readAnswers({ length, aspect }) {
   if (length !== undefined && !(length > 0)) throw new UsageError(`--length must be a number of seconds above 0, got ${length}`);
   if (aspect !== undefined && !ASPECTS[aspect] && !/^\d+:\d+$/.test(aspect)) throw new UsageError(`--aspect "${aspect}" must be one of ${Object.keys(ASPECTS).join(' ')} or a W:H ratio`);
-  return { length, aspect, title };
 }
 
 const DETAIL_LINE = /^\s*(?:[-*]\s+|\d+\.\s+)?([a-z]+)\s*:\s*(.+?)\s*$/;
@@ -282,18 +272,23 @@ export function readDetails({ answers, detail = [] }) {
   return details;
 }
 
-// A length in seconds and an aspect written inside the format answer; flags win over it.
+// A length in seconds and an aspect written in the format answer, else in the request; flags win over both.
 function formatFrom(text = '') {
   const s = text.match(/(\d+(?:\.\d+)?)\s*(?:s|sec|secs|seconds?)\b/);
   const a = text.match(/\b(\d+:\d+)\b/);
   return { length: s ? Number(s[1]) : undefined, aspect: a && (ASPECTS[a[1]] || /^\d+:\d+$/.test(a[1])) ? a[1] : undefined };
 }
 
+function askedFormat(details, request) {
+  const [format, ask] = [formatFrom(details.format), formatFrom(request)];
+  return { length: format.length ?? ask.length, aspect: format.aspect ?? ask.aspect };
+}
+
 const answerCommand = (name, request, from) => `bin/vawe new ${name} --request ${JSON.stringify(request ?? '<the ask>')}${from ? ` --from ${from}` : ''}`;
 
 /** The open details as AskUserQuestion calls; writes nothing. */
 export function questionsJson(name, { request, from, details = {}, length, aspect }) {
-  const format = formatFrom(details.format);
+  const format = askedFormat(details, request);
   const answered = answeredDetails({ request, given: details, length: length ?? format.length, aspect: aspect ?? format.aspect });
   return { calls: questionCalls(unansweredDetails(answered), request), answer_with: `${answerCommand(name, request, from)} --answers <file>` };
 }
@@ -353,19 +348,20 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   if (!/^[a-z0-9][a-z0-9-]*$/.test(name)) throw new UsageError(`film name "${name}" must be lowercase letters, digits and dashes`);
   const dir = path.join(root, 'films', name);
   if (fs.existsSync(path.join(dir, 'page.html'))) throw new UsageError(`${path.relative(root, dir)}/page.html already exists`);
-  const format = formatFrom(details.format);
+  const format = askedFormat(details, request);
   length ??= format.length;
   aspect ??= format.aspect;
-  const page = readAnswers({ length, aspect, title });
+  readAnswers({ length, aspect, title });
   const answered = answeredDetails({ request, given: details, length, aspect });
   const open = unansweredDetails(answered);
   if (!defaults && open.some((d) => d.required)) return { asked: open, request, from };
   const { template, route } = chooseTemplate(root, { from, request, name, title, length });
   const markdown = fs.readFileSync(template, 'utf8');
   const questions = parseQuestions(markdown);
+  length ??= formatFrom(questions.find((q) => /^length$/i.test(q.key))?.default).length;
   const face = starterFace(name);
   copyFace(root, dir, face);
-  const given = Object.fromEntries(Object.entries(page).filter(([, v]) => v !== undefined));
+  const given = Object.fromEntries(Object.entries({ length, aspect, title }).filter(([, v]) => v !== undefined));
   fs.writeFileSync(path.join(dir, 'page.html'), starterPage({ ...given, face }));
   fs.writeFileSync(path.join(dir, 'directions.html'), directionsPage(given));
   const answers = {};
@@ -376,6 +372,5 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const sections = parseSections(markdown);
   const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe));
-  console.log(formatQuestions(questions));
   return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [] };
 }

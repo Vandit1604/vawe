@@ -6,6 +6,7 @@ import { APPEAR_TOL_S, LAYOUT_TOL_PCT, checkLine } from './spec-conformance.mjs'
 import { RULES } from './draft-check.mjs';
 import { PEAK_DBFS } from './peak-limit.mjs';
 import { DRAFT_MIN_RATIO } from './text-contrast.mjs';
+import { unrunReason } from './draft-tiers.mjs';
 
 export const HISTORY_KEEP = 10;
 const SHOW = 3;
@@ -49,7 +50,7 @@ export function targetTest(text) {
   return null;
 }
 
-const skip = (reason) => ({ skip: reason });
+const skip = (reason, label = 'not measured') => ({ skip: reason, label });
 const done = (ok, measured, detail = []) => ({ ok, measured, detail });
 
 function countRow(list, pass, describe, fix) {
@@ -58,8 +59,8 @@ function countRow(list, pass, describe, fix) {
   return done(pass(list.length), String(list.length), detail.length ? [...detail, fix] : []);
 }
 
-function deviationRow(checks, pass, none, fmt, fix) {
-  if (!checks || !checks.length) return skip(none);
+function deviationRow(checks, pass, none, fmt, fix, guessed = 0) {
+  if (!checks || !checks.length) return guessed ? skip('the rows are still template guesses: replace them with your numbers', 'not set') : skip(none);
   const worst = Math.max(...checks.map((c) => c.dev));
   const off = checks.filter((c) => !pass(c.dev));
   return done(!off.length, worst === Infinity ? 'not found' : fmt(worst), off.length ? [...off.slice(0, SHOW).map(checkLine), fix] : []);
@@ -92,10 +93,10 @@ const ROWS = {
     return done(!m.readHold.length, `${m.readHold.length ? `${m.readHold.length} line(s) short` : 'all long enough'}${unmeasured}`, m.readHold.slice(0, SHOW).map((p) => `"${p.text.slice(0, 40)}" holds ${p.hold.toFixed(2)} s, needs ${p.need.toFixed(2)} s`));
   },
   'exits shorter than entrances': (m) => (m.exits ? done(!m.exits.length, m.exits.length ? `${m.exits.length} too long` : 'all', m.exits.slice(0, SHOW).map((e) => `${e.at.toFixed(2)} s: ${e.what}`)) : skip('no motion probe')),
-  'word appear time vs spec': (m, pass) => deviationRow(m.appear, pass, m.skippedWords?.length ? `every Words row is too short to find (${m.skippedWords.map((w) => `"${w}"`).join(', ')})` : 'no spec', (d) => `${d.toFixed(2)} s`, 'move the word to its appear time in the Words table, or change the table'),
-  'word cap height and position vs spec': (m, pass) => deviationRow(m.layout, pass, 'no spec', (d) => `${d.toFixed(1)}%`, 'set the font size and box to the Words table, or change the table'),
+  'word appear time vs spec': (m, pass) => deviationRow(m.appear, pass, m.skippedWords?.length ? `every Words row is too short to find (${m.skippedWords.map((w) => `"${w}"`).join(', ')})` : 'no spec', (d) => `${d.toFixed(2)} s`, 'move the word to its appear time in the Words table, or change the table', m.guessed?.words),
+  'word cap height and position vs spec': (m, pass) => deviationRow(m.layout, pass, 'no spec', (d) => `${d.toFixed(1)}%`, 'set the font size and box to the Words table, or change the table', m.guessed?.words),
   'cuts vs spec': (m, pass) => deviationRow(m.cuts, pass, m.hasShots ? 'no hard cut near a shot start' : 'no spec', (d) => `${d.toFixed(1)} frames`, 'land the cut on the Shots boundary, or change the table'),
-  'objects in/settle/out vs spec': (m, pass) => deviationRow(m.objects, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the object to its Objects times, or change the table'),
+  'objects in/settle/out vs spec': (m, pass) => deviationRow(m.objects, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the object to its Objects times, or change the table', m.guessed?.objects),
   loudness: (m, pass) => (m.lufs == null ? skip('no audio in the video') : done(pass(m.lufs), `${m.lufs.toFixed(1)} LUFS`, pass(m.lufs) ? [] : [m.lufs < LUFS_LOW ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues'])),
   peak: (m, pass) => (m.peak == null ? skip('no audio in the video') : done(pass(m.peak), `${m.peak.toFixed(1)} dBFS`, pass(m.peak) ? [] : [`lower data-gain on the loudest cue by ${Math.ceil(m.peak - PEAK_DBFS)} dB`])),
   'judge: each storyboard frame as beautiful as the anchor, full size': (m) => (m.judge ? done(m.judge.yes === m.judge.total, `${m.judge.yes} of ${m.judge.total} YES`, m.judge.fixes.slice(0, SHOW)) : skip('not run')),
@@ -103,7 +104,9 @@ const ROWS = {
 
 const DEFAULT_TEST = new Map(DEFAULT_ROWS.map((r) => [r.metric, targetTest(r.target)]));
 
-const read = (row, m, carried) => {
+const read = (row, m, carried, mode) => {
+  const unrun = unrunReason(row.metric, mode);
+  if (unrun) return skip(unrun);
   const measure = ROWS[row.metric];
   if (!measure) return skip('no measure for this metric');
   const pass = targetTest(row.target) ?? DEFAULT_TEST.get(row.metric) ?? (() => true);
@@ -117,12 +120,12 @@ const read = (row, m, carried) => {
  * parsed Acceptance rows (empty: the defaults), `m` the measures, `objects` whether the brief has an Objects table,
  * `carry` the rows of an earlier run, used where this run could not measure a row. Pure.
  */
-export function buildRows(brief, m, { objects = false, carry = [] } = {}) {
+export function buildRows(brief, m, { objects = false, carry = [], mode = 'full' } = {}) {
   const rows = brief.length ? brief : DEFAULT_ROWS;
   const all = objects && !rows.some((r) => r.metric === OBJECTS_ROW.metric) ? [...rows, OBJECTS_ROW] : rows;
   return all.map((row) => {
-    const out = read(row, m, carry.find((c) => c.metric === row.metric));
-    if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: `not measured: ${out.skip}`, detail: [] };
+    const out = read(row, m, carry.find((c) => c.metric === row.metric), mode);
+    if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: `${out.label}: ${out.skip}`, detail: [] };
     return { metric: row.metric, target: row.target, status: out.ok ? 'ok' : 'advice', measured: out.measured, detail: out.detail ?? [] };
   });
 }
@@ -143,6 +146,20 @@ export function tableLines(rows, was = null) {
   lines.push(`acceptance: ${greens(rows)} of ${rows.length} green${unmeasured ? `, ${unmeasured} not measured` : ''}${was === null ? '' : ` (was ${was})`}`);
   return lines;
 }
+
+/** One printed line for a red row: the measure, its worst example and the fix. Pure. */
+export const redLine = (r) => `  ${r.metric}: ${r.measured}${r.detail[0] ? ` (${r.detail[0]})` : ''}${r.detail.length > 1 ? `; ${r.detail.at(-1)}` : ''}`;
+
+/** The one summary line of a draft: green of measured (a row that is not measured or not set is in neither count), the trend and the extras. Pure. */
+export function summaryLine(rows, was, extras = []) {
+  const measured = rows.filter((r) => r.status !== 'not measured').length;
+  return ['acceptance: ' + `${greens(rows)} of ${measured} green${was === null ? '' : ` (was ${was})`}`, ...extras].join(' · ');
+}
+
+/** Every row, green or not, as markdown table lines with each row's detail under it. Pure. */
+export const fullTable = (rows) => ['| status | metric | target | measured |', '| --- | --- | --- | --- |',
+  ...rows.map((r) => `| ${r.status} | ${r.metric} | ${r.target} | ${r.measured} |`),
+  ...rows.filter((r) => r.detail.length).flatMap((r) => ['', `${r.metric}:`, ...r.detail.map((d) => `- ${d}`)])];
 
 /** True when every measured row is green. A row that could not be measured does not count against it. Pure. */
 export const allMeasuredGreen = (rows) => rows.every((r) => r.status !== 'advice');
