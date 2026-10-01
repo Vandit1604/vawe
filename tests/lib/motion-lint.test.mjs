@@ -30,6 +30,17 @@ test('linear easing on a move over 0.3 s is flagged; a per-keyframe curve or a s
   assert.deepEqual(linearMove([rec({ props: ['color'], kfEasings: ['linear'], duration: 0.8 })]), []);
 });
 
+test('a default CSS keyword on a move over 0.3 s points at the EASE names; a custom curve does not', () => {
+  const move = { props: ['translate'], duration: 0.8 };
+  const [f] = linearMove([rec({ ...move, easing: 'ease-in-out', kfEasings: ['linear', 'linear'] })]);
+  assert.equal(f.code, 'default-ease');
+  assert.match(f.fix, /EASE\.land.*EASE\.leave/);
+  assert.match(linearMove([rec({ ...move, easing: 'ease', kfEasings: ['ease', 'ease'] })])[0].what, /CSS keyword ease/);
+  assert.match(linearMove([rec({ ...move, kfEasings: ['linear', 'linear'] })])[0].fix, /EASE\.land/);
+  assert.deepEqual(linearMove([rec({ ...move, easing: 'linear(0, 0.6, 1)', kfEasings: ['ease', 'ease'] })]), []);
+  assert.deepEqual(linearMove([rec({ ...move, easing: 'ease', kfEasings: ['ease', 'ease'], duration: 0.2 })]), []);
+});
+
 test('moveDirection reads translate, translateX/Y and a single-value translate', () => {
   assert.equal(moveDirection('0 0.5em'), 'y+');
   assert.equal(moveDirection('-0.8em'), 'x-');

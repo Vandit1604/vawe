@@ -18,7 +18,7 @@ technique, not motion design, and is not part of vawe.
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from
 the clip, not the name. Copy the snippet into the page; the numbers are the ones that read well.
 Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a hand-fitted
-`cubic-bezier()`. The demo page each clip was rendered from is in `demo/`. Every demo links `demo/demo.css`
+`cubic-bezier()`. New snippets use the `EASE` names (`EASE.land`, `EASE.leave`, ... from `core/motion/presets.js`, table in `core/motion/README.md`). The demo page each clip was rendered from is in `demo/`. Every demo links `demo/demo.css`
 (tokens, type scale as a share of frame height, the UI card look); the snippets name its classes, so copy the ones you use.
 
 [LIBRARY.md](LIBRARY.md) lists every approved move in seven groups, including the ones still to build.

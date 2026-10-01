@@ -46,8 +46,7 @@ const STARTER_TEMPLATE = `<!doctype html>
 </style>
 <script type="module">
 // core/motion/README.md: enter, leave, stagger and layer carry the house motion; change the options, keep the calls
-import { curveToLinear } from '../../core/motion/springs.js';
-import { layer, leave, stagger, LAND } from '../../core/motion/presets.js';
+import { layer, leave, stagger, EASE } from '../../core/motion/presets.js';
 const root = document.documentElement;
 const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
 const end = parseFloat(document.querySelector('meta[name="duration"]').content);
@@ -58,12 +57,11 @@ leave($('.line'), { end: beat(2) - 0.06 });
 leave($('h1'), { end: beat(2) });
 
 const turn = $('.w2');
-turn.animate([{ clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0)' }], { delay: (beat(2) - 0.06) * 1000, duration: 300, easing: LAND, fill: 'both' });
+turn.animate([{ clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0)' }], { delay: (beat(2) - 0.06) * 1000, duration: 300, easing: EASE.land, fill: 'both' });
 stagger(document.querySelectorAll('.facts li'), { at: beat(2), band: 'energy', from: '0.6em 0' });
 
-const drift = curveToLinear('easeInOutSine');
-$('.w1').animate([{ scale: 1 }, { scale: 1.05 }], { duration: beat(2) * 1000, easing: drift, fill: 'both' });
-turn.animate([{ scale: 1 }, { scale: 1.04 }], { delay: beat(2) * 1000, duration: (end - beat(2)) * 1000, easing: drift, fill: 'both' });
+$('.w1').animate([{ scale: 1 }, { scale: 1.05 }], { duration: beat(2) * 1000, easing: EASE.glide, fill: 'both' });
+turn.animate([{ scale: 1 }, { scale: 1.04 }], { delay: beat(2) * 1000, duration: (end - beat(2)) * 1000, easing: EASE.glide, fill: 'both' });
 </script>
 </head>
 <body>

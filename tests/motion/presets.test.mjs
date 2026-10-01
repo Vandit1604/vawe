@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, LAND, LAUNCH } from '../../core/motion/presets.js';
+import { BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys } from '../../core/motion/presets.js';
+import { handleCurve, HANDLE_REGISTRY } from '../../core/motion/motion.js';
 
 function fakeEl() {
   const anims = [];
@@ -26,10 +27,10 @@ test('bands name the speed-bands doc ranges and pick by duration and distance', 
   assert.throws(() => bandSeconds('slow'), /valid: energy professional gravity cinematic/);
 });
 
-test('enter lands on an exact expo-out curve, fades in the first 40% and holds both ends', () => {
+test('enter lands on the land ease, fades in the first 40% and holds both ends', () => {
   const [move, fade] = enterSpecs({ at: 1.2, band: 'gravity' });
-  assert.equal(move.timing.easing, LAND);
-  assert.match(LAND, /^linear\(0, /);
+  assert.equal(move.timing.easing, EASE.land);
+  assert.match(EASE.land, /^linear\(0, /);
   assert.equal(move.timing.delay, 1200);
   assert.equal(move.timing.duration, 650);
   assert.equal(fade.timing.duration, 260);
@@ -50,7 +51,7 @@ test('leave runs 0.6 of the entrance it finds, accelerates, and fills forwards o
   const [a] = leave(el, { end: 3 });
   assert.equal(a.timing.duration, 390);
   assert.equal(a.timing.delay, 2610);
-  assert.equal(a.timing.easing, LAUNCH);
+  assert.equal(a.timing.easing, EASE.launch);
   assert.equal(a.timing.fill, 'forwards');
 });
 
@@ -94,4 +95,63 @@ test('layer staggers a list of secondaries', () => {
   layer(main, parts, { band: 'energy' });
   const starts = parts.map((p) => p.anims[0].timing.delay);
   assert.ok(starts[0] < starts[1] && starts[1] < starts[2]);
+});
+
+test('leave accepts ease: leave, enter accepts any EASE name, an unknown name throws', () => {
+  const [a] = leaveSpecs({ at: 0, band: 'gravity', ease: 'leave' });
+  assert.equal(a.timing.easing, EASE.leave);
+  assert.equal(enterSpecs({ ease: 'settle' })[0].timing.easing, EASE.settle);
+  assert.throws(() => enterSpecs({ ease: 'zoom' }), /valid: land settle swap glide carry leave launch/);
+});
+
+test('the handle numbers follow the Lottie and HyperFrames data', () => {
+  const at = (n) => HANDLE_REGISTRY.pick(n);
+  assert.deepEqual(at('fling'), { influence: 12, speed: 4.8 });
+  assert.deepEqual(at('overshoot'), { influence: 35, speed: -0.4 });
+  assert.deepEqual(at('long'), { influence: 60, speed: 0 });
+  assert.deepEqual(at('hang'), { influence: 75, speed: 0 });
+  assert.equal(at('easyEase').speed, 0);
+});
+
+function parseLinear(str) {
+  return str.slice('linear('.length, -1).split(',').map(Number);
+}
+
+test('every EASE is a linear() from its handle pair, starts at 0 and ends at 1', () => {
+  assert.deepEqual(Object.keys(EASE), Object.keys(EASE_HANDLES));
+  for (const [name, [out, into]] of Object.entries(EASE_HANDLES)) {
+    const pts = parseLinear(EASE[name]), f = handleCurve(out, into);
+    assert.equal(pts[0], 0);
+    assert.equal(pts.at(-1), 1);
+    pts.forEach((v, i) => assert.ok(Math.abs(v - f(i / (pts.length - 1))) < 1e-3, `${name} sample ${i}`));
+  }
+  assert.ok(parseLinear(EASE.land)[2] > 0.15, 'land leaves fast');
+});
+
+test('keys: a two-key table is the handleCurve of its two handles', () => {
+  const { keyframes, timing } = keysSpec('translate', [[1, '0 0', 'fling'], [2.5, '0 40px', 'hang']]);
+  assert.equal(keyframes.length, 2);
+  assert.deepEqual(keyframes.map((k) => k.offset), [0, 1]);
+  assert.equal(timing.delay, 1000);
+  assert.equal(timing.duration, 1500);
+  const pts = parseLinear(keyframes[0].easing), f = handleCurve('fling', 'hang');
+  pts.forEach((v, i) => assert.ok(Math.abs(v - f(i / (pts.length - 1))) < 1e-3));
+  assert.equal(keyframes[1].easing, undefined);
+});
+
+test('keys: a three-key table has two segment easings and offsets from times', () => {
+  const el = fakeEl();
+  keys(el, 'scale', [[0, 1, { out: 'fling' }], [1, 1.2, 'easyEase'], [4, 1, { in: 'long' }]]);
+  const { keyframes } = el.anims[0];
+  assert.deepEqual(keyframes.map((k) => k.offset), [0, 0.25, 1]);
+  assert.match(keyframes[0].easing, /^linear\(0, /);
+  assert.match(keyframes[1].easing, /^linear\(0, /);
+  assert.notEqual(keyframes[0].easing, keyframes[1].easing);
+  assert.equal(keyframes[2].easing, undefined);
+});
+
+test('keys: no handles is a straight segment; bad tables throw', () => {
+  assert.equal(keysSpec('x', [[0, 0], [1, 1]]).keyframes[0].easing, 'linear');
+  assert.throws(() => keysSpec('x', [[0, 0]]), /two keys/);
+  assert.throws(() => keysSpec('x', [[1, 0], [1, 1]]), /increase/);
 });
