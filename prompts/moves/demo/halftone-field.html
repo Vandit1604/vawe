@@ -1,0 +1,67 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="chrome">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<title>move: halftone field</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; }
+  .copy .title { margin: 0; font-size: calc(var(--u) * 13); line-height: 1.04; }
+  .copy .lead { margin: var(--s3) 0 0; max-width: 24em; color: var(--ink); text-wrap: pretty; }
+
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
+  @keyframes rise { to { translate: 0 0; } }
+
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
+</style>
+</head>
+<body>
+<main class="copy">
+  <h1 class="title"><span class="mask" style="--i:0"><span>A screen</span></span><span class="mask" style="--i:1"><span>that breathes.</span></span></h1>
+  <p class="lead" id="lead">A fine screen that thickens and thins, slowly, behind still type.</p>
+</main>
+<script type="module">
+import '/core/engine/page-api.js';
+import { shaderField } from '/core/surfaces/shader-field.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+
+const root = document.documentElement;
+root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const lead = document.getElementById('lead');
+lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+
+const tokens = getComputedStyle(root);
+const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
+
+// A fine 45 degree dot screen in one neutral ink. Dot centres never move; the radius follows a slow density wave.
+const frag = `
+uniform vec3 u_ground, u_ink;
+const float CELL = 0.020;                                    // pitch as a share of the frame height: 22 px at 1080
+void main() {
+  float aspect = u_res.x / u_res.y;
+  vec2 p = gl_FragCoord.xy / u_res.y;
+  vec2 g = vec2(p.x + p.y, p.y - p.x) * 0.7071 / CELL;
+  vec2 id = floor(g);
+  vec2 f = fract(g) - 0.5;
+  vec2 c = (id + 0.5) * CELL;
+  vec2 cp = vec2(c.x - c.y, c.x + c.y) * 0.7071;
+  float wave = 0.5 + 0.5 * sin(2.2 * cp.x + 0.9 * cp.y - u_time * 1.6 + u_seed);
+  float keep = 1.0 - 0.6 * smoothstep(0.80 * aspect, 0.56 * aspect, cp.x);     // the copy sits left: thinner dots behind it
+  float radius = mix(0.05, 0.075, wave) * keep;                // 2.2 to 3.2 px across at 1080, a 1.5 times swing
+  float aa = 1.0 / (u_res.y * CELL);
+  float dotMask = smoothstep(radius + aa, radius - aa, length(f));
+  vec3 ink = mix(u_ground, u_ink, (0.16 + 0.22 * wave) * keep);   // tone swings with the wave, 16 to 38 percent: texture at rest, a soft tide as it passes
+  gl_FragColor = vec4(mix(u_ground, ink, dotMask), 1.0);
+}`;
+
+const field = shaderField(frag, { seed: 2, uniforms: { u_ground: rgb('--ground'), u_ink: rgb('--ink') } });
+vawe.onFrame((t) => field.draw(t));
+</script>
+</body>
+</html>

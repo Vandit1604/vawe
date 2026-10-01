@@ -1,6 +1,6 @@
 ---
 when: "you plan a film and want to know which moves exist, which are planned, and what each is for"
-answers: "the owner-approved library of moves in six groups, with the use, the reference and the build status of each"
+answers: "the owner-approved library of moves in seven groups, with the use, the reference and the build status of each"
 group: reference
 ---
 
@@ -113,3 +113,15 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | integration-hub | logos or icons fly in from the edges and converge on a central product mark, then connect in one beat | HyperFrames constellation-hub, locked-nucleus-orbit; video-shotcraft ui-entrance/integration-hub-map | built |
 | device-tilt-stage | the product UI sits in a laptop or phone frame that tilts in 3D and settles | HyperFrames device-frame-stage, browser-device-stage, parallax-device-dive; Apple keynote product films | built |
 | command-palette-summon | a Cmd+K palette drops in, a query types, the list filters, a row is chosen | video-shotcraft interaction/command-palette-summon, type-and-filter; HyperFrames cursor-context-menu; Linear and Raycast launch films | built |
+
+## 7. Grounds
+
+| move | use it for | reference | status |
+|---|---|---|---|
+| aurora-drift | soft folding bands of light hang from the top of the frame while the copy sits low, in one shader | HyperFrames aurora-drift (name only) | built |
+| grain-field | a slow tonal ground with film grain that turns over at 24 fps, seeded from the seek time | HyperFrames grain-field (name only) | built |
+| halftone-field | a 45 degree dot screen whose dot size waves across the frame | HyperFrames halftone-field (name only) | built |
+| ink-warp | marbled ink flowing by domain warp, thinner behind the copy | domain-warp ink shader from the harvest (idea only) | built |
+| dot-grid-wave | an SVG dot grid with a travelling wave of scale and brightness | gradients.css and dot-grid grounds (idea only) | built |
+| light-pool | one soft pool of light wandering on a seeded path over a matte ground, plain CSS | HyperFrames mk-background (name only) | built |
+

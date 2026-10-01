@@ -21,7 +21,7 @@ Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a
 `cubic-bezier()`. The demo page each clip was rendered from is in `demo/`. Every demo links `demo/demo.css`
 (tokens, type scale as a share of frame height, the UI card look); the snippets name its classes, so copy the ones you use.
 
-[LIBRARY.md](LIBRARY.md) lists every approved move in six groups, including the ones still to build.
+[LIBRARY.md](LIBRARY.md) lists every approved move in seven groups, including the ones still to build.
 This index lists the built ones, in the same groups.
 
 ## Pick by job
@@ -48,6 +48,7 @@ One row per job, best move first. Every built move is in this table.
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
 | hold a line still to read, the ground alive | [drift-hold](drift-hold.md), [gradient-mesh-field](gradient-mesh-field.md) |
+| give a held frame a living ground | [aurora-drift](aurora-drift.md), [grain-field](grain-field.md), [halftone-field](halftone-field.md), [ink-warp](ink-warp.md), [dot-grid-wave](dot-grid-wave.md), [light-pool](light-pool.md), [gradient-mesh-field](gradient-mesh-field.md) |
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md), [command-palette-summon](command-palette-summon.md) |
 | show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md), [device-tilt-stage](device-tilt-stage.md) |
 | show an AI product answering | [ai-stream-response](ai-stream-response.md) |
@@ -81,4 +82,5 @@ One table per group, with a use-when line and a clip for each move, in [GROUPS.m
 - [Move the camera](GROUPS.md#move-the-camera): push, pan, dive, rack focus.
 - [End a film](GROUPS.md#end-a-film): the last second, quiet or with an action.
 - [Product moments](GROUPS.md#product-moments): a click, a card, a number, a real UI arriving.
+- [Grounds](GROUPS.md#grounds): a living ground for a held frame, shader, SVG or CSS.
 - [Looks](GROUPS.md#looks): the ten demo looks and their tokens.

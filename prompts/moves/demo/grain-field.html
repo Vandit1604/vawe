@@ -1,0 +1,67 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="paper">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<title>move: grain field</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; }
+  .copy .title { margin: 0; font-size: calc(var(--u) * 16); line-height: 1.04; }
+  .copy .lead { margin: var(--s3) 0 0; max-width: 24em; color: var(--ink); text-wrap: pretty; }
+
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
+  @keyframes rise { to { translate: 0 0; } }
+
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
+</style>
+</head>
+<body>
+<main class="copy">
+  <h1 class="title"><span class="mask" style="--i:0"><span>A ground</span></span><span class="mask" style="--i:1"><span>with a pulse.</span></span></h1>
+  <p class="lead" id="lead">Film grain turns over 24 times a second on a slow shift of tone.</p>
+</main>
+<script type="module">
+import '/core/engine/page-api.js';
+import { shaderField } from '/core/surfaces/shader-field.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+
+const root = document.documentElement;
+root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const lead = document.getElementById('lead');
+lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+
+const tokens = getComputedStyle(root);
+const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
+
+// A slow tonal ground from two layers of value noise, and film grain that is a hash of the pixel cell and the frame number.
+const frag = `
+uniform vec3 u_ground, u_raised, u_accent;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed * 17.0) * 43758.5453); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+void main() {
+  vec2 p = gl_FragCoord.xy / u_res.y;
+  float tone = 0.6 * vnoise(p * 1.6 + vec2(u_time * 0.45, -u_time * 0.3)) + 0.4 * vnoise(p * 3.0 - vec2(u_time * 0.25, u_time * 0.55));
+  float t = smoothstep(0.30, 0.70, tone);
+  vec3 col = mix(u_ground, u_raised, t);
+  col = mix(col, u_accent, 0.07 * smoothstep(0.55, 0.85, tone));
+  float frame = floor(u_time * 24.0 + 0.001);
+  vec2 cell = floor(gl_FragCoord.xy / 2.0) + vec2(frame * 17.31, frame * 5.77);
+  float grain = hash(cell) + hash(cell + 41.7) - 1.0;
+  gl_FragColor = vec4(col + grain * 0.035, 1.0);
+}`;
+
+const field = shaderField(frag, { seed: 5, uniforms: { u_ground: rgb('--ground'), u_raised: rgb('--raised'), u_accent: rgb('--accent') } });
+vawe.onFrame((t) => field.draw(t));
+</script>
+</body>
+</html>
