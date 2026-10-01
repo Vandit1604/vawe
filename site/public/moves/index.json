@@ -936,6 +936,20 @@
    "duration": 2
   },
   {
+   "name": "gradient-mesh-field",
+   "title": "Gradient mesh field",
+   "group": "move-the-camera",
+   "look": "signal",
+   "jobs": [
+    "hold-a-line-still-to-read-the-ground-alive"
+   ],
+   "use": "a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1",
+   "clip": "https://vawe.dev/moves/gradient-mesh-field.mp4",
+   "md": "https://vawe.dev/moves/gradient-mesh-field.md",
+   "page": "https://vawe.dev/moves/gradient-mesh-field",
+   "duration": 3
+  },
+  {
    "name": "pan-stations",
    "title": "Pan stations",
    "group": "move-the-camera",
