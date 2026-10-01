@@ -231,6 +231,20 @@ export const VERBS = [
     build: () => [{ node: ['--test', 'tests/**/*.test.mjs'] }],
   },
   {
+    name: 'runs', summary: 'the log of a film (one row per step: new, dev, judge, ship) or, with --all, one row per film of the last 30 days',
+    positional: [{ name: 'film', help: 'film name or films/<name>/page.html' }],
+    flags: [
+      { name: 'all', type: 'bool', help: 'one row per film (drafts, median draft seconds, first and best judged total, PASS), then medians per model' },
+      { name: 'json', type: 'bool', help: 'print the records (or with --all the rows) as JSON' },
+      { name: 'dir', type: 'path', default: 'out', help: 'the folder that holds the <film>.runs.jsonl files' },
+    ],
+    example: 'vawe runs my-launch   |   vawe runs --all',
+    build: (v, [film]) => {
+      if (!v.all && !film) throw new UsageError('missing <film>; usage: vawe runs <film>  or  vawe runs --all');
+      return [{ script: 'harness/dev/runs.mjs', args: [...(v.all ? ['--all'] : [film]), ...(v.json ? ['--json'] : []), ...opt('--dir', v.dir)] }];
+    },
+  },
+  {
     name: 'judge', summary: 'prepare key frames and the rubric for a fresh session to score',
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'a page or a rendered mp4' }],
     flags: [

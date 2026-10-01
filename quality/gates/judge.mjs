@@ -22,6 +22,7 @@ import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { craftRubric, structuredRubric } from './rubric.mjs';
 import { gateFindings, readFindings } from '../../harness/lib/findings.mjs';
 import { appendRun } from '../../harness/lib/runlog.mjs';
+import { judgeEvent } from '../../harness/lib/run-events.mjs';
 import { selfRecordCheck } from '../../harness/lib/judge-self-record.mjs';
 import { JUDGE_CODES, isJudgeCode, parseFix } from '../../harness/lib/judge-codes.mjs';
 import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
@@ -189,7 +190,7 @@ if (verdictArg) {
   console.log(`  judge result: ${resultFile}`);
   // Logged here, and only here: this is the agent's actual verdict, written down after the eye looked,
   // never a verdict the prep step invents for itself (a judge PASS is never self-recorded).
-  appendRun(inp, { cmd: 'judge', judge: { verdict: v, file: sheet } });
+  appendRun(inp, judgeEvent({ stage: 'manual', verdict: v }));
   const fixSummary = fixRecords.length
     ? ` (${fixRecords.map((r) => `${r.code}@${r.beat}`).join(', ')})`
     : (fixesProse ? ` (${fixesProse})` : '');
@@ -279,7 +280,7 @@ if (verdictJsonArg) {
     console.error('  note: a FIX verdict should carry "fixes": each with shot, frame, wrong, why and the exact fix. None recorded.');
   }
   writeReceipt(stage, inp, { run, verdict: v, overall, criteria: payload.criteria, fixes, sheet, renderHash, mp4, at: new Date().toISOString().slice(0, 10) });
-  appendRun(inp, { cmd: 'judge-struct', judge: { run, verdict: v, overall, file: verdictJsonArg } });
+  appendRun(inp, judgeEvent({ stage: 'struct', verdict: v, scores: { overall } }));
   const first = fixes.find((x) => x && x.fix);
   const time = first && [first.t, first.time, first.at].find((x) => typeof x === 'number');
   writeJudgeResult(mp4, { verdict: v, pass: v === 'PASS', time: time ?? null, topFix: first ? first.fix : null, overall, run, renderHash });

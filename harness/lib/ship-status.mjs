@@ -6,6 +6,11 @@ import { STILL_SEC, undeclaredStills, stillText } from './still-limit.mjs';
 export const LIMITS = { staticSec: STILL_SEC, worldSec: 2, blankSec: 0.3, blankEdgeSec: 0.5, maxProblems: 3 };
 const SAMPLE_FPS = 10;
 
+export const SHIP_JOBS_DIR = path.join('out', 'ship-jobs');
+
+/** The log of a ship job: out/ship-jobs/<id>.log, where the id is <film>-<time>. */
+export const jobLogPath = (id) => path.join(SHIP_JOBS_DIR, `${id}.log`);
+
 export const samePage = (a, b) => path.resolve(a) === path.resolve(b);
 
 const clock = (ms) => `${Math.round(ms / 1000)}s`;
@@ -44,6 +49,13 @@ export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}) {
   return found.sort((x, y) => y.len - x.len).map((p) => p.text);
 }
 
+/** PASS when the fresh judge passed and no acceptance row missed, FIX when not, null when no judge ran. */
+export function shipVerdict(job) {
+  if (!job.verdict) return null;
+  const judged = /: PASS/.test(job.verdict[0] || '');
+  return judged && job.acceptance?.allGreen !== false ? 'PASS' : 'FIX';
+}
+
 export function doneLines(job) {
   const lines = [`job ${job.id}: done in ${clock(job.endedAt - job.startedAt)}`];
   for (const o of job.outputs || []) lines.push(`output: ${o}`);
@@ -61,7 +73,7 @@ export function doneLines(job) {
   if (!job.outputs?.length) return lines;
   const judged = /: PASS/.test(job.verdict?.[0] || '');
   const missed = job.acceptance?.allGreen === false;
-  if (job.verdict) lines.push(`ship verdict: ${judged && !missed ? 'PASS' : 'FIX'} (the judge ${judged ? 'passed' : 'did not pass'}; ${missed ? 'an acceptance row missed' : 'every measured acceptance row is green'})`);
+  if (job.verdict) lines.push(`ship verdict: ${shipVerdict(job)} (the judge ${judged ? 'passed' : 'did not pass'}; ${missed ? 'an acceptance row missed' : 'every measured acceptance row is green'})`);
   if (!job.verdict) lines.push(`next: bin/vawe judge ${job.outputs[0]} --fresh`);
   else if (judged && !missed) lines.push('next: show the owner');
   else if (judged) lines.push(`next: fix the acceptance rows above on drafts (bin/vawe dev), then bin/vawe ship ${job.page} again`);

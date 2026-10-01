@@ -13,7 +13,7 @@ import { heldTextRuns } from '../lib/draft-check.mjs';
 import { textCollisions } from '../lib/text-collision.mjs';
 import { readHoldProblems, readHoldUnmeasured, probeTracks } from '../lib/read-hold.mjs';
 import { wordChecks, cutChecks, skippedWords, measuredSpec } from '../lib/spec-conformance.mjs';
-import { buildRows, withHistory, tableLines, allMeasuredGreen, syncLine } from '../lib/acceptance.mjs';
+import { buildRows, withHistory, tableLines, allMeasuredGreen, syncLine, acceptanceCounts } from '../lib/acceptance.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaived } from '../lib/waivers.mjs';
 
@@ -92,7 +92,7 @@ async function finalLevel(mp4) {
 }
 
 /**
- * The acceptance table for a finished final, after its judge ran: { lines, allGreen }. The rows that need the
+ * The acceptance table for a finished final, after its judge ran: { lines, allGreen, counts }. The rows that need the
  * live page (text, collisions, exits, spec words) keep the value of the last run, marked "(draft)".
  */
 export async function finalAcceptance({ page, outputs }) {
@@ -103,7 +103,7 @@ export async function finalAcceptance({ page, outputs }) {
   const level = await finalLevel(mp4);
   const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(tables.acceptance, m, { objects: tables.objects.length > 0, carry: history.at(-1)?.rows ?? [] });
-  return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows) };
+  return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows), counts: acceptanceCounts(rows) };
 }
 
 /** The measured text sizes of the last draft, [{ text, cap, t }] with cap in % of frame height, for the judge. Product chrome is not a line to read, so it is left out. */

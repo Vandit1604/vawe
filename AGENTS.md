@@ -42,6 +42,8 @@ next command for the film you edited last.
 | 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
 | 6 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
 
+Every step logs to `out/<film>.runs.jsonl`: set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell, then `bin/vawe runs <film>` or `--all` reads the log.
+
 Recreating a reference: `bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md; mark every line KEEP
 or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until it passes
 (`vawe-reference`). `ship` refuses until that loop passes.
