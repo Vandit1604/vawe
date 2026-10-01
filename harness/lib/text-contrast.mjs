@@ -101,6 +101,9 @@ export function draftLowContrast(samples) {
 }
 
 /** One advice line per text under DRAFT_MIN_RATIO in the draft's probe samples. Pure. */
-export function draftContrastLines(samples) {
-  return (draftLowContrast(samples) ?? []).map((c) => `text "${c.text}" at ${c.t.toFixed(2)} s reads ${c.ratio.toFixed(1)}:1 on the pixels behind it (${hexOf(c.fg)} on ${hexOf(c.bg)}, needs ${c.need}:1): use ${passingColour(c)}, or change the ground behind it, or waive "text-low-contrast" with a _why`);
+export const draftContrastLines = (samples) => contrastLines(draftLowContrast(samples));
+
+/** One advice line per low-contrast text (draftLowContrast's list). Pure. */
+export function contrastLines(low) {
+  return (low ?? []).map((c) => `text "${c.text}" at ${c.t.toFixed(2)} s reads ${c.ratio.toFixed(1)}:1 on the pixels behind it (${hexOf(c.fg)} on ${hexOf(c.bg)}, needs ${c.need}:1): use ${passingColour(c)}, or change the ground behind it, or waive "text-low-contrast" with a _why`);
 }

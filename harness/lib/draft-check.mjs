@@ -18,6 +18,26 @@ export function sampleTimes(dur) {
   return { step, times: Array.from({ length: n }, (_, i) => +((i + 0.5) * step).toFixed(3)) };
 }
 
+const STILL_PX = 2;
+const SETTLED_MAX = 8;
+const stateOf = (s) => s.lines.map((l) => `${l.text}|${l.box.map((v) => Math.round(v / STILL_PX)).join(',')}|${Math.round((l.opacity ?? 1) * 10)}`).join(';');
+
+/**
+ * The samples to read pixels at: the last sample of each run where the visible text held still (same text, boxes
+ * within STILL_PX, same opacity to a tenth) for two or more samples, at most SETTLED_MAX spread over the film.
+ * A film whose text never holds still gives its busiest sample. Pure.
+ */
+export function settledSamples(samples, max = SETTLED_MAX) {
+  const withText = samples.filter((s) => s.lines.length);
+  const last = withText.filter((s, i) => {
+    const next = withText[i + 1];
+    return i > 0 && stateOf(withText[i - 1]) === stateOf(s) && !(next && stateOf(next) === stateOf(s));
+  });
+  const picked = last.length ? last : withText.slice().sort((a, b) => b.lines.length - a.lines.length).slice(0, 1);
+  const stride = Math.max(1, Math.ceil(picked.length / max));
+  return picked.filter((_, i) => i % stride === 0);
+}
+
 const keyOf = (text) => text.replace(/\s+/g, ' ').trim().slice(0, 40);
 
 function keep(kept, run, step, rules) {

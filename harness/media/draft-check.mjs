@@ -3,16 +3,21 @@
 import { spawnSync } from 'node:child_process';
 import { readFeatures, summarize, probeSize } from './scene-stats.mjs';
 import { blankRuns, isFlat, problemsOf } from '../lib/ship-status.mjs';
-import { sampleTimes, DECORATIVE, CHROME } from '../lib/draft-check.mjs';
+import { sampleTimes, settledSamples, DECORATIVE, CHROME } from '../lib/draft-check.mjs';
+import { draftLowContrast, shownAndHidden } from '../lib/text-contrast.mjs';
 import { sheetFps, tileProblems, TILE_W } from '../lib/sheet-tiles.mjs';
 import { specTimes, wordTimes, objectChecks } from '../lib/spec-conformance.mjs';
 import { sampleBoxTracks } from '../lib/box-track.mjs';
+import { frameMotion } from './motion-curve.mjs';
 
-/** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. Throws when ffmpeg fails. */
-export function videoProblems(mp4, authoring = {}) {
-  const feats = readFeatures(mp4);
-  const { diffs, fps } = sheetTileDiffs(mp4);
-  return [...problemsOf(summarize(feats), blankRuns(feats, isFlat), undefined, authoring), ...tileProblems(diffs, fps, authoring)];
+/** What one pass over a draft video reads: its scene features, the judge sheet's tile differences and its frame motion. Throws when ffmpeg fails. */
+export function readVideo(mp4) {
+  return { feats: readFeatures(mp4), tiles: sheetTileDiffs(mp4), motion: frameMotion(mp4) };
+}
+
+/** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. */
+export function videoProblems({ feats, tiles }, authoring = {}) {
+  return [...problemsOf(summarize(feats), blankRuns(feats, isFlat), undefined, authoring), ...tileProblems(tiles.diffs, tiles.fps, authoring)];
 }
 
 /** The judge's sheet tiles (harness/media/judge-fresh.mjs contactSheet, without labels): adjacent mean grey differences. */
@@ -77,22 +82,34 @@ export function visibleLines(decorative, chrome) {
   return { lines: out, blocks };
 }
 
-/** Seek to each sample time and list the visible text. `seek(ms)` is the renderer's seek; `shots(page)` adds pixels. */
-export async function sampleText(page, dur, seek, shots = null) {
+/** Seek to each sample time (film seconds from `from`) and list the visible text. `seek(ms)` is a layout seek: text needs no paint. */
+export async function sampleText(page, dur, seek, from = 0) {
   const { step, times } = sampleTimes(dur);
   const samples = [];
-  for (const t of times) {
+  for (const rel of times) {
+    const t = +(from + rel).toFixed(3);
     await seek(t * 1000);
-    samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME)).lines, ...(shots ? { shots: await shots(page) } : {}) });
+    samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME)).lines });
   }
   return { samples, step, frameH: await page.evaluate(() => innerHeight) };
 }
 
+/** The texts under the draft contrast floor, read from two screenshots at each settled sample only. `seek(ms)` must paint. */
+export async function sampleContrast(page, samples, seek) {
+  const withShots = [];
+  for (const s of settledSamples(samples)) {
+    await seek(s.t * 1000);
+    withShots.push({ ...s, shots: await shownAndHidden(page) });
+  }
+  return draftLowContrast(withShots);
+}
+
 /**
- * The brief's SPEC tables read off the live page: { samples (the text at each settle time), times (per Words row,
- * when it appears and settles), objects (the Objects checks), frameW, frameH }. Null when the tables name neither.
+ * The brief's SPEC Words rows read off the live page: { samples (the text at each settle time), times (per Words row,
+ * when it appears and settles), objects (the Objects checks, or null when `objects` is false), frameW, frameH }.
+ * Null when the tables name neither. The Words times are searched around the spec times, a few seeks each.
  */
-export async function sampleSpec(page, tables, seek, dur) {
+export async function sampleSpec(page, tables, seek, dur, { objects = true } = {}) {
   if (!tables.words.length && !tables.objects.length) return null;
   const [frameW, frameH] = await page.evaluate(() => [innerWidth, innerHeight]);
   const frame = { frameW, frameH };
@@ -102,6 +119,15 @@ export async function sampleSpec(page, tables, seek, dur) {
   for (const t of times.text) samples.push({ t, ...(await linesAt(t)) });
   const wordTimesOf = [];
   for (const w of tables.words) wordTimesOf.push(await wordTimes(w, linesAt, { dur, frame }));
-  const boxes = tables.objects.length ? await sampleBoxTracks(page, times.boxes, { selectors: tables.objects.map((o) => o.selector) }) : null;
-  return { samples, times: wordTimesOf, objects: boxes ? await objectChecks(tables.objects, boxes, frame) : null, frameW, frameH };
+  return { samples, times: wordTimesOf, objects: objects ? await sampleObjects(page, tables, frame, dur) : null, frameW, frameH };
 }
+
+/** The Objects checks: every frame of the film boxed per named selector, then in/settle/out found. Null when no Objects rows. */
+export async function sampleObjects(page, tables, frame, dur) {
+  if (!tables.objects.length) return null;
+  const boxes = await sampleBoxTracks(page, specTimes(tables, dur).boxes, { selectors: tables.objects.map((o) => o.selector) });
+  return objectChecks(tables.objects, boxes, frame);
+}
+
+/** A stored Objects result with the "not found" distance back as Infinity (JSON writes it as null). */
+export const reviveObjects = (checks) => checks && checks.map((c) => (c.dev === null ? { ...c, dev: Infinity } : c));
