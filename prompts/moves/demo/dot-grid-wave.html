@@ -25,7 +25,7 @@
 <svg class="grid" id="grid" aria-hidden="true"></svg>
 <main class="copy">
   <h1 class="title"><span class="mask" style="--i:0"><span>A wave</span></span><span class="mask" style="--i:1"><span>in the grid.</span></span></h1>
-  <p class="lead" id="lead">Scale and brightness travel across a plain field of dots.</p>
+  <p class="lead" id="lead">A fine dot texture, until a soft wave passes through it.</p>
 </main>
 <script type="module">
 import '/core/engine/page-api.js';
@@ -38,7 +38,7 @@ const lead = document.getElementById('lead');
 lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
 
 // A grid of SVG dots. A plane wave sets each dot's radius and opacity from its place and the seek time: no state between frames.
-const PITCH = 0.052, BASE = 0.0095, SPEED = 3.4;       // grid pitch and base radius as shares of the frame height, wave rad/s
+const PITCH = 0.021, BASE = 0.0011, SPEED = 1.7;       // pitch (22 px at 1080) and base radius (1.2 px) as shares of the frame height, wave rad/s
 const W = innerWidth, H = innerHeight;
 const svg = document.getElementById('grid');
 svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -51,15 +51,15 @@ for (let y = PITCH * H / 2; y < H; y += PITCH * H) {
     c.setAttribute('cx', x.toFixed(1)); c.setAttribute('cy', y.toFixed(1));
     svg.append(c);
     const zone = (1 - smooth(0.60 * W, 0.74 * W, x)) * (1 - smooth(0.30 * H, 0.40 * H, Math.abs(y - 0.5 * H)));   // the copy box
-    dots.push({ c, nx: x / H, ny: y / H, keep: 1 - 0.8 * zone });
+    dots.push({ c, nx: x / H, ny: y / H, keep: 1 - 0.75 * zone });
   }
 }
-svg.style.fill = getComputedStyle(root).getPropertyValue('--accent');
+svg.style.fill = getComputedStyle(root).getPropertyValue('--ink');
 vawe.onFrame((t) => {
   for (const d of dots) {
-    const w = (0.5 + 0.5 * Math.sin(6.0 * (d.nx * 0.9 + d.ny * 0.45) - t * SPEED)) * d.keep;
-    d.c.setAttribute('r', (BASE * H * (0.5 + 1.3 * w)).toFixed(2));
-    d.c.setAttribute('opacity', (0.2 + 0.8 * w).toFixed(3));
+    const w = (0.5 + 0.5 * Math.sin(2.4 * (d.nx * 0.9 + d.ny * 0.45) - t * SPEED));
+    d.c.setAttribute('r', (BASE * H * (1 + 0.5 * w)).toFixed(2));
+    d.c.setAttribute('opacity', (d.keep * (0.10 + 0.42 * w)).toFixed(3));
   }
 });
 </script>
