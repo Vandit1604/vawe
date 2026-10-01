@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { motionLint, exitLength, groupLanding, linearMove, seamRepeat, oneBand, moveDirection, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
+import { mergeRecords, motionLint, exitLength, groupLanding, linearMove, seamRepeat, oneBand, moveDirection, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
 
 const rec = (o) => ({ target: 0, label: 'h1 "Hi"', id: '', props: ['opacity'], delay: 0, duration: 0.5, easing: 'linear',
   kfEasings: ['ease', 'ease'], opacity: null, from: '', fullFrame: false, ...o });
@@ -70,4 +70,27 @@ test('lines carry the rule, the second, the code and one fix, in time order', ()
   const lines = lintLines(findings);
   assert.match(lines[0], /^rule 6 @1\.00s linear-move: .*; fix: /);
   assert.match(lines[1], /^rule 5 @3\.00s exit-length: /);
+});
+
+test('an element inside aria-hidden is texture: its exit is not measured', () => {
+  const inn = rec({ opacity: [0, 1], duration: 0.6, decorative: true });
+  assert.deepEqual(exitLength([inn, rec({ opacity: [1, 0], delay: 2, duration: 0.6, decorative: true })]), []);
+});
+
+test('an exit sampled at a spacing as long as the exit is not measured; a measured one still is', () => {
+  const inn = rec({ opacity: [0, 1], duration: 0.6 });
+  const coarse = rec({ opacity: [1, 0], delay: 2, duration: 0.075, step: 0.075 });
+  assert.deepEqual(exitLength([inn, coarse]), []);
+  const fine = rec({ opacity: [1, 0], delay: 2, duration: 0.3, step: 0.075 });
+  assert.deepEqual(exitLength([inn, fine]), []);
+  const slow = rec({ opacity: [1, 0], delay: 2, duration: 0.75, step: 0.075 });
+  assert.equal(exitLength([inn, slow]).length, 1);
+});
+
+test('mergeRecords: sampled records get targets of their own, so an entrance never pairs with another element exit', () => {
+  const animated = [rec({ target: 0, opacity: [0, 1], duration: 0.6 }), rec({ target: 1, opacity: [0, 1], duration: 0.6 })];
+  const sampled = [rec({ target: 0, opacity: [1, 0], delay: 2, duration: 0.9, step: 0.05 })];
+  const merged = mergeRecords(animated, sampled);
+  assert.deepEqual(merged.map((r) => r.target), [0, 1, 2]);
+  assert.deepEqual(exitLength(merged), []);
 });

@@ -80,6 +80,14 @@ export const VERBS = [
     },
   },
   {
+    name: 'spec-sync', summary: 'write the times the last draft measured into the brief\'s Words and Objects tables (after you retimed on purpose)',
+    positional: [PAGE],
+    flags: [],
+    example: 'vawe spec-sync films/my-launch/page.html',
+    build: (v, [page]) => [{ script: 'harness/media/spec-sync.mjs', args: [page] }],
+    next: (v, [page]) => `bin/vawe dev ${page}; the changed cells end in *`,
+  },
+  {
     name: 'critique', summary: 'phone sheet, strip, loop seam, measured deltas and page-check to look at',
     positional: [PAGE],
     flags: [

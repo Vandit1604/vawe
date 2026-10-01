@@ -10,6 +10,7 @@ import { DRAFT_MIN_RATIO } from './text-contrast.mjs';
 export const HISTORY_KEEP = 10;
 const SHOW = 3;
 const { lufsLow: LUFS_LOW, lufsHigh: LUFS_HIGH } = RULES;
+const CHROME_CAP_PCT = RULES.chromeCapFrac * 100;
 
 export const DEFAULT_ROWS = [
   ['frozen runs of 3+ frames inside a shot', '0'],
@@ -74,8 +75,10 @@ const ROWS = {
   'text cap height': (m, pass) => {
     if (!m.caps) return skip('no text probe');
     if (!m.caps.length) return done(true, 'no held text');
-    const low = m.caps.reduce((a, c) => (c.cap < a.cap ? c : a));
-    return done(pass(low.cap), `${low.cap.toFixed(1)}%`, pass(low.cap) ? [] : m.caps.filter((c) => !pass(c.cap)).slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%`).concat('raise the font size until the cap height reaches the target'));
+    const ok = (c) => (c.chrome ? c.cap >= CHROME_CAP_PCT : pass(c.cap));
+    const short = m.caps.filter((c) => !ok(c));
+    const low = (short.length ? short : m.caps).reduce((a, c) => (c.cap < a.cap ? c : a));
+    return done(!short.length, `${low.cap.toFixed(1)}%`, short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : ''}`).concat(short.length ? 'raise the font size until the cap height reaches the target, or mark UI texture data-chrome, or aria-hidden="true"' : []));
   },
   'text contrast': (m, pass) => {
     if (!m.contrast) return skip('no pixels sampled behind the text');
@@ -83,9 +86,13 @@ const ROWS = {
     return done(m.contrast.every((c) => pass(c.ratio)), m.contrast.length ? `${low.toFixed(1)}:1` : 'all pass', m.contrast.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(2)} s: ${c.ratio.toFixed(1)}:1`));
   },
   'text collisions': (m, pass) => countRow(m.collisions, pass, (c) => `"${c.a}" and "${c.b}" overlap at ${c.t.toFixed(2)} s`, 'move one, or time one out before the other comes in'),
-  'read hold per line': (m) => (m.readHold ? done(!m.readHold.length, m.readHold.length ? `${m.readHold.length} line(s) short` : 'all long enough', m.readHold.slice(0, SHOW).map((p) => `"${p.text.slice(0, 40)}" holds ${p.hold.toFixed(2)} s, needs ${p.need.toFixed(2)} s`)) : skip('no text probe')),
+  'read hold per line': (m) => {
+    if (!m.readHold) return skip('no text probe');
+    const unmeasured = m.readHoldUnmeasured?.length ? ` (${m.readHoldUnmeasured.length} not measured: settle time after the line left)` : '';
+    return done(!m.readHold.length, `${m.readHold.length ? `${m.readHold.length} line(s) short` : 'all long enough'}${unmeasured}`, m.readHold.slice(0, SHOW).map((p) => `"${p.text.slice(0, 40)}" holds ${p.hold.toFixed(2)} s, needs ${p.need.toFixed(2)} s`));
+  },
   'exits shorter than entrances': (m) => (m.exits ? done(!m.exits.length, m.exits.length ? `${m.exits.length} too long` : 'all', m.exits.slice(0, SHOW).map((e) => `${e.at.toFixed(2)} s: ${e.what}`)) : skip('no motion probe')),
-  'word appear time vs spec': (m, pass) => deviationRow(m.appear, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the word to its appear time in the Words table, or change the table'),
+  'word appear time vs spec': (m, pass) => deviationRow(m.appear, pass, m.skippedWords?.length ? `every Words row is too short to find (${m.skippedWords.map((w) => `"${w}"`).join(', ')})` : 'no spec', (d) => `${d.toFixed(2)} s`, 'move the word to its appear time in the Words table, or change the table'),
   'word cap height and position vs spec': (m, pass) => deviationRow(m.layout, pass, 'no spec', (d) => `${d.toFixed(1)}%`, 'set the font size and box to the Words table, or change the table'),
   'cuts vs spec': (m, pass) => deviationRow(m.cuts, pass, m.hasShots ? 'no hard cut near a shot start' : 'no spec', (d) => `${d.toFixed(1)} frames`, 'land the cut on the Shots boundary, or change the table'),
   'objects in/settle/out vs spec': (m, pass) => deviationRow(m.objects, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the object to its Objects times, or change the table'),
@@ -123,8 +130,8 @@ export function buildRows(brief, m, { objects = false, carry = [] } = {}) {
 const greens = (rows) => rows.filter((r) => r.status === 'ok').length;
 
 /** The history entry for one run, and the file with it appended (the last HISTORY_KEEP kept). Pure. */
-export function withHistory(file, rows, { stage, caps = null, at }) {
-  const entry = { at, stage, green: greens(rows), total: rows.length, unmeasured: rows.filter((r) => r.status === 'not measured').length, rows, ...(caps ? { caps } : {}) };
+export function withHistory(file, rows, { stage, caps = null, spec = null, at }) {
+  const entry = { at, stage, green: greens(rows), total: rows.length, unmeasured: rows.filter((r) => r.status === 'not measured').length, rows, ...(caps ? { caps } : {}), ...(spec ? { spec } : {}) };
   const past = file?.history ?? [];
   return { file: { history: [...past, entry].slice(-HISTORY_KEEP) }, entry, was: past.length ? past[past.length - 1].green : null };
 }
@@ -139,3 +146,11 @@ export function tableLines(rows, was = null) {
 
 /** True when every measured row is green. A row that could not be measured does not count against it. Pure. */
 export const allMeasuredGreen = (rows) => rows.every((r) => r.status !== 'advice');
+
+const SYNC_AFTER = 3;
+
+/** The next-command line when more than SYNC_AFTER timed spec checks (word appear, object in/settle/out) are off, else null. Pure. */
+export function syncLine(timeChecks, page) {
+  const off = timeChecks.filter((c) => c.dev > APPEAR_TOL_S + 1e-9).length;
+  return off > SYNC_AFTER ? `next: ${off} spec times are off; if you retimed on purpose, bin/vawe spec-sync ${page} writes the measured times into the brief` : null;
+}

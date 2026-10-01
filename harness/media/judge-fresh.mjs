@@ -17,6 +17,8 @@ import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { sizeLines, capLines, anchorLines, anchorResult } from '../lib/judge-prompt.mjs';
 import { referenceFor } from '../lib/motion-stamp.mjs';
+import { parseBriefTables } from '../lib/brief-tables.mjs';
+import { settledMoments } from '../lib/key-frames.mjs';
 import { probeSize } from './scene-stats.mjs';
 import { lastCaps } from './acceptance-run.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
@@ -24,7 +26,6 @@ import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 const repoRoot = path.resolve(import.meta.dirname, '../..');
 const SHEET_COLS = 10;
 const KEY_FRAMES = 6;
-const KEY_GAP_S = 0.4;
 const PASS_AT = 8;
 const TASTE_CARD = path.join(repoRoot, 'engine-doctrine', 'TASTE-CARD.md');
 const FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/System/Library/Fonts/Helvetica.ttc', '/Library/Fonts/Arial.ttf'].find(fs.existsSync);
@@ -76,28 +77,22 @@ function contactSheet(video, dur, dir) {
   return { file: out, fps };
 }
 
-/** The moments of largest change: peaks of the mean absolute difference between 10 fps thumbnails. */
-function changePeaks(video) {
+/** The mean absolute difference between 10 fps thumbnails: [{ t, d }], d the change that arrives at second t. */
+function thumbMotion(video) {
   const W = 64, H = 36, FPS = 10, size = W * H;
-  const r = ff(['-i', video, '-vf', `fps=${FPS},scale=${W}:${H},format=gray`, '-f', 'rawvideo', '-'], { raw: true });
-  const buf = r.stdout;
+  const buf = ff(['-i', video, '-vf', `fps=${FPS},scale=${W}:${H},format=gray`, '-f', 'rawvideo', '-'], { raw: true }).stdout;
   const n = Math.floor(buf.length / size);
-  const diffs = [];
+  const motion = [];
   for (let i = 1; i < n; i++) {
     let sum = 0;
     for (let p = 0; p < size; p++) sum += Math.abs(buf[i * size + p] - buf[(i - 1) * size + p]);
-    diffs.push({ t: i / FPS, d: sum / size });
+    motion.push({ t: i / FPS, d: sum / size });
   }
-  const picked = [];
-  for (const c of [...diffs].sort((a, b) => b.d - a.d || a.t - b.t)) {
-    if (picked.length === KEY_FRAMES) break;
-    if (picked.every((p) => Math.abs(p.t - c.t) >= KEY_GAP_S)) picked.push(c);
-  }
-  return picked.sort((a, b) => a.t - b.t).map((p) => p.t);
+  return motion;
 }
 
-function keyFrames(video, dur, dir) {
-  const times = changePeaks(video).map((t) => Math.min(t, dur - 0.05));
+function keyFrames(video, dur, dir, tables) {
+  const times = settledMoments({ words: tables.words, shots: tables.shots, motion: thumbMotion(video), dur, count: KEY_FRAMES });
   return times.map((t, i) => {
     const file = path.join(dir, `key-${i + 1}-${t.toFixed(1)}s.png`);
     ff(['-ss', String(t), '-i', video, '-frames:v', '1', file]);
@@ -147,7 +142,7 @@ async function prepare(input, stage, brief) {
   }
   const dur = durationOf(video);
   const sheet = contactSheet(video, dur, dir);
-  const keys = keyFrames(video, dur, dir);
+  const keys = keyFrames(video, dur, dir, parseBriefTables(brief ? fs.readFileSync(brief, 'utf8') : null));
   const sound = stage === 'final' && hasAudio(video) ? loudness(video) : null;
   const anchor = anchorOf(input, brief);
   const anchorShots = anchor.kind === 'reference' ? anchorFrames(anchor.ref, keys, dir) : [];
@@ -156,7 +151,7 @@ async function prepare(input, stage, brief) {
   const notes = [
     `video: ${video} (${dur.toFixed(2)} s)`,
     `sheet: ${sheet.file}  (one frame every ${(1 / sheet.fps).toFixed(2)} s, read left to right and top to bottom, each tile is labelled with its time in seconds)`,
-    ...keys.map((k, i) => `key frame ${i + 1} at ${k.t.toFixed(1)} s (a moment of large change): ${k.file}`),
+    ...keys.map((k, i) => `key frame ${i + 1} at ${k.t.toFixed(1)} s (a settled moment: nothing mid-transition): ${k.file}`),
     ...anchorShots.map((a, i) => `anchor frame ${i + 1} (the reference at ${a.t.toFixed(1)} s, the anchor for key frame ${i + 1}): ${a.file}`),
     sound || (stage === 'final' ? 'sound: the file has no audio track' : 'sound: not scored at this stage'),
   ];

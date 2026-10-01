@@ -53,3 +53,8 @@ test('numberOf reads seconds and percents and rejects prose', () => {
   assert.equal(numberOf('-'), null);
   assert.equal(numberOf(''), null);
 });
+
+test('a cell spec-sync marked with * still reads as its number', () => {
+  assert.equal(numberOf('1.2 s*'), 1.2);
+  assert.equal(numberOf('14%'), 14);
+});

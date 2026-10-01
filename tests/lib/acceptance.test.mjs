@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRows, targetTest, withHistory, tableLines, allMeasuredGreen, DEFAULT_ROWS } from '../../harness/lib/acceptance.mjs';
+import { buildRows, syncLine, targetTest, withHistory, tableLines, allMeasuredGreen, DEFAULT_ROWS } from '../../harness/lib/acceptance.mjs';
 
 const clean = { smooth: { frozen: [], jerky: [], jumps: [] }, stills: [], tail: 2, caps: [{ text: 'Hi', cap: 7, t: 1 }], contrast: [], collisions: [], readHold: [], exits: [], lufs: -20, peak: -12 };
 const byMetric = (rows) => Object.fromEntries(rows.map((r) => [r.metric, r]));
@@ -76,4 +76,36 @@ test('history keeps the last 10 and the summary shows the trend', () => {
   assert.match(lines.at(-1), /^acceptance: \d+ of 16 green, \d+ not measured \(was 9\)$/);
   assert.ok(lines.some((l) => l.includes('still windows over 0.5 s outside a declared hold | 0 | 1')));
   assert.ok(!lines.some((l) => l.includes('jerky steps')));
+});
+
+test('text cap height: product chrome passes at its own floor and a plain line still needs the target', () => {
+  const rows = (caps) => byMetric(buildRows([{ metric: 'text cap height', target: '6% or more' }], { ...clean, caps }));
+  assert.equal(rows([{ text: 'Inbox', cap: 3, t: 1, chrome: true }, { text: 'Hi', cap: 7, t: 1 }])['text cap height'].status, 'ok');
+  const low = rows([{ text: 'Inbox', cap: 2, t: 1, chrome: true }])['text cap height'];
+  assert.equal(low.status, 'advice');
+  assert.match(low.detail[0], /data-chrome floor 2\.5%/);
+  assert.equal(rows([{ text: 'Hi', cap: 3, t: 1 }])['text cap height'].status, 'advice');
+});
+
+test('read hold: lines with no measurable hold are named in the measure, not failed', () => {
+  const [row] = buildRows([{ metric: 'read hold per line', target: 'max(1.2 s, words/3 s) or more' }], { ...clean, readHold: [], readHoldUnmeasured: [{ text: 'Go' }] });
+  assert.equal(row.status, 'ok');
+  assert.match(row.measured, /1 not measured/);
+});
+
+test('word appear row: when every Words row is too short to find, the row says so', () => {
+  const [row] = buildRows([{ metric: 'word appear time vs spec', target: 'within 0.05 s' }], { ...clean, appear: [], skippedWords: ['.'] });
+  assert.equal(row.status, 'not measured');
+  assert.match(row.measured, /too short to find \("\."\)/);
+});
+
+test('syncLine: names spec-sync only when more than 3 timed spec checks are off', () => {
+  const c = (dev) => ({ dev });
+  assert.equal(syncLine([c(0.3), c(0.3), c(0.3), c(0.01)], 'films/a/page.html'), null);
+  assert.match(syncLine([c(0.3), c(0.3), c(0.3), c(Infinity)], 'films/a/page.html'), /^next: 4 spec times are off; .* bin\/vawe spec-sync films\/a\/page\.html/);
+});
+
+test('withHistory keeps the measured spec of a draft for spec-sync', () => {
+  const { file } = withHistory(null, [], { stage: 'draft', spec: { words: [], objects: [] }, at: 'now' });
+  assert.deepEqual(file.history[0].spec, { words: [], objects: [] });
 });

@@ -40,6 +40,15 @@ test('a product demo, feature tour or proof film takes the brand launch template
   }
 });
 
+test('an invented product has no URL to capture: it never takes the brand launch template and still gets the launch chain', () => {
+  const request = 'a launch film for an invented invoice tool';
+  const r = pickTemplate({ request, length: 22 }, table);
+  assert.equal(r.template, 'prompts/beat-sheet.md');
+  assert.match(r.why, /invented/);
+  assert.equal(pickRecipe({ request, length: 22 }, readRecipes(root)).heading.split(',')[0], '9. Problem to fix launch');
+  assert.equal(pickTemplate({ request: 'a launch film for an invented tool, like https://acme.com', length: 22 }, table).template, 'prompts/brand-launch-from-url.md');
+});
+
 test('an unknown request takes the motion-graphic row and says so', () => {
   const r = pickTemplate({ name: 'zz-demo' }, table);
   assert.equal(r.template, 'prompts/beat-sheet.md');

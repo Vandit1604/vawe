@@ -84,6 +84,9 @@ and `y %` are the text box's left and top edges. Every cell is a number you can 
 ```
 
 `vawe new` writes one example row per table, marked `(guess: change me)` in its first cell. Replace it.
+Text that is texture, not copy, is outside the text rows: `aria-hidden="true"` skips every text check, and
+`data-chrome` (a real product's UI labels) is held to a 2.5% cap floor and has no read hold. If you retime on
+purpose, `bin/vawe spec-sync <page>` writes the last draft's measured times into the Words and Objects cells.
 Answers: the gold film's gains came from numbers (ring width equals the "o", push 12%, a window onto the
 real next world), and a static tail after 4 s appeared in 5 of 11 films.
 

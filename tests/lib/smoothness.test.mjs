@@ -41,3 +41,9 @@ test('a jump at a detected hard cut is excused within the sampling tolerance', (
 test('hardJumps lists the seconds over the jump size', () => {
   assert.deepEqual(hardJumps([1, 30, 1, 26]), [2 / 30, 4 / 30]);
 });
+
+test('the first frames of a fast move from rest are not a jerky step; a spike inside a moving run is', () => {
+  assert.equal(smoothness([0.2, 0.2, 1.5, 6, 6, 6, 0.4]).jerky.length, 0);
+  assert.equal(smoothness([0.2, 1.5, 6, 6, 6]).jerky.length, 0);
+  assert.equal(smoothness([3, 3.2, 3.1, 9, 9]).jerky.length, 1);
+});

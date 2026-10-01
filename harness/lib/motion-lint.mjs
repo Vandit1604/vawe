@@ -3,10 +3,11 @@
 // records from element boxes over time (harness/lib/box-track.mjs) for a page that paints in window.seek
 // or vawe.onFrame. Everything else is pure over the records.
 import { isWaived } from './waivers.mjs';
+import { DECORATIVE } from './draft-check.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
 
-// motionRecord and collectMotion run inside the page (runMotionCollector bundles their source), so
-// each is self-contained: no outer bindings.
+// motionRecord and collectMotion run inside the page (runMotionCollector bundles their source with DECORATIVE),
+// so each is self-contained: no other outer bindings.
 export function motionRecord(a, k, area) {
   const skip = ['offset', 'computedOffset', 'easing', 'composite'];
   const e = a.effect, el = e.target, t = e.getComputedTiming(), kfs = e.getKeyframes();
@@ -22,6 +23,7 @@ export function motionRecord(a, k, area) {
     opacity: withOpacity.length ? [Number(withOpacity[0].opacity), Number(withOpacity[withOpacity.length - 1].opacity)] : null,
     from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''),
     fullFrame: box.width * box.height >= 0.6 * area,
+    decorative: Boolean(el.closest(DECORATIVE)),
   };
 }
 
@@ -37,7 +39,7 @@ export function collectMotion() {
   return { records, scripted: typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length > 0 };
 }
 
-const COLLECTOR = [motionRecord, collectMotion].map((fn) => fn.toString()).join('\n');
+const COLLECTOR = `const DECORATIVE = ${JSON.stringify(DECORATIVE)};\n${[motionRecord, collectMotion].map((fn) => fn.toString()).join('\n')}`;
 
 /** { records, scripted } from a loaded page. Call it before any seek past the start: a finished fill-none animation drops out of getAnimations. */
 export function runMotionCollector(page) {
@@ -52,6 +54,9 @@ const MOVE = /^(transform|translate|scale|rotate|left|top|right|bottom|clipPath|
 const moves = (r) => r.props.some((p) => MOVE.test(p));
 const entering = (r) => r.id === 'enter' || (r.opacity && r.opacity[1] > r.opacity[0]);
 const exiting = (r) => r.id === 'leave' || (r.opacity && r.opacity[1] < r.opacity[0]);
+// A record inferred from box samples is exact only when it spans a few samples; one animation's own timing always is.
+const MIN_SAMPLES = 2;
+const measured = (r) => !r.step || r.duration >= MIN_SAMPLES * r.step;
 const isLinear = (r) => r.easing === 'linear' && r.kfEasings.every((e) => e === 'linear');
 const s2 = (x) => x.toFixed(2);
 
@@ -61,11 +66,11 @@ function byTarget(records) {
   return [...m.values()];
 }
 
-/** An exit that runs as long as or longer than its entrance, per element (card rule 5). */
+/** An exit that runs as long as or longer than its entrance, per element (card rule 5). Decorative elements and sampled runs under two samples are not measured. */
 export function exitLength(records) {
   const out = [];
-  for (const rs of byTarget(records)) {
-    const ins = rs.filter((r) => entering(r) && r.duration > CUT), outs = rs.filter((r) => exiting(r) && r.duration > CUT);
+  for (const rs of byTarget(records.filter((r) => !r.decorative))) {
+    const ins = rs.filter((r) => entering(r) && r.duration > CUT && measured(r)), outs = rs.filter((r) => exiting(r) && r.duration > CUT && measured(r));
     if (!ins.length || !outs.length) continue;
     const came = Math.max(...ins.map((r) => r.duration)), exit = outs.reduce((a, r) => (r.duration > a.duration ? r : a));
     if (exit.duration >= came) out.push({ code: 'exit-length', rule: 5, at: exit.delay,
@@ -212,6 +217,7 @@ function runRecord(boxes, i, own, [a, b]) {
     opacity: fade ? [s[4], e[4]] : null,
     from: moved ? `translate(${(s[0] - e[0]).toFixed(1)}px, ${(s[1] - e[1]).toFixed(1)}px)` : '',
     fullFrame: Math.max(track[a - 1][2] * track[a - 1][3], track[b][2] * track[b][3]) >= 0.6 * boxes.area,
+    step: boxes.times[1] - boxes.times[0],
   };
 }
 
@@ -224,6 +230,12 @@ export function recordsFromBoxes(boxes) {
     for (const run of activeRuns(own)) out.push(runRecord(boxes, i, own, run));
   });
   return out.filter((r) => r.props.length);
+}
+
+/** Animation records and box-inferred records in one list: the two sources number their targets from 0, so the second set moves up. */
+export function mergeRecords(animated, sampled) {
+  const base = Math.max(-1, ...animated.map((r) => r.target)) + 1;
+  return [...animated, ...sampled.map((r) => ({ ...r, target: r.target + base }))];
 }
 
 /** Every lint finding, in time order. */

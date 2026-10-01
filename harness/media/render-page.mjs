@@ -55,13 +55,13 @@ import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, sampleSpec, videoProblems } from './draft-check.mjs';
 import { parseBriefTables, readBrief } from '../lib/brief-tables.mjs';
 import { draftAcceptance } from './acceptance-run.mjs';
-import { textProblems, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
+import { textProblems, frameUnitLines, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived } from '../lib/waivers.mjs';
 import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
-import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes } from '../lib/motion-lint.mjs';
+import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
@@ -711,7 +711,7 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
 
 function motionFindings(pagePath, motion) {
   const boxes = motion.boxes;
-  const records = boxes ? [...motion.records, ...recordsFromBoxes(boxes)] : motion.records;
+  const records = boxes ? mergeRecords(motion.records, recordsFromBoxes(boxes)) : motion.records;
   return unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath));
 }
 
@@ -727,7 +727,7 @@ function motionAdvice(pagePath, motion) {
 export async function probePage(page, dur, pagePath) {
   const motion = await collectPageMotion(page, dur);
   const probe = await sampleText(page, dur, (ms) => seekAll(page, ms), shownAndHidden);
-  probe.spec = await sampleSpec(page, parseBriefTables(readBrief(pagePath)), (ms) => seekAll(page, ms));
+  probe.spec = await sampleSpec(page, parseBriefTables(readBrief(pagePath)), (ms) => seekAll(page, ms), dur);
   return { motion, probe };
 }
 
@@ -741,7 +741,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions, ...recipeEchoLines(brief)],
+    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions, ...recipeEchoLines(brief)],
   };
 }
 
