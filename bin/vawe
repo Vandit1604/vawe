@@ -61,7 +61,7 @@ function main(argv) {
       const code = runStep(step);
       if (code !== 0) process.exit(code);
     }
-    if (verb.next) console.log(`\nnext: ${verb.next(values, positional)}`);
+    if (verb.next && !verb.nextInline) console.log(`\nnext: ${verb.next(values, positional)}`);
   } catch (e) {
     if (e instanceof UsageError) return fail(e.message);
     throw e;

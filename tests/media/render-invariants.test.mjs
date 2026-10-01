@@ -34,7 +34,7 @@ test('a blank run in the middle renders and advises with the range to declare', 
   const r = render(path.join(dir, 'invariants/invariant-blank-bad.html'));
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /^advice: frames \d+-\d+ .* blank; declare it with <meta name="blank"/m);
-  assert.match(r.stdout, /^\(advice only: the render continued\)$/m);
+  assert.match(r.stdout, /^acceptance: \d+ of \d+ green/m);
 });
 
 for (const page of ['invariant-blank-ok.html', 'invariant-assert-ok.html']) {

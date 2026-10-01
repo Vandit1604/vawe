@@ -52,9 +52,12 @@ import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun } from '../lib/runlog.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
-import { sampleText, sampleSpec, videoProblems } from './draft-check.mjs';
-import { parseBriefTables, readBrief } from '../lib/brief-tables.mjs';
-import { draftAcceptance } from './acceptance-run.mjs';
+import { sampleText, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
+import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
+import { createChecks, timeLine } from '../lib/check-runner.mjs';
+import { MODES } from '../lib/draft-tiers.mjs';
+import { redLine, summaryLine, fullTable } from '../lib/acceptance.mjs';
+import { draftAcceptance, videoMeasures } from './acceptance-run.mjs';
 import { textProblems, frameUnitLines, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
@@ -66,7 +69,7 @@ import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
-import { draftContrastLines, shownAndHidden } from '../lib/text-contrast.mjs';
+import { contrastLines } from '../lib/text-contrast.mjs';
 import { peakLine } from '../lib/peak-limit.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 
@@ -118,7 +121,7 @@ export async function openPage(pagePath, frame, { warm = false } = {}) {
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
   await (await opened.page.createCDPSession()).send('Emulation.setFocusEmulationEnabled', { enabled: true });
-  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};`);
+  await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
 
@@ -156,14 +159,6 @@ async function frameSpeedsFromBoxes(page, frames, fps, from) {
 }
 
 const isScripted = () => typeof window.seek === 'function' || (window.__vaweFrameHooks || []).length > 0;
-
-// A page that paints in window.seek or onFrame hooks has no animation records; its element boxes over
-// time stand in for them. Call it after runMotionCollector, which must see the animations before any seek.
-async function collectPageMotion(page, dur) {
-  const motion = await runMotionCollector(page);
-  if (!motion.scripted) return motion;
-  return { ...motion, boxes: await sampleBoxTracks(page, lintTimes(dur), 'visible') };
-}
 
 const PIXEL_W = 64;
 
@@ -335,6 +330,9 @@ const stillKey = () => {
   return JSON.stringify(document.getAnimations().map((a) => { const c = a.effect.getComputedTiming(); return [c.progress, c.currentIteration]; }));
 };
 
+// One round trip: a CDP call costs about as much as the seek itself on a page with a heavy frame hook.
+const seekThenKey = async (ms) => { await window.__pageSeek(ms / 1000); return window.__stillKey(); };
+
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
 async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, stallMs) {
   return runShards(pagePath, frame, frames, workers, async (page, i, local, mark) => {
@@ -343,9 +341,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     for (let j = 0; j < k; j++) {
       const file = path.join(tmpDir, `f${String(subframeStart[i] + j).padStart(6, '0')}.png`);
       mark('seek');
-      await page.evaluate((t) => window.__pageSeek(t / 1000), baseMs + (j / k) * SHUTTER * (1000 / fps));
-      mark('still key');
-      const key = await page.evaluate(stillKey);
+      const key = await page.evaluate(seekThenKey, baseMs + (j / k) * SHUTTER * (1000 / fps));
       const reused = key !== null && key === local.key;
       if (reused) fs.linkSync(local.file, file);
       else {
@@ -619,7 +615,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
     if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
-    const { motion = null, probe = null } = opts.probe ? await probePage(page, dur, pagePath) : {};
+    const { motion = null, probe = null } = opts.checks ? await probePage(page, dur, pagePath, { checks: opts.checks, from, whole: from === 0 && durArg == null }) : {};
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
@@ -671,7 +667,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const mixed = await place(tmpOut, outPath);
     if (tmpWeb) await place(tmpWeb, webPath);
     appendRun(pagePath, { cmd: 'render-page', render: { file: outPath, frames, fps, ms: captureMs + encodeMs } });
-    const level = opts.probe && !mixed ? await mixLevel(page, pagePath, dur) : null;
+    const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(page, pagePath, dur)) : null;
     const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
     return { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion, advice, profile, web: webPath };
   } finally {
@@ -723,12 +719,25 @@ function motionAdvice(pagePath, motion) {
   return out;
 }
 
-/** The live page's motion records and text samples (with pixels for contrast): what the draft check reads besides the video. */
-export async function probePage(page, dur, pagePath) {
-  const motion = await collectPageMotion(page, dur);
-  const probe = await sampleText(page, dur, (ms) => seekAll(page, ms), shownAndHidden);
-  probe.spec = await sampleSpec(page, parseBriefTables(readBrief(pagePath)), (ms) => seekAll(page, ms), dur);
-  return { motion, probe };
+// Text and spec probes read layout only, so their seeks skip the paint barrier that a screenshot needs.
+const seekLayout = (page) => (ms) => page.evaluate((t) => window.__pageSeek(t / 1000), ms);
+
+/**
+ * The live page's motion records and text samples: what the draft check reads besides the video. `checks` (harness/lib/check-runner.mjs)
+ * gates each probe by tier and caches it; the default runs every tier with no cache. `from` is the film second the
+ * samples start at, and `whole` is false for a window, where the brief's spec rows (film-long times) are not read.
+ */
+export async function probePage(page, dur, pagePath, { checks = createChecks({ pagePath, mode: 'full', cache: false }), from = 0, whole = true } = {}) {
+  const window = { from, dur };
+  const tables = dropGuesses(parseBriefTables(readBrief(pagePath))).set;
+  const found = await checks.run('motion', () => runMotionCollector(page), window);
+  const boxes = found?.scripted ? await checks.run('box-motion', () => sampleBoxTracks(page, lintTimes(dur), 'visible'), window) : undefined;
+  const text = await checks.run('text', () => sampleText(page, dur, seekLayout(page), from), window);
+  const contrast = await checks.run('contrast', () => sampleContrast(page, text.samples, (ms) => seekAll(page, ms)), window);
+  const specKey = { tables, dur };
+  const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
+  const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, contrast, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
@@ -736,7 +745,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
   const brief = readBrief(pagePath);
   const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
-  const contrast = isWaived(authoring, 'text-low-contrast') ? [] : draftContrastLines(probe.samples);
+  const contrast = isWaived(authoring, 'text-low-contrast') ? [] : contrastLines(probe.contrast);
   const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor')));
   return {
     text: textProblems(probe.samples, probe),
@@ -745,37 +754,68 @@ export function pageAdvice(pagePath, { probe, motion }) {
   };
 }
 
-function printDraftCheck(mp4, pagePath, { probe, level, motion, advice: blanks }) {
-  let video = [];
-  try { video = videoProblems(mp4, pageAuthoring(pagePath)); } catch (e) { console.error(`  no draft check on the video: ${e.message}`); }
+/** { problems, measures } of the draft video from one read (stills, held worlds, blank runs, tail tiles, smoothness), or null when ffmpeg fails. */
+export async function videoChecks(mp4, pagePath, checks) {
+  const authoring = pageAuthoring(pagePath);
+  const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
+  try {
+    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring), measures: videoMeasures(read, authoring, shots) }; }, { authoring, shots });
+  } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
+}
+
+const NOTE_LINES = /^(waive a rule line|motion lint read element boxes)/;
+
+/**
+ * What a draft says about itself: { red, notes, rows, was, sync }. `red` is what the terminal shows (the red acceptance
+ * rows, then the advice that no row covers); `notes` is every line, for out/<film>.dev.md. A window has no acceptance
+ * table and no video checks: its text and motion advice is all red.
+ */
+async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks, whole, checks }) {
+  const authoring = pageAuthoring(pagePath);
   const page = pageAdvice(pagePath, { probe, motion });
-  const problems = mergeProblems(video, page.text);
+  const video = whole ? await videoChecks(mp4, pagePath, checks) : null;
+  const problems = mergeProblems(video?.problems ?? [], page.text);
   const sound = soundLine(level?.I ?? null);
   const peak = peakLine(level?.TP ?? null);
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...page.lines];
-  console.log(draftCheckLines(advice).join('\n'));
-  const taste = ['', ...draftTasteLines([...problems, sound, peak].filter(Boolean))];
-  if (/<audio/i.test(fs.readFileSync(pagePath, 'utf8'))) taste.push('', ...tasteLines('sound'));
-  console.log(taste.join('\n'));
-  console.log(draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion) }).join('\n'));
+  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode })) : null;
+  const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples), ...contrastLines(probe.contrast)] : []);
+  const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
+  const taste = [...draftTasteLines([...problems, sound, peak].filter(Boolean)), ...(/<audio/i.test(fs.readFileSync(pagePath, 'utf8')) ? ['', ...tasteLines('sound')] : [])];
+  return { red: [...(table ? table.rows.filter((r) => r.status === 'advice').map(redLine) : []), ...loose], notes: { advice, taste, rows: table?.rows ?? [] }, rows: table?.rows ?? null, was: table?.was ?? null, sync: table?.sync ?? null };
 }
 
-function printDraftSheet(mp4, { fps, from }) {
-  try {
-    const { out, frames, fastest } = writeDraftSheet({ video: mp4, out: mp4.replace(/\.mp4$/, '.png'), fps, from });
-    console.log(`  look: ${out} (frames at ${frames.join(', ')} s; fastest motion at ${fastest} s)`);
-  } catch (e) { console.error(`  no key-frame sheet: ${e.message}`); }
+function writeDevNotes(mp4, { timing, advice, taste, rows }) {
+  const file = path.resolve('out', `${nameOfFilm(mp4)}.dev.md`);
+  const body = [`# ${nameOfFilm(mp4)} draft`, '', timing, '', '## Draft check', '', ...draftCheckLines(advice), '', '## Acceptance', '', ...(rows.length ? fullTable(rows) : ['not measured in this draft']), '', '## Taste', '', ...taste, ''];
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, body.join('\n'));
+  return path.relative(process.cwd(), file);
+}
+
+const nameOfFilm = (mp4) => path.basename(mp4, '.mp4').replace(/-draft.*$/, '');
+
+async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from }) {
+  let look = '';
+  try { await checks.time('sheet', async () => { const { out, frames, fastest } = writeDraftSheet({ video: mp4, out: mp4.replace(/\.mp4$/, '.png'), fps: opts.fps, from }); look = `  look: ${out} (frames at ${frames.join(', ')} s; fastest motion at ${fastest} s)`; }); } catch (e) { console.error(`  no key-frame sheet: ${e.message}`); }
+  const report = await draftReport(mp4, pagePath, { ...r, whole: from === 0 && opts.durArg == null, checks });
+  checks.save();
+  const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds() });
+  const notes = writeDevNotes(mp4, { timing, ...report.notes });
+  const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
+  const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
+  console.log([timing, look, ...report.red, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
 
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (name, d) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : d; };
-  const valueFlags = new Set(['--aspect', '--fps', '--from', '--dur', '--to', '--blur', '--w', '--h', '--workers']);
+  const valueFlags = new Set(['--aspect', '--fps', '--from', '--dur', '--to', '--blur', '--w', '--h', '--workers', '--next']);
   const positional = argv.filter((a, i) => !a.startsWith('--') && !valueFlags.has(argv[i - 1]));
   const [pagePath, outArg] = positional;
   if (!pagePath) {
     die('usage: node harness/media/render-page.mjs <page.html> [out.mp4] [--aspect 16:9|9:16|1:1|4:5|4:3|all] [--fps N] '
-      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio] [--profile]', 2);
+      + '[--from s] [--dur s | --to s] [--blur N] [--w px] [--h px] [--workers N] [--final] [--audio] [--profile] [--fast | --full] [--taste] [--next cmd]', 2);
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   const drift = briefProblems(pagePath);
@@ -798,7 +838,7 @@ async function main() {
       blur: Number(flag('--blur', final ? 32 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
-      probe: !final && from === 0 && durArg == null,
+      checks: final ? undefined : createChecks({ pagePath, mode: argv.includes('--full') ? 'full' : argv.includes('--fast') ? 'fast' : 'draft' }),
     };
     const frame = resolveFrame(pagePath, opts);
     const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
@@ -809,11 +849,10 @@ async function main() {
       process.exit(2);
     });
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
-      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}, `
-      + `prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s`);
+      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}`
+      + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`);
     if (r.web) console.log(`  web copy: ${r.web} (${(fs.statSync(r.web).size / 1e6).toFixed(1)} MB; master ${(fs.statSync(outPath).size / 1e6).toFixed(1)} MB)`);
-    if (!final) printDraftSheet(outPath, opts);
-    if (r.probe) printDraftCheck(outPath, pagePath, r);
+    if (!final) await printDraft(outPath, pagePath, r, { checks: opts.checks, taste: argv.includes('--taste'), next: flag('--next', null), opts, from });
     else if (r.advice.length) console.log(adviceBlock(r.advice).join('\n'));
     if (argv.includes('--profile')) console.log(r.profile.join('\n'));
   }
