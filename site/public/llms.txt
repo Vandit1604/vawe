@@ -36,6 +36,8 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Ticker takeover](https://vawe.dev/moves/ticker-takeover.md): a line with a cycling word is replaced by the answer: the word rolls through three values, then the hero crashes in on a long slide and its edge pushes the whole text group out of the frame
 - [Anchor cycle](https://vawe.dev/moves/anchor-cycle.md): one phrase stays pinned while a tape beside it is hard-cut through eight words, slow then fast, and holds on the last; a brand lockup then drops in under the still anchor
 - [Lower third](https://vawe.dev/moves/lower-third.md): a person is on screen: an accent rule grows, a plate wipes open, the name rises from a mask and the role follows, then the card leaves faster than it came
+- [Liquid displace](https://vawe.dev/moves/liquid-displace.md): a title arrives bent by moving water and settles to sharp type: an SVG turbulence map drives a displacement that drains to zero by 1.15 s, then the type holds still and readable
+- [Echo trail](https://vawe.dev/moves/echo-trail.md): one element flies in and stops on a beat: five time-offset copies of it trail with falling opacity, then fold into the lead on the hit frame while it squashes and recoils
 - [Cut on motion](https://vawe.dev/moves/cut-on-motion.md): a moving shape carries the eye across a hard cut into a new scene
 - [Push with directional blur](https://vawe.dev/moves/push-blur.md): a panel pushes in with a directional blur that follows its speed, set per frame
 - [Exits faster than entrances](https://vawe.dev/moves/exit-fast.md): the pair every beat needs: arrive fast and land soft, leave faster and shorter
@@ -76,6 +78,7 @@ Each move is one markdown file an agent copies: when to use it, the CSS and WAAP
 - [Logo sting](https://vawe.dev/moves/logo-sting.md): a short logo hit: the mark lands, one light band crosses it, the word opens from behind it, a slow push runs to the last frame; use once per film
 - [Wordmark cascade](https://vawe.dev/moves/wordmark-cascade.md): the name is the last beat: letters fall onto a rail with shrinking gaps, the full stop lands last, an accent bar runs the rail; use once per film
 - [Mark trace](https://vawe.dev/moves/mark-trace.md): a line mark draws itself with a riding tip, thickens to its final weight, then an accent bar runs the finished mark; use once per film
+- [Shape trace morph](https://vawe.dev/moves/shape-trace-morph.md): a brand mark is built like a shape layer: an outline draws on, fills as it closes, then morphs into the real mark on one spring; both paths keep the same command count; use once per film
 - [Calm lockup](https://vawe.dev/moves/calm-lockup.md): the quiet ending: logo and line settle slowly while two lights drift behind and the lockup floats; use once per film
 - [CTA pop](https://vawe.dev/moves/cta-pop.md): the call to action pops in under its line on the overshoot curve, the one accent, and the arrow leans to invite the click
 - [Thanks sweep](https://vawe.dev/moves/thanks-sweep.md): a closing line sweeps in on a soft mask edge with an accent bar riding the edge, then drifts; use once per film
