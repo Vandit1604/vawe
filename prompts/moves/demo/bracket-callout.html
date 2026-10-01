@@ -39,8 +39,8 @@
 </div>
 <script type="module">
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--land', curveToLinear(CURVES.overshoot));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--land', EASE.pop);
 </script>
 </body>
 </html>

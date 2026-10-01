@@ -18,15 +18,14 @@ Use once per film: the drifting lights is a stock device (engine-doctrine/TASTE-
 .grain { position: absolute; inset: 0; opacity: 0.05; mix-blend-mode: screen; /* an feTurbulence tile as a data URI */ }
 </style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '../../core/motion/presets.js';
 [['.brand', 60], ['.line', 200]].forEach(([sel, at]) => {
-  q(sel).animate([{ translate: '0 2.2vh', filter: 'blur(8px)' }, { translate: '0 0', filter: 'blur(0px)' }], { duration: 1000, delay: at, easing: settle, fill: 'both' });
+  q(sel).animate([{ translate: '0 2.2vh', filter: 'blur(8px)' }, { translate: '0 0', filter: 'blur(0px)' }], { duration: 1000, delay: at, easing: EASE.land, fill: 'both' });
   q(sel).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, delay: at, easing: 'linear', fill: 'both' });
 });
-q('.l1').animate([{ translate: '0 0' }, { translate: '14vw 9vh' }], { duration: 2000, easing: 'linear', fill: 'both' });
-q('.l2').animate([{ translate: '0 0' }, { translate: '-12vw -8vh' }], { duration: 2000, easing: 'linear', fill: 'both' });
-q('.lockup').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2000, easing: 'linear', fill: 'both' });
+q('.l1').animate([{ translate: '0 0' }, { translate: '14vw 9vh' }], { duration: 2000, easing: EASE.glide, fill: 'both' });
+q('.l2').animate([{ translate: '0 0' }, { translate: '-12vw -8vh' }], { duration: 2000, easing: EASE.glide, fill: 'both' });
+q('.lockup').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
 </script>
 ```
 

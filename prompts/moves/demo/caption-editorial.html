@@ -23,9 +23,8 @@
   <p class="cap"><span class="line"><span>Built for teams who</span></span><span class="line"><span>ship <em class="key">every</em> Friday.</span></span></p>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 
-const LAND = curveToLinear(CURVES.expoOut), LAUNCH = curveToLinear('easeInCubic');
 // [seconds the caption is cut in, seconds it is cut out]
 const CUTS = [[0.1, 1.6], [1.65, 3.6]];
 const IN = 0.42, OUT = 0.22, LINE_GAP = 0.07;
@@ -38,8 +37,8 @@ stage.style.height = `${caps[0].offsetHeight}px`;
 caps.forEach((cap, c) => {
   const [on, off] = CUTS[c];
   [...cap.querySelectorAll('.line > span')].forEach((s, i) => {
-    s.animate([{ translate: '0 135%' }, { translate: '0 0' }], { delay: (on + i * LINE_GAP) * 1000, duration: IN * 1000, easing: LAND, fill: 'both' });
-    if (c < CUTS.length - 1) s.animate([{ translate: '0 0' }, { translate: '0 -135%' }], { delay: (off - OUT + i * 0.04) * 1000, duration: OUT * 1000, easing: LAUNCH, fill: 'forwards' });
+    s.animate([{ translate: '0 135%' }, { translate: '0 0' }], { delay: (on + i * LINE_GAP) * 1000, duration: IN * 1000, easing: EASE.land, fill: 'both' });
+    if (c < CUTS.length - 1) s.animate([{ translate: '0 0' }, { translate: '0 -135%' }], { delay: (off - OUT + i * 0.04) * 1000, duration: OUT * 1000, easing: EASE.launch, fill: 'forwards' });
   });
 });
 </script>

@@ -21,7 +21,7 @@ outside, snap onto the target box and land with a small overshoot. Clip:
 
 Sound: pluck at --beat-1 + 0.20 s, when the corners first reach the box and snap (default gain).
 
-`--land` is `curveToLinear(CURVES.overshoot)`. The curve passes 1, so each corner travels 5 to 10
+`--land` is `EASE.pop`. The curve passes 1, so each corner travels 5 to 10
 percent past the box (toward the target's centre) and comes back.
 
 ## The numbers that make it look expensive

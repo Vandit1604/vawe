@@ -49,25 +49,24 @@
   </ul>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
 const opt = { fill: 'both' };
 const at = { card: 80, rows: 420, checks: [1250, 1800, 2350], swaps: [420, 1250, 2000] };   // ms
 
-q('.run').animate([{ translate: '-50% -46%', scale: 0.94, opacity: 0 }, { opacity: 1, offset: 0.3 }, { translate: '-50% -50%', scale: 1, opacity: 1 }], { duration: 560, delay: at.card, easing: pop, ...opt });
-qa('.row').forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: settle, ...opt }));
+q('.run').animate([{ translate: '-50% -46%', scale: 0.94, opacity: 0 }, { opacity: 1, offset: 0.3 }, { translate: '-50% -50%', scale: 1, opacity: 1 }], { duration: 560, delay: at.card, easing: EASE.pop, ...opt });
+qa('.row').forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: EASE.land, ...opt }));
 
 // the machine works: both arcs turn for the whole clip and the bar advances with each check
 q('.spin').animate([{ rotate: '0deg' }, { rotate: '900deg' }], { duration: 3200, easing: 'linear', ...opt });
 q('.badge .arc').animate([{ rotate: '0deg' }, { rotate: '1080deg' }], { duration: 3200, easing: 'linear', ...opt });
 const steps = [0.04, 0.3, 0.55, 0.78];
-at.checks.forEach((k, i) => q('.bar i').animate([{ transform: `scaleX(${steps[i]})` }, { transform: `scaleX(${steps[i + 1]})` }], { duration: 420, delay: k, easing: settle, fill: 'forwards' }));
+at.checks.forEach((k, i) => q('.bar i').animate([{ transform: `scaleX(${steps[i]})` }, { transform: `scaleX(${steps[i + 1]})` }], { duration: 420, delay: k, easing: EASE.land, fill: 'forwards' }));
 
 // a slot swaps whole states: the old one leaves in 120 ms, the new one rises in 260 ms
 const slot = (els, times) => els.forEach((el, i) => {
-  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: times[i], easing: settle, ...opt });
-  if (times[i + 1] !== undefined) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 120, delay: times[i + 1] - 120, easing: leave, fill: 'forwards' });
+  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: times[i], easing: EASE.land, ...opt });
+  if (times[i + 1] !== undefined) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 120, delay: times[i + 1] - 120, easing: EASE.launch, fill: 'forwards' });
 });
 slot(qa('.status span'), at.swaps);
 slot(qa('.count span'), [at.rows, ...at.checks]);
@@ -75,13 +74,13 @@ slot(qa('.count span'), [at.rows, ...at.checks]);
 // a check lands: the numbered outline flips to a solid circle, the tick draws, the label strikes and dims
 at.checks.forEach((k, i) => {
   const row = qa('.row')[i], done = row.querySelector('.done'), lab = row.querySelector('.lab');
-  row.querySelector('.num').animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 120, delay: k, easing: leave, fill: 'forwards' });
-  done.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1.12, offset: 0.6 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: pop, fill: 'forwards' });
-  done.querySelector('path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: settle, fill: 'forwards' });
-  lab.querySelector('i').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: settle, fill: 'forwards' });
+  row.querySelector('.num').animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 120, delay: k, easing: EASE.launch, fill: 'forwards' });
+  done.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: EASE.pop, fill: 'forwards' });
+  done.querySelector('path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: EASE.land, fill: 'forwards' });
+  lab.querySelector('i').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: EASE.land, fill: 'forwards' });
   lab.animate([{ color: 'var(--ink)' }, { color: 'var(--muted)' }], { duration: 300, delay: k + 60, easing: 'linear', fill: 'forwards' });
 });
-q('.row.live').animate([{ background: 'transparent' }, { background: 'var(--raised)' }], { duration: 240, delay: at.checks[2], easing: settle, ...opt });
+q('.row.live').animate([{ background: 'transparent' }, { background: 'var(--raised)' }], { duration: 240, delay: at.checks[2], easing: EASE.land, ...opt });
 </script>
 </body>
 </html>

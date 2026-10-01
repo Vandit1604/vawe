@@ -71,7 +71,8 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+import { rng } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 
 // seven days of p95 samples on a 0 to 1000 ms axis, from a seeded rng so every render draws the same week
@@ -92,17 +93,16 @@ const draw = (svg, values, stroke, fillTop) => {
 draw(q('.before svg'), series(3, 760, 160, 180), 'var(--faint)', '#8f92b5');
 draw(q('.after svg'), series(4, 96, 22, 30), 'var(--accent)', '#5b3df0');
 
-const E = CURVES.expoOut, accelerate = curveToLinear((u) => u * u * u);
 const scan = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
 const W = q('.stage').getBoundingClientRect().width, at = 300, dur = 900;
 
-q('.after').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: curveToLinear(scan), fill: 'both' });
-q('.scan').animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: curveToLinear(scan), fill: 'both' });
+q('.after').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
+q('.scan').animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
 // the divider leaves faster than it came, on the move it was already making
 q('.scan').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, delay: at - 60, easing: 'linear', fill: 'both' });
-q('.scan').animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: accelerate, fill: 'both' });
-q('.after .delta').animate([{ scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 400, delay: at + dur - 120, easing: curveToLinear(E), fill: 'both' });
-q('.card').animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: 'linear', fill: 'both' });
+q('.scan').animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: EASE.launch, fill: 'both' });
+q('.after .delta').animate([{ scale: 0.92, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 400, delay: at + dur - 120, easing: EASE.land, fill: 'both' });
+q('.card').animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

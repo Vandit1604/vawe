@@ -24,8 +24,8 @@
 <body>
 <p id="line">Motion that reads like it was designed by hand</p>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--soft', EASE.land);
 const line = document.getElementById('line');
 line.innerHTML = line.textContent.split(' ').map((t, i) => `<span class="w${t === 'hand' ? ' hot' : ''}" style="--i:${i}">${t}</span>`).join(' ');
 </script>
