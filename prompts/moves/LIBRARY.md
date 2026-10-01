@@ -77,6 +77,8 @@ Status: **built** has a snippet, a demo and a clip in this folder (see [README.m
 | pull-back-reveal | start tight on a detail and pull back to show the whole | to be captured | built |
 | parallax-dive | layers at different depths move at different speeds | to be captured | built |
 | drift-hold | a very slow drift so a quiet frame never sits dead | to be captured | built |
+| gradient-mesh-field | a title sits on a gradient-mesh ground: soft colour pools drift on seeded paths in one shader, with grain | modern SaaS hero grounds | built |
+| photo-parallax-2.5d | one photo cut into far, subject and near layers; a slow push and a small drift move each by its depth | After Effects 2.5D photo animation | built |
 | rack-focus | focus moves from one layer to another | to be captured | built |
 | pan-stations | one wide canvas; the camera pans between several stations and holds at each | HyperFrames pan-stations component and spatial-pan-stations blueprint | built |
 | crash-zoom | a very fast push at a detail on a beat, with blur that follows speed | video-shotcraft camera/crash-zoom-punch; HyperFrames cinematic-zoom | built |
