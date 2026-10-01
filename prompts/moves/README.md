@@ -10,6 +10,11 @@ group: reference
 stings, one per direction family, a 15 s launch, a kinetic type line, and six complete videos of 20 to 30 s: problem to fix, AI demo, feature tour, proof, manifesto, brand reveal), with the beat table, the sound cues and the traps at each seam.
 Each move file has a `Sound:` line under its snippet: the voice and the second to cue it, or none.
 
+Scope: a move animates designed things (type, shapes, UI, illustration, colour fields). A photo may be content in a
+move (a card, a tile, a window, a carousel item), moved whole. A move that only works by processing a captured
+image (cutting it into depth layers, faking camera depth inside it, tracking or rotoscoping footage) is a footage
+technique, not motion design, and is not part of vawe.
+
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from
 the clip, not the name. Copy the snippet into the page; the numbers are the ones that read well.
 Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a hand-fitted
