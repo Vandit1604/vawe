@@ -151,7 +151,7 @@ function lastJson(stderr) {
   return JSON.parse(m[m.length - 1]);
 }
 
-function measureFile(file) {
+export function measureFile(file) {
   const err = run('ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-vn', '-af', 'ebur128=peak=true', '-f', 'null', '-']);
   const summary = err.slice(err.lastIndexOf('Summary:'));
   return { I: parseFloat(summary.match(/I:\s+(-?[\d.]+) LUFS/)[1]), TP: parseFloat(summary.match(/Peak:\s+(-?[\d.]+) dBFS/)[1]) };

@@ -21,11 +21,11 @@ function keep(kept, run, step, rules) {
 }
 
 /**
- * Text lines that stay on screen at least `holdSec` and are smaller than `capFrac` of the frame height.
- * `samples` is [{ t, lines: [{ text, fontPx }] }] in time order, `step` the seconds between samples,
- * `frameH` the frame height in the same px as fontPx. Smallest first; one entry per text.
+ * Text lines that stay on screen at least `holdSec`, each with its smallest cap height (share of the frame
+ * height) and the sample time of that. `samples` is [{ t, lines: [{ text, fontPx }] }] in time order, `step`
+ * the seconds between samples, `frameH` the frame height in the same px as fontPx. One entry per text.
  */
-export function textProblems(samples, { step, frameH }, rules = RULES) {
+export function heldTextRuns(samples, { step, frameH }, rules = RULES) {
   const kept = new Map();
   const open = new Map();
   for (const s of samples) {
@@ -34,8 +34,8 @@ export function textProblems(samples, { step, frameH }, rules = RULES) {
       const key = keyOf(l.text);
       if (!key) continue;
       const cap = (rules.capOfFont * l.fontPx) / frameH;
-      const run = open.get(key) || { key, n: 0, t: s.t, cap };
-      if (!seen.has(key)) run.n += 1;
+      const run = open.get(key) || { key, n: 0, t: s.t, cap, first: s.t };
+      if (!seen.has(key)) { run.n += 1; run.last = s.t; }
       seen.add(key);
       if (cap < run.cap) { run.cap = cap; run.t = s.t; }
       open.set(key, run);
@@ -47,7 +47,12 @@ export function textProblems(samples, { step, frameH }, rules = RULES) {
     }
   }
   for (const run of open.values()) keep(kept, run, step, rules);
-  return [...kept.values()]
+  return [...kept.values()];
+}
+
+/** The held text lines under `capFrac`, smallest first, each as a problem line. */
+export function textProblems(samples, ctx, rules = RULES) {
+  return heldTextRuns(samples, ctx, rules)
     .filter((r) => r.cap < rules.capFrac)
     .sort((a, b) => a.cap - b.cap)
     .map((r) => `text "${r.key}" at ${r.t.toFixed(1)} s: cap height ${(r.cap * 100).toFixed(1)}% of frame (rule 9 asks ${rules.capFrac * 100}%)`);

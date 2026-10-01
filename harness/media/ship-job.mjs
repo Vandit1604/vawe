@@ -18,6 +18,7 @@ import { defaultOut } from './render-page.mjs';
 import { videoProblems } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { samePage, doneLines } from '../lib/ship-status.mjs';
+import { finalAcceptance } from './acceptance-run.mjs';
 
 const WAIT_CAP_MS = 100_000;
 
@@ -67,10 +68,15 @@ function runJob(id) {
   child.on('close', (code) => {
     if (code !== 0) return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
     const checked = { ...readJob(id), ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
-    if (!checked.judge || !checked.outputs.length) return writeJob({ ...checked, status: 'done', endedAt: Date.now() });
+    if (!checked.judge || !checked.outputs.length) return finishJob(id, checked);
     writeJob({ ...checked, status: 'judging' });
-    judgeFinal(checked, (verdict) => writeJob({ ...readJob(id), status: 'done', verdict, endedAt: Date.now() }));
+    judgeFinal(checked, (verdict) => finishJob(id, { ...readJob(id), verdict }));
   });
+}
+
+async function finishJob(id, job) {
+  const acceptance = job.outputs.length ? await finalAcceptance(job).then((a) => ({ acceptance: a }), (e) => ({ acceptanceError: e.message })) : {};
+  writeJob({ ...job, ...acceptance, status: 'done', endedAt: Date.now() });
 }
 
 function judgeFinal(job, done) {

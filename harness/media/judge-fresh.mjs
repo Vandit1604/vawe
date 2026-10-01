@@ -15,6 +15,10 @@ import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
+import { sizeLines, capLines, anchorLines, anchorResult } from '../lib/judge-prompt.mjs';
+import { referenceFor } from '../lib/motion-stamp.mjs';
+import { probeSize } from './scene-stats.mjs';
+import { lastCaps } from './acceptance-run.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
@@ -109,7 +113,23 @@ function loudness(file) {
   return I ? `loudness: ${I} LUFS integrated, ${LRA} LU range, true peak ${peak} dBFS` : 'loudness: not measured';
 }
 
-async function prepare(input, stage) {
+function anchorOf(input, brief) {
+  const dir = path.extname(input).toLowerCase() === '.html' ? path.dirname(path.resolve(input)) : brief ? path.dirname(path.resolve(brief)) : null;
+  const ref = dir && referenceFor(path.join(dir, 'page.html'));
+  if (ref && fs.existsSync(path.resolve(ref))) return { kind: 'reference', ref: path.resolve(ref) };
+  return { kind: brief ? 'brief' : 'none' };
+}
+
+function anchorFrames(ref, keys, dir) {
+  const last = Math.max(0, durationOf(ref) - 0.05);
+  return keys.map((k, i) => {
+    const file = path.join(dir, `anchor-${i + 1}-${k.t.toFixed(1)}s.png`);
+    ff(['-ss', String(Math.min(k.t, last)), '-i', ref, '-frames:v', '1', file]);
+    return { t: k.t, file };
+  }).filter((a) => fs.existsSync(a.file));
+}
+
+async function prepare(input, stage, brief) {
   const name = filmName(input);
   const dir = scratch('judge-fresh', name);
   const ext = path.extname(input).toLowerCase();
@@ -129,13 +149,18 @@ async function prepare(input, stage) {
   const sheet = contactSheet(video, dur, dir);
   const keys = keyFrames(video, dur, dir);
   const sound = stage === 'final' && hasAudio(video) ? loudness(video) : null;
+  const anchor = anchorOf(input, brief);
+  const anchorShots = anchor.kind === 'reference' ? anchorFrames(anchor.ref, keys, dir) : [];
+  const sizeOf = (label, file, tile) => ({ label, ...probeSize(file), ...(tile ? { tile } : {}) });
+  const images = [sizeOf('the sheet', sheet.file, TILE_W), ...keys.map((k, i) => sizeOf(`key frame ${i + 1}`, k.file)), ...anchorShots.map((a, i) => sizeOf(`anchor frame ${i + 1}`, a.file))];
   const notes = [
     `video: ${video} (${dur.toFixed(2)} s)`,
     `sheet: ${sheet.file}  (one frame every ${(1 / sheet.fps).toFixed(2)} s, read left to right and top to bottom, each tile is labelled with its time in seconds)`,
     ...keys.map((k, i) => `key frame ${i + 1} at ${k.t.toFixed(1)} s (a moment of large change): ${k.file}`),
+    ...anchorShots.map((a, i) => `anchor frame ${i + 1} (the reference at ${a.t.toFixed(1)} s, the anchor for key frame ${i + 1}): ${a.file}`),
     sound || (stage === 'final' ? 'sound: the file has no audio track' : 'sound: not scored at this stage'),
   ];
-  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file)], notes, dir };
+  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file)], notes, dir, keys, images, anchor, caps: lastCaps(name) };
 }
 
 const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
@@ -144,6 +169,12 @@ Name the strongest with one reason. Then score the axes below for the strongest 
 
 const STILLS_JSON = `
 Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"one short line"},{"id":"B",...},{"id":"C",...}], "strongest":"A, B or C", "reason":"one sentence".`;
+
+function checkBlock(ev) {
+  if (ev.stage === 'stills') return '';
+  const parts = [sizeLines(ev.images || []), capLines(ev.caps), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : []].filter((p) => p.length);
+  return parts.map((p) => `${p.join('\n')}\n\n`).join('');
+}
 
 function buildPrompt(ev, brief, ledger = '') {
   const optional = [
@@ -158,7 +189,7 @@ ${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key fr
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}
 ${optional.length ? `\n${optional.map((o) => `- ${o}`).join('\n')}\n` : ''}
-${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : ''}${ledger ? `\n\n${ledger}` : ''}`;
+${checkBlock(ev)}${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : ''}${ledger ? `\n\n${ledger}` : ''}`;
 }
 
 function extractJson(text) {
@@ -192,7 +223,7 @@ function finish(ev, raw, ms) {
   const pass = low.length === 0;
   const first = raw.fixFirst || fixes[0]?.fix || null;
   const time = fixes.map((x) => parseFloat(x.at)).find((t) => Number.isFinite(t)) ?? null;
-  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ms, recorded: new Date().toISOString().slice(0, 10) };
+  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
 const input = process.argv[2];
@@ -219,7 +250,7 @@ function readJson(file) {
 }
 
 const t0 = Date.now();
-const ev = await prepare(input, stage);
+const ev = await prepare(input, stage, brief);
 const file = path.resolve('out', `${ev.name}.${stage === 'stills' ? 'stills' : 'judge'}.json`);
 const prevItems = stage === 'stills' ? [] : previousItems(readJson(file));
 const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(prevItems), prevItems)), ev);

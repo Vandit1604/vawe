@@ -11,7 +11,8 @@ import { turnAndClip } from './edge-travel.mjs';
 export async function trackBoxes(times, scope) {
   const SKIP = new Set(['SCRIPT', 'STYLE', 'AUDIO', 'VIDEO', 'SOURCE', 'META', 'LINK', 'TEMPLATE', 'BR', 'TITLE', 'HEAD']);
   const MAX_ELEMENTS = 300;
-  const els = scope === 'animated'
+  const found = scope.selectors ? scope.selectors.map((s) => document.querySelector(s)) : null;
+  const els = found ? found.filter(Boolean) : scope === 'animated'
     ? [...new Set(document.getAnimations().map((a) => a.effect && a.effect.target).filter((t) => t && t.getBoundingClientRect))]
     : [...document.body.querySelectorAll('*')].filter((el) => !SKIP.has(el.tagName) && !el.closest('svg defs, svg mask, svg clipPath')).slice(0, MAX_ELEMENTS);
   const index = new Map(els.map((el, i) => [el, i]));
@@ -40,10 +41,11 @@ export async function trackBoxes(times, scope) {
     times, tracks, labels: els.map(label), parent: els.map(parentOf),
     area: innerWidth * innerHeight, width: innerWidth, height: innerHeight,
     canvas: document.querySelectorAll('canvas').length,
+    matched: found ? found.map((el) => (el ? els.indexOf(el) : -1)) : undefined,
   };
 }
 
-/** Box tracks at `times` (seconds) for 'animated' (animation targets) or 'visible' (every element). */
+/** Box tracks at `times` (seconds) for 'animated' (animation targets), 'visible' (every element) or { selectors } (the first match of each; `matched` gives its track). */
 export async function sampleBoxTracks(page, times, scope) {
   await page.evaluate(`window.__turnAndClip = ${turnAndClip}`);
   return page.evaluate(trackBoxes, times, scope);
