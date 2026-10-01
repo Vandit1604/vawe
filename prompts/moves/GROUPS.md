@@ -33,6 +33,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | caption karaoke | a spoken line runs as captions: the word being said lifts to full ink and one soft pill glides word to word on a [[t, wordIndex]] speech table | [caption-karaoke.md](caption-karaoke.md) | [caption-karaoke.mp4](caption-karaoke.mp4) |
 | caption editorial | editorial captions: one or two key words per line in a contrasting italic serif, and the next caption replaces the last on a short line-by-line mask cut | [caption-editorial.md](caption-editorial.md) | [caption-editorial.mp4](caption-editorial.mp4) |
 | variable weight wave | one hero word arrives as a wave: weight and width of a variable face crest letter by letter, left to right, then settle at a firm weight | [variable-weight-wave.md](variable-weight-wave.md) | [variable-weight-wave.mp4](variable-weight-wave.mp4) |
+| text on path | a line of words rides an SVG path with startOffset set from the seek time, front word first, and settles readable on the curve | [text-on-path.md](text-on-path.md) | [text-on-path.mp4](text-on-path.mp4) |
 
 ## Change between shots
 
@@ -146,7 +147,7 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep, caption editorial |
 | dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot, caption karaoke |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade, variable weight wave |
-| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep |
+| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep, text on path |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan |
 | chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
 
