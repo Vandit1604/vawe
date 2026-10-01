@@ -1,0 +1,89 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="swiss">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.8">
+<meta name="blank" content="0-0.1">
+<title>move: hand drawn notes</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/Caveat.woff2') format('woff2'); }
+  body { display: block; position: relative; }
+  .stage { position: absolute; left: 9vw; top: 50%; translate: 0 -50%; width: 82vw; }
+  p { margin: 0; font: 700 calc(var(--u) * 14)/1.12 var(--sans); letter-spacing: -0.045em; }
+  .w { display: inline-block; }
+  svg { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+  svg path { fill: none; stroke: var(--accent); stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+  .label { position: absolute; margin: 0; font: 700 calc(var(--u) * 9)/1 'Caveat', cursive; letter-spacing: 0; color: var(--accent); white-space: nowrap; clip-path: inset(-10% 100% -10% 0); }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <p id="line">Ship the fix<br>before the standup.</p>
+  <svg id="ink"></svg>
+  <p class="label" id="label">start here</p>
+</div>
+<script type="module">
+import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+import { enter } from '/core/motion/presets.js';
+
+const PEN = curveToLinear('easeInOutCubic'), LAND = curveToLinear(CURVES.expoOut);
+const SEED = 7;
+const rand = rng(SEED);
+const wob = (amount) => (rand() * 2 - 1) * amount;
+
+const line = document.getElementById('line'), svg = document.getElementById('ink'), label = document.getElementById('label'), stage = document.getElementById('stage');
+line.innerHTML = line.innerHTML.split('<br>').map((l) => l.split(' ').map((t) => `<span class="w">${t}</span>`).join(' ')).join('<br>');
+await document.fonts.ready;
+const word = (text) => [...line.querySelectorAll('.w')].find((w) => w.textContent.startsWith(text));
+const fs = parseFloat(getComputedStyle(line).fontSize);
+const rect = (el) => ({ x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight });
+svg.style.cssText = `width:${stage.offsetWidth}px;height:${stage.offsetHeight}px`;
+
+// Catmull-Rom through points, written as cubic Beziers: one smooth hand-made stroke
+function smooth(pts) {
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [p0, p1, p2, p3] = [pts[i - 1] || pts[i], pts[i], pts[i + 1], pts[i + 2] || pts[i + 1]];
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += `C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+function stroke(d, at, dur, easing, width = fs * 0.05) {
+  const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  p.setAttribute('d', d); p.setAttribute('pathLength', '1'); p.style.strokeWidth = `${width}px`;
+  svg.append(p);
+  p.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { delay: at * 1000, duration: dur * 1000, easing, fill: 'both' });
+}
+
+// circle: 1.12 turns, the radius drifting out so the end overshoots the start
+const fix = rect(word('fix'));
+const cx = fix.x + fix.w / 2, cy = fix.y + fix.h / 2 + fs * 0.04, rx = fix.w / 2 + fs * 0.17, ry = fix.h / 2 + fs * 0.02;
+const ring = Array.from({ length: 14 }, (_, i) => {
+  const a = -2.5 + (i / 12) * Math.PI * 2 * 1.06, grow = 1 + (i / 13) * 0.07 + wob(0.025);
+  return [cx + Math.cos(a) * rx * grow, cy + Math.sin(a) * ry * grow];
+});
+stroke(smooth(ring), 0.45, 0.6, PEN);
+
+// label, then an arrow from it to the circle
+const lab = { x: cx + rx + fs * 1.05, y: fix.y + fix.h * 0.08 };
+label.style.left = `${lab.x}px`; label.style.top = `${lab.y}px`;
+const from = [lab.x - fs * 0.18, lab.y + fs * 0.34], to = [cx + rx + fs * 0.08, cy + fs * 0.04];
+const bow = (t) => Math.sin(t * Math.PI) * fs * 0.14;
+const shaft = Array.from({ length: 6 }, (_, i) => { const t = i / 5; return [from[0] + (to[0] - from[0]) * t + wob(fs * 0.012), from[1] + (to[1] - from[1]) * t + bow(t) + wob(fs * 0.012)]; });
+stroke(smooth(shaft), 0.95, 0.35, PEN);
+const head = (s) => `M${to[0] + fs * 0.2} ${to[1] - fs * 0.14 * s + wob(2)}L${to[0]} ${to[1]}L${to[0] + fs * 0.2} ${to[1] + fs * 0.16 * s + wob(2)}`;
+stroke(head(1), 1.27, 0.14, LAND);
+label.animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% 0% -10% 0)' }], { delay: 1.1 * 1000, duration: 450, easing: 'linear', fill: 'both' });
+
+// underline: a long, slightly sagging stroke under the last word
+const sd = rect(word('standup'));
+const y = sd.y + sd.h * 0.98;
+const under = Array.from({ length: 7 }, (_, i) => { const t = i / 6; return [sd.x - fs * 0.04 + (sd.w + fs * 0.1) * t, y + Math.sin(t * Math.PI) * fs * 0.03 - t * fs * 0.03 + wob(fs * 0.008)]; });
+stroke(smooth(under), 1.65, 0.45, PEN);
+
+enter(line, { at: 0.05, band: 'professional', from: '0 0.3em' });
+</script>
+</body>
+</html>

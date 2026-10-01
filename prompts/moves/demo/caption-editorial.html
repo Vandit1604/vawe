@@ -1,0 +1,47 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="paper">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<meta name="blank" content="0-0.1">
+<title>move: caption editorial</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .stage { position: absolute; left: 9vw; right: 9vw; top: 50%; translate: 0 -50%; }
+  /* the mask: a tall box so the italic descenders are never cut; the padding is paid back by the negative margin */
+  .line { display: block; overflow: clip; padding-block: 0.16em; margin-block: -0.16em; }
+  .line > span { display: block; }
+  .cap { position: absolute; inset: 0 0 auto 0; margin: 0; font: 600 calc(var(--u) * 13)/1.12 var(--sans); letter-spacing: -0.03em; }
+  /* the key word changes face and weight, not colour: an italic serif, 1.16em to match the sans x-height */
+  .key { font: italic 400 1.16em/0.9 'Instrument Serif', serif; letter-spacing: -0.015em; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <p class="cap"><span class="line"><span>Software should feel</span></span><span class="line"><span>like a <em class="key">quiet</em> room.</span></span></p>
+  <p class="cap"><span class="line"><span>Built for teams who</span></span><span class="line"><span>ship <em class="key">every</em> Friday.</span></span></p>
+</div>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+
+const LAND = curveToLinear(CURVES.expoOut), LAUNCH = curveToLinear('easeInCubic');
+// [seconds the caption is cut in, seconds it is cut out]
+const CUTS = [[0.1, 1.6], [1.65, 3.6]];
+const IN = 0.42, OUT = 0.22, LINE_GAP = 0.07;
+
+// the stage takes its height from the first caption, so cutting captions never moves the centre
+const stage = document.getElementById('stage');
+const caps = [...document.querySelectorAll('.cap')];
+stage.style.height = `${caps[0].offsetHeight}px`;
+
+caps.forEach((cap, c) => {
+  const [on, off] = CUTS[c];
+  [...cap.querySelectorAll('.line > span')].forEach((s, i) => {
+    s.animate([{ translate: '0 135%' }, { translate: '0 0' }], { delay: (on + i * LINE_GAP) * 1000, duration: IN * 1000, easing: LAND, fill: 'both' });
+    if (c < CUTS.length - 1) s.animate([{ translate: '0 0' }, { translate: '0 -135%' }], { delay: (off - OUT + i * 0.04) * 1000, duration: OUT * 1000, easing: LAUNCH, fill: 'forwards' });
+  });
+});
+</script>
+</body>
+</html>

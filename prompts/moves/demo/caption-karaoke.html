@@ -1,0 +1,69 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="dusk">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.4">
+<meta name="blank" content="0-0.2">
+<title>move: caption karaoke</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  .cap { position: relative; width: 78vw; font: 700 calc(var(--u) * 9.2)/1.5 var(--sans); letter-spacing: -0.02em; color: var(--muted); text-wrap: balance; }
+  .w { display: inline-block; }
+  /* the pill sits under the words: z-index -1 inside the stacking context of .cap */
+  .pill-bg { position: absolute; left: 0; top: 0; z-index: -1; height: 0; width: 0; border-radius: var(--r3);
+             background: var(--hover); box-shadow: inset 0 0 0 var(--w-hair) color-mix(in srgb, var(--accent) 55%, transparent); }
+  .cap { isolation: isolate; }
+</style>
+</head>
+<body>
+<p class="cap" id="cap"><span class="pill-bg" id="pill"></span>Captions that follow the voice, one word at a time</p>
+<script type="module">
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { enter, leave } from '/core/motion/presets.js';
+
+const END = 3.4;
+// [seconds the word starts, word index]
+const SPOKEN = [[0.3, 0], [0.7, 1], [0.95, 2], [1.2, 3], [1.4, 4], [1.85, 5], [2.05, 6], [2.3, 7], [2.45, 8], [2.6, 9]];
+const GLIDE = 0.14, PAD_X = 0.16, PAD_Y = 0.06;
+
+const cap = document.getElementById('cap'), pill = document.getElementById('pill');
+const words = cap.lastChild.textContent.split(' ');
+cap.lastChild.remove();
+words.forEach((t, i) => { cap.insertAdjacentHTML('beforeend', `<span class="w">${t}</span>${i < words.length - 1 ? ' ' : ''}`); });
+const spans = [...cap.querySelectorAll('.w')];
+const css = getComputedStyle(document.documentElement);
+const MUTED = css.getPropertyValue('--muted').trim(), INK = css.getPropertyValue('--ink').trim();
+const LAND = curveToLinear(CURVES.expoOut);
+await document.fonts.ready;
+
+const box = (el) => {
+  const px = parseFloat(getComputedStyle(el).fontSize) * PAD_X, py = parseFloat(getComputedStyle(el).fontSize) * PAD_Y;
+  return { x: el.offsetLeft - px, y: el.offsetTop - py, w: el.offsetWidth + 2 * px, h: el.offsetHeight + 2 * py };
+};
+const at = (b) => ({ transform: `translate(${b.x}px, ${b.y}px)`, width: `${b.w}px`, height: `${b.h}px` });
+
+enter(cap, { at: 0.05, band: 'professional', from: '0 0.4em' });
+leave(cap, { end: END });
+
+const frames = [{ offset: 0, ...at(box(spans[0])), easing: 'linear' }];
+SPOKEN.forEach(([t, i], n) => {
+  if (n === 0) return;
+  frames.push({ offset: t / END, ...at(box(spans[SPOKEN[n - 1][1]])), easing: LAND });
+  frames.push({ offset: (t + GLIDE) / END, ...at(box(spans[i])), easing: 'linear' });
+});
+frames.push({ offset: 1, ...at(box(spans[SPOKEN.at(-1)[1]])) });
+pill.animate(frames, { duration: END * 1000, fill: 'both', easing: 'linear' });
+pill.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 150, duration: 150, fill: 'both' });
+
+SPOKEN.forEach(([t, i], n) => {
+  const next = SPOKEN[n + 1]?.[0];
+  const lead = 0.04, rise = 0.1, dur = next ? next - t + lead + 0.12 : 0.3;
+  const up = { color: INK, translate: '0 -0.05em' }, down = { color: MUTED, translate: '0 0' };
+  const keys = next
+    ? [{ offset: 0, ...down, easing: LAND }, { offset: (lead + rise) / dur, ...up, easing: 'linear' }, { offset: (next - t + lead) / dur, ...up, easing: LAND }, { offset: 1, ...down }]
+    : [{ offset: 0, ...down, easing: LAND }, { offset: 1, ...up }];
+  spans[i].animate(keys, { delay: (t - lead) * 1000, duration: dur * 1000, easing: 'linear', fill: 'both' });
+});
+</script>
+</body>
+</html>

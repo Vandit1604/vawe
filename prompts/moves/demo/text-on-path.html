@@ -1,0 +1,63 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="signal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<meta name="blank" content="0-0.1">
+<title>move: text on path</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .rail { fill: none; stroke: var(--line); stroke-width: 2; }
+  text { font: 800 150px/1 'Big Shoulders', sans-serif; letter-spacing: 0.01em; text-transform: uppercase; fill: var(--ink); }
+  text.key { fill: var(--accent); }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid meet">
+  <path id="p" class="rail" d="M -260 820 C 260 820, 520 330, 1000 400 S 1560 740, 2200 380"/>
+  <g id="words"></g>
+</svg>
+<script type="module">
+import { CURVES } from '/core/motion/springs.js';
+
+await document.fonts.load('800 150px "Big Shoulders"');
+const WORDS = ['Words', 'follow', 'the', 'curve'];
+const KEY = 'curve';
+const GAP = 56;
+const ARRIVE = [[0.15, 0], [1.3, 1]];
+const STAGGER = 0.14, LEAVE_AT = 2.55, LEAVE_LEN = 0.3;
+const FLY = 1500;
+
+const svgNS = 'http://www.w3.org/2000/svg';
+const g = document.getElementById('words');
+const els = WORDS.map((w) => {
+  const t = document.createElementNS(svgNS, 'text');
+  if (w === KEY) t.setAttribute('class', 'key');
+  const tp = document.createElementNS(svgNS, 'textPath');
+  tp.setAttribute('href', '#p'); tp.textContent = w;
+  t.append(tp); g.append(t);
+  return tp;
+});
+// settled start of each word along the path: words one after another with a fixed gap, the run centred on the rail
+const widths = els.map((tp) => tp.parentNode.getComputedTextLength());
+const run = widths.reduce((a, b) => a + b, 0) + GAP * (WORDS.length - 1);
+const pathLen = document.getElementById('p').getTotalLength();
+let x = 420 + (pathLen - 560 - run) / 2;
+const REST = widths.map((w) => { const s = x; x += w + GAP; return s; });
+
+const arrive = (p) => CURVES.expoOut(Math.min(1, Math.max(0, p)));
+const leave = (p) => { const q = Math.min(1, Math.max(0, p)); return q * q * q; };
+window.seek = (t) => {
+  els.forEach((tp, i) => {
+    const lead = WORDS.length - 1 - i;
+    const a = arrive((t - ARRIVE[0][0] - lead * STAGGER) / (ARRIVE[1][0] - ARRIVE[0][0]));
+    const l = leave((t - LEAVE_AT - lead * 0.04) / LEAVE_LEN);
+    tp.setAttribute('startOffset', (REST[i] - (1 - a) * FLY + l * FLY).toFixed(2));
+  });
+};
+window.seek(0);
+</script>
+</body>
+</html>
