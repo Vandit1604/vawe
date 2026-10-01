@@ -63,6 +63,7 @@ One row per job, best move first. Every built move is in this table.
 | replace a line with the answer, by impact | [ticker-takeover](ticker-takeover.md) |
 | say it works for everyone while the brand stays still | [anchor-cycle](anchor-cycle.md) |
 | name the person on screen | [lower-third](lower-third.md) |
+| run a spoken line as captions | [caption-karaoke](caption-karaoke.md) |
 
 ## Groups
 
