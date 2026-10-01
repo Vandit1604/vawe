@@ -17,7 +17,7 @@ for (const pagePath of pages) {
     try {
       await opened.page.goto(opened.url, { waitUntil: 'load' });
       await settle(opened.page);
-      const advice = pageAdvice(pagePath, await probePage(opened.page, Number(readPageMeta(pagePath, 'duration'))));
+      const advice = pageAdvice(pagePath, await probePage(opened.page, Number(readPageMeta(pagePath, 'duration')), pagePath));
       assert.deepEqual([...advice.text, advice.brief, ...advice.lines].filter(Boolean), []);
     } finally { await opened.close(); }
   });
