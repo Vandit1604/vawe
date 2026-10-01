@@ -45,6 +45,7 @@ The range check in `bin/vawe dev` reads the names and shapes it flags from `engi
 - A dusk sun or a crescent; the name Vesper or a similar light-poetry name.
 - Lens streaks, light-beam or sheen-band sweeps; accent bars and rule lines under a word.
 - The same seam move twice.
+- A finance, invoice or accounts tool as the invented product (3 of 3 complete films on 2026-10-01). Pick the subject from the request, never from an example.
 - Three directions in one material. Take different ones (type, paper or print, liquid, cut geometry, photograph, UI, light); at most one is light.
 
 ## The 5 anti-patterns, with a frame from our films
