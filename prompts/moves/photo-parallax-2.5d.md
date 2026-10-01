@@ -36,8 +36,8 @@ Each layer has its own scale and drift: the far layer gains 4 percent and travel
 layer 13 percent and 2.4 vw, the near layer 30 percent and 7 vw. The ratio between near and far is
 what the eye reads as depth, so keep it at 3x or more; the demo uses 7.5x on the push and 8.8x on
 the drift. All layers share one `transform-origin` (a point on the subject), so at p = 0 they line up
-as the original photo. Measured in the demo: the near boulder edge moves from x = 485 to 545 px
-while the far ridge moves 25 px, and the boulder slides over the middle rocks beside the hiker.
+as the original photo. Measured in the demo at 1280 px: the near layer travels 90 px sideways against 10 px for the far
+layer, and the near boulder edge moves from x = 485 to 545 px toward the hiker.
 
 Cut the layers once, in an image tool, with two rules. First, give every layer that sits over
 another a hidden part that is filled by blur (the far layer under the mid cut, the mid layer under
