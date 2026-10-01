@@ -33,20 +33,18 @@
   <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z"/></svg>
 </section>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const E = CURVES.expoOut;
-const settle = curveToLinear(E);
+import { EASE } from '/core/motion/presets.js';
 const px = 0.66 * window.innerWidth, py = 0.63 * window.innerHeight;
 const R = Math.hypot(px, py);   // to the farthest corner, so no travel is spent outside the frame
 const at = `${px}px ${py}px`;   // px, not var(): a var() in a keyframe does not interpolate
 const a = document.querySelector('.a'), b = document.querySelector('.b');
 const close = { at: 550, dur: 650 };
-document.querySelector('.cursor').animate([{ translate: '-24vw 16vh' }, { translate: '0 0' }], { duration: 500, delay: 50, easing: settle, fill: 'both' });
-document.querySelector('.btn').animate([{ scale: 1 }, { scale: 0.95, offset: 0.4 }, { scale: 1 }], { duration: 220, delay: 480, easing: settle, fill: 'both' });
+document.querySelector('.cursor').animate([{ translate: '-24vw 16vh' }, { translate: '0 0' }], { duration: 500, delay: 50, easing: EASE.land, fill: 'both' });
+document.querySelector('.btn').animate([{ scale: 1 }, { scale: 0.95, offset: 0.4 }, { scale: 1 }], { duration: 220, delay: 480, easing: EASE.land, fill: 'both' });
 // ease in, fastest at the midpoint, soft close on the button; an accelerating-only curve spends its whole travel in the last 0.1 s
 a.animate([{ clipPath: `circle(${R}px at ${at})` }, { clipPath: `circle(0px at ${at})` }],
-  { duration: close.dur, delay: close.at, easing: curveToLinear((u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1))), fill: 'both' });
-b.animate([{ scale: 1.1 }, { scale: 1 }], { duration: 1100, delay: close.at, easing: settle, fill: 'both' });
+  { duration: close.dur, delay: close.at, easing: EASE.settle, fill: 'both' });
+b.animate([{ scale: 1.1 }, { scale: 1 }], { duration: 1100, delay: close.at, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

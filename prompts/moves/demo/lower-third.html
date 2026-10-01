@@ -26,20 +26,19 @@
   </div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut);
 const opt = { fill: 'both' };
 const at = { rule: 420, plate: 520, name: 760, role: 900 };   // ms
 
 // the shot keeps drifting under the card, so the frame is alive while the name holds
-q('.shot').animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: 'linear', ...opt });
+q('.shot').animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: EASE.glide, ...opt });
 
 // in: the rule grows up, the plate wipes open from it, the name rises out of its mask, then the role
-q('.rule').animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: settle, ...opt });
-q('.plate').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: settle, ...opt });
-q('.name').animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: settle, ...opt });
-q('.role').animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: settle, ...opt });
+q('.rule').animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: EASE.land, ...opt });
+q('.plate').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: EASE.land, ...opt });
+q('.name').animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: EASE.land, ...opt });
+q('.role').animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: EASE.land, ...opt });
 </script>
 </body>
 </html>

@@ -6,16 +6,15 @@ away on the new shot. The new shot starts over-bright (`brightness(2.4)`) and 1.
 with the flash. Clip: [flash-cut.mp4](flash-cut.mp4). Demo: [demo/flash-cut.html](demo/flash-cut.html).
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '../../core/motion/presets.js';
 const beat = 500, cutAt = beat + 20;   // ms; the cut is inside the peak
 flash.animate(
-  [{ opacity: 0 }, { opacity: 1, offset: 0.04 }, { opacity: 1, offset: 0.16, easing: settle }, { opacity: 0 }],
+  [{ opacity: 0 }, { opacity: 1, offset: 0.04 }, { opacity: 1, offset: 0.16, easing: EASE.leave }, { opacity: 0 }],
   { duration: 420, delay: beat, fill: 'both' });
 shotB.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: cutAt, fill: 'both' });
 shotA.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1, delay: cutAt, fill: 'both' });
 shotB.animate([{ filter: 'brightness(2.4)', scale: 1.06 }, { filter: 'brightness(1)', scale: 1 }],
-  { duration: 700, delay: cutAt, easing: settle, fill: 'both' });
+  { duration: 700, delay: cutAt, easing: EASE.land, fill: 'both' });
 ```
 
 ```html

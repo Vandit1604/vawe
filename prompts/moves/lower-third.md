@@ -15,22 +15,21 @@ alive while the name holds. Clip: [lower-third.mp4](lower-third.mp4). Demo:
 ```
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), leave = curveToLinear((u) => u * u * u);
+import { EASE } from '../../core/motion/presets.js';
 const at = { rule: 420, plate: 520, name: 760, role: 900, exit: 2600 };   // ms
-shot.animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: 'linear', fill: 'both' });   // the picture never sits still
+shot.animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: EASE.glide, fill: 'both' });   // the picture never sits still
 
 // in: the rule grows up, the plate wipes open from it, the name rises out of its mask, then the role
-rule.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: settle, fill: 'both' });
-plate.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: settle, fill: 'both' });
-name.animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: settle, fill: 'both' });
-role.animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: settle, fill: 'both' });
+rule.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: EASE.land, fill: 'both' });
+plate.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: EASE.land, fill: 'both' });
+name.animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: EASE.land, fill: 'both' });
+role.animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: EASE.land, fill: 'both' });
 
 // out, left off the clip so it ends on the held card: text first (160 ms), then the plate closes toward the rule in 260 ms, then the rule drops; no `from` fill over the entrance
-name.animate([{ translate: '0 0' }, { translate: '0 105%' }], { duration: 160, delay: at.exit, easing: leave, fill: 'forwards' });
-role.animate([{ translate: '0 0' }, { translate: '0 120%' }], { duration: 160, delay: at.exit + 40, easing: leave, fill: 'forwards' });
-plate.animate([{ clipPath: 'inset(0 0% 0 0)' }, { clipPath: 'inset(0 100% 0 0)' }], { duration: 260, delay: at.exit + 120, easing: leave, fill: 'forwards' });
-rule.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: 240, delay: at.exit + 260, easing: leave, fill: 'forwards' });
+name.animate([{ translate: '0 0' }, { translate: '0 105%' }], { duration: 160, delay: at.exit, easing: EASE.launch, fill: 'forwards' });
+role.animate([{ translate: '0 0' }, { translate: '0 120%' }], { duration: 160, delay: at.exit + 40, easing: EASE.launch, fill: 'forwards' });
+plate.animate([{ clipPath: 'inset(0 0% 0 0)' }, { clipPath: 'inset(0 100% 0 0)' }], { duration: 260, delay: at.exit + 120, easing: EASE.launch, fill: 'forwards' });
+rule.animate([{ transform: 'scaleY(1)' }, { transform: 'scaleY(0)' }], { duration: 240, delay: at.exit + 260, easing: EASE.launch, fill: 'forwards' });
 ```
 
 Sound: none; a name card is a read, not an event.

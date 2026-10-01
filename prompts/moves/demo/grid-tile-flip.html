@@ -34,9 +34,9 @@
 <template id="b"><div class="shot b"><div class="big">shipped</div><div class="line">film.mp4, 12.4 s, 60 fps</div><div class="tick"><svg viewBox="0 0 24 24"><path d="M5.5 12.5l4.2 4.2L18.5 7.6"/></svg></div><img class="thumb" src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></div></template>
 <div class="grid" id="grid"></div>
 <script type="module">
-import { springLinear, springDuration, curveToLinear } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const W = innerWidth, H = innerHeight, COLS = 8, ROWS = 5, tw = W / COLS, th = H / ROWS;
-const K = 150, D = 22, flip = springLinear(K, D), dur = springDuration(K, D) * 1000;
+const dur = 690;
 const t0 = 220, step = 58;                                    // ms: the wave crosses the grid in about 0.5 s
 const tplA = document.getElementById('a').content, tplB = document.getElementById('b').content;
 const grid = document.getElementById('grid');
@@ -56,10 +56,10 @@ for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
   const d = Math.hypot(c, (ROWS - 1 - r) * 1.15), delay = t0 + d * step;   // the wave starts in the bottom-left corner
   // 90 degrees at half progress: the tile is edge-on at its darkest and its highest
   tile.animate([{ transform: 'translateZ(0) rotateY(0deg)' }, { transform: 'translateZ(90px) rotateY(90deg)', offset: 0.5 }, { transform: 'translateZ(0) rotateY(180deg)' }],
-    { duration: dur, delay, easing: flip, fill: 'both' });
-  for (const f of [front, back]) f.lastElementChild.animate([{ opacity: 0 }, { opacity: 0.7, offset: 0.5 }, { opacity: 0 }], { duration: dur, delay, easing: flip, fill: 'both' });
+    { duration: dur, delay, easing: EASE.settle, fill: 'both' });
+  for (const f of [front, back]) f.lastElementChild.animate([{ opacity: 0 }, { opacity: 0.7, offset: 0.5 }, { opacity: 0 }], { duration: dur, delay, easing: EASE.settle, fill: 'both' });
 }
-grid.animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1400, easing: 'linear', fill: 'both' });
+grid.animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1400, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

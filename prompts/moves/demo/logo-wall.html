@@ -26,9 +26,9 @@
 <div class="wall" id="wall"></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE, easeFn } from '/core/motion/presets.js';
 import { mark, wordmark } from '/prompts/moves/demo/assets/logos.js';
-const settle = curveToLinear(CURVES.expoOut), E = CURVES.expoOut;
+const E = easeFn('land');
 const W = innerWidth, H = innerHeight, u = H / 100;
 // invented brands from the shared set; a wide or mono face sets smaller so every wordmark has one optical size
 const brands = [['northwind', 1], ['halcyon', 1.08], ['fernbank', 0.66], ['kestrel', 0.88], ['orbital', 1], ['lumen', 1], ['quarry', 1], ['tidewell', 1.08], ['parcel', 0.82], ['mosaic', 1], ['ardent', 1], ['vantage', 1]];
@@ -49,9 +49,9 @@ const arrive = 1300, stagger = 110, run = 190 * u;      // px each row travels w
 const plan = rows.map((row, i) => {
   const dir = i % 2 ? 1 : -1, delay = 150 + i * stagger;
   row.style.filter = `url(#lb${i})`;
-  row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: arrive, delay, easing: settle, fill: 'both' });
+  row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: arrive, delay, easing: EASE.land, fill: 'both' });
   // after it lands the row never stops: a slow linear drift, so the last frame still moves
-  row.firstElementChild.animate([{ translate: '0 0' }, { translate: `${dir * 6 * u}px 0` }], { duration: 2000, easing: 'linear', fill: 'both' });
+  row.firstElementChild.animate([{ translate: '0 0' }, { translate: `${dir * 6 * u}px 0` }], { duration: 2000, easing: EASE.glide, fill: 'both' });
   return { blur: document.getElementById(`lg${i}`), delay: delay / 1000, run };
 });
 vawe.onFrame((t) => plan.forEach((p) => {
@@ -60,7 +60,7 @@ vawe.onFrame((t) => plan.forEach((p) => {
   p.blur.setAttribute('stdDeviation', `${(slope * p.run / (arrive / 1000) / 60 * 0.3).toFixed(2)} 0`);
 }));
 const lede = [...document.querySelectorAll('.lede i')];
-lede.forEach((el, i) => el.animate([{ translate: '0 110%' }, { translate: '0 0' }], { duration: 640, delay: 80 + i * 90, easing: settle, fill: 'both' }));
+lede.forEach((el, i) => el.animate([{ translate: '0 110%' }, { translate: '0 0' }], { duration: 640, delay: 80 + i * 90, easing: EASE.land, fill: 'both' }));
 </script>
 </body>
 </html>

@@ -6,15 +6,13 @@ from 1.1x to 1 as it is uncovered. It is the closing iris of silent film, so it 
 caused that scene". Clip: [iris-wipe.mp4](iris-wipe.mp4). Demo: [demo/iris-wipe.html](demo/iris-wipe.html).
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut;
+import { EASE } from '../../core/motion/presets.js';
 const px = 0.66 * innerWidth, py = 0.63 * innerHeight;      // the point the eye is on
 const R = Math.hypot(px, py);                               // to the farthest corner
 const at = `${px}px ${py}px`;
-const iris = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
 shotA.animate([{ clipPath: `circle(${R}px at ${at})` }, { clipPath: `circle(0px at ${at})` }],
-  { duration: 650, delay: 550, easing: curveToLinear(iris), fill: 'both' });
-shotB.animate([{ scale: 1.1 }, { scale: 1 }], { duration: 1100, delay: 550, easing: curveToLinear(E), fill: 'both' });
+  { duration: 650, delay: 550, easing: EASE.settle, fill: 'both' });
+shotB.animate([{ scale: 1.1 }, { scale: 1 }], { duration: 1100, delay: 550, easing: EASE.land, fill: 'both' });
 ```
 
 Sound: none; the click that closes the iris carries the cue.

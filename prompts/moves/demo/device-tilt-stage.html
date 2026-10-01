@@ -52,8 +52,8 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { CURVES } from '/core/motion/springs.js';
-const S = CURVES.spring, clamp = (u) => Math.min(1, Math.max(0, u));
+import { easeFn } from '/core/motion/presets.js';
+const S = easeFn('settle'), clamp = (u) => Math.min(1, Math.max(0, u));
 const device = document.querySelector('.device'), gloss = document.querySelector('.gloss');
 const shadow = document.querySelector('.shadow'), fill = document.querySelector('.bar b'), pct = document.querySelector('.pct');
 const t0 = 0.05, dur = 1.45;

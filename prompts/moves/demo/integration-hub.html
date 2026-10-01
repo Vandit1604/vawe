@@ -33,8 +33,8 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { CURVES } from '/core/motion/springs.js';
-const E = CURVES.expoOut, W = innerWidth, H = innerHeight, cx = W / 2, cy = H / 2;
+import { easeFn } from '/core/motion/presets.js';
+const E = easeFn('land'), W = innerWidth, H = innerHeight, cx = W / 2, cy = H / 2;
 const clamp = (u) => Math.min(1, Math.max(0, u));
 const R = 0.36 * H, FLY = 0.62, STAGGER = 0.05, T0 = 0.05, WIRE = 0.95, WIRE_DUR = 0.22;
 const tools = [...document.querySelectorAll('.tool')], hub = document.querySelector('.hub');
