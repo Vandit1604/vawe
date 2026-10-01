@@ -3,10 +3,10 @@
 vawe is the framework for agent-native motion graphics: one HTML page in, one film out. Write the
 page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js): you never learn a
 private format, and if something you would naturally write fails, that is a framework bug to report.
-This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`
-(`bin/vawe <verb> --help` lists flags; a wrong flag exits 2 with the valid ones). Start with
-`bin/vawe new <name> --request "<the ask>"`: it picks the template and writes `films/<name>/page.html`
-(a valid starter) and `brief.md`. `films/examples/three-star/page.html` shows structure, not a look. `films/examples/colour-sting/` is a judged-PASS, owner-approved 5 s colour-led sting (brief, directions, page): study how it moves, then make your own direction.
+This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`.
+Start with `bin/vawe new <name> --request "<the ask>"`: it writes `films/<name>/page.html` (a valid starter)
+and `brief.md`. `films/examples/colour-sting/` is a judged-PASS 5 s sting: study how it moves, then make
+your own direction.
 
 ## The page contract  `[live: harness/media/render-page.mjs]`
 
@@ -26,12 +26,12 @@ This file adds only what you would get wrong on your own. One command runs every
   custom property); the studio edits those literals in place.
 - Text checks skip text inside `aria-hidden="true"` (texture); product UI labels shown as texture take `data-chrome` (cap floor 2.5%, no read hold).
 - `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
-  one big moment; put quiet before it. One focal point per frame.
+  one big moment; put quiet before it.
 
 ## The loop  `[live: harness/live/stage-say.mjs]`
 
-Read `engine-doctrine/TASTE-CARD-DIGEST.md` first. Each command prints the taste rules for its step. The
-judge scores the full `engine-doctrine/TASTE-CARD.md`. A hook names the next command for the page film you edited last.
+Read `engine-doctrine/TASTE-CARD-DIGEST.md` first: it is the one list of taste pitfalls. A hook names the
+next command for the film you edited last.
 
 | # | stage | the command |
 |---|---|---|
@@ -56,22 +56,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 
 Over 60 seconds or more than one session: one chapter file per agent
 (`prompts/directors-brief-long-form.md`). Skills: `vawe-page` (write), `vawe-critique` (look),
-`vawe-reference` (match). Score with `bin/vawe judge <page|mp4> --runs A,B` in a fresh session; a
-PASS is never self-recorded.
-
-## Gotchas from real runs  `[eye]`
-
-- 4 of 8 agent films invented one brand (Vesper, a dusk sun that becomes a crescent) and all 8 had one
-  glowing circle. Choose the hero from the direction, never from the card's Attractors list.
-- A flat disc with no light source reads as clip art. If light is the idea, give it a source and a surface.
-- Judges name template devices: light beams, lens streaks, sheen bands, accent bars, rule lines. One per film.
-- The same seam move twice reads as a template, even in another direction. Change the move.
-- A crossfade between two busy frames goes grey and muddy. Cut, or wipe on the motion.
-- First drafts score about 6/10 on motion: one move per beat at one speed. Move with
-  `core/motion/presets.js` (`enter`, `leave`, `stagger`, `layer`, `BANDS`), as the starter does.
-- Agents read the card once and forget it: read the lines each command prints before the next edit.
-- Also banned unless the brief asks: a centred title on a gradient, corner labels, glow on UI text,
-  particles, camera shake, gradient text, fake product UI, an em dash on screen, a hook over 12 words.
+`vawe-reference` (match). A PASS is never self-recorded: score with `bin/vawe judge` in a fresh session.
 
 ## Waivers  `[live: harness/media/render-page.mjs]`
 
