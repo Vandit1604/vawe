@@ -1,6 +1,6 @@
 # Taste card digest (authors)
 
-One line per rule of `TASTE-CARD.md`. The judge scores the full card; read it for the why and the five frames.
+The one list of taste pitfalls. One line per rule of `TASTE-CARD.md`; the judge scores the full card. Every command prints these lines again.
 
 1. Subject in frame 0 (by 0.1 s); never an empty ground for 0.5 s.
 2. Turn the world every 1-2 beats; nothing static in the last 1 s.
@@ -19,3 +19,5 @@ One line per rule of `TASTE-CARD.md`. The judge scores the full card; read it fo
 15. One entrance per beat, with an origin; not all opacity fades, no bounce.
 
 Attractors (fine only if the direction chose them): glowing orb or disc, dusk sun, lens streak or sheen band, accent bar or rule line, same seam move twice, three directions in one material.
+
+Also, from real runs: choose the hero from the direction, never from this list; a disc needs a light source and a surface; a crossfade between two busy frames goes muddy, so cut or wipe on the motion; first drafts score 6/10 on motion, so overlap a slower second move; banned unless the brief asks: centred title on a gradient, fake product UI, an em dash on screen, a hook over 12 words. The judge varies about 1 point per axis: after 3 rounds that flip one note, keep the value you measured.

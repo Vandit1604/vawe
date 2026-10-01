@@ -1,6 +1,6 @@
 ---
 name: vawe-page
-description: "Author a vawe page film: one films/<name>/page.html the renderer seeks frame by frame. Load before writing or editing any page.html: audio tags, the spring helpers, and the ten mistakes a first draft makes. The page contract itself is in AGENTS.md."
+description: "Author a vawe page film: one films/<name>/page.html the renderer seeks frame by frame. Load before writing or editing any page.html: audio tags, the spring helpers, and the page-code mistakes a first draft makes. The page contract itself is in AGENTS.md."
 effort: medium
 ---
 
@@ -8,7 +8,8 @@ effort: medium
 
 A film is one HTML page; the renderer seeks it, screenshots every frame and mixes the audio offline.
 The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start with
-`bin/vawe new <name>`; this skill holds what a first draft gets wrong.
+`bin/vawe new <name>`; this skill holds the code a first draft gets wrong. Taste pitfalls are in
+`engine-doctrine/TASTE-CARD-DIGEST.md`.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->
@@ -74,7 +75,7 @@ asks for overshoot. Full reference: `core/motion/README.md`.
    A recreation is done when `bin/vawe coverage <film.mp4> --ref <ref.mp4>` exits 0.
 5. Hand the draft to a fresh session: `vawe-critique`.
 
-## The ten mistakes a first draft makes
+## Page-code mistakes a first draft makes
 
 1. A live clock. `Date.now()` or a running `requestAnimationFrame` loop instead of t. The frame is a
    function of the seek; anything else renders differently on every run.
@@ -86,22 +87,19 @@ asks for overshoot. Full reference: `core/motion/README.md`.
    the longhands. `bin/vawe check anim-traps <page>` finds this and six more.
 6. No end keyframe. A `@keyframes` rule with no `100%` slides back after it ends.
 7. Opacity or filter on a `preserve-3d` element flattens it. Fade the wrapper.
-8. Everything fades in and everything eases out. One entrance per beat, exits faster than
-   entrances, arrive fast and land soft (`engine-doctrine/RULES/banned-defaults.md`).
-9. Text that cannot be read: hold `words x 0.6 s`, floor 1.2 s
-   (`engine-doctrine/RULES/readable-hold.md`). Add a hold; never slow the move.
-10. A layout in fixed pixels for 16:9. Use `--vw`/`--vh`, container units and `[data-aspect]`
-    selectors, then draft `--aspect 9:16` once before the final.
-
-Shell on macOS: `sed -i` needs an empty suffix (`sed -i '' 's/a/b/' file`); the Edit tool or a short python script avoids it. Never `sleep` to wait for a render: `bin/vawe ship --status <page> --wait` blocks up to 100 s and returns.
-Also: `fill: both` (or `backwards`) on an animation with a delay shows its first keyframe from frame 0, so a late glint or scene is on screen early; use `forwards` unless it should sit there before it starts.
-Also: `--vw` and `--vh` hold a unit (`1920px`), so write `calc(var(--vh) * 0.11)`, never `* 0.11px`;
-a capture scaled below 0.6 loses its type, crop instead; an em dash on screen fails the validator; the
-first-frame hook is 12 words or fewer. Waivers (`<script id="authoring">`) are in `AGENTS.md`.
+8. A layout in fixed pixels for 16:9. Use `--vw`/`--vh`, container units and `[data-aspect]`
+   selectors, then draft `--aspect 9:16` once before the final.
+9. `fill: both` (or `backwards`) on an animation with a delay shows its first keyframe from frame 0;
+   use `forwards` unless it should sit there before it starts.
+10. `--vw` and `--vh` hold a unit (`1920px`): write `calc(var(--vh) * 0.11)`, never `* 0.11px`. A capture
+    scaled below 0.6 loses its type: crop instead.
 
 ## Commands
 
 `bin/vawe dev <page> [--aspect --from --to --audio]`: half size, 30 fps, silent.
-`bin/vawe ship <page> [--aspect all]`: 60 fps, motion blur, audio mixed, then a final check and a fresh judge (about 30 s). It runs in the background: `bin/vawe ship --status <page> --wait` waits at most 100 s (under the 120 s tool timeout); repeat until it says done. The result is the verdict with rule numbers and seconds: fix them, worst first, on drafts (`bin/vawe dev`, then `bin/vawe judge <draft mp4> --fresh`, about 1 to 2 min a round) until PASS, then ship once more. A second ship of the same page cancels the first. Never use `ship --wait` (the foreground render) inside an agent tool call: it hits the timeout.
+`bin/vawe ship <page> [--aspect all]` runs in the background; wait with `bin/vawe ship --status <page> --wait`
+(at most 100 s, repeat until done). Fix the verdict worst first on drafts (`bin/vawe dev`, then
+`bin/vawe judge <draft mp4> --fresh`) until PASS, then ship once more. Never use `ship --wait` in an agent
+tool call: it hits the timeout.
 `bin/vawe critique <page> [--ref mp4]`: the fresh look (`vawe-critique`; with `--ref`, `vawe-reference`).
 Templates: `prompts/README.md`. Long films: `prompts/directors-brief-long-form.md`.

@@ -188,16 +188,7 @@ const gatesText = (name) => `Do the gates in order. A failed gate sends you back
    Then \`bin/vawe critique films/${name}/page.html\` in a session that did not write the page.
 4. Final: \`bin/vawe ship films/${name}/page.html\`, then \`bin/vawe ship --status films/${name}/page.html --wait\`.`;
 
-const PITFALLS = `Read the lines \`bin/vawe dev\` prints; they come from engine-doctrine/TASTE-CARD-DIGEST.md. Also:
-
-- Attractors: the hero comes from the picked direction, never from the card's Attractors list.
-- Template devices: light beam, lens streak, sheen band, accent bar, rule line. One per film.
-- One move per beat at one speed reads as a template: overlap a slower second move.
-- A small tagline (under 6% cap height) fails the Acceptance table and the judge.
-- A crossfade between two busy frames goes muddy. Cut, or wipe on the motion.
-- A dead tail: something visible moves in the last second.
-- The judge varies by about 1 point per axis. After 3 rounds that flip one note, keep the value you
-  measured and go on.`;
+const PITFALLS = `Taste pitfalls: engine-doctrine/TASTE-CARD-DIGEST.md (\`bin/vawe dev\` prints them).`;
 
 const deliverText = (name) => `- out/${name}.mp4 from \`bin/vawe ship\`.
 - This brief, with Spec edited to what you built and the Acceptance table filled with the number you

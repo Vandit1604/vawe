@@ -132,11 +132,8 @@ Answers: a ship takes 3 to 19 minutes and one failed final cost 40 (trace study 
 
 ### 7. PITFALLS
 
-From our traces: attractors (a disc, a sun, "Vesper"); template devices (beam, streak, sheen band,
-accent bar), one per film; one move per beat at one speed; a tagline under 6%; a crossfade between busy
-frames goes muddy; a dead tail. The judge varies by about 1 point per axis: after 3 rounds that flip one
-note, keep the value you measured. Do not repeat the ban list: read the taste card digest
-(`engine-doctrine/TASTE-CARD-DIGEST.md`) and the lines `bin/vawe dev` prints.
+One line pointing to `engine-doctrine/TASTE-CARD-DIGEST.md`, the one list of taste pitfalls, plus any pitfall
+specific to this film.
 
 ### 8. DELIVER
 
