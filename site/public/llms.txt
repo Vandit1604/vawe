@@ -19,6 +19,8 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 
 ## Moves
 Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.
+To filter: fetch https://vawe.dev/moves/index.json. Top-level groups, looks and jobs list the ids. Each move has group, look, jobs, use (the when line), clip, md and duration.
+A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=paper&q=wipe (group, look and job take comma lists: OR within one, AND across).
 
 - [Mask rise](https://vawe.dev/moves/mask-rise.md): a line of type enters from under an invisible edge; the mask box is tall enough for descenders
 - [Tracking collapse](https://vawe.dev/moves/tracking-collapse.md): a title or wordmark arrives: letters converge from wide tracking while the word sharpens
