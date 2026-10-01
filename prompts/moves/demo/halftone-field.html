@@ -22,8 +22,8 @@
 </head>
 <body>
 <main class="copy">
-  <h1 class="title"><span class="mask" style="--i:0"><span>Dots swell,</span></span><span class="mask" style="--i:1"><span>dots fade.</span></span></h1>
-  <p class="lead" id="lead">A dot screen waves across the frame while the type holds still.</p>
+  <h1 class="title"><span class="mask" style="--i:0"><span>A screen</span></span><span class="mask" style="--i:1"><span>that breathes.</span></span></h1>
+  <p class="lead" id="lead">A fine screen that thickens and thins, slowly, behind still type.</p>
 </main>
 <script type="module">
 import '/core/engine/page-api.js';
@@ -39,10 +39,10 @@ lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" styl
 const tokens = getComputedStyle(root);
 const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
 
-// A 45 degree dot screen. The cell centres never move; each dot's radius follows a plane wave that travels across the frame.
+// A fine 45 degree dot screen in one neutral ink. Dot centres never move; the radius follows a slow density wave.
 const frag = `
-uniform vec3 u_ground, u_dot, u_faint, u_accent;
-const float CELL = 0.032;
+uniform vec3 u_ground, u_ink;
+const float CELL = 0.020;                                    // pitch as a share of the frame height: 22 px at 1080
 void main() {
   float aspect = u_res.x / u_res.y;
   vec2 p = gl_FragCoord.xy / u_res.y;
@@ -51,18 +51,16 @@ void main() {
   vec2 f = fract(g) - 0.5;
   vec2 c = (id + 0.5) * CELL;
   vec2 cp = vec2(c.x - c.y, c.x + c.y) * 0.7071;
-  float wave = 0.5 + 0.5 * sin(4.0 * cp.x + 1.6 * cp.y - u_time * 3.2 + u_seed);
-  float keep = 1.0 - 0.45 * smoothstep(0.80 * aspect, 0.56 * aspect, cp.x);       // the copy sits left: smaller dots behind it
-  float radius = mix(0.10, 0.50, wave) * keep;
+  float wave = 0.5 + 0.5 * sin(2.2 * cp.x + 0.9 * cp.y - u_time * 1.6 + u_seed);
+  float keep = 1.0 - 0.6 * smoothstep(0.80 * aspect, 0.56 * aspect, cp.x);     // the copy sits left: thinner dots behind it
+  float radius = mix(0.05, 0.075, wave) * keep;                // 2.2 to 3.2 px across at 1080, a 1.5 times swing
   float aa = 1.0 / (u_res.y * CELL);
   float dotMask = smoothstep(radius + aa, radius - aa, length(f));
-  vec3 ink = mix(u_dot, u_faint, 0.25);
-  ink = mix(ink, u_accent, 0.5 * smoothstep(0.72 * aspect, 0.94 * aspect, cp.x));   // half way to the accent on the right, away from the copy
-  vec3 col = mix(u_ground, ink, dotMask);
-  gl_FragColor = vec4(col, 1.0);
+  vec3 ink = mix(u_ground, u_ink, (0.16 + 0.22 * wave) * keep);   // tone swings with the wave, 16 to 38 percent: texture at rest, a soft tide as it passes
+  gl_FragColor = vec4(mix(u_ground, ink, dotMask), 1.0);
 }`;
 
-const field = shaderField(frag, { seed: 2, uniforms: { u_ground: rgb('--ground'), u_dot: rgb('--dot'), u_faint: rgb('--faint'), u_accent: rgb('--accent') } });
+const field = shaderField(frag, { seed: 2, uniforms: { u_ground: rgb('--ground'), u_ink: rgb('--ink') } });
 vawe.onFrame((t) => field.draw(t));
 </script>
 </body>
