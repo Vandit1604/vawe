@@ -110,3 +110,9 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Command palette summon](https://vawe.dev/moves/command-palette-summon.md): the keyboard-first beat: the app dims, a Cmd+K palette drops in on a spring, a query types, non-matching rows collapse to zero height, Enter presses the chosen row and the palette leaves fast
 - [Agent progress](https://vawe.dev/moves/agent-progress.md): an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list
 - [Panel live sync](https://vawe.dev/moves/panel-live-sync.md): an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames
+- [Aurora drift](https://vawe.dev/moves/aurora-drift.md): three soft bands of light hang from the top of the frame and fold slowly in one shader while the copy sits low; the light thins out above the type
+- [Grain field](https://vawe.dev/moves/grain-field.md): a quiet printed or filmic frame breathes: a slow tonal ground and film grain that turns over 24 times a second, seeded from the seek time, never from Math.random
+- [Halftone field](https://vawe.dev/moves/halftone-field.md): a physical or retro frame gets a 45 degree dot screen whose dot size waves across the frame while every dot stays in its cell
+- [Ink warp](https://vawe.dev/moves/ink-warp.md): a rich liquid ground for short large copy: marbled ink flows by domain warp in one shader, thinner behind the type
+- [Dot grid wave](https://vawe.dev/moves/dot-grid-wave.md): a clean product or data frame gets a plain SVG dot grid with one travelling wave of scale and brightness, weaker behind the copy
+- [Light pool](https://vawe.dev/moves/light-pool.md): a matte held frame gets one soft pool of light that wanders on a seeded path, plain CSS with no shader; the stillest ground of the group
