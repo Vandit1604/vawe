@@ -110,5 +110,29 @@
     "license": "cc0",
     "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
     "source": "https://stocksnap.io/photo/window-view-VTNNBQLDPH"
+  },
+  "ridge-far.webp": {
+    "title": "A lone hiker walks through a vibrant alpine meadow with colorful wildflowers, surrounded by misty mountains and large rocks under a cloudy sky.",
+    "creator": "nabinstha811",
+    "license": "cc0",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://wordpress.org/photos/photo/2776a13bbc/",
+    "note": "cut into three depth layers from the 5712 px original, resized to 3000 px; the hidden parts of far and mid are filled by blur"
+  },
+  "ridge-mid.webp": {
+    "title": "A lone hiker walks through a vibrant alpine meadow with colorful wildflowers, surrounded by misty mountains and large rocks under a cloudy sky.",
+    "creator": "nabinstha811",
+    "license": "cc0",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://wordpress.org/photos/photo/2776a13bbc/",
+    "note": "cut into three depth layers from the 5712 px original, resized to 3000 px; the hidden parts of far and mid are filled by blur"
+  },
+  "ridge-near.webp": {
+    "title": "A lone hiker walks through a vibrant alpine meadow with colorful wildflowers, surrounded by misty mountains and large rocks under a cloudy sky.",
+    "creator": "nabinstha811",
+    "license": "cc0",
+    "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "source": "https://wordpress.org/photos/photo/2776a13bbc/",
+    "note": "cut into three depth layers from the 5712 px original, resized to 3000 px; the hidden parts of far and mid are filled by blur"
   }
 }
