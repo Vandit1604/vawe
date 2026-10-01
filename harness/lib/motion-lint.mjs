@@ -57,7 +57,9 @@ const exiting = (r) => r.id === 'leave' || (r.opacity && r.opacity[1] < r.opacit
 // A record inferred from box samples is exact only when it spans a few samples; one animation's own timing always is.
 const MIN_SAMPLES = 2;
 const measured = (r) => !r.step || r.duration >= MIN_SAMPLES * r.step;
-const isLinear = (r) => r.easing === 'linear' && r.kfEasings.every((e) => e === 'linear');
+const KEYWORDS = new Set(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']);
+const onKeywords = (r) => [r.easing, ...r.kfEasings].every((e) => KEYWORDS.has(e));
+const isLinear = (r) => [r.easing, ...r.kfEasings].every((e) => e === 'linear');
 const s2 = (x) => x.toFixed(2);
 
 function byTarget(records) {
@@ -97,13 +99,16 @@ export function groupLanding(records) {
   }));
 }
 
-/** A move longer than 0.3 s on linear easing (card rule 6). */
+const EASE_ADVICE = 'easing: EASE.land to arrive, EASE.leave or EASE.launch to exit, EASE.glide for a drift (core/motion/presets.js), or enter(el)';
+
+/** A move longer than 0.3 s on linear easing, or on a default CSS keyword (ease, ease-in-out) with no curve of its own (card rule 6). */
 export function linearMove(records) {
-  return records.filter((r) => moves(r) && r.duration > LINEAR_LIMIT && isLinear(r)).map((r) => ({
-    code: 'linear-move', rule: 6, at: r.delay,
-    what: `${r.label} moves ${r.props.filter((p) => MOVE.test(p)).join(',')} for ${s2(r.duration)} s on linear easing`,
-    fix: 'easing: curveToLinear(CURVES.expoOut) to land, curveToLinear(\'easeInCubic\') to leave, or enter(el)',
-  }));
+  return records.filter((r) => moves(r) && r.duration > LINEAR_LIMIT && onKeywords(r)).map((r) => {
+    const linear = isLinear(r);
+    return { code: linear ? 'linear-move' : 'default-ease', rule: 6, at: r.delay,
+      what: `${r.label} moves ${r.props.filter((p) => MOVE.test(p)).join(',')} for ${s2(r.duration)} s on ${linear ? 'linear' : `the CSS keyword ${[r.easing, ...r.kfEasings].find((e) => e !== 'linear')}`} easing`,
+      fix: EASE_ADVICE };
+  });
 }
 
 /** A translate or transform's dominant direction: x+, x-, y+, y- or ''. */

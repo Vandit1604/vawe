@@ -96,17 +96,20 @@ const HANDLES = {
   easyEase: withBlurb('AE\'s Easy Ease: reaches a third of the way in and arrives at a DEAD STOP. The default handle, and the one to use when you just want a key to stop being mechanical', { influence: HANDLE_DEFAULT_INFLUENCE, speed: 0 }),
   linear: withBlurb('the straight line, written down: the handle sits on the diagonal so this side of the segment has constant speed. Use it to make one side explicit while the other is shaped', { ...LINEAR_SIDE }),
   hang: withBlurb('influence 75 at a dead stop: the value HANGS at this key and the movement is crushed away from it. On BOTH sides of a segment this is the flat-ended, near-vertical speed graph a snappy swap is cut on. 75 is the number practitioners state', { influence: 75, speed: 0 }),
-  fling: withBlurb('a short handle at four times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The steep half of a snappy move', { influence: 18, speed: 4 }),
+  long: withBlurb('influence 60 at a dead stop: the heavy move that eases at both ends. 5.4 per cent of Lottie handles and 18 per cent of tuned entrances (60 median); softer than hang, wider than easyEase', { influence: 60, speed: 0 }),
+  fling: withBlurb('a short handle at 4.8 times the average speed: the value leaves (or arrives) FAST and the segment spends its length recovering. The only shape in the HyperFrames carousels (12 per cent at 4.8x out, 6 per cent at 10x in); 1.6 per cent of Lottie handles', { influence: 12, speed: 4.8 }),
   // Speed must be NEGATIVE here: `y2 = 1 - speed*influence`, so a positive speed pulls the control
   // point below the key (measured peak 1.000000 over 20,001 samples, a plain ease-in, no overshoot).
-  // -0.8 at influence 62 peaks at 1.1008, the 10 per cent practitioners state for a snappy overshoot.
-  overshoot: withBlurb('arrives from BEYOND its key and settles back: the value sails about 10 per cent past and returns. The handle version of a back ease, and it needs the far side to stop it', { influence: 62, speed: -0.8 }),
+  // 35 / -0.4 are the Lottie medians; as the in handle against easyEase it peaks at 1.0119, a 1 per cent
+  // overshoot. A deeper speed (-0.8 peaks 1.04) is an authored choice, not the data.
+  overshoot: withBlurb('arrives a hair BEYOND its key and settles back (35 per cent at -0.4x, the Lottie medians: about 1 per cent past). The handle version of a back ease, and it needs the far side to stop it. 0.7 per cent of Lottie handles', { influence: 35, speed: -0.4 }),
 };
 
 const HANDLE_AKA = {
   easyEase: ['ease in and out', 'the default handle', 'stops smoothly at the key'],
   linear: ['constant speed handle', 'straight handle', 'no easing on this side'],
   hang: ['hangs at the key', 'flat-ended handle', 'crushed toward the key'],
+  long: ['heavy handle', 'wide soft stop', 'eases both ends of a big move'],
   fling: ['fast exit handle', 'throws it out', 'the steep half of a snappy move'],
   overshoot: ['sails past and settles', 'ten percent overshoot handle', 'back-ease handle'],
 };
@@ -116,7 +119,7 @@ export const HANDLE_REGISTRY = defineRegistry('keyframe handle', HANDLES, {
   catalog: {
     title: 'Keyframe handles (the graph editor)',
     tag: 'motion key',
-    intro: 'On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles. A named easing is one stock curve for the whole gap; a handle is a control point you place. Each carries an `influence` (how far along the segment it reaches, 0-100 per cent of the DURATION) and a `speed` (how fast the value moves AT the key, as a MULTIPLE of the segment\'s own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out). A multiple and not px/sec, so one handle pair is correct for x, scale and rot at once. The names below are ONE SIDE each and the slot picks the side: `{ "t":0.6, "x":400, "easeOut":"fling", "easeIn":"easyEase" }`, or the long form `{ "influence": 18, "speed": 4 }`. Refused beside `ease` on the same segment.',
+    intro: 'On a `motion` or `camera` key, per SIDE: `easeOut` shapes the segment LEAVING the key, `easeIn` the segment ARRIVING at it, so one segment is drawn by two handles. A named easing is one stock curve for the whole gap; a handle is a control point you place. Each carries an `influence` (how far along the segment it reaches, 0-100 per cent of the DURATION) and a `speed` (how fast the value moves AT the key, as a MULTIPLE of the segment\'s own average velocity: 0 is a dead stop, 1 is a straight line, 4 rushes out). A multiple and not px/sec, so one handle pair is correct for x, scale and rot at once. The names below are ONE SIDE each and the slot picks the side: `{ "t":0.6, "x":400, "easeOut":"fling", "easeIn":"easyEase" }`, or the long form `{ "influence": 12, "speed": 4.8 }`. Refused beside `ease` on the same segment.',
     // Shows both sides of a segment, since a single-sided example would read as a whole-segment easing.
     usage: (n, { text }) => text({ anim: 'none', motion: [{ t: 0, x: -300, easeOut: n }, { t: 0.9, x: 300, easeIn: n }] }),
     noPreview: 'a handle is half the shape of a segment, so it has the same problem a mode has: a still frame is one point on the curve and says nothing about the curve. The playground card draws the curve itself with both handles on dials.',
