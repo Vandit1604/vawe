@@ -30,15 +30,15 @@ One row per job, best move first. Every built move is in this table.
 | arrive by flying into a scene | [parallax-dive](parallax-dive.md) |
 | land a title or wordmark, soft | [tracking-collapse](tracking-collapse.md), [mask-rise](mask-rise.md), [blur-word-cascade](blur-word-cascade.md), [liquid-displace](liquid-displace.md) |
 | type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
-| land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md) |
+| land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md), [variable-weight-wave](variable-weight-wave.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
 | decide a name or number on screen | [flap-resolve](flap-resolve.md), [text-scramble-decode](text-scramble-decode.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |
-| point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md) |
+| point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md), [hand-drawn-notes](hand-drawn-notes.md) |
 | change what a word means | [weight-morph](weight-morph.md) |
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
 | change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [speed-ramp-freeze](speed-ramp-freeze.md), [smear-stretch](smear-stretch.md) |
 | change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md), [light-leak-transition](light-leak-transition.md) |
-| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md) |
+| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md), [type-match-cut](type-match-cut.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md), [spin-transition](spin-transition.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
@@ -63,6 +63,8 @@ One row per job, best move first. Every built move is in this table.
 | replace a line with the answer, by impact | [ticker-takeover](ticker-takeover.md) |
 | say it works for everyone while the brand stays still | [anchor-cycle](anchor-cycle.md) |
 | name the person on screen | [lower-third](lower-third.md) |
+| carry a line along a curve | [text-on-path](text-on-path.md) |
+| run a spoken line as captions | [caption-karaoke](caption-karaoke.md), [caption-editorial](caption-editorial.md) |
 
 ## Groups
 

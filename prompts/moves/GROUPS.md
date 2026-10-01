@@ -30,6 +30,10 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | lower third | a person is on screen: an accent rule grows, a plate wipes open, the name rises from a mask and the role follows, then the card leaves faster than it came | [lower-third.md](lower-third.md) | [lower-third.mp4](lower-third.mp4) |
 | liquid displace | a title arrives bent by moving water and settles to sharp type: an SVG turbulence map drives a displacement that drains to zero by 1.15 s, then the type holds still and readable | [liquid-displace.md](liquid-displace.md) | [liquid-displace.mp4](liquid-displace.mp4) |
 | echo trail | one element flies in and stops on a beat: five time-offset copies of it trail with falling opacity, then fold into the lead on the hit frame while it squashes and recoils | [echo-trail.md](echo-trail.md) | [echo-trail.mp4](echo-trail.mp4) |
+| caption karaoke | a spoken line runs as captions: the word being said lifts to full ink and one soft pill glides word to word on a [[t, wordIndex]] speech table | [caption-karaoke.md](caption-karaoke.md) | [caption-karaoke.mp4](caption-karaoke.mp4) |
+| caption editorial | editorial captions: one or two key words per line in a contrasting italic serif, and the next caption replaces the last on a short line-by-line mask cut | [caption-editorial.md](caption-editorial.md) | [caption-editorial.mp4](caption-editorial.mp4) |
+| variable weight wave | one hero word arrives as a wave: weight and width of a variable face crest letter by letter, left to right, then settle at a firm weight | [variable-weight-wave.md](variable-weight-wave.md) | [variable-weight-wave.mp4](variable-weight-wave.mp4) |
+| text on path | a line of words rides an SVG path with startOffset set from the seek time, front word first, and settles readable on the curve | [text-on-path.md](text-on-path.md) | [text-on-path.mp4](text-on-path.mp4) |
 
 ## Change between shots
 
@@ -57,6 +61,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | shape morph wipe | the next shot grows out of a shape on screen: the mask is born as a dot, grows as a circle, then widens and squares off into a rounded card and past the frame | [shape-morph-wipe.md](shape-morph-wipe.md) | [shape-morph-wipe.mp4](shape-morph-wipe.mp4) |
 | spin transition | a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures | [spin-transition.md](spin-transition.md) | [spin-transition.mp4](spin-transition.mp4) |
 | light leak transition | two shots meet through warmth: three generated warm layers swell over a dark UI on their own clocks, the cut lands on the peak, and the new shot climbs out as they fall faster; no image asset | [light-leak-transition.md](light-leak-transition.md) | [light-leak-transition.mp4](light-leak-transition.mp4) |
+| type match cut | one word grows in shot A and holds its place while the frame cuts around it; in shot B the same node is part of a new line | [type-match-cut.md](type-match-cut.md) | [type-match-cut.mp4](type-match-cut.mp4) |
 
 ## Point the eye
 
@@ -68,6 +73,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | underline draw | a line draws under the key word, left to right, fast in and slow out | [underline-draw.md](underline-draw.md) | [underline-draw.mp4](underline-draw.mp4) |
 | bracket callout | corner brackets fly in and snap onto a word or a UI part with a small overshoot | [bracket-callout.md](bracket-callout.md) | [bracket-callout.mp4](bracket-callout.mp4) |
 | spotlight dim | the frame dims around one target: a hole closes from the full frame onto it and its shadow is the dim | [spotlight-dim.md](spotlight-dim.md) | [spotlight-dim.mp4](spotlight-dim.mp4) |
+| hand drawn notes | a person's margin notes: a loose circle round one word, an arrow from a written label and an underline, drawn on with stroke-dashoffset and a seeded wobble | [hand-drawn-notes.md](hand-drawn-notes.md) | [hand-drawn-notes.mp4](hand-drawn-notes.mp4) |
 
 ## Move the camera
 
@@ -138,12 +144,12 @@ A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper
 | vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through, light leak transition |
 | daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, photo parallax 2.5d, push blur, smear stretch, ui focus zoom |
 | terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode |
-| swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph |
-| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep |
-| dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot |
-| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade |
-| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep |
-| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan |
+| swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph, hand drawn notes |
+| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep, caption editorial |
+| dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot, caption karaoke |
+| brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade, variable weight wave |
+| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep, text on path |
+| field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan, type match cut |
 | chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.

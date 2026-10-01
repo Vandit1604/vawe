@@ -1,0 +1,64 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="field">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.6">
+<meta name="blank" content="0-0.1">
+<title>move: type match cut</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .shot { position: absolute; inset: 0; }
+  #b { background: var(--paper); color: var(--paper-ink); visibility: hidden; }
+  .line { position: absolute; left: 0; top: 0; margin: 0; white-space: nowrap; letter-spacing: -0.04em; }
+  #a .line { font: 600 calc(var(--u) * 7)/1 var(--sans); }
+  #b .line { font: 800 calc(var(--u) * 12)/1 var(--sans); letter-spacing: -0.05em; }
+  /* the held word: the same node in both shots, so nothing about it is redrawn at the cut */
+  .hold { position: absolute; left: 0; top: 0; z-index: 2; font: 800 calc(var(--u) * 12)/1 var(--sans); letter-spacing: -0.05em; white-space: nowrap; color: var(--accent); transform-origin: 50% 50%; }
+  .slot { visibility: hidden; display: inline-block; }
+</style>
+</head>
+<body>
+<section class="shot" id="a"><p class="line" id="la">Everything we ship is <span class="slot" id="sa">fast</span></p></section>
+<section class="shot" id="b"><p class="line" id="lb">The feature is <span class="slot" id="sb">fast</span></p></section>
+<span class="hold" id="hold">fast</span>
+<script type="module">
+import { curveToLinear } from '/core/motion/springs.js';
+import { enter } from '/core/motion/presets.js';
+
+await document.fonts.ready;
+const CUT = 1.45, GROW_AT = 0.8;
+const INOUT = curveToLinear('easeInOutCubic');
+const $ = (id) => document.getElementById(id);
+const hold = $('hold');
+
+// the held word sits at one point P in both shots: each shot's line is shifted until its slot is centred on P
+$('b').style.visibility = 'visible';
+const wA = $('sa').offsetWidth, wB = $('sb').offsetWidth;
+const P = { x: innerWidth * 0.8 - wB / 2, y: innerHeight * 0.5 };
+for (const [line, slot] of [[$('la'), $('sa')], [$('lb'), $('sb')]]) {
+  line.style.left = `${P.x - (slot.offsetLeft + slot.offsetWidth / 2)}px`;
+  line.style.top = `${P.y - (slot.offsetTop + slot.offsetHeight / 2)}px`;
+}
+$('b').style.visibility = '';
+hold.style.left = `${P.x - hold.offsetWidth / 2}px`;
+hold.style.top = `${P.y - hold.offsetHeight / 2}px`;
+
+// A: the word starts at the size of its slot, holds, then grows to its final size and keeps its place
+const s0 = wA / wB;
+hold.animate([{ transform: `scale(${s0})` }, { transform: `scale(${s0})`, offset: GROW_AT / CUT, easing: INOUT }, { transform: 'scale(1)' }],
+  { duration: CUT * 1000, fill: 'both' });
+// the cut: shot A is gone and shot B is there in one frame; the word changes ink with it
+const swap = (el, from, to) => el.animate([from, to], { duration: CUT * 1000, easing: 'steps(1, jump-end)', fill: 'both' });
+swap($('a'), { visibility: 'visible' }, { visibility: 'hidden' });
+swap($('b'), { visibility: 'hidden' }, { visibility: 'visible' });
+swap(hold, { color: getComputedStyle(hold).color }, { color: getComputedStyle(document.documentElement).getPropertyValue('--paper-ink').trim() });
+
+enter($('la'), { at: 0.1, band: 'professional', from: '0 0.4em' });
+enter(hold, { at: 0.1, band: 'professional', from: '0 0.4em' });
+enter($('lb'), { at: CUT + 0.02, band: 'gravity', from: '-0.5em 0' });
+// the old line leaves before the word reaches it, so the growing word never runs over its neighbours
+$('la').animate([{ opacity: 1 }, { opacity: 0 }], { delay: (GROW_AT - 0.1) * 1000, duration: 260, easing: curveToLinear('easeInCubic'), fill: 'forwards' });
+</script>
+</body>
+</html>
