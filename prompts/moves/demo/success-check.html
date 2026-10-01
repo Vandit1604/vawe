@@ -41,23 +41,22 @@
 </div>
 <script type="module">
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot), press = curveToLinear(CURVES.spring);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 const btn = q('.pay'), W = btn.offsetWidth, Hh = btn.offsetHeight;
 const T = { press: 200, morph: 280, draw: 600, land: 940 };   // ms
-// 1 the press: the whole button dips to 0.96 and comes back on the spring
-btn.animate([{ scale: 1 }, { scale: 0.96, offset: 0.3 }, { scale: 1 }], { duration: 300, delay: T.press, easing: press, fill: 'both' });
+// 1 the press: the whole button dips to 0.96 and comes back on a pop
+btn.animate([{ scale: 1 }, { scale: 0.96, offset: 0.3 }, { scale: 1 }], { duration: 300, delay: T.press, easing: EASE.pop, fill: 'both' });
 // 2 it resolves: width closes to the height and the radius follows, so the rectangle becomes its own circle
-btn.animate([{ width: `${W}px`, borderRadius: getComputedStyle(btn).borderRadius }, { width: `${Hh}px`, borderRadius: `${Hh / 2}px` }], { duration: 420, delay: T.morph, easing: settle, fill: 'both' });
-q('.label').animate([{ opacity: 1, scale: 1, filter: 'blur(0px)' }, { opacity: 0, scale: 0.6, filter: 'blur(3px)' }], { duration: 160, delay: T.morph, easing: 'ease-out', fill: 'both' });
+btn.animate([{ width: `${W}px`, borderRadius: getComputedStyle(btn).borderRadius }, { width: `${Hh}px`, borderRadius: `${Hh / 2}px` }], { duration: 420, delay: T.morph, easing: EASE.land, fill: 'both' });
+q('.label').animate([{ opacity: 1, scale: 1, filter: 'blur(0px)' }, { opacity: 0, scale: 0.6, filter: 'blur(3px)' }], { duration: 160, delay: T.morph, easing: EASE.launch, fill: 'both' });
 // 3 the check draws: pathLength 1, one dash, the short stroke first because the path turns at its corner
-q('.pay path').animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 360, delay: T.draw, easing: settle, fill: 'both' });
-// 4 it lands: a small press spring on the finished circle and one ring that leaves it
-btn.animate([{ scale: 1 }, { scale: 0.93, offset: 0.16 }, { scale: 1 }], { duration: 620, delay: T.land, easing: pop, fill: 'both' });
-q('.ring').animate([{ opacity: 0.9, scale: 1 }, { opacity: 0, scale: 2.3 }], { duration: 640, delay: T.land + 40, easing: settle, fill: 'both' });
-q('.done').animate([{ opacity: 0, translate: '0 1.6vh', filter: 'blur(3px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 520, delay: T.land + 120, easing: settle, fill: 'both' });
-q('.checkout').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 1000, delay: 500, easing: settle, fill: 'both' });
+q('.pay path').animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 360, delay: T.draw, easing: EASE.land, fill: 'both' });
+// 4 it lands: a small press pop on the finished circle and one ring that leaves it
+btn.animate([{ scale: 1 }, { scale: 0.93, offset: 0.16 }, { scale: 1 }], { duration: 620, delay: T.land, easing: EASE.pop, fill: 'both' });
+q('.ring').animate([{ opacity: 0.9, scale: 1 }, { opacity: 0, scale: 2.3 }], { duration: 640, delay: T.land + 40, easing: EASE.land, fill: 'both' });
+q('.done').animate([{ opacity: 0, translate: '0 1.6vh', filter: 'blur(3px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 520, delay: T.land + 120, easing: EASE.land, fill: 'both' });
+q('.checkout').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 1000, delay: 500, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

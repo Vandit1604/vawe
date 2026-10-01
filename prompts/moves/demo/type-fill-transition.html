@@ -26,13 +26,13 @@
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const E = CURVES.expoOut;
+import { EASE, easeFn } from '/core/motion/presets.js';
+const E = easeFn('land');
 const W = window.innerWidth, H = window.innerHeight;
 const world = document.getElementById('world'), fill = document.getElementById('fill'), word = document.getElementById('word'), b = document.getElementById('b');
 const t0 = 0.35, dur = 1.0, COVER = 0.62;   // COVER: the share of the zoom at which the letter fills the frame;
 // ease in, fastest at the midpoint, soft finish: the letter fills the frame and the zoom does not slam
-const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+const whip = easeFn('swap');
 vawe.onFrame((t) => {
   // offset metrics ignore transforms, so the letter's centre is read fresh every frame
   const ox = word.offsetLeft + fill.offsetLeft + fill.offsetWidth / 2, oy = word.offsetTop + fill.offsetTop + fill.offsetHeight / 2;
@@ -47,7 +47,7 @@ vawe.onFrame((t) => {
 });
 const tIn = (t0 + dur * COVER - 0.02) * 1000;
 document.querySelectorAll('.b .line > div').forEach((el, i) => el.animate([{ translate: '0 115%' }, { translate: '0 0' }],
-  { duration: 700, delay: tIn + i * 90, easing: curveToLinear(E), fill: 'both' }));
+  { duration: 700, delay: tIn + i * 90, easing: EASE.land, fill: 'both' }));
 </script>
 </body>
 </html>

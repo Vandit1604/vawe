@@ -29,8 +29,8 @@ Sound: pluck at 1.08 s into the move, on the press (default gain); nothing on th
 
 The cursor tip is the origin of the arrow path, so the translate is the point that clicks. Aim at
 the lower right of the button, not its centre, or the pointer sits on the label and hides it. The
-arrival is an exponential (fast in, soft landing); the press dip is 14 percent on the cursor and 3
-percent on the button, and it lasts 230 ms. The exit is a cubic ease-in over 380 ms, half the time
+arrival is `EASE.land` (fast in, soft landing); the press dip is 14 percent on the cursor and 3
+percent on the button, and it lasts 230 ms. The exit is `EASE.launch` over 380 ms, half the time
 of the entrance and accelerating, so the last frames are the cursor leaving. The accent is used
 once, on the pressed result.
 

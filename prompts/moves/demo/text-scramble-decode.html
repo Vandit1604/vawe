@@ -25,9 +25,9 @@
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+import { rng } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut);
 const TARGET = 'NOOR HALVORSEN', GLYPHS = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#$%&*+<>?/=', FPS = 24, SEED = 41;
 const start = 0.4, gap = 0.1, flash = 0.14;
 
@@ -40,9 +40,9 @@ const lockAt = [...TARGET].map((_, i) => start + i * gap + rng(SEED + i)() * 0.0
 const glyph = (i, step) => { const r = rng(Math.imul(i + 1, 0x9e3779b1) ^ Math.imul(step + 1, 0x85ebca6b))(); return GLYPHS[Math.floor(r * GLYPHS.length)]; };
 const DONE = start + (TARGET.length - 1) * gap + 0.08;
 
-q('.shell').animate([{ translate: '-50% -46%', opacity: 0 }, { translate: '-50% -50%', opacity: 1 }], { duration: 420, delay: 60, easing: settle, fill: 'both' });
-q('.status').animate([{ translate: '0 1.2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 320, delay: DONE * 1000 + 160, easing: settle, fill: 'both' });
-q('.status path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 280, delay: DONE * 1000 + 260, easing: settle, fill: 'both' });
+q('.shell').animate([{ translate: '-50% -46%', opacity: 0 }, { translate: '-50% -50%', opacity: 1 }], { duration: 420, delay: 60, easing: EASE.land, fill: 'both' });
+q('.status').animate([{ translate: '0 1.2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 320, delay: DONE * 1000 + 160, easing: EASE.land, fill: 'both' });
+q('.status path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 280, delay: DONE * 1000 + 260, easing: EASE.land, fill: 'both' });
 
 vawe.onFrame((t) => {
   const step = Math.floor(t * FPS);

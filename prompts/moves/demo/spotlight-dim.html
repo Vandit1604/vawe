@@ -24,15 +24,14 @@
 <div class="tile t4"><h2>In queue</h2><b>3</b><p>Next starts in 12 s</p></div>
 <div class="hole"></div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '/core/motion/presets.js';
 const pad = '0.6vh';
 document.querySelector('.hole').animate([
   { left: '0px', top: '0px', width: '100vw', height: '100vh', borderRadius: '0px' },
   { left: `calc(14vw - ${pad})`, top: `calc(52vh - ${pad})`, width: `calc(35vw + 2 * ${pad})`, height: `calc(34vh + 2 * ${pad})`, borderRadius: '3.6vh' }],
-  { duration: 800, delay: 150, easing: settle, fill: 'both' });
+  { duration: 800, delay: 150, easing: EASE.land, fill: 'both' });
 // the lit tile leans in a little, on the same curve
-document.querySelector('.t3').animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: settle, fill: 'both' });
+document.querySelector('.t3').animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

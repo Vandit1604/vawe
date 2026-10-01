@@ -24,18 +24,17 @@
   <img class="photo thumb" src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""><div class="when">now</div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 const note = q('.note');
 // the banner drops from above the frame and dips just past its slot before it settles; the width closes from 92 percent, so it lands as an object, not a slide
-note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: drop, fill: 'both' });
+note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: EASE.pop, fill: 'both' });
 note.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
 // contents follow the shell: the icon pops first, the text resolves 80 ms after it
-q('.app').animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: drop, fill: 'both' });
-[['.text', 280], ['.when', 340]].forEach(([s, at]) => q(s).animate([{ translate: '0 1.4vh', opacity: 0, filter: 'blur(4px)' }, { translate: '0 0', opacity: 1, filter: 'blur(0px)' }], { duration: 420, delay: at, easing: settle, fill: 'both' }));
+q('.app').animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: EASE.pop, fill: 'both' });
+[['.text', 280], ['.when', 340]].forEach(([s, at]) => q(s).animate([{ translate: '0 1.4vh', opacity: 0, filter: 'blur(4px)' }, { translate: '0 0', opacity: 1, filter: 'blur(0px)' }], { duration: 420, delay: at, easing: EASE.land, fill: 'both' }));
 // the exit is shorter than the entrance and accelerates: 260 ms, cubic in, and it ends on the last frame
-note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: leave, fill: 'forwards' });
+note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: EASE.launch, fill: 'forwards' });
 </script>
 </body>
 </html>

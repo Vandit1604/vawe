@@ -29,19 +29,19 @@
 <div class="shot a"><div class="fg"><div class="word">Draft</div><div class="bar"></div><div class="note">cut 3 of 4</div></div></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { spring, springDuration } from '/core/motion/springs.js';
+import { easeFn } from '/core/motion/presets.js';
 const a = document.querySelector('.a'), fa = a.firstElementChild, fb = document.querySelector('.b .fg'), blur = document.getElementById('mb');
 const clamp = (u) => Math.min(1, Math.max(0, u));
 const OUT = 0.5, OUT_DUR = 0.16, IN_DUR = 0.62, PEAK = 9;   // stretch start (s), stretch length (s), snap-back length (s), peak scaleX
-const K = 300, D = 20, TS = springDuration(K, D);               // an under-damped spring: the snap passes 1 and squashes once
+const carry = easeFn('carry'), pop = easeFn('pop');             // the snap passes rest by 15 percent and squashes once
 const cut = OUT + OUT_DUR;
-// stretch amount: rises on an ease-in into the cut, then falls on the spring after it
+// stretch amount: rises on carry into the cut, then falls on pop after it
 const stretch = (t) => {
-  if (t < cut) return Math.pow(clamp((t - OUT) / OUT_DUR), 2);
-  return 1 - spring(clamp((t - cut) / IN_DUR) * TS, K, D);
+  if (t < cut) return carry(clamp((t - OUT) / OUT_DUR));
+  return 1 - pop(clamp((t - cut) / IN_DUR));
 };
 vawe.onFrame((t) => {
-  const s = stretch(t), sx = s > 0 ? 1 + (PEAK - 1) * s : 1 + 0.6 * s;   // the spring's undershoot is a squash of a few percent, not a ninth of the stretch
+  const s = stretch(t), sx = s > 0 ? 1 + (PEAK - 1) * s : 1 + 0.6 * s;   // the pop's overshoot is a squash of a few percent, not a seventh of the stretch
   const sy = s > 0 ? 1 - 0.1 * Math.min(1, s * 1.5) : 1 - 0.5 * s;       // it thins as it stretches and bulges as it squashes
   const speed = Math.abs(stretch(t + 1 / 60) - s) * PEAK;
   const shot = t < cut ? fa : fb;

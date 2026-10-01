@@ -24,10 +24,10 @@
 <div id="pile"></div>
 <div class="clean"><div class="chip"><svg class="icon" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div><div><b>Inbox zero</b><span>12 apps, one feed</span></div></div>
 <script type="module">
-import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
+import { rng } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 import { mark } from '/prompts/moves/demo/assets/logos.js';
 const apps = ['relay', 'kestrel', 'parcel', 'mosaic', 'halcyon', 'orbital', 'quarry', 'lumen', 'tidewell', 'ardent', 'northwind'];
-const pop = curveToLinear(CURVES.overshoot), suck = curveToLinear((u) => u * u * u), settle = curveToLinear(CURVES.expoOut);
 const W = innerWidth, H = innerHeight, rand = rng(7);
 const items = [
   ['Deploy failed', '#ff3b30'], ['3 new comments', '#1a2bff'], ['Invoice overdue', '#ff3b30'], ['Standup in 5 min', '#00b86b'],
@@ -51,18 +51,18 @@ items.forEach(([label, c], i) => {
   const x = (0.02 + rand() * 0.9) * W - w * 0.2, y = (0.04 + rand() * 0.84) * H, rot = (rand() - 0.5) * 16;
   el.style.left = `${x}px`; el.style.top = `${y}px`;
   const dx = cx - (x + w / 2), dy = cy - (y + h / 2);
-  el.animate([{ scale: 0.4, rotate: `${rot}deg`, opacity: 0 }, { scale: 1, rotate: `${rot}deg`, opacity: 1 }], { duration: 380, delay: at, easing: pop, fill: 'both' });
+  el.animate([{ scale: 0.4, rotate: `${rot}deg`, opacity: 0 }, { scale: 1, rotate: `${rot}deg`, opacity: 1 }], { duration: 380, delay: at, easing: EASE.pop, fill: 'both' });
   // collapse: outer items leave first, each on a cubic-in path into the centre; blur follows the speed
   const d = Math.hypot(dx, dy) / Math.hypot(cx, cy);
   const go = 1340 + (1 - d) * 90 + rand() * 40;
   el.animate([{ translate: '0 0', scale: 1, filter: 'blur(0px)', opacity: 1 }, { translate: `${dx}px ${dy}px`, scale: 0.12, filter: `blur(${(d * 6 + 1.5).toFixed(1)}px)`, opacity: 1, offset: 0.9 }, { translate: `${dx}px ${dy}px`, scale: 0.1, opacity: 0 }],
-    { duration: 300, delay: go, easing: suck, fill: 'forwards' });
+    { duration: 300, delay: go, easing: EASE.launch, fill: 'forwards' });
   at += 62 - i * 1.8;
 });
 const clean = document.querySelector('.clean');
-clean.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 640, delay: 1610, easing: pop, fill: 'both' });
-clean.querySelector('.chip').animate([{ scale: 0.6 }, { scale: 1 }], { duration: 520, delay: 1730, easing: pop, fill: 'both' });
-clean.animate([{ translate: '0 0' }, { translate: '0 -1.2vh' }], { duration: 700, delay: 1610, easing: settle, fill: 'both' });
+clean.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 640, delay: 1610, easing: EASE.pop, fill: 'both' });
+clean.querySelector('.chip').animate([{ scale: 0.6 }, { scale: 1 }], { duration: 520, delay: 1730, easing: EASE.pop, fill: 'both' });
+clean.animate([{ translate: '0 0' }, { translate: '0 -1.2vh' }], { duration: 700, delay: 1610, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

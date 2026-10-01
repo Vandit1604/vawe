@@ -7,9 +7,9 @@ edge and grows wider and darker as the overlap grows. Clip: [stack-cover.mp4](st
 [demo/stack-cover.html](demo/stack-cover.html).
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const ease = curveToLinear(CURVES.expoOut), W = innerWidth;
-const opt = { duration: 1000, delay: 200, easing: ease, fill: 'both' };
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const W = innerWidth;
+const opt = { duration: 1000, delay: 200, easing: EASE.land, fill: 'both' };
 sheet.animate([{ translate: `${W}px 0` }, { translate: '0 0' }], opt);
 old.animate([{ translate: '0 0', scale: 1 }, { translate: `${-W * 0.24}px 0`, scale: 0.96 }], opt);
 dim.animate([{ opacity: 0 }, { opacity: 0.4 }], opt);                       // #14103a over the old shot

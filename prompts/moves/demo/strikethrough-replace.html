@@ -28,17 +28,16 @@
 </div>
 <script type="module">
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 // 1 the strike: 240 ms, drawn from the left, on the curve that leads with speed
-q('.strike').animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 240, delay: 260, easing: settle, fill: 'both' });
+q('.strike').animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 240, delay: 260, easing: EASE.land, fill: 'both' });
 // 2 the old value gives way: it dims and drops to 0.7 the moment the line passes it
-q('.old').animate([{ color: 'var(--ink)', scale: 1 }, { color: 'var(--muted)', scale: 0.7 }], { duration: 380, delay: 380, easing: settle, fill: 'both' });
+q('.old').animate([{ color: 'var(--ink)', scale: 1 }, { color: 'var(--muted)', scale: 0.7 }], { duration: 380, delay: 380, easing: EASE.land, fill: 'both' });
 // 3 the new value writes in beside it: one mask per character, 70 ms apart, each rising from under its edge
-document.querySelectorAll('.mask i').forEach((el, i) => el.animate([{ translate: '0 130%' }, { translate: '0 0' }], { duration: 520, delay: 500 + i * 70, easing: settle, fill: 'both' }));
-q('.per').animate([{ opacity: 0, translate: '0 1.2vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 840, easing: settle, fill: 'both' });
-q('.row').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 900, delay: 700, easing: settle, fill: 'both' });
+document.querySelectorAll('.mask i').forEach((el, i) => el.animate([{ translate: '0 130%' }, { translate: '0 0' }], { duration: 520, delay: 500 + i * 70, easing: EASE.land, fill: 'both' }));
+q('.per').animate([{ opacity: 0, translate: '0 1.2vh' }, { opacity: 1, translate: '0 0' }], { duration: 420, delay: 840, easing: EASE.land, fill: 'both' });
+q('.row').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 900, delay: 700, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

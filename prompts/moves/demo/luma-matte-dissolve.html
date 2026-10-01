@@ -33,8 +33,7 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '/core/motion/presets.js';
 const S = 8, t0 = 0.3, dur = 1.0;                       // S: how many luminance steps the edge is soft over (1/S wide)
 const sweep = (u) => 1 - (1 - u) ** 1.7;               // quick to start, and the dark ground still arrives before the end
 const ramp = document.getElementById('ramp'), b = document.getElementById('b');
@@ -45,8 +44,8 @@ vawe.onFrame((t) => {
   ramp.setAttribute('slope', S);
   ramp.setAttribute('intercept', (-S * th).toFixed(4));
 });
-document.querySelector('.a').animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0.55 }], { duration: 1000, delay: t0 * 1000, easing: settle, fill: 'both' });
-b.querySelector('.in').animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1200, delay: 250, easing: settle, fill: 'both' });
+document.querySelector('.a').animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0.55 }], { duration: 1000, delay: t0 * 1000, easing: EASE.leave, fill: 'both' });
+b.querySelector('.in').animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1200, delay: 250, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

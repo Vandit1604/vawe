@@ -33,20 +33,19 @@
   <div class="side"><h2>Rendered</h2><p>launch-16x9, 60 fps</p></div>
 </section>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '/core/motion/presets.js';
 const T = 1250, cut = 500;
 // the cut is a one-millisecond step at 0.5 s; the ring's angle is one animation shared by both rings, so it cannot jump
 document.querySelector('.b').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: cut, fill: 'both' });
-const spin = [{ rotate: '0deg' }, { rotate: '220deg', offset: cut / T, easing: settle }, { rotate: '272deg' }];
+const spin = [{ rotate: '0deg' }, { rotate: '220deg', offset: cut / T, easing: EASE.land }, { rotate: '289deg' }];
 document.querySelectorAll('.ring').forEach((r) => r.animate(spin, { duration: T, fill: 'both' }));
 // shot B: the arc closes into a full ring as the number lands
 const arc = document.querySelector('.b circle');
-arc.animate([{ strokeDasharray: '28 72' }, { strokeDasharray: '100 0' }], { duration: 1000, delay: cut, easing: settle, fill: 'both' });
+arc.animate([{ strokeDasharray: '28 72' }, { strokeDasharray: '100 0' }], { duration: 1000, delay: cut, easing: EASE.land, fill: 'both' });
 document.querySelector('.b .label').animate([{ opacity: 0, translate: '-50% -30%' }, { opacity: 1, translate: '-50% -50%' }],
-  { duration: 700, delay: cut + 60, easing: settle, fill: 'both' });
+  { duration: 700, delay: cut + 60, easing: EASE.land, fill: 'both' });
 document.querySelector('.b .side').animate([{ opacity: 0, translate: '3vw 0' }, { opacity: 1, translate: '0 0' }],
-  { duration: 800, delay: cut + 120, easing: settle, fill: 'both' });
+  { duration: 800, delay: cut + 120, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

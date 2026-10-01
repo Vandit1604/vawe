@@ -9,9 +9,8 @@ when out of focus and snap to points when in it, which is what sells a lens. Cli
 Use once per film: the lights that swell into discs is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut;
-const pull = curveToLinear((u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1)));
+import { EASE } from '../../core/motion/presets.js';
+const pull = EASE.settle;
 const beat = { duration: 700, delay: 550, easing: pull, fill: 'both' };
 near.animate([{ filter: 'blur(0px)' }, { filter: 'blur(1.9vh)' }], beat);
 far.animate([{ filter: 'blur(1.9vh)' }, { filter: 'blur(0px)' }], beat);

@@ -25,10 +25,10 @@
 <body>
 <div><h1 id="word">Elastic</h1><div class="axes">wght 100 to 900 / wdth 75 to 125</div></div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const root = document.documentElement.style;
-root.setProperty('--settle', curveToLinear(CURVES.expoOut));
-root.setProperty('--rise', curveToLinear('easeInCubic'));
+root.setProperty('--settle', EASE.land);
+root.setProperty('--rise', EASE.carry);
 const w = document.getElementById('word');
 w.innerHTML = [...w.textContent].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('');
 </script>

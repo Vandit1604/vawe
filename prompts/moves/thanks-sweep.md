@@ -18,11 +18,10 @@ Use once per film: the accent bar is a stock device (engine-doctrine/TASTE-CARD.
 .bar { position: absolute; top: 8%; bottom: 8%; left: var(--p); width: 0.9vh; margin-left: -0.45vh; border-radius: 1vh; background: var(--accent); }
 </style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
-sweep.animate([{ '--p': '0%' }, { '--p': '112%' }], { duration: 950, easing: settle, fill: 'both' });
+import { EASE } from '../../core/motion/presets.js';
+sweep.animate([{ '--p': '0%' }, { '--p': '112%' }], { duration: 950, easing: EASE.land, fill: 'both' });
 bar.animate([{ opacity: 1 }, { opacity: 1, offset: 0.3 }, { opacity: 0, offset: 0.42 }, { opacity: 0 }], { duration: 950, easing: 'linear', fill: 'both' });
-drift.animate([{ translate: '0 0' }, { translate: '-2.4vw 0' }], { duration: 1800, easing: 'linear', fill: 'both' });
+drift.animate([{ translate: '0 0' }, { translate: '-2.4vw 0' }], { duration: 1800, easing: EASE.glide, fill: 'both' });
 </script>
 ```
 

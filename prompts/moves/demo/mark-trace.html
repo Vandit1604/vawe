@@ -21,10 +21,9 @@
 </svg>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const smooth = (u) => u * u * (3 - 2 * u);
+import { EASE, easeFn } from '/core/motion/presets.js';
+const smooth = easeFn('settle');
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut), glide = curveToLinear(smooth);
 const ink = q('.ink'), tip = q('.tip');
 const len = ink.getTotalLength();
 ink.style.strokeDasharray = len;
@@ -37,9 +36,9 @@ vawe.onFrame((t) => {
   ink.style.strokeDashoffset = ((1 - smooth(u)) * len).toFixed(2);
   tip.setAttribute('cx', p.x.toFixed(2)); tip.setAttribute('cy', p.y.toFixed(2));
 });
-tip.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4 }], { duration: 220, delay: 980, easing: settle, fill: 'both' });
-ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 420, delay: 950, easing: settle, fill: 'both' });
-q('.run').animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffset: -1 }], { duration: 750, delay: 1250, easing: glide, fill: 'both' });
+tip.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4 }], { duration: 220, delay: 980, easing: EASE.launch, fill: 'both' });
+ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 420, delay: 950, easing: EASE.land, fill: 'both' });
+q('.run').animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffset: -1 }], { duration: 750, delay: 1250, easing: EASE.settle, fill: 'both' });
 </script>
 </body>
 </html>

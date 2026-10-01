@@ -25,8 +25,9 @@
 <svg width="0" height="0" style="position:absolute"><filter id="vb" x="-20%" width="140%" y="-60%" height="220%"><feGaussianBlur id="vbs" stdDeviation="0 0"/></filter></svg>
 <script type="module">
 import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
 const H = innerHeight, u = H / 100, q = (s) => document.querySelector(s);
-const smooth = (x) => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+const land = easeFn('land'), settle = easeFn('settle'), smooth = (x) => settle(Math.min(1, Math.max(0, x)));
 // the time remap: speed s(t) is 1, ramps to 0.03 (a near freeze, never dead) over 0.4 s, holds 0.25 s, then snaps to 3.5 and settles back to 1
 const T = { ramp: 0.35, rampLen: 0.4, hold: 0.75, snap: 1.0 }, FREEZE = 0.03;
 const speed = (t) => t < T.hold ? 1 - (1 - FREEZE) * smooth((t - T.ramp) / T.rampLen) : t < T.snap ? FREEZE : 1 + 2.5 * Math.exp(-(t - T.snap) / 0.1);
@@ -36,7 +37,7 @@ const tauAt = (t) => { const x = Math.max(0, t) / DT, i = Math.min(tau.length - 
 const HIT = tauAt(T.snap), TOUCH = HIT - 0.06, DROP = 80 * u, RISE = 56 * u, LIFT = 1.1;   // story time: TOUCH the ball meets the floor, HIT the deepest squash (the frozen frame)
 const state = (t) => {
   const p = tauAt(t), c = p - HIT;
-  const y = p < TOUCH ? -DROP * (1 - (p / TOUCH) ** 2) : c < 0 ? 0 : -RISE * (1 - (1 - Math.min(1, c / LIFT)) ** 2);
+  const y = p < TOUCH ? -DROP * (1 - (p / TOUCH) ** 2) : c < 0 ? 0 : -RISE * land(Math.min(1, c / LIFT));
   const sq = c < 0 ? smooth((p - TOUCH) / (HIT - TOUCH)) : c < 0.1 ? 1 - 1.25 * smooth(c / 0.1) : -0.25 * (1 - smooth((c - 0.1) / 0.2));
   return { y, sq, c };
 };

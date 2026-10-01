@@ -46,10 +46,10 @@
 </section>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const E = CURVES.expoOut, ease = curveToLinear(E);
+import { EASE, easeFn } from '/core/motion/presets.js';
+const E = easeFn('land');
 const W = window.innerWidth, t0 = 0.2, dur = 1.0, far = 0.24;   // A travels 24 percent of B's distance: that gap is the parallax
-const opt = { duration: dur * 1000, delay: t0 * 1000, easing: ease, fill: 'both' };
+const opt = { duration: dur * 1000, delay: t0 * 1000, easing: EASE.land, fill: 'both' };
 document.getElementById('b').animate([{ translate: `${W}px 0` }, { translate: '0 0' }], opt);
 document.getElementById('a').animate([{ translate: '0 0', scale: 1 }, { translate: `${-W * far}px 0`, scale: 0.96 }], opt);
 document.getElementById('dim').animate([{ opacity: 0 }, { opacity: 0.4 }], opt);
@@ -57,7 +57,7 @@ document.getElementById('dim').animate([{ opacity: 0 }, { opacity: 0.4 }], opt);
 document.getElementById('cast').animate([{ opacity: 0.25, scale: '0.35 1' }, { opacity: 1, scale: '1 1' }], opt);
 // the copy rides the sheet and lags it slightly, so the sheet reads as a surface with things on it
 [...document.querySelector('.b .copy').children].forEach((el, i) => el.animate([{ translate: `${9 + i * 3}vw 0` }, { translate: '0 0' }],
-  { duration: 1100, delay: (t0 + 0.05) * 1000, easing: ease, fill: 'both' }));
+  { duration: 1100, delay: (t0 + 0.05) * 1000, easing: EASE.land, fill: 'both' }));
 const blur = document.getElementById('mb');
 vawe.onFrame((t) => {
   const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;

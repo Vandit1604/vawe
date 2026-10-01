@@ -35,10 +35,9 @@
   </div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-// half constant speed, half expoOut: the camera keeps moving to the last frame and still lands soft
-const push = curveToLinear((u) => 0.5 * u + 0.5 * CURVES.expoOut(u));
-const opts = { duration: 2000, easing: push, fill: 'both' };
+import { EASE } from '/core/motion/presets.js';
+// glide never quite stops: the camera is still moving on the beat's last frame
+const opts = { duration: 2000, easing: EASE.glide, fill: 'both' };
 // the subject scales further than the ground behind it, so the two layers separate as the camera closes in
 document.querySelector('.world').animate([{ scale: 1 }, { scale: 1.2 }], opts);
 document.querySelector('.bg').animate([{ scale: 1 }, { scale: 1.05 }], opts);

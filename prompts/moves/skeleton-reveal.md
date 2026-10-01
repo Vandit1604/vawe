@@ -10,8 +10,7 @@ Use once per film: the moving light is a stock device (engine-doctrine/TASTE-CAR
 ```html
 <div class="reg head"><div class="real">...avatar, name, status...</div><div class="sk-layer"><i class="sk round"></i>...</div></div>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+import { EASE } from '../../core/motion/presets.js';
 const card = document.querySelector('.card'), box = card.getBoundingClientRect();
 document.querySelectorAll('.sk').forEach((sk) => {
   const band = Object.assign(document.createElement('i'), { className: 'band' });   // a 26vh wide light gradient
@@ -21,8 +20,8 @@ document.querySelectorAll('.sk').forEach((sk) => {
 });
 Object.entries({ '.head': 600, '.stats': 800, '.chart': 1000, '.list': 1200 }).forEach(([sel, t]) => {
   const reg = document.querySelector(sel);
-  reg.querySelector('.real').animate([{ opacity: 0, translate: '0 1.4vh', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 480, delay: t, easing: settle, fill: 'both' });
-  reg.querySelector('.sk-layer').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: t, easing: accelerate, fill: 'both' });
+  reg.querySelector('.real').animate([{ opacity: 0, translate: '0 1.4vh', filter: 'blur(5px)' }, { opacity: 1, translate: '0 0', filter: 'blur(0px)' }], { duration: 480, delay: t, easing: EASE.land, fill: 'both' });
+  reg.querySelector('.sk-layer').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, delay: t, easing: EASE.launch, fill: 'both' });
 });
 </script>
 ```

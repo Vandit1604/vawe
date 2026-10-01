@@ -20,7 +20,7 @@
   <g id="words"></g>
 </svg>
 <script type="module">
-import { CURVES } from '/core/motion/springs.js';
+import { easeFn } from '/core/motion/presets.js';
 
 await document.fonts.load('800 150px "Big Shoulders"');
 const WORDS = ['Words', 'follow', 'the', 'curve'];
@@ -47,8 +47,8 @@ const pathLen = document.getElementById('p').getTotalLength();
 let x = 420 + (pathLen - 560 - run) / 2;
 const REST = widths.map((w) => { const s = x; x += w + GAP; return s; });
 
-const arrive = (p) => CURVES.expoOut(Math.min(1, Math.max(0, p)));
-const leave = (p) => { const q = Math.min(1, Math.max(0, p)); return q * q * q; };
+const land = easeFn('land'), arrive = (p) => land(Math.min(1, Math.max(0, p)));
+const launch = easeFn('launch'), leave = (p) => launch(Math.min(1, Math.max(0, p)));
 window.seek = (t) => {
   els.forEach((tp, i) => {
     const lead = WORDS.length - 1 - i;

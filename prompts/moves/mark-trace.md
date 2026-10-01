@@ -21,8 +21,8 @@ path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 <script type="module">
 import '../../core/engine/page-api.js';
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const smooth = (u) => u * u * (3 - 2 * u), glide = curveToLinear(smooth), settle = curveToLinear(CURVES.expoOut);
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const smooth = easeFn('settle');
 const len = ink.getTotalLength(); ink.style.strokeDasharray = len;
 const t0 = 0.08, dur = 0.9;
 vawe.onFrame((t) => {   // line and tip read one function per frame, so the tip is always on the leading end
@@ -31,15 +31,15 @@ vawe.onFrame((t) => {   // line and tip read one function per frame, so the tip 
   const p = ink.getPointAtLength(smooth(u) * len);
   tip.setAttribute('cx', p.x.toFixed(2)); tip.setAttribute('cy', p.y.toFixed(2));
 });
-tip.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4 }], { duration: 220, delay: 980, easing: settle, fill: 'both' });
-ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 420, delay: 950, easing: settle, fill: 'both' });
-run.animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffset: -1 }], { duration: 750, delay: 1250, easing: glide, fill: 'both' });
+tip.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4 }], { duration: 220, delay: 980, easing: EASE.launch, fill: 'both' });
+ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 420, delay: 950, easing: EASE.land, fill: 'both' });
+run.animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffset: -1 }], { duration: 750, delay: 1250, easing: EASE.settle, fill: 'both' });
 </script>
 ```
 
 Sound: droplet at 0.95 s into the move, when the line thickens and the tip sinks into it (default gain).
 
-The trace is a smoothstep at 0.9 s: even speed with soft ends. An exponential curve draws the whole
+The trace is `EASE.settle` at 0.9 s: even speed with soft ends. `EASE.land` draws the whole
 mark in 0.4 s and then waits, which reads as a wipe. The tip is set from the same function as the
 line, so it never drifts off the leading end (rule 4: a mark rides its parent). Dashes on the
 `.ink` path use its real length, not `pathLength`, so the tip and the line agree. The thin-to-thick

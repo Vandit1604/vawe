@@ -21,10 +21,9 @@
 <div class="far"><div class="lights"></div><div class="card"><div class="k"><img class="photo" src="/prompts/moves/demo/assets/photos/meadow.jpg">launch-16x9</div><b>41 s</b><span class="pill up">Shipped</span></div></div>
 <div class="near"><h1>Draft</h1></div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 import { rng } from '/core/motion/springs.js';
-const E = CURVES.expoOut;
-const pull = curveToLinear((u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1)));
+const pull = EASE.settle;
 const far = document.querySelector('.far'), near = document.querySelector('.near'), lights = document.querySelector('.lights');
 const rand = rng(11);
 for (let i = 0; i < 16; i++) {
