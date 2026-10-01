@@ -25,9 +25,10 @@ const HIT = 1.05, FLY = 0.85, N = 5, LAG = 0.035, SPREAD = 0.22;   // copy i sho
 const copies = Array.from({ length: N }, () => {
   const c = lead.cloneNode(true);
   c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
-  lead.before(c);
+  c.textContent = '';                                        // copies carry the tile shape only, never the glyph
   return c;
 });
+[...copies].reverse().forEach((c) => lead.before(c));        // the oldest copy sits lowest, the lead on top
 const ease = (u) => u * u * u;                               // accelerates into the hit
 const pos = (t) => {                                          // the one moving element, a pure function of time
   const u = ease(Math.min(1, Math.max(0, (t - (HIT - FLY)) / FLY)));

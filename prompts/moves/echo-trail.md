@@ -13,9 +13,10 @@ const HIT = 1.05, FLY = 0.85, N = 5, LAG = 0.035, SPREAD = 0.22;   // copy i sho
 const copies = Array.from({ length: N }, () => {
   const c = lead.cloneNode(true);
   c.removeAttribute('id'); c.setAttribute('aria-hidden', 'true');
-  lead.before(c);
+  c.textContent = '';                                         // copies carry the tile shape only, never the glyph
   return c;
 });
+[...copies].reverse().forEach((c) => lead.before(c));         // the oldest copy sits lowest, the lead on top
 const pos = (t) => {                                          // the one path, a pure function of time
   const u = Math.min(1, Math.max(0, (t - (HIT - FLY)) / FLY)) ** 3;   // accelerates into the hit
   return { x: (1 - u) * -620, y: (1 - u) * 260 };
@@ -43,7 +44,8 @@ Sound: a thud or pluck at the hit second, 1.05 s into the move (default gain).
 - Keep `N * LAG` divided by `SPREAD` under 1 (5 x 0.035 over 0.22 is 0.8). Above 1 a copy would run
   backwards in time while it closes up. Close the gap late and fast, in the last 0.22 s.
 - Opacity falls per copy (0.6 down to 0.12) and all copies reach 0 on the hit, so no ghost outlives it.
-- The copies share the lead's markup, so a glyph inside the lead shows faintly through them; keep the
-  lead opaque and draw copies behind it.
+- The copies are clones of the lead with the glyph removed (`textContent = ''`): a trail of bare tile
+  shapes reads as motion, where cloned letters read as ghost text. Insert them oldest first so the
+  nearest copy sits just under the lead and the lead, fully opaque, hides them on the hit frame.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
