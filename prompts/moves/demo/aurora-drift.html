@@ -1,0 +1,78 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<title>move: aurora drift</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; bottom: 8vh; width: 56vw; }
+  .copy .title { margin: 0; font-size: calc(var(--u) * 11); line-height: 1.08; }
+  .copy .lead { margin: var(--s3) 0 0; max-width: 40em; color: var(--ink); text-wrap: pretty; }
+
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
+  @keyframes rise { to { translate: 0 0; } }
+
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
+</style>
+</head>
+<body>
+<main class="copy">
+  <h1 class="title"><span class="mask" style="--i:0"><span>Bands of light</span></span><span class="mask" style="--i:1"><span>fold, slowly.</span></span></h1>
+  <p class="lead" id="lead">The ground moves all the time and never asks for the eye.</p>
+</main>
+<script type="module">
+import '/core/engine/page-api.js';
+import { shaderField } from '/core/surfaces/shader-field.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+
+const root = document.documentElement;
+root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const lead = document.getElementById('lead');
+lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+
+const tokens = getComputedStyle(root);
+const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
+
+// Three bands hang from the top. Each band's centre folds on a slow noise and a sine; rays are fine vertical noise.
+const frag = `
+uniform vec3 u_ground, u_a, u_b;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed * 17.0) * 43758.5453); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float band(vec2 p, float k) {
+  float fold = vnoise(vec2(p.x * 2.0 + k * 5.0, u_time * 0.65 + k * 2.0));
+  float centre = 0.88 - 0.15 * k + 0.28 * (fold - 0.5) + 0.07 * sin(p.x * 5.0 + u_time * 2.2 + k * 2.0);
+  float d = (p.y - centre) / (0.055 + 0.02 * k);
+  float body = d < 0.0 ? exp(-d * d * 2.2) : exp(-d * d * 0.5);
+  float rays = 0.6 + 0.4 * vnoise(vec2(p.x * 12.0 + k * 3.0, u_time * 0.9));
+  return body * rays;
+}
+vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }
+void main() {
+  float aspect = u_res.x / u_res.y;
+  vec2 p = gl_FragCoord.xy / u_res.y;
+  vec3 ground = lin(u_ground), a = lin(u_a), b = lin(u_b);
+  vec3 col = ground;
+  col += a * 0.40 * band(p, 0.0);
+  col += mix(a, b, 0.5) * 0.28 * band(p, 1.0);
+  col += b * 0.20 * band(p, 2.0);
+  float keep = 0.15 + 0.85 * smoothstep(0.42, 0.74, p.y);   // the copy sits low: the light thins out above it
+  col = mix(ground, col, keep);
+  col = pow(col, vec3(1.0 / 2.2));
+  gl_FragColor = vec4(col + (hash(gl_FragCoord.xy) - 0.5) * 0.012, 1.0);   // a static dither of 3 levels so the bands never step
+}`;
+
+const field = shaderField(frag, { seed: 3, uniforms: { u_ground: rgb('--ground'), u_a: rgb('--accent'), u_b: rgb('--muted') } });
+vawe.onFrame((t) => field.draw(t));
+</script>
+</body>
+</html>
