@@ -1,6 +1,6 @@
 ---
 when: "the pick-by-job row in README.md did not settle the move, and you want the group table with a use-when line and a clip for each move"
-answers: "the built moves in six groups, each with its use-when line, snippet and clip, and the ten demo looks"
+answers: "the built moves in seven groups, each with its use-when line, snippet and clip, and the ten demo looks"
 group: reference
 ---
 
@@ -135,22 +135,35 @@ Two rules the snippets already obey, so keep them when you adapt one: an exit ke
 The demo look was polished with two ui-skills: `jakubkrehel/better-ui` (concentric radius, layered shadow over border for depth, optical alignment, tabular numbers, icon stroke matched to text weight) and `emilkowalski/animate` (only to check the approved motion, nothing rewritten).
 Rejected from them: their default UI sizes and 300 ms duration caps (film type needs a 6 percent cap height and holds), the 0.96 press scale and blur-in icon values as global rules (each move keeps its own tuned numbers), and reduced-motion and hit-area advice (a film has no input).
 
+## Grounds
+
+The job: give a held frame a living ground that never steals the eye. Each ground moves at a mean luma change of 0.5 to 3.0 per frame at 60 fps, keeps 4.5:1 for the copy against the lightest and darkest pixel behind it, and is a pure function of the seek time. [gradient mesh field](gradient-mesh-field.md) and [drift hold](drift-hold.md), in Move the camera, do the same job.
+
+| move | use when | snippet | clip |
+|---|---|---|---|
+| aurora drift | three soft bands of light hang from the top of the frame and fold slowly in one shader while the copy sits low; the light thins out above the type | [aurora-drift.md](aurora-drift.md) | [aurora-drift.mp4](aurora-drift.mp4) |
+| grain field | a quiet printed or filmic frame breathes: a slow tonal ground and film grain that turns over 24 times a second, seeded from the seek time, never from Math.random | [grain-field.md](grain-field.md) | [grain-field.mp4](grain-field.mp4) |
+| halftone field | a physical or retro frame gets a 45 degree dot screen whose dot size waves across the frame while every dot stays in its cell | [halftone-field.md](halftone-field.md) | [halftone-field.mp4](halftone-field.mp4) |
+| ink warp | a rich liquid ground for short large copy: marbled ink flows by domain warp in one shader, thinner behind the type | [ink-warp.md](ink-warp.md) | [ink-warp.mp4](ink-warp.mp4) |
+| dot grid wave | a clean product or data frame gets a plain SVG dot grid with one travelling wave of scale and brightness, weaker behind the copy | [dot-grid-wave.md](dot-grid-wave.md) | [dot-grid-wave.mp4](dot-grid-wave.mp4) |
+| light pool | a matte held frame gets one soft pool of light that wanders on a seeded path, plain CSS with no shader; the stillest ground of the group | [light-pool.md](light-pool.md) | [light-pool.mp4](light-pool.mp4) |
+
 ## Looks
 
 A demo sets its look on the html tag (`<html data-aspect="16:9" data-look="paper">`). The look is a full token set in `demo/demo.css` (ground, surface, ink, muted, accent, line, fonts, radius, shadow); no class or timing changes. The snippets stay neutral. No look is a house style: pick the one that shows your move best, and let the film keep one look per scene.
 
 | look | what it is | fonts | accent | clips that use it |
 |---|---|---|---|---|
-| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through, light leak transition |
-| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, photo parallax 2.5d, push blur, smear stretch, ui focus zoom |
-| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode |
+| vawe (default) | the dark brand: #16151a ground, layered shadow, white type | Archivo, JetBrains Mono | cobalt | command palette summon, iris wipe, logo sting, pan stations, panel live sync, pull back reveal, success check, ui strip away, zoom through, light leak transition, light pool |
+| daylight | cold white-blue product UI: navy ink, blue-tinted layered shadow | Inter, Geist Mono | indigo | agent progress, before after wipe, bracket callout, cursor click, logo wall, photo parallax 2.5d, push blur, smear stretch, ui focus zoom, dot grid wave |
+| terminal | near-black green, one mono face for all text | JetBrains Mono | phosphor green | ai stream response, caret follow, caret typing, chain beats, grid tile flip, integration hub, text scramble decode, aurora drift |
 | swiss | off-white, black hairlines instead of shadow, tight radius, tracked mono labels | Geist, Geist Mono | red | blur word cascade, chart build, count up, mark trace, match cut, push in, shape morph wipe, tracking collapse, weight morph, hand drawn notes |
-| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep, caption editorial |
+| paper | warm editorial: cream ground with a fine print grain, a serif display, soft shadow | Instrument Serif, Hanken Grotesk | brick orange | drift hold, exit fast, lower third, marker highlight, mask rise, spin transition, strikethrough replace, thanks sweep, caption editorial, grain field |
 | dusk | indigo to plum gradient with 6 percent grain, one italic serif word | Manrope, Instrument Serif | amber | calm lockup, clip expand, echo trail, luma matte dissolve, rack focus, skeleton reveal, split reveal, spotlight dim, word swap slot, caption karaoke |
 | brutal | acid yellow, thick black borders, hard offset shadow, wide heavy grotesk | Anybody, Geist Mono | blue | cut on motion, overwhelm collapse, scale punch, text as mask, ticker takeover, type fill transition, underline draw, wordmark cascade, variable weight wave |
-| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep, text on path |
+| signal | near-black, condensed capitals, tracked mono labels, pills, no shadow | Big Shoulders, Hanken Grotesk, Geist Mono | mint | anchor cycle, crash zoom, flash cut, gradient mesh field, letter stagger, outline fill, shape trace morph, slice shift, word sweep, text on path, ink warp |
 | field | one saturated green ground, white type, no dark surfaces | Bricolage Grotesque | lemon | color block wipe, cta pop, grid stagger wave, liquid displace, liquid wipe, notification pop, parallax dive, whip pan, type match cut |
-| chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover |
+| chrome | periwinkle metal, bevelled plates, halftone ground, for physical objects | Archivo, JetBrains Mono | burnt orange | CTA morph press, card assemble, device tilt stage, flap resolve, speed ramp freeze, stack cover, halftone field |
 
 Rules for a new look: ink, muted and on-accent text pass 4.5:1 on their surface, accent used as text passes 3:1 (large type only); no glow on text; a gradient ground carries grain. The `paper` token pair (`--paper`, `--paper-ink`, `--paper-muted`) is the second ground a look uses for a cut or a wipe into a contrasting scene.
 
