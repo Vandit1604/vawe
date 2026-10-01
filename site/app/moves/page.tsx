@@ -17,10 +17,10 @@ export default function Moves() {
       <Header active="moves" />
       <main className="wrap" id="content" tabIndex={-1}>
         <section className="ls ls-top mv">
-          <h1>Moves to copy, each with its clip.</h1>
+          <h1>Moves</h1>
           <p className="ls-sub">
-            A move is one markdown file: when to use it, the snippet, the notes and the sound cue. Pick
-            from the clip, then hand the file to your agent.
+            Each move is a clip and one markdown file: when to use it, the snippet, the notes and the
+            sound cue. Agents can filter the same list in <a href="/moves/index.json">index.json</a>.
           </p>
           <MovesGallery
             moves={MOVES.map(toCard)}

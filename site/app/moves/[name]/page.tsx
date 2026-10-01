@@ -48,8 +48,9 @@ export default async function MovePage({ params }: Params) {
             <h1>{move.title}</h1>
             <p className="meta mvd-meta">
               <span>look: {move.look}</span>
+              {move.duration ? <span>{move.duration} s</span> : null}
               <a className="mvd-raw" href={files.md} type="text/markdown">
-                For your agent: {move.name}.md
+                {move.name}.md
               </a>
             </p>
           </header>
