@@ -24,6 +24,10 @@
   {
    "id": "product-moments",
    "label": "Product moments"
+  },
+  {
+   "id": "grounds",
+   "label": "Grounds"
   }
  ],
  "looks": [
@@ -110,6 +114,10 @@
   {
    "id": "hold-a-line-still-to-read-the-ground-alive",
    "label": "hold a line still to read, the ground alive"
+  },
+  {
+   "id": "give-a-held-frame-a-living-ground",
+   "label": "give a held frame a living ground"
   },
   {
    "id": "show-a-click-doing-its-job",
@@ -1033,7 +1041,8 @@
    "group": "move-the-camera",
    "look": "signal",
    "jobs": [
-    "hold-a-line-still-to-read-the-ground-alive"
+    "hold-a-line-still-to-read-the-ground-alive",
+    "give-a-held-frame-a-living-ground"
    ],
    "use": "a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1",
    "clip": "https://vawe.dev/moves/gradient-mesh-field.mp4",
@@ -1433,6 +1442,90 @@
    "md": "https://vawe.dev/moves/panel-live-sync.md",
    "page": "https://vawe.dev/moves/panel-live-sync",
    "duration": 3.8
+  },
+  {
+   "name": "aurora-drift",
+   "title": "Aurora drift",
+   "group": "grounds",
+   "look": "terminal",
+   "jobs": [
+    "give-a-held-frame-a-living-ground"
+   ],
+   "use": "three soft bands of light hang from the top of the frame and fold slowly in one shader while the copy sits low; the light thins out above the type",
+   "clip": "https://vawe.dev/moves/aurora-drift.mp4",
+   "md": "https://vawe.dev/moves/aurora-drift.md",
+   "page": "https://vawe.dev/moves/aurora-drift",
+   "duration": 4
+  },
+  {
+   "name": "grain-field",
+   "title": "Grain field",
+   "group": "grounds",
+   "look": "paper",
+   "jobs": [
+    "give-a-held-frame-a-living-ground"
+   ],
+   "use": "a quiet printed or filmic frame breathes: a slow tonal ground and film grain that turns over 24 times a second, seeded from the seek time, never from Math.random",
+   "clip": "https://vawe.dev/moves/grain-field.mp4",
+   "md": "https://vawe.dev/moves/grain-field.md",
+   "page": "https://vawe.dev/moves/grain-field",
+   "duration": 4
+  },
+  {
+   "name": "halftone-field",
+   "title": "Halftone field",
+   "group": "grounds",
+   "look": "chrome",
+   "jobs": [
+    "give-a-held-frame-a-living-ground"
+   ],
+   "use": "a physical or retro frame gets a 45 degree dot screen whose dot size waves across the frame while every dot stays in its cell",
+   "clip": "https://vawe.dev/moves/halftone-field.mp4",
+   "md": "https://vawe.dev/moves/halftone-field.md",
+   "page": "https://vawe.dev/moves/halftone-field",
+   "duration": 4
+  },
+  {
+   "name": "ink-warp",
+   "title": "Ink warp",
+   "group": "grounds",
+   "look": "signal",
+   "jobs": [
+    "give-a-held-frame-a-living-ground"
+   ],
+   "use": "a rich liquid ground for short large copy: marbled ink flows by domain warp in one shader, thinner behind the type",
+   "clip": "https://vawe.dev/moves/ink-warp.mp4",
+   "md": "https://vawe.dev/moves/ink-warp.md",
+   "page": "https://vawe.dev/moves/ink-warp",
+   "duration": 4
+  },
+  {
+   "name": "dot-grid-wave",
+   "title": "Dot grid wave",
+   "group": "grounds",
+   "look": "daylight",
+   "jobs": [
+    "give-a-held-frame-a-living-ground"
+   ],
+   "use": "a clean product or data frame gets a plain SVG dot grid with one travelling wave of scale and brightness, weaker behind the copy",
+   "clip": "https://vawe.dev/moves/dot-grid-wave.mp4",
+   "md": "https://vawe.dev/moves/dot-grid-wave.md",
+   "page": "https://vawe.dev/moves/dot-grid-wave",
+   "duration": 4
+  },
+  {
+   "name": "light-pool",
+   "title": "Light pool",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "give-a-held-frame-a-living-ground"
+   ],
+   "use": "a matte held frame gets one soft pool of light that wanders on a seeded path, plain CSS with no shader; the stillest ground of the group",
+   "clip": "https://vawe.dev/moves/light-pool.mp4",
+   "md": "https://vawe.dev/moves/light-pool.md",
+   "page": "https://vawe.dev/moves/light-pool",
+   "duration": 4
   }
  ]
 }
