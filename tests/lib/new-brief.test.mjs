@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { newFilm, newFilmLines, readDetails } from '../../harness/cli/new.mjs';
+import { newFilm, newFilmLines, readDetails, questionsJson } from '../../harness/cli/new.mjs';
 import { parseDirections, directionsLines } from '../../harness/lib/directions.mjs';
-import { ACCEPTANCE, GUESS, DETAIL_KEYS } from '../../harness/lib/measured-brief.mjs';
+import { ACCEPTANCE, GUESS, DETAIL_KEYS, optionsFor } from '../../harness/lib/measured-brief.mjs';
 import { briefLine } from '../../harness/lib/draft-check.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
@@ -113,7 +113,8 @@ test('a thin request asks the unanswered details, in order, and writes nothing',
   assert.deepEqual(made.asked.map((d) => d.key), DETAIL_KEYS);
   assert.equal(fs.existsSync(path.join(root, 'films')), false);
   const lines = newFilmLines('zz', made);
-  assert.equal(lines[0], 'vawe new: 8 details needed before a good brief');
+  assert.equal(lines[0], 'agents: run with --questions-json and ask with AskUserQuestion');
+  assert.ok(lines.includes('vawe new: 8 details needed before a good brief'));
   assert.ok(lines.some((l) => l.startsWith('1. subject: ')));
   assert.ok(lines.some((l) => l.includes('why: ')) && lines.some((l) => l.includes('example: ')));
   assert.ok(lines.some((l) => l.startsWith('  bin/vawe new zz --request "a launch film for Argus"') && l.endsWith('--answers <file>')));
@@ -149,6 +150,27 @@ test('--detail and --answers fill the fields, and an unanswered optional detail 
   assert.match(fs.readFileSync(path.join(root, 'films/zz/page.html'), 'utf8'), /name="duration" content="12"[\s\S]*name="aspect" content="9:16"/);
   assert.throws(() => readDetails({ detail: ['color=red'] }), /not a detail/);
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('--questions-json shape: at most 4 questions per call, short headers, 2 to 4 options, recommended first', () => {
+  const { calls, answer_with } = questionsJson('zz', { request: 'a launch film for Argus' });
+  assert.deepEqual(calls.map((c) => c.questions.length), [4, 4]);
+  const all = calls.flatMap((c) => c.questions);
+  assert.deepEqual(all.map((q) => q.header), ['Subject', 'Message', 'Show', 'Look', 'Format', 'Family', 'Assets', 'Ending']);
+  for (const q of all) {
+    assert.ok(q.header.length <= 12 && q.question && q.multiSelect === false);
+    assert.ok(q.options.length >= 2 && q.options.length <= 4);
+    for (const o of q.options) assert.ok(o.description && o.label.replace(/ \(Recommended\)$/, '').split(' ').length <= 5, o.label);
+    assert.ok(q.options.slice(1).every((o) => !o.label.endsWith('(Recommended)')));
+  }
+  assert.equal(all[0].options[0].label, 'Argus for developers (Recommended)');
+  assert.equal(answer_with, 'bin/vawe new zz --request "a launch film for Argus" --answers <file>');
+});
+
+test('--questions-json lists only the open details, and options fall back to generic choices', () => {
+  const { calls } = questionsJson('zz', { request: FULL, details: { family: 'type-led' }, length: 12 });
+  assert.deepEqual(calls.flatMap((c) => c.questions.map((q) => q.header)), ['Assets', 'Ending']);
+  assert.equal(optionsFor({ key: 'subject' }, 'a film')[0].label, 'A developer tool (Recommended)');
 });
 
 test('--defaults keeps the guesses and names the details it guessed', () => {
