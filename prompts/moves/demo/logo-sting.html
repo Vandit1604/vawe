@@ -25,21 +25,20 @@
   <span class="word">vawe</span>
 </div></div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), land = curveToLinear(CURVES.overshoot);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 const word = q('.word'), lockup = q('.lockup'), mark = q('.mark');
 const w = word.getBoundingClientRect().width, gap = parseFloat(getComputedStyle(lockup).gap);
 const shift = (w + gap) / 2;   // the mark starts centred, then the lockup re-centres as the word opens
 
-mark.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 550, delay: 60, easing: land, fill: 'both' });
+mark.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 550, delay: 60, easing: EASE.pop, fill: 'both' });
 mark.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 110, delay: 60, easing: 'linear', fill: 'both' });
-q('.sheen').animate([{ translate: '-130% 0' }, { translate: '130% 0' }], { duration: 650, delay: 380, easing: settle, fill: 'both' });
-lockup.animate([{ translate: `${shift}px 0` }, { translate: '0 0' }], { duration: 650, delay: 520, easing: settle, fill: 'both' });
+q('.sheen').animate([{ translate: '-130% 0' }, { translate: '130% 0' }], { duration: 650, delay: 380, easing: EASE.land, fill: 'both' });
+lockup.animate([{ translate: `${shift}px 0` }, { translate: '0 0' }], { duration: 650, delay: 520, easing: EASE.land, fill: 'both' });
 word.animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)', translate: `-${w * 0.35}px 0` }, { clipPath: 'inset(-0.3em -0.3em -0.3em 0)', translate: '0 0' }],
-  { duration: 650, delay: 520, easing: settle, fill: 'both' });
+  { duration: 650, delay: 520, easing: EASE.land, fill: 'both' });
 // a slow push keeps the settled lockup alive to the last frame
-q('.drift').animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1800, easing: 'linear', fill: 'both' });
+q('.drift').animate([{ scale: 1 }, { scale: 1.045 }], { duration: 1800, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

@@ -37,11 +37,11 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import { noise1 } from '/core/motion/springs.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 
 const root = document.documentElement;
-root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
-root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--settle', EASE.land);
+root.style.setProperty('--soft', EASE.land);
 const lead = document.getElementById('lead');
 lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
 

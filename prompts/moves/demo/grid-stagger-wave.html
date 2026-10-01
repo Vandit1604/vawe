@@ -19,7 +19,7 @@
   <div class="tile title"><b>Plugs into<br>everything.</b></div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 import { mark } from '/prompts/moves/demo/assets/logos.js';
 const grid = document.querySelector('.grid');
 const glyphs = ['kestrel', 'halcyon', 'parcel', 'fernbank', 'mosaic', 'lumen', 'northwind', 'orbital', 'quarry', 'tidewell', 'ardent', 'vantage', 'compass', 'aster'].map((name) => {
@@ -27,7 +27,6 @@ const glyphs = ['kestrel', 'halcyon', 'parcel', 'fernbank', 'mosaic', 'lumen', '
 });
 const COLS = 8, ROWS = 4, src = { c: 2.5, r: 1.5 };   // the wave starts at the title tile's centre, in tile units
 const inTitle = (c, r) => c >= 1 && c <= 3 && r >= 1 && r <= 2;
-const settle = curveToLinear(CURVES.spring), fast = curveToLinear(CURVES.expoOut);
 const STEP = 70, T0 = 140;                                // ms per tile of distance: the wave front speed
 let n = 0;
 for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
@@ -40,12 +39,12 @@ for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
   const dx = c - src.c, dy = r - src.r, d = Math.hypot(dx, dy);
   // each tile starts pulled 30 percent of a tile toward the source and is pushed out by the front
   tile.animate([{ translate: `${(-dx / d) * 30}% ${(-dy / d) * 30}%`, scale: 0.55 }, { translate: '0 0', scale: 1 }],
-    { duration: 520, delay: T0 + d * STEP, easing: settle, fill: 'both' });
+    { duration: 520, delay: T0 + d * STEP, easing: EASE.pop, fill: 'both' });
   tile.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: T0 + d * STEP, easing: 'linear', fill: 'both' });
 }
 const title = document.querySelector('.title');
-title.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 420, easing: fast, fill: 'both' });
-grid.animate([{ scale: 1 }, { scale: 1.025 }], { duration: 1600, easing: 'linear', fill: 'both' });
+title.animate([{ scale: 0.9 }, { scale: 1 }], { duration: 420, easing: EASE.land, fill: 'both' });
+grid.animate([{ scale: 1 }, { scale: 1.025 }], { duration: 1600, easing: EASE.glide, fill: 'both' });
 </script>
 </body>
 </html>

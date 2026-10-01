@@ -25,6 +25,7 @@
 <h1 aria-label="Resolve"></h1>
 <script type="module">
 import { rng } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const word = 'RESOLVE', pool = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', flips = 6, flip = 68, stagger = 68, t0 = 120;
 const rand = rng(11);
 const h1 = document.querySelector('h1');
@@ -57,11 +58,11 @@ const on = (el, keys, delay, duration, easing = 'linear') => el.animate(keys, { 
     // the next glyph's top half is revealed behind the falling flap from the start of the flip
     on(top, [{ opacity: 1 }, { opacity: 1 }], at, flip);
     // top half of the old glyph falls on the hinge (accelerates like gravity), then goes edge-on
-    on(fall, [{ opacity: 1, transform: 'rotateX(0deg)' }, { opacity: 1, transform: 'rotateX(-90deg)', offset: 0.999 }, { opacity: 0, transform: 'rotateX(-90deg)' }], at, mid, 'cubic-bezier(0.55, 0, 1, 0.6)');
-    on(fall.lastChild, [{ opacity: 0 }, { opacity: 0.6 }], at, mid, 'ease-in');
+    on(fall, [{ opacity: 1, transform: 'rotateX(0deg)' }, { opacity: 1, transform: 'rotateX(-90deg)', offset: 0.999 }, { opacity: 0, transform: 'rotateX(-90deg)' }], at, mid, EASE.launch);
+    on(fall.lastChild, [{ opacity: 0 }, { opacity: 0.6 }], at, mid, EASE.launch);
     // the back of the flap carries the next glyph's bottom half and swings 90 to 0, snapping shut
-    on(rise, [{ opacity: 1, transform: 'rotateX(90deg)' }, { opacity: 1, transform: 'rotateX(0deg)' }], at + mid, mid, 'cubic-bezier(0.2, 0.7, 0.4, 1)');
-    on(rise.lastChild, [{ opacity: 0.6 }, { opacity: 0 }], at + mid, mid, 'ease-out');
+    on(rise, [{ opacity: 1, transform: 'rotateX(90deg)' }, { opacity: 1, transform: 'rotateX(0deg)' }], at + mid, mid, EASE.land);
+    on(rise.lastChild, [{ opacity: 0.6 }, { opacity: 0 }], at + mid, mid, EASE.land);
   }
   h1.append(tile);
 });

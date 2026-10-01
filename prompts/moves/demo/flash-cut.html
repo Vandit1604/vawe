@@ -28,20 +28,19 @@
 <section class="shot b"><h1>Ship<i>.</i></h1><p>one page in, one film out</p></section>
 <div class="flash"></div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '/core/motion/presets.js';
 const beat = 500;   // ms; the flash peaks on the beat and the cut lands inside the peak
 const cutAt = beat + 20;
 // one frame up, about three at full white, then a decay like an exposure: fast, then a long tail
 document.querySelector('.flash').animate(
-  [{ opacity: 0 }, { opacity: 1, offset: 0.04 }, { opacity: 1, offset: 0.16, easing: settle }, { opacity: 0 }],
+  [{ opacity: 0 }, { opacity: 1, offset: 0.04 }, { opacity: 1, offset: 0.16, easing: EASE.leave }, { opacity: 0 }],
   { duration: 420, delay: beat, fill: 'both' });
 document.querySelector('.b').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: cutAt, fill: 'both' });
 document.querySelector('.a').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1, delay: cutAt, fill: 'both' });
 document.querySelector('.a .card').animate([{ translate: '0 0' }, { translate: '-2vw 0' }], { duration: cutAt, fill: 'both' });
 // B is overexposed at the cut and settles to its true exposure with the flash
 document.querySelector('.b').animate([{ filter: 'brightness(2.4)', scale: 1.06 }, { filter: 'brightness(1)', scale: 1 }],
-  { duration: 700, delay: cutAt, easing: settle, fill: 'both' });
+  { duration: 700, delay: cutAt, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

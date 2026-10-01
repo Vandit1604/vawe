@@ -19,10 +19,10 @@
 <body>
 <h1 class="title">Pick a look, <span class="accent">then ship</span></h1>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const root = document.documentElement.style;
-root.setProperty('--settle', curveToLinear(CURVES.expoOut));
-root.setProperty('--accelerate', curveToLinear((u) => u * u * u));
+root.setProperty('--settle', EASE.land);
+root.setProperty('--accelerate', EASE.launch);
 </script>
 </body>
 </html>

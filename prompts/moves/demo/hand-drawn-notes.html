@@ -24,10 +24,9 @@
   <p class="label" id="label">start here</p>
 </div>
 <script type="module">
-import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
-import { enter } from '/core/motion/presets.js';
+import { rng } from '/core/motion/springs.js';
+import { enter, EASE } from '/core/motion/presets.js';
 
-const PEN = curveToLinear('easeInOutCubic'), LAND = curveToLinear(CURVES.expoOut);
 const SEED = 7;
 const rand = rng(SEED);
 const wob = (amount) => (rand() * 2 - 1) * amount;
@@ -64,7 +63,7 @@ const ring = Array.from({ length: 14 }, (_, i) => {
   const a = -2.5 + (i / 12) * Math.PI * 2 * 1.06, grow = 1 + (i / 13) * 0.07 + wob(0.025);
   return [cx + Math.cos(a) * rx * grow, cy + Math.sin(a) * ry * grow];
 });
-stroke(smooth(ring), 0.45, 0.6, PEN);
+stroke(smooth(ring), 0.45, 0.6, EASE.settle);
 
 // label, then an arrow from it to the circle
 const lab = { x: cx + rx + fs * 1.05, y: fix.y + fix.h * 0.08 };
@@ -72,16 +71,16 @@ label.style.left = `${lab.x}px`; label.style.top = `${lab.y}px`;
 const from = [lab.x - fs * 0.18, lab.y + fs * 0.34], to = [cx + rx + fs * 0.08, cy + fs * 0.04];
 const bow = (t) => Math.sin(t * Math.PI) * fs * 0.14;
 const shaft = Array.from({ length: 6 }, (_, i) => { const t = i / 5; return [from[0] + (to[0] - from[0]) * t + wob(fs * 0.012), from[1] + (to[1] - from[1]) * t + bow(t) + wob(fs * 0.012)]; });
-stroke(smooth(shaft), 0.95, 0.35, PEN);
+stroke(smooth(shaft), 0.95, 0.35, EASE.settle);
 const head = (s) => `M${to[0] + fs * 0.2} ${to[1] - fs * 0.14 * s + wob(2)}L${to[0]} ${to[1]}L${to[0] + fs * 0.2} ${to[1] + fs * 0.16 * s + wob(2)}`;
-stroke(head(1), 1.27, 0.14, LAND);
-label.animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% 0% -10% 0)' }], { delay: 1.1 * 1000, duration: 450, easing: 'linear', fill: 'both' });
+stroke(head(1), 1.27, 0.14, EASE.land);
+label.animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% 0% -10% 0)' }], { delay: 1.1 * 1000, duration: 450, easing: EASE.land, fill: 'both' });
 
 // underline: a long, slightly sagging stroke under the last word
 const sd = rect(word('standup'));
 const y = sd.y + sd.h * 0.98;
 const under = Array.from({ length: 7 }, (_, i) => { const t = i / 6; return [sd.x - fs * 0.04 + (sd.w + fs * 0.1) * t, y + Math.sin(t * Math.PI) * fs * 0.03 - t * fs * 0.03 + wob(fs * 0.008)]; });
-stroke(smooth(under), 1.65, 0.45, PEN);
+stroke(smooth(under), 1.65, 0.45, EASE.settle);
 
 enter(line, { at: 0.05, band: 'professional', from: '0 0.3em' });
 </script>
