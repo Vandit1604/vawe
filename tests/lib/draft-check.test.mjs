@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sampleTimes, textProblems, soundLine, mergeProblems, draftCheckLines, draftAdvice, briefLine } from '../../harness/lib/draft-check.mjs';
+import { sampleTimes, frameUnitLines, textProblems, soundLine, mergeProblems, draftCheckLines, draftAdvice, briefLine } from '../../harness/lib/draft-check.mjs';
 
 const at = (t, ...lines) => ({ t, lines: lines.map(([text, fontPx]) => ({ text, fontPx })) });
 const dim = { step: 0.5, frameH: 540 };
@@ -65,4 +65,20 @@ test('a brief with answered inputs and a few kept defaults is not the template',
   assert.equal(briefLine(answered), null);
   const template = '## Inputs\n\n- URL: x [unanswered: default taken]\n- Promise: y [unanswered: default taken]\n';
   assert.match(briefLine(template), /template defaults/);
+});
+
+test('textProblems: text in data-chrome has a 2.5% floor; plain text keeps 6%', () => {
+  const chrome = (cap) => ({ t: 1, lines: [{ text: 'Inbox', fontPx: (cap * 540) / 0.7, chrome: true }] });
+  const held = (s) => [s, { ...s, t: 1.5 }];
+  assert.deepEqual(textProblems(held(chrome(0.03)), dim), []);
+  assert.match(textProblems(held(chrome(0.02)), dim)[0], /cap height 2\.0% of frame \(rule 9 asks 2\.5%\)/);
+  assert.equal(textProblems([at(1, ['Inbox', 30]), at(1.5, ['Inbox', 30])], dim).length, 1);
+});
+
+test('frameUnitLines: a font taller than the frame or under 0.2% of it names the --vh mistake', () => {
+  const [line] = frameUnitLines([at(1, ['Big', 54000], ['ok', 40])], dim);
+  assert.match(line, /"Big" is 54000\.0 px in a frame 540 px tall/);
+  assert.match(line, /--vh is the frame height in px; use calc\(var\(--vh\) \* 0\.08\) for 8%/);
+  assert.equal(frameUnitLines([at(1, ['dot', 0.4])], dim).length, 1);
+  assert.deepEqual(frameUnitLines([at(1, ['fine', 40], ['huge', 500])], dim), []);
 });

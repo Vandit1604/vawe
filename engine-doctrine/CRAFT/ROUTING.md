@@ -37,6 +37,7 @@ that "looks AI" or a product UI surface takes `impeccable` (`skills/impeccable/S
 - A short sting cut from a captured site (a 6 s logo reveal for a real brand) is still a sting when
   both hold: under 10 s and motion is the message. "Make a video from this site" with no length is a
   brand launch.
+- An invented product (no URL, nothing real to capture) is never a brand launch: take `beat-sheet.md` and the RECIPES.md launch chain.
 - Data with a real product behind it is a brand launch when the ask is to market it; an explainer
   only when nothing is sold.
 - A song plus a product is a music video: the song owns the cuts, the product fills the frames.

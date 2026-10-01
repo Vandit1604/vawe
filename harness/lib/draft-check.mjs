@@ -3,7 +3,13 @@
 // harness/media/draft-check.mjs feeds it.
 import { adviceBlock } from './advice.mjs';
 
-export const RULES = { capFrac: 0.06, capOfFont: 0.7, holdSec: 0.5, maxProblems: 4, lufsLow: -24, lufsHigh: -16 };
+export const RULES = { capFrac: 0.06, chromeCapFrac: 0.025, capOfFont: 0.7, holdSec: 0.5, maxProblems: 4, lufsLow: -24, lufsHigh: -16 };
+
+// Text inside these is not copy to read: aria-hidden is texture, data-chrome is the label of a product shown as texture.
+export const DECORATIVE = '[aria-hidden="true"]';
+export const CHROME = '[data-chrome]';
+
+const FONT_TINY_SHARE = 0.002;
 
 /** Sample times spread over the film: one every 0.5 s, between 10 and 40 samples, each at the middle of its slot. */
 export function sampleTimes(dur) {
@@ -34,7 +40,7 @@ export function heldTextRuns(samples, { step, frameH }, rules = RULES) {
       const key = keyOf(l.text);
       if (!key) continue;
       const cap = (rules.capOfFont * l.fontPx) / frameH;
-      const run = open.get(key) || { key, n: 0, t: s.t, cap, first: s.t };
+      const run = open.get(key) || { key, n: 0, t: s.t, cap, first: s.t, chrome: Boolean(l.chrome) };
       if (!seen.has(key)) { run.n += 1; run.last = s.t; }
       seen.add(key);
       if (cap < run.cap) { run.cap = cap; run.t = s.t; }
@@ -50,12 +56,22 @@ export function heldTextRuns(samples, { step, frameH }, rules = RULES) {
   return [...kept.values()];
 }
 
-/** The held text lines under `capFrac`, smallest first, each as a problem line. */
+const floorOf = (run, rules) => (run.chrome ? rules.chromeCapFrac : rules.capFrac);
+
+/** The held text lines under their cap floor (`capFrac`, or `chromeCapFrac` inside data-chrome), smallest first, each as a problem line. */
 export function textProblems(samples, ctx, rules = RULES) {
   return heldTextRuns(samples, ctx, rules)
-    .filter((r) => r.cap < rules.capFrac)
+    .filter((r) => r.cap < floorOf(r, rules))
     .sort((a, b) => a.cap - b.cap)
-    .map((r) => `text "${r.key}" at ${r.t.toFixed(1)} s: cap height ${(r.cap * 100).toFixed(1)}% of frame (rule 9 asks ${rules.capFrac * 100}%)`);
+    .map((r) => `text "${r.key}" at ${r.t.toFixed(1)} s: cap height ${(r.cap * 100).toFixed(1)}% of frame (rule 9 asks ${+(floorOf(r, rules) * 100).toFixed(1)}%)`);
+}
+
+/** One line when a text is taller than the frame or under 0.2% of it: the sign of --vh read as 1vh. Pure. */
+export function frameUnitLines(samples, { frameH }) {
+  const off = samples.flatMap((s) => s.lines).filter((l) => l.fontPx > frameH || l.fontPx < FONT_TINY_SHARE * frameH);
+  if (!off.length) return [];
+  const worst = off.reduce((a, l) => (Math.abs(Math.log(l.fontPx / frameH)) > Math.abs(Math.log(a.fontPx / frameH)) ? l : a));
+  return [`text "${worst.text.slice(0, 30)}" is ${worst.fontPx.toFixed(1)} px in a frame ${frameH} px tall (${new Set(off.map((l) => l.text)).size} such texts): --vh is the frame height in px; use calc(var(--vh) * 0.08) for 8%`];
 }
 
 /** The sound line when the mix is outside the band, else null. */

@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="duration" content="4">
+<style>
+*{margin:0}html,body{background:#fff}
+p{font:700 48px system-ui;color:#111;padding:20px}
+#w span{display:inline-block}
+</style></head><body>
+<p id="w"><span>S</span><span>h</span><span>i</span><span>p</span></p>
+<p id="box" style="width:80px;height:40px;background:#111"></p>
+<script>
+// the word is on from 2.5 s; the box is on from 1 s and rests from 1.5 s
+document.querySelectorAll('#w span').forEach((el) => el.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 2500, duration: 4000, easing: 'steps(1, start)', fill: 'both' }));
+const box = document.getElementById('box');
+box.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 1000, duration: 3000, easing: 'steps(1, start)', fill: 'both' });
+box.animate([{ translate: '200px 0' }, { translate: '0 0' }], { delay: 1000, duration: 500, easing: 'linear', fill: 'both' });
+</script>
+</body></html>

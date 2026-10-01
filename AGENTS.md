@@ -24,6 +24,7 @@ This file adds only what you would get wrong on your own. One command runs every
   (`bin/vawe sounds`, `bin/vawe fonts` list them); `data-role="vo"` ducks the bed.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
+- Text checks skip text inside `aria-hidden="true"` (texture); product UI labels shown as texture take `data-chrome` (cap floor 2.5%, no read hold).
 - `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
   one big moment; put quiet before it. One focal point per frame.
 

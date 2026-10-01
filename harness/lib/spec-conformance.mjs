@@ -1,83 +1,139 @@
 // The film against the brief's SPEC tables. Every check is { label, spec, got, dev, unit }: `dev` is how far
-// the film is from the spec (Infinity when the thing was not found), in `unit`. The times to sample come from
-// specTimes; the samples are the draft's text probe (harness/media/draft-check.mjs sampleSpec) and box tracks.
+// the film is from the spec (Infinity when the thing was not found), in `unit`. A time is measured on the frame
+// grid by runStart, which looks around the spec time and widens until the run's edge, so the measure does not
+// depend on the spec value. The samples are the draft's text probe (harness/media/draft-check.mjs sampleSpec).
 import { RULES } from './draft-check.mjs';
+import { FPS } from '../media/motion-curve.mjs';
 
-export const GRID_S = 0.05;
-const WINDOW_STEPS = 5;
+const COARSE_FRAMES = 8;
 const REST_SHARE = 0.005;
+const REST_LOOK_S = 0.25;
+const MIN_WORD_CHARS = 2;
 export const APPEAR_TOL_S = 0.05;
 export const LAYOUT_TOL_PCT = 1;
 
 const round = (t) => +t.toFixed(3);
-const grid = (t) => Array.from({ length: 2 * WINDOW_STEPS + 1 }, (_, k) => round(t + (k - WINDOW_STEPS) * GRID_S)).filter((x) => x >= 0);
 const norm = (s) => String(s).replace(/\s+/g, ' ').trim().toLowerCase();
+const squash = (s) => norm(s).replace(/\s+/g, '');
 const has = (v) => typeof v === 'number';
 
-/** The seconds to sample: { text, boxes }, each sorted and unique. A window of 0.25 s each side of every spec time. Pure. */
-export function specTimes({ words = [], objects = [] }) {
-  const sorted = (list) => [...new Set(list)].sort((a, b) => a - b);
-  return {
-    text: sorted(words.flatMap((w) => [...(has(w.appear) ? grid(w.appear) : []), ...(has(w.settle) ? [round(w.settle)] : [])])),
-    boxes: sorted(objects.flatMap((o) => [o.in, o.settle, o.out].filter(has).flatMap(grid))),
-  };
+/** False for a Words text too short to find: under 2 letters or digits, or only punctuation. */
+export const findable = (text) => String(text).replace(/[^\p{L}\p{N}]/gu, '').length >= MIN_WORD_CHARS;
+
+/** The Words texts that spec checks skip, for the note. Pure. */
+export const skippedWords = (words) => words.filter((w) => !findable(w.text)).map((w) => w.text);
+
+/** The seconds to sample: { text: the settle times, boxes: every frame of the film when objects are named }. Pure. */
+export function specTimes({ words = [], objects = [] }, dur, fps = FPS) {
+  const settles = [...new Set(words.filter((w) => findable(w.text) && has(w.settle)).map((w) => round(w.settle)))].sort((a, b) => a - b);
+  return { text: settles, boxes: objects.length ? Array.from({ length: Math.floor(dur * fps + 1e-9) + 1 }, (_, k) => round(k / fps)) : [] };
 }
 
-const lineFor = (sample, text) => {
+/**
+ * The first frame time of the run where `on(t)` holds that is nearest `hint`: the run's start when `on` holds at
+ * `hint`, the start of the next run when it does not. Null when no run starts before `dur`. `on` may be async. The
+ * search steps back or forward by COARSE_FRAMES, then scans the last gap frame by frame.
+ */
+export async function runStart(on, hint, { dur, fps = FPS }) {
+  const last = Math.floor(dur * fps + 1e-9);
+  const k = Math.min(last, Math.max(0, Math.round(hint * fps)));
+  const firstOn = async (from, to) => { for (let j = from; j < to; j++) if (await on(j / fps)) return round(j / fps); return round(to / fps); };
+  if (await on(k / fps)) {
+    let hi = k;
+    while (hi > 0) {
+      const p = Math.max(0, hi - COARSE_FRAMES);
+      if (!(await on(p / fps))) return firstOn(p + 1, hi);
+      hi = p;
+    }
+    return 0;
+  }
+  let lo = k;
+  while (lo < last) {
+    const p = Math.min(last, lo + COARSE_FRAMES);
+    if (await on(p / fps)) return firstOn(lo + 1, p);
+    lo = p;
+  }
+  return null;
+}
+
+/** The line a spec word is on: an exact line, else the shortest line or block (a whole element's text) that holds the word, spaces ignored. */
+export function lineFor(sample, text) {
   const lines = sample?.lines ?? [];
-  return lines.find((l) => norm(l.text) === norm(text)) || lines.find((l) => norm(l.text).includes(norm(text))) || null;
-};
+  const exact = lines.find((l) => norm(l.text) === norm(text));
+  if (exact) return exact;
+  const key = squash(text);
+  return [...(sample?.blocks ?? []), ...lines].filter((l) => squash(l.text).includes(key)).sort((a, b) => a.text.length - b.text.length)[0] ?? null;
+}
 
 const sampleAt = (samples, t) => samples.find((s) => Math.abs(s.t - t) < 1e-6);
 
-const check = (label, spec, got, unit) => ({ label, spec, got, dev: got === null ? Infinity : Math.abs(got - spec), unit });
+const boxAtRest = (a, b, { frameW, frameH }) => Math.abs(a[0] - b[0]) <= REST_SHARE * frameW && Math.abs(a[1] - b[1]) <= REST_SHARE * frameH
+  && Math.abs(a[2] - b[2]) <= REST_SHARE * frameW && Math.abs(a[3] - b[3]) <= REST_SHARE * frameH;
 
-/** Per spec word: the first time its text shows vs `appear s`, then cap height, x and y at `settle s`. Pure. */
-export function wordChecks(words, samples, { frameW, frameH }) {
+const check = (label, spec, got, unit, of = null) => ({ label, spec, got, dev: got === null ? Infinity : Math.abs(got - spec), unit, ...(of ? { of } : {}) });
+
+/**
+ * Per spec word, when its text first shows (appear) and when its box stops moving (settle), measured around the
+ * spec times. `linesAt(t)` is the async text probe { lines, blocks } of one seek. { appear, settle }, null where
+ * the word was not found or has no spec time.
+ */
+export async function wordTimes(word, linesAt, { dur, frame }) {
+  if (!findable(word.text)) return { appear: null, settle: null };
+  const seen = async (t) => lineFor(await linesAt(t), word.text);
+  const span = { dur };
+  const appear = has(word.appear) ? await runStart(async (t) => Boolean(await seen(t)), word.appear, span) : null;
+  const ref = has(word.settle) ? await seen(Math.min(dur, word.settle + REST_LOOK_S)) : null;
+  const settle = ref ? await runStart(async (t) => { const l = await seen(t); return Boolean(l) && boxAtRest(l.box, ref.box, frame); }, word.settle, span) : null;
+  return { appear, settle };
+}
+
+/** Per spec word: the first time its text shows vs `appear s` (from `times`, wordTimes per word), then cap height, x and y at `settle s`. Pure. */
+export function wordChecks(words, samples, { frameW, frameH }, times = []) {
   const out = [];
-  for (const w of words) {
-    if (has(w.appear)) {
-      const first = grid(w.appear).find((t) => lineFor(sampleAt(samples, t), w.text));
-      out.push(check(`"${w.text}" appears`, w.appear, first ?? null, 's'));
-    }
-    if (!has(w.settle)) continue;
+  words.forEach((w, i) => {
+    if (!findable(w.text)) return;
+    if (has(w.appear)) out.push(check(`"${w.text}" appears`, w.appear, times[i]?.appear ?? null, 's'));
+    if (!has(w.settle)) return;
     const line = lineFor(sampleAt(samples, round(w.settle)), w.text);
     const got = line && { cap: (RULES.capOfFont * line.fontPx * 100) / frameH, x: (line.box[0] * 100) / frameW, y: (line.box[1] * 100) / frameH };
     for (const [key, name] of [['cap', 'cap height'], ['x', 'x'], ['y', 'y']]) {
       if (has(w[key])) out.push(check(`"${w.text}" ${name} at ${w.settle} s`, w[key], got ? got[key] : null, '%'));
     }
-  }
+  });
   return out;
 }
 
 const alphaOf = (box) => box[4];
 
-function restTime(track, times, settle, frameW, frameH) {
-  const window = grid(settle).map((t) => times.indexOf(t)).filter((k) => k >= 0 && track[k]);
-  if (window.length < 2) return null;
-  const last = track[window[window.length - 1]];
-  const still = (k) => Math.abs(track[k][0] - last[0]) <= REST_SHARE * frameW && Math.abs(track[k][1] - last[1]) <= REST_SHARE * frameH
-    && Math.abs(track[k][2] - last[2]) <= REST_SHARE * frameW && Math.abs(track[k][3] - last[3]) <= REST_SHARE * frameH;
-  const first = window.findIndex((_, i) => window.slice(i).every(still));
-  return times[window[first]];
-}
-
 /**
  * Per spec object: when it is half visible (`in`), when it stops moving (`settle`), when it drops under half
- * visible (`out`). `boxes` is sampleBoxTracks with { selectors }: tracks of [x, y, w, h, alpha, own], and
- * `matched`, the track index of each selector or -1. Pure.
+ * visible (`out`). `boxes` is sampleBoxTracks with { selectors } at every frame of the film (specTimes): tracks of
+ * [x, y, w, h, alpha, own], and `matched`, the track index of each selector or -1.
  */
-export function objectChecks(objects, boxes, { frameW, frameH }) {
+export async function objectChecks(objects, boxes, frame, fps = FPS) {
   const out = [];
-  objects.forEach((o, i) => {
+  const span = { dur: boxes.times.at(-1) ?? 0, fps };
+  for (const [i, o] of objects.entries()) {
     const track = boxes.tracks[boxes.matched[i]];
-    if (!track) { out.push(check(`${o.id} (${o.selector}) found`, 0, null, 's')); return; }
-    const visible = (k) => alphaOf(track[k]) >= 0.5;
-    if (has(o.in)) out.push(check(`${o.id} in`, o.in, grid(o.in).find((t) => visible(boxes.times.indexOf(t))) ?? null, 's'));
-    if (has(o.settle)) out.push(check(`${o.id} settle`, o.settle, restTime(track, boxes.times, o.settle, frameW, frameH), 's'));
-    if (has(o.out)) out.push(check(`${o.id} out`, o.out, grid(o.out).find((t) => !visible(boxes.times.indexOf(t))) ?? null, 's'));
-  });
+    if (!track) { out.push(check(`${o.id} (${o.selector}) found`, 0, null, 's')); continue; }
+    const box = (t) => track[Math.min(track.length - 1, Math.round(t * fps))];
+    const visible = (t) => alphaOf(box(t)) >= 0.5;
+    const of = (field) => ({ list: 'objects', key: o.id, field });
+    if (has(o.in)) out.push(check(`${o.id} in`, o.in, await runStart(visible, o.in, span), 's', of('in')));
+    if (has(o.settle)) {
+      const rest = box(Math.min(span.dur, o.settle + REST_LOOK_S));
+      out.push(check(`${o.id} settle`, o.settle, await runStart((t) => boxAtRest(box(t), rest, frame), o.settle, span), 's', of('settle')));
+    }
+    if (has(o.out)) out.push(check(`${o.id} out`, o.out, await runStart((t) => !visible(t), o.out, span), 's', of('out')));
+  }
   return out;
+}
+
+/** The times the film measured for the SPEC rows, for spec-sync: { words: [{ text, appear, settle }], objects: [{ id, in, settle, out }] }. Pure. */
+export function measuredSpec(words, times, objects) {
+  const byId = new Map();
+  for (const c of objects.filter((x) => x.of)) byId.set(c.of.key, { ...(byId.get(c.of.key) ?? { id: c.of.key }), [c.of.field]: c.got });
+  return { words: words.map((w, i) => ({ text: w.text, appear: times[i]?.appear ?? null, settle: times[i]?.settle ?? null })), objects: [...byId.values()] };
 }
 
 /**

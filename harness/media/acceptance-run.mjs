@@ -12,9 +12,9 @@ import { tailTiles } from '../lib/sheet-tiles.mjs';
 import { heldTextRuns } from '../lib/draft-check.mjs';
 import { draftLowContrast } from '../lib/text-contrast.mjs';
 import { textCollisions } from '../lib/text-collision.mjs';
-import { readHoldProblems, probeTracks } from '../lib/read-hold.mjs';
-import { wordChecks, objectChecks, cutChecks } from '../lib/spec-conformance.mjs';
-import { buildRows, withHistory, tableLines, allMeasuredGreen } from '../lib/acceptance.mjs';
+import { readHoldProblems, readHoldUnmeasured, probeTracks } from '../lib/read-hold.mjs';
+import { wordChecks, cutChecks, skippedWords, measuredSpec } from '../lib/spec-conformance.mjs';
+import { buildRows, withHistory, tableLines, allMeasuredGreen, syncLine } from '../lib/acceptance.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaived } from '../lib/waivers.mjs';
 
@@ -43,16 +43,20 @@ function videoMeasures(mp4, authoring, shots) {
 /** What the live page's samples tell: text size, contrast, collisions, read holds, exits and the spec checks. */
 function pageMeasures({ probe, findings, authoring }, tables) {
   const spec = probe.spec;
-  const wordResult = spec && tables.words.length ? wordChecks(tables.words, spec.samples, spec) : null;
+  const wordResult = spec && tables.words.length ? wordChecks(tables.words, spec.samples, spec, spec.times) : null;
+  const tracks = probeTracks(probe.samples, probe, tables.words);
   return {
-    caps: heldTextRuns(probe.samples, probe).map((r) => ({ text: r.key, cap: r.cap * 100, t: r.t })),
+    caps: heldTextRuns(probe.samples, probe).map((r) => ({ text: r.key, cap: r.cap * 100, t: r.t, ...(r.chrome ? { chrome: true } : {}) })),
     contrast: isWaived(authoring, 'text-low-contrast') ? [] : draftLowContrast(probe.samples),
     collisions: textCollisions(probe.samples),
-    readHold: readHoldProblems(probeTracks(probe.samples, probe, tables.words)),
+    readHold: readHoldProblems(tracks),
+    readHoldUnmeasured: readHoldUnmeasured(tracks),
+    skippedWords: skippedWords(tables.words),
     exits: findings.filter((f) => f.code === 'exit-length').map((f) => ({ at: f.at, what: f.what })),
     appear: wordResult && wordResult.filter((c) => c.label.endsWith('appears')),
     layout: wordResult && wordResult.filter((c) => !c.label.endsWith('appears')),
-    objects: spec?.boxes ? objectChecks(tables.objects, spec.boxes, spec) : null,
+    objects: spec?.objects ?? null,
+    measuredSpec: spec ? measuredSpec(tables.words, spec.times, spec.objects ?? []) : null,
   };
 }
 
@@ -63,8 +67,8 @@ function judgeMeasure(name) {
   return { yes: anchor.length - no.length, total: anchor.length, fixes: no.map((a) => `${a.frame}${a.at != null ? ` at ${a.at} s` : ''}: ${a.fix}`) };
 }
 
-function record(name, rows, stage, caps = null) {
-  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, at: new Date().toISOString() });
+function record(name, rows, stage, caps = null, spec = null) {
+  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, at: new Date().toISOString() });
   fs.mkdirSync(path.dirname(outFile(name, 'acceptance')), { recursive: true });
   fs.writeFileSync(outFile(name, 'acceptance'), JSON.stringify(file, null, 1));
   return tableLines(rows, was);
@@ -79,7 +83,8 @@ export function draftAcceptance({ mp4, pagePath, probe, level, findings }) {
   try { video = videoMeasures(mp4, authoring, tables.shots); } catch (e) { console.error(`  acceptance: video not read: ${e.message}`); }
   const page = pageMeasures({ probe, findings, authoring }, tables);
   const m = { ...video, ...page, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
-  return ['acceptance:', ...record(name, buildRows(tables.acceptance, m, { objects: tables.objects.length > 0 }), 'draft', page.caps)];
+  const lines = record(name, buildRows(tables.acceptance, m, { objects: tables.objects.length > 0 }), 'draft', page.caps, page.measuredSpec);
+  return ['acceptance:', ...lines, syncLine([...(page.appear ?? []), ...(page.objects ?? [])], pagePath)].filter(Boolean);
 }
 
 async function finalLevel(mp4) {
@@ -101,7 +106,12 @@ export async function finalAcceptance({ page, outputs }) {
   return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...record(name, rows, 'final')], allGreen: allMeasuredGreen(rows) };
 }
 
-/** The measured text sizes of the last draft, [{ text, cap, t }] with cap in % of frame height, for the judge. */
+/** The measured text sizes of the last draft, [{ text, cap, t }] with cap in % of frame height, for the judge. Product chrome is not a line to read, so it is left out. */
 export function lastCaps(name) {
-  return (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.caps)?.caps ?? [];
+  return ((readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.caps)?.caps ?? []).filter((c) => !c.chrome);
+}
+
+/** The times the last draft measured for the brief's SPEC rows, { words, objects }, or null before any draft. */
+export function lastSpec(name) {
+  return (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.spec)?.spec ?? null;
 }

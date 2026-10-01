@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const COLUMNS = {
+export const COLUMNS = {
   Shots: ['id', 'start', 'end', 'notices', 'moveIn', 'moveOut', 'camera'],
   Words: ['text', 'shot', 'appear', 'settle', 'cap', 'x', 'y', 'weight', 'colour'],
   Objects: ['id', 'selector', 'shot', 'in', 'settle', 'out'],
@@ -15,9 +15,9 @@ const cellsOf = (line) => line.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/)
 const isSeparator = (cells) => cells.every((c) => /^:?-{2,}:?$/.test(c));
 const clean = (c) => c.replace(/^`+|`+$/g, '').trim();
 
-/** "1.2 s" and "14%" give a number; "", "-" and prose give null. */
+/** "1.2 s", "14%" and "1.2 s*" (a cell spec-sync changed) give a number; "", "-" and prose give null. */
 export function numberOf(cell) {
-  const m = /^\s*(-?\d+(?:\.\d+)?|-?\.\d+)\s*(?:s|%)?\s*$/.exec(cell);
+  const m = /^\s*(-?\d+(?:\.\d+)?|-?\.\d+)\s*(?:s|%)?\s*\*?\s*$/.exec(cell);
   return m ? Number(m[1]) : null;
 }
 
@@ -25,20 +25,23 @@ function rowsAfter(lines, from) {
   const rows = [];
   for (let i = from + 1; i < lines.length && !/^#{1,6}\s/.test(lines[i]); i++) {
     if (!lines[i].trim().startsWith('|')) continue;
-    rows.push(cellsOf(lines[i]));
+    rows.push({ line: i, cells: cellsOf(lines[i]) });
   }
-  return rows.slice(1).filter((r) => !isSeparator(r));
+  return rows.slice(1).filter((r) => !isSeparator(r.cells));
 }
 
-function table(lines, name) {
+/** The data rows of one table as { line (index in `lines`), cells, row (the parsed object) }; [] when the table is missing. */
+export function tableRows(lines, name) {
   const head = lines.findIndex((l) => new RegExp(`^#{2,4}\\s+${name}\\s*$`, 'i').test(l.trim()));
   if (head < 0) return [];
   const keys = COLUMNS[name];
-  return rowsAfter(lines, head).filter((r) => r.some(Boolean)).map((cells) => Object.fromEntries(keys.map((k, i) => {
+  return rowsAfter(lines, head).filter((r) => r.cells.some(Boolean)).map(({ line, cells }) => ({ line, cells, row: Object.fromEntries(keys.map((k, i) => {
     const cell = clean(cells[i] ?? '');
     return [k, NUMERIC.has(k) ? numberOf(cell) : cell];
-  })));
+  })) }));
 }
+
+const table = (lines, name) => tableRows(lines, name).map((r) => r.row);
 
 /** { shots, words, objects, acceptance } from the text of a brief.md; null text gives four empty arrays. */
 export function parseBriefTables(text) {

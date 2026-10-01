@@ -10,6 +10,10 @@ export const FALLBACK = 'sting';
 const STING_MAX_S = 10;
 const LONG_MIN_S = 60;
 
+// A brand launch films a real site with real captures: it needs a URL, and an invented product has none.
+const URL_WORDS = /(https?:\/\/|\bwww\.|\b[a-z0-9-]+\.(?:com|io|ai|app|dev|co|net|org|so)\b)/;
+const INVENTED_WORDS = /\b(invented|fictional|fictitious|imaginary|made[- ]up|fake|hypothetical|placeholder)\b/;
+
 const WORDS = [
   ['reference rebuild', /\b(recreat\w*|rebuild|remake|reference)\b/],
   ['sting', /\b(sting|bumper|ident|logo reveal|intro|outro|title card|lower third|motion graphic|stat hit|teaser)\b/],
@@ -78,7 +82,9 @@ function typeFor(text, length) {
   if (length !== undefined && length > LONG_MIN_S) return { type: 'long form', why: `${length} s is over ${LONG_MIN_S} s` };
   for (const [type, re] of WORDS.slice(1)) {
     const m = re.exec(text);
-    if (m) return { type, why: `the request says "${m[0]}"` };
+    if (!m) continue;
+    if (type === 'brand launch' && INVENTED_WORDS.test(text) && !URL_WORDS.test(text)) return { type: FALLBACK, why: 'the product is invented and has no URL to capture, so the beat sheet, with the launch chain for the beats' };
+    return { type, why: `the request says "${m[0]}"` };
   }
   return null;
 }
