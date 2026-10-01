@@ -1,0 +1,60 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<title>move: light pool</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; z-index: 2; }
+  .pool { position: absolute; left: 0; top: 0; width: calc(var(--u) * 115); aspect-ratio: 1; border-radius: 50%;
+          background: radial-gradient(closest-side,
+            color-mix(in srgb, var(--accent) 62%, transparent) 0%, color-mix(in srgb, var(--accent) 46%, transparent) 22%,
+            color-mix(in srgb, var(--accent) 26%, transparent) 46%, color-mix(in srgb, var(--accent) 10%, transparent) 70%,
+            color-mix(in srgb, var(--accent) 2%, transparent) 90%, transparent 100%); }
+  .matte { position: absolute; inset: 0; opacity: 0.05; mix-blend-mode: screen;
+           background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='9' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='240' height='240' filter='url(%23n)'/></svg>"); }
+  .copy .title { margin: 0; font-size: calc(var(--u) * 17); line-height: 1.04; }
+  .copy .lead { margin: var(--s3) 0 0; max-width: 24em; color: var(--ink); text-wrap: pretty; }
+
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
+  @keyframes rise { to { translate: 0 0; } }
+
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
+</style>
+</head>
+<body>
+<div class="pool" id="pool"></div>
+<div class="matte"></div>
+<main class="copy">
+  <h1 class="title"><span class="mask" style="--i:0"><span>One light,</span></span><span class="mask" style="--i:1"><span>wandering.</span></span></h1>
+  <p class="lead" id="lead">A soft pool drifts over a matte ground on a seeded path.</p>
+</main>
+<script type="module">
+import '/core/engine/page-api.js';
+import { noise1 } from '/core/motion/springs.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+
+const root = document.documentElement;
+root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const lead = document.getElementById('lead');
+lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+
+// One radial gradient on a seeded path: noise1 is a pure function of the seek time and the seed, so frame t never depends on an earlier frame.
+const pool = document.getElementById('pool');
+const RATE = 1.5;                                      // noise steps a second: a new heading about every 0.7 s
+const AMP_X = 0.38, AMP_Y = 0.30;                      // travel as shares of the frame width and height
+vawe.onFrame((t) => {
+  const W = innerWidth, H = innerHeight, d = pool.offsetWidth;
+  const x = W * (0.58 + AMP_X * noise1(t * RATE, 11)) - d / 2;
+  const y = H * (0.45 + AMP_Y * noise1(t * RATE, 23)) - d / 2;
+  pool.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+});
+</script>
+</body>
+</html>
