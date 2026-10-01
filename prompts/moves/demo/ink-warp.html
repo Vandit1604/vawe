@@ -1,0 +1,76 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="signal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<title>move: ink warp</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; width: 56vw; }
+  .copy .title { margin: 0; font-size: calc(var(--u) * 17); line-height: 1.02; }
+  .copy .lead { margin: var(--s3) 0 0; max-width: 24em; color: var(--ink); text-wrap: pretty; }
+
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.12s + var(--i) * 0.14s); }
+  @keyframes rise { to { translate: 0 0; } }
+
+  .w { display: inline-block; opacity: 0; filter: blur(0.14em); translate: 0 0.22em;
+       animation: resolve 0.8s var(--soft) both; animation-delay: calc(0.5s + var(--i) * 0.09s); }
+  @keyframes resolve { 45% { opacity: 1; } to { opacity: 1; filter: blur(0); translate: 0 0; } }
+</style>
+</head>
+<body>
+<main class="copy">
+  <h1 class="title"><span class="mask" style="--i:0"><span>Ink in</span></span><span class="mask" style="--i:1"><span>slow water.</span></span></h1>
+  <p class="lead" id="lead">Marbled ink folds into itself, dimmed behind the copy.</p>
+</main>
+<script type="module">
+import '/core/engine/page-api.js';
+import { shaderField } from '/core/surfaces/shader-field.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
+
+const root = document.documentElement;
+root.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+root.style.setProperty('--soft', curveToLinear(CURVES.expoOut));
+const lead = document.getElementById('lead');
+lead.innerHTML = lead.textContent.split(' ').map((t, i) => `<span class="w" style="--i:${i}">${t}</span>`).join(' ');
+
+const tokens = getComputedStyle(root);
+const rgb = (name) => { const h = tokens.getPropertyValue(name).trim(); return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255); };
+
+// Marbled ink by domain warp: noise that samples a noise. Time moves the warp field, never the sampling grid.
+const frag = `
+uniform vec3 u_ground, u_ink, u_vein;
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7)) + u_seed * 17.0) * 43758.5453); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
+float fbm(vec2 p) {
+  float s = 0.0, a = 0.5;
+  for (int i = 0; i < 4; i++) { s += a * vnoise(p); p = p * 2.03 + 11.7; a *= 0.5; }
+  return s;
+}
+vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }
+void main() {
+  float aspect = u_res.x / u_res.y;
+  vec2 p = gl_FragCoord.xy / u_res.y;
+  float t = u_time * 0.4;
+  vec2 q = vec2(fbm(p * 1.6 + vec2(0.0, t)), fbm(p * 1.6 + vec2(5.2, 1.3 - t)));
+  vec2 r = vec2(fbm(p * 1.6 + 3.0 * q + vec2(1.7, 9.2) + t * 0.7), fbm(p * 1.6 + 3.0 * q + vec2(8.3, 2.8) - t * 0.6));
+  float n = fbm(p * 1.6 + 3.2 * r);
+  vec3 ground = lin(u_ground), ink = lin(u_ink), vein = lin(u_vein);
+  float body = smoothstep(0.35, 0.80, n);
+  float line = 1.0 - smoothstep(0.0, 0.035, abs(n - 0.52));          // thin marbling veins
+  float keep = 1.0 - 0.7 * smoothstep(0.86 * aspect, 0.50 * aspect, p.x);   // the copy sits left: the ink thins behind it
+  vec3 col = ground + ink * 0.42 * body * keep + vein * 0.16 * line * keep * keep;
+  gl_FragColor = vec4(pow(col, vec3(1.0 / 2.2)) + (hash(gl_FragCoord.xy) - 0.5) * 0.012, 1.0);
+}`;
+
+const field = shaderField(frag, { seed: 4, uniforms: { u_ground: rgb('--ground'), u_ink: rgb('--tile-alt'), u_vein: rgb('--accent') } });
+vawe.onFrame((t) => field.draw(t));
+</script>
+</body>
+</html>
