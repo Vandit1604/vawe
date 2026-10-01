@@ -24,3 +24,35 @@ export function readHoldProblems(tracks) {
   }
   return out;
 }
+
+/**
+ * Word tracks for readHoldProblems from the draft's text samples: every run of samples that shows one line
+ * is a track per word, in at the run's first sample minus half a step, out at its last plus half a step. A
+ * word of the brief's Words table that the line holds gives the settle time; without one the run's start stands
+ * in for it, so the hold is the whole time on screen. Pure.
+ */
+export function probeTracks(samples, { step, frameH }, words = []) {
+  const tracks = [];
+  const open = new Map();
+  const close = (key) => {
+    const r = open.get(key);
+    open.delete(key);
+    for (const w of r.text.split(' ')) tracks.push({ text: w, sizeSettled: r.h / frameH, tIn: r.tIn, tSettled: r.tSettled, tOut: r.tOut });
+  };
+  for (const { t, lines } of samples) {
+    const seen = new Set();
+    for (const l of lines) {
+      const text = l.text.replace(/\s+/g, ' ').trim();
+      if (!text || !l.box) continue;
+      seen.add(text);
+      const r = open.get(text) || { text, h: l.box[3], tIn: Math.max(0, t - step / 2) };
+      const spec = words.find((w) => typeof w.settle === 'number' && text.toLowerCase().includes(w.text.toLowerCase()));
+      r.tSettled = Math.max(r.tIn, spec ? spec.settle : r.tIn);
+      r.tOut = t + step / 2;
+      open.set(text, r);
+    }
+    for (const key of [...open.keys()]) if (!seen.has(key)) close(key);
+  }
+  for (const key of [...open.keys()]) close(key);
+  return tracks;
+}

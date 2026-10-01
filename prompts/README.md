@@ -22,7 +22,7 @@ prompt from scratch is [ANATOMY.md](ANATOMY.md). Every template targets the vawe
   (`DEFAULT_GAIN_DB`); a few soft ticks and one swell beat many hits;
 - moves to copy, each with a 1 s clip: [moves/README.md](moves/README.md);
 - `bin/vawe dev <page>` (draft), `bin/vawe ship <page>` (final), `bin/vawe critique <page> --ref <mp4>`
-  (match a reference), `bin/vawe judge` (threshold 7, two fresh runs);
+  (match a reference), `bin/vawe judge` (two fresh runs; it passes only when every axis is 8 or more);
 - helpers in `core/motion/springs.js`: `spring`, `track`, `approach`, `kf`, `springLinear`, `rng`.
 
 ## Index
@@ -53,9 +53,11 @@ only: the templates are our own text in the same shape.
 1. Pick the row. If two fit, the shorter film wins; under 15 s most types are one continuous action.
 2. `bin/vawe new <name> --from prompts/<t>.md` prints the template's questions with their defaults
    and writes `films/<name>/brief.md` with the defaults filled in, each marked
-   `[unanswered: default taken]`. Ask the bank in one message; a skipped answer keeps its default.
+   `[unanswered: default taken]`, and the measured-brief sections (Task, Look, Spec, Acceptance, Gates,
+   Pitfalls, Deliver) with every field it could not answer marked `(guess: change me)`. Ask the bank in one message; a skipped answer keeps its default.
    The agent side of this is the `vawe-brief` skill (`skills/vawe-brief/SKILL.md`; everyone else
    reads `ANATOMY.md`).
-3. Every template stops before code at least once. Honour the stop: the beat grid, the facts list or
-   the SPEC is what the owner reads.
-4. Draft with `bin/vawe dev <page>`, then run `critique-pass.md` as a fresh agent.
+3. Fill the brief's Spec tables before the page (the shape is in [ANATOMY.md](ANATOMY.md)). Never wait for
+   a reply: take the guess marked `(guess: change me)` and go on.
+4. Draft with `bin/vawe dev <page>` until every Acceptance row is green, then run `critique-pass.md` as a
+   fresh agent. The taste rules are in `engine-doctrine/TASTE-CARD-DIGEST.md` and in the lines `dev` prints.

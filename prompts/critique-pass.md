@@ -6,6 +6,8 @@ group: reference
 
 # Critique pass: fresh eyes, default reject, frame-locked
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** a draft exists and the question is "is it good", not "is it valid". Run it as a
 separate agent (`VAWE_AGENT=<name>`) that has not seen the authoring session. The author never
 grades its own film.

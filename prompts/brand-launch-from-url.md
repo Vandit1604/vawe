@@ -1,6 +1,6 @@
 ---
 when: "a real product or site from a URL is the subject and only its own kit and real captures may appear"
-answers: "the six-section launch brief (inputs, direction, structure, build, gotchas, start) targeting one page.html with kit assets"
+answers: "the measured launch brief (task, look, spec, pitfalls, build; shape in prompts/ANATOMY.md) targeting one page.html with kit assets"
 group: reference
 ---
 
@@ -21,21 +21,27 @@ the Questions section and go on. Then run `node scripts/brand/kit.mjs <url> <nam
 assets/brands/<brand>/kit.json with the site's own palette, fonts and favicon. Use nothing else.
 </inputs>
 
-<direction>
-One idea per shot. Empty space. The brand's own accent, once per frame. The brand's own sans, tight
-tracking, no full stops in on-screen text. Real captures only: every screen in the film is a capture
-of the real site or app, cropped, never a placeholder card. One camera language for the whole film.
-Banned: shockwave rings, particle bursts, RGB split, camera shake, lens flares, neon glows, grid
-floors, flashing backgrounds, bouncy easing, a feature the product does not have.
-</direction>
+<task>
+Name the product, who sees the film, the one message in under 12 words, and the spectacle second: the
+one big moment, with 1.5 s of quiet before it.
+</task>
 
-<structure>
-Write the beat list first, with a timestamp per beat, one message per beat, and the real capture that
-proves it. Hook: the promise, word by word, first frame under 12 words. Then one move per beat: the
-hook word becomes the product; a cursor does one real thing; the key output, big; the second
-surface; a stat you can source; the wordmark. The last beat keeps the world moving: no still tail.
-For 20 to 30 s, start from a chain in `prompts/moves/RECIPES.md` (Complete videos), and change two moves.
-</structure>
+<look>
+Ground, ink and accent as hex, taken from kit.json: never improve them. Typeface and weight from the
+kit. The hook's cap height as a percent of frame height; every other line 6% or more. For each real
+capture: its crop, corner radius and shadow in px. Real captures only: every screen is a capture of
+the real site or app, never a placeholder card. One camera language for the whole film.
+</look>
+
+<spec>
+Write the three tables before any code. Shots: one row per beat (the hook, then one move per beat: the
+hook word becomes the product; a cursor does one real thing; the key output, big; the second surface;
+a stat you can source; the wordmark), with the real capture that proves the beat in "the viewer
+notices". Words: every on-screen string with its appear and settle seconds, cap height, position and
+colour. Objects: every capture and cursor with its in, settle and out seconds. The last beat keeps
+the world moving: no still tail. For 20 to 30 s, start from a chain in `prompts/moves/RECIPES.md`
+(Complete videos), keep its `invent` row and design that beat yourself.
+</spec>
 
 <build>
 1. One page: films/<name>/page.html, <meta name="duration" content="<s>">. Relative asset paths.
@@ -51,16 +57,11 @@ For 20 to 30 s, start from a chain in `prompts/moves/RECIPES.md` (Complete video
    cramped, overlapping or unreadable before any motion work.
 </build>
 
-<gotchas>
-The brand's accent on its dark surface may fail contrast (the kit says which pair to use). A capture scaled below 0.6 loses its type; crop instead. Never set
-opacity or filter on a preserve-3d element; fade its wrapper. A feature you did not see on the site is
-a feature you must not show.
-</gotchas>
-
-<start>
-Ask me for the inputs, run the kit, then show me the beat list with a capture named per beat before
-you write any code.
-</start>
+<pitfalls>
+The brand's accent on its dark surface may fail contrast (the kit says which pair to use). A capture
+scaled below 0.6 loses its type; crop instead. Never set opacity or filter on a preserve-3d element;
+fade its wrapper. A feature you did not see on the site is a feature you must not show.
+</pitfalls>
 ```
 
 ## Questions

@@ -9,6 +9,10 @@ group: reference
 A recipe is one proven path, not the film. The direction you picked decides the film, so pick the
 recipe from your direction's family (type-led, object- or product-led, graphic- or colour-led), and change at least two moves to make it yours.
 
+Each recipe has one row that reads `invent: the film's own moment`. Do not copy it: design that beat
+from the brief's own words, product and look, and name its move in the Shots table. A film whose beats
+follow a recipe almost 1:1 gets advice from `dev` (`harness/lib/recipe-echo.mjs`).
+
 Each recipe joins moves from [README.md](README.md). Times are film seconds. The sound column uses
 each move's own `Sound:` line: `<audio data-synth="<voice>" data-at="<s>">`, no `data-gain`. A snippet's
 delays start at 0, so add the beat start to each one; name each beat once (`--beat-2: 1.60s`).
@@ -21,6 +25,7 @@ Measure every rect with the layout at rest, before any `vawe.onFrame` sets a tra
 | 0.00 | [text-as-mask](text-as-mask.md) | the picture fills the frame at 0.05 s; the pull back ends on the name | bloom 0.05 |
 | 1.55 | [color-block-wipe](color-block-wipe.md) | the name rides the brand block; the block covers at 2.21 and leaves shot B, the brand ground | none |
 | 2.45 | [logo-sting](logo-sting.md) | the mark lands as the trailing block clears the centre; the word opens at 2.97 | chime 2.97 |
+| 4.10 | invent: the film's own moment | one small event on the lockup that only this brand's own mark, colour or name can cause | none |
 | 3.20 | [blur-word-cascade](blur-word-cascade.md) | the tagline resolves under the lockup and reads for 1.2 s; the push runs to 5.00 | none |
 
 Why it works: the name is the carrying element (a window, then a rider on the block, then the
@@ -45,6 +50,7 @@ One pulse every 0.48 s (125 bpm): 0.48, 0.96, 1.44, 1.92 and on. Every landing a
 | 1.62 | [slice-shift](slice-shift.md) | the bands tear on the pulse at 1.92; the line waits under them, "Kiln" as its first word | none |
 | 2.40 | [word-swap-slot](word-swap-slot.md) (segs 480/480/480) | "Kiln fires [cups / tiles / yours]": the values land on 2.88, 3.36 and 3.84 | pluck 3.84 |
 | 3.54 | [outline-fill](outline-fill.md), fill only | "yours" is an outline; the accent floods it from the baseline on the pulse at 4.32 | bloom 4.24 |
+| 4.15 | invent: the film's own moment | one rhythm event that belongs to the name's own letters or product, on the pulse | none |
 | 4.40 | [drift-hold](drift-hold.md) | the line drifts to 5.00 | none |
 
 Why it works: the pulse is the thread, so the eye expects each change a beat before it comes. The
@@ -67,6 +73,7 @@ Traps:
 | 0.85 | [crash-zoom](crash-zoom.md) (hit at 1.40) | the camera slams onto the mark tile at 1.53; the tile is 2.6x, in the centre | pluck 1.53 |
 | 2.10 | [grid-tile-flip](grid-tile-flip.md) | the frame is a wall of tiles the size of the zoomed mark; it turns to the name's ground | none |
 | 3.00 | [wordmark-cascade](wordmark-cascade.md) | "tessera" falls onto the rail; the full stop is the mark tile and lands last | droplet 3.55 |
+| 3.95 | invent: the film's own moment | one thing the brand's real work does to the lockup tile that no other studio's work would | none |
 | 4.20 | [drift-hold](drift-hold.md) | the rail run ends at 4.85; the lockup drifts to 5.00 | none |
 
 Why it works: one tile carries the film. It is the source of the wave, the target of the zoom, the
@@ -87,6 +94,7 @@ Traps:
 | 0.00 | [pull-back-reveal](pull-back-reveal.md) (dur 0.8 s) | tight on the product mark in the sidebar of a real capture; pulls back to the whole app | bloom 0.10 |
 | 0.60 | [cursor-click](cursor-click.md) | the cursor presses the one action at 1.68; the done state holds to 2.90 | pluck 1.68 |
 | 2.90 | [ui-strip-away](ui-strip-away.md) | layers leave outward; the same mark travels to the lockup; the word opens at 3.65 | chime 3.65 |
+| 3.95 | invent: the film's own moment | one real thing the product's own UI does on the done state, taken from its captures | none |
 | 4.25 | lockup push, 3.5 percent | the name holds 1.2 s and still moves | none |
 
 Why it works: the mark carries the film, from the first frame (at 9x) to the lockup. The pull back
@@ -106,6 +114,7 @@ Traps:
 | 1.40 | [type-fill-transition](type-fill-transition.md) | the camera dives into the "o" of "report" in the lit row; its ink is shot B's ground at 2.37 | none |
 | 2.37 | [mask-rise](mask-rise.md) | "Ledger reports: 3 hours" rises on the new ground | none |
 | 2.80 | [strikethrough-replace](strikethrough-replace.md) | "3 hours" is struck at 3.06; "3 min" rises from 3.30 and reads by 3.90 | pluck 3.30 |
+| 3.55 | invent: the film's own moment | one change the viewer sees made in the product's own data, not in the claim text | none |
 | 3.90 | [drift-hold](drift-hold.md) | the line drifts to 5.00 | none |
 
 Why it works: one word carries the film. "report" is the typed query, the chosen row, the letter
@@ -128,6 +137,7 @@ Traps:
 | 1.20 | [shape-morph-wipe](shape-morph-wipe.md) | the accent circle grows from 1.60, widens into a card and past the frame by 2.45 | none |
 | 2.00 | [count-up](count-up.md) | on the accent ground, "1.8 s to paid" settles at 2.80 | chime 2.80 |
 | 3.20 | [liquid-wipe](liquid-wipe.md) | the dark ground floods in from the left from 3.45; the name waits in the left third | none |
+| 4.05 | invent: the film's own moment | one moment where the accent does something only this product's checkout can do | none |
 | 4.40 | [drift-hold](drift-hold.md) | the name, its full stop in the accent, drifts to 5.00 | none |
 
 Why it works: the accent is the thread. It is the button, then the check circle, then the ground,
@@ -152,6 +162,7 @@ Traps:
 | 5.60 | [skeleton-reveal](skeleton-reveal.md) | feature 2 resolves 6.20 to 6.80; its accent status dot is the next target | pluck 6.20 |
 | 8.00 | [zoom-through](zoom-through.md) | the camera dives into the dot; the dot's colour is the proof's ground at 9.02 | swell 8.30 (ends 9.02) |
 | 9.10 | [count-up](count-up.md) | the proof number settles at 9.90, chip and sparkline to 10.60 | chime 9.90 |
+| 10.60 | invent: the film's own moment | the one proof moment specific to this product, built from its own number or capture | none |
 | 10.90 | [exit-fast](exit-fast.md) | the number leaves up in 0.22 s | none |
 | 11.10 | [wordmark-cascade](wordmark-cascade.md) | the name falls onto the rail; the accent full stop | none |
 | 12.80 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) from 13.50 | the button pops at 13.10, the arrow leans at 14.00 and 14.40 | droplet 13.25 |
@@ -177,6 +188,7 @@ Traps:
 | 1.90 | [cut-on-motion](cut-on-motion.md) | the full stop leaves the line as the ball; the ground inverts at 2.40 | none |
 | 2.45 | [scale-punch](scale-punch.md) | "One film out" hits; the ball lands as its full stop at 2.67 | pluck 2.65 |
 | 4.00 | [weight-morph](weight-morph.md) (1.1 s) | "out" thickens from 200 to 900 | bloom 4.00 |
+| 4.70 | invent: the film's own moment | one event on the line's own dot or words that follows from what the sentence says | none |
 | 5.10 | [drift-hold](drift-hold.md) | the line holds still; only the ground drifts to 6.00 | none |
 
 Why it works: one dot carries the line (a full stop, then a ball across the cut, then a full stop).
@@ -207,6 +219,7 @@ film. The beat times are a plan: re-time them to the copy's reading time (words 
 | 6.20 | [cursor-click](cursor-click.md) | the press at 7.28 fixes the mess; the accent done state reads to 8.80 | pluck 7.28 |
 | 8.80 | [exit-fast](exit-fast.md) | the card leaves left in 0.22 s | none |
 | 9.10 | [count-up](count-up.md) | "3.2 h saved a week" settles at 9.90 (spectacle); chip and sparkline to 10.60 | chime 9.90 |
+| 11.40 | invent: the film's own moment | the one moment where the fix changes something only this product's users would recognise | none |
 | 11.80 | [logo-wall](logo-wall.md) | lanes land under the settled number from 11.80; the wall drifts to 15.00 | none |
 | 15.00 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | wall and number leave up; the name falls onto the rail at 15.30, full stop at 15.85 | droplet 15.85 |
 | 16.90 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) | the button pops at 17.20, the arrow leans at 18.00 and 18.40; the line drifts to 21.00 | droplet 17.35 |
@@ -235,6 +248,7 @@ Traps:
 | 11.00 | [clip-expand](clip-expand.md), inset | a window opens from the "2.1%" figure: the real report; it reads to 14.10 (quiet) | bloom 11.00 |
 | 14.10 | [success-check](success-check.md) | the press on "Send to team" at 14.30; the circle lands at 15.04 (spectacle); done reads to 16.40 | chime 15.04 |
 | 16.40 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | the window leaves left; the name falls onto the rail at 16.70, its full stop at 17.25 | droplet 17.25 |
+| 17.80 | invent: the film's own moment | one moment in the round trip that uses the product's own data, figure or wording | none |
 | 18.20 | [drift-hold](drift-hold.md) | the lockup drifts to 22.00 | none |
 
 Why it works: a prompt becomes an answer, the answer becomes a deliverable and the deliverable is
@@ -262,6 +276,7 @@ Traps:
 | 11.60 | pan 3, down | station 4 arrives at 12.02; 1.4 s of quiet | pluck 12.02 |
 | 13.40 | [ui-focus-zoom](ui-focus-zoom.md) | the cursor lands on the status at 13.40; the camera scales from 13.45 (spectacle); the status holds to 16.30 | none |
 | 16.40 | [exit-fast](exit-fast.md), [calm-lockup](calm-lockup.md) | the world leaves up in 0.22 s; the brand settles from 16.70, the line at 16.84 | bloom 16.76 |
+| 17.40 | invent: the film's own moment | one moment on the canvas that belongs to the product's own extra feature or surface | none |
 | 18.00 | [drift-hold](drift-hold.md) | the lockup floats to 20.00 | none |
 
 Why it works: one canvas, so four features read as one product and not four slides. The rail and the
@@ -286,6 +301,7 @@ Traps:
 | 8.60 | [exit-fast](exit-fast.md) | the chart leaves down | none |
 | 8.85 | [logo-wall](logo-wall.md) | lanes land under "212 studios" by 9.90; the wall drifts to 13.60 | none |
 | 13.60 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | wall and line leave up; the name falls at 13.85, its full stop at 14.40 | droplet 14.40 |
+| 14.80 | invent: the film's own moment | one proof detail only this product can show: a real customer figure or a real chart event | none |
 | 16.20 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) | the button pops at 16.50, the arrow leans at 17.30 and 17.70; the line drifts to 20.00 | droplet 16.65 |
 
 Why it works: the number is the claim, the chart is its proof and the wall says who counts it. The
@@ -310,6 +326,7 @@ Traps:
 | 11.40 | [exit-fast](exit-fast.md) | the line leaves left in 0.22 s | none |
 | 11.60 | [scale-punch](scale-punch.md) | "One page in." is already on the ground; "film" of "One film out." hits at 12.30 (spectacle), full stop at 12.52; it reads to 15.40 | pluck 12.50 |
 | 15.40 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | the line leaves up; the name falls at 15.70, its full stop at 16.25 | droplet 16.25 |
+| 17.20 | invent: the film's own moment | one moment where the words of the manifesto do what they say | none |
 | 17.60 | [drift-hold](drift-hold.md) | the lockup drifts to 20.00 | none |
 
 Why it works: one argument in four beats (the problem, the values, the claim, the name), and each beat
@@ -334,6 +351,7 @@ Traps:
 | 6.40 | [exit-fast](exit-fast.md), [count-up](count-up.md) | the app leaves left; "1.8 s to paid" settles at 7.50; chip to 8.25; it reads to 10.20 | chime 7.50 |
 | 10.20 | [exit-fast](exit-fast.md), [mark-trace](mark-trace.md) | the number leaves up; the line draws the mark from 10.50, thickens at 11.45 (spectacle); the mark reads to 12.90 | droplet 11.45 |
 | 12.90 | [logo-sting](logo-sting.md), word half only | the word opens from behind the mark at 13.42; the lockup re-centres by 14.30; the push runs to 20.00 | chime 13.42 |
+| 14.45 | invent: the film's own moment | one moment where the mark does something that only this brand's own shape allows | none |
 | 14.60 | [blur-word-cascade](blur-word-cascade.md) | the tagline resolves inside the lockup's `.drift` and reads from 15.90 to 20.00 | none |
 
 Why it works: the film shows the product do one real thing, proves it with one number, then the mark
