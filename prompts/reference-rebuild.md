@@ -1,10 +1,10 @@
 ---
 when: "a reference mp4 must be matched, not merely echoed"
-answers: "the three prompts: frame-by-frame SPEC.md, KEEP/CHANGE, the rebuild loop on bin/vawe critique <page> --ref <mp4>"
+answers: "the three prompts: the measured Task, Look and Spec of the reference, KEEP/SWAP, the rebuild loop on bin/vawe critique <page> --ref <mp4>"
 group: reference
 ---
 
-# Reference rebuild: frame study, KEEP/CHANGE, rebuild
+# Reference rebuild: measurements, KEEP/SWAP, rebuild
 
 **Use when** a reference film exists and the deliverable must match it: its light, its pacing, its
 type, its motion curves. Route 1 in `engine-doctrine/CRAFT/ROUTING.md`. Not for "inspired by";
@@ -14,50 +14,66 @@ that is the director's brief.
 
 ## The template, in three prompts
 
-### Prompt 1: the SPEC
+Each prompt fills sections of films/<name>/brief.md (`prompts/ANATOMY.md`). Measure what a program can
+measure; use your eyes for the rest.
+
+### Prompt 1: the measurements
 
 ```
-Reference: quality/refs/<ref>/source.mp4. Do not write any code yet.
+<task>
+Reference: quality/refs/<ref>/source.mp4. One line: what it is, who sees our film, the message, the
+spectacle second. Do not write page code yet.
+</task>
+
+<look>
 1. node harness/media/see.mjs quality/refs/<ref>/source.mp4. Read index.md and every grid it wrote.
 2. node harness/dev/ref-cutlist.mjs REF=<ref> for the measured cut list. Never eyeball cuts off a sheet.
-3. Write quality/refs/<ref>/SPEC.md, frame by frame at every cut and every hold:
-   - t (s), the frame's job in five words, the light map (bg colour, key direction, contrast band),
-     every on-screen string quoted exactly, the type (size as a fraction of the frame height, weight,
-     tracking), the position of each element as a fraction of the frame, the camera (static, push,
-     whip), and the motion curve of the one thing that moves (name it from core/motion/motion.js's
-     EASINGS; fit, do not guess).
-   - Every entrance and exit: duration in ms, direction, and whether it accelerates. Exits should
-     run shorter than entrances; write down when the reference disagrees.
+3. Measure, then write as numbers: ground, ink and accent as hex; the typeface and weight; cap height
+   as a percent of frame height; the surface recipe (shadow and glass values).
 4. Measure the approach rate of each settle: what share of the remaining distance closes per frame.
    Real UI motion sits at 12 to 19 percent. Write the number per move.
 5. Pull five stills at the five moments that define the look. Name them.
-Stop and show me SPEC.md.
+</look>
+
+<spec>
+Fill the Shots, Words and Objects tables of brief.md, at every cut and every hold. Shots: start and end
+in seconds, what the viewer notices, the move in and out (name it from core/motion/motion.js EASINGS;
+fit, do not guess), the camera. Words: every on-screen string quoted exactly, with appear and settle
+seconds, cap height and position as a percent of the frame from its top left, weight, colour. Objects:
+every moving element with its in, settle and out seconds. Exits should run shorter than entrances; write
+down when the reference disagrees.
+</spec>
 ```
 
-### Prompt 2: KEEP / CHANGE
+### Prompt 2: keep and swap
 
 ```
-Read SPEC.md. For every line, write KEEP or CHANGE and one reason.
+<swap>
+Read the Spec. For every line, write KEEP or SWAP and one reason.
 KEEP: anything the reference does that we want exactly (light, pacing, curves, type scale).
-CHANGE: the content (our strings, our captures, our brand from its kit), anything the
-reference does that breaks a house rule (an em dash on screen, a hook over 12 words, an exit slower
-than its entrance, two adjacent transitions in one direction), and anything measured off the grid.
-Nothing is silent: an unmarked line is a bug. Stop and show me the KEEP/CHANGE list.
+SWAP: the content (our strings, our captures, our brand from its kit), anything the reference does
+that breaks a house rule (an em dash on screen, a hook over 12 words, an exit slower than its entrance,
+two adjacent transitions in one direction), and anything measured off the grid.
+Nothing is silent: an unmarked line is a bug.
+</swap>
 ```
 
 ### Prompt 3: the rebuild
 
 ```
-Build films/<name>/page.html from SPEC.md and the KEEP/CHANGE list. Match the light map first, then
+<build>
+Build films/<name>/page.html from the Spec and the KEEP/SWAP table. Match the light map first, then
 the camera and depth of field, then the type, then the detail (house order for recreations).
 Every KEEP line is a number in the page: a @keyframes stop, an element.animate keyframe or a
 [[f, v]] table in seek(t). Use approach(f, from, to, k) from core/motion/springs.js with the k you
 measured. Then:
   bin/vawe critique films/<name>/page.html --ref quality/refs/<ref>/source.mp4
 It compares the draft to the reference at the same timestamps and prints a match score. Loop until
-combined >= 0.70. Then run bin/vawe coverage out/<name>.mp4 --ref <ref.mp4> and fix the seconds it lists
-below its floor. Then stop and ask for the critique pass (prompts/critique-pass.md, frame-locked).
-Three passes without progress: stop and report, do not keep going.
+combined >= 0.70 and every Acceptance row is green. Then run bin/vawe coverage out/<name>.mp4 --ref
+<ref.mp4> and fix the seconds it lists below its floor. Then run the critique pass
+(prompts/critique-pass.md, frame-locked) as a fresh agent.
+Three passes without progress: report what blocks you and go on with the next row.
+</build>
 ```
 
 ## Questions
@@ -66,8 +82,8 @@ Ask in this order; the first changes the film most. A skipped question takes its
 
 1. **Reference**: the mp4 to match? Default: `quality/refs/kinetic-promo/source.mp4`. Why: the SPEC comes from it, frame by frame.
 2. **Privacy**: does the film stay private with its reference? Default: private; references are in-house and never published. Why: it decides where the film lives (`films/recreations/` is ignored by git).
-3. **Content**: the strings and captures that replace the reference's? Default: vawe's own strings and captures from `site/app/`. Why: every CHANGE line needs its replacement before the rebuild.
-4. **Kit**: the brand kit? Default: `themes/vawe.css`. Why: every colour on a CHANGE line comes from it.
+3. **Content**: the strings and captures that replace the reference's? Default: vawe's own strings and captures from `site/app/`. Why: every SWAP line needs its replacement before the rebuild.
+4. **Kit**: the brand kit? Default: `themes/vawe.css`. Why: every colour on a SWAP line comes from it.
 5. **Threshold**: the match score that ends the loop? Default: 0.70 combined, then the frame-locked critique. Why: three passes without progress stop the loop; a number says when it is done.
 
 ## Gotchas

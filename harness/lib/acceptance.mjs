@@ -1,0 +1,141 @@
+// The brief's ACCEPTANCE table with a measured value on every row it can measure. Pure: the measures come
+// from harness/media/acceptance-run.mjs, the brief's targets from brief-tables.mjs, and each number is
+// the one its own module already computes (still-limit, sheet-tiles, text-contrast, text-collision,
+// read-hold, motion-lint, peak-limit, smoothness, spec-conformance).
+import { APPEAR_TOL_S, LAYOUT_TOL_PCT, checkLine } from './spec-conformance.mjs';
+import { RULES } from './draft-check.mjs';
+import { PEAK_DBFS } from './peak-limit.mjs';
+import { DRAFT_MIN_RATIO } from './text-contrast.mjs';
+
+export const HISTORY_KEEP = 10;
+const SHOW = 3;
+const { lufsLow: LUFS_LOW, lufsHigh: LUFS_HIGH } = RULES;
+
+export const DEFAULT_ROWS = [
+  ['frozen runs of 3+ frames inside a shot', '0'],
+  ['jerky steps', 'under 5'],
+  ['jumps not at a declared cut', '0'],
+  ['still windows over 0.5 s outside a declared hold', '0'],
+  ['near-identical tail tiles', '4 or fewer'],
+  ['text cap height', '6% or more'],
+  ['text contrast', `${DRAFT_MIN_RATIO}:1 or more`],
+  ['text collisions', '0'],
+  ['read hold per line', 'max(1.2 s, words/3 s) or more'],
+  ['exits shorter than entrances', 'all'],
+  ['word appear time vs spec', `within ${APPEAR_TOL_S} s`],
+  ['word cap height and position vs spec', `within ${LAYOUT_TOL_PCT}% of frame`],
+  ['cuts vs spec', 'within 1 frame'],
+  ['loudness', `${LUFS_LOW} to ${LUFS_HIGH} LUFS`],
+  ['peak', `${PEAK_DBFS} dBFS or lower`],
+  ['judge: each storyboard frame as beautiful as the anchor, full size', 'YES'],
+].map(([metric, target]) => ({ metric, target }));
+
+const OBJECTS_ROW = { metric: 'objects in/settle/out vs spec', target: `within ${APPEAR_TOL_S} s` };
+
+const num = '(-?\\d+(?:\\.\\d+)?)';
+const unit = '(?::1|%| s| dBFS| LUFS)?';
+
+/** A target's test as a function of the measured number, or null when the text holds no number rule. */
+export function targetTest(text) {
+  const t = String(text).replace(/\(.*?\)/g, '').trim();
+  let m;
+  if ((m = new RegExp(`${num}\\s*to\\s*${num}`).exec(t))) return (v) => v >= Number(m[1]) && v <= Number(m[2]);
+  if ((m = new RegExp(`under\\s+${num}`).exec(t))) return (v) => v < Number(m[1]);
+  if ((m = new RegExp(`${num}${unit}\\s+or\\s+(?:fewer|lower|less)`).exec(t))) return (v) => v <= Number(m[1]);
+  if ((m = new RegExp(`${num}${unit}\\s+or\\s+(?:more|higher|greater)`).exec(t))) return (v) => v >= Number(m[1]);
+  if ((m = new RegExp(`within\\s+${num}`).exec(t))) return (v) => v <= Number(m[1]) + 1e-9;
+  if ((m = /^(\d+)$/.exec(t))) return (v) => v <= Number(m[1]);
+  return null;
+}
+
+const skip = (reason) => ({ skip: reason });
+const done = (ok, measured, detail = []) => ({ ok, measured, detail });
+
+function countRow(list, pass, describe, fix) {
+  if (!list) return skip('the draft video was not read');
+  const detail = list.slice(0, SHOW).map(describe);
+  return done(pass(list.length), String(list.length), detail.length ? [...detail, fix] : []);
+}
+
+function deviationRow(checks, pass, none, fmt, fix) {
+  if (!checks || !checks.length) return skip(none);
+  const worst = Math.max(...checks.map((c) => c.dev));
+  const off = checks.filter((c) => !pass(c.dev));
+  return done(!off.length, worst === Infinity ? 'not found' : fmt(worst), off.length ? [...off.slice(0, SHOW).map(checkLine), fix] : []);
+}
+
+// Each row reads its measure from `m`, a plain object the run fills; a key left out is "not measured".
+const ROWS = {
+  'frozen runs of 3+ frames inside a shot': (m, pass) => countRow(m.smooth?.frozen, pass, (f) => `${f.t.toFixed(2)} s: ${f.frames} frames still between moves`, 'keep the motion going through those frames, or finish the move before the stop'),
+  'jerky steps': (m, pass) => countRow(m.smooth?.jerky, pass, (j) => `${j.t.toFixed(2)} s: speed changes ${j.ratio.toFixed(1)}x in one frame`, 'ease the start and the stop of the move instead of a sudden speed change'),
+  'jumps not at a declared cut': (m, pass) => countRow(m.smooth?.jumps, pass, (j) => `${j.t.toFixed(2)} s: the picture jumps (${j.mag.toFixed(0)} of 255) with no cut declared`, 'move the cut to a Shots boundary, or soften the jump'),
+  'still windows over 0.5 s outside a declared hold': (m, pass) => countRow(m.stills, pass, (r) => `${r.a}-${r.b} s held still`, 'keep one thing moving, or declare the hold with dead-air@a-b and a _why'),
+  'near-identical tail tiles': (m, pass) => (m.tail == null ? skip('the draft video was not read') : done(pass(m.tail), String(m.tail), m.tail ? ['the last tiles of the judge sheet barely change: add a move near the end'] : [])),
+  'text cap height': (m, pass) => {
+    if (!m.caps) return skip('no text probe');
+    if (!m.caps.length) return done(true, 'no held text');
+    const low = m.caps.reduce((a, c) => (c.cap < a.cap ? c : a));
+    return done(pass(low.cap), `${low.cap.toFixed(1)}%`, pass(low.cap) ? [] : m.caps.filter((c) => !pass(c.cap)).slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%`).concat('raise the font size until the cap height reaches the target'));
+  },
+  'text contrast': (m, pass) => {
+    if (!m.contrast) return skip('no pixels sampled behind the text');
+    const low = m.contrast.reduce((a, c) => Math.min(a, c.ratio), Infinity);
+    return done(m.contrast.every((c) => pass(c.ratio)), m.contrast.length ? `${low.toFixed(1)}:1` : 'all pass', m.contrast.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(2)} s: ${c.ratio.toFixed(1)}:1`));
+  },
+  'text collisions': (m, pass) => countRow(m.collisions, pass, (c) => `"${c.a}" and "${c.b}" overlap at ${c.t.toFixed(2)} s`, 'move one, or time one out before the other comes in'),
+  'read hold per line': (m) => (m.readHold ? done(!m.readHold.length, m.readHold.length ? `${m.readHold.length} line(s) short` : 'all long enough', m.readHold.slice(0, SHOW).map((p) => `"${p.text.slice(0, 40)}" holds ${p.hold.toFixed(2)} s, needs ${p.need.toFixed(2)} s`)) : skip('no text probe')),
+  'exits shorter than entrances': (m) => (m.exits ? done(!m.exits.length, m.exits.length ? `${m.exits.length} too long` : 'all', m.exits.slice(0, SHOW).map((e) => `${e.at.toFixed(2)} s: ${e.what}`)) : skip('no motion probe')),
+  'word appear time vs spec': (m, pass) => deviationRow(m.appear, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the word to its appear time in the Words table, or change the table'),
+  'word cap height and position vs spec': (m, pass) => deviationRow(m.layout, pass, 'no spec', (d) => `${d.toFixed(1)}%`, 'set the font size and box to the Words table, or change the table'),
+  'cuts vs spec': (m, pass) => deviationRow(m.cuts, pass, m.hasShots ? 'no hard cut near a shot start' : 'no spec', (d) => `${d.toFixed(1)} frames`, 'land the cut on the Shots boundary, or change the table'),
+  'objects in/settle/out vs spec': (m, pass) => deviationRow(m.objects, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the object to its Objects times, or change the table'),
+  loudness: (m, pass) => (m.lufs == null ? skip('no audio in the video') : done(pass(m.lufs), `${m.lufs.toFixed(1)} LUFS`, pass(m.lufs) ? [] : [m.lufs < LUFS_LOW ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues'])),
+  peak: (m, pass) => (m.peak == null ? skip('no audio in the video') : done(pass(m.peak), `${m.peak.toFixed(1)} dBFS`, pass(m.peak) ? [] : [`lower data-gain on the loudest cue by ${Math.ceil(m.peak - PEAK_DBFS)} dB`])),
+  'judge: each storyboard frame as beautiful as the anchor, full size': (m) => (m.judge ? done(m.judge.yes === m.judge.total, `${m.judge.yes} of ${m.judge.total} YES`, m.judge.fixes.slice(0, SHOW)) : skip('not run')),
+};
+
+const DEFAULT_TEST = new Map(DEFAULT_ROWS.map((r) => [r.metric, targetTest(r.target)]));
+
+const read = (row, m, carried) => {
+  const measure = ROWS[row.metric];
+  if (!measure) return skip('no measure for this metric');
+  const pass = targetTest(row.target) ?? DEFAULT_TEST.get(row.metric) ?? (() => true);
+  const out = measure(m, pass);
+  if (out.skip && carried?.status && carried.status !== 'not measured') return { ok: carried.status === 'ok', measured: `${carried.measured} (draft)`, detail: carried.detail ?? [] };
+  return out;
+};
+
+/**
+ * The table rows: { metric, target, status: 'ok' | 'advice' | 'not measured', measured, detail }. `brief` is the
+ * parsed Acceptance rows (empty: the defaults), `m` the measures, `objects` whether the brief has an Objects table,
+ * `carry` the rows of an earlier run, used where this run could not measure a row. Pure.
+ */
+export function buildRows(brief, m, { objects = false, carry = [] } = {}) {
+  const rows = brief.length ? brief : DEFAULT_ROWS;
+  const all = objects && !rows.some((r) => r.metric === OBJECTS_ROW.metric) ? [...rows, OBJECTS_ROW] : rows;
+  return all.map((row) => {
+    const out = read(row, m, carry.find((c) => c.metric === row.metric));
+    if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: `not measured: ${out.skip}`, detail: [] };
+    return { metric: row.metric, target: row.target, status: out.ok ? 'ok' : 'advice', measured: out.measured, detail: out.detail ?? [] };
+  });
+}
+
+const greens = (rows) => rows.filter((r) => r.status === 'ok').length;
+
+/** The history entry for one run, and the file with it appended (the last HISTORY_KEEP kept). Pure. */
+export function withHistory(file, rows, { stage, caps = null, at }) {
+  const entry = { at, stage, green: greens(rows), total: rows.length, unmeasured: rows.filter((r) => r.status === 'not measured').length, rows, ...(caps ? { caps } : {}) };
+  const past = file?.history ?? [];
+  return { file: { history: [...past, entry].slice(-HISTORY_KEEP) }, entry, was: past.length ? past[past.length - 1].green : null };
+}
+
+/** Only the rows that are not green in full, then the one-line trend. */
+export function tableLines(rows, was = null) {
+  const lines = rows.filter((r) => r.status !== 'ok').flatMap((r) => [`  ${r.metric} | ${r.target} | ${r.measured}`, ...r.detail.map((d) => `      ${d}`)]);
+  const unmeasured = rows.filter((r) => r.status === 'not measured').length;
+  lines.push(`acceptance: ${greens(rows)} of ${rows.length} green${unmeasured ? `, ${unmeasured} not measured` : ''}${was === null ? '' : ` (was ${was})`}`);
+  return lines;
+}
+
+/** True when every measured row is green. A row that could not be measured does not count against it. Pure. */
+export const allMeasuredGreen = (rows) => rows.every((r) => r.status !== 'advice');

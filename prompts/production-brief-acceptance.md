@@ -6,6 +6,8 @@ group: reference
 
 # Production brief with acceptance gates
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** the film is for a client, a launch, or a claim that must be right, and someone other
 than the author signs it off. It is the paperwork that a prompt alone skips: inputs and rights,
 what must stay exact, and three gates with a named reviewer. Fill it before the storyboard.

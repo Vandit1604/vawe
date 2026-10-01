@@ -6,6 +6,8 @@ group: reference
 
 # Interactive lab, then a scripted capture
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** the subject is a mechanism (a lens, an engine, a queue, a renderer) and the film is
 the explorable model of it, driven through a scripted path. Two of the ten most bookmarked cases in
 awesome-ai-motion are this: a camera-focus lab and a rocket engine you take apart. The film is a

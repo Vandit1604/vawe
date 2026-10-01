@@ -28,7 +28,7 @@ One row per job, best move first. Every built move is in this table.
 | open on a detail, answer with the whole | [pull-back-reveal](pull-back-reveal.md) |
 | open on the brand in under 2 s | [logo-sting](logo-sting.md) |
 | arrive by flying into a scene | [parallax-dive](parallax-dive.md) |
-| land a title or wordmark, soft | [tracking-collapse](tracking-collapse.md), [mask-rise](mask-rise.md), [blur-word-cascade](blur-word-cascade.md) |
+| land a title or wordmark, soft | [tracking-collapse](tracking-collapse.md), [mask-rise](mask-rise.md), [blur-word-cascade](blur-word-cascade.md), [liquid-displace](liquid-displace.md) |
 | type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
 | land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
@@ -51,7 +51,7 @@ One row per job, best move first. Every built move is in this table.
 | show an edit and its result in one frame | [panel-live-sync](panel-live-sync.md) |
 | prove a number | [count-up](count-up.md), [chart-build](chart-build.md) |
 | prove a change with a picture | [before-after-wipe](before-after-wipe.md) |
-| end on the brand | [wordmark-cascade](wordmark-cascade.md), [logo-sting](logo-sting.md), [mark-trace](mark-trace.md) |
+| end on the brand | [wordmark-cascade](wordmark-cascade.md), [logo-sting](logo-sting.md), [mark-trace](mark-trace.md), [shape-trace-morph](shape-trace-morph.md) |
 | end quietly | [calm-lockup](calm-lockup.md), [thanks-sweep](thanks-sweep.md) |
 | end on an action | [cta-pop](cta-pop.md), [cta-morph-press](cta-morph-press.md) |
 | hand the product to the brand | [ui-strip-away](ui-strip-away.md) |
@@ -60,7 +60,7 @@ One row per job, best move first. Every built move is in this table.
 | show the product works with other tools | [integration-hub](integration-hub.md) |
 | make many things read as one gesture | [grid-stagger-wave](grid-stagger-wave.md) |
 | tour several features in one space | [pan-stations](pan-stations.md) |
-| hit one detail on a beat | [crash-zoom](crash-zoom.md) |
+| hit one detail on a beat | [crash-zoom](crash-zoom.md), [echo-trail](echo-trail.md) |
 | replace a line with the answer, by impact | [ticker-takeover](ticker-takeover.md) |
 | say it works for everyone while the brand stays still | [anchor-cycle](anchor-cycle.md) |
 | name the person on screen | [lower-third](lower-third.md) |

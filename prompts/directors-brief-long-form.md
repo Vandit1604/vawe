@@ -6,6 +6,8 @@ group: reference
 
 # Director's brief for long form: chapters, sessions, one guide for every subagent
 
+Brief shape: `bin/vawe new` writes Task, Look, Spec and Acceptance sections with numbers into brief.md; fill them as `prompts/ANATOMY.md` says.
+
 **Use when** the film runs over about 60 seconds, or it will not fit one session, or more than one
 agent will paint it. A music video, a documentary, a history film, a multi-part explainer.
 
