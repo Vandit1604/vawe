@@ -17,15 +17,14 @@
 <h1>Your first film<br>is one page away.</h1>
 <div class="btn primary cta"><span>Start free</span><svg class="icon" viewBox="0 0 24 24"><path class="arrow" d="M4 12 H19 M13 6 L19 12 L13 18"/></svg></div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-const pop = curveToLinear(CURVES.overshoot), settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 const cta = q('.cta');
 // the pill grows out of the headline's left edge (transform-origin 0 50%), not from the centre of nowhere
-cta.animate([{ scale: '0.86', translate: '0 3vh' }, { scale: '1', translate: '0 0' }], { duration: 650, delay: 300, easing: pop, fill: 'both' });
+cta.animate([{ scale: '0.86', translate: '0 3vh' }, { scale: '1', translate: '0 0' }], { duration: 650, delay: 300, easing: EASE.pop, fill: 'both' });
 cta.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 100, delay: 300, easing: 'linear', fill: 'both' });
 // after it lands, the arrow leans right and returns: the button is inviting a click and is never still
-[1200, 1600].forEach((at) => q('.arrow').animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }], { duration: 380, delay: at, easing: settle, fill: 'both' }));
+[1200, 1600].forEach((at) => q('.arrow').animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }], { duration: 380, delay: at, easing: EASE.land, fill: 'both' }));
 </script>
 </body>
 </html>

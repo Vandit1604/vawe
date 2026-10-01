@@ -33,8 +33,8 @@
   <div class="still"><img class="photo" src="/prompts/moves/demo/assets/photos/harbour.jpg"><span>00:14 / 01:02</span></div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 </body>
 </html>

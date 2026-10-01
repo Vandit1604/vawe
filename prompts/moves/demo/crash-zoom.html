@@ -39,7 +39,7 @@
 <div id="layers"></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { CURVES } from '/core/motion/springs.js';
+import { easeFn } from '/core/motion/presets.js';
 import { mark } from '/prompts/moves/demo/assets/logos.js';
 document.getElementById('world').content.querySelector('.mk').outerHTML = mark('relay');
 const W = innerWidth, H = innerHeight, N = 16, clamp = (u) => Math.min(1, Math.max(0, u));
@@ -53,13 +53,13 @@ const layers = Array.from({ length: N }, (_, j) => {
 });
 const r = layers[0].querySelector('.hit b').getBoundingClientRect();
 const target = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
-const HIT = 0.55, PUSH = 0.13, S = 2.6, OVER = 1.05, RECOIL = 0.32;   // the beat (s), push (s), rest scale, overshoot, recoil (s)
+const land = easeFn('land'), HIT = 0.55, PUSH = 0.13, S = 2.6, OVER = 1.05, RECOIL = 0.32;   // the beat (s), push (s), rest scale, overshoot, recoil (s)
 // ease-in push (accelerates into the hit), then a short recoil from 5 percent past the rest scale, then a slow creep
 const scaleAt = (t) => {
   if (t < HIT) return 1 + 0.02 * t;
   const u = clamp((t - HIT) / PUSH);
   if (u < 1) return 1.011 + (S * OVER - 1.011) * u * u * u;
-  const v = CURVES.expoOut(clamp((t - HIT - PUSH) / RECOIL));
+  const v = land(clamp((t - HIT - PUSH) / RECOIL));
   return S * OVER + (S - S * OVER) * v + 0.08 * Math.max(0, t - HIT - PUSH - RECOIL);
 };
 vawe.onFrame((t) => {

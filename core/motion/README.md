@@ -83,7 +83,7 @@ two handles that meet there. The renderer seeks it like any Web Animation.
 keys(card, 'translate', [[0.2, '0 80px', { out: 'fling' }], [0.9, '0 0', { in: 'hang' }], [2.4, '0 0', 'easyEase'], [3.0, '0 -40px']]);
 ```
 
-Use `easing: EASE.land` on a plain `el.animate` for one segment. Never `ease`, `ease-in-out` or
+Use `easing: EASE.land` on a plain `el.animate` for one segment. In per-frame code (`vawe.onFrame`, `window.seek`) use `easeFn('land')(u)`. Never `ease`, `ease-in-out` or
 `linear` on a move over 0.3 s: the motion lint says which `EASE` name to use.
 
 ## 1. CSS and WAAPI: a spring as an easing
@@ -128,7 +128,7 @@ const [r, g, b] = kf(f, TINT);
 - `indicator(t, stops, width)`: `{left, right}` for a moving highlight; the leading edge is stiffer.
 - `swapAlpha(t, tIn, tOut)`: text in a morphing box enters after the morph starts, leaves before the next.
 - `curveToLinear(fn)` turns any curve into an exact CSS `linear()` easing; `CURVES` holds `expoOut`, `spring`, `overshoot`.
-  It returns a string for `easing:`, so calling it in `vawe.onFrame` throws; there call `CURVES.expoOut(p)`.
+  It returns a string for `easing:`, so calling it in `vawe.onFrame` throws; there call `easeFn('land')(p)`, the same `EASE` name as a function.
 - `rng(seed)` mulberry32; `noise1(x, seed)` smooth noise in [-1, 1] for drift; `loopT(t, dur)` wraps t.
 
 ## Render it

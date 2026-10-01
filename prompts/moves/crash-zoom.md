@@ -10,14 +10,14 @@ vanish the frame the camera stops. Clip: [crash-zoom.mp4](crash-zoom.mp4). Demo:
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
 const W = innerWidth, H = innerHeight, N = 16, clamp = (u) => Math.min(1, Math.max(0, u));
-const HIT = 0.55, PUSH = 0.13, S = 2.6, OVER = 1.05, RECOIL = 0.32;    // beat (s), push (s), rest scale, overshoot, recoil (s)
+const land = easeFn('land'), HIT = 0.55, PUSH = 0.13, S = 2.6, OVER = 1.05, RECOIL = 0.32;    // beat (s), push (s), rest scale, overshoot, recoil (s)
 const scaleAt = (t) => {
   if (t < HIT) return 1 + 0.02 * t;                                     // a slow creep while it holds wide
   const u = clamp((t - HIT) / PUSH);
   if (u < 1) return 1.011 + (S * OVER - 1.011) * u * u * u;
-  const v = CURVES.expoOut(clamp((t - HIT - PUSH) / RECOIL));
+  const v = land(clamp((t - HIT - PUSH) / RECOIL));
   return S * OVER + (S - S * OVER) * v + 0.08 * Math.max(0, t - HIT - PUSH - RECOIL);
 };
 vawe.onFrame((t) => {

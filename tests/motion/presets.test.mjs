@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys } from '../../core/motion/presets.js';
+import { easeFn, BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys } from '../../core/motion/presets.js';
 import { handleCurve, HANDLE_REGISTRY } from '../../core/motion/motion.js';
 
 function fakeEl() {
@@ -154,4 +154,11 @@ test('keys: no handles is a straight segment; bad tables throw', () => {
   assert.equal(keysSpec('x', [[0, 0], [1, 1]]).keyframes[0].easing, 'linear');
   assert.throws(() => keysSpec('x', [[0, 0]]), /two keys/);
   assert.throws(() => keysSpec('x', [[1, 0], [1, 1]]), /increase/);
+});
+
+test('easeFn samples a named ease, and pop passes its mark', () => {
+  assert.equal(easeFn('land')(0), 0);
+  assert.equal(easeFn('land')(1), 1);
+  assert.ok(Math.max(...Array.from({ length: 101 }, (_, i) => easeFn('pop')(i / 100))) > 1.1);
+  assert.throws(() => easeFn('nope'), /unknown ease/);
 });

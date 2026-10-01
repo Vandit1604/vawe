@@ -44,28 +44,27 @@
 <div class="cur"><div class="x"><div class="y"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div></div></div>
 <script type="module">
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const settle = curveToLinear(CURVES.expoOut), smooth = curveToLinear((u) => u * u * (3 - 2 * u)), leave = curveToLinear((u) => u * u * u);
 const W = innerWidth, H = innerHeight, b = q('.btn').getBoundingClientRect();
 const from = { x: W * 0.16, y: H * 0.9 }, to = { x: b.left + b.width * 0.86, y: b.top + b.height * 0.72 };
 const at = { go: 200, dur: 760, press: 1080, release: 1190 };
 
 // x settles on expoOut while y follows a smoothstep, so the path bows like a hand, not a straight rail
-q('.x').animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: at.dur, delay: at.go, easing: settle, fill: 'both' });
-q('.y').animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: at.dur, delay: at.go, easing: smooth, fill: 'both' });
+q('.x').animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: at.dur, delay: at.go, easing: EASE.land, fill: 'both' });
+q('.y').animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: at.dur, delay: at.go, easing: EASE.settle, fill: 'both' });
 // hover as the cursor arrives, then the press: the cursor dips 14 percent, the button dips 3 percent and turns accent
 q('.btn').animate([{ background: css('--raised') }, { background: css('--hover') }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
-q('.cur svg').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: at.press, easing: settle, fill: 'both' });
-q('.btn').animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: at.press, easing: settle, fill: 'both' });
+q('.cur svg').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: at.press, easing: EASE.land, fill: 'both' });
+q('.btn').animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: at.press, easing: EASE.land, fill: 'both' });
 q('.btn').animate([{ background: css('--hover') }, { background: css('--accent') }], { duration: 120, delay: at.press, easing: 'linear', fill: 'forwards' });
 // the result: the label rolls up and the confirmed state rolls in
-q('.idle').animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: at.release, easing: settle, fill: 'both' });
-q('.done').animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.release + 40, easing: settle, fill: 'both' });
+q('.idle').animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: at.release, easing: EASE.launch, fill: 'both' });
+q('.done').animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.release + 40, easing: EASE.land, fill: 'both' });
 // the cursor leaves faster than it came, accelerating out of the frame
-q('.x').animate([{ translate: `${to.x}px 0` }, { translate: `${W * 1.06}px 0` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });
-q('.y').animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${H * 0.86}px` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });
+q('.x').animate([{ translate: `${to.x}px 0` }, { translate: `${W * 1.06}px 0` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
+q('.y').animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${H * 0.86}px` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
 </script>
 </body>
 </html>

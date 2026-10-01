@@ -9,20 +9,19 @@ state. Clip: [cursor-click.mp4](cursor-click.mp4). Demo: [demo/cursor-click.html
 <div class="btn"><span class="l idle">Export PDF</span><span class="l done">Exported</span></div>
 <div class="cur"><div class="x"><div class="y"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div></div></div>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), smooth = curveToLinear((u) => u * u * (3 - 2 * u)), leave = curveToLinear((u) => u * u * u);
+import { EASE } from '../../core/motion/presets.js';
 const b = btn.getBoundingClientRect();
 const from = { x: innerWidth * 0.16, y: innerHeight * 0.9 }, to = { x: b.left + b.width * 0.86, y: b.top + b.height * 0.72 };
-x.animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: 760, delay: 200, easing: settle, fill: 'both' });
-y.animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: 760, delay: 200, easing: smooth, fill: 'both' });
+x.animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: 760, delay: 200, easing: EASE.land, fill: 'both' });
+y.animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: 760, delay: 200, easing: EASE.settle, fill: 'both' });
 btn.animate([{ background: '#2b2a31' }, { background: '#37363e' }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
-curSvg.animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: 1080, easing: settle, fill: 'both' });   // transform-origin: 0 0, the tip
-btn.animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: 1080, easing: settle, fill: 'both' });
+curSvg.animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: 1080, easing: EASE.land, fill: 'both' });   // transform-origin: 0 0, the tip
+btn.animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: 1080, easing: EASE.land, fill: 'both' });
 btn.animate([{ background: '#37363e' }, { background: '#0a87ff' }], { duration: 120, delay: 1080, easing: 'linear', fill: 'forwards' });
-idle.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: 1190, easing: settle, fill: 'both' });
-done.animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: 1230, easing: settle, fill: 'both' });
-x.animate([{ translate: `${to.x}px 0` }, { translate: `${innerWidth * 1.06}px 0` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });
-y.animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${innerHeight * 0.86}px` }], { duration: 380, delay: 1560, easing: leave, fill: 'forwards' });
+idle.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: 1190, easing: EASE.launch, fill: 'both' });
+done.animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: 1230, easing: EASE.land, fill: 'both' });
+x.animate([{ translate: `${to.x}px 0` }, { translate: `${innerWidth * 1.06}px 0` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
+y.animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${innerHeight * 0.86}px` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
 </script>
 ```
 

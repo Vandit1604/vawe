@@ -41,10 +41,9 @@
 <script type="module">
 import '/core/engine/page-api.js';
 import '/prompts/moves/demo/assets/logos.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE, easeFn } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut), glide = curveToLinear((u) => u * u * (3 - 2 * u));
-const value = '48,290';
+const land = easeFn('land'), value = '48,290';
 const loops = [1, 1, 2, 2, 3];   // the digits on the right spin further, so they are still rolling when the left ones have landed
 let d = 0;
 [...value].forEach((ch) => {
@@ -56,7 +55,7 @@ let d = 0;
   cell.append(strip); q('#num').append(cell);
   const steps = n * 10 + Number(ch);
   const t0 = 0.1 + d * 0.045, dur = 1.15, id = `mb${d}`;
-  strip.animate([{ translate: '0 0' }, { translate: `0 ${-steps * 1.16}em` }], { duration: dur * 1000, delay: t0 * 1000, easing: settle, fill: 'both' });
+  strip.animate([{ translate: '0 0' }, { translate: `0 ${-steps * 1.16}em` }], { duration: dur * 1000, delay: t0 * 1000, easing: EASE.land, fill: 'both' });
   // SVG filters cannot be keyframed: each column's vertical blur follows its own speed, half a frame of travel, y only
   const f = document.createElementNS('http://www.w3.org/2000/svg', 'filter'), g = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
   f.id = id; f.setAttribute('y', '-20%'); f.setAttribute('height', '140%'); f.append(g); q('#defs').append(f);
@@ -64,16 +63,16 @@ let d = 0;
   const travel = steps * 1.16 * parseFloat(getComputedStyle(strip).fontSize);
   vawe.onFrame((t) => {
     const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
-    const slope = (CURVES.expoOut(Math.min(1, u + du)) - CURVES.expoOut(u)) / du;
+    const slope = (land(Math.min(1, u + du)) - land(u)) / du;
     g.setAttribute('stdDeviation', `0 ${(u > 0 && u < 1 ? (slope / dur) * travel / 60 * 0.5 : 0).toFixed(2)}`);
   });
   d++;
 });
-q('.delta').animate([{ translate: '-3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: 1050, easing: settle, fill: 'both' });
-q('.up').animate([{ translate: '0 0' }, { translate: '0 -2px', offset: 0.5 }, { translate: '0 0' }], { duration: 500, delay: 1500, easing: settle, fill: 'both' });
+q('.delta').animate([{ translate: '-3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: 1050, easing: EASE.land, fill: 'both' });
+q('.up').animate([{ translate: '0 0' }, { translate: '0 -2px', offset: 0.5 }, { translate: '0 0' }], { duration: 500, delay: 1500, easing: EASE.land, fill: 'both' });
 const line = q('.spark path'), len = line.getTotalLength();
 line.style.strokeDasharray = len;
-line.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 1500, delay: 400, easing: glide, fill: 'both' });
+line.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 1500, delay: 400, easing: EASE.settle, fill: 'both' });
 </script>
 </body>
 </html>

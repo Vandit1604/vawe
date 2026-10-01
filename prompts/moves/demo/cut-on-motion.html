@@ -30,8 +30,8 @@
 <div class="scene after"><div class="title">Final render</div><div class="lead">launch.mp4, 4K, 60 fps</div></div>
 <div class="ball"></div>
 <script type="module">
-import { curveToLinear } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--through', curveToLinear((u) => u * u * (3 - 2 * u)));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--through', EASE.swap);
 </script>
 </body>
 </html>
