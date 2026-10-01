@@ -11,39 +11,88 @@ export const DEFAULT_TITLE = 'Say the one thing';
 // A `required` detail stops `vawe new` until answered (or --defaults). `seen` is the request wording
 // that counts as an answer; when unsure a detail is unanswered.
 export const DETAILS = [
-  { key: 'subject', required: true, question: 'What is the product or subject, and who is it for?',
+  { key: 'subject', header: 'Subject', required: true, question: 'What is the product or subject, and who is it for?',
     why: 'every shot, word and colour follows from the real thing; a thin subject gives a generic film',
     example: 'Argus, a log search tool for on-call engineers at small SaaS teams',
     seen: /https?:\/\/|\bwww\.|\bfor\b.{0,60}\b(teams?|engineers?|developers?|designers?|users?|customers?|founders?|marketers?)\b|\b(that|which) (helps?|lets?|turns?|makes?)\b/ },
-  { key: 'message', required: true, question: 'What is the one message, and what is the one big moment?',
+  { key: 'message', header: 'Message', required: true, question: 'What is the one message, and what is the one big moment?',
     why: 'the film is built to land one thing, and the quiet before the big moment is timed from it',
     example: 'message: find the bug in seconds; big moment: the one red line in 10 million logs lights up',
     seen: /\b(message|tagline|big moment|spectacle|hook)\b|"[^"]{6,}"/ },
-  { key: 'show', required: true, question: 'What must the viewer see working: the product UI, a number or a process?',
+  { key: 'show', header: 'Show', required: true, question: 'What must the viewer see working: the product UI, a number or a process?',
     why: 'a film that shows the product working beats a slogan on a plain ground',
     example: 'the search box, a result list filling in, and the count "10M lines in 0.3 s"',
     seen: /\b(shows?|showing|ui|dashboard|screens?|captures?|numbers?|metrics?|workflow|steps?)\b/ },
-  { key: 'look', required: true, question: 'What is the look: a reference film, site or brand, or colours, typeface, light or dark?',
+  { key: 'look', header: 'Look', required: true, question: 'What is the look: a reference film, site or brand, or colours, typeface, light or dark?',
     why: 'the look is the largest score lever; with no anchor every film drifts to the same default',
     example: 'dark ground, one signal-red accent, a monospace face, like linear.app',
     seen: /#[0-9a-f]{3,6}\b|\b(dark|light) (mode|ground|theme)\b|\b(palette|colou?rs?|typeface|fonts?|serif|sans|style|reference)\b/ },
-  { key: 'format', question: 'How long, and which aspect?',
+  { key: 'format', header: 'Format', question: 'How long, and which aspect?',
     why: 'length sets the beat count and aspect sets the layout; both change every frame',
     example: '20 s, 16:9',
     seen: /\b\d+(\.\d+)?\s*(s|sec|secs|seconds?)\b|\b\d+:\d+\b|\b(vertical|square|landscape)\b/ },
-  { key: 'family', question: 'Which family fits: type-led, object-led, colour-led or graphic-led?',
+  { key: 'family', header: 'Family', question: 'Which family fits: type-led, object-led, colour-led or graphic-led?',
     why: 'it picks which of the three directions leads; skip it if unsure',
     example: 'object-led',
     seen: /\b(type|object|colou?r|graphic)-led\b|\b(kinetic type|typographic)\b/ },
-  { key: 'assets', question: 'Which real assets exist: captures, logo, photos? Or should the film invent them?',
+  { key: 'assets', header: 'Assets', question: 'Which real assets exist: captures, logo, photos? Or should the film invent them?',
     why: 'real captures beat invented UI, and a missing logo changes the ending',
     example: 'logo.svg and three screen recordings; invent nothing else',
     seen: /\b(captures?|logo|photos?|footage|screenshots?|invent)\b/ },
-  { key: 'ending', question: 'How does it end: the brand, a call to action, a URL?',
+  { key: 'ending', header: 'Ending', question: 'How does it end: the brand, a call to action, a URL?',
     why: 'the last second is what the viewer keeps',
     example: 'the Argus wordmark, then "argus.dev"',
     seen: /\b(cta|call to action|url|ending|sign-?off|ends? (on|with))\b/ },
 ];
+
+const asOptions = (pairs) => pairs.map(([label, description]) => ({ label, description }));
+
+const FIXED_OPTIONS = {
+  look: asOptions([['Light and calm', 'a light ground, soft ink, one cobalt accent'], ['Dark and precise', 'a dark ground, sharp type, one signal accent'],
+    ['Match a reference', 'I give a film, site or brand to copy'], ['Use brand colours', "the brand's own palette and typeface"]]),
+  format: asOptions([['24 s launch 16:9 (Recommended)', 'room for four beats and a real moment'], ['6 s sting 16:9', 'one idea and an ending'],
+    ['15 s vertical 9:16', 'for a phone feed'], ['30 s explainer 16:9', 'a process told step by step']]),
+  family: asOptions([['Type-led', 'the words are the picture'], ['Object-led', 'one real thing, lit and moving'],
+    ['Colour-led', 'fields of colour in a rhythm'], ['Graphic-led', 'shapes and diagrams carry it']]),
+  assets: asOptions([['Invent everything (Recommended)', 'the film draws its own UI and shapes'], ['I have screen captures', 'real recordings go in the film'],
+    ['Logo only', 'a logo file, nothing else']]),
+  ending: asOptions([['Brand lockup', 'the logo and name hold at the end'], ['Call to action', 'one line that asks for the next step'],
+    ['Website URL', 'the address stays on screen']]),
+};
+
+const PRODUCT_NAME = /\bfor\s+([A-Z][\w.-]*)/;
+
+// Choices for an AskUserQuestion call. Open answers (subject, message, show) take guesses from the
+// request when it names the product; the person can always pick "Other" and type.
+export function optionsFor(detail, request = '') {
+  if (FIXED_OPTIONS[detail.key]) return FIXED_OPTIONS[detail.key];
+  const name = request.match(PRODUCT_NAME)?.[1];
+  if (detail.key === 'subject') {
+    return asOptions([
+      [name ? `${name} for developers (Recommended)` : 'A developer tool (Recommended)', 'engineers are the viewers'],
+      [name ? `${name} for teams` : 'A team product', 'managers and teams are the viewers'],
+      [name ? `${name} for consumers` : 'A consumer app', 'everyday people are the viewers'],
+    ]);
+  }
+  if (detail.key === 'message') {
+    const who = name ?? 'It';
+    return asOptions([[`${who} saves you time (Recommended)`, 'the big moment is the time saved, shown as a number'],
+      [`${who} is simple`, 'the big moment is one clear action'], [`${who} is trusted`, 'the big moment is proof, such as a count']]);
+  }
+  return asOptions([['The product UI working (Recommended)', 'the real screen does the task'], ['One proof number', 'a single big figure counts up'],
+    ['A before and after', 'the old way, then the new way']]);
+}
+
+const MAX_QUESTIONS_PER_CALL = 4;
+
+/** The open details as AskUserQuestion calls of at most 4 questions each, required details first. */
+export function questionCalls(open, request) {
+  const ordered = [...open.filter((d) => d.required), ...open.filter((d) => !d.required)];
+  const questions = ordered.map((d) => ({ question: d.question, header: d.header, multiSelect: false, options: optionsFor(d, request) }));
+  const calls = [];
+  for (let i = 0; i < questions.length; i += MAX_QUESTIONS_PER_CALL) calls.push({ questions: questions.slice(i, i + MAX_QUESTIONS_PER_CALL) });
+  return calls;
+}
 
 export const DETAIL_KEYS = DETAILS.map((d) => d.key);
 

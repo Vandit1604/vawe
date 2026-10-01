@@ -13,7 +13,7 @@ import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
-import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails } from '../lib/measured-brief.mjs';
+import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls } from '../lib/measured-brief.mjs';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -289,13 +289,22 @@ function formatFrom(text = '') {
   return { length: s ? Number(s[1]) : undefined, aspect: a && (ASPECTS[a[1]] || /^\d+:\d+$/.test(a[1])) ? a[1] : undefined };
 }
 
+const answerCommand = (name, request, from) => `bin/vawe new ${name} --request ${JSON.stringify(request ?? '<the ask>')}${from ? ` --from ${from}` : ''}`;
+
+/** The open details as AskUserQuestion calls; writes nothing. */
+export function questionsJson(name, { request, from, details = {}, length, aspect }) {
+  const format = formatFrom(details.format);
+  const answered = answeredDetails({ request, given: details, length: length ?? format.length, aspect: aspect ?? format.aspect });
+  return { calls: questionCalls(unansweredDetails(answered), request), answer_with: `${answerCommand(name, request, from)} --answers <file>` };
+}
+
 export function askLines(name, request, from, open) {
-  const lines = [`vawe new: ${open.length} details needed before a good brief`, '',
+  const lines = ['agents: run with --questions-json and ask with AskUserQuestion', '', `vawe new: ${open.length} details needed before a good brief`, '',
     'Nothing is written yet. Answer these, most film-changing first. Skip an optional one to take a guess.', ''];
   open.forEach((d, i) => {
     lines.push(`${i + 1}. ${d.key}${d.required ? '' : ' (optional)'}: ${d.question}`, `   why: ${d.why}`, `   example: ${d.example}`);
   });
-  const base = `bin/vawe new ${name} --request ${JSON.stringify(request ?? '<the ask>')}${from ? ` --from ${from}` : ''}`;
+  const base = answerCommand(name, request, from);
   lines.push('', 'Put the answers in a file, one `key: value` line each, then run:', `  ${base} --answers <file>`,
     'or give each one on the command line:', `  ${base} --detail ${open[0].key}="..." --detail ${open[1]?.key ?? open[0].key}="..."`,
     'For an unattended run that guesses instead, add --defaults.');
