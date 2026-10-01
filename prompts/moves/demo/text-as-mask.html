@@ -28,7 +28,8 @@
 <div class="stage"><h1 class="title"><span>Golden</span><span>Hour</span></h1></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { CURVES } from '/core/motion/springs.js';
+import { easeFn } from '/core/motion/presets.js';
+const land = easeFn('land'), glide = easeFn('glide');
 const q = (s) => document.querySelector(s);
 const title = q('.title'), stage = q('.stage');
 const S = 3.2, t0 = 0.05, dur = 1.15, total = 2;
@@ -36,11 +37,11 @@ const S = 3.2, t0 = 0.05, dur = 1.15, total = 2;
 // the scene moves inside the fixed type: near ridge fastest, far ridge slower, the sun rises out of the far ridge
 const lerp = (a, b, u) => a + (b - a) * u;
 vawe.onFrame((t) => {
-  const u = Math.min(1, Math.max(0, (t - t0) / dur)), p = CURVES.expoOut(u);
+  const u = Math.min(1, Math.max(0, (t - t0) / dur)), p = land(u);
   const s = Math.exp(Math.log(S) * (1 - p));
   const k = Math.min(1, t / total);
   stage.style.scale = (s * (1 + 0.035 * k)).toFixed(4);
-  const sunY = lerp(100, 46, CURVES.expoOut(Math.min(1, t / 1.8)));
+  const sunY = lerp(100, 46, glide(Math.min(1, t / 1.8)));
   title.style.backgroundPosition = `${lerp(0, 22, k).toFixed(2)}% 100%, ${lerp(0, 12, k).toFixed(2)}% 100%, 62% ${sunY.toFixed(2)}%, 50% 100%, 0 0`;
 });
 </script>

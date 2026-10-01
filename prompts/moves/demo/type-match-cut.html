@@ -23,12 +23,10 @@
 <section class="shot" id="b"><p class="line" id="lb">The feature is <span class="slot" id="sb">fast</span></p></section>
 <span class="hold" id="hold">fast</span>
 <script type="module">
-import { curveToLinear } from '/core/motion/springs.js';
-import { enter } from '/core/motion/presets.js';
+import { EASE, enter } from '/core/motion/presets.js';
 
 await document.fonts.ready;
 const CUT = 1.45, GROW_AT = 0.8;
-const INOUT = curveToLinear('easeInOutCubic');
 const $ = (id) => document.getElementById(id);
 const hold = $('hold');
 
@@ -46,7 +44,7 @@ hold.style.top = `${P.y - hold.offsetHeight / 2}px`;
 
 // A: the word starts at the size of its slot, holds, then grows to its final size and keeps its place
 const s0 = wA / wB;
-hold.animate([{ transform: `scale(${s0})` }, { transform: `scale(${s0})`, offset: GROW_AT / CUT, easing: INOUT }, { transform: 'scale(1)' }],
+hold.animate([{ transform: `scale(${s0})` }, { transform: `scale(${s0})`, offset: GROW_AT / CUT, easing: EASE.settle }, { transform: 'scale(1)' }],
   { duration: CUT * 1000, fill: 'both' });
 // the cut: shot A is gone and shot B is there in one frame; the word changes ink with it
 const swap = (el, from, to) => el.animate([from, to], { duration: CUT * 1000, easing: 'steps(1, jump-end)', fill: 'both' });
@@ -58,7 +56,7 @@ enter($('la'), { at: 0.1, band: 'professional', from: '0 0.4em' });
 enter(hold, { at: 0.1, band: 'professional', from: '0 0.4em' });
 enter($('lb'), { at: CUT + 0.02, band: 'gravity', from: '-0.5em 0' });
 // the old line leaves before the word reaches it, so the growing word never runs over its neighbours
-$('la').animate([{ opacity: 1 }, { opacity: 0 }], { delay: (GROW_AT - 0.1) * 1000, duration: 260, easing: curveToLinear('easeInCubic'), fill: 'forwards' });
+$('la').animate([{ opacity: 1 }, { opacity: 0 }], { delay: (GROW_AT - 0.1) * 1000, duration: 260, easing: EASE.launch, fill: 'forwards' });
 </script>
 </body>
 </html>

@@ -37,8 +37,8 @@ Sound: pluck at 0.80 s after the first flip, when the last tile locks (default g
 - `perspective: 3em` on the tile (the tile is 0.72em by 1.1em). Wider values look flat.
 - 68 ms per flip: 34 ms fall, 34 ms rise. Six flips per tile, tiles start 68 ms apart, so the word
   resolves left to right in about 0.8 s.
-- The fall eases in (`cubic-bezier(0.55, 0, 1, 0.6)`, gravity), the rise eases out and snaps shut
-  (`cubic-bezier(0.2, 0.7, 0.4, 1)`).
+- The fall eases in (`EASE.launch`, gravity), the rise eases out and snaps shut
+  (`EASE.land`).
 - A black shade layer inside each flap goes to 0.6 opacity at 90 degrees, so the moving flap darkens
   as it turns edge-on.
 - A 0.016em split line above all layers, and a 0.07em gap between tiles.

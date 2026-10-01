@@ -12,7 +12,7 @@ import '../../core/engine/page-api.js';
 const vw = innerWidth / 100, vh = innerHeight / 100;
 const at = [{ x: 50, y: 50 }, { x: 150, y: 58 }, { x: 250, y: 44 }];   // station centres on the canvas, vw and vh
 const PANS = [0.5, 1.2], PAN = 0.42, DRIFT = 0.8;                       // pan starts (s), pan length (s), drift (vw per s)
-const inout = (u) => u * u * u * (u * (u * 6 - 15) + 10);                // quintic smoothstep: no jolt at either end
+const inout = easeFn('settle');                // no jolt at either end
 const clamp = (u) => Math.min(1, Math.max(0, u));
 const cam = (t) => {
   let k = 0;

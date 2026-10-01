@@ -20,9 +20,8 @@
   <div class="rail"><div class="run"></div></div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s);
-const settle = curveToLinear(CURVES.expoOut), fall = curveToLinear(CURVES.spring), glide = curveToLinear((u) => u * u * (3 - 2 * u));
 const stage = q('.stage'), rail = q('.rail');
 const base = q('.base').getBoundingClientRect().top - stage.getBoundingClientRect().top;
 rail.style.top = `${base}px`;
@@ -31,11 +30,11 @@ rail.style.top = `${base}px`;
 const at = [100, 190, 260, 315, 360];
 [...document.querySelectorAll('h1 span')].forEach((s, i) => {
   s.animate([{ translate: '0 -0.85em', filter: 'blur(10px)' }, { translate: '0 0', filter: 'blur(0px)' }],
-    { duration: 620, delay: at[i], easing: fall, fill: 'both' });
+    { duration: 620, delay: at[i], easing: EASE.pop, fill: 'both' });
   s.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, delay: at[i], easing: 'linear', fill: 'both' });
 });
-rail.animate([{ scale: '0.35 1', opacity: 0.5 }, { scale: '1 1', opacity: 1 }], { duration: 500, easing: settle, fill: 'both' });
-q('.run').animate([{ translate: '-100% 0' }, { translate: '560% 0' }], { duration: 800, delay: 1050, easing: glide, fill: 'both' });
+rail.animate([{ scale: '0.35 1', opacity: 0.5 }, { scale: '1 1', opacity: 1 }], { duration: 500, easing: EASE.land, fill: 'both' });
+q('.run').animate([{ translate: '-100% 0' }, { translate: '560% 0' }], { duration: 800, delay: 1050, easing: EASE.settle, fill: 'both' });
 </script>
 </body>
 </html>

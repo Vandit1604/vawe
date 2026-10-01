@@ -26,9 +26,9 @@
 <div class="hero"><i>Meet</i><b>Plinth</b></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE, easeFn } from '/core/motion/presets.js';
+const land = easeFn('land');
 const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
-const settle = curveToLinear(CURVES.expoOut), leave = curveToLinear((u) => u * u * u);
 const clamp = (u) => Math.min(1, Math.max(0, u));
 const W = innerWidth, unit = innerHeight / 100, LEAD = 'Your work lives in a';
 const group = q('.group'), hero = q('.hero'), blur = q('#streak-blur');
@@ -39,8 +39,8 @@ const at = { type: [0.15, 0.95], words: [1.0, 1.5, 2.0], hit: 2.4, settle: 1.0 }
 // the slot rolls like a ticker: the old word leaves up in 140 ms, the next rises in 300 ms
 qa('.slot span').forEach((w, i) => {
   const t0 = at.words[i] * 1000, t1 = at.words[i + 1] * 1000;
-  w.animate([{ opacity: 0, translate: '0 70%' }, { opacity: 1, translate: '0 0' }], { duration: 300, delay: t0, easing: settle, fill: 'both' });
-  if (t1) w.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 -70%' }], { duration: 140, delay: t1 - 140, easing: leave, fill: 'forwards' });
+  w.animate([{ opacity: 0, translate: '0 70%' }, { opacity: 1, translate: '0 0' }], { duration: 300, delay: t0, easing: EASE.land, fill: 'both' });
+  if (t1) w.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 -70%' }], { duration: 140, delay: t1 - 140, easing: EASE.launch, fill: 'forwards' });
 });
 q('.slot').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: at.words[0] * 1000 - 1, fill: 'both' });
 
@@ -50,14 +50,14 @@ vawe.onFrame((t) => {
   q('.typed').textContent = LEAD.slice(0, n);
   q('.caret').style.opacity = t < at.words[0] ? 1 : 0;
 
-  const u = clamp((t - at.hit) / at.settle), p = CURVES.expoOut(u);
+  const u = clamp((t - at.hit) / at.settle), p = land(u);
   const x0 = W / 2 + heroW / 2, heroX = x0 * (1 - p);
   hero.style.translate = `calc(-50% + ${heroX.toFixed(1)}px) -50%`;
   hero.style.visibility = t < at.hit ? 'hidden' : 'visible';
   blur.setAttribute('stdDeviation', `${(unit * 5 * Math.max(0, 1 - u * 3.2) ** 2).toFixed(2)} 0`);
 
   const heroLeft = W / 2 - heroW / 2 + heroX, follow = Math.min(0, heroLeft - groupRight - unit * 2);
-  const carry = -W * 0.9 * (1 - (1 - clamp((t - at.hit - 0.17) / 1.2)) ** 2);
+  const carry = -W * 0.9 * land(clamp((t - at.hit - 0.17) / 1.2));
   const x = t < at.hit ? 0 : Math.min(follow, carry);
   group.style.transform = `translateX(${x.toFixed(1)}px) rotate(${(-4 * clamp(-x / (W * 0.4))).toFixed(2)}deg)`;
 });

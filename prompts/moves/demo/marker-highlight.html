@@ -24,8 +24,8 @@
 <body>
 <p>Ship the <span class="hl">launch film<span class="wipe"><span class="bar"></span><span class="dark">launch film</span></span></span><br>before the meeting</p>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--sweep', curveToLinear(CURVES.expoOut));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--sweep', EASE.land);
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 ---
 when: "you are about to write a text or panel entrance, a transition, an exit, a typing effect or an emphasis, and want the proven version instead of your first idea"
-answers: "the built moves as CSS and WAAPI snippets an agent copies, grouped by job, each with its curve from curveToLinear and a 1 s clip"
+answers: "the built moves as CSS and WAAPI snippets an agent copies, grouped by job, each with its `EASE` curve and a 1 s clip"
 group: reference
 ---
 
@@ -17,8 +17,8 @@ technique, not motion design, and is not part of vawe.
 
 Each move is one markdown file with a 10 to 40 line snippet and a 1 s clip next to it. Choose from
 the clip, not the name. Copy the snippet into the page; the numbers are the ones that read well.
-Every curve comes from `curveToLinear` in `core/motion/springs.js`, never from a hand-fitted
-`cubic-bezier()`. New snippets use the `EASE` names (`EASE.land`, `EASE.leave`, ... from `core/motion/presets.js`, table in `core/motion/README.md`). The demo page each clip was rendered from is in `demo/`. Every demo links `demo/demo.css`
+Every curve is an `EASE` name (`EASE.land` for an entrance, `EASE.launch` for an exit, `EASE.pop` for an overshoot, ... from `core/motion/presets.js`, table in `core/motion/README.md`), never a hand-fitted
+`cubic-bezier()`. Per-frame code (`vawe.onFrame`, `window.seek`) calls `easeFn('land')(u)` instead. The demo page each clip was rendered from is in `demo/`. Every demo links `demo/demo.css`
 (tokens, type scale as a share of frame height, the UI card look); the snippets name its classes, so copy the ones you use.
 
 [LIBRARY.md](LIBRARY.md) lists every approved move in seven groups, including the ones still to build.

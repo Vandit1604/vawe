@@ -20,7 +20,7 @@ h1 span { display: block; animation-name: crest; animation-duration: 1.1s; anima
 ```
 
 ```js
-// --rise: curveToLinear('easeInCubic'), --settle: curveToLinear(CURVES.expoOut)
+// --rise: EASE.carry, --settle: EASE.land
 word.innerHTML = [...word.textContent].map((c, i) => `<span style="--i:${i}">${c}</span>`).join('');
 ```
 
@@ -29,7 +29,7 @@ Sound: none; or one low swell from the first letter's second to the last crest.
 ## The numbers that make it look expensive
 
 - 85 ms between letters and 1.1 s per letter: the crest (38 percent, 0.42 s in) of one letter passes while the next is still rising, so the wave is one shape, not seven pops.
-- The rise is ease-in (the letter gathers), the fall is expo-out (it lets go and settles). The word rests at 640, not at the start weight: the start is light, the end is firm, so the move also lands the word.
+- The rise is `EASE.carry` (the letter gathers), the fall is `EASE.land` (it lets go and settles). The word rests at 640, not at the start weight: the start is light, the end is firm, so the move also lands the word.
 - Weight and width move together on the same keyframes. Weight alone is [weight-morph.md](weight-morph.md); the width axis is what makes the wave read at a glance.
 - Start at 300, not 100: a hairline vanishes on the ground and the first frames read as empty.
 - Set `font-weight` and `font-stretch`, never `font-variation-settings`: the properties keep working with a fallback face. The `@font-face` must declare both ranges, or the browser snaps to the nearest static instance and nothing morphs.

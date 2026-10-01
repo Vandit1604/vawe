@@ -20,19 +20,18 @@
 <body>
 <p>We make films that feel <span class="slot"><span class="col"><b>fast</b><b>loud</b><b>clean</b><b>alive</b></span>&#8203;</span></p>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 await document.fonts.load('700 1em Archivo');
 const slot = document.querySelector('.slot'), col = slot.firstElementChild, words = [...col.children];
 const px = parseFloat(getComputedStyle(slot).fontSize);
 const w = words.map((b) => { const r = document.createRange(); r.selectNodeContents(b); return r.getBoundingClientRect().width / px; });
 const row = 1.7, t0 = 200, seg = [380, 380, 650];
 const total = seg.reduce((a, b) => a + b, 0);
-const land = curveToLinear(CURVES.overshoot);
 const at = [0, ...seg.map((_, i) => seg.slice(0, i + 1).reduce((a, b) => a + b, 0) / total)];
 slot.style.width = `${w[0]}em`;
 const opts = { delay: t0, duration: total, fill: 'both', easing: 'linear' };
 // every segment carries its own easing: two rolls that dwell then snap, then a soft landing on the last word
-const easing = ['cubic-bezier(0.8, 0, 0.2, 1)', 'cubic-bezier(0.8, 0, 0.2, 1)', land];
+const easing = [EASE.swap, EASE.swap, EASE.pop];
 col.animate(at.map((o, i) => ({ offset: o, translate: `0 ${-i * row}em`, easing: easing[i] })), opts);
 // the width follows the same rolls, so the sentence reflows while the word moves
 slot.animate(at.map((o, i) => ({ offset: o, width: `${w[i]}em`, easing: easing[i] })), opts);

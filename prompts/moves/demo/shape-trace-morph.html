@@ -25,17 +25,14 @@
   <p class="tag lead" id="tag">Every stop, one feed</p>
 </main>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-import { enter } from '/core/motion/presets.js';
-const smooth = (u) => u * u * (3 - 2 * u);
-const glide = curveToLinear(smooth), settle = curveToLinear(CURVES.expoOut), spring = curveToLinear(CURVES.spring);
+import { EASE, enter } from '/core/motion/presets.js';
 const route = document.getElementById('route'), twin = document.getElementById('twin');
 // the route is a delivery line with five stops; the first chevron of the Relay mark has the same 1 M, 5 L and 1 Z
 const ROUTE = 'M2.5 19 L9.5 12 L3.5 6 L10 5.5 L15 11 L8 19 Z';
 const CHEVRON = 'M2.5 19 L9.5 12 L2.5 5 L7.3 5 L14.3 12 L7.3 19 Z';
 const RETURN = 0.113;   // the closing Z is 11% of the length: the dash stops short so the route reads open
 const TRACE = { at: 100, dur: 900 }, MORPH = 1050;
-route.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: RETURN }], { duration: TRACE.dur, delay: TRACE.at, easing: glide, fill: 'both' });
+route.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: RETURN }], { duration: TRACE.dur, delay: TRACE.at, easing: EASE.settle, fill: 'both' });
 // a stop dot appears as the stroke reaches its corner
 const pts = [[2.5, 19], [9.5, 12], [3.5, 6], [10, 5.5], [15, 11], [8, 19]];
 const cum = pts.map((p, i) => pts.slice(1, i + 1).reduce((s, q, j) => s + Math.hypot(q[0] - pts[j][0], q[1] - pts[j][1]), 0));
@@ -45,15 +42,15 @@ pts.slice(0, 6).forEach(([x, y], i) => {
   dot.setAttribute('class', 'stop'); dot.setAttribute('cx', x); dot.setAttribute('cy', y); dot.setAttribute('r', 0.95);
   route.before(dot);
   const at = TRACE.at + TRACE.dur * (cum[i] / total) * 0.9;
-  dot.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 160, delay: at, fill: 'both', easing: settle });
+  dot.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 160, delay: at, fill: 'both', easing: EASE.land });
   dot.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 240, delay: MORPH, fill: 'forwards' });
   dot.style.transformBox = 'fill-box'; dot.style.transformOrigin = 'center';
 });
-route.animate([{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 380, delay: MORPH, easing: settle, fill: 'both' });
+route.animate([{ fillOpacity: 0 }, { fillOpacity: 1 }], { duration: 380, delay: MORPH, easing: EASE.land, fill: 'both' });
 route.animate([{ d: `path("${ROUTE}")`, stroke: 'var(--ink)', strokeDashoffset: RETURN }, { d: `path("${CHEVRON}")`, stroke: 'var(--accent)', strokeDashoffset: 0 }],
-  { duration: 800, delay: MORPH, easing: spring, fill: 'forwards' });
+  { duration: 800, delay: MORPH, easing: EASE.pop, fill: 'forwards' });
 // the second chevron hands off from the first, the Relay mark complete at about 2.1 s
-twin.animate([{ opacity: 0, translate: '-7.7px 0' }, { opacity: 0.45, translate: '0 0' }], { duration: 520, delay: 1650, easing: settle, fill: 'both' });
+twin.animate([{ opacity: 0, translate: '-7.7px 0' }, { opacity: 0.45, translate: '0 0' }], { duration: 520, delay: 1650, easing: EASE.land, fill: 'both' });
 enter(document.getElementById('name'), { at: 2.05, band: 'professional', from: '0 0.4em', blur: 10 });
 enter(document.getElementById('tag'), { at: 2.3, band: 'professional', from: '0 0.4em' });
 </script>

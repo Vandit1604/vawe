@@ -10,7 +10,8 @@ not 0). Clip: [speed-ramp-freeze.mp4](speed-ramp-freeze.mp4). Demo:
 
 ```js
 import '../../core/engine/page-api.js';
-const smooth = (x) => { x = Math.min(1, Math.max(0, x)); return x * x * (3 - 2 * x); };
+import { easeFn } from '../../core/motion/presets.js';
+const land = easeFn('land'), settle = easeFn('settle'), smooth = (x) => settle(Math.min(1, Math.max(0, x)));
 const T = { ramp: 0.35, rampLen: 0.4, hold: 0.75, snap: 1.0 }, FREEZE = 0.03;   // seconds of real time
 const speed = (t) => t < T.hold ? 1 - (1 - FREEZE) * smooth((t - T.ramp) / T.rampLen)
                   : t < T.snap ? FREEZE : 1 + 2.5 * Math.exp(-(t - T.snap) / 0.1);   // the snap: 3.5x, settling to 1x
@@ -27,7 +28,7 @@ vawe.onFrame((t) => {
 Sound: droplet at 0.75 s into the move, on the contact of the hit frame (default gain); nothing on the snap.
 
 Fall on `y = -drop * (1 - (p / touch)^2)` (gravity in story time), squash between the touch and the
-hit, rebound on an ease-out of `p - hit`. The ramp is 0.4 s and the hold 0.25 s: a shorter hold
+hit, rebound on `EASE.land` of `p - hit`. The ramp is 0.4 s and the hold 0.25 s: a shorter hold
 reads as a stutter, a longer one as a dropped frame. The blur is measured in real time, so it
 vanishes in the hold and peaks (26 px) on the snap: that contrast is what the eye reads as speed.
 This is the slowest beat the film needs (at least 3x the fastest); use it once. Do not freeze on a

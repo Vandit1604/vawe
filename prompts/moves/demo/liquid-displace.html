@@ -41,7 +41,7 @@ vawe.onFrame((t) => {
   const swap = Math.min(1, Math.max(0, (t - SWAP) / SWAP_LEN));
   disp.setAttribute('scale', (vh * 0.3 * left ** 1.75).toFixed(2));
   noise.setAttribute('baseFrequency', `${(0.004 + 0.012 * left).toFixed(5)} ${(0.008 + 0.03 * left).toFixed(5)}`);
-  clean.style.opacity = (swap * swap * (3 - 2 * swap)).toFixed(3);
+  clean.style.opacity = easeFn('swap')(swap).toFixed(3);
   title.style.opacity = swap >= 1 ? 0 : 1;
 });
 document.querySelector('.stack').animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: 50, easing: 'linear', fill: 'both' });

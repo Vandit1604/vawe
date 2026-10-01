@@ -25,7 +25,7 @@ vawe.onFrame((t) => {                                         // the seek time d
   const swap = Math.min(1, Math.max(0, (t - 0.5) / 0.16));    // the plain copy fades in over 0.5 to 0.66 s
   disp.setAttribute('scale', (vh * 0.3 * left ** 1.75).toFixed(2));
   noise.setAttribute('baseFrequency', `${(0.004 + 0.012 * left).toFixed(5)} ${(0.008 + 0.03 * left).toFixed(5)}`);
-  clean.style.opacity = (swap * swap * (3 - 2 * swap)).toFixed(3);
+  clean.style.opacity = easeFn('swap')(swap).toFixed(3);
   title.style.opacity = swap >= 1 ? 0 : 1;
 });
 </script>

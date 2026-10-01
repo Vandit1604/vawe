@@ -28,9 +28,10 @@
 <div id="slices"></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES, rng } from '/core/motion/springs.js';
-const E = CURVES.expoOut, W = window.innerWidth, H = window.innerHeight;
-const leave = (u) => 1 - E(1 - u);   // slow off the mark, fastest as the slice leaves the frame
+import { rng } from '/core/motion/springs.js';
+import { EASE, easeFn } from '/core/motion/presets.js';
+const W = window.innerWidth, H = window.innerHeight;
+const leave = easeFn('launch');   // slow off the mark, fastest as the slice leaves the frame
 const N = 7, h = H / N, t0 = 0.3, stagger = 0.042, rand = rng(11);
 const tpl = document.getElementById('a'), host = document.getElementById('slices');
 const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -44,10 +45,10 @@ const slices = Array.from({ length: N }, (_, i) => {
   svg.insertAdjacentHTML('beforeend', `<filter id="m${i}" x="-30%" width="160%" y="0" height="100%"><feGaussianBlur id="b${i}" stdDeviation="0 0"/></filter>`);
   host.append(el);
   const dir = i % 2 ? 1 : -1, delay = t0 + i * stagger + rand() * 0.03, dur = 0.5 + rand() * 0.1;
-  el.animate([{ translate: '0 0' }, { translate: `${dir * W * 1.04}px 0` }], { duration: dur * 1000, delay: delay * 1000, easing: curveToLinear(leave), fill: 'both' });
+  el.animate([{ translate: '0 0' }, { translate: `${dir * W * 1.04}px 0` }], { duration: dur * 1000, delay: delay * 1000, easing: EASE.launch, fill: 'both' });
   return { blur: document.getElementById(`b${i}`), delay, dur };
 });
-document.querySelector('.b .in').animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1000, delay: (t0 + 0.15) * 1000, easing: curveToLinear(E), fill: 'both' });
+document.querySelector('.b .in').animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1000, delay: (t0 + 0.15) * 1000, easing: EASE.land, fill: 'both' });
 // one blur per slice: half a frame of its own travel, x only
 vawe.onFrame((t) => slices.forEach((s) => {
   const u = Math.min(1, Math.max(0, (t - s.delay) / s.dur)), du = 1 / 240;

@@ -36,7 +36,7 @@
   <svg class="cursor" viewBox="0 0 24 24"><path d="M3 2l17 8-7.5 2.2L9.8 20z"/></svg>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE } from '/core/motion/presets.js';
 const world = document.querySelector('.world');
 const r = document.querySelector('.pill').getBoundingClientRect();
 const W = window.innerWidth, H = window.innerHeight;
@@ -45,10 +45,10 @@ cur.style.left = `${r.left + r.width * 0.72}px`; cur.style.top = `${r.top + r.he
 const s = (0.36 * W) / r.width;                          // the target fills 36% of the frame width
 const tx = W * 0.5 - s * (r.left + r.width / 2), ty = H * 0.5 - s * (r.top + r.height / 2);
 cur.animate([{ translate: '-16vw 12vh' }, { translate: '0 0' }],
-  { duration: 500, delay: 50, easing: curveToLinear(CURVES.expoOut), fill: 'both' });
+  { duration: 500, delay: 50, easing: EASE.land, fill: 'both' });
 // the camera is one translate and one scale on the same curve: the target's centre travels straight to the middle of the frame
 world.animate([{ translate: '0 0', scale: 1 }, { translate: `${tx}px ${ty}px`, scale: s }],
-  { duration: 1000, delay: 550, easing: curveToLinear(CURVES.spring), fill: 'both' });
+  { duration: 1000, delay: 550, easing: EASE.land, fill: 'both' });
 </script>
 </body>
 </html>

@@ -12,14 +12,13 @@ Demo: [demo/spotlight-dim.html](demo/spotlight-dim.html).
 ```
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '../../core/motion/presets.js';
 const pad = '0.6vh';
 hole.animate([
   { left: '0px', top: '0px', width: '100vw', height: '100vh', borderRadius: '0px' },
   { left: `calc(14vw - ${pad})`, top: `calc(52vh - ${pad})`, width: `calc(35vw + 2 * ${pad})`, height: `calc(34vh + 2 * ${pad})`, borderRadius: '3.6vh' }],
-  { duration: 800, delay: 150, easing: settle, fill: 'both' });
-target.animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: settle, fill: 'both' });
+  { duration: 800, delay: 150, easing: EASE.land, fill: 'both' });
+target.animate([{ scale: 1 }, { scale: 1.04 }], { duration: 800, delay: 150, easing: EASE.land, fill: 'both' });
 ```
 
 Sound: none; the dim points the eye without a sound.

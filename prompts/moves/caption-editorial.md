@@ -28,7 +28,7 @@ Sound: none; a soft tick at each cut-in second if the film wants the replace mar
 
 ## The numbers that make it look expensive
 
-- In 0.42 s on expo-out, out 0.22 s on ease-in: the exit is about half as long as the entrance, and the new caption starts 0.05 s after the old one is gone, so the frame is never empty for long.
+- In 0.42 s on `EASE.land`, out 0.22 s on `EASE.launch`: the exit is about half as long as the entrance, and the new caption starts 0.05 s after the old one is gone, so the frame is never empty for long.
 - The second line follows the first by 70 ms (and leaves 40 ms behind it), so a caption moves as one stack.
 - Contrast is face and weight, not colour: sans 600 against a 400 italic serif. The key word is the only serif on screen.
 - The mask box carries 0.16em of padding paid back by a negative margin, so descenders and the italic swashes are not cut. Travel is 135 percent, not 110: with 110 the padding lets the next line show above its own mask.

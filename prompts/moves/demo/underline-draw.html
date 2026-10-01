@@ -21,8 +21,8 @@
 <body>
 <p>Launch films that get<br><span class="key">noticed<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path pathLength="1" d="M4 12 C 70 5, 190 4, 296 9"/></svg></span></p>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--draw', curveToLinear(CURVES.expoOut));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--draw', EASE.land);
 </script>
 </body>
 </html>

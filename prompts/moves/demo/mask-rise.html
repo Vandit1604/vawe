@@ -20,8 +20,8 @@
 <body>
 <h1 class="hero mask"><span>typography</span></h1>
 <script type="module">
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '/core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 </body>
 </html>

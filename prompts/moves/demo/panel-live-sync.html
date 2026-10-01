@@ -41,10 +41,9 @@
 <div class="cur"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
 <script type="module">
 import '/core/engine/page-api.js';
-import { curveToLinear, CURVES } from '/core/motion/springs.js';
+import { EASE, easeFn } from '/core/motion/presets.js';
 const q = (s) => document.querySelector(s), qa = (s) => [...document.querySelectorAll(s)];
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);
-const smooth = (u) => u * u * (3 - 2 * u), clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (a, b, u) => a + (b - a) * u;
+const smooth = easeFn('settle'), clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (a, b, u) => a + (b - a) * u;
 const seg = (t, a, b, f = smooth) => f(clamp((t - a) / (b - a)));
 
 const W = innerWidth, H = innerHeight, fields = Object.fromEntries(qa('.field').map((f) => [f.dataset.k, f]));
@@ -71,8 +70,8 @@ const cursorAt = (t) => {
   return p;
 };
 
-q('.page').animate([{ translate: '0 2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 420, delay: 60, easing: settle, fill: 'both' });
-q('.panel').animate([{ translate: '3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 480, delay: 160, easing: pop, fill: 'both' });
+q('.page').animate([{ translate: '0 2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 420, delay: 60, easing: EASE.land, fill: 'both' });
+q('.panel').animate([{ translate: '3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 480, delay: 160, easing: EASE.pop, fill: 'both' });
 
 vawe.onFrame((t) => {
   const rot = held(t, 'rot'), rad = held(t, 'rad'), pad = held(t, 'pad');
