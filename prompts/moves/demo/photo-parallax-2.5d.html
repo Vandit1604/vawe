@@ -2,46 +2,51 @@
 <html data-aspect="16:9" data-look="daylight">
 <head>
 <meta charset="utf-8">
-<meta name="duration" content="3">
+<meta name="duration" content="3.4">
 <title>move: photo parallax 2.5d</title>
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
-  body { display: block; position: relative; }
-  .stage { position: absolute; inset: 0; perspective: 180vh; perspective-origin: 50% 50%; overflow: hidden; }
-  .rig { position: absolute; inset: 0; transform-style: preserve-3d; }
-  /* each cut is the whole photo at 106vw; its depth --z (vh) is paid back by scale, so at rest every layer lines up with the others */
-  .layer { position: absolute; left: 50%; top: 50%; width: 106vw; aspect-ratio: 3 / 2; translate: -50% -50%;
-           transform: translateZ(calc(var(--z) * 1vh)) scale(calc((180 - var(--z)) / 180)) translateY(10vh); }
+  body { display: block; position: relative; overflow: hidden; }
+  /* three cut-outs of one 3000 px photo; each is wider than the frame so no edge shows at the end of the push */
+  .layer { position: absolute; left: 50%; top: 46%; width: 112vw; aspect-ratio: 4 / 3; translate: -50% -50%; transform-origin: 46% 54%; will-change: transform; }
   .layer img { display: block; width: 100%; height: 100%; }
-  .far { --z: -50; }
-  .subject { --z: 0; clip-path: polygon(0% 14.5%, 6.3% 11.4%, 12.5% 8.3%, 20.8% 5.6%, 26.6% 5.2%, 29.7% 6.6%, 34.4% 11.4%, 38.8% 13.8%, 43.8% 13.6%, 49% 14%, 54.2% 12.8%, 59.4% 12.2%, 66.7% 11%, 72.9% 10.8%, 76% 13.4%, 80.2% 14.2%, 83.3% 14.6%, 86.5% 12.4%, 89.6% 10.2%, 93.8% 9.2%, 97.9% 8.6%, 100% 9%, 100% 100%, 0% 100%); }
-  .near { --z: 30; clip-path: polygon(0% 76.6%, 13.5% 73.1%, 31.3% 70.6%, 37.5% 67.5%, 43.8% 68.4%, 49% 72.7%, 51.6% 64.1%, 57.8% 62.2%, 60.4% 67%, 66.7% 73.4%, 79.2% 76.6%, 86.9% 70.6%, 89.6% 70.6%, 93.8% 78.1%, 100% 81.3%, 100% 100%, 0% 100%); }
-  .caption { position: absolute; left: var(--s5); bottom: var(--s5); width: 37vw; padding: var(--s3) var(--s4); }
+  .caption { position: absolute; left: var(--s5); top: var(--s5); width: 33vw; padding: var(--s3) var(--s4); animation: lift 0.8s var(--settle) 0.35s both; }
   .caption .head { margin: 0; text-wrap: balance; }
   .caption .head .em { color: var(--accent); }
   .caption .body { margin: var(--s1) 0 0; color: var(--muted); text-wrap: pretty; }
+  .mask { display: block; overflow: hidden; padding: 0.1em 0.1em 0.25em; margin: -0.1em -0.1em -0.25em; }
+  .mask > span { display: block; translate: 0 118%; animation: rise 0.7s var(--settle) both; animation-delay: calc(0.55s + var(--i) * 0.12s); }
+  @keyframes rise { to { translate: 0 0; } }
+  @keyframes lift { from { opacity: 0; translate: 0 6vh; } to { opacity: 1; translate: 0 0; } }
+  .caption .body { animation: lift 0.7s var(--settle) 0.95s both; }
 </style>
 </head>
 <body>
-<div class="stage"><div class="rig">
-  <div class="layer far"><img src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""></div>
-  <div class="layer subject"><img src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""></div>
-  <div class="layer near"><img src="/prompts/moves/demo/assets/photos/meadow.jpg" alt=""></div>
-</div></div>
+<div class="layer" id="far"><img src="/prompts/moves/demo/assets/photos/ridge-far.webp" alt=""></div>
+<div class="layer" id="mid"><img src="/prompts/moves/demo/assets/photos/ridge-mid.webp" alt=""></div>
+<div class="layer" id="near"><img src="/prompts/moves/demo/assets/photos/ridge-near.webp" alt=""></div>
 <div class="caption card">
-  <h1 class="head">Depth from <span class="em">one photo.</span></h1>
-  <p class="body">Three cuts, a slow push, a small drift.</p>
+  <h1 class="head"><span class="mask" style="--i:0"><span>Depth from</span></span><span class="mask" style="--i:1"><span class="em">one photo.</span></span></h1>
+  <p class="body">Three cuts, one push, one drift.</p>
 </div>
 <script type="module">
 import '/core/engine/page-api.js';
+import { curveToLinear, CURVES } from '/core/motion/springs.js';
 
-const rig = document.querySelector('.rig');
-const dur = 3, push = 14, drift = 1.6;   // push in vh of camera travel, drift in vw either side of centre
+document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+// push: scale gained by the end; drift: sideways travel in vw. Near moves 3x or more than far on both.
+const rig = { far: { push: 0.04, drift: 0.8 }, mid: { push: 0.13, drift: 2.4 }, near: { push: 0.30, drift: 7.0 } };
+const dur = 3.4;
 const ease = (u) => 0.5 * u + 0.5 * u * u * (3 - 2 * u);
+const layers = Object.entries(rig).map(([id, v]) => [document.getElementById(id), v]);
 vawe.onFrame((t) => {
-  const p = ease(Math.min(1, Math.max(0, t / dur)));
-  const vh = innerHeight / 100, vw = innerWidth / 100;
-  rig.style.transform = `translate3d(${((1 - 2 * p) * drift * vw).toFixed(3)}px, ${(2 * vh * (1 - p)).toFixed(3)}px, ${(push * p * vh).toFixed(3)}px)`;
+  const p = ease(Math.min(1, Math.max(0, t / dur))), vw = innerWidth / 100;
+  window.__rig = {};
+  for (const [el, v] of layers) {
+    const s = 1 + v.push * p, x = v.drift * vw * p;
+    el.style.transform = `translate3d(${x.toFixed(3)}px, 0, 0) scale(${s.toFixed(5)})`;
+    window.__rig[el.id] = { scale: s, x };
+  }
 });
 </script>
 </body>
