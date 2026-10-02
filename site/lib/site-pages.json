@@ -62,6 +62,48 @@
       "changeFrequency": "monthly",
       "group": "job",
       "label": "Launch video"
+    },
+    {
+      "path": "/vs/remotion",
+      "priority": 0.7,
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "Vawe vs Remotion"
+    },
+    {
+      "path": "/vs/hyperframes",
+      "priority": 0.7,
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "Vawe vs HyperFrames"
+    },
+    {
+      "path": "/vs/motion-canvas",
+      "priority": 0.7,
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "Vawe vs Motion Canvas"
+    },
+    {
+      "path": "/vs/lottie",
+      "priority": 0.7,
+      "changeFrequency": "monthly",
+      "group": "comparison",
+      "label": "Vawe vs Lottie"
+    },
+    {
+      "path": "/problems",
+      "priority": 0.7,
+      "changeFrequency": "monthly",
+      "group": "project",
+      "label": "Hard problems"
+    },
+    {
+      "path": "/roadmap",
+      "priority": 0.7,
+      "changeFrequency": "monthly",
+      "group": "project",
+      "label": "Roadmap"
     }
   ],
   "docs": [
@@ -137,6 +179,11 @@
     },
     {
       "path": "/docs/troubleshooting",
+      "priority": 0.8,
+      "changeFrequency": "monthly"
+    },
+    {
+      "path": "/docs/html-to-mp4-with-claude-code",
       "priority": 0.8,
       "changeFrequency": "monthly"
     }
