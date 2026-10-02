@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "predev": "node ../scripts/site/vendor-assets.mjs && node ../scripts/site/moves.mjs",
+    "predev": "node ../scripts/site/vendor-assets.mjs && node ../scripts/site/moves.mjs && node ../scripts/site/easing.mjs",
     "dev": "next dev",
-    "prebuild": "node ../scripts/site/vendor-assets.mjs && node ../scripts/site/moves.mjs",
+    "prebuild": "node ../scripts/site/vendor-assets.mjs && node ../scripts/site/moves.mjs && node ../scripts/site/easing.mjs",
     "build": "NEXT_DIST_DIR=.next-build next build",
     "start": "NEXT_DIST_DIR=.next-build next start",
     "lint": "next lint",
