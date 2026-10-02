@@ -1,5 +1,6 @@
 {
  "fixture": "tests/fixtures/pages/word-at-2-5.html",
+ "captureS": 0.74,
  "seconds": {
   "motion": 0,
   "text": 0.01,
