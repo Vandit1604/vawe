@@ -43,13 +43,6 @@
       "label": "AI agents"
     },
     {
-      "path": "/json-to-video",
-      "priority": 0.7,
-      "changeFrequency": "monthly",
-      "group": "topic",
-      "label": "HTML to video"
-    },
-    {
       "path": "/remotion-alternatives",
       "priority": 0.7,
       "changeFrequency": "monthly",

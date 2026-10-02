@@ -9,7 +9,6 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [moves](https://vawe.dev/moves): Proven motion moves, each a 1 to 2 s clip and one markdown file an agent copies. Every move file is listed under Moves below.
 - [determinism](https://vawe.dev/determinism): A page seeked, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true and how it checks it.
 - [ai-agents](https://vawe.dev/ai-agents): An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges the result.
-- [json-to-video](https://vawe.dev/json-to-video): HTML to video. One HTML page in, one MP4 out; the old JSON scene format is gone.
 - [remotion-alternatives](https://vawe.dev/remotion-alternatives): "Remotion alternative" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what Vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.
 - [when-determinism-matters](https://vawe.dev/when-determinism-matters): Byte-identical rendering is a real property, not a universal one. When it decides which engine to pick, and when a human editing a timeline by eye makes it beside the point.
 - [hyperframes-alternatives](https://vawe.dev/hyperframes-alternatives): HyperFrames is HeyGen's self-hosted, Apache-2.0, agent-facing rendering engine, the closest peer Vawe has. Both compose from HTML, timed and made deterministic in different ways. Read 2026-09-19.
