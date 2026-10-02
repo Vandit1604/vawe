@@ -129,3 +129,11 @@
 .mvd-rel a::after{content:"";position:absolute;inset:0}
 @media (max-width:900px){ .mvd-rel{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:640px){ .mvd-rel{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+.mvd-table{overflow-x:auto;max-width:66ch}
+.mvd-table table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.45}
+.mvd-table th,.mvd-table td{text-align:left;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);font-weight:400;vertical-align:top}
+.mvd-table thead th{font-family:var(--font-mono),monospace;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.mvd-table tbody th{font-weight:600}
+.mvd-more{margin-top:28px;max-width:66ch;color:var(--ink-2);line-height:1.65}
+.mvd-more a{color:var(--accent);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}

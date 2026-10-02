@@ -9,13 +9,28 @@ A Vawe film is one HTML page (CSS, Web Animations, SVG, canvas or three.js). The
 - [moves](https://vawe.dev/moves): Proven motion moves, each a 1 to 2 s clip and one markdown file an agent copies. Every move file is listed under Moves below.
 - [determinism](https://vawe.dev/determinism): A page seeked, never played: the same page produces the same frames on every render, in any order. How Vawe makes that true and how it checks it.
 - [ai-agents](https://vawe.dev/ai-agents): An agent writes the film as one HTML page, one command renders and checks it, and a fresh session judges the result.
+- [json-to-video](https://vawe.dev/json-to-video): HTML to video. One HTML page in, one MP4 out; the old JSON scene format is gone.
 - [remotion-alternatives](https://vawe.dev/remotion-alternatives): "Remotion alternative" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what Vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.
 - [when-determinism-matters](https://vawe.dev/when-determinism-matters): Byte-identical rendering is a real property, not a universal one. When it decides which engine to pick, and when a human editing a timeline by eye makes it beside the point.
 - [hyperframes-alternatives](https://vawe.dev/hyperframes-alternatives): HyperFrames is HeyGen's self-hosted, Apache-2.0, agent-facing rendering engine, the closest peer Vawe has. Both compose from HTML, timed and made deterministic in different ways. Read 2026-09-19.
 - [launch-video](https://vawe.dev/launch-video): How Vawe builds a product launch video: real captured UI, not invented mockups, one message per beat, from the site's own palette and type.
 
 ## Docs
-- [Docs](https://vawe.dev/docs): the documentation site.
+- [Introduction](https://vawe.dev/docs): Vawe is a framework for agent-native motion graphics. One HTML page in, one film out.
+- [Aspect ratios](https://vawe.dev/docs/aspect-ratios): One page, five ratios. Lay out with CSS, never crop.
+- [Audio](https://vawe.dev/docs/audio): Audio tags in the page, synth voices, and the offline mix.
+- [Backgrounds and images](https://vawe.dev/docs/backgrounds-and-images): The ground is CSS, canvas or three.js. Real images come first, and every image gets a treatment.
+- [Brand reflection](https://vawe.dev/docs/brand-reflection): Turn a real website into an on-brand film. Study the site and capture it before you write the page.
+- [CLI](https://vawe.dev/docs/cli): Every bin/vawe verb and its flags.
+- [Determinism](https://vawe.dev/docs/determinism): Why a frame is a function of the seek time, what the virtual clock owns, and how to check your page.
+- [Motion](https://vawe.dev/docs/motion): Springs, keyframe tables, the motion rules, and the moves to copy.
+- [Prompting](https://vawe.dev/docs/prompting): You do not write the page alone. You answer five questions and an agent writes the brief, the stills and the page.
+- [Quality gates](https://vawe.dev/docs/quality-gates): The checks you can run by name, and the ones that advise.
+- [Quickstart](https://vawe.dev/docs/quickstart): Install, write the starter page, and render a draft.
+- [Reading your own film](https://vawe.dev/docs/reading-your-film): Checks read structure. They cannot see whether a film is good. These tools put the frames in front of you.
+- [Recipes](https://vawe.dev/docs/recipes): Chains of built moves for common short films, with the beat table and the traps at each seam.
+- [The page](https://vawe.dev/docs/the-page): The page contract. One HTML file, a duration, a seek, relative assets.
+- [When it looks wrong](https://vawe.dev/docs/troubleshooting): Symptom to cause, for the failures that repeat. Most of them do not throw an error.
 
 ## Moves
 Each move is one markdown file an agent copies: when to use it, the CSS and WAAPI snippet, the notes and the sound cue. The gallery with clips is https://vawe.dev/moves.

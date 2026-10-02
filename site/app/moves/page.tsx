@@ -2,11 +2,13 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
 import { GROUPS, JOBS, LOOKS, MOVES, toCard } from "../../lib/moves";
+import { jsonLdScript } from "../../lib/schema";
+import { movesItemListSchema } from "../../lib/schema-content";
 import { MovesGallery } from "./MovesGallery";
 import "./moves.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · moves",
+  title: `${MOVES.length} CSS motion graphics moves for AI-agent video | vawe`,
   description: `${MOVES.length} proven motion moves, each a clip and the markdown an agent copies: when to use it, the CSS and Web Animations snippet, the notes and the sound cue.`,
   path: "/moves",
 });
@@ -14,6 +16,7 @@ export const metadata = pageMetadata({
 export default function Moves() {
   return (
     <div className="shell">
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(movesItemListSchema())} />
       <Header active="moves" />
       <main className="wrap" id="content" tabIndex={-1}>
         <section className="ls ls-top mv">

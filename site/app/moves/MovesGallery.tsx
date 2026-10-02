@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Facet, MoveCard } from "../../lib/moves";
+import { clip } from "../../lib/clip";
+import { moveAlt } from "../../lib/move-words";
 
 // Enough to show the grid is alive; each playing clip holds a decoder, and phones drop frames past this.
 const MAX_PLAYING = 6;
@@ -60,12 +62,13 @@ const Card = memo(function Card({
   reduced: boolean;
   onToggle: (name: string) => void;
 }) {
+  const files = clip(move);
   return (
     <li className="mv-card panel" data-name={move.name}>
       <div className="mv-media">
         <img
-          src={`/moves/${move.name}.webp`}
-          alt=""
+          src={files.poster}
+          alt={moveAlt(move)}
           width={640}
           height={360}
           loading={first ? "eager" : "lazy"}
@@ -81,8 +84,8 @@ const Card = memo(function Card({
             aria-hidden="true"
             onPlaying={(e) => e.currentTarget.setAttribute("data-on", "")}
           >
-            <source src={`/moves/${move.name}.webm`} type="video/webm" />
-            <source src={`/moves/${move.name}.mp4`} type="video/mp4" />
+            <source src={files.webm} type="video/webm" />
+            <source src={files.mp4} type="video/mp4" />
           </video>
         ) : null}
         {reduced ? (
