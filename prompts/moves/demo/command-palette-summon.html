@@ -104,11 +104,11 @@ const at = { dim: 120, drop: 150, rows: 220, keys: [780, 930, 1080], enter: 1340
 const opt = { fill: 'both' };
 
 // the app steps back, the palette drops in from above and settles
-q('.dim').animate([{ opacity: 0 }, { opacity: 0.55 }], { duration: 220, delay: at.dim, easing: EASE.land, ...opt });
+q('.dim').animate([{ opacity: 0 }, { opacity: 0.55 }], { duration: 320, delay: at.dim, easing: EASE.landSoft, ...opt });
 q('.app').animate([{ scale: 1 }, { scale: 0.985 }], { duration: 400, delay: at.dim, easing: EASE.land, ...opt });
 q('.palette').animate([{ translate: '0 -4vh', opacity: 0 }, { opacity: 1, offset: 0.25 }, { translate: '0 0', opacity: 1 }], { duration: 520, delay: at.drop, easing: EASE.pop, ...opt });
 // rows rise in 40 ms apart
-qa('.opt > div').forEach((r, i) => r.animate([{ translate: '0 1.6vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 360, delay: at.rows + i * 40, easing: EASE.land, ...opt }));
+qa('.opt > div').forEach((r, i) => r.animate([{ translate: '0 1.6vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 360, delay: at.rows + i * 40, easing: EASE.landSoft, ...opt }));
 
 // three keys: each one types a character and collapses the rows that stop matching
 const show = (el, k) => el.animate([{ display: 'none' }, { display: 'inline' }], { duration: 1, delay: k - 1, fill: 'both' });
@@ -116,7 +116,7 @@ qa('.typed > span:not(.caret)').forEach((c, i) => show(c, at.keys[i]));
 q('.ph').animate([{ display: 'inline' }, { display: 'none' }], { duration: 1, delay: at.keys[0] - 1, fill: 'both' });
 qa('.opt[data-out]').forEach((o) => {
   const k = Number(o.dataset.out) * 1000;
-  o.animate([{ height: 'calc(var(--px) * 44)', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 220, delay: k, easing: EASE.swap, ...opt });
+  o.animate([{ height: 'calc(var(--px) * 44)', opacity: 1 }, { height: '0px', opacity: 0 }], { duration: 280, delay: k, easing: EASE.swap, ...opt });
 });
 // the highlight sits on the first row, then on the first match once "Create issue" is gone
 const rows = qa('.opt > div'), css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -124,8 +124,8 @@ rows[0].animate([{ background: css('--raised') }, { background: 'transparent' }]
 rows[1].animate([{ background: 'transparent' }, { background: css('--raised') }], { duration: 120, delay: at.keys[0], easing: 'linear', ...opt });
 // Enter: the chosen row presses and turns accent, then the palette leaves faster than it came
 rows[1].animate([{ background: css('--raised'), color: css('--ink') }, { background: css('--accent'), color: css('--on-accent') }], { duration: 90, delay: at.enter, easing: 'linear', fill: 'forwards' });
-rows[1].animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { duration: 240, delay: at.enter, easing: EASE.land, fill: 'both' });
-q('.palette').animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 180, delay: at.exit, easing: EASE.launch, fill: 'forwards' });
+rows[1].animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { duration: 320, delay: at.enter, easing: EASE.landSoft, fill: 'both' });
+q('.palette').animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 220, delay: at.exit, easing: EASE.launch, fill: 'forwards' });
 q('.dim').animate([{ opacity: 0.55 }, { opacity: 0 }], { duration: 300, delay: at.exit + 60, easing: EASE.launch, fill: 'forwards' });
 q('.app').animate([{ scale: 0.985 }, { scale: 1 }], { duration: 400, delay: at.exit + 60, easing: EASE.land, fill: 'forwards' });
 </script>

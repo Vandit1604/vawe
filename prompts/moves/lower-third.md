@@ -20,10 +20,10 @@ const at = { rule: 420, plate: 520, name: 760, role: 900, exit: 2600 };   // ms
 shot.animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: EASE.glide, fill: 'both' });   // the picture never sits still
 
 // in: the rule grows up, the plate wipes open from it, the name rises out of its mask, then the role
-rule.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: EASE.land, fill: 'both' });
+rule.animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: EASE.landSoft, fill: 'both' });
 plate.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: EASE.land, fill: 'both' });
 name.animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: EASE.land, fill: 'both' });
-role.animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: EASE.land, fill: 'both' });
+role.animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: EASE.landSoft, fill: 'both' });
 
 // out, left off the clip so it ends on the held card: text first (160 ms), then the plate closes toward the rule in 260 ms, then the rule drops; no `from` fill over the entrance
 name.animate([{ translate: '0 0' }, { translate: '0 105%' }], { duration: 160, delay: at.exit, easing: EASE.launch, fill: 'forwards' });

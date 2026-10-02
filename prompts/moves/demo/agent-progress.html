@@ -55,7 +55,7 @@ const opt = { fill: 'both' };
 const at = { card: 80, rows: 420, checks: [1250, 1800, 2350], swaps: [420, 1250, 2000] };   // ms
 
 q('.run').animate([{ translate: '-50% -46%', scale: 0.94, opacity: 0 }, { opacity: 1, offset: 0.3 }, { translate: '-50% -50%', scale: 1, opacity: 1 }], { duration: 560, delay: at.card, easing: EASE.pop, ...opt });
-qa('.row').forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: EASE.land, ...opt }));
+qa('.row').forEach((r, i) => r.animate([{ translate: '0 1.8vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.rows + i * 70, easing: EASE.landSoft, ...opt }));
 
 // the machine works: both arcs turn for the whole clip and the bar advances with each check
 q('.spin').animate([{ rotate: '0deg' }, { rotate: '900deg' }], { duration: 3200, easing: 'linear', ...opt });
@@ -65,8 +65,8 @@ at.checks.forEach((k, i) => q('.bar i').animate([{ transform: `scaleX(${steps[i]
 
 // a slot swaps whole states: the old one leaves in 120 ms, the new one rises in 260 ms
 const slot = (els, times) => els.forEach((el, i) => {
-  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: times[i], easing: EASE.land, ...opt });
-  if (times[i + 1] !== undefined) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 120, delay: times[i + 1] - 120, easing: EASE.launch, fill: 'forwards' });
+  el.animate([{ opacity: 0, translate: '0 0.9vh' }, { opacity: 1, translate: '0 0' }], { duration: 260, delay: times[i], easing: EASE.landSoft, ...opt });
+  if (times[i + 1] !== undefined) el.animate([{ opacity: 1 }, { opacity: 0, translate: '0 -0.9vh' }], { duration: 160, delay: times[i + 1] - 160, easing: EASE.launch, fill: 'forwards' });
 });
 slot(qa('.status span'), at.swaps);
 slot(qa('.count span'), [at.rows, ...at.checks]);
@@ -74,13 +74,13 @@ slot(qa('.count span'), [at.rows, ...at.checks]);
 // a check lands: the numbered outline flips to a solid circle, the tick draws, the label strikes and dims
 at.checks.forEach((k, i) => {
   const row = qa('.row')[i], done = row.querySelector('.done'), lab = row.querySelector('.lab');
-  row.querySelector('.num').animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 120, delay: k, easing: EASE.launch, fill: 'forwards' });
+  row.querySelector('.num').animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.6 }], { duration: 160, delay: k, easing: EASE.launch, fill: 'forwards' });
   done.animate([{ opacity: 0, scale: 0.4 }, { opacity: 1, scale: 1 }], { duration: 380, delay: k, easing: EASE.pop, fill: 'forwards' });
-  done.querySelector('path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: EASE.land, fill: 'forwards' });
-  lab.querySelector('i').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: EASE.land, fill: 'forwards' });
+  done.querySelector('path').animate([{ strokeDashoffset: 24 }, { strokeDashoffset: 0 }], { duration: 260, delay: k + 100, easing: EASE.landSoft, fill: 'forwards' });
+  lab.querySelector('i').animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 300, delay: k + 60, easing: EASE.landSoft, fill: 'forwards' });
   lab.animate([{ color: 'var(--ink)' }, { color: 'var(--muted)' }], { duration: 300, delay: k + 60, easing: 'linear', fill: 'forwards' });
 });
-q('.row.live').animate([{ background: 'transparent' }, { background: 'var(--raised)' }], { duration: 240, delay: at.checks[2], easing: EASE.land, ...opt });
+q('.row.live').animate([{ background: 'transparent' }, { background: 'var(--raised)' }], { duration: 240, delay: at.checks[2], easing: EASE.landSoft, ...opt });
 </script>
 </body>
 </html>

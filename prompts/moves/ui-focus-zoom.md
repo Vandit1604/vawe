@@ -15,9 +15,9 @@ const W = innerWidth, H = innerHeight;
 const s = (0.36 * W) / r.width;                             // the target fills 36% of the frame width
 const tx = W * 0.5 - s * (r.left + r.width / 2), ty = H * 0.5 - s * (r.top + r.height / 2);
 cursor.animate([{ translate: '-16vw 12vh' }, { translate: '0 0' }],
-  { duration: 500, delay: 50, easing: EASE.land, fill: 'both' });
+  { duration: 500, delay: 50, easing: EASE.landSoft, fill: 'both' });
 world.animate([{ translate: '0 0', scale: 1 }, { translate: `${tx}px ${ty}px`, scale: s }],
-  { duration: 1000, delay: 550, easing: EASE.land, fill: 'both' });
+  { duration: 1000, delay: 550, easing: EASE.landSoft, fill: 'both' });
 ```
 
 Sound: none; the cursor landing is the cue's job in cursor-click, and the zoom itself is silent.
@@ -25,8 +25,8 @@ Sound: none; the cursor landing is the cue's job in cursor-click, and the zoom i
 The individual `translate` and `scale` properties apply as translate then scale from the origin, so
 `p -> t + s * p` and the target lands exactly on the frame centre. Measure the rect once at load,
 never per frame. Start the camera 50 ms after the cursor lands, so the eye is on the target when the
-move begins. A scale of 2.5 to 4 reads as a zoom; past 5 the capture goes soft. `EASE.land`
-gives a fast start and a long soft arrival; use `EASE.settle` for a calmer film. Cut back out on the next
+move begins. A scale of 2.5 to 4 reads as a zoom; past 5 the capture goes soft. `EASE.landSoft`
+gives a firm start and a long soft arrival; use `EASE.settle` for a calmer film. Cut back out on the next
 beat, never zoom back on a mirror curve.
 If a pan-stations camera owns the `.world`, fold the zoom into that camera's one `translate` and `scale`: two transforms on one world stack, and the target lands off centre.
 

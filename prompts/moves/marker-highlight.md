@@ -27,11 +27,11 @@ Ship the <span class="hl">launch film<span class="wipe"><span class="bar"></span
 
 Sound: none; the bar points at a word the viewer is already reading.
 
-`--sweep` is `EASE.land`, set on `:root` as in [mask-rise.md](mask-rise.md).
+`--sweep` is `EASE.landSoft`, set on `:root` as in [mask-rise.md](mask-rise.md).
 
 ## The numbers that make it look expensive
 
-- 0.55 s on `EASE.land`: the pen is fast at the start and settles at the end.
+- 0.55 s on `EASE.landSoft`: the pen is fast at the start and settles at the end.
 - The leading edge is slanted (`--e: 8`, 8% of the phrase width), not vertical.
 - The bar is 0.16em wider than the text on each side and sits 0.14em below the top, so the ends show
   as rounded caps and the bar covers the x-height plus a little, like a marker.

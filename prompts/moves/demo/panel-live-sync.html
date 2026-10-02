@@ -71,7 +71,7 @@ const cursorAt = (t) => {
 };
 
 q('.page').animate([{ translate: '0 2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 420, delay: 60, easing: EASE.land, fill: 'both' });
-q('.panel').animate([{ translate: '3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 480, delay: 160, easing: EASE.pop, fill: 'both' });
+q('.panel').animate([{ translate: '3vh 0', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 600, delay: 160, easing: EASE.pop, fill: 'both' });
 
 vawe.onFrame((t) => {
   const rot = held(t, 'rot'), rad = held(t, 'rad'), pad = held(t, 'pad');

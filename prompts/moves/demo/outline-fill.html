@@ -31,7 +31,7 @@ const word = document.querySelector('.word');
   word.append(ch);
   // the outline arrives first, letter by letter; the fill floods each letter from its baseline on the beat, 35 ms apart
   ch.animate([{ opacity: 0, translate: '0 5vh' }, { opacity: 1, translate: '0 0' }], { duration: 650, delay: 40 + i * 45, easing: EASE.land, fill: 'both' });
-  ch.querySelector('.f').animate([{ clipPath: 'inset(110% -0.1em -0.3em -0.1em)' }, { clipPath: 'inset(-0.3em -0.1em -0.3em -0.1em)' }], { duration: 480, delay: 780 + i * 35, easing: EASE.land, fill: 'both' });
+  ch.querySelector('.f').animate([{ clipPath: 'inset(110% -0.1em -0.3em -0.1em)' }, { clipPath: 'inset(-0.3em -0.1em -0.3em -0.1em)' }], { duration: 720, delay: 780 + i * 35, easing: EASE.landSoft, fill: 'both' });
 });
 word.animate([{ scale: 1 }, { scale: 1.03 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
 </script>

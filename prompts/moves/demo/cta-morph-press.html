@@ -45,7 +45,7 @@ vawe.onFrame((t) => {
   const morph = q('.morph');
   // one pop drives width, height and radius, so the plate is the button at every frame between
   const m = easeFn('pop')(clamp((t - at.morph) / 0.7));
-  const enter = seg(t, at.plate, at.plate + 0.42, easeFn('land'));
+  const enter = seg(t, at.plate, at.plate + 0.42, easeFn('landSoft'));
   const pressed = seg(t, at.down, at.down + 0.09) - spring(t - at.release, 300, 13);
   const s = 1 - pressed * 0.04;
   morph.style.width = `${lerp(plate.w, button.w, m).toFixed(2)}px`;
@@ -62,7 +62,7 @@ vawe.onFrame((t) => {
   q('.lbl.ok').style.opacity = seg(t, at.release + 0.1, at.release + 0.28);
   q('.lbl.ok').style.translate = `0 ${((1 - c) * u * 1.2).toFixed(2)}px`;
   q('.lbl.ok .icon path').style.strokeDasharray = 24;
-  q('.lbl.ok .icon path').style.strokeDashoffset = 24 * (1 - seg(t, at.release + 0.08, at.release + 0.36, easeFn('land')));
+  q('.lbl.ok .icon path').style.strokeDashoffset = 24 * (1 - seg(t, at.release + 0.08, at.release + 0.36, easeFn('landSoft')));
 
   // the cursor rides a quadratic bow and decelerates onto the label; the dip and the release follow the button
   const arrive = at2(start, bow, target, seg(t, at.go, at.arrive, easeFn('land')));
