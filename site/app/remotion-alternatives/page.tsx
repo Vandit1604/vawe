@@ -1,12 +1,13 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import { GithubCta, OpenSourceMark } from "../components/Icon";
 import "../components/intent.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · Remotion alternatives, categorized",
+  title: "vawe · Remotion alternatives, categorized",
   description:
-    "\"Remotion alternative\" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what Vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.",
+    "\"Remotion alternative\" returns two different products: a hosted JSON video API, or a self-hosted rendering engine. What Remotion's own license requires, what vawe and HyperFrames give away free, and where a hosted API fits instead. Read 2026-09-19.",
   path: "/remotion-alternatives",
 });
 
@@ -26,6 +27,7 @@ export default function RemotionAlternatives() {
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
+            <OpenSourceMark />
             <h1>Remotion alternatives, actually categorized.</h1>
             <p>
               &quot;Remotion alternative&quot; returns two different products under one query:
@@ -44,9 +46,9 @@ export default function RemotionAlternatives() {
                 <strong>Hosted JSON video APIs</strong> (JSON2Video, Shotstack) take a JSON
                 request over HTTPS and hand back a rendered file: no server to run, no Chrome to
                 manage, billed by the minute or by credits. <strong>Self-hosted rendering
-                engines</strong> (Remotion, HyperFrames, Vawe) are code you run: a composition
+                engines</strong> (Remotion, HyperFrames, vawe) are code you run: a composition
                 format, a headless-browser render step, output you own end to end. A team
-                choosing between JSON2Video and Vawe is not really choosing an alternative, it is
+                choosing between JSON2Video and vawe is not really choosing an alternative, it is
                 choosing whether to run infrastructure at all.
               </p>
               <span className="cite">
@@ -87,12 +89,12 @@ paid "Company License":
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Vawe and HyperFrames are the free self-hosted ones.</h2>
+              <h2>vawe and HyperFrames are the free self-hosted ones.</h2>
               <p>
-                Vawe ships under Apache-2.0 with no company-size clause and no paid tier. A film is
+                vawe ships under Apache-2.0 with no company-size clause and no paid tier. A film is
                 one HTML page. HyperFrames (HeyGen) is also Apache-2.0 and composes from HTML with
-                data attributes. Each has its own side-by-side page: <a href="/vs/remotion">Vawe vs
-                Remotion</a> and <a href="/vs/hyperframes">Vawe vs HyperFrames</a>.
+                data attributes. Each has its own side-by-side page: <a href="/vs/remotion">vawe vs
+                Remotion</a> and <a href="/vs/hyperframes">vawe vs HyperFrames</a>.
               </p>
               <span className="cite">
                 LICENSE and package.json (this repo) · github.com/heygen-com/hyperframes · read
@@ -145,7 +147,7 @@ paid "Company License":
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Vawe</td>
+                    <td>vawe</td>
                     <td>Apache-2.0, no size clause</td>
                     <td>yes</td>
                     <td>one HTML page: CSS, Web Animations, SVG, canvas, three.js</td>
@@ -177,8 +179,9 @@ paid "Company License":
             </div>
             <div className="hero-cta">
               <a className="btn btn-primary" href="/vs/remotion">
-                Vawe vs Remotion <span className="arw">→</span>
+                vawe vs Remotion <span className="arw">→</span>
               </a>
+              <GithubCta />
             </div>
             <div className="irelated">
               <a href="/hyperframes-alternatives">HyperFrames alternatives</a>

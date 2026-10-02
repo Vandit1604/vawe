@@ -6,7 +6,7 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "problems",
-    title: "Vawe · hard problems in agent-made motion graphics",
+    title: "vawe · hard problems in agent-made motion graphics",
     description: "Thirteen problems, seven solved with numbers, six still open.",
     path: "/problems",
   });

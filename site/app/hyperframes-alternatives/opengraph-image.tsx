@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "alternatives",
-    title: "Vawe · HyperFrames alternatives",
+    title: "vawe · HyperFrames alternatives",
     description:
-      "Four alternatives to HyperFrames: Vawe, Remotion, Motion Canvas and Lottie. What each is and which job it fits.",
+      "Four alternatives to HyperFrames: vawe, Remotion, Motion Canvas and Lottie. What each is and which job it fits.",
     path: "/hyperframes-alternatives",
   });
 }
