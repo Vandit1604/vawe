@@ -1,0 +1,14 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="duration" content="1">
+<style>body{margin:0;background:#000;overflow:hidden}</style></head>
+<body><script type="module">
+import '/core/engine/page-api.js';
+import { shaderField } from '/core/surfaces/shader-field.js';
+const field = shaderField(`
+void main() {
+  vec2 uv = gl_FragCoord.xy / u_res;
+  float w = sin(uv.x * 40.0 + u_time * 9.0) * cos(uv.y * 30.0 - u_time * 7.0);
+  gl_FragColor = vec4(0.5 + 0.5 * w, uv.y, 0.5 + 0.5 * sin(u_time * 5.0), 1.0);
+}`, { seed: 3 });
+vawe.onFrame((t) => field.draw(t));
+</script></body></html>
