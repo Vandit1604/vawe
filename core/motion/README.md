@@ -67,12 +67,13 @@ work uses, as CSS `linear()` strings, built with `curveToLinear(handleCurve(out,
 | name | out | in | use | evidence |
 |---|---|---|---|---|
 | `land` | fling | hang | an entrance: fast start, long soft arrival (default of `enter`) | arrive side: 27% of Lottie entrances end on hang or long; fast start: HyperFrames |
+| `landSoft` | fling at 20/2.5 | hang | an entrance under 0.4 s: the first frame moves 15 per cent of the way, not 24 | measured on the migrated clips: `land` at 4.8x reads as a jump on a short move |
 | `settle` | long | long | a big or heavy move easing both ends, 0.5 to 1 s | 18% of tuned Lottie entrances |
 | `swap` | hang | hang | a snappy swap: the value waits at each key | 27% of tuned glides |
 | `glide` | easyEase | speed 0.1 | a slow drift that never quite stops, camera and scale | glide, position: ease at both ends is the median |
 | `carry` | easyEase | fling | still fast at the key, into a cut | HyperFrames carousels (6 to 11x in) |
 | `leave` | easyEase | long | a decelerating exit | 76% of tuned Lottie exits end ease then hang |
-| `launch` | easyEase | fling | an accelerating exit (default of `leave`: exits run shorter and speed up) | owner rule; Lottie shows no exit above 1.5x |
+| `launch` | easyEase | 25/3 | an accelerating exit (default of `leave`: exits run shorter and speed up), at most 3x at the cut | owner rule; Lottie shows no exit above 1.5x; 4.8x at the cut read as a vanish |
 | `pop` | fling | overshoot at speed -1.5 | a pop that passes its mark by about 15 per cent and settles back (CTA, notification, check) | the `overshoot` handle's own blurb: a deeper speed is an authored choice (-0.4 passes by 2 per cent, too little to see) |
 
 `keys(el, prop, [[t, value, handle?], ...])` is an After Effects key table. Times are seconds, a handle

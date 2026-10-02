@@ -22,12 +22,13 @@ const STAGGER = { gap: 0.05, min: 0.03, max: 0.08, total: 0.5, jitter: 0.25 };
 // A handle is a name from HANDLE_REGISTRY or { influence, speed }.
 export const EASE_HANDLES = {
   land: ['fling', 'hang'],
+  landSoft: [{ influence: 20, speed: 2.5 }, 'hang'],
   settle: ['long', 'long'],
   swap: ['hang', 'hang'],
   glide: ['easyEase', { influence: 33, speed: 0.1 }],
   carry: ['easyEase', 'fling'],
   leave: ['easyEase', 'long'],
-  launch: ['easyEase', 'fling'],
+  launch: ['easyEase', { influence: 25, speed: 3 }],
   pop: ['fling', { influence: 35, speed: -1.5 }],
 };
 
