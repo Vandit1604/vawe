@@ -116,7 +116,7 @@ velocity across the film, not only the effect.
 | smooth | gentle ease in and out | a calm dissolve or fade, where a ramp would fight the mood |
 | linear | constant speed | a deliberately mechanical sweep; rarely what you want |
 
-In a page, write a ramp as a `linear()` easing from `curveToLinear` (`core/motion/springs.js`), or a
+In a page, write a ramp with an `EASE` name (`core/motion/presets.js`: `carry` into a cut, `land` out of it), or a
 `[[f, v]]` table in `seek(t)`. A whole film gets one velocity personality: calm decelerates in, brand
 uses ramps, hype is snappy, tense rushes. An explicit curve on one seam still wins.
 

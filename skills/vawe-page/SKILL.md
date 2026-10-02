@@ -53,13 +53,15 @@ const rot = kf(t * 30, [[0, 0], [24, 90], [60, 90]], 'easeInOutCubic');
 ```
 
 Never approximate a curve with `cubic-bezier()`: a hand-fitted bezier starts too hard and stops too
-early, and the motion reads jerky. Turn the real curve into an exact CSS easing with
-`curveToLinear(fn)` (presets in `CURVES`: `expoOut`, `spring`, `overshoot`), and use it in CSS or WAAPI:
+early, and the motion reads jerky. Use the After Effects eases in `EASE` (`core/motion/presets.js`):
+`land` to arrive, `landSoft` for a move under 0.4 s, `launch` or `leave` to exit, `glide` for a drift,
+`settle`, `swap`, `carry`, `pop`. Each is an exact CSS `linear()` easing; in `window.seek` or
+`vawe.onFrame` code use `easeFn(name)`, a function of 0..1. Multi-key motion: `keys()`.
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-el.animate([{ translate: '0 40px' }, { translate: '0 0' }], { duration: 700, easing: curveToLinear(CURVES.expoOut), fill: 'both', delay: 1200 });
-document.documentElement.style.setProperty('--ease-settle', curveToLinear(CURVES.expoOut)); // CSS: animation-timing-function: var(--ease-settle)
+import { EASE } from '../../core/motion/presets.js';
+el.animate([{ translate: '0 40px' }, { translate: '0 0' }], { duration: 700, easing: EASE.land, fill: 'both', delay: 1200 });
+document.documentElement.style.setProperty('--ease-land', EASE.land); // CSS: animation-timing-function: var(--ease-land)
 ```
 
 `SPRINGS.snappy` for leading edges, `heavy` for big type and logos, `playful` only when the brief
