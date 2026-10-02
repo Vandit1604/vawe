@@ -181,6 +181,7 @@ export const LEGACY_REDIRECTS = [
   permanent("/showcase/:path*", MOVES),
   permanent("/product-tour-video", MOVES),
   permanent("/type", MOVES),
+  permanent("/json-to-video", "/docs/html-to-mp4-with-claude-code"),
   permanent("/docs/the-scene", "/docs/the-page"),
   permanent("/docs/camera", "/docs/motion"),
   permanent("/docs/:slug(layers|blocks|themes|mcp)", "/docs"),
