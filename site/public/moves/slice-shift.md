@@ -8,16 +8,17 @@ sliding as one sheet. Clip: [slice-shift.mp4](slice-shift.mp4). Demo:
 [demo/slice-shift.html](demo/slice-shift.html).
 
 ```js
-import { curveToLinear, CURVES, rng } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, W = innerWidth, H = innerHeight, N = 7, h = H / N, rand = rng(11);
-const leave = (u) => 1 - E(1 - u);        // slow off the mark, fastest as the band leaves the frame
+import { rng } from '../../core/motion/springs.js';
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const W = innerWidth, H = innerHeight, N = 7, h = H / N, rand = rng(11);
+const leave = easeFn('launch');           // slow off the mark, fastest as the band leaves the frame
 for (let i = 0; i < N; i++) {
   // band i: overflow hidden, top i*h, height h+1 (the extra px hides a seam); inside it a full-frame copy of shot A at top -i*h
   const dir = i % 2 ? 1 : -1, delay = 300 + i * 42 + rand() * 30, dur = 500 + rand() * 100;   // ms
   band[i].animate([{ translate: '0 0' }, { translate: `${dir * W * 1.04}px 0` }],
-    { duration: dur, delay, easing: curveToLinear(leave), fill: 'both' });
+    { duration: dur, delay, easing: EASE.launch, fill: 'both' });
 }
-shotB.animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1000, delay: 450, easing: curveToLinear(E), fill: 'both' });
+shotB.animate([{ scale: 1.07 }, { scale: 1 }], { duration: 1000, delay: 450, easing: EASE.land, fill: 'both' });
 // one SVG feGaussianBlur per band, stdDeviation = 0.3 x that band's travel per frame, x only, set in vawe.onFrame as in push-blur
 ```
 

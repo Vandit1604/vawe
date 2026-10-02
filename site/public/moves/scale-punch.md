@@ -22,8 +22,8 @@ h1 { scale: 1.4; opacity: 0;
 ```html
 <h1>punch<span class="dot"></span></h1>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--recoil', curveToLinear(CURVES.overshoot));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--recoil', EASE.pop);
 </script>
 ```
 

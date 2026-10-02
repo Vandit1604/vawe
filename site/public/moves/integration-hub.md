@@ -8,8 +8,8 @@ Clip: [integration-hub.mp4](integration-hub.mp4). Demo: [demo/integration-hub.ht
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, H = innerHeight, cx = innerWidth / 2, cy = H / 2, R = 0.36 * H;
+import { easeFn } from '../../core/motion/presets.js';
+const E = easeFn('land'), H = innerHeight, cx = innerWidth / 2, cy = H / 2, R = 0.36 * H;
 const clamp = (u) => Math.min(1, Math.max(0, u));
 const quad = (p, q, r, u) => (1 - u) * (1 - u) * p + 2 * (1 - u) * u * q + u * u * r;
 const plan = tools.map((el, i) => {                      // tools: the logo chips, centred on their own origin
@@ -33,7 +33,7 @@ vawe.onFrame((t) => {
 Sound: droplet at 1.17 s into the move, when every wire is drawn and the first pulses ride in (default gain); no tick per tool.
 
 The start point sits half a radian off the landing bearing and the bend point off the other side,
-so each path is an S that swings in; straight rays read as a starburst. `expoOut` lands them soft,
+so each path is an S that swings in; straight rays read as a starburst. `EASE.land` lands them soft,
 and the small counter-rotation that unwinds on landing is what makes them feel thrown. Keep wires
 drawn in one window: a stagger here reads as one tool at a time. Invent the logos (a glyph in a
 chip); never use real brand marks without the brand's permission. A slow turn of the whole ring

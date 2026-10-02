@@ -2,7 +2,7 @@
 
 **Use when** one detail must hit on a beat ("look at this!"): the camera holds wide, then in 0.13 s
 it slams in to 2.6x on the detail, overshoots 5 percent and recoils in 0.32 s. Where `push-in` says
-"please look", this says "look now". The push accelerates into the hit (an ease-in, `u^3`), the
+"please look", this says "look now". The push accelerates into the hit (`EASE.carry`), the
 opposite of a normal entrance, because the stop is the impact. The detail that sells it is real zoom
 blur: 16 copies of the frame at scales fanned across half of one frame's change, stacked at
 opacities 1, 1/2, 1/3 and so on so they average to one exposure. The streaks point at the detail and
@@ -10,14 +10,14 @@ vanish the frame the camera stops. Clip: [crash-zoom.mp4](crash-zoom.mp4). Demo:
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
 const W = innerWidth, H = innerHeight, N = 16, clamp = (u) => Math.min(1, Math.max(0, u));
-const HIT = 0.55, PUSH = 0.13, S = 2.6, OVER = 1.05, RECOIL = 0.32;    // beat (s), push (s), rest scale, overshoot, recoil (s)
+const land = easeFn('land'), carry = easeFn('carry'), HIT = 0.55, PUSH = 0.13, S = 2.6, OVER = 1.05, RECOIL = 0.32;    // beat (s), push (s), rest scale, overshoot, recoil (s)
 const scaleAt = (t) => {
   if (t < HIT) return 1 + 0.02 * t;                                     // a slow creep while it holds wide
   const u = clamp((t - HIT) / PUSH);
-  if (u < 1) return 1.011 + (S * OVER - 1.011) * u * u * u;
-  const v = CURVES.expoOut(clamp((t - HIT - PUSH) / RECOIL));
+  if (u < 1) return 1.011 + (S * OVER - 1.011) * carry(u);
+  const v = land(clamp((t - HIT - PUSH) / RECOIL));
   return S * OVER + (S - S * OVER) * v + 0.08 * Math.max(0, t - HIT - PUSH - RECOIL);
 };
 vawe.onFrame((t) => {

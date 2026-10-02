@@ -1,7 +1,7 @@
 # Device tilt stage
 
 **Use when** the product should be seen as an object: the UI sits on a laptop screen that rises from
-a steep top-down angle, turns and settles at a hero three-quarter view on a spring. It is a real CSS 3D
+a steep top-down angle, turns and settles at a hero three-quarter view on a long ease. It is a real CSS 3D
 object (a lid with a bezel and a keyboard deck at 90 degrees), so the deck foreshortens as it turns.
 The detail that sells it is the reflection on the glass: it is driven by the lid's angle, not by time,
 so it slides across the screen exactly as the lid turns and stops when the lid stops. Clip:
@@ -17,11 +17,11 @@ so it slides across the screen exactly as the lid turns and stops when the lid s
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
 const from = { y: 30, rx: -62, ry: -38, rz: 5, s: 0.62 }, to = { y: 0, rx: -16, ry: -8, rz: 0, s: 0.74 };   // vh, degrees
 const lerp = (a, b, u) => a + (b - a) * u, clamp = (u) => Math.min(1, Math.max(0, u));
 vawe.onFrame((t) => {
-  const u = CURVES.spring(clamp((t - 0.05) / 1.45));
+  const u = easeFn('settle')(clamp((t - 0.05) / 1.45));
   const float = Math.sin(t * 2.4) * 0.5 * clamp((t - 1.2) / 0.4);          // a slow bob once it has landed
   const ry = lerp(from.ry, to.ry, u) + float * 1.2;
   device.style.transform = `translateY(${lerp(from.y, to.y, u) + float}vh) rotateX(${lerp(from.rx, to.rx, u)}deg) rotateY(${ry}deg) rotateZ(${lerp(from.rz, to.rz, u)}deg) scale(${lerp(from.s, to.s, u)})`;

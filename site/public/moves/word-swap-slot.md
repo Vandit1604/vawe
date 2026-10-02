@@ -16,7 +16,7 @@ kinetic-type-swap. Clip: [word-swap-slot.mp4](word-swap-slot.mp4). Demo:
 ```js
 const w = words.map((b) => { const r = document.createRange(); r.selectNodeContents(b); return r.getBoundingClientRect().width / px; });
 const seg = [380, 380, 650], total = 1410, at = [0, 0.27, 0.54, 1];   // cumulative share of total
-const easing = ['cubic-bezier(0.8, 0, 0.2, 1)', 'cubic-bezier(0.8, 0, 0.2, 1)', curveToLinear(CURVES.overshoot)];
+const easing = [EASE.swap, EASE.swap, EASE.pop];
 const opts = { delay: 200, duration: total, fill: 'both', easing: 'linear' };
 col.animate(at.map((o, i) => ({ offset: o, translate: `0 ${-i * 1.7}em`, easing: easing[i] })), opts);
 slot.animate(at.map((o, i) => ({ offset: o, width: `${w[i]}em`, easing: easing[i] })), opts);
@@ -29,9 +29,9 @@ exact. `<span>` in the slot holds a zero-width space so the slot has a baseline.
 
 ## The numbers that make it look expensive
 
-- Each word dwells about 0.25 s and then rolls: the roll easing `cubic-bezier(0.8, 0, 0.2, 1)` is slow
+- Each word dwells about 0.25 s and then rolls: the roll easing `EASE.swap` is slow
   at the start and fast at the end, so the eye reads every value.
-- The last segment uses the overshoot curve: the final word drops in, dips 8 percent past its row
+- The last segment uses `EASE.pop`: the final word drops in, dips 8 percent past its row
   and settles. The last word takes the accent colour.
 - The width animates on the same keyframes and the same easing as the roll, so the words after the
   slot (or the centred sentence) move with the word, never before or after it.

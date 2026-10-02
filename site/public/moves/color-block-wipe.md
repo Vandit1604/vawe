@@ -9,15 +9,15 @@ one flat edge. Clip: [color-block-wipe.mp4](color-block-wipe.mp4). Demo:
 [demo/color-block-wipe.html](demo/color-block-wipe.html).
 
 ```js
-import { CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, W = innerWidth;
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const E = easeFn('land'), W = innerWidth;
 const tIn = 0.3, dIn = 0.36, hold = 0.04, dOut = 0.42, lag = 0.08;
 const from = -1.3 * W, cover = -0.16 * W, to = 1.05 * W;       // block is 130vw wide; at `cover` it fills the frame, skew included
 const pos = (t) => {
   if (t <= tIn) return from;
   if (t < tIn + dIn) return from + (cover - from) * E((t - tIn) / dIn);            // arrive fast, land soft
   const u = Math.min(1, Math.max(0, (t - tIn - dIn - hold) / dOut));
-  return cover + (to - cover) * (0.3 * u + 0.7 * (1 - E(1 - u)));                    // slow off the mark, fastest leaving
+  return cover + (to - cover) * easeFn('launch')(u);                    // slow off the mark, fastest leaving
 };
 vawe.onFrame((t) => {
   lead.style.transform = `translateX(${pos(t)}px)`;      // .face inside is skewX(-9deg); the wordmark is not skewed

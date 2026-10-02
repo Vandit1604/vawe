@@ -18,14 +18,14 @@ Use on one title per film. The type must hold readable and sharp for at least 1.
 </div>
 <script type="module">
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
 const vh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh'));
 vawe.onFrame((t) => {                                         // the seek time drives the filter, never a SMIL animate
-  const left = 1 - CURVES.expoOut(Math.min(1, Math.max(0, (t - 0.05) / 1.1)));   // 1 at the start, 0 at 1.15 s
+  const left = 1 - easeFn('land')(Math.min(1, Math.max(0, (t - 0.05) / 1.1)));   // 1 at the start, 0 at 1.15 s
   const swap = Math.min(1, Math.max(0, (t - 0.5) / 0.16));    // the plain copy fades in over 0.5 to 0.66 s
   disp.setAttribute('scale', (vh * 0.3 * left ** 1.75).toFixed(2));
   noise.setAttribute('baseFrequency', `${(0.004 + 0.012 * left).toFixed(5)} ${(0.008 + 0.03 * left).toFixed(5)}`);
-  clean.style.opacity = (swap * swap * (3 - 2 * swap)).toFixed(3);
+  clean.style.opacity = easeFn('swap')(swap).toFixed(3);
   title.style.opacity = swap >= 1 ? 0 : 1;
 });
 </script>

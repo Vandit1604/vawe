@@ -10,9 +10,9 @@ viewer sees a circle turn into a card, not a box that was always a box. Clip:
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, W = innerWidth, H = innerHeight, clamp = (u) => Math.min(1, Math.max(0, u));
-const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+import { easeFn } from '../../core/motion/presets.js';
+const E = easeFn('land'), W = innerWidth, H = innerHeight, clamp = (u) => Math.min(1, Math.max(0, u));
+const whip = easeFn('swap');
 const grow = (u) => 0.35 * u + 0.65 * whip(u), lerp = (p, q, u) => p + (q - p) * u;
 const r = dot.getBoundingClientRect(), o = { x: r.left + r.width / 2, y: r.top + r.height / 2, d: r.width };
 const T0 = 0.4, DUR = 0.85, PAD = 0.04 * H;                         // PAD: the box ends past every edge, so no corner shows shot A

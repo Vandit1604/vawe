@@ -17,8 +17,8 @@ the settled word still looks clipped. Clip: [mask-rise.mp4](mask-rise.mp4). Demo
 ```html
 <h1 class="mask"><span>typography</span></h1>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 ```
 

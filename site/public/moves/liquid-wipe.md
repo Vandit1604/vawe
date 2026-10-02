@@ -8,8 +8,9 @@ between rows. The detail that sells it is the second edge: an accent band leads 
 [liquid-wipe.mp4](liquid-wipe.mp4). Demo: [demo/liquid-wipe.html](demo/liquid-wipe.html).
 
 ```js
-import { curveToLinear, CURVES, rng } from '../../core/motion/springs.js';
-const E = (u) => 1 - (1 - u) ** 2.4, rand = rng(5), N = 8, rh = H / N, R = rh * 0.8, blur = rh * 0.42;
+import { rng } from '../../core/motion/springs.js';
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const E = easeFn('land'), rand = rng(5), N = 8, rh = H / N, R = rh * 0.8, blur = rh * 0.42;
 const rows = Array.from({ length: N }, (_, i) => ({ y: (i + 0.5) * rh, lag: rand() * 0.22, dur: 0.85 + rand() * 0.25 }));
 const prog = (row, t) => Math.min(1, Math.max(0, (t - 0.25 - row.lag) / row.dur));
 const front = (row, t) => -R - 3 * blur + (W + 2 * R + 6 * blur + W * 0.14) * E(prog(row, t));   // starts fully outside the frame

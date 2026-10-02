@@ -16,9 +16,9 @@ The speed differences are the depth; nothing is faked with per-layer offsets. Cl
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
 const t0 = 0.1, dur = 1.8, dive = 120;                     // dive: camera travel in vh, so the title (z -120) ends at z 0
-const ease = (u) => 0.35 * u + 0.65 * CURVES.expoOut(u);
+const ease = easeFn('land');
 vawe.onFrame((t) => {
   const p = ease(Math.min(1, Math.max(0, (t - t0) / dur))), vh = innerHeight / 100;
   rig.style.transform = `translate3d(${-3 * p * vh * 0.5625}px, 0, ${dive * p * vh}px)`;   // a small sideways drift adds parallax

@@ -8,7 +8,7 @@ no lag. Clip: [panel-live-sync.mp4](panel-live-sync.mp4). Demo: [demo/panel-live
 
 ```js
 import '../../core/engine/page-api.js';
-const smooth = (u) => u * u * (3 - 2 * u), clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (a, b, u) => a + (b - a) * u;
+const smooth = easeFn('settle'), clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (a, b, u) => a + (b - a) * u;
 const seg = (t, a, b) => smooth(clamp((t - a) / (b - a)));
 // one gesture per beat: glide to a field, press, scrub, release (seconds); values hold between beats
 const beats = [

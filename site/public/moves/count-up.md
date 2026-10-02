@@ -16,15 +16,15 @@ speed. A delta chip slides in when the number lands and a sparkline draws to the
 </style>
 <script type="module">
 import '../../core/engine/page-api.js';
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const land = easeFn('land');
 const loops = [1, 1, 2, 2, 3];   // full turns per digit; more turns on the right
 // per digit d: a strip of 10 * (loops + 1) numerals in a clipped cell, and a filter of its own
 const steps = loops[d] * 10 + digit, t0 = 0.1 + d * 0.045, dur = 1.15;
-strip.animate([{ translate: '0 0' }, { translate: `0 ${-steps * 1.16}em` }], { duration: dur * 1000, delay: t0 * 1000, easing: settle, fill: 'both' });
+strip.animate([{ translate: '0 0' }, { translate: `0 ${-steps * 1.16}em` }], { duration: dur * 1000, delay: t0 * 1000, easing: EASE.land, fill: 'both' });
 vawe.onFrame((t) => {   // SVG filters cannot be keyframed: blur y by half a frame of this wheel's travel
   const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
-  const slope = (CURVES.expoOut(Math.min(1, u + du)) - CURVES.expoOut(u)) / du;
+  const slope = (land(Math.min(1, u + du)) - land(u)) / du;
   blur.setAttribute('stdDeviation', `0 ${(u > 0 && u < 1 ? (slope / dur) * travel / 60 * 0.5 : 0).toFixed(2)}`);
 });
 </script>

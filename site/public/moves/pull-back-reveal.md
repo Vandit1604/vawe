@@ -7,11 +7,11 @@ full composition. The detail is the hook and the wide frame is the payoff. Clip:
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
 const r = dot.getBoundingClientRect();                     // measured before the first frame
 const d = { x: r.left + r.width / 2, y: r.top + r.height / 2 }, c = { x: innerWidth / 2, y: innerHeight / 2 };
 const s0 = 9, t0 = 0.1, dur = 1.6;                         // world { transform-origin: 0 0 }
-const ease = (u) => 0.3 * u + 0.7 * CURVES.expoOut(u);     // fast, then soft; the linear share keeps the tail alive
+const ease = easeFn('land');     // fast, then a long soft arrival
 vawe.onFrame((t) => {
   const u = Math.min(1, Math.max(0, (t - t0) / dur)), p = ease(u);
   const s = Math.exp(Math.log(s0) * (1 - p));              // zoom is multiplicative: scale on a log path

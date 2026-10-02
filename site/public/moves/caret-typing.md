@@ -22,8 +22,8 @@ under the word), so nothing new enters. Monospace type makes `ch` exact. Clip:
 ```html
 <div class="type"><span class="text">vawe ship</span><span class="caret"></span></div>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 ```
 

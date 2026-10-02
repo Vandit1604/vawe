@@ -8,14 +8,14 @@ so the wall reads as different companies and not as one font repeated. Clip:
 [logo-wall.mp4](logo-wall.mp4). Demo: [demo/logo-wall.html](demo/logo-wall.html).
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), run = 190 * u;      // u = 1 percent of the frame height
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const run = 190 * u;      // u = 1 percent of the frame height
 // lane markup: .lane (overflow hidden) > .row (absolute, left -20u) > .track (flex, 2 x 12 cells of 38u)
 // a cell is an inline SVG mark (24 x 24 viewBox, filled, currentColor) plus a wordmark; invented brands only (demo/assets/logos.js)
 lanes.forEach((row, i) => {
   const dir = i % 2 ? 1 : -1, delay = 150 + i * 110;                // lanes alternate, 110 ms apart
-  row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: 1300, delay, easing: settle, fill: 'both' });
-  row.firstElementChild.animate([{ translate: '0 0' }, { translate: `${dir * 6 * u}px 0` }], { duration: 2000, easing: 'linear', fill: 'both' });
+  row.animate([{ translate: `${-dir * run}px 0` }, { translate: '0 0' }], { duration: 1300, delay, easing: EASE.land, fill: 'both' });
+  row.firstElementChild.animate([{ translate: '0 0' }, { translate: `${dir * 6 * u}px 0` }], { duration: 2000, easing: EASE.glide, fill: 'both' });
   // blur: SVG feGaussianBlur on the row, x only, stdDeviation = 0.3 x its travel per frame, set in vawe.onFrame as in push-blur
 });
 ```

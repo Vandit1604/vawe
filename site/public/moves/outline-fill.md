@@ -12,12 +12,11 @@ No blur and no mask hides the word at any point. Clip: [outline-fill.mp4](outlin
 <style>.o { filter: url(#ring); } .f { position: absolute; inset: 0; color: var(--accent); clip-path: inset(110% -0.1em -0.3em -0.1em); }</style>
 <span class="ch"><i class="o">F</i><i class="f">F</i></span>   <!-- one per letter -->
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut);
+import { EASE } from '../../core/motion/presets.js';
 chars.forEach((ch, i) => {
-  ch.animate([{ opacity: 0, translate: '0 5vh' }, { opacity: 1, translate: '0 0' }], { duration: 650, delay: 40 + i * 45, easing: settle, fill: 'both' });
+  ch.animate([{ opacity: 0, translate: '0 5vh' }, { opacity: 1, translate: '0 0' }], { duration: 650, delay: 40 + i * 45, easing: EASE.land, fill: 'both' });
   ch.querySelector('.f').animate([{ clipPath: 'inset(110% -0.1em -0.3em -0.1em)' }, { clipPath: 'inset(-0.3em -0.1em -0.3em -0.1em)' }],
-    { duration: 480, delay: 780 + i * 35, easing: settle, fill: 'both' });
+    { duration: 720, delay: 780 + i * 35, easing: EASE.landSoft, fill: 'both' });
 });
 </script>
 ```

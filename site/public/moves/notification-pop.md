@@ -14,14 +14,13 @@ about a second so the text can be read, then leaves faster than it came. Clip:
 </div>
 <style>.note { transform-origin: 50% 0; opacity: 0; }</style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.overshoot), leave = curveToLinear((u) => u * u * u);
-note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: drop, fill: 'both' });
+import { EASE } from '../../core/motion/presets.js';
+note.animate([{ translate: '0 -62vh', scale: '0.92 0.96' }, { translate: '0 0', scale: '1 1' }], { duration: 700, easing: EASE.pop, fill: 'both' });
 note.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 90, easing: 'linear', fill: 'both' });
-app.animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: drop, fill: 'both' });
+app.animate([{ scale: 0.7, opacity: 0 }, { scale: 1, opacity: 1 }], { duration: 520, delay: 200, easing: EASE.pop, fill: 'both' });
 [[text, 280], [when, 340]].forEach(([el, at]) => el.animate([{ translate: '0 1.4vh', opacity: 0, filter: 'blur(4px)' }, { translate: '0 0', opacity: 1, filter: 'blur(0px)' }],
-  { duration: 420, delay: at, easing: settle, fill: 'both' }));
-note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: leave, fill: 'forwards' });
+  { duration: 420, delay: at, easing: EASE.land, fill: 'both' }));
+note.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -34vh', opacity: 0 }], { duration: 260, delay: 1740, easing: EASE.launch, fill: 'forwards' });
 </script>
 ```
 
