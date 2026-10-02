@@ -68,28 +68,28 @@
       "priority": 0.7,
       "changeFrequency": "monthly",
       "group": "comparison",
-      "label": "Vawe vs Remotion"
+      "label": "vawe vs Remotion"
     },
     {
       "path": "/vs/hyperframes",
       "priority": 0.7,
       "changeFrequency": "monthly",
       "group": "comparison",
-      "label": "Vawe vs HyperFrames"
+      "label": "vawe vs HyperFrames"
     },
     {
       "path": "/vs/motion-canvas",
       "priority": 0.7,
       "changeFrequency": "monthly",
       "group": "comparison",
-      "label": "Vawe vs Motion Canvas"
+      "label": "vawe vs Motion Canvas"
     },
     {
       "path": "/vs/lottie",
       "priority": 0.7,
       "changeFrequency": "monthly",
       "group": "comparison",
-      "label": "Vawe vs Lottie"
+      "label": "vawe vs Lottie"
     },
     {
       "path": "/problems",
