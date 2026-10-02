@@ -13,6 +13,39 @@ export const jobLogPath = (id) => path.join(SHIP_JOBS_DIR, `${id}.log`);
 
 export const samePage = (a, b) => path.resolve(a) === path.resolve(b);
 
+/** The line a failed final prints last; the ship job reads it back from the render's log. */
+export const finalFailedLine = (pct, reason) => `final failed at ${pct}% (${reason})`;
+
+const FAILED_AT = /final failed at (\d+)% \((.*)\)\s*$/gm;
+const CAPTURING = /capturing (\d+)\/(\d+) subframe/g;
+
+/** { pct, reason } of a failed final from its log: its own failed line, else the last progress and the last error line. */
+export function finalFailure(text, fallbackReason = 'the render stopped') {
+  const own = [...text.matchAll(FAILED_AT)].pop();
+  if (own) return { pct: Number(own[1]), reason: own[2] };
+  const seen = [...text.matchAll(CAPTURING)].pop();
+  const errors = text.split(/[\r\n]+/).map((l) => l.trim()).filter((l) => /^error:|error|failed/i.test(l) && !l.includes('capturing '));
+  return { pct: seen ? Math.floor((100 * Number(seen[1])) / Number(seen[2])) : 0, reason: (errors.pop() || fallbackReason).replace(/^error:\s*/, '') };
+}
+
+/** The newest `ship` event of a film's runs when it failed, else null. */
+export function lastFailedShip(runs) {
+  const ship = runs.filter((r) => r.cmd === 'ship').pop();
+  return ship && ship.verdict === 'failed' ? ship : null;
+}
+
+const RECENT_MS = 3 * 24 * 60 * 60 * 1000;
+
+/** One failed-final line per film whose newest ship failed in the last 3 days (render-page keeps frames that long). `films` is readAllRuns. */
+export function recentFailedShipLines(films, now) {
+  return films.map(({ film, runs }) => [film, lastFailedShip(runs)])
+    .filter(([, ship]) => ship && now - Date.parse(ship.at) < RECENT_MS)
+    .map(([film, ship]) => failedShipLine(film, ship));
+}
+
+/** The one line that says a film's last final failed and how to resume it. */
+export const failedShipLine = (film, ship) => `error: the last final of ${film} failed at ${ship.failedAt ?? '?'}% (${ship.reason ?? 'no reason recorded'}); bin/vawe ship ${ship.page ?? `films/${film}/page.html`} resumes it`;
+
 const clock = (ms) => `${Math.round(ms / 1000)}s`;
 
 /** One colour fills the frame and the luma grid is level. */

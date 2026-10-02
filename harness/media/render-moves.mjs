@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Render every prompts/moves/demo/<move>.html to prompts/moves/<move>.mp4: 1280 px wide, 60 fps, the
 // demo's own duration. Renders only stale clips (source hash differs from clips.lock.json); --all or --only forces.
-// Runs a few renders at once.
+// Runs a few renders at once; each waits for a machine-wide render slot (harness/lib/render-slots.mjs).
 //   node harness/media/render-moves.mjs [--only <name>] [--all]
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -59,7 +59,7 @@ function renderArgs(name) {
 
 function renderOne(name) {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, renderArgs(name), { cwd: ROOT, stdio: ['ignore', 'ignore', 'pipe'] });
+    const child = spawn(process.execPath, renderArgs(name), { cwd: ROOT, stdio: ['ignore', 'ignore', 'pipe'], env: { ...process.env, VAWE_RENDER_KIND: 'clip' } });
     let stderr = '';
     child.stderr.on('data', (d) => { stderr += d; });
     child.on('close', (code) => resolve({ name, code, stderr: stderr.trim() }));

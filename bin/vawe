@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
 import { VERBS } from '../harness/cli/verbs.mjs';
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
-import { appendRun } from '../harness/lib/runlog.mjs';
+import { appendRun, readAllRuns } from '../harness/lib/runlog.mjs';
+import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
 import { newEvent } from '../harness/lib/run-events.mjs';
 import { doctorHintFromFile } from '../harness/lib/doctor-hint.mjs';
 
@@ -61,7 +62,9 @@ function main(argv) {
         process.chdir(ROOT);
         appendRun(positional[0], newEvent({ template: made.template, length: made.length, answered: made.answered, guessed: made.guesses }));
       }
-      return console.log(newFilmLines(positional[0], made).join('\n'));
+      console.log(newFilmLines(positional[0], made).join('\n'));
+      for (const line of recentFailedShipLines(readAllRuns(path.join(ROOT, 'out')), Date.now())) console.error(line);
+      return;
     }
     for (const step of steps) {
       const code = runStep(step);

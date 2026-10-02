@@ -1,6 +1,7 @@
 // vawe runs <film> | --all [--json] [--dir out]: reads <dir>/<film>.runs.jsonl (harness/lib/runlog.mjs) into tables (harness/lib/runs-report.mjs).
 import { readAllRuns, filmKeyOf } from '../lib/runlog.mjs';
 import { filmLines, allRows, modelRows, allLines } from '../lib/runs-report.mjs';
+import { lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
 
 const args = process.argv.slice(2);
 const json = args.includes('--json');
@@ -15,6 +16,8 @@ if (args.includes('--all')) {
   const key = filmKeyOf(film);
   const runs = readAllRuns(dir).find((f) => f.film === key)?.runs ?? [];
   console.log(json ? JSON.stringify(runs, null, 1) : filmLines(key, runs).join('\n'));
+  const failed = lastFailedShip(runs);
+  if (failed && !json) console.error(failedShipLine(key, failed));
 } else {
   console.error('vawe runs: give a film name or --all');
   process.exit(2);
