@@ -1,0 +1,102 @@
+---
+title: HTML to MP4 with Claude Code
+description: Install vawe, ask Claude Code for a film, and render one HTML page to an MP4 in four commands.
+icon: Terminal
+---
+
+A vawe film is one HTML page. Claude Code writes the page. The renderer opens it in headless Chrome, seeks it frame by frame, and encodes an MP4. This page takes you from a clean machine to a rendered file.
+
+## What you need
+
+- Node 22 or later, git and ffmpeg (with libx264 and drawtext).
+- Claude Code, started in the vawe repository.
+
+```bash
+npm install
+bin/vawe doctor
+```
+
+`bin/vawe doctor` checks each tool and prints the install line for any that is missing.
+
+## Ask for the film
+
+Claude Code reads `AGENTS.md` when it starts in the repository, so it already knows the page contract. Describe the film in one sentence:
+
+```text
+Make a 6 second film that announces version 2.0 of my CLI tool.
+Dark background, one big number, a short caption.
+```
+
+A typical run goes in this order:
+
+1. `bin/vawe new <name> --request "<your sentence>"` writes `films/<name>/page.html` and `brief.md`.
+2. It writes three directions in the brief and picks one.
+3. It edits `page.html`.
+4. It renders a draft and looks at it.
+
+You can also start the film yourself and give the page to Claude Code. The command may ask for missing details first. Pass `--defaults` to skip the questions:
+
+```bash
+bin/vawe new v2-launch --request "6 second film that announces version 2.0 of my CLI tool" --defaults
+```
+
+## What the page looks like
+
+The page is HTML and CSS. The only vawe parts are a duration tag and, if you want sound, an `<audio>` tag.
+
+```html
+<!doctype html>
+<meta charset="utf-8">
+<meta name="duration" content="6">
+<meta name="message" content="version 2.0 is here">
+<style>
+  body { margin: 0; background: #0b0d12; color: #f4f6fb; font: 800 calc(var(--vh) * 0.2) system-ui; }
+  h1 { position: absolute; left: 8%; top: 30%; margin: 0;
+       animation: in 0.6s cubic-bezier(.2,.9,.2,1) 0.4s both; }
+  @keyframes in { from { transform: translateY(0.4em); opacity: 0 } to { transform: none; opacity: 1 } }
+</style>
+<h1>2.0</h1>
+```
+
+Time is the seek, not the clock. CSS `@keyframes` and `element.animate()` run on the time the renderer sets. A page can also define `window.seek(t)` and paint frame `t` as a function of `t`. Do not use timers or unseeded random numbers. vawe replaces `Date`, `requestAnimationFrame`, timers and `Math.random` with versions that follow the seek, so the same page gives the same frames on every render.
+
+## Render a draft, then the final
+
+```bash
+bin/vawe dev  films/v2-launch/page.html
+bin/vawe ship films/v2-launch/page.html
+```
+
+`bin/vawe dev` renders a draft at half size and 30 fps, without sound, to `out/v2-launch-draft.mp4`. Use `--from` and `--to` to render only the seconds you are working on.
+
+`bin/vawe ship` renders the final at 60 fps with motion blur and the audio mix, to `out/v2-launch.mp4`. It runs in the background. Run `bin/vawe ship --status films/v2-launch/page.html --wait` to wait for the result.
+
+## Review the film in a fresh session
+
+Do not review a film in the session that wrote it. Start a new Claude Code session and run:
+
+```bash
+bin/vawe critique films/v2-launch/page.html
+```
+
+The critique names each problem as a shot, a frame and a fix. Fix the worst items, render only those seconds again, and critique again.
+
+## Other shapes
+
+One page renders to every supported shape. Lay the page out with CSS, and vawe sets `--vw` and `--vh` for the shape:
+
+```bash
+bin/vawe ship films/v2-launch/page.html --aspect all
+```
+
+<Callout title="Same machine, same bytes">
+Output can differ between hosts that rasterise on a different GPU or Chrome version. On one machine, two renders of one page give identical frames.
+</Callout>
+
+## Next
+
+<Cards>
+  <Card title="Prompting" href="/docs/prompting" description="Templates, the five questions and the brief." />
+  <Card title="The page" href="/docs/the-page" description="What a page must contain." />
+  <Card title="Troubleshooting" href="/docs/troubleshooting" description="When a render fails." />
+</Cards>

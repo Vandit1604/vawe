@@ -6,9 +6,9 @@ export const contentType = "image/png";
 export default function Image() {
   return staticOgImage({
     tag: "alternatives",
-    title: "Vawe · HyperFrames alternatives",
+    title: "vawe · HyperFrames alternatives",
     description:
-      "The one close peer HyperFrames has: same license, same self-hosted shape, both compose from HTML, timed and made deterministic in different ways. Read 2026-09-19.",
+      "Four alternatives to HyperFrames: vawe, Remotion, Motion Canvas and Lottie. What each is and which job it fits.",
     path: "/hyperframes-alternatives",
   });
 }
