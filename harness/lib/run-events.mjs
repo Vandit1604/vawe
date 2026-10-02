@@ -24,7 +24,8 @@ export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, ledge
   ledger, seconds,
 });
 
-/** A final render: `verdict` PASS, FIX, failed, or null when no judge ran; `acceptance` as acceptanceCounts. */
-export const shipEvent = ({ verdict, renderS, acceptance }) => ({
+/** A final render: `verdict` PASS, FIX, failed, or null when no judge ran; `acceptance` as acceptanceCounts. A failed one also records `failedAt` (percent of subframes captured), `reason` and `page`. */
+export const shipEvent = ({ verdict, renderS, acceptance, failure = null }) => ({
   cmd: 'ship', verdict: verdict ?? null, renderS: tenths(renderS), acceptance: acceptance ?? null,
+  ...(failure ? { failedAt: failure.pct, reason: failure.reason, page: failure.page } : {}),
 });

@@ -20,8 +20,9 @@
 // sets the clock, calls window.seek(t) when the page defines it, then seeks CSS/WAAPI/SMIL animations and
 // vawe.onFrame hooks, then waits for fonts, image decode and two real paints before the screenshot.
 //
+// A render first takes one of the machine-wide render slots (harness/lib/render-slots.mjs) and waits for one.
 // Capture is split into fixed 60-frame slices, `--workers` of them at once (default VAWE_WORKERS, else 2 while
-// another render runs, else min(4, cpus-1)), each on
+// another render holds a slot, else min(4, cpus-1)), each on
 // its own page of the shared browser (harness/media/preview-server.mjs); the speed pass below runs the same
 // way. Slice boundaries do not depend on the worker count, so the pixels never do either. When
 // blur > 1, a per-frame speed pass decides how many subframes that frame actually needs: a still frame
@@ -50,7 +51,8 @@ import { scratch } from '../lib/scratch.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
-import { appendRun } from '../lib/runlog.mjs';
+import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
+import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
 import { devEvent, shipEvent } from '../lib/run-events.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
@@ -74,19 +76,12 @@ import { textCollisionLines } from '../lib/text-collision.mjs';
 import { contrastLines } from '../lib/text-contrast.mjs';
 import { peakLine } from '../lib/peak-limit.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
+import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
 
 // A laptop running two renders at 4 workers each overheats and throttles; the second render starts cool.
 const COOL_WORKERS = 2;
 
-function otherRenderRunning() {
-  const ps = spawnSync('ps', ['-Ao', 'pid=,command='], { encoding: 'utf8' });
-  return (ps.stdout || '').split('\n').some((line) => {
-    const [pid, ...cmd] = line.trim().split(/\s+/);
-    return Number(pid) !== process.pid && cmd.join(' ').includes('render-page.mjs');
-  });
-}
-
-export function defaultWorkers(env = process.env, busy = otherRenderRunning) {
+export function defaultWorkers(env = process.env, busy = () => slotsInUse().length > 1) {
   if (Number(env.VAWE_WORKERS) > 0) return Number(env.VAWE_WORKERS);
   if (busy()) return COOL_WORKERS;
   return Math.max(1, Math.min(4, os.cpus().length - 1));
@@ -194,16 +189,18 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
     speeds[i] = sum / next.length;
     local.prev = next;
     return 2;
-  }, { fps, from }, stallMs);
+  }, { fps, from, stallMs });
   return speeds;
 }
 
-// The pass is a pure function of the page folder, core/ and the render settings, so a second ship of an
-// unchanged page reads its answer from the scratch folder.
-async function frameSubframes(page, job) {
-  const { pagePath, frame, frames, fps, from, blur } = job;
+// The pixels of a render are a pure function of the page folder, core/ and the render settings: this key names
+// both the speed pass answer and the frames dir, so a second render of an unchanged page reuses them.
+export function renderKey({ pagePath, frame, frames, fps, from, blur }) {
   const files = [path.dirname(path.resolve(pagePath)), path.join(REPO_ROOT, 'core')];
-  const key = createHash('sha1').update(JSON.stringify([treeSignature(files), path.resolve(pagePath), frame, frames, fps, from, blur])).digest('hex').slice(0, 16);
+  return createHash('sha1').update(JSON.stringify([treeSignature(files), path.resolve(pagePath), frame, frames, fps, from, blur])).digest('hex').slice(0, 16);
+}
+
+async function frameSubframes(page, job, key) {
   const cacheFile = scratch('render-prepass', `${key}.json`);
   try { return JSON.parse(fs.readFileSync(cacheFile, 'utf8')); } catch { /* not cached yet */ }
   const kArr = await measureSubframes(page, job);
@@ -250,24 +247,29 @@ function clampSegments(kArr, cap = 200) {
 // Runs work(page, i, local, mark) for every frame 0..frames-1 in fixed SLICE_FRAMES slices, `workers` slices at
 // a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state;
 // work calls mark('<step>') before each await so a stall can name it.
-// A slice whose browser or page dies, or that makes no progress for `stallMs`, is restarted once from its first
-// frame (returns the restarted slices as "lo-hi s" strings); a second death exits 2, a second stall throws.
-// `clock` is { fps, from } and only names the time range.
+// A slice whose browser or page dies, or that makes no progress for `stallMs`, runs again from its first frame on a
+// fresh page, up to SLICE_ATTEMPTS in all; then the render throws an InvariantError. Returns the retried slices as
+// "lo-hi s" strings, one per retry. `run` is { fps, from } (they only name the time range) and optionally stallMs,
+// resume { done(slice), finish(slice) } to skip the slices an earlier run finished, and fault(slice, attempt), a test
+// hook that may throw at the start of an attempt.
 const LOST_PAGE = /Connection closed|Target closed|No target with given id|Session closed|Protocol error|timed out|timeout/i;
 
 // Measured slowest step: 0.38 s (a colour-sting draft screenshot); awaitFonts gives up at 10 s. A step at 60 s
 // is stuck, and the 30 min CDP protocol timeout would fire far too late.
 export const STALL_MS = 60000;
 
+export const SLICE_ATTEMPTS = 4;
+
 class StallError extends Error {}
 
-async function runShards(pagePath, frame, frames, workers, work, clock, stallMs = STALL_MS) {
+async function runShards(pagePath, frame, frames, workers, work, run) {
+  const { stallMs = STALL_MS, resume = null, fault = null } = run;
   const slices = [];
   for (let lo = 0; lo < frames; lo += SLICE_FRAMES) slices.push([lo, Math.min(frames, lo + SLICE_FRAMES)]);
   const restarted = [];
   let next = 0;
-  const range = ([lo, hi]) => `${(clock.from + lo / clock.fps).toFixed(2)}-${(clock.from + hi / clock.fps).toFixed(2)}s`;
-  const runSliceOnce = async ([lo, hi], worker) => {
+  const range = ([lo, hi]) => `${(run.from + lo / run.fps).toFixed(2)}-${(run.from + hi / run.fps).toFixed(2)}s`;
+  const runSliceOnce = async ([lo, hi], worker, attempt) => {
     const at = { frame: lo, step: 'open page', since: Date.now(), stuck: false, opened: null };
     const mark = (step, i = at.frame) => {
       if (at.stuck) throw new StallError('abandoned after a stall');
@@ -277,6 +279,7 @@ async function runShards(pagePath, frame, frames, workers, work, clock, stallMs 
       const local = {};
       let sinceOpen = 0;
       try {
+        if (fault) fault([lo, hi], attempt);
         for (let i = lo; i < hi; i++) {
           if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await at.opened.close().catch(() => {}); at.opened = null; }
           if (!at.opened) {
@@ -298,7 +301,7 @@ async function runShards(pagePath, frame, frames, workers, work, clock, stallMs 
         if (idle < stallMs) return;
         at.stuck = true;
         if (at.opened) at.opened.close().catch(() => {});
-        const t = (clock.from + at.frame / clock.fps).toFixed(2);
+        const t = (run.from + at.frame / run.fps).toFixed(2);
         reject(new StallError(`render stalled: worker ${worker}, frame ${at.frame} (${t} s), in ${at.step} for ${(idle / 1000).toFixed(0)} s`));
       }, Math.min(1000, stallMs / 4));
     });
@@ -306,20 +309,31 @@ async function runShards(pagePath, frame, frames, workers, work, clock, stallMs 
     try { await Promise.race([loop, stalled]); } finally { clearInterval(timer); }
   };
   const runSlice = async (slice, worker) => {
-    try { await runSliceOnce(slice, worker); } catch (e) {
-      const stall = e instanceof StallError;
-      if (!stall && !LOST_PAGE.test(String(e && e.message))) throw e;
-      if (stall) console.error(`${e.message}; restarting slice ${range(slice)} once`);
-      restarted.push(range(slice));
-      try { await runSliceOnce(slice, worker); } catch (e2) {
-        if (e2 instanceof StallError) throw new InvariantError([`${e2.message}, the second time on slice ${range(slice)}: the page never finished that step (a window.seek or onFrame hook that never resolves, a font or image that never loads), or the browser is starved`]);
-        if (!LOST_PAGE.test(String(e2 && e2.message))) throw e2;
-        die(`slice ${slice[0]}-${slice[1]} (${range(slice)}) lost its page twice: another process closed the shared browser, or the page crashed (${e2.message})`, 2);
+    if (resume && resume.done(slice)) return;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await runSliceOnce(slice, worker, attempt);
+        if (resume) resume.finish(slice);
+        return;
+      } catch (e) {
+        const stall = e instanceof StallError;
+        if (!stall && !LOST_PAGE.test(String(e && e.message))) throw e;
+        if (attempt === SLICE_ATTEMPTS) {
+          if (stall) throw new InvariantError([`${e.message}, ${SLICE_ATTEMPTS} times on slice ${range(slice)}: the page never finished that step (a window.seek or onFrame hook that never resolves, a font or image that never loads), or the browser is starved`]);
+          throw new InvariantError([`slice ${slice[0]}-${slice[1]} (${range(slice)}) lost its page ${SLICE_ATTEMPTS} times: another process closed the shared browser, or the page crashed (${e.message})`]);
+        }
+        console.error(`${stall ? e.message : `slice ${range(slice)} lost its page (${e.message})`}; retrying slice ${range(slice)} on a fresh page (attempt ${attempt + 1} of ${SLICE_ATTEMPTS})`);
+        restarted.push(range(slice));
       }
     }
   };
-  const lane = async (worker) => { while (next < slices.length) await runSlice(slices[next++], worker); };
+  // After a failure no new slice starts, but the slices already running finish, so a later run resumes them.
+  let failure = null;
+  const lane = async (worker) => {
+    while (next < slices.length && !failure) await runSlice(slices[next++], worker).catch((e) => { failure ??= e; });
+  };
   await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1)));
+  if (failure) throw failure;
   return restarted;
 }
 
@@ -336,7 +350,13 @@ const stillKey = () => {
 const seekThenKey = async (ms) => { await window.__pageSeek(ms / 1000); return window.__stillKey(); };
 
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, stallMs) {
+// A slice that finished writes slice-<lo>.done in tmpDir; a later render into the same tmpDir skips it and calls onResumed.
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, fault, onResumed }) {
+  const marker = ([lo]) => path.join(tmpDir, `slice-${lo}.done`);
+  const resume = {
+    done: (slice) => { const found = fs.existsSync(marker(slice)); if (found) onResumed(slice); return found; },
+    finish: (slice) => fs.writeFileSync(marker(slice), ''),
+  };
   return runShards(pagePath, frame, frames, workers, async (page, i, local, mark) => {
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
@@ -345,8 +365,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
       mark('seek');
       const key = await page.evaluate(seekThenKey, baseMs + (j / k) * SHUTTER * (1000 / fps));
       const reused = key !== null && key === local.key;
-      if (reused) fs.linkSync(local.file, file);
-      else {
+      if (reused) { fs.rmSync(file, { force: true }); fs.linkSync(local.file, file); } else {
         mark('settle (fonts, image decode, two paints)');
         await settle(page);
         mark('screenshot');
@@ -356,7 +375,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
       onSubframe(i, reused);
     }
     return k;
-  }, { fps, from }, stallMs);
+  }, { fps, from, stallMs, fault, resume });
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -594,11 +613,10 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const frame = resolveFrame(pagePath, opts);
   const wantAudio = opts.audio ?? (final && from === 0 && durArg == null);
   if (opts.audio && from > 0) die('--audio needs a render from 0: the mix has no offset');
+  const slot = await takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) });
+  removeStaleFrames(path.dirname(path.resolve(outPath)));
   const { page, url, close } = await openPage(pagePath, frame);
   const scriptErrors = watchPageErrors(page);
-  const tmpDir = `${outPath}.frames-${process.pid}`;
-  fs.rmSync(tmpDir, { recursive: true, force: true });
-  fs.mkdirSync(tmpDir, { recursive: true });
   try {
     await page.goto(url, { waitUntil: 'load' });
     try { await settle(page); } catch (e) {
@@ -621,9 +639,12 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const frames = Math.round(dur * fps);
     if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
-    const workers = opts.workers || defaultWorkers();
+    const workers = opts.workers || defaultWorkers(process.env, () => slot.others > 0);
     const tPre = Date.now();
-    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs }) : Array(frames).fill(1);
+    const key = renderKey({ pagePath, frame, frames, fps, from, blur });
+    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs }, key) : Array(frames).fill(1);
+    const tmpDir = `${outPath}.frames-${key}`;
+    fs.mkdirSync(tmpDir, { recursive: true });
     const subframeStart = new Array(frames + 1);
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
@@ -636,8 +657,16 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const tick = progress ? setInterval(() => {
       process.stdout.write(`\r  capturing ${doneSub}/${totalSub} subframe(s)...`);
     }, 1000) : null;
-    const restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, opts.stallMs);
-    if (tick) { clearInterval(tick); process.stdout.write(`\r${' '.repeat(40)}\r`); }
+    let resumed = 0;
+    const onResumed = ([lo, hi]) => { resumed++; doneSub += subframeStart[hi] - subframeStart[lo]; };
+    let restarted;
+    try {
+      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, fault: opts.sliceFault, onResumed });
+    } catch (e) {
+      throw Object.assign(e, { progress: doneSub / totalSub, framesDir: tmpDir });
+    } finally {
+      if (tick) { clearInterval(tick); process.stdout.write(`\r${' '.repeat(40)}\r`); }
+    }
     const captureMs = Date.now() - t0;
 
     const tmpOut = `${outPath}.tmp-${process.pid}.mp4`;
@@ -655,6 +684,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
       die(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
+    fs.rmSync(tmpDir, { recursive: true, force: true });
     const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
@@ -670,11 +700,30 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (tmpWeb) await place(tmpWeb, webPath);
     const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(page, pagePath, dur)) : null;
     const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
-    return { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, probe, level, motion, advice, profile, web: webPath };
+    return { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, probe, level, motion, advice, profile, web: webPath };
   } finally {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
     await close();
+    slot.release();
   }
+}
+
+const STALE_FRAMES_DAYS = 3;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// A failed render keeps its frames dir so the next run resumes it; one untouched this long is never coming back.
+export function removeStaleFrames(dir, now = Date.now(), log = (l) => console.error(l)) {
+  if (!fs.existsSync(dir)) return [];
+  const removed = [];
+  for (const name of fs.readdirSync(dir).filter((n) => /\.frames-[0-9a-f]+$/.test(n))) {
+    const full = path.join(dir, name);
+    const st = fs.statSync(full);
+    const days = (now - st.mtimeMs) / DAY_MS;
+    if (!st.isDirectory() || days < STALE_FRAMES_DAYS) continue;
+    fs.rmSync(full, { recursive: true, force: true });
+    log(`removed stale frames ${full} (${days.toFixed(0)} days old)`);
+    removed.push(full);
+  }
+  return removed;
 }
 
 // A page whose folder declares a reference (the recreation starter writes `reference.json`) refuses a
@@ -809,6 +858,22 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   console.log([timing, look, ...report.red, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
 
+// Test hook for the CLI: VAWE_TEST_SLICE_FAULT=<lo>:<n> makes the slice starting at frame <lo> lose its page on its first n attempts.
+function faultFromEnv(value) {
+  const m = String(value || '').match(/^(\d+):(\d+)$/);
+  if (!m) return undefined;
+  return ([lo], attempt) => { if (lo === Number(m[1]) && attempt <= Number(m[2])) throw new Error('Target closed (VAWE_TEST_SLICE_FAULT)'); };
+}
+
+// The ship job reads the failed line back from this render's log and logs the ship event itself (--job).
+function reportFailedFinal(pagePath, e, byJob) {
+  const page = path.relative(process.cwd(), path.resolve(pagePath));
+  const failure = { pct: Math.floor(100 * (e.progress ?? 0)), reason: String((e.problems || [e.message])[0]).split('\n')[0], page };
+  if (e.framesDir) console.error(`frames kept in ${e.framesDir}; bin/vawe ship ${page} resumes it`);
+  console.error(finalFailedLine(failure.pct, failure.reason));
+  if (!byJob) appendRun(pagePath, shipEvent({ verdict: 'failed', renderS: process.uptime(), failure }));
+}
+
 async function main() {
   const argv = process.argv.slice(2);
   const flag = (name, d) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : d; };
@@ -824,6 +889,8 @@ async function main() {
   if (drift.length) { for (const p of drift) console.error(errorLine(p)); process.exit(2); }
   const final = argv.includes('--final');
   if (final) assertFinalReady(pagePath);
+  const failedShip = final ? null : lastFailedShip(readRuns(pagePath));
+  if (failedShip) console.error(failedShipLine(filmKeyOf(pagePath), failedShip));
   const from = final ? 0 : Number(flag('--from', 0));
   const toFlag = flag('--to', null);
   const durFlag = flag('--dur', null);
@@ -840,18 +907,20 @@ async function main() {
       blur: Number(flag('--blur', final ? 32 : 1)), from, durArg, progress: argv.includes('--progress') || (final && Boolean(process.stdout.isTTY)),
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
+      sliceFault: faultFromEnv(process.env.VAWE_TEST_SLICE_FAULT),
       checks: final ? undefined : createChecks({ pagePath, mode: argv.includes('--full') ? 'full' : argv.includes('--fast') ? 'fast' : 'draft' }),
     };
     const frame = resolveFrame(pagePath, opts);
     const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
     const r = await renderPage(pagePath, outPath, opts).catch((e) => {
-      if (!(e instanceof InvariantError)) throw e;
-      for (const p of e.problems) console.error(errorLine(p));
+      if (!(e instanceof InvariantError) && !final) throw e;
+      for (const p of e.problems || [e.stack || String(e)]) console.error(errorLine(p));
+      if (final) reportFailedFinal(pagePath, e, argv.includes('--job'));
       process.exit(2);
     });
     console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
-      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, restarted slice(s) ${r.restarted.join(' ')}` : ''}`
+      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, retried slice(s) ${r.restarted.join(' ')}` : ''}${r.resumed ? `, ${r.resumed} slice(s) resumed from an earlier run` : ''}`
       + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`);
     if (r.web) console.log(`  web copy: ${r.web} (${(fs.statSync(r.web).size / 1e6).toFixed(1)} MB; master ${(fs.statSync(outPath).size / 1e6).toFixed(1)} MB)`);
     if (!final) await printDraft(outPath, pagePath, r, { checks: opts.checks, taste: argv.includes('--taste'), next: flag('--next', null), opts, from });

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { samePage, blankRuns, isFlat, problemsOf, doneLines } from '../../harness/lib/ship-status.mjs';
+import { samePage, blankRuns, isFlat, problemsOf, doneLines, finalFailedLine, finalFailure, lastFailedShip, failedShipLine, recentFailedShipLines } from '../../harness/lib/ship-status.mjs';
+import { shipEvent } from '../../harness/lib/run-events.mjs';
 
 const stats = (over = {}) => ({ duration: 6, turns: [{ t: 2 }, { t: 4 }], static: [], ...over });
 
@@ -55,4 +56,27 @@ test('doneLines: the ship verdict is PASS only when the judge passes and no meas
 test('doneLines: no problems and a skipped check are said plainly', () => {
   assert.match(doneLines({ id: 'x', startedAt: 0, endedAt: 1000, outputs: ['o.mp4'], problems: [] }).join('\n'), /no problems found/);
   assert.match(doneLines({ id: 'x', startedAt: 0, endedAt: 1000, outputs: ['o.mp4'], problems: [], checkError: 'boom' }).join('\n'), /check skipped: boom/);
+});
+
+test('a failed final reads its percent and reason back from its own last line', () => {
+  const reason = 'slice 1260-1320 (21.00-22.00s) lost its page 4 times (Navigation timeout of 30000 ms exceeded)';
+  const log = `\r  capturing 100/200 subframe(s)...\nerror: ${reason}\n${finalFailedLine(96, reason)}\n`;
+  assert.deepEqual(finalFailure(log), { pct: 96, reason });
+});
+
+test('a final killed without its own line falls back to the last progress and error lines', () => {
+  assert.deepEqual(finalFailure('\r  capturing 20768/21504 subframe(s)...', 'exit null'), { pct: 96, reason: 'exit null' });
+  assert.deepEqual(finalFailure('error: ffmpeg encode failed (exit 1):', 'exit 1'), { pct: 0, reason: 'ffmpeg encode failed (exit 1):' });
+});
+
+test('the newest ship event decides whether the last final failed, and the line says how to resume', () => {
+  const failed = { at: '2026-10-02T06:35:00Z', ...shipEvent({ verdict: 'failed', renderS: 960, failure: { pct: 96, reason: 'lost its page', page: 'films/brindle/page.html' } }) };
+  assert.equal(failed.failedAt, 96);
+  assert.equal(lastFailedShip([{ cmd: 'dev' }, failed]), failed);
+  assert.equal(lastFailedShip([failed, { cmd: 'ship', verdict: 'PASS' }]), null);
+  assert.equal(lastFailedShip([failed, { cmd: 'dev' }]), failed);
+  assert.equal(failedShipLine('brindle', failed), 'error: the last final of brindle failed at 96% (lost its page); bin/vawe ship films/brindle/page.html resumes it');
+  const now = Date.parse('2026-10-03T06:00:00Z');
+  const films = [{ film: 'brindle', runs: [failed] }, { film: 'old', runs: [{ ...failed, at: '2026-09-01T00:00:00Z' }] }];
+  assert.deepEqual(recentFailedShipLines(films, now), [failedShipLine('brindle', failed)]);
 });

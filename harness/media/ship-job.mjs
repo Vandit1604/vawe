@@ -17,8 +17,8 @@ import { fileURLToPath } from 'node:url';
 import { defaultOut } from './render-page.mjs';
 import { videoProblems } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
-import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath } from '../lib/ship-status.mjs';
-import { appendRun } from '../lib/runlog.mjs';
+import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine } from '../lib/ship-status.mjs';
+import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance } from './acceptance-run.mjs';
 
@@ -70,8 +70,9 @@ function runJob(id) {
   child.on('close', (code) => {
     const renderMs = Date.now() - job.startedAt;
     if (code !== 0) {
-      appendRun(job.page, shipEvent({ verdict: 'failed', renderS: renderMs / 1000 }));
-      return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now() });
+      const failure = { ...finalFailure(logText(job), `exit ${code}`), page: job.page };
+      appendRun(job.page, shipEvent({ verdict: 'failed', renderS: renderMs / 1000, failure }));
+      return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now(), failure });
     }
     const checked = { ...readJob(id), renderMs, ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
     if (!checked.judge || !checked.outputs.length) return finishJob(id, checked);
@@ -143,7 +144,12 @@ function errorLines(text) {
 function finalLines(job, text) {
   if (job.status === 'done') return doneLines(job);
   if (job.status === 'cancelled') return [`job ${job.id}: cancelled, a newer job for the same page replaced it`];
-  return [`job ${job.id}: failed (exit ${job.exit}) after ${clock(job.endedAt - job.startedAt)}`, ...errorLines(text), `full log: ${job.log}`];
+  return [failedLine(job, text, `exit ${job.exit}`), `job ${job.id}: failed (exit ${job.exit}) after ${clock(job.endedAt - job.startedAt)}`, ...errorLines(text), `full log: ${job.log}`];
+}
+
+function failedLine(job, text, fallback) {
+  const { pct, reason } = job.failure ?? finalFailure(text, fallback);
+  return failedShipLine(filmKeyOf(job.page), { failedAt: pct, reason, page: job.page });
 }
 
 function newestJobFor(page) {
@@ -160,7 +166,7 @@ function statusOf(id) {
   const job = readJob(target);
   const text = logText(job);
   if (['done', 'failed', 'cancelled'].includes(job.status)) return finalLines(job, text);
-  if (job.status === 'running' && !pidAlive(job.pid)) return [`job ${job.id}: the render process died without a result`, `log: ${job.log}`];
+  if (job.status === 'running' && !pidAlive(job.pid)) return [failedLine(job, text, 'the render process died without a result'), `job ${job.id}: the render process died without a result`, `log: ${job.log}`];
   if (job.status === 'judging') return [`job ${job.id}: rendered; a fresh judge is scoring the final (about 30 s)`];
   return [progressLine(job, text), `log: ${job.log}`];
 }
