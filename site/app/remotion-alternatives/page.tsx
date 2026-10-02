@@ -87,31 +87,16 @@ paid "Company License":
 
           <section className="isec">
             <div className="isec-text">
-              <h2>Vawe: Apache-2.0, no employee count.</h2>
+              <h2>Vawe and HyperFrames are the free self-hosted ones.</h2>
               <p>
-                Vawe ships under the Apache License, Version 2.0, the same file at the root of
-                this repo. There is no company-size clause and no paid tier: the renderer, the
-                command line, the motion helpers and the skills are all in the license&apos;s scope.
-                A film is one HTML page, written with CSS, Web Animations, SVG, canvas or three.js,
-                so there is no framework to learn before the first render.
-              </p>
-              <span className="cite">LICENSE · package.json &quot;license&quot;: &quot;Apache-2.0&quot;</span>
-            </div>
-          </section>
-
-          <section className="isec">
-            <div className="isec-text">
-              <h2>HyperFrames is the other free one.</h2>
-              <p>
-                HyperFrames (HeyGen) is also Apache-2.0: no license fee, no per-render charge, and
-                no requirement to use HeyGen&apos;s cloud, per its own repository. It composes from
-                HTML, CSS and GSAP rather than React, and states the same pitch Vawe does: built
-                for an agent to write, not a human to click through a timeline. It is a genuine
-                peer to Vawe on licensing terms, and this page does not claim otherwise. The closer
-                comparison between the two has its own page.
+                Vawe ships under Apache-2.0 with no company-size clause and no paid tier. A film is
+                one HTML page. HyperFrames (HeyGen) is also Apache-2.0 and composes from HTML with
+                data attributes. Each has its own side-by-side page: <a href="/vs/remotion">Vawe vs
+                Remotion</a> and <a href="/vs/hyperframes">Vawe vs HyperFrames</a>.
               </p>
               <span className="cite">
-                github.com/heygen-com/hyperframes · read 2026-09-19
+                LICENSE and package.json (this repo) · github.com/heygen-com/hyperframes · read
+                2026-09-19
               </span>
             </div>
           </section>
@@ -171,7 +156,7 @@ paid "Company License":
                     <td>free ≤3 employees, paid above</td>
                     <td>yes</td>
                     <td>React</td>
-                    <td>not publicly stated</td>
+                    <td>Agent Skills (remotion.dev/docs/ai/skills)</td>
                   </tr>
                   <tr>
                     <td>HyperFrames</td>
@@ -191,11 +176,12 @@ paid "Company License":
               </table>
             </div>
             <div className="hero-cta">
-              <a className="btn btn-primary" href="/hyperframes-alternatives">
-                Vawe vs HyperFrames <span className="arw">→</span>
+              <a className="btn btn-primary" href="/vs/remotion">
+                Vawe vs Remotion <span className="arw">→</span>
               </a>
             </div>
             <div className="irelated">
+              <a href="/hyperframes-alternatives">HyperFrames alternatives</a>
               <a href="/determinism">Why the same page always renders the same frames</a>
               <a href="/ai-agents">How an agent writes and checks a film</a>
               <a href="/when-determinism-matters">When determinism is the reason to pick an engine</a>
