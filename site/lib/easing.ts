@@ -81,9 +81,9 @@ export function waapi(e: Ease) {
 }
 
 export function importLine(e: Ease) {
-  if (e.kind === "vawe") return `import { EASE } from 'vawe/core/motion/presets.js';\n\nel.animate(\n  [{ translate: '0 4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }],\n  { duration: 500, easing: EASE.${camelOf(e.slug)}, fill: 'both' },\n);\n\n// per-frame code (window.seek, vawe.onFrame): easeFn('${camelOf(e.slug)}')(u)`;
+  if (e.kind === "vawe") return `import { EASE } from '../../core/motion/presets.js';\n\nel.animate(\n  [{ translate: '0 4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }],\n  { duration: 500, easing: EASE.${camelOf(e.slug)}, fill: 'both' },\n);\n\n// per-frame code (window.seek, vawe.onFrame): easeFn('${camelOf(e.slug)}')(u)`;
   if (e.kind === "css") return `animation: slide 600ms ${e.name};`;
-  return `import { ${e.name} } from 'vawe/core/motion/curves.js';\nimport { curveToLinear } from 'vawe/core/motion/springs.js';\n\nconst easing = curveToLinear(${e.name}, { tolerance: 0.002 }); // the linear() string above\nconst x = ${e.name}(u);                                         // per-frame code, u in 0..1`;
+  return `import { ${e.name} } from '../../core/motion/curves.js';\nimport { curveToLinear } from '../../core/motion/springs.js';\n\nconst easing = curveToLinear(${e.name}, { tolerance: 0.002 }); // the linear() string above\nconst x = ${e.name}(u);                                         // per-frame code, u in 0..1`;
 }
 
 const ORG = { "@type": "Organization", name: "Vawe", url: "https://vawe.dev" };
