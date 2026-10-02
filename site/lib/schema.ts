@@ -78,8 +78,8 @@ export function techArticleSchema(opts: { headline: string; description: string;
     url: `${SITE_URL}${opts.path}`,
     mainEntityOfPage: `${SITE_URL}${opts.path}`,
     datePublished: opts.datePublished,
-    author: { "@type": "Organization", name: "Vawe", url: SITE_URL },
-    publisher: { "@type": "Organization", name: "Vawe", url: SITE_URL },
+    author: { "@type": "Organization", name: "vawe", url: SITE_URL },
+    publisher: { "@type": "Organization", name: "vawe", url: SITE_URL },
   };
 }
 

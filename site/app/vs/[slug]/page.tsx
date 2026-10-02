@@ -1,14 +1,30 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Header } from "../../components/Header";
+import { Header, WaveGlyph } from "../../components/Header";
+import { GithubCta, Icon, OpenSourceMark } from "../../components/Icon";
 import { Footer } from "../../components/Footer";
 import { pageMetadata } from "../../components/seo";
 import { jsonLdScript, breadcrumbSchema } from "../../../lib/schema";
-import { RIVALS, RIVAL_BY_SLUG, VAWE_SOURCES } from "../data";
+import { RIVALS, RIVAL_BY_SLUG, VAWE_SOURCES, type Mark } from "../data";
 import "../../components/intent.css";
 import "../../components/study.css";
 
 export const dynamicParams = false;
+
+const MARK_LABEL: Record<Mark, string> = { yes: "Yes", no: "No", partial: "Partly" };
+
+function Cell({ text, mark }: { text: string; mark?: Mark }) {
+  return (
+    <td>
+      {mark && (
+        <span className={`mk mk-${mark}`}>
+          <Icon name={mark === "yes" ? "check" : mark === "no" ? "x" : "minus"} size={14} label={MARK_LABEL[mark]} />
+        </span>
+      )}
+      {text}
+    </td>
+  );
+}
 
 export function generateStaticParams() {
   return RIVALS.map((r) => ({ slug: r.slug }));
@@ -35,16 +51,20 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
             type="application/ld+json"
             dangerouslySetInnerHTML={jsonLdScript(
               breadcrumbSchema([
-                { name: "Vawe", url: "/" },
+                { name: "vawe", url: "/" },
                 { name: "Compare", url: "/remotion-alternatives" },
-                { name: `Vawe vs ${r.name}`, url: `/vs/${r.slug}` },
+                { name: `vawe vs ${r.name}`, url: `/vs/${r.slug}` },
               ]),
             )}
           />
           <section className="phead">
+            <OpenSourceMark />
             <h1>{r.h1}</h1>
             <p>{r.intro}</p>
-            <p className="bnote">Facts read from {r.name}&apos;s own pages on {r.read}. Sources are listed at the end.</p>
+            <p className="bnote">
+              Facts read from {r.name}&apos;s own pages on {r.read}. Sources are listed at the end. vawe
+              runs on your machine, needs no account and has no per-render fee.
+            </p>
           </section>
 
           <section className="tldr" aria-label="Which one to choose">
@@ -57,9 +77,9 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
               </ul>
             </div>
             <div>
-              <h2>Choose Vawe when</h2>
+              <h2>Choose vawe when</h2>
               <ul>
-                {r.chooseVawe.map((t) => (
+                {r.choosevawe.map((t) => (
                   <li key={t}>{t}</li>
                 ))}
               </ul>
@@ -78,16 +98,21 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
                 <thead>
                   <tr>
                     <th scope="col">feature</th>
-                    <th scope="col">{r.name}</th>
-                    <th scope="col">Vawe</th>
+                    <th scope="col">
+                      {r.name}
+                    </th>
+                    <th scope="col">
+                      <WaveGlyph className="glyph-sm" />
+                      vawe
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {r.rows.map((row) => (
                     <tr key={row.feature}>
                       <td>{row.feature}</td>
-                      <td>{row.them}</td>
-                      <td>{row.vawe}</td>
+                      <Cell text={row.them} mark={row.t} />
+                      <Cell text={row.vawe} mark={row.v} />
                     </tr>
                   ))}
                 </tbody>
@@ -117,7 +142,7 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
           </section>
 
           <section className="iend">
-            <h2 className="h2">Try Vawe on one page.</h2>
+            <h2 className="h2">Try vawe on one page.</h2>
             <p className="lead">
               Write a page, run one command, get an MP4. The quickstart takes a few minutes.
             </p>
@@ -126,12 +151,13 @@ export default async function Vs({ params }: { params: Promise<{ slug: string }>
                 HTML to MP4 with Claude Code <span className="arw">→</span>
               </a>
               <a className="btn btn-ghost" href="/moves">See the moves</a>
+              <GithubCta />
             </div>
             <div className="irelated">
               {r.related.map((l) => (
                 <a key={l.href} href={l.href}>{l.label}</a>
               ))}
-              <a href="/problems">Hard problems and where Vawe stands</a>
+              <a href="/problems">Hard problems and where vawe stands</a>
             </div>
             <div className="srcs" aria-label="Sources">
               {[...r.sources, ...VAWE_SOURCES].map((s) => (

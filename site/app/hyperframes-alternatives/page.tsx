@@ -1,44 +1,45 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import { GithubCta, OpenSourceMark } from "../components/Icon";
 import "../components/intent.css";
 import "../components/study.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · HyperFrames alternatives: Vawe, Remotion, Motion Canvas, Lottie",
+  title: "vawe · HyperFrames alternatives: vawe, Remotion, Motion Canvas, Lottie",
   description:
-    "Four alternatives to HyperFrames, HeyGen's HTML-to-video framework: Vawe, Remotion, Motion Canvas and Lottie. What each one is, how you author with it, and which job it fits. Read 2026-10-03.",
+    "Four alternatives to HyperFrames, HeyGen's HTML-to-video framework: vawe, Remotion, Motion Canvas and Lottie. What each one is, how you author with it, and which job it fits. Read 2026-10-03.",
   path: "/hyperframes-alternatives",
 });
 
 /* /hyperframes-alternatives keeps its URL (it ranks) and its angle: a short list of what to look at
- * instead of HyperFrames, Vawe included. The per-tool facts, tables and sources live on /vs/<name>
+ * instead of HyperFrames, vawe included. The per-tool facts, tables and sources live on /vs/<name>
  * (app/vs/data.ts), so none of that text is repeated here. The HyperFrames facts below were read
  * 2026-10-03 from github.com/heygen-com/hyperframes and hyperframes.heygen.com/introduction. */
 
 const ALTERNATIVES = [
   {
-    name: "Vawe",
+    name: "vawe",
     href: "/vs/hyperframes",
-    cta: "Vawe vs HyperFrames",
-    body: "The closest peer. Both are Apache-2.0, both drive headless Chrome, and both aim at an agent that writes the file. Vawe takes timing from CSS keyframes, element.animate() or a seek(t) function, and replaces Date, timers and Math.random with versions that follow the seek. HyperFrames forbids those calls instead.",
+    cta: "vawe vs HyperFrames",
+    body: "The closest peer. Both are Apache-2.0, both drive headless Chrome, and both aim at an agent that writes the file. vawe takes timing from CSS keyframes, element.animate() or a seek(t) function, and replaces Date, timers and Math.random with versions that follow the seek. HyperFrames forbids those calls instead.",
   },
   {
     name: "Remotion",
     href: "/vs/remotion",
-    cta: "Vawe vs Remotion",
+    cta: "vawe vs Remotion",
     body: "Video from React components, with a Studio editor and distributed rendering on AWS Lambda and Cloud Run. Its licence is free up to 3 employees in a for-profit company. It publishes Agent Skills for coding agents.",
   },
   {
     name: "Motion Canvas",
     href: "/vs/motion-canvas",
-    cta: "Vawe vs Motion Canvas",
+    cta: "vawe vs Motion Canvas",
     body: "A TypeScript library for vector animation, written as generator functions, with a real-time editor. MIT licence. It fits diagram and explainer animation synced to a voice-over.",
   },
   {
     name: "Lottie",
     href: "/vs/lottie",
-    cta: "Vawe vs Lottie",
+    cta: "vawe vs Lottie",
     body: "A JSON format for vector animation, exported from After Effects and played inside apps. It is a playback format, not an MP4 renderer. Pick it for animated icons and loaders in a product.",
   },
 ];
@@ -50,6 +51,7 @@ export default function HyperframesAlternatives() {
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
+            <OpenSourceMark />
             <h1>HyperFrames alternatives.</h1>
             <p>
               HyperFrames is HeyGen&apos;s open-source framework that turns HTML, CSS and seekable
@@ -105,7 +107,7 @@ export default function HyperframesAlternatives() {
                     <td>MP4</td>
                   </tr>
                   <tr>
-                    <td>Vawe</td>
+                    <td>vawe</td>
                     <td>One HTML page</td>
                     <td>Apache-2.0</td>
                     <td>MP4</td>
@@ -133,12 +135,13 @@ export default function HyperframesAlternatives() {
             </div>
             <div className="hero-cta">
               <a className="btn btn-primary" href="/vs/hyperframes">
-                Vawe vs HyperFrames <span className="arw">→</span>
+                vawe vs HyperFrames <span className="arw">→</span>
               </a>
+              <GithubCta />
             </div>
             <div className="irelated">
               <a href="/remotion-alternatives">Remotion alternatives, categorized</a>
-              <a href="/determinism">How Vawe keeps renders deterministic</a>
+              <a href="/determinism">How vawe keeps renders deterministic</a>
               <a href="/ai-agents">How an agent writes and checks a film</a>
             </div>
           </section>

@@ -1,13 +1,14 @@
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { pageMetadata } from "../components/seo";
+import { OpenSourceMark } from "../components/Icon";
 import "../components/intent.css";
 import "../components/study.css";
 
 export const metadata = pageMetadata({
-  title: "Vawe · roadmap: now, next, later",
+  title: "vawe · roadmap: now, next, later",
   description:
-    "What Vawe works on now, next and later: render reliability, a pairwise judge, motion-shape measures and faster final capture. Each item links to the problem it addresses.",
+    "What vawe works on now, next and later: render reliability, a pairwise judge, motion-shape measures and faster final capture. Each item links to the problem it addresses.",
   path: "/roadmap",
 });
 
@@ -53,9 +54,10 @@ export default function Roadmap() {
       <div className="wrap">
         <main id="content" className="ipage" tabIndex={-1}>
           <section className="phead">
+            <OpenSourceMark />
             <h1>Roadmap: now, next, later.</h1>
             <p>
-              The order of work on Vawe. There are no dates: Now comes before Next, and Next before Later.
+              The order of work on vawe. There are no dates: Now comes before Next, and Next before Later.
               Each item links to the problem it addresses.
             </p>
             <p className="bnote">
@@ -84,12 +86,13 @@ export default function Roadmap() {
           <section className="iend" style={{ marginTop: 12 }}>
             <h2 className="h2">Follow the work.</h2>
             <p className="lead">
-              The engine and its changes are public. Open an issue if a problem here costs you a film.
+              vawe is open source under Apache-2.0, runs on your machine, needs no account and has no per-render fee. Open an issue if a problem here costs you a film.
             </p>
             <div className="hero-cta">
               <a className="btn btn-primary" href="https://github.com/Vandit1604/vawe">
-                Vawe on GitHub <span className="arw">→</span>
+                vawe on GitHub <span className="arw">→</span>
               </a>
+              <a className="btn btn-ghost" href="/problems">Read the problems</a>
             </div>
           </section>
         </main>

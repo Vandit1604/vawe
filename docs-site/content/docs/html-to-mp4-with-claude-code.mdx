@@ -1,15 +1,15 @@
 ---
 title: HTML to MP4 with Claude Code
-description: Install Vawe, ask Claude Code for a film, and render one HTML page to an MP4 in four commands.
+description: Install vawe, ask Claude Code for a film, and render one HTML page to an MP4 in four commands.
 icon: Terminal
 ---
 
-A Vawe film is one HTML page. Claude Code writes the page. The renderer opens it in headless Chrome, seeks it frame by frame, and encodes an MP4. This page takes you from a clean machine to a rendered file.
+A vawe film is one HTML page. Claude Code writes the page. The renderer opens it in headless Chrome, seeks it frame by frame, and encodes an MP4. This page takes you from a clean machine to a rendered file.
 
 ## What you need
 
 - Node 22 or later, git and ffmpeg (with libx264 and drawtext).
-- Claude Code, started in the Vawe repository.
+- Claude Code, started in the vawe repository.
 
 ```bash
 npm install
@@ -42,7 +42,7 @@ bin/vawe new v2-launch --request "6 second film that announces version 2.0 of my
 
 ## What the page looks like
 
-The page is HTML and CSS. The only Vawe parts are a duration tag and, if you want sound, an `<audio>` tag.
+The page is HTML and CSS. The only vawe parts are a duration tag and, if you want sound, an `<audio>` tag.
 
 ```html
 <!doctype html>
@@ -58,7 +58,7 @@ The page is HTML and CSS. The only Vawe parts are a duration tag and, if you wan
 <h1>2.0</h1>
 ```
 
-Time is the seek, not the clock. CSS `@keyframes` and `element.animate()` run on the time the renderer sets. A page can also define `window.seek(t)` and paint frame `t` as a function of `t`. Do not use timers or unseeded random numbers. Vawe replaces `Date`, `requestAnimationFrame`, timers and `Math.random` with versions that follow the seek, so the same page gives the same frames on every render.
+Time is the seek, not the clock. CSS `@keyframes` and `element.animate()` run on the time the renderer sets. A page can also define `window.seek(t)` and paint frame `t` as a function of `t`. Do not use timers or unseeded random numbers. vawe replaces `Date`, `requestAnimationFrame`, timers and `Math.random` with versions that follow the seek, so the same page gives the same frames on every render.
 
 ## Render a draft, then the final
 
@@ -83,7 +83,7 @@ The critique names each problem as a shot, a frame and a fix. Fix the worst item
 
 ## Other shapes
 
-One page renders to every supported shape. Lay the page out with CSS, and Vawe sets `--vw` and `--vh` for the shape:
+One page renders to every supported shape. Lay the page out with CSS, and vawe sets `--vw` and `--vh` for the shape:
 
 ```bash
 bin/vawe ship films/v2-launch/page.html --aspect all

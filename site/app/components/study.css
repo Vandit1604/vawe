@@ -63,3 +63,27 @@
   .cols{grid-template-columns:minmax(0,1fr)}
   .tldr{grid-template-columns:minmax(0,1fr)}
 }
+
+.osmark{display:inline-flex;align-items:center;gap:7px;margin-bottom:16px;padding:5px 12px;border-radius:999px;
+  background:var(--raised);color:var(--ink);font-family:var(--font-mono),monospace;font-size:12px;letter-spacing:.02em;
+  text-decoration:none;transition:background-color .15s ease}
+.osmark:hover{background:var(--raised-2)}
+.ico{flex:none;vertical-align:-2px}
+.chip .ico{width:13px;height:13px}
+.chip::before{display:none}
+.mk{display:inline-flex;margin-right:8px;vertical-align:-2px;color:var(--ink)}
+.mk-no{color:var(--muted)}
+.mk-partial{color:var(--ink-2)}
+.itable th .glyph-sm{width:20px;height:11px;margin-right:6px;vertical-align:-1px}
+
+.prob-side{display:grid;gap:12px;align-content:start}
+.prob-media{border-radius:var(--r-in);overflow:hidden;box-shadow:var(--ring);background:var(--bg)}
+.prob-media img,.prob-media video{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.prob-code{margin:0;padding:14px 16px;border-radius:var(--r-in);background:var(--bg);box-shadow:var(--ring);
+  font-family:var(--font-mono),monospace;font-size:12.5px;line-height:1.6;color:var(--ink-2);overflow-x:auto}
+.prob-curve{padding:10px 14px}
+.ease-curve{display:block;width:100%;height:auto}
+.ec-axis{stroke:var(--line-2);stroke-width:1}
+.ec-lin{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 4}
+.ec-path{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.ec-dot{fill:var(--ink)}

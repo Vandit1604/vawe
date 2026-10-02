@@ -31,7 +31,7 @@ export const PROBLEMS: Problem[] = [
     title: "No private format",
     status: "solved",
     why: "An agent writes best what it already knows. A private format is one more thing to learn, and agents get it wrong more often.",
-    does: "A film is one HTML page. Vawe had its own JSON engine, ran an A/B test, and removed the engine. Agents now write HTML, CSS and Web Animations.",
+    does: "A film is one HTML page. vawe had its own JSON engine, ran an A/B test, and removed the engine. Agents now write HTML, CSS and Web Animations.",
     figure: "1 file",
     figureLabel: "one HTML page is the whole film",
   },
@@ -49,7 +49,7 @@ export const PROBLEMS: Problem[] = [
     title: "Designed motion",
     status: "solved",
     why: "Browser eases suit interface changes. Film motion needs the speed and influence handles that motion designers set in After Effects.",
-    does: "Vawe uses After Effects speed and influence eases, fitted to real keyframes. All 94 moves use them.",
+    does: "vawe uses After Effects speed and influence eases, fitted to real keyframes. All 94 moves use them.",
     figure: "1,339",
     figureLabel: "real keyframe segments used for the fit",
   },
@@ -76,7 +76,7 @@ export const PROBLEMS: Problem[] = [
     title: "Learning from traces",
     status: "solved",
     why: "Agents fail in ways the author does not predict. The failures show only in what the agents did.",
-    does: "Vawe studied 147 agent transcripts. In them, 443 of 5,520 shell calls had failed. The causes were fixed.",
+    does: "vawe studied 147 agent transcripts. In them, 443 of 5,520 shell calls had failed. The causes were fixed.",
     figure: "443 of 5,520",
     figureLabel: "shell calls failed in 147 transcripts",
   },
@@ -103,9 +103,9 @@ export const PROBLEMS: Problem[] = [
     title: "Making good measurable",
     status: "progress",
     why: "A check can only enforce what it can measure. Much of what makes a film good has no number yet.",
-    does: "16 acceptance rows are measured. One idea, the eye path and a thread through the film are not measured yet.",
-    figure: "16 rows",
-    figureLabel: "of the acceptance table are measured",
+    does: "The acceptance table has 17 rows. Code measures 16 of them and the judge scores 1. One idea, the eye path and a thread through the film are not measured yet.",
+    figure: "16 of 17",
+    figureLabel: "acceptance rows measured by code, 1 by the judge",
   },
   {
     id: 11,
@@ -130,7 +130,7 @@ export const PROBLEMS: Problem[] = [
     title: "Sound",
     status: "parked",
     why: "A synthesized cue sounds machine-made. Good sound needs a better source than synthesis.",
-    does: "Sound work is parked. The synthesized cues sound machine-made, so Vawe does not claim sound as a strength.",
+    does: "Sound work is parked. The synthesized cues sound machine-made, so vawe does not claim sound as a strength.",
     figure: "parked",
     figureLabel: "synthesized cues sound machine-made",
   },
@@ -138,3 +138,24 @@ export const PROBLEMS: Problem[] = [
 
 export const SOLVED = PROBLEMS.filter((p) => p.status === "solved");
 export const OPEN = PROBLEMS.filter((p) => p.status !== "solved");
+
+export type Visual =
+  | { kind: "poster"; move: string; alt: string }
+  | { kind: "clip"; move: string; alt: string }
+  | { kind: "curve"; ease: "land" | "settle" | "pop" | "leave"; alt: string }
+  | { kind: "code"; text: string };
+
+export const VISUALS: Record<number, Visual> = {
+  1: { kind: "poster", move: "speed-ramp-freeze", alt: "A frame from the speed-ramp-freeze move, held still. The same frame renders every time." },
+  2: { kind: "code", text: '<meta name="duration" content="6">\n<h1>2.0</h1>\n<style>\n  h1 { animation: in .6s both }\n</style>' },
+  3: { kind: "clip", move: "push-blur", alt: "The push-blur move: fast motion drawn as one soft streak." },
+  4: { kind: "curve", ease: "land", alt: "The land ease: value against time, a fast start and a long soft stop. A straight line is drawn for comparison." },
+  5: { kind: "poster", move: "ai-stream-response", alt: "A frame from the ai-stream-response move." },
+  6: { kind: "poster", move: "agent-progress", alt: "A frame from the agent-progress move." },
+  7: { kind: "poster", move: "count-up", alt: "A frame from the count-up move." },
+  8: { kind: "poster", move: "light-pool", alt: "A frame from the light-pool move: a glowing pool of light, the shape that many agent films reach for." },
+  9: { kind: "poster", move: "before-after-wipe", alt: "A frame from the before-after-wipe move, two versions side by side." },
+  10: { kind: "poster", move: "chart-build", alt: "A frame from the chart-build move." },
+  11: { kind: "poster", move: "flash-cut", alt: "A frame from the flash-cut move." },
+  12: { kind: "poster", move: "success-check", alt: "A frame from the success-check move." },
+};
