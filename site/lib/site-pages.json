@@ -22,6 +22,13 @@
       "label": "Moves"
     },
     {
+      "path": "/easing",
+      "priority": 0.8,
+      "changeFrequency": "monthly",
+      "group": "product",
+      "label": "Easing"
+    },
+    {
       "path": "/determinism",
       "priority": 0.7,
       "changeFrequency": "monthly",
@@ -142,7 +149,7 @@
     }
   ],
   "counts": {
-    "routes": 9,
+    "routes": 10,
     "docs": 15
   }
 }

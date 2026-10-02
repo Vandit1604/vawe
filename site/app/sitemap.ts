@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import pages from "../lib/site-pages.json";
 import { MOVES } from "../lib/moves";
+import { EASES } from "../lib/easing";
 
 /* site/app/sitemap.ts: every URL vawe.dev serves. The routes come from lib/site-pages.json, the same
  * file the footer nav reads; the move pages come from lib/moves.json.
@@ -13,8 +14,10 @@ const built = new Date();
 
 const moves = MOVES.map((m) => ({ path: `/moves/${m.name}`, priority: 0.6, changeFrequency: "monthly" }));
 
+const easing = EASES.map((e) => ({ path: `/easing/${e.slug}`, priority: 0.6, changeFrequency: "monthly" }));
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [...pages.routes, ...moves, ...pages.docs].map((r) => ({
+  return [...pages.routes, ...moves, ...easing, ...pages.docs].map((r) => ({
     url: `${BASE}${r.path}`,
     lastModified: built,
     changeFrequency: r.changeFrequency as MetadataRoute.Sitemap[number]["changeFrequency"],
