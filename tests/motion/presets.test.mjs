@@ -101,7 +101,7 @@ test('leave accepts ease: leave, enter accepts any EASE name, an unknown name th
   const [a] = leaveSpecs({ at: 0, band: 'gravity', ease: 'leave' });
   assert.equal(a.timing.easing, EASE.leave);
   assert.equal(enterSpecs({ ease: 'settle' })[0].timing.easing, EASE.settle);
-  assert.throws(() => enterSpecs({ ease: 'zoom' }), /valid: land settle swap glide carry leave launch/);
+  assert.throws(() => enterSpecs({ ease: 'zoom' }), /valid: land landSoft settle swap glide carry leave launch/);
 });
 
 test('the handle numbers follow the Lottie and HyperFrames data', () => {
