@@ -9,16 +9,22 @@ import type { Metadata } from "next";
 // twitter:image tags from automatically. Setting an image here too would just print a second,
 // competing tag. The one route that keeps a hand-made image (the homepage, `/assets/og.png`) sets
 // its own openGraph/twitter block directly in app/layout.tsx instead of calling this helper.
-export function pageMetadata(opts: { title: string; description: string; path: string }): Metadata {
-  const { title, description, path } = opts;
+export function pageMetadata(opts: {
+  title: string;
+  description: string;
+  path: string;
+  type?: "website" | "article";
+  markdown?: string;
+}): Metadata {
+  const { title, description, path, type = "website", markdown } = opts;
   return {
     title,
     description,
-    alternates: { canonical: path },
+    alternates: { canonical: path, ...(markdown ? { types: { "text/markdown": markdown } } : {}) },
     openGraph: {
       title,
       description,
-      type: "website",
+      type,
       url: path,
       siteName: "Vawe",
     },

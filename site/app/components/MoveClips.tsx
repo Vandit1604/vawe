@@ -8,7 +8,7 @@ export function MoveClips({ names }: { names: string[] }) {
   return (
     <ul className="imoves">
       {moves.map((m) => {
-        const files = clip(m.name);
+        const files = clip(m);
         return (
           <li key={m.name} className="panel">
             <Clip src={files.mp4} webm={files.webm} poster={files.poster} />

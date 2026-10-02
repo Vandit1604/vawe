@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SRC = path.join(root, 'prompts', 'moves');
@@ -20,6 +20,9 @@ const REPO_BLOB = 'https://github.com/Vandit1604/vawe/blob/main/prompts/moves/';
 const SITE = 'https://vawe.dev';
 const NOT_MOVES = new Set(['README.md', 'GROUPS.md', 'LIBRARY.md', 'RECIPES.md', 'LOOKS.md']);
 const DEFAULT_LOOK = 'vawe';
+
+const { EASE_HANDLES } = await import(pathToFileURL(path.join(root, 'core', 'motion', 'presets.js')));
+const { resolveHandle } = await import(pathToFileURL(path.join(root, 'core', 'motion', 'motion.js')));
 
 const read = (p) => fs.readFileSync(p, 'utf8');
 const hashFile = (p) => crypto.createHash('sha1').update(fs.readFileSync(p)).digest('hex').slice(0, 12);
@@ -147,9 +150,11 @@ function codeBlock(lang, code) {
   return `<div class="mv-code"><div class="mv-code-bar"><span>${l}</span><button type="button" class="mv-copy" data-copy>Copy</button></div><pre><code>${body}</code></pre></div>`;
 }
 
+// Blocks in file order: { type: 'code' | 'sound' | 'text', html }. The page puts them under H2 headings.
 function renderMarkdown(md) {
   const lines = md.split('\n');
-  const html = [];
+  const blocks = [];
+  const html = { push: (h, type = 'text') => blocks.push({ type, html: h }) };
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
@@ -158,7 +163,7 @@ function renderMarkdown(md) {
       const code = [];
       for (i++; i < lines.length && !lines[i].startsWith('```'); i++) code.push(lines[i]);
       i++;
-      html.push(codeBlock(fence[1], code.join('\n')));
+      html.push(codeBlock(fence[1], code.join('\n')), 'code');
       continue;
     }
     const h = line.match(/^(#{1,3}) (.+)/);
@@ -185,9 +190,9 @@ function renderMarkdown(md) {
     while (i < lines.length && lines[i].trim() && !/^(```|#{1,3} |- |\d+\. )/.test(lines[i])) para.push(lines[i++].trim());
     const text = para.join(' ');
     const sound = text.startsWith('Sound:');
-    html.push(sound ? `<p class="mv-sound">${inline(text)}</p>` : `<p>${inline(text)}</p>`);
+    html.push(sound ? `<p class="mv-sound">${inline(text)}</p>` : `<p>${inline(text)}</p>`, sound ? 'sound' : 'text');
   }
-  return html.join('\n');
+  return blocks;
 }
 
 // Seconds, from the mvhd box of an mp4 (the move clips are plain H.264, so no ffprobe in prebuild).
@@ -201,6 +206,41 @@ function mp4Seconds(file) {
   return scale ? Math.round((units / scale) * 100) / 100 : null;
 }
 
+// The vawe eases a move uses, with the After Effects handle pair behind each (influence is a per cent of
+// the segment, speed a multiple of its average velocity). The page shows them as data.
+function easesOf(...sources) {
+  const found = new Set();
+  for (const src of sources) for (const m of src.matchAll(/\bEASE(?:\.(\w+)|\[['"](\w+)['"]\])|\beaseFn\(['"](\w+)['"]\)/g)) found.add(m[1] ?? m[2] ?? m[3]);
+  return [...found].filter((n) => EASE_HANDLES[n]).sort().map((name) => {
+    const [out, into] = EASE_HANDLES[name];
+    const side = (h, which) => {
+      const r = resolveHandle(h, which);
+      return { influence: Math.round(r.influence), speed: Math.round(r.speed * 100) / 100 };
+    };
+    return { name, out: side(out, 'easeOut'), into: side(into, 'easeIn') };
+  });
+}
+
+// The date of the last commit that touched the files, or their newest mtime when git has none
+// (an untracked clip). The sitemap and the VideoObject read it, so it must not be "now".
+function firstCommitted(file) {
+  try {
+    const out = execFileSync('git', ['log', '--format=%cI', '--', file], { cwd: root, encoding: 'utf8' }).trim().split('\n').pop();
+    if (out) return out.slice(0, 10);
+  } catch { /* no git here: fall through to mtime */ }
+  return new Date(fs.statSync(file).mtimeMs).toISOString().slice(0, 10);
+}
+
+function lastChanged(files) {
+  const existing = files.filter((f) => fs.existsSync(f));
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cI', '--', ...existing], { cwd: root, encoding: 'utf8' }).trim();
+    if (out) return out.slice(0, 10);
+  } catch { /* no git here: fall through to mtime */ }
+  const newest = Math.max(...existing.map((f) => fs.statSync(f).mtimeMs));
+  return new Date(newest).toISOString().slice(0, 10);
+}
+
 // ---- one move -------------------------------------------------------------------------------------
 function readMove(file, index) {
   const name = file.replace(/\.md$/, '');
@@ -212,6 +252,10 @@ function readMove(file, index) {
   const look = fs.existsSync(demo) ? (read(demo).match(/data-look="([a-z-]+)"/)?.[1] ?? DEFAULT_LOOK) : DEFAULT_LOOK;
   const clip = path.join(SRC, `${name}.mp4`);
   const sound = md.match(/^Sound:\s*(.+)/m)?.[1].trim() ?? null;
+  const blocks = renderMarkdown(md);
+  const firstCode = blocks.findIndex((b) => b.type === 'code');
+  const joined = (list) => list.map((b) => b.html).join('\n');
+  const snippet = md.match(/^```\w*\n([\s\S]*?)^```/m)?.[1].trimEnd() ?? '';
   return {
     name,
     title,
@@ -221,10 +265,17 @@ function readMove(file, index) {
     useWhen,
     jobs: index.jobs.filter((j) => j.moves.includes(name)).map((j) => j.id),
     sound: sound ? plain(sound) : null,
-    snippet: md.match(/^```\w*\n([\s\S]*?)^```/m)?.[1].trimEnd() ?? '',
+    snippet,
+    eases: easesOf(snippet, fs.existsSync(demo) ? read(demo) : ''),
+    published: firstCommitted(path.join(SRC, file)),
+    modified: lastChanged([path.join(SRC, file), clip]),
+    clipDate: fs.existsSync(clip) ? lastChanged([clip]) : null,
     clipHash: fs.existsSync(clip) ? hashFile(clip) : null,
     duration: fs.existsSync(clip) ? mp4Seconds(clip) : null,
-    html: renderMarkdown(md),
+    useHtml: joined(blocks.slice(0, Math.max(firstCode, 0))),
+    codeHtml: firstCode === -1 ? '' : blocks[firstCode].html,
+    soundHtml: joined(blocks.filter((b) => b.type === 'sound')),
+    notesHtml: joined(blocks.slice(firstCode + 1).filter((b) => b.type !== 'sound')),
   };
 }
 

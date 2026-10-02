@@ -4,6 +4,8 @@ import { SectionStrip } from "./components/SectionStrip";
 import { Footer } from "./components/Footer";
 import { ProofHash, ProofAspect } from "./components/proofs";
 import { organizationSchema, websiteSchema, softwareApplicationSchema, jsonLdScript } from "../lib/schema";
+import { faqSchema } from "../lib/schema-content";
+import { FAQ } from "../lib/faq";
 import "./landing.css";
 
 /* THE LANDING PAGE (site/IDENTITY.md). The three.js example film first; then how it works, what a page film
@@ -50,10 +52,11 @@ const Icon = ({ name }: { name: keyof typeof ICONS }) => (
 export default function Home() {
   return (
     <div className="shell">
-      {/* Organization, WebSite, SoftwareApplication, built in site/lib/schema.ts from real repo data. */}
+      {/* Organization, WebSite, SoftwareApplication and FAQPage, built in site/lib/schema.ts from real repo data. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(organizationSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(websiteSchema())} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(softwareApplicationSchema())} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLdScript(faqSchema())} />
       <Header />
       <main className="wrap" id="content" tabIndex={-1}>
         <HeroSplit />
@@ -113,10 +116,14 @@ export default function Home() {
         <section className="ls" id="faq">
           <h2>Questions.</h2>
           <div className="panel ls-faq">
-            <details open><summary>Is it open source?</summary><p>Yes, under Apache 2.0. The engine, the studio and this site are <a href={REPO_URL}>on GitHub</a>.</p></details>
-            <details><summary>Where does it run?</summary><p>On your machine. The renderer drives Chrome and encodes with ffmpeg, and the studio previews a page live.</p></details>
-            <details><summary>Does it work with my agent?</summary><p>Yes. A film is plain HTML, so any coding agent can write one, and vawe ships skills that teach it the loop: write, draft, critique, ship.</p></details>
-            <details><summary>Can it match my brand?</summary><p>Yes. A page uses your fonts and colours as CSS, the same way your site does.</p></details>
+            {FAQ.map((item, i) => (
+              <details key={item.q} open={i === 0}>
+                <summary>{item.q}</summary>
+                <p>
+                  {item.a.map((seg, j) => (typeof seg === "string" ? seg : <a key={j} href={seg.href}>{seg.text}</a>))}
+                </p>
+              </details>
+            ))}
           </div>
         </section>
       </main>

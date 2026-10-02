@@ -1,18 +1,12 @@
 // THE ONE OWNER OF STRUCTURED DATA. Every JSON-LD object the site emits is built here, from real
 // data already in the repo (package.json's licence and repo URL, the same REPO_URL the header
 // links to), never a hand-typed literal. Pages import the
-// builder they need; nothing pastes a JSON-LD blob of its own.
+// builder they need; nothing pastes a JSON-LD blob of its own. The builders that read move or FAQ data
+// live in schema-content.ts.
 //
-// Two schema.org types are deliberately absent, and this comment is the record of why:
-//
-// HowTo: Google removed HowTo rich results in September 2023. There is no SERP feature left to
-// earn, and Vawe's pages are not step-by-step instructions anyway.
-//
-// FAQPage: Google retired the FAQ rich result for all sites on 2026-05-07. It carries no SERP
-// feature any more. It keeps some entity-resolution value for an AI answer engine, so it is not
-// forbidden forever, but nothing on vawe.dev is genuinely Q&A content today, so adding it now would
-// be farming a result that no longer exists. Add it only where real Q&A content exists, and label
-// it there as entity resolution, not as a rich-result play.
+// HowTo is absent on purpose: Google removed its rich result in 2023 and no page here is a step list.
+// FAQPage is present only on the home FAQ, built in schema-content.ts from the data the page renders (lib/faq.ts).
+// Google no longer shows an FAQ rich result for it; it stays as entity data for answer engines.
 
 import pkg from "../../package.json";
 
@@ -56,8 +50,8 @@ export function softwareApplicationSchema() {
     name: "Vawe",
     description: pkg.description,
     url: SITE_URL,
-    applicationCategory: "MultimediaApplication",
-    operatingSystem: "Any",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "macOS, Linux",
     softwareVersion: pkg.version,
     license: `https://www.apache.org/licenses/LICENSE-2.0`,
     offers: {
@@ -66,6 +60,7 @@ export function softwareApplicationSchema() {
       priceCurrency: "USD",
     },
     codeRepository: REPO_URL,
+    image: `${SITE_URL}/assets/og.png`,
   };
 }
 

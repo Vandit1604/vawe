@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+import { LEGACY_REDIRECTS } from "./lib/redirects.mjs";
 
 // The docs are a separate Next app (docs-site/) pinned to Next 16 + fumadocs 16, while this site
 // is on Next 15. Rather than force a framework upgrade on one of them so they can share a codebase,
@@ -37,26 +38,26 @@ const nextConfig = {
         destination: "https://vawe.dev/:path*",
         permanent: true,
       },
-      // The JSON engine's pages and films are gone. /arsenal, the film pages and the older URLs they
-      // absorbed land on /moves; the rest go home. :path* also matches the bare route.
-      { source: "/arsenal/:path*", destination: "/moves", permanent: true },
-      { source: "/blocks/:path*", destination: "/moves", permanent: true },
-      { source: "/showcase/:path*", destination: "/moves", permanent: true },
-      { source: "/product-tour-video", destination: "/moves", permanent: true },
-      { source: "/type", destination: "/moves", permanent: true },
-      { source: "/docs/the-scene", destination: "/docs/the-page", permanent: true },
-      { source: "/docs/camera", destination: "/docs/motion", permanent: true },
-      { source: "/docs/:slug(layers|blocks|themes|mcp)", destination: "/docs", permanent: true },
-      { source: "/editor/:path*", destination: "/", permanent: true },
-      { source: "/playground/:path*", destination: "/", permanent: true },
-      { source: "/json-to-video", destination: "/", permanent: true },
-      { source: "/deck", destination: "/", permanent: true },
-      { source: "/deck.html", destination: "/", permanent: true },
-      { source: "/vawe-rules.md", destination: "/", permanent: true },
+      ...LEGACY_REDIRECTS,
       // THE FEATURES FOLD: eight feature detail pages became three sections on /features itself.
       // Wildcarded, because the slugs were content and a new one must not 404 either. The route's
       // own social card lives under /features too, so it is excluded from the catch-all.
       { source: "/features/:slug((?!opengraph-image$).+)", destination: "/features", permanent: true },
+    ];
+  },
+  // Clip files keep their names when a move is re-rendered, so the pages link them as ?v=<hash of the
+  // source clip> (lib/clip.ts). A versioned URL never changes content: cache it for a year. The same
+  // file without ?v= (an agent following index.json or llms.txt) and the .md revalidate after an hour.
+  // Later entries win, so the versioned rule comes last.
+  async headers() {
+    const media = "/moves/:file(.+\\.(?:mp4|webm|webp|md))";
+    return [
+      { source: media, headers: [{ key: "Cache-Control", value: "public, max-age=3600, stale-while-revalidate=86400" }] },
+      {
+        source: media,
+        has: [{ type: "query", key: "v" }],
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
     ];
   },
   async rewrites() {
