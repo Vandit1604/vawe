@@ -1,10 +1,10 @@
 {
- "/": "2026-10-01",
+ "/": "2026-10-03",
  "/features": "2026-09-30",
- "/moves": "2026-10-01",
+ "/moves": "2026-10-03",
  "/determinism": "2026-09-30",
  "/ai-agents": "2026-09-30",
- "/json-to-video": "2026-09-30",
+ "/json-to-video": "2026-10-03",
  "/remotion-alternatives": "2026-09-30",
  "/when-determinism-matters": "2026-09-30",
  "/hyperframes-alternatives": "2026-09-30",
