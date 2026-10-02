@@ -87,6 +87,10 @@ keys(card, 'translate', [[0.2, '0 80px', { out: 'fling' }], [0.9, '0 0', { in: '
 Use `easing: EASE.land` on a plain `el.animate` for one segment. In per-frame code (`vawe.onFrame`, `window.seek`) use `easeFn('land')(u)`. Never `ease`, `ease-in-out` or
 `linear` on a move over 0.3 s: the motion lint says which `EASE` name to use.
 
+Every `EASE` name, the 30 classic eases and the CSS keywords have a page with the curve, the velocity,
+the `linear()` string and the handle data: <https://vawe.dev/easing>. `node scripts/site/easing.mjs`
+builds its data from this library.
+
 ## 1. CSS and WAAPI: a spring as an easing
 
 The renderer seeks `document.getAnimations()`, so a native animation needs no `seek`.
