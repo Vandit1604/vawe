@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import pages from "../lib/site-pages.json";
 import lastmod from "../lib/lastmod.json";
 import { MOVES } from "../lib/moves";
+import { EASES } from "../lib/easing";
 
 /* site/app/sitemap.ts: every URL vawe.dev serves. The routes come from lib/site-pages.json, the same
  * file the footer nav reads; the move pages come from lib/moves.json. To add a route, add one entry
@@ -23,6 +24,7 @@ function entries(): Entry[] {
   return [
     ...[...pages.routes, ...pages.docs].map((r) => ({ path: r.path, lastmod: dates[r.path] })),
     ...MOVES.map((m) => ({ path: `/moves/${m.name}`, lastmod: m.modified })),
+    ...EASES.map((e) => ({ path: `/easing/${e.slug}`, lastmod: dates["/easing"] })),
   ];
 }
 
