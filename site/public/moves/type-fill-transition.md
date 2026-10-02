@@ -9,9 +9,9 @@ letter drifts to the middle of the frame so the fill is even. Clip:
 [demo/type-fill-transition.html](demo/type-fill-transition.html).
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, W = innerWidth, H = innerHeight, t0 = 0.35, dur = 1.0, COVER = 0.62;
-const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+import { EASE, easeFn } from '../../core/motion/presets.js';
+const E = easeFn('land'), W = innerWidth, H = innerHeight, t0 = 0.35, dur = 1.0, COVER = 0.62;
+const whip = easeFn('swap');
 vawe.onFrame((t) => {
   const ox = word.offsetLeft + letter.offsetLeft + letter.offsetWidth / 2;    // offset metrics ignore transforms
   const oy = word.offsetTop + letter.offsetTop + letter.offsetHeight / 2;

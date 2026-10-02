@@ -18,8 +18,8 @@ h1 { font: 200 18vh/1 'Archivo', sans-serif; letter-spacing: -0.02em;
 ```html
 <h1>weight</h1>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 ```
 

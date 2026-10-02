@@ -9,6 +9,7 @@ never hand-placed, so the trail bends wherever the path bends.
 
 ```js
 import '../../core/engine/page-api.js';
+import { easeFn } from '../../core/motion/presets.js';
 const HIT = 1.05, FLY = 0.85, N = 5, LAG = 0.035, SPREAD = 0.22;   // copy i shows the lead's frame i * LAG ago
 const copies = Array.from({ length: N }, () => {
   const c = lead.cloneNode(true);
@@ -17,8 +18,9 @@ const copies = Array.from({ length: N }, () => {
   return c;
 });
 [...copies].reverse().forEach((c) => lead.before(c));         // the oldest copy sits lowest, the lead on top
+const ease = easeFn('carry');                                 // accelerates into the hit
 const pos = (t) => {                                          // the one path, a pure function of time
-  const u = Math.min(1, Math.max(0, (t - (HIT - FLY)) / FLY)) ** 3;   // accelerates into the hit
+  const u = ease(Math.min(1, Math.max(0, (t - (HIT - FLY)) / FLY)));
   return { x: (1 - u) * -620, y: (1 - u) * 260 };
 };
 const squash = (t) => (t < HIT ? 0 : Math.exp(-14 * (t - HIT)) * Math.cos(34 * (t - HIT)));
@@ -37,6 +39,7 @@ vawe.onFrame((t) => {
 
 Sound: a thud or pluck at the hit second, 1.05 s into the move (default gain).
 
+- The squash after the hit stays a damped cosine: it rings several times, which no `EASE` segment does.
 - Each copy calls the lead's own `pos(t - offset)`. For a path written as WAAPI keyframes, give each
   copy the same animation with a later `delay` (`i * 35` ms) instead: the copy then lags the same way.
 - The trail is widest where the lead is fastest, so the ease accelerates into the stop. A slow ease

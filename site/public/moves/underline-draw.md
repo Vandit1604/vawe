@@ -20,12 +20,12 @@ Demo: [demo/underline-draw.html](demo/underline-draw.html).
 
 Sound: none; the line points at a word the viewer is already reading.
 
-`--draw` is `curveToLinear(CURVES.expoOut)`. `pathLength="1"` lets the dash be 1 whatever the real
+`--draw` is `EASE.land`. `pathLength="1"` lets the dash be 1 whatever the real
 length is, so the same two lines work for any path.
 
 ## The numbers that make it look expensive
 
-- 0.6 s on `expoOut`: two thirds of the line is out in the first 0.15 s, the last third takes the rest.
+- 0.6 s on `EASE.land`: two thirds of the line is out in the first 0.15 s, the last third takes the rest.
 - The path is a slight curve (ends 5 units apart in a 20 unit box), not a ruler line. A straight
   line reads as a border.
 - Round caps, and a stroke about 0.06em thick at this size. Thin lines vanish in a 640 px clip.

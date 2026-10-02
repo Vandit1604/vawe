@@ -1,7 +1,7 @@
 # Command palette summon
 
 **Use when** the product is keyboard first (the Linear and Raycast beat): the app steps back and dims,
-a Cmd+K palette drops in from above on a spring, its rows rise 40 ms apart, three keys type a query at
+a Cmd+K palette drops in from above on a pop, its rows rise 40 ms apart, three keys type a query at
 a real typist's pace, the rows that stop matching collapse to zero height, and Enter turns the chosen
 row accent before the palette leaves faster than it came. The detail that sells it is the collapse:
 rows lose their height, so the list squeezes shut under the query; a fade would leave holes. Clip:
@@ -18,21 +18,20 @@ rows lose their height, so the list squeezes shut under the query; a fade would 
 ```
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), drop = curveToLinear(CURVES.spring), leave = curveToLinear((u) => u * u * u);
+import { EASE } from '../../core/motion/presets.js';
 const at = { dim: 120, drop: 150, rows: 220, keys: [780, 930, 1080], enter: 1340, exit: 1560 };   // ms
-dim.animate([{ opacity: 0 }, { opacity: 0.55 }], { duration: 220, delay: at.dim, easing: settle, fill: 'both' });
+dim.animate([{ opacity: 0 }, { opacity: 0.55 }], { duration: 320, delay: at.dim, easing: EASE.landSoft, fill: 'both' });
 palette.animate([{ translate: '0 -4vh', opacity: 0 }, { opacity: 1, offset: 0.25 }, { translate: '0 0', opacity: 1 }],
-  { duration: 520, delay: at.drop, easing: drop, fill: 'both' });
+  { duration: 520, delay: at.drop, easing: EASE.pop, fill: 'both' });
 rows.forEach((r, i) => r.animate([{ translate: '0 1.6vh', opacity: 0 }, { translate: '0 0', opacity: 1 }],
-  { duration: 360, delay: at.rows + i * 40, easing: settle, fill: 'both' }));
+  { duration: 360, delay: at.rows + i * 40, easing: EASE.landSoft, fill: 'both' }));
 // each typed letter is a span that exists from the start and switches display on its key
 letters.forEach((c, i) => c.animate([{ display: 'none' }, { display: 'inline' }], { duration: 1, delay: at.keys[i] - 1, fill: 'both' }));
 // a row that stops matching (data-out = the second of the key that drops it) collapses to zero height
 misses.forEach((o) => o.animate([{ height: 'calc(var(--px) * 44)', opacity: 1 }, { height: '0px', opacity: 0 }],
-  { duration: 220, delay: o.dataset.out * 1000, easing: settle, fill: 'both' }));
-chosen.animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { duration: 240, delay: at.enter, easing: settle, fill: 'both' });
-palette.animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 180, delay: at.exit, easing: leave, fill: 'forwards' });
+  { duration: 280, delay: o.dataset.out * 1000, easing: EASE.swap, fill: 'both' }));
+chosen.animate([{ scale: 1 }, { scale: 0.97, offset: 0.4 }, { scale: 1 }], { duration: 320, delay: at.enter, easing: EASE.landSoft, fill: 'both' });
+palette.animate([{ scale: 1, opacity: 1 }, { scale: 0.96, opacity: 0 }], { duration: 220, delay: at.exit, easing: EASE.launch, fill: 'forwards' });
 ```
 
 Sound: pluck at 1.34 s into the move, when Enter presses the chosen row (default gain); no tick per key.

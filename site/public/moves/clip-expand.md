@@ -19,8 +19,8 @@ Demo: [demo/clip-expand.html](demo/clip-expand.html).
 <div class="thumb">...play icon...</div>
 <div class="panel">...chapter title...</div>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 ```
 

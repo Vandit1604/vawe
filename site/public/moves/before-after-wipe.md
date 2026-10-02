@@ -15,14 +15,12 @@ numbers and the colour change; the before is grey, the after holds the one accen
   </div>
 </div>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, accelerate = curveToLinear((u) => u * u * u);
-const scanCurve = curveToLinear((u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1)));
+import { EASE } from '../../core/motion/presets.js';
 const W = stage.getBoundingClientRect().width, at = 300, dur = 900;
-after.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: scanCurve, fill: 'both' });
-scan.animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: scanCurve, fill: 'both' });
+after.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
+scan.animate([{ translate: '0 0' }, { translate: `${W}px 0` }], { duration: dur, delay: at, easing: EASE.settle, fill: 'both' });
 scan.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 80, delay: at - 60, easing: 'linear', fill: 'both' });
-scan.animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: accelerate, fill: 'both' });
+scan.animate([{ opacity: 0 }], { duration: 160, delay: at + dur - 120, easing: EASE.launch, fill: 'both' });
 </script>
 ```
 

@@ -28,7 +28,7 @@ vawe.onFrame((t) => {
   });
 });
 const done = start + (TARGET.length - 1) * gap + 0.08;
-status.animate([{ translate: '0 1.2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 320, delay: done * 1000 + 160, easing: settle, fill: 'both' });
+status.animate([{ translate: '0 1.2vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 320, delay: done * 1000 + 160, easing: EASE.land, fill: 'both' });
 ```
 
 Sound: pluck at 1.72 s into the move, when the last letter locks (default gain); no tick per glyph.

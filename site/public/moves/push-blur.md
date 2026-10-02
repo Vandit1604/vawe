@@ -10,14 +10,14 @@ across it. Clip: [push-blur.mp4](push-blur.mp4). Demo: [demo/push-blur.html](dem
 <div class="panel" style="filter: url(#motion)">in</div>
 <script type="module">
 import '../../core/engine/page-api.js';
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
+import { EASE, easeFn } from '../../core/motion/presets.js';
 const panel = document.querySelector('.panel'), blur = document.getElementById('mb');
 const t0 = 0.1, dur = 0.7, travel = 0.6 * window.innerWidth;   // t0 is the beat, in seconds
 panel.animate([{ translate: `${travel}px 0` }, { translate: '0 0' }],
-  { duration: dur * 1000, delay: t0 * 1000, easing: curveToLinear(CURVES.expoOut), fill: 'both' });
+  { duration: dur * 1000, delay: t0 * 1000, easing: EASE.land, fill: 'both' });
 vawe.onFrame((t) => {
   const u = Math.min(1, Math.max(0, (t - t0) / dur)), du = 1 / 240;
-  const slope = (CURVES.expoOut(Math.min(1, u + du)) - CURVES.expoOut(u)) / du;
+  const slope = (land(Math.min(1, u + du)) - land(u)) / du;
   const pxPerFrame = (slope / dur) * travel / 60;
   blur.setAttribute('stdDeviation', `${(u > 0 && u < 1 ? pxPerFrame * 0.5 : 0).toFixed(2)} 0`);
 });

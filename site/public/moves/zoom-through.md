@@ -9,12 +9,12 @@ travel. An SVG blur cannot do a radial streak; this can. Clip: [zoom-through.mp4
 Demo: [demo/zoom-through.html](demo/zoom-through.html).
 
 ```js
-import { CURVES } from '../../core/motion/springs.js';
-const E = CURVES.expoOut, W = innerWidth, H = innerHeight;
-const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));
+import { easeFn } from '../../core/motion/presets.js';
+const W = innerWidth, H = innerHeight;
+const ease = easeFn('settle');
 const t0 = 0.3, dur = 1.1, R = 20, S = R * 1.08, N = 8, SWAP = 12.5, EMERGE = 6.5;
 const ox = 0.66 * W, oy = 0.5 * H;                                   // the part the camera dives into
-const P = (t) => { const u = Math.min(1, Math.max(0, (t - t0) / dur)); return 0.4 * u + 0.6 * whip(u); };
+const P = (t) => { const u = Math.min(1, Math.max(0, (t - t0) / dur)); return ease(u); };
 vawe.onFrame((t) => {
   const p = P(t), spread = 0.5 * (P(t + 1 / 60) - P(t));             // 180 degree shutter
   layers.forEach((l, j) => {                                        // layer j: opacity 1 / (j + 1), holds a copy of shot A and of shot B

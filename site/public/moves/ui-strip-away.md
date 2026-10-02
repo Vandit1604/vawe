@@ -9,19 +9,18 @@ Clip: [ui-strip-away.mp4](ui-strip-away.mp4). Demo: [demo/ui-strip-away.html](de
 <div class="app">...<div class="slot"></div>...<div class="card peel" data-to="-5 -5">...</div></div>
 <div class="lockup"><div class="mark"></div><div><div class="word">Meridian</div><div class="tag">Revenue, live.</div></div></div>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), accelerate = curveToLinear((u) => u * u * u);
+import { EASE } from '../../core/motion/presets.js';
 [toast, ...cards, topbar].forEach((el, i) => {
   const [x, y] = el.dataset.to.split(' ');
   el.animate([{ opacity: 1, translate: '0 0', scale: 1, filter: 'blur(0px)' }, { opacity: 0, translate: `${x}vh ${y}vh`, scale: 1.03, filter: 'blur(7px)' }],
-    { duration: 300, delay: 150 + i * 45, easing: accelerate, fill: 'both' });
+    { duration: 300, delay: 150 + i * 45, easing: EASE.launch, fill: 'both' });
 });
-sidebar.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '-12vh 0' }], { duration: 300, delay: 400, easing: accelerate, fill: 'both' });
-app.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 1.03 }], { duration: 260, delay: 520, easing: accelerate, fill: 'both' });
+sidebar.animate([{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '-12vh 0' }], { duration: 300, delay: 400, easing: EASE.launch, fill: 'both' });
+app.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 1.03 }], { duration: 260, delay: 520, easing: EASE.launch, fill: 'both' });
 const from = slot.getBoundingClientRect(), to = mark.getBoundingClientRect();
 mark.animate([{ translate: `${from.x + from.width / 2 - to.x - to.width / 2}px ${from.y + from.height / 2 - to.y - to.height / 2}px`, scale: from.width / to.width }, { translate: '0 0', scale: 1 }],
-  { duration: 700, delay: 300, easing: settle, fill: 'both' });
-word.animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)' }, { clipPath: 'inset(-0.3em -0.3em -0.3em 0)' }], { duration: 600, delay: 750, easing: settle, fill: 'both' });
+  { duration: 700, delay: 300, easing: EASE.land, fill: 'both' });
+word.animate([{ clipPath: 'inset(-0.3em 100% -0.3em 0)' }, { clipPath: 'inset(-0.3em -0.3em -0.3em 0)' }], { duration: 600, delay: 750, easing: EASE.land, fill: 'both' });
 </script>
 ```
 

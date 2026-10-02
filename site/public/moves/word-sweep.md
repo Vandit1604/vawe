@@ -9,19 +9,18 @@ Every device directs the eye; this one names its target in the markup. Clip:
 <h1>every device directs the eye</h1>
 <style>h1 { color: var(--dim); } h1 span { display: inline-block; white-space: pre; }</style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
+import { EASE } from '../../core/motion/presets.js';
 const h1 = document.querySelector('h1');
 const words = h1.textContent.split(' ').map((w, i, a) =>
   Object.assign(document.createElement('span'), { textContent: i < a.length - 1 ? w + ' ' : w }));
 h1.replaceChildren(...words);
-const settle = curveToLinear(CURVES.expoOut);
 const css = getComputedStyle(document.documentElement);
 const dim = css.getPropertyValue('--dim'), ink = css.getPropertyValue('--ink'), accent = css.getPropertyValue('--accent');
 const beat = 150, step = 140;   // ms; step is faster than reading (about 250 ms a word), so the sweep leads the eye
 words.forEach((s, i) => {
   const last = i === words.length - 1;
   s.animate([{ color: dim }, { color: accent, offset: 0.25 }, { color: last ? accent : ink }],
-    { duration: 520, delay: beat + i * step, easing: settle, fill: 'both' });
+    { duration: 520, delay: beat + i * step, easing: EASE.land, fill: 'both' });
 });
 </script>
 ```

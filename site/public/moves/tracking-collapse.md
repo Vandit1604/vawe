@@ -18,8 +18,8 @@ h1 { white-space: nowrap; text-transform: uppercase; letter-spacing: 0.35em; tex
 ```html
 <h1>Converge</h1>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-document.documentElement.style.setProperty('--settle', curveToLinear(CURVES.expoOut));
+import { EASE } from '../../core/motion/presets.js';
+document.documentElement.style.setProperty('--settle', EASE.land);
 </script>
 ```
 

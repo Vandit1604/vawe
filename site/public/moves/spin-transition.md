@@ -10,10 +10,10 @@ sharp. Clip: [spin-transition.mp4](spin-transition.mp4). Demo: [demo/spin-transi
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
-const W = innerWidth, H = innerHeight, N = 16, E = CURVES.expoOut, clamp = (u) => Math.min(1, Math.max(0, u));
+import { easeFn } from '../../core/motion/presets.js';
+const W = innerWidth, H = innerHeight, N = 16, clamp = (u) => Math.min(1, Math.max(0, u));
 const T0 = 0.45, DUR = 0.5, ROLL = 90;
-const whip = (u) => (u < 0.5 ? 0.5 * (1 - E(1 - 2 * u)) : 0.5 + 0.5 * E(2 * u - 1));   // full speed at the cut
+const whip = easeFn('swap');   // full speed at the cut
 const P = (t) => whip(clamp((t - T0) / DUR));
 const cover = (deg) => {                                  // the smallest scale at which the turned frame still covers the frame
   const r = Math.abs(deg) * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);

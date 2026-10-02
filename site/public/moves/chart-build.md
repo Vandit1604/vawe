@@ -13,13 +13,12 @@ Clip: [chart-build.mp4](chart-build.mp4). Demo: [demo/chart-build.html](demo/cha
 .tag { position: absolute; left: 50%; bottom: 100%; margin-bottom: 1.6vh; translate: -50% 0; background: #fff; color: #16151a; transform-origin: 50% 100%; opacity: 0; }
 </style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), pop = curveToLinear(CURVES.overshoot);
+import { EASE } from '../../core/motion/presets.js';
 const max = 40;   // the axis top: above the tallest bar, or the tag collides with the header
-grid.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 500, delay: 60 + i * 40, easing: settle, fill: 'both' });
-bars.forEach((bar, i) => bar.animate([{ height: '0%' }, { height: `${(value[i] / max) * 100}%` }], { duration: 800, delay: 260 + i * 70, easing: settle, fill: 'both' }));
+grid.animate([{ scale: '0 1' }, { scale: '1 1' }], { duration: 500, delay: 60 + i * 40, easing: EASE.land, fill: 'both' });
+bars.forEach((bar, i) => bar.animate([{ height: '0%' }, { height: `${(value[i] / max) * 100}%` }], { duration: 800, delay: 260 + i * 70, easing: EASE.land, fill: 'both' }));
 last.animate([{ background: 'rgba(255,255,255,0.28)' }, { background: '#0a87ff' }], { duration: 240, delay: 1250, easing: 'linear', fill: 'both' });
-tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, translate: '-50% 0', opacity: 1 }], { duration: 650, delay: 1350, easing: pop, fill: 'both' });
+tag.animate([{ scale: 0.85, translate: '-50% 1.6vh', opacity: 0 }, { scale: 1, translate: '-50% 0', opacity: 1 }], { duration: 650, delay: 1350, easing: EASE.pop, fill: 'both' });
 </script>
 ```
 

@@ -17,13 +17,14 @@ Clip: [text-as-mask.mp4](text-as-mask.mp4). Demo: [demo/text-as-mask.html](demo/
 
 ```js
 import '../../core/engine/page-api.js';
-import { CURVES } from '../../core/motion/springs.js';
+import { easeFn } from '../../core/motion/presets.js';
+const land = easeFn('land'), glide = easeFn('glide');
 const S = 3.2, t0 = 0.05, dur = 1.15, lerp = (a, b, u) => a + (b - a) * u;
 vawe.onFrame((t) => {
-  const p = CURVES.expoOut(Math.min(1, Math.max(0, (t - t0) / dur)));
+  const p = land(Math.min(1, Math.max(0, (t - t0) / dur)));
   const k = Math.min(1, t / 2);
   stage.style.scale = Math.exp(Math.log(S) * (1 - p)) * (1 + 0.035 * k);          // pull back on a log path, then a slow push
-  const sunY = lerp(100, 46, CURVES.expoOut(Math.min(1, t / 1.8)));
+  const sunY = lerp(100, 46, glide(Math.min(1, t / 1.8)));
   title.style.backgroundPosition = `${lerp(0, 22, k)}% 100%, ${lerp(0, 12, k)}% 100%, 62% ${sunY}%, 50% 100%, 0 0`;   // one value per layer
 });
 ```

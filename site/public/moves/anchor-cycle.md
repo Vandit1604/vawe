@@ -29,7 +29,7 @@ vawe.onFrame((t) => {
   tape.classList.toggle('b', i % 2 === 1 && i < states.length - 1);
   tape.style.rotate = i === states.length - 1 ? '0deg' : `${tilt[i]}deg`;   // slapped on at a tilt, squared on the last
 });
-lock.animate([{ translate: '0 3vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 480, delay: 3850, easing: pop, fill: 'both' });
+lock.animate([{ translate: '0 3vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 480, delay: 3850, easing: EASE.pop, fill: 'both' });
 ```
 
 Sound: none under the cycle; pluck at 3.85 s into the move, when the lockup lands (default gain).

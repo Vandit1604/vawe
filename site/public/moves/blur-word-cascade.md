@@ -19,7 +19,7 @@ p { font: 600 calc(var(--u) * 16)/1.02 var(--sans); letter-spacing: -0.052em; te
 
 ```js
 line.innerHTML = line.textContent.split(' ').map((t, i) => `<span class="w${t === 'hand' ? ' hot' : ''}" style="--i:${i}">${t}</span>`).join(' ');
-// --soft: curveToLinear(CURVES.expoOut)
+document.documentElement.style.setProperty('--soft', EASE.land);
 ```
 
 Sound: none; soft copy resolving from blur has no event to mark.

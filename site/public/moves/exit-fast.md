@@ -1,7 +1,7 @@
 # Exits faster than entrances
 
 **Use when** anything enters and later leaves, which is every beat. In: 0.55 s, arrives fast and lands
-soft (`expoOut`). Out: 0.22 s, accelerates, and travels less than half the entrance distance. The
+soft (`EASE.land`). Out: 0.22 s, accelerates, and travels less than half the entrance distance. The
 exit keyframe has no `from`: a `from` would fill backwards over the entrance and hide it. Clip:
 [exit-fast.mp4](exit-fast.mp4). Demo: [demo/exit-fast.html](demo/exit-fast.html).
 
@@ -17,10 +17,10 @@ h1 { animation-name: land, leave; animation-duration: 0.55s, 0.22s;
 <style>:root { --beat-1: 0.05s; --beat-1-out: 0.72s; }</style>
 <h1>in, then out</h1>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
+import { EASE } from '../../core/motion/presets.js';
 const root = document.documentElement.style;
-root.setProperty('--settle', curveToLinear(CURVES.expoOut));
-root.setProperty('--accelerate', curveToLinear((u) => u * u * u));
+root.setProperty('--settle', EASE.land);
+root.setProperty('--accelerate', EASE.launch);
 </script>
 ```
 

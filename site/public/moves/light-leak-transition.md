@@ -15,19 +15,18 @@ shot climbs out of the light. The warm flare reads against a dark ground, so use
 ```
 
 ```js
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const settle = curveToLinear(CURVES.expoOut), ramp = curveToLinear((u) => u * u), smooth = curveToLinear((u) => u * u * (3 - 2 * u));
+import { EASE } from '../../core/motion/presets.js';
 const cut = 1080;   // ms: the peak of the layers
 // start, rise, fall (ms), peak amount, drift [x0, y0, x1, y1] in percent: each layer keeps its own clock
 const layers = { '.l1': [600, 480, 300, 1, [-18, 4, 14, -2]], '.l2': [680, 400, 280, 0.9, [20, -6, -16, 6]], '.l3': [640, 440, 360, 0.85, [-6, 10, 8, -10]] };
 for (const [sel, [t0, rise, fall, amp, [x0, y0, x1, y1]]] of Object.entries(layers)) {
   const dur = rise + fall, peak = rise / dur;
-  el(sel).animate([{ opacity: 0, easing: ramp }, { opacity: amp, offset: peak, easing: settle }, { opacity: 0 }], { duration: dur, delay: t0, fill: 'both' });
-  el(sel).animate([{ translate: `${x0}% ${y0}%`, scale: 0.8 }, { translate: `${x1}% ${y1}%`, scale: 1.3 }], { duration: dur, delay: t0, easing: smooth, fill: 'both' });
+  el(sel).animate([{ opacity: 0, easing: EASE.carry }, { opacity: amp, offset: peak, easing: EASE.leave }, { opacity: 0 }], { duration: dur, delay: t0, fill: 'both' });
+  el(sel).animate([{ translate: `${x0}% ${y0}%`, scale: 0.8 }, { translate: `${x1}% ${y1}%`, scale: 1.3 }], { duration: dur, delay: t0, easing: EASE.glide, fill: 'both' });
 }
 // the old shot sinks into the light, the cut lands on the peak, the new shot climbs out as the light leaves
-shotA.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: cut - 400, easing: ramp, fill: 'both' });
-shotB.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: cut, easing: settle, fill: 'both' });
+shotA.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, delay: cut - 400, easing: EASE.launch, fill: 'both' });
+shotB.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: cut, easing: EASE.land, fill: 'both' });
 ```
 
 Sound: whoosh at 0.6 s into the move, so its swell meets the flare at the cut (default gain).

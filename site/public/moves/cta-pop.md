@@ -15,12 +15,11 @@ invites a click and the tail is never still. Clip: [cta-pop.mp4](cta-pop.mp4). D
 .cta path { fill: none; stroke: #fff; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 </style>
 <script type="module">
-import { curveToLinear, CURVES } from '../../core/motion/springs.js';
-const pop = curveToLinear(CURVES.overshoot), settle = curveToLinear(CURVES.expoOut);
-cta.animate([{ scale: '0.86', translate: '0 3vh' }, { scale: '1', translate: '0 0' }], { duration: 650, delay: 300, easing: pop, fill: 'both' });
+import { EASE } from '../../core/motion/presets.js';
+cta.animate([{ scale: '0.86', translate: '0 3vh' }, { scale: '1', translate: '0 0' }], { duration: 650, delay: 300, easing: EASE.pop, fill: 'both' });
 cta.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 100, delay: 300, easing: 'linear', fill: 'both' });
 [1200, 1600].forEach((at) => arrow.animate([{ translate: '0 0' }, { translate: '4px 0', offset: 0.4 }, { translate: '0 0' }],
-  { duration: 380, delay: at, easing: settle, fill: 'both' }));
+  { duration: 520, delay: at, easing: EASE.landSoft, fill: 'both' }));
 </script>
 ```
 
