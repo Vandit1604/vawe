@@ -9,7 +9,7 @@
 # absent from the context until somebody says otherwise, and the failure mode of forgetting is a build
 # that stops with "not found" instead of one that quietly grows.
 #
-#   Dockerfile      (the site + docs apps): assets/vendor scripts generators harness/media/fonts.lock.json
+#   Dockerfile      (the site + docs apps): assets/vendor scripts generators core harness/media/fonts.lock.json
 #                   site (site/docker-start.sh included) docs-site NOTICE package.json package-lock.json (gsap)
 #
 # EDITING THIS FILE: add a COPY, add its `!` line here in the same commit. `quality/gates/site-build-check.mjs` builds
@@ -23,6 +23,7 @@
 # generators/media/fonts.mjs refuses to run without its lock, and the builder stage runs it.
 !harness/media/fonts.lock.json
 !generators
+!core
 !assets/vendor
 
 # ── the two web apps ─────────────────────────────────────────────────────────────────────────────

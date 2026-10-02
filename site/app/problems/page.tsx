@@ -5,7 +5,7 @@ import { jsonLdScript, techArticleSchema } from "../../lib/schema";
 import { Clip } from "../components/Clip";
 import { EaseCurve } from "../components/EaseCurve";
 import { GithubCta, Icon, OpenSourceMark } from "../components/Icon";
-import { clip } from "../../lib/moves";
+import { MOVES, clip } from "../../lib/moves";
 import { OPEN, PROBLEMS, SOLVED, STATUS_LABEL, VISUALS, type Problem } from "./data";
 import "../components/intent.css";
 import "../components/study.css";
@@ -25,7 +25,7 @@ function Visual({ id }: { id: number }) {
   if (!v) return null;
   if (v.kind === "code") return <pre className="prob-code" aria-label="A film is one HTML page">{v.text}</pre>;
   if (v.kind === "curve") return <div className="prob-media prob-curve"><EaseCurve name={v.ease} label={v.alt} /></div>;
-  const f = clip(v.move);
+  const f = clip(MOVES.find((m) => m.name === v.move) ?? { name: v.move, clipHash: null });
   if (v.kind === "clip")
     return (
       <div className="prob-media" role="img" aria-label={v.alt}>
