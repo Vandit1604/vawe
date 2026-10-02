@@ -15,6 +15,8 @@ COPY assets/vendor ./assets/vendor
 COPY scripts ./scripts
 # generators/ bakes the standing assets (fonts here); the RUN below needs it in the image
 COPY generators ./generators
+# scripts/site/moves.mjs and easing.mjs import the motion library at build time
+COPY core ./core
 # The rule this encodes: only COPY a path git actually carries. A COPY of a gitignored directory is a
 # hard failure at build time, not a missing file.
 

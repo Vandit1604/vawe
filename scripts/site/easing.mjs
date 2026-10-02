@@ -17,6 +17,11 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = path.join(root, 'site', 'lib', 'easing.json');
 const AE = JSON.parse(fs.readFileSync(path.join(root, 'scripts/site/data/ae-handles.json'), 'utf8'));
 const MOVES_DIR = path.join(root, 'prompts', 'moves');
+
+if (!fs.existsSync(MOVES_DIR)) {
+  console.log('~ prompts/moves is not here; using the committed site/lib/easing.json');
+  process.exit(0);
+}
 const MOVES_JSON = JSON.parse(fs.readFileSync(path.join(root, 'site/lib/moves.json'), 'utf8'));
 
 const SAMPLES = 100;
