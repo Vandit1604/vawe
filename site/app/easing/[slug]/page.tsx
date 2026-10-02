@@ -126,7 +126,7 @@ function Handles({ e }: { e: Ease }) {
       <div className="ez-codes">
         <Code
           label="vawe: key table"
-          text={`import { keys } from 'vawe/core/motion/presets.js';\n\n// out handle on the first key, in handle on the second\nkeys(el, 'translate', [\n  [0, '0 6vh', { out: ${handleSpec(h.out)} }],\n  [0.6, '0 0', { in: ${handleSpec(h.in)} }],\n]);`}
+          text={`import { keys } from '../../core/motion/presets.js';\n\n// out handle on the first key, in handle on the second\nkeys(el, 'translate', [\n  [0, '0 6vh', { out: ${handleSpec(h.out)} }],\n  [0.6, '0 0', { in: ${handleSpec(h.in)} }],\n]);`}
         />
       </div>
     </section>
