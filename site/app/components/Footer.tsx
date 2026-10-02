@@ -13,6 +13,7 @@ const NAV_GROUPS: { title: string; group: string }[] = [
   { title: "Learn", group: "topic" },
   { title: "Use cases", group: "job" },
   { title: "Compare", group: "comparison" },
+  { title: "Project", group: "project" },
 ];
 
 /* Same active-hint mechanism Header.tsx uses (a prop naming the current item, so the current page

@@ -64,6 +64,20 @@ export function softwareApplicationSchema() {
   };
 }
 
+export function techArticleSchema(opts: { headline: string; description: string; path: string; datePublished: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: opts.headline,
+    description: opts.description,
+    url: `${SITE_URL}${opts.path}`,
+    mainEntityOfPage: `${SITE_URL}${opts.path}`,
+    datePublished: opts.datePublished,
+    author: { "@type": "Organization", name: "vawe", url: SITE_URL },
+    publisher: { "@type": "Organization", name: "vawe", url: SITE_URL },
+  };
+}
+
 export type BreadcrumbItem = { name: string; url: string };
 
 export function breadcrumbSchema(items: BreadcrumbItem[]) {
