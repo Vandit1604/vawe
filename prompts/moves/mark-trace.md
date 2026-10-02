@@ -32,7 +32,7 @@ vawe.onFrame((t) => {   // line and tip read one function per frame, so the tip 
   tip.setAttribute('cx', p.x.toFixed(2)); tip.setAttribute('cy', p.y.toFixed(2));
 });
 tip.animate([{ opacity: 1, scale: 1 }, { opacity: 0, scale: 0.4 }], { duration: 220, delay: 980, easing: EASE.launch, fill: 'both' });
-ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 420, delay: 950, easing: EASE.land, fill: 'both' });
+ink.animate([{ strokeWidth: 2.5 }, { strokeWidth: 9 }], { duration: 520, delay: 950, easing: EASE.landSoft, fill: 'both' });
 run.animate([{ opacity: 1, strokeDashoffset: 0.2 }, { opacity: 1, strokeDashoffset: -1 }], { duration: 750, delay: 1250, easing: EASE.settle, fill: 'both' });
 </script>
 ```

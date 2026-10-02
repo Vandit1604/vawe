@@ -16,7 +16,7 @@ import { EASE } from '../../core/motion/presets.js';
 chars.forEach((ch, i) => {
   ch.animate([{ opacity: 0, translate: '0 5vh' }, { opacity: 1, translate: '0 0' }], { duration: 650, delay: 40 + i * 45, easing: EASE.land, fill: 'both' });
   ch.querySelector('.f').animate([{ clipPath: 'inset(110% -0.1em -0.3em -0.1em)' }, { clipPath: 'inset(-0.3em -0.1em -0.3em -0.1em)' }],
-    { duration: 480, delay: 780 + i * 35, easing: EASE.land, fill: 'both' });
+    { duration: 720, delay: 780 + i * 35, easing: EASE.landSoft, fill: 'both' });
 });
 </script>
 ```

@@ -35,10 +35,10 @@ const at = { rule: 420, plate: 520, name: 760, role: 900 };   // ms
 q('.shot').animate([{ scale: 1.0 }, { scale: 1.05 }], { duration: 3200, easing: EASE.glide, ...opt });
 
 // in: the rule grows up, the plate wipes open from it, the name rises out of its mask, then the role
-q('.rule').animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: EASE.land, ...opt });
+q('.rule').animate([{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 380, delay: at.rule, easing: EASE.landSoft, ...opt });
 q('.plate').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)' }], { duration: 560, delay: at.plate, easing: EASE.land, ...opt });
 q('.name').animate([{ translate: '0 105%' }, { translate: '0 0' }], { duration: 520, delay: at.name, easing: EASE.land, ...opt });
-q('.role').animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: EASE.land, ...opt });
+q('.role').animate([{ translate: '0 120%' }, { translate: '0 0' }], { duration: 460, delay: at.role, easing: EASE.landSoft, ...opt });
 </script>
 </body>
 </html>

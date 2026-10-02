@@ -33,8 +33,8 @@ Sound: none; or a dry pen scratch under each stroke, if the film has a bed that 
 
 ## The numbers that make it look expensive
 
-- Order is the story: circle (0.6 s), then the label writes on (0.45 s) while the arrow draws from it to the circle (0.35 s) and its head flicks in (0.14 s), then the underline (0.45 s). Strokes overlap by a third.
-- A pen starts slow, runs, and stops: `EASE.settle` for the long strokes, `EASE.land` only for the arrow head.
+- Order is the story: circle (0.6 s), then the label writes on (0.45 s) while the arrow draws from it to the circle (0.35 s) and its head flicks in (0.2 s), then the underline (0.45 s). Strokes overlap by a third.
+- A pen starts slow, runs, and stops: `EASE.settle` for the long strokes, `EASE.landSoft` only for the arrow head.
 - The wobble is small and seeded: 2.5 percent of the radius on the circle, 1 percent of the font size on the shaft. More reads as a bad drawing, none as a vector ellipse.
 - The circle overshoots its start by 6 percent of a turn: a closed circle is a shape, an overlapped one is a gesture.
 - The label is written on a hard left-to-right clip, not a fade, and sits in a handwriting face (Caveat) against the sans line. One accent colour for every mark, 4.5:1 on the ground.

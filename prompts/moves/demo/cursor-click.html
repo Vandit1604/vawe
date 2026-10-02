@@ -56,12 +56,12 @@ q('.x').animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], 
 q('.y').animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: at.dur, delay: at.go, easing: EASE.settle, fill: 'both' });
 // hover as the cursor arrives, then the press: the cursor dips 14 percent, the button dips 3 percent and turns accent
 q('.btn').animate([{ background: css('--raised') }, { background: css('--hover') }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
-q('.cur svg').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: at.press, easing: EASE.land, fill: 'both' });
-q('.btn').animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: at.press, easing: EASE.land, fill: 'both' });
+q('.cur svg').animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: at.press, easing: EASE.landSoft, fill: 'both' });
+q('.btn').animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: at.press, easing: EASE.landSoft, fill: 'both' });
 q('.btn').animate([{ background: css('--hover') }, { background: css('--accent') }], { duration: 120, delay: at.press, easing: 'linear', fill: 'forwards' });
 // the result: the label rolls up and the confirmed state rolls in
 q('.idle').animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: at.release, easing: EASE.launch, fill: 'both' });
-q('.done').animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.release + 40, easing: EASE.land, fill: 'both' });
+q('.done').animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: at.release + 40, easing: EASE.landSoft, fill: 'both' });
 // the cursor leaves faster than it came, accelerating out of the frame
 q('.x').animate([{ translate: `${to.x}px 0` }, { translate: `${W * 1.06}px 0` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
 q('.y').animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${H * 0.86}px` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });

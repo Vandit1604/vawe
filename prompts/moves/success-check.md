@@ -15,7 +15,7 @@ btn.animate([{ scale: 1 }, { scale: 0.96, offset: 0.3 }, { scale: 1 }], { durati
 btn.animate([{ width: `${W}px`, borderRadius: r0 }, { width: `${H}px`, borderRadius: `${H / 2}px` }], { duration: 420, delay: T.morph, easing: EASE.land, fill: 'both' });
 label.animate([{ opacity: 1, scale: 1, filter: 'blur(0px)' }, { opacity: 0, scale: 0.6, filter: 'blur(3px)' }], { duration: 160, delay: T.morph, easing: EASE.launch, fill: 'both' });
 // 3 draw: <path pathLength="1" stroke-dasharray="1" stroke-dashoffset="1" d="M5.5 12.5l4.2 4.2L18.5 7.6"/>
-check.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 360, delay: T.draw, easing: EASE.land, fill: 'both' });
+check.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 360, delay: T.draw, easing: EASE.landSoft, fill: 'both' });
 // 4 land: a small press pop on the circle, one ring leaves it, the confirmation rises
 btn.animate([{ scale: 1 }, { scale: 0.93, offset: 0.16 }, { scale: 1 }], { duration: 620, delay: T.land, easing: EASE.pop, fill: 'both' });
 ring.animate([{ opacity: 0.9, scale: 1 }, { opacity: 0, scale: 2.3 }], { duration: 640, delay: T.land + 40, easing: EASE.land, fill: 'both' });

@@ -73,8 +73,8 @@ const bow = (t) => Math.sin(t * Math.PI) * fs * 0.14;
 const shaft = Array.from({ length: 6 }, (_, i) => { const t = i / 5; return [from[0] + (to[0] - from[0]) * t + wob(fs * 0.012), from[1] + (to[1] - from[1]) * t + bow(t) + wob(fs * 0.012)]; });
 stroke(smooth(shaft), 0.95, 0.35, EASE.settle);
 const head = (s) => `M${to[0] + fs * 0.2} ${to[1] - fs * 0.14 * s + wob(2)}L${to[0]} ${to[1]}L${to[0] + fs * 0.2} ${to[1] + fs * 0.16 * s + wob(2)}`;
-stroke(head(1), 1.27, 0.14, EASE.land);
-label.animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% 0% -10% 0)' }], { delay: 1.1 * 1000, duration: 450, easing: EASE.land, fill: 'both' });
+stroke(head(1), 1.27, 0.2, EASE.landSoft);
+label.animate([{ clipPath: 'inset(-10% 100% -10% 0)' }, { clipPath: 'inset(-10% 0% -10% 0)' }], { delay: 1.1 * 1000, duration: 450, easing: EASE.landSoft, fill: 'both' });
 
 // underline: a long, slightly sagging stroke under the last word
 const sd = rect(word('standup'));

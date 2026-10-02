@@ -33,7 +33,7 @@ vawe.onFrame((t) => {
   el.style.scale = 1 - pressed * 0.04;
 
   // the cursor rides a quadratic bow and decelerates onto the label, dips with the button and leaves
-  const [x, y] = bezier(start, bow, target, seg(t, at.go, at.arrive, easeFn('land')));
+  const [x, y] = bezier(start, bow, target, seg(t, at.go, at.arrive, easeFn('landSoft')));
   cursor.style.translate = `${x}px ${y + pressed * 0.9 * u}px`;
   cursorSvg.style.scale = 1 - pressed * 0.16;
 });

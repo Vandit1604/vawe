@@ -15,11 +15,11 @@ const from = { x: innerWidth * 0.16, y: innerHeight * 0.9 }, to = { x: b.left + 
 x.animate([{ translate: `${from.x}px 0` }, { translate: `${to.x}px 0` }], { duration: 760, delay: 200, easing: EASE.land, fill: 'both' });
 y.animate([{ translate: `0 ${from.y}px` }, { translate: `0 ${to.y}px` }], { duration: 760, delay: 200, easing: EASE.settle, fill: 'both' });
 btn.animate([{ background: '#2b2a31' }, { background: '#37363e' }], { duration: 160, delay: 780, easing: 'linear', fill: 'both' });
-curSvg.animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: 1080, easing: EASE.land, fill: 'both' });   // transform-origin: 0 0, the tip
-btn.animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: 1080, easing: EASE.land, fill: 'both' });
+curSvg.animate([{ scale: 1 }, { scale: 0.86 }, { scale: 1 }], { duration: 230, delay: 1080, easing: EASE.landSoft, fill: 'both' });   // transform-origin: 0 0, the tip
+btn.animate([{ scale: 1 }, { scale: 0.965, offset: 0.4 }, { scale: 1 }], { duration: 300, delay: 1080, easing: EASE.landSoft, fill: 'both' });
 btn.animate([{ background: '#37363e' }, { background: '#0a87ff' }], { duration: 120, delay: 1080, easing: 'linear', fill: 'forwards' });
 idle.animate([{ translate: '0 0', opacity: 1 }, { translate: '0 -3.4vh', opacity: 0 }], { duration: 260, delay: 1190, easing: EASE.launch, fill: 'both' });
-done.animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: 1230, easing: EASE.land, fill: 'both' });
+done.animate([{ translate: '0 3.4vh', opacity: 0 }, { translate: '0 0', opacity: 1 }], { duration: 380, delay: 1230, easing: EASE.landSoft, fill: 'both' });
 x.animate([{ translate: `${to.x}px 0` }, { translate: `${innerWidth * 1.06}px 0` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
 y.animate([{ translate: `0 ${to.y}px` }, { translate: `0 ${innerHeight * 0.86}px` }], { duration: 380, delay: 1560, easing: EASE.launch, fill: 'forwards' });
 </script>
@@ -30,7 +30,7 @@ Sound: pluck at 1.08 s into the move, on the press (default gain); nothing on th
 The cursor tip is the origin of the arrow path, so the translate is the point that clicks. Aim at
 the lower right of the button, not its centre, or the pointer sits on the label and hides it. The
 arrival is `EASE.land` (fast in, soft landing); the press dip is 14 percent on the cursor and 3
-percent on the button, and it lasts 230 ms. The exit is `EASE.launch` over 380 ms, half the time
+percent on the button, and it lasts 230 ms on `EASE.landSoft`. The exit is `EASE.launch` over 380 ms, half the time
 of the entrance and accelerating, so the last frames are the cursor leaving. The accent is used
 once, on the pressed result.
 
