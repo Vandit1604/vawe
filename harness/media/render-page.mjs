@@ -46,7 +46,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { PAGE_ARGS, REPO_ROOT, serveRepo, trackBrowser, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
@@ -54,6 +53,7 @@ import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
 import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
 import { devEvent, shipEvent } from '../lib/run-events.mjs';
+import { REPO_ROOT } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleText, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
@@ -94,8 +94,24 @@ const RECYCLE_SUBFRAMES = 300;
 // A page keeps raster state between seeks: the first frame on a fresh page differs from the same frame
 // reached by seeking on (a sparse SSIM 0.99997 drift on gradient text). So the slice boundaries are fixed
 // by this constant, never by the worker count, and each slice starts on its own fresh page: the pixels
-// are then identical for any --workers.
+// are then identical for any --workers. A draft trades that for speed: its slices are sized to the work.
 const SLICE_FRAMES = 60;
+const MIN_DRAFT_SLICE_FRAMES = 15;
+
+// A final keeps SLICE_FRAMES. A draft splits the frames evenly over the worker lanes (several slices per lane
+// only when a lane would carry more than SLICE_FRAMES), so a short window still uses every worker.
+export function sliceFramesFor(frames, workers, final) {
+  if (final) return SLICE_FRAMES;
+  const perLane = Math.ceil(frames / workers);
+  return Math.max(MIN_DRAFT_SLICE_FRAMES, Math.ceil(perLane / Math.ceil(perLane / SLICE_FRAMES)));
+}
+
+// A final captures lossless PNG. A draft captures JPEG: encoding and writing a half-size frame costs about
+// half as much, and the draft encode and checks read the frames through ffmpeg either way.
+const DRAFT_JPEG_QUALITY = 92;
+export const frameFormat = (final) => (final
+  ? { ext: 'png', label: 'final: png, software', shot: { type: 'png', optimizeForSpeed: true } }
+  : { ext: 'jpg', label: 'draft: jpeg, gpu', shot: { type: 'jpeg', quality: DRAFT_JPEG_QUALITY, optimizeForSpeed: true } });
 
 const die = (msg, code = 1) => { console.error(errorLine(msg)); process.exit(code); };
 
@@ -112,27 +128,11 @@ export function readPageMeta(pagePath, name) {
   return null;
 }
 
-// Speed spike: VAWE_BROWSER_PER_WORKER=1 gives each worker lane its own browser process.
-const BROWSER_PER_WORKER = process.env.VAWE_BROWSER_PER_WORKER === '1';
 // Speed spike bench only: per-subframe timings (seek, settle, screenshot call, PNG write) appended here as JSONL.
 const BENCH_TIMING_FILE = process.env.VAWE_BENCH_TIMING_FILE || null;
 
-async function openOwnPage(pagePath, frame, own, worker) {
-  const page = await own.browsers[worker - 1].newPage();
-  await page.setViewport({ width: frame.width, height: frame.height, deviceScaleFactor: frame.scale });
-  const url = `http://127.0.0.1:${own.port}/${path.relative(REPO_ROOT, path.resolve(pagePath)).split(path.sep).join('/')}`;
-  return { page, url, persistent: true, close: async () => { await page.close().catch(() => {}); } };
-}
-
-async function launchOwnBrowsers(count) {
-  const { default: puppeteer } = await import('puppeteer');
-  const server = await serveRepo({ root: REPO_ROOT });
-  const browsers = await Promise.all(Array.from({ length: count }, async () => trackBrowser(await puppeteer.launch({ headless: true, args: PAGE_ARGS, protocolTimeout: PROTOCOL_TIMEOUT_MS }))));
-  return { browsers, port: server.port, close: async () => { await Promise.all(browsers.map((b) => b.close().catch(() => {}))); server.close(); } };
-}
-
-export async function openPage(pagePath, frame, { warm = false, own = null, worker = 1 } = {}) {
-  const opened = own ? await openOwnPage(pagePath, frame, own, worker) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, args: PAGE_ARGS, warm });
+export async function openPage(pagePath, frame, { warm = false, final = true } = {}) {
+  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
@@ -181,7 +181,7 @@ const PIXEL_W = 64;
 // Mean absolute luma difference (0-255) between consecutive frames downscaled to PIXEL_W wide, one
 // low-quality screenshot per frame. An estimate of "how much of the picture moved", enough to tell a
 // held frame from a fast one, decoded inside the page so the renderer needs no image library.
-async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers, stallMs) {
+async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers, stallMs, final) {
   const speeds = new Array(frames);
   const lumaAt = async (page, i, mark) => {
     mark('seek');
@@ -208,15 +208,15 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
     speeds[i] = sum / next.length;
     local.prev = next;
     return 2;
-  }, { fps, from, stallMs });
+  }, { fps, from, stallMs, final, sliceFrames: sliceFramesFor(frames, workers, final) });
   return speeds;
 }
 
 // The pixels of a render are a pure function of the page folder, core/ and the render settings: this key names
 // both the speed pass answer and the frames dir, so a second render of an unchanged page reuses them.
-export function renderKey({ pagePath, frame, frames, fps, from, blur }) {
+export function renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant = null }) {
   const files = [path.dirname(path.resolve(pagePath)), path.join(REPO_ROOT, 'core')];
-  return createHash('sha1').update(JSON.stringify([treeSignature(files), path.resolve(pagePath), frame, frames, fps, from, blur])).digest('hex').slice(0, 16);
+  return createHash('sha1').update(JSON.stringify([treeSignature(files), path.resolve(pagePath), frame, frames, fps, from, blur, ...(draftVariant ? [draftVariant] : [])])).digest('hex').slice(0, 16);
 }
 
 async function frameSubframes(page, job, key) {
@@ -228,10 +228,10 @@ async function frameSubframes(page, job, key) {
 }
 
 // Returns bucketed subframe counts per output frame.
-export async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs }) {
+export async function measureSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs, final }) {
   const boxes = await frameSpeedsFromBoxes(page, frames, fps, from);
   if (boxes) return clampSegments(boxes.map((px) => subframesForTravel(px * frame.scale, blur)));
-  return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers, stallMs), blur, PIXEL_BANDS));
+  return clampSegments(bucketize(await frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers, stallMs, final), blur, PIXEL_BANDS));
 }
 
 // A fast move blended from too few subframes shows as separate copies of the object (3 ghosts at 3
@@ -263,14 +263,14 @@ function clampSegments(kArr, cap = 200) {
   return kArr.map(() => maxK);
 }
 
-// Runs work(page, i, local, mark) for every frame 0..frames-1 in fixed SLICE_FRAMES slices, `workers` slices at
+// Runs work(page, i, local, mark) for every frame 0..frames-1 in slices of run.sliceFrames, `workers` slices at
 // a time, each slice on its own recycled page. work returns how many seeks it made; `local` is that slice's own state;
 // work calls mark('<step>') before each await so a stall can name it.
 // A slice whose browser or page dies, or that makes no progress for `stallMs`, runs again from its first frame on a
 // fresh page, up to SLICE_ATTEMPTS in all; then the render throws an InvariantError. Returns the retried slices as
 // "lo-hi s" strings, one per retry. `run` is { fps, from } (they only name the time range) and optionally stallMs,
 // resume { done(slice), finish(slice) } to skip the slices an earlier run finished, and fault(slice, attempt), a test
-// hook that may throw at the start of an attempt.
+// hook that may throw at the start of an attempt. `run.final` picks the browser flags and `run.sliceFrames` the slice size.
 const LOST_PAGE = /Connection closed|Target closed|No target with given id|Session closed|Protocol error|timed out|timeout/i;
 
 // Measured slowest step: 0.38 s (a colour-sting draft screenshot); awaitFonts gives up at 10 s. A step at 60 s
@@ -282,11 +282,10 @@ export const SLICE_ATTEMPTS = 4;
 class StallError extends Error {}
 
 async function runShards(pagePath, frame, frames, workers, work, run) {
-  const { stallMs = STALL_MS, resume = null, fault = null } = run;
+  const { stallMs = STALL_MS, resume = null, fault = null, final, sliceFrames } = run;
   const slices = [];
-  for (let lo = 0; lo < frames; lo += SLICE_FRAMES) slices.push([lo, Math.min(frames, lo + SLICE_FRAMES)]);
+  for (let lo = 0; lo < frames; lo += sliceFrames) slices.push([lo, Math.min(frames, lo + sliceFrames)]);
   const restarted = [];
-  const ownBrowsers = BROWSER_PER_WORKER ? await launchOwnBrowsers(Math.min(workers, slices.length)) : null;
   let next = 0;
   const range = ([lo, hi]) => `${(run.from + lo / run.fps).toFixed(2)}-${(run.from + hi / run.fps).toFixed(2)}s`;
   const runSliceOnce = async ([lo, hi], worker, attempt) => {
@@ -304,7 +303,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
           if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await at.opened.close().catch(() => {}); at.opened = null; }
           if (!at.opened) {
             mark('open page', i);
-            at.opened = await openPage(pagePath, frame, { own: ownBrowsers, worker });
+            at.opened = await openPage(pagePath, frame, { final });
             mark('load page', i);
             await at.opened.page.goto(at.opened.url, { waitUntil: 'load' });
             sinceOpen = 0;
@@ -352,7 +351,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   const lane = async (worker) => {
     while (next < slices.length && !failure) await runSlice(slices[next++], worker).catch((e) => { failure ??= e; });
   };
-  try { await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1))); } finally { if (ownBrowsers) await ownBrowsers.close(); }
+  await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1)));
   if (failure) throw failure;
   return restarted;
 }
@@ -371,7 +370,8 @@ const seekThenKey = async (ms) => { await window.__pageSeek(ms / 1000); return w
 
 // A reused capture is only ever the previous one on the same page, so the pixels stay independent of --workers.
 // A slice that finished writes slice-<lo>.done in tmpDir; a later render into the same tmpDir skips it and calls onResumed.
-async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, fault, onResumed }) {
+async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, onSubframe, { stallMs, fault, onResumed, final }) {
+  const format = frameFormat(final);
   const marker = ([lo]) => path.join(tmpDir, `slice-${lo}.done`);
   const resume = {
     done: (slice) => { const found = fs.existsSync(marker(slice)); if (found) onResumed(slice); return found; },
@@ -381,7 +381,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
-      const file = path.join(tmpDir, `f${String(subframeStart[i] + j).padStart(6, '0')}.png`);
+      const file = path.join(tmpDir, `f${String(subframeStart[i] + j).padStart(6, '0')}.${format.ext}`);
       mark('seek');
       const t0 = performance.now();
       const key = await page.evaluate(seekThenKey, baseMs + (j / k) * SHUTTER * (1000 / fps));
@@ -393,18 +393,18 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
         const t2 = performance.now();
         mark('screenshot');
         if (BENCH_TIMING_FILE) {
-          const png = await page.screenshot({ type: 'png', optimizeForSpeed: true });
+          const bytes = await page.screenshot(format.shot);
           const t3 = performance.now();
-          fs.writeFileSync(file, png);
+          fs.writeFileSync(file, bytes);
           const t4 = performance.now();
-          fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, write: t4 - t3, bytes: png.length })}\n`);
-        } else await page.screenshot({ path: file, type: 'png', optimizeForSpeed: true });
+          fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, write: t4 - t3, bytes: bytes.length })}\n`);
+        } else await page.screenshot({ path: file, ...format.shot });
       }
       Object.assign(local, { key, file });
       onSubframe(i, reused);
     }
     return k;
-  }, { fps, from, stallMs, fault, resume });
+  }, { fps, from, stallMs, fault, resume, final, sliceFrames: sliceFramesFor(frames, workers, final) });
 }
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
@@ -454,7 +454,7 @@ function blendGraph(kArr, subframeStart, fps) {
 
 // One ffmpeg pass: the master to tmpOut and, when webOut is given, the web copy from the same blend.
 export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final, webOut = null) {
-  const seq = path.join(tmpDir, 'f%06d.png');
+  const seq = path.join(tmpDir, `f%06d.${frameFormat(final).ext}`);
   const master = final ? `,${DITHER}` : '';
   const outputs = webOut
     ? `;[blend]split=2[m][w];[m]null${master}[outv];[w]format=yuv420p10le[web]`
@@ -644,7 +644,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   if (opts.audio && from > 0) die('--audio needs a render from 0: the mix has no offset');
   const slot = await takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) });
   removeStaleFrames(path.dirname(path.resolve(outPath)));
-  const { page, url, close } = await openPage(pagePath, frame);
+  const { page, url, close } = await openPage(pagePath, frame, { final });
   const scriptErrors = watchPageErrors(page);
   try {
     await page.goto(url, { waitUntil: 'load' });
@@ -670,8 +670,9 @@ export async function renderPage(pagePath, outPath, opts = {}) {
 
     const workers = opts.workers || defaultWorkers(process.env, () => slot.others > 0);
     const tPre = Date.now();
-    const key = renderKey({ pagePath, frame, frames, fps, from, blur });
-    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs }, key) : Array(frames).fill(1);
+    const draftVariant = final ? null : `jpeg-${sliceFramesFor(frames, workers, false)}`;
+    const key = renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant });
+    const kArr = blur > 1 ? await frameSubframes(page, { pagePath, frame, frames, fps, from, blur, workers, stallMs: opts.stallMs, final }, key) : Array(frames).fill(1);
     const tmpDir = `${outPath}.frames-${key}`;
     fs.mkdirSync(tmpDir, { recursive: true });
     const subframeStart = new Array(frames + 1);
@@ -690,7 +691,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const onResumed = ([lo, hi]) => { resumed++; doneSub += subframeStart[hi] - subframeStart[lo]; };
     let restarted;
     try {
-      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, fault: opts.sliceFault, onResumed });
+      restarted = await captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps, from, frame, workers, (i, again) => { doneSub++; if (again) reused[i]++; }, { stallMs: opts.stallMs, fault: opts.sliceFault, onResumed, final });
     } catch (e) {
       throw Object.assign(e, { progress: doneSub / totalSub, framesDir: tmpDir });
     } finally {
@@ -879,7 +880,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   try { await checks.time('sheet', async () => { const { out, frames, fastest } = writeDraftSheet({ video: mp4, out: mp4.replace(/\.mp4$/, '.png'), fps: opts.fps, from }); look = `  look: ${out} (frames at ${frames.join(', ')} s; fastest motion at ${fastest} s)`; }); } catch (e) { console.error(`  no key-frame sheet: ${e.message}`); }
   const report = await draftReport(mp4, pagePath, { ...r, whole: from === 0 && opts.durArg == null, checks });
   checks.save();
-  const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds() });
+  const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds(), capture: frameFormat(false).label });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
   appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows }));

@@ -42,8 +42,8 @@ test('a check outside the tier does not run, and an unchanged page re-runs nothi
 });
 
 test('the time line names every check', () => {
-  assert.equal(timeLine({ captureMs: 18000, encodeMs: 300, checks: [['spec', 2], ['contrast', 3.1], ['text', 0.01]] }),
-    'time: capture 18.0 s · checks 5.1 s (contrast 3.1, spec 2.0) · encode 0.3 s');
+  assert.equal(timeLine({ captureMs: 18000, encodeMs: 300, checks: [['spec', 2], ['contrast', 3.1], ['text', 0.01]], capture: 'draft: jpeg, gpu' }),
+    'time: capture 18.0 s (draft: jpeg, gpu) · checks 5.1 s (contrast 3.1, spec 2.0) · encode 0.3 s');
 });
 
 const line = (text, x = 0, opacity = 1) => ({ text, box: [x, 0, 100, 20], opacity });
