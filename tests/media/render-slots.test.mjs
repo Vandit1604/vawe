@@ -11,9 +11,10 @@ const PAGE = 'tests/fixtures/pages/seek-canvas.html';
 
 const render = (out, env) => new Promise((resolve) => {
   const child = spawn(process.execPath, ['harness/media/render-page.mjs', PAGE, out, '--fps', '120', '--w', '160', '--h', '90', '--workers', '1', '--fast'], { env });
-  let stderr = '';
+  let stdout = '', stderr = '';
+  child.stdout.on('data', (d) => { stdout += d; });
   child.stderr.on('data', (d) => { stderr += d; });
-  child.on('close', (code) => resolve({ code, stderr }));
+  child.on('close', (code) => resolve({ code, stdout, stderr }));
 });
 
 test('three concurrent renders with two slots: the third waits and all finish', async () => {
@@ -22,8 +23,8 @@ test('three concurrent renders with two slots: the third waits and all finish', 
   try {
     const runs = await Promise.all([1, 2, 3].map((n) => render(path.join(dir, `r${n}.mp4`), env)));
     for (const r of runs) assert.equal(r.code, 0, r.stderr);
-    const waited = runs.filter((r) => /waiting for a render slot \(2 in use: seek-canvas\.html \(draft, pid \d+\), seek-canvas\.html \(draft, pid \d+\)\)/.test(r.stderr));
-    assert.ok(waited.length >= 1, runs.map((r) => r.stderr).join('\n---\n'));
+    const waited = runs.filter((r) => /waiting for a render slot \(2 in use: seek-canvas\.html \(draft, pid \d+\), seek-canvas\.html \(draft, pid \d+\)\)/.test(r.stdout));
+    assert.ok(waited.length >= 1, runs.map((r) => r.stdout).join('\n---\n'));
     for (const n of [1, 2, 3]) assert.ok(fs.statSync(path.join(dir, `r${n}.mp4`)).size > 0);
     assert.deepEqual(fs.readdirSync(path.join(dir, 'slots')), [], 'every slot is released');
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }

@@ -54,7 +54,7 @@ function tryTake(dir, count, entry) {
  * Waits for a free slot, then holds it until release() or process exit. Prints one line when it has to wait.
  * Returns { release, others }: `others` is how many other renders held a slot when this one got its own.
  */
-export async function takeRenderSlot({ kind, who }, { env = process.env, log = (l) => console.error(l) } = {}) {
+export async function takeRenderSlot({ kind, who }, { env = process.env, log = (l) => console.log(l) } = {}) {
   const dir = slotDir(env);
   const count = slotCount(env);
   fs.mkdirSync(dir, { recursive: true });
