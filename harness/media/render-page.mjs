@@ -46,7 +46,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { PAGE_ARGS, REPO_ROOT } from '../lib/render-harness.mjs';
+import { PAGE_ARGS, REPO_ROOT, serveRepo, trackBrowser, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { scratch } from '../lib/scratch.mjs';
 import { installPageClock } from '../../core/engine/page-clock.js';
 import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-seek.js';
@@ -112,8 +112,27 @@ export function readPageMeta(pagePath, name) {
   return null;
 }
 
-export async function openPage(pagePath, frame, { warm = false } = {}) {
-  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, args: PAGE_ARGS, warm });
+// Speed spike: VAWE_BROWSER_PER_WORKER=1 gives each worker lane its own browser process.
+const BROWSER_PER_WORKER = process.env.VAWE_BROWSER_PER_WORKER === '1';
+// Speed spike bench only: per-subframe timings (seek, settle, screenshot call, PNG write) appended here as JSONL.
+const BENCH_TIMING_FILE = process.env.VAWE_BENCH_TIMING_FILE || null;
+
+async function openOwnPage(pagePath, frame, own, worker) {
+  const page = await own.browsers[worker - 1].newPage();
+  await page.setViewport({ width: frame.width, height: frame.height, deviceScaleFactor: frame.scale });
+  const url = `http://127.0.0.1:${own.port}/${path.relative(REPO_ROOT, path.resolve(pagePath)).split(path.sep).join('/')}`;
+  return { page, url, persistent: true, close: async () => { await page.close().catch(() => {}); } };
+}
+
+async function launchOwnBrowsers(count) {
+  const { default: puppeteer } = await import('puppeteer');
+  const server = await serveRepo({ root: REPO_ROOT });
+  const browsers = await Promise.all(Array.from({ length: count }, async () => trackBrowser(await puppeteer.launch({ headless: true, args: PAGE_ARGS, protocolTimeout: PROTOCOL_TIMEOUT_MS }))));
+  return { browsers, port: server.port, close: async () => { await Promise.all(browsers.map((b) => b.close().catch(() => {}))); server.close(); } };
+}
+
+export async function openPage(pagePath, frame, { warm = false, own = null, worker = 1 } = {}) {
+  const opened = own ? await openOwnPage(pagePath, frame, own, worker) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, args: PAGE_ARGS, warm });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
@@ -267,6 +286,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   const slices = [];
   for (let lo = 0; lo < frames; lo += SLICE_FRAMES) slices.push([lo, Math.min(frames, lo + SLICE_FRAMES)]);
   const restarted = [];
+  const ownBrowsers = BROWSER_PER_WORKER ? await launchOwnBrowsers(Math.min(workers, slices.length)) : null;
   let next = 0;
   const range = ([lo, hi]) => `${(run.from + lo / run.fps).toFixed(2)}-${(run.from + hi / run.fps).toFixed(2)}s`;
   const runSliceOnce = async ([lo, hi], worker, attempt) => {
@@ -284,7 +304,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
           if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await at.opened.close().catch(() => {}); at.opened = null; }
           if (!at.opened) {
             mark('open page', i);
-            at.opened = await openPage(pagePath, frame);
+            at.opened = await openPage(pagePath, frame, { own: ownBrowsers, worker });
             mark('load page', i);
             await at.opened.page.goto(at.opened.url, { waitUntil: 'load' });
             sinceOpen = 0;
@@ -332,7 +352,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   const lane = async (worker) => {
     while (next < slices.length && !failure) await runSlice(slices[next++], worker).catch((e) => { failure ??= e; });
   };
-  await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1)));
+  try { await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1))); } finally { if (ownBrowsers) await ownBrowsers.close(); }
   if (failure) throw failure;
   return restarted;
 }
@@ -363,13 +383,22 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     for (let j = 0; j < k; j++) {
       const file = path.join(tmpDir, `f${String(subframeStart[i] + j).padStart(6, '0')}.png`);
       mark('seek');
+      const t0 = performance.now();
       const key = await page.evaluate(seekThenKey, baseMs + (j / k) * SHUTTER * (1000 / fps));
+      const t1 = performance.now();
       const reused = key !== null && key === local.key;
       if (reused) { fs.rmSync(file, { force: true }); fs.linkSync(local.file, file); } else {
         mark('settle (fonts, image decode, two paints)');
         await settle(page);
+        const t2 = performance.now();
         mark('screenshot');
-        await page.screenshot({ path: file, type: 'png', optimizeForSpeed: true });
+        if (BENCH_TIMING_FILE) {
+          const png = await page.screenshot({ type: 'png', optimizeForSpeed: true });
+          const t3 = performance.now();
+          fs.writeFileSync(file, png);
+          const t4 = performance.now();
+          fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, write: t4 - t3, bytes: png.length })}\n`);
+        } else await page.screenshot({ path: file, type: 'png', optimizeForSpeed: true });
       }
       Object.assign(local, { key, file });
       onSubframe(i, reused);
