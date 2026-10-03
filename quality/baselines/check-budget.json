@@ -1,12 +1,12 @@
 {
  "fixture": "tests/fixtures/pages/word-at-2-5.html",
- "captureS": 0.83,
+ "captureS": 0.74,
  "seconds": {
   "motion": 0,
   "text": 0.01,
-  "contrast": 0.26,
+  "contrast": 0.21,
   "spec": 0,
   "sound": 0,
-  "video": 0.49
+  "video": 0.4
  }
 }
