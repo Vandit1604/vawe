@@ -16,7 +16,7 @@ import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS
 
 const SELF = fileURLToPath(import.meta.url);
 // One daemon per checkout: a shared state file made a worktree render pages from another checkout's root.
-const STATE_FILE = scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}.json`);
+export const STATE_FILE = scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}.json`);
 const IDLE_MS = 5 * 60 * 1000;
 
 function readState() {
