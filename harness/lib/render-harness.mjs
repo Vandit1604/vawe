@@ -66,8 +66,8 @@ function installCleanupHandlers() {
       catch { try { b.process()?.kill('SIGKILL'); } catch { /* already gone */ } }
     }
   };
-  for (const sig of ['SIGTERM', 'SIGINT', 'SIGALRM']) {
-    process.on(sig, async () => { await closeAll(); process.kill(process.pid, sig === 'SIGALRM' ? 'SIGTERM' : sig); });
+  for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130], ['SIGALRM', 143]]) {
+    process.on(sig, async () => { await closeAll(); process.exit(code); });
   }
   process.on('uncaughtException', async (e) => { await closeAll(); console.error(e); process.exit(1); });
   process.on('unhandledRejection', async (e) => { await closeAll(); console.error(e); process.exit(1); });
