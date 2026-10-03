@@ -4,12 +4,12 @@
 // warm tab. The look must never touch the capture's tab: listing every tab gave it puppeteer's default
 // 800x600 viewport, and the film got frames laid out at 800x600 in the top-left corner. Launches Chrome.
 import puppeteer from 'puppeteer';
-import { PAGE_ARGS } from '../../harness/lib/render-harness.mjs';
+import { pageArgs } from '../../harness/lib/render-harness.mjs';
 import { takeWarmPage, WARM_HASH } from '../../harness/media/preview-server.mjs';
 
 function assert(cond, msg) { if (!cond) throw new Error(`FAIL: ${msg}`); }
 
-const browser = await puppeteer.launch({ headless: true, args: PAGE_ARGS });
+const browser = await puppeteer.launch({ headless: true, args: pageArgs(true) });
 try {
   const render = await puppeteer.connect({ browserWSEndpoint: browser.wsEndpoint() });
   const capture = await render.newPage();

@@ -50,9 +50,9 @@ export function createChecks({ pagePath, mode = 'draft', cache = true }) {
   };
 }
 
-/** The time line a draft prints: `time: capture 18.0 s · checks 8.8 s (contrast 3.1, spec 2.0) · encode 0.3 s`. Pure. */
-export function timeLine({ captureMs, encodeMs, checks }) {
+/** The time line a draft prints: `time: capture 18.0 s (draft: jpeg, gpu) · checks 8.8 s (contrast 3.1, spec 2.0) · encode 0.3 s`. Pure. */
+export function timeLine({ captureMs, encodeMs, checks, capture }) {
   const total = checks.reduce((a, [, s]) => a + s, 0);
   const parts = checks.filter(([, s]) => s >= 0.05).sort((a, b) => b[1] - a[1]).map(([name, s]) => `${name} ${s.toFixed(1)}`);
-  return `time: capture ${(captureMs / 1000).toFixed(1)} s · checks ${total.toFixed(1)} s${parts.length ? ` (${parts.join(', ')})` : ''} · encode ${(encodeMs / 1000).toFixed(1)} s`;
+  return `time: capture ${(captureMs / 1000).toFixed(1)} s${capture ? ` (${capture})` : ''} · checks ${total.toFixed(1)} s${parts.length ? ` (${parts.join(', ')})` : ''} · encode ${(encodeMs / 1000).toFixed(1)} s`;
 }

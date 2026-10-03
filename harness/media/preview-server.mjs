@@ -12,28 +12,28 @@ import { createHash } from 'node:crypto';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { scratch } from '../lib/scratch.mjs';
-import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, RENDER_ARGS, PAGE_ARGS, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
+import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, pageArgs, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
-// One daemon per checkout: a shared state file made a worktree render pages from another checkout's root.
-export const STATE_FILE = scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}.json`);
+// One daemon per checkout and capture mode (a draft and a final need different browser flags): a shared state file made a worktree render pages from another checkout's root.
+export const stateFile = (final) => scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}${final ? '' : '-draft'}.json`);
 const IDLE_MS = 5 * 60 * 1000;
 
-function readState() {
-  try { return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8')); } catch { return null; }
+function readState(final) {
+  try { return JSON.parse(fs.readFileSync(stateFile(final), 'utf8')); } catch { return null; }
 }
 function pidAlive(pid) {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
-function touch() {
-  try { const now = new Date(); fs.utimesSync(STATE_FILE, now, now); } catch { /* daemon exits on its own next idle check */ }
+function touch(final) {
+  try { const now = new Date(); fs.utimesSync(stateFile(final), now, now); } catch { /* daemon exits on its own next idle check */ }
 }
 
-function waitForState(timeoutMs) {
+function waitForState(final, timeoutMs) {
   return new Promise((resolve) => {
     const start = Date.now();
     (function tick() {
-      const s = readState();
+      const s = readState(final);
       if (s && s.wsEndpoint) return resolve(s);
       if (Date.now() - start > timeoutMs) return resolve(null);
       setTimeout(tick, 100);
@@ -41,18 +41,18 @@ function waitForState(timeoutMs) {
   });
 }
 
-async function connectShared() {
-  let state = readState();
+async function connectShared(final) {
+  let state = readState(final);
   if (!state || !pidAlive(state.pid)) {
-    try { spawn(process.execPath, [SELF, '--daemon'], { detached: true, stdio: 'ignore' }).unref(); }
+    try { spawn(process.execPath, [SELF, '--daemon', ...(final ? [] : ['--draft'])], { detached: true, stdio: 'ignore' }).unref(); }
     catch { return null; }
-    state = await waitForState(5000);
+    state = await waitForState(final, 5000);
     if (!state) return null;
   }
   try {
     const { default: puppeteer } = await import('puppeteer');
     const browser = await puppeteer.connect({ browserWSEndpoint: state.wsEndpoint, protocolTimeout: PROTOCOL_TIMEOUT_MS });
-    touch();
+    touch(final);
     return { browser, port: state.port };
   } catch { return null; }
 }
@@ -106,14 +106,13 @@ export async function takeWarmPage(browser, url, sig) {
  * `url` is already the right one to `page.goto()`: relative to the shared daemon's REPO_ROOT server
  * when the shared browser is live and `pagePath` is inside the repo, a fresh per-call server otherwise
  * (a scratch/tmp fixture outside the repo, or the daemon not running). `close()` releases only what
- * THIS call opened: its own page when persistent, the whole server+browser otherwise. `args` (default
- * RENDER_ARGS) only affects the fallback launch: the shared browser is always launched with PAGE_ARGS,
- * the one flag a rapid screenshot loop (render-page.mjs) needs and a single still never does.
+ * THIS call opened: its own page when persistent, the whole server+browser otherwise. `final` (default
+ * true) picks the browser flags (pageArgs) and the daemon: a draft render passes false.
  */
-export async function openPreview(pagePath, { width = 1920, height = 1080, scale = 1, args = RENDER_ARGS, warm = false } = {}) {
+export async function openPreview(pagePath, { width = 1920, height = 1080, scale = 1, final = true, warm = false } = {}) {
   const abs = path.resolve(pagePath);
   if (insideRoot(REPO_ROOT, abs)) {
-    const shared = await connectShared();
+    const shared = await connectShared(final);
     if (shared) {
       const url = `http://127.0.0.1:${shared.port}/${path.relative(REPO_ROOT, abs)}${warm ? WARM_HASH : ''}`;
       const sig = warm ? treeSignature([path.dirname(abs), path.join(REPO_ROOT, 'core')]) : '';
@@ -129,29 +128,29 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   }
   const root = pageRoot(abs);
   const { close: closeServer, port } = await serveRepo({ root });
-  const { page, close: closePage } = await launchPage({ width, height, scale, args });
+  const { page, close: closePage } = await launchPage({ width, height, scale, args: pageArgs(final) });
   const url = `http://127.0.0.1:${port}/${path.relative(root, abs).split(path.sep).join('/')}`;
   return { page, url, persistent: false, close: async () => { await closePage(); closeServer(); } };
 }
 
-async function daemonMain() {
+async function daemonMain(final) {
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: PAGE_ARGS, protocolTimeout: PROTOCOL_TIMEOUT_MS }));
-  fs.writeFileSync(STATE_FILE, JSON.stringify({ pid: process.pid, port, wsEndpoint: browser.wsEndpoint() }));
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS }));
+  fs.writeFileSync(stateFile(final), JSON.stringify({ pid: process.pid, port, wsEndpoint: browser.wsEndpoint() }));
 
   const shutdown = async () => {
     clearInterval(idleTimer);
     try { await browser.close(); } catch { /* already gone */ }
     closeServer();
-    try { fs.rmSync(STATE_FILE, { force: true }); } catch { /* a fresher daemon may have replaced it */ }
+    try { fs.rmSync(stateFile(final), { force: true }); } catch { /* a fresher daemon may have replaced it */ }
     process.exit(0);
   };
   const idleTimer = setInterval(() => {
     let mtime = 0;
-    try { mtime = fs.statSync(STATE_FILE).mtimeMs; } catch { return shutdown(); }
+    try { mtime = fs.statSync(stateFile(final)).mtimeMs; } catch { return shutdown(); }
     if (Date.now() - mtime > IDLE_MS) shutdown();
   }, 30000);
 }
 
-if (process.argv.includes('--daemon')) daemonMain();
+if (process.argv.includes('--daemon')) daemonMain(!process.argv.includes('--draft'));
