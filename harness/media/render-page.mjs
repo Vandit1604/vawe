@@ -106,8 +106,7 @@ export function sliceFramesFor(frames, workers, final) {
   return Math.max(MIN_DRAFT_SLICE_FRAMES, Math.ceil(perLane / Math.ceil(perLane / SLICE_FRAMES)));
 }
 
-// A final captures lossless PNG. A draft captures JPEG: encoding and writing a half-size frame costs about
-// half as much, and the draft encode and checks read the frames through ffmpeg either way.
+// A final captures lossless PNG. A draft captures JPEG at quality 92 (about 73 KB a frame on colour-sting).
 const DRAFT_JPEG_QUALITY = 92;
 export const frameFormat = (final) => (final
   ? { ext: 'png', label: 'final: png, software', shot: { type: 'png', optimizeForSpeed: true } }
