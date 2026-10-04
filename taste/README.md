@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.
 
-98 rules, 34 scored by the judge.
+101 rules, 34 scored by the judge.
 
 ## concept
 
@@ -41,7 +41,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 
 ## look
 
-- [accent-share](rules/accent-share.md): One accent hue per film, scarce and visible. Check: judge.
+- [accent-share](rules/accent-share.md): One accent hue per film, scarce and visible. Check: judge, accent-flood.
 - [archetype-rotation](rules/archetype-rotation.md): Pick the layout by what the beat does, then rotate: never the same archetype twice in a row. Check: judge.
 - [asymmetry](rules/asymmetry.md): Compose asymmetric with one hero, anchored to edges and thirds. Check: judge.
 - [claim-shape-graphic](rules/claim-shape-graphic.md): A claim that is a quantity, a proportion, a change over time, a flow or a real thing wants its own graphic, not a number set in type. Check: judge.
@@ -59,22 +59,24 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [licensed-assets](rules/licensed-assets.md): Embed only assets you may publish. Check: none.
 - [logo-prominence](rules/logo-prominence.md): A mark reads as the brand, not as punctuation, next to the title and on the end card. Check: none.
 - [one-focal-point](rules/one-focal-point.md): One focal point per frame and one accent colour per frame. Check: judge.
-- [palette-from-brand](rules/palette-from-brand.md): Colours come from the brand or the brief: take them from the real pixels and the real CSS, and declare the palette once as :root custom properties. Check: judge.
+- [palette-from-brand](rules/palette-from-brand.md): Colours come from the brand or the brief: take them from the real pixels and the real CSS, and declare the palette once as :root custom properties. Check: judge, pure-black-white.
 - [readable-hold](rules/readable-hold.md): A line the viewer must read holds fully legible long enough to be read. Check: read-hold.
 - [readable-text-size](rules/readable-text-size.md): A line the viewer must read has a cap height of at least 6 percent of the frame height (about 65 px at 1080p). Check: text-cap-height.
-- [safe-margin](rules/safe-margin.md): Keep essential content inside the title-safe area and out of the caption bands of the destination. Check: none.
+- [safe-margin](rules/safe-margin.md): Keep essential content inside the title-safe area and out of the caption bands of the destination. Check: text-margin.
 - [screen-designed](rules/screen-designed.md): A product screen in a film is designed for the video, never a plain mock. Check: none.
+- [shared-edges](rules/shared-edges.md): Text blocks in one frame share a few left edges. Check: left-edges.
 - [surface-spec](rules/surface-spec.md): Lock a bespoke surface in one page of tokens before authoring, then check the frame against it. Check: judge.
 - [text-contrast](rules/text-contrast.md): A headline sits on a flat patch, not a moving blob or a gradient hot spot. Check: text-contrast.
 - [theme-source](rules/theme-source.md): The theme comes from the brand site; with a bare prompt, ask; with "you choose", invent one on purpose. Check: none.
-- [type-setting](rules/type-setting.md): Set display type tight and body type open. Check: none.
+- [type-scale](rules/type-scale.md): A frame uses few text sizes, and each size step is visible. Check: type-sizes.
+- [type-setting](rules/type-setting.md): Set display type tight and body type open. Check: display-tracking.
 - [typeface-default](rules/typeface-default.md): Use the kit's face and surface for a brand, or a face the direction chose. Check: judge.
-- [typeface-system](rules/typeface-system.md): One to three faces, each with a role (primary, secondary, accent). Check: judge.
+- [typeface-system](rules/typeface-system.md): One to three faces, each with a role (primary, secondary, accent). Check: judge, font-families.
 - [value-dominance](rules/value-dominance.md): Decide dominance by looking at the brand's hero: a light site gets a light-first film, a dark site a dark-first film. Check: judge.
 - [visual-style-one](rules/visual-style-one.md): Pick one visual style as the register and do not mix. Check: judge.
 - [weight-contrast](rules/weight-contrast.md): Weight contrast is extreme on video: light against black. Check: judge.
 - [whitespace](rules/whitespace.md): Empty space does a job. Check: judge.
-- [word-colour](rules/word-colour.md): Per-word colour goes on one or two words per line, and each coloured word is the word the beat is about. Check: judge.
+- [word-colour](rules/word-colour.md): Per-word colour goes on one or two words per line, and each coloured word is the word the beat is about. Check: judge, coloured-word.
 - [world-turns](rules/world-turns.md): The world (ground, palette, composition) turns at least every 2 s or at each beat, whichever comes first. Check: world-held.
 
 ## motion
@@ -85,9 +87,9 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [blur-follows-motion](rules/blur-follows-motion.md): Blur follows motion: a still thing never blurs. Check: judge.
 - [blur-out-dense](rules/blur-out-dense.md): Faces, cards and dense grids leave through focus, not through space. Check: judge.
 - [counter-no-overshoot](rules/counter-no-overshoot.md): A counting number never overshoots. Check: judge.
-- [ease-variety](rules/ease-variety.md): Vary eases like you vary font weights, and offset layers that move together. Check: judge.
+- [ease-variety](rules/ease-variety.md): Vary eases like you vary font weights, and offset layers that move together. Check: judge, ease-count, lockstep.
 - [entrance-ease](rules/entrance-ease.md): An entrance is a landing: it decelerates on EASE.land and shows most of its move by frame 1. Check: judge.
-- [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge.
+- [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge, entrance-direction.
 - [exits-shorter](rules/exits-shorter.md): An exit is a launch: it runs shorter than its entrance and accelerates. Check: exit-length.
 - [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: judge.
 - [live-hold](rules/live-hold.md): A hold keeps life. Check: static-window, sheet-tiles.
@@ -124,6 +126,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [no-tells](rules/no-tells.md): No generated tells. Check: judge.
 - [reveal-mask-pad](rules/reveal-mask-pad.md): A reveal mask clears the glyphs. Check: judge.
 - [stock-device-once](rules/stock-device-once.md): A stock device is seasoning, never the idea. Check: judge.
+- [template-chrome](rules/template-chrome.md): No template chrome. Check: template-chrome.
 
 ## sound
 

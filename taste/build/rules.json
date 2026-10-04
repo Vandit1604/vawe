@@ -159,6 +159,10 @@
   "file": "taste/rules/screen-designed.md",
   "instead": "build a fragment for the shot: large type, few elements, real imagery. Set each cell to the source's own aspect ratio so object-fit: cover neither crops nor letterboxes. A dark capture goes on a dark surface."
  },
+ "shared-edges": {
+  "file": "taste/rules/shared-edges.md",
+  "instead": "snap the blocks to one margin and one indent; centre a lone title instead of nudging it."
+ },
  "surface-spec": {
   "file": "taste/rules/surface-spec.md",
   "instead": "build a reusable surface standalone first (`bin/vawe compare --page <page> --at t` renders one frame in seconds); glass needs a moving gradient behind it. Check: every colour is in the palette, families and weights match with no silent swap, radii match the scale, no forbidden component appears."
@@ -170,6 +174,10 @@
  "theme-source": {
   "file": "taste/rules/theme-source.md",
   "instead": "ask for a reference or a theme when none is given; seed an invented palette with `skills/impeccable/scripts/palette.mjs`. Never fall back to plain grey."
+ },
+ "type-scale": {
+  "file": "taste/rules/type-scale.md",
+  "instead": "pick three sizes (hero, support, label) and set every text to one of them."
  },
  "type-setting": {
   "file": "taste/rules/type-setting.md",
@@ -370,6 +378,10 @@
  "stock-device-once": {
   "file": "taste/rules/stock-device-once.md",
   "instead": "let the subject carry the beat. A different look, shader or 3D toy every beat is effect soup."
+ },
+ "template-chrome": {
+  "file": "taste/rules/template-chrome.md",
+  "instead": "drop the eyebrow and let the title carry the beat; number only a true sequence; mark a card with space or a surface step, not a stripe; vary the cards in size and weight."
  },
  "cue-has-event": {
   "file": "taste/rules/cue-has-event.md",

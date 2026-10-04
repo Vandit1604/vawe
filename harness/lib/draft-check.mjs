@@ -38,6 +38,24 @@ export function settledSamples(samples, max = SETTLED_MAX) {
   return picked.filter((_, i) => i % stride === 0);
 }
 
+const PLACE_PX = 4;
+
+/** One text at one place: its text (60 characters) and its box rounded to PLACE_PX. */
+export const placeKey = (text, box) => `${String(text).slice(0, 60)}|${box.map((v) => Math.round(v / PLACE_PX)).join(',')}`;
+
+/** The texts that hold one place for at least `holdSec` of the samples: a Set of placeKey. Text in motion is not in it. Pure. */
+export function heldPlaces(samples, { step }, rules = RULES) {
+  const seen = new Map();
+  for (const s of samples) for (const key of new Set(s.lines.map((l) => placeKey(l.text, l.box)))) seen.set(key, (seen.get(key) ?? 0) + 1);
+  return new Set([...seen].filter(([, n]) => n * step >= rules.holdSec - 1e-9).map(([key]) => key));
+}
+
+/** The film seconds to read the layout at: the settled text samples, else a quarter, a half and three quarters of the way through. Pure. */
+export function layoutTimes(samples, { dur, from = 0 }) {
+  const settled = settledSamples(samples).map((s) => s.t);
+  return settled.length ? settled : [0.25, 0.5, 0.75].map((f) => +(from + f * dur).toFixed(3));
+}
+
 const keyOf = (text) => text.replace(/\s+/g, ' ').trim().slice(0, 40);
 
 function keep(kept, run, step, rules) {
