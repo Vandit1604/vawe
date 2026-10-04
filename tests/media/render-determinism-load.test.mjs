@@ -8,7 +8,8 @@ import path from 'node:path';
 import { spawn, execFileSync } from 'node:child_process';
 import { renderPage } from '../../harness/media/render-page.mjs';
 
-const SPIN = 'let x = 0; for (;;) x += Math.sqrt(x + 1);';
+// The loop ends by itself: a killed test run must not leave a core spinning forever.
+const SPIN = 'let x = 0; const end = Date.now() + 120000; while (Date.now() < end) x += Math.sqrt(x + 1);';
 
 function busyCores(n) {
   const kids = Array.from({ length: n }, () => spawn(process.execPath, ['-e', SPIN], { stdio: 'ignore' }));
