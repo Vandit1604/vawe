@@ -12,7 +12,6 @@ prevents: doc MOTION-CRAFT: three or more layers on one exact start read as a bl
 status: active
 scored: no
 numbers: {"cascade_interval_tolerance":0.3,"next_start_share_min":0.6,"next_start_share_max":0.7}
-digest: First drafts score about 6 of 10 on motion (one move per beat at one speed): overlap a slower second move.
 craft: motion-craft
 ---
 

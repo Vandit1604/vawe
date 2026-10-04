@@ -58,7 +58,14 @@ test('an unknown request takes the motion-graphic row and says so', () => {
 test('the starter uses exact curves, a bundled face and beat properties', () => {
   const page = starterPage({ face: starterFace('zz-demo') });
   assert.doesNotMatch(page, /cubic-bezier|system-ui/);
-  assert.match(page, /EASE\.land/);
+  assert.match(page, /EASE\.glide/);
   assert.match(page, /@font-face \{ font-family: "[^"]+"; src: url\("assets\/[A-Za-z]+\.woff2"\)/);
   assert.match(page, /--beat-1: 0s; --beat-2:/);
+});
+
+test('the starter has no house default: grey placeholders, no accent, no band or ease named, an empty signature', () => {
+  const page = starterPage({ face: starterFace('zz-demo') });
+  assert.doesNotMatch(page, /#f4f1ea|#2b5cff|Bricolage|--accent|<em>|band:/i);
+  assert.match(page, /--ground: #8c8c8c/);
+  assert.match(page, /<meta name="signature" content="band=; ease=; stagger=; seam=; palette=; thread=">/);
 });

@@ -60,7 +60,7 @@ function main(argv) {
       const made = newFilm(positional[0], { from: values.from, root: ROOT, length: values.length, aspect: values.aspect, title: values.title, request: values.request, details: readDetails(values), defaults: values.defaults });
       if (!made.asked) {
         process.chdir(ROOT);
-        appendRun(positional[0], newEvent({ template: made.template, length: made.length, answered: made.answered, guessed: made.guesses }));
+        appendRun(positional[0], newEvent({ template: made.template, length: made.length, answered: made.answered, guessed: made.guesses, ranges: made.ranges }));
       }
       console.log(newFilmLines(positional[0], made).join('\n'));
       for (const line of recentFailedShipLines(readAllRuns(path.join(ROOT, 'out')), Date.now())) console.error(line);

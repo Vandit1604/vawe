@@ -12,7 +12,6 @@ prevents: doc payoff-last and STORY: the best number in the hook spends the film
 status: active
 scored: no
 numbers: {"hook_words_max":12,"hook_seconds":3,"payoff_start_pct":77,"payoff_end_pct":90}
-digest: A hook of 12 words or fewer in the first 3 s; the payoff lands at 77 to 90 percent of the runtime.
 craft: story
 ---
 

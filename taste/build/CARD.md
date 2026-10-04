@@ -34,7 +34,7 @@ Each beat shows a real artifact working: the real UI for a real product, the bra
 
 One thread carries through the film: an object, a type line, a colour or a rhythm. Carry it in two registers (one literal, one subtle) so no single one has to be obvious.
 
-- Range: 1 to 2 threads, named in the brief
+- Range: 1 to 2 threads, named in the brief: an object, a type line, a colour or a rhythm
 - Judge: Trace the thread across the sheet from row 1 to the last row: what survives each cut?
 
 ### three-materials
@@ -74,7 +74,7 @@ One focal point per frame and one accent colour per frame. The brightest and lar
 
 Colours come from the brand or the brief: take them from the real pixels and the real CSS, and declare the palette once as :root custom properties.
 
-- Range: ground, surface, three text levels, one accent
+- Range: a family (warm neutral, cool neutral, saturated, mono plus accent, duotone) with a ground, a surface, three text levels and one accent
 - Judge: Does every colour trace to the kit or to a stated choice, and is any ground pure black or white?
 
 ### readable-hold
@@ -182,7 +182,7 @@ Speed is a voice. Every move sits in a named band, and the slowest move runs at 
 A group reads as one beat with an inner rhythm: not a chord on one frame and not a queue.
 
 - Limit: no 3 or more elements landing on one frame at 60 fps; the whole run at most 0.5 s
-- Range: 30 to 80 ms between siblings (engine default 45 ms); calm 80 to 120 ms; the total (n minus 1) times the gap, so delay = 0.5 / (n minus 1) capped at 80 ms; past about 7 items stagger a few and bring the rest as a block; board cards 60 to 90 ms
+- Range: 30 to 80 ms between siblings (engine default 45 ms); calm 80 to 120 ms. The total (n minus 1) times the gap, so delay = 0.5 / (n minus 1) capped at 80 ms; past about 7 items stagger a few and bring the rest as a block; board cards 60 to 90 ms
 - Judge: Do siblings land on one frame, or does the last land in another beat?
 
 ## transitions

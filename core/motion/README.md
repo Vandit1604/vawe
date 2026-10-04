@@ -19,6 +19,10 @@ import { spring, track, approach, kf, springLinear, springDuration, curveToLinea
 (`BANDS`: energy 0.15-0.3, professional 0.3-0.5, gravity 0.5-0.8, cinematic 0.8-2.0 s) and each call
 takes its middle unless you pass `duration`. `bin/vawe new` writes a starter that uses all four.
 
+The page chooses its band, ease and stagger once, in `<meta name="signature" content="band=professional; ease=land; stagger=60; seam=...; palette=...; thread=...">`
+(`signature.js`). The four calls default to it: `band`, `ease` (enter only) and `gap` below are the fallbacks when the page chose nothing,
+and an option you pass always wins. `bin/vawe dev` names each dial still unchosen and shows the measured band, ease and stagger.
+
 ```js
 import { enter, leave, stagger, layer, EASE, keys, BANDS, bandOf, pickBand } from '../../core/motion/presets.js';
 ```

@@ -9,6 +9,7 @@ instead: use bandSeconds(name) and the presets; give the hero gravity or cinemat
 check: one-band
 judge: List each move's duration on the sheet: is the longest at least 3 times the shortest?
 prevents: feedback: "more done in 5 seconds, quick continuous motion". doc TASTE.md: uniform-cadence reads as template. A film that uses one band reads as monotone narration; the library median followed move was about 700 px/s.
+dial: band
 status: active
 scored: yes
 numbers: {"energy_min_s":0.15,"energy_max_s":0.3,"professional_max_s":0.5,"gravity_max_s":0.8,"cinematic_max_s":2,"slowest_to_fastest_min":3,"eye_speed_px_per_s":700}

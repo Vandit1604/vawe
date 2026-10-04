@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { DIALS } from '../../core/motion/signature.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const STEPS = ['concept', 'look', 'motion', 'transitions', 'finish', 'sound', 'preship'];
@@ -19,6 +20,7 @@ export const CHECK_IDS = ['judge', 'none', 'world-held', 'static-window', 'sheet
 const REQUIRED = ['id', 'step', 'principle', 'limit', 'range', 'break-when', 'instead', 'check', 'judge', 'prevents', 'status', 'scored', 'numbers'];
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const CONTENTS_OVER = 100;
+export const DIGEST_WORDS_MAX = 400;
 
 const FOOTER = ['The judge varies about 1 point per axis: after 3 rounds that flip one note, keep the value you measured.'];
 
@@ -58,6 +60,7 @@ function valueProblems(r) {
   const out = [];
   if (r.step && !STEPS.includes(r.step)) out.push(`${r.file}: step "${r.step}" is not one of ${STEPS.join(' ')}`);
   if (r.status && r.status !== 'active') out.push(`${r.file}: status "${r.status}" is not active`);
+  if (r.dial && !DIALS.includes(r.dial)) out.push(`${r.file}: dial "${r.dial}" is not one of ${DIALS.join(' ')}`);
   if (r.scored && !['yes', 'no'].includes(r.scored)) out.push(`${r.file}: scored must be yes or no`);
   if (r.numbers === null || typeof r.numbers !== 'object' || Array.isArray(r.numbers)) out.push(`${r.file}: numbers must be a JSON object`);
   for (const c of String(r.check || '').split(',').map((x) => x.trim()).filter(Boolean)) {
@@ -94,9 +97,12 @@ export function loadRules(dir) {
     } catch (e) { problems.push(`${f}: ${e.message}`); }
   }
   const seen = new Set();
+  const dials = new Set();
   for (const r of rules) {
     if (seen.has(r.id)) problems.push(`${r.file}: id "${r.id}" is used twice`);
     seen.add(r.id);
+    if (r.dial && dials.has(r.dial)) problems.push(`${r.file}: dial "${r.dial}" is set by another rule`);
+    if (r.dial) dials.add(r.dial);
   }
   if (problems.length) throw new Error(`taste rules: ${problems.length} problem(s)\n${problems.join('\n')}`);
   return rules.sort(byStep);
@@ -153,11 +159,14 @@ export function cardText(rules, attractors, anti) {
 /** taste/build/DIGEST.md: the first read of an author. Pure. */
 export function digestText(rules, attractors) {
   const lines = rules.filter((r) => r.digest).map((r) => `- ${r.digest} (${r.id})`);
-  return `${[GENERATED, '# Taste digest (authors)', '',
+  const text = `${[GENERATED, '# Taste digest (authors)', '',
     'Every command prints the lines of its step again. All rules: `taste/README.md`. The judge scores `taste/build/CARD.md`.', '',
     '## Every film', '', ...lines, '',
     '## Attractors', '', `Fine only if the direction chose them on purpose: ${attractors.digest}. A disc needs a light source and a surface.`, '',
     '## Also', '', ...FOOTER.map((l) => `- ${l}`)].join('\n')}\n`;
+  const words = text.split(/\s+/).filter(Boolean).length;
+  if (words > DIGEST_WORDS_MAX) throw new Error(`taste digest is ${words} words, ${words - DIGEST_WORDS_MAX} over the ${DIGEST_WORDS_MAX} cap: remove the \`digest:\` line of a low-frequency rule (it stays in taste/README.md)`);
+  return text;
 }
 
 /** taste/build/steps.json: what each command prints at its step, every line keyed by rule id. Pure. */
@@ -168,6 +177,13 @@ export function stepsJson(rules) {
     steps[step] = { title, lines };
   }
   return `${JSON.stringify(steps, null, 1)}\n`;
+}
+
+/** taste/build/rules.json: rule id to its file, its `instead` text and, for a signature dial, the dial and its range. Pure. */
+export function rulesJson(rules) {
+  const out = {};
+  for (const r of rules) out[r.id] = { file: `taste/rules/${r.file}`, instead: r.instead, ...(r.dial ? { dial: r.dial, range: r.range } : {}) };
+  return `${JSON.stringify(out, null, 1)}\n`;
 }
 
 /** taste/build/limits.json: rule id to the numbers its check or its range uses. Pure. */
@@ -182,7 +198,8 @@ export function readmeText(rules, craft) {
   const out = [GENERATED, '# taste: the rules of vawe films', '',
     'One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else here is generated from them: do not edit `taste/build/` or this index by hand.', '',
     '- Add or change a rule: edit its file, then run `node harness/dev/taste-build.mjs`. A test fails when the build is stale.',
-    '- Author first read: `taste/build/DIGEST.md`. Judge: `taste/build/CARD.md` (the rules marked scored). Commands print `taste/build/steps.json` lines.',
+    '- Author first read: `taste/build/DIGEST.md` (at most ' + DIGEST_WORDS_MAX + ' words: the build fails above it; a rule without a `digest:` line stays in this index). Judge: `taste/build/CARD.md` (the rules marked scored). Commands print `taste/build/steps.json` lines.',
+    '- A rule that owns a signature dial has `dial: <name>` (core/motion/signature.js): `vawe new` offers its `range`, `vawe dev` names the dial while the page leaves it unchosen. `taste/build/rules.json` holds each rule file and its `instead` text.',
     '- Every threshold a check reads: `taste/build/limits.json`. Long reasons, sources and examples: `taste/craft/`.',
     '- Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.',
     '', `${rules.length} rules, ${rules.filter((r) => r.scored === 'yes').length} scored by the judge.`, ''];
@@ -204,6 +221,7 @@ export function buildFiles({ rules, attractors, anti, craft }) {
     'taste/build/DIGEST.md': digestText(rules, attractors),
     'taste/build/steps.json': stepsJson(rules),
     'taste/build/limits.json': limitsJson(rules),
+    'taste/build/rules.json': rulesJson(rules),
     'taste/README.md': readmeText(rules, craft),
   };
 }

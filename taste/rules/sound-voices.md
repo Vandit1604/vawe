@@ -13,7 +13,6 @@ status: active
 scored: yes
 numbers: {}
 print-sound: use quiet ticks (droplet, pluck, bloom) at their default gains, not impact, braam, drop or riser without a brief that asks for weight
-digest: Quiet ticks and at most one soft swell; no impact, braam, drop or riser unless the brief asks.
 craft: sound
 ---
 

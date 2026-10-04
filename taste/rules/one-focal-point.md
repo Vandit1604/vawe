@@ -13,7 +13,6 @@ status: active
 scored: yes
 numbers: {}
 print-concept: give each frame one focal point and one accent colour, not two things fighting
-digest: One focal point and one accent colour per frame.
 craft: layout
 ---
 

@@ -4,7 +4,7 @@
 // or vawe.onFrame. Everything else is pure over the records.
 import { isWaived } from './waivers.mjs';
 import { DECORATIVE } from './draft-check.mjs';
-import { BANDS, bandOf } from '../../core/motion/presets.js';
+import { BANDS, EASE, bandOf } from '../../core/motion/presets.js';
 
 // motionRecord and collectMotion run inside the page (runMotionCollector bundles their source with DECORATIVE),
 // so each is self-contained: no other outer bindings.
@@ -241,6 +241,28 @@ export function recordsFromBoxes(boxes) {
 export function mergeRecords(animated, sampled) {
   const base = Math.max(-1, ...animated.map((r) => r.target)) + 1;
   return [...animated, ...sampled.map((r) => ({ ...r, target: r.target + base }))];
+}
+
+const median = (xs) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] : null);
+// A browser reports linear() with explicit stop positions, so compare the output values alone.
+const outputs = (curve) => String(curve).replace(/^linear\(|\)$/g, '').split(',').map((stop) => stop.trim().split(/\s+/)[0]).join(' ');
+const easeName = (r) => Object.keys(EASE).find((n) => outputs(EASE[n]) === outputs(r.easing)) ?? null;
+const mostCommon = (xs) => [...new Set(xs)].sort((a, b) => xs.filter((x) => x === b).length - xs.filter((x) => x === a).length)[0] ?? null;
+const SIBLING_MAX_S = 0.2;
+
+/**
+ * What the page's moves measure for the signature dials: { band, ease, stagger }, each null when nothing measures it.
+ * band is the band of the median move duration; ease the most common EASE name on entering moves (null on an inferred
+ * or unnamed curve); stagger the median ms between the starts of entering moves that follow each other within 0.2 s.
+ */
+export function measureMotion(records) {
+  const own = records.filter((r) => !r.decorative && r.duration > CUT && moves(r));
+  const secs = median(own.map((r) => r.duration));
+  const starts = own.filter(entering).map((r) => r.delay).sort((a, b) => a - b);
+  const gaps = starts.slice(1).map((t, i) => t - starts[i]).filter((g) => g > 0.005 && g <= SIBLING_MAX_S);
+  const names = own.filter(entering).map(easeName).filter(Boolean);
+  const gap = median(gaps);
+  return { band: secs == null ? null : bandOf(secs), ease: mostCommon(names), stagger: gap == null ? null : Math.round(gap * 1000), medianS: secs == null ? null : +secs.toFixed(2) };
 }
 
 /** Every lint finding, in time order. */

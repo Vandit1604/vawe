@@ -3,6 +3,7 @@
 // verbs only call el.animate on what they return.
 import { curveToLinear, rng } from './springs.js';
 import { handleCurve } from './motion.js';
+import { readSignature } from './signature.js';
 
 // taste/rules/speed-bands.md, seconds
 export const BANDS = {
@@ -17,6 +18,10 @@ const ORDER = Object.keys(BANDS);
 const EYE_SPEED = 700;
 const LEAVE_SHARE = 0.6;
 const STAGGER = { gap: 0.05, min: 0.03, max: 0.08, total: 0.5, jitter: 0.25 };
+
+// A dial the page chose in its signature (core/motion/signature.js), else the engine default.
+const signed = (dial, fallback) => readSignature()[dial] ?? fallback;
+const signedGap = () => (Number(signed('stagger')) > 0 ? Number(signed('stagger')) / 1000 : STAGGER.gap);
 
 // After Effects handle pairs [out, in] of one segment, named by what the move does (core/motion/README.md).
 // A handle is a name from HANDLE_REGISTRY or { influence, speed }.
@@ -70,7 +75,7 @@ function nextSlower(name) {
   return ORDER[Math.min(ORDER.length - 1, ORDER.indexOf(name) + 1)];
 }
 
-function durationOf({ band = 'gravity', duration }) {
+function durationOf({ band = signed('band', 'gravity'), duration }) {
   return duration ?? bandSeconds(band);
 }
 
@@ -80,7 +85,7 @@ const ms = (s) => Math.round(s * 1000);
 const FADE_SHARE = 0.4;
 
 /** Pure: the keyframes and timing enter() hands to el.animate. */
-export function enterSpecs({ at = 0, from = '0 0.5em', scale = 0.96, blur = 0, ease = 'land', ...rest } = {}) {
+export function enterSpecs({ at = 0, from = '0 0.5em', scale = 0.96, blur = 0, ease = signed('ease', 'land'), ...rest } = {}) {
   const d = durationOf(rest);
   const start = { translate: from, scale: String(scale) }, end = { translate: '0 0', scale: '1' };
   if (blur) {
@@ -120,7 +125,8 @@ export function leave(el, opts = {}) {
 }
 
 /** Pure: the start second of each of n items. Gaps sit in 30 to 80 ms, seeded jitter, and the run fits 0.5 s. */
-export function staggerTimes(n, { at = 0, gap = STAGGER.gap, seed = 1 } = {}) {
+export function staggerTimes(n, { at = 0, gap = signedGap(), seed = 1 } = {}) {
+  const [lo, hi] = [Math.min(STAGGER.min, gap), Math.max(STAGGER.max, gap)];
   const fit = n > 1 ? Math.min(gap, STAGGER.total / (n - 1)) : gap;
   const rand = rng(seed);
   const times = [];
@@ -128,7 +134,7 @@ export function staggerTimes(n, { at = 0, gap = STAGGER.gap, seed = 1 } = {}) {
   for (let i = 0; i < n; i++) {
     times.push(+t.toFixed(4));
     const step = fit * (1 + STAGGER.jitter * (rand() * 2 - 1));
-    t += Math.min(STAGGER.max, Math.max(STAGGER.min, step));
+    t += Math.min(hi, Math.max(lo, step));
   }
   return times;
 }
@@ -140,7 +146,7 @@ export function stagger(els, opts = {}) {
 }
 
 /** Pure: when the secondary starts and which band it speaks in. It starts `overlap` of the lead's move before the lead lands. */
-export function layerTiming({ at = 0, overlap = 0.3, band = 'gravity', duration, secondary = {} } = {}) {
+export function layerTiming({ at = 0, overlap = 0.3, band = signed('band', 'gravity'), duration, secondary = {} } = {}) {
   const lead = duration ?? bandSeconds(band);
   return { at: +(at + lead * (1 - overlap)).toFixed(4), band: secondary.band ?? nextSlower(band) };
 }

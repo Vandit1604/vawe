@@ -1,0 +1,406 @@
+{
+ "attractors": {
+  "file": "taste/rules/attractors.md",
+  "instead": "carry the idea on type, a real object or a colour field. If you keep a disc, give it a light source and a surface. Name the product after what it does or a concrete thing it owns (a place, a tool, a material), not light poetry. Pick the subject from the request, never from an example."
+ },
+ "beat-cause": {
+  "file": "taste/rules/beat-cause.md",
+  "instead": "name an act as the cause (\"the cursor hits Send on the card in beat 1\"), not \"then\" or \"it cuts to\"."
+ },
+ "beat-earns-time": {
+  "file": "taste/rules/beat-earns-time.md",
+  "instead": "write per beat the role, the persuasion move (pain agitation, negative contrast, future pacing, social proof, risk reversal, inevitability) and the feeling arc (anxiety to relief, curiosity to payoff). A beat with neither is cut."
+ },
+ "claim-backed": {
+  "file": "taste/rules/claim-backed.md",
+  "instead": "cut the number, or demonstrate it in the same beat: \"26 looks\" needs 26 looks on screen."
+ },
+ "cta-last-short": {
+  "file": "taste/rules/cta-last-short.md",
+  "instead": "keep the world moving under the end card (see moving-tail)."
+ },
+ "hook-payoff": {
+  "file": "taste/rules/hook-payoff.md",
+  "instead": "tease the number in the hook, show it last. Front-load the strong word. Order the middle by rising surprise."
+ },
+ "legible-effect": {
+  "file": "taste/rules/legible-effect.md",
+  "instead": "enlarge it, lengthen it or cut it: a displacement wash on smooth material, a glow on dark content or a blinds slat in 0.4 s reads as nothing."
+ },
+ "motion-register": {
+  "file": "taste/rules/motion-register.md",
+  "instead": "write the register in the brief. A hype film with every beat moving the same way is still monotone."
+ },
+ "name-three-reject-first": {
+  "file": "taste/rules/name-three-reject-first.md",
+  "instead": "write the three in the brief: a capture, the real data, a counter that ticks, a hand-keyed reveal. The first answer is rise plus fade; the third is usually the film."
+ },
+ "no-emdash-on-screen": {
+  "file": "taste/rules/no-emdash-on-screen.md",
+  "instead": "a comma, a period or a middle dot."
+ },
+ "no-inventory": {
+  "file": "taste/rules/no-inventory.md",
+  "instead": "tagline to hook, pain to the problem beat, how it works to build, best stat to the payoff, transformation to the payoff, CTA to the end."
+ },
+ "scene-budget": {
+  "file": "taste/rules/scene-budget.md",
+  "instead": "set the count from the brand tempo: a calm brand is slow with few scenes, playful is fast with many. Accelerate toward the climax, then hold it longer than anything else."
+ },
+ "shot-length-varies": {
+  "file": "taste/rules/shot-length-varies.md",
+  "instead": "tighten cutting through the build, release on the payoff."
+ },
+ "show-real-thing": {
+  "file": "taste/rules/show-real-thing.md",
+  "instead": "render a mini-scene so the viewer watches the thing work (a value changes and the output updates; the real word cycles through colours). If a cursor clicks, the next frames show what the click did. For a product, capture the real UI; never a fake UI or a placeholder label."
+ },
+ "thread": {
+  "file": "taste/rules/thread.md",
+  "instead": "name the thread before the first still. Object: the caret writes, then expands into the panel. Type line: the headline's last word is the next shot's first. Colour: one accent passes from a word to a ground to a button. Rhythm: every cut lands on one pulse. Unfinished sentence: no clause finishes at a cut.",
+  "dial": "thread",
+  "range": "1 to 2 threads, named in the brief: an object, a type line, a colour or a rhythm"
+ },
+ "three-materials": {
+  "file": "taste/rules/three-materials.md",
+  "instead": "take a different material for each of A, B and C, not three colours of one idea."
+ },
+ "accent-share": {
+  "file": "taste/rules/accent-share.md",
+  "instead": "put the accent on one thing: a caret, an eyebrow, one numeral, the CTA. On an accent-coloured ground, do not use the accent for emphasis (blue on blue vanishes)."
+ },
+ "archetype-rotation": {
+  "file": "taste/rules/archetype-rotation.md",
+  "instead": "change three or more of layout, scale, value, ground, hue and motion between neighbours; value is the strongest variety lever."
+ },
+ "asymmetry": {
+  "file": "taste/rules/asymmetry.md",
+  "instead": "a split (headline left, artifact right), a corner anchor, big left and small right. A 6/6 split is the equal grid again. Left-align anything multi-line or list-like."
+ },
+ "claim-shape-graphic": {
+  "file": "taste/rules/claim-shape-graphic.md",
+  "instead": "quantity: a bar whose length is the figure (a count-up beside it, never instead). Proportion: a ring, an arc, a filled grid. Change: a line or a before and after side by side. Flow: nodes and connectors that draw on. Real thing: a capture, a photo, a clipped screenshot."
+ },
+ "dense-where-dense": {
+  "file": "taste/rules/dense-where-dense.md",
+  "instead": "put the product and photos at hero size in the acts where the reference shows them; real photos, never an invented image."
+ },
+ "eye-path": {
+  "file": "taste/rules/eye-path.md",
+  "instead": "move the eye with light (a glow that arrives cold and wide, then tightens and goes hot), with focus (rack from one plane to the other) or with a beam used as a mask. A glow parked on the hero for the whole beat stops being seen within a second."
+ },
+ "first-frame": {
+  "file": "taste/rules/first-frame.md",
+  "instead": "put the thread, the first word or the brand colour in frame 0, and start the sound at 0 as well."
+ },
+ "gradient-or-flat": {
+  "file": "taste/rules/gradient-or-flat.md",
+  "instead": "a flat brand gets a flat field; for atmosphere prefer a radial, keep the ramp short, or break it with grain (see gradient-grain)."
+ },
+ "graphic-is-subject": {
+  "file": "taste/rules/graphic-is-subject.md",
+  "instead": "bring the picture forward and make the type a caption. A picture behind the content is scenery."
+ },
+ "hero-plus-proof": {
+  "file": "taste/rules/hero-plus-proof.md",
+  "instead": "the background is not empty: a radial glow, oversized ghost type bleeding off the frame, or a subtle panel, 2 to 5 decoratives sharing one slow ambient motion. Decoratives never carry information. Never a big word centred on empty space."
+ },
+ "hero-scale": {
+  "file": "taste/rules/hero-scale.md",
+  "instead": "use bigger type, not a wider box: the glyphs filled only 67 percent of the declared boxes."
+ },
+ "hierarchy": {
+  "file": "taste/rules/hierarchy.md",
+  "instead": "lower the contrast or the weight of supporting text instead of only shrinking it. If you read the support first, it is too loud."
+ },
+ "icon-family": {
+  "file": "taste/rules/icon-family.md",
+  "instead": "a text-only list of named things is a missed layer. A mono logo the same value as the ground is invisible, so keep a light and a dark variant."
+ },
+ "image-source-order": {
+  "file": "taste/rules/image-source-order.md",
+  "instead": "a clean gradient beats a mismatched photo; if a beat reads fine on a plain field, add no image. Generated images get the same treatment and grade as any other."
+ },
+ "image-treatment": {
+  "file": "taste/rules/image-treatment.md",
+  "instead": "use the lightest treatment that does the job; an over-graded image is as off as a raw one."
+ },
+ "licensed-assets": {
+  "file": "taste/rules/licensed-assets.md",
+  "instead": "capture the real product UI. Check a new source against engine-doctrine/ASSET-SOURCES.md. Record the source and licence of every bed in assets/music/credits.json before it goes under a film."
+ },
+ "logo-prominence": {
+  "file": "taste/rules/logo-prominence.md",
+  "instead": "size by optical balance (a circle looks smaller than a square of the same box). Keep a light variant for dark grounds and a dark variant for light grounds. The end card keeps moving with the world."
+ },
+ "one-focal-point": {
+  "file": "taste/rules/one-focal-point.md",
+  "instead": "let the second thing arrive after the first lands. Brighter means contrast against the ground, not luminance: white type on a white field is not the focal point."
+ },
+ "palette-from-brand": {
+  "file": "taste/rules/palette-from-brand.md",
+  "instead": "read the site's CSS tokens before an eyedrop: CSS beats pixels for anything declared. Tint the neutrals (a warm ink, a cool grey); never pure `#000`, `#fff` or `#808080` the brief did not ask for.",
+  "dial": "palette",
+  "range": "a family (warm neutral, cool neutral, saturated, mono plus accent, duotone) with a ground, a surface, three text levels and one accent"
+ },
+ "readable-hold": {
+  "file": "taste/rules/readable-hold.md",
+  "instead": "add seconds before the exit, or give the beat a second thing to look at. The clock starts when the last character settles. Motion stays quick; exits still run shorter than entrances."
+ },
+ "readable-text-size": {
+  "file": "taste/rules/readable-text-size.md",
+  "instead": "raise the font size until the cap height passes; do not shrink the line to fit more words."
+ },
+ "safe-margin": {
+  "file": "taste/rules/safe-margin.md",
+  "instead": "move the element in; check the real box after layout, not the source."
+ },
+ "screen-designed": {
+  "file": "taste/rules/screen-designed.md",
+  "instead": "build a fragment for the shot: large type, few elements, real imagery. Set each cell to the source's own aspect ratio so object-fit: cover neither crops nor letterboxes. A dark capture goes on a dark surface."
+ },
+ "surface-spec": {
+  "file": "taste/rules/surface-spec.md",
+  "instead": "build a reusable surface standalone first (`bin/vawe compare --page <page> --at t` renders one frame in seconds); glass needs a moving gradient behind it. Check: every colour is in the palette, families and weights match with no silent swap, radii match the scale, no forbidden component appears."
+ },
+ "text-contrast": {
+  "file": "taste/rules/text-contrast.md",
+  "instead": "keep drifting background elements off any text during its hold, or park the text over a flat part of the field."
+ },
+ "theme-source": {
+  "file": "taste/rules/theme-source.md",
+  "instead": "ask for a reference or a theme when none is given; seed an invented palette with `skills/impeccable/scripts/palette.mjs`. Never fall back to plain grey."
+ },
+ "type-setting": {
+  "file": "taste/rules/type-setting.md",
+  "instead": "for a dark scene, drop body weight from 400 to 350 and open leading by 0.05 to 0.1 by hand."
+ },
+ "typeface-default": {
+  "file": "taste/rules/typeface-default.md",
+  "instead": "run `node scripts/brand/kit.mjs <url> <name> --init` and use the kit's face; with no brand, look at the bundled faces in assets/fonts, name the signal you want and reject your first instinct."
+ },
+ "typeface-system": {
+  "file": "taste/rules/typeface-system.md",
+  "instead": "give each face a role like a colour has; use tabular numerals on counters so the width does not jitter; emphasise inside a line by recolouring at the same weight, not a heavier bold."
+ },
+ "value-dominance": {
+  "file": "taste/rules/value-dominance.md",
+  "instead": "on a light canvas use bolder borders (2 px or more), stronger structure and full-saturation accent hits; do not swap the values of a dark design."
+ },
+ "visual-style-one": {
+  "file": "taste/rules/visual-style-one.md",
+  "instead": "justify the style from the brand's own site; a register you cannot justify there is the wrong one: restudy, do not guess."
+ },
+ "weight-contrast": {
+  "file": "taste/rules/weight-contrast.md",
+  "instead": "use the full 100 to 900 range the loaded faces carry; thin weights shimmer in motion and compression."
+ },
+ "whitespace": {
+  "file": "taste/rules/whitespace.md",
+  "instead": "name what the empty area does in one clause. If a bigger subject removes the gap and the frame improves, the space was passive: enlarge the subject, or crop it at the edge."
+ },
+ "word-colour": {
+  "file": "taste/rules/word-colour.md",
+  "instead": "say what the colour is for in one clause: \"it walks the eye to the product name\" passes, \"it is on brand\" does not. A flash that walks in reading order to the key word is direction; a flash on every word is wallpaper."
+ },
+ "world-turns": {
+  "file": "taste/rules/world-turns.md",
+  "instead": "change the ground at a cut the film already has; carry the change across the join (a colour that follows the content), never a cold flash. Judge a moving backdrop at 4 or more timestamps, never one still. A ruled grid is a design tool's canvas: use it only if you can say what it does in one clause."
+ },
+ "ambient-restraint": {
+  "file": "taste/rules/ambient-restraint.md",
+  "instead": "do not put an ambient zoom on every scene. Do not loop anything near text being read. Ambient padding to look busy raises global motion and costs the film."
+ },
+ "anticipation": {
+  "file": "taste/rules/anticipation.md",
+  "instead": "a heavy object anticipates longer."
+ },
+ "arrival-rhythm": {
+  "file": "taste/rules/arrival-rhythm.md",
+  "instead": "start the next move while the last still settles. Elements in one beat arrive as one phrase, with a tiny anticipation before the main move."
+ },
+ "blur-follows-motion": {
+  "file": "taste/rules/blur-follows-motion.md",
+  "instead": "real motion blur makes a word illegible: for type echo the glyph outline in a second colour under the type. A blurred still looks fast; a half-opacity still looks broken."
+ },
+ "blur-out-dense": {
+  "file": "taste/rules/blur-out-dense.md",
+  "instead": "blur out and fade; the blur runs only during the exit itself."
+ },
+ "counter-no-overshoot": {
+  "file": "taste/rules/counter-no-overshoot.md",
+  "instead": "ease the count with expo-out or quart-out: the deceleration is the weight. Counting to a small number is a stunt: cut it."
+ },
+ "ease-variety": {
+  "file": "taste/rules/ease-variety.md",
+  "instead": "pick the scene ease from the signature (a punchy brand tightens durations and stagger, a calm one stretches them; set it once as :root custom properties)."
+ },
+ "entrance-ease": {
+  "file": "taste/rules/entrance-ease.md",
+  "instead": "enter(el) from core/motion/presets.js. EASE.land on a handover decelerates through the whole travel and reads as two objects, not one that moved."
+ },
+ "entrance-origin": {
+  "file": "taste/rules/entrance-origin.md",
+  "instead": "set transform-origin to the point the thing came from. Do not enter everything from one direction with translateY(30px) plus a fade."
+ },
+ "exits-shorter": {
+  "file": "taste/rules/exits-shorter.md",
+  "instead": "exit on EASE.launch (accelerating) with leave(el) from core/motion/presets.js. An exit on the entrance's own ease arrives while leaving."
+ },
+ "follow-through": {
+  "file": "taste/rules/follow-through.md",
+  "instead": "when the trailing thing is a separate element, delay it as its own move. Stagger is not follow-through: stagger delays siblings."
+ },
+ "live-hold": {
+  "file": "taste/rules/live-hold.md",
+  "instead": "add a second key at the end of the hold; do not fill every flat segment with drift (a uniform churn made the number move and the film worse). Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion."
+ },
+ "named-eases": {
+  "file": "taste/rules/named-eases.md",
+  "instead": "EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only.",
+  "dial": "ease",
+  "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop; sampled springs with 8 or more stops"
+ },
+ "no-bounce": {
+  "file": "taste/rules/no-bounce.md",
+  "instead": "arrive fast, land soft: EASE.land, or approach(k 0.12 to 0.19). Overshoot only on things that then hold still; never on text held for reading (it wobbles)."
+ },
+ "no-dead-stop": {
+  "file": "taste/rules/no-dead-stop.md",
+  "instead": "fix the curve that produced the stop: end the move on a spring or EASE.land; never smooth the number after the fact. A linear camera station or a slow-start curve straight into a hold is the classic shape."
+ },
+ "one-hero-motion": {
+  "file": "taste/rules/one-hero-motion.md",
+  "instead": "key the hero first at its start and end pose, check the read with nothing else moving, then add secondary and ambient in decreasing loudness. Slide up plus fade is one claim \"arriving\"; rise plus rotate is two claims about one object: drop one."
+ },
+ "real-physics": {
+  "file": "taste/rules/real-physics.md",
+  "instead": "a flap has a hinge, perspective and shading; do not sell a glyph scramble as a flap or one cubic-bezier as an exponential."
+ },
+ "speed-bands": {
+  "file": "taste/rules/speed-bands.md",
+  "instead": "use bandSeconds(name) and the presets; give the hero gravity or cinematic and the payoff energy. Too many distinct durations read as drift: hold to a few named bands.",
+  "dial": "band",
+  "range": "energy 0.15 to 0.3 s; professional 0.3 to 0.5 s; gravity 0.5 to 0.8 s; cinematic 0.8 to 2 s only when the film has the seconds. By role: ambient 0.8 to 1.2 s, thesis line 0.5 to 0.8 s, heavy title 0.5 to 0.7 s, caption 0.25 to 0.4 s, payoff snap 0.25 to 0.35 s. Frame counts at 60 fps (finals) or in seconds"
+ },
+ "stagger": {
+  "file": "taste/rules/stagger.md",
+  "instead": "stagger(els) from core/motion/presets.js. Use a seeded shuffle for the order when you want it organic; a gap over 150 ms reads as sluggish. Eight items at 0.10 s run 0.7 s, over the cap.",
+  "dial": "stagger",
+  "range": "30 to 80 ms between siblings (engine default 45 ms); calm 80 to 120 ms. The total (n minus 1) times the gap, so delay = 0.5 / (n minus 1) capped at 80 ms; past about 7 items stagger a few and bring the rest as a block; board cards 60 to 90 ms"
+ },
+ "camera-path-linear": {
+  "file": "taste/rules/camera-path-linear.md",
+  "instead": "an eased curve at each stop zeroes velocity and breaks one flight into N hops: compute the tangent at a waypoint key from its neighbours. Each station has a centre, a zoom, a flight time and a dwell."
+ },
+ "crossfade-limit": {
+  "file": "taste/rules/crossfade-limit.md",
+  "instead": "cut, wipe on the motion, or match on a shape. A blend of two still rasters freezes any motion inside its window; use a live join (a shared moving object, a camera travelling through)."
+ },
+ "cut-on-beat": {
+  "file": "taste/rules/cut-on-beat.md",
+  "instead": "cut on the action frame (a word lands, a count finishes). Find the grid with `node harness/media/beatmap.mjs <track.wav>` and put the cut times on it. If the logo lands at 24:15, pick the tempo that puts a beat there; do not nudge the logo."
+ },
+ "eye-trace": {
+  "file": "taste/rules/eye-trace.md",
+  "instead": "in order of cost: place the next headline where the last focal point was; aim the outgoing beat at the corner the next beat opens in; give the next beat more time; keep the jump and say why."
+ },
+ "ground-jump-cover": {
+  "file": "taste/rules/ground-jump-cover.md",
+  "instead": "match the ground to the content; never fade a full-bleed background out (the white flash). Carry the change with a colour that follows the content."
+ },
+ "handoff-duration": {
+  "file": "taste/rules/handoff-duration.md",
+  "instead": "travel eases at both ends; EASE.land on a handover reads as two objects. Every element has a designed enter, hold and exit, or a handoff: an element simply gone in the next frame is dropped, not finished."
+ },
+ "hard-cut-default": {
+  "file": "taste/rules/hard-cut-default.md",
+  "instead": "cut on the beat or two frames early. Use a dissolve for passing time, a fade for an act break, a whip for momentum, a zoom to enter a surface, a match cut for a hidden connection, a morph for a logo or one hero moment."
+ },
+ "match-cut-align": {
+  "file": "taste/rules/match-cut-align.md",
+  "instead": "cut cleanly, or find the real rhyme."
+ },
+ "one-cut-family": {
+  "file": "taste/rules/one-cut-family.md",
+  "instead": "be able to say which meaning each accent serves, such as a tone flip or a time jump. Master a few: a dissolve, one momentum move, one zoom, a rare morph."
+ },
+ "paired-exit-direction": {
+  "file": "taste/rules/paired-exit-direction.md",
+  "instead": "pair every directional entrance with an exit that continues the same line of travel."
+ },
+ "seam-duration": {
+  "file": "taste/rules/seam-duration.md",
+  "instead": "write a ramp with an EASE name (carry into a cut, land out of it). Feather a wipe edge: a hard edge reads as a slide deck. A wipe can sweep at any angle. One velocity personality per film."
+ },
+ "seam-meaning": {
+  "file": "taste/rules/seam-meaning.md",
+  "instead": "ask in order: does the seam need to exist; what must the viewer feel; invisible or expressive; what is the relationship (same object new state: morph; rhyme: match cut; time: dissolve; act boundary: fade; opposition: smash cut; new place with energy: whip or wipe). \"It looks smoother\" is not a reason."
+ },
+ "seam-overlap": {
+  "file": "taste/rules/seam-overlap.md",
+  "instead": "a blend that mixes the frame before and the frame after turns copy into an unreadable double: end the outgoing text at the seam. A full-bleed layer above a moving layer must not start mid-move and hide it: start the cover after the move ends, or raise the mover."
+ },
+ "seam-variety": {
+  "file": "taste/rules/seam-variety.md",
+  "instead": "change the axis or direction (a wipe on x after a push on y), or cut.",
+  "dial": "seam",
+  "range": "moving seams: wipes, pushes, whips, zooms; rotate inside one family (soft, motion, shape, spatial)"
+ },
+ "gradient-grain": {
+  "file": "taste/rules/gradient-grain.md",
+  "instead": "break the ramp with grain, dither or a dot texture; grain is the cheapest fix and what film did for the same reason. Check at the darkest moment and at the brightest glow."
+ },
+ "mark-rides-parent": {
+  "file": "taste/rules/mark-rides-parent.md",
+  "instead": "tie the mark to the thing that moves, or delete it the moment it points at nothing."
+ },
+ "moving-tail": {
+  "file": "taste/rules/moving-tail.md",
+  "instead": "carry one thread through the lockup (the tagline's key word takes the accent) and end on that motion, not on a hold. Do not fade the payoff and do not freeze it."
+ },
+ "no-tells": {
+  "file": "taste/rules/no-tells.md",
+  "instead": "gradient text: one flat colour from the kit. Corner labels and borders: nothing decorates the edge. Glow on UI text: contrast from weight and size. Bursts, rings, split and shake: the subject itself moving. Centred title on a gradient: the title on a real surface, a capture or white space."
+ },
+ "reveal-mask-pad": {
+  "file": "taste/rules/reveal-mask-pad.md",
+  "instead": "pad the mask box 0.3 em past the glyph bounds, or reveal with blur and translate and no clip edge."
+ },
+ "stock-device-once": {
+  "file": "taste/rules/stock-device-once.md",
+  "instead": "let the subject carry the beat. A different look, shader or 3D toy every beat is effect soup."
+ },
+ "cue-has-event": {
+  "file": "taste/rules/cue-has-event.md",
+  "instead": "time each cue to the page's own beat number (the literal the CSS or seek uses), so a retimed beat moves both. A pluck with nothing landing on screen is a lie: cut it."
+ },
+ "cue-sparse": {
+  "file": "taste/rules/cue-sparse.md",
+  "instead": "spend the sync points on the moments you want believed. Wall-to-wall hits turn into noise and the audience stops noticing them."
+ },
+ "music-licence": {
+  "file": "taste/rules/music-licence.md",
+  "instead": "read the contract of a subscription library before buying; add the destination channel to the safelist before posting; use AI-generated music (not copyrightable when purely prompt-made) for internal animatics only. assets/music/ is gitignored; record every bed in assets/music/credits.json."
+ },
+ "sound-bridge": {
+  "file": "taste/rules/sound-bridge.md",
+  "instead": "never butt two sounds; use an equal-power crossfade."
+ },
+ "sound-default-on": {
+  "file": "taste/rules/sound-default-on.md",
+  "instead": "do not cut the bed to nothing before an impact: drop to a held tone."
+ },
+ "sound-level": {
+  "file": "taste/rules/sound-level.md",
+  "instead": "leave data-gain off or lower the loudest cue; a cue that peaks more than 6 dB above the median cue draws a warning with the change that fixes it. Measure with `ffmpeg -af ebur128=peak=true`."
+ },
+ "sound-swell": {
+  "file": "taste/rules/sound-swell.md",
+  "instead": "a swell stops dead on the cut it introduces (no tail); a riser ends on the beat and leaves the frame after it quiet."
+ },
+ "sound-voices": {
+  "file": "taste/rules/sound-voices.md",
+  "instead": "use a quiet tick; braam dates a piece to 2010s trailers, use it rarely. Voices are synthesized, so they carry no licence question: keep it that way. To audition: `node harness/dev/sound-lab.mjs`."
+ }
+}

@@ -13,7 +13,8 @@ Contents:
 One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else here is generated from them: do not edit `taste/build/` or this index by hand.
 
 - Add or change a rule: edit its file, then run `node harness/dev/taste-build.mjs`. A test fails when the build is stale.
-- Author first read: `taste/build/DIGEST.md`. Judge: `taste/build/CARD.md` (the rules marked scored). Commands print `taste/build/steps.json` lines.
+- Author first read: `taste/build/DIGEST.md` (at most 400 words: the build fails above it; a rule without a `digest:` line stays in this index). Judge: `taste/build/CARD.md` (the rules marked scored). Commands print `taste/build/steps.json` lines.
+- A rule that owns a signature dial has `dial: <name>` (core/motion/signature.js): `vawe new` offers its `range`, `vawe dev` names the dial while the page leaves it unchosen. `taste/build/rules.json` holds each rule file and its `instead` text.
 - Every threshold a check reads: `taste/build/limits.json`. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.
 
