@@ -23,21 +23,21 @@ export function dialRanges(rules = RULES) {
   });
 }
 
-/** The `## Signature` section of brief.md: each dial with its range and an empty `chosen:` line. */
+/** The `## Signature` section of brief.md: each dial with its range. The choice itself lives in the page meta. */
 export function signatureSection(ranges = dialRanges()) {
-  const dials = ranges.map((d) => `- ${d.dial} (${d.meaning}): ${d.range} (${d.file})\n  chosen:`).join('\n');
+  const dials = ranges.map((d) => `- ${d.dial} (${d.meaning}): ${d.range} (${d.file})`).join('\n');
   return `## Signature
 
-Six dials, chosen before the first still. Write each value after \`chosen:\`, then copy them into
-\`<meta name="signature" content="band=...; ease=...; stagger=...; seam=...; palette=...; thread=...">\` in page.html:
-the presets (enter, leave, stagger, layer) use band, ease and stagger as their defaults, and \`bin/vawe dev\` reads all six.
+Six dials. Choose in the page: \`<meta name="signature" content="band=...; ease=...; stagger=...; seam=...; palette=...; thread=...">\`.
+The presets (enter, leave, stagger, layer) use band, ease and stagger as their defaults, and \`bin/vawe dev\` reads all six.
 
 ${dials}`;
 }
 
-/** One advice line per unchosen dial. Pure. */
-export function unchosenAdvice(chosen, ranges = dialRanges()) {
-  return ranges.filter((d) => !chosen[d.dial]).map((d) => `signature dial "${d.dial}" is unchosen; choose from ${d.range} (${d.file})`);
+/** One advice line naming every unchosen dial, or none when all six are chosen. Pure. */
+export function unchosenAdvice(chosen, dials = DIALS) {
+  const open = dials.filter((d) => !chosen[d]);
+  return open.length ? [`signature unchosen: ${open.join(', ')} (choose in <meta name="signature">; ranges: brief.md)`] : [];
 }
 
 const MEASURED = ['band', 'ease', 'stagger'];

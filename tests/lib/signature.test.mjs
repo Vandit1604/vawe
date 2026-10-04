@@ -23,17 +23,18 @@ test('every dial has one owning rule, and its range is the first sentence of tha
   }
 });
 
-test('the brief block lists six dials with a range and an empty chosen line, and no example value', () => {
+test('the brief block lists six dials with a range, points at the page meta and holds no chosen line', () => {
   const section = signatureSection();
-  assert.equal(section.match(/^  chosen:$/gm).length, 6);
+  assert.equal(section.match(/^- (band|ease|stagger|seam|palette|thread) /gm).length, 6);
+  assert.doesNotMatch(section, /chosen:/);
+  assert.match(section, /Choose in the page: `<meta name="signature"/);
   assert.match(section, /^- band .*energy 0\.15 to 0\.3 s/m);
   assert.doesNotMatch(starterPage({}), /(?:band|ease|stagger|seam|palette|thread)=[^;"]/);
 });
 
-test('unchosen dials get one advice line each, with the range and the rule file', () => {
-  const lines = unchosenAdvice({ band: 'gravity' });
-  assert.equal(lines.length, 5);
-  assert.match(lines.find((l) => l.includes('"ease"')), /^signature dial "ease" is unchosen; choose from EASE\.land, .* \(taste\/rules\/named-eases\.md\)$/);
+test('unchosen dials give one advice line that names them all', () => {
+  assert.deepEqual(unchosenAdvice({ band: 'gravity', seam: 'wipe', thread: 'type' }),
+    ['signature unchosen: ease, stagger, palette (choose in <meta name="signature">; ranges: brief.md)']);
   assert.deepEqual(unchosenAdvice(Object.fromEntries(DIALS.map((d) => [d, 'x']))), []);
 });
 
