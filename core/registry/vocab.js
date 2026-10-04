@@ -53,7 +53,7 @@ export const DURATION = {
   fast: 0.18,        // read as quick but still a move.
   // productive/expressive: Carbon Design System's own two duration REGISTERS (carbondesignsystem.com/
   // elements/motion/overview), picked by how much the moment is worth, not by how far something
-  // travels. Their numbers are the same published bands engine-doctrine/CRAFT/MOTION-REGISTERS.md §2
+  // travels. Their numbers are the same published bands taste/craft/motion-registers.md §2
   // already cites (MD3's "standard transition" 200-300ms, "dramatic/hero" 300-500ms): productive sits
   // at the low end of the standard band, expressive at the low end of the dramatic one. Slotted into
   // THIS SAME ladder rather than a second table, since `resolveComparative`'s "faster"/"slower" walks

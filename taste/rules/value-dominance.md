@@ -1,0 +1,22 @@
+---
+id: value-dominance
+step: look
+principle: Decide dominance by looking at the brand's hero: a light site gets a light-first film, a dark site a dark-first film. Commit fully.
+limit: none
+range: light-first: off-white ground, near-black ink, one vivid accent. Dark-first: a tinted near-black ground, off-white text, one vivid accent
+break-when: a value flip between beats is the transition
+instead: on a light canvas use bolder borders (2 px or more), stronger structure and full-saturation accent hits; do not swap the values of a dark design.
+check: judge
+judge: Is the film clearly light-first or dark-first, and does it match the brand?
+prevents: doc COLOR.md: a light canvas is not a dark one with the values swapped. Owner: "vawe is no more blue"; a white page with a large cobalt shape is wrong.
+status: active
+scored: no
+numbers: {}
+craft: color
+---
+
+## Example
+
+A white site: off-white ground, ink type, one blue accent.
+
+Why and sources: [color](../craft/color.md).

@@ -1,6 +1,9 @@
 // Prompt text the fresh judge gets besides the rubric: the pixel size of every image it sees, the text sizes
 // the draft measured, and the yes or no anchor question per key frame. Pure; harness/media/judge-fresh.mjs feeds it.
 
+// The card the fresh judge reads, built from taste/rules by harness/dev/taste-build.mjs.
+export const TASTE_CARD_REL = 'taste/build/CARD.md';
+
 const MAX_CAPS = 8;
 
 /** Lines that state each image's size and how the taste card's percent rules map onto it. `images` are { label, w, h, tile }. */
@@ -16,7 +19,7 @@ export function sizeLines(images) {
 export function capLines(caps) {
   if (!caps?.length) return [];
   const worst = [...caps].sort((a, b) => a.cap - b.cap).slice(0, MAX_CAPS);
-  return ['Measured text sizes (exact, read from the page; cap height as a percent of the frame height, which is what the taste card rule 9 asks for at 6% or more). Use these numbers; do not estimate type size from pixels:',
+  return ['Measured text sizes (exact, read from the page; cap height as a percent of the frame height, which is what the taste rule readable-text-size asks for at 6% or more). Use these numbers; do not estimate type size from pixels:',
     ...worst.map((c) => `- "${c.text.slice(0, 40)}" at ${c.t.toFixed(1)} s: cap height ${c.cap.toFixed(1)}%`)];
 }
 

@@ -1,4 +1,4 @@
-// The mix's true peak against the taste card's ceiling (engine-doctrine/TASTE-CARD.md rule 13).
+// The mix's true peak against the taste limit (taste/rules/sound-level.md).
 export const PEAK_DBFS = -10;
 
 /** The advice line when the as-written mix peaks over PEAK_DBFS, else null. Pure. */

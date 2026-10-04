@@ -62,4 +62,4 @@ only: the templates are our own text in the same shape.
 3. Fill the brief's Spec tables before the page (the shape is in [ANATOMY.md](ANATOMY.md)). After the details are in, never wait for
    a reply: take the guess marked `(guess: change me)` and go on.
 4. Draft with `bin/vawe dev <page>` until every Acceptance row is green, then run `critique-pass.md` as a
-   fresh agent. The taste rules are in `engine-doctrine/TASTE-CARD-DIGEST.md` and in the lines `dev` prints.
+   fresh agent. The taste rules are in `taste/build/DIGEST.md` and in the lines `dev` prints.

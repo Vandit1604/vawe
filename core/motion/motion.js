@@ -197,7 +197,7 @@ export const EASINGS = {
 // `isEasingName` is the one membership test), and it carries its own GSAP-name hint.
 //
 // `skip` is deliberate: 41 curves named by mechanism are better served by the feel table in
-// engine-doctrine/MOTION-CRAFT.md than by 41 near-identical sentences about acceleration.
+// taste/craft/motion-craft.md than by 41 near-identical sentences about acceleration.
 // `Object.assign(EASING_AKA, …)` below EASINGS.snap merges in the aka for five names (spring-bouncy,
 // spring-stiff, springEase, settle, snap) added to EASINGS after this registry is defined.
 const EASING_AKA = {
@@ -300,9 +300,9 @@ export const EASING_REGISTRY = defineRegistry('easing', EASINGS, { slot: 'ease',
     title: 'Easings',
     tag: 'timing',
     intro: '`ease` on a motion key, a count, a camera leg. Entrances decelerate, exits accelerate; springs carry velocity.',
-    skip: 'named by curve; pick by FEELING from the table in engine-doctrine/MOTION-CRAFT.md',
+    skip: 'named by curve; pick by FEELING from the table in taste/craft/motion-craft.md',
     usage: (n, { j }) => j({ motion: [{ t: 0, x: 160 }, { t: 1.2, x: 460, ease: n }] }),
-    noPreview: 'a curve is a feeling over time. Read the table in engine-doctrine/MOTION-CRAFT.md, then feel it in the editor.',
+    noPreview: 'a curve is a feeling over time. Read the table in taste/craft/motion-craft.md, then feel it in the editor.',
   },
 });
 // GSAP's easing vocabulary, which this engine also carries: `parts[].ease` and `morph.ease` go
@@ -449,7 +449,7 @@ export function spring(t, { bounce = 0.3, settle = 0.6 } = {}) {
 //
 // spring() is a damped oscillator in SECONDS, and it has not stopped ringing at t=1, sampling it
 // directly over [0,1] made `spring-bouncy` land at 0.96 and STAY there, i.e. an element eased with
-// it never actually reached its keyframe (breaking MOTION-CRAFT rule 5, "settle and hold"). Map t
+// it never actually reached its keyframe (breaking the rule live-hold). Map t
 // onto each spring's own settle window so the ring completes inside [0,1], and snap the endpoints
 // exactly the way easeOutSettle does. Guarded by the easing-registry contract in lib-test.
 // springWindow: maps the seconds-based spring() into its own settle window so the ring completes inside
@@ -492,10 +492,10 @@ Object.assign(EASING_AKA, {
   snap: ['near-instant landing', 'fast with a hair of overshoot', 'default layer snap'],
 });
 // MD3'S FOUR CURVES, wired through the cubicBezier primitive that already exists (no new curve math),
-// picked by PURPOSE rather than by curve family: engine-doctrine/CRAFT/MOTION-REGISTERS.md §2 cites the
+// picked by PURPOSE rather than by curve family: taste/craft/motion-registers.md §2 cites the
 // exact control points (m3.material.io/styles/motion/easing-and-duration/tokens-specs). `enter` and
 // `exit` are MD3's own decelerate/accelerate split, i.e. this engine's existing "entrances decelerate,
-// exits accelerate" rule (MOTION-STANDARDS.md), spelled by INTENT instead of by mechanism. `emphasized`
+// exits accelerate" rule (taste/craft/motion-standards.md), spelled by INTENT instead of by mechanism. `emphasized`
 // is MD3's decelerate half of its two-part hero curve: the more common of the two in isolation (an
 // element ARRIVING with emphasis), so a single easing carries it rather than a two-segment composite.
 EASINGS.standard = cubicBezier(0.2, 0, 0, 1);
@@ -704,7 +704,7 @@ export function pickDuration(seed, min = 58.2, max = 61.8) {
 //
 // Default ease is `easeOutQuint`: sampled at 21 points, it is the nearest of our 41 easings (mean
 // error 0.0044) to the custom ease-out `cubic-bezier(0.23, 1, 0.32, 1)` outside motion standards argue
-// for (engine-doctrine/CRAFT/MOTION-STANDARDS.md), which the old default `easeOutCubic` was weaker than.
+// for (taste/craft/motion-standards.md), which the old default `easeOutCubic` was weaker than.
 // `stagger` 0.045 (45ms) is mid-band of their 30-80ms range.
 //
 // `bounce`, `settle` and `enter` are resolved here but not read by any entrance yet: `rise` is
@@ -720,7 +720,7 @@ export const exitRatioFromMotion = (durationScale) => Math.min(0.7, Math.max(0.3
 
 // The wind-up amount `core/engine/produce.js` defaults onto a qualifying directional entrance, derived
 // from `theme.motion.bounce` so a calm and a bouncy theme wind up by different amounts. Practitioner
-// band is 10-20% of the move (engine-doctrine/CRAFT/AFTER-EFFECTS-TECHNIQUES.md): bounce 0 sits at the
+// band is 10-20% of the move (taste/craft/after-effects-techniques.md): bounce 0 sits at the
 // floor, the bounciest shipped theme (threadcite, 0.42) at the ceiling, clamped to that band.
 export const anticipateFromMotion = (bounce) => Math.min(0.2, Math.max(0.1, 0.1 + 0.25 * (bounce ?? 0)));
 

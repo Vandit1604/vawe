@@ -132,7 +132,7 @@ Answers: a ship takes 3 to 19 minutes and one failed final cost 40 (trace study 
 
 ### 7. PITFALLS
 
-One line pointing to `engine-doctrine/TASTE-CARD-DIGEST.md`, the one list of taste pitfalls, plus any pitfall
+One line pointing to `taste/build/DIGEST.md`, the one list of taste pitfalls, plus any pitfall
 specific to this film.
 
 ### 8. DELIVER

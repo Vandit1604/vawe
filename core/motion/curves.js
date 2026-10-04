@@ -12,7 +12,7 @@ export const punch = (t, amt = 0.14) => 1 + amt * Math.sin(clamp01(t) * Math.PI)
 export const easeInCubic = (t) => t * t * t;
 export const easeOutElastic = (t) => { if (t <= 0) return 0; if (t >= 1) return 1; const p = 0.3; return Math.pow(2, -10 * t) * Math.sin(((t - p / 4) * (2 * Math.PI)) / p) + 1; };
 export const easeInQuart = (t) => t * t * t * t;
-// sine family: MOTION-CRAFT / the planning skill prescribe "ambient loops sinusoidal", which was
+// sine family: taste/craft/motion-craft.md / the planning skill prescribe "ambient loops sinusoidal", which was
 // unexpressable until now: the registry had no sine curve at all. This is the gentlest ease there
 // is (no hard stop), which is exactly what a drifting/breathing loop wants.
 export const easeInSine = (t) => 1 - Math.cos((t * Math.PI) / 2);

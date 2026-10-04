@@ -47,6 +47,8 @@ It prints the template's question bank (five questions, each with its default an
 the order they change the film) and writes `films/<name>/brief.md` with every default filled in and
 marked `[unanswered: default taken]`, and the measured-brief sections with guesses marked `(guess: change me)`.
 
+Before you fill the directions, read `taste/build/DIGEST.md`: one thread, three materials, a hero that is not an attractor.
+
 ## 3. Template questions
 
 The template's bank is for what step 0 did not cover. Do not ask it again: take each default. Replace each marker with the answer or keep the default and

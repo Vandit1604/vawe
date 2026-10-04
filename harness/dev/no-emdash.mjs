@@ -9,7 +9,7 @@ const QUIET = process.argv.includes('--quiet');
 export const SCOPE = [
   'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'films', 'scene', 'films',
   'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
-  'cmd', 'internal', 'mcp', 'themes', 'directions', 'registry',
+  'cmd', 'internal', 'mcp', 'themes', 'directions', 'registry', 'taste',
 ];
 
 // Exported so harness/live's write-time twin checks the same allowlist instead of growing its own copy.

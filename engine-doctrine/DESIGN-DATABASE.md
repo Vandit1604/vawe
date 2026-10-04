@@ -7,8 +7,8 @@ group: reference
 # Design database: motion and style numbers
 
 Sources: Saffer Microinteractions, Material 3, Emil Kowalski (animations.dev), motion.dev, Fitts's
-law (IxDF), NN/g, StudioBinder. Beat order and pacing live in `engine-doctrine/CRAFT/STORY.md`.
-Layout archetypes live in `engine-doctrine/CRAFT/LAYOUT.md`, colour method in `engine-doctrine/CRAFT/COLOR.md`.
+law (IxDF), NN/g, StudioBinder. Beat order and pacing live in `taste/craft/story.md`.
+Layout archetypes live in `taste/craft/layout.md`, colour method in `taste/craft/color.md`.
 
 ## 1. Motion: the 12 principles, applied
 
@@ -24,7 +24,7 @@ Layout archetypes live in `engine-doctrine/CRAFT/LAYOUT.md`, colour method in `e
 
 **Durations:** micro 150-200 ms, element enter 300-400 ms, full-screen transition 375-500 ms,
 exit about 0.7x the enter. **Stagger** 40-80 ms per item, cascade capped near 300 ms. **Hold**
-about 0.3 s per word for UI copy (for on-screen prose use `words x 0.6 s`, see `RULES/readable-hold.md`).
+about 0.3 s per word for UI copy (for on-screen prose use `words x 0.6 s`, see `taste/rules/readable-hold.md`).
 Never exit type before it is read.
 
 ## 2. Easing curves (Material 3, drop-in `cubic-bezier`)

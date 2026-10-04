@@ -1,4 +1,4 @@
-// The motion lint: five advice lines on how a page moves, each with its taste card rule, the second and
+// The motion lint: five advice lines on how a page moves, each with its taste rule id, the second and
 // one fix. collectMotion runs in the page and reads Web Animations; recordsFromBoxes infers the same
 // records from element boxes over time (harness/lib/box-track.mjs) for a page that paints in window.seek
 // or vawe.onFrame. Everything else is pure over the records.
@@ -68,21 +68,21 @@ function byTarget(records) {
   return [...m.values()];
 }
 
-/** An exit that runs as long as or longer than its entrance, per element (card rule 5). Decorative elements and sampled runs under two samples are not measured. */
+/** An exit that runs as long as or longer than its entrance, per element (rule exits-shorter). Decorative elements and sampled runs under two samples are not measured. */
 export function exitLength(records) {
   const out = [];
   for (const rs of byTarget(records.filter((r) => !r.decorative))) {
     const ins = rs.filter((r) => entering(r) && r.duration > CUT && measured(r)), outs = rs.filter((r) => exiting(r) && r.duration > CUT && measured(r));
     if (!ins.length || !outs.length) continue;
     const came = Math.max(...ins.map((r) => r.duration)), exit = outs.reduce((a, r) => (r.duration > a.duration ? r : a));
-    if (exit.duration >= came) out.push({ code: 'exit-length', rule: 5, at: exit.delay,
+    if (exit.duration >= came) out.push({ code: 'exit-length', rule: 'exits-shorter', at: exit.delay,
       what: `${exit.label} leaves in ${s2(exit.duration)} s, its entrance took ${s2(came)} s`,
       fix: 'leave(el) from core/motion/presets.js: 0.6 of the entrance, accelerating' });
   }
   return out;
 }
 
-/** Three or more elements whose entrances land on one frame at 60 fps (card rule 8). */
+/** Three or more elements whose entrances land on one frame at 60 fps (rule stagger). */
 export function groupLanding(records) {
   const frames = new Map();
   for (const rs of byTarget(records)) {
@@ -93,7 +93,7 @@ export function groupLanding(records) {
     (frames.get(f) || frames.set(f, []).get(f)).push(ins[0].label);
   }
   return [...frames].filter(([, labels]) => labels.length >= 3).map(([f, labels]) => ({
-    code: 'group-landing', rule: 8, at: f / FINAL_FPS,
+    code: 'group-landing', rule: 'stagger', at: f / FINAL_FPS,
     what: `${labels.length} elements land on one frame (${labels.slice(0, 3).join(', ')})`,
     fix: 'stagger(els) from core/motion/presets.js: 30 to 80 ms apart',
   }));
@@ -101,11 +101,11 @@ export function groupLanding(records) {
 
 const EASE_ADVICE = 'easing: EASE.land to arrive, EASE.leave or EASE.launch to exit, EASE.glide for a drift (core/motion/presets.js), or enter(el)';
 
-/** A move longer than 0.3 s on linear easing, or on a default CSS keyword (ease, ease-in-out) with no curve of its own (card rule 6). */
+/** A move longer than 0.3 s on linear easing, or on a default CSS keyword (ease, ease-in-out) with no curve of its own (rule named-eases). */
 export function linearMove(records) {
   return records.filter((r) => moves(r) && r.duration > LINEAR_LIMIT && onKeywords(r)).map((r) => {
     const linear = isLinear(r);
-    return { code: linear ? 'linear-move' : 'default-ease', rule: 6, at: r.delay,
+    return { code: linear ? 'linear-move' : 'default-ease', rule: 'named-eases', at: r.delay,
       what: `${r.label} moves ${r.props.filter((p) => MOVE.test(p)).join(',')} for ${s2(r.duration)} s on ${linear ? 'linear' : `the CSS keyword ${[r.easing, ...r.kfEasings].find((e) => e !== 'linear')}`} easing`,
       fix: EASE_ADVICE };
   });
@@ -128,27 +128,27 @@ function seamMove(r) {
   return `${[...r.props].sort().join('+')}${dir ? ` ${dir}` : r.from && !/translate/.test(r.from) ? ` ${r.from}` : ''}`;
 }
 
-/** The same full-frame transition move twice in a row; hard cuts are not moves (card rule 10). */
+/** The same full-frame transition move twice in a row; hard cuts are not moves (rule seam-variety). */
 export function seamRepeat(records) {
   const seams = records.filter((r) => r.fullFrame && r.duration > CUT && (moves(r) || r.opacity)).sort((a, b) => a.delay - b.delay);
   const out = [];
   for (let i = 1; i < seams.length; i++) {
     const [a, b] = [seams[i - 1], seams[i]];
-    if (b.delay - a.delay > CUT && seamMove(a) === seamMove(b)) out.push({ code: 'seam-repeat', rule: 10, at: b.delay,
+    if (b.delay - a.delay > CUT && seamMove(a) === seamMove(b)) out.push({ code: 'seam-repeat', rule: 'seam-variety', at: b.delay,
       what: `the seam at ${s2(b.delay)} s repeats the one at ${s2(a.delay)} s (${seamMove(b)})`,
       fix: 'change the axis or direction, or cut: a wipe on x after a push on y' });
   }
   return out;
 }
 
-/** Every timed move in one speed band. A page that paints in onFrame or seek is not measured here (card rule 8). */
+/** Every timed move in one speed band. A page that paints in onFrame or seek is not measured here (rule speed-bands). */
 export function oneBand(records, { scripted = false } = {}) {
   const timed = records.filter((r) => r.duration > CUT && (moves(r) || r.opacity));
   if (scripted || timed.length < 2) return [];
   const bands = new Set(timed.map((r) => bandOf(r.duration)));
   if (bands.size > 1) return [];
   const [band] = bands;
-  return [{ code: 'one-band', rule: 8, at: Math.min(...timed.map((r) => r.delay)),
+  return [{ code: 'one-band', rule: 'speed-bands', at: Math.min(...timed.map((r) => r.delay)),
     what: `all ${timed.length} timed moves sit in the ${band} band (${BANDS[band].join(' to ')} s)`,
     fix: 'give the hero gravity or cinematic and a payoff energy: the slowest beat at least 3x the fastest' }];
 }

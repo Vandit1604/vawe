@@ -1,14 +1,13 @@
 ---
 when: you cannot find the doctrine you need from AGENTS.md's routing table alone
-answers: "what engine-doctrine/ holds: craft rules, atomic rules, taste, motion, judging, references"
+answers: "what engine-doctrine/ holds: engine and process guides, judging, references. Taste and motion rules live in taste/"
 group: reference
 ---
 
 # engine-doctrine/
 
-- `CRAFT/`: craft guides. Start at `CRAFT/README.md` and `CRAFT/ROUTING.md`.
-- `RULES/`: one atomic rule per file. Start at `RULES/INDEX.md`.
-- `TASTE.md`: the one law and the value tests. `MOTION-CRAFT.md`: the motion rules. `DESIGN-DATABASE.md`: motion and style numbers.
+- `CRAFT/`: engine and process guides. Start at `CRAFT/README.md` and `CRAFT/ROUTING.md`.
+- Taste and motion rules moved to `taste/` at the repo root: start at `taste/README.md`. `DESIGN-DATABASE.md` here holds motion and style numbers.
 - `JUDGE.md`: how `bin/vawe judge` scores a film.
 - `RESEARCH/`: outside sources for timing numbers and open-source assets. `ASSET-SOURCES.md`: which footage, sound and music sites allow redistribution.
 

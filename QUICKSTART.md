@@ -85,4 +85,4 @@ lists the seconds that still differ (`vawe-reference`).
 - `core/motion/README.md`: springs, keyframe tables, seeded noise.
 - `prompts/README.md`: one template per film type; `engine-doctrine/CRAFT/ROUTING.md` picks it.
 - `prompts/moves/README.md`: moves to copy, each with a 1 s clip.
-- `engine-doctrine/RULES/`: readable-hold, speed-bands, banned-defaults.
+- `taste/README.md`: every taste rule, one per file in `taste/rules/`; `taste/build/DIGEST.md` is the first read.

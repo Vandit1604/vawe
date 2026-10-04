@@ -1,117 +1,37 @@
-# CRAFT: decision guides for authoring a video
+# CRAFT: engine and process guides
 
-> **New here? Start at [`../TASTE.md`](../TASTE.md)**. The front door that ties the spines together.
-> CRAFT is where each decision actually gets made.
->
-> [`DIRECTION.md`](DIRECTION.md) is the cross-cutting spine (pacing · restraint · story
-> placement) these decisions all serve.
->
+Taste and motion rules moved to `taste/` at the repo root. Start at `taste/README.md`: one rule per file,
+the first read in `taste/build/DIGEST.md`, the long reasons in `taste/craft/`. The guides left here are
+about how to run a film or change the engine, not about how a film should look.
 
-These guides answer *how to choose*: a beat order, a transition, a face, a palette, a layout, an
-image, a sound. They are opinionated checklists, not textbooks: if a rule wouldn't change what you
-build, it's cut. **Load the relevant guide before you author.**
-
----
-
-## The layering order: decide in this sequence, hand off down the chain
-
-**You will decide the effects first, because effects are the fun part and the table below is admin.
-Don't.** That is the single biggest reason a from-scratch video comes out as effect-soup. Decide in this
-order instead. Each layer sets constraints the next one fills; a choice upstream makes
-the downstream choices for you.
-
-| # | Decide | Load | It hands the next layer… |
-|---|---|---|---|
-| 1 | **The beats**: why these, in what order, doing what | [STORY.md](STORY.md) | each beat's role + its persuasion + its feeling |
-| 2 | **The anchor**: one reference profile for the whole film | [SELECTION.md](SELECTION.md) | the coordinated face/pace/cut-family/accent policy |
-| 3 | **Per beat, the effect**: the transition/look/sting for THIS beat's feeling | [SELECTION.md](SELECTION.md) | which cut, which face role |
-| 4 | **How each frame looks**: type · colour · layout · imagery | [TYPOGRAPHY](TYPOGRAPHY.md) · [COLOR](COLOR.md) · [LAYOUT](LAYOUT.md) · [IMAGERY](IMAGERY.md) | the composed frame, on the brand's palette + face |
-| 5 | **How full each frame is**: produced, not a slide | [DENSITY.md](DENSITY.md) | hero + support + metadata on the content beats |
-| 5b | **Whether the frame SHOWS or only tells** | [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | a quantity, proportion or real surface drawn as a graphic, not set in type |
-| 6 | **The restraint pass**: cut what doesn't earn its place | [TASTE-RULES.md](TASTE-RULES.md) | a film with 2–3 earned effects, not fifteen |
-| 7 | **The sound**: sound by default, silence only with a stated reason | [SOUND.md](SOUND.md) | a film held together aurally, and a licence we can produce |
-
-**Not authoring a film at all?** The nine steps above are for somebody making one. If you are changing
-the ENGINE (a gate, a layer type, a registry, the capture path, anything under `core/` or `internal/`),
-the doctrine is [ENGINE-CHANGES.md](ENGINE-CHANGES.md): why a gate is the last resort, why sugar must
-fail loudly, the three extension primitives, how to price a change that touches the capture path, and
-the framework harvest.
-
-**Why the order matters:** STORY (1) decides a beat is a *proof* beat → its role tells SELECTION (2–3)
-to reach for a demonstration, a hard cut, `weightShift` emphasis → COLOR/LAYOUT (4) go flat and
-full-bleed so the number lands → DENSITY (5) adds the supporting stat + a mono readout → TASTE-RULES
-(6) confirms no effect competes → SOUND (7) puts one `chime` on the number. One coherent beat, not
-seven independent guesses. (Motion physics runs alongside 3–4: see [../MOTION-CRAFT.md](../MOTION-CRAFT.md).)
-
----
-
-<!-- docmap:start -->
-## The full index
-
-**Front-to-back & cross-cutting:**
-
-| Guide | Load it when you are… | Answers |
+| Guide | Load it when you are... | Answers |
 |---|---|---|
-| [COMMAND-OUTPUT.md](COMMAND-OUTPUT.md) | you are writing or changing a command that reports something (a gate, a check, an audit) | the one output contract every reporting command follows, tight prose by default and --json for structure |
-| [DIRECTION.md](DIRECTION.md) | it "reads amateur" though every layer renders fine | the direction spine, Disney's 12 · Murch's Rule of Six · restraint · story placement, each sourced + tagged by which gate enforces it |
-| [ENGINE-CHANGES.md](ENGINE-CHANGES.md) | you are changing the ENGINE rather than authoring a film: a gate, a layer type, a registry, the capture path, or anything under core/ and internal/ | why a gate is the LAST resort and where a refusal belongs instead · how sugar must fail loudly rather than no-op · the three primitives that let you add a thing without touching everything · how to price a change that touches the capture path · the framework harvest, and how to classify a problem as framework, gate gap or authoring |
-| [FILM-STRUCTURE.md](FILM-STRUCTURE.md) | "what holds this film together across its cuts" | the devices a short film can be held by (spatial · verbal · temporal · conceptual), what practitioners actually say about choosing between them, and why our one blocking structural rule enforced the item Murch ranks last |
-| [GRAMMAR.md](GRAMMAR.md) | before authoring, or when a film reads flat and you cannot say why | what films that read well actually MEASURE: shot length, motion, whether the ground turns, and what carries across a cut |
+| [ROUTING.md](ROUTING.md) | "let's make a video", before opening any file | the film-type table (nine types, first matching row wins), the `prompts/` template and skill each one takes, and how to resolve common ambiguities |
 | [PITCH.md](PITCH.md) | the brief is unformed, "make a video about X" with no locked angle yet | diverge before you converge: five concepts sampled wide, an anti-median probability gate, a silhouette check, the three-line pitch format |
-| [REVIEW-STOPS.md](REVIEW-STOPS.md) | "we built the whole thing and then it was rejected\ | the points where the work gets shown before it is finished: concept, storyboard, style frames, the 85% draft |
-| [ROUTING.md](ROUTING.md) | "let's make a video", before opening any file: which film type is this, and which prompt template and skill does it take? | the film-type table (nine types, first matching row wins), the prompts/ template and skill each one takes, and how to resolve the common ambiguities |
-| [SOUND.md](SOUND.md) | the film has no sound, you are about to ship it mute, or you are placing a cue or a music bed | how to place subtle cues with <audio data-synth>; the 13 voices and their pitfalls; sound bridges, sync points, silence; what music we may legally put under a film |
-| [SUBAGENTS.md](SUBAGENTS.md) | judging your own render (a full pass, a recreation, anything you will ship), or about to fan work out to subagents | why a self-grading agent grades kindly; the critics and the one artifact each is handed; how to run them; what a fan-out costs; the brief lines and worktree contract every subagent brief needs |
-| [WRITING-FOR-AGENTS.md](WRITING-FOR-AGENTS.md) | you are writing or editing AGENTS.md, a skills/*/SKILL.md, or a brief an agent will read, and want the rule to survive truncation | six patterns that keep a rule readable by an agent, and the frontmatter and size contract a SKILL.md must meet |
+| [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video and locking the plan before you build | the per-video design-system spec and scene-by-scene storyboard, the anti-front-load reveal model, seam QA |
+| [REVIEW-STOPS.md](REVIEW-STOPS.md) | the work is big and you want to show it before it is finished | the points where work is shown: concept, storyboard, style frames, the 85% draft |
+| [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end, or reflecting a real website section by section | the ordered loop: measure, capture, build, score, verify; the honest 1:1 ceiling |
+| [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn and copy why | how to sample a reference and what a dense read shows |
+| [LAUNCH-REFERENCE.md](LAUNCH-REFERENCE.md) | you are about to author a launch or product film and want a real bar | 6 launch sites as links only, each with 2 to 3 named moves mapped to the vawe mechanism that makes them |
+| [SUBAGENTS.md](SUBAGENTS.md) | judging your own render, or about to fan work out to subagents | why a self-grading agent grades kindly; the critics and the artifact each is handed; the brief lines and worktree contract every subagent brief needs |
+| [ENGINE-CHANGES.md](ENGINE-CHANGES.md) | you are changing the ENGINE rather than authoring a film | why a gate is the last resort, why sugar must fail loudly, the three extension primitives, how to price a change that touches the capture path, the framework harvest |
+| [COMMAND-OUTPUT.md](COMMAND-OUTPUT.md) | you are writing or changing a command that reports something | the one output contract every reporting command follows |
+| [WRITING-FOR-AGENTS.md](WRITING-FOR-AGENTS.md) | you are writing AGENTS.md, a SKILL.md, or a brief an agent will read | six patterns that keep a rule readable by an agent, and the SKILL.md frontmatter and size contract |
 
-**What & why (the story layer):**
+## Where the taste guides went
 
-| Guide | Load it when you are… | Answers |
-|---|---|---|
-| [RECREATION.md](RECREATION.md) | recreating a specific reference video end to end ("make ours look like this"), or reflecting a real website section by section | the ordered loop: measure, capture, build, score, verify; one beat per section in the site's order; what to sample; the honest 1:1 ceiling |
-| [REFERENCE-STUDY.md](REFERENCE-STUDY.md) | a real video looks better than ours and you want to learn and copy why | how to sample a reference, what a dense read shows, and the premium-feel habits to reach for on purpose |
-| [SELECTION.md](SELECTION.md) | picking the transition, font, easing or overall look for a feeling, or picking between whole directions | intent to choice (cited) for cuts, faces and easing; eight named reference profiles as a whole coordinated look; the contradictions to avoid |
-| [STORY.md](STORY.md) | deciding the beats and their order | the spine, beat role to persuasion to feeling, named spines with timing, scene budget, product material to beats |
-| [TASTE-RULES.md](TASTE-RULES.md) | it "renders fine but feels cheap\ | the guardrails you break by default, the cause to feeling ease table, the failure-modes catalog, restraint, continuity |
-| [TRANSITIONS.md](TRANSITIONS.md) | choosing the cut between two beats (you cannot say why a transition is there) | the transition taxonomy (type, meaning), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles |
+| Was | Now |
+|---|---|
+| STORY, SELECTION, DIRECTION, FILM-STRUCTURE, GRAMMAR | `taste/craft/story.md`, `selection.md`, `direction.md`, `film-structure.md`, `grammar.md` |
+| TYPOGRAPHY, COLOR, LAYOUT, IMAGERY, SURFACES, SCREENS | `taste/craft/typography.md`, `color.md`, `layout.md`, `imagery.md`, `surfaces.md`, `screens.md` |
+| DENSITY, SHOW-DONT-TELL, CONTENT, READING | `taste/craft/density.md`, `show-dont-tell.md`, `content.md`, `reading.md` |
+| TRANSITIONS, EYE-TRACE, MOTION-STANDARDS, MOTION-REGISTERS, AFTER-EFFECTS-TECHNIQUES | `taste/craft/transitions.md`, `eye-trace.md`, `motion-standards.md`, `motion-registers.md`, `after-effects-techniques.md` |
+| SOUND, TASTE-RULES | `taste/craft/sound.md`, `taste/craft/failure-modes.md` |
+| TASTE.md, MOTION-CRAFT.md | `taste/craft/law.md`, `taste/craft/motion-craft.md` |
 
-**How it looks (the house-style layer):**
+## How these relate to the rest of the docs
 
-| Guide | Load it when you are… | Answers |
-|---|---|---|
-| [COLOR.md](COLOR.md) | authoring a `theme` palette, choosing bg/accent | build from one dominant · 60-30-10 · dominance · deploy-for-mood · gradient-vs-flat · WCAG |
-| [EYE-TRACE.md](EYE-TRACE.md) | a cut moves the subject across the frame | where the eye is at each cut · the attention ranking · our 0.30 threshold and where it came from · why it reports |
-| [FRAME-SPEC.md](FRAME-SPEC.md) | starting a video, lock the contract BEFORE the JSON | the per-video design-system spec + scene-by-scene storyboard (Reproduce/Adapt · persuasion · emotion) · the anti-front-load reveal model · seam QA.  |
-| [IMAGERY.md](IMAGERY.md) | choosing image vs gradient, treating a photo, icons, or fetching a brand mark | the visual ladder · where a real asset comes from · treatment→intent · licensing · icon choice |
-| [LAYOUT.md](LAYOUT.md) | placing layers, composing a beat | grid · one hero · asymmetry vs centered · archetype→intent · safe zones · active vs passive whitespace |
-| [MOTION-REGISTERS.md](MOTION-REGISTERS.md) | the restraint rule (one loud moment, effects as seasoning) reads wrong for the type you are writing, or you need a published number instead of an adjective | why restraint is register-dependent, not universal; the Material Design 3 curves and the duration/stagger numbers that replace our adjectives; the seven-device motion taxonomy; what is and is not measurable about motion |
-| [MOTION-STANDARDS.md](MOTION-STANDARDS.md) | motion is technically correct and still feels wrong, or you are choosing an easing or a duration | the outside standards for why motion reads well, which of them transfer to FILM, and what this engine already has against what it is missing |
-| [SCREENS.md](SCREENS.md) | you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card) for a film, or a screen previews as a grey box, with tiny type, or with something clipped | why a product screen is designed for the video, not a plain mock; the measured numbers; the checks for size, clipping and images |
-| [SURFACES.md](SURFACES.md) | choosing the surface copy sits on (glass, mesh, spotlight, bento), or locking a look in one page | the design spec that locks a look, the check against it, the 8 visual styles picker, and the backdrop and ruled-grid rules |
-| [TYPOGRAPHY.md](TYPOGRAPHY.md) | picking a font or type face, or sizing headlines | which face signals which personality, pairing, the size scale, weight, tracking and leading, the overused-face list |
-
-**How full · how it sounds:**
-
-| Guide | Load it when you are… | Answers |
-|---|---|---|
-| [CONTENT.md](CONTENT.md) | a beat draws a screen/window/product/photo, or a film reads as plain beside its reference | the four content numbers · dense-where-dense/quiet-where-quiet · theme source (R1) · screens (R2) · what real material means |
-| [DENSITY.md](DENSITY.md) | a beat looks flat / slide-like | hero + support + metadata triad · the "produced" tell · thin-beat rule |
-| [READING.md](READING.md) | a line is on screen and you do not know if anyone can read it | hold by word count, the numbers and their sources, which text counts as prose, the flicker gap |
-| [SHOW-DONT-TELL.md](SHOW-DONT-TELL.md) | the film is all type in boxes | decoration versus explanation, what each claim shape wants, why the graphic must be the subject, three questions to ask by hand |
-
-**Reference (look it up):**
-
-| Guide | Load it when you are… | Answers |
-|---|---|---|
-| [AFTER-EFFECTS-TECHNIQUES.md](AFTER-EFFECTS-TECHNIQUES.md) | you want the named procedure a motion designer would reach for, and the engine word for it (or the news that there isn't one) | 26 named After Effects recipes with their real numbers · a HAVE/PARTLY/LACK verdict per recipe against this engine (26 HAVE, 0 PARTLY, 0 LACK as of 2026-09-23) · what is left and where it would live |
-| [LAUNCH-REFERENCE.md](LAUNCH-REFERENCE.md) | you are about to author a launch/product film and want a real bar for what 'great' looks like, not a memory of it | 6 launch sites as links only, each with 2-3 named moves mapped to the vawe mechanism that makes them |
-
-_The whole-repo map, including everything outside CRAFT, is [`../INDEX.md`](../INDEX.md)._
-<!-- docmap:end -->
-
-## How these relate to the rest of the docs (no overlap)
-- **CRAFT/** = *how to choose/build* (decisions). ← you are here
-- [`../DESIGN-DATABASE.md`](../DESIGN-DATABASE.md) = *what techniques exist* (the catalog).
-- [`../MOTION-CRAFT.md`](../MOTION-CRAFT.md) = *how it moves* (motion rules + gates).
-- `skills/{taste-skill,impeccable}` = *enforcement* (the anti-slop detector + dials). CRAFT tells
-  you what to do; impeccable checks you did it. Reach past what impeccable flags using these guides.
+- `taste/` = what a film should look and sound like: the rules, and the reasons behind them.
+- `engine-doctrine/CRAFT/` = how to choose a film type, run the loop and change the engine (you are here).
+- `engine-doctrine/DESIGN-DATABASE.md` = what techniques exist (the catalog).
+- `skills/{taste-skill,impeccable}` = enforcement for web UI work, not for films.

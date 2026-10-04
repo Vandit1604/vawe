@@ -1,6 +1,6 @@
 // Pure parsing and the range check for the Directions section of a film's brief.md: three slots
 // (### A, ### B, ### C) of `- field: value` lines, and a `picked:` line. No I/O. Advice only.
-import ATTRACTORS from '../../engine-doctrine/attractors.json' with { type: 'json' };
+import ATTRACTORS from '../../taste/attractors.json' with { type: 'json' };
 
 export const FIELDS = ['family', 'sentence', 'key frame', 'palette', 'typeface', 'move', 'thread'];
 

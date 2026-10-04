@@ -1,5 +1,5 @@
 // Pure decisions for the draft check that `bin/vawe dev` prints after a full-length draft: text size
-// (taste card rule 9), sound level, and the merge with the ship problems. No I/O, no clock.
+// (taste rule readable-text-size), sound level, and the merge with the ship problems. No I/O, no clock.
 // harness/media/draft-check.mjs feeds it.
 import { adviceBlock } from './advice.mjs';
 
@@ -83,7 +83,7 @@ export function textProblems(samples, ctx, rules = RULES) {
   return heldTextRuns(samples, ctx, rules)
     .filter((r) => r.cap < floorOf(r, rules))
     .sort((a, b) => a.cap - b.cap)
-    .map((r) => `text "${r.key}" at ${r.t.toFixed(1)} s: cap height ${(r.cap * 100).toFixed(1)}% of frame (rule 9 asks ${+(floorOf(r, rules) * 100).toFixed(1)}%)`);
+    .map((r) => `text "${r.key}" at ${r.t.toFixed(1)} s: cap height ${(r.cap * 100).toFixed(1)}% of frame (rule readable-text-size asks ${+(floorOf(r, rules) * 100).toFixed(1)}%)`);
 }
 
 /** One line when a text is taller than the frame or under 0.2% of it: the sign of --vh read as 1vh. Pure. */

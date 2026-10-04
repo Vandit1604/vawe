@@ -1,7 +1,7 @@
 // Text as data: when each line of text enters, is fully readable, and leaves, and where its glyph ink
 // leaves the box that clips it. The in-page collector reads the live DOM; everything after it is pure.
 
-const READ_PER_WORD = 0.6;   // engine-doctrine/RULES/readable-hold.md: words x 0.6 s, no hold under 1.2 s
+const READ_PER_WORD = 0.6;   // taste/rules/readable-hold.md: words x 0.6 s, no hold under 1.2 s
 const READ_FLOOR = 1.2;
 const CLIP_TOL_PX = 2;
 const CLIP_REVEALED = 0.8;   // a line this far revealed is judged on its clipping edge, moving or not

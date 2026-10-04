@@ -120,7 +120,8 @@ harness/media/     render-page.mjs · page-audio.mjs · see.mjs (the views) · r
 quality/gates/     page-check.mjs · anim-traps.mjs · judge.mjs · doc-refs.mjs
 prompts/           one template per film type, and prompts/moves/ (moves to copy, with clips)
 skills/            vawe-brief · vawe-page · vawe-critique · vawe-reference (loaded on demand)
-engine-doctrine/   RULES/ (readable-hold, speed-bands, banned-defaults) · CRAFT/ · JUDGE.md
+taste/             rules/ (one rule per file) · craft/ · build/ (generated) · README.md (the index)
+engine-doctrine/   CRAFT/ (engine and process guides) · JUDGE.md
 films/             <name>/page.html per film
 out/               rendered mp4s (gitignored)
 ```
