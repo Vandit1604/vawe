@@ -26,7 +26,7 @@ const STARTER_TEMPLATE = `<!doctype html>
 <meta name="message" content="one thing to remember">
 <meta name="signature" content="{{signature}}">
 <title>{{title}}</title>
-<!-- signature: choose the six dials in brief.md (## Signature), then write each value in the tag above.
+<!-- signature: choose the six dials in the tag above (ranges: brief.md, ## Signature).
   enter, leave, stagger and layer take band, ease and stagger from it; bin/vawe dev names each dial still unchosen
   budget (taste/build/DIGEST.md); change any line on purpose:
   colours: --ground and --ink are grey placeholders until the palette dial is chosen; one accent on one thing, if any
