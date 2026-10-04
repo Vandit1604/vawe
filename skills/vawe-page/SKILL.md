@@ -9,7 +9,7 @@ effort: medium
 A film is one HTML page; the renderer seeks it, screenshots every frame and mixes the audio offline.
 The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start with
 `bin/vawe new <name>`; this skill holds the code a first draft gets wrong. Taste pitfalls are in
-`engine-doctrine/TASTE-CARD-DIGEST.md`.
+`taste/build/DIGEST.md`.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->

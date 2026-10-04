@@ -5,10 +5,10 @@ import { mergeRecords, motionLint, exitLength, groupLanding, linearMove, seamRep
 const rec = (o) => ({ target: 0, label: 'h1 "Hi"', id: '', props: ['opacity'], delay: 0, duration: 0.5, easing: 'linear',
   kfEasings: ['ease', 'ease'], opacity: null, from: '', fullFrame: false, ...o });
 
-test('an exit as long as its entrance is flagged under rule 5; a shorter one is not', () => {
+test('an exit as long as its entrance is flagged under rule exits-shorter; a shorter one is not', () => {
   const inn = rec({ opacity: [0, 1], duration: 0.6 });
   const [f] = exitLength([inn, rec({ opacity: [1, 0], delay: 2, duration: 0.6 })]);
-  assert.equal(f.rule, 5);
+  assert.equal(f.rule, 'exits-shorter');
   assert.equal(f.at, 2);
   assert.deepEqual(exitLength([inn, rec({ opacity: [1, 0], delay: 2, duration: 0.36 })]), []);
 });
@@ -16,7 +16,7 @@ test('an exit as long as its entrance is flagged under rule 5; a shorter one is 
 test('three entrances landing on one 60 fps frame are a group landing; a stagger is not', () => {
   const same = [0, 1, 2].map((k) => rec({ target: k, opacity: [0, 1], delay: 1, duration: 0.4 }));
   const [f] = groupLanding(same);
-  assert.equal(f.rule, 8);
+  assert.equal(f.rule, 'stagger');
   assert.equal(f.at, 1.4);
   const staggered = [0, 1, 2].map((k) => rec({ target: k, opacity: [0, 1], delay: 1 + k * 0.05, duration: 0.4 }));
   assert.deepEqual(groupLanding(staggered), []);
@@ -24,7 +24,7 @@ test('three entrances landing on one 60 fps frame are a group landing; a stagger
 
 test('linear easing on a move over 0.3 s is flagged; a per-keyframe curve or a short move is not', () => {
   const move = { props: ['translate'], kfEasings: ['linear', 'linear'] };
-  assert.equal(linearMove([rec({ ...move, duration: 0.8 })])[0].rule, 6);
+  assert.equal(linearMove([rec({ ...move, duration: 0.8 })])[0].rule, 'named-eases');
   assert.deepEqual(linearMove([rec({ ...move, duration: 0.2 })]), []);
   assert.deepEqual(linearMove([rec({ ...move, duration: 0.8, kfEasings: ['linear(0, 0.5, 1)', 'linear'] })]), []);
   assert.deepEqual(linearMove([rec({ props: ['color'], kfEasings: ['linear'], duration: 0.8 })]), []);
@@ -52,7 +52,7 @@ test('moveDirection reads translate, translateX/Y and a single-value translate',
 test('the same full-frame seam move twice in a row is flagged; a changed direction and hard cuts are not', () => {
   const seam = (delay, from) => rec({ fullFrame: true, props: ['translate'], delay, duration: 0.4, from, kfEasings: ['x', 'x'] });
   const [f] = seamRepeat([seam(1, '100% 0'), seam(2, '100% 0')]);
-  assert.equal(f.rule, 10);
+  assert.equal(f.rule, 'seam-variety');
   assert.equal(f.at, 2);
   assert.deepEqual(seamRepeat([seam(1, '100% 0'), seam(2, '0 100%')]), []);
   const cut = (delay) => rec({ fullFrame: true, opacity: [0, 1], delay, duration: 0.001 });
@@ -61,7 +61,7 @@ test('the same full-frame seam move twice in a row is flagged; a changed directi
 
 test('one speed band across the film is flagged unless the page paints in script', () => {
   const same = [rec({ opacity: [0, 1], duration: 0.4 }), rec({ opacity: [0, 1], delay: 1, duration: 0.45 })];
-  assert.equal(oneBand(same)[0].rule, 8);
+  assert.equal(oneBand(same)[0].rule, 'speed-bands');
   assert.deepEqual(oneBand(same, { scripted: true }), []);
   assert.deepEqual(oneBand([...same, rec({ opacity: [0, 1], duration: 1.2 })]), []);
 });
@@ -79,8 +79,8 @@ test('lines carry the rule, the second, the code and one fix, in time order', ()
     rec({ target: 1, props: ['translate'], kfEasings: ['linear', 'linear'], delay: 1, duration: 0.9 }),
   ] });
   const lines = lintLines(findings);
-  assert.match(lines[0], /^rule 6 @1\.00s linear-move: .*; fix: /);
-  assert.match(lines[1], /^rule 5 @3\.00s exit-length: /);
+  assert.match(lines[0], /^rule named-eases @1\.00s linear-move: .*; fix: /);
+  assert.match(lines[1], /^rule exits-shorter @3\.00s exit-length: /);
 });
 
 test('an element inside aria-hidden is texture: its exit is not measured', () => {

@@ -1,4 +1,4 @@
-// The judge's contact sheet, counted the way the judge counts it: TASTE-CARD rule 2 allows at most 8
+// The judge's contact sheet, counted the way the judge counts it: taste rule world-turns allows at most 8
 // near-identical adjacent tiles in a row and at most 4 at the tail. harness/media/judge-fresh.mjs builds
 // the sheet from these constants, and the draft and final checks read the same tiles, so dev and the
 // judge see one number. A run inside a declared hold ("dead-air" waiver) is not counted.

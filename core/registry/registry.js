@@ -125,7 +125,7 @@ export function defineRegistry(kind, entries, { blurbs, aka, slot, catalog, pitf
  *   preview  (name, kit) → a whole scene object the site plays, `kit` being { base, HERO, TWO, OVER }
  *   noPreview  why this family cannot honestly be played in one small clip. The alternative to
  *            `preview`, never a companion to it, and never absent: a blank was how blanks got shipped
- *   register optional, the key into SELECTION.md §4 when the register IS the description (looks, stings)
+ *   register optional, the key into taste/craft/selection.md §4 when the register IS the description (looks, stings)
  *   skip     optional, the DECISION that a family is self-describing, rendered instead of a blank row
  *
  * Refused here rather than checked by a gate, because a gate only promises to notice: a registry with
@@ -250,7 +250,7 @@ const nameWords = (name) => new Set(String(name)
  * THE RULE IS DELIBERATELY THE NARROWEST ONE THAT CATCHES THAT. Strip the stopwords, strip every word
  * the name already carries, strip the kind every sibling shares, and refuse only when NOTHING is left. It says nothing about length, about
  * style, or about whether the blurb is any good: a wrong refusal fires at module load and stops the
- * engine, and this repo has deleted two gates for measuring the wrong thing (engine-doctrine/TASTE.md, the
+ * engine, and this repo has deleted two gates for measuring the wrong thing (taste/craft/law.md, the
  * `visual-vocabulary` story). Run over all 445 named things the day it was written, it fired ONCE, on
  * `tilt: "3D tilt-in"`, whose only non-name word is `3D`, which the tokenizer cannot index at all.
  *

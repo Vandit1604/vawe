@@ -46,7 +46,7 @@ use its screenshot with a slow move. Hand-write HTML only for connective tissue:
 "Ours shows so little" is rarely too few cuts. It is frame emptiness (one word on black), telling
 instead of showing, and under-using the surfaces you captured. Back every claim beat with the surface
 that proves it, and use most of what you captured. Big type on black is a hook or a transition, never the
-film. Details: `SHOW-DONT-TELL.md`, `DENSITY.md`.
+film. Details: `taste/craft/show-dont-tell.md`, `taste/craft/density.md`.
 
 ## Light
 
@@ -59,7 +59,7 @@ low-frequency map in linear light), and check it with `compare` before you touch
 
 Keep the camera one monotonic move with no reversal, and use a linear interior ease: an eased chain
 zeroes velocity at every key and pulses. Cut to the track: a cut a few frames off the beat reads
-sloppy, on the beat it reads directed. Copy the reference audio when you have it (`SOUND.md`).
+sloppy, on the beat it reads directed. Copy the reference audio when you have it (`taste/craft/sound.md`).
 
 ## The honest ceiling
 

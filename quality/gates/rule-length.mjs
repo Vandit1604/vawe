@@ -35,9 +35,11 @@ function agentDocFiles() {
     const rel = `skills/${d}/SKILL.md`;
     if (isAgentDoc(rel) && fs.existsSync(path.join(ROOT, rel))) out.push(rel);
   }
-  for (const f of fs.readdirSync(path.join(ROOT, 'engine-doctrine/CRAFT'))) {
-    const rel = `engine-doctrine/CRAFT/${f}`;
-    if (isAgentDoc(rel)) out.push(rel);
+  for (const dir of ['engine-doctrine/CRAFT', 'taste/craft']) {
+    for (const f of fs.readdirSync(path.join(ROOT, dir))) {
+      const rel = `${dir}/${f}`;
+      if (isAgentDoc(rel)) out.push(rel);
+    }
   }
   return out;
 }

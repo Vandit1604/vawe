@@ -30,7 +30,7 @@ your own direction.
 
 ## The loop  `[live: harness/live/stage-say.mjs]`
 
-Read `engine-doctrine/TASTE-CARD-DIGEST.md` first: it is the one list of taste pitfalls. A hook names the
+Read `taste/build/DIGEST.md` first: it is the one list of taste pitfalls (every rule: `taste/README.md`). A hook names the
 next command for the film you edited last.
 
 | # | stage | the command |

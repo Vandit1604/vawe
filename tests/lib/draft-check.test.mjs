@@ -14,7 +14,7 @@ test('sampleTimes: 10 samples for a 5 s film, capped at 40', () => {
 
 test('textProblems: small text held 1 s is named with its cap height', () => {
   const out = textProblems([at(3.25, ['Light, after dark', 30]), at(3.75, ['Light, after dark', 30])], dim);
-  assert.deepEqual(out, ['text "Light, after dark" at 3.3 s: cap height 3.9% of frame (rule 9 asks 6%)']);
+  assert.deepEqual(out, ['text "Light, after dark" at 3.3 s: cap height 3.9% of frame (rule readable-text-size asks 6%)']);
 });
 
 test('textProblems: text at 6% or more passes', () => {
@@ -71,7 +71,7 @@ test('textProblems: text in data-chrome has a 2.5% floor; plain text keeps 6%', 
   const chrome = (cap) => ({ t: 1, lines: [{ text: 'Inbox', fontPx: (cap * 540) / 0.7, chrome: true }] });
   const held = (s) => [s, { ...s, t: 1.5 }];
   assert.deepEqual(textProblems(held(chrome(0.03)), dim), []);
-  assert.match(textProblems(held(chrome(0.02)), dim)[0], /cap height 2\.0% of frame \(rule 9 asks 2\.5%\)/);
+  assert.match(textProblems(held(chrome(0.02)), dim)[0], /cap height 2\.0% of frame \(rule readable-text-size asks 2\.5%\)/);
   assert.equal(textProblems([at(1, ['Inbox', 30]), at(1.5, ['Inbox', 30])], dim).length, 1);
 });
 

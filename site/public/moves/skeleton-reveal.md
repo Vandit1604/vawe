@@ -5,7 +5,7 @@ shimmer under one moving light, then each region resolves into its real content,
 The viewer sees a product loading, then the product. Clip: [skeleton-reveal.mp4](skeleton-reveal.mp4).
 Demo: [demo/skeleton-reveal.html](demo/skeleton-reveal.html).
 
-Use once per film: the moving light is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+Use once per film: the moving light is a stock device (rule stock-device-once), never the idea.
 
 ```html
 <div class="reg head"><div class="real">...avatar, name, status...</div><div class="sk-layer"><i class="sk round"></i>...</div></div>

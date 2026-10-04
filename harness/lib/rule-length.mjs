@@ -3,11 +3,11 @@ export const RULE_LENGTH_LIMIT = 500;
 
 export const RULE_LENGTH_DOC = 'engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md';
 
-// Agent-facing prose surfaces only, not reference tables, generated indexes, or per-film artifacts: engine-doctrine/CRAFT/*.md (not its subfolders), plus AGENTS.md and skills/*/SKILL.md named directly.
+// Agent-facing prose surfaces only, not reference tables, generated indexes, or per-film artifacts: engine-doctrine/CRAFT/*.md and taste/craft/*.md (not their subfolders), plus AGENTS.md and skills/*/SKILL.md named directly.
 export function isAgentDoc(rel) {
   if (rel === 'AGENTS.md') return true;
   if (/^skills\/[^/]+\/SKILL\.md$/.test(rel)) return true;
-  if (/^engine-doctrine\/CRAFT\/[^/]+\.md$/.test(rel)) return true;
+  if (/^(engine-doctrine\/CRAFT|taste\/craft)\/[^/]+\.md$/.test(rel)) return true;
   return false;
 }
 

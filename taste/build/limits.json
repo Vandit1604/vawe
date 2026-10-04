@@ -1,0 +1,255 @@
+{
+ "cta-last-short": {
+  "cta_min_s": 3,
+  "cta_max_s": 5
+ },
+ "hook-payoff": {
+  "hook_words_max": 12,
+  "hook_seconds": 3,
+  "payoff_start_pct": 77,
+  "payoff_end_pct": 90
+ },
+ "no-inventory": {
+  "steps_max": 3
+ },
+ "scene-budget": {
+  "scenes_30s_min": 5,
+  "scenes_30s_max": 7,
+  "scenes_60s_min": 8,
+  "scenes_60s_max": 12,
+  "scene_seconds_min": 3,
+  "scene_seconds_max": 7
+ },
+ "shot-length-varies": {
+  "punchy_min_s": 0.8,
+  "punchy_max_s": 1.5,
+  "breathing_min_s": 2,
+  "breathing_max_s": 3
+ },
+ "three-materials": {
+  "directions": 3,
+  "light_directions_max": 1
+ },
+ "accent-share": {
+  "accent_share_pct_typical": 10,
+  "accent_share_pct_atmosphere_max": 25
+ },
+ "first-frame": {
+  "subject_by_s": 0.1,
+  "empty_max_s": 0.5,
+  "motion_delay_min_s": 0,
+  "motion_delay_max_s": 0.3
+ },
+ "graphic-is-subject": {
+  "graphic_area_pct_min": 8,
+  "graphic_runtime_share_min": 0.33
+ },
+ "hero-plus-proof": {
+  "proof_after_s": 3,
+  "decoratives_min": 2,
+  "decoratives_max": 5
+ },
+ "hero-scale": {
+  "hero_width_pct_min": 60,
+  "hero_width_pct_max": 80,
+  "headline_px_min_1920": 84,
+  "support_px_1920": 44,
+  "label_px_1920": 32
+ },
+ "hierarchy": {
+  "scale_contrast_min": 4,
+  "scale_contrast_max": 8,
+  "levels": 3
+ },
+ "image-treatment": {
+  "ken_burns_pct_min": 3,
+  "ken_burns_pct_max": 8,
+  "scrim_pct_min": 40,
+  "scrim_pct_max": 60
+ },
+ "logo-prominence": {
+  "logo_height_pct_min": 5,
+  "logo_height_pct_typical": 7
+ },
+ "readable-hold": {
+  "hold_floor_s": 1.2,
+  "prose_s_per_word": 0.6,
+  "short_words_per_s": 3,
+  "prose_min_words": 4,
+  "ceiling_s": 5
+ },
+ "readable-text-size": {
+  "cap_height_pct": 6,
+  "chrome_cap_height_pct": 2.5
+ },
+ "safe-margin": {
+  "safe_pct": 90,
+  "margin_pct_min": 6,
+  "margin_pct_max": 8,
+  "social_margin_pct": 10
+ },
+ "screen-designed": {
+  "screen_text_px_min_1920": 28
+ },
+ "text-contrast": {
+  "large_ratio": 3,
+  "body_ratio": 4.5,
+  "aim_ratio": 7
+ },
+ "type-setting": {
+  "display_tracking_em_min": -0.05,
+  "display_tracking_em_max": -0.02,
+  "measure_chars_min": 45,
+  "measure_chars_max": 75
+ },
+ "typeface-system": {
+  "faces_max": 3
+ },
+ "weight-contrast": {
+  "light_weight": 300,
+  "heavy_weight": 900,
+  "body_weight_min": 400
+ },
+ "whitespace": {
+  "lean_empty_pct_min": 40,
+  "lean_empty_pct_max": 60
+ },
+ "world-turns": {
+  "turn_seconds_max": 2,
+  "run_tiles_max": 8,
+  "tail_tiles_max": 4,
+  "sheet_fps": 5
+ },
+ "anticipation": {
+  "dip_pct_min": 2,
+  "dip_pct_max": 4,
+  "counter_travel_pct_min": 10,
+  "counter_travel_pct_max": 20
+ },
+ "arrival-rhythm": {
+  "cascade_interval_tolerance": 0.3,
+  "next_start_share_min": 0.6,
+  "next_start_share_max": 0.7
+ },
+ "counter-no-overshoot": {
+  "count_min_s": 0.8,
+  "count_max_s": 1.4
+ },
+ "ease-variety": {
+  "eases_per_scene_min": 1,
+  "eases_per_scene_max": 2
+ },
+ "entrance-ease": {
+  "scale_start_min": 0.9,
+  "scale_start_max": 0.97
+ },
+ "exits-shorter": {
+  "exit_share_min": 0.35,
+  "exit_share_max": 0.6,
+  "preset_leave_share": 0.6
+ },
+ "follow-through": {
+  "trail_min_s": 0.05,
+  "trail_max_s": 0.15
+ },
+ "live-hold": {
+  "still_limit_s": 0.5,
+  "drift_scale_pct_min": 1,
+  "drift_scale_pct_max": 3,
+  "rest_min_s": 0.4,
+  "rest_max_s": 0.6
+ },
+ "named-eases": {
+  "linear_move_limit_s": 0.3
+ },
+ "no-bounce": {
+  "pop_overshoot_pct": 15
+ },
+ "no-dead-stop": {
+  "jolt_px_per_s": 600,
+  "jolt_zoom_per_s": 0.6
+ },
+ "real-physics": {
+  "linear_stops_min": 8
+ },
+ "speed-bands": {
+  "energy_min_s": 0.15,
+  "energy_max_s": 0.3,
+  "professional_max_s": 0.5,
+  "gravity_max_s": 0.8,
+  "cinematic_max_s": 2,
+  "slowest_to_fastest_min": 3,
+  "eye_speed_px_per_s": 700
+ },
+ "stagger": {
+  "gap_min_s": 0.03,
+  "gap_max_s": 0.08,
+  "gap_default_s": 0.05,
+  "calm_min_s": 0.08,
+  "calm_max_s": 0.12,
+  "total_max_s": 0.5,
+  "same_frame_group": 3
+ },
+ "cut-on-beat": {
+  "early_frames": 2,
+  "match_overlap_min_frames": 2,
+  "match_overlap_max_frames": 5
+ },
+ "eye-trace": {
+  "jump_far_diagonal": 0.3
+ },
+ "handoff-duration": {
+  "handoff_min_s": 0.8,
+  "handoff_max_s": 1
+ },
+ "hard-cut-default": {
+  "hard_cut_share_pct_min": 50,
+  "hard_cut_share_pct_max": 95
+ },
+ "one-cut-family": {
+  "accents_min": 2,
+  "accents_max": 3
+ },
+ "seam-duration": {
+  "whip_min_s": 0.27,
+  "whip_max_s": 0.4,
+  "dissolve_quick_min_s": 0.4,
+  "dissolve_quick_max_s": 0.5,
+  "slide_min_s": 0.5,
+  "slide_max_s": 1,
+  "fade_min_s": 0.66,
+  "fade_max_s": 1.33
+ },
+ "gradient-grain": {
+  "grain_pct_min": 1,
+  "grain_pct_max": 2
+ },
+ "moving-tail": {
+  "tail_seconds": 1,
+  "tail_tiles_max": 4
+ },
+ "reveal-mask-pad": {
+  "mask_pad_em": 0.3
+ },
+ "stock-device-once": {
+  "stock_devices_max": 1
+ },
+ "cue-sparse": {
+  "sync_points_max": 2
+ },
+ "sound-bridge": {
+  "j_cut_lead_min_s": 0.4,
+  "j_cut_lead_max_s": 0.8,
+  "crossfade_s": 0.35
+ },
+ "sound-level": {
+  "peak_dbfs": -10,
+  "lufs_target": -20,
+  "lufs_low": -24,
+  "lufs_high": -16,
+  "cue_peak_over_median_db": 6
+ },
+ "sound-swell": {
+  "swells_max": 1
+ }
+}

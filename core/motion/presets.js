@@ -4,7 +4,7 @@
 import { curveToLinear, rng } from './springs.js';
 import { handleCurve } from './motion.js';
 
-// engine-doctrine/RULES/speed-bands.md, seconds
+// taste/rules/speed-bands.md, seconds
 export const BANDS = {
   energy: [0.15, 0.3],
   professional: [0.3, 0.5],
@@ -13,7 +13,7 @@ export const BANDS = {
 };
 const ORDER = Object.keys(BANDS);
 
-// The median followed move in 135 library scenes (engine-doctrine/MOTION-CRAFT.md, speed numbers).
+// The median followed move in 135 library scenes (taste/rules/speed-bands.md).
 const EYE_SPEED = 700;
 const LEAVE_SHARE = 0.6;
 const STAGGER = { gap: 0.05, min: 0.03, max: 0.08, total: 0.5, jitter: 0.25 };

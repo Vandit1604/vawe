@@ -1,0 +1,22 @@
+---
+id: type-setting
+step: look
+principle: Set display type tight and body type open. Body and caption lines keep a readable measure; display type is exempt and fills the frame instead.
+limit: none
+range: display tracking -0.02 to -0.05 em; leading: body 1.2 to 1.45, big headlines 1.02 to 1.1; measure 45 to 75 characters (about 66) for body and captions; light type on dark opens +0.01 em at hero size; uppercase opens, lowercase is never letterspaced
+break-when: a display line short enough for one fixation (60 px and up) has no measure
+instead: for a dark scene, drop body weight from 400 to 350 and open leading by 0.05 to 0.1 by hand.
+check: none
+judge: Does any body line run past 75 characters or any display line sit loose?
+prevents: doc TYPOGRAPHY.md and LAYOUT.md: the tracking numbers are reference-note values, not measured here; light ink on a dark ground bleeds into its counters.
+status: active
+scored: no
+numbers: {"display_tracking_em_min":-0.05,"display_tracking_em_max":-0.02,"measure_chars_min":45,"measure_chars_max":75}
+craft: typography
+---
+
+## Example
+
+Headline -0.03 em, leading 1.05; a 66 character caption.
+
+Why and sources: [typography](../craft/typography.md).

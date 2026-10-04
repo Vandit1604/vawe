@@ -188,7 +188,7 @@ const gatesText = (name) => `Do the gates in order. A failed gate sends you back
    Then \`bin/vawe critique films/${name}/page.html\` in a session that did not write the page.
 4. Final: \`bin/vawe ship films/${name}/page.html\`, then \`bin/vawe ship --status films/${name}/page.html --wait\`.`;
 
-const PITFALLS = `Taste pitfalls: engine-doctrine/TASTE-CARD-DIGEST.md (\`bin/vawe dev\` prints them).`;
+const PITFALLS = `Taste pitfalls: taste/build/DIGEST.md (\`bin/vawe dev\` prints them).`;
 
 const deliverText = (name) => `- out/${name}.mp4 from \`bin/vawe ship\`.
 - This brief, with Spec edited to what you built and the Acceptance table filled with the number you

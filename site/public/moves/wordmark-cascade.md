@@ -5,7 +5,7 @@ gap shorter than the last, so the word speeds up as it lands; the full stop is t
 last. After the landing a short accent bar runs along the rail, so the tail is never still. Clip:
 [wordmark-cascade.mp4](wordmark-cascade.mp4). Demo: [demo/wordmark-cascade.html](demo/wordmark-cascade.html).
 
-Use once per film: the accent bar is a stock device (engine-doctrine/TASTE-CARD.md, Attractors), never the idea.
+Use once per film: the accent bar is a stock device (rule stock-device-once), never the idea.
 
 ```html
 <div class="stage">
@@ -32,6 +32,6 @@ Sound: droplet at 0.55 s into the move, when the accent full stop lands on the r
 The gaps run 90, 70, 55, 45 ms: inside the 30 to 80 ms band except the first, which is the hook.
 The letters blur only while they fall and are sharp on landing. The rail is on screen from frame 0
 so the first frame has a subject. The bar on the rail is the last-frame motion; a landed wordmark
-held still is what the taste card bans. Use `EASE.pop` (a small overshoot).
+held still is what the rule moving-tail bans. Use `EASE.pop` (a small overshoot).
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

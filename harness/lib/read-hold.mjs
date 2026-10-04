@@ -1,4 +1,4 @@
-// harness/lib/read-hold.mjs: the readable-hold rule (engine-doctrine/RULES/readable-hold.md) as a pure function.
+// harness/lib/read-hold.mjs: the readable-hold rule (taste/rules/readable-hold.md) as a pure function.
 const READ_PER_WORD = 0.6;      // prose: words x 0.6 s
 const READ_FLOOR = 1.2;         // no held frame under 1.2 s
 const READ_OTHER_WPS = 3;

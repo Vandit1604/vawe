@@ -15,9 +15,9 @@ One page, from the brand study. Every frame uses only these values.
 
 - **Colour roles, not hexes.** Ground, text, text-muted, one scarce accent, positive, negative. The accent
   is voltage: eyebrows, numerals, one rule per frame, the CTA. No frame lets it dominate by area. Put them
-  in `:root` custom properties (`COLOR.md`).
+  in `:root` custom properties (`taste/craft/color.md`).
 - **Type by role, in fixed faces.** Display, body, and mono for every numeral ("a dollar figure in anything
-  but mono is a bug"). Use the measured weights from the brand, never a default 800 (`TYPOGRAPHY.md`).
+  but mono is a bug"). Use the measured weights from the brand, never a default 800 (`taste/craft/typography.md`).
 - **A negative list.** Name what this film will not do: no nav or footer chrome, no AI gradients or bokeh,
   no second accent, no `back`, `bounce` or `elastic` easing unless the brand is a toy brand.
 - **A pre-render self-audit.** Squint, silence, restraint, reference.

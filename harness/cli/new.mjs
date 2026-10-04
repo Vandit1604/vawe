@@ -23,13 +23,13 @@ const STARTER_TEMPLATE = `<!doctype html>
 <meta name="aspect" content="{{aspect}}">
 <meta name="message" content="one thing to remember">
 <title>{{title}}</title>
-<!-- budget (engine-doctrine/TASTE-CARD.md); change any line on purpose:
+<!-- budget (taste/build/DIGEST.md); change any line on purpose:
   colours: 2 and one accent on one thing: --bg, --ink, --accent
   typefaces: 1, {{family}} (assets/{{font}}), the starter's pick; bundle the face the direction needs
   signature move: one, named here, used once
-  thread: the one object, type line, colour or rhythm that carries through (rule 3)
-  sound cues: quiet ticks at default gains, at most one soft swell (rule 13)
-  world turns: a new element, cut or ground every 1 to 2 s (rule 2) -->
+  thread: the one object, type line, colour or rhythm that carries through (rule thread)
+  sound cues: quiet ticks at default gains, at most one soft swell (rule sound-swell)
+  world turns: a new element, cut or ground every 1 to 2 s (rule world-turns) -->
 <style>
   @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
   :root { --bg: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --beat-1: 0s; --beat-2: {{beat2}}s; }
@@ -236,7 +236,7 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
     key === 'directions' ? directionsText(name) : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
   const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))
     .map((s) => `## ${heading(s.name)}\n\n${own[s.name]}`);
-  const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: engine-doctrine/TASTE-CARD-DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (taste card rule 13).\n\nbin/vawe dev films/${name}/page.html\n`;
+  const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: taste/build/DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (rule sound-swell).\n\nbin/vawe dev films/${name}/page.html\n`;
   const head = `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default. Replace each ${GUESS} with a measured value or your own choice.\n\n## Inputs\n\n${inputs}`;
   return [head, ...skeleton, ...rest, tail].join('\n\n');
 }
@@ -334,7 +334,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
     `directions: films/${name}/directions.html holds one starter still per family (type, object, graphic); fill the three slots in brief.md, then pick one`,
     ...brandAdvice(`${name} ${title ?? ''}`),
   ];
-  return [...lines, '', 'rules for authors: engine-doctrine/TASTE-CARD-DIGEST.md (2 KB); the full card is engine-doctrine/TASTE-CARD.md', '', ...tasteLines('concept'), '',
+  return [...lines, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('concept'), '',
     ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
 }
 

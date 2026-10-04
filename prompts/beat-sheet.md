@@ -62,7 +62,7 @@ edit moves the whole beat:
 <audio data-synth="swell" data-at="1.24"></audio>
 ```
 
-Sound is felt, not noticed (taste card rule 13): quiet ticks at their default gains and at most one swell beat a hit on every word.
+Sound is felt, not noticed (rule sound-level): quiet ticks at their default gains and at most one swell beat a hit on every word.
 
 Column meanings:
 - **the viewer notices**: what the eye lands on first. One thing. If you cannot name it, the shot

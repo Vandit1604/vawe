@@ -28,7 +28,7 @@ function saveRatchet(patch) {
 function readLoad() {
   const detail = [];
   let words = 0;
-  for (const rel of ['CLAUDE.md', 'AGENTS.md', 'skills/vawe-page/SKILL.md']) {
+  for (const rel of ['CLAUDE.md', 'AGENTS.md', 'taste/build/DIGEST.md', 'skills/vawe-page/SKILL.md']) {
     const w = wordsIn(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
     words += w;
     detail.push({ file: rel, words: w });
@@ -207,7 +207,7 @@ function reportFast(stamp) {
   const prior = loadRatchet();
 
   console.log(`\n── bench · fast (deterministic, warns when a count grows)\n`);
-  console.log(`  read-load   ${rl.words} word(s) / ~${rl.tokens} token(s)  (CLAUDE.md + AGENTS.md + vawe-page + the vawe new starter)`);
+  console.log(`  read-load   ${rl.words} word(s) / ~${rl.tokens} token(s)  (CLAUDE.md + AGENTS.md + the taste digest + vawe-page + the vawe new starter)`);
   console.log(`  fast-path   ${fp.commands} command(s) brief -> first draft render (${fp.commandList.join(', ')}), ${fp.makefileTargets} verb(s)`);
 
   if (stamp) {

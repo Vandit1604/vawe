@@ -80,8 +80,8 @@ test('attractors: a light-poetry brand name and a disc hero are advice with the 
 });
 
 test('the attractor data quotes the card, so the list and the card cannot drift', () => {
-  const card = fs.readFileSync(path.join(ROOT, 'engine-doctrine/TASTE-CARD.md'), 'utf8');
-  const section = card.split('## Attractors')[1].split('\n## ')[0];
+  const card = fs.readFileSync(path.join(ROOT, 'taste/build/CARD.md'), 'utf8');
+  const section = card.split('\n## attractors\n')[1].split('\n## ')[0];
   for (const quote of [ATTRACTORS.names.card, ...ATTRACTORS.shapes.cards]) assert.ok(section.includes(quote), quote);
   assert.ok(ATTRACTORS.names.words.includes('vesper'));
 });

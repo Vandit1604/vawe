@@ -1,0 +1,134 @@
+{
+ "concept": {
+  "title": "concept",
+  "lines": [
+   {
+    "rule": "attractors",
+    "text": "choose the hero on purpose, not an attractor: a glowing circle or orb, a dusk sun or crescent, a light-poetry name like Vesper"
+   },
+   {
+    "rule": "thread",
+    "text": "pick one thread that carries through (an object, a type line, a colour or a rhythm), not separate reveals one after another"
+   },
+   {
+    "rule": "three-materials",
+    "text": "draw three directions from different materials (type, paper, liquid, cut geometry, photograph, UI, light), not three colours of one idea; at most one is light"
+   },
+   {
+    "rule": "first-frame",
+    "text": "show the subject by 0.1 s, not an empty ground for the first half second"
+   },
+   {
+    "rule": "one-focal-point",
+    "text": "give each frame one focal point and one accent colour, not two things fighting"
+   },
+   {
+    "rule": "typeface-default",
+    "text": "use the kit's face and ground or a face the direction chose, not Inter or Space Grotesk by habit"
+   },
+   {
+    "rule": "world-turns",
+    "text": "turn the world every 1 to 2 s (a new element, a cut, a ground swap), not one lockup held"
+   }
+  ]
+ },
+ "motion": {
+  "title": "motion",
+  "lines": [
+   {
+    "rule": "entrance-origin",
+    "text": "make each entrance a move with an origin, not everything fading in"
+   },
+   {
+    "rule": "exits-shorter",
+    "text": "exit shorter than the entrance on EASE.launch, not an exit as long as its entrance"
+   },
+   {
+    "rule": "named-eases",
+    "text": "take curves from EASE names (or a sampled spring), not a CSS keyword or a hand-fitted cubic-bezier"
+   },
+   {
+    "rule": "speed-bands",
+    "text": "put each move in a speed band with the slowest move 3x the fastest, not every move at one duration"
+   },
+   {
+    "rule": "stagger",
+    "text": "stagger a group 30 to 80 ms, not a group that lands on one frame"
+   },
+   {
+    "rule": "crossfade-limit",
+    "text": "cut, wipe on the motion or match a shape, not a muddy crossfade"
+   },
+   {
+    "rule": "seam-variety",
+    "text": "change axis or direction at every moving seam, not the same seam move twice"
+   },
+   {
+    "rule": "stock-device-once",
+    "text": "use a stock device (sheen band, lens streak, light beam, accent bar, rule line) once, not as the idea"
+   }
+  ]
+ },
+ "sound": {
+  "title": "sound",
+  "lines": [
+   {
+    "rule": "cue-has-event",
+    "text": "tie each cue to one visible event, not sound for its own sake"
+   },
+   {
+    "rule": "cue-sparse",
+    "text": "cue the first and the last key word, not a tick on every word"
+   },
+   {
+    "rule": "sound-level",
+    "text": "keep the true peak at or below -10 dBFS and the mix near -20 LUFS, not a mix pushed loud"
+   },
+   {
+    "rule": "sound-swell",
+    "text": "use at most one soft swell that ends on a cut, not a whoosh on every cut"
+   },
+   {
+    "rule": "sound-voices",
+    "text": "use quiet ticks (droplet, pluck, bloom) at their default gains, not impact, braam, drop or riser without a brief that asks for weight"
+   }
+  ]
+ },
+ "preship": {
+  "title": "before the verdict",
+  "lines": [
+   {
+    "rule": "accent-share",
+    "text": "keep the accent on one thing, not a full-frame flood"
+   },
+   {
+    "rule": "first-frame",
+    "text": "check the frame at 0.1 s has the subject, not an empty ground"
+   },
+   {
+    "rule": "readable-text-size",
+    "text": "set a read line at a 6% cap height and hold it max(1.2 s, words/3), not a small tagline that flashes by"
+   },
+   {
+    "rule": "live-hold",
+    "text": "keep one thing moving in every hold, not a frozen frame"
+   },
+   {
+    "rule": "gradient-grain",
+    "text": "keep gradients clean with 1 to 2% grain, not banding rings or a straight seam in a glow"
+   },
+   {
+    "rule": "mark-rides-parent",
+    "text": "let every mark ride its parent, not a mark that points at nothing"
+   },
+   {
+    "rule": "moving-tail",
+    "text": "end on motion in the last 1 s, not a frozen lockup"
+   },
+   {
+    "rule": "reveal-mask-pad",
+    "text": "pad each reveal mask 0.3 em past the glyphs, not letters cut by their own reveal"
+   }
+  ]
+ }
+}

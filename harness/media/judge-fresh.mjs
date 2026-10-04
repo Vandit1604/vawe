@@ -4,7 +4,7 @@
 //   node harness/media/judge-fresh.mjs <page.html | film.mp4 | sheet.png> [--brief brief.md] [--stage stills|draft|final]
 // Advises, never blocks: exit 0 with a verdict either way. Exit 2 when the claude CLI is missing.
 // Writes out/<name>.judge.json with the fix ledger (harness/lib/judge-ledger.mjs), or out/<name>.stills.json for stills.
-// Env: VAWE_TASTE_CARD (overrides the taste card the judge reads, default engine-doctrine/TASTE-CARD.md), VAWE_JUDGE_TIMEOUT (seconds, default 240).
+// Env: VAWE_TASTE_CARD (overrides the taste card the judge reads, default taste/build/CARD.md), VAWE_JUDGE_TIMEOUT (seconds, default 240).
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -17,7 +17,7 @@ import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
-import { sizeLines, capLines, anchorLines, anchorResult } from '../lib/judge-prompt.mjs';
+import { sizeLines, capLines, anchorLines, anchorResult, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
 import { referenceFor } from '../lib/motion-stamp.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
 import { settledMoments } from '../lib/key-frames.mjs';
@@ -29,7 +29,7 @@ const repoRoot = path.resolve(import.meta.dirname, '../..');
 const SHEET_COLS = 10;
 const KEY_FRAMES = 6;
 const PASS_AT = 8;
-const TASTE_CARD = path.join(repoRoot, 'engine-doctrine', 'TASTE-CARD.md');
+const TASTE_CARD = path.join(repoRoot, TASTE_CARD_REL);
 const FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/System/Library/Fonts/Helvetica.ttc', '/Library/Fonts/Arial.ttf'].find(fs.existsSync);
 
 const die = (m, code = 1) => { console.error(`vawe judge --fresh: ${m}`); process.exit(code); };
@@ -176,7 +176,7 @@ function checkBlock(ev) {
 function buildPrompt(ev, brief, ledger = '') {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
-    `Taste card: 15 rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule number in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
+    `Taste card: the scored rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule id in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
   ].filter(Boolean);
   const kind = ev.stage === 'stills' ? 'three still directions for a film' : `a ${ev.stage} cut of a film`;
   return `You are a fresh taste judge. You did not make this work and you own no part of it. You judge ${kind} from the evidence files below.

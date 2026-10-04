@@ -43,8 +43,9 @@ PASS is never self-recorded.
 
 Name every default you recognise; each is a rejection: a particle burst, a bouncy spring, a glow, a
 logo slam, a gradient on chrome, a centred title on a gradient, everything fading in, corner labels,
-a crossfade where a cut belongs, fake UI, dead time that no `authoring` waiver declares
-(`engine-doctrine/RULES/banned-defaults.md`).
+a crossfade where a cut belongs, fake UI, dead time that no `authoring` waiver declares.
+Name the rule id of each (`no-tells`, `no-bounce`, `entrance-origin`, `crossfade-limit`, `show-real-thing`,
+`live-hold`); every id is in `taste/README.md`.
 
 ## The report shape
 

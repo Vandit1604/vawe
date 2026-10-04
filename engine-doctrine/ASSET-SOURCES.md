@@ -57,5 +57,5 @@ Standalone basis." Never commit a raw music file.
 - **NASA:** content "generally are not subject to copyright in the United States." Acknowledge NASA as the source.
 - **Prelinger:** the collection has no blanket licence. Do not assume its reputation covers every file.
 
-See also `engine-doctrine/CRAFT/SOUND.md` (music licensing) and `engine-doctrine/CRAFT/IMAGERY.md`
+See also `taste/craft/sound.md` (music licensing) and `taste/craft/imagery.md`
 (the visual ladder and image licensing).
