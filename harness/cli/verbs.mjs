@@ -1,7 +1,19 @@
 // The verb table for bin/vawe. Each verb names the script it forwards to and the one command to run next.
 // build() returns the steps to run in order; a step is { script, args, env }.
+import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { UsageError } from './parse.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
+export const SERIAL_TESTS = ['tests/media/check-budget.test.mjs'];
+
+const testFiles = (dir) => fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })
+  .flatMap((e) => (e.isDirectory() ? testFiles(path.join(dir, e.name)) : e.name.endsWith('.test.mjs') ? [path.join(dir, e.name)] : []));
+
+/** The two node --test runs of `vawe test`: every test file in parallel except the serial ones, then the serial ones alone. */
+export const testSteps = () => [{ node: ['--test', ...testFiles('tests').filter((f) => !SERIAL_TESTS.includes(f)).sort()] }, { node: ['--test', ...SERIAL_TESTS] }];
 
 const pageName = (page) => {
   const base = path.basename(page, '.html');
@@ -225,10 +237,10 @@ export const VERBS = [
     build: () => [{ script: 'harness/dev/e2e.mjs', args: [] }],
   },
   {
-    name: 'test', summary: 'run every tests/**/*.test.mjs with node --test',
+    name: 'test', summary: 'run every tests/**/*.test.mjs with node --test; the timing test runs alone at the end',
     positional: [], flags: [],
     example: 'vawe test',
-    build: () => [{ node: ['--test', 'tests/**/*.test.mjs'] }],
+    build: () => testSteps(),
   },
   {
     name: 'runs', summary: 'the log of a film (one row per step: new, dev, judge, ship) or, with --all, one row per film of the last 30 days',
