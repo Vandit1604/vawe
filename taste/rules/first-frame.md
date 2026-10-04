@@ -14,7 +14,6 @@ scored: yes
 numbers: {"subject_by_s":0.1,"empty_max_s":0.5,"motion_delay_min_s":0,"motion_delay_max_s":0.3}
 print-concept: show the subject by 0.1 s, not an empty ground for the first half second
 print-preship: check the frame at 0.1 s has the subject, not an empty ground
-digest: Subject in frame 0 (by 0.1 s); never an empty ground for 0.5 s. Its motion may start 0 to 0.3 s later.
 craft: grammar
 ---
 

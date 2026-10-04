@@ -67,8 +67,10 @@ import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived } from '../lib/waivers.mjs';
-import { draftTasteLines, tasteLines } from '../lib/taste-steps.mjs';
-import { runMotionCollector, motionLint, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
+import { draftTasteLines, tasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
+import { parseSignature } from '../../core/motion/signature.js';
+import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
+import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
@@ -784,9 +786,13 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
   return path.join('out', `${name}${suffixAspect ? `-${aspect.replace(':', 'x')}` : ''}${final ? '' : '-draft'}${range}.mp4`);
 }
 
+const motionRecords = (motion) => (motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records);
+
+const chosenSignature = (pagePath) => parseSignature(readPageMeta(pagePath, 'signature'));
+
 function motionFindings(pagePath, motion) {
   const boxes = motion.boxes;
-  const records = boxes ? mergeRecords(motion.records, recordsFromBoxes(boxes)) : motion.records;
+  const records = motionRecords(motion);
   return unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath));
 }
 
@@ -829,7 +835,8 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions, ...recipeEchoLines(brief)],
+    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions, ...recipeEchoLines(brief),
+      ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
 }
 
@@ -860,13 +867,18 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
-  const taste = [...draftTasteLines([...problems, sound, peak].filter(Boolean)), ...(/<audio/i.test(fs.readFileSync(pagePath, 'utf8')) ? ['', ...tasteLines('sound')] : [])];
-  return { red: [...(table ? table.rows.filter((r) => r.status === 'advice').map(redLine) : []), ...loose], notes: { advice, taste, rows: table?.rows ?? [] }, rows: table?.rows ?? null, was: table?.was ?? null, sync: table?.sync ?? null };
+  const hard = [...problems, sound, peak].filter(Boolean);
+  const fired = firedRules(motionFindings(pagePath, motion), hard, table?.rows ?? []);
+  const chosen = chosenSignature(pagePath);
+  const measured = measureMotion(motionRecords(motion));
+  const taste = [...draftTasteLines(hard), ...(/<audio/i.test(fs.readFileSync(pagePath, 'utf8')) ? ['', ...tasteLines('sound')] : [])];
+  const signature = { chosen, measured, line: signatureLine(chosen, measured) };
+  return { red: [...(table ? table.rows.filter((r) => r.status === 'advice').map(redLine) : []), ...loose, ...firedLines(fired)], signature, fired, notes: { advice, taste, signature: signature.line, fired: firedLines(fired, fired.length), rows: table?.rows ?? [] }, rows: table?.rows ?? null, was: table?.was ?? null, sync: table?.sync ?? null };
 }
 
-function writeDevNotes(mp4, { timing, advice, taste, rows }) {
+function writeDevNotes(mp4, { timing, advice, taste, signature, fired, rows }) {
   const file = path.resolve('out', `${nameOfFilm(mp4)}.dev.md`);
-  const body = [`# ${nameOfFilm(mp4)} draft`, '', timing, '', '## Draft check', '', ...draftCheckLines(advice), '', '## Acceptance', '', ...(rows.length ? fullTable(rows) : ['not measured in this draft']), '', '## Taste', '', ...taste, ''];
+  const body = [`# ${nameOfFilm(mp4)} draft`, '', timing, '', '## Draft check', '', ...draftCheckLines(advice), '', '## Signature', '', signature, '', '## Rules behind the red rows', '', ...(fired.length ? fired : ['none']), '', '## Acceptance', '', ...(rows.length ? fullTable(rows) : ['not measured in this draft']), '', '## Taste', '', ...taste, ''];
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, body.join('\n'));
   return path.relative(process.cwd(), file);
@@ -882,9 +894,9 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds(), capture: frameFormat(false).label });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
-  appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows }));
+  appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
-  console.log([timing, look, ...report.red, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
+  console.log([timing, look, report.signature.line, ...report.red, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
 
 // Test hook for the CLI: VAWE_TEST_SLICE_FAULT=<lo>:<n> makes the slice starting at frame <lo> lose its page on its first n attempts.

@@ -9,6 +9,7 @@ instead: EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onF
 check: linear-move, default-ease
 judge: Is any move on a bare keyword or a hand-fitted bezier? Does frame 1 jump?
 prevents: feedback: "CSS curves must be smooth (never approximate an exponential with cubic-bezier)". A hand-fitted bezier starts too hard and stops too early. doc banned-defaults: ease-out on everything is the stock-template tell.
+dial: ease
 status: active
 scored: yes
 numbers: {"linear_move_limit_s":0.3}

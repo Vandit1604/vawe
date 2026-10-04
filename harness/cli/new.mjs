@@ -13,7 +13,9 @@ import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
-import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls } from '../lib/measured-brief.mjs';
+import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls, PLACEHOLDER } from '../lib/measured-brief.mjs';
+import { dialRanges, signatureSection } from '../lib/signature.mjs';
+import { DIALS } from '../../core/motion/signature.js';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -22,26 +24,28 @@ const STARTER_TEMPLATE = `<!doctype html>
 <meta name="duration" content="{{length}}">
 <meta name="aspect" content="{{aspect}}">
 <meta name="message" content="one thing to remember">
+<meta name="signature" content="{{signature}}">
 <title>{{title}}</title>
-<!-- budget (taste/build/DIGEST.md); change any line on purpose:
-  colours: 2 and one accent on one thing: --bg, --ink, --accent
-  typefaces: 1, {{family}} (assets/{{font}}), the starter's pick; bundle the face the direction needs
+<!-- signature: choose the six dials in brief.md (## Signature), then write each value in the tag above.
+  enter, leave, stagger and layer take band, ease and stagger from it; bin/vawe dev names each dial still unchosen
+  budget (taste/build/DIGEST.md); change any line on purpose:
+  colours: --ground and --ink are grey placeholders until the palette dial is chosen; one accent on one thing, if any
+  typefaces: 1, {{family}} (assets/{{font}}), a stand-in; bundle the face the direction needs
   signature move: one, named here, used once
   thread: the one object, type line, colour or rhythm that carries through (rule thread)
   sound cues: quiet ticks at default gains, at most one soft swell (rule sound-swell)
   world turns: a new element, cut or ground every 1 to 2 s (rule world-turns) -->
 <style>
   @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
-  :root { --bg: #f4f1ea; --ink: #14161a; --accent: #2b5cff; --beat-1: 0s; --beat-2: {{beat2}}s; }
-  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; }
+  :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; --beat-1: 0s; --beat-2: {{beat2}}s; }
+  html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
   .world { position: absolute; inset: 0; box-sizing: border-box; display: grid; align-content: end; gap: calc(var(--vh) * 0.03);
            padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); font-family: "{{family}}", sans-serif; }
-  .w1 { background: var(--bg); color: var(--ink); }
-  .w2 { background: var(--ink); color: var(--bg); }
+  .w1 { background: var(--ground); color: var(--ink); }
+  .w2 { background: var(--ink); color: var(--ground); }
   h1 { margin: 0; font-size: calc(var(--vh) * 0.14); font-weight: 700; line-height: 1; }
   .line { margin: 0; font-size: calc(var(--vh) * 0.09); }
   .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
-  .facts em { font-style: normal; color: var(--accent); }
   [data-aspect="9:16"] h1 { font-size: calc(var(--vw) * 0.13); }
 </style>
 <script type="module">
@@ -52,16 +56,18 @@ const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-'
 const end = parseFloat(document.querySelector('meta[name="duration"]').content);
 const $ = (s) => document.querySelector(s);
 
-layer($('h1'), $('.line'), { at: beat(1), band: 'professional' });
+layer($('h1'), $('.line'), { at: beat(1) });
 leave($('.line'), { end: beat(2) - 0.06 });
 leave($('h1'), { end: beat(2) });
 
 const turn = $('.w2');
-turn.animate([{ clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0)' }], { delay: (beat(2) - 0.06) * 1000, duration: 300, easing: EASE.land, fill: 'both' });
-stagger(document.querySelectorAll('.facts li'), { at: beat(2), band: 'energy', from: '0.6em 0' });
+// the cut frame already carries the first fact moving: a blank frame there fails the draft check
+const cut = beat(2) - 0.04;
+turn.animate([{ visibility: 'hidden' }, { visibility: 'visible' }], { delay: cut * 1000, duration: 1, fill: 'both' });
+stagger(document.querySelectorAll('.facts li'), { at: cut, from: '0.6em 0' });
 
 $('.w1').animate([{ scale: 1 }, { scale: 1.05 }], { duration: beat(2) * 1000, easing: EASE.glide, fill: 'both' });
-turn.animate([{ scale: 1 }, { scale: 1.04 }], { delay: beat(2) * 1000, duration: (end - beat(2)) * 1000, easing: EASE.glide, fill: 'both' });
+$('.facts').animate([{ translate: '0 0' }, { translate: '0 -0.4em' }], { delay: cut * 1000, duration: (end - cut) * 1000, easing: EASE.glide, fill: 'both' });
 </script>
 </head>
 <body>
@@ -70,7 +76,7 @@ turn.animate([{ scale: 1 }, { scale: 1.04 }], { delay: beat(2) * 1000, duration:
   <p class="line">one line that backs it up</p>
 </main>
 <section class="world w2">
-  <ul class="facts"><li>first fact</li><li>second fact</li><li>the <em>one</em> that matters</li></ul>
+  <ul class="facts"><li>first fact</li><li>second fact</li><li>the one that matters</li></ul>
 </section>
 </body>
 </html>
@@ -160,8 +166,7 @@ ${slotText('C', 'graphic')}
 // Variable faces fetched by generators/media/fonts.mjs, none a house default. The film name picks one,
 // so eight starters do not open on one face.
 export const STARTER_FACES = [
-  ['Fraunces.woff2', 'Fraunces'], ['BricolageGrotesque.woff2', 'Bricolage Grotesque'],
-  ['HankenGrotesk.woff2', 'Hanken Grotesk'], ['Unbounded.woff2', 'Unbounded'], ['Manrope.woff2', 'Manrope'],
+  ['Fraunces.woff2', 'Fraunces'], ['HankenGrotesk.woff2', 'Hanken Grotesk'], ['Unbounded.woff2', 'Unbounded'], ['Manrope.woff2', 'Manrope'],
 ];
 
 export function starterFace(name = '') {
@@ -175,7 +180,8 @@ export const STARTER = starterPage({});
 
 export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
-    .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family)
+    .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family).replaceAll('{{ground}}', PLACEHOLDER.ground).replaceAll('{{ink}}', PLACEHOLDER.ink)
+    .replaceAll('{{signature}}', DIALS.map((d) => `${d}=`).join('; '))
     .replaceAll('{{beat2}}', String(+(length * 0.5).toFixed(2))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
 
@@ -222,7 +228,7 @@ function inputLines(questions, answers) {
 
 const recipeLine = (recipe) => `chain to start from: ${RECIPES}, "## ${recipe.heading}" (${recipe.why}); copy it, then change two moves`;
 
-const SKELETON = [['task', 'Task'], ['directions'], ['look', 'Look'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
+const SKELETON = [['task', 'Task'], ['directions'], ['signature'], ['look', 'Look'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
 
 const heading = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
@@ -232,8 +238,8 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
     ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
   const own = Object.fromEntries(sections.map((s) => [s.name, s.body.replaceAll('<name>', name)]));
-  const skeleton = SKELETON.filter(([key]) => key === 'directions' || measured.sections[key]).map(([key, title]) => (
-    key === 'directions' ? directionsText(name) : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
+  const skeleton = SKELETON.filter(([key]) => key === 'directions' || key === 'signature' || measured.sections[key]).map(([key, title]) => (
+    key === 'directions' ? directionsText(name) : key === 'signature' ? signatureSection() : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
   const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))
     .map((s) => `## ${heading(s.name)}\n\n${own[s.name]}`);
   const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: taste/build/DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (rule sound-swell).\n\nbin/vawe dev films/${name}/page.html\n`;
@@ -370,5 +376,5 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   const sections = parseSections(markdown);
   const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
   fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe));
-  return { page: `films/${name}/page.html`, route, title, guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length, answered: [...answered] };
+  return { page: `films/${name}/page.html`, route, title, ranges: dialRanges(), guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length, answered: [...answered] };
 }

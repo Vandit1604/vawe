@@ -144,12 +144,15 @@ function taskLines({ request, title, length, details, answered }, guess) {
   ].join('\n');
 }
 
+/** The starter's grey stand-ins: no house palette, and dev names the palette dial unchosen until the page picks one. */
+export const PLACEHOLDER = { ground: '#8c8c8c', ink: '#1c1c1c' };
+
 function lookLines({ face, details, answered }, guess) {
   return [
     ...(answered.has('look') ? [`- look: ${details.look ?? IN_WHAT}`] : []),
-    `- ground: ${guess('ground', '#f4f1ea')}`,
-    `- ink: ${guess('ink', '#14161a')}`,
-    `- accent: ${guess('accent', '#2b5cff')}`,
+    `- ground: ${guess('ground', `${PLACEHOLDER.ground}, the starter's grey placeholder: choose from the palette dial`)}`,
+    `- ink: ${guess('ink', `${PLACEHOLDER.ink}, the starter's placeholder`)}`,
+    `- accent: ${guess('accent', 'none yet: at most one, on one thing')}`,
     `- typeface: ${guess('typeface', `${face.family}, weight 700`)}`,
     `- cap height: ${guess('cap height', '10% of frame height for the headline, never under 6%')}`,
     `- surface: ${guess('surface', 'flat fill, 1 px edge rgba(20,22,26,0.12), no shadow')}`,
@@ -164,7 +167,7 @@ function specText({ title, length }) {
       [[`s1 ${GUESS}`, '0', cut, cell(title), 'layer in', 'leave 0.22 s', 'static']]),
     '### Words',
     table(['text', 'shot', 'appear s', 'settle s', 'cap %', 'x %', 'y %', 'weight', 'colour'],
-      [[`${cell(title)} ${GUESS}`, 's1', '0', '0.6', '10', '7', '60', '700', '#14161a']]),
+      [[`${cell(title)} ${GUESS}`, 's1', '0', '0.6', '10', '7', '60', '700', PLACEHOLDER.ink]]),
     '### Objects',
     table(['id', 'selector', 'shot', 'in s', 'settle s', 'out s'], [[`o1 ${GUESS}`, 'h1', 's1', '0', '0.6', String(cut)]]),
   ].join('\n\n');

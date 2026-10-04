@@ -9,6 +9,7 @@ instead: change the axis or direction (a wipe on x after a push on y), or cut.
 check: seam-repeat
 judge: Compare the last frame before and the first frame after each moving seam: direction and axis.
 prevents: feedback vawe-flow-2: "Monotonous." doc banned-defaults, TRANSITIONS and MOTION-CRAFT: adjacent transitions that both push left read as a stutter; the same seam move twice reads as a template, even in another direction.
+dial: seam
 status: active
 scored: yes
 numbers: {}
