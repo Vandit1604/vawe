@@ -56,13 +56,14 @@ import { devEvent, shipEvent } from '../lib/run-events.mjs';
 import { REPO_ROOT } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
-import { sampleText, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
+import { sampleText, sampleLayout, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
 import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
 import { createChecks, timeLine } from '../lib/check-runner.mjs';
 import { MODES } from '../lib/draft-tiers.mjs';
 import { redLine, summaryLine, fullTable } from '../lib/acceptance.mjs';
 import { draftAcceptance, videoMeasures } from './acceptance-run.mjs';
-import { textProblems, frameUnitLines, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines } from '../lib/draft-check.mjs';
+import { textProblems, frameUnitLines, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes } from '../lib/draft-check.mjs';
+import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
@@ -796,6 +797,8 @@ function motionFindings(pagePath, motion) {
   return unwaived(motionLint({ records, scripted: motion.scripted && !boxes }), pageAuthoring(pagePath));
 }
 
+const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
+
 function motionAdvice(pagePath, motion) {
   const lines = lintLines(motionFindings(pagePath, motion));
   if (!lines.length) return [];
@@ -819,10 +822,11 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const boxes = found?.scripted ? await checks.run('box-motion', () => sampleBoxTracks(page, lintTimes(dur), 'visible'), window) : undefined;
   const text = await checks.run('text', () => sampleText(page, dur, seekLayout(page), from), window);
   const contrast = await checks.run('contrast', () => sampleContrast(page, text.samples, (ms) => seekAll(page, ms)), window);
+  const layout = await checks.run('layout', () => sampleLayout(page, layoutTimes(text.samples, window), seekLayout(page)), window);
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, contrast, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, contrast, layout, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
@@ -835,7 +839,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...directions, ...recipeEchoLines(brief),
+    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
 }
@@ -868,7 +872,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
   const hard = [...problems, sound, peak].filter(Boolean);
-  const fired = firedRules(motionFindings(pagePath, motion), hard, table?.rows ?? []);
+  const fired = firedRules([...motionFindings(pagePath, motion), ...layoutFindings(pagePath, probe)], hard, table?.rows ?? []);
   const chosen = chosenSignature(pagePath);
   const measured = measureMotion(motionRecords(motion));
   const taste = [...draftTasteLines(hard), ...(/<audio/i.test(fs.readFileSync(pagePath, 'utf8')) ? ['', ...tasteLines('sound')] : [])];

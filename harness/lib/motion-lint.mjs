@@ -1,10 +1,14 @@
-// The motion lint: five advice lines on how a page moves, each with its taste rule id, the second and
+// The motion lint: advice lines on how a page moves, each with its taste rule id, the second and
 // one fix. collectMotion runs in the page and reads Web Animations; recordsFromBoxes infers the same
 // records from element boxes over time (harness/lib/box-track.mjs) for a page that paints in window.seek
 // or vawe.onFrame. Everything else is pure over the records.
 import { isWaived } from './waivers.mjs';
 import { DECORATIVE } from './draft-check.mjs';
-import { BANDS, EASE, bandOf } from '../../core/motion/presets.js';
+import { BANDS, bandOf } from '../../core/motion/presets.js';
+import { CUT, moves, moveProps, entering, exiting, measured, byTarget, easeName, moveDirection } from './motion-records.mjs';
+import { motionVariety } from './motion-variety.mjs';
+
+export { moveDirection };
 
 // motionRecord and collectMotion run inside the page (runMotionCollector bundles their source with DECORATIVE),
 // so each is self-contained: no other outer bindings.
@@ -46,27 +50,12 @@ export function runMotionCollector(page) {
   return page.evaluate((src) => new Function(`${src}\nreturn collectMotion();`)(), COLLECTOR);
 }
 
-const CUT = 0.05;
 const LINEAR_LIMIT = 0.3;
 const FINAL_FPS = 60;
-const MOVE = /^(transform|translate|scale|rotate|left|top|right|bottom|clipPath|maskPosition|backgroundPosition|offsetDistance)$/;
-
-const moves = (r) => r.props.some((p) => MOVE.test(p));
-const entering = (r) => r.id === 'enter' || (r.opacity && r.opacity[1] > r.opacity[0]);
-const exiting = (r) => r.id === 'leave' || (r.opacity && r.opacity[1] < r.opacity[0]);
-// A record inferred from box samples is exact only when it spans a few samples; one animation's own timing always is.
-const MIN_SAMPLES = 2;
-const measured = (r) => !r.step || r.duration >= MIN_SAMPLES * r.step;
 const KEYWORDS = new Set(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']);
 const onKeywords = (r) => [r.easing, ...r.kfEasings].every((e) => KEYWORDS.has(e));
 const isLinear = (r) => [r.easing, ...r.kfEasings].every((e) => e === 'linear');
 const s2 = (x) => x.toFixed(2);
-
-function byTarget(records) {
-  const m = new Map();
-  for (const r of records) (m.get(r.target) || m.set(r.target, []).get(r.target)).push(r);
-  return [...m.values()];
-}
 
 /** An exit that runs as long as or longer than its entrance, per element (rule exits-shorter). Decorative elements and sampled runs under two samples are not measured. */
 export function exitLength(records) {
@@ -106,21 +95,9 @@ export function linearMove(records) {
   return records.filter((r) => moves(r) && r.duration > LINEAR_LIMIT && onKeywords(r)).map((r) => {
     const linear = isLinear(r);
     return { code: linear ? 'linear-move' : 'default-ease', rule: 'named-eases', at: r.delay,
-      what: `${r.label} moves ${r.props.filter((p) => MOVE.test(p)).join(',')} for ${s2(r.duration)} s on ${linear ? 'linear' : `the CSS keyword ${[r.easing, ...r.kfEasings].find((e) => e !== 'linear')}`} easing`,
+      what: `${r.label} moves ${moveProps(r).join(',')} for ${s2(r.duration)} s on ${linear ? 'linear' : `the CSS keyword ${[r.easing, ...r.kfEasings].find((e) => e !== 'linear')}`} easing`,
       fix: EASE_ADVICE };
   });
-}
-
-/** A translate or transform's dominant direction: x+, x-, y+, y- or ''. */
-export function moveDirection(from) {
-  const s = String(from);
-  const one = /translate([XY])\(\s*(-?[\d.]+)/.exec(s);
-  if (one) return Number(one[2]) ? `${one[1].toLowerCase()}${Number(one[2]) > 0 ? '+' : '-'}` : '';
-  const pair = /(?:translate\(|^)\s*(-?[\d.]+)[a-z%]*(?:[\s,]+(-?[\d.]+))?/.exec(s);
-  if (!pair) return '';
-  const [x, y] = [Number(pair[1]), Number(pair[2] || 0)];
-  if (!x && !y) return '';
-  return Math.abs(x) >= Math.abs(y) ? `x${x > 0 ? '+' : '-'}` : `y${y > 0 ? '+' : '-'}`;
 }
 
 function seamMove(r) {
@@ -244,9 +221,6 @@ export function mergeRecords(animated, sampled) {
 }
 
 const median = (xs) => (xs.length ? [...xs].sort((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] : null);
-// A browser reports linear() with explicit stop positions, so compare the output values alone.
-const outputs = (curve) => String(curve).replace(/^linear\(|\)$/g, '').split(',').map((stop) => stop.trim().split(/\s+/)[0]).join(' ');
-const easeName = (r) => Object.keys(EASE).find((n) => outputs(EASE[n]) === outputs(r.easing)) ?? null;
 const mostCommon = (xs) => [...new Set(xs)].sort((a, b) => xs.filter((x) => x === b).length - xs.filter((x) => x === a).length)[0] ?? null;
 const SIBLING_MAX_S = 0.2;
 
@@ -267,7 +241,7 @@ export function measureMotion(records) {
 
 /** Every lint finding, in time order. */
 export function motionLint({ records, scripted }) {
-  return [...exitLength(records), ...groupLanding(records), ...linearMove(records), ...seamRepeat(records), ...oneBand(records, { scripted })]
+  return [...exitLength(records), ...groupLanding(records), ...linearMove(records), ...seamRepeat(records), ...oneBand(records, { scripted }), ...motionVariety(records)]
     .sort((a, b) => a.at - b.at);
 }
 

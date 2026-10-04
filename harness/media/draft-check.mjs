@@ -82,6 +82,129 @@ export function visibleLines(decorative, chrome) {
   return { lines: out, blocks };
 }
 
+// Runs inside the page, so it is self-contained: each inner function does one job. One moment's layout for the layout lint
+// (harness/lib/layout-lint.mjs): { w, h, accent, texts, blocks, boxes }. texts is one entry per visible text node (colour as
+// [r, g, b, a], tracking in em, `block` the index of its block-level ancestor in blocks); boxes is one entry per painted HTML
+// element (SVG is not read; at most 300), `p` the index of its nearest listed ancestor. accent is the :root property --accent, or null.
+export function layoutSample(decorative, chrome) {
+  const w = innerWidth, h = innerHeight;
+  const memo = new Map();
+  const canvas = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+  const fromCanvas = (css) => {
+    canvas.clearRect(0, 0, 1, 1);
+    canvas.fillStyle = '#000';
+    canvas.fillStyle = css;
+    canvas.fillRect(0, 0, 1, 1);
+    const d = canvas.getImageData(0, 0, 1, 1).data;
+    return [d[0], d[1], d[2], d[3] / 255];
+  };
+  const fromRgb = (m) => {
+    const p = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
+    return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+  };
+  const rgba = (css) => {
+    if (!memo.has(css)) { const m = /^rgba?\(([^)]+)\)$/.exec(css); memo.set(css, m ? fromRgb(m) : fromCanvas(css)); }
+    return memo.get(css);
+  };
+  const inFrame = (r) => r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < w && r.top < h;
+  const clipTo = (clip, n) => {
+    const c = n.getBoundingClientRect();
+    return clip ? [Math.max(clip[0], c.left), Math.max(clip[1], c.top), Math.min(clip[2], c.right), Math.min(clip[3], c.bottom)] : [c.left, c.top, c.right, c.bottom];
+  };
+  const fadeAndScale = (el) => {
+    let opacity = 1, scale = 1, clip = null;
+    for (let n = el; n && opacity > 0; n = n.parentElement) {
+      const s = getComputedStyle(n);
+      opacity *= s.display === 'none' ? 0 : Number(s.opacity);
+      if (s.transform !== 'none') { const m = new DOMMatrix(s.transform); scale *= Math.sqrt(Math.abs(m.a * m.d - m.b * m.c)) || 1; }
+      if (n !== el && n !== document.documentElement && /(hidden|clip|scroll|auto)/.test(s.overflowX + s.overflowY)) clip = clipTo(clip, n);
+    }
+    return { opacity, scale, clip };
+  };
+  const visibleRect = (r, clip) => {
+    if (!clip) return r;
+    const [l, t, rt, b] = [Math.max(r.left, clip[0]), Math.max(r.top, clip[1]), Math.min(r.right, clip[2]), Math.min(r.bottom, clip[3])];
+    return { left: l, top: t, right: rt, bottom: b, x: l, y: t, width: rt - l, height: b - t };
+  };
+  const blockElement = (el) => {
+    let b = el;
+    while (b !== document.body && /^(inline|contents)/.test(getComputedStyle(b).display)) b = b.parentElement;
+    return b;
+  };
+  const blocks = [], blockIndex = new Map();
+  const joinBlock = (el, r) => {
+    const b = blockElement(el);
+    if (!blockIndex.has(b)) { blockIndex.set(b, blocks.length); blocks.push({ x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }); }
+    const k = blockIndex.get(b), bk = blocks[k];
+    bk.x0 = Math.min(bk.x0, r.left); bk.y0 = Math.min(bk.y0, r.top); bk.x1 = Math.max(bk.x1, r.right); bk.y1 = Math.max(bk.y1, r.bottom);
+    return k;
+  };
+  const textOf = (node) => {
+    const text = node.nodeValue.replace(/\s+/g, ' ').trim();
+    const el = node.parentElement;
+    if (!text || !el || /^(SCRIPT|STYLE|NOSCRIPT|TITLE)$/.test(el.tagName) || el.closest(decorative)) return null;
+    const cs = getComputedStyle(el);
+    const { opacity, scale, clip } = fadeAndScale(el);
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const r = visibleRect(range.getBoundingClientRect(), clip);
+    if (cs.visibility === 'hidden' || opacity <= 0.5 || !inFrame(r)) return null;
+    const own = parseFloat(cs.fontSize);
+    return {
+      text: text.slice(0, 60), box: [r.x, r.y, r.width, r.height], fontPx: own * scale, block: joinBlock(el, r),
+      family: cs.fontFamily.split(',')[0].trim().replace(/^["']|["']$/g, '').toLowerCase(), weight: Number(cs.fontWeight) || 400,
+      trackingEm: cs.letterSpacing === 'normal' ? 0 : parseFloat(cs.letterSpacing) / own,
+      caps: cs.textTransform === 'uppercase' || (/[A-Z]/.test(text) && text === text.toUpperCase()),
+      color: rgba(cs.color), chrome: Boolean(el.closest(chrome)),
+    };
+  };
+  const texts = [];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    const t = textOf(node);
+    if (t) texts.push(t);
+  }
+  const listed = new WeakMap(), opOf = new WeakMap(), boxes = [];
+  const side = (cs, s) => (cs[`border${s}Style`] !== 'none' && parseFloat(cs[`border${s}Width`]) > 0 ? [parseFloat(cs[`border${s}Width`]), rgba(cs[`border${s}Color`])] : [0, null]);
+  const nearestListed = (el) => {
+    let up = el.parentElement;
+    while (up && !listed.has(up)) up = up.parentElement;
+    return up ? listed.get(up) : -1;
+  };
+  const boxOf = (el) => {
+    const cs = getComputedStyle(el);
+    const op = cs.display === 'none' ? 0 : (el.parentElement ? (opOf.get(el.parentElement) ?? 1) : 1) * Number(cs.opacity);
+    opOf.set(el, op);
+    const r = el.getBoundingClientRect();
+    if (op <= 0.05 || cs.visibility === 'hidden' || !inFrame(r)) return null;
+    const bg = rgba(cs.backgroundColor);
+    return {
+      tag: el.tagName.toLowerCase(), p: nearestListed(el), box: [r.x, r.y, r.width, r.height], op,
+      bg: bg[3] > 0 ? bg : null, image: cs.backgroundImage !== 'none',
+      border: { l: side(cs, 'Left'), r: side(cs, 'Right'), t: side(cs, 'Top'), b: side(cs, 'Bottom') },
+      radius: parseFloat(cs.borderTopLeftRadius) || 0, shadow: cs.boxShadow !== 'none', decorative: Boolean(el.closest(decorative)),
+    };
+  };
+  const skipTag = (el) => /^(SCRIPT|STYLE|NOSCRIPT|TITLE|LINK|META)$/.test(el.tagName) || el instanceof SVGElement;
+  for (const el of [document.documentElement, document.body, ...document.body.querySelectorAll('*')]) {
+    if (boxes.length >= 300) break;
+    const b = skipTag(el) ? null : boxOf(el);
+    if (b) { listed.set(el, boxes.length); boxes.push(b); }
+  }
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  return { w, h, accent: accent ? rgba(accent) : null, texts, boxes, blocks: blocks.map((b) => ({ box: [b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0] })) };
+}
+
+/** Seek to each time and read the page's layout there. `seek(ms)` is a layout seek: layout needs no paint. */
+export async function sampleLayout(page, times, seek) {
+  const samples = [];
+  for (const t of times) {
+    await seek(t * 1000);
+    samples.push({ t, ...(await page.evaluate(layoutSample, DECORATIVE, CHROME)) });
+  }
+  return samples;
+}
+
 /** Seek to each sample time (film seconds from `from`) and list the visible text. `seek(ms)` is a layout seek: text needs no paint. */
 export async function sampleText(page, dur, seek, from = 0) {
   const { step, times } = sampleTimes(dur);

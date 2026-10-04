@@ -11,7 +11,7 @@ judge: Does scene length vary, and does the payoff hold longest?
 prevents: doc STORY.md: uniform scene length is the story form of monotone timing.
 status: active
 scored: no
-numbers: {"scenes_30s_min":5,"scenes_30s_max":7,"scenes_60s_min":8,"scenes_60s_max":12,"scene_seconds_min":3,"scene_seconds_max":7}
+numbers: {"scene_gap_s":1,"scenes_30s_min":5,"scenes_30s_max":7,"scenes_60s_min":8,"scenes_60s_max":12,"scene_seconds_min":3,"scene_seconds_max":7}
 craft: story
 ---
 
@@ -20,3 +20,5 @@ craft: story
 A 30 s film with six scenes of 3, 4, 5, 6, 5 and 7 s, the longest holding the payoff.
 
 Why and sources: [story](../craft/story.md).
+
+Draft check: a gap of more than 1 s between two entrances starts a new scene, for the checks of ease-variety and entrance-origin.

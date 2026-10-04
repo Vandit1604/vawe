@@ -15,7 +15,8 @@ export const PRINT_STEPS = { concept: 'concept', motion: 'motion', sound: 'sound
 // Every check a rule may name: the id the draft check, the lint or the judge prints. `judge` and `none` are not checks.
 export const CHECK_IDS = ['judge', 'none', 'world-held', 'static-window', 'sheet-tiles', 'text-cap-height', 'text-contrast', 'read-hold',
   'exit-length', 'group-landing', 'linear-move', 'default-ease', 'seam-repeat', 'one-band', 'dead-stop', 'sound-peak', 'sound-loudness',
-  'attractors', 'range', 'no-emdash'];
+  'attractors', 'range', 'no-emdash', 'type-sizes', 'font-families', 'display-tracking', 'left-edges', 'text-margin', 'accent-flood',
+  'entrance-direction', 'ease-count', 'lockstep', 'pure-black-white', 'template-chrome', 'coloured-word'];
 
 const REQUIRED = ['id', 'step', 'principle', 'limit', 'range', 'break-when', 'instead', 'check', 'judge', 'prevents', 'status', 'scored', 'numbers'];
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
