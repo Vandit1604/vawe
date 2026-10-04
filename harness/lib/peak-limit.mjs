@@ -1,5 +1,7 @@
 // The mix's true peak against the taste limit (taste/rules/sound-level.md).
-export const PEAK_DBFS = -10;
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+
+export const PEAK_DBFS = LIMITS['sound-level'].peak_dbfs;
 
 /** The advice line when the as-written mix peaks over PEAK_DBFS, else null. Pure. */
 export function peakLine(tp) {

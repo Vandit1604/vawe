@@ -2,6 +2,7 @@
 // one fix. collectMotion runs in the page and reads Web Animations; recordsFromBoxes infers the same
 // records from element boxes over time (harness/lib/box-track.mjs) for a page that paints in window.seek
 // or vawe.onFrame. Everything else is pure over the records.
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { isWaived } from './waivers.mjs';
 import { DECORATIVE } from './draft-check.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
@@ -50,7 +51,7 @@ export function runMotionCollector(page) {
   return page.evaluate((src) => new Function(`${src}\nreturn collectMotion();`)(), COLLECTOR);
 }
 
-const LINEAR_LIMIT = 0.3;
+const LINEAR_LIMIT = LIMITS['named-eases'].linear_move_limit_s;
 const FINAL_FPS = 60;
 const KEYWORDS = new Set(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']);
 const onKeywords = (r) => [r.easing, ...r.kfEasings].every((e) => KEYWORDS.has(e));
@@ -81,7 +82,7 @@ export function groupLanding(records) {
     const f = Math.round(land * FINAL_FPS);
     (frames.get(f) || frames.set(f, []).get(f)).push(ins[0].label);
   }
-  return [...frames].filter(([, labels]) => labels.length >= 3).map(([f, labels]) => ({
+  return [...frames].filter(([, labels]) => labels.length >= LIMITS.stagger.same_frame_group).map(([f, labels]) => ({
     code: 'group-landing', rule: 'stagger', at: f / FINAL_FPS,
     what: `${labels.length} elements land on one frame (${labels.slice(0, 3).join(', ')})`,
     fix: 'stagger(els) from core/motion/presets.js: 30 to 80 ms apart',

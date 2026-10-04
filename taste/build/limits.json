@@ -84,7 +84,8 @@
  },
  "readable-text-size": {
   "cap_height_pct": 6,
-  "chrome_cap_height_pct": 2.5
+  "chrome_cap_height_pct": 2.5,
+  "held_min_s": 0.5
  },
  "safe-margin": {
   "safe_pct": 90,
@@ -135,7 +136,10 @@
   "turn_seconds_max": 2,
   "run_tiles_max": 8,
   "tail_tiles_max": 4,
-  "sheet_fps": 5
+  "sheet_fps": 5,
+  "near_identical_diff": 4.5,
+  "blank_run_s": 0.3,
+  "blank_edge_s": 0.5
  },
  "anticipation": {
   "dip_pct_min": 2,

@@ -2,17 +2,18 @@
 // near-identical adjacent tiles in a row and at most 4 at the tail. harness/media/judge-fresh.mjs builds
 // the sheet from these constants, and the draft and final checks read the same tiles, so dev and the
 // judge see one number. A run inside a declared hold ("dead-air" waiver) is not counted.
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { declaredHolds } from './still-limit.mjs';
 
-export const SHEET_FPS = 5;
+export const SHEET_FPS = LIMITS['world-turns'].sheet_fps;
 export const SHEET_MAX_FRAMES = 150;
 export const TILE_W = 288;
-export const RUN_TILES = 8;
-export const TAIL_TILES = 4;
+export const RUN_TILES = LIMITS['world-turns'].run_tiles_max;
+export const TAIL_TILES = LIMITS['moving-tail'].tail_tiles_max;
 
 // Mean absolute grey difference (0-255) between adjacent 288 px tiles. Measured on the exp-h4o draft: the
 // tail tiles 4.0-4.8 s the judge called "5 static tiles" differ by 3.4 to 3.6; the next larger pair on that sheet, by 5.2.
-export const NEAR_IDENTICAL = 4.5;
+export const NEAR_IDENTICAL = LIMITS['world-turns'].near_identical_diff;
 
 export const sheetFps = (dur) => Math.min(SHEET_FPS, SHEET_MAX_FRAMES / dur);
 

@@ -1,9 +1,11 @@
 // Pure text and decisions for ship jobs: no I/O, no clock. harness/media/ship-job.mjs feeds it.
 import path from 'node:path';
+import LIMITS_JSON from '../../taste/build/limits.json' with { type: 'json' };
 import { tasteLines } from './taste-steps.mjs';
 import { STILL_SEC, undeclaredStills, stillText } from './still-limit.mjs';
 
-export const LIMITS = { staticSec: STILL_SEC, worldSec: 2, blankSec: 0.3, blankEdgeSec: 0.5, maxProblems: 3 };
+const WORLD = LIMITS_JSON['world-turns'];
+export const LIMITS = { staticSec: STILL_SEC, worldSec: WORLD.turn_seconds_max, blankSec: WORLD.blank_run_s, blankEdgeSec: WORLD.blank_edge_s, maxProblems: 3 };
 const SAMPLE_FPS = 10;
 
 export const SHIP_JOBS_DIR = path.join('out', 'ship-jobs');

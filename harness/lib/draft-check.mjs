@@ -1,9 +1,12 @@
 // Pure decisions for the draft check that `bin/vawe dev` prints after a full-length draft: text size
 // (taste rule readable-text-size), sound level, and the merge with the ship problems. No I/O, no clock.
 // harness/media/draft-check.mjs feeds it.
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { adviceBlock } from './advice.mjs';
 
-export const RULES = { capFrac: 0.06, chromeCapFrac: 0.025, capOfFont: 0.7, holdSec: 0.5, maxProblems: 4, lufsLow: -24, lufsHigh: -16 };
+const SIZE = LIMITS['readable-text-size'];
+const LEVEL = LIMITS['sound-level'];
+export const RULES = { capFrac: SIZE.cap_height_pct / 100, chromeCapFrac: SIZE.chrome_cap_height_pct / 100, capOfFont: 0.7, holdSec: SIZE.held_min_s, maxProblems: 4, lufsLow: LEVEL.lufs_low, lufsHigh: LEVEL.lufs_high };
 
 // Text inside these is not copy to read: aria-hidden is texture, data-chrome is the label of a product shown as texture.
 export const DECORATIVE = '[aria-hidden="true"]';

@@ -1,9 +1,10 @@
 // The whole frame held still for longer than STILL_SEC outside a declared hold. The still runs come from
 // scene-stats staticRuns; a hold is declared with the dead-air waiver (AGENTS.md "Waivers"): a bare
 // "dead-air" covers the film, "dead-air@2.1-3.4" covers those seconds.
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { splitWaiver, hasReason } from './waivers.mjs';
 
-export const STILL_SEC = 0.5;
+export const STILL_SEC = LIMITS['live-hold'].still_limit_s;
 
 /** The [a, b] second ranges the page declares as holds, each with its _why. Pure. */
 export function declaredHolds({ allow = [], _why = {} } = {}) {
