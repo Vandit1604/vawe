@@ -82,12 +82,9 @@ export function visibleLines(decorative, chrome) {
   return { lines: out, blocks };
 }
 
-// Runs inside the page, so it is self-contained: each inner function does one job. One moment's layout for the layout lint
-// (harness/lib/layout-lint.mjs): { w, h, accent, texts, blocks, boxes }. texts is one entry per visible text node (colour as
-// [r, g, b, a], tracking in em, `block` the index of its block-level ancestor in blocks); boxes is one entry per painted HTML
-// element (SVG is not read; at most 300), `p` the index of its nearest listed ancestor. accent is the :root property --accent, or null.
-export function layoutSample(decorative, chrome) {
-  const w = innerWidth, h = innerHeight;
+// The layout reader runs inside the page: layoutColours, layoutFrame, layoutTexts, layoutBoxes and layoutSample are bundled as source
+// (like the motion collector), so each is self-contained and takes what it needs as arguments.
+function layoutColours() {
   const memo = new Map();
   const canvas = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
   const fromCanvas = (css) => {
@@ -102,10 +99,13 @@ export function layoutSample(decorative, chrome) {
     const p = m[1].split(/[ ,/]+/).filter(Boolean).map(Number);
     return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
   };
-  const rgba = (css) => {
+  return (css) => {
     if (!memo.has(css)) { const m = /^rgba?\(([^)]+)\)$/.exec(css); memo.set(css, m ? fromRgb(m) : fromCanvas(css)); }
     return memo.get(css);
   };
+}
+
+function layoutFrame(w, h) {
   const inFrame = (r) => r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < w && r.top < h;
   const clipTo = (clip, n) => {
     const c = n.getBoundingClientRect();
@@ -126,12 +126,17 @@ export function layoutSample(decorative, chrome) {
     const [l, t, rt, b] = [Math.max(r.left, clip[0]), Math.max(r.top, clip[1]), Math.min(r.right, clip[2]), Math.min(r.bottom, clip[3])];
     return { left: l, top: t, right: rt, bottom: b, x: l, y: t, width: rt - l, height: b - t };
   };
+  return { inFrame, fadeAndScale, visibleRect };
+}
+
+function layoutTexts(env) {
+  const { rgba, frame, decorative, chrome } = env;
+  const blocks = [], blockIndex = new Map();
   const blockElement = (el) => {
     let b = el;
     while (b !== document.body && /^(inline|contents)/.test(getComputedStyle(b).display)) b = b.parentElement;
     return b;
   };
-  const blocks = [], blockIndex = new Map();
   const joinBlock = (el, r) => {
     const b = blockElement(el);
     if (!blockIndex.has(b)) { blockIndex.set(b, blocks.length); blocks.push({ x0: r.left, y0: r.top, x1: r.right, y1: r.bottom }); }
@@ -144,11 +149,11 @@ export function layoutSample(decorative, chrome) {
     const el = node.parentElement;
     if (!text || !el || /^(SCRIPT|STYLE|NOSCRIPT|TITLE)$/.test(el.tagName) || el.closest(decorative)) return null;
     const cs = getComputedStyle(el);
-    const { opacity, scale, clip } = fadeAndScale(el);
+    const { opacity, scale, clip } = frame.fadeAndScale(el);
     const range = document.createRange();
     range.selectNodeContents(node);
-    const r = visibleRect(range.getBoundingClientRect(), clip);
-    if (cs.visibility === 'hidden' || opacity <= 0.5 || !inFrame(r)) return null;
+    const r = frame.visibleRect(range.getBoundingClientRect(), clip);
+    if (cs.visibility === 'hidden' || opacity <= 0.5 || !frame.inFrame(r)) return null;
     const own = parseFloat(cs.fontSize);
     return {
       text: text.slice(0, 60), box: [r.x, r.y, r.width, r.height], fontPx: own * scale, block: joinBlock(el, r),
@@ -164,6 +169,11 @@ export function layoutSample(decorative, chrome) {
     const t = textOf(node);
     if (t) texts.push(t);
   }
+  return { texts, blocks: blocks.map((b) => ({ box: [b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0] })) };
+}
+
+function layoutBoxes(env) {
+  const { rgba, frame, decorative } = env;
   const listed = new WeakMap(), opOf = new WeakMap(), boxes = [];
   const side = (cs, s) => (cs[`border${s}Style`] !== 'none' && parseFloat(cs[`border${s}Width`]) > 0 ? [parseFloat(cs[`border${s}Width`]), rgba(cs[`border${s}Color`])] : [0, null]);
   const nearestListed = (el) => {
@@ -176,7 +186,7 @@ export function layoutSample(decorative, chrome) {
     const op = cs.display === 'none' ? 0 : (el.parentElement ? (opOf.get(el.parentElement) ?? 1) : 1) * Number(cs.opacity);
     opOf.set(el, op);
     const r = el.getBoundingClientRect();
-    if (op <= 0.05 || cs.visibility === 'hidden' || !inFrame(r)) return null;
+    if (op <= 0.05 || cs.visibility === 'hidden' || !frame.inFrame(r)) return null;
     const bg = rgba(cs.backgroundColor);
     return {
       tag: el.tagName.toLowerCase(), p: nearestListed(el), box: [r.x, r.y, r.width, r.height], op,
@@ -191,16 +201,29 @@ export function layoutSample(decorative, chrome) {
     const b = skipTag(el) ? null : boxOf(el);
     if (b) { listed.set(el, boxes.length); boxes.push(b); }
   }
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  return { w, h, accent: accent ? rgba(accent) : null, texts, boxes, blocks: blocks.map((b) => ({ box: [b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0] })) };
+  return boxes;
 }
+
+// One moment's layout for the layout lint (harness/lib/layout-lint.mjs): { w, h, accent, texts, blocks, boxes }. texts is one entry per
+// visible text node (colour as [r, g, b, a], tracking in em, `block` the index of its block-level ancestor in blocks); boxes is one entry
+// per painted HTML element (SVG is not read; at most 300), `p` the index of its nearest listed ancestor. accent is :root --accent, or null.
+function layoutSample(decorative, chrome) {
+  const [w, h] = [innerWidth, innerHeight];
+  const rgba = layoutColours();
+  const env = { rgba, frame: layoutFrame(w, h), decorative, chrome };
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+  return { w, h, accent: accent ? rgba(accent) : null, ...layoutTexts(env), boxes: layoutBoxes(env) };
+}
+
+const LAYOUT_SOURCE = [layoutColours, layoutFrame, layoutTexts, layoutBoxes, layoutSample].map((fn) => fn.toString()).join('\n');
+const readLayout = (page) => page.evaluate((src, d, c) => new Function(`${src}\nreturn layoutSample(${JSON.stringify(d)}, ${JSON.stringify(c)});`)(), LAYOUT_SOURCE, DECORATIVE, CHROME);
 
 /** Seek to each time and read the page's layout there. `seek(ms)` is a layout seek: layout needs no paint. */
 export async function sampleLayout(page, times, seek) {
   const samples = [];
   for (const t of times) {
     await seek(t * 1000);
-    samples.push({ t, ...(await page.evaluate(layoutSample, DECORATIVE, CHROME)) });
+    samples.push({ t, ...(await readLayout(page)) });
   }
   return samples;
 }
