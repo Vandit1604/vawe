@@ -1,8 +1,10 @@
 // Text as data: when each line of text enters, is fully readable, and leaves, and where its glyph ink
 // leaves the box that clips it. The in-page collector reads the live DOM; everything after it is pure.
 
-const READ_PER_WORD = 0.6;   // taste/rules/readable-hold.md: words x 0.6 s, no hold under 1.2 s
-const READ_FLOOR = 1.2;
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+
+const READ_PER_WORD = LIMITS['readable-hold'].prose_s_per_word;
+const READ_FLOOR = LIMITS['readable-hold'].hold_floor_s;
 const CLIP_TOL_PX = 2;
 const CLIP_REVEALED = 0.8;   // a line this far revealed is judged on its clipping edge, moving or not
 const SOFT_MASK_ALPHA = 0.2; // a gradient mask under this opacity at the ink's bottom edge fades text by design

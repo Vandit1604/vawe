@@ -1,8 +1,11 @@
 // harness/lib/read-hold.mjs: the readable-hold rule (taste/rules/readable-hold.md) as a pure function.
-const READ_PER_WORD = 0.6;      // prose: words x 0.6 s
-const READ_FLOOR = 1.2;         // no held frame under 1.2 s
-const READ_OTHER_WPS = 3;
-const PROSE_WORDS = 4;
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+
+const HOLD = LIMITS['readable-hold'];
+const READ_PER_WORD = HOLD.prose_s_per_word;
+const READ_FLOOR = HOLD.hold_floor_s;
+const READ_OTHER_WPS = HOLD.short_words_per_s;
+const PROSE_WORDS = HOLD.prose_min_words;
 const MIN_TEXT_H = 0.02;        // share of frame height below which text is a caption or credit, not read on the way past
 
 function groupsOf(tracks) {

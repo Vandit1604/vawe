@@ -2,9 +2,11 @@
 // transparent, so the ground is read without the glyphs. The critique (quality/gates/page-check.mjs) and
 // the draft (harness/media/render-page.mjs, on the text probe's samples) share it.
 import { spawnSync } from 'node:child_process';
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { contrastRatio, ensureContrast } from '../../core/color/index.js';
 
-export const DRAFT_MIN_RATIO = 4.5;
+const RATIO = LIMITS['text-contrast'];
+export const DRAFT_MIN_RATIO = RATIO.body_ratio;
 const HIDE_TEXT = '*{color:transparent!important;text-shadow:none!important;-webkit-text-stroke:0!important;caret-color:transparent!important}';
 
 export const rawRgb = (png) => spawnSync('ffmpeg', ['-v', 'error', '-f', 'image2pipe', '-i', '-', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'],
@@ -55,7 +57,7 @@ function contrastOf(row, frame, it, min) {
   const a = fg.a * it.opacity;
   const eff = { r: fg.r * a + bg.r * (1 - a), g: fg.g * a + bg.g * (1 - a), b: fg.b * a + bg.b * (1 - a) };
   const large = it.size >= 0.022 * row.vh || (it.size >= 0.017 * row.vh && Number(it.weight) >= 700);
-  const need = min ?? (large ? 3 : 4.5);
+  const need = min ?? (large ? RATIO.large_ratio : RATIO.body_ratio);
   return { ratio: contrastRatio(hexOf(eff), hexOf(bg)), need, fg: eff, bg };
 }
 

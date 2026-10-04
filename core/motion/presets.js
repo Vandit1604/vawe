@@ -4,20 +4,23 @@
 import { curveToLinear, rng } from './springs.js';
 import { handleCurve } from './motion.js';
 import { readSignature } from './signature.js';
+import LIMITS from './taste-limits.js';
 
 // taste/rules/speed-bands.md, seconds
+const BAND = LIMITS['speed-bands'];
 export const BANDS = {
-  energy: [0.15, 0.3],
-  professional: [0.3, 0.5],
-  gravity: [0.5, 0.8],
-  cinematic: [0.8, 2.0],
+  energy: [BAND.energy_min_s, BAND.energy_max_s],
+  professional: [BAND.energy_max_s, BAND.professional_max_s],
+  gravity: [BAND.professional_max_s, BAND.gravity_max_s],
+  cinematic: [BAND.gravity_max_s, BAND.cinematic_max_s],
 };
 const ORDER = Object.keys(BANDS);
 
 // The median followed move in 135 library scenes (taste/rules/speed-bands.md).
-const EYE_SPEED = 700;
-const LEAVE_SHARE = 0.6;
-const STAGGER = { gap: 0.05, min: 0.03, max: 0.08, total: 0.5, jitter: 0.25 };
+const EYE_SPEED = BAND.eye_speed_px_per_s;
+const LEAVE_SHARE = LIMITS['exits-shorter'].preset_leave_share;
+const GAP = LIMITS.stagger;
+const STAGGER = { gap: GAP.gap_default_s, min: GAP.gap_min_s, max: GAP.gap_max_s, total: GAP.total_max_s, jitter: 0.25 };
 
 // A dial the page chose in its signature (core/motion/signature.js), else the engine default.
 const signed = (dial, fallback) => readSignature()[dial] ?? fallback;

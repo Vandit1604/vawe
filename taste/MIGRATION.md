@@ -54,17 +54,21 @@ doc), or `deleted: <reason>`.
 Also: `speed-bands` names MOVES and counts frames at 60 fps or in seconds; JSON-era text in CRAFT/README is deleted; the vawe
 facts left the general rules; step 2's hand ffmpeg tiles are deleted.
 
-## Checks that still hold their own numbers
+## Checks that read limits.json
 
-`taste/build/limits.json` lists every number. These files read their own copy today; a test compares the main ones with
-`limits.json`, and Phase 4 makes them read it:
+Phase 4 moved every number below into `taste/build/limits.json`. Each module imports it (the motion presets import
+`core/motion/taste-limits.js`, generated from the same rules, because a page loads them from a folder with no `taste/`).
+`tests/lib/limits-readers.test.mjs` pins each value to the number it had before the move.
 
-- `harness/lib/draft-check.mjs` (RULES: cap height 6 and 2.5 percent, LUFS band -24 to -16, hold 0.5 s)
-- `harness/lib/peak-limit.mjs` (PEAK_DBFS -10)
-- `harness/lib/sheet-tiles.mjs` (RUN_TILES 8, TAIL_TILES 4, NEAR_IDENTICAL, SHEET_FPS)
-- `harness/lib/still-limit.mjs` (STILL_SEC 0.5) and `harness/lib/ship-status.mjs` (LIMITS: worldSec 2, blank frame limits)
-- `harness/lib/read-hold.mjs`, `harness/lib/text-timing.mjs`, `quality/gates/page-check.mjs` (0.6 s per word, 1.2 s floor, contrast floors)
-- `harness/lib/motion-lint.mjs` (linear limit 0.3 s, one-frame landing at 60 fps) and `core/motion/presets.js` (BANDS, LEAVE_SHARE, STAGGER)
+- `harness/lib/draft-check.mjs` (cap height, LUFS band, text hold), `harness/lib/peak-limit.mjs`, `harness/lib/sheet-tiles.mjs`
+- `harness/lib/still-limit.mjs`, `harness/lib/ship-status.mjs` (world seconds, blank runs)
+- `harness/lib/read-hold.mjs`, `harness/lib/text-timing.mjs`, `harness/lib/text-contrast.mjs` (per word, floor, contrast ratios)
+- `harness/lib/motion-lint.mjs` (linear limit, same-frame group), `core/motion/presets.js` (bands, leave share, stagger)
+- The twelve checks added in Phase 4 (`harness/lib/layout-lint.mjs`, `harness/lib/motion-variety.mjs`) read their numbers there from the start.
+
+Still outside `limits.json`, because they are not taste numbers: the frame rate of the group-landing test (60 fps, the final render),
+the 30 ms cut, the 0.7 cap-height share of a font, the 4 problem lines a draft prints.
+
 - `harness/lib/directions.mjs` (range check) reads `taste/attractors.json`, not `limits.json`.
 
 ## Table
