@@ -1,6 +1,10 @@
-// vawe runs <film> | --all [--json] [--dir out]: reads <dir>/<film>.runs.jsonl (harness/lib/runlog.mjs) into tables (harness/lib/runs-report.mjs).
+// vawe runs <film> | --all | --taste [--json] [--dir out]: reads <dir>/<film>.runs.jsonl (harness/lib/runlog.mjs) into tables (harness/lib/runs-report.mjs).
 import { readAllRuns, filmKeyOf } from '../lib/runlog.mjs';
 import { filmLines, allRows, modelRows, allLines } from '../lib/runs-report.mjs';
+import { tasteReport, tasteLines } from '../lib/taste-report.mjs';
+import { metaReader } from '../lib/variety.mjs';
+import RULES from '../../taste/build/rules.json' with { type: 'json' };
+import path from 'node:path';
 import { lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
 
 const args = process.argv.slice(2);
@@ -9,7 +13,10 @@ const dirAt = args.indexOf('--dir');
 const dir = dirAt >= 0 ? args[dirAt + 1] : 'out';
 const film = args.find((a, i) => !a.startsWith('--') && args[i - 1] !== '--dir');
 
-if (args.includes('--all')) {
+if (args.includes('--taste')) {
+  const report = tasteReport(readAllRuns(dir), { ruleIds: Object.keys(RULES), readMeta: metaReader(path.resolve(dir, '..')) });
+  console.log(json ? JSON.stringify(report, null, 1) : tasteLines(report).join('\n'));
+} else if (args.includes('--all')) {
   const rows = allRows(readAllRuns(dir), Date.now());
   console.log(json ? JSON.stringify({ films: rows, models: modelRows(rows) }, null, 1) : allLines(rows, modelRows(rows)).join('\n'));
 } else if (film) {
@@ -19,6 +26,6 @@ if (args.includes('--all')) {
   const failed = lastFailedShip(runs);
   if (failed && !json) console.error(failedShipLine(key, failed));
 } else {
-  console.error('vawe runs: give a film name or --all');
+  console.error('vawe runs: give a film name, --all or --taste');
   process.exit(2);
 }

@@ -15,6 +15,7 @@ import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls, PLACEHOLDER } from '../lib/measured-brief.mjs';
 import { dialRanges, signatureSection } from '../lib/signature.mjs';
+import { recentFromDisk, varietyFor, namesBrandKit } from '../lib/variety.mjs';
 import { DIALS } from '../../core/motion/signature.js';
 
 const STARTER_TEMPLATE = `<!doctype html>
@@ -232,14 +233,14 @@ const SKELETON = [['task', 'Task'], ['directions'], ['signature'], ['look', 'Loo
 
 const heading = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
-function briefText(name, templateRel, questions, sections, answers, measured, recipe = null) {
+function briefText(name, templateRel, questions, sections, answers, measured, recipe = null, variety = {}) {
   const lines = inputLines(questions, answers);
   const inputs = questions.length || lines.length
     ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
   const own = Object.fromEntries(sections.map((s) => [s.name, s.body.replaceAll('<name>', name)]));
   const skeleton = SKELETON.filter(([key]) => key === 'directions' || key === 'signature' || measured.sections[key]).map(([key, title]) => (
-    key === 'directions' ? directionsText(name) : key === 'signature' ? signatureSection() : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
+    key === 'directions' ? directionsText(name) : key === 'signature' ? signatureSection(undefined, variety) : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
   const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))
     .map((s) => `## ${heading(s.name)}\n\n${own[s.name]}`);
   const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: taste/build/DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (rule sound-swell).\n\nbin/vawe dev films/${name}/page.html\n`;
@@ -326,7 +327,7 @@ function copyFace(root, dir, face) {
   fs.copyFileSync(src, path.join(dir, 'assets', face.font));
 }
 
-export function newFilmLines(name, { page, route, title, guesses = [], asked, request, from, defaulted = [] }) {
+export function newFilmLines(name, { page, route, title, guesses = [], asked, request, from, defaulted = [], variety = { lines: [] } }) {
   if (asked) return askLines(name, request, from, asked);
   const lines = [`wrote ${page}, films/${name}/brief.md and films/${name}/directions.html`];
   if (defaulted.length) lines.push(`--defaults: details guessed, not asked: ${defaulted.join(', ')}`);
@@ -340,7 +341,8 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
     `directions: films/${name}/directions.html holds one starter still per family (type, object, graphic); fill the three slots in brief.md, then pick one`,
     ...brandAdvice(`${name} ${title ?? ''}`),
   ];
-  return [...lines, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('concept'), '',
+  const spread = variety.lines.length ? ['', ...variety.lines] : [];
+  return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('concept'), '',
     ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
 }
 
@@ -375,6 +377,7 @@ export function newFilm(name, { from, root, length, aspect, title, request, deta
   if (title !== undefined) answers.title = title;
   const sections = parseSections(markdown);
   const measured = measuredSections({ name, request, title, length, face, reference: sections.some((s) => s.name === 'swap'), details, answered });
-  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe));
-  return { page: `films/${name}/page.html`, route, title, ranges: dialRanges(), guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length, answered: [...answered] };
+  const variety = varietyFor(recentFromDisk(root, name), namesBrandKit([request, title, ...Object.values(details)].join(' ')));
+  fs.writeFileSync(path.join(dir, 'brief.md'), briefText(name, path.relative(root, template), questions, sections, answers, measured, route?.recipe, variety));
+  return { variety, page: `films/${name}/page.html`, route, title, ranges: dialRanges(), guesses: measured.guesses, defaulted: defaults ? open.map((d) => d.key) : [], template: path.relative(root, template), length, answered: [...answered] };
 }

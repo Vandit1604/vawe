@@ -85,7 +85,8 @@ test('the ledger tracks notes by rule id: an open rule keeps its item, and a fli
 test('the judge event keeps the notes as { rule, t, verdict } and the sameness and template answers', () => {
   const event = judgeEvent({ stage: 'draft', verdict: 'FIX', scores: { hook: 6 }, findings: findingsEvent({ ...readFindings(raw, IDS), fixes: [] }) });
   assert.deepEqual(event.notes, [{ rule: 'first-frame', t: 0.1, verdict: 'fail' }, { rule: null, t: 2, verdict: 'unknown' }, { rule: 'sameness', t: 1, verdict: 'fail' }]);
-  assert.deepEqual(event.sameness, { sibling: true, films: ['brindle'] });
+  assert.deepEqual(event.waivers, [{ code: 'attractor', earned: true }]);
+  assert.deepEqual(event.sameness, { sibling: true, films: ['brindle'], shared: 'the ring' });
   assert.deepEqual(event.template, { tell: false, t: null });
   assert.deepEqual(judgeEvent({ stage: 'stills', verdict: 'FIX' }).notes, null);
 });

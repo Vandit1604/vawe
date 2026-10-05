@@ -23,9 +23,10 @@ export function dialRanges(rules = RULES) {
   });
 }
 
-/** The `## Signature` section of brief.md: each dial with its range. The choice itself lives in the page meta. */
-export function signatureSection(ranges = dialRanges()) {
-  const dials = ranges.map((d) => `- ${d.dial} (${d.meaning}): ${d.range} (${d.file})`).join('\n');
+/** The `## Signature` section of brief.md: each dial with its range and the values the last films left unused (variety.mjs). The choice itself lives in the page meta. */
+export function signatureSection(ranges = dialRanges(), { unused = {}, exempt = [] } = {}) {
+  const note = (dial) => (unused[dial] ? `\n  unused so far: ${unused[dial].join(', ')}` : exempt.includes(dial) ? '\n  the brief names a brand kit: follow it' : '');
+  const dials = ranges.map((d) => `- ${d.dial} (${d.meaning}): ${d.range} (${d.file})${note(d.dial)}`).join('\n');
   return `## Signature
 
 Six dials. Choose in the page: \`<meta name="signature" content="band=...; ease=...; stagger=...; seam=...; palette=...; thread=...">\`.

@@ -247,13 +247,14 @@ export const VERBS = [
     positional: [{ name: 'film', help: 'film name or films/<name>/page.html' }],
     flags: [
       { name: 'all', type: 'bool', help: 'one row per film (drafts, median draft seconds, first and best judged total, PASS), then medians per model' },
-      { name: 'json', type: 'bool', help: 'print the records (or with --all the rows) as JSON' },
+      { name: 'taste', type: 'bool', help: 'the taste report over every film: per rule fired, fixed, waived, score gain and a verdict; variety per dial; sibling films; template tells' },
+      { name: 'json', type: 'bool', help: 'print the records (or with --all or --taste the report) as JSON' },
       { name: 'dir', type: 'path', default: 'out', help: 'the folder that holds the <film>.runs.jsonl files' },
     ],
-    example: 'vawe runs my-launch   |   vawe runs --all',
+    example: 'vawe runs my-launch   |   vawe runs --all   |   vawe runs --taste',
     build: (v, [film]) => {
-      if (!v.all && !film) throw new UsageError('missing <film>; usage: vawe runs <film>  or  vawe runs --all');
-      return [{ script: 'harness/dev/runs.mjs', args: [...(v.all ? ['--all'] : [film]), ...(v.json ? ['--json'] : []), ...opt('--dir', v.dir)] }];
+      if (!v.all && !v.taste && !film) throw new UsageError('missing <film>; usage: vawe runs <film>, vawe runs --all or vawe runs --taste');
+      return [{ script: 'harness/dev/runs.mjs', args: [...(v.taste ? ['--taste'] : v.all ? ['--all'] : [film]), ...(v.json ? ['--json'] : []), ...opt('--dir', v.dir)] }];
     },
   },
   {
