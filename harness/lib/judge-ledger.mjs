@@ -1,6 +1,7 @@
 // The judge ledger: every fix a fresh judge asks for gets an id and stays in out/<name>.judge.json. The
 // next judge of the film marks each open one fixed, partly or still before it adds new ones, and says
-// why when a new fix reverses an old one. Each fix names what it changes, its value now and the value it
+// why when a new fix reverses an old one. Every item carries the rule id it traces to (taste/rules), and a
+// failing note of a rule that has an open item stays that item. A target is a rule id, else its "what". Each fix names what it changes, its value now and the value it
 // wants, so the next judge starts from numbers, and a target the judges move back and forth over three
 // rounds prints a stop line. Pure: harness/media/judge-fresh.mjs reads and writes the file.
 
@@ -12,20 +13,20 @@ const idNumber = (id) => Number(/^f(\d+)$/.exec(id || '')?.[1] || 0);
 export function previousItems(prev) {
   if (!prev) return [];
   if (Array.isArray(prev.items)) return prev.items;
-  return (prev.fixes || []).map((f, i) => ({ id: `f${i + 1}`, axis: f.axis, at: f.at ?? null, fix: f.fix, status: 'new' }));
+  return (prev.fixes || []).map((f, i) => ({ id: `f${i + 1}`, axis: f.axis, ...(f.rule ? { rule: f.rule } : {}), at: f.at ?? null, fix: f.fix, status: 'new' }));
 }
 
 export const openItems = (items) => items.filter((i) => i.status !== 'fixed');
 
 const whatKey = (what) => String(what || '').toLowerCase().replace(/[^a-z0-9%.]+/g, ' ').trim();
 
-/** Every item that names a value, grouped by what it changes, oldest first: [{ what, items }]. */
+/** Every item that names a value, grouped by its rule id (else by what it changes), oldest first: [{ what, items }]. */
 export function targetHistory(items) {
   const groups = new Map();
   for (const i of items) {
-    const key = whatKey(i.what);
+    const key = i.rule || whatKey(i.what);
     if (!key || !i.want) continue;
-    if (!groups.has(key)) groups.set(key, { what: i.what, items: [] });
+    if (!groups.has(key)) groups.set(key, { what: i.rule ? `${i.rule}: ${i.what}` : i.what, items: [] });
     groups.get(key).items.push(i);
   }
   return [...groups.values()];
@@ -50,8 +51,8 @@ export function ledgerPrompt(open, all = open) {
   if (!open.length) return '';
   const asked = targetHistory(all).map((g) => `- ${g.what}: ${g.items.map((i) => `${i.id} now ${i.now ?? '?'}, asked ${i.want}`).join('; ')}`);
   return `Ledger: the last judge of this film asked for these fixes.
-${open.map((i) => `- ${i.id} (${i.axis}${i.at != null ? ` at ${i.at}` : ''}): ${i.fix}`).join('\n')}
-${asked.length ? `Values asked so far; measure the same "what" on the frames and reuse its words:\n${asked.join('\n')}\n` : ''}First mark each one: add "ledger":[{"id":"${open[0].id}","status":"fixed, partly or still"}, ...] to the JSON. Then give fixes only for what is new; for an axis whose item is still open, write "fix":"${open[0].id}" (its id). A fix that undoes an item above needs "reverses":"<id>" and "why":"<one reason>".`;
+${open.map((i) => `- ${i.id} (${i.axis}${i.rule ? `, rule ${i.rule}` : ''}${i.at != null ? ` at ${i.at}` : ''}): ${i.fix}`).join('\n')}
+${asked.length ? `Values asked so far; measure the same target on the frames and reuse its words:\n${asked.join('\n')}\n` : ''}First mark each one: add "ledger":[{"id":"${open[0].id}","status":"fixed, partly or still"}, ...] to the JSON. Then give fixes only for what is new; for an axis whose item is still open, write "fix":"${open[0].id}" (its id). A fix that undoes an item above needs "reverses":"<id>" and "why":"<one reason>".`;
 }
 
 function refersTo(fix, open) {
@@ -62,9 +63,10 @@ function refersTo(fix, open) {
 /**
  * The next ledger. `prev` is the previous items, `raw` the judge's JSON (its ledger marks, its fixes with
  * reverses and why), `fixes` the result's fixes. Returns { items, fixes, counts, reversals }: `fixes` with
- * id references replaced by the old item's text.
+ * id references replaced by the old item's text. `notes` are the judge's notes: each failing one with a rule
+ * and no open item for that rule becomes a new item.
  */
-export function mergeLedger(prev, raw, fixes) {
+export function mergeLedger(prev, raw, fixes, notes = []) {
   const marks = new Map((raw.ledger || []).map((m) => [m.id, m.status]));
   const counts = { fixed: 0, partly: 0, still: 0, unmarked: 0, new: 0 };
   const open = openItems(prev);
@@ -80,11 +82,15 @@ export function mergeLedger(prev, raw, fixes) {
     const old = refersTo(f.fix, open);
     if (old) return { ...f, fix: `${old.id}: ${old.fix}` };
     const given = (raw.fixes || []).find((x) => x.axis === f.axis) || {};
-    const item = { id: `f${++n}`, axis: f.axis, at: f.at, fix: f.fix, status: 'new', ...(given.what ? { what: given.what, now: given.now ?? null, want: given.want ?? null } : {}) };
+    const item = { id: `f${++n}`, axis: f.axis, ...(f.rule ? { rule: f.rule } : {}), at: f.at, fix: f.fix, status: 'new', ...(given.what ? { what: given.what, now: given.now ?? null, want: given.want ?? null } : {}) };
     if (given.reverses) Object.assign(item, { reverses: given.reverses, why: given.why || null });
     fresh.push(item);
     return { ...f, fix: `${item.id}: ${f.fix}` };
   });
+  for (const note of notes.filter((x) => x.verdict === 'fail' && x.rule)) {
+    if ([...carried, ...fresh].some((i) => i.rule === note.rule && i.status !== 'fixed')) continue;
+    fresh.push({ id: `f${++n}`, axis: 'note', rule: note.rule, at: note.t, fix: note.note || 'no note given', status: 'new' });
+  }
   counts.new = fresh.length;
   return { items: [...carried, ...fresh], fixes: shown, counts, reversals: fresh.filter((i) => i.reverses) };
 }

@@ -18,12 +18,13 @@ export const devEvent = ({ tier, wallS, captureS, checks, cache, rows, signature
   signature, measured, rules_fired: fired,
 });
 
-/** A judge run: `stage` is stills, draft, final, manual or struct; `ledger` is mergeLedger counts. */
-export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, ledger = null, seconds = null }) => ({
+/** A judge run: `stage` is stills, draft, final, manual or struct; `ledger` is mergeLedger counts; `findings` is { notes: [{ rule, t, verdict }], sameness, template } (judge-findings.mjs findingsEvent). */
+export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, ledger = null, seconds = null, findings = null }) => ({
   cmd: 'judge', stage, verdict, scores,
   anchorYes: anchor ? anchor.filter((a) => a.yes).length : null,
   anchorTotal: anchor ? anchor.length : null,
   ledger, seconds,
+  notes: findings?.notes ?? null, sameness: findings?.sameness ?? null, template: findings?.template ?? null,
 });
 
 /** A final render: `verdict` PASS, FIX, failed, or null when no judge ran; `acceptance` as acceptanceCounts. A failed one also records `failedAt` (percent of subframes captured), `reason` and `page`. */
