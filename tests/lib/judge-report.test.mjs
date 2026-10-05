@@ -16,7 +16,7 @@ test('the report is the verdict, one score line, the three worst fixes and the f
   const lines = reportLines(result, 'out/x.judge.json');
   assert.equal(lines[0], 'judge --fresh (draft): FIX');
   assert.equal(lines[1], 'hook 6, thread 9, motion 5, type 7; worlds 5');
-  assert.deepEqual(lines.slice(2, 5).map((l) => l.split(':')[0]), ['- motion 5', '- hook 6 at 0.1', '- type 7 at 2.5']);
+  assert.deepEqual(lines.slice(2, 5).map((l) => l.split(':')[0]), ['- motion 5 [no rule]', '- hook 6 at 0.1 [no rule]', '- type 7 at 2.5 [no rule]']);
   assert.equal(lines.at(-1), 'full report: out/x.judge.json');
   assert.equal(lines.length, 6);
 });

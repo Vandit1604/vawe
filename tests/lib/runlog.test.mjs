@@ -33,7 +33,7 @@ test('event shapes: new, dev, judge, ship carry only their own fields', () => {
     { cmd: 'dev', tier: 'draft', wallS: 31.4, captureS: 18, checksS: { contrast: 3.1, spec: 2 }, cache: { hit: 1, miss: 2 }, acceptance: { green: 1, measured: 2, red: ['b'] }, signature: {}, measured: {}, rules_fired: [] });
   assert.equal(devEvent({ tier: 'fast', wallS: 1, captureS: 1, checks: [], cache: { hit: 0, miss: 0 }, rows: null }).acceptance, null);
   assert.deepEqual(judgeEvent({ stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, anchor: [{ yes: true }, { yes: false }], ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2 }),
-    { cmd: 'judge', stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, anchorYes: 1, anchorTotal: 2, ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2 });
+    { cmd: 'judge', stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, anchorYes: 1, anchorTotal: 2, ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2, notes: null, sameness: null, template: null });
   assert.deepEqual(shipEvent({ verdict: 'PASS', renderS: 120.04, acceptance: { green: 5, measured: 5, red: [] } }),
     { cmd: 'ship', verdict: 'PASS', renderS: 120, acceptance: { green: 5, measured: 5, red: [] } });
   assert.equal(shipEvent({ renderS: 1 }).verdict, null);

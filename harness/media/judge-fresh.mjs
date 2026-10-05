@@ -17,8 +17,11 @@ import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
+import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
+import { siblingFilms } from '../lib/judge-siblings.mjs';
+import { parseSignature } from '../../core/motion/signature.js';
 import { sizeLines, capLines, anchorLines, anchorResult, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
-import { referenceFor } from '../lib/motion-stamp.mjs';
+import { referenceFor, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
 import { settledMoments } from '../lib/key-frames.mjs';
 import { probeSize } from './scene-stats.mjs';
@@ -30,6 +33,8 @@ const SHEET_COLS = 10;
 const KEY_FRAMES = 6;
 const PASS_AT = 8;
 const TASTE_CARD = path.join(repoRoot, TASTE_CARD_REL);
+const RULE_IDS = fs.readdirSync(path.join(repoRoot, 'taste/rules')).filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
+const SIBLING_W = 320;
 const FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/System/Library/Fonts/Helvetica.ttc', '/Library/Fonts/Arial.ttf'].find(fs.existsSync);
 
 const die = (m, code = 1) => { console.error(`vawe judge --fresh: ${m}`); process.exit(code); };
@@ -126,6 +131,27 @@ function anchorFrames(ref, keys, dir) {
   }).filter((a) => fs.existsSync(a.file));
 }
 
+function pageOf(input, brief) {
+  if (path.extname(input).toLowerCase() === '.html') return path.resolve(input);
+  const page = brief && path.join(path.dirname(path.resolve(brief)), 'page.html');
+  return page && fs.existsSync(page) ? page : null;
+}
+
+async function declaredOf(page) {
+  if (!page) return { signature: {}, waivers: [], message: null };
+  const { readPageMeta } = await import('./render-page.mjs');
+  const { allow = [], _why = {} } = pageAuthoring(page);
+  return { signature: parseSignature(readPageMeta(page, 'signature')), message: readPageMeta(page, 'message'), waivers: allow.map((code) => ({ code, why: _why[code] ?? null })) };
+}
+
+function siblingThumbs(name, dir) {
+  return siblingFilms(path.resolve('out'), name).map((s, i) => {
+    const file = path.join(dir, `sibling-${i + 1}-${s.name}.png`);
+    ff(['-ss', String(durationOf(s.video) / 2), '-i', s.video, '-vf', `scale=${SIBLING_W}:-2`, '-frames:v', '1', file]);
+    return { name: s.name, file };
+  }).filter((s) => fs.existsSync(s.file));
+}
+
 async function prepare(input, stage, brief) {
   const name = filmName(input);
   const dir = scratch('judge-fresh', name);
@@ -157,7 +183,9 @@ async function prepare(input, stage, brief) {
     ...anchorShots.map((a, i) => `anchor frame ${i + 1} (the reference at ${a.t.toFixed(1)} s, the anchor for key frame ${i + 1}): ${a.file}`),
     sound || (stage === 'final' ? 'sound: the file has no audio track' : 'sound: not scored at this stage'),
   ];
-  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file)], notes, dir, keys, images, anchor, caps: lastCaps(name) };
+  const siblings = siblingThumbs(name, dir);
+  const declared = await declaredOf(pageOf(input, brief));
+  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, declared };
 }
 
 const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
@@ -166,6 +194,8 @@ Name the strongest with one reason. Then score the axes below for the strongest 
 
 const STILLS_JSON = `
 Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"one short line"},{"id":"B",...},{"id":"C",...}], "strongest":"A, B or C", "reason":"one sentence".`;
+
+const findingsBlock = (ev) => findingsPrompt({ card: fs.readFileSync(path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD), 'utf8'), declared: ev.declared, siblings: ev.siblings });
 
 function checkBlock(ev) {
   if (ev.stage === 'stills') return '';
@@ -176,7 +206,7 @@ function checkBlock(ev) {
 function buildPrompt(ev, brief, ledger = '') {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
-    `Taste card: the scored rules and 5 anti-patterns (Read this file once, and no other file or image beside it): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule id in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
+    `Taste card: the scored rules and 5 anti-patterns (Read this file once; besides it, open only the evidence images and the sibling thumbnails): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule id in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
   ].filter(Boolean);
   const kind = ev.stage === 'stills' ? 'three still directions for a film' : `a ${ev.stage} cut of a film`;
   return `You are a fresh taste judge. You did not make this work and you own no part of it. You judge ${kind} from the evidence files below.
@@ -186,7 +216,7 @@ ${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key fr
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}
 ${optional.length ? `\n${optional.map((o) => `- ${o}`).join('\n')}\n` : ''}
-${checkBlock(ev)}${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : ''}${ledger ? `\n\n${ledger}` : ''}`;
+${checkBlock(ev)}${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : `\n\n${findingsBlock(ev)}`}${ledger ? `\n\n${ledger}` : ''}`;
 }
 
 function extractJson(text) {
@@ -215,12 +245,12 @@ function finish(ev, raw, ms) {
   const low = axes.filter((k) => !(scores[k] >= PASS_AT));
   const fixes = low.map((k) => {
     const given = (raw.fixes || []).find((x) => x.axis === k) || {};
-    return { axis: k, score: scores[k], at: given.at ?? null, fix: given.fix || 'no fix given' };
+    return { axis: k, score: scores[k], rule: ruleOf(given, RULE_IDS), at: given.at ?? null, fix: given.fix || 'no fix given' };
   });
   const pass = low.length === 0;
   const first = raw.fixFirst || fixes[0]?.fix || null;
   const time = fixes.map((x) => parseFloat(x.at)).find((t) => Number.isFinite(t)) ?? null;
-  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ms, recorded: new Date().toISOString().slice(0, 10) };
+  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ...(ev.stage === 'stills' ? {} : readFindings(raw, RULE_IDS)), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
 const input = process.argv[2];
@@ -252,9 +282,9 @@ const file = path.resolve('out', `${ev.name}.${stage === 'stills' ? 'stills' : '
 const prevItems = stage === 'stills' ? [] : previousItems(readJson(file));
 const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(prevItems), prevItems)), ev);
 const result = finish(ev, raw, Date.now() - t0);
-const led = stage === 'stills' ? null : mergeLedger(prevItems, raw, result.fixes);
+const led = stage === 'stills' ? null : mergeLedger(prevItems, raw, result.fixes, result.notes);
 if (led) Object.assign(result, { fixes: led.fixes, items: led.items, ledger: ledgerLines(led) });
-appendRun(ev.name, judgeEvent({ stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, ledger: led?.counts, seconds: result.ms / 1000 }));
+appendRun(ev.name, judgeEvent({ stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, ledger: led?.counts, seconds: result.ms / 1000, findings: stage === 'stills' ? null : findingsEvent(result) }));
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, JSON.stringify(result, null, 1));
 console.log(reportLines(result, path.relative(process.cwd(), file)).join('\n'));
