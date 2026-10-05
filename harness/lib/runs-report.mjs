@@ -28,7 +28,7 @@ function fromOld(r) {
   return { cmd: 'judge', stage: struct ? 'struct' : 'manual', verdict: r.judge.verdict ?? null, scores: r.judge.overall != null ? { overall: r.judge.overall } : null };
 }
 
-/** One record of either age as { at, cmd, agent, model, seconds, green, measured, stage, verdict, scores, total }. */
+/** One record of either age as { at, cmd, agent, model, seconds, green, measured, stage, verdict, scores, total, fired, signature, notes, waivers, sameness, template }. */
 export function normalize(r) {
   const e = { ...r, ...fromOld(r) };
   return {
@@ -37,6 +37,9 @@ export function normalize(r) {
     green: e.acceptance?.green ?? null, measured: e.acceptance?.measured ?? null,
     stage: e.stage ?? null, verdict: e.verdict ?? null, scores: e.scores ?? null, total: sum(e.scores),
     fired: Array.isArray(e.rules_fired) ? e.rules_fired.map((f) => f.id) : null,
+    signature: e.signature && typeof e.signature === 'object' && !e.signature.offered ? e.signature : null,
+    notes: Array.isArray(e.notes) ? e.notes : null, waivers: Array.isArray(e.waivers) ? e.waivers : null,
+    sameness: e.sameness ?? null, template: e.template ?? null,
   };
 }
 
@@ -68,7 +71,7 @@ function judgeCell(e) {
 }
 
 const pad = (rows, widths) => rows.map((r) => r.map((c, i) => (i === widths.length ? c : String(c).padEnd(widths[i]))).join('  ').trimEnd());
-const table = (rows) => pad(rows, rows[0].slice(0, -1).map((_, i) => Math.max(...rows.map((r) => String(r[i]).length))));
+export const table = (rows) => pad(rows, rows[0].slice(0, -1).map((_, i) => Math.max(...rows.map((r) => String(r[i]).length))));
 
 /** One compact line per draft that logged its rules: the rules it fired, and against the draft before it which were fixed (fired then, not now) and which are still firing. */
 export function draftRuleLines(events) {

@@ -90,11 +90,12 @@ export function ruleCoverage(result) {
   return { total: all.length, ruled: all.filter((x) => x.rule).length };
 }
 
-/** What the run log keeps of the findings: the notes as { rule, t, verdict } plus the sameness and template answers. */
+/** What the run log keeps of the findings: the notes as { rule, t, verdict }, the waiver verdicts as { code, earned }, plus the sameness and template answers. */
 export function findingsEvent(result) {
   return {
     notes: (result.notes || []).map(({ rule, t, verdict }) => ({ rule, t, verdict })),
-    sameness: result.sameness ? { sibling: result.sameness.sibling, films: result.sameness.films } : null,
+    waivers: (result.waivers || []).map(({ code, earned }) => ({ code, earned })),
+    sameness: result.sameness ? { sibling: result.sameness.sibling, films: result.sameness.films, shared: result.sameness.shared } : null,
     template: result.template ? { tell: result.template.tell, t: result.template.t } : null,
   };
 }
