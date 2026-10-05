@@ -28,7 +28,8 @@ const PAGE = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="durat
 
 function writePage(tmp, extra = '') {
   const p = path.join(tmp, 'page.html');
-  fs.writeFileSync(p, PAGE.replace('</body>', `${extra}</body>`));
+  // The stamp store is shared and keyed on page content: a unique page per test keeps stamps apart.
+  fs.writeFileSync(p, PAGE.replace('</body>', `${extra}<!-- ${path.basename(tmp)} --></body>`));
   return p;
 }
 
