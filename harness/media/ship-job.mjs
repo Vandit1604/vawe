@@ -15,12 +15,12 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { defaultOut } from './render-page.mjs';
-import { videoProblems } from './draft-check.mjs';
+import { videoProblems, readVideo } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
-import { finalAcceptance } from './acceptance-run.mjs';
+import { finalAcceptance, lastPageFacts } from './acceptance-run.mjs';
 
 const WAIT_CAP_MS = 100_000;
 
@@ -105,9 +105,11 @@ const verdictLines = (text, code) => {
 
 const outputsOf = (text) => text.split(/[\r\n]+/).filter((l) => l.startsWith('✓ ')).map((l) => l.slice(2).split(':')[0]);
 
+const filmName = (mp4) => path.basename(mp4).replace(/\.(web\.)?mp4$/, '').replace(/-draft$/, '');
+
 function finalCheck(outputs, authoring) {
   try {
-    const problems = outputs.flatMap((mp4) => videoProblems(mp4, authoring).map((p) => (outputs.length > 1 ? `${path.basename(mp4)}: ${p}` : p)));
+    const problems = outputs.flatMap((mp4) => videoProblems(readVideo(mp4), authoring, lastPageFacts(filmName(mp4))).map((p) => (outputs.length > 1 ? `${path.basename(mp4)}: ${p}` : p)));
     return { outputs, problems };
   } catch (e) {
     return { outputs, problems: [], checkError: e.message };

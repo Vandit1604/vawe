@@ -21,7 +21,7 @@ export function elementShows(el, minOpacity) {
   return getComputedStyle(el).visibility !== 'hidden' && opacity > minOpacity && inside;
 }
 
-// Runs inside the page: [{ id, visible, ground }] for every [data-world] element. visible: elementShows. ground: the first
+// Runs inside the page: [{ id, visible, ground, texts }] for every [data-world] element. visible: elementShows. ground: the first
 // non-transparent background of the element, its ancestors, then a descendant covering over GROUND_MIN_SHARE of the frame, as #rrggbb, or null.
 function worldsSample(minOpacity, minShare) {
   const hex = (css) => {
@@ -43,7 +43,14 @@ function worldsSample(minOpacity, minShare) {
     const child = [...el.querySelectorAll('*')].find((n) => covers(n) && bgOf(n));
     return child ? bgOf(child) : null;
   };
-  return [...document.querySelectorAll('[data-world]')].map((el) => ({ id: el.dataset.world, visible: elementShows(el, minOpacity), ground: groundOf(el) }));
+  // The texts to read: each visible element with its own words, skipping texture (aria-hidden) and product chrome (data-chrome), as the text checks do.
+  const textsOf = (world) => [...world.querySelectorAll('*')]
+    .filter((n) => [...n.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim()) && !n.closest('[aria-hidden="true"],[data-chrome]') && elementShows(n, minOpacity))
+    .map((n) => n.textContent.replace(/\s+/g, ' ').trim());
+  return [...document.querySelectorAll('[data-world]')].map((el) => {
+    const visible = elementShows(el, minOpacity);
+    return { id: el.dataset.world, visible, ground: groundOf(el), texts: visible ? textsOf(el) : [] };
+  });
 }
 
 export const SHOWS_SOURCE = elementShows.toString();

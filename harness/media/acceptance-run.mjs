@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { FPS } from './motion-curve.mjs';
+import { tailMoving } from '../lib/tail-motion.mjs';
 import { summarize } from './scene-stats.mjs';
 import { readVideo } from './draft-check.mjs';
 import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
@@ -63,8 +64,8 @@ function judgeMeasure(name) {
   return { yes: anchor.length - no.length, total: anchor.length, fixes: no.map((a) => `${a.frame}${a.at != null ? ` at ${a.at} s` : ''}: ${a.fix}`) };
 }
 
-function record(name, rows, stage, caps = null, spec = null, worlds = null) {
-  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, worlds, at: new Date().toISOString() });
+function record(name, rows, stage, caps = null, spec = null, worlds = null, tailMoving = null) {
+  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, worlds, tailMoving, at: new Date().toISOString() });
   fs.mkdirSync(path.dirname(outFile(name, 'acceptance')), { recursive: true });
   fs.writeFileSync(outFile(name, 'acceptance'), JSON.stringify(file, null, 1));
   return was;
@@ -82,7 +83,7 @@ export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, 
   const page = pageMeasures({ probe, findings, authoring }, set);
   const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(set.acceptance, m, { mode });
-  const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds);
+  const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds, tailMoving(probe.tail));
   return { rows, was, sync: writeBriefFromPage(pagePath, page.measuredSpec, probe.samples) };
 }
 
@@ -118,7 +119,7 @@ export async function finalAcceptance({ page, outputs }) {
   const name = nameOf(mp4);
   const history = readJson(outFile(name, 'acceptance'))?.history ?? [];
   const level = await finalLevel(mp4);
-  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
+  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, lastPageFacts(name).tailMoving), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(tables.acceptance, m, { carry: history.at(-1)?.rows ?? [] });
   return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows), counts: acceptanceCounts(rows) };
 }
@@ -131,6 +132,15 @@ export function lastCaps(name) {
 /** The times the last draft measured for the brief's SPEC rows, { words, objects }, or null before any draft. */
 export function lastSpec(name) {
   return (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.spec)?.spec ?? null;
+}
+
+/**
+ * What the live page said at the last full draft, for checks that run on a final video alone:
+ * { worlds (lastWorlds), tailMoving (an animation ran on a visible element through the last second) }.
+ */
+export function lastPageFacts(name) {
+  const last = (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.worlds || e.tailMoving != null);
+  return { worlds: last?.worlds ?? null, tailMoving: Boolean(last?.tailMoving) };
 }
 
 /** The worlds of the last full draft, [{ id, start, end, ground }] (harness/lib/worlds.mjs), or null before any draft. */

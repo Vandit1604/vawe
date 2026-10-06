@@ -147,6 +147,9 @@ function taskLines({ request, title, length, details, answered }, guess) {
 /** The starter's grey stand-ins: no house palette, and dev names the palette dial unchosen until the page picks one. */
 export const PLACEHOLDER = { ground: '#8c8c8c', ink: '#1c1c1c' };
 
+/** The starter's line under the headline; its first beat is sized to read both. */
+export const STARTER_LINE = 'why it matters';
+
 function lookLines({ face, details, answered }, guess) {
   return [
     ...(answered.has('look') ? [`- look: ${details.look ?? IN_WHAT}`] : []),
@@ -160,7 +163,7 @@ function lookLines({ face, details, answered }, guess) {
 }
 
 function specText({ title, length }) {
-  const beats = starterBeats(length);
+  const beats = starterBeats(length, [title, STARTER_LINE]);
   return [
     '### Shots',
     table(['id', 'start s', 'end s', 'the viewer notices', 'move in', 'move out', 'camera', 'ground'],

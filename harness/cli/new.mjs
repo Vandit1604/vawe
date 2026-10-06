@@ -13,7 +13,7 @@ import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
-import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls, PLACEHOLDER } from '../lib/measured-brief.mjs';
+import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls, PLACEHOLDER, STARTER_LINE } from '../lib/measured-brief.mjs';
 import { dialRanges, signatureSection } from '../lib/signature.mjs';
 import { recentFromDisk, varietyFor, namesBrandKit } from '../lib/variety.mjs';
 import { DIALS } from '../../core/motion/signature.js';
@@ -182,24 +182,23 @@ export function starterFace(name = '') {
 
 const beatVars = (beats) => beats.map((b, i) => `--beat-${i + 1}: ${b.start}s;`).join(' ');
 
-const FACTS = ['first fact', 'second fact', 'the one that matters'];
-
 function worldsHtml(n, title) {
-  const facts = (i) => (i === 2 ? FACTS : [`fact for beat ${i}`, 'another fact']).map((t) => `<li>${t}</li>`).join('');
+  const facts = (i) => `<li>fact ${i}</li>`;
   const rest = Array.from({ length: n - 1 }, (_, k) => `<section class="world" data-world="s${k + 2}">
   <ul class="facts">${facts(k + 2)}</ul>
 </section>`);
   return [`<main class="world" data-world="s1">
   <h1>${title}</h1>
-  <p class="line">one line that backs it up</p>
+  <p class="line">${STARTER_LINE}</p>
 </main>`, ...rest].join('\n');
 }
 
 export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
+  const beats = starterBeats(length, [title, STARTER_LINE]);
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
     .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family).replaceAll('{{ground}}', PLACEHOLDER.ground).replaceAll('{{ink}}', PLACEHOLDER.ink)
     .replaceAll('{{signature}}', DIALS.map((d) => `${d}=`).join('; '))
-    .replaceAll('{{beats}}', beatVars(starterBeats(length))).replaceAll('{{worlds}}', worldsHtml(starterBeats(length).length, title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
+    .replaceAll('{{beats}}', beatVars(beats)).replaceAll('{{worlds}}', worldsHtml(beats.length, title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
     .replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
 
