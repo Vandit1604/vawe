@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { sizeLines, capLines, anchorLines, anchorResult } from '../../harness/lib/judge-prompt.mjs';
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+import { sizeLines, capLines, holdLines, anchorLines, anchorResult } from '../../harness/lib/judge-prompt.mjs';
 
 test('the prompt states each image size and what 6% is in that image', () => {
   const text = sizeLines([{ label: 'the sheet', w: 2880, h: 630, tile: 288 }, { label: 'key frame 1', w: 960, h: 540 }]).join('\n');
@@ -18,6 +19,16 @@ test('the measured cap heights come in as facts, smallest first, and only the sm
   assert.equal(lines.length, 9);
   assert.equal(lines[1], '- "line 9" at 9.0 s: cap height 5.5%');
   assert.deepEqual(capLines([]), []);
+});
+
+test('the judge reads the readable-hold numbers of limits.json, so it cannot ask for a hold the check rejects', () => {
+  const hold = LIMITS['readable-hold'];
+  const [text] = holdLines();
+  assert.ok(text.includes(`at least ${hold.hold_floor_s} s`));
+  assert.ok(text.includes(`words x ${hold.prose_s_per_word} s`));
+  assert.ok(text.includes(`words / ${hold.short_words_per_s}`));
+  assert.ok(text.includes(`at most ${hold.ceiling_s} s`));
+  assert.ok(text.includes('6 tiles on the 5 fps sheet'));
 });
 
 test('the anchor question is the same binary question for a reference, a brief and neither', () => {
