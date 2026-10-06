@@ -140,7 +140,7 @@ const LINEAR_CV = 0.15;
 const boxMoved = (a, b, px = STILL_PX) => Math.abs(a[0] - b[0]) > px || Math.abs(a[1] - b[1]) > px || Math.abs(a[2] - b[2]) > px || Math.abs(a[3] - b[3]) > px;
 
 /** The element's own motion: its box in its parent's frame (the parent's move and scale undone) and its own opacity. */
-function ownTrack(track, parentTrack) {
+export function ownTrack(track, parentTrack) {
   if (!parentTrack) return track.map((b) => b.slice(0, 5));
   const [w0, h0] = [parentTrack[0][2], parentTrack[0][3]];
   return track.map((b, k) => {
@@ -181,7 +181,7 @@ function looksLinear(speeds) {
   return mean > 0 && sd / mean < LINEAR_CV;
 }
 
-function inFrame(b, { width, height }) {
+export function inFrame(b, { width, height }) {
   return b[2] > 0 && b[3] > 0 && b[0] < width && b[1] < height && b[0] + b[2] > 0 && b[1] + b[3] > 0 && b[4] > SEEN;
 }
 

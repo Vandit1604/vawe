@@ -1,0 +1,178 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { boxMotion, speedCeiling, overshootShare, textBreathing, textLingers, lingerCeiling, barLint } from '../../harness/lib/bar-lint.mjs';
+import { unwaived } from '../../harness/lib/motion-lint.mjs';
+import { firedRules, firedLines } from '../../harness/lib/taste-steps.mjs';
+import { probeTracks, readHoldProblems, lineNeed } from '../../harness/lib/read-hold.mjs';
+import { worldLimit, readNeed } from '../../harness/lib/worlds.mjs';
+import { EASE } from '../../core/motion/presets.js';
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+
+const W = 1920, H = 1080, DT = 0.04;
+const frame = (tracks, parent = tracks.map(() => -1)) => ({
+  times: tracks[0].map((_, k) => +(k * DT).toFixed(3)), tracks, labels: tracks.map((_, i) => `el${i}`), parent, area: W * H, width: W, height: H,
+});
+const at = (xs, { y = 300, w = 100, h = 100, alpha = 1 } = {}) => xs.map((x, k) => [x, y, w, h, typeof alpha === 'function' ? alpha(k) : alpha, 1]);
+const line = (n, step) => Array.from({ length: n }, (_, k) => k * step);
+
+test('boxMotion: the peak speed is the longest step in frame heights per second, and when it came', () => {
+  const { peaks } = boxMotion(frame([at([0, 10, 30, 60, 100, 140, 180, 190, 195, 196, 196])]));
+  assert.equal(peaks.length, 1);
+  assert.ok(Math.abs(peaks[0].speed - 40 / H / DT) < 1e-9);
+  assert.equal(peaks[0].at, 0.2);
+});
+
+test('boxMotion: a step much longer than its neighbours is a cut, a camera or ground over 60% of the frame is no element, a hidden element does not count', () => {
+  const smooth = line(8, 20);
+  const jumped = [...smooth, 160 + 700, 860, 860, 860];
+  const camera = at(line(11, 20), { w: 1600, h: 900 });
+  const hidden = at(line(11, 20), { alpha: 0 });
+  const { peaks } = boxMotion(frame([at(jumped), camera, hidden]));
+  assert.equal(peaks.length, 1);
+  assert.ok(Math.abs(peaks[0].speed - 20 / H / DT) < 1e-9);
+});
+
+test('boxMotion: the motion a parent carries is not the child\'s own speed', () => {
+  const parent = at(line(11, 30), { w: 600, h: 400 });
+  const child = at(line(11, 30).map((x) => x + 50), { w: 100, h: 50 });
+  assert.deepEqual(boxMotion(frame([parent, child], [-1, 0])).peaks.filter((p) => p.label === 'el1'), []);
+});
+
+test('speedCeiling: the p90 of the moving elements decides, and names the fastest and the second', () => {
+  const peaks = [0.5, 1, 2, 3, 4, 5, 6, 14, 15].map((speed, i) => ({ label: `el${i}`, speed, at: i }));
+  const found = speedCeiling(peaks);
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['speed-ceiling', 'speed-ceiling', 8]]);
+  assert.match(found[0].what, /9 moving elements peaks at 15\.0 frame heights/);
+  assert.match(found[0].what, /Fastest: el8 15\.0 at 8\.00 s, then el7 14\.0 at 7\.00 s/);
+  assert.equal(speedCeiling(peaks.slice(0, 7)).length, 0);
+  assert.equal(speedCeiling(peaks.slice(5, 9)).length, 0, 'fewer than moving_min elements');
+  assert.equal(speedCeiling(null).length, 0);
+});
+
+test('speedCeiling: one fast element among many does not move the p90, and drifts under the floor are not elements', () => {
+  const calm = Array.from({ length: 20 }, (_, i) => ({ label: `a${i}`, speed: 3 + i * 0.1, at: i }));
+  assert.equal(speedCeiling([...calm, { label: 'fast', speed: 19, at: 1 }]).length, 0);
+  const drifts = Array.from({ length: 30 }, (_, i) => ({ label: `d${i}`, speed: 0.05, at: i }));
+  const fast = Array.from({ length: 5 }, (_, i) => ({ label: `f${i}`, speed: 20, at: i }));
+  assert.equal(speedCeiling([...drifts, ...fast]).length, 1);
+});
+
+const rec = (over) => ({ target: 0, label: 'card', id: 'enter', props: ['translate'], delay: 0, duration: 0.5, easing: EASE.land, kfEasings: [], opacity: [0, 1], from: 'translate(0px, 24px)', fullFrame: false, decorative: false, ...over });
+const arrivals = (eases) => eases.map((easing, i) => rec({ target: i, delay: i * 0.6, easing }));
+
+test('overshootShare: a third of the arrivals on a spring is inside the range', () => {
+  assert.deepEqual(overshootShare(arrivals([EASE.pop, EASE.pop, EASE.land, EASE.land, EASE.land, EASE.land])), []);
+});
+
+test('overshootShare: no spring among six arrivals fires, with the first arrival second and the fix named', () => {
+  const found = overshootShare(arrivals(Array(6).fill(EASE.land)));
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['overshoot-share', 'overshoot-share', 0]]);
+  assert.match(found[0].what, /0 of 6 arrivals overshoot \(0%\); the reference films overshoot 21% to 41%/);
+  assert.match(found[0].fix, /EASE\.pop/);
+});
+
+test('overshootShare: far over the range fires, the limit being 1.5 times the reference p90', () => {
+  const found = overshootShare(arrivals(Array(6).fill(EASE.pop)));
+  assert.match(found[0].what, /6 of 6 arrivals overshoot \(100%\)/);
+  assert.ok(LIMITS['overshoot-share'].share_max_pct > 41);
+  assert.equal(overshootShare(arrivals([EASE.pop, EASE.pop, EASE.pop, EASE.pop, EASE.land, EASE.land, EASE.land, EASE.land, EASE.land, EASE.land])).length, 0);
+});
+
+test('overshootShare: css curves count, a fade alone, a decorative layer and a curve it cannot read do not', () => {
+  const bezier = arrivals(['cubic-bezier(0.34, 1.56, 0.64, 1)', 'ease', 'ease-out', 'linear', 'ease-in-out', 'ease-out']);
+  assert.match(overshootShare(bezier)[0].what, /1 of 6/);
+  assert.equal(overshootShare(arrivals(Array(6).fill(EASE.land)).map((r) => ({ ...r, props: ['opacity'] }))).length, 0);
+  assert.equal(overshootShare(arrivals(Array(6).fill(EASE.land)).map((r) => ({ ...r, decorative: true }))).length, 0);
+  assert.equal(overshootShare(arrivals(Array(6).fill('inferred')).map((r) => ({ ...r, easing: 'inferred', kfEasings: ['inferred'] }))).length, 0);
+  assert.equal(overshootShare(arrivals(Array(5).fill(EASE.land))).length, 0, 'fewer than arrivals_min');
+});
+
+test('overshootShare: a page with no animation records reads its arrivals from the boxes', () => {
+  const boxArrivals = [0, 1, 2, 3, 4, 5, 6].map((i) => ({ at: 1 + i, over: i === 0 }));
+  assert.match(overshootShare([], boxArrivals)[0].what, /1 of 7 arrivals overshoot \(14%\)/);
+  assert.equal(overshootShare([], boxArrivals.map((a, i) => ({ ...a, over: i < 2 }))).length, 0);
+  assert.equal(overshootShare(arrivals([EASE.pop, EASE.pop, EASE.land, EASE.land, EASE.land, EASE.land]), boxArrivals).length, 0, 'the records win when they are enough');
+});
+
+test('boxMotion: an arrival is a move that starts faded out and ends faded in; it overshoots when it goes past its end and returns', () => {
+  const fade = (k) => Math.min(1, 0.2 + k * 0.3);
+  const settle = [0, 50, 85, 105, 112, 108, 103, 100, 100, 100, 100, 100];
+  const tight = [0, 50, 80, 95, 100, 100, 100, 100, 100, 100, 100, 100];
+  const { arrivals: found } = boxMotion(frame([at(settle, { alpha: fade }), at(tight, { alpha: fade }), at(settle, { alpha: 1 })]));
+  assert.deepEqual(found.map((a) => a.over), [true, false]);
+});
+
+const at5 = (t, ...texts) => ({ t, lines: texts.map((text, block) => ({ text, box: [0, 0, 400, 60], block })) });
+const CTX = { step: 0.5, frameH: 600 };
+const times = (n) => Array.from({ length: n }, (_, k) => 0.25 + k * 0.5);
+const filmOf = (n, shows) => times(n).map((t, k) => (shows(k) ? at5(t, 'Ship it now') : at5(t)));
+
+test('textBreathing: text in more than 84% of a film fires and names the longest run', () => {
+  const samples = filmOf(40, (k) => k >= 4);
+  const found = textBreathing(samples, CTX);
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['text-breathing', 'text-breathing', 2]]);
+  assert.match(found[0].what, /90% of the film \(18\.0 s in one run from 2\.0 s\)/);
+});
+
+test('textBreathing: rests inside the range, a short film, chrome text and tiny text give no advice', () => {
+  assert.equal(textBreathing(filmOf(40, (k) => k % 4 !== 3), CTX).length, 0);
+  assert.equal(textBreathing(filmOf(8, () => true), CTX).length, 0);
+  const chrome = times(40).map((t) => ({ t, lines: [{ text: 'Inbox', box: [0, 0, 100, 60], chrome: true }] }));
+  assert.equal(textBreathing(chrome, CTX).length, 0);
+  const tiny = times(40).map((t) => ({ t, lines: [{ text: 'credit', box: [0, 0, 100, 6] }] }));
+  assert.equal(textBreathing(tiny, CTX).length, 0);
+});
+
+const shown = (n, from, count, text) => times(n).map((t, k) => (k >= from && k < from + count ? at5(t, text) : at5(t)));
+
+test('textLingers: a one word line on screen 5 s fires with its read time and its ceiling', () => {
+  const found = textLingers(shown(40, 2, 10, 'Launch'), CTX);
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['text-lingers', 'text-lingers', 1]]);
+  assert.match(found[0].what, /"Launch" stays on screen 5\.0 s; it needs 1\.2 s to read, so it may stay 2\.8 s/);
+});
+
+test('textLingers: a line still on screen at the end is the end card and is not measured', () => {
+  assert.equal(textLingers(shown(40, 30, 10, 'Download now'), CTX).length, 0);
+});
+
+test('textLingers: words of one element that arrive one after another are one line', () => {
+  const words = 'one two three four five six seven eight nine ten'.split(' ');
+  const samples = times(40).map((t, k) => ({ t, lines: words.filter((_, i) => k >= 2 + i && k < 16).map((text) => ({ text, box: [0, 0, 100, 60], block: 0 })) }));
+  assert.equal(textLingers(samples, CTX).length, 0);
+  const slow = times(40).map((t, k) => ({ t, lines: words.filter((_, i) => k >= 2 + i && k < 20).map((text) => ({ text, box: [0, 0, 100, 60], block: 0 })) }));
+  assert.match(textLingers(slow, CTX)[0].what, /stays on screen 9\.\d s; it needs 6\.0 s to read, so it may stay 7\.5 s/);
+});
+
+test('text-lingers, readable-hold and the world limit agree for lines of 1, 4, 10 and 20 words', () => {
+  for (const n of [1, 4, 10, 20]) {
+    const text = Array.from({ length: n }, (_, i) => `w${i}`).join(' ');
+    const need = lineNeed(n);
+    const cap = worldLimit({ readNeed: readNeed([text]) });
+    const ceiling = lingerCeiling(need);
+    assert.ok(0.9 * need < ceiling, `${n} words: the readable-hold minimum is under the ceiling`);
+    assert.ok(0.9 * need <= cap, `${n} words: the readable-hold minimum fits in a world`);
+    assert.ok(cap <= ceiling, `${n} words: a line that fills its world stays under the ceiling`);
+    const steps = Math.round(cap / CTX.step);
+    const samples = shown(steps + 40, 2, steps, text);
+    const tracks = probeTracks(samples, CTX);
+    assert.deepEqual(readHoldProblems(tracks), [], `${n} words: held for the world limit passes readable-hold`);
+    assert.deepEqual(textLingers(samples, CTX), [], `${n} words: held for the world limit passes text-lingers`);
+  }
+});
+
+test('barLint: the findings sit in time order, and a window draft has no text findings', () => {
+  const samples = filmOf(40, (k) => k >= 4);
+  const all = barLint({ records: arrivals(Array(6).fill(EASE.land)), boxes: null, text: { samples, ctx: CTX } });
+  assert.deepEqual(all.map((f) => f.code), ['overshoot-share', 'text-breathing']);
+  assert.deepEqual(barLint({ records: [], boxes: null, text: null }), []);
+});
+
+test('a bar finding is waived by its code, and fires its rule id into rules_fired and the printed line', () => {
+  const found = barLint({ records: arrivals(Array(6).fill(EASE.land)), boxes: null, text: null });
+  assert.deepEqual(unwaived(found, { allow: ['overshoot-share'], _why: { 'overshoot-share': 'the film is a typewriter' } }), []);
+  assert.equal(unwaived(found, {}).length, 1);
+  const fired = firedRules(found, []);
+  assert.deepEqual(fired.map((f) => f.id), ['overshoot-share']);
+  const [printed] = firedLines(fired);
+  assert.match(printed, /\(rule overshoot-share, taste\/rules\/overshoot-share\.md\); instead: give about 1 in 3 arrivals/);
+});
