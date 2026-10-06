@@ -362,7 +362,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
   ];
   const spread = variety.lines.length ? ['', ...variety.lines] : [];
   return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('concept'), '',
-    ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
+    ...adviceBlock(advice, '(advice only)'), '', `next: design one static frame per world in page.html, then bin/vawe frames ${page}`];
 }
 
 /**
