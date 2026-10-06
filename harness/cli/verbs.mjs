@@ -192,15 +192,15 @@ export const VERBS = [
     next: () => 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild',
   },
   {
-    name: 'refs', summary: 'the reference films the fresh judge compares your film with (kept outside the repo in ~/.vawe/refs, or $VAWE_REFS_DIR)',
-    positional: [{ name: 'action', required: true, help: 'list, index (build refs.json from the folder), or add' }, { name: 'source', help: 'with add: an mp4 file or a URL (yt-dlp, 360p)' }],
+    name: 'refs', summary: 'the top reference films to study before you design, and that the fresh judge compares your film with (kept outside the repo in ~/.vawe/refs, or $VAWE_REFS_DIR)',
+    positional: [{ name: 'action', required: true, help: 'list, index (build refs.json from the folder), add, or frames (the settled full-size frame of each shot, into frames/<id>/)' }, { name: 'source', help: 'with add: an mp4 file or a URL (yt-dlp, 360p); with frames: one film id (default: every film in scope)' }],
     flags: [
       { name: 'type', type: 'string', help: 'with add: product (product and UI launch films) or brand (idents, brand and studio films)' },
       { name: 'title', type: 'string', help: 'with add: the film title' },
     ],
-    example: 'vawe refs list   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
+    example: 'vawe refs list   |   vawe refs frames u6iro1jHujs   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
     build: (v, [action, source]) => [{ script: 'harness/dev/refs.mjs', args: [action, ...(source ? [source] : []), ...opt('--type', v.type), ...opt('--title', v.title)] }],
-    next: (v, [action]) => (action === 'list' ? 'bin/vawe judge <film.mp4> --fresh --brief films/<name>/brief.md reads two of these beside your film' : 'bin/vawe refs list'),
+    next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read ~/.vawe/refs/frames/<id>/*.png at full size before you design' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
   },
   {
     name: 'studio', summary: 'live scrubbable preview; edits the page literals in place',
