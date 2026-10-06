@@ -41,10 +41,17 @@ const STARTER_TEMPLATE = `<!doctype html>
   @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
   :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; {{beats}} }
   html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
-  .world { position: absolute; inset: 0; box-sizing: border-box; display: grid; align-content: end; gap: calc(var(--vh) * 0.03);
+  .world { position: absolute; inset: 0; isolation: isolate; box-sizing: border-box; display: grid; align-content: end; gap: calc(var(--vh) * 0.03);
            padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); font-family: "{{family}}", sans-serif; }
-  .world:nth-child(odd) { background: var(--ground); color: var(--ink); }
-  .world:nth-child(even) { background: var(--ink); color: var(--ground); }
+  .world:nth-child(odd) { background: var(--ground); color: var(--ink);
+    --glow-1: color-mix(in srgb, var(--ground), white 45%); --glow-2: color-mix(in srgb, var(--ground), white 25%); --glow-3: color-mix(in srgb, var(--ground), var(--ink) 22%); }
+  .world:nth-child(even) { background: var(--ink); color: var(--ground);
+    --glow-1: color-mix(in srgb, var(--ink), var(--ground) 70%); --glow-2: color-mix(in srgb, var(--ink), var(--ground) 45%); --glow-3: color-mix(in srgb, var(--ink), black 40%); }
+  .ground { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .ground i { position: absolute; width: calc(var(--vh) * 0.95); height: calc(var(--vh) * 0.95); border-radius: 50%; }
+  .ground i:nth-child(1) { right: -5%; top: -30%; background: radial-gradient(closest-side, var(--glow-1), transparent); }
+  .ground i:nth-child(2) { right: 15%; bottom: -35%; background: radial-gradient(closest-side, var(--glow-2), transparent); }
+  .ground i:nth-child(3) { left: 38%; top: 20%; background: radial-gradient(closest-side, var(--glow-3), transparent); }
   h1 { margin: 0; font-size: calc(var(--vh) * 0.14); font-weight: 700; line-height: 1; }
   .line { margin: 0; font-size: calc(var(--vh) * 0.09); }
   .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
@@ -59,24 +66,33 @@ const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-'
 const end = parseFloat(document.querySelector('meta[name="duration"]').content);
 const $ = (s) => document.querySelector(s);
 const worlds = [...document.querySelectorAll('[data-world]')];
+// each ground blob drifts by [x, y] fractions of the frame while its world shows; a world with no words also blooms them
+const DRIFT = [[-0.2, 0.1], [0.18, -0.2], [0.14, -0.16]];
+const blobs = (world, from, to, keyframes, easing) => world.querySelectorAll('.ground i').forEach((blob, k) => blob.animate(keyframes(k), { delay: from * 1000, duration: (to - from) * 1000, easing, fill: 'both' }));
+const drift = (world, from, to) => blobs(world, from, to, (k) => [{ translate: '0 0' }, { translate: 'calc(var(--vw) * ' + DRIFT[k][0] + ') calc(var(--vh) * ' + DRIFT[k][1] + ')' }], EASE.glide);
+const bloom = (world, from, to) => blobs(world, from, to, () => [{ scale: 0.7 }, { scale: 1.25 }], EASE.land);
 const cutTo = (el, visibility, at, fill) => el.animate([{ visibility: visibility === 'visible' ? 'hidden' : 'visible' }, { visibility }], { delay: at * 1000, duration: 1, fill });
 worlds.forEach((world, i) => {
   const last = i + 1 === worlds.length;
   const stop = last ? end : beat(i + 2);
   if (i === 0) {
     cutTo(world, 'hidden', stop, 'forwards');
-    layer($('h1'), $('.line'), { at: beat(1) });
+    drift(world, 0, stop);
+    layer($('h1'), $('.line'), { at: beat(1), blur: 14, from: '0 0.4em', secondary: { blur: 8 } });
     leave($('.line'), { end: stop - 0.06 });
     leave($('h1'), { end: stop });
     world.animate([{ scale: 1 }, { scale: 1.05 }], { duration: stop * 1000, easing: EASE.glide, fill: 'both' });
     return;
   }
   // the cut frame already carries the first fact moving: a blank frame there fails the draft check
-  const cut = beat(i + 1) - 0.04;
+  const cut = beat(i + 1) - 0.03;
   cutTo(world, 'visible', cut, 'both');
   if (!last) cutTo(world, 'hidden', stop, 'forwards');
-  stagger(world.querySelectorAll('.facts li'), { at: cut, from: '0.6em 0' });
-  world.querySelector('.facts').animate([{ translate: '0 0' }, { translate: '0 -0.4em' }], { delay: cut * 1000, duration: (stop - cut) * 1000, easing: EASE.glide, fill: 'both' });
+  drift(world, cut, stop);
+  const facts = world.querySelector('.facts');
+  if (!facts) return bloom(world, cut, stop);
+  stagger(facts.querySelectorAll('li'), { at: cut, from: '0.6em 0', blur: 10, ...(i % 2 ? {} : { ease: 'pop' }) });
+  facts.animate([{ translate: '0 0' }, { translate: '0 -0.4em' }], { delay: cut * 1000, duration: (stop - cut) * 1000, easing: EASE.glide, fill: 'both' });
 });
 </script>
 </head>
@@ -182,12 +198,14 @@ export function starterFace(name = '') {
 
 const beatVars = (beats) => beats.map((b, i) => `--beat-${i + 1}: ${b.start}s;`).join(' ');
 
-function worldsHtml(n, title) {
-  const facts = (i) => `<li>fact ${i}</li>`;
-  const rest = Array.from({ length: n - 1 }, (_, k) => `<section class="world" data-world="s${k + 2}">
-  <ul class="facts">${facts(k + 2)}</ul>
+const GROUND = '<div class="ground" aria-hidden="true"><i></i><i></i><i></i></div>';
+
+function worldsHtml(beats, title) {
+  const rest = beats.slice(1).map((b, k) => `<section class="world" data-world="s${k + 2}">
+  ${GROUND}${b.wordless ? '' : `\n  <ul class="facts"><li>fact ${k + 2}</li></ul>`}
 </section>`);
   return [`<main class="world" data-world="s1">
+  ${GROUND}
   <h1>${title}</h1>
   <p class="line">${STARTER_LINE}</p>
 </main>`, ...rest].join('\n');
@@ -198,7 +216,7 @@ export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
     .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family).replaceAll('{{ground}}', PLACEHOLDER.ground).replaceAll('{{ink}}', PLACEHOLDER.ink)
     .replaceAll('{{signature}}', DIALS.map((d) => `${d}=`).join('; '))
-    .replaceAll('{{beats}}', beatVars(beats)).replaceAll('{{worlds}}', worldsHtml(beats.length, title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
+    .replaceAll('{{beats}}', beatVars(beats)).replaceAll('{{worlds}}', worldsHtml(beats, title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
     .replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
 

@@ -93,3 +93,18 @@ test('a flat run inside worlds that show text is not blank; a run past them is',
   assert.equal(insideTextWorlds(spans, { a: 1, b: 5.9 }), true);
   assert.equal(insideTextWorlds(spans, { a: 5, b: 7.5 }), false);
 });
+
+test('the starter rests the eye: every fourth world after the first three, never the last, shows no words and lasts the limit', async () => {
+  const { starterBeats } = await import('../../harness/lib/worlds.mjs');
+  const quiet = (length) => starterBeats(length).filter((b) => b.wordless);
+  assert.deepEqual(quiet(8), []);
+  assert.deepEqual(quiet(12).map((b) => b.id), ['s4']);
+  assert.deepEqual(quiet(20).map((b) => b.id), ['s4', 's8']);
+  for (const length of [10, 12, 20, 30, 61]) {
+    const beats = starterBeats(length);
+    assert.equal(beats.at(-1).wordless, false);
+    assert.equal(beats.at(-1).end, length);
+    for (const b of quiet(length)) assert.equal(+(b.end - b.start).toFixed(2), TURN_SECONDS_MAX);
+    beats.slice(1).forEach((b, i) => assert.equal(b.start, beats[i].end));
+  }
+});
