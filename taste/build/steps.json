@@ -28,6 +28,10 @@
     "text": "show the subject by 0.1 s, not an empty ground for the first half second"
    },
    {
+    "rule": "living-ground",
+    "text": "put soft colour blobs behind the content, not one flat fill"
+   },
+   {
     "rule": "one-focal-point",
     "text": "give each frame one focal point and one accent colour, not two things fighting"
    },

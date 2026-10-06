@@ -18,7 +18,7 @@ export const CHECK_IDS = ['judge', 'none', 'world-held', 'static-window', 'sheet
   'exit-length', 'group-landing', 'linear-move', 'default-ease', 'seam-repeat', 'one-band', 'dead-stop', 'sound-peak', 'sound-loudness',
   'attractors', 'range', 'no-emdash', 'type-sizes', 'font-families', 'display-tracking', 'left-edges', 'text-margin', 'accent-flood',
   'entrance-direction', 'ease-count', 'lockstep', 'pure-black-white', 'template-chrome', 'coloured-word',
-  'speed-ceiling', 'overshoot-share', 'text-breathing', 'text-lingers'];
+  'speed-ceiling', 'overshoot-share', 'text-breathing', 'text-lingers', 'living-ground'];
 
 const REQUIRED = ['id', 'step', 'principle', 'limit', 'range', 'break-when', 'instead', 'check', 'judge', 'prevents', 'status', 'scored', 'numbers'];
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;

@@ -9,6 +9,7 @@ Every command prints the lines of its step again. All rules: `taste/README.md`. 
 - Show real things working, not slogans in boxes; no fake product UI. (show-real-thing)
 - One thread carries through (object, type line, colour or rhythm), not separate reveals one after another. (thread)
 - One accent hue, on one thing; never a full-frame flood. (accent-share)
+- A ground is never one flat fill: soft blobs or light behind the content, drifting. (living-ground)
 - Read lines: cap height 6 percent of the frame or more, held max(1.2 s, words / 3); prose words x 0.6 s. Add hold, never slow the move. (readable-hold)
 - Use the kit's face and ground, or a face the direction chose; not Inter or Space Grotesk by habit. (typeface-default)
 - Turn the world at least every 2 s or at each beat; no one lockup held. (world-turns)

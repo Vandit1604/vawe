@@ -1,7 +1,7 @@
 // The layout lint: advice lines on how a frame is built, read from the DOM at settled moments (harness/media/draft-check.mjs
 // layoutSample). Each finding is { code, rule, at, what, fix } like the motion lint's. Every number is read from
 // taste/build/limits.json under the rule that owns it. Pure. A sample is { t, w, h, accent, texts, blocks, boxes }.
-// Not measured: SVG, canvas and image fills, gradients, and a ground the page never paints (the browser's white).
+// Not measured: SVG, and a ground the page never paints (the browser's white).
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { heldPlaces, placeKey } from './draft-check.mjs';
 
@@ -127,6 +127,19 @@ export function pureBlackWhite(samples) {
   return [];
 }
 
+const MEDIA = /^(img|video|canvas)$/;
+const layered = (b) => b.image || b.blurred || MEDIA.test(b.tag);
+
+/** The share (0 to 1) of samples whose frame has no gradient, image, blurred or media layer over the ground_layer_area_pct_min of its area, over the limit (rule living-ground). One sample is one world in `bin/vawe frames`. */
+export function livingGround(samples) {
+  const { ground_layer_area_pct_min: min, flat_samples_share_max_pct: max } = L['living-ground'];
+  const read = samples.filter((s) => s.boxes.length);
+  const flat = read.filter((s) => coveredShare(s.boxes.filter((b) => b.op >= 0.5 && layered(b)).map((b) => b.box), s) * 100 < min);
+  if (!read.length || (100 * flat.length) / read.length <= max) return [];
+  return [finding('living-ground', 'living-ground', flat[0].t, `${flat.length} of ${read.length} sampled frames have one flat ground: no gradient, image or blurred layer behind the content`,
+    'put soft colour blobs behind the content and let them drift (prompts/moves/gradient-mesh-field.md, light-pool.md)')];
+}
+
 const MARKER = /^\(?0\d\)?(\s*[/.]\s*0\d)*\.?$/;
 const SLASHED = /[/]/;
 
@@ -231,7 +244,7 @@ export function colouredWords(samples, named = '') {
 export function layoutLint(samples, { named = '', held = null } = {}) {
   if (held) samples = samples.map((s) => ({ ...s, texts: s.texts.filter((t) => held.has(placeKey(t.text, t.box))) }));
   return [...typeSizes(samples), ...fontFamilies(samples), ...displayTracking(samples), ...leftEdges(samples), ...textMargin(samples), ...accentFlood(samples),
-    ...pureBlackWhite(samples), ...templateChrome(samples), ...colouredWords(samples, named)].sort((a, b) => a.at - b.at);
+    ...pureBlackWhite(samples), ...templateChrome(samples), ...colouredWords(samples, named), ...livingGround(samples)].sort((a, b) => a.at - b.at);
 }
 
 /** The layout findings of a draft probe (its layout samples and its text samples), in time order. */

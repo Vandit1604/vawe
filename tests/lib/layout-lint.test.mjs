@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { typeSizes, fontFamilies, displayTracking, leftEdges, textMargin, accentFlood, pureBlackWhite, templateChrome, colouredWords, coveredShare, namedText, layoutLint } from '../../harness/lib/layout-lint.mjs';
+import { typeSizes, fontFamilies, displayTracking, leftEdges, textMargin, accentFlood, pureBlackWhite, templateChrome, colouredWords, livingGround, coveredShare, namedText, layoutLint } from '../../harness/lib/layout-lint.mjs';
 import { layoutTimes, heldPlaces, placeKey } from '../../harness/lib/draft-check.mjs';
 import { CHECK_TIER, runsIn } from '../../harness/lib/draft-tiers.mjs';
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
@@ -152,4 +152,25 @@ test('coloured word: a page with no message and no beats names nothing, so the c
   const frame = sample({ texts: [text({ text: 'Design that feels', block: 0 }), text({ text: 'expensive', color: accent, block: 0 })] });
   assert.equal(colouredWords([frame], '').length, 0);
   assert.equal(colouredWords([frame], namedText('one thing', '')).length, 1);
+});
+
+test('living ground: a frame with no gradient, blur, image or canvas layer is flat; a blob over 15 percent is not', () => {
+  const flat = sample({ boxes: [box({ box: [0, 0, 1920, 1080], bg: [140, 140, 140, 1] })] });
+  const blob = (over) => sample({ boxes: [box({ box: [0, 0, 1920, 1080], bg: [140, 140, 140, 1] }), box({ box: [100, 0, 900, 900], decorative: true, image: true, ...over })] });
+  const [f] = livingGround([flat]);
+  assert.deepEqual([f.code, f.rule, f.at], ['living-ground', 'living-ground', 1]);
+  assert.equal(livingGround([blob()]).length, 0);
+  assert.equal(livingGround([blob({ image: false, blurred: true })]).length, 0);
+  assert.equal(livingGround([blob({ image: false, tag: 'canvas' })]).length, 0);
+  assert.equal(livingGround([blob({ box: [0, 0, 200, 200] })]).length, 1);
+  assert.equal(livingGround([blob({ op: 0.1 })]).length, 1);
+});
+
+test('living ground: fires when more than half the samples are flat, and a one-world sample is judged alone', () => {
+  const flat = sample({ boxes: [box({ box: [0, 0, 1920, 1080] })] });
+  const live = sample({ boxes: [box({ box: [0, 0, 1920, 1080], image: true })] });
+  assert.equal(livingGround([flat, live]).length, 0);
+  assert.equal(livingGround([flat, flat, live]).length, 1);
+  assert.equal(livingGround([]).length, 0);
+  assert.equal(layoutLint([flat]).filter((f) => f.code === 'living-ground').length, 1);
 });

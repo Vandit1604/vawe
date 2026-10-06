@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.
 
-105 rules, 34 scored by the judge.
+106 rules, 34 scored by the judge.
 
 ## concept
 
@@ -57,6 +57,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [image-source-order](rules/image-source-order.md): Use the lightest visual that carries the meaning, and take it from the best source. Check: judge.
 - [image-treatment](rules/image-treatment.md): Treat every image by what it must do. Check: judge.
 - [licensed-assets](rules/licensed-assets.md): Embed only assets you may publish. Check: none.
+- [living-ground](rules/living-ground.md): A ground has depth. Check: living-ground.
 - [logo-prominence](rules/logo-prominence.md): A mark reads as the brand, not as punctuation, next to the title and on the end card. Check: none.
 - [one-focal-point](rules/one-focal-point.md): One focal point per frame and one accent colour per frame. Check: judge.
 - [palette-from-brand](rules/palette-from-brand.md): Colours come from the brand or the brief: take them from the real pixels and the real CSS, and declare the palette once as :root custom properties. Check: judge, pure-black-white.
