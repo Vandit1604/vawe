@@ -92,7 +92,7 @@ test('bar counts wins and losses per dial from the latest judge of each film tha
     two: [judge('2026-10-01T03:00:00Z', 10, { bar: bar('ours', 'ours', 'R') })],
     three: [judge('2026-10-01T04:00:00Z', 10)],
   });
-  assert.deepEqual(r.bar, { films: 2, dials: { text: { won: 2, lost: 0 }, colour: { won: 1, lost: 1 }, motion: { won: 0, lost: 2 } } });
+  assert.deepEqual(r.bar, { films: 2, dials: { text: { won: 2, lost: 0 }, colour: { won: 1, lost: 1 }, motion: { won: 0, lost: 2 }, craft: { won: 0, lost: 0 } } });
   assert.ok(tasteLines(r).some((l) => l === 'bar (latest judge per film, ours against reference films, 2 films): text won 2 lost 0, colour won 1 lost 1, motion won 0 lost 2'));
   assert.ok(tasteLines(reportFor({})).some((l) => l.startsWith('bar: no judge run')));
 });

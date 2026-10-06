@@ -151,7 +151,7 @@ export function tasteLines(r) {
     `sameness (siblings the judge named): ${r.sameness.length ? '' : 'none'}`.trimEnd(), ...pairs, ...(r.sameness.length > pairs.length ? [`... ${r.sameness.length - pairs.length} more pairs (use --json)`] : []),
     `attractor hits by day: ${r.attractors.length ? r.attractors.map((a) => `${a.day} ${a.n}`).join(', ') : 'none logged'}`,
     `template tells (judge): ${r.template.length ? r.template.slice(0, TEMPLATE_FILMS_SHOWN).map((t) => `${t.film} ${t.n}`).join(', ') : 'none'}`,
-    r.bar.films ? `bar (latest judge per film, ours against reference films, ${r.bar.films} films): ${BAR_DIALS.map((d) => `${d} won ${r.bar.dials[d].won} lost ${r.bar.dials[d].lost}`).join(', ')}` : 'bar: no judge run compared a film with reference films'];
+    r.bar.films ? `bar (latest judge per film, ours against reference films, ${r.bar.films} films): ${BAR_DIALS.filter((d) => r.bar.dials[d].won + r.bar.dials[d].lost).map((d) => `${d} won ${r.bar.dials[d].won} lost ${r.bar.dials[d].lost}`).join(', ')}` : 'bar: no judge run compared a film with reference films'];
   const rulesHead = ['', 'rules: fired = draft fires + judge fails; fixed = gone in the next draft; gain = judge total across that draft (shared by the rules it fixed)'];
   const room = MAX_LINES - [...head, ...rulesHead, ...dead, ...variety, ...tail].length - 1;
   const shown = r.rows.length > room ? r.rows.slice(0, Math.max(room - 1, 0)) : r.rows;

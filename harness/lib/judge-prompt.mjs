@@ -62,6 +62,7 @@ const DIAL_HELP = {
   text: 'faces, scale contrast, hierarchy, how words arrive and leave',
   colour: 'palette, light, contrast, how the colour changes',
   motion: 'the type and the speed of the moves: curves, overlap, the pace of the cuts',
+  craft: 'how rich and finished each frame is: layers and depth, a living ground, light and texture, how many ideas per second; a plain frame with one element on a flat ground loses',
 };
 
 /** The prompt lines for the comparison. `refs` are { id, title, studio, file }: the sheet of each reference film. */
