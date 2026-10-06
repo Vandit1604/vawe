@@ -203,10 +203,23 @@ function layoutBoxes(env) {
     };
   };
   const skipTag = (el) => /^(SCRIPT|STYLE|NOSCRIPT|TITLE|LINK|META)$/.test(el.tagName) || el instanceof SVGElement;
+  // A ::before or ::after that paints a gradient, image or blur is its own box with no parent, so only the living-ground lint counts it.
+  const pseudoBoxes = (el, host) => ['::before', '::after'].map((which) => {
+    const cs = getComputedStyle(el, which);
+    const blurred = cs.filter.includes('blur');
+    if (cs.content === 'none' || (cs.backgroundImage === 'none' && !blurred)) return null;
+    const placed = /^(absolute|fixed)$/.test(cs.position);
+    const [w, h] = [parseFloat(cs.width), parseFloat(cs.height)];
+    return {
+      tag: which, p: -1, box: [host.box[0] + (placed ? parseFloat(cs.left) || 0 : 0), host.box[1] + (placed ? parseFloat(cs.top) || 0 : 0), w > 0 ? w : host.box[2], h > 0 ? h : host.box[3]],
+      op: host.op * Number(cs.opacity), bg: null, image: cs.backgroundImage !== 'none', blurred,
+      border: { l: [0, null], r: [0, null], t: [0, null], b: [0, null] }, radius: 0, shadow: false, decorative: host.decorative,
+    };
+  }).filter(Boolean);
   for (const el of [document.documentElement, document.body, ...document.body.querySelectorAll('*')]) {
     if (boxes.length >= 300) break;
     const b = skipTag(el) ? null : boxOf(el);
-    if (b) { listed.set(el, boxes.length); boxes.push(b); }
+    if (b) { listed.set(el, boxes.length); boxes.push(b, ...pseudoBoxes(el, b)); }
   }
   return boxes;
 }

@@ -11,11 +11,16 @@ The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start wi
 `bin/vawe new <name>`; this skill holds the code a first draft gets wrong. Taste pitfalls are in
 `taste/build/DIGEST.md`.
 
-Study first: `bin/vawe refs frames`, then Read `~/.vawe/refs/frames/<id>/*.png` at full size and write what you take
-from which frame. Use `bin/vawe` verbs, never raw ffmpeg or Chrome (`bin/vawe --help`).
-Order: design each `data-world` beat as a static frame first (`bin/vawe frames <page>`, one still per
-world), then write the Shots rows for the motion, then the motion, then `bin/vawe dev`. A film is a
-well designed website plus storyboarded motion.
+This file is `skills/vawe-page/SKILL.md` in the repo. Use `bin/vawe` verbs, never raw ffmpeg or Chrome (`bin/vawe --help`).
+Order: (1) the brief, facts only. (2) Study the references (`bin/vawe refs frames`, Read `~/.vawe/refs/frames/<id>/*.png`
+at full size), then fill brief.md "Taken from": 4 to 6 named frame paths and what each gives. (3) Write
+`films/<name>/DESIGN.md` and `films/<name>/kit/`: ground layers, and each moving part (word, mark, bar, card, icon,
+wordmark) as its own element. Fetch skills with `command npx -y ui-skills get <slug>`: `leonxlnx/soft-skill` (builder),
+`pbakaus/colorize`, `mengto/progressive-blur`. Take the principles; reject web-page patterns (nav, CTA button, pill,
+eyebrow, section padding): a video frame is not a hero page. Record the skills used and the rules rejected in DESIGN.md.
+(4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a
+ground that is never flat (a light, grain or depth device named from a reference frame, changed at each world turn). Then
+the Shots rows, the motion and `bin/vawe dev`: phases 5 and 6 (board, motion) are still being tested.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->

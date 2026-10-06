@@ -115,8 +115,10 @@ test('a thin request asks the unanswered details, in order, and writes nothing',
   assert.deepEqual(made.asked.map((d) => d.key), DETAIL_KEYS);
   assert.equal(fs.existsSync(path.join(root, 'films')), false);
   const lines = newFilmLines('zz', made);
-  assert.equal(lines[0], 'agents: run with --questions-json and ask with AskUserQuestion');
-  assert.ok(lines.includes('vawe new: 8 details needed before a good brief'));
+  assert.match(lines[0], /^agents: with AskUserQuestion, run --questions-json; without it, write the answers file/);
+  assert.ok(lines.includes('vawe new: 6 facts needed before a good brief'));
+  assert.ok(lines.includes('  subject: Argus, a log search tool for on-call engineers at small SaaS teams'));
+  assert.ok(!lines.some((l) => /^\d+\. (look|family)\b/.test(l)), 'look and family are phase 3, not asked');
   assert.ok(lines.some((l) => l.startsWith('1. subject: ')));
   assert.ok(lines.some((l) => l.includes('why: ')) && lines.some((l) => l.includes('example: ')));
   assert.ok(lines.some((l) => l.startsWith('  bin/vawe new zz --request "a launch film for Argus"') && l.endsWith('--answers <file>')));
@@ -129,7 +131,6 @@ test('a full request writes the brief with no guess marker on an answered field'
   assert.equal(made.asked, undefined);
   const text = briefOf(root);
   for (const key of ['what', 'for', 'message', 'show']) assert.match(text, new RegExp(`^- ${key}: (?!.*guess: change me).+$`, 'm'));
-  assert.match(text, /^- look: named in what$/m);
   assert.ok(!made.guesses.includes('what') && !made.guesses.includes('for') && !made.guesses.includes('message'));
   fs.rmSync(root, { recursive: true, force: true });
 });
@@ -137,9 +138,9 @@ test('a full request writes the brief with no guess marker on an answered field'
 test('--detail and --answers fill the fields, and an unanswered optional detail does not stop the run', () => {
   const root = sandbox();
   const file = path.join(root, 'answers.md');
-  fs.writeFileSync(file, '# answers\n\n- subject: Argus, log search for on-call engineers\n2. message: find the bug in seconds, big moment at 4 s\nshow: the result list\nlook: dark, red accent\n');
-  const details = readDetails({ answers: file, detail: ['look=light ground, serif', 'format=12 s, 9:16'] });
-  assert.equal(details.look, 'light ground, serif');
+  fs.writeFileSync(file, '# answers\n\n- subject: Argus, log search for on-call engineers\n2. message: find the bug in seconds, big moment at 4 s\nshow: the result list\n');
+  const details = readDetails({ answers: file, detail: ['assets=none, invent all', 'format=12 s, 9:16'] });
+  assert.equal(details.assets, 'none, invent all');
   const made = runNew(root, { request: 'launch film', details });
   assert.equal(made.asked, undefined);
   const text = briefOf(root);
@@ -148,7 +149,7 @@ test('--detail and --answers fill the fields, and an unanswered optional detail 
   assert.match(text, /^- message: find the bug in seconds, big moment at 4 s$/m);
   assert.match(text, /^- spectacle: 4 s$/m);
   assert.match(text, /^- show: the result list$/m);
-  assert.match(text, /^- look: light ground, serif$/m);
+  assert.match(text, /^- assets: none, invent all$/m);
   assert.match(fs.readFileSync(path.join(root, 'films/zz/page.html'), 'utf8'), /name="duration" content="12"[\s\S]*name="aspect" content="9:16"/);
   assert.throws(() => readDetails({ detail: ['color=red'] }), /not a detail/);
   fs.rmSync(root, { recursive: true, force: true });
@@ -156,9 +157,9 @@ test('--detail and --answers fill the fields, and an unanswered optional detail 
 
 test('--questions-json shape: at most 4 questions per call, short headers, 2 to 4 options, recommended first', () => {
   const { calls, answer_with } = questionsJson('zz', { request: 'a launch film for Argus' });
-  assert.deepEqual(calls.map((c) => c.questions.length), [4, 4]);
+  assert.deepEqual(calls.map((c) => c.questions.length), [4, 2]);
   const all = calls.flatMap((c) => c.questions);
-  assert.deepEqual(all.map((q) => q.header), ['Subject', 'Message', 'Show', 'Look', 'Format', 'Family', 'Assets', 'Ending']);
+  assert.deepEqual(all.map((q) => q.header), ['Subject', 'Message', 'Show', 'Format', 'Assets', 'Ending']);
   for (const q of all) {
     assert.ok(q.header.length <= 12 && q.question && q.multiSelect === false);
     assert.ok(q.options.length >= 2 && q.options.length <= 4);
@@ -170,7 +171,7 @@ test('--questions-json shape: at most 4 questions per call, short headers, 2 to 
 });
 
 test('--questions-json lists only the open details, and options fall back to generic choices', () => {
-  const { calls } = questionsJson('zz', { request: FULL, details: { family: 'type-led' }, length: 12 });
+  const { calls } = questionsJson('zz', { request: FULL, details: { show: 'the result list' }, length: 12 });
   assert.deepEqual(calls.flatMap((c) => c.questions.map((q) => q.header)), ['Assets', 'Ending']);
   assert.equal(optionsFor({ key: 'subject' }, 'a film')[0].label, 'A developer tool (Recommended)');
 });
@@ -199,6 +200,17 @@ test('with no length anywhere, the page takes the template default length the br
   assert.ok(stated > 0);
   assert.match(fs.readFileSync(path.join(root, 'films/zz/page.html'), 'utf8'), new RegExp(`name="duration" content="${stated}"`));
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('the brief carries a Taken from table, the design system step and the states budget, and no URL or capture line for an invented product', () => {
+  const { text } = briefFor('beat-sheet.md', { request: 'a 20 s launch film for Loomline, an invented app', length: 20 });
+  const found = headings(text);
+  assert.ok(found.indexOf('Taken from') > found.indexOf('Task') && found.indexOf('Taken from') < found.indexOf('Directions'));
+  assert.ok(found.indexOf('Design system and kit') > found.indexOf('Look') && found.indexOf('States') > found.indexOf('Design system and kit'));
+  assert.match(text, /name 4 to 6 frames/);
+  assert.match(text, /about 1 line and 2 or 3 things/);
+  assert.match(text, /soft-skill[\s\S]*colorize[\s\S]*progressive-blur/);
+  assert.ok(!/^- (url|promise):/im.test(text) && !/never a placeholder/.test(text));
 });
 
 test('plain questions and --questions-json ask the same details', () => {
