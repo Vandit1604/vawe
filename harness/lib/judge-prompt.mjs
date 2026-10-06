@@ -3,6 +3,7 @@
 
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { HOLD_RULE } from './read-hold.mjs';
+import { DIALS } from './judge-bar.mjs';
 
 // The card the fresh judge reads, built from taste/rules by harness/dev/taste-build.mjs.
 export const TASTE_CARD_REL = 'taste/build/CARD.md';
@@ -55,4 +56,22 @@ export function anchorResult(raw, keys) {
     const yes = given.yes === true || /^yes$/i.test(String(given.yes));
     return { frame: label, at: k.t, yes, fix: yes ? null : given.fix || 'no fix given' };
   });
+}
+
+const DIAL_HELP = {
+  text: 'faces, scale contrast, hierarchy, how words arrive and leave',
+  colour: 'palette, light, contrast, how the colour changes',
+  motion: 'the type and the speed of the moves: curves, overlap, the pace of the cuts',
+};
+
+/** The prompt lines for the comparison. `refs` are { id, title, studio, file }: the sheet of each reference film. */
+export function barLines(refs) {
+  const ids = refs.map((r) => r.id);
+  return [
+    `Side by side. ${refs.length === 1 ? 'A reference film' : `${refs.length} reference films`} by top studios, each a sheet laid out like the sheet of this film. Open ${refs.length === 1 ? 'it' : 'every one'} before you answer:`,
+    ...refs.map((r) => `- REF ${r.id} (${r.title}${r.studio ? `, ${r.studio}` : ''}): ${r.file}`),
+    'For each reference and each dial, say which film is better: OURS or that REF. Judge what the sheets show, not the budget. Do not favour OURS. Each answer names the visible difference in one sentence.',
+    ...DIALS.map((d) => `- ${d}: ${DIAL_HELP[d]}`),
+    `Add one more key to the JSON object: "bar":[{"ref":"${ids[0]}","dial":"text","winner":"ours or ${ids[0]}","why":"one sentence"},...], ${refs.length * DIALS.length} entries, one for each reference and dial.`,
+  ];
 }

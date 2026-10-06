@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { barLines, barResult, dialLosses, lostBoth, capScores, barFix, barReport, barEvent, AXIS_DIAL } from '../../harness/lib/judge-bar.mjs';
+import { barLines } from '../../harness/lib/judge-prompt.mjs';
+import { barResult, dialLosses, lostBoth, capScores, barFix, barReport, barEvent, AXIS_DIAL } from '../../harness/lib/judge-bar.mjs';
 import { FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const refs = [{ id: 'A', title: 'Film A', studio: 'Studio', file: '/r/A.png' }, { id: 'B', title: 'Film B', studio: null, file: '/r/B.png' }];
