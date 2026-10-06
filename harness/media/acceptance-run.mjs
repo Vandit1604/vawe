@@ -63,8 +63,8 @@ function judgeMeasure(name) {
   return { yes: anchor.length - no.length, total: anchor.length, fixes: no.map((a) => `${a.frame}${a.at != null ? ` at ${a.at} s` : ''}: ${a.fix}`) };
 }
 
-function record(name, rows, stage, caps = null, spec = null) {
-  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, at: new Date().toISOString() });
+function record(name, rows, stage, caps = null, spec = null, worlds = null) {
+  const { file, was } = withHistory(readJson(outFile(name, 'acceptance')), rows, { stage, caps, spec, worlds, at: new Date().toISOString() });
   fs.mkdirSync(path.dirname(outFile(name, 'acceptance')), { recursive: true });
   fs.writeFileSync(outFile(name, 'acceptance'), JSON.stringify(file, null, 1));
   return was;
@@ -82,7 +82,7 @@ export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, 
   const page = pageMeasures({ probe, findings, authoring }, set);
   const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(set.acceptance, m, { mode });
-  const was = record(name, rows, 'draft', page.caps, page.measuredSpec);
+  const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds);
   return { rows, was, sync: writeBriefFromPage(pagePath, page.measuredSpec, probe.samples) };
 }
 
@@ -131,4 +131,9 @@ export function lastCaps(name) {
 /** The times the last draft measured for the brief's SPEC rows, { words, objects }, or null before any draft. */
 export function lastSpec(name) {
   return (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.spec)?.spec ?? null;
+}
+
+/** The worlds of the last full draft, [{ id, start, end, ground }] (harness/lib/worlds.mjs), or null before any draft. */
+export function lastWorlds(name) {
+  return (readJson(outFile(name, 'acceptance'))?.history ?? []).findLast((e) => e.worlds)?.worlds ?? null;
 }

@@ -137,8 +137,8 @@ export const acceptanceCounts = (rows) => ({
 });
 
 /** The history entry for one run, and the file with it appended (the last HISTORY_KEEP kept). Pure. */
-export function withHistory(file, rows, { stage, caps = null, spec = null, at }) {
-  const entry = { at, stage, green: greens(rows), total: rows.length, unmeasured: rows.filter((r) => r.status === 'not measured').length, rows, ...(caps ? { caps } : {}), ...(spec ? { spec } : {}) };
+export function withHistory(file, rows, { stage, caps = null, spec = null, worlds = null, at }) {
+  const entry = { at, stage, green: greens(rows), total: rows.length, unmeasured: rows.filter((r) => r.status === 'not measured').length, rows, ...(caps ? { caps } : {}), ...(spec ? { spec } : {}), ...(worlds ? { worlds } : {}) };
   const past = file?.history ?? [];
   return { file: { history: [...past, entry].slice(-HISTORY_KEEP) }, entry, was: past.length ? past[past.length - 1].green : null };
 }

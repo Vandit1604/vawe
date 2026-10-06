@@ -38,12 +38,12 @@ const STARTER_TEMPLATE = `<!doctype html>
   world turns: a new element, cut or ground every 1 to 2 s (rule world-turns) -->
 <style>
   @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
-  :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; --beat-1: 0s; --beat-2: {{beat2}}s; }
+  :root { --ground: {{ground}} /* unchosen: palette dial */; --ink: {{ink}} /* unchosen: palette dial */; {{beats}} }
   html, body { margin: 0; height: 100%; background: var(--ground); overflow: hidden; }
   .world { position: absolute; inset: 0; box-sizing: border-box; display: grid; align-content: end; gap: calc(var(--vh) * 0.03);
            padding: 0 calc(var(--vw) * 0.07) calc(var(--vh) * 0.12); font-family: "{{family}}", sans-serif; }
-  .w1 { background: var(--ground); color: var(--ink); }
-  .w2 { background: var(--ink); color: var(--ground); }
+  .world:nth-child(odd) { background: var(--ground); color: var(--ink); }
+  .world:nth-child(even) { background: var(--ink); color: var(--ground); }
   h1 { margin: 0; font-size: calc(var(--vh) * 0.14); font-weight: 700; line-height: 1; }
   .line { margin: 0; font-size: calc(var(--vh) * 0.09); }
   .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
@@ -56,29 +56,30 @@ const root = document.documentElement;
 const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue('--beat-' + n));
 const end = parseFloat(document.querySelector('meta[name="duration"]').content);
 const $ = (s) => document.querySelector(s);
-
-layer($('h1'), $('.line'), { at: beat(1) });
-leave($('.line'), { end: beat(2) - 0.06 });
-leave($('h1'), { end: beat(2) });
-
-const turn = $('.w2');
-// the cut frame already carries the first fact moving: a blank frame there fails the draft check
-const cut = beat(2) - 0.04;
-turn.animate([{ visibility: 'hidden' }, { visibility: 'visible' }], { delay: cut * 1000, duration: 1, fill: 'both' });
-stagger(document.querySelectorAll('.facts li'), { at: cut, from: '0.6em 0' });
-
-$('.w1').animate([{ scale: 1 }, { scale: 1.05 }], { duration: beat(2) * 1000, easing: EASE.glide, fill: 'both' });
-$('.facts').animate([{ translate: '0 0' }, { translate: '0 -0.4em' }], { delay: cut * 1000, duration: (end - cut) * 1000, easing: EASE.glide, fill: 'both' });
+const worlds = [...document.querySelectorAll('[data-world]')];
+const cutTo = (el, visibility, at, fill) => el.animate([{ visibility: visibility === 'visible' ? 'hidden' : 'visible' }, { visibility }], { delay: at * 1000, duration: 1, fill });
+worlds.forEach((world, i) => {
+  const last = i + 1 === worlds.length;
+  const stop = last ? end : beat(i + 2);
+  if (i === 0) {
+    cutTo(world, 'hidden', stop, 'forwards');
+    layer($('h1'), $('.line'), { at: beat(1) });
+    leave($('.line'), { end: stop - 0.06 });
+    leave($('h1'), { end: stop });
+    world.animate([{ scale: 1 }, { scale: 1.05 }], { duration: stop * 1000, easing: EASE.glide, fill: 'both' });
+    return;
+  }
+  // the cut frame already carries the first fact moving: a blank frame there fails the draft check
+  const cut = beat(i + 1) - 0.04;
+  cutTo(world, 'visible', cut, 'both');
+  if (!last) cutTo(world, 'hidden', stop, 'forwards');
+  stagger(world.querySelectorAll('.facts li'), { at: cut, from: '0.6em 0' });
+  world.querySelector('.facts').animate([{ translate: '0 0' }, { translate: '0 -0.4em' }], { delay: cut * 1000, duration: (stop - cut) * 1000, easing: EASE.glide, fill: 'both' });
+});
 </script>
 </head>
 <body>
-<main class="world w1">
-  <h1>{{title}}</h1>
-  <p class="line">one line that backs it up</p>
-</main>
-<section class="world w2">
-  <ul class="facts"><li>first fact</li><li>second fact</li><li>the one that matters</li></ul>
-</section>
+{{worlds}}
 </body>
 </html>
 `;
@@ -177,14 +178,32 @@ export function starterFace(name = '') {
   return { font, family };
 }
 
-export const STARTER = starterPage({});
+export const worldCount = (length) => Math.max(2, Math.round(length / 2.5));
+
+const worldBeats = (length, n) => Array.from({ length: n }, (_, i) => `--beat-${i + 1}: ${i ? +((length * i) / n).toFixed(2) : 0}s;`).join(' ');
+
+const FACTS = ['first fact', 'second fact', 'the one that matters'];
+
+function worldsHtml(n, title) {
+  const facts = (i) => (i === 2 ? FACTS : [`fact for beat ${i}`, 'another fact']).map((t) => `<li>${t}</li>`).join('');
+  const rest = Array.from({ length: n - 1 }, (_, k) => `<section class="world" data-world="s${k + 2}">
+  <ul class="facts">${facts(k + 2)}</ul>
+</section>`);
+  return [`<main class="world" data-world="s1">
+  <h1>${title}</h1>
+  <p class="line">one line that backs it up</p>
+</main>`, ...rest].join('\n');
+}
 
 export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 'Say the one thing', face = starterFace() }) {
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
     .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family).replaceAll('{{ground}}', PLACEHOLDER.ground).replaceAll('{{ink}}', PLACEHOLDER.ink)
     .replaceAll('{{signature}}', DIALS.map((d) => `${d}=`).join('; '))
-    .replaceAll('{{beat2}}', String(+(length * 0.5).toFixed(2))).replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
+    .replaceAll('{{beats}}', worldBeats(length, worldCount(length))).replaceAll('{{worlds}}', worldsHtml(worldCount(length), title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
+    .replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
+
+export const STARTER = starterPage({});
 
 export const UNANSWERED = '[unanswered: default taken]';
 
@@ -343,7 +362,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
   ];
   const spread = variety.lines.length ? ['', ...variety.lines] : [];
   return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('explore'), '',
-    ...adviceBlock(advice, '(advice only: the film was written)'), '', `next: fill brief.md, then bin/vawe dev ${page}`];
+    ...adviceBlock(advice, '(advice only)'), '', `next: design one static frame per world in page.html, then bin/vawe frames ${page}`];
 }
 
 /**

@@ -24,6 +24,7 @@ your own direction.
   (`bin/vawe sounds`, `bin/vawe fonts` list them); `data-role="vo"` ducks the bed.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
+- Each beat is one element with `data-world="<id>"` (lowercase, the brief's Shots ids); the checks and the judge read the worlds from it.
 - Text checks skip text inside `aria-hidden="true"` (texture); product UI labels shown as texture take `data-chrome` (cap floor 2.5%, no read hold).
 - `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
   one big moment; put quiet before it.
@@ -36,7 +37,7 @@ next command for the film you edited last.
 | # | stage | the command |
 |---|---|---|
 | 1 | type | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing details first (answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
-| 2 | stills | three directions in `brief.md`, their key frames side by side in `directions.html`; pick one, then the five frames that define the look |
+| 2 | frames | three directions in `brief.md`, side by side in `directions.html`; pick one, then `bin/vawe frames <page>` (one still per world, about 2 s) |
 | 3 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 4 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
