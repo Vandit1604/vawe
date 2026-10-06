@@ -1,9 +1,12 @@
 // The seconds the fresh judge looks at full size: settled moments, never a frame in flight. The brief's Words
 // `settle s` times when it has them, else the calmest frame of each shot (of equal slices of the film when the
-// brief names no shots). `motion` is [{ t, d }]: the mean grey change that arrives at frame t (any steady rate).
+// brief names no shots). `motion` is [{ t, d, spread }]: the mean grey change that arrives at frame t (any steady rate) and the
+// spread of grey levels in that frame; a blank frame is never picked while the shot shows anything else.
 // Pure; harness/media/judge-fresh.mjs feeds it.
 
 const MIN_GAP_S = 0.4;
+// A frame whose grey levels spread less than this (0-255 scale) is a blank or a fade: calm, but nothing to look at.
+const BLANK_SPREAD = 6;
 const EDGE_S = 0.05;
 
 const spread = (list, count) => (list.length <= count ? list : Array.from({ length: count }, (_, i) => list[Math.round((i * (list.length - 1)) / (count - 1))]));
@@ -13,8 +16,10 @@ const unrest = (motion, i) => Math.max(motion[i].d, motion[i + 1]?.d ?? 0);
 
 function calmest(motion, from, to) {
   let best = null;
+  const shown = motion.some((m) => m.t >= from && m.t <= to && !(m.spread < BLANK_SPREAD));
   motion.forEach((m, i) => {
     if (m.t < from || m.t > to) return;
+    if (shown && m.spread < BLANK_SPREAD) return;
     const u = unrest(motion, i);
     if (!best || u < best.u || (u === best.u && m.t > best.t)) best = { t: m.t, u };
   });

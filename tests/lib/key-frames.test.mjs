@@ -34,3 +34,11 @@ test('settled moments: more settle times than frames are spread over the film, a
   assert.equal(times[0], 0.5);
   assert.deepEqual(settledMoments({ words: [{ settle: 2 }, { settle: 2.2 }], shots: [], motion, dur: 10 }), [2]);
 });
+
+test('settled moments: a fade to black is calm but never picked while the shot shows something', () => {
+  const fade = Array.from({ length: 40 }, (_, i) => ({ t: (i + 1) / 10, d: i < 30 ? 0.5 : 0, spread: i < 30 ? 40 : 1 }));
+  const [t] = settledMoments({ words: [], shots: [{ start: 0, end: 4 }], motion: fade, dur: 4, count: 1 });
+  assert.ok(t <= 3, `picked ${t}, inside the black tail`);
+  const black = fade.map((m) => ({ ...m, spread: 1 }));
+  assert.equal(settledMoments({ words: [], shots: [{ start: 0, end: 4 }], motion: black, dur: 4, count: 1 }).length, 1);
+});
