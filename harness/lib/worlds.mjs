@@ -26,3 +26,10 @@ export function worldSpans(samples, { step, dur }) {
 
 /** The second to take the still of one world: the middle of its visible span, or 0 when the page never shows it. Pure. */
 export const stillTime = (span) => (span && span.start != null ? round((span.start + span.end) / 2) : 0);
+
+/** The starter's beats: about one world per 2.5 s, at least 2, equal lengths: [{ id, start, end }]. Pure. */
+export function starterBeats(length) {
+  const n = Math.max(2, Math.round(length / 2.5));
+  const at = (i) => +((length * i) / n).toFixed(2);
+  return Array.from({ length: n }, (_, i) => ({ id: `s${i + 1}`, start: at(i), end: at(i + 1) }));
+}

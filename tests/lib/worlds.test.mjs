@@ -28,7 +28,9 @@ test('stillTime is the middle of the span, and 0 for a world never shown', () =>
 });
 
 test('the starter has one data-world element per beat, with ids s1, s2, ...', async () => {
-  const { starterPage, worldCount } = await import('../../harness/cli/new.mjs');
+  const { starterPage } = await import('../../harness/cli/new.mjs');
+  const { starterBeats } = await import('../../harness/lib/worlds.mjs');
+  const worldCount = (l) => starterBeats(l).length;
   assert.equal(worldCount(4), 2);
   assert.equal(worldCount(12), 5);
   assert.equal(worldCount(1), 2);

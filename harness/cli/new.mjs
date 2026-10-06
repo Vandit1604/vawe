@@ -17,6 +17,7 @@ import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, 
 import { dialRanges, signatureSection } from '../lib/signature.mjs';
 import { recentFromDisk, varietyFor, namesBrandKit } from '../lib/variety.mjs';
 import { DIALS } from '../../core/motion/signature.js';
+import { starterBeats } from '../lib/worlds.mjs';
 
 const STARTER_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -47,6 +48,7 @@ const STARTER_TEMPLATE = `<!doctype html>
   h1 { margin: 0; font-size: calc(var(--vh) * 0.14); font-weight: 700; line-height: 1; }
   .line { margin: 0; font-size: calc(var(--vh) * 0.09); }
   .facts { margin: 0; padding: 0; list-style: none; font-size: calc(var(--vh) * 0.09); font-weight: 600; line-height: 1.15; }
+  h1, .line, .facts { letter-spacing: -0.03em; }
   [data-aspect="9:16"] h1 { font-size: calc(var(--vw) * 0.13); }
 </style>
 <script type="module">
@@ -178,9 +180,7 @@ export function starterFace(name = '') {
   return { font, family };
 }
 
-export const worldCount = (length) => Math.max(2, Math.round(length / 2.5));
-
-const worldBeats = (length, n) => Array.from({ length: n }, (_, i) => `--beat-${i + 1}: ${i ? +((length * i) / n).toFixed(2) : 0}s;`).join(' ');
+const beatVars = (beats) => beats.map((b, i) => `--beat-${i + 1}: ${b.start}s;`).join(' ');
 
 const FACTS = ['first fact', 'second fact', 'the one that matters'];
 
@@ -199,7 +199,7 @@ export function starterPage({ length = DEFAULT_LENGTH, aspect = '16:9', title = 
   return STARTER_TEMPLATE.replaceAll('{{length}}', String(length)).replaceAll('{{aspect}}', aspect)
     .replaceAll('{{font}}', face.font).replaceAll('{{family}}', face.family).replaceAll('{{ground}}', PLACEHOLDER.ground).replaceAll('{{ink}}', PLACEHOLDER.ink)
     .replaceAll('{{signature}}', DIALS.map((d) => `${d}=`).join('; '))
-    .replaceAll('{{beats}}', worldBeats(length, worldCount(length))).replaceAll('{{worlds}}', worldsHtml(worldCount(length), title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
+    .replaceAll('{{beats}}', beatVars(starterBeats(length))).replaceAll('{{worlds}}', worldsHtml(starterBeats(length).length, title.replace(/&/g, '&amp;').replace(/</g, '&lt;')))
     .replaceAll('{{title}}', title.replace(/&/g, '&amp;').replace(/</g, '&lt;'));
 }
 

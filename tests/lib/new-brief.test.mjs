@@ -40,7 +40,7 @@ test('vawe new writes every section of the measured brief, in order', () => {
 test('the Spec and Acceptance tables have the fixed header rows', () => {
   const { text } = briefFor('beat-sheet.md');
   for (const row of [
-    '| id | start s | end s | the viewer notices | move in | move out | camera |',
+    '| id | start s | end s | the viewer notices | move in | move out | camera | ground |',
     '| text | shot | appear s | settle s | cap % | x % | y % | weight | colour |',
     '| id | selector | shot | in s | settle s | out s |',
     '| metric | target |',
@@ -49,13 +49,14 @@ test('the Spec and Acceptance tables have the fixed header rows', () => {
   assert.equal(ACCEPTANCE.length, 15);
 });
 
-test('each table carries one example row marked as a guess, derived from the request', () => {
+test('Shots has one row per starter world with its span; Words and Objects one guessed example each', () => {
   const { text } = briefFor('beat-sheet.md', { length: 10, title: 'Ship faster' });
   const spec = text.split('## Spec')[1].split('## Acceptance')[0];
   const rows = spec.split('\n').filter((l) => l.includes(GUESS));
-  assert.equal(rows.length, 3);
-  assert.match(rows[0], /^\| s1 \(guess: change me\) \| 0 \| 5 \| Ship faster \|/);
-  assert.match(rows[1], /^\| Ship faster \(guess: change me\) \| s1 \|/);
+  assert.equal(rows.length, 6);
+  assert.match(rows[0], /^\| s1 \| 0 \| 2\.5 \| Ship faster \(guess: change me\) \|/);
+  assert.match(rows[3], /^\| s4 \| 7\.5 \| 10 \| one fact \(guess: change me\) \|/);
+  assert.match(rows[4], /^\| Ship faster \(guess: change me\) \| s1 \|/);
 });
 
 test('every field the request does not answer is a marked guess, and one line names them', () => {

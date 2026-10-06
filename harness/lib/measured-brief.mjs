@@ -1,6 +1,7 @@
 // The measured-brief skeleton `vawe new` writes into brief.md (prompts/ANATOMY.md): Task, Look, Spec,
 // Acceptance, Gates, Pitfalls, Deliver, and Keep and swap for a reference film. A field the request does not
 // answer holds a stated guess that ends in GUESS. Pure: no I/O.
+import { starterBeats } from './worlds.mjs';
 
 export const GUESS = '(guess: change me)';
 export const DEFAULT_LENGTH = 4;
@@ -159,16 +160,16 @@ function lookLines({ face, details, answered }, guess) {
 }
 
 function specText({ title, length }) {
-  const cut = secs(length * 0.5);
+  const beats = starterBeats(length);
   return [
     '### Shots',
-    table(['id', 'start s', 'end s', 'the viewer notices', 'move in', 'move out', 'camera'],
-      [[`s1 ${GUESS}`, '0', cut, cell(title), 'layer in', 'leave 0.22 s', 'static']]),
+    table(['id', 'start s', 'end s', 'the viewer notices', 'move in', 'move out', 'camera', 'ground'],
+      beats.map((b, i) => [b.id, String(b.start), String(b.end), `${i ? 'one fact' : cell(title)} ${GUESS}`, 'layer in', 'leave 0.22 s', 'static', i % 2 ? PLACEHOLDER.ink : PLACEHOLDER.ground])),
     '### Words',
     table(['text', 'shot', 'appear s', 'settle s', 'cap %', 'x %', 'y %', 'weight', 'colour'],
       [[`${cell(title)} ${GUESS}`, 's1', '0', '0.6', '10', '7', '60', '700', PLACEHOLDER.ink]]),
     '### Objects',
-    table(['id', 'selector', 'shot', 'in s', 'settle s', 'out s'], [[`o1 ${GUESS}`, 'h1', 's1', '0', '0.6', String(cut)]]),
+    table(['id', 'selector', 'shot', 'in s', 'settle s', 'out s'], [[`o1 ${GUESS}`, 'h1', 's1', '0', '0.6', String(beats[0].end)]]),
   ].join('\n\n');
 }
 
