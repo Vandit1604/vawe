@@ -4,6 +4,7 @@ import { DIALS } from '../../core/motion/signature.js';
 import { normalize, table } from './runs-report.mjs';
 import { declaredSignature, valueKeys } from './variety.mjs';
 import { SAMENESS, TEMPLATE } from './judge-findings.mjs';
+import { DIALS as BAR_DIALS, OURS } from './judge-bar.mjs';
 
 export const MAX_LINES = 50;
 export const FIX_RATE_MIN = 0.5; // a rule that agents fix in the next draft at least half the time is read
@@ -113,6 +114,16 @@ function attractorDays(filmEvents) {
   return [...days].sort((a, b) => a[0].localeCompare(b[0])).map(([day, n]) => ({ day, n }));
 }
 
+/** Per dial, the side-by-side answers of each film's latest judge run that had them: { films, dials: { text: { won, lost }, ... } }. */
+function barRows(filmEvents) {
+  const latest = filmEvents.map(({ events }) => events.findLast((e) => e.cmd === 'judge' && e.bar)?.bar).filter(Boolean);
+  const dials = Object.fromEntries(BAR_DIALS.map((d) => {
+    const rows = latest.flat().filter((b) => b.dial === d);
+    return [d, { won: rows.filter((b) => b.winner === OURS).length, lost: rows.filter((b) => b.winner !== OURS).length }];
+  }));
+  return { films: latest.length, dials };
+}
+
 /** The whole report as data. `films` is readAllRuns(); `ruleIds` the rules that exist; `readMeta(film)` the page's signature meta or null. */
 export function tasteReport(films, { ruleIds = [], readMeta = () => null } = {}) {
   const filmEvents = films.map(({ film, runs }) => ({ film, events: runs.map(normalize).sort(byTime) }));
@@ -120,7 +131,7 @@ export function tasteReport(films, { ruleIds = [], readMeta = () => null } = {})
   const template = filmEvents.map(({ film, events }) => ({ film, n: events.filter((e) => e.template?.tell).length })).filter((t) => t.n).sort((a, b) => b.n - a.n || a.film.localeCompare(b.film));
   return {
     counts: { films: films.length, drafts: all.filter((e) => e.cmd === 'dev').length, draftsWithRules: all.filter((e) => e.cmd === 'dev' && e.fired).length, judges: all.filter((e) => e.cmd === 'judge').length, judgesWithNotes: all.filter((e) => e.cmd === 'judge' && e.notes).length },
-    ...ruleRows(filmEvents, ruleIds), variety: varietyRows(films, readMeta), sameness: siblingPairs(filmEvents), attractors: attractorDays(filmEvents), template,
+    ...ruleRows(filmEvents, ruleIds), variety: varietyRows(films, readMeta), sameness: siblingPairs(filmEvents), attractors: attractorDays(filmEvents), template, bar: barRows(filmEvents),
   };
 }
 
@@ -139,7 +150,8 @@ export function tasteLines(r) {
   const tail = ['',
     `sameness (siblings the judge named): ${r.sameness.length ? '' : 'none'}`.trimEnd(), ...pairs, ...(r.sameness.length > pairs.length ? [`... ${r.sameness.length - pairs.length} more pairs (use --json)`] : []),
     `attractor hits by day: ${r.attractors.length ? r.attractors.map((a) => `${a.day} ${a.n}`).join(', ') : 'none logged'}`,
-    `template tells (judge): ${r.template.length ? r.template.slice(0, TEMPLATE_FILMS_SHOWN).map((t) => `${t.film} ${t.n}`).join(', ') : 'none'}`];
+    `template tells (judge): ${r.template.length ? r.template.slice(0, TEMPLATE_FILMS_SHOWN).map((t) => `${t.film} ${t.n}`).join(', ') : 'none'}`,
+    r.bar.films ? `bar (latest judge per film, ours against reference films, ${r.bar.films} films): ${BAR_DIALS.map((d) => `${d} won ${r.bar.dials[d].won} lost ${r.bar.dials[d].lost}`).join(', ')}` : 'bar: no judge run compared a film with reference films'];
   const rulesHead = ['', 'rules: fired = draft fires + judge fails; fixed = gone in the next draft; gain = judge total across that draft (shared by the rules it fixed)'];
   const room = MAX_LINES - [...head, ...rulesHead, ...dead, ...variety, ...tail].length - 1;
   const shown = r.rows.length > room ? r.rows.slice(0, Math.max(room - 1, 0)) : r.rows;

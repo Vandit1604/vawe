@@ -13,14 +13,18 @@ import { appendRun } from '../lib/runlog.mjs';
 import { judgeEvent } from '../lib/run-events.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
-import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
+import { TILE_W } from '../lib/sheet-tiles.mjs';
+import { contactSheet as buildSheet, durationOf as readDuration } from '../lib/contact-sheet.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
 import { siblingFilms } from '../lib/judge-siblings.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
-import { sizeLines, capLines, holdLines, anchorLines, anchorResult, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
+import { sizeLines, capLines, holdLines, anchorLines, anchorResult, barLines, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
+import { barResult, capScores, lostBoth, barFix, barEvent } from '../lib/judge-bar.mjs';
+import { chooseRefs, refsDir } from '../lib/refs.mjs';
+import { pickTemplate, readRouting } from '../cli/route.mjs';
 import { referenceFor, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
 import { settledMoments } from '../lib/key-frames.mjs';
@@ -29,24 +33,18 @@ import { lastCaps } from './acceptance-run.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
-const SHEET_COLS = 10;
 const KEY_FRAMES = 6;
 const PASS_AT = 8;
 const TASTE_CARD = path.join(repoRoot, TASTE_CARD_REL);
 const RULE_IDS = fs.readdirSync(path.join(repoRoot, 'taste/rules')).filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
 const SIBLING_W = 320;
-const FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/System/Library/Fonts/Helvetica.ttc', '/Library/Fonts/Arial.ttf'].find(fs.existsSync);
 
 const die = (m, code = 1) => { console.error(`vawe judge --fresh: ${m}`); process.exit(code); };
 const arg = (k) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : null; };
 const ff = (args, opts = {}) => spawnSync('ffmpeg', ['-hide_banner', '-nostdin', '-y', ...args], { encoding: opts.raw ? 'buffer' : 'utf8', maxBuffer: 1 << 28 });
 
-function durationOf(file) {
-  const r = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file], { encoding: 'utf8' });
-  const d = parseFloat(r.stdout);
-  if (!(d > 0)) die(`cannot read the duration of ${file}`);
-  return d;
-}
+const orDie = (fn) => (...args) => { try { return fn(...args); } catch (e) { return die(e.message); } };
+const durationOf = orDie(readDuration);
 
 const hasAudio = (file) => spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a', '-show_entries', 'stream=index', '-of', 'csv=p=0', file], { encoding: 'utf8' }).stdout.trim() !== '';
 
@@ -74,15 +72,7 @@ async function draftOf(page, name) {
   return video;
 }
 
-function contactSheet(video, dur, dir) {
-  const fps = sheetFps(dur);
-  const rows = Math.ceil(dur * fps / SHEET_COLS);
-  const label = `drawtext=${FONT ? `fontfile=${FONT}:` : ''}text='%{pts\\:flt}s':x=4:y=4:fontsize=20:fontcolor=white:box=1:boxcolor=black@0.7`;
-  const out = path.join(dir, 'sheet.png');
-  const r = ff(['-i', video, '-vf', `fps=${fps},scale=${TILE_W}:-2,${label},tile=${SHEET_COLS}x${rows}`, '-frames:v', '1', out]);
-  if (r.status !== 0 || !fs.existsSync(out)) die(`could not build the sheet: ${String(r.stderr).split('\n').slice(-4).join(' ')}`);
-  return { file: out, fps };
-}
+const contactSheet = orDie(buildSheet);
 
 /** The mean absolute difference between 10 fps thumbnails: [{ t, d }], d the change that arrives at second t. */
 function thumbMotion(video) {
@@ -152,6 +142,14 @@ function siblingThumbs(name, dir) {
   }).filter((s) => fs.existsSync(s.file));
 }
 
+const routeRequest = (request, length) => { const r = pickTemplate({ request, length }, readRouting(repoRoot)); return r.known ? r.template : null; };
+
+function referencesFor(briefFile, dur) {
+  const found = chooseRefs({ dir: refsDir(), briefText: briefFile ? fs.readFileSync(briefFile, 'utf8') : null, seconds: dur, routeRequest });
+  if (found.skipped) console.error(`judge: side-by-side comparison skipped: ${found.skipped}`);
+  return found.refs;
+}
+
 async function prepare(input, stage, brief) {
   const name = filmName(input);
   const dir = scratch('judge-fresh', name);
@@ -184,8 +182,9 @@ async function prepare(input, stage, brief) {
     sound || (stage === 'final' ? 'sound: the file has no audio track' : 'sound: not scored at this stage'),
   ];
   const siblings = siblingThumbs(name, dir);
+  const refs = referencesFor(briefArg, dur);
   const declared = await declaredOf(pageOf(input, brief));
-  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, declared };
+  return { name, stage, files: [sheet.file, ...keys.map((k) => k.file), ...anchorShots.map((a) => a.file), ...siblings.map((s) => s.file), ...refs.map((r) => r.file)], notes, dir, keys, images, anchor, caps: lastCaps(name), siblings, refs, declared };
 }
 
 const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
@@ -199,7 +198,7 @@ const findingsBlock = (ev) => findingsPrompt({ card: fs.readFileSync(path.resolv
 
 function checkBlock(ev) {
   if (ev.stage === 'stills') return '';
-  const parts = [sizeLines(ev.images || []), capLines(ev.caps), holdLines(), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : []].filter((p) => p.length);
+  const parts = [sizeLines(ev.images || []), capLines(ev.caps), holdLines(), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : [], ev.refs?.length ? barLines(ev.refs) : []].filter((p) => p.length);
   return parts.map((p) => `${p.join('\n')}\n\n`).join('');
 }
 
@@ -241,16 +240,18 @@ function runJudge(prompt, ev) {
 
 function finish(ev, raw, ms) {
   const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && ev.stage !== 'final'));
-  const scores = Object.fromEntries(axes.map((k) => [k, Number(raw.scores[k])]));
+  const bar = ev.refs?.length ? barResult(raw.bar, ev.refs) : null;
+  const given = Object.fromEntries(axes.map((k) => [k, Number(raw.scores[k])]));
+  const scores = bar ? capScores(given, bar).scores : given;
   const low = axes.filter((k) => !(scores[k] >= PASS_AT));
   const fixes = low.map((k) => {
-    const given = (raw.fixes || []).find((x) => x.axis === k) || {};
-    return { axis: k, score: scores[k], rule: ruleOf(given, RULE_IDS), at: given.at ?? null, fix: given.fix || 'no fix given' };
+    const asked = (raw.fixes || []).find((x) => x.axis === k) || {};
+    return { axis: k, score: scores[k], rule: ruleOf(asked, RULE_IDS), at: asked.at ?? null, fix: asked.fix || (bar && barFix(k, bar)) || 'no fix given' };
   });
-  const pass = low.length === 0;
+  const pass = low.length === 0 && !(bar && lostBoth(bar).length);
   const first = raw.fixFirst || fixes[0]?.fix || null;
   const time = fixes.map((x) => parseFloat(x.at)).find((t) => Number.isFinite(t)) ?? null;
-  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ...(ev.stage === 'stills' ? {} : readFindings(raw, RULE_IDS)), ms, recorded: new Date().toISOString().slice(0, 10) };
+  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ...(bar ? { bar, scoresGiven: given } : {}), ...(ev.stage === 'stills' ? {} : readFindings(raw, RULE_IDS)), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
 const input = process.argv[2];
@@ -284,7 +285,7 @@ const { verdict: raw } = runJudge(buildPrompt(ev, brief, ledgerPrompt(openItems(
 const result = finish(ev, raw, Date.now() - t0);
 const led = stage === 'stills' ? null : mergeLedger(prevItems, raw, result.fixes, result.notes);
 if (led) Object.assign(result, { fixes: led.fixes, items: led.items, ledger: ledgerLines(led) });
-appendRun(ev.name, judgeEvent({ stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, ledger: led?.counts, seconds: result.ms / 1000, findings: stage === 'stills' ? null : findingsEvent(result) }));
+appendRun(ev.name, judgeEvent({ stage, verdict: result.verdict, scores: result.scores, anchor: result.anchor, bar: result.bar ? barEvent(result.bar) : null, ledger: led?.counts, seconds: result.ms / 1000, findings: stage === 'stills' ? null : findingsEvent(result) }));
 fs.mkdirSync(path.dirname(file), { recursive: true });
 fs.writeFileSync(file, JSON.stringify(result, null, 1));
 console.log(reportLines(result, path.relative(process.cwd(), file)).join('\n'));
