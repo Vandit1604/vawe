@@ -39,7 +39,7 @@ export function normalize(r) {
     fired: Array.isArray(e.rules_fired) ? e.rules_fired.map((f) => f.id) : null,
     signature: e.signature && typeof e.signature === 'object' && !e.signature.offered ? e.signature : null,
     notes: Array.isArray(e.notes) ? e.notes : null, waivers: Array.isArray(e.waivers) ? e.waivers : null,
-    sameness: e.sameness ?? null, template: e.template ?? null,
+    sameness: e.sameness ?? null, template: e.template ?? null, bar: Array.isArray(e.bar) ? e.bar : null,
   };
 }
 

@@ -85,6 +85,18 @@ test('attractor hits by day and template tells by film', () => {
   assert.deepEqual(r.template, [{ film: 'alpha', n: 2 }]);
 });
 
+test('bar counts wins and losses per dial from the latest judge of each film that had them', () => {
+  const bar = (...w) => ['text', 'colour', 'motion'].map((dial, i) => ({ ref: 'R', dial, winner: w[i] }));
+  const r = reportFor({
+    one: [judge('2026-10-01T01:00:00Z', 10, { bar: bar('R', 'R', 'R') }), judge('2026-10-01T02:00:00Z', 10, { bar: bar('ours', 'R', 'R') })],
+    two: [judge('2026-10-01T03:00:00Z', 10, { bar: bar('ours', 'ours', 'R') })],
+    three: [judge('2026-10-01T04:00:00Z', 10)],
+  });
+  assert.deepEqual(r.bar, { films: 2, dials: { text: { won: 2, lost: 0 }, colour: { won: 1, lost: 1 }, motion: { won: 0, lost: 2 } } });
+  assert.ok(tasteLines(r).some((l) => l === 'bar (latest judge per film, ours against reference films, 2 films): text won 2 lost 0, colour won 1 lost 1, motion won 0 lost 2'));
+  assert.ok(tasteLines(reportFor({})).some((l) => l.startsWith('bar: no judge run')));
+});
+
 test('old records without rule, signature or note fields are tolerated and counted', () => {
   const r = reportFor();
   assert.deepEqual(r.counts, { films: 4, drafts: 8, draftsWithRules: 7, judges: 5, judgesWithNotes: 4 });

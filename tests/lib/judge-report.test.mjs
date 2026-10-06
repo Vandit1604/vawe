@@ -25,3 +25,9 @@ test('the ledger lines follow the score line', () => {
   const lines = reportLines({ ...result, ledger: ['ledger: 1 fixed, 0 partly, 0 still; 2 new'] }, 'out/x.judge.json');
   assert.equal(lines[2], 'ledger: 1 fixed, 0 partly, 0 still; 2 new');
 });
+
+test('the side-by-side answers print before the file line', () => {
+  const bar = [{ ref: 'A', dial: 'text', winner: 'A', why: 'ours is one size' }, { ref: 'A', dial: 'colour', winner: 'ours', why: '' }, { ref: 'A', dial: 'motion', winner: 'ours', why: '' }];
+  const lines = reportLines({ ...result, bar }, 'out/x.judge.json');
+  assert.deepEqual(lines.slice(-3), ['bar: text won 0 of 1, colour won 1 of 1, motion won 1 of 1', '- text: REF A is better, ours is one size', 'full report: out/x.judge.json']);
+});
