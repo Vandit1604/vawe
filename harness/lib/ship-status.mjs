@@ -2,7 +2,8 @@
 import path from 'node:path';
 import LIMITS_JSON from '../../taste/build/limits.json' with { type: 'json' };
 import { tasteLines } from './taste-steps.mjs';
-import { STILL_SEC, undeclaredStills, stillText } from './still-limit.mjs';
+import { STILL_SEC, undeclaredStills, stillText, insideHold } from './still-limit.mjs';
+import { heldWorlds } from './worlds.mjs';
 
 const WORLD = LIMITS_JSON['world-turns'];
 export const LIMITS = { staticSec: STILL_SEC, worldSec: WORLD.turn_seconds_max, blankSec: WORLD.blank_run_s, blankEdgeSec: WORLD.blank_edge_s, maxProblems: 3 };
@@ -71,16 +72,24 @@ export function blankRuns(feats, isFlat, limits = LIMITS) {
   return runs;
 }
 
-/** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns, `authoring` the page's #authoring waivers. */
-export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}) {
+/** Held worlds from the pixel turns of scene-stats: the guess for a page with no data-world element. Pure. */
+function heldFromTurns(stats, limits, authoring) {
+  const held = insideHold(authoring);
+  const edges = [0, ...stats.turns.map((t) => t.t), stats.duration];
+  const found = [];
+  for (let i = 1; i < edges.length; i++) {
+    const len = edges[i] - edges[i - 1];
+    if (len > limits.worldSec && !held({ a: edges[i - 1], b: edges[i] })) found.push({ len, text: `world held ${edges[i - 1].toFixed(1)}-${edges[i].toFixed(1)} s (${len.toFixed(1)} s)` });
+  }
+  return found;
+}
+
+/** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns, `authoring` the page's #authoring waivers, `worlds` the measured data-world spans (null for a page with none, which reads the turns from pixels). */
+export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}, worlds = null) {
   const found = [];
   for (const r of blanks) found.push({ len: r.b - r.a, text: `blank frame ${r.a.toFixed(1)}-${r.b.toFixed(1)} s` });
   for (const r of undeclaredStills(stats.static, authoring, limits.staticSec)) found.push({ len: r.len, text: stillText(r, limits.staticSec) });
-  const edges = [0, ...stats.turns.map((t) => t.t), stats.duration];
-  for (let i = 1; i < edges.length; i++) {
-    const len = edges[i] - edges[i - 1];
-    if (len > limits.worldSec) found.push({ len, text: `world held ${edges[i - 1].toFixed(1)}-${edges[i].toFixed(1)} s (${len.toFixed(1)} s)` });
-  }
+  found.push(...(worlds?.length ? heldWorlds(worlds, limits.worldSec, authoring) : heldFromTurns(stats, limits, authoring)));
   return found.sort((x, y) => y.len - x.len).map((p) => p.text);
 }
 

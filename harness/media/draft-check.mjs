@@ -15,9 +15,9 @@ export function readVideo(mp4) {
   return { feats: readFeatures(mp4), tiles: sheetTileDiffs(mp4), motion: frameMotion(mp4) };
 }
 
-/** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. */
-export function videoProblems({ feats, tiles }, authoring = {}) {
-  return [...problemsOf(summarize(feats), blankRuns(feats, isFlat), undefined, authoring), ...tileProblems(tiles.diffs, tiles.fps, authoring)];
+/** Static windows, held worlds and blank runs of one video, worst first, then the judge's sheet runs. `page` is what the live page says: { worlds (the measured data-world spans, or null), tailMoving }. */
+export function videoProblems({ feats, tiles }, authoring = {}, page = {}) {
+  return [...problemsOf(summarize(feats), blankRuns(feats, isFlat), undefined, authoring, page.worlds), ...tileProblems(tiles.diffs, tiles.fps, authoring, page.tailMoving)];
 }
 
 /** The judge's sheet tiles (harness/media/judge-fresh.mjs contactSheet, without labels): adjacent mean grey differences. */

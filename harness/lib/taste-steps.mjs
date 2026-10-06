@@ -38,7 +38,7 @@ export function draftTasteLines(problems, steps = TASTE_STEPS) {
   return lines.length ? format('the rules behind these problems', lines) : tasteLines('motion', steps);
 }
 
-const AT = /(?:\bat |@|\bheld )(\d+(?:\.\d+)?)(?: ?s|-)/;
+const AT = /(?:\bat |@|\bheld (?:[a-z][\w-]* )?)(\d+(?:\.\d+)?)(?: ?s|-)/;
 
 // The acceptance rows (harness/lib/acceptance.mjs DEFAULT_ROWS) that a taste rule owns.
 export const ROW_RULES = {

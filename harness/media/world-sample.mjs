@@ -4,12 +4,25 @@ import { sampleTimes } from '../lib/draft-check.mjs';
 import { worldSpans } from '../lib/worlds.mjs';
 import { runStart } from '../lib/spec-conformance.mjs';
 
-const SEEN_MIN_OPACITY = 0.05;
+export const SEEN_MIN_OPACITY = 0.05;
 const GROUND_MIN_SHARE = 0.5;
 
-// Runs inside the page: [{ id, visible, ground }] for every [data-world] element. visible: no display:none or visibility:hidden,
-// opacity (with its ancestors') above SEEN_MIN_OPACITY, and a box that meets the viewport. ground: the first non-transparent
-// background of the element, its ancestors, then a descendant covering over GROUND_MIN_SHARE of the frame, as #rrggbb, or null.
+// Runs inside the page, bundled as source with the readers that use it (tail-sample.mjs too): no display:none or visibility:hidden,
+// opacity (with its ancestors') above minOpacity, and a box that meets the viewport.
+export function elementShows(el, minOpacity) {
+  let opacity = 1;
+  for (let n = el; n; n = n.parentElement) {
+    const s = getComputedStyle(n);
+    if (s.display === 'none') return false;
+    opacity *= Number(s.opacity);
+  }
+  const r = el.getBoundingClientRect();
+  const inside = r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight;
+  return getComputedStyle(el).visibility !== 'hidden' && opacity > minOpacity && inside;
+}
+
+// Runs inside the page: [{ id, visible, ground }] for every [data-world] element. visible: elementShows. ground: the first
+// non-transparent background of the element, its ancestors, then a descendant covering over GROUND_MIN_SHARE of the frame, as #rrggbb, or null.
 function worldsSample(minOpacity, minShare) {
   const hex = (css) => {
     const m = /^rgba?\(([^)]+)\)$/.exec(css);
@@ -30,22 +43,12 @@ function worldsSample(minOpacity, minShare) {
     const child = [...el.querySelectorAll('*')].find((n) => covers(n) && bgOf(n));
     return child ? bgOf(child) : null;
   };
-  const shows = (el) => {
-    let opacity = 1;
-    for (let n = el; n; n = n.parentElement) {
-      const s = getComputedStyle(n);
-      if (s.display === 'none') return false;
-      opacity *= Number(s.opacity);
-    }
-    const r = el.getBoundingClientRect();
-    const inside = r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight;
-    return getComputedStyle(el).visibility !== 'hidden' && opacity > minOpacity && inside;
-  };
-  return [...document.querySelectorAll('[data-world]')].map((el) => ({ id: el.dataset.world, visible: shows(el), ground: groundOf(el) }));
+  return [...document.querySelectorAll('[data-world]')].map((el) => ({ id: el.dataset.world, visible: elementShows(el, minOpacity), ground: groundOf(el) }));
 }
 
-export const WORLDS_SOURCE = worldsSample.toString();
-export const readWorlds = (page) => page.evaluate((src, o, s) => new Function(`return (${src});`)()(o, s), WORLDS_SOURCE, SEEN_MIN_OPACITY, GROUND_MIN_SHARE);
+export const SHOWS_SOURCE = elementShows.toString();
+const WORLDS_SOURCE = [elementShows, worldsSample].map((fn) => fn.toString()).join('\n');
+export const readWorlds = (page) => page.evaluate((src, o, s) => new Function(`${src}\nreturn worldsSample(${o}, ${s});`)(), WORLDS_SOURCE, SEEN_MIN_OPACITY, GROUND_MIN_SHARE);
 
 /** Seek to each draft sample time and read the worlds there; returns [{ id, start, end, ground }] in page order. `seek(ms)` is a layout seek. */
 export async function sampleWorlds(page, dur, seek, from = 0) {

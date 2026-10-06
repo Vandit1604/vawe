@@ -1,3 +1,5 @@
+// The one wording of the waiver syntax a draft line ends with: `entry` is the allow entry (a code, or code@instance).
+export const waiverHint = (entry) => `waive: "allow": ["${entry}"], "_why": {"${entry}": "<reason>"} in <script id="authoring">`;
 
 /** Split one `authoring.allow` entry into { code, instance }. `instance` is null for a bare entry. */
 export function splitWaiver(entry) {

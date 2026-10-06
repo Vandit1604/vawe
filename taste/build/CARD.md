@@ -110,9 +110,9 @@ Per-word colour goes on one or two words per line, and each coloured word is the
 
 The world (ground, palette, composition) turns at least every 2 s or at each beat, whichever comes first. Tone changes per beat; the backdrop is always a decision, never a default.
 
-- Limit: at most 8 near-identical tiles in a row on the 5 fps sheet, at most 4 at the tail; no world held longer than the world-held limit
+- Limit: at most 8 near-identical tiles in a row on the 5 fps sheet, at most 4 at the tail; no data-world element visible longer than 2 s
 - Range: a new element, a cut or a ground swap every 1 to 2 s
-- Judge: Count identical adjacent tiles on the sheet. Does the ground or the composition change at least every 2 s?
+- Judge: The turns are the page's data-world spans, a new world is a turn even on the same ground. Count identical adjacent tiles on the sheet. Does each world last 2 s or less?
 
 ## motion
 
@@ -228,7 +228,7 @@ Every mark rides the thing it belongs to. A mark that sits still while its paren
 
 The world keeps moving to the last frame: the last second carries a slow push or drift. A wordmark may land and hold, but something still moves.
 
-- Limit: no static frame in the last 1 s; at most 4 near-identical tail tiles on the sheet
+- Limit: no static frame in the last 1 s; at most 4 near-identical tail tiles, unless an animation runs on a visible element through the last 1 s on the sheet
 - Range: a slow push or drift through the last second
 - Judge: Does anything move in the last second?
 

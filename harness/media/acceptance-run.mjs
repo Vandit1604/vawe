@@ -27,13 +27,13 @@ function readJson(file) {
 }
 
 /** What the video alone tells: smoothness, still windows, tail tiles and the hard jumps' times, from one read of the video. */
-export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots) {
+export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots, tailMoving = false) {
   const stats = summarize(feats);
   const cuts = shots.slice(1).map((s) => s.start).filter((t) => typeof t === 'number');
   return {
     smooth: smoothness(diffs, { fps: FPS, cuts, turns: stats.turns.map((t) => t.t) }),
     stills: undeclaredStills(stats.static, authoring),
-    tail: tailTiles(tiles.diffs, tiles.fps, authoring),
+    tail: tailTiles(tiles.diffs, tiles.fps, authoring, tailMoving),
     cuts: shots.length ? cutChecks(shots, hardJumps(diffs, FPS), FPS) : null,
     hasShots: shots.length > 0,
   };
