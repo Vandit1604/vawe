@@ -11,11 +11,11 @@ export const newEvent = ({ template, length, answered, guessed, ranges = [], cho
 });
 
 /** `vawe dev`: seconds, the check seconds by name, the tier and cache use, the acceptance rows (null for a window), the chosen signature dials, what the moves measured for them, and the rules the draft fired ({ id, value, t }). */
-export const devEvent = ({ tier, wallS, captureS, checks, cache, rows, signature = {}, measured = {}, fired = [] }) => ({
+export const devEvent = ({ tier, wallS, captureS, checks, cache, rows, signature = {}, measured = {}, fired = [], worlds = null }) => ({
   cmd: 'dev', tier, wallS: tenths(wallS), captureS: tenths(captureS),
   checksS: Object.fromEntries(checks.map(([name, s]) => [name, tenths(s)])),
   cache, acceptance: rows ? acceptanceCounts(rows) : null,
-  signature, measured, rules_fired: fired,
+  signature, measured, rules_fired: fired, worlds: worlds?.length ? worlds : null,
 });
 
 /** A judge run: `stage` is stills, draft, final, manual or struct; `ledger` is mergeLedger counts; `findings` is { notes: [{ rule, t, verdict }], waivers: [{ code, earned }], sameness, template } (judge-findings.mjs findingsEvent). */

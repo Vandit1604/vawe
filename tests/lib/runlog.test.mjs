@@ -30,7 +30,9 @@ test('event shapes: new, dev, judge, ship carry only their own fields', () => {
   assert.deepEqual(newEvent({ template: 'prompts/a.md', length: 5, answered: new Set(['show']), guessed: ['words'] }),
     { cmd: 'new', template: 'prompts/a.md', length: 5, answered: ['show'], guessed: ['words'], signature: { offered: {}, chosen: {} } });
   assert.deepEqual(devEvent({ tier: 'draft', wallS: 31.44, captureS: 18.04, checks: [['contrast', 3.14], ['spec', 2]], cache: { hit: 1, miss: 2 }, rows: ROWS }),
-    { cmd: 'dev', tier: 'draft', wallS: 31.4, captureS: 18, checksS: { contrast: 3.1, spec: 2 }, cache: { hit: 1, miss: 2 }, acceptance: { green: 1, measured: 2, red: ['b'] }, signature: {}, measured: {}, rules_fired: [] });
+    { cmd: 'dev', tier: 'draft', wallS: 31.4, captureS: 18, checksS: { contrast: 3.1, spec: 2 }, cache: { hit: 1, miss: 2 }, acceptance: { green: 1, measured: 2, red: ['b'] }, signature: {}, measured: {}, rules_fired: [], worlds: null });
+  const worlds = [{ id: 'a', start: 0, end: 2, ground: '#112233' }];
+  assert.deepEqual(devEvent({ tier: 'draft', wallS: 1, captureS: 1, checks: [], cache: { hit: 0, miss: 0 }, rows: null, worlds }).worlds, worlds);
   assert.equal(devEvent({ tier: 'fast', wallS: 1, captureS: 1, checks: [], cache: { hit: 0, miss: 0 }, rows: null }).acceptance, null);
   assert.deepEqual(judgeEvent({ stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, anchor: [{ yes: true }, { yes: false }], ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2 }),
     { cmd: 'judge', stage: 'draft', verdict: 'FIX', scores: { hook: 9, motion: 6 }, anchorYes: 1, anchorTotal: 2, ledger: { fixed: 1, partly: 0, still: 2, unmarked: 0, new: 1 }, seconds: 30.2, notes: null, waivers: null, sameness: null, template: null });

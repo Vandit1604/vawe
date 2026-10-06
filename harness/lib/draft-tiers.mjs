@@ -6,6 +6,7 @@
 export const CHECK_TIER = {
   motion: 'fast',
   text: 'fast',
+  worlds: 'fast',
   video: 'fast',
   contrast: 'settled',
   layout: 'settled',
