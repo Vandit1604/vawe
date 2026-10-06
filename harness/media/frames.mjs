@@ -44,7 +44,7 @@ async function shootWorlds(opened, pagePath, stills) {
     const layout = await sampleLayout(opened.page, [at], noSeek);
     await style.evaluate((el) => el.remove());
     const found = unwaived(layoutLint(layout, { named }), authoring);
-    shots.push({ id: span.id, at, png, lines: firedLines(firedRules(found, [], [])) });
+    shots.push({ id: span.id, at, png, fired: firedRules(found, [], []) });
   }
   return shots;
 }
@@ -80,7 +80,7 @@ async function main(pagePath) {
   fs.writeFileSync(html, framesPage({ title, aspect: readPageMeta(abs, 'aspect') || '16:9', worlds: shots.map((s) => ({ id: s.id, src: path.relative(path.dirname(abs), s.png) })) }));
   const rel = (p) => path.relative(process.cwd(), p);
   console.log([`frames: ${rel(sheet)} (${shots.length} worlds: ${shots.map((s) => `${s.id} @${s.at}s`).join(', ')}), ${rel(html)}`,
-    ...shots.flatMap((s) => worldLines(s.id, s.lines)), `time: ${((Date.now() - t0) / 1000).toFixed(1)} s`].join('\n'));
+    ...worldLines(shots, firedLines), `time: ${((Date.now() - t0) / 1000).toFixed(1)} s`].join('\n'));
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main(process.argv[2]).catch((e) => die(e.stack || String(e)));
