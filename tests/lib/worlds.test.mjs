@@ -26,3 +26,13 @@ test('stillTime is the middle of the span, and 0 for a world never shown', () =>
   assert.equal(stillTime({ start: null, end: null }), 0);
   assert.equal(stillTime(undefined), 0);
 });
+
+test('the starter has one data-world element per beat, with ids s1, s2, ...', async () => {
+  const { starterPage, worldCount } = await import('../../harness/cli/new.mjs');
+  assert.equal(worldCount(4), 2);
+  assert.equal(worldCount(12), 5);
+  assert.equal(worldCount(1), 2);
+  const ids = [...starterPage({ length: 12 }).matchAll(/data-world="([a-z0-9-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids, ['s1', 's2', 's3', 's4', 's5']);
+  assert.match(starterPage({ length: 12 }), /--beat-5: 9\.6s/);
+});
