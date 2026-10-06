@@ -30,7 +30,7 @@ test('the next judge marks every open item before new ones, and new ids continue
   };
   const fixes = [{ axis: 'motion', score: 6, at: 1, fix: 'f3' }, { axis: 'type', score: 7, at: 2, fix: 'make the tagline smaller' }, { axis: 'hook', score: 6, at: 0, fix: 'subject by 0.1 s' }];
   const led = mergeLedger(prev, raw, fixes);
-  assert.deepEqual(led.counts, { fixed: 1, partly: 1, still: 1, unmarked: 1, new: 2 });
+  assert.deepEqual(led.counts, { fixed: 1, partly: 1, still: 1, stale: 0, unmarked: 1, new: 2 });
   assert.equal(led.fixes[0].fix, 'f3: stagger the words 50 ms');
   assert.equal(led.fixes[1].fix, 'f5: make the tagline smaller');
   assert.deepEqual(led.items.map((i) => `${i.id} ${i.status}`), ['f1 fixed', 'f2 partly', 'f3 still', 'f4 unmarked', 'f5 new', 'f6 new']);
@@ -70,4 +70,19 @@ test('back and forth: numbers change direction, words return to an earlier value
   assert.equal(movesBackAndForth(['85%', '40%', '30%', '85%']), true);
   assert.equal(movesBackAndForth(['longer hold', 'bigger tagline', 'longer hold']), true);
   assert.equal(movesBackAndForth(['a', 'b']), false);
+});
+
+test('a stale item is dropped from the printed fixes, counted, closed, and a fresh note of its rule is a new item', () => {
+  const prev = [{ id: 'f1', axis: 'note', rule: 'palette-limit', at: 3.2, fix: 'replace the ground-only swap from dark green to mid green', status: 'still' }, { id: 'f2', axis: 'pace', at: 1, fix: 'hold the tagline 1.2 s', status: 'new' }];
+  assert.match(ledgerPrompt(openItems(prev)), /still or stale/);
+  const raw = { ledger: [{ id: 'f1', status: 'stale' }, { id: 'f2', status: 'still' }], fixes: [{ axis: 'colour', fix: 'f1' }, { axis: 'pace', fix: 'f2' }] };
+  const fixes = [{ axis: 'colour', score: 7, at: 3.2, fix: 'f1' }, { axis: 'pace', score: 7, at: 1, fix: 'f2' }];
+  const led = mergeLedger(prev, raw, fixes);
+  assert.deepEqual(led.fixes.map((f) => f.fix), ['f2: hold the tagline 1.2 s']);
+  assert.equal(led.counts.stale, 1);
+  assert.deepEqual(openItems(led.items).map((i) => i.id), ['f2']);
+  assert.equal(ledgerLines(led)[0], 'ledger: 0 fixed, 0 partly, 1 still, 1 stale; 0 new');
+  const next = mergeLedger(led.items, { ledger: [] }, [], [{ rule: 'palette-limit', t: 5, verdict: 'fail', note: 'two greens' }]);
+  assert.deepEqual(next.items.filter((i) => i.status === 'new').map((i) => `${i.id} ${i.rule}`), ['f3 palette-limit']);
+  assert.equal(next.items[0].status, 'stale');
 });

@@ -1,6 +1,7 @@
-// The side-by-side half of the fresh judge: the question that sets our film beside reference films, its parse,
-// and the score caps that follow from it. A judge that answers "which is better" agrees with people more
-// often than one that scores alone, so the scores follow the answers. Pure; harness/media/judge-fresh.mjs feeds it.
+// The side-by-side half of the fresh judge: the parse of its answers and the score caps that follow from
+// it. A judge that answers "which is better" agrees with people more often than one that scores alone,
+// so the scores follow the answers. Pure; harness/media/judge-fresh.mjs feeds it. The question itself is
+// barLines in judge-prompt.mjs.
 
 export const DIALS = ['text', 'colour', 'motion'];
 export const OURS = 'ours';
@@ -9,24 +10,6 @@ export const CAP_LOST_BOTH = 6;
 
 // The fresh axes (quality/gates/rubric.mjs FRESH_AXES) that each dial caps; the other axes have no dial.
 export const AXIS_DIAL = { type: 'text', colour: 'colour', motion: 'motion', pace: 'motion' };
-
-const DIAL_HELP = {
-  text: 'faces, scale contrast, hierarchy, how words arrive and leave',
-  colour: 'palette, light, contrast, how the colour changes',
-  motion: 'the type and the speed of the moves: curves, overlap, the pace of the cuts',
-};
-
-/** The prompt lines for the comparison. `refs` are { id, title, studio, file }: the sheet of each reference film. */
-export function barLines(refs) {
-  const ids = refs.map((r) => r.id);
-  return [
-    `Side by side. ${refs.length === 1 ? 'A reference film' : `${refs.length} reference films`} by top studios, each a sheet laid out like the sheet of this film. Open ${refs.length === 1 ? 'it' : 'every one'} before you answer:`,
-    ...refs.map((r) => `- REF ${r.id} (${r.title}${r.studio ? `, ${r.studio}` : ''}): ${r.file}`),
-    'For each reference and each dial, say which film is better: OURS or that REF. Judge what the sheets show, not the budget. Do not favour OURS. Each answer names the visible difference in one sentence.',
-    ...DIALS.map((d) => `- ${d}: ${DIAL_HELP[d]}`),
-    `Add one more key to the JSON object: "bar":[{"ref":"${ids[0]}","dial":"text","winner":"ours or ${ids[0]}","why":"one sentence"},...], ${refs.length * DIALS.length} entries, one for each reference and dial.`,
-  ];
-}
 
 /** The answers as [{ ref, dial, winner, why }], one per reference and dial in that order. `winner` is OURS or the ref id. A missing answer is a loss: the judge gave no reason to rank ours first. */
 export function barResult(raw, refs) {
