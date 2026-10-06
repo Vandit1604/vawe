@@ -13,7 +13,8 @@ import { appendRun } from '../lib/runlog.mjs';
 import { judgeEvent } from '../lib/run-events.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
-import { sheetFps, TILE_W } from '../lib/sheet-tiles.mjs';
+import { TILE_W } from '../lib/sheet-tiles.mjs';
+import { contactSheet as buildSheet, durationOf as readDuration } from '../lib/contact-sheet.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
@@ -29,24 +30,18 @@ import { lastCaps } from './acceptance-run.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
-const SHEET_COLS = 10;
 const KEY_FRAMES = 6;
 const PASS_AT = 8;
 const TASTE_CARD = path.join(repoRoot, TASTE_CARD_REL);
 const RULE_IDS = fs.readdirSync(path.join(repoRoot, 'taste/rules')).filter((f) => f.endsWith('.md')).map((f) => f.slice(0, -3));
 const SIBLING_W = 320;
-const FONT = ['/System/Library/Fonts/Supplemental/Arial.ttf', '/System/Library/Fonts/Helvetica.ttc', '/Library/Fonts/Arial.ttf'].find(fs.existsSync);
 
 const die = (m, code = 1) => { console.error(`vawe judge --fresh: ${m}`); process.exit(code); };
 const arg = (k) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : null; };
 const ff = (args, opts = {}) => spawnSync('ffmpeg', ['-hide_banner', '-nostdin', '-y', ...args], { encoding: opts.raw ? 'buffer' : 'utf8', maxBuffer: 1 << 28 });
 
-function durationOf(file) {
-  const r = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file], { encoding: 'utf8' });
-  const d = parseFloat(r.stdout);
-  if (!(d > 0)) die(`cannot read the duration of ${file}`);
-  return d;
-}
+const orDie = (fn) => (...args) => { try { return fn(...args); } catch (e) { return die(e.message); } };
+const durationOf = orDie(readDuration);
 
 const hasAudio = (file) => spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a', '-show_entries', 'stream=index', '-of', 'csv=p=0', file], { encoding: 'utf8' }).stdout.trim() !== '';
 
@@ -74,15 +69,7 @@ async function draftOf(page, name) {
   return video;
 }
 
-function contactSheet(video, dur, dir) {
-  const fps = sheetFps(dur);
-  const rows = Math.ceil(dur * fps / SHEET_COLS);
-  const label = `drawtext=${FONT ? `fontfile=${FONT}:` : ''}text='%{pts\\:flt}s':x=4:y=4:fontsize=20:fontcolor=white:box=1:boxcolor=black@0.7`;
-  const out = path.join(dir, 'sheet.png');
-  const r = ff(['-i', video, '-vf', `fps=${fps},scale=${TILE_W}:-2,${label},tile=${SHEET_COLS}x${rows}`, '-frames:v', '1', out]);
-  if (r.status !== 0 || !fs.existsSync(out)) die(`could not build the sheet: ${String(r.stderr).split('\n').slice(-4).join(' ')}`);
-  return { file: out, fps };
-}
+const contactSheet = orDie(buildSheet);
 
 /** The mean absolute difference between 10 fps thumbnails: [{ t, d }], d the change that arrives at second t. */
 function thumbMotion(video) {
