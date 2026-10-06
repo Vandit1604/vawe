@@ -1,10 +1,10 @@
-// vawe refs list | index | add <mp4-or-url> --type product|brand [--title t] | frames [id]: the reference films an agent
+// vawe refs list [id] | index | add <mp4-or-url> --type product|brand [--title t] | frames [id]: the reference films an agent
 // studies and the fresh judge compares a film with (harness/lib/refs.mjs). They live in $VAWE_REFS_DIR (default ~/.vawe/refs),
 // never in the repo. `frames` writes the settled full-size frames of each shot, from the 1080p copy in hd/ when there is one.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { refsDir, parseVerified, readRegistry, writeRegistry, listLines, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { refsDir, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -86,20 +86,25 @@ function frames() {
   if (!films.length) die(source ? `no film ${source} in scope` : 'no film in scope');
   for (const r of films) {
     const video = hdOf(r.id) ?? videoOf(r.id);
-    const out = path.join(dir, 'frames', r.id);
+    const out = path.join(dir, FRAMES, r.id);
     fs.rmSync(out, { recursive: true, force: true });
     const got = keyFrameFiles(video, durationOf(video), out, { shots: shotsOf(r.id), count: FRAMES_PER_FILM });
-    console.log(`${r.id}: ${got.length} frames (${got.map((k) => `${k.t.toFixed(1)}s`).join(' ')}) from ${path.relative(dir, video)} -> ${path.relative(dir, out)}/`);
+    const manifest = frameManifest(r.id, got);
+    fs.writeFileSync(path.join(out, FRAMES_MANIFEST), `${JSON.stringify(manifest, null, 1)}\n`);
+    console.log([`${r.id}: ${got.length} frames from ${path.relative(dir, video)}, manifest ${path.join(out, FRAMES_MANIFEST)}`, ...frameLines(manifest)].join('\n'));
   }
 }
 
 function list() {
   const registry = readRegistry(dir);
   if (!registry) die(`no registry in ${dir}; run: bin/vawe refs index`);
-  console.log(listLines(registry).join('\n'));
-  console.log(`${registry.filter((r) => r.inScope).length} in scope of ${registry.length}, in ${dir}`);
+  const shown = registry.filter((r) => !source || r.id === source);
+  if (!shown.length) die(`no film ${source} in the registry`);
+  const rows = listLines(shown);
+  console.log(shown.flatMap((r, i) => [rows[i], ...(readFrameManifest(dir, r.id) ? frameLines(readFrameManifest(dir, r.id)) : [])]).join('\n'));
+  console.log(`${registry.filter((r) => r.inScope).length} in scope of ${registry.length}, in ${dir}; a film with no frame lines needs: vawe refs frames <id>`);
 }
 
 const actions = { list, index, add, frames };
-if (!actions[action]) die('usage: vawe refs list | index | add <mp4-or-url> --type product|brand [--title t] | frames [id]');
+if (!actions[action]) die('usage: vawe refs list [id] | index | add <mp4-or-url> --type product|brand [--title t] | frames [id]');
 actions[action]();

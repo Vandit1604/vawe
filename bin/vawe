@@ -2,10 +2,10 @@
 // vawe: the one command for authoring, rendering and checking a page film. `vawe --help` lists the verbs.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
-import { VERBS } from '../harness/cli/verbs.mjs';
+import { VERBS, stripChromeNoise, commitsBehind, staleNote } from '../harness/cli/verbs.mjs';
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
 import { appendRun, readAllRuns } from '../harness/lib/runlog.mjs';
 import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
@@ -31,7 +31,7 @@ function requireFiles(verb, values, positional) {
 function runStep(step) {
   const argv = step.node || [path.join(ROOT, step.script), ...step.args];
   const r = spawnSync(process.execPath, argv, { stdio: ['inherit', 'inherit', 'pipe'], encoding: 'utf8', maxBuffer: 1 << 28, cwd: ROOT, env: { ...process.env, ...step.env } });
-  process.stderr.write(r.stderr || '');
+  process.stderr.write(stripChromeNoise(r.stderr || ''));
   const status = r.status ?? 1;
   const hint = status === 0 ? null : doctorHintFromFile(ROOT, r.stderr || '');
   if (hint) console.error(hint);
@@ -44,7 +44,8 @@ function main(argv) {
   const verb = VERBS.find((v) => v.name === name);
   if (!verb) {
     const guess = closest(name, VERBS.map((v) => v.name));
-    return fail(`unknown verb ${name}; valid: ${VERBS.map((v) => v.name).join(' ')}${guess ? `; did you mean ${guess}?` : ''}`);
+    const stale = staleNote(commitsBehind((args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })));
+    return fail(`unknown verb ${name}; valid: ${VERBS.map((v) => v.name).join(' ')}${guess ? `; did you mean ${guess}?` : ''}${stale ? `; ${stale}` : ''}`);
   }
   if (rest.includes('--help') || rest.includes('-h')) return console.log(verbHelp(verb));
   try {

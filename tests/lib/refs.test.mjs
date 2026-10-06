@@ -3,7 +3,21 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, writeRegistry } from '../../harness/lib/refs.mjs';
+import { parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
+
+test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
+  const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
+  assert.deepEqual(m, { id: 'a', frames: [{ n: 1, t: 0.1, file: '/r/frames/a/key-1-0.1s.png' }, { n: 2, t: 3.6, file: '/r/frames/a/key-2-3.6s.png' }] });
+  assert.deepEqual(frameLines(m), ['  1  0.1 s  /r/frames/a/key-1-0.1s.png', '  2  3.6 s  /r/frames/a/key-2-3.6s.png']);
+});
+
+test('readFrameManifest reads frames/<id>/frames.json and is null when it is absent', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'refs-manifest-'));
+  assert.equal(readFrameManifest(dir, 'a'), null);
+  fs.mkdirSync(path.join(dir, 'frames', 'a'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'frames', 'a', 'frames.json'), JSON.stringify({ id: 'a', frames: [] }));
+  assert.deepEqual(readFrameManifest(dir, 'a'), { id: 'a', frames: [] });
+});
 
 const VERIFIED = `
 **A. Product and UI films (best fit for HTML/CSS/WebGL)**

@@ -106,6 +106,24 @@ export function chooseRefs({ dir, briefText, seconds, routeRequest }) {
   return { refs: picked.map((r) => ({ id: r.id, title: r.title, studio: r.studio, file: path.join(dir, r.sheet) })), skipped: null };
 }
 
+export const FRAMES = 'frames';
+export const FRAMES_MANIFEST = 'frames.json';
+
+/** The manifest of one film's key frames: { id, frames: [{ n, t, file }] }, `file` absolute. `got` is [{ t, file }] in order. Pure. */
+export function frameManifest(id, got) {
+  return { id, frames: got.map((k, i) => ({ n: i + 1, t: +k.t.toFixed(1), file: path.resolve(k.file) })) };
+}
+
+/** The manifest of film `id` under `dir`, or null when `vawe refs frames` has not written it. */
+export function readFrameManifest(dir, id) {
+  try { return JSON.parse(fs.readFileSync(path.join(dir, FRAMES, id, FRAMES_MANIFEST), 'utf8')); } catch { return null; }
+}
+
+/** One line per frame: `  n  t s  <absolute path>`. Pure. */
+export function frameLines(manifest) {
+  return manifest.frames.map((f) => `  ${f.n}  ${f.t.toFixed(1)} s  ${f.file}`);
+}
+
 /** One line per film for `vawe refs list`. */
 export function listLines(registry) {
   const rows = registry.map((r) => [r.id, r.inScope ? r.type : `out (${r.why})`, `${Math.round(r.seconds)} s`, r.studio ?? '-', r.title]);

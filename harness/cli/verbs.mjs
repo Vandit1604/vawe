@@ -4,12 +4,29 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { UsageError } from './parse.mjs';
+import { compareProblem } from '../media/compare-frames.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
 export const SERIAL_TESTS = ['tests/media/check-budget.test.mjs'];
 
-const testFiles = (dir) => fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })
+// Chrome on macOS prints these to stderr on every launch; they mean nothing for a render.
+const CHROME_NOISE = [/task_policy_set/, /CVDisplayLinkCreateWithCGDisplay/];
+
+/** `text` without the known Chrome noise lines. Pure. */
+export const stripChromeNoise = (text) => String(text).split('\n').filter((l) => !CHROME_NOISE.some((re) => re.test(l))).join('\n');
+
+/** The most commits HEAD lacks from the local `main` or `origin/main` ref (no network); 0 when neither exists. `git(args)` returns stdout or throws. */
+export function commitsBehind(git) {
+  return Math.max(0, ...['main', 'origin/main'].map((ref) => {
+    try { return Number.parseInt(git(['rev-list', '--count', `HEAD..${ref}`]), 10) || 0; } catch { return 0; }
+  }));
+}
+
+/** The sentence for an unknown verb on a checkout that lags main, or '' when it does not. Pure. */
+export const staleNote = (behind) => (behind > 0 ? `this checkout is ${behind} commit${behind === 1 ? '' : 's'} behind main: the verb may exist there (git pull or rebase on main)` : '');
+
+const testFiles =(dir) => fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true })
   .flatMap((e) => (e.isDirectory() ? testFiles(path.join(dir, e.name)) : e.name.endsWith('.test.mjs') ? [path.join(dir, e.name)] : []));
 
 /** The two node --test runs of `vawe test`: every test file in parallel except the serial ones, then the serial ones alone. */
@@ -53,9 +70,12 @@ export const VERBS = [
   {
     name: 'frames', summary: 'one still per data-world element (the others hidden), a contact sheet and the still-frame layout rules; about 2 s',
     positional: [PAGE],
-    flags: [],
-    example: 'vawe frames films/my-launch/page.html',
-    build: (v, [page]) => [{ script: 'harness/media/frames.mjs', args: [page] }],
+    flags: [
+      { name: 'full', type: 'bool', help: 'full-size stills (the page\'s own size, 1920x1080 for 16:9) as out/<name>-frames/<id>-full.png; no sheet, no frames.html' },
+      { name: 'world', type: 'string', repeat: true, help: 'only this world id (comma list or repeat the flag); no sheet, no frames.html. Each still is at its own world\'s time' },
+    ],
+    example: 'vawe frames films/my-launch/page.html   |   vawe frames films/my-launch/page.html --full --world s3,s5',
+    build: (v, [page]) => [{ script: 'harness/media/frames.mjs', args: [page, ...(v.full ? ['--full'] : []), ...(v.world ?? []).flatMap((w) => ['--world', w])] }],
     next: (v, [page]) => `storyboard the motion in brief.md (Shots), then bin/vawe dev ${page}`,
   },
   {
@@ -135,17 +155,21 @@ export const VERBS = [
   },
   {
     name: 'compare', summary: 'reference and your film at the same exact seconds, side by side, one PNG',
-    positional: [{ name: 'ours.mp4', help: 'your render (a draft is fine); or use --page' }],
+    positional: [{ name: 'ours.mp4', help: 'your render (a draft is fine); or use --page. Without --ref: a labelled sheet of your frames at the --at seconds' }],
     flags: [
       { name: 'page', type: 'path', help: 'seek this page and screenshot it at half size: no render needed; without --ref, only your frames, labelled with time', kind: 'file' },
-      { name: 'ref', type: 'path', help: 'reference mp4', kind: 'file' },
+      { name: 'ref', type: 'path', help: 'reference mp4; leave it out for a sheet of your own frames', kind: 'file' },
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 2.5,3.1,4' },
       { name: 'from', type: 'number', default: 0, help: 'the film second where ours starts (a --from/--to draft)' },
       { name: 'out', type: 'path', default: 'out/compare-<ours>.png', help: 'output PNG' },
     ],
-    example: 'vawe compare --page films/my-launch/page.html --at 2.5,3.1,4   (add --ref refs/ad.mp4 to see the reference beside it)',
-    build: (v, [ours]) => [{ script: 'harness/media/compare-frames.mjs', args: [...(ours ? [ours] : []), ...opt('--page', v.page), ...opt('--ref', v.ref), ...opt('--at', v.at), ...opt('--from', v.from), ...opt('--out', v.out)] }],
-    next: () => 'look at the PNG: reference left, yours right; fix the worst row first',
+    example: 'vawe compare --page films/my-launch/page.html --at 2.5,3.1,4   |   vawe compare out/my-launch.mp4 --at 1,4,7   (add --ref refs/ad.mp4 to see the reference beside it)',
+    build: (v, [ours]) => {
+      const problem = compareProblem({ ours, page: v.page, ref: v.ref, at: v.at });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/compare-frames.mjs', args: [...(ours ? [ours] : []), ...opt('--page', v.page), ...opt('--ref', v.ref), ...opt('--at', v.at), ...opt('--from', v.from), ...opt('--out', v.out)] }];
+    },
+    next: (v) => (v.ref ? 'look at the PNG: reference left, yours right; fix the worst row first' : 'look at the PNG, one labelled frame per second'),
   },
   {
     name: 'coverage', summary: 'SSIM of your render against the reference at every step; the done check for a recreation',
@@ -193,14 +217,14 @@ export const VERBS = [
   },
   {
     name: 'refs', summary: 'the top reference films to study before you design, and that the fresh judge compares your film with (kept outside the repo in ~/.vawe/refs, or $VAWE_REFS_DIR)',
-    positional: [{ name: 'action', required: true, help: 'list, index (build refs.json from the folder), add, or frames (the settled full-size frame of each shot, into frames/<id>/)' }, { name: 'source', help: 'with add: an mp4 file or a URL (yt-dlp, 360p); with frames: one film id (default: every film in scope)' }],
+    positional: [{ name: 'action', required: true, help: 'list, index (build refs.json from the folder), add, or frames (the settled full-size frame of each shot, into frames/<id>/ with a frames.json manifest; prints every absolute path)' }, { name: 'source', help: 'with add: an mp4 file or a URL (yt-dlp, 360p); with frames: one film id (default: every film in scope); with list: one film id, whose frame paths it prints' }],
     flags: [
       { name: 'type', type: 'string', help: 'with add: product (product and UI launch films) or brand (idents, brand and studio films)' },
       { name: 'title', type: 'string', help: 'with add: the film title' },
     ],
-    example: 'vawe refs list   |   vawe refs frames u6iro1jHujs   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
+    example: 'vawe refs list [id]   |   vawe refs frames u6iro1jHujs   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
     build: (v, [action, source]) => [{ script: 'harness/dev/refs.mjs', args: [action, ...(source ? [source] : []), ...opt('--type', v.type), ...opt('--title', v.title)] }],
-    next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read ~/.vawe/refs/frames/<id>/*.png at full size before you design' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
+    next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read the absolute paths it prints (one per frame) at full size before you design' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
   },
   {
     name: 'studio', summary: 'live scrubbable preview; edits the page literals in place',
