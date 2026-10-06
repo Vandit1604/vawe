@@ -55,7 +55,8 @@ test('Shots has one row per starter world with its span; Words and Objects one g
   const rows = spec.split('\n').filter((l) => l.includes(GUESS));
   assert.equal(rows.length, 7);
   assert.match(rows[0], /^\| s1 \| 0 \| 2\.33 \| Ship faster \(guess: change me\) \|/);
-  assert.match(rows[3], /^\| s4 \| 6\.1\d \| 8\.0\d \| one fact \(guess: change me\) \|/);
+  assert.match(rows[2], /^\| s3 \| 4\.\d+ \| 6\.1\d \| one fact \(guess: change me\) \|/);
+  assert.match(rows[3], /^\| s4 \| 6\.1\d \| 8\.1\d \| no words: the ground carries it \(guess: change me\) \| ground bloom \|/);
   assert.match(rows[5], /^\| Ship faster \(guess: change me\) \| s1 \|/);
 });
 

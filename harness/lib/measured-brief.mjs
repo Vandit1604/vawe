@@ -167,7 +167,7 @@ function specText({ title, length }) {
   return [
     '### Shots',
     table(['id', 'start s', 'end s', 'the viewer notices', 'move in', 'move out', 'camera', 'ground'],
-      beats.map((b, i) => [b.id, String(b.start), String(b.end), `${i ? 'one fact' : cell(title)} ${GUESS}`, 'layer in', 'leave 0.22 s', 'static', i % 2 ? PLACEHOLDER.ink : PLACEHOLDER.ground])),
+      beats.map((b, i) => [b.id, String(b.start), String(b.end), `${b.wordless ? 'no words: the ground carries it' : i ? 'one fact' : cell(title)} ${GUESS}`, b.wordless ? 'ground bloom' : 'layer in', 'leave 0.22 s', 'static', i % 2 ? PLACEHOLDER.ink : PLACEHOLDER.ground])),
     '### Words',
     table(['text', 'shot', 'appear s', 'settle s', 'cap %', 'x %', 'y %', 'weight', 'colour'],
       [[`${cell(title)} ${GUESS}`, 's1', '0', '0.6', '10', '7', '60', '700', PLACEHOLDER.ink]]),

@@ -12,6 +12,8 @@ export const SPAN_SLACK_S = 0.1;
 // A world must outlast its text's read time by an entrance settling and an exit clearing (each about 0.4 s in the house presets).
 export const READ_MARGIN_S = 0.8;
 
+const WORDLESS_EVERY = 4;
+
 const round = (n) => +n.toFixed(3);
 const wordCount = (text) => text.split(/\s+/).filter(Boolean).length;
 
@@ -69,11 +71,16 @@ export function heldWorlds(spans, max = TURN_SECONDS_MAX, authoring = {}) {
 
 /**
  * The starter's beats: the first world lasts as long as its texts need to be read (at least the world-turns limit, at most half the film),
- * the rest split equally with none longer than the limit; at least 2 worlds: [{ id, start, end }]. Pure.
+ * the rest split equally with none longer than the limit; at least 2 worlds: [{ id, start, end, wordless }]. Every fourth world after the
+ * first three, never the last, shows no words and lasts the full limit, so the eye rests (rule text-breathing). Pure.
  */
 export function starterBeats(length, firstTexts = []) {
   const first = Math.min(length / 2, Math.max(TURN_SECONDS_MAX, readNeed(firstTexts) + READ_MARGIN_S));
   const n = Math.max(1, Math.ceil((length - first) / TURN_SECONDS_MAX - 1e-9));
-  const at = (i) => +(i === 0 ? 0 : first + ((length - first) * (i - 1)) / n).toFixed(2);
-  return Array.from({ length: n + 1 }, (_, i) => ({ id: `s${i + 1}`, start: at(i), end: at(i + 1) }));
+  const wordless = (i) => i % WORDLESS_EVERY === WORDLESS_EVERY - 1 && i < n;
+  const quiet = Math.floor(n / WORDLESS_EVERY);
+  const shared = (length - first - quiet * TURN_SECONDS_MAX) / (n - quiet);
+  const lasts = Array.from({ length: n + 1 }, (_, i) => (i === 0 ? first : wordless(i) ? TURN_SECONDS_MAX : shared));
+  const ends = lasts.map((_, i) => (i === n ? length : +lasts.slice(0, i + 1).reduce((a, b) => a + b, 0).toFixed(2)));
+  return ends.map((end, i) => ({ id: `s${i + 1}`, start: i === 0 ? 0 : ends[i - 1], end, wordless: wordless(i) }));
 }
