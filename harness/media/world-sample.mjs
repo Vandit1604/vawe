@@ -2,6 +2,7 @@
 // (pure span math: harness/lib/worlds.mjs). It runs in the draft check's text sample times.
 import { sampleTimes } from '../lib/draft-check.mjs';
 import { worldSpans } from '../lib/worlds.mjs';
+import { runStart } from '../lib/spec-conformance.mjs';
 
 const SEEN_MIN_OPACITY = 0.05;
 const GROUND_MIN_SHARE = 0.5;
@@ -55,5 +56,18 @@ export async function sampleWorlds(page, dur, seek, from = 0) {
     await seek(t * 1000);
     samples.push({ t, worlds: await readWorlds(page) });
   }
-  return worldSpans(samples, { step, dur: from + dur });
+  const spans = worldSpans(samples, { step, dur: from + dur });
+  return refineSpans(spans, async (id, t) => { await seek(t * 1000); return (await readWorlds(page)).some((w) => w.id === id && w.visible); }, from + dur);
+}
+
+/** Moves each coarse span edge onto the frame grid: start is the first visible frame, end the first hidden frame after it (or dur). */
+async function refineSpans(spans, visibleAt, dur) {
+  const out = [];
+  for (const s of spans) {
+    if (s.start == null) { out.push(s); continue; }
+    const start = await runStart((t) => visibleAt(s.id, t), s.start, { dur });
+    const end = await runStart(async (t) => t > start && !(await visibleAt(s.id, t)), s.end, { dur });
+    out.push({ ...s, start: start ?? s.start, end: end ?? dur });
+  }
+  return out;
 }

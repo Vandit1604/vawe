@@ -52,7 +52,7 @@ function pageMeasures({ probe, findings, authoring }, tables) {
     readHoldUnmeasured: readHoldUnmeasured(tracks),
     exits: findings.filter((f) => f.code === 'exit-length').map((f) => ({ at: f.at, what: f.what })),
     layout: wordResult && wordResult.filter((c) => !c.label.endsWith('appears')),
-    measuredSpec: spec ? measuredSpec(tables.words, spec.times, spec.objects ?? [], probe.worlds ?? spec.worlds ?? []) : null,
+    measuredSpec: spec || probe.worlds?.length ? measuredSpec(tables.words, spec?.times ?? [], spec?.objects ?? [], probe.worlds ?? spec?.worlds ?? []) : null,
   };
 }
 
