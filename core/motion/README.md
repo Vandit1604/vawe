@@ -140,6 +140,10 @@ const [r, g, b] = kf(f, TINT);
   It returns a string for `easing:`, so calling it in `vawe.onFrame` throws; there call `easeFn('land')(p)`, the same `EASE` name as a function.
 - `rng(seed)` mulberry32; `noise1(x, seed)` smooth noise in [-1, 1] for drift; `loopT(t, dur)` wraps t.
 
+## The starter's motion
+
+`bin/vawe new` writes drifting ground blobs, a blur on each entrance and `EASE.pop` on every second fact. Skill used: emilkowalski/animate (transform and opacity, ease-out arrivals). Rejected: its cubic-bezier curves, Motion library and no-animation gate (`EASE` names and WAAPI win; a film is seen once).
+
 ## Render it
 
 `bin/vawe dev <page> --from s --to s` renders a half-size draft of the seconds you are working on.
