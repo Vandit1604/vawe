@@ -20,7 +20,10 @@ import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
 import { findTransitions } from '../lib/ref-measure/transition.mjs';
 import { measureLayout } from '../lib/ref-measure/layout.mjs';
-import { transitionRow, easingLines, layoutLines, audioRow, errorLines } from '../lib/ref-measure/spec-lines.mjs';
+import { transitionRow, easingLines, layoutLines, audioRow, errorLines, colourLines, motionRegionLines } from '../lib/ref-measure/spec-lines.mjs';
+import { measureColour } from '../lib/ref-measure/colour.mjs';
+import { worldTurns } from '../lib/ref-measure/world-turns.mjs';
+import { measureMotionRegions } from '../lib/ref-measure/motion-regions.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
 import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 import { trackWords, refineWordTimes, buildLines, restBox, fontPxOf, inkColor } from '../lib/ref-measure/words.mjs';
@@ -38,6 +41,12 @@ function probeRate(video) {
     '-of', 'default=noprint_wrappers=1:nokey=1', video], { encoding: 'utf8' });
   const m = /^(\d+)(?:\/(\d+))?/.exec(String(r.stdout).trim());
   return m ? +m[1] / (m[2] ? +m[2] : 1) : 30;
+}
+
+// The highest rate that keeps the film inside MAX_FRAMES; the two spare frames cover the decoder's rounding up.
+function fitFps(fps, duration) {
+  if (!duration || duration * fps <= MAX_FRAMES - 2) return fps;
+  return Math.floor(((MAX_FRAMES - 2) / duration) * 100) / 100;
 }
 
 const FAST_GRID_W = 160;
@@ -538,6 +547,7 @@ function renderSpec(spec) {
       `beat frames: ${a.beatFrames.slice(0, 48).join(' ')}${a.beatFrames.length > 48 ? ' ...' : ''}`, '',
       tableRows(a.hits.map(audioRow), [['attack s', 'attack'], ['attack f', 'attackFrame'], ['err ms', 'errMs'], ['peak s', 't'], ['peak f', 'frame'], ['strength', 'strength'], ['note', 'note']], 60), '');
   } else L.push('## Audio', '', 'no audio stream.', '');
+  L.push(...colourLines(spec.colour, spec.worldTurns), ...motionRegionLines(spec.motionRegions));
   if (spec.textLines && spec.textLines.length) L.push(...wordLines(spec.textLines, spec.fps));
   if (spec.textRuns) L.push('## On-screen text (every 0.25 s, whole film)', '', 'Every row must exist in the rebuild at its time. OCR spelling can be off; the timing and the line breaks are right.', '', tableRows(spec.textRuns.map((r) => ({ from: r.t0.toFixed(2), to: r.t1.toFixed(2), text: r.text || '(no text)' })), [['from s', 'from'], ['to s', 'to'], ['text (lines split by /)', 'text']], 400), '');
   for (const s of spec.shots) L.push(shotSection(s, spec.fps, spec.err), '');
@@ -583,6 +593,9 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
   if (!W || !H) die(`${video} has no readable video stream`);
   const nativeFps = probeRate(video);
   fps = fps || Math.round(nativeFps * 100) / 100;
+  const fitted = fitFps(fps, duration);
+  if (fitted !== fps) console.error(`ref-spec: ${duration} s at ${fps} fps is over ${MAX_FRAMES} frames, analysing at ${fitted} fps`);
+  fps = fitted;
   const dir = scratch('ref-spec', path.basename(video, path.extname(video)));
   fs.mkdirSync(dir, { recursive: true });
   console.error(`ref-spec: decoding ${path.basename(video)} at ${fps} fps`);
@@ -636,9 +649,12 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
       text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
   }
+  const colour = measureColour(V, spans, fps);
+  const turns = worldTurns(colour.perShot, V.n / fps);
+  const motionRegions = measureMotionRegions(V, cuts.map((c) => c.transition), fps);
   const errors = calibrating ? loadErrors('/nonexistent') : loadErrors();
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
-    fast, cuts, audio: aud, shots, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
+    fast, cuts, audio: aud, shots, colour, worldTurns: turns, motionRegions, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
   fs.writeFileSync(path.join(outDir, 'SPEC.md'), `${renderSpec(spec)}\n`);

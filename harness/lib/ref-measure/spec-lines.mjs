@@ -47,6 +47,20 @@ export function layoutLines(s, err) {
   return L;
 }
 
+export function colourLines(c, turns) {
+  const L = ['## Colour', '',
+    `Per shot and per film, in Lab on ${c.sampleWidth} px wide frames: k-means, clusters over 3% of pixels, clusters closer than deltaE 10 merged.`, '',
+    `colours per shot: median ${c.coloursPerShotMedian ?? 'n/a'}; distinct colours in the film: ${c.coloursDistinct ?? 'n/a'}`,
+    `chroma C*: median ${c.chromaMedian}, p90 ${c.chromaP90}`,
+    `value: ${pct(c.shareDark)} of pixels below L 20, ${pct(c.shareLight)} above L 85, L std ${c.lStd}`, ''];
+  L.push('### World turns', '', `${turns.count} shot boundaries where the dominant colour moves more than deltaE ${turns.thresholdDE} (${turns.per10s} per 10 s)${turns.count ? `, at ${turns.times.join(', ')} s` : ''}.`, '');
+  return L;
+}
+
+export function motionRegionLines(m) {
+  return ['## Moving regions', '', `Separate regions moving at once, per frame, over ${m.frames} frames: median ${m.median}, p90 ${m.p90}, mean ${m.mean}.`, `Method: ${m.method}.`, ''];
+}
+
 export function audioRow(h) {
   return { ...h, attackMs: h.attack != null ? r1(h.attack * 1000) : '', note: h.errMs > 6 ? eye(h.attackFrame) : '' };
 }

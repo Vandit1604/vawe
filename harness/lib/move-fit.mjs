@@ -9,6 +9,11 @@ export const r1 = (v) => Math.round(v * 10) / 10;
 export const r2 = (v) => Math.round(v * 100) / 100;
 export const r3 = (v) => Math.round(v * 1000) / 1000;
 export const median = (a) => [...a].sort((x, y) => x - y)[Math.floor(a.length / 2)];
+export const percentile = (a, q) => {
+  if (!a.length) return null;
+  const s = Float64Array.from(a).sort(), x = (q / 100) * (s.length - 1), i = Math.floor(x);
+  return i + 1 < s.length ? s[i] + (s[i + 1] - s[i]) * (x - i) : s[i];
+};
 export const mode = (a) => { const c = {}; for (const x of a) c[x] = (c[x] || 0) + 1; return Object.entries(c).sort((x, y) => y[1] - x[1])[0][0]; };
 
 const REST_PX = 0.5;
