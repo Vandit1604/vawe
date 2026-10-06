@@ -12,7 +12,7 @@ prevents: judge notes name template devices: light beams, lens streaks, sheen ba
 status: active
 scored: yes
 numbers: {"stock_devices_max":1}
-print-motion: use a stock device (sheen band, lens streak, light beam, accent bar, rule line) once, not as the idea
+print-check: use a stock device (sheen band, lens streak, light beam, accent bar, rule line) once, not as the idea
 craft: failure-modes
 ---
 

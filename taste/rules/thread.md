@@ -13,7 +13,7 @@ dial: thread
 status: active
 scored: yes
 numbers: {}
-print-concept: pick one thread that carries through (an object, a type line, a colour or a rhythm), not separate reveals one after another
+print-explore: pick one thread that carries through (an object, a type line, a colour or a rhythm), not separate reveals one after another
 digest: One thread carries through (object, type line, colour or rhythm), not separate reveals one after another.
 craft: film-structure
 ---

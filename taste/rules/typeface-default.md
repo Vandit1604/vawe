@@ -12,7 +12,7 @@ prevents: feedback: Instrument Serif was picked for a real film and rejected as 
 status: active
 scored: yes
 numbers: {}
-print-concept: use the kit's face and ground or a face the direction chose, not Inter or Space Grotesk by habit
+print-frames: use the kit's face and ground or a face the direction chose, not Inter or Space Grotesk by habit
 digest: Use the kit's face and ground, or a face the direction chose; not Inter or Space Grotesk by habit.
 craft: typography
 ---

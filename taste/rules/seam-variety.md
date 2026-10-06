@@ -13,7 +13,7 @@ dial: seam
 status: active
 scored: yes
 numbers: {}
-print-motion: change axis or direction at every moving seam, not the same seam move twice
+print-storyboard: change axis or direction at every moving seam, not the same seam move twice
 digest: Each moving seam changes axis or direction; a hard cut is exempt.
 craft: transitions
 ---

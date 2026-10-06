@@ -101,7 +101,7 @@ export function doneLines(job) {
     lines.push(`final check: ${problems.length} problem${problems.length > 1 ? 's' : ''}, look at these seconds`);
     for (const p of problems.slice(0, LIMITS.maxProblems)) lines.push(`  ${p}`);
   }
-  if (job.outputs?.length) lines.push(...tasteLines('preship'));
+  if (job.outputs?.length) lines.push(...tasteLines('check'));
   for (const v of job.verdict || []) lines.push(v);
   if (job.acceptanceError) lines.push(`acceptance skipped: ${job.acceptanceError}`);
   else if (job.acceptance) lines.push(...job.acceptance.lines);

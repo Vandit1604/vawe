@@ -12,7 +12,6 @@ prevents: feedback: "use subtle sounds"; doc SOUND: mickey-mousing applied to ed
 status: active
 scored: yes
 numbers: {"swells_max":1}
-print-sound: use at most one soft swell that ends on a cut, not a whoosh on every cut
 craft: sound
 ---
 

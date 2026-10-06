@@ -12,7 +12,7 @@ prevents: doc SOUND (Chion's synchresis): a sound and an image that meet fuse in
 status: active
 scored: no
 numbers: {"sync_points_max":2}
-print-sound: cue the first and the last key word, not a tick on every word
+print-check: cue the first and the last key word, not a tick on every word
 craft: sound
 ---
 

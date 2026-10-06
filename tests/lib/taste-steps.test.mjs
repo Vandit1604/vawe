@@ -5,11 +5,18 @@ import { TASTE_STEPS, tasteLines, draftTasteLines, rulesOf } from '../../harness
 
 const ruleIds = new Set(fs.readdirSync(new URL('../../taste/rules/', import.meta.url)).map((f) => f.replace(/\.md$/, '')));
 
-test('each step prints 5 to 8 lines, each a contrast pair naming an existing rule id', () => {
+test('the printed steps are the process steps: explore, frames, storyboard, motion, check', () => {
+  assert.deepEqual(Object.keys(TASTE_STEPS), ['explore', 'frames', 'storyboard', 'motion', 'check']);
+  const ids = (step) => TASTE_STEPS[step].lines.map((l) => l.rule);
+  assert.ok(ids('storyboard').includes('world-turns') && ids('frames').includes('typeface-default') && ids('check').includes('sound-level'));
+  assert.throws(() => tasteLines('concept'), /no step "concept"/);
+});
+
+test('each step prints 3 to 8 lines, each a contrast pair naming an existing rule id', () => {
   for (const step of Object.keys(TASTE_STEPS)) {
     const [header, ...lines] = tasteLines(step);
     assert.match(header, /^taste, .+ \(taste\/build\/CARD\.md\):$/);
-    assert.ok(lines.length >= 5 && lines.length <= 8, `${step}: ${lines.length} lines`);
+    assert.ok(lines.length >= 3 && lines.length <= 8, `${step}: ${lines.length} lines`);
     for (const l of lines) assert.match(l, /^- .+, not .+ \(rule [a-z][a-z0-9-]*\)$/);
     for (const l of TASTE_STEPS[step].lines) assert.ok(ruleIds.has(l.rule), `${step}: no rule ${l.rule}`);
   }

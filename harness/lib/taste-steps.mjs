@@ -9,7 +9,7 @@ const CARD = 'taste/build/CARD.md';
 
 const format = (header, lines) => [`taste, ${header} (${CARD}):`, ...lines.map((l) => `- ${l.text} (rule ${l.rule})`)];
 
-/** The printed lines of one step: concept, motion, sound or preship. */
+/** The printed lines of one step: explore, frames, storyboard, motion or check. */
 export function tasteLines(step, steps = TASTE_STEPS) {
   const s = steps[step];
   if (!s) throw new Error(`taste-steps: no step "${step}"; valid: ${Object.keys(steps).join(' ')}`);
