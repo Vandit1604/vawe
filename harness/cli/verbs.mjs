@@ -192,6 +192,17 @@ export const VERBS = [
     next: () => 'mark every SPEC.md line KEEP or CHANGE, then vawe new <name> and rebuild',
   },
   {
+    name: 'refs', summary: 'the reference films the fresh judge compares your film with (kept outside the repo in ~/.vawe/refs, or $VAWE_REFS_DIR)',
+    positional: [{ name: 'action', required: true, help: 'list, index (build refs.json from the folder), or add' }, { name: 'source', help: 'with add: an mp4 file or a URL (yt-dlp, 360p)' }],
+    flags: [
+      { name: 'type', type: 'string', help: 'with add: product (product and UI launch films) or brand (idents, brand and studio films)' },
+      { name: 'title', type: 'string', help: 'with add: the film title' },
+    ],
+    example: 'vawe refs list   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
+    build: (v, [action, source]) => [{ script: 'harness/dev/refs.mjs', args: [action, ...(source ? [source] : []), ...opt('--type', v.type), ...opt('--title', v.title)] }],
+    next: (v, [action]) => (action === 'list' ? 'bin/vawe judge <film.mp4> --fresh --brief films/<name>/brief.md reads two of these beside your film' : 'bin/vawe refs list'),
+  },
+  {
     name: 'studio', summary: 'live scrubbable preview; edits the page literals in place',
     positional: [PAGE],
     flags: [{ name: 'port', type: 'number', default: 8799, help: 'http port' }],

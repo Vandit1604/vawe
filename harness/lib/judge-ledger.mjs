@@ -1,11 +1,12 @@
 // The judge ledger: every fix a fresh judge asks for gets an id and stays in out/<name>.judge.json. The
-// next judge of the film marks each open one fixed, partly or still before it adds new ones, and says
+// next judge of the film marks each open one fixed, partly, still or stale (a fault the sheet no longer shows) before it adds new ones, and says
 // why when a new fix reverses an old one. Every item carries the rule id it traces to (taste/rules), and a
 // failing note of a rule that has an open item stays that item. A target is a rule id, else its "what". Each fix names what it changes, its value now and the value it
 // wants, so the next judge starts from numbers, and a target the judges move back and forth over three
 // rounds prints a stop line. Pure: harness/media/judge-fresh.mjs reads and writes the file.
 
-export const MARKS = ['fixed', 'partly', 'still'];
+export const MARKS = ['fixed', 'partly', 'still', 'stale'];
+const CLOSED = ['fixed', 'stale'];
 
 const idNumber = (id) => Number(/^f(\d+)$/.exec(id || '')?.[1] || 0);
 
@@ -16,7 +17,7 @@ export function previousItems(prev) {
   return (prev.fixes || []).map((f, i) => ({ id: `f${i + 1}`, axis: f.axis, ...(f.rule ? { rule: f.rule } : {}), at: f.at ?? null, fix: f.fix, status: 'new' }));
 }
 
-export const openItems = (items) => items.filter((i) => i.status !== 'fixed');
+export const openItems = (items) => items.filter((i) => !CLOSED.includes(i.status));
 
 const whatKey = (what) => String(what || '').toLowerCase().replace(/[^a-z0-9%.]+/g, ' ').trim();
 
@@ -52,7 +53,7 @@ export function ledgerPrompt(open, all = open) {
   const asked = targetHistory(all).map((g) => `- ${g.what}: ${g.items.map((i) => `${i.id} now ${i.now ?? '?'}, asked ${i.want}`).join('; ')}`);
   return `Ledger: the last judge of this film asked for these fixes.
 ${open.map((i) => `- ${i.id} (${i.axis}${i.rule ? `, rule ${i.rule}` : ''}${i.at != null ? ` at ${i.at}` : ''}): ${i.fix}`).join('\n')}
-${asked.length ? `Values asked so far; measure the same target on the frames and reuse its words:\n${asked.join('\n')}\n` : ''}First mark each one: add "ledger":[{"id":"${open[0].id}","status":"fixed, partly or still"}, ...] to the JSON. Then give fixes only for what is new; for an axis whose item is still open, write "fix":"${open[0].id}" (its id). A fix that undoes an item above needs "reverses":"<id>" and "why":"<one reason>".`;
+${asked.length ? `Values asked so far; measure the same target on the frames and reuse its words:\n${asked.join('\n')}\n` : ''}First mark each one: add "ledger":[{"id":"${open[0].id}","status":"fixed, partly, still or stale"}, ...] to the JSON. Mark "still" only if the sheet you see now shows that fault at the time named; mark "stale" when the element or the moment is no longer in this film. Then give fixes only for what is new; for an axis whose item is still open, write "fix":"${open[0].id}" (its id). A fix that undoes an item above needs "reverses":"<id>" and "why":"<one reason>".`;
 }
 
 function refersTo(fix, open) {
@@ -68,27 +69,28 @@ function refersTo(fix, open) {
  */
 export function mergeLedger(prev, raw, fixes, notes = []) {
   const marks = new Map((raw.ledger || []).map((m) => [m.id, m.status]));
-  const counts = { fixed: 0, partly: 0, still: 0, unmarked: 0, new: 0 };
+  const counts = { fixed: 0, partly: 0, still: 0, stale: 0, unmarked: 0, new: 0 };
   const open = openItems(prev);
   const carried = prev.map((i) => {
-    if (i.status === 'fixed') return i;
+    if (CLOSED.includes(i.status)) return i;
     const status = MARKS.includes(marks.get(i.id)) ? marks.get(i.id) : 'unmarked';
     counts[status] += 1;
     return { ...i, status };
   });
   let n = Math.max(0, ...prev.map((i) => idNumber(i.id)));
   const fresh = [];
-  const shown = fixes.map((f) => {
+  const shown = fixes.flatMap((f) => {
     const old = refersTo(f.fix, open);
-    if (old) return { ...f, fix: `${old.id}: ${old.fix}` };
+    if (old && marks.get(old.id) === 'stale') return [];
+    if (old) return [{ ...f, fix: `${old.id}: ${old.fix}` }];
     const given = (raw.fixes || []).find((x) => x.axis === f.axis) || {};
     const item = { id: `f${++n}`, axis: f.axis, ...(f.rule ? { rule: f.rule } : {}), at: f.at, fix: f.fix, status: 'new', ...(given.what ? { what: given.what, now: given.now ?? null, want: given.want ?? null } : {}) };
     if (given.reverses) Object.assign(item, { reverses: given.reverses, why: given.why || null });
     fresh.push(item);
-    return { ...f, fix: `${item.id}: ${f.fix}` };
+    return [{ ...f, fix: `${item.id}: ${f.fix}` }];
   });
   for (const note of notes.filter((x) => x.verdict === 'fail' && x.rule)) {
-    if ([...carried, ...fresh].some((i) => i.rule === note.rule && i.status !== 'fixed')) continue;
+    if ([...carried, ...fresh].some((i) => i.rule === note.rule && !CLOSED.includes(i.status))) continue;
     fresh.push({ id: `f${++n}`, axis: 'note', rule: note.rule, at: note.t, fix: note.note || 'no note given', status: 'new' });
   }
   counts.new = fresh.length;
@@ -105,7 +107,7 @@ export function flipFlopLines(items) {
 
 /** The compact line: "ledger: 3 fixed, 1 partly, 1 still; 2 new", one line per reversal, one per flip-flop. */
 export function ledgerLines({ counts, reversals, items = [] }) {
-  const unmarked = counts.unmarked ? `, ${counts.unmarked} unmarked` : '';
+  const unmarked = `${counts.stale ? `, ${counts.stale} stale` : ''}${counts.unmarked ? `, ${counts.unmarked} unmarked` : ''}`;
   return [
     `ledger: ${counts.fixed} fixed, ${counts.partly} partly, ${counts.still} still${unmarked}; ${counts.new} new`,
     ...reversals.map((r) => `reverses ${r.reverses}: ${r.why || 'no reason given; treat the old fix as standing'}`),
