@@ -51,6 +51,14 @@ export const VERBS = [
     build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref, ...(v.score ? { SCORE: '1' } : {}) } }] : null),
   },
   {
+    name: 'frames', summary: 'one still per data-world element (the others hidden), a contact sheet and the still-frame layout rules; about 2 s',
+    positional: [PAGE],
+    flags: [],
+    example: 'vawe frames films/my-launch/page.html',
+    build: (v, [page]) => [{ script: 'harness/media/frames.mjs', args: [page] }],
+    next: (v, [page]) => `storyboard the motion in brief.md (Shots), then bin/vawe dev ${page}`,
+  },
+  {
     name: 'dev', summary: 'draft render: half size, 30 fps, silent; also writes a key-frame sheet PNG next to it',
     positional: [PAGE],
     flags: [

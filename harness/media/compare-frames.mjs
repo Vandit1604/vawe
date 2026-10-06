@@ -60,7 +60,7 @@ export async function compareFrames({ ours, ref, times, out, from = 0 }) {
 }
 
 // No reference: the frames alone, labelled with time, tiled up to 3 per row.
-function tile(pngs, out) {
+export function tile(pngs, out) {
   const cols = Math.min(pngs.length, 3), rows = Math.ceil(pngs.length / cols);
   const seq = path.join(path.dirname(pngs[0]), 't%d.png');
   pngs.forEach((p, i) => fs.copyFileSync(p, seq.replace('%d', i + 1)));
