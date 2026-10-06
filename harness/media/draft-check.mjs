@@ -197,7 +197,7 @@ function layoutBoxes(env) {
     const bg = rgba(cs.backgroundColor);
     return {
       tag: el.tagName.toLowerCase(), p: nearestListed(el), box: [r.x, r.y, r.width, r.height], op,
-      bg: bg[3] > 0 ? bg : null, image: cs.backgroundImage !== 'none',
+      bg: bg[3] > 0 ? bg : null, image: cs.backgroundImage !== 'none', blurred: cs.filter.includes('blur'),
       border: { l: side(cs, 'Left'), r: side(cs, 'Right'), t: side(cs, 'Top'), b: side(cs, 'Bottom') },
       radius: parseFloat(cs.borderTopLeftRadius) || 0, shadow: cs.boxShadow !== 'none', decorative: Boolean(el.closest(decorative)),
     };
