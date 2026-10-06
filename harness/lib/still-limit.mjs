@@ -2,7 +2,7 @@
 // scene-stats staticRuns; a hold is declared with the dead-air waiver (AGENTS.md "Waivers"): a bare
 // "dead-air" covers the film, "dead-air@2.1-3.4" covers those seconds.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
-import { splitWaiver, hasReason } from './waivers.mjs';
+import { splitWaiver, hasReason, waiverHint } from './waivers.mjs';
 
 export const STILL_SEC = LIMITS['live-hold'].still_limit_s;
 
@@ -28,5 +28,11 @@ export function undeclaredStills(runs, authoring = {}, limit = STILL_SEC) {
 
 /** The problem line for one still run, with the two fixes. Pure. */
 export function stillText(r, limit = STILL_SEC) {
-  return `static window ${r.a}-${r.b} s (${r.len} s, limit ${limit} s): keep one thing moving (a slow drift on the ground or the hero), or declare the hold with "dead-air@${r.a}-${r.b}" in authoring.allow and a _why`;
+  return `static window ${r.a}-${r.b} s (${r.len} s, limit ${limit} s): keep one thing moving (a slow drift on the ground or the hero); ${waiverHint(`dead-air@${r.a}-${r.b}`)}`;
+}
+
+/** A predicate for { a, b } second ranges that lie inside one declared hold. Pure. */
+export function insideHold(authoring = {}) {
+  const holds = declaredHolds(authoring);
+  return (r) => holds.some(([a, b]) => a <= r.a + 1e-9 && r.b <= b + 1e-9);
 }

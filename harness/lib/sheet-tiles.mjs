@@ -3,7 +3,8 @@
 // the sheet from these constants, and the draft and final checks read the same tiles, so dev and the
 // judge see one number. A run inside a declared hold ("dead-air" waiver) is not counted.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
-import { declaredHolds } from './still-limit.mjs';
+import { insideHold } from './still-limit.mjs';
+import { waiverHint } from './waivers.mjs';
 
 export const SHEET_FPS = LIMITS['world-turns'].sheet_fps;
 export const SHEET_MAX_FRAMES = 150;
@@ -29,30 +30,26 @@ export function tileRuns(diffs, fps) {
   return runs;
 }
 
-const heldBy = (authoring) => {
-  const holds = declaredHolds(authoring);
-  return (r) => holds.some(([a, b]) => a <= r.a + 1e-9 && r.b <= b + 1e-9);
-};
-
-/** The tiles in the near-identical run that reaches the end of the sheet, 0 for none or a declared hold. Pure. */
-export function tailTiles(diffs, fps, authoring = {}) {
-  const held = heldBy(authoring);
+/** The tiles in the near-identical run that reaches the end of the sheet, 0 for none, a declared hold or a tail the page animates (`moving`). Pure. */
+export function tailTiles(diffs, fps, authoring = {}, moving = false) {
+  if (moving) return 0;
+  const held = insideHold(authoring);
   const lastTile = +(diffs.length / fps).toFixed(2);
   const run = tileRuns(diffs, fps).find((r) => r.b === lastTile && !held(r));
   return run ? run.tiles : 0;
 }
 
-/** The problem lines for the sheet's runs: over RUN_TILES anywhere, over TAIL_TILES at the end. Pure. */
-export function tileProblems(diffs, fps, authoring = {}) {
-  const held = heldBy(authoring);
+/** The problem lines for the sheet's runs: over RUN_TILES anywhere, over TAIL_TILES at the end unless the page animates its tail (`moving`). Pure. */
+export function tileProblems(diffs, fps, authoring = {}, moving = false) {
+  const held = insideHold(authoring);
   const lastTile = +(diffs.length / fps).toFixed(2);
   const lines = [];
   for (const r of tileRuns(diffs, fps)) {
-    if (held(r)) continue;
     const tail = r.b === lastTile;
+    if (held(r) || (tail && moving)) continue;
     const limit = tail ? TAIL_TILES : RUN_TILES;
     if (r.tiles <= limit) continue;
-    lines.push(`${r.tiles} near-identical ${tail ? 'tail ' : ''}tiles ${r.a}-${r.b} s on the judge's sheet (limit ${limit}): add a move there or make the push larger, or declare the hold with "dead-air@${r.a}-${r.b}" in authoring.allow and a _why`);
+    lines.push(`${r.tiles} near-identical ${tail ? 'tail ' : ''}tiles ${r.a}-${r.b} s on the judge's sheet (limit ${limit}): add a move there or make the push larger; ${waiverHint(`dead-air@${r.a}-${r.b}`)}`);
   }
   return lines;
 }

@@ -53,10 +53,10 @@ test('Shots has one row per starter world with its span; Words and Objects one g
   const { text } = briefFor('beat-sheet.md', { length: 10, title: 'Ship faster' });
   const spec = text.split('## Spec')[1].split('## Acceptance')[0];
   const rows = spec.split('\n').filter((l) => l.includes(GUESS));
-  assert.equal(rows.length, 6);
-  assert.match(rows[0], /^\| s1 \| 0 \| 2\.5 \| Ship faster \(guess: change me\) \|/);
-  assert.match(rows[3], /^\| s4 \| 7\.5 \| 10 \| one fact \(guess: change me\) \|/);
-  assert.match(rows[4], /^\| Ship faster \(guess: change me\) \| s1 \|/);
+  assert.equal(rows.length, 7);
+  assert.match(rows[0], /^\| s1 \| 0 \| 2 \| Ship faster \(guess: change me\) \|/);
+  assert.match(rows[3], /^\| s4 \| 6 \| 8 \| one fact \(guess: change me\) \|/);
+  assert.match(rows[5], /^\| Ship faster \(guess: change me\) \| s1 \|/);
 });
 
 test('every field the request does not answer is a marked guess, and one line names them', () => {

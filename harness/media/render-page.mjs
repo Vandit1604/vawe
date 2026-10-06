@@ -57,6 +57,8 @@ import { REPO_ROOT } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
+import { sampleTail } from './tail-sample.mjs';
+import { tailMoving } from '../lib/tail-motion.mjs';
 import { sampleText, sampleLayout, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
 import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
 import { createChecks, timeLine } from '../lib/check-runner.mjs';
@@ -68,7 +70,7 @@ import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
-import { isWaivedBy, hasReason, isWaived } from '../lib/waivers.mjs';
+import { isWaivedBy, hasReason, isWaived, waiverHint } from '../lib/waivers.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
@@ -801,9 +803,9 @@ function motionFindings(pagePath, motion) {
 const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
 
 function motionAdvice(pagePath, motion) {
-  const lines = lintLines(motionFindings(pagePath, motion));
-  if (!lines.length) return [];
-  const out = [...lines, 'waive a rule line with its code in authoring.allow and a _why'];
+  const findings = motionFindings(pagePath, motion);
+  if (!findings.length) return [];
+  const out = [...lintLines(findings), waiverHint(findings[0].code)];
   if (motion.boxes?.canvas) out.push(`motion lint read element boxes over time; the motion inside ${motion.boxes.canvas} canvas (2D or WebGL) is out of its scope`);
   return out;
 }
@@ -823,12 +825,13 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const boxes = found?.scripted ? await checks.run('box-motion', () => sampleBoxTracks(page, lintTimes(dur), 'visible'), window) : undefined;
   const text = await checks.run('text', () => sampleText(page, dur, seekLayout(page), from), window);
   const worlds = whole ? await checks.run('worlds', () => sampleWorlds(page, dur, seekLayout(page)), window) : null;
+  const tail = whole ? await checks.run('tail', () => sampleTail(page, dur, seekLayout(page)), window) : null;
   const contrast = await checks.run('contrast', () => sampleContrast(page, text.samples, (ms) => seekAll(page, ms)), window);
   const layout = await checks.run('layout', () => sampleLayout(page, layoutTimes(text.samples, window), seekLayout(page)), window);
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, contrast, layout, worlds, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
@@ -847,15 +850,16 @@ export function pageAdvice(pagePath, { probe, motion }) {
 }
 
 /** { problems, measures } of the draft video from one read (stills, held worlds, blank runs, tail tiles, smoothness), or null when ffmpeg fails. */
-export async function videoChecks(mp4, pagePath, checks) {
+export async function videoChecks(mp4, pagePath, checks, probe = {}) {
   const authoring = pageAuthoring(pagePath);
   const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
+  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail) };
   try {
-    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring), measures: videoMeasures(read, authoring, shots) }; }, { authoring, shots });
+    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving) }; }, { authoring, shots, page });
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
-const NOTE_LINES = /^(waive a rule line|motion lint read element boxes)/;
+const NOTE_LINES = /^(waive: |motion lint read element boxes)/;
 
 /**
  * What a draft says about itself: { red, notes, rows, was, sync }. `red` is what the terminal shows (the red acceptance
@@ -865,7 +869,7 @@ const NOTE_LINES = /^(waive a rule line|motion lint read element boxes)/;
 async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks, whole, checks }) {
   const authoring = pageAuthoring(pagePath);
   const page = pageAdvice(pagePath, { probe, motion });
-  const video = whole ? await videoChecks(mp4, pagePath, checks) : null;
+  const video = whole ? await videoChecks(mp4, pagePath, checks, probe) : null;
   const problems = mergeProblems(video?.problems ?? [], page.text);
   const sound = soundLine(level?.I ?? null);
   const peak = peakLine(level?.TP ?? null);

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { samePage, blankRuns, isFlat, problemsOf, doneLines, finalFailedLine, finalFailure, lastFailedShip, failedShipLine, recentFailedShipLines } from '../../harness/lib/ship-status.mjs';
+import { waiverHint } from '../../harness/lib/waivers.mjs';
 import { shipEvent } from '../../harness/lib/run-events.mjs';
 
 const stats = (over = {}) => ({ duration: 6, turns: [{ t: 2 }, { t: 4 }], static: [], ...over });
@@ -12,7 +13,19 @@ test('samePage: relative and absolute spellings of one page match', () => {
 
 test('problemsOf: worst first, seconds named, small things ignored', () => {
   const out = problemsOf(stats({ duration: 10, turns: [{ t: 6.5 }], static: [{ a: 1, b: 2.5, len: 1.5 }, { a: 8, b: 8.5, len: 0.5 }] }), [{ a: 4, b: 4.4 }]);
-  assert.deepEqual(out, ['world held 0.0-6.5 s (6.5 s)', 'world held 6.5-10.0 s (3.5 s)', 'static window 1-2.5 s (1.5 s, limit 0.5 s): keep one thing moving (a slow drift on the ground or the hero), or declare the hold with "dead-air@1-2.5" in authoring.allow and a _why', 'blank frame 4.0-4.4 s']);
+  assert.deepEqual(out, ['world held 0.0-6.5 s (6.5 s)', 'world held 6.5-10.0 s (3.5 s)', 'static window 1-2.5 s (1.5 s, limit 0.5 s): keep one thing moving (a slow drift on the ground or the hero); ' + waiverHint('dead-air@1-2.5'), 'blank frame 4.0-4.4 s']);
+});
+
+test('problemsOf: measured data-world spans replace the pixel turns', () => {
+  const worlds = [{ id: 'a', start: 0, end: 2, ground: '#fff' }, { id: 'b', start: 2, end: 6, ground: '#fff' }];
+  const out = problemsOf(stats({ turns: [], duration: 6 }), [], undefined, {}, worlds);
+  assert.deepEqual(out, [`world held b 2-6 s (4 s); ${waiverHint('dead-air@2-6')}`]);
+});
+
+test('problemsOf: a swap the pixels see is no turn when the worlds are measured, and a page with no worlds keeps the pixel turns', () => {
+  const worlds = [{ id: 'a', start: 0, end: 2, ground: '#fff' }, { id: 'b', start: 2, end: 4, ground: '#fff' }];
+  assert.deepEqual(problemsOf(stats({ turns: [{ t: 5.5 }], duration: 6 }), [], undefined, {}, worlds), []);
+  assert.deepEqual(problemsOf(stats({ turns: [], duration: 6 }), [], undefined, {}, []), ['world held 0.0-6.0 s (6.0 s)']);
 });
 
 test('problemsOf: a clean film has none', () => {
