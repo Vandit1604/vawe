@@ -11,7 +11,7 @@ import { buildRows, redLine, summaryLine } from '../../harness/lib/acceptance.mj
 
 test('fast runs the fast tier, draft adds settled, full adds ship', () => {
   assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'fast')), ['motion', 'text', 'worlds', 'tail', 'video']);
-  assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'draft')), ['motion', 'text', 'worlds', 'tail', 'video', 'contrast', 'layout', 'spec']);
+  assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'draft')), ['motion', 'text', 'worlds', 'tail', 'video', 'contrast', 'layout', 'spec', 'speed']);
   assert.equal(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'full')).length, Object.keys(CHECK_TIER).length);
   assert.match(unrunReason('loudness', 'draft'), /ship tier/);
   assert.equal(unrunReason('loudness', 'full'), null);

@@ -76,6 +76,7 @@ import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
+import { barLint, boxMotion } from '../lib/bar-lint.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
@@ -802,6 +803,10 @@ function motionFindings(pagePath, motion) {
 
 const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
 
+const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null }), pageAuthoring(pagePath));
+
+const barAdvice = (pagePath, motion, probe) => barFindings(pagePath, motion, probe).flatMap((f) => [...lintLines([f]), waiverHint(f.code)]);
+
 function motionAdvice(pagePath, motion) {
   const findings = motionFindings(pagePath, motion);
   if (!findings.length) return [];
@@ -823,6 +828,7 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const tables = dropGuesses(parseBriefTables(readBrief(pagePath))).set;
   const found = await checks.run('motion', () => runMotionCollector(page), window);
   const boxes = found?.scripted ? await checks.run('box-motion', () => sampleBoxTracks(page, lintTimes(dur), 'visible'), window) : undefined;
+  const speed = boxes ? boxMotion(boxes) : await checks.run('speed', async () => boxMotion(await sampleBoxTracks(page, lintTimes(dur).map((t) => +(from + t).toFixed(4)), 'visible')), window);
   const text = await checks.run('text', () => sampleText(page, dur, seekLayout(page), from), window);
   const worlds = whole ? await checks.run('worlds', () => sampleWorlds(page, dur, seekLayout(page)), window) : null;
   const tail = whole ? await checks.run('tail', () => sampleTail(page, dur, seekLayout(page)), window) : null;
@@ -831,7 +837,7 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
@@ -844,7 +850,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
 }
@@ -878,7 +884,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
   const hard = [...problems, sound, peak].filter(Boolean);
-  const fired = firedRules([...motionFindings(pagePath, motion), ...layoutFindings(pagePath, probe)], hard, table?.rows ?? []);
+  const fired = firedRules([...motionFindings(pagePath, motion), ...layoutFindings(pagePath, probe), ...barFindings(pagePath, motion, probe)], hard, table?.rows ?? []);
   const chosen = chosenSignature(pagePath);
   const measured = measureMotion(motionRecords(motion));
   const taste = draftTasteLines(hard);

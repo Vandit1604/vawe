@@ -1,7 +1,7 @@
 // The one table of which draft check runs in which tier. A check earns a place in every draft only when it
 // is fast and changes the next edit; the rest runs at `bin/vawe dev --full` or at ship.
 //   fast    every draft: read from the page's declared animations, its text samples and the encoded video
-//   settled every draft, but only at settled frames (contrast, layout) or near the spec times (the Words rows)
+//   settled every draft, but only at settled frames (contrast, layout), near the spec times (the Words rows) or on a boxed pass (speed: up to 300 moments)
 //   ship    `dev --full` and ship: per-frame box tracks, object tracks, loudness and peak
 export const CHECK_TIER = {
   motion: 'fast',
@@ -12,6 +12,7 @@ export const CHECK_TIER = {
   contrast: 'settled',
   layout: 'settled',
   spec: 'settled',
+  speed: 'settled',
   'box-motion': 'ship',
   objects: 'ship',
   sound: 'ship',
