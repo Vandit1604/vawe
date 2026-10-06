@@ -11,6 +11,8 @@ The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start wi
 `bin/vawe new <name>`; this skill holds the code a first draft gets wrong. Taste pitfalls are in
 `taste/build/DIGEST.md`.
 
+Study first: `bin/vawe refs frames`, then Read `~/.vawe/refs/frames/<id>/*.png` at full size and write what you take
+from which frame. Use `bin/vawe` verbs, never raw ffmpeg or Chrome (`bin/vawe --help`).
 Order: design each `data-world` beat as a static frame first (`bin/vawe frames <page>`, one still per
 world), then write the Shots rows for the motion, then the motion, then `bin/vawe dev`. A film is a
 well designed website plus storyboarded motion.

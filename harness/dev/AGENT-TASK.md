@@ -25,6 +25,11 @@ RULES (read first):
 5. Scratch files go ONLY in your own /tmp/claude-501/<your-topic>/, never the session scratchpad or another agent's folder; draft renders take --out out/<your-topic>-*.mp4 when two agents render one film. Return the report as text. Never write it to
    FINDINGS.md or REPORT.md.
 
+6. Use `bin/vawe` before any raw ffmpeg, Chrome, python or yt-dlp command: `bin/vawe --help` lists every verb
+   (frames, spec, refs, compare, judge, runs...). Reuse its libraries (harness/lib/contact-sheet.mjs, key-frames.mjs,
+   refs.mjs) instead of a second way to do one job. A capability that is missing becomes a verb or a flag, never a
+   one-off script.
+
 CONTEXT: <one paragraph: what the task changes and why>
 
 STATIC CHECKS before each commit: `node --check <each changed .mjs>`,

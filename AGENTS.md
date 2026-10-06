@@ -43,6 +43,11 @@ next command for the film you edited last.
 | 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
 | 6 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
 
+Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Frames of a film:
+`vawe refs frames` (reference films, settled full-size frames per shot) and `vawe frames` (your page); a film measured:
+`vawe spec`; side by side: `vawe compare`. If a verb is missing what you need, say so in your report; do not hand-roll it.
+Before you design, study the references: `bin/vawe refs list`, then Read `~/.vawe/refs/frames/<id>/*.png` at full size.
+
 Every step logs to `out/<film>.runs.jsonl`: set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell, then `bin/vawe runs <film>` or `--all` reads the log.
 
 Recreating a reference: `bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md; mark every line KEEP
