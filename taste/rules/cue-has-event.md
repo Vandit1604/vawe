@@ -12,7 +12,7 @@ prevents: doc SOUND: two cues in one frame, or a cue louder than the bed's textu
 status: active
 scored: no
 numbers: {}
-print-sound: tie each cue to one visible event, not sound for its own sake
+print-check: tie each cue to one visible event, not sound for its own sake
 craft: sound
 ---
 

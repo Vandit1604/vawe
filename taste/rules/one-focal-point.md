@@ -12,7 +12,7 @@ prevents: feedback 2026-09-11: "every device points the eye". doc banned-default
 status: active
 scored: yes
 numbers: {}
-print-concept: give each frame one focal point and one accent colour, not two things fighting
+print-frames: give each frame one focal point and one accent colour, not two things fighting
 craft: layout
 ---
 

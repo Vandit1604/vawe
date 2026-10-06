@@ -12,7 +12,7 @@ prevents: feedback: "the world should turn every 1-2 beats; 7 beats on one colou
 status: active
 scored: yes
 numbers: {"turn_seconds_max":2,"run_tiles_max":8,"tail_tiles_max":4,"sheet_fps":5,"near_identical_diff":4.5,"blank_run_s":0.3,"blank_edge_s":0.5}
-print-concept: turn the world every 1 to 2 s (a new element, a cut, a ground swap), not one lockup held
+print-storyboard: turn the world every 1 to 2 s (a new element, a cut, a ground swap), not one lockup held
 digest: Turn the world at least every 2 s or at each beat; no one lockup held.
 craft: grammar
 ---

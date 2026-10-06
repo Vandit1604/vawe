@@ -12,7 +12,7 @@ prevents: feedback: "I don't like the sounds at all; use subtle sounds." judge1:
 status: active
 scored: yes
 numbers: {"peak_dbfs":-10,"lufs_target":-20,"lufs_low":-24,"lufs_high":-16,"cue_peak_over_median_db":6}
-print-sound: keep the true peak at or below -10 dBFS and the mix near -20 LUFS, not a mix pushed loud
+print-check: keep the true peak at or below -10 dBFS and the mix near -20 LUFS, not a mix pushed loud
 craft: sound
 ---
 

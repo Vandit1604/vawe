@@ -12,7 +12,7 @@ prevents: Three directions in one material give one direction. judge notes: all 
 status: active
 scored: yes
 numbers: {"directions":3,"light_directions_max":1}
-print-concept: draw three directions from different materials (type, paper, liquid, cut geometry, photograph, UI, light), not three colours of one idea; at most one is light
+print-explore: draw three directions from different materials (type, paper, liquid, cut geometry, photograph, UI, light), not three colours of one idea; at most one is light
 craft: law
 ---
 

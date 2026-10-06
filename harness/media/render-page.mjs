@@ -68,7 +68,7 @@ import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived } from '../lib/waivers.mjs';
-import { draftTasteLines, tasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
+import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
@@ -875,7 +875,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const fired = firedRules([...motionFindings(pagePath, motion), ...layoutFindings(pagePath, probe)], hard, table?.rows ?? []);
   const chosen = chosenSignature(pagePath);
   const measured = measureMotion(motionRecords(motion));
-  const taste = [...draftTasteLines(hard), ...(/<audio/i.test(fs.readFileSync(pagePath, 'utf8')) ? ['', ...tasteLines('sound')] : [])];
+  const taste = draftTasteLines(hard);
   const signature = { chosen, measured, line: signatureLine(chosen, measured) };
   return { red: [...(table ? table.rows.filter((r) => r.status === 'advice').map(redLine) : []), ...loose, ...firedLines(fired)], signature, fired, notes: { advice, taste, signature: signature.line, fired: firedLines(fired, fired.length), rows: table?.rows ?? [] }, rows: table?.rows ?? null, was: table?.was ?? null, sync: table?.sync ?? null };
 }

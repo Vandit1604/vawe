@@ -12,8 +12,7 @@ prevents: judge1: sting-5s near-black 0 to 0.5 s, hook 5/10. judge2: v2 "tiny do
 status: active
 scored: yes
 numbers: {"subject_by_s":0.1,"empty_max_s":0.5,"motion_delay_min_s":0,"motion_delay_max_s":0.3}
-print-concept: show the subject by 0.1 s, not an empty ground for the first half second
-print-preship: check the frame at 0.1 s has the subject, not an empty ground
+print-frames: show the subject by 0.1 s, not an empty ground for the first half second
 craft: grammar
 ---
 

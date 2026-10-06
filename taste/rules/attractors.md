@@ -12,7 +12,7 @@ prevents: Seen in 8 agent films of 2026-09-30: all 8 had one glowing circle, 4 o
 status: active
 scored: yes
 numbers: {}
-print-concept: choose the hero on purpose, not an attractor: a glowing circle or orb, a dusk sun or crescent, a light-poetry name like Vesper
+print-explore: choose the hero on purpose, not an attractor: a glowing circle or orb, a dusk sun or crescent, a light-poetry name like Vesper
 digest: Choose the hero from the direction, never from the attractor list below.
 craft: law
 ---

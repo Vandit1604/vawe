@@ -10,7 +10,8 @@ import { DIALS } from '../../core/motion/signature.js';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const STEPS = ['concept', 'look', 'motion', 'transitions', 'finish', 'sound', 'preship'];
-export const PRINT_STEPS = { concept: 'concept', motion: 'motion', sound: 'sound', preship: 'before the verdict' };
+// The owner's process steps: each command prints the rules of its own step (a rule's `print-<step>` line).
+export const PRINT_STEPS = { explore: 'explore', frames: 'frames', storyboard: 'storyboard', motion: 'motion', check: 'check' };
 
 // Every check a rule may name: the id the draft check, the lint or the judge prints. `judge` and `none` are not checks.
 export const CHECK_IDS = ['judge', 'none', 'world-held', 'static-window', 'sheet-tiles', 'text-cap-height', 'text-contrast', 'read-hold',

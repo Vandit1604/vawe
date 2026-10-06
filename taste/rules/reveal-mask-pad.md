@@ -12,7 +12,7 @@ prevents: feedback: "letters cut by their reveal". judge1: sting-5s 2.5 s, desce
 status: active
 scored: yes
 numbers: {"mask_pad_em":0.3}
-print-preship: pad each reveal mask 0.3 em past the glyphs, not letters cut by their own reveal
+print-check: pad each reveal mask 0.3 em past the glyphs, not letters cut by their own reveal
 craft: failure-modes
 ---
 

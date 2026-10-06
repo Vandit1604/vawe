@@ -12,7 +12,7 @@ prevents: feedback: "The blue dot is stationary." judge2: still dot 1.0 to 1.6 s
 status: active
 scored: yes
 numbers: {}
-print-preship: let every mark ride its parent, not a mark that points at nothing
+print-check: let every mark ride its parent, not a mark that points at nothing
 craft: failure-modes
 ---
 

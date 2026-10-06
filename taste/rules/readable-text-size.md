@@ -12,7 +12,7 @@ prevents: judge1: 50 px tagline, fix 64 to 72 px. judge2: "about 4% of frame hei
 status: active
 scored: yes
 numbers: {"cap_height_pct":6,"chrome_cap_height_pct":2.5,"held_min_s":0.5}
-print-preship: set a read line at a 6% cap height and hold it max(1.2 s, words/3), not a small tagline that flashes by
+print-frames: set a read line at a 6% cap height and hold it max(1.2 s, words/3), not a small tagline that flashes by
 craft: reading
 ---
 

@@ -12,7 +12,7 @@ prevents: judge1: static 1.1 s tail. judge2: 1.4 s static lockup. A logo slam wi
 status: active
 scored: yes
 numbers: {"tail_seconds":1,"tail_tiles_max":4}
-print-preship: end on motion in the last 1 s, not a frozen lockup
+print-check: end on motion in the last 1 s, not a frozen lockup
 digest: Nothing static in the last 1 s: end on a slow push or drift.
 craft: failure-modes
 ---

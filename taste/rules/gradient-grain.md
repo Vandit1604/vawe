@@ -12,7 +12,7 @@ prevents: judge1: banding rings at 0.6 s; vertical glow seam at x=860 at 2.5 s.
 status: active
 scored: yes
 numbers: {"grain_pct_min":1,"grain_pct_max":2}
-print-preship: keep gradients clean with 1 to 2% grain, not banding rings or a straight seam in a glow
+print-check: keep gradients clean with 1 to 2% grain, not banding rings or a straight seam in a glow
 craft: color
 ---
 

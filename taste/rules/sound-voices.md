@@ -12,7 +12,6 @@ prevents: feedback: "use subtle sounds". judge1 sound 4/10 for loud cues. Ten no
 status: active
 scored: yes
 numbers: {}
-print-sound: use quiet ticks (droplet, pluck, bloom) at their default gains, not impact, braam, drop or riser without a brief that asks for weight
 craft: sound
 ---
 

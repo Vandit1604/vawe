@@ -12,7 +12,7 @@ prevents: doc TASTE-RULES "stillness is powerful" met card "never static in the 
 status: active
 scored: yes
 numbers: {"still_limit_s":0.5,"drift_scale_pct_min":1,"drift_scale_pct_max":3,"rest_min_s":0.4,"rest_max_s":0.6}
-print-preship: keep one thing moving in every hold, not a frozen frame
+print-motion: keep one thing moving in every hold, not a frozen frame
 craft: motion-craft
 ---
 

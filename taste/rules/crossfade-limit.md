@@ -12,7 +12,7 @@ prevents: doc banned-defaults and AGENTS gotchas: a crossfade between two busy f
 status: active
 scored: yes
 numbers: {}
-print-motion: cut, wipe on the motion or match a shape, not a muddy crossfade
+print-storyboard: cut, wipe on the motion or match a shape, not a muddy crossfade
 craft: transitions
 ---
 
