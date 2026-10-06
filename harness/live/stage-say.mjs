@@ -16,12 +16,16 @@ function pages(root) {
     .filter((p) => p.endsWith('/page.html')).map((p) => path.join(root, p));
 }
 
+const hasWorlds = (page) => { try { return /\bdata-world=/.test(fs.readFileSync(page, 'utf8')); } catch { return false; } };
+
 export function nextStep(page, root = process.cwd()) {
   const name = path.basename(path.dirname(page));
   const rel = path.relative(root, page);
   const t = mtime(page);
   const draft = mtime(path.join(root, 'out', `${name}-draft.mp4`));
   const final = mtime(path.join(root, 'out', `${name}.mp4`));
+  const framed = mtime(path.join(root, 'out', `${name}-frames.png`)) > t;
+  if (!draft && !final && !framed && hasWorlds(page)) return { name, next: `bin/vawe frames ${rel}`, why: 'the frames come before the motion' };
   if (draft < t && final < t) return { name, next: `bin/vawe dev ${rel}`, why: 'the page changed after its last draft' };
   if (final < t) return { name, next: `bin/vawe critique ${rel}`, why: 'a draft exists; critique it in a fresh session, fix the named seconds, then bin/vawe ship' };
   return { name, next: `bin/vawe critique ${rel}`, why: 'the final is rendered; a fresh session judges it' };
