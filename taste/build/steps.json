@@ -45,6 +45,14 @@
   "title": "storyboard",
   "lines": [
    {
+    "rule": "text-breathing",
+    "text": "leave beats with no words, not text in every frame"
+   },
+   {
+    "rule": "text-lingers",
+    "text": "take a line off screen when it is read plus 1.5 s, not hold it for the beat"
+   },
+   {
     "rule": "world-turns",
     "text": "turn the world every 1 to 2 s (a new element, a cut, a ground swap), not one lockup held"
    },
@@ -78,8 +86,16 @@
     "text": "take curves from EASE names (or a sampled spring), not a CSS keyword or a hand-fitted cubic-bezier"
    },
    {
+    "rule": "overshoot-share",
+    "text": "land about 1 in 3 arrivals with a spring (EASE.pop), not every arrival on one soft stop"
+   },
+   {
     "rule": "speed-bands",
     "text": "put each move in a speed band with the slowest move 3x the fastest, not every move at one duration"
+   },
+   {
+    "rule": "speed-ceiling",
+    "text": "keep the fastest moves under 12 frame heights a second, not every move at full speed"
    },
    {
     "rule": "stagger",

@@ -100,10 +100,18 @@
   "left_edges_max": 3,
   "edge_tol_px_1920": 4
  },
+ "text-breathing": {
+  "text_share_max_pct": 84,
+  "film_min_s": 10
+ },
  "text-contrast": {
   "large_ratio": 3,
   "body_ratio": 4.5,
   "aim_ratio": 7
+ },
+ "text-lingers": {
+  "hold_ref_p90_s": 2.8,
+  "read_margin_s": 1.5
  },
  "type-scale": {
   "sizes_max": 6
@@ -194,6 +202,15 @@
   "jolt_px_per_s": 600,
   "jolt_zoom_per_s": 0.6
  },
+ "overshoot-share": {
+  "share_min_pct": 21,
+  "share_max_pct": 61,
+  "arrivals_min": 6,
+  "tolerance": 0.01,
+  "min_travel_px": 4,
+  "past_share": 0.03,
+  "past_px_min": 1
+ },
  "real-physics": {
   "linear_stops_min": 8
  },
@@ -205,6 +222,13 @@
   "cinematic_max_s": 2,
   "slowest_to_fastest_min": 3,
   "eye_speed_px_per_s": 700
+ },
+ "speed-ceiling": {
+  "ceiling_fh_s": 12.6,
+  "isolated_ratio": 3,
+  "moving_floor_fh_s": 0.2,
+  "moving_min": 5,
+  "moving_steps_min": 3
  },
  "stagger": {
   "gap_min_s": 0.03,

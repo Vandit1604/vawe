@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.
 
-101 rules, 34 scored by the judge.
+105 rules, 34 scored by the judge.
 
 ## concept
 
@@ -66,7 +66,9 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [screen-designed](rules/screen-designed.md): A product screen in a film is designed for the video, never a plain mock. Check: none.
 - [shared-edges](rules/shared-edges.md): Text blocks in one frame share a few left edges. Check: left-edges.
 - [surface-spec](rules/surface-spec.md): Lock a bespoke surface in one page of tokens before authoring, then check the frame against it. Check: judge.
+- [text-breathing](rules/text-breathing.md): Words need rests. Check: text-breathing.
 - [text-contrast](rules/text-contrast.md): A headline sits on a flat patch, not a moving blob or a gradient hot spot. Check: text-contrast.
+- [text-lingers](rules/text-lingers.md): A line stays long enough to read and no longer. Check: text-lingers.
 - [theme-source](rules/theme-source.md): The theme comes from the brand site; with a bare prompt, ask; with "you choose", invent one on purpose. Check: none.
 - [type-scale](rules/type-scale.md): A frame uses few text sizes, and each size step is visible. Check: type-sizes.
 - [type-setting](rules/type-setting.md): Set display type tight and body type open. Check: display-tracking.
@@ -97,8 +99,10 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [no-bounce](rules/no-bounce.md): No bounce or overshoot on type or UI by default. Check: judge.
 - [no-dead-stop](rules/no-dead-stop.md): A move never jumps speed from one frame to the next. Check: dead-stop.
 - [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: judge.
+- [overshoot-share](rules/overshoot-share.md): Some arrivals land with a spring: the value goes past rest and returns. Check: overshoot-share.
 - [real-physics](rules/real-physics.md): Real physics, not an imitation: a spring or an exponential as sampled keyframes or linear() with 8 or more stops, and a named effect that looks like its real-world thing. Check: judge.
 - [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band.
+- [speed-ceiling](rules/speed-ceiling.md): Elements move at a speed the eye can follow. Check: speed-ceiling.
 - [stagger](rules/stagger.md): A group reads as one beat with an inner rhythm: not a chord on one frame and not a queue. Check: group-landing.
 
 ## transitions
