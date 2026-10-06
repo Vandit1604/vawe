@@ -7,7 +7,7 @@ export const GUESS = '(guess: change me)';
 export const DEFAULT_LENGTH = 4;
 export const DEFAULT_TITLE = 'Say the one thing';
 
-// The details a good brief needs, most film-changing first. `vawe new` asks the unanswered ones,
+// The facts a good brief needs, most film-changing first; look and family are phase 3 design choices, not asked here. `vawe new` asks the unanswered ones,
 // the vawe-brief skill asks them of a person, ANATOMY.md names them: this list is the only copy.
 // A `required` detail stops `vawe new` until answered (or --defaults). `seen` is the request wording
 // that counts as an answer; when unsure a detail is unanswered.
@@ -24,18 +24,10 @@ export const DETAILS = [
     why: 'a film that shows the product working beats a slogan on a plain ground',
     example: 'the search box, a result list filling in, and the count "10M lines in 0.3 s"',
     seen: /\b(shows?|showing|ui|dashboard|screens?|captures?|numbers?|metrics?|workflow|steps?)\b/ },
-  { key: 'look', header: 'Look', required: true, question: 'What is the look: a reference film, site or brand, or colours, typeface, light or dark?',
-    why: 'the look is the largest score lever; with no anchor every film drifts to the same default',
-    example: 'dark ground, one signal-red accent, a monospace face, like linear.app',
-    seen: /#[0-9a-f]{3,6}\b|\b(dark|light) (mode|ground|theme)\b|\b(palette|colou?rs?|typeface|fonts?|serif|sans|style|reference)\b/ },
   { key: 'format', header: 'Format', question: 'How long, and which aspect?',
     why: 'length sets the beat count and aspect sets the layout; both change every frame',
     example: '20 s, 16:9',
     seen: /\b\d+(\.\d+)?\s*(s|sec|secs|seconds?)\b|\b\d+:\d+\b|\b(vertical|square|landscape)\b/ },
-  { key: 'family', header: 'Family', question: 'Which family fits: type-led, object-led, colour-led or graphic-led?',
-    why: 'it picks which of the three directions leads; skip it if unsure',
-    example: 'object-led',
-    seen: /\b(type|object|colou?r|graphic)-led\b|\b(kinetic type|typographic)\b/ },
   { key: 'assets', header: 'Assets', question: 'Which real assets exist: captures, logo, photos? Or should the film invent them?',
     why: 'real captures beat invented UI, and a missing logo changes the ending',
     example: 'logo.svg and three screen recordings; invent nothing else',
@@ -49,12 +41,8 @@ export const DETAILS = [
 const asOptions = (pairs) => pairs.map(([label, description]) => ({ label, description }));
 
 const FIXED_OPTIONS = {
-  look: asOptions([['Light and calm', 'a light ground, soft ink, one cobalt accent'], ['Dark and precise', 'a dark ground, sharp type, one signal accent'],
-    ['Match a reference', 'I give a film, site or brand to copy'], ['Use brand colours', "the brand's own palette and typeface"]]),
   format: asOptions([['24 s launch 16:9 (Recommended)', 'room for four beats and a real moment'], ['6 s sting 16:9', 'one idea and an ending'],
     ['15 s vertical 9:16', 'for a phone feed'], ['30 s explainer 16:9', 'a process told step by step']]),
-  family: asOptions([['Type-led', 'the words are the picture'], ['Object-led', 'one real thing, lit and moving'],
-    ['Colour-led', 'fields of colour in a rhythm'], ['Graphic-led', 'shapes and diagrams carry it']]),
   assets: asOptions([['Invent everything (Recommended)', 'the film draws its own UI and shapes'], ['I have screen captures', 'real recordings go in the film'],
     ['Logo only', 'a logo file, nothing else']]),
   ending: asOptions([['Brand lockup', 'the logo and name hold at the end'], ['Call to action', 'one line that asks for the next step'],
@@ -134,7 +122,7 @@ const SECONDS = /(\d+(?:\.\d+)?)\s*s\b/;
 
 function taskLines({ request, title, length, details, answered }, guess) {
   const spectacle = details.message?.match(SECONDS)?.[1];
-  const extra = ['show', 'family', 'assets', 'ending'].filter((k) => answered.has(k)).map((k) => `- ${k}: ${details[k] ?? IN_WHAT}`);
+  const extra = ['show', 'assets', 'ending'].filter((k) => answered.has(k)).map((k) => `- ${k}: ${details[k] ?? IN_WHAT}`);
   return [
     `- what: ${details.subject ?? request ?? guess('what', `a ${length} s film titled "${title}"`)}`,
     `- for: ${answered.has('subject') ? IN_WHAT : guess('for', 'people who see it once, muted, in a feed')}`,
@@ -150,9 +138,8 @@ export const PLACEHOLDER = { ground: '#8c8c8c', ink: '#1c1c1c' };
 /** The starter's line under the headline; its first beat is sized to read both. */
 export const STARTER_LINE = 'why it matters';
 
-function lookLines({ face, details, answered }, guess) {
+function lookLines({ face }, guess) {
   return [
-    ...(answered.has('look') ? [`- look: ${details.look ?? IN_WHAT}`] : []),
     `- ground: ${guess('ground', `${PLACEHOLDER.ground}, the starter's grey placeholder: choose from the palette dial`)}`,
     `- ink: ${guess('ink', `${PLACEHOLDER.ink}, the starter's placeholder`)}`,
     `- accent: ${guess('accent', 'none yet: at most one, on one thing')}`,

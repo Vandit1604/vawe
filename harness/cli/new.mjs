@@ -1,7 +1,8 @@
 // `vawe new <name>`: writes films/<name>/page.html (a valid starter), films/<name>/directions.html
 // (three key frames side by side) and films/<name>/brief.md. brief.md takes the template's question
 // bank with every default filled in and marked unanswered, then the measured-brief sections in the order of
-// prompts/ANATOMY.md (harness/lib/measured-brief.mjs), a Directions section (three slots from three families,
+// prompts/ANATOMY.md (harness/lib/measured-brief.mjs), a Taken from table (the references' frames, filled before
+// any design file), the Design system and States budget sections, a Directions section (three slots from three families,
 // a picked line) after Task, and the template's own tagged sections: a section named like a skeleton section
 // puts its text above that one's fields (so a table ends its section), the others follow as headings.
 import fs from 'node:fs';
@@ -265,7 +266,24 @@ function inputLines(questions, answers) {
 
 const recipeLine = (recipe) => `chain to start from: ${RECIPES}, "## ${recipe.heading}" (${recipe.why}); copy it, then change two moves`;
 
-const SKELETON = [['task', 'Task'], ['directions'], ['signature'], ['look', 'Look'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
+const takenFromText = () => `## Taken from
+
+Phase 2, before any design file. Study the references (\`bin/vawe refs list\`, then Read \`~/.vawe/refs/frames/<id>/<shot>.png\` at full size; planned: \`vawe frames --full --world <id>\`), then name 4 to 6 frames, not all. One row each: the exact path, and what you take (ground or light, type, colour, layout, motion). Fill it before DESIGN.md and page.html; \`bin/vawe\` says "Taken from not filled" until it holds a frame path.
+
+| frame (exact path) | what you take |
+|---|---|
+| [path/to/frame.png] | [ground or light, type, colour, layout or motion] |`;
+
+const systemText = (name) => `## Design system and kit
+
+Phase 3. Write films/${name}/DESIGN.md: the palette as roles, the type, the ground and light devices, the text treatment, the skills used and the rules rejected. Write films/${name}/kit/: the ground layers, and every moving part as its own element (words, marks, bars, cards, icons, the wordmark).
+Skills, fetched with \`command npx -y ui-skills get <slug>\`: leonxlnx/soft-skill (builder), pbakaus/colorize, mengto/progressive-blur. Take the principles. Reject the web-page patterns (nav, CTA button, pill, eyebrow, section padding): a video frame is not a hero page.`;
+
+const statesText = () => `## States
+
+Phase 4: one static key frame per world, built from the kit, before any motion. Budget: the reference frames show a median of 1 text line, 1 word and 2 objects. A state shows about 1 line and 2 or 3 things. Its ground is never flat: one light, grain or depth device per film, named from a Taken from frame, and the ground changes at each world turn.`;
+
+const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
 
 const heading = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
@@ -275,8 +293,9 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
     ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
   const own = Object.fromEntries(sections.map((s) => [s.name, s.body.replaceAll('<name>', name)]));
-  const skeleton = SKELETON.filter(([key]) => key === 'directions' || key === 'signature' || measured.sections[key]).map(([key, title]) => (
-    key === 'directions' ? directionsText(name) : key === 'signature' ? signatureSection(undefined, variety) : `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
+  const fixed = { taken: takenFromText(), directions: directionsText(name), signature: signatureSection(undefined, variety), system: systemText(name), states: statesText() };
+  const skeleton = SKELETON.filter(([key]) => fixed[key] || measured.sections[key]).map(([key, title]) => (
+    fixed[key] ?? `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
   const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))
     .map((s) => `## ${heading(s.name)}\n\n${own[s.name]}`);
   const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: taste/build/DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (rule sound-swell).\n\nbin/vawe dev films/${name}/page.html\n`;
@@ -335,13 +354,13 @@ export function questionsJson(name, { request, from, details = {}, length, aspec
 }
 
 export function askLines(name, request, from, open) {
-  const lines = ['agents: run with --questions-json and ask with AskUserQuestion', '', `vawe new: ${open.length} details needed before a good brief`, '',
+  const lines = ['agents: with AskUserQuestion, run --questions-json; without it, write the answers file shown below', '', `vawe new: ${open.length} facts needed before a good brief`, '',
     'Nothing is written yet. Answer these, most film-changing first. Skip an optional one to take a guess.', ''];
   open.forEach((d, i) => {
     lines.push(`${i + 1}. ${d.key}${d.required ? '' : ' (optional)'}: ${d.question}`, `   why: ${d.why}`, `   example: ${d.example}`);
   });
   const base = answerCommand(name, request, from);
-  lines.push('', 'Put the answers in a file, one `key: value` line each, then run:', `  ${base} --answers <file>`,
+  lines.push('', 'Write the answers to a file (Write tool), one `key: value` line each, for example:', ...open.slice(0, 3).map((d) => `  ${d.key}: ${d.example}`), 'then run:', `  ${base} --answers <file>`,
     'or give each one on the command line:', `  ${base} --detail ${open[0].key}="..." --detail ${open[1]?.key ?? open[0].key}="..."`,
     'For an unattended run that guesses instead, add --defaults.');
   return lines;
@@ -379,7 +398,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
   ];
   const spread = variety.lines.length ? ['', ...variety.lines] : [];
   return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('explore'), '',
-    ...adviceBlock(advice, '(advice only)'), '', `next: design one static frame per world in page.html, then bin/vawe frames ${page}`];
+    ...adviceBlock(advice, '(advice only)'), '', `next: study the references and fill "Taken from" in films/${name}/brief.md (4 to 6 named frames); then DESIGN.md and kit/, then one static state per world in page.html, then bin/vawe frames ${page}`];
 }
 
 /**

@@ -21,6 +21,6 @@ craft: color
 
 Wrong: a warm field with one headline. Right: the same field with two blurred blobs drifting slowly behind the headline.
 
-Draft check: The layout read counts a gradient, a blurred element, an image, a video or a canvas as a layer. SVG is not read. A frame is flat when the layers cover under 15 percent of it. `bin/vawe frames` reads one frame per world; the draft reads its layout samples.
+Draft check: The layout read counts a gradient or image background (also on a `::before` or `::after`), a blur filter, an image, a video or a canvas as a layer. It names every flat frame, and adds the limit when they pass it. SVG is not read. A frame is flat when the layers cover under 15 percent of it. `bin/vawe frames` reads one frame per world; the draft reads its layout samples.
 
 Why and sources: [color](../craft/color.md).

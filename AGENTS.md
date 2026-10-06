@@ -36,12 +36,14 @@ next command for the film you edited last.
 
 | # | stage | the command |
 |---|---|---|
-| 1 | type | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing details first (answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
-| 2 | frames | three directions in `brief.md`, side by side in `directions.html`; pick one, then `bin/vawe frames <page>` (one still per world, about 2 s) |
-| 3 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
-| 4 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
-| 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
-| 6 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
+| 1 | brief (facts only) | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing facts first (write them to a file, answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
+| 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives (ground or light, type, colour, layout, motion), before any design file |
+| 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, skills used and rules rejected) and `films/<name>/kit/` (ground layers; each moving part its own element); `vawe-page` names the skills |
+| 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` (one still per world, about 2 s) |
+| 5 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
+| 6 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
+| 7 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
+| 8 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
 
 Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Frames of a film:
 `vawe refs frames` (reference films, settled full-size frames per shot) and `vawe frames` (your page); a film measured:

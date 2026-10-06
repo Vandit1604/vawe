@@ -130,14 +130,20 @@ export function pureBlackWhite(samples) {
 const MEDIA = /^(img|video|canvas)$/;
 const layered = (b) => b.image || b.blurred || MEDIA.test(b.tag);
 
-/** The share (0 to 1) of samples whose frame has no gradient, image, blurred or media layer over the ground_layer_area_pct_min of its area, over the limit (rule living-ground). One sample is one world in `bin/vawe frames`. */
+/**
+ * Advice when a frame has no living ground (rule living-ground); one sample is one world in `bin/vawe frames`.
+ * A layer is a CSS gradient or image background (on the element, or on its ::before or ::after), a blur filter, an img, a video or a canvas,
+ * at opacity 0.5 or more, covering the ground_layer_area_pct_min of the frame. The finding names every flat frame, and says when they pass the limit.
+ */
 export function livingGround(samples) {
   const { ground_layer_area_pct_min: min, flat_samples_share_max_pct: max } = L['living-ground'];
   const read = samples.filter((s) => s.boxes.length);
   const flat = read.filter((s) => coveredShare(s.boxes.filter((b) => b.op >= 0.5 && layered(b)).map((b) => b.box), s) * 100 < min);
-  if (!read.length || (100 * flat.length) / read.length <= max) return [];
-  return [finding('living-ground', 'living-ground', flat[0].t, `${flat.length} of ${read.length} sampled frames have one flat ground: no gradient, image or blurred layer behind the content`,
-    'put soft colour blobs behind the content and let them drift (prompts/moves/gradient-mesh-field.md, light-pool.md)')];
+  if (!flat.length) return [];
+  const over = (100 * flat.length) / read.length > max;
+  const at = flat.map((s) => `${s.t} s`).join(', ');
+  return [finding('living-ground', 'living-ground', flat[0].t, `${flat.length} of ${read.length} sampled frames have one flat ground (at ${at}): no gradient, image or blurred layer behind the content${over ? `; over the limit of ${max}%` : ''}`,
+    'give each world a light, grain or depth layer that differs from the last (a CSS gradient or ::before counts; prompts/moves/gradient-mesh-field.md, light-pool.md)')];
 }
 
 const MARKER = /^\(?0\d\)?(\s*[/.]\s*0\d)*\.?$/;

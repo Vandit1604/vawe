@@ -169,8 +169,11 @@ test('living ground: a frame with no gradient, blur, image or canvas layer is fl
 test('living ground: fires when more than half the samples are flat, and a one-world sample is judged alone', () => {
   const flat = sample({ boxes: [box({ box: [0, 0, 1920, 1080] })] });
   const live = sample({ boxes: [box({ box: [0, 0, 1920, 1080], image: true })] });
-  assert.equal(livingGround([flat, live]).length, 0);
-  assert.equal(livingGround([flat, flat, live]).length, 1);
+  const [advice] = livingGround([flat, live]);
+  assert.match(advice.what, /1 of 2 sampled frames have one flat ground \(at 1 s\)/);
+  assert.ok(!advice.what.includes('over the limit'));
+  assert.match(livingGround([flat, flat, live])[0].what, /over the limit of 50%/);
+  assert.equal(livingGround([live, live]).length, 0);
   assert.equal(livingGround([]).length, 0);
   assert.equal(layoutLint([flat]).filter((f) => f.code === 'living-ground').length, 1);
 });
