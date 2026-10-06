@@ -54,8 +54,8 @@ test('Shots has one row per starter world with its span; Words and Objects one g
   const spec = text.split('## Spec')[1].split('## Acceptance')[0];
   const rows = spec.split('\n').filter((l) => l.includes(GUESS));
   assert.equal(rows.length, 7);
-  assert.match(rows[0], /^\| s1 \| 0 \| 2 \| Ship faster \(guess: change me\) \|/);
-  assert.match(rows[3], /^\| s4 \| 6 \| 8 \| one fact \(guess: change me\) \|/);
+  assert.match(rows[0], /^\| s1 \| 0 \| 2\.33 \| Ship faster \(guess: change me\) \|/);
+  assert.match(rows[3], /^\| s4 \| 6\.1\d \| 8\.0\d \| one fact \(guess: change me\) \|/);
   assert.match(rows[5], /^\| Ship faster \(guess: change me\) \| s1 \|/);
 });
 

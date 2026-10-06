@@ -3,7 +3,7 @@ import path from 'node:path';
 import LIMITS_JSON from '../../taste/build/limits.json' with { type: 'json' };
 import { tasteLines } from './taste-steps.mjs';
 import { STILL_SEC, undeclaredStills, stillText, insideHold } from './still-limit.mjs';
-import { heldWorlds } from './worlds.mjs';
+import { heldWorlds, insideTextWorlds } from './worlds.mjs';
 
 const WORLD = LIMITS_JSON['world-turns'];
 export const LIMITS = { staticSec: STILL_SEC, worldSec: WORLD.turn_seconds_max, blankSec: WORLD.blank_run_s, blankEdgeSec: WORLD.blank_edge_s, maxProblems: 3 };
@@ -87,7 +87,7 @@ function heldFromTurns(stats, limits, authoring) {
 /** Problems worth a look, worst first, each with its seconds. `stats` is scene-stats summarize(), `blanks` from blankRuns, `authoring` the page's #authoring waivers, `worlds` the measured data-world spans (null for a page with none, which reads the turns from pixels). */
 export function problemsOf(stats, blanks, limits = LIMITS, authoring = {}, worlds = null) {
   const found = [];
-  for (const r of blanks) found.push({ len: r.b - r.a, text: `blank frame ${r.a.toFixed(1)}-${r.b.toFixed(1)} s` });
+  for (const r of blanks.filter((x) => !(worlds?.length && insideTextWorlds(worlds, x)))) found.push({ len: r.b - r.a, text: `blank frame ${r.a.toFixed(1)}-${r.b.toFixed(1)} s` });
   for (const r of undeclaredStills(stats.static, authoring, limits.staticSec)) found.push({ len: r.len, text: stillText(r, limits.staticSec) });
   found.push(...(worlds?.length ? heldWorlds(worlds, limits.worldSec, authoring) : heldFromTurns(stats, limits, authoring)));
   return found.sort((x, y) => y.len - x.len).map((p) => p.text);

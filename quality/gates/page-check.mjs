@@ -34,6 +34,7 @@ import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { decodeMono, envelopeOf, onsetsOf, meanDb } from '../../harness/lib/audio-onsets.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { sampleText, clippedGlyphs } from '../../harness/lib/text-timing.mjs';
+import { readHoldProblems } from '../../harness/lib/read-hold.mjs';
 import { lowContrast, passingColour, hexOf, shownAndHidden } from '../../harness/lib/text-contrast.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -42,11 +43,6 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const FAST_MOVE = HOLD_FLOOR * 4;
 const STOP_RATIO = 0.25;
 const QUIET_WINDOW = 0.4;
-const READ_PER_WORD = 0.6;      // taste/rules/readable-hold.md: prose, words x 0.6 s
-const READ_FLOOR = 1.2;         // same doc: no held frame under 1.2 s
-const READ_OTHER_WPS = 3;
-const PROSE_WORDS = 4;
-const MIN_TEXT_H = 0.02;        // share of frame height below which text is a caption or credit, not read on the way past
 const HEARD_TOL = 0.15;
 const DRIFT_FRAMES = 2;
 const HIT_EARLY_FRAMES = 1.5;   // sound may lead its picture by this much and still read as one event
@@ -65,26 +61,6 @@ export function detectDeadStops(series, cutTimes = []) {
     if (c.v >= b.v * STOP_RATIO || c.v >= HOLD_FLOOR) continue;
     if (cutTimes.some((t) => Math.abs(t - c.t) < 0.1)) continue;
     out.push({ t: c.t, from: b.v, to: c.v });
-  }
-  return out;
-}
-
-/** Group word tracks that arrive and settle together into lines, then compare each line's still time to its read time. Pure. */
-export function readHoldProblems(tracks) {
-  const words = tracks.filter((w) => w.sizeSettled >= MIN_TEXT_H && w.tOut - w.tIn > 0.3).sort((a, b) => a.tIn - b.tIn);
-  const groups = [];
-  for (const w of words) {
-    const g = groups.find((x) => Math.abs(x.tIn - w.tIn) <= 0.5 && Math.abs(x.tSettled - w.tSettled) <= 0.5);
-    if (g) g.words.push(w); else groups.push({ tIn: w.tIn, tSettled: w.tSettled, words: [w] });
-  }
-  const out = [];
-  for (const g of groups) {
-    const n = g.words.length;
-    const need = n >= PROSE_WORDS ? n * READ_PER_WORD : Math.max(READ_FLOOR, n / READ_OTHER_WPS);
-    const tSettled = Math.max(...g.words.map((w) => w.tSettled));
-    const tOut = Math.min(...g.words.map((w) => w.tOut));
-    const hold = tOut - tSettled;
-    if (hold < need * 0.9) out.push({ text: g.words.map((w) => w.text).join(' '), n, tSettled, tOut, hold, need });
   }
   return out;
 }

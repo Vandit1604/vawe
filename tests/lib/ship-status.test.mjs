@@ -19,7 +19,7 @@ test('problemsOf: worst first, seconds named, small things ignored', () => {
 test('problemsOf: measured data-world spans replace the pixel turns', () => {
   const worlds = [{ id: 'a', start: 0, end: 2, ground: '#fff' }, { id: 'b', start: 2, end: 6, ground: '#fff' }];
   const out = problemsOf(stats({ turns: [], duration: 6 }), [], undefined, {}, worlds);
-  assert.deepEqual(out, [`world held b 2-6 s (4 s); ${waiverHint('dead-air@2-6')}`]);
+  assert.deepEqual(out, [`world held b 2-6 s (4 s, limit 2 s); ${waiverHint('dead-air@2-6')}`]);
 });
 
 test('problemsOf: a swap the pixels see is no turn when the worlds are measured, and a page with no worlds keeps the pixel turns', () => {
