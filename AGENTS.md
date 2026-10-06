@@ -37,7 +37,7 @@ next command for the film you edited last.
 | # | stage | the command |
 |---|---|---|
 | 1 | type | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing details first (answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
-| 2 | stills | three directions in `brief.md`, their key frames side by side in `directions.html`; pick one, then the five frames that define the look |
+| 2 | frames | three directions in `brief.md`, side by side in `directions.html`; pick one, then `bin/vawe frames <page>` (one still per world, about 2 s) |
 | 3 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 4 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 5 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
