@@ -3,13 +3,14 @@
 // so the scores follow the answers. Pure; harness/media/judge-fresh.mjs feeds it. The question itself is
 // barLines in judge-prompt.mjs.
 
-export const DIALS = ['text', 'colour', 'motion'];
+// text, colour and motion are the owner's three dials; craft asks the plain question behind "this looks simple".
+export const DIALS = ['text', 'colour', 'motion', 'craft'];
 export const OURS = 'ours';
 export const CAP_LOST_ONE = 7;
 export const CAP_LOST_BOTH = 6;
 
 // The fresh axes (quality/gates/rubric.mjs FRESH_AXES) that each dial caps; the other axes have no dial.
-export const AXIS_DIAL = { type: 'text', colour: 'colour', motion: 'motion', pace: 'motion' };
+export const AXIS_DIAL = { type: 'text', colour: 'colour', motion: 'motion', pace: 'motion', scenes: 'craft', expensive: 'craft' };
 
 /** The answers as [{ ref, dial, winner, why }], one per reference and dial in that order. `winner` is OURS or the ref id. A missing answer is a loss: the judge gave no reason to rank ours first. */
 export function barResult(raw, refs) {
@@ -59,7 +60,7 @@ export function barReport(bar, shown = 3) {
   const losses = dialLosses(bar);
   const lost = bar.filter((b) => b.winner !== OURS);
   return [
-    `bar: ${DIALS.map((d) => `${d} won ${losses[d].of - losses[d].lost} of ${losses[d].of}`).join(', ')}`,
+    `bar: ${DIALS.filter((d) => losses[d].of).map((d) => `${d} won ${losses[d].of - losses[d].lost} of ${losses[d].of}`).join(', ')}`,
     ...lost.slice(0, shown).map((b) => `- ${b.dial}: REF ${b.ref} is better, ${b.why}`),
   ];
 }
