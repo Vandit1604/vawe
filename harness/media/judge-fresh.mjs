@@ -14,7 +14,7 @@ import { judgeEvent } from '../lib/run-events.mjs';
 import { isTemplateBrief } from '../lib/draft-check.mjs';
 import { parseDirections, rangeProblems, attractorProblems } from '../lib/directions.mjs';
 import { TILE_W } from '../lib/sheet-tiles.mjs';
-import { contactSheet as buildSheet, durationOf as readDuration } from '../lib/contact-sheet.mjs';
+import { contactSheet as buildSheet, durationOf as readDuration, keyFrameFiles } from '../lib/contact-sheet.mjs';
 import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from '../lib/judge-ledger.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
@@ -27,7 +27,6 @@ import { chooseRefs, refsDir } from '../lib/refs.mjs';
 import { pickTemplate, readRouting } from '../cli/route.mjs';
 import { referenceFor, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
-import { settledMoments } from '../lib/key-frames.mjs';
 import { probeSize } from './scene-stats.mjs';
 import { lastCaps } from './acceptance-run.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
@@ -74,27 +73,8 @@ async function draftOf(page, name) {
 
 const contactSheet = orDie(buildSheet);
 
-/** The mean absolute difference between 10 fps thumbnails: [{ t, d }], d the change that arrives at second t. */
-function thumbMotion(video) {
-  const W = 64, H = 36, FPS = 10, size = W * H;
-  const buf = ff(['-i', video, '-vf', `fps=${FPS},scale=${W}:${H},format=gray`, '-f', 'rawvideo', '-'], { raw: true }).stdout;
-  const n = Math.floor(buf.length / size);
-  const motion = [];
-  for (let i = 1; i < n; i++) {
-    let sum = 0;
-    for (let p = 0; p < size; p++) sum += Math.abs(buf[i * size + p] - buf[(i - 1) * size + p]);
-    motion.push({ t: i / FPS, d: sum / size });
-  }
-  return motion;
-}
-
 function keyFrames(video, dur, dir, tables) {
-  const times = settledMoments({ words: tables.words, shots: tables.shots, motion: thumbMotion(video), dur, count: KEY_FRAMES });
-  return times.map((t, i) => {
-    const file = path.join(dir, `key-${i + 1}-${t.toFixed(1)}s.png`);
-    ff(['-ss', String(t), '-i', video, '-frames:v', '1', file]);
-    return { t, file };
-  }).filter((k) => fs.existsSync(k.file));
+  return keyFrameFiles(video, dur, dir, { words: tables.words, shots: tables.shots, count: KEY_FRAMES });
 }
 
 function loudness(file) {
