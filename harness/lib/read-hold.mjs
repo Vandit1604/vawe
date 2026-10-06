@@ -6,7 +6,7 @@ const READ_PER_WORD = HOLD.prose_s_per_word;
 const READ_FLOOR = HOLD.hold_floor_s;
 const READ_OTHER_WPS = HOLD.short_words_per_s;
 const PROSE_WORDS = HOLD.prose_min_words;
-const MIN_TEXT_H = 0.02;        // share of frame height below which text is a caption or credit, not read on the way past
+export const MIN_TEXT_H = 0.02; // share of frame height below which text is a caption or credit, not read on the way past
 const SAME_TIME = 0.5;          // s: rows that arrive and settle within this of each other are shown together
 
 /** What the readable-hold rule asks, for the judge prompt and this check: one source for the numbers. */
@@ -43,6 +43,20 @@ function groupsOf(tracks) {
     const rows = lines.filter((x) => together(x, l));
     return { text: l.text, n: l.n, tSettled: l.tSettled, tOut: l.tOut, hold: l.tOut - l.tSettled, rows: rows.length, need: rowsNeed(rows.map((x) => lineNeed(x.n))) };
   });
+}
+
+/**
+ * The lines as the viewer sees them, for a ceiling on how long one stays: words of one element that show at the same time are one
+ * line, however late each arrives. `need` is the read time of the line with the rows that arrive beside it. [{ text, n, tIn, tOut, need }]. Pure.
+ */
+export function screenLines(tracks) {
+  const merged = [];
+  for (const l of linesOf(tracks).sort((a, b) => a.tIn - b.tIn)) {
+    const same = l.block == null ? null : merged.find((x) => x.block === l.block && l.tIn < x.tOut);
+    if (same) Object.assign(same, { n: same.n + l.n, text: `${same.text} ${l.text}`, tOut: Math.max(same.tOut, l.tOut), tSettled: Math.max(same.tSettled, l.tSettled) });
+    else merged.push({ block: l.block, text: l.text, n: l.n, tIn: l.tIn, tSettled: l.tSettled, tOut: l.tOut });
+  }
+  return merged.map((l) => ({ text: l.text, n: l.n, tIn: l.tIn, tOut: l.tOut, need: rowsNeed(merged.filter((x) => together(x, l)).map((x) => lineNeed(x.n))) }));
 }
 
 /** Group the tracks of one element into a line, then compare each line's still time to its read time. Rows that arrive together share the longest row's time plus a word's time per extra row. A line that leaves before its settle time has no hold to measure. Pure. */

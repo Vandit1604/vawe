@@ -1,0 +1,205 @@
+// Four advice findings from the measured bar of the reference films (harness/dev/bar-from-refs.mjs), in the shape of the motion
+// lint's: { code, rule, at, what, fix }. The code is the rule id. Each number is read from taste/build/limits.json. Pure.
+//   speed-ceiling    the fastest tenth of the moving elements, from element boxes over time
+//   overshoot-share  the share of the arrivals whose easing goes past rest, from the animation records
+//   text-breathing   the share of the film with readable text on screen, from the text samples
+//   text-lingers     a line on screen well past its read time, from the text tracks
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+import { overshoots } from './ease-curve.mjs';
+import { CUT, moves, entering, measured, byTarget } from './motion-records.mjs';
+import { ownTrack, inFrame } from './motion-lint.mjs';
+import { probeTracks, screenLines, MIN_TEXT_H } from './read-hold.mjs';
+
+const SPEED = LIMITS['speed-ceiling'];
+const SHOOT = LIMITS['overshoot-share'];
+const BREATH = LIMITS['text-breathing'];
+const LINGER = LIMITS['text-lingers'];
+
+const STILL_PX = 0.25;
+const FULL_FRAME = 0.6;
+const s1 = (x) => x.toFixed(1);
+const pct = (x) => Math.round(x);
+const finding = (rule, at, what, fix) => ({ code: rule, rule, at, what, fix });
+
+const cornerTravel = (a, b) => {
+  const corners = ([x, y, w, h]) => [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
+  const [ca, cb] = [corners(a), corners(b)];
+  return Math.max(...cb.map(([x, y], i) => Math.hypot(x - ca[i][0], y - ca[i][1])));
+};
+
+const coversFrame = (b, { area }) => b[2] * b[3] >= FULL_FRAME * area;
+
+/** The travel in px of each step of one element in its parent's frame, null where the element is not visible at both ends of the step or covers most of the frame. */
+function stepTravels(boxes, i) {
+  const track = boxes.tracks[i];
+  const own = ownTrack(track, boxes.tracks[boxes.parent[i]]);
+  return track.slice(1).map((b, j) => {
+    const a = track[j];
+    return inFrame(a, boxes) && inFrame(b, boxes) && !coversFrame(a, boxes) && !coversFrame(b, boxes) ? cornerTravel(own[j], own[j + 1]) : null;
+  });
+}
+
+/** A step much longer than both its neighbours is a jump: the element is replaced, not moved. */
+const isJump = (travels, k) => travels[k] > SPEED.isolated_ratio * Math.max(travels[k - 1] ?? 0, travels[k + 1] ?? 0);
+
+/** One element's peak speed in frame heights per second and when it came, or null when it never moves by itself. */
+function peakSpeed(boxes, i) {
+  const travels = stepTravels(boxes, i);
+  let peak = null;
+  let moving = 0;
+  travels.forEach((px, k) => {
+    if (px === null || px <= STILL_PX) return;
+    moving += 1;
+    if (isJump(travels, k)) return;
+    const speed = px / boxes.height / (boxes.times[k + 1] - boxes.times[k]);
+    if (!peak || speed > peak.speed) peak = { speed, at: boxes.times[k] };
+  });
+  return moving >= SPEED.moving_steps_min && peak ? { label: boxes.labels[i], ...peak } : null;
+}
+
+const nearestRank = (sorted, q) => sorted[Math.max(0, Math.ceil(q * sorted.length) - 1)];
+
+const centre = ([x, y, w, h]) => [x + w / 2, y + h / 2];
+const ALPHA_IN = 0.5;
+const QUIET_STEPS = 3;
+
+/** The runs of one element's moving steps as [first step, last step]; a run ends after QUIET_STEPS steps without motion. */
+function moveRuns(travels) {
+  const runs = [];
+  travels.forEach((px, k) => {
+    if (px === null || px <= STILL_PX) return;
+    const last = runs.at(-1);
+    if (last && k - last[1] <= QUIET_STEPS) last[1] = k; else runs.push([k, k]);
+  });
+  return runs;
+}
+
+/** Does the run's path go past its end along the way it came, by more than the tolerance of its length? Null when the run has no length to measure. */
+function runOvershoots(points) {
+  const [from, to] = [points[0], points.at(-1)];
+  const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
+  if (length < SHOOT.min_travel_px) return null;
+  const past = Math.max(...points.map((p) => ((p[0] - to[0]) * (to[0] - from[0]) + (p[1] - to[1]) * (to[1] - from[1])) / length));
+  return past > Math.max(SHOOT.past_px_min, SHOOT.past_share * length);
+}
+
+/** The arrivals of one element read from its boxes: a run of motion that starts while the element is faded out and ends faded in. */
+function boxArrivals(boxes, i) {
+  const track = boxes.tracks[i];
+  const own = ownTrack(track, boxes.tracks[boxes.parent[i]]);
+  const travels = stepTravels(boxes, i);
+  return moveRuns(travels).filter(([a, b]) => track[a][4] < ALPHA_IN && track[b + 1][4] >= ALPHA_IN).map(([a, b]) => ({
+    at: boxes.times[a],
+    over: runOvershoots(own.slice(a, b + 2).map(centre)),
+  })).filter((r) => r.over !== null);
+}
+
+/**
+ * What one pass of element boxes (sampleBoxTracks 'visible') says: { peaks: [{ label, speed, at }] slowest first, arrivals: [{ at, over }] }.
+ * A camera or ground that covers most of the frame, and a step much longer than both its neighbours (an element replaced, a cut), are not speed.
+ * An arrival is a run of motion that starts faded out and ends faded in.
+ */
+export function boxMotion(boxes) {
+  const elements = boxes.tracks.map((_, i) => i);
+  return {
+    peaks: elements.map((i) => peakSpeed(boxes, i)).filter(Boolean).sort((a, b) => a.speed - b.speed),
+    arrivals: elements.flatMap((i) => boxArrivals(boxes, i)),
+  };
+}
+
+/** The fastest tenth of the moving elements over the speed ceiling (rule speed-ceiling). `all` is the peaks of boxMotion, or null when the speed was not sampled. An element slower than moving_floor_fh_s is a drift the eye does not follow (the reference films' slowest tracked elements peak near 0.2). */
+export function speedCeiling(all, { ceiling = SPEED.ceiling_fh_s } = {}) {
+  const peaks = (all ?? []).filter((p) => p.speed >= SPEED.moving_floor_fh_s);
+  if (peaks.length < SPEED.moving_min) return [];
+  const p90 = nearestRank(peaks, 0.9).speed;
+  if (p90 <= ceiling) return [];
+  const [first, second] = [peaks.at(-1), peaks.at(-2)];
+  return [finding('speed-ceiling', first.at,
+    `the fastest tenth of ${peaks.length} moving elements peaks at ${s1(p90)} frame heights per second; the reference films stay under ${ceiling}. Fastest: ${first.label} ${s1(first.speed)} at ${first.at.toFixed(2)} s, then ${second.label} ${s1(second.speed)} at ${second.at.toFixed(2)} s`,
+    'give the fastest moves a longer duration (the next speed band) or a shorter distance')];
+}
+
+const curvesOf = (r) => [r.easing, ...r.kfEasings];
+
+/** Does one arrival (the entering records of one element) overshoot? Null when it has no move or no curve that can be read. */
+function arrivalOvershoots(records) {
+  const readable = records.filter((r) => moves(r) && measured(r) && curvesOf(r).some((c) => overshoots(c) !== null));
+  if (!readable.length) return null;
+  return readable.some((r) => curvesOf(r).some((c) => overshoots(c, SHOOT.tolerance)));
+}
+
+/** The arrivals of the animation records, one per element: { at, over }. Decorative and full-frame elements are not arrivals. */
+function recordArrivals(records) {
+  return byTarget(records.filter((r) => !r.decorative && !r.fullFrame))
+    .map((rs) => rs.filter((r) => entering(r) && r.duration > CUT))
+    .filter((rs) => rs.length)
+    .map((rs) => ({ at: Math.min(...rs.map((r) => r.delay)), over: arrivalOvershoots(rs) }))
+    .filter((a) => a.over !== null);
+}
+
+/**
+ * Too few or too many arrivals that overshoot (rule overshoot-share). The easing of the animation records decides; a page that paints
+ * in window.seek has none, so its arrivals come from the boxes (`boxArrivals`, from boxMotion) when the records give fewer than arrivals_min.
+ */
+export function overshootShare(records, boxArrivals = []) {
+  const fromRecords = recordArrivals(records);
+  const arrivals = fromRecords.length >= SHOOT.arrivals_min ? fromRecords : boxArrivals;
+  if (arrivals.length < SHOOT.arrivals_min) return [];
+  const over = arrivals.filter((a) => a.over).length;
+  const share = (100 * over) / arrivals.length;
+  const at = Math.min(...arrivals.map((a) => a.at));
+  const counted = `${over} of ${arrivals.length} arrivals overshoot (${pct(share)}%)`;
+  if (share < SHOOT.share_min_pct) return [finding('overshoot-share', at, `${counted}; the reference films overshoot ${SHOOT.share_min_pct}% to 41%`,
+    'give about 1 in 3 arrivals a spring: EASE.pop, or curveToLinear(CURVES.overshoot) from core/motion/springs.js')];
+  if (share > SHOOT.share_max_pct) return [finding('overshoot-share', at, `${counted}; the reference films overshoot 41% at most`,
+    'land most arrivals on EASE.land and keep the spring for the one that matters')];
+  return [];
+}
+
+const hasText = (s, frameH) => s.lines.some((l) => !l.chrome && l.box && l.box[3] / frameH >= MIN_TEXT_H);
+
+/** The longest run of consecutive samples that satisfy `on`, as { first, count } (first is an index). */
+function longestRun(samples, on) {
+  let best = { first: 0, count: 0 };
+  let run = { first: 0, count: 0 };
+  samples.forEach((s, i) => {
+    run = on(s) ? { first: run.count ? run.first : i, count: run.count + 1 } : { first: i, count: 0 };
+    if (run.count > best.count) best = run;
+  });
+  return best;
+}
+
+/** Readable text on screen for more of the film than the reference films allow (rule text-breathing). A film under film_min_s (the shortest reference film is 19 s) is one beat and has no rest to give. `ctx` is { step, frameH }. */
+export function textBreathing(samples, { step, frameH }) {
+  if (samples.length * step < BREATH.film_min_s) return [];
+  const share = (100 * samples.filter((s) => hasText(s, frameH)).length) / samples.length;
+  if (share <= BREATH.text_share_max_pct) return [];
+  const run = longestRun(samples, (s) => hasText(s, frameH));
+  const from = Math.max(0, samples[run.first].t - step / 2);
+  return [finding('text-breathing', from, `readable text is on screen for ${pct(share)}% of the film (${s1(run.count * step)} s in one run from ${s1(from)} s); the reference films stay at ${BREATH.text_share_max_pct}% or less`,
+    'leave a beat with no words: let the product or the ground carry it')];
+}
+
+/** The most seconds a line may stay on screen: the reference hold, or its read time plus the margin when that is longer. Pure. */
+export const lingerCeiling = (need) => Math.max(LINGER.hold_ref_p90_s, need + LINGER.read_margin_s);
+
+/** The line that stays on screen longest past its ceiling (rule text-lingers). A line still on screen at the last sample is the end card (rule cta-last-short) and is not measured. */
+export function textLingers(samples, ctx) {
+  if (!samples.length) return [];
+  const end = samples.at(-1).t + ctx.step / 2;
+  const over = screenLines(probeTracks(samples, ctx))
+    .filter((l) => l.tOut < end - 1e-6)
+    .map((l) => ({ ...l, onScreen: l.tOut - l.tIn, ceiling: lingerCeiling(l.need) }))
+    .filter((l) => l.onScreen > l.ceiling)
+    .sort((a, b) => b.onScreen - b.ceiling - (a.onScreen - a.ceiling));
+  if (!over.length) return [];
+  const w = over[0];
+  return [finding('text-lingers', w.tIn, `"${w.text.slice(0, 30)}" stays on screen ${s1(w.onScreen)} s; it needs ${s1(w.need)} s to read, so it may stay ${s1(w.ceiling)} s${over.length > 1 ? ` (${over.length} lines)` : ''}`,
+    'take the line off at its read time plus 1.5 s, or give the held seconds a second thing to look at')];
+}
+
+/** Every bar finding in time order. `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
+export function barLint({ records, boxes, text }) {
+  return [...speedCeiling(boxes?.peaks), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
+    .sort((a, b) => a.at - b.at);
+}
