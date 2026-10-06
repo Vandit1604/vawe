@@ -72,6 +72,14 @@ test('wordTimes: settle is the first frame the box stops moving', async () => {
   assert.ok(Math.abs(settle - 2) <= 2 * FRAME_S, `settle ${settle}`);
 });
 
+test('wordTimes: settle is the same whatever the brief says, so a synced brief never moves it', async () => {
+  const linesAt = async (t) => ({ lines: [{ text: 'Ship it', fontPx: 40, box: [t < 2 ? 100 + (2 - t) * 300 : 100, 200, 300, 60] }], blocks: [] });
+  for (const spec of [0.6, 1, 1.5, 2.4, 4]) {
+    const { settle } = await wordTimes({ text: 'Ship it', appear: 0.5, settle: spec }, linesAt, { dur: 5, frame });
+    assert.ok(Math.abs(settle - 2) <= 2 * FRAME_S, `spec ${spec} gave ${settle}`);
+  }
+});
+
 test('wordChecks: appear time from the measure, then cap height and position at settle', () => {
   // 1% of a 500 px frame is 5 px; fontPx 57.14 gives cap 0.7 * 57.14 / 500 = 8%
   const samples = [{ t: 1.5, lines: [{ text: 'Ship it', fontPx: 57.14, box: [100, 200, 300, 60] }] }];

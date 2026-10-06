@@ -82,9 +82,21 @@ export async function wordTimes(word, linesAt, { dur, frame }) {
   const seen = async (t) => lineFor(await linesAt(t), word.text);
   const span = { dur };
   const appear = has(word.appear) ? await runStart(async (t) => Boolean(await seen(t)), word.appear, span) : null;
-  const ref = has(word.settle) ? await seen(Math.min(dur, word.settle + REST_LOOK_S)) : null;
-  const settle = ref ? await runStart(async (t) => { const l = await seen(t); return Boolean(l) && boxAtRest(l.box, ref.box, frame); }, word.settle, span) : null;
+  if (!has(word.settle)) return { appear, settle: null };
+  const restAt = await firstRest(seen, appear ?? 0, { dur, frame });
+  if (restAt === null) return { appear, settle: null };
+  const ref = await seen(Math.min(dur, restAt + REST_LOOK_S));
+  const settle = await runStart(async (t) => { const l = await seen(t); return Boolean(l) && boxAtRest(l.box, ref.box, frame); }, restAt, span);
   return { appear, settle };
+}
+
+/** The first coarse frame time from `from` where the word's box holds still for REST_LOOK_S, so settle never depends on the brief's value. */
+async function firstRest(seen, from, { dur, frame, fps = FPS }) {
+  for (let k = Math.round(from * fps); k / fps + REST_LOOK_S <= dur; k += COARSE_FRAMES) {
+    const [a, b] = [await seen(k / fps), await seen(k / fps + REST_LOOK_S)];
+    if (a && b && boxAtRest(a.box, b.box, frame)) return round(k / fps);
+  }
+  return null;
 }
 
 /** Per spec word: the first time its text shows vs `appear s` (from `times`, wordTimes per word), then cap height, x and y at `settle s`. Pure. */
