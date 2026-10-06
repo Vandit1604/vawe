@@ -31,16 +31,22 @@ export function contactSheet(video, dur, dir, name = 'sheet.png') {
 
 const ff = (args, opts = {}) => spawnSync('ffmpeg', ['-hide_banner', '-nostdin', '-y', ...args], { encoding: opts.raw ? 'buffer' : 'utf8', maxBuffer: 1 << 28 });
 
-/** The mean absolute difference between 10 fps thumbnails: [{ t, d }], d the change that arrives at second t. */
+/** 10 fps thumbnails: [{ t, d, spread }], d the mean change that arrives at second t, spread the grey-level spread of that frame. */
 export function thumbMotion(video) {
   const W = 64, H = 36, FPS = 10, size = W * H;
   const buf = ff(['-i', video, '-vf', `fps=${FPS},scale=${W}:${H},format=gray`, '-f', 'rawvideo', '-'], { raw: true }).stdout;
   const n = Math.floor(buf.length / size);
   const motion = [];
   for (let i = 1; i < n; i++) {
-    let sum = 0;
-    for (let p = 0; p < size; p++) sum += Math.abs(buf[i * size + p] - buf[(i - 1) * size + p]);
-    motion.push({ t: i / FPS, d: sum / size });
+    let sum = 0, mean = 0, sq = 0;
+    for (let p = 0; p < size; p++) {
+      const v = buf[i * size + p];
+      sum += Math.abs(v - buf[(i - 1) * size + p]);
+      mean += v;
+      sq += v * v;
+    }
+    mean /= size;
+    motion.push({ t: i / FPS, d: sum / size, spread: Math.sqrt(Math.max(0, sq / size - mean * mean)) });
   }
   return motion;
 }
