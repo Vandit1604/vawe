@@ -31,7 +31,30 @@ export function framesPage({ title, aspect = '16:9', worlds }) {
     .replaceAll('{{cols}}', String(Math.min(worlds.length, 3) || 1)).replaceAll('{{figures}}', figures);
 }
 
-/** The lines printed for one world: each fired-rule line led by the world id, or one "clean" line. Pure. */
+/** { page, full, worlds } from the argv after the script name; --world takes ids, comma-separated or repeated. Throws an Error naming the flag. Pure. */
+export function parseFramesArgs(argv) {
+  const out = { page: null, full: false, worlds: [] };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === '--full') out.full = true;
+    else if (a === '--world') {
+      const v = argv[++i];
+      if (!v || v.startsWith('--')) throw new Error('--world needs a world id, for example --world s3 or --world s1,s3');
+      out.worlds.push(...v.split(',').map((s) => s.trim()).filter(Boolean));
+    } else if (a.startsWith('--')) throw new Error(`unknown flag ${a}; valid: --full --world <id>`);
+    else if (out.page === null) out.page = a;
+    else throw new Error(`unexpected argument ${a}; one page only`);
+  }
+  return out;
+}
+
+/** The spans of the wanted ids, in page order; every span when `ids` is empty. Throws an Error that lists the page's worlds when an id is unknown. Pure. */
+export function selectWorlds(spans, ids) {
+  const unknown = ids.filter((id) => !spans.some((s) => s.id === id));
+  if (unknown.length) throw new Error(`--world ${unknown.join(',')}: no such world; this page has ${spans.map((s) => s.id).join(' ')}`);
+  return ids.length ? spans.filter((s) => ids.includes(s.id)) : spans;
+}
+
 /**
  * The printed lines for all worlds: each fired rule once, led by every world it fired in, and one line for the
  * clean worlds. `shots` are [{ id, fired }] with fired from firedRules; `format` is firedLines. Pure.

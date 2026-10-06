@@ -70,6 +70,16 @@ export async function sampleWorlds(page, dur, seek, from = 0) {
   return refineSpans(spans, async (id, t) => { await seek(t * 1000); return (await readWorlds(page)).some((w) => w.id === id && w.visible); }, from + dur);
 }
 
+const STILL_FRACTIONS = [0.5, 0.65, 0.35, 0.8, 0.2];
+
+/** The seconds to try for one world's still, best first: the middle of its span, then other points inside it. [0] when the page never shows it. Pure. */
+export const stillCandidates = (span) => (span && span.start != null
+  ? STILL_FRACTIONS.map((f) => +(span.start + (span.end - span.start) * f).toFixed(3))
+  : [0]);
+
+/** True when world `id` shows on the page as it is now. */
+export const worldShowsNow = async (page, id) => (await readWorlds(page)).some((w) => w.id === id && w.visible);
+
 /** Moves each coarse span edge onto the frame grid: start is the first visible frame, end the first hidden frame after it (or dur). */
 async function refineSpans(spans, visibleAt, dur) {
   const out = [];

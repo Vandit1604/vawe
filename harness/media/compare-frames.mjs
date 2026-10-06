@@ -2,6 +2,7 @@
 // Reference and render frames at the SAME exact seconds, side by side, one row per time, in one PNG.
 //   node harness/media/compare-frames.mjs --page <page.html> --at 1,2,3   (no --ref: your frames only, labelled, 3 per row)
 //   node harness/media/compare-frames.mjs <ours.mp4> --ref <ref.mp4> --at 2.5,3.1 [--from <s>] [--out file.png]
+//   node harness/media/compare-frames.mjs <ours.mp4> --at 1,4,7 [--out file.png]   (no --ref: a labelled sheet of those seconds, 3 per row)
 // --at is film seconds; --from is the film second where ours starts (a --from/--to draft).
 // Each frame is an accurate seek (-ss after -i), never an fps=N,tile sheet: those drift about 0.1 s.
 import fs from 'node:fs';
@@ -51,7 +52,26 @@ async function framesOnly({ times, out, oursAt }) {
   return out;
 }
 
+/** The seconds of a --at value, or an Error naming the flag. Pure. */
+export function parseAt(text) {
+  if (text === undefined || text === '') throw new Error('missing --at: comma-separated film seconds, for example --at 1,4,7');
+  const parts = String(text).split(',').map((s) => s.trim());
+  const bad = parts.filter((s) => s === '' || !Number.isFinite(Number(s)) || Number(s) < 0);
+  if (bad.length) throw new Error(`--at has a value that is not a number of seconds: "${bad.join('", "')}" (use for example --at 1,4,7)`);
+  return parts.map(Number);
+}
+
+/** The first problem in the input of compare, naming the flag or argument at fault, or null. Pure. */
+export function compareProblem({ ours, page, ref, at }) {
+  if (!ours && !page) return 'missing <ours.mp4> or --page <page.html>: name the film to take frames from';
+  if (ours && page) return 'give <ours.mp4> or --page, not both';
+  if (ref && page && ref === page) return '--ref is the page itself: give a reference mp4';
+  try { parseAt(at); } catch (e) { return e.message; }
+  return null;
+}
+
 export async function compareFrames({ ours, ref, times, out, from = 0 }) {
+  if (!ref) return framesOnly({ times, out, oursAt: (t, i, dir) => { const png = path.join(dir, `o${i}.png`); grab(ours, t - from, png, t); return png; } });
   return sheet({ ref, times, out, oursAt: (t, i, dir) => {
     const png = path.join(dir, `o${i}.png`);
     grab(ours, t - from, png, t);
@@ -114,15 +134,16 @@ async function main() {
   const page = flag('--page');
   const ours = argv.find((a, i) => !a.startsWith('--') && !['--ref', '--at', '--out', '--from', '--page'].includes(argv[i - 1]));
   const ref = flag('--ref');
-  const times = String(flag('--at') || '').split(',').map(Number).filter((t) => Number.isFinite(t));
-  if (!(page || ours) || (!ref && !page) || !times.length) die('usage: compare-frames.mjs <ours.mp4> | --page <page.html> [--ref <ref.mp4>] --at 2.5,3.1 [--out file.png]');
-  for (const f of [page || ours, ref].filter(Boolean)) if (!fs.existsSync(f)) die(`no such file: ${f}`);
+  const problem = compareProblem({ ours, page, ref, at: flag('--at') });
+  if (problem) die(`${problem}; usage: compare-frames.mjs <ours.mp4> | --page <page.html> [--ref <ref.mp4>] --at 2.5,3.1 [--out file.png]`);
+  const times = parseAt(flag('--at'));
+  for (const [name, f] of [[page ? '--page' : '<ours.mp4>', page || ours], ['--ref', ref]]) if (f && !fs.existsSync(f)) die(`no such file for ${name}: ${f}`);
   const source = page || ours;
   const out = path.resolve(flag('--out') || path.join('out', `compare-${path.basename(source, path.extname(source))}.png`));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   if (page) await comparePage({ page, ref, times, out });
   else await compareFrames({ ours, ref, times, out, from: Number(flag('--from')) || 0 });
-  console.log(ref ? `✓ ${path.relative(process.cwd(), out)}: reference left, yours right, ${times.length} row(s) at ${times.join(', ')} s` : `✓ ${path.relative(process.cwd(), out)}: your frames at ${times.join(', ')} s`);
+  console.log(ref ? `✓ ${out}: reference left, yours right, ${times.length} row(s) at ${times.join(', ')} s` : `✓ ${out}: your frames at ${times.join(', ')} s, 3 per row`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => die(e.stack || String(e)));
