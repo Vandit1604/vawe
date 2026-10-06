@@ -24,6 +24,8 @@ import { transitionRow, easingLines, layoutLines, audioRow, errorLines, colourLi
 import { measureColour } from '../lib/ref-measure/colour.mjs';
 import { worldTurns } from '../lib/ref-measure/world-turns.mjs';
 import { measureMotionRegions } from '../lib/ref-measure/motion-regions.mjs';
+import { measureEye } from '../lib/ref-measure/eye-path.mjs';
+import { measureGround } from '../lib/ref-measure/ground.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
 import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 import { trackWords, refineWordTimes, buildLines, restBox, fontPxOf, inkColor } from '../lib/ref-measure/words.mjs';
@@ -652,9 +654,11 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
   const colour = measureColour(V, spans, fps);
   const turns = worldTurns(colour.perShot, V.n / fps);
   const motionRegions = measureMotionRegions(V, cuts.map((c) => c.transition), fps);
+  const eye = measureEye(V, spans, fps);
+  const ground = measureGround(V, spans, fps);
   const errors = calibrating ? loadErrors('/nonexistent') : loadErrors();
   const spec = { media: { file: video, width: W, height: H, nativeFps: r1(nativeFps) }, fps, frames: V.n, duration: duration || V.n / fps,
-    fast, cuts, audio: aud, shots, colour, worldTurns: turns, motionRegions, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
+    fast, cuts, audio: aud, shots, colour, worldTurns: turns, motionRegions, eye, ground, ocr, textRuns, textLines: read.lines, err: errors.measures, errCalibrated: errors.generated };
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'spec.json'), `${JSON.stringify(spec, null, 1)}\n`);
   fs.writeFileSync(path.join(outDir, 'SPEC.md'), `${renderSpec(spec)}\n`);

@@ -18,7 +18,7 @@ function boxMean({ g, w, h }, x0, x1, y0, y1) {
   return s / n;
 }
 
-function coarse(img, gw, gh) {
+export function coarse(img, gw, gh) {
   const out = new Float32Array(gw * gh), start = (i, size, grid) => Math.floor((i * size) / grid);
   const end = (i, size, grid) => Math.max(start(i, size, grid) + 1, start(i + 1, size, grid));
   for (let y = 0; y < gh; y++) for (let x = 0; x < gw; x++) {
@@ -27,7 +27,7 @@ function coarse(img, gw, gh) {
   return { g: out, w: gw, h: gh };
 }
 
-function blur3(img) {
+export function blur3(img) {
   const out = new Float32Array(img.g.length);
   for (let y = 0; y < img.h; y++) for (let x = 0; x < img.w; x++) out[y * img.w + x] = boxMean(img, x - 1, x + 2, y - 1, y + 2);
   return { ...img, g: out };
@@ -38,7 +38,7 @@ function paint(dst, i, pos, len, stride) {
 }
 
 // A moving object changes at its leading and trailing edge; growing the mask by JOIN_R joins the two.
-function dilate(mask, w, h) {
+export function dilate(mask, w, h) {
   const rows = new Uint8Array(mask.length), out = new Uint8Array(mask.length);
   for (let i = 0; i < mask.length; i++) if (mask[i]) paint(rows, i, i % w, w, 1);
   for (let i = 0; i < mask.length; i++) if (rows[i]) paint(out, i, Math.floor(i / w), h, w);
@@ -71,12 +71,17 @@ export function countRegions(a, b, w, h, thr = DIFF_THR) {
   return regions;
 }
 
+// Frame f of V as a gw by gh grid of luminance, box-averaged and blurred.
+export function blurredGrid(V, f, gw, gh) {
+  return blur3(coarse({ g: V.gray.subarray(f * V.w * V.h, (f + 1) * V.w * V.h), w: V.w, h: V.h }, gw, gh)).g;
+}
+
 // V: decoded frames { w, h, n, gray }. transitions: [{ startFrame, endFrame }], excluded from the differences.
 export function measureMotionRegions(V, transitions, fps, thr = DIFF_THR) {
   const gw = Math.min(GRID_W, V.w), gh = Math.max(1, Math.round((gw * V.h) / V.w));
   const step = Math.max(1, Math.round(fps * STEP_S));
   const grid = [];
-  for (let f = 0; f < V.n; f++) grid.push(blur3(coarse({ g: V.gray.subarray(f * V.w * V.h, (f + 1) * V.w * V.h), w: V.w, h: V.h }, gw, gh)).g);
+  for (let f = 0; f < V.n; f++) grid.push(blurredGrid(V, f, gw, gh));
   const inCut = new Int32Array(V.n + 1);
   for (const t of transitions) for (let f = t.startFrame; f <= t.endFrame && f < V.n; f++) inCut[f + 1] = 1;
   for (let f = 0; f < V.n; f++) inCut[f + 1] += inCut[f];

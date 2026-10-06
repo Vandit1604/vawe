@@ -27,3 +27,19 @@ test('a film with no word dwell is left out of that metric only', () => {
   assert.equal(bar.word_dwell_s_median.n, 1);
   assert.equal(bar.text_time_pct.n, 2);
 });
+
+const shape = (jump, carried, centre, change) => ({
+  eye: { summary: { shots: 10, cuts: 9, jumpMedian: jump, carriedShare: carried, movedShare: 0.5, travelMedian: 0.3, centreShare: centre, centredShotShare: 0.1, motionPointShare: 0.8 } },
+  ground: { summary: { dEMedian: 4, changedShare: change, turnShare: 0.1, driftShotShare: null } },
+});
+
+test('shapeBarOf takes one value per film, counts shots and cuts, and leaves out a missing share', async () => {
+  const { shapeBarOf } = await import('../../harness/dev/bar-from-refs.mjs');
+  const bar = shapeBarOf([shape(0.2, 0.1, 0.3, 0.5), shape(0.6, 0.3, 0.5, 0.7), { media: {} }]);
+  assert.equal(bar.films, 2);
+  assert.equal(bar.cuts, 18);
+  assert.equal(bar.eye_jump_median_fh.median, 0.4);
+  assert.equal(bar.eye_carried_pct.median, 20);
+  assert.equal(bar.ground_changed_pct.p90, 68);
+  assert.equal(bar.ground_drift_pct.n, 0);
+});
