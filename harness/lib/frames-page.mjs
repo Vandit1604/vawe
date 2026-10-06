@@ -32,4 +32,17 @@ export function framesPage({ title, aspect = '16:9', worlds }) {
 }
 
 /** The lines printed for one world: each fired-rule line led by the world id, or one "clean" line. Pure. */
-export const worldLines = (id, lines) => (lines.length ? lines.map((l) => `  ${id} ${l.trim()}`) : [`  ${id}: clean`]);
+/**
+ * The printed lines for all worlds: each fired rule once, led by every world it fired in, and one line for the
+ * clean worlds. `shots` are [{ id, fired }] with fired from firedRules; `format` is firedLines. Pure.
+ */
+export function worldLines(shots, format) {
+  const byRule = new Map();
+  for (const s of shots) for (const f of s.fired) {
+    if (!byRule.has(f.id)) byRule.set(f.id, { first: f, worlds: [] });
+    byRule.get(f.id).worlds.push(s.id);
+  }
+  const lines = [...byRule.values()].map(({ first, worlds }) => `  ${worlds.join(', ')}: ${format([first], 1)[0].trim()}`);
+  const clean = shots.filter((s) => !s.fired.length).map((s) => s.id);
+  return clean.length ? [...lines, `  clean: ${clean.join(', ')}`] : lines;
+}

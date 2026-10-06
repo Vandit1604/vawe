@@ -11,7 +11,9 @@ test('frames.html has one figure per world with the id under the image and relat
   assert.doesNotMatch(html, /src="\//);
 });
 
-test('worldLines leads each fired line with the world id, and says clean when none fired', () => {
-  assert.deepEqual(worldLines('s1', ['  @1.3s text (rule a)']), ['  s1 @1.3s text (rule a)']);
-  assert.deepEqual(worldLines('s2', []), ['  s2: clean']);
+test('worldLines prints each rule once with every world it fired in, then the clean worlds', () => {
+  const format = (fired) => fired.map((f) => `  @${f.t}s ${f.value} (rule ${f.id})`);
+  const a = { id: 'tracking', value: 'loose', t: 1 };
+  const shots = [{ id: 's1', fired: [a] }, { id: 's2', fired: [] }, { id: 's3', fired: [{ ...a, t: 6 }] }];
+  assert.deepEqual(worldLines(shots, format), ['  s1, s3: @1s loose (rule tracking)', '  clean: s2']);
 });

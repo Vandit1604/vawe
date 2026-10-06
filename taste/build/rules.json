@@ -181,7 +181,7 @@
  },
  "type-setting": {
   "file": "taste/rules/type-setting.md",
-  "instead": "for a dark scene, drop body weight from 400 to 350 and open leading by 0.05 to 0.1 by hand."
+  "instead": "set display type to letter-spacing: -0.03em. For a dark scene, drop body weight from 400 to 350 and open leading by 0.05 to 0.1 by hand."
  },
  "typeface-default": {
   "file": "taste/rules/typeface-default.md",
