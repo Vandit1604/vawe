@@ -167,9 +167,17 @@
   "file": "taste/rules/surface-spec.md",
   "instead": "build a reusable surface standalone first (`bin/vawe compare --page <page> --at t` renders one frame in seconds); glass needs a moving gradient behind it. Check: every colour is in the palette, families and weights match with no silent swap, radii match the scale, no forbidden component appears."
  },
+ "text-breathing": {
+  "file": "taste/rules/text-breathing.md",
+  "instead": "leave one or two beats with no words: let the product, the object or the ground carry them. Cut text from the beat that says the same thing twice."
+ },
  "text-contrast": {
   "file": "taste/rules/text-contrast.md",
   "instead": "keep drifting background elements off any text during its hold, or park the text over a flat part of the field."
+ },
+ "text-lingers": {
+  "file": "taste/rules/text-lingers.md",
+  "instead": "cut the line when its read time plus 1.5 s has passed, or give the held seconds a second thing to look at."
  },
  "theme-source": {
   "file": "taste/rules/theme-source.md",
@@ -281,6 +289,10 @@
   "file": "taste/rules/one-hero-motion.md",
   "instead": "key the hero first at its start and end pose, check the read with nothing else moving, then add secondary and ambient in decreasing loudness. Slide up plus fade is one claim \"arriving\"; rise plus rotate is two claims about one object: drop one."
  },
+ "overshoot-share": {
+  "file": "taste/rules/overshoot-share.md",
+  "instead": "give about 1 in 3 arrivals a spring: EASE.pop, or curveToLinear(CURVES.overshoot) from core/motion/springs.js. Land the rest on EASE.land."
+ },
  "real-physics": {
   "file": "taste/rules/real-physics.md",
   "instead": "a flap has a hinge, perspective and shading; do not sell a glyph scramble as a flap or one cubic-bezier as an exponential."
@@ -290,6 +302,10 @@
   "instead": "use bandSeconds(name) and the presets; give the hero gravity or cinematic and the payoff energy. Too many distinct durations read as drift: hold to a few named bands.",
   "dial": "band",
   "range": "energy 0.15 to 0.3 s; professional 0.3 to 0.5 s; gravity 0.5 to 0.8 s; cinematic 0.8 to 2 s only when the film has the seconds. By role: ambient 0.8 to 1.2 s, thesis line 0.5 to 0.8 s, heavy title 0.5 to 0.7 s, caption 0.25 to 0.4 s, payoff snap 0.25 to 0.35 s. Frame counts at 60 fps (finals) or in seconds"
+ },
+ "speed-ceiling": {
+  "file": "taste/rules/speed-ceiling.md",
+  "instead": "give the fastest moves more seconds (the next speed band) or less distance. Keep a quick move for the one element the beat is about."
  },
  "stagger": {
   "file": "taste/rules/stagger.md",
