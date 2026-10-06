@@ -20,7 +20,7 @@ bin/vawe judge <page|mp4> --verdict PASS|FIX [--at <s> --top-fix "<fix>"] [--fix
 ```
 
 - **Prepare** writes a key-frame sheet and `rubric.md` under the scratch base. A fresh session reads the sheet against the rubric. With `--ref`, every tile is frame-locked: reference left, film right.
-- **`--fresh`** scores now with a separate headless Claude session that has the Read tool only (about 30 s). It returns one JSON object and writes `out/<name>.judge.json` (`out/<name>.stills.json` for `--stage stills`). Each fix gets an id in a ledger: the next judge of the film marks every open fix fixed, partly or still before it adds new ones, and names the old fix a new one reverses, with a reason (`harness/lib/judge-ledger.mjs`). Each fix also names `what` it changes, its value `now` and the value it `want`s; when the asked value for one `what` moves back and forth over three rounds, the report prints `stop: keep <what> at its current value; the judge varies on this item`. `bin/vawe dev` runs the stills judge itself once per change of `directions.html` (`--no-judge` skips it). It advises and never blocks.
+- **`--fresh`** scores now with a separate headless Claude session that has the Read tool only (about 30 s). It returns one JSON object and writes `out/<name>.judge.json` (`out/<name>.stills.json` for `--stage stills`). Each fix gets an id in a ledger: the next judge of the film marks every open fix fixed, partly, still or stale (the sheet no longer shows it: closed, dropped from the printed fixes and counted) before it adds new ones, and names the old fix a new one reverses, with a reason (`harness/lib/judge-ledger.mjs`). Each fix also names `what` it changes, its value `now` and the value it `want`s; when the asked value for one `what` moves back and forth over three rounds, the report prints `stop: keep <what> at its current value; the judge varies on this item`. `bin/vawe dev` runs the stills judge itself once per change of `directions.html` (`--no-judge` skips it). It advises and never blocks.
 - **`--verdict`** records the verdict against the exact render. It refuses a stale render, a missing sheet, and a PASS recorded by the agent that rendered the film.
 - **`--struct --runs A,B`** writes one rubric per run, scored by two independent judges on the 12 criteria in `harness/lib/judge-codes.mjs`. Every criterion needs `{score, evidence, t}`, and the evidence must name a concrete observation (`harness/lib/evidence-lint.mjs`). `node quality/gates/judge.mjs --compare A.json B.json` flags any criterion where the runs differ by more than 2 points.
 
@@ -43,6 +43,12 @@ can make in one edit.
 
 Stills axes: concept, focal, colour, type, template (distance from a generic template). The rubric
 text is `FRESH_AXES` in `quality/gates/rubric.mjs`. Keep this table and that text in step.
+
+## Side by side with real films
+
+When `~/.vawe/refs` exists (`bin/vawe refs list`; `$VAWE_REFS_DIR` moves it), the judge also reads the sheets of two in-scope reference films of the film's type (product or brand, the closest length, then id order) and says per dial (text, colour, motion) which is better, ours or the reference. Without the folder, one line says the comparison was skipped.
+The dials cap the axes (`AXIS_DIAL` in `harness/lib/judge-bar.mjs`): type is text, colour is colour, motion and pace are motion. Ours losing a dial to both references caps its axes at 6, losing to one caps them at 7, and the verdict is not PASS while ours loses a dial to both.
+The answers are `bar` in `out/<name>.judge.json` and the run log; `bin/vawe runs --taste` shows wins and losses per dial. The anchor question stays: it compares key frames, the bar compares whole sheets.
 
 ## The verdict contract
 

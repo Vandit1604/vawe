@@ -18,12 +18,12 @@ export const devEvent = ({ tier, wallS, captureS, checks, cache, rows, signature
   signature, measured, rules_fired: fired, worlds: worlds?.length ? worlds : null,
 });
 
-/** A judge run: `stage` is stills, draft, final, manual or struct; `ledger` is mergeLedger counts; `findings` is { notes: [{ rule, t, verdict }], waivers: [{ code, earned }], sameness, template } (judge-findings.mjs findingsEvent). */
-export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, ledger = null, seconds = null, findings = null }) => ({
+/** A judge run: `stage` is stills, draft, final, manual or struct; `ledger` is mergeLedger counts; `bar` is the side-by-side answers as [{ ref, dial, winner }] (judge-bar.mjs barEvent); `findings` is { notes: [{ rule, t, verdict }], waivers: [{ code, earned }], sameness, template } (judge-findings.mjs findingsEvent). */
+export const judgeEvent = ({ stage, verdict, scores = null, anchor = null, bar = null, ledger = null, seconds = null, findings = null }) => ({
   cmd: 'judge', stage, verdict, scores,
   anchorYes: anchor ? anchor.filter((a) => a.yes).length : null,
   anchorTotal: anchor ? anchor.length : null,
-  ledger, seconds,
+  bar, ledger, seconds,
   notes: findings?.notes ?? null, waivers: findings?.waivers ?? null, sameness: findings?.sameness ?? null, template: findings?.template ?? null,
 });
 

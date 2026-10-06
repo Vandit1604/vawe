@@ -1,5 +1,7 @@
 // The judge text an agent sees in its terminal: the verdict, the scores on one line, the worst fixes.
 // The full result stays in out/<name>.judge.json.
+import { barReport } from './judge-bar.mjs';
+
 export const TOP_FIXES = 3;
 
 const at = (t) => (t != null ? ` at ${t}` : '');
@@ -24,6 +26,7 @@ export function reportLines(r, file) {
     lines.push(`anchor: ${r.anchor.filter((a) => a.yes).length} of ${r.anchor.length} frames YES`);
     for (const a of r.anchor.filter((x) => !x.yes).slice(0, TOP_FIXES)) lines.push(`- anchor ${a.frame}${a.at != null ? ` at ${a.at}` : ''}: NO, ${a.fix}`);
   }
+  if (r.bar?.length) lines.push(...barReport(r.bar));
   lines.push(`full report: ${file}`);
   return lines;
 }
