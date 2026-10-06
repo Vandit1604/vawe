@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseVerified, filmType, pickRefs, refsDir, listLines } from '../../harness/lib/refs.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, writeRegistry } from '../../harness/lib/refs.mjs';
 
 const VERIFIED = `
 **A. Product and UI films (best fit for HTML/CSS/WebGL)**
@@ -66,6 +69,18 @@ test('pickRefs takes the two closest lengths of the type, ties by id, and skips 
 test('refsDir prefers VAWE_REFS_DIR', () => {
   assert.equal(refsDir({ VAWE_REFS_DIR: '/r' }, '/h'), '/r');
   assert.equal(refsDir({}, '/h'), '/h/.vawe/refs');
+});
+
+test('chooseRefs gives the picked sheets, or one line saying why none', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'refs-'));
+  const brief = 'Template: prompts/brand-launch-from-url.md. Shape: x.';
+  assert.match(chooseRefs({ dir, briefText: brief, seconds: 18 }).skipped, /no reference films/);
+  writeRegistry(dir, registry);
+  assert.match(chooseRefs({ dir, briefText: null, seconds: 18 }).skipped, /film type is unknown/);
+  assert.deepEqual(chooseRefs({ dir, briefText: 'Template: prompts/beat-sheet.md.', seconds: 18 }).refs.map((r) => r.id), ['e']);
+  const got = chooseRefs({ dir, briefText: brief, seconds: 25 });
+  assert.deepEqual(got.refs.map((r) => r.id), ['a', 'b']);
+  assert.equal(got.refs[0].file, path.join(dir, 's/a.png'));
 });
 
 test('listLines gives one aligned line per film', () => {
