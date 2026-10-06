@@ -7,33 +7,56 @@ const READ_FLOOR = HOLD.hold_floor_s;
 const READ_OTHER_WPS = HOLD.short_words_per_s;
 const PROSE_WORDS = HOLD.prose_min_words;
 const MIN_TEXT_H = 0.02;        // share of frame height below which text is a caption or credit, not read on the way past
+const SAME_TIME = 0.5;          // s: rows that arrive and settle within this of each other are shown together
 
-function groupsOf(tracks) {
-  const words = tracks.filter((w) => w.sizeSettled >= MIN_TEXT_H && w.tOut - w.tIn > 0.3).sort((a, b) => a.tIn - b.tIn);
-  const groups = [];
-  for (const w of words) {
-    const g = groups.find((x) => Math.abs(x.tIn - w.tIn) <= 0.5 && Math.abs(x.tSettled - w.tSettled) <= 0.5);
-    if (g) g.words.push(w); else groups.push({ tIn: w.tIn, tSettled: w.tSettled, words: [w] });
+/** What the readable-hold rule asks, for the judge prompt and this check: one source for the numbers. */
+export const HOLD_RULE = { floor: READ_FLOOR, perWord: READ_PER_WORD, shortWps: READ_OTHER_WPS, proseWords: PROSE_WORDS, ceiling: HOLD.ceiling_s, perExtraRow: 1 / READ_OTHER_WPS };
+
+/** Seconds to read one line of `n` words. Pure. */
+export const lineNeed = (n) => (n >= PROSE_WORDS ? n * READ_PER_WORD : Math.max(READ_FLOOR, n / READ_OTHER_WPS));
+
+/** Seconds to read rows shown together: the longest row, plus a word's time for each extra row, never past the ceiling (a row that needs more alone keeps its own need). Pure. */
+export function rowsNeed(needs) {
+  const longest = Math.max(...needs);
+  return Math.max(longest, Math.min(longest + (needs.length - 1) * HOLD_RULE.perExtraRow, HOLD_RULE.ceiling));
+}
+
+const wordCount = (text) => text.split(/\s+/).filter(Boolean).length;
+const together = (a, b) => Math.abs(a.tIn - b.tIn) <= SAME_TIME && Math.abs(a.tSettled - b.tSettled) <= SAME_TIME;
+
+// A line is one element's text: the tracks of one block that arrive and settle together. A track with no block is a line of its own.
+function linesOf(tracks) {
+  const shown = tracks.filter((w) => w.sizeSettled >= MIN_TEXT_H && w.tOut - w.tIn > 0.3).sort((a, b) => a.tIn - b.tIn);
+  const lines = [];
+  for (const w of shown) {
+    const line = w.block == null ? null : lines.find((x) => x.block === w.block && together(x, w));
+    if (line) line.tracks.push(w); else lines.push({ block: w.block, tIn: w.tIn, tSettled: w.tSettled, tracks: [w] });
   }
-  return groups.map((g) => {
-    const n = g.words.length;
-    const tSettled = Math.max(...g.words.map((w) => w.tSettled));
-    const tOut = Math.min(...g.words.map((w) => w.tOut));
-    return { text: g.words.map((w) => w.text).join(' '), n, tSettled, tOut, hold: tOut - tSettled, need: n >= PROSE_WORDS ? n * READ_PER_WORD : Math.max(READ_FLOOR, n / READ_OTHER_WPS) };
+  return lines.map((l) => ({ ...l, text: l.tracks.map((w) => w.text).join(' '), n: l.tracks.reduce((s, w) => s + wordCount(w.text), 0),
+    tSettled: Math.max(...l.tracks.map((w) => w.tSettled)), tOut: Math.min(...l.tracks.map((w) => w.tOut)) }));
+}
+
+// Lines that settle together are rows of one list: each holds for the longest row plus the extras, not for its own text alone.
+function groupsOf(tracks) {
+  const lines = linesOf(tracks);
+  return lines.map((l) => {
+    const rows = lines.filter((x) => together(x, l));
+    return { text: l.text, n: l.n, tSettled: l.tSettled, tOut: l.tOut, hold: l.tOut - l.tSettled, rows: rows.length, need: rowsNeed(rows.map((x) => lineNeed(x.n))) };
   });
 }
 
-/** Group word tracks that arrive and settle together into lines, then compare each line's still time to its read time. A line that leaves before its settle time has no hold to measure. Pure. */
+/** Group the tracks of one element into a line, then compare each line's still time to its read time. Rows that arrive together share the longest row's time plus a word's time per extra row. A line that leaves before its settle time has no hold to measure. Pure. */
 export const readHoldProblems = (tracks) => groupsOf(tracks).filter((g) => g.hold >= 0 && g.hold < g.need * 0.9);
 
 /** The lines whose settle time is after they left the screen: the Words table or the sampling is wrong, so their hold is not measured. Pure. */
 export const readHoldUnmeasured = (tracks) => groupsOf(tracks).filter((g) => g.hold < 0);
 
 /**
- * Word tracks for readHoldProblems from the draft's text samples: every run of samples that shows one line
- * is a track per word, in at the run's first sample minus half a step, out at its last plus half a step. A
- * word of the brief's Words table that the line holds gives the settle time; without one the run's start stands
- * in for it, so the hold is the whole time on screen. Text inside data-chrome is not a line to read and has no track. Pure.
+ * Tracks for readHoldProblems from the draft's text samples: every run of samples that shows one text is a track, in at
+ * the run's first sample minus half a step, out at its last plus half a step. `block` is the sample's element identity
+ * (the nearest block-level ancestor): the texts of one element read as one line, two elements never join. A word of the
+ * brief's Words table that the text holds gives the settle time; without one the run's start stands in for it, so the hold
+ * is the whole time on screen. Text inside data-chrome is not a line to read and has no track. Pure.
  */
 export function probeTracks(samples, { step, frameH }, words = []) {
   const tracks = [];
@@ -41,19 +64,21 @@ export function probeTracks(samples, { step, frameH }, words = []) {
   const close = (key) => {
     const r = open.get(key);
     open.delete(key);
-    for (const w of r.text.split(' ')) tracks.push({ text: w, sizeSettled: r.h / frameH, tIn: r.tIn, tSettled: r.tSettled, tOut: r.tOut });
+    tracks.push({ text: r.text, block: r.block, sizeSettled: r.h / frameH, tIn: r.tIn, tSettled: r.tSettled, tOut: r.tOut });
   };
   for (const { t, lines } of samples) {
     const seen = new Set();
     for (const l of lines) {
       const text = l.text.replace(/\s+/g, ' ').trim();
       if (!text || !l.box || l.chrome) continue;
-      seen.add(text);
-      const r = open.get(text) || { text, h: l.box[3], tIn: Math.max(0, t - step / 2) };
+      const block = l.block ?? text;
+      const key = `${block}|${text}`;
+      seen.add(key);
+      const r = open.get(key) || { text, block, h: l.box[3], tIn: Math.max(0, t - step / 2) };
       const spec = words.find((w) => typeof w.settle === 'number' && text.toLowerCase().includes(w.text.toLowerCase()));
       r.tSettled = Math.max(r.tIn, spec ? spec.settle : r.tIn);
       r.tOut = t + step / 2;
-      open.set(text, r);
+      open.set(key, r);
     }
     for (const key of [...open.keys()]) if (!seen.has(key)) close(key);
   }

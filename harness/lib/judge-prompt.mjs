@@ -1,6 +1,9 @@
 // Prompt text the fresh judge gets besides the rubric: the pixel size of every image it sees, the text sizes
 // the draft measured, and the yes or no anchor question per key frame. Pure; harness/media/judge-fresh.mjs feeds it.
 
+import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
+import { HOLD_RULE } from './read-hold.mjs';
+
 // The card the fresh judge reads, built from taste/rules by harness/dev/taste-build.mjs.
 export const TASTE_CARD_REL = 'taste/build/CARD.md';
 
@@ -21,6 +24,13 @@ export function capLines(caps) {
   const worst = [...caps].sort((a, b) => a.cap - b.cap).slice(0, MAX_CAPS);
   return ['Measured text sizes (exact, read from the page; cap height as a percent of the frame height, which is what the taste rule readable-text-size asks for at 6% or more). Use these numbers; do not estimate type size from pixels:',
     ...worst.map((c) => `- "${c.text.slice(0, 40)}" at ${c.t.toFixed(1)} s: cap height ${c.cap.toFixed(1)}%`)];
+}
+
+const r1 = (x) => +x.toFixed(2);
+
+/** The hold a line needs, in the draft check's own numbers (read-hold.mjs), so the judge cannot ask for a hold the check rejects or accepts less. Pure. */
+export function holdLines(rule = HOLD_RULE, sheetFps = LIMITS['world-turns'].sheet_fps) {
+  return [`Read holds (taste rule readable-hold; the draft check measures these exact numbers). A line the viewer reads holds fully legible for at least ${rule.floor} s (${Math.ceil(rule.floor * sheetFps)} tiles on the ${sheetFps} fps sheet). Text under ${rule.proseWords} words needs max(${rule.floor} s, words / ${rule.shortWps}); prose of ${rule.proseWords} or more words needs words x ${rule.perWord} s. Rows that appear together need the longest row plus ${r1(rule.perExtraRow)} s per extra row, at most ${rule.ceiling} s. Count tiles against these numbers. Never ask for a hold longer than they give, never ask for a shorter one, and never ask to slow the move.`];
 }
 
 /** The anchor the key frames are compared with: { kind: 'reference', frames } (images of the reference at the key times), { kind: 'brief' } or { kind: 'none' }. */

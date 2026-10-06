@@ -2,12 +2,12 @@
 id: readable-hold
 step: look
 principle: A line the viewer must read holds fully legible long enough to be read. When a hold is short, add hold time; never slow the move.
-limit: no held frame under 1.2 s; short or non-prose text max(1.2 s, words / 3); prose (4 or more words) words x 0.6 s
+limit: no held frame under 1.2 s; short or non-prose text max(1.2 s, words / 3); prose (4 or more words) words x 0.6 s; each element is its own line, and rows that appear together need the longest row plus 1/3 s per extra row, at most the ceiling
 range: one line holds at most about 5 s; past 8 words cut the line
 break-when: text is a counter, an axis label, a chip, a credit or a watermark: looked at, not read
 instead: add seconds before the exit, or give the beat a second thing to look at. The clock starts when the last character settles. Motion stays quick; exits still run shorter than entrances.
 check: read-hold
-judge: Count the legible tiles per line on the sheet: five or more at 4 fps?
+judge: Count the legible tiles per line on the 5 fps sheet against the read-hold facts in the prompt (the same numbers as the draft check): is each line held long enough, and no longer than needed?
 prevents: feedback vawe-flow-2: "a little too fast", "still too fast", chose the 15 percent slower cut. doc readable-hold: "the fix is always a hold".
 status: active
 scored: yes

@@ -23,7 +23,7 @@ test('the draft check, the peak limit, the sheet and the ship status hold the nu
 });
 
 test('the read hold needs 0.6 s per word for four words or more, and at least 1.2 s for fewer (a line passes at 0.9 of that)', () => {
-  const track = (text, tIn, tSettled, tOut) => ({ text, sizeSettled: 0.1, tIn, tSettled, tOut });
+  const track = (text, tIn, tSettled, tOut) => ({ text, block: 0, sizeSettled: 0.1, tIn, tSettled, tOut });
   const words = (n, hold) => Array.from({ length: n }, (_, i) => track(`w${i}`, 0, 0.2, 0.2 + hold));
   assert.equal(readHoldProblems(words(5, 2.6)).length, 1);
   assert.equal(readHoldProblems(words(5, 2.8)).length, 0);

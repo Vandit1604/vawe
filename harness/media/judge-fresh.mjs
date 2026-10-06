@@ -20,7 +20,7 @@ import { reportLines } from '../lib/judge-report.mjs';
 import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
 import { siblingFilms } from '../lib/judge-siblings.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
-import { sizeLines, capLines, anchorLines, anchorResult, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
+import { sizeLines, capLines, holdLines, anchorLines, anchorResult, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
 import { referenceFor, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
 import { settledMoments } from '../lib/key-frames.mjs';
@@ -199,7 +199,7 @@ const findingsBlock = (ev) => findingsPrompt({ card: fs.readFileSync(path.resolv
 
 function checkBlock(ev) {
   if (ev.stage === 'stills') return '';
-  const parts = [sizeLines(ev.images || []), capLines(ev.caps), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : []].filter((p) => p.length);
+  const parts = [sizeLines(ev.images || []), capLines(ev.caps), holdLines(), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : []].filter((p) => p.length);
   return parts.map((p) => `${p.join('\n')}\n\n`).join('');
 }
 
