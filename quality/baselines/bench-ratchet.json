@@ -1,11 +1,11 @@
 {
  "readLoad": {
-  "words": 2839,
-  "tokens": 3776
+  "words": 3111,
+  "tokens": 4138
  },
  "fastPath": {
   "commands": 3,
-  "makefileTargets": 20
+  "makefileTargets": 21
  },
  "render": {
   "msMedian": 9077,
