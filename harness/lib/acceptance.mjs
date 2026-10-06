@@ -2,7 +2,7 @@
 // from harness/media/acceptance-run.mjs, the brief's targets from brief-tables.mjs, and each number is
 // the one its own module already computes (still-limit, sheet-tiles, text-contrast, text-collision,
 // read-hold, motion-lint, peak-limit, smoothness, spec-conformance).
-import { APPEAR_TOL_S, LAYOUT_TOL_PCT, checkLine } from './spec-conformance.mjs';
+import { LAYOUT_TOL_PCT, checkLine } from './spec-conformance.mjs';
 import { RULES } from './draft-check.mjs';
 import { PEAK_DBFS } from './peak-limit.mjs';
 import { DRAFT_MIN_RATIO } from './text-contrast.mjs';
@@ -24,7 +24,6 @@ export const DEFAULT_ROWS = [
   ['text collisions', '0'],
   ['read hold per line', 'max(1.2 s, words/3 s) or more'],
   ['exits shorter than entrances', 'all'],
-  ['word appear time vs spec', `within ${APPEAR_TOL_S} s`],
   ['word cap height and position vs spec', `within ${LAYOUT_TOL_PCT}% of frame`],
   ['cuts vs spec', 'within 1 frame'],
   ['loudness', `${LUFS_LOW} to ${LUFS_HIGH} LUFS`],
@@ -32,7 +31,8 @@ export const DEFAULT_ROWS = [
   ['judge: each storyboard frame as beautiful as the anchor, full size', 'YES'],
 ].map(([metric, target]) => ({ metric, target }));
 
-const OBJECTS_ROW = { metric: 'objects in/settle/out vs spec', target: `within ${APPEAR_TOL_S} s` };
+// Times are written from the page into the brief (spec-sync), so a row that compares them to the brief would compare a time to itself.
+const RETIRED_ROWS = new Set(['word appear time vs spec', 'objects in/settle/out vs spec']);
 
 const num = '(-?\\d+(?:\\.\\d+)?)';
 const unit = '(?::1|%| s| dBFS| LUFS)?';
@@ -93,10 +93,8 @@ const ROWS = {
     return done(!m.readHold.length, `${m.readHold.length ? `${m.readHold.length} line(s) short` : 'all long enough'}${unmeasured}`, m.readHold.slice(0, SHOW).map((p) => `"${p.text.slice(0, 40)}" holds ${p.hold.toFixed(2)} s, needs ${p.need.toFixed(2)} s`));
   },
   'exits shorter than entrances': (m) => (m.exits ? done(!m.exits.length, m.exits.length ? `${m.exits.length} too long` : 'all', m.exits.slice(0, SHOW).map((e) => `${e.at.toFixed(2)} s: ${e.what}`)) : skip('no motion probe')),
-  'word appear time vs spec': (m, pass) => deviationRow(m.appear, pass, m.skippedWords?.length ? `every Words row is too short to find (${m.skippedWords.map((w) => `"${w}"`).join(', ')})` : 'no spec', (d) => `${d.toFixed(2)} s`, 'move the word to its appear time in the Words table, or change the table', m.guessed?.words),
   'word cap height and position vs spec': (m, pass) => deviationRow(m.layout, pass, 'no spec', (d) => `${d.toFixed(1)}%`, 'set the font size and box to the Words table, or change the table', m.guessed?.words),
   'cuts vs spec': (m, pass) => deviationRow(m.cuts, pass, m.hasShots ? 'no hard cut near a shot start' : 'no spec', (d) => `${d.toFixed(1)} frames`, 'land the cut on the Shots boundary, or change the table'),
-  'objects in/settle/out vs spec': (m, pass) => deviationRow(m.objects, pass, 'no spec', (d) => `${d.toFixed(2)} s`, 'move the object to its Objects times, or change the table', m.guessed?.objects),
   loudness: (m, pass) => (m.lufs == null ? skip('no audio in the video') : done(pass(m.lufs), `${m.lufs.toFixed(1)} LUFS`, pass(m.lufs) ? [] : [m.lufs < LUFS_LOW ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues'])),
   peak: (m, pass) => (m.peak == null ? skip('no audio in the video') : done(pass(m.peak), `${m.peak.toFixed(1)} dBFS`, pass(m.peak) ? [] : [`lower data-gain on the loudest cue by ${Math.ceil(m.peak - PEAK_DBFS)} dB`])),
   'judge: each storyboard frame as beautiful as the anchor, full size': (m) => (m.judge ? done(m.judge.yes === m.judge.total, `${m.judge.yes} of ${m.judge.total} YES`, m.judge.fixes.slice(0, SHOW)) : skip('not run')),
@@ -117,13 +115,12 @@ const read = (row, m, carried, mode) => {
 
 /**
  * The table rows: { metric, target, status: 'ok' | 'advice' | 'not measured', measured, detail }. `brief` is the
- * parsed Acceptance rows (empty: the defaults), `m` the measures, `objects` whether the brief has an Objects table,
- * `carry` the rows of an earlier run, used where this run could not measure a row. Pure.
+ * parsed Acceptance rows (empty: the defaults), `m` the measures, `carry` the rows of an earlier run, used where this
+ * run could not measure a row. Pure.
  */
-export function buildRows(brief, m, { objects = false, carry = [], mode = 'full' } = {}) {
-  const rows = brief.length ? brief : DEFAULT_ROWS;
-  const all = objects && !rows.some((r) => r.metric === OBJECTS_ROW.metric) ? [...rows, OBJECTS_ROW] : rows;
-  return all.map((row) => {
+export function buildRows(brief, m, { carry = [], mode = 'full' } = {}) {
+  const rows = brief.length ? brief.filter((r) => !RETIRED_ROWS.has(r.metric)) : DEFAULT_ROWS;
+  return rows.map((row) => {
     const out = read(row, m, carry.find((c) => c.metric === row.metric), mode);
     if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: `${out.label}: ${out.skip}`, detail: [] };
     return { metric: row.metric, target: row.target, status: out.ok ? 'ok' : 'advice', measured: out.measured, detail: out.detail ?? [] };
@@ -170,11 +167,3 @@ export const fullTable = (rows) => ['| status | metric | target | measured |', '
 
 /** True when every measured row is green. A row that could not be measured does not count against it. Pure. */
 export const allMeasuredGreen = (rows) => rows.every((r) => r.status !== 'advice');
-
-const SYNC_AFTER = 3;
-
-/** The next-command line when more than SYNC_AFTER timed spec checks (word appear, object in/settle/out) are off, else null. Pure. */
-export function syncLine(timeChecks, page) {
-  const off = timeChecks.filter((c) => c.dev > APPEAR_TOL_S + 1e-9).length;
-  return off > SYNC_AFTER ? `next: ${off} spec times are off; if you retimed on purpose, bin/vawe spec-sync ${page} writes the measured times into the brief` : null;
-}

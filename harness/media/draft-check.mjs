@@ -38,7 +38,7 @@ export function sheetTileDiffs(mp4) {
   return { diffs, fps };
 }
 
-// Runs inside the page. { lines, blocks }: lines is one { text, fontPx, box, color, opacity, chrome? } per visible text
+// Runs inside the page. { lines, blocks }: lines is one { text, fontPx, family, weight, box, color, opacity, chrome? } per visible text
 // node (fontPx includes ancestor transform scale); blocks is the joined visible text of each element that holds
 // two or more such nodes, so a word split into per-letter spans reads as one text. Text inside `decorative` is left out.
 export function visibleLines(decorative, chrome) {
@@ -68,7 +68,7 @@ export function visibleLines(decorative, chrome) {
     const inside = r.width > 0 && r.height > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight;
     if (!(opacity > 0.5 && inside)) continue;
     const fontPx = parseFloat(cs.fontSize) * scale;
-    out.push({ text, fontPx, box: [r.x, r.y, r.width, r.height], color: cs.color, opacity, ...(el.closest(chrome) ? { chrome: true } : {}) });
+    out.push({ text, fontPx, family: cs.fontFamily, weight: cs.fontWeight, box: [r.x, r.y, r.width, r.height], color: cs.color, opacity, ...(el.closest(chrome) ? { chrome: true } : {}) });
     for (let a = el; a && a !== document.documentElement; a = a.parentElement) {
       const o = owners.get(a) || { raw: '', n: 0, fontPx, x0: r.left, y0: r.top, x1: r.right, y1: r.bottom };
       o.raw += node.nodeValue;

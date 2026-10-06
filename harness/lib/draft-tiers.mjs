@@ -25,9 +25,7 @@ export const runsIn = (check, mode) => ORDER.indexOf(CHECK_TIER[check]) <= ORDER
 // The check behind each acceptance row; a row with no entry is read from a file or from the check that always runs.
 export const ROW_CHECK = {
   'text contrast': 'contrast',
-  'word appear time vs spec': 'spec',
   'word cap height and position vs spec': 'spec',
-  'objects in/settle/out vs spec': 'objects',
   loudness: 'sound',
   peak: 'sound',
 };

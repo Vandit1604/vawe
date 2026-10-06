@@ -34,7 +34,7 @@ const brief = `# Brief
 test('the four tables parse with numbers, tolerant of spacing, pipes and code spans', () => {
   const t = parseBriefTables(brief);
   assert.equal(t.shots.length, 2);
-  assert.deepEqual(t.shots[1], { id: 'S2', start: 2.4, end: 5, notices: 'a line reads', moveIn: 'cut', moveOut: 'fade', camera: 'still' });
+  assert.deepEqual(t.shots[1], { id: 'S2', start: 2.4, end: 5, notices: 'a line reads', moveIn: 'cut', moveOut: 'fade', camera: 'still', ground: '' });
   assert.deepEqual(t.words[0], { text: 'Ship it', shot: 'S1', appear: 0.6, settle: 1, cap: 8, x: 10, y: 42.5, weight: '700', colour: '#fff' });
   assert.deepEqual(t.objects[0], { id: 'mark', selector: '.mark', shot: 'S1', in: 0.2, settle: 0.9, out: 2.3 });
   assert.deepEqual(t.acceptance.map((r) => r.metric), ['jerky steps', 'loudness']);

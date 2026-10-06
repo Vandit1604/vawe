@@ -4,14 +4,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export const COLUMNS = {
-  Shots: ['id', 'start', 'end', 'notices', 'moveIn', 'moveOut', 'camera'],
+  Shots: ['id', 'start', 'end', 'notices', 'moveIn', 'moveOut', 'camera', 'ground'],
   Words: ['text', 'shot', 'appear', 'settle', 'cap', 'x', 'y', 'weight', 'colour'],
   Objects: ['id', 'selector', 'shot', 'in', 'settle', 'out'],
   Acceptance: ['metric', 'target'],
 };
 const NUMERIC = new Set(['start', 'end', 'appear', 'settle', 'cap', 'x', 'y', 'in', 'out']);
 
-const cellsOf = (line) => line.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, '|'));
+export const cellsOf = (line) => line.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, '|'));
 const isSeparator = (cells) => cells.every((c) => /^:?-{2,}:?$/.test(c));
 const clean = (c) => c.replace(/^`+|`+$/g, '').trim();
 

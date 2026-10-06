@@ -12,8 +12,10 @@ import { tailTiles } from '../lib/sheet-tiles.mjs';
 import { heldTextRuns } from '../lib/draft-check.mjs';
 import { textCollisions } from '../lib/text-collision.mjs';
 import { readHoldProblems, readHoldUnmeasured, probeTracks } from '../lib/read-hold.mjs';
-import { wordChecks, cutChecks, skippedWords, measuredSpec } from '../lib/spec-conformance.mjs';
-import { buildRows, withHistory, tableLines, allMeasuredGreen, syncLine, acceptanceCounts } from '../lib/acceptance.mjs';
+import { wordChecks, cutChecks, measuredSpec } from '../lib/spec-conformance.mjs';
+import { buildRows, withHistory, tableLines, allMeasuredGreen, acceptanceCounts } from '../lib/acceptance.mjs';
+import { syncSpec } from '../lib/spec-sync.mjs';
+import { pageLook, writeLook, firstFamily } from '../lib/page-look.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaived } from '../lib/waivers.mjs';
 
@@ -48,12 +50,9 @@ function pageMeasures({ probe, findings, authoring }, tables) {
     collisions: textCollisions(probe.samples),
     readHold: readHoldProblems(tracks),
     readHoldUnmeasured: readHoldUnmeasured(tracks),
-    skippedWords: skippedWords(tables.words),
     exits: findings.filter((f) => f.code === 'exit-length').map((f) => ({ at: f.at, what: f.what })),
-    appear: wordResult && wordResult.filter((c) => c.label.endsWith('appears')),
     layout: wordResult && wordResult.filter((c) => !c.label.endsWith('appears')),
-    objects: spec?.objects ?? null,
-    measuredSpec: spec ? measuredSpec(tables.words, spec.times, spec.objects ?? []) : null,
+    measuredSpec: spec ? measuredSpec(tables.words, spec.times, spec.objects ?? [], probe.worlds ?? spec.worlds ?? []) : null,
   };
 }
 
@@ -82,10 +81,28 @@ export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, 
   const name = nameOf(mp4);
   const page = pageMeasures({ probe, findings, authoring }, set);
   const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
-  const rows = buildRows(set.acceptance, m, { objects: set.objects.length > 0, mode });
+  const rows = buildRows(set.acceptance, m, { mode });
   const was = record(name, rows, 'draft', page.caps, page.measuredSpec);
-  return { rows, was, sync: syncLine([...(page.appear ?? []), ...(page.objects ?? [])], pagePath) };
+  return { rows, was, sync: writeBriefFromPage(pagePath, page.measuredSpec, probe.samples) };
 }
+
+const largestText = (samples) => samples.flatMap((s) => s.lines).reduce((a, l) => (a && a.fontPx >= l.fontPx ? a : l), null);
+
+/**
+ * The page owns the times and the Look: writes the measured times and the page's colours and face into brief.md.
+ * Returns the printed lines, or null when nothing changed.
+ */
+function writeBriefFromPage(pagePath, measured, samples) {
+  const text = readBrief(pagePath);
+  if (text === null) return null;
+  const spec = measured ? syncSpec(text, measured) : { text, changes: [] };
+  const largest = largestText(samples);
+  const look = writeLook(spec.text, pageLook(fs.readFileSync(pagePath, 'utf8'), largest && { family: firstFamily(largest.family), weight: largest.weight }));
+  if (look.text !== text) fs.writeFileSync(path.join(path.dirname(path.resolve(pagePath)), 'brief.md'), look.text);
+  return [spec.changes.length && timesLine(spec.changes.length), look.written.length && `brief: look written from the page (${look.written.join(', ')})`].filter(Boolean).join('\n') || null;
+}
+
+const timesLine = (n) => `brief: ${n} times written from the page (the page owns the times)`;
 
 async function finalLevel(mp4) {
   try { return (await import('./page-audio.mjs')).measureFile(mp4); } catch { return null; }
@@ -102,7 +119,7 @@ export async function finalAcceptance({ page, outputs }) {
   const history = readJson(outFile(name, 'acceptance'))?.history ?? [];
   const level = await finalLevel(mp4);
   const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
-  const rows = buildRows(tables.acceptance, m, { objects: tables.objects.length > 0, carry: history.at(-1)?.rows ?? [] });
+  const rows = buildRows(tables.acceptance, m, { carry: history.at(-1)?.rows ?? [] });
   return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows), counts: acceptanceCounts(rows) };
 }
 
