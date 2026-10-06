@@ -69,6 +69,6 @@ test('only red rows print, one line each, and the count of green matches them', 
   assert.match(redLine(red[0]), /^ {2}still windows over 0.5 s outside a declared hold: 1 \(1-2 s held still\); keep one thing moving/);
   const measured = rows.filter((r) => r.status !== 'not measured').length;
   assert.equal(summaryLine(rows, 3, ['checks 1.0 s']), `acceptance: ${measured - 1} of ${measured} green (was 3) · checks 1.0 s`);
-  const appear = rows.find((r) => r.metric === 'word appear time vs spec');
-  assert.match(appear.measured, /^not set: /);
+  const layout = rows.find((r) => r.metric === 'word cap height and position vs spec');
+  assert.match(layout.measured, /^not set: /);
 });

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRows, syncLine, targetTest, withHistory, tableLines, allMeasuredGreen, DEFAULT_ROWS } from '../../harness/lib/acceptance.mjs';
+import { buildRows, targetTest, withHistory, tableLines, allMeasuredGreen, DEFAULT_ROWS } from '../../harness/lib/acceptance.mjs';
 
 const clean = { smooth: { frozen: [], jerky: [], jumps: [] }, stills: [], tail: 2, caps: [{ text: 'Hi', cap: 7, t: 1 }], contrast: [], collisions: [], readHold: [], exits: [], lufs: -20, peak: -12 };
 const byMetric = (rows) => Object.fromEntries(rows.map((r) => [r.metric, r]));
@@ -21,7 +21,7 @@ test('a clean draft with no brief tables: measured rows green, spec rows say no 
   const rows = byMetric(buildRows([], clean));
   assert.equal(Object.keys(rows).length, DEFAULT_ROWS.length);
   assert.equal(rows['jerky steps'].status, 'ok');
-  assert.equal(rows['word appear time vs spec'].measured, 'not measured: no spec');
+  assert.equal(rows['word cap height and position vs spec'].measured, 'not measured: no spec');
   assert.equal(rows['cuts vs spec'].status, 'not measured');
   assert.equal(rows['judge: each storyboard frame as beautiful as the anchor, full size'].measured, 'not measured: not run');
   assert.ok(allMeasuredGreen(Object.values(rows)));
@@ -37,18 +37,18 @@ test('a missed row is advice with the times and the fix, and uses the brief targ
   assert.ok(!allMeasuredGreen(Object.values(rows)));
 });
 
-test('an unknown metric is not measured, and Objects rows join when the brief has objects', () => {
-  const rows = buildRows([{ metric: 'mood', target: 'warm' }], clean, { objects: true });
-  assert.deepEqual(rows.map((r) => r.metric), ['mood', 'objects in/settle/out vs spec']);
+test('an unknown metric is not measured, and the retired time rows of an old brief are left out', () => {
+  const rows = buildRows([{ metric: 'mood', target: 'warm' }, { metric: 'word appear time vs spec', target: 'within 0.05 s' }, { metric: 'objects in/settle/out vs spec', target: 'within 0.05 s' }], clean);
+  assert.deepEqual(rows.map((r) => r.metric), ['mood']);
   assert.match(rows[0].measured, /no measure for this metric/);
 });
 
 test('spec rows take the worst deviation against the brief target', () => {
-  const appear = [{ label: '"a" appears', spec: 1, got: 1.04, dev: 0.04, unit: 's' }, { label: '"b" appears', spec: 2, got: 2.3, dev: 0.3, unit: 's' }];
-  const [row] = buildRows([{ metric: 'word appear time vs spec', target: 'within 0.05 s' }], { appear });
+  const layout = [{ label: '"a" cap height at 1 s', spec: 8, got: 7.5, dev: 0.5, unit: '%' }, { label: '"b" x at 2 s', spec: 10, got: 12.3, dev: 2.3, unit: '%' }];
+  const [row] = buildRows([{ metric: 'word cap height and position vs spec', target: 'within 1% of frame' }], { layout });
   assert.equal(row.status, 'advice');
-  assert.equal(row.measured, '0.30 s');
-  assert.match(row.detail[0], /"b" appears: spec 2.00 s, film 2.30 s/);
+  assert.equal(row.measured, '2.3%');
+  assert.match(row.detail[0], /"b" x at 2 s: spec 10.0%, film 12.3%/);
 });
 
 test('a row the final cannot measure keeps the draft value, marked', () => {
@@ -73,7 +73,7 @@ test('history keeps the last 10 and the summary shows the trend', () => {
   assert.equal(was, entry.green);
   const rows = buildRows([], { ...clean, stills: [{ a: 1, b: 2, len: 1 }] });
   const lines = tableLines(rows, 9);
-  assert.match(lines.at(-1), /^acceptance: \d+ of 16 green, \d+ not measured \(was 9\)$/);
+  assert.match(lines.at(-1), /^acceptance: \d+ of 15 green, \d+ not measured \(was 9\)$/);
   assert.ok(lines.some((l) => l.includes('still windows over 0.5 s outside a declared hold | 0 | 1')));
   assert.ok(!lines.some((l) => l.includes('jerky steps')));
 });
@@ -91,18 +91,6 @@ test('read hold: lines with no measurable hold are named in the measure, not fai
   const [row] = buildRows([{ metric: 'read hold per line', target: 'max(1.2 s, words/3 s) or more' }], { ...clean, readHold: [], readHoldUnmeasured: [{ text: 'Go' }] });
   assert.equal(row.status, 'ok');
   assert.match(row.measured, /1 not measured/);
-});
-
-test('word appear row: when every Words row is too short to find, the row says so', () => {
-  const [row] = buildRows([{ metric: 'word appear time vs spec', target: 'within 0.05 s' }], { ...clean, appear: [], skippedWords: ['.'] });
-  assert.equal(row.status, 'not measured');
-  assert.match(row.measured, /too short to find \("\."\)/);
-});
-
-test('syncLine: names spec-sync only when more than 3 timed spec checks are off', () => {
-  const c = (dev) => ({ dev });
-  assert.equal(syncLine([c(0.3), c(0.3), c(0.3), c(0.01)], 'films/a/page.html'), null);
-  assert.match(syncLine([c(0.3), c(0.3), c(0.3), c(Infinity)], 'films/a/page.html'), /^next: 4 spec times are off; .* bin\/vawe spec-sync films\/a\/page\.html/);
 });
 
 test('withHistory keeps the measured spec of a draft for spec-sync', () => {

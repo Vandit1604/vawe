@@ -74,7 +74,7 @@ and `y %` are the text box's left and top edges. Every cell is a number you can 
 
 ```
 ### Shots
-| id | start s | end s | the viewer notices | move in | move out | camera |
+| id | start s | end s | the viewer notices | move in | move out | camera | ground |
 
 ### Words
 | text | shot | appear s | settle s | cap % | x % | y % | weight | colour |
@@ -85,8 +85,11 @@ and `y %` are the text box's left and top edges. Every cell is a number you can 
 
 `vawe new` writes one example row per table, marked `(guess: change me)` in its first cell. Replace it.
 Text that is texture, not copy, is outside the text rows: `aria-hidden="true"` skips every text check, and
-`data-chrome` (a real product's UI labels) is held to a 2.5% cap floor and has no read hold. If you retime on
-purpose, `bin/vawe spec-sync <page>` writes the last draft's measured times into the Words and Objects cells.
+`data-chrome` (a real product's UI labels) is held to a 2.5% cap floor and has no read hold.
+The page owns the times: after each full draft `bin/vawe dev` writes the measured times into the Words,
+Objects and Shots cells (a changed cell ends in `*`), and never a target (cap, x, y). It also writes the page's
+`:root` colours and typeface into each Look line still marked as a guess. `bin/vawe spec-sync <page>` does the
+times by hand.
 Answers: the gold film's gains came from numbers (ring width equals the "o", push 12%, a window onto the
 real next world), and a static tail after 4 s appeared in 5 of 11 films.
 
@@ -108,7 +111,6 @@ than 70% of a chain's moves appear in your Shots table in the chain's order.
 | text collisions | 0 |
 | read hold per line | max(1.2 s, words/3 s) or more |
 | exits shorter than entrances | all |
-| word appear time vs spec | within 0.05 s |
 | word cap height and position vs spec | within 1% of frame |
 | cuts vs spec | within 1 frame |
 | loudness | -24 to -16 LUFS |

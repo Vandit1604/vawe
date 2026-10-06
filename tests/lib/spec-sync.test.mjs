@@ -43,3 +43,21 @@ test('spec-sync is stable: a second run with the same measure changes nothing an
   assert.deepEqual(twice.changes, []);
   assert.doesNotMatch(twice.text, /\*/);
 });
+
+test('spec-sync writes the Shots start, end and ground from the measured worlds, adding the ground column at the end', () => {
+  const shots = `### Shots
+| id | start s | end s | the viewer notices | move in | move out | camera |
+|---|---|---|---|---|---|---|
+| s1 | 0 | 2 | a line | cut | fade | still |
+| s2 (guess: change me) | 2 | 4 | x | cut | fade | still |
+
+### Words
+`;
+  const worlds = [{ id: 'S1', start: 0, end: 2.4, ground: '#16151a' }, { id: 's2', start: 2.4, end: 4, ground: '#fff' }];
+  const { text, changes, missing } = syncSpec(shots, { words: [], objects: [], worlds });
+  const t = parseBriefTables(text);
+  assert.deepEqual(t.shots.map((s) => [s.id, s.start, s.end, s.ground]), [['s1', 0, 2.4, '#16151a'], ['s2 (guess: change me)', 2, 4, '']]);
+  assert.match(text, /\| camera \| ground \|\n\| --- \| --- \| --- \| --- \| --- \| --- \| --- \| --- \|/);
+  assert.deepEqual(changes, ['Shots "s1" end: 2 -> 2.4']);
+  assert.deepEqual(missing, ['Shots "s2 (guess: change me)"']);
+});

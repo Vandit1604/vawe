@@ -46,7 +46,7 @@ test('the Spec and Acceptance tables have the fixed header rows', () => {
     '| metric | target |',
   ]) assert.ok(text.includes(`${row}\n`), row);
   for (const [metric, target] of ACCEPTANCE) assert.ok(text.includes(`| ${metric} | ${target} |`), metric);
-  assert.equal(ACCEPTANCE.length, 16);
+  assert.equal(ACCEPTANCE.length, 15);
 });
 
 test('each table carries one example row marked as a guess, derived from the request', () => {

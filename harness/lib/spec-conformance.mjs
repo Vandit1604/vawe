@@ -129,11 +129,11 @@ export async function objectChecks(objects, boxes, frame, fps = FPS) {
   return out;
 }
 
-/** The times the film measured for the SPEC rows, for spec-sync: { words: [{ text, appear, settle }], objects: [{ id, in, settle, out }] }. Pure. */
-export function measuredSpec(words, times, objects) {
+/** The times the film measured for the SPEC rows, for spec-sync: { words: [{ text, appear, settle }], objects: [{ id, in, settle, out }], worlds: [{ id, start, end, ground }] }. Pure. */
+export function measuredSpec(words, times, objects, worlds = []) {
   const byId = new Map();
   for (const c of objects.filter((x) => x.of)) byId.set(c.of.key, { ...(byId.get(c.of.key) ?? { id: c.of.key }), [c.of.field]: c.got });
-  return { words: words.map((w, i) => ({ text: w.text, appear: times[i]?.appear ?? null, settle: times[i]?.settle ?? null })), objects: [...byId.values()] };
+  return { words: words.map((w, i) => ({ text: w.text, appear: times[i]?.appear ?? null, settle: times[i]?.settle ?? null })), objects: [...byId.values()], worlds };
 }
 
 /**
