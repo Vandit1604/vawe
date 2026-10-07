@@ -28,11 +28,12 @@ function readJson(file) {
 }
 
 /** What the video alone tells: smoothness, still windows, tail tiles and the hard jumps' times, from one read of the video. */
-export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots, tailMoving = false) {
+export function videoMeasures({ feats, tiles, motion: diffs }, authoring, shots, tailMoving = false, worlds = null) {
   const stats = summarize(feats);
   const cuts = shots.slice(1).map((s) => s.start).filter((t) => typeof t === 'number');
+  const worldCuts = (worlds ?? []).flatMap((w) => [w.start, w.end]).filter((t) => t > 0);
   return {
-    smooth: smoothness(diffs, { fps: FPS, cuts, turns: stats.turns.map((t) => t.t) }),
+    smooth: smoothness(diffs, { fps: FPS, cuts, turns: stats.turns.map((t) => t.t), worldCuts }),
     stills: undeclaredStills(stats.static, authoring),
     tail: tailTiles(tiles.diffs, tiles.fps, authoring, tailMoving),
     cuts: shots.length ? cutChecks(shots, hardJumps(diffs, FPS), FPS) : null,
@@ -119,7 +120,8 @@ export async function finalAcceptance({ page, outputs }) {
   const name = nameOf(mp4);
   const history = readJson(outFile(name, 'acceptance'))?.history ?? [];
   const level = await finalLevel(mp4);
-  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, lastPageFacts(name).tailMoving), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
+  const facts = lastPageFacts(name);
+  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, facts.tailMoving, facts.worlds), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(tables.acceptance, m, { carry: history.at(-1)?.rows ?? [] });
   return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows), counts: acceptanceCounts(rows) };
 }
