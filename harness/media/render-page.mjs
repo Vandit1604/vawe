@@ -53,7 +53,7 @@ import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
 import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
 import { devEvent, shipEvent } from '../lib/run-events.mjs';
-import { REPO_ROOT } from '../lib/render-harness.mjs';
+import { REPO_ROOT, serveRepo, trackBrowser, pageArgs, insideRoot, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
@@ -140,8 +140,8 @@ export function readPageMeta(pagePath, name) {
 // Speed spike bench only: per-subframe timings (seek, settle, screenshot call, PNG write) appended here as JSONL.
 const BENCH_TIMING_FILE = process.env.VAWE_BENCH_TIMING_FILE || null;
 
-export async function openPage(pagePath, frame, { warm = false, final = true } = {}) {
-  const opened = await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
+export async function openPage(pagePath, frame, { warm = false, final = true, lane = null } = {}) {
+  const opened = lane ? await openLanePage(lane, pagePath, frame) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
@@ -155,6 +155,20 @@ export async function openPage(pagePath, frame, { warm = false, final = true } =
   opened.cdp = cdp;
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
+}
+
+async function openLane(final) {
+  const { default: puppeteer } = await import('puppeteer');
+  const server = await serveRepo({ root: REPO_ROOT });
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS }));
+  return { browser, port: server.port, close: async () => { await browser.close().catch(() => {}); server.close(); } };
+}
+
+async function openLanePage(lane, pagePath, frame) {
+  const page = await lane.browser.newPage();
+  await page.setViewport({ width: frame.width, height: frame.height, deviceScaleFactor: frame.scale });
+  const url = `http://127.0.0.1:${lane.port}/${path.relative(REPO_ROOT, path.resolve(pagePath))}`;
+  return { page, url, persistent: true, close: () => page.close() };
 }
 
 // The seek itself is core/engine/page-seek.js seekTo, installed as window.__pageSeek so the studio runs the
@@ -307,7 +321,8 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   let queue = Promise.resolve();
   const exclusive = (fn) => { const turn = queue.then(fn); queue = turn.catch(() => {}); return turn; };
   const range = ([lo, hi]) => `${(run.from + lo / run.fps).toFixed(2)}-${(run.from + hi / run.fps).toFixed(2)}s`;
-  const runSliceOnce = async ([lo, hi], worker, attempt) => {
+  const runSliceOnce = async ([lo, hi], worker, attempt, lane) => {
+    const ex = lane ? (fn) => fn() : exclusive;
     const at = { frame: lo, step: 'open page', since: Date.now(), stuck: false, opened: null };
     const mark = (step, i = at.frame) => {
       if (at.stuck) throw new StallError('abandoned after a stall');
@@ -319,18 +334,18 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
       try {
         if (fault) fault([lo, hi], attempt);
         for (let i = lo; i < hi; i++) {
-          if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await exclusive(() => at.opened.close().catch(() => {})); at.opened = null; }
+          if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await ex(() => at.opened.close().catch(() => {})); at.opened = null; }
           if (!at.opened) {
             mark('open page', i);
-            at.opened = await exclusive(() => openPage(pagePath, frame, { final }));
+            at.opened = await ex(() => openPage(pagePath, frame, { final, lane }));
             mark('load page', i);
             await at.opened.page.goto(at.opened.url, { waitUntil: 'load' });
             sinceOpen = 0;
           }
           mark('frame', i);
-          sinceOpen += await work(at.opened.page, i, local, (step) => mark(step, i), exclusive);
+          sinceOpen += await work(at.opened.page, i, local, (step) => mark(step, i), ex);
         }
-      } finally { if (at.opened) await exclusive(() => at.opened.close().catch(() => {})); }
+      } finally { if (at.opened) await ex(() => at.opened.close().catch(() => {})); }
     })();
     let timer;
     const stalled = new Promise((_, reject) => {
@@ -346,11 +361,11 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
     loop.catch(() => {});
     try { await Promise.race([loop, stalled]); } finally { clearInterval(timer); }
   };
-  const runSlice = async (slice, worker) => {
+  const runSlice = async (slice, worker, lane) => {
     if (resume && resume.done(slice)) return;
     for (let attempt = 1; ; attempt++) {
       try {
-        await runSliceOnce(slice, worker, attempt);
+        await runSliceOnce(slice, worker, attempt, lane);
         if (resume) resume.finish(slice);
         return;
       } catch (e) {
@@ -368,7 +383,11 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   // After a failure no new slice starts, but the slices already running finish, so a later run resumes them.
   let failure = null;
   const lane = async (worker) => {
-    while (next < slices.length && !failure) await runSlice(slices[next++], worker).catch((e) => { failure ??= e; });
+    // A final gives each lane its own Chrome: lanes in one browser queue every screenshot, open and close, and a 20 s film captured 3x slower (140 s against 47 s).
+    const own = final &&insideRoot(REPO_ROOT, path.resolve(pagePath)) ? await openLane(final) : null;
+    try {
+      while (next < slices.length && !failure) await runSlice(slices[next++], worker, own).catch((e) => { failure ??= e; });
+    } finally { if (own) await own.close(); }
   };
   await Promise.all(Array.from({ length: Math.min(workers, slices.length) }, (_, w) => lane(w + 1)));
   if (failure) throw failure;
