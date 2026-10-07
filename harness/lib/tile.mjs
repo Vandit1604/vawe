@@ -141,17 +141,6 @@ export const tileBox = (landscape) => (landscape ? { tw: 600, th: 338 } : { tw: 
 
 export const baseOf = (p) => path.basename(p).replace(/\.[^.]+$/, '');
 
-// renderOf(sceneJson) → the mp4 the RENDERER actually writes for it. `.expanded` is a build artifact
-// (harness/author/expand-blocks.mjs), and cmd/render/main.go:188 trims it so a scene never ships as
-// "x.expanded.mp4". Two gates kept their own copy of that name and only stripped `.json`, so
-// `vawe judge <x>.expanded.json` looked for a file the renderer never writes. Normally that is a
-// clean "render first" error; when a stale `x.expanded.mp4` from an earlier film is lying in out/, the
-// judge grades THAT and reports a clean run on a video the author never made. Observed exactly once,
-// on a rewritten film whose predecessor's render was still on disk. quality/gates/seams.mjs had
-// the right rule all along; this is that rule, in one place, for every consumer.
-export const renderOf = (scenePath) =>
-  path.join('out', `${path.basename(scenePath).replace(/\.(expanded\.)?json$/, '')}.mp4`);
-
 // pageRenderOf(pageHtml) -> the mp4 render-page.mjs writes for a page: the final render when it is
 // newer than the draft, else the draft (harness/media/render-page.mjs defaultOut names both).
 export const pageRenderOf = (pagePath) => {
@@ -163,17 +152,11 @@ export const pageRenderOf = (pagePath) => {
   return mtime(final) >= mtime(draft) ? final : draft;
 };
 
-// EXISTS IS NOT FRESH, and the comment above stops one step short of its own lesson. Resolving the
-// right NAME was half the bug: the other half is that `out/x.mp4` can be the right name for a film the
-// author has since rewritten, and every consumer of this path checks only `existsSync`. So an author
-// edits a scene, runs `vawe judge`, and is handed a verdict about a video that no longer exists. There
-// is no error, because nothing is wrong with the file: it is simply the previous answer.
+// EXISTS IS NOT FRESH: `out/x.mp4` can be the right name for a film the author has since rewritten,
+// and a consumer that checks only `existsSync` hands the author a verdict about a video that no longer
+// exists, with no error, because it is simply the previous answer.
 //
-// Named `gradeable` rather than folded into `renderOf`, because `renderOf` is also the right function
-// for asking where a render WILL go, and a resolver that refuses a path it is about to create would be
-// wrong. A grader wants the other question, and it is the one that has bitten.
-//
-// mtime and not a content hash: the render is minutes of work and the scene is a text file, so the
+// mtime and not a content hash: the render is minutes of work and the page is a text file, so the
 // question is only ever "was the film written after the frames were made". A hash would be exact,
 // slower, and would still need a place to keep the answer, which is a second fact to go stale.
 // "10228 minute(s)" is a number a reader has to convert before it means anything, and the whole point
@@ -185,14 +168,14 @@ const ago = (ms) => {
   return h < 36 ? `${h} hour(s)` : `${Math.round(h / 24)} day(s)`;
 };
 
-export function gradeable(scenePath, mp4 = renderOf(scenePath)) {
-  const fix = scenePath.endsWith('.html') ? `node harness/media/render-page.mjs ${scenePath}` : `node harness/media/render-page.mjs ${scenePath}`;
+export function gradeable(filmPath, mp4) {
+  const fix = `node harness/media/render-page.mjs ${filmPath}`;
   if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix };
-  if (!/\.(json|html)$/.test(scenePath)) return { ok: true, mp4 };
-  const src = fs.statSync(scenePath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
+  if (!filmPath.endsWith('.html')) return { ok: true, mp4 };
+  const src = fs.statSync(filmPath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
   if (src > out) {
     return { ok: false, mp4,
-      why: `${mp4} is ${ago(src - out)} older than ${scenePath}. It is a render of a film you have since edited`,
+      why: `${mp4} is ${ago(src - out)} older than ${filmPath}. It is a render of a film you have since edited`,
       fix };
   }
   return { ok: true, mp4 };
