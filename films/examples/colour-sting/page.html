@@ -5,8 +5,8 @@
 <meta name="duration" content="5">
 <meta name="aspect" content="16:9">
 <meta name="message" content="onsen turns up the colour">
-<meta name="spectacle" content="2.0">
-<meta name="signature" content="band=gravity; ease=settle; stagger=0; seam=hard cut; palette=saturated; thread=object (the ring)">
+<meta name="spectacle" content="2.75">
+<meta name="signature" content="band=gravity; ease=land; stagger=0; seam=hard cut; palette=saturated; thread=object (the ring)">
 <title>Onsen</title>
 <script type="application/json" id="authoring">{"allow": ["text-low-contrast", "attractor", "display-tracking"], "_why": {"text-low-contrast": "owner-approved display type: 'nsen', 'the' and 'colour' cross the dye flood mid-move at 2.7 to 3.7:1 and land readable; the display-type threshold is an open owner decision, so 4.5:1 stays and this film is waived", "attractor": "direction A's ring is the idea: the dye runs round it from cold to hot, it is lit and glossy, and the owner approved it", "display-tracking": "owner-approved display type: the Unbounded words are set untracked (letter-spacing 0) because the face is already wide; the display tracking range is an open owner decision for this film"}}</script>
 <script type="importmap">{"imports":{"three":"../../../assets/vendor/three.module.min.js"}}</script>
@@ -67,12 +67,12 @@
 </style>
 </head>
 <body>
-<div class="world w1"></div>
-<div class="world w2"></div>
-<div class="world w3"></div>
-<div class="world w4"></div>
+<div class="world w1" data-world="cold"></div>
+<div class="world w2" data-world="warm"></div>
+<div class="world w3" data-world="hot"></div>
+<div class="world w4" data-world="amber"></div>
 <div class="heat"></div>
-<div class="world w5"></div>
+<div class="world w5" data-world="red"></div>
 <div class="glow"></div>
 
 <div class="camera">
@@ -85,17 +85,20 @@
 <canvas id="gl"></canvas>
 <div class="grain"></div>
 
-<audio data-synth="droplet" data-at="0.02" data-gain="-7"></audio>
-<audio data-synth="droplet" data-at="0.7" data-gain="-7"></audio>
-<audio data-synth="swell" data-at="1.1" data-gain="-5.5"></audio>
-<audio data-synth="bloom" data-at="2.75" data-gain="-6.5"></audio>
-<audio data-synth="droplet" data-at="4.35" data-gain="-7"></audio>
+<audio data-synth="bed" data-at="0" data-fade-out="0.8" loop></audio>
+<audio data-synth="tap" data-on="world:cold" data-at="0.02"></audio>
+<audio data-synth="tick" data-on="world:warm" data-at="0"></audio>
+<audio data-synth="swoosh-long" data-on="world:hot" data-at="0.3"></audio>
+<audio data-synth="sub-thump" data-on="world:amber" data-at="0"></audio>
+<audio data-synth="shimmer" data-on="world:amber" data-at="1.0"></audio>
+<audio data-synth="tap" data-on="world:red" data-at="0"></audio>
 
 <script type="module">
 import * as THREE from 'three';
 import '../../../core/engine/page-api.js';
 window.THREE = THREE;   // vawe.three.studio reads the global
-import { kf, curveToLinear, CURVES, rng } from '../../../core/motion/springs.js';
+import { kf, CURVES, rng } from '../../../core/motion/springs.js';
+import { EASE, easeFn } from '../../../core/motion/presets.js';
 
 const root = document.documentElement;
 const beat = (n) => parseFloat(getComputedStyle(root).getPropertyValue(`--beat-${n}`));
@@ -103,14 +106,11 @@ const B1 = beat(1), B2 = beat(2), B3 = beat(3), B4 = beat(4), B5 = beat(5);
 const TAIL = B4;   // the last turn of the world starts on the cut into amber
 const LIT = 3.9;   // the light and the accent reach "colour"
 const PUSH_AT = B3 + 0.45;   // the push starts as the ring lands, so the match cut falls on a moving lockup
-const settle = curveToLinear(CURVES.expoOut);
-root.style.setProperty('--settle', settle);
-
 const expoOut = CURVES.expoOut;
 const easeIn = (u) => u * u;
 const cubicOut = (u) => 1 - (1 - u) ** 3;
 const inOut = (u) => (u < 0.5 ? 4 * u ** 3 : 1 - (2 - 2 * u) ** 3 / 2);
-const landing = (u) => 0.5 * inOut(u) + 0.5 * expoOut(u);   // leaves the lens without a jump, settles long
+const landing = (u) => 0.5 * inOut(u) + 0.5 * easeFn('pop')(u);   // the one hero arrival: the ring passes its slot by about 7 per cent and settles in; the inOut half leaves the lens without a jump
 const pullBack = (u) => 0.3 * u + 0.7 * expoOut(u);
 const pushCurve = (u) => 0.85 * u + 0.15 * expoOut(u);   // mostly constant speed, so the last second still moves
 const PUSH = 0.2, PUNCH = 0.12;
@@ -118,11 +118,17 @@ const PUSH = 0.2, PUNCH = 0.12;
 const zoomAt = (t) => (1 + PUSH * pushCurve(Math.min(1, Math.max(0, (t - PUSH_AT) / (5 - PUSH_AT)))))
   * (1 + PUNCH * pushCurve(Math.min(1, Math.max(0, (t - B5) / (5 - B5)))));
 
-// Hard cuts between worlds (prompts/moves/match-cut.md): each ground appears in one millisecond on its beat.
-const cutIn = (sel, at) => document.querySelector(sel).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: at * 1000, fill: 'both' });
-cutIn('.w2', B2);
-cutIn('.w4', B4);
-cutIn('.w5', B5);
+// Hard cuts between worlds (prompts/moves/match-cut.md): a ground shows from its beat until the next one covers it, so each data-world has its own span.
+const show = (sel, from, to) => {
+  const el = document.querySelector(sel);
+  el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 1, delay: from * 1000, fill: 'both' });
+  el.animate([{ opacity: 0 }], { duration: 1, delay: to * 1000, fill: 'forwards' });
+};
+show('.w1', 0, B2);
+show('.w2', B2, B3);
+show('.w3', B2 + 0.3, B4);   // the hole opens on the ring at B2 + 0.3
+show('.w4', B4, B5);
+show('.w5', B5, 5);
 // the ink flips with each ground: --ink on vermilion, --deep on amber, --ink again on red (a later animation wins once it starts)
 document.querySelector('.lockup').animate([{ color: '#fff3e3' }, { color: '#2a0710' }], { duration: 1, delay: B4 * 1000, fill: 'both' });
 document.querySelector('.lockup').animate([{ color: '#fff3e3' }], { duration: 1, delay: B5 * 1000, fill: 'forwards' });
@@ -342,13 +348,13 @@ const step = 140;   // ms; faster than reading, so the sweep leads the eye
 words.forEach((w, i) => {
   const last = i === words.length - 1;
   const from = ink(last ? '--accent' : '--deep');   // "colour" wears the accent from its first frame; the sweep leads the eye to it
-  w.animate([{ color: from, easing: settle }, { color: ink('--accent'), offset: 0.12 },
-    { color: ink('--accent'), offset: 0.32, easing: settle }, { color: ink(last ? '--accent' : '--deep') }],
+  w.animate([{ color: from, easing: EASE.land }, { color: ink('--accent'), offset: 0.12 },
+    { color: ink('--accent'), offset: 0.32, easing: EASE.land }, { color: ink(last ? '--accent' : '--deep') }],
     { duration: 700, delay: (LIT - 0.13) * 1000 - (words.length - 1 - i) * step, easing: 'linear', fill: 'both' });   // one curve per segment, so the hold is a hold
 });
 
 line.animate([{ maskPosition: '100% 0', translate: '-0.8em 0' }, { maskPosition: '0% 0', translate: '0 0' }],
-  { duration: 650, delay: (B4 + 0.05) * 1000, easing: settle, fill: 'both' });
+  { duration: 650, delay: (B4 + 0.05) * 1000, easing: EASE.nudge, fill: 'both' });
 
 // on the red world the line turns cream and "colour" takes the ring's hot end, amber
 words.forEach((w, i) => w.animate([{ color: i === words.length - 1 ? '#ffc24a' : ink('--ink') }], { duration: 1, delay: B5 * 1000, fill: 'forwards' }));
