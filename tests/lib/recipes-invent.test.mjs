@@ -9,7 +9,7 @@ const SLOT = "invent: the film's own moment";
 
 test('every recipe has exactly one invention slot, in a beat row with a line on what to invent', () => {
   const sections = recipes.split(/^## (?=\d+\. )/m).slice(1);
-  assert.equal(sections.length, 14);
+  assert.equal(sections.length, 15);
   for (const section of sections) {
     const title = section.split('\n')[0];
     const rows = section.split('\n').filter((l) => l.startsWith('|') && l.split('|')[2]?.trim() === SLOT);

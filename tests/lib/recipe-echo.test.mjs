@@ -11,7 +11,7 @@ const shots = (rows) => `### Shots\n| id | start s | end s | the viewer notices 
 
 test('recipeMoves reads every chain in table order', () => {
   const chains = recipeMoves(recipes);
-  assert.equal(Object.keys(chains).length, 14);
+  assert.equal(Object.keys(chains).length, 15);
   assert.deepEqual(chains[1], ['text-as-mask', 'color-block-wipe', 'logo-sting', 'blur-word-cascade']);
 });
 

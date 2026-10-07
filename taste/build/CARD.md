@@ -152,7 +152,7 @@ A hold keeps life. A readable hold is good, and it carries a slow drift or push;
 Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. The CSS keywords ease, ease-out and ease-in-out are not a default for everything.
 
 - Limit: a move longer than 0.3 s is not on linear or on a bare CSS keyword with no curve of its own
-- Range: EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop; sampled springs with 8 or more stops
+- Range: EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops
 - Judge: Is any move on a bare keyword or a hand-fitted bezier? Does frame 1 jump?
 
 ### no-bounce
