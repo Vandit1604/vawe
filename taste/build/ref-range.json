@@ -35,13 +35,13 @@
   },
   "ground_changed_pct": {
    "p10": 0,
-   "median": 50,
+   "median": 56.3,
    "p90": 100,
    "n": 17
   },
   "ground_turn_pct": {
    "p10": 0,
-   "median": 25,
+   "median": 50,
    "p90": 100,
    "n": 17
   },
