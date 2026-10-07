@@ -14,8 +14,8 @@ import { BANDS, bandOf, leaveSpecs, staggerTimes } from '../../core/motion/prese
 
 test('the draft check, the peak limit, the sheet and the ship status hold the numbers they held before', () => {
   assert.deepEqual({ ...RULES }, { capFrac: 0.06, chromeCapFrac: 0.025, capOfFont: 0.7, holdSec: 0.5, maxProblems: 4, lufsLow: -24, lufsHigh: -16 });
-  assert.equal(PEAK_DBFS, -10);
-  assert.equal(peakLine(-9.5), 'sound: true peak -9.5 dBFS (limit -10 dBFS); lower data-gain on the loudest cue by 1 dB');
+  assert.equal(PEAK_DBFS, -3);
+  assert.equal(peakLine(-2.5), 'sound: true peak -2.5 dBFS (limit -3 dBFS); lower data-gain on the loudest cue by 1 dB');
   assert.deepEqual([SHEET_FPS, RUN_TILES, TAIL_TILES, NEAR_IDENTICAL], [5, 8, 4, 4.5]);
   assert.equal(STILL_SEC, 0.5);
   assert.deepEqual({ ...LIMITS }, { staticSec: 0.5, worldSec: 2, blankSec: 0.3, blankEdgeSec: 0.5, maxProblems: 3 });

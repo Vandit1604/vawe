@@ -140,7 +140,7 @@
    },
    {
     "rule": "sound-level",
-    "text": "keep the true peak at or below -10 dBFS and the mix near -20 LUFS, not a mix pushed loud"
+    "text": "keep the true peak at or below -3 dBFS and the mix near -20 LUFS, not a mix pushed loud"
    }
   ]
  }

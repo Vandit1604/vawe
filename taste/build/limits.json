@@ -306,7 +306,7 @@
   "crossfade_s": 0.35
  },
  "sound-level": {
-  "peak_dbfs": -10,
+  "peak_dbfs": -3,
   "lufs_target": -20,
   "lufs_low": -24,
   "lufs_high": -16,

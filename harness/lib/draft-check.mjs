@@ -115,6 +115,12 @@ export function frameUnitLines(samples, { frameH }) {
   return [`text "${worst.text.slice(0, 30)}" is ${worst.fontPx.toFixed(1)} px in a frame ${frameH} px tall (${new Set(off.map((l) => l.text)).size} such texts): --vh is the frame height in px; use calc(var(--vh) * 0.08) for 8%`];
 }
 
+/** One line with the measured level and its band, for every draft that has a measure; null without one. */
+export function soundSummary(level, rules = RULES) {
+  if (!level) return null;
+  return `sound: ${level.I.toFixed(1)} LUFS integrated, ${level.TP.toFixed(1)} dBTP true peak (band ${rules.lufsLow} to ${rules.lufsHigh} LUFS, peak at most ${LEVEL.peak_dbfs} dBTP)`;
+}
+
 /** The sound line when the mix is outside the band, else null. */
 export function soundLine(lufs, rules = RULES) {
   if (lufs === null || (lufs >= rules.lufsLow && lufs <= rules.lufsHigh)) return null;

@@ -10,10 +10,10 @@ import { dropGuesses } from '../../harness/lib/brief-tables.mjs';
 import { buildRows, redLine, summaryLine } from '../../harness/lib/acceptance.mjs';
 
 test('fast runs the fast tier, draft adds settled, full adds ship', () => {
-  assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'fast')), ['motion', 'text', 'worlds', 'tail', 'video']);
-  assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'draft')), ['motion', 'text', 'worlds', 'tail', 'video', 'contrast', 'layout', 'spec', 'speed']);
+  assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'fast')), ['motion', 'text', 'worlds', 'tail', 'video', 'sound']);
+  assert.deepEqual(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'draft')), ['motion', 'text', 'worlds', 'tail', 'video', 'sound', 'contrast', 'layout', 'spec', 'speed']);
   assert.equal(Object.keys(CHECK_TIER).filter((c) => runsIn(c, 'full')).length, Object.keys(CHECK_TIER).length);
-  assert.match(unrunReason('loudness', 'draft'), /ship tier/);
+  assert.equal(unrunReason('loudness', 'fast'), null);
   assert.equal(unrunReason('loudness', 'full'), null);
   assert.equal(unrunReason('text collisions', 'fast'), null);
 });

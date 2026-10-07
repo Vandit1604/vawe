@@ -260,9 +260,9 @@ A stock device is seasoning, never the idea. Use it at most once per film.
 
 Sound is subtle: low peak, quiet mix. What you write is what you hear: no normalising, default gains.
 
-- Limit: true peak at or below -10 dBFS
-- Range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: soft voices -6 dB, whoosh, riser and swell -4, impact, drop and braam -2; four soft cues plus one swell land near -20 LUFS
-- Judge: Read the measured peak and loudness: are they at or below -10 dBFS and near -20 LUFS?
+- Limit: true peak at or below -3 dBFS
+- Range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: palette tap -3 dB, tick, air, swoosh-long and sub-thump -5, bed -19; the old voices soft -6 dB, whoosh, riser and swell -4, impact, drop and braam -2; a bed plus one palette cue per beat lands near -20 LUFS
+- Judge: Read the measured peak and loudness: are they at or below -3 dBFS and near -20 LUFS?
 
 ### sound-swell
 
