@@ -14,7 +14,6 @@ import { CUES, renderCue, musicBed, encodeWav, wavDuration, normalize, SR } from
 // The duration class per role name, owned by the gate that grades it. A role is an ALIAS onto a
 // voicing, and an alias must inherit the envelope its own name implies, not the one its target has.
 import { capFor } from '../../harness/lib/sfx-classes.mjs';
-import { CUT_CUE, SEAM_CUE } from '../../core/audio/cues.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SFX = path.join(root, 'assets/sfx');
@@ -49,10 +48,6 @@ export const ROLES = {
   release: 'pluck', toggle: 'pluck', page: 'whoosh', loading: 'swell', error: 'impact',
   whisper: 'swell', thud: 'impact', travel: 'whoosh', sweep: 'whoosh',
 };
-
-// Cut/seam cue tables now live in core/audio-cues.js (pure data, shared by scene.html + lib-test) so
-// they cannot drift. Re-exported here for anything already importing them from the bake catalogue.
-export { CUT_CUE, SEAM_CUE };
 
 if (process.argv.includes('--list')) {
   console.log('cues:', Object.keys(CUES).join(', '));
