@@ -34,6 +34,8 @@ export async function main() {
     + '| --sheet-check <ref.json> <film.json> '
     + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...>');
   if (argv.includes('--moment') || argv.includes('--cuts')) return dispatchStrip(video, flag, argv);
+  if (argv.includes('--onion')) return (await import('./onion.mjs')).dispatchOnion(video, flag);
+  if (argv.includes('--velocity')) return (await import('./velocity.mjs')).dispatchVelocity(video, flag);
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   for (const bin of ['ffprobe', 'ffmpeg']) {
     if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
