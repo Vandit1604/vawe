@@ -1,6 +1,5 @@
 // core/engine/page-api.js: wires `window.vawe` for a hand-authored BARE HTML page, the render target
-// harness/media/render-page.mjs and preview-server.mjs serve (never a scene-JSON film: scene.js drives
-// its own layers directly and never imports this file). Importing this ONE module gives such a page:
+// harness/media/render-page.mjs and preview-server.mjs serve. Importing this ONE module gives a page:
 //
 //   vawe.onFrame((t) => { ... })   registers a per-frame hook, run by core/engine/page-seek.js.
 //   vawe.value(row, t)             samples a timing-sheet row ({at,dur,from,to,ease}) as a plain
