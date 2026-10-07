@@ -858,7 +858,7 @@ export async function videoChecks(mp4, pagePath, checks, probe = {}) {
   const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
   const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail) };
   try {
-    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving) }; }, { authoring, shots, page });
+    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds) }; }, { authoring, shots, page });
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 

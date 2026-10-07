@@ -47,3 +47,11 @@ test('the first frames of a fast move from rest are not a jerky step; a spike in
   assert.equal(smoothness([0.2, 1.5, 6, 6, 6]).jerky.length, 0);
   assert.equal(smoothness([3, 3.2, 3.1, 9, 9]).jerky.length, 1);
 });
+
+test('a hard cut between worlds is not a speed change inside a move; a spike elsewhere still is', () => {
+  const diffs = [2, 2, 2, 2, 2, 8, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 1.2, 5, 5];
+  assert.deepEqual(smoothness(diffs).jerky.map((j) => +(j.t * 30).toFixed(0)), [6, 7, 14]);
+  assert.deepEqual(smoothness(diffs, { worldCuts: [6 / 30] }).jerky.map((j) => +(j.t * 30).toFixed(0)), [14]);
+  assert.deepEqual(smoothness(diffs, { worldCuts: [5 / 30] }).jerky.map((j) => +(j.t * 30).toFixed(0)), [14]);
+  assert.equal(smoothness(diffs, { worldCuts: [10 / 30] }).jerky.length, 3);
+});
