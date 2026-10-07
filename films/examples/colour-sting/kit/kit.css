@@ -1,0 +1,39 @@
+/* The kit of colour-sting: tokens, ground layers and parts, each one element. page.html uses these values;
+   kit.html shows them on one sheet. A new film copies this file, renames the palette roles and keeps the
+   part names (ground, light, grain, lockup, word, line) so DESIGN.md and the page read the same. */
+
+:root {
+  /* palette roles (DESIGN.md) */
+  --ink: #fff3e3;       /* text on the dark worlds */
+  --ink-on-light: #2a0710;   /* text on the amber world */
+  --room: #1a0907;      /* the page ground behind every world */
+  --accent: #2536ff;    /* the cold end of the ring: one word only */
+
+  /* the light the grounds are lit from: the page moves these every frame */
+  --lx: 50%; --ly: 50%; --lr: 486px;
+  --hx: 50%; --hy: 50%;
+  --sx: 50%; --sy: 50%; --heat3: 0.5;
+}
+
+/* ground layers: one radial gradient per world, lit from the ring, farthest-corner so none ends inside the frame */
+.ground { position: absolute; inset: 0; --at: circle farthest-corner at var(--lx) var(--ly); }
+.ground-cold  { background: radial-gradient(var(--at), #4254ff 0, #1826cc calc(var(--lr) * 0.5), #0b1170 100%); }
+.ground-warm  { background: radial-gradient(var(--at), #ff5aa8 0, #e0197a calc(var(--lr) * 0.6), #a30d57 100%); }
+.ground-hot   { background: radial-gradient(circle farthest-corner at var(--sx) var(--sy), #ffb347 0, #ff4a1f calc(var(--vh) * var(--heat3)), #d4320f calc(var(--vh) * var(--heat3) * 2.6), #b8260c 100%); }
+.ground-amber { background: radial-gradient(circle farthest-corner at var(--hx) var(--hy), #ffd35c 0, #ffb52e calc(var(--lr) * 0.7), #f39212 calc(var(--lr) * 1.8), #d8640a 100%); }
+.ground-red   { background: radial-gradient(circle farthest-corner at var(--lx) var(--ly), #ff8a3a 0, #f0400f calc(var(--lr) * 1.2), #a8160a 100%); }
+
+/* light devices: the heat front closes in from the edges, the glow sits on the ring */
+.heat { position: absolute; inset: 0; background: radial-gradient(circle calc(var(--vh) * var(--heat-r, 3)) at var(--hx) var(--hy), transparent 50%, #ff4a1f 100%); }
+.glow { position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 50%; translate: -50% -50%; mix-blend-mode: screen; pointer-events: none;
+        background: radial-gradient(circle, var(--glow-color, #fff) 0%, transparent 68%); }
+
+/* grain: 12 percent overlay so no gradient bands; the page paints its tile from a canvas, the sheet from an SVG */
+.grain { position: absolute; inset: 0; opacity: 0.12; background-size: 256px 256px; mix-blend-mode: overlay; pointer-events: none; }
+
+/* text: one face, the name big, the line light with one heavy word */
+.lockup { position: absolute; left: calc(var(--vw) * 0.1); top: calc(var(--vh) * 0.26); color: var(--ink); font-family: "Unbounded", sans-serif; }
+.word { width: max-content; margin: 0; font-weight: 400; font-size: calc(var(--vh) * 0.29); line-height: 1.1; letter-spacing: 0; white-space: nowrap; }
+.line { width: max-content; margin: calc(var(--vh) * 0.03) 0 0; font-weight: 400; font-size: calc(var(--vh) * 0.115); line-height: 1.1; letter-spacing: -0.01em; }
+.w { display: inline-block; font-weight: 300; }
+.line em.w { font-style: normal; font-weight: 600; }

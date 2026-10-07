@@ -20,7 +20,7 @@ your own direction.
 - Aspect: `<html data-aspect="16:9">`, `--vw`/`--vh` (px lengths) on `:root` and `window.vawe` are set
   before your scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Audio is `<audio>` tags, mixed offline as written (about -20 LUFS at default gains): `src` + `data-at`
-  (s), `data-gain` (dB), `data-fade-out`; `loop` is the music bed; `data-synth="pluck"` picks a voice
+  (s), `data-gain` (absolute dB, replaces the voice default; leave it off), `data-fade-out`; `loop` is the music bed; `data-synth="pluck"` picks a voice
   (`bin/vawe sounds`, `bin/vawe fonts` list them); `data-role="vo"` ducks the bed.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
@@ -38,11 +38,11 @@ next command for the film you edited last.
 |---|---|---|
 | 1 | brief (facts only) | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing facts first (write them to a file, answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
 | 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives. Then how they MOVE: `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves (ref id, cut second) |
-| 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, skills used and rules rejected) and `films/<name>/kit/` (ground layers; each moving part its own element); `vawe-page` names the skills |
+| 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, a `Skills:` line with the skills used and rules rejected) and `films/<name>/kit/` (ground layers; each moving part its own element); format and example in `vawe-page`; product UI inside the film is built as a real interface with one UI skill, then placed under the density budget |
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
 | 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows and a bed |
 | 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
-| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut, fix what reads flat |
+| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
 | 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
@@ -50,6 +50,8 @@ next command for the film you edited last.
 Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe refs frames` (reference stills),
 `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),
 `vawe compare` (side by side). If a verb is missing what you need, say so in your report; do not hand-roll it.
+
+`bin/vawe` names the next stage after each step; `ship` warns, never refuses, while the Board or Motion pass is unfilled. A page over about 25k tokens cannot be Read in one call: Read it with offset and limit.
 
 Every step logs to `out/<film>.runs.jsonl`: set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell, then `bin/vawe runs <film>` or `--all` reads the log.
 

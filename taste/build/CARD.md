@@ -28,7 +28,7 @@ The hero comes from the direction, not from the list of things first drafts fall
 Each beat shows a real artifact working: the real UI for a real product, the brand's own mark and world for an invented one. A word in a box is not a beat.
 
 - Range: a capture, a drawn real artifact or a live demo in every beat that makes a claim
-- Judge: Name the artifact that earns each beat. Which beat holds only a word in a box, a fake UI or a click with no result?
+- Judge: Name the artifact that earns each beat. Which beat holds only a word in a box, chrome with no function or a click with no result?
 
 ### thread
 

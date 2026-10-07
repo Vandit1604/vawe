@@ -6,7 +6,7 @@ Every command prints the lines of its step again. All rules: `taste/README.md`. 
 ## Every film
 
 - Choose the hero from the direction, never from the attractor list below. (attractors)
-- Show real things working, not slogans in boxes; no fake product UI. (show-real-thing)
+- Show real things working, not slogans in boxes; an invented product gets a UI designed as a real interface, never functionless chrome. (show-real-thing)
 - One thread carries through (object, type line, colour or rhythm), not separate reveals one after another. (thread)
 - One accent hue, on one thing; never a full-frame flood. (accent-share)
 - A ground is never one flat fill: soft blobs or light behind the content, drifting. (living-ground)

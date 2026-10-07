@@ -53,7 +53,7 @@
  },
  "show-real-thing": {
   "file": "taste/rules/show-real-thing.md",
-  "instead": "render a mini-scene so the viewer watches the thing work (a value changes and the output updates; the real word cycles through colours). If a cursor clicks, the next frames show what the click did. For a product, capture the real UI; never a fake UI or a placeholder label."
+  "instead": "render a mini-scene so the viewer watches the thing work (a value changes and the output updates; the real word cycles through colours). If a cursor clicks, the next frames show what the click did. For a real product, capture the real UI. For an invented product the brief asks you to invent the UI: design it as a real interface (one UI skill, real-looking data, controls that do something), then place it in the frame. Only fake chrome with no function, or a placeholder label, is the pitfall."
  },
  "thread": {
   "file": "taste/rules/thread.md",
@@ -161,7 +161,7 @@
  },
  "screen-designed": {
   "file": "taste/rules/screen-designed.md",
-  "instead": "build a fragment for the shot: large type, few elements, real imagery. Set each cell to the source's own aspect ratio so object-fit: cover neither crops nor letterboxes. A dark capture goes on a dark surface."
+  "instead": "build the screen as a real interface first (one UI skill, real-looking data), then place it in the frame under the density budget: a fragment for the shot with large type, few elements, real imagery. Set each cell to the source's own aspect ratio so object-fit: cover neither crops nor letterboxes. A dark capture goes on a dark surface."
  },
  "shared-edges": {
   "file": "taste/rules/shared-edges.md",
