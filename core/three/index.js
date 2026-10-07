@@ -1,10 +1,9 @@
 // core/three/index.js: the three.js helpers a bare HTML page reaches as `vawe.three.studio/extrude/
-// material` and that core/surfaces/three-fx.js builds its declarative `three` scenes from: one
-// lighting rig, one SVG-path extruder, one material-preset table, two consumers.
+// material`: one lighting rig, one SVG-path extruder, one material-preset table.
 // three.js is the GLOBAL window.THREE (vendored), never a static import, so this module loads in Node.
 export const T = () => {
   if (typeof window === 'undefined' || !window.THREE) {
-    throw new Error('three.js is not loaded: boot only imports it when a scene declares a `three` layer, so this means the layer was built outside the normal boot path');
+    throw new Error('three.js is not loaded: the page must load the vendored three.js before it calls vawe.three');
   }
   return window.THREE;
 };

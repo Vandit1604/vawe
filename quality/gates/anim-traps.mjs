@@ -158,7 +158,7 @@ function pageTraps(src, add) {
   if (has(/\bDate\.now\s*\(/))
     add('page reads Date.now()', 'script', 'use the t argument vawe.onFrame((t) => {...}) already hands you');
   if (has(/\bMath\.random\s*\(/))
-    add('page calls unseeded Math.random()', 'script', 'seed a small PRNG (the same rng(seed) shape core/surfaces/three-fx.js uses) so the same seed rebuilds the identical scene across render orders and re-renders');
+    add('page calls unseeded Math.random()', 'script', 'seed a small PRNG (the rng(seed) shape in core/motion/springs.js) so the same seed rebuilds the identical scene across render orders and re-renders');
   if (has(/\bset(?:Timeout|Interval)\s*\(/))
     add('page uses setTimeout/setInterval', 'script', 'the render clock fires a timer only when a seek passes its due time, so a timer that starts motion or changes state lands on the frame after its delay, never mid-frame: put the change in a keyframe table or an element.animate() delay, or compute it from t in window.seek(t)');
   if (has(/(^|[\s;{"'])transition(-property)?\s*:\s*(?!none\b)[^;}]*/m))
