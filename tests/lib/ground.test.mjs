@@ -34,6 +34,12 @@ function film(frames, colourAt) {
   return { w, h, n: frames, rgb, gray };
 }
 
+function pixelFilm(frames, colourAt) {
+  const w = 32, h = 18, rgb = new Uint8Array(frames * w * h * 3), gray = new Uint8Array(frames * w * h);
+  for (let f = 0; f < frames; f++) for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) rgb.set(colourAt(f, x, y), ((f * h + y) * w + x) * 3);
+  return { w, h, n: frames, rgb, gray };
+}
+
 test('a cut from a black ground to a white ground is a change, a cut to the same ground is not', () => {
   const V = film(30, (f) => (f < 10 ? [0, 0, 0] : f < 20 ? [255, 255, 255] : [255, 255, 255]));
   const g = measureGround(V, [{ f0: 0, f1: 10 }, { f0: 10, f1: 20 }, { f0: 20, f1: 30 }], 10);
@@ -41,6 +47,16 @@ test('a cut from a black ground to a white ground is a change, a cut to the same
   assert.ok(g.cuts[0].dE > 90);
   assert.equal(g.cuts[1].dE, 0);
   assert.equal(g.summary.changedShare, 0.5);
+});
+
+test('a cut between two pastel blob grounds on one white is a change; a small object at the edge is not', () => {
+  const white = [255, 255, 255], lilac = [200, 180, 235], mint = [190, 235, 210];
+  const V = pixelFilm(30, (f, x) => (f < 10 ? (x < 10 ? lilac : white) : (x > 22 ? mint : white)));
+  const g = measureGround(V, [{ f0: 0, f1: 10 }, { f0: 10, f1: 30 }], 10);
+  assert.ok(g.cuts[0].dE >= 6, `dE ${g.cuts[0].dE}`);
+  assert.equal(g.summary.changedShare, 1);
+  const edge = pixelFilm(20, (f, x, y) => (f >= 10 && x < 3 && y < 4 ? [20, 20, 20] : white));
+  assert.equal(measureGround(edge, [{ f0: 0, f1: 10 }, { f0: 10, f1: 20 }], 10).cuts[0].dE, 0);
 });
 
 test('a ground that brightens inside a shot is a drift', () => {

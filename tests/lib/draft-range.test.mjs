@@ -37,6 +37,12 @@ test('the world spans become frame spans in start order, clamped to the video, n
   assert.deepEqual(worldShots(null, 10, 50), []);
 });
 
+test('a world that opens before the last one closes (a cut a frame early) takes the shot from it, so the cut compares the two worlds', () => {
+  const worlds = [{ id: 'a', start: 0, end: 2.2 }, { id: 'b', start: 2.17, end: 4.8 }, { id: 'c', start: 4.77, end: 6 }];
+  assert.deepEqual(worldShots(worlds, 30, 180), [{ f0: 0, f1: 65 }, { f0: 65, f1: 143 }, { f0: 143, f1: 180 }]);
+  assert.deepEqual(worldShots([{ id: 'a', start: 0, end: 3 }, { id: 'b', start: 0, end: 6 }], 10, 60), [{ f0: 0, f1: 30 }, { f0: 0, f1: 60 }]);
+});
+
 test('detected transitions split the film into shots that leave out the transition frames', () => {
   assert.deepEqual(shotSpans([{ startFrame: 10, endFrame: 12 }, { startFrame: 20, endFrame: 20 }], 30), [{ f0: 0, f1: 10 }, { f0: 12, f1: 20 }, { f0: 20, f1: 30 }]);
   assert.deepEqual(shotSpans([], 30), [{ f0: 0, f1: 30 }]);

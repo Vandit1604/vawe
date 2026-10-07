@@ -45,10 +45,16 @@ export function rangeLines(values, range = RANGE) {
   ];
 }
 
-/** Frame spans of the measured worlds, in start order; the shots the ref-measure code reads. Pure. */
-export const worldShots = (worlds, fps, n) => (worlds ?? []).filter((w) => w.start != null)
-  .sort((a, b) => a.start - b.start)
-  .map((w) => ({ f0: Math.min(n - 1, Math.round(w.start * fps)), f1: Math.min(n, Math.round(w.end * fps)) }));
+/**
+ * Frame spans of the measured worlds, in start order; the shots the ref-measure code reads. A world that opens while the last
+ * one still shows (the starter cuts a frame early) takes the shot from it: the last frame of a shot must be its own world. Pure.
+ */
+export function worldShots(worlds, fps, n) {
+  const shots = (worlds ?? []).filter((w) => w.start != null)
+    .sort((a, b) => a.start - b.start)
+    .map((w) => ({ f0: Math.min(n - 1, Math.round(w.start * fps)), f1: Math.min(n, Math.round(w.end * fps)) }));
+  return shots.map((s, i) => (shots[i + 1] && shots[i + 1].f0 > s.f0 ? { ...s, f1: Math.min(s.f1, shots[i + 1].f0) } : s));
+}
 
 /** { <metric key>: number or null } of a draft video. Cuts are the world spans the page declares, or the detected transitions when the page shows fewer than two worlds. Null when there is no cut. */
 export function measureDraftShape(mp4, worlds, fps) {
