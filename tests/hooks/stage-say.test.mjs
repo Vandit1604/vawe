@@ -43,7 +43,13 @@ test('an empty Taken from table says so before any design file; four named frame
   const rows = [1, 2, 3, 4].map((n) => `| ~/.vawe/refs/frames/a/s${n}.png | ground |`).join('\n');
   fs.writeFileSync(brief, `## Taken from\n\n| frame | take |\n|---|---|\n${rows}\n\n## Look\n`);
   assert.match(nextStep(page, root).next, /DESIGN\.md/);
-  fs.writeFileSync(path.join(root, 'films', 'f', 'DESIGN.md'), '# d');
+  const design = path.join(root, 'films', 'f', 'DESIGN.md');
+  fs.writeFileSync(design, '# d');
+  assert.match(nextStep(page, root).next, /add a "Skills:" line to films\/f\/DESIGN\.md/);
+  fs.writeFileSync(design, '# d\n\nSkills: pbakaus/colorize; rejected: nav patterns\n');
+  assert.match(nextStep(page, root).next, /^build one static state per world in films\/f\/page\.html from the kit/);
+  const later = new Date(Date.now() + 5000);
+  fs.utimesSync(page, later, later);
   assert.equal(nextStep(page, root).next, 'bin/vawe frames films/f/page.html');
 });
 
@@ -106,8 +112,28 @@ test('a fresh draft names strip --cuts before critique; once the strips exist it
   const later = new Date(Date.now() - 1000);
   fs.utimesSync(draft, later, later);
   const s = nextStep(page, root);
-  assert.equal(s.next, 'bin/vawe strip films/f/page.html --cuts');
+  assert.match(s.next, /^bin\/vawe strip films\/f\/page\.html --cuts and Read every cut/);
   assert.match(s.why, /overshoot-share, live-hold and seam-variety/);
   fs.mkdirSync(path.join(root, 'out', 'strip', 'f'), { recursive: true });
   assert.equal(nextStep(page, root).next, 'bin/vawe critique films/f/page.html');
+});
+
+test('a stripped draft with an empty Motion pass names the rows to write; a filled one names critique', () => {
+  const empty = '## Motion pass\n\n| cut | what read flat | what I fixed |\n|---|---|---|\n| [s1 to s2] | [x] | [y] |\n';
+  const { root, page } = film('<section data-world="s1"></section>', empty);
+  fs.writeFileSync(path.join(root, 'out', 'f-draft.mp4'), '');
+  const later = new Date(Date.now() - 1000);
+  fs.utimesSync(path.join(root, 'out', 'f-draft.mp4'), later, later);
+  fs.mkdirSync(path.join(root, 'out', 'strip', 'f'), { recursive: true });
+  assert.match(nextStep(page, root).next, /write one row per cut in "Motion pass"/);
+  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), empty.replace('[s1 to s2] | [x] | [y]', 's1 to s2 | flat | pushed'));
+  assert.equal(nextStep(page, root).next, 'bin/vawe critique films/f/page.html');
+});
+
+test('the motion step names onion and velocity for the spectacle', () => {
+  const { root, page } = film('<section data-world="s1"></section>');
+  fs.writeFileSync(path.join(root, 'out', 'f-draft.mp4'), '');
+  const later = new Date(Date.now() - 1000);
+  fs.utimesSync(path.join(root, 'out', 'f-draft.mp4'), later, later);
+  assert.match(nextStep(page, root).next, /strip films\/f\/page\.html --cuts.*onion.*velocity/);
 });
