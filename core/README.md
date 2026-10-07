@@ -9,8 +9,8 @@ group: engine
 The engine's vocabulary, one subfolder per capability family: `motion/` (springs, keyframe tables,
 seeded noise: `core/motion/README.md`), `engine/` (the virtual clock `page-clock.js`, the seek
 `page-seek.js`, `page-api.js`), `audio/` (the synth voices in `kit.mjs`), `layout/` (aspects),
-`color/`, `beats/` (beat detection), `three/` and `surfaces/` (three.js helpers), `timeline/` and
-`registry/`. Every effect composes from what is here; nothing bypasses it with a private code path
+`color/`, `beats/` (beat detection), `three/` (three.js helpers), `surfaces/` (the shader field) and
+`timeline/` (animation overlap checks). Every effect composes from what is here; nothing bypasses it with a private code path
 (`AGENTS.md`, "Changing the engine, not a film").
 
 A frame is a pure function of the seek time: no `Date`, no unseeded random, no state between frames.

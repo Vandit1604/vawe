@@ -33,13 +33,12 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100);
 camera.position.set(0, 0, 4);
 
-// The tuned lighting rig core/surfaces/three-fx.js already builds for the declarative `object`/`three`
-// layer types, reused here rather than four lights re-hand-tuned: 'metal' picks the bright softbox
-// room an iridescent/metal body wants (the glass room is mostly dark, tuned for transmission instead).
+// The tuned lighting rig from core/three/index.js, not four lights re-hand-tuned: 'metal' picks the
+// bright softbox room an iridescent/metal body wants (the glass room is mostly dark, tuned for
+// transmission instead).
 vawe.three.studio(renderer, scene, { kind: 'metal' });
 
-// A plain rounded four-point star, extruded from its own SVG path (M/L/Q only): the same parser
-// core/surfaces/three-fx.js's declarative `object` layer already reads for `geometry.kind:"svgExtrude"`.
+// A plain rounded four-point star, extruded from its own SVG path (M/L/Q only).
 const STAR_D = 'M83.91,5.91 L42.96,20.96 Q26.87,26.87 20.96,42.96 L5.91,83.91 Q0,100 -5.91,83.91 '
   + 'L-20.96,42.96 Q-26.87,26.87 -42.96,20.96 L-83.91,5.91 Q-100,0 -83.91,-5.91 L-42.96,-20.96 '
   + 'Q-26.87,-26.87 -20.96,-42.96 L-5.91,-83.91 Q0,-100 5.91,-83.91 L20.96,-42.96 Q26.87,-26.87 42.96,-20.96 '

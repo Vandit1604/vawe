@@ -30,7 +30,5 @@
  "harness/media/ref-spec.mjs::max-depth": 2,
  "quality/gates/doc-refs.mjs::unicorn(prefer-string-starts-ends-with)": 1,
  "quality/gates/doc-refs.mjs::no-useless-escape": 1,
- "harness/media/study.mjs::no-unused-vars": 2,
- "core/surfaces/three-fx.js::no-unused-vars": 2,
- "core/surfaces/three-fx.js::max-params": 1
+ "harness/media/study.mjs::no-unused-vars": 2
 }
