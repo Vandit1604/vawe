@@ -135,7 +135,7 @@ Spectacle: the one big moment at 2.75 s (also `<meta name="spectacle">`): the ri
 |---|---|---|---|---|---|---|---|
 | cold to warm, 0.70 | match-cut: the ring holds its place in the turn | the ring | the cold ground | 0 | none, the ring moves in 3D | ground, ring | none |
 | warm to hot, 1.00 to 2.00 | pull-back-reveal, run the other way: the ring rushes the lens and the next world shows through its hole | the ring, then the name inside it | the magenta ground | 1.00 | none, the ring moves in 3D | ground, ring, name | none |
-| hot to amber, 2.75 | match-cut: the lockup holds, ground and ink flip | the ring as the o | the red ground | 0 | push from 2.45, 20% to the last frame | ground, lockup | the ring's landing on the `pop` curve (the one hero arrival), the line opening on `EASE.nudge` |
+| hot to amber, 2.75 | match-cut: the lockup holds, ground and ink flip; logo-sting: the line opens from the ring; push-in: the camera pushes on from 2.45 | the ring as the o | the red ground | 0 | push from 2.45, 20% to the last frame | ground, lockup | the ring's landing on the `pop` curve (the one hero arrival), the line opening on `EASE.nudge` |
 | amber to red, 4.35 | match-cut with a heat front that closes first | the hotspot, then "colour" | the amber ground | 0.95 | the same push plus a 12% punch | ground, heat, lockup | none, the word sweep runs on `EASE.land` |
 
 Sound is subtle: a bed for the whole film, one voice per cut and one for the spectacle. Voices are the quiet palette of `bin/vawe sounds` at their default gain. Cues sit on `data-on="world:<id>"`, so they follow the picture.

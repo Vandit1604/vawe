@@ -18,15 +18,22 @@ at full size), then fill brief.md "Taken from": 4 to 6 named frame paths and wha
 `films/<name>/DESIGN.md` and `films/<name>/kit/`: ground layers, and each moving part (word, mark, bar, card, icon,
 wordmark) as its own element. Fetch skills with `command npx -y ui-skills get <slug>`: `leonxlnx/soft-skill` (builder),
 `pbakaus/colorize`, `mengto/progressive-blur`. Take the principles; reject web-page patterns (nav, CTA button, pill,
-eyebrow, section padding): a video frame is not a hero page. Record the skills used and the rules rejected in DESIGN.md.
-(4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a
+eyebrow, section padding): a video frame is not a hero page. Record the skills used and the rules rejected on a `Skills:`
+line in DESIGN.md (`bin/vawe` advises while it is missing). Product UI inside the film (an app screen, a card, a panel): build
+it as a real interface with one UI skill and real-looking data, then place it in the frame under the density budget.
+For an invented product the UI is invented but designed; only chrome with no function is a pitfall.
+Kit format: `kit/kit.css` holds `:root` tokens (palette roles, light positions) and one rule per part (`.ground-*`,
+light devices, `.grain`, `.lockup`, `.word`, `.line`), each moving part its own element; `kit/kit.html` is an optional
+sheet that shows every part once. Example: `films/examples/colour-sting/DESIGN.md` and `kit/`. (4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a
 ground that is never flat (a light, grain or depth device named from a reference frame, changed at each world turn).
 (5) Fill the brief's Board: a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s),
 the spectacle second (also `<meta name="spectacle">`; recipe 15 in `prompts/moves/RECIPES.md`), a named move per cut
 (overlap, camera, what carries the eye, which arrivals overshoot: `EASE.nudge` for ordinary ones, `EASE.pop` for the hero),
 and sound: a subtle bed plus one voice per cut and for the spectacle (`bin/vawe sounds`). (6) Then the Shots rows, the
 motion and `bin/vawe dev`. The motion is done when overshoot-share, live-hold and seam-variety are clean or waived with a
-reason, and you have Read `bin/vawe strip <page> --cuts` for every cut and fixed what reads flat.
+reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe onion` and `bin/vawe velocity` on the
+spectacle second), fixed what reads flat and written a row per cut in the brief's "Motion pass". `bin/vawe` names the next
+stage after each step; `bin/vawe ship` warns while the Board or the Motion pass is unfilled.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->
@@ -39,9 +46,10 @@ reason, and you have Read `bin/vawe strip <page> --cuts` for every cut and fixed
 
 ## Sound is felt, not noticed
 
-A few soft key ticks and one swell beat many hits. Leave `data-gain` off and a voice takes its soft
-default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the
-weight voices impact/drop/braam -2). Reach for impact, braam or drop only when the brief asks for
+A few soft key ticks and one swell beat many hits. `data-gain` is absolute dB: it replaces the voice's
+default, it does not add to it. Leave it off and a voice takes its default (`DEFAULT_GAIN_DB` in
+`core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the weight voices impact/drop/braam -2; the quiet
+palette tap -12, tick -14, bed -28; a `src` file defaults to 0 dB). Write a gain only to move one cue on purpose. Reach for impact, braam or drop only when the brief asks for
 weight. Not every word gets a tick: cue the first and the last. The mix warns when one cue peaks more
 than 6 dB above the median cue, with the `data-gain` change that fixes it. Name each beat once in
 CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat.

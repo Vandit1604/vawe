@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>colour-sting kit</title>
+<style>
+  @font-face { font-family: "Unbounded"; src: url("../../../../assets/fonts/Unbounded.woff2") format("woff2"); font-weight: 200 900; }
+  :root { --vw: 640px; --vh: 360px; --lr: 160px; --lx: 62%; --ly: 48%; --hx: 70%; --hy: 60%; --sx: 55%; --sy: 50%; }
+  body { margin: 0; padding: 16px; background: #1a0907; display: grid; grid-template-columns: repeat(auto-fill, 320px); gap: 12px; font: 12px/1.3 system-ui, sans-serif; color: #fff3e3; }
+  figure { margin: 0; }
+  .tile { position: relative; width: 320px; height: 180px; overflow: hidden; --vw: 320px; --vh: 180px; --lr: 80px; }
+  .tile .lockup { top: 22%; left: 10%; }
+  .tile .grain { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='256' height='256' filter='url(%23n)'/></svg>"); }
+  .tile.light .lockup { color: var(--ink-on-light); }
+</style>
+<link rel="stylesheet" href="kit.css">
+</head>
+<body>
+<figure><div class="tile"><div class="ground ground-cold"></div><div class="glow" style="left: 62%; top: 48%; width: 120px; height: 120px; --glow-color: #6a7bff"></div><div class="grain"></div></div><figcaption>ground-cold, glow on the ring</figcaption></figure>
+<figure><div class="tile"><div class="ground ground-warm"></div><div class="grain"></div></div><figcaption>ground-warm</figcaption></figure>
+<figure><div class="tile"><div class="ground ground-hot"></div><div class="grain"></div></div><figcaption>ground-hot</figcaption></figure>
+<figure><div class="tile light"><div class="ground ground-amber"></div><div class="grain"></div><div class="lockup"><h1 class="word" style="font-size: 52px">onsen</h1><p class="line" style="font-size: 20px"><span class="w">Turn</span> <span class="w">up</span> <span class="w">the</span> <em class="w" style="color: var(--accent)">colour</em></p></div></div><figcaption>ground-amber, lockup in ink-on-light, accent on one word</figcaption></figure>
+<figure><div class="tile"><div class="ground ground-amber"></div><div class="heat" style="--heat-r: 1.2"></div><div class="grain"></div></div><figcaption>heat front over ground-amber</figcaption></figure>
+<figure><div class="tile"><div class="ground ground-red"></div><div class="grain"></div><div class="lockup"><h1 class="word" style="font-size: 52px">onsen</h1><p class="line" style="font-size: 20px"><span class="w">Turn</span> <span class="w">up</span> <span class="w">the</span> <em class="w" style="color: #ffab24">colour</em></p></div></div><figcaption>ground-red, cream ink, "colour" in amber</figcaption></figure>
+</body>
+</html>
