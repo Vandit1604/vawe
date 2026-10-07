@@ -50,13 +50,37 @@ test('moveDirection reads translate, translateX/Y and a single-value translate',
 });
 
 test('the same full-frame seam move twice in a row is flagged; a changed direction and hard cuts are not', () => {
-  const seam = (delay, from) => rec({ fullFrame: true, props: ['translate'], delay, duration: 0.4, from, kfEasings: ['x', 'x'] });
+  const seam = (delay, from) => rec({ fullFrame: true, props: ['translate'], delay, duration: 0.4, kf: { translate: [from, '0px'] }, kfEasings: ['x', 'x'] });
   const [f] = seamRepeat([seam(1, '100% 0'), seam(2, '100% 0')]);
   assert.equal(f.rule, 'seam-variety');
   assert.equal(f.at, 2);
   assert.deepEqual(seamRepeat([seam(1, '100% 0'), seam(2, '0 100%')]), []);
   const cut = (delay) => rec({ fullFrame: true, opacity: [0, 1], delay, duration: 0.001 });
   assert.deepEqual(seamRepeat([cut(1), cut(2)]), []);
+});
+
+test('the seam signature reads the real move: scale, slide axis and direction, blur, clip; a changed one is not a repeat', () => {
+  const seam = (delay, kf, o = {}) => rec({ fullFrame: true, props: Object.keys(kf), delay, duration: 0.6, kf, kfEasings: ['x', 'x'], ...o });
+  const push = (delay) => seam(delay, { scale: ['1', '1.05'] });
+  const [f] = seamRepeat([push(1), push(3)]);
+  assert.equal(f.at, 3);
+  assert.match(f.what, /scale 1 to 1\.05/);
+  assert.deepEqual(seamRepeat([push(1), seam(3, { scale: ['1.05', '1'] })]), []);
+  const slide = (delay, to) => seam(delay, { translate: ['0px', to] });
+  assert.deepEqual(seamRepeat([slide(1, 'calc(var(--vw) * -0.3) 0px'), slide(3, 'calc(var(--vw) * 0.3) 0px')]), []);
+  assert.deepEqual(seamRepeat([slide(1, '-40px 0px'), slide(3, '0px 40px')]), []);
+  assert.match(seamRepeat([slide(1, '-40px 0px'), slide(3, '-60px 0px')])[0].what, /moves left/);
+  assert.match(seamRepeat([seam(1, { filter: ['blur(8px)', 'blur(0px)'] }), seam(3, { filter: ['blur(6px)', 'blur(0px)'] })])[0].what, /blur/);
+  assert.deepEqual(seamRepeat([seam(1, { clipPath: ['inset(0 100% 0 0)', 'inset(0)'] }), seam(3, { scale: ['1', '1.05'] })]), []);
+});
+
+test('records that start on one second are one seam; texture records are not seams', () => {
+  const seam = (delay, kf, o = {}) => rec({ fullFrame: true, props: Object.keys(kf), delay, duration: 0.6, kf, kfEasings: ['x', 'x'], ...o });
+  const blob = (delay) => seam(delay, { translate: ['0px', 'calc(var(--vw) * 0.2) 0px'] }, { decorative: true, duration: 2 });
+  const world = (delay, kf) => [seam(delay, kf), blob(delay)];
+  assert.deepEqual(seamRepeat([...world(0, { scale: ['1', '1.05'] }), ...world(2, { scale: ['1.04', '1'] }), ...world(4, { translate: ['0px', '-3vw 0px'] })]), []);
+  const two = (delay) => [seam(delay, { scale: ['1', '1.05'] }), seam(delay + 0.02, { translate: ['0px', '-40px 0px'] })];
+  assert.equal(seamRepeat([...two(1), ...two(3)]).length, 1);
 });
 
 test('one speed band across the film is flagged unless the page paints in script', () => {
