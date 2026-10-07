@@ -71,11 +71,32 @@ export async function sampleWorlds(page, dur, seek, from = 0) {
 }
 
 const STILL_FRACTIONS = [0.5, 0.65, 0.35, 0.8, 0.2];
+// An animation that ends this close to the end of its world is the world's exit, not an entrance.
+const EXIT_WINDOW_S = 0.1;
+const SETTLE_S = 0.05;
 
-/** The seconds to try for one world's still, best first: the middle of its span, then other points inside it. [0] when the page never shows it. Pure. */
-export const stillCandidates = (span) => (span && span.start != null
-  ? STILL_FRACTIONS.map((f) => +(span.start + (span.end - span.start) * f).toFixed(3))
-  : [0]);
+/** [{ world, id, start, end }] in seconds for every finite animation on a [data-world] element or inside one, texture (aria-hidden) left out. Run in the page as it is now. */
+export const readWorldAnimations = (page) => page.evaluate(() => document.getAnimations().flatMap((a) => {
+  const el = a.effect && a.effect.target;
+  const world = el && el.closest && el.closest('[data-world]');
+  const t = a.effect && a.effect.getComputedTiming();
+  if (!world || el.closest('[aria-hidden="true"]') || !Number.isFinite(t.endTime)) return [];
+  return [{ world: world.dataset.world, id: a.id || a.animationName || '', start: t.delay / 1000, end: t.endTime / 1000 }];
+}));
+
+/** The second the world's own entrances have all ended, a frame later, or null: animations that end inside the span and not at its end. Pure. */
+function settledAt(span, anims) {
+  const ends = anims.filter((a) => a.world === span.id && a.end > span.start && a.end < span.end - EXIT_WINDOW_S).map((a) => a.end);
+  return ends.length ? +(Math.max(...ends) + SETTLE_S).toFixed(3) : null;
+}
+
+/** The seconds to try for one world's still, best first: after the world's entrances end, then the middle of its span and other points inside it. [0] when the page never shows it. Pure. */
+export function stillCandidates(span, anims = []) {
+  if (!span || span.start == null) return [0];
+  const spread = STILL_FRACTIONS.map((f) => +(span.start + (span.end - span.start) * f).toFixed(3));
+  const settled = settledAt(span, anims);
+  return settled != null && settled < span.end ? [settled, ...spread] : spread;
+}
 
 /** True when world `id` shows on the page as it is now. */
 export const worldShowsNow = async (page, id) => (await readWorlds(page)).some((w) => w.id === id && w.visible);

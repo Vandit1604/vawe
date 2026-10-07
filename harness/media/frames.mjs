@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { openPage, seekAll, settle, resolveFrame, readPageMeta } from './render-page.mjs';
-import { sampleWorlds, stillCandidates, worldShowsNow } from './world-sample.mjs';
+import { sampleWorlds, stillCandidates, worldShowsNow, readWorldAnimations } from './world-sample.mjs';
 import { sampleLayout } from './draft-check.mjs';
 import { tile } from './compare-frames.mjs';
 import { layoutLint, namedText } from '../lib/layout-lint.mjs';
@@ -29,8 +29,8 @@ function labelled(png, text, out) {
 }
 
 /** Seeks to the first candidate second at which the world shows (the others are hidden); returns that second, or the first candidate when none does. */
-async function seekToShown(page, span) {
-  const times = stillCandidates(span);
+async function seekToShown(page, span, anims) {
+  const times = stillCandidates(span, anims);
   for (const t of times) {
     await seekAll(page, t * 1000);
     if (await worldShowsNow(page, span.id)) return t;
@@ -43,6 +43,7 @@ async function seekToShown(page, span) {
 /** Shoots the wanted worlds of the page (all when `ids` is empty); returns [{ id, at, png, fired }] in page order. */
 async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
   const dur = Number(readPageMeta(pagePath, 'duration'));
+  const anims = await readWorldAnimations(opened.page);
   const found = await sampleWorlds(opened.page, dur, (ms) => opened.page.evaluate((t) => window.__pageSeek(t / 1000), ms));
   if (!found.length) die(`${pagePath} has no data-world element: give each beat one, for example <section data-world="s1">`);
   let spans;
@@ -52,7 +53,7 @@ async function shootWorlds(opened, pagePath, stills, { ids, suffix }) {
   const shots = [];
   for (const span of spans) {
     const style = await opened.page.addStyleTag({ content: hideOthers(span.id) });
-    const at = await seekToShown(opened.page, span);
+    const at = await seekToShown(opened.page, span, anims);
     const png = path.join(stills, `${span.id}${suffix}.png`);
     await opened.page.screenshot({ path: png });
     const layout = await sampleLayout(opened.page, [at], noSeek);
