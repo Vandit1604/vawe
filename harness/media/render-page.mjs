@@ -122,6 +122,13 @@ export const frameFormat = (final) => (final
   ? { ext: 'png', label: 'final: png, software', shot: { type: 'png', optimizeForSpeed: true } }
   : { ext: 'jpg', label: 'draft: jpeg, gpu', shot: { type: 'jpeg', quality: DRAFT_JPEG_QUALITY, optimizeForSpeed: true } });
 
+// page.screenshot must keep its browser-wide lock: parallel Page.captureScreenshot calls on several tabs
+// returned 1200x818 frames (measured). Only its result decode is slow (a per-character Uint8Array.from,
+// about 70 ms a 1 MB PNG on the one node thread), so take the base64 string and decode it with Buffer.
+async function captureShot(page, shot) {
+  return Buffer.from(await page.screenshot({ ...shot, encoding: 'base64' }), 'base64');
+}
+
 const die = (msg, code = 1) => { console.error(errorLine(msg)); process.exit(code); };
 
 // Page meta the renderer needs before the page loads (its canvas, its authoring rate), read from the
@@ -289,6 +296,9 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   for (let lo = 0; lo < frames; lo += sliceFrames) slices.push([lo, Math.min(frames, lo + sliceFrames)]);
   const restarted = [];
   let next = 0;
+  // A page opened or closed during another lane's screenshot gave that frame a corrupt 1200x818 tile (3 of 9 renders, tide-v).
+  let queue = Promise.resolve();
+  const exclusive = (fn) => { const turn = queue.then(fn); queue = turn.catch(() => {}); return turn; };
   const range = ([lo, hi]) => `${(run.from + lo / run.fps).toFixed(2)}-${(run.from + hi / run.fps).toFixed(2)}s`;
   const runSliceOnce = async ([lo, hi], worker, attempt) => {
     const at = { frame: lo, step: 'open page', since: Date.now(), stuck: false, opened: null };
@@ -302,18 +312,18 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
       try {
         if (fault) fault([lo, hi], attempt);
         for (let i = lo; i < hi; i++) {
-          if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await at.opened.close().catch(() => {}); at.opened = null; }
+          if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await exclusive(() => at.opened.close().catch(() => {})); at.opened = null; }
           if (!at.opened) {
             mark('open page', i);
-            at.opened = await openPage(pagePath, frame, { final });
+            at.opened = await exclusive(() => openPage(pagePath, frame, { final }));
             mark('load page', i);
             await at.opened.page.goto(at.opened.url, { waitUntil: 'load' });
             sinceOpen = 0;
           }
           mark('frame', i);
-          sinceOpen += await work(at.opened.page, i, local, (step) => mark(step, i));
+          sinceOpen += await work(at.opened.page, i, local, (step) => mark(step, i), exclusive);
         }
-      } finally { if (at.opened) await at.opened.close().catch(() => {}); }
+      } finally { if (at.opened) await exclusive(() => at.opened.close().catch(() => {})); }
     })();
     let timer;
     const stalled = new Promise((_, reject) => {
@@ -379,7 +389,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     done: (slice) => { const found = fs.existsSync(marker(slice)); if (found) onResumed(slice); return found; },
     finish: (slice) => fs.writeFileSync(marker(slice), ''),
   };
-  return runShards(pagePath, frame, frames, workers, async (page, i, local, mark) => {
+  return runShards(pagePath, frame, frames, workers, async (page, i, local, mark, exclusive) => {
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
@@ -394,13 +404,10 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
         await settle(page);
         const t2 = performance.now();
         mark('screenshot');
-        if (BENCH_TIMING_FILE) {
-          const bytes = await page.screenshot(format.shot);
-          const t3 = performance.now();
-          fs.writeFileSync(file, bytes);
-          const t4 = performance.now();
-          fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, write: t4 - t3, bytes: bytes.length })}\n`);
-        } else await page.screenshot({ path: file, ...format.shot });
+        const bytes = await exclusive(() => captureShot(page, format.shot));
+        const t3 = performance.now();
+        fs.writeFileSync(file, bytes);
+        if (BENCH_TIMING_FILE) fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, write: performance.now() - t3, bytes: bytes.length })}\n`);
       }
       Object.assign(local, { key, file });
       onSubframe(i, reused);
