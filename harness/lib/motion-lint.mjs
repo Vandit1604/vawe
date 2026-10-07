@@ -6,7 +6,7 @@ import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { isWaived } from './waivers.mjs';
 import { DECORATIVE } from './draft-check.mjs';
 import { BANDS, bandOf } from '../../core/motion/presets.js';
-import { CUT, moves, moveProps, entering, exiting, measured, byTarget, easeName, moveDirection } from './motion-records.mjs';
+import { CUT, moves, moveProps, moveParts, entering, exiting, measured, byTarget, easeName, moveDirection } from './motion-records.mjs';
 import { motionVariety } from './motion-variety.mjs';
 
 export { moveDirection };
@@ -19,6 +19,11 @@ export function motionRecord(a, k, area) {
   const withOpacity = kfs.filter((f) => f.opacity != null);
   const box = el.getBoundingClientRect();
   const text = (el.textContent || '').trim().replace(/\s+/g, ' ').slice(0, 18);
+  const kf = {};
+  for (const p of ['scale', 'translate', 'rotate', 'transform', 'filter', 'clipPath', 'maskImage', 'maskPosition']) {
+    const vs = kfs.map((f) => f[p]).filter((v) => v != null && v !== '');
+    if (vs.length) kf[p] = [String(vs[0]), String(vs[vs.length - 1])];
+  }
   const cls = typeof el.className === 'string' && el.className ? `.${el.className.trim().split(/\s+/)[0]}` : '';
   return {
     target: k, label: `${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : cls}${text ? ` "${text}"` : ''}`,
@@ -26,7 +31,7 @@ export function motionRecord(a, k, area) {
     delay: (t.delay || 0) / 1000, duration: (t.duration || 0) / 1000,
     easing: t.easing || 'linear', kfEasings: kfs.map((f) => f.easing || 'linear'),
     opacity: withOpacity.length ? [Number(withOpacity[0].opacity), Number(withOpacity[withOpacity.length - 1].opacity)] : null,
-    from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''),
+    from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''), kf,
     fullFrame: box.width * box.height >= 0.6 * area,
     decorative: Boolean(el.closest(DECORATIVE)),
   };
@@ -101,19 +106,30 @@ export function linearMove(records) {
   });
 }
 
-function seamMove(r) {
-  const dir = moveDirection(r.from);
-  return `${[...r.props].sort().join('+')}${dir ? ` ${dir}` : r.from && !/translate/.test(r.from) ? ` ${r.from}` : ''}`;
+/** The full-frame moves of a film as seams: records that start within one cut length of each other are one seam, with the moves they make. Texture is no seam. */
+function seamsOf(records) {
+  const timed = records.filter((r) => r.fullFrame && !r.decorative && r.duration > CUT).sort((a, b) => a.delay - b.delay);
+  const seams = [];
+  for (const r of timed) {
+    const parts = moveParts(r);
+    if (!parts.length) continue;
+    const last = seams.at(-1);
+    if (last && r.delay - last.at <= CUT) last.parts.push(...parts); else seams.push({ at: r.delay, parts });
+  }
+  return seams.map(({ at, parts }) => {
+    const unique = [...new Map(parts.map((p) => [p.key, p])).values()];
+    return { at, key: unique.map((p) => p.key).sort().join(' + '), text: unique.map((p) => p.text).join(', ') };
+  });
 }
 
-/** The same full-frame transition move twice in a row; hard cuts are not moves (rule seam-variety). */
+/** The same full-frame transition move twice in a row, read from the animation's own keyframes; hard cuts are not moves (rule seam-variety). */
 export function seamRepeat(records) {
-  const seams = records.filter((r) => r.fullFrame && r.duration > CUT && (moves(r) || r.opacity)).sort((a, b) => a.delay - b.delay);
+  const seams = seamsOf(records);
   const out = [];
   for (let i = 1; i < seams.length; i++) {
     const [a, b] = [seams[i - 1], seams[i]];
-    if (b.delay - a.delay > CUT && seamMove(a) === seamMove(b)) out.push({ code: 'seam-repeat', rule: 'seam-variety', at: b.delay,
-      what: `the seam at ${s2(b.delay)} s repeats the one at ${s2(a.delay)} s (${seamMove(b)})`,
+    if (a.key === b.key) out.push({ code: 'seam-repeat', rule: 'seam-variety', at: b.at,
+      what: `the seam at ${s2(b.at)} s repeats the one at ${s2(a.at)} s (${b.text})`,
       fix: 'change the axis or direction, or cut: a wipe on x after a push on y' });
   }
   return out;
@@ -199,6 +215,7 @@ function runRecord(boxes, i, own, [a, b]) {
     easing: linear ? 'linear' : 'inferred', kfEasings: [linear ? 'linear' : 'inferred'],
     opacity: fade ? [s[4], e[4]] : null,
     from: moved ? `translate(${(s[0] - e[0]).toFixed(1)}px, ${(s[1] - e[1]).toFixed(1)}px)` : '',
+    kf: moved ? { translate: [`${s[0].toFixed(1)}px ${s[1].toFixed(1)}px`, `${e[0].toFixed(1)}px ${e[1].toFixed(1)}px`], ...(Math.abs(e[2] - s[2]) > 1 && s[2] > 0 ? { scale: [String(+(s[2] / e[2]).toFixed(3)), '1'] } : {}) } : {},
     fullFrame: Math.max(track[a - 1][2] * track[a - 1][3], track[b][2] * track[b][3]) >= 0.6 * boxes.area,
     step: boxes.times[1] - boxes.times[0],
   };
