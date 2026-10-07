@@ -7,7 +7,8 @@
 // A job is two files in out/ship-jobs, <id>.json (state) and <id>.log (the render's own output); the id starts with the film name. The
 // detached `run` process owns the state file: it starts render-page.mjs --final, then records how it ended and,
 // on success, the result of the cheap final check (scene-stats plus a blank-frame scan) and of a fresh
-// judge on the final (harness/media/judge-fresh.mjs, about 30 s; VAWE_SHIP_JUDGE=0 skips it). The job writes the
+// judge on the final (harness/media/judge-fresh.mjs, about 30 s; VAWE_SHIP_JUDGE=0 skips it). The mp4 is final
+// and listed as `rendered` (status judging) before the judge and the acceptance run; `done` adds the verdict. The job writes the
 // `ship` event of out/<film>.runs.jsonl when it ends, so the render runs with --job and logs nothing itself.
 // A new job for a page cancels the running job for the same page. `status <page>` reports that page's newest job.
 import fs from 'node:fs';
@@ -68,8 +69,16 @@ function runJob(id) {
   const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final', '--progress', '--job'], { stdio: ['ignore', 'pipe', 'pipe'] });
   writeJob({ ...job, status: 'running', pid: process.pid });
   let started = false;
+  let verdictLater = null;
+  const masterReady = () => {
+    const checked = { ...readJob(id), renderMs: Date.now() - job.startedAt, ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
+    if (!checked.outputs.length) return;
+    writeJob({ ...checked, status: 'judging' });
+    verdictLater = new Promise((resolve) => (checked.judge ? judgeFinal(checked, resolve) : resolve(null)));
+  };
   const relay = (chunk) => {
     fs.writeSync(fd, chunk);
+    if (!verdictLater && /(^|[\r\n])✓ /.test(String(chunk))) masterReady();
     const first = started ? null : firstCapture(String(chunk));
     if (!first) return;
     started = true;
@@ -77,17 +86,15 @@ function runJob(id) {
   };
   child.stdout.on('data', relay);
   child.stderr.on('data', relay);
-  child.on('close', (code) => {
-    const renderMs = Date.now() - job.startedAt;
+  child.on('close', async (code) => {
     if (code !== 0) {
       const failure = { ...finalFailure(logText(job), `exit ${code}`), page: job.page };
-      appendRun(job.page, shipEvent({ verdict: 'failed', renderS: renderMs / 1000, failure }));
+      appendRun(job.page, shipEvent({ verdict: 'failed', renderS: (Date.now() - job.startedAt) / 1000, failure }));
       return writeJob({ ...readJob(id), status: 'failed', exit: code, endedAt: Date.now(), failure });
     }
-    const checked = { ...readJob(id), renderMs, ...finalCheck(outputsOf(logText(job)), pageAuthoring(job.page)) };
-    if (!checked.judge || !checked.outputs.length) return finishJob(id, checked);
-    writeJob({ ...checked, status: 'judging' });
-    judgeFinal(checked, (verdict) => finishJob(id, { ...readJob(id), verdict }));
+    if (!verdictLater) return finishJob(id, { ...readJob(id), renderMs: Date.now() - job.startedAt, ...finalCheck([], null) });
+    const verdict = await verdictLater;
+    finishJob(id, { ...readJob(id), ...(verdict ? { verdict } : {}) });
   });
 }
 
@@ -180,16 +187,25 @@ function statusOf(id) {
   const text = logText(job);
   if (['done', 'failed', 'cancelled'].includes(job.status)) return finalLines(job, text);
   if (job.status === 'running' && !pidAlive(job.pid)) return [failedLine(job, text, 'the render process died without a result'), `job ${job.id}: the render process died without a result`, `log: ${job.log}`];
-  if (job.status === 'judging') return [`job ${job.id}: rendered; a fresh judge is scoring the final (about 30 s)`];
+  if (job.status === 'judging') return renderedLines(job);
   return [progressLine(job, text), `log: ${job.log}`];
 }
+
+const renderedLines = (job) => [
+  `job ${job.id}: RENDERED in ${clock(job.renderMs)}, the mp4 is ready; NOT JUDGED yet (a fresh judge and the acceptance rows run now, about 70 s)`,
+  ...job.outputs.map((o) => `output: ${o}`),
+];
 
 const isOver = (id) => ['done', 'failed', 'cancelled'].includes(readJob(id).status) || (readJob(id).status === 'running' && !pidAlive(readJob(id).pid));
 
 async function waitThenStatus(id) {
   const target = resolveTarget(id);
   const until = Date.now() + WAIT_CAP_MS;
-  while (target && fs.existsSync(stateFile(target)) && !isOver(target) && Date.now() < until) await new Promise((r) => setTimeout(r, 2000));
+  let announced = false;
+  while (target && fs.existsSync(stateFile(target)) && !isOver(target) && Date.now() < until) {
+    if (!announced && readJob(target).status === 'judging') { announced = true; console.log(renderedLines(readJob(target)).join('\n')); }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
   console.log(statusOf(target).join('\n'));
 }
 

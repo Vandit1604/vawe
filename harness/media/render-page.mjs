@@ -454,18 +454,22 @@ function blendGraph(kArr, subframeStart, fps) {
   return `${split};${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB[blend]`;
 }
 
-// One ffmpeg pass: the master to tmpOut and, when webOut is given, the web copy from the same blend.
-export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final, webOut = null) {
+function blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, codecArgs, out) {
   const seq = path.join(tmpDir, `f%06d.${frameFormat(final).ext}`);
-  const master = final ? `,${DITHER}` : '';
-  const outputs = webOut
-    ? `;[blend]split=2[m][w];[m]null${master}[outv];[w]format=yuv420p10le[web]`
-    : `;[blend]null${master}[outv]`;
   const args = ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps), '-i', seq,
-    '-filter_complex', blendGraph(kArr, subframeStart, fps) + outputs,
-    '-map', '[outv]', '-fps_mode', 'passthrough', ...x264Args(final), tmpOut,
-    ...(webOut ? ['-map', '[web]', '-fps_mode', 'passthrough', ...WEB_ARGS, webOut] : [])];
+    '-filter_complex', `${blendGraph(kArr, subframeStart, fps)};[blend]${tail}[outv]`,
+    '-map', '[outv]', '-fps_mode', 'passthrough', ...codecArgs, out];
   return spawnSync('ffmpeg', args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 16 });
+}
+
+// One ffmpeg pass over the blended frames: the master (x264).
+export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
+  return blendEncode(tmpDir, fps, kArr, subframeStart, final, `null${final ? `,${DITHER}` : ''}`, x264Args(final), tmpOut);
+}
+
+// The web copy is its own pass, run after the master is delivered.
+export function ffmpegWebEncode(tmpDir, fps, kArr, subframeStart, webOut) {
+  return blendEncode(tmpDir, fps, kArr, subframeStart, true, 'format=yuv420p10le', WEB_ARGS, webOut);
 }
 
 // The cost table `--profile` prints. Subframes and screenshots per film second are a pure function of the
@@ -705,22 +709,20 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const webPath = final ? webOut(outPath) : null;
     const tmpWeb = webPath && `${webPath}.tmp-${process.pid}.mp4`;
     const t1 = Date.now();
-    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final, tmpWeb);
+    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final);
     const encodeMs = Date.now() - t1;
     if (res.status !== 0 || res.error) {
       fs.rmSync(tmpOut, { force: true });
-      if (tmpWeb) fs.rmSync(tmpWeb, { force: true });
       die(`ffmpeg encode failed (${res.error ? res.error.message : `exit ${res.status}`}):\n`
         + `${(res.stderr || '').trim().split('\n').slice(-15).join('\n')}`);
     }
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
       die(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
     const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
     const broken = late.filter((l) => !l.includes(' blank;'));
-    if (broken.length) { for (const f of [tmpOut, tmpWeb].filter(Boolean)) fs.rmSync(f, { force: true }); throw new InvariantError(broken); }
+    if (broken.length) { fs.rmSync(tmpOut, { force: true }); fs.rmSync(tmpDir, { recursive: true, force: true }); throw new InvariantError(broken); }
     const advice = late.filter((l) => l.includes(' blank;'));
     const place = async (video, out) => {
       const mixed = wantAudio && await muxPageAudio(page, pagePath, { video, out, duration: dur, explicit: opts.audio === true });
@@ -729,10 +731,21 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       return mixed;
     };
     const mixed = await place(tmpOut, outPath);
-    if (tmpWeb) await place(tmpWeb, webPath);
+    const result = { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, advice };
+    opts.onMaster?.(result);
+    if (tmpWeb) {
+      const webRes = ffmpegWebEncode(tmpDir, fps, kArr, subframeStart, tmpWeb);
+      if (webRes.status !== 0 || webRes.error) {
+        fs.rmSync(tmpWeb, { force: true });
+        die(`ffmpeg web copy failed, the master ${outPath} is complete (${webRes.error ? webRes.error.message : `exit ${webRes.status}`}):\n`
+          + `${(webRes.stderr || '').trim().split('\n').slice(-15).join('\n')}`);
+      }
+      await place(tmpWeb, webPath);
+    }
+    fs.rmSync(tmpDir, { recursive: true, force: true });
     const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(page, pagePath, dur)) : null;
     const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
-    return { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, probe, level, motion, advice, profile, web: webPath };
+    return { ...result, probe, level, motion, profile, web: webPath };
   } finally {
     await close();
     slot.release();
@@ -979,15 +992,17 @@ async function main() {
     const frame = resolveFrame(pagePath, opts);
     const outPath = outArg || defaultOut(pagePath, { aspect, suffixAspect: all, final, from, to: durArg != null ? from + durArg : null });
     fs.mkdirSync(path.dirname(path.resolve(outPath)), { recursive: true });
+    const masterLine = (r) => `✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
+      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, retried slice(s) ${r.restarted.join(' ')}` : ''}${r.resumed ? `, ${r.resumed} slice(s) resumed from an earlier run` : ''}`
+      + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`;
+    if (final) opts.onMaster = (r) => console.log(masterLine(r));
     const r = await renderPage(pagePath, outPath, opts).catch((e) => {
       if (!(e instanceof InvariantError) && !final) throw e;
       for (const p of e.problems || [e.stack || String(e)]) console.error(errorLine(p));
       if (final) reportFailedFinal(pagePath, e, argv.includes('--job'));
       process.exit(2);
     });
-    console.log(`✓ ${outPath}: ${r.frames} frame(s) at ${opts.fps}fps, ${Math.round(frame.width * frame.scale)}x${Math.round(frame.height * frame.scale)} (${aspect}), ${from}s-${(from + r.dur).toFixed(2)}s`
-      + `${opts.blur > 1 ? `, blur=${opts.blur} (${r.subframes} subframe(s))` : ''}${r.audio ? ', audio mixed' : ''}${r.restarted.length ? `, retried slice(s) ${r.restarted.join(' ')}` : ''}${r.resumed ? `, ${r.resumed} slice(s) resumed from an earlier run` : ''}`
-      + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`);
+    if (!final) console.log(masterLine(r));
     if (r.web) console.log(`  web copy: ${r.web} (${(fs.statSync(r.web).size / 1e6).toFixed(1)} MB; master ${(fs.statSync(outPath).size / 1e6).toFixed(1)} MB)`);
     if (!final) await printDraft(outPath, pagePath, r, { checks: opts.checks, taste: argv.includes('--taste'), next: flag('--next', null), opts, from });
     else {

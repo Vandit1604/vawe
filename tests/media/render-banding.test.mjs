@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { ffmpegEncode } from '../../harness/media/render-page.mjs';
+import { ffmpegEncode, ffmpegWebEncode } from '../../harness/media/render-page.mjs';
 
 const W = 960, H = 540, ROWS = 64;
 
@@ -34,8 +34,10 @@ test('the master and the web copy keep a dark ramp free of bands', () => {
     const kArr = Array(30).fill(1);
     const start = kArr.map((_, i) => i).concat(30);
     const master = path.join(dir, 'master.mp4'), web = path.join(dir, 'web.mp4');
-    const r = ffmpegEncode(dir, 60, kArr, start, master, true, web);
+    const r = ffmpegEncode(dir, 60, kArr, start, master, true);
     assert.equal(r.status, 0, r.stderr);
+    const w = ffmpegWebEncode(dir, 60, kArr, start, web);
+    assert.equal(w.status, 0, w.stderr);
     const plain = path.join(dir, 'plain.mp4');
     execFileSync('ffmpeg', ['-v', 'error', '-framerate', '60', '-i', path.join(dir, 'f%06d.png'), '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '16', plain]);
     const banded = longestFlatRun(plain);
