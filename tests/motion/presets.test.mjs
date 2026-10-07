@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { easeFn, BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys } from '../../core/motion/presets.js';
+import { easeFn, BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys, cameraSpecs, parallax, focusSpecs } from '../../core/motion/presets.js';
+import { peakValue, overshoots } from '../../harness/lib/ease-curve.mjs';
 import { handleCurve, HANDLE_REGISTRY } from '../../core/motion/motion.js';
 
 function fakeEl() {
@@ -161,4 +162,48 @@ test('easeFn samples a named ease, and pop passes its mark', () => {
   assert.equal(easeFn('land')(1), 1);
   assert.ok(Math.max(...Array.from({ length: 101 }, (_, i) => easeFn('pop')(i / 100))) > 1.1);
   assert.throws(() => easeFn('nope'), /unknown ease/);
+});
+
+test('nudge overshoots by a few per cent, which the dev check counts', () => {
+  const peak = peakValue(EASE.nudge);
+  assert.ok(peak > 1.03 && peak < 1.1, `peak ${peak}`);
+  assert.equal(overshoots(EASE.nudge, 0.01), true);
+  assert.equal(overshoots(EASE.land, 0.01), false);
+});
+
+test('stagger nudgeEvery lands every nth element on nudge', () => {
+  const els = [fakeEl(), fakeEl(), fakeEl(), fakeEl(), fakeEl(), fakeEl()];
+  stagger(els, { nudgeEvery: 3 });
+  assert.deepEqual(els.map((e) => e.anims[0].timing.easing === EASE.nudge), [false, false, true, false, false, true]);
+});
+
+test('camera: push, pull, drift and whips are transforms on one wrapper', () => {
+  const [push] = cameraSpecs({ kind: 'push', at: 1, duration: 2, origin: '30% 40%' });
+  assert.equal(push.timing.easing, EASE.glide);
+  assert.equal(push.timing.duration, 2000);
+  assert.deepEqual(push.keyframes.map((k) => k.scale), ['1', '1.12']);
+  assert.equal(push.keyframes[0].transformOrigin, '30% 40%');
+  assert.deepEqual(cameraSpecs({ kind: 'pull' })[0].keyframes.map((k) => k.scale), ['1.15', '1']);
+  const [drift] = cameraSpecs({ kind: 'drift', duration: 4, from: 1.12, to: 1.15 });
+  assert.deepEqual(drift.keyframes.map((k) => k.translate), ['0% 0%', '-1.5% -0.8%']);
+  const [out] = cameraSpecs({ kind: 'whipOut' }), [into] = cameraSpecs({ kind: 'whipIn' });
+  assert.deepEqual(out.keyframes.map((k) => k.translate), ['0% 0%', '-100% 0%']);
+  assert.deepEqual(into.keyframes.map((k) => k.translate), ['100% 0%', '0% 0%']);
+  assert.equal(out.timing.easing, EASE.launch);
+  assert.equal(into.timing.easing, EASE.land);
+  assert.throws(() => cameraSpecs({ kind: 'spin' }), /unknown camera/);
+});
+
+test('parallax moves a layer by its depth', () => {
+  const [ground, front] = [fakeEl(), fakeEl()];
+  parallax([[ground, 0.5], [front, 2]], { kind: 'push', duration: 1 });
+  assert.deepEqual(ground.anims[0].keyframes.map((k) => k.scale), ['1', '1.06']);
+  assert.deepEqual(front.anims[0].keyframes.map((k) => k.scale), ['1', '1.24']);
+});
+
+test('focus clears a blur from small and faint to sharp', () => {
+  const [spec] = focusSpecs({ at: 1, blur: 8, scale: 0.85, opacity: 0.6 });
+  assert.deepEqual(spec.keyframes[0], { filter: 'blur(8px)', scale: '0.85', opacity: '0.6' });
+  assert.deepEqual(spec.keyframes[1], { filter: 'blur(0px)', scale: '1', opacity: '1' });
+  assert.equal(spec.timing.delay, 1000);
 });
