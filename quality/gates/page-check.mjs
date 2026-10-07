@@ -237,7 +237,7 @@ function checkSpectacle(ctx) {
     f.warn('quiet-before-spectacle', `the ${QUIET_WINDOW}s before the spectacle sits at ${q.preDb.toFixed(0)} dB against ${q.hitDb.toFixed(0)} dB on the hit: the sound does not drop first`,
       { at, fix: 'fade the bed out or cut it (data-fade-out on the music, or end it at the spectacle time minus 0.4 s), then land the hit into the gap.' });
   }
-  if (!q.audioMeasured) ctx.notes.push('quiet-before-spectacle: no audio in the render, only the picture was checked');
+  if (!q.audioMeasured) ctx.notes.push('quiet-before-spectacle: no audio in the render, only the picture was checked; ' + (ctx.audioTags.length ? 'for the sound run bin/vawe dev <page> --audio, then bin/vawe critique <page> again' : 'the page has no <audio> tag: add the Board\'s sound rows'));
 }
 
 const nearestTo = (list, t, key = (x) => x) => list.reduce((best, x) => (best == null || Math.abs(key(x) - t) < Math.abs(key(best) - t) ? x : best), null);
@@ -270,7 +270,7 @@ function checkCues(ctx) {
   const cues = ctx.audioTags.filter(isCue);
   if (!cues.length) return;
   if (!ctx.envelope) {
-    ctx.notes.push(`${cues.length} <audio data-at> cue(s) but the render has no audio track: render with the audio mixed (vawe critique does)`);
+    ctx.notes.push(`${cues.length} <audio data-at> cue(s) but the render has no audio track: the audio checks are skipped; run bin/vawe dev <page> --audio, then bin/vawe critique <page> again`);
     return;
   }
   const onsets = onsetsOf(ctx.envelope);
