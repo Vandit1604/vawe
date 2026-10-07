@@ -17,59 +17,10 @@
 // Used by harness/media/gen-audio.mjs (`make gen X=audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
 // which the Go mixer (internal/audio/audio.go) beds under the render.
 
-export const SR = 44100;
-export const TAU = Math.PI * 2;
-const sec = (s) => Math.round(s * SR);
-const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
+import { SR, TAU, sec, clamp, rng, osc, biquad } from './dsp.mjs';
+import { renderVoice } from './palette.mjs';
 
-// ---------------------------------------------------------------- deterministic noise
-// Seeded LCG. A cue that used Math.random would re-bake differently every time and silently break
-// byte-stability of the shipped audio, which is the same class of bug as a wall-clock in a frame.
-export function rng(seed = 0x9e3779b1) {
-  let s = seed >>> 0;
-  return () => { s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return (s / 4294967296) * 2 - 1; };
-}
-
-// `triangle` IS AN ALIAS FOR `tri`, AND AN UNKNOWN NAME NOW THROWS. Both halves matter. Several specs
-// said `triangle`, which was not a name this function knew, and the final `return Math.sin(ph)` turned
-// every one of them into a SINE without a word: silent substitution, which this repo names as its worst
-// bug class. It could not be fixed while `pluck` depended on the accident, because aliasing the name
-// would have re-voiced a cue a person had approved. Round 5 replaced that pluck with one that asks for
-// a sine outright, so nothing is standing on the bug any more and it goes.
-const WAVES = { sine: 1, tri: 1, triangle: 'tri', saw: 1, square: 1 };
-export function osc(type, f, t, phase = 0) {
-  const ph = TAU * f * t + phase;
-  const w = WAVES[type];
-  if (!w) throw new Error(`audio: unknown waveform "${type}". Use ${Object.keys(WAVES).join(', ')}.`);
-  const kind = w === 1 ? type : w;
-  if (kind === 'tri') return (2 / Math.PI) * Math.asin(Math.sin(ph));
-  if (kind === 'saw') return 2 * (((f * t) % 1) + phase / TAU % 1) - 1;
-  if (kind === 'square') return Math.sin(ph) >= 0 ? 1 : -1;
-  return Math.sin(ph);
-}
-
-// ---------------------------------------------------------------- biquad (RBJ cookbook)
-// Cuelume shapes its noise layers with BiquadFilterNode (lowpass/bandpass/highpass). A one-pole
-// filter is not close enough. The bandpass Q is what makes `tick` a click and not a thud.
-export function biquad(type, f0, Q) {
-  let B0, B1, B2, A1, A2;
-  // `tune` is separate from construction so the cutoff can MOVE. Coefficients change; the delay
-  // state (x1..y2) does not, which is what keeps a swept filter continuous instead of clicking.
-  const tune = (f) => {
-    const w0 = TAU * clamp(f, 20, SR / 2 - 100) / SR;
-    const c = Math.cos(w0), s = Math.sin(w0), alpha = s / (2 * Math.max(0.0001, Q));
-    let b0, b1, b2, a0, a1, a2;
-    if (type === 'lowpass') { b0 = (1 - c) / 2; b1 = 1 - c; b2 = b0; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; }
-    else if (type === 'highpass') { b0 = (1 + c) / 2; b1 = -(1 + c); b2 = b0; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; }
-    else { b0 = alpha; b1 = 0; b2 = -alpha; a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha; } // bandpass (0dB peak)
-    B0 = b0 / a0; B1 = b1 / a0; B2 = b2 / a0; A1 = a1 / a0; A2 = a2 / a0;
-  };
-  tune(f0);
-  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
-  const run = (x) => { const y = B0 * x + B1 * x1 + B2 * x2 - A1 * y1 - A2 * y2; x2 = x1; x1 = x; y2 = y1; y1 = y; return y; };
-  run.tune = tune;
-  return run;
-}
+export { SR, TAU, rng, osc, biquad };
 
 // ---------------------------------------------------------------- envelope
 // Linear attack to `peak`, then exponential decay, Web Audio's setTargetAtTime shape.
@@ -131,7 +82,21 @@ function renderLayer(out, L, li, seed, n) {
   }
 }
 
+/**
+ * Render one cue to [left, right]. A palette spec ({ voice, params }) is stereo; `params` overrides the
+ * spec's own (a page's data-length). A layered spec is mono, played on both channels.
+ */
+export function renderCueStereo(spec, seed = 1, params = {}) {
+  if (spec.voice) return renderVoice(spec.voice, { ...spec.params, ...params }, seed);
+  const m = renderCue(spec, seed);
+  return [m, m];
+}
+
 export function renderCue(spec, seed = 1) {
+  if (spec.voice) {
+    const [l, r] = renderVoice(spec.voice, spec.params, seed);
+    return l.map((v, i) => (v + r[i]) / 2);
+  }
   const layers = spec.layers || [];
   const tail = (spec.shimmer ? spec.shimmer.delay * 6 : 0) + 0.08;
   const dur = Math.max(...layers.map((l) => (l.offset || 0) + (l.attack || 0) + (l.decay || 0) * 5), 0.05) + tail;
@@ -169,11 +134,23 @@ export function normalize(samples, ceiling = 0.8) {
   return samples;
 }
 
+/** normalize for [left, right]: one gain for both, so the stereo image keeps its balance. */
+export function normalizeStereo(channels, ceiling = 0.8) {
+  let peak = 0;
+  for (const c of channels) for (let i = 0; i < c.length; i++) { const a = Math.abs(c[i]); if (a > peak) peak = a; }
+  if (peak < 1e-6) return channels;
+  const g = ceiling / peak;
+  for (const c of channels) for (let i = 0; i < c.length; i++) c[i] *= g;
+  return channels;
+}
+
 // ---------------------------------------------------------------- WAV
 // Pure encode, no I/O: core/ is fetched and evaluated by a browser, so nothing here may import
 // node:fs. The caller (a CLI script, which already has fs) writes the returned Buffer to disk.
+// `samples` is a Float32Array (mono) or [left, right]; `stereo` writes a mono array on both channels.
 export function encodeWav(samples, { stereo = false } = {}) {
-  const ch = stereo ? 2 : 1, n = samples.length, bytes = n * 2 * ch;
+  const pair = Array.isArray(samples);
+  const ch = pair || stereo ? 2 : 1, n = pair ? samples[0].length : samples.length, bytes = n * 2 * ch;
   const buf = Buffer.alloc(44 + bytes);
   buf.write('RIFF', 0); buf.writeUInt32LE(36 + bytes, 4); buf.write('WAVE', 8);
   buf.write('fmt ', 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20); buf.writeUInt16LE(ch, 22);
@@ -181,15 +158,16 @@ export function encodeWav(samples, { stereo = false } = {}) {
   buf.write('data', 36); buf.writeUInt32LE(bytes, 40);
   let o = 44;
   for (let i = 0; i < n; i++) {
-    const v = Math.round(clamp(samples[i], -1, 1) * 32767);
+    const v = Math.round(clamp(pair ? samples[0][i] : samples[i], -1, 1) * 32767);
     buf.writeInt16LE(v, o); o += 2;
-    if (stereo) { buf.writeInt16LE(v, o); o += 2; }
+    if (pair) { buf.writeInt16LE(Math.round(clamp(samples[1][i], -1, 1) * 32767), o); o += 2; }
+    else if (stereo) { buf.writeInt16LE(v, o); o += 2; }
   }
   return buf;
 }
 
 // samples.length / SR, named so a caller doesn't need to import SR just to compute a duration.
-export function wavDuration(samples) { return samples.length / SR; }
+export function wavDuration(samples) { return (Array.isArray(samples) ? samples[0].length : samples.length) / SR; }
 
 // ---------------------------------------------------------------- CUE LIBRARY
 // Voicings ported from Cuelume (MIT © Daniel White). Grouped by the role a video actually needs.
@@ -374,6 +352,21 @@ export const CUES = {
   // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   braam: {"masterGain": 0.42, "layers": [{"kind": "tone", "waveform": "tri", "frequency": 74.52258396847174, "detune": -22.92972768098116, "attack": 0.3493133140960708, "decay": 0.9, "peak": 0.2142857142857143}, {"kind": "tone", "waveform": "saw", "frequency": 111.7838759527076, "detune": 29.808645985275508, "attack": 0.37931331409607083, "decay": 0.9, "peak": 0.125}, {"kind": "tone", "waveform": "tri", "frequency": 149.04516793694347, "detune": -36.687564289569856, "attack": 0.4093133140960708, "decay": 0.9, "peak": 0.08823529411764706}, {"kind": "tone", "waveform": "saw", "frequency": 223.5677519054152, "detune": 43.5664825938642, "attack": 0.4393133140960708, "decay": 0.9, "peak": 0.06818181818181818}, {"kind": "noise", "filterType": "bandpass", "filterFrequency": 857.5214679539204, "filterGlideTo": 2744.068697452545, "filterGlideTime": 1.1093133140960707, "filterQ": 1.0484928160905838, "attack": 0.4093133140960708, "decay": 0.7, "peak": 0.2838631074968726, "offset": 0}]},
+
+  // ---- THE SUBTLE PALETTE (core/audio/palette.mjs): stereo, seeded per use, with a generated room ------
+  // Quiet by default. Each is a pure function of its seed; the mixer gives every <audio> its own seed.
+  // data-length (s) sets `air`, `swoosh-long` and `swell-soft` to the move they sit under; the swell
+  // peaks `length` seconds after data-at, so put data-at that far before the moment.
+  tap: { voice: 'tap' },
+  tick: { voice: 'tick' },
+  air: { voice: 'air', params: { length: 0.45 } },
+  'swoosh-long': { voice: 'swoosh-long', params: { length: 1.1 } },
+  shimmer: { voice: 'shimmer' },
+  glass: { voice: 'glass' },
+  'swell-soft': { voice: 'swell-soft', params: { length: 1.5 } },
+  'sub-thump': { voice: 'sub-thump' },
+  // A soft evolving pad and air, an 11.9 s loop with no seam. Use with `loop` (the music bed).
+  bed: { voice: 'bed' },
 };
 
 /**
@@ -387,6 +380,12 @@ export const DEFAULT_GAIN_DB = {
   pluck: -6, chime: -6, sparkle: -6, droplet: -6, bloom: -6, success: -6, ready: -6,
   whoosh: -4, riser: -4, swell: -4,
   impact: -2, drop: -2, braam: -2,
+  // The palette: every cue peaks within 4 dB of the others (-14 to -18 dBFS after the 0.8 ceiling). The taps
+  // get the high end of that range because equal peaks make a sustained cue 5 to 10 dB louder than a tap
+  // (loudest 100 ms RMS, measured once by hand). The bed sits 12 dB under the quietest cue. A sparse film of
+  // these lands near -30 LUFS, the bottom of the band that harness/lib/draft-check.mjs accepts.
+  tap: -12, tick: -14, air: -14, 'swoosh-long': -14, shimmer: -16, glass: -16, 'swell-soft': -15, 'sub-thump': -14,
+  bed: -28,
 };
 for (const name of Object.keys(CUES)) if (!(name in DEFAULT_GAIN_DB)) throw new Error(`audio: voice "${name}" has no DEFAULT_GAIN_DB entry`);
 
