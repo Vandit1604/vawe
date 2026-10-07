@@ -46,3 +46,25 @@ test('seeking back into a finished fill:none animation applies it again', async 
     assert.deepEqual(await opacities(late), expected);
   } finally { await browser.close(); }
 });
+
+test('an animation the page cancelled or removed stays gone on later seeks', async () => {
+  const browser = await puppeteer.launch({ headless: true, args: pageArgs(true) });
+  try {
+    const page = await browser.newPage();
+    await page.evaluateOnNewDocument(`window.__pageSeek = ${seekTo};`);
+    await page.goto(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+    await seek(page, 0.25);
+    assert.deepEqual(await opacities(page), ['0.2', '0.3']);
+
+    await page.evaluate(() => {
+      document.getElementById('css').getAnimations().forEach((a) => a.cancel());
+      document.getElementById('waapi').getAnimations().forEach((a) => a.cancel());
+    });
+    await seek(page, 0.25);
+    assert.deepEqual(await opacities(page), ['1', '1']);
+
+    await page.evaluate(() => document.getElementById('css').remove());
+    await seek(page, 0.5);
+    assert.equal(await page.evaluate(() => document.getAnimations().length), 0);
+  } finally { await browser.close(); }
+});
