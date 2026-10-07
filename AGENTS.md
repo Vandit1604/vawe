@@ -37,18 +37,19 @@ next command for the film you edited last.
 | # | stage | the command |
 |---|---|---|
 | 1 | brief (facts only) | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing facts first (write them to a file, answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
-| 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives (ground or light, type, colour, layout, motion), before any design file |
+| 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives. Then how they MOVE: `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves (ref id, cut second) |
 | 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, skills used and rules rejected) and `films/<name>/kit/` (ground layers; each moving part its own element); `vawe-page` names the skills |
-| 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` (one still per world, about 2 s) |
-| 5 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
-| 6 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
-| 7 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
-| 8 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
+| 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
+| 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows and a bed |
+| 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
+| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut, fix what reads flat |
+| 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
+| 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
+| 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
 
-Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Frames of a film:
-`vawe refs frames` (reference films, settled full-size frames per shot) and `vawe frames` (your page); a film measured:
-`vawe spec`; side by side: `vawe compare`. If a verb is missing what you need, say so in your report; do not hand-roll it.
-Before you design, study the references: `bin/vawe refs list`, then Read `~/.vawe/refs/frames/<id>/*.png` at full size.
+Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe refs frames` (reference stills),
+`vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),
+`vawe compare` (side by side). If a verb is missing what you need, say so in your report; do not hand-roll it.
 
 Every step logs to `out/<film>.runs.jsonl`: set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell, then `bin/vawe runs <film>` or `--all` reads the log.
 

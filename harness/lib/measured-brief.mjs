@@ -178,6 +178,7 @@ const gatesText = (name) => `Do the gates in order. A failed gate sends you back
    on its own page films/${name}/labs/<piece>.html at 3 sizes (\`bin/vawe dev <lab> --aspect 16:9\`, then
    \`1:1\`, then \`9:16\`). Fix a piece in its lab before it goes in the film.
 3. Draft loop: \`bin/vawe dev films/${name}/page.html\`, fix, repeat until every Acceptance row is green.
+   Then Read \`bin/vawe strip films/${name}/page.html --cuts\` for every cut and fix what reads flat.
    Then \`bin/vawe critique films/${name}/page.html\` in a session that did not write the page.
 4. Final: \`bin/vawe ship films/${name}/page.html\`, then \`bin/vawe ship --status films/${name}/page.html --wait\`.`;
 

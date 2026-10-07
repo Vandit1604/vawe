@@ -13,14 +13,20 @@ The contract (duration meta, seek, aspect, literals) is in `AGENTS.md`. Start wi
 
 This file is `skills/vawe-page/SKILL.md` in the repo. Use `bin/vawe` verbs, never raw ffmpeg or Chrome (`bin/vawe --help`).
 Order: (1) the brief, facts only. (2) Study the references (`bin/vawe refs frames`, Read `~/.vawe/refs/frames/<id>/*.png`
-at full size), then fill brief.md "Taken from": 4 to 6 named frame paths and what each gives. (3) Write
+at full size), then fill brief.md "Taken from": 4 to 6 named frame paths and what each gives. Then study how they move:
+`bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves with the ref id and cut second. (3) Write
 `films/<name>/DESIGN.md` and `films/<name>/kit/`: ground layers, and each moving part (word, mark, bar, card, icon,
 wordmark) as its own element. Fetch skills with `command npx -y ui-skills get <slug>`: `leonxlnx/soft-skill` (builder),
 `pbakaus/colorize`, `mengto/progressive-blur`. Take the principles; reject web-page patterns (nav, CTA button, pill,
 eyebrow, section padding): a video frame is not a hero page. Record the skills used and the rules rejected in DESIGN.md.
 (4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a
-ground that is never flat (a light, grain or depth device named from a reference frame, changed at each world turn). Then
-the Shots rows, the motion and `bin/vawe dev`: phases 5 and 6 (board, motion) are still being tested.
+ground that is never flat (a light, grain or depth device named from a reference frame, changed at each world turn).
+(5) Fill the brief's Board: a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s),
+the spectacle second (also `<meta name="spectacle">`; recipe 15 in `prompts/moves/RECIPES.md`), a named move per cut
+(overlap, camera, what carries the eye, which arrivals overshoot: `EASE.nudge` for ordinary ones, `EASE.pop` for the hero),
+and sound: a subtle bed plus one voice per cut and for the spectacle (`bin/vawe sounds`). (6) Then the Shots rows, the
+motion and `bin/vawe dev`. The motion is done when overshoot-share, live-hold and seam-variety are clean or waived with a
+reason, and you have Read `bin/vawe strip <page> --cuts` for every cut and fixed what reads flat.
 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->

@@ -150,7 +150,7 @@ export function overshootShare(records, boxArrivals = []) {
   const at = Math.min(...arrivals.map((a) => a.at));
   const counted = `${over} of ${arrivals.length} arrivals overshoot (${pct(share)}%)`;
   if (share < SHOOT.share_min_pct) return [finding('overshoot-share', at, `${counted}; the reference films overshoot ${SHOOT.share_min_pct}% to 41%`,
-    'give about 1 in 3 arrivals a spring: EASE.pop, or curveToLinear(CURVES.overshoot) from core/motion/springs.js')];
+    'give about 1 in 3 arrivals a small spring: EASE.nudge (stagger(els, {nudgeEvery: 3})); keep EASE.pop for the one hero arrival')];
   if (share > SHOOT.share_max_pct) return [finding('overshoot-share', at, `${counted}; the reference films overshoot 41% at most`,
     'land most arrivals on EASE.land and keep the spring for the one that matters')];
   return [];
