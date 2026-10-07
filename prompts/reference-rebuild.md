@@ -37,7 +37,7 @@ spectacle second. Do not write page code yet.
 
 <spec>
 Fill the Shots, Words and Objects tables of brief.md, at every cut and every hold. Shots: start and end
-in seconds, what the viewer notices, the move in and out (name it from core/motion/motion.js EASINGS;
+in seconds, what the viewer notices, the move in and out (name it from core/motion/easings.js EASINGS;
 fit, do not guess), the camera. Words: every on-screen string quoted exactly, with appear and settle
 seconds, cap height and position as a percent of the frame from its top left, weight, colour. Objects:
 every moving element with its in, settle and out seconds. Exits should run shorter than entrances; write
