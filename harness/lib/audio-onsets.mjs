@@ -2,7 +2,7 @@
 //
 // One ffmpeg pass to mono PCM, one pass over the samples for a short-window loudness envelope and its
 // onsets (a sudden rise over the trailing floor). No library, the same arithmetic as the pixel sweeps.
-// Owned here so audio-render-check (scene JSON) and page-check (page) read the same onsets.
+// Owned here so every check that reads onsets reads the same ones.
 import { spawnSync } from 'node:child_process';
 
 export const SR = 8000;

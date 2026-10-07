@@ -1,5 +1,5 @@
 // core/color/harmony.js: classic hue-wheel colour harmonies, built on toHsl/fromHsl. Each returns
-// hex strings so an authoring tool can drop the result straight into a scene JSON's palette.
+// hex strings so an authoring tool can drop the result straight into a page's palette.
 import { toHsl, fromHsl } from './hsl.js';
 import { format, asColor } from './parse.js';
 
