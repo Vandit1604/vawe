@@ -298,6 +298,29 @@ export const VERBS = [
     build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['sounds'] }],
   },
   {
+    name: 'timeline', summary: 'the worlds, cut rhythm, spectacle and every audio cue as text, before any pixel; about 3 s',
+    positional: [PAGE],
+    flags: [{ name: 'json', type: 'bool', help: 'print the same data as JSON' }],
+    example: 'vawe timeline films/my-launch/page.html',
+    build: (v, [page]) => [{ script: 'harness/media/timeline.mjs', args: [page, ...(v.json ? ['--json'] : [])] }],
+    next: (v, [page]) => `fix a flagged rhythm or a cue in the wrong world, then bin/vawe audio ${page} --waveform to check each sound on its event`,
+  },
+  {
+    name: 'audio', summary: 'which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
+    positional: [PAGE],
+    flags: [
+      { name: 'at', type: 'string', help: 'comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },
+      { name: 'waveform', type: 'bool', help: 'one PNG: mixed waveform, loudness curve, world starts as dashed lines, a tick per cue start; prints LUFS and true peak' },
+      { name: 'out', type: 'path', default: 'out/<film>-waveform.png', help: 'with --waveform: the PNG path' },
+    ],
+    example: 'vawe audio films/my-launch/page.html --at 0.8,2.75   |   vawe audio films/my-launch/page.html --waveform',
+    build: (v, [page]) => {
+      if (!v.at && !v.waveform) throw new UsageError('give --at <s,s,...> or --waveform; usage: vawe audio <page> --at 0.8,2.75');
+      return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(v.waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
+    },
+    next: (v) => (v.waveform ? 'Read the PNG: each orange tick must sit on the dashed world line of its visual event; move a cue with data-at or data-on' : 'a cue 0 s into itself starts at that second; move one that is off its event with data-at'),
+  },
+  {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',
     positional: [], flags: [],
     example: 'vawe e2e',

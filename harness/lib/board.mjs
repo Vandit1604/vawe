@@ -51,16 +51,21 @@ export function spectacleOf(html) {
 
 const s1 =(x) => `${Math.round(x * 100) / 100}`;
 
+/** Rhythm advice for cut lengths in seconds: all equal, none under CUT_SHORT_S, none over CUT_LONG_S. [] for fewer than 2 cuts. Pure. */
+export function cutAdvice(cuts) {
+  if (cuts.length < 2) return [];
+  const lines = [];
+  if (cuts.every((c) => c === cuts[0])) lines.push(`all ${cuts.length} cuts last ${s1(cuts[0])} s; vary them`);
+  if (cuts.every((c) => c >= CUT_SHORT_S)) lines.push(`no cut under ${CUT_SHORT_S} s; add one quick cut`);
+  if (cuts.every((c) => c <= CUT_LONG_S)) lines.push(`no cut over ${CUT_LONG_S} s; add one slow cut`);
+  return lines;
+}
+
 /** Advice lines for a filled board: rhythm, spectacle, sound, moves. `pageSpectacle` is the page's `<meta name="spectacle">` in seconds, or null. [] for a brief with no filled board. */
 export function boardChecks(brief, pageSpectacle = null) {
   if (boardFilled(brief ?? '') !== true) return [];
   const { cuts, moves, sound, spectacle } = parseBoard(brief);
-  const lines = [];
-  if (cuts.length >= 2) {
-    if (cuts.every((c) => c === cuts[0])) lines.push(`board: all ${cuts.length} cuts last ${s1(cuts[0])} s; vary them`);
-    if (cuts.every((c) => c >= CUT_SHORT_S)) lines.push(`board: no cut under ${CUT_SHORT_S} s; add one quick cut`);
-    if (cuts.every((c) => c <= CUT_LONG_S)) lines.push(`board: no cut over ${CUT_LONG_S} s; add one slow cut`);
-  }
+  const lines = cutAdvice(cuts).map((l) => `board: ${l}`);
   if (spectacle === null) lines.push('board: the Spectacle line names no second ("at 7.2"); name the one big moment');
   else if (pageSpectacle !== null && Math.abs(spectacle - pageSpectacle) > SPECTACLE_TOLERANCE_S) {
     lines.push(`board: the Spectacle is at ${s1(spectacle)} s but <meta name="spectacle"> says ${s1(pageSpectacle)} s; make them one second`);

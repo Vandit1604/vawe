@@ -14,6 +14,7 @@
 // safety limiter runs, and it never raises a level. <meta name="loudness"> opts in to normalising to it.
 // A cue that peaks more than 6 dB above the median cue is warned about, never refused.
 // CLI: node harness/media/page-audio.mjs <page.html> <video.mp4> <out.mp4>
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -57,7 +58,7 @@ function toFilePath(rawSrc, pageUrl, pagePath) {
  * without it a src resolves against the repo root that the preview server serves.
  * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, duck (dB or null), role }
  */
-export async function readPageAudio(page, { pagePath } = {}) {
+export async function readPageAudio(page, { pagePath, spans } = {}) {
   const raw = await page.evaluate(() => {
     const num = (el, k, d) => { const v = parseFloat(el.dataset[k]); return Number.isFinite(v) ? v : d; };
     const tracks = [...document.querySelectorAll('audio')].map((el) => ({
@@ -82,30 +83,38 @@ export async function readPageAudio(page, { pagePath } = {}) {
     if (!fs.existsSync(file)) problems.push(`${where}: src="${src}" resolved to ${file}, which does not exist`);
     return { ...t, src: file, gain: t.gain ?? 0 };
   });
-  problems.push(...await startOnWorlds(page, specs, raw.duration));
+  problems.push(...await startOnWorlds(page, specs, raw.duration, spans));
   if (problems.length) throw new Error(problems.join('\n'), { cause: { problems } });
   for (const s of specs) s.role ||= 'sfx';
-  return { specs, loudness: raw.loudness };
+  return { specs, loudness: raw.loudness, duration: raw.duration };
 }
 
-// data-on="world:<id>" moves a cue to the second world <id> first shows, plus its data-at. The page's own
-// seek finds the second, so the cue follows the film when the animation changes. Returns the problems.
-async function startOnWorlds(page, specs, duration) {
-  const on = specs.filter((s) => s.on);
-  if (!on.length) return [];
-  const bad = on.filter((s) => !/^world:\S+$/.test(s.on)).map((s) => `<audio> at ${s.at} s: data-on="${s.on}" is not world:<id>`);
-  if (bad.length) return bad;
-  if (!(duration > 0) || !(await page.evaluate(() => typeof window.__pageSeek === 'function'))) {
-    return ['data-on needs <meta name="duration"> and the renderer\'s page seek: it cannot run here'];
-  }
-  const { sampleWorlds } = await import('./world-sample.mjs');
-  const spans = await sampleWorlds(page, duration, (ms) => page.evaluate((t) => window.__pageSeek(t / 1000), ms));
-  return on.flatMap((s) => {
+/** Moves each data-on="world:<id>" spec to the second world <id> first shows, plus its data-at. Returns the problems. Pure but for the `at` it sets. */
+export function startOnSpans(specs, spans) {
+  return specs.filter((s) => s.on).flatMap((s) => {
+    if (!/^world:\S+$/.test(s.on)) return [`<audio> at ${s.at} s: data-on="${s.on}" is not world:<id>`];
     const span = spans.find((w) => w.id === s.on.slice(6));
     if (span?.start == null) return [`<audio> data-on="${s.on}": no world shows with that id (worlds: ${spans.map((w) => w.id).join(' ')})`];
     s.at += span.start;
     return [];
   });
+}
+
+// data-on="world:<id>" follows the page's own seek, so the cue follows the film when the animation changes.
+// `spans` (from sampleWorlds) saves a second sampling when the caller has them.
+async function startOnWorlds(page, specs, duration, spans) {
+  const on = specs.filter((s) => s.on);
+  if (!on.length) return [];
+  if (!spans) {
+    const bad = on.filter((s) => !/^world:\S+$/.test(s.on));
+    if (bad.length) return startOnSpans(bad, []);
+    if (!(duration > 0) || !(await page.evaluate(() => typeof window.__pageSeek === 'function'))) {
+      return ['data-on needs <meta name="duration"> and the renderer\'s page seek: it cannot run here'];
+    }
+    const { sampleWorlds } = await import('./world-sample.mjs');
+    spans = await sampleWorlds(page, duration, (ms) => page.evaluate((t) => window.__pageSeek(t / 1000), ms));
+  }
+  return startOnSpans(specs, spans);
 }
 
 function probePeakDb(file) {
@@ -198,7 +207,7 @@ function normaliseFilter(mixWav, loudness) {
   return `loudnorm=I=${loudness}:TP=${PEAK_LIMIT_DB}:LRA=11:${measured}:linear=true,aresample=${RATE}`;
 }
 
-/** Mix the specs into `<tmp>/mix.wav` as written (no limiter, no normalising). Returns the wav path and the cue-spread warnings. */
+/** Mix the specs into `<tmp>/mix.wav` as written (no limiter, no normalising). Returns the wav path, the cue-spread warnings and the tracks ({ spec, file, seconds, peakDb }). */
 function writeMix(specs, duration, tmp) {
   const tracks = specs.map((spec, i) => ({ spec, ...materialise(spec, tmp, i) }));
   const windows = duckWindows(tracks, duration);
@@ -207,7 +216,32 @@ function writeMix(specs, duration, tmp) {
   const graph = `${chains.join(';')};${labels}amix=inputs=${tracks.length}:normalize=0:duration=longest:dropout_transition=0,apad,atrim=end=${f(duration)}[mix]`;
   const mixWav = path.join(tmp, 'mix.wav');
   run('ffmpeg', ['-y', '-loglevel', 'error', ...tracks.flatMap((t) => ['-i', t.file]), '-filter_complex', graph, '-map', '[mix]', '-c:a', 'pcm_f32le', mixWav]);
-  return { warnings: cueSpreadWarnings(tracks), mixWav };
+  return { warnings: cueSpreadWarnings(tracks), mixWav, tracks };
+}
+
+const mixKey = (specs, duration) => crypto.createHash('sha1').update(JSON.stringify({
+  specs, duration, kit: fs.statSync(path.join(REPO_ROOT, 'core/audio/kit.mjs')).mtimeMs,
+  files: specs.filter((s) => s.src).map((s) => { const st = fs.statSync(s.src); return [st.size, st.mtimeMs]; }),
+})).digest('hex');
+
+/**
+ * renderMixCached({ specs, duration, dir }) -> { mixWav, tracks, measured: { I, TP }, cached }
+ * The mix as written, kept in `dir` with its tracks and loudness; a second call with the same specs, duration, source files and
+ * synth kit returns them without rendering. `dir` is owned by this function.
+ */
+export function renderMixCached({ specs, duration, dir }) {
+  const key = mixKey(specs, duration);
+  const info = path.join(dir, 'mix.json');
+  if (fs.existsSync(info)) {
+    const kept = JSON.parse(fs.readFileSync(info, 'utf8'));
+    if (kept.key === key && fs.existsSync(kept.mixWav)) return { ...kept, cached: true };
+  }
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
+  const { mixWav, tracks } = writeMix(specs, duration, dir);
+  const kept = { key, mixWav, tracks, measured: measureFile(mixWav) };
+  fs.writeFileSync(info, JSON.stringify(kept));
+  return { ...kept, cached: false };
 }
 
 /** { I, TP }: integrated LUFS and true peak dBFS of the mix as written, before the limiter; null when there are no specs. */
