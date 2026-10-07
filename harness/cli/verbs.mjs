@@ -7,6 +7,9 @@ import { UsageError } from './parse.mjs';
 import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
+import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
+import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
 export const SERIAL_TESTS = ['tests/media/check-budget.test.mjs'];
@@ -194,6 +197,44 @@ export const VERBS = [
       return [{ script: 'harness/media/see.mjs', args: [film, ...(v.cuts ? ['--cuts'] : ['--moment', v.at]), '--span', String(span), '--fps', String(fps), ...opt('--out', v.out)] }];
     },
     next: (v) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}`,
+  },
+  {
+    name: 'onion', summary: 'several frames of one move blended into ONE image, newest strongest, older ones fainter and tinted cool to warm: the spacing, path and overshoot of the move',
+    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list (uses the 1080p copy)' }],
+    flags: [
+      { name: 'at', type: 'string', help: 'the second to centre the onion on' },
+      { name: 'span', type: 'number', default: ONION_SPAN, help: 'seconds of film the frames cover' },
+      { name: 'n', type: 'number', default: ONION_FRAMES, help: 'frames blended, from 2 to 12' },
+      { name: 'out', type: 'path', default: 'out/onion/<film>', help: 'folder for the PNG' },
+    ],
+    example: 'vawe onion out/my-launch.mp4 --at 8.4 --span 0.6 --n 6   |   vawe onion u6iro1jHujs --at 12.3',
+    build: (v, [film]) => {
+      const span = v.span ?? ONION_SPAN;
+      const n = v.n ?? ONION_FRAMES;
+      const problem = onionProblem({ at: v.at, span, n });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/see.mjs', args: [film, '--onion', v.at, '--span', String(span), '--n', String(n), ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe velocity gives the numbers for a page',
+  },
+  {
+    name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page)',
+    positional: [PAGE],
+    flags: [
+      { name: 'at', type: 'string', help: 'the second to centre the window on' },
+      { name: 'span', type: 'number', default: VELOCITY_SPAN, help: 'seconds of film in the window, sampled 120 a second' },
+      { name: 'sel', type: 'string', help: 'a CSS selector: graph every element it matches (default: the 4 elements that move most)' },
+      { name: 'ids', type: 'string', help: 'element ids, comma separated, instead of --sel' },
+      { name: 'out', type: 'path', default: 'out/velocity', help: 'folder for the PNG' },
+    ],
+    example: 'vawe velocity films/my-launch/page.html --at 2.75   |   vawe velocity films/my-launch/page.html --at 4 --span 0.5 --sel .card',
+    build: (v, [page]) => {
+      const span = v.span ?? VELOCITY_SPAN;
+      const problem = velocityProblem({ at: v.at, span, sel: v.sel, ids: v.ids });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/see.mjs', args: [page, '--velocity', v.at, '--span', String(span), ...opt('--sel', v.sel), ...opt('--ids', v.ids), ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read the PNG, then fix the move the summary names: the page literal that sets its ease, its duration or its overshoot',
   },
   {
     name: 'coverage', summary: 'SSIM of your render against the reference at every step; the done check for a recreation',
