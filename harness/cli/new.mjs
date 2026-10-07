@@ -272,7 +272,13 @@ Phase 2, before any design file. Study the references (\`bin/vawe refs list\`, t
 
 | frame (exact path) | what you take |
 |---|---|
-| [path/to/frame.png] | [ground or light, type, colour, layout or motion] |`;
+| [path/to/frame.png] | [ground or light, type, colour, layout or motion] |
+
+Then study how the references MOVE, since stills do not show it: run \`bin/vawe strip <ref-id> --cuts\` on 2 reference films, Read the strips, and name 3 moves you take (the ref id, the cut second, the move from prompts/moves).
+
+| move taken | ref id | cut s |
+|---|---|---|
+| [move name] | [ref id] | [s] |`;
 
 const systemText = (name) => `## Design system and kit
 
@@ -283,7 +289,34 @@ const statesText = () => `## States
 
 Phase 4: one static key frame per world, built from the kit, before any motion. Budget: the reference frames show a median of 1 text line, 1 word and 2 objects. A state shows about 1 line and 2 or 3 things. Its ground is never flat: one light, grain or depth device per film, named from a Taken from frame, and the ground changes at each world turn.`;
 
-const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
+const boardText = () => `## Board
+
+Phase 5, after the states and before any motion. The board is a plan for time: rhythm, spectacle, transitions, sound. It is not a list of frames. Name each move from prompts/moves (\`prompts/moves/README.md\`), never "fade" by default. Replace every bracket.
+
+Rhythm: cut lengths and holds are NOT all equal. At least one cut under 0.4 s, one over 0.9 s, and holds that vary.
+
+| beat | in s | hold s | cut out s (length) |
+|---|---|---|---|
+| [s1] | [0] | [s] | [s] |
+
+Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Quiet before it: [1 to 2 s of fewer, slower moves, what stays]. Release after: [what drifts, what stops arriving]. Build it from recipe 15 in prompts/moves/RECIPES.md.
+
+| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) |
+|---|---|---|---|---|---|---|---|
+| [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] |
+
+Sound is part of every film, subtle: a bed for the whole film, one voice per cut and one for the spectacle (names from \`bin/vawe sounds\`, never a fixed list).
+
+| at s | voice | gain dB | for |
+|---|---|---|---|
+| [0] | [bed, loop] | [dB] | [the whole film] |
+| [s] | [voice] | [dB] | [a cut or the spectacle] |`;
+
+const motionText = () => `## Motion pass
+
+Phase 6, after the first draft. The motion is done when \`bin/vawe dev\` shows overshoot-share, live-hold (still windows) and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut and fixed what reads flat.`;
+
+const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['board'], ['motion'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
 
 const heading = (text) => `${text[0].toUpperCase()}${text.slice(1)}`;
 
@@ -293,12 +326,12 @@ function briefText(name, templateRel, questions, sections, answers, measured, re
     ? lines.join('\n')
     : '- the template has no question bank: write the promise, the moments and the platform';
   const own = Object.fromEntries(sections.map((s) => [s.name, s.body.replaceAll('<name>', name)]));
-  const fixed = { taken: takenFromText(), directions: directionsText(name), signature: signatureSection(undefined, variety), system: systemText(name), states: statesText() };
+  const fixed = { taken: takenFromText(), directions: directionsText(name), signature: signatureSection(undefined, variety), system: systemText(name), states: statesText(), board: boardText(), motion: motionText() };
   const skeleton = SKELETON.filter(([key]) => fixed[key] || measured.sections[key]).map(([key, title]) => (
     fixed[key] ?? `## ${title}\n\n${own[key] ? `${own[key]}\n\n` : ''}${measured.sections[key]}`));
   const rest = sections.filter((s) => !SKELETON.some(([key]) => key === s.name))
     .map((s) => `## ${heading(s.name)}\n\n${own[s.name]}`);
-  const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: taste/build/DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: quiet ticks at default gains, at most one soft swell (rule sound-swell).\n\nbin/vawe dev films/${name}/page.html\n`;
+  const tail = `## First draft\n\n${recipe ? `${recipeLine(recipe)}.\n\n` : ''}Taste: taste/build/DIGEST.md (the full card is for the judge). Moves to copy: prompts/moves/README.md. Sound: the Board's sound rows, subtle (rule sound-swell).\n\nbin/vawe dev films/${name}/page.html\n`;
   const head = `# ${name}: brief\n\nTemplate: ${templateRel}. Shape: prompts/ANATOMY.md. Replace each ${UNANSWERED} with the answer, or keep the default. Replace each ${GUESS} with a measured value or your own choice.\n\n## Inputs\n\n${inputs}`;
   return [head, ...skeleton, ...rest, tail].join('\n\n');
 }
@@ -398,7 +431,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
   ];
   const spread = variety.lines.length ? ['', ...variety.lines] : [];
   return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('explore'), '',
-    ...adviceBlock(advice, '(advice only)'), '', `next: study the references and fill "Taken from" in films/${name}/brief.md (4 to 6 named frames); then DESIGN.md and kit/, then one static state per world in page.html, then bin/vawe frames ${page}`];
+    ...adviceBlock(advice, '(advice only)'), '', `next: study the references and fill "Taken from" in films/${name}/brief.md (4 to 6 named frames, then 3 moves from bin/vawe strip <ref-id> --cuts); then DESIGN.md and kit/, one static state per world in page.html, bin/vawe frames ${page}, the Board, then the motion`];
 }
 
 /**
