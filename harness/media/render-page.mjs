@@ -411,10 +411,11 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
 
 // Same libx264 settings the Go renderer uses for its final and draft encodes (renderer/internal/encode/
 // encode.go), except CRF 16 where encode.go uses 20: a page is captured lossless and CRF 16 keeps thin
-// type and gradients clean. Draft is ultrafast. aq-mode=3 spends bits on dark flat areas, where 8-bit bands.
+// type and gradients clean. The final uses preset fast: against medium it encodes 25% faster for a 15% larger file, 49 dB PSNR apart
+// (preset faster is 2x quicker but leaves a 54 px flat run on the dark ramp of render-banding.test.mjs). Draft is ultrafast. aq-mode=3 spends bits on dark flat areas, where 8-bit bands.
 function x264Args(final) {
   return final
-    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'medium', '-crf', '16', '-x264-params', 'aq-mode=3', '-movflags', '+faststart']
+    ? ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-preset', 'fast', '-crf', '16', '-x264-params', 'aq-mode=3', '-movflags', '+faststart']
     : ['-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'ultrafast', '-crf', '20', '-movflags', '+faststart'];
 }
 
