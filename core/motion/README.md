@@ -76,6 +76,14 @@ camera(newWorld, { kind: 'whipIn', at: 5, duration: 0.3 });
 focus(farWord, { at: 3.5, blur: 9, scale: 0.8, opacity: 0.4 });
 ```
 
+`ramp(outEl, inEl, { at, kind: 'scaleOut' | 'scaleIn' | 'x' | 'y', duration = 0.45, amount, inAmount, blur, fade })` is a speed ramp across a cut at `at`:
+the outgoing move ends there on an accelerating ease, the incoming starts there on a decelerating one, and the two handle speeds are solved so
+the velocity is equal on both sides of the cut (`rampSpeeds` shows it). `inEl` must cover `outEl`. See [speed-ramp](../../prompts/moves/speed-ramp.md).
+
+```js
+ramp(document.querySelector('.seq'), document.querySelector('.final'), { at: 18.8, kind: 'scaleOut' });
+```
+
 `pickBand(px)` names the band for a move of that many pixels at the 700 px/s an eye follows;
 `bandOf(seconds)` names the band a duration sits in.
 

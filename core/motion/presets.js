@@ -235,6 +235,88 @@ export function parallax(layers, opts) {
   return layers.flatMap(([el, depth]) => camera(el, { ...opts, strength: depth }));
 }
 
+const RAMP = {
+  scaleOut: { out: (a) => 1 - a, into: (b) => 1 + b, prop: 'scale', amount: 0.3, inAmount: 0.4 },
+  scaleIn: { out: (a) => 1 + a, into: (b) => 1 - b, prop: 'scale', amount: 0.3, inAmount: 0.4 },
+  x: { prop: 'translate', amount: 40, inAmount: 60, axis: 0 },
+  y: { prop: 'translate', amount: 40, inAmount: 60, axis: 1 },
+};
+const RAMP_OUT_SHARE = 0.4;
+const RAMP_OUT_SPEED = 3.5;
+const RAMP_REACH = 0.4;
+const RAMP_TOLERANCE = 0.0003;
+const RAMP_Y_CAP = 0.7;
+const reach = (speed) => +(100 * Math.min(RAMP_REACH, RAMP_Y_CAP / speed)).toFixed(2);
+
+/**
+ * Pure: the durations, handles and end speeds of a ramp. The in handle speed is solved so the velocity
+ * at the end of the outgoing move (amount / dOut x its end speed) equals the velocity at the start of the
+ * incoming one (inAmount / dIn x its start speed), in the move's own units per second.
+ */
+export function rampSpeeds({ duration = 0.45, amount, inAmount, kind = 'scaleOut' } = {}) {
+  const r = RAMP[kind];
+  if (!r) throw new Error(`presets: unknown ramp "${kind}"; valid: ${Object.keys(RAMP).join(' ')}`);
+  const [a, b] = [amount ?? r.amount, inAmount ?? r.inAmount];
+  const dOut = +(duration * RAMP_OUT_SHARE).toFixed(4), dIn = +(duration - dOut).toFixed(4);
+  const outSpeed = RAMP_OUT_SPEED;
+  const inSpeed = +((outSpeed * a * dIn) / (dOut * b)).toFixed(4);
+  return {
+    dOut, dIn, amount: a, inAmount: b, outSpeed, inSpeed,
+    outEase: handleCurve('easyEase', { influence: reach(outSpeed), speed: outSpeed }),
+    inEase: handleCurve({ influence: reach(inSpeed), speed: inSpeed }, 'long'),
+    velocity: { out: (a / dOut) * outSpeed, in: (b / dIn) * inSpeed },
+  };
+}
+
+const hidden = (delay, duration, fill, id) => ({
+  keyframes: [{ visibility: 'hidden' }, { visibility: 'hidden' }],
+  timing: { delay: ms(delay), duration: ms(duration), fill, id },
+});
+
+/**
+ * Pure: a speed ramp across a cut at `at`. The outgoing move ends there, the incoming starts there, and the
+ * two ease so the velocity is the same on both sides of the cut. kind scaleOut | scaleIn | x | y;
+ * opts { at, duration (total, 0.45), amount (outgoing travel), inAmount (incoming travel), blur (px), fade (outgoing opacity at the cut), dir, origin }.
+ * Scale amounts are scale units, x and y are per cent of the frame; dir 1 moves left (x) or up (y).
+ */
+export function rampSpecs({ at = 0, kind = 'scaleOut', blur = 6, fade = 0.5, dir = 1, origin, ...rest } = {}) {
+  const s = rampSpeeds({ kind, ...rest });
+  const r = RAMP[kind];
+  const place = origin ? { transformOrigin: origin } : {};
+  const moved = (v) => (r.prop === 'scale' ? String(+v.toFixed(4)) : r.axis === 0 ? percent(v, 0) : percent(0, v));
+  const home = moved(r.prop === 'scale' ? 1 : 0);
+  const outTo = r.out ? r.out(s.amount) : -dir * s.amount, inFrom = r.into ? r.into(s.inAmount) : dir * s.inAmount;
+  const ease = (fn) => curveToLinear(fn, { tolerance: RAMP_TOLERANCE });
+  const out = {
+    keyframes: [
+      { offset: 0, [r.prop]: home, opacity: '1', filter: 'blur(0px)', ...place },
+      { offset: 0.6, opacity: '1', filter: 'blur(0px)' },
+      { offset: 1, [r.prop]: moved(outTo), opacity: String(fade), filter: `blur(${blur}px)` },
+    ],
+    timing: { delay: ms(at - s.dOut), duration: ms(s.dOut), easing: ease(s.outEase), fill: 'both', id: 'ramp-out' },
+  };
+  const into = {
+    keyframes: [
+      { offset: 0, [r.prop]: moved(inFrom), filter: `blur(${blur}px)`, ...place },
+      { offset: 0.35, filter: 'blur(0px)' },
+      { offset: 1, [r.prop]: home, filter: 'blur(0px)' },
+    ],
+    timing: { delay: ms(at), duration: ms(s.dIn), easing: ease(s.inEase), fill: 'both', id: 'ramp-in' },
+  };
+  return [out, into, hidden(at, 1, 'forwards', 'ramp-out-gone'), ...(at > 0 ? [hidden(0, at, 'none', 'ramp-in-wait')] : [])];
+}
+
+/** A speed ramp between two elements: ramp(outEl, inEl, { at: 18.8, kind: 'scaleOut' }). The outgoing accelerates into the cut, the incoming leaves it at the same speed and slows. */
+export function ramp(outEl, inEl, opts) {
+  const [out, into, gone, wait] = rampSpecs(opts);
+  return [
+    outEl.animate(out.keyframes, out.timing),
+    inEl.animate(into.keyframes, into.timing),
+    outEl.animate(gone.keyframes, gone.timing),
+    ...(wait ? [inEl.animate(wait.keyframes, wait.timing)] : []),
+  ];
+}
+
 /** Pure: a blur that clears, optionally from smaller and fainter, on a settle that never overshoots. */
 export function focusSpecs({ at = 0, blur = 10, scale = 1, opacity = 1, ease = 'settle', ...rest } = {}) {
   const d = durationOf({ band: 'cinematic', ...rest });

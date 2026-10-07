@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { easeFn, BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys, cameraSpecs, parallax, focusSpecs } from '../../core/motion/presets.js';
+import { easeFn, BANDS, bandSeconds, bandOf, pickBand, enterSpecs, enter, leaveSpecs, leave, staggerTimes, stagger, layerTiming, layer, EASE, EASE_HANDLES, keysSpec, keys, cameraSpecs, parallax, focusSpecs, ramp, rampSpecs, rampSpeeds } from '../../core/motion/presets.js';
 import { peakValue, overshoots } from '../../harness/lib/ease-curve.mjs';
 import { handleCurve, HANDLE_REGISTRY } from '../../core/motion/motion.js';
 
@@ -206,4 +206,56 @@ test('focus clears a blur from small and faint to sharp', () => {
   assert.deepEqual(spec.keyframes[0], { filter: 'blur(8px)', scale: '0.85', opacity: '0.6' });
   assert.deepEqual(spec.keyframes[1], { filter: 'blur(0px)', scale: '1', opacity: '1' });
   assert.equal(spec.timing.delay, 1000);
+});
+
+function linearPoints(easing) {
+  return easing.slice('linear('.length, -1).split(', ').map(Number);
+}
+function atU(points, u) {
+  const x = u * (points.length - 1), i = Math.min(points.length - 2, Math.floor(x));
+  return points[i] + (points[i + 1] - points[i]) * (x - i);
+}
+const slope = (points, from, to) => (atU(points, to) - atU(points, from)) / (to - from);
+
+for (const kind of ['scaleOut', 'scaleIn', 'x', 'y']) {
+  test(`ramp ${kind}: same velocity either side of the cut, monotonic, ends on its targets`, () => {
+    const [out, into] = rampSpecs({ at: 5, kind });
+    const s = rampSpeeds({ kind });
+    assert.ok(Math.abs(s.velocity.out - s.velocity.in) / s.velocity.out < 0.02);
+    const outP = linearPoints(out.timing.easing), inP = linearPoints(into.timing.easing);
+    for (const p of [outP, inP]) for (let i = 1; i < p.length; i++) assert.ok(p[i] >= p[i - 1], 'monotonic');
+    const h = 1 / 256;
+    const vOut = (s.amount / s.dOut) * slope(outP, 1 - h, 1), vIn = (s.inAmount / s.dIn) * slope(inP, 0, h);
+    assert.ok(Math.abs(vOut - vIn) / vOut < 0.02, `sampled velocities ${vOut} vs ${vIn}`);
+    assert.ok(outP[0] === 0 && outP.at(-1) === 1 && inP[0] === 0 && inP.at(-1) === 1);
+    const prop = kind.startsWith('scale') ? 'scale' : 'translate';
+    assert.equal(into.keyframes.at(-1)[prop], kind.startsWith('scale') ? '1' : '0% 0%');
+    assert.equal(out.timing.delay + out.timing.duration, 5000);
+    assert.equal(into.timing.delay, 5000);
+    assert.equal(out.timing.duration + into.timing.duration, 450);
+    assert.ok(out.timing.duration < into.timing.duration);
+  });
+}
+
+test('ramp: the outgoing accelerates and the incoming decelerates, in the same direction', () => {
+  const [out, into] = rampSpecs({ at: 2, kind: 'scaleOut' });
+  const [o, i] = [linearPoints(out.timing.easing), linearPoints(into.timing.easing)];
+  assert.ok(slope(o, 0, 0.1) < slope(o, 0.9, 1));
+  assert.ok(slope(i, 0, 0.1) > slope(i, 0.9, 1));
+  assert.ok(Number(out.keyframes.at(-1).scale) < 1 && Number(into.keyframes[0].scale) > 1);
+  const [slideOut, slideIn] = rampSpecs({ at: 2, kind: 'x', dir: 1 });
+  assert.equal(slideOut.keyframes.at(-1).translate, '-40% 0%');
+  assert.equal(slideIn.keyframes[0].translate, '60% 0%');
+});
+
+test('ramp hides the outgoing from the cut and the incoming before it; unknown kind throws', () => {
+  const [, , gone, wait] = rampSpecs({ at: 3 });
+  assert.equal(gone.timing.delay, 3000);
+  assert.equal(gone.timing.fill, 'forwards');
+  assert.equal(wait.timing.duration, 3000);
+  assert.throws(() => rampSpecs({ kind: 'spin' }), /unknown ramp/);
+  const [a, b] = [fakeEl(), fakeEl()];
+  ramp(a, b, { at: 1 });
+  assert.equal(a.anims.length, 2);
+  assert.equal(b.anims.length, 2);
 });

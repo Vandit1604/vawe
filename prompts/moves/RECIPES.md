@@ -379,6 +379,7 @@ The one big moment of a film, in three parts: quiet before, the moment, the rele
 | 1.20 | [arrival-spring](arrival-spring.md) `pop` | the hero word lands on `EASE.pop`, the one deep overshoot of the beat | hit 1.20 |
 | 1.40 | [chain-beats](chain-beats.md) overlap | the front-layer chips arrive 0.2 s after the word, one in four on `EASE.nudge`, a ring bursts on the ground; four layers move at once | tick 1.60 |
 | 2.40 | [camera-moves](camera-moves.md) `drift` from the push's end | the release: the push has stopped, the camera drifts, nothing new arrives; it holds to 3.00 | none |
+| 0.00 | option: [speed-ramp](speed-ramp.md) into the moment | when the quiet before and the big word share a direction (a shrink into a word that arrives from larger), cut with `ramp(quiet, big, { at })` at the landing second instead of a camera push | swell ends on the cut |
 | 2.20 | invent: the film's own moment | one detail inside the big moment that only this product's own object can make | none |
 
 Why it works: contrast. Few moves and a slow band make the quiet; then four layers move together
