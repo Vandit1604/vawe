@@ -137,14 +137,25 @@ function recordArrivals(records) {
     .filter((a) => a.over !== null);
 }
 
+const countedArrivals = (records, boxArrivals) => {
+  const fromRecords = recordArrivals(records);
+  const arrivals = fromRecords.length >= SHOOT.arrivals_min ? fromRecords : boxArrivals;
+  return arrivals.length < SHOOT.arrivals_min ? [] : arrivals;
+};
+
+/** The percent of arrivals that overshoot, counted as overshootShare counts them; null under arrivals_min arrivals. */
+export function overshootPct(records, boxArrivals = []) {
+  const arrivals = countedArrivals(records, boxArrivals);
+  return arrivals.length ? (100 * arrivals.filter((a) => a.over).length) / arrivals.length : null;
+}
+
 /**
  * Too few or too many arrivals that overshoot (rule overshoot-share). The easing of the animation records decides; a page that paints
  * in window.seek has none, so its arrivals come from the boxes (`boxArrivals`, from boxMotion) when the records give fewer than arrivals_min.
  */
 export function overshootShare(records, boxArrivals = []) {
-  const fromRecords = recordArrivals(records);
-  const arrivals = fromRecords.length >= SHOOT.arrivals_min ? fromRecords : boxArrivals;
-  if (arrivals.length < SHOOT.arrivals_min) return [];
+  const arrivals = countedArrivals(records, boxArrivals);
+  if (!arrivals.length) return [];
   const over = arrivals.filter((a) => a.over).length;
   const share = (100 * over) / arrivals.length;
   const at = Math.min(...arrivals.map((a) => a.at));

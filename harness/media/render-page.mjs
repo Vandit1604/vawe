@@ -69,6 +69,8 @@ import { textProblems, frameUnitLines, soundLine, briefLine, mergeProblems, draf
 import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
+import { metaOf } from '../lib/page-meta.mjs';
+import { boardChecks, spectacleOf } from '../lib/board.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived, waiverHint } from '../lib/waivers.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
@@ -76,7 +78,8 @@ import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
-import { barLint, boxMotion } from '../lib/bar-lint.mjs';
+import { barLint, boxMotion, overshootPct } from '../lib/bar-lint.mjs';
+import { measureDraftShape, rangeLines } from '../lib/draft-range.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
@@ -124,14 +127,7 @@ const die = (msg, code = 1) => { console.error(errorLine(msg)); process.exit(cod
 // Page meta the renderer needs before the page loads (its canvas, its authoring rate), read from the
 // file so the viewport is right before any page script runs.
 export function readPageMeta(pagePath, name) {
-  const html = fs.readFileSync(pagePath, 'utf8');
-  for (const tag of html.match(/<meta\b[^>]*>/gi) || []) {
-    if (new RegExp(`\\bname\\s*=\\s*["']${name}["']`, 'i').test(tag)) {
-      const m = tag.match(/\bcontent\s*=\s*["']([^"']*)["']/i);
-      if (m) return m[1];
-    }
-  }
-  return null;
+  return metaOf(fs.readFileSync(pagePath, 'utf8'), name);
 }
 
 // Speed spike bench only: per-subframe timings (seek, settle, screenshot call, PNG write) appended here as JSONL.
@@ -851,6 +847,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
     lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+      ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
 }
@@ -902,17 +899,29 @@ function writeDevNotes(mp4, { timing, advice, taste, signature, fired, rows }) {
 
 const nameOfFilm = (mp4) => path.basename(mp4, '.mp4').replace(/-draft.*$/, '');
 
+/** The reference-range lines of a whole draft; [] when the page has under two worlds or the measure fails (advice must never stop a draft). */
+async function rangeBlock(mp4, r, fps, checks) {
+  try {
+    return await checks.time('range', async () => {
+      const shape = measureDraftShape(mp4, r.probe?.worlds, fps);
+      return shape ? rangeLines({ ...shape, overshoot_pct: overshootPct(motionRecords(r.motion), r.probe?.speed?.arrivals) }) : [];
+    });
+  } catch (e) { console.error(`  no reference range: ${e.message}`); return []; }
+}
+
 async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from }) {
   let look = '';
   try { await checks.time('sheet', async () => { const { out, frames, fastest } = writeDraftSheet({ video: mp4, out: mp4.replace(/\.mp4$/, '.png'), fps: opts.fps, from }); look = `  look: ${out} (frames at ${frames.join(', ')} s; fastest motion at ${fastest} s)`; }); } catch (e) { console.error(`  no key-frame sheet: ${e.message}`); }
-  const report = await draftReport(mp4, pagePath, { ...r, whole: from === 0 && opts.durArg == null, checks });
+  const whole = from === 0 && opts.durArg == null;
+  const report = await draftReport(mp4, pagePath, { ...r, whole, checks });
+  const range = whole ? await rangeBlock(mp4, r, opts.fps, checks) : [];
   checks.save();
   const timing = timeLine({ captureMs: r.captureMs, encodeMs: r.encodeMs, checks: checks.seconds(), capture: frameFormat(false).label });
   const notes = writeDevNotes(mp4, { timing, ...report.notes });
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
   appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
-  console.log([timing, look, report.signature.line, ...report.red, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
+  console.log([timing, look, report.signature.line, ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
 
 // Test hook for the CLI: VAWE_TEST_SLICE_FAULT=<lo>:<n> makes the slice starting at frame <lo> lose its page on its first n attempts.

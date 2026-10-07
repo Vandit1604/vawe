@@ -17,6 +17,16 @@ function film(html, brief = '## Look\n') {
   return { root, page };
 }
 
+test('a filled board that fails a check is named before the first draft, as advice', () => {
+  const { root, page } = film('<meta name="spectacle" content="3"><p>x</p>');
+  const filled = '## Board\n\n| beat | in s | hold s | cut out s (length) |\n|---|---|---|---|\n| s1 | 0 | 1 | 0.6 |\n| s2 | 1 | 1 | 0.6 |\n\nSpectacle: the big moment at 7 s.\n\n| cut | move |\n|---|---|\n| s1 to s2 | whip |\n\n| at s | voice | gain dB | for |\n|---|---|---|---|\n| 0 | bed, loop | -20 | all |\n';
+  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), filled);
+  const s = nextStep(page, root);
+  assert.match(s.why, /all 2 cuts last 0\.6 s/);
+  assert.match(s.why, /Spectacle is at 7 s but/);
+  assert.match(s.next, /bin\/vawe dev films\/f\/page\.html/);
+});
+
 test('a page with worlds and no frames sheet or draft names bin/vawe frames', () => {
   const { root, page } = film('<section data-world="s1"></section>');
   const s = nextStep(page, root);
@@ -84,7 +94,7 @@ test('after the frames, an unfilled Board is the next step; a filled one moves o
   fs.writeFileSync(path.join(root, 'out', 'f-frames.png'), '');
   assert.equal(boardFilled(placeholder), false);
   assert.match(nextStep(page, root).next, /fill "Board"/);
-  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), '## Board\n\n| beat | in s |\n|---|---|\n| s1 | 0 |\n');
+  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), '## Board\n\n| beat | in s | hold s | cut out s (length) |\n|---|---|---|---|\n| s1 | 0 | 1 | 0.3 |\n| s2 | 1 | 1 | 1.2 |\n\nSpectacle: at 7.\n\n| cut | move |\n|---|---|\n| s1 to s2 | whip |\n\n| at s | voice | gain dB | for |\n|---|---|---|---|\n| 0 | bed, loop | -20 | all |\n');
   assert.equal(nextStep(page, root).next, 'bin/vawe dev films/f/page.html');
   assert.equal(boardFilled('## Look\n'), null);
 });

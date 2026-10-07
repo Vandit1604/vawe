@@ -227,3 +227,6 @@ export function findTransitions(V) {
   }
   return kept;
 }
+
+/** The shots between transitions as [{ f0, f1 }] over `n` frames: a transition's own frames belong to no shot. Pure. */
+export const shotSpans = (transitions, n) => transitions.reduce((acc, t) => { acc[acc.length - 1].f1 = t.startFrame; acc.push({ f0: t.endFrame, f1: n }); return acc; }, [{ f0: 0, f1: n }]);
