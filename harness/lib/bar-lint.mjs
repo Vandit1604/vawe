@@ -1,6 +1,7 @@
-// Four advice findings from the measured bar of the reference films (harness/dev/bar-from-refs.mjs), in the shape of the motion
+// Five advice findings from the measured bar of the reference films (harness/dev/bar-from-refs.mjs), in the shape of the motion
 // lint's: { code, rule, at, what, fix }. The code is the rule id. Each number is read from taste/build/limits.json. Pure.
 //   speed-ceiling    the fastest tenth of the moving elements, from element boxes over time
+//   spectacle-weak   the page's spectacle second moves slower than another moment, from the same boxes
 //   overshoot-share  the share of the arrivals whose easing goes past rest, from the animation records
 //   text-breathing   the share of the film with readable text on screen, from the text samples
 //   text-lingers     a line on screen well past its read time, from the text tracks
@@ -104,7 +105,27 @@ export function boxMotion(boxes) {
   return {
     peaks: elements.map((i) => peakSpeed(boxes, i)).filter(Boolean).sort((a, b) => a.speed - b.speed),
     arrivals: elements.flatMap((i) => boxArrivals(boxes, i)),
+    span: [boxes.times[0], boxes.times.at(-1)],
   };
+}
+
+const SPECTACLE = LIMITS['spectacle-weak'];
+const n1 = (x) => +x.toFixed(1);
+
+/**
+ * The page's spectacle second (`<meta name="spectacle">`) against every other moment: the fastest element peak within a window of it, and the
+ * fastest peak outside it. Fires when another moment is stronger (rule spectacle-weak). `peaks` is boxMotion's, `span` the seconds the boxes were
+ * sampled over: a spectacle second outside them is not measured.
+ */
+export function spectacleWeak(peaks, spectacle, span) {
+  if (spectacle == null || !peaks?.length || (span && (spectacle < span[0] || spectacle > span[1]))) return [];
+  const fastest = (list) => list.reduce((best, p) => (!best || p.speed > best.speed ? p : best), null);
+  const near = (p) => Math.abs(p.at - spectacle) <= SPECTACLE.window_s;
+  const [mine, other] = [fastest(peaks.filter(near)), fastest(peaks.filter((p) => !near(p)))];
+  if (!other || (mine && other.speed < mine.speed * SPECTACLE.stronger_margin)) return [];
+  return [finding('spectacle-weak', spectacle,
+    `spectacle at ${n1(spectacle)} s is weaker than ${n1(other.at)} s: ${mine ? `${mine.label} peaks at ${n1(mine.speed)} frame heights per second there` : 'no element moves there'}, ${other.label} peaks at ${n1(other.speed)} at ${n1(other.at)} s`,
+    'give the spectacle the fastest or longest move of the film, or move <meta name="spectacle"> to the moment that already is strongest and put quiet before it')];
 }
 
 /** The fastest tenth of the moving elements over the speed ceiling (rule speed-ceiling). `all` is the peaks of boxMotion, or null when the speed was not sampled. An element slower than moving_floor_fh_s is a drift the eye does not follow (the reference films' slowest tracked elements peak near 0.2). */
@@ -210,7 +231,7 @@ export function textLingers(samples, ctx) {
 }
 
 /** Every bar finding in time order. `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
-export function barLint({ records, boxes, text }) {
-  return [...speedCeiling(boxes?.peaks), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
+export function barLint({ records, boxes, text, spectacle = null }) {
+  return [...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
     .sort((a, b) => a.at - b.at);
 }

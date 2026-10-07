@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.
 
-106 rules, 34 scored by the judge.
+107 rules, 34 scored by the judge.
 
 ## concept
 
@@ -102,6 +102,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: judge.
 - [overshoot-share](rules/overshoot-share.md): Some arrivals land with a spring: the value goes past rest and returns. Check: overshoot-share.
 - [real-physics](rules/real-physics.md): Real physics, not an imitation: a spring or an exponential as sampled keyframes or linear() with 8 or more stops, and a named effect that looks like its real-world thing. Check: judge.
+- [spectacle-weak](rules/spectacle-weak.md): The spectacle second carries the strongest move of the film. Check: spectacle-weak.
 - [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band.
 - [speed-ceiling](rules/speed-ceiling.md): Elements move at a speed the eye can follow. Check: speed-ceiling.
 - [stagger](rules/stagger.md): A group reads as one beat with an inner rhythm: not a chord on one frame and not a queue. Check: group-landing.

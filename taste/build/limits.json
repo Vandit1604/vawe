@@ -218,6 +218,10 @@
  "real-physics": {
   "linear_stops_min": 8
  },
+ "spectacle-weak": {
+  "stronger_margin": 1.25,
+  "window_s": 0.75
+ },
  "speed-bands": {
   "energy_min_s": 0.15,
   "energy_max_s": 0.3,
