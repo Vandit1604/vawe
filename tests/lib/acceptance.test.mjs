@@ -87,6 +87,13 @@ test('text cap height: product chrome passes at its own floor and a plain line s
   assert.equal(rows([{ text: 'Hi', cap: 3, t: 1 }])['text cap height'].status, 'advice');
 });
 
+test('text cap height: the measure names the floor of each kind, so a chrome 2.5% never sits beside a 6% target alone', () => {
+  const row = (caps) => buildRows([{ metric: 'text cap height', target: '6% or more' }], { ...clean, caps })[0];
+  assert.equal(row([{ text: 'Inbox', cap: 2.6, t: 1, chrome: true }, { text: 'Hi', cap: 7, t: 1 }]).measured, '7.0%, data-chrome 2.6% (floor 2.5%)');
+  assert.equal(row([{ text: 'Inbox', cap: 2.6, t: 1, chrome: true }]).measured, 'data-chrome 2.6% (floor 2.5%)');
+  assert.equal(row([{ text: 'Hi', cap: 3.2, t: 1 }, { text: 'Inbox', cap: 4, t: 1, chrome: true }]).measured, '3.2%, data-chrome 4.0% (floor 2.5%)');
+});
+
 test('read hold: lines with no measurable hold are named in the measure, not failed', () => {
   const [row] = buildRows([{ metric: 'read hold per line', target: 'max(1.2 s, words/3 s) or more' }], { ...clean, readHold: [], readHoldUnmeasured: [{ text: 'Go' }] });
   assert.equal(row.status, 'ok');

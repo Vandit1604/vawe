@@ -78,8 +78,11 @@ const ROWS = {
     if (!m.caps.length) return done(true, 'no held text');
     const ok = (c) => (c.chrome ? c.cap >= CHROME_CAP_PCT : pass(c.cap));
     const short = m.caps.filter((c) => !ok(c));
-    const low = (short.length ? short : m.caps).reduce((a, c) => (c.cap < a.cap ? c : a));
-    return done(!short.length, `${low.cap.toFixed(1)}%`, short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : ''}`).concat(short.length ? 'raise the font size until the cap height reaches the target, or mark UI texture data-chrome, or aria-hidden="true"' : []));
+    const lowest = (list) => list.reduce((a, c) => (c.cap < a.cap ? c : a));
+    const plain = m.caps.filter((c) => !c.chrome);
+    const chrome = m.caps.filter((c) => c.chrome);
+    const measured = [...(plain.length ? [`${lowest(plain).cap.toFixed(1)}%`] : []), ...(chrome.length ? [`data-chrome ${lowest(chrome).cap.toFixed(1)}% (floor ${CHROME_CAP_PCT}%)`] : [])].join(', ');
+    return done(!short.length, measured,short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : ''}`).concat(short.length ? 'raise the font size until the cap height reaches the target, or mark UI texture data-chrome, or aria-hidden="true"' : []));
   },
   'text contrast': (m, pass) => {
     if (!m.contrast) return skip('no pixels sampled behind the text');
