@@ -144,6 +144,33 @@ const [r, g, b] = kf(f, TINT);
 
 `bin/vawe new` writes drifting ground blobs, a blur on each entrance and `EASE.pop` on every second fact. Skill used: emilkowalski/animate (transform and opacity, ease-out arrivals). Rejected: its cubic-bezier curves, Motion library and no-animation gate (`EASE` names and WAAPI win; a film is seen once).
 
+## Link the states
+
+`states.js` writes the motion between the worlds for you, with the View Transitions vocabulary. Each beat is a
+`data-world` element with `data-at="<second>"` (the first may omit it); a world ends where the next begins.
+
+```html
+<style>
+  [data-id="tray"] { view-transition-name: tray; }                    /* same name in two worlds: it moves */
+  ::view-transition-group(*)    { animation-duration: 650ms; }       /* movers, and the default */
+  ::view-transition-group(tray) { animation-duration: 800ms; animation-timing-function: ease-in-out; animation-delay: 0ms; }
+  ::view-transition-old(root)   { animation-duration: 300ms; }       /* how the leaving content goes */
+  ::view-transition-new(chip)   { animation-delay: 80ms; }           /* how a named newcomer comes */
+</style>
+<script type="module">
+import { linkStates } from '../../core/motion/states.js';
+document.querySelectorAll('.w').forEach((el) => { el.style.viewTransitionName = el.dataset.id; });  // one name per element
+linkStates();
+</script>
+```
+
+- A name on one element in each of two worlds: the new one animates from the old rect (translate and scale, no cross-fade). Text scales by height.
+- Unnamed content in the old world leaves; in the new world it enters. A name in one world only leaves or enters like unnamed content, with its own `old(name)` or `new(name)` rule. `root` means unnamed content, `*` means all.
+- Order: leavers (0.6 of an entrance, `EASE.launch`) end at the cut; movers start at the cut on `EASE.carry`, one that must vacate a spot goes before one that lands there, a far move bows to its right, and a mover waits (at most 0.6 s) rather than pass through another; enterers (`EASE.land`) start when the movers are 85% landed.
+- A name inside a named parent moves with the parent and keeps the parent's timing. A named parent that enters around a mover does not fade, because its child would fade with it.
+- A texture (`aria-hidden="true"`) that covers over half the frame is the ground: it swaps at the cut. An unnamed box that holds named things is never animated: name it to animate it.
+- `linkStates()` returns a promise (it waits for fonts, then measures each world alone) with `[{ world, at, moved, animations }]`. Duplicate names inside one world throw.
+
 ## Render it
 
 `bin/vawe dev <page> --from s --to s` renders a half-size draft of the seconds you are working on.
