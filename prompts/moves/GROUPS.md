@@ -84,6 +84,12 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | caret follow | the camera trails the typing caret on a soft spring, so a long line stays readable at close range | [caret-follow.md](caret-follow.md) | [caret-follow.mp4](caret-follow.mp4) |
 | pull back reveal | open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even | [pull-back-reveal.md](pull-back-reveal.md) | [pull-back-reveal.mp4](pull-back-reveal.mp4) |
 | parallax dive | the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves | [parallax-dive.md](parallax-dive.md) | [parallax-dive.mp4](parallax-dive.mp4) |
+| camera moves | a whole world as one wrapper: push, pull, drift for a live hold, whip between worlds (`camera()`) | [camera-moves.md](camera-moves.md) | none yet |
+| depth parallax | one camera move on ground, mid and front layers, each by its depth (`parallax()`) | [depth-parallax.md](depth-parallax.md) | none yet |
+| depth resolve | far words small and soft resolve as the camera arrives; a focus pull (`focus()`) | [depth-resolve.md](depth-resolve.md) | none yet |
+| scale through | fly into a plain element and its colour is the next world, in Web Animations only | [scale-through.md](scale-through.md) | none yet |
+| direction wipe | a mask edge moves the way the last move went and reveals the next beat | [direction-wipe.md](direction-wipe.md) | none yet |
+| arrival spring | `EASE.nudge` on one arrival in three, `EASE.pop` on the one that matters (`nudgeEvery`) | [arrival-spring.md](arrival-spring.md) | none yet |
 | rack focus | focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs; use once per film | [rack-focus.md](rack-focus.md) | [rack-focus.mp4](rack-focus.mp4) |
 | drift hold | the line holds still while only the ground drifts, so a held frame never sits dead | [drift-hold.md](drift-hold.md) | [drift-hold.mp4](drift-hold.mp4) |
 | gradient mesh field | a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1 | [gradient-mesh-field.md](gradient-mesh-field.md) | [gradient-mesh-field.mp4](gradient-mesh-field.mp4) |

@@ -1,6 +1,6 @@
 ---
 when: you write a film page and want entrances, exits, staggers, spring motion, keyframe tables or seeded noise without writing the math
-answers: "how a page uses the presets (enter, leave, stagger, layer, BANDS) and springs.js (spring, track, approach, kf, springLinear)"
+answers: "how a page uses the presets (enter, leave, stagger, layer, camera, parallax, focus, BANDS) and springs.js (spring, track, approach, kf, springLinear)"
 group: engine
 ---
 
@@ -57,6 +57,25 @@ slower.
 layer(title, subline, { at: 0, band: 'professional' });
 ```
 
+`stagger` also takes `nudgeEvery: n`: every nth element lands on `EASE.nudge`, an arrival that passes its mark by about 6 per cent.
+The reference films overshoot 21 to 41 per cent of their arrivals and the dev check `overshoot-share` counts them, so give one arrival in three
+`nudge` (`stagger(..., { nudgeEvery: 3 })`, or `enter(el, { ease: 'nudge' })`) and `EASE.pop` to the one that matters.
+
+`camera(wrapper, { kind, at, band | duration, from, to, origin, strength, dir })` is one camera move on the element that holds a whole world,
+in transforms only, so the seek runs it. `kind`: `push` (scale 1 to 1.12 on `glide`), `pull` (1.15 to 1 on `settle`), `drift` (a slow slide
+and 3 per cent scale for a live hold), `whipOut` and `whipIn` (a 0.3 s slide of a world off or onto the frame with a blur, on `launch` and `land`).
+`from` and `to` are scales; chain a drift after a push with `from` set to the push's `to`. `parallax([[el, depth], ...], opts)` runs the same
+move on layers, each by its depth (0.3 ground, 1 the camera, 1.8 front). `focus(el, { at, blur, scale, opacity, duration })` clears a blur from a
+smaller, fainter start on `settle`: a focus pull, or far words that resolve when the camera arrives.
+
+```js
+import { camera, parallax, focus } from '../../core/motion/presets.js';
+parallax([[ground, 0.3], [mid, 1], [front, 1.8]], { kind: 'push', at: 0, duration: 2.4 });
+camera(oldWorld, { kind: 'whipOut', at: 5, duration: 0.3 });
+camera(newWorld, { kind: 'whipIn', at: 5, duration: 0.3 });
+focus(farWord, { at: 3.5, blur: 9, scale: 0.8, opacity: 0.4 });
+```
+
 `pickBand(px)` names the band for a move of that many pixels at the 700 px/s an eye follows;
 `bandOf(seconds)` names the band a duration sits in.
 
@@ -78,6 +97,7 @@ work uses, as CSS `linear()` strings, built with `curveToLinear(handleCurve(out,
 | `carry` | easyEase | fling | still fast at the key, into a cut | HyperFrames carousels (6 to 11x in) |
 | `leave` | easyEase | long | a decelerating exit | 76% of tuned Lottie exits end ease then hang |
 | `launch` | easyEase | 25/3 | an accelerating exit (default of `leave`: exits run shorter and speed up), at most 3x at the cut | owner rule; Lottie shows no exit above 1.5x; 4.8x at the cut read as a vanish |
+| `nudge` | fling | overshoot at speed -0.8 | an arrival that passes its mark by about 6 per cent: one arrival in three, so the film overshoots 21 to 41 per cent like the references | measured: peak 1.063, counted by the `overshoot-share` check (tolerance 0.01) |
 | `pop` | fling | overshoot at speed -1.5 | a pop that passes its mark by about 15 per cent and settles back (CTA, notification, check) | the `overshoot` handle's own blurb: a deeper speed is an authored choice (-0.4 passes by 2 per cent, too little to see) |
 
 `keys(el, prop, [[t, value, handle?], ...])` is an After Effects key table. Times are seconds, a handle

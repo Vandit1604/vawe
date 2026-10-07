@@ -1,6 +1,6 @@
 ---
 when: "you plan a film of a common shape (a sting, a launch, a type line, a 20 to 30 s product, proof or brand film) and want a chain of built moves that joins, not a list of moves"
-answers: "fourteen chains of existing moves (eight short films, then six complete videos of 20 to 30 s) with a beat table, why each chain holds, and the traps at each seam"
+answers: "fifteen chains of existing moves (eight short films, six complete videos of 20 to 30 s, then the spectacle beat that goes inside any film) with a beat table, why each chain holds, and the traps at each seam"
 group: reference
 ---
 
@@ -366,3 +366,29 @@ Traps:
 - Put the tagline inside logo-sting's `.drift`, so it rides the push. Set the push duration to the time left (7.1 s), or the tail freezes.
 - The capture is pixels: cut in a second capture of the done state at the press. Never draw a button over it.
 - The mark at frame 0 and the traced mark are the same path at the same size, so the thread reads.
+
+## 15. Spectacle beat, 3 s, inside any film (thread: one camera, three depths)
+
+The one big moment of a film, in three parts: quiet before, the moment, the release. Put it where
+`<meta name="spectacle">` says; the quiet before is the 1 to 2 s ahead of it.
+
+| time | move | what carries into the next beat | sound |
+|---|---|---|---|
+| 0.00 | [camera-moves](camera-moves.md) `drift` on the ground only | quiet: one line, fewer moves, the slow band (cinematic), nothing else arrives; it reads for 1.0 s | none |
+| 1.00 | [camera-moves](camera-moves.md) `push` with [depth-parallax](depth-parallax.md) | the camera starts leaning 0.2 s before the word lands; ground 0.3, mid 1, front 1.8; it runs to 2.40 | whoosh 0.80 |
+| 1.20 | [arrival-spring](arrival-spring.md) `pop` | the hero word lands on `EASE.pop`, the one deep overshoot of the beat | hit 1.20 |
+| 1.40 | [chain-beats](chain-beats.md) overlap | the front-layer chips arrive 0.2 s after the word, one in four on `EASE.nudge`, a ring bursts on the ground; four layers move at once | tick 1.60 |
+| 2.40 | [camera-moves](camera-moves.md) `drift` from the push's end | the release: the push has stopped, the camera drifts, nothing new arrives; it holds to 3.00 | none |
+| 2.20 | invent: the film's own moment | one detail inside the big moment that only this product's own object can make | none |
+
+Why it works: contrast. Few moves and a slow band make the quiet; then four layers move together
+under one camera, with one deep overshoot, so the eye has one place to go; then the camera keeps drifting
+so the hold is alive. The camera starts before the word, so the word lands into a move that is already
+under way.
+
+Traps:
+- The quiet is not a freeze: the ground drifts under it (taste rule live-hold).
+- Spend `pop` once. The rest of the beat lands on `land` and `nudge`; three eases in one scene is advice from `dev`.
+- Chain the camera moves by `from`: a drift that starts at scale 1 after a push to 1.16 jumps.
+- A front layer at depth 1.8 leaves the frame at the end of the push: set its things 12 percent inside the edge.
+- Put the film's spectacle meta on the hero word's landing second, not on the push's start.

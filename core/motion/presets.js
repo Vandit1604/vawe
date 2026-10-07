@@ -38,6 +38,7 @@ export const EASE_HANDLES = {
   leave: ['easyEase', 'long'],
   launch: ['easyEase', { influence: 25, speed: 3 }],
   pop: ['fling', { influence: 35, speed: -1.5 }],
+  nudge: ['fling', { influence: 35, speed: -0.8 }],
 };
 
 const LINEAR_TOLERANCE = 0.002;
@@ -142,10 +143,13 @@ export function staggerTimes(n, { at = 0, gap = signedGap(), seed = 1 } = {}) {
   return times;
 }
 
-/** enter() on each element in order, on staggerTimes. opts: enter's, plus gap and seed. */
-export function stagger(els, opts = {}) {
+// Every nth arrival (the nth, 2nth, ...) overshoots by about 6 per cent; the reference films overshoot 21 to 41 per cent of theirs.
+const springs = (nudgeEvery, i, ease) => (nudgeEvery > 0 && (i + 1) % nudgeEvery === 0 ? 'nudge' : ease);
+
+/** enter() on each element in order, on staggerTimes. opts: enter's, plus gap, seed and nudgeEvery (every nth element lands on EASE.nudge). */
+export function stagger(els, { nudgeEvery = 0, ...opts } = {}) {
   const list = [...els];
-  return staggerTimes(list.length, opts).flatMap((at, i) => enter(list[i], { ...opts, at }));
+  return staggerTimes(list.length, opts).flatMap((at, i) => enter(list[i], { ...opts, at, ease: springs(nudgeEvery, i, opts.ease) }));
 }
 
 /** Pure: when the secondary starts and which band it speaks in. It starts `overlap` of the lead's move before the lead lands. */
@@ -184,4 +188,61 @@ export function keysSpec(prop, table) {
 export function keys(el, prop, table) {
   const { keyframes, timing } = keysSpec(prop, table);
   return el.animate(keyframes, timing);
+}
+
+// from and to are scales; drift also slides the frame by `slide` per cent of its size.
+const CAMERA = {
+  push: { from: 1, to: 1.12, ease: 'glide' },
+  pull: { from: 1.15, to: 1, ease: 'settle' },
+  drift: { from: 1, to: 1.03, ease: 'glide', slide: [-1.5, -0.8] },
+};
+const WHIP_BLUR_PX = 16;
+const deeper = (scale, strength) => +(1 + (scale - 1) * strength).toFixed(4);
+const percent = (x, y) => `${+x.toFixed(3)}% ${+y.toFixed(3)}%`;
+
+function whipSpec({ kind, dir, travel, strength, ease }) {
+  const out = kind === 'whipOut';
+  const home = { translate: '0% 0%', filter: 'blur(0px)' };
+  const gone = { translate: percent(-dir * travel * strength * (out ? 1 : -1), 0), filter: `blur(${WHIP_BLUR_PX * strength}px)` };
+  return { keyframes: out ? [home, gone] : [gone, home], easing: easeOf(ease ?? (out ? 'launch' : 'land')) };
+}
+
+/**
+ * Pure: the keyframes and timing of one camera move on a wrapper that holds a whole world.
+ * kind push | pull | drift | whipOut | whipIn. opts { at, band | duration, from, to (scales), origin, strength, dir (1 or -1), travel (% of the frame) }.
+ * `strength` is the depth of a layer: 1 is the camera, under 1 moves less (ground), over 1 moves more (front).
+ */
+export function cameraSpecs({ kind = 'push', at = 0, origin, strength = 1, dir = 1, travel = 100, ease, ...rest } = {}) {
+  const timing = { delay: ms(at), fill: 'both', id: 'camera' };
+  if (kind === 'whipOut' || kind === 'whipIn') {
+    const { keyframes, easing } = whipSpec({ kind, dir, travel, strength, ease });
+    return [{ keyframes, timing: { ...timing, easing, duration: ms(rest.duration ?? bandSeconds('energy')) } }];
+  }
+  const c = CAMERA[kind];
+  if (!c) throw new Error(`presets: unknown camera "${kind}"; valid: ${[...Object.keys(CAMERA), 'whipOut', 'whipIn'].join(' ')}`);
+  const frame = (scale, slide) => ({ scale: String(deeper(scale, strength)), ...(slide ? { translate: percent(slide[0] * strength, slide[1] * strength) } : {}), ...(origin ? { transformOrigin: origin } : {}) });
+  const keyframes = [frame(rest.from ?? c.from, c.slide && [0, 0]), frame(rest.to ?? c.to, c.slide)];
+  return [{ keyframes, timing: { ...timing, easing: easeOf(ease ?? c.ease), duration: ms(rest.duration ?? bandSeconds(rest.band ?? 'cinematic')) } }];
+}
+
+/** One camera move on one wrapper: camera(world, { kind: 'push', at: 1, duration: 2, origin: '34% 46%' }). A wrapper takes one scale animation at a time: chain moves with `from` set to where the last one ended. */
+export function camera(el, opts) {
+  return cameraSpecs(opts).map(({ keyframes, timing }) => el.animate(keyframes, timing));
+}
+
+/** The same camera move on ground, mid and front layers, each moving by its depth: parallax([[ground, 0.3], [mid, 1], [front, 1.8]], { kind: 'push', at: 1, duration: 2 }). */
+export function parallax(layers, opts) {
+  return layers.flatMap(([el, depth]) => camera(el, { ...opts, strength: depth }));
+}
+
+/** Pure: a blur that clears, optionally from smaller and fainter, on a settle that never overshoots. */
+export function focusSpecs({ at = 0, blur = 10, scale = 1, opacity = 1, ease = 'settle', ...rest } = {}) {
+  const d = durationOf({ band: 'cinematic', ...rest });
+  const start = { filter: `blur(${blur}px)`, scale: String(scale), opacity: String(opacity) }, end = { filter: 'blur(0px)', scale: '1', opacity: '1' };
+  return [{ keyframes: [start, end], timing: { delay: ms(at), duration: ms(d), easing: easeOf(ease), fill: 'both', id: 'focus' } }];
+}
+
+/** A focus pull: focus(far, { at: 1.4, blur: 8, scale: 0.85, opacity: 0.6 }) makes far words small and soft until the camera arrives, then resolves them. */
+export function focus(el, opts) {
+  return focusSpecs(opts).map(({ keyframes, timing }) => el.animate(keyframes, timing));
 }

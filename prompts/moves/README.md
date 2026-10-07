@@ -7,7 +7,7 @@ group: reference
 # prompts/moves/: proven moves to copy
 
 [RECIPES.md](RECIPES.md) joins these moves into fourteen films (three brand stings and three product
-stings, one per direction family, a 15 s launch, a kinetic type line, and six complete videos of 20 to 30 s: problem to fix, AI demo, feature tour, proof, manifesto, brand reveal), with the beat table, the sound cues and the traps at each seam.
+stings, one per direction family, a 15 s launch, a kinetic type line, and six complete videos of 20 to 30 s: problem to fix, AI demo, feature tour, proof, manifesto, brand reveal) and one spectacle beat for any film (quiet, the big moment, the release), with the beat table, the sound cues and the traps at each seam.
 Each move file has a `Sound:` line under its snippet: the voice and the second to cue it, or none.
 
 Scope: a move animates designed things (type, shapes, UI, illustration, colour fields). A photo may be content in a
@@ -43,10 +43,17 @@ One row per job, best move first. Every built move is in this table.
 | point at one part of a UI | [spotlight-dim](spotlight-dim.md), [bracket-callout](bracket-callout.md), [ui-focus-zoom](ui-focus-zoom.md) |
 | change between shots, hard and fast | [flash-cut](flash-cut.md), [cut-on-motion](cut-on-motion.md), [slice-shift](slice-shift.md), [speed-ramp-freeze](speed-ramp-freeze.md), [smear-stretch](smear-stretch.md) |
 | change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md), [light-leak-transition](light-leak-transition.md) |
-| change between shots, graphic | [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md), [type-match-cut](type-match-cut.md) |
+| change between shots, graphic | [direction-wipe](direction-wipe.md), [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md), [type-match-cut](type-match-cut.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md), [spin-transition](spin-transition.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
+| move the camera over a whole world: push, pull, live-hold drift, whip | [camera-moves](camera-moves.md) |
+| give a camera move depth: ground, mid and front layers move by different amounts | [depth-parallax](depth-parallax.md) |
+| two depths of words that resolve as the camera arrives; a focus pull | [depth-resolve](depth-resolve.md) |
+| make some arrivals overshoot (21 to 41 percent of them) | [arrival-spring](arrival-spring.md) |
+| enter the next world by flying into an element | [scale-through](scale-through.md), [zoom-through](zoom-through.md) |
+| wipe in the next beat along the last move's direction | [direction-wipe](direction-wipe.md) |
+| overlap beats so the next starts before the last ends | [chain-beats](chain-beats.md) |
 | hold a line still to read, the ground alive | [drift-hold](drift-hold.md), [gradient-mesh-field](gradient-mesh-field.md) |
 | give a held frame a living ground | [aurora-drift](aurora-drift.md), [grain-field](grain-field.md), [halftone-field](halftone-field.md), [ink-warp](ink-warp.md), [dot-grid-wave](dot-grid-wave.md), [light-pool](light-pool.md), [gradient-mesh-field](gradient-mesh-field.md) |
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md), [command-palette-summon](command-palette-summon.md) |
