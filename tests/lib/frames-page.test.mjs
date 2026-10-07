@@ -21,6 +21,7 @@ test('stillCandidates starts at the middle of the span and stays inside it', () 
   const c = stillCandidates({ start: 2, end: 6 });
   assert.equal(c[0], 4);
   assert.ok(c.every((t) => t > 2 && t < 6));
+  assert.equal(stillCandidates({ id: 'a', start: 2, end: 6 }, [{ world: 'a', id: 'enter', start: 2, end: 2.5 }])[0], 2.55);
   assert.deepEqual(stillCandidates({ start: null, end: null }), [0]);
 });
 
@@ -31,6 +32,20 @@ test('frames.html has one figure per world with the id under the image and relat
   assert.match(html, /<title>a &amp; b: key frames<\/title>/);
   assert.match(html, /repeat\(2, /);
   assert.doesNotMatch(html, /src="\//);
+});
+
+test('stillCandidates puts the still after the world entrances end, and ignores exits, texture and the span end', () => {
+  const span = { id: 'b', start: 0, end: 6 };
+  const anims = [
+    { world: 'b', id: 'ramp-in', start: 3, end: 3.27 },
+    { world: 'b', id: 'enter', start: 4.2, end: 4.58 },
+    { world: 'b', id: 'leave', start: 5.4, end: 5.95 },
+    { world: 'b', id: '', start: 0, end: 6 },
+    { world: 'a', id: 'enter', start: 5, end: 5.5 },
+  ];
+  assert.equal(stillCandidates(span, anims)[0], 4.63);
+  assert.equal(stillCandidates(span, [])[0], 3);
+  assert.equal(stillCandidates(span, [{ world: 'b', id: 'enter', start: 5.7, end: 5.98 }])[0], 3);
 });
 
 test('the untouched starter page is named as the starter, not as clean; a written page is not', async () => {
