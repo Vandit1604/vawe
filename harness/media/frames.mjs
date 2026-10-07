@@ -17,7 +17,7 @@ import { readBrief } from '../lib/brief-tables.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { unwaived } from '../lib/motion-lint.mjs';
 import { firedRules, firedLines } from '../lib/taste-steps.mjs';
-import { framesPage, worldLines, parseFramesArgs, selectWorlds } from '../lib/frames-page.mjs';
+import { framesPage, worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../lib/frames-page.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const hideOthers = (id) => `[data-world]:not([data-world="${id}"]) { display: none !important; }`;
@@ -89,7 +89,7 @@ async function main(argv) {
   const partial = full || ids.length > 0;
   const head = `${shots.length} worlds: ${shots.map((s) => `${s.id} @${s.at}s`).join(', ')}`;
   const paths = shots.map((s) => `  ${s.id}  ${s.png}`);
-  const rules = worldLines(shots, firedLines);
+  const rules = worldLines(shots, firedLines, { starter: isStarterPage(fs.readFileSync(abs, 'utf8')) });
   const done = () => `time: ${((Date.now() - t0) / 1000).toFixed(1)} s`;
   if (partial) {
     console.log([`frames${full ? ' (full size)' : ''}: ${head}`, ...paths, ...rules, done()].join('\n'));

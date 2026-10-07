@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { framesPage, worldLines, parseFramesArgs, selectWorlds } from '../../harness/lib/frames-page.mjs';
+import { framesPage, worldLines, parseFramesArgs, selectWorlds, isStarterPage } from '../../harness/lib/frames-page.mjs';
 import { stillCandidates } from '../../harness/media/world-sample.mjs';
 
 test('parseFramesArgs reads the page, --full and --world as a comma list or repeated', () => {
@@ -31,6 +31,17 @@ test('frames.html has one figure per world with the id under the image and relat
   assert.match(html, /<title>a &amp; b: key frames<\/title>/);
   assert.match(html, /repeat\(2, /);
   assert.doesNotMatch(html, /src="\//);
+});
+
+test('the untouched starter page is named as the starter, not as clean; a written page is not', async () => {
+  const { starterPage } = await import('../../harness/cli/new.mjs');
+  assert.equal(isStarterPage(starterPage({})), true);
+  assert.equal(isStarterPage(starterPage({}).replace('why it matters', 'every school email')), false);
+  assert.equal(isStarterPage(starterPage({}).replace('#8c8c8c', '#f4efe6')), false);
+  const shots = [{ id: 's1', fired: [] }, { id: 's2', fired: [] }];
+  const [line] = worldLines(shots, () => [], { starter: true });
+  assert.match(line, /starter page: s1, s2 .*not written yet/);
+  assert.doesNotMatch(line, /clean/);
 });
 
 test('worldLines prints each rule once with every world it fired in, then the clean worlds', () => {

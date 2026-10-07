@@ -1,7 +1,9 @@
 // `vawe frames`: the pure parts. films/<film>/frames.html holds the key frame of each world side by side, the world id under
 // each, like directions.html; harness/media/frames.mjs renders the stills it points at.
 
-const escape = (text) => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+import { PLACEHOLDER, STARTER_LINE } from './measured-brief.mjs';
+
+const escape =(text) => String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
 const FRAMES_TEMPLATE = `<!doctype html>
 <html data-aspect="{{aspect}}">
@@ -59,7 +61,7 @@ export function selectWorlds(spans, ids) {
  * The printed lines for all worlds: each fired rule once, led by every world it fired in, and one line for the
  * clean worlds. `shots` are [{ id, fired }] with fired from firedRules; `format` is firedLines. Pure.
  */
-export function worldLines(shots, format) {
+export function worldLines(shots, format, { starter = false } = {}) {
   const byRule = new Map();
   for (const s of shots) for (const f of s.fired) {
     if (!byRule.has(f.id)) byRule.set(f.id, { first: f, worlds: [] });
@@ -67,5 +69,9 @@ export function worldLines(shots, format) {
   }
   const lines = [...byRule.values()].map(({ first, worlds }) => `  ${worlds.join(', ')}: ${format([first], 1)[0].trim()}`);
   const clean = shots.filter((s) => !s.fired.length).map((s) => s.id);
-  return clean.length ? [...lines, `  clean: ${clean.join(', ')}`] : lines;
+  if (!clean.length) return lines;
+  return [...lines, starter ? `  starter page: ${clean.join(', ')} hold the starter's grey and words, so no rule has a film to read; the film is not written yet` : `  clean: ${clean.join(', ')}`];
 }
+
+/** True while the page is still the one `vawe new` wrote: its grey ground placeholder and its line under the headline are both unchanged. Pure. */
+export const isStarterPage = (html) => html.includes(`--ground: ${PLACEHOLDER.ground}`) && html.includes(`>${STARTER_LINE}<`);
