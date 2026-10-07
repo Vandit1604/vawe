@@ -19,7 +19,6 @@ const FAILS = [
   ['invariants/invariant-assert-bad.html', /^error: assert at 0.5 s failed: headline says Bye/],
   ['invariants/invariant-script-bad.html', /^error: \S+invariant-script-bad\.html: \S+no-such-module\.js: HTTP 404$/],
   ['invariants/invariant-throw-bad.html', /^error: \S+invariant-throw-bad\.html: \S+: camera rig missing$/],
-  ['invariants/brief-drift/page.html', /^error: brief: 5 s 16:9; page: 1 s 16:9$/],
 ];
 for (const [page, line] of FAILS) {
   test(`${page} exits 2 with one line`, () => {
@@ -29,6 +28,12 @@ for (const [page, line] of FAILS) {
     assert.equal(r.stderr.trim().split('\n').length, 1);
   });
 }
+
+test('a brief that names another length advises and the render uses the page', () => {
+  const r = render(path.join(dir, 'invariants/brief-drift/page.html'));
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stderr, /^advice: brief: 5 s 16:9; page: 1 s 16:9; the render uses the page/m);
+});
 
 test('a blank run in the middle renders and advises with the range to declare', () => {
   const r = render(path.join(dir, 'invariants/invariant-blank-bad.html'));

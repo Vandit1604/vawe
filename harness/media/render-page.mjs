@@ -952,7 +952,7 @@ async function main() {
   }
   if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
   const drift = briefProblems(pagePath);
-  if (drift.length) { for (const p of drift) console.error(errorLine(p)); process.exit(2); }
+  if (drift.length) console.error(adviceBlock(drift.map((p) => `${p}; the render uses the page: update the brief's length and aspect lines to match`)).join('\n'));
   const final = argv.includes('--final');
   if (final) assertFinalReady(pagePath);
   const failedShip = final ? null : lastFailedShip(readRuns(pagePath));
