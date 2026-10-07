@@ -3,7 +3,7 @@ id: named-eases
 step: motion
 principle: Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. The CSS keywords ease, ease-out and ease-in-out are not a default for everything.
 limit: a move longer than 0.3 s is not on linear or on a bare CSS keyword with no curve of its own
-range: EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop; sampled springs with 8 or more stops
+range: EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops
 break-when: linear is allowed on the interior legs of a multi-key camera path (keys()), where constant speed is the point; a scripted page is not measured by the lint
 instead: EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only.
 check: linear-move, default-ease

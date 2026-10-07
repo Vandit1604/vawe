@@ -4,9 +4,10 @@ import { peakValue, overshoots } from '../../harness/lib/ease-curve.mjs';
 import { EASE } from '../../core/motion/presets.js';
 import { curveToLinear, CURVES } from '../../core/motion/springs.js';
 
-test('the named eases: only EASE.pop goes past rest', () => {
-  assert.deepEqual(Object.keys(EASE).filter((name) => overshoots(EASE[name])), ['pop']);
+test('the named eases: only EASE.pop and EASE.nudge go past rest, nudge by at most 7 percent', () => {
+  assert.deepEqual(Object.keys(EASE).filter((name) => overshoots(EASE[name])), ['pop', 'nudge']);
   assert.ok(peakValue(EASE.pop) > 1.1);
+  assert.ok(peakValue(EASE.nudge) <= 1.07);
 });
 
 test('the overshoot spring curve overshoots and the plain spring does not', () => {

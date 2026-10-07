@@ -279,7 +279,7 @@
   "file": "taste/rules/named-eases.md",
   "instead": "EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only.",
   "dial": "ease",
-  "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop; sampled springs with 8 or more stops"
+  "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops"
  },
  "no-bounce": {
   "file": "taste/rules/no-bounce.md",
