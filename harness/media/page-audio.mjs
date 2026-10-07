@@ -2,7 +2,12 @@
 // (never played live); this reads them and mixes ONE ffmpeg graph onto the rendered video.
 //   <audio src="music.mp3" loop data-at="0" data-gain="-3" data-fade-out="0.4"></audio>   (loop = the music bed)
 //   <audio data-synth="whoosh" data-at="2.4"></audio>   (voices: core/audio/kit.mjs CUES; no data-gain
-//                                                        takes the voice's DEFAULT_GAIN_DB, -26 for a UI cue)
+//                                                        takes the voice's DEFAULT_GAIN_DB)
+//   <audio data-synth="air" data-at="2.4" data-length="0.6"></audio>   (data-length: the move's seconds, for the
+//                                                        palette voices air, swoosh-long, swell-soft)
+//   <audio data-synth="tap" data-on="world:s4" data-at="0.1"></audio>  (data-on: data-at counts from the first
+//                                                        second world s4 shows; needs the page's seek)
+//   <audio data-synth="bed" loop></audio>                (a seamless generated pad, the music bed)
 //   <audio src="vo.wav" data-role="vo"></audio>          (ducks music -18 dB while it plays)
 //   <meta name="loudness" content="-14">   (wins over the default below)
 // The mix is as written: the sum of the cues at their gains, nothing raised or lowered. Only a -1 dBTP
@@ -14,7 +19,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { CUES, DEFAULT_GAIN_DB, renderCue, normalize, encodeWav, wavDuration } from '../../core/audio/kit.mjs';
+import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, normalize, normalizeStereo, encodeWav, wavDuration } from '../../core/audio/kit.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATE = 48000;
@@ -57,12 +62,13 @@ export async function readPageAudio(page, { pagePath } = {}) {
     const num = (el, k, d) => { const v = parseFloat(el.dataset[k]); return Number.isFinite(v) ? v : d; };
     const tracks = [...document.querySelectorAll('audio')].map((el) => ({
       src: el.getAttribute('src') || el.querySelector('source')?.getAttribute('src') || null,
-      synth: el.dataset.synth || null,
+      synth: el.dataset.synth || null, on: el.dataset.on || null, length: num(el, 'length', null),
       at: num(el, 'at', 0), gain: num(el, 'gain', null), fadeIn: num(el, 'fadeIn', 0), fadeOut: num(el, 'fadeOut', 0),
       trim: num(el, 'trim', 0), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
     }));
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
-    return { tracks, loudness: Number.isFinite(meta) ? meta : null, url: location.href };
+    const duration = parseFloat(document.querySelector('meta[name="duration"]')?.content);
+    return { tracks, loudness: Number.isFinite(meta) ? meta : null, url: location.href, duration };
   });
   const problems = [];
   const specs = raw.tracks.map(({ src, ...t }) => {
@@ -76,9 +82,30 @@ export async function readPageAudio(page, { pagePath } = {}) {
     if (!fs.existsSync(file)) problems.push(`${where}: src="${src}" resolved to ${file}, which does not exist`);
     return { ...t, src: file, gain: t.gain ?? 0 };
   });
+  problems.push(...await startOnWorlds(page, specs, raw.duration));
   if (problems.length) throw new Error(problems.join('\n'), { cause: { problems } });
   for (const s of specs) s.role ||= 'sfx';
   return { specs, loudness: raw.loudness };
+}
+
+// data-on="world:<id>" moves a cue to the second world <id> first shows, plus its data-at. The page's own
+// seek finds the second, so the cue follows the film when the animation changes. Returns the problems.
+async function startOnWorlds(page, specs, duration) {
+  const on = specs.filter((s) => s.on);
+  if (!on.length) return [];
+  const bad = on.filter((s) => !/^world:\S+$/.test(s.on)).map((s) => `<audio> at ${s.at} s: data-on="${s.on}" is not world:<id>`);
+  if (bad.length) return bad;
+  if (!(duration > 0) || !(await page.evaluate(() => typeof window.__pageSeek === 'function'))) {
+    return ['data-on needs <meta name="duration"> and the renderer\'s page seek: it cannot run here'];
+  }
+  const { sampleWorlds } = await import('./world-sample.mjs');
+  const spans = await sampleWorlds(page, duration, (ms) => page.evaluate((t) => window.__pageSeek(t / 1000), ms));
+  return on.flatMap((s) => {
+    const span = spans.find((w) => w.id === s.on.slice(6));
+    if (span?.start == null) return [`<audio> data-on="${s.on}": no world shows with that id (worlds: ${spans.map((w) => w.id).join(' ')})`];
+    s.at += span.start;
+    return [];
+  });
 }
 
 function probePeakDb(file) {
@@ -90,7 +117,11 @@ function probePeakDb(file) {
 // peakDb is the cue's loudest sample after data-gain, in dBFS, before the limiter.
 function materialise(spec, tmp, i) {
   if (spec.src) return { file: spec.src, seconds: probeSeconds(spec.src), peakDb: probePeakDb(spec.src) + spec.gain };
-  const samples = normalize(renderCue(CUES[spec.synth]), CUE_CEILING);
+  const cue = CUES[spec.synth];
+  // A palette voice draws pitch, timing and detune from its seed: the index gives each use its own.
+  const samples = cue.voice
+    ? normalizeStereo(renderCueStereo(cue, i + 1, spec.length == null ? {} : { length: spec.length }), CUE_CEILING)
+    : normalize(renderCue(cue), CUE_CEILING);
   const file = path.join(tmp, `cue${i}-${spec.synth}.wav`);
   fs.writeFileSync(file, encodeWav(samples));
   return { file, seconds: wavDuration(samples), peakDb: 20 * Math.log10(CUE_CEILING) + spec.gain };
