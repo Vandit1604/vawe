@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { boxMotion, speedCeiling, overshootShare, textBreathing, textLingers, lingerCeiling, barLint } from '../../harness/lib/bar-lint.mjs';
+import { boxMotion, spectacleWeak, speedCeiling, overshootShare, textBreathing, textLingers, lingerCeiling, barLint } from '../../harness/lib/bar-lint.mjs';
 import { unwaived } from '../../harness/lib/motion-lint.mjs';
 import { firedRules, firedLines } from '../../harness/lib/taste-steps.mjs';
 import { probeTracks, readHoldProblems, lineNeed } from '../../harness/lib/read-hold.mjs';
@@ -59,6 +59,25 @@ test('speedCeiling: one fast element among many does not move the p90, and drift
 
 const rec = (over) => ({ target: 0, label: 'card', id: 'enter', props: ['translate'], delay: 0, duration: 0.5, easing: EASE.land, kfEasings: [], opacity: [0, 1], from: 'translate(0px, 24px)', fullFrame: false, decorative: false, ...over });
 const arrivals = (eases) => eases.map((easing, i) => rec({ target: i, delay: i * 0.6, easing }));
+
+test('spectacleWeak: a spectacle second whose move is slower than another moment fires with both numbers; the strongest or an unsampled second does not', () => {
+  const peaks = [{ label: 'chip', speed: 0.29, at: 12.1 }, { label: 'strip', speed: 3.1, at: 12.0 }, { label: 'badge', speed: 5.0, at: 4.8 }, { label: 'mail', speed: 1.2, at: 2.0 }];
+  const [f] = spectacleWeak(peaks, 12, [0, 20]);
+  assert.equal(f.rule, 'spectacle-weak');
+  assert.equal(f.at, 12);
+  assert.match(f.what, /spectacle at 12 s is weaker than 4\.8 s: strip peaks at 3\.1 frame heights per second there, badge peaks at 5 at 4\.8 s/);
+  assert.deepEqual(spectacleWeak(peaks, 4.8, [0, 20]), []);
+  assert.deepEqual(spectacleWeak(peaks, 12, [0, 10]), []);
+  assert.deepEqual(spectacleWeak(peaks, null, [0, 20]), []);
+  assert.deepEqual(spectacleWeak([{ label: 'strip', speed: 3.1, at: 12 }, { label: 'badge', speed: 3.5, at: 4.8 }], 12, [0, 20]), []);
+  assert.match(spectacleWeak([{ label: 'badge', speed: 5, at: 4.8 }], 12, [0, 20])[0].what, /no element moves there/);
+});
+
+test('barLint reads the spectacle second beside the speed and arrival checks', () => {
+  const boxes = { peaks: [{ label: 'badge', speed: 5, at: 4.8 }], arrivals: [], span: [0, 20] };
+  assert.equal(barLint({ records: [], boxes, text: null, spectacle: 12 })[0].rule, 'spectacle-weak');
+  assert.equal(barLint({ records: [], boxes, text: null })[0], undefined);
+});
 
 test('overshootShare: a third of the arrivals on a spring is inside the range', () => {
   assert.deepEqual(overshootShare(arrivals([EASE.pop, EASE.pop, EASE.land, EASE.land, EASE.land, EASE.land])), []);

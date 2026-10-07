@@ -301,6 +301,10 @@
   "file": "taste/rules/real-physics.md",
   "instead": "a flap has a hinge, perspective and shading; do not sell a glyph scramble as a flap or one cubic-bezier as an exponential."
  },
+ "spectacle-weak": {
+  "file": "taste/rules/spectacle-weak.md",
+  "instead": "give the spectacle the fastest or longest move of the film, or move the spectacle meta to the moment that already is strongest and put quiet before it."
+ },
  "speed-bands": {
   "file": "taste/rules/speed-bands.md",
   "instead": "use bandSeconds(name) and the presets; give the hero gravity or cinematic and the payoff energy. Too many distinct durations read as drift: hold to a few named bands.",
