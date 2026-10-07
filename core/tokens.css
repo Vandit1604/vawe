@@ -1,35 +1,15 @@
-/* tokens.css, PLUMBING ONLY: font registration, frame geometry, determinism reset, and the few
-   engine classes every scene shares. Contains NO look values, no colors, no font choices, no
-   scales, no shadows. The theme owns 100% of the look: applyTheme() (core/boot.js) writes every
-   --font-* and palette var onto :root, and core/theme-contract.js guarantees a theme is complete
-   before a single frame renders. A missing theme key is a loud error, never a fallback pixel. */
+/* tokens.css: font registration and the frame geometry fallback. No look values: the page owns
+   colours and font choices. */
 
-/* ---------- frame geometry: PRE-BOOT FALLBACK ONLY ----------
-   boot() overwrites all six of these on :root before the first frame: --vw/--vh from the resolved
-   aspect, --safe-* from core/safe.js (the single safe-area definition). They live here only so the
-   page is not zero-sized in the instant before boot runs, and for fragment previews that never boot.
-
-   They used to be the real source, keyed on [data-orient], and that was the bug. data-orient is
-   `width > height`: a binary that cannot describe five ratios. 1:1 and 4:5 both resolved to
-   "portrait", so a square got a 1080x1920 stage (cropped to 1080 tall) and TikTok's 240/580 safe
-   inset, which reserved 76% of its height. Do NOT reintroduce a per-orientation table here: the
-   canvas is a function of the aspect, and the safe area is a function of the aspect AND the
-   destination, neither of which CSS can see. */
+/* ---------- frame geometry: FALLBACK ONLY ----------
+   The renderer sets --vw and --vh from the page's data-aspect before the page scripts run. They live
+   here only so a page opened outside the renderer is not zero-sized. Do NOT add a per-orientation
+   table: the canvas is a function of the aspect, and CSS cannot see the aspect. */
 :root {
   --vw: 1080px;
   --vh: 1920px;
-  --safe-top: 65px;
-  --safe-bottom: 65px;
-  --safe-left: 65px;
-  --safe-right: 65px;
 }
 
-/* determinism: every frame is set explicitly. transition/animation used to be killed here, because
-   nothing paused and seeked them; core/timeline/clips.js's seekAll() now pauses and seeks every
-   document.getAnimations() entry (CSS animation, CSS transition, Web Animation) and every SVG SMIL
-   root to the film's own t on every frame, so a wall-clock effect became a seeked one instead of a
-   forbidden one. See core/type/sanitize-html.js for what is still refused (a timeline source no seek
-   can reach, e.g. `animation-timeline: scroll()`). */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -40,13 +20,6 @@ html, body {
   font-family: var(--font-sans), 'Hanken Grotesk', sans-serif;
   -webkit-font-smoothing: antialiased; text-rendering: geometricPrecision;
 }
-
-/* the render surface: geometry only. The theme's bg paints it, bg presets add texture */
-.stage { position: relative; width: var(--vw); height: var(--vh); overflow: hidden; background: var(--bg); }
-
-/* alpha export (--alpha): drop every opaque backdrop so unpainted pixels render transparent.
-   The motion graphics (text/images/cards) still paint normally → a compositable overlay layer. */
-html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { background: transparent !important; }
 
 /* ---------- font REGISTRATION (capability, not choice: the theme picks which are used) ---------- */
 /* Inter = Linear's EXACT self-hosted variable font (static.linear.app/fonts/InterVariable.woff2, full
@@ -80,22 +53,6 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
 @font-face { font-family: 'JetBrains Mono'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/JetBrainsMono.woff2') format('woff2'); }
 @font-face { font-family: 'Caveat'; font-weight: 400 700; font-display: block; src: url('/assets/fonts/Caveat.woff2') format('woff2'); }
 
-/* numbers: tabular figures so digits don't jitter on count-up */
-.num { font-family: var(--font-num), monospace; font-feature-settings: 'tnum' 1; letter-spacing: -0.01em; }
-
-/* real logo/flag images sit inside any icon/badge container */
-.icon-img { width: 100%; height: 100%; object-fit: contain; display: block; }
-
-/* ---------- ?debug=safe overlay (audit tooling, not look) ---------- */
-.stage.debug-safe .dbg { display: block; }
-.dbg { display: none; position: absolute; inset: 0; z-index: 99; pointer-events: none; }
-.dbg .zone { position: absolute; background: rgba(255, 40, 90, 0.16); }
-.dbg .zt { top: 0; left: 0; right: 0; height: var(--safe-top); }
-.dbg .zb { bottom: 0; left: 0; right: 0; height: var(--safe-bottom); }
-.dbg .zl { top: 0; bottom: 0; left: 0; width: var(--safe-left); }
-.dbg .zr { top: 0; bottom: 0; right: 0; width: var(--safe-right); }
-.dbg .box { position: absolute; left: var(--safe-left); right: var(--safe-right);
-  top: var(--safe-top); bottom: var(--safe-bottom); border: 3px solid rgba(120, 240, 60, 0.9); }
 /* Hanken Grotesk (free, open): a distinctive neo-grotesque; stand-in for brands on licensed faces
    (e.g. Stripe's Söhne, which we can't redistribute). Variable weight axis. */
 @font-face { font-family: 'Hanken Grotesk'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
@@ -103,15 +60,8 @@ html.alpha, html.alpha body, html.alpha .stage, html.alpha .hs-stage { backgroun
    grotesque (opsz+wght). Vendored for the tokenjam theme's headlines. */
 @font-face { font-family: 'Bricolage Grotesque'; font-weight: 200 800; font-display: block; src: url('/assets/fonts/BricolageGrotesque.woff2') format('woff2'); }
 /* Sohne (Stripe's licensed Klim face): the file lives in assets/fonts/local/ which is GITIGNORED.
-   Never commit it.
-   The second src IS the fallback, and it has to live here rather than in a font stack: a theme names
-   ONE family ("Sohne"), and boot() does document.fonts.load("400 100px 'Sohne'"), so a CSS stack
-   would never be consulted for the load and the name would simply fail to resolve. Chaining src
-   means 'Sohne' resolves to Hanken Grotesk wherever the licensed file is absent, which is every
-   deploy: the browser editor was rendering the Stripe scene in a raw system sans and 404ing.
-   Hanken Grotesk is the fallback this file already intended, it is OFL/Google Fonts, and it is
-   already vendored and shipped, so this costs no new bytes. Local renders still get real Sohne,
-   because the first src wins wherever it exists. */
+   Never commit it. The second src is the fallback: 'Sohne' resolves to the vendored Hanken Grotesk
+   wherever the licensed file is absent, and the first src wins wherever it exists. */
 @font-face { font-family: 'Sohne'; font-weight: 100 900; font-display: block;
   src: url('/assets/fonts/local/Sohne.woff2') format('woff2'),
        url('/assets/fonts/HankenGrotesk.woff2') format('woff2'); }
