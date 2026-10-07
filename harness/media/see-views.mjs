@@ -23,14 +23,16 @@ export function probe(video) {
 
 // A page is rendered as a half-size 30 fps draft with its audio mixed (the audio checks read it), and
 // the draft is reused while it is newer than the page.
+const hasAudioStream = (video) => spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'csv=p=0', video], { encoding: 'utf8' }).stdout.trim() !== '';
+
 export async function videoFor(input, { audio = true } = {}) {
   if (!input.endsWith('.html')) return input;
   const { renderPage, defaultOut } = await import('./render-page.mjs');
   const out = defaultOut(input, { aspect: '16:9', suffixAspect: false, final: false });
+  const hasAudio = audio && /<audio\b/i.test(fs.readFileSync(input, 'utf8'));
   const fresh = fs.existsSync(out) && fs.statSync(out).mtimeMs > fs.statSync(input).mtimeMs;
-  if (!fresh) {
+  if (!fresh || (hasAudio && !hasAudioStream(out))) {
     fs.mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
-    const hasAudio = audio && /<audio\b/i.test(fs.readFileSync(input, 'utf8'));
     await renderPage(input, out, { fps: 30, audio: hasAudio || undefined });
   }
   return out;
