@@ -49,7 +49,7 @@ stage after each step; `bin/vawe ship` warns while the Board or the Motion pass 
 A few soft key ticks and one swell beat many hits. `data-gain` is absolute dB: it replaces the voice's
 default, it does not add to it. Leave it off and a voice takes its default (`DEFAULT_GAIN_DB` in
 `core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the weight voices impact/drop/braam -2; the quiet
-palette tap -12, tick -14, bed -28; a `src` file defaults to 0 dB). Write a gain only to move one cue on purpose. Reach for impact, braam or drop only when the brief asks for
+palette tap -3, tick -5, bed -19, which land a film near -20 LUFS; a `src` file defaults to 0 dB). Write a gain only to move one cue on purpose. Reach for impact, braam or drop only when the brief asks for
 weight. Not every word gets a tick: cue the first and the last. The mix warns when one cue peaks more
 than 6 dB above the median cue, with the `data-gain` change that fixes it. Name each beat once in
 CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat.
