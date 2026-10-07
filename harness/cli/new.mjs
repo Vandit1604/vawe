@@ -14,6 +14,7 @@ import { tasteLines } from '../lib/taste-steps.mjs';
 import { ASPECTS } from '../../core/layout/aspects.js';
 import { FAMILIES, FIELDS, brandAdvice } from '../lib/directions.mjs';
 import { adviceBlock } from '../lib/advice.mjs';
+import { SAY } from '../live/stage-say.mjs';
 import { measuredSections, DEFAULT_LENGTH, GUESS, DETAIL_KEYS, answeredDetails, unansweredDetails, questionCalls, PLACEHOLDER, STARTER_LINE } from '../lib/measured-brief.mjs';
 import { dialRanges, signatureSection } from '../lib/signature.mjs';
 import { recentFromDisk, varietyFor, namesBrandKit } from '../lib/variety.mjs';
@@ -268,7 +269,7 @@ const recipeLine = (recipe) => `chain to start from: ${RECIPES}, "## ${recipe.he
 
 const takenFromText = () => `## Taken from
 
-Phase 2, before any design file. Study the references (\`bin/vawe refs list\`, then Read \`~/.vawe/refs/frames/<id>/<shot>.png\` at full size; planned: \`vawe frames --full --world <id>\`), then name 4 to 6 frames, not all. One row each: the exact path, and what you take (ground or light, type, colour, layout, motion). Fill it before DESIGN.md and page.html; \`bin/vawe\` says "Taken from not filled" until it holds a frame path.
+Phase 2, before any design file. Study the references (\`bin/vawe refs list\`, then \`bin/vawe refs frames <id>\`, then Read each \`~/.vawe/refs/frames/<id>/<shot>.png\` at full size), then name 4 to 6 frames, not all. One row each: the exact path, and what you take (ground or light, type, colour, layout, motion). Fill it before DESIGN.md and page.html; \`bin/vawe\` says "Taken from not filled" until it holds a frame path.
 
 | frame (exact path) | what you take |
 |---|---|
@@ -283,7 +284,8 @@ Then study how the references MOVE, since stills do not show it: run \`bin/vawe 
 const systemText = (name) => `## Design system and kit
 
 Phase 3. Write films/${name}/DESIGN.md: the palette as roles, the type, the ground and light devices, the text treatment, the skills used and the rules rejected. Write films/${name}/kit/: the ground layers, and every moving part as its own element (words, marks, bars, cards, icons, the wordmark).
-Skills, fetched with \`command npx -y ui-skills get <slug>\`: leonxlnx/soft-skill (builder), pbakaus/colorize, mengto/progressive-blur. Take the principles. Reject the web-page patterns (nav, CTA button, pill, eyebrow, section padding): a video frame is not a hero page.`;
+Skills, fetched with \`command npx -y ui-skills get <slug>\`: leonxlnx/soft-skill (builder), pbakaus/colorize, mengto/progressive-blur. Take the principles. Reject the web-page patterns (nav, CTA button, pill, eyebrow, section padding): a video frame is not a hero page. DESIGN.md has a "Skills:" line naming the skills used and rejected; \`bin/vawe\` advises until it does. The kit format and an example: skills/vawe-page/SKILL.md, films/examples/colour-sting/kit/.
+Product UI inside the film (app screens, cards, panels): build it as a real interface with one UI skill and real-looking data, then place it in the frame under the density budget. For an invented product the UI is invented but designed; only chrome with no function is a pitfall.`;
 
 const statesText = () => `## States
 
@@ -307,14 +309,20 @@ Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Qu
 
 Sound is part of every film, subtle: a bed for the whole film, one voice per cut and one for the spectacle (names from \`bin/vawe sounds\`, never a fixed list).
 
+Gain: leave the column empty to take the voice's default (\`bin/vawe sounds\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
+
 | at s | voice | gain dB | for |
 |---|---|---|---|
-| [0] | [bed, loop] | [dB] | [the whole film] |
-| [s] | [voice] | [dB] | [a cut or the spectacle] |`;
+| [0] | [bed, loop] | | [the whole film] |
+| [s] | [voice] | | [a cut or the spectacle] |`;
 
 const motionText = () => `## Motion pass
 
-Phase 6, after the first draft. The motion is done when \`bin/vawe dev\` shows overshoot-share, live-hold (still windows) and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut and fixed what reads flat.`;
+Phase 7, after the first draft. The motion is done when \`bin/vawe dev\` shows overshoot-share, live-hold (still windows) and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut (all of them, not some) and fixed what reads flat. For the spectacle second also run \`bin/vawe onion\` and \`bin/vawe velocity\` on it. Then write one row per cut. \`bin/vawe ship\` warns while this table holds a placeholder.
+
+| cut | what read flat | what I fixed (or why it stays) |
+|---|---|---|
+| [s1 to s2] | [the strip showed] | [the change, or the reason it stays] |`;
 
 const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['board'], ['motion'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
 
@@ -431,7 +439,7 @@ export function newFilmLines(name, { page, route, title, guesses = [], asked, re
   ];
   const spread = variety.lines.length ? ['', ...variety.lines] : [];
   return [...lines, ...spread, '', 'rules for authors: taste/build/DIGEST.md; the judge scores taste/build/CARD.md; every rule is in taste/README.md', '', ...tasteLines('explore'), '',
-    ...adviceBlock(advice, '(advice only)'), '', `next: study the references and fill "Taken from" in films/${name}/brief.md (4 to 6 named frames, then 3 moves from bin/vawe strip <ref-id> --cuts); then DESIGN.md and kit/, one static state per world in page.html, bin/vawe frames ${page}, the Board, then the motion`];
+    ...adviceBlock(advice, '(advice only)'), '', `next: ${SAY.study(name)}; then ${SAY.moves()}. The stages after it are in AGENTS.md, The loop; bin/vawe names the next one after each step.`];
 }
 
 /**

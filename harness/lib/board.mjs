@@ -30,12 +30,13 @@ function rowsOf(section, head) {
   return filledRows(rows.join('\n')).map(cellsOf);
 }
 
-/** { cuts (seconds), moves (cells), sound (cells), spectacle (seconds or null) } of the Board section, or null when the brief has none. */
+/** { starts (seconds), cuts (seconds), moves (cells), sound (cells), spectacle (seconds or null) } of the Board section, or null when the brief has none. */
 export function parseBoard(brief) {
   const section = brief ? sectionOf(brief, 'Board') : undefined;
   if (section === undefined) return null;
   const spectacle = /Spectacle:[^\n]*?\bat\s+(\d+(?:\.\d+)?)/.exec(section);
   return {
+    starts: rowsOf(section, 'beat').map((c) => numberOf(c[1] ?? '')).filter((v) => v !== null),
     cuts: rowsOf(section, 'beat').map((c) => numberOf(c[3] ?? '')).filter((v) => v !== null),
     moves: rowsOf(section, 'cut').map((c) => c[1] ?? ''),
     sound: rowsOf(section, 'at s'),
@@ -73,5 +74,56 @@ export function boardChecks(brief, pageSpectacle = null) {
   if (!sound.length) lines.push('board: no sound rows; add a bed and one voice per cut');
   else if (!sound.some((r) => /bed|loop/i.test(r[1] ?? ''))) lines.push('board: the sound rows have no bed; add a looped bed for the whole film');
   moves.forEach((m, i) => { if (!m || /\bfade\b/i.test(m)) lines.push(`board: cut ${i + 1} names ${m ? `"${m}"` : 'no move'}; name a move from prompts/moves`); });
+  return lines;
+}
+
+/** False while the Motion pass section keeps its bracketed placeholder row or the instruction `vawe new` wrote before the table; null when the brief has no such section. */
+export function motionFilled(brief) {
+  const section = sectionOf(brief, 'Motion pass');
+  if (section === undefined) return null;
+  const oldTemplateOnly = !section.includes('| cut |') && section.includes('The motion is done when `bin/vawe dev` shows');
+  return !section.split('\n').some((l) => l.startsWith('| [')) && !oldTemplateOnly;
+}
+
+/** The names in the first column of the "move taken" table of Taken from, placeholders left out; [] when the brief has none. */
+export function movesTaken(brief) {
+  const section = sectionOf(brief, 'Taken from');
+  const at = section?.indexOf('| move taken');
+  if (at === undefined || at < 0) return [];
+  return filledRows(section.slice(at)).slice(1).map((l) => cellsOf(l)[0]).filter(Boolean);
+}
+
+const plain = (s) => s.toLowerCase().replace(/[-_]+/g, ' ');
+
+/** The moves named in Taken from that appear nowhere in the Board section. [] for a brief with no filled Board. Pure. */
+export function movesUnused(brief) {
+  if (boardFilled(brief ?? '') !== true) return [];
+  const board = plain(sectionOf(brief, 'Board'));
+  return movesTaken(brief).filter((m) => !board.includes(plain(m)));
+}
+
+const START_TOLERANCE_S = 0.25;
+
+/** Lines where the Board's beat starts differ from the page's world starts, both in seconds (harness/lib/timeline.mjs worldRows). [] for a brief with no filled Board. Pure. */
+export function boardVsPage(brief, pageStarts) {
+  if (boardFilled(brief ?? '') !== true) return [];
+  const { starts } = parseBoard(brief);
+  const lines = [];
+  if (starts.length !== pageStarts.length) lines.push(`the Board lists ${starts.length} beats and the page has ${pageStarts.length} worlds`);
+  const off = starts.map((b, i) => ({ i, b, p: pageStarts[i] })).filter(({ b, p }) => p !== undefined && Math.abs(b - p) > START_TOLERANCE_S);
+  for (const { i, b, p } of off.slice(0, 3)) lines.push(`beat ${i + 1} starts at ${s1(b)} s in the Board and at ${s1(p)} s in the page`);
+  if (off.length > 3) lines.push(`${off.length - 3} more beats differ`);
+  return lines;
+}
+
+/** What ship warns about before it renders: an unfilled Board or Motion pass, a Board that differs from the page, a move from Taken from that the Board never uses. `pageStarts` (the world start seconds) may be null (not measured). Pure. */
+export function shipWarnings(brief, pageStarts = null) {
+  if (!brief) return [];
+  const lines = [];
+  if (boardFilled(brief) === false) lines.push('the Board is not filled: write the rhythm, the spectacle, a move per cut and the sound rows in brief.md "Board"');
+  if (motionFilled(brief) === false) lines.push('the Motion pass is not filled: Read `bin/vawe strip <page> --cuts` for every cut, then write one row per cut in brief.md "Motion pass" (what read flat, what you fixed)');
+  if (pageStarts) lines.push(...boardVsPage(brief, pageStarts).map((l) => `Board and page differ: ${l}`));
+  const unused = movesUnused(brief);
+  if (unused.length) lines.push(`Taken from names ${unused.map((m) => `"${m}"`).join(', ')} but the Board uses no such move: put it in a cut, or remove the row`);
   return lines;
 }

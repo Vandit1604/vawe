@@ -9,6 +9,7 @@ import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs
 
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
+import { SAY, nextStep } from '../live/stage-say.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
@@ -40,12 +41,9 @@ const pageName = (page) => {
   const base = path.basename(page, '.html');
   return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
 };
-// Mirrors defaultOut in harness/media/render-page.mjs for a draft.
-const draftOut = (page, { from, to }) => {
-  const range = (from > 0 || to != null) ? `-${from ?? 0}-${to ?? 'end'}` : '';
-  return `out/${pageName(page)}-draft${range}.mp4`;
-};
-const devNext = (v, page) => `bin/vawe judge ${v.out || draftOut(page, v)} --fresh --stage draft --brief ${path.join(path.dirname(page), 'brief.md')} (about 30 s); fix what it names and draft again until PASS, then bin/vawe ship ${page}`;
+const devNext = (v, [page]) => (v.from != null || v.to != null
+  ? `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`
+  : SAY.motion(pageName(page), page));
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
@@ -80,7 +78,9 @@ export const VERBS = [
     ],
     example: 'vawe frames films/my-launch/page.html   |   vawe frames films/my-launch/page.html --full --world s3,s5',
     build: (v, [page]) => [{ script: 'harness/media/frames.mjs', args: [page, ...(v.full ? ['--full'] : []), ...(v.world ?? []).flatMap((w) => ['--world', w])] }],
-    next: (v, [page]) => `storyboard the motion in brief.md (Shots), then bin/vawe dev ${page}`,
+    next: (v, [page]) => (v.full || v.world?.length
+      ? `Read the stills at full size and fix the states; then bin/vawe frames ${page} for the sheet`
+      : nextStep(path.resolve(page), ROOT).next),
   },
   {
     name: 'dev', summary: 'draft render: half size, 30 fps, silent; also writes a key-frame sheet PNG next to it',
@@ -98,7 +98,7 @@ export const VERBS = [
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [
-      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : []), '--next', devNext(v, page)] },
+      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : []), '--next', devNext(v, [page])] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
     ],
     next: devNext,
@@ -119,8 +119,9 @@ export const VERBS = [
       if (v.status) return [{ script: 'harness/media/ship-job.mjs', args: ['status', ...(page ? [page] : []), ...(v.wait ? ['--wait'] : [])] }];
       if (!page) throw new UsageError('missing <page>; usage: vawe ship <page> [flags]  or  vawe ship --status [job]');
       const args = [page, ...(v.out ? [v.out] : []), ...(v.profile ? ['--profile'] : [])];
-      if (v.wait) return [{ script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
-      return [{ script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
+      const warn = { script: 'harness/live/ship-warn.mjs', args: [page] };
+      if (v.wait) return [warn, { script: 'harness/media/render-page.mjs', args: [...args, '--final', ...opt('--aspect', v.aspect)] }];
+      return [warn, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
       if (v.status) return 'repeat vawe ship --status <page> --wait (up to 100 s each) until it says done; the result includes the judge';
@@ -148,14 +149,14 @@ export const VERBS = [
     ],
     example: 'vawe critique films/my-launch/page.html --ref refs/ad.mp4 --at 4.2',
     build: (v, [page]) => [
-      { script: 'quality/gates/anim-traps.mjs', args: [page] },
-      { script: 'harness/media/see.mjs', args: [page, '--phone', '--strip', v.at || 'auto', '--loop'] },
+      { label: 'page code traps', script: 'quality/gates/anim-traps.mjs', args: [page] },
+      { label: 'phone sheet, strip and loop seam (renders a draft with audio when the last one is stale or silent; 1 to 3 min)', script: 'harness/media/see.mjs', args: [page, '--phone', '--strip', v.at || 'auto', '--loop'] },
       v.ref
-        ? { script: 'harness/media/see.mjs', args: [page, '--dom', '--ref', v.ref, ...opt('--from', v.from), ...opt('--to', v.to), ...(v.final ? ['--final'] : [])] }
-        : { script: 'harness/media/see.mjs', args: [page, '--measure'] },
-      { script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)] },
+        ? { label: 'motion against the reference (1 to 3 min)', script: 'harness/media/see.mjs', args: [page, '--dom', '--ref', v.ref, ...opt('--from', v.from), ...opt('--to', v.to), ...(v.final ? ['--final'] : [])] }
+        : { label: 'measured deltas', script: 'harness/media/see.mjs', args: [page, '--measure'] },
+      { label: 'page-check: text, cues, spectacle, cuts (1 to 3 min)', script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)] },
     ],
-    next: (v, [page]) => `look at the sheets above, then in a fresh session: VAWE_AGENT=judge-${pageName(page)} vawe judge ${page}${v.ref ? ` --ref ${v.ref}` : ''}`,
+    next: (v, [page]) => `look at the sheets above, then ${SAY.judge(pageName(page), page, v.ref)}`,
   },
   {
     name: 'compare', summary: 'reference and your film at the same exact seconds, side by side, one PNG',
@@ -196,7 +197,7 @@ export const VERBS = [
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/see.mjs', args: [film, ...(v.cuts ? ['--cuts'] : ['--moment', v.at]), '--span', String(span), '--fps', String(fps), ...opt('--out', v.out)] }];
     },
-    next: (v) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}`,
+    next: (v, [film]) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}${v.cuts ? (film.endsWith('.html') ? `; ${SAY.motionRows(pageName(film))}, then ${SAY.critique(pageName(film), film)}` : '; then name 3 moves in "Taken from" (ref id, cut second)') : ''}`,
   },
   {
     name: 'onion', summary: 'several frames of one move blended into ONE image, newest strongest, older ones fainter and tinted cool to warm: the spacing, path and overshoot of the move',

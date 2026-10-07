@@ -67,7 +67,8 @@ function main(argv) {
       for (const line of recentFailedShipLines(readAllRuns(path.join(ROOT, 'out')), Date.now())) console.error(line);
       return;
     }
-    for (const step of steps) {
+    for (const [i, step] of steps.entries()) {
+      if (step.label) console.log(`\n[${verb.name} ${i + 1}/${steps.length}: ${step.label}]`);
       const code = runStep(step);
       if (code !== 0) process.exit(code);
     }

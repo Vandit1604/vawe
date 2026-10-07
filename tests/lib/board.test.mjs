@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseBoard, boardChecks, boardFilled, spectacleOf } from '../../harness/lib/board.mjs';
+import { parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings } from '../../harness/lib/board.mjs';
 
 const board = ({ cuts = ['0.6', '0.3', '1.1'], spectacle = 'at 7.2', moves = ['whip', 'push', 'overlap'], sound = ['bed, loop', 'tick'] } = {}) => `## Look
 
@@ -95,4 +95,36 @@ test('the spectacle second reads from the page meta', () => {
   assert.equal(spectacleOf('<meta name="spectacle" content="7.2">'), 7.2);
   assert.equal(spectacleOf('<meta name="spectacle" content="">'), null);
   assert.equal(spectacleOf('<p>x</p>'), null);
+});
+
+const taken = (moves) => `## Taken from\n\n| move taken | ref id | cut s |\n|---|---|---|\n${moves.map((m) => `| ${m} | a | 1 |`).join('\n')}\n\n`;
+
+test('motionFilled: a placeholder row or the untouched old text is unfilled, a written row or prose is filled, no section is null', () => {
+  assert.equal(motionFilled('## Look\n'), null);
+  assert.equal(motionFilled('## Motion pass\n\n| cut | read | fixed |\n|---|---|---|\n| [s1 to s2] | [x] | [y] |\n'), false);
+  assert.equal(motionFilled('## Motion pass\n\nThe motion is done when `bin/vawe dev` shows overshoot-share.\n'), false);
+  assert.equal(motionFilled('## Motion pass\n\n| cut | read | fixed |\n|---|---|---|\n| s1 to s2 | flat | pushed |\n'), true);
+  assert.equal(motionFilled('## Motion pass\n\nI read every strip and pushed the cut at 2.\n'), true);
+});
+
+test('movesUnused names a Taken from move that no Board row uses', () => {
+  const b = board();
+  assert.deepEqual(movesUnused(taken(['whip', 'match-cut']) + b), ['match-cut']);
+  assert.deepEqual(movesUnused(taken(['whip', 'push']) + b), []);
+  assert.deepEqual(movesUnused(taken(['x']) + '## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n'), []);
+});
+
+test('boardVsPage compares the beat starts of the Board with the page worlds', () => {
+  const b = board();
+  assert.deepEqual(boardVsPage(b, [0, 1, 2]), []);
+  assert.deepEqual(boardVsPage(b, [0, 1]), ['the Board lists 3 beats and the page has 2 worlds']);
+  assert.deepEqual(boardVsPage(b, [0, 1, 4]), ['beat 3 starts at 2 s in the Board and at 4 s in the page']);
+});
+
+test('shipWarnings: unfilled Board and Motion pass, nothing for a brief without them', () => {
+  assert.deepEqual(shipWarnings('## Look\n'), []);
+  const w = shipWarnings('## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n\n## Motion pass\n\n| cut | a |\n|---|---|\n| [x] | [y] |\n');
+  assert.equal(w.length, 2);
+  assert.match(w[0], /Board is not filled/);
+  assert.match(w[1], /Motion pass is not filled/);
 });

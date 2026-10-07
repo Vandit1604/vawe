@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { sectionOf, filledRows, boardFilled, boardChecks, spectacleOf } from '../lib/board.mjs';
+import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf } from '../lib/board.mjs';
 
 export { boardFilled };
 
@@ -35,13 +35,32 @@ const MOVES_MIN = 3;
 
 /** How many moves the "Taken from" study names (rows of the "Moves taken" table past its header); null when the brief has no such table. */
 export function movesTakenCount(brief) {
-  const section = sectionOf(brief, 'Taken from');
-  const at = section?.indexOf('| move taken');
-  if (at === undefined || at < 0) return null;
-  return filledRows(section.slice(at)).length - 1;
+  return brief.includes('| move taken') ? movesTaken(brief).length : null;
 }
 
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
+
+const SKILLS_LINE = /^\W*skills?\b/im;
+
+/**
+ * The one owner of the stage order (AGENTS.md, The loop). Each entry is the text of one command line; the verbs in
+ * harness/cli/verbs.mjs print these after they run, so a verb and this hook never name different next steps.
+ */
+export const SAY = {
+  study: (name) => `bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, then fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 frames, exact path and what you take`,
+  moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second)`,
+  design: (name) => `write films/${name}/DESIGN.md and films/${name}/kit/ (format: skills/vawe-page/SKILL.md, example: films/examples/colour-sting/kit/)`,
+  skills: (name) => `add a "Skills:" line to films/${name}/DESIGN.md: the ui-skills you used (command npx -y ui-skills list) and the rules you rejected`,
+  states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet, then bin/vawe frames ${rel}`,
+  frames: (name, rel) => `bin/vawe frames ${rel}`,
+  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut, sound`,
+  dev: (name, rel) => `bin/vawe dev ${rel}`,
+  motion: (name, rel) => `bin/vawe strip ${rel} --cuts and Read every cut at full size; for the spectacle second also bin/vawe onion ${rel} --at <s> and bin/vawe velocity ${rel} --at <s>; fix what reads flat`,
+  motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: what read flat, what you fixed`,
+  critique: (name, rel) => `bin/vawe critique ${rel}`,
+  judge: (name, rel, ref) => `VAWE_AGENT=judge-${name} bin/vawe judge ${rel} --struct --runs A,B${ref ? ` --ref ${ref}` : ''} in a fresh session, then fix the named seconds with bin/vawe dev ${rel} --from s --to s`,
+  ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait`,
+};
 
 export function nextStep(page, root = process.cwd()) {
   const name = path.basename(path.dirname(page));
@@ -53,6 +72,7 @@ export function nextStep(page, root = process.cwd()) {
   const framed = mtime(path.join(root, 'out', `${name}-frames.png`)) > t;
   const stripped = mtime(path.join(root, 'out', 'strip', name)) > draft;
   const brief = read(path.join(dir, 'brief.md'));
+  const design = path.join(dir, 'DESIGN.md');
   const taken = takenFromCount(brief);
   const moves = movesTakenCount(brief);
   const early = !draft && !final && !framed;
@@ -60,26 +80,33 @@ export function nextStep(page, root = process.cwd()) {
     return { name, next: `create films/${name}/brief.md: the ask, the message, the spectacle second, "Taken from", "Board" (bin/vawe new <other-name> writes the template to copy)`, why: `films/${name} has no brief.md` };
   }
   if (early && taken !== null && taken < TAKEN_FROM_MIN) {
-    return { name, next: `fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 reference frames, exact path and what you take`, why: `Taken from not filled (${taken} named frames); it comes before the design files` };
+    return { name, next: SAY.study(name), why: `Taken from not filled (${taken} named frames); it comes before the design files` };
   }
   if (early && moves !== null && moves < MOVES_MIN) {
-    return { name, next: `bin/vawe strip <ref-id> --cuts on 2 reference films, Read the strips, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second)`, why: `${moves} moves named; motion is studied before the board` };
+    return { name, next: SAY.moves(), why: `${moves} moves named; motion is studied before the board` };
   }
-  if (early && taken !== null && !mtime(path.join(dir, 'DESIGN.md'))) {
-    return { name, next: `write films/${name}/DESIGN.md and films/${name}/kit/`, why: 'the design system and the asset kit come before the states' };
+  if (early && taken !== null && !mtime(design)) {
+    return { name, next: SAY.design(name), why: 'the design system and the asset kit come before the states' };
   }
-  if (early && hasWorlds(page)) return { name, next: `bin/vawe frames ${rel}`, why: 'the frames come before the motion' };
+  if (early && taken !== null && !SKILLS_LINE.test(read(design))) {
+    return { name, next: SAY.skills(name), why: 'DESIGN.md names no skills; the interface and colour skills are chosen before the states' };
+  }
+  if (early && taken !== null && t <= mtime(design)) {
+    return { name, next: SAY.states(name, rel), why: 'DESIGN.md is newer than the page; the states come before the frames and the motion' };
+  }
+  if (early && hasWorlds(page)) return { name, next: SAY.frames(name, rel), why: 'the frames come before the motion' };
   if (!draft && !final && boardFilled(brief) === false) {
-    return { name, next: `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut, sound`, why: 'the board is a plan for time and comes after the states, before the motion' };
+    return { name, next: SAY.board(name), why: 'the board is a plan for time and comes after the states, before the motion' };
   }
   const boardAdvice = !draft && !final && boardFilled(brief) ? boardChecks(brief, spectacleOf(read(page))) : [];
   if (boardAdvice.length) {
-    return { name, next: `check "Board" in films/${name}/brief.md (advice; a plan you keep on purpose needs no change), then bin/vawe dev ${rel}`, why: boardAdvice.map((l) => l.replace(/^board: /, '')).join('; ') };
+    return { name, next: `check "Board" in films/${name}/brief.md (advice; a plan you keep on purpose needs no change), then ${SAY.dev(name, rel)}`, why: boardAdvice.map((l) => l.replace(/^board: /, '')).join('; ') };
   }
-  if (draft < t && final < t) return { name, next: `bin/vawe dev ${rel}`, why: 'the page changed after its last draft' };
-  if (final < t && !stripped) return { name, next: `bin/vawe strip ${rel} --cuts`, why: 'a draft exists; Read the strip of every cut and fix what reads flat (dev: overshoot-share, live-hold and seam-variety clean or waived with a reason), then bin/vawe critique in a fresh session, then bin/vawe ship' };
-  if (final < t) return { name, next: `bin/vawe critique ${rel}`, why: 'the cuts are stripped; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship' };
-  return { name, next: `bin/vawe critique ${rel}`, why: 'the final is rendered; a fresh session judges it' };
+  if (draft < t && final < t) return { name, next: SAY.dev(name, rel), why: 'the page changed after its last draft' };
+  if (final < t && !stripped) return { name, next: SAY.motion(name, rel), why: 'a draft exists; the motion pass comes before the critique (dev: overshoot-share, live-hold and seam-variety clean or waived with a reason)' };
+  if (final < t && motionFilled(brief) === false) return { name, next: SAY.motionRows(name), why: 'the cuts are stripped; the Motion pass section is empty' };
+  if (final < t) return { name, next: SAY.critique(name, rel), why: 'the motion pass is done; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship' };
+  return { name, next: SAY.critique(name, rel), why: 'the final is rendered; a fresh session judges it' };
 }
 
 function main() {
