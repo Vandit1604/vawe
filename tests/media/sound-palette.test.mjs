@@ -6,7 +6,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, SR } from '../../core/audio/kit.mjs';
 import { BED_LOOP_SAMPLES, VOICES } from '../../core/audio/palette.mjs';
-import { cueSpreadWarnings } from '../../harness/media/page-audio.mjs';
+import { cueSpreadWarnings, measureMixLevel } from '../../harness/media/page-audio.mjs';
+import { PEAK_DBFS } from '../../harness/lib/peak-limit.mjs';
 
 const CUE_VOICES = Object.keys(VOICES).filter((n) => n !== 'bed');
 const OLD_VOICES = ['pluck', 'chime', 'sparkle', 'droplet', 'bloom', 'success', 'ready', 'whoosh', 'riser', 'drop', 'impact', 'swell', 'braam'];
@@ -64,6 +65,18 @@ test('default gains: every palette cue peaks within 4 dB of the others, the bed 
   assert.ok(DEFAULT_GAIN_DB.bed <= Math.min(...gains) - 12, `bed ${DEFAULT_GAIN_DB.bed} dB against the quietest cue ${Math.min(...gains)} dB`);
   const tracks = CUE_VOICES.map((synth) => ({ spec: { role: 'sfx', synth, at: 0 }, peakDb: 20 * Math.log10(0.8) + DEFAULT_GAIN_DB[synth] }));
   assert.deepEqual(cueSpreadWarnings(tracks), []);
+});
+
+test('default gains: a bed with one palette cue per beat lands in the loudness band and under the peak limit', () => {
+  const beats = ['tap', 'tick', 'swoosh-long', 'shimmer', 'sub-thump'];
+  const base = { trim: 0, fadeIn: 0, fadeOut: 0, duck: null };
+  const specs = [
+    { ...base, synth: 'bed', role: 'music', at: 0, gain: DEFAULT_GAIN_DB.bed },
+    ...beats.map((synth, i) => ({ ...base, synth, role: 'sfx', at: 0.5 + i * 1.1, gain: DEFAULT_GAIN_DB[synth] })),
+  ];
+  const { I, TP } = measureMixLevel({ specs, duration: 6 });
+  assert.ok(I >= -22 && I <= -18, `${I.toFixed(1)} LUFS`);
+  assert.ok(TP <= PEAK_DBFS, `${TP.toFixed(1)} dBTP`);
 });
 
 test('the old voice names still render and keep a default gain', () => {

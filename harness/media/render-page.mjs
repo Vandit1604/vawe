@@ -65,7 +65,7 @@ import { createChecks, timeLine } from '../lib/check-runner.mjs';
 import { MODES } from '../lib/draft-tiers.mjs';
 import { redLine, summaryLine, fullTable } from '../lib/acceptance.mjs';
 import { draftAcceptance, videoMeasures } from './acceptance-run.mjs';
-import { textProblems, frameUnitLines, soundLine, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes } from '../lib/draft-check.mjs';
+import { textProblems, frameUnitLines, soundLine, soundSummary, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes } from '../lib/draft-check.mjs';
 import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
@@ -921,7 +921,7 @@ async function printDraft(mp4, pagePath, r, { checks, taste, next, opts, from })
   const checkSeconds = checks.seconds().reduce((a, [, s]) => a + s, 0).toFixed(1);
   appendRun(pagePath, devEvent({ tier: checks.mode, wallS: process.uptime(), captureS: r.captureMs / 1000, checks: checks.seconds(), cache: checks.cache(), rows: report.rows, signature: report.signature.chosen, measured: report.signature.measured, fired: report.fired, worlds: r.probe?.worlds }));
   const head = report.rows ? summaryLine(report.rows, report.was) : `checks on this window: ${report.red.length} red`;
-  console.log([timing, look, report.signature.line, ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
+  console.log([timing, look, report.signature.line, soundSummary(r.level), ...report.red, ...range, ...(taste ? ['', ...report.notes.taste] : []), report.sync, `${head} · checks ${checkSeconds} s · details ${notes}${next ? ` · next: ${next}` : ''}`].filter((l) => l !== null && l !== '').join('\n'));
 }
 
 // Test hook for the CLI: VAWE_TEST_SLICE_FAULT=<lo>:<n> makes the slice starting at frame <lo> lose its page on its first n attempts.

@@ -380,12 +380,12 @@ export const DEFAULT_GAIN_DB = {
   pluck: -6, chime: -6, sparkle: -6, droplet: -6, bloom: -6, success: -6, ready: -6,
   whoosh: -4, riser: -4, swell: -4,
   impact: -2, drop: -2, braam: -2,
-  // The palette: every cue peaks within 4 dB of the others (-14 to -18 dBFS after the 0.8 ceiling). The taps
+  // The palette: every cue peaks within 4 dB of the others (-5 to -9 dBFS after the 0.8 ceiling). The taps
   // get the high end of that range because equal peaks make a sustained cue 5 to 10 dB louder than a tap
-  // (loudest 100 ms RMS, measured once by hand). The bed sits 12 dB under the quietest cue. A sparse film of
-  // these lands near -30 LUFS, the bottom of the band that harness/lib/draft-check.mjs accepts.
-  tap: -12, tick: -14, air: -14, 'swoosh-long': -14, shimmer: -16, glass: -16, 'swell-soft': -15, 'sub-thump': -14,
-  bed: -28,
+  // (loudest 100 ms RMS, measured once by hand). The bed sits 12 dB under the quietest cue. A film with a bed
+  // and one cue per beat lands near -20 LUFS integrated with a true peak under -3 dBTP (tests/media/sound-palette.test.mjs).
+  tap: -3, tick: -5, air: -5, 'swoosh-long': -5, shimmer: -7, glass: -7, 'swell-soft': -6, 'sub-thump': -5,
+  bed: -19,
 };
 for (const name of Object.keys(CUES)) if (!(name in DEFAULT_GAIN_DB)) throw new Error(`audio: voice "${name}" has no DEFAULT_GAIN_DB entry`);
 
