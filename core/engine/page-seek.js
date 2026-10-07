@@ -11,7 +11,10 @@ export async function seekTo(t, win = window) {
   if (win.__pageClock) win.__pageClock.set(t);
   if (typeof win.seek === 'function') await win.seek(t);
   if (win.__pageFonts) await win.__pageFonts();
-  for (const a of win.document.getAnimations()) { a.pause(); a.currentTime = t * 1000; }
+  const seen = win.__seekAnimations || (win.__seekAnimations = new Set());
+  // getAnimations() drops a finished fill:none animation, so a later seek back would miss it.
+  for (const a of win.document.getAnimations()) seen.add(a);
+  for (const a of seen) { a.pause(); a.currentTime = t * 1000; }
   win.document.querySelectorAll('svg').forEach((svg) => {
     if (typeof svg.pauseAnimations === 'function') { try { svg.pauseAnimations(); svg.setCurrentTime(t); } catch { /* best-effort */ } }
   });
