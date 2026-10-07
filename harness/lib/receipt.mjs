@@ -12,33 +12,11 @@ export const dirFor = (stage) => LEGACY[stage] || path.join(ROOT, 'quality', 'ba
 const keyOf = (subject) => filmKeyOf(subject).replace(/\.(md|markdown)$/i, '');
 export const receiptPath = (stage, subject) => path.join(dirFor(stage), `${keyOf(subject)}.json`);
 
-/** The `.html` fragment paths a scene JSON names (`{"type":"html","src":…}` layers, any depth, plus
- *  `bg` entries), relative to the repo root: the one scan `hashOf` already does, exported so a caller
- *  that needs to know WHICH files (post-draft.mjs's own layout step) never re-walks the scene itself. */
-export function fragmentsOf(subject) {
-  if (!/\.json$/i.test(subject)) return [];
-  let data;
-  try { data = JSON.parse(fs.readFileSync(subject, 'utf8')); } catch { return []; }
-  const out = new Set();
-  const walk = (a) => { if (Array.isArray(a)) for (const l of a) {
-    if (!l || typeof l !== 'object') continue;
-    if (l.type === 'html' && typeof l.src === 'string') out.add(l.src);
-    if (l.children) walk(l.children);
-  } };
-  walk(data.layers);
-  for (const b of Array.isArray(data.bg) ? data.bg : []) if (b && typeof b === 'object' && typeof b.src === 'string') out.add(b.src);
-  return [...out].sort();
-}
-
-/** sha256 of the subject's bytes, plus the bytes of any html fragment it names. Null when anything it
- *  covers is unreadable, never a thrown error: a missing subject is the caller's problem to report,
- *  not this module's to crash on. A subject that names no fragment hashes exactly as it always has,
- *  which is what keeps this change from un-approving the whole library in one commit. */
+/** sha256 of the subject's bytes. Null when it is unreadable, never a thrown error: a missing
+ *  subject is the caller's problem to report, not this module's to crash on. */
 export function hashOf(subject) {
   try {
-    const h = crypto.createHash('sha256').update(fs.readFileSync(subject));
-    for (const rel of fragmentsOf(subject)) h.update('\0').update(rel).update('\0').update(fs.readFileSync(path.join(ROOT, rel)));
-    return h.digest('hex');
+    return crypto.createHash('sha256').update(fs.readFileSync(subject)).digest('hex');
   } catch { return null; }
 }
 

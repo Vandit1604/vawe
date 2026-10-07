@@ -4,7 +4,7 @@
 // sheet and writes the rubric (the brand house-style + the craft rubric (11 dimensions + 2 checks) + a verdict template). The
 // AGENT then reads judge/<name>/sheet.png against judge/<name>/rubric.md (under the scratch base) and returns a PASS/FIX verdict.
 //
-// Usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>] [--no-measure]
+// Usage: node quality/gates/judge.mjs <page.html|mp4> [--vs <brand>] [--ref <ref.mp4>] [--no-measure]
 //        vawe judge <file> [VS=<brand>] [REF=<ref.mp4>]
 //        vawe judge <file> --verdict PASS|FIX [--at <seconds>] [--top-fix "<fix>"]   writes out/<film>.judge.json
 // A page film (films/<name>/page.html) is judged from its render in out/. A reference (--ref, or the page's
@@ -16,7 +16,7 @@ import { writeReceipt, readReceipt } from '../../harness/lib/receipt.mjs';
 import path from 'node:path';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
 import { fileURLToPath } from 'node:url';
-import { frameTile, tileGrid, tileBox, baseOf, renderOf, pageRenderOf, gradeable, evenSamples } from '../../harness/lib/tile.mjs';
+import { frameTile, tileGrid, tileBox, baseOf, pageRenderOf, gradeable, evenSamples } from '../../harness/lib/tile.mjs';
 import { readPageMeta } from '../../harness/media/render-page.mjs';
 import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { craftRubric, structuredRubric } from './rubric.mjs';
@@ -88,20 +88,13 @@ if (compareIdx >= 0) {
 
 const inp = process.argv[2];
 if (!inp) {
-  console.error('usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>]');
-  f.fail('judge-usage', 'usage: node quality/gates/judge.mjs <scene.json|page.html|mp4> [--vs <brand>] [--ref <ref.mp4>]');
+  console.error('usage: node quality/gates/judge.mjs <page.html|mp4> [--vs <brand>] [--ref <ref.mp4>]');
+  f.fail('judge-usage', 'usage: node quality/gates/judge.mjs <page.html|mp4> [--vs <brand>] [--ref <ref.mp4>]');
   process.exit(2);
 }
 
-// resolve the rendered mp4 (from a scene JSON → out/<name>.mp4, or a direct mp4) + the scene for beats.
-let mp4 = inp, scene = null;
 const isPage = inp.endsWith('.html');
-if (inp.endsWith('.json')) {
-  scene = JSON.parse(fs.readFileSync(inp, 'utf8'));
-  mp4 = renderOf(inp);
-} else if (isPage) {
-  mp4 = pageRenderOf(inp);
-}
+const mp4 = isPage ? pageRenderOf(inp) : inp;
 // A STALE RENDER IS THE ANSWER TO THE PREVIOUS QUESTION, and it grades clean. `gradeable` asks both
 // halves: is there a video, and was it made after the film was last edited.
 const ready = gradeable(inp, mp4);
@@ -113,7 +106,7 @@ if (!ready.ok) {
 const declaredRef = isPage ? referenceFor(inp) : null;
 const ref = arg('--ref', null) || (declaredRef ? path.resolve(repoRoot, declaredRef) : null);
 if (ref && !fs.existsSync(ref)) { console.error(`✗ no such reference: ${ref}`); process.exit(2); }
-const brand = arg('--vs', scene?.theme && typeof scene.theme === 'string' ? scene.theme : '');
+const brand = arg('--vs', '');
 
 // RECORD THE VERDICT (taste loop, phase 1+4). The prep run below produces the sheet and writes a
 // "looked at this content" receipt. But looking is not judging: the receipt that gates `ledger-add`
@@ -317,24 +310,20 @@ const tileAt = (m, i) => {
 const tiles = mids.flatMap(tileAt);
 tileGrid(tiles, { cols: landscape ? 2 : (ref ? 4 : 3), tw: TW, th: TH, out: `${dir}/sheet.png` });
 
-// MEASURED FINDINGS, HANDED TO THE EYE. quality/audit.mjs measures 18 kinds of pixel defect (overlap,
-// clipped text, off-frame, low contrast, ...) against these SAME rendered frames, and
-// sweep-static.mjs measures whether the pixels ever move; `vawe ship` already pays for both and neither
-// one's output ever reached this rubric, so the agent scored against a blank card next to findings a
-// script had already made (one real overlap shipped this way). Reuse VAWE_FINDINGS_OUT, the channel
-// every gate already writes structured records to (harness/lib/findings.mjs), rather than re-parsing
-// either script's prose or inventing a second findings channel. Only for a scene JSON input: both
-// scripts need one, so an mp4-only `judge <file>.mp4` run still preps a sheet with no measured findings.
+// MEASURED FINDINGS, HANDED TO THE EYE. page-check.mjs measures the page's pixel and timing defects;
+// `vawe ship` already pays for it and its output never reached this rubric, so the agent scored
+// against a blank card next to findings a script had already made. Reuse VAWE_FINDINGS_OUT, the
+// channel every gate already writes structured records to (harness/lib/findings.mjs). Only for a
+// page input: an mp4-only `judge <file>.mp4` run still preps a sheet with no measured findings.
 const runFindings = (script, args) => {
   const out = path.join(dir, `.findings-${path.basename(script, '.mjs')}.json`);
   spawnSync(process.execPath, [path.join(repoRoot, script), ...args],
     { encoding: 'utf8', env: { ...process.env, VAWE_FINDINGS_OUT: out } });
   return readFindings(out) || [];
 };
-const measuredBy = isPage ? 'quality/gates/page-check.mjs' : 'quality/audit.mjs + sweep-static.mjs';
+const measuredBy = 'quality/gates/page-check.mjs';
 let measured = [];
-if (scene) measured = [...runFindings('quality/audit.mjs', [inp]), ...runFindings('quality/gates/sweep-static.mjs', [inp])];
-else if (isPage && !process.argv.includes('--no-measure')) measured = runFindings('quality/gates/page-check.mjs', [inp, ...(ref ? ['--ref', ref] : [])]);
+if (isPage && !process.argv.includes('--no-measure')) measured = runFindings('quality/gates/page-check.mjs', [inp, ...(ref ? ['--ref', ref] : [])]);
 
 // Numbers about the page's own timing, size and colour (against the reference when there is one), measured
 // by code on both sides so the judge does not eyeball them. Same channel as the findings above: a child process.

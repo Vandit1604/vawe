@@ -57,8 +57,6 @@ const FORMULA = new Set([
   'harness/lib/frame-forensics.mjs#N',              // sample grid cell count (32*18), not a bar
   'harness/lib/resolve-range.mjs#GRID',              // 1/60s time-snap grid, a unit conversion
   'quality/gates/beat-check.mjs#STEP',               // search-loop step size
-  'quality/gates/compare.mjs#TW',                    // thumbnail pixel width, display geometry
-  'quality/gates/compare.mjs#TH',                    // thumbnail pixel height, display geometry
   'quality/gates/motion-split.mjs#GRID',             // grid subdivision count
   'quality/gates/motion-split.mjs#SUB',              // grid subdivision count
   'quality/gates/snap-blocks.mjs#CTX',               // diff display context lines

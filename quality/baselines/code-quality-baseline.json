@@ -21,7 +21,6 @@
  "harness/media/render-page.mjs::complexity": 2,
  "harness/media/render-page.mjs::unicorn(no-new-array)": 1,
  "harness/media/see/words.mjs::complexity": 1,
- "quality/gates/compare.mjs::no-unused-vars": 1,
  "harness/dev/e2e.mjs::unicorn(no-new-array)": 1,
  "scripts/brand/sections.mjs::complexity": 1,
  "harness/media/ref-spec.mjs::no-unused-vars": 1,
