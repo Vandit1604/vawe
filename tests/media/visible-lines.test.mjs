@@ -10,6 +10,26 @@ import { lineFor } from '../../harness/lib/spec-conformance.mjs';
 
 const PAGE = 'tests/fixtures/pages/decorative-text.html';
 
+test('a line keeps its block id when lines before it come and go, wrapped text lists its line boxes, and a line names its world', async () => {
+  const stable = 'tests/fixtures/pages/stable-blocks.html';
+  const opened = await openPage(stable, resolveFrame(stable, {}));
+  try {
+    await opened.page.goto(opened.url, { waitUntil: 'load' });
+    await settle(opened.page);
+    const read = () => opened.page.evaluate(visibleLines, DECORATIVE, CHROME);
+    const before = (await read()).lines;
+    await opened.page.evaluate(() => { document.getElementById('early').style.visibility = 'hidden'; });
+    const after = (await read()).lines;
+    const block = (lines, text) => lines.find((l) => l.text === text).block;
+    assert.equal(block(after, 'Reads it'), block(before, 'Reads it'));
+    assert.equal(before.find((l) => l.text === 'Reads it').world, 'a');
+    const wrapped = before.find((l) => l.text.startsWith('one two'));
+    assert.ok(wrapped.rects.length > 1);
+    assert.ok(wrapped.rects.every((r) => r[3] < wrapped.box[3]));
+    assert.equal(before.find((l) => l.text === 'Reads it').rects, undefined);
+  } finally { await opened.close(); }
+});
+
 test('aria-hidden text is not probed, data-chrome text is flagged, and split letters join into one text', async () => {
   const opened = await openPage(PAGE, resolveFrame(PAGE, {}));
   try {
