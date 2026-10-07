@@ -82,6 +82,17 @@ export function readSpecs(dir, all = false) {
   });
 }
 
+export const RANGE_KEYS = ['eye_jump_median_fh', 'eye_carried_pct', 'eye_moved_pct', 'eye_centre_pct', 'eye_travel_median_fh', 'ground_changed_pct', 'ground_turn_pct', 'ground_drift_pct'];
+
+/** taste/build/ref-range.json: aggregates only (p10, median, p90, film count) of the numbers `bin/vawe dev` prints beside a draft. Pure. */
+export function rangeOf(shapeBar, filmBar, date) {
+  const metrics = Object.fromEntries([...RANGE_KEYS.map((k) => [k, shapeBar[k]]), ['overshoot_pct', filmBar.overshoot_pct]]);
+  return {
+    _source: `node harness/dev/bar-from-refs.mjs --range, ${date}: eye and ground from ${shapeBar.films} in-scope reference films (${shapeBar.cuts} cuts, bin/vawe spec); overshoot share from ${filmBar.overshoot_pct.n} films (measures.json); one value per film, then p10, median and p90`,
+    films: shapeBar.films, cuts: shapeBar.cuts, metrics,
+  };
+}
+
 function printBar(bar, metrics, heading) {
   console.log(heading);
   for (const m of metrics) {
@@ -93,6 +104,11 @@ function printBar(bar, metrics, heading) {
 function main() {
   const args = process.argv.slice(2), json = args.includes('--json'), all = args.includes('--all');
   const file = args.find((a) => !a.startsWith('--'));
+  if (args.includes('--range')) {
+    const films = barOf(JSON.parse(fs.readFileSync(path.join(refsDir(), 'measures.json'), 'utf8')));
+    console.log(JSON.stringify(rangeOf(shapeBarOf(readSpecs(refsDir())), films, new Date().toISOString().slice(0, 10)), null, 1));
+    return;
+  }
   if (args.includes('--refs')) {
     const bar = shapeBarOf(readSpecs(refsDir(), all));
     if (json) { console.log(JSON.stringify(bar, null, 1)); return; }
@@ -100,7 +116,7 @@ function main() {
     return;
   }
   if (!file) {
-    console.error('usage: node harness/dev/bar-from-refs.mjs <measures.json> [--json]\n       node harness/dev/bar-from-refs.mjs --refs [--all] [--json]   (eye and ground, from ~/.vawe/refs/spec)');
+    console.error('usage: node harness/dev/bar-from-refs.mjs <measures.json> [--json]\n       node harness/dev/bar-from-refs.mjs --refs [--all] [--json]   (eye and ground, from ~/.vawe/refs/spec)\n       node harness/dev/bar-from-refs.mjs --range > taste/build/ref-range.json   (the aggregates bin/vawe dev prints)');
     process.exit(2);
   }
   const bar = barOf(JSON.parse(fs.readFileSync(file, 'utf8')));

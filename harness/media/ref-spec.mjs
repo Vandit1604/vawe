@@ -18,7 +18,7 @@ import { readWav } from './wav-read.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
-import { findTransitions } from '../lib/ref-measure/transition.mjs';
+import { findTransitions, shotSpans } from '../lib/ref-measure/transition.mjs';
 import { measureLayout } from '../lib/ref-measure/layout.mjs';
 import { transitionRow, easingLines, layoutLines, audioRow, errorLines, colourLines, motionRegionLines } from '../lib/ref-measure/spec-lines.mjs';
 import { measureColour } from '../lib/ref-measure/colour.mjs';
@@ -26,6 +26,7 @@ import { worldTurns } from '../lib/ref-measure/world-turns.mjs';
 import { measureMotionRegions } from '../lib/ref-measure/motion-regions.mjs';
 import { measureEye } from '../lib/ref-measure/eye-path.mjs';
 import { measureGround } from '../lib/ref-measure/ground.mjs';
+import { decode as decodeFrames } from '../lib/ref-measure/decode.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
 import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 import { trackWords, refineWordTimes, buildLines, restBox, fontPxOf, inkColor } from '../lib/ref-measure/words.mjs';
@@ -54,21 +55,7 @@ function fitFps(fps, duration) {
 const FAST_GRID_W = 160;
 
 function decode(video, fps, dir, W, H, gridW = GRID_W) {
-  const w = gridW, h = 2 * Math.round((gridW * H) / W / 2);
-  const raw = path.join(dir, 'frames.rgb');
-  ffmpegOrDie(['-v', 'error', '-y', '-i', video, '-an', '-vf', `fps=${fps},scale=${w}:${h}`,
-    '-f', 'rawvideo', '-pix_fmt', 'rgb24', raw], raw, 'frame decode');
-  const buf = fs.readFileSync(raw);
-  fs.rmSync(raw, { force: true });
-  const n = Math.floor(buf.length / (w * h * 3));
-  if (n < 2) die('fewer than 2 frames decoded');
-  if (n > MAX_FRAMES) die(`${n} frames at ${fps} fps is too long for a per-frame spec (max ${MAX_FRAMES}). Pass --fps lower, or cut the reference.`);
-  const gray = new Uint8Array(n * w * h);
-  for (let i = 0; i < gray.length; i++) {
-    const o = i * 3;
-    gray[i] = (buf[o] * 77 + buf[o + 1] * 150 + buf[o + 2] * 29) >> 8;
-  }
-  return { w, h, n, rgb: buf, gray, frame: (i) => gray.subarray(i * w * h, (i + 1) * w * h) };
+  try { return decodeFrames(video, fps, dir, W, H, gridW, MAX_FRAMES); } catch (e) { return die(e.message); }
 }
 
 // ── cuts: every shot change, classified, in ref-measure/transition.mjs ─────────────────────────────
@@ -604,7 +591,7 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
   const V = decode(video, fps, dir, W, H, fast ? FAST_GRID_W : GRID_W);
   const sc = W / V.w;
   const cuts = findCuts(V, fps);
-  const spans = cuts.reduce((acc, c, i) => { acc[i].f1 = c.transition.startFrame; acc.push({ f0: c.frame, f1: V.n }); return acc; }, [{ f0: 0, f1: V.n }]);
+  const spans = shotSpans(cuts.map((c) => c.transition), V.n);
 
   const cams = [{ s: 1, dx: 0, dy: 0 }];
   let prev = halfRes(V.frame(0), V.w, V.h);

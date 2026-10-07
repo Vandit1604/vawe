@@ -1,0 +1,61 @@
+{
+ "_source": "node harness/dev/bar-from-refs.mjs --range, 2026-10-07: eye and ground from 17 in-scope reference films (167 cuts, bin/vawe spec); overshoot share from 22 films (measures.json); one value per film, then p10, median and p90",
+ "films": 17,
+ "cuts": 167,
+ "metrics": {
+  "eye_jump_median_fh": {
+   "p10": 0.152,
+   "median": 0.185,
+   "p90": 0.396,
+   "n": 17
+  },
+  "eye_carried_pct": {
+   "p10": 12,
+   "median": 42.9,
+   "p90": 50,
+   "n": 17
+  },
+  "eye_moved_pct": {
+   "p10": 16.7,
+   "median": 33.3,
+   "p90": 50,
+   "n": 17
+  },
+  "eye_centre_pct": {
+   "p10": 32.7,
+   "median": 50,
+   "p90": 69.48,
+   "n": 17
+  },
+  "eye_travel_median_fh": {
+   "p10": 0.066,
+   "median": 0.153,
+   "p90": 0.435,
+   "n": 17
+  },
+  "ground_changed_pct": {
+   "p10": 0,
+   "median": 50,
+   "p90": 100,
+   "n": 17
+  },
+  "ground_turn_pct": {
+   "p10": 0,
+   "median": 25,
+   "p90": 100,
+   "n": 17
+  },
+  "ground_drift_pct": {
+   "p10": 0,
+   "median": 30,
+   "p90": 94,
+   "n": 17
+  },
+  "overshoot_pct": {
+   "p10": 21.1,
+   "median": 30.5,
+   "p90": 40.9,
+   "n": 22
+  }
+ }
+}

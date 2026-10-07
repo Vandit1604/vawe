@@ -5,6 +5,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { sectionOf, filledRows, boardFilled, boardChecks, spectacleOf } from '../lib/board.mjs';
+
+export { boardFilled };
 
 const RECENT_MS = 3 * 60 * 60 * 1000;
 const mtime = (p) => { try { return fs.statSync(p).mtimeMs; } catch { return 0; } };
@@ -30,22 +33,12 @@ export function takenFromCount(brief) {
 
 const MOVES_MIN = 3;
 
-const sectionOf = (brief, title) => brief.split(/^## /m).find((s) => s.startsWith(title));
-const filledRows = (section) => section.split('\n').filter((l) => l.startsWith('|') && !/^\|[-| ]+\|$/.test(l) && !l.split('|')[1].trim().startsWith('['));
-
 /** How many moves the "Taken from" study names (rows of the "Moves taken" table past its header); null when the brief has no such table. */
 export function movesTakenCount(brief) {
   const section = sectionOf(brief, 'Taken from');
   const at = section?.indexOf('| move taken');
   if (at === undefined || at < 0) return null;
   return filledRows(section.slice(at)).length - 1;
-}
-
-/** False while the Board section still holds a bracketed placeholder row; null when the brief has no Board section. */
-export function boardFilled(brief) {
-  const section = sectionOf(brief, 'Board');
-  if (section === undefined) return null;
-  return !section.split('\n').some((l) => l.startsWith('| ['));
 }
 
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
@@ -78,6 +71,10 @@ export function nextStep(page, root = process.cwd()) {
   if (early && hasWorlds(page)) return { name, next: `bin/vawe frames ${rel}`, why: 'the frames come before the motion' };
   if (!draft && !final && boardFilled(brief) === false) {
     return { name, next: `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut, sound`, why: 'the board is a plan for time and comes after the states, before the motion' };
+  }
+  const boardAdvice = !draft && !final && boardFilled(brief) ? boardChecks(brief, spectacleOf(read(page))) : [];
+  if (boardAdvice.length) {
+    return { name, next: `check "Board" in films/${name}/brief.md (advice; a plan you keep on purpose needs no change), then bin/vawe dev ${rel}`, why: boardAdvice.map((l) => l.replace(/^board: /, '')).join('; ') };
   }
   if (draft < t && final < t) return { name, next: `bin/vawe dev ${rel}`, why: 'the page changed after its last draft' };
   if (final < t && !stripped) return { name, next: `bin/vawe strip ${rel} --cuts`, why: 'a draft exists; Read the strip of every cut and fix what reads flat (dev: overshoot-share, live-hold and seam-variety clean or waived with a reason), then bin/vawe critique in a fresh session, then bin/vawe ship' };
