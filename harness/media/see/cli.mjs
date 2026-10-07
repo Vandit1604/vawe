@@ -7,6 +7,7 @@ import { runDom, runRequiredMotionMatch } from './dom.mjs';
 import { runFullFlow } from './ocr.mjs';
 import { runLayout, runLook, runProbe } from './inspect.mjs';
 import { runWordEventCompare } from './words.mjs';
+import { STRIP_FPS, STRIP_SPAN, stripProblem } from './strip-math.mjs';
 
 
 export async function main() {
@@ -32,6 +33,7 @@ export async function main() {
     + '| --word-events <film.mp4> [--from s --to s] '
     + '| --sheet-check <ref.json> <film.json> '
     + '| --probe --at <s> --sel <css> | --look --times <s,...> [--ref <mp4>] | --layout --times <s,...>');
+  if (argv.includes('--moment') || argv.includes('--cuts')) return dispatchStrip(video, flag, argv);
   if (!fs.existsSync(video)) die(`no such file: ${video}`);
   for (const bin of ['ffprobe', 'ffmpeg']) {
     if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error)
@@ -151,6 +153,17 @@ export async function dispatchViews(input, positional, flag, argv) {
     const r = views.loopSeam(video, outDir);
     console.log(`✓ loop seam: LOOK at ${rel(r.sheet)}\n  ${views.describeLoop(r)}`);
   }
+}
+
+export async function dispatchStrip(input, flag, argv) {
+  for (const bin of ['ffprobe', 'ffmpeg']) {
+    if (spawnSync(bin, ['-version'], { encoding: 'utf8' }).error) die(`${bin} is not on PATH`);
+  }
+  const opts = { cuts: argv.includes('--cuts'), at: flag('--moment', undefined), span: Number(flag('--span', STRIP_SPAN)), fps: Number(flag('--fps', STRIP_FPS)), out: flag('--out', undefined) };
+  const problem = stripProblem(opts);
+  if (problem) die(problem);
+  const { runStrip } = await import('./strip.mjs');
+  return runStrip(input, { ...opts, at: opts.cuts ? undefined : Number(opts.at) });
 }
 
 export function dispatchShot(video, positional, shotSpec, flag) {

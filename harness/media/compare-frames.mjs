@@ -3,13 +3,15 @@
 //   node harness/media/compare-frames.mjs --page <page.html> --at 1,2,3   (no --ref: your frames only, labelled, 3 per row)
 //   node harness/media/compare-frames.mjs <ours.mp4> --ref <ref.mp4> --at 2.5,3.1 [--from <s>] [--out file.png]
 //   node harness/media/compare-frames.mjs <ours.mp4> --at 1,4,7 [--out file.png]   (no --ref: a labelled sheet of those seconds, 3 per row)
-// --at is film seconds; --from is the film second where ours starts (a --from/--to draft).
+// --at is film seconds, or `cuts` for the middle of each world change (a page, or an mp4 whose film has a measured draft); --from is the film second where ours starts (a --from/--to draft).
 // Each frame is an accurate seek (-ss after -i), never an fps=N,tile sheet: those drift about 0.1 s.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const ROW_H = 360;
+/** `--at cuts`: the middle of each world change of ours, from the last full draft's measured data-world spans. */
+export const CUTS = 'cuts';
 const die = (m) => { console.error(`✗ ${m}`); process.exit(2); };
 
 function grab(video, t, out, label = t) {
@@ -66,6 +68,7 @@ export function compareProblem({ ours, page, ref, at }) {
   if (!ours && !page) return 'missing <ours.mp4> or --page <page.html>: name the film to take frames from';
   if (ours && page) return 'give <ours.mp4> or --page, not both';
   if (ref && page && ref === page) return '--ref is the page itself: give a reference mp4';
+  if (at === CUTS) return null;
   try { parseAt(at); } catch (e) { return e.message; }
   return null;
 }
@@ -136,14 +139,15 @@ async function main() {
   const ref = flag('--ref');
   const problem = compareProblem({ ours, page, ref, at: flag('--at') });
   if (problem) die(`${problem}; usage: compare-frames.mjs <ours.mp4> | --page <page.html> [--ref <ref.mp4>] --at 2.5,3.1 [--out file.png]`);
-  const times = parseAt(flag('--at'));
   for (const [name, f] of [[page ? '--page' : '<ours.mp4>', page || ours], ['--ref', ref]]) if (f && !fs.existsSync(f)) die(`no such file for ${name}: ${f}`);
   const source = page || ours;
+  const times = flag('--at') === CUTS ? await (await import('./see/strip.mjs')).cutSeconds(source) : parseAt(flag('--at'));
   const out = path.resolve(flag('--out') || path.join('out', `compare-${path.basename(source, path.extname(source))}.png`));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   if (page) await comparePage({ page, ref, times, out });
   else await compareFrames({ ours, ref, times, out, from: Number(flag('--from')) || 0 });
-  console.log(ref ? `✓ ${out}: reference left, yours right, ${times.length} row(s) at ${times.join(', ')} s` : `✓ ${out}: your frames at ${times.join(', ')} s, 3 per row`);
+  const which = flag('--at') === CUTS ? 'the middle of each world change, ' : '';
+  console.log(ref ? `✓ ${out}: reference left, yours right, ${which}${times.length} row(s) at ${times.join(', ')} s` : `✓ ${out}: your frames, ${which}at ${times.join(', ')} s, 3 per row, left to right`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => die(e.stack || String(e)));

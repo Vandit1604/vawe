@@ -51,6 +51,22 @@ export const failedShipLine = (film, ship) => `error: the last final of ${film} 
 
 const clock = (ms) => `${Math.round(ms / 1000)}s`;
 
+/** First capture progress line of a render's output as { done, total }, or null. */
+export const firstCapture = (text) => {
+  const m = /capturing (\d+)\/(\d+) subframe/.exec(text);
+  return m ? { done: Number(m[1]), total: Number(m[2]) } : null;
+};
+
+/**
+ * Milliseconds the capture still needs, or null when it cannot say yet. The rate is the subframes captured since the first progress line
+ * (`first`, seen at `firstAt`), so the page load, the checks and the speed pass before the capture, and the subframes a resumed render
+ * skipped, do not count as capture time. Pure.
+ */
+export function captureEtaMs({ first, firstAt, done, total, now }) {
+  const rate = (done - first.done) / (now - firstAt);
+  return rate > 0 ? (total - done) / rate : null;
+}
+
 /** One colour fills the frame and the luma grid is level. */
 export const isFlat = (f) => Math.max(...f.hist) >= 0.99 && Math.max(...f.grid) - Math.min(...f.grid) < 0.03;
 

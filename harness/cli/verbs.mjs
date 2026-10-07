@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { UsageError } from './parse.mjs';
-import { compareProblem } from '../media/compare-frames.mjs';
+import { compareProblem, CUTS } from '../media/compare-frames.mjs';
+import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
@@ -159,17 +160,40 @@ export const VERBS = [
     flags: [
       { name: 'page', type: 'path', help: 'seek this page and screenshot it at half size: no render needed; without --ref, only your frames, labelled with time', kind: 'file' },
       { name: 'ref', type: 'path', help: 'reference mp4; leave it out for a sheet of your own frames', kind: 'file' },
-      { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 2.5,3.1,4' },
+      { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 2.5,3.1,4; or `cuts` for the middle of each world change (the last full draft\'s data-world spans: run vawe dev first)' },
       { name: 'from', type: 'number', default: 0, help: 'the film second where ours starts (a --from/--to draft)' },
       { name: 'out', type: 'path', default: 'out/compare-<ours>.png', help: 'output PNG' },
     ],
-    example: 'vawe compare --page films/my-launch/page.html --at 2.5,3.1,4   |   vawe compare out/my-launch.mp4 --at 1,4,7   (add --ref refs/ad.mp4 to see the reference beside it)',
+    example: 'vawe compare --page films/my-launch/page.html --at 2.5,3.1,4   |   vawe compare out/my-launch.mp4 --at cuts --ref refs/ad.mp4   (without --ref: only your frames, 3 per row)',
     build: (v, [ours]) => {
       const problem = compareProblem({ ours, page: v.page, ref: v.ref, at: v.at });
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/compare-frames.mjs', args: [...(ours ? [ours] : []), ...opt('--page', v.page), ...opt('--ref', v.ref), ...opt('--at', v.at), ...opt('--from', v.from), ...opt('--out', v.out)] }];
     },
-    next: (v) => (v.ref ? 'look at the PNG: reference left, yours right; fix the worst row first' : 'look at the PNG, one labelled frame per second'),
+    next: (v) => {
+      const rows = v.at === CUTS ? 'one frame per world change, at its middle' : 'one frame per --at second';
+      return v.ref ? `look at the PNG: ${rows}, reference left, yours right; fix the worst row first` : `look at the PNG: ${rows}, each labelled with its second, 3 per row, left to right`;
+    },
+  },
+  {
+    name: 'strip', summary: 'the frames through one moment as ONE grid plus the motion numbers of that window: when it starts, peaks and settles; or one strip per cut',
+    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list (uses the 1080p copy)' }],
+    flags: [
+      { name: 'at', type: 'string', help: 'the second to centre the strip on' },
+      { name: 'cuts', type: 'bool', help: 'one strip per world change (a page or mp4: the data-world spans of the last full draft) or per shot cut (a reference: spec.json); the strip is centred on the cut' },
+      { name: 'span', type: 'number', default: STRIP_SPAN, help: 'seconds of film in the strip' },
+      { name: 'fps', type: 'number', default: STRIP_FPS, help: 'frames per second of film in the strip; a grid holds 9 frames, more make a second grid' },
+      { name: 'out', type: 'path', default: 'out/strip/<film>', help: 'folder for the grids' },
+    ],
+    example: 'vawe strip out/my-launch.mp4 --at 8.4   |   vawe strip films/my-launch/page.html --cuts   |   vawe strip u6iro1jHujs --cuts',
+    build: (v, [film]) => {
+      const span = v.span ?? STRIP_SPAN;
+      const fps = v.fps ?? STRIP_FPS;
+      const problem = stripProblem({ at: v.at, cuts: v.cuts, span, fps });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/see.mjs', args: [film, ...(v.cuts ? ['--cuts'] : ['--moment', v.at]), '--span', String(span), '--fps', String(fps), ...opt('--out', v.out)] }];
+    },
+    next: (v) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}`,
   },
   {
     name: 'coverage', summary: 'SSIM of your render against the reference at every step; the done check for a recreation',
@@ -224,7 +248,7 @@ export const VERBS = [
     ],
     example: 'vawe refs list [id]   |   vawe refs frames u6iro1jHujs   |   vawe refs add https://youtu.be/xxxx --type product --title "Linear Agent"',
     build: (v, [action, source]) => [{ script: 'harness/dev/refs.mjs', args: [action, ...(source ? [source] : []), ...opt('--type', v.type), ...opt('--title', v.title)] }],
-    next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read the absolute paths it prints (one per frame) at full size before you design' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
+    next: (v, [action]) => (action === 'list' ? 'bin/vawe refs frames, then Read the absolute paths it prints (one per frame) at full size before you design; bin/vawe strip <id> --cuts shows how the film moves through each cut' : action === 'frames' ? 'Read the frames at full size; write what you take from which frame before you design' : 'bin/vawe refs list'),
   },
   {
     name: 'studio', summary: 'live scrubbable preview; edits the page literals in place',

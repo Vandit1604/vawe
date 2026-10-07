@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { defaultOut } from './render-page.mjs';
 import { videoProblems, readVideo } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
-import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine } from '../lib/ship-status.mjs';
+import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance, lastPageFacts } from './acceptance-run.mjs';
@@ -65,8 +65,18 @@ function startJob(page, renderArgs) {
 function runJob(id) {
   const job = readJob(id);
   const fd = fs.openSync(job.log, 'a');
-  const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final', '--progress', '--job'], { stdio: ['ignore', fd, fd] });
+  const child = spawn(process.execPath, [RENDER, job.page, ...job.args, '--final', '--progress', '--job'], { stdio: ['ignore', 'pipe', 'pipe'] });
   writeJob({ ...job, status: 'running', pid: process.pid });
+  let started = false;
+  const relay = (chunk) => {
+    fs.writeSync(fd, chunk);
+    const first = started ? null : firstCapture(String(chunk));
+    if (!first) return;
+    started = true;
+    writeJob({ ...readJob(id), capture: { first, at: Date.now() } });
+  };
+  child.stdout.on('data', relay);
+  child.stderr.on('data', relay);
   child.on('close', (code) => {
     const renderMs = Date.now() - job.startedAt;
     if (code !== 0) {
@@ -131,8 +141,9 @@ function progressLine(job, text) {
   const elapsed = Date.now() - job.startedAt;
   if (!seen) return `job ${job.id}: running, ${clock(elapsed)} in, before capture (page load, checks, speed pass)`;
   const [done, total] = [Number(seen[1]), Number(seen[2])];
-  const eta = done > 0 ? clock((elapsed * (total - done)) / done) : 'unknown';
-  return `job ${job.id}: running, ${done}/${total} subframes (${Math.round((100 * done) / total)}%), ${clock(elapsed)} in, about ${eta} left, then encode`;
+  const etaMs = job.capture ? captureEtaMs({ first: job.capture.first, firstAt: job.capture.at, done, total, now: Date.now() }) : null;
+  const eta = etaMs === null ? 'not known yet' : `about ${clock(etaMs)}`;
+  return `job ${job.id}: running, ${done}/${total} subframes (${Math.round((100 * done) / total)}%), ${clock(elapsed)} in, ${eta} left, then encode`;
 }
 
 const LINE_CAP = 240;
