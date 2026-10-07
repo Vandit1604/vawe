@@ -2,6 +2,7 @@
 //
 //   node harness/media/see.mjs <video> [outDir] [--frames N]                    grids, beats, OCR words
 //   node harness/media/see.mjs <video> --shot <from>-<to> [--fps N]             a dense strip of one window
+//   node harness/media/see.mjs <mp4|page.html|ref-id> --moment <s> | --cuts [--span s --fps N]   one grid through a moment, or one per cut (`vawe strip`)
 //   node harness/media/see.mjs <video> --compare <draft.mp4> [--from s --to s]  reference vs draft, same timestamps
 //   node harness/media/see.mjs <html> --probe --at <s> --sel <css>              box, opacity, transform, animation progress
 //   node harness/media/see.mjs <html> --look --times <s,...> [--ref <mp4>]      a still per time
@@ -20,6 +21,7 @@
 //   core      shared measures: energy, holds, probe, grid tiling
 //   ocr       tesseract words, beats, frame choice and the default reading flow
 //   compare   --shot, --compare, --sheet-check, --measure
+//   strip     --moment, --cuts (strip-math.mjs holds the pure window, cut and settle maths)
 //   dom       --dom and the required-motion and text-scale checks against a reference
 //   words     per-word events from two videos
 //   inspect   --probe, --look, --layout

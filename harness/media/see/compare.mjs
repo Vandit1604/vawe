@@ -9,7 +9,8 @@ import { compareFrames } from '../compare-frames.mjs';
 
 
 // ── --shot <from>-<to>: a dense strip of ONE window, plus its motion curve ──────────────────────────
-export function runShot(video, outDirRoot, from, to, fps) {
+// `opts.energy` is an already computed series (a caller with many windows of one video measures it once); `opts.quiet` skips the summary line.
+export function runShot(video, outDirRoot, from, to, fps, opts = {}) {
   const { width, height, dur } = probeVideo(video);
   if (from >= dur) die(`--shot ${from}-${to}: from (${from}s) is past ${video}'s duration (${dur.toFixed(2)}s)`);
   const clampedTo = Math.min(to, dur);
@@ -20,7 +21,7 @@ export function runShot(video, outDirRoot, from, to, fps) {
   const chosen = timeRange(from, clampedTo, 1 / fps).map((t) => ({ t, tag: '' }));
   const gridPaths = renderGrids(video, outDir, chosen, width, height, dur);
 
-  const energy = computeEnergy(video).filter((p) => p.t >= from && p.t < clampedTo);
+  const energy = (opts.energy ?? computeEnergy(video)).filter((p) => p.t >= from && p.t < clampedTo);
   const curve = bucketMean(energy, from, clampedTo, 0.5)
     .map((w) => ({ t0: Number(w.t0.toFixed(2)), t1: Number(w.t1.toFixed(2)), mean: Number(w.mean.toFixed(3)) }));
 
@@ -42,7 +43,8 @@ ${gridPaths.map((p) => `- ${path.relative(ROOT, p)}`).join('\n')}
 ${rows}
 `;
   fs.writeFileSync(path.join(outDir, 'index.md'), index);
-  console.log(`✓ shot ${from}-${clampedTo}s: ${gridPaths.length} grid(s) at ${fps}fps -> ${path.relative(ROOT, outDir)}/index.md`);
+  if (!opts.quiet) console.log(`✓ shot ${from}-${clampedTo}s: ${gridPaths.length} grid(s) at ${fps}fps -> ${path.relative(ROOT, outDir)}/index.md`);
+  return { gridPaths, outDir, to: clampedTo };
 }
 
 // ── --compare <draft.mp4>: reference vs draft at the SAME timestamps ────────────────────────────────

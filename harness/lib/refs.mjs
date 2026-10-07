@@ -114,6 +114,18 @@ export function frameManifest(id, got) {
   return { id, frames: got.map((k, i) => ({ n: i + 1, t: +k.t.toFixed(1), file: path.resolve(k.file) })) };
 }
 
+/** The 360p video of film `id` in `dir`, or undefined. */
+export const refVideo = (dir, id) => ['mp4', 'webm'].map((e) => path.join(dir, `${id}.${e}`)).find(fs.existsSync);
+
+/** The video to look at for film `id`: the 1080p copy in hd/ when there is one, else the 360p video; undefined when neither exists. */
+export const refSharpVideo = (dir, id) => [path.join(dir, 'hd', `${id}.mp4`)].find(fs.existsSync) ?? refVideo(dir, id);
+
+/** The measured shots of film `id` as [{ start, end }] from spec/<id>/spec.json; empty before `vawe spec` ran. */
+export function refShots(dir, id) {
+  const file = path.join(dir, 'spec', id, 'spec.json');
+  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, 'utf8')).shots ?? []).map((s) => ({ start: s.t0, end: s.t1 })) : [];
+}
+
 /** The manifest of film `id` under `dir`, or null when `vawe refs frames` has not written it. */
 export function readFrameManifest(dir, id) {
   try { return JSON.parse(fs.readFileSync(path.join(dir, FRAMES, id, FRAMES_MANIFEST), 'utf8')); } catch { return null; }

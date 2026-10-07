@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { refsDir, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { refsDir, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -13,7 +13,7 @@ const [action, source] = process.argv.slice(2).filter((a, i, all) => !a.startsWi
 const flag = (k) => { const i = process.argv.indexOf(k); return i >= 0 ? process.argv[i + 1] : null; };
 const die = (m) => { console.error(`vawe refs: ${m}`); process.exit(1); };
 
-const videoOf = (id) => ['mp4', 'webm'].map((e) => path.join(dir, `${id}.${e}`)).find(fs.existsSync);
+const videoOf = (id) => refVideo(dir, id);
 const specOf = (id) => (fs.existsSync(path.join(dir, 'spec', id, 'spec.json')) ? path.join('spec', id, 'spec.json') : null);
 
 function sheetOf(id, video) {
@@ -73,11 +73,6 @@ function add() {
 }
 
 const FRAMES_PER_FILM = 8;
-const hdOf = (id) => [path.join(dir, 'hd', `${id}.mp4`)].find(fs.existsSync);
-const shotsOf = (id) => {
-  const file = path.join(dir, 'spec', id, 'spec.json');
-  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, 'utf8')).shots ?? []).map((s) => ({ start: s.t0, end: s.t1 })) : [];
-};
 
 function frames() {
   const registry = readRegistry(dir);
@@ -85,10 +80,10 @@ function frames() {
   const films = registry.filter((r) => r.inScope && (!source || r.id === source));
   if (!films.length) die(source ? `no film ${source} in scope` : 'no film in scope');
   for (const r of films) {
-    const video = hdOf(r.id) ?? videoOf(r.id);
+    const video = refSharpVideo(dir, r.id);
     const out = path.join(dir, FRAMES, r.id);
     fs.rmSync(out, { recursive: true, force: true });
-    const got = keyFrameFiles(video, durationOf(video), out, { shots: shotsOf(r.id), count: FRAMES_PER_FILM });
+    const got = keyFrameFiles(video, durationOf(video), out, { shots: refShots(dir, r.id), count: FRAMES_PER_FILM });
     const manifest = frameManifest(r.id, got);
     fs.writeFileSync(path.join(out, FRAMES_MANIFEST), `${JSON.stringify(manifest, null, 1)}\n`);
     console.log([`${r.id}: ${got.length} frames from ${path.relative(dir, video)}, manifest ${path.join(out, FRAMES_MANIFEST)}`, ...frameLines(manifest)].join('\n'));
