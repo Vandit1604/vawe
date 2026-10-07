@@ -1,8 +1,8 @@
 // Pure parts of `vawe onion`: which frames, how much each one weighs, how each one is tinted, and the ffmpeg graph that blends them.
 // No I/O and no heavy imports: harness/cli/verbs.mjs loads this file to check the arguments.
 
-export const ONION_SPAN = 0.6;
-export const ONION_FRAMES = 6;
+export const ONION_SPAN = 0.3;
+export const ONION_FRAMES = 5;
 const LEGEND_H = 68;
 const COOL = [0.15, 0.5, 1];
 const WARM = [1, 0.4, 0.08];

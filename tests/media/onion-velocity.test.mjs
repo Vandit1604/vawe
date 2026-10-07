@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { blendWeights, frameTint, isLightGround, onionGraph, onionProblem, onionTimes, tintMixer } from '../../harness/media/see/onion-math.mjs';
+import { ONION_FRAMES, ONION_SPAN, blendWeights, frameTint, isLightGround, onionGraph, onionProblem, onionTimes, tintMixer } from '../../harness/media/see/onion-math.mjs';
 import { analyseMove, analyseTrack, easeShape, moveScore, pathProgress, sampleTimes, scaleSeries, speedSeries, topMovers, trackPoints, velocityProblem } from '../../harness/media/see/velocity-math.mjs';
 import { velocitySvg } from '../../harness/media/see/velocity-graph.mjs';
 
@@ -52,6 +52,7 @@ test('onionGraph: one input per frame, a weight per frame, the negative only on 
 
 test('onionProblem and velocityProblem: name the flag at fault', () => {
   assert.equal(onionProblem({ at: '2', span: 0.6, n: 6 }), null);
+  assert.deepEqual([ONION_SPAN, ONION_FRAMES], [0.3, 5]);
   assert.match(onionProblem({ span: 0.6, n: 6 }), /--at/);
   assert.match(onionProblem({ at: '2', span: 0, n: 6 }), /--span/);
   assert.match(onionProblem({ at: '2', span: 0.6, n: 1 }), /-n/);
