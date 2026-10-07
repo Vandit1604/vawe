@@ -145,7 +145,14 @@ export async function openPage(pagePath, frame, { warm = false, final = true } =
   if (opened.reused) return opened;
   // The tab that holds browser focus rasterizes edges differently from the others (sub-pixel text and
   // shape edges, SSIM 0.9994), so which slice was frontmost changed the pixels with --workers.
-  await (await opened.page.createCDPSession()).send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  const cdp = await opened.page.createCDPSession();
+  await cdp.send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  // The document timeline runs in real time from page load, and the compositor rasterizes the animated layers against that
+  // time before the first seek pauses them: a first seek 1.5 s after load painted other edge pixels than one at 0.05 s.
+  // Rate 0 freezes the timeline, so only a seek moves an animation.
+  await cdp.send('Animation.enable');
+  await cdp.send('Animation.setPlaybackRate', { playbackRate: 0 });
+  opened.cdp = cdp;
   await opened.page.evaluateOnNewDocument(`(${installPageClock})();(${installPageFrame})(${JSON.stringify(frame)});window.__pageFonts = ${awaitFonts};window.__pageSeek = ${seekTo};window.__stillKey = ${stillKey};`);
   return opened;
 }
