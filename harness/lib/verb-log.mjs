@@ -64,9 +64,14 @@ export function footerLine({ verb, code, reason, seconds }) {
 /** True when the records hold a call of `verb` that succeeded after `sinceMs`. */
 export const verbRanSince = (records, verb, sinceMs) => records.some((r) => r.cmd === 'verb' && r.verb === verb && r.exitCode === 0 && Date.parse(r.start ?? r.at) > sinceMs);
 
-/** A child script reports a fact about its call (`slotWaitS`) to the bin/vawe process that started it, through the file VAWE_VERB_NOTES names. */
+/** A child script reports a fact about its call (`slotWaitS`) to the bin/vawe process that started it, through the file VAWE_VERB_NOTES names. A detached job outlives the verb that removed the file; with no reader left the note is dropped. */
 export function noteVerb(fields, env = process.env) {
-  if (env.VAWE_VERB_NOTES) fs.appendFileSync(env.VAWE_VERB_NOTES, `${JSON.stringify(fields)}\n`);
+  if (!env.VAWE_VERB_NOTES) return;
+  try {
+    fs.appendFileSync(env.VAWE_VERB_NOTES, `${JSON.stringify(fields)}\n`);
+  } catch (e) {
+    if (e.code !== 'ENOENT') throw e;
+  }
 }
 
 /** The merged notes of a call, later lines winning; {} when the file is missing. */

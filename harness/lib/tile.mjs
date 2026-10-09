@@ -3,12 +3,17 @@
 // The xstack + pad + fill=white graph was written twice (compare.mjs, judge.mjs) with small differences
 // that were accidents rather than decisions. One implementation, so a sheet from one tool reads the same
 // as a sheet from the next, and so a fix to the ffmpeg graph lands everywhere at once.
-import { execFileSync, spawnSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { srgbToLinear } from '../../core/color/linear.js';
 
-const ff = (a) => execFileSync('ffmpeg', a, { stdio: ['ignore', 'ignore', 'ignore'] });
+const ff = (a) => {
+  const r = spawnSync('ffmpeg', ['-hide_banner', '-v', 'error', '-nostdin', ...a], { encoding: 'utf8', maxBuffer: 1 << 24 });
+  if (r.status === 0) return;
+  const why = r.signal ? `killed by ${r.signal}` : String(r.stderr).trim().split('\n').slice(-3).join(' | ');
+  throw new Error(`ffmpeg failed (${why}): ${a.filter((x) => !x.includes('pad=')).join(' ').slice(0, 300)}`);
+};
 
 // ffmpeg drawtext takes a filtergraph argument: `:` splits options and `'` closes the quote.
 export const safeLabel = (s) => String(s).replace(/[:']/g, '');

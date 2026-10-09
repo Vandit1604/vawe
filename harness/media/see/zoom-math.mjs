@@ -33,41 +33,66 @@ export function zoomProblem({ at, box, auto, scale, vs, atB }) {
   return null;
 }
 
-/** The box (AUTO_BOX size) around the densest cluster of edges brighter than `bright` in a 1920x1080 luma plane, or null when there is none. Pure. */
-export function autoBox(luma, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
+/** Per-cell counts and coordinate sums of the edges brighter than `bright` in one luma plane. Pure. */
+function edgeCells(luma, w, h, bright) {
   const cols = Math.ceil(w / CELL), rows = Math.ceil(h / CELL);
   const count = new Float64Array(cols * rows), sx = new Float64Array(cols * rows), sy = new Float64Array(cols * rows);
-  let any = false;
   for (let y = 1; y < h - 1; y++) {
     for (let x = 1; x < w - 1; x++) {
       const i = y * w + x;
       if (luma[i] < bright) continue;
       if (Math.abs(luma[i + 1] - luma[i - 1]) < EDGE_STEP && Math.abs(luma[i + w] - luma[i - w]) < EDGE_STEP) continue;
       const c = Math.floor(y / CELL) * cols + Math.floor(x / CELL);
-      count[c]++; sx[c] += x; sy[c] += y; any = true;
+      count[c]++; sx[c] += x; sy[c] += y;
     }
   }
-  if (!any) return null;
-  const near = (c) => {
-    const cx = c % cols, cy = Math.floor(c / cols);
-    let n = 0, x = 0, y = 0;
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const nx = cx + dx, ny = cy + dy;
-        if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
-        const k = ny * cols + nx;
-        n += count[k]; x += sx[k]; y += sy[k];
-      }
+  return { cols, rows, count, sx, sy };
+}
+
+/** The 3x3 cell neighbourhood around cell `c`: { n, x, y } with the edge count and the mean edge position. Pure. */
+function neighbourhood({ cols, rows, count, sx, sy }, c) {
+  const cx = c % cols, cy = Math.floor(c / cols);
+  let n = 0, x = 0, y = 0;
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const nx = cx + dx, ny = cy + dy;
+      if (nx < 0 || ny < 0 || nx >= cols || ny >= rows) continue;
+      const k = ny * cols + nx;
+      n += count[k]; x += sx[k]; y += sy[k];
     }
-    return { n, x: x / n, y: y / n };
-  };
+  }
+  return { n, x: n ? x / n : 0, y: n ? y / n : 0 };
+}
+
+const boxAround = (p, w, h) => ({
+  x: Math.min(w - AUTO_BOX.w, Math.max(0, Math.round(p.x - AUTO_BOX.w / 2))),
+  y: Math.min(h - AUTO_BOX.h, Math.max(0, Math.round(p.y - AUTO_BOX.h / 2))),
+  w: AUTO_BOX.w, h: AUTO_BOX.h,
+});
+
+/** The box (AUTO_BOX size) around the densest cluster of edges brighter than `bright` in a 1920x1080 luma plane, or null when there is none. Pure. */
+export function autoBox(luma, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
+  const cells = edgeCells(luma, w, h, bright);
   let best = null;
-  for (let c = 0; c < count.length; c++) {
-    if (!count[c]) continue;
-    const s = near(c);
+  for (let c = 0; c < cells.count.length; c++) {
+    if (!cells.count[c]) continue;
+    const s = neighbourhood(cells, c);
     if (!best || s.n > best.n) best = s;
   }
-  const bx = Math.min(w - AUTO_BOX.w, Math.max(0, Math.round(best.x - AUTO_BOX.w / 2)));
-  const by = Math.min(h - AUTO_BOX.h, Math.max(0, Math.round(best.y - AUTO_BOX.h / 2)));
-  return { x: bx, y: by, w: AUTO_BOX.w, h: AUTO_BOX.h };
+  return best && boxAround(best, w, h);
+}
+
+/**
+ * One box with bright edges in both luma planes: the neighbourhood whose weaker plane has the most edges, centred on plane a's edges.
+ * Null when the two planes share no such neighbourhood; the caller then takes autoBox of each plane. Pure.
+ */
+export function commonBox(lumaA, lumaB, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
+  const a = edgeCells(lumaA, w, h, bright), b = edgeCells(lumaB, w, h, bright);
+  let best = null;
+  for (let c = 0; c < a.count.length; c++) {
+    const sa = neighbourhood(a, c), sb = neighbourhood(b, c);
+    const n = Math.min(sa.n, sb.n);
+    if (n > 0 && (!best || n > best.n)) best = { n, x: sa.x, y: sa.y };
+  }
+  return best && boxAround(best, w, h);
 }

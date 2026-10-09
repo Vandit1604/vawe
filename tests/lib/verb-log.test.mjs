@@ -77,3 +77,15 @@ test('refCard: shots, flashes, luma bands, camera and a palette per shot, in und
   assert.match(text, /1: #111111 90%/);
   assert.match(text, /\/refs\/spec\/demo\/SPEC\.md/);
 });
+
+test('a detached job writing a note after the verb removed its notes dir does not fail', async () => {
+  const { spawn } = await import('node:child_process');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-notes-'));
+  const file = path.join(dir, 'n.jsonl');
+  const mod = new URL('../../harness/lib/verb-log.mjs', import.meta.url).href;
+  const child = spawn(process.execPath, ['--input-type=module', '-e', `import { noteVerb } from '${mod}'; await new Promise((r) => setTimeout(r, 300)); noteVerb({ slotWaitS: 1 });`],
+    { env: { ...process.env, VAWE_VERB_NOTES: file }, stdio: 'ignore' });
+  fs.rmSync(dir, { recursive: true, force: true });
+  const code = await new Promise((r) => child.on('exit', r));
+  assert.equal(code, 0);
+});
