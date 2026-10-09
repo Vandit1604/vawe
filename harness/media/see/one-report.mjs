@@ -16,7 +16,8 @@ const patternText = (t) => {
 };
 
 const openingLine = (s) => {
-  const cut = s.cutIn.type === 'start' ? 'opens the film' : `enters by a ${s.cutIn.type}${s.cutIn.dir ? ` ${s.cutIn.dir}` : ''} over ${s.cutIn.frames} f`;
+  const kind = s.cutIn.type === 'other' ? 'change no known kind fits (not a cut, blend, wipe or slide)' : `${s.cutIn.type}${s.cutIn.dir ? ` ${s.cutIn.dir}` : ''}`;
+  const cut = s.cutIn.type === 'start' ? 'opens the film' : `enters by a ${kind} over ${s.cutIn.frames} f`;
   return `${s.start.toFixed(2)} to ${s.end.toFixed(2)} s (${s.length.toFixed(2)} s, ${s.frames} f), ${cut}${s.flashes.length ? `; a flash at ${s.flashes.map((t) => t.toFixed(2)).join(', ')} s lies inside it` : ''}.`;
 };
 
@@ -153,7 +154,7 @@ function soundSection(m) {
 /** The numbers of one second `t` of a film: its shot, the moves under way, the flash, the words on screen and the sounds close to it. Pure. */
 export function momentLines(m, t) {
   const shot = m.shots.find((s) => t >= s.start - 1e-6 && t < s.end + 1e-6);
-  if (!shot) return [`second ${t.toFixed(2)}: outside the shots read`];
+  if (!shot) return [`second ${t.toFixed(2)}: between shots (inside a flash or a change)`];
   const L = [`second ${t.toFixed(2)}: in shot ${shot.index} (${shot.id}), ${(t - shot.start).toFixed(2)} s after its start and ${(shot.end - t).toFixed(2)} s before its end`];
   const live = shot.moves.filter((x) => x.start != null && t >= x.start && t <= x.settle);
   L.push(live.length ? `moving now: ${live.map((x) => `${x.id} ${x.axis} at up to ${x.peakPxPerS} px/s (${x.ease ?? 'no fit'}, ${((100 * (t - x.start)) / Math.max(x.settle - x.start, 1e-6)).toFixed(0)}% of its time)`).join('; ')}` : 'no tracked part is moving now');

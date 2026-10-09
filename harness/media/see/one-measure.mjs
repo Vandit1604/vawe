@@ -22,6 +22,7 @@ import { stripWindow } from './strip-math.mjs';
 const round = (n, d = 3) => (n == null ? null : +n.toFixed(d));
 const GRAIN_W = 960, GRAIN_H = 540;
 const MAX_LOOK_SHOTS = 80;
+const MIN_HIT = 0.1;
 const SOLID_STEP = 24;
 const SOLID_SHARE = 0.004;
 
@@ -169,7 +170,7 @@ function typeOf(spec, shots, pageTimeline) {
 
 async function soundOf(src, spec, pageRead, dir, shots, log) {
   const cuts = spec.cuts.map((c) => c.t);
-  const hits = (spec.audio?.hits ?? []).map((h) => {
+  const hits = (spec.audio?.hits ?? []).filter((h) => h.strength >= MIN_HIT).map((h) => {
     const onset = h.attack ?? h.t;
     const near = cuts.reduce((b, c) => (b == null || Math.abs(c - onset) < Math.abs(b - onset) ? c : b), null);
     return { onset: round(onset), peak: h.t, strength: h.strength, errMs: h.errMs ?? null, nearestCut: near == null || Math.abs(near - onset) > 0.3 ? null : round(near), leadMs: near == null || Math.abs(near - onset) > 0.3 ? null : Math.round((near - onset) * 1000), shot: shots.find((s) => onset >= s.start && onset < s.end)?.index ?? null };

@@ -30,7 +30,10 @@ export function stillImage(video, t, file) {
 }
 
 /** The first grid of `runShot` over [from, from + span) with exactly STRIP_FRAMES frames, moved to `file`. */
-function stripImage(video, tmp, from, span, energy, file) {
+function stripImage(video, tmp, from, span, energy, file, { duration: dur, fps: rate }) {
+  const last = dur - 1.5 / rate;
+  from = Math.max(0, Math.min(from, last - span));
+  span = Math.min(span, last - from);
   const fps = Math.min(30, STRIP_FRAMES / span);
   const { gridPaths, outDir } = runShot(video, tmp, from, from + span, fps, { energy, quiet: true });
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -85,7 +88,7 @@ function cutImage(shot, ctx, folder) {
   const prev = ctx.m.shots[shot.index - 2];
   if (!prev) return null;
   const span = Math.min(1, Math.max(0.5, 2.5 * Math.min(prev.length, shot.length)));
-  const strip = stripImage(ctx.video, ctx.tmp, stripWindow(shot.start, span, ctx.dur).from, span, ctx.energy, path.join(folder, 'cut-in.png'));
+  const strip = stripImage(ctx.video, ctx.tmp, stripWindow(shot.start, span, ctx.dur).from, span, ctx.energy, path.join(folder, 'cut-in.png'), ctx.m.media);
   const near = (c) => Math.abs(c.at - shot.start) < 0.04;
   return { ...strip, lines: cutLines(shot, prev, ctx.m.structure.cuts.find(near), ctx.m.groundCuts?.find(near), ctx.m.motion.eyeCuts.find(near)) };
 }
@@ -93,7 +96,9 @@ function cutImage(shot, ctx, folder) {
 function onionImage(shot, ctx, folder) {
   const big = shot.moves.filter((x) => x.start != null && x.settle != null && x.settle - x.start >= MIN_ONION_S).sort((a, b) => b.travelPx - a.travelPx)[0];
   if (!big) return null;
-  const on = makeOnion({ video: ctx.video, name: ctx.src.name }, { at: (big.start + big.settle) / 2, span: Math.min(2, big.settle - big.start + 0.1), n: ONION_FRAMES, out: folder });
+  const lastSecond = ctx.dur - 1.5 / ctx.m.media.fps;
+  const span = Math.min(2, big.settle - big.start + 0.1, lastSecond);
+  const on = makeOnion({ video: ctx.video, name: ctx.src.name }, { at: Math.min((big.start + big.settle) / 2, lastSecond - span / 2), span, n: ONION_FRAMES, out: folder });
   const file = path.join(folder, 'move-onion.png');
   fs.renameSync(on.out, file);
   return { file, from: on.times[0], to: on.times.at(-1), lines: [`${move(big)}; peak ${big.peakPxPerS} px/s (${big.peakHeightsPerS} frame heights/s); ${ONION_FRAMES} frames, oldest cool and faint, newest strong; a ghost past the final place is overshoot`] };
@@ -120,7 +125,7 @@ function textureZoom(shot, ctx, folder) {
 
 function flashImage(f, i, ctx, folder) {
   const n = Math.min(STRIP_FRAMES, f.frames + 2);
-  const strip = stripImage(ctx.video, ctx.tmp, Math.max(0, (f.frame - 1) / ctx.m.media.fps), (n + 0.5) / ctx.m.media.fps, ctx.energy, path.join(folder, `flash-${i + 1}.png`));
+  const strip = stripImage(ctx.video, ctx.tmp, Math.max(0, (f.frame - 1) / ctx.m.media.fps), (n + 0.5) / ctx.m.media.fps, ctx.energy, path.join(folder, `flash-${i + 1}.png`), ctx.m.media);
   const box = effectBox(ctx.video, Math.min(f.peakAt, ctx.dur - 0.05));
   let zoom = null;
   if (box) { zoom = { file: path.join(folder, `flash-${i + 1}-peak.png`), box, t: f.peakAt }; zoomCell(ctx.clip, f.peakAt, box, ZOOM, zoom.file); }
@@ -150,7 +155,7 @@ export function momentImages(src, m, at, dir, log) {
   const folder = path.join(imagesRoot(dir, src), `moment-${at.toFixed(2)}`);
   const out = { at, frame: stillImage(video, Math.min(at, dur - 0.05), path.join(folder, 'frame.png')) };
   const { from } = stripWindow(at, 1, dur);
-  out.strip = stripImage(video, path.join(dir, '.tmp'), from, 1, energy, path.join(folder, 'strip.png'));
+  out.strip = stripImage(video, path.join(dir, '.tmp'), from, 1, energy, path.join(folder, 'strip.png'), m.media);
   const on = makeOnion({ video, name: src.name }, { at, span: 0.6, n: ONION_FRAMES, out: folder });
   out.onion = path.join(folder, 'onion.png');
   fs.renameSync(on.out, out.onion);
