@@ -38,6 +38,7 @@ One row per job, best move first. Every built move is in this table.
 | land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md), [variable-weight-wave](variable-weight-wave.md) |
 | cut a line in under hard edges, per character, word or line | [vertical-cut-reveal](vertical-cut-reveal.md) |
 | roll a word or label letter by letter, forward, back, or in random order | [letter-swap](letter-swap.md) |
+| a cut that reads as camera over-exposure | [exposure-flash](exposure-flash.md) |
 | turn each character over as a small cube | [letter-3d-swap](letter-3d-swap.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
 | decide a name or number on screen | [flap-resolve](flap-resolve.md), [text-scramble-decode](text-scramble-decode.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |

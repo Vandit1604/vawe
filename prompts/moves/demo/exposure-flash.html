@@ -1,0 +1,45 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="terminal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>move: exposure flash</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { margin: 0; }
+  .root { position: fixed; inset: 0; background: #02030a; overflow: hidden; }
+  #host { position: absolute; inset: 0; }
+  .shot { position: absolute; inset: 0; display: grid; align-content: center; justify-items: start; gap: var(--s3); padding: 0 var(--margin); visibility: hidden; }
+  .shot[data-on] { visibility: visible; }
+  .num { font: 800 calc(var(--u) * 36) / 0.9 var(--mono); letter-spacing: -0.04em; }
+  .tag { font: 700 calc(var(--u) * 5) / 1 var(--mono); letter-spacing: 0.04em; }
+  #s0 { background: #08104a; color: #cfd8ff; }
+  #s1 { background: #0b2a14; color: #d8ffd0; }
+  #s2 { background: #2a0a2e; color: #ffd0f4; }
+  #white { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="root">
+  <div id="host">
+    <div class="shot" id="s0"><div class="tag">TRK 0631</div><div class="num">631</div></div>
+    <div class="shot" id="s1"><div class="tag">LOCK 494</div><div class="num">494</div></div>
+    <div class="shot" id="s2"><div class="tag">SIGNAL</div><div class="num">HELD</div></div>
+  </div>
+  <div id="white"></div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { flashAt } from '/core/motion/exposure.js';
+const CUTS = [0.7, 1.3];   // 0.6 s apart: well under the three-flashes-a-second limit
+const shots = [...document.querySelectorAll('.shot')];
+const host = document.getElementById('host'), white = document.getElementById('white');
+vawe.onFrame((t) => {
+  const { white: w, brightness, shot } = flashAt(t, CUTS);
+  shots.forEach((s, i) => s.toggleAttribute('data-on', i === shot));
+  host.style.filter = brightness === 1 ? 'none' : `brightness(${brightness.toFixed(3)})`;
+  white.style.opacity = w.toFixed(3);
+});
+</script>
+</body>
+</html>

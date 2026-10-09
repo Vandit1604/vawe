@@ -88,6 +88,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | caret follow | the camera trails the typing caret on a soft spring, so a long line stays readable at close range | [caret-follow.md](caret-follow.md) | [caret-follow.mp4](caret-follow.mp4) |
 | pull back reveal | open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even | [pull-back-reveal.md](pull-back-reveal.md) | [pull-back-reveal.mp4](pull-back-reveal.mp4) |
 | parallax dive | the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves | [parallax-dive.md](parallax-dive.md) | [parallax-dive.mp4](parallax-dive.mp4) |
+| exposure flash | a cut on a screen film reads as over-exposure: 3 frames of white, the swap inside the peak, the new shot starts at 2x brightness and settles in 0.15 s; at most 3 flashes a second | [exposure-flash.md](exposure-flash.md) | [exposure-flash.mp4](exposure-flash.mp4) |
 | camera moves | a whole world as one wrapper: push, pull, drift for a live hold, whip between worlds (`camera()`) | [camera-moves.md](camera-moves.md) | none yet |
 | depth parallax | one camera move on ground, mid and front layers, each by its depth (`parallax()`) | [depth-parallax.md](depth-parallax.md) | none yet |
 | depth resolve | far words small and soft resolve as the camera arrives; a focus pull (`focus()`) | [depth-resolve.md](depth-resolve.md) | none yet |
