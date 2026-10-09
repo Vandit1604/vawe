@@ -122,9 +122,11 @@ test('compareSides gives advice that names the page literal and none for equal f
   const a = side(), b = side({ look: { ...side().look, flashes: [{ frames: 2, seconds: 0.067, peakLuma: 200, baseLuma: 48 }], film: { ...side().look.film, bloom: { px: 16, sigma: 12.5, n: 100 }, chroma: { dx: -4, dy: 0, share: 80, n: 100 } } } });
   const rows = compareSides(a, b);
   const advice = rows.filter((r) => r.advice).map((r) => r.advice).join('\n');
-  assert.match(advice, /add flashes/);
-  assert.match(advice, /filter: blur\(12.5px\)/);
-  assert.match(advice, /translateX\(2px\)/);
+  assert.match(advice, /add 1 flash:/);
+  assert.match(advice, /film the screen with the lens/);
+  assert.match(advice, /bloom \{strength, radius\}/);
+  assert.match(advice, /aberration\.amount/);
+  assert.doesNotMatch(advice, /text-shadow|mix-blend-mode|repeating-linear-gradient/);
   assert.equal(compareSides(a, side()).filter((r) => r.advice).length, 0);
   assert.ok(vsLines(rows, ['a', 'b']).join('\n').includes('Advice'));
 });
@@ -168,4 +170,16 @@ test('layoutTilt reads the lean of a turned rectangle and is zero for an upright
   assert.ok(Math.abs(turned.deg - 8) <= 1.5, `deg ${turned.deg}`);
   assert.equal(layoutTilt(rect(0), w, h).deg, 0);
   assert.deepEqual(layoutTilt(new Uint8Array(w * h), w, h), { deg: 0, share: 0, peaks: [] });
+});
+
+test('vs: a lens page gets lens options, a count delta says how many, silent and low-OCR sides give no sound or word advice', () => {
+  const base = side();
+  const lensPage = side({ source: { ...base.source, lens: true }, look: { ...base.look, film: { ...base.look.film, bloom: { px: 4, sigma: 3, n: 50 } } } });
+  const ref = side({ look: { ...base.look, flashes: [1, 2, 3].map(() => ({ frames: 2, seconds: 0.07, peakLuma: 200, baseLuma: 40 })), film: { ...base.look.film, bloom: { px: 16, sigma: 12.5, n: 50 } } }, sound: { hits: [], mp4: null, page: null, bpm: 178, hasAudio: false }, type: { words: [{ text: 'x', hold: 1, capHeightPct: 4, fontPx: 50 }], lines: [], holds: null, ocr: true, confidence: 'low' } });
+  const rows = compareSides(lensPage, ref);
+  const text = rows.filter((r) => r.advice).map((r) => r.advice).join('\n');
+  assert.match(text, /bloom\.radius until the glow measures 16 px \(core\/surfaces\/lens\.js\)|bloom\.radius until the glow measures 16 px/);
+  assert.match(text, /add 3 flashes/);
+  assert.doesNotMatch(text, /BPM|cues|word/);
+  assert.equal(rows.find((r) => r.measure === 'tempo BPM').b, 'no audio');
 });

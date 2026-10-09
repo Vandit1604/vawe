@@ -12,7 +12,7 @@ import { measureFile, renderMixCached } from '../page-audio.mjs';
 import { readTimeline } from '../timeline.mjs';
 import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
 import { frameRgb } from './frame.mjs';
-import { edgesAt, lumaSeries } from './look.mjs';
+import { edgesAt, lumaSeries, measureFilm } from './look.mjs';
 import { bloomSigma, flashProfile, hueOf, summarise } from './look-math.mjs';
 import { noiseOf, readMotion } from './motion-math.mjs';
 import { burstsOfMoves, cameraWords, grainOf, layoutTilt, maskFlashes, separateFlashes, sharpnessMap, shotsWithoutFlashes } from './one-math.mjs';
@@ -23,6 +23,8 @@ const round = (n, d = 3) => (n == null ? null : +n.toFixed(d));
 const GRAIN_W = 960, GRAIN_H = 540;
 const MAX_LOOK_SHOTS = 80;
 const MIN_HIT = 0.1;
+const SILENT_LUFS = -70;
+const MIN_WORDS = 6;
 const SOLID_STEP = 24;
 const SOLID_SHARE = 0.004;
 
@@ -165,7 +167,7 @@ function typeOf(spec, shots, pageTimeline) {
   const words = spec.shots.flatMap((s) => s.text.map((w) => ({ text: w.text, in: round(w.f0 / fps), out: round(w.f1 / fps), hold: round((w.f1 - w.f0) / fps), capHeightPct: round((100 * w.boxHeightPx) / H, 2), fontPx: round(w.fontPxApprox * k, 0), boxHeightPx: round(w.boxHeightPx * k, 0), cx: round(w.cxPx * k, 0), cy: round(w.cyPx * k, 0) })));
   const lines = (spec.textLines ?? []).map((l) => ({ text: l.text, y: l.y, in: l.t0, out: l.t1, stagger: l.stagger, stepS: l.stepS ?? null, words: l.words.length }));
   const holds = pageTimeline ? pageTimeline.worlds.map((w) => ({ id: w.id, length: round(w.end - w.start), readNeed: w.hold, short: w.hold > 0 && w.end - w.start < w.hold })) : null;
-  return { ocr: Boolean(spec.ocr), words, lines, runs: spec.textRuns ?? null, holds, shotsWithText: shots.filter((s) => s.text.length).map((s) => s.index) };
+  return { ocr: Boolean(spec.ocr), confidence: !spec.ocr || words.length >= MIN_WORDS ? 'ok' : 'low', words, lines, runs: spec.textRuns ?? null, holds, shotsWithText: shots.filter((s) => s.text.length).map((s) => s.index) };
 }
 
 async function soundOf(src, spec, pageRead, dir, shots, log) {
@@ -177,7 +179,8 @@ async function soundOf(src, spec, pageRead, dir, shots, log) {
   });
   let loudness = null;
   try { loudness = measureFile(src.video); } catch { loudness = null; }
-  const out = { hasAudio: Boolean(spec.audio), bpm: spec.audio?.bpm ?? null, bpmConfidence: spec.audio?.confidence ?? null, beatFrames: spec.audio?.beatFrames ?? [], hits, mp4: loudness ? { lufs: loudness.I, truePeakDb: loudness.TP } : null, page: null };
+  const live = Boolean(spec.audio) && loudness != null && loudness.I > SILENT_LUFS;
+  const out = { hasAudio: live, bpm: live ? spec.audio.bpm : null, bpmConfidence: live ? spec.audio.confidence : null, beatFrames: live ? spec.audio.beatFrames : [], hits: live ? hits : [], mp4: loudness ? { lufs: loudness.I, truePeakDb: loudness.TP } : null, page: null };
   if (pageRead) {
     log('mixing the audio tags as written');
     const { read, timeline } = pageRead;
@@ -238,9 +241,7 @@ export async function measureSide(src, opts, dir, log) {
   if (world) for (const w of world.timeline.worlds) if (!worldIds.has(w.id)) log(`world ${w.id} has no shot of its own in the film (it is under or inside another)`);
 
   log('reading light and texture per shot');
-  const filmTimes = [...shots].sort((a, b) => b.length - a.length).slice(0, 16).map((s) => s.key);
-  const filmEdges = edgesAt(video, filmTimes.length ? filmTimes : [probe.dur / 2], probe.dur);
-  const film = summarise({ means: light.means, fps, clips: light.clips, ...filmEdges });
+  const film = measureFilm(video);
   const look = {
     film: { luma: film.luma, clip: film.clip, bloom: film.bloom ? { ...film.bloom, sigma: bloomSigma(film.bloom.px) } : null, chroma: film.chroma, glow: film.glow, texture: film.texture },
     flashes: flashes.flashes.map((f) => ({ ...f, shot: shots.find((s) => f.at >= s.start - 0.001 && f.at < s.end + 0.001)?.index ?? null })),
@@ -252,9 +253,10 @@ export async function measureSide(src, opts, dir, log) {
   const structure = structureOf(spec, shots, flashes.cuts, flashes, world ? { worlds: world.timeline.worlds, spectacle: world.timeline.spectacle } : null, fps);
   const velocity = src.page ? await pageVelocity(src.page, shots, log) : null;
   const sound = await soundOf(src, spec, world, dir, shots, log);
+  if (!sound.hasAudio) structure.tempo = null;
 
   return {
-    source: { name: src.name, kind: src.kind, video: src.video, page: src.page, hash: src.hash, note: src.note },
+    source: { name: src.name, kind: src.kind, video: src.video, page: src.page, hash: src.hash, note: src.note, lens: Boolean(src.page) && /surfaces\/lens|\blens\(/.test(fs.readFileSync(src.page, 'utf8')) },
     media: { width: probe.width, height: probe.height, fps, duration: round(probe.dur), frames: spec.frames, specFps: spec.fps, audio: Boolean(spec.audio) },
     structure,
     motion: { noise: { mu: round(noise.mu, 3), sigma: round(noise.sigma, 3) }, perShot: shots.map((s) => ({ index: s.index, id: s.id, moves: s.moves, bursts: s.bursts, energy: s.energy, camera: s.camera, eye: s.eye })),

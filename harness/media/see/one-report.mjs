@@ -125,6 +125,7 @@ function lookSection(m) {
 function typeSection(m) {
   const t = m.type;
   const L = ['## TYPE', ''];
+  if (t.confidence === 'low') L.push(`LOW CONFIDENCE: only ${t.words.length} word(s) read; OCR is weak on stylised, blurred or moving type, so word timing and size here are not to be trusted: read the key frames.`, '');
   if (!t.words.length) { L.push(t.ocr ? 'No words read.' : 'Text was not read (--no-ocr).'); } else {
     L.push(...table(['word', 'in s', 'out s', 'hold s', 'cap box % of frame', 'font px about', 'centre px'], t.words.map((w) => [w.text, f2(w.in), f2(w.out), f2(w.hold), w.capHeightPct, w.fontPx, `${w.cx},${w.cy}`])));
     if (t.lines.length) L.push('', 'Lines:', ...t.lines.map((l) => `- "${l.text}" ${l.in}-${l.out} s, stagger ${l.stagger}${l.stepS ? `, ${Math.round(l.stepS * 1000)} ms between words` : ''}`));
