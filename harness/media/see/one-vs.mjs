@@ -14,11 +14,19 @@ const overshootShare = (m) => share(moves(m).filter((x) => (x.overshootPct ?? 0)
 const cameraShare = (m) => share(m.shots.filter((s) => s.camera.words !== 'static').length, m.shots.length);
 const hardShare = (m) => share(m.structure.cuts.filter((c) => c.type === 'cut' || c.type === 'match').length, m.structure.cuts.length);
 const lengthOf = (m) => med(m.structure.shots.map((s) => s.length));
+/** How to change an optical effect: the lens option when the page films its screen with the lens, else the way to start. Optical effects are never faked in CSS. */
+const lens = (a, option, detail) => (a.source.lens ? `${option} ${detail} (core/surfaces/lens.js)` : `film the screen with the lens (prompts/moves/lens.md), then ${option} ${detail}`);
 const worldWord = (m) => (m.source.kind === 'page' ? 'world' : 'shot');
 
 /** A delta row; `advice` is a string or null. */
 const tidy = (v) => (typeof v === 'number' ? round(v, 3) : v);
 const row = (section, measure, a, b, advice) => ({ section, measure, a: tidy(a), b: tidy(b), advice: advice ?? null });
+
+const flashCountAdvice = (a, b) => {
+  const d = b.look.flashes.length - a.look.flashes.length;
+  if (d === 0) return null;
+  return `${d > 0 ? 'add' : 'remove'} ${Math.abs(d)} flash${Math.abs(d) === 1 ? '' : 'es'}: yours ${a.look.flashes.length}, the reference ${b.look.flashes.length}; a flash is a full-frame white layer whose opacity rises and falls in a few frames (the reference's biggest runs ${flashPeak(b)?.frames ?? '?'} f)`;
+};
 
 function structureRows(a, b) {
   const la = lengthOf(a), lb = lengthOf(b);
@@ -31,8 +39,8 @@ function structureRows(a, b) {
     row('STRUCTURE', 'longest shot s', a.structure.rhythm.max, b.structure.rhythm.max, differs(a.structure.rhythm.max, b.structure.rhythm.max, 0.4) ? `hold the longest ${worldWord(a)} for ${b.structure.rhythm.max} s (now ${a.structure.rhythm.max} s)` : null),
     row('STRUCTURE', 'cuts per 10 s', round((cutsA * 10) / a.media.duration, 1), round((cutsB * 10) / b.media.duration, 1), null),
     row('STRUCTURE', 'share of hard cuts', hardShare(a), hardShare(b), differs(hardShare(a), hardShare(b), 0.3) ? `${hardShare(a) < hardShare(b) ? 'replace transitions with hard cuts: set the cross-fade or slide duration of the world change to 0' : 'soften cuts: give the incoming world an opacity or transform entrance of 4 to 8 frames'}` : null),
-    row('STRUCTURE', 'flashes', a.look.flashes.length, b.look.flashes.length, a.look.flashes.length === b.look.flashes.length ? null : `${a.look.flashes.length < b.look.flashes.length ? 'add' : 'remove'} flashes: a full-frame white layer whose opacity keyframes rise and fall over ${fb ? fb.frames : 2} frames`),
-    row('STRUCTURE', 'biggest flash frames, peak luma', fa ? `${fa.frames} f, ${fa.peakLuma}` : '-', fb ? `${fb.frames} f, ${fb.peakLuma}` : '-', fa && fb && (differs(fa.frames, fb.frames, 0.4) || differs(fa.peakLuma, fb.peakLuma, 0.15)) ? `set the flash layer's keyframe length to ${fb.frames} f (${fb.seconds} s) and its peak opacity so the mean luma reaches ${fb.peakLuma} (now ${fa.peakLuma})` : null),
+    row('STRUCTURE', 'flashes', a.look.flashes.length, b.look.flashes.length, flashCountAdvice(a, b)),
+    row('STRUCTURE', 'biggest flash frames, peak luma', fa ? `${fa.frames} f, ${fa.peakLuma}` : '-', fb ? `${fb.frames} f, ${fb.peakLuma}` : '-', fa && fb && a.look.flashes.length === b.look.flashes.length && (differs(fa.frames, fb.frames, 0.4) || differs(fa.peakLuma, fb.peakLuma, 0.15)) ? `set the flash layer's keyframe length to ${fb.frames} f (${fb.seconds} s) and its peak opacity so the mean luma reaches ${fb.peakLuma} (now ${fa.peakLuma})` : null),
   ];
 }
 
@@ -62,22 +70,23 @@ const bloomSigmaOf = (m) => m.look.film.bloom?.sigma ?? '?';
 
 function bloomRow(a, b) {
   const [pa, pb] = [bloomPx(a), bloomPx(b)];
-  const wider = pa != null && pb != null && differs(pa, pb, 0.35) ? `${pb > pa ? 'widen' : 'narrow'} the glow: the glow layer's \`filter: blur()\` or the \`text-shadow\` radius from about ${bloomSigmaOf(a)} px to about ${bloomSigmaOf(b)} px` : null;
-  const add = pb != null && pa == null ? `add a glow: a blurred copy of the bright layer, \`filter: blur(${bloomSigmaOf(b)}px)\`` : null;
+  const wider = pa != null && pb != null && differs(pa, pb, 0.35) ? lens(a, `${pb > pa ? 'raise' : 'lower'}`, `bloom.radius until the glow measures ${pb} px (90 to 10%, gaussian sigma about ${bloomSigmaOf(b)} px; yours ${pa} px)`) : null;
+  const add = pb != null && pa == null ? lens(a, 'turn on', `bloom {strength, radius} until the glow measures ${pb} px (sigma about ${bloomSigmaOf(b)} px)`) : null;
   return row('LOOK', 'bloom 90 to 10% px', pa, pb, wider ?? add);
 }
 
 function fringeRow(a, b) {
   const [fa, fb] = [fringe(a), fringe(b)];
-  const split = fb != null && (fa == null || differs(fa, fb, 0.5)) ? `split red and blue copies of the layer by ${round(fb, 1)} px: \`translateX(${round(fb / 2, 1)}px)\` and \`translateX(${round(-fb / 2, 1)}px)\` with \`mix-blend-mode: screen\`` : null;
-  return row('LOOK', 'colour fringe px (blue minus red)', fa == null ? null : round(fa, 1), fb == null ? null : round(fb, 1), split);
+  const [sa, sb] = [a.look.film.chroma?.share ?? 0, b.look.film.chroma?.share ?? 0];
+  const split = (fb != null && (fa == null || differs(fa, fb, 0.5))) || sb >= sa + 20 ? lens(a, 'set', `aberration.amount so that ${sb}% of edges show a fringe of 1 px or more (yours ${sa}%; median offset ${round(fb ?? 0, 1)} px against ${round(fa ?? 0, 1)} px)`) : null;
+  return row('LOOK', 'colour fringe: median px, share of edges at 1 px or more', `${round(fa ?? 0, 1)} px, ${sa}%`, `${round(fb ?? 0, 1)} px, ${sb}%`, split);
 }
 
 function textureRow(a, b) {
   const [ta, tb] = [textureOf(a), textureOf(b)];
   const period = tb ? (tb.period == null ? `${round(tb.periodX)} x ${round(tb.periodY)}` : round(tb.period)) : null;
   const differ = tb && ta && (ta.kind !== tb.kind || Math.abs((ta.period ?? 0) - (tb.period ?? 0)) > 0.5);
-  const advice = (tb && (!ta || differ)) ? `set the overlay's \`repeating-linear-gradient\` period to ${period} px${tb.striped ? ' with red, green and blue stripes' : ''}` : ta && !tb ? 'remove the screen texture overlay' : null;
+  const advice = (tb && (!ta || differ)) ? lens(a, 'set', `grid {layout: '${tb.striped ? 'stripe' : tb.kind === 'grid' ? 'dot' : 'stripe'}', cell: ${period}} (the reference's pattern, ${texText(tb)})`) : ta && !tb ? lens(a, 'set', 'grid.amount to 0') : null;
   return row('LOOK', 'screen texture', texText(ta), texText(tb), advice);
 }
 
@@ -85,8 +94,8 @@ function lightRows(a, b) {
   const [la, lb] = [a.look.film.luma.median, b.look.film.luma.median];
   const [ca, cb] = [a.look.film.clip, b.look.film.clip];
   return [
-    row('LOOK', 'mean luma median', la, lb, differs(la, lb, 0.3) ? `${la < lb ? 'lighten' : 'darken'} the grounds: change the \`background\` of the worlds toward luma ${lb}` : null),
-    row('LOOK', 'clipped share median, peak %', `${ca.median}, ${ca.peak}`, `${cb.median}, ${cb.peak}`, cb.median > 2 * ca.median + 0.5 || cb.peak > 2 * ca.peak + 1 ? 'push the brights to full white: set the highlight text or shape colour to #fff' : null),
+    row('LOOK', 'mean luma median', la, lb, differs(la, lb, 0.3) ? `${la < lb ? 'raise' : 'lower'} the mean luma toward ${lb}: the ground colours of the worlds, or ${lens(a, 'set', 'exposure')}` : null),
+    row('LOOK', 'clipped share median, peak %', `${ca.median}, ${ca.peak}`, `${cb.median}, ${cb.peak}`, cb.median > 2 * ca.median + 0.5 || cb.peak > 2 * ca.peak + 1 ? lens(a, 'raise', 'exposure (and bloom.strength) until the clipped share reaches the reference') : null),
   ];
 }
 
@@ -94,9 +103,9 @@ function surfaceRows(a, b) {
   const [ga, gb] = [grainOf(a), grainOf(b)], [xa, xb] = [focusOf(a), focusOf(b)];
   const glowA = a.look.film.glow?.name ?? 'none', glowB = b.look.film.glow?.name ?? 'none';
   return [
-    row('LOOK', 'glow colour', glowA, glowB, b.look.film.glow && glowA !== glowB ? `tint the glow ${glowB}: the colour of the blurred glow layer` : null),
-    row('LOOK', 'grain sigma (levels)', ga, gb, gb != null && (ga == null || differs(ga, gb, 0.5)) ? `${(ga ?? 0) < gb ? 'raise' : 'lower'} the grain overlay opacity (the noise layer's \`opacity\`) until the flat-tile noise reads ${gb} levels` : null),
-    row('LOOK', 'focus ratio (sharp over soft)', xa, xb, xa != null && xb != null && differs(xa, xb, 0.5) ? (xa < xb ? 'add depth of field: blur the background layer (`filter: blur()`) and keep the subject sharp' : 'even the focus: remove the blur on the background layer') : null),
+    row('LOOK', 'glow colour', glowA, glowB, b.look.film.glow && glowA !== glowB ? lens(a, 'set', `palette {stops} so the bright end tints ${glowB}`) : null),
+    row('LOOK', 'grain sigma (levels)', ga, gb, gb != null && (ga == null || differs(ga, gb, 0.5)) ? lens(a, (ga ?? 0) < gb ? 'raise' : 'lower', `grain until the flat-tile noise reads ${gb} levels (yours ${ga ?? 0})`) : null),
+    row('LOOK', 'focus ratio (sharp over soft)', xa, xb, xa != null && xb != null && differs(xa, xb, 0.5) ? lens(a, xa < xb ? 'raise' : 'lower', `dof {blur, focus} until the sharp-over-soft ratio reads ${xb} (yours ${xa})`) : null),
   ];
 }
 
@@ -104,39 +113,46 @@ function colourRows(a, b) {
   const [ca, cb] = [a.look.colour, b.look.colour];
   const darker = Math.abs(ca.shareDark - cb.shareDark) > 0.15;
   return [
-    row('LOOK', 'chroma median', ca.chromaMedian, cb.chromaMedian, differs(ca.chromaMedian, cb.chromaMedian, 0.4) ? `${ca.chromaMedian < cb.chromaMedian ? 'saturate' : 'desaturate'} the palette custom properties on \`:root\` toward chroma ${cb.chromaMedian}` : null),
+    row('LOOK', 'chroma median', ca.chromaMedian, cb.chromaMedian, differs(ca.chromaMedian, cb.chromaMedian, 0.4) ? `${ca.chromaMedian < cb.chromaMedian ? 'saturate' : 'desaturate'} the palette custom properties on \`:root\` toward chroma ${cb.chromaMedian}, or ${lens(a, 'set', 'palette.amount')}` : null),
     row('LOOK', 'share dark, light', `${ca.shareDark}, ${ca.shareLight}`, `${cb.shareDark}, ${cb.shareLight}`, darker ? `${ca.shareDark < cb.shareDark ? 'darken' : 'lighten'} the grounds: the reference is ${Math.round(cb.shareDark * 100)}% dark pixels, yours ${Math.round(ca.shareDark * 100)}%` : null),
   ];
 }
 
 const lookRows = (a, b) => [...lightRows(a, b), bloomRow(a, b), fringeRow(a, b), textureRow(a, b), ...surfaceRows(a, b), ...colourRows(a, b)];
 
+const lowOcr = (m) => m.type.confidence === 'low';
+
 function typeRows(a, b) {
   const ca = med(a.type.words.map((w) => w.capHeightPct)), cb = med(b.type.words.map((w) => w.capHeightPct));
   const ha = med(a.type.words.map((w) => w.hold)), hb = med(b.type.words.map((w) => w.hold));
+  const trusted = !lowOcr(a) && !lowOcr(b);
+  const tag = (m, n) => (lowOcr(m) ? `${n} (low confidence)` : n);
   return [
-    row('TYPE', 'words read', a.type.words.length, b.type.words.length, null),
-    row('TYPE', 'median text box height % of frame', ca, cb, differs(ca, cb, 0.35) ? `${ca < cb ? 'enlarge' : 'reduce'} the type: \`font-size\` from about ${med(a.type.words.map((w) => w.fontPx))} px to about ${med(b.type.words.map((w) => w.fontPx))} px` : null),
-    row('TYPE', 'median word hold s', ha, hb, differs(ha, hb, 0.35) ? `${ha < hb ? 'hold' : 'clear'} each word ${ha < hb ? 'longer' : 'sooner'}: set its on-screen time to ${hb} s (now ${ha} s)` : null),
+    row('TYPE', 'words read', tag(a, a.type.words.length), tag(b, b.type.words.length), null),
+    row('TYPE', 'median text box height % of frame', ca, cb, trusted && differs(ca, cb, 0.35) ? `${ca < cb ? 'enlarge' : 'reduce'} the type: \`font-size\` from about ${med(a.type.words.map((w) => w.fontPx))} px to about ${med(b.type.words.map((w) => w.fontPx))} px` : null),
+    row('TYPE', 'median word hold s', ha, hb, trusted && differs(ha, hb, 0.35) ? `${ha < hb ? 'hold' : 'clear'} each word ${ha < hb ? 'longer' : 'sooner'}: set its on-screen time to ${hb} s (now ${ha} s)` : null),
   ];
 }
 
 const leadOf = (m) => med(m.sound.hits.map((h) => h.leadMs));
 const onsetRate = (m) => round(m.sound.hits.length / m.media.duration, 2);
-const lufsOf = (m) => m.sound.mp4?.lufs ?? m.sound.page?.mix?.lufs ?? null;
+const lufsOf = (m) => (m.sound.hasAudio || m.sound.page?.mix ? (m.sound.mp4?.lufs ?? m.sound.page?.mix?.lufs ?? null) : null);
+const heard = (m) => lufsOf(m) != null;
+const orNone = (m, v) => (heard(m) ? v : 'no audio');
 
 function soundRows(a, b) {
+  const both = heard(a) && heard(b);
   const [la, lb] = [lufsOf(a), lufsOf(b)];
   const [ra, rb] = [onsetRate(a), onsetRate(b)];
   const [da, db] = [leadOf(a), leadOf(b)];
-  const louder = la != null && lb != null && Math.abs(la - lb) > 2 ? `${la < lb ? 'raise' : 'lower'} the mix by ${round(Math.abs(la - lb), 1)} dB: the \`data-gain\` of the loudest \`<audio>\` tag, or the bed` : null;
-  const tempo = a.sound.bpm && b.sound.bpm && differs(a.sound.bpm, b.sound.bpm, 0.15) ? `retime the cues to ${b.sound.bpm} BPM: the \`data-at\` of the repeating cue` : null;
-  const lead = da != null && db != null && Math.abs(da - db) > 40 ? `move each cue to ${db} ms before its cut: the cue's \`data-at\`` : null;
+  const louder = both && Math.abs(la - lb) > 2 ? `${la < lb ? 'raise' : 'lower'} the mix by ${round(Math.abs(la - lb), 1)} dB: the \`data-gain\` of the loudest \`<audio>\` tag, or the bed` : null;
+  const tempo = both && a.sound.bpm && b.sound.bpm && differs(a.sound.bpm, b.sound.bpm, 0.15) ? `retime the cues to ${b.sound.bpm} BPM: the \`data-at\` of the repeating cue` : null;
+  const lead = both && da != null && db != null && Math.abs(da - db) > 40 ? `move each cue to ${db} ms before its cut: the cue's \`data-at\`` : null;
   return [
-    row('SOUND', 'integrated loudness LUFS', la, lb, louder),
-    row('SOUND', 'tempo BPM', a.sound.bpm, b.sound.bpm, tempo),
-    row('SOUND', 'onsets per second', ra, rb, differs(ra, rb, 0.4) ? `${ra < rb ? 'add' : 'remove'} cues: one \`<audio data-synth data-at>\` per event` : null),
-    row('SOUND', 'median sound lead to the nearest cut ms', da, db, lead),
+    row('SOUND', 'integrated loudness LUFS', orNone(a, la), orNone(b, lb), louder),
+    row('SOUND', 'tempo BPM', orNone(a, a.sound.bpm), orNone(b, b.sound.bpm), tempo),
+    row('SOUND', 'onsets per second', orNone(a, ra), orNone(b, rb), both && differs(ra, rb, 0.4) ? `${ra < rb ? 'add' : 'remove'} cues: one \`<audio data-synth data-at>\` per event` : null),
+    row('SOUND', 'median sound lead to the nearest cut ms', orNone(a, da), orNone(b, db), lead),
   ];
 }
 
