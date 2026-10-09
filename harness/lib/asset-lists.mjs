@@ -18,7 +18,7 @@ export function fontLines(faces) {
   return [
     'free faces (OFL). Copy the file into films/<name>/assets/, then src: url("assets/<file>") format("woff2"):',
     ...freeFaces(faces).map(([file, family, weight]) => `${family} | ${weight} | assets/fonts/${file}`),
-    'missing file: node generators/media/fonts.mjs',
+    'if a listed file is not in assets/fonts, fetch it: node generators/media/fonts.mjs',
   ];
 }
 

@@ -124,6 +124,9 @@ export function shipWarnings(brief, pageStarts = null) {
   if (motionFilled(brief) === false) lines.push('the Motion pass is not filled: Read `bin/vawe strip <page> --cuts` for every cut, then write one row per cut in brief.md "Motion pass" (what read flat, what you fixed)');
   if (pageStarts) lines.push(...boardVsPage(brief, pageStarts).map((l) => `Board and page differ: ${l}`));
   const unused = movesUnused(brief);
-  if (unused.length) lines.push(`Taken from names ${unused.map((m) => `"${m}"`).join(', ')} but the Board uses no such move: put it in a cut, or remove the row`);
+  if (unused.length) {
+    const seen = parseBoard(brief).moves.filter(Boolean).map((m) => `"${m}"`).join(', ') || 'none';
+    lines.push(`Taken from names ${unused.map((m) => `"${m}"`).join(', ')} but no Board move cell contains that move name (matched as written, "-" and "_" read as spaces); Board moves seen: ${seen}. Write the name in a cut's move cell, or remove the row`);
+  }
   return lines;
 }

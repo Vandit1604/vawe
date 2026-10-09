@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { fontLines, soundLines } from '../../harness/lib/asset-lists.mjs';
 
 const faces = {
@@ -13,6 +14,11 @@ test('fontLines: one line per woff2 face with its file; OG-only woff is left out
   assert.ok(lines.includes('Fraunces | variable 100-900 | assets/fonts/Fraunces.woff2'));
   assert.ok(lines.includes('Space Grotesk | 500 | assets/fonts/space-500.woff2'));
   assert.ok(!lines.some((l) => l.includes('JetBrainsMono-400')));
+});
+
+test('fontLines: the script its last line names exists', () => {
+  const script = /node (\S+)/.exec(fontLines(faces).at(-1))[1];
+  assert.ok(fs.existsSync(new URL(`../../${script}`, import.meta.url)), script);
 });
 
 test('soundLines: one line per voice with gain and length', () => {
