@@ -565,20 +565,20 @@ async function fontProblems(page) {
   return bad.map((family) => `font ${family} failed to load: fix its src or remove the @font-face`);
 }
 
-async function audioProblems(page, pagePath) {
-  if (!(await page.evaluate(() => document.querySelector('audio') !== null))) return [];
+// Reads the page's <audio> specs once, before the capture: the tab that read them can be gone by the time the mux needs them
+// (a 49 min final failed with "detached Frame" at 19198/19200). Returns { read: null } for a page with no <audio>.
+async function readAudio(page, pagePath) {
+  if (!(await page.evaluate(() => document.querySelector('audio') !== null))) return { read: null, problems: [] };
   const { readPageAudio } = await import('./page-audio.mjs');
-  try { await readPageAudio(page, { pagePath }); } catch (e) { return String(e.message).split('\n'); }
-  return [];
+  try { return { read: await readPageAudio(page, { pagePath }), problems: [] }; } catch (e) { return { read: null, problems: String(e.message).split('\n') }; }
 }
 
 // Null when the page has no <audio> or sets <meta name="loudness"> (the delivery is then normalised, so
 // the as-written level is not the result).
-async function mixLevel(page, pagePath, duration) {
-  if (!(await page.evaluate(() => document.querySelector('audio') !== null))) return null;
-  const { readPageAudio, measureMixLevel } = await import('./page-audio.mjs');
-  const { specs, loudness } = await readPageAudio(page, { pagePath });
-  return loudness === null ? measureMixLevel({ specs, duration }) : null;
+async function mixLevel(read, duration) {
+  if (!read) return null;
+  const { measureMixLevel } = await import('./page-audio.mjs');
+  return read.loudness === null ? measureMixLevel({ specs: read.specs, duration }) : null;
 }
 
 async function assertProblems(page) {
@@ -670,10 +670,10 @@ export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
   return { aspect: name, width: Math.round(outW / scale), height: Math.round(outH / scale), scale };
 }
 
-// The page's <audio> elements are read from the live page and mixed offline, never played
+// The page's <audio> elements are read from the loaded page before the capture (readAudio) and mixed offline, never played
 // (harness/media/page-audio.mjs). Returns false when the page has no <audio> and none was demanded.
-async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) {
-  if (!(await page.evaluate(() => document.querySelector('audio') !== null))) {
+async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fault }) {
+  if (!read) {
     if (explicit) die(`${pagePath}: --audio given but the page has no <audio> element`);
     return false;
   }
@@ -682,9 +682,9 @@ async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) 
     if (e.code === 'ERR_MODULE_NOT_FOUND') die(`${pagePath} has <audio> elements but harness/media/page-audio.mjs is missing: ${e.message}`);
     throw e;
   }
-  const { specs, loudness } = await audio.readPageAudio(page, { pagePath });
+  if (fault) fault();
   const muxed = `${out}.mux-${process.pid}.mp4`;
-  await audio.mixAndMux({ specs, duration, video, out: muxed, loudness });
+  try { await audio.mixAndMux({ specs: read.specs, duration, video, out: muxed, loudness: read.loudness }); } catch (e) { fs.rmSync(muxed, { force: true }); throw e; }
   fs.renameSync(muxed, out);
   return true;
 }
@@ -692,7 +692,7 @@ async function muxPageAudio(page, pagePath, { video, out, duration, explicit }) 
 /**
  * renderPage(pagePath, outPath, opts) -> { frames, subframes, captureMs, encodeMs, dur }.
  * opts: aspect (the page's <meta name="aspect">, else 16:9), w/h (the output pixel size; see resolveFrame),
- * final (false: half-size capture of the same layout, ultrafast x264), audio (final: mix the page's <audio> elements in; a draft
+ * muxFault (test hook: called before the audio mux), final (false: half-size capture of the same layout, ultrafast x264), audio (final: mix the page's <audio> elements in; a draft
  * or a windowed render stays silent unless true), fps (30), blur (1, the MAX subframes blended per output frame; each
  * frame gets what its fastest move needs, a still frame 1), from (0, seconds into the page's own timeline the
  * render starts at), durArg (seconds rendered from `from`; defaults to the page's own <meta
@@ -715,7 +715,8 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
       throw e;
     }
-    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page), ...await audioProblems(page, pagePath), ...await assertProblems(page)];
+    const audioRead = await readAudio(page, pagePath);
+    const early = [...pageErrorLines(scriptErrors, pagePath), ...await fontProblems(page), ...audioRead.problems, ...await assertProblems(page)];
     if (early.length) throw new InvariantError(early);
 
     const totalDur = await page.evaluate(() => {
@@ -782,12 +783,16 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     if (broken.length) { fs.rmSync(tmpOut, { force: true }); fs.rmSync(tmpDir, { recursive: true, force: true }); throw new InvariantError(broken); }
     const advice = late.filter((l) => l.includes(' blank;'));
     const place = async (video, out) => {
-      const mixed = wantAudio && await muxPageAudio(page, pagePath, { video, out, duration: dur, explicit: opts.audio === true });
+      const mixed = wantAudio && await muxPageAudio(audioRead.read, pagePath, { video, out, duration: dur, explicit: opts.audio === true, fault: opts.muxFault });
       if (mixed) fs.rmSync(video, { force: true });
       else fs.renameSync(video, out);
       return mixed;
     };
-    const mixed = await place(tmpOut, outPath);
+    let mixed;
+    try { mixed = await place(tmpOut, outPath); } catch (e) {
+      fs.rmSync(tmpOut, { force: true });
+      throw Object.assign(e, { stage: 'audio mux', progress: 1, framesDir: tmpDir });
+    }
     const result = { frames, subframes: totalSub, reused: reused.reduce((a, b) => a + b, 0), prepassMs, captureMs, encodeMs, dur, audio: Boolean(mixed), restarted, resumed, advice };
     opts.onMaster?.(result);
     if (tmpWeb) {
@@ -800,7 +805,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       await place(tmpWeb, webPath);
     }
     fs.rmSync(tmpDir, { recursive: true, force: true });
-    const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(page, pagePath, dur)) : null;
+    const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(audioRead.read, dur)) : null;
     const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
     return { ...result, probe, level, motion, profile, web: webPath };
   } finally {
@@ -1005,7 +1010,7 @@ function faultFromEnv(value) {
 // The ship job reads the failed line back from this render's log and logs the ship event itself (--job).
 function reportFailedFinal(pagePath, e, byJob) {
   const page = path.relative(process.cwd(), path.resolve(pagePath));
-  const failure = { pct: Math.floor(100 * (e.progress ?? 0)), reason: String((e.problems || [e.message])[0]).split('\n')[0], page };
+  const failure = { pct: Math.floor(100 * (e.progress ?? 0)), reason: `${e.stage ? `${e.stage}: ` : ''}${String((e.problems || [e.message])[0]).split('\n')[0]}`, page };
   if (e.framesDir) console.error(`frames kept in ${e.framesDir}; bin/vawe ship ${page} resumes it`);
   console.error(finalFailedLine(failure.pct, failure.reason));
   if (!byJob) appendRun(pagePath, shipEvent({ verdict: 'failed', renderS: process.uptime(), failure }));
@@ -1045,6 +1050,7 @@ async function main() {
       workers: flag('--workers', null) && Number(flag('--workers', null)),
       audio: argv.includes('--audio') ? true : undefined,
       sliceFault: faultFromEnv(process.env.VAWE_TEST_SLICE_FAULT),
+      muxFault: process.env.VAWE_TEST_MUX_FAULT ? () => { throw new Error('mux failed (VAWE_TEST_MUX_FAULT)'); } : undefined,
       checks: final ? undefined : createChecks({ pagePath, mode: argv.includes('--full') ? 'full' : argv.includes('--fast') ? 'fast' : 'draft' }),
     };
     const frame = resolveFrame(pagePath, opts);
