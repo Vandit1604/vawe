@@ -16,18 +16,24 @@ function meanGrey(video, t) {
   return r.status === 0 && r.stdout.length ? r.stdout[0] : 0;
 }
 
-/** Runs `vawe onion`: writes one PNG of `opts.n` frames across `opts.span` seconds around `opts.at`, prints its absolute path. */
-export function runOnion(found, opts) {
-  if (found.draftMissing) die(`no draft of ${found.page} yet: run bin/vawe dev ${found.page} first (it writes ${found.video}), then repeat`);
-  if (found.draftOld) console.log(`note: ${found.video} is older than ${found.page}; run bin/vawe dev ${found.page} for the current page`);
-  const { width, height, dur } = probeVideo(found.video);
+/** Writes the onion PNG of `opts.n` frames across `opts.span` seconds around `opts.at` (into `opts.out`, default out/onion/<name>) and returns { out, times }. */
+export function makeOnion(found, opts) {
+  const { width, height, dur, fps } = probeVideo(found.video);
   const { from, to } = stripWindow(opts.at, opts.span, dur);
-  const times = onionTimes(from, Math.min(to, dur - FRAME_GAP_S), opts.n);
+  const times = onionTimes(from, Math.min(to, dur - Math.max(FRAME_GAP_S, 1.5 / fps)), opts.n);
   const outDir = path.resolve(opts.out ?? path.join('out', 'onion', found.name));
   fs.mkdirSync(outDir, { recursive: true });
   const out = path.join(outDir, `onion-${opts.at.toFixed(2)}-n${opts.n}.png`);
   const inputs = times.flatMap((t) => ['-ss', t.toFixed(3), '-i', found.video]);
   ffmpegOrDie(['-v', 'error', '-y', ...inputs, '-filter_complex', onionGraph(times, width, height, isLightGround(meanGrey(found.video, times.at(-1)))), '-map', '[out]', '-frames:v', '1', out], out, 'onion');
+  return { out, times };
+}
+
+/** Runs `vawe onion`: writes one PNG of `opts.n` frames across `opts.span` seconds around `opts.at`, prints its absolute path. */
+export function runOnion(found, opts) {
+  if (found.draftMissing) die(`no draft of ${found.page} yet: run bin/vawe dev ${found.page} first (it writes ${found.video}), then repeat`);
+  if (found.draftOld) console.log(`note: ${found.video} is older than ${found.page}; run bin/vawe dev ${found.page} for the current page`);
+  const { out, times } = makeOnion(found, opts);
   console.log(`onion of ${found.video}: ${opts.n} frames, ${times[0].toFixed(2)} to ${times.at(-1).toFixed(2)} s, oldest cool and faint, newest strong`);
   console.log(out);
 }

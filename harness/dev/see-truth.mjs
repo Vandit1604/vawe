@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // harness/dev/see-truth.mjs: score today's measuring tools against fixtures whose properties are known by construction.
-//   node harness/dev/see-truth.mjs [--only <fixture>] [--reuse] [--json]
+//   node harness/dev/see-truth.mjs [--only <fixture>] [--reuse] [--json] [--tool old|see]
 // Each fixture is tests/fixtures/truth/<name>/page.html plus truth.json (the known values and the tolerances a good tool
 // should meet). A fixture renders with harness/media/render-page.mjs in its default draft mode (960x540, 30 fps, silent;
 // the sound fixture adds --audio; the look fixture is a final render). That is the render `vawe dev` runs, without the
 // page checks, which cost minutes on a busy machine. The tools then run on the mp4 or the page and a table of
 // measure | truth | measured | error | tolerance | pass/fail | tool is printed. --reuse keeps an mp4 newer than its page.
 // A measure with no tool today is listed as "no tool"; a verb that is not on main yet is "not available".
+// `vawe see` is graded on the same measures (tool column "vawe see"); --tool old or --tool see prints one side only.
 // Fixtures live in tests/fixtures/truth/; mp4s, spec folders and PNGs go to out/see-truth/.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -285,14 +286,149 @@ export function soundRows(t, { audioAt, lufs, timeline, spec }) {
 /** Seconds after a cue start at which `vawe audio --at` probes it. */
 export const PROBE_OFFSET = 0.1;
 
-export function lookRows(t, { available }) {
-  const F = 'look', tol = t.tolerance, v = t.truth;
-  const make = available ? (m, truth, tolerance) => ({ ...noTool(F, m, truth, tolerance), tool: 'look verb found, not wired into the scorer' })
-    : (m, truth, tolerance) => notAvailable(F, m, truth, 'vawe look / zoom', tolerance);
+/** `vawe look` table: the glow sigma, the signed channel offsets and the stripe period of the screen texture. */
+export function parseLook(text) {
+  const t = String(text);
+  const num1 = (re) => { const m = re.exec(t); return m ? Number(m[1]) : null; };
+  const dx = num1(/median dx (-?\d+(?:\.\d+)?) px/), dy = num1(/median dx -?\d+(?:\.\d+)? px, dy (-?\d+(?:\.\d+)?) px/);
+  return { bloomSigma: num1(/gaussian sigma about (\d+(?:\.\d+)?)/), offset: dx === null ? null : Math.hypot(dx, dy ?? 0), stripePeriod: /RGB-striped/.test(t) ? num1(/period (\d+(?:\.\d+)?) px, RGB-striped/) : null };
+}
+
+export function lookRows(t, { look }) {
+  const F = 'look', tol = t.tolerance, v = t.truth, tool = 'vawe look';
   return [
-    make('bloom radius (css px, gaussian sigma)', v.bloomSigmaPx, tol.bloomPx),
-    make('red vs blue channel offset (css px)', v.channelOffsetPx, tol.channelOffsetPx),
-    make('RGB stripe period (css px)', v.stripePeriodPx, tol.stripePeriodPx),
+    scoreRow({ fixture: F, measure: 'bloom radius (css px, gaussian sigma)', tool, truth: v.bloomSigmaPx, measured: look?.bloomSigma, tolerance: tol.bloomPx }),
+    scoreRow({ fixture: F, measure: 'red vs blue channel offset (css px)', tool, truth: v.channelOffsetPx, measured: look?.offset, tolerance: tol.channelOffsetPx }),
+    scoreRow({ fixture: F, measure: 'RGB stripe period (css px)', tool, truth: v.stripePeriodPx, measured: look?.stripePeriod, tolerance: tol.stripePeriodPx }),
+  ];
+}
+
+// ---------- rows for `vawe see`, one builder per fixture ----------
+// Each takes truth.json and the see.json of the mp4 (`a`) and, where the page matters, of the page (`p`). Pure.
+
+const SEE = 'vawe see';
+
+export function cutsSeeRows(t, { a, p }) {
+  const F = 'cuts', tol = t.tolerance;
+  const rows = [];
+  t.truth.cuts.forEach((c, i) => rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} second`, tool: `${SEE} (mp4)`, truth: c, measured: a?.structure.cuts[i]?.at, tolerance: tol.cutSeconds })));
+  rows.push(scoreRow({ fixture: F, measure: 'world count', tool: `${SEE} (mp4)`, truth: t.truth.worlds.length, measured: a?.structure.shots.length, tolerance: tol.worldCount }));
+  rows.push(scoreRow({ fixture: F, measure: 'world count', tool: `${SEE} (page)`, truth: t.truth.worlds.length, measured: p?.structure.worlds?.length, tolerance: tol.worldCount }));
+  for (const id of t.truth.durationWorlds) {
+    const w = t.truth.worlds.find((x) => x.id === id);
+    const shot = a?.structure.shots.find((s) => Math.abs(s.start - w.start) <= tol.worldSeconds);
+    const world = p?.structure.worlds?.find((x) => x.id === id);
+    rows.push(scoreRow({ fixture: F, measure: `world ${id} duration`, tool: `${SEE} (mp4)`, truth: r(w.end - w.start), measured: shot?.length, tolerance: tol.worldSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `world ${id} duration`, tool: `${SEE} (page)`, truth: r(w.end - w.start), measured: world ? world.end - world.start : null, tolerance: tol.worldSeconds }));
+  }
+  return rows;
+}
+
+export function flashSeeRows(t, { a }) {
+  const F = 'flash', tol = t.tolerance;
+  const rows = [];
+  t.truth.flashes.forEach((fl, i) => {
+    const m = a?.look.flashes.find((x) => Math.abs(x.at - fl.start) <= 2 * tol.startSeconds);
+    rows.push(scoreRow({ fixture: F, measure: `flash ${i + 1} start second`, tool: SEE, truth: fl.start, measured: m?.at, tolerance: tol.startSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `flash ${i + 1} length in frames`, tool: SEE, truth: fl.frames, measured: m?.frames, tolerance: tol.lengthFrames }));
+    rows.push(scoreRow({ fixture: F, measure: `flash ${i + 1} peak mean luma`, tool: SEE, truth: fl.peakLuma, measured: m?.peakLuma, tolerance: tol.peakLuma }));
+  });
+  const alone = a && a.structure.cuts.length === 0 ? a.look.flashes.length : null;
+  rows.push(scoreRow({ fixture: F, measure: 'flash event (one exposure flash, not two cuts)', tool: SEE, truth: 2, measured: alone, tolerance: 0 }));
+  return rows;
+}
+
+export function motionSeeRows(t, { a }) {
+  const F = 'motion', tol = t.tolerance, { a: A, b: B } = t.truth;
+  const moves = a?.shots.flatMap((s) => s.moves) ?? [];
+  const mv = (start) => moves.find((m) => Math.abs(m.start - start) <= 0.1);
+  const [mA, mB] = [mv(A.start), mv(B.start)];
+  const window = (from, to) => a?.motion.perShot.flatMap((s) => s.energy?.bursts ?? []).filter((b) => b.t1 > from && b.t0 < to).length;
+  return [
+    scoreRow({ fixture: F, measure: 'A start second', tool: SEE, truth: A.start, measured: mA?.start, tolerance: tol.startSeconds }),
+    scoreRow({ fixture: F, measure: 'A settle second', tool: SEE, truth: A.settle, measured: mA?.settle, tolerance: tol.settleSeconds }),
+    scoreRow({ fixture: F, measure: 'A overshoot (points of travel)', tool: SEE, truth: A.overshootPct, measured: mA?.overshootPct, tolerance: tol.overshootPoints }),
+    scoreRow({ fixture: F, measure: 'A rest x (video px)', tool: SEE, truth: A.restVideoX, measured: mA?.to ? mA.to[0] * (a.media.height / 1080) : null, tolerance: tol.restPx }),
+    scoreRow({ fixture: F, measure: 'A bursts', tool: SEE, truth: A.bursts, measured: a ? window(A.start - 0.1, A.settle + 0.1) : null, tolerance: tol.bursts }),
+    scoreRow({ fixture: F, measure: 'B start second', tool: SEE, truth: B.start, measured: mB?.start, tolerance: tol.startSeconds }),
+    scoreRow({ fixture: F, measure: 'B settle second (end of move)', tool: SEE, truth: B.settle, measured: mB?.settle, tolerance: tol.settleSeconds }),
+    scoreRow({ fixture: F, measure: 'B peak speed (css px/s)', tool: SEE, truth: B.peakCssPxPerS, measured: mB?.peakPxPerS, tolerance: B.peakCssPxPerS * tol.speedRatio }),
+    scoreRow({ fixture: F, measure: 'B ease shape', tool: SEE, truth: B.shape, measured: mB?.ease }),
+    scoreRow({ fixture: F, measure: 'A overshoot as a number (what onion shows as an image)', tool: SEE, truth: A.overshootPct, measured: mA?.overshootPct, tolerance: tol.overshootPoints }),
+  ];
+}
+
+export function eyeSeeRows(t, { a }) {
+  const F = 'eye', tol = t.tolerance, asp = t.aspect;
+  const rows = [];
+  const shot = (t0) => a?.motion.perShot.find((s) => Math.abs((a.shots.find((x) => x.index === s.index)?.start ?? -1) - t0) <= 0.05);
+  t.truth.shots.forEach((s, i) => {
+    const m = shot(s.t0)?.eye;
+    for (const end of ['start', 'end']) rows.push(scoreRow({ fixture: F, measure: `shot ${i + 1} eye ${end} (frame heights from truth)`, tool: SEE, truth: 0, measured: m ? heights(m[end], s[end], asp) : null, tolerance: tol.eyeHeights }));
+    rows.push(scoreRow({ fixture: F, measure: `shot ${i + 1} eye travel inside the shot (frame heights)`, tool: SEE, truth: r(heights(s.start, s.end, asp)), measured: m?.travel, tolerance: tol.travelHeights }));
+  });
+  for (let i = 0; i + 1 < t.truth.shots.length; i++) {
+    const b = t.truth.shots[i + 1];
+    const jump = a?.motion.eyeCuts.find((c) => Math.abs(c.at - b.t0) <= 0.05);
+    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} eye jump (frame heights)`, tool: SEE, truth: r(heights(t.truth.shots[i].end, b.start, asp)), measured: jump?.jump, tolerance: tol.travelHeights }));
+  }
+  return rows;
+}
+
+export function groundSeeRows(t, { a }) {
+  const F = 'ground', tol = t.tolerance;
+  const rows = [];
+  const shot = (t0) => a?.shots.find((s) => Math.abs(s.start - t0) <= 0.05);
+  t.truth.shots.forEach((s, i) => {
+    const g = shot(s.t0)?.ground;
+    rows.push(scoreRow({ fixture: F, measure: `world ${i + 1} ground colour (deltaE from truth)`, tool: SEE, truth: 0, measured: g?.startLab ? deltaE76(g.startLab, s.lab) : null, tolerance: tol.deltaE }));
+  });
+  t.truth.cutDeltaE.forEach((de, i) => {
+    const cut = a?.groundCuts.find((c) => Math.abs(c.at - t.truth.shots[i + 1].t0) <= 0.05);
+    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} deltaE`, tool: SEE, truth: de, measured: cut?.dE, tolerance: tol.deltaE }));
+  });
+  const drift = t.truth.shots.at(-1), d = shot(drift.t0)?.ground;
+  rows.push(scoreRow({ fixture: F, measure: 'light drift of world 4 (L change)', tool: SEE, truth: drift.driftL, measured: d?.lightDrift == null ? null : Math.abs(d.lightDrift), tolerance: tol.driftL }));
+  const still = [0, 1, 2].map((i) => shot(t.truth.shots[i].t0)?.ground);
+  rows.push(scoreRow({ fixture: F, measure: 'still worlds report no drift (worlds 1 to 3)', tool: SEE, truth: 0, measured: still.every(Boolean) ? Math.max(...still.map((g) => Math.abs(g.lightDrift ?? 0))) : null, tolerance: tol.driftL }));
+  return rows;
+}
+
+export function typeSeeRows(t, { a }) {
+  const F = 'type', tol = t.tolerance;
+  const rows = [];
+  const words = a?.type.words ?? null;
+  const find = (text) => words?.find((w) => String(w.text).toUpperCase().replace(/[^A-Z]/g, '') === text);
+  rows.push(scoreRow({ fixture: F, measure: 'word count', tool: SEE, truth: t.truth.words.length, measured: words?.length, tolerance: tol.wordCount }));
+  for (const w of t.truth.words) {
+    const m = find(w.text);
+    rows.push(scoreRow({ fixture: F, measure: `${w.text} in second`, tool: SEE, truth: w.in, measured: m?.in, tolerance: tol.wordSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${w.text} out second`, tool: SEE, truth: w.out, measured: m?.out, tolerance: tol.wordSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${w.text} cap height (fraction of frame)`, tool: SEE, truth: t.truth.capHeightFraction, measured: m ? m.capHeightPct / 100 : null, tolerance: tol.capHeightFraction }));
+  }
+  return rows;
+}
+
+export function soundSeeRows(t, { a, p }) {
+  const F = 'sound', tol = t.tolerance;
+  const rows = [];
+  t.truth.cues.forEach((c, i) => {
+    const hit = a?.sound.hits.reduce((best, h) => (!best || Math.abs(h.onset - c.at) < Math.abs(best.onset - c.at) ? h : best), null);
+    const cue = p?.sound.page?.cues[i];
+    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: `${SEE} (mp4 onset)`, truth: c.at, measured: hit?.onset, tolerance: tol.cueSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: `${SEE} (page)`, truth: c.at, measured: cue?.voice === c.voice ? cue.at : null, tolerance: tol.cueSeconds }));
+  });
+  rows.push(scoreRow({ fixture: F, measure: 'integrated loudness (LUFS)', tool: `${SEE} (page mix)`, truth: t.truth.lufs, measured: p?.sound.page?.mix?.lufs, tolerance: tol.lufs }));
+  return rows;
+}
+
+export function lookSeeRows(t, { a }) {
+  const F = 'look', tol = t.tolerance, v = t.truth;
+  const f = a?.look.film;
+  return [
+    scoreRow({ fixture: F, measure: 'bloom radius (css px, gaussian sigma)', tool: SEE, truth: v.bloomSigmaPx, measured: f?.bloom?.sigma, tolerance: tol.bloomPx }),
+    scoreRow({ fixture: F, measure: 'red vs blue channel offset (css px)', tool: SEE, truth: v.channelOffsetPx, measured: f?.chroma ? Math.hypot(f.chroma.dx, f.chroma.dy) : null, tolerance: tol.channelOffsetPx }),
+    scoreRow({ fixture: F, measure: 'RGB stripe period (css px)', tool: SEE, truth: v.stripePeriodPx, measured: f?.texture?.striped ? f.texture.period : null, tolerance: tol.stripePeriodPx }),
   ];
 }
 
@@ -327,31 +463,38 @@ function specOf(name, mp4, ocr) {
 
 const timelineOf = (name) => { const res = vawe('timeline', pageOf(name), '--json'); try { return JSON.parse(res.text.slice(0, res.text.lastIndexOf('}') + 1)); } catch { return null; } };
 
-const verbs = () => new Set([...fs.readFileSync(path.join(ROOT, 'harness/cli/verbs.mjs'), 'utf8').matchAll(/name:\s*'([a-z-]+)'/g)].map((m) => m[1]));
+/** The see.json of `vawe see` on the mp4 (or, with `page`, on the page read with that mp4 as its draft); null when it failed. */
+function seeOf(name, mp4, { page = false, ocr = false } = {}) {
+  if (!mp4) return null;
+  const out = path.join('out/see-truth', `${name}-see${page ? '-page' : ''}`);
+  const res = sh('node', ['harness/media/see/one.mjs', page ? pageOf(name) : mp4, '--out', out, ...(page ? ['--draft', mp4] : []), ...(ocr ? [] : ['--no-ocr'])]);
+  if (!res.ok) console.error(`vawe see on ${name}${page ? ' (page)' : ''} failed:\n${res.text.split('\n').slice(-8).join('\n')}`);
+  return readJson(path.join(ROOT, out, 'see.json'))?.a ?? null;
+}
 
 const FIXTURE_RUN = {
-  cuts: (t, o) => { const mp4 = render('cuts', o); return cutsRows(t, { spec: specOf('cuts', mp4), timeline: timelineOf('cuts') }); },
-  flash: (t, o) => { const mp4 = render('flash', o); return flashRows(t, { spec: specOf('flash', mp4) }); },
+  cuts: (t, o) => { const mp4 = render('cuts', o); return [...cutsRows(t, { spec: specOf('cuts', mp4), timeline: timelineOf('cuts') }), ...cutsSeeRows(t, { a: seeOf('cuts', mp4), p: seeOf('cuts', mp4, { page: true }) })]; },
+  flash: (t, o) => { const mp4 = render('flash', o); return [...flashRows(t, { spec: specOf('flash', mp4) }), ...flashSeeRows(t, { a: seeOf('flash', mp4) })]; },
   motion: (t, o) => {
     const mp4 = render('motion', o);
     const { a, b } = t.truth;
     const vel = vawe('velocity', pageOf('motion'), '--at', '1.5', '--span', '3', '--out', 'out/see-truth/velocity');
     const strip = (s) => (mp4 ? parseStrip(vawe('strip', mp4, '--at', String(s.at), '--span', String(s.span), '--out', 'out/see-truth/strip').text) : null);
-    return motionRows(t, { velocity: parseVelocity(vel.text), spec: specOf('motion', mp4), stripA: strip(a.strip), stripB: strip(b.strip) });
+    return [...motionRows(t, { velocity: parseVelocity(vel.text), spec: specOf('motion', mp4), stripA: strip(a.strip), stripB: strip(b.strip) }), ...motionSeeRows(t, { a: seeOf('motion', mp4) })];
   },
-  eye: (t, o) => { const mp4 = render('eye', o); return eyeRows(t, { spec: specOf('eye', mp4) }); },
-  ground: (t, o) => { const mp4 = render('ground', o); return groundRows(t, { spec: specOf('ground', mp4) }); },
-  type: (t, o) => { const mp4 = render('type', o); return typeRows(t, { spec: specOf('type', mp4, true) }); },
+  eye: (t, o) => { const mp4 = render('eye', o); return [...eyeRows(t, { spec: specOf('eye', mp4) }), ...eyeSeeRows(t, { a: seeOf('eye', mp4) })]; },
+  ground: (t, o) => { const mp4 = render('ground', o); return [...groundRows(t, { spec: specOf('ground', mp4) }), ...groundSeeRows(t, { a: seeOf('ground', mp4) })]; },
+  type: (t, o) => { const mp4 = render('type', o); return [...typeRows(t, { spec: specOf('type', mp4, true) }), ...typeSeeRows(t, { a: seeOf('type', mp4, { ocr: true }) })]; },
   sound: (t, o) => {
     const mp4 = render('sound', { ...o, audio: true });
     const probes = t.truth.cues.map((c) => r(c.at + PROBE_OFFSET, 3)).join(',');
     const at = vawe('audio', pageOf('sound'), '--at', probes);
     const wave = vawe('audio', pageOf('sound'), '--waveform', '--out', 'out/see-truth/sound-wave.png');
-    return soundRows(t, { audioAt: parseAudioAt(at.text), lufs: parseLufs(wave.text), timeline: timelineOf('sound'), spec: specOf('sound', mp4) });
+    return [...soundRows(t, { audioAt: parseAudioAt(at.text), lufs: parseLufs(wave.text), timeline: timelineOf('sound'), spec: specOf('sound', mp4) }), ...soundSeeRows(t, { a: seeOf('sound', mp4), p: seeOf('sound', mp4, { page: true }) })];
   },
-  look: (t) => {
-    const names = verbs();
-    return lookRows(t, { available: names.has('look') || names.has('zoom') });
+  look: (t, o) => {
+    const mp4 = render('look', { ...o, final: true });
+    return [...lookRows(t, { look: mp4 ? parseLook(vawe('look', mp4).text) : null }), ...lookSeeRows(t, { a: seeOf('look', mp4) })];
   },
 };
 
@@ -366,8 +509,10 @@ export async function main(argv) {
     console.error(`see-truth: ${name}`);
     rows.push(...FIXTURE_RUN[name](loadTruth(name), opts));
   }
-  if (argv.includes('--json')) console.log(JSON.stringify(rows, null, 1));
-  else console.log(`${formatTable(rows)}\n\n${formatSummary(rows)}\nrun time: ${Math.round((Date.now() - started) / 1000)} s`);
+  const tool = argv.includes('--tool') ? argv[argv.indexOf('--tool') + 1] : 'all';
+  const shown = rows.filter((x) => tool === 'all' || (tool === 'see' ? x.tool.startsWith('vawe see') : !x.tool.startsWith('vawe see')));
+  if (argv.includes('--json')) console.log(JSON.stringify(shown, null, 1));
+  else console.log(`${formatTable(shown)}\n\n${formatSummary(shown)}\nrun time: ${Math.round((Date.now() - started) / 1000)} s`);
   return 0;
 }
 

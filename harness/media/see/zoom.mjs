@@ -15,7 +15,8 @@ async function film(input, label) {
   return { ...found, label, dur: probeVideo(found.video).dur };
 }
 
-function cell(clip, at, box, scale, file) {
+/** Writes the box of `clip` at second `at`, enlarged `scale` times with nearest-neighbour, to `file`; the clip is { video, dur, label, name }. */
+export function zoomCell(clip, at, box, scale, file) {
   const t = Math.max(0, Math.min(at, clip.dur - 0.03));
   const label = drawtext(`${clip.label} ${clip.name} ${at.toFixed(2)}s x${scale}`, 60);
   ffmpegOrDie(['-v', 'error', '-y', '-ss', t.toFixed(3), '-i', clip.video, '-frames:v', '1', '-vf',
@@ -38,10 +39,10 @@ export async function runZoom(input, opts) {
   const stem = `zoom-${at.toFixed(2)}-${box.x}_${box.y}_${box.w}x${box.h}x${opts.scale}${b ? `-vs-${b.name}` : ''}`.replace(/[^\w.+-]/g, '_');
   const out = path.join(outDir, `${stem}.png`);
   const fileA = path.join(outDir, `.${stem}-a.png`);
-  cell(a, at, box, opts.scale, fileA);
+  zoomCell(a, at, box, opts.scale, fileA);
   if (b) {
     const fileB = path.join(outDir, `.${stem}-b.png`);
-    cell(b, atB, box, opts.scale, fileB);
+    zoomCell(b, atB, box, opts.scale, fileB);
     stackImages([fileA, fileB], out, 'h', box.w * opts.scale * 2, box.h * opts.scale);
     fs.rmSync(fileB, { force: true });
   } else {
