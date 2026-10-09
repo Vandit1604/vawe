@@ -166,6 +166,7 @@ const [r, g, b] = kf(f, TINT);
 - `swapAlpha(t, tIn, tOut)`: text in a morphing box enters after the morph starts, leaves before the next.
 - `curveToLinear(fn)` turns any curve into an exact CSS `linear()` easing; `CURVES` holds `expoOut`, `spring`, `overshoot`.
   It returns a string for `easing:`, so calling it in `vawe.onFrame` throws; there call `easeFn('land')(p)`, the same `EASE` name as a function.
+- `exposure.js`: `flashAt(t, cuts)` gives the white overlay, the brightness and the shot index of an exposure flash; `flashCuts` keeps at most 3 flashes a second. See [exposure-flash](../../prompts/moves/exposure-flash.md).
 - `rng(seed)` mulberry32; `noise1(x, seed)` smooth noise in [-1, 1] for drift; `loopT(t, dur)` wraps t.
 
 ## The starter's motion
