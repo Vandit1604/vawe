@@ -5,6 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { verbRanSince } from '../lib/verb-log.mjs';
 import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf } from '../lib/board.mjs';
 
 export { boardFilled };
@@ -71,6 +72,18 @@ export const SAY = {
   ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`,
 };
 
+/** The records of out/<name>.runs.jsonl under `root`, oldest first; [] when the log is missing. */
+function runsOf(root, name) {
+  return read(path.join(root, 'out', `${name}.runs.jsonl`)).split('\n').filter(Boolean)
+    .map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+}
+
+/** True when `out/strip/<name>` or `out/strip/<name>-*` changed after `sinceMs`: an agent's own --out folders count. */
+function stripsSince(root, name, sinceMs) {
+  const dir = path.join(root, 'out', 'strip');
+  try { return fs.readdirSync(dir).some((f) => (f === name || f.startsWith(`${name}-`)) && mtime(path.join(dir, f)) > sinceMs); } catch { return false; }
+}
+
 export function nextStep(page, root = process.cwd()) {
   const name = path.basename(path.dirname(page));
   const rel = path.relative(root, page);
@@ -79,44 +92,47 @@ export function nextStep(page, root = process.cwd()) {
   const draft = mtime(path.join(root, 'out', `${name}-draft.mp4`));
   const final = mtime(path.join(root, 'out', `${name}.mp4`));
   const framed = mtime(path.join(root, 'out', `${name}-frames.png`)) > t;
-  const stripped = mtime(path.join(root, 'out', 'strip', name)) > draft;
+  const stripped = stripsSince(root, name, draft);
   const brief = read(path.join(dir, 'brief.md'));
   const design = path.join(dir, 'DESIGN.md');
   const taken = takenFromCount(brief);
   const moves = movesTakenCount(brief);
   const early = !draft && !final && !framed;
   if (early && !brief) {
-    return { name, next: `create films/${name}/brief.md: the ask, the message, the spectacle second, "Taken from", "Board" (bin/vawe new <other-name> writes the template to copy)`, why: `films/${name} has no brief.md` };
+    return { name, stage: 'brief', next: `create films/${name}/brief.md: the ask, the message, the spectacle second, "Taken from", "Board" (bin/vawe new <other-name> writes the template to copy)`, why: `films/${name} has no brief.md` };
   }
   if (early && taken !== null && taken < TAKEN_FROM_MIN) {
-    return { name, next: SAY.study(name), why: `Taken from not filled (${taken} named frames); it comes before the design files` };
+    return { name, stage: 'study', next: SAY.study(name), why: `Taken from not filled (${taken} named frames); it comes before the design files` };
   }
   if (early && moves !== null && moves < MOVES_MIN) {
-    return { name, next: SAY.moves(), why: `${moves} moves named; motion is studied before the board` };
+    return { name, stage: 'moves', next: SAY.moves(), why: `${moves} moves named; motion is studied before the board` };
   }
   if (early && taken !== null && !mtime(design)) {
-    return { name, next: SAY.design(name), why: 'the design system and the asset kit come before the states' };
+    return { name, stage: 'design', next: SAY.design(name), why: 'the design system and the asset kit come before the states' };
   }
   const rungs = early && taken !== null ? missingRungs(read(design)) : [];
   if (rungs.length) {
-    return { name, next: SAY.skills(name, rungs), why: `DESIGN.md has no Skill line for ${rungs.join(', ')}; one skill per rung is applied before the states (advice: a rung you skip needs a "Skipped <rung>: <reason>" line)` };
+    return { name, stage: 'skills', next: SAY.skills(name, rungs), why: `DESIGN.md has no Skill line for ${rungs.join(', ')}; one skill per rung is applied before the states (advice: a rung you skip needs a "Skipped <rung>: <reason>" line that cites a reference frame path or a SPEC.md line)` };
   }
   if (early && taken !== null && t <= mtime(design)) {
-    return { name, next: SAY.states(name, rel), why: 'DESIGN.md is newer than the page; the states come before the frames and the motion' };
+    return { name, stage: 'states', next: SAY.states(name, rel), why: 'DESIGN.md is newer than the page; the states come before the frames and the motion' };
   }
-  if (early && hasWorlds(page)) return { name, next: SAY.frames(name, rel), why: 'the frames come before the motion' };
+  if (early && hasWorlds(page)) return { name, stage: 'states', next: SAY.frames(name, rel), why: 'the frames come before the motion' };
   if (!draft && !final && boardFilled(brief) === false) {
-    return { name, next: SAY.board(name), why: 'the board is a plan for time and comes after the states, before the motion' };
+    return { name, stage: 'board', next: SAY.board(name), why: 'the board is a plan for time and comes after the states, before the motion' };
   }
   const boardAdvice = !draft && !final && boardFilled(brief) ? boardChecks(brief, spectacleOf(read(page))) : [];
   if (boardAdvice.length) {
-    return { name, next: `check "Board" in films/${name}/brief.md (advice; a plan you keep on purpose needs no change), then ${SAY.dev(name, rel)}`, why: boardAdvice.map((l) => l.replace(/^board: /, '')).join('; ') };
+    return { name, stage: 'board', next: `check "Board" in films/${name}/brief.md (advice; a plan you keep on purpose needs no change), then ${SAY.dev(name, rel)}`, why: boardAdvice.map((l) => l.replace(/^board: /, '')).join('; ') };
   }
-  if (draft < t && final < t) return { name, next: SAY.dev(name, rel), why: 'the page changed after its last draft' };
-  if (final < t && !stripped) return { name, next: SAY.motion(name, rel), why: 'a draft exists; the motion pass comes before the critique (dev: overshoot-share, live-hold and seam-variety clean or waived with a reason)' };
-  if (final < t && motionFilled(brief) === false) return { name, next: SAY.motionRows(name), why: 'the cuts are stripped; the Motion pass section is empty' };
-  if (final < t) return { name, next: SAY.critique(name, rel), why: 'the motion pass is done; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship' };
-  return { name, next: SAY.critique(name, rel), why: 'the final is rendered; a fresh session judges it' };
+  if (draft < t && final < t) return { name, stage: 'draft', next: SAY.dev(name, rel), why: 'the page changed after its last draft' };
+  if (final < t && !stripped) return { name, stage: 'motion', next: SAY.motion(name, rel), why: 'a draft exists; the motion pass comes before the critique (dev: overshoot-share, live-hold and seam-variety clean or waived with a reason)' };
+  if (final < t && motionFilled(brief) === false) return { name, stage: 'motion', next: SAY.motionRows(name), why: 'the cuts are stripped; the Motion pass section is empty' };
+  if (final < t && !verbRanSince(runsOf(root, name), 'critique', draft)) {
+    return { name, stage: 'critique', next: SAY.critique(name, rel), why: 'the motion pass is done; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship' };
+  }
+  if (final < t) return { name, stage: 'ship', next: SAY.ship(name, rel), why: 'the critique ran on this draft; fix the seconds it named, then render the final' };
+  return { name, stage: 'judge', next: SAY.critique(name, rel), why: 'the final is rendered; a fresh session judges it' };
 }
 
 function main() {

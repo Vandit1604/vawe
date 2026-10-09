@@ -127,6 +127,7 @@ const routeRequest = (request, length) => { const r = pickTemplate({ request, le
 function referencesFor(briefFile, dur) {
   const found = chooseRefs({ dir: refsDir(), briefText: briefFile ? fs.readFileSync(briefFile, 'utf8') : null, seconds: dur, routeRequest });
   if (found.skipped) console.error(`judge: side-by-side comparison skipped: ${found.skipped}`);
+  if (found.named) console.error(`judge: side-by-side includes ${found.named}, the reference the brief names`);
   return found.refs;
 }
 

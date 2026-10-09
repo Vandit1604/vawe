@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ytDlpArgs, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
+import { ytDlpArgs, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, briefRefIds, namedRef, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
 
 test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
   const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
@@ -110,4 +110,38 @@ test('the yt-dlp argv ends with the url, for a YouTube and an X url', () => {
     assert.equal(args.filter((a) => a === url).length, 1);
     assert.equal(args[args.indexOf('-o') + 1], '/r/%(id)s.%(ext)s');
   }
+});
+
+const NAMING_BRIEF = `- Reference: private style reference \`mnowak\` (\`~/.vawe/refs/mnowak.mp4\`)
+
+## Taken from
+
+| frame | take |
+|---|---|
+| /h/.vawe/refs/frames/mnowak/key-1.png | glow |
+| /h/.vawe/refs/frames/other/key-2.png | grid |
+
+| move taken | ref id | cut s |
+|---|---|---|
+| flash-cut | mnowak | 0.17 |
+| [move name] | [ref id] | [s] |
+`;
+
+test('briefRefIds ranks the ids a brief names: frame paths, the move table, the Reference line, --ref', () => {
+  assert.deepEqual(briefRefIds(NAMING_BRIEF), ['mnowak', 'other']);
+  assert.deepEqual(briefRefIds('run bin/vawe compare --ref abc123 --at 2'), ['abc123']);
+  assert.deepEqual(briefRefIds('--ref refs/x.mp4 and Reference: quality/refs/<ref>/source.mp4'), []);
+  assert.deepEqual(briefRefIds(''), []);
+});
+
+test('namedRef finds the first named id that has a video; chooseRefs puts it first and needs no film type', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'refs-named-'));
+  fs.writeFileSync(path.join(dir, 'mnowak.mp4'), '');
+  assert.deepEqual(namedRef({ dir, briefText: NAMING_BRIEF }), { id: 'mnowak', file: path.join(dir, 'mnowak.mp4') });
+  assert.equal(namedRef({ dir, briefText: 'nothing' }), null);
+  writeRegistry(dir, [...registry, { id: 'mnowak', title: 'M', studio: null, type: 'brand', seconds: 5, inScope: true, why: null, sheet: 's/mnowak.png' }]);
+  const got = chooseRefs({ dir, briefText: NAMING_BRIEF, seconds: 5 });
+  assert.equal(got.skipped, null);
+  assert.equal(got.named, 'mnowak');
+  assert.deepEqual(got.refs.map((r) => r.id), ['mnowak']);
 });
