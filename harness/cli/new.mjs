@@ -284,7 +284,7 @@ Then study how the references MOVE, since stills do not show it: run \`bin/vawe 
 const systemText = (name) => `## Design system and kit
 
 Phase 3. Write films/${name}/DESIGN.md: the palette as roles, the type, the ground and light devices, the text treatment. Write films/${name}/kit/: the ground layers, and every moving part as its own element (words, marks, bars, cards, icons, the wordmark).
-Skill ladder: apply one skill per rung, in this order, fetched with \`command npx -y ui-skills get <slug>\`. DESIGN.md records each rung as \`Skill <rung>: <slug>: what it decided\`, or \`Skipped <rung>: <reason>\`; \`bin/vawe\` advises on a missing rung.
+Start from a PROVEN combo in prompts/skill-combos.md and record \`Combo: <name>\` in DESIGN.md. Skill ladder: apply one skill per rung, in this order, fetched with \`command npx -y ui-skills get <slug>\`. DESIGN.md records each rung as \`Skill <rung>: <slug>: what it decided\`, or \`Skipped <rung>: <reason>\`; \`bin/vawe\` advises on a missing rung.
 1. builder: build the product UI and the kit parts as a real, beautiful interface (leonxlnx/soft-skill or emilkowalski/emil-design-eng). Real-looking data; never placeholder bars.
 2. type: scale, weight, tracking (jakubkrehel/better-typography or pbakaus/typeset).
 3. colour: roles and one accent (pbakaus/colorize or jakubkrehel/better-colors).

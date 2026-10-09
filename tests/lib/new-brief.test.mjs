@@ -211,6 +211,8 @@ test('the brief carries a Taken from table, the design system step and the state
   assert.match(text, /about 1 line and 2 or 3 things/);
   assert.match(text, /soft-skill[\s\S]*better-typography[\s\S]*colorize[\s\S]*beautiful-shadows[\s\S]*5\. frame/);
   assert.match(text, /Skill <rung>: <slug>: what it decided/);
+  assert.match(text, /prompts\/skill-combos\.md/);
+  assert.match(text, /Combo: <name>/);
   assert.match(text, /rung 1 still builds the UI parts/);
   assert.ok(!/^- (url|promise):/im.test(text) && !/never a placeholder/.test(text));
 });
