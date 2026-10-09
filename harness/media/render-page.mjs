@@ -101,6 +101,9 @@ export function defaultWorkers(env = process.env, busy = () => slotsInUse().leng
 // page every 300 subframes keeps it fast, and a seek is a pure function of time so the pixels do not change.
 const RECYCLE_SUBFRAMES = 300;
 
+const LARGE_FINAL_SUBFRAMES = 8000;
+const SUBFRAMES_PER_MINUTE = 1000;
+
 // A page keeps raster state between seeks: the first frame on a fresh page differs from the same frame
 // reached by seeking on (a sparse SSIM 0.99997 drift on gradient text). So the slice boundaries are fixed
 // by this constant, never by the worker count, and each slice starts on its own fresh page: the pixels
@@ -720,6 +723,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     subframeStart[0] = 0;
     for (let i = 0; i < frames; i++) subframeStart[i + 1] = subframeStart[i] + kArr[i];
     const totalSub = subframeStart[frames];
+    if (final && totalSub > LARGE_FINAL_SUBFRAMES) console.error(adviceBlock([`${totalSub} subframes to capture: about ${Math.round(totalSub / SUBFRAMES_PER_MINUTE)} min (measured: 19200 took 15 to 23 min). Lower --blur, the most subframes blended per frame (now ${blur}), or shorten the fast moves`]).join('\n'));
 
     const t0 = Date.now();
     const prepassMs = t0 - tPre;
