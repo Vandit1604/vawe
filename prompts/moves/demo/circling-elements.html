@@ -1,0 +1,46 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="5">
+<title>move: circling elements</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Fraunces'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Fraunces.woff2') format('woff2'); }
+  html, body { background: #efefef; }
+  body { display: block; position: relative; --p: calc(var(--vh) / 532); }
+  #ring { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+  .cell { position: absolute; width: calc(var(--p) * 112); height: calc(var(--p) * 112); translate: -50% -50%;
+          display: grid; place-items: center; font: 600 calc(var(--p) * 64) / 1 'Fraunces', serif; transform-style: flat; }
+</style>
+</head>
+<body>
+<div id="ring"></div>
+<script type="module">
+const RADIUS = 120;     // px of the demo's 532 px tall box
+const DURATION = 10;    // seconds for one turn
+const DIRECTION = 1;    // -1 turns the other way
+const ease = (p) => p; // "linear", the default; any easing runs per turn
+
+const CARDS = [['#e0431b', '#fff3e6', 'a'], ['#7fd3e6', '#0b4a63', '~'], ['#1f4fd8', '#cfe0ff', 'o'], ['#d9a28a', '#5a2a1a', 'e'],
+  ['#b9b9b4', '#161616', '/'], ['#6f9a52', '#e8f3d6', '*'], ['#9b9a90', '#26261f', 'i'], ['#e8789a', '#fff0f4', 'u']];
+
+const ring = document.getElementById('ring');
+const P = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) / 532;
+const cards = CARDS.map(([bg, fg, ch]) => {
+  const d = document.createElement('div');
+  d.className = 'cell'; d.textContent = ch; d.style.background = bg; d.style.color = fg;
+  ring.append(d);
+  return d;
+});
+
+window.seek = (t) => cards.forEach((el, i) => {
+  const offset = (i * 360) / cards.length;
+  const turn = ease(((t / DURATION) % 1 + 1) % 1);
+  const a = DIRECTION * (offset + 360 * turn);
+  el.style.transform = `rotate(${a}deg) translate(${RADIUS * P}px, 0) rotate(${-a}deg)`;
+});
+window.seek(0);
+</script>
+</body>
+</html>

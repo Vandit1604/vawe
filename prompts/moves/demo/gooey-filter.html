@@ -1,0 +1,98 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<meta name="blank" content="0-0.1">
+<title>move: gooey filter</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Fraunces'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Fraunces.woff2') format('woff2'); }
+  html, body { background: #000; }
+  body { display: block; position: relative; font-family: 'Fraunces', serif; font-weight: 380; font-variant-numeric: normal; }
+  /* 1 original px of the fancy demo (a 532 px tall box) in this frame */
+  .stage { --s: calc(var(--vh) / 532); font-size: calc(var(--s) * 16); line-height: 1.5; position: absolute; inset: 0; }
+  .block { position: absolute; left: 50%; top: 8em; width: 27.9em; translate: -50% 0; }
+  .filtered { position: absolute; inset: 0; }
+  .tabs, .labels { display: flex; width: 100%; }
+  .tabs > div, .labels > div { flex: 1; height: 3em; }
+  .tabs > div { position: relative; }
+  .labels { position: relative; }
+  .labels > div { display: flex; align-items: center; justify-content: center; color: #a1a1aa; }
+  .labels > div.on { color: #000; }
+  #ind { position: absolute; top: 0; left: 0; width: 25%; height: 100%; background: #efefef; }
+  .panel { position: relative; width: 100%; height: 18.75em; background: #efefef; overflow: hidden; }
+  .page { position: absolute; left: 0; top: 0; width: 100%; padding: 3em; }
+  .page ul { list-style: none; margin: 2em 0 0; padding: 0; }
+  .page li { color: #000; padding: 0.5em 0 0.25em; border-bottom: calc(var(--s) * 1) solid rgba(161, 161, 170, 0.5); }
+</style>
+</head>
+<body>
+<svg style="position:absolute;width:0;height:0"><defs>
+  <filter id="gooey-filter">
+    <feGaussianBlur id="gblur" in="SourceGraphic" stdDeviation="15" result="blur-sm"/>
+    <feColorMatrix in="blur-sm" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
+    <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+  </filter>
+</defs></svg>
+<div class="stage" id="stage">
+  <div class="block">
+    <div class="filtered" id="filtered" style="filter:url(#gooey-filter)">
+      <div class="tabs"><div></div><div></div><div></div><div></div></div>
+      <div class="panel" id="panel"></div>
+    </div>
+    <div class="labels" id="labels"></div>
+  </div>
+</div>
+<script type="module">
+import { spring } from '/core/motion/springs.js';
+import { cubicBezier } from '/core/motion/curves.js';
+
+const TABS = [
+  ['2024', ['learning-to-meditate.md', 'spring-garden-plans.md', 'travel-wishlist.md', 'new-coding-projects.md']],
+  ['2023', ['year-in-review.md', 'marathon-training-log.md', 'recipe-collection.md', 'book-reflections.md']],
+  ['2022', ['moving-to-a-new-city.md', 'starting-a-blog.md', 'photography-basics.md', 'first-coding-project.md']],
+  ['2021', ['goals-and-aspirations.md', 'daily-gratitude.md', 'learning-to-cook.md', 'remote-work-journal.md']],
+];
+const STRENGTH = 15;                       // the demo's desktop value; its phone value is 8
+const CLICKS = [[0, 0], [0.5, 2], [1.7, 1], [2.6, 3]];   // [second, tab index]; the first is the mount
+const SPRING = { k: 171.4, d: 26.2 };      // motion spring { duration: 0.4, bounce: 0 }: critically damped, w = 2 pi / (0.4 * 1.2)
+const easeOut = cubicBezier(0, 0, 0.58, 1);  // motion's "easeOut", the 0.2 s page swap
+
+const S = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) / 532;
+document.getElementById('gblur').setAttribute('stdDeviation', String(STRENGTH * S));
+const labels = document.getElementById('labels');
+TABS.forEach(([title]) => { const d = document.createElement('div'); d.textContent = title; labels.append(d); });
+const ind = document.createElement('div'); ind.id = 'ind';
+document.querySelector('.tabs').append(ind);
+const panel = document.getElementById('panel');
+const pages = CLICKS.map(([, tab]) => {
+  const p = document.createElement('div'); p.className = 'page';
+  p.innerHTML = `<ul>${TABS[tab][1].map((f) => `<li>${f}</li>`).join('')}</ul>`;
+  panel.append(p);
+  return p;
+});
+
+window.seek = (t) => {
+  let k = 0;
+  CLICKS.forEach(([at], i) => { if (t >= at) k = i; });
+  const from = CLICKS[Math.max(0, k - 1)][1], to = CLICKS[k][1];
+  const p = k === 0 ? 1 : spring(t - CLICKS[k][0], SPRING.k, SPRING.d);
+  ind.style.translate = `${(from + (to - from) * p) * 100}% 0`;
+  [...labels.children].forEach((el, i) => el.classList.toggle('on', i === to));
+  pages.forEach((page, i) => {
+    const u = easeOut(Math.min(1, Math.max(0, (t - CLICKS[i][0]) / 0.2)));          // this page entering
+    const v = i + 1 < CLICKS.length ? easeOut(Math.min(1, Math.max(0, (t - CLICKS[i + 1][0]) / 0.2))) : 0;  // and leaving
+    const enter = t < CLICKS[i][0] ? 0 : u, leave = v;
+    const visible = t >= CLICKS[i][0] && !(leave >= 1);
+    page.style.display = visible ? 'block' : 'none';
+    const a = enter * (1 - leave), y = leave > 0 ? -50 * leave : 50 * (1 - enter), blur = leave > 0 ? 10 * leave : 10 * (1 - enter);
+    page.style.opacity = a;
+    page.style.transform = `translateY(${y * S}px)`;
+    page.style.filter = blur > 0.01 ? `blur(${blur * S}px)` : 'none';
+  });
+};
+window.seek(0);
+</script>
+</body>
+</html>

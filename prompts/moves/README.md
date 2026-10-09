@@ -77,6 +77,9 @@ One row per job, best move first. Every built move is in this table.
 | say it works for everyone while the brand stays still | [anchor-cycle](anchor-cycle.md) |
 | name the person on screen | [lower-third](lower-third.md) |
 | carry a line along a curve | [text-on-path](text-on-path.md) |
+| melt a tab or panel into the next | [gooey-filter](gooey-filter.md) |
+| ride tiles along a curve, or slide rows of them | [marquee-along-path](marquee-along-path.md), [simple-marquee](simple-marquee.md) |
+| orbit tiles around one point | [circling-elements](circling-elements.md) |
 | run a spoken line as captions | [caption-karaoke](caption-karaoke.md), [caption-editorial](caption-editorial.md) |
 
 ## Groups

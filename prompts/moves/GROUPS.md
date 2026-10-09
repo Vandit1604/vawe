@@ -130,6 +130,7 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | integration hub | the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub | [integration-hub.md](integration-hub.md) | [integration-hub.mp4](integration-hub.mp4) |
 | device tilt stage | the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle | [device-tilt-stage.md](device-tilt-stage.md) | [device-tilt-stage.mp4](device-tilt-stage.mp4) |
 | command palette summon | the keyboard-first beat: the app dims, a Cmd+K palette drops in on a spring, a query types, non-matching rows collapse to zero height, Enter presses the chosen row and the palette leaves fast | [command-palette-summon.md](command-palette-summon.md) | [command-palette-summon.mp4](command-palette-summon.mp4) |
+| gooey filter | a tab, pill or panel must melt into the next: shapes that touch merge into one soft outline through the SVG gooey filter (blur 15, alpha matrix 19 and -9), the active tab box slides on a critically damped spring and the page swaps in 0.2 s | [gooey-filter.md](gooey-filter.md) | [gooey-filter.mp4](gooey-filter.mp4) |
 | agent progress | an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list | [agent-progress.md](agent-progress.md) | [agent-progress.mp4](agent-progress.mp4) |
 | panel live sync | an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames | [panel-live-sync.md](panel-live-sync.md) | [panel-live-sync.mp4](panel-live-sync.mp4) |
 
@@ -154,6 +155,9 @@ The job: give a held frame a living ground that never steals the eye. Each groun
 | ink warp | a rich liquid ground for short large copy: marbled ink flows by domain warp in one shader, thinner behind the type | [ink-warp.md](ink-warp.md) | [ink-warp.mp4](ink-warp.mp4) |
 | dot grid wave | a clean product or data frame gets a plain SVG dot grid with one travelling wave of scale and brightness, weaker behind the copy | [dot-grid-wave.md](dot-grid-wave.md) | [dot-grid-wave.mp4](dot-grid-wave.mp4) |
 | light pool | a matte held frame gets one soft pool of light that wanders on a seeded path, plain CSS with no shader; the stillest ground of the group | [light-pool.md](light-pool.md) | [light-pool.mp4](light-pool.mp4) |
+| marquee along path | tiles ride one SVG path forever at an even gap, turned with the curve, rolling z-index, 8 percent of the path per second; one element along the path is an option | [marquee-along-path.md](marquee-along-path.md) | [marquee-along-path.mp4](marquee-along-path.mp4) |
+| simple marquee | three rows of tiles slide for a whole beat, left, right, left, each row four copies that wrap by one set width at 8 percent per second | [simple-marquee.md](simple-marquee.md) | [simple-marquee.mp4](simple-marquee.mp4) |
+| circling elements | eight upright tiles orbit one point on a 120 px radius, one linear turn in 10 s | [circling-elements.md](circling-elements.md) | [circling-elements.mp4](circling-elements.mp4) |
 
 ## Looks
 
