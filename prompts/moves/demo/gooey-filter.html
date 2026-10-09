@@ -13,7 +13,7 @@
   /* 1 original px of the fancy demo (a 532 px tall box) in this frame */
   .stage { --s: calc(var(--vh) / 532); font-size: calc(var(--s) * 16); line-height: 1.5; position: absolute; inset: 0; }
   .block { position: absolute; left: 50%; top: 8em; width: 27.9em; translate: -50% 0; }
-  .filtered { position: absolute; inset: 0; }
+  .filtered { position: absolute; inset: 0; will-change: transform; }
   .tabs, .labels { display: flex; width: 100%; }
   .tabs > div, .labels > div { flex: 1; height: 3em; }
   .tabs > div { position: relative; }
@@ -29,7 +29,7 @@
 </head>
 <body>
 <svg style="position:absolute;width:0;height:0"><defs>
-  <filter id="gooey-filter">
+  <filter id="gooey-filter" x="-30%" y="-30%" width="160%" height="160%">
     <feGaussianBlur id="gblur" in="SourceGraphic" stdDeviation="15" result="blur-sm"/>
     <feColorMatrix in="blur-sm" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
     <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
