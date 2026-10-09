@@ -436,7 +436,7 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
     done: (slice) => { const found = fs.existsSync(marker(slice)); if (found) onResumed(slice); return found; },
     finish: (slice) => fs.writeFileSync(marker(slice), ''),
   };
-  return runShards(pagePath, frame, frames, workers, async (page, i, local, mark, exclusive) => {
+  return runShards(pagePath, { ...frame, scale: 1 }, frames, workers, async (page, i, local, mark, exclusive) => {
     const baseMs = from * 1000 + (i / fps) * 1000;
     const k = kArr[i];
     for (let j = 0; j < k; j++) {
@@ -509,8 +509,7 @@ function blendGraph(kArr, subframeStart, fps) {
   return `${split};${filters.join(';')};${joins}concat=n=${segments.length}:v=1:a=0,setpts=N/${fps}/TB[blend]`;
 }
 
-function blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, codecArgs, out) {
-  const seq = path.join(tmpDir, `f%06d.${frameFormat(final).ext}`);
+function blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, codecArgs, out) {  const seq = path.join(tmpDir, `f%06d.${frameFormat(final).ext}`);
   const args = ['-y', '-v', 'error', ...ONE_FORMAT_IN, '-framerate', String(fps), '-i', seq,
     '-filter_complex', `${blendGraph(kArr, subframeStart, fps)};[blend]${tail}[outv]`,
     '-map', '[outv]', '-fps_mode', 'passthrough', ...codecArgs, out];
@@ -518,8 +517,10 @@ function blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, codecArgs, o
 }
 
 // One ffmpeg pass over the blended frames: the master (x264).
-export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final) {
-  return blendEncode(tmpDir, fps, kArr, subframeStart, final, `null${final ? `,${DITHER}` : ''}`, x264Args(final), tmpOut);
+// `size` is the output [width, height] when the capture is larger: the browser's own downscale gave different pixels run to run.
+export function ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size = null }) {
+  const tail = size ? `scale=${size[0]}:${size[1]}:flags=area` : `null${final ? `,${DITHER}` : ''}`;
+  return blendEncode(tmpDir, fps, kArr, subframeStart, final, tail, x264Args(final), tmpOut);
 }
 
 // The web copy is its own pass, run after the master is delivered.
@@ -765,7 +766,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const webPath = final ? webOut(outPath) : null;
     const tmpWeb = webPath && `${webPath}.tmp-${process.pid}.mp4`;
     const t1 = Date.now();
-    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, final);
+    const res = ffmpegEncode(tmpDir, fps, kArr, subframeStart, tmpOut, { final, size: final ? null : [Math.round(frame.width * frame.scale), Math.round(frame.height * frame.scale)] });
     const encodeMs = Date.now() - t1;
     if (res.status !== 0 || res.error) {
       fs.rmSync(tmpOut, { force: true });

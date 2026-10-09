@@ -19,7 +19,7 @@ test('a sequence that switches between RGB and RGBA frames loses no frames', () 
   const start = [0];
   for (const k of kArr) start.push(start.at(-1) + k);
   const out = path.join(dir, 'out.mp4');
-  const r = ffmpegEncode(dir, 60, kArr, start, out, true);
+  const r = ffmpegEncode(dir, 60, kArr, start, out, { final: true });
   assert.equal(r.status, 0, r.stderr);
   assert.equal(frameCount(out), 45);
   fs.rmSync(dir, { recursive: true, force: true });
