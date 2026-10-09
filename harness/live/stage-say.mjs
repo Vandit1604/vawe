@@ -53,6 +53,8 @@ export function missingRungs(design) {
  * The one owner of the stage order (AGENTS.md, The loop). Each entry is the text of one command line; the verbs in
  * harness/cli/verbs.mjs print these after they run, so a verb and this hook never name different next steps.
  */
+export const WAIT_WORK = "while it renders, fill the brief's Board and Motion pass rows if empty, Read the bin/vawe strip <page> --cuts grids, or prepare the critique notes";
+
 export const SAY = {
   study: (name) => `bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, then fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 frames, exact path and what you take`,
   moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second)`,
@@ -66,7 +68,7 @@ export const SAY = {
   motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: what read flat, what you fixed`,
   critique: (name, rel) => `bin/vawe critique ${rel}`,
   judge: (name, rel, ref) => `VAWE_AGENT=judge-${name} bin/vawe judge ${rel} --struct --runs A,B${ref ? ` --ref ${ref}` : ''} in a fresh session, then fix the named seconds with bin/vawe dev ${rel} --from s --to s`,
-  ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait`,
+  ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait (about 100 s each, repeat); ${WAIT_WORK}`,
 };
 
 export function nextStep(page, root = process.cwd()) {
