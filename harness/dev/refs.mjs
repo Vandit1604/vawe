@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { refCard } from '../lib/ref-card.mjs';
 import { refsDir, ytDlpArgs, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
@@ -14,6 +15,12 @@ const flag = (k) => { const i = process.argv.indexOf(k); return i >= 0 ? process
 const die = (m) => { console.error(`vawe refs: ${m}`); process.exit(1); };
 
 const videoOf = (id) => refVideo(dir, id);
+
+function cardLines(id) {
+  const spec = path.join(dir, 'spec', id, 'spec.json');
+  if (!fs.existsSync(spec)) return [`card ${id}: not measured yet; bin/vawe spec ${path.join(dir, `${id}.mp4`)}`];
+  return refCard(JSON.parse(fs.readFileSync(spec, 'utf8')), id, path.dirname(spec));
+}
 const specOf = (id) => (fs.existsSync(path.join(dir, 'spec', id, 'spec.json')) ? path.join('spec', id, 'spec.json') : null);
 
 function sheetOf(id, video) {
@@ -85,7 +92,7 @@ function frames() {
     const got = keyFrameFiles(video, durationOf(video), out, { shots: refShots(dir, r.id), count: FRAMES_PER_FILM });
     const manifest = frameManifest(r.id, got);
     fs.writeFileSync(path.join(out, FRAMES_MANIFEST), `${JSON.stringify(manifest, null, 1)}\n`);
-    console.log([`${r.id}: ${got.length} frames from ${path.relative(dir, video)}, manifest ${path.join(out, FRAMES_MANIFEST)}`, ...frameLines(manifest)].join('\n'));
+    console.log([`${r.id}: ${got.length} frames from ${path.relative(dir, video)}, manifest ${path.join(out, FRAMES_MANIFEST)}`, ...frameLines(manifest), ...(source ? cardLines(r.id) : [])].join('\n'));
   }
 }
 
@@ -95,7 +102,7 @@ function list() {
   const shown = registry.filter((r) => !source || r.id === source);
   if (!shown.length) die(`no film ${source} in the registry`);
   const rows = listLines(shown);
-  console.log(shown.flatMap((r, i) => [rows[i], ...(readFrameManifest(dir, r.id) ? frameLines(readFrameManifest(dir, r.id)) : [])]).join('\n'));
+  console.log(shown.flatMap((r, i) => [rows[i], ...(readFrameManifest(dir, r.id) ? frameLines(readFrameManifest(dir, r.id)) : []), ...(source ? cardLines(r.id) : [])]).join('\n'));
   console.log(`${registry.filter((r) => r.inScope).length} in scope of ${registry.length}, in ${dir}; a film with no frame lines needs: vawe refs frames <id>`);
 }
 

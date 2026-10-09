@@ -46,9 +46,12 @@ const pageName = (page) => {
   const base = path.basename(page, '.html');
   return base === 'page' ? path.basename(path.dirname(path.resolve(page))) : base;
 };
-const devNext = (v, [page]) => (v.from != null || v.to != null
-  ? `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`
-  : SAY.motion(pageName(page), page));
+const devNext = (v, [page]) => {
+  if (v.from != null || v.to != null) return `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`;
+  const state = nextStep(path.resolve(page), ROOT);
+  if (state.stage === 'draft') return SAY.motion(pageName(page), page);
+  return state.stage === 'motion' && !/Motion pass/.test(state.why) ? state.next : `${state.next} (${state.why})`;
+};
 const readFresh = (file, sinceMs) => (fs.existsSync(file) && fs.statSync(file).mtimeMs >= sinceMs ? readFindings(file) || [] : []);
 const critiqueFindingsFile = (page) => path.join(scratch('critique', filmKey(page)), 'findings.json');
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
@@ -106,11 +109,10 @@ export const VERBS = [
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [
       { script: 'harness/live/dev-warn.mjs', args: [page] },
-      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : []), '--next', devNext(v, [page])] },
+      { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : [])] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
     ],
     next: devNext,
-    nextInline: true,
   },
   {
     name: 'ship', summary: 'final render: 60 fps, motion blur, audio mixed, then a final check and a fresh judge; runs in the background',
@@ -149,12 +151,13 @@ export const VERBS = [
     name: 'critique', summary: 'phone sheet, strip, loop seam, measured deltas and page-check to look at',
     positional: [PAGE],
     flags: [
-      { name: 'ref', type: 'path', help: 'reference mp4 to measure against', kind: 'file' },
+      { name: 'ref', type: 'path', help: 'reference mp4 to measure against (default: the reference the brief names)', kind: 'file' },
       { name: 'at', type: 'string', default: 'auto', help: 'seconds for the strip, or auto' },
       { name: 'from', type: 'number', help: 'with --ref: match only from this second' },
       { name: 'to', type: 'number', help: 'with --ref: match only to this second' },
       { name: 'final', type: 'bool', help: 'with --ref: match the full-size render; a pass unlocks vawe ship' },
     ],
+    defaultRef: (v, [page]) => page,
     example: 'vawe critique films/my-launch/page.html --ref refs/ad.mp4 --at 4.2',
     build: (v, [page]) => [
       { label: 'page code traps', script: 'quality/gates/anim-traps.mjs', args: [page] },
@@ -175,11 +178,13 @@ export const VERBS = [
     positional: [{ name: 'ours.mp4', help: 'your render (a draft is fine); or use --page. Without --ref: a labelled sheet of your frames at the --at seconds' }],
     flags: [
       { name: 'page', type: 'path', help: 'seek this page and screenshot it at half size: no render needed; without --ref, only your frames, labelled with time', kind: 'file' },
-      { name: 'ref', type: 'path', help: 'reference mp4; leave it out for a sheet of your own frames', kind: 'file' },
+      { name: 'ref', type: 'path', help: 'reference mp4 (default: the reference the brief names)', kind: 'file' },
+      { name: 'alone', type: 'bool', help: 'only your frames, labelled with time, even when the brief names a reference' },
       { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 2.5,3.1,4; or `cuts` for the middle of each world change (the last full draft\'s data-world spans: run vawe dev first)' },
       { name: 'from', type: 'number', default: 0, help: 'the film second where ours starts (a --from/--to draft)' },
       { name: 'out', type: 'path', default: 'out/compare-<ours>.png', help: 'output PNG' },
     ],
+    defaultRef: (v, [ours]) => v.page ?? ours,
     example: 'vawe compare --page films/my-launch/page.html --at 2.5,3.1,4   |   vawe compare out/my-launch.mp4 --at cuts --ref refs/ad.mp4   (without --ref: only your frames, 3 per row)',
     build: (v, [ours]) => {
       const problem = compareProblem({ ours, page: v.page, ref: v.ref, at: v.at });
@@ -424,7 +429,7 @@ export const VERBS = [
     build: () => testSteps(),
   },
   {
-    name: 'runs', summary: 'the log of a film (one row per step: new, dev, judge, ship) or, with --all, one row per film of the last 30 days',
+    name: 'runs', summary: 'where a film\'s time went (per stage and verb, slot wait), what failed (by cause) and the draft series; or, with --all, one row per film of the last 30 days',
     positional: [{ name: 'film', help: 'film name or films/<name>/page.html' }],
     flags: [
       { name: 'all', type: 'bool', help: 'one row per film (drafts, median draft seconds, first and best judged total, PASS), then medians per model' },
@@ -442,7 +447,7 @@ export const VERBS = [
     name: 'judge', summary: 'prepare key frames and the rubric for a fresh session to score',
     positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'a page or a rendered mp4' }],
     flags: [
-      { name: 'ref', type: 'path', help: 'reference mp4', kind: 'file' },
+      { name: 'ref', type: 'path', help: 'reference mp4 (default: the reference the brief names)', kind: 'file' },
       { name: 'struct', type: 'bool', help: 'add the structure pass' },
       { name: 'runs', type: 'string', help: 'double-run labels, for example A,B' },
       { name: 'verdict', type: 'string', help: 'record PASS or FIX; writes out/<name>.judge.json' },
@@ -452,6 +457,7 @@ export const VERBS = [
       { name: 'brief', type: 'path', help: 'with --fresh: the brief the judge reads', kind: 'file' },
       { name: 'stage', type: 'string', help: 'with --fresh: stills, draft or final' },
     ],
+    defaultRef: (v, [input]) => (v.fresh || v.verdict ? null : input),
     example: 'vawe judge out/my-launch.mp4 --struct --runs A,B   |   vawe judge --fresh films/x/page.html --brief films/x/brief.md',
     build: (v, [input]) => v.fresh ? [{ script: 'harness/media/judge-fresh.mjs', args: [input, ...opt('--brief', v.brief), ...opt('--stage', v.stage)] }] : [{ script: 'quality/gates/judge.mjs', args: [input, ...opt('--ref', v.ref), ...(v.struct ? ['--struct'] : []), ...opt('--runs', v.runs), ...opt('--verdict', v.verdict), ...opt('--at', v.at), ...opt('--top-fix', v['top-fix'])] }],
     next: (v) => (v.fresh ? 'read the report; fix the lines under 8, worst first' : 'judge returns at once; do not poll for it'),

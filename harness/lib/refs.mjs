@@ -95,15 +95,58 @@ export function writeRegistry(dir, registry) {
   fs.writeFileSync(path.join(dir, REGISTRY), `${JSON.stringify(registry, null, 1)}\n`);
 }
 
-/** The references for a film: { refs: [{ id, title, studio, file }], skipped: null }, or { refs: [], skipped: <one line why> }. `file` is the absolute path of the sheet. */
+const ID = /^[A-Za-z0-9_-]{3,}$/;
+const mentions = (text, re, group = 1) => [...text.matchAll(re)].map((m) => m[group]).filter((id) => ID.test(id));
+
+/** The reference ids a brief names, most mentioned first: frame paths (`frames/<id>/`), the ref id column of the "move taken" table, `--ref <id>` and the backticked id on a "Reference:" line. */
+export function briefRefIds(briefText) {
+  const text = String(briefText ?? '');
+  const at = text.indexOf('| move taken');
+  const rows = at < 0 ? [] : text.slice(at).split('\n').slice(2);
+  const moves = [];
+  for (const row of rows) {
+    if (!row.startsWith('|')) break;
+    const id = row.split('|')[2]?.trim();
+    if (ID.test(id ?? '')) moves.push(id);
+  }
+  const referenceLines = text.split('\n').filter((l) => /Reference:/i.test(l)).join('\n');
+  const all = [
+    ...mentions(text, /\/frames\/([^/\s|`]+)\//g),
+    ...moves,
+    ...mentions(text, /--ref ([^\s|`/]+)(?![^\s|`]*\.)/g),
+    ...mentions(referenceLines, /`([A-Za-z0-9_-]+)`/g),
+    ...mentions(referenceLines, /refs\/([A-Za-z0-9_-]+)\.(?:mp4|webm)/g),
+  ];
+  const counts = new Map();
+  for (const id of all) counts.set(id, (counts.get(id) ?? 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1]).map(([id]) => id);
+}
+
+/** The reference film a brief names that exists under `dir`: { id, file } with the sharpest video, or null. */
+export function namedRef({ dir, briefText }) {
+  for (const id of briefRefIds(briefText)) {
+    const file = refSharpVideo(dir, id);
+    if (file) return { id, file };
+  }
+  return null;
+}
+
+/** The references for a film: { refs: [{ id, title, studio, file }], skipped: null, named }, or { refs: [], skipped: <one line why> }. `file` is the absolute path of the sheet. A reference the brief names comes first; `named` is its id. */
 export function chooseRefs({ dir, briefText, seconds, routeRequest }) {
   const registry = readRegistry(dir);
   if (!registry) return { refs: [], skipped: `no reference films in ${dir} (bin/vawe refs index)` };
+  const named = briefText ? namedRef({ dir, briefText }) : null;
+  const own = named && registry.find((r) => r.id === named.id && r.sheet);
+  const first = own ? [{ id: own.id, title: own.title, studio: own.studio, file: path.join(dir, own.sheet) }] : [];
   const type = briefText ? filmType(briefText, routeRequest) : null;
-  if (!type) return { refs: [], skipped: 'the film type is unknown: add a line `Template: prompts/<type>.md` to brief.md (bin/vawe new --from prompts/<type>.md writes it), or a `- request:` line the router can read' };
-  const picked = pickRefs(registry, { type, seconds });
-  if (!picked.length) return { refs: [], skipped: `no ${type} reference film has a sheet` };
-  return { refs: picked.map((r) => ({ id: r.id, title: r.title, studio: r.studio, file: path.join(dir, r.sheet) })), skipped: null };
+  if (!type) {
+    if (first.length) return { refs: first, skipped: null, named: own.id };
+    return { refs: [], skipped: 'the film type is unknown: add a line `Template: prompts/<type>.md` to brief.md (bin/vawe new --from prompts/<type>.md writes it), or a `- request:` line the router can read' };
+  }
+  const picked = pickRefs(registry, { type, seconds }).filter((r) => r.id !== own?.id).slice(0, REFS_PER_FILM - first.length);
+  if (!picked.length && !first.length) return { refs: [], skipped: `no ${type} reference film has a sheet` };
+  const refs = [...first, ...picked.map((r) => ({ id: r.id, title: r.title, studio: r.studio, file: path.join(dir, r.sheet) }))];
+  return { refs, skipped: null, ...(own ? { named: own.id } : {}) };
 }
 
 export const FRAMES = 'frames';

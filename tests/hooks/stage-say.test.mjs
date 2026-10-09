@@ -160,3 +160,23 @@ test('dev advises, never blocks, while the Board is the template', () => {
   fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), '## Board\n\n| beat | in s |\n|---|---|\n| s1 | 0 |\n');
   assert.equal(run().stdout, '');
 });
+
+test('after a draft the next step follows what is done: strips under any out/strip/<name>* folder, Motion pass rows, critique, then ship', () => {
+  const { root, page } = film('<section data-world="s1"></section>');
+  const out = (f) => path.join(root, 'out', f);
+  const now = Date.now();
+  const draft = out('f-draft.mp4');
+  fs.writeFileSync(draft, '');
+  fs.utimesSync(draft, new Date(now - 30000), new Date(now - 30000));
+  assert.equal(nextStep(page, root).stage, 'motion');
+  fs.mkdirSync(out('strip/f-cut-3.1'), { recursive: true });
+  const brief = path.join(root, 'films', 'f', 'brief.md');
+  fs.writeFileSync(brief, '## Motion pass\n\n| cut | what read flat | fixed |\n|---|---|---|\n| [cut] | [x] | [y] |\n');
+  assert.equal(nextStep(page, root).next, SAY.motionRows('f'));
+  fs.writeFileSync(brief, '## Motion pass\n\n| cut | what read flat | fixed |\n|---|---|---|\n| s1 | too slow | shortened |\n');
+  assert.equal(nextStep(page, root).stage, 'critique');
+  fs.writeFileSync(out('f.runs.jsonl'), `${JSON.stringify({ cmd: 'verb', verb: 'critique', exitCode: 0, at: new Date(now).toISOString(), start: new Date(now).toISOString() })}\n`);
+  const s = nextStep(page, root);
+  assert.equal(s.stage, 'ship');
+  assert.equal(s.next, SAY.ship('f', 'films/f/page.html'));
+});
