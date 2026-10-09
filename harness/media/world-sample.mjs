@@ -1,8 +1,9 @@
 // The world reader's I/O: which data-world elements show at each sample time, read from the live page
 // (pure span math: harness/lib/worlds.mjs). It runs in the draft check's text sample times.
-import { sampleTimes } from '../lib/draft-check.mjs';
 import { worldSpans } from '../lib/worlds.mjs';
-import { runStart } from '../lib/spec-conformance.mjs';
+import { FPS } from './motion-curve.mjs';
+
+const round = (n) => +n.toFixed(3);
 
 export const SEEN_MIN_OPACITY = 0.05;
 const GROUND_MIN_SHARE = 0.5;
@@ -57,17 +58,20 @@ export const SHOWS_SOURCE = elementShows.toString();
 const WORLDS_SOURCE = [elementShows, worldsSample].map((fn) => fn.toString()).join('\n');
 export const readWorlds = (page) => page.evaluate((src, o, s) => new Function(`${src}\nreturn worldsSample(${o}, ${s});`)(), WORLDS_SOURCE, SEEN_MIN_OPACITY, GROUND_MIN_SHARE);
 
-/** Seek to each draft sample time and read the worlds there; returns [{ id, start, end, ground }] in page order. `seek(ms)` is a layout seek. */
-export async function sampleWorlds(page, dur, seek, from = 0) {
-  const { step, times } = sampleTimes(dur);
+/**
+ * Seek to every frame of the draft grid and read the worlds there; returns [{ id, start, end, ground, readNeed }] in page order.
+ * A fixed coarse step misses a world shorter than the step, so no world can fall between samples. start is the first visible frame
+ * and end the first hidden frame after it. `seek(ms)` is a layout seek.
+ */
+export async function sampleWorlds(page, dur, seek, from = 0, fps = FPS) {
   const samples = [];
-  for (const rel of times) {
-    const t = +(from + rel).toFixed(3);
+  for (let j = 0; j / fps <= dur + 1e-9; j++) {
+    const t = +(from + j / fps).toFixed(3);
     await seek(t * 1000);
     samples.push({ t, worlds: await readWorlds(page) });
   }
-  const spans = worldSpans(samples, { step, dur: from + dur });
-  return refineSpans(spans, async (id, t) => { await seek(t * 1000); return (await readWorlds(page)).some((w) => w.id === id && w.visible); }, from + dur);
+  const end = from + dur;
+  return worldSpans(samples, { step: 0, dur: end }).map((s) => (s.start == null ? s : { ...s, end: Math.min(end, round(s.end + 1 / fps)) }));
 }
 
 const STILL_FRACTIONS = [0.5, 0.65, 0.35, 0.8, 0.2];
@@ -100,15 +104,3 @@ export function stillCandidates(span, anims = []) {
 
 /** True when world `id` shows on the page as it is now. */
 export const worldShowsNow = async (page, id) => (await readWorlds(page)).some((w) => w.id === id && w.visible);
-
-/** Moves each coarse span edge onto the frame grid: start is the first visible frame, end the first hidden frame after it (or dur). */
-async function refineSpans(spans, visibleAt, dur) {
-  const out = [];
-  for (const s of spans) {
-    if (s.start == null) { out.push(s); continue; }
-    const start = await runStart((t) => visibleAt(s.id, t), s.start, { dur });
-    const end = await runStart(async (t) => t > start && !(await visibleAt(s.id, t)), s.end, { dur });
-    out.push({ ...s, start: start ?? s.start, end: end ?? dur });
-  }
-  return out;
-}
