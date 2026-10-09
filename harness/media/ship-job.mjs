@@ -2,7 +2,8 @@
 //
 //   node harness/media/ship-job.mjs start <page.html> [render-page args]   detach a final render, print its job id
 //   node harness/media/ship-job.mjs status [job] [--wait]                  progress, or the result (default: newest job);
-//                                                                          --wait blocks until the job ends or 100 s pass
+//                                                                          --wait blocks until the job ends or 9 minutes pass,
+//                                                                          one progress line per minute
 //
 // A job is two files in out/ship-jobs, <id>.json (state) and <id>.log (the render's own output); the id starts with the film name. The
 // detached `run` process owns the state file: it starts render-page.mjs --final, then records how it ended and,
@@ -24,7 +25,9 @@ import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance, lastPageFacts } from './acceptance-run.mjs';
 
-const WAIT_CAP_MS = 100_000;
+// The Bash tool stops a call at 10 minutes: 9 leaves room to print the result.
+const WAIT_CAP_MS = Number(process.env.VAWE_SHIP_WAIT_MS) || 540_000;
+const PROGRESS_MS = Number(process.env.VAWE_SHIP_PROGRESS_MS) || 60_000;
 
 const SELF = fileURLToPath(import.meta.url);
 const RENDER = path.join(path.dirname(SELF), 'render-page.mjs');
@@ -204,11 +207,14 @@ async function waitThenStatus(id) {
   const target = resolveTarget(id);
   const until = Date.now() + WAIT_CAP_MS;
   let announced = false;
+  let nextProgress = Date.now() + PROGRESS_MS;
   while (target && fs.existsSync(stateFile(target)) && !isOver(target) && Date.now() < until) {
     if (!announced && readJob(target).status === 'judging') { announced = true; console.log(renderedLines(readJob(target)).join('\n')); }
+    if (Date.now() >= nextProgress) { nextProgress += PROGRESS_MS; console.log(statusOf(target)[0]); }
     await new Promise((r) => setTimeout(r, 2000));
   }
   console.log(statusOf(target).join('\n'));
+  if (target && fs.existsSync(stateFile(target)) && !isOver(target)) console.log(`not done after ${clock(WAIT_CAP_MS)}: run the same command once more`);
 }
 
 const [mode, ...rest] = process.argv.slice(2);
