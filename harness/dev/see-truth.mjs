@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIXTURES = path.join(ROOT, 'tests/fixtures/truth');
 const OUT = path.join(ROOT, 'out/see-truth');
-export const ORDER = ['cuts', 'flash', 'motion', 'eye', 'ground', 'look', 'type', 'sound'];
+export const ORDER = ['cuts', 'flash', 'motion', 'camera', 'eye', 'ground', 'look', 'type', 'sound'];
 const EPS = 1e-9;
 
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
@@ -358,6 +358,32 @@ export function motionSeeRows(t, { a }) {
   ];
 }
 
+/** The camera rows of one tool: `shots` is [{ pan (video px), zoom, turn (deg) }] per world, null where the tool read nothing. */
+function cameraGrade(t, shots, tool) {
+  const F = 'camera', tol = t.tolerance, T = t.truth.shots;
+  const g = (i, k) => shots?.[i]?.[k] ?? null;
+  return [
+    scoreRow({ fixture: F, measure: 'world 1 pan x (video px)', tool, truth: T[0].panVideoPx, measured: g(0, 'pan'), tolerance: tol.panPx }),
+    scoreRow({ fixture: F, measure: 'world 1 zoom', tool, truth: T[0].zoom, measured: g(0, 'zoom'), tolerance: tol.zoom }),
+    scoreRow({ fixture: F, measure: 'world 2 zoom', tool, truth: T[1].zoom, measured: g(1, 'zoom'), tolerance: tol.zoom }),
+    scoreRow({ fixture: F, measure: 'world 2 pan x (video px)', tool, truth: T[1].panVideoPx, measured: g(1, 'pan'), tolerance: tol.stillPx }),
+    scoreRow({ fixture: F, measure: 'world 3 turn (degrees clockwise)', tool, truth: T[2].turnDeg, measured: g(2, 'turn'), tolerance: tol.turnDeg }),
+    scoreRow({ fixture: F, measure: 'world 3 zoom', tool, truth: T[2].zoom, measured: g(2, 'zoom'), tolerance: tol.zoom }),
+    scoreRow({ fixture: F, measure: 'world 1 turn (degrees clockwise)', tool, truth: T[0].turnDeg, measured: g(0, 'turn'), tolerance: tol.turnDeg }),
+  ];
+}
+
+export function cameraRows(t, { spec }) {
+  const shots = spec?.shots.map((s) => ({ pan: s.camera.panTotalPx[0], zoom: s.camera.zoomTotal, turn: s.camera.rotation?.total ?? 0 }));
+  return [...cameraGrade(t, shots, 'vawe spec (camera)'), noTool('camera', 'world 4 tilt of a still picture (degrees clockwise)', t.truth.shots[3].tiltDeg, t.tolerance.tiltDeg)];
+}
+
+export function cameraSeeRows(t, { a }) {
+  const per = a?.motion.perShot.map((s) => ({ pan: s.camera.panTotalPx[0], zoom: s.camera.zoomTotal, turn: s.camera.rotation?.total ?? 0 }));
+  const tilt = a?.shots[3]?.camera.tilt?.deg ?? null;
+  return [...cameraGrade(t, per, SEE), scoreRow({ fixture: 'camera', measure: 'world 4 tilt of a still picture (degrees clockwise)', tool: SEE, truth: t.truth.shots[3].tiltDeg, measured: tilt, tolerance: t.tolerance.tiltDeg })];
+}
+
 export function eyeSeeRows(t, { a }) {
   const F = 'eye', tol = t.tolerance, asp = t.aspect;
   const rows = [];
@@ -482,6 +508,7 @@ const FIXTURE_RUN = {
     const strip = (s) => (mp4 ? parseStrip(vawe('strip', mp4, '--at', String(s.at), '--span', String(s.span), '--out', 'out/see-truth/strip').text) : null);
     return [...motionRows(t, { velocity: parseVelocity(vel.text), spec: specOf('motion', mp4), stripA: strip(a.strip), stripB: strip(b.strip) }), ...motionSeeRows(t, { a: seeOf('motion', mp4) })];
   },
+  camera: (t, o) => { const mp4 = render('camera', o); return [...cameraRows(t, { spec: specOf('camera', mp4) }), ...cameraSeeRows(t, { a: seeOf('camera', mp4) })]; },
   eye: (t, o) => { const mp4 = render('eye', o); return [...eyeRows(t, { spec: specOf('eye', mp4) }), ...eyeSeeRows(t, { a: seeOf('eye', mp4) })]; },
   ground: (t, o) => { const mp4 = render('ground', o); return [...groundRows(t, { spec: specOf('ground', mp4) }), ...groundSeeRows(t, { a: seeOf('ground', mp4) })]; },
   type: (t, o) => { const mp4 = render('type', o); return [...typeRows(t, { spec: specOf('type', mp4, true) }), ...typeSeeRows(t, { a: seeOf('type', mp4, { ocr: true }) })]; },

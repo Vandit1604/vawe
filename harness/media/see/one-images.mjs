@@ -19,6 +19,9 @@ const ONION_FRAMES = 8;
 const round = (n, d = 2) => +n.toFixed(d);
 const pad = (n) => String(n).padStart(2, '0');
 
+/** The folder of the images of one film: keyed by the content hash, so the images of another film or another version never mix with these. */
+const imagesRoot = (dir, src) => path.join(dir, 'images', src.hash.slice(0, 8));
+
 /** The native-size PNG of the frame at second `t`. */
 export function stillImage(video, t, file) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -129,7 +132,7 @@ function flashImage(f, i, ctx, folder) {
 export function makeImages(src, m, dir, log) {
   const ctx = { src, m, video: src.video, dur: m.media.duration, energy: downsample(motionDeltaSeries(src.video), 10), clip: { video: src.video, dur: m.media.duration, label: 'a', name: src.name }, tmp: path.join(dir, '.tmp') };
   const shots = m.shots.map((shot) => {
-    const folder = path.join(dir, 'images', `shot-${pad(shot.index)}`);
+    const folder = path.join(imagesRoot(dir, src), `shot-${pad(shot.index)}`);
     log(`images of shot ${shot.index} of ${m.shots.length}`);
     return { index: shot.index, id: shot.id, frame: frameImage(shot, ctx, folder), cut: cutImage(shot, ctx, folder), onion: onionImage(shot, ctx, folder),
       zooms: [edgeZoom(shot, ctx, folder), textureZoom(shot, ctx, folder)].filter(Boolean),
@@ -144,7 +147,7 @@ export function momentImages(src, m, at, dir, log) {
   log(`images of the moment ${at} s`);
   const video = src.video, dur = m.media.duration;
   const energy = downsample(motionDeltaSeries(video), 10);
-  const folder = path.join(dir, 'images', `moment-${at.toFixed(2)}`);
+  const folder = path.join(imagesRoot(dir, src), `moment-${at.toFixed(2)}`);
   const out = { at, frame: stillImage(video, Math.min(at, dur - 0.05), path.join(folder, 'frame.png')) };
   const { from } = stripWindow(at, 1, dur);
   out.strip = stripImage(video, path.join(dir, '.tmp'), from, 1, energy, path.join(folder, 'strip.png'));

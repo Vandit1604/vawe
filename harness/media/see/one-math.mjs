@@ -66,7 +66,7 @@ export const maskFlashes = (series, flashes, fps) => series.map((p) => (flashes.
 
 /** The moves of a shot's tracked elements grouped into bursts: moves whose start is within `gap` seconds of the running end join. [{ t0, t1, elements }]. Pure. */
 export function burstsOfMoves(moves, gap = 0.17) {
-  const sorted = moves.filter((m) => m.start != null && m.settle != null).sort((a, b) => a.start - b.start);
+  const sorted = moves.filter((m) => m.start != null && m.settle != null && m.confidence !== 'low').sort((a, b) => a.start - b.start);
   const out = [];
   for (const m of sorted) {
     const last = out.at(-1);
@@ -133,4 +133,68 @@ export function grainOf(a, b, w, h, tile = 8) {
   if (spreads.length < 20) return null;
   spreads.sort((p, q) => p - q);
   return { sigma: round(spreads[spreads.length >> 1] / Math.SQRT2, 2), tiles: spreads.length };
+}
+
+const TILT_MAX_DEG = 35;
+const TILT_MIN_DEG = 2;
+const TILT_GAIN = 1.3;
+const TILT_MIN_SHARE = 0.05;
+const PEAK_GAP_DEG = 6;
+const PEAK_COUNT = 4;
+
+const THRESHOLD = 25;
+
+/** The plane smoothed with the 3 by 3 binomial kernel: a hard pixel step has no direction until it is smoothed. Pure. */
+function smooth(a, w, h) {
+  const out = new Float32Array(a.length), t = new Float32Array(a.length);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) t[y * w + x] = (a[y * w + Math.max(0, x - 1)] + 2 * a[y * w + x] + a[y * w + Math.min(w - 1, x + 1)]) / 4;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) out[y * w + x] = (t[Math.max(0, y - 1) * w + x] + 2 * t[y * w + x] + t[Math.min(h - 1, y + 1) * w + x]) / 4;
+  return out;
+}
+
+/** The edge-angle histogram of a grey plane: 180 bins of one degree (edge direction measured from the horizontal, clockwise on screen, modulo 180), weighted by strength. Pure. */
+function edgeHistogram(plane, w, h) {
+  const luma = smooth(smooth(plane, w, h), w, h);
+  const bins = new Float64Array(180);
+  let total = 0;
+  for (let y = 1; y < h - 1; y++) {
+    for (let x = 1; x < w - 1; x++) {
+      const i = y * w + x;
+      const gx = luma[i + 1] - luma[i - 1], gy = luma[i + w] - luma[i - w], m = Math.hypot(gx, gy);
+      if (m < THRESHOLD) continue;
+      bins[Math.round((Math.atan2(gy, gx) * 180) / Math.PI + 90 + 720) % 180] += m; total += m;
+    }
+  }
+  return { bins, total };
+}
+
+/** The strongest directions of a histogram as [{ deg, share }], deg in (-90, 90], at least 6 degrees apart. Pure. */
+function directionPeaks({ bins, total }) {
+  const at = (d) => bins[((d % 180) + 180) % 180] + 0.5 * (bins[(((d + 1) % 180) + 180) % 180] + bins[(((d - 1) % 180) + 180) % 180]);
+  const taken = [], out = [];
+  for (let k = 0; k < PEAK_COUNT; k++) {
+    let best = null;
+    for (let d = 0; d < 180; d++) if (!taken.some((t) => Math.min(Math.abs(t - d), 180 - Math.abs(t - d)) < PEAK_GAP_DEG) && (best === null || at(d) > at(best))) best = d;
+    if (best === null || at(best) / total < 0.03) break;
+    taken.push(best);
+    out.push({ deg: best > 90 ? best - 180 : best, share: round(at(best) / total, 3) });
+  }
+  return out;
+}
+
+/**
+ * The tilt of a picture: how far its straight edges lean from the horizontal and the vertical, and the strongest edge directions. The lean is the offset
+ * (under 35 degrees) whose edges, upright and across, carry the most strength; positive is clockwise on screen. `deg` is 0 when the lean is under 2 degrees,
+ * carries under 1.3 times the upright mass or under 5% of the edge strength. `peaks` lists the strongest directions: a diagonal hatch at 41 degrees says as much
+ * as a lean of the text. Pure.
+ */
+export function layoutTilt(luma, w, h) {
+  const hist = edgeHistogram(luma, w, h);
+  if (hist.total === 0) return { deg: 0, share: 0, peaks: [] };
+  const { bins, total } = hist;
+  const comb = (d) => { const f = (a) => bins[((Math.round(a) % 180) + 180) % 180]; return f(d) + f(d + 90) + 0.5 * (f(d + 1) + f(d - 1) + f(d + 91) + f(d + 89)); };
+  let best = 0;
+  for (let d = -TILT_MAX_DEG; d <= TILT_MAX_DEG; d++) if (comb(d) > comb(best)) best = d;
+  const leans = Math.abs(best) >= TILT_MIN_DEG && comb(best) >= TILT_GAIN * comb(0) && comb(best) / total >= TILT_MIN_SHARE;
+  return { deg: leans ? best : 0, share: round(comb(leans ? best : 0) / total, 3), peaks: directionPeaks(hist) };
 }

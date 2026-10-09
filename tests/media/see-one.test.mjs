@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { findRuns, findTransitions } from '../../harness/lib/ref-measure/transition.mjs';
 import { despike, noiseOf, readMotion } from '../../harness/media/see/motion-math.mjs';
-import { burstsOfMoves, cameraWords, grainOf, maskFlashes, separateFlashes, seeProblem, sharpnessMap, shotsWithoutFlashes } from '../../harness/media/see/one-math.mjs';
+import { burstsOfMoves, cameraWords, grainOf, layoutTilt, maskFlashes, separateFlashes, seeProblem, sharpnessMap, shotsWithoutFlashes } from '../../harness/media/see/one-math.mjs';
 import { peakSpeed } from '../../harness/media/see/one-measure.mjs';
 import { compareSides, vsLines } from '../../harness/media/see/one-vs.mjs';
 import { notMeasured, shotAccount } from '../../harness/media/see/one-report.mjs';
@@ -151,4 +151,21 @@ test('transitions: a ground that drifts over many frames is no transition, a har
   assert.equal(findTransitions(drift).length, 0);
   const cut = { w, h, n, rgb: rgb.map((v, i) => (Math.floor(i / (w * h * 3)) >= 20 ? 255 - v : v)) };
   assert.equal(findRuns(cut).length, 1);
+});
+
+test('layoutTilt reads the lean of a turned rectangle and is zero for an upright one', () => {
+  const w = 400, h = 300;
+  const rect = (deg) => {
+    const th = (deg * Math.PI) / 180, a = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+      const u = (x - 200) * Math.cos(th) + (y - 150) * Math.sin(th), v = -(x - 200) * Math.sin(th) + (y - 150) * Math.cos(th);
+      const edge = Math.min(Math.max(0, Math.min(100 - Math.abs(u), 40 - Math.abs(v)) + 0.5), 1);
+      a[y * w + x] = 20 + 235 * edge;
+    }
+    return a;
+  };
+  const turned = layoutTilt(rect(8), w, h);
+  assert.ok(Math.abs(turned.deg - 8) <= 1.5, `deg ${turned.deg}`);
+  assert.equal(layoutTilt(rect(0), w, h).deg, 0);
+  assert.deepEqual(layoutTilt(new Uint8Array(w * h), w, h), { deg: 0, share: 0, peaks: [] });
 });

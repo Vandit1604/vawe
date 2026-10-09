@@ -15,7 +15,7 @@ import { frameRgb } from './frame.mjs';
 import { edgesAt, lumaSeries } from './look.mjs';
 import { bloomSigma, flashProfile, hueOf, summarise } from './look-math.mjs';
 import { noiseOf, readMotion } from './motion-math.mjs';
-import { burstsOfMoves, cameraWords, grainOf, maskFlashes, separateFlashes, sharpnessMap, shotsWithoutFlashes } from './one-math.mjs';
+import { burstsOfMoves, cameraWords, grainOf, layoutTilt, maskFlashes, separateFlashes, sharpnessMap, shotsWithoutFlashes } from './one-math.mjs';
 import { readVelocity } from './velocity.mjs';
 import { stripWindow } from './strip-math.mjs';
 
@@ -61,7 +61,7 @@ function movesOf(shot, fps, frameH) {
   const k = 1080 / frameH;
   return shot.elements.map((e) => {
     const px = peakSpeed(e.rows, fps) * k;
-    const start = Math.max(shot.f0 / fps, e.start?.t ?? e.f0 / fps), settle = e.land?.t ?? e.f1 / fps;
+    const start = Math.max(shot.f0 / fps, e.start?.t ?? e.f0 / fps), settle = Math.min(shot.f1 / fps, e.land?.t ?? e.f1 / fps);
     const at = (p) => p.map((v) => round(v * k, 1));
     return {
       id: e.id, axis: e.axis, from: at(e.from), to: at(e.to), travelPx: Math.round(Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]) * k), size: at(e.size),
@@ -128,9 +128,9 @@ function shotLook(video, shot, series, fps, dur) {
 
 function shotFocus(video, shot) {
   const pair = grayFrames(video, shot.key, 2, GRAIN_W, GRAIN_H);
-  if (!pair) return { grain: null, sharp: null };
+  if (!pair) return { grain: null, sharp: null, tilt: null };
   const still = !shot.energy?.moving || shot.key >= (shot.energy.settle ?? 0);
-  return { grain: still ? grainOf(pair[0], pair[1], GRAIN_W, GRAIN_H) : null, sharp: sharpnessMap(pair[0], GRAIN_W, GRAIN_H) };
+  return { grain: still ? grainOf(pair[0], pair[1], GRAIN_W, GRAIN_H) : null, sharp: sharpnessMap(pair[0], GRAIN_W, GRAIN_H), tilt: layoutTilt(pair[0], GRAIN_W, GRAIN_H) };
 }
 
 /** The share of pixels of a gray plane that sit on a step of more than 24 levels: near 0 for a solid fill. */
@@ -246,7 +246,7 @@ export async function measureSide(src, opts, dir, log) {
     perShot: [],
   };
   for (const s of shots.slice(0, MAX_LOOK_SHOTS)) look.perShot.push({ index: s.index, ...shotLook(video, s, light, fps, probe.dur), ...shotFocus(video, s) });
-  for (const l of look.perShot) { const s = shots.find((x) => x.index === l.index); s.look = l; }
+  for (const l of look.perShot) { const s = shots.find((x) => x.index === l.index); s.look = l; s.camera = { ...s.camera, tilt: l.tilt }; }
 
   const structure = structureOf(spec, shots, flashes.cuts, flashes, world ? { worlds: world.timeline.worlds, spectacle: world.timeline.spectacle } : null, fps);
   const velocity = src.page ? await pageVelocity(src.page, shots, log) : null;

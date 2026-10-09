@@ -22,6 +22,7 @@ import { findTransitions, shotSpans } from '../lib/ref-measure/transition.mjs';
 import { measureLayout } from '../lib/ref-measure/layout.mjs';
 import { transitionRow, easingLines, layoutLines, audioRow, errorLines, colourLines, motionRegionLines } from '../lib/ref-measure/spec-lines.mjs';
 import { measureColour } from '../lib/ref-measure/colour.mjs';
+import { DEG, estimateCamera, halfRes, slowCamera, warp } from '../lib/ref-measure/camera.mjs';
 import { worldTurns } from '../lib/ref-measure/world-turns.mjs';
 import { measureMotionRegions } from '../lib/ref-measure/motion-regions.mjs';
 import { measureEye } from '../lib/ref-measure/eye-path.mjs';
@@ -61,67 +62,6 @@ function decode(video, fps, dir, W, H, gridW = GRID_W) {
 // ── cuts: every shot change, classified, in ref-measure/transition.mjs ─────────────────────────────
 function findCuts(V, fps) {
   return findTransitions(V).map((t) => ({ frame: t.endFrame, t: r3(t.endFrame / fps), spike: t.spike, transition: { ...t, startT: r3(t.startFrame / fps) } }));
-}
-
-// ── camera: global zoom + pan between two frames ─────────────────────────────────────────────────
-const halfRes = (g, w, h) => {
-  const w2 = w >> 1, h2 = h >> 1, out = new Float32Array(w2 * h2);
-  for (let y = 0; y < h2; y++) for (let x = 0; x < w2; x++) {
-    const i = 2 * y * w + 2 * x;
-    out[y * w2 + x] = (g[i] + g[i + 1] + g[i + w] + g[i + w + 1]) / 4;
-  }
-  return out;
-};
-
-// B(x) = A(c + (x - c)/s - d): trimmed mean error (lowest 60%), so moving elements do not vote.
-function camCost(A, B, w, h, s, dx, dy, hist) {
-  hist.fill(0);
-  let n = 0;
-  const cx = (w - 1) / 2, cy = (h - 1) / 2;
-  for (let y = 6; y < h - 6; y += 2) for (let x = 6; x < w - 6; x += 2) {
-    const sx = cx + (x - cx) / s - dx, sy = cy + (y - cy) / s - dy;
-    if (sx < 0 || sy < 0 || sx >= w - 1 || sy >= h - 1) continue;
-    const x0 = sx | 0, y0 = sy | 0, fx = sx - x0, fy = sy - y0, i = y0 * w + x0;
-    const a = A[i] * (1 - fx) * (1 - fy) + A[i + 1] * fx * (1 - fy) + A[i + w] * (1 - fx) * fy + A[i + w + 1] * fx * fy;
-    hist[Math.min(255, Math.round(Math.abs(B[y * w + x] - a)))]++;
-    n++;
-  }
-  let keep = Math.floor(n * 0.6);
-  const want = keep || 1;
-  let sum = 0;
-  for (let b = 0; b < 256 && keep > 0; b++) { const c = Math.min(hist[b], keep); sum += c * b; keep -= c; }
-  return n ? sum / want : Infinity;
-}
-
-function estimateCamera(A, B, w, h) {
-  const hist = new Uint32Array(256);
-  const cost = (s, dx, dy) => camCost(A, B, w, h, s, dx, dy, hist) + 1e-3 * (Math.abs(dx) + Math.abs(dy) + Math.abs(s - 1) * 100);
-  const c0 = cost(1, 0, 0);
-  const still = { s: 1, dx: 0, dy: 0 };
-  if (c0 < 0.4) return still;
-  let best = { ...still, cost: c0 };
-  const tryc = (s, dx, dy) => { const v = cost(s, dx, dy); if (v < best.cost) best = { s, dx, dy, cost: v }; };
-  for (let dy = -10; dy <= 10; dy += 2) for (let dx = -10; dx <= 10; dx += 2) tryc(1, dx, dy);
-  for (let s = 0.9; s <= 1.101; s += 0.02) tryc(s, 0, 0);
-  for (const step of [1, 1, 0.5, 0.5, 0.25]) {
-    const b = { ...best };
-    for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) tryc(b.s, b.dx + i * step, b.dy + j * step);
-    const b2 = { ...best };
-    for (const k of [-2, -1, 1, 2]) tryc(b2.s + k * step * 0.01, b2.dx, b2.dy);
-  }
-  return best.cost > c0 * 0.97 ? still : { s: best.s, dx: best.dx, dy: best.dy };
-}
-
-function warp(A, B, w, h, cam) {
-  const out = new Uint8Array(A.length), cx = (w - 1) / 2, cy = (h - 1) / 2, tx = cam.dx * 2, ty = cam.dy * 2;
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const sx = cx + (x - cx) / cam.s - tx, sy = cy + (y - cy) / cam.s - ty;
-    const o = y * w + x;
-    if (sx < 0 || sy < 0 || sx >= w - 1 || sy >= h - 1) { out[o] = B[o]; continue; }
-    const x0 = sx | 0, y0 = sy | 0, fx = sx - x0, fy = sy - y0, i = y0 * w + x0;
-    out[o] = A[i] * (1 - fx) * (1 - fy) + A[i + 1] * fx * (1 - fy) + A[i + w] * (1 - fx) * fy + A[i + w + 1] * fx * fy;
-  }
-  return out;
 }
 
 // ── moving elements: connected components of the camera-compensated difference ───────────────────
@@ -228,7 +168,7 @@ function trackShot(V, f0, f1, cams, maxTracks) {
   const tracks = [];
   for (let f = f0 + 1; f < f1; f++) {
     const cam = cams[f];
-    const still = cam.s === 1 && cam.dx === 0 && cam.dy === 0;
+    const still = cam.s === 1 && cam.dx === 0 && cam.dy === 0 && !cam.r;
     const B = V.frame(f);
     const A = still ? V.frame(f - 1) : warp(V.frame(f - 1), B, w, h, cam);
     const pairs = [], cands = [];
@@ -488,8 +428,8 @@ function shotSection(s, fps, err) {
   const L = [`## Shot ${s.index}: frames ${s.f0}-${s.f1 - 1} (${s.frames} f, ${r1(s.frames / fps * 100) / 100} s)`, ''];
   L.push(`palette: ${s.palette.map((p) => `${p.hex} ${Math.round(p.share * 100)}%`).join(', ')}`);
   const c = s.camera;
-  L.push(`camera: zoom x${c.zoomTotal} (peak ${c.peakZoomPerFrame}/f), pan ${c.panTotalPx[0]},${c.panTotalPx[1]} px (peak ${c.peakPanPxPerFrame} px/f)${c.big ? '' : ' (static, no table)'}`);
-  if (c.big) L.push('', tableRows(c.rows, [['f', 'f'], ['zoom cum', 'zoomCum'], ['dzoom', 'dz'], ['pan x px', 'panX'], ['pan y px', 'panY'], ['dx', 'dx'], ['dy', 'dy']], 40));
+  L.push(`camera: zoom x${c.zoomTotal} (peak ${c.peakZoomPerFrame}/f), pan ${c.panTotalPx[0]},${c.panTotalPx[1]} px (peak ${c.peakPanPxPerFrame} px/f), turn ${c.rotation.total} deg (peak ${c.rotation.peakPerFrame} deg/f)${c.big ? '' : ' (static, no table)'}`);
+  if (c.big) L.push('', tableRows(c.rows, [['f', 'f'], ['zoom cum', 'zoomCum'], ['dzoom', 'dz'], ['pan x px', 'panX'], ['pan y px', 'panY'], ['dx', 'dx'], ['dy', 'dy'], ['turn deg', 'dr'], ['turn cum', 'rotCum']], 40));
   if (!s.elements.length) L.push('elements: none tracked');
   for (const e of s.elements) {
     const over = e.overshoot != null ? `; overshoot x${e.overshoot}` : '';
@@ -593,15 +533,17 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
   const cuts = findCuts(V, fps);
   const spans = shotSpans(cuts.map((c) => c.transition), V.n);
 
-  const cams = [{ s: 1, dx: 0, dy: 0 }];
+  const cams = [{ s: 1, dx: 0, dy: 0, r: 0 }];
   let prev = halfRes(V.frame(0), V.w, V.h);
   const inCut = (f) => cuts.some((c) => f >= c.transition.startFrame && f <= c.frame);
   for (let f = 1; f < V.n; f++) {
     const cur = halfRes(V.frame(f), V.w, V.h);
-    cams.push(inCut(f) ? { s: 1, dx: 0, dy: 0 } : estimateCamera(prev, cur, V.w >> 1, V.h >> 1));
+    cams.push(inCut(f) ? { s: 1, dx: 0, dy: 0, r: 0 } : estimateCamera(prev, cur, V.w >> 1, V.h >> 1));
     prev = cur;
     if (f % 200 === 0) console.error(`  camera ${f}/${V.n}`);
   }
+
+  slowCamera(V, cams, spans, Math.max(2, Math.round(fps / 6)));
 
   const aud = audio ? analyseAudio(video, dir, fps, V.n / fps) : null;
   const leads = cutLeads(cuts, aud, fps);
@@ -616,24 +558,24 @@ async function measureRef({ video, outDir, fps, maxElements, ocr, audio, calibra
     console.error(`  shot ${i + 1}: frames ${f0}-${f1 - 1}`);
     const tracks = trackShot(V, f0, f1, cams, maxElements);
     const elements = tracks.map((t, j) => {
-      const e = analyseTrack(t, V, fps, sc, { f0, f1, still: cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0) });
+      const e = analyseTrack(t, V, fps, sc, { f0, f1, still: cams.slice(f0 + 1, f1).every((c) => c.s === 1 && c.dx === 0 && c.dy === 0 && !c.r) });
       const travel = Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]);
       if (e.frames <= 4 && travel < 3 && !e.blur) return null;
       return { id: `${i + 1}.${j + 1}`, ...e, big: travel >= 0.03 * W || e.blur != null };
     }).filter(Boolean);
-    let zc = 1, px = 0, py = 0;
+    let zc = 1, px = 0, py = 0, rot = 0;
     const camRows = [];
     for (let f = f0 + 1; f < f1; f++) {
       const c = cams[f];
-      zc *= c.s; px += c.dx * 2 * sc; py += c.dy * 2 * sc;
-      camRows.push({ f, zoomCum: r3(zc), dz: r3(c.s - 1), panX: r1(px), panY: r1(py), dx: r1(c.dx * 2 * sc), dy: r1(c.dy * 2 * sc) });
+      zc *= c.s; px += c.dx * 2 * sc; py += c.dy * 2 * sc; rot += (c.r ?? 0) / DEG;
+      camRows.push({ f, zoomCum: r3(zc), dz: r3(c.s - 1), panX: r1(px), panY: r1(py), dx: r1(c.dx * 2 * sc), dy: r1(c.dy * 2 * sc), dr: r3((c.r ?? 0) / DEG), rotCum: r3(rot) });
     }
-    const peakZ = Math.max(0, ...camRows.map((r) => Math.abs(r.dz))), peakP = Math.max(0, ...camRows.map((r) => Math.hypot(r.dx, r.dy)));
-    const big = Math.abs(zc - 1) > 0.02 || Math.hypot(px, py) > 0.02 * W;
+    const peakZ = Math.max(0, ...camRows.map((r) => Math.abs(r.dz))), peakP = Math.max(0, ...camRows.map((r) => Math.hypot(r.dx, r.dy))), peakR = Math.max(0, ...camRows.map((r) => Math.abs(r.dr)));
+    const big = Math.abs(zc - 1) > 0.02 || Math.hypot(px, py) > 0.02 * W || Math.abs(rot) > 1;
     shots.push({ index: i + 1, f0, f1, frames: f1 - f0, t0: r3(f0 / fps), t1: r3(f1 / fps),
       palette: palette(V, f0, f1),
-      camera: { zoomTotal: r3(zc), panTotalPx: [r1(px), r1(py)], peakZoomPerFrame: r3(peakZ), peakPanPxPerFrame: r1(peakP), big,
-        rows: camRows.filter((r) => Math.abs(r.dz) > 0.0015 || Math.hypot(r.dx, r.dy) > 0.5) },
+      camera: { zoomTotal: r3(zc), panTotalPx: [r1(px), r1(py)], peakZoomPerFrame: r3(peakZ), peakPanPxPerFrame: r1(peakP), rotation: { total: r1(rot), peakPerFrame: r3(peakR) }, big,
+        rows: camRows.filter((r) => Math.abs(r.dz) > 0.0015 || Math.hypot(r.dx, r.dy) > 0.5 || Math.abs(r.dr) > 0.05) },
       elements, layout: shotLayout(V, f1 - 1),
       text: text.filter((t) => t.f0 >= f0 && t.f0 < f1),
       hits: aud ? aud.hits.filter((h) => h.frame >= f0 && h.frame < f1) : [] });
