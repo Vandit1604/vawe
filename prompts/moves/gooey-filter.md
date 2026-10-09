@@ -15,7 +15,7 @@ matrix (a threshold with a soft edge), then draws the sharp source on top of tha
 
 ```html
 <svg style="position:absolute;width:0;height:0"><defs>
-  <filter id="gooey-filter">
+  <filter id="gooey-filter" x="-30%" y="-30%" width="160%" height="160%">
     <feGaussianBlur id="gblur" in="SourceGraphic" stdDeviation="15" result="blur-sm"/>
     <feColorMatrix in="blur-sm" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9" result="goo"/>
     <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
@@ -43,6 +43,8 @@ Sound: none; or a soft wet tick on each click.
 - The tab box moves 0.4 s on a critically damped spring (no overshoot), the page swap is 0.2 s `easeOut`: the box lands after the text.
 - The filter acts on the whole wrapper: any text inside it stays sharp (`atop`) but its edges are bound by the blob, so pad the text well inside the shape.
 - The label row is separate and switches colour at the click, not with the box: the new label is dark on the dark ground for a moment, as in the original.
+
+- Give the filter a wide region (`x="-30%" y="-30%" width="160%" height="160%"`) and the wrapper `will-change: transform`. The default region (10 percent of the wrapper box) cuts the blur, and on a page that two render workers share the outline then flipped 1.5 px between frames on a still shape. Both lines fixed that in the render.
 
 ## The common mistake
 
