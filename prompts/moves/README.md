@@ -51,6 +51,7 @@ One row per job, best move first. Every built move is in this table.
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md), [spin-transition](spin-transition.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [push-in](push-in.md), [rack-focus](rack-focus.md) |
+| film a screen as a real object: tilt, depth, bloom, LED grid, fringes | [lens](lens.md) |
 | move the camera over a whole world: push, pull, live-hold drift, whip | [camera-moves](camera-moves.md) |
 | give a camera move depth: ground, mid and front layers move by different amounts | [depth-parallax](depth-parallax.md) |
 | two depths of words that resolve as the camera arrives; a focus pull | [depth-resolve](depth-resolve.md) |

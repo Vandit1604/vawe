@@ -1,0 +1,83 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="6">
+<title>move: lens</title>
+<style>
+  @font-face { font-family: "JetBrains Mono"; src: url("../../../assets/fonts/JetBrainsMono.woff2") format("woff2"); font-weight: 100 800; }
+  html, body { margin: 0; background: #000; overflow: hidden; }
+  #screen { width: 1920px; height: 1080px; background: #04050a; color: #c4cad4; font: 500 22px/32px "JetBrains Mono", monospace; overflow: hidden; }
+  #screen > * { position: absolute; }
+  #log { left: 70px; top: 40px; width: 1500px; color: #55647a; white-space: pre; }
+  #log b { color: #8fa3bd; font-weight: 500; }
+  #line { left: 150px; top: 440px; font-size: 118px; line-height: 150px; font-weight: 700; white-space: nowrap; letter-spacing: -2px; }
+  #line i { font-style: normal; display: inline-block; height: 112px; vertical-align: middle; margin: 0 6px; }
+  .hatch { width: 118px; background: repeating-linear-gradient(135deg, #cfcfcf 0 6px, #000 6px 12px); outline: 3px solid #cfcfcf; }
+  .solid { width: 118px; background: #cfcfcf; }
+  .four { width: 120px; border: 6px solid #cfcfcf; box-sizing: border-box; text-align: center; line-height: 100px; font-size: 100px; }
+  #lock { left: 1498px; top: 440px; width: 150px; height: 150px; border: 5px solid #ff2a1a; box-sizing: border-box; }
+  #foot { left: 70px; top: 1020px; color: #3f4c5e; }
+  .tag { position: absolute; z-index: 5; font: 500 15px/1 "JetBrains Mono", monospace; color: #cfe3ff; white-space: nowrap; opacity: 0; transform: translate(-50%, -150%); text-shadow: none; }
+  #links { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="screen">
+  <div id="log"><b>agent</b> session 3e4f1a  ~/ff-tracking
+<b>ok</b>    lens  x: 1180 y: 512
+<b>warn</b>  lock drifted 3 px, correcting
+<b>think</b> not just completing, composing
+<b>read</b>  scenes.rs              210 lines
+<b>tool</b>  inspect --all-frames
+<b>ok</b>    0 problems
+<b>plan</b>  3/4  sound on every lock
+<b>tool</b>  sfx.synth(beep, 1760 Hz)</div>
+  <div id="line">attention → t<i class="hatch"></i><i class="solid"></i>ke <i class="four">4</i></div>
+  <div id="lock"></div>
+  <div id="foot">tokens 3,853 · 10 ms/frame · frame 092/180 · scene 06/12</div>
+</div>
+<svg id="links"></svg>
+<div class="tag" id="t0"></div><div class="tag" id="t1"></div><div class="tag" id="t2"></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { lens, htmlSource, OFF, PALETTES } from '/core/surfaces/lens.js';
+
+// Stage k turns one more effect on, over 0.4 s from second k: 1 perspective, 2 depth of field,
+// 3 palette and aberration, 4 bloom and grid, 5 tear, grain and the camera tracker.
+const ramp = (k, t) => Math.min(1, Math.max(0, (t - k) / 0.4));
+const smooth = (x) => x * x * (3 - 2 * x);
+const on = (k, t) => smooth(ramp(k, t));
+const AIM = [1390, 520];
+const cam = lens(htmlSource(document.getElementById('screen'), { scale: 2 }), {
+  ...OFF,
+  aim: (t) => [960 + (AIM[0] - 960) * on(1, t), 540 + (AIM[1] - 540) * on(1, t)],
+  zoom: (t) => 1 + 1.9 * on(1, t), tiltY: (t) => 0.38 * on(1, t), tiltX: (t) => 0.1 * on(1, t), roll: (t) => -0.03 * on(1, t),
+  dof: { blur: (t) => 0.55 * on(2, t), focus: [1400, 520], bokeh: 7 },
+  palette: { stops: PALETTES.thermal, amount: (t) => on(3, t), keepColor: 0.9 },
+  aberration: { amount: (t) => 6 * on(3, t) },
+  bloom: { strength: (t) => 0.8 * on(4, t), radius: 42, threshold: 0.3 },
+  grid: { amount: (t) => on(4, t), cell: 2.5, brightness: 0.55 },
+  tear: { amount: (t) => (t > 5.55 && t < 5.7 ? 70 : 0), prob: 0.25, band: 14 },
+  grain: (t) => 0.07 * on(5, t), vignette: (t) => 0.5 * on(5, t),
+});
+
+const TAGS = [[1180, 600, 't0'], [1498, 440, 't1'], [1648, 590, 't2']];
+const svg = document.getElementById('links');
+vawe.onFrame(async (t) => {
+  await cam.draw(t);
+  const a = on(5, t);
+  svg.style.opacity = a;
+  svg.setAttribute('viewBox', `0 0 ${innerWidth} ${innerHeight}`);
+  const pts = TAGS.map(([x, y, id]) => {
+    const p = cam.project(x, y, t);
+    const el = document.getElementById(id);
+    el.textContent = `x: ${Math.round(x)} y: ${Math.round(y)}`;
+    el.style.left = `${p.x}px`; el.style.top = `${p.y}px`; el.style.opacity = a;
+    return p;
+  });
+  svg.innerHTML = `<polyline points="${pts.map((p) => `${p.x},${p.y}`).join(' ')}" fill="none" stroke="#cfe3ff" stroke-width="1"/>`;
+});
+</script>
+</body>
+</html>
