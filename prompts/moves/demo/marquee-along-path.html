@@ -1,0 +1,62 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="5">
+<title>move: marquee along path</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Fraunces'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Fraunces.woff2') format('woff2'); }
+  html, body { background: #fafafa; }
+  body { display: block; position: relative; }
+  #box { position: absolute; left: 0; top: 0; width: 996px; height: 330px; transform-origin: 0 0; contain: layout style; }
+  #box svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .tile { position: absolute; left: 0; top: 0; width: 56px; height: 56px; display: grid; place-items: center;
+          font: 700 40px/1 'Fraunces', serif; backface-visibility: hidden; }
+</style>
+</head>
+<body>
+<div id="box">
+  <svg viewBox="0 0 996 330" preserveAspectRatio="xMidYMid meet"><path id="rail" d="" fill="none" stroke="none"/></svg>
+</div>
+<script type="module">
+const PATH = 'M1 209.434C58.5872 255.935 387.926 325.938 482.583 209.434C600.905 63.8051 525.516 -43.2211 427.332 19.9613C329.149 83.1436 352.902 242.723 515.041 267.302C644.752 286.966 943.56 181.94 995 156.5';
+const VIEW = [996, 330];
+const BASE_VELOCITY = 8;            // percent of the path per second
+const REPEAT = 2;
+const ROLLING_Z = { base: 1, range: 10 };
+const SCROLL_FACTOR = 1 / 1000 * 5; // the original feeds a constant 1 through [0, 1000] -> [0, 5]: +0.5 percent speed
+const STAGE = 1.05;                 // the demo's scale-105
+
+const TILES = [['#cbb8e6', '#3a2a55', 'a'], ['#ff5a2a', '#1b1b1b', 'B'], ['#e6e6e6', '#111', '3'], ['#e0aa7a', '#a8451f', '::'],
+  ['#e8e8e8', '#111', '&'], ['#4fc1c6', '#fff', 'g'], ['#ef3a2a', '#1b1b1b', 'A'], ['#ef3a2a', '#0b3a2c', 'G'],
+  ['#f2b8d2', '#7a1b4a', 'abc'], ['#91b078', '#17301f', '&'], ['#f6dc57', '#2e3a9a', 'x'], ['#2d4ea8', '#ff5a2a', 'D'], ['#e6e6e6', '#111', 'S']];
+
+document.getElementById('rail').setAttribute('d', PATH);
+const box = document.getElementById('box');
+const items = [];
+for (let r = 0; r < REPEAT; r++) TILES.forEach(([bg, fg, ch]) => {
+  const d = document.createElement('div');
+  d.className = 'tile'; d.textContent = ch; d.style.background = bg; d.style.color = fg;
+  d.style.offsetPath = `path('${PATH}')`;
+  box.append(d); items.push(d);
+});
+
+const vw = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vw'));
+const vh = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh'));
+const k = Math.min(vw / VIEW[0], vh / VIEW[1]) * STAGE;
+box.style.transform = `translate(${(vw - VIEW[0] * k) / 2}px, ${(vh - VIEW[1] * k) / 2}px) scale(${k})`;
+
+const wrap = (v) => ((v % 100) + 100) % 100;
+window.seek = (t) => {
+  const base = BASE_VELOCITY * (1 + SCROLL_FACTOR) * t;
+  items.forEach((el, i) => {
+    const pct = wrap(base + (i * 100) / items.length);
+    el.style.offsetDistance = `${pct}%`;
+    el.style.zIndex = Math.floor(ROLLING_Z.base + (pct / 100) * ROLLING_Z.range);
+  });
+};
+window.seek(0);
+</script>
+</body>
+</html>

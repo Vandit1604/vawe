@@ -1,0 +1,66 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<title>move: simple marquee</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Fraunces'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Fraunces.woff2') format('woff2'); }
+  html, body { background: #000; }
+  body { display: block; position: relative; --p: calc(var(--vh) / 532); }
+  h1 { position: absolute; left: 0; right: 0; top: calc(var(--p) * 133); margin: 0; text-align: center; color: #fff;
+       font: 380 calc(var(--p) * 60) / 1 'Fraunces', serif; }
+  .rows { position: absolute; left: 0; right: 0; top: calc(var(--p) * 324); display: flex; flex-direction: column; gap: calc(var(--p) * 16); }
+  .row { display: flex; width: 100%; }
+  .copy { display: flex; flex-shrink: 0; }
+  .item { margin: 0 calc(var(--p) * 16); width: calc(var(--p) * 192); height: calc(var(--p) * 128); flex-shrink: 0; }
+</style>
+</head>
+<body>
+<h1>Weekly Finds</h1>
+<div class="rows" id="rows"></div>
+<script type="module">
+import { rng } from '/core/motion/springs.js';
+
+const ROWS = [{ dir: 'left' }, { dir: 'right' }, { dir: 'left' }];
+const BASE_VELOCITY = 8;        // percent of one copy of the row per second
+const REPEAT = 4;
+const PER_ROW = 5;
+
+const rand = rng(11);
+const hue = () => Math.round(rand() * 360);
+const gradient = () => {
+  const blob = () => `radial-gradient(${40 + Math.round(rand() * 50)}% ${50 + Math.round(rand() * 50)}% at ${Math.round(rand() * 100)}% ${Math.round(rand() * 100)}%, hsl(${hue()} ${45 + Math.round(rand() * 35)}% ${48 + Math.round(rand() * 22)}%), transparent 85%)`;
+  return `${blob()}, ${blob()}, hsl(${hue()} 40% 22%)`;
+};
+
+const rowsEl = document.getElementById('rows');
+const bases = ROWS.map(({ dir }, r) => {
+  const row = document.createElement('div');
+  row.className = 'row';
+  const copies = Array.from({ length: REPEAT }, () => {
+    const copy = document.createElement('div');
+    copy.className = 'copy';
+    row.append(copy);
+    return copy;
+  });
+  for (let i = 0; i < PER_ROW; i++) {
+    const item = document.createElement('div');
+    item.className = 'item';
+    item.style.background = gradient();
+    copies.forEach((c, n) => c.append(n ? item.cloneNode(true) : item));
+  }
+  rowsEl.append(row);
+  return { copies, sign: dir === 'left' ? -1 : 1 };
+});
+
+const wrap = (v) => ((v % -100) + -100) % -100;
+window.seek = (t) => bases.forEach(({ copies, sign }) => {
+  const x = wrap(sign * BASE_VELOCITY * t);
+  copies.forEach((c) => { c.style.transform = `translateX(${x}%)`; });
+});
+window.seek(0);
+</script>
+</body>
+</html>
