@@ -66,14 +66,16 @@ function pageRoot(abs) {
   } catch { return dir; }
 }
 
-// Size and mtime of every file under the dirs: any edit to the page folder or to core/ changes it.
-export function treeSignature(dirs) {
+// Size and mtime of every file under the dirs (any edit to the page folder or to core/ changes it), or with
+// `content` the bytes of each file: a checkout, rebase or touch then leaves it alone.
+export function treeSignature(dirs, { content = false } = {}) {
   const h = createHash('sha1');
   const walk = (dir) => {
     for (const e of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
       if (e.name === 'node_modules' || e.name.startsWith('.')) continue;
       const p = path.join(dir, e.name);
       if (e.isDirectory()) walk(p);
+      else if (content) h.update(`${p}:`).update(fs.readFileSync(p)).update(';');
       else { const st = fs.statSync(p); h.update(`${p}:${st.size}:${st.mtimeMs};`); }
     }
   };
