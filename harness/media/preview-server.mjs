@@ -17,7 +17,7 @@ import { serveRepo, launchPage, trackBrowser, insideRoot, REPO_ROOT, pageArgs, P
 const SELF = fileURLToPath(import.meta.url);
 // One daemon per checkout and capture mode (a draft and a final need different browser flags): a shared state file made a worktree render pages from another checkout's root.
 export const stateFile = (final) => scratch('preview-server', `${createHash('sha1').update(REPO_ROOT).digest('hex').slice(0, 10)}${final ? '' : '-draft'}.json`);
-const IDLE_MS = 5 * 60 * 1000;
+const IDLE_MS = Number(process.env.VAWE_PREVIEW_IDLE_MS) || 5 * 60 * 1000;
 
 function readState(final) {
   try { return JSON.parse(fs.readFileSync(stateFile(final), 'utf8')); } catch { return null; }
@@ -133,6 +133,9 @@ export async function openPreview(pagePath, { width = 1920, height = 1080, scale
   return { page, url, persistent: false, close: async () => { await closePage(); closeServer(); } };
 }
 
+// A final's lanes run in their own browsers, so a long capture leaves the daemon untouched while the render still holds its tab here.
+const hasLiveTab = (browser) => browser.targets().some((t) => t.type() === 'page' && !t.url().endsWith(WARM_HASH));
+
 async function daemonMain(final) {
   const { default: puppeteer } = await import('puppeteer');
   const { close: closeServer, port } = await serveRepo({ root: REPO_ROOT });
@@ -149,8 +152,8 @@ async function daemonMain(final) {
   const idleTimer = setInterval(() => {
     let mtime = 0;
     try { mtime = fs.statSync(stateFile(final)).mtimeMs; } catch { return shutdown(); }
-    if (Date.now() - mtime > IDLE_MS) shutdown();
-  }, 30000);
+    if (Date.now() - mtime > IDLE_MS && !hasLiveTab(browser)) shutdown();
+  }, Math.min(30000, IDLE_MS / 2));
 }
 
 if (process.argv.includes('--daemon')) daemonMain(!process.argv.includes('--draft'));
