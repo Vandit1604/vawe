@@ -332,7 +332,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
       const local = {};
       let sinceOpen = 0;
       try {
-        if (fault) fault([lo, hi], attempt);
+        if (fault) await fault([lo, hi], attempt, lane);
         for (let i = lo; i < hi; i++) {
           if (at.opened && sinceOpen >= RECYCLE_SUBFRAMES) { mark('close page', i); await ex(() => at.opened.close().catch(() => {})); at.opened = null; }
           if (!at.opened) {
@@ -365,6 +365,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
     if (resume && resume.done(slice)) return;
     for (let attempt = 1; ; attempt++) {
       try {
+        if (lane && !lane.browser.connected) { await lane.close(); Object.assign(lane, await openLane(final)); }
         await runSliceOnce(slice, worker, attempt, lane);
         if (resume) resume.finish(slice);
         return;
