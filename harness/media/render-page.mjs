@@ -130,8 +130,13 @@ export const frameFormat = (final) => (final
 // page.screenshot must keep its browser-wide lock: parallel Page.captureScreenshot calls on several tabs
 // returned 1200x818 frames (measured). Only its result decode is slow (a per-character Uint8Array.from,
 // about 70 ms a 1 MB PNG on the one node thread), so take the base64 string and decode it with Buffer.
-async function captureShot(page, shot) {
-  return Buffer.from(await page.screenshot({ ...shot, encoding: 'base64' }), 'base64');
+async function captureShot(page, shot, stats = null) {
+  const t0 = performance.now();
+  const b64 = await page.screenshot({ ...shot, encoding: 'base64' });
+  const t1 = performance.now();
+  const bytes = Buffer.from(b64, 'base64');
+  if (stats) Object.assign(stats, { call: t1 - t0, decode: performance.now() - t1 });
+  return bytes;
 }
 
 const die = (msg, code = 1) => { console.error(errorLine(msg)); process.exit(code); };
@@ -142,7 +147,7 @@ export function readPageMeta(pagePath, name) {
   return metaOf(fs.readFileSync(pagePath, 'utf8'), name);
 }
 
-// Speed spike bench only: per-subframe timings (seek, settle, screenshot call, PNG write) appended here as JSONL.
+// Profile only: per-subframe stage times (seek, settle, screenshot call and decode, write) appended here as JSONL.
 const BENCH_TIMING_FILE = process.env.VAWE_BENCH_TIMING_FILE || null;
 
 const NAV_TIMEOUT_MS = 30_000;
@@ -464,10 +469,11 @@ async function captureFrames(pagePath, tmpDir, frames, kArr, subframeStart, fps,
         await settle(page);
         const t2 = performance.now();
         mark('screenshot');
-        const bytes = await exclusive(() => captureShot(page, format.shot));
+        const stats = BENCH_TIMING_FILE ? {} : null;
+        const bytes = await exclusive(() => captureShot(page, format.shot, stats));
         const t3 = performance.now();
         fs.writeFileSync(file, bytes);
-        if (BENCH_TIMING_FILE) fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, write: performance.now() - t3, bytes: bytes.length })}\n`);
+        if (stats) fs.appendFileSync(BENCH_TIMING_FILE, `${JSON.stringify({ i, j, seek: t1 - t0, settle: t2 - t1, shot: t3 - t2, call: stats.call, decode: stats.decode, write: performance.now() - t3, bytes: bytes.length })}\n`);
       }
       Object.assign(local, { key, file });
       onSubframe(i, reused);
@@ -819,7 +825,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       }
       await place(tmpWeb, webPath);
     }
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    if (!process.env.LOCAL_KEEP) fs.rmSync(tmpDir, { recursive: true, force: true });
     const level = opts.checks && !mixed && from === 0 && durArg == null ? await opts.checks.run('sound', () => mixLevel(audioRead.read, dur)) : null;
     const profile = costLines({ kArr, reused, fps, from, prepassMs, captureMs, encodeMs });
     return { ...result, probe, level, motion, profile, web: webPath };
