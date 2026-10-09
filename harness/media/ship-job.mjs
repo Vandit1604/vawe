@@ -18,6 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { defaultOut } from './render-page.mjs';
 import { videoProblems, readVideo } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
+import { WAIT_WORK } from '../live/stage-say.mjs';
 import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
@@ -61,6 +62,7 @@ function startJob(page, renderArgs) {
   console.log(`job ${id} started: final render of ${page} in the background`);
   console.log(`log: ${log}`);
   console.log(`status: bin/vawe ship --status ${page} --wait`);
+  console.log(`work: ${WAIT_WORK}`);
 }
 
 function runJob(id) {
@@ -188,7 +190,7 @@ function statusOf(id) {
   if (['done', 'failed', 'cancelled'].includes(job.status)) return finalLines(job, text);
   if (job.status === 'running' && !pidAlive(job.pid)) return [failedLine(job, text, 'the render process died without a result'), `job ${job.id}: the render process died without a result`, `log: ${job.log}`];
   if (job.status === 'judging') return renderedLines(job);
-  return [progressLine(job, text), `log: ${job.log}`];
+  return [progressLine(job, text), `work: ${WAIT_WORK}`, `log: ${job.log}`];
 }
 
 const renderedLines = (job) => [

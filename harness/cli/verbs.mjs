@@ -9,7 +9,7 @@ import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs
 
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
-import { SAY, nextStep } from '../live/stage-say.mjs';
+import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // A test that compares seconds with a stamped budget reads a slowdown from the other test files as a slow check, so it runs alone, last.
@@ -98,6 +98,7 @@ export const VERBS = [
     ],
     example: 'vawe dev films/my-launch/page.html --from 2 --to 6',
     build: (v, [page]) => [
+      { script: 'harness/live/dev-warn.mjs', args: [page] },
       { script: 'harness/media/render-page.mjs', args: [page, ...(v.out ? [v.out] : []), ...opt('--aspect', v.aspect), ...opt('--from', v.from), ...opt('--to', v.to), ...(v.audio ? ['--audio'] : []), ...(v.fast ? ['--fast'] : []), ...(v.full ? ['--full'] : []), ...(v.taste ? ['--taste'] : []), '--next', devNext(v, [page])] },
       ...(v['no-judge'] ? [] : [{ script: 'harness/media/directions-judge.mjs', args: [page] }]),
     ],
@@ -124,9 +125,9 @@ export const VERBS = [
       return [warn, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
-      if (v.status) return 'repeat vawe ship --status <page> --wait (up to 100 s each) until it says done; the result includes the judge';
+      if (v.status) return 'repeat vawe ship --status <page> --wait (up to 100 s each) until it says done; the result includes the judge. Between waits: ' + WAIT_WORK;
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
-      return `rendering in the background: bin/vawe ship --status ${page} --wait`;
+      return `rendering in the background: bin/vawe ship --status ${page} --wait (about 100 s each, repeat); ${WAIT_WORK}`;
     },
   },
   {

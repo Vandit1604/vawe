@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { nextStep, takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
+import { spawnSync } from 'node:child_process';
+import { SAY, WAIT_WORK, nextStep,takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
 
 function film(html, brief = '## Look\n') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stage-'));
@@ -143,4 +144,19 @@ test('the motion step names onion and velocity for the spectacle', () => {
   const later = new Date(Date.now() - 1000);
   fs.utimesSync(path.join(root, 'out', 'f-draft.mp4'), later, later);
   assert.match(nextStep(page, root).next, /strip films\/f\/page\.html --cuts.*onion.*velocity/);
+});
+
+test('the ship step names the work for the wait', () => {
+  assert.match(WAIT_WORK, /Board and Motion pass rows.*strip <page> --cuts.*critique notes/);
+  assert.match(SAY.ship('f', 'films/f/page.html'), /--wait \(about 100 s each, repeat\); while it renders, fill/);
+});
+
+test('dev advises, never blocks, while the Board is the template', () => {
+  const { root, page } = film('<p>x</p>', '## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n');
+  const run = () => spawnSync(process.execPath, [path.resolve('harness/live/dev-warn.mjs'), page], { encoding: 'utf8' });
+  const empty = run();
+  assert.equal(empty.status, 0);
+  assert.match(empty.stdout, /The Board comes before the motion: fill rhythm, spectacle, one move per cut, sound/);
+  fs.writeFileSync(path.join(root, 'films', 'f', 'brief.md'), '## Board\n\n| beat | in s |\n|---|---|\n| s1 | 0 |\n');
+  assert.equal(run().stdout, '');
 });
