@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="duration" content="1">
+<style>
+@font-face { font-family: "Anybody"; src: url("../../../assets/fonts/Anybody.woff2") format("woff2"); font-weight: 100 900; }
+html, body { margin: 0; background: #000; overflow: hidden; }
+#screen { width: 1920px; height: 1080px; background: #06080c; color: #fff; font-family: Anybody, sans-serif; overflow: hidden; }
+#screen > * { position: absolute; }
+#word { left: 120px; top: 40px; font-size: 130px; font-weight: 800; letter-spacing: 4px; }
+#glyph { left: 300px; top: 500px; width: 60px; height: 60px; background: #fff; }
+#patch { left: 1100px; top: 300px; width: 600px; height: 400px; background: #808080; }
+#bar { left: 100px; top: 100px; width: 40px; height: 880px; background: #fff; }
+#stripes { left: 400px; top: 300px; width: 1400px; height: 700px; background: repeating-linear-gradient(90deg, #fff 0 5px, #000 5px 10px); }
+#marker { left: 1500px; top: 800px; width: 24px; height: 24px; background: #fff; }
+#point { left: 1000px; top: 800px; width: 12px; height: 12px; background: #fff; }
+#box { left: 760px; top: 700px; width: 240px; height: 150px; border: 6px solid #ff2a1a; box-sizing: border-box; }
+</style></head>
+<body><div id="screen">
+  <div id="word">LENS 0123</div>
+  <div id="stripes"></div><div id="glyph"></div><div id="patch"></div><div id="bar"></div><div id="marker"></div><div id="box"></div><div id="point"></div>
+</div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { lens, htmlSource, canvasSource, merge, OFF, PALETTES } from '/core/surfaces/lens.js';
+const q = new URLSearchParams(location.search);
+const only = q.get('only');
+if (only) document.querySelectorAll('#screen > *').forEach((el) => { if (el.id !== only) el.style.display = 'none'; });
+const cfg = JSON.parse(q.get('cfg') || 'null');
+const moving = {
+  zoom: (t) => 1 + 0.4 * t, tiltY: (t) => 0.3 * Math.sin(t * 3), tiltX: 0.15,
+  palette: { stops: PALETTES.thermal },
+  tear: { amount: (t) => (t > 0.5 ? 30 : 0), prob: 0.2 },
+};
+function drawnScreen() {
+  const c = document.createElement('canvas');
+  c.width = 1920; c.height = 1080;
+  const g = c.getContext('2d');
+  g.fillStyle = '#06080c'; g.fillRect(0, 0, 1920, 1080);
+  g.fillStyle = '#fff'; g.fillRect(300, 500, 60, 60); g.fillRect(100, 100, 40, 880);
+  g.fillStyle = '#808080'; g.fillRect(1100, 300, 600, 400);
+  g.font = '800 130px Anybody, sans-serif'; g.fillText('LENS 0123', 120, 160);
+  return c;
+}
+const source = q.get('src') === 'canvas' ? canvasSource(drawnScreen()) : htmlSource(document.getElementById('screen'), { scale: Number(q.get('scale') || 1) });
+const cam = lens(source, cfg ? merge(OFF, cfg) : moving);
+window.__lens = cam;
+vawe.onFrame((t) => cam.draw(t));
+</script></body></html>

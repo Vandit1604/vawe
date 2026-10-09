@@ -9,7 +9,7 @@ group: engine
 The engine's vocabulary, one subfolder per capability family: `motion/` (springs, keyframe tables,
 seeded noise: `core/motion/README.md`), `engine/` (the virtual clock `page-clock.js`, the seek
 `page-seek.js`, `page-api.js`), `audio/` (the synth voices in `kit.mjs`), `layout/` (aspects),
-`color/`, `beats/` (beat detection), `three/` (three.js helpers), `surfaces/` (the shader field) and
+`color/`, `beats/` (beat detection), `three/` (three.js helpers), `surfaces/` (the shader field, and the lens that films a screen like a camera: `prompts/moves/lens.md`) and
 `timeline/` (animation overlap checks). Every effect composes from what is here; nothing bypasses it with a private code path
 (`AGENTS.md`, "Changing the engine, not a film").
 
