@@ -115,7 +115,12 @@ export function frameManifest(id, got) {
 }
 
 /** The 360p video of film `id` in `dir`, or undefined. */
-export const refVideo = (dir, id) => ['mp4', 'webm'].map((e) => path.join(dir, `${id}.${e}`)).find(fs.existsSync);
+export function ytDlpArgs(url, dir) {
+  return ['-f', 'bv*[height<=360]/b[height<=360]/worst', '--merge-output-format', 'mp4', '--no-playlist', '-o', path.join(dir, '%(id)s.%(ext)s'),
+    '--print', 'after_move:%(filepath)s\t%(id)s\t%(title)s\t%(channel)s', url];
+}
+
+export const refVideo =(dir, id) => ['mp4', 'webm'].map((e) => path.join(dir, `${id}.${e}`)).find(fs.existsSync);
 
 /** The video to look at for film `id`: the 1080p copy in hd/ when there is one, else the 360p video; undefined when neither exists. */
 export const refSharpVideo = (dir, id) => [path.join(dir, 'hd', `${id}.mp4`)].find(fs.existsSync) ?? refVideo(dir, id);

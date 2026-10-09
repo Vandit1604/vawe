@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { refsDir, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
+import { refsDir, ytDlpArgs, parseVerified, readRegistry, writeRegistry, listLines, frameManifest, readFrameManifest, frameLines, refVideo, refSharpVideo, refShots, FRAMES, FRAMES_MANIFEST, SHEETS, VERIFIED, TYPES } from '../lib/refs.mjs';
 import { contactSheet, durationOf, keyFrameFiles } from '../lib/contact-sheet.mjs';
 
 const root = path.resolve(import.meta.dirname, '../..');
@@ -43,12 +43,11 @@ function index() {
 }
 
 function download(url) {
-  const r = spawnSync('yt-dlp', ['-f', 'bv*[height<=360]/b[height<=360]/worst', '--merge-output-format', 'mp4', '--no-playlist', '-o', path.join(dir, '%(id)s.%(ext)s'),
-    '--print', 'after_move:filepath', '--print', '%(id)s\t%(title)s\t%(channel)s'], { encoding: 'utf8' });
+  const args = ytDlpArgs(url, dir);
+  const r = spawnSync('yt-dlp', args, { encoding: 'utf8' });
   if (r.error?.code === 'ENOENT') die('yt-dlp is not installed: brew install yt-dlp');
-  if (r.status !== 0) die(`yt-dlp failed: ${String(r.stderr).split('\n').filter(Boolean).slice(-2).join(' ')}`);
-  const [file, info] = r.stdout.trim().split('\n');
-  const [id, title, studio] = info.split('\t');
+  if (r.status !== 0) die(`yt-dlp failed: ${String(r.stderr).split('\n').filter(Boolean).slice(-2).join(' ')}\n  argv: yt-dlp ${args.join(' ')}`);
+  const [file, id, title, studio] = r.stdout.trim().split('\n').at(-1).split('\t');
   return { file, id, title, studio };
 }
 

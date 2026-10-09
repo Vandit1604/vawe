@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
+import { ytDlpArgs, parseVerified, filmType, pickRefs, refsDir, listLines, chooseRefs, writeRegistry, frameManifest, frameLines, readFrameManifest } from '../../harness/lib/refs.mjs';
 
 test('the frame manifest numbers each frame and holds its absolute path; frameLines prints it', () => {
   const m = frameManifest('a', [{ t: 0.14, file: '/r/frames/a/key-1-0.1s.png' }, { t: 3.62, file: '/r/frames/a/key-2-3.6s.png' }]);
@@ -101,4 +101,13 @@ test('listLines gives one aligned line per film', () => {
   const lines = listLines([{ id: 'a', type: 'product', seconds: 30.4, inScope: true, studio: 'Linear', title: 'T' }, { id: 'bb', type: null, seconds: 9, inScope: false, why: '3D CG', studio: null, title: 'U' }]);
   assert.equal(lines.length, 2);
   assert.match(lines[1], /^bb {2}out \(3D CG\) {2}9 s +- +U$/);
+});
+
+test('the yt-dlp argv ends with the url, for a YouTube and an X url', () => {
+  for (const url of ['https://www.youtube.com/watch?v=abc123', 'https://x.com/mnowakdesign/status/2108253918086176899']) {
+    const args = ytDlpArgs(url, '/r');
+    assert.equal(args.at(-1), url);
+    assert.equal(args.filter((a) => a === url).length, 1);
+    assert.equal(args[args.indexOf('-o') + 1], '/r/%(id)s.%(ext)s');
+  }
 });
