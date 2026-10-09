@@ -33,7 +33,10 @@ export async function resolveSource(input, { draft, log = () => {} } = {}) {
   if (!fs.existsSync(video)) die(`no film to read at ${video}`);
   const isRef = !page && path.resolve(video).startsWith(path.resolve(refsDir()));
   const kind = page ? 'page' : isRef ? 'ref' : 'mp4';
+  const probe = probeVideo(video);
+  const stream = Number(spawnSync('ffprobe', ['-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=duration', '-of', 'default=noprint_wrappers=1:nokey=1', video], { encoding: 'utf8' }).stdout);
+  if (stream > 0) probe.dur = Math.min(probe.dur, stream);
   const hash = crypto.createHash('sha1').update(fileHash(video)).update(page ? fs.readFileSync(page) : '').digest('hex');
-  return { video: path.resolve(video), name: found.name, kind, page: page ? path.resolve(page) : null, hash, probe: probeVideo(video),
+  return { video: path.resolve(video), name: found.name, kind, page: page ? path.resolve(page) : null, hash, probe,
     note: page ? `draft of ${page}` : isRef ? 'reference film' : 'film' };
 }

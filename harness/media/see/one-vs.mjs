@@ -17,7 +17,8 @@ const lengthOf = (m) => med(m.structure.shots.map((s) => s.length));
 const worldWord = (m) => (m.source.kind === 'page' ? 'world' : 'shot');
 
 /** A delta row; `advice` is a string or null. */
-const row = (section, measure, a, b, advice) => ({ section, measure, a, b, advice: advice ?? null });
+const tidy = (v) => (typeof v === 'number' ? round(v, 3) : v);
+const row = (section, measure, a, b, advice) => ({ section, measure, a: tidy(a), b: tidy(b), advice: advice ?? null });
 
 function structureRows(a, b) {
   const la = lengthOf(a), lb = lengthOf(b);
