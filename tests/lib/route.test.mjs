@@ -49,6 +49,13 @@ test('an invented product has no URL to capture: it never takes the brand launch
   assert.equal(pickTemplate({ request: 'a launch film for an invented tool, like https://acme.com', length: 22 }, table).template, 'prompts/brand-launch-from-url.md');
 });
 
+test('a URL in the request is not the product site: a launch word or url answer routes to the URL template', () => {
+  const request = 'Make a video about design systems, using the components from https://www.fancycomponents.dev/';
+  assert.notEqual(pickTemplate({ request, length: 22 }, table).type, 'brand launch');
+  assert.equal(pickTemplate({ request: 'a launch film for https://example.com', length: 22 }, table).template, 'prompts/brand-launch-from-url.md');
+  assert.equal(pickTemplate({ request: 'url: https://example.com', length: 22 }, table).type, 'brand launch');
+});
+
 test('an unknown request takes the motion-graphic row and says so', () => {
   const r = pickTemplate({ name: 'zz-demo' }, table);
   assert.equal(r.template, 'prompts/beat-sheet.md');

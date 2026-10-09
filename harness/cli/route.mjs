@@ -23,7 +23,7 @@ const WORDS = [
   ['story or explainer', /\b(explain\w*|story|article|tutorial|how it works)\b/],
   ['app or game capture', /\b(game|lab|interactive|simulation)\b/],
   ['showreel', /\b(showreel|reel|taste probe)\b/],
-  ['brand launch', /(https?:\/\/|\bwww\.|\b(launch|promo|product|saas|landing page|website|site|ai demo|product demo|demo video|feature tour|walkthrough|proof film|case study)\b)/],
+  ['brand launch', /\b(launch|promo|product|saas|landing page|website|site|url|ai demo|product demo|demo video|feature tour|walkthrough|proof film|case study)\b/],
 ];
 
 // RECIPES.md "Complete videos": one chain per 20 to 30 s film, found by its heading number.

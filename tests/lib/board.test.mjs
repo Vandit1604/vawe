@@ -114,6 +114,13 @@ test('movesUnused names a Taken from move that no Board row uses', () => {
   assert.deepEqual(movesUnused(taken(['x']) + '## Board\n\n| beat | in s |\n|---|---|\n| [s1] | [0] |\n'), []);
 });
 
+test('shipWarnings explains how an unused Taken from move is matched and lists the Board moves', () => {
+  const [line] = shipWarnings(taken(['match-cut']) + board()).filter((l) => l.startsWith('Taken from'));
+  assert.match(line, /"match-cut"/);
+  assert.match(line, /Board move cell contains that move name/);
+  assert.match(line, /Board moves seen: "whip/);
+});
+
 test('boardVsPage compares the beat starts of the Board with the page worlds', () => {
   const b = board();
   assert.deepEqual(boardVsPage(b, [0, 1, 2]), []);
