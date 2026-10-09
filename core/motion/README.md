@@ -87,6 +87,23 @@ ramp(document.querySelector('.seq'), document.querySelector('.final'), { at: 18.
 `pickBand(px)` names the band for a move of that many pixels at the 700 px/s an eye follows;
 `bandOf(seconds)` names the band a duration sits in.
 
+Every export of `presets.js`, with its defaults and ranges, so you do not read the source. The `*Specs` functions are the pure
+versions of the same call: they return `{ keyframes, timing }` and touch no element.
+
+| export | defaults and ranges |
+|---|---|
+| `BANDS`, `bandSeconds(name)`, `bandOf(s)`, `pickBand(px)` | energy 0.15-0.3 s, professional 0.3-0.5, gravity 0.5-0.8, cinematic 0.8-2.0; `bandSeconds` is the middle (0.225, 0.4, 0.65, 1.4 s) |
+| `enter` / `enterSpecs` | `at` 0, `band` gravity (or `duration` s), `from` `'0 0.5em'`, `scale` 0.96, `blur` 0 px, `ease` land; the fade takes the first 40% |
+| `leave` / `leaveSpecs` | `at` or `end`, `to` `'0 -0.3em'`, `blur` 0, `ease` launch or leave; lasts 0.6 of the element's enter |
+| `stagger` / `staggerTimes` | `gap` 0.05 s (clamped 0.03-0.08), seeded jitter 25%, the run fits 0.5 s, `nudgeEvery` 0 (off), `seed` 1 |
+| `layer` / `layerTiming` | `overlap` 0.3 of the lead's move; the secondary is one band slower |
+| `camera` / `cameraSpecs` | `kind` push (scale 1 to 1.12), pull (1.15 to 1), drift (1 to 1.03 and a slide), whipOut, whipIn (0.225 s, 16 px blur, travel 100%); default duration cinematic; `strength` 1, `dir` 1 |
+| `parallax` | `[[el, depth], ...]`, depth 0.3 ground, 1 camera, 1.8 front; the options of `camera` |
+| `ramp` / `rampSpecs` / `rampSpeeds` | `kind` scaleOut, scaleIn, x, y; `duration` 0.45 s (out 40%, in 60%); amounts: scale 0.3 out and 0.4 in, x and y 40 and 60 per cent; `blur` 6 px, `fade` 0.5 |
+| `focus` / `focusSpecs` | `at` 0, `blur` 10 px, `scale` 1, `opacity` 1, duration cinematic, `ease` settle |
+| `keys` / `keysSpec` | `[[t, value, handle?], ...]`, at least two keys, times rising; no handle is linear |
+| `EASE`, `EASE_HANDLES`, `easeFn(name)` | land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; `easeFn` is the same curve as a function of u in 0..1 |
+
 ## After Effects handles
 
 A segment is shaped by two handles, one per key. `influence` is how far along the segment the handle
