@@ -3,9 +3,14 @@
 The system of the 5 s onsen sting. The tokens and parts are in `kit/kit.css`; `kit/kit.html` shows them on one sheet.
 `page.html` is built from them.
 
-Skills (named when this kit was written, after the film): the principles of `pbakaus/colorize` (one saturated colour per world, a near-neutral room behind it, one accent on one word).
-Rejected: the web-page patterns of `leonxlnx/soft-skill` (nav, CTA button, pill, eyebrow, section padding), because a video frame is not a hero page.
-No UI skill was needed: the film has no product UI.
+Skill ladder (named when this kit was written, after the film):
+
+Skipped builder: the film has no product UI and no card or panel parts.
+Skill type: pbakaus/typeset: one face, the name untracked because the face is wide, the heaviest weight on the one word the film is about.
+Skill colour: pbakaus/colorize: one saturated colour per world, a near-neutral room behind it, one accent on one word.
+Skipped depth: the light is a glow and a heat front drawn by the page, not shadows or blur layers.
+Skill frame: vawe rules: one name and one line of four words, a ground never flat, the eye follows the ring.
+Rejected at the frame: the web-page patterns of leonxlnx/soft-skill (nav, CTA button, pill, eyebrow, section padding), because a video frame is not a hero page.
 
 ## Palette roles
 

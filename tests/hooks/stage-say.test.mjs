@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { nextStep, takenFromCount, movesTakenCount, boardFilled } from '../../harness/live/stage-say.mjs';
+import { nextStep, takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
 
 function film(html, brief = '## Look\n') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stage-'));
@@ -45,12 +45,19 @@ test('an empty Taken from table says so before any design file; four named frame
   assert.match(nextStep(page, root).next, /DESIGN\.md/);
   const design = path.join(root, 'films', 'f', 'DESIGN.md');
   fs.writeFileSync(design, '# d');
-  assert.match(nextStep(page, root).next, /add a "Skills:" line to films\/f\/DESIGN\.md/);
-  fs.writeFileSync(design, '# d\n\nSkills: pbakaus/colorize; rejected: nav patterns\n');
+  assert.match(nextStep(page, root).why, /no Skill line for builder, type, colour, depth, frame/);
+  fs.writeFileSync(design, '# d\n\nSkill builder: leonxlnx/soft-skill: card and row styles\nSkill colour: pbakaus/colorize: one accent\nSkipped type: one face already set\n');
+  assert.match(nextStep(page, root).why, /no Skill line for depth, frame/);
+  fs.writeFileSync(design, '# d\n\nSkill builder: a: x\nSkill type: b: x\nSkill colour: c: x\nSkipped depth: flat film\nSkill frame: vawe rules: one line, three things\n');
   assert.match(nextStep(page, root).next, /^build one static state per world in films\/f\/page\.html from the kit/);
   const later = new Date(Date.now() + 5000);
   fs.utimesSync(page, later, later);
   assert.equal(nextStep(page, root).next, 'bin/vawe frames films/f/page.html');
+});
+
+test('a Skipped line needs a reason, and a Skill line needs a slug and a decision', () => {
+  assert.deepEqual(missingRungs('Skipped type:\nSkill depth: slug\n'), ['builder', 'type', 'colour', 'depth', 'frame']);
+  assert.deepEqual(missingRungs('Skill color: pbakaus/colorize: one accent\n'), ['builder', 'type', 'depth', 'frame']);
 });
 
 test('a brief with no Taken from section (an older film) is not nagged', () => {

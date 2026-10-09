@@ -16,12 +16,14 @@ Order: (1) the brief, facts only. (2) Study the references (`bin/vawe refs frame
 at full size), then fill brief.md "Taken from": 4 to 6 named frame paths and what each gives. Then study how they move:
 `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves with the ref id and cut second. (3) Write
 `films/<name>/DESIGN.md` and `films/<name>/kit/`: ground layers, and each moving part (word, mark, bar, card, icon,
-wordmark) as its own element. Fetch skills with `command npx -y ui-skills get <slug>`: `leonxlnx/soft-skill` (builder),
-`pbakaus/colorize`, `mengto/progressive-blur`. Take the principles; reject web-page patterns (nav, CTA button, pill,
-eyebrow, section padding): a video frame is not a hero page. Record the skills used and the rules rejected on a `Skills:`
-line in DESIGN.md (`bin/vawe` advises while it is missing). Product UI inside the film (an app screen, a card, a panel): build
-it as a real interface with one UI skill and real-looking data, then place it in the frame under the density budget.
-For an invented product the UI is invented but designed; only chrome with no function is a pitfall.
+wordmark) as its own element. Apply the skill ladder, one skill per rung in order (`command npx -y ui-skills get <slug>`):
+builder (`leonxlnx/soft-skill` or `emilkowalski/emil-design-eng`: the product UI and kit parts as a real, beautiful interface),
+type (`jakubkrehel/better-typography` or `pbakaus/typeset`), colour (`pbakaus/colorize` or `jakubkrehel/better-colors`),
+depth (`mengto/beautiful-shadows` or `mengto/progressive-blur`), then frame: compose the video frame with vawe's own rules
+(about 1 line and 2 or 3 things, ground never flat, an eye path). The frame rejects web-page patterns (nav, CTA button, pill,
+eyebrow, section padding), never by skipping the builder rung. Write one DESIGN.md line per rung: `Skill <rung>: <slug>: what it
+decided`, or `Skipped <rung>: <reason>` (`bin/vawe` advises on a missing rung). Product UI inside the film is a designed
+interface with real-looking data, never placeholder bars. For an invented product the UI is invented but designed.
 Kit format: `kit/kit.css` holds `:root` tokens (palette roles, light positions) and one rule per part (`.ground-*`,
 light devices, `.grain`, `.lockup`, `.word`, `.line`), each moving part its own element; `kit/kit.html` is an optional
 sheet that shows every part once. Example: `films/examples/colour-sting/DESIGN.md` and `kit/`. (4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a

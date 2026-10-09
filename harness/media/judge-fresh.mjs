@@ -169,7 +169,7 @@ async function prepare(input, stage, brief) {
 
 const STILLS_TASK = `The image shows three directions side by side: A on the left, B in the middle, C on the right, each a key frame with a caption.
 Score each direction 1 to 10 for how well its one frame would carry the film the brief asks for, and how far it is from a template.
-Name the strongest with one reason. Then score the axes below for the strongest direction only.`;
+Name the strongest with one reason. Does the product UI read as a designed interface, or as placeholder bars? Answer in the reason. Then score the axes below for the strongest direction only.`;
 
 const STILLS_JSON = `
 Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"one short line"},{"id":"B",...},{"id":"C",...}], "strongest":"A, B or C", "reason":"one sentence".`;

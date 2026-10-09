@@ -283,9 +283,14 @@ Then study how the references MOVE, since stills do not show it: run \`bin/vawe 
 
 const systemText = (name) => `## Design system and kit
 
-Phase 3. Write films/${name}/DESIGN.md: the palette as roles, the type, the ground and light devices, the text treatment, the skills used and the rules rejected. Write films/${name}/kit/: the ground layers, and every moving part as its own element (words, marks, bars, cards, icons, the wordmark).
-Skills, fetched with \`command npx -y ui-skills get <slug>\`: leonxlnx/soft-skill (builder), pbakaus/colorize, mengto/progressive-blur. Take the principles. Reject the web-page patterns (nav, CTA button, pill, eyebrow, section padding): a video frame is not a hero page. DESIGN.md has a "Skills:" line naming the skills used and rejected; \`bin/vawe\` advises until it does. The kit format and an example: skills/vawe-page/SKILL.md, films/examples/colour-sting/kit/.
-Product UI inside the film (app screens, cards, panels): build it as a real interface with one UI skill and real-looking data, then place it in the frame under the density budget. For an invented product the UI is invented but designed; only chrome with no function is a pitfall.`;
+Phase 3. Write films/${name}/DESIGN.md: the palette as roles, the type, the ground and light devices, the text treatment. Write films/${name}/kit/: the ground layers, and every moving part as its own element (words, marks, bars, cards, icons, the wordmark).
+Skill ladder: apply one skill per rung, in this order, fetched with \`command npx -y ui-skills get <slug>\`. DESIGN.md records each rung as \`Skill <rung>: <slug>: what it decided\`, or \`Skipped <rung>: <reason>\`; \`bin/vawe\` advises on a missing rung.
+1. builder: build the product UI and the kit parts as a real, beautiful interface (leonxlnx/soft-skill or emilkowalski/emil-design-eng). Real-looking data; never placeholder bars.
+2. type: scale, weight, tracking (jakubkrehel/better-typography or pbakaus/typeset).
+3. colour: roles and one accent (pbakaus/colorize or jakubkrehel/better-colors).
+4. depth: shadows, light, blur layers (mengto/beautiful-shadows or mengto/progressive-blur).
+5. frame: compose the video frame with vawe's own rules: about 1 line and 2 or 3 things, a ground that is never flat, an eye path. The frame rejects web-page patterns (nav, CTA button, pill, eyebrow, section padding); rung 1 still builds the UI parts. The kit format and an example: skills/vawe-page/SKILL.md, films/examples/colour-sting/kit/.
+Product UI inside the film (app screens, cards, panels) is a designed interface placed under the density budget. For an invented product the UI is invented but designed; only chrome with no function is a pitfall.`;
 
 const statesText = () => `## States
 
