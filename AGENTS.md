@@ -38,14 +38,14 @@ next command for the film you edited last.
 |---|---|---|
 | 1 | brief (facts only) | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing facts first (write them to a file, answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
 | 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives. Then how they MOVE: `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves (ref id, cut second) |
-| 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, one line per rung of the skill ladder: builder, type, colour, depth, frame) and `films/<name>/kit/` (ground layers; each moving part its own element); format and example in `vawe-page`; the builder rung builds product UI as a real interface; the frame rung rejects web-page patterns |
+| 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, one line per rung of the skill ladder: builder, type, colour, depth, frame) and `films/<name>/kit/` (ground layers; each moving part its own element); format and example in `vawe-page`; the builder rung builds product UI as a real interface; the frame rung rejects web-page patterns; a `Skipped <rung>` line cites a reference frame path or a SPEC.md line |
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
 | 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows and a bed |
 | 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
-| 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS |
+| 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS; poll once per call and work on the last draft between polls |
 
 Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe refs frames` (reference stills),
 `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),
@@ -53,7 +53,11 @@ Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> -
 
 `bin/vawe` names the next stage after each step; `ship` warns, never refuses, while the Board or Motion pass is unfilled. A page over about 25k tokens cannot be Read in one call: Read it with offset and limit.
 
-Every step logs to `out/<film>.runs.jsonl`: set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell, then `bin/vawe runs <film>` or `--all` reads the log.
+Every verb logs to `out/<film>.runs.jsonl` (verb, stage, seconds, exit code, slot wait): set `VAWE_AGENT=<name>` (one per agent) and `VAWE_MODEL=<model>` in your shell, then `bin/vawe runs <film>` or `--all` reads the log.
+
+A style from a reference (not a recreation): the brief names the ref and `critique`, `compare` and `judge` default to it (the line `ref: <id>` shows
+which). Read the card `bin/vawe refs frames <id>` prints (cuts, flashes, luma, camera, palette), not only the top of SPEC.md, and judge the film
+against the ref, not against the generic range.
 
 Recreating a reference: `bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md; mark every line KEEP
 or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until it passes
@@ -63,6 +67,8 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 
 - The shell is zsh: quote every glob and `?`, `grep --include='*.mjs'`, `curl 'x?a=b'` (unquoted: `no matches found`).
 - One file per `cat` or `head`: a hook rewrites `cat a b` and it breaks. Read the second file in a second call.
+- Do not pipe `bin/vawe` into `tail`, `head` or `grep`: the pipe hides the exit code. Every verb ends with `vawe: <verb> ok|FAILED (<reason>) in <s>s`.
+- A Bash call over 120 s moves to the background and keeps its render slot: run `dev` alone and strips in a second call.
 - Never `sleep`: wait with `bin/vawe ship --status <page> --wait`: one call blocks until the render ends or about 9 minutes, with a progress line each minute. Run it once, never in parallel, and do the work it names before it.
 - Run `git` plainly from the worktree: no `git -C`, no `$(...)`, no `for` loop around it.
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
