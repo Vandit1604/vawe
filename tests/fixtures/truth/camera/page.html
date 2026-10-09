@@ -1,0 +1,50 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4">
+<meta name="message" content="a pan, a zoom, a turn and a fixed tilt">
+<title>Truth camera</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #0b1020; }
+  .world { position: absolute; inset: 0; display: none; overflow: clip; }
+  .pic { position: absolute; inset: -200px; }
+  .pic i { position: absolute; border-radius: 50%; }
+  .slab { position: absolute; inset: 0; transform: rotate(8deg); }
+  .slab b { position: absolute; left: 22%; top: 30%; font: 800 220px/1 sans-serif; color: #f4f1ea; }
+  .slab u { position: absolute; background: #3d6df2; height: 90px; }
+  .slab u:nth-of-type(1) { left: 10%; top: 12%; width: 40%; }
+  .slab u:nth-of-type(2) { left: 55%; top: 70%; width: 30%; background: #f2a33d; }
+  .slab u:nth-of-type(3) { left: 8%; top: 74%; width: 22%; background: #3df2a1; }
+</style>
+</head>
+<body>
+<div class="world" data-world="pan"><div class="pic"></div></div>
+<div class="world" data-world="zoom"><div class="pic"></div></div>
+<div class="world" data-world="turn"><div class="pic"></div></div>
+<div class="world" data-world="tilt"><div class="slab"><b>TILT</b><u></u><u></u><u></u></div></div>
+<script>
+  // The same picture in three worlds: 140 deterministic discs. Pan: 120 px to the right over 1 s. Zoom: 1 to 1.3 over 1 s. Turn: 0 to 12 degrees clockwise over 1 s. Tilt: a still slab of rectangles and type turned 8 degrees clockwise.
+  const lcg = (seed) => () => (seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296;
+  const pics = [...document.querySelectorAll('.pic')];
+  pics.forEach((pic, k) => {
+    const rnd = lcg(7 + k * 13);
+    for (let n = 0; n < 140; n++) {
+      const d = document.createElement('i'), size = 30 + rnd() * 120;
+      d.style.cssText = `left:${rnd() * 2300}px;top:${rnd() * 1480}px;width:${size}px;height:${size}px;background:hsl(${Math.floor(rnd() * 360)} ${40 + rnd() * 50}% ${25 + rnd() * 50}%)`;
+      pic.appendChild(d);
+    }
+  });
+  const worlds = [...document.querySelectorAll('.world')];
+  const moves = [(u) => `translateX(${120 * u}px)`, (u) => `scale(${1 + 0.3 * u})`, (u) => `rotate(${12 * u}deg)`];
+  window.seek = (t) => {
+    worlds.forEach((w, i) => {
+      const on = t >= i && t < i + 1;
+      w.style.display = on ? 'block' : 'none';
+      if (on && pics[i]) pics[i].style.transform = moves[i](t - i);
+    });
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

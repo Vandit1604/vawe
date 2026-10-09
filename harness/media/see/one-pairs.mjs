@@ -26,7 +26,7 @@ function half(video, t, file) {
 
 /** Writes the pair images of every moment into `root/pairs` and returns [{ label, ta, tb, frames, zoom }]. */
 export function pairImages([{ src: srcA, m: a }, { src: srcB, m: b }], root, opts, log) {
-  const dir = path.join(root, 'pairs');
+  const dir = path.join(root, 'pairs', `${srcA.hash.slice(0, 8)}-${srcB.hash.slice(0, 8)}`);
   fs.mkdirSync(dir, { recursive: true });
   const clipA = { video: srcA.video, dur: a.media.duration, label: 'a', name: srcA.name }, clipB = { video: srcB.video, dur: b.media.duration, label: 'b', name: srcB.name };
   return pairMoments(a, b, opts).map((p, i) => {

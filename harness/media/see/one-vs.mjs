@@ -7,7 +7,7 @@ const share = (n, d) => (d ? round(n / d) : 0);
 const ratio = (a, b) => (a && b ? a / b : null);
 const differs = (a, b, tol = 0.3) => a != null && b != null && (Math.abs(a - b) > tol * Math.max(Math.abs(a), Math.abs(b), 1e-6));
 
-const moves = (m) => m.shots.flatMap((s) => s.moves).filter((x) => x.start != null && x.settle != null);
+const moves = (m) => m.shots.flatMap((s) => s.moves).filter((x) => x.start != null && x.settle != null && x.confidence !== 'low');
 const flashPeak = (m) => m.look.flashes.reduce((best, f) => (!best || f.peakLuma - f.baseLuma > best.peakLuma - best.baseLuma ? f : best), null);
 const moveSeconds = (m) => med(moves(m).map((x) => x.settle - x.start));
 const overshootShare = (m) => share(moves(m).filter((x) => (x.overshootPct ?? 0) >= 2).length, moves(m).filter((x) => x.overshootPct != null).length);

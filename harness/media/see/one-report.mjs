@@ -35,7 +35,7 @@ const moveLine = (m) => {
   const dir = m.axis === 'x' ? (m.to[0] >= m.from[0] ? 'right' : 'left') : (m.to[1] >= m.from[1] ? 'down' : 'up');
   const over = m.overshootPct == null ? '' : m.overshootPct >= 1 ? `, overshoots ${m.overshootPct}%` : ', no overshoot';
   const css = m.css && m.css !== m.ease ? ` ${m.css.length > 60 ? `${m.css.slice(0, 60)}...` : m.css}` : '';
-  return `- ${m.id}: ${m.size[0]}x${m.size[1]} px ${m.color ?? ''} from (${m.from}) to (${m.to}) px, ${dir} ${m.travelPx} px, starts ${s2(m.start)}, lands ${s2(m.settle)}, peak ${m.peakPxPerS} px/s (${m.peakHeightsPerS} frame heights/s)${over}, ${m.ease ?? 'too short to fit'}${css}${m.blur ? `, motion blur ${m.blur.dir}` : ''}.`;
+  return `- ${m.id}: ${m.size[0]}x${m.size[1]} px ${m.color ?? ''} from (${m.from}) to (${m.to}) px, ${dir} ${m.travelPx} px, starts ${s2(m.start)}, lands ${s2(m.settle)}, peak ${m.peakPxPerS} px/s (${m.peakHeightsPerS} frame heights/s)${over}, ${m.ease ?? 'too short to fit'}${css}${m.blur ? `, motion blur ${m.blur.dir}` : ''}${m.confidence === 'low' ? ' (low confidence: a short or crowded track)' : ''}.`;
 };
 
 const energyLine = (e) => {
@@ -48,12 +48,18 @@ const eyeLine = (e) => (e ? `Eye: from ${Math.round(e.start.x * 100)},${Math.rou
 
 const textLine = (text) => (text.length ? `Text: ${text.map((t) => `"${t.text}" frames ${t.f0}-${t.f1}, ${t.boxHeightPx} px high (font about ${t.fontPxApprox} px)`).join('; ')}.` : null);
 
+const tiltWords = (t) => {
+  if (!t) return '';
+  const lean = t.deg ? ` The picture is tilted ${Math.abs(t.deg)} deg ${t.deg > 0 ? 'clockwise' : 'anticlockwise'}: its straight edges lean that far from the horizontal and the vertical (${Math.round(t.share * 100)}% of edge strength).` : '';
+  return `${lean} Edge directions from the horizontal (clockwise is positive): ${t.peaks.map((p) => `${p.deg} deg ${Math.round(p.share * 100)}%`).join(', ') || 'none'}.`;
+};
+
 /** One shot as plain sentences: what appears, what moves, where the eye goes, how the camera moves. */
 export function shotAccount(s) {
   const moves = s.moves.length ? [`Moving parts (${s.moves.length}):`, ...s.moves.map(moveLine)] : ['No part is tracked as moving.'];
   const hits = s.hits.length ? `Sound hits inside: ${s.hits.map((h) => `f${h.frame} (${h.strength})`).join(', ')}.` : null;
   return [openingLine(s), groundLine(s.ground), `Palette ${s.palette.map((p) => `${p.hex} ${Math.round(p.share * 100)}%`).join(', ')}.`, layoutLine(s.layout), ...moves,
-    energyLine(s.energy), `Camera: ${s.camera.words}.`, eyeLine(s.eye), textLine(s.text), hits].filter(Boolean);
+    energyLine(s.energy), `Camera: ${s.camera.words}.${tiltWords(s.camera.tilt)}`, eyeLine(s.eye), textLine(s.text), hits].filter(Boolean);
 }
 
 function structureSection(m) {
@@ -144,6 +150,23 @@ function soundSection(m) {
   return L;
 }
 
+/** The numbers of one second `t` of a film: its shot, the moves under way, the flash, the words on screen and the sounds close to it. Pure. */
+export function momentLines(m, t) {
+  const shot = m.shots.find((s) => t >= s.start - 1e-6 && t < s.end + 1e-6);
+  if (!shot) return [`second ${t.toFixed(2)}: outside the shots read`];
+  const L = [`second ${t.toFixed(2)}: in shot ${shot.index} (${shot.id}), ${(t - shot.start).toFixed(2)} s after its start and ${(shot.end - t).toFixed(2)} s before its end`];
+  const live = shot.moves.filter((x) => x.start != null && t >= x.start && t <= x.settle);
+  L.push(live.length ? `moving now: ${live.map((x) => `${x.id} ${x.axis} at up to ${x.peakPxPerS} px/s (${x.ease ?? 'no fit'}, ${((100 * (t - x.start)) / Math.max(x.settle - x.start, 1e-6)).toFixed(0)}% of its time)`).join('; ')}` : 'no tracked part is moving now');
+  L.push(`camera: ${shot.camera.words}`);
+  const flash = m.look.flashes.find((f) => t >= f.at - 1e-6 && t <= f.at + f.seconds + 1e-6);
+  if (flash) L.push(`a flash is on: mean luma ${flash.baseLuma} to ${flash.peakLuma}, ${flash.frames} f`);
+  const words = m.type.words.filter((w) => t >= w.in && t < w.out);
+  if (words.length) L.push(`words on screen: ${words.map((w) => `"${w.text}" ${w.boxHeightPx} px high`).join(', ')}`);
+  const hits = m.sound.hits.filter((h) => Math.abs(h.onset - t) <= 0.15);
+  if (hits.length) L.push(`sound within 0.15 s: ${hits.map((h) => `onset ${h.onset.toFixed(2)} s strength ${h.strength}`).join(', ')}`);
+  return L;
+}
+
 function imagesSection(m, images, momentImgs) {
   const L = ['## IMAGES', '', 'Read each image together with the numbers under its path. Frames are native size; zooms are nearest-neighbour, every pixel a square.', ''];
   for (const s of images.shots) {
@@ -160,7 +183,7 @@ function imagesSection(m, images, momentImgs) {
   }
   if (momentImgs) {
     const x = momentImgs;
-    L.push(`### Moment ${x.at} s`, '', `frame: ${x.frame}`, `strip: ${x.strip.file} (${x.strip.from} to ${x.strip.to} s, ${x.strip.fps} fps)`, `onion: ${x.onion}`);
+    L.push(`### Moment ${x.at} s`, '', ...momentLines(m, x.at).map((l) => `  ${l}`), '', `frame: ${x.frame}`, `strip: ${x.strip.file} (${x.strip.from} to ${x.strip.to} s, ${x.strip.fps} fps)`, `onion: ${x.onion}`);
     if (x.zoom) L.push(`edge zoom: ${x.zoom.file} (box ${x.zoom.box.x},${x.zoom.box.y},${x.zoom.box.w},${x.zoom.box.h})`);
     L.push('');
   }
@@ -175,7 +198,7 @@ export function notMeasured(m) {
   L.push('Which glyphs or shapes a region is: layout gives boxes and colours, not what they depict (look at the key frames).');
   L.push('Whether a move reads as elegant or abrupt: the numbers give timing and shape; look at each onion and strip.');
   if (m.look.film.texture && m.look.film.texture.kind === 'none') L.push('Screen texture: none found in dark blocks; a texture over bright areas is not tested (look at the edge zooms).');
-  L.push('Camera tilt and 3D perspective of a plane: rotation is measured as a whole-frame turn only (a plane turned in depth reads as a shear: look at the key frame).');
+  L.push('3D perspective of a plane (a plane turned in depth reads as a shear): the tilt reads straight edges leaning in the picture, not a vanishing point; look at the key frame.');
   return L;
 }
 

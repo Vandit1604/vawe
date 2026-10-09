@@ -10,7 +10,7 @@ import { die, ROOT } from './core.mjs';
 import { measureSide } from './one-measure.mjs';
 import { makeImages, momentImages } from './one-images.mjs';
 import { resolveSource } from './one-input.mjs';
-import { seeReport, seeSummary } from './one-report.mjs';
+import { momentLines, seeReport, seeSummary } from './one-report.mjs';
 import { pairImages } from './one-pairs.mjs';
 import { compareSides, vsLines } from './one-vs.mjs';
 
@@ -58,7 +58,8 @@ function windowed(side, from, to) {
 
 /** Runs `vawe see`: returns { dir, md, json, summary, cached } and writes see.md and see.json. */
 export async function runSee(input, opts = {}) {
-  const log = opts.quiet ? () => {} : (m) => console.error(`see: ${m}`);
+  const t0 = Date.now();
+  const log = opts.quiet ? () => {} : (m) => console.error(`see: [${((Date.now() - t0) / 1000).toFixed(1)} s] ${m}`);
   const a = await resolveSource(input, { draft: opts.draft, log });
   const b = opts.vs ? await resolveSource(opts.vs, { log }) : null;
   const name = b ? `${a.name}-vs-${b.name}` : a.name;
@@ -71,6 +72,7 @@ export async function runSee(input, opts = {}) {
   let vs = null;
   if (sb) {
     const rows = compareSides(sa.measures, sb.measures);
+    fs.rmSync(path.join(root, 'pairs'), { recursive: true, force: true });
     const pairs = pairImages([{ src: a, m: sa.measures }, { src: b, m: sb.measures }], root, opts, log);
     vs = { rows, pairs };
     L.splice(0, L.length, `# vawe see: ${sa.measures.source.name} against ${sb.measures.source.name}`, '', ...vsSection(rows, pairs, sa.measures, sb.measures), '', '# SIDE A (yours)', '', ...seeReport(sa.measures, sa.images, sa.moment), '', '# SIDE B (the reference)', '', ...seeReport(sb.measures, sb.images, null));
@@ -84,7 +86,7 @@ export async function runSee(input, opts = {}) {
 
 function vsSection(rows, pairs, a, b) {
   const L = ['## VS: yours (a) against the reference (b)', '', `a: ${a.source.video}`, `b: ${b.source.video}`, '', ...vsLines(rows, [a.source.name, b.source.name]), '', 'Paired images (the same moment of both; a left, b right):', ''];
-  for (const p of pairs) L.push(`${p.label}: a ${p.ta.toFixed(2)} s, b ${p.tb.toFixed(2)} s`, `  frames: ${p.frames}`, ...(p.zoom ? [`  zoom ${p.zoom.box.x},${p.zoom.box.y},${p.zoom.box.w},${p.zoom.box.h} at 8x: ${p.zoom.file}`] : []), '');
+  for (const p of pairs) L.push(`${p.label}: a ${p.ta.toFixed(2)} s, b ${p.tb.toFixed(2)} s`, ...momentLines(a, p.ta).map((l) => `  a, ${l}`), ...momentLines(b, p.tb).map((l) => `  b, ${l}`), `  frames: ${p.frames}`, ...(p.zoom ? [`  zoom ${p.zoom.box.x},${p.zoom.box.y},${p.zoom.box.w},${p.zoom.box.h} at 8x: ${p.zoom.file}`] : []), '');
   return L;
 }
 
