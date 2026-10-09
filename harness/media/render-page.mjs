@@ -52,7 +52,7 @@ import { seekTo, awaitFonts, installPageFrame } from '../../core/engine/page-see
 import { ASPECTS, aspectDims } from '../../core/layout/aspects.js';
 import { appendRun, filmKeyOf, readRuns } from '../lib/runlog.mjs';
 import { finalFailedLine, lastFailedShip, failedShipLine } from '../lib/ship-status.mjs';
-import { devEvent, shipEvent } from '../lib/run-events.mjs';
+import { devEvent, devFailedEvent, shipEvent } from '../lib/run-events.mjs';
 import { REPO_ROOT, serveRepo, trackBrowser, pageArgs, insideRoot, PROTOCOL_TIMEOUT_MS } from '../lib/render-harness.mjs';
 import { openPreview, treeSignature } from './preview-server.mjs';
 import { writeDraftSheet } from './draft-sheet.mjs';
@@ -142,6 +142,17 @@ export function readPageMeta(pagePath, name) {
 
 // Speed spike bench only: per-subframe timings (seek, settle, screenshot call, PNG write) appended here as JSONL.
 const BENCH_TIMING_FILE = process.env.VAWE_BENCH_TIMING_FILE || null;
+
+const NAV_TIMEOUT_MS = 30_000;
+const NAV_RETRY_TIMEOUT_MS = 120_000;
+
+// Puppeteer's 30 s navigation limit fired on two drafts that ran beside a loaded machine: a second try with a longer limit.
+export async function gotoLoaded(page, url) {
+  try { await page.goto(url, { waitUntil: 'load', timeout: NAV_TIMEOUT_MS }); } catch (e) {
+    if (e?.name !== 'TimeoutError') throw e;
+    await page.goto(url, { waitUntil: 'load', timeout: NAV_RETRY_TIMEOUT_MS });
+  }
+}
 
 export async function openPage(pagePath, frame, { warm = false, final = true, lane = null } = {}) {
   const opened = lane ? await openLanePage(lane, pagePath, frame) : await openPreview(pagePath, { width: frame.width, height: frame.height, scale: frame.scale, final, warm });
@@ -359,7 +370,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
             mark('open page', i);
             at.opened = await ex(() => openPage(pagePath, frame, { final, lane }));
             mark('load page', i);
-            await at.opened.page.goto(at.opened.url, { waitUntil: 'load' });
+            await gotoLoaded(at.opened.page, at.opened.url);
             sinceOpen = 0;
           }
           mark('frame', i);
@@ -709,7 +720,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const { page, url, close } = await openPage(pagePath, frame, { final });
   const scriptErrors = watchPageErrors(page);
   try {
-    await page.goto(url, { waitUntil: 'load' });
+    await gotoLoaded(page, url);
     try { await settle(page); } catch (e) {
       const msg = String(e.message).replace(/^.*?Error: /, '');
       if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
@@ -1037,6 +1048,8 @@ async function main() {
   const toFlag = flag('--to', null);
   const durFlag = flag('--dur', null);
   const durArg = final ? null : (toFlag != null ? Number(toFlag) - from : (durFlag != null ? Number(durFlag) : null));
+  const logDevFailure = (reason) => appendRun(pagePath, devFailedEvent({ reason, wallS: process.uptime() }));
+  if (!final) for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, () => { logDevFailure(`killed by ${signal}`); process.exit(130); });
   const aspectFlag = flag('--aspect', null);
   const all = aspectFlag === 'all';
   const aspects = all ? Object.keys(ASPECTS) : [aspectFlag || readPageMeta(pagePath, 'aspect') || '16:9'];
@@ -1061,6 +1074,7 @@ async function main() {
       + `${final ? `, prepass ${(r.prepassMs / 1000).toFixed(1)}s, capture ${(r.captureMs / 1000).toFixed(1)}s, encode ${(r.encodeMs / 1000).toFixed(1)}s` : ''}`;
     if (final) opts.onMaster = (r) => console.log(masterLine(r));
     const r = await renderPage(pagePath, outPath, opts).catch((e) => {
+      if (!final) logDevFailure(String((e.problems || [e.message])[0]).split('\n')[0]);
       if (!(e instanceof InvariantError) && !final) throw e;
       for (const p of e.problems || [e.stack || String(e)]) console.error(errorLine(p));
       if (final) reportFailedFinal(pagePath, e, argv.includes('--job'));

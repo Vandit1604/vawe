@@ -33,7 +33,8 @@ export function slotsInUse(dir = slotDir()) {
   return live;
 }
 
-const whoLine = (slots) => slots.map((s) => `${s.who} (${s.kind}, pid ${s.pid})`).join(', ');
+const ageS = (start, now) => Math.max(0, Math.round((now - Date.parse(start)) / 1000)) || 0;
+export const whoLine = (slots, now = Date.now()) => slots.map((s) => `${s.who} (${s.kind}, pid ${s.pid}, running ${ageS(s.start, now)}s)`).join(', ');
 
 // A slot file is written in two steps (create, then fill); a reader that sees it empty treats it as taken.
 function tryTake(dir, count, entry) {
