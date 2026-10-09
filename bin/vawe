@@ -2,22 +2,22 @@
 // vawe: the one command for authoring, rendering and checking a page film. `vawe --help` lists the verbs.
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync, spawnSync } from 'node:child_process';
+import os from 'node:os';
+import { execFileSync, spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { closest, parseArgs, topHelp, UsageError, verbHelp } from '../harness/cli/parse.mjs';
 import { VERBS, stripChromeNoise, commitsBehind, staleNote } from '../harness/cli/verbs.mjs';
 import { newFilm, newFilmLines, readDetails, questionsJson } from '../harness/cli/new.mjs';
-import { appendRun, readAllRuns } from '../harness/lib/runlog.mjs';
+import { appendRun, readAllRuns, filmKeyOf } from '../harness/lib/runlog.mjs';
+import { verbEvent, footerLine, filmOfCall, imagesIn, reasonOf, readNotes } from '../harness/lib/verb-log.mjs';
+import { namedRef, refsDir } from '../harness/lib/refs.mjs';
+import { nextStep } from '../harness/live/stage-say.mjs';
 import { recentFailedShipLines } from '../harness/lib/ship-status.mjs';
 import { newEvent } from '../harness/lib/run-events.mjs';
 import { doctorHintFromFile } from '../harness/lib/doctor-hint.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-function fail(message) {
-  console.error(`vawe: ${message}`);
-  process.exit(2);
-}
+const MAX_SCAN = 4_000_000;
 
 function requireFiles(verb, values, positional) {
   (verb.positional || []).forEach((p, i) => {
@@ -28,57 +28,122 @@ function requireFiles(verb, values, positional) {
   }
 }
 
-function runStep(step) {
+function runStep(step, call) {
   const argv = step.node || [path.join(ROOT, step.script), ...step.args];
-  const r = spawnSync(process.execPath, argv, { stdio: ['inherit', 'inherit', 'pipe'], encoding: 'utf8', maxBuffer: 1 << 28, cwd: ROOT, env: { ...process.env, ...step.env } });
-  process.stderr.write(stripChromeNoise(r.stderr || ''));
-  const status = r.status ?? 1;
-  const hint = status === 0 ? null : doctorHintFromFile(ROOT, r.stderr || '');
-  if (hint) console.error(hint);
-  return status;
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, argv, { stdio: ['inherit', 'pipe', 'pipe'], cwd: ROOT, env: { ...process.env, ...step.env, VAWE_VERB_NOTES: call.notes } });
+    let stderr = '';
+    child.stdout.on('data', (d) => { process.stdout.write(d); if (call.stdout.length < MAX_SCAN) call.stdout += d; });
+    child.stderr.on('data', (d) => { stderr += d; });
+    child.on('close', (code, signal) => {
+      const clean = stripChromeNoise(stderr);
+      process.stderr.write(clean);
+      call.stderr = clean;
+      const hint = code === 0 ? null : doctorHintFromFile(ROOT, stderr);
+      if (hint) console.error(hint);
+      resolve({ code: code ?? 1, signal });
+    });
+  });
 }
 
-function main(argv) {
+async function execute(verb, rest, call) {
+  if (verb.raw) call.positional = rest;
+  if (verb.raw) return stepCode(await runStep(verb.build({}, rest)[0], call), call);
+  const { values, positional } = parseArgs(verb, rest);
+  call.positional = [...positional, ...(values.page ? [values.page] : [])];
+  requireFiles(verb, values, positional);
+  call.stage = stageOf(positional);
+  const named = verb.defaultRef && !values.ref && !values.alone ? namedRef({ dir: refsDir(), briefText: briefOf(verb.defaultRef(values, positional)) }) : null;
+  if (named) {
+    values.ref = named.file;
+    console.log(`ref: ${named.id}, named in the brief (${named.file}); pass --ref to use another`);
+  }
+  const steps = verb.build ? verb.build(values, positional) : null;
+  if (!steps && values['questions-json']) {
+    const { length, aspect, request, from } = values;
+    console.log(JSON.stringify(questionsJson(positional[0], { request, from, length, aspect, details: readDetails(values) }), null, 2));
+    return 0;
+  }
+  if (!steps) {
+    const made = newFilm(positional[0], { from: values.from, root: ROOT, length: values.length, aspect: values.aspect, title: values.title, request: values.request, details: readDetails(values), defaults: values.defaults });
+    if (!made.asked) {
+      process.chdir(ROOT);
+      appendRun(positional[0], newEvent({ template: made.template, length: made.length, answered: made.answered, guessed: made.guesses, ranges: made.ranges }));
+    }
+    console.log(newFilmLines(positional[0], made).join('\n'));
+    for (const line of recentFailedShipLines(readAllRuns(path.join(ROOT, 'out')), Date.now())) console.error(line);
+    return 0;
+  }
+  const startedMs = Date.now();
+  for (const [i, step] of steps.entries()) {
+    if (step.label) console.log(`\n[${verb.name} ${i + 1}/${steps.length}: ${step.label}]`);
+    const code = stepCode(await runStep(step, call), call);
+    if (code !== 0) return code;
+  }
+  if (typeof verb.summary === 'function') console.log(verb.summary(values, positional, startedMs).join('\n'));
+  if (verb.next && !verb.nextInline) console.log(`\nnext: ${verb.next(values, positional)}`);
+  return 0;
+}
+
+function stepCode({ code, signal }, call) {
+  call.signal = signal;
+  return code;
+}
+
+function stageOf(positional) {
+  const page = positional.find((p) => p.endsWith('.html'));
+  try { return page ? nextStep(path.resolve(ROOT, page), ROOT).stage : null; } catch { return null; }
+}
+
+function briefOf(input) {
+  const page = input && String(input).endsWith('.html') ? input : input && filmKeyOf(input) ? path.join('films', filmKeyOf(input), 'page.html') : null;
+  try { return page ? fs.readFileSync(path.resolve(ROOT, path.dirname(page), 'brief.md'), 'utf8') : ''; } catch { return ''; }
+}
+
+function record(verb, rest, call, code, reason, endMs) {
+  const event = verbEvent({ verb: verb.name, args: rest, stage: call.stage, startMs: call.startMs, endMs, exitCode: code, reason, slotWaitS: readNotes(call.notes).slotWaitS ?? null, images: imagesIn(call.stdout) });
+  const cwd = process.cwd();
+  try {
+    process.chdir(ROOT);
+    appendRun(filmOfCall(verb.name, call.positional), event);
+  } catch (e) {
+    console.error(`vawe: could not write the run log: ${e.message}`);
+  } finally { process.chdir(cwd); }
+}
+
+const quietFooter = (rest) => rest.includes('--json') || rest.includes('--questions-json');
+
+async function main(argv) {
   const [name, ...rest] = argv;
   if (!name || name === '--help' || name === '-h' || name === 'help') return console.log(topHelp(VERBS));
   const verb = VERBS.find((v) => v.name === name);
   if (!verb) {
     const guess = closest(name, VERBS.map((v) => v.name));
     const stale = staleNote(commitsBehind((args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })));
-    return fail(`unknown verb ${name}; valid: ${VERBS.map((v) => v.name).join(' ')}${guess ? `; did you mean ${guess}?` : ''}${stale ? `; ${stale}` : ''}`);
+    const message = `unknown verb ${name}; valid: ${VERBS.map((v) => v.name).join(' ')}${guess ? `; did you mean ${guess}?` : ''}${stale ? `; ${stale}` : ''}`;
+    console.error(`vawe: ${message}`);
+    console.log(footerLine({ verb: name, code: 2, reason: `unknown verb ${name}`, seconds: 0 }));
+    process.exitCode = 2;
+    return;
   }
   if (rest.includes('--help') || rest.includes('-h')) return console.log(verbHelp(verb));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-verb-'));
+  const call = { startMs: Date.now(), positional: [], stage: null, stdout: '', stderr: '', signal: null, notes: path.join(dir, 'notes.jsonl') };
+  let code = 0;
+  let reason = null;
   try {
-    if (verb.raw) return process.exit(runStep(verb.build({}, rest)[0]));
-    const { values, positional } = parseArgs(verb, rest);
-    requireFiles(verb, values, positional);
-    const steps = verb.build ? verb.build(values, positional) : null;
-    if (!steps && values['questions-json']) {
-      const { length, aspect, request, from } = values;
-      return console.log(JSON.stringify(questionsJson(positional[0], { request, from, length, aspect, details: readDetails(values) }), null, 2));
-    }
-    if (!steps) {
-      const made = newFilm(positional[0], { from: values.from, root: ROOT, length: values.length, aspect: values.aspect, title: values.title, request: values.request, details: readDetails(values), defaults: values.defaults });
-      if (!made.asked) {
-        process.chdir(ROOT);
-        appendRun(positional[0], newEvent({ template: made.template, length: made.length, answered: made.answered, guessed: made.guesses, ranges: made.ranges }));
-      }
-      console.log(newFilmLines(positional[0], made).join('\n'));
-      for (const line of recentFailedShipLines(readAllRuns(path.join(ROOT, 'out')), Date.now())) console.error(line);
-      return;
-    }
-    const startedMs = Date.now();
-    for (const [i, step] of steps.entries()) {
-      if (step.label) console.log(`\n[${verb.name} ${i + 1}/${steps.length}: ${step.label}]`);
-      const code = runStep(step);
-      if (code !== 0) process.exit(code);
-    }
-    if (verb.summary) console.log(verb.summary(values, positional, startedMs).join('\n'));
-    if (verb.next && !verb.nextInline) console.log(`\nnext: ${verb.next(values, positional)}`);
+    code = await execute(verb, rest, call);
+    if (code !== 0) reason = reasonOf({ code, signal: call.signal, stderr: call.stderr });
   } catch (e) {
-    if (e instanceof UsageError) return fail(e.message);
-    throw e;
+    code = e instanceof UsageError ? 2 : 1;
+    reason = e instanceof UsageError ? e.message : `exit 1: ${e.message}`;
+    console.error(e instanceof UsageError ? `vawe: ${e.message}` : e.stack);
   }
+  const endMs = Date.now();
+  record(verb, rest, call, code, reason, endMs);
+  fs.rmSync(dir, { recursive: true, force: true });
+  if (!quietFooter(rest)) console.log(footerLine({ verb: verb.name, code, reason, seconds: (endMs - call.startMs) / 1000 }));
+  process.exitCode = code;
 }
 
 main(process.argv.slice(2));
