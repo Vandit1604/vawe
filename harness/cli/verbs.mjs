@@ -10,6 +10,7 @@ import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
+import { seeProblem } from '../media/see/one-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
 import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs';
 import { readFindings } from '../lib/findings.mjs';
@@ -78,6 +79,28 @@ export const VERBS = [
     ],
     example: 'vawe new my-launch --from prompts/story-explainer.md',
     build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref, ...(v.score ? { SCORE: '1' } : {}) } }] : null),
+  },
+  {
+    name: 'see', summary: 'ONE command that reads a film completely: shots and cuts, motion, light and texture, type, sound, and every image with its numbers; --vs puts a reference beside yours with advice',
+    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (its draft is rendered first when missing or older than the page), or a reference id from vawe refs list' }],
+    flags: [
+      { name: 'vs', type: 'string', help: 'a second film (same kinds as <film>), usually the reference: both are read, with a delta per measure, one advice line per delta and paired images of the same moment' },
+      { name: 'at', type: 'string', help: 'a moment: adds its native frame, a strip, an onion and an edge zoom (with --vs, the same moment of both)' },
+      { name: 'at-b', type: 'string', help: 'with --vs and --at: the second of the second film' },
+      { name: 'from', type: 'string', help: 'start second: shots before it are left out of the report and the images' },
+      { name: 'to', type: 'string', help: 'end second: shots after it are left out of the report and the images' },
+      { name: 'draft', type: 'path', help: 'for a page: read this mp4 as its draft instead of out/<name>-draft.mp4', kind: 'file' },
+      { name: 'out', type: 'path', default: 'out/see/<name>', help: 'folder for see.md, see.json and the images' },
+      { name: 'no-ocr', type: 'bool', help: 'skip reading the words (OCR runs by default when tesseract is installed)' },
+      { name: 'no-cache', type: 'bool', help: 'measure again even if this film and the code were measured before (the result is cached by content hash)' },
+    ],
+    example: 'vawe see out/my-launch.mp4   |   vawe see films/my-launch/page.html --vs mnowak   |   vawe see mnowak --at 2.4',
+    build: (v, [film]) => {
+      const problem = seeProblem({ at: v.at, atB: v['at-b'], from: v.from, to: v.to, vs: v.vs });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/see/one.mjs', args: [film, ...opt('--vs', v.vs), ...opt('--at', v.at), ...opt('--at-b', v['at-b']), ...opt('--from', v.from), ...opt('--to', v.to), ...opt('--draft', v.draft), ...opt('--out', v.out), ...(v['no-ocr'] ? ['--no-ocr'] : []), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
+    },
+    next: (v) => (v.vs ? 'Read see.md, then every image path in it at full size, each with the numbers under it; act on the advice lines (each names the page literal), then vawe see again' : 'Read see.md, then every image path in it at full size, each with the numbers under it; vawe see <film> --vs <ref id> puts a reference beside it'),
   },
   {
     name: 'frames', summary: 'one still per data-world element (the others hidden), a contact sheet and the still-frame layout rules; about 2 s',

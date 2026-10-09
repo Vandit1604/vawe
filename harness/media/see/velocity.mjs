@@ -20,6 +20,16 @@ async function scopeOf(page, { sel, ids }) {
   return { selectors: Array.from({ length: count }, (_, i) => `[${TAG}="${i}"]`) };
 }
 
+/** The moves of an open page between `from` and `to` seconds: { times, height, rows } with one row { label, colour, analysis } per element (the `opts.sel`, `opts.ids` or the elements that move most); no rows when nothing moves. */
+export async function readVelocity(page, opts, from, to) {
+  const scope = await scopeOf(page, opts);
+  const times = sampleTimes(from, to);
+  const sampled = await sampleBoxTracks(page, times, scope);
+  const picked = scope === 'visible' ? topMovers(sampled.tracks.map((t) => moveScore(trackPoints(times, t), sampled.height))) : sampled.tracks.map((_, i) => i).filter((i) => sampled.tracks[i].length).slice(0, LINE_COLOURS.length);
+  const rows = picked.map((i, k) => ({ label: `${k + 1}. ${sampled.labels[i]}`, colour: LINE_COLOURS[k], analysis: analyseTrack(trackPoints(times, sampled.tracks[i]), sampled.height) }));
+  return { times, height: sampled.height, rows };
+}
+
 /** Runs `vawe velocity`: samples the page at 120 a second across `opts.span` seconds around `opts.at`, writes the graph, prints its path and the summary. */
 export async function runVelocity(pagePath, opts) {
   if (!fs.existsSync(pagePath)) die(`no such page: ${pagePath}`);
@@ -29,16 +39,8 @@ export async function runVelocity(pagePath, opts) {
   const { page, url, close } = await openPage(pagePath, frame, { final: false });
   try {
     await page.goto(url, { waitUntil: 'load' });
-    const scope = await scopeOf(page, opts);
-    const times = sampleTimes(from, to);
-    const sampled = await sampleBoxTracks(page, times, scope);
-    const picked = scope === 'visible' ? topMovers(sampled.tracks.map((t) => moveScore(trackPoints(times, t), sampled.height))) : sampled.tracks.map((_, i) => i).filter((i) => sampled.tracks[i].length).slice(0, LINE_COLOURS.length);
-    if (!picked.length) die(`nothing moves in ${pagePath} from ${from} to ${to} s (a page that paints a canvas in window.seek has no element to read: pass --sel for the elements that carry the move)`);
-    const rows = picked.map((i, k) => {
-      const pts = trackPoints(times, sampled.tracks[i]);
-      const a = analyseTrack(pts, sampled.height);
-      return { label: `${k + 1}. ${sampled.labels[i]}`, colour: LINE_COLOURS[k], analysis: a };
-    });
+    const { times, height, rows } = await readVelocity(page, opts, from, to);
+    if (!rows.length) die(`nothing moves in ${pagePath} from ${from} to ${to} s (a page that paints a canvas in window.seek has no element to read: pass --sel for the elements that carry the move)`);
     const series = rows.map(({ label, colour, analysis: a }) => ({
       label, colour, speed: a.speed,
       peak: a.pos.moves ? { t: a.pos.peakAt, v: a.pos.peakSpeed } : null,
@@ -50,8 +52,8 @@ export async function runVelocity(pagePath, opts) {
     await page.setViewport({ width: GRAPH_W, height: GRAPH_H });
     await page.setContent(`<body style="margin:0">${velocitySvg({ from, to, series })}</body>`);
     await page.screenshot({ path: out, type: 'png' });
-    console.log(`velocity of ${pagePath}, ${from.toFixed(2)} to ${to.toFixed(2)} s, ${times.length} samples (${sampled.height} px frame height)`);
-    for (const r of rows) for (const l of summaryLines(r.label, r.analysis.pos, r.analysis.scale, sampled.height)) console.log(l);
+    console.log(`velocity of ${pagePath}, ${from.toFixed(2)} to ${to.toFixed(2)} s, ${times.length} samples (${height} px frame height)`);
+    for (const r of rows) for (const l of summaryLines(r.label, r.analysis.pos, r.analysis.scale, height)) console.log(l);
     console.log(out);
   } finally {
     await close();

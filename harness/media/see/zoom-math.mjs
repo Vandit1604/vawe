@@ -33,15 +33,15 @@ export function zoomProblem({ at, box, auto, scale, vs, atB }) {
   return null;
 }
 
-/** The box (AUTO_BOX size) around the densest cluster of bright edges in a 1920x1080 luma plane, or null when no bright edge exists. Pure. */
-export function autoBox(luma, w = FRAME_W, h = FRAME_H) {
+/** The box (AUTO_BOX size) around the densest cluster of edges brighter than `bright` in a 1920x1080 luma plane, or null when there is none. Pure. */
+export function autoBox(luma, w = FRAME_W, h = FRAME_H, bright = BRIGHT) {
   const cols = Math.ceil(w / CELL), rows = Math.ceil(h / CELL);
   const count = new Float64Array(cols * rows), sx = new Float64Array(cols * rows), sy = new Float64Array(cols * rows);
   let any = false;
   for (let y = 1; y < h - 1; y++) {
     for (let x = 1; x < w - 1; x++) {
       const i = y * w + x;
-      if (luma[i] < BRIGHT) continue;
+      if (luma[i] < bright) continue;
       if (Math.abs(luma[i + 1] - luma[i - 1]) < EDGE_STEP && Math.abs(luma[i + w] - luma[i - w]) < EDGE_STEP) continue;
       const c = Math.floor(y / CELL) * cols + Math.floor(x / CELL);
       count[c]++; sx[c] += x; sy[c] += y; any = true;

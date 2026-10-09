@@ -18,6 +18,9 @@ const ACTIVE_MIN = 0.8;
 const CHANGED_SHARE = 0.3;
 const MAX_FRAMES = 60;
 const PIX_TOL = 10;
+const EDGE_STEP = 24;
+const EDGE_MIN_SHARE = 0.002;
+const SAME_STRUCTURE = 0.85;
 
 function small(V, f) {
   const w = V.w >> 1, h = V.h >> 1, out = new Int16Array(w * h * 3), base = f * V.w * V.h * 3;
@@ -48,6 +51,26 @@ function changedShare(A, B) {
   return n / (A.d.length / 3);
 }
 
+const pixDiffAt = (d, i, j) => Math.max(Math.abs(d[i] - d[j]), Math.abs(d[i + 1] - d[j + 1]), Math.abs(d[i + 2] - d[j + 2]));
+
+// Pixels where a colour step of more than EDGE_STEP sits to the right or below.
+function edgeMask(S) {
+  const m = new Uint8Array(S.w * S.h);
+  for (let y = 0; y < S.h - 1; y++) for (let x = 0; x < S.w - 1; x++) {
+    const i = (y * S.w + x) * 3;
+    if (pixDiffAt(S.d, i, i + 3) > EDGE_STEP || pixDiffAt(S.d, i, i + S.w * 3) > EDGE_STEP) m[y * S.w + x] = 1;
+  }
+  return m;
+}
+
+/** True when the edges of A and B stand in the same places: the light or the ground changed, the picture did not. A drifting ground or an exposure ramp is no transition. */
+function sameStructure(A, B) {
+  const ea = edgeMask(A), eb = edgeMask(B);
+  let inter = 0, uni = 0;
+  for (let i = 0; i < ea.length; i++) { inter += ea[i] & eb[i]; uni += ea[i] | eb[i]; }
+  return uni >= EDGE_MIN_SHARE * ea.length && inter / uni >= SAME_STRUCTURE;
+}
+
 /** Runs of changed frames: [{ a, b, spike }]. A single-frame jump far above its neighbours is a cut; a longer
  *  run counts only when frame a-1 and frame b differ over a large share of the picture. */
 export function findRuns(V, d = meanDiffs(V)) {
@@ -65,7 +88,7 @@ export function findRuns(V, d = meanDiffs(V)) {
     while (e + 1 < V.n && (active(e + 1) || (active(e + 2) && !isSpike[e + 1]))) e++;
     if (e - f + 1 >= 2 && e - f + 1 <= MAX_FRAMES) {
       const A = small(V, f - 1), B = small(V, e);
-      if (changedShare(A, B) >= CHANGED_SHARE) runs.push({ a: f, b: e, spike: r1(Math.max(...d.slice(f, e + 1)) / Math.max(0.05, base)) });
+      if (changedShare(A, B) >= CHANGED_SHARE && !sameStructure(A, B)) runs.push({ a: f, b: e, spike: r1(Math.max(...d.slice(f, e + 1)) / Math.max(0.05, base)) });
     }
     f = e + 1;
   }

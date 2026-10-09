@@ -47,7 +47,7 @@ next command for the film you edited last.
 | 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
 | 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS; poll once per call and work on the last draft between polls |
 
-Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe refs frames` (reference stills),
+Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe see <mp4 | page | ref-id> [--vs <ref>]`, the one command that reads a film completely (shots, motion, light, type, sound, every image with its numbers; `--vs` adds deltas and advice naming the page literal), or with its parts: `vawe refs frames` (reference stills),
 `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),
 `vawe compare` (side by side). If a verb is missing what you need, say so in your report; do not hand-roll it.
 

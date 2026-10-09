@@ -16,7 +16,7 @@ const SAMPLES = 8;
 const MAX_FRAMES = 6000;
 
 /** Per-frame mean luma and clipped share of `video` between from and to (one ffmpeg pass, both from the same decode). */
-function series(video, from, to) {
+export function lumaSeries(video, from, to) {
   const dir = scratch('look', `run-${process.pid}`);
   const fileMean = path.join(dir, 'mean.rgb'), fileClip = path.join(dir, 'clip.rgb');
   const range = ['-ss', String(from), ...(to === undefined ? [] : ['-t', String(to - from)])];
@@ -62,7 +62,7 @@ function channelBlock(P, x, y, c) {
   return block;
 }
 
-/** The strongest repeating pattern over the dark blocks of the frames, or null when no block is dark. */
+/** The strongest repeating pattern over the dark blocks of the frames, or null when no block is dark. `at` is the second of the frame and `box` the block in 1920x1080 pixels. */
 function bestTexture(frames) {
   let best = null;
   for (const P of frames) {
@@ -75,17 +75,22 @@ function bestTexture(frames) {
   const pattern = describePattern(best.peak);
   if (pattern.kind === 'none') return pattern;
   const [r, g, bl] = [0, 1, 2].map((c) => channelPhase(channelBlock(best.P, best.x, best.y, c), best.peak.fx, best.peak.fy));
-  return { ...pattern, ...channelsSplit(r, g, bl) };
+  return { ...pattern, ...channelsSplit(r, g, bl), at: best.P.t, box: { x: best.x, y: best.y, w: BLOCK, h: BLOCK } };
 }
 
-/** The look numbers of `video` between from and to (seconds; the whole film when absent). */
-export function measureFilm(video, from = 0, to = undefined) {
+/** { edges, texture } read from full-size frames of `video` at `times` (seconds): the edge samples of each and the strongest screen texture over them. */
+export function edgesAt(video, times, dur = probeVideo(video).dur) {
+  const frames = times.map((t) => { const at = Math.min(t, dur - 0.05), f = frameRgb(video, at); return { ...f, t: +at.toFixed(3), L: lumaOf(f.rgb, f.w * f.h) }; });
+  return { edges: frames.map((f) => edgeSamples(f)), texture: bestTexture(frames) };
+}
+
+/** The look numbers of `video` between from and to (seconds; the whole film when absent), from `samples` full-size frames spread over the window. */
+export function measureFilm(video, from = 0, to = undefined, samples = SAMPLES) {
   const { fps, dur } = probeVideo(video);
   const end = Math.min(to ?? dur, dur);
-  const { means, clips } = series(video, from, to === undefined ? undefined : end);
-  const times = Array.from({ length: SAMPLES }, (_, i) => from + ((i + 0.5) * (end - from)) / SAMPLES);
-  const frames = times.map((t) => { const f = frameRgb(video, Math.min(t, dur - 0.05)); return { ...f, L: lumaOf(f.rgb, f.w * f.h) }; });
-  return summarise({ means, fps, clips, edges: frames.map((f) => edgeSamples(f)), texture: bestTexture(frames) });
+  const { means, clips } = lumaSeries(video, from, to === undefined ? undefined : end);
+  const times = Array.from({ length: samples }, (_, i) => from + ((i + 0.5) * (end - from)) / samples);
+  return summarise({ means, fps, clips, ...edgesAt(video, times, dur) });
 }
 
 async function source(input, label) {

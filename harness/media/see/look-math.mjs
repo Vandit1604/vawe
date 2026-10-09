@@ -25,6 +25,9 @@ export const median = (list) => {
 const r1 = (n) => Math.round(n * 10) / 10;
 const r2 = (n) => Math.round(n * 100) / 100;
 
+/** The gaussian sigma (px) of a glow behind a sharp edge from its 90 to 10 % spread: the glow is half of full white at the edge, so the spread runs to 1.28 sigma. Pure. */
+export const bloomSigma = (spreadPx) => r1(spreadPx / 1.28);
+
 /** The first problem in the arguments of look, or null. Pure. */
 export function lookProblem({ from, to }) {
   if (from !== undefined && !(Number.isFinite(Number(from)) && Number(from) >= 0)) return `--from is not a number of seconds: "${from}"`;
@@ -193,7 +196,7 @@ export function lookRows(a, b) {
   }
   rows.push(
     ['clipped >=250, median, peak %', ...both((m) => `${m.clip.median}, ${m.clip.peak}`)],
-    ['bloom 90 to 10% (px)', ...both((m) => (m.bloom ? `${m.bloom.px} (${m.bloom.n} edges)` : 'too few edges'))],
+    ['bloom 90 to 10% (px)', ...both((m) => (m.bloom ? `${m.bloom.px} (gaussian sigma about ${bloomSigma(m.bloom.px)}; ${m.bloom.n} edges)` : 'too few edges'))],
     ['chromatic offset B minus R', ...both((m) => chromaText(m.chroma))],
     ['screen texture', ...both((m) => patternText(m.texture))],
     ['glow colour', ...both((m) => (m.glow ? `${m.glow.name}${m.glow.hue ? ` (hue ${m.glow.hue}, sat ${m.glow.sat})` : ''}` : 'none'))],

@@ -5,8 +5,8 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
-  ORDER, PROBE_OFFSET, cutsRows, eyeRows, flashRows, formatSummary, formatTable, groundRows, heights, lookRows, lumaOfL, motionRows,
-  noTool, notAvailable, parseAudioAt, parseLufs, parseStrip, parseVelocity, scoreRow, soundRows, summarise, typeRows,
+  ORDER, PROBE_OFFSET, cutsRows, cutsSeeRows, eyeRows, flashRows, flashSeeRows, formatSummary, formatTable, groundRows, heights, lookRows, lookSeeRows, lumaOfL, motionRows,
+  noTool, notAvailable, parseAudioAt, parseLook, parseLufs, parseStrip, parseVelocity, scoreRow, soundRows, summarise, typeRows,
 } from '../../harness/dev/see-truth.mjs';
 
 const DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../fixtures/truth');
@@ -196,7 +196,37 @@ test('soundRows read cue starts from the probes, the timeline, the mp4 hits and 
   assert.ok(soundRows(t, { audioAt, lufs: -20.6, timeline, spec: late }).some((x) => x.status === 'fail'));
 });
 
-test('lookRows list three measures as not available until a look verb exists', () => {
-  assert.deepEqual(statuses(lookRows(truth('look'), { available: false })), Array(3).fill('not available'));
-  assert.deepEqual(statuses(lookRows(truth('look'), { available: true })), Array(3).fill('no tool'));
+test('parseLook reads the glow sigma, the signed offset and the stripe period from the look table', () => {
+  const text = [
+    'bloom 90 to 10% (px)         | 16 (gaussian sigma about 12.5; 11080 edges)',
+    'chromatic offset B minus R   | median dx -4.4 px, dy 0 px; 81% of 9502 edges off by 1 px or more',
+    'screen texture               | vertical stripes, period 3 px, RGB-striped (channels 75 deg apart)',
+  ].join('\n');
+  assert.deepEqual(parseLook(text), { bloomSigma: 12.5, offset: 4.4, stripePeriod: 3 });
+  assert.deepEqual(parseLook('nothing'), { bloomSigma: null, offset: null, stripePeriod: null });
+});
+
+test('lookRows grade the look measures against the truth, and a missing reading fails', () => {
+  assert.deepEqual(statuses(lookRows(truth('look'), { look: { bloomSigma: 12.5, offset: 4.4, stripePeriod: 3 } })), Array(3).fill('pass'));
+  assert.deepEqual(statuses(lookRows(truth('look'), { look: null })), Array(3).fill('fail'));
+});
+
+test('see rows pass on the values of the truth and fail on a missing see.json', () => {
+  const t = truth('cuts');
+  const a = { structure: { cuts: t.truth.cuts.map((at) => ({ at })), shots: t.truth.worlds.map((w) => ({ start: w.start, length: w.end - w.start })), worlds: t.truth.worlds }, media: { height: 540 } };
+  assert.ok(cutsSeeRows(t, { a, p: a }).every((x) => x.status === 'pass'));
+  assert.ok(cutsSeeRows(t, { a: null, p: null }).every((x) => x.status === 'fail'));
+});
+
+test('the flash event row needs the flashes counted and no cut left over', () => {
+  const t = truth('flash');
+  const flashes = t.truth.flashes.map((f) => ({ at: f.start, frames: f.frames, peakLuma: f.peakLuma }));
+  assert.ok(flashSeeRows(t, { a: { structure: { cuts: [] }, look: { flashes } } }).every((x) => x.status === 'pass'));
+  const row = flashSeeRows(t, { a: { structure: { cuts: [{ at: 0.8 }] }, look: { flashes } } }).at(-1);
+  assert.equal(row.status, 'fail');
+});
+
+test('lookSeeRows read the sigma, the offset and the stripe period of see.json', () => {
+  const a = { look: { film: { bloom: { sigma: 12.5 }, chroma: { dx: -4.4, dy: 0 }, texture: { striped: true, period: 3.01 } } } };
+  assert.deepEqual(statuses(lookSeeRows(truth('look'), { a })), Array(3).fill('pass'));
 });
