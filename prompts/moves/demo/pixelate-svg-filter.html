@@ -1,0 +1,68 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4.8">
+<meta name="blank" content="0-0.1">
+<title>move: pixelate svg filter</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  html, body { background: #000; }
+  body { display: block; position: relative; }
+  /* the fancy demo box is 500 x 530 px: one scaled stage holds it */
+  .stage { position: absolute; left: 50%; top: 50%; width: 500px; height: 530px; translate: -50% -50%; display: flex; align-items: center; justify-content: center; }
+  #image { width: 166.667px; height: 265px; overflow: hidden; position: relative; filter: url(#pixelate-filter); }
+  #image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 46% 50%; }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <svg><defs>
+    <filter id="pixelate-filter" x="0" y="0" width="1" height="1">
+      <feConvolveMatrix kernelMatrix="1 1 1 1 1 1 1 1 1" result="AVG"/>
+      <feFlood x="1" y="1" width="1" height="1"/>
+      <feComposite id="c0" operator="arithmetic" k1="0" k2="1" k3="0" k4="0" width="16" height="16"/>
+      <feTile result="TILE"/>
+      <feComposite in="AVG" in2="TILE" operator="in" k1="0" k2="1" k3="0" k4="0"/>
+      <feMorphology id="m0" operator="dilate" radius="8" result="NORMAL"/>
+      <feConvolveMatrix kernelMatrix="1 1 1 1 1 1 1 1 1" result="AVG"/>
+      <feFlood x="1" y="1" width="1" height="1"/>
+      <feComposite id="c1" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="0" k4="0" width="8" height="16"/>
+      <feTile result="TILE"/>
+      <feComposite in="AVG" in2="TILE" operator="in" k1="0" k2="1" k3="0" k4="0"/>
+      <feMorphology id="m1" operator="dilate" radius="8" result="FALLBACKX"/>
+      <feConvolveMatrix kernelMatrix="1 1 1 1 1 1 1 1 1" result="AVG"/>
+      <feFlood x="1" y="1" width="1" height="1"/>
+      <feComposite id="c2" in2="SourceGraphic" operator="arithmetic" k1="0" k2="1" k3="0" k4="0" width="16" height="8"/>
+      <feTile result="TILE"/>
+      <feComposite in="AVG" in2="TILE" operator="in" k1="0" k2="1" k3="0" k4="0"/>
+      <feMorphology id="m2" operator="dilate" radius="8" result="FALLBACKY"/>
+      <feMerge><feMergeNode in="FALLBACKX"/><feMergeNode in="FALLBACKY"/><feMergeNode in="NORMAL"/></feMerge>
+    </filter>
+  </defs></svg>
+  <div id="image"><img src="/prompts/moves/demo/assets/photos/shore.jpg" alt=""></div>
+</div>
+<script type="module">
+import { kf } from '/core/motion/springs.js';
+
+const SIZE_PER_PX = 1 / 30;   // the original: pixel size = mouse x / 30, clamped to 1..64
+const MIN = 1, MAX = 64;
+// [second, mouse x in px from the left of the 500 px box]: a slow sweep out and back; below x 45 (size under 1.5) the original filter draws nothing, so the sweep starts at x 60
+const MOUSE_X = [[0, 60], [0.4, 60], [2.2, 600], [2.5, 600], [4.3, 60], [4.8, 60]];
+
+const S = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) / 530;
+document.getElementById('stage').style.scale = String(S);
+const set = (id, attr, v) => document.getElementById(id).setAttribute(attr, String(v));
+
+window.seek = (t) => {
+  const size = Math.min(Math.max(kf(t, MOUSE_X, 'easeInOutSine') * SIZE_PER_PX, MIN), MAX);
+  set('c0', 'width', size); set('c0', 'height', size);
+  set('c1', 'width', size / 2); set('c1', 'height', size);
+  set('c2', 'width', size); set('c2', 'height', size / 2);
+  for (const id of ['m0', 'm1', 'm2']) set(id, 'radius', size / 2);
+};
+window.seek(0);
+</script>
+</body>
+</html>
