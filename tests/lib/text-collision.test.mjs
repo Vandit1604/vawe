@@ -1,6 +1,7 @@
+import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { textCollisions, textCollisionLines } from '../../harness/lib/text-collision.mjs';
+import { textCollisions, textCollisionLines, textCrossings } from '../../harness/lib/text-collision.mjs';
 
 const line = (text, box) => ({ text, fontPx: 40, box });
 
@@ -45,4 +46,33 @@ test('texts that touch or graze under a quarter of the smaller box do not collid
 
 test('a line with no box is skipped', () => {
   assert.deepEqual(textCollisions([{ t: 1, lines: [{ text: 'A', fontPx: 40 }, line('B', [0, 0, 10, 10])] }]), []);
+});
+
+const ship = JSON.parse(fs.readFileSync(new URL('../fixtures/text-collision-s11a-ship-the-beta.json', import.meta.url), 'utf8'));
+
+test('s11a: "beta" and "on" cross while both move at 11.03 to 11.13 s', () => {
+  const lines = textCollisionLines([], ship);
+  assert.ok(lines.includes('text "beta" and "on" cross while moving from 11.03 to 11.13 s: keep their paths apart, or time one out before the other comes in'));
+  assert.deepEqual(textCollisions(ship.filter((s) => s.t % 0.5 < 0.034)), []);
+});
+
+const dense = (pathA, pathB, extra = {}) => pathA.map((a, k) => ({
+  t: +(k / 30).toFixed(3),
+  lines: [{ text: 'Out', fontPx: 40, box: [a, 100, 200, 60], block: 1, own: 1, up: [1], ...extra.a }, { text: 'In', fontPx: 40, box: [pathB[k], 110, 200, 60], block: 2, own: 2, up: [2], ...extra.b }],
+}));
+const sweep = (from, step, n) => Array.from({ length: n }, (_, k) => from + k * step);
+
+test('two moving texts that overlap for 3 samples cross; 2 samples, a still text and a drift do not', () => {
+  assert.equal(textCrossings(dense(sweep(0, 40, 10), sweep(600, -40, 10))).length, 1);
+  assert.equal(textCrossings(dense(sweep(0, 40, 6), sweep(400, -40, 6))).length, 0);
+  assert.equal(textCrossings(dense(sweep(0, 40, 10), sweep(300, 0, 10))).length, 0);
+  assert.equal(textCrossings(dense(sweep(0, 1, 10), sweep(100, 0.5, 10))).length, 0);
+});
+
+test('texts that share a source, a world or an ancestor never cross, and a pair the settled check names is not named twice', () => {
+  const [a, b] = [sweep(0, 40, 10), sweep(600, -40, 10)];
+  assert.equal(textCrossings(dense(a, b, { a: { source: 'id:chip' }, b: { source: 'id:chip' } })).length, 0);
+  assert.equal(textCrossings(dense(a, b, { a: { world: 'a' }, b: { world: 'b' } })).length, 0);
+  assert.equal(textCrossings(dense(a, b, { b: { up: [2, 1] } })).length, 0);
+  assert.equal(textCrossings(dense(a, b), [{ t: 3, a: 'Out', b: 'In' }]).length, 0);
 });

@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { boxMotion, spectacleWeak, speedCeiling, overshootShare, textBreathing, textLingers, lingerCeiling, barLint } from '../../harness/lib/bar-lint.mjs';
@@ -194,4 +195,24 @@ test('a bar finding is waived by its code, and fires its rule id into rules_fire
   assert.deepEqual(fired.map((f) => f.id), ['overshoot-share']);
   const [printed] = firedLines(fired);
   assert.match(printed, /\(rule overshoot-share, taste\/rules\/overshoot-share\.md\); instead: give about 1 in 3 arrivals/);
+});
+
+const tideRamp = JSON.parse(fs.readFileSync(new URL('../fixtures/spectacle-tide-v-ramp-boxes.json', import.meta.url), 'utf8'));
+
+test('spectacleWeak: tide-v, a speed ramp at 3.0 s (the world scales out, the next scales in) is stronger than the underline at 4.2 s', () => {
+  const { peaks, scales, span } = boxMotion(tideRamp);
+  const ramp = scales.find((s) => s.label.startsWith('section.world') && Math.abs(s.at - 3) < 0.1);
+  assert.ok(ramp.speed > 3.6);
+  const underline = peaks.find((p) => p.label === 'u');
+  assert.ok(underline.at > 4.1 && underline.speed > 3.6);
+  assert.deepEqual(spectacleWeak(peaks, 3, span, scales), []);
+  assert.match(spectacleWeak(peaks, 3, span)[0].what, /weaker than 4\.2 s/);
+});
+
+test('spectacleWeak: a scale move counts against the spectacle too, and a nearby ramp-in counts for it', () => {
+  const scaling = (sizes) => sizes.map((s, k) => [500 - s / 2, 300, s, s, 1, 1]);
+  const quick = boxMotion(frame([scaling([100, 100, 100, 160, 240, 340, 460, 600, 600, 600, 600, 600])]));
+  assert.ok(quick.scales[0].speed > 3);
+  assert.equal(spectacleWeak([], 0.1, quick.span, quick.scales).length, 0);
+  assert.equal(spectacleWeak([{ label: 'badge', speed: 9, at: 6 }], 0.1, [0, 8], quick.scales).length, 1);
 });

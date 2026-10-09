@@ -41,7 +41,59 @@ export function textCollisions(samples) {
   return [...found.values()];
 }
 
-/** One advice line per collision, naming the time, both texts and the fix. Pure. */
-export function textCollisionLines(samples) {
-  return textCollisions(samples).map((c) => `text "${c.a}" and "${c.b}" overlap at ${c.t.toFixed(2)} s: move one, or time one out before the other comes in`);
+const MOVE_PX = 2; // between two samples 1/30 s apart: slower than this is a drift, not a move
+const CROSS_SAMPLES = 3;
+const idOf = (l) => `${l.text}\u0000${l.block}`;
+const moved = (a, b) => a.box.some((v, k) => Math.abs(v - b.box[k]) > MOVE_PX);
+
+/** Texts of one source: the same data-id or view-transition-name, one element, or one inside the other. */
+const sameSource = (a, b) => (a.source != null && a.source === b.source) || (a.own != null && b.own != null && (a.own === b.own || a.up?.includes(b.own) || b.up?.includes(a.own)));
+
+const movingIds = (cur, prev, next) => {
+  const ids = new Set();
+  for (const l of cur) if ([prev, next].some((m) => m?.get(idOf(l)) && moved(l, m.get(idOf(l))))) ids.add(idOf(l));
+  return ids;
+};
+
+/**
+ * Two different texts whose boxes overlap for at least CROSS_SAMPLES consecutive samples while both move: the words cross during a move,
+ * which the settled check skips. `samples` are the dense text samples (harness/media/draft-check.mjs sampleTextMotion). Texts of one
+ * source, of two worlds, and pairs the settled check already names are skipped. Pure.
+ */
+export function textCrossings(samples, settled = []) {
+  const named = new Set(settled.map((c) => [c.a, c.b].sort().join('\n')));
+  const bySample = samples.map(({ lines }) => new Map(lines.filter((l) => l.box).map((l) => [idOf(l), l])));
+  const runs = new Map();
+  const found = [];
+  samples.forEach(({ t }, s) => {
+    const lines = [...bySample[s].values()];
+    const moving = movingIds(lines, bySample[s - 1], bySample[s + 1]);
+    const live = new Set();
+    for (let i = 0; i < lines.length; i++) {
+      for (let j = i + 1; j < lines.length; j++) {
+        const [a, b] = [lines[i], lines[j]];
+        if (a.text === b.text || !moving.has(idOf(a)) || !moving.has(idOf(b)) || otherWorlds(a, b) || sameSource(a, b) || !overlaps(a, b)) continue;
+        const key = [idOf(a), idOf(b)].sort().join('\n');
+        live.add(key);
+        const run = runs.get(key) ?? { from: t, n: 0, a: a.text, b: b.text };
+        run.n += 1;
+        run.to = t;
+        runs.set(key, run);
+        const textKey = [a.text, b.text].sort().join('\n');
+        if (run.n === CROSS_SAMPLES && !named.has(textKey)) { found.push(run); named.add(textKey); }
+      }
+    }
+    for (const key of runs.keys()) if (!live.has(key)) runs.delete(key);
+  });
+  return found.map(({ from, to, a, b }) => ({ t: from, to, a, b }));
+}
+
+/** One advice line per collision, naming the time, both texts and the fix. `moving` is the dense text samples, for the crossings during a move. Pure. */
+export function textCollisionLines(samples, moving = []) {
+  const settled = textCollisions(samples);
+  const crossings = textCrossings(moving, settled);
+  return [
+    ...settled.map((c) => `text "${c.a}" and "${c.b}" overlap at ${c.t.toFixed(2)} s: move one, or time one out before the other comes in`),
+    ...crossings.map((c) => `text "${c.a}" and "${c.b}" cross while moving from ${c.t.toFixed(2)} to ${c.to.toFixed(2)} s: keep their paths apart, or time one out before the other comes in`),
+  ];
 }

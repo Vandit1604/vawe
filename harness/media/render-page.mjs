@@ -59,7 +59,7 @@ import { writeDraftSheet } from './draft-sheet.mjs';
 import { sampleWorlds } from './world-sample.mjs';
 import { sampleTail } from './tail-sample.mjs';
 import { tailMoving } from '../lib/tail-motion.mjs';
-import { sampleText, sampleLayout, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
+import { sampleText, sampleTextMotion, sampleLayout, sampleContrast, sampleSpec, sampleObjects, reviveObjects, readVideo, videoProblems } from './draft-check.mjs';
 import { parseBriefTables, readBrief, dropGuesses } from '../lib/brief-tables.mjs';
 import { createChecks, timeLine } from '../lib/check-runner.mjs';
 import { MODES } from '../lib/draft-tiers.mjs';
@@ -895,6 +895,7 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const boxes = found?.scripted ? await checks.run('box-motion', () => sampleBoxTracks(page, lintTimes(dur), 'visible'), window) : undefined;
   const speed = boxes ? boxMotion(boxes) : await checks.run('speed', async () => boxMotion(await sampleBoxTracks(page, lintTimes(dur).map((t) => +(from + t).toFixed(4)), 'visible')), window);
   const text = await checks.run('text', () => sampleText(page, dur, seekLayout(page), from), window);
+  const motionText = await checks.run('text-motion', () => sampleTextMotion(page, dur, seekLayout(page), from), window);
   const worlds = whole ? await checks.run('worlds', () => sampleWorlds(page, dur, seekLayout(page)), window) : null;
   const tail = whole ? await checks.run('tail', () => sampleTail(page, dur, seekLayout(page)), window) : null;
   const contrast = await checks.run('contrast', () => sampleContrast(page, text.samples, (ms) => seekAll(page, ms)), window);
@@ -902,7 +903,7 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
@@ -915,7 +916,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+    lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
@@ -947,7 +948,7 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const peak = peakLine(level?.TP ?? null);
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...page.lines];
   const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode })) : null;
-  const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples), ...contrastLines(probe.contrast)] : []);
+  const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
   const hard = [...problems, sound, peak].filter(Boolean);
   const fired = firedRules([...motionFindings(pagePath, motion), ...layoutFindings(pagePath, probe), ...barFindings(pagePath, motion, probe)], hard, table?.rows ?? []);
