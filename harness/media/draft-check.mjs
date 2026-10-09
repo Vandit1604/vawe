@@ -42,7 +42,7 @@ export function sheetTileDiffs(mp4) {
 // node (fontPx includes ancestor transform scale; rects is the box of each wrapped line when the text wraps; world is its data-world;
 // block is the document-order index of its nearest block-level ancestor, the element a reader sees as one line, the same at every sample); blocks is the joined visible text of each element that holds
 // two or more such nodes, so a word split into per-letter spans reads as one text. Text inside `decorative` is left out.
-export function visibleLines(decorative, chrome) {
+export function visibleLines(decorative, chrome, lineage = false) {
   const out = [];
   const owners = new Map();
   const docOrder = new Map([...document.getElementsByTagName('*')].map((e, i) => [e, i]));
@@ -51,13 +51,20 @@ export function visibleLines(decorative, chrome) {
     while (b !== document.body && /^(inline|contents)/.test(getComputedStyle(b).display)) b = b.parentElement;
     return docOrder.get(b);
   };
+  const ancestorsOf = (el) => { const up = []; for (let a = el; a && a !== document.documentElement; a = a.parentElement) up.push(docOrder.get(a)); return up; };
+  const sourceOf = (el) => {
+    const name = getComputedStyle(el).viewTransitionName;
+    if (el.dataset.id) return `id:${el.dataset.id}`;
+    return name && name !== 'none' ? `vt:${name}` : null;
+  };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const text = node.nodeValue.replace(/\s+/g, ' ').trim();
     const el = node.parentElement;
     if (!text || !el || /^(SCRIPT|STYLE|NOSCRIPT|TITLE)$/.test(el.tagName) || el.closest(decorative)) continue;
     const cs = getComputedStyle(el);
-    if (cs.visibility === 'hidden' || /^rgba\(.*, 0\)$/.test(cs.color)) continue;
+    const clipped = cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text';
+    if (cs.visibility === 'hidden' || (/^rgba\(.*, 0\)$/.test(cs.color) && !clipped)) continue;
     let opacity = 1;
     let scale = 1;
     for (let n = el; n; n = n.parentElement) {
@@ -77,8 +84,10 @@ export function visibleLines(decorative, chrome) {
     const fontPx = parseFloat(cs.fontSize) * scale;
     const rects = [...range.getClientRects()].filter((q) => q.width > 0 && q.height > 0).map((q) => [q.x, q.y, q.width, q.height]);
     const world = el.closest('[data-world]')?.dataset.world;
+    const source = lineage ? sourceOf(el) : null;
     out.push({ text, fontPx, family: cs.fontFamily, weight: cs.fontWeight, box: [r.x, r.y, r.width, r.height], color: cs.color, opacity, block: blockOf(el),
-      ...(rects.length > 1 ? { rects } : {}), ...(world ? { world } : {}), ...(el.closest(chrome) ? { chrome: true } : {}) });
+      ...(rects.length > 1 ? { rects } : {}), ...(world ? { world } : {}), ...(el.closest(chrome) ? { chrome: true } : {}),
+      ...(lineage ? { own: docOrder.get(el), up: ancestorsOf(el), ...(source ? { source } : {}) } : {}) });
     for (let a = el; a && a !== document.documentElement; a = a.parentElement) {
       const o = owners.get(a) || { raw: '', n: 0, fontPx, x0: r.left, y0: r.top, x1: r.right, y1: r.bottom };
       o.raw += node.nodeValue;
@@ -261,6 +270,22 @@ export async function sampleText(page, dur, seek, from = 0) {
     samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME)).lines });
   }
   return { samples, step, frameH: await page.evaluate(() => innerHeight) };
+}
+
+const MOTION_TEXT_HZ = 30;
+const MOTION_TEXT_MAX = 600;
+
+/** The visible text at 30 samples a second (at most 600 over the film), each line with its element lineage: the input of the mid-move collision check. `seek(ms)` is a layout seek. */
+export async function sampleTextMotion(page, dur, seek, from = 0) {
+  const step = Math.max(1 / MOTION_TEXT_HZ, dur / MOTION_TEXT_MAX);
+  const n = Math.floor(dur / step + 1e-9);
+  const samples = [];
+  for (let i = 0; i <= n; i++) {
+    const t = +(from + i * step).toFixed(4);
+    await seek(t * 1000);
+    samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME, true)).lines });
+  }
+  return { samples, step };
 }
 
 /** The texts under the draft contrast floor, read from two screenshots at each settled sample only. `seek(ms)` must paint. */

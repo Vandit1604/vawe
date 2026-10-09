@@ -58,7 +58,29 @@ function peakSpeed(boxes, i) {
   return moving >= SPEED.moving_steps_min && peak ? { label: boxes.labels[i], ...peak } : null;
 }
 
-const nearestRank = (sorted, q) => sorted[Math.max(0, Math.ceil(q * sorted.length) - 1)];
+/**
+ * One element's fastest change of size in frame heights per second and when it came, or null when it never changes size. Read from the box in the
+ * frame, not in its parent's: a world that scales out moves every word in it, and a world that covers the frame is still a scale ramp.
+ */
+function peakScale(boxes, i) {
+  const track = boxes.tracks[i];
+  const sizes = track.slice(1).map((b, j) => {
+    const a = track[j];
+    return inFrame(a, boxes) && inFrame(b, boxes) ? Math.max(Math.abs(b[2] - a[2]), Math.abs(b[3] - a[3])) : null;
+  });
+  let peak = null;
+  let moving = 0;
+  sizes.forEach((px, k) => {
+    if (px === null || px <= STILL_PX) return;
+    moving += 1;
+    if (isJump(sizes, k)) return;
+    const speed = px / boxes.height / (boxes.times[k + 1] - boxes.times[k]);
+    if (!peak || speed > peak.speed) peak = { speed, at: boxes.times[k] };
+  });
+  return moving >= SPEED.moving_steps_min && peak ? { label: boxes.labels[i], ...peak } : null;
+}
+
+const nearestRank =(sorted, q) => sorted[Math.max(0, Math.ceil(q * sorted.length) - 1)];
 
 const centre = ([x, y, w, h]) => [x + w / 2, y + h / 2];
 const ALPHA_IN = 0.5;
@@ -104,6 +126,7 @@ export function boxMotion(boxes) {
   const elements = boxes.tracks.map((_, i) => i);
   return {
     peaks: elements.map((i) => peakSpeed(boxes, i)).filter(Boolean).sort((a, b) => a.speed - b.speed),
+    scales: elements.map((i) => peakScale(boxes, i)).filter(Boolean).sort((a, b) => a.speed - b.speed),
     arrivals: elements.flatMap((i) => boxArrivals(boxes, i)),
     span: [boxes.times[0], boxes.times.at(-1)],
   };
@@ -115,13 +138,15 @@ const n1 = (x) => +x.toFixed(1);
 /**
  * The page's spectacle second (`<meta name="spectacle">`) against every other moment: the fastest element peak within a window of it, and the
  * fastest peak outside it. Fires when another moment is stronger (rule spectacle-weak). `peaks` is boxMotion's, `span` the seconds the boxes were
- * sampled over: a spectacle second outside them is not measured.
+ * sampled over: a spectacle second outside them is not measured. `scales` is boxMotion's too: a speed ramp is a scale change, and it counts as a
+ * move beside the translations.
  */
-export function spectacleWeak(peaks, spectacle, span) {
-  if (spectacle == null || !peaks?.length || (span && (spectacle < span[0] || spectacle > span[1]))) return [];
+export function spectacleWeak(peaks, spectacle, span, scales = []) {
+  const moves = [...(peaks ?? []), ...scales];
+  if (spectacle == null || !moves.length || (span && (spectacle < span[0] || spectacle > span[1]))) return [];
   const fastest = (list) => list.reduce((best, p) => (!best || p.speed > best.speed ? p : best), null);
   const near = (p) => Math.abs(p.at - spectacle) <= SPECTACLE.window_s;
-  const [mine, other] = [fastest(peaks.filter(near)), fastest(peaks.filter((p) => !near(p)))];
+  const [mine, other] = [fastest(moves.filter(near)), fastest(moves.filter((p) => !near(p)))];
   if (!other || (mine && other.speed < mine.speed * SPECTACLE.stronger_margin)) return [];
   return [finding('spectacle-weak', spectacle,
     `spectacle at ${n1(spectacle)} s is weaker than ${n1(other.at)} s: ${mine ? `${mine.label} peaks at ${n1(mine.speed)} frame heights per second there` : 'no element moves there'}, ${other.label} peaks at ${n1(other.speed)} at ${n1(other.at)} s`,
@@ -232,6 +257,6 @@ export function textLingers(samples, ctx) {
 
 /** Every bar finding in time order. `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
 export function barLint({ records, boxes, text, spectacle = null }) {
-  return [...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
+  return [...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
     .sort((a, b) => a.at - b.at);
 }
