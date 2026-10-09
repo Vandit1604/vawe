@@ -34,7 +34,7 @@ test('the master and the web copy keep a dark ramp free of bands', () => {
     const kArr = Array(30).fill(1);
     const start = kArr.map((_, i) => i).concat(30);
     const master = path.join(dir, 'master.mp4'), web = path.join(dir, 'web.mp4');
-    const r = ffmpegEncode(dir, 60, kArr, start, master, true);
+    const r = ffmpegEncode(dir, 60, kArr, start, master, { final: true });
     assert.equal(r.status, 0, r.stderr);
     const w = ffmpegWebEncode(dir, 60, kArr, start, web);
     assert.equal(w.status, 0, w.stderr);
