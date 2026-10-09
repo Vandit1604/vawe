@@ -202,6 +202,10 @@ Traps:
 - After the ball lands, swap it for the inline dot. The morph reflows the line, and only an inline dot rides it.
 - The drift goes on the ground behind the line, never on the h1: a drifting line reads as a move, not a hold.
 
+Swaps for the first beat (same 1.9 s slot): [vertical-cut-reveal](vertical-cut-reveal.md) with `staggerFrom: 'last'` for a harder
+edge, or [letter-3d-swap](letter-3d-swap.md) for a line that turns over before it settles. Keep the accent full stop out of the
+reveal and land it last, as the beat table says. [letter-swap](letter-swap.md) suits a label that changes later in the film, not the opening line.
+
 # Complete videos, 20 to 30 s
 
 Same rules as above, at film length. Each film shows the product or the idea working in its middle,

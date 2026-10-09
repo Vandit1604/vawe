@@ -34,6 +34,9 @@ Each group lists its moves with a clip. The index is [README.md](README.md).
 | caption editorial | editorial captions: one or two key words per line in a contrasting italic serif, and the next caption replaces the last on a short line-by-line mask cut | [caption-editorial.md](caption-editorial.md) | [caption-editorial.mp4](caption-editorial.mp4) |
 | variable weight wave | one hero word arrives as a wave: weight and width of a variable face crest letter by letter, left to right, then settle at a firm weight | [variable-weight-wave.md](variable-weight-wave.md) | [variable-weight-wave.mp4](variable-weight-wave.mp4) |
 | text on path | a line of words rides an SVG path with startOffset set from the seek time, front word first, and settles readable on the curve | [text-on-path.md](text-on-path.md) | [text-on-path.mp4](text-on-path.mp4) |
+| vertical cut reveal | a line arrives hard-edged: every character, word or line rises from under its own clip edge, staggered from the first, last, middle or any item on the motion library's spring (port of fancy) | [vertical-cut-reveal.md](vertical-cut-reveal.md) | [vertical-cut-reveal.mp4](vertical-cut-reveal.mp4) |
+| letter swap | a word or label rolls letter by letter: each letter slides out of its clip box and the same letter slides in; forward or pingpong, stagger or seeded random order (port of fancy) | [letter-swap.md](letter-swap.md) | [letter-swap.mp4](letter-swap.mp4) |
+| letter 3d swap | a lowercase line turns over as boxes: each character is a cube that rolls 90 degrees about its centre to the same character on the next face (port of fancy) | [letter-3d-swap.md](letter-3d-swap.md) | [letter-3d-swap.mp4](letter-3d-swap.mp4) |
 
 ## Change between shots
 

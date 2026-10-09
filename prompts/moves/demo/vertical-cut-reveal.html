@@ -1,0 +1,70 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="swiss">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.4">
+<title>move: vertical cut reveal</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; display: flex; flex-direction: column; font: 700 calc(var(--u) * 11)/1.12 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
+  .vcr { display: flex; flex-wrap: wrap; white-space: pre-wrap; }
+  .vcr.lines { flex-direction: column; }
+  .vcr-word { display: inline-flex; overflow: hidden; }
+  .vcr-char { position: relative; white-space: pre-wrap; }
+  .vcr-glyph { display: inline-block; }
+</style>
+</head>
+<body>
+<div class="copy"><span id="a"></span><span id="b"></span><span id="c"></span></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { motionSpring } from '/core/motion/motion-spring.js';
+import { rng } from '/core/motion/springs.js';
+
+const graphemes = (s) => Array.from(new Intl.Segmenter('en', { granularity: 'grapheme' }).segment(s), (x) => x.segment);
+const make = (cls, parent, text) => {
+  const e = document.createElement('span');
+  e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  parent?.append(e);
+  return e;
+};
+
+function verticalCutReveal(el, text, { splitBy = 'words', staggerFrom = 'first', stagger = 0.2, reverse = false, spring = { stiffness: 190, damping: 22 }, delay = 0, at = 0, seed = 1 } = {}) {
+  const words = splitBy === 'characters' ? text.split(' ').map(graphemes) : (splitBy === 'words' ? text.split(' ') : splitBy === 'lines' ? text.split('\n') : text.split(splitBy)).map((s) => [s]);
+  const total = splitBy === 'characters' ? words.reduce((n, w, i) => n + w.length + (i < words.length - 1), 0) : words.length;
+  const rand = rng(seed);
+  const delayOf = (i) => {
+    if (staggerFrom === 'first') return i * stagger;
+    if (staggerFrom === 'last') return (total - 1 - i) * stagger;
+    if (staggerFrom === 'center') return Math.abs(Math.floor(total / 2) - i) * stagger;
+    if (staggerFrom === 'random') return Math.abs(Math.floor(rand() * total) - i) * stagger;
+    return Math.abs(staggerFrom - i) * stagger;
+  };
+  el.classList.add('vcr', ...(splitBy === 'lines' ? ['lines'] : []));
+  el.replaceChildren();
+  const glyphs = [];
+  words.forEach((chars, w) => {
+    const word = make('vcr-word', el);
+    chars.forEach((ch) => glyphs.push({ g: make('vcr-glyph', make('vcr-char', word), ch), delay: delayOf(glyphs.length) }));
+    if (w < words.length - 1) make('', word, ' ');
+  });
+  const progress = motionSpring(spring, 100);
+  return (t) => glyphs.forEach(({ g, delay: d }) => {
+    const y = (reverse ? -100 : 100) * (1 - progress(t - at - delay - d));
+    g.style.transform = y === 0 ? 'none' : `translateY(${y}%)`;
+  });
+}
+
+const spring = { stiffness: 200, damping: 21 };
+const q = (id) => document.getElementById(id);
+const lines = [
+  verticalCutReveal(q('a'), 'Cut from below,', { splitBy: 'characters', stagger: 0.025, spring, at: 0.1 }),
+  verticalCutReveal(q('b'), 'then from above,', { splitBy: 'characters', stagger: 0.025, staggerFrom: 'last', reverse: true, delay: 0.5, spring, at: 0.1 }),
+  verticalCutReveal(q('c'), 'out of the middle.', { splitBy: 'characters', stagger: 0.025, staggerFrom: 'center', delay: 1.1, spring, at: 0.1 }),
+];
+vawe.onFrame((t) => lines.forEach((f) => f(t)));
+</script>
+</body>
+</html>

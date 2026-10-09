@@ -1,0 +1,93 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="swiss">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.8">
+<title>move: letter swap</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .copy { position: absolute; left: 9vw; top: 50vh; translate: 0 -50%; display: flex; flex-direction: column; align-items: flex-start; gap: calc(var(--u) * 2); font: 700 calc(var(--u) * 12)/1.1 var(--sans); letter-spacing: -0.03em; color: var(--ink); }
+  .ls { display: flex; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+  .ls-letter { white-space: pre; position: relative; display: flex; }
+  .ls-p { position: relative; }
+  .ls-p.pad { padding-bottom: 0.5rem; }
+  .ls-s { position: absolute; }
+  #b { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="copy"><span id="a"></span><span id="b"></span></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { motionSpring, motionSpringEasing, motionStagger } from '/core/motion/motion-spring.js';
+import { rng } from '/core/motion/springs.js';
+
+const make = (cls, parent, text) => {
+  const e = document.createElement('span');
+  e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  parent?.append(e);
+  return e;
+};
+
+function letterSwap(el, label, { mode = 'forward', reverse = true, random = false, stagger = random ? 0.02 : 0.03, from = 'first', spring = { duration: random ? 0.8 : 0.7 }, at = 0, leave = null, seed = 1, rand = rng(seed), orders = [] } = {}) {
+  const n = label.length, out = reverse ? 100 : -100, rest = reverse ? -100 : 100;
+  el.classList.add('ls');
+  el.replaceChildren();
+  const cells = Array.from(label, (ch) => {
+    const l = make('ls-letter', el);
+    const p = make(`ls-p${random ? ' pad' : ''}`, l, ch), s = make('ls-s', l, ch);
+    s.style.top = `${rest}%`;
+    return { p, s, cp: [], cs: [] };
+  });
+  const queue = [...orders];
+  const dur = motionSpringEasing(spring).duration / 1000;
+  const delays = () => {
+    if (!random) return cells.map((_, j) => motionStagger(stagger, from, j, n));
+    const order = queue.shift() ?? Array.from({ length: n }, (_, i) => i).sort(() => rand() - 0.5);
+    return order.reduce((d, letter, i) => Object.assign(d, { [letter]: i * stagger }), []);
+  };
+  const sweep = (iss, toP, toS, endAfter) => {
+    const d = delays(), last = Math.max(...d);
+    cells.forEach((c, j) => {
+      c.cp.push({ iss, delay: d[j], to: toP });
+      c.cs.push({ iss, delay: d[j], to: toS });
+      if (endAfter) {
+        const reset = iss + (random ? d[j] : last) + dur + 1 / 60;
+        c.cp.push({ iss: reset, to: 0, instant: true });
+        c.cs.push({ iss: reset, to: rest, instant: true });
+      }
+    });
+  };
+  sweep(at, out, 0, mode === 'forward');
+  if (mode === 'pingpong' && leave !== null) sweep(leave, 0, rest, false);
+  const progress = motionSpring(spring, 100);
+  const track = (cmds, init, t) => {
+    let a = init, b = init, start = -Infinity;
+    const value = (s) => (s <= start ? a : a + (b - a) * progress(s - start));
+    for (const c of cmds.sort((x, y) => x.iss - y.iss)) {
+      if (c.iss > t) break;
+      a = value(c.iss);
+      b = c.to;
+      start = c.iss + (c.delay ?? 0);
+      if (c.instant) a = b;
+    }
+    return value(t);
+  };
+  return (t) => cells.forEach((c) => {
+    const y = track(c.cp, 0, t);
+    c.p.style.transform = y === 0 ? 'none' : `translateY(${y}%)`;
+    c.s.style.top = `${track(c.cs, rest, t)}%`;
+  });
+}
+
+const q = (id) => document.getElementById(id);
+const lines = [
+  letterSwap(q('a'), 'Swap the letters', { at: 0.3 }),
+  letterSwap(q('b'), 'and swap them back.', { mode: 'pingpong', from: 'center', reverse: false, at: 0.3, leave: 2.1 }),
+];
+vawe.onFrame((t) => lines.forEach((f) => f(t)));
+</script>
+</body>
+</html>
