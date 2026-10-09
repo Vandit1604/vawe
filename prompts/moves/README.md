@@ -36,6 +36,9 @@ One row per job, best move first. Every built move is in this table.
 | land a title or wordmark, soft | [tracking-collapse](tracking-collapse.md), [mask-rise](mask-rise.md), [blur-word-cascade](blur-word-cascade.md), [liquid-displace](liquid-displace.md) |
 | type a command, prompt or name | [caret-typing](caret-typing.md), [caret-follow](caret-follow.md) |
 | land one hero word on the beat | [scale-punch](scale-punch.md), [letter-stagger](letter-stagger.md), [outline-fill](outline-fill.md), [variable-weight-wave](variable-weight-wave.md) |
+| cut a line in under hard edges, per character, word or line | [vertical-cut-reveal](vertical-cut-reveal.md) |
+| roll a word or label letter by letter, forward, back, or in random order | [letter-swap](letter-swap.md) |
+| turn each character over as a small cube | [letter-3d-swap](letter-3d-swap.md) |
 | put a picture inside the name | [text-as-mask](text-as-mask.md) |
 | decide a name or number on screen | [flap-resolve](flap-resolve.md), [text-scramble-decode](text-scramble-decode.md), [word-swap-slot](word-swap-slot.md), [strikethrough-replace](strikethrough-replace.md) |
 | point at one word in a held line | [word-sweep](word-sweep.md), [marker-highlight](marker-highlight.md), [underline-draw](underline-draw.md), [hand-drawn-notes](hand-drawn-notes.md) |
