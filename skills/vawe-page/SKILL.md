@@ -16,7 +16,7 @@ Order: (1) the brief, facts only. (2) Study the references (`bin/vawe refs frame
 at full size), then fill brief.md "Taken from": 4 to 6 named frame paths and what each gives. Then study how they move:
 `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves with the ref id and cut second. (3) Write
 `films/<name>/DESIGN.md` and `films/<name>/kit/`: ground layers, and each moving part (word, mark, bar, card, icon,
-wordmark) as its own element. Apply the skill ladder, one skill per rung in order (`command npx -y ui-skills get <slug>`):
+wordmark) as its own element. Start from a PROVEN combo in `prompts/skill-combos.md` (record `Combo: <name>`; swap at most one rung, with a reason). The skill ladder, one skill per rung in order (`command npx -y ui-skills get <slug>`):
 builder (`leonxlnx/soft-skill` or `emilkowalski/emil-design-eng`: the product UI and kit parts as a real, beautiful interface),
 type (`jakubkrehel/better-typography` or `pbakaus/typeset`), colour (`pbakaus/colorize` or `jakubkrehel/better-colors`),
 depth (`mengto/beautiful-shadows` or `mengto/progressive-blur`), then frame: compose the video frame with vawe's own rules
