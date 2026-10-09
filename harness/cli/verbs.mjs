@@ -8,6 +8,8 @@ import { compareProblem, CUTS } from '../media/compare-frames.mjs';
 import { STRIP_FPS, STRIP_SPAN, stripProblem } from '../media/see/strip-math.mjs';
 
 import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.mjs';
+import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
+import { lookProblem } from '../media/see/look-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
 
@@ -218,6 +220,43 @@ export const VERBS = [
       return [{ script: 'harness/media/see.mjs', args: [film, '--onion', v.at, '--span', String(span), '--n', String(n), ...opt('--out', v.out)] }];
     },
     next: () => 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe velocity gives the numbers for a page',
+  },
+  {
+    name: 'zoom', summary: 'one region of a frame enlarged with no smoothing (every pixel a square), beside the same region of a second film: fringes, masks and glow',
+    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list' }],
+    flags: [
+      { name: 'at', type: 'string', help: 'the second to crop' },
+      { name: 'box', type: 'string', help: 'x,y,w,h in 1920x1080 pixels' },
+      { name: 'auto', type: 'bool', help: 'crop 240x135 around the densest bright text edge instead of --box' },
+      { name: 'scale', type: 'number', default: ZOOM_SCALE, help: 'whole-number enlargement, 1 to 16' },
+      { name: 'vs', type: 'string', help: 'a second film (same kinds as <film>): its region goes right of the first, labelled' },
+      { name: 'at-b', type: 'string', help: 'with --vs: the second of the second film (default: --at)' },
+      { name: 'out', type: 'path', default: 'out/zoom/<film>', help: 'folder for the PNG' },
+    ],
+    example: 'vawe zoom out/my-launch.mp4 --vs mnowak --at 2.4 --box 800,400,240,135   |   vawe zoom films/my-launch/page.html --auto --at 3',
+    build: (v, [film]) => {
+      const scale = v.scale ?? ZOOM_SCALE;
+      const problem = zoomProblem({ at: v.at, box: v.box, auto: v.auto, scale, vs: v.vs, atB: v['at-b'] });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/see/zoom.mjs', args: [film, '--at', v.at, ...(v.auto ? ['--auto'] : ['--box', v.box]), '--scale', String(scale), ...opt('--vs', v.vs), ...opt('--at-b', v['at-b']), ...opt('--out', v.out)] }];
+    },
+    next: () => 'Read the PNG at full size: left is a, right is b; name the pixel pattern you see (colour fringes, a stripe mask, halo width) and then vawe look for the numbers',
+  },
+  {
+    name: 'look', summary: 'numbers for light and texture, a against b: flashes, clipped pixels, bloom width, colour fringe, screen pattern, glow colour, with advice',
+    positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list' }],
+    flags: [
+      { name: 'vs', type: 'string', help: 'a second film, usually the reference: adds its column and advice lines' },
+      { name: 'from', type: 'string', help: 'start second of the window (default: 0)' },
+      { name: 'to', type: 'string', help: 'end second of the window (default: the end)' },
+    ],
+    example: 'vawe look out/my-launch.mp4 --vs mnowak   |   vawe look films/my-launch/page.html --from 2 --to 6',
+    build: (v, [film]) => {
+      const problem = lookProblem({ from: v.from, to: v.to });
+      if (problem) throw new UsageError(problem);
+      return [{ script: 'harness/media/see/look.mjs', args: [film, ...opt('--vs', v.vs), ...opt('--from', v.from), ...opt('--to', v.to)] }];
+    },
+    next: (v) => (v.vs ? 'act on the advice lines, then vawe zoom <film> --vs <ref> --auto --at <s> to see the pixels behind a number' : 'vawe look <film> --vs <ref id> to put the numbers beside a reference'),
   },
   {
     name: 'velocity', summary: 'the speed and scale of page elements over time as a graph, with start, peak, settle, overshoot and ease shape per element (exact: read from the page)',
