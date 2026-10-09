@@ -160,11 +160,26 @@ export async function openPage(pagePath, frame, { warm = false, final = true, la
   return opened;
 }
 
-async function openLane(final) {
+async function openLane(software) {
   const { default: puppeteer } = await import('puppeteer');
   const server = await serveRepo({ root: REPO_ROOT });
-  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(final), protocolTimeout: PROTOCOL_TIMEOUT_MS }));
+  const browser = trackBrowser(await puppeteer.launch({ headless: true, args: pageArgs(software), protocolTimeout: PROTOCOL_TIMEOUT_MS }));
   return { browser, port: server.port, close: async () => { await browser.close().catch(() => {}); server.close(); } };
+}
+
+// GPU compositing rasterised an SVG filter in two different states at random (the gooey move: 70 of 216 draft
+// frames differed between two renders in one shared browser, 1 of 1296 with a Chrome per lane). Software compositing
+// gave 0 of 648 but costs a draft about 2.5x, so only a page that draws a filter pays it.
+const SVG_FILTER = /<filter[\s>]|\bfe[A-Z][a-zA-Z]+\b|filter\s*:[^;}]*url\(|createElementNS\([^)]*['"]filter['"]/;
+const IMPORTED = /(?:from\s*|import\s*\(?\s*)['"]([^'"]+\.m?js)['"]/g;
+
+export function usesSvgFilter(pagePath, seen = new Set()) {
+  const file = path.resolve(pagePath);
+  if (seen.has(file) || !fs.existsSync(file)) return false;
+  seen.add(file);
+  const text = fs.readFileSync(file, 'utf8');
+  if (SVG_FILTER.test(text)) return true;
+  return [...text.matchAll(IMPORTED)].some(([, spec]) => usesSvgFilter(spec.startsWith('/') ? path.join(REPO_ROOT, spec) : path.resolve(path.dirname(file), spec), seen));
 }
 
 async function openLanePage(lane, pagePath, frame) {
@@ -317,6 +332,7 @@ class StallError extends Error {}
 
 async function runShards(pagePath, frame, frames, workers, work, run) {
   const { stallMs = STALL_MS, resume = null, fault = null, final, sliceFrames } = run;
+  const software = final || usesSvgFilter(pagePath);
   const slices = [];
   for (let lo = 0; lo < frames; lo += sliceFrames) slices.push([lo, Math.min(frames, lo + sliceFrames)]);
   const restarted = [];
@@ -369,7 +385,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
     if (resume && resume.done(slice)) return;
     for (let attempt = 1; ; attempt++) {
       try {
-        if (lane && !lane.browser.connected) { await lane.close(); Object.assign(lane, await openLane(final)); }
+        if (lane && !lane.browser.connected) { await lane.close(); Object.assign(lane, await openLane(software)); }
         await runSliceOnce(slice, worker, attempt, lane);
         if (resume) resume.finish(slice);
         return;
@@ -388,8 +404,8 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
   // After a failure no new slice starts, but the slices already running finish, so a later run resumes them.
   let failure = null;
   const lane = async (worker) => {
-    // A final gives each lane its own Chrome: lanes in one browser queue every screenshot, open and close, and a 20 s film captured 3x slower (140 s against 47 s).
-    const own = final &&insideRoot(REPO_ROOT, path.resolve(pagePath)) ? await openLane(final) : null;
+    // Each lane gets its own Chrome: lanes in one browser queue every screenshot, open and close, and a 20 s film captured 3x slower (140 s against 47 s); tabs of one browser also changed filter pixels.
+    const own = insideRoot(REPO_ROOT, path.resolve(pagePath)) ? await openLane(software) : null;
     try {
       while (next < slices.length && !failure) await runSlice(slices[next++], worker, own).catch((e) => { failure ??= e; });
     } finally { if (own) await own.close(); }
