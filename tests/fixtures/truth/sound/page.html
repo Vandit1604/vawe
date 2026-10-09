@@ -1,0 +1,19 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.5">
+<meta name="message" content="three synth cues at known seconds">
+<title>Truth sound</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #101418; }
+</style>
+</head>
+<body>
+<div class="world" data-world="quiet" style="position:absolute;inset:0"></div>
+<audio data-synth="pluck" data-at="0.5"></audio>
+<audio data-synth="impact" data-at="1.5"></audio>
+<audio data-synth="droplet" data-at="2.4"></audio>
+<script>window.seek = () => {};</script>
+</body>
+</html>

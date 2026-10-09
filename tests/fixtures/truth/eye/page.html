@@ -1,0 +1,40 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<meta name="message" content="one bright mover, three shots">
+<title>Truth eye</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #101418; }
+  .world { position: absolute; inset: 0; display: none; background: #101418; }
+  .dot { position: absolute; width: 72px; height: 72px; margin: -36px 0 0 -36px; border-radius: 50%; background: #fff; }
+</style>
+</head>
+<body>
+<div class="world" data-world="s1" style="background:#101418"><div class="dot"></div></div>
+<div class="world" data-world="s2" style="background:#3a1420"><div class="dot"></div></div>
+<div class="world" data-world="s3" style="background:#0f3a26"><div class="dot"></div></div>
+<script>
+  // centre of the dot as 0..1 of the frame, from the shot's first to its last frame
+  const shots = [
+    { from: 0, to: 1, a: [0.2, 0.3], b: [0.5, 0.3] },
+    { from: 1, to: 2, a: [0.8, 0.8], b: [0.8, 0.2] },
+    { from: 2, to: 3, a: [0.3, 0.7], b: [0.7, 0.3] },
+  ];
+  const worlds = [...document.querySelectorAll('.world')];
+  window.seek = (t) => {
+    shots.forEach((s, i) => {
+      const w = worlds[i], on = t >= s.from && t < s.to;
+      w.style.display = on ? 'block' : 'none';
+      if (!on) return;
+      const u = (t - s.from) / (s.to - s.from);
+      const dot = w.firstElementChild;
+      dot.style.left = `${(s.a[0] + (s.b[0] - s.a[0]) * u) * 100}%`;
+      dot.style.top = `${(s.a[1] + (s.b[1] - s.a[1]) * u) * 100}%`;
+    });
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

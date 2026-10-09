@@ -1,0 +1,41 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.75">
+<meta name="message" content="four grounds, three cuts, one light drift">
+<title>Truth ground</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #000; }
+  .world { position: absolute; inset: 0; display: none; }
+  .dot { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; background: #fff; }
+</style>
+</head>
+<body>
+<div class="world" data-world="g1"><div class="dot"></div></div>
+<div class="world" data-world="g2"><div class="dot"></div></div>
+<div class="world" data-world="g3"><div class="dot"></div></div>
+<div class="world" data-world="g4"><div class="dot"></div></div>
+<script>
+  // g4 drifts linearly from #2a2a3a (L 17.7) to #5a5a7a (L 39.4) over 1.5 s
+  const grounds = [
+    { from: 0, to: 0.75, a: [27, 42, 65] },
+    { from: 0.75, to: 1.5, a: [138, 59, 43] },
+    { from: 1.5, to: 2.25, a: [47, 111, 79] },
+    { from: 2.25, to: 3.75, a: [42, 42, 58], b: [90, 90, 122] },
+  ];
+  const worlds = [...document.querySelectorAll('.world')];
+  window.seek = (t) => {
+    grounds.forEach((g, i) => {
+      const on = t >= g.from && t < g.to;
+      worlds[i].style.display = on ? 'block' : 'none';
+      if (!on) return;
+      const u = g.b ? (t - g.from) / (g.to - g.from) : 0;
+      const c = g.a.map((v, k) => Math.round(v + ((g.b ? g.b[k] : v) - v) * u));
+      worlds[i].style.background = `rgb(${c.join(',')})`;
+    });
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

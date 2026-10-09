@@ -1,0 +1,15 @@
+{
+  "fixture": "type",
+  "about": "three upper-case words in Inter 700 at 200 css px, one at a time, hard in and out. The cap height of Inter is 0.727 em: 145.5 css px, 13.47 percent of a 1080 px frame.",
+  "render": "draft",
+  "fps": 30,
+  "tolerance": { "wordSeconds": 0.0334, "capHeightFraction": 0.01, "wordCount": 0 },
+  "truth": {
+    "capHeightFraction": 0.1347,
+    "words": [
+      { "text": "ALPHA", "in": 0.3, "out": 1.0 },
+      { "text": "BRAVO", "in": 1.0, "out": 1.7 },
+      { "text": "CHARLIE", "in": 1.7, "out": 2.4 }
+    ]
+  }
+}

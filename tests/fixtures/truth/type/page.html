@@ -1,0 +1,31 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2.7">
+<meta name="message" content="three words, three known windows">
+<title>Truth type</title>
+<style>
+  @font-face { font-family: "Inter"; src: url("../../../../assets/fonts/inter-700.woff2") format("woff2"); font-weight: 700; }
+  html, body { margin: 0; height: 100%; overflow: clip; background: #101418; }
+  .world { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .word { font: 700 200px/1 "Inter", sans-serif; color: #fff; letter-spacing: 0; visibility: hidden; }
+</style>
+</head>
+<body>
+<div class="world" data-world="words">
+  <div class="word" data-from="0.3" data-to="1.0">ALPHA</div>
+  <div class="word" data-from="1.0" data-to="1.7" style="position:absolute">BRAVO</div>
+  <div class="word" data-from="1.7" data-to="2.4" style="position:absolute">CHARLIE</div>
+</div>
+<script>
+  // cap height of Inter is 0.727 em: 200 px gives 145.5 px
+  const words = [...document.querySelectorAll('.word')];
+  window.seek = (t) => {
+    for (const w of words) w.style.visibility = t >= +w.dataset.from - 1e-6 && t < +w.dataset.to - 1e-6 ? 'visible' : 'hidden';
+  };
+  document.fonts.ready.then(() => window.seek(0));
+  window.seek(0);
+</script>
+</body>
+</html>

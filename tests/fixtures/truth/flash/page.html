@@ -1,0 +1,28 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<meta name="message" content="two full-frame flashes">
+<title>Truth flash</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #303030; }
+  #f { position: absolute; inset: 0; opacity: 0; }
+</style>
+</head>
+<body>
+<div class="world" data-world="grey" style="position:absolute;inset:0;background:#303030"></div>
+<div id="f"></div>
+<script>
+  // grey ground luma 48. flash 1: 0.8 to 0.8666 s (2 frames at 30 fps), grey 200. flash 2: 1.8 to 1.9 s (3 frames), grey 240.
+  const flashes = [{ from: 0.8, to: 0.8666, luma: 200 }, { from: 1.8, to: 1.9, luma: 240 }];
+  const f = document.getElementById('f');
+  window.seek = (t) => {
+    const on = flashes.find((x) => t >= x.from - 1e-6 && t < x.to - 1e-6);
+    f.style.opacity = on ? 1 : 0;
+    if (on) f.style.background = `rgb(${on.luma},${on.luma},${on.luma})`;
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

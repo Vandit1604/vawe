@@ -1,0 +1,34 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<meta name="message" content="one box overshoots 8 percent, one box moves linearly">
+<title>Truth motion</title>
+<style>
+  :root { --back: 1.5; --a-from: 0.5; --a-len: 1; --a-px: 600; --b-from: 1.75; --b-len: 1; --b-px: 400; }
+  html, body { margin: 0; height: 100%; overflow: clip; background: #101820; }
+  .box { position: absolute; left: 100px; width: 120px; height: 120px; }
+  #a { top: 150px; background: #ff7a3d; }
+  #b { top: 450px; background: #3dd6ff; }
+</style>
+</head>
+<body>
+<div class="world" data-world="move" style="position:absolute;inset:0">
+  <div class="box" id="a"></div>
+  <div class="box" id="b"></div>
+</div>
+<script>
+  const css = (n) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n));
+  const clamp = (u) => Math.min(1, Math.max(0, u));
+  const back = (u) => { const c1 = css('--back'), c3 = c1 + 1; return 1 + c3 * (u - 1) ** 3 + c1 * (u - 1) ** 2; };
+  window.seek = (t) => {
+    const ua = clamp((t - css('--a-from')) / css('--a-len'));
+    const ub = clamp((t - css('--b-from')) / css('--b-len'));
+    document.getElementById('a').style.transform = `translateX(${css('--a-px') * back(ua)}px)`;
+    document.getElementById('b').style.transform = `translateX(${css('--b-px') * ub}px)`;
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

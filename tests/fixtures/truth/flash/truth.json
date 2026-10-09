@@ -1,0 +1,14 @@
+{
+  "fixture": "flash",
+  "about": "two full-frame flashes over a grey ground of luma 48; each flash is one solid grey",
+  "render": "draft",
+  "fps": 30,
+  "tolerance": { "startSeconds": 0.0334, "lengthFrames": 1, "peakLuma": 10 },
+  "truth": {
+    "groundLuma": 48,
+    "flashes": [
+      { "start": 0.8, "frames": 2, "peakLuma": 200 },
+      { "start": 1.8, "frames": 3, "peakLuma": 240 }
+    ]
+  }
+}

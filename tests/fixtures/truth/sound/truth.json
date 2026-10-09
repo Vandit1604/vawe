@@ -1,0 +1,14 @@
+{
+  "fixture": "sound",
+  "about": "three synth cues at known seconds. The loudness is the mix of the existing mixer, measured once with `vawe audio --waveform` and recorded here: it guards against drift and is not an outside reference.",
+  "render": "draft with audio",
+  "tolerance": { "cueSeconds": 0.02, "lufs": 1 },
+  "truth": {
+    "cues": [
+      { "voice": "pluck", "at": 0.5 },
+      { "voice": "impact", "at": 1.5 },
+      { "voice": "droplet", "at": 2.4 }
+    ],
+    "lufs": -20.6
+  }
+}
