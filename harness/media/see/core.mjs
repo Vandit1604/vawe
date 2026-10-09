@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { ffmpegOrDie, scratch } from '../../lib/scratch.mjs';
 import { motionDeltaSeries } from '../shot-detect.mjs';
+import { filmKey } from '../../lib/critique-summary.mjs';
 
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -56,7 +57,7 @@ export function findHolds(series, floor, minLen) {
 export function defaultOutDir(video) {
   const abs = path.resolve(video);
   const m = /^(.*\/quality\/refs\/([^/]+))\//.exec(abs);
-  const name = path.basename(video).replace(/\.[^.]+$/, '');
+  const name = filmKey(video);
   if (m) return path.join(m[1], 'see');
   return scratch('see', name);
 }

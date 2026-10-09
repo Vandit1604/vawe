@@ -100,7 +100,7 @@ export function chooseRefs({ dir, briefText, seconds, routeRequest }) {
   const registry = readRegistry(dir);
   if (!registry) return { refs: [], skipped: `no reference films in ${dir} (bin/vawe refs index)` };
   const type = briefText ? filmType(briefText, routeRequest) : null;
-  if (!type) return { refs: [], skipped: 'the film type is unknown (pass --brief with a Template line)' };
+  if (!type) return { refs: [], skipped: 'the film type is unknown: add a line `Template: prompts/<type>.md` to brief.md (bin/vawe new --from prompts/<type>.md writes it), or a `- request:` line the router can read' };
   const picked = pickRefs(registry, { type, seconds });
   if (!picked.length) return { refs: [], skipped: `no ${type} reference film has a sheet` };
   return { refs: picked.map((r) => ({ id: r.id, title: r.title, studio: r.studio, file: path.join(dir, r.sheet) })), skipped: null };

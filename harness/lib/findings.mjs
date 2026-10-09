@@ -15,7 +15,7 @@ if (jsonMode) process.stdout.write = process.stderr.write.bind(process.stderr);
  *   .fail / .warn / .note (code, summary, extra?)  record one finding
  *   .finding({ code, severity, scene, at, summary, fix, doc })  the long form
  *   .records                                        what has been recorded
- *   .emit()                                         render: prose to stdout, or JSON under --json
+ *   .emit(print?)                                   render: prose to stdout (`print(records)` returns the lines), or JSON under --json
  *
  * `line(record, glyph)` renders ONE record and may return several lines. It exists because the gates
  * do not all print alike and their output must not move; it consumes the record, so the record is still
@@ -68,9 +68,9 @@ export function gateFindings(opts = {}) {
     warn: (code, summary, extra) => add('warn', code, summary, extra),
     note: (code, summary, extra) => add('info', code, summary, extra),
     render,
-    emit() {
+    emit(print = null) {
       emitted = true;
-      if (!jsonMode) for (const r of records) console.log(render(r));
+      if (!jsonMode) { if (print) print(records).forEach((l) => console.log(l)); else for (const r of records) console.log(render(r)); }
       flush();
     },
   };

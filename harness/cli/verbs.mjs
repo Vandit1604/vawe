@@ -11,6 +11,9 @@ import { ONION_FRAMES, ONION_SPAN, onionProblem } from '../media/see/onion-math.
 import { ZOOM_SCALE, zoomProblem } from '../media/see/zoom-math.mjs';
 import { lookProblem } from '../media/see/look-math.mjs';
 import { VELOCITY_SPAN, velocityProblem } from '../media/see/velocity-math.mjs';
+import { filmKey, freshImages, summaryLines } from '../lib/critique-summary.mjs';
+import { readFindings } from '../lib/findings.mjs';
+import { scratch } from '../lib/scratch.mjs';
 import { SAY, WAIT_WORK, nextStep } from '../live/stage-say.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -46,6 +49,8 @@ const pageName = (page) => {
 const devNext = (v, [page]) => (v.from != null || v.to != null
   ? `bin/vawe strip ${page} --at <the second you fixed> and Read it; when every named second is fixed: ${SAY.critique(pageName(page), page)}`
   : SAY.motion(pageName(page), page));
+const readFresh = (file, sinceMs) => (fs.existsSync(file) && fs.statSync(file).mtimeMs >= sinceMs ? readFindings(file) || [] : []);
+const critiqueFindingsFile = (page) => path.join(scratch('critique', filmKey(page)), 'findings.json');
 const opt = (flag, value) => (value === undefined ? [] : [flag, String(value)]);
 
 const PAGE = { name: 'page', required: true, kind: 'file', help: 'films/<name>/page.html' };
@@ -157,8 +162,12 @@ export const VERBS = [
       v.ref
         ? { label: 'motion against the reference (1 to 3 min)', script: 'harness/media/see.mjs', args: [page, '--dom', '--ref', v.ref, ...opt('--from', v.from), ...opt('--to', v.to), ...(v.final ? ['--final'] : [])] }
         : { label: 'measured deltas', script: 'harness/media/see.mjs', args: [page, '--measure'] },
-      { label: 'page-check: text, cues, spectacle, cuts (1 to 3 min)', script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)] },
+      { label: 'page-check: text, cues, spectacle, cuts (1 to 3 min)', script: 'quality/gates/page-check.mjs', args: [page, ...opt('--ref', v.ref)], env: { VAWE_FINDINGS_OUT: critiqueFindingsFile(page) } },
     ],
+    summary: (v, [page], sinceMs) => summaryLines(
+      readFresh(critiqueFindingsFile(page), sinceMs),
+      freshImages(scratch('see', filmKey(page)), sinceMs),
+    ),
     next: (v, [page]) => `look at the sheets above, then ${SAY.judge(pageName(page), page, v.ref)}`,
   },
   {

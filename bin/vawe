@@ -67,11 +67,13 @@ function main(argv) {
       for (const line of recentFailedShipLines(readAllRuns(path.join(ROOT, 'out')), Date.now())) console.error(line);
       return;
     }
+    const startedMs = Date.now();
     for (const [i, step] of steps.entries()) {
       if (step.label) console.log(`\n[${verb.name} ${i + 1}/${steps.length}: ${step.label}]`);
       const code = runStep(step);
       if (code !== 0) process.exit(code);
     }
+    if (verb.summary) console.log(verb.summary(values, positional, startedMs).join('\n'));
     if (verb.next && !verb.nextInline) console.log(`\nnext: ${verb.next(values, positional)}`);
   } catch (e) {
     if (e instanceof UsageError) return fail(e.message);
