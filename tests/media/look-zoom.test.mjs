@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { advise, clippedShare, edgeSamples, flashProfile, hueOf, lookProblem, lookTable, median, summarise } from '../../harness/media/see/look-math.mjs';
 import { BLOCK, channelPhase, channelsSplit, describePattern, powerSpectrum, spectrumPeak } from '../../harness/media/see/texture-math.mjs';
-import { autoBox, parseBox, zoomProblem } from '../../harness/media/see/zoom-math.mjs';
+import { autoBox, commonBox, parseBox, zoomProblem } from '../../harness/media/see/zoom-math.mjs';
 import { VERBS } from '../../harness/cli/verbs.mjs';
 
 const lumaOf = (rgb) => Uint8Array.from({ length: rgb.length / 3 }, (_, i) => (rgb[i * 3] * 77 + rgb[i * 3 + 1] * 150 + rgb[i * 3 + 2] * 29) >> 8);
@@ -129,6 +129,21 @@ test('autoBox: centres on a bright text edge', () => {
   const box = autoBox(luma);
   assert.ok(box.x <= 1050 && box.x + box.w >= 1050 && box.y <= 620 && box.y + box.h >= 620, JSON.stringify(box));
   assert.equal(autoBox(new Uint8Array(1920 * 1080).fill(10)), null);
+});
+
+test('commonBox: picks the region bright in both films, not the densest one of film a', () => {
+  const plane = (...rects) => {
+    const luma = new Uint8Array(1920 * 1080).fill(10);
+    for (const [x0, y0, x1, y1] of rects) for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) luma[y * 1920 + x] = 255;
+    return luma;
+  };
+  const stripes = Array.from({ length: 12 }, (_, i) => [200, 200 + i * 8, 280, 204 + i * 8]);
+  const a = plane(...stripes, [1000, 600, 1100, 640]);
+  const b = plane([1000, 600, 1100, 640]);
+  assert.ok(autoBox(a).x < 700, 'film a alone picks its big block');
+  const box = commonBox(a, b);
+  assert.ok(box.x <= 1050 && box.x + box.w >= 1050 && box.y <= 620 && box.y + box.h >= 620, JSON.stringify(box));
+  assert.equal(commonBox(plane(...stripes), plane([1000, 600, 1100, 640])), null);
 });
 
 test('verbs: zoom and look are registered and build a step', () => {
