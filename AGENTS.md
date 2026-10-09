@@ -63,7 +63,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 
 - The shell is zsh: quote every glob and `?`, `grep --include='*.mjs'`, `curl 'x?a=b'` (unquoted: `no matches found`).
 - One file per `cat` or `head`: a hook rewrites `cat a b` and it breaks. Read the second file in a second call.
-- Never `sleep`: wait with `bin/vawe ship --status <page> --wait` (returns within about 100 s; repeat, and do the work it names between waits).
+- Never `sleep`: wait with `bin/vawe ship --status <page> --wait`: one call blocks until the render ends or about 9 minutes, with a progress line each minute. Run it once, never in parallel, and do the work it names before it.
 - Run `git` plainly from the worktree: no `git -C`, no `$(...)`, no `for` loop around it.
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
 

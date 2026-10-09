@@ -118,7 +118,7 @@ export const VERBS = [
     flags: [
       { name: 'aspect', type: 'string', default: 'the page meta, else 16:9', help: `${ASPECT}, or all for one file each` },
       { name: 'out', type: 'path', default: 'out/<name>.mp4', help: 'output file (not with --aspect all)' },
-      { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait at most 100 s for the background job' },
+      { name: 'wait', type: 'bool', help: 'block until the render ends instead of running it in the background; with --status, wait up to 9 minutes for the background job, one progress line per minute' },
       { name: 'status', type: 'bool', help: 'print the progress or the result of a background render' },
       { name: 'profile', type: 'bool', help: 'print a cost table: frames, subframes, screenshots, capture and encode seconds, the 5 costliest seconds' },
     ],
@@ -132,9 +132,9 @@ export const VERBS = [
       return [warn, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
-      if (v.status) return 'repeat vawe ship --status <page> --wait (up to 100 s each) until it says done; the result includes the judge. Between waits: ' + WAIT_WORK;
+      if (v.status) return 'if it says "not done", run vawe ship --status <page> --wait once more (one call blocks up to 9 minutes; never run two at once); the result includes the judge. Before you wait: ' + WAIT_WORK;
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
-      return `rendering in the background: bin/vawe ship --status ${page} --wait (about 100 s each, repeat); ${WAIT_WORK}`;
+      return `rendering in the background: bin/vawe ship --status ${page} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`;
     },
   },
   {
