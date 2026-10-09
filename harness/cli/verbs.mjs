@@ -81,7 +81,7 @@ export const VERBS = [
     build: (v, [name]) => (v.ref ? [{ script: 'harness/dev/recreation-new.mjs', args: [], env: { TYPE: 'recreation', NAME: name, REF: v.ref, ...(v.score ? { SCORE: '1' } : {}) } }] : null),
   },
   {
-    name: 'see', summary: 'ONE command that reads a film completely: shots and cuts, motion, light and texture, type, sound, and every image with its numbers; --vs puts a reference beside yours with advice',
+    name: 'see', summary: 'ONE command that reads a film completely: shots and cuts, motion, light and texture, type, sound, and every image with its numbers (the full read of a bed for cutting to it: vawe sound); --vs puts a reference beside yours with advice',
     positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (its draft is rendered first when missing or older than the page), or a reference id from vawe refs list' }],
     flags: [
       { name: 'vs', type: 'string', help: 'a second film (same kinds as <film>), usually the reference: both are read, with a delta per measure, one advice line per delta and paired images of the same moment' },
@@ -411,9 +411,39 @@ export const VERBS = [
     build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts'] }],
   },
   {
-    name: 'sounds', summary: 'the synth voices for <audio data-synth>, one line each, with default gain and length',
+    name: 'sound', summary: 'the sound of a track, a film or a page read completely, for cutting to the music: loudness, tempo, beat grid with frames, bars, every hit, sections, a PNG, and with --cuts each cut against the beat; with --at or --waveform the cues of a page; with no argument the synth voices',
+    positional: [{ name: 'input', required: false, kind: 'file', help: 'an audio file (m4a, mp3, wav), an mp4 with audio, or a page (reads its <audio loop> bed, the synth cues as separate rows, and the page\'s own cuts); none: list the synth voices for <audio data-synth>' }],
+    flags: [
+      { name: 'cuts', type: 'string', kind: 'file', help: 'a page (exact worlds from the DOM) or an mp4 (shot cuts): a table per cut with the nearest hit and beat line, offset in ms and frames, verdict, and the second to move each off cut to' },
+      { name: 'from', type: 'number', help: 'start second of the window' },
+      { name: 'to', type: 'number', help: 'end second of the window' },
+      { name: 'at', type: 'string', help: 'a page: comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },
+      { name: 'waveform', type: 'bool', help: 'a page: one PNG of the mixed waveform, loudness curve, world starts and a tick per cue; prints LUFS and true peak' },
+      { name: 'out', type: 'path', default: 'out/see/<name>, or out/<film>-waveform.png with --waveform', help: 'folder for sound.md, sound.json and sound.png, or the PNG path with --waveform' },
+      { name: 'no-cache', type: 'bool', help: 'read the track again even if this file and the code were read before' },
+    ],
+    example: 'vawe sound assets/bed.m4a --cuts films/my-launch/page.html   |   vawe sound films/my-launch/page.html   |   vawe sound films/my-launch/page.html --at 0.8,2.75   |   vawe sound',
+    build: (v, [input]) => {
+      const view = Boolean(v.at || v.waveform);
+      if (!input) {
+        if (view || v.cuts) throw new UsageError('give a page: usage: vawe sound <page> --at 0.8,2.75 | --waveform');
+        return [{ script: 'harness/dev/list-assets.mjs', args: ['sounds'] }];
+      }
+      if (view) {
+        if (!input.endsWith('.html')) throw new UsageError('--at and --waveform read a page: usage: vawe sound <page> --at 0.8,2.75 | --waveform');
+        return [{ script: 'harness/media/audio-view.mjs', args: [input, ...opt('--at', v.at), ...(v.waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
+      }
+      return [{ script: 'harness/media/sound.mjs', args: [input, ...opt('--cuts', v.cuts), ...opt('--from', v.from), ...opt('--to', v.to), ...opt('--out', v.out), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
+    },
+    next: (v, [input]) => (!input ? 'a voice goes in <audio data-synth="name" data-at="s">; vawe sound <bed> gives the beat grid and hits of a music bed'
+      : v.at || v.waveform ? (v.waveform ? 'Read the PNG: each orange tick must sit on the dashed world line of its visual event; move a cue with data-at or data-on' : 'a cue 0 s into itself starts at that second; move one that is off its event with data-at')
+        : 'Read sound.md and sound.png; put each cut on a hit or a beat line at the frame the cut table names, then vawe sound <bed> --cuts <page> again'),
+  },
+  {
+    name: 'sounds', summary: 'alias of vawe sound with no argument: the synth voices for <audio data-synth>, one line each, with default gain and length',
     positional: [], flags: [],
     example: 'vawe sounds',
+    next: () => 'vawe sounds is now vawe sound with no argument; both print the same list',
     build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['sounds'] }],
   },
   {
@@ -422,10 +452,10 @@ export const VERBS = [
     flags: [{ name: 'json', type: 'bool', help: 'print the same data as JSON' }],
     example: 'vawe timeline films/my-launch/page.html',
     build: (v, [page]) => [{ script: 'harness/media/timeline.mjs', args: [page, ...(v.json ? ['--json'] : [])] }],
-    next: (v, [page]) => `fix a flagged rhythm or a cue in the wrong world, then bin/vawe audio ${page} --waveform to check each sound on its event`,
+    next: (v, [page]) => `fix a flagged rhythm or a cue in the wrong world, then bin/vawe sound ${page} --waveform to check each sound on its event`,
   },
   {
-    name: 'audio', summary: 'which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
+    name: 'audio', summary: 'alias of vawe sound: which cues sound at given seconds and how loud, or one PNG of the mixed waveform with world lines and cue ticks',
     positional: [PAGE],
     flags: [
       { name: 'at', type: 'string', help: 'comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },
@@ -437,7 +467,7 @@ export const VERBS = [
       if (!v.at && !v.waveform) throw new UsageError('give --at <s,s,...> or --waveform; usage: vawe audio <page> --at 0.8,2.75');
       return [{ script: 'harness/media/audio-view.mjs', args: [page, ...opt('--at', v.at), ...(v.waveform ? ['--waveform'] : []), ...opt('--out', v.out)] }];
     },
-    next: (v) => (v.waveform ? 'Read the PNG: each orange tick must sit on the dashed world line of its visual event; move a cue with data-at or data-on' : 'a cue 0 s into itself starts at that second; move one that is off its event with data-at'),
+    next: (v) => `vawe audio is now vawe sound <page> ${v.waveform ? '--waveform' : '--at <s,s>'}; the output is the same`,
   },
   {
     name: 'e2e', summary: 'page tests plus a parallel half-size draft of every film (about 5 s)',

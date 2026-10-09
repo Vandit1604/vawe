@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
-  ORDER, PROBE_OFFSET, cutsRows, cutsSeeRows, eyeRows, flashRows, flashSeeRows, formatSummary, formatTable, groundRows, heights, lookRows, lookSeeRows, lumaOfL, motionRows,
+  ORDER, PROBE_OFFSET, beatRows, cutsRows, cutsSeeRows, eyeRows, flashRows, flashSeeRows, formatSummary, formatTable, groundRows, heights, lookRows, lookSeeRows, lumaOfL, motionRows,
   noTool, notAvailable, parseAudioAt, parseLook, parseLufs, parseStrip, parseVelocity, scoreRow, soundRows, summarise, typeRows,
 } from '../../harness/dev/see-truth.mjs';
 
@@ -229,4 +229,14 @@ test('the flash event row needs the flashes counted and no cut left over', () =>
 test('lookSeeRows read the sigma, the offset and the stripe period of see.json', () => {
   const a = { look: { film: { bloom: { sigma: 12.5 }, chroma: { dx: -4.4, dy: 0 }, texture: { striped: true, period: 3.01 } } } };
   assert.deepEqual(statuses(lookSeeRows(truth('look'), { a })), Array(3).fill('pass'));
+});
+
+test('beatRows passes a sound.json that matches the truth and fails a wrong verdict', () => {
+  const t = truth('beat');
+  const sound = { tempo: { bpm: 100.4 }, grid: [{ kind: 'beat', t: 0.3 }], onsets: t.truth.hits.map((h) => ({ attack: h + 0.002 })),
+    cuts: { rows: t.truth.cuts.map((c) => ({ verdict: c.verdict, frames: -c.frames })) }, cues: [{ voice: t.truth.cue.voice, at: t.truth.cue.at }] };
+  assert.ok(statuses(beatRows(t, { sound })).every((s) => s === 'pass'));
+  sound.cuts.rows[2].verdict = 'on beat';
+  assert.equal(beatRows(t, { sound }).filter((x) => x.status === 'fail').length, 1);
+  assert.ok(beatRows(t, { sound: null }).every((x) => x.status === 'fail'));
 });

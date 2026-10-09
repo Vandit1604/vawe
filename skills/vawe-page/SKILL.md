@@ -31,7 +31,7 @@ ground that is never flat (a light, grain or depth device named from a reference
 (5) Fill the brief's Board: a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s),
 the spectacle second (also `<meta name="spectacle">`; recipe 15 in `prompts/moves/RECIPES.md`), a named move per cut
 (overlap, camera, what carries the eye, which arrivals overshoot: `EASE.nudge` for ordinary ones, `EASE.pop` for the hero),
-and sound: a subtle bed plus one voice per cut and for the spectacle (`bin/vawe sounds`). (6) Then the Shots rows, the
+and sound: a subtle bed plus one voice per cut and for the spectacle (`bin/vawe sound`). (6) Then the Shots rows, the
 motion and `bin/vawe dev`. The motion is done when overshoot-share, live-hold and seam-variety are clean or waived with a
 reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe onion` and `bin/vawe velocity` on the
 spectacle second), fixed what reads flat and written a row per cut in the brief's "Motion pass". `bin/vawe` names the next

@@ -312,9 +312,9 @@ Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Qu
 |---|---|---|---|---|---|---|---|
 | [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] |
 
-Sound is part of every film, subtle: a bed for the whole film, one voice per cut and one for the spectacle (names from \`bin/vawe sounds\`, never a fixed list).
+Sound is part of every film, subtle: a bed for the whole film, one voice per cut and one for the spectacle (names from \`bin/vawe sound\`, never a fixed list).
 
-Gain: leave the column empty to take the voice's default (\`bin/vawe sounds\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
+Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
 
 | at s | voice | gain dB | for |
 |---|---|---|---|

@@ -2,7 +2,7 @@
 //
 // Pure maths, no deps, no I/O: every function here is a deterministic transform of a sample array,
 // so the same track always yields the same grid and a beat-matched video stays reproducible.
-// (harness/media/beatmap.mjs does the file reading and writes the sidecar.)
+// (harness/lib/sound-read.mjs does the file reading and joins the hits to the grid.)
 //
 // The chain is the standard one, kept deliberately small:
 //   samples -> onset envelope -> tempo by autocorrelation -> phase by pulse-train correlation -> grid
@@ -103,3 +103,28 @@ export function snapToBeat(t, beats, maxShift = 0.12) {
 
 /** Every Nth beat: the bar line. Cuts on a downbeat read as intentional; off-bar reads as drift. */
 export const downbeats = (beats, per = 4, offset = 0) => beats.filter((_, i) => (i - offset) % per === 0);
+
+/**
+ * Refine a coarse grid against measured onset times (attack times, not envelope frames). The envelope gives the period in whole hops,
+ * which is 1 to 3 BPM off at 100 to 140 BPM; a least-squares line through (beat index, onset time) gives the true period and phase.
+ * Onsets farther than a quarter period from a beat are off-beat hits and are left out. Returns { periodSeconds, phaseSeconds } with
+ * the phase in [0, period), or null when fewer than `minOnsets` onsets sit on the grid.
+ */
+export function fitGrid(times, periodSeconds, phaseSeconds, { minOnsets = 4 } = {}) {
+  let period = periodSeconds, phase = phaseSeconds;
+  for (let pass = 0; pass < 3; pass++) {
+    const pts = [];
+    for (const t of times) {
+      const k = Math.round((t - phase) / period);
+      if (Math.abs(t - phase - k * period) <= period / 4) pts.push([k, t]);
+    }
+    if (pts.length < minOnsets) return null;
+    const n = pts.length;
+    const mk = pts.reduce((s, p) => s + p[0], 0) / n, mt = pts.reduce((s, p) => s + p[1], 0) / n;
+    const sxx = pts.reduce((s, p) => s + (p[0] - mk) ** 2, 0);
+    if (sxx === 0) return null;
+    period = pts.reduce((s, p) => s + (p[0] - mk) * (p[1] - mt), 0) / sxx;
+    phase = mt - period * mk;
+  }
+  return { periodSeconds: period, phaseSeconds: ((phase % period) + period) % period };
+}

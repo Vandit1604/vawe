@@ -34,7 +34,7 @@ Read the material at <path or URL>. Then write films/<name>/BRIEF.md:
 - The arc in five lines, each a chapter: its name, its time window, its one job, its palette, its
   motif (the object or move that ties the chapter to the next).
 - The cast: every recurring character or object, drawn once, with the expressions or states it needs.
-- The music: the file, its BPM and offset (measure it: `node harness/media/beatmap.mjs <file.wav>`), or "no music, narration timings from <tts timings file>".
+- The music: the file, its BPM and offset (measure it: `vawe sound <file>`), or "no music, narration timings from <tts timings file>".
 - What ties it together: one sentence.
 Then write STORYBOARD.md: per chapter, a table of time | line or beat | shot | out. Every shot is
 1.4 to 4 seconds and has ONE focal action. "Out" names the transition to the next shot. Every

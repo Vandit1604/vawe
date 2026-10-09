@@ -1,0 +1,31 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="8">
+<meta name="message" content="cuts partly on and partly off a 100 BPM bed">
+<title>Truth beat</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #000; }
+  .world { position: absolute; inset: 0; display: none; }
+  .world b { position: absolute; left: 8%; top: 38%; font: 800 160px/1 sans-serif; color: rgba(255,255,255,.9); }
+</style>
+</head>
+<body>
+<div class="world" data-world="w1" data-from="0" data-to="1.5" style="background:#c0392b"><b>1</b></div>
+<div class="world" data-world="w2" data-from="1.5" data-to="3.3" style="background:#1f5fbf"><b>2</b></div>
+<div class="world" data-world="w3" data-from="3.3" data-to="4.567" style="background:#e8c547"><b>3</b></div>
+<div class="world" data-world="w4" data-from="4.567" data-to="5.833" style="background:#1d8a5a"><b>4</b></div>
+<div class="world" data-world="w5" data-from="5.833" data-to="6.9" style="background:#6d2fa0"><b>5</b></div>
+<div class="world" data-world="w6" data-from="6.9" data-to="8" style="background:#f2f2f2"><b style="color:#222">6</b></div>
+<audio loop src="track.wav" data-at="0"></audio>
+<audio data-synth="pluck" data-at="1.5"></audio>
+<script>
+  const worlds = [...document.querySelectorAll('.world')];
+  window.seek = (t) => {
+    for (const w of worlds) w.style.display = t >= +w.dataset.from && t < +w.dataset.to ? 'block' : 'none';
+  };
+  window.seek(0);
+</script>
+</body>
+</html>
