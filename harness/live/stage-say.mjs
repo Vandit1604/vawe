@@ -40,7 +40,14 @@ export function movesTakenCount(brief) {
 
 const read = (p) => { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } };
 
-const SKILLS_LINE = /^\W*skills?\b/im;
+export const RUNGS = ['builder', 'type', 'colour', 'depth', 'frame'];
+
+export function missingRungs(design) {
+  return RUNGS.filter((rung) => {
+    const name = rung === 'colour' ? 'colou?r' : rung;
+    return !new RegExp(`^\\W*(skill[ \\t]+${name}[ \\t]*:[ \\t]*\\S+.*:[ \\t]*\\S|skipped[ \\t]+${name}[ \\t]*:[ \\t]*\\S)`, 'im').test(design);
+  });
+}
 
 /**
  * The one owner of the stage order (AGENTS.md, The loop). Each entry is the text of one command line; the verbs in
@@ -50,7 +57,7 @@ export const SAY = {
   study: (name) => `bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, then fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 frames, exact path and what you take`,
   moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second)`,
   design: (name) => `write films/${name}/DESIGN.md and films/${name}/kit/ (format: skills/vawe-page/SKILL.md, example: films/examples/colour-sting/kit/)`,
-  skills: (name) => `add a "Skills:" line to films/${name}/DESIGN.md: the ui-skills you used (command npx -y ui-skills list) and the rules you rejected`,
+  skills: (name, rungs) => `add to films/${name}/DESIGN.md one line per rung (${rungs.join(', ')}): "Skill <rung>: <slug>: what it decided", or "Skipped <rung>: <reason>"; list the skills with command npx -y ui-skills list`,
   states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet, then bin/vawe frames ${rel}`,
   frames: (name, rel) => `bin/vawe frames ${rel}`,
   board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut, sound`,
@@ -88,8 +95,9 @@ export function nextStep(page, root = process.cwd()) {
   if (early && taken !== null && !mtime(design)) {
     return { name, next: SAY.design(name), why: 'the design system and the asset kit come before the states' };
   }
-  if (early && taken !== null && !SKILLS_LINE.test(read(design))) {
-    return { name, next: SAY.skills(name), why: 'DESIGN.md names no skills; the interface and colour skills are chosen before the states' };
+  const rungs = early && taken !== null ? missingRungs(read(design)) : [];
+  if (rungs.length) {
+    return { name, next: SAY.skills(name, rungs), why: `DESIGN.md has no Skill line for ${rungs.join(', ')}; one skill per rung is applied before the states (advice: a rung you skip needs a "Skipped <rung>: <reason>" line)` };
   }
   if (early && taken !== null && t <= mtime(design)) {
     return { name, next: SAY.states(name, rel), why: 'DESIGN.md is newer than the page; the states come before the frames and the motion' };
