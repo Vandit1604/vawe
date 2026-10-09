@@ -62,6 +62,30 @@ test('a slice that fails 4 times fails the render, keeps the frames, and the nex
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('touching the page and core/ between a failed render and its resume keeps the frames key', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-resume-'));
+  const out = path.join(dir, 'film.mp4');
+  const core = 'core/layout/aspects.js';
+  const before = fs.statSync(core);
+  const pageBefore = fs.statSync(PAGE);
+  try {
+    const e = await quietly(() => renderPage(PAGE, out, { ...OPTS, workers: 2, sliceFault: failSecondSlice(SLICE_ATTEMPTS) }).then(() => null, (err) => err));
+    assert.ok(e instanceof InvariantError, String(e));
+    const later = new Date(Date.now() + 5000);
+    fs.utimesSync(PAGE, later, later);
+    fs.utimesSync(core, later, later);
+    const r = await renderPage(PAGE, out, { ...OPTS, workers: 2 });
+    assert.equal(r.resumed, 1, 'the resume finds the kept slice after a touch');
+    const clean = path.join(dir, 'clean.mp4');
+    await renderPage(PAGE, clean, { ...OPTS, workers: 2 });
+    assert.deepEqual(frameHashes(out), frameHashes(clean));
+  } finally {
+    fs.utimesSync(PAGE, pageBefore.atime, pageBefore.mtime);
+    fs.utimesSync(core, before.atime, before.mtime);
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test('frames dirs untouched for 3 days are removed with a printed line, newer ones stay', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stale-'));
   try {

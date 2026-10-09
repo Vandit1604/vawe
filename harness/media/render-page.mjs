@@ -247,9 +247,10 @@ async function frameSpeedsFromPixels(pagePath, frame, frames, fps, from, workers
 
 // The pixels of a render are a pure function of the page folder, core/ and the render settings: this key names
 // both the speed pass answer and the frames dir, so a second render of an unchanged page reuses them.
+// It hashes bytes, not mtimes: a touch, checkout or rebase between a failed final and its resume must keep the key.
 export function renderKey({ pagePath, frame, frames, fps, from, blur, draftVariant = null }) {
   const files = [path.dirname(path.resolve(pagePath)), path.join(REPO_ROOT, 'core')];
-  return createHash('sha1').update(JSON.stringify([treeSignature(files), path.resolve(pagePath), frame, frames, fps, from, blur, ...(draftVariant ? [draftVariant] : [])])).digest('hex').slice(0, 16);
+  return createHash('sha1').update(JSON.stringify([treeSignature(files, { content: true }), path.resolve(pagePath), frame, frames, fps, from, blur, ...(draftVariant ? [draftVariant] : [])])).digest('hex').slice(0, 16);
 }
 
 async function frameSubframes(page, job, key) {
