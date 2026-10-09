@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const FIXTURES = path.join(ROOT, 'tests/fixtures/truth');
 const OUT = path.join(ROOT, 'out/see-truth');
-export const ORDER = ['cuts', 'flash', 'motion', 'camera', 'eye', 'ground', 'look', 'type', 'sound'];
+export const ORDER = ['cuts', 'flash', 'motion', 'camera', 'eye', 'ground', 'look', 'type', 'sound', 'beat'];
 const EPS = 1e-9;
 
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
@@ -103,7 +103,7 @@ export function parseStrip(text) {
   return m ? { start: Number(m[1]), settle: Number(m[4]), bursts: Number(m[5]) } : null;
 }
 
-/** `vawe audio --at a,b` : for each probed second, the cues sounding with the seconds into each. */
+/** `vawe sound --at a,b` : for each probed second, the cues sounding with the seconds into each. */
 export function parseAudioAt(text) {
   const out = [];
   let cur = null;
@@ -116,7 +116,7 @@ export function parseAudioAt(text) {
   return out;
 }
 
-/** The integrated loudness of `vawe audio`: "mix as written: -20.6 LUFS". */
+/** The integrated loudness of `vawe sound --waveform`: "mix as written: -20.6 LUFS". */
 export function parseLufs(text) {
   const m = /(-?\d+(?:\.\d+)?) LUFS/.exec(String(text));
   return m ? Number(m[1]) : null;
@@ -274,16 +274,16 @@ export function soundRows(t, { audioAt, lufs, timeline, spec }) {
   t.truth.cues.forEach((c, i) => {
     const probe = audioAt?.find((p) => Math.abs(p.at - (c.at + PROBE_OFFSET)) < 1e-6);
     const cue = probe?.cues.find((x) => x.voice === c.voice);
-    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe audio --at (page)', truth: c.at, measured: cue ? probe.at - cue.into : null, tolerance: tol.cueSeconds }));
+    rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe sound --at (page)', truth: c.at, measured: cue ? probe.at - cue.into : null, tolerance: tol.cueSeconds }));
     rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe timeline (page)', truth: c.at, measured: timeline?.cues?.[i]?.voice === c.voice ? timeline.cues[i].at : null, tolerance: tol.cueSeconds }));
     const hit = spec?.audio?.hits ? nearest(spec.audio.hits, c.at, (h) => h.t ?? h.frame / spec.fps) : undefined;
     rows.push(scoreRow({ fixture: F, measure: `${c.voice} cue second`, tool: 'vawe spec (audio hits of the mp4)', truth: c.at, measured: hit ? hit.t ?? hit.frame / spec.fps : null, tolerance: tol.cueSeconds }));
   });
-  rows.push(scoreRow({ fixture: F, measure: 'integrated loudness (LUFS)', tool: 'vawe audio --waveform (page)', truth: t.truth.lufs, measured: lufs, tolerance: tol.lufs }));
+  rows.push(scoreRow({ fixture: F, measure: 'integrated loudness (LUFS)', tool: 'vawe sound --waveform (page)', truth: t.truth.lufs, measured: lufs, tolerance: tol.lufs }));
   return rows;
 }
 
-/** Seconds after a cue start at which `vawe audio --at` probes it. */
+/** Seconds after a cue start at which `vawe sound --at` probes it. */
 export const PROBE_OFFSET = 0.1;
 
 /** `vawe look` table: the glow sigma, the signed channel offsets and the stripe period of the screen texture. */
@@ -448,6 +448,26 @@ export function soundSeeRows(t, { a, p }) {
   return rows;
 }
 
+const BEAT = 'vawe sound';
+
+/** `vawe sound` on the beat fixture: tempo, first beat, every strike, each cut's verdict and frames, the page cue. `sound` is its sound.json; null when the verb failed. */
+export function beatRows(t, { sound }) {
+  const F = 'beat', tol = t.tolerance, v = t.truth;
+  const rows = [
+    scoreRow({ fixture: F, measure: 'tempo (BPM)', tool: BEAT, truth: v.bpm, measured: sound?.tempo?.bpm, tolerance: tol.bpm }),
+    scoreRow({ fixture: F, measure: 'first beat second', tool: BEAT, truth: v.firstBeat, measured: sound?.grid?.find((l) => l.kind === 'beat')?.t, tolerance: tol.beatSeconds }),
+  ];
+  for (const h of v.hits) rows.push(scoreRow({ fixture: F, measure: `strike at ${h} s: attack second`, tool: BEAT, truth: h, measured: nearest(sound?.onsets ?? [], h, (o) => o.attack)?.attack, tolerance: tol.onsetSeconds }));
+  v.cuts.forEach((c, i) => {
+    const row = sound?.cuts?.rows?.[i];
+    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} (${r(c.at, 2)} s) verdict`, tool: BEAT, truth: c.verdict, measured: row?.verdict, tolerance: null }));
+    rows.push(scoreRow({ fixture: F, measure: `cut ${i + 1} (${r(c.at, 2)} s) offset in frames`, tool: BEAT, truth: c.frames, measured: row?.frames == null ? null : Math.abs(row.frames), tolerance: 0.1 }));
+  });
+  const cue = sound?.cues?.find((x) => x.voice === v.cue.voice);
+  rows.push(scoreRow({ fixture: F, measure: `${v.cue.voice} cue second (its own row, apart from the bed)`, tool: BEAT, truth: v.cue.at, measured: cue?.at, tolerance: tol.cueSeconds }));
+  return rows;
+}
+
 export function lookSeeRows(t, { a }) {
   const F = 'look', tol = t.tolerance, v = t.truth;
   const f = a?.look.film;
@@ -515,9 +535,15 @@ const FIXTURE_RUN = {
   sound: (t, o) => {
     const mp4 = render('sound', { ...o, audio: true });
     const probes = t.truth.cues.map((c) => r(c.at + PROBE_OFFSET, 3)).join(',');
-    const at = vawe('audio', pageOf('sound'), '--at', probes);
-    const wave = vawe('audio', pageOf('sound'), '--waveform', '--out', 'out/see-truth/sound-wave.png');
+    const at = vawe('sound', pageOf('sound'), '--at', probes);
+    const wave = vawe('sound', pageOf('sound'), '--waveform', '--out', 'out/see-truth/sound-wave.png');
     return [...soundRows(t, { audioAt: parseAudioAt(at.text), lufs: parseLufs(wave.text), timeline: timelineOf('sound'), spec: specOf('sound', mp4) }), ...soundSeeRows(t, { a: seeOf('sound', mp4), p: seeOf('sound', mp4, { page: true }) })];
+  },
+  beat: (t) => {
+    const out = 'out/see-truth/beat-sound';
+    const res = vawe('sound', pageOf('beat'), '--out', out, '--no-cache');
+    if (!res.ok) console.error(`vawe sound on beat failed:\n${res.text.split('\n').slice(-8).join('\n')}`);
+    return beatRows(t, { sound: readJson(path.join(ROOT, out, 'sound.json')) });
   },
   look: (t, o) => {
     const mp4 = render('look', { ...o, final: true });

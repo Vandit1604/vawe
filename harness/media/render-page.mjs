@@ -73,6 +73,7 @@ import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, spectacleOf } from '../lib/board.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived, waiverHint } from '../lib/waivers.mjs';
+import { beatAdvice } from '../lib/sound-read.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
@@ -926,6 +927,12 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
+/** The cut-off-beat advice of a page with a music bed; [] for a window, a waiver with its reason, no bed, or a bed that cannot be read (advice must never stop a draft). */
+function beatLines(pagePath, worlds, authoring) {
+  if (!worlds || isWaived(authoring, 'cut-off-beat')) return [];
+  try { return beatAdvice(pagePath, worlds).flatMap((l) => [l, waiverHint('cut-off-beat')]); } catch (e) { return [`cut-off-beat: the music bed was not read: ${e.message}`]; }
+}
+
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
 export function pageAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
@@ -938,6 +945,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
     lines: [...frameUnitLines(probe.samples, probe), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))),
+      ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };
 }

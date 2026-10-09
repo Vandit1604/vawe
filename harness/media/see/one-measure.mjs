@@ -10,6 +10,7 @@ import { motionDeltaSeries } from '../shot-detect.mjs';
 import { refSpec } from '../ref-spec.mjs';
 import { measureFile, renderMixCached } from '../page-audio.mjs';
 import { readTimeline } from '../timeline.mjs';
+import { hitKind } from '../../lib/sound-read.mjs';
 import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
 import { frameRgb } from './frame.mjs';
 import { edgesAt, lumaSeries, measureFilm } from './look.mjs';
@@ -175,7 +176,7 @@ async function soundOf(src, spec, pageRead, dir, shots, log) {
   const hits = (spec.audio?.hits ?? []).filter((h) => h.strength >= MIN_HIT).map((h) => {
     const onset = h.attack ?? h.t;
     const near = cuts.reduce((b, c) => (b == null || Math.abs(c - onset) < Math.abs(b - onset) ? c : b), null);
-    return { onset: round(onset), peak: h.t, strength: h.strength, errMs: h.errMs ?? null, nearestCut: near == null || Math.abs(near - onset) > 0.3 ? null : round(near), leadMs: near == null || Math.abs(near - onset) > 0.3 ? null : Math.round((near - onset) * 1000), shot: shots.find((s) => onset >= s.start && onset < s.end)?.index ?? null };
+    return { onset: round(onset), peak: h.t, strength: h.strength, kind: hitKind(h), errMs: h.errMs ?? null, nearestCut: near == null || Math.abs(near - onset) > 0.3 ? null : round(near), leadMs: near == null || Math.abs(near - onset) > 0.3 ? null : Math.round((near - onset) * 1000), shot: shots.find((s) => onset >= s.start && onset < s.end)?.index ?? null };
   });
   let loudness = null;
   try { loudness = measureFile(src.video); } catch { loudness = null; }

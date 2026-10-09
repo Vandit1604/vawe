@@ -111,7 +111,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 
 - [camera-path-linear](rules/camera-path-linear.md): A camera flight through one space replaces the cut. Check: none.
 - [crossfade-limit](rules/crossfade-limit.md): A crossfade is not the only transition, and a crossfade between two busy frames goes muddy. Check: judge.
-- [cut-on-beat](rules/cut-on-beat.md): Cut on the beat, or two frames early, on an action; never in a dead hold. Check: none.
+- [cut-on-beat](rules/cut-on-beat.md): Cut on the beat, or two frames early, on an action; never in a dead hold. Check: cut-off-beat.
 - [eye-trace](rules/eye-trace.md): Land the incoming subject where the eye was on the outgoing frame. Check: judge.
 - [ground-jump-cover](rules/ground-jump-cover.md): A background jump (dark to light) wants a cover that peaks at the cut. Check: judge.
 - [handoff-duration](rules/handoff-duration.md): A handoff where the outgoing element's final pose becomes the incoming element's first pose reads as one object travelling. Check: judge.

@@ -33,6 +33,7 @@ import { probe, videoFor, loopSeam, describeLoop } from '../../harness/media/see
 import { readPageMeta } from '../../harness/media/render-page.mjs';
 import { referenceFor } from '../../harness/lib/motion-stamp.mjs';
 import { decodeMono, envelopeOf, onsetsOf, meanDb } from '../../harness/lib/audio-onsets.mjs';
+import { pageAudio } from '../../harness/lib/sound-read.mjs';
 import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
 import { sampleText, clippedGlyphs } from '../../harness/lib/text-timing.mjs';
 import { readHoldProblems } from '../../harness/lib/read-hold.mjs';
@@ -91,15 +92,6 @@ export function cutsAgainstBeats(cutTimes, beats, fps, lead = 0) {
   }).filter((c) => c.related);
 }
 
-const attrOf = (tag, name) => { const m = tag.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']*)["']`, 'i')); return m ? m[1] : null; };
-
-/** The page's <audio> elements as data. `loop` is the native attribute: the music bed. */
-export function pageAudio(html) {
-  return (html.match(/<audio\b[^>]*>/gi) || []).map((tag) => ({
-    src: attrOf(tag, 'src'), synth: attrOf(tag, 'data-synth'), at: attrOf(tag, 'data-at'),
-    loop: /\bloop\b/i.test(tag.replace(/(["'])[^"']*\1/g, '')),
-  }));
-}
 const isCue = (a) => !a.loop && a.at != null && !/(^|\/)(vo|voice|narration)/i.test(a.src || '');
 
 function pageFor(input) {

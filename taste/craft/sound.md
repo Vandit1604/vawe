@@ -96,7 +96,7 @@ turn into noise and the audience stops noticing them.
 
 - Track first (lock the track, mark audio and visual key moments, design against the markers) for a 10 to
   40 s product film. Cut on the beat, or two frames early: the eye needs time to find the new subject.
-- Find the grid with `node harness/media/beatmap.mjs <track.wav>`. It reports low confidence on an
+- Find the grid with `vawe sound <track>`. It reports low confidence on an
   ambient pad and says so, which is the right answer. Then put the cut times on that grid.
 - If the logo lands at 24:15, pick the tempo that puts a beat there. Do not nudge the logo.
 

@@ -4,7 +4,7 @@
 //
 //   node harness/media/ref-spec.mjs <ref.mp4> [--out dir] [--fps 29.97] [--elements 6] [--ocr] [--no-audio]
 //
-// Reuses: ref-measure/transition.mjs (cuts and how each one changes the picture), core/beats/detect.js (audio onsets, tempo, beat grid),
+// Reuses: ref-measure/transition.mjs (cuts and how each one changes the picture), lib/sound-read.mjs (audio onsets, tempo, beat grid),
 // core/motion/springs.js approach()/spring() (the curves an arrival is fitted to), see.mjs ocrWords.
 // Every frame is decoded at 320px wide; positions and sizes are reported in reference pixels.
 import crypto from 'node:crypto';
@@ -15,7 +15,7 @@ import { spawnSync } from 'node:child_process';
 import { probeSize } from '../lib/frame-forensics.mjs';
 import { scratch, ffmpegOrDie } from '../lib/scratch.mjs';
 import { readWav } from './wav-read.mjs';
-import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid } from '../../core/beats/detect.js';
+import { analyseMono } from '../lib/sound-read.mjs';
 import { r1, r3, median, mode, summariseMove } from '../lib/move-fit.mjs';
 import { refineTrack } from '../lib/ref-measure/subpixel.mjs';
 import { findTransitions, shotSpans } from '../lib/ref-measure/transition.mjs';
@@ -29,7 +29,6 @@ import { measureEye } from '../lib/ref-measure/eye-path.mjs';
 import { measureGround } from '../lib/ref-measure/ground.mjs';
 import { decode as decodeFrames } from '../lib/ref-measure/decode.mjs';
 import { estimateShutter } from '../lib/ref-measure/shutter.mjs';
-import { attackTimes } from '../lib/ref-measure/audio-attack.mjs';
 import { trackWords, refineWordTimes, buildLines, restBox, fontPxOf, inkColor } from '../lib/ref-measure/words.mjs';
 import { loadErrors } from '../lib/ref-measure/error-table.mjs';
 
@@ -363,24 +362,10 @@ function analyseAudio(video, dir, fps, dur) {
   catch { return null; }
   const { mono, sampleRate } = readWav(wav);
   fs.rmSync(wav, { force: true });
-  const hop = 256, win = 512;
-  const { env, hopSeconds } = onsetEnvelope(mono, sampleRate, hop, win);
-  if (!env.length) return null;
-  const mean = env.reduce((a, b) => a + b, 0) / env.length;
-  const sd = Math.sqrt(env.reduce((a, b) => a + (b - mean) ** 2, 0) / env.length);
-  const max = Math.max(...env, 1e-9), thr = mean + 1.2 * sd, hits = [];
-  for (let i = 3; i < env.length - 3; i++) {
-    if (env[i] < thr) continue;
-    let isMax = true;
-    for (let k = -3; k <= 3; k++) if (env[i + k] > env[i]) { isMax = false; break; }
-    const t = (i * hop + win / 2) / sampleRate;
-    if (isMax && (!hits.length || t - hits[hits.length - 1].t >= 0.06)) hits.push({ t: r3(t), frame: Math.round(t * fps), strength: r3(env[i] / max) });
-  }
-  attackTimes(mono, sampleRate, hits.map((h) => h.t)).forEach((a, i) => Object.assign(hits[i], { attack: r3(a.attack), attackFrame: r1(a.attack * fps), errMs: a.errMs }));
-  const tempo = estimateTempo(env, hopSeconds), phase = estimatePhase(env, tempo.periodFrames);
-  const beats = beatGrid(tempo.periodFrames, phase, hopSeconds, dur);
-  return { hits, bpm: r1(tempo.bpm), confidence: r1(tempo.confidence), framesPerBeat: tempo.bpm ? r1((60 / tempo.bpm) * fps) : 0, beats,
-    beatFrames: beats.map((b) => Math.round(b * fps)) };
+  const a = analyseMono(mono, sampleRate, { fps, duration: dur });
+  if (!a) return null;
+  return { hits: a.hits, bpm: r1(a.bpm), confidence: r1(a.confidence), framesPerBeat: a.bpm ? r1((60 / a.bpm) * fps) : 0, beats: a.beats,
+    beatFrames: a.beats.map((b) => Math.round(b * fps)) };
 }
 
 function cutLeads(cuts, audio, fps) {

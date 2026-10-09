@@ -140,14 +140,14 @@ function soundSection(m) {
   if (so.mp4) L.push(`Loudness of the film's own audio: ${so.mp4.lufs} LUFS, true peak ${so.mp4.truePeakDb} dBFS.`);
   if (so.page?.mix) L.push(`Mix of the page's audio tags as written: ${so.page.mix.lufs} LUFS, true peak ${so.page.mix.truePeakDb} dBFS.`);
   if (!so.hasAudio && !so.page) L.push('No audio stream.');
-  if (so.bpm) L.push(`Tempo ${so.bpm} BPM (confidence ${so.bpmConfidence}).`);
+  if (so.bpm) L.push(`Tempo ${so.bpm} BPM (confidence ${so.bpmConfidence}). To cut to the music: vawe sound <bed> gives the beat grid with frames, the hits and a cut table (the same reader).`);
   if (so.page) {
     L.push(`Bed: ${so.page.bed.length ? so.page.bed.map((b) => `${b.voice} from ${b.at} s, ${b.gain} dB`).join('; ') : 'none'}.`, '', 'Cues from the page:');
     for (const c of so.page.cues) L.push(`- ${c.at} s ${c.voice} ${c.gain} dB, world ${c.world ?? 'none'}${c.on ? ` (${c.on})` : ''}`);
   }
   if (so.hits.length) {
     L.push('', `Onsets heard in the film (${so.hits.length}; onset is where the sound starts, peak is its loudest change, later):`, '',
-      ...table(['onset s', 'peak s', 'strength', 'shot', 'nearest cut s', 'lead ms (+ = sound first)'], so.hits.map((h) => [f2(h.onset), f2(h.peak), h.strength, h.shot ?? '-', h.nearestCut == null ? '-' : f2(h.nearestCut), h.leadMs ?? '-'])));
+      ...table(['onset s', 'peak s', 'strength', 'kind', 'shot', 'nearest cut s', 'lead ms (+ = sound first)'], so.hits.map((h) => [f2(h.onset), f2(h.peak), h.strength, h.kind ?? '-', h.shot ?? '-', h.nearestCut == null ? '-' : f2(h.nearestCut), h.leadMs ?? '-'])));
   }
   return L;
 }
