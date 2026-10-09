@@ -945,8 +945,8 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const page = pageAdvice(pagePath, { probe, motion });
   const video = whole ? await videoChecks(mp4, pagePath, checks, probe) : null;
   const problems = mergeProblems(video?.problems ?? [], page.text);
-  const sound = soundLine(level?.I ?? null);
-  const peak = peakLine(level?.TP ?? null);
+  const sound = soundLine(level?.I ?? null, undefined, level);
+  const peak = peakLine(level?.TP ?? null, level?.cues);
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...page.lines];
   const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);

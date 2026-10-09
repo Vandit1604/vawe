@@ -82,8 +82,8 @@ export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, 
   const authoring = pageAuthoring(pagePath);
   const name = nameOf(mp4);
   const page = pageMeasures({ probe, findings, authoring }, set);
-  const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
-  const rows = buildRows(set.acceptance, m, { mode });
+  const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, cues: level?.cues, judge: judgeMeasure(name) };
+  const rows = buildRows(set.acceptance, m, { mode, stage: 'draft' });
   const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds, tailMoving(probe.tail));
   return { rows, was, sync: writeBriefFromPage(pagePath, page.measuredSpec, probe.samples) };
 }

@@ -63,12 +63,16 @@ test('template guess rows are dropped from the spec tables and counted', () => {
 });
 
 test('only red rows print, one line each, and the count of green matches them', () => {
-  const rows = buildRows([], { stills: [{ a: 1, b: 2 }], guessed: { words: 1 } }, { mode: 'draft' });
+  const rows = buildRows([], { stills: [{ a: 1, b: 2 }], guessed: { words: 1 } }, { mode: 'draft', stage: 'draft' });
   const red = rows.filter((r) => r.status === 'advice');
   assert.equal(red.length, 1);
   assert.match(redLine(red[0]), /^ {2}still windows over 0.5 s outside a declared hold: 1 \(1-2 s held still\); keep one thing moving/);
   const measured = rows.filter((r) => r.status !== 'not measured').length;
-  assert.equal(summaryLine(rows, 3, ['checks 1.0 s']), `acceptance: ${measured - 1} of ${measured} green (was 3) · checks 1.0 s`);
+  const atShip = rows.filter((r) => r.atShip).length;
+  assert.equal(rows.length, 15);
+  assert.ok(atShip >= 1, 'the judge row is counted for ship');
+  assert.equal(summaryLine(rows, 3, ['checks 1.0 s']), `acceptance: ${measured - 1} of ${measured} measured green, ${atShip} more at ship (15 rows) (was 3) · checks 1.0 s`);
+  assert.equal(rows.find((r) => r.metric.startsWith('judge:')).measured, 'not measured in a draft (ship measures it)');
   const layout = rows.find((r) => r.metric === 'word cap height and position vs spec');
   assert.match(layout.measured, /^not set: /);
 });

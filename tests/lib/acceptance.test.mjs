@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildRows, targetTest, withHistory, tableLines, allMeasuredGreen, DEFAULT_ROWS } from '../../harness/lib/acceptance.mjs';
+import { buildRows, targetTest, withHistory, tableLines, summaryLine, allMeasuredGreen, DEFAULT_ROWS } from '../../harness/lib/acceptance.mjs';
 
 const clean = { smooth: { frozen: [], jerky: [], jumps: [] }, stills: [], tail: 2, caps: [{ text: 'Hi', cap: 7, t: 1 }], contrast: [], collisions: [], readHold: [], exits: [], lufs: -20, peak: -12 };
 const byMetric = (rows) => Object.fromEntries(rows.map((r) => [r.metric, r]));
@@ -76,6 +76,21 @@ test('history keeps the last 10 and the summary shows the trend', () => {
   assert.match(lines.at(-1), /^acceptance: \d+ of 15 green, \d+ not measured \(was 9\)$/);
   assert.ok(lines.some((l) => l.includes('still windows over 0.5 s outside a declared hold | 0 | 1')));
   assert.ok(!lines.some((l) => l.includes('jerky steps')));
+});
+
+test('the draft and the ship use the same 15 rows: the draft names the rows only ship measures', () => {
+  const draft = buildRows([], clean, { stage: 'draft' });
+  const ship = buildRows([], clean);
+  assert.equal(draft.length, ship.length);
+  assert.equal(summaryLine(draft, null), 'acceptance: 12 of 12 measured green, 1 more at ship (15 rows)');
+  assert.equal(tableLines(ship).at(-1), 'acceptance: 12 of 15 green, 3 not measured');
+});
+
+test('the loudness row names the dB to change; the peak row names the loudest cue', () => {
+  const cues = [{ name: 'impact', at: 2.4, peakDb: -5 }];
+  const rows = byMetric(buildRows([], { ...clean, lufs: -28.8, peak: -2, cues }));
+  assert.match(rows.loudness.detail[0], /change every data-gain by \+9 dB/);
+  assert.match(rows.peak.detail[0], /on the loudest cue "impact" at 2\.4 s by 1 dB/);
 });
 
 test('text cap height: product chrome passes at its own floor and a plain line still needs the target', () => {

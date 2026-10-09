@@ -44,6 +44,13 @@ test('soundLine: silent inside -24 to -16, a fix outside', () => {
   assert.match(soundLine(-12), /lower data-gain on the loud cues/);
 });
 
+test('soundLine with a level names the dB for every data-gain, and the loudest cue when the peak then passes the limit', () => {
+  assert.match(soundLine(-25.7, undefined, { I: -25.7, TP: -12 }), /^sound: -26 LUFS integrated \(subtle target about -20; change every data-gain by \+6 dB, or remove the gains to use the voice defaults \(they land near -20 LUFS\)\)$/);
+  const cues = [{ name: 'tap', at: 1, peakDb: -9 }, { name: 'impact', at: 2.4, peakDb: -5 }];
+  assert.match(soundLine(-27.4, undefined, { I: -27.4, TP: -8, cues }), /by \+7 dB.*peak then reaches -1\.0 dBTP \(limit -3\), so lower the loudest cue "impact" at 2\.4 s by 2 dB more/);
+  assert.match(soundLine(-12, undefined, { I: -12, TP: -5 }), /by -8 dB/);
+});
+
 test('mergeProblems: alternates the two lists and stops at 4', () => {
   assert.deepEqual(mergeProblems(['v1', 'v2', 'v3'], ['t1', 't2', 't3']), ['v1', 't1', 'v2', 't2']);
   assert.deepEqual(mergeProblems([], ['t1']), ['t1']);

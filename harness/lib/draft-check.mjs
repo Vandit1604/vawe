@@ -3,10 +3,11 @@
 // harness/media/draft-check.mjs feeds it.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { adviceBlock } from './advice.mjs';
+import { loudestCue } from './peak-limit.mjs';
 
 const SIZE = LIMITS['readable-text-size'];
 const LEVEL = LIMITS['sound-level'];
-export const RULES = { capFrac: SIZE.cap_height_pct / 100, chromeCapFrac: SIZE.chrome_cap_height_pct / 100, capOfFont: 0.7, holdSec: SIZE.held_min_s, maxProblems: 4, lufsLow: LEVEL.lufs_low, lufsHigh: LEVEL.lufs_high };
+export const RULES = { capFrac: SIZE.cap_height_pct / 100, chromeCapFrac: SIZE.chrome_cap_height_pct / 100, capOfFont: 0.7, holdSec: SIZE.held_min_s, maxProblems: 4, lufsTarget: LEVEL.lufs_target, lufsLow: LEVEL.lufs_low, lufsHigh: LEVEL.lufs_high };
 
 // Text inside these is not copy to read: aria-hidden is texture, data-chrome is the label of a product shown as texture.
 export const DECORATIVE = '[aria-hidden="true"]';
@@ -121,11 +122,24 @@ export function soundSummary(level, rules = RULES) {
   return `sound: ${level.I.toFixed(1)} LUFS integrated, ${level.TP.toFixed(1)} dBTP true peak (band ${rules.lufsLow} to ${rules.lufsHigh} LUFS, peak at most ${LEVEL.peak_dbfs} dBTP)`;
 }
 
-/** The sound line when the mix is outside the band, else null. */
-export function soundLine(lufs, rules = RULES) {
+/**
+ * The change that brings a mix outside the band to the target: whole dB on every data-gain (a level shift moves
+ * integrated loudness and true peak by the same dB), and the loudest cue when the peak then passes its limit. Pure.
+ * `level`: { I, TP, cues? } as measured.
+ */
+export function loudnessFix(level, rules = RULES) {
+  const db = Math.round(rules.lufsTarget - level.I);
+  const change = `change every data-gain by ${db < 0 ? '-' : '+'}${Math.abs(db)} dB, or remove the gains to use the voice defaults (they land near ${rules.lufsTarget} LUFS)`;
+  const peak = level.TP + db;
+  if (!(peak > LEVEL.peak_dbfs)) return change;
+  return `${change}; the true peak then reaches ${peak.toFixed(1)} dBTP (limit ${LEVEL.peak_dbfs}), so lower ${loudestCue(level.cues)} by ${Math.ceil(peak - LEVEL.peak_dbfs)} dB more`;
+}
+
+/** The sound line when the mix is outside the band, else null. `level` adds the exact change. */
+export function soundLine(lufs, rules = RULES, level = null) {
   if (lufs === null || (lufs >= rules.lufsLow && lufs <= rules.lufsHigh)) return null;
-  const fix = lufs < rules.lufsLow ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues';
-  return `sound: ${Math.round(lufs)} LUFS integrated (subtle target about -20; ${fix})`;
+  const fix = level ? loudnessFix(level, rules) : lufs < rules.lufsLow ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues';
+  return `sound: ${Math.round(lufs)} LUFS integrated (subtle target about ${rules.lufsTarget}; ${fix})`;
 }
 
 /** Alternate two ranked lists (video problems, text problems) and keep the first `max`. */

@@ -3,8 +3,8 @@
 // the one its own module already computes (still-limit, sheet-tiles, text-contrast, text-collision,
 // read-hold, motion-lint, peak-limit, smoothness, spec-conformance).
 import { LAYOUT_TOL_PCT, checkLine } from './spec-conformance.mjs';
-import { RULES } from './draft-check.mjs';
-import { PEAK_DBFS } from './peak-limit.mjs';
+import { RULES, loudnessFix } from './draft-check.mjs';
+import { PEAK_DBFS, loudestCue } from './peak-limit.mjs';
 import { DRAFT_MIN_RATIO } from './text-contrast.mjs';
 import { unrunReason } from './draft-tiers.mjs';
 
@@ -50,7 +50,8 @@ export function targetTest(text) {
   return null;
 }
 
-const skip = (reason, label = 'not measured') => ({ skip: reason, label });
+const skip = (reason, label = 'not measured', atShip = false) => ({ skip: reason, label, atShip });
+const DRAFT_SKIP = 'not measured in a draft (ship measures it)';
 const done = (ok, measured, detail = []) => ({ ok, measured, detail });
 
 function countRow(list, pass, describe, fix) {
@@ -98,20 +99,22 @@ const ROWS = {
   'exits shorter than entrances': (m) => (m.exits ? done(!m.exits.length, m.exits.length ? `${m.exits.length} too long` : 'all', m.exits.slice(0, SHOW).map((e) => `${e.at.toFixed(2)} s: ${e.what}`)) : skip('no motion probe')),
   'word cap height and position vs spec': (m, pass) => deviationRow(m.layout, pass, 'no spec', (d) => `${d.toFixed(1)}%`, 'set the font size and box to the Words table, or change the table', m.guessed?.words),
   'cuts vs spec': (m, pass) => deviationRow(m.cuts, pass, m.hasShots ? 'no hard cut near a shot start' : 'no spec', (d) => `${d.toFixed(1)} frames`, 'land the cut on the Shots boundary, or change the table'),
-  loudness: (m, pass) => (m.lufs == null ? skip('no audio in the video') : done(pass(m.lufs), `${m.lufs.toFixed(1)} LUFS`, pass(m.lufs) ? [] : [m.lufs < LUFS_LOW ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues'])),
-  peak: (m, pass) => (m.peak == null ? skip('no audio in the video') : done(pass(m.peak), `${m.peak.toFixed(1)} dBFS`, pass(m.peak) ? [] : [`lower data-gain on the loudest cue by ${Math.ceil(m.peak - PEAK_DBFS)} dB`])),
+  loudness: (m, pass) => (m.lufs == null ? skip('no audio in the video') : done(pass(m.lufs), `${m.lufs.toFixed(1)} LUFS`, pass(m.lufs) ? [] : [loudnessFix({ I: m.lufs, TP: m.peak ?? -Infinity, cues: m.cues })])),
+  peak: (m, pass) => (m.peak == null ? skip('no audio in the video') : done(pass(m.peak), `${m.peak.toFixed(1)} dBFS`, pass(m.peak) ? [] : [`lower data-gain on ${loudestCue(m.cues)} by ${Math.ceil(m.peak - PEAK_DBFS)} dB`])),
   'judge: each storyboard frame as beautiful as the anchor, full size': (m) => (m.judge ? done(m.judge.yes === m.judge.total, `${m.judge.yes} of ${m.judge.total} YES`, m.judge.fixes.slice(0, SHOW)) : skip('not run')),
 };
 
+const JUDGE_ROW = 'judge: each storyboard frame as beautiful as the anchor, full size';
 const DEFAULT_TEST = new Map(DEFAULT_ROWS.map((r) => [r.metric, targetTest(r.target)]));
 
-const read = (row, m, carried, mode) => {
+const read = (row, m, carried, mode, stage) => {
   const unrun = unrunReason(row.metric, mode);
-  if (unrun) return skip(unrun);
+  if (unrun) return stage === 'draft' ? skip(`${DRAFT_SKIP}: ${unrun}`, 'not measured', true) : skip(unrun);
   const measure = ROWS[row.metric];
   if (!measure) return skip('no measure for this metric');
   const pass = targetTest(row.target) ?? DEFAULT_TEST.get(row.metric) ?? (() => true);
   const out = measure(m, pass);
+  if (out.skip && stage === 'draft' && row.metric === JUDGE_ROW) return skip(DRAFT_SKIP, 'not measured', true);
   if (out.skip && carried?.status && carried.status !== 'not measured') return { ok: carried.status === 'ok', measured: `${carried.measured} (draft)`, detail: carried.detail ?? [] };
   return out;
 };
@@ -121,11 +124,11 @@ const read = (row, m, carried, mode) => {
  * parsed Acceptance rows (empty: the defaults), `m` the measures, `carry` the rows of an earlier run, used where this
  * run could not measure a row. Pure.
  */
-export function buildRows(brief, m, { carry = [], mode = 'full' } = {}) {
+export function buildRows(brief, m, { carry = [], mode = 'full', stage = 'final' } = {}) {
   const rows = brief.length ? brief.filter((r) => !RETIRED_ROWS.has(r.metric)) : DEFAULT_ROWS;
   return rows.map((row) => {
-    const out = read(row, m, carry.find((c) => c.metric === row.metric), mode);
-    if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: `${out.label}: ${out.skip}`, detail: [] };
+    const out = read(row, m, carry.find((c) => c.metric === row.metric), mode, stage);
+    if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: out.atShip ? out.skip : `${out.label}: ${out.skip}`, detail: [], ...(out.atShip ? { atShip: true } : {}) };
     return { metric: row.metric, target: row.target, status: out.ok ? 'ok' : 'advice', measured: out.measured, detail: out.detail ?? [] };
   });
 }
@@ -157,10 +160,11 @@ export function tableLines(rows, was = null) {
 /** One printed line for a red row: the measure, its worst example and the fix. Pure. */
 export const redLine = (r) => `  ${r.metric}: ${r.measured}${r.detail[0] ? ` (${r.detail[0]})` : ''}${r.detail.length > 1 ? `; ${r.detail.at(-1)}` : ''}`;
 
-/** The one summary line of a draft: green of measured (a row that is not measured or not set is in neither count), the trend and the extras. Pure. */
+/** The one summary line of a draft: green of measured, the rows only ship measures, the rows in all (the ship's denominator), the trend and the extras. Pure. */
 export function summaryLine(rows, was, extras = []) {
   const { green, measured } = acceptanceCounts(rows);
-  return ['acceptance: ' + `${green} of ${measured} green${was === null ? '' : ` (was ${was})`}`, ...extras].join(' · ');
+  const atShip = rows.filter((r) => r.atShip).length;
+  return ['acceptance: ' + `${green} of ${measured} measured green${atShip ? `, ${atShip} more at ship` : ''} (${rows.length} rows)${was === null ? '' : ` (was ${was})`}`, ...extras].join(' · ');
 }
 
 /** Every row, green or not, as markdown table lines with each row's detail under it. Pure. */
