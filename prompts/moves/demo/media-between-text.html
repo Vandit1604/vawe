@@ -1,0 +1,57 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4.2">
+<meta name="blank" content="0-0.1">
+<title>move: media between text</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Overused Grotesk'; font-weight: 300 900; font-display: block; src: url('/prompts/moves/demo/assets/fonts/OverusedGrotesk.woff2') format('woff2'); }
+  html, body { background: #0b0a09; }
+  body { display: block; position: relative; font-family: 'Overused Grotesk', sans-serif; }
+  /* the fancy demo box is 500 x 530 px: one scaled stage holds it */
+  .stage { position: absolute; left: 50%; top: 50%; width: 500px; height: 530px; translate: -50% -50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .line { display: flex; flex-direction: row; align-items: center; justify-content: center; width: 100%; font-size: 60px; line-height: 60px; font-weight: 300; text-transform: lowercase; color: #ff5941; }
+  .line p { margin: 0; }
+  #media { width: 0; height: 100px; overflow: hidden; margin: 16px 8px 0; }
+  #media img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 12% 40%; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"><a>
+  <div class="line">
+    <p>that's a nice (</p>
+    <div id="media"><img src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></div>
+    <p>) chair!</p>
+  </div>
+</a></div>
+<script type="module">
+import { spring } from '/core/motion/springs.js';
+import { cubicBezier } from '/core/motion/curves.js';
+
+const WIDTH = 100;                         // the demo's animate width on screens from sm up
+const OPEN = { k: 532.6, d: 46.15 };       // motion spring { duration: 0.4, type: "spring", bounce: 0 }: critically damped, w = 9.23 / 0.4
+const CLOSE_DURATION = 0.3;                // back to "initial" has no transition: motion's default tween
+const closeEase = cubicBezier(0.25, 0.1, 0.35, 1);
+// [second the pointer enters, second it leaves]: each hover opens, each leave closes
+const HOVERS = [[0.5, 1.9], [2.8, 3.7]];
+
+const S = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) / 530;
+document.getElementById('stage').style.scale = String(S);
+const media = document.getElementById('media');
+
+const widthAt = (t) => {
+  for (let i = HOVERS.length - 1; i >= 0; i--) {
+    const [enter, leave] = HOVERS[i];
+    if (t >= leave) return WIDTH * (1 - closeEase(Math.min((t - leave) / CLOSE_DURATION, 1)));
+    if (t >= enter) return WIDTH * spring(t - enter, OPEN.k, OPEN.d);
+  }
+  return 0;
+};
+
+window.seek = (t) => { media.style.width = `${widthAt(t)}px`; };
+window.seek(0);
+</script>
+</body>
+</html>

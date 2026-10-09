@@ -83,6 +83,9 @@ One row per job, best move first. Every built move is in this table.
 | melt a tab or panel into the next | [gooey-filter](gooey-filter.md) |
 | ride tiles along a curve, or slide rows of them | [marquee-along-path](marquee-along-path.md), [simple-marquee](simple-marquee.md) |
 | orbit tiles around one point | [circling-elements](circling-elements.md) |
+| turn a cube to show another face | [css-box](css-box.md) |
+| break a picture into blocks and clear it | [pixelate-svg-filter](pixelate-svg-filter.md) |
+| open a picture inside a line of type | [media-between-text](media-between-text.md) |
 | run a spoken line as captions | [caption-karaoke](caption-karaoke.md), [caption-editorial](caption-editorial.md) |
 
 ## Groups

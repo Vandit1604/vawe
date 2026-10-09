@@ -1,0 +1,54 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="4.6">
+<meta name="blank" content="0-0.1">
+<title>move: css box</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  @font-face { font-family: 'Overused Grotesk'; font-weight: 300 900; font-display: block; src: url('/prompts/moves/demo/assets/fonts/OverusedGrotesk.woff2') format('woff2'); }
+  html, body { background: #0b0a09; }
+  body { display: block; position: relative; font-family: 'Overused Grotesk', sans-serif; }
+  /* the fancy demo box is 500 x 530 px: one scaled stage holds it */
+  .stage { position: absolute; left: 50%; top: 50%; width: 500px; height: 530px; translate: -50% -50%; display: flex; align-items: center; justify-content: center; }
+  .box { width: 200px; height: 200px; perspective: 600px; font-size: 30px; line-height: 36px; }
+  .cube { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; }
+  .face { position: absolute; backface-visibility: hidden; display: flex; flex-direction: column; width: 200px; height: 200px; padding: 8px; box-sizing: border-box; user-select: none; }
+  .face div { color: #0015ff; font-weight: 700; letter-spacing: 0.05em; }
+  .a { text-align: right; justify-content: flex-end; align-items: flex-end; }
+  .b { text-align: left; justify-content: flex-end; }
+  .c { align-items: flex-end; }
+</style>
+</head>
+<body>
+<div class="stage"><div class="box"><div class="cube" id="cube">
+  <div class="face a" style="transform: rotateY(0deg) translateZ(100px)"><div>YOU CAN</div><div>JUST</div><div>DO THINGS</div></div>
+  <div class="face b" style="transform: rotateY(180deg) translateZ(100px)"><div>MAKE THINGS</div><div>YOU WISH</div><div>EXISTED</div></div>
+  <div class="face b" style="transform: rotateY(90deg) translateZ(100px)"><div>MAKE THINGS</div><div>YOU WISH</div><div>EXISTED</div></div>
+  <div class="face c" style="transform: rotateY(-90deg) translateZ(100px)"><div>BREAK</div><div>THINGS</div><div>MOVE</div><div>FAST</div></div>
+  <div class="face a" style="transform: rotateX(90deg) translateZ(100px)"><div>YOU CAN</div><div>JUST</div><div>DO THINGS</div></div>
+  <div class="face c" style="transform: rotateX(-90deg) translateZ(100px)"><div>BREAK</div><div>THINGS</div><div>MOVE</div><div>FAST</div></div>
+</div></div></div>
+<script type="module">
+import { track } from '/core/motion/springs.js';
+
+const STIFFNESS = 100;   // CSSBox default, motion useSpring with mass 1
+const DAMPING = 30;      // damping ratio 1.5: no overshoot
+const DEPTH = 200;
+// [second, degrees]: each key is one jump of the drag target. 90 is a drag of 180 px (delta / 2).
+const ROTATE_Y = [[0, 0], [0.6, 90]];
+const ROTATE_X = [[0, 0], [2.0, -90], [3.4, 0]];
+
+const S = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--vh')) / 530;   // the original demo box is 530 px tall
+document.querySelector('.stage').style.scale = String(S);
+const cube = document.getElementById('cube');
+window.seek = (t) => {
+  const x = track(t, ROTATE_X, STIFFNESS, DAMPING);
+  const y = track(t, ROTATE_Y, STIFFNESS, DAMPING);
+  cube.style.transform = `translateZ(-${DEPTH / 2}px) rotateX(${x}deg) rotateY(${y}deg)`;
+};
+window.seek(0);
+</script>
+</body>
+</html>

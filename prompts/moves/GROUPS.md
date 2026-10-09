@@ -161,6 +161,9 @@ The job: give a held frame a living ground that never steals the eye. Each groun
 | marquee along path | tiles ride one SVG path forever at an even gap, turned with the curve, rolling z-index, 8 percent of the path per second; one element along the path is an option | [marquee-along-path.md](marquee-along-path.md) | [marquee-along-path.mp4](marquee-along-path.mp4) |
 | simple marquee | three rows of tiles slide for a whole beat, left, right, left, each row four copies that wrap by one set width at 8 percent per second | [simple-marquee.md](simple-marquee.md) | [simple-marquee.mp4](simple-marquee.mp4) |
 | circling elements | eight upright tiles orbit one point on a 120 px radius, one linear turn in 10 s | [circling-elements.md](circling-elements.md) | [circling-elements.mp4](circling-elements.mp4) |
+| css box | a 200 px cube of bold type turns to another face on a stiff overdamped spring (stiffness 100, damping 30, no overshoot) under perspective 600 | [css-box.md](css-box.md) | [css-box.mp4](css-box.mp4) |
+| pixelate svg filter | a photo breaks into square blocks that grow and shrink with one number, size = x / 30 through a convolve, tile and dilate SVG filter | [pixelate-svg-filter.md](pixelate-svg-filter.md) | [pixelate-svg-filter.mp4](pixelate-svg-filter.mp4) |
+| media between text | a picture grows from zero width inside a line of type on a 0.4 s critical spring and closes on a 0.3 s tween, the words part and wrap | [media-between-text.md](media-between-text.md) | [media-between-text.mp4](media-between-text.mp4) |
 
 ## Looks
 
