@@ -70,3 +70,18 @@ test('<meta name="loudness"> opts in: the mix is normalised to that target', () 
   assert.ok(Math.abs(normalised.measured.I + 14) <= 1.5, `normalised to ${normalised.measured.I} LUFS, wanted -14`);
   assert.ok(Math.abs(ebur(path.join(dir, 'loud.mp4')).I - normalised.measured.I) <= 0.2);
 }));
+
+test('a page with low explicit gains gets a dB change that brings the mix into the band', async () => {
+  const { measureMixLevel } = await import('../../harness/media/page-audio.mjs');
+  const { soundLine, RULES } = await import('../../harness/lib/draft-check.mjs');
+  const at = (shift) => ['pluck', 'chime', 'droplet', 'bloom', 'swell'].map((s, i) => cue(s, 0.4 + i, DEFAULT_GAIN_DB[s] + shift));
+  const before = measureMixLevel({ specs: at(-7), duration: 6 });
+  assert.ok(before.I < RULES.lufsLow, `fixture level ${before.I} LUFS is not under the band`);
+  const line = soundLine(before.I, undefined, before);
+  console.log(`before ${before.I} LUFS: ${line}`);
+  const change = Number(/change every data-gain by ([+-]\d+) dB/.exec(line)[1]);
+  const after = measureMixLevel({ specs: at(-7 + change), duration: 6 });
+  console.log(`after ${after.I} LUFS`);
+  assert.ok(after.I >= RULES.lufsLow && after.I <= RULES.lufsHigh, `after ${change} dB: ${after.I} LUFS`);
+  assert.ok(Math.abs(after.I - RULES.lufsTarget) <= 1, `after ${change} dB: ${after.I} LUFS, wanted about ${RULES.lufsTarget}`);
+});

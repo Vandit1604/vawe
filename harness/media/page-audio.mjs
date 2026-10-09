@@ -244,12 +244,14 @@ export function renderMixCached({ specs, duration, dir }) {
   return { ...kept, cached: false };
 }
 
-/** { I, TP }: integrated LUFS and true peak dBFS of the mix as written, before the limiter; null when there are no specs. */
+/** { I, TP, cues }: integrated LUFS and true peak dBFS of the mix as written, before the limiter, and each cue's { name, at, peakDb }; null when there are no specs. */
 export function measureMixLevel({ specs, duration }) {
   if (!specs.length) return null;
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-audio-'));
   try {
-    return measureFile(writeMix(specs, duration, tmp).mixWav);
+    const { mixWav, tracks } = writeMix(specs, duration, tmp);
+    const cues = tracks.map(({ spec, peakDb }) => ({ name: spec.synth || path.basename(spec.src), at: spec.at, peakDb }));
+    return { ...measureFile(mixWav), cues };
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
