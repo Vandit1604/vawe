@@ -40,15 +40,15 @@ export async function videoFor(input, { audio = true } = {}) {
 
 const frameBox = (w, h, long) => (w >= h ? { tw: long, th: Math.round(long * h / w) } : { tw: Math.round(long * w / h), th: long });
 
-/** Contact sheet at phone width: 360 px wide tiles, 1 fps, time burned in. Reads how the film holds up small. */
+/** Contact sheet of small tiles (360 px wide, the film's own aspect), 1 fps, time burned in. Reads how the film holds up small. */
 export function phoneSheet(video, outDir) {
   const { width, height, dur } = probe(video);
   const tw = 360, th = Math.round(360 * height / width);
   const n = Math.max(1, Math.ceil(dur));
   fs.mkdirSync(outDir, { recursive: true });
-  const frames = sampleFrames(video, { t0: 0, len: n, n }, path.join(outDir, 'phone'), { tw, th, stamp: '%{eif\\:t\\:d}s' });
+  const frames = sampleFrames(video, { t0: 0, len: n, n }, path.join(outDir, 'small'), { tw, th, stamp: '%{eif\\:t\\:d}s' });
   const cols = width >= height ? 4 : 6;
-  const out = path.join(outDir, 'phone.png');
+  const out = path.join(outDir, 'small.png');
   tileGrid(frames, { cols, tw, th, out });
   frames.forEach((f) => fs.rmSync(f, { force: true }));
   return { sheet: out, frames: frames.length };

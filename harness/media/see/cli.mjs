@@ -141,9 +141,10 @@ export async function dispatchViews(input, positional, flag, argv) {
   const video = await views.videoFor(input);
   const outDir = path.resolve(positional[1] || defaultOutDir(input));
   const rel = (p) => path.relative(process.cwd(), p);
+  if (argv.includes('--strip') && fs.existsSync(outDir)) for (const f of fs.readdirSync(outDir).filter((n) => /^strip-.*\.png$/.test(n))) fs.rmSync(path.join(outDir, f));
   if (argv.includes('--phone')) {
     const r = views.phoneSheet(video, outDir);
-    console.log(`✓ phone sheet, ${r.frames} frame(s) at 360 px, 1 fps: LOOK at ${rel(r.sheet)}`);
+    console.log(`✓ small sheet, ${r.frames} frame(s) at 360 px wide, 1 fps: LOOK at ${rel(r.sheet)}`);
   }
   let stripAt = flag('--strip', null);
   if (stripAt === 'auto') stripAt = views.autoStripTime(input, video);

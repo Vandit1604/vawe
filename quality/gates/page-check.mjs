@@ -25,6 +25,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { gateFindings } from '../../harness/lib/findings.mjs';
+import { groupFindingLines } from '../../harness/lib/critique-summary.mjs';
 import { scratch } from '../../harness/lib/scratch.mjs';
 import { motionDeltaSeries, detectCuts } from '../../harness/media/shot-detect.mjs';
 import { HOLD_FLOOR, wordEventTracks } from '../../harness/media/see.mjs';
@@ -385,7 +386,7 @@ async function main() {
   if (page && readPageMeta(page, 'loop') === 'true') checkLoop(ctx);
 
   console.log(`\n  page-check · ${path.basename(ctx.input)} · ${ctx.dur.toFixed(2)}s at ${ctx.fps} fps, ${ctx.width}x${ctx.height} · ${ctx.f.count} finding(s), advisory`);
-  ctx.f.emit();
+  ctx.f.emit((records) => groupFindingLines(records));
   for (const n of ctx.notes) console.log(`  · ${n}`);
   if (!ctx.f.count) console.log('  ✓ nothing measured is off. The eye still judges what a number cannot.');
 }
