@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="duration" content="1">
+<script type="importmap">{"imports":{"three":"/assets/vendor/three.module.min.js"}}</script>
+<style>body{margin:0;background:#fff;overflow:hidden}#a{width:200px;height:80px;background:#06c}</style></head>
+<body><div id="a" data-chrome></div><canvas id="c" width="64" height="64"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import '/core/engine/page-api.js';
+import { timeline } from '/core/motion/timeline.js';
+window.THREE = THREE;
+timeline([{ el: '#a', at: 0, dur: 0.8, from: { opacity: 0 }, to: { opacity: 1 } }], document);
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), alpha: true });
+const scene = new THREE.Scene();
+vawe.three.studio(renderer, scene, null, 'metal');
+vawe.three.studio(renderer, scene, ['#ffffff', '#d4d4d8'], 'metal');
+</script></body></html>

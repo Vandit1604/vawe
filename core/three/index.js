@@ -95,8 +95,14 @@ export function glassEnvironment(renderer, colors) {
 // as `studio` for `vawe.three.studio(renderer, scene, { colors, kind })` or `(renderer, scene, 'glass')` (core/engine/page-api.js), the same
 // function `createThreeLayer` below already calls for every declarative `three` layer: one lighting rig,
 // two consumers, never a second copy tuned separately and drifting from this one.
-export function studio(renderer, scene, opts = {}) {
-  const { colors, kind = 'metal' } = typeof opts === 'string' ? { kind: opts } : opts;
+function studioOptions(opts, legacyKind) {
+  if (typeof opts === 'string') return { kind: opts };
+  if (Array.isArray(opts)) return { colors: opts, kind: legacyKind };
+  return opts ?? { kind: legacyKind };
+}
+
+export function studio(renderer, scene, opts, legacyKind) {
+  const { colors, kind = 'metal' } = studioOptions(opts, legacyKind);
   const ambient = new (T().AmbientLight)(0xffffff, 0.55); scene.add(ambient);
   const key = new (T().DirectionalLight)(0xffffff, 2.4); key.position.set(4, 6, 5); scene.add(key);
   const fill = new (T().DirectionalLight)(hex(colors?.[1], '#9fb6ff'), 0.9); fill.position.set(-5, 2, 3); scene.add(fill);
