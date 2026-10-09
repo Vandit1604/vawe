@@ -1,0 +1,29 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3">
+<meta name="message" content="hard cuts at known seconds">
+<title>Truth cuts</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: clip; background: #000; }
+  .world { position: absolute; inset: 0; display: none; }
+  .world b { position: absolute; left: 8%; top: 38%; font: 800 160px/1 sans-serif; color: rgba(255,255,255,.9); }
+</style>
+</head>
+<body>
+<div class="world" data-world="w1" data-from="0" data-to="0.5" style="background:#c0392b"><b>1</b></div>
+<div class="world" data-world="w2" data-from="0.5" data-to="0.6" style="background:#1f5fbf"><b>2</b></div>
+<div class="world" data-world="w3" data-from="0.6" data-to="0.85" style="background:#e8c547"><b>3</b></div>
+<div class="world" data-world="w4" data-from="0.85" data-to="1.85" style="background:#1d8a5a"><b>4</b></div>
+<div class="world" data-world="w5" data-from="1.85" data-to="2.25" style="background:#6d2fa0"><b>5</b></div>
+<div class="world" data-world="w6" data-from="2.25" data-to="3" style="background:#f2f2f2"><b style="color:#222">6</b></div>
+<script>
+  const worlds = [...document.querySelectorAll('.world')];
+  window.seek = (t) => {
+    for (const w of worlds) w.style.display = t >= +w.dataset.from && t < +w.dataset.to ? 'block' : 'none';
+  };
+  window.seek(0);
+</script>
+</body>
+</html>

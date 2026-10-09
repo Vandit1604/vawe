@@ -1,0 +1,33 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<meta name="message" content="known bloom, known channel offset, known RGB stripe texture">
+<title>Truth look</title>
+<style>
+  @font-face { font-family: "Inter"; src: url("../../../../assets/fonts/inter-700.woff2") format("woff2"); font-weight: 700; }
+  :root { --bloom-sigma: 12px; --split: 4px; --stripe: 3px; }
+  html, body { margin: 0; height: 100%; overflow: clip; background: #000; }
+  .world { position: absolute; inset: 0; }
+  .t { position: absolute; left: 6%; top: 18%; font: 700 180px/1 "Inter", sans-serif; letter-spacing: 0; }
+  #glow { color: #fff; filter: blur(var(--bloom-sigma)); }
+  #r, #b { mix-blend-mode: screen; }
+  #r { color: #f00; transform: translateX(calc(var(--split) / 2)); }
+  #b { color: #00f; transform: translateX(calc(var(--split) / -2)); }
+  #g { color: #0f0; }
+  #stripes { position: absolute; left: 0; right: 0; top: 62%; bottom: 0;
+    background: repeating-linear-gradient(90deg, #f00 0, #f00 1px, #0f0 1px, #0f0 2px, #00f 2px, #00f var(--stripe)); opacity: .5; }
+</style>
+</head>
+<body>
+<div class="world" data-world="look">
+  <div class="t" id="glow">LOOK</div>
+  <div class="t" id="g">LOOK</div>
+  <div class="t" id="r">LOOK</div>
+  <div class="t" id="b">LOOK</div>
+  <div id="stripes"></div>
+</div>
+<script>window.seek = () => {};</script>
+</body>
+</html>

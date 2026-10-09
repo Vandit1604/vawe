@@ -1,0 +1,15 @@
+{
+  "fixture": "eye",
+  "about": "one bright dot moving linearly in three 1 s shots. Truth is the dot centre (0..1 of the frame) at the middle of the first and of the last 0.3 s of each shot (u = 0.15 and 0.85).",
+  "render": "draft",
+  "fps": 30,
+  "aspect": 1.7778,
+  "tolerance": { "eyeHeights": 0.05, "travelHeights": 0.05 },
+  "truth": {
+    "shots": [
+      { "t0": 0, "start": { "x": 0.245, "y": 0.3 }, "end": { "x": 0.455, "y": 0.3 } },
+      { "t0": 1, "start": { "x": 0.8, "y": 0.71 }, "end": { "x": 0.8, "y": 0.29 } },
+      { "t0": 2, "start": { "x": 0.36, "y": 0.64 }, "end": { "x": 0.64, "y": 0.36 } }
+    ]
+  }
+}

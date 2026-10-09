@@ -1,0 +1,11 @@
+{
+  "fixture": "motion",
+  "about": "box A overshoots 8 percent (easeOutBack, c1 = 1.5) over 600 css px; box B moves linearly over 400 css px after A has settled. Settle is the last second the box is more than 1 percent of its travel from rest. The css frame height is 1080 px.",
+  "render": "draft",
+  "fps": 30,
+  "tolerance": { "startSeconds": 0.0334, "settleSeconds": 0.1, "overshootPoints": 2, "restPx": 3, "speedRatio": 0.05, "bursts": 0 },
+  "truth": {
+    "a": { "start": 0.5, "settle": 1.412, "overshootPct": 8, "travelCssPx": 600, "restVideoX": 380, "bursts": 1, "strip": { "at": 1.0, "span": 1.4 } },
+    "b": { "start": 1.75, "settle": 2.75, "travelCssPx": 400, "peakCssPxPerS": 400, "shape": "linear", "strip": { "at": 2.25, "span": 1.5 } }
+  }
+}

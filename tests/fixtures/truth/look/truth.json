@@ -1,0 +1,7 @@
+{
+  "fixture": "look",
+  "about": "white text with a gaussian glow of sigma 12 css px, red and blue copies 4 css px apart, and an RGB stripe texture of period 3 css px. Rendered and measured only when a look or zoom verb exists; the stripe needs a full-size render.",
+  "render": "final",
+  "tolerance": { "bloomPx": 2, "channelOffsetPx": 1, "stripePeriodPx": 0.5 },
+  "truth": { "bloomSigmaPx": 12, "channelOffsetPx": 4, "stripePeriodPx": 3 }
+}

@@ -1,0 +1,16 @@
+{
+  "fixture": "ground",
+  "about": "four grounds; deltaE is CIE76 in Lab D65; the fourth ground drifts linearly from #2a2a3a to #5a5a7a over 1.5 s",
+  "render": "draft",
+  "fps": 30,
+  "tolerance": { "deltaE": 3, "driftL": 3 },
+  "truth": {
+    "shots": [
+      { "t0": 0, "hex": "#1b2a41", "lab": [16.85, 1.64, -16.49] },
+      { "t0": 0.75, "hex": "#8a3b2b", "lab": [35.41, 32.54, 26.23] },
+      { "t0": 1.5, "hex": "#2f6f4f", "lab": [42.06, -28.71, 11.77] },
+      { "t0": 2.25, "hex": "#2a2a3a", "lab": [17.71, 4.32, -10.21], "endLab": [39.4, 7.7, -18.02], "driftL": 21.69 }
+    ],
+    "cutDeltaE": [55.9, 63.29, 46.55]
+  }
+}
