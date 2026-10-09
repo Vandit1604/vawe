@@ -1,11 +1,11 @@
 // Reads out/<film>.runs.jsonl records, new and old, into tables. Pure: no I/O, no clock (`now` is passed in).
 // Old records (before harness/lib/run-events.mjs) hold `render` for a draft or final and `judge` for a verdict.
 import { namedAgent } from './runlog.mjs';
+import { causeOf } from './verb-log.mjs';
 
 const DAY_MS = 86_400_000;
 const WINDOW_DAYS = 30;
 const MAX_LINES = 40;
-const PASS_AT = 8;
 
 const agentName = (agent) => { const name = namedAgent(agent); return name && !/^\d+$/.test(name) ? name : null; };
 
@@ -33,13 +33,15 @@ export function normalize(r) {
   const e = { ...r, ...fromOld(r) };
   return {
     at: e.at, cmd: e.cmd, agent: agentName(e.agent), model: e.model ?? null,
-    seconds: e.wallS ?? e.renderS ?? e.seconds ?? null,
+    seconds: e.cmd === 'verb' ? e.durationS ?? null : e.wallS ?? e.renderS ?? e.seconds ?? null,
     green: e.acceptance?.green ?? null, measured: e.acceptance?.measured ?? null,
     stage: e.stage ?? null, verdict: e.verdict ?? null, scores: e.scores ?? null, total: sum(e.scores),
     fired: Array.isArray(e.rules_fired) ? e.rules_fired.map((f) => f.id) : null,
     signature: e.signature && typeof e.signature === 'object' && !e.signature.offered ? e.signature : null,
     notes: Array.isArray(e.notes) ? e.notes : null, waivers: Array.isArray(e.waivers) ? e.waivers : null,
     sameness: e.sameness ?? null, template: e.template ?? null, bar: Array.isArray(e.bar) ? e.bar : null,
+    verb: e.verb ?? null, loopStage: e.cmd === 'verb' ? e.stage ?? null : null, exitCode: e.exitCode ?? null, error: e.error ?? e.reason ?? null,
+    slotWaitS: e.slotWaitS ?? null, red: e.acceptance?.red ?? null, tagged: e.cmd === 'verb' ? e.tagged !== false : agentName(e.agent) !== null,
   };
 }
 
@@ -59,51 +61,81 @@ export function filmStats(events) {
   };
 }
 
-const lowAxes = (scores) => Object.entries(scores ?? {}).filter(([, v]) => v < PASS_AT).map(([k, v]) => `${k} ${v}`).join(', ');
-
-function judgeCell(e) {
-  if (e.cmd === 'ship') return e.verdict ?? '-';
-  if (e.cmd === 'judge') {
-    const low = lowAxes(e.scores);
-    return [e.verdict, e.total != null ? `total ${e.total}` : null, low ? `(${low})` : null, e.stage ? `[${e.stage}]` : null].filter(Boolean).join(' ');
-  }
-  return '-';
-}
-
 const pad = (rows, widths) => rows.map((r) => r.map((c, i) => (i === widths.length ? c : String(c).padEnd(widths[i]))).join('  ').trimEnd());
 export const table = (rows) => pad(rows, rows[0].slice(0, -1).map((_, i) => Math.max(...rows.map((r) => String(r[i]).length))));
 
-/** One compact line per draft that logged its rules: the rules it fired, and against the draft before it which were fixed (fired then, not now) and which are still firing. */
-export function draftRuleLines(events) {
-  const drafts = events.filter((e) => e.cmd === 'dev' && e.fired);
-  return drafts.map((e, i) => {
-    const before = i ? drafts[i - 1].fired : null;
-    const parts = [`fired ${e.fired.join(', ') || 'none'}`];
-    if (before?.length) {
-      const [fixed, still] = [before.filter((id) => !e.fired.includes(id)), before.filter((id) => e.fired.includes(id))];
-      parts.push(`fixed ${fixed.join(', ') || 'none'}`, `still ${still.join(', ') || 'none'}`);
-    }
-    return `draft ${i + 1} ${String(e.at).slice(5, 16).replace('T', ' ')}: ${parts.join(' · ')}`;
-  });
+const clock = (at) => String(at).slice(5, 16).replace('T', ' ');
+const TOP = 8;
+const MAX_DRAFTS = 12;
+
+const tally = (events, keyOf) => {
+  const rows = new Map();
+  for (const e of events) {
+    const key = keyOf(e) ?? '-';
+    const row = rows.get(key) ?? { key, calls: 0, secs: 0, wait: 0, failed: 0 };
+    rows.set(key, { key, calls: row.calls + 1, secs: row.secs + (e.seconds ?? 0), wait: row.wait + (e.slotWaitS ?? 0), failed: row.failed + (e.exitCode ? 1 : 0) });
+  }
+  return [...rows.values()].sort((a, b) => b.secs - a.secs);
+};
+
+const timeTable = (head, rows) => table([[head, 'calls', 'secs', 'slot wait', 'failed'], ...rows.slice(0, TOP).map((r) => [r.key, r.calls, num(r.secs, 0), num(r.wait, 0), r.failed])]).map((l) => `  ${l}`);
+
+/** The three questions about one film: where the time went, what failed, whether the drafts improved. */
+function timeLines(calls) {
+  const tagged = calls.filter((e) => e.tagged);
+  const used = tagged.length ? tagged : calls;
+  const rest = calls.length - used.length;
+  const minutes = used.reduce((a, e) => a + (e.seconds ?? 0), 0) / 60;
+  const wait = used.reduce((a, e) => a + (e.slotWaitS ?? 0), 0);
+  return [
+    `where time went: ${used.length} verb calls, ${num(minutes, 0)} min of verb time${tagged.length ? '' : ', none tagged with VAWE_AGENT'}${rest ? `; ${rest} untagged calls left out` : ''}`,
+    ...timeTable('stage', tally(used, (e) => e.loopStage)),
+    ...timeTable('verb', tally(used, (e) => e.verb)),
+    `  slot wait: ${num(wait, 0)} s over ${used.filter((e) => e.slotWaitS > 0).length} calls`,
+  ];
 }
 
-/** The lines of `vawe runs <film>`: one row per event in time order, then the rules of each draft, then one summary line. */
+function failedLines(events) {
+  const failures = events.filter((e) => (e.cmd === 'verb' && e.exitCode) || (e.cmd === 'ship' && e.verdict === 'failed'));
+  if (!failures.length) return ['what failed: nothing'];
+  const causes = new Map();
+  for (const e of failures) causes.set(causeOf(e.error), [...(causes.get(causeOf(e.error)) ?? []), e]);
+  const groups = [...causes].sort((a, b) => b[1].length - a[1].length).slice(0, 5);
+  const last = failures.at(-1);
+  return [`what failed: ${failures.length} of ${events.filter((e) => e.cmd === 'verb').length} verb calls`,
+    ...groups.map(([cause, list]) => `  ${list.length} x ${cause} (${[...new Set(list.map((e) => e.verb ?? e.cmd))].join(', ')})`),
+    `  last: ${clock(last.at)} ${last.verb ?? last.cmd} ${String(last.error ?? '').slice(0, 100)}`];
+}
+
+/** One row per draft: acceptance green, the rules it fired, and the red rows, so a flat series shows at a glance. */
+export function draftSeries(events) {
+  const drafts = events.filter((e) => e.cmd === 'dev' && e.seconds != null);
+  const shown = drafts.slice(-MAX_DRAFTS);
+  const hidden = drafts.length - shown.length;
+  const rows = shown.map((e, i) => [hidden + i + 1, clock(e.at), e.green != null ? `${e.green}/${e.measured}` : '-', e.fired ? e.fired.length : '-', `${(e.red ?? []).slice(0, 3).join(', ') || '-'}${e.tagged ? '' : ' (untagged)'}`]);
+  if (!rows.length) return [];
+  const judged = events.filter((e) => e.cmd === 'judge' && e.total != null).map((e) => `${e.stage ?? '?'} ${e.total}`);
+  return ['quality per draft:', ...table([['#', 'time', 'accept', 'rules', 'red rows'], ...rows]).map((l) => `  ${l}`), ...(hidden ? [`  (${hidden} earlier drafts not shown)`] : []), ...(judged.length ? [`  judge totals in order: ${judged.join(', ')}`] : [])];
+}
+
+/** The lines of `vawe runs <film>`: time by stage and verb, failures by cause, the draft series, then one summary line. */
 export function filmLines(film, records) {
   const events = records.map(normalize).sort((a, b) => String(a.at).localeCompare(String(b.at)));
   if (!events.length) return [`${film}: no runs logged`];
-  const rows = [['time', 'cmd', 'agent', 'secs', 'accept', 'judge'], ...events.map((e) => [
-    String(e.at).slice(5, 16).replace('T', ' '), e.cmd ?? '?', e.agent ?? '-', num(e.seconds),
-    e.green != null ? `${e.green}/${e.measured}` : '-', judgeCell(e),
-  ])];
+  const calls = events.filter((e) => e.cmd === 'verb');
   const s = filmStats(events);
   const pass = s.passed ? `PASS after ${s.roundsToPass} judge round${s.roundsToPass > 1 ? 's' : ''}` : 'no PASS yet';
-  return [...table(rows), ...draftRuleLines(events), `drafts ${s.drafts} · median draft ${num(s.medianDraftS)} s · ${pass} · first judged total ${num(s.firstTotal, 0)}`];
+  return [
+    ...(calls.length ? timeLines(calls) : [`${film}: no verb calls logged (a log from before every verb was logged)`]),
+    ...failedLines(events), ...draftSeries(events),
+    `drafts ${s.drafts} · median draft ${num(s.medianDraftS)} s · ${pass} · first judged total ${num(s.firstTotal, 0)}`,
+  ];
 }
 
 /** One row per film with an event in the last 30 days: stats plus who ran it (model, else agent name), newest first. */
 export function allRows(films, now) {
   const since = now - WINDOW_DAYS * DAY_MS;
-  return films.map(({ film, runs }) => {
+  return films.filter(({ film }) => !film.startsWith('_')).map(({ film, runs }) => {
     const events = runs.map(normalize).filter((e) => Date.parse(e.at) >= since).sort((a, b) => String(a.at).localeCompare(String(b.at)));
     const who = events.findLast((e) => e.model) ?? events.findLast((e) => e.agent);
     return events.length ? { film, last: events.at(-1).at, ...filmStats(events), model: who?.model ?? null, agent: who?.model ? null : who?.agent ?? null } : null;

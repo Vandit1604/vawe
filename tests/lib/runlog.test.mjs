@@ -103,21 +103,44 @@ test('normalize reads an old render record as a draft and an old verdict as a ju
   assert.deepEqual([normalize(OLD_JUDGE).cmd, normalize(OLD_JUDGE).verdict, normalize(OLD_JUDGE).stage], ['judge', 'FIX', 'manual']);
 });
 
-test('runs <film>: old and new records mix, one row each in time order, then the summary', () => {
+test('runs <film>: old records and new mix; no verb calls says so, the draft series and the summary line stay', () => {
   const lines = filmLines('demo', [...NEW, OLD_JUDGE, OLD].reverse());
-  assert.equal(lines.length, 1 + 1 + 7 + 0);
-  assert.match(lines[1], /^09-29 10:00\s+dev\s+-\s+20\s+-\s+-$/);
-  assert.match(lines[4], /judge\s+judge-demo\s+28\s+-\s+FIX total 23 \(motion 6\) \[draft\]/);
+  assert.match(lines[0], /no verb calls logged/);
+  assert.match(lines.join('\n'), /quality per draft:[\s\S]*09-30 09:00\s+9\/12/);
+  assert.match(lines.join('\n'), /judge totals in order: draft 23, draft 27/);
   assert.match(lines.at(-1), /^drafts 3 · median draft 20 s · PASS after 3 judge rounds · first judged total 23$/);
   assert.deepEqual(filmLines('none', []), ['none: no runs logged']);
 });
 
-test('runs <film>: a film with no judged PASS says so', () => {
-  assert.match(filmLines('demo', NEW.slice(0, 2)).at(-1), /no PASS yet · first judged total 23$/);
+const call = (over) => ({ at: '2026-10-09T20:00:00.000Z', cmd: 'verb', agent: 'hud', verb: 'dev', stage: 'draft', durationS: 30, exitCode: 0, error: null, slotWaitS: 0, images: [], tagged: true, ...over });
+
+test('runs <film>: time by stage and verb, slot wait, failures grouped by cause, untagged calls left out', () => {
+  const records = [
+    call({ durationS: 30, slotWaitS: 12 }),
+    call({ at: '2026-10-09T20:05:00.000Z', verb: 'strip', stage: 'motion', durationS: 6, exitCode: 137, error: 'killed by SIGKILL' }),
+    call({ at: '2026-10-09T20:06:00.000Z', durationS: 70, exitCode: 1, error: 'exit 1: TimeoutError: Navigation timeout of 30000 ms exceeded' }),
+    call({ at: '2026-10-09T20:07:00.000Z', durationS: 5, tagged: false, agent: 'ab#12' }),
+    { at: '2026-10-09T20:08:00.000Z', cmd: 'ship', agent: 'hud', verdict: 'failed', renderS: 900, reason: 'muxPageAudio: detached Frame', failedAt: 0 },
+  ];
+  const text = filmLines('hud', records).join('\n');
+  assert.match(text, /where time went: 3 verb calls, 2 min of verb time; 1 untagged calls left out/);
+  assert.match(text, /draft\s+2\s+100\s+12\s+1/);
+  assert.match(text, /slot wait: 12 s over 1 calls/);
+  assert.match(text, /what failed: 3 of 4 verb calls/);
+  assert.match(text, /1 x killed \(strip\)/);
+  assert.match(text, /1 x render slot or navigation timeout \(dev\)/);
+  assert.match(text, /1 x browser lost \(ship\)/);
+});
+
+test('runs <film>: the draft series marks an untagged draft', () => {
+  const dev = { at: '2026-10-09T20:00:00.000Z', cmd: 'dev', wallS: 20, acceptance: { green: 7, measured: 14, red: ['jerky steps'] }, rules_fired: [{ id: 'a' }] };
+  const text = filmLines('x', [{ ...dev, agent: 'hud' }, { ...dev, agent: 'ab#12', at: '2026-10-09T21:00:00.000Z' }]).join('\n');
+  assert.match(text, /7\/14\s+1\s+jerky steps\n/);
+  assert.match(text, /jerky steps \(untagged\)/);
 });
 
 test('runs --all: one row per film in the last 30 days, medians per model, at most 40 lines', () => {
-  const films = [{ film: 'demo', runs: NEW }, { film: 'old', runs: [{ ...OLD, at: '2026-07-01T00:00:00.000Z' }] }, { film: 'legacy', runs: [OLD] }];
+  const films = [{ film: '_unfiled', runs: NEW }, { film: 'demo', runs: NEW }, { film: 'old', runs: [{ ...OLD, at: '2026-07-01T00:00:00.000Z' }] }, { film: 'legacy', runs: [OLD] }];
   const rows = allRows(films, NOW);
   assert.deepEqual(rows.map((r) => r.film), ['demo', 'legacy']);
   assert.deepEqual([rows[0].drafts, rows[0].medianDraftS, rows[0].firstTotal, rows[0].bestTotal, rows[0].passed, rows[0].model], [2, 25, 23, 27, true, 'sonnet']);

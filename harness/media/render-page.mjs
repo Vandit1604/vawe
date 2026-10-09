@@ -87,6 +87,7 @@ import { contrastLines } from '../lib/text-contrast.mjs';
 import { peakLine } from '../lib/peak-limit.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
+import { noteVerb } from '../lib/verb-log.mjs';
 
 // A laptop running two renders at 4 workers each overheats and throttles; the second render starts cool.
 const COOL_WORKERS = 2;
@@ -715,7 +716,9 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const frame = resolveFrame(pagePath, opts);
   const wantAudio = opts.audio ?? (final && from === 0 && durArg == null);
   if (opts.audio && from > 0) die('--audio needs a render from 0: the mix has no offset');
+  const slotAskedAt = Date.now();
   const slot = await takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) });
+  noteVerb({ slotWaitS: (Date.now() - slotAskedAt) / 1000 });
   removeStaleFrames(path.dirname(path.resolve(outPath)));
   const { page, url, close } = await openPage(pagePath, frame, { final });
   const scriptErrors = watchPageErrors(page);
