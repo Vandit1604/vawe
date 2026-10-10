@@ -11,7 +11,7 @@ export const metadata = pageMetadata({
 });
 
 /* /ai-agents · the intent page for "video rendering for AI agents". Every fact below is read off the
- * repo AGENTS.md, QUICKSTART.md, harness/cli/verbs.mjs and skills/; no adoption numbers, no
+ * repo AGENTS.md, README.md, harness/cli/verbs.mjs and skills/; no adoption numbers, no
  * benchmark, no characterisation of any other product.
  */
 
@@ -97,7 +97,7 @@ export default function AiAgents() {
                 with the install line for your system. Then point the agent at{" "}
                 <code>AGENTS.md</code> and ask for a film.
               </p>
-              <span className="cite">QUICKSTART.md</span>
+              <span className="cite">README.md</span>
             </div>
             <div className="isec-art">
               <div className="codeblock">

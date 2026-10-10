@@ -1,6 +1,6 @@
 ---
 when: you have never run this repo
-answers: what vawe is, how to install it, and the one command that turns a page into an mp4
+answers: what vawe is, how to install it, the one command that turns a page into an mp4, and the hard rules for day one
 group: project
 ---
 
@@ -43,12 +43,32 @@ bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, a
   `<html data-aspect>`, `--vw`/`--vh` and `window.vawe` so one page lays out for
   `16:9 9:16 1:1 4:5 4:3` (`bin/vawe ship <page> --aspect all` renders every one).
 - Audio is `<audio>` tags with `data-at`, `data-gain`, `data-fade-out`; `loop` marks a music file the user gives;
-  `data-synth` picks a voice from `core/audio/kit.mjs`. Mixed offline as written; `<meta name="loudness">`
+  `data-synth` picks a fallback effect voice from `core/audio/kit.mjs` (a recorded effect comes first). Mixed offline as written; `<meta name="loudness">`
   opts in to a target.
 - Springs, keyframe tables and seeded noise: `core/motion/springs.js` (`core/motion/README.md`).
 
 The whole contract, and the mistakes a first draft makes, is `skills/vawe-page/SKILL.md`. The house
-rules an agent reads are `AGENTS.md`.
+rules an agent reads are `AGENTS.md`. Note the shape the rules ask for in the example: the entrance is a
+move, not only a fade; the exit is shorter than the entrance; the text holds still long enough to read;
+the cue lands with the move.
+
+## Before you write a page
+
+Read `AGENTS.md` first: the contract, the loop, and the motion rules that are not your defaults. Pick the
+film type in `engine-doctrine/CRAFT/ROUTING.md` and start it with
+`bin/vawe new <name> --from prompts/<template>.md`. Every template stops before code at least once (a
+beat table, a facts list or a SPEC); honour the stop. If your tool loads skills, load `vawe-page` before
+the first line. `bin/vawe new hello` writes `films/hello/page.html`, `directions.html` and `brief.md`.
+
+Hard rules for day one:
+
+- No live clock, no state between frames, no unseeded random. Frame 400 never needs frame 399.
+- Lay out with `--vw`/`--vh` and `[data-aspect]`, never fixed pixels for one aspect.
+- Bundle fonts in `assets/`; never load one from the network.
+- No em dash on screen. The first-frame hook is 12 words or fewer.
+- Exits faster than entrances. Arrive fast, land soft. One entrance per beat, not a fade on all.
+- Text holds for its read time (rule `readable-hold`). Add a hold; never slow the move.
+- A rule broken on purpose is declared in the page with a `_why` (`AGENTS.md`, Waivers).
 
 ## Install
 
@@ -81,7 +101,7 @@ A hook (`harness/live/stage-say.mjs`) names the next command for the film you ed
 
 The critique is run by a session that did not write the page, rejects by default, and names every
 finding as shot + frame + fix (`skills/vawe-critique/SKILL.md`). A reference is matched through
-`SPEC.md` and a KEEP/CHANGE list (`skills/vawe-reference/SKILL.md`). One prompt template per film
+`SPEC.md` and a KEEP/CHANGE list (`bin/vawe spec <mp4>`, then `bin/vawe coverage <film.mp4> --ref <mp4>` lists the seconds that still differ; `skills/vawe-reference/SKILL.md`). One prompt template per film
 type: `prompts/README.md`; the router: `engine-doctrine/CRAFT/ROUTING.md`.
 
 ## Determinism
@@ -128,9 +148,8 @@ out/               rendered mp4s (gitignored)
 
 ## Docs
 
-New here and want to author? `QUICKSTART.md` (a blank page to a rendered film in one page), then
-`AGENTS.md` (the house rules). Then `prompts/README.md`, `prompts/moves/README.md`,
-`core/motion/README.md`, and `engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
+New here and want to author? This page, then `AGENTS.md` (the house rules). Then `prompts/README.md`,
+`prompts/moves/README.md`, `core/motion/README.md`, `taste/README.md` (every taste rule; `taste/build/DIGEST.md` is the first read), and `engine-doctrine/JUDGE.md` (how a film is scored). `bin/vawe --help` prints every command.
 
 ## Status and license
 
