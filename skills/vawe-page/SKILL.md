@@ -46,6 +46,8 @@ stage after each step; `bin/vawe ship` warns while the Board or the Motion pass 
 <audio src="assets/vo.wav" data-role="vo" data-at="1.0"></audio>
 ```
 
+`data-trim` and `data-trim-end` cut a clip to the part you want, so there is no need for ffmpeg. `data-bpm` sets the synth bed's tempo (default 96) and `bin/vawe sound <page> --cuts <page>` checks the cuts against it.
+
 ## Sound is felt, not noticed
 
 A few soft key ticks and one swell beat many hits. `data-gain` is absolute dB: it replaces the voice's

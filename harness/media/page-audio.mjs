@@ -7,7 +7,10 @@
 //                                                        palette voices air, swoosh-long, swell-soft)
 //   <audio data-synth="tap" data-on="world:s4" data-at="0.1"></audio>  (data-on: data-at counts from the first
 //                                                        second world s4 shows; needs the page's seek)
-//   <audio data-synth="bed" loop></audio>                (a seamless generated pad, the music bed)
+//   <audio data-synth="bed" loop data-bpm="96"></audio>  (a seamless generated pad with a soft pulse, the music bed;
+//                                                        data-bpm snaps to a whole number of beats per loop)
+//   <audio src="hit.wav" data-trim="0.2" data-trim-end="0.9"></audio>   (play seconds 0.2 to 0.9 of the file; a 8 ms fade
+//                                                        at each cut avoids a click)
 //   <audio src="vo.wav" data-role="vo"></audio>          (ducks music -18 dB while it plays)
 //   <meta name="loudness" content="-14">   (wins over the default below)
 // The mix is as written: the sum of the cues at their gains, nothing raised or lowered. Only a -1 dBTP
@@ -20,6 +23,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { playableOf } from '../lib/audio-view.mjs';
 import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, normalize, normalizeStereo, encodeWav, wavDuration } from '../../core/audio/kit.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -27,6 +31,7 @@ const RATE = 48000;
 const VO_DUCK_DB = -18;
 const DUCK_ATTACK = 0.05;
 const DUCK_RELEASE = 0.3;
+const CUT_FADE = 0.008;
 const CUE_CEILING = 0.8;
 const CUE_SPREAD_DB = 6;
 const PEAK_LIMIT_DB = -1;
@@ -56,7 +61,7 @@ function toFilePath(rawSrc, pageUrl, pagePath) {
  * readPageAudio(page, { pagePath }?) -> { specs, loudness }  (loudness: the <meta name="loudness"> value, or null)
  * `page` is a puppeteer Page on a loaded film. `pagePath` (the page's file) makes src resolution exact;
  * without it a src resolves against the repo root that the preview server serves.
- * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, duck (dB or null), role }
+ * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, trimEnd, bpm, duck (dB or null), role }
  */
 export async function readPageAudio(page, { pagePath, spans } = {}) {
   const raw = await page.evaluate(() => {
@@ -65,7 +70,7 @@ export async function readPageAudio(page, { pagePath, spans } = {}) {
       src: el.getAttribute('src') || el.querySelector('source')?.getAttribute('src') || null,
       synth: el.dataset.synth || null, on: el.dataset.on || null, length: num(el, 'length', null),
       at: num(el, 'at', 0), gain: num(el, 'gain', null), fadeIn: num(el, 'fadeIn', 0), fadeOut: num(el, 'fadeOut', 0),
-      trim: num(el, 'trim', 0), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
+      trim: num(el, 'trim', 0), trimEnd: num(el, 'trimEnd', null), bpm: num(el, 'bpm', null), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
     }));
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
     const duration = parseFloat(document.querySelector('meta[name="duration"]')?.content);
@@ -129,7 +134,7 @@ function materialise(spec, tmp, i) {
   const cue = CUES[spec.synth];
   // A palette voice draws pitch, timing and detune from its seed: the index gives each use its own.
   const samples = cue.voice
-    ? normalizeStereo(renderCueStereo(cue, i + 1, spec.length == null ? {} : { length: spec.length }), CUE_CEILING)
+    ? normalizeStereo(renderCueStereo(cue, i + 1, { ...(spec.length == null ? {} : { length: spec.length }), ...(spec.bpm == null ? {} : { bpm: spec.bpm }) }), CUE_CEILING)
     : normalize(renderCue(cue), CUE_CEILING);
   const file = path.join(tmp, `cue${i}-${spec.synth}.wav`);
   fs.writeFileSync(file, encodeWav(samples));
@@ -158,7 +163,7 @@ function duckWindows(tracks, duration) {
   return tracks.flatMap(({ spec, seconds }) => {
     const db = spec.duck ?? (spec.role === 'vo' ? VO_DUCK_DB : null);
     if (db === null || spec.role === 'music') return [];
-    const end = Math.min(duration, spec.at + Math.max(0, seconds - spec.trim));
+    const end = Math.min(duration, spec.at + playableOf(spec, seconds));
     return [{ a: spec.at, b: end, linear: 10 ** (db / 20) }];
   });
 }
@@ -172,15 +177,18 @@ function duckExpr(windows) {
 function trackChain({ spec, seconds }, i, duration, windows) {
   const isMusic = spec.role === 'music';
   const room = Math.max(0.01, duration - spec.at);
-  const playable = Math.max(0.01, seconds - spec.trim);
+  const playable = playableOf(spec, seconds);
   const len = isMusic && playable < room ? room : Math.min(room, playable);
   const c = [`atrim=start=${f(spec.trim)}`, 'asetpts=PTS-STARTPTS', `aresample=${RATE}`, 'aformat=channel_layouts=stereo'];
   if (isMusic) c.push('aloop=loop=-1:size=2147483647', 'asetpts=N/SR/TB');
   c.push(`atrim=end=${f(len)}`, 'asetpts=PTS-STARTPTS', `volume=${f(spec.gain)}dB`);
-  if (spec.fadeIn > 0) c.push(`afade=t=in:st=0:d=${f(spec.fadeIn)}`);
-  if (spec.fadeOut > 0) c.push(`afade=t=out:st=${f(Math.max(0, len - spec.fadeOut))}:d=${f(spec.fadeOut)}`);
+  const cutIn = !isMusic && spec.trim > 0 ? CUT_FADE : 0;
+  const cutOut = !isMusic && spec.trimEnd != null && spec.trimEnd < seconds ? CUT_FADE : 0;
+  const fadeIn = Math.max(spec.fadeIn, cutIn), fadeOut = Math.max(spec.fadeOut, cutOut);
+  if (fadeIn > 0) c.push(`afade=t=in:st=0:d=${f(fadeIn)}`);
+  if (fadeOut > 0) c.push(`afade=t=out:st=${f(Math.max(0, len - fadeOut))}:d=${f(fadeOut)}`);
   const ms = Math.round(spec.at * 1000);
-  if (ms > 0) c.push(`adelay=${ms}|${ms}`);
+  if (ms > 0) c.push(`adelay=${ms}|${ms}`, 'asetpts=N/SR/TB');
   if (isMusic && windows.length) c.push(`volume=eval=frame:volume='${duckExpr(windows)}'`);
   return `[${i}:a]${c.join(',')}[a${i}]`;
 }

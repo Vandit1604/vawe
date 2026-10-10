@@ -85,3 +85,18 @@ test('a page with low explicit gains gets a dB change that brings the mix into t
   assert.ok(after.I >= RULES.lufsLow && after.I <= RULES.lufsHigh, `after ${change} dB: ${after.I} LUFS`);
   assert.ok(Math.abs(after.I - RULES.lufsTarget) <= 1, `after ${change} dB: ${after.I} LUFS, wanted about ${RULES.lufsTarget}`);
 });
+
+test('data-trim and data-trim-end play only that part of a file, with a fade at each cut', () => withFilm(3, async ({ dir, video }) => {
+  const tone = path.join(dir, 'tone.wav');
+  const mk = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'lavfi', '-i', 'sine=frequency=440:duration=2', '-ar', String(SR), tone]);
+  assert.equal(mk.status, 0, String(mk.stderr));
+  const spec = { src: tone, at: 0.5, gain: 0, fadeIn: 0, fadeOut: 0, trim: 0.5, trimEnd: 1.0, duck: null, role: 'sfx' };
+  const out = path.join(dir, 'trim.mp4');
+  await mixAndMux({ specs: [spec], duration: 3, video, out });
+  const pcm = spawnSync('ffmpeg', ['-loglevel', 'error', '-i', out, '-ac', '1', '-ar', String(SR), '-f', 'f32le', '-'], { maxBuffer: 64 * 1024 * 1024 });
+  const s = new Float32Array(pcm.stdout.buffer.slice(pcm.stdout.byteOffset, pcm.stdout.byteLength + pcm.stdout.byteOffset));
+  const peak = (a, b) => s.slice(Math.round(a * SR), Math.round(b * SR)).reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+  assert.ok(peak(0, 0.4) < 0.01, 'silent before data-at');
+  assert.ok(peak(0.6, 0.95) > 0.05, 'sounds inside the trimmed part');
+  assert.ok(peak(1.15, 3) < 0.01, `silent after the trimmed part (0.5 s long): ${peak(1.15, 3)}`);
+}));

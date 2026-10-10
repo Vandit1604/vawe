@@ -7,6 +7,9 @@ const LEVEL_WINDOW_S = 0.05;
 const CURVE_WINDOW_S = 0.4;
 const CURVE_STEP_S = 0.1;
 
+/** Seconds of a source between data-trim and data-trim-end (or its end). Pure. */
+export const playableOf = (spec, seconds) => Math.max(0.01, Math.min(seconds, spec.trimEnd ?? Infinity) - spec.trim);
+
 const round1 = (n) => Math.round(n * 10) / 10;
 const toDb = (linear) => (linear > 1e-6 ? Math.max(SILENT_DB, 20 * Math.log10(linear)) : SILENT_DB);
 
@@ -34,7 +37,7 @@ export function rmsDb(samples, from, to) {
  */
 export function activeAt(tracks, t, duration) {
   return tracks.flatMap(({ spec, seconds }, index) => {
-    const playable = Math.max(0.01, seconds - spec.trim);
+    const playable = playableOf(spec, seconds);
     const bed = spec.role === 'music';
     const length = bed ? duration - spec.at : Math.min(playable, duration - spec.at);
     const into = t - spec.at;
