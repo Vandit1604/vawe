@@ -108,7 +108,7 @@ function writeBriefFromPage(pagePath, measured, samples) {
 const timesLine = (n) => `brief: ${n} times written from the page (the page owns the times)`;
 
 async function finalLevel(mp4) {
-  try { return (await import('./page-audio.mjs')).measureFile(mp4); } catch { return null; }
+  try { return (await import('../lib/loudness.mjs')).measureFile(mp4); } catch { return null; }
 }
 
 /**

@@ -8,7 +8,7 @@ import { scratch } from '../../lib/scratch.mjs';
 import { die, probeVideo } from './core.mjs';
 import { frameRgb, lumaOf } from './frame.mjs';
 import { advise, clippedShare, edgeSamples, lookProblem, lookTable, summarise } from './look-math.mjs';
-import { resolveInput } from './strip.mjs';
+import { resolveInput } from './input.mjs';
 import { BLOCK, channelPhase, channelsSplit, DARK_MEAN, DARK_PEAK, describePattern, powerSpectrum, spectrumPeak } from './texture-math.mjs';
 
 const SERIES_W = 480, SERIES_H = 270, MEAN_W = 160, MEAN_H = 90;

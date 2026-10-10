@@ -25,6 +25,7 @@ import { playableOf } from '../lib/audio-view.mjs';
 import { balanceLines } from '../lib/cue-balance.mjs';
 import { spectralChange, BED_RATE } from '../lib/bed-motion.mjs';
 import { decodeMono } from '../lib/audio-onsets.mjs';
+import { measureFile } from '../lib/loudness.mjs';
 import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, normalize, normalizeStereo, encodeWav, wavDuration } from '../../core/audio/kit.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -192,12 +193,6 @@ function lastJson(stderr) {
   const m = stderr.match(/\{[^{}]*"input_i"[^{}]*\}/g);
   if (!m) throw new Error('page-audio: loudnorm printed no measurement');
   return JSON.parse(m[m.length - 1]);
-}
-
-export function measureFile(file) {
-  const err = run('ffmpeg', ['-hide_banner', '-nostats', '-i', file, '-vn', '-af', 'ebur128=peak=true', '-f', 'null', '-']);
-  const summary = err.slice(err.lastIndexOf('Summary:'));
-  return { I: parseFloat(summary.match(/I:\s+(-?[\d.]+) LUFS/)[1]), TP: parseFloat(summary.match(/Peak:\s+(-?[\d.]+) dBFS/)[1]) };
 }
 
 // The limiter lowers peaks above LIMITER_DB and passes everything below it untouched.
