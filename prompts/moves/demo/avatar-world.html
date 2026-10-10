@@ -8,17 +8,20 @@
 <style>
   body { display: block; position: relative; }
   .a { position: absolute; inset: 0; z-index: 1; }
-  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 33); width: 72vw; height: calc(var(--u) * 34); }
-  .a .who { position: absolute; left: calc(var(--u) * 33); top: calc(var(--u) * 7.2); }
-  .a .who .title { margin-bottom: var(--s2); }
+  .a .card { position: absolute; left: 14vw; top: calc(var(--u) * 30); width: 72vw; height: calc(var(--u) * 40); }
+  .a .who { position: absolute; left: calc(var(--u) * 38); top: 50%; transform: translateY(-50%); }
+  .a .who .title { margin-bottom: var(--s1); font-size: var(--t-head); }
   .a .who .lead { color: var(--muted); }
-  .a .btn { position: absolute; right: var(--s5); top: calc(var(--u) * 11); }
+  .a .who .tags { display: flex; gap: var(--s1); margin-top: var(--s3); }
+  .a .btn { position: absolute; right: var(--s5); top: 50%; margin-top: calc(var(--u) * -4.8); padding: calc(var(--u) * 3) calc(var(--u) * 6.5); font-size: var(--t-lead); }
   .avatar-world { position: absolute; left: 0; top: 0; z-index: 3; border-radius: 50%; overflow: hidden; }
   .avatar-world svg { display: block; width: 100%; height: 100%; }
   .b { position: absolute; inset: 0; z-index: 4; pointer-events: none; color: #fff; }
-  .b .name { position: absolute; left: 8vw; bottom: calc(var(--u) * 24); margin: 0; font: 700 calc(var(--u) * 17)/1 var(--sans); letter-spacing: -0.05em; }
-  .b .meta { position: absolute; left: 8.4vw; bottom: calc(var(--u) * 14); margin: 0; font: 500 var(--t-lead)/1 var(--sans); color: #d7f3ee; }
-  .b .cta { position: absolute; right: 8vw; bottom: calc(var(--u) * 14); }
+  .b .scrim { position: absolute; left: 0; right: 0; bottom: 0; height: 36%; background: linear-gradient(180deg, rgba(3, 28, 36, 0) 0%, rgba(3, 28, 36, 0.55) 100%); }
+  .b .name { position: absolute; left: 8vw; bottom: calc(var(--u) * 17); margin: 0; font: 700 calc(var(--u) * 15)/1 var(--sans); letter-spacing: -0.045em; }
+  .b .meta { position: absolute; left: 8.4vw; bottom: calc(var(--u) * 7); margin: 0; font: 500 var(--t-lead)/1 var(--sans); color: #d7f3ee; }
+  .b .cta { position: absolute; right: 8vw; bottom: calc(var(--u) * 6); }
+  .b .cta .btn { padding: calc(var(--u) * 3) calc(var(--u) * 6.5); font-size: var(--t-lead); }
   .cur { position: absolute; left: 0; top: 0; z-index: 10; }
   .cursor { display: block; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); overflow: visible; transform-origin: 0 0; }
   .cursor path { fill: #fff; stroke: #0f2033; stroke-width: 1.4; stroke-linejoin: round; }
@@ -26,22 +29,24 @@
 </head>
 <body>
 <section class="a" id="a">
-  <div class="card card"><div class="who"><div class="title">Mira Okafor</div><div class="lead">Illustrator, Lagos</div></div><div class="btn primary">Follow</div></div>
+  <div class="card card"><div class="who"><div class="title">Mira Okafor</div><div class="lead">Illustrator, Lagos</div><div class="tags"><span class="pill">128 works</span><span class="pill up">Open to work</span></div></div><div class="btn primary">Follow</div></div>
 </section>
 <div class="avatar-world" id="av">
   <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
     <defs>
       <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2a8f"/><stop offset="0.38" stop-color="#b8479a"/><stop offset="0.58" stop-color="#ff9a6a"/><stop offset="0.6" stop-color="#ffd08a"/></linearGradient>
       <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b8f8c"/><stop offset="1" stop-color="#0b3b4a"/></linearGradient>
+      <radialGradient id="halo"><stop offset="0" stop-color="#ffe2a8" stop-opacity="0.55"/><stop offset="1" stop-color="#ffb06a" stop-opacity="0"/></radialGradient>
     </defs>
     <rect width="100" height="100" fill="url(#sky)"/>
+    <circle id="glow" cx="62" cy="52" r="24" fill="url(#halo)"/>
     <circle id="sun" cx="62" cy="52" r="10" fill="#fff3c9"/>
     <path d="M0 60 Q 18 54 34 60 T 70 59 T 100 56 L100 100 L0 100Z" fill="url(#sea)"/>
     <path d="M0 74 Q 25 64 52 72 T 100 68 L100 100 L0 100Z" fill="#0c4c5a"/>
     <path d="M0 86 Q 30 78 60 85 T 100 82 L100 100 L0 100Z" fill="#07303d"/>
   </svg>
 </div>
-<section class="b" id="b"><h1 class="name" id="nm">Mira</h1><p class="meta" id="mt">12.4k followers</p><div class="cta" id="cp"><div class="btn primary">Follow</div></div></section>
+<section class="b" id="b"><div class="scrim" id="sc"></div><h1 class="name" id="nm">Mira Okafor</h1><p class="meta" id="mt">Illustrator, Lagos  &middot;  12.4k followers</p><div class="cta" id="cp"><div class="btn primary">Follow</div></div></section>
 <div class="cur" id="cur"><svg class="cursor" id="arrow" viewBox="0 0 24 24"><path transform="translate(-2 -2)" d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
 <script type="module">
 import '/core/engine/page-api.js';
@@ -51,7 +56,7 @@ const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, k) => p + (q - p
 const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch'), swap = easeFn('swap');
 const $ = (id) => document.getElementById(id);
 const av = $('av'), a = $('a'), cur = $('cur'), arrow = $('arrow'), sun = $('sun');
-const D = 22 * u, START = { x: 14 * (W / 100) + 7 * u + D / 2, y: 50 * u };   // the avatar's circle in the card
+const D = 24 * u, START = { x: 14 * (W / 100) + 8 * u + D / 2, y: 50 * u };   // the avatar's circle in the card
 const CENTER = { x: W / 2, y: H / 2 };
 const SMAX = (Math.hypot(W, H) / 2 / (D / 2)) * 1.03;                           // its radius reaches the farthest corner
 av.style.width = av.style.height = `${D}px`;
@@ -66,12 +71,14 @@ vawe.onFrame((t) => {
   const s = lerp(1, SMAX, g) * (1 - 0.05 * dip);
   const cx = lerp(START.x, CENTER.x, g), cy = lerp(START.y, CENTER.y, g);
   av.style.transform = `translate(${cx - D / 2}px, ${cy - D / 2}px) scale(${s})`;
-  a.style.opacity = lerp(1, 0.55, g).toFixed(3);
+  a.style.opacity = (1 - swap(clamp(g / 0.8))).toFixed(3);                     // the card leaves under the circle
   // the art keeps living once it is the ground: the sun climbs
-  sun.setAttribute('cy', (52 - 3.5 * clamp((t - T.grow) / 2.6)).toFixed(3));
+  const sy = (52 - 3.5 * clamp((t - T.grow) / 2.6)).toFixed(3);
+  sun.setAttribute('cy', sy); $('glow').setAttribute('cy', sy);
   const rise = (el, at, d) => { const e = land(clamp((t - at) / 0.7)); el.style.opacity = e; el.style.transform = `translateY(${(1 - e) * d * u}px)`; };
+  $('sc').style.opacity = land(clamp((t - 1.85) / 0.6));
   rise($('nm'), 1.95, 6); rise($('mt'), 2.1, 4); rise($('cp'), 2.25, 4);
-  $('mt').textContent = `${(12.4 * land(clamp((t - 2.1) / 1.0))).toFixed(1)}k followers`;
+  $('mt').textContent = `Illustrator, Lagos  \u00b7  ${(12.4 * land(clamp((t - 2.1) / 1.0))).toFixed(1)}k followers`;
 });
 </script>
 </body>

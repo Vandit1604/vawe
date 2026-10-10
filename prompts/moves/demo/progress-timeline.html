@@ -7,37 +7,45 @@
 <link rel="stylesheet" href="/prompts/moves/demo/demo.css">
 <style>
   body { display: block; position: relative; }
-  .shot { position: absolute; inset: 0; }
+  .shot { position: absolute; inset: 0; background: var(--ground); }
   .a { z-index: 1; }
   .a .card { position: absolute; left: 8vw; top: calc(var(--u) * 24); width: 46vw; height: calc(var(--u) * 52); }
   .a .card .title { position: absolute; left: var(--s5); top: var(--s5); }
-  .a .card .lead { position: absolute; left: var(--s5); top: calc(var(--u) * 20); color: var(--muted); }
-  .a .pct { position: absolute; right: var(--s5); top: var(--s5); font: 600 var(--t-lead)/1 var(--mono); color: var(--muted); }
-  .a .track { position: absolute; left: 10vw; width: 40vw; top: calc(var(--u) * 64.3); height: calc(var(--u) * 1.4); border-radius: 999px; background: var(--dot); }
-  .a .thumb { position: absolute; right: 8vw; top: calc(var(--u) * 24); width: 32vw; height: calc(var(--u) * 52); border-radius: var(--r-card); background: linear-gradient(140deg, #23222a 0%, #2f3a57 100%); box-shadow: var(--shadow-card); }
-  .b { z-index: 2; background: #0d0c11; }
-  .b .mon { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 8); height: calc(var(--u) * 30); border-radius: var(--r-card); background: linear-gradient(120deg, #101a3a, #1c2f66 60%, #0a87ff); box-shadow: var(--shadow-card); }
+  .a .card .lead { position: absolute; left: var(--s5); top: calc(var(--u) * 20.5); color: var(--muted); }
+  .a .pct { position: absolute; right: var(--s5); top: calc(var(--u) * 9); font: 600 var(--t-lead)/1 var(--mono); color: var(--muted); }
+  .a .track { position: absolute; left: calc(8vw + var(--s5)); width: calc(46vw - 2 * var(--s5)); top: calc(var(--u) * 59.3); height: calc(var(--u) * 1.4); border-radius: 999px; background: var(--dot); }
+  .a .chips { position: absolute; left: calc(8vw + var(--s5)); top: calc(var(--u) * 65); display: flex; gap: var(--s1); }
+  .a .chips .pill { transition: none; }
+  .a .thumb { position: absolute; right: 8vw; top: calc(var(--u) * 24); width: 32vw; height: calc(var(--u) * 52); border-radius: var(--r-card); background: linear-gradient(140deg, #1c2038 0%, #26335c 60%, #2d4a8a 100%); box-shadow: var(--shadow-card); overflow: hidden; }
+  .a .thumb .play { position: absolute; left: 50%; top: 50%; width: calc(var(--u) * 11); height: calc(var(--u) * 11); margin: calc(var(--u) * -5.5) 0 0 calc(var(--u) * -5.5); border-radius: 50%; background: rgba(255, 255, 255, 0.14); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); display: grid; place-items: center; }
+  .a .thumb .play::after { content: ''; margin-left: calc(var(--u) * 0.9); border-style: solid; border-width: calc(var(--u) * 2.2) 0 calc(var(--u) * 2.2) calc(var(--u) * 3.6); border-color: transparent transparent transparent rgba(255, 255, 255, 0.85); }
+  .a .thumb .nm { position: absolute; left: var(--s3); bottom: var(--s3); font: 500 var(--t-small)/1 var(--mono); color: rgba(255, 255, 255, 0.7); }
+  .a .thumb .du { position: absolute; right: var(--s3); bottom: var(--s3); font: 500 var(--t-small)/1 var(--mono); color: rgba(255, 255, 255, 0.7); }
+  .b { z-index: 2; }
+  .b .mon { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 8); height: calc(var(--u) * 25); border-radius: var(--r-card); background: linear-gradient(120deg, #101a3a, #1c2f66 60%, #0a87ff); box-shadow: var(--shadow-card); }
   .b .mon span { position: absolute; left: var(--s4); bottom: var(--s3); font: 500 var(--t-small)/1 var(--mono); color: #cfe3ff; }
-  .b .ruler { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 42); height: calc(var(--u) * 2.2); background: repeating-linear-gradient(90deg, var(--faint) 0 1px, transparent 1px calc(var(--u) * 4.2)); opacity: 0.8; }
+  .b .mon em { position: absolute; right: var(--s4); bottom: var(--s3); font: 500 var(--t-small)/1 var(--mono); color: #cfe3ff; font-style: normal; }
+  .b .ruler { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 38); height: calc(var(--u) * 2.2); background: repeating-linear-gradient(90deg, var(--faint) 0 1px, transparent 1px calc(var(--u) * 4.2)); opacity: 0.8; }
   .lane { position: absolute; left: 8vw; right: 8vw; height: calc(var(--u) * 10); }
-  .lane i { position: absolute; top: 0; bottom: 0; border-radius: var(--r2); background: var(--raised); box-shadow: var(--ring); }
-  .lane i.hot { background: #1d4f99; }
-  .tc { position: absolute; z-index: 9; padding: var(--s1) var(--s2); border-radius: var(--r2); background: var(--raised); box-shadow: var(--ring); font: 600 var(--t-small)/1 var(--mono); color: var(--ink); }
+  .lane i { position: absolute; top: 0; bottom: 0; border-radius: var(--r2); background: var(--raised); box-shadow: var(--ring); font: 500 var(--t-small)/1 var(--mono); font-style: normal; color: var(--muted); padding: calc(var(--u) * 1.4) var(--s2); overflow: hidden; white-space: nowrap; }
+  .lane i.hot { background: #1d4f99; color: #cfe3ff; }
+  .tc { position: absolute; z-index: 9; padding: var(--s1) var(--s2); border-radius: var(--r2); background: var(--raised); box-shadow: var(--ring); font: 600 var(--t-small)/1 var(--mono); color: var(--ink); white-space: nowrap; }
   .head { position: absolute; z-index: 8; background: var(--accent); border-radius: 999px; }
 </style>
 </head>
 <body>
 <section class="shot b" id="b">
-  <div class="mon"><span>launch.mp4</span></div>
+  <div class="mon"><span>launch.mp4</span><em>16:9</em></div>
   <div class="ruler"></div>
-  <div class="lane" style="top: calc(var(--u) * 47)"><i style="left: 0; width: 22%"></i><i class="hot" style="left: 23%; width: 31%"></i><i style="left: 55%; width: 18%"></i><i style="left: 74%; width: 26%"></i></div>
-  <div class="lane" style="top: calc(var(--u) * 59)"><i style="left: 6%; width: 38%"></i><i class="hot" style="left: 45%; width: 14%"></i><i style="left: 60%; width: 40%"></i></div>
-  <div class="lane" style="top: calc(var(--u) * 71)"><i class="hot" style="left: 0; width: 60%"></i><i style="left: 61%; width: 39%"></i></div>
+  <div class="lane" style="top: calc(var(--u) * 44)"><i style="left: 0; width: 22%">Intro</i><i class="hot" style="left: 23%; width: 31%">Product tour</i><i style="left: 55%; width: 18%">Pricing</i><i style="left: 74%; width: 26%">Outro</i></div>
+  <div class="lane" style="top: calc(var(--u) * 56)"><i style="left: 6%; width: 38%">Voice over</i><i class="hot" style="left: 45%; width: 14%">Hit</i><i style="left: 60%; width: 40%">Music</i></div>
+  <div class="lane" style="top: calc(var(--u) * 68)"><i class="hot" style="left: 0; width: 60%">Captions</i><i style="left: 61%; width: 39%">Logo</i></div>
 </section>
 <section class="shot a" id="a">
   <div class="card card"><div class="title">Exporting</div><div class="lead">launch.mp4, 3 ratios</div><div class="pct" id="pct">0%</div></div>
-  <div class="track"></div>
-  <div class="thumb"></div>
+  <div class="track" id="trk"></div>
+  <div class="chips" id="chips"><div class="pill">16:9</div><div class="pill">9:16</div><div class="pill">1:1</div></div>
+  <div class="thumb"><div class="play"></div><span class="nm">launch.mp4</span><span class="du">0:41</span></div>
 </section>
 <div class="head" id="head"></div><div class="tc" id="tc"></div>
 <script type="module">
@@ -45,11 +53,13 @@ import '/core/engine/page-api.js';
 import { easeFn } from '/core/motion/presets.js';
 const W = innerWidth, H = innerHeight, u = H / 100, vw = W / 100;
 const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, k) => p + (q - p) * k;
-const land = easeFn('land'), swap = easeFn('swap'), launch = easeFn('launch');
+const land = easeFn('land'), swap = easeFn('swap');
 const $ = (id) => document.getElementById(id);
-const head = $('head'), a = $('a'), b = $('b'), tc = $('tc'), pct = $('pct');
+const head = $('head'), b = $('b'), tc = $('tc'), pct = $('pct');
+const chips = [...$('chips').children];
+const tr = $('trk').getBoundingClientRect();
 // one speed curve carries the whole move: the fill head accelerates, runs at V past the end of the track, becomes the scrubber, then brakes
-const X0 = 10 * vw, END = 50 * vw, REST = 92 * vw, V = 44 * vw, T0 = 0.4, ACC = 0.5, BRAKE = 0.6;
+const X0 = tr.left, END = tr.right, CY = tr.top + tr.height / 2, REST = 92 * vw, V = 44 * vw, T0 = 0.4, ACC = 0.5, BRAKE = 0.6;
 const Xd = REST - 0.5 * V * BRAKE, Td = T0 + ACC + (Xd - (X0 + 0.5 * V * ACC)) / V;
 function xAt(t) {
   if (t <= T0) return X0;
@@ -58,9 +68,9 @@ function xAt(t) {
   const s = clamp((t - Td) / BRAKE);
   return Xd + V * BRAKE * (s - s * s / 2);
 }
-const CY = 65 * u, BAR_H = 1.4 * u, LINE_H = 50 * u, LINE_W = 0.55 * u;
+const BAR_H = 1.4 * u, LINE_H = 44 * u, LINE_W = 0.55 * u;
 const tEnd = (() => { let t = T0; while (xAt(t) < END) t += 0.001; return t; })();   // the second the head leaves the track
-const STAND = 0.7;                                                                     // seconds to stand up
+const STAND = 0.9;                                                                     // seconds to stand up
 vawe.onFrame((t) => {
   const x = xAt(t), past = clamp((t - tEnd) / STAND);
   const tailX = lerp(X0, x - LINE_W, swap(clamp(past / 0.55)));    // the tail catches up with the head, then the head stands up
@@ -68,13 +78,20 @@ vawe.onFrame((t) => {
   head.style.left = `${tailX}px`; head.style.width = `${Math.max(x - tailX, LINE_W)}px`;
   head.style.top = `${CY - h / 2}px`; head.style.height = `${h}px`;
   head.style.visibility = t < T0 ? 'hidden' : 'visible';
-  pct.textContent = `${Math.round(100 * clamp((x - X0) / (END - X0)))}%`;
-  // B sits to the left of the scrubber; its left edge flies off the frame fast once the line is up
-  const edge = lerp(x, 0, launch(clamp((past - 0.75) / 0.25)));
-  b.style.clipPath = past > 0.75 ? `inset(0 ${W - x - LINE_W}px 0 ${edge}px)` : 'inset(0 100% 0 100%)';
+  const f = clamp((x - X0) / (END - X0));
+  pct.textContent = `${Math.round(100 * f)}%`;
+  chips.forEach((el, i) => {
+    const done = f >= (i + 1) / 3 - 0.001;
+    el.style.background = done ? 'color-mix(in srgb, var(--accent) 20%, transparent)' : 'var(--raised)';
+    el.style.color = done ? 'var(--up-ink)' : 'var(--muted)';
+  });
+  // B sits to the left of the scrubber
+  const e = swap(clamp((past - 0.5) / 0.5)), v = ((H - h) / 2) * (1 - e);   // the window opens from the line: as tall as the line, then wider to the left, then to full height
+  b.style.clipPath = past > 0.5 ? `inset(${v}px ${W - x - LINE_W}px ${v}px ${lerp(x, 0, e)}px)` : 'inset(0 100% 0 100%)';
   const sec = Math.max(0, ((x - 8 * vw) / (84 * vw)) * 41);
   tc.textContent = `0:${String(Math.floor(sec)).padStart(2, '0')}:${String(Math.floor((sec % 1) * 30)).padStart(2, '0')}`;
-  tc.style.left = `${x + 1.2 * u}px`; tc.style.top = `${CY - LINE_H / 2 - 4 * u}px`; tc.style.opacity = past > 0.9 ? 1 : 0;
+  const tw = tc.offsetWidth;
+  tc.style.left = `${Math.min(x + LINE_W / 2 - tw / 2, W - 8 * vw + 0.5 * tw)}px`; tc.style.top = `${CY - LINE_H / 2 - 6.5 * u}px`; tc.style.opacity = clamp((past - 0.8) / 0.2);
 });
 </script>
 </body>
