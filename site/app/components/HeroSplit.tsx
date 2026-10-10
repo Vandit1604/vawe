@@ -29,6 +29,7 @@ const FILMS = [
 
 export function HeroSplit() {
   const [playing, setPlaying] = useState(true);
+  const [sound, setSound] = useState(false);
   const [index, setIndex] = useState(0);
   const film = FILMS[index];
   const video = useRef<HTMLVideoElement>(null);
@@ -40,9 +41,11 @@ export function HeroSplit() {
   useEffect(() => {
     const v = video.current;
     if (!v) return;
-    if (playing) void v.play().catch(() => setPlaying(false));
-    else v.pause();
-  }, [playing, index]);
+    v.muted = !sound;
+    if (playing) {
+      void v.play().catch(() => (sound ? setSound(false) : setPlaying(false)));
+    } else v.pause();
+  }, [playing, index, sound]);
 
   return (
     <section className="hs" id="intro">
@@ -85,6 +88,19 @@ export function HeroSplit() {
           </button>
           <span className="hs-now-title">{film.title}</span>
           {"source" in film && <a className="hs-now-link" href={film.source}>Read the page</a>}
+          <button className="hs-sound" type="button" onClick={() => setSound((s) => !s)} aria-pressed={sound} aria-label="Sound on">
+            {sound ? (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor" />
+                <path d="M10.5 5.5a3.5 3.5 0 0 1 0 5M12.3 3.7a6 6 0 0 1 0 8.6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M2 6h2.5L8 3v10L4.5 10H2z" fill="currentColor" />
+                <path d="M10.5 6l4 4M14.5 6l-4 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
         </div>
         <p className="hs-cap">
           {film.line}
