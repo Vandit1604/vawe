@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-101 rules, 34 scored by the judge.
+97 rules, 34 scored by the judge.
 
 ## concept
 
@@ -46,7 +46,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [asymmetry](rules/asymmetry.md): Compose asymmetric with one hero, anchored to edges and thirds. Check: judge.
 - [claim-shape-graphic](rules/claim-shape-graphic.md): A claim that is a quantity, a proportion, a change over time, a flow or a real thing wants its own graphic, not a number set in type. Check: judge.
 - [dense-where-dense](rules/dense-where-dense.md): Match the reference per act: dense where the reference is dense, quiet where it is quiet. Check: none.
-- [eye-path](rules/eye-path.md): Plan the eye path per beat: where the eye starts, what pulls it (name the device), where it lands. Check: judge.
 - [first-frame](rules/first-frame.md): Something of the subject (the subject, its ground or its first mark) is on screen at frame 0 and reads as an image by 0.1 s. Check: judge.
 - [gradient-or-flat](rules/gradient-or-flat.md): Gradients on low-copy beats, flat on high-copy and payoff beats. Check: judge.
 - [graphic-is-subject](rules/graphic-is-subject.md): If a graphic is the point of the beat, it owns the frame: hero scale, type demoted to a caption. Check: judge.
@@ -111,14 +110,11 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [cut-on-beat](rules/cut-on-beat.md): Cut on the beat, or two frames early, on an action; never in a dead hold. Check: cut-off-beat.
 - [eye-trace](rules/eye-trace.md): Land the incoming subject where the eye was on the outgoing frame. Check: judge.
 - [ground-jump-cover](rules/ground-jump-cover.md): A background jump (dark to light) wants a cover that peaks at the cut. Check: judge.
-- [handoff-duration](rules/handoff-duration.md): A handoff where the outgoing element's final pose becomes the incoming element's first pose reads as one object travelling. Check: judge.
 - [hard-cut-default](rules/hard-cut-default.md): The hard cut is the default seam. Check: judge.
 - [match-cut-align](rules/match-cut-align.md): A match cut aligns the two silhouettes before cutting: a graphic match asserts that A is B. Check: none.
-- [one-cut-family](rules/one-cut-family.md): A film keeps one transition family for most seams and earns 2 to 3 accents by meaning. Check: judge.
 - [paired-exit-direction](rules/paired-exit-direction.md): Entrances and exits travel in one continuous direction; never enter and retreat. Check: judge.
-- [seam-duration](rules/seam-duration.md): A seam is felt, not measured: round to the frame, and give each type its own speed. Check: none.
 - [seam-meaning](rules/seam-meaning.md): A transition serves the relationship between two beats and the feeling across the seam. Check: judge.
-- [seam-overlap](rules/seam-overlap.md): The outgoing beat ends at the seam and the incoming beat starts at it. Check: judge.
+- [seam-timing](rules/seam-timing.md): A seam is felt, not measured: round to the frame, give each type its own speed, and keep the joint full. Check: judge.
 - [seam-variety](rules/seam-variety.md): Each moving seam changes axis or direction from the previous moving seam, and the same moving seam never appears twice. Check: seam-repeat.
 
 ## finish
@@ -146,7 +142,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [content.md](craft/content.md)
 - [density.md](craft/density.md)
 - [direction.md](craft/direction.md)
-- [eye-trace.md](craft/eye-trace.md)
 - [failure-modes.md](craft/failure-modes.md)
 - [film-structure.md](craft/film-structure.md)
 - [grammar.md](craft/grammar.md)

@@ -1,6 +1,6 @@
 ---
 when: "choosing the cut between two beats (you cannot say why a transition is there)"
-answers: "the transition taxonomy (type, meaning), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles"
+answers: "the transition taxonomy (type, meaning), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles, where the eye is at a cut"
 group: story
 ---
 
@@ -15,6 +15,7 @@ Contents:
 - [Restraint: the invisible cut dominates](#restraint-the-invisible-cut-dominates)
 - [Speed is the anti-repetition lever](#speed-is-the-anti-repetition-lever)
 - [Durations](#durations)
+- [Where the eye is at a cut](#where-the-eye-is-at-a-cut)
 - [Align the beats to the seam](#align-the-beats-to-the-seam)
 - [Station to station: the launch-film transition with no cut](#station-to-station-the-launch-film-transition-with-no-cut)
 - [The motion-design layer (elements, not shots)](#the-motion-design-layer-elements-not-shots)
@@ -100,7 +101,7 @@ against). Dissolve, graphic match, smash cut. Ask: should this seam disappear or
 8. Rhythm: accelerate into a climax, then hold the payoff. Cut on the beat when the user gave a track, or
    two frames early.
 9. Restraint check: is this the one primary family or one of the earned accents
-   ([one-cut-family](../rules/one-cut-family.md))? Adjacent moving transitions change axis or direction
+   ([hard-cut-default](../rules/hard-cut-default.md))? Adjacent moving transitions change axis or direction
    ([seam-variety](../rules/seam-variety.md)): two back-to-back seams that both push left read as a stutter.
 
 If a seam cannot answer 1 to 5 with a real relationship or feeling, it is a hard cut. That rule stops
@@ -137,10 +138,20 @@ film uses ramps, hype is snappy, tense rushes. An explicit curve on one seam sti
 ## Durations
 
 The ranges per transition type (match overlap, whip, dissolve, slide, zoom, fade) are in
-[seam-duration](../rules/seam-duration.md), in seconds. Finals render at 60 fps, so count frames at 60.
+[seam-timing](../rules/seam-timing.md), in seconds. Finals render at 60 fps, so count frames at 60.
 A seam is felt, not measured: round to the frame. A whip that is not fast and blurred reads as a slow
 slide. Soft edges are the cheap-versus-polished tell: a hard wipe edge reads as a slide deck, a feathered
 one reads graded. A wipe can sweep at any angle, not only the four cardinals.
+
+## Where the eye is at a cut
+
+Nothing measures this: judge it by eye on the frames on both sides of a cut (`bin/vawe critique`). Read the focal point of the frame before the cut and put the incoming subject at or near that screen point; do not make the eye cross the frame at a joint (Derek Lieu). Murch ranks eye-trace fourth of six, at 7 %, under emotion (51 %), story (23 %) and rhythm (10 %), so a cut that serves the story may cost the eye a journey. It is a strong default, not a wall. Rule: [eye-trace](../rules/eye-trace.md).
+
+The eye ranks targets in a fixed order: brighter, larger, in focus, moving (a built frame has no face). The focal point is the winner among the live elements, not what you meant it to be. Brighter means contrast against the ground, not luminance: white type on a white field is the brightest thing and nobody looks at it.
+
+The eye is steered, not only ranked, and all four terms can be animated: brighter (a glow whose intensity, radius and colour change over the shot, cold to hot, wide to tight), larger (travel in Z under perspective instead of scaling, so the element stays crisp), in focus (rack the blur from one plane to another), moving (a keyed path, or a beam that sweeps and reveals what it touches through a moving `mask-image`). Light the subject, then move the light: a glow parked on the hero stops being seen within a second. Rack, do not cut, when two things share a frame and the second matters now. Ask of every beat: where is the eye at the start, where should it be at the end, and what moves it? "It stays where the cut put it" is fair on a held beat and a failure on any other.
+
+When a cut makes the eye jump, in order of cost: place the next headline where the last focal point was (free in a built film); aim the outgoing beat at the corner the next beat opens in; give the next beat more time (a run of short beats, each demanding a jump, never lets the viewer catch up); keep the jump and say why in the page's `authoring` block. No source publishes a distance: the rule's 0.30 of the frame diagonal is this repo's working figure.
 
 ## Align the beats to the seam
 

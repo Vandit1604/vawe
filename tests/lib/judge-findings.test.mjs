@@ -76,9 +76,9 @@ test('the ledger tracks notes by rule id: an open rule keeps its item, and a fli
   assert.match(ledgerPrompt(openItems(prev.items)), /f2 \(note, rule thread at 3\): no thread/);
   const next = mergeLedger(prev.items, { ledger: [{ id: 'f1', status: 'still' }, { id: 'f2', status: 'still' }] }, [], [{ rule: 'thread', t: 3.5, verdict: 'fail', note: 'still no thread' }, { rule: 'hierarchy', t: 1, verdict: 'fail', note: 'flat' }, { rule: 'sound-cues', t: 1, verdict: 'unknown', note: 'x' }]);
   assert.deepEqual(next.items.map((i) => `${i.id} ${i.rule} ${i.status}`), ['f1 first-frame still', 'f2 thread still', 'f3 hierarchy new']);
-  const round = (items, now, want) => mergeLedger(items, { ledger: openItems(items).map((i) => ({ id: i.id, status: 'fixed' })), fixes: [{ axis: 'hook', rule: 'eye-path', what: `phrase ${want}`, now, want }] }, [{ axis: 'hook', score: 7, at: 1, rule: 'eye-path', fix: `to ${want}` }]);
+  const round = (items, now, want) => mergeLedger(items, { ledger: openItems(items).map((i) => ({ id: i.id, status: 'fixed' })), fixes: [{ axis: 'hook', rule: 'eye-trace', what: `phrase ${want}`, now, want }] }, [{ axis: 'hook', score: 7, at: 1, rule: 'eye-trace', fix: `to ${want}` }]);
   const r3 = round(round(round([], '40%', '85%').items, '85%', '40%').items, '40%', '85%');
-  assert.match(ledgerLines(r3)[1], /^stop: keep eye-path: phrase 85% at its current value/);
+  assert.match(ledgerLines(r3)[1], /^stop: keep eye-trace: phrase 85% at its current value/);
   assert.equal(previousItems({ fixes: [{ axis: 'a', rule: 'hierarchy', fix: 'x' }] })[0].rule, 'hierarchy');
 });
 

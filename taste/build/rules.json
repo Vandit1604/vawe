@@ -85,10 +85,6 @@
   "file": "taste/rules/dense-where-dense.md",
   "instead": "put the product and photos at hero size in the acts where the reference shows them; real photos, never an invented image."
  },
- "eye-path": {
-  "file": "taste/rules/eye-path.md",
-  "instead": "move the eye with light (a glow that arrives cold and wide, then tightens and goes hot), with focus (rack from one plane to the other) or with a beam used as a mask. A glow parked on the hero for the whole beat stops being seen within a second."
- },
  "first-frame": {
   "file": "taste/rules/first-frame.md",
   "instead": "put the thread, the first word or the brand colour in frame 0, and start the sound at 0 as well."
@@ -323,43 +319,31 @@
  },
  "eye-trace": {
   "file": "taste/rules/eye-trace.md",
-  "instead": "in order of cost: place the next headline where the last focal point was; aim the outgoing beat at the corner the next beat opens in; give the next beat more time; keep the jump and say why."
+  "instead": "in order of cost: place the next headline where the last focal point was; aim the outgoing beat at the corner the next beat opens in; give the next beat more time; keep the jump and say why. Within a beat, move the eye with light (a glow that arrives cold and wide, then tightens and goes hot), with focus (rack from one plane to the other) or with a beam used as a mask; a glow parked on the hero for the whole beat stops being seen within a second."
  },
  "ground-jump-cover": {
   "file": "taste/rules/ground-jump-cover.md",
   "instead": "match the ground to the content; never fade a full-bleed background out (the white flash). Carry the change with a colour that follows the content."
  },
- "handoff-duration": {
-  "file": "taste/rules/handoff-duration.md",
-  "instead": "travel eases at both ends; EASE.land on a handover reads as two objects. Every element has a designed enter, hold and exit, or a handoff: an element simply gone in the next frame is dropped, not finished."
- },
  "hard-cut-default": {
   "file": "taste/rules/hard-cut-default.md",
-  "instead": "cut on the beat or two frames early. Use a dissolve for passing time, a fade for an act break, a whip for momentum, a zoom to enter a surface, a match cut for a hidden connection, a morph for a logo or one hero moment."
+  "instead": "be able to say which meaning each accent serves, such as a tone flip or a time jump. Master a few: a dissolve, one momentum move, one zoom, a rare morph. Cut on the beat or two frames early. Use a dissolve for passing time, a fade for an act break, a whip for momentum, a zoom to enter a surface, a match cut for a hidden connection, a morph for a logo or one hero moment."
  },
  "match-cut-align": {
   "file": "taste/rules/match-cut-align.md",
   "instead": "cut cleanly, or find the real rhyme."
  },
- "one-cut-family": {
-  "file": "taste/rules/one-cut-family.md",
-  "instead": "be able to say which meaning each accent serves, such as a tone flip or a time jump. Master a few: a dissolve, one momentum move, one zoom, a rare morph."
- },
  "paired-exit-direction": {
   "file": "taste/rules/paired-exit-direction.md",
   "instead": "pair every directional entrance with an exit that continues the same line of travel."
- },
- "seam-duration": {
-  "file": "taste/rules/seam-duration.md",
-  "instead": "write a ramp with an EASE name (carry into a cut, land out of it). Feather a wipe edge: a hard edge reads as a slide deck. A wipe can sweep at any angle. One velocity personality per film."
  },
  "seam-meaning": {
   "file": "taste/rules/seam-meaning.md",
   "instead": "ask in order: does the seam need to exist; what must the viewer feel; invisible or expressive; what is the relationship (same object new state: morph; rhyme: match cut; time: dissolve; act boundary: fade; opposition: smash cut; new place with energy: whip or wipe). \"It looks smoother\" is not a reason."
  },
- "seam-overlap": {
-  "file": "taste/rules/seam-overlap.md",
-  "instead": "a blend that mixes the frame before and the frame after turns copy into an unreadable double: end the outgoing text at the seam. A full-bleed layer above a moving layer must not start mid-move and hide it: start the cover after the move ends, or raise the mover."
+ "seam-timing": {
+  "file": "taste/rules/seam-timing.md",
+  "instead": "write a ramp with an EASE name (carry into a cut, land out of it). Feather a wipe edge: a hard edge reads as a slide deck. A wipe can sweep at any angle. One velocity personality per film. A handoff eases at both ends: EASE.land on a handover reads as two objects. A blend of the frame before and the frame after turns copy into an unreadable double, so end the outgoing text at the seam. A full-bleed layer above a moving layer must not start mid-move and hide it: start the cover after the move ends, or raise the mover."
  },
  "seam-variety": {
   "file": "taste/rules/seam-variety.md",

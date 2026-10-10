@@ -72,7 +72,7 @@ an interface, not how a shot should feel, so use the film stagger in [stagger](.
 Every element has a designed enter, hold and exit, or a handoff. An element that is simply gone in the
 next frame is dropped, not finished. Ask why before you ship it. A handoff where the outgoing
 element's final pose becomes the incoming element's first pose reads as one object travelling
-([handoff-duration](../rules/handoff-duration.md)).
+([seam-timing](../rules/seam-timing.md)).
 
 ### Handoffs that lead the eye (School of Motion's six transitions)
 
