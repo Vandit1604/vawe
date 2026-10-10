@@ -329,7 +329,7 @@ vawe.onFrame((t) => {
   const p = pose(t), dist = CAM_Z - p.z;
   holder.position.set(p.x, p.y, p.z);
   holder.scale.setScalar(p.s * zoomAt(t));   // the push, in 3D, so the ring re-renders sharp
-  cameraEl.style.scale = zoomAt(t);   // push in (prompts/moves/push-in.md), closing on the ring to the last frame
+  cameraEl.style.scale = zoomAt(t);   // push in (prompts/moves/camera-moves.md), closing on the ring to the last frame
   aim.rotation.set(p.face * Math.atan2(p.y, dist), p.face * Math.atan2(-p.x, dist), 0, 'YXZ');
   ring.rotation.set(p.tilt, p.turn, 0, 'YXZ');
   dial.offset.x = p.spin;

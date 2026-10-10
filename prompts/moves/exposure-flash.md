@@ -23,13 +23,15 @@ vawe.onFrame((t) => {
 </script>
 ```
 
-Sound: a short noise hit at each cut (default gain).
+Sound: a recorded hit at each cut, or one soft swell that stops dead on the cut (the film's one swell, on one flash only).
 
 - The peak is `frames / fps` seconds centred on the cut: white at 0.75 alpha lifts a mean luma of 60 to about 200.
   `shot` counts the cuts passed, so the swap happens in the middle of the peak and the viewer never sees it.
 - After the peak the shot is at `brightness(2)` and eases to 1 on a squared curve over `settle` s.
 - Safety: `flashAt` flashes at most 3 cuts in any one second (`flashCuts`). A fourth cut in that second still
   cuts, without the flash. Keep flashes to a few per film; they are accents.
+- Use it once or twice a film, on the strongest beats only; a flash on every cut is a tell. Held for 6 frames or more it is a strobe. Give the outgoing shot a little element motion up to the flash so the last frame before it is not a still. The renderer flags an all-white frame: declare it with `<meta name="blank" content="0.52-0.58">`.
+- A page-built variant with no helper: a white div at `opacity 0 -> 1` over 0.04 of 420 ms, held about three frames, then a long fall on `EASE.leave`, with the shot swap (`duration: 1`) inside the peak and the new shot starting at `brightness(2.4)` and `scale 1.06`, both settling on `EASE.land` over 0.7 s. The fall is what makes it read as light and not as a white slide.
 - Measured on the clip (60 fps): mean luma 27 before the cut, 203 to 208 in the peak, 67 on the first frame
   after it, then 38 after 0.15 s.
 
