@@ -174,8 +174,7 @@ export function dispatchShot(video, positional, shotSpec, flag) {
   const fps = Number(flag('--fps', 10));
   const outDirRoot = path.resolve(positional[1] || defaultOutDir(video));
   const pageArg = flag('--page', null);
-  if (pageArg) console.log(`\n  next: node harness/media/see.mjs ${pageArg} --dom --ref ${video} --from ${from} --to ${to}`
-    + `  (or: vawe critique ${pageArg} --ref ${video})`);
+  if (pageArg) console.log(`\n  next: bin/vawe critique ${pageArg} --ref ${video}`);
   return runShot(video, outDirRoot, from, to, fps);
 }
 

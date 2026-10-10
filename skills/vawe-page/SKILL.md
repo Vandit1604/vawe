@@ -51,7 +51,7 @@ stage after each step; `bin/vawe ship` warns while the Board or the Motion pass 
 
 ## Sound is felt, not noticed
 
-A recorded effect first, a few soft synth ticks and at most one swell after it, never a bed (`taste/craft/sound.md`). `data-gain` is absolute dB and replaces the voice default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`; a `src` file defaults to 0 dB): write it only to move one cue on purpose. Cue the first and the last key word, not every word. Name each beat once in CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat. What you write is what you hear: no normalising, and `<meta name="loudness" content="-14">` opts in to a delivery target. The mix warns when one cue peaks more than 6 dB above the median, and `node harness/media/review.mjs <page> --final` warns outside -30 to -12 LUFS.
+A recorded effect first, a few soft synth ticks and at most one swell after it, never a bed (`taste/craft/sound.md`). `data-gain` is absolute dB and replaces the voice default (`DEFAULT_GAIN_DB` in `core/audio/kit.mjs`; a `src` file defaults to 0 dB): write it only to move one cue on purpose. Cue the first and the last key word, not every word. Name each beat once in CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat. What you write is what you hear: no normalising, and `<meta name="loudness" content="-14">` opts in to a delivery target. The mix warns when one cue peaks more than 6 dB above the median, and `bin/vawe review <page> --final` warns outside -30 to -12 LUFS.
 
 ## Moves to copy
 

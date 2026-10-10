@@ -324,11 +324,11 @@ Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lis
 
 const motionText = () => `## Motion pass
 
-Phase 7, after the first draft. The motion is done when \`bin/vawe dev\` shows overshoot-share, live-hold (still windows: element motion, not camera drift), constant-camera and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut (all of them, not some) and fixed what reads flat. For the spectacle second also run \`bin/vawe onion\` and \`bin/vawe velocity\` on it. Then write one row per cut. \`bin/vawe ship\` warns while this table holds a placeholder.
+Phase 7, after the first draft. Done when \`bin/vawe dev\` shows overshoot-share, live-hold, constant-camera and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut. For the spectacle second also run \`bin/vawe onion\` and \`bin/vawe velocity\`. Check each cut against taste/craft/motion-craft.md and the principles in core/motion/README.md; one row per cut, ok, fix or n/a per principle. \`bin/vawe ship\` warns while this table holds a placeholder.
 
-| cut | what read flat | what I fixed (or why it stays) |
-|---|---|---|
-| [s1 to s2] | [the strip showed] | [the change, or the reason it stays] |`;
+| cut | anticipation (hero) | follow-through, overlap | spacing eased | arcs | secondary action | exits faster | hold alive | camera still | what read flat | what I fixed (or why it stays) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| [s1 to s2] | [ok] | [ok] | [ok] | [ok] | [ok] | [ok] | [ok] | [ok] | [the strip showed] | [the change, or the reason it stays] |`;
 
 const SKELETON = [['task', 'Task'], ['taken'], ['directions'], ['signature'], ['look', 'Look'], ['system'], ['states'], ['board'], ['motion'], ['swap', 'Keep and swap'], ['spec', 'Spec'], ['acceptance', 'Acceptance'], ['gates', 'Gates'], ['pitfalls', 'Pitfalls'], ['deliver', 'Deliver']];
 

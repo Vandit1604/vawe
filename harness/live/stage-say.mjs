@@ -56,17 +56,20 @@ export function missingRungs(design) {
  */
 export const WAIT_WORK = "while it renders, fill the brief's Board and Motion pass rows if empty, Read the bin/vawe strip <page> --cuts grids, or prepare the critique notes";
 
+export const CRITIQUE_ASK = 'ask: what reads flat, and what is a trick (an effect with no job)?';
+export const BRIEF_ASK = 'ask: what is the one thing to remember, who watches it, and where (platform, sound on or off)?';
+
 export const SAY = {
-  study: (name) => `bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, then fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 frames, exact path and what you take`,
-  moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second) and which of the ten patterns in taste/craft/film-structure.md (The motion grammar) each ref uses`,
-  design: (name) => `write films/${name}/DESIGN.md and films/${name}/kit/ (format: skills/vawe-page/SKILL.md, example: films/examples/colour-sting/kit/; type: taste/craft/typography.md, colour: taste/craft/color.md)`,
+  study: (name) => `bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, then fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 frames, exact path and what you take; ask: what does this ref do that a simple film does not?`,
+  moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second) and which of the ten patterns in taste/craft/film-structure.md (The motion grammar) each ref uses; ask: what does the cut do to the eye?`,
+  design: (name) => `write films/${name}/DESIGN.md and films/${name}/kit/ (format: skills/vawe-page/SKILL.md, example: films/examples/colour-sting/kit/; type: taste/craft/typography.md, colour: taste/craft/color.md); ask: which type scale and colour roles still read at this screen size?`,
   skills: (name, rungs) => `add to films/${name}/DESIGN.md one line per rung (${rungs.join(', ')}): "Skill <rung>: <slug>: what it decided", or "Skipped <rung>: <reason>"; list the skills with command npx -y ui-skills list`,
-  states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet (layout: taste/craft/layout.md), then bin/vawe frames ${rel}`,
+  states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet (layout: taste/craft/layout.md), then bin/vawe frames ${rel}; ask: where is the eye in each frame, and what does it see first?`,
   frames: (name, rel) => `bin/vawe frames ${rel}`,
-  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut (feeling: taste/craft/selection.md, seams: taste/craft/transitions.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md)`,
+  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut (feeling: taste/craft/selection.md, seams: taste/craft/transitions.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md); ask: what carries the eye across each cut, what is the rhythm, where is the one big moment, what sound sits on each action?`,
   dev: (name, rel) => `bin/vawe dev ${rel}`,
-  motion: (name, rel) => `bin/vawe strip ${rel} --cuts and Read every cut at full size; for the spectacle second also bin/vawe onion ${rel} --at <s> and bin/vawe velocity ${rel} --at <s>; fix what reads flat`,
-  motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: what read flat, what you fixed`,
+  motion: (name, rel) => `bin/vawe strip ${rel} --cuts and Read every cut at full size; for the spectacle second also bin/vawe onion ${rel} --at <s> and bin/vawe velocity ${rel} --at <s>; check each cut against taste/craft/motion-craft.md and the principles in core/motion/README.md: anticipation on the hero, follow-through and overlap, eased spacing, arcs on travelling elements, secondary action, exits faster than entrances, holds alive through element motion, camera still unless the spectacle; fix what reads flat`,
+  motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: each principle checked, what read flat, what you fixed`,
   critique: (name, rel) => `bin/vawe critique ${rel}`,
   judge: (name, rel, ref) => `VAWE_AGENT=judge-${name} bin/vawe judge ${rel} --struct --runs A,B${ref ? ` --ref ${ref}` : ''} in a fresh session, then fix the named seconds with bin/vawe dev ${rel} --from s --to s`,
   ship: (name, rel) => `bin/vawe ship ${rel}, then bin/vawe ship --status ${rel} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`,
@@ -99,7 +102,7 @@ export function nextStep(page, root = process.cwd()) {
   const moves = movesTakenCount(brief);
   const early = !draft && !final && !framed;
   if (early && !brief) {
-    return { name, stage: 'brief', next: `create films/${name}/brief.md: the ask, the message, the spectacle second, "Taken from", "Board" (bin/vawe new <other-name> writes the template to copy)`, why: `films/${name} has no brief.md` };
+    return { name, stage: 'brief', next: `create films/${name}/brief.md: the ask, the message, the spectacle second, "Taken from", "Board" (bin/vawe new <other-name> writes the template to copy); ${BRIEF_ASK}`, why: `films/${name} has no brief.md` };
   }
   if (early && taken !== null && taken < TAKEN_FROM_MIN) {
     return { name, stage: 'study', next: SAY.study(name), why: `Taken from not filled (${taken} named frames); it comes before the design files` };
@@ -129,7 +132,7 @@ export function nextStep(page, root = process.cwd()) {
   if (final < t && !stripped) return { name, stage: 'motion', next: SAY.motion(name, rel), why: 'a draft exists; the motion pass comes before the critique (dev: overshoot-share, live-hold and seam-variety clean or waived with a reason)' };
   if (final < t && motionFilled(brief) === false) return { name, stage: 'motion', next: SAY.motionRows(name), why: 'the cuts are stripped; the Motion pass section is empty' };
   if (final < t && !verbRanSince(runsOf(root, name), 'critique', draft)) {
-    return { name, stage: 'critique', next: SAY.critique(name, rel), why: 'the motion pass is done; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship' };
+    return { name, stage: 'critique', next: SAY.critique(name, rel), why: `the motion pass is done; critique the draft in a fresh session, fix the named seconds, then bin/vawe ship; ${CRITIQUE_ASK}` };
   }
   if (final < t) return { name, stage: 'ship', next: SAY.ship(name, rel), why: 'the critique ran on this draft; fix the seconds it named, then render the final' };
   return { name, stage: 'judge', next: SAY.critique(name, rel), why: 'the final is rendered; a fresh session judges it' };

@@ -238,6 +238,9 @@ test('the brief carries the strip study, the Board (rhythm, spectacle, cuts, sou
   assert.match(board, /\| camera/);
   assert.match(board, /overlap/);
   assert.match(board, /\| voice \|/);
+  const motion = text.split(/^## /m).find((x) => x.startsWith('Motion pass'));
+  assert.match(motion, /motion-craft\.md[\s\S]*core\/motion\/README\.md/);
+  assert.match(motion, /\| cut \| anticipation[^\n]*follow-through[^\n]*arcs[^\n]*secondary[^\n]*exits[^\n]*hold[^\n]*camera[^\n]*what read flat/);
   assert.doesNotMatch(board, /\[bed/);
   assert.match(text, /strip films\/zz\/page\.html --cuts/);
 });

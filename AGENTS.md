@@ -4,9 +4,7 @@ vawe is the framework for agent-native motion graphics: one HTML page in, one fi
 page in what you already know (HTML, CSS, Web Animations, SVG, canvas, three.js): you never learn a
 private format, and if something you would naturally write fails, that is a framework bug to report.
 This file adds only what you would get wrong on your own. One command runs everything: `bin/vawe --help`.
-Start with `bin/vawe new <name> --request "<the ask>"`: it writes `films/<name>/page.html` (a valid starter)
-and `brief.md`. `films/examples/colour-sting/` is a judged-PASS 5 s sting: study how it moves, then make
-your own direction.
+`films/examples/colour-sting/` is a judged-PASS 5 s sting: study how it moves, then make your own direction.
 
 ## The page contract  `[live: harness/media/render-page.mjs]`
 
@@ -42,7 +40,7 @@ next command for the film you edited last.
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
 | 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows (effects on actions, no bed); with a music file the user gave: `vawe sound <file> --cuts <page>` gives the beat grid, the hits and each cut's frame offset |
 | 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
-| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold (a hold lives through an element motion, never a camera drift), constant-camera, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
+| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, constant-camera, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut and check it against `taste/craft/motion-craft.md` and the principles in `core/motion/README.md` (anticipation on the hero, follow-through and overlap, eased spacing, arcs, secondary action, exits faster than entrances, holds alive through element motion, camera still unless the spectacle); for the spectacle also `vawe onion`, `vawe velocity`; one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
 | 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; fix what the final check and the acceptance rows name on drafts; the judge is read once and never tuned to (its score is not a target); poll once per call and work on the last draft between polls |
@@ -63,7 +61,7 @@ Recreating a reference: `bin/vawe new <name> --ref <ref.mp4>` writes SPEC.md; ma
 or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until it passes
 (`vawe-reference`). `ship` refuses until that loop passes.
 
-## Shell  `[eye: 443 of 5,520 agent Bash calls failed on these]`
+## Shell
 
 - The shell is zsh: quote every glob and `?`, `grep --include='*.mjs'`, `curl 'x?a=b'` (unquoted: `no matches found`).
 - One file per `cat` or `head`: a hook rewrites `cat a b` and it breaks. Read the second file in a second call.
