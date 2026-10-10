@@ -58,6 +58,9 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Caption editorial](https://vawe.dev/moves/caption-editorial.md): editorial captions: one or two key words per line in a contrasting italic serif, and the next caption replaces the last on a short line-by-line mask cut
 - [Variable weight wave](https://vawe.dev/moves/variable-weight-wave.md): one hero word arrives as a wave: weight and width of a variable face crest letter by letter, left to right, then settle at a firm weight
 - [Text on path](https://vawe.dev/moves/text-on-path.md): a line of words rides an SVG path with startOffset set from the seek time, front word first, and settles readable on the curve
+- [Vertical cut reveal](https://vawe.dev/moves/vertical-cut-reveal.md): a line arrives hard-edged: every character, word or line rises from under its own clip edge, staggered from the first, last, middle or any item on the motion library's spring (port of fancy)
+- [Letter swap](https://vawe.dev/moves/letter-swap.md): a word or label rolls letter by letter: each letter slides out of its clip box and the same letter slides in; forward or pingpong, stagger or seeded random order (port of fancy)
+- [Letter 3D swap](https://vawe.dev/moves/letter-3d-swap.md): a lowercase line turns over as boxes: each character is a cube that rolls 90 degrees about its centre to the same character on the next face (port of fancy)
 - [Cut on motion](https://vawe.dev/moves/cut-on-motion.md): a moving shape carries the eye across a hard cut into a new scene
 - [Push with directional blur](https://vawe.dev/moves/push-blur.md): a panel pushes in with a directional blur that follows its speed, set per frame
 - [Exits faster than entrances](https://vawe.dev/moves/exit-fast.md): the pair every beat needs: arrive fast and land soft, leave faster and shorter
@@ -65,7 +68,6 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Whip pan](https://vawe.dev/moves/whip-pan.md): the next shot is to the side: a fast sideways pan with a blur that follows its speed hides the seam
 - [Match cut](https://vawe.dev/moves/match-cut.md): one shape crosses a scene change at the same place, size and angle and changes meaning (spinner ring, finished ring)
 - [Iris wipe](https://vawe.dev/moves/iris-wipe.md): a circle closes on the click or mark the eye is on and uncovers the next scene
-- [Flash cut](https://vawe.dev/moves/flash-cut.md): a hard cut on a beat: a three-frame white peak hides the cut and the new shot settles from overexposed
 - [Stack cover](https://vawe.dev/moves/stack-cover.md): the next panel slides over the last one: the old shot moves a quarter as far and dims, a shadow grows with the overlap
 - [Split reveal](https://vawe.dev/moves/split-reveal.md): the frame opens like doors onto the next shot: two halves part, the gap starts dark and lights as they clear
 - [Slice shift](https://vawe.dev/moves/slice-shift.md): horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot
@@ -73,6 +75,7 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Colour block wipe](https://vawe.dev/moves/color-block-wipe.md): a solid brand-colour block sweeps across the cut with a slanted, blurred leading edge; a darker block trails it and the next shot sits behind
 - [Zoom through](https://vawe.dev/moves/zoom-through.md): the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures
 - [Speed ramp freeze](https://vawe.dev/moves/speed-ramp-freeze.md): a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur
+- [Speed ramp](https://vawe.dev/moves/speed-ramp.md): both sides of a cut move the same way: the outgoing accelerates into the cut and the incoming leaves it at the same speed and slows, so the cut lands at peak speed
 - [Liquid wipe](https://vawe.dev/moves/liquid-wipe.md): a gooey organic edge floods the frame onto the next shot: bars with round heads fuse through a goo filter into a wet edge, and an accent band leads the next shot
 - [Grid tile flip](https://vawe.dev/moves/grid-tile-flip.md): a wall of tiles flips in a wave to the next shot: one perspective for the grid, each tile lifts toward the camera and darkens edge-on, shot A on the front and shot B on the back
 - [Luma matte dissolve](https://vawe.dev/moves/luma-matte-dissolve.md): the next shot arrives through its own brightness: an SVG luminance matte with a falling threshold shows its bright areas first, then midtones, and its dark ground last
@@ -88,11 +91,17 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Bracket callout](https://vawe.dev/moves/bracket-callout.md): corner brackets fly in and snap onto a word or a UI part with a small overshoot
 - [Spotlight dim](https://vawe.dev/moves/spotlight-dim.md): the frame dims around one target: a hole closes from the full frame onto it and its shadow is the dim
 - [Hand drawn notes](https://vawe.dev/moves/hand-drawn-notes.md): a person's margin notes: a loose circle round one word, an arrow from a written label and an underline, drawn on with stroke-dashoffset and a seeded wobble
-- [Push in](https://vawe.dev/moves/push-in.md): a slow scale toward the subject over a beat; the ground scales less so the layers separate
 - [UI focus zoom](https://vawe.dev/moves/ui-focus-zoom.md): zoom onto one part of a captured UI: the cursor lands, then one translate and one scale put the part in the middle
 - [Caret follow](https://vawe.dev/moves/caret-follow.md): the camera trails the typing caret on a soft spring, so a long line stays readable at close range
 - [Pull back reveal](https://vawe.dev/moves/pull-back-reveal.md): open tight on a detail and pull back to the whole; scale runs on a log path so the speed reads even
-- [Parallax dive](https://vawe.dev/moves/parallax-dive.md): the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves
+- [Parallax dive](https://vawe.dev/moves/parallax-dive.md): the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves; also one camera move on ground, mid and front layers by depth (parallax())
+- [Exposure flash](https://vawe.dev/moves/exposure-flash.md): a cut on a screen film reads as over-exposure: 3 frames of white, the swap inside the peak, the new shot starts at 2x brightness and settles in 0.15 s; at most 3 flashes a second
+- [Lens](https://vawe.dev/moves/lens.md): a screen filmed as a real object: tilt, depth, bloom, LED grid, fringes, done as lens work and never faked with CSS layers
+- [Camera moves](https://vawe.dev/moves/camera-moves.md): a whole world as one wrapper: push toward a subject (the ground scales less so the layers separate), pull, whip between worlds (camera()); the camera holds still by default
+- [Depth resolve](https://vawe.dev/moves/depth-resolve.md): far words small and soft resolve as the camera arrives; a focus pull (focus())
+- [Scale through](https://vawe.dev/moves/scale-through.md): fly into a plain element and its colour is the next world, in Web Animations only
+- [Direction wipe](https://vawe.dev/moves/direction-wipe.md): a mask edge moves the way the last move went and reveals the next beat
+- [Arrival spring](https://vawe.dev/moves/arrival-spring.md): EASE.nudge on one arrival in three, EASE.pop on the one that matters (nudgeEvery)
 - [Rack focus](https://vawe.dev/moves/rack-focus.md): focus moves from one depth layer to another: near melts, far resolves, pinpoint lights swell into discs; use once per film
 - [Drift hold](https://vawe.dev/moves/drift-hold.md): the line holds still while only the ground drifts, so a held frame never sits dead
 - [Gradient mesh field](https://vawe.dev/moves/gradient-mesh-field.md): a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1
@@ -122,6 +131,7 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Integration hub](https://vawe.dev/moves/integration-hub.md): the "works with your tools" beat: invented tool logos fly in on curved paths and land on a ring around the product mark, then every wire draws in the same frames and pulses ride into the hub
 - [Device tilt stage](https://vawe.dev/moves/device-tilt-stage.md): the product as an object: the UI on a CSS 3D laptop that rises from a steep top-down angle, turns and settles on a spring, the glass reflection sliding with the lid's angle
 - [Command palette summon](https://vawe.dev/moves/command-palette-summon.md): the keyboard-first beat: the app dims, a Cmd+K palette drops in on a spring, a query types, non-matching rows collapse to zero height, Enter presses the chosen row and the palette leaves fast
+- [Gooey filter](https://vawe.dev/moves/gooey-filter.md): a tab, pill or panel must melt into the next: shapes that touch merge into one soft outline through the SVG gooey filter (blur 15, alpha matrix 19 and -9), the active tab box slides on a critically damped spring and the page swaps in 0.2 s
 - [Agent progress](https://vawe.dev/moves/agent-progress.md): an AI agent works through steps: a card springs in, an arc turns beside a status line that swaps states, and numbered rows flip to checks one by one, ending mid-list
 - [Panel live sync](https://vawe.dev/moves/panel-live-sync.md): an edit and its result in one frame: a cursor scrubs fields in a panel and the button on the page beside it rotates, rounds and grows in the same frames
 - [Aurora drift](https://vawe.dev/moves/aurora-drift.md): three soft bands of light hang from the top of the frame and fold slowly in one shader while the copy sits low; the light thins out above the type
@@ -130,3 +140,9 @@ A human link filters the same way: https://vawe.dev/moves?group=end-a-film&look=
 - [Ink warp](https://vawe.dev/moves/ink-warp.md): a rich liquid ground for short large copy: marbled ink flows by domain warp in one shader, thinner behind the type
 - [Dot grid wave](https://vawe.dev/moves/dot-grid-wave.md): a clean product or data frame gets a plain SVG dot grid with one travelling wave of scale and brightness, weaker behind the copy
 - [Light pool](https://vawe.dev/moves/light-pool.md): a matte held frame gets one soft pool of light that wanders on a seeded path, plain CSS with no shader; the stillest ground of the group
+- [Marquee along path](https://vawe.dev/moves/marquee-along-path.md): tiles ride one SVG path forever at an even gap, turned with the curve, rolling z-index, 8 percent of the path per second; one element along the path is an option
+- [Simple marquee](https://vawe.dev/moves/simple-marquee.md): three rows of tiles slide for a whole beat, left, right, left, each row four copies that wrap by one set width at 8 percent per second
+- [Circling elements](https://vawe.dev/moves/circling-elements.md): eight upright tiles orbit one point on a 120 px radius, one linear turn in 10 s
+- [CSS box](https://vawe.dev/moves/css-box.md): a 200 px cube of bold type turns to another face on a stiff overdamped spring (stiffness 100, damping 30, no overshoot) under perspective 600
+- [Pixelate SVG filter](https://vawe.dev/moves/pixelate-svg-filter.md): a photo breaks into square blocks that grow and shrink with one number, size = x / 30 through a convolve, tile and dilate SVG filter
+- [Media between text](https://vawe.dev/moves/media-between-text.md): a picture grows from zero width inside a line of type on a 0.4 s critical spring and closes on a 0.3 s tween, the words part and wrap
