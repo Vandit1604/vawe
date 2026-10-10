@@ -20,4 +20,4 @@ craft: typography
 
 A 20 s film shows text for 16 s at most; the 4 s left show the product alone.
 
-Draft check: The draft check counts the samples of the whole film (one every 0.5 s or more) that hold a line with a height of 2 percent of the frame or more. Text inside aria-hidden or data-chrome is not counted. A window draft and a film under 10 s do not run it.
+Draft check: The draft check counts the samples of the whole film (one every 0.5 s or more) that hold a line with a height of 2 percent of the frame or more. Text inside aria-hidden or data-chrome is left out only when it is texture by measure (cap height under 2 percent, the same words 3 or more times, or a data-texture reason); any other hidden text counts as copy. A window draft and a film under 10 s do not run it.

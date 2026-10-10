@@ -19,6 +19,6 @@ craft: motion-craft
 
 A spectacle at 12 s where the strongest element peaks at 3.1 frame heights per second, while an element at 4.8 s peaks at 5.0, fires. A near tie (under 1.25 times) does not.
 
-Draft check: The draft check reads the same element boxes as speed-ceiling (a camera or ground over 60 percent of the frame is not an element). It compares the fastest element peak within 0.75 s of `<meta name="spectacle">` with the fastest peak elsewhere. A spectacle second outside the drafted seconds is not measured.
+Draft check: The draft check reads the same element boxes as the speed-bands check (a camera or ground over 60 percent of the frame is not an element). It compares the fastest element peak within 0.75 s of `<meta name="spectacle">` with the fastest peak elsewhere. A spectacle second outside the drafted seconds is not measured.
 
 Exaggeration floor: the spectacle peak must reach 1.3 times the median peak of the moving elements (5 or more, over 0.2 frame heights per second). Source: in the 22 reference films (`~/.vawe/refs/measures.json`, 17 with a median over 0.3) the p90 peak speed over the median peak speed has p10 1.3, median 9.8, p90 16.4. A film at the p10 is the weakest key moment the references hold, so a spectacle under 1.3 times the median is below every reference. Our colour-sting is quiet on it.
