@@ -1,6 +1,6 @@
 ---
 when: "choosing the cut between two beats (you cannot say why a transition is there)"
-answers: "the transition taxonomy (type, meaning), the twelve handoff families (what carries the eye across a cut, when each fits, its cost, moves to copy), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles, where the eye is at a cut"
+answers: "the transition taxonomy (type, meaning), the banned slideshow tells with their fixes, the twelve handoff families (what carries the eye across a cut, when each fits, its cost, moves to copy), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles, where the eye is at a cut"
 group: story
 ---
 
@@ -12,6 +12,7 @@ Contents:
 - [Invisible or expressive](#invisible-or-expressive)
 - [The taxonomy: type, meaning, when](#the-taxonomy-type-meaning-when)
 - [The twelve handoff families](#the-twelve-handoff-families)
+- [Banned (slideshow tells)](#banned-slideshow-tells)
 - [The decision procedure: run it at every seam](#the-decision-procedure-run-it-at-every-seam)
 - [Restraint: the invisible cut dominates](#restraint-the-invisible-cut-dominates)
 - [Speed is the anti-repetition lever](#speed-is-the-anti-repetition-lever)
@@ -109,6 +110,27 @@ cut. Choose per cut with the skill `skills/vawe-transitions/SKILL.md`; this tabl
 
 Ledger limits (no family on adjacent cuts, none more than twice) and the choice procedure are in the skill, not here. A deliberate cut is exempt from both limits:
 hard cuts are most seams.
+
+## Banned (slideshow tells)
+
+A film that reads as slides has one of these. `bin/vawe check slideshow <page>` measures them and scores the film out of 10
+(advice; waive with the code `slideshow` and a reason that names a second and a measured value).
+
+| tell | the fix, in one line |
+|---|---|
+| every scene enters and exits the same way (`same-in-out`) | change the way in or out per scene; exits shorter than entrances |
+| a fade or crossfade between every scene (`crossfade-every-cut`) | carry one handoff object across the cut, from a family above |
+| hard cut plus a fade in on every scene (`cut-and-fade-in`) | open each scene on the carried object landing, not on a fade |
+| a full-frame background swap at every cut with no carried element (`swap-no-carry`) | name a handoff object that leaves A and starts B |
+| scene B starts only after scene A fully left, a dead gap (`dead-gap`) | overlap 0.2 to 0.4 s |
+| all elements of a scene enter at once with one move (`all-at-once`) | stagger 30 to 80 ms, a different move for hero and support |
+| one centred line of text per scene on a still ground (`one-thing-scenes`) | give each scene a part that moves while the line is read |
+| equal shot lengths (`equal-shots`) | vary: one under 0.4 s, one over 0.9 s |
+| a static camera and static content in a hold (`static-holds`) | element motion inside every hold |
+| the same entrance (fade-up, scale-in) for every element in the film (`same-entrance`) | different moves for hero, support and detail |
+
+The thresholds are repeat counts, not single events: 3 or more cuts, 5 or more elements, a 75 percent share, shots within 15 percent
+of one length. One crossfade for a time jump is a choice, not a tell. The code is `harness/lib/slideshow.mjs`.
 
 ## The decision procedure: run it at every seam
 

@@ -27,8 +27,9 @@ Run it for every cut of the Board's cut table, then write the result in its `han
    - camera direction never reverses across a cut without a reason.
 5. **Defaults need a reason.** Plain fade, crossfade, whip pan, slide-up reveal and scale-in each need `because ...` in the handoff cell
    (a dissolve for passing time between calm frames is a reason; "it looks smooth" is not).
-6. **Surprise question.** Which cut would a viewer predict? Replace it, or write why the plain one is right.
-7. **Execution notes**, one line per cut in the motion pass:
+6. **Slideshow tells.** Read "Banned (slideshow tells)" in `taste/craft/transitions.md`; none of the ten may describe your plan. `bin/vawe check slideshow <page>` scores the draft.
+7. **Surprise question.** Which cut would a viewer predict? Replace it, or write why the plain one is right.
+8. **Execution notes**, one line per cut in the motion pass:
    - z-order: the handoff object sits above both beats until the new one covers the frame; the old layer does not pop off first;
    - speed matched at the seam: read `bin/vawe velocity` on both sides, the exit must not decelerate into an entrance that starts from rest;
    - a flood reaches the farthest corner in about 0.35 s and has a reveal point, else it just cuts;
@@ -44,5 +45,5 @@ A cut with nothing to carry: `deliberate cut: lands on the downbeat, the tone fl
 ## Check
 
 `bin/vawe check transitions films/<name>/page.html [--mp4 out/<name>-draft.mp4]` and the draft's advice name: a cut with no planned handoff, one family on
-adjacent cuts or more than twice, a plain fade with no reason, and a planned handoff that measures as a hard cut. Advice only. Waive in the page:
+adjacent cuts or more than twice, a plain fade with no reason, and a planned handoff that measures as a hard cut. Advice only. The `slideshow` check scores the ten banned tells. Waive in the page:
 code `transitions`, with a reason that names a second and a measure.

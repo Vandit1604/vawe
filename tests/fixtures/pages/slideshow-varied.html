@@ -1,0 +1,32 @@
+<!DOCTYPE html><html data-aspect="16:9"><head><meta charset="utf-8">
+<meta name="duration" content="7">
+<style>
+*{margin:0}html,body{background:#f4f1ea;width:100%;height:100%}
+section{position:absolute;inset:0;display:grid;place-items:center;opacity:0}
+h1{font:700 96px system-ui;color:#111}
+.b{position:absolute;font:600 40px system-ui;color:#222}
+#ring{position:absolute;width:120px;height:120px;border:12px solid #c33;border-radius:50%;left:200px;top:300px}
+</style></head><body>
+<div id="ring"></div>
+<section data-world="a"><h1>Ship</h1><div class="b" style="left:200px;top:150px">fast</div><div class="b" style="left:900px;top:700px">safe</div></section>
+<section data-world="b"><h1>Track</h1><div class="b" style="left:300px;top:200px">every move</div><div class="b" style="left:1000px;top:800px">in one place</div></section>
+<section data-world="c"><h1>Done</h1><div class="b" style="left:600px;top:300px">ship it</div></section>
+<section data-world="d"><h1>Now</h1><div class="b" style="left:800px;top:600px">free to try</div></section>
+
+<script>
+const on = (el, a, b) => { el.animate([{ opacity: 0 }, { opacity: 1 }], { delay: a * 1000, duration: 1, fill: 'both' }); if (b != null) el.animate([{ opacity: 1 }, { opacity: 0 }], { delay: b * 1000, duration: 1, fill: 'forwards' }); };
+const S = [...document.querySelectorAll('section')];
+const spans = [[0, 1.0], [0.8, 3.4], [3.2, 4.4], [4.2, 7]];
+S.forEach((s, i) => on(s, spans[i][0], i < 3 ? spans[i][1] : null));
+const ring = document.getElementById('ring');
+ring.animate([{ opacity: 0 }, { opacity: 1 }], { delay: 0, duration: 300, fill: 'both' });
+ring.animate([{ translate: '0 0', scale: '1' }, { translate: '500px -120px', scale: '1.6' }, { translate: '900px 200px', scale: '0.6' }], { delay: 600, duration: 4000, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' });
+const moves = [['translate', '-200px 0', '0 0'], ['translate', '0 120px', '0 0'], ['scale', '0.6', '1'], ['translate', '200px 0', '0 0']];
+S.forEach((s, i) => {
+  const h = s.querySelector('h1');
+  const [p, a, b] = moves[i];
+  h.animate([{ opacity: 0, [p]: a }, { opacity: 1, [p]: b }], { delay: spans[i][0] * 1000 + 100, duration: 500 + i * 120, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'both' });
+  s.querySelectorAll('.b').forEach((el, k) => el.animate([{ opacity: 0, translate: `0 ${30 + k * 20}px` }, { opacity: 1, translate: '0 0' }], { delay: spans[i][0] * 1000 + 350 + k * 200, duration: 450, easing: 'cubic-bezier(.3,.9,.3,1)', fill: 'both' }));
+});
+</script>
+</body></html>

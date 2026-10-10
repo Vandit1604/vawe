@@ -72,6 +72,8 @@ import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, boardFilled, spectacleOf, lockedSpectacle, moveRows } from '../lib/board.mjs';
 import { handoffAdvice } from '../lib/handoffs.mjs';
+import { slideshowTells, slideshowLines } from '../lib/slideshow.mjs';
+import { worldRows } from '../lib/timeline.mjs';
 import { moveDocLines } from '../lib/move-docs.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaived, waiverHint, waiverProblems } from '../lib/waivers.mjs';
@@ -956,6 +958,14 @@ function beatLines(pagePath, worlds, authoring) {
   try { return beatAdvice(pagePath, worlds).flatMap((l) => [l, waiverHint('cut-off-beat')]); } catch (e) { return [`cut-off-beat: the music bed was not read: ${e.message}`]; }
 }
 
+/** The slideshow tells a draft shows without a video (entrances, exits, world spans); [] for a window or a waiver naming the code. */
+function slideshowAdvice(pagePath, motion, probe, authoring) {
+  if (!probe.worlds || (motion.scripted && !motion.boxes)) return [];
+  const { tells } = slideshowTells({ worlds: worldRows(probe.worlds), records: motionRecords(motion) });
+  const live = tells.filter((t) => !isWaived(authoring, 'slideshow', t.at[0]));
+  return live.length ? [...slideshowLines({ score: live.length, of: 10, tells: live }), waiverHint('slideshow')] : [];
+}
+
 /** The draft-check advice that needs the live page but no video: { text, brief, lines }, waivers applied. */
 export function pageAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
@@ -966,7 +976,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, { ...probe, rules: rulesWith(readDecls(pagePath), RULES) }),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+    lines: [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...slideshowAdvice(pagePath, motion, probe, authoring), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...(isWaived(authoring, 'transitions') || boardFilled(brief ?? '') !== true ? [] : handoffAdvice(moveRows(brief)).flatMap((l) => [l, waiverHint('transitions')])), ...moveDocLines(brief),
       ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],

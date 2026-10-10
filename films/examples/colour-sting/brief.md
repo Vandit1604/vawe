@@ -131,12 +131,12 @@ Rhythm: the holds are 0.70, 1.30, 0.75, 1.60 and 0.65 s. The cuts out are 0 s (a
 
 Spectacle: the one big moment at 2.75 s (also `<meta name="spectacle">`): the ring lands as the o of the name on the `pop` curve and the world flips to amber. Quiet before: 2.00 to 2.75, one object moves (the ring flies back) on a world that does not change; the rush from 1.4 to 2.0 is the build. Release after: the line opens, the light and the accent run to "colour", and nothing new arrives after 3.9 while the push keeps the hold alive. Built from recipe 15 in prompts/moves/RECIPES.md.
 
-| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) |
-|---|---|---|---|---|---|---|---|
-| cold to warm, 0.70 | match-cut: the ring holds its place in the turn | the ring | the cold ground | 0 | none, the ring moves in 3D | ground, ring | none |
-| warm to hot, 1.00 to 2.00 | pull-back-reveal, run the other way: the ring rushes the lens and the next world shows through its hole | the ring, then the name inside it | the magenta ground | 1.00 | none, the ring moves in 3D | ground, ring, name | none |
-| hot to amber, 2.75 | match-cut: the lockup holds, ground and ink flip; logo-sting: the line opens from the ring; camera-moves: the camera pushes on from 2.45 | the ring as the o | the red ground | 0 | push from 2.45, 20% to the last frame | ground, lockup | the ring's landing on the `pop` curve (the one hero arrival), the line opening on `EASE.nudge` |
-| amber to red, 4.35 | match-cut with a heat front that closes first | the hotspot, then "colour" | the amber ground | 0.95 | the same push plus a 12% punch | ground, heat, lockup | none, the word sweep runs on `EASE.land` |
+| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) | handoff (family: object) |
+|---|---|---|---|---|---|---|---|---|
+| cold to warm, 0.70 | match-cut: the ring holds its place in the turn | the ring | the cold ground | 0 | none, the ring moves in 3D | ground, ring | none | graphic match: the ring holds its place |
+| warm to hot, 1.00 to 2.00 | pull-back-reveal, run the other way: the ring rushes the lens and the next world shows through its hole | the ring, then the name inside it | the magenta ground | 1.00 | none, the ring moves in 3D | ground, ring, name | none | camera through: the ring rushes the lens |
+| hot to amber, 2.75 | match-cut: the lockup holds, ground and ink flip; logo-sting: the line opens from the ring; camera-moves: the camera pushes on from 2.45 | the ring as the o | the red ground | 0 | push from 2.45, 20% to the last frame | ground, lockup | the ring's landing on the `pop` curve (the one hero arrival), the line opening on `EASE.nudge` | position lock: the lockup holds while ground and ink flip |
+| amber to red, 4.35 | match-cut with a heat front that closes first | the hotspot, then "colour" | the amber ground | 0.95 | the same push plus a 12% punch | ground, heat, lockup | none, the word sweep runs on `EASE.land` | colour or light flood: the heat front |
 
 Sound is subtle: no bed, one voice per cut and one for the spectacle. Voices are the quiet palette of `bin/vawe sound` at their default gain. Cues sit on `data-on="world:<id>"`, so they follow the picture.
 

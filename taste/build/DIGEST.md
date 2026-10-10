@@ -9,7 +9,7 @@ Every command prints the lines of its step again. All rules: `taste/README.md`. 
 - The film's DESIGN.md and the owner's decisions (font, size, camera) outrank house defaults. (owner-decides)
 - Show real things working, not slogans in boxes; an invented product gets a UI designed as a real interface, never functionless chrome. (show-real-thing)
 - Take a reference's style (grammar, light, moves), never its text, logos or photos. (style-not-content)
-- One thread carries through (object, type line, colour or rhythm), not separate reveals one after another. (thread)
+- One thread carries through (object, type line, colour or rhythm), not separate reveals; slideshow tells: taste/craft/transitions.md. (thread)
 - A ground is never one flat fill: soft blobs or a real field behind the content. (living-ground)
 - Read lines: cap height 6 percent of the frame or more (UI that is the subject, in data-ui: 3 percent), held max(1.2 s, words / 3); prose words x 0.6 s. Readable, not rushed: add hold, never slow the move. (readable-hold)
 - Lens, blur, bloom and fringe are real optics (the lens surface), never a CSS fake. (real-optics)

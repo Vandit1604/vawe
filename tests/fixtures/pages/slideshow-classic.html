@@ -1,0 +1,23 @@
+<!DOCTYPE html><html data-aspect="16:9"><head><meta charset="utf-8">
+<meta name="duration" content="8">
+<style>
+*{margin:0}html,body{background:#f4f1ea;width:100%;height:100%}
+section{position:absolute;inset:0;display:grid;place-items:center;opacity:0}
+h1{font:700 96px system-ui;color:#111}
+.b{position:absolute;font:600 40px system-ui;color:#222}
+#ring{position:absolute;width:120px;height:120px;border:12px solid #c33;border-radius:50%;left:200px;top:300px}
+</style></head><body>
+<section data-world="s1"><h1>Title 1</h1></section>
+<section data-world="s2"><h1>Title 2</h1></section>
+<section data-world="s3"><h1>Title 3</h1></section>
+<section data-world="s4"><h1>Title 4</h1></section>
+
+<script>
+document.querySelectorAll('section').forEach((el, i) => {
+  const t = i * 2000;
+  el.animate([{ opacity: 0 }, { opacity: 1 }], { delay: t, duration: 500, easing: 'linear', fill: 'both' });
+  if (i < 3) el.animate([{ opacity: 1 }, { opacity: 0 }], { delay: t + 1500, duration: 500, easing: 'linear', fill: 'forwards' });
+  el.querySelector('h1').animate([{ opacity: 0 }, { opacity: 1 }], { delay: t, duration: 500, easing: 'linear', fill: 'both' });
+});
+</script>
+</body></html>

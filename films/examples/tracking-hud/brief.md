@@ -114,23 +114,23 @@ Spectacle: the cut at 5.183 s into s14b (grid k = 12); the nodes fan out at 5.23
 
 Camera is the tilt in every state (perspective rx, ry, rz in the page table). Every world keeps a live ground (the light drifts) and a blur layer behind the word. Axis of each seam alternates: x, y, z, then reverse, so no two neighbours move the same way.
 
-| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) |
-|---|---|---|---|---|---|---|---|
-| s1 to s2 (0.30) | flash-cut, x | the box on the "e" | labels | 0 | whip, x | 3 | none |
-| s2 to s3 (0.55) | cut-on-motion, y | the box slides to the next digit | ghost word | 0.05 | none | 2 | boxes on nudge |
-| s3 to s4 (0.80) | flap-resolve then cut, z | digits roll 1, 6, then land | halftone dots | 0.05 | push | 3 | none |
-| s4 to s5 (1.25) | flash-cut, x reverse | label stripe across "every" | boxes | 0 | whip, x reverse | 3 | none |
-| s5 to s6 (1.60) | slice-shift, y reverse | the yellow m | ghost word | 0.05 | none | 3 | m highlight on nudge |
-| s6 to s7 (1.90) | push-blur, z reverse | the p box | type crop | 0.1 | pull | 2 | none |
-| s7 to s8 (2.20) | cut-on-motion, x | the dither dots resolve into mono glyphs | dither fringe | 0.1 | none | 2 | none |
-| s8 to s9 (3.40) | caret-follow then flash-cut, y | the caret | code lines | 0 | drift | 2 | caret on nudge |
-| s9 to s10 (3.70) | flash-cut, x reverse | box on "state" | labels | 0 | whip, x | 3 | none |
-| s10 to s11 (3.95) | slice-shift, y | the 7 | fringe | 0.05 | none | 2 | none |
-| s11 to s12 (4.25) | cut-on-motion, z | the hatch lines | ghost | 0 | push | 3 | none |
-| s12 to s13 (4.55) | flap-resolve, y reverse | the label counters | boxes | 0.05 | none | 2 | none |
-| s13 to s14 (4.85) | zoom-through, z (spectacle) | the c box grows into the full word | the halftone | 0.2 | push with depth-parallax | 4 | "computed" lands on EASE.pop; one in four boxes on nudge |
-| s14 to s15 (6.20) | cut-on-motion, x | the longest connector | nodes and connectors | 0.1 | drift into whip | 3 | none |
-| s15 to s16 (6.50) | push-blur, y | the f box | green glow | 0.15 | slow push to the end | 3 | none |
+| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) | handoff (family: object) |
+|---|---|---|---|---|---|---|---|---|
+| s1 to s2 (0.30) | flash-cut, x | the box on the "e" | labels | 0 | whip, x | 3 | none | deliberate cut: the flash lands on the beat |
+| s2 to s3 (0.55) | cut-on-motion, y | the box slides to the next digit | ghost word | 0.05 | none | 2 | boxes on nudge | action match: the box slides to the next digit |
+| s3 to s4 (0.80) | flap-resolve then cut, z | digits roll 1, 6, then land | halftone dots | 0.05 | push | 3 | none | object to object: the digits roll into the landed number |
+| s4 to s5 (1.25) | flash-cut, x reverse | label stripe across "every" | boxes | 0 | whip, x reverse | 3 | none | deliberate cut: the flash on the beat |
+| s5 to s6 (1.60) | slice-shift, y reverse | the yellow m | ghost word | 0.05 | none | 3 | m highlight on nudge | shared axis: the slice carries the yellow m |
+| s6 to s7 (1.90) | push-blur, z reverse | the p box | type crop | 0.1 | pull | 2 | none | invisible cut: the push-blur peak |
+| s7 to s8 (2.20) | cut-on-motion, x | the dither dots resolve into mono glyphs | dither fringe | 0.1 | none | 2 | none | action match: the dither dots resolve into glyphs |
+| s8 to s9 (3.40) | caret-follow then flash-cut, y | the caret | code lines | 0 | drift | 2 | caret on nudge | sound bridge: the caret tick leads the flash |
+| s9 to s10 (3.70) | flash-cut, x reverse | box on "state" | labels | 0 | whip, x | 3 | none | deliberate cut: the flash on the box |
+| s10 to s11 (3.95) | slice-shift, y | the 7 | fringe | 0.05 | none | 2 | none | shared axis: the slice carries the 7 |
+| s11 to s12 (4.25) | cut-on-motion, z | the hatch lines | ghost | 0 | push | 3 | none | position lock: the hatch lines hold their place |
+| s12 to s13 (4.55) | flap-resolve, y reverse | the label counters | boxes | 0.05 | none | 2 | none | object to object: the label counters flap |
+| s13 to s14 (4.85) | zoom-through, z (spectacle) | the c box grows into the full word | the halftone | 0.2 | push with depth-parallax | 4 | "computed" lands on EASE.pop; one in four boxes on nudge | camera through: the c box grows into the full word |
+| s14 to s15 (6.20) | cut-on-motion, x | the longest connector | nodes and connectors | 0.1 | drift into whip | 3 | none | graphic match: the longest connector |
+| s15 to s16 (6.50) | push-blur, y | the f box | green glow | 0.15 | slow push to the end | 3 | none | invisible cut: the push-blur to the end |
 
 ### Sound
 

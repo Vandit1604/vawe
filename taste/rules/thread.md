@@ -14,7 +14,7 @@ status: active
 scored: yes
 numbers: {}
 print-explore: pick one thread that carries through (an object, a type line, a colour or a rhythm), not separate reveals one after another
-digest: One thread carries through (object, type line, colour or rhythm), not separate reveals one after another.
+digest: One thread carries through (object, type line, colour or rhythm), not separate reveals; slideshow tells: taste/craft/transitions.md.
 craft: film-structure
 ---
 
