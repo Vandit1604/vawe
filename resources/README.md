@@ -47,3 +47,18 @@ Sites for the material a film is made of. Each line: name, link, what it has. Ch
 ## Animation
 
 - LottieFiles: https://lottiefiles.com : Lottie animations and icons
+
+## Code and palettes: what may ship
+
+Search before you build a gradient, easing, noise function, SVG filter or palette. "Verified" means the licence text was opened. Never compile code from a study-only source into a shipped film: read the technique and reimplement the idea.
+
+- Safe to ship (MIT, BSD or CC0; keep the copyright notice in a copied source file):
+  - Radiant (https://github.com/pbakaus/radiant): 106 GLSL shaders for light rays, caustics, bloom and auroras; single-pass demos that still need a port to a `(time, seed)` shape.
+  - glsl-noise (https://github.com/hughsk/glsl-noise) and FastNoiseLite (https://github.com/Auburn/FastNoiseLite): portable noise to import into a new shader.
+  - glsl-fast-gaussian-blur (https://github.com/Jam3/glsl-fast-gaussian-blur): a cheap separable blur for bloom.
+  - d3-ease (https://github.com/d3/d3-ease) and easing-js (https://github.com/danro/easing-js): the Penner easing canon, JS functions to check a curve against, not CSS curves.
+  - Radix Colors (https://github.com/radix-ui/colors), Open Color (https://github.com/yeun/open-color), the Tailwind default palette (https://github.com/tailwindlabs/tailwindcss), uiGradients (https://github.com/ghosh/uiGradients): colour scales and named gradients to check against.
+  - Poly Haven (https://polyhaven.com): CC0 HDRIs, textures and models.
+- Free with terms (check the licence page of the clip): Pexels and Pixabay (no resale of unaltered files), Mixkit (a Free and a Restricted tier per clip; no redistribution of the file), Coverr (attribution unless Coverr+; no AI training), NASA media (public domain, keep the insignia out).
+- Study only (non-commercial, unlicensed or unclear; read the technique, do not copy code): LYGIA (Prosperity licence, a 30-day commercial trial), Shadertoy (CC BY-NC-SA by default), glslsandbox (per-shader licences unstated), The Book of Shaders (all rights reserved), yoksel/svg-filters (no LICENSE file).
+- Rejected as sources: Adobe Color and single-purpose gradient pickers (tools with nothing to verify).

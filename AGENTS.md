@@ -89,7 +89,7 @@ do not count, and nor does one reason copied to 3 or more waivers. The draft lis
 ## Changing the engine, not a film  `[ref: engine-doctrine/CRAFT/ENGINE-CHANGES.md]`
 
 Every effect composes; none is a special case. Run `bin/vawe e2e` (about 4 s) before and after.
-Framework agents: `harness/dev/AGENT-TASK.md`. Comments hold only a fact the code cannot show.
+Framework agents: the template in `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Comments hold only a fact the code cannot show.
 
 Where to look: `engine-doctrine/CRAFT/ROUTING.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
 with clips; `prompts/moves/RECIPES.md` chains them), `core/motion/README.md` (springs, curves, noise),
