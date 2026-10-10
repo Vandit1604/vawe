@@ -34,4 +34,6 @@ percent on the button, and it lasts 230 ms on `EASE.landSoft`. The exit is `EASE
 of the entrance and accelerating, so the last frames are the cursor leaving. The accent is used
 once, on the pressed result.
 
+Timing for a scripted demo (Fitts: the move time grows with the log of distance over target size): a short hop 0.4 to 0.6 s, across the screen 0.7 to 1.0 s, in from off-screen about 1.0 s; ballistic, so a fast launch, a deceleration into the target and a slight arc. Dwell 200 to 400 ms on the target before the press, then 100 to 300 ms before the UI reacts (an instant reaction reads fake). After a major action hold 1.0 to 1.4 s so the change registers. Cutting these pauses is the most common demo mistake.
+
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

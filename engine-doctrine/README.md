@@ -7,7 +7,7 @@ group: reference
 # engine-doctrine/
 
 - `CRAFT/`: engine and process guides. Start at `CRAFT/README.md` and `CRAFT/ROUTING.md`.
-- Taste and motion rules moved to `taste/` at the repo root: start at `taste/README.md`. `DESIGN-DATABASE.md` here holds motion and style numbers.
+- Taste and motion rules moved to `taste/` at the repo root: start at `taste/README.md`.
 - `JUDGE.md`: how `bin/vawe judge` scores a film.
 - `RESEARCH/`: outside sources for timing numbers and open-source assets.
 

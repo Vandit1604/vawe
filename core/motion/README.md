@@ -123,6 +123,13 @@ versions of the same call: they return `{ keyframes, timing }` and touch no elem
 | `keys` / `keysSpec` | `[[t, value, handle?], ...]`, at least two keys, times rising; no handle is linear |
 | `EASE`, `EASE_HANDLES`, `easeFn(name)` | land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; `easeFn` is the same curve as a function of u in 0..1 |
 
+### Microinteraction numbers (product demos)
+
+Trigger, rules, feedback, loops: you animate the feedback, 100 to 300 ms and never over 400 ms, ease-out for anything triggered.
+Button press 100 ms down and 180 ms up, scale 1 to 0.96. Hover lift 150 to 200 ms, `translateY` -2 to -4 px. Toggle 200 to 250 ms on a low-bounce spring.
+Checkmark draw 300 to 400 ms (`stroke-dashoffset`). Ripple 300 to 600 ms, alpha 0.3 to 0. Number tick 400 to 800 ms. Success pulse once, 300 to 600 ms, scale 1 to 1.05 to 1.
+Error shake 300 to 400 ms, `translateX` 6 to 10 px decaying. Skeleton shimmer about 1200 ms a loop. Cursor and zoom timing: `prompts/moves/cursor-click.md`, `prompts/moves/ui-focus-zoom.md`.
+
 ## After Effects handles
 
 A segment is shaped by two handles, one per key. `influence` is how far along the segment the handle
