@@ -3,7 +3,7 @@
 import { spawnSync } from 'node:child_process';
 import { readFeatures, summarize, probeSize } from './scene-stats.mjs';
 import { blankRuns, isFlat, problemsOf } from '../lib/ship-status.mjs';
-import { sampleTimes, settledSamples, DECORATIVE, CHROME } from '../lib/draft-check.mjs';
+import { sampleTimes, settledSamples, DECORATIVE, CHROME, TEXTURE } from '../lib/draft-check.mjs';
 import { draftLowContrast, shownAndHidden } from '../lib/text-contrast.mjs';
 import { sheetFps, tileProblems, TILE_W } from '../lib/sheet-tiles.mjs';
 import { specTimes, wordTimes, objectChecks } from '../lib/spec-conformance.mjs';
@@ -45,9 +45,29 @@ export function sheetTileDiffs(mp4) {
 // Runs inside the page. { lines, blocks }: lines is one { text, fontPx, family, weight, box, rects?, world?, color, opacity, block, chrome? } per visible text
 // node (fontPx includes ancestor transform scale; rects is the box of each wrapped line when the text wraps; world is its data-world;
 // block is the document-order index of its nearest block-level ancestor, the element a reader sees as one line, the same at every sample); blocks is the joined visible text of each element that holds
-// two or more such nodes, so a word split into per-letter spans reads as one text. Text inside `decorative` is left out.
-export function visibleLines(decorative, chrome, lineage = false) {
+// two or more such nodes, so a word split into per-letter spans reads as one text. Text inside `decorative` is left out, and text inside `chrome` is
+// flagged, only when it is texture by measure (`texture`: a cap height under capFrac, the same words repeatsMin times on the page, or a data-texture
+// attribute of reasonMin characters); any other marked text is read as copy. `hidden` counts the marked nodes: { total, marked, reads, sample }.
+export function visibleLines(decorative, chrome, lineage = false, texture = { capFrac: 0, repeatsMin: Infinity, reasonMin: Infinity }) {
   const out = [];
+  const norm = (s) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+  const textNodes = [];
+  const repeats = new Map();
+  const pre = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let node = pre.nextNode(); node; node = pre.nextNode()) {
+    const el = node.parentElement;
+    if (!norm(node.nodeValue) || !el || /^(SCRIPT|STYLE|NOSCRIPT|TITLE)$/.test(el.tagName)) continue;
+    textNodes.push(node);
+    repeats.set(norm(node.nodeValue), (repeats.get(norm(node.nodeValue)) || 0) + 1);
+  }
+  const isTexture = (node) => {
+    const el = node.parentElement;
+    const reason = (el.closest('[data-texture]')?.getAttribute('data-texture') || '').trim();
+    return reason.length >= texture.reasonMin || repeats.get(norm(node.nodeValue)) >= texture.repeatsMin || (0.7 * parseFloat(getComputedStyle(el).fontSize)) / innerHeight < texture.capFrac;
+  };
+  const marked = (node) => Boolean(node.parentElement.closest(decorative) || node.parentElement.closest(chrome));
+  const reading = textNodes.filter((n) => marked(n) && !isTexture(n));
+  const hidden = { total: textNodes.length, marked: textNodes.filter(marked).length, reads: reading.length, sample: [...new Set(reading.map((n) => n.nodeValue.replace(/\s+/g, ' ').trim()))].slice(0, 3) };
   const owners = new Map();
   const docOrder = new Map([...document.getElementsByTagName('*')].map((e, i) => [e, i]));
   const blockOf = (el) => {
@@ -65,7 +85,7 @@ export function visibleLines(decorative, chrome, lineage = false) {
   for (let node = walker.nextNode(); node; node = walker.nextNode()) {
     const text = node.nodeValue.replace(/\s+/g, ' ').trim();
     const el = node.parentElement;
-    if (!text || !el || /^(SCRIPT|STYLE|NOSCRIPT|TITLE)$/.test(el.tagName) || el.closest(decorative)) continue;
+    if (!text || !el || /^(SCRIPT|STYLE|NOSCRIPT|TITLE)$/.test(el.tagName) || (el.closest(decorative) && isTexture(node))) continue;
     const cs = getComputedStyle(el);
     const clipped = cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text';
     if (cs.visibility === 'hidden' || (/^rgba\(.*, 0\)$/.test(cs.color) && !clipped)) continue;
@@ -90,7 +110,7 @@ export function visibleLines(decorative, chrome, lineage = false) {
     const world = el.closest('[data-world]')?.dataset.world;
     const source = lineage ? sourceOf(el) : null;
     out.push({ text, fontPx, family: cs.fontFamily, weight: cs.fontWeight, box: [r.x, r.y, r.width, r.height], color: cs.color, opacity, block: blockOf(el),
-      ...(rects.length > 1 ? { rects } : {}), ...(world ? { world } : {}), ...(el.closest(chrome) ? { chrome: true } : {}),
+      ...(rects.length > 1 ? { rects } : {}), ...(world ? { world } : {}), ...(el.closest(chrome) && isTexture(node) ? { chrome: true } : {}),
       ...(lineage ? { own: docOrder.get(el), up: ancestorsOf(el), ...(source ? { source } : {}) } : {}) });
     for (let a = el; a && a !== document.documentElement; a = a.parentElement) {
       const o = owners.get(a) || { raw: '', n: 0, fontPx, x0: r.left, y0: r.top, x1: r.right, y1: r.bottom };
@@ -102,7 +122,7 @@ export function visibleLines(decorative, chrome, lineage = false) {
   }
   const blocks = [...owners.values()].filter((o) => o.n > 1)
     .map((o) => ({ text: o.raw.replace(/\s+/g, ' ').trim(), fontPx: o.fontPx, box: [o.x0, o.y0, o.x1 - o.x0, o.y1 - o.y0] }));
-  return { lines: out, blocks };
+  return { lines: out, blocks, hidden };
 }
 
 // The layout reader runs inside the page: layoutColours, layoutFrame, layoutTexts, layoutBoxes and layoutSample are bundled as source
@@ -283,12 +303,15 @@ export async function sampleLayout(page, times, seek) {
 export async function sampleText(page, dur, seek, from = 0) {
   const { step, times } = sampleTimes(dur);
   const samples = [];
+  let hidden = null;
   for (const rel of times) {
     const t = +(from + rel).toFixed(3);
     await seek(t * 1000);
-    samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME)).lines });
+    const read = await page.evaluate(visibleLines, DECORATIVE, CHROME, false, TEXTURE);
+    samples.push({ t, lines: read.lines });
+    hidden = read.hidden;
   }
-  return { samples, step, frameH: await page.evaluate(() => innerHeight) };
+  return { samples, step, frameH: await page.evaluate(() => innerHeight), hidden };
 }
 
 const MOTION_TEXT_HZ = 30;
@@ -302,7 +325,7 @@ export async function sampleTextMotion(page, dur, seek, from = 0) {
   for (let i = 0; i <= n; i++) {
     const t = +(from + i * step).toFixed(4);
     await seek(t * 1000);
-    samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME, true)).lines });
+    samples.push({ t, lines: (await page.evaluate(visibleLines, DECORATIVE, CHROME, true, TEXTURE)).lines });
   }
   return { samples, step };
 }
@@ -326,7 +349,7 @@ export async function sampleSpec(page, tables, seek, dur, { objects = true } = {
   if (!tables.words.length && !tables.objects.length) return null;
   const [frameW, frameH] = await page.evaluate(() => [innerWidth, innerHeight]);
   const frame = { frameW, frameH };
-  const linesAt = async (t) => { await seek(t * 1000); return page.evaluate(visibleLines, DECORATIVE, CHROME); };
+  const linesAt = async (t) => { await seek(t * 1000); return page.evaluate(visibleLines, DECORATIVE, CHROME, false, TEXTURE); };
   const times = specTimes(tables, dur);
   const samples = [];
   for (const t of times.text) samples.push({ t, ...(await linesAt(t)) });

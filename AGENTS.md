@@ -25,7 +25,7 @@ your own direction.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
 - Each beat is one element with `data-world="<id>"` (lowercase, the brief's Shots ids); the checks and the judge read the worlds from it.
-- Text checks skip text inside `aria-hidden="true"` (texture); product UI labels shown as texture take `data-chrome` (cap floor 2.5%, no read hold).
+- Text checks skip `aria-hidden="true"` and `data-chrome` text only when it is texture by measure: cap height under 2% of the frame, the same words 3 or more times, or `data-texture="why"` (12 characters or more). Any other hidden text is checked as copy. A `data-chrome` texture keeps the 2.5% cap floor and no read hold.
 - `<meta name="message">`: the one thing to remember. `<meta name="spectacle">`: the second of the
   one big moment; put quiet before it.
 

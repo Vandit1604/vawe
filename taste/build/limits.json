@@ -90,7 +90,11 @@
  "readable-text-size": {
   "cap_height_pct": 6,
   "chrome_cap_height_pct": 2.5,
-  "held_min_s": 0.5
+  "held_min_s": 0.5,
+  "texture_cap_pct_max": 2,
+  "texture_repeats_min": 3,
+  "texture_reason_min_chars": 12,
+  "texture_share_max_pct": 50
  },
  "safe-margin": {
   "safe_pct": 90,
