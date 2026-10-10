@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rgbToLab, measureColour, mergeClusters } from '../../harness/lib/ref-measure/colour.mjs';
+import { rgbToLab, labOf, labToHex, measureColour, mergeClusters } from '../../harness/lib/ref-measure/colour.mjs';
 import { worldTurns } from '../../harness/lib/ref-measure/world-turns.mjs';
 import { measureMotionRegions, countRegions } from '../../harness/lib/ref-measure/motion-regions.mjs';
 
@@ -95,4 +95,26 @@ test('a transition is left out of the differences', () => {
   const cut = grayFilm(6, (g, f) => g.fill(f < 3 ? 20 : 220));
   assert.equal(measureMotionRegions(cut, [{ startFrame: 3, endFrame: 3 }], 10).p90, 0);
   assert.equal(countRegions(new Float32Array(80 * 45).fill(20), new Float32Array(80 * 45).fill(220), 80, 45), 1);
+});
+
+test('labOf gives the table result for whole numbers and takes fractions', () => {
+  const lab = new Float32Array(3);
+  rgbToLab(220, 30, 30, lab);
+  const viaLabOf = labOf([220, 30, 30]);
+  for (let i = 0; i < 3; i++) assert.ok(Math.abs(lab[i] - viaLabOf[i]) < 1e-3);
+  assert.ok(Number.isFinite(labOf([220.5, 30.2, 29.9])[0]));
+});
+
+test('labToHex undoes labOf', () => {
+  for (const rgb of [[220, 30, 30], [10, 120, 200], [255, 255, 255], [0, 0, 0]]) {
+    assert.equal(labToHex(labOf(rgb)), `#${rgb.map((c) => c.toString(16).padStart(2, '0')).join('')}`);
+  }
+});
+
+test('the tile and hex distances are the one Lab distance', async () => {
+  const { labDeltaE } = await import('../../harness/lib/tile.mjs');
+  const { deltaE: hexDeltaE } = await import('../../harness/lib/color-delta.mjs');
+  assert.ok(Math.abs(labDeltaE([0, 0, 0], [255, 255, 255]) - 100) < 0.1);
+  assert.ok(Math.abs(hexDeltaE('#000000', '#ffffff') - labDeltaE([0, 0, 0], [255, 255, 255])) < 1e-9);
+  assert.equal(labDeltaE(null, [1, 2, 3]), null);
 });
