@@ -22,7 +22,7 @@
 //
 // A render first takes one of the machine-wide render slots (harness/lib/render-slots.mjs) and waits for one.
 // Capture is split into fixed 60-frame slices, `--workers` of them at once (default VAWE_WORKERS, else 2 while
-// another render holds a slot, else min(4, cpus-1)), each on
+// another render holds a slot, else the lane budget of harness/lib/lane-budget.mjs), each on
 // its own page of the shared browser (harness/media/preview-server.mjs); the speed pass below runs the same
 // way. Slice boundaries do not depend on the worker count, so the pixels never do either. When
 // blur > 1, a per-frame speed pass decides how many subframes that frame actually needs: a still frame
@@ -42,7 +42,6 @@
 // exit code and prints its stderr on failure, and only renames the encode into place once ffmpeg
 // succeeds (`writeJsonAtomic`'s same write-then-rename discipline, harness/media/see.mjs).
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -89,14 +88,14 @@ import { peakLine } from '../lib/peak-limit.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
 import { noteVerb } from '../lib/verb-log.mjs';
+import { machineLanes } from '../lib/lane-budget.mjs';
 
 // A laptop running two renders at 4 workers each overheats and throttles; the second render starts cool.
 const COOL_WORKERS = 2;
 
-export function defaultWorkers(env = process.env, busy = () => slotsInUse().length > 1) {
+export function defaultWorkers(env = process.env, busy = () => slotsInUse().length > 1, lanes = machineLanes) {
   if (Number(env.VAWE_WORKERS) > 0) return Number(env.VAWE_WORKERS);
-  if (busy()) return COOL_WORKERS;
-  return Math.max(1, Math.min(4, os.cpus().length - 1));
+  return busy() ? Math.min(COOL_WORKERS, lanes()) : lanes();
 }
 
 // A page with several WebGL canvases slows down over a long run until one CDP call times out; a fresh
