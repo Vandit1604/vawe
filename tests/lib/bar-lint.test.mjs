@@ -266,7 +266,19 @@ test('anticipation: the spectacle move needs a counter-move or a dip; a straight
   assert.deepEqual(anticipation(light.runs, 0.1, light.span), [], 'a light that covers over 40 percent of the frame carries no weight');
   assert.deepEqual(anticipation(straight.runs, 9, straight.span), [], 'a spectacle outside the sampled seconds is not measured');
   assert.deepEqual(anticipation(straight.runs, null, straight.span), []);
-  assert.deepEqual(anticipation(straight.runs, 5, [0, 10]), [], 'no move near the spectacle second');
+  assert.match(anticipation(straight.runs, 5, [0, 10])[0].what, /no element moves within 0\.75 s of the spectacle second 5 s/, 'a spectacle second with no move is named, not passed');
+});
+
+test('anticipation: a dip that every mover shares winds up nothing; the hero alone dipping passes', () => {
+  const grow = (sizes, y) => sizes.map((w, k) => [100 + k * 20, y, w, w, 1, 1]);
+  const dip = [100, 97, 96, 100, 110, 125, 140, 150, 150, 150, 150];
+  const hero = [100, 97, 96, 100, 120, 150, 190, 230, 250, 250, 250];
+  const alone = boxMotion(frame([grow(hero, 100), at([300, 305, 310, 315, 320, 325, 325, 325, 325, 325, 325], { y: 500 })]));
+  assert.deepEqual(anticipation(alone.runs, 0.1, alone.span), []);
+  const everyone = boxMotion(frame([grow(hero, 100), grow(dip, 300), grow(dip, 500), grow(dip, 700)]));
+  const [f] = anticipation(everyone.runs, 0.1, everyone.span);
+  assert.match(f.what, /starts with no wind-up/);
+  assert.match(f.fix, /other movers dip at the same time/);
 });
 
 test('spectacleWeak: the exaggeration floor wants the spectacle at 1.3 times the median mover', () => {

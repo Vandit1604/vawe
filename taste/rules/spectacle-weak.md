@@ -5,13 +5,13 @@ principle: The spectacle second carries the strongest move of the film. No other
 limit: no element peak elsewhere is more than 1.25 times the fastest peak within 0.75 s of the spectacle second, and that peak is at least 1.3 times the median mover
 range: the spectacle second is the one big moment (recipe 15); quiet comes before it, so its move is the film's fastest or longest
 break-when: the spectacle is a held reveal, a sound or a colour change that needs no travel; say so in the brief and waive with the reason
-instead: give the spectacle the fastest or longest move of the film, or move the spectacle meta to the moment that already is strongest and put quiet before it.
+instead: give the second the Board names the fastest or longest move of the film, with quiet before it. The checks read the Board's Spectacle second, so moving the meta changes nothing.
 check: spectacle-weak
 judge: Does the eye go to the spectacle second as the biggest moment of the film?
 prevents: films/tidepool: the hero chip at the spectacle second moved 0.29 frame heights per second while a strip at 4.8 s peaked at 5.0, so the big moment was one of the quietest.
 status: active
 scored: no
-numbers: {"stronger_margin":1.25,"window_s":0.75,"exaggeration_min":1.3}
+numbers: {"stronger_margin":1.25,"window_s":0.75,"exaggeration_min":1.3,"shared_dip_min":2}
 craft: motion-craft
 ---
 
