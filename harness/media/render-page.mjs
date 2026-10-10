@@ -582,6 +582,8 @@ export function costLines({ kArr, reused, fps, from, prepassMs, captureMs, encod
 // Render invariants. Each check returns one line per problem; renderPage throws them together as an
 // InvariantError and the CLI prints `error: <line>` for each and exits 2. An intended exception is declared
 // on the page: <meta name="blank" content="0-0.4, 4.8-5"> (or data-blank on <html>) for empty frames.
+export class RenderError extends Error {}
+
 export class InvariantError extends Error {
   constructor(problems) { super(problems.join('\n')); this.problems = problems; }
 }
@@ -692,7 +694,7 @@ export function briefProblems(pagePath) {
 // Returns { aspect, width, height, scale }; the output is width x height times scale.
 export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
   const name = aspect || readPageMeta(pagePath, 'aspect') || '16:9';
-  if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) die(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
+  if (!ASPECTS[name] && !/^\d+:\d+$/.test(name)) throw new RenderError(`${pagePath}: unknown aspect "${name}" (use ${Object.keys(ASPECTS).join(' ')} or a W:H ratio)`);
   const [fw, fh] = aspectDims(name);
   const scale = w ? w / fw : h ? h / fh : final ? 1 : 0.5;
   const outW = w || Math.round(fw * scale), outH = h || Math.round(fh * scale);
@@ -703,12 +705,12 @@ export function resolveFrame(pagePath, { aspect, w, h, final = false } = {}) {
 // (harness/media/page-audio.mjs). Returns false when the page has no <audio> and none was demanded.
 async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fault }) {
   if (!read) {
-    if (explicit) die(`${pagePath}: --audio given but the page has no <audio> element`);
+    if (explicit) throw new RenderError(`${pagePath}: --audio given but the page has no <audio> element`);
     return false;
   }
   let audio;
   try { audio = await import('./page-audio.mjs'); } catch (e) {
-    if (e.code === 'ERR_MODULE_NOT_FOUND') die(`${pagePath} has <audio> elements but harness/media/page-audio.mjs is missing: ${e.message}`);
+    if (e.code === 'ERR_MODULE_NOT_FOUND') throw new RenderError(`${pagePath} has <audio> elements but harness/media/page-audio.mjs is missing: ${e.message}`);
     throw e;
   }
   if (fault) fault();
@@ -729,10 +731,10 @@ async function muxPageAudio(read, pagePath, { video, out, duration, explicit, fa
  */
 export async function renderPage(pagePath, outPath, opts = {}) {
   const { fps = 30, blur = 1, durArg = null, from = 0, progress = false, final = false } = opts;
-  if (!fs.existsSync(pagePath)) die(`no such file: ${pagePath}`);
+  if (!fs.existsSync(pagePath)) throw new RenderError(`no such file: ${pagePath}`);
   const frame = resolveFrame(pagePath, opts);
   const wantAudio = opts.audio ?? (final && from === 0 && durArg == null);
-  if (opts.audio && from > 0) die('--audio needs a render from 0: the mix has no offset');
+  if (opts.audio && from > 0) throw new RenderError('--audio needs a render from 0: the mix has no offset');
   const slotAskedAt = Date.now();
   const slot = await takeRenderSlot({ kind: process.env.VAWE_RENDER_KIND || (final ? 'final' : 'draft'), who: filmKeyOf(pagePath) });
   noteVerb({ slotWaitS: (Date.now() - slotAskedAt) / 1000 });
@@ -756,11 +758,11 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       return Math.max(0, ...document.getAnimations().map((a) => (a.effect.getComputedTiming().endTime || 0) / 1000));
     });
     const dur = durArg != null ? durArg : Math.max(0, totalDur - from);
-    if (!(dur > 0)) die(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
+    if (!(dur > 0)) throw new RenderError(`${pagePath}: no duration (add <meta name="duration" content="<seconds>"> or pass --dur/--to)`);
 
     const { motion = null, probe = null } = opts.checks ? await probePage(page, dur, pagePath, { checks: opts.checks, from, whole: from === 0 && durArg == null }) : {};
     const frames = Math.round(dur * fps);
-    if (!(frames > 0)) die(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
+    if (!(frames > 0)) throw new RenderError(`${pagePath}: ${dur}s at ${fps}fps rounds to 0 frames`);
 
     const workers = opts.workers || defaultWorkers(process.env, () => slot.others > 0);
     const tPre = Date.now();
@@ -802,11 +804,11 @@ export async function renderPage(pagePath, outPath, opts = {}) {
     const encodeMs = Date.now() - t1;
     if (res.status !== 0 || res.error) {
       fs.rmSync(tmpOut, { force: true });
-      die(`ffmpeg encode failed (${res.error ? res.error.message : `exit ${res.status}`}):\n`
+      throw new RenderError(`ffmpeg encode failed (${res.error ? res.error.message : `exit ${res.status}`}):\n`
         + `${(res.stderr || '').trim().split('\n').slice(-15).join('\n')}`);
     }
     if (!fs.existsSync(tmpOut) || fs.statSync(tmpOut).size === 0) {
-      die(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
+      throw new RenderError(`ffmpeg reported success but wrote no bytes to ${tmpOut}; stderr:\n${(res.stderr || '').trim()}`);
     }
     const late = frameProblems(probeFrames(tmpOut), { frames, fps, from, declared: parseBlankRanges(fs.readFileSync(pagePath, 'utf8')) });
     // A missing frame is a broken encode; a flat frame may be a colour block or a flash, so it only advises.
@@ -830,7 +832,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
       const webRes = ffmpegWebEncode(tmpDir, fps, kArr, subframeStart, tmpWeb);
       if (webRes.status !== 0 || webRes.error) {
         fs.rmSync(tmpWeb, { force: true });
-        die(`ffmpeg web copy failed, the master ${outPath} is complete (${webRes.error ? webRes.error.message : `exit ${webRes.status}`}):\n`
+        throw new RenderError(`ffmpeg web copy failed, the master ${outPath} is complete (${webRes.error ? webRes.error.message : `exit ${webRes.status}`}):\n`
           + `${(webRes.stderr || '').trim().split('\n').slice(-15).join('\n')}`);
       }
       await place(tmpWeb, webPath);
@@ -875,7 +877,7 @@ export function assertFinalReady(pagePath) {
   if (motionStampFresh(pagePath)) return;
   const code = 'unverified-final';
   if (isWaived(pageAuthoring(pagePath), code)) return;
-  die(`${pagePath}: FINAL render refused, no passing required-motion-match for this page's current `
+  throw new RenderError(`${pagePath}: FINAL render refused, no passing required-motion-match for this page's current `
     + `content. Run: vawe critique ${pagePath} --ref ${ref}\n`
     + `Waivable only in the page: ${waiverHint(code)}`);
 }
@@ -1112,6 +1114,10 @@ async function main() {
     if (final) opts.onMaster = (r) => console.log(masterLine(r));
     const r = await renderPage(pagePath, outPath, opts).catch((e) => {
       if (!final) logDevFailure(String((e.problems || [e.message])[0]).split('\n')[0]);
+      if (e instanceof RenderError) {
+        if (final) reportFailedFinal(pagePath, e, argv.includes('--job'));
+        die(e.message);
+      }
       if (!(e instanceof InvariantError) && !final) throw e;
       for (const p of e.problems || [e.stack || String(e)]) console.error(errorLine(p));
       if (final) reportFailedFinal(pagePath, e, argv.includes('--job'));
@@ -1128,4 +1134,4 @@ async function main() {
   }
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => die(e.stack || String(e)));
+if (import.meta.url === `file://${process.argv[1]}`) main().catch((e) => die(e instanceof RenderError ? e.message : e.stack || String(e)));

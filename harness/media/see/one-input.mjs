@@ -4,8 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { refsDir } from '../../lib/refs.mjs';
-import { die, probeVideo, ROOT } from './core.mjs';
+import { probeVideo, ROOT } from './core.mjs';
 import { resolveInput } from './strip.mjs';
+
+export class SourceError extends Error {}
 
 /** The sha1 of a file's bytes. */
 export const fileHash = (file) => crypto.createHash('sha1').update(fs.readFileSync(file)).digest('hex');
@@ -13,7 +15,7 @@ export const fileHash = (file) => crypto.createHash('sha1').update(fs.readFileSy
 function renderDraft(page, log) {
   log(`rendering a draft of ${page} (harness/media/render-page.mjs)`);
   const res = spawnSync('node', [path.join(ROOT, 'harness/media/render-page.mjs'), page], { cwd: process.cwd(), encoding: 'utf8', maxBuffer: 1 << 26 });
-  if (res.status !== 0) die(`the draft render of ${page} failed:\n${String(res.stderr || res.stdout).split('\n').slice(-8).join('\n')}`);
+  if (res.status !== 0) throw new SourceError(`the draft render of ${page} failed:\n${String(res.stderr || res.stdout).split('\n').slice(-8).join('\n')}`);
 }
 
 /**
@@ -25,12 +27,12 @@ export async function resolveSource(input, { draft, log = () => {} } = {}) {
   const page = input.endsWith('.html') ? input : null;
   let video = found.video;
   if (page && draft) {
-    if (!fs.existsSync(draft)) die(`no such --draft file: ${draft}`);
+    if (!fs.existsSync(draft)) throw new SourceError(`no such --draft file: ${draft}`);
     video = draft;
   } else if (page && (found.draftMissing || found.draftOld)) {
     renderDraft(page, log);
   }
-  if (!fs.existsSync(video)) die(`no film to read at ${video}`);
+  if (!fs.existsSync(video)) throw new SourceError(`no film to read at ${video}`);
   const isRef = !page && path.resolve(video).startsWith(path.resolve(refsDir()));
   const kind = page ? 'page' : isRef ? 'ref' : 'mp4';
   const probe = probeVideo(video);

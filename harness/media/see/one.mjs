@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { die, ROOT } from './core.mjs';
 import { measureSide } from './one-measure.mjs';
 import { makeImages, momentImages } from './one-images.mjs';
-import { resolveSource } from './one-input.mjs';
+import { resolveSource, SourceError } from './one-input.mjs';
 import { momentLines, seeReport, seeSummary } from './one-report.mjs';
 import { pairImages } from './one-pairs.mjs';
 import { compareSides, vsLines } from './one-vs.mjs';
@@ -104,4 +104,4 @@ async function main(argv) {
   console.log(`data:   ${r.json}`);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main(process.argv.slice(2)).catch((e) => die(e.stack || String(e)));
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main(process.argv.slice(2)).catch((e) => die(e instanceof SourceError ? e.message : e.stack || String(e)));

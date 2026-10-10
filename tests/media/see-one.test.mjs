@@ -191,3 +191,8 @@ test('arcOf: the bow of a path off its chord as a share of the chord; a straight
   assert.equal(arcOf(rows([[0, 0], [30, 5], [60, 0]])), null);
   assert.equal(arcOf(rows([[0, 0], [300, 0]])), null);
 });
+
+test('resolveSource throws a SourceError for a draft that is not there', async () => {
+  const { resolveSource, SourceError } = await import('../../harness/media/see/one-input.mjs');
+  await assert.rejects(resolveSource('films/examples/colour-sting/page.html', { draft: '/no/such/draft.mp4' }), (e) => e instanceof SourceError && /no such --draft file/.test(e.message));
+});
