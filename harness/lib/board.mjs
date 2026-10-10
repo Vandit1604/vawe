@@ -32,13 +32,15 @@ function rowsOf(section, head) {
 
 const NUMBERS = /\d+(?:\.\d+)?/g;
 
-/** The cut rows of the Board's move table as { label, at, end, move, camera, overshoots }: `at` is the first second in the cut cell ("warm to hot, 1.00 to 2.00" gives 1 and 2), null for none. */
+/** The cut rows of the Board's move table as { label, at, end, move, camera, overshoots, handoff (the "handoff (family: object)" cell, null when the table has no such column) }: `at` is the first second in the cut cell ("warm to hot, 1.00 to 2.00" gives 1 and 2), null for none. */
 export function moveRows(brief) {
   const section = brief ? sectionOf(brief, 'Board') : undefined;
   if (section === undefined) return [];
+  const header = section.split('\n').find((l) => l.startsWith('|') && cellsOf(l)[0] === 'cut');
+  const handoffAt = header ? cellsOf(header).findIndex((h) => h.startsWith('handoff')) : -1;
   return rowsOf(section, 'cut').map((c) => {
     const nums = ((c[0] ?? '').split(',').slice(1).join(',').match(NUMBERS) ?? []).map(Number);
-    return { label: c[0] ?? '', at: nums[0] ?? null, end: nums[1] ?? null, move: c[1] ?? '', camera: c[5] ?? '', overshoots: c[7] ?? '' };
+    return { label: c[0] ?? '', at: nums[0] ?? null, end: nums[1] ?? null, move: c[1] ?? '', camera: c[5] ?? '', overshoots: c[7] ?? '', handoff: handoffAt < 0 ? null : (c[handoffAt] ?? '') };
   });
 }
 

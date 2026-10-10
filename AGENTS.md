@@ -38,7 +38,7 @@ next command for the film you edited last.
 | 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives. Then how they MOVE: `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves (ref id, cut second) |
 | 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, one line per rung of the skill ladder: builder, type, colour, depth, frame) and `films/<name>/kit/` (ground layers; each moving part its own element); format and example in `vawe-page`; the builder rung builds product UI as a real interface; the frame rung rejects web-page patterns; a `Skipped <rung>` line cites a reference frame path or a SPEC.md line |
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
-| 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows (effects on actions, no bed); with a music file the user gave: `vawe sound <file> --cuts <page>` gives the beat grid, the hits and each cut's frame offset |
+| 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), a handoff per cut (`vawe-transitions`), sound rows (effects on actions, no bed); with a music file the user gave: `vawe sound <file> --cuts <page>` gives the beat grid, the hits and each cut's frame offset |
 | 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, constant-camera, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut and check it against `taste/craft/motion-craft.md` and the principles in `core/motion/README.md` (anticipation on the hero, follow-through and overlap, eased spacing, arcs, secondary action, exits faster than entrances, holds alive through element motion, camera still unless the spectacle); for the spectacle also `vawe onion`, `vawe velocity`; one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
@@ -73,7 +73,7 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 
 Over 60 seconds or more than one session: one chapter file per agent
 (`prompts/directors-brief-long-form.md`). Skills: `vawe-brief` (no `brief.md` yet), `vawe-page` (write),
-`vawe-critique` (look), `vawe-reference` (match). A PASS is never self-recorded: score with `bin/vawe judge` in a fresh session.
+`vawe-critique` (look), `vawe-transitions` (the cuts), `vawe-reference` (match). A PASS is never self-recorded: score with `bin/vawe judge` in a fresh session.
 
 ## Waivers  `[live: harness/media/render-page.mjs]`
 
