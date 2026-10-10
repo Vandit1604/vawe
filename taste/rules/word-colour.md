@@ -12,6 +12,7 @@ prevents: ref: "design", "Simple.", "expensive" coloured, the rest white. feedba
 status: active
 scored: yes
 numbers: {"coloured_words_max":2,"colour_diff_min":40}
+print-frames: colour one or two words per line, each the word the beat is about, not every word
 craft: direction
 ---
 

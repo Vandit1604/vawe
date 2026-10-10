@@ -13,6 +13,7 @@ dial: palette
 status: active
 scored: yes
 numbers: {"ground_area_pct_min":80}
+print-frames: read the brand CSS tokens and tint the neutrals, not pure #000, #fff or a guessed palette
 craft: color
 ---
 

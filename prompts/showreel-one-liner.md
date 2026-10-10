@@ -62,6 +62,7 @@ The plain line needs none. Ask these only to choose the second run; a skipped qu
 
 ## Gotchas
 
+- Pick the register before the restraint: kinetic and hype films keep sustained motion and a still beat is the cost (`taste/craft/motion-craft.md`, Registers).
 - Read the first frame before anything else. The validator rejects an em dash on screen and a hook
   over 12 words.
 - A 15 second reel with no quiet beat is a wall of motion. Put quiet before the one big moment, or

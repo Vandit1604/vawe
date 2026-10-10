@@ -92,6 +92,7 @@ If real clips exist: the files and their licence go in the rights table.
 
 ## Gotchas
 
+- Pick the register before the restraint: kinetic and hype films keep sustained motion and a still beat is the cost (`taste/craft/motion-craft.md`, Registers).
 - A tempo tag is not a beat grid. Measure.
 - The kick and the visual hit must land within 20 ms. Check three hits on the strip.
 - The one spectacle is one. A film with three drops has none.

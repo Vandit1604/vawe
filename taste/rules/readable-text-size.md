@@ -5,7 +5,7 @@ principle: A line the viewer must read has a cap height of at least 6 percent of
 limit: cap height at least 6 percent of frame height; product UI labels shown as texture (data-chrome) at least 2.5 percent
 range: none
 break-when: text is texture: aria-hidden or data-chrome text that is also texture by measure (cap height under 2 percent of the frame, the same words 3 or more times on the page, or a data-texture="reason" of 12 characters or more)
-instead: raise the font size until the cap height passes; do not shrink the line to fit more words, and do not hide a line from the check with aria-hidden or data-chrome: a hidden text that reads as copy is checked as copy.
+instead: raise the font until the cap height is 6 percent of the frame (about 93 px at 1080p), never shrink the line (taste/craft/typography.md).
 check: text-cap-height
 judge: Measure the cap-height band in one full frame: is it at least 6 percent?
 prevents: judge1: 50 px tagline, fix 64 to 72 px. judge2: "about 4% of frame height".

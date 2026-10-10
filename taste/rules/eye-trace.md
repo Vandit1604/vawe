@@ -12,6 +12,7 @@ prevents: owner rule 2026-09-11: every device directs the eye; two devices pulli
 status: active
 scored: yes
 numbers: {"jump_far_diagonal":0.3}
+print-storyboard: land the next subject where the eye was (within 0.3 of the frame diagonal), not across the frame
 craft: transitions
 ---
 

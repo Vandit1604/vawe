@@ -8,8 +8,8 @@
   "makefileTargets": 30
  },
  "render": {
-  "msMedian": 9077,
-  "msPerFrame": 39.81140350877193,
-  "frames": 228
+  "msMedian": 1881,
+  "msPerFrame": 125.4,
+  "frames": 15
  }
 }

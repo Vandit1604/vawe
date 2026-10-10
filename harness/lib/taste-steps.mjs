@@ -54,7 +54,8 @@ export const ROW_RULES = {
   peak: 'sound-level',
 };
 const LINE_MAX = 110;
-const clip = (text) => (text.length > LINE_MAX ? `${text.slice(0, LINE_MAX - 3)}...` : text);
+const INSTEAD_MAX = 170;
+const clip = (text, max = LINE_MAX) => (text.length > max ? `${text.slice(0, max - 3)}...` : text);
 
 /**
  * The rules a draft broke, one per rule id at its first second: [{ id, value, t }] in time order. `findings` are the motion
@@ -80,7 +81,7 @@ export function firedRules(findings, problems, rows = []) {
 export function firedLines(fired, max = 3, rules = RULES) {
   return fired.slice(0, max).map(({ id, value, t }) => {
     const rule = rules[id];
-    const instead = rule?.instead ? `; instead: ${clip(rule.instead.split(/(?<=\.) /)[0])}` : '';
+    const instead = rule?.instead ? `; instead: ${clip(rule.instead.split(/(?<=\.) /)[0], INSTEAD_MAX)}` : '';
     return `  ${t == null ? '' : `@${t.toFixed(1)}s `}${clip(value)} (rule ${id}, ${rule?.file ?? `taste/rules/${id}.md`})${instead}`;
   });
 }

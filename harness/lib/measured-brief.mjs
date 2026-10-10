@@ -21,7 +21,7 @@ export const DETAILS = [
     example: 'message: find the bug in seconds; big moment: the one red line in 10 million logs lights up',
     seen: /\b(message|tagline|big moment|spectacle|hook)\b|"[^"]{6,}"/ },
   { key: 'show', header: 'Show', required: true, question: 'What must the viewer see working: the product UI, a number or a process?',
-    why: 'a film that shows the product working beats a slogan on a plain ground',
+    why: 'a film that shows the product working beats a slogan on a plain ground (taste/craft/show-dont-tell.md: decoration is not explanation)',
     example: 'the search box, a result list filling in, and the count "10M lines in 0.3 s"',
     seen: /\b(shows?|showing|ui|dashboard|screens?|captures?|numbers?|metrics?|workflow|steps?)\b/ },
   { key: 'format', header: 'Format', question: 'How long, and which aspect?',

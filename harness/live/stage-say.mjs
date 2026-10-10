@@ -58,12 +58,12 @@ export const WAIT_WORK = "while it renders, fill the brief's Board and Motion pa
 
 export const SAY = {
   study: (name) => `bin/vawe refs list, bin/vawe refs frames <id>, Read the frames at full size, then fill "Taken from" in films/${name}/brief.md: ${TAKEN_FROM_MIN} to 6 frames, exact path and what you take`,
-  moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second)`,
-  design: (name) => `write films/${name}/DESIGN.md and films/${name}/kit/ (format: skills/vawe-page/SKILL.md, example: films/examples/colour-sting/kit/)`,
+  moves: () => `bin/vawe strip <ref-id> --cuts on 2 reference films, Read every strip, then name ${MOVES_MIN} moves in "Taken from" (ref id, cut second) and which of the ten patterns in taste/craft/film-structure.md (The motion grammar) each ref uses`,
+  design: (name) => `write films/${name}/DESIGN.md and films/${name}/kit/ (format: skills/vawe-page/SKILL.md, example: films/examples/colour-sting/kit/; type: taste/craft/typography.md, colour: taste/craft/color.md)`,
   skills: (name, rungs) => `add to films/${name}/DESIGN.md one line per rung (${rungs.join(', ')}): "Skill <rung>: <slug>: what it decided", or "Skipped <rung>: <reason>"; list the skills with command npx -y ui-skills list`,
-  states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet, then bin/vawe frames ${rel}`,
+  states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet (layout: taste/craft/layout.md), then bin/vawe frames ${rel}`,
   frames: (name, rel) => `bin/vawe frames ${rel}`,
-  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut, sound`,
+  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut (feeling: taste/craft/selection.md, seams: taste/craft/transitions.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md)`,
   dev: (name, rel) => `bin/vawe dev ${rel}`,
   motion: (name, rel) => `bin/vawe strip ${rel} --cuts and Read every cut at full size; for the spectacle second also bin/vawe onion ${rel} --at <s> and bin/vawe velocity ${rel} --at <s>; fix what reads flat`,
   motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: what read flat, what you fixed`,

@@ -12,6 +12,7 @@ prevents: owner rule: constant synthy sounds or chords are banned. feedback: "us
 status: active
 scored: yes
 numbers: {}
+print-check: take a recorded effect first (resources/README.md), not a synth bed or a tick on every cut
 craft: sound
 ---
 
