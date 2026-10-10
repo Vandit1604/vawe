@@ -26,6 +26,7 @@ import { barResult, capScores, lostBoth, barFix, barEvent } from '../lib/judge-b
 import { chooseRefs, refsDir } from '../lib/refs.mjs';
 import { pickTemplate, readRouting } from '../cli/route.mjs';
 import { referenceFor, pageAuthoring } from '../lib/motion-stamp.mjs';
+import { waiverVerdicts } from '../lib/waivers.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
 import { probeSize } from './scene-stats.mjs';
 import { lastCaps } from './acceptance-run.mjs';
@@ -110,8 +111,8 @@ function pageOf(input, brief) {
 async function declaredOf(page) {
   if (!page) return { signature: {}, waivers: [], message: null };
   const { readPageMeta } = await import('./render-page.mjs');
-  const { allow = [], _why = {} } = pageAuthoring(page);
-  return { signature: parseSignature(readPageMeta(page, 'signature')), message: readPageMeta(page, 'message'), waivers: allow.map((code) => ({ code, why: _why[code] ?? null })) };
+  const authoring = pageAuthoring(page);
+  return { signature: parseSignature(readPageMeta(page, 'signature')), message: readPageMeta(page, 'message'), waivers: waiverVerdicts(authoring).map(({ entry, why, problem }) => ({ code: entry, why, problem })) };
 }
 
 function siblingThumbs(name, dir) {

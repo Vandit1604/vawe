@@ -29,6 +29,9 @@ export const worldLimit = (span, max = TURN_SECONDS_MAX) => Math.max(max, Math.m
 /** Every world id in page order. Pure. */
 export const worldIds = (samples) => [...new Set(samples.flatMap((s) => s.worlds.map((w) => w.id)))];
 
+/** A world's content as one string, or null when nothing of it can be read (no ground, no words, no visible parts): such a world is never called a copy of another. */
+const contentSignature = (ground, texts, shape) => (ground || texts.length || shape.length ? JSON.stringify([ground, texts.map((t) => t.toLowerCase()).sort(), shape]) : null);
+
 /**
  * [{ id, start, end, ground, readNeed }] per world in page order: the span covers the first to the last sample where the world was visible,
  * widened by half a sample step and kept inside [0, dur]. `ground` is read at the middle visible sample; `readNeed` is the read time of every
@@ -43,7 +46,7 @@ export function worldSpans(samples, { step, dur }) {
     const ground = mid.worlds.find((w) => w.id === id).ground ?? null;
     return {
       id,
-      signature: JSON.stringify([ground, texts.map((t) => t.toLowerCase()).sort()]),
+      signature: contentSignature(ground, texts, mid.worlds.find((w) => w.id === id).shape ?? []),
       start: round(Math.max(0, seen[0].t - step / 2)),
       end: round(Math.min(dur, seen.at(-1).t + step / 2)),
       ground,
@@ -66,7 +69,7 @@ export function insideTextWorlds(spans, run) {
   return reached >= run.b - SPAN_SLACK_S;
 }
 
-/** The spans with adjacent worlds that show the same ground and the same words merged into one: a world turns when its content changes, not when its id does. Pure. */
+/** The spans with adjacent worlds that show the same ground, words and things merged into one: a world turns when its content changes, not when its id does. Pure. */
 export function mergeSameContent(spans) {
   const out = [];
   for (const s of spans.filter((x) => x.start != null).sort((a, b) => a.start - b.start)) {
@@ -79,10 +82,10 @@ export function mergeSameContent(spans) {
 
 /** The world-held problems of measured spans: one { len, text } per world visible longer than `max` seconds, outside a declared hold. Worlds with the same content count as one. Pure. */
 export function heldWorlds(spans, max = TURN_SECONDS_MAX, authoring = {}) {
-  const held = insideHold(authoring);
+  const held = insideHold(authoring, 'world-held');
   return mergeSameContent(spans)
     .filter((s) => s.start != null && s.end - s.start > worldLimit(s, max) + SPAN_SLACK_S && !held({ a: s.start, b: s.end }))
-    .map((s) => ({ len: s.end - s.start, text: `world held ${s.id} ${s.start}-${s.end} s (${round(s.end - s.start)} s, limit ${round(worldLimit(s, max))} s${s.readNeed + READ_MARGIN_S > max ? ': its text needs that long' : ''}${s.id.includes('+') ? `; ${s.id.split('+').join(' and ')} show the same ground and words, so they are one world: cut the world where the content changes` : ''}); ${waiverHint(`dead-air@${s.start}-${s.end}`)}` }));
+    .map((s) => ({ len: s.end - s.start, text: `world held ${s.id} ${s.start}-${s.end} s (${round(s.end - s.start)} s, limit ${round(worldLimit(s, max))} s${s.readNeed + READ_MARGIN_S > max ? ': its text needs that long' : ''}${s.id.includes('+') ? `; ${s.id.split('+').join(' and ')} show the same ground, words and things, so they are one world: cut the world where the content changes` : ''}); ${waiverHint(`world-held@${s.start}-${s.end}`)}` }));
 }
 
 /**

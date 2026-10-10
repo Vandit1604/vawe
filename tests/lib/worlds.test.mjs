@@ -12,13 +12,13 @@ test('worldIds keeps page order', () => {
 
 test('a span runs from the first to the last visible sample, widened by half a step', () => {
   const spans = worldSpans(samples, { step: 1, dur: 5 });
-  assert.deepEqual(spans[0], { id: 'a', signature: '["#111111",[]]', start: 0, end: 3, ground: '#111111', readNeed: 0 });
-  assert.deepEqual(spans[1], { id: 'b', signature: '["#eeeeee",[]]', start: 2, end: 5, ground: '#eeeeee', readNeed: 0 });
+  assert.deepEqual(spans[0], { id: 'a', signature: '["#111111",[],[]]', start: 0, end: 3, ground: '#111111', readNeed: 0 });
+  assert.deepEqual(spans[1], { id: 'b', signature: '["#eeeeee",[],[]]', start: 2, end: 5, ground: '#eeeeee', readNeed: 0 });
 });
 
 test('a span stays inside the film and a world never shown has null times', () => {
   const spans = worldSpans([at(0.2, 'b'), at(0.7, 'b')], { step: 1, dur: 0.9 });
-  assert.deepEqual(spans[1], { id: 'b', signature: '["#eeeeee",[]]', start: 0, end: 0.9, ground: '#eeeeee', readNeed: 0 });
+  assert.deepEqual(spans[1], { id: 'b', signature: '["#eeeeee",[],[]]', start: 0, end: 0.9, ground: '#eeeeee', readNeed: 0 });
   assert.deepEqual(spans[2], { id: 'c', start: null, end: null, ground: null, readNeed: 0 });
 });
 
@@ -51,7 +51,7 @@ const span = (id, start, end) => ({ id, start, end, ground: '#fff' });
 
 test('a world visible longer than the limit is held, and its line names the world', () => {
   const found = heldWorlds([span('s1', 0, 2), span('s2', 2, 5.5), span('s3', 5.5, 7.5)]);
-  assert.deepEqual(found, [{ len: 3.5, text: `world held s2 2-5.5 s (3.5 s, limit 2 s); ${waiverHint('dead-air@2-5.5')}` }]);
+  assert.deepEqual(found, [{ len: 3.5, text: `world held s2 2-5.5 s (3.5 s, limit 2 s); ${waiverHint('world-held@2-5.5')}` }]);
 });
 
 test('a world of exactly the limit, measured a few frames long on the frame grid, is not held', () => {
@@ -66,7 +66,7 @@ test('adjacent worlds with the same ground are two turns, not one held world', (
 
 test('a world never shown is not held, and a declared hold covers its world', () => {
   assert.deepEqual(heldWorlds([{ id: 'x', start: null, end: null, ground: null }]), []);
-  const authoring = { allow: ['dead-air@2-5.5'], _why: { 'dead-air@2-5.5': 'the held wordmark is the last beat' } };
+  const authoring = { allow: ['world-held@2-5.5'], _why: { 'world-held@2-5.5': 'world s2 holds the wordmark 3.5 s as the last beat' }, _worlds: ['s2'] };
   assert.deepEqual(heldWorlds([span('s2', 2, 5.5)], TURN_SECONDS_MAX, authoring), []);
 });
 
@@ -115,7 +115,7 @@ test('a beat split into two data-world elements with the same ground and words i
   const split = [content('s1', 0, 2, '["#111",["ship it"]]'), content('s2', 2, 4.5, '["#111",["ship it"]]')];
   assert.equal(mergeSameContent(split).length, 1);
   const [found] = heldWorlds(split);
-  assert.match(found.text, /^world held s1\+s2 0-4\.5 s \(4\.5 s, limit 2 s; s1 and s2 show the same ground and words, so they are one world/);
+  assert.match(found.text, /^world held s1\+s2 0-4\.5 s \(4\.5 s, limit 2 s; s1 and s2 show the same ground, words and things, so they are one world/);
 });
 
 test('worlds whose words or ground differ are separate turns, and a span with no signature never merges', () => {
@@ -134,5 +134,23 @@ test('padding words cannot buy a world more than the read cap', () => {
 test('worldSpans signs a world by its ground and its lower-cased words in any order', () => {
   const sample = (t, texts) => ({ t, worlds: [{ id: 'a', visible: true, ground: '#111', texts }] });
   const [one] = worldSpans([sample(0, ['B', 'a']), sample(1, ['a'])], { step: 1, dur: 2 });
-  assert.equal(one.signature, '["#111",["a","b"]]');
+  assert.equal(one.signature, '["#111",["a","b"],[]]');
+});
+
+test('worlds with the same words but different things on screen are not merged', () => {
+  const sample = (t, id, shape) => ({ t, worlds: [{ id, visible: true, ground: '#111', texts: [], shape }] });
+  const a = worldSpans([sample(0, 'a', ['div.ring|#ff0000|2,2,8,8'])], { step: 1, dur: 4 })[0];
+  const b = worldSpans([sample(2, 'b', ['div.card|#ffffff|4,4,6,6'])], { step: 1, dur: 4 })[0];
+  const copy = worldSpans([sample(2, 'c', ['div.ring|#ff0000|2,2,8,8'])], { step: 1, dur: 4 })[0];
+  assert.notEqual(a.signature, b.signature);
+  assert.equal(a.signature, copy.signature);
+  assert.equal(mergeSameContent([{ ...a, start: 0, end: 2 }, { ...b, start: 2, end: 4 }]).length, 2);
+});
+
+test('worlds with nothing readable on them (no ground, words or parts) are never merged', () => {
+  const sample = (t, id) => ({ t, worlds: [{ id, visible: true, ground: null, texts: [], shape: [] }] });
+  const [a] = worldSpans([sample(0, 'a')], { step: 1, dur: 4 });
+  const [b] = worldSpans([sample(2, 'b')], { step: 1, dur: 4 });
+  assert.equal(a.signature, null);
+  assert.equal(mergeSameContent([{ ...a, start: 0, end: 2 }, { ...b, start: 2, end: 4 }]).length, 2);
 });

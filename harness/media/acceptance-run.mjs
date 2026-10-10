@@ -18,7 +18,7 @@ import { buildRows, withHistory, tableLines, allMeasuredGreen, acceptanceCounts 
 import { syncSpec } from '../lib/spec-sync.mjs';
 import { pageLook, writeLook, firstFamily } from '../lib/page-look.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
-import { isWaived } from '../lib/waivers.mjs';
+import { unwaivedContrast } from '../lib/text-contrast.mjs';
 
 const outFile = (name, kind) => path.resolve('out', `${name}.${kind}.json`);
 const nameOf = (mp4) => path.basename(mp4, '.mp4').replace(/-draft$/, '');
@@ -48,7 +48,7 @@ function pageMeasures({ probe, findings, authoring }, tables) {
   const tracks = probeTracks(probe.samples, probe, tables.words);
   return {
     caps: heldTextRuns(probe.samples, probe).map((r) => ({ text: r.key, cap: r.cap * 100, t: r.t, ...(r.chrome ? { chrome: true } : {}) })),
-    contrast: isWaived(authoring, 'text-low-contrast') ? [] : probe.contrast,
+    contrast: unwaivedContrast(probe.contrast, authoring),
     collisions: textCollisions(probe.samples),
     readHold: readHoldProblems(tracks),
     readHoldUnmeasured: readHoldUnmeasured(tracks),

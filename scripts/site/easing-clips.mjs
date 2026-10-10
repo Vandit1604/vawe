@@ -23,7 +23,7 @@ function filmPage(e) {
 <meta name="duration" content="2">
 <meta name="message" content="${e.slug} against linear">
 <title>${e.slug}</title>
-<script type="application/json" id="authoring">{"allow": ["dead-air", "no-brief", "one-band"], "_why": {"dead-air": "the held end is the point: it shows where the ease comes to rest", "no-brief": "a 2 s diagram clip for the /easing page, not a film", "one-band": "one move of 1.2 s, shown twice for contrast"}}</script>
+<script type="application/json" id="authoring">{"allow": ["static-window@1.5-2", "no-brief", "one-band"], "_why": {"static-window@1.5-2": "the held end 1.5-2 s of a 2 s clip is the point: both boxes rest, 0.5 s, so the ease shows where it settles", "no-brief": "a 2 s diagram clip for the /easing page at world s1, not a film", "one-band": "one move of 1.2 s in world s1, shown twice for contrast"}}</script>
 <style>
   html, body { margin: 0; height: 100%; overflow: clip; background: #16151a; color: #fff; font-family: ui-monospace, "JetBrains Mono", Menlo, monospace; }
   .head { position: absolute; left: 8vw; top: 9vh; }

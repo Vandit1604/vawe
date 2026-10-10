@@ -71,7 +71,7 @@ import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, spectacleOf, lockedSpectacle } from '../lib/board.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
-import { isWaivedBy, hasReason, isWaived, waiverHint } from '../lib/waivers.mjs';
+import { isWaivedBy, hasReason, isWaived, waiverHint, waiverProblems } from '../lib/waivers.mjs';
 import { beatAdvice } from '../lib/sound-read.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
@@ -84,7 +84,7 @@ import { measureDraftShape, rangeLines } from '../lib/draft-range.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
-import { contrastLines } from '../lib/text-contrast.mjs';
+import { contrastLines, unwaivedContrast } from '../lib/text-contrast.mjs';
 import { peakLine } from '../lib/peak-limit.mjs';
 import { balanceLines } from '../lib/cue-balance.mjs';
 import { bedLine } from '../lib/bed-motion.mjs';
@@ -867,7 +867,7 @@ export function assertFinalReady(pagePath) {
   if (motionStampFresh(pagePath)) return;
   const { allow = [], _why = {} } = pageAuthoring(pagePath);
   const code = 'unverified-final';
-  if (isWaivedBy(allow, code) && hasReason(_why, code)) return;
+  if (isWaivedBy(allow, code) && hasReason(_why, code, { loose: true })) return;
   die(`${pagePath}: FINAL render refused, no passing required-motion-match for this page's current `
     + `content. Run: vawe critique ${pagePath} --ref ${ref}\n`
     + `Waivable only via <script type="application/json" id="authoring">{"allow":["${code}"],`
@@ -949,12 +949,12 @@ export function pageAdvice(pagePath, { probe, motion }) {
   const authoring = pageAuthoring(pagePath);
   const brief = readBrief(pagePath);
   const dir = path.relative(process.cwd(), path.dirname(path.resolve(pagePath)));
-  const contrast = isWaived(authoring, 'text-low-contrast') ? [] : contrastLines(probe.contrast);
-  const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor')));
+  const contrast = contrastLines(unwaivedContrast(probe.contrast, authoring));
+  const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor', /^attractor: direction (\w+)/.exec(l)?.[1] ?? null)));
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+    lines: [...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))),
       ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],

@@ -154,9 +154,9 @@ export function attractorProblems(brief, slots = parseDirections(brief).slots) {
   for (const s of slots.filter(isFilled)) {
     const text = `${s.fields.sentence} ${s.fields['key frame']} ${s.fields.thread ?? ''}`;
     const own = attractorWords(s.fields.sentence.split(/[,:;]/)[0], NAME).filter((n) => !names.includes(n));
-    if (own.length) out.push(`attractor: direction ${s.id} is named ${quote(own)}, a light-poetry name (card Attractors); fix: ${ATTRACTORS.names.fix}; or waive "attractor" in the page with a _why`);
+    if (own.length) out.push(`attractor: direction ${s.id} is named ${quote(own)}, a light-poetry name (card Attractors); fix: ${ATTRACTORS.names.fix}; or waive "attractor@${s.id}" in the page with a _why`);
     const shapes = attractorWords(text);
-    if (shapes.length) out.push(`attractor: direction ${s.id}'s hero is ${quote(shapes)} (card Attractors: ${ATTRACTORS.shapes.cards.join('; ').toLowerCase()}); fix: ${ATTRACTORS.shapes.fix}; or waive "attractor" in the page with a _why`);
+    if (shapes.length) out.push(`attractor: direction ${s.id}'s hero is ${quote(shapes)} (card Attractors: ${ATTRACTORS.shapes.cards.join('; ').toLowerCase()}); fix: ${ATTRACTORS.shapes.fix}; or waive "attractor@${s.id}" in the page with a _why`);
   }
   return out;
 }

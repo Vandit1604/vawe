@@ -54,12 +54,14 @@ A page starts from a template: `bin/vawe new <name> --from prompts/<template>.md
 
 ## Waivers
 
-A rule broken for cause is declared in the page, with its reason, and nowhere else. A waiver with no reason does not count.
+A rule broken for cause is declared in the page, with its reason, and nowhere else. Each check has its own code, scoped to the seconds it covers.
 
 ```html
 <script type="application/json" id="authoring">
-{"allow": ["dead-air"], "_why": {"dead-air": "the held wordmark IS the last beat"}}
+{"allow": ["world-held@3.5-6.2"], "_why": {"world-held@3.5-6.2": "world s4, 2.7 s: the wordmark is the last beat and a caret ticks on it"}}
 </script>
 ```
 
-Checks advise. Only determinism and a missing reason refuse.
+A reason names where (a world id of the page or a second) and what was measured (a number with its unit). A generic reason ("intentional", "by design", "fine") does not count, and nor does one reason copied to three waivers.
+
+Checks advise. Only determinism, banned items and a reason that does not count refuse.
