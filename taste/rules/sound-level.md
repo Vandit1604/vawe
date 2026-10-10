@@ -3,7 +3,7 @@ id: sound-level
 step: sound
 principle: Sound is subtle: low peak, quiet mix. What you write is what you hear: no normalising, default gains.
 limit: true peak at or below -3 dBFS
-range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: palette tap -3 dB, tick, air, swoosh-long and sub-thump -5, bed -19; the old voices soft -6 dB, whoosh, riser and swell -4, impact, drop and braam -2; a bed plus one palette cue per beat lands near -20 LUFS
+range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: palette tap -3 dB, tick, air, swoosh-long and sub-thump -5; the old voices soft -6 dB, whoosh, riser and swell -4, impact and drop -2; one palette cue per beat lands near -20 LUFS
 break-when: the brief names a delivery target: `<meta name="loudness" content="-14">` opts in to normalising
 instead: leave data-gain off or lower the loudest cue; a cue that peaks more than 6 dB above the median cue draws a warning with the change that fixes it. Measure with `ffmpeg -af ebur128=peak=true`.
 check: sound-peak, sound-loudness

@@ -4,11 +4,9 @@
 //   <audio data-synth="whoosh" data-at="2.4"></audio>   (voices: core/audio/kit.mjs CUES; no data-gain
 //                                                        takes the voice's DEFAULT_GAIN_DB)
 //   <audio data-synth="air" data-at="2.4" data-length="0.6"></audio>   (data-length: the move's seconds, for the
-//                                                        palette voices air, swoosh-long, swell-soft)
+//                                                        palette voices air and swoosh-long)
 //   <audio data-synth="tap" data-on="world:s4" data-at="0.1"></audio>  (data-on: data-at counts from the first
 //                                                        second world s4 shows; needs the page's seek)
-//   <audio data-synth="bed" loop data-bpm="96"></audio>  (a seamless generated pad with a soft pulse, the music bed;
-//                                                        data-bpm snaps to a whole number of beats per loop)
 //   <audio src="hit.wav" data-trim="0.2" data-trim-end="0.9"></audio>   (play seconds 0.2 to 0.9 of the file; a 8 ms fade
 //                                                        at each cut avoids a click)
 //   <audio src="vo.wav" data-role="vo"></audio>          (ducks music -18 dB while it plays)
@@ -28,6 +26,8 @@ import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, normalize, normalize
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATE = 48000;
+const BANNED_SYNTH = new Set(['bed', 'pad', 'drone', 'hum', 'chord', 'swell-soft', 'braam']);
+export const BANNED_MESSAGE = 'synth beds are banned (owner rule: no constant synthy sounds, pads or chords): use a real music file (<audio loop src=...>) or no bed. Sparse effects on actions are fine.';
 const VO_DUCK_DB = -18;
 const DUCK_ATTACK = 0.05;
 const DUCK_RELEASE = 0.3;
@@ -61,7 +61,7 @@ function toFilePath(rawSrc, pageUrl, pagePath) {
  * readPageAudio(page, { pagePath }?) -> { specs, loudness }  (loudness: the <meta name="loudness"> value, or null)
  * `page` is a puppeteer Page on a loaded film. `pagePath` (the page's file) makes src resolution exact;
  * without it a src resolves against the repo root that the preview server serves.
- * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, trimEnd, bpm, duck (dB or null), role }
+ * spec: { src | synth, at, gain (dB), fadeIn, fadeOut, trim, trimEnd, duck (dB or null), role }
  */
 export async function readPageAudio(page, { pagePath, spans } = {}) {
   const raw = await page.evaluate(() => {
@@ -70,7 +70,7 @@ export async function readPageAudio(page, { pagePath, spans } = {}) {
       src: el.getAttribute('src') || el.querySelector('source')?.getAttribute('src') || null,
       synth: el.dataset.synth || null, on: el.dataset.on || null, length: num(el, 'length', null),
       at: num(el, 'at', 0), gain: num(el, 'gain', null), fadeIn: num(el, 'fadeIn', 0), fadeOut: num(el, 'fadeOut', 0),
-      trim: num(el, 'trim', 0), trimEnd: num(el, 'trimEnd', null), bpm: num(el, 'bpm', null), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
+      trim: num(el, 'trim', 0), trimEnd: num(el, 'trimEnd', null), duck: num(el, 'duck', null), role: el.dataset.role || (el.loop ? 'music' : null),
     }));
     const meta = parseFloat(document.querySelector('meta[name="loudness"]')?.content);
     const duration = parseFloat(document.querySelector('meta[name="duration"]')?.content);
@@ -80,7 +80,8 @@ export async function readPageAudio(page, { pagePath, spans } = {}) {
   const specs = raw.tracks.map(({ src, ...t }) => {
     const where = `<audio> at ${t.at} s`;
     if (t.synth) {
-      if (!CUES[t.synth]) problems.push(`${where}: data-synth="${t.synth}" is not a voice. Voices: ${Object.keys(CUES).join(' ')}`);
+      if (BANNED_SYNTH.has(t.synth)) problems.push(`${where}: ${BANNED_MESSAGE}`);
+      else if (!CUES[t.synth]) problems.push(`${where}: data-synth="${t.synth}" is not a voice. Voices: ${Object.keys(CUES).join(' ')}`);
       return { ...t, gain: t.gain ?? DEFAULT_GAIN_DB[t.synth] ?? 0 };
     }
     if (!src) { problems.push(`${where}: an <audio> element needs src or data-synth`); return t; }
@@ -134,7 +135,7 @@ function materialise(spec, tmp, i) {
   const cue = CUES[spec.synth];
   // A palette voice draws pitch, timing and detune from its seed: the index gives each use its own.
   const samples = cue.voice
-    ? normalizeStereo(renderCueStereo(cue, i + 1, { ...(spec.length == null ? {} : { length: spec.length }), ...(spec.bpm == null ? {} : { bpm: spec.bpm }) }), CUE_CEILING)
+    ? normalizeStereo(renderCueStereo(cue, i + 1, { ...(spec.length == null ? {} : { length: spec.length }) }), CUE_CEILING)
     : normalize(renderCue(cue), CUE_CEILING);
   const file = path.join(tmp, `cue${i}-${spec.synth}.wav`);
   fs.writeFileSync(file, encodeWav(samples));

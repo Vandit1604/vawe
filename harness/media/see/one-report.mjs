@@ -140,7 +140,7 @@ function soundSection(m) {
   if (so.mp4) L.push(`Loudness of the film's own audio: ${so.mp4.lufs} LUFS, true peak ${so.mp4.truePeakDb} dBFS.`);
   if (so.page?.mix) L.push(`Mix of the page's audio tags as written: ${so.page.mix.lufs} LUFS, true peak ${so.page.mix.truePeakDb} dBFS.`);
   if (!so.hasAudio && !so.page) L.push('No audio stream.');
-  if (so.bpm) L.push(`Tempo ${so.bpm} BPM (confidence ${so.bpmConfidence}). To cut to the music: vawe sound <bed> gives the beat grid with frames, the hits and a cut table (the same reader).`);
+  if (so.bpm) L.push(`Tempo ${so.bpm} BPM (confidence ${so.bpmConfidence}). To cut to the music: vawe sound <track> gives the beat grid with frames, the hits and a cut table (the same reader).`);
   if (so.page) {
     L.push(`Bed: ${so.page.bed.length ? so.page.bed.map((b) => `${b.voice} from ${b.at} s, ${b.gain} dB`).join('; ') : 'none'}.`, '', 'Cues from the page:');
     for (const c of so.page.cues) L.push(`- ${c.at} s ${c.voice} ${c.gain} dB, world ${c.world ?? 'none'}${c.on ? ` (${c.on})` : ''}`);

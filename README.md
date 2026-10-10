@@ -42,7 +42,7 @@ bin/vawe ship films/hello/page.html        # full size, 60 fps, subframe blur, a
   `requestAnimationFrame`, timers and a seeded `Math.random` all follow the seek) and sets
   `<html data-aspect>`, `--vw`/`--vh` and `window.vawe` so one page lays out for
   `16:9 9:16 1:1 4:5 4:3` (`bin/vawe ship <page> --aspect all` renders every one).
-- Audio is `<audio>` tags with `data-at`, `data-gain`, `data-fade-out`; `loop` is the music bed;
+- Audio is `<audio>` tags with `data-at`, `data-gain`, `data-fade-out`; `loop` marks a music file the user gives;
   `data-synth` picks a voice from `core/audio/kit.mjs`. Mixed offline as written; `<meta name="loudness">`
   opts in to a target.
 - Springs, keyframe tables and seeded noise: `core/motion/springs.js` (`core/motion/README.md`).

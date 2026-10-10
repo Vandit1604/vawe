@@ -9,7 +9,7 @@ noticed. Make it look expensive, not like a template."
 
 - length: 5 s
 - aspect: 16:9
-- sound: synth cues only, a quiet bed, near -20 LUFS after the mux
+- sound: synth cues only, no bed, near -20 LUFS after the mux
 
 ## Task
 
@@ -138,11 +138,10 @@ Spectacle: the one big moment at 2.75 s (also `<meta name="spectacle">`): the ri
 | hot to amber, 2.75 | match-cut: the lockup holds, ground and ink flip; logo-sting: the line opens from the ring; push-in: the camera pushes on from 2.45 | the ring as the o | the red ground | 0 | push from 2.45, 20% to the last frame | ground, lockup | the ring's landing on the `pop` curve (the one hero arrival), the line opening on `EASE.nudge` |
 | amber to red, 4.35 | match-cut with a heat front that closes first | the hotspot, then "colour" | the amber ground | 0.95 | the same push plus a 12% punch | ground, heat, lockup | none, the word sweep runs on `EASE.land` |
 
-Sound is subtle: a bed for the whole film, one voice per cut and one for the spectacle. Voices are the quiet palette of `bin/vawe sound` at their default gain. Cues sit on `data-on="world:<id>"`, so they follow the picture.
+Sound is subtle: no bed, one voice per cut and one for the spectacle. Voices are the quiet palette of `bin/vawe sound` at their default gain. Cues sit on `data-on="world:<id>"`, so they follow the picture.
 
 | at s | voice | gain dB | for |
 |---|---|---|---|
-| 0.00 | bed, loop, fade out 0.8 s | -28 | the whole film |
 | 0.02 | tap | -12 | the first frame |
 | 0.70 | tick | -14 | the turn cut |
 | 1.30 | swoosh-long | -14 | the rush at the lens |

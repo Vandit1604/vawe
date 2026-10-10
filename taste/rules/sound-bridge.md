@@ -17,6 +17,6 @@ craft: sound
 
 ## Example
 
-The next scene's bed fades in 0.6 s before the cut.
+The next scene's recorded sound fades in 0.6 s before the cut.
 
 Why and sources: [sound](../craft/sound.md).

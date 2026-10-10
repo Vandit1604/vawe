@@ -20,8 +20,8 @@ your own direction.
 - Aspect: `<html data-aspect="16:9">`, `--vw`/`--vh` (px lengths) on `:root` and `window.vawe` are set
   before your scripts run. Lay out with CSS for `16:9 9:16 1:1 4:5 4:3`. Never crop.
 - Audio is `<audio>` tags, mixed offline as written (about -20 LUFS at default gains): `src` + `data-at`
-  (s), `data-gain` (absolute dB, replaces the voice default; leave it off), `data-fade-out`; `loop` is the music bed; `data-synth="pluck"` picks a voice
-  (`bin/vawe sound`, `bin/vawe fonts` list them; `bin/vawe sound <page> --at s | --waveform` checks the cues); `data-role="vo"` ducks the bed.
+  (s), `data-gain` (absolute dB, replaces the voice default; leave it off), `data-fade-out`; `data-synth="pluck"` picks a short effect voice
+  (`bin/vawe sound`, `bin/vawe fonts` list them; `bin/vawe sound <page> --at s | --waveform` checks the cues); `data-role="vo"` ducks a music track. No bed: sound is small effects on actions, a music track only from a file the user gives (`taste/craft/sound.md`); `data-synth="bed"` is refused.
 - Every tunable number is a literal in the page (a `[[f, v]]` table, a keyframe stop, a `:root`
   custom property); the studio edits those literals in place.
 - Each beat is one element with `data-world="<id>"` (lowercase, the brief's Shots ids); the checks and the judge read the worlds from it.
@@ -40,7 +40,7 @@ next command for the film you edited last.
 | 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives. Then how they MOVE: `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves (ref id, cut second) |
 | 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, one line per rung of the skill ladder: builder, type, colour, depth, frame) and `films/<name>/kit/` (ground layers; each moving part its own element); format and example in `vawe-page`; the builder rung builds product UI as a real interface; the frame rung rejects web-page patterns; a `Skipped <rung>` line cites a reference frame path or a SPEC.md line |
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
-| 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows and a bed; cut to the music: `vawe sound <bed> --cuts <page>` gives the beat grid, the hits and each cut's frame offset |
+| 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows (effects on actions, no bed); with a music file the user gave: `vawe sound <file> --cuts <page>` gives the beat grid, the hits and each cut's frame offset |
 | 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
 | 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |

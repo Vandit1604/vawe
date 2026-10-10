@@ -90,24 +90,5 @@ writeWav(path.join(SFX, 'beep3.wav'), tone(960, 0.22, { type: 'sine', attack: 0.
   writeWav(path.join(SFX, 'wrong.wav'), out);
 })();
 
-(() => {
-  const LOOP = 8, n = sec(LOOP), out = new Float32Array(n);
-  const lf = (f) => Math.round(f * LOOP) / LOOP; // snap to integer cycles -> seamless loop
-  const pad = [lf(110), lf(164.8), lf(220)];
-  for (let i = 0; i < n; i++) {
-    const t = i / SR;
-    const trem = 0.7 + 0.3 * Math.sin(TAU * lf(0.25) * t);
-    let v = 0;
-    for (const f of pad) v += Math.sin(TAU * f * t);
-    out[i] += (v / pad.length) * 0.05 * trem;
-    out[i] += Math.sin(TAU * lf(880) * t) * 0.018 * (0.6 + 0.4 * Math.sin(TAU * lf(0.125) * t)); // airy shimmer
-  }
-  const pulse = tone(58, 0.18, { decay: 0.1, gain: 0.18, harmonics: [[2, 0.2]] });
-  for (let b = 0; b < LOOP / 0.5; b++) add(out, pulse, b * 0.5, b % 2 === 0 ? 1 : 0.7);
-  const hat = (() => { const m = sec(0.03), a = new Float32Array(m); for (let i = 0; i < m; i++) a[i] = noise() * Math.exp(-i / sec(0.008)) * 0.06; return a; })();
-  for (let b = 0; b < LOOP / 0.25; b++) add(out, hat, b * 0.25, 1);
-  writeWav(path.join(ASSETS, 'music.wav'), out);
-})();
-
 console.log('✓ audio assets written:');
-console.log('  music.wav (8s loop) +', fs.readdirSync(SFX).join(', '));
+console.log(' ', fs.readdirSync(SFX).join(', '));

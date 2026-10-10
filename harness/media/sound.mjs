@@ -12,7 +12,6 @@ import { launchPage } from '../lib/render-harness.mjs';
 import { readTimeline } from './timeline.mjs';
 import { probeVideo } from './see/core.mjs';
 import { refVideo, refsDir } from '../lib/refs.mjs';
-import { writeSynthBed } from '../lib/synth-bed.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const PRINT_ROWS = 24;
@@ -63,9 +62,13 @@ async function main(argv) {
   let file = o.input, offset = 0, cues = [], read = null;
   if (isPage) {
     read = await readTimeline(o.input).catch((e) => die(e.message));
-    const bed = read.specs.find((s) => s.role === 'music' && (s.src || s.synth === 'bed'));
-    if (!bed) die(`${o.input} has no music bed (an <audio loop src="..."> or <audio loop data-synth="bed"> tag): nothing to read for cutting; pass an audio file instead`);
-    file = bed.src ?? writeSynthBed(bed, read.duration, dir); offset = bed.at - (bed.trim || 0);
+    const bed = read.specs.find((s) => s.role === 'music' && s.src);
+    if (!bed) {
+      const rows = read.specs.map((s) => `  ${+Number(s.at).toFixed(2)} s  ${s.synth || path.basename(s.src ?? '?')}  ${s.gain} dB`);
+      console.log([`${o.input} has no music file (<audio loop src="...">): there is no beat grid, so the cuts are checked against nothing. Synth beds are banned.`, ...(rows.length ? ['Cues of the page:', ...rows] : [])].join('\n'));
+      return;
+    }
+    file = bed.src; offset = bed.at - (bed.trim || 0);
     cues = read.specs.filter((s) => s.role !== 'music').map((s) => ({ at: s.at, voice: s.synth || path.basename(s.src ?? '?'), gain: s.gain, world: read.spans.find((w) => w.start != null && s.at >= w.start && s.at < w.end)?.id ?? null })).sort((a, b) => a.at - b.at);
   }
   let sound;

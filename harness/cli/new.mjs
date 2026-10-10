@@ -312,13 +312,12 @@ Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Qu
 |---|---|---|---|---|---|---|---|
 | [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] |
 
-Sound is part of every film, subtle: a bed for the whole film, one voice per cut and one for the spectacle (names from \`bin/vawe sound\`, never a fixed list).
+Sound is part of every film, subtle: sparse effects on actions: one voice per cut and one for the spectacle (names from \`bin/vawe sound\`, never a fixed list). No synth bed, pad or chord. A music bed only from a file the user gives.
 
 Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
 
 | at s | voice | gain dB | for |
 |---|---|---|---|
-| [0] | [bed, loop] | | [the whole film] |
 | [s] | [voice] | | [a cut or the spectacle] |`;
 
 const motionText = () => `## Motion pass

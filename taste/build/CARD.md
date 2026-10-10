@@ -261,7 +261,7 @@ A stock device is seasoning, never the idea. Use it at most once per film.
 Sound is subtle: low peak, quiet mix. What you write is what you hear: no normalising, default gains.
 
 - Limit: true peak at or below -3 dBFS
-- Range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: palette tap -3 dB, tick, air, swoosh-long and sub-thump -5, bed -19; the old voices soft -6 dB, whoosh, riser and swell -4, impact, drop and braam -2; a bed plus one palette cue per beat lands near -20 LUFS
+- Range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: palette tap -3 dB, tick, air, swoosh-long and sub-thump -5; the old voices soft -6 dB, whoosh, riser and swell -4, impact and drop -2; one palette cue per beat lands near -20 LUFS
 - Judge: Read the measured peak and loudness: are they at or below -3 dBFS and near -20 LUFS?
 
 ### sound-swell
@@ -274,10 +274,10 @@ At most one soft swell, and it ends on a cut. A whoosh on every transition makes
 
 ### sound-voices
 
-Quiet ticks carry the film: droplet, pluck, bloom, chime at their default gains. Weight voices are for a brief that asks for weight.
+Small effects on actions carry the film, with no synth bed, pad or chord. Prefer real recorded effects; the quiet synth ticks are the fallback. Weight voices are for a brief that asks for weight.
 
-- Range: accent: pluck, chime, sparkle, droplet; confirm: bloom, success, ready; weight (impact, drop, braam, riser) only when the brief asks
-- Judge: Is there an impact, braam, drop or riser the brief did not ask for?
+- Range: accent: pluck, chime, sparkle, droplet; confirm: bloom, success, ready; weight (impact, drop, riser) only when the brief asks
+- Judge: Is there a synth bed, pad or chord, or an impact, drop or riser the brief did not ask for?
 
 ## attractors
 

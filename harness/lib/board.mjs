@@ -71,8 +71,7 @@ export function boardChecks(brief, pageSpectacle = null) {
   else if (pageSpectacle !== null && Math.abs(spectacle - pageSpectacle) > SPECTACLE_TOLERANCE_S) {
     lines.push(`board: the Spectacle is at ${s1(spectacle)} s but <meta name="spectacle"> says ${s1(pageSpectacle)} s; make them one second`);
   }
-  if (!sound.length) lines.push('board: no sound rows; add a bed and one voice per cut');
-  else if (!sound.some((r) => /bed|loop/i.test(r[1] ?? ''))) lines.push('board: the sound rows have no bed; add a looped bed for the whole film');
+  if (!sound.length) lines.push('board: no sound rows; add one voice per cut, or one row with "none" for a silent film');
   moves.forEach((m, i) => { if (!m || /\bfade\b/i.test(m)) lines.push(`board: cut ${i + 1} names ${m ? `"${m}"` : 'no move'}; name a move from prompts/moves`); });
   return lines;
 }

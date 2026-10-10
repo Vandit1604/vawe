@@ -238,6 +238,6 @@ test('the brief carries the strip study, the Board (rhythm, spectacle, cuts, sou
   assert.match(board, /\| camera/);
   assert.match(board, /overlap/);
   assert.match(board, /\| voice \|/);
-  assert.match(board, /bed/);
+  assert.doesNotMatch(board, /\[bed/);
   assert.match(text, /strip films\/zz\/page\.html --cuts/);
 });

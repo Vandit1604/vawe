@@ -17,7 +17,7 @@ prompt from scratch is [ANATOMY.md](ANATOMY.md). Every template targets the vawe
   `window.seek(t)` in seconds as a pure function of `t`;
 - `<audio src data-at data-gain data-fade-out>` for files, `<audio data-synth="<voice>" data-at>`
   for the synth voices in `core/audio/kit.mjs` (pluck, chime, sparkle, droplet, bloom, success,
-  ready, whoosh, riser, drop, impact, swell, braam); never played live, mixed offline as written
+  ready, whoosh, riser, drop, impact, swell); no synth bed (`taste/craft/sound.md`); never played live, mixed offline as written
   (`<meta name="loudness">` opts in to a target). No `data-gain` takes the voice's soft default
   (`DEFAULT_GAIN_DB`); a few soft ticks and one swell beat many hits;
 - moves to copy, each with a 1 s clip: [moves/README.md](moves/README.md);

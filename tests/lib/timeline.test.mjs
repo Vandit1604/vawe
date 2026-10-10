@@ -45,11 +45,11 @@ test('the rhythm line flags equal cuts, no quick cut and no slow cut with the bo
 });
 
 test('the timeline puts the spectacle and every cue in its world, the bed apart', () => {
-  const specs = [spec({ at: 0.75, on: 'world:b' }), spec({ synth: 'bed', role: 'music', at: 0, gain: -28 })];
+  const specs = [spec({ at: 0.75, on: 'world:b' }), spec({ synth: null, src: 'track.wav', role: 'music', at: 0, gain: -28 })];
   const t = timelineOf({ spans, specs, duration: 5, spectacle: 2.5 });
   assert.deepEqual(t.spectacle, { at: 2.5, world: 'c' });
   assert.deepEqual(t.cues.map((c) => [c.voice, c.at, c.world]), [['tap', 0.75, 'b']]);
-  assert.deepEqual(t.bed.map((c) => c.voice), ['bed']);
+  assert.deepEqual(t.bed.map((c) => c.voice), ['track.wav']);
   assert.ok(timelineLines(t).some((l) => l.includes('0.75 s  tap  -12 dB  world b')));
 });
 
@@ -59,10 +59,10 @@ test('--at reads comma seconds and refuses anything else', () => {
 });
 
 test('activeAt gives the cue offset, a looped bed wraps and a finished cue is gone', () => {
-  const tracks = [{ spec: spec({ at: 1 }), seconds: 0.5 }, { spec: spec({ synth: 'bed', role: 'music', at: 0 }), seconds: 2 }];
+  const tracks = [{ spec: spec({ at: 1 }), seconds: 0.5 }, { spec: spec({ synth: null, src: 'track.wav', role: 'music', at: 0 }), seconds: 2 }];
   const at = (t) => activeAt(tracks, t, 6).map((h) => [h.voice, +h.into.toFixed(2), +h.offset.toFixed(2)]);
-  assert.deepEqual(at(1.25), [['tap', 0.25, 0.25], ['bed', 1.25, 1.25]]);
-  assert.deepEqual(at(3), [['bed', 3, 1]]);
+  assert.deepEqual(at(1.25), [['tap', 0.25, 0.25], ['track.wav', 1.25, 1.25]]);
+  assert.deepEqual(at(3), [['track.wav', 3, 1]]);
 });
 
 test('level is the window RMS plus data-gain, and a fade-out lowers it', () => {

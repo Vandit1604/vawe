@@ -6,7 +6,7 @@
 //   - a generated room (a decaying noise impulse, convolved by FFT) and a gentle high cut give the tail
 //   - width comes from a sub-millisecond delay between the channels and from two different room impulses
 // Each voice is a pure function (params, seed) -> [left, right]. Same seed, same samples.
-import { SR, TAU, sec, clamp, rng, biquad, convolve, filtered, delayed, fadeTail, fft } from './dsp.mjs';
+import { SR, TAU, sec, clamp, rng, biquad, convolve, filtered, delayed, fadeTail } from './dsp.mjs';
 
 const dice = (seed) => {
   const r = rng(seed);
@@ -151,24 +151,6 @@ function swooshLong(p, seed) {
   return finish(band(sum(top, body), 90, 7000), seed, { time: 0.9, wet: 0.22, cut: 7000 });
 }
 
-function swellSoft(p, seed) {
-  const length = clamp(p.length ?? 1.5, 0.5, 6), d = dice(seed), n = sec(length);
-  const rise = (u) => u ** 2.2 * (u < 0.94 ? 1 : 0.5 + 0.5 * Math.cos(Math.PI * (u - 0.94) / 0.06));
-  const noise = sweep(seed, { length, f0: 220, f1: 2000, Q: 0.9, envelope: rise });
-  const pad = [0, 1].map(() => new Float32Array(n));
-  for (const f of [110, 164.8, 220]) {
-    const cents = d.between(3, 8);
-    for (const ch of [0, 1]) {
-      const side = ch === 0 ? 1 : -1, f1 = f * Math.pow(2, side * cents / 1200), f2 = f * Math.pow(2, -side * cents / 1200), ph = d.r() * Math.PI;
-      for (let i = 0; i < n; i++) {
-        const t = i / SR;
-        pad[ch][i] += (Math.sin(TAU * f1 * t + ph) + Math.sin(TAU * f2 * t)) * 0.17 * rise(i / n) ** 0.8;
-      }
-    }
-  }
-  return finish(band(sum(noise, pad), 70, 7000), seed, { time: 1.4, wet: 0.4, cut: 7000 });
-}
-
 // ---------------------------------------------------------------- weight
 
 function subThump(_, seed) {
@@ -184,79 +166,7 @@ function subThump(_, seed) {
   return finish([m, m.slice()], seed, { time: 0.35, wet: 0.12, cut: 240 });
 }
 
-// ---------------------------------------------------------------- bed
-
-// 2^19 samples, 11.89 s. Every partial and every slow modulation has a whole number of cycles in the loop,
-// and the air is built in the frequency domain, so the loop is periodic by construction: no seam to hide.
-export const BED_LOOP_SAMPLES = 1 << 19;
-export const BED_DEFAULT_BPM = 96;
-const BED_PULSE_AMP = 0.9;
-
-/** Beats in one bed loop for `bpm`: a whole number, so the pulse is as seamless as the pad. */
-export const bedBeats = (bpm) => Math.max(1, Math.round((BED_LOOP_SAMPLES / SR) * bpm / 60));
-
-function addPulse(out, beats, seed) {
-  const N = out[0].length, d = dice(seed + 31);
-  const f = 52 + d.between(0, 4), decay = 0.11, attack = 0.006;
-  const life = sec(decay * 6);
-  for (let b = 0; b < beats; b++) {
-    const start = Math.round(b * N / beats), accent = b % 4 === 0 ? 1 : 0.7;
-    for (let i = 0; i < life; i++) {
-      const t = i / SR, v = BED_PULSE_AMP * accent * Math.sin(TAU * f * t) * Math.exp(-t / decay) * Math.min(1, t / attack);
-      const k = (start + i) % N;
-      out[0][k] += v; out[1][k] += v;
-    }
-  }
-}
-
-function bed({ bpm = BED_DEFAULT_BPM } = {}, seed) {
-  const N = BED_LOOP_SAMPLES, d = dice(seed), bin = SR / N;
-  const snap = (f) => Math.round(f / bin) * bin;
-  const chord = [[98, 1], [147, 0.8], [196, 0.6], [220.5, 0.35], [294, 0.25]];
-  const out = [new Float32Array(N), new Float32Array(N)];
-  for (const [f, amp] of chord) {
-    const lfo = (1 + Math.floor(d.u() * 3)) * bin, lfoPhase = d.r() * Math.PI, cents = d.between(4, 9);
-    for (const ch of [0, 1]) {
-      const side = ch === 0 ? 1 : -1;
-      for (const [detune, harmonics] of [[side * cents, [1, 0.3, 0.1]], [-side * cents, [1, 0.3, 0.1]]]) {
-        const f1 = snap(f * Math.pow(2, detune / 1200)), ph = d.r() * Math.PI;
-        harmonics.forEach((hAmp, h) => {
-          const w = TAU * snap(f1 * (h + 1));
-          for (let i = 0; i < N; i++) {
-            const t = i / SR;
-            out[ch][i] += amp * hAmp * 0.5 * Math.sin(w * t + ph * (h + 1)) * (1 + 0.35 * Math.sin(TAU * lfo * t + lfoPhase));
-          }
-        });
-      }
-    }
-  }
-  const air = [0, 1].map(() => periodicAir(N, d, bin));
-  for (let ch = 0; ch < 2; ch++) for (let i = 0; i < N; i++) out[ch][i] += air[ch][i] * 0.9;
-  addPulse(out, bedBeats(bpm), seed);
-  return out;
-}
-
-// Random-phase noise limited to 300 Hz to 7 kHz with a falling slope, then breathing at 2 and 3 cycles per loop.
-function periodicAir(N, d, bin) {
-  const re = new Float64Array(N), im = new Float64Array(N);
-  const lo = Math.round(300 / bin), hi = Math.round(7000 / bin);
-  for (let k = lo; k <= hi; k++) {
-    const f = k * bin, edge = clamp(Math.min((k - lo) / 40, (hi - k) / 400), 0, 1);
-    const mag = edge * Math.pow(f / 1000, -0.5) , ph = d.r() * Math.PI;
-    re[k] = mag * Math.cos(ph); im[k] = mag * Math.sin(ph); re[N - k] = re[k]; im[N - k] = -im[k];
-  }
-  fft(re, im, true);
-  let peak = 0;
-  for (let i = 0; i < N; i++) peak = Math.max(peak, Math.abs(re[i]));
-  const out = new Float32Array(N), ph2 = d.r() * Math.PI;
-  for (let i = 0; i < N; i++) {
-    const t = i / SR;
-    out[i] = (re[i] / peak) * 0.25 * (0.6 + 0.2 * Math.sin(TAU * 2 * bin * t + ph2) + 0.2 * Math.sin(TAU * 3 * bin * t));
-  }
-  return out;
-}
-
-export const VOICES = { tap, tick, glass, shimmer, air, 'swoosh-long': swooshLong, 'swell-soft': swellSoft, 'sub-thump': subThump, bed };
+export const VOICES = { tap, tick, glass, shimmer, air, 'swoosh-long': swooshLong, 'sub-thump': subThump };
 
 /** renderVoice(name, params, seed) -> [left, right]: equal-length Float32Array, not normalised. */
 export function renderVoice(name, params = {}, seed = 1) {

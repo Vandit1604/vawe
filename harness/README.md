@@ -22,7 +22,7 @@ list below. A script none of those reaches is dead: delete it.
 Run with `node <path>`; the file header holds the usage. A film rarely needs them.
 
 - `harness/media/tts.mjs` a voiceover file from text
-- `harness/media/music.mjs` a music bed by genre
+- `harness/media/music.mjs` a music track by genre (only for a user-requested track)
 - `harness/media/kie.mjs` a generated image or video
 - `harness/media/cutout.mjs` a cutout with the background removed
 - `harness/media/ref.mjs` fetch a reference film into `refs/`

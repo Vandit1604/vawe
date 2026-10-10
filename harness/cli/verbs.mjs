@@ -435,9 +435,9 @@ export const VERBS = [
       }
       return [{ script: 'harness/media/sound.mjs', args: [input, ...opt('--cuts', v.cuts), ...opt('--from', v.from), ...opt('--to', v.to), ...opt('--out', v.out), ...(v['no-cache'] ? ['--no-cache'] : [])] }];
     },
-    next: (v, [input]) => (!input ? 'a voice goes in <audio data-synth="name" data-at="s">; vawe sound <bed> gives the beat grid and hits of a music bed'
+    next: (v, [input]) => (!input ? 'a voice goes in <audio data-synth="name" data-at="s">; vawe sound <track> gives the beat grid and hits of a music file the user gave'
       : v.at || v.waveform ? (v.waveform ? 'Read the PNG: each orange tick must sit on the dashed world line of its visual event; move a cue with data-at or data-on' : 'a cue 0 s into itself starts at that second; move one that is off its event with data-at')
-        : 'Read sound.md and sound.png; put each cut on a hit or a beat line at the frame the cut table names, then vawe sound <bed> --cuts <page> again'),
+        : 'Read sound.md and sound.png; put each cut on a hit or a beat line at the frame the cut table names, then vawe sound <track> --cuts <page> again'),
   },
   {
     name: 'sounds', summary: 'alias of vawe sound with no argument: the synth voices for <audio data-synth>, one line each, with default gain and length',

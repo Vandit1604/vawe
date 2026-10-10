@@ -29,7 +29,7 @@ svg path { fill: none; stroke: var(--accent); stroke-linecap: round; stroke-dash
 .label { font: 700 9vh/1 'Caveat', cursive; color: var(--accent); }
 ```
 
-Sound: none; or a dry pen scratch under each stroke, if the film has a bed that can carry it.
+Sound: none; or a dry pen scratch under each stroke, as a short recorded effect.
 
 ## The numbers that make it look expensive
 
