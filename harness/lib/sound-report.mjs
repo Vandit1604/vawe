@@ -19,7 +19,7 @@ function tempoLines(p) {
 export function soundLines({ name, source, placed, limit = Infinity, file = 'sound.md' }) {
   const L = [`# sound: ${name}`, '', `Source ${source}. Duration ${s2(placed.duration)} s${placed.offset ? `; the file starts at film second ${s2(placed.offset)} (data-at minus data-trim), all seconds below are film seconds` : ''}.`];
   if (placed.window.from > 0 || placed.window.to != null) L.push(`Window ${s2(placed.window.from)} to ${s2(placed.window.to ?? placed.duration + placed.offset)} s only.`);
-  L.push(placed.loudness ? `Loudness ${placed.loudness.lufs} LUFS integrated, true peak ${placed.loudness.truePeakDb} dBFS.` : 'Loudness: not measured.', ...tempoLines(placed), '');
+  L.push(placed.loudness ? `Loudness ${placed.loudness.lufs} LUFS integrated, true peak ${placed.loudness.truePeakDb} dBFS.` : `${placed.loudnessNote ?? 'Loudness: not measured'}.`, ...tempoLines(placed), '');
   const top = placed.top.map((t) => placed.onsets.find((o) => o.attack === t)).filter(Boolean);
   L.push('## Strongest hits, ranked', '', 'Put a cue or a cut on `attack` (where the sound starts); `peak` is the loudest change, later.', '',
     ...table(['#', 'attack s', 'f30', 'f60', 'peak s', 'strength', 'kind', 'sounds like', ...(top.some((o) => o.moves) ? ['what moves'] : [])], top.map((o, i) => [i + 1, s2(o.attack), o.f30, o.f60, s2(o.peak), o.strength, o.kind, o.sound ?? '-', ...(top.some((x) => x.moves) ? [o.moves ?? '-'] : [])])), '');

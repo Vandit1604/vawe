@@ -151,7 +151,7 @@ function flashEvents(video, flashes, fps, series, dur) {
   return flashes.map((f) => {
     const peak = f.frame + Math.max(0, f.rise - 1);
     const t = Math.min(peak / fps, dur - 0.05);
-    let tint = null, solid = false;
+    let tint = null, solid = false, tintNote = null;
     try {
       const { rgb, w, h } = frameRgb(video, t);
       const sum = [0, 0, 0];
@@ -160,9 +160,9 @@ function flashEvents(video, flashes, fps, series, dur) {
       tint = hueOf(sum[0] / n, sum[1] / n, sum[2] / n);
       const g = grayFrames(video, t, 1, GRAIN_W, GRAIN_H);
       solid = g ? edgeShare(g[0], GRAIN_W, GRAIN_H) < SOLID_SHARE : false;
-    } catch { tint = null; }
+    } catch (e) { tint = null; tintNote = `tint not read: ${String(e.message).split('\n')[0]}`; }
     return { solid, frame: f.frame, at: f.at, frames: f.frames, seconds: round(f.frames / fps), baseLuma: f.base, peakLuma: f.peak, rise: f.rise, decay: f.decay,
-      peakAt: round(t), clippedAtPeak: series.clips[peak] == null ? null : round(series.clips[peak], 1), tint: tint?.name ?? null };
+      peakAt: round(t), clippedAtPeak: series.clips[peak] == null ? null : round(series.clips[peak], 1), tint: tint?.name ?? null, ...(tintNote ? { tintNote } : {}) };
   });
 }
 
@@ -187,10 +187,10 @@ async function soundOf(src, spec, pageRead, dir, shots, log) {
     const near = cuts.reduce((b, c) => (b == null || Math.abs(c - onset) < Math.abs(b - onset) ? c : b), null);
     return { onset: round(onset), peak: h.t, strength: h.strength, kind: hitKind(h), sound: classes.find((o) => Math.abs(o.attack - onset) <= 0.01)?.sound ?? null, errMs: h.errMs ?? null, nearestCut: near == null || Math.abs(near - onset) > 0.3 ? null : round(near), leadMs: near == null || Math.abs(near - onset) > 0.3 ? null : Math.round((near - onset) * 1000), shot: shots.find((s) => onset >= s.start && onset < s.end)?.index ?? null };
   });
-  let loudness = null;
-  try { loudness = measureFile(src.video); } catch { loudness = null; }
+  let loudness = null, mp4Note = null;
+  try { loudness = measureFile(src.video); } catch (e) { if (spec.audio) mp4Note = `loudness not read: ${String(e.message).split('\n')[0]}`; }
   const live = Boolean(spec.audio) && loudness != null && loudness.I > SILENT_LUFS;
-  const out = { hasAudio: live, bpm: live ? spec.audio.bpm : null, bpmConfidence: live ? spec.audio.confidence : null, beatFrames: live ? spec.audio.beatFrames : [], hits: live ? hits : [], mp4: loudness ? { lufs: loudness.I, truePeakDb: loudness.TP } : null, page: null };
+  const out = { hasAudio: live, bpm: live ? spec.audio.bpm : null, bpmConfidence: live ? spec.audio.confidence : null, beatFrames: live ? spec.audio.beatFrames : [], hits: live ? hits : [], mp4: loudness ? { lufs: loudness.I, truePeakDb: loudness.TP } : null, ...(mp4Note ? { mp4Note } : {}), page: null };
   if (pageRead) {
     log('mixing the audio tags as written');
     const { read, timeline } = pageRead;
