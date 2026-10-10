@@ -412,9 +412,9 @@ export const VERBS = [
   },
   {
     name: 'sound', summary: 'the sound of a track, a film or a page read completely, for cutting to the music: loudness, tempo, beat grid with frames, bars, every hit, sections, a PNG, and with --cuts each cut against the beat; with --at or --waveform the cues of a page; with no argument the synth voices',
-    positional: [{ name: 'input', required: false, kind: 'file', help: 'an audio file (m4a, mp3, wav), an mp4 with audio, or a page (reads its <audio loop> bed, the synth cues as separate rows, and the page\'s own cuts); none: list the synth voices for <audio data-synth>' }],
+    positional: [{ name: 'input', required: false, help: 'an audio file (m4a, mp3, wav), an mp4 with audio, a reference id from vawe refs list, or a page (reads its <audio loop> bed, the synth cues as separate rows, and the page\'s own cuts); none: list the synth voices for <audio data-synth>' }],
     flags: [
-      { name: 'cuts', type: 'string', kind: 'file', help: 'a page (exact worlds from the DOM) or an mp4 (shot cuts): a table per cut with the nearest hit and beat line, offset in ms and frames, verdict, and the second to move each off cut to' },
+      { name: 'cuts', type: 'string', help: 'a page (exact worlds from the DOM), an mp4 or a reference id (shot cuts): a table per cut with the nearest hit and beat line, offset in ms and frames, verdict, and the second to move each off cut to' },
       { name: 'from', type: 'number', help: 'start second of the window' },
       { name: 'to', type: 'number', help: 'end second of the window' },
       { name: 'at', type: 'string', help: 'a page: comma-separated seconds, for example 0.8,2.75: the cues sounding there, how far into each and its level in dB' },

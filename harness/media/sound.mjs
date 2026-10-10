@@ -11,6 +11,8 @@ import { decodeMono } from '../lib/audio-onsets.mjs';
 import { launchPage } from '../lib/render-harness.mjs';
 import { readTimeline } from './timeline.mjs';
 import { probeVideo } from './see/core.mjs';
+import { refVideo, refsDir } from '../lib/refs.mjs';
+import { writeSynthBed } from '../lib/synth-bed.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const PRINT_ROWS = 24;
@@ -28,6 +30,8 @@ function parse(argv) {
   for (const k of ['from', 'to']) if (o[k] != null && !Number.isFinite(Number(o[k]))) die(`--${k} needs a number of seconds, got "${o[k]}"`);
   return o;
 }
+
+const existing = (input) => (fs.existsSync(input) ? input : refVideo(refsDir(), input) ?? die(`${input} is not a file or a reference film id (bin/vawe refs list)`));
 
 const pageCuts = (read) => cutTimesOf(read.spans, DEFAULT_FPS);
 
@@ -51,30 +55,29 @@ async function pngOf(file, { samples, placed, rows, title }) {
 async function main(argv) {
   const o = parse(argv);
   if (!o.input) die('missing <input>; usage: vawe sound <audio | mp4 | page.html> [--cuts <page | mp4>] [--from s --to s]');
-  if (!fs.existsSync(o.input)) die(`no such file: ${o.input}`);
+  o.input = existing(o.input);
   const isPage = o.input.endsWith('.html');
   const name = path.basename(isPage ? path.dirname(path.resolve(o.input)) : o.input, path.extname(o.input));
+  const dir = path.resolve(o.out ?? path.join('out', 'see', name));
+  fs.mkdirSync(dir, { recursive: true });
   let file = o.input, offset = 0, cues = [], read = null;
   if (isPage) {
     read = await readTimeline(o.input).catch((e) => die(e.message));
-    const bed = read.specs.find((s) => s.role === 'music' && s.src);
-    if (!bed) die(`${o.input} has no music bed (an <audio loop src="..."> tag): nothing to read for cutting; pass an audio file instead`);
-    file = bed.src; offset = bed.at - (bed.trim || 0);
+    const bed = read.specs.find((s) => s.role === 'music' && (s.src || s.synth === 'bed'));
+    if (!bed) die(`${o.input} has no music bed (an <audio loop src="..."> or <audio loop data-synth="bed"> tag): nothing to read for cutting; pass an audio file instead`);
+    file = bed.src ?? writeSynthBed(bed, read.duration, dir); offset = bed.at - (bed.trim || 0);
     cues = read.specs.filter((s) => s.role !== 'music').map((s) => ({ at: s.at, voice: s.synth || path.basename(s.src ?? '?'), gain: s.gain, world: read.spans.find((w) => w.start != null && s.at >= w.start && s.at < w.end)?.id ?? null })).sort((a, b) => a.at - b.at);
   }
   let sound;
   try { sound = readSound(file, { cache: !o.noCache }); } catch (e) { die(e.message); }
   const placed = placeSound(sound, { offset, from: o.from == null ? 0 : Number(o.from), to: o.to == null ? Infinity : Number(o.to) });
-  const cutSpec = o.cuts ?? (isPage ? o.input : null);
+  const cutSpec = o.cuts ? existing(o.cuts) : isPage ? o.input : null;
   let cutInfo = null, result = null;
   if (cutSpec) {
-    if (!fs.existsSync(cutSpec)) die(`no such --cuts file: ${cutSpec}`);
     cutInfo = cutSpec === o.input && read ? { cuts: pageCuts(read), fps: DEFAULT_FPS, source: o.input } : await cutsOf(cutSpec);
     const cuts = cutInfo.cuts.filter((t) => t >= placed.window.from && t <= (placed.window.to ?? Infinity));
     result = cutsVsSound(cuts, placed, cutInfo.fps);
   }
-  const dir = path.resolve(o.out ?? path.join('out', 'see', name));
-  fs.mkdirSync(dir, { recursive: true });
   const png = path.join(dir, 'sound.png');
   const samples = decodeMono(file, 22050).samples;
   await pngOf(png, { samples, placed, rows: result?.rows ?? [], title: `${name}: ${placed.tempo.bpm} BPM (${placed.tempo.usable ? 'usable' : 'weak'}); orange: hits, grey: beats, dashed: half beats, black: bars${result ? '; green, amber, red: cuts on beat, near, off' : ''}` });
