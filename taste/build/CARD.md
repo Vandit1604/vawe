@@ -11,7 +11,7 @@ Contents:
 - [attractors](#attractors)
 - [anti-patterns](#anti-patterns)
 
-One page, CSS and WAAPI, 5 to 40 s. The author reads taste/build/DIGEST.md at the brief. The judge scores against these 34 rules and the 5 anti-patterns below.
+One page, CSS and WAAPI, 5 to 40 s. The author reads taste/build/DIGEST.md at the brief. The judge scores against these 33 rules and the 5 anti-patterns below.
 Every rule is observable from frames or from an ffmpeg measurement. Name the rule id in each fix.
 Where the frames and the measurements disagree with a rule, the frames and the measurements decide.
 
@@ -27,8 +27,9 @@ The hero comes from the direction, not from the list of things first drafts fall
 
 Each beat shows a real artifact working: the real UI for a real product, the brand's own mark and world for an invented one. A word in a box is not a beat.
 
-- Range: a capture, a drawn real artifact or a live demo in every beat that makes a claim
-- Judge: Name the artifact that earns each beat. Which beat holds only a word in a box, chrome with no function or a click with no result?
+- Limit: no text under 28 px at 1920 wide on a built screen
+- Range: a capture, a drawn real artifact or a live demo in every beat that makes a claim; a product screen is designed for the video, never a plain mock, and a capture of the real product beats a mock: one focal element per screen, the subject fills most of the frame, real images whole at the source aspect ratio, colour from theme tokens with one accent
+- Judge: Name the artifact that earns each beat. Which beat holds only a word in a box, chrome with no function or a click with no result? Does the screen look designed for the film, and is every claim in its copy true?
 
 ### thread
 
@@ -236,10 +237,11 @@ The film keeps moving to the last frame: the last second carries a move on a par
 
 ### no-tells
 
-No generated tells. Each one reads as made without a direction.
+No generated tells. Each one reads as made without a direction. No template chrome: structure encodes information or it is absent. A stock device is seasoning, never the idea.
 
-- Range: banned unless the brief asks: gradient text, a cyan to purple gradient the brand does not own, corner labels, frame borders, registration marks, glow on UI text, particle bursts, shockwave rings, RGB split, camera shake, lens flares, a centred title on a gradient
-- Judge: Scan every frame for the listed effects. Is each one asked for or declared?
+- Limit: a sheen band, lens streak, light beam, accent bar or rule line at most once per film
+- Range: banned unless the brief asks: gradient text, a cyan to purple gradient the brand does not own, corner labels, frame borders, registration marks, glow on UI text, particle bursts, shockwave rings, RGB split, camera shake, lens flares, a centred title on a gradient; template chrome (a tracked-caps eyebrow above a title, 01 / 02 / 03 step markers on a non-sequence, a coloured side-stripe border on a card, a card inside a card, three or more identical sibling cards); effects are seasoning, 2 to 3 earned moments in a 45 s film (the hero reveal, an act break, the CTA)
+- Judge: Scan every frame for the listed effects. Is each one asked for or declared? Is any label, number, stripe or card there for the look and not for the information? Count the sheen bands, streaks, beams, accent bars and rule lines.
 
 ### reveal-mask-pad
 
@@ -247,14 +249,6 @@ A reveal mask clears the glyphs. Never letters cut by their own reveal.
 
 - Limit: pad the clip box at least 0.3 em below the baseline and above the cap height
 - Judge: On a full frame mid-reveal, is every descender whole?
-
-### stock-device-once
-
-A stock device is seasoning, never the idea. Use it at most once per film.
-
-- Limit: a sheen band, lens streak, light beam, accent bar or rule line at most once per film
-- Range: effects are seasoning: 2 to 3 earned moments in a 45 s film (the hero reveal, an act break, the CTA)
-- Judge: Count the sheen bands, streaks, beams, accent bars and rule lines.
 
 ## sound
 

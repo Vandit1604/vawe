@@ -123,12 +123,12 @@
     "text": "end on motion in the last 1 s, not a frozen lockup"
    },
    {
-    "rule": "reveal-mask-pad",
-    "text": "pad each reveal mask 0.3 em past the glyphs, not letters cut by their own reveal"
+    "rule": "no-tells",
+    "text": "use a stock device (sheen band, lens streak, light beam, accent bar, rule line) once, not as the idea"
    },
    {
-    "rule": "stock-device-once",
-    "text": "use a stock device (sheen band, lens streak, light beam, accent bar, rule line) once, not as the idea"
+    "rule": "reveal-mask-pad",
+    "text": "pad each reveal mask 0.3 em past the glyphs, not letters cut by their own reveal"
    },
    {
     "rule": "sound-cues",
