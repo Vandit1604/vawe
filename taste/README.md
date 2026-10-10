@@ -140,10 +140,10 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [cue-sparse](rules/cue-sparse.md): Sync points are scarce. Check: none.
 - [music-licence](rules/music-licence.md): Only music whose licence we can produce goes under a film. Check: none.
 - [sound-bridge](rules/sound-bridge.md): A sound bridge is a continuous object that costs the picture nothing: audio runs across a picture change and stitches unrelated beats. Check: none.
-- [sound-default-on](rules/sound-default-on.md): Sound is the default; silence is a device with a reason. Check: none.
+- [sound-default-on](rules/sound-default-on.md): Sound is small effects on actions, never a synth bed. Check: none.
 - [sound-level](rules/sound-level.md): Sound is subtle: low peak, quiet mix. Check: sound-peak, sound-loudness.
 - [sound-swell](rules/sound-swell.md): At most one soft swell, and it ends on a cut. Check: none.
-- [sound-voices](rules/sound-voices.md): Quiet ticks carry the film: droplet, pluck, bloom, chime at their default gains. Check: none.
+- [sound-voices](rules/sound-voices.md): Small effects on actions carry the film, with no synth bed, pad or chord. Check: none.
 
 ## craft
 

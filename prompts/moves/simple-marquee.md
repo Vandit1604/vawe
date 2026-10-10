@@ -27,7 +27,7 @@ Layout of the demo (a 532 px tall box, scaled to the frame): three rows of five 
 margin each side (32 px gap), 16 px between rows, the first row 324 px from the top; the title
 "Weekly Finds" is 60 px, centred, 133 px from the top. Directions: left, right, left.
 
-Sound: none; or a quiet tape-like bed.
+Sound: none; or a quiet tape click on each tile.
 
 ## The numbers that make it look expensive
 

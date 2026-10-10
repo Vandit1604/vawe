@@ -20,14 +20,14 @@ Audio is `<audio>` tags in the page. The renderer never plays them live. It read
 | `data-at` | start time in seconds |
 | `data-gain` | gain in dB. Without it, a synth voice takes its soft default |
 | `data-fade-out` | fade-out length in seconds |
-| `loop` | marks the music bed |
-| `data-role="vo"` | a voiceover. It ducks the bed by 18 dB while it plays |
+| `loop` | marks a music file the user gives. No synth bed: `data-synth="bed"` is refused |
+| `data-role="vo"` | a voiceover. It ducks a music track by 18 dB while it plays |
 
 ## Synth voices
 
-`pluck`, `chime`, `sparkle`, `droplet`, `bloom`, `success`, `ready`, `whoosh`, `riser`, `swell`, `impact`, `drop`, `braam`.
+`pluck`, `chime`, `sparkle`, `droplet`, `bloom`, `success`, `ready`, `whoosh`, `riser`, `swell`, `impact`, `drop`.
 
-Each voice is synthesized from parameters with a seeded generator, so a cue gives the same bytes on every machine. Default gains: UI cues (`pluck`, `chime`, `sparkle`, `droplet`, `bloom`, `success`, `ready`) -6 dB, `whoosh`, `riser` and `swell` -4 dB, and the weight voices `impact`, `drop` and `braam` -2 dB.
+Each voice is synthesized from parameters with a seeded generator, so a cue gives the same bytes on every machine. Default gains: UI cues (`pluck`, `chime`, `sparkle`, `droplet`, `bloom`, `success`, `ready`) -6 dB, `whoosh`, `riser` and `swell` -4 dB, and the weight voices `impact` and `drop` -2 dB.
 
 ## The mix
 
@@ -35,7 +35,7 @@ The mix is as written. It sums the cues at their gains. It does not normalise. A
 
 ## Taste
 
-Sound is felt, not noticed. A few soft ticks and one swell beat many hits. Cue the first and the last key word, not every word. Use `impact`, `braam` or `drop` only when the brief asks for weight. The mix warns when one cue peaks more than 6 dB above the median cue.
+Sound is felt, not noticed. A few soft ticks and one swell beat many hits. Cue the first and the last key word, not every word. Use `impact` or `drop` only when the brief asks for weight. The mix warns when one cue peaks more than 6 dB above the median cue.
 
 Name each beat once in CSS (`--beat-2: 1.85s`) and read it in every delay of that beat. One edit then moves the beat.
 

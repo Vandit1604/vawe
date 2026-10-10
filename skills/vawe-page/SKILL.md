@@ -31,7 +31,7 @@ ground that is never flat (a light, grain or depth device named from a reference
 (5) Fill the brief's Board: a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s),
 the spectacle second (also `<meta name="spectacle">`; recipe 15 in `prompts/moves/RECIPES.md`), a named move per cut
 (overlap, camera, what carries the eye, which arrivals overshoot: `EASE.nudge` for ordinary ones, `EASE.pop` for the hero),
-and sound: a subtle bed plus one voice per cut and for the spectacle (`bin/vawe sound`). (6) Then the Shots rows, the
+and sound: small effects on actions, no bed (`taste/craft/sound.md`; `bin/vawe sound`). (6) Then the Shots rows, the
 motion and `bin/vawe dev`. The motion is done when overshoot-share, live-hold and seam-variety are clean or waived with a
 reason, and you have Read `bin/vawe strip <page> --cuts` for every cut (and `bin/vawe onion` and `bin/vawe velocity` on the
 spectacle second), fixed what reads flat and written a row per cut in the brief's "Motion pass". `bin/vawe` names the next
@@ -40,20 +40,20 @@ stage after each step; `bin/vawe ship` warns while the Board or the Motion pass 
 ```html
 <meta name="message" content="zero fees">    <!-- the one thing to remember -->
 <meta name="spectacle" content="6.2">        <!-- the second of the one big moment -->
-<audio src="assets/music.mp3" loop data-at="0" data-gain="-3" data-fade-out="0.4"></audio>
+<audio src="assets/click.wav" data-at="0.4"></audio>   <!-- a recorded effect; a loop src only if the user gives a track -->
 <audio data-synth="pluck" data-at="0.85"></audio>   <!-- a quiet tick on one key word, default gain -->
 <audio data-synth="swell" data-at="1.66"></audio>   <!-- the one soft swell, ends on the cut -->
 <audio src="assets/vo.wav" data-role="vo" data-at="1.0"></audio>
 ```
 
-`data-trim` and `data-trim-end` cut a clip to the part you want, so there is no need for ffmpeg. `data-bpm` sets the synth bed's tempo (default 96) and `bin/vawe sound <page> --cuts <page>` checks the cuts against it.
+`data-trim` and `data-trim-end` cut a clip to the part you want, so there is no need for ffmpeg. `bin/vawe sound <track> --cuts <page>` checks the cuts against a track the user gave.
 
 ## Sound is felt, not noticed
 
 A few soft key ticks and one swell beat many hits. `data-gain` is absolute dB: it replaces the voice's
 default, it does not add to it. Leave it off and a voice takes its default (`DEFAULT_GAIN_DB` in
-`core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the weight voices impact/drop/braam -2; the quiet
-palette tap -3, tick -5, bed -19, which land a film near -20 LUFS; a `src` file defaults to 0 dB). Write a gain only to move one cue on purpose. Reach for impact, braam or drop only when the brief asks for
+`core/audio/kit.mjs`: UI cues -6 dB, whoosh/riser/swell -4, the weight voices impact/drop -2; the quiet
+palette tap -3, tick -5, which land a film near -20 LUFS; a `src` file defaults to 0 dB). Write a gain only to move one cue on purpose. Reach for impact or drop only when the brief asks for
 weight. Not every word gets a tick: cue the first and the last. The mix warns when one cue peaks more
 than 6 dB above the median cue, with the `data-gain` change that fixes it. Name each beat once in
 CSS (`--beat-2: 1.85s`) and read it from every delay in that beat, so one edit moves the beat.

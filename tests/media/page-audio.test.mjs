@@ -56,7 +56,7 @@ test('4 soft cues and 1 swell at default gains land near -20 LUFS, true peak und
 }));
 
 test('the limiter only lowers peaks: a hot mix stays under -1 dBTP, a quiet one is not raised', () => withFilm(3, async ({ dir, video }) => {
-  const hot = await mixAndMux({ specs: [cue('impact', 0.3, 12), cue('braam', 0.3, 12)], duration: 3, video, out: path.join(dir, 'hot.mp4') });
+  const hot = await mixAndMux({ specs: [cue('impact', 0.3, 12), cue('drop', 0.3, 12)], duration: 3, video, out: path.join(dir, 'hot.mp4') });
   assert.ok(hot.measured.TP <= -0.5, `hot mix peaks at ${hot.measured.TP} dBTP`);
   const soft = await mixAndMux({ specs: [cue('pluck', 0.3, -40)], duration: 3, video, out: path.join(dir, 'soft.mp4') });
   assert.ok(soft.measured.TP < -35, `a -40 dB cue measured ${soft.measured.TP} dBTP: something raised it`);

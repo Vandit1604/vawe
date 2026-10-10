@@ -31,4 +31,4 @@ The draft is half size, 30 fps. `ship` renders the final.
 
 ## Add your own music
 
-The film ships the synth bed and the ticks. To use a track, add `<audio loop src="assets/your-track.m4a" data-at="0" data-fade-out="0.4"></audio>`, then run `bin/vawe see films/examples/tracking-hud/page.html` and check that the cuts land on its beat. The cuts sit on a 73.8 BPM grid (see `brief.md`, Board). Do not commit a track you do not have the rights to.
+The film ships the ticks and no bed. To use a track, add `<audio loop src="assets/your-track.m4a" data-at="0" data-fade-out="0.4"></audio>`, then run `bin/vawe see films/examples/tracking-hud/page.html` and check that the cuts land on its beat. The cuts sit on a 73.8 BPM grid (see `brief.md`, Board). Do not commit a track you do not have the rights to.

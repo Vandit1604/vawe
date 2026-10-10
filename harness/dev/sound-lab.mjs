@@ -14,7 +14,7 @@ for (const n of names) fs.writeFileSync(path.join(OUT, `${n}.wav`), encodeWav(no
 
 const FAMILY = {
   whoosh: 'movement', riser: 'movement', swell: 'movement',
-  impact: 'weight', drop: 'weight', braam: 'weight',
+  impact: 'weight', drop: 'weight',
   pluck: 'accent', chime: 'accent', sparkle: 'accent', droplet: 'accent', bloom: 'accent',
   success: 'state', ready: 'state',
 };

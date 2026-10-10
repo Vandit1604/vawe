@@ -97,7 +97,7 @@ against). Dissolve, graphic match, smash cut. Ask: should this seam disappear or
 6. Lead or linger with sound? This is where "smooth" comes from in pro work.
 7. Eye-trace and velocity: cut where the eye already is. Keep direction and speed across the seam (exit
    accelerating, enter decelerating through a shared blur).
-8. Rhythm: accelerate into a climax, then hold the payoff. Cut on the beat when there is a bed, or
+8. Rhythm: accelerate into a climax, then hold the payoff. Cut on the beat when the user gave a track, or
    two frames early.
 9. Restraint check: is this the one primary family or one of the earned accents
    ([one-cut-family](../rules/one-cut-family.md))? Adjacent moving transitions change axis or direction

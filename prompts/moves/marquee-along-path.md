@@ -34,7 +34,7 @@ Its progress is `duration` 4 s, linear, looping: `offsetDistance = ((t / 4) % 1)
 original demo runs it once, 3 s, on `cubicBezier(0.757, -0.002, 0.123, 0.993)`: `offsetDistance = cubicBezier(0.757, -0.002, 0.123, 0.993)(clamp01(t / 3)) * 100 + '%'`.
 `direction: reverse` runs 100 to 0.
 
-Sound: none; or a low bed with one tick as the lead tile crosses the loop.
+Sound: none; or one tick as the lead tile crosses the loop.
 
 ## The numbers that make it look expensive
 

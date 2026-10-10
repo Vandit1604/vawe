@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings } from '../../harness/lib/board.mjs';
 
-const board = ({ cuts = ['0.6', '0.3', '1.1'], spectacle = 'at 7.2', moves = ['whip', 'push', 'overlap'], sound = ['bed, loop', 'tick'] } = {}) => `## Look
+const board = ({ cuts = ['0.6', '0.3', '1.1'], spectacle = 'at 7.2', moves = ['whip', 'push', 'overlap'], sound = ['tick', 'tap'] } = {}) => `## Look
 
 ## Board
 
@@ -79,9 +79,9 @@ test('a spectacle more than 0.25 s from the page meta is named; 0.25 s is not', 
   assert.deepEqual(boardChecks(board(), null), []);
 });
 
-test('no sound rows and no bed are named', () => {
+test('no sound rows is named; effects without a bed are fine', () => {
   assert.match(boardChecks(board({ sound: [] }), 7.2)[0], /no sound rows/);
-  assert.match(boardChecks(board({ sound: ['tick', 'whoosh'] }), 7.2)[0], /no bed/);
+  assert.deepEqual(boardChecks(board({ sound: ['tick', 'whoosh'] }), 7.2), []);
 });
 
 test('a move that says fade or is empty is named by its cut', () => {

@@ -134,11 +134,10 @@ Camera is the tilt in every state (perspective rx, ry, rz in the page table). Ev
 
 ### Sound
 
-Subtle. The page ships the synth bed plus one `tick` per cut (the `data-synth="tick"` rows in `page.html`), quiet at -17 dB. Add your own music as an `<audio loop src=...>` row and check the cuts against its beat with `bin/vawe see`.
+Subtle. The page ships one `tick` per cut (the `data-synth="tick"` rows in `page.html`), quiet at -17 dB. Add your own music as an `<audio loop src=...>` row and check the cuts against its beat with `bin/vawe see`.
 
 | at s | voice | gain dB | for |
 |---|---|---|---|
-| 0 | bed, loop | -10 | the synth bed under the whole film, fading out at the end |
 | 0.02 to 7.21 | tick | -17 | one tick per cut and lock (the 19 `data-synth="tick"` rows) |
 
 ## Motion pass

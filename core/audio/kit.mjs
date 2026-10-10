@@ -14,8 +14,7 @@
 // envelope -> feedback delay) is reimplemented here as offline DSP. The parameter tables are its
 // design work; the DSP below is our implementation of the same signal path.
 //
-// Used by harness/media/gen-audio.mjs (`make gen X=audio`) to bake assets/sfx/*.wav + assets/music/*.wav,
-// which the Go mixer (internal/audio/audio.go) beds under the render.
+// Used by harness/media/gen-audio.mjs (`make gen X=audio`) to bake assets/sfx/*.wav.
 
 import { SR, TAU, sec, clamp, rng, osc, biquad } from './dsp.mjs';
 import { renderVoice } from './palette.mjs';
@@ -330,43 +329,16 @@ export const CUES = {
   // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
   swell: {"masterGain": 0.5, "layers": [{"kind": "noise", "filterType": "bandpass", "filterFrequency": 274.12175975739956, "filterGlideTo": 961.1819964135066, "filterGlideTime": 0.7306436157366262, "filterQ": 2.2556555460207166, "attack": 0.7106436157366262, "decay": 0.02, "peak": 0.5, "offset": 0}]},
 
-  // Braam. The Inception horn: a stack of detuned saws an octave and a fifth apart, low enough to feel.
-  // The detune is what makes one sustained note sound like a section rather than a synth, because two
-  // saws a few cents apart beat at the difference frequency. THE BEAT RATE IS THE NUMBER TO SET, not
-  // the cents, and it is the one nobody computes: 14 cents is a ratio of 1.00811, so at 55Hz it beats
-  // at 0.45Hz, slow enough to read as a swell inside the note. The SAME 14 cents an octave up beats
-  // twice as fast, which is why one detune value cannot serve a whole stack. The small downward glide
-  // is the player running out of air, and it is what stops the note sounding held by a machine.
-  //
-  // WHAT THIS IS NOT, said plainly because it would otherwise read as a full recipe. No source I could
-  // reach gives a braam's detune in cents or its intervals, so the cents here are chosen to hit beat
-  // rates and are not quoted from anyone. And the two published methods both say the identity is
-  // RESONANCE AND DISTORTION rather than the note: about twenty detuned saws, one per brass player you
-  // are imagining, spread across the stereo field with real brass on top and heavy distortion
-  // (https://professionalcomposers.com/sound-design-how-to-make-trailer-braaam-fx/); or Zimmer's
-  // original, brass players playing INTO the resonance of an open piano in a church
-  // (https://richardpryn.com/braaams/). This engine has five voices, no distortion, no stereo and no
-  // resonator, so this is the shape of a braam at a fraction of its density. Treat it as the low
-  // sustained weight in the library, not as the trailer horn.
-  // PROMOTED FROM A VARIANT, round 5 (`composeMovement('braam', 1)` in
-  // harness/dev/sound-vary.mjs reproduces it, and out/sound-vary/specs-r5.json records it). The
-  // shipped voicing was REJECTED by ear and this one kept. The numbers are a measured preference.
-  braam: {"masterGain": 0.42, "layers": [{"kind": "tone", "waveform": "tri", "frequency": 74.52258396847174, "detune": -22.92972768098116, "attack": 0.3493133140960708, "decay": 0.9, "peak": 0.2142857142857143}, {"kind": "tone", "waveform": "saw", "frequency": 111.7838759527076, "detune": 29.808645985275508, "attack": 0.37931331409607083, "decay": 0.9, "peak": 0.125}, {"kind": "tone", "waveform": "tri", "frequency": 149.04516793694347, "detune": -36.687564289569856, "attack": 0.4093133140960708, "decay": 0.9, "peak": 0.08823529411764706}, {"kind": "tone", "waveform": "saw", "frequency": 223.5677519054152, "detune": 43.5664825938642, "attack": 0.4393133140960708, "decay": 0.9, "peak": 0.06818181818181818}, {"kind": "noise", "filterType": "bandpass", "filterFrequency": 857.5214679539204, "filterGlideTo": 2744.068697452545, "filterGlideTime": 1.1093133140960707, "filterQ": 1.0484928160905838, "attack": 0.4093133140960708, "decay": 0.7, "peak": 0.2838631074968726, "offset": 0}]},
-
   // ---- THE SUBTLE PALETTE (core/audio/palette.mjs): stereo, seeded per use, with a generated room ------
   // Quiet by default. Each is a pure function of its seed; the mixer gives every <audio> its own seed.
-  // data-length (s) sets `air`, `swoosh-long` and `swell-soft` to the move they sit under; the swell
-  // peaks `length` seconds after data-at, so put data-at that far before the moment.
+  // data-length (s) sets `air` and `swoosh-long` to the move they sit under.
   tap: { voice: 'tap' },
   tick: { voice: 'tick' },
   air: { voice: 'air', params: { length: 0.45 } },
   'swoosh-long': { voice: 'swoosh-long', params: { length: 1.1 } },
   shimmer: { voice: 'shimmer' },
   glass: { voice: 'glass' },
-  'swell-soft': { voice: 'swell-soft', params: { length: 1.5 } },
   'sub-thump': { voice: 'sub-thump' },
-  // A soft evolving pad and air, an 11.9 s loop with no seam. Use with `loop` (the music bed).
-  bed: { voice: 'bed' },
 };
 
 /**
@@ -374,45 +346,16 @@ export const CUES = {
  * data-gain. The mix is not normalised, so these are absolute: a cue is normalised to -2 dBFS before
  * this. Measured (tests/media/page-audio.test.mjs): 4 soft cues plus 1 swell land near -20 LUFS with
  * a true peak under -6 dBTP. UI cues are the softest, swells and whooshes sit above them, the weight
- * voices impact/drop/braam are the loudest; data-gain moves any of them on purpose.
+ * voices impact and drop are the loudest; data-gain moves any of them on purpose.
  */
 export const DEFAULT_GAIN_DB = {
   pluck: -6, chime: -6, sparkle: -6, droplet: -6, bloom: -6, success: -6, ready: -6,
   whoosh: -4, riser: -4, swell: -4,
-  impact: -2, drop: -2, braam: -2,
+  impact: -2, drop: -2,
   // The palette: every cue peaks within 4 dB of the others (-5 to -9 dBFS after the 0.8 ceiling). The taps
   // get the high end of that range because equal peaks make a sustained cue 5 to 10 dB louder than a tap
-  // (loudest 100 ms RMS, measured once by hand). The bed sits 12 dB under the quietest cue. A film with a bed
-  // and one cue per beat lands near -20 LUFS integrated with a true peak under -3 dBTP (tests/media/sound-palette.test.mjs).
-  tap: -3, tick: -5, air: -5, 'swoosh-long': -5, shimmer: -7, glass: -7, 'swell-soft': -6, 'sub-thump': -5,
-  bed: -19,
+  // (loudest 100 ms RMS, measured once by hand). A film with
+  // one cue per beat lands near -20 LUFS integrated with a true peak under -3 dBTP (tests/media/sound-palette.test.mjs).
+  tap: -3, tick: -5, air: -5, 'swoosh-long': -5, shimmer: -7, glass: -7, 'sub-thump': -5,
 };
 for (const name of Object.keys(CUES)) if (!(name in DEFAULT_GAIN_DB)) throw new Error(`audio: voice "${name}" has no DEFAULT_GAIN_DB entry`);
-
-/**
- * Music bed: a seamless ambient loop built from a chord, a slow tremolo and an optional pulse.
- * Every partial is snapped to an integer number of cycles over the loop so the seam is inaudible.
- * Parameterized so a brand's bed is numbers, not a downloaded track.
- */
-export function musicBed({ loop = 8, root = 110, chord = [1, 1.5, 2, 3], gain = 0.05, air = 0.016,
-  tremolo = 0.25, pulse = null, pulseGain = 0.16, seed = 7, brightness = 1 } = {}) {
-  const n = sec(loop), out = new Float32Array(n);
-  const snap = (f) => Math.round(f * loop) / loop; // integer cycles per loop -> seamless
-  const partials = chord.map((m) => snap(root * m));
-  const trem = snap(tremolo), airF = snap(root * 8 * brightness), airLfo = snap(tremolo / 2);
-  for (let i = 0; i < n; i++) {
-    const t = i / SR;
-    const tr = 0.7 + 0.3 * Math.sin(TAU * trem * t);
-    let v = 0;
-    for (const f of partials) v += Math.sin(TAU * f * t);
-    out[i] = (v / partials.length) * gain * tr + Math.sin(TAU * airF * t) * air * (0.6 + 0.4 * Math.sin(TAU * airLfo * t));
-  }
-  if (pulse) {
-    const p = renderCue({ masterGain: pulseGain, layers: [{ kind: 'tone', waveform: 'sine', frequency: root * 0.53, attack: 0.004, decay: 0.1, peak: 0.6 }] }, seed);
-    for (let b = 0; b * pulse < loop; b++) {
-      const off = sec(b * pulse);
-      for (let i = 0; i < p.length && off + i < n; i++) out[off + i] += p[i] * (b % 2 === 0 ? 1 : 0.7);
-    }
-  }
-  return out;
-}
