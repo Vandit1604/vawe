@@ -76,10 +76,11 @@ import { beatAdvice } from '../lib/sound-read.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
-import { cameraOnlySpans } from '../lib/camera-moves.mjs';
+import { cameraOnlySpans, cameraSpans } from '../lib/camera-moves.mjs';
+import { boardVerify } from '../lib/board-verify.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
-import { barLint, boxMotion, overshootPct } from '../lib/bar-lint.mjs';
+import { barLint, boxMotion, overshootPct, timedArrivals } from '../lib/bar-lint.mjs';
 import { measureDraftShape, rangeLines } from '../lib/draft-range.mjs';
 import { adviceBlock, errorLine } from '../lib/advice.mjs';
 import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
@@ -987,7 +988,12 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const sound = soundLine(level?.I ?? null, undefined, level);
   const peak = peakLine(level?.TP ?? null, level?.cues);
   const bedAdvice = [...(level?.beds ?? []).map(bedLine), ...balanceLines((level?.cues ?? []).filter((c) => c.role === 'sfx'))].filter(Boolean);
-  const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...bedAdvice, ...page.lines];
+  const planAdvice = boardVerify(readBrief(pagePath), {
+    cameraSpans: (motion.scripted && !motion.boxes) || motion.boxes?.canvas ? null : cameraSpans(motionRecords(motion)),
+    arrivals: timedArrivals(motionRecords(motion), probe.speed?.arrivals ?? []),
+    cues: (level?.cues ?? []).filter((c) => c.role === 'sfx'), dur: Number(readPageMeta(pagePath, 'duration')),
+  });
+  const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...bedAdvice, ...planAdvice, ...page.lines];
   const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);

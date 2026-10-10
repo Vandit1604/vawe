@@ -158,8 +158,7 @@
   "blank_run_s": 0.3,
   "blank_edge_s": 0.5,
   "blank_grid_span_max": 0.06,
-  "blank_grain_spread": 0.06,
-  "read_world_s_max": 4
+  "blank_grain_spread": 0.06
  },
  "anticipation": {
   "dip_pct_min": 2,
