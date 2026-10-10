@@ -81,7 +81,15 @@ Ask in this order; the first changes the table most. A skipped question takes it
 1. **Length**: the total seconds, and about how many rows? Default: 15 s, 6 rows. Why: the last end s is the duration meta; a longer film than the rows has a dead tail.
 2. **Grid**: a beat grid (BPM and offset) or free timing? Default: free; cuts follow the picture. Why: with a grid every start is a beat, or two frames before one.
 3. **Exposure**: ones or twos? Default: ones. Why: UI is on ones; a drawn look is on twos.
-4. **Cues**: synth voices or sound files? Default: synth voices from `core/audio/kit.mjs`. Why: cues come from the picture and are placed 30 ms early either way.
+4. **Cues**: recorded effects or synth voices? Default: a recorded effect where one fits (`resources/README.md`), a synth voice from `core/audio/kit.mjs` otherwise. Why: cues come from the picture and are placed 30 ms early either way.
+
+## Beyond the three tables
+
+A story beat can also carry: the arc position (hook, build, proof, payoff, CTA; outcome first beats product first), the mechanism you reproduce or adapt (the signature of the device you keep and the one thing you change), the persuasion job (negative contrast, category naming, risk reversal; a beat with none is decoration) and the felt arc (curiosity, recognition, trust, urgency).
+
+Every beat has three phases: build 0 to 30 percent (elements enter, staggered), breathe 30 to 70 (the content is visible and one part moves) and resolve 70 to 100 (a decisive end, faster than the entrance). Weight the cues into the back half of the beat; at a beat's start only its first cue is present. Two banned failures: the slideshow (everything dumped in the first 25 percent, then frozen) and the screensaver (elements drifting independently to fake life in a hold).
+
+Vary the cut rhythm and set the fastest beat by contrast with a slow one beside it. Bookend: let the payoff call back the hook. No two beats move alike. The worst render bugs (a black flash, a morph that reads as a collision) hide in the transition overlap, so sample the frames that straddle every seam: `bin/vawe critique <page>` writes the strip and the loop seam.
 
 ## From the table to the page
 

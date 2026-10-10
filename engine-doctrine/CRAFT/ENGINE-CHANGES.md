@@ -102,6 +102,17 @@ default, one example, the steps it runs and the one next command. Keep the parse
 flag exits 2 and names the valid ones. Do not add a verb for a tool a film does not need; run that
 tool with `node <path>` and list it in `harness/README.md`.
 
+## Command output: one contract, two renderings
+
+A reporting command (a gate, a check, an audit) builds a finding as a record first and renders prose from it; it never prints ad-hoc text. The contract lives in `harness/lib/findings.mjs`.
+
+1. A finding is a record: `{code, severity, summary, at?, fix?, doc?}`. Build the record, not a sentence.
+2. Prose is rendered from the record, one tight line per finding, so prose and JSON cannot drift.
+3. `--json` emits the records and nothing else on stdout. Headers, counts and advice go to stderr; the exit code is the same in both modes.
+4. The rationale lives in a code comment, not in runtime output: a reader wants what is wrong, where (`at`), the fix and the one doc (`doc`).
+
+Use `gateFindings()` to record and render, and `emitJson()` to print a payload of your own under `--json`. `bin/vawe check <gate> --json` forwards the flag; a gate can also write its records to the file named by `VAWE_FINDINGS_OUT`. Test runners tally pass and fail and stay prose.
+
 ## After a render
 
 Classify every friction point as an engine bug, a gate gap or an authoring choice. Fix the engine ones
