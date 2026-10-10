@@ -46,27 +46,21 @@ assets/fonts/local/Sohne.woff2.
 
 Icon and photo sources:
 
-- Brand logos: Simple Icons (simpleicons.org), CC0. A handful of these SVGs
-  are committed under assets/icons/ because local demos load them. CC0
-  covers the icon file, not the trademark: a company mark stays that
-  company's mark.
+- Icons: Lucide (ISC) under assets/icons/ui/ and the Markdown mark (CC0)
+  are committed. Third-party brand logos are not committed: they are
+  trademarks, kept local and gitignored.
 
-- Other brand marks and site captures under assets/brands/ and assets/icons/plinth.png:
-  used to show integrations, not owned by vawe, and not covered by the licence of
-  this repository. Each file and what is known of its origin is listed in
-  assets/README-LICENCE.md (Brand marks and captures).
-
-- Flags: flagcdn.com, public domain. Fetched on demand, not committed.
+- Flags: flagcdn.com, public domain. Committed under assets/flags/.
 
 - Photos: CC0 / CC-BY via the photo fetcher; CC-BY credits are recorded per
   video. Fetched on demand, not committed.
 
 Sound effects:
 
-Every cue is synthesized from parameters by `node generators/media/audio-bake.mjs`
-(core/audio/kit.mjs): no download, no third-party license, byte-identical on
-every machine. All 28 wav files under assets/sfx/ are committed. They are our
-own output and ship under the repository license.
+Every cue is synthesized from parameters in core/audio/kit.mjs when a film
+renders: no download, no license, byte-identical on every machine. The
+optional `node generators/media/audio-bake.mjs` writes them to the gitignored assets/sfx/. A real
+sample is an optional OVERRIDE, never a replacement.
 
 See resources/README.md for a list of stock media sites.
 
