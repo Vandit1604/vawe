@@ -36,7 +36,7 @@ next command for the film you edited last.
 
 | # | stage | the command |
 |---|---|---|
-| 1 | brief (facts only) | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing facts first (write them to a file, answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`engine-doctrine/CRAFT/ROUTING.md`) |
+| 1 | brief (facts only) | `bin/vawe new <name> --request "<the ask>" [--length s]` asks for missing facts first (write them to a file, answer with `--answers <file>`; unattended: `--defaults`), or `--from prompts/<t>.md` (`guides/ROUTING.md`) |
 | 2 | reference study | `bin/vawe refs list`, Read the frames at full size, then fill `brief.md` "Taken from": 4 to 6 named frame paths and what each gives. Then how they MOVE: `bin/vawe strip <ref-id> --cuts` on 2 refs, Read the strips, name 3 moves (ref id, cut second) |
 | 3 | design system and kit | `films/<name>/DESIGN.md` (palette roles, type, ground and light devices, text treatment, one line per rung of the skill ladder: builder, type, colour, depth, frame) and `films/<name>/kit/` (ground layers; each moving part its own element); format and example in `vawe-page`; the builder rung builds product UI as a real interface; the frame rung rejects web-page patterns; a `Skipped <rung>` line cites a reference frame path or a SPEC.md line |
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
@@ -86,11 +86,11 @@ and what was measured (a number with its unit); "intentional", "by design", "del
 do not count, and nor does one reason copied to 3 or more waivers. The draft lists every refused waiver; the judge sees every waiver.
 `<script type="application/json" id="authoring">{"allow": ["world-held@3.5-6.2"], "_why": {"world-held@3.5-6.2": "world s4, 2.7 s: the wordmark is the last beat and a caret ticks on it"}}</script>`
 
-## Changing the engine, not a film  `[ref: engine-doctrine/CRAFT/ENGINE-CHANGES.md]`
+## Changing the engine, not a film  `[ref: guides/ENGINE-CHANGES.md]`
 
 Every effect composes; none is a special case. Run `bin/vawe e2e` (about 4 s) before and after.
-Framework agents: the template in `engine-doctrine/CRAFT/ENGINE-CHANGES.md`. Comments hold only a fact the code cannot show.
+Framework agents: the template in `guides/ENGINE-CHANGES.md`. Comments hold only a fact the code cannot show.
 
-Where to look: `engine-doctrine/CRAFT/ROUTING.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
+Where to look: `guides/ROUTING.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
 with clips; `prompts/moves/RECIPES.md` chains them), `core/motion/README.md` (springs, curves, noise),
-`engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script), `resources/README.md` (sites for sound, music, footage and fonts).
+`guides/judge.md` (scoring), `harness/README.md` (every script), `resources/README.md` (sites for sound, music, footage and fonts).

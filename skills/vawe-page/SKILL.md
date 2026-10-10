@@ -99,7 +99,7 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 
 ## Before the first draft
 
-1. Pick the film type in `engine-doctrine/CRAFT/ROUTING.md`; `bin/vawe new <name> --from prompts/<t>.md`.
+1. Pick the film type in `guides/ROUTING.md`; `bin/vawe new <name> --from prompts/<t>.md`.
 2. Write the beat table (`prompts/beat-sheet.md`): time, message, the one thing that moves, the cue.
 3. Make the five stills that define the look. Fix cramped, overlapping or unreadable before motion.
 4. Check frames with `bin/vawe compare --page <page> --ref <ref.mp4> --at s,s,s` (about 4 s for 4 frames).
@@ -134,4 +134,4 @@ asks for overshoot. Full reference: `core/motion/README.md`.
 Motion pass rows, Read the `bin/vawe strip <page> --cuts` grids, prepare the critique notes). Fix the verdict worst first on drafts (`bin/vawe dev`, then
 `bin/vawe judge <draft mp4> --fresh`) until PASS, then ship once more.
 `bin/vawe critique <page> [--ref mp4]`: the fresh look (`vawe-critique`; with `--ref`, `vawe-reference`).
-Templates: `engine-doctrine/CRAFT/ROUTING.md`. Long films: `prompts/directors-brief-long-form.md`.
+Templates: `guides/ROUTING.md`. Long films: `prompts/directors-brief-long-form.md`.

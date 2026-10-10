@@ -106,7 +106,7 @@ echo "✓ $WT  (branch wt-$name)   node_modules: shared   bin/vawe: shared"
 
 # Record the claim LAST, once the worktree is proven usable. Scopes are whatever globs the caller
 # passed after <name>; none is fine, it just carries no overlap check (see the header note). Warns
-# on overlap with another LIVE worktree's declared scope, never blocks: engine-doctrine/CRAFT's
+# on overlap with another LIVE worktree's declared scope, never blocks: guides's
 # observability plan, Task 2.
 if [ -f "$WT/harness/dev/worktree-claim.mjs" ]; then
   node "$WT/harness/dev/worktree-claim.mjs" add "$name" "wt-$name" "$@"

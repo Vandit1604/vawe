@@ -7,7 +7,7 @@ group: project
 # Contributing to Vawe
 
 Thanks for looking. This file is short because the repo explains itself: `AGENTS.md` is the authoring
-doctrine (tool-neutral; `CLAUDE.md` is a shim that loads it) and `engine-doctrine/README.md` maps the other documents.
+doctrine (tool-neutral; `CLAUDE.md` is a shim that loads it) and `guides/README.md` maps the other documents.
 
 ## Licence, first, so nobody wastes an afternoon
 

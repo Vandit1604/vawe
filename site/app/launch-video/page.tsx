@@ -11,7 +11,7 @@ export const metadata = pageMetadata({
   path: "/launch-video",
 });
 
-/* /launch-video · a use-case page built from engine-doctrine/CRAFT/ROUTING.md's film-type table.
+/* /launch-video · a use-case page built from guides/ROUTING.md's film-type table.
  * Someone searching "product launch video" names a JOB, not this engine's vocabulary, so the page
  * answers in that wording, and shows the moves a launch film is built from.
  */
@@ -41,7 +41,7 @@ export default function LaunchVideo() {
                 explainer, a UI morph or a music video. Only a reference rebuild, where a film must
                 match an existing video, ranks above it.
               </p>
-              <span className="cite">engine-doctrine/CRAFT/ROUTING.md, row 2</span>
+              <span className="cite">guides/ROUTING.md, row 2</span>
             </div>
           </section>
 

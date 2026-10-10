@@ -85,4 +85,4 @@ close a beat, never the agent that wrote the fix.
 - `critique --ref` scores the match, not taste. The critique is a separate step.
 
 Prompt text for the three stops: `prompts/reference-rebuild.md`. The loop's doctrine:
-`engine-doctrine/CRAFT/REFERENCE-STUDY.md`.
+`guides/REFERENCE-STUDY.md`.

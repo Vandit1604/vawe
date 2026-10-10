@@ -36,7 +36,7 @@ a KEEP/CHANGE line is a rejection (`vawe-reference`).
 
 ## The judge
 
-Score the seven dimensions of `engine-doctrine/JUDGE.md` (readability, hierarchy, composition, brand
+Score the seven dimensions of `guides/judge.md` (readability, hierarchy, composition, brand
 fidelity, asset fidelity, produced-not-generated, value), 1 to 10. Threshold 7 on every one. Two
 runs, A and B, before a beat closes; one judge is an opinion: `bin/vawe judge <page> --struct --runs A,B`. A
 PASS is never self-recorded.
@@ -89,6 +89,6 @@ A fresh critic matters because the thread that wrote the page has anchored on it
 | fidelity (recreations) | `bin/vawe compare` frames | `{beat, score 0-10, gaps}` (gaps, not agreement) |
 | seam | the seam frames and the loop seam | `{seam, flash, evidence, fix}` |
 
-Launch the panel in one message so the critics run at once. Critics report, the main thread fixes. A critic is evidence, not a ruling: if you look and the flaw is not there, it is wrong. A panel suits a full authoring pass, a recreation and any render you ship; a colour swap is not worth it. The fan-out cost and the brief lines for any subagent: `engine-doctrine/CRAFT/SUBAGENTS.md`. Judge dimensions: `engine-doctrine/JUDGE.md`.
+Launch the panel in one message so the critics run at once. Critics report, the main thread fixes. A critic is evidence, not a ruling: if you look and the flaw is not there, it is wrong. A panel suits a full authoring pass, a recreation and any render you ship; a colour swap is not worth it. The fan-out cost and the brief lines for any subagent: `guides/SUBAGENTS.md`. Judge dimensions: `guides/judge.md`.
 
 <!-- doc-refs-allow: films/x/page.html · an example path in a sample judge line -->

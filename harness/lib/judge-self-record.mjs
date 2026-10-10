@@ -5,7 +5,7 @@
 // copy of the answer.
 //
 // Session alone cannot answer "which agent": a subagent launched via the Agent tool (the fresh judge
-// this guard exists to allow, engine-doctrine/JUDGE.md, "the PASS is not the author's to self-record")
+// this guard exists to allow, guides/judge.md, "the PASS is not the author's to self-record")
 // can inherit the SAME `CLAUDE_CODE_SESSION_ID` as the agent that authored the render, because env vars
 // propagate to a spawned child by default (harness/lib/runlog.mjs stamps every run with both).
 // Refusing on session alone then refuses the one PASS this guard exists to allow.

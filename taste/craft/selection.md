@@ -72,7 +72,7 @@ Choose by decision, not by menu. An agent read the anti-default doctrine in full
 menu of 34 and wrote the reasoning afterwards. The test: name the profile you picked, then describe the
 content that would make a different profile correct. If you cannot, you recognised one, you did not
 choose between eight. Reject your first instinct: it is usually your training-data default for that
-register. For whole directions, not single choices, use the pitch round (`engine-doctrine/CRAFT/PITCH.md`).
+register. For whole directions, not single choices, use the pitch round (`guides/PITCH.md`).
 
 ## Contradictions to flag
 

@@ -4,7 +4,7 @@
   "description": "One HTML page becomes one frame-perfect video. A deterministic motion-graphics framework for people and coding agents: write the page in HTML, CSS, Web Animations, SVG and canvas, render an mp4.",
   "branch": "main",
   "folders": [
-    "engine-doctrine",
+    "guides",
     "skills",
     "docs-site/content"
   ],
@@ -17,7 +17,7 @@
     "out",
     "node_modules",
     "refs",
-    "engine-doctrine/RESEARCH"
+    "research"
   ],
   "rules": [
     "A film is films/<name>/page.html. Time is the seek, never the clock: write CSS keyframes, element.animate() or window.seek(t) as a pure function of t.",

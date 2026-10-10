@@ -41,7 +41,7 @@ quality/baselines/approved/
 
 # make evals: every timestamped run + compare dir is scratch, mp4s included. quality/runs/evals/baseline/ is
 # the one committed run, and only its sheets + manifest.json, never its mp4s (they are gigabytes across
-# a library; see engine-doctrine/CRAFT/EVALS.md and harness/dev/evals.mjs saveBaseline()).
+# a library; see guides/EVALS.md and harness/dev/evals.mjs saveBaseline()).
 quality/runs/evals/runs/
 quality/runs/evals/baseline/*.mp4
 
@@ -102,7 +102,7 @@ films/scene/*.expanded.json
 # and somebody's record rather than the framework. Same policy as assets/gen.
 films/scene/_data/
 films/scene/_batch/
-# auto-orient: the A/B pair for AE technique 12 (engine-doctrine/CRAFT/AE-TECHNIQUES.md). Two files that differ
+# auto-orient: the A/B pair for AE technique 12 (guides/AE-TECHNIQUES.md). Two files that differ
 # in one key, the `upright` modifier on each carried mark, so the verdict can be re-rendered rather
 # than taken on trust. A worked example the docs NAME and a clone does not have is not an example.
 !films/scene/_auto-orient.json
@@ -126,7 +126,7 @@ films/scene/example-*.expanded.json
 !films/scene/process.json
 !films/scene/process.intent.json
 !films/scene/process.storyboard.md
-# Worked examples engine-doctrine/CRAFT docs and skills name and walk a reader through. A worked
+# Worked examples guides docs and skills name and walk a reader through. A worked
 # example a clone does not have is not an example, same rule as _auto-orient above.
 !films/scene/_kinetic-cut.json
 !films/scene/_kinetic-cut-plain.json
@@ -184,7 +184,7 @@ build/
 
 # reference films: third-party marketing videos downloaded for LOCAL STUDY ONLY (measure timings,
 # easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel: a
-# recreation reproduces INTENT with our own assets (engine-doctrine/CRAFT/REFERENCE-STUDY.md).
+# recreation reproduces INTENT with our own assets (guides/REFERENCE-STUDY.md).
 # Root-anchored: quality/refs/ (quality/refs/LOOP.md) is a different, tracked directory and gets its
 # own narrower rule below, not this one.
 /refs/

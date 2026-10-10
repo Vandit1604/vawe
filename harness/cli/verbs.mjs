@@ -65,7 +65,7 @@ export const VERBS = [
     name: 'new', summary: 'start a film: films/<name>/page.html and brief.md',
     positional: [{ name: 'name', required: true, help: 'film name, lowercase with dashes' }],
     flags: [
-      { name: 'from', type: 'path', default: 'the engine-doctrine/CRAFT/ROUTING.md row that --request, the name and --length point at; a sting when none does', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
+      { name: 'from', type: 'path', default: 'the guides/ROUTING.md row that --request, the name and --length point at; a sting when none does', help: 'prompts/<template>.md whose inputs section becomes brief.md', kind: 'file' },
       { name: 'request', type: 'string', help: 'the ask in its own words: picks the template when --from is absent, and goes into brief.md' },
       { name: 'answers', type: 'path', help: 'a markdown or `key: value` file with the details the request leaves open (subject, message, show, look, format, family, assets, ending)', kind: 'file' },
       { name: 'detail', type: 'string', repeat: true, help: 'one answer as key=value, repeatable; same keys as --answers' },

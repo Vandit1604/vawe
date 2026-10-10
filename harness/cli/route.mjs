@@ -1,9 +1,9 @@
 // `vawe new` without --from: the film type from the request words and the length. The templates come
-// from the table in engine-doctrine/CRAFT/ROUTING.md; this file holds only the words that point at a row.
+// from the table in guides/ROUTING.md; this file holds only the words that point at a row.
 import fs from 'node:fs';
 import path from 'node:path';
 
-export const ROUTING = 'engine-doctrine/CRAFT/ROUTING.md';
+export const ROUTING = 'guides/ROUTING.md';
 export const FALLBACK = 'sting';
 
 // ROUTING.md: a sting is under 10 s, a long form over 60 s.

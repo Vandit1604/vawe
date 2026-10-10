@@ -8,7 +8,7 @@ const QUIET = process.argv.includes('--quiet');
 // Exported so harness/live's write-time twin can tell which files this scan already reaches, and stay quiet on them instead of repeating the same finding at push time.
 export const SCOPE = [
   'core', 'blocks', 'scripts', 'harness', 'quality', 'generators', 'research', 'tools', 'films', 'scene', 'films',
-  'blueprints', 'cli', 'engine-doctrine', 'Makefile', '*.md', 'studio',
+  'blueprints', 'cli', 'guides', 'Makefile', '*.md', 'studio',
   'cmd', 'internal', 'mcp', 'themes', 'directions', 'registry', 'taste',
 ];
 

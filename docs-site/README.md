@@ -1,7 +1,7 @@
 # docs-site/
 
 A standalone fumadocs (Next.js) app that publishes MDX documentation pages. Separate from
-`engine-doctrine/`, which is the doctrine an agent reads while authoring; this is the public site build.
+`guides/` and `taste/`, which are the doctrine an agent reads while authoring; this is the public site build.
 
 Read by: a human browsing the published docs, and Next.js at build/dev time. Not read by the engine or
 by an authoring agent.

@@ -6,7 +6,7 @@
 //   node quality/gates/rule-length.mjs --stamp    ·   record today's count as the new ceiling
 //
 // WHY THIS EXISTS. `harness/live/craft-live.mjs` nudges an author at the keystroke when a rule in
-// AGENTS.md, a skill, or an engine-doctrine/CRAFT doc runs long, but a nudge only fires on a file that
+// AGENTS.md, a skill, or an guides doc runs long, but a nudge only fires on a file that
 // gets SAVED again; nothing counted the standing total so the library could drift back up unnoticed.
 // This is that count, ratcheted the same way `threshold-provenance.mjs` ratchets its own worklist: a
 // FAIL tier gate is a wall, and Task 2 of the rules-agents-can-read plan did not, and was never meant
@@ -15,7 +15,7 @@
 // THE LENGTH IS A FORMATTING CONVENTION, NOT A QUALITY THRESHOLD, and it is deliberately absent from
 // `threshold-provenance.mjs`'s sourceless-constant worklist for that reason: it does not decide whether
 // a FILM passes or fails, only whether a rule is likely to survive a truncating filter unread
-// (engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md, pattern 6). `harness/lib/rule-length.mjs` is the one
+// (guides/WRITING-FOR-AGENTS.md, pattern 6). `harness/lib/rule-length.mjs` is the one
 // place `RULE_LENGTH_LIMIT` is defined, and its own comment says why 500 was chosen; nothing here
 // re-derives it.
 //
@@ -35,7 +35,7 @@ function agentDocFiles() {
     const rel = `skills/${d}/SKILL.md`;
     if (isAgentDoc(rel) && fs.existsSync(path.join(ROOT, rel))) out.push(rel);
   }
-  for (const dir of ['engine-doctrine/CRAFT', 'taste/craft']) {
+  for (const dir of ['guides', 'taste/craft']) {
     for (const f of fs.readdirSync(path.join(ROOT, dir))) {
       const rel = `${dir}/${f}`;
       if (isAgentDoc(rel)) out.push(rel);
@@ -67,7 +67,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     for (const o of r.overLong.sort((a, b) => b.length - a.length)) {
       console.log(`   ${o.file}  ${o.length}c  "${o.excerpt}…"`);
     }
-    console.log(`\n  Rewrite, never truncate. engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md has the shape.\n`);
+    console.log(`\n  Rewrite, never truncate. guides/WRITING-FOR-AGENTS.md has the shape.\n`);
     process.exit(0);
   }
 
@@ -84,7 +84,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] || '').href) {
     f.fail('rule-length-ratchet',
       `${r.count} rule(s) in an agent-facing doc run over ${RULE_LENGTH_LIMIT} characters, up from ${prior.overLong}. ` +
       'This is a formatting convention, not a quality bar: a long rule is not wrong, only likely to be ' +
-      'read past its truncation point (engine-doctrine/CRAFT/WRITING-FOR-AGENTS.md, pattern 6). ' +
+      'read past its truncation point (guides/WRITING-FOR-AGENTS.md, pattern 6). ' +
       'Rewrite, never truncate: split rule / reason / mechanism, keep every fact. ' +
       'node quality/gates/rule-length.mjs --list names each one. ' +
       'If the new length is deliberate, raise the bar on purpose: node quality/gates/rule-length.mjs --stamp');
