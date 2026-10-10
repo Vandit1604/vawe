@@ -51,6 +51,11 @@ Icon and photo sources:
   covers the icon file, not the trademark: a company mark stays that
   company's mark.
 
+- Other brand marks and site captures under assets/brands/ and assets/icons/plinth.png:
+  used to show integrations, not owned by vawe, and not covered by the licence of
+  this repository. Each file and what is known of its origin is listed in
+  assets/README-LICENCE.md (Brand marks and captures).
+
 - Flags: flagcdn.com, public domain. Fetched on demand, not committed.
 
 - Photos: CC0 / CC-BY via the photo fetcher; CC-BY credits are recorded per

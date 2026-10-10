@@ -53,3 +53,25 @@ explicitly prohibits reselling, sublicensing, or redistributing the files *on th
 They are NOT committed: `.gitignore` lists `assets/gradients/` and `assets/ransom/`, because this repo is public and
 a public repo would publish them as standalone downloadable files, which the licence forbids. They stay on the
 owner's machine only. The bake recipes are not in this repo.
+
+## Brand marks and captures
+
+`assets/brands/` and `assets/icons/` hold marks and captures of other parties' products. vawe does not own
+any of them. They are here to show integrations and to serve as test and example inputs. A mark stays the
+property of its owner, and nothing here grants a right to use it. `.gitignore` tracks only the files below.
+The origin of a file is the commit that added it, because no file carries its own source record, except
+where this table says so.
+
+| path | what it is | origin |
+|---|---|---|
+| `assets/icons/*.svg` (Simple Icons set) | brand logos, for example `apple.svg`, `netflix.svg` | Simple Icons, CC0 for the file. The trademark stays with the company (see `NOTICE`). |
+| `assets/icons/plinth.png` | a 505 x 512 logo image for "plinth" | Unknown. Added in the 2026-07-16 layout commit with no source note. |
+| `assets/brands/preface/agents/*.svg` | ten logos of AI coding agents (ChatGPT, Claude, Claude Code, Codex, Cursor, Devin, Grok, OpenCode, Replit, v0), shown as a ring of names in the preface-launch film | Origin not recorded. Each is the mark of the tool it names. |
+| `assets/brands/linear/icon.png` | the Linear app icon, 180 x 180, used by the brand-kit test fixture | Origin not recorded. |
+| `assets/brands/argus/mascot.png`, `house-style.md` | the Argus mascot image, and a measured house-style note | Origin not recorded for either. `house-style.md` is a Design Read that `bin/vawe judge` uses as a scoring key. |
+| `assets/brands/threadcite/icon.svg`, `components/howitworks.json` | the ThreadCite icon, and a captured DOM of one section of threadcite.live | Origin not recorded. The JSON names threadcite.live as the page it was captured from. Not our content. |
+| `assets/brands/ditherkit/sections/*.png` | six screenshots of sections of a Dither Kit page | Origin not recorded. `sections.json` beside them is the output format of `scripts/brand/sections.mjs`. Not our content. |
+| `assets/brands/looks/photos/` | one sculpture photo | CC0. Source and licence are in `credits.json` beside it. |
+
+If an owner of any of these asks, delete the file. Do not add a new mark here without writing its source and
+licence in this table first.

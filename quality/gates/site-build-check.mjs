@@ -18,7 +18,7 @@
 // inputs; this file closes the remaining gap by running the real commands instead of parsing them.
 //
 // WHAT RUNS, AND WHY EACH ONE MADE THE CUT:
-//   - scripts/site/vendor-assets.mjs the site's own `prebuild`. Copies the fonts and gsap into site/public and
+//   - scripts/site/vendor-assets.mjs the site's own `prebuild`. Copies the fonts into site/public and
 //                                    REFUSES on a missing tree. ~0.5s.
 //   - generators/media/fonts.mjs     the exact command the Dockerfile RUNs after the lock COPY. Skips
 //                                    files already on disk, so a repeat run is near-instant (~0.05s

@@ -1,8 +1,7 @@
-// Copy the two asset trees that cannot be committed into the site's public/ folder: the free font faces
-// (fetched by generators/media/fonts.mjs) and gsap (written by scripts/vendor-gsap.mjs on install).
-// Everything else the browser engine loads is a frozen, committed copy under site/public.
+// Copy the free font faces, which cannot be committed (fetched by generators/media/fonts.mjs), into the
+// site's public/ folder. Everything else the browser engine loads is a frozen, committed copy under site/public.
 //
-//   node scripts/site/vendor-assets.mjs            copy assets/{fonts,vendor} -> site/public/assets
+//   node scripts/site/vendor-assets.mjs            copy assets/fonts -> site/public/assets
 //   node scripts/site/vendor-assets.mjs --check    report drift, write nothing
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PUB = path.join(root, 'site', 'public');
 const DRY = process.argv.includes('--check');
-const TREES = ['assets/fonts', 'assets/vendor'];
+const TREES = ['assets/fonts'];
 const SKIP = (rel) => rel.startsWith(`assets${path.sep}fonts${path.sep}local${path.sep}`);
 
 const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
@@ -23,7 +22,7 @@ let copied = 0;
 let drift = 0;
 for (const tree of TREES) {
   const from = path.join(root, tree);
-  if (!fs.existsSync(from)) { console.error(`✗ missing ${tree}. Run: node generators/media/fonts.mjs (fonts) or npm install (gsap).`); process.exit(1); }
+  if (!fs.existsSync(from)) { console.error(`✗ missing ${tree}. Run: node generators/media/fonts.mjs.`); process.exit(1); }
   for (const f of walk(from)) {
     const rel = path.relative(root, f);
     if (SKIP(rel)) continue;
@@ -36,4 +35,4 @@ for (const tree of TREES) {
   }
 }
 if (DRY) console.log(drift ? `\n~ ${drift} file(s) drifted, run without --check` : '\n✓ vendored assets in sync');
-else console.log(`✓ fonts and gsap -> site/public/assets  (${copied} file(s))`);
+else console.log(`✓ fonts -> site/public/assets  (${copied} file(s))`);

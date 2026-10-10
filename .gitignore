@@ -161,15 +161,8 @@ assets/music/*
 # music.wav is BAKED by `make audio` (core/audio-kit.mjs): generated, never committed.
 assets/music.wav
 
-# gsap's UMD build is a real npm dependency now, vendored into place by scripts/vendor-gsap.mjs
-# (the postinstall script), never committed: GSAP's Standard license does not clearly allow
-# redistributing the built file. The 3 bonus plugin files stay committed (see assets/vendor/README.md).
-assets/vendor/gsap.min.js
-
-# The site's generated assets: fonts (fetched by generators/media/fonts.mjs) and gsap (vendored on
-# install), copied in by scripts/site/vendor-assets.mjs.
+# The site's generated fonts (fetched by generators/media/fonts.mjs), copied in by scripts/site/vendor-assets.mjs.
 site/public/assets/fonts/
-site/public/assets/vendor/
 
 # local scratch (agent shell logs): never commit
 /scratchpad/
