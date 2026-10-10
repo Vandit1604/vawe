@@ -95,11 +95,7 @@
    },
    {
     "rule": "speed-bands",
-    "text": "put each move in a speed band with the slowest move 3x the fastest, not every move at one duration"
-   },
-   {
-    "rule": "speed-ceiling",
-    "text": "keep the fastest moves under 12 frame heights a second, not every move at full speed"
+    "text": "put each move in a speed band with the slowest move 3x the fastest and the fastest under 12 frame heights a second, not every move at one duration"
    },
    {
     "rule": "stagger",

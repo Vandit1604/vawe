@@ -144,9 +144,9 @@ An exit is a launch: it runs shorter than its entrance and accelerates. A card t
 
 A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. A readable hold is good; a frozen frame is not a hold. A camera drift or push does not count, the camera holds still by default.
 
-- Limit: no span longer than 0.5 s outside a declared hold where no part of the frame moves by itself (a whole-frame move does not count)
-- Range: an element move with slow ease at both ends; a rest of 0.4 to 0.6 s after an element settles
-- Judge: Is there a 0.5 s span where nothing moves and no hold is declared?
+- Limit: no span longer than 0.5 s outside a declared hold where no part of the frame moves by itself (a whole-frame move does not count); a move never jumps speed from one frame to the next: stopping within one step from over 600 px/s (position) or 0.6 scale units per second (zoom) is a jolt
+- Range: an element move with slow ease at both ends; a rest of 0.4 to 0.6 s after an element settles; ambient motion is the smallest of the three motion levels (primary, secondary, ambient): a glint or a colour shift on a part, a field at about 0.3 intensity, one overlay per film (VHS, CRT, film grain, or a real lens effect from prompts/moves/lens.md) at 0.6 to 0.9, never behind small body copy, never two together
+- Judge: Is there a 0.5 s span where nothing moves and no hold is declared? Does any move stop within one frame? Is the same ambient on every scene, or does anything loop near text?
 
 ### named-eases
 
@@ -175,9 +175,9 @@ Real physics, not an imitation: a spring or an exponential as sampled keyframes 
 
 Speed is a voice. Every move sits in a named band, and the slowest move runs at least 3 times the fastest move. Never every move at one duration.
 
-- Limit: the slowest move at least 3 times the fastest move; not all moves in one band
-- Range: energy 0.15 to 0.3 s; professional 0.3 to 0.5 s; gravity 0.5 to 0.8 s; cinematic 0.8 to 2 s only when the film has the seconds. By role: ambient 0.8 to 1.2 s, thesis line 0.5 to 0.8 s, heavy title 0.5 to 0.7 s, caption 0.25 to 0.4 s, payoff snap 0.25 to 0.35 s. Frame counts at 60 fps (finals) or in seconds
-- Judge: List each move's duration on the sheet: is the longest at least 3 times the shortest?
+- Limit: the slowest move at least 3 times the fastest move; not all moves in one band; the p90 of the peak speed of the moving elements at most 12.6 frame heights per second
+- Range: energy 0.15 to 0.3 s; professional 0.3 to 0.5 s; gravity 0.5 to 0.8 s; cinematic 0.8 to 2 s only when the film has the seconds. Reference films peak at 4 to 13 frame heights per second (p10 to p90 of each film's p90). By role: ambient 0.8 to 1.2 s, thesis line 0.5 to 0.8 s, heavy title 0.5 to 0.7 s, caption 0.25 to 0.4 s, payoff snap 0.25 to 0.35 s. Frame counts at 60 fps (finals) or in seconds
+- Judge: List each move's duration on the sheet: is the longest at least 3 times the shortest? Which elements cross the frame in a blink? Can the eye follow each one?
 
 ### stagger
 
@@ -215,11 +215,11 @@ Each moving seam changes axis or direction from the previous moving seam, and th
 
 ### gradient-grain
 
-A gradient the brief asks for is clean. h264 bands a slow dark ramp in the mp4 even when the browser looks clean.
+A gradient the brief asks for is clean. h264 bands a slow dark ramp in the mp4 even when the browser looks clean. Use only a gradient the real brand has: gradients on low-copy beats, flat on high-copy and payoff beats, and never one behind the thing the beat exists to land.
 
 - Limit: no banding rings and no straight edge inside a glow
-- Range: 1 to 2 percent grain on dark gradients; hold a grain pattern 2 frames; prefer a radial and a short ramp
-- Judge: On a full frame at the darkest moment and at the brightest glow, are there banding rings or a straight seam?
+- Range: 1 to 2 percent grain on dark gradients; hold a grain pattern 2 frames; prefer a radial and a short ramp; gradient on the hook, CTA or an emotional beat, flat on proof, payoff and copy-heavy beats
+- Judge: On a full frame at the darkest moment and at the brightest glow, are there banding rings or a straight seam? Is the gradient the brand's own, and is it behind low-copy beats only?
 
 ### mark-rides-parent
 

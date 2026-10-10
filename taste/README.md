@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-92 rules, 33 scored by the judge.
+88 rules, 33 scored by the judge.
 
 ## concept
 
@@ -45,7 +45,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [archetype-rotation](rules/archetype-rotation.md): Pick the layout by what the beat does, then rotate: never the same archetype twice in a row. Check: judge.
 - [asymmetry](rules/asymmetry.md): Compose asymmetric with one hero, anchored to edges and thirds. Check: judge.
 - [first-frame](rules/first-frame.md): Something of the subject (the subject, its ground or its first mark) is on screen at frame 0 and reads as an image by 0.1 s. Check: judge.
-- [gradient-or-flat](rules/gradient-or-flat.md): Gradients on low-copy beats, flat on high-copy and payoff beats. Check: judge.
 - [graphic-is-subject](rules/graphic-is-subject.md): If a graphic is the point of the beat, it owns the frame: hero scale, type demoted to a caption. Check: judge.
 - [hero-plus-proof](rules/hero-plus-proof.md): A beat held longer than 3 s carries a hero plus proof. Check: judge.
 - [hero-scale](rules/hero-scale.md): Size for video, not the web. Check: none.
@@ -79,7 +78,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 
 ## motion
 
-- [ambient-restraint](rules/ambient-restraint.md): Ambient motion keeps a held frame alive without asking to be watched. Check: judge.
 - [anticipation](rules/anticipation.md): A small opposite wind-up readies the eye before a hero move. Check: anticipation.
 - [arrival-rhythm](rules/arrival-rhythm.md): Motion order is reading order. Check: no-overlap.
 - [blur-follows-motion](rules/blur-follows-motion.md): Blur follows motion: a still thing never blurs. Check: judge.
@@ -89,15 +87,13 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge, entrance-direction.
 - [exits-shorter](rules/exits-shorter.md): An exit is a launch: it runs shorter than its entrance and accelerates. Check: exit-length.
 - [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: follow-through.
-- [live-hold](rules/live-hold.md): A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. Check: static-window, sheet-tiles.
+- [live-hold](rules/live-hold.md): A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. Check: static-window, sheet-tiles, dead-stop.
 - [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease, ease-count, lockstep.
-- [no-dead-stop](rules/no-dead-stop.md): A move never jumps speed from one frame to the next. Check: dead-stop.
 - [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: staging.
 - [overshoot](rules/overshoot.md): Overshoot is a claim about mass. Check: judge, overshoot-share.
 - [real-physics](rules/real-physics.md): Real physics, not an imitation: a spring or an exponential as sampled keyframes or linear() with 8 or more stops, and a named effect that looks like its real-world thing. Check: judge.
 - [spectacle-weak](rules/spectacle-weak.md): The spectacle second carries the strongest move of the film. Check: spectacle-weak.
-- [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band,duration-size.
-- [speed-ceiling](rules/speed-ceiling.md): Elements move at a speed the eye can follow. Check: speed-ceiling.
+- [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band, duration-size, speed-ceiling.
 - [stagger](rules/stagger.md): A group reads as one beat with an inner rhythm: not a chord on one frame and not a queue. Check: group-landing.
 
 ## transitions

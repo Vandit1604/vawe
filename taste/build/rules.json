@@ -81,10 +81,6 @@
   "file": "taste/rules/first-frame.md",
   "instead": "put the thread, the first word or the brand colour in frame 0, and start the sound at 0 as well."
  },
- "gradient-or-flat": {
-  "file": "taste/rules/gradient-or-flat.md",
-  "instead": "a flat brand gets a flat field; for atmosphere prefer a radial, keep the ramp short, or break it with grain (see gradient-grain)."
- },
  "graphic-is-subject": {
   "file": "taste/rules/graphic-is-subject.md",
   "instead": "bring the picture forward and make the type a caption. A picture behind the content is scenery. Quantity: a bar whose length is the figure (a count-up beside it, never instead). Proportion: a ring, an arc, a filled grid. Change: a line or a before and after side by side. Flow: nodes and connectors that draw on. Real thing: a capture, a photo, a clipped screenshot."
@@ -119,7 +115,7 @@
  },
  "living-ground": {
   "file": "taste/rules/living-ground.md",
-  "instead": "put two or three large soft blobs, clearly lighter or more saturated than the ground, behind the content: the Grounds moves in prompts/moves/README.md (gradient-mesh-field, aurora-drift, light-pool, grain-field). Keep the text on a calm part of the blob."
+  "instead": "put two or three large soft blobs, clearly lighter or more saturated than the ground, behind the content: the Grounds moves in prompts/moves/README.md (gradient-mesh-field, aurora-drift, light-pool, grain-field). Keep the text on a calm part of the blob. The ground is a field behind the content: it does not need to move, and a ground drift is never what keeps a hold alive (rule live-hold). Light that should read as a lens effect (bloom, flare, a pool of light on a screen) is real lens work (prompts/moves/lens.md), not a CSS gradient."
  },
  "logo-prominence": {
   "file": "taste/rules/logo-prominence.md",
@@ -207,10 +203,6 @@
   "file": "taste/rules/world-turns.md",
   "instead": "cut the world where the content changes (a new ground, a new object, new words); a second data-world with the same content, or padding words, does not turn the world. Change the ground at a cut the film already has; carry the change across the join (a colour that follows the content), never a cold flash. Judge a moving backdrop at 4 or more timestamps, never one still. A ruled grid is a design tool's canvas: use it only if you can say what it does in one clause."
  },
- "ambient-restraint": {
-  "file": "taste/rules/ambient-restraint.md",
-  "instead": "do not put an ambient zoom on every scene. Do not loop anything near text being read. Ambient padding to look busy raises global motion and costs the film."
- },
  "anticipation": {
   "file": "taste/rules/anticipation.md",
   "instead": "a heavy object anticipates longer."
@@ -249,17 +241,13 @@
  },
  "live-hold": {
   "file": "taste/rules/live-hold.md",
-  "instead": "give the hold an element motion: type a line, tick a counter, pass a glint, start a secondary action, add a second key at the end of the hold. Do not fill the hold with a camera drift, push or pan, a scale or translate on a world or stage root, or parallax on the whole ground: the check leaves those out and constant-camera names a camera that never rests. Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion."
+  "instead": "give the hold an element motion: type a line, tick a counter, pass a glint, start a secondary action, add a second key at the end of the hold. Do not fill the hold with a camera drift, push or pan, a scale or translate on a world or stage root, or parallax on the whole ground: the check leaves those out and constant-camera names a camera that never rests. Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion. Do not put the same ambient on every scene, do not loop anything near text being read, and do not pad a scene with ambient motion to look busy: it raises global motion and costs the film. Fix a jolt at the curve that produced it: end the move on a spring or EASE.land, never smooth the number after the fact; a linear camera station or a slow-start curve straight into a hold is the classic shape."
  },
  "named-eases": {
   "file": "taste/rules/named-eases.md",
   "instead": "EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only. Pick the scene ease from the signature (a punchy brand tightens durations and stagger, a calm one stretches them; set it once as :root custom properties).",
   "dial": "ease",
   "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops; vary eases like font weights, and two layers moving in one beat differ in duration or offset"
- },
- "no-dead-stop": {
-  "file": "taste/rules/no-dead-stop.md",
-  "instead": "fix the curve that produced the stop: end the move on a spring or EASE.land; never smooth the number after the fact. A linear camera station or a slow-start curve straight into a hold is the classic shape."
  },
  "one-hero-motion": {
   "file": "taste/rules/one-hero-motion.md",
@@ -279,13 +267,9 @@
  },
  "speed-bands": {
   "file": "taste/rules/speed-bands.md",
-  "instead": "use bandSeconds(name) and the presets; give the hero gravity or cinematic and the payoff energy. Too many distinct durations read as drift: hold to a few named bands.",
+  "instead": "use bandSeconds(name) and the presets; give the hero gravity or cinematic and the payoff energy. Too many distinct durations read as drift: hold to a few named bands. Give the fastest moves more seconds (the next band) or less distance; keep a quick move for the one element the beat is about.",
   "dial": "band",
-  "range": "energy 0.15 to 0.3 s; professional 0.3 to 0.5 s; gravity 0.5 to 0.8 s; cinematic 0.8 to 2 s only when the film has the seconds. By role: ambient 0.8 to 1.2 s, thesis line 0.5 to 0.8 s, heavy title 0.5 to 0.7 s, caption 0.25 to 0.4 s, payoff snap 0.25 to 0.35 s. Frame counts at 60 fps (finals) or in seconds"
- },
- "speed-ceiling": {
-  "file": "taste/rules/speed-ceiling.md",
-  "instead": "give the fastest moves more seconds (the next speed band) or less distance. Keep a quick move for the one element the beat is about."
+  "range": "energy 0.15 to 0.3 s; professional 0.3 to 0.5 s; gravity 0.5 to 0.8 s; cinematic 0.8 to 2 s only when the film has the seconds. Reference films peak at 4 to 13 frame heights per second (p10 to p90 of each film's p90). By role: ambient 0.8 to 1.2 s, thesis line 0.5 to 0.8 s, heavy title 0.5 to 0.7 s, caption 0.25 to 0.4 s, payoff snap 0.25 to 0.35 s. Frame counts at 60 fps (finals) or in seconds"
  },
  "stagger": {
   "file": "taste/rules/stagger.md",
@@ -341,7 +325,7 @@
  },
  "gradient-grain": {
   "file": "taste/rules/gradient-grain.md",
-  "instead": "break the ramp with grain, dither or a dot texture; grain breaks a ramp and film did the same for the same reason. Grain is texture: it is not a ground, not motion and not a fix for a flat frame. Check at the darkest moment and at the brightest glow."
+  "instead": "a flat brand gets a flat field. Break the ramp with grain, dither or a dot texture; grain breaks a ramp and film did the same for the same reason. Grain is texture: it is not a ground, not motion and not a fix for a flat frame. Check at the darkest moment and at the brightest glow."
  },
  "mark-rides-parent": {
   "file": "taste/rules/mark-rides-parent.md",

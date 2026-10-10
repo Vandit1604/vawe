@@ -78,7 +78,7 @@ Accent frequency is the excitement dial.
 ## 6. Gradient or flat
 
 - Use a gradient or atmospheric ground on low-copy beats, go flat on high-copy and payoff beats, and use
-  only a gradient the real brand has ([gradient-or-flat](../rules/gradient-or-flat.md)). Never put a gradient behind the thing
+  only a gradient the real brand has ([gradient-grain](../rules/gradient-grain.md)). Never put a gradient behind the thing
   the beat exists to land.
 - **A full-screen linear gradient on a dark ground bands in the mp4.** h264 quantises a slow luminance
   ramp into steps, worst on a large area with a shallow slope. The browser and the draft still look

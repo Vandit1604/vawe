@@ -43,7 +43,7 @@ const AT = /(?:\bat |@|\bheld (?:[a-z][\w-]* )?)(\d+(?:\.\d+)?)(?: ?s|-)/;
 // The acceptance rows (harness/lib/acceptance.mjs DEFAULT_ROWS) that a taste rule owns.
 export const ROW_RULES = {
   'frozen runs of 3+ frames inside a shot': 'live-hold',
-  'jerky steps': 'no-dead-stop',
+  'jerky steps': 'live-hold',
   'still windows over 0.5 s outside a declared hold': 'live-hold',
   'near-identical tail tiles': 'moving-tail',
   'text cap height': 'readable-text-size',
