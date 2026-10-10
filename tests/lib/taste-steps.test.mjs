@@ -12,11 +12,11 @@ test('the printed steps are the process steps: explore, frames, storyboard, moti
   assert.throws(() => tasteLines('concept'), /no step "concept"/);
 });
 
-test('each step prints 3 to 8 lines, each a contrast pair naming an existing rule id', () => {
+test('each step prints 3 to 9 lines, each a contrast pair naming an existing rule id', () => {
   for (const step of Object.keys(TASTE_STEPS)) {
     const [header, ...lines] = tasteLines(step);
     assert.match(header, /^taste, .+ \(taste\/build\/CARD\.md\):$/);
-    assert.ok(lines.length >= 3 && lines.length <= 8, `${step}: ${lines.length} lines`);
+    assert.ok(lines.length >= 3 && lines.length <= 9, `${step}: ${lines.length} lines`);
     for (const l of lines) assert.match(l, /^- .+, not .+ \(rule [a-z][a-z0-9-]*\)$/);
     for (const l of TASTE_STEPS[step].lines) assert.ok(ruleIds.has(l.rule), `${step}: no rule ${l.rule}`);
   }

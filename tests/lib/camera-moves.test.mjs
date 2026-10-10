@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cameraOnlySpans, cameraLoad, withCameraStills } from '../../harness/lib/camera-moves.mjs';
-import { constantCamera } from '../../harness/lib/bar-lint.mjs';
+import { barLint, constantCamera } from '../../harness/lib/bar-lint.mjs';
 import { problemsOf } from '../../harness/lib/ship-status.mjs';
 
 const rec = (over) => ({ target: 0, label: 'el', id: '', props: ['translate'], delay: 0, duration: 1, easing: 'linear', kfEasings: [], opacity: null, from: '', kf: {}, fullFrame: false, area: 1000, decorative: false, ...over });
@@ -53,4 +53,12 @@ test('withCameraStills merges the camera seconds into the pixel runs and drops s
   assert.deepEqual(withCameraStills([{ a: 1, b: 1.5, len: 0.5 }], [[1.4, 3]]), [{ a: 1, b: 3, len: 2, camera: true }]);
   assert.deepEqual(withCameraStills([], [[1, 1.2]]), []);
   assert.deepEqual(withCameraStills([{ a: 1, b: 2, len: 1 }], []), [{ a: 1, b: 2, len: 1 }]);
+});
+
+test('a camera: free declaration in DESIGN.md turns the constant-camera finding off', () => {
+  const sting = { dur: 5, worlds: null };
+  const run = (decl) => barLint({ records: [camera(0, 4.5)], boxes: null, text: null, film: sting, camera: decl }).map((f) => f.code);
+  assert.deepEqual(run(null), ['constant-camera']);
+  assert.deepEqual(run('still'), ['constant-camera']);
+  assert.deepEqual(run('free'), []);
 });
