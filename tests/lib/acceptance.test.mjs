@@ -119,3 +119,23 @@ test('withHistory keeps the measured spec of a draft for spec-sync', () => {
   const { file } = withHistory(null, [], { stage: 'draft', spec: { words: [], objects: [] }, at: 'now' });
   assert.deepEqual(file.history[0].spec, { words: [], objects: [] });
 });
+
+test('text cap height: UI that is the subject has its own floor, 3% by default and the declared ui-scale when set', () => {
+  const caps = [{ text: 'Start', cap: 3.4, t: 1, ui: true }, { text: 'Title', cap: 7, t: 1 }];
+  const row = (m) => buildRows([], { ...clean, caps, ...m }).find((r) => r.metric === 'text cap height');
+  assert.equal(row({}).status, 'ok');
+  assert.match(row({}).measured, /data-ui 3\.4% \(floor 3%\)/);
+  assert.equal(buildRows([], { ...clean, caps: [{ text: 'Start', cap: 2.6, t: 1, ui: true }] }).find((r) => r.metric === 'text cap height').status, 'advice');
+  assert.equal(row({ caps: [{ text: 'Start', cap: 2.6, t: 1, ui: true }], decls: { uiScale: 2.5 } }).status, 'ok');
+  assert.equal(row({ caps: [{ text: 'Title', cap: 3.4, t: 1 }] }).status, 'advice');
+});
+
+test('a DESIGN.md type-scale replaces the house 6% and the row target names the line it followed', () => {
+  const m = { ...clean, caps: [{ text: 'Menu', cap: 3.6, t: 1 }], decls: { typeScale: 3.5, uiScale: null } };
+  const row = buildRows([], m).find((r) => r.metric === 'text cap height');
+  assert.equal(row.status, 'ok');
+  assert.match(row.target, /followed DESIGN\.md type-scale: 3\.5%/);
+  const edited = buildRows([{ metric: 'text cap height', target: '5% or more' }], m).find((r) => r.metric === 'text cap height');
+  assert.equal(edited.status, 'advice');
+  assert.equal(edited.target, '5% or more');
+});

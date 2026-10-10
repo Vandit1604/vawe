@@ -110,7 +110,7 @@ export function visibleLines(decorative, chrome, lineage = false, texture = { ca
     const world = el.closest('[data-world]')?.dataset.world;
     const source = lineage ? sourceOf(el) : null;
     out.push({ text, fontPx, family: cs.fontFamily, weight: cs.fontWeight, box: [r.x, r.y, r.width, r.height], color: cs.color, opacity, block: blockOf(el),
-      ...(rects.length > 1 ? { rects } : {}), ...(world ? { world } : {}), ...(el.closest(chrome) && isTexture(node) ? { chrome: true } : {}),
+      ...(rects.length > 1 ? { rects } : {}), ...(world ? { world } : {}), ...(el.closest(chrome) && isTexture(node) ? { chrome: true } : {}), ...(el.closest('[data-ui]') ? { ui: true } : {}),
       ...(lineage ? { own: docOrder.get(el), up: ancestorsOf(el), ...(source ? { source } : {}) } : {}) });
     for (let a = el; a && a !== document.documentElement; a = a.parentElement) {
       const o = owners.get(a) || { raw: '', n: 0, fontPx, x0: r.left, y0: r.top, x1: r.right, y1: r.bottom };

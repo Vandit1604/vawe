@@ -14,7 +14,6 @@ status: active
 scored: yes
 numbers: {"gap_min_s":0.03,"gap_max_s":0.08,"gap_default_s":0.05,"calm_min_s":0.08,"calm_max_s":0.12,"total_max_s":0.5,"same_frame_group":3}
 print-motion: stagger a group 30 to 80 ms, not a group that lands on one frame
-digest: Stagger a group 30 to 80 ms; never a group that lands on one frame.
 craft: motion-craft
 ---
 

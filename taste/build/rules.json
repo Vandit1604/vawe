@@ -43,6 +43,10 @@
   "file": "taste/rules/no-inventory.md",
   "instead": "tagline to hook, pain to the problem beat, how it works to build, best stat to the payoff, transformation to the payoff, CTA to the end."
  },
+ "owner-decides": {
+  "file": "taste/rules/owner-decides.md",
+  "instead": "write the decision as a line under '## Declared' in the film's DESIGN.md (font, type-scale, ui-scale, camera); the acceptance rows and the judge then follow it and print which line they followed."
+ },
  "scene-budget": {
   "file": "taste/rules/scene-budget.md",
   "instead": "set the count from the brand tempo: a calm brand is slow with few scenes, playful is fast with many. Accelerate toward the climax, then hold it longer than anything else."
@@ -54,6 +58,10 @@
  "show-real-thing": {
   "file": "taste/rules/show-real-thing.md",
   "instead": "render a mini-scene so the viewer watches the thing work (a value changes and the output updates; the real word cycles through colours). If a cursor clicks, the next frames show what the click did. For a real product, capture the real UI. For an invented product the brief asks you to invent the UI: design it as a real interface (the builder skill of the ladder, real-looking data, controls that do something; the frame rejects web-page patterns, the UI parts do not), then place it in the frame. Only fake chrome with no function, or a placeholder label, is the pitfall. Build a screen as a real interface first, then place it under the density budget: a fragment for the shot with large type, few elements, real imagery. Set each cell to the source's own aspect ratio so object-fit: cover neither crops nor letterboxes. A dark capture goes on a dark surface."
+ },
+ "style-not-content": {
+  "file": "taste/rules/style-not-content.md",
+  "instead": "write what the reference does (a cut every 0.8 s, a warm key light, a push on the last word) and rebuild it with your own subject, words and marks."
  },
  "thread": {
   "file": "taste/rules/thread.md",
@@ -133,7 +141,11 @@
  },
  "readable-text-size": {
   "file": "taste/rules/readable-text-size.md",
-  "instead": "raise the font until the cap height is 6 percent of the frame (about 93 px at 1080p), never shrink the line (taste/craft/typography.md)."
+  "instead": "raise the font until the cap height is 6 percent of the frame (about 93 px at 1080p), never shrink the line (taste/craft/typography.md). A mock screen whose UI is the subject goes in a `data-ui` element and keeps its real proportions: 3 percent, or the `ui-scale` the film's DESIGN.md declares."
+ },
+ "real-optics": {
+  "file": "taste/rules/real-optics.md",
+  "instead": "use the lens surface (prompts/moves/lens.md) for bloom, fringe, focus and flares; a CSS blur or radial gradient is not a lens."
  },
  "safe-margin": {
   "file": "taste/rules/safe-margin.md",
@@ -214,6 +226,10 @@
  "blur-out-dense": {
   "file": "taste/rules/blur-out-dense.md",
   "instead": "blur out and fade; the blur runs only during the exit itself."
+ },
+ "cause-first": {
+  "file": "taste/rules/cause-first.md",
+  "instead": "move the effect to the frame of its cause (prompts/moves/cursor-click.md: press, then the answer); copy the reference's grammar, not an order that breaks our story. `vawe see` lists the events of a shot next to the nearest sound hit."
  },
  "constant-camera": {
   "file": "taste/rules/constant-camera.md",

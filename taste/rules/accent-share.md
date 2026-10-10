@@ -13,7 +13,6 @@ status: active
 scored: yes
 numbers: {"accent_share_pct_typical":10,"accent_share_pct_atmosphere_max":25}
 print-frames: keep the accent on one thing, not a full-frame flood
-digest: One accent hue, on one thing; never a full-frame flood.
 craft: color
 ---
 

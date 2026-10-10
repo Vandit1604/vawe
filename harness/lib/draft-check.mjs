@@ -8,7 +8,7 @@ import { balanceLines } from './cue-balance.mjs';
 
 const SIZE = LIMITS['readable-text-size'];
 const LEVEL = LIMITS['sound-level'];
-export const RULES = { capFrac: SIZE.cap_height_pct / 100, chromeCapFrac: SIZE.chrome_cap_height_pct / 100, capOfFont: 0.7, holdSec: SIZE.held_min_s, maxProblems: 4, lufsTarget: LEVEL.lufs_target, lufsLow: LEVEL.lufs_low, lufsHigh: LEVEL.lufs_high };
+export const RULES = { capFrac: SIZE.cap_height_pct / 100, chromeCapFrac: SIZE.chrome_cap_height_pct / 100, uiCapFrac: SIZE.ui_cap_height_pct / 100, capOfFont: 0.7, holdSec: SIZE.held_min_s, maxProblems: 4, lufsTarget: LEVEL.lufs_target, lufsLow: LEVEL.lufs_low, lufsHigh: LEVEL.lufs_high };
 
 // Text inside these is not copy to read: aria-hidden is texture, data-chrome is the label of a product shown as texture.
 export const DECORATIVE = '[aria-hidden="true"]';
@@ -86,7 +86,7 @@ export function heldTextRuns(samples, { step, frameH }, rules = RULES) {
       const key = keyOf(l.text);
       if (!key) continue;
       const cap = (rules.capOfFont * l.fontPx) / frameH;
-      const run = open.get(key) || { key, n: 0, t: s.t, cap, first: s.t, chrome: Boolean(l.chrome) };
+      const run = open.get(key) || { key, n: 0, t: s.t, cap, first: s.t, chrome: Boolean(l.chrome), ui: Boolean(l.ui) };
       if (!seen.has(key)) { run.n += 1; run.last = s.t; }
       seen.add(key);
       if (cap < run.cap) { run.cap = cap; run.t = s.t; }
@@ -102,10 +102,10 @@ export function heldTextRuns(samples, { step, frameH }, rules = RULES) {
   return [...kept.values()];
 }
 
-const floorOf = (run, rules) => (run.chrome ? rules.chromeCapFrac : rules.capFrac);
+export const floorOf = (run, rules) => (run.chrome ? rules.chromeCapFrac : run.ui ? rules.uiCapFrac : rules.capFrac);
 
-/** The held text lines under their cap floor (`capFrac`, or `chromeCapFrac` inside data-chrome), smallest first, each as a problem line. */
-export function textProblems(samples, ctx, rules = RULES) {
+/** The held text lines under their cap floor (`capFrac`; `uiCapFrac` inside data-ui; `chromeCapFrac` inside data-chrome), smallest first, each as a problem line. `ctx.rules` (a film's declared scales, harness/lib/design-decls.mjs) replaces `rules`. */
+export function textProblems(samples, ctx, rules = ctx.rules ?? RULES) {
   return heldTextRuns(samples, ctx, rules)
     .filter((r) => r.cap < floorOf(r, rules))
     .sort((a, b) => a.cap - b.cap)

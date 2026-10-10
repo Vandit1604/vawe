@@ -13,7 +13,7 @@ status: active
 scored: yes
 numbers: {"exit_share_min":0.35,"exit_share_max":0.6,"preset_leave_share":0.6}
 print-motion: exit shorter than the entrance on EASE.launch, not an exit as long as its entrance
-digest: Exits run shorter than the entrance on EASE.launch (EASE.leave only for a settle or hand-off the page names).
+digest: Exits are faster than entrances: shorter, on EASE.launch (EASE.leave only for a settle or hand-off the page names).
 craft: motion-craft
 ---
 

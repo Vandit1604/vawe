@@ -19,6 +19,7 @@ import { syncSpec } from '../lib/spec-sync.mjs';
 import { pageLook, writeLook, firstFamily } from '../lib/page-look.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { unwaivedContrast } from '../lib/text-contrast.mjs';
+import { readDecls } from '../lib/design-decls.mjs';
 
 const outFile = (name, kind) => path.resolve('out', `${name}.${kind}.json`);
 const nameOf = (mp4) => path.basename(mp4, '.mp4').replace(/-draft$/, '');
@@ -47,7 +48,7 @@ function pageMeasures({ probe, findings, authoring }, tables) {
   const wordResult = spec && tables.words.length ? wordChecks(tables.words, spec.samples, spec, spec.times) : null;
   const tracks = probeTracks(probe.samples, probe, tables.words);
   return {
-    caps: heldTextRuns(probe.samples, probe).map((r) => ({ text: r.key, cap: r.cap * 100, t: r.t, ...(r.chrome ? { chrome: true } : {}) })),
+    caps: heldTextRuns(probe.samples, probe).map((r) => ({ text: r.key, cap: r.cap * 100, t: r.t, ...(r.chrome ? { chrome: true } : {}), ...(r.ui ? { ui: true } : {}) })),
     contrast: unwaivedContrast(probe.contrast, authoring),
     collisions: textCollisions(probe.samples),
     readHold: readHoldProblems(tracks),
@@ -82,7 +83,7 @@ export function draftAcceptance({ mp4, pagePath, probe, level, findings, video, 
   const authoring = pageAuthoring(pagePath);
   const name = nameOf(mp4);
   const page = pageMeasures({ probe, findings, authoring }, set);
-  const m = { ...(video ?? {}), ...page, guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, cues: level?.cues, judge: judgeMeasure(name) };
+  const m = { ...(video ?? {}), ...page, decls: readDecls(pagePath), guessed, lufs: level?.I ?? null, peak: level?.TP ?? null, cues: level?.cues, judge: judgeMeasure(name) };
   const rows = buildRows(set.acceptance, m, { mode, stage: 'draft' });
   const was = record(name, rows, 'draft', page.caps, page.measuredSpec, probe.worlds, tailMoving(probe.tail), cameraOnly);
   return { rows, was, sync: writeBriefFromPage(pagePath, page.measuredSpec, probe.samples) };
@@ -121,7 +122,7 @@ export async function finalAcceptance({ page, outputs }) {
   const history = readJson(outFile(name, 'acceptance'))?.history ?? [];
   const level = await finalLevel(mp4);
   const facts = lastPageFacts(name);
-  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, facts.tailMoving, facts.worlds, facts.cameraOnly), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
+  const m = { ...videoMeasures(readVideo(mp4), pageAuthoring(page), tables.shots, facts.tailMoving, facts.worlds, facts.cameraOnly), decls: readDecls(page), lufs: level?.I ?? null, peak: level?.TP ?? null, judge: judgeMeasure(name) };
   const rows = buildRows(tables.acceptance, m, { carry: history.at(-1)?.rows ?? [] });
   return { lines: [`acceptance (final ${path.basename(mp4)}):`, ...tableLines(rows, record(name, rows, 'final'))], allGreen: allMeasuredGreen(rows), counts: acceptanceCounts(rows) };
 }

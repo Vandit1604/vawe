@@ -24,6 +24,7 @@ depth (`mengto/beautiful-shadows` or `mengto/progressive-blur`), then frame: com
 eyebrow, section padding), never by skipping the builder rung. Write one DESIGN.md line per rung: `Skill <rung>: <slug>: what it
 decided`, or `Skipped <rung>: <reason>` (`bin/vawe` advises on a missing rung). Product UI inside the film is a designed
 interface with real-looking data, never placeholder bars. For an invented product the UI is invented but designed.
+An owner decision that differs from a house default goes under `## Declared` in DESIGN.md, one `- key: value` line each: `font`, `type-scale` (percent cap height of read text), `ui-scale` (percent for UI that is the subject, put in a `data-ui` element), `camera` (`still` or `free`). The acceptance rows and the judge follow the line and print it (`harness/lib/design-decls.mjs`).
 DESIGN.md also names colour roles (ground, text, muted, one scarce accent, positive, negative), type roles (mono for every numeral; the measured brand weights) and a negative list (no nav or footer chrome, no second accent, no `back`, `bounce` or `elastic` easing unless the brand is a toy brand).
 Kit format: `kit/kit.css` holds `:root` tokens (palette roles, light positions) and one rule per part (`.ground-*`,
 light devices, `.grain`, `.lockup`, `.word`, `.line`), each moving part its own element; `kit/kit.html` is an optional

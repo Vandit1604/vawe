@@ -19,12 +19,12 @@ export function sizeLines(images) {
   return ['Image sizes. The taste card states every size as a percent of the frame height. Convert with the height of the image you look at, never with a 1080 px figure from memory, and measure type only on a key frame:', ...each];
 }
 
-/** The measured text sizes, smallest first, as facts the judge must use instead of estimating type from pixels. `caps` are { text, cap (percent of frame height), t }. */
-export function capLines(caps) {
+/** The measured text sizes, smallest first, as facts the judge must use instead of estimating type from pixels. `caps` are { text, cap (percent of frame height), t, ui? }. `floors` are the film's { copy, ui } percents (its DESIGN.md declarations, else the house 6 and 3). */
+export function capLines(caps, floors = { copy: 6, ui: 3 }) {
   if (!caps?.length) return [];
   const worst = [...caps].sort((a, b) => a.cap - b.cap).slice(0, MAX_CAPS);
-  return ['Measured text sizes (exact, read from the page; cap height as a percent of the frame height, which is what the taste rule readable-text-size asks for at 6% or more). Use these numbers; do not estimate type size from pixels:',
-    ...worst.map((c) => `- "${c.text.slice(0, 40)}" at ${c.t.toFixed(1)} s: cap height ${c.cap.toFixed(1)}%`)];
+  return [`Measured text sizes (exact, read from the page; cap height as a percent of the frame height; the floor for read text is ${floors.copy}%, for UI that is the subject (data-ui) ${floors.ui}%). Use these numbers; do not estimate type size from pixels:`,
+    ...worst.map((c) => `- "${c.text.slice(0, 40)}" at ${c.t.toFixed(1)} s: cap height ${c.cap.toFixed(1)}%${c.ui ? ' (UI that is the subject)' : ''}`)];
 }
 
 const r1 = (x) => +x.toFixed(2);
