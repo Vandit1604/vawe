@@ -48,6 +48,7 @@ One row per job, best move first. Every built move is in this table.
 | change between shots, soft | [stack-cover](stack-cover.md), [split-reveal](split-reveal.md), [iris-wipe](iris-wipe.md), [luma-matte-dissolve](luma-matte-dissolve.md), [light-leak-transition](light-leak-transition.md) |
 | change between shots, graphic | [direction-wipe](direction-wipe.md), [color-block-wipe](color-block-wipe.md), [type-fill-transition](type-fill-transition.md), [match-cut](match-cut.md), [liquid-wipe](liquid-wipe.md), [shape-morph-wipe](shape-morph-wipe.md), [type-match-cut](type-match-cut.md) |
 | change between shots, spatial | [whip-pan](whip-pan.md), [zoom-through](zoom-through.md), [push-blur](push-blur.md), [grid-tile-flip](grid-tile-flip.md), [spin-transition](spin-transition.md) |
+| change between shots, one object carries over with no cut and no crossfade | [cursor-spotlight](cursor-spotlight.md), [toggle-horizon](toggle-horizon.md), [progress-timeline](progress-timeline.md), [avatar-world](avatar-world.md), [glow-record](glow-record.md) |
 | run every beat in and out | [exit-fast](exit-fast.md), [chain-beats](chain-beats.md) |
 | lean the camera toward a subject | [camera-moves](camera-moves.md), [rack-focus](rack-focus.md) |
 | film a screen as a real object: tilt, depth, bloom, LED grid, fringes | [lens](lens.md) |
@@ -146,6 +147,11 @@ One row per job, best move first. Every built move is in this table.
 | [spin transition](spin-transition.md) | a 90 degree camera roll carries the cut: A rolls to 45 degrees speeding up, B rolls in from -45 and lands soft, scaled to always cover the frame, with rotational blur from 16 stacked exposures |
 | [light leak transition](light-leak-transition.md) | two shots meet through warmth: three generated warm layers swell over a dark UI on their own clocks, the cut lands on the peak, and the new shot climbs out as they fall faster; no image asset |
 | [type match cut](type-match-cut.md) | one word grows in shot A and holds its place while the frame cuts around it; in shot B the same node is part of a new line |
+| [cursor spotlight](cursor-spotlight.md) | a click opens the next screen: the cursor tip grows a soft circle (a radial mask, not a blur) that shows shot B inside it while shot A stays outside until the circle covers the frame |
+| [toggle horizon](toggle-horizon.md) | a setting switches the world: the toggle track stretches past both frame edges and thins to the horizon line of the next scene, and shot A opens away from the line, up and down |
+| [progress timeline](progress-timeline.md) | a bar ends and the result opens in an editor: the fill runs past its end, stands up into the scrubber of a timeline and reveals it while it keeps the fill's speed |
+| [avatar world](avatar-world.md) | a person or brand is the way in: a round vector avatar grows until its circle covers the frame and its art is the ground of the next scene |
+| [glow record](glow-record.md) | an alert becomes a live state: a badge's red floods the frame in 0.35 s on a screen blend with over-exposure, then gathers into the red dot of a recording light |
 
 ## Point the eye
 
