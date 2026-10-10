@@ -24,6 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { playableOf } from '../lib/audio-view.mjs';
 import { balanceLines } from '../lib/cue-balance.mjs';
 import { spectralChange, BED_RATE } from '../lib/bed-motion.mjs';
+import { decodeMono } from '../lib/audio-onsets.mjs';
 import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, normalize, normalizeStereo, encodeWav, wavDuration } from '../../core/audio/kit.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -249,10 +250,8 @@ export function renderMixCached({ specs, duration, dir }) {
 /** [{ name, change }] for every looped music file: how far its spectrum moves from half second to half second (harness/lib/bed-motion.mjs). The first BED_SECONDS only. */
 function measureBeds(specs) {
   return specs.filter((s) => s.role === 'music' && s.src).map((s) => {
-    const r = spawnSync('ffmpeg', ['-v', 'error', '-t', '40', '-i', s.src, '-vn', '-ac', '1', '-ar', String(BED_RATE), '-f', 'f32le', '-'], { maxBuffer: 1 << 28 });
-    const raw = r.status === 0 ? r.stdout : Buffer.alloc(0);
-    const samples = new Float32Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.length - (raw.length % 4)));
-    return { name: path.basename(s.src), change: spectralChange(samples) };
+    const { samples } = decodeMono(s.src, BED_RATE, { seconds: 40 });
+    return { name: path.basename(s.src), change: samples ? spectralChange(samples) : null };
   });
 }
 
