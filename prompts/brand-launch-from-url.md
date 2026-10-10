@@ -90,6 +90,19 @@ URL `site/app/` (local), promise "Write a scene. Get a film.", moments: the edit
 scene on five canvases, frame 412 rendered twice, `bin/vawe ship`. Kit: `themes/vawe.css`. The vawe
 brand is a dark ground `#16151a`, white, the accent `#0a87ff` sparingly, Archivo / Unbounded / JetBrains Mono.
 
+## Launch bars to study
+
+Links only. Look at the live site before you copy a move, and measure it first (`engine-doctrine/CRAFT/REFERENCE-STUDY.md`): a description is not a reference.
+
+| site | moves worth studying |
+|---|---|
+| [Apple](https://apple.com) | a camera dolly or zoom into the product hero; a clipped reveal that wipes in the next claim |
+| [Linear](https://linear.app) | a 3D-tilted product shot that settles flat; hard cuts on the beat, no crossfades |
+| [Vercel](https://vercel.com) | a terminal or deploy-log typing sequence; a monochrome ground with one accent flash |
+| [Stripe](https://stripe.com) | a cursor demo clicking through a real flow; numbers counting up on a stat card |
+| [Arc](https://arc.net) | a window reveal that grows from a UI chrome element; sidebar items entering staggered |
+| [Raycast](https://raycast.com) | a command-palette cursor demo with instant, snappy transitions; no held dead frames |
+
 source: pattern from twoclipping's "Beat-Synced Product Motion Ad" brief,
 https://x.com/twoclipping/status/2102554209166000267 (third-party text, so this is our own template
 in the same six-section shape); the "real assets only,

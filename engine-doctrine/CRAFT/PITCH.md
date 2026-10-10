@@ -38,11 +38,15 @@ second question does: is this the film a hundred other attempts would land on?
 - Sketch each concept as rough boxes (hero mass, type, how full the frame is). Two concepts with one
   silhouette are one concept. Replace one.
 
+## What got rejected after the whole film was built
+
+Each was visible earlier and cheaper. A glass film that was four frosted rectangles drifting (one line of concept text). A saturated AI-default serif (one token, in a style frame). An explainer whose first slide carried nothing (one element, in a style frame). A scroll-driven deck whose motion was the point, and missed (a sentence of concept). A film whose first two seconds held one character (one line of the beat sheet). So write the concept in one line, build two or three stills at final quality before any motion, and look at them. Render a hand-written fragment on its own (`bin/vawe compare --page <page> --at t`) before it goes into a film.
+
 ## Presenting
 
 Three lines per concept: the concept, the visual world, the literal first thing on screen. Show all
 five, then recommend one with a one-sentence reason. Mixing two is a valid answer. Silence accepts the
-recommendation. This is one round, not an iteration loop. The chosen concept is the brief's `angle`.
+recommendation. This is one round, not an iteration loop. Never wait for a reply: show the round, take the recommendation and go on. The chosen concept is the brief's `angle`.
 
 Autonomous ("just build it"): run the same round, pick yourself, and name in one line the most typical
 direction you left behind. Requester without video vocabulary: skip the pitches and give a short

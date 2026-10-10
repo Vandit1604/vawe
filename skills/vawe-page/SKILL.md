@@ -24,6 +24,7 @@ depth (`mengto/beautiful-shadows` or `mengto/progressive-blur`), then frame: com
 eyebrow, section padding), never by skipping the builder rung. Write one DESIGN.md line per rung: `Skill <rung>: <slug>: what it
 decided`, or `Skipped <rung>: <reason>` (`bin/vawe` advises on a missing rung). Product UI inside the film is a designed
 interface with real-looking data, never placeholder bars. For an invented product the UI is invented but designed.
+DESIGN.md also names colour roles (ground, text, muted, one scarce accent that is voltage and never dominant by area, positive, negative), type roles in fixed faces (display, body, mono for every numeral; the measured brand weights) and a negative list (no nav or footer chrome, no second accent, no `back`, `bounce` or `elastic` easing unless the brand is a toy brand).
 Kit format: `kit/kit.css` holds `:root` tokens (palette roles, light positions) and one rule per part (`.ground-*`,
 light devices, `.grain`, `.lockup`, `.word`, `.line`), each moving part its own element; `kit/kit.html` is an optional
 sheet that shows every part once. Example: `films/examples/colour-sting/DESIGN.md` and `kit/`. (4) Build each `data-world` as a static state from the kit (`bin/vawe frames <page>`): about 1 line and 2 or 3 things, and a
@@ -70,7 +71,7 @@ approximate it by eye.
 ## Springs and tables
 
 Start every entrance, exit and group from `core/motion/presets.js` (`enter`, `leave`, `stagger`,
-`layer`, `BANDS`): they land on real curves, exit at 0.6 of the entrance and stagger 30 to 80 ms,
+`layer`, `BANDS`): they land on real curves, exit shorter than the entrance (rule exits-shorter) and stagger 30 to 80 ms,
 and the `bin/vawe dev` motion lint names each move that breaks those rules.
 
 ```js
