@@ -19,6 +19,7 @@ import { previousItems, openItems, ledgerPrompt, mergeLedger, ledgerLines } from
 import { adviceBlock } from '../lib/advice.mjs';
 import { reportLines } from '../lib/judge-report.mjs';
 import { findingsPrompt, readFindings, ruleOf, findingsEvent } from '../lib/judge-findings.mjs';
+import { readTricks, capByTricks } from '../lib/judge-tricks.mjs';
 import { siblingFilms } from '../lib/judge-siblings.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { sizeLines, capLines, holdLines, anchorLines, anchorResult, barLines, TASTE_CARD_REL } from '../lib/judge-prompt.mjs';
@@ -184,9 +185,15 @@ function checkBlock(ev) {
   return parts.map((p) => `${p.join('\n')}\n\n`).join('');
 }
 
+function designOf(brief) {
+  const file = brief && path.join(path.dirname(path.resolve(brief)), 'DESIGN.md');
+  return file && fs.existsSync(file) ? file : null;
+}
+
 function buildPrompt(ev, brief, ledger = '') {
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
+    designOf(brief) && `The film's DESIGN.md (the owner's decisions for this film; Read it and judge the film against it): ${designOf(brief)}`,
     `Taste card: the scored rules and 5 anti-patterns (Read this file once; besides it, open only the evidence images and the sibling thumbnails): ${path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD)}. Score the axes below with these rules in mind, and name the rule id in each fix. Where the brief asks for something a card rule treats as a default to avoid (glow, gradients, rich colour, several hues), the brief wins: do not mark it down.`,
   ].filter(Boolean);
   const kind = ev.stage === 'stills' ? 'three still directions for a film' : `a ${ev.stage} cut of a film`;
@@ -224,7 +231,8 @@ function finish(ev, raw, ms) {
   const axes = FRESH_AXES[ev.stage === 'stills' ? 'stills' : 'film'].map(([k]) => k).filter((k) => !(k === 'sound' && ev.stage !== 'final'));
   const bar = ev.refs?.length ? barResult(raw.bar, ev.refs) : null;
   const given = Object.fromEntries(axes.map((k) => [k, Number(raw.scores[k])]));
-  const scores = bar ? capScores(given, bar).scores : given;
+  const tricks = ev.stage === 'stills' ? [] : readTricks(raw);
+  const scores = capByTricks(bar ? capScores(given, bar).scores : given, tricks);
   const low = axes.filter((k) => !(scores[k] >= PASS_AT));
   const fixes = low.map((k) => {
     const asked = (raw.fixes || []).find((x) => x.axis === k) || {};
@@ -233,7 +241,7 @@ function finish(ev, raw, ms) {
   const pass = low.length === 0 && !(bar && lostBoth(bar).length);
   const first = raw.fixFirst || fixes[0]?.fix || null;
   const time = fixes.map((x) => parseFloat(x.at)).find((t) => Number.isFinite(t)) ?? null;
-  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ...(bar ? { bar, scoresGiven: given } : {}), ...(ev.stage === 'stills' ? {} : readFindings(raw, RULE_IDS)), ms, recorded: new Date().toISOString().slice(0, 10) };
+  return { fresh: true, stage: ev.stage, verdict: pass ? 'PASS' : 'FIX', pass, scores, worlds: ev.stage === 'stills' ? null : raw.worlds ?? null, fixes, fixFirst: first, time, topFix: first, ...(ev.stage === 'stills' ? { directions: raw.directions ?? null, strongest: raw.strongest ?? null, reason: raw.reason ?? null } : {}), ...(ev.keys?.length ? { anchor: anchorResult(raw.anchor, ev.keys) } : {}), ...(bar ? { bar, scoresGiven: given } : {}), ...(ev.stage === 'stills' ? {} : { ...readFindings(raw, RULE_IDS), tricks }), ms, recorded: new Date().toISOString().slice(0, 10) };
 }
 
 const input = process.argv[2];

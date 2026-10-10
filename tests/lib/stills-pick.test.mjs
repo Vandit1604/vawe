@@ -20,9 +20,10 @@ test('dev judges the stills only when three directions are filled, once per chan
 test('the pick prints in three lines', () => {
   const lines = stillsLines({ strongest: 'B', reason: 'the object carries it', fixFirst: 'light the bottle from the left', scores: { concept: 8, template: 7 }, directions: [{ id: 'A', score: 6 }, { id: 'B', score: 8 }, { id: 'C', score: 5 }] });
   assert.deepEqual(lines, [
-    'stills judge: pick B (A 6, B 8, C 5; concept 8, template 7)',
+    'stills judge, advice and not a target: pick B',
     '  why: the object carries it',
     '  fix first: light the bottle from the left',
   ]);
-  assert.match(stillsLines({ strongest: 'A' }, { cached: true })[0], /^stills judge \(unchanged since the last run\): pick A/);
+  assert.ok(!stillsLines({ strongest: 'B', scores: { concept: 8 }, directions: [{ id: 'B', score: 8 }] }).join('\n').match(/\d/), 'no score is printed');
+  assert.match(stillsLines({ strongest: 'A' }, { cached: true })[0], /^stills judge \(unchanged since the last run\), advice and not a target: pick A/);
 });
