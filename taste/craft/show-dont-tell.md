@@ -65,7 +65,7 @@ answer to "I could not think of one".
 
 ## Where the graphic comes from
 
-- Captured UI of the live product (`engine-doctrine/CRAFT/RECREATION.md` for the capture rules).
+- Captured UI of the live product (`engine-doctrine/CRAFT/REFERENCE-STUDY.md` for the capture rules).
 - A bespoke SVG for a diagram: SVG draw-on and morph ([after-effects-techniques.md](after-effects-techniques.md)).
 - Photos and logos: [imagery.md](imagery.md) for sourcing, treatment and licence. Never embed copyrighted stills.
 
