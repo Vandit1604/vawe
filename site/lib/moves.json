@@ -203,6 +203,27 @@
    ]
   },
   {
+   "id": "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade",
+   "label": "change between shots, one object carries over with no cut and no crossfade",
+   "moves": [
+    "cursor-spotlight",
+    "toggle-horizon",
+    "progress-timeline",
+    "avatar-world",
+    "glow-record",
+    "highlight-sweep",
+    "shadow-handoff",
+    "word-portal",
+    "underline-road",
+    "caret-door",
+    "swipe-continues",
+    "drop-and-land",
+    "spin-rotation",
+    "counter-dive",
+    "thumbnail-grid"
+   ]
+  },
+  {
    "id": "run-every-beat-in-and-out",
    "label": "run every beat in and out",
    "moves": [
@@ -1471,7 +1492,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "e60e2e90e02c",
    "duration": 2.4,
    "useHtml": "<p><strong>Use when</strong> a line of type must arrive hard-edged and fast: every character (or word, or line) rises from under its own invisible edge, one after another, and the stagger can start at the first item, the last, the middle or any index. It is a port of the <code>vertical-cut-reveal</code> component of fancy, so the numbers below are the original's. Clip: <a href=\"/moves/vertical-cut-reveal.mp4\">vertical-cut-reveal.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/vertical-cut-reveal.html\">demo/vertical-cut-reveal.html</a>.</p>\n<p>The function is in the demo page (about 30 lines): copy it with the CSS. Time is the seek: there is no trigger, <code>at</code> is the second the animation starts.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>css</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>.vcr { <span class=\"tk-p\">display</span>: flex; <span class=\"tk-p\">flex-wrap</span>: wrap; <span class=\"tk-p\">white-space</span>: pre-wrap; }\n.vcr.lines { <span class=\"tk-p\">flex-direction</span>: column; }\n.vcr-word { <span class=\"tk-p\">display</span>: inline-flex; <span class=\"tk-p\">overflow</span>: hidden; }       <span class=\"tk-c\">/* the clip box: one per word */</span>\n.vcr-char { <span class=\"tk-p\">position</span>: relative; <span class=\"tk-p\">white-space</span>: pre-wrap; }\n.vcr-glyph { <span class=\"tk-p\">display</span>: inline-block; }                       <span class=\"tk-c\">/* the part that moves */</span></code></pre></div>",
@@ -1494,7 +1515,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "1b086b2a7a25",
    "duration": 3.8,
    "useHtml": "<p><strong>Use when</strong> a word or label must react: each letter slides out of a clip box and the same letter slides in behind it, so the word seems to roll once. Options give four looks from one move: <code>forward</code> (the swap plays once and resets) or <code>pingpong</code> (it holds, then plays back on <code>leave</code>), in stagger order or in seeded <code>random</code> order. It is a port of the <code>letter-swap</code> and <code>random-letter-swap</code> components of fancy. The hover trigger becomes a time: <code>at</code> is the second the swap starts, <code>leave</code> the second it plays back. Clip: <a href=\"/moves/letter-swap.mp4\">letter-swap.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/letter-swap.html\">demo/letter-swap.html</a>.</p>\n<p>The function is in the demo page (about 55 lines): copy it with the CSS.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>css</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>.ls { <span class=\"tk-p\">display</span>: flex; <span class=\"tk-p\">justify-content</span>: center; <span class=\"tk-p\">align-items</span>: center; <span class=\"tk-p\">position</span>: relative; <span class=\"tk-p\">overflow</span>: hidden; }\n.ls-letter { <span class=\"tk-p\">white-space</span>: pre; <span class=\"tk-p\">position</span>: relative; <span class=\"tk-p\">display</span>: flex; }\n.ls-p { <span class=\"tk-p\">position</span>: relative; }          <span class=\"tk-c\">/* the letter on show: y 0 to 100% (reverse) or -100% */</span>\n.ls-s { <span class=\"tk-p\">position</span>: absolute; }          <span class=\"tk-c\">/* the copy waiting outside: top -100% (reverse) or 100%, moves to 0 */</span>\n.ls-p.pad { <span class=\"tk-p\">padding-bottom</span>: <span class=\"tk-n\">0.5rem</span>; }  <span class=\"tk-c\">/* the random variants only */</span></code></pre></div>",
@@ -1517,7 +1538,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "8780ed22ec47",
    "duration": 1.8,
    "useHtml": "<p><strong>Use when</strong> a line of lowercase or sentence-case type must turn over as a set of boxes: every character is a small cube that rolls 90 degrees about its own centre and shows the same character on the next face, left to right. It is a port of the <code>letter-3d-swap</code> component of fancy. The hover trigger becomes a time: <code>at</code> is the second the roll starts. Clip: <a href=\"/moves/letter-3d-swap.mp4\">letter-3d-swap.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/letter-3d-swap.html\">demo/letter-3d-swap.html</a>.</p>\n<p>The function is in the demo page (about 45 lines): copy it with the CSS. The roll is one Web Animation per character, so the renderer seeks it; only the DOM and the delays are built in script.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>css</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>.l3 { <span class=\"tk-p\">display</span>: flex; <span class=\"tk-p\">flex-wrap</span>: wrap; <span class=\"tk-p\">position</span>: relative; }\n.l3-word { <span class=\"tk-p\">display</span>: inline-flex; }\n.l3-box { <span class=\"tk-p\">transform-style</span>: preserve-3d; }                    <span class=\"tk-c\">/* one per character: the cube */</span>\n.l3-face { <span class=\"tk-p\">backface-visibility</span>: hidden; <span class=\"tk-p\">height</span>: 1lh; <span class=\"tk-p\">background</span>: var(<span class=\"tk-p\">--ground</span>); <span class=\"tk-p\">color</span>: var(<span class=\"tk-p\">--ink</span>); }\n.l3-front { <span class=\"tk-p\">position</span>: relative; }\n.l3-second { <span class=\"tk-p\">position</span>: absolute; <span class=\"tk-p\">top</span>: <span class=\"tk-n\">0</span>; <span class=\"tk-p\">left</span>: <span class=\"tk-n\">0</span>; }</code></pre></div>",
@@ -2393,6 +2414,247 @@
    "notesHtml": "<p>Show one copy when the frame is still. Stacked translucent copies that are rotated fall on Chromium's 256 px compositor tiles, and on a flat light ground the tile seams show as a faint vertical band. Each copy picks its own shot by its own time, so copies either side of the cut mix A and B, which is what a real shutter records. A 0.5 s roll reads as a spin; under 0.35 s it is a flash of blur. Roll the other way at the next spin, and keep type away from the frame corners: they travel the farthest and blur the most.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
   },
   {
+   "name": "swipe-continues",
+   "title": "Swipe continues",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "use": "a card is swiped left and the next scene arrives from the right at the same speed: one belt, the finger lets go at the peak, 40 percent of the travel on the throw and 60 on the brake, 8 stacked exposures for the blur",
+   "useWhen": "one scene hands over to the next as a single gesture: a card is swiped left, and the next scene arrives from the right at the speed the card left. One belt carries both cards, so there is no cut and no crossfade. The detail that sells it is the seam: the finger lets go at the peak, the belt keeps that speed for the frame the cards cross, and only then does the next card brake. The measured speed is the same on both sides of the seam (a peak of about 6 frame heights a second, 6400 px/s at 1080 p, read with bin/vawe velocity).",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "a soft swish at 0.55 s, as the finger drags; the landing makes no sound.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nconst carry = easeFn('carry'), land = easeFn('land');            // fast at its end / fast at its start\nconst TRAVEL = 0.74 * W, EXIT_SHARE = 0.4;                       // card A sits 0.74 W left of card B: B starts off screen\nconst T0 = 0.55, D_OUT = 0.4, D_IN = 0.6, T1 = T0 + D_OUT;       // belt starts, the throw, the brake\n// both curves meet at 4.8 x their average speed: share * TRAVEL / D_OUT = (1 - share) * TRAVEL / D_IN\nconst belt = (t) => (t < T1\n  ? EXIT_SHARE * TRAVEL * carry(clamp((t - T0) / D_OUT))\n  : EXIT_SHARE * TRAVEL + (1 - EXIT_SHARE) * TRAVEL * land(clamp((t - T1) / D_IN)));\nvawe.onFrame((t) => {\n  layers.forEach((l, j) => {                                      // 8 copies at shutter times: real motion blur\n    const tj = t + (j / 7 - 0.5) * 0.5 / 60;\n    l.belt.style.transform = `translateX(${-belt(tj)}px)`;       // .belt holds card A and card B, B at left: 50% + 74vw\n  });\n});",
+   "eases": [
+    {
+     "name": "carry",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 12,
+      "speed": 4.8
+     }
+    },
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "d2eed842794d",
+   "duration": 3,
+   "useHtml": "<p><strong>Use when</strong> one scene hands over to the next as a single gesture: a card is swiped left, and the next scene arrives from the right at the speed the card left. One belt carries both cards, so there is no cut and no crossfade. The detail that sells it is the seam: the finger lets go at the peak, the belt keeps that speed for the frame the cards cross, and only then does the next card brake. The measured speed is the same on both sides of the seam (a peak of about 6 frame heights a second, 6400 px/s at 1080 p, read with <code>bin/vawe velocity</code>). Clip: <a href=\"/moves/swipe-continues.mp4\">swipe-continues.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/swipe-continues.html\">demo/swipe-continues.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> carry = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'carry'</span>), land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>);            <span class=\"tk-c\">// fast at its end / fast at its start</span>\n<span class=\"tk-k\">const</span> TRAVEL = <span class=\"tk-n\">0.74</span> * W, EXIT_SHARE = <span class=\"tk-n\">0.4</span>;                       <span class=\"tk-c\">// card A sits 0.74 W left of card B: B starts off screen</span>\n<span class=\"tk-k\">const</span> T0 = <span class=\"tk-n\">0.55</span>, D_OUT = <span class=\"tk-n\">0.4</span>, D_IN = <span class=\"tk-n\">0.6</span>, T1 = T0 + D_OUT;       <span class=\"tk-c\">// belt starts, the throw, the brake</span>\n<span class=\"tk-c\">// both curves meet at 4.8 x their average speed: share * TRAVEL / D_OUT = (1 - share) * TRAVEL / D_IN</span>\n<span class=\"tk-k\">const</span> belt = (t) =&gt; (t &lt; T1\n  ? EXIT_SHARE * TRAVEL * <span class=\"tk-f\">carry</span>(<span class=\"tk-f\">clamp</span>((t - T0) / D_OUT))\n  : EXIT_SHARE * TRAVEL + (<span class=\"tk-n\">1</span> - EXIT_SHARE) * TRAVEL * <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((t - T1) / D_IN)));\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  layers.<span class=\"tk-f\">forEach</span>((l, j) =&gt; {                                      <span class=\"tk-c\">// 8 copies at shutter times: real motion blur</span>\n    <span class=\"tk-k\">const</span> tj = t + (j / <span class=\"tk-n\">7</span> - <span class=\"tk-n\">0.5</span>) * <span class=\"tk-n\">0.5</span> / <span class=\"tk-n\">60</span>;\n    l.belt.style.transform = <span class=\"tk-s\">`translateX(${-belt(tj)}px)`</span>;       <span class=\"tk-c\">// .belt holds card A and card B, B at left: 50% + 74vw</span>\n  });\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: a soft swish at 0.55 s, as the finger drags; the landing makes no sound.</p>",
+   "notesHtml": "<p>Cause comes first: the finger lands on the card 0.25 s before the belt moves, drags it, and lets go at the seam (it grows and fades in 0.12 s on <code>launch</code>). The card leaves faster than the next one arrives: 0.4 s of throw against 0.6 s of brake, 40 percent of the travel on the throw side. That ratio is not free: the two curves only meet at the same speed when <code>EXIT_SHARE * TRAVEL / D_OUT</code> equals <code>(1 - EXIT_SHARE) * TRAVEL / D_IN</code>. Change a duration and change the share with it, then read the speed graph: the peak must be one point, not a step.</p>\n<p>What goes wrong: a gap under 0.74 W (cards 0.45 W wide) shows card B at the frame edge at rest, so keep card B's left edge past the frame; two separate tweens, one per card, each with its own ease, step at the seam and read as two swipes; a swipe longer than 0.5 s of throw reads as a slide, not a flick. The camera does not move: the belt is the only motion, and the ground stays still behind it.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "drop-and-land",
+   "title": "Drop and land",
+   "group": "change-between-shots",
+   "look": "paper",
+   "use": "an action in scene A lands in scene B: the product tile lifts, falls under gravity out of the card into the cart while one camera tilt brings the cart up and stops before the landing, then squashes and settles on a spring",
+   "useWhen": "an action in scene A has its result in scene B: the user presses \"Add to cart\", the product tile drops out of the card and lands in the cart on the next screen. One item carries the handoff. It falls under gravity the whole way, so its speed never steps at the seam, while one camera tilt brings the cart up to meet it and stops before it lands.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "a short tap at the landing frame (1.85 s), one cue; the press has its own click.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nimport { spring } from '../../core/motion/springs.js';\nconst settle = easeFn('settle'), land = easeFn('land');\nconst FALL = 0.92, LAND = 1.85, CAM = { at: 1.0, dur: 0.7 };      // seconds; the camera is done 0.15 s before the landing\nconst camY = (t) => H * settle(clamp((t - CAM.at) / CAM.dur));     // one tilt down by one frame height, never back\nconst itemAt = (t) => {\n  if (t < FALL) return { x: START.x, y: START.y - 1.8 * u * land(clamp((t - 0.76) / (FALL - 0.76))) };   // the lift: cause before the fall\n  if (t < LAND) {\n    const f = (t - FALL) / (LAND - FALL), apex = START.y - 1.8 * u, trayNow = SLOT.y - camY(LAND);\n    return { x: START.x + (SLOT.x - START.x) * settle(f), y: apex + (trayNow - apex) * f * f };   // y: gravity, 0 speed at the apex\n  }\n  const k = spring(t - LAND, 220, 12);                              // a small settle: the tile squashes to 0.86 and rings once\n  return { x: SLOT.x, y: SLOT.y - camY(t), sy: 1 - 0.14 * (1 - k) };\n};\n// belt.style.transform = `translateY(${-camY(t)}px)`: scene A at world y 0, the cart at world y H; the item is not on the belt",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "0e1ca02d860e",
+   "duration": 3.2,
+   "useHtml": "<p><strong>Use when</strong> an action in scene A has its result in scene B: the user presses &quot;Add to cart&quot;, the product tile drops out of the card and lands in the cart on the next screen. One item carries the handoff. It falls under gravity the whole way, so its speed never steps at the seam, while one camera tilt brings the cart up to meet it and stops before it lands. Clip: <a href=\"/moves/drop-and-land.mp4\">drop-and-land.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/drop-and-land.html\">demo/drop-and-land.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">import</span> { spring } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/springs.js'</span>;\n<span class=\"tk-k\">const</span> settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>), land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>);\n<span class=\"tk-k\">const</span> FALL = <span class=\"tk-n\">0.92</span>, LAND = <span class=\"tk-n\">1.85</span>, CAM = { at: <span class=\"tk-n\">1.0</span>, dur: <span class=\"tk-n\">0.7</span> };      <span class=\"tk-c\">// seconds; the camera is done 0.15 s before the landing</span>\n<span class=\"tk-k\">const</span> camY = (t) =&gt; H * <span class=\"tk-f\">settle</span>(<span class=\"tk-f\">clamp</span>((t - CAM.at) / CAM.dur));     <span class=\"tk-c\">// one tilt down by one frame height, never back</span>\n<span class=\"tk-k\">const</span> itemAt = (t) =&gt; {\n  <span class=\"tk-k\">if</span> (t &lt; FALL) <span class=\"tk-k\">return</span> { x: START.x, y: START.y - <span class=\"tk-n\">1.8</span> * u * <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((t - <span class=\"tk-n\">0.76</span>) / (FALL - <span class=\"tk-n\">0.76</span>))) };   <span class=\"tk-c\">// the lift: cause before the fall</span>\n  <span class=\"tk-k\">if</span> (t &lt; LAND) {\n    <span class=\"tk-k\">const</span> f = (t - FALL) / (LAND - FALL), apex = START.y - <span class=\"tk-n\">1.8</span> * u, trayNow = SLOT.y - <span class=\"tk-f\">camY</span>(LAND);\n    <span class=\"tk-k\">return</span> { x: START.x + (SLOT.x - START.x) * <span class=\"tk-f\">settle</span>(f), y: apex + (trayNow - apex) * f * f };   <span class=\"tk-c\">// y: gravity, 0 speed at the apex</span>\n  }\n  <span class=\"tk-k\">const</span> k = <span class=\"tk-f\">spring</span>(t - LAND, <span class=\"tk-n\">220</span>, <span class=\"tk-n\">12</span>);                              <span class=\"tk-c\">// a small settle: the tile squashes to 0.86 and rings once</span>\n  <span class=\"tk-k\">return</span> { x: SLOT.x, y: SLOT.y - <span class=\"tk-f\">camY</span>(t), sy: <span class=\"tk-n\">1</span> - <span class=\"tk-n\">0.14</span> * (<span class=\"tk-n\">1</span> - k) };\n};\n<span class=\"tk-c\">// belt.style.transform = `translateY(${-camY(t)}px)`: scene A at world y 0, the cart at world y H; the item is not on the belt</span></code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: a short tap at the landing frame (1.85 s), one cue; the press has its own click.</p>",
+   "notesHtml": "<p>The item is free in the frame, not stuck to a scene: it gets its own gravity clock, and the belt slides under it. That is why its speed has no kink where it passes from scene A's area into the cart's: the measured speed rises from 0 at 0.92 s to 1.2 frame heights a second and meets the cart at 0.8. The camera moves first and finishes first, so the item lands on a cart that is already still; a camera that is still moving at the landing carries the item up as it hits. Fall under 0.7 s reads as a snap, and over 1.1 s reads as floating.</p>\n<p>Two numbers make it a drop: the lift (1.8 percent of frame height up, 0.16 s, <code>EASE.land</code>) is the anticipation, and the squash at the landing is 14 percent with one overshoot. The tile shrinks from 24 to 14 percent of frame height on the way down so it fits the slot; its x moves on <code>settle</code> so there is no sideways speed at the release or at the contact. Never put the item on a different layer order after it lands: it stays above the cart, <code>z-index</code> explicit.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "spin-rotation",
+   "title": "Spin rotation",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "use": "a loading spinner hands over to the loaded screen: the arc's leading edge sweeps a wedge that uncovers the next screen, the camera rolls 14 degrees with the turn and settles tilted, and the ring flies to the header as its mark",
+   "useWhen": "a loading screen hands over to the loaded one and the spinner is on screen: the spinner keeps turning, the arc's leading edge sweeps round like a radar hand and uncovers the next screen behind it, and the camera rolls with the turn until the new screen holds at a slight tilt. One angle runs the move: the spinner, the reveal and the roll all read from it.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; the turn is the cue, and the settled screen takes its own entrance sound.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nconst land = easeFn('land'), settle = easeFn('settle');\nconst OMEGA = 330, T0 = 0.5, T_C = 1.7, D2 = 0.8;                  // deg/s, sweep starts, brake starts, brake length\nconst ROLL = { at: 0.9, dur: 1.3, deg: 14 };                       // one eased roll, the way the spinner turns\nconst head = (t) => (t < T_C ? OMEGA * t : OMEGA * T_C + (OMEGA * D2 / 4.8) * land(clamp((t - T_C) / D2)));   // land starts at 4.8 x its average: 330\nconst roll = (t) => ROLL.deg * settle(clamp((t - ROLL.at) / ROLL.dur));\nconst own = (t) => head(t) - roll(t);                              // screen angle of the arc = own + roll, so it never jumps\n// world.style.transform = `rotate(${roll(t)}deg)`; ring.style.transform = `rotate(${own(t)}deg)`\n// B's plane is clipped to the wedge from own(T0) to own(t): polygon(centre, points on a circle of radius 3 W)",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "00cfc40246b7",
+   "duration": 3.2,
+   "useHtml": "<p><strong>Use when</strong> a loading screen hands over to the loaded one and the spinner is on screen: the spinner keeps turning, the arc's leading edge sweeps round like a radar hand and uncovers the next screen behind it, and the camera rolls with the turn until the new screen holds at a slight tilt. One angle runs the move: the spinner, the reveal and the roll all read from it. Clip: <a href=\"/moves/spin-rotation.mp4\">spin-rotation.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/spin-rotation.html\">demo/spin-rotation.html</a>. Not <a href=\"/moves/spin-transition\">spin-transition</a>, which rolls the whole frame 90 degrees across a cut and needs no spinner.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>), settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>);\n<span class=\"tk-k\">const</span> OMEGA = <span class=\"tk-n\">330</span>, T0 = <span class=\"tk-n\">0.5</span>, T_C = <span class=\"tk-n\">1.7</span>, D2 = <span class=\"tk-n\">0.8</span>;                  <span class=\"tk-c\">// deg/s, sweep starts, brake starts, brake length</span>\n<span class=\"tk-k\">const</span> ROLL = { at: <span class=\"tk-n\">0.9</span>, dur: <span class=\"tk-n\">1.3</span>, deg: <span class=\"tk-n\">14</span> };                       <span class=\"tk-c\">// one eased roll, the way the spinner turns</span>\n<span class=\"tk-k\">const</span> head = (t) =&gt; (t &lt; T_C ? OMEGA * t : OMEGA * T_C + (OMEGA * D2 / <span class=\"tk-n\">4.8</span>) * <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((t - T_C) / D2)));   <span class=\"tk-c\">// land starts at 4.8 x its average: 330</span>\n<span class=\"tk-k\">const</span> roll = (t) =&gt; ROLL.deg * <span class=\"tk-f\">settle</span>(<span class=\"tk-f\">clamp</span>((t - ROLL.at) / ROLL.dur));\n<span class=\"tk-k\">const</span> own = (t) =&gt; <span class=\"tk-f\">head</span>(t) - <span class=\"tk-f\">roll</span>(t);                              <span class=\"tk-c\">// screen angle of the arc = own + roll, so it never jumps</span>\n<span class=\"tk-c\">// world.style.transform = `rotate(${roll(t)}deg)`; ring.style.transform = `rotate(${own(t)}deg)`</span>\n<span class=\"tk-c\">// B's plane is clipped to the wedge from own(T0) to own(t): polygon(centre, points on a circle of radius 3 W)</span></code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; the turn is the cue, and the settled screen takes its own entrance sound.</p>",
+   "notesHtml": "<p>The angle that matters is the arc's angle on screen. It is <code>own + roll</code>, and the roll starts at zero speed, so the sum has the same speed before and after the roll begins (330 degrees a second); then <code>EASE.land</code> brakes it from that same speed (its first frame moves at 4.8 times its average, so the brake covers <code>OMEGA * D2 / 4.8</code> = 55 degrees). The wedge starts at the arc's leading edge at <code>T0</code> and needs 360 degrees, so it closes while the spinner is still at full speed, 1.1 s later; the braking turn is only the ring settling, never a slow reveal. The ring then flies to the header and becomes its mark: one shared element, no fade.</p>\n<p>Roll 10 to 15 degrees, clockwise with the spinner, never back; at 30 degrees the new screen reads as a mistake. Both planes are larger than the frame (<code>inset: -50%</code>), so the roll never shows a corner. A sweep needs motion blur or the hard edge strobes at 5.5 degrees a frame: stack 8 copies of the world at shutter times, as in <a href=\"/moves/spin-transition\">spin-transition</a>, and show one copy when nothing moves.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "counter-dive",
+   "title": "Counter dive",
+   "group": "change-between-shots",
+   "look": "field",
+   "use": "a title is entered through one letter: the camera pushes in log space into the counter of an \"o\" cut out of the title, scene B is already inside it as a miniature, and it fills the frame with no cut",
+   "useWhen": "a title hands over to the next scene by entering one of its letters: the camera pushes into the counter (the hole) of an \"o\" and the next scene is inside it. The hole shows scene B from the first frame as a tiny world, so the dive is a reveal that was already there, and there is no cut. It is a different move from zoom-through, which dives into a plain disc and swaps shots at the end; here the letter's own shape is the portal.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; the dive carries the eye, and the next scene's own entrance takes the cue.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nconst settle = easeFn('settle');\nconst AT = 0.7, DUR = 1.5;\nconst ri = 0.24 * disc.width;                                       // the counter of the drawn \"o\": a disc in ink, a hole cut out of scene A\nconst R = (1.15 * Math.hypot(W / 2, H / 2)) / ri;                   // the scale at which the hole covers the frame corners\na.style.clipPath = `path(evenodd, 'M0 0H${W}V${H}H0Z M${ox + ri} ${oy}A${ri} ${ri} 0 1 0 ${ox - ri} ${oy}A${ri} ${ri} 0 1 0 ${ox + ri} ${oy}Z')`;\nvawe.onFrame((t) => {\n  const p = settle(clamp((t - AT) / DUR)), s = Math.exp(Math.log(R) * p);   // log space: equal share of the zoom every frame\n  const px = ox + (W / 2 - ox) * p, py = oy + (H / 2 - oy) * p;             // the counter's centre drifts to the middle\n  a.style.transform = `translate(${px - s * ox}px, ${py - s * oy}px) scale(${s})`;           // transform-origin 0 0\n  const k = s / R;                                                                        // scene B is full frame at the end\n  b.style.transform = `translate(${px - k * W / 2}px, ${py - k * H / 2}px) scale(${k})`;\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "cd57226eb169",
+   "duration": 3.6,
+   "useHtml": "<p><strong>Use when</strong> a title hands over to the next scene by entering one of its letters: the camera pushes into the counter (the hole) of an &quot;o&quot; and the next scene is inside it. The hole shows scene B from the first frame as a tiny world, so the dive is a reveal that was already there, and there is no cut. It is a different move from <a href=\"/moves/zoom-through\">zoom-through</a>, which dives into a plain disc and swaps shots at the end; here the letter's own shape is the portal. Clip: <a href=\"/moves/counter-dive.mp4\">counter-dive.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/counter-dive.html\">demo/counter-dive.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>);\n<span class=\"tk-k\">const</span> AT = <span class=\"tk-n\">0.7</span>, DUR = <span class=\"tk-n\">1.5</span>;\n<span class=\"tk-k\">const</span> ri = <span class=\"tk-n\">0.24</span> * disc.width;                                       <span class=\"tk-c\">// the counter of the drawn &quot;o&quot;: a disc in ink, a hole cut out of scene A</span>\n<span class=\"tk-k\">const</span> R = (<span class=\"tk-n\">1.15</span> * Math.<span class=\"tk-f\">hypot</span>(W / <span class=\"tk-n\">2</span>, H / <span class=\"tk-n\">2</span>)) / ri;                   <span class=\"tk-c\">// the scale at which the hole covers the frame corners</span>\na.style.clipPath = <span class=\"tk-s\">`path(evenodd, 'M0 0H${W}V${H}H0Z M${ox + ri} ${oy}A${ri} ${ri} 0 1 0 ${ox - ri} ${oy}A${ri} ${ri} 0 1 0 ${ox + ri} ${oy}Z')`</span>;\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> p = <span class=\"tk-f\">settle</span>(<span class=\"tk-f\">clamp</span>((t - AT) / DUR)), s = Math.<span class=\"tk-f\">exp</span>(Math.<span class=\"tk-f\">log</span>(R) * p);   <span class=\"tk-c\">// log space: equal share of the zoom every frame</span>\n  <span class=\"tk-k\">const</span> px = ox + (W / <span class=\"tk-n\">2</span> - ox) * p, py = oy + (H / <span class=\"tk-n\">2</span> - oy) * p;             <span class=\"tk-c\">// the counter's centre drifts to the middle</span>\n  a.style.transform = <span class=\"tk-s\">`translate(${px - s * ox}px, ${py - s * oy}px) scale(${s})`</span>;           <span class=\"tk-c\">// transform-origin 0 0</span>\n  <span class=\"tk-k\">const</span> k = s / R;                                                                        <span class=\"tk-c\">// scene B is full frame at the end</span>\n  b.style.transform = <span class=\"tk-s\">`translate(${px - k * W / 2}px, ${py - k * H / 2}px) scale(${k})`</span>;\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; the dive carries the eye, and the next scene's own entrance takes the cue.</p>",
+   "notesHtml": "<p>Draw the &quot;o&quot; as an ink disc and cut the counter out of the whole of scene A with an even-odd path, not as a CSS border: the hole and the ring edge are then one circle, and scene B shows through it with no mask layer. Scene B sits behind and scales by <code>s / R</code>, so it is one world from the miniature in the hole to full frame at the last frame. Its ground must differ from the letter's ink (here lemon on white type) or the ring disappears and the &quot;o&quot; reads as a plain disc. Hide scene A once <code>s</code> passes 95 percent of <code>R</code>: its hole already covers the frame.</p>\n<p>The zoom runs in log space on one <code>EASE.settle</code>, 1.5 s for about 20 times: faster than 1 s loses the miniature, and a push that goes past <code>R</code> and back reads as a bounce. Zoom blur is real: 8 copies at shutter times, opacities 1, 1/2, 1/3 and so on, shown as one copy when the frame is still. Keep the word short and put the &quot;o&quot; away from the frame edge: a long dive off-centre makes the counter's centre travel, and the hold before it reads as drift.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "thumbnail-grid",
+   "title": "Thumbnail grid",
+   "group": "change-between-shots",
+   "look": "swiss",
+   "use": "the scene shrinks into a thumbnail in a grid that is the next scene: one pull back in log space about the middle cell, nine frame-sized cells in the world, radius from square to the look's step, then the title and a selection ring",
+   "useWhen": "the film steps back from one scene to show where it sits among others: the scene shrinks into a thumbnail, and the pull back reveals its neighbours; the grid is the next scene (\"all projects\", \"your library\", \"the whole roadmap\"). One camera move does it: a pull back in log space, centred on the starting scene, with no push after. The neighbours were always there, off the edge of the frame, so nothing arrives and nothing fades.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; the pull back is felt, and the title takes the one cue.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nconst settle = easeFn('settle');\nconst AT = 0.7, DUR = 1.5, S_END = 0.24, GAP = 6 * u;               // 3 x 3 cells, each one frame (W x H) in the world\n// cell (c, r) sits at ((c - 1) * (W + GAP), (r - 1) * (H + GAP)) from the centre; the middle one is shot A\nvawe.onFrame((t) => {\n  const p = settle(clamp((t - AT) / DUR)), s = Math.exp(Math.log(S_END) * p);   // one scale, about the centre: A is the middle cell\n  world.style.transform = `scale(${s})`;                                       // .world is a 0 x 0 box at the frame centre\n  cells.forEach((c) => { c.style.borderRadius = `${7 * u * p}px`; });          // A starts square: it is the full frame\n});\n// after the pull back: the title and a ring round A enter on EASE.land; A's own bar was moving before it started",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "dddbe552e825",
+   "duration": 3.4,
+   "useHtml": "<p><strong>Use when</strong> the film steps back from one scene to show where it sits among others: the scene shrinks into a thumbnail, and the pull back reveals its neighbours; the grid is the next scene (&quot;all projects&quot;, &quot;your library&quot;, &quot;the whole roadmap&quot;). One camera move does it: a pull back in log space, centred on the starting scene, with no push after. The neighbours were always there, off the edge of the frame, so nothing arrives and nothing fades. Clip: <a href=\"/moves/thumbnail-grid.mp4\">thumbnail-grid.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/thumbnail-grid.html\">demo/thumbnail-grid.html</a>. Not <a href=\"/moves/grid-tile-flip\">grid-tile-flip</a>, which flips tiles over to shot B.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>);\n<span class=\"tk-k\">const</span> AT = <span class=\"tk-n\">0.7</span>, DUR = <span class=\"tk-n\">1.5</span>, S_END = <span class=\"tk-n\">0.24</span>, GAP = <span class=\"tk-n\">6</span> * u;               <span class=\"tk-c\">// 3 x 3 cells, each one frame (W x H) in the world</span>\n<span class=\"tk-c\">// cell (c, r) sits at ((c - 1) * (W + GAP), (r - 1) * (H + GAP)) from the centre; the middle one is shot A</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> p = <span class=\"tk-f\">settle</span>(<span class=\"tk-f\">clamp</span>((t - AT) / DUR)), s = Math.<span class=\"tk-f\">exp</span>(Math.<span class=\"tk-f\">log</span>(S_END) * p);   <span class=\"tk-c\">// one scale, about the centre: A is the middle cell</span>\n  world.style.transform = <span class=\"tk-s\">`scale(${s})`</span>;                                       <span class=\"tk-c\">// .world is a 0 x 0 box at the frame centre</span>\n  cells.<span class=\"tk-f\">forEach</span>((c) =&gt; { c.style.borderRadius = <span class=\"tk-s\">`${7 * u * p}px`</span>; });          <span class=\"tk-c\">// A starts square: it is the full frame</span>\n});\n<span class=\"tk-c\">// after the pull back: the title and a ring round A enter on EASE.land; A's own bar was moving before it started</span></code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; the pull back is felt, and the title takes the one cue.</p>",
+   "notesHtml": "<p>The scale ends at 0.24: the grid fills about 74 percent of the frame, which leaves room for a title above it. Pull back to 0.35 or more and the neighbours read as clipped; under 0.2 the cell text is too small to read. Put the shot you leave in the middle cell: the camera then needs only a scale about the frame centre, with no pan, and the move reads as one gesture. If it must sit in a corner, scale about the pivot <code>P = (C - s_end * G) / (1 - s_end)</code> (C the frame centre, G the grid centre) so the scale and the pan are one motion, never two.</p>\n<p>Neighbour cells need real content in the same scale as the first (a label, a number, a bar), set in world units so they read as scenes, not as tiles. Radius and gap are world units too: set them from the progress so the first frame has square corners and the last frame has the look's radius. The selection ring (the shot you came from) enters after the move has settled, on <code>EASE.land</code>. The camera never moves back; if the next beat needs a closer look at a tile, that is a second move, after a hold.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
    "name": "light-leak-transition",
    "title": "Light leak transition",
    "group": "change-between-shots",
@@ -2516,6 +2778,609 @@
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>html</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>&lt;<span class=\"tk-k\">section</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;shot&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;a&quot;</span>&gt;&lt;<span class=\"tk-k\">p</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;line&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;la&quot;</span>&gt;Everything we ship is &lt;<span class=\"tk-k\">span</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;slot&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;sa&quot;</span>&gt;fast&lt;/<span class=\"tk-k\">span</span>&gt;&lt;/<span class=\"tk-k\">p</span>&gt;&lt;/<span class=\"tk-k\">section</span>&gt;\n&lt;<span class=\"tk-k\">section</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;shot&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;b&quot;</span>&gt;&lt;<span class=\"tk-k\">p</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;line&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;lb&quot;</span>&gt;The feature is &lt;<span class=\"tk-k\">span</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;slot&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;sb&quot;</span>&gt;fast&lt;/<span class=\"tk-k\">span</span>&gt;&lt;/<span class=\"tk-k\">p</span>&gt;&lt;/<span class=\"tk-k\">section</span>&gt;\n&lt;<span class=\"tk-k\">span</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;hold&quot;</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;hold&quot;</span>&gt;fast&lt;/<span class=\"tk-k\">span</span>&gt;   <span class=\"tk-c\">&lt;!-- one node above both; .slot is visibility:hidden and only reserves the room --&gt;</span></code></pre></div>",
    "soundHtml": "<p class=\"mv-sound\">Sound: a hit on the cut second (CUT), low and short; the grow before it is silent.</p>",
    "notesHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">await</span> document.fonts.ready;\n<span class=\"tk-c\">// the held word sits at one point P: each shot's line is shifted until its slot is centred on P</span>\n<span class=\"tk-k\">const</span> P = { x: innerWidth * <span class=\"tk-n\">0.8</span> - wB / <span class=\"tk-n\">2</span>, y: innerHeight * <span class=\"tk-n\">0.5</span> };\n<span class=\"tk-k\">for</span> (<span class=\"tk-k\">const</span> [line, slot] <span class=\"tk-k\">of</span> [[la, sa], [lb, sb]]) {\n  line.style.left = <span class=\"tk-s\">`${P.x - (slot.offsetLeft + slot.offsetWidth / 2)}px`</span>;\n  line.style.top = <span class=\"tk-s\">`${P.y - (slot.offsetTop + slot.offsetHeight / 2)}px`</span>;\n}\n<span class=\"tk-k\">const</span> s0 = wA / wB;                                    <span class=\"tk-c\">// slot widths: the word starts at the size of its slot in A</span>\nhold.<span class=\"tk-f\">animate</span>([{ transform: <span class=\"tk-s\">`scale(${s0})`</span> }, { transform: <span class=\"tk-s\">`scale(${s0})`</span>, offset: GROW_AT / CUT, easing: EASE.settle }, { transform: <span class=\"tk-s\">'scale(1)'</span> }], { duration: CUT * <span class=\"tk-n\">1000</span>, fill: <span class=\"tk-s\">'both'</span> });\n<span class=\"tk-k\">const</span> swap = (el, <span class=\"tk-k\">from</span>, to) =&gt; el.<span class=\"tk-f\">animate</span>([<span class=\"tk-k\">from</span>, to], { duration: CUT * <span class=\"tk-n\">1000</span>, easing: <span class=\"tk-s\">'steps(1, jump-end)'</span>, fill: <span class=\"tk-s\">'both'</span> });\n<span class=\"tk-f\">swap</span>(a, { visibility: <span class=\"tk-s\">'visible'</span> }, { visibility: <span class=\"tk-s\">'hidden'</span> });   <span class=\"tk-c\">// the cut: one frame</span>\n<span class=\"tk-f\">swap</span>(b, { visibility: <span class=\"tk-s\">'hidden'</span> }, { visibility: <span class=\"tk-s\">'visible'</span> });\n<span class=\"tk-f\">swap</span>(hold, { color: lemon }, { color: paperInk });\n<span class=\"tk-f\">enter</span>(lb, { at: CUT + <span class=\"tk-n\">0.02</span>, band: <span class=\"tk-s\">'gravity'</span>, <span class=\"tk-k\">from</span>: <span class=\"tk-s\">'-0.5em 0'</span> });</code></pre></div>\n<h2 id=\"the-numbers-that-make-it-look-expensive\">The numbers that make it look expensive</h2>\n<ul><li>The word grows 0.65 s (<code>EASE.settle</code>) and the cut lands on the frame it stops: the eye is on the word at the cut, so the new ground reads as the word moving into place, not as a jump.</li><li>The rest of shot A leaves in 0.26 s on <code>EASE.launch</code> as the word starts to grow, so the word never runs over its neighbours. The cut itself is <code>steps(1, jump-end)</code>: one frame, no fade.</li><li>Shot B's other words enter 20 ms after the cut, from the side, so the first frame of B is the word alone on the new ground.</li><li>The ink flips with the cut (accent to dark on white). Contrast is 4.5:1 or more in both shots.</li><li>Match centre to centre, not left edge to left edge: the word scales about its centre, so the centre is the one point that does not move.</li><li>Wait for <code>document.fonts.ready</code> before measuring slots, or the match is off by a font swap.</li></ul>\n<h2 id=\"the-common-mistake\">The common mistake</h2>\n<p>Two copies of the word, one per shot, lined up by eye. They differ by a pixel or a sub-pixel of kerning and the word shivers at the cut. One node, measured slots, and nothing else moves it.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "cursor-spotlight",
+   "title": "Cursor spotlight",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "use": "a click opens the next screen: the cursor tip grows a soft circle (a radial mask, not a blur) that shows shot B inside it while shot A stays outside until the circle covers the frame",
+   "useWhen": "a click opens the next screen and the film must not cut: the cursor tip is the handoff object. After the press, a soft circle is born at the tip, grows from a tip-sized spot, and shows the next screen inside it. Screen A stays outside the circle until the circle covers the frame. The cause (the press) and the effect (the circle) share one point, so the viewer reads \"this click opened that screen\".",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "one soft click on the press (0.1 s before the circle is born); nothing on the growth.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nconst land = easeFn('land'), settle = easeFn('settle');\nconst FEATHER = 0.14, R0 = 0.9 * u;                                        // u = innerHeight / 100\nconst RMAX = (FAR / (1 - FEATHER)) * 1.02;                                 // FAR: tip to the farthest corner\nvawe.onFrame((t) => {\n  const k = clamp((t - T.grow) / 0.8), g = 0.35 * k * k * (3 - 2 * k) + 0.65 * settle(k);\n  const R = lerp(R0, RMAX, g), f = Math.max(R * FEATHER, 1.5);\n  const mask = `radial-gradient(circle at ${x}px ${y}px, #000 ${Math.max(R - f, 0)}px, transparent ${R}px)`;\n  shotB.style.maskImage = mask;                                            // shot B sits above shot A, the cursor above both\n  shotB.firstElementChild.style.transform = `scale(${lerp(1.06, 1, land(k))})`;\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "f80c922112c8",
+   "duration": 3.6,
+   "useHtml": "<p><strong>Use when</strong> a click opens the next screen and the film must not cut: the cursor tip is the handoff object. After the press, a soft circle is born at the tip, grows from a tip-sized spot, and shows the next screen inside it. Screen A stays outside the circle until the circle covers the frame. The cause (the press) and the effect (the circle) share one point, so the viewer reads &quot;this click opened that screen&quot;. Clip: <a href=\"/moves/cursor-spotlight.mp4\">cursor-spotlight.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/cursor-spotlight.html\">demo/cursor-spotlight.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>), settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>);\n<span class=\"tk-k\">const</span> FEATHER = <span class=\"tk-n\">0.14</span>, R0 = <span class=\"tk-n\">0.9</span> * u;                                        <span class=\"tk-c\">// u = innerHeight / 100</span>\n<span class=\"tk-k\">const</span> RMAX = (FAR / (<span class=\"tk-n\">1</span> - FEATHER)) * <span class=\"tk-n\">1.02</span>;                                 <span class=\"tk-c\">// FAR: tip to the farthest corner</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> k = <span class=\"tk-f\">clamp</span>((t - T.grow) / <span class=\"tk-n\">0.8</span>), g = <span class=\"tk-n\">0.35</span> * k * k * (<span class=\"tk-n\">3</span> - <span class=\"tk-n\">2</span> * k) + <span class=\"tk-n\">0.65</span> * <span class=\"tk-f\">settle</span>(k);\n  <span class=\"tk-k\">const</span> R = <span class=\"tk-f\">lerp</span>(R0, RMAX, g), f = Math.<span class=\"tk-f\">max</span>(R * FEATHER, <span class=\"tk-n\">1.5</span>);\n  <span class=\"tk-k\">const</span> mask = <span class=\"tk-s\">`radial-gradient(circle at ${x}px ${y}px, #000 ${Math.max(R - f, 0)}px, transparent ${R}px)`</span>;\n  shotB.style.maskImage = mask;                                            <span class=\"tk-c\">// shot B sits above shot A, the cursor above both</span>\n  shotB.firstElementChild.style.transform = <span class=\"tk-s\">`scale(${lerp(1.06, 1, land(k))})`</span>;\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: one soft click on the press (0.1 s before the circle is born); nothing on the growth.</p>",
+   "notesHtml": "<ul><li>The edge is a mask, not a blur: a radial gradient with an opaque core and a soft shoulder of 14 percent of the radius. A blur of the edge would also blur the content inside it.</li><li>The core, <code>R - feather</code>, must reach the farthest corner, so <code>RMAX = FAR / (1 - FEATHER)</code>. If you set <code>RMAX = FAR</code>, a wedge of shot A stays in the corner after the move and shows when the cursor leaves.</li><li>The circle centre is the cursor tip, and the cursor keeps drifting 2 percent of the width for 1 s after the press, so the tip is never frozen under the circle. Stop following the cursor when it leaves: the centre must not move with the exit.</li><li>Timing: the cursor lands in 0.8 s on <code>EASE.land</code>, the press dips the arrow 14 percent and the button 3.5 percent, the circle starts 0.1 s after the press and grows in 0.8 s: a quarter on a smoothstep, the rest on <code>EASE.settle</code>. The cursor leaves in 0.35 s on <code>EASE.launch</code>, faster than it came.</li><li>Speed across the handoff: the cursor arrives near rest and the circle is born at rest, so no speed jumps. Do not start the circle while the cursor still travels fast, or the circle seems to lag behind its own tip.</li><li>Z-order is explicit: shot A z 1, shot B z 5 with the mask, cursor z 10. If B is below A the mask shows nothing.</li><li>Shot B arrives at 1.06x and settles to 1 while the circle grows, and its own motion (a counter, bars) starts 0.5 s into the growth, so the hold is alive. Draw the cursor with a white fill and a dark edge: it must read on both screens.</li><li>What goes wrong: a hard <code>clip-path: circle()</code> reads as an iris wipe (<a href=\"/moves/iris-wipe\">iris-wipe</a>), a hard edge that closes. Here the circle opens, with a soft edge, from the tip. A circle born from the button centre, not the tip, breaks the link to the cursor.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "toggle-horizon",
+   "title": "Toggle horizon",
+   "group": "change-between-shots",
+   "look": "dusk",
+   "use": "a setting switches the world: the toggle track stretches past both frame edges and thins to the horizon line of the next scene, and shot A opens away from the line, up and down",
+   "useWhen": "a setting switches the whole product into a new state (dark mode, night, focus) and the next scene is a world with a horizon. A toggle switches on, its track stretches sideways past both frame edges and thins to a hairline, and that line is the horizon of the next scene. Scene A opens away from the line, up and down, and scene B is already behind it. No cut and no crossfade: the line is the seam and it never leaves the screen.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "one short tick on the press, a low swell on the stretch that ends when the line is thin; nothing on the wipe.",
+   "snippet": "import { easeFn } from '../../core/motion/presets.js';\nimport { spring } from '../../core/motion/springs.js';\nconst land = easeFn('land'), swap = easeFn('swap');\nconst LINE_Y = 0.62 * H;                                                   // the toggle sits on the horizon of scene B\nvawe.onFrame((t) => {\n  const on = spring(t - T.press - 0.02, 380, 26);                          // the knob after the press\n  const sk = clamp((t - 1.5) / 0.7);\n  const w = lerp(TW, W * 1.05, land(sk)), h = lerp(TH, 0.5 * u, swap(clamp(sk * 1.25)));\n  track.style.cssText = `left:${W / 2 - w / 2}px; top:${LINE_Y - h / 2}px; width:${w}px; height:${h}px`;\n  const wk = swap(clamp((t - 2.0) / 0.75));                                // A shrinks away from the line\n  topHalf.style.clipPath = `inset(0 0 ${H - LINE_Y * (1 - wk)}px 0)`;\n  bottomHalf.style.clipPath = `inset(${LINE_Y + (H - LINE_Y) * wk}px 0 0 0)`;\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    },
+    {
+     "name": "swap",
+     "out": {
+      "influence": 75,
+      "speed": 0
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "06584c90a34d",
+   "duration": 3.8,
+   "useHtml": "<p><strong>Use when</strong> a setting switches the whole product into a new state (dark mode, night, focus) and the next scene is a world with a horizon. A toggle switches on, its track stretches sideways past both frame edges and thins to a hairline, and that line is the horizon of the next scene. Scene A opens away from the line, up and down, and scene B is already behind it. No cut and no crossfade: the line is the seam and it never leaves the screen. Clip: <a href=\"/moves/toggle-horizon.mp4\">toggle-horizon.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/toggle-horizon.html\">demo/toggle-horizon.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">import</span> { spring } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/springs.js'</span>;\n<span class=\"tk-k\">const</span> land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>), swap = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'swap'</span>);\n<span class=\"tk-k\">const</span> LINE_Y = <span class=\"tk-n\">0.62</span> * H;                                                   <span class=\"tk-c\">// the toggle sits on the horizon of scene B</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> on = <span class=\"tk-f\">spring</span>(t - T.press - <span class=\"tk-n\">0.02</span>, <span class=\"tk-n\">380</span>, <span class=\"tk-n\">26</span>);                          <span class=\"tk-c\">// the knob after the press</span>\n  <span class=\"tk-k\">const</span> sk = <span class=\"tk-f\">clamp</span>((t - <span class=\"tk-n\">1.5</span>) / <span class=\"tk-n\">0.7</span>);\n  <span class=\"tk-k\">const</span> w = <span class=\"tk-f\">lerp</span>(TW, W * <span class=\"tk-n\">1.05</span>, <span class=\"tk-f\">land</span>(sk)), h = <span class=\"tk-f\">lerp</span>(TH, <span class=\"tk-n\">0.5</span> * u, <span class=\"tk-f\">swap</span>(<span class=\"tk-f\">clamp</span>(sk * <span class=\"tk-n\">1.25</span>)));\n  track.style.cssText = <span class=\"tk-s\">`left:${W / 2 - w / 2}px; top:${LINE_Y - h / 2}px; width:${w}px; height:${h}px`</span>;\n  <span class=\"tk-k\">const</span> wk = <span class=\"tk-f\">swap</span>(<span class=\"tk-f\">clamp</span>((t - <span class=\"tk-n\">2.0</span>) / <span class=\"tk-n\">0.75</span>));                                <span class=\"tk-c\">// A shrinks away from the line</span>\n  topHalf.style.clipPath = <span class=\"tk-s\">`inset(0 0 ${H - LINE_Y * (1 - wk)}px 0)`</span>;\n  bottomHalf.style.clipPath = <span class=\"tk-s\">`inset(${LINE_Y + (H - LINE_Y) * wk}px 0 0 0)`</span>;\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: one short tick on the press, a low swell on the stretch that ends when the line is thin; nothing on the wipe.</p>",
+   "notesHtml": "<ul><li>Scene A is two copies of the same layer, each clipped to its side of the line (<code>bottom.innerHTML = top.innerHTML</code>). One clipped layer would cut the card in half and show the cut half. The toggle sits on the line, so the card spans both halves.</li><li>The horizon is the track, in the accent colour: it stays at <code>LINE_Y</code> for the whole of scene B. Put the horizon of B (the sky edge, the sea line) on the same y. A line that moves after the handoff is a second object.</li><li>Order: the knob switches first (spring k 380, d 26, about 0.3 s), 0.2 s of dwell, then the track stretches 0.7 s on <code>EASE.land</code>: width to 105 percent of the frame, height 10 u to 0.5 u on <code>EASE.swap</code>, 1.25 times faster than the width, so the pill is long before it is thin. The knob rides the right end and shrinks with the track height.</li><li>The wipe starts 0.5 s into the stretch, when the line is nearly full width: 0.75 s on <code>EASE.swap</code>, fast in the middle. It overlaps the stretch, so the line never waits. The wipe is the exit of A: shorter and faster than the stretch plus the dwell.</li><li>The world arrives after the seam: the sun climbs from under the line 0.5 s after the wipe starts (1.1 s, <code>EASE.land</code>), a reflection lengthens under it, the caption holds. The camera does not move.</li><li>What goes wrong: a cursor that leaves slowly stays on screen over the new world, so send it off the frame. Stars and sun must be in B only. A line thicker than 0.6 u reads as a bar, not a horizon.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "progress-timeline",
+   "title": "Progress timeline",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "use": "a bar ends and the result opens in an editor: the fill runs past its end, stands up into the scrubber of a timeline and reveals it while it keeps the fill's speed",
+   "useWhen": "an export, a render or an upload ends and the product shows the result in an editor. A loading bar fills and does not stop at its end: the fill keeps going, its tail catches up with its head, the head stands up into a thin vertical line, and that line is the scrubber of a video timeline. The scrubber reveals the timeline as it moves, and it keeps the speed the fill had. One object, one speed, two screens.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "a soft tick when the line is up (past 1), a low tone under the scrub that stops when the line brakes.",
+   "snippet": "// one speed curve for the whole move: accelerate, run at V, brake at the end of the timeline\nconst X0 = 10 * vw, END = 50 * vw, REST = 92 * vw, V = 44 * vw, T0 = 0.4, ACC = 0.5, BRAKE = 0.6;\nconst x = xAt(t);                                                          // piecewise integral of that speed\nconst past = clamp((t - tEnd) / 0.7);                                      // tEnd: the second x passes the end of the track\nconst tail = lerp(X0, x - LINE_W, swap(clamp(past / 0.55)));               // the tail catches up with the head\nconst h = lerp(1.4 * u, 50 * u, land(clamp((past - 0.4) / 0.6)));          // then the head stands up\nhead.style.cssText = `left:${tail}px; width:${Math.max(x - tail, LINE_W)}px; height:${h}px; top:${CY - h / 2}px`;\ntimeline.style.clipPath = past > 0.75 ? `inset(0 ${W - x - LINE_W}px 0 ${edge}px)` : 'inset(0 100% 0 100%)';",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "swap",
+     "out": {
+      "influence": 75,
+      "speed": 0
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "053bca046ce8",
+   "duration": 3.6,
+   "useHtml": "<p><strong>Use when</strong> an export, a render or an upload ends and the product shows the result in an editor. A loading bar fills and does not stop at its end: the fill keeps going, its tail catches up with its head, the head stands up into a thin vertical line, and that line is the scrubber of a video timeline. The scrubber reveals the timeline as it moves, and it keeps the speed the fill had. One object, one speed, two screens. Clip: <a href=\"/moves/progress-timeline.mp4\">progress-timeline.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/progress-timeline.html\">demo/progress-timeline.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-c\">// one speed curve for the whole move: accelerate, run at V, brake at the end of the timeline</span>\n<span class=\"tk-k\">const</span> X0 = <span class=\"tk-n\">10</span> * vw, END = <span class=\"tk-n\">50</span> * vw, REST = <span class=\"tk-n\">92</span> * vw, V = <span class=\"tk-n\">44</span> * vw, T0 = <span class=\"tk-n\">0.4</span>, ACC = <span class=\"tk-n\">0.5</span>, BRAKE = <span class=\"tk-n\">0.6</span>;\n<span class=\"tk-k\">const</span> x = <span class=\"tk-f\">xAt</span>(t);                                                          <span class=\"tk-c\">// piecewise integral of that speed</span>\n<span class=\"tk-k\">const</span> past = <span class=\"tk-f\">clamp</span>((t - tEnd) / <span class=\"tk-n\">0.7</span>);                                      <span class=\"tk-c\">// tEnd: the second x passes the end of the track</span>\n<span class=\"tk-k\">const</span> tail = <span class=\"tk-f\">lerp</span>(X0, x - LINE_W, <span class=\"tk-f\">swap</span>(<span class=\"tk-f\">clamp</span>(past / <span class=\"tk-n\">0.55</span>)));               <span class=\"tk-c\">// the tail catches up with the head</span>\n<span class=\"tk-k\">const</span> h = <span class=\"tk-f\">lerp</span>(<span class=\"tk-n\">1.4</span> * u, <span class=\"tk-n\">50</span> * u, <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((past - <span class=\"tk-n\">0.4</span>) / <span class=\"tk-n\">0.6</span>)));          <span class=\"tk-c\">// then the head stands up</span>\nhead.style.cssText = <span class=\"tk-s\">`left:${tail}px; width:${Math.max(x - tail, LINE_W)}px; height:${h}px; top:${CY - h / 2}px`</span>;\ntimeline.style.clipPath = past &gt; <span class=\"tk-n\">0.75</span> ? <span class=\"tk-s\">`inset(0 ${W - x - LINE_W}px 0 ${edge}px)`</span> : <span class=\"tk-s\">'inset(0 100% 0 100%)'</span>;</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: a soft tick when the line is up (<code>past</code> 1), a low tone under the scrub that stops when the line brakes.</p>",
+   "notesHtml": "<ul><li>The speed matches because there is one <code>xAt(t)</code>. The fill and the scrubber read the same function, so the head never jumps in speed at the end of the track. 44 vw per second at the end of the track is the number that read well; slower looks stuck, faster loses the stand-up.</li><li>Order inside the stand-up (0.7 s): first the width collapses (<code>EASE.swap</code>, 0 to 55 percent), so the fill is a dash, then the height grows (<code>EASE.land</code>, 40 to 100 percent). Both at once make a fat pill; the dash is the beat that says &quot;the bar is becoming a line&quot;.</li><li>The timeline is revealed to the left of the scrubber only: its right edge is the line, its left edge flies to 0 in the last 25 percent of the stand-up on <code>EASE.launch</code>. Anything to the right of the line is still shot A (the thumbnail), so the scrubber visibly plays across it. Keep the thumbnail dim: a thumbnail in the accent colour hides the line.</li><li>Z-order: A z 1, B z 2, scrubber and time code z 8 and 9. The time code is a function of the same <code>x</code>, in a pill so it reads on both sides.</li><li>The scrubber brakes on <code>0.6 s</code> and rests at 92 vw, so B is fully shown. If it rests earlier, a strip of A stays at the right.</li><li>What goes wrong: a horizontal bar that rotates 90 degrees is a spin, not a handoff, and it breaks the speed. A scrubber line that is thicker than 0.7 u reads as a bar. Do not fade the bar out.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "avatar-world",
+   "title": "Avatar world",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "use": "a person or brand is the way in: a round vector avatar grows until its circle covers the frame and its art is the ground of the next scene",
+   "useWhen": "a person, a brand or a place is the way into the next scene: a profile, a creator page, a case study. A round avatar in a card grows until its circle is larger than the frame, and its picture becomes the ground of the next scene. The avatar art is vector (an SVG illustration or a gradient), so it stays sharp at 12 times its size.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "one soft pluck on the press; a rising swell under the growth that stops when the circle covers the frame.",
+   "snippet": "const D = 22 * u;                                                          // the avatar in the card\nconst SMAX = (Math.hypot(W, H) / 2 / (D / 2)) * 1.03;                      // its radius reaches the farthest corner from the frame centre\navatar.style.cssText = `width:${D}px; height:${D}px; border-radius:50%; overflow:hidden`;   // the svg inside is the art\nvawe.onFrame((t) => {\n  const k = clamp((t - T.grow) / 0.95), g = 0.3 * k * k * (3 - 2 * k) + 0.7 * easeFn('swap')(k);\n  const cx = lerp(START.x, W / 2, g), cy = lerp(START.y, H / 2, g);        // the circle travels to the middle while it grows\n  avatar.style.transform = `translate(${cx - D / 2}px, ${cy - D / 2}px) scale(${lerp(1, SMAX, g)})`;\n  card.style.opacity = lerp(1, 0.55, g);\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    },
+    {
+     "name": "swap",
+     "out": {
+      "influence": 75,
+      "speed": 0
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "58d327c74762",
+   "duration": 3.8,
+   "useHtml": "<p><strong>Use when</strong> a person, a brand or a place is the way into the next scene: a profile, a creator page, a case study. A round avatar in a card grows until its circle is larger than the frame, and its picture becomes the ground of the next scene. The avatar art is vector (an SVG illustration or a gradient), so it stays sharp at 12 times its size. Clip: <a href=\"/moves/avatar-world.mp4\">avatar-world.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/avatar-world.html\">demo/avatar-world.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> D = <span class=\"tk-n\">22</span> * u;                                                          <span class=\"tk-c\">// the avatar in the card</span>\n<span class=\"tk-k\">const</span> SMAX = (Math.<span class=\"tk-f\">hypot</span>(W, H) / <span class=\"tk-n\">2</span> / (D / <span class=\"tk-n\">2</span>)) * <span class=\"tk-n\">1.03</span>;                      <span class=\"tk-c\">// its radius reaches the farthest corner from the frame centre</span>\navatar.style.cssText = <span class=\"tk-s\">`width:${D}px; height:${D}px; border-radius:50%; overflow:hidden`</span>;   <span class=\"tk-c\">// the svg inside is the art</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> k = <span class=\"tk-f\">clamp</span>((t - T.grow) / <span class=\"tk-n\">0.95</span>), g = <span class=\"tk-n\">0.3</span> * k * k * (<span class=\"tk-n\">3</span> - <span class=\"tk-n\">2</span> * k) + <span class=\"tk-n\">0.7</span> * <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'swap'</span>)(k);\n  <span class=\"tk-k\">const</span> cx = <span class=\"tk-f\">lerp</span>(START.x, W / <span class=\"tk-n\">2</span>, g), cy = <span class=\"tk-f\">lerp</span>(START.y, H / <span class=\"tk-n\">2</span>, g);        <span class=\"tk-c\">// the circle travels to the middle while it grows</span>\n  avatar.style.transform = <span class=\"tk-s\">`translate(${cx - D / 2}px, ${cy - D / 2}px) scale(${lerp(1, SMAX, g)})`</span>;\n  card.style.opacity = <span class=\"tk-f\">lerp</span>(<span class=\"tk-n\">1</span>, <span class=\"tk-n\">0.55</span>, g);\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: one soft pluck on the press; a rising swell under the growth that stops when the circle covers the frame.</p>",
+   "notesHtml": "<ul><li>The art must be drawn for the end frame too. At the end the frame is a window onto the middle of the art: for 16:9 it shows about half of the art's height and 87 percent of its width. Keep the horizon, the sun and the main shapes in the middle half; sky and floor at the top and bottom are cropped away. The <code>slice</code> setting on the SVG keeps the art square.</li><li>Do not set <code>will-change: transform</code> on the avatar. Chromium keeps the first raster and scales it, and the ground is soft. Without it the vector is drawn again at each scale and stays crisp.</li><li>The press has a cause: a cursor lands on the avatar, the avatar dips to 95 percent, and the growth starts 0.12 s later. The cursor leaves faster than it came (0.3 s, <code>EASE.launch</code>).</li><li>Growth takes 0.95 s: 30 percent smoothstep and 70 percent <code>EASE.swap</code>, so it starts slow and is fastest in the middle. The card dims to 55 percent under it. Scene B text arrives 0.83 s after the growth starts, 0.15 s apart (name, count, button), each rising from 4 to 6 u on <code>EASE.land</code>.</li><li>The ground keeps living after the handoff: the sun climbs 3.5 percent of the art height over 2.6 s. It is the same element that was in the avatar, so the ground is the avatar, not a copy.</li><li>Z-order: card z 1, avatar z 3, scene B text z 4, cursor z 10. Use an illustration or a generated gradient, never a photo of a real person.</li><li>What goes wrong: a circle clip over a static background is an iris (<a href=\"/moves/iris-wipe\">iris-wipe</a>). Here the picture grows with the circle. If the avatar does not move to the centre while it grows, the frame shows an off-centre part of the art.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "glow-record",
+   "title": "Glow record",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "use": "an alert becomes a live state: a badge's red floods the frame in 0.35 s on a screen blend with over-exposure, then gathers into the red dot of a recording light",
+   "useWhen": "an alert turns into a live state: a notification leads to a recording, a call or a live stream. The red of a notification badge floods the frame from the badge, reaches the farthest corner in about 0.35 s, and then gathers back into one point: the red dot of the recording light in the next scene. The red is the handoff object. The swap of the scenes happens inside the full-frame red, so the viewer never sees it.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "a short ping when the badge count rolls; one low swell that stops dead when the red is full; nothing on the gather.",
+   "snippet": "const R_FULL = (FAR * 1.02) / (1 - FEATHER);                               // the opaque core must reach the farthest corner\nvawe.onFrame((t) => {\n  const e = land(clamp((t - 1.35) / 0.35)), g = settle(clamp((t - T_GATHER) / 0.85));\n  const cx = lerp(SRC.x, DST.x, g), cy = lerp(SRC.y, DST.y, g);            // badge to recording light\n  const R = t < T_GATHER ? lerp(SRC.r, R_FULL, e) : lerp(R_FULL, DST.r, g);\n  const f = Math.max(R * 0.3, 0.25 * u);\n  flood.style.background = `radial-gradient(circle at ${cx}px ${cy}px, rgba(255,45,58,0.92) ${Math.max(R - f, 0)}px, rgba(255,45,58,0) ${R}px)`;\n  host.style.filter = `brightness(${1 + 0.45 * lit})`;                     // the frame over-exposes under the light\n  shotA.style.visibility = t >= T_FULL ? 'hidden' : 'visible';\n  shotB.style.visibility = t >= T_FULL ? 'visible' : 'hidden';\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "aa122fdd07e7",
+   "duration": 3.8,
+   "useHtml": "<p><strong>Use when</strong> an alert turns into a live state: a notification leads to a recording, a call or a live stream. The red of a notification badge floods the frame from the badge, reaches the farthest corner in about 0.35 s, and then gathers back into one point: the red dot of the recording light in the next scene. The red is the handoff object. The swap of the scenes happens inside the full-frame red, so the viewer never sees it. Clip: <a href=\"/moves/glow-record.mp4\">glow-record.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/glow-record.html\">demo/glow-record.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> R_FULL = (FAR * <span class=\"tk-n\">1.02</span>) / (<span class=\"tk-n\">1</span> - FEATHER);                               <span class=\"tk-c\">// the opaque core must reach the farthest corner</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> e = <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((t - <span class=\"tk-n\">1.35</span>) / <span class=\"tk-n\">0.35</span>)), g = <span class=\"tk-f\">settle</span>(<span class=\"tk-f\">clamp</span>((t - T_GATHER) / <span class=\"tk-n\">0.85</span>));\n  <span class=\"tk-k\">const</span> cx = <span class=\"tk-f\">lerp</span>(SRC.x, DST.x, g), cy = <span class=\"tk-f\">lerp</span>(SRC.y, DST.y, g);            <span class=\"tk-c\">// badge to recording light</span>\n  <span class=\"tk-k\">const</span> R = t &lt; T_GATHER ? <span class=\"tk-f\">lerp</span>(SRC.r, R_FULL, e) : <span class=\"tk-f\">lerp</span>(R_FULL, DST.r, g);\n  <span class=\"tk-k\">const</span> f = Math.<span class=\"tk-f\">max</span>(R * <span class=\"tk-n\">0.3</span>, <span class=\"tk-n\">0.25</span> * u);\n  flood.style.background = <span class=\"tk-s\">`radial-gradient(circle at ${cx}px ${cy}px, rgba(255,45,58,0.92) ${Math.max(R - f, 0)}px, rgba(255,45,58,0) ${R}px)`</span>;\n  host.style.filter = <span class=\"tk-s\">`brightness(${1 + 0.45 * lit})`</span>;                     <span class=\"tk-c\">// the frame over-exposes under the light</span>\n  shotA.style.visibility = t &gt;= T_FULL ? <span class=\"tk-s\">'hidden'</span> : <span class=\"tk-s\">'visible'</span>;\n  shotB.style.visibility = t &gt;= T_FULL ? <span class=\"tk-s\">'visible'</span> : <span class=\"tk-s\">'hidden'</span>;\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: a short ping when the badge count rolls; one low swell that stops dead when the red is full; nothing on the gather.</p>",
+   "notesHtml": "<ul><li>The light is the exposure-flash recipe with a red gel (<a href=\"/moves/exposure-flash\">exposure-flash</a>): the layer is <code>mix-blend-mode: screen</code>, so it adds light to the screen, and the host takes <code>filter: brightness()</code> up to 1.45, so the UI over-exposes where the red lands. Do not paint the glow with a <code>box-shadow</code> or a blurred copy of the badge. <code>core/surfaces/lens.js</code> bloom has 6 levels and a glow of a few hundred pixels at most, so it cannot reach the far corner; use it for the small glow of the end dot when the page has a lens.</li><li>Timing: the badge count rolls 2 to 3 on <code>EASE.land</code> in 0.2 s; the badge swells to 1.35x in the 0.15 s before the flood (anticipation); the flood reaches the farthest corner in 0.35 s on <code>EASE.land</code>; it holds 0.08 s; it gathers in 0.85 s on <code>EASE.settle</code>. The flood is fast because it is the exit of scene A. The gather is slow because it is the arrival of the recording light.</li><li>The soft edge is 30 percent of the radius while the light is large, and it shrinks with the radius to 0.25 u, so the last frames of the gather are a crisp dot.</li><li>Speed: the centre moves from the badge to the dot on the same curve as the radius, so the red contracts toward the dot, not toward the middle. The scene swap is at the first full-frame frame, before the hold; the viewer sees red on red.</li><li>The end dot is its own element, the same colour and size as the disc at the end of the gather and 0.05 s under it. It then pulses at 1 Hz between 55 and 100 percent opacity, so the hold is alive; the timecode and the level bars run beside it.</li><li>What goes wrong: a flood slower than 0.5 s reads as a fade. A flood that stops before the corner leaves a wedge of A. A recording dot of another size or red pops when the disc ends. Keep a full-frame red hold under 0.1 s: longer is a strobe.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "highlight-sweep",
+   "title": "Highlight sweep",
+   "group": "change-between-shots",
+   "look": "signal",
+   "use": "a highlight sweeps across a key word, keeps going off the line and grows into the next panel's background; the edge never stops at the word, and the word flips to dark ink at the edge",
+   "useWhen": "a key word in a held line should hand the film to the next panel: a highlight sweeps across the word, keeps going past the end of the line, and grows into the next panel's background. One shape carries over from scene A into scene B, so there is no cut and no crossfade. The detail that sells it is that the edge never stops at the word: the sweep reads as a highlight while it crosses the word and as a colour wipe once it is past, at one speed.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; the sweep is the cause and the headline rising out of the line is the cue point, so a cue belongs there only if the film has an effects row.",
+   "snippet": "import '../../core/engine/page-api.js';\nimport { easeFn } from '../../core/motion/presets.js';\nconst sweep = easeFn('swap'), open = easeFn('carry'), launch = easeFn('launch'), land = easeFn('land');\nconst T0 = 0.95, DUR = 1.05, EXP = 0.6, PAD = 0.06 * H, SLANT = 0.012 * W;\nconst reach = (u) => 0.5 * u + 0.5 * sweep(u);                       // half linear: the speed through the word is the speed past it\nconst edge = (t, L) => lerp(L, W + PAD + SLANT, reach(clamp((t - T0) / DUR)));\nvawe.onFrame((t) => {\n  const r = word.getBoundingClientRect();                            // per frame: the face may load after the first paint\n  let tE = T0; while (tE < T0 + DUR && edge(tE, r.left) < r.right + 0.05 * W) tE += 0.005;   // the edge is past the word\n  const q = open(clamp((t - tE) / EXP)), x = edge(t, r.left);\n  const top = lerp(r.top + 0.12 * r.height, -PAD, q), bot = lerp(r.bottom - 0.04 * r.height, H + PAD, q), left = lerp(r.left, -PAD, q);\n  b.style.clipPath = `polygon(${left}px ${top}px, ${x + SLANT * (1 - q)}px ${top}px, ${x}px ${bot}px, ${left}px ${bot}px)`;\n  const tC = tE + EXP + 0.1;                                         // the carried word leaves once the panel is whole\n  carry.style.translate = `0 ${-120 * launch(clamp((t - tC) / 0.28))}%`;   // its line is clipped, so it exits through the line's top edge\n  head.style.translate = `0 ${(1 - land(clamp((t - tC - 0.06) / 0.8))) * 110}%`;\n});",
+   "eases": [
+    {
+     "name": "carry",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 12,
+      "speed": 4.8
+     }
+    },
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "swap",
+     "out": {
+      "influence": 75,
+      "speed": 0
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "b917e792fc07",
+   "duration": 3.6,
+   "useHtml": "<p><strong>Use when</strong> a key word in a held line should hand the film to the next panel: a highlight sweeps across the word, keeps going past the end of the line, and grows into the next panel's background. One shape carries over from scene A into scene B, so there is no cut and no crossfade. The detail that sells it is that the edge never stops at the word: the sweep reads as a highlight while it crosses the word and as a colour wipe once it is past, at one speed. Clip: <a href=\"/moves/highlight-sweep.mp4\">highlight-sweep.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/highlight-sweep.html\">demo/highlight-sweep.html</a>.</p>\n<p>The shared element is the next panel itself, <code>.b</code>, drawn over scene A and cut by one <code>clip-path</code>. It holds a copy of the same line with every word transparent but the key word, set at the same coordinates in the on-accent ink. The clip box is first the word's bar, so the word flips to dark ink exactly at the edge, as in <a href=\"/moves/marker-highlight\">marker-highlight</a>. The same box then opens to the frame.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> <span class=\"tk-s\">'../../core/engine/page-api.js'</span>;\n<span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> sweep = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'swap'</span>), open = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'carry'</span>), launch = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'launch'</span>), land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>);\n<span class=\"tk-k\">const</span> T0 = <span class=\"tk-n\">0.95</span>, DUR = <span class=\"tk-n\">1.05</span>, EXP = <span class=\"tk-n\">0.6</span>, PAD = <span class=\"tk-n\">0.06</span> * H, SLANT = <span class=\"tk-n\">0.012</span> * W;\n<span class=\"tk-k\">const</span> reach = (u) =&gt; <span class=\"tk-n\">0.5</span> * u + <span class=\"tk-n\">0.5</span> * <span class=\"tk-f\">sweep</span>(u);                       <span class=\"tk-c\">// half linear: the speed through the word is the speed past it</span>\n<span class=\"tk-k\">const</span> edge = (t, L) =&gt; <span class=\"tk-f\">lerp</span>(L, W + PAD + SLANT, <span class=\"tk-f\">reach</span>(<span class=\"tk-f\">clamp</span>((t - T0) / DUR)));\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> r = word.<span class=\"tk-f\">getBoundingClientRect</span>();                            <span class=\"tk-c\">// per frame: the face may load after the first paint</span>\n  <span class=\"tk-k\">let</span> tE = T0; <span class=\"tk-k\">while</span> (tE &lt; T0 + DUR &amp;&amp; <span class=\"tk-f\">edge</span>(tE, r.left) &lt; r.right + <span class=\"tk-n\">0.05</span> * W) tE += <span class=\"tk-n\">0.005</span>;   <span class=\"tk-c\">// the edge is past the word</span>\n  <span class=\"tk-k\">const</span> q = <span class=\"tk-f\">open</span>(<span class=\"tk-f\">clamp</span>((t - tE) / EXP)), x = <span class=\"tk-f\">edge</span>(t, r.left);\n  <span class=\"tk-k\">const</span> top = <span class=\"tk-f\">lerp</span>(r.top + <span class=\"tk-n\">0.12</span> * r.height, -PAD, q), bot = <span class=\"tk-f\">lerp</span>(r.bottom - <span class=\"tk-n\">0.04</span> * r.height, H + PAD, q), left = <span class=\"tk-f\">lerp</span>(r.left, -PAD, q);\n  b.style.clipPath = <span class=\"tk-s\">`polygon(${left}px ${top}px, ${x + SLANT * (1 - q)}px ${top}px, ${x}px ${bot}px, ${left}px ${bot}px)`</span>;\n  <span class=\"tk-k\">const</span> tC = tE + EXP + <span class=\"tk-n\">0.1</span>;                                         <span class=\"tk-c\">// the carried word leaves once the panel is whole</span>\n  carry.style.translate = <span class=\"tk-s\">`0 ${-120 * launch(clamp((t - tC) / 0.28))}%`</span>;   <span class=\"tk-c\">// its line is clipped, so it exits through the line's top edge</span>\n  head.style.translate = <span class=\"tk-s\">`0 ${(1 - land(clamp((t - tC - 0.06) / 0.8))) * 110}%`</span>;\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; the sweep is the cause and the headline rising out of the line is the cue point, so a cue belongs there only if the film has an effects row.</p>",
+   "notesHtml": "<ul><li>The z-order is fixed: scene A under, <code>.b</code> over it, and nothing else changes in z. The carried word lives in <code>.b</code>, so the highlight needs no second layer and no z swap.</li><li>Open the box to the frame when the edge is past the word, not when it ends. The top, bottom and left edges then leave the word's cap height on <code>EASE.carry</code> (still fast at the key), so the panel opens while the sweep carries on.</li><li>The leading edge is slanted by 1.2 percent of the frame width (the marker look) and straightens as the box opens.</li><li>Exits are faster than entrances: the carried word leaves in 0.28 s on <code>EASE.launch</code>, the new headline rises over 0.8 s on <code>EASE.land</code>.</li><li>What goes wrong: a sweep that eases to a stop at the word end reads as a highlight followed by a wipe, two moves. A key word at the end of a long line leaves no room to run off it, so put it at 50 to 70 percent of the frame width. The headline and the carried word must share one font and one position, or the dark word shifts when the bar reaches it.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "shadow-handoff",
+   "title": "Shadow handoff",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "use": "a card lifts, its blurred shadow stretches down and right and darkens into the night scene's ground colour, then the card leaves faster than it lifted",
+   "useWhen": "a light scene hands over to a night scene and one card carries the change: the card lifts, its shadow stretches and darkens until it is the next scene's ground, and the card leaves. The shadow is the shared element. It starts as the card's contact shadow in scene A and ends as the flat ground colour of scene B, with no cut and no crossfade. The detail that sells it is the order: the card lifts first (the cause), the shadow answers, and the card leaves only once the shadow already covers the frame.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; one soft low swell under the stretch is the most the film can afford, and it stops when the card leaves.",
+   "snippet": "import '../../core/engine/page-api.js';\nimport { easeFn } from '../../core/motion/presets.js';\nconst settle = easeFn('settle'), glide = easeFn('glide'), launch = easeFn('launch');\nconst LIFT = { at: 0.6, dur: 0.8 }, SPREAD = { at: 0.85, dur: 1.15 }, LEAVE = { at: 2.05, dur: 0.42 };\nconst day = [15, 32, 51, 0.2], night = [6, 9, 20, 1];                // the shadow ends as the colour of scene B's ground\nvawe.onFrame((t) => {\n  const p = settle(clamp((t - LIFT.at) / LIFT.dur));                   // height of the card above the ground\n  const g = glide(clamp((t - SPREAD.at) / SPREAD.dur));                // how far the shadow has spread over the frame\n  const out = launch(clamp((t - LEAVE.at) / LEAVE.dur));\n  card.style.translate = `0 ${-6 * u * p - 0.9 * H * out}px`; card.style.scale = 1 + 0.04 * p + 0.1 * out;\n  const w = lerp(cw * (1 + 0.1 * p), 1.7 * W, g), h = lerp(ch * (1 + 0.3 * p), 1.7 * H, g);   // longer than wide: a low light\n  const dx = lerp(2 * u * p, 0, g), dy = lerp(1.6 * u + 9 * u * p, 0, g);\n  Object.assign(shadow.style, { left: `${cx - w / 2 + dx}px`, top: `${cy - h / 2 + dy}px`, width: `${w}px`, height: `${h}px`,\n    background: `rgba(${day.map((v, i) => lerp(v, night[i], g)).join()})`, filter: `blur(${lerp(1.2 * u + 3.4 * u * p, 9 * u, g)}px)` });\n});",
+   "eases": [
+    {
+     "name": "glide",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 33,
+      "speed": 0.1
+     }
+    },
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "f9d2c3eaaf92",
+   "duration": 3.8,
+   "useHtml": "<p><strong>Use when</strong> a light scene hands over to a night scene and one card carries the change: the card lifts, its shadow stretches and darkens until it is the next scene's ground, and the card leaves. The shadow is the shared element. It starts as the card's contact shadow in scene A and ends as the flat ground colour of scene B, with no cut and no crossfade. The detail that sells it is the order: the card lifts first (the cause), the shadow answers, and the card leaves only once the shadow already covers the frame. Clip: <a href=\"/moves/shadow-handoff.mp4\">shadow-handoff.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/shadow-handoff.html\">demo/shadow-handoff.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> <span class=\"tk-s\">'../../core/engine/page-api.js'</span>;\n<span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>), glide = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'glide'</span>), launch = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'launch'</span>);\n<span class=\"tk-k\">const</span> LIFT = { at: <span class=\"tk-n\">0.6</span>, dur: <span class=\"tk-n\">0.8</span> }, SPREAD = { at: <span class=\"tk-n\">0.85</span>, dur: <span class=\"tk-n\">1.15</span> }, LEAVE = { at: <span class=\"tk-n\">2.05</span>, dur: <span class=\"tk-n\">0.42</span> };\n<span class=\"tk-k\">const</span> day = [<span class=\"tk-n\">15</span>, <span class=\"tk-n\">32</span>, <span class=\"tk-n\">51</span>, <span class=\"tk-n\">0.2</span>], night = [<span class=\"tk-n\">6</span>, <span class=\"tk-n\">9</span>, <span class=\"tk-n\">20</span>, <span class=\"tk-n\">1</span>];                <span class=\"tk-c\">// the shadow ends as the colour of scene B's ground</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> p = <span class=\"tk-f\">settle</span>(<span class=\"tk-f\">clamp</span>((t - LIFT.at) / LIFT.dur));                   <span class=\"tk-c\">// height of the card above the ground</span>\n  <span class=\"tk-k\">const</span> g = <span class=\"tk-f\">glide</span>(<span class=\"tk-f\">clamp</span>((t - SPREAD.at) / SPREAD.dur));                <span class=\"tk-c\">// how far the shadow has spread over the frame</span>\n  <span class=\"tk-k\">const</span> out = <span class=\"tk-f\">launch</span>(<span class=\"tk-f\">clamp</span>((t - LEAVE.at) / LEAVE.dur));\n  card.style.translate = <span class=\"tk-s\">`0 ${-6 * u * p - 0.9 * H * out}px`</span>; card.style.scale = <span class=\"tk-n\">1</span> + <span class=\"tk-n\">0.04</span> * p + <span class=\"tk-n\">0.1</span> * out;\n  <span class=\"tk-k\">const</span> w = <span class=\"tk-f\">lerp</span>(cw * (<span class=\"tk-n\">1</span> + <span class=\"tk-n\">0.1</span> * p), <span class=\"tk-n\">1.7</span> * W, g), h = <span class=\"tk-f\">lerp</span>(ch * (<span class=\"tk-n\">1</span> + <span class=\"tk-n\">0.3</span> * p), <span class=\"tk-n\">1.7</span> * H, g);   <span class=\"tk-c\">// longer than wide: a low light</span>\n  <span class=\"tk-k\">const</span> dx = <span class=\"tk-f\">lerp</span>(<span class=\"tk-n\">2</span> * u * p, <span class=\"tk-n\">0</span>, g), dy = <span class=\"tk-f\">lerp</span>(<span class=\"tk-n\">1.6</span> * u + <span class=\"tk-n\">9</span> * u * p, <span class=\"tk-n\">0</span>, g);\n  Object.<span class=\"tk-f\">assign</span>(shadow.style, { left: <span class=\"tk-s\">`${cx - w / 2 + dx}px`</span>, top: <span class=\"tk-s\">`${cy - h / 2 + dy}px`</span>, width: <span class=\"tk-s\">`${w}px`</span>, height: <span class=\"tk-s\">`${h}px`</span>,\n    background: <span class=\"tk-s\">`rgba(${day.map((v, i) =&gt; lerp(v, night[i], g)).join()})`</span>, filter: <span class=\"tk-s\">`blur(${lerp(1.2 * u + 3.4 * u * p, 9 * u, g)}px)`</span> });\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; one soft low swell under the stretch is the most the film can afford, and it stops when the card leaves.</p>",
+   "notesHtml": "<ul><li>Z-order, bottom to top: scene A's ground and copy, the shadow, the card, scene B's copy. The shadow sits above A's copy, so the copy darkens with the ground. B's headline is above everything and rises only after the card is gone.</li><li>The shadow is a real blurred element (<code>filter: blur</code>), not a gradient: its edge softens as it grows, 1.2 u at rest and 9 u once it is the ground. Its final colour is B's ground colour exactly, so nothing is swapped.</li><li>The card keeps <code>--ring</code> only. The contact shadow is the shared element, and a second <code>box-shadow</code> on the card would double it.</li><li>The card leaves on <code>EASE.launch</code> in 0.42 s, faster than the 0.8 s lift. It moves up and toward the viewer (scale 1.1), like an object that was lifted.</li><li>What goes wrong: a shadow that only changes opacity is a fade. A shadow that grows evenly on all sides reads as a vignette, so stretch it down and to the right first. If the card leaves before the shadow is dark, a strip of A's ground shows behind it for a few frames.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "word-portal",
+   "title": "Word portal",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "use": "a typed word grows until one stem is the whole frame and the next scene shows through the letterforms (an SVG text clip over a fixed scene B), on a log-path zoom",
+   "useWhen": "a typed word is on screen and the next scene should appear inside its letters: the word grows until one stem is the whole frame, and scene B shows through the letterforms the whole way. The word is the shared element, and it is a window, not a filled shape. The detail that sells it is that B is fixed and the letters move over it, so the view through the glyphs slides like a real window until the stem is wider than the frame and B is all there is.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; the typed characters are the film's keys, and the growth needs no extra cue.",
+   "snippet": "<svg width=\"0\" height=\"0\"><defs><clipPath id=\"portal\" clipPathUnits=\"userSpaceOnUse\"><text id=\"ptext\"></text></clipPath></defs></svg>\n<section class=\"b\" style=\"clip-path: url(#portal)\">...scene B, its ground in the colour of the word...</section>",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "swap",
+     "out": {
+      "influence": 75,
+      "speed": 0
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "d610b3254f16",
+   "duration": 3.8,
+   "useHtml": "<p><strong>Use when</strong> a typed word is on screen and the next scene should appear inside its letters: the word grows until one stem is the whole frame, and scene B shows through the letterforms the whole way. The word is the shared element, and it is a window, not a filled shape. The detail that sells it is that B is fixed and the letters move over it, so the view through the glyphs slides like a real window until the stem is wider than the frame and B is all there is. Clip: <a href=\"/moves/word-portal.mp4\">word-portal.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/word-portal.html\">demo/word-portal.html</a>. <a href=\"/moves/type-fill-transition\">type fill transition</a> fills the frame with a flat colour; this one keeps a live scene inside the type.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>html</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>&lt;<span class=\"tk-k\">svg</span> <span class=\"tk-p\">width</span>=<span class=\"tk-s\">&quot;0&quot;</span> <span class=\"tk-p\">height</span>=<span class=\"tk-s\">&quot;0&quot;</span>&gt;&lt;<span class=\"tk-k\">defs</span>&gt;&lt;<span class=\"tk-k\">clipPath</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;portal&quot;</span> <span class=\"tk-p\">clipPathUnits</span>=<span class=\"tk-s\">&quot;userSpaceOnUse&quot;</span>&gt;&lt;<span class=\"tk-k\">text</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;ptext&quot;</span>&gt;&lt;/<span class=\"tk-k\">text</span>&gt;&lt;/<span class=\"tk-k\">clipPath</span>&gt;&lt;/<span class=\"tk-k\">defs</span>&gt;&lt;/<span class=\"tk-k\">svg</span>&gt;\n&lt;<span class=\"tk-k\">section</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;b&quot;</span> <span class=\"tk-p\">style</span>=<span class=\"tk-s\">&quot;clip-path: url(#portal)&quot;</span>&gt;...scene B, its ground in the colour of the word...&lt;/<span class=\"tk-k\">section</span>&gt;</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; the typed characters are the film's keys, and the growth needs no extra cue.</p>",
+   "notesHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> <span class=\"tk-s\">'../../core/engine/page-api.js'</span>;\n<span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> swap = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'swap'</span>), land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>);\n<span class=\"tk-k\">const</span> T0 = <span class=\"tk-n\">1.6</span>, DUR = <span class=\"tk-n\">1.15</span>, STEM = <span class=\"tk-n\">0.19</span>;                             <span class=\"tk-c\">// STEM: ink width of the first letter's stem as a share of the font size</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> ext = measure.<span class=\"tk-f\">getExtentOfChar</span>(<span class=\"tk-n\">0</span>);                            <span class=\"tk-c\">// a hidden copy of the full word, so the aim does not move while it types</span>\n  <span class=\"tk-k\">const</span> ox = ext.x + ext.width / <span class=\"tk-n\">2</span>, oy = Y0 - <span class=\"tk-n\">0.37</span> * F;              <span class=\"tk-c\">// the middle of the stem of the first letter</span>\n  <span class=\"tk-k\">const</span> S = (<span class=\"tk-n\">1.15</span> * W) / (STEM * F);\n  <span class=\"tk-k\">const</span> q = <span class=\"tk-f\">clamp</span>((t - T0) / DUR), p = <span class=\"tk-n\">0.4</span> * q + <span class=\"tk-n\">0.6</span> * <span class=\"tk-f\">swap</span>(q), s = Math.<span class=\"tk-f\">exp</span>(Math.<span class=\"tk-f\">log</span>(S) * p);   <span class=\"tk-c\">// log path: equal steps read as equal speed</span>\n  <span class=\"tk-k\">const</span> px = ox + (W / <span class=\"tk-n\">2</span> - ox) * p, py = oy + (H / <span class=\"tk-n\">2</span> - oy) * p;      <span class=\"tk-c\">// the stem drifts to the middle as it grows</span>\n  ptext.textContent = WORD.<span class=\"tk-f\">slice</span>(<span class=\"tk-n\">0</span>, typed);\n  ptext.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'transform'</span>, <span class=\"tk-s\">`translate(${px - s * ox} ${py - s * oy}) scale(${s})`</span>);\n  caret.style.transform = <span class=\"tk-s\">`translate(${px - s * ox}px, ${py - s * oy}px) scale(${s})`</span>;   <span class=\"tk-c\">// the caret grows with the word</span>\n  b.style.clipPath = q &gt;= <span class=\"tk-n\">1</span> ? <span class=\"tk-s\">'none'</span> : <span class=\"tk-s\">'url(#portal)'</span>;               <span class=\"tk-c\">// the stem covers the frame: drop the mask</span>\n  pops.<span class=\"tk-f\">forEach</span>((el, i) =&gt; { el.style.translate = <span class=\"tk-s\">`0 ${(1 - land(clamp((t - T0 - 0.1 - i * 0.12) / 0.7))) * 7 * u}px`</span>; });\n});</code></pre></div>\n<ul><li>Z-order: scene A (ground, label, caret) under, scene B over it, clipped by the glyphs. A is never faded: it is whatever the letters do not cover.</li><li>Scene B's ground is the colour of the typed word, so the typed word is B's ground seen through the letters. At the first frame of the growth nothing changes on screen. B's own elements then arrive inside the glyphs, and that is when the viewer sees a scene in the type.</li><li>Aim at the stem of a letter with a plain vertical stem (l, I, T). A round letter has no stem to fill the frame. The scale is <code>1.15 * W / (STEM * F)</code>, about 41 for a 26 u word, which is why the growth runs on a log path and ends with the stem opening as a tall window across the frame.</li><li>B's elements sit away from the typed word's first position, or they show inside the letters before the move starts.</li><li>The word types at 0.14 s a letter and the portal opens on a lit caret after two blinks.</li><li>What goes wrong: a thin face leaves no window, so use weight 800 or more. Leaving the <code>clip-path</code> on after the stem is wider than the frame costs a huge path for nothing. A caret in a layer that does not take the same matrix stays behind and reads as a cut.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "underline-road",
+   "title": "Underline road",
+   "group": "change-between-shots",
+   "look": "paper",
+   "use": "the underline of a headline extends, bends down and becomes the route on a simple map, with the camera trailing the head at its speed and stopping at the map's end",
+   "useWhen": "a headline is about a way to somewhere and the next scene is a map: the underline under the key word extends past the line, bends down, and becomes the route on a simple map. The underline is the shared element, one stroke from the first frame to the last, and the camera follows its head down the page into the map. There is no cut and no crossfade. The detail that sells it is the camera: it trails the head at the same speed while the line runs down, so the viewer never sees a seam, and it stops when the map ends.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; the pin landing at the end is the one point a cue could use.",
+   "snippet": "import '../../core/engine/page-api.js';\nimport { easeFn } from '../../core/motion/presets.js';\nconst land = easeFn('land'), swap = easeFn('swap');\nconst T_UL = 0.35, D_UL = 0.4, T_GO = 1.05, D_GO = 1.8, k = 0.09 * H;\nconst sp = (x) => k * Math.log(1 + Math.exp(x / k));                 // a soft max(x, 0): the camera starts and stops without a kink\nconst stops = (x0, y0) => [[x0, y0], [XS[5], y0], [XS[5], YS[2]], [XS[3], YS[2]], [XS[3], DEST.y], [DEST.x, DEST.y]];   // street centres\nvawe.onFrame((t) => {\n  world.style.translate = '0 0';                                     // measure the word before the camera moves\n  const r = word.getBoundingClientRect();\n  route.setAttribute('d', rounded(stops(r.left, r.bottom - 0.1 * r.height), 3.2 * u));   // corners are quadratic curves, radius 3.2 u\n  const total = route.getTotalLength(), under = r.width, go = clamp((t - T_GO) / D_GO);\n  const s = t < T_GO ? under * land(clamp((t - T_UL) / D_UL)) : under + (total - under) * (0.5 * go + 0.5 * swap(go));\n  route.style.strokeDasharray = `${total} ${total}`; route.style.strokeDashoffset = total - s;\n  const head = route.getPointAtLength(Math.min(s, total));\n  const x = head.y - 0.55 * H;\n  world.style.translate = `0 ${-(sp(x) - sp(x - 1.1 * H))}px`;       // follow the head from 55 percent of the frame, stop at 1.1 frames\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "pop",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 35,
+      "speed": -1.5
+     }
+    },
+    {
+     "name": "swap",
+     "out": {
+      "influence": 75,
+      "speed": 0
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "53c89465d998",
+   "duration": 3.9,
+   "useHtml": "<p><strong>Use when</strong> a headline is about a way to somewhere and the next scene is a map: the underline under the key word extends past the line, bends down, and becomes the route on a simple map. The underline is the shared element, one stroke from the first frame to the last, and the camera follows its head down the page into the map. There is no cut and no crossfade. The detail that sells it is the camera: it trails the head at the same speed while the line runs down, so the viewer never sees a seam, and it stops when the map ends. Clip: <a href=\"/moves/underline-road.mp4\">underline-road.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/underline-road.html\">demo/underline-road.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> <span class=\"tk-s\">'../../core/engine/page-api.js'</span>;\n<span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>), swap = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'swap'</span>);\n<span class=\"tk-k\">const</span> T_UL = <span class=\"tk-n\">0.35</span>, D_UL = <span class=\"tk-n\">0.4</span>, T_GO = <span class=\"tk-n\">1.05</span>, D_GO = <span class=\"tk-n\">1.8</span>, k = <span class=\"tk-n\">0.09</span> * H;\n<span class=\"tk-k\">const</span> sp = (x) =&gt; k * Math.<span class=\"tk-f\">log</span>(<span class=\"tk-n\">1</span> + Math.<span class=\"tk-f\">exp</span>(x / k));                 <span class=\"tk-c\">// a soft max(x, 0): the camera starts and stops without a kink</span>\n<span class=\"tk-k\">const</span> stops = (x0, y0) =&gt; [[x0, y0], [XS[<span class=\"tk-n\">5</span>], y0], [XS[<span class=\"tk-n\">5</span>], YS[<span class=\"tk-n\">2</span>]], [XS[<span class=\"tk-n\">3</span>], YS[<span class=\"tk-n\">2</span>]], [XS[<span class=\"tk-n\">3</span>], DEST.y], [DEST.x, DEST.y]];   <span class=\"tk-c\">// street centres</span>\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  world.style.translate = <span class=\"tk-s\">'0 0'</span>;                                     <span class=\"tk-c\">// measure the word before the camera moves</span>\n  <span class=\"tk-k\">const</span> r = word.<span class=\"tk-f\">getBoundingClientRect</span>();\n  route.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'d'</span>, <span class=\"tk-f\">rounded</span>(<span class=\"tk-f\">stops</span>(r.left, r.bottom - <span class=\"tk-n\">0.1</span> * r.height), <span class=\"tk-n\">3.2</span> * u));   <span class=\"tk-c\">// corners are quadratic curves, radius 3.2 u</span>\n  <span class=\"tk-k\">const</span> total = route.<span class=\"tk-f\">getTotalLength</span>(), under = r.width, go = <span class=\"tk-f\">clamp</span>((t - T_GO) / D_GO);\n  <span class=\"tk-k\">const</span> s = t &lt; T_GO ? under * <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((t - T_UL) / D_UL)) : under + (total - under) * (<span class=\"tk-n\">0.5</span> * go + <span class=\"tk-n\">0.5</span> * <span class=\"tk-f\">swap</span>(go));\n  route.style.strokeDasharray = <span class=\"tk-s\">`${total} ${total}`</span>; route.style.strokeDashoffset = total - s;\n  <span class=\"tk-k\">const</span> head = route.<span class=\"tk-f\">getPointAtLength</span>(Math.<span class=\"tk-f\">min</span>(s, total));\n  <span class=\"tk-k\">const</span> x = head.y - <span class=\"tk-n\">0.55</span> * H;\n  world.style.translate = <span class=\"tk-s\">`0 ${-(sp(x) - sp(x - 1.1 * H))}px`</span>;       <span class=\"tk-c\">// follow the head from 55 percent of the frame, stop at 1.1 frames</span>\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; the pin landing at the end is the one point a cue could use.</p>",
+   "notesHtml": "<ul><li>One world, 2.5 frames tall: scene A at the top, the map below, one stroke over both. Z-order: map under, headline copy, route, pin, ETA card. The map blocks fade in over the first 28 vh of their own height with a static gradient mask, so the map has no top edge.</li><li>The route follows street centres, and the streets are gaps of 3.4 u between blocks, so the line runs inside a road. The stroke is 1.1 u for the whole length: an underline and a route are the same line.</li><li>The head runs half linear, half <code>EASE.swap</code>: no stop at the bend, a soft arrival at the pin. The camera velocity equals the head's down the vertical run, which keeps the head at 55 percent of the frame height.</li><li>Cause before effect: the underline draws under the word and holds 0.3 s so the word is read, then the line runs. The pin pops on <code>EASE.pop</code> when the head arrives and one ring leaves it; the ETA card rises 0.15 s later.</li><li>What goes wrong: a camera that eases on its own curve falls behind the head or passes it, and the line looks like it is sliding on the page. Measuring the word while the world is translated shifts the underline by the camera offset, so measure first. A map drawn with a visible first row below scene A reads as a second slide, not the same place.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+  },
+  {
+   "name": "caret-door",
+   "title": "Caret door",
+   "group": "change-between-shots",
+   "look": "terminal",
+   "use": "the blinking caret grows tall, then opens as a two-frame-wide door that turns about it under perspective; the next screen is on the door's face",
+   "useWhen": "a typed command is done and the next screen should open out of the caret: the blinking caret grows tall, then opens like a door, a vertical bar widening to a panel that is the next screen. The caret is the shared element and the door's axis. There is no cut and no crossfade. The detail that sells it is real depth: the door is a two-frame-wide leaf that turns about the caret under perspective, so one side swings toward the viewer and sweeps the typed line off the frame while the far side shrinks.",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "sound": "none; a key tick per typed character is the film's, and the door adds no cue of its own.",
+   "snippet": "import '../../core/engine/page-api.js';\nimport { easeFn } from '../../core/motion/presets.js';\nconst land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch');\nconst T_GROW = 1.3, D_GROW = 0.5, T_OPEN = 1.8, D_OPEN = 0.9, RETRACT = 0.3, PERSPECTIVE = 1.7 * W;\nvawe.onFrame((t) => {\n  const rl = line.getBoundingClientRect(), cx = rl.right + 0.5 * u, cy = (rl.top + rl.bottom) / 2;   // the caret sits at the end of the typed text\n  const g = land(clamp((t - T_GROW) / D_GROW)), dip = Math.sin(Math.PI * clamp((t - T_GROW + 0.12) / 0.12)) * 0.08;   // gather 8 percent, then rise\n  const h = (7.4 * u * (1 - dip) + (1.04 * H - 7.4 * u) * g) * (1 - launch(clamp((t - T_OPEN) / RETRACT)));\n  Object.assign(caret.style, { left: `${cx - 0.6 * u}px`, width: `${1.2 * u}px`, height: `${h}px`, top: `${cy - h / 2 + (H / 2 - cy) * g}px` });\n  door.style.left = `${cx - W}px`; door.style.width = `${2 * W}px`;  // two frames wide, centred on the caret\n  face.style.left = `${W - cx}px`;                                     // the screen inside it lines up with the frame when the door is flat\n  door.style.visibility = t >= T_OPEN ? 'visible' : 'hidden';\n  door.style.transform = `perspective(${PERSPECTIVE}px) rotateY(${90 * (1 - settle(clamp((t - T_OPEN) / D_OPEN)))}deg)`;\n});",
+   "eases": [
+    {
+     "name": "land",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 75,
+      "speed": 0
+     }
+    },
+    {
+     "name": "launch",
+     "out": {
+      "influence": 33,
+      "speed": 0
+     },
+     "into": {
+      "influence": 25,
+      "speed": 3
+     }
+    },
+    {
+     "name": "pop",
+     "out": {
+      "influence": 12,
+      "speed": 4.8
+     },
+     "into": {
+      "influence": 35,
+      "speed": -1.5
+     }
+    },
+    {
+     "name": "settle",
+     "out": {
+      "influence": 60,
+      "speed": 0
+     },
+     "into": {
+      "influence": 60,
+      "speed": 0
+     }
+    }
+   ],
+   "published": "2026-10-10",
+   "modified": "2026-10-10",
+   "clipDate": "2026-10-10",
+   "clipHash": "228a3c07c3a6",
+   "duration": 3.6,
+   "useHtml": "<p><strong>Use when</strong> a typed command is done and the next screen should open out of the caret: the blinking caret grows tall, then opens like a door, a vertical bar widening to a panel that is the next screen. The caret is the shared element and the door's axis. There is no cut and no crossfade. The detail that sells it is real depth: the door is a two-frame-wide leaf that turns about the caret under perspective, so one side swings toward the viewer and sweeps the typed line off the frame while the far side shrinks. Clip: <a href=\"/moves/caret-door.mp4\">caret-door.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/caret-door.html\">demo/caret-door.html</a>.</p>",
+   "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> <span class=\"tk-s\">'../../core/engine/page-api.js'</span>;\n<span class=\"tk-k\">import</span> { easeFn } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> land = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'land'</span>), settle = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'settle'</span>), launch = <span class=\"tk-f\">easeFn</span>(<span class=\"tk-s\">'launch'</span>);\n<span class=\"tk-k\">const</span> T_GROW = <span class=\"tk-n\">1.3</span>, D_GROW = <span class=\"tk-n\">0.5</span>, T_OPEN = <span class=\"tk-n\">1.8</span>, D_OPEN = <span class=\"tk-n\">0.9</span>, RETRACT = <span class=\"tk-n\">0.3</span>, PERSPECTIVE = <span class=\"tk-n\">1.7</span> * W;\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> rl = line.<span class=\"tk-f\">getBoundingClientRect</span>(), cx = rl.right + <span class=\"tk-n\">0.5</span> * u, cy = (rl.top + rl.bottom) / <span class=\"tk-n\">2</span>;   <span class=\"tk-c\">// the caret sits at the end of the typed text</span>\n  <span class=\"tk-k\">const</span> g = <span class=\"tk-f\">land</span>(<span class=\"tk-f\">clamp</span>((t - T_GROW) / D_GROW)), dip = Math.<span class=\"tk-f\">sin</span>(Math.PI * <span class=\"tk-f\">clamp</span>((t - T_GROW + <span class=\"tk-n\">0.12</span>) / <span class=\"tk-n\">0.12</span>)) * <span class=\"tk-n\">0.08</span>;   <span class=\"tk-c\">// gather 8 percent, then rise</span>\n  <span class=\"tk-k\">const</span> h = (<span class=\"tk-n\">7.4</span> * u * (<span class=\"tk-n\">1</span> - dip) + (<span class=\"tk-n\">1.04</span> * H - <span class=\"tk-n\">7.4</span> * u) * g) * (<span class=\"tk-n\">1</span> - <span class=\"tk-f\">launch</span>(<span class=\"tk-f\">clamp</span>((t - T_OPEN) / RETRACT)));\n  Object.<span class=\"tk-f\">assign</span>(caret.style, { left: <span class=\"tk-s\">`${cx - 0.6 * u}px`</span>, width: <span class=\"tk-s\">`${1.2 * u}px`</span>, height: <span class=\"tk-s\">`${h}px`</span>, top: <span class=\"tk-s\">`${cy - h / 2 + (H / 2 - cy) * g}px`</span> });\n  door.style.left = <span class=\"tk-s\">`${cx - W}px`</span>; door.style.width = <span class=\"tk-s\">`${2 * W}px`</span>;  <span class=\"tk-c\">// two frames wide, centred on the caret</span>\n  face.style.left = <span class=\"tk-s\">`${W - cx}px`</span>;                                     <span class=\"tk-c\">// the screen inside it lines up with the frame when the door is flat</span>\n  door.style.visibility = t &gt;= T_OPEN ? <span class=\"tk-s\">'visible'</span> : <span class=\"tk-s\">'hidden'</span>;\n  door.style.transform = <span class=\"tk-s\">`perspective(${PERSPECTIVE}px) rotateY(${90 * (1 - settle(clamp((t - T_OPEN) / D_OPEN)))}deg)`</span>;\n});</code></pre></div>",
+   "soundHtml": "<p class=\"mv-sound\">Sound: none; a key tick per typed character is the film's, and the door adds no cue of its own.</p>",
+   "notesHtml": "<ul><li>Z-order, bottom to top: the typed line, the door, the caret. The door starts edge-on (90 degrees, no width) under the caret, so the first visible frame of the door is a sliver beside a bar of the same height. The caret then draws back into the middle in 0.3 s on <code>EASE.launch</code>, as the axis the door turns on.</li><li>The door turns on <code>EASE.settle</code> in 0.9 s. A fast-start curve (<code>EASE.land</code>) makes the leaf jump to half open in two frames: a leaf that turns from edge-on needs a slow start, because its width goes with the sine of the angle.</li><li>The caret is solid while typing, blinks every 0.28 s, and grows on a lit phase after a short dip (8 percent over 0.12 s) that gathers it before it rises from its middle. It grows to 1.04 frame heights, the height of the door.</li><li>Perspective is 1.7 frame widths. Less makes the far side collapse to a point; more flattens the swing into a plain wipe.</li><li>The new screen is on the door's face, so it is foreshortened while the door turns and flat when it lands. Its small accent (the live pill) pops on <code>EASE.pop</code> after the door has landed.</li><li>What goes wrong: a door narrower than two frames leaves a strip of scene A on one side when it lands. Hinging at the door's left edge instead of its middle puts the caret on the edge, not in the middle of the opening. A caret bar that is wider than the door's first sliver reads as a swap.</li></ul>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
   },
   {
    "name": "word-sweep",
@@ -2918,7 +3783,7 @@
    "published": "2026-10-10",
    "modified": "2026-10-10",
    "clipDate": "2026-10-10",
-   "clipHash": null,
+   "clipHash": "edf0138aa54f",
    "duration": 2,
    "useHtml": "<p><strong>Use when</strong> a screen film cuts between worlds and the cut must read as a camera over-exposing: the frame blows out for 3 frames, the shot swaps inside the peak, and the new shot starts over-bright and settles in 0.15 s. A 0.3 s white div at partial opacity is not this: it is a fade, not a flash. Clip: <a href=\"/moves/exposure-flash.mp4\">exposure-flash.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/exposure-flash.html\">demo/exposure-flash.html</a>. The helper is <code>core/motion/exposure.js</code>. The flash is a real exposure change, not a CSS look. The glow, mask and colour fringe of a screen are lens work: do not fake them with CSS (a stripe layer, a blurred copy, a colour offset).</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>html</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;host&quot;</span>&gt;&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;shot&quot;</span>&gt;...&lt;/<span class=\"tk-k\">div</span>&gt;&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;shot&quot;</span>&gt;...&lt;/<span class=\"tk-k\">div</span>&gt;&lt;/<span class=\"tk-k\">div</span>&gt;\n&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;white&quot;</span> <span class=\"tk-p\">style</span>=<span class=\"tk-s\">&quot;position:absolute;inset:0;background:#fff;opacity:0&quot;</span>&gt;&lt;/<span class=\"tk-k\">div</span>&gt;\n&lt;<span class=\"tk-k\">script</span> <span class=\"tk-p\">type</span>=<span class=\"tk-s\">&quot;module&quot;</span>&gt;\n<span class=\"tk-k\">import</span> <span class=\"tk-s\">'../../core/engine/page-api.js'</span>;\n<span class=\"tk-k\">import</span> { flashAt } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/exposure.js'</span>;\n<span class=\"tk-k\">const</span> CUTS = [<span class=\"tk-n\">0.7</span>, <span class=\"tk-n\">1.3</span>];\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; {\n  <span class=\"tk-k\">const</span> { white: w, brightness, shot } = <span class=\"tk-f\">flashAt</span>(t, CUTS);   <span class=\"tk-c\">// { fps: 30, frames: 3, peak: 0.75, over: 2, settle: 0.15 }</span>\n  shots.<span class=\"tk-f\">forEach</span>((s, i) =&gt; s.<span class=\"tk-f\">toggleAttribute</span>(<span class=\"tk-s\">'data-on'</span>, i === shot));\n  host.style.filter = brightness === <span class=\"tk-n\">1</span> ? <span class=\"tk-s\">'none'</span> : <span class=\"tk-s\">`brightness(${brightness})`</span>;\n  white.style.opacity = w;\n});\n&lt;/<span class=\"tk-k\">script</span>&gt;</code></pre></div>",
@@ -2941,7 +3806,7 @@
    "published": "2026-10-10",
    "modified": "2026-10-10",
    "clipDate": "2026-10-10",
-   "clipHash": null,
+   "clipHash": "f70dbf21eefe",
    "duration": 6,
    "useHtml": "<p><strong>Use when</strong> a screen (a terminal, a dashboard, a tracking HUD, a type line shown as a monitor) must read as a real object filmed by a camera: tilted, soft at one end, bright glyphs blooming, LED cells and colour fringes visible when the camera pushes in. Render the flat screen, then let one shader film it. Clip: <a href=\"/moves/lens.mp4\">lens.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/lens.html\">demo/lens.html</a>. Code: <code>core/surfaces/lens.js</code>.</p>\n<p>The six stages of the clip, each turned on for one second: flat, perspective, depth of field, palette and aberration, bloom and LED grid, tear and grain with the camera tracker.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { lens, htmlSource, PALETTES, OFF } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'/core/surfaces/lens.js'</span>;\n<span class=\"tk-k\">const</span> cam = <span class=\"tk-f\">lens</span>(<span class=\"tk-f\">htmlSource</span>(document.<span class=\"tk-f\">getElementById</span>(<span class=\"tk-s\">'screen'</span>), { scale: <span class=\"tk-n\">2</span> }), {\n  aim: (t) =&gt; [<span class=\"tk-n\">1390</span>, <span class=\"tk-n\">520</span>], zoom: (t) =&gt; <span class=\"tk-n\">1</span> + <span class=\"tk-n\">1.9</span> * <span class=\"tk-f\">ease</span>(t), tiltY: <span class=\"tk-n\">0.38</span>, tiltX: <span class=\"tk-n\">0.1</span>,\n  dof: { blur: <span class=\"tk-n\">0.55</span>, focus: [<span class=\"tk-n\">1400</span>, <span class=\"tk-n\">520</span>] },\n  palette: { stops: PALETTES.thermal, keepColor: <span class=\"tk-n\">0.9</span> },\n  bloom: { strength: <span class=\"tk-n\">0.9</span>, radius: <span class=\"tk-n\">42</span> }, grid: { amount: <span class=\"tk-n\">0.9</span>, cell: <span class=\"tk-n\">3</span> },\n  aberration: { amount: (t) =&gt; <span class=\"tk-n\">6</span> + <span class=\"tk-n\">8</span> * <span class=\"tk-f\">lock</span>(t) },\n  tear: { amount: (t) =&gt; (<span class=\"tk-f\">hit</span>(t) ? <span class=\"tk-n\">70</span> : <span class=\"tk-n\">0</span>) },\n});\nvawe.<span class=\"tk-f\">onFrame</span>((t) =&gt; cam.<span class=\"tk-f\">draw</span>(t));            <span class=\"tk-c\">// the seek awaits it</span>\n<span class=\"tk-k\">const</span> p = cam.<span class=\"tk-f\">project</span>(<span class=\"tk-n\">1498</span>, <span class=\"tk-n\">440</span>, t);         <span class=\"tk-c\">// { x, y, scale, depth, visible } in CSS px: put a label there</span></code></pre></div>",
@@ -3010,7 +3875,7 @@
    "published": "2026-10-07",
    "modified": "2026-10-10",
    "clipDate": "2026-10-10",
-   "clipHash": null,
+   "clipHash": "f544fefa925b",
    "duration": 2,
    "useHtml": "<p><strong>Use when</strong> a whole world should feel like it is seen through a lens that moves: lean in on a hold, pull back to reveal, whip to the next world. Clip: <a href=\"/moves/camera-moves.mp4\">camera-moves.mp4</a> (a push toward a subject). Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/camera-moves.html\">demo/camera-moves.html</a>. Each is a transform on one wrapper (or on one layer, see the layered depth section of <a href=\"/moves/parallax-dive\">parallax-dive</a>), so it is deterministic under the seek. <strong>The camera holds still by default.</strong> It moves only with a reason: the spectacle, a reveal. A camera that moves in every beat is the lazy way to keep a hold alive: live-hold does not count a whole-frame move, and constant-camera (taste rule) names a camera that moves for over 60 percent of the film or over 4 worlds in a row.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">import</span> { camera, EASE } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> w = document.<span class=\"tk-f\">querySelector</span>(<span class=\"tk-s\">'[data-world=&quot;hero&quot;]'</span>);\n<span class=\"tk-f\">camera</span>(w, { kind: <span class=\"tk-s\">'push'</span>, at: <span class=\"tk-n\">0</span>, duration: <span class=\"tk-n\">2.4</span>, origin: <span class=\"tk-s\">'66% 56%'</span> });      <span class=\"tk-c\">// 1 to 1.12, EASE.glide: never quite stops</span>\n<span class=\"tk-f\">camera</span>(w, { kind: <span class=\"tk-s\">'pull'</span>, at: <span class=\"tk-n\">0</span>, duration: <span class=\"tk-n\">1.4</span> });                          <span class=\"tk-c\">// 1.15 to 1, EASE.settle: reveals</span>\n<span class=\"tk-f\">camera</span>(w, { kind: <span class=\"tk-s\">'drift'</span>, at: <span class=\"tk-n\">2.4</span>, duration: <span class=\"tk-n\">3</span>, <span class=\"tk-k\">from</span>: <span class=\"tk-n\">1.12</span>, to: <span class=\"tk-n\">1.15</span> });   <span class=\"tk-c\">// slides 1.5% and scales 3%: a rare, deliberate slow move, not a hold's life</span>\n<span class=\"tk-c\">// a whip: the old world leaves on EASE.launch, the new one arrives on EASE.land, together</span>\n<span class=\"tk-f\">camera</span>(oldWorld, { kind: <span class=\"tk-s\">'whipOut'</span>, at: <span class=\"tk-n\">5.0</span>, duration: <span class=\"tk-n\">0.3</span> });\n<span class=\"tk-f\">camera</span>(newWorld, { kind: <span class=\"tk-s\">'whipIn'</span>, at: <span class=\"tk-n\">5.0</span>, duration: <span class=\"tk-n\">0.3</span> });</code></pre></div>",
@@ -3982,7 +4847,7 @@
    "useHtml": "<p><strong>Use when</strong> the film shows a product doing its job: a cursor travels to a control, the control answers the click, and the cursor leaves. The path bows like a hand (x and y ease on different curves), the button lights on hover, both dip on the press, and the label rolls into a confirmed state. Clip: <a href=\"/moves/cursor-click.mp4\">cursor-click.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/cursor-click.html\">demo/cursor-click.html</a>.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>html</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;btn&quot;</span>&gt;&lt;<span class=\"tk-k\">span</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;l idle&quot;</span>&gt;Export PDF&lt;/<span class=\"tk-k\">span</span>&gt;&lt;<span class=\"tk-k\">span</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;l done&quot;</span>&gt;Exported&lt;/<span class=\"tk-k\">span</span>&gt;&lt;/<span class=\"tk-k\">div</span>&gt;\n&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;cur&quot;</span>&gt;&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;x&quot;</span>&gt;&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;y&quot;</span>&gt;&lt;<span class=\"tk-k\">svg</span> <span class=\"tk-p\">viewBox</span>=<span class=\"tk-s\">&quot;0 0 24 24&quot;</span>&gt;&lt;<span class=\"tk-k\">path</span> <span class=\"tk-p\">d</span>=<span class=\"tk-s\">&quot;M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z&quot;</span>/&gt;&lt;/<span class=\"tk-k\">svg</span>&gt;&lt;/<span class=\"tk-k\">div</span>&gt;&lt;/<span class=\"tk-k\">div</span>&gt;&lt;/<span class=\"tk-k\">div</span>&gt;\n&lt;<span class=\"tk-k\">script</span> <span class=\"tk-p\">type</span>=<span class=\"tk-s\">&quot;module&quot;</span>&gt;\n<span class=\"tk-k\">import</span> { EASE } <span class=\"tk-k\">from</span> <span class=\"tk-s\">'../../core/motion/presets.js'</span>;\n<span class=\"tk-k\">const</span> b = btn.<span class=\"tk-f\">getBoundingClientRect</span>();\n<span class=\"tk-k\">const</span> <span class=\"tk-k\">from</span> = { x: innerWidth * <span class=\"tk-n\">0.16</span>, y: innerHeight * <span class=\"tk-n\">0.9</span> }, to = { x: b.left + b.width * <span class=\"tk-n\">0.86</span>, y: b.top + b.height * <span class=\"tk-n\">0.72</span> };\nx.<span class=\"tk-f\">animate</span>([{ translate: <span class=\"tk-s\">`${from.x}px 0`</span> }, { translate: <span class=\"tk-s\">`${to.x}px 0`</span> }], { duration: <span class=\"tk-n\">760</span>, delay: <span class=\"tk-n\">200</span>, easing: EASE.land, fill: <span class=\"tk-s\">'both'</span> });\ny.<span class=\"tk-f\">animate</span>([{ translate: <span class=\"tk-s\">`0 ${from.y}px`</span> }, { translate: <span class=\"tk-s\">`0 ${to.y}px`</span> }], { duration: <span class=\"tk-n\">760</span>, delay: <span class=\"tk-n\">200</span>, easing: EASE.settle, fill: <span class=\"tk-s\">'both'</span> });\nbtn.<span class=\"tk-f\">animate</span>([{ background: <span class=\"tk-s\">'#2b2a31'</span> }, { background: <span class=\"tk-s\">'#37363e'</span> }], { duration: <span class=\"tk-n\">160</span>, delay: <span class=\"tk-n\">780</span>, easing: <span class=\"tk-s\">'linear'</span>, fill: <span class=\"tk-s\">'both'</span> });\ncurSvg.<span class=\"tk-f\">animate</span>([{ scale: <span class=\"tk-n\">1</span> }, { scale: <span class=\"tk-n\">0.86</span> }, { scale: <span class=\"tk-n\">1</span> }], { duration: <span class=\"tk-n\">230</span>, delay: <span class=\"tk-n\">1080</span>, easing: EASE.landSoft, fill: <span class=\"tk-s\">'both'</span> });   <span class=\"tk-c\">// transform-origin: 0 0, the tip</span>\nbtn.<span class=\"tk-f\">animate</span>([{ scale: <span class=\"tk-n\">1</span> }, { scale: <span class=\"tk-n\">0.965</span>, offset: <span class=\"tk-n\">0.4</span> }, { scale: <span class=\"tk-n\">1</span> }], { duration: <span class=\"tk-n\">300</span>, delay: <span class=\"tk-n\">1080</span>, easing: EASE.landSoft, fill: <span class=\"tk-s\">'both'</span> });\nbtn.<span class=\"tk-f\">animate</span>([{ background: <span class=\"tk-s\">'#37363e'</span> }, { background: <span class=\"tk-s\">'#0a87ff'</span> }], { duration: <span class=\"tk-n\">120</span>, delay: <span class=\"tk-n\">1080</span>, easing: <span class=\"tk-s\">'linear'</span>, fill: <span class=\"tk-s\">'forwards'</span> });\nidle.<span class=\"tk-f\">animate</span>([{ translate: <span class=\"tk-s\">'0 0'</span>, opacity: <span class=\"tk-n\">1</span> }, { translate: <span class=\"tk-s\">'0 -3.4vh'</span>, opacity: <span class=\"tk-n\">0</span> }], { duration: <span class=\"tk-n\">260</span>, delay: <span class=\"tk-n\">1190</span>, easing: EASE.launch, fill: <span class=\"tk-s\">'both'</span> });\ndone.<span class=\"tk-f\">animate</span>([{ translate: <span class=\"tk-s\">'0 3.4vh'</span>, opacity: <span class=\"tk-n\">0</span> }, { translate: <span class=\"tk-s\">'0 0'</span>, opacity: <span class=\"tk-n\">1</span> }], { duration: <span class=\"tk-n\">380</span>, delay: <span class=\"tk-n\">1230</span>, easing: EASE.landSoft, fill: <span class=\"tk-s\">'both'</span> });\nx.<span class=\"tk-f\">animate</span>([{ translate: <span class=\"tk-s\">`${to.x}px 0`</span> }, { translate: <span class=\"tk-s\">`${innerWidth * 1.06}px 0`</span> }], { duration: <span class=\"tk-n\">380</span>, delay: <span class=\"tk-n\">1560</span>, easing: EASE.launch, fill: <span class=\"tk-s\">'forwards'</span> });\ny.<span class=\"tk-f\">animate</span>([{ translate: <span class=\"tk-s\">`0 ${to.y}px`</span> }, { translate: <span class=\"tk-s\">`0 ${innerHeight * 0.86}px`</span> }], { duration: <span class=\"tk-n\">380</span>, delay: <span class=\"tk-n\">1560</span>, easing: EASE.launch, fill: <span class=\"tk-s\">'forwards'</span> });\n&lt;/<span class=\"tk-k\">script</span>&gt;</code></pre></div>",
    "soundHtml": "<p class=\"mv-sound\">Sound: pluck at 1.08 s into the move, on the press (default gain); nothing on the travel or the exit.</p>",
-   "notesHtml": "<p>The cursor tip is the origin of the arrow path, so the translate is the point that clicks. Aim at the lower right of the button, not its centre, or the pointer sits on the label and hides it. The arrival is <code>EASE.land</code> (fast in, soft landing); the press dip is 14 percent on the cursor and 3 percent on the button, and it lasts 230 ms on <code>EASE.landSoft</code>. The exit is <code>EASE.launch</code> over 380 ms, half the time of the entrance and accelerating, so the last frames are the cursor leaving. The accent is used once, on the pressed result.</p>\n<p>Timing for a scripted demo (Fitts: the move time grows with the log of distance over target size): a short hop 0.4 to 0.6 s, across the screen 0.7 to 1.0 s, in from off-screen about 1.0 s; ballistic, so a fast launch, a deceleration into the target and a slight arc. Dwell 200 to 400 ms on the target before the press, then 100 to 300 ms before the UI reacts (an instant reaction reads fake). After a major action hold 1.0 to 1.4 s so the change registers. Cutting these pauses is the most common demo mistake.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
+   "notesHtml": "<p>The cursor tip is the origin of the arrow path, so the translate is the point that clicks. Aim at the lower right of the button, not its centre, or the pointer sits on the label and hides it. The arrival is <code>EASE.land</code> (fast in, soft landing); the press dip is 14 percent on the cursor and 3 percent on the button, and it lasts 230 ms on <code>EASE.landSoft</code>. The exit is <code>EASE.launch</code> over 380 ms, half the time of the entrance and accelerating, so the last frames are the cursor leaving. The accent is used once, on the pressed result.</p>\n<p>Timing for a scripted demo (Fitts: the move time grows with the log of distance over target size): a short hop 0.4 to 0.6 s, across the screen 0.7 to 1.0 s, in from off-screen about 1.0 s; ballistic, so a fast launch, a deceleration into the target and a slight arc. Dwell 200 to 400 ms on the target before the press, then 100 to 300 ms before the UI reacts (an instant reaction reads fake). After a major action hold 1.0 to 1.4 s so the change registers. Cutting these pauses is the most common demo mistake.</p>\n<p>Cause then effect: the answer to the click (a burst, a ring, a pop of the window, the click sound) starts on the press frame or after it, never before. A reference that shows the burst first has another story; when its sound sets your timing, move the effect to your press (<code>taste/rules/cause-first.md</code>). <code>vawe see</code> lists each event beside the nearest sound with the frame offset; a sound before its action reads <code>sound before its action</code>.</p>\n<p>Looks (ground, type, radius, accent) live in <code>demo/demo.css</code>; this snippet keeps neutral tokens.</p>"
   },
   {
    "name": "count-up",
@@ -4662,7 +5527,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "2448c68f7ebc",
    "duration": 3.6,
    "useHtml": "<p><strong>Use when</strong> a tab, a pill or a panel must melt into the next one: a tab bar whose active tab is joined to the page below it, a blob that stretches to a new slot, a menu that pours out of a button. Shapes that touch merge into one soft outline with rounded joins. Clip: <a href=\"/moves/gooey-filter.mp4\">gooey-filter.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/gooey-filter.html\">demo/gooey-filter.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/filter/gooey-svg-filter\">gooey-svg-filter</a> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The filter values and the demo are the original's.</p>\n<p>Put the shapes and a <code>filter: url(#gooey-filter)</code> on one wrapper. Keep text that must stay crisp outside the wrapper: the blur would smear it. The filter blurs the shapes, pushes their alpha through a steep matrix (a threshold with a soft edge), then draws the sharp source on top of that mask (<code>atop</code>).</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>html</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code>&lt;<span class=\"tk-k\">svg</span> <span class=\"tk-p\">style</span>=<span class=\"tk-s\">&quot;position:absolute;width:0;height:0&quot;</span>&gt;&lt;<span class=\"tk-k\">defs</span>&gt;\n  &lt;<span class=\"tk-k\">filter</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;gooey-filter&quot;</span> <span class=\"tk-p\">x</span>=<span class=\"tk-s\">&quot;-30%&quot;</span> <span class=\"tk-p\">y</span>=<span class=\"tk-s\">&quot;-30%&quot;</span> <span class=\"tk-p\">width</span>=<span class=\"tk-s\">&quot;160%&quot;</span> <span class=\"tk-p\">height</span>=<span class=\"tk-s\">&quot;160%&quot;</span>&gt;\n    &lt;<span class=\"tk-k\">feGaussianBlur</span> <span class=\"tk-p\">id</span>=<span class=\"tk-s\">&quot;gblur&quot;</span> <span class=\"tk-p\">in</span>=<span class=\"tk-s\">&quot;SourceGraphic&quot;</span> <span class=\"tk-p\">stdDeviation</span>=<span class=\"tk-s\">&quot;15&quot;</span> <span class=\"tk-p\">result</span>=<span class=\"tk-s\">&quot;blur-sm&quot;</span>/&gt;\n    &lt;<span class=\"tk-k\">feColorMatrix</span> <span class=\"tk-p\">in</span>=<span class=\"tk-s\">&quot;blur-sm&quot;</span> <span class=\"tk-p\">type</span>=<span class=\"tk-s\">&quot;matrix&quot;</span> <span class=\"tk-p\">values</span>=<span class=\"tk-s\">&quot;1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9&quot;</span> <span class=\"tk-p\">result</span>=<span class=\"tk-s\">&quot;goo&quot;</span>/&gt;\n    &lt;<span class=\"tk-k\">feComposite</span> <span class=\"tk-p\">in</span>=<span class=\"tk-s\">&quot;SourceGraphic&quot;</span> <span class=\"tk-p\">in2</span>=<span class=\"tk-s\">&quot;goo&quot;</span> <span class=\"tk-p\">operator</span>=<span class=\"tk-s\">&quot;atop&quot;</span>/&gt;\n  &lt;/<span class=\"tk-k\">filter</span>&gt;\n&lt;/<span class=\"tk-k\">defs</span>&gt;&lt;/<span class=\"tk-k\">svg</span>&gt;\n&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;filtered&quot;</span> <span class=\"tk-p\">style</span>=<span class=\"tk-s\">&quot;filter:url(#gooey-filter)&quot;</span>&gt; tab row (one #efefef box slides) + panel &lt;/<span class=\"tk-k\">div</span>&gt;\n&lt;<span class=\"tk-k\">div</span> <span class=\"tk-p\">class</span>=<span class=\"tk-s\">&quot;labels&quot;</span>&gt; the tab titles, no filter &lt;/<span class=\"tk-k\">div</span>&gt;</code></pre></div>",
@@ -5020,7 +5885,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-10",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "d26dfa0ee151",
    "duration": 5,
    "useHtml": "<p><strong>Use when</strong> a row of things must travel a curve for a whole beat: a loop-the-loop of tiles, a ribbon of logos or posters, a stream that rides an S-curve behind a title. Every item sits on the same SVG path at an even gap and moves forever; the path can show or hide. Clip: <a href=\"/moves/marquee-along-path.mp4\">marquee-along-path.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/marquee-along-path.html\">demo/marquee-along-path.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/blocks/marquee-along-svg-path\">marquee-along-svg-path</a> and <code>element-along-svg-path</code> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The maths and the demo path are the originals'.</p>\n<p>Each item is a box with <code>offset-path: path(...)</code> and an <code>offset-distance</code> that the page sets from the time. <code>offset-rotate</code> stays at its default <code>auto</code>, so each tile turns with the curve and its centre sits on the path.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> BASE_VELOCITY = <span class=\"tk-n\">8</span>;            <span class=\"tk-c\">// percent of the path per second</span>\n<span class=\"tk-k\">const</span> REPEAT = <span class=\"tk-n\">2</span>;                   <span class=\"tk-c\">// copies of the child list: 13 tiles x 2 = 26 items, 100/26 percent apart</span>\n<span class=\"tk-k\">const</span> SCROLL_FACTOR = <span class=\"tk-n\">5</span> / <span class=\"tk-n\">1000</span>;     <span class=\"tk-c\">// the original maps a constant 1 through [0, 1000] -&gt; [0, 5]: speed x 1.005</span>\n<span class=\"tk-k\">const</span> wrap = (v) =&gt; ((v % <span class=\"tk-n\">100</span>) + <span class=\"tk-n\">100</span>) % <span class=\"tk-n\">100</span>;\nwindow.seek = (t) =&gt; items.<span class=\"tk-f\">forEach</span>((el, i) =&gt; {\n  <span class=\"tk-k\">const</span> pct = <span class=\"tk-f\">wrap</span>(BASE_VELOCITY * (<span class=\"tk-n\">1</span> + SCROLL_FACTOR) * t + (i * <span class=\"tk-n\">100</span>) / items.length);  <span class=\"tk-c\">// direction reverse: negate the first term</span>\n  el.style.offsetPath = <span class=\"tk-s\">`path('${PATH}')`</span>;                                              <span class=\"tk-c\">// viewBox px, same box as the svg</span>\n  el.style.offsetDistance = <span class=\"tk-s\">`${easing ? easing(pct / 100) * 100 : pct}%`</span>;                <span class=\"tk-c\">// optional easing of the lap</span>\n  el.style.zIndex = Math.<span class=\"tk-f\">floor</span>(<span class=\"tk-n\">1</span> + (pct / <span class=\"tk-n\">100</span>) * <span class=\"tk-n\">10</span>);                                   <span class=\"tk-c\">// rolling z: the lead item is on top</span>\n});</code></pre></div>",
@@ -5043,7 +5908,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-10",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "01d1db694e5a",
    "duration": 4,
    "useHtml": "<p><strong>Use when</strong> rows of pictures, logos or words must slide for a whole beat, and the rows must run in different directions: a ticker band, a &quot;weekly finds&quot; wall, a trust strip. Each row is one set of items repeated four times that moves one set width and wraps without a seam. Clip: <a href=\"/moves/simple-marquee.mp4\">simple-marquee.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/simple-marquee.html\">demo/simple-marquee.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/blocks/simple-marquee\">simple-marquee</a> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The maths and the demo layout are the original's.</p>\n<p>A row is <code>repeat</code> copies of its items side by side, each copy <code>flex-shrink: 0</code>. All copies get the same <code>translateX(x%)</code>, where the percent is of one copy's own width. When x wraps from -100 to 0 each copy sits where the one before it was, so the loop is seamless.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> BASE_VELOCITY = <span class=\"tk-n\">8</span>;     <span class=\"tk-c\">// percent of one copy per second: a 1120 px copy moves 90 px per second</span>\n<span class=\"tk-k\">const</span> REPEAT = <span class=\"tk-n\">4</span>;\n<span class=\"tk-k\">const</span> wrap = (v) =&gt; ((v % -<span class=\"tk-n\">100</span>) + -<span class=\"tk-n\">100</span>) % -<span class=\"tk-n\">100</span>;           <span class=\"tk-c\">// 0 down to -100, also for positive v</span>\nwindow.seek = (t) =&gt; rows.<span class=\"tk-f\">forEach</span>(({ copies, sign }) =&gt; {   <span class=\"tk-c\">// sign: left -1, right +1; up and down use translateY</span>\n  <span class=\"tk-k\">const</span> x = <span class=\"tk-f\">wrap</span>(sign * BASE_VELOCITY * t);\n  copies.<span class=\"tk-f\">forEach</span>((c) =&gt; { c.style.transform = <span class=\"tk-s\">`translateX(${easing ? easing(x / -100) * -100 : x}%)`</span>; });\n});</code></pre></div>",
@@ -5066,7 +5931,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "428e3a65e4ea",
    "duration": 5,
    "useHtml": "<p><strong>Use when</strong> a handful of cards, logos or photos must orbit one point and stay upright: a ring around a product, a halo of integrations, a carousel that never ends. Items sit evenly on a circle and turn as one wheel, linearly, forever. Clip: <a href=\"/moves/circling-elements.mp4\">circling-elements.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/circling-elements.html\">demo/circling-elements.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/blocks/circling-elements\">circling-elements</a> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The keyframes and the demo are the original's.</p>\n<p>All items are <code>position: absolute</code> in a zero size box at the circle centre, each centred on its own point (<code>translate: -50% -50%</code>). The transform is the original's: turn to the angle, go out by the radius, turn back by the same angle so the item stays upright.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> RADIUS = <span class=\"tk-n\">120</span>, DURATION = <span class=\"tk-n\">10</span>, DIRECTION = <span class=\"tk-n\">1</span>;          <span class=\"tk-c\">// px of a 532 px tall box (scale by vh/532), seconds per turn, -1 reverses</span>\n<span class=\"tk-k\">const</span> ease = (p) =&gt; p;                                      <span class=\"tk-c\">// &quot;linear&quot;, the original default; any easing runs per turn</span>\nwindow.seek = (t) =&gt; cards.<span class=\"tk-f\">forEach</span>((el, i) =&gt; {\n  <span class=\"tk-k\">const</span> offset = (i * <span class=\"tk-n\">360</span>) / cards.length;                  <span class=\"tk-c\">// start angle: even spacing</span>\n  <span class=\"tk-k\">const</span> a = DIRECTION * (offset + <span class=\"tk-n\">360</span> * <span class=\"tk-f\">ease</span>(((t / DURATION) % <span class=\"tk-n\">1</span> + <span class=\"tk-n\">1</span>) % <span class=\"tk-n\">1</span>));\n  el.style.transform = <span class=\"tk-s\">`rotate(${a}deg) translate(${RADIUS * P}px, 0) rotate(${-a}deg)`</span>;\n});</code></pre></div>",
@@ -5089,7 +5954,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "edfe424583fa",
    "duration": 4.6,
    "useHtml": "<p><strong>Use when</strong> a cuboid must turn to show another face: a product block with a message on each side, a cube that flips to the next fact, a tilt that lands on a face. The box rolls on a stiff, overdamped spring and stops with no overshoot. Clip: <a href=\"/moves/css-box.mp4\">css-box.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/css-box.html\">demo/css-box.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/blocks/css-box\">css-box</a> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The geometry, the spring and the demo faces are the original's. The font is Overused Grotesk (OFL), the site's own.</p>\n<p>Six absolute faces sit in one <code>preserve-3d</code> box inside a <code>perspective: 600px</code> parent. Each face is pushed out by half its depth. The whole box is pulled back by half the depth, so the front face rests on the screen plane.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> STIFFNESS = <span class=\"tk-n\">100</span>, DAMPING = <span class=\"tk-n\">30</span>;                       <span class=\"tk-c\">// CSSBox defaults: motion useSpring, mass 1, damping ratio 1.5</span>\n<span class=\"tk-k\">const</span> ROTATE_Y = [[<span class=\"tk-n\">0</span>, <span class=\"tk-n\">0</span>], [<span class=\"tk-n\">0.6</span>, <span class=\"tk-n\">90</span>]];                      <span class=\"tk-c\">// [second, degrees]: each key is one jump of the target</span>\n<span class=\"tk-k\">const</span> ROTATE_X = [[<span class=\"tk-n\">0</span>, <span class=\"tk-n\">0</span>], [<span class=\"tk-n\">2.0</span>, -<span class=\"tk-n\">90</span>], [<span class=\"tk-n\">3.4</span>, <span class=\"tk-n\">0</span>]];\nwindow.seek = (t) =&gt; {\n  <span class=\"tk-k\">const</span> x = <span class=\"tk-f\">track</span>(t, ROTATE_X, STIFFNESS, DAMPING), y = <span class=\"tk-f\">track</span>(t, ROTATE_Y, STIFFNESS, DAMPING);\n  cube.style.transform = <span class=\"tk-s\">`translateZ(-${DEPTH / 2}px) rotateX(${x}deg) rotateY(${y}deg)`</span>;\n};</code></pre></div>",
@@ -5112,7 +5977,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "bf039b4d4b24",
    "duration": 4.8,
    "useHtml": "<p><strong>Use when</strong> a photo or a clip must break into blocks and clear again: a censor, a retro reveal, a resolve from mosaic to sharp, a scrub of the pixel size with the cursor. The block size is one number, and the picture stays live under it. Clip: <a href=\"/moves/pixelate-svg-filter.mp4\">pixelate-svg-filter.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/pixelate-svg-filter.html\">demo/pixelate-svg-filter.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/filter/pixelate-svg-filter\">pixelate-svg-filter</a> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The filter graph and the demo mapping are the original's.</p>\n<p>Put <code>filter: url(#pixelate-filter)</code> on the wrapper of the picture. The filter averages with a 3 x 3 convolution, floods a one pixel point, tiles it at <code>size</code>, keeps the average under each tile point, and dilates each point by <code>size / 2</code> into a block. With <code>crossLayers</code> two more passes tile at half width and half height and sit under the main one, so the blocks cover the edges.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> SIZE_PER_PX = <span class=\"tk-n\">1</span> / <span class=\"tk-n\">30</span>;                                    <span class=\"tk-c\">// the demo: block size = pointer x / 30, clamped 1..64</span>\n<span class=\"tk-k\">const</span> MOUSE_X = [[<span class=\"tk-n\">0</span>, <span class=\"tk-n\">60</span>], [<span class=\"tk-n\">0.4</span>, <span class=\"tk-n\">60</span>], [<span class=\"tk-n\">2.2</span>, <span class=\"tk-n\">600</span>], [<span class=\"tk-n\">2.5</span>, <span class=\"tk-n\">600</span>], [<span class=\"tk-n\">4.3</span>, <span class=\"tk-n\">60</span>], [<span class=\"tk-n\">4.8</span>, <span class=\"tk-n\">60</span>]];   <span class=\"tk-c\">// px from the left of the 500 px box</span>\nwindow.seek = (t) =&gt; {\n  <span class=\"tk-k\">const</span> size = Math.<span class=\"tk-f\">min</span>(Math.<span class=\"tk-f\">max</span>(<span class=\"tk-f\">kf</span>(t, MOUSE_X, <span class=\"tk-s\">'easeInOutSine'</span>) * SIZE_PER_PX, <span class=\"tk-n\">1</span>), <span class=\"tk-n\">64</span>);\n  c0.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'width'</span>, size);  c0.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'height'</span>, size);          <span class=\"tk-c\">// first layer (feComposite)</span>\n  c1.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'width'</span>, size / <span class=\"tk-n\">2</span>); c1.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'height'</span>, size);       <span class=\"tk-c\">// crossLayers: tile half width</span>\n  c2.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'width'</span>, size);  c2.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'height'</span>, size / <span class=\"tk-n\">2</span>);      <span class=\"tk-c\">// crossLayers: tile half height</span>\n  <span class=\"tk-k\">for</span> (<span class=\"tk-k\">const</span> m <span class=\"tk-k\">of</span> [m0, m1, m2]) m.<span class=\"tk-f\">setAttribute</span>(<span class=\"tk-s\">'radius'</span>, size / <span class=\"tk-n\">2</span>);          <span class=\"tk-c\">// feMorphology dilate</span>\n};</code></pre></div>",
@@ -5135,7 +6000,7 @@
    "published": "2026-10-09",
    "modified": "2026-10-09",
    "clipDate": "2026-10-09",
-   "clipHash": null,
+   "clipHash": "6415546e70e7",
    "duration": 4.2,
    "useHtml": "<p><strong>Use when</strong> a line of type must open a gap and put a picture or a clip into it: &quot;that's a nice ( ) chair!&quot;, a product shot inside a sentence, a face between two words. The two halves of the line part as the media grows from zero width and close again when it leaves. Clip: <a href=\"/moves/media-between-text.mp4\">media-between-text.mp4</a>. Demo: <a href=\"https://github.com/Vandit1604/vawe/blob/main/prompts/moves/demo/media-between-text.html\">demo/media-between-text.html</a>.</p>\n<p>Credit: port of fancy by Daniel Petho, MIT. Source: <a href=\"https://www.fancycomponents.dev/docs/components/blocks/media-between-text\">media-between-text</a> (<a href=\"https://github.com/danielpetho/fancy\">repo</a>). The markup, the sizes and the demo are the original's. The font is Overused Grotesk (OFL), the site's own.</p>\n<p>One flex row, centred: the left words, a media box of width 0 and height 100 px with <code>overflow: hidden</code>, the right words. Only the media width moves; the flex layout parts the words and wraps them when the row is full. No text is animated.</p>",
    "codeHtml": "<div class=\"mv-code\"><div class=\"mv-code-bar\"><span>js</span><button type=\"button\" class=\"mv-copy\" data-copy>Copy</button></div><pre><code><span class=\"tk-k\">const</span> WIDTH = <span class=\"tk-n\">100</span>;                                        <span class=\"tk-c\">// px</span>\n<span class=\"tk-k\">const</span> OPEN = { k: <span class=\"tk-n\">532.6</span>, d: <span class=\"tk-n\">46.15</span> };                      <span class=\"tk-c\">// motion spring { duration: 0.4, bounce: 0 }: critically damped, w = 9.23 / 0.4</span>\n<span class=\"tk-k\">const</span> closeEase = <span class=\"tk-f\">cubicBezier</span>(<span class=\"tk-n\">0.25</span>, <span class=\"tk-n\">0.1</span>, <span class=\"tk-n\">0.35</span>, <span class=\"tk-n\">1</span>);        <span class=\"tk-c\">// motion's default tween for a value with no transition, 0.3 s</span>\n<span class=\"tk-k\">const</span> HOVERS = [[<span class=\"tk-n\">0.5</span>, <span class=\"tk-n\">1.9</span>], [<span class=\"tk-n\">2.8</span>, <span class=\"tk-n\">3.7</span>]];                  <span class=\"tk-c\">// [enter, leave] seconds</span>\n<span class=\"tk-k\">const</span> widthAt = (t) =&gt; {\n  <span class=\"tk-k\">for</span> (<span class=\"tk-k\">let</span> i = HOVERS.length - <span class=\"tk-n\">1</span>; i &gt;= <span class=\"tk-n\">0</span>; i--) {\n    <span class=\"tk-k\">const</span> [enter, leave] = HOVERS[i];\n    <span class=\"tk-k\">if</span> (t &gt;= leave) <span class=\"tk-k\">return</span> WIDTH * (<span class=\"tk-n\">1</span> - <span class=\"tk-f\">closeEase</span>(Math.<span class=\"tk-f\">min</span>((t - leave) / <span class=\"tk-n\">0.3</span>, <span class=\"tk-n\">1</span>)));\n    <span class=\"tk-k\">if</span> (t &gt;= enter) <span class=\"tk-k\">return</span> WIDTH * <span class=\"tk-f\">spring</span>(t - enter, OPEN.k, OPEN.d);\n  }\n  <span class=\"tk-k\">return</span> <span class=\"tk-n\">0</span>;\n};\nmedia.style.width = <span class=\"tk-s\">`${widthAt(t)}px`</span>;</code></pre></div>",

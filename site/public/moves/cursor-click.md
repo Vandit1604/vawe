@@ -36,4 +36,6 @@ once, on the pressed result.
 
 Timing for a scripted demo (Fitts: the move time grows with the log of distance over target size): a short hop 0.4 to 0.6 s, across the screen 0.7 to 1.0 s, in from off-screen about 1.0 s; ballistic, so a fast launch, a deceleration into the target and a slight arc. Dwell 200 to 400 ms on the target before the press, then 100 to 300 ms before the UI reacts (an instant reaction reads fake). After a major action hold 1.0 to 1.4 s so the change registers. Cutting these pauses is the most common demo mistake.
 
+Cause then effect: the answer to the click (a burst, a ring, a pop of the window, the click sound) starts on the press frame or after it, never before. A reference that shows the burst first has another story; when its sound sets your timing, move the effect to your press (`taste/rules/cause-first.md`). `vawe see` lists each event beside the nearest sound with the frame offset; a sound before its action reads `sound before its action`.
+
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

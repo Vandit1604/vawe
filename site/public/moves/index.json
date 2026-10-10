@@ -116,6 +116,10 @@
    "label": "change between shots, spatial"
   },
   {
+   "id": "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade",
+   "label": "change between shots, one object carries over with no cut and no crossfade"
+  },
+  {
    "id": "run-every-beat-in-and-out",
    "label": "run every beat in and out"
   },
@@ -924,6 +928,76 @@
    "duration": 1.4
   },
   {
+   "name": "swipe-continues",
+   "title": "Swipe continues",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a card is swiped left and the next scene arrives from the right at the same speed: one belt, the finger lets go at the peak, 40 percent of the travel on the throw and 60 on the brake, 8 stacked exposures for the blur",
+   "clip": "https://vawe.dev/moves/swipe-continues.mp4",
+   "md": "https://vawe.dev/moves/swipe-continues.md",
+   "page": "https://vawe.dev/moves/swipe-continues",
+   "duration": 3
+  },
+  {
+   "name": "drop-and-land",
+   "title": "Drop and land",
+   "group": "change-between-shots",
+   "look": "paper",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "an action in scene A lands in scene B: the product tile lifts, falls under gravity out of the card into the cart while one camera tilt brings the cart up and stops before the landing, then squashes and settles on a spring",
+   "clip": "https://vawe.dev/moves/drop-and-land.mp4",
+   "md": "https://vawe.dev/moves/drop-and-land.md",
+   "page": "https://vawe.dev/moves/drop-and-land",
+   "duration": 3.2
+  },
+  {
+   "name": "spin-rotation",
+   "title": "Spin rotation",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a loading spinner hands over to the loaded screen: the arc's leading edge sweeps a wedge that uncovers the next screen, the camera rolls 14 degrees with the turn and settles tilted, and the ring flies to the header as its mark",
+   "clip": "https://vawe.dev/moves/spin-rotation.mp4",
+   "md": "https://vawe.dev/moves/spin-rotation.md",
+   "page": "https://vawe.dev/moves/spin-rotation",
+   "duration": 3.2
+  },
+  {
+   "name": "counter-dive",
+   "title": "Counter dive",
+   "group": "change-between-shots",
+   "look": "field",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a title is entered through one letter: the camera pushes in log space into the counter of an \"o\" cut out of the title, scene B is already inside it as a miniature, and it fills the frame with no cut",
+   "clip": "https://vawe.dev/moves/counter-dive.mp4",
+   "md": "https://vawe.dev/moves/counter-dive.md",
+   "page": "https://vawe.dev/moves/counter-dive",
+   "duration": 3.6
+  },
+  {
+   "name": "thumbnail-grid",
+   "title": "Thumbnail grid",
+   "group": "change-between-shots",
+   "look": "swiss",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "the scene shrinks into a thumbnail in a grid that is the next scene: one pull back in log space about the middle cell, nine frame-sized cells in the world, radius from square to the look's step, then the title and a selection ring",
+   "clip": "https://vawe.dev/moves/thumbnail-grid.mp4",
+   "md": "https://vawe.dev/moves/thumbnail-grid.md",
+   "page": "https://vawe.dev/moves/thumbnail-grid",
+   "duration": 3.4
+  },
+  {
    "name": "light-leak-transition",
    "title": "Light leak transition",
    "group": "change-between-shots",
@@ -950,6 +1024,146 @@
    "md": "https://vawe.dev/moves/type-match-cut.md",
    "page": "https://vawe.dev/moves/type-match-cut",
    "duration": 2.6
+  },
+  {
+   "name": "cursor-spotlight",
+   "title": "Cursor spotlight",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a click opens the next screen: the cursor tip grows a soft circle (a radial mask, not a blur) that shows shot B inside it while shot A stays outside until the circle covers the frame",
+   "clip": "https://vawe.dev/moves/cursor-spotlight.mp4",
+   "md": "https://vawe.dev/moves/cursor-spotlight.md",
+   "page": "https://vawe.dev/moves/cursor-spotlight",
+   "duration": 3.6
+  },
+  {
+   "name": "toggle-horizon",
+   "title": "Toggle horizon",
+   "group": "change-between-shots",
+   "look": "dusk",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a setting switches the world: the toggle track stretches past both frame edges and thins to the horizon line of the next scene, and shot A opens away from the line, up and down",
+   "clip": "https://vawe.dev/moves/toggle-horizon.mp4",
+   "md": "https://vawe.dev/moves/toggle-horizon.md",
+   "page": "https://vawe.dev/moves/toggle-horizon",
+   "duration": 3.8
+  },
+  {
+   "name": "progress-timeline",
+   "title": "Progress timeline",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a bar ends and the result opens in an editor: the fill runs past its end, stands up into the scrubber of a timeline and reveals it while it keeps the fill's speed",
+   "clip": "https://vawe.dev/moves/progress-timeline.mp4",
+   "md": "https://vawe.dev/moves/progress-timeline.md",
+   "page": "https://vawe.dev/moves/progress-timeline",
+   "duration": 3.6
+  },
+  {
+   "name": "avatar-world",
+   "title": "Avatar world",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a person or brand is the way in: a round vector avatar grows until its circle covers the frame and its art is the ground of the next scene",
+   "clip": "https://vawe.dev/moves/avatar-world.mp4",
+   "md": "https://vawe.dev/moves/avatar-world.md",
+   "page": "https://vawe.dev/moves/avatar-world",
+   "duration": 3.8
+  },
+  {
+   "name": "glow-record",
+   "title": "Glow record",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "an alert becomes a live state: a badge's red floods the frame in 0.35 s on a screen blend with over-exposure, then gathers into the red dot of a recording light",
+   "clip": "https://vawe.dev/moves/glow-record.mp4",
+   "md": "https://vawe.dev/moves/glow-record.md",
+   "page": "https://vawe.dev/moves/glow-record",
+   "duration": 3.8
+  },
+  {
+   "name": "highlight-sweep",
+   "title": "Highlight sweep",
+   "group": "change-between-shots",
+   "look": "signal",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a highlight sweeps across a key word, keeps going off the line and grows into the next panel's background; the edge never stops at the word, and the word flips to dark ink at the edge",
+   "clip": "https://vawe.dev/moves/highlight-sweep.mp4",
+   "md": "https://vawe.dev/moves/highlight-sweep.md",
+   "page": "https://vawe.dev/moves/highlight-sweep",
+   "duration": 3.6
+  },
+  {
+   "name": "shadow-handoff",
+   "title": "Shadow handoff",
+   "group": "change-between-shots",
+   "look": "daylight",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a card lifts, its blurred shadow stretches down and right and darkens into the night scene's ground colour, then the card leaves faster than it lifted",
+   "clip": "https://vawe.dev/moves/shadow-handoff.mp4",
+   "md": "https://vawe.dev/moves/shadow-handoff.md",
+   "page": "https://vawe.dev/moves/shadow-handoff",
+   "duration": 3.8
+  },
+  {
+   "name": "word-portal",
+   "title": "Word portal",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "a typed word grows until one stem is the whole frame and the next scene shows through the letterforms (an SVG text clip over a fixed scene B), on a log-path zoom",
+   "clip": "https://vawe.dev/moves/word-portal.mp4",
+   "md": "https://vawe.dev/moves/word-portal.md",
+   "page": "https://vawe.dev/moves/word-portal",
+   "duration": 3.8
+  },
+  {
+   "name": "underline-road",
+   "title": "Underline road",
+   "group": "change-between-shots",
+   "look": "paper",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "the underline of a headline extends, bends down and becomes the route on a simple map, with the camera trailing the head at its speed and stopping at the map's end",
+   "clip": "https://vawe.dev/moves/underline-road.mp4",
+   "md": "https://vawe.dev/moves/underline-road.md",
+   "page": "https://vawe.dev/moves/underline-road",
+   "duration": 3.9
+  },
+  {
+   "name": "caret-door",
+   "title": "Caret door",
+   "group": "change-between-shots",
+   "look": "terminal",
+   "jobs": [
+    "change-between-shots-one-object-carries-over-with-no-cut-and-no-crossfade"
+   ],
+   "use": "the blinking caret grows tall, then opens as a two-frame-wide door that turns about it under perspective; the next screen is on the door's face",
+   "clip": "https://vawe.dev/moves/caret-door.mp4",
+   "md": "https://vawe.dev/moves/caret-door.md",
+   "page": "https://vawe.dev/moves/caret-door",
+   "duration": 3.6
   },
   {
    "name": "word-sweep",
