@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings } from '../../harness/lib/board.mjs';
+import { parseBoard, boardChecks, boardFilled, spectacleOf, motionFilled, movesUnused, boardVsPage, shipWarnings, lockedSpectacle } from '../../harness/lib/board.mjs';
 
 const board = ({ cuts = ['0.6', '0.3', '1.1'], spectacle = 'at 7.2', moves = ['whip', 'push', 'overlap'], sound = ['tick', 'tap'] } = {}) => `## Look
 
@@ -134,4 +134,12 @@ test('shipWarnings: unfilled Board and Motion pass, nothing for a brief without 
   assert.equal(w.length, 2);
   assert.match(w[0], /Board is not filled/);
   assert.match(w[1], /Motion pass is not filled/);
+});
+
+test('the spectacle second the checks read is the Board\'s: a moved meta changes nothing', () => {
+  assert.equal(lockedSpectacle(board(), 4.8), 7.2);
+  assert.equal(lockedSpectacle(board(), null), 7.2);
+  assert.equal(lockedSpectacle(null, 4.8), 4.8);
+  assert.equal(lockedSpectacle('## Look\nno board', 4.8), 4.8);
+  assert.match(boardChecks(board(), 4.8).join('\n'), /the spectacle checks read 7\.2 s, the Board's/);
 });

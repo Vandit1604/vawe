@@ -69,7 +69,7 @@ import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
-import { boardChecks, spectacleOf } from '../lib/board.mjs';
+import { boardChecks, spectacleOf, lockedSpectacle } from '../lib/board.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived, waiverHint } from '../lib/waivers.mjs';
 import { beatAdvice } from '../lib/sound-read.mjs';
@@ -898,7 +898,7 @@ function motionFindings(pagePath, motion) {
 
 const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
 
-const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: spectacleOf(fs.readFileSync(pagePath, 'utf8')), film: { dur: Number(readPageMeta(pagePath, 'duration')), worlds: probe.worlds } }), pageAuthoring(pagePath));
+const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: lockedSpectacle(readBrief(pagePath), spectacleOf(fs.readFileSync(pagePath, 'utf8'))), film: { dur: Number(readPageMeta(pagePath, 'duration')), worlds: probe.worlds } }), pageAuthoring(pagePath));
 
 const barAdvice = (pagePath, motion, probe) => barFindings(pagePath, motion, probe).flatMap((f) => [...lintLines([f]), waiverHint(f.code)]);
 

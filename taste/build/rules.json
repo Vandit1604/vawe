@@ -307,7 +307,7 @@
  },
  "spectacle-weak": {
   "file": "taste/rules/spectacle-weak.md",
-  "instead": "give the spectacle the fastest or longest move of the film, or move the spectacle meta to the moment that already is strongest and put quiet before it."
+  "instead": "give the second the Board names the fastest or longest move of the film, with quiet before it. The checks read the Board's Spectacle second, so moving the meta changes nothing."
  },
  "speed-bands": {
   "file": "taste/rules/speed-bands.md",

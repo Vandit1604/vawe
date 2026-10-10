@@ -247,15 +247,16 @@ export function staging(runs) {
 export function anticipation(runs, spectacle, span) {
   if (spectacle == null || !runs?.length || (span && (spectacle < span[0] || spectacle > span[1]))) return [];
   const near = runs.filter((r) => r.from <= spectacle + SPECTACLE.window_s && r.to >= spectacle - SPECTACLE.window_s);
-  if (!near.length) return [];
+  if (!near.length) return [finding('anticipation', spectacle, `no element moves within ${SPECTACLE.window_s} s of the spectacle second ${n1(spectacle)} s`, 'put the one big move on that second, with its wind-up')];
   const hero = near.reduce((m, r) => (r.score > m.score ? r : m), near[0]);
   if (hero.counter === null) return [];
   const counter = hero.counter >= WIND.counter_floor_pct / 100 && hero.counter <= WIND.counter_travel_pct_max / 100;
-  const dip = hero.dip >= WIND.dip_pct_min / 100;
-  if (counter || dip) return [];
+  const dips = (r) => r.dip !== null && r.dip >= WIND.dip_pct_min / 100;
+  const sharedDip = near.filter((r) => r !== hero && dips(r)).length >= SPECTACLE.shared_dip_min;
+  if (counter || (dips(hero) && !sharedDip)) return [];
   return [finding('anticipation', spectacle,
     `the spectacle move (${hero.label}, ${hero.from.toFixed(2)} s) starts with no wind-up: it first moves ${pct(hero.counter * 100)}% of its travel back and dips ${pct(hero.dip * 100)}% in size`,
-    'enter(el, { anticipate: 0.12 }) from core/motion/presets.js adds a counter-move; or dip the scale 2 to 4% for 4 frames before the move')];
+    `${sharedDip ? 'other movers dip at the same time, so the dip winds up nothing: ' : ''}enter(el, { anticipate: 0.12 }) from core/motion/presets.js adds a counter-move; or dip the hero's own scale 2 to 4% for 4 frames before the move`)];
 }
 
 /** The fastest tenth of the moving elements over the speed ceiling (rule speed-ceiling). `all` is the peaks of boxMotion, or null when the speed was not sampled. An element slower than moving_floor_fh_s is a drift the eye does not follow (the reference films' slowest tracked elements peak near 0.2). */
