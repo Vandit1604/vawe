@@ -91,6 +91,8 @@ import { peakLine } from '../lib/peak-limit.mjs';
 import { balanceLines } from '../lib/cue-balance.mjs';
 import { bedLine } from '../lib/bed-motion.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
+import { watchLoad, loadStallLines } from '../lib/load-stall.mjs';
+import { canvasCoversFrame, CANVAS_SHARE, DOM_PICTURE_CHECKS, canvasFilmNote } from '../lib/canvas-film.mjs';
 import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
 import { noteVerb } from '../lib/verb-log.mjs';
 import { machineLanes } from '../lib/lane-budget.mjs';
@@ -157,10 +159,14 @@ const BENCH_TIMING_FILE = process.env.VAWE_BENCH_TIMING_FILE || null;
 const NAV_TIMEOUT_MS = 30_000;
 const NAV_RETRY_TIMEOUT_MS = 120_000;
 
-// Puppeteer's 30 s navigation limit fired on two drafts that ran beside a loaded machine: a second try with a longer limit.
-export async function gotoLoaded(page, url) {
+// Puppeteer's 30 s navigation limit fired on two drafts that ran beside a loaded machine: a second try with a longer limit,
+// but only when nothing explains the stall. An unfinished request, a blocked main thread or a console error fails at once, naming it.
+export async function gotoLoaded(page, url, pagePath = url) {
+  const watch = watchLoad(page);
   try { await page.goto(url, { waitUntil: 'load', timeout: NAV_TIMEOUT_MS }); } catch (e) {
     if (e?.name !== 'TimeoutError') throw e;
+    const why = await loadStallLines(page, watch, pagePath);
+    if (why.length) throw new InvariantError([`${pagePath}: no load event after ${NAV_TIMEOUT_MS / 1000} s`, ...why]);
     await page.goto(url, { waitUntil: 'load', timeout: NAV_RETRY_TIMEOUT_MS });
   }
 }
@@ -381,7 +387,7 @@ async function runShards(pagePath, frame, frames, workers, work, run) {
             mark('open page', i);
             at.opened = await ex(() => openPage(pagePath, frame, { final, lane }));
             mark('load page', i);
-            await gotoLoaded(at.opened.page, at.opened.url);
+            await gotoLoaded(at.opened.page, at.opened.url, pagePath);
             sinceOpen = 0;
           }
           mark('frame', i);
@@ -734,7 +740,7 @@ export async function renderPage(pagePath, outPath, opts = {}) {
   const { page, url, close } = await openPage(pagePath, frame, { final });
   const scriptErrors = watchPageErrors(page);
   try {
-    await gotoLoaded(page, url);
+    await gotoLoaded(page, url, pagePath);
     try { await settle(page); } catch (e) {
       const msg = String(e.message).replace(/^.*?Error: /, '');
       if (/^font (still loading|failed)/.test(msg)) throw new InvariantError([msg]);
@@ -922,8 +928,10 @@ const seekLayout = (page) => (ms) => page.evaluate((t) => window.__pageSeek(t / 
  * gates each probe by tier and caches it; the default runs every tier with no cache. `from` is the film second the
  * samples start at, and `whole` is false for a window, where the brief's spec rows (film-long times) are not read.
  */
-export async function probePage(page, dur, pagePath, { checks = createChecks({ pagePath, mode: 'full', cache: false }), from = 0, whole = true } = {}) {
+export async function probePage(page, dur, pagePath, { checks: all = createChecks({ pagePath, mode: 'full', cache: false }), from = 0, whole = true } = {}) {
   const window = { from, dur };
+  const canvasFilm = await page.evaluate(canvasCoversFrame, CANVAS_SHARE);
+  const checks = canvasFilm ? { ...all, run: (check, fn, settings) => (DOM_PICTURE_CHECKS.has(check) ? null : all.run(check, fn, settings)) } : all;
   const tables = dropGuesses(parseBriefTables(readBrief(pagePath))).set;
   const found = await checks.run('motion', () => runMotionCollector(page), window);
   const boxes = found?.scripted ? await checks.run('box-motion', () => sampleBoxTracks(page, lintTimes(dur), 'visible'), window) : undefined;
@@ -937,7 +945,7 @@ export async function probePage(page, dur, pagePath, { checks = createChecks({ p
   const specKey = { tables, dur };
   const spec = whole ? await checks.run('spec', () => sampleSpec(page, tables, seekLayout(page), dur, { objects: false }), specKey) : null;
   const objects = spec && tables.objects.length ? reviveObjects(await checks.run('objects', () => sampleObjects(page, tables, spec, dur), specKey)) : undefined;
-  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
+  return { motion: { ...found, ...(boxes ? { boxes } : {}) }, probe: { ...text, canvasFilm, motionText: motionText?.samples, whole, speed, contrast, layout, worlds, tail, spec: spec && { ...spec, objects: objects ?? null } } };
 }
 
 /** The cut-off-beat advice of a page with a music bed; [] for a window, a waiver with its reason, no bed, or a bed that cannot be read (advice must never stop a draft). */
@@ -956,7 +964,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   return {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
-    lines: [...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
+    lines: [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...moveDocLines(brief),
       ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
@@ -973,7 +981,7 @@ export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly 
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
-const NOTE_LINES = /^(waive: |motion lint read element boxes)/;
+const NOTE_LINES = /^(waive: |motion lint read element boxes|checks skipped: )/;
 
 /**
  * What a draft says about itself: { red, notes, rows, was, sync }. `red` is what the terminal shows (the red acceptance

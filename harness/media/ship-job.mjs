@@ -20,7 +20,7 @@ import { defaultOut } from './render-page.mjs';
 import { videoProblems, readVideo } from './draft-check.mjs';
 import { pageAuthoring } from '../lib/motion-stamp.mjs';
 import { WAIT_WORK } from '../live/stage-say.mjs';
-import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs } from '../lib/ship-status.mjs';
+import { samePage, doneLines, shipVerdict, SHIP_JOBS_DIR, jobLogPath, finalFailure, failedShipLine, firstCapture, captureEtaMs, waitCallsLeft } from '../lib/ship-status.mjs';
 import { appendRun, filmKeyOf } from '../lib/runlog.mjs';
 import { shipEvent } from '../lib/run-events.mjs';
 import { finalAcceptance, lastPageFacts } from './acceptance-run.mjs';
@@ -148,14 +148,23 @@ function logText(job) {
   try { return fs.readFileSync(job.log, 'utf8'); } catch { return ''; }
 }
 
-function progressLine(job, text) {
+function progress(job, text) {
   const seen = [...text.matchAll(/capturing (\d+)\/(\d+) subframe/g)].pop();
   const elapsed = Date.now() - job.startedAt;
-  if (!seen) return `job ${job.id}: running, ${clock(elapsed)} in, before capture (page load, checks, speed pass)`;
+  if (!seen) return { line: `job ${job.id}: running, ${clock(elapsed)} in, before capture (page load, checks, speed pass)`, etaMs: null, elapsed };
   const [done, total] = [Number(seen[1]), Number(seen[2])];
   const etaMs = job.capture ? captureEtaMs({ first: job.capture.first, firstAt: job.capture.at, done, total, now: Date.now() }) : null;
   const eta = etaMs === null ? 'not known yet' : `about ${clock(etaMs)}`;
-  return `job ${job.id}: running, ${done}/${total} subframes (${Math.round((100 * done) / total)}%), ${clock(elapsed)} in, ${eta} left, then encode`;
+  return { line: `job ${job.id}: running, ${done}/${total} subframes (${Math.round((100 * done) / total)}%), ${clock(elapsed)} in, ${eta} left, then encode`, etaMs, elapsed };
+}
+
+const progressLine = (job, text) => progress(job, text).line;
+
+/** The next: line of a job still running: the command, and how many calls it needs at the current pace. */
+function waitNextLine(job, text) {
+  const { etaMs, elapsed } = progress(job, text);
+  const { calls, basis } = waitCallsLeft({ etaMs, elapsedMs: elapsed, capMs: WAIT_CAP_MS });
+  return `next: bin/vawe ship --status ${job.page} --wait (about ${calls} more ${calls === 1 ? 'call' : 'calls'} ${basis}; one call waits up to ${clock(WAIT_CAP_MS)}; run it alone, not in parallel); ${WAIT_WORK}`;
 }
 
 const LINE_CAP = 240;
@@ -193,12 +202,13 @@ function statusOf(id) {
   if (['done', 'failed', 'cancelled'].includes(job.status)) return finalLines(job, text);
   if (job.status === 'running' && !pidAlive(job.pid)) return [failedLine(job, text, 'the render process died without a result'), `job ${job.id}: the render process died without a result`, `log: ${job.log}`];
   if (job.status === 'judging') return renderedLines(job);
-  return [progressLine(job, text), `work: ${WAIT_WORK}`, `log: ${job.log}`];
+  return [progressLine(job, text), waitNextLine(job, text), `log: ${job.log}`];
 }
 
 const renderedLines = (job) => [
   `job ${job.id}: RENDERED in ${clock(job.renderMs)}, the mp4 is ready; NOT JUDGED yet (a fresh judge and the acceptance rows run now, about 70 s)`,
   ...job.outputs.map((o) => `output: ${o}`),
+  `next: bin/vawe ship --status ${job.page} --wait (1 more call: the judge and the acceptance rows end within about 70 s)`,
 ];
 
 const isOver = (id) => ['done', 'failed', 'cancelled'].includes(readJob(id).status) || (readJob(id).status === 'running' && !pidAlive(readJob(id).pid));
@@ -208,13 +218,14 @@ async function waitThenStatus(id) {
   const until = Date.now() + WAIT_CAP_MS;
   let announced = false;
   let nextProgress = Date.now() + PROGRESS_MS;
+  if (target && fs.existsSync(stateFile(target)) && !isOver(target)) console.log(`${statusOf(target)[0]} (waiting up to ${clock(WAIT_CAP_MS)} in this call)`);
   while (target && fs.existsSync(stateFile(target)) && !isOver(target) && Date.now() < until) {
     if (!announced && readJob(target).status === 'judging') { announced = true; console.log(renderedLines(readJob(target)).join('\n')); }
     if (Date.now() >= nextProgress) { nextProgress += PROGRESS_MS; console.log(statusOf(target)[0]); }
     await new Promise((r) => setTimeout(r, 2000));
   }
   console.log(statusOf(target).join('\n'));
-  if (target && fs.existsSync(stateFile(target)) && !isOver(target)) console.log(`not done after ${clock(WAIT_CAP_MS)}: run the same command once more`);
+  if (target && fs.existsSync(stateFile(target)) && !isOver(target)) console.log(`this call stopped after ${clock(WAIT_CAP_MS)} because a call may not run longer than the 10 minute limit of the Bash tool. The render is still running; nothing is lost. Run the next: command to keep waiting.`);
 }
 
 const [mode, ...rest] = process.argv.slice(2);

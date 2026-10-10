@@ -81,7 +81,8 @@ async function execute(verb, rest, call) {
     if (code !== 0) return code;
   }
   if (typeof verb.summary === 'function') console.log(verb.summary(values, positional, startedMs).join('\n'));
-  if (verb.next && !verb.nextInline) console.log(`\nnext: ${verb.next(values, positional)}`);
+  const next = verb.next && !verb.nextInline ? verb.next(values, positional) : null;
+  if (next) console.log(`\nnext: ${next}`);
   return 0;
 }
 

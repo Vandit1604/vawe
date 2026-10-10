@@ -11,7 +11,13 @@ import { gotoLoaded } from '../../harness/media/render-page.mjs';
 const RENDER = path.resolve('harness/media/render-page.mjs');
 const fakePage = (failures) => {
   const calls = [];
-  return { calls, goto: async (url, o) => { calls.push(o.timeout); if (calls.length <= failures) throw Object.assign(new Error('Navigation timeout of 30000 ms exceeded'), { name: 'TimeoutError' }); } };
+  const handlers = {};
+  return {
+    calls, handlers,
+    on: (name, fn) => { handlers[name] = fn; },
+    evaluate: async () => true,
+    goto: async (url, o) => { calls.push(o.timeout); if (calls.length <= failures) throw Object.assign(new Error('Navigation timeout of 30000 ms exceeded'), { name: 'TimeoutError' }); },
+  };
 };
 
 test('one navigation timeout retries with a longer limit', async () => {
@@ -25,9 +31,21 @@ test('a second timeout fails, and another error is not retried', async () => {
   const twice = fakePage(2);
   await assert.rejects(gotoLoaded(twice, 'http://x'), /Navigation timeout/);
   assert.equal(twice.calls.length, 2);
-  const other = { calls: 0, goto: async () => { other.calls++; throw new Error('net::ERR_CONNECTION_REFUSED'); } };
+  const other = { calls: 0, on() {}, goto: async () => { other.calls++; throw new Error('net::ERR_CONNECTION_REFUSED'); } };
   await assert.rejects(gotoLoaded(other, 'http://x'), /ERR_CONNECTION_REFUSED/);
   assert.equal(other.calls, 1);
+});
+
+test('a stalled load with an unfinished request fails at once and names the request and the console error', async () => {
+  const page = fakePage(1);
+  const goto = page.goto;
+  page.goto = async (url, o) => {
+    page.handlers.request({ resourceType: () => 'media', url: () => 'http://x/assets/sfx/pop1.mp3' });
+    page.handlers.console({ type: () => 'error', text: () => 'Failed to decode' });
+    return goto(url, o);
+  };
+  await assert.rejects(gotoLoaded(page, 'http://x', 'films/a/page.html'), (e) => /no load event after 30 s/.test(e.message) && /media http:\/\/x\/assets\/sfx\/pop1\.mp3/.test(e.message) && /console error: Failed to decode/.test(e.message));
+  assert.equal(page.calls.length, 1);
 });
 
 function runDraft(cwd, page, env, onLine) {
@@ -72,5 +90,13 @@ test('a draft that fails an invariant logs a failed dev line with the error', as
     const [line] = devLines(cwd);
     assert.equal(line.failed, true);
     assert.ok(line.reason.length > 0);
+  } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
+});
+
+test('a rotate keyframe with a per-keyframe easing renders', async () => {
+  const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-robust-'));
+  try {
+    const { code, out } = await runDraft(cwd, 'tests/fixtures/pages/rotate-ease.html', {});
+    assert.equal(code, 0, out);
   } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
 });

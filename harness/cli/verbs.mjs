@@ -157,7 +157,7 @@ export const VERBS = [
       return [warn, { script: 'harness/media/ship-job.mjs', args: ['start', ...args, ...opt('--aspect', v.aspect)] }];
     },
     next: (v, [page]) => {
-      if (v.status) return 'if it says "not done", run vawe ship --status <page> --wait once more (one call blocks up to 9 minutes; never run two at once); the result includes the judge. Before you wait: ' + WAIT_WORK;
+      if (v.status) return null;
       if (v.wait) return `vawe judge out/${pageName(page)}.mp4`;
       return `rendering in the background: bin/vawe ship --status ${page} --wait (one call blocks up to 9 minutes; run it once, not in parallel); ${WAIT_WORK}`;
     },
