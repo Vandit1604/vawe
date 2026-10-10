@@ -15,7 +15,7 @@ import { pairImages } from './one-pairs.mjs';
 import { compareSides, vsLines } from './one-vs.mjs';
 
 const CODE_DIRS = ['harness/media/see', 'harness/lib/ref-measure'];
-const CODE_FILES = ['harness/media/ref-spec.mjs', 'harness/lib/move-fit.mjs', 'harness/media/shot-detect.mjs', 'harness/lib/board.mjs', 'harness/lib/timeline.mjs', 'harness/media/page-audio.mjs'];
+const CODE_FILES = ['harness/media/ref-spec.mjs', 'harness/lib/move-fit.mjs', 'harness/media/shot-detect.mjs', 'harness/lib/board.mjs', 'harness/lib/timeline.mjs', 'harness/media/page-audio.mjs', 'harness/lib/sound-read.mjs', 'harness/lib/sound-class.mjs'];
 
 function codeHash() {
   const files = [...CODE_DIRS.flatMap((d) => fs.readdirSync(path.join(ROOT, d)).filter((f) => f.endsWith('.mjs')).sort().map((f) => path.join(d, f))), ...CODE_FILES];

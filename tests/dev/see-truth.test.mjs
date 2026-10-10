@@ -5,7 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
-  ORDER, PROBE_OFFSET, beatRows, cutsRows, cutsSeeRows, eyeRows, flashRows, flashSeeRows, formatSummary, formatTable, groundRows, heights, lookRows, lookSeeRows, lumaOfL, motionRows,
+  ORDER, PROBE_OFFSET, beatRows, cutsRows, cutsSeeRows, eventsSeeRows, eyeRows, flashRows, flashSeeRows, formatSummary, formatTable, groundRows, heights, lookRows, lookSeeRows, lumaOfL, motionRows,
   noTool, notAvailable, parseAudioAt, parseLook, parseLufs, parseStrip, parseVelocity, scoreRow, soundRows, summarise, typeRows,
 } from '../../harness/dev/see-truth.mjs';
 
@@ -239,4 +239,17 @@ test('beatRows passes a sound.json that matches the truth and fails a wrong verd
   sound.cuts.rows[2].verdict = 'on beat';
   assert.equal(beatRows(t, { sound }).filter((x) => x.status === 'fail').length, 1);
   assert.ok(beatRows(t, { sound: null }).every((x) => x.status === 'fail'));
+});
+
+test('eventsSeeRows score each event second, its sound offset and verdict, and the sounds with no action', () => {
+  const t = truth('events');
+  const a = { shots: [{ events: [
+    { t: 1.033, sound: { t: 1.005, label: 'pop', frames: -0.8 }, verdict: 'sound on the frame' },
+    { t: 2.233, sound: { t: 2.305, label: 'pop', frames: 2.2 }, verdict: 'sound near' },
+  ] }], sound: { events: { soundsWithoutAction: [{ t: 3.604, label: 'pop' }] } } };
+  assert.ok(eventsSeeRows(t, { a }).every((x) => x.status === 'pass'));
+  const late = { ...a, shots: [{ events: [{ ...a.shots[0].events[0], sound: { t: 1.2, label: 'pop', frames: 6 }, verdict: 'sound off' }, a.shots[0].events[1]] }] };
+  const rows = eventsSeeRows(t, { a: late });
+  assert.equal(rows.find((x) => x.measure.endsWith('box A appears: verdict')).status, 'fail');
+  assert.ok(eventsSeeRows(t, { a: null }).every((x) => x.status === 'fail'));
 });

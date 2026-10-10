@@ -1,0 +1,14 @@
+{
+  "fixture": "events",
+  "about": "box A appears at 1.0 s with a pluck on the same frame, box B appears at 2.2 s with a droplet 3 frames later (2.3 s), and a third pluck at 3.6 s has no action in the picture. Each box fades in over 0.15 s from its second; the event is the start of the fade.",
+  "render": "draft with audio",
+  "fps": 30,
+  "tolerance": { "eventSeconds": 0.07, "soundFrames": 1.5, "count": 0 },
+  "truth": {
+    "events": [
+      { "label": "box A appears", "t": 1.0, "frames": 0, "verdict": "sound on the frame" },
+      { "label": "box B appears", "t": 2.2, "frames": 3, "verdict": "sound near" }
+    ],
+    "soundsWithoutAction": [3.6]
+  }
+}

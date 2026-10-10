@@ -22,7 +22,7 @@ export function soundLines({ name, source, placed, limit = Infinity, file = 'sou
   L.push(placed.loudness ? `Loudness ${placed.loudness.lufs} LUFS integrated, true peak ${placed.loudness.truePeakDb} dBFS.` : 'Loudness: not measured.', ...tempoLines(placed), '');
   const top = placed.top.map((t) => placed.onsets.find((o) => o.attack === t)).filter(Boolean);
   L.push('## Strongest hits, ranked', '', 'Put a cue or a cut on `attack` (where the sound starts); `peak` is the loudest change, later.', '',
-    ...table(['#', 'attack s', 'f30', 'f60', 'peak s', 'strength', 'kind'], top.map((o, i) => [i + 1, s2(o.attack), o.f30, o.f60, s2(o.peak), o.strength, o.kind])), '');
+    ...table(['#', 'attack s', 'f30', 'f60', 'peak s', 'strength', 'kind', 'sounds like', ...(top.some((o) => o.moves) ? ['what moves'] : [])], top.map((o, i) => [i + 1, s2(o.attack), o.f30, o.f60, s2(o.peak), o.strength, o.kind, o.sound ?? '-', ...(top.some((x) => x.moves) ? [o.moves ?? '-'] : [])])), '');
   L.push('## Quiet and loud sections', '', ...(placed.sections.length ? table(['from s', 'to s', 'level', 'dB'], placed.sections.map((x) => [s2(x.from), s2(x.to), x.level, x.db])) : ['No section stands out from the median level by a clear margin.']), '');
   const beats = placed.grid.filter((l) => l.kind === 'beat');
   const sub = (b, share) => placed.grid.find((l) => l.bar === b.bar && l.beat === b.beat && l.kind === (share === 0.5 ? 'half' : 'quarter') && Math.abs(l.t - (b.t + placed.tempo.periodS * share)) < 0.002);
@@ -30,8 +30,8 @@ export function soundLines({ name, source, placed, limit = Infinity, file = 'sou
   L.push('## Beat grid', '', `${placed.tempo.usable ? '' : 'The tempo is weak: this grid is a guess. '}Each row is one beat; the +1/4, +1/2 and +3/4 columns give the quarter and half beat after it as seconds (frame at 30 fps).`, '',
     ...(beats.length ? table(['bar.beat', 'beat s', 'f30', 'f60', '+1/4', '+1/2', '+3/4'], beats.slice(0, limit).map((b) => [`${b.bar}.${b.beat}`, s2(b.t), b.f30, b.f60, cell(sub(b, 0.25)), cell(sub(b, 0.5)), cell(sub(b, 0.75))])) : ['No grid.']),
     ...more(limit, beats.length, file), '');
-  L.push(`## Every onset (${placed.onsets.length})`, '', 'kind: hit is a clear strike, soft a weak one (strength under 0.25), sustained a slow rise (a swell or pad).', '',
-    ...table(['attack s', 'f30', 'f60', 'peak s', 'strength', 'kind', 'rise ms'], placed.onsets.slice(0, limit).map((o) => [s2(o.attack), o.f30, o.f60, s2(o.peak), o.strength, o.kind, o.errMs])), ...more(limit, placed.onsets.length, file), '');
+  L.push(`## Every onset (${placed.onsets.length})`, '', 'kind: hit is a clear strike, soft a weak one (strength under 0.25), sustained a slow rise (a swell or pad). Sounds like: click (bright, under 0.09 s), pop (short, mid), swish (bright, longer), impact (low, over 0.25 s), sustained (slow rise or over 0.6 s).', '',
+    ...table(['attack s', 'f30', 'f60', 'peak s', 'strength', 'kind', 'sounds like', 'rise ms', ...(placed.onsets.some((o) => o.moves) ? ['what moves'] : [])], placed.onsets.slice(0, limit).map((o) => [s2(o.attack), o.f30, o.f60, s2(o.peak), o.strength, o.kind, o.sound ?? '-', o.errMs, ...(placed.onsets.some((x) => x.moves) ? [o.moves ?? '-'] : [])])), ...more(limit, placed.onsets.length, file), '');
   return L;
 }
 

@@ -12,9 +12,12 @@ import { launchPage } from '../lib/render-harness.mjs';
 import { readTimeline } from './timeline.mjs';
 import { probeVideo } from './see/core.mjs';
 import { refVideo, refsDir } from '../lib/refs.mjs';
+import { whatMovesAt } from './see/events.mjs';
 
 const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const PRINT_ROWS = 24;
+const VIDEO = /\.(mp4|mov|webm|mkv)$/i;
+const MOVES_MAX = 60;
 const DEFAULT_FPS = 30;
 
 function parse(argv) {
@@ -40,6 +43,13 @@ async function cutsOf(spec) {
   const dir = path.resolve('out', 'sound-cuts', path.basename(spec, path.extname(spec)));
   const found = await refSpec({ video: spec, outDir: dir, maxElements: 1, ocr: false, audio: false, fast: true });
   return { cuts: found.cuts.map((c) => c.t), fps: probeVideo(spec).fps || DEFAULT_FPS, source: spec };
+}
+
+/** For a film: each hit (the strongest MOVES_MAX) gets `moves`, the words for what changes in the frame at its attack. */
+function withMoves(placed, video) {
+  const fps = probeVideo(video).fps || DEFAULT_FPS;
+  const strongest = new Set([...placed.onsets].sort((a, b) => b.strength - a.strength).slice(0, MOVES_MAX));
+  for (const o of placed.onsets) if (strongest.has(o)) o.moves = whatMovesAt(video, o.attack, fps)?.words ?? null;
 }
 
 async function pngOf(file, { samples, placed, rows, title }) {
@@ -74,6 +84,7 @@ async function main(argv) {
   let sound;
   try { sound = readSound(file, { cache: !o.noCache }); } catch (e) { die(e.message); }
   const placed = placeSound(sound, { offset, from: o.from == null ? 0 : Number(o.from), to: o.to == null ? Infinity : Number(o.to) });
+  if (VIDEO.test(o.input)) withMoves(placed, o.input);
   const cutSpec = o.cuts ? existing(o.cuts) : isPage ? o.input : null;
   let cutInfo = null, result = null;
   if (cutSpec) {

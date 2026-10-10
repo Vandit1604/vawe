@@ -10,7 +10,8 @@ import { motionDeltaSeries } from '../shot-detect.mjs';
 import { refSpec } from '../ref-spec.mjs';
 import { measureFile, renderMixCached } from '../page-audio.mjs';
 import { readTimeline } from '../timeline.mjs';
-import { hitKind } from '../../lib/sound-read.mjs';
+import { hitKind, readSound } from '../../lib/sound-read.mjs';
+import { APPEAR_MIN_FRAMES, matchOf, pairEvents, shotEvents, soundsWithoutAction } from './events-math.mjs';
 import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
 import { frameRgb } from './frame.mjs';
 import { edgesAt, lumaSeries, measureFilm } from './look.mjs';
@@ -80,7 +81,7 @@ function movesOf(shot, fps, frameH) {
     const start = Math.max(shot.f0 / fps, e.start?.t ?? e.f0 / fps), settle = Math.min(shot.f1 / fps, e.land?.t ?? e.f1 / fps);
     const at = (p) => p.map((v) => round(v * k, 1));
     return {
-      id: e.id, axis: e.axis, from: at(e.from), to: at(e.to), travelPx: Math.round(Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]) * k), arc: arcOf(e.rows, ARC_MIN_TRAVEL_PX / k), size: at(e.size),
+      id: e.id, axis: e.axis, firstSeen: round(e.f0 / fps), appears: e.f0 - shot.f0 >= APPEAR_MIN_FRAMES, from: at(e.from), to: at(e.to), travelPx: Math.round(Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]) * k), arc: arcOf(e.rows, ARC_MIN_TRAVEL_PX / k), size: at(e.size),
       start: round(start), settle: round(settle), peakPxPerS: Math.round(px), peakHeightsPerS: round(px / 1080, 3),
       overshootPct: e.overshoot == null ? null : round((e.overshoot - 1) * 100, 1),
       ease: e.easing?.class ?? null, css: e.easing?.css ?? null, durMs: e.easing?.durMs ?? null, confidence: e.confidence, blur: e.blur ? { dir: e.blur.dir, minSharp: e.blur.minSharp } : null,
@@ -183,12 +184,18 @@ function typeOf(spec, shots, pageTimeline) {
   return { ocr: Boolean(spec.ocr), confidence: !spec.ocr || words.length >= MIN_WORDS ? 'ok' : 'low', words, lines, runs: spec.textRuns ?? null, holds, shotsWithText: shots.filter((s) => s.text.length).map((s) => s.index) };
 }
 
+function soundClasses(video, hasAudio) {
+  if (!hasAudio) return [];
+  try { return readSound(video).onsets; } catch { return []; }
+}
+
 async function soundOf(src, spec, pageRead, dir, shots, log) {
   const cuts = spec.cuts.map((c) => c.t);
+  const classes = soundClasses(src.video, Boolean(spec.audio));
   const hits = (spec.audio?.hits ?? []).filter((h) => h.strength >= MIN_HIT).map((h) => {
     const onset = h.attack ?? h.t;
     const near = cuts.reduce((b, c) => (b == null || Math.abs(c - onset) < Math.abs(b - onset) ? c : b), null);
-    return { onset: round(onset), peak: h.t, strength: h.strength, kind: hitKind(h), errMs: h.errMs ?? null, nearestCut: near == null || Math.abs(near - onset) > 0.3 ? null : round(near), leadMs: near == null || Math.abs(near - onset) > 0.3 ? null : Math.round((near - onset) * 1000), shot: shots.find((s) => onset >= s.start && onset < s.end)?.index ?? null };
+    return { onset: round(onset), peak: h.t, strength: h.strength, kind: hitKind(h), sound: classes.find((o) => Math.abs(o.attack - onset) <= 0.01)?.sound ?? null, errMs: h.errMs ?? null, nearestCut: near == null || Math.abs(near - onset) > 0.3 ? null : round(near), leadMs: near == null || Math.abs(near - onset) > 0.3 ? null : Math.round((near - onset) * 1000), shot: shots.find((s) => onset >= s.start && onset < s.end)?.index ?? null };
   });
   let loudness = null;
   try { loudness = measureFile(src.video); } catch { loudness = null; }
@@ -267,12 +274,15 @@ export async function measureSide(src, opts, dir, log) {
   const velocity = src.page ? await pageVelocity(src.page, shots, log) : null;
   const sound = await soundOf(src, spec, world, dir, shots, log);
   if (!sound.hasAudio) structure.tempo = null;
+  const marks = sound.hasAudio ? sound.hits.filter((h) => h.kind !== 'soft').map((h) => ({ t: h.onset, label: h.sound ?? h.kind })) : (sound.page?.cues ?? []).map((c) => ({ t: c.at, label: c.voice }));
+  for (const s of shots) s.events = pairEvents(shotEvents(s, spec.fps), marks, spec.fps);
+  sound.events = { ...matchOf(shots), soundsWithoutAction: soundsWithoutAction(marks, shots.flatMap((s) => s.events), spec.fps) };
 
   return {
     source: { name: src.name, kind: src.kind, video: src.video, page: src.page, hash: src.hash, note: src.note, lens: Boolean(src.page) && /surfaces\/lens|\blens\(/.test(fs.readFileSync(src.page, 'utf8')) },
     media: { width: probe.width, height: probe.height, fps, duration: round(probe.dur), frames: spec.frames, specFps: spec.fps, audio: Boolean(spec.audio) },
     structure,
-    motion: { noise: { mu: round(noise.mu, 3), sigma: round(noise.sigma, 3) }, perShot: shots.map((s) => ({ index: s.index, id: s.id, moves: s.moves, bursts: s.bursts, energy: s.energy, camera: s.camera, eye: s.eye })),
+    motion: { noise: { mu: round(noise.mu, 3), sigma: round(noise.sigma, 3) }, perShot: shots.map((s) => ({ index: s.index, id: s.id, moves: s.moves, bursts: s.bursts, energy: s.energy, events: s.events, camera: s.camera, eye: s.eye })),
       holds: world ? world.timeline.worlds.map((w) => ({ id: w.id, cut: w.cut })) : null, velocity,
       regions: spec.motionRegions ? { median: spec.motionRegions.median, p90: spec.motionRegions.p90 } : null,
       eyeCuts: spec.eye.cuts ?? [], eyeSummary: spec.eye.summary ?? null },
