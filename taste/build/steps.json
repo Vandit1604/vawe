@@ -83,7 +83,7 @@
    },
    {
     "rule": "live-hold",
-    "text": "keep one thing moving in every hold, not a frozen frame"
+    "text": "keep one part moving in every hold (typing, a counter, a glint), not a frozen frame and not a camera drift"
    },
    {
     "rule": "named-eases",

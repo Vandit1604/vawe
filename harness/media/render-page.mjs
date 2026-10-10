@@ -76,6 +76,7 @@ import { beatAdvice } from '../lib/sound-read.mjs';
 import { draftTasteLines, firedRules, firedLines } from '../lib/taste-steps.mjs';
 import { parseSignature } from '../../core/motion/signature.js';
 import { unchosenAdvice, signatureLine } from '../lib/signature.mjs';
+import { cameraOnlySpans } from '../lib/camera-moves.mjs';
 import { runMotionCollector, motionLint, measureMotion, unwaived, lintLines, recordsFromBoxes, mergeRecords } from '../lib/motion-lint.mjs';
 import { sampleBoxTracks, lintTimes } from '../lib/box-track.mjs';
 import { barLint, boxMotion, overshootPct } from '../lib/bar-lint.mjs';
@@ -884,6 +885,9 @@ export function defaultOut(pagePath, { aspect, suffixAspect, final, from = 0, to
 
 const motionRecords = (motion) => (motion.boxes ? mergeRecords(motion.records, recordsFromBoxes(motion.boxes)) : motion.records);
 
+// A page that paints in window.seek with no sampled boxes, or on a canvas, has no records that tell a camera move from an element move.
+const cameraOnlyOf = (motion) => (motion.scripted && !motion.boxes) || motion.boxes?.canvas ? [] : cameraOnlySpans(motionRecords(motion));
+
 const chosenSignature = (pagePath) => parseSignature(readPageMeta(pagePath, 'signature'));
 
 function motionFindings(pagePath, motion) {
@@ -894,7 +898,7 @@ function motionFindings(pagePath, motion) {
 
 const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
 
-const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: spectacleOf(fs.readFileSync(pagePath, 'utf8')) }), pageAuthoring(pagePath));
+const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: spectacleOf(fs.readFileSync(pagePath, 'utf8')), film: { dur: Number(readPageMeta(pagePath, 'duration')), worlds: probe.worlds } }), pageAuthoring(pagePath));
 
 const barAdvice = (pagePath, motion, probe) => barFindings(pagePath, motion, probe).flatMap((f) => [...lintLines([f]), waiverHint(f.code)]);
 
@@ -956,12 +960,12 @@ export function pageAdvice(pagePath, { probe, motion }) {
 }
 
 /** { problems, measures } of the draft video from one read (stills, held worlds, blank runs, tail tiles, smoothness), or null when ffmpeg fails. */
-export async function videoChecks(mp4, pagePath, checks, probe = {}) {
+export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly = []) {
   const authoring = pageAuthoring(pagePath);
   const shots = dropGuesses(parseBriefTables(readBrief(pagePath))).set.shots;
-  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail) };
+  const page = { worlds: probe.worlds, tailMoving: tailMoving(probe.tail), cameraOnly };
   try {
-    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds) }; }, { authoring, shots, page });
+    return await checks.run('video', () => { const read = readVideo(mp4); return { problems: videoProblems(read, authoring, page), measures: videoMeasures(read, authoring, shots, page.tailMoving, page.worlds, cameraOnly) }; }, { authoring, shots, page });
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
@@ -975,12 +979,13 @@ const NOTE_LINES = /^(waive: |motion lint read element boxes)/;
 async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks, whole, checks }) {
   const authoring = pageAuthoring(pagePath);
   const page = pageAdvice(pagePath, { probe, motion });
-  const video = whole ? await videoChecks(mp4, pagePath, checks, probe) : null;
+  const cameraOnly = cameraOnlyOf(motion);
+  const video = whole ? await videoChecks(mp4, pagePath, checks, probe, cameraOnly) : null;
   const problems = mergeProblems(video?.problems ?? [], page.text);
   const sound = soundLine(level?.I ?? null, undefined, level);
   const peak = peakLine(level?.TP ?? null, level?.cues);
   const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...page.lines];
-  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode })) : null;
+  const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);
   const hard = [...problems, sound, peak].filter(Boolean);

@@ -42,7 +42,7 @@ next command for the film you edited last.
 | 4 | states | one key frame per world, built from the kit: about 1 line and 2 or 3 things, a ground never flat; `bin/vawe frames <page>` |
 | 5 | board | `brief.md` "Board": a plan for time, not frames. Rhythm (cuts not all equal: one under 0.4 s, one over 0.9 s), the spectacle second (= `<meta name="spectacle">`, recipe 15), a named move per cut (overlap, camera, what carries the eye, which arrivals overshoot), sound rows (effects on actions, no bed); with a music file the user gave: `vawe sound <file> --cuts <page>` gives the beat grid, the hits and each cut's frame offset |
 | 6 | draft | `bin/vawe dev <page> [--from s --to s]` (half size, 30 fps, silent) |
-| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
+| 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold (a hold lives through an element motion, never a camera drift), constant-camera, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
 | 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS; poll once per call and work on the last draft between polls |

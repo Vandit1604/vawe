@@ -83,7 +83,6 @@ worlds.forEach((world, i) => {
     layer($('h1'), $('.line'), { at: beat(1), blur: 14, from: '0 0.4em', secondary: { blur: 8 } });
     leave($('.line'), { end: stop - 0.06 });
     leave($('h1'), { end: stop });
-    world.animate([{ scale: 1 }, { scale: 1.05 }], { duration: stop * 1000, easing: EASE.glide, fill: 'both' });
     return;
   }
   // the cut frame already carries the first fact moving: a blank frame there fails the draft check
@@ -322,7 +321,7 @@ Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lis
 
 const motionText = () => `## Motion pass
 
-Phase 7, after the first draft. The motion is done when \`bin/vawe dev\` shows overshoot-share, live-hold (still windows) and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut (all of them, not some) and fixed what reads flat. For the spectacle second also run \`bin/vawe onion\` and \`bin/vawe velocity\` on it. Then write one row per cut. \`bin/vawe ship\` warns while this table holds a placeholder.
+Phase 7, after the first draft. The motion is done when \`bin/vawe dev\` shows overshoot-share, live-hold (still windows: element motion, not camera drift), constant-camera and seam-variety clean or waived with a reason, and you have Read \`bin/vawe strip films/<name>/page.html --cuts\` for every cut (all of them, not some) and fixed what reads flat. For the spectacle second also run \`bin/vawe onion\` and \`bin/vawe velocity\` on it. Then write one row per cut. \`bin/vawe ship\` warns while this table holds a placeholder.
 
 | cut | what read flat | what I fixed (or why it stays) |
 |---|---|---|

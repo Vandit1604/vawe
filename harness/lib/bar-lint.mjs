@@ -8,12 +8,14 @@
 //   dead-stop        an element that stops from a speed over the jolt limit within one step, from element boxes (rule no-dead-stop)
 //   staging          a beat of several movers where none owns the motion, from the move runs (rule one-hero-motion)
 //   anticipation     the spectacle move arrives with no wind-up, from the move run of the hero (rule anticipation)
+//   constant-camera  the camera moves for most of the film or for several worlds in a row, from the animation records (rule constant-camera)
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { overshoots } from './ease-curve.mjs';
 import { CUT, moves, entering, measured, byTarget } from './motion-records.mjs';
 import { ownTrack, inFrame } from './motion-lint.mjs';
 import { probeTracks, screenLines, MIN_TEXT_H } from './read-hold.mjs';
 import { moveScore, trackPoints } from '../media/see/velocity-math.mjs';
+import { cameraLoad } from './camera-moves.mjs';
 
 const SPEED = LIMITS['speed-ceiling'];
 const SHOOT = LIMITS['overshoot-share'];
@@ -22,6 +24,7 @@ const LINGER = LIMITS['text-lingers'];
 const JOLT = LIMITS['no-dead-stop'];
 const STAGE = LIMITS['one-hero-motion'];
 const WIND = LIMITS.anticipation;
+const CAM = LIMITS['constant-camera'];
 
 const STILL_PX = 0.25;
 const FULL_FRAME = 0.6;
@@ -357,8 +360,24 @@ export function textLingers(samples, ctx) {
     'take the line off at its read time plus 1.5 s, or give the held seconds a second thing to look at')];
 }
 
+/**
+ * A camera that never rests (rule constant-camera): whole-frame moves over share_max_pct of the film, or over worlds_max worlds in a row. The move
+ * that holds the spectacle second is the one deliberate move and is not counted. `film` is { dur, worlds }; null when the length is not known.
+ */
+export function constantCamera(records, film, spectacle = null) {
+  if (!film?.dur) return [];
+  const load = cameraLoad(records, { ...film, spectacle });
+  const share = 100 * load.share;
+  const over = [];
+  if (share > CAM.share_max_pct) over.push(`the camera moves for ${pct(share)}% of the film (limit ${CAM.share_max_pct}%)`);
+  if (load.worlds > CAM.worlds_max) over.push(`the camera moves in ${load.worlds} worlds in a row (limit ${CAM.worlds_max})`);
+  if (!over.length) return [];
+  return [finding('constant-camera', load.first ?? 0, over.join('; '),
+    'hold the camera still and give each hold an element motion (a line typing, a counter, a glint, a secondary action); keep one deliberate camera move for the spectacle or a reveal')];
+}
+
 /** Every bar finding in time order. `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
-export function barLint({ records, boxes, text, spectacle = null }) {
-  return [...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...deadStop(boxes?.stops), ...staging(boxes?.runs), ...anticipation(boxes?.runs, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
+export function barLint({ records, boxes, text, spectacle = null, film = null }) {
+  return [...constantCamera(records, film, spectacle), ...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...deadStop(boxes?.stops), ...staging(boxes?.runs), ...anticipation(boxes?.runs, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
     .sort((a, b) => a.at - b.at);
 }

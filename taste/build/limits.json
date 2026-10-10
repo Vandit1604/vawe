@@ -168,6 +168,12 @@
   "next_start_share_max": 0.7,
   "chain_min": 3
  },
+ "constant-camera": {
+  "share_max_pct": 60,
+  "worlds_max": 4,
+  "move_min_s": 0.6,
+  "still_min_s": 0.3
+ },
  "counter-no-overshoot": {
   "count_min_s": 0.8,
   "count_max_s": 1.4
@@ -196,8 +202,6 @@
  },
  "live-hold": {
   "still_limit_s": 0.5,
-  "drift_scale_pct_min": 1,
-  "drift_scale_pct_max": 3,
   "rest_min_s": 0.4,
   "rest_max_s": 0.6
  },

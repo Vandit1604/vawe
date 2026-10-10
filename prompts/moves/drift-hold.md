@@ -27,6 +27,8 @@ vawe.onFrame((t) => {
 </script>
 ```
 
+The ground drift is the ground's life (rule living-ground). It is a whole-frame move, so it does not count for live-hold: give the held line's seconds an element motion too (a glint, a caret, a counter).
+
 Sound: none; a hold is quiet, and the quiet before the spectacle is the point.
 
 `noise1` is seeded, so frame `t` is the same on every render and depends on no earlier frame. Put

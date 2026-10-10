@@ -1,5 +1,5 @@
-// The whole frame held still for longer than STILL_SEC outside a declared hold. The still runs come from
-// scene-stats staticRuns; a hold is declared with the dead-air waiver (AGENTS.md "Waivers"): a bare
+// No part of the frame moving by itself for longer than STILL_SEC outside a declared hold. The still runs come from
+// scene-stats staticRuns plus the seconds where only a whole-frame move runs (harness/lib/camera-moves.mjs); a hold is declared with the dead-air waiver (AGENTS.md "Waivers"): a bare
 // "dead-air" covers the film, "dead-air@2.1-3.4" covers those seconds.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { splitWaiver, hasReason, waiverHint } from './waivers.mjs';
@@ -28,7 +28,8 @@ export function undeclaredStills(runs, authoring = {}, limit = STILL_SEC) {
 
 /** The problem line for one still run, with the two fixes. Pure. */
 export function stillText(r, limit = STILL_SEC) {
-  return `static window ${r.a}-${r.b} s (${r.len} s, limit ${limit} s): keep one thing moving (a slow drift on the ground or the hero); ${waiverHint(`dead-air@${r.a}-${r.b}`)}`;
+  const why = r.camera ? 'only the camera moves' : 'nothing moves';
+  return `static window ${r.a}-${r.b} s (${r.len} s, limit ${limit} s): ${why}; give the hold an element motion (typing, a counter, a glint), not a camera drift; ${waiverHint(`dead-air@${r.a}-${r.b}`)}`;
 }
 
 /** A predicate for { a, b } second ranges that lie inside one declared hold. Pure. */

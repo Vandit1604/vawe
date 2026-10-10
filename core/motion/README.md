@@ -78,9 +78,11 @@ Advice only; each is waived in the page with a reason. The numbers and their sou
 - Arcs: `vawe see` prints how far a move bows off its straight line. It is a number, never a gate: straight moves read clean on type and UI.
 - Squash and stretch: only for a named physical object (a ball, a blob, a rubber stamp): scale along the travel axis, the cross axis inverse, volume kept. Never on type, a logo or UI, which have no mass.
 
+The camera holds still by default and moves only with a reason: the spectacle, a reveal. Nothing here starts a camera for you, and a drift on every hold is not a live hold: the live-hold check leaves whole-frame moves out and constant-camera flags a camera that never rests. Keep a hold alive with an element motion (typing, a counter, a glint, a secondary action).
+
 `camera(wrapper, { kind, at, band | duration, from, to, origin, strength, dir })` is one camera move on the element that holds a whole world,
 in transforms only, so the seek runs it. `kind`: `push` (scale 1 to 1.12 on `glide`), `pull` (1.15 to 1 on `settle`), `drift` (a slow slide
-and 3 per cent scale for a live hold), `whipOut` and `whipIn` (a 0.3 s slide of a world off or onto the frame with a blur, on `launch` and `land`).
+and 3 per cent scale, a rare slow move), `whipOut` and `whipIn` (a 0.3 s slide of a world off or onto the frame with a blur, on `launch` and `land`).
 `from` and `to` are scales; chain a drift after a push with `from` set to the push's `to`. `parallax([[el, depth], ...], opts)` runs the same
 move on layers, each by its depth (0.3 ground, 1 the camera, 1.8 front). `focus(el, { at, blur, scale, opacity, duration })` clears a blur from a
 smaller, fainter start on `settle`: a focus pull, or far words that resolve when the camera arrives.
