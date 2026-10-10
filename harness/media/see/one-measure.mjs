@@ -3,7 +3,6 @@
 // (bursts of energy), the page (timeline, velocity). This file joins them per shot; it adds only what no owner has: flashes as events, grain, focus.
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { cutAdvice } from '../../lib/board.mjs';
 import { timelineOf } from '../../lib/timeline.mjs';
 import { motionDeltaSeries } from '../shot-detect.mjs';
@@ -13,7 +12,7 @@ import { readTimeline } from '../timeline.mjs';
 import { hitKind, readSound } from '../../lib/sound-read.mjs';
 import { APPEAR_MIN_FRAMES, matchOf, pairEvents, shotEvents, soundsWithoutAction } from './events-math.mjs';
 import { openPage, readPageMeta, resolveFrame } from '../render-page.mjs';
-import { frameRgb } from './frame.mjs';
+import { decodeGray, frameRgb } from './frame.mjs';
 import { edgesAt, lumaSeries, measureFilm } from './look.mjs';
 import { bloomSigma, flashProfile, hueOf, summarise } from './look-math.mjs';
 import { noiseOf, readMotion } from './motion-math.mjs';
@@ -41,9 +40,9 @@ export function labToHex([L, a, b]) {
 }
 
 function grayFrames(video, t, n, w, h) {
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-ss', Math.max(0, t).toFixed(3), '-i', video, '-frames:v', String(n), '-vf', `scale=${w}:${h}:flags=area,format=gray`, '-f', 'rawvideo', '-'], { maxBuffer: 1 << 26 });
-  if (r.status !== 0 || r.stdout.length < w * h * n) return null;
-  return Array.from({ length: n }, (_, i) => new Uint8Array(r.stdout.subarray(i * w * h, (i + 1) * w * h)));
+  const { data } = decodeGray(video, { w, h, t, frames: n, flags: 'area' });
+  if (!data || data.length < w * h * n) return null;
+  return Array.from({ length: n }, (_, i) => new Uint8Array(data.subarray(i * w * h, (i + 1) * w * h)));
 }
 
 /** The second at which a shot shows its settled picture: a beat after its last move lands, else its middle. */

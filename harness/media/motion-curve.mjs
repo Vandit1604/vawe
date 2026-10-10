@@ -5,6 +5,7 @@
 // 240x136 gray frame against the frame before it.
 import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
+import { decodeGray } from './see/frame.mjs';
 
 export const FPS = 30;
 const W = 240, H = 136;
@@ -17,9 +18,9 @@ const CHANGED_SSIM = 0.985;
 
 /** Mean absolute change between consecutive frames: item i is frame i+1 against frame i. */
 export function frameMotion(video) {
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', video, '-vf', `fps=${FPS},scale=${W}:${H},format=gray`, '-f', 'rawvideo', '-'], { maxBuffer: 1 << 30 });
-  if (r.status !== 0) throw new Error(`motion-curve: ffmpeg cannot read ${video}: ${String(r.stderr || '').trim()}`);
-  const buf = r.stdout, n = W * H, frames = Math.floor(buf.length / n), out = [];
+  const { data: buf, error } = decodeGray(video, { w: W, h: H, fps: FPS });
+  if (error !== null) throw new Error(`motion-curve: ffmpeg cannot read ${video}: ${error}`);
+  const n = W * H, frames = Math.floor(buf.length / n), out = [];
   for (let f = 1; f < frames; f++) {
     let s = 0;
     for (let i = 0; i < n; i++) s += Math.abs(buf[f * n + i] - buf[(f - 1) * n + i]);

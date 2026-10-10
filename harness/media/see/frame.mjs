@@ -10,6 +10,14 @@ export function frameRgb(video, t, w = FRAME_W, h = FRAME_H) {
   return { w, h, rgb: r.stdout };
 }
 
+/** { data, error }: the gray frames of `video` scaled to w x h, back to back in one buffer. `t` starts at that second, `fps` resamples, `frames` stops after that many, `flags` picks the scaler. `error` is the ffmpeg message when it fails. */
+export function decodeGray(video, { w, h, t, fps, frames, flags }) {
+  const chain = [fps && `fps=${fps}`, `scale=${w}:${h}${flags ? `:flags=${flags}` : ''}`, 'format=gray'].filter(Boolean).join(',');
+  const args = ['-v', 'error', ...(t === undefined ? [] : ['-ss', Math.max(0, t).toFixed(3)]), '-i', video, ...(frames ? ['-frames:v', String(frames)] : []), '-vf', chain, '-f', 'rawvideo', '-'];
+  const r = spawnSync('ffmpeg', args, { maxBuffer: 1 << 30 });
+  return r.status === 0 ? { data: r.stdout, error: null } : { data: null, error: String(r.stderr || '').trim() };
+}
+
 /** The luma plane (0 to 255) of an rgb24 buffer. Pure. */
 export function lumaOf(rgb, n = rgb.length / 3) {
   const out = new Uint8Array(n);
