@@ -7,7 +7,9 @@ export default {
     "gravity_max_s": 0.8,
     "cinematic_max_s": 2,
     "slowest_to_fastest_min": 3,
-    "eye_speed_px_per_s": 700
+    "eye_speed_px_per_s": 700,
+    "area_ratio": 4,
+    "duration_ratio": 2
   },
   "stagger": {
     "gap_min_s": 0.03,

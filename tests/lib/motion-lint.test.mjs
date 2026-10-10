@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mergeRecords, motionLint, exitLength, groupLanding, linearMove, seamRepeat, oneBand, moveDirection, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
+import { mergeRecords, motionLint, exitLength, groupLanding, linearMove, seamRepeat, oneBand, durationSize, moveDirection, unwaived, lintLines } from '../../harness/lib/motion-lint.mjs';
 
 const rec = (o) => ({ target: 0, label: 'h1 "Hi"', id: '', props: ['opacity'], delay: 0, duration: 0.5, easing: 'linear',
   kfEasings: ['ease', 'ease'], opacity: null, from: '', fullFrame: false, ...o });
@@ -128,4 +128,18 @@ test('mergeRecords: sampled records get targets of their own, so an entrance nev
   const merged = mergeRecords(animated, sampled);
   assert.deepEqual(merged.map((r) => r.target), [0, 1, 2]);
   assert.deepEqual(exitLength(merged), []);
+});
+
+test('durationSize: a small element on a longer move than a large one fires; a size-matched or similar duration does not', () => {
+  const mover = (o) => rec({ props: ['translate'], opacity: [0, 1], id: 'enter', ...o });
+  const title = mover({ target: 0, label: 'h1 "Title"', area: 400000, duration: 0.2 });
+  const chip = mover({ target: 1, label: 'span.chip', area: 20000, duration: 0.8, delay: 1 });
+  const [f] = durationSize([title, chip]);
+  assert.deepEqual([f.code, f.rule, f.at], ['duration-size', 'speed-bands', 1]);
+  assert.match(f.what, /span\.chip \(20k px2\) moves for 0\.80 s, h1 "Title" \(400k px2, 20 times larger\) for 0\.20 s/);
+  assert.deepEqual(durationSize([mover({ target: 0, area: 400000, duration: 0.8 }), mover({ target: 1, area: 20000, duration: 0.2 })]), []);
+  assert.deepEqual(durationSize([title, { ...chip, duration: 0.3 }]), [], 'under the duration ratio');
+  assert.deepEqual(durationSize([title, { ...chip, area: 200000 }]), [], 'under the area ratio');
+  assert.deepEqual(durationSize([title, { ...chip, decorative: true }]), []);
+  assert.deepEqual(durationSize([title, { ...chip, area: undefined }]), []);
 });

@@ -87,23 +87,41 @@ const ms = (s) => Math.round(s * 1000);
 
 // The fade finishes in the first 40% of the move, so the thing is there at once and then settles.
 const FADE_SHARE = 0.4;
+// The wind-up of anticipate takes this share of the move (about 4 frames of a 0.5 s move).
+const WIND_SHARE = 0.15;
+const WIND_MAX = 0.2;
+
+const lengthsOf = (s) => String(s).match(/calc\((?:[^()]|\([^()]*\))*\)|\S+/g) || [];
+const isZero = (len) => parseFloat(len) === 0 && !/^calc/.test(len);
+
+/** Pure: a CSS translate pushed `share` of its length further from the rest pose: the counter-move of an anticipation. */
+export function windUpTranslate(from, share) {
+  const [x, y = '0'] = lengthsOf(from);
+  const push = (len) => (isZero(len) ? len : `calc((${len}) * ${+(1 + share).toFixed(4)})`);
+  return `${push(x)} ${push(y)}`;
+}
 
 /** Pure: the keyframes and timing enter() hands to el.animate. */
-export function enterSpecs({ at = 0, from = '0 0.5em', scale = 0.96, blur = 0, ease = signed('ease', 'land'), ...rest } = {}) {
+export function enterSpecs({ at = 0, from = '0 0.5em', scale = 0.96, blur = 0, anticipate = 0, ease = signed('ease', 'land'), ...rest } = {}) {
   const d = durationOf(rest);
+  if (anticipate && !(anticipate > 0 && anticipate <= WIND_MAX)) throw new Error(`presets: anticipate is a share of the travel from 0 to ${WIND_MAX}, got ${anticipate}`);
+  if (anticipate && lengthsOf(from).every(isZero)) throw new Error('presets: anticipate needs a from offset to move away from first');
   const start = { translate: from, scale: String(scale) }, end = { translate: '0 0', scale: '1' };
   if (blur) {
     start.filter = `blur(${blur}px)`;
     end.filter = 'blur(0px)';
   }
   const timing = { delay: ms(at), easing: easeOf(ease), fill: 'both' };
+  const move = anticipate
+    ? { keyframes: [{ ...start, offset: 0, easing: 'ease-out' }, { ...start, translate: windUpTranslate(from, anticipate), offset: WIND_SHARE, easing: easeOf(ease) }, { ...end, offset: 1 }], timing: { ...timing, easing: 'linear', duration: ms(d), id: 'enter' } }
+    : { keyframes: [start, end], timing: { ...timing, duration: ms(d), id: 'enter' } };
   return [
-    { keyframes: [start, end], timing: { ...timing, duration: ms(d), id: 'enter' } },
+    move,
     { keyframes: [{ opacity: 0 }, { opacity: 1 }], timing: { ...timing, duration: ms(d * FADE_SHARE), id: 'enter-fade' } },
   ];
 }
 
-/** Arrive fast, land soft: opts { at, band | duration, from (a CSS translate), scale, blur (px), ease (an EASE name) }. */
+/** Arrive fast, land soft: opts { at, band | duration, from (a CSS translate), scale, blur (px), ease (an EASE name), anticipate (0 to 0.2: first move that share of the travel away from rest) }. */
 export function enter(el, opts) {
   return enterSpecs(opts).map(({ keyframes, timing }) => el.animate(keyframes, timing));
 }

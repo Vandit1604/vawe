@@ -61,6 +61,23 @@ layer(title, subline, { at: 0, band: 'professional' });
 The reference films overshoot 21 to 41 per cent of their arrivals and the dev check `overshoot-share` counts them, so give one arrival in three
 `nudge` (`stagger(..., { nudgeEvery: 3 })`, or `enter(el, { ease: 'nudge' })`) and `EASE.pop` to the one that matters.
 
+`enter(el, { anticipate: 0.12 })` adds a wind-up: the element first moves 12 per cent of its travel further from rest (up to 0.2, and `from` must be an offset), then lands. Use it on the spectacle move only.
+
+### The animation principles and the draft checks that read them
+
+Advice only; each is waived in the page with a reason. The numbers and their sources are in the rule files (`taste/rules/`).
+
+- Slow in and slow out: `linear-move` (named-eases) flags a flat curve over 0.3 s.
+- Timing and spacing: `one-band` flags one speed band for every move; `duration-size` flags a small element on a move twice as long as an element 4 times its area.
+- Follow-through: `follow-through` flags an element whose properties all stop on one frame; let the trailing property end 0.05 to 0.15 s later.
+- Overlap: `no-overlap` flags three entrances in a row that each start after the last landed; start the next at 60 to 70 percent of the last (`layer`).
+- Staging: `staging` flags a beat of 4 or more equal movers that start together and none leads; one hero, smaller movers later.
+- Anticipation: `anticipation` asks for a counter-move (2 to 20 percent of travel) or a 2 to 4 percent dip before the spectacle move only.
+- Exaggeration: `spectacle-weak` also asks the spectacle peak to reach 1.3 times the median mover.
+- Continuity: `dead-stop` flags an element that stops from over 600 px/s in one step; end on `EASE.land` or a spring.
+- Arcs: `vawe see` prints how far a move bows off its straight line. It is a number, never a gate: straight moves read clean on type and UI.
+- Squash and stretch: only for a named physical object (a ball, a blob, a rubber stamp): scale along the travel axis, the cross axis inverse, volume kept. Never on type, a logo or UI, which have no mass.
+
 `camera(wrapper, { kind, at, band | duration, from, to, origin, strength, dir })` is one camera move on the element that holds a whole world,
 in transforms only, so the seek runs it. `kind`: `push` (scale 1 to 1.12 on `glide`), `pull` (1.15 to 1 on `settle`), `drift` (a slow slide
 and 3 per cent scale for a live hold), `whipOut` and `whipIn` (a 0.3 s slide of a world off or onto the frame with a blur, on `launch` and `land`).

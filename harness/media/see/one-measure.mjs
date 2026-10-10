@@ -60,6 +60,18 @@ export function peakSpeed(rows, fps) {
   return peak;
 }
 
+const ARC_MIN_TRAVEL_PX = 100;
+
+/** The bow of a path: its largest distance from the straight line between its ends, as a share of that line. Null under ARC_MIN_TRAVEL_PX of travel (in the units of the rows), where an arc is not told from noise. Printed, never a gate. */
+export function arcOf(rows, minTravel = ARC_MIN_TRAVEL_PX) {
+  if (rows.length < 3) return null;
+  const [a, b] = [rows[0], rows.at(-1)];
+  const chord = Math.hypot(b.x - a.x, b.y - a.y);
+  if (chord < minTravel) return null;
+  const bow = Math.max(...rows.map((p) => Math.abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y)) / chord));
+  return round(bow / chord, 3);
+}
+
 /** The moves of a spec shot's elements, lengths in pixels of a 1080-high frame so that films of any size compare. */
 function movesOf(shot, fps, frameH) {
   const k = 1080 / frameH;
@@ -68,7 +80,7 @@ function movesOf(shot, fps, frameH) {
     const start = Math.max(shot.f0 / fps, e.start?.t ?? e.f0 / fps), settle = Math.min(shot.f1 / fps, e.land?.t ?? e.f1 / fps);
     const at = (p) => p.map((v) => round(v * k, 1));
     return {
-      id: e.id, axis: e.axis, from: at(e.from), to: at(e.to), travelPx: Math.round(Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]) * k), size: at(e.size),
+      id: e.id, axis: e.axis, from: at(e.from), to: at(e.to), travelPx: Math.round(Math.hypot(e.to[0] - e.from[0], e.to[1] - e.from[1]) * k), arc: arcOf(e.rows, ARC_MIN_TRAVEL_PX / k), size: at(e.size),
       start: round(start), settle: round(settle), peakPxPerS: Math.round(px), peakHeightsPerS: round(px / 1080, 3),
       overshootPct: e.overshoot == null ? null : round((e.overshoot - 1) * 100, 1),
       ease: e.easing?.class ?? null, css: e.easing?.css ?? null, durMs: e.easing?.durMs ?? null, confidence: e.confidence, blur: e.blur ? { dir: e.blur.dir, minSharp: e.blur.minSharp } : null,

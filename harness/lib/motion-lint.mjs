@@ -32,7 +32,7 @@ export function motionRecord(a, k, area) {
     easing: t.easing || 'linear', kfEasings: kfs.map((f) => f.easing || 'linear'),
     opacity: withOpacity.length ? [Number(withOpacity[0].opacity), Number(withOpacity[withOpacity.length - 1].opacity)] : null,
     from: String((kfs[0] && (kfs[0].translate || kfs[0].transform || kfs[0].clipPath)) || ''), kf,
-    fullFrame: box.width * box.height >= 0.6 * area,
+    fullFrame: box.width * box.height >= 0.6 * area, area: Math.round(box.width * box.height),
     decorative: Boolean(el.closest(DECORATIVE)),
   };
 }
@@ -147,6 +147,24 @@ export function oneBand(records, { scripted = false } = {}) {
     fix: 'give the hero gravity or cinematic and a payoff energy: the slowest beat at least 3x the fastest' }];
 }
 
+const SIZE = LIMITS['speed-bands'];
+
+/** A small element on a longer move than a large one (rule speed-bands): the large is area_ratio times the area of the small and moves in under 1/duration_ratio of its time. The worst pair, one finding. */
+export function durationSize(records) {
+  const timed = records.filter((r) => !r.decorative && !r.fullFrame && r.area > 0 && r.duration > CUT && moves(r) && entering(r) && (!r.step || r.duration >= 2 * r.step));
+  let worst = null;
+  for (const big of timed) for (const small of timed) {
+    if (big.target === small.target || big.area < SIZE.area_ratio * small.area || small.duration < SIZE.duration_ratio * big.duration) continue;
+    const gap = small.duration / big.duration;
+    if (!worst || gap > worst.gap) worst = { big, small, gap };
+  }
+  if (!worst) return [];
+  const { big, small } = worst;
+  return [{ code: 'duration-size', rule: 'speed-bands', at: small.delay,
+    what: `${small.label} (${Math.round(small.area / 1000)}k px2) moves for ${s2(small.duration)} s, ${big.label} (${Math.round(big.area / 1000)}k px2, ${Math.round(big.area / small.area)} times larger) for ${s2(big.duration)} s`,
+    fix: 'a large element needs the longer move: give the small one the faster band, or the large one gravity' }];
+}
+
 // Box noise under these is no motion: sub-pixel layout jitter and colour-rounding of opacity.
 const STILL_PX = 0.25;
 const STILL_ALPHA = 0.005;
@@ -217,6 +235,7 @@ function runRecord(boxes, i, own, [a, b]) {
     from: moved ? `translate(${(s[0] - e[0]).toFixed(1)}px, ${(s[1] - e[1]).toFixed(1)}px)` : '',
     kf: moved ? { translate: [`${s[0].toFixed(1)}px ${s[1].toFixed(1)}px`, `${e[0].toFixed(1)}px ${e[1].toFixed(1)}px`], ...(Math.abs(e[2] - s[2]) > 1 && s[2] > 0 ? { scale: [String(+(s[2] / e[2]).toFixed(3)), '1'] } : {}) } : {},
     fullFrame: Math.max(track[a - 1][2] * track[a - 1][3], track[b][2] * track[b][3]) >= 0.6 * boxes.area,
+    area: Math.round(Math.max(track[a - 1][2] * track[a - 1][3], track[b][2] * track[b][3])),
     step: boxes.times[1] - boxes.times[0],
   };
 }
@@ -259,7 +278,7 @@ export function measureMotion(records) {
 
 /** Every lint finding, in time order. */
 export function motionLint({ records, scripted }) {
-  return [...exitLength(records), ...groupLanding(records), ...linearMove(records), ...seamRepeat(records), ...oneBand(records, { scripted }), ...motionVariety(records)]
+  return [...exitLength(records), ...groupLanding(records), ...linearMove(records), ...seamRepeat(records), ...oneBand(records, { scripted }), ...durationSize(records), ...motionVariety(records)]
     .sort((a, b) => a.at - b.at);
 }
 

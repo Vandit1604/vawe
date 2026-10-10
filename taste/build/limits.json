@@ -157,12 +157,16 @@
   "dip_pct_min": 2,
   "dip_pct_max": 4,
   "counter_travel_pct_min": 10,
-  "counter_travel_pct_max": 20
+  "counter_travel_pct_max": 20,
+  "counter_floor_pct": 2,
+  "reveal_from_share": 0.25,
+  "atmosphere_share": 0.4
  },
  "arrival-rhythm": {
   "cascade_interval_tolerance": 0.3,
   "next_start_share_min": 0.6,
-  "next_start_share_max": 0.7
+  "next_start_share_max": 0.7,
+  "chain_min": 3
  },
  "counter-no-overshoot": {
   "count_min_s": 0.8,
@@ -187,7 +191,8 @@
  },
  "follow-through": {
   "trail_min_s": 0.05,
-  "trail_max_s": 0.15
+  "trail_max_s": 0.15,
+  "end_spread_max_s": 0.017
  },
  "live-hold": {
   "still_limit_s": 0.5,
@@ -206,6 +211,12 @@
   "jolt_px_per_s": 600,
   "jolt_zoom_per_s": 0.6
  },
+ "one-hero-motion": {
+  "movers_min": 4,
+  "top_share_min": 0.3,
+  "simultaneous_s": 0.03,
+  "mover_floor": 0.05
+ },
  "overshoot-share": {
   "share_min_pct": 21,
   "share_max_pct": 61,
@@ -220,7 +231,8 @@
  },
  "spectacle-weak": {
   "stronger_margin": 1.25,
-  "window_s": 0.75
+  "window_s": 0.75,
+  "exaggeration_min": 1.3
  },
  "speed-bands": {
   "energy_min_s": 0.15,
@@ -229,7 +241,9 @@
   "gravity_max_s": 0.8,
   "cinematic_max_s": 2,
   "slowest_to_fastest_min": 3,
-  "eye_speed_px_per_s": 700
+  "eye_speed_px_per_s": 700,
+  "area_ratio": 4,
+  "duration_ratio": 2
  },
  "speed-ceiling": {
   "ceiling_fh_s": 12.6,
