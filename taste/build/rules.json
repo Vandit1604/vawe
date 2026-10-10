@@ -225,7 +225,7 @@
  },
  "world-turns": {
   "file": "taste/rules/world-turns.md",
-  "instead": "change the ground at a cut the film already has; carry the change across the join (a colour that follows the content), never a cold flash. Judge a moving backdrop at 4 or more timestamps, never one still. A ruled grid is a design tool's canvas: use it only if you can say what it does in one clause."
+  "instead": "cut the world where the content changes (a new ground, a new object, new words); a second data-world with the same content, or padding words, does not turn the world. Change the ground at a cut the film already has; carry the change across the join (a colour that follows the content), never a cold flash. Judge a moving backdrop at 4 or more timestamps, never one still. A ruled grid is a design tool's canvas: use it only if you can say what it does in one clause."
  },
  "ambient-restraint": {
   "file": "taste/rules/ambient-restraint.md",

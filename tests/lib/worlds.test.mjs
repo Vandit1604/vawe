@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { waiverHint } from '../../harness/lib/waivers.mjs';
-import { worldIds, worldSpans, stillTime, heldWorlds, TURN_SECONDS_MAX } from '../../harness/lib/worlds.mjs';
+import { worldIds, worldSpans, stillTime, heldWorlds, mergeSameContent, worldLimit, READ_WORLD_MAX_S, TURN_SECONDS_MAX } from '../../harness/lib/worlds.mjs';
 
 const at = (t, ...shown) => ({ t, worlds: [['a', '#111111'], ['b', '#eeeeee'], ['c', null]].map(([id, ground]) => ({ id, visible: shown.includes(id), ground })) });
 const samples = [at(0.5, 'a'), at(1.5, 'a'), at(2.5, 'a', 'b'), at(3.5, 'b'), at(4.5, 'b')];
@@ -12,13 +12,13 @@ test('worldIds keeps page order', () => {
 
 test('a span runs from the first to the last visible sample, widened by half a step', () => {
   const spans = worldSpans(samples, { step: 1, dur: 5 });
-  assert.deepEqual(spans[0], { id: 'a', start: 0, end: 3, ground: '#111111', readNeed: 0 });
-  assert.deepEqual(spans[1], { id: 'b', start: 2, end: 5, ground: '#eeeeee', readNeed: 0 });
+  assert.deepEqual(spans[0], { id: 'a', signature: '["#111111",[]]', start: 0, end: 3, ground: '#111111', readNeed: 0 });
+  assert.deepEqual(spans[1], { id: 'b', signature: '["#eeeeee",[]]', start: 2, end: 5, ground: '#eeeeee', readNeed: 0 });
 });
 
 test('a span stays inside the film and a world never shown has null times', () => {
   const spans = worldSpans([at(0.2, 'b'), at(0.7, 'b')], { step: 1, dur: 0.9 });
-  assert.deepEqual(spans[1], { id: 'b', start: 0, end: 0.9, ground: '#eeeeee', readNeed: 0 });
+  assert.deepEqual(spans[1], { id: 'b', signature: '["#eeeeee",[]]', start: 0, end: 0.9, ground: '#eeeeee', readNeed: 0 });
   assert.deepEqual(spans[2], { id: 'c', start: null, end: null, ground: null, readNeed: 0 });
 });
 
@@ -107,4 +107,32 @@ test('the starter rests the eye: every fourth world after the first three, never
     for (const b of quiet(length)) assert.equal(+(b.end - b.start).toFixed(2), TURN_SECONDS_MAX);
     beats.slice(1).forEach((b, i) => assert.equal(b.start, beats[i].end));
   }
+});
+
+const content = (id, start, end, signature, readNeed = 0) => ({ id, start, end, signature, readNeed, ground: '#111' });
+
+test('a beat split into two data-world elements with the same ground and words is one held world', () => {
+  const split = [content('s1', 0, 2, '["#111",["ship it"]]'), content('s2', 2, 4.5, '["#111",["ship it"]]')];
+  assert.equal(mergeSameContent(split).length, 1);
+  const [found] = heldWorlds(split);
+  assert.match(found.text, /^world held s1\+s2 0-4\.5 s \(4\.5 s, limit 2 s; s1 and s2 show the same ground and words, so they are one world/);
+});
+
+test('worlds whose words or ground differ are separate turns, and a span with no signature never merges', () => {
+  assert.deepEqual(heldWorlds([content('s1', 0, 2, '["#111",["a"]]'), content('s2', 2, 4, '["#111",["b"]]')]), []);
+  assert.deepEqual(heldWorlds([content('s1', 0, 2, '["#111",["a"]]'), content('s2', 2, 4, '["#eee",["a"]]')]), []);
+  assert.deepEqual(heldWorlds([span('s1', 0, 2), span('s2', 2, 4)]), []);
+});
+
+test('padding words cannot buy a world more than the read cap', () => {
+  assert.equal(worldLimit({ readNeed: 20 }), READ_WORLD_MAX_S);
+  assert.equal(worldLimit({ readNeed: 1 }), TURN_SECONDS_MAX);
+  assert.equal(heldWorlds([content('s1', 0, 6, '["#111",["many words"]]', 20)]).length, 1);
+  assert.equal(heldWorlds([content('s1', 0, 3.5, '["#111",["real line"]]', 2.6)]).length, 0);
+});
+
+test('worldSpans signs a world by its ground and its lower-cased words in any order', () => {
+  const sample = (t, texts) => ({ t, worlds: [{ id: 'a', visible: true, ground: '#111', texts }] });
+  const [one] = worldSpans([sample(0, ['B', 'a']), sample(1, ['a'])], { step: 1, dur: 2 });
+  assert.equal(one.signature, '["#111",["a","b"]]');
 });
