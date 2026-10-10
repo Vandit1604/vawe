@@ -31,7 +31,7 @@ jump between dark and light? If so, cover it with an effect that peaks at the cu
 | product focus | push-in or punch | scale draws the eye to one subject |
 | a dramatic pivot | a heavy transition | a heavy transition earns a heavy story turn |
 
-One cut family per film: mixing whip and iris is five fonts on a slide ([one-cut-family](../rules/one-cut-family.md)).
+One cut family per film: mixing whip and iris is five fonts on a slide ([hard-cut-default](../rules/hard-cut-default.md)).
 Adjacent moving transitions change axis or direction ([seam-variety](../rules/seam-variety.md)). Full theory and
 per-seam procedure: [transitions.md](transitions.md).
 

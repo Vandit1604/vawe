@@ -59,7 +59,7 @@ each exists to point attention somewhere. The plan says where each device points
   walks in reading order to the key word is direction. Say what the colour is for in one clause: "it walks
   the eye to the product name" passes, "it is on brand" does not.
 - **State the eye path.** Where the eye starts, what pulls it (name the device), where it lands, per beat.
-  [eye-trace.md](eye-trace.md) has the rules for cuts ([eye-path](../rules/eye-path.md), [eye-trace](../rules/eye-trace.md)).
+  [transitions.md](transitions.md#where-the-eye-is-at-a-cut) has the rules for cuts ([eye-trace](../rules/eye-trace.md)).
 
 ## 3. Editing and pacing: rhythm is the direction
 
@@ -85,7 +85,7 @@ each exists to point attention somewhere. The plan says where each device points
   the element is doing in one clause. If it needs an "and" between unrelated verbs, drop one.
 - **Effects are seasoning.** Two or three earned moments per film. Content and proof beats stay clean.
 - **One cut family per film.** Rotate inside a family (soft, motion, shape, spatial). Mixing families
-  announces edits ([one-cut-family](../rules/one-cut-family.md)).
+  announces edits ([hard-cut-default](../rules/hard-cut-default.md)).
 - **Continuity over slideshow.** Something carries across each cut ([film-structure.md](film-structure.md), [thread](../rules/thread.md)).
 - **Paired directional exits.** A layer that enters from one side exits the opposite side, in one direction
   of travel. Enter-and-retreat is the tell ([paired-exit-direction](../rules/paired-exit-direction.md)).

@@ -54,7 +54,7 @@ CTA, a music punctuation. Everything else is a hard cut on the beat ([hard-cut-d
 | a held, readable beat | one part moving (typing, a counter, a glint), the camera at rest ([live-hold](../rules/live-hold.md)) |
 
 One cut family per film. One accent hue. Mixing whip and iris in one piece, or a new look every beat,
-is five fonts on a slide ([one-cut-family](../rules/one-cut-family.md)).
+is five fonts on a slide ([hard-cut-default](../rules/hard-cut-default.md)).
 
 The budget flexes with the register ([motion-craft.md](motion-craft.md#registers-restraint-depends-on-the-film)): quiet (UI-adjacent, explainer) treats
 motion as a cost the viewer pays, so one loud moment against a calm field is right. Kinetic (launch,

@@ -196,10 +196,11 @@ A crossfade is not the only transition, and a crossfade between two busy frames 
 
 ### eye-trace
 
-Land the incoming subject where the eye was on the outgoing frame. Do not make the eye cross the frame at a seam.
+Land the incoming subject where the eye was on the outgoing frame. Do not make the eye cross the frame at a seam. Plan the eye path per beat: where the eye starts, what pulls it (name the device), where it lands, and every device (colour flash, reveal, push, cursor, contrast, focus pull) names its target.
 
 - Limit: the incoming subject lands within 0.30 of the frame diagonal of the outgoing focal point
-- Judge: Compare the last frame before and the first frame after each cut: the focal point's distance.
+- Range: one landing per moment; motion pulls first, then colour or size settles it
+- Judge: Compare the last frame before and the first frame after each cut: the focal point's distance. Name the device that pulls the eye in each beat and its target.
 
 ### seam-variety
 

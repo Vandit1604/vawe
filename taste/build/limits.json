@@ -273,19 +273,13 @@
  "eye-trace": {
   "jump_far_diagonal": 0.3
  },
- "handoff-duration": {
-  "handoff_min_s": 0.8,
-  "handoff_max_s": 1
- },
  "hard-cut-default": {
   "hard_cut_share_pct_min": 50,
-  "hard_cut_share_pct_max": 95
- },
- "one-cut-family": {
+  "hard_cut_share_pct_max": 95,
   "accents_min": 2,
   "accents_max": 3
  },
- "seam-duration": {
+ "seam-timing": {
   "whip_min_s": 0.27,
   "whip_max_s": 0.4,
   "dissolve_quick_min_s": 0.4,
@@ -293,7 +287,9 @@
   "slide_min_s": 0.5,
   "slide_max_s": 1,
   "fade_min_s": 0.66,
-  "fade_max_s": 1.33
+  "fade_max_s": 1.33,
+  "handoff_min_s": 0.8,
+  "handoff_max_s": 1
  },
  "gradient-grain": {
   "grain_pct_min": 1,
