@@ -33,6 +33,25 @@ jobs:
             node bin/vawe check "$g"
           done
 
+  unit-tests:
+    name: unit tests (tests/lib, motion, hooks, dev)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npm ci
+      - name: fetch the locked faces
+        run: node generators/media/fonts.mjs
+      - run: node --test --test-concurrency=1 'tests/lib/*.test.mjs' 'tests/motion/*.test.mjs' 'tests/hooks/*.test.mjs' 'tests/dev/*.test.mjs'
+
   e2e:
     name: e2e (page tests + draft renders of every page film)
     runs-on: ubuntu-latest
