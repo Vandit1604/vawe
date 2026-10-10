@@ -405,10 +405,10 @@ export const VERBS = [
     next: () => 'look at a clip in prompts/moves/ before you commit it',
   },
   {
-    name: 'fonts', summary: 'the free font faces, one line each, with the file to copy into films/<name>/assets/',
-    positional: [], flags: [],
-    example: 'vawe fonts',
-    build: () => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts'] }],
+    name: 'fonts', summary: 'the free font faces, one line each, with the file to copy into films/<name>/assets/; with --system the faces installed on this machine, usable through local() in a film you render yourself',
+    positional: [], flags: [{ name: 'system', type: 'bool', help: 'list the installed system faces (Tahoma, Verdana, ...) with their local() name; never copy or commit the font file' }],
+    example: 'vawe fonts --system',
+    build: (v) => [{ script: 'harness/dev/list-assets.mjs', args: ['fonts', ...(v.system ? ['--system'] : [])] }],
   },
   {
     name: 'sound', summary: 'the sound of a track, a film or a page read completely, for cutting to the music: loudness, tempo, beat grid with frames, bars, every hit, sections, a PNG, and with --cuts each cut against the beat; with --at or --waveform the cues of a page; with no argument the synth voices',

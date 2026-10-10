@@ -28,3 +28,23 @@ export function soundLines(cues, gains, lengthOf) {
     ...Object.keys(cues).map((name) => `${name} | ${gains[name]} dB | ${lengthOf(cues[name]).toFixed(2)} s`),
   ];
 }
+
+/** [{ family, styles }] from lines of `family|style` (fc-list --format), system UI families (a leading dot) left out, sorted by family. */
+export function parseSystemFonts(text) {
+  const byFamily = new Map();
+  for (const line of String(text).split('\n')) {
+    const [family, style] = line.split('|').map((x) => x?.trim());
+    if (!family || family.startsWith('.') || !/^[\x20-\x7e]+$/.test(family)) continue;
+    byFamily.set(family, [...new Set([...(byFamily.get(family) ?? []), style].filter(Boolean))]);
+  }
+  return [...byFamily].map(([family, styles]) => ({ family, styles })).sort((a, b) => a.family.localeCompare(b.family));
+}
+
+/** The lines of `vawe fonts --system`: each installed family usable through local(), and the rule for using it. */
+export function systemFontLines(fonts) {
+  return [
+    'system faces on this machine. Use one in a film that you render yourself: @font-face { font-family: "Mine"; src: local("<name>"); }',
+    'Never copy or commit the font file: it is licensed to this machine, and the film renders only where the face is installed.',
+    ...fonts.map((f) => `${f.family} | ${f.styles.join(', ')} | local("${f.family}")`),
+  ];
+}

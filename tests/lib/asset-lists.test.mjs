@@ -25,3 +25,12 @@ test('soundLines: one line per voice with gain and length', () => {
   const lines = soundLines({ pluck: {}, swell: {} }, { pluck: -6, swell: -4 }, () => 0.5);
   assert.deepEqual(lines.slice(1), ['pluck | -6 dB | 0.50 s', 'swell | -4 dB | 0.50 s']);
 });
+
+test('parseSystemFonts groups styles per family and drops system UI and non-latin names; systemFontLines states the local() rule', async () => {
+  const { parseSystemFonts, systemFontLines } = await import('../../harness/lib/asset-lists.mjs');
+  const fonts = parseSystemFonts('Tahoma|Regular\nTahoma|Bold\nTahoma|Regular\n.SF NS|Bold\nفرح|عادي\nVerdana|Regular\n');
+  assert.deepEqual(fonts, [{ family: 'Tahoma', styles: ['Regular', 'Bold'] }, { family: 'Verdana', styles: ['Regular'] }]);
+  const lines = systemFontLines(fonts);
+  assert.ok(lines.includes('Tahoma | Regular, Bold | local("Tahoma")'));
+  assert.match(lines[1], /Never copy or commit the font file/);
+});
