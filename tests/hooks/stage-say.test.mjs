@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { SAY, WAIT_WORK, nextStep,takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
+import { SAY, BRIEF_ASK, CRITIQUE_ASK, WAIT_WORK, nextStep,takenFromCount, movesTakenCount, boardFilled, missingRungs } from '../../harness/live/stage-say.mjs';
 
 function film(html, brief = '## Look\n') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-stage-'));
@@ -144,6 +144,12 @@ test('the motion step names onion and velocity for the spectacle', () => {
   const later = new Date(Date.now() - 1000);
   fs.utimesSync(path.join(root, 'out', 'f-draft.mp4'), later, later);
   assert.match(nextStep(page, root).next, /strip films\/f\/page\.html --cuts.*onion.*velocity/);
+});
+
+test('the motion step names the doc and each principle to check; every stage line carries a designer question', () => {
+  const line = SAY.motion('f', 'films/f/page.html');
+  assert.match(line, /taste\/craft\/motion-craft\.md.*core\/motion\/README\.md.*anticipation.*follow-through.*overlap.*spacing.*arcs.*secondary action.*exits faster.*holds alive.*camera still/);
+  for (const text of [BRIEF_ASK, SAY.study('f'), SAY.moves(), SAY.design('f'), SAY.states('f', 'p'), SAY.board('f'), CRITIQUE_ASK]) assert.match(text, /ask: /);
 });
 
 test('the ship step names the work for the wait', () => {

@@ -174,7 +174,7 @@ const ago = (ms) => {
 };
 
 export function gradeable(filmPath, mp4) {
-  const fix = `node harness/media/render-page.mjs ${filmPath}`;
+  const fix = `bin/vawe dev ${filmPath}`;
   if (!fs.existsSync(mp4)) return { ok: false, why: `no rendered video at ${mp4}`, fix };
   if (!filmPath.endsWith('.html')) return { ok: true, mp4 };
   const src = fs.statSync(filmPath).mtimeMs, out = fs.statSync(mp4).mtimeMs;
