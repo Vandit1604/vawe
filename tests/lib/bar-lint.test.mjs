@@ -147,7 +147,7 @@ const shown = (n, from, count, text) => times(n).map((t, k) => (k >= from && k <
 
 test('textLingers: a one word line on screen 5 s fires with its read time and its ceiling', () => {
   const found = textLingers(shown(40, 2, 10, 'Launch'), CTX);
-  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['text-lingers', 'text-lingers', 1]]);
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['text-lingers', 'readable-hold', 1]]);
   assert.match(found[0].what, /"Launch" stays on screen 5\.0 s; it needs 1\.2 s to read, so it may stay 2\.8 s/);
 });
 

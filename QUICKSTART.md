@@ -75,7 +75,7 @@ lists the seconds that still differ (`vawe-reference`).
 - Bundle fonts in `assets/`; never load one from the network.
 - No em dash on screen. The first-frame hook is 12 words or fewer.
 - Exits faster than entrances. Arrive fast, land soft. One entrance per beat, not a fade on all.
-- Text holds `words x 0.6 s`, floor 1.2 s. Add a hold; never slow the move.
+- Text holds for its read time (rule `readable-hold`). Add a hold; never slow the move.
 - A rule broken on purpose is declared in the page with a `_why` (`AGENTS.md`, Waivers).
 
 ## Where to go next

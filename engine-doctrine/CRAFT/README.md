@@ -18,17 +18,6 @@ about how to run a film or change the engine, not about how a film should look.
 | [COMMAND-OUTPUT.md](COMMAND-OUTPUT.md) | you are writing or changing a command that reports something | the one output contract every reporting command follows |
 | [WRITING-FOR-AGENTS.md](WRITING-FOR-AGENTS.md) | you are writing AGENTS.md, a SKILL.md, or a brief an agent will read | six patterns that keep a rule readable by an agent, and the SKILL.md frontmatter and size contract |
 
-## Where the taste guides went
-
-| Was | Now |
-|---|---|
-| STORY, SELECTION, DIRECTION, FILM-STRUCTURE, GRAMMAR | `taste/craft/story.md`, `selection.md`, `direction.md`, `film-structure.md`, `grammar.md` |
-| TYPOGRAPHY, COLOR, LAYOUT, IMAGERY, SURFACES, SCREENS | `taste/craft/typography.md`, `color.md`, `layout.md`, `imagery.md`, `surfaces.md`, `screens.md` |
-| DENSITY, SHOW-DONT-TELL, CONTENT, READING | `taste/craft/density.md`, `show-dont-tell.md`, `content.md`, `reading.md` |
-| TRANSITIONS, EYE-TRACE, MOTION-STANDARDS, MOTION-REGISTERS, AFTER-EFFECTS-TECHNIQUES | `taste/craft/transitions.md`, `eye-trace.md`, `motion-standards.md`, `motion-registers.md`, `after-effects-techniques.md` |
-| SOUND, TASTE-RULES | `taste/craft/sound.md`, `taste/craft/failure-modes.md` |
-| TASTE.md, MOTION-CRAFT.md | `taste/craft/law.md`, `taste/craft/motion-craft.md` |
-
 ## How these relate to the rest of the docs
 
 - `taste/` = what a film should look and sound like: the rules, and the reasons behind them.

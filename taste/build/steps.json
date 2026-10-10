@@ -49,12 +49,12 @@
   "title": "storyboard",
   "lines": [
    {
-    "rule": "text-breathing",
-    "text": "leave beats with no words, not text in every frame"
+    "rule": "readable-hold",
+    "text": "take a line off screen when it is read plus 1.5 s, not hold it for the beat"
    },
    {
-    "rule": "text-lingers",
-    "text": "take a line off screen when it is read plus 1.5 s, not hold it for the beat"
+    "rule": "text-breathing",
+    "text": "leave beats with no words, not text in every frame"
    },
    {
     "rule": "world-turns",

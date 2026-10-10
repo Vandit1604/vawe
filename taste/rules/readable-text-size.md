@@ -13,11 +13,11 @@ status: active
 scored: yes
 numbers: {"cap_height_pct":6,"chrome_cap_height_pct":2.5,"held_min_s":0.5,"texture_cap_pct_max":2,"texture_repeats_min":3,"texture_reason_min_chars":12,"texture_share_max_pct":50}
 print-frames: set a read line at a 6% cap height and hold it max(1.2 s, words/3), not a small tagline that flashes by
-craft: reading
+craft: typography
 ---
 
 ## Example
 
 At 1080p a 6 percent cap height is about 65 px, a font near 93 px.
 
-Why and sources: [reading](../craft/reading.md).
+Why and sources: [typography](../craft/typography.md).
