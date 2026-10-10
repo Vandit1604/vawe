@@ -1,7 +1,7 @@
 /* Shared look of the move demos: ONE design system, ten expressions. Link it, then add only what the move needs.
    Foundation (:root): type scale, spacing, radius steps, line weights, shadow recipe and one 12-column grid, all as a
    share of frame height (--u is 1 percent of it). A look (html[data-look="name"], end of file) changes colour, faces,
-   which radius and line steps it picks, and its depth; it never changes a size or a class. Rules: prompts/moves/LOOKS.md.
+   which radius and line steps it picks, and its depth; it never changes a size or a class. Rules: the Looks section of prompts/moves/README.md.
    Check the contrast of every look with: node prompts/moves/demo/contrast.mjs */
 @font-face { font-family: 'Archivo'; font-weight: 100 900; font-display: block; src: url('/assets/fonts/Archivo.woff2') format('woff2'); }
 @font-face { font-family: 'Unbounded'; font-weight: 200 900; font-display: block; src: url('/assets/fonts/Unbounded.woff2') format('woff2'); }

@@ -1,7 +1,7 @@
 # Crash zoom
 
 **Use when** one detail must hit on a beat ("look at this!"): the camera holds wide, then in 0.13 s
-it slams in to 2.6x on the detail, overshoots 5 percent and recoils in 0.32 s. Where `push-in` says
+it slams in to 2.6x on the detail, overshoots 5 percent and recoils in 0.32 s. Where the push in [camera-moves](camera-moves.md) says
 "please look", this says "look now". The push accelerates into the hit (`EASE.carry`), the
 opposite of a normal entrance, because the stop is the impact. The detail that sells it is real zoom
 blur: 16 copies of the frame at scales fanned across half of one frame's change, stacked at
@@ -32,7 +32,7 @@ vawe.onFrame((t) => {
 
 Sound: pluck at 0.68 s into the move, the frame the push stops at 2.6x (default gain); never an impact, since the overshoot is the hit.
 
-Keep the push between 0.1 and 0.15 s: past 0.2 s it reads as an ordinary push-in. Eight copies show
+Keep the push between 0.1 and 0.15 s: past 0.2 s it reads as an ordinary push. Eight copies show
 as separate ghosts at this speed; sixteen blend into streaks. Measure the target's rect once at load.
 The detail must be live type or vector, since it is seen at 2.6x for the rest of the shot; a small
 screenshot goes soft. No camera shake on the stop: the overshoot is the impact. Use it at most twice

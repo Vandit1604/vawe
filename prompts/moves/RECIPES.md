@@ -379,7 +379,7 @@ The one big moment of a film, in three parts: quiet before, the moment, the rele
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|
 | 0.00 | [drift-hold](drift-hold.md) the ground only, the camera rests | quiet: one line, fewer moves, the slow band (cinematic), nothing else arrives; it reads for 1.0 s | none |
-| 1.00 | [camera-moves](camera-moves.md) `push` with [depth-parallax](depth-parallax.md) | the camera starts leaning 0.2 s before the word lands; ground 0.3, mid 1, front 1.8; it runs to 2.40 | whoosh 0.80 |
+| 1.00 | [camera-moves](camera-moves.md) `push` with [parallax-dive](parallax-dive.md) | the camera starts leaning 0.2 s before the word lands; ground 0.3, mid 1, front 1.8; it runs to 2.40 | whoosh 0.80 |
 | 1.20 | [arrival-spring](arrival-spring.md) `pop` | the hero word lands on `EASE.pop`, the one deep overshoot of the beat | hit 1.20 |
 | 1.40 | [chain-beats](chain-beats.md) overlap | the front-layer chips arrive 0.2 s after the word, one in four on `EASE.nudge`, a ring bursts on the ground; four layers move at once | tick 1.60 |
 | 2.40 | the camera rests where the push ended | the release: the push has stopped, nothing new arrives, one small element move keeps the hold alive (a glint, a counter settling); it holds to 3.00 | none |
