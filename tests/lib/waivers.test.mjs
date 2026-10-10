@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { reasonProblem, hasReason, isWaived, waiverCovers, waiverProblems, RETIRED_CODES } from '../../harness/lib/waivers.mjs';
+import { reasonProblem, hasReason, isWaived, waiverCovers, waiverProblems, RETIRED_CODES, entryHasReason } from '../../harness/lib/waivers.mjs';
 
 const ctx = { worlds: ['s1', 's4', 'hero'] };
 const GOOD = 'world s4 holds the wordmark 3.5 s as the last beat';
@@ -56,4 +56,11 @@ test('a second matches a waiver written with fewer or more places, and a range h
   assert.equal(waiverCovers('one-band@0.2', 'one-band', '0.20'), true);
   assert.equal(waiverCovers('one-band@0.2', 'one-band', '0.3'), false);
   assert.equal(waiverCovers('display-tracking@2.2-2.3', 'display-tracking', '2.25'), true);
+});
+
+test('entryHasReason vets a reason the same way for every check', () => {
+  const authoring = { allow: ['static-window@1-2'], _why: { 'static-window@1-2': 'intentional hold' }, _worlds: ['s1'] };
+  assert.equal(entryHasReason(authoring, 'static-window@1-2'), false);
+  authoring._why['static-window@1-2'] = 'world s1 holds 1.0 s on the logo';
+  assert.equal(entryHasReason(authoring, 'static-window@1-2'), true);
 });
