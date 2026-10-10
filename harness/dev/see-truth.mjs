@@ -132,7 +132,7 @@ export function lumaOfL(L) {
   return 255 * enc;
 }
 
-export const deltaE76 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+const deltaE76 = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
 /** Distance in frame heights between two 0..1 frame positions. */
 export const heights = (a, b, aspect) => Math.hypot((a.x - b.x) * aspect, a.y - b.y);
@@ -338,7 +338,7 @@ export function flashSeeRows(t, { a }) {
   return rows;
 }
 
-export function motionSeeRows(t, { a }) {
+function motionSeeRows(t, { a }) {
   const F = 'motion', tol = t.tolerance, { a: A, b: B } = t.truth;
   const moves = a?.shots.flatMap((s) => s.moves) ?? [];
   const mv = (start) => moves.find((m) => Math.abs(m.start - start) <= 0.1);
@@ -378,13 +378,13 @@ export function cameraRows(t, { spec }) {
   return [...cameraGrade(t, shots, 'vawe spec (camera)'), noTool('camera', 'world 4 tilt of a still picture (degrees clockwise)', t.truth.shots[3].tiltDeg, t.tolerance.tiltDeg)];
 }
 
-export function cameraSeeRows(t, { a }) {
+function cameraSeeRows(t, { a }) {
   const per = a?.motion.perShot.map((s) => ({ pan: s.camera.panTotalPx[0], zoom: s.camera.zoomTotal, turn: s.camera.rotation?.total ?? 0 }));
   const tilt = a?.shots[3]?.camera.tilt?.deg ?? null;
   return [...cameraGrade(t, per, SEE), scoreRow({ fixture: 'camera', measure: 'world 4 tilt of a still picture (degrees clockwise)', tool: SEE, truth: t.truth.shots[3].tiltDeg, measured: tilt, tolerance: t.tolerance.tiltDeg })];
 }
 
-export function eyeSeeRows(t, { a }) {
+function eyeSeeRows(t, { a }) {
   const F = 'eye', tol = t.tolerance, asp = t.aspect;
   const rows = [];
   const shot = (t0) => a?.motion.perShot.find((s) => Math.abs((a.shots.find((x) => x.index === s.index)?.start ?? -1) - t0) <= 0.05);
@@ -401,7 +401,7 @@ export function eyeSeeRows(t, { a }) {
   return rows;
 }
 
-export function groundSeeRows(t, { a }) {
+function groundSeeRows(t, { a }) {
   const F = 'ground', tol = t.tolerance;
   const rows = [];
   const shot = (t0) => a?.shots.find((s) => Math.abs(s.start - t0) <= 0.05);
@@ -420,7 +420,7 @@ export function groundSeeRows(t, { a }) {
   return rows;
 }
 
-export function typeSeeRows(t, { a }) {
+function typeSeeRows(t, { a }) {
   const F = 'type', tol = t.tolerance;
   const rows = [];
   const words = a?.type.words ?? null;
@@ -435,7 +435,7 @@ export function typeSeeRows(t, { a }) {
   return rows;
 }
 
-export function soundSeeRows(t, { a, p }) {
+function soundSeeRows(t, { a, p }) {
   const F = 'sound', tol = t.tolerance;
   const rows = [];
   t.truth.cues.forEach((c, i) => {

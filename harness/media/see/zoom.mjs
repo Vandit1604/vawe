@@ -35,7 +35,7 @@ function autoBoxes(a, b, at, atB) {
 }
 
 /** Runs `vawe zoom`: writes one PNG and prints its absolute path. `opts`: { at, atB, box (text), auto, scale, vs, out }. */
-export async function runZoom(input, opts) {
+async function runZoom(input, opts) {
   const problem = zoomProblem({ ...opts, box: opts.box });
   if (problem) die(problem);
   const a = await film(input, 'a');

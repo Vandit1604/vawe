@@ -11,7 +11,7 @@ const FRAME = /^(transform|translate|scale|rotate)$/;
 export const isCameraMove = (r) => r.duration >= CAM.move_min_s && (r.id === 'camera' || r.fullFrame) && moveProps(r).some((p) => FRAME.test(p));
 
 /** The seconds [a, b] covered by `spans`, overlapping spans merged. */
-export function unionOf(spans) {
+function unionOf(spans) {
   const out = [];
   for (const [a, b] of [...spans].sort((x, y) => x[0] - y[0])) {
     const last = out.at(-1);

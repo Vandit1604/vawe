@@ -25,8 +25,8 @@ const SILENT_DB = -70;
 const SLOW_RISE_MS = 25;
 const FRAMES = [30, 60];
 
-export const TEMPO_USABLE = 1.6;
-export const SOFT_HIT = 0.25;
+const TEMPO_USABLE = 1.6;
+const SOFT_HIT = 0.25;
 export const ON_BEAT_FRAMES = 1;
 export const NEAR_FRAMES = 3;
 const STRONG_HIT = 0.5;
@@ -74,7 +74,7 @@ function barOffset(beats, hits) {
 }
 
 /** The quiet and loud runs of a signal, against its own median level: [{ from, to, level, db }]. Pure. */
-export function sectionsOf(mono, sampleRate) {
+function sectionsOf(mono, sampleRate) {
   const size = Math.round(SECTION_WINDOW_S * sampleRate), db = [];
   for (let o = 0; o + size <= mono.length; o += size) {
     let s = 0;
@@ -158,7 +158,7 @@ export function placeSound(sound, { offset = 0, from = 0, to = Infinity } = {}) 
 }
 
 /** The lines a cut may land on: every hit that is not soft, and, when the tempo is usable, every beat and half beat. Pure. */
-export function targetsOf(placed) {
+function targetsOf(placed) {
   const hits = placed.onsets.filter((o) => o.kind !== 'soft').map((o) => ({ t: o.attack, what: 'hit', strength: o.strength }));
   const lines = placed.tempo.usable ? placed.grid.filter((l) => l.kind !== 'quarter').map((l) => ({ t: l.t, what: l.kind === 'beat' ? `beat ${l.bar}.${l.beat}` : 'half beat' })) : [];
   return [...hits, ...lines];

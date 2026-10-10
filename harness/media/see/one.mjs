@@ -57,7 +57,7 @@ function windowed(side, from, to) {
 }
 
 /** Runs `vawe see`: returns { dir, md, json, summary, cached } and writes see.md and see.json. */
-export async function runSee(input, opts = {}) {
+async function runSee(input, opts = {}) {
   const t0 = Date.now();
   const log = opts.quiet ? () => {} : (m) => console.error(`see: [${((Date.now() - t0) / 1000).toFixed(1)} s] ${m}`);
   const a = await resolveSource(input, { draft: opts.draft, log });

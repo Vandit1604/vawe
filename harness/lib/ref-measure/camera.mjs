@@ -125,7 +125,7 @@ function explainsQuadrants(A, B, w, h, pts, [a, b, tx, ty]) {
  * B(x) = A(c + M (x - c) + t), M = [[a, b], [-b, a]], over the edge points with Huber weights. The fit stands only when it explains the edges, so a
  * picture that is one big moving element gives still. Returns { s, dx, dy, r } (r in radians) or null.
  */
-export function estimateSlowCamera(A, B, w, h) {
+function estimateSlowCamera(A, B, w, h) {
   const pts = edgePoints(A, w, h);
   if (!pts) return null;
   const cx = (w - 1) / 2, cy = (h - 1) / 2;
