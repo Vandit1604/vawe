@@ -4,6 +4,7 @@
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { adviceBlock } from './advice.mjs';
 import { loudestCue } from './peak-limit.mjs';
+import { balanceLines } from './cue-balance.mjs';
 
 const SIZE = LIMITS['readable-text-size'];
 const LEVEL = LIMITS['sound-level'];
@@ -142,22 +143,26 @@ export function soundSummary(level, rules = RULES) {
 }
 
 /**
- * The change that brings a mix outside the band to the target: whole dB on every data-gain (a level shift moves
- * integrated loudness and true peak by the same dB), and the loudest cue when the peak then passes its limit. Pure.
+ * The fix for a mix outside the band. The gap in dB is named, but the fix is about the cues against each other: a shift of every data-gain
+ * moves the loudness and leaves the balance as it was (harness/lib/cue-balance.mjs). Pure.
  * `level`: { I, TP, cues? } as measured.
  */
 export function loudnessFix(level, rules = RULES) {
   const db = Math.round(rules.lufsTarget - level.I);
-  const change = `change every data-gain by ${db < 0 ? '-' : '+'}${Math.abs(db)} dB, or remove the gains to use the voice defaults (they land near ${rules.lufsTarget} LUFS)`;
-  const peak = level.TP + db;
-  if (!(peak > LEVEL.peak_dbfs)) return change;
-  return `${change}; the true peak then reaches ${peak.toFixed(1)} dBTP (limit ${LEVEL.peak_dbfs}), so lower ${loudestCue(level.cues)} by ${Math.ceil(peak - LEVEL.peak_dbfs)} dB more`;
+  const cues = level.cues ?? [];
+  const balance = balanceLines(cues);
+  const gap = `${Math.abs(db)} dB ${db > 0 ? 'under' : 'over'} the target`;
+  const sfx = cues.filter((c) => (c.role ?? 'sfx') === 'sfx');
+  const fix = balance.length ? balance[0]
+    : db > 0 ? 'add the cue the picture lacks, or raise the one cue that carries the moment'
+      : `lower ${loudestCue(sfx.length ? sfx : null)}`;
+  return `the mix is ${gap}; ${fix}. Moving every data-gain by the same dB changes the loudness and fixes nothing`;
 }
 
 /** The sound line when the mix is outside the band, else null. `level` adds the exact change. */
 export function soundLine(lufs, rules = RULES, level = null) {
   if (lufs === null || (lufs >= rules.lufsLow && lufs <= rules.lufsHigh)) return null;
-  const fix = level ? loudnessFix(level, rules) : lufs < rules.lufsLow ? 'raise data-gain on the quiet cues' : 'lower data-gain on the loud cues';
+  const fix = level ? loudnessFix(level, rules) : lufs < rules.lufsLow ? 'add the cue the picture lacks, or raise the one cue that carries the moment' : 'lower the loudest cue';
   return `sound: ${Math.round(lufs)} LUFS integrated (subtle target about ${rules.lufsTarget}; ${fix})`;
 }
 

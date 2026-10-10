@@ -22,6 +22,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { playableOf } from '../lib/audio-view.mjs';
+import { balanceLines } from '../lib/cue-balance.mjs';
+import { spectralChange, BED_RATE } from '../lib/bed-motion.mjs';
 import { CUES, DEFAULT_GAIN_DB, renderCue, renderCueStereo, normalize, normalizeStereo, encodeWav, wavDuration } from '../../core/audio/kit.mjs';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -82,12 +84,12 @@ export async function readPageAudio(page, { pagePath, spans } = {}) {
     if (t.synth) {
       if (BANNED_SYNTH.has(t.synth)) problems.push(`${where}: ${BANNED_MESSAGE}`);
       else if (!CUES[t.synth]) problems.push(`${where}: data-synth="${t.synth}" is not a voice. Voices: ${Object.keys(CUES).join(' ')}`);
-      return { ...t, gain: t.gain ?? DEFAULT_GAIN_DB[t.synth] ?? 0 };
+      return { ...t, gain: t.gain ?? DEFAULT_GAIN_DB[t.synth] ?? 0, gainSet: t.gain !== null, defaultGain: DEFAULT_GAIN_DB[t.synth] ?? 0 };
     }
     if (!src) { problems.push(`${where}: an <audio> element needs src or data-synth`); return t; }
     const file = toFilePath(src, raw.url, pagePath);
     if (!fs.existsSync(file)) problems.push(`${where}: src="${src}" resolved to ${file}, which does not exist`);
-    return { ...t, src: file, gain: t.gain ?? 0 };
+    return { ...t, src: file, gain: t.gain ?? 0, gainSet: t.gain !== null, defaultGain: 0 };
   });
   problems.push(...await startOnWorlds(page, specs, raw.duration, spans));
   if (problems.length) throw new Error(problems.join('\n'), { cause: { problems } });
@@ -142,20 +144,11 @@ function materialise(spec, tmp, i) {
   return { file, seconds: wavDuration(samples), peakDb: 20 * Math.log10(CUE_CEILING) + spec.gain };
 }
 
-/**
- * cueSpreadWarnings(tracks) -> string[]: one line per sfx cue that peaks more than CUE_SPREAD_DB above
- * the median cue, naming the cue, its level, the median and the data-gain change that fixes it.
- */
+const cueOf = ({ spec, peakDb }) => ({ name: spec.synth || path.basename(spec.src), at: spec.at, peakDb, gain: spec.gain, gainSet: Boolean(spec.gainSet), defaultGain: spec.defaultGain ?? 0 });
+
+/** cueSpreadWarnings(tracks) -> string[]: the balance lines of the sfx cues (harness/lib/cue-balance.mjs). */
 export function cueSpreadWarnings(tracks) {
-  const cues = tracks.filter(({ spec }) => spec.role === 'sfx');
-  if (cues.length < 2) return [];
-  const sorted = cues.map((c) => c.peakDb).sort((a, b) => a - b);
-  const median = sorted[Math.floor((sorted.length - 1) / 2)];
-  return cues.filter((c) => c.peakDb - median > CUE_SPREAD_DB).map(({ spec, peakDb }) => {
-    const over = Math.round(peakDb - median);
-    const name = spec.synth || path.basename(spec.src);
-    return `cue "${name}" at ${spec.at} s peaks ${over} dB above the rest (${Math.round(peakDb)} vs ${Math.round(median)} dB): lower data-gain by ${over}`;
-  });
+  return balanceLines(tracks.filter(({ spec }) => spec.role === 'sfx').map(cueOf));
 }
 
 const f = (n) => Number(n.toFixed(4));
@@ -253,14 +246,24 @@ export function renderMixCached({ specs, duration, dir }) {
   return { ...kept, cached: false };
 }
 
-/** { I, TP, cues }: integrated LUFS and true peak dBFS of the mix as written, before the limiter, and each cue's { name, at, peakDb }; null when there are no specs. */
+/** [{ name, change }] for every looped music file: how far its spectrum moves from half second to half second (harness/lib/bed-motion.mjs). The first BED_SECONDS only. */
+function measureBeds(specs) {
+  return specs.filter((s) => s.role === 'music' && s.src).map((s) => {
+    const r = spawnSync('ffmpeg', ['-v', 'error', '-t', '40', '-i', s.src, '-vn', '-ac', '1', '-ar', String(BED_RATE), '-f', 'f32le', '-'], { maxBuffer: 1 << 28 });
+    const raw = r.status === 0 ? r.stdout : Buffer.alloc(0);
+    const samples = new Float32Array(raw.buffer.slice(raw.byteOffset, raw.byteOffset + raw.length - (raw.length % 4)));
+    return { name: path.basename(s.src), change: spectralChange(samples) };
+  });
+}
+
+/** { I, TP, cues, beds }: integrated LUFS and true peak dBFS of the mix as written, before the limiter, each cue's { name, at, peakDb, gain, gainSet, defaultGain, role } and each music file's { name, change }; null when there are no specs. */
 export function measureMixLevel({ specs, duration }) {
   if (!specs.length) return null;
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-audio-'));
   try {
     const { mixWav, tracks } = writeMix(specs, duration, tmp);
-    const cues = tracks.map(({ spec, peakDb }) => ({ name: spec.synth || path.basename(spec.src), at: spec.at, peakDb }));
-    return { ...measureFile(mixWav), cues };
+    const cues = tracks.map(cueOf).map((c, i) => ({ ...c, role: tracks[i].spec.role }));
+    return { ...measureFile(mixWav), cues, beds: measureBeds(specs) };
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
