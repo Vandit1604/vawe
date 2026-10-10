@@ -64,7 +64,8 @@ import { createChecks, timeLine } from '../lib/check-runner.mjs';
 import { MODES } from '../lib/draft-tiers.mjs';
 import { redLine, summaryLine, fullTable } from '../lib/acceptance.mjs';
 import { draftAcceptance, videoMeasures } from './acceptance-run.mjs';
-import { textProblems, frameUnitLines, hiddenTextLines, soundLine, soundSummary, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes } from '../lib/draft-check.mjs';
+import { readDecls, rulesWith } from '../lib/design-decls.mjs';
+import { RULES, textProblems, frameUnitLines, hiddenTextLines, soundLine, soundSummary, briefLine, mergeProblems, draftAdvice, draftCheckLines, layoutTimes } from '../lib/draft-check.mjs';
 import { probeLayoutLint, namedText } from '../lib/layout-lint.mjs';
 import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
@@ -908,7 +909,7 @@ function motionFindings(pagePath, motion) {
 
 const layoutFindings = (pagePath, probe) => unwaived(probeLayoutLint(probe, namedText(readPageMeta(pagePath, 'message'), readBrief(pagePath))), pageAuthoring(pagePath));
 
-const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: lockedSpectacle(readBrief(pagePath), spectacleOf(fs.readFileSync(pagePath, 'utf8'))), film: { dur: Number(readPageMeta(pagePath, 'duration')), worlds: probe.worlds } }), pageAuthoring(pagePath));
+const barFindings = (pagePath, motion, probe) => unwaived(barLint({ records: motionRecords(motion), boxes: probe.speed, text: probe.whole ? { samples: probe.samples, ctx: probe } : null, spectacle: lockedSpectacle(readBrief(pagePath), spectacleOf(fs.readFileSync(pagePath, 'utf8'))), film: { dur: Number(readPageMeta(pagePath, 'duration')), worlds: probe.worlds }, camera: readDecls(pagePath).camera }), pageAuthoring(pagePath));
 
 const barAdvice = (pagePath, motion, probe) => barFindings(pagePath, motion, probe).flatMap((f) => [...lintLines([f]), waiverHint(f.code)]);
 
@@ -962,7 +963,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
   const contrast = contrastLines(unwaivedContrast(probe.contrast, authoring));
   const directions = directionsLines(brief, dir).filter((l) => !(l.startsWith('attractor:') && isWaived(authoring, 'attractor', /^attractor: direction (\w+)/.exec(l)?.[1] ?? null)));
   return {
-    text: textProblems(probe.samples, probe),
+    text: textProblems(probe.samples, { ...probe, rules: rulesWith(readDecls(pagePath), RULES) }),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
     lines: [...(probe.canvasFilm ? [canvasFilmNote()] : []), ...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
       ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...moveDocLines(brief),

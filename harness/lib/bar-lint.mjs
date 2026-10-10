@@ -383,8 +383,8 @@ export function constantCamera(records, film, spectacle = null) {
     'hold the camera still and give each hold an element motion (a line typing, a counter, a glint, a secondary action); keep one deliberate camera move for the spectacle or a reveal')];
 }
 
-/** Every bar finding in time order. `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
-export function barLint({ records, boxes, text, spectacle = null, film = null }) {
-  return [...constantCamera(records, film, spectacle), ...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...deadStop(boxes?.stops), ...staging(boxes?.runs), ...anticipation(boxes?.runs, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
+/** Every bar finding in time order. `camera` is the camera: line of DESIGN.md (free turns the constant-camera finding off). `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
+export function barLint({ records, boxes, text, spectacle = null, film = null, camera = null }) {
+  return [...(camera === 'free' ? [] : constantCamera(records, film, spectacle)), ...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...deadStop(boxes?.stops), ...staging(boxes?.runs), ...anticipation(boxes?.runs, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
     .sort((a, b) => a.at - b.at);
 }
