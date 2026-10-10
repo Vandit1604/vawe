@@ -9,6 +9,7 @@ import { sheetFps, tileProblems, TILE_W } from '../lib/sheet-tiles.mjs';
 import { specTimes, wordTimes, objectChecks } from '../lib/spec-conformance.mjs';
 import { sampleBoxTracks } from '../lib/box-track.mjs';
 import { frameMotion } from './motion-curve.mjs';
+import { decodeGray } from './see/frame.mjs';
 import { withCameraStills } from '../lib/camera-moves.mjs';
 
 /** What one pass over a draft video reads: its scene features, the judge sheet's tile differences and its frame motion. Throws when ffmpeg fails. */
@@ -31,12 +32,12 @@ export function sheetTileDiffs(mp4) {
   const src = probeSize(mp4);
   const w = TILE_W, h = Math.round((src.h * w) / src.w / 2) * 2;
   const fps = sheetFps(dur);
-  const r = spawnSync('ffmpeg', ['-v', 'error', '-i', mp4, '-vf', `fps=${fps},scale=${w}:${h},format=gray`, '-f', 'rawvideo', '-'], { maxBuffer: 1 << 28 });
-  if (r.status !== 0) throw new Error(`sheet tiles: ffmpeg failed on ${mp4}: ${String(r.stderr).trim()}`);
-  const size = w * h, n = Math.floor(r.stdout.length / size), diffs = [];
+  const { data, error } = decodeGray(mp4, { w, h, fps });
+  if (error !== null) throw new Error(`sheet tiles: ffmpeg failed on ${mp4}: ${error}`);
+  const size = w * h, n = Math.floor(data.length / size), diffs = [];
   for (let i = 1; i < n; i++) {
     let sum = 0;
-    for (let p = 0; p < size; p++) sum += Math.abs(r.stdout[i * size + p] - r.stdout[(i - 1) * size + p]);
+    for (let p = 0; p < size; p++) sum += Math.abs(data[i * size + p] - data[(i - 1) * size + p]);
     diffs.push(sum / size);
   }
   return { diffs, fps };
