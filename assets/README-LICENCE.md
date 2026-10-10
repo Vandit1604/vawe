@@ -1,4 +1,6 @@
-# Licence of every asset set
+# assets/: what stays in git, and the licence of every set
+
+Read by the renderer and by the generators under `generators/` that write files here. Regenerate a baked asset by re-running its generator; do not hand-edit it. The mixer builds sound cues from code, not from `sfx/`. Put a brand's marks in `assets/brands/<name>/` (or `assets/icons/`); a page loads them by path. Only `brands/*/house-style.md` is tracked.
 
 Tracked in git (we may share these):
 
