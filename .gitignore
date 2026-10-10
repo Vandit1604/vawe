@@ -308,3 +308,5 @@ assets/edit-montage/
 films/recreations/
 # draft key-frame sheets that bin/vawe moves leaves next to each clip
 prompts/moves/*.png
+# render-page keeps a failed render's frames next to the output so a resume finds them; never source
+*.mp4.frames-*/
