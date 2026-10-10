@@ -26,13 +26,14 @@ function jobDir(job) {
   return cwd;
 }
 
-test('a running job prints a progress line each interval, then says to run the wait once more at the cap', async () => {
+test('a running job prints a progress line each interval, then names the next call and the calls left at the cap', async () => {
   const cwd = jobDir({ status: 'running', pid: process.pid });
   try {
     const out = await runWait(cwd, { VAWE_SHIP_WAIT_MS: '5500', VAWE_SHIP_PROGRESS_MS: '2000' });
     const progress = out.split('\n').filter((l) => l.startsWith('job demo-1: running'));
-    assert.ok(progress.length >= 3, out);
-    assert.match(out, /not done after 6s: run the same command once more/);
+    assert.ok(progress.length >= 4, out);
+    assert.match(out, /this call stopped after 6s .*Run the next: command to keep waiting/);
+    assert.match(out, /next: bin\/vawe ship --status films\/demo\/page\.html --wait \(about \d+ more calls? /);
   } finally { fs.rmSync(cwd, { recursive: true, force: true }); }
 });
 

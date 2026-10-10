@@ -67,6 +67,18 @@ export function captureEtaMs({ first, firstAt, done, total, now }) {
   return rate > 0 ? (total - done) / rate : null;
 }
 
+// Judge and acceptance take about 70 s after the master is written (ship-job renderedLines); encode comes first.
+const TAIL_MS = 120_000;
+// Finals of 20 s at 60 fps ran 985 to 1402 s (tracking-hud ships, 2026-10-10).
+const TYPICAL_FINAL_MS = 1_200_000;
+
+/** How many more `ship --status --wait` calls of `capMs` a running job needs: { calls, basis }. The eta is the capture's, or null before it has a rate. Pure. */
+export function waitCallsLeft({ etaMs, elapsedMs, capMs }) {
+  const known = etaMs !== null && etaMs !== undefined;
+  const left = known ? etaMs + TAIL_MS : Math.max(0, TYPICAL_FINAL_MS - elapsedMs);
+  return { calls: Math.max(1, Math.ceil(left / capMs)), basis: known ? 'at the current capture pace' : 'from the usual 15 to 25 minutes of a final, because the capture has no pace yet' };
+}
+
 /** The luma spread (0 to 1) of the pixels between the 2nd and the 98th percentile: film grain stays inside it, text and shapes do not. */
 function lumaSpread(luma) {
   const counts = new Array(256).fill(0);

@@ -103,3 +103,13 @@ test('isFlat: grain over one colour is still flat, a faint gradient is flat, a l
   const text = Uint8Array.from({ length: 1000 }, (_, i) => (i % 10 === 0 ? 255 : 20));
   assert.ok(!isFlat({ hist: hist(0.6), grid: Float64Array.from([0.5, 0.5]), luma: text }));
 });
+
+test('waitCallsLeft counts the wait calls from the capture eta, else from the usual final time', async () => {
+  const { waitCallsLeft } = await import('../../harness/lib/ship-status.mjs');
+  const cap = 540_000;
+  assert.deepEqual(waitCallsLeft({ etaMs: 600_000, elapsedMs: 0, capMs: cap }).calls, 2);
+  assert.equal(waitCallsLeft({ etaMs: 60_000, elapsedMs: 0, capMs: cap }).calls, 1);
+  const early = waitCallsLeft({ etaMs: null, elapsedMs: 120_000, capMs: cap });
+  assert.equal(early.calls, 2);
+  assert.match(early.basis, /no pace yet/);
+});

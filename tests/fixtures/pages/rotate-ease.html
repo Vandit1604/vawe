@@ -1,0 +1,20 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="2">
+<title>Rotate ease</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; overflow: clip; }
+  .box { position: absolute; left: 40%; top: 40%; width: 20%; height: 20%; background: #fc3; }
+</style>
+</head>
+<body>
+<div class="box" id="b"></div>
+<script>
+document.getElementById('b').animate(
+  [{ rotate: '0deg', easing: 'cubic-bezier(0.2,0.8,0.2,1)' }, { rotate: '90deg' }],
+  { duration: 2000, fill: 'both' });
+</script>
+</body>
+</html>
