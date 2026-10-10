@@ -8,7 +8,7 @@ Checked 2026-10-10 by running `bin/vawe new <tmp> --request "a 10 s launch film 
   unchosen palette, one bundled face, and `data-world` sections cut by length (`starterBeats`, `harness/lib/worlds.mjs`:
   one world every 2 s or so, every third world wordless). No kit, no motion, no sound.
 - `brief.md`: built from the routed template `prompts/<t>.md` (`--from`, or chosen from `--request` and the length by
-  `harness/lib/route.mjs`). The template gives the Questions, Spec tables and Pitfalls. The shared skeleton adds Taken from,
+  `harness/cli/route.mjs`). The template gives the Questions, Spec tables and Pitfalls. The shared skeleton adds Taken from,
   Directions, Signature, Design system and kit, States, Board, Motion pass.
 - `directions.html`: three starter stills (type, object, graphic).
 - `assets/`: the starter face. `--ref` writes SPEC.md instead (reference rebuild).
