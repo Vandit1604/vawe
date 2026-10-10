@@ -13,7 +13,7 @@ const MIN_BURST_FRAMES = 2;
 const round = (n, d = 3) => +n.toFixed(d);
 const median = (xs) => { const s = [...xs].sort((a, b) => a - b); return s.length ? s[s.length >> 1] : 0; };
 
-/** { mu, sigma } of an energy series [{ t, v }]: the median and the robust spread (1.4826 times the MAD) of its quietest fifth. Pure. */
+/** { mu, sigma } of an energy series [{ t, v }]: the median and the robust spread (1.4826 times the MAD) of its quietest fifth. */
 export function noiseOf(series) {
   if (!series.length) return { mu: 0, sigma: 0 };
   const quiet = series.map((p) => p.v).sort((a, b) => a - b).slice(0, Math.max(3, Math.ceil(series.length * NOISE_SHARE)));
@@ -21,10 +21,10 @@ export function noiseOf(series) {
   return { mu, sigma: 1.4826 * median(quiet.map((v) => Math.abs(v - mu))) };
 }
 
-/** The series with each value replaced by the median of itself and its two neighbours: a one-frame spike (an encoder keyframe, a pop) goes, a move of two frames or more stays. Pure. */
+/** The series with each value replaced by the median of itself and its two neighbours: a one-frame spike (an encoder keyframe, a pop) goes, a move of two frames or more stays. */
 export const despike = (series) => series.map((p, i) => ({ t: p.t, v: median([series[Math.max(0, i - 1)].v, p.v, series[Math.min(series.length - 1, i + 1)].v]) }));
 
-/** The sample spacing of a series in seconds (the median gap). Pure. */
+/** The sample spacing of a series in seconds (the median gap). */
 export function stepOf(series) {
   const gaps = series.slice(1).map((p, i) => p.t - series[i].t).filter((g) => g > 1e-6);
   return gaps.length ? median(gaps) : 0.1;
@@ -34,7 +34,7 @@ export function stepOf(series) {
  * What a per-frame energy series [{ t, v }] says about the window [from, to): the bursts of motion (a burst opens above mu + 6 sigma and
  * closes below mu + 2.5 sigma, both raised to a share of the window's peak so a noise-free file still has a scale), bursts closer than
  * 0.17 s joined (a spring turning at its far end is one move), a burst of one frame dropped (that is a cut or a pop). Energy of frame k
- * is the change from frame k-1, so a burst starts one step before its first sample. Pure.
+ * is the change from frame k-1, so a burst starts one step before its first sample.
  */
 export function readMotion(raw, from, to, noise = noiseOf(raw)) {
   const series = despike(raw);

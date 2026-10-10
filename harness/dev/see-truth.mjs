@@ -1,14 +1,11 @@
 #!/usr/bin/env node
-// harness/dev/see-truth.mjs: score today's measuring tools against fixtures whose properties are known by construction.
+// Score the measuring tools against fixtures whose properties are known by construction.
 //   node harness/dev/see-truth.mjs [--only <fixture>] [--reuse] [--json] [--tool old|see]
-// Each fixture is tests/fixtures/truth/<name>/page.html plus truth.json (the known values and the tolerances a good tool
-// should meet). A fixture renders with harness/media/render-page.mjs in its default draft mode (960x540, 30 fps, silent;
-// the sound fixture adds --audio; the look fixture is a final render). That is the render `vawe dev` runs, without the
-// page checks, which cost minutes on a busy machine. The tools then run on the mp4 or the page and a table of
-// measure | truth | measured | error | tolerance | pass/fail | tool is printed. --reuse keeps an mp4 newer than its page.
-// A measure with no tool today is listed as "no tool"; a verb that is not on main yet is "not available".
-// `vawe see` is graded on the same measures (tool column "vawe see"); --tool old or --tool see prints one side only.
-// Fixtures live in tests/fixtures/truth/; mp4s, spec folders and PNGs go to out/see-truth/.
+// Each fixture is tests/fixtures/truth/<name>/page.html plus truth.json (the known values and the tolerances). It renders as `vawe dev` does
+// (960x540, 30 fps, silent; the sound fixture adds --audio; the look fixture is a final render) without the page checks, then the tools run
+// and a table of measure | truth | measured | error | tolerance | pass/fail | tool is printed. --reuse keeps an mp4 newer than its page.
+// A measure with no tool is "no tool"; a verb that is missing is "not available". --tool old or --tool see prints one side only.
+// mp4s, spec folders and PNGs go to out/see-truth/.
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -23,8 +20,6 @@ const EPS = 1e-9;
 const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
 const r = (v, d = 3) => (v == null ? null : Math.round(v * 10 ** d) / 10 ** d);
 
-// ---------- rows ----------
-
 /** One scored measure. Numbers pass inside the tolerance; strings pass when equal; a missing value fails. */
 export function scoreRow({ fixture, measure, tool, truth, measured, tolerance }) {
   const base = { fixture, measure, tool, truth, tolerance: tolerance ?? null };
@@ -35,16 +30,13 @@ export function scoreRow({ fixture, measure, tool, truth, measured, tolerance })
   return { ...base, measured: m, error, status: Math.abs(error) <= (tolerance ?? 0) + EPS ? 'pass' : 'fail' };
 }
 
-/** A measure the repo has no tool for. */
 export const noTool = (fixture, measure, truth, tolerance) => ({ fixture, measure, tool: 'no tool', truth, tolerance: tolerance ?? null, measured: null, error: null, status: 'no tool' });
 
-/** A measure whose verb is not on main yet. */
 export const notAvailable = (fixture, measure, truth, tool, tolerance) => ({ fixture, measure, tool, truth, tolerance: tolerance ?? null, measured: null, error: null, status: 'not available' });
 
 const cell = (v) => (v == null ? '-' : typeof v === 'number' ? String(r(v, 3)) : String(v));
 const pad = (s, n) => s + ' '.repeat(Math.max(0, n - s.length));
 
-/** The accuracy table as text: one line per row. */
 export function formatTable(rows) {
   const head = ['measure', 'truth', 'measured', 'error', 'tolerance', 'result', 'tool'];
   const body = rows.map((x) => [`${x.fixture}: ${x.measure}`, cell(x.truth), cell(x.measured), x.error == null ? '-' : `${x.error >= 0 ? '+' : ''}${r(x.error, 3)}`,
@@ -73,8 +65,6 @@ export function formatSummary(rows) {
   lines.push(`weakest: ${weakest.join(', ')}`);
   return lines.join('\n');
 }
-
-// ---------- parsing today's text output ----------
 
 /** `vawe velocity` summary: one entry per element with its position move. */
 export function parseVelocity(text) {
@@ -122,8 +112,6 @@ export function parseLufs(text) {
   return m ? Number(m[1]) : null;
 }
 
-// ---------- maths ----------
-
 /** Display luma 0..255 of a grey whose CIE L* is given. */
 export function lumaOfL(L) {
   const f = (L + 16) / 116;
@@ -139,8 +127,7 @@ export const heights = (a, b, aspect) => Math.hypot((a.x - b.x) * aspect, a.y - 
 
 const nearest = (list, value, key = (x) => x) => list.reduce((best, x) => (best === undefined || Math.abs(key(x) - value) < Math.abs(key(best) - value) ? x : best), undefined);
 
-// ---------- row builders, one per fixture ----------
-// Each takes truth.json and the parsed tool results (null when a tool failed) and returns rows. Pure.
+// Each takes truth.json and the parsed tool results (null when a tool failed) and returns rows.
 
 export function cutsRows(t, { spec, timeline }) {
   const F = 'cuts', tol = t.tolerance;
@@ -303,8 +290,7 @@ export function lookRows(t, { look }) {
   ];
 }
 
-// ---------- rows for `vawe see`, one builder per fixture ----------
-// Each takes truth.json and the see.json of the mp4 (`a`) and, where the page matters, of the page (`p`). Pure.
+// Each takes truth.json and the see.json of the mp4 (`a`) and, where the page matters, of the page (`p`).
 
 const SEE = 'vawe see';
 
@@ -495,8 +481,6 @@ export function lookSeeRows(t, { a }) {
     scoreRow({ fixture: F, measure: 'RGB stripe period (css px)', tool: SEE, truth: v.stripePeriodPx, measured: f?.texture?.striped ? f.texture.period : null, tolerance: tol.stripePeriodPx }),
   ];
 }
-
-// ---------- running the tools ----------
 
 const sh = (cmd, args, opts = {}) => {
   const res = spawnSync(cmd, args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26, ...opts });

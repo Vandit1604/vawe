@@ -1,4 +1,4 @@
-// tests/dev/see-truth.test.mjs: the scorer's own maths and table on canned tool results. No renders.
+// The scorer's own maths and table on canned tool results. No renders.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';

@@ -1,11 +1,10 @@
 // The waiver syntax and its vetting. A page declares a broken rule in <script id="authoring"> as "allow" entries (a check's code, or
 // code@instance) with a "_why" reason each. A reason that is generic, names no place or no measure, or repeats across the page does not waive.
-// Pure.
 
 /** The one wording of the waiver syntax a draft line ends with: `entry` is the allow entry (a code, or code@instance). */
 export const waiverHint = (entry) => `waive: "allow": ["${entry}"], "_why": {"${entry}": "<where: a world id or a second, and what you measured, with its unit>"} in <script id="authoring">`;
 
-/** Codes that waive nothing now, each with what to write instead. */
+/** Codes that waive nothing, each with what to write instead. */
 export const RETIRED_CODES = {
   'dead-air': 'it covered four checks at once: waive the one that fired, "static-window@a-b", "tile-run@a-b", "tail-tiles@a-b" or "world-held@a-b"',
   glow: 'no check emits it, so it waives nothing: remove it',

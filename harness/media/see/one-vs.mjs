@@ -18,7 +18,6 @@ const lengthOf = (m) => med(m.structure.shots.map((s) => s.length));
 const lens = (a, option, detail) => (a.source.lens ? `${option} ${detail} (core/surfaces/lens.js)` : `film the screen with the lens (prompts/moves/lens.md), then ${option} ${detail}`);
 const worldWord = (m) => (m.source.kind === 'page' ? 'world' : 'shot');
 
-/** A delta row; `advice` is a string or null. */
 const tidy = (v) => (typeof v === 'number' ? round(v, 3) : v);
 const row = (section, measure, a, b, advice) => ({ section, measure, a: tidy(a), b: tidy(b), advice: advice ?? null });
 
@@ -162,7 +161,6 @@ export function compareSides(a, b) {
   return [...structureRows(a, b), ...motionRows(a, b), ...lookRows(a, b), ...typeRows(a, b), ...soundRows(a, b)].map((r) => ({ ...r, delta: delta(r.a, r.b) }));
 }
 
-/** The vs section as lines: one table of deltas, then the advice lines. Pure. */
 export function vsLines(rows, names) {
   const cell = (v) => (v == null ? '-' : String(v));
   const w = [Math.max(7, ...rows.map((r) => r.measure.length)), Math.max(names[0].length, ...rows.map((r) => cell(r.a).length)), Math.max(names[1].length, ...rows.map((r) => cell(r.b).length))];

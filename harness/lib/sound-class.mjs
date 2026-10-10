@@ -1,4 +1,4 @@
-// What a hit sounds like: click, pop, swish, impact or sustained, from the samples after its attack. Pure.
+// What a hit sounds like: click, pop, swish, impact or sustained, from the samples after its attack.
 // The two readings are the decay (how long the envelope takes to fall to a fifth of its peak) and the brightness
 // (zero crossings per second, about twice the dominant frequency of a tone and a high figure for noise).
 

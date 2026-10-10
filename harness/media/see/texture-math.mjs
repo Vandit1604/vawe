@@ -38,7 +38,7 @@ function fft(re, im) {
 const hann = (n) => Float64Array.from({ length: n }, (_, i) => 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / n));
 const signed = (k) => (k < BLOCK / 2 ? k : k - BLOCK);
 
-/** The power spectrum (BLOCK x BLOCK, row = vertical frequency) of a BLOCK x BLOCK luma block, Hann-windowed, mean removed. Pure. */
+/** The power spectrum (BLOCK x BLOCK, row = vertical frequency) of a BLOCK x BLOCK luma block, Hann-windowed, mean removed. */
 export function powerSpectrum(block) {
   const w = hann(BLOCK);
   const n = BLOCK * BLOCK;
@@ -63,7 +63,7 @@ export function powerSpectrum(block) {
 
 const median = (a) => { const s = Float64Array.from(a).sort(); return s[s.length >> 1]; };
 
-/** { fx, fy, ratio, axisX, axisY } of a power spectrum: the strongest frequency with a period of 2 to 16 px (cycles per block), its power over the median power of that band, and the strongest power on each axis (as a ratio and as a share of the peak). Pure. */
+/** { fx, fy, ratio, axisX, axisY } of a power spectrum: the strongest frequency with a period of 2 to 16 px (cycles per block), its power over the median power of that band, and the strongest power on each axis (as a ratio and as a share of the peak). */
 export function spectrumPeak(power) {
   const band = [];
   let best = { p: -1, fx: 0, fy: 0 };
@@ -85,7 +85,7 @@ export function spectrumPeak(power) {
   return { fx: best.fx, fy: best.fy, ratio: best.p / med, axisX: { ratio: ax.p / med, share: ax.p / best.p, f: ax.f }, axisY: { ratio: ay.p / med, share: ay.p / best.p, f: ay.f } };
 }
 
-/** { kind, period, angle, ratio, text } from a spectrum peak: stripes, lines, a grid, a diagonal pattern or none. Pure. */
+/** { kind, period, angle, ratio, text } from a spectrum peak: stripes, lines, a grid, a diagonal pattern or none. */
 export function describePattern(peak) {
   const f = Math.hypot(peak.fx, peak.fy);
   const period = f ? BLOCK / f : 0;
@@ -99,7 +99,7 @@ export function describePattern(peak) {
   return { kind: 'diagonal', period, angle, ratio: peak.ratio };
 }
 
-/** The amplitude and phase (radians) of the (fx, fy) frequency in one channel of a block. Pure. */
+/** The amplitude and phase (radians) of the (fx, fy) frequency in one channel of a block. */
 export function channelPhase(block, fx, fy) {
   const w = hann(BLOCK);
   let re = 0, im = 0;
@@ -115,7 +115,7 @@ export function channelPhase(block, fx, fy) {
 
 const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
 
-/** { striped, spreadDeg } for the R, G and B phases at the peak: striped when two channels sit more than PHASE_SPLIT radians apart. Pure. */
+/** { striped, spreadDeg } for the R, G and B phases at the peak: striped when two channels sit more than PHASE_SPLIT radians apart. */
 export function channelsSplit(r, g, b) {
   const chans = [r, g, b];
   const top = Math.max(...chans.map((c) => c.amp));

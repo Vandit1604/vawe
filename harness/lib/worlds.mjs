@@ -20,7 +20,7 @@ const wordCount = (text) => text.split(/\s+/).filter(Boolean).length;
 /** Seconds to read the texts one world shows (rows read together: harness/lib/read-hold.mjs rowsNeed), 0 for none. Pure. */
 export const readNeed = (texts) => (texts.length ? round(rowsNeed(texts.map((t) => lineNeed(wordCount(t))))) : 0);
 
-/** The longest a world may stay: the world-turns limit, or longer when its own text needs more time to read. The text counts for at most the readable-hold ceiling (one line holds about 5 s): padding words buy no more. Pure. */
+/** The longest a world may stay: the world-turns limit, or longer when its own text needs more time to read. The text counts for at most the readable-hold ceiling (one line holds about 5 s): padding words buy no more. */
 export const worldLimit = (span, max = TURN_SECONDS_MAX) => Math.max(max, Math.min(span.readNeed ?? 0, HOLD_RULE.ceiling) + READ_MARGIN_S);
 
 /** Every world id in page order. Pure. */
@@ -66,7 +66,7 @@ export function insideTextWorlds(spans, run) {
   return reached >= run.b - SPAN_SLACK_S;
 }
 
-/** The spans with adjacent worlds that show the same ground, words and things merged into one: a world turns when its content changes, not when its id does. Pure. */
+/** The spans with adjacent worlds that show the same ground, words and things merged into one: a world turns when its content changes, not when its id does. */
 export function mergeSameContent(spans) {
   const out = [];
   for (const s of spans.filter((x) => x.start != null).sort((a, b) => a.start - b.start)) {
@@ -77,7 +77,7 @@ export function mergeSameContent(spans) {
   return out;
 }
 
-/** The world-held problems of measured spans: one { len, text } per world visible longer than `max` seconds, outside a declared hold. Worlds with the same content count as one. Pure. */
+/** The world-held problems of measured spans: one { len, text } per world visible longer than `max` seconds, outside a declared hold. Worlds with the same content count as one. */
 export function heldWorlds(spans, max = TURN_SECONDS_MAX, authoring = {}) {
   const held = insideHold(authoring, 'world-held');
   return mergeSameContent(spans)

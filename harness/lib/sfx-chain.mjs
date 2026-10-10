@@ -1,4 +1,4 @@
-// The ffmpeg audio filter that trims, pitches, fades and levels one sound effect. Pure.
+// The ffmpeg audio filter that trims, pitches, fades and levels one sound effect.
 const RATE = 44100;
 
 /** The playback rate of a pitch shift in semitones: +12 is twice as fast and an octave up. */

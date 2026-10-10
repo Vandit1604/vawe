@@ -114,7 +114,7 @@ export function textProblems(samples, ctx, rules = ctx.rules ?? RULES) {
 
 /**
  * Advice on text hidden from the checks. `hidden` is { total (text nodes on the page), marked (under aria-hidden or data-chrome),
- * reads (marked nodes that are not texture by measure, so they are checked as copy), sample (a few of their words) }. Pure.
+ * reads (marked nodes that are not texture by measure, so they are checked as copy), sample (a few of their words) }.
  */
 export function hiddenTextLines(hidden, texture = TEXTURE) {
   if (!hidden?.total) return [];
@@ -144,7 +144,7 @@ export function soundSummary(level, rules = RULES) {
 
 /**
  * The fix for a mix outside the band. The gap in dB is named, but the fix is about the cues against each other: a shift of every data-gain
- * moves the loudness and leaves the balance as it was (harness/lib/cue-balance.mjs). Pure.
+ * moves the loudness and leaves the balance as it was (harness/lib/cue-balance.mjs).
  * `level`: { I, TP, cues? } as measured.
  */
 export function loudnessFix(level, rules = RULES) {

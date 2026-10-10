@@ -3,7 +3,7 @@ import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 
 export const PEAK_DBFS = LIMITS['sound-level'].peak_dbfs;
 
-/** The cue with the highest peak, from [{ name, at, peakDb }], as `the loudest cue "name" at 2.4 s`; plain words without cues. Pure. */
+/** The cue with the highest peak, from [{ name, at, peakDb }], as `the loudest cue "name" at 2.4 s`; plain words without cues. */
 export function loudestCue(cues) {
   if (!cues?.length) return 'the loudest cue';
   const c = cues.reduce((a, b) => (b.peakDb > a.peakDb ? b : a));

@@ -1,4 +1,4 @@
-// tests/media/critique-summary.test.mjs: the grouped findings, the closing summary and the per-film output paths of `vawe critique`.
+// The grouped findings, the closing summary and the per-film output paths of `vawe critique`.
 //   node --test tests/media/critique-summary.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

@@ -112,5 +112,4 @@ export function noOverlap(records, { chainMin = OVERLAP.chain_min, gap = LIMITS.
     fix: 'start each move while the last still settles, at 60 to 70 percent of it: layer(main, secondary) from core/motion/presets.js' }));
 }
 
-/** The findings together. */
 export const motionVariety = (records) => [...entranceDirection(records), ...easeCount(records), ...lockstep(records), ...followThrough(records), ...noOverlap(records)];

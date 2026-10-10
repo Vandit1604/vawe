@@ -1,4 +1,4 @@
-// harness/lib/ref-measure/camera.mjs: the camera of a film between two frames: zoom, pan and turn of the whole picture. A pure function of
+// The camera of a film between two frames: zoom, pan and turn of the whole picture. A pure function of
 // two grey frames (Uint8Array, w by h); nothing here starts ffmpeg or a browser.
 
 export const halfRes = (g, w, h) => {

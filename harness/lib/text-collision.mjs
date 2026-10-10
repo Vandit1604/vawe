@@ -58,7 +58,7 @@ const movingIds = (cur, prev, next) => {
 /**
  * Two different texts whose boxes overlap for at least CROSS_SAMPLES consecutive samples while both move: the words cross during a move,
  * which the settled check skips. `samples` are the dense text samples (harness/media/draft-check.mjs sampleTextMotion). Texts of one
- * source, of two worlds, and pairs the settled check already names are skipped. Pure.
+ * source, of two worlds, and pairs the settled check already names are skipped.
  */
 export function textCrossings(samples, settled = []) {
   const named = new Set(settled.map((c) => [c.a, c.b].sort().join('\n')));
@@ -88,7 +88,7 @@ export function textCrossings(samples, settled = []) {
   return found.map(({ from, to, a, b }) => ({ t: from, to, a, b }));
 }
 
-/** One advice line per collision, naming the time, both texts and the fix. `moving` is the dense text samples, for the crossings during a move. Pure. */
+/** One advice line per collision, naming the time, both texts and the fix. `moving` is the dense text samples, for the crossings during a move. */
 export function textCollisionLines(samples, moving = []) {
   const settled = textCollisions(samples);
   const crossings = textCrossings(moving, settled);

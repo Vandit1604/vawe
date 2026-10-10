@@ -25,10 +25,9 @@ export const median = (list) => {
 const r1 = (n) => Math.round(n * 10) / 10;
 const r2 = (n) => Math.round(n * 100) / 100;
 
-/** The gaussian sigma (px) of a glow behind a sharp edge from its 90 to 10 % spread: the glow is half of full white at the edge, so the spread runs to 1.28 sigma. Pure. */
+/** The gaussian sigma (px) of a glow behind a sharp edge from its 90 to 10 % spread: the glow is half of full white at the edge, so the spread runs to 1.28 sigma. */
 export const bloomSigma = (spreadPx) => r1(spreadPx / 1.28);
 
-/** The first problem in the arguments of look, or null. Pure. */
 export function lookProblem({ from, to }) {
   if (from !== undefined && !(Number.isFinite(Number(from)) && Number(from) >= 0)) return `--from is not a number of seconds: "${from}"`;
   if (to !== undefined && !(Number.isFinite(Number(to)) && Number(to) > 0)) return `--to is not a number of seconds: "${to}"`;
@@ -36,7 +35,7 @@ export function lookProblem({ from, to }) {
   return null;
 }
 
-/** The flashes in a series of per-frame mean luma: runs where the mean sits more than `jump` above the running median. Each is { frame, at, frames, peak, base, rise, decay } with the length counted where the mean is above a quarter of the excess. Pure. */
+/** The flashes in a series of per-frame mean luma: runs where the mean sits more than `jump` above the running median. Each is { frame, at, frames, peak, base, rise, decay } with the length counted where the mean is above a quarter of the excess. */
 export function flashProfile(means, fps, jump = FLASH_JUMP, half = FLASH_HALF_WINDOW) {
   const base = means.map((_, i) => median(means.slice(Math.max(0, i - half), i + half + 1)));
   const out = [];
@@ -57,7 +56,7 @@ export function flashProfile(means, fps, jump = FLASH_JUMP, half = FLASH_HALF_WI
   return out;
 }
 
-/** The share (0 to 100) of pixels at or above `level` in a luma plane. Pure. */
+/** The share (0 to 100) of pixels at or above `level` in a luma plane. */
 export function clippedShare(luma, level = CLIP_LEVEL) {
   let n = 0;
   for (let i = 0; i < luma.length; i++) if (luma[i] >= level) n++;
@@ -72,7 +71,7 @@ function crossing(v, level, from, to) {
   return null;
 }
 
-/** Bloom spreads and halo colour along one line of a frame (`base` index of the first pixel, `step` between pixels, `n` pixels): the distance in px over which luma falls from 90% to 10% into the dark side of each bright edge. Pure. */
+/** Bloom spreads and halo colour along one line of a frame (`base` index of the first pixel, `step` between pixels, `n` pixels): the distance in px over which luma falls from 90% to 10% into the dark side of each bright edge. */
 function bloomOnLine(P, base, step, n, out) {
   const L = (i) => P.L[base + i * step];
   const C = (i, c) => P.rgb[(base + i * step) * 3 + c];
@@ -99,7 +98,7 @@ function bloomOnLine(P, base, step, n, out) {
   }
 }
 
-/** The signed offsets (px, blue minus red) of high-contrast edges along one line, appended to `out`. Pure. */
+/** The signed offsets (px, blue minus red) of high-contrast edges along one line, appended to `out`. */
 function chromaOnLine(P, base, step, n, out) {
   const L = (i) => P.L[base + i * step];
   const ch = (c) => (i) => P.rgb[(base + i * step) * 3 + c];
@@ -124,7 +123,7 @@ function chromaOnLine(P, base, step, n, out) {
   }
 }
 
-/** { spreads, halo, dx, dy }: the bloom spreads (both sides, both axes), halo colours and the blue-minus-red offsets (along x and y) of one frame. Pure. */
+/** { spreads, halo, dx, dy }: the bloom spreads (both sides, both axes), halo colours and the blue-minus-red offsets (along x and y) of one frame. */
 export function edgeSamples(P, stride = 2) {
   const out = { spreads: [], halo: [], dx: [], dy: [] };
   for (let y = 0; y < P.h; y += stride) {
@@ -142,7 +141,7 @@ export function edgeSamples(P, stride = 2) {
 
 const HUES = [[15, 'red'], [45, 'orange'], [70, 'yellow'], [160, 'green'], [200, 'cyan'], [260, 'blue'], [320, 'magenta'], [346, 'pink'], [361, 'red']];
 
-/** { hue, sat, name } of an rgb mean: neutral when the saturation is below 0.15. Pure. */
+/** { hue, sat, name } of an rgb mean: neutral when the saturation is below 0.15. */
 export function hueOf(r, g, b) {
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
   const sat = max > 0 ? (max - min) / max : 0;
@@ -153,7 +152,7 @@ export function hueOf(r, g, b) {
   return { hue: Math.round(hue), sat: r2(sat), name: HUES.find(([h]) => hue < h)[1] };
 }
 
-/** The numbers of a film from its parts: flashes, per-frame clip shares, edge samples and the best texture. Pure. */
+/** The numbers of a film from its parts: flashes, per-frame clip shares, edge samples and the best texture. */
 export function summarise({ means, fps, clips, edges, texture }) {
   const spreads = edges.flatMap((e) => e.spreads);
   const dx = edges.flatMap((e) => e.dx), dy = edges.flatMap((e) => e.dy);
@@ -183,7 +182,7 @@ const patternText = (t) => {
 };
 const chromaText = (c) => (c ? `median dx ${c.dx} px, dy ${c.dy} px; ${c.share}% of ${c.n} edges off by 1 px or more` : 'too few edges');
 
-/** Rows [label, a, b] of the look table; `b` is null for one film. Pure. */
+/** Rows [label, a, b] of the look table; `b` is null for one film. */
 export function lookRows(a, b) {
   const both = (fn) => [fn(a), b ? fn(b) : null];
   const rows = [
@@ -204,7 +203,6 @@ export function lookRows(a, b) {
   return rows;
 }
 
-/** The look table as text lines. Pure. */
 export function lookTable(a, b, names = ['a', 'b']) {
   const rows = lookRows(a, b);
   const w0 = Math.max(...rows.map((r) => r[0].length));
@@ -216,7 +214,7 @@ export function lookTable(a, b, names = ['a', 'b']) {
 const biggest = (m) => m.flashes.reduce((best, f) => (!best || f.peak - f.base > best.peak - best.base ? f : best), null);
 const lengthS = (f, m) => f.frames / m.fps;
 
-/** Advice lines for a film `a` (yours) against a reference `b`. Each names the number to change. Pure. */
+/** Advice lines for a film `a` (yours) against a reference `b`. Each names the number to change. */
 export function advise(a, b) {
   const out = [];
   const fa = biggest(a), fb = biggest(b);

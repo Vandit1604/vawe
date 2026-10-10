@@ -16,10 +16,9 @@ const die = (m) => { console.error(`error: ${m}`); process.exit(2); };
 const EVEN_TILES = 12;
 const TILE_W = 480;
 
-/** The tile label: the second, then the world id when there is one. Pure. */
 export const tileLabel = (t, world) => `${t}s${world ? ` ${world}` : ''}`;
 
-/** `n` seconds spread over the film, centred in equal parts. Pure. */
+/** `n` seconds spread over the film, centred in equal parts. */
 export const evenSeconds = (dur, n = EVEN_TILES) => Array.from({ length: n }, (_, i) => +((i + 0.5) * dur / n).toFixed(2));
 
 function videoSize(file) {
@@ -29,7 +28,7 @@ function videoSize(file) {
   return { w, h };
 }
 
-/** The middle of each world that shows, or `evenSeconds` for a page with none. Pure. */
+/** The middle of each world that shows, or `evenSeconds` for a page with none. */
 export function storyboardSeconds(spans, dur) {
   const mids = worldRows(spans).map((w) => +((w.start + w.end) / 2).toFixed(2));
   return mids.length ? mids : evenSeconds(dur);

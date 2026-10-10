@@ -1,4 +1,4 @@
-// harness/lib/lane-budget.mjs: how many capture lanes (one Chrome each) this machine can carry right now.
+// How many capture lanes (one Chrome each) this machine can carry right now.
 // lanes = min(cores - 1, free memory / LANE_MB, free process slots / LANE_PROCS, MAX_LANES), at least 1.
 import os from 'node:os';
 import fs from 'node:fs';

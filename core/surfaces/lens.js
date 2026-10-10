@@ -1,32 +1,8 @@
-// core/surfaces/lens.js: films a flat screen like a camera pointed at a physical monitor.
-//
-//   import { lens, canvasSource, htmlSource, PALETTES } from '/core/surfaces/lens.js';
-//   const cam = lens(htmlSource(document.getElementById('screen')), {
-//     aim: [960, 540], zoom: (t) => 1 + 0.4 * t, tiltY: 0.35,
-//     dof: { blur: 0.6, focus: [1200, 400], blades: 6 }, palette: { stops: PALETTES.phosphor },
-//     bloom: { strength: 1.2, radius: 60 }, grid: { layout: 'triad' },
-//     aberration: { amount: (t) => 2 + 6 * lock(t) },
-//     fit: { keep: [1200, 400], cover: true },
-//   });
-//   vawe.onFrame((t) => cam.draw(t));            // awaited by the seek: the source may decode
-//   const at = cam.project(x, y, t);             // { x, y, scale, depth, visible } in CSS px
-//
-// The SOURCE is the screen pixels in source px (a page's 1920x1080 for example). The camera sees a plane
-// at distance 1 with focal length `focal`. Light is linear from the first tap to the last pass:
-//   1 scene pass: perspective ray -> aperture-shaped depth of field with chromatic aberration -> palette
-//     -> LED/CRT panel mask (a soft dot per subpixel, projected with the plane) -> half-float target;
-//   2 bloom: the target is thresholded with a soft knee, downsampled 6 levels (13-tap) and upsampled
-//     (tent), the levels weighted by `bloom.radius`: a core plus a wide tail, energy normalised;
-//   3 final pass: add bloom, exposure, vignette, tone map (overexposure turns white), sRGB, grain.
+// Films a flat screen like a camera pointed at a physical monitor. Usage: prompts/moves/lens.md.
 // Any option value may be a number, an array, or a function of the seek time t returning one.
-// Pixel sizes are CSS px of the page, so a draft (half-size capture) and a final look the same.
-// draw(t) paints once and starts no loop: time is the seek. Everything random is hashed from `seed` and
-// floor(t * fps), so a frame is a pure function of t.
-//
-// The technique (one shader that rays onto a tilted plane, focuses by depth difference with golden-angle
-// taps, maps brightness through a palette, adds bloom and an RGB subpixel mask) is learned from
-// ff-tracking's lens shader (MIT); the bloom chain is the 2014 Call of Duty: Advanced Warfare filter
-// (Jimenez). The code here is our own.
+// Pixel sizes are CSS px, so a draft (half-size capture) and a final look the same. draw(t) paints once and starts no loop;
+// everything random is hashed from `seed` and floor(t * fps).
+// The technique is learned from ff-tracking's lens shader (MIT) and the bloom chain of Call of Duty: Advanced Warfare (Jimenez, 2014). The code is our own.
 import { canvasSource, htmlSource } from './lens-source.js';
 
 export { canvasSource, htmlSource };

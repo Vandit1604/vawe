@@ -61,7 +61,6 @@ export function footerLine({ verb, code, reason, seconds }) {
   return code === 0 ? `vawe: ${verb} ok in ${seconds.toFixed(1)}s` : `vawe: ${verb} FAILED (${reason}) in ${seconds.toFixed(1)}s`;
 }
 
-/** True when the records hold a call of `verb` that succeeded after `sinceMs`. */
 export const verbRanSince = (records, verb, sinceMs) => records.some((r) => r.cmd === 'verb' && r.verb === verb && r.exitCode === 0 && Date.parse(r.start ?? r.at) > sinceMs);
 
 /** A child script reports a fact about its call (`slotWaitS`) to the bin/vawe process that started it, through the file VAWE_VERB_NOTES names. A detached job outlives the verb that removed the file; with no reader left the note is dropped. */

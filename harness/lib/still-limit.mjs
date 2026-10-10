@@ -6,7 +6,7 @@ import { splitWaiver, entryHasReason, waiverHint } from './waivers.mjs';
 
 export const STILL_SEC = LIMITS['live-hold'].still_limit_s;
 
-/** The [a, b] second ranges the page declares as holds for check `code`, each with its _why. Pure. */
+/** The [a, b] second ranges the page declares as holds for check `code`, each with its _why. */
 export function declaredHolds(authoring = {}, code = 'static-window') {
   const { allow = [] } = authoring;
   const holds = [];
@@ -33,7 +33,7 @@ export function stillText(r, limit = STILL_SEC) {
   return `static window ${r.a}-${r.b} s (${r.len} s, limit ${limit} s): ${why}; give the hold an element motion (typing, a counter, a glint), not a camera drift; ${waiverHint(`static-window@${r.a}-${r.b}`)}`;
 }
 
-/** A predicate for { a, b } second ranges that lie inside one hold declared for check `code`. Pure. */
+/** A predicate for { a, b } second ranges that lie inside one hold declared for check `code`. */
 export function insideHold(authoring = {}, code = 'static-window') {
   const holds = declaredHolds(authoring, code);
   return (r) => holds.some(([a, b]) => a <= r.a + 1e-9 && r.b <= b + 1e-9);

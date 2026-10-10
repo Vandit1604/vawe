@@ -10,7 +10,7 @@ const ZOOM = 8;
 const HALF_W = 960;
 const RELATIVE = [0.2, 0.5, 0.8];
 
-/** The moments to pair: `--at` (b at `--at-b` or the same second), else the first flash of each and three relative positions. Pure. */
+/** The moments to pair: `--at` (b at `--at-b` or the same second), else the first flash of each and three relative positions. */
 export function pairMoments(a, b, opts) {
   if (opts.at != null) return [{ label: `at ${opts.at} s`, ta: opts.at, tb: opts.atB ?? opts.at }];
   const out = [];

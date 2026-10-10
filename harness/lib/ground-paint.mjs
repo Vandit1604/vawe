@@ -1,6 +1,6 @@
 // How much a ground layer really paints, from the computed style the layout reader takes (harness/media/draft-check.mjs layoutBoxes).
 // Box area says a layer exists; this says it differs from the ground behind it. Grain, a blend overlay and a faint gradient paint
-// almost nothing: they are texture, not a living ground. Pure.
+// almost nothing: they are texture, not a living ground.
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 
 const L = LIMITS['living-ground'];
@@ -46,5 +46,4 @@ function layerStrength(b, ground) {
   return strength * b.op;
 }
 
-/** True when the layer paints at least the limit's strength. */
 export const paintsGround = (b, ground) => layerStrength(b, ground) >= L.ground_layer_strength_min;

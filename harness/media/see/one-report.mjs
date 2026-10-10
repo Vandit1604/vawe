@@ -158,7 +158,7 @@ function soundSection(m) {
   return L;
 }
 
-/** The numbers of one second `t` of a film: its shot, the moves under way, the flash, the words on screen and the sounds close to it. Pure. */
+/** The numbers of one second `t` of a film: its shot, the moves under way, the flash, the words on screen and the sounds close to it. */
 export function momentLines(m, t) {
   const shot = m.shots.find((s) => t >= s.start - 1e-6 && t < s.end + 1e-6);
   if (!shot) return [`second ${t.toFixed(2)}: between shots (inside a flash or a change)`];
@@ -198,7 +198,7 @@ function imagesSection(m, images, momentImgs) {
   return L;
 }
 
-/** What the code does not decide: the reader looks at the named images. Pure. */
+/** What the code does not decide: the reader looks at the named images. */
 export function notMeasured(m) {
   const L = [];
   if (!m.type.ocr) L.push('Text: not read (run without --no-ocr).');
@@ -210,7 +210,7 @@ export function notMeasured(m) {
   return L;
 }
 
-/** The see.md of one film as an array of lines. `images` and `momentImgs` come from one-images. Pure. */
+/** The see.md of one film as an array of lines. `images` and `momentImgs` come from one-images. */
 export function seeReport(m, images, momentImgs) {
   const M = m.media;
   const L = [`# vawe see: ${m.source.name}`, '', `${m.source.note}: ${m.source.video}`, `${M.width}x${M.height}, ${M.fps} fps, ${M.duration} s, ${M.frames} frames analysed at ${M.specFps} fps, audio ${M.audio ? 'yes' : 'no'}. Content hash ${m.source.hash.slice(0, 12)}.`, '',
@@ -219,7 +219,6 @@ export function seeReport(m, images, momentImgs) {
   return L;
 }
 
-/** The short summary printed after a run. */
 export function seeSummary(m) {
   const st = m.structure, r = st.rhythm, fl = m.look.flashes;
   return [`${m.source.name}: ${m.media.duration} s, ${st.shots.length} shots (shortest ${s2(r.min)}, median ${s2(r.median)}, longest ${s2(r.max)}), ${st.cuts.length} cuts, ${fl.length} flash${fl.length === 1 ? '' : 'es'}`,

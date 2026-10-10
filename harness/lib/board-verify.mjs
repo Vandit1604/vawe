@@ -1,5 +1,5 @@
 // Intent then verify: what the Board says each cut does (its camera cell, its overshoots cell, its sound rows) against what the film measures.
-// The Board is the plan, the measure is the page; a mismatch is advice with both values, never a refusal. Pure.
+// The Board is the plan, the measure is the page; a mismatch is advice with both values, never a refusal.
 import { moveRows, parseBoard, boardFilled } from './board.mjs';
 import { numberOf } from './brief-tables.mjs';
 

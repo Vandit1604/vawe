@@ -1,5 +1,5 @@
 // Cue levels read against each other. A loudness number alone is moved by one uniform data-gain shift; the balance of the cues is not.
-// A cue is { name, at, peakDb, gain, gainSet } (gainSet: the page wrote data-gain; defaultGain: the voice's default). Pure.
+// A cue is { name, at, peakDb, gain, gainSet } (gainSet: the page wrote data-gain; defaultGain: the voice's default).
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 
 const LEVEL = LIMITS['sound-level'];

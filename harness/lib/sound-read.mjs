@@ -1,7 +1,5 @@
-// harness/lib/sound-read.mjs: the one reader of a track's sound for cutting to it. Hits (attack time, peak time, strength, kind),
-// tempo and beat grid, bars, quiet and loud sections, loudness; and the cuts of a film set against them.
-// The estimators are core/beats/detect.js (tempo, phase, grid) and ref-measure/audio-attack.mjs (attack times): this file only joins them.
-// `vawe sound`, `vawe see` (SOUND), `vawe spec` (audio) and the draft check all read sound through here.
+// The one reader of a track's sound for cutting to it: hits, tempo and beat grid, bars, sections, loudness, and the cuts of a film against them.
+// `vawe sound`, `vawe see`, `vawe spec` and the draft check all read sound through here; core/beats/detect.js and ref-measure/audio-attack.mjs do the estimating.
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -35,7 +33,7 @@ const EPS = 1e-6;
 const r1 = (v) => Math.round(v * 10) / 10;
 const r3 = (v) => Math.round(v * 1000) / 1000;
 
-/** soft: a weak hit; sustained: a slow rise (a pad or swell, not a strike); hit: a clear strike. Pure. */
+/** soft: a weak hit; sustained: a slow rise (a pad or swell, not a strike); hit: a clear strike. */
 export const hitKind = ({ strength, errMs }) => (strength < SOFT_HIT ? 'soft' : errMs > SLOW_RISE_MS ? 'sustained' : 'hit');
 
 /**
@@ -73,7 +71,7 @@ function barOffset(beats, hits) {
   return weight.reduce((best, w, k) => (w > weight[best] ? k : best), 0);
 }
 
-/** The quiet and loud runs of a signal, against its own median level: [{ from, to, level, db }]. Pure. */
+/** The quiet and loud runs of a signal, against its own median level: [{ from, to, level, db }]. */
 function sectionsOf(mono, sampleRate) {
   const size = Math.round(SECTION_WINDOW_S * sampleRate), db = [];
   for (let o = 0; o + size <= mono.length; o += size) {
@@ -130,12 +128,12 @@ export function readSound(file, { cache = true } = {}) {
 
 const frameOf = (t, fps) => Math.round(t * fps);
 
-/** The cut seconds of a page's world spans, each on its frame: a world starts on a frame, and the spans are rounded to 10 ms. Pure. */
+/** The cut seconds of a page's world spans, each on its frame: a world starts on a frame, and the spans are rounded to 10 ms. */
 export const cutTimesOf = (spans, fps) => spans.filter((w) => w.start != null && w.start > EPS).map((w) => frameOf(w.start, fps) / fps);
 
 /**
  * The sound set on a film's clock: every time moved by `offset` (the bed's data-at minus its data-trim) and cut to `from`..`to`,
- * with the beat grid as lines (beat, half, quarter), the bars and the frame numbers at 30 and 60 fps. Pure.
+ * with the beat grid as lines (beat, half, quarter), the bars and the frame numbers at 30 and 60 fps.
  */
 export function placeSound(sound, { offset = 0, from = 0, to = Infinity } = {}) {
   const inside = (t) => t >= from && t <= to;
@@ -157,7 +155,7 @@ export function placeSound(sound, { offset = 0, from = 0, to = Infinity } = {}) 
   return { ...sound, offset, window: { from, to: Number.isFinite(to) ? to : null }, grid, bars, onsets, top: ranked, sections };
 }
 
-/** The lines a cut may land on: every hit that is not soft, and, when the tempo is usable, every beat and half beat. Pure. */
+/** The lines a cut may land on: every hit that is not soft, and, when the tempo is usable, every beat and half beat. */
 function targetsOf(placed) {
   const hits = placed.onsets.filter((o) => o.kind !== 'soft').map((o) => ({ t: o.attack, what: 'hit', strength: o.strength }));
   const lines = placed.tempo.usable ? placed.grid.filter((l) => l.kind !== 'quarter').map((l) => ({ t: l.t, what: l.kind === 'beat' ? `beat ${l.bar}.${l.beat}` : 'half beat' })) : [];
@@ -169,7 +167,7 @@ const nearest = (list, t) => list.reduce((best, x) => (best == null || Math.abs(
 /**
  * Every cut set against the sound: [{ n, t, hit, line, best, frames, ms, verdict, move }] and the strong hits no cut carries.
  * frames and ms are the cut minus its nearest target (positive: the cut comes after the sound). verdict: `on beat` within 1 frame,
- * `near` within 3, `off` beyond. `move` is the second to move an off or near cut to. Pure.
+ * `near` within 3, `off` beyond. `move` is the second to move an off or near cut to.
  */
 export function cutsVsSound(cuts, placed, fps) {
   const hits = targetsOf(placed).filter((x) => x.what === 'hit'), lines = targetsOf(placed).filter((x) => x.what !== 'hit');

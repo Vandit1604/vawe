@@ -9,7 +9,6 @@ import { resolveInput } from './input.mjs';
 
 export class SourceError extends Error {}
 
-/** The sha1 of a file's bytes. */
 export const fileHash = (file) => crypto.createHash('sha1').update(fs.readFileSync(file)).digest('hex');
 
 function renderDraft(page, log) {

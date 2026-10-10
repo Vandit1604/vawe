@@ -18,7 +18,7 @@ export function decodeGray(video, { w, h, t, fps, frames, flags }) {
   return r.status === 0 ? { data: r.stdout, error: null } : { data: null, error: String(r.stderr || '').trim() };
 }
 
-/** The luma plane (0 to 255) of an rgb24 buffer. Pure. */
+/** The luma plane (0 to 255) of an rgb24 buffer. */
 export function lumaOf(rgb, n = rgb.length / 3) {
   const out = new Uint8Array(n);
   for (let i = 0; i < n; i++) out[i] = (rgb[i * 3] * 77 + rgb[i * 3 + 1] * 150 + rgb[i * 3 + 2] * 29) >> 8;

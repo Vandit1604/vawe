@@ -1,4 +1,4 @@
-// harness/lib/sound-report.mjs: the text of `vawe sound` (sound.md). Pure: placed sound (sound-read.mjs placeSound), cut rows (cutsVsSound), page cues in; lines out.
+// The text of `vawe sound` (sound.md). Pure: placed sound (sound-read.mjs placeSound), cut rows (cutsVsSound), page cues in; lines out.
 import { ON_BEAT_FRAMES, NEAR_FRAMES } from './sound-read.mjs';
 
 const s2 = (n) => (n == null ? '-' : Number(n).toFixed(2));

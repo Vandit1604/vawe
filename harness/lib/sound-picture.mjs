@@ -1,4 +1,4 @@
-// harness/lib/sound-picture.mjs: the waveform of a track with its onsets, beat grid and cuts drawn on it, as one SVG. Pure.
+// The waveform of a track with its onsets, beat grid and cuts drawn on it, as one SVG.
 // One panel per PANEL_S seconds, so a three minute track stays readable at full size.
 const PANEL_S = 12;
 const W = 1600;

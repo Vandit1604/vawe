@@ -3,7 +3,6 @@
 
 const round = (n, d = 3) => +n.toFixed(d);
 
-/** The first problem in the arguments of see, or null. Pure. */
 export function seeProblem({ at, atB, from, to, vs }) {
   const bad = (v) => v !== undefined && !(Number.isFinite(Number(v)) && Number(v) >= 0);
   for (const [name, v] of [['--at', at], ['--at-b', atB], ['--from', from], ['--to', to]]) if (bad(v)) return `${name} is not a number of seconds: "${v}"`;
@@ -15,7 +14,7 @@ export function seeProblem({ at, atB, from, to, vs }) {
 const SAME_PICTURE_DE = 15;
 const FLASH_EDGE_FRAMES = 1;
 
-/** The seconds of film in a number of frames, three places. Pure. */
+/** The seconds of film in a number of frames, three places. */
 export const secs = (frames, fps) => round(frames / fps);
 
 /**
@@ -23,7 +22,7 @@ export const secs = (frames, fps) => round(frames / fps);
  * after it is the same shot (the dominant Lab colours of the two neighbouring shots differ by under 15) or its own colour is neutral white (a white-out);
  * a short coloured shot between two different shots is a shot. The cuts within one frame of a flash's first frame or of the frame after its last are its
  * edges; a white-out that hides a cut keeps its last edge as that cut. `shotLab(frame)` is the dominant Lab colour of the spec shot that holds `frame`,
- * or null. Returns { cuts, flashEdges, flashes } with each flash carrying `sameShot`, `dE` and the frames of its `edgeFrames`. Pure.
+ * or null. Returns { cuts, flashEdges, flashes } with each flash carrying `sameShot`, `dE` and the frames of its `edgeFrames`.
  */
 export function separateFlashes(cuts, candidates, shotLab) {
   const judged = candidates.map((f) => {
@@ -46,7 +45,7 @@ export function separateFlashes(cuts, candidates, shotLab) {
 
 /**
  * Shots [{ f0, f1, ... }] of the spec joined across the flashes that sit inside one shot: a shot that lies wholly inside a flash is dropped
- * and the shots either side of a same-shot flash become one. `flashes` is the output of separateFlashes. Pure.
+ * and the shots either side of a same-shot flash become one. `flashes` is the output of separateFlashes.
  */
 export function shotsWithoutFlashes(shots, flashes) {
   const inFlash = (s) => flashes.some((f) => s.f0 >= f.frame - FLASH_EDGE_FRAMES && s.f1 <= f.frame + f.frames + FLASH_EDGE_FRAMES + 1);
@@ -61,10 +60,10 @@ export function shotsWithoutFlashes(shots, flashes) {
   return out;
 }
 
-/** The energy series [{ t, v }] with the samples under each flash (its edges included) set to zero: a flash is an exposure event, not motion. Pure. */
+/** The energy series [{ t, v }] with the samples under each flash (its edges included) set to zero: a flash is an exposure event, not motion. */
 export const maskFlashes = (series, flashes, fps) => series.map((p) => (flashes.some((f) => p.t >= (f.frame - 0.5) / fps && p.t <= (f.frame + f.frames + 1.5) / fps) ? { t: p.t, v: 0 } : p));
 
-/** The moves of a shot's tracked elements grouped into bursts: moves whose start is within `gap` seconds of the running end join. [{ t0, t1, elements }]. Pure. */
+/** The moves of a shot's tracked elements grouped into bursts: moves whose start is within `gap` seconds of the running end join. [{ t0, t1, elements }]. */
 export function burstsOfMoves(moves, gap = 0.17) {
   const sorted = moves.filter((m) => m.start != null && m.settle != null && m.confidence !== 'low').sort((a, b) => a.start - b.start);
   const out = [];
@@ -75,7 +74,7 @@ export function burstsOfMoves(moves, gap = 0.17) {
   return out.map((b) => ({ ...b, t0: round(b.t0), t1: round(b.t1) }));
 }
 
-/** The camera of a shot in words from the spec's camera block: zoom, pan, how fast. Pure. */
+/** The camera of a shot in words from the spec's camera block: zoom, pan, how fast. */
 export function cameraWords(c, fps) {
   if (!c) return 'unknown';
   const parts = [];
@@ -91,7 +90,7 @@ export function cameraWords(c, fps) {
 
 /**
  * Sharpness map of a luma plane: the mean absolute Laplacian in a gw x gh grid of cells, and the ratio of the sharpest third of the cells to the
- * softest third. A ratio near 1 is an even focus; a high one is a shallow depth of field or a blurred region. Pure.
+ * softest third. A ratio near 1 is an even focus; a high one is a shallow depth of field or a blurred region.
  */
 export function sharpnessMap(luma, w, h, gw = 4, gh = 3) {
   const cell = new Float64Array(gw * gh), n = new Float64Array(gw * gh);
@@ -112,7 +111,7 @@ export function sharpnessMap(luma, w, h, gw = 4, gh = 3) {
 
 /**
  * Grain from two luma planes of one still moment: the robust spread (1.4826 times the MAD, in levels of 0..255) of the frame difference over
- * the flat, unchanged tiles, divided by root 2 for one frame. Null when fewer than 20 tiles are flat in both frames. Pure.
+ * the flat, unchanged tiles, divided by root 2 for one frame. Null when fewer than 20 tiles are flat in both frames.
  */
 export function grainOf(a, b, w, h, tile = 8) {
   const spreads = [];
@@ -144,7 +143,7 @@ const PEAK_COUNT = 4;
 
 const THRESHOLD = 25;
 
-/** The plane smoothed with the 3 by 3 binomial kernel: a hard pixel step has no direction until it is smoothed. Pure. */
+/** The plane smoothed with the 3 by 3 binomial kernel: a hard pixel step has no direction until it is smoothed. */
 function smooth(a, w, h) {
   const out = new Float32Array(a.length), t = new Float32Array(a.length);
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) t[y * w + x] = (a[y * w + Math.max(0, x - 1)] + 2 * a[y * w + x] + a[y * w + Math.min(w - 1, x + 1)]) / 4;
@@ -152,7 +151,7 @@ function smooth(a, w, h) {
   return out;
 }
 
-/** The edge-angle histogram of a grey plane: 180 bins of one degree (edge direction measured from the horizontal, clockwise on screen, modulo 180), weighted by strength. Pure. */
+/** The edge-angle histogram of a grey plane: 180 bins of one degree (edge direction measured from the horizontal, clockwise on screen, modulo 180), weighted by strength. */
 function edgeHistogram(plane, w, h) {
   const luma = smooth(smooth(plane, w, h), w, h);
   const bins = new Float64Array(180);
@@ -168,7 +167,7 @@ function edgeHistogram(plane, w, h) {
   return { bins, total };
 }
 
-/** The strongest directions of a histogram as [{ deg, share }], deg in (-90, 90], at least 6 degrees apart. Pure. */
+/** The strongest directions of a histogram as [{ deg, share }], deg in (-90, 90], at least 6 degrees apart. */
 function directionPeaks({ bins, total }) {
   const at = (d) => bins[((d % 180) + 180) % 180] + 0.5 * (bins[(((d + 1) % 180) + 180) % 180] + bins[(((d - 1) % 180) + 180) % 180]);
   const taken = [], out = [];
@@ -186,7 +185,7 @@ function directionPeaks({ bins, total }) {
  * The tilt of a picture: how far its straight edges lean from the horizontal and the vertical, and the strongest edge directions. The lean is the offset
  * (under 35 degrees) whose edges, upright and across, carry the most strength; positive is clockwise on screen. `deg` is 0 when the lean is under 2 degrees,
  * carries under 1.3 times the upright mass or under 5% of the edge strength. `peaks` lists the strongest directions: a diagonal hatch at 41 degrees says as much
- * as a lean of the text. Pure.
+ * as a lean of the text.
  */
 export function layoutTilt(luma, w, h) {
   const hist = edgeHistogram(luma, w, h);
