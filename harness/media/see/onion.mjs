@@ -30,7 +30,7 @@ export function makeOnion(found, opts) {
 }
 
 /** Runs `vawe onion`: writes one PNG of `opts.n` frames across `opts.span` seconds around `opts.at`, prints its absolute path. */
-export function runOnion(found, opts) {
+function runOnion(found, opts) {
   if (found.draftMissing) die(`no draft of ${found.page} yet: run bin/vawe dev ${found.page} first (it writes ${found.video}), then repeat`);
   if (found.draftOld) console.log(`note: ${found.video} is older than ${found.page}; run bin/vawe dev ${found.page} for the current page`);
   const { out, times } = makeOnion(found, opts);

@@ -38,7 +38,7 @@ function grayFrames(video, t, n, w, h) {
 }
 
 /** The second at which a shot shows its settled picture: a beat after its last move lands, else its middle. */
-export function keyTime(shot, fps) {
+function keyTime(shot, fps) {
   const frame = 1 / fps;
   const settled = Math.max(0, ...shot.moves.map((m) => m.settle ?? 0), shot.energy?.moving ? shot.energy.settle ?? 0 : 0);
   const t = settled > shot.start ? settled + 0.05 : (shot.start + shot.end) / 2;

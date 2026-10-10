@@ -31,7 +31,7 @@ export function groundOf(boxes) {
  * a gradient whose stops stay close to the ground, an empty canvas. A box with no paint string (an image, a video, a canvas the reader
  * could not sample) is unknown and counts in full.
  */
-export function layerStrength(b, ground) {
+function layerStrength(b, ground) {
   if (b.blend && b.blend !== 'normal') return 0;
   let strength = 1;
   if (b.canvasVaries != null) strength = b.canvasVaries;

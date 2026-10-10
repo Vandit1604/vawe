@@ -47,7 +47,7 @@ const LIT_SHARE = { stripe: 0.232, triad: 0.152, dot: 0.458 };
 
 // The "filmed screen" look: every effect on at a measured strength. OFF flattens all of them (the
 // identity camera) so a test or a page can turn on one effect at a time.
-export const DEFAULTS = {
+const DEFAULTS = {
   seed: 1, fps: 30,
   aim: null, zoom: 1, tiltX: 0, tiltY: 0, roll: 0, focal: 1.7, outside: [0.012, 0.012, 0.016],
   edge: 'extend', // 'extend' repeats the screen's edge pixels past the border; 'black' shows `outside`
@@ -114,7 +114,7 @@ export function projectWith(p, src, view, x, y) {
 }
 
 // The source point seen at view pixel (x, y), or null above the horizon of a plane tilted edge-on.
-export function unprojectWith(p, src, view, x, y) {
+function unprojectWith(p, src, view, x, y) {
   const c = camera(p, src);
   const d = [(x - view.w / 2) / view.h, (y - view.h / 2) / view.h, p.focal];
   const dn = dot(d, c.n);
@@ -128,7 +128,7 @@ const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 // Pan, then zoom out, until every `keep` point sits inside the view margin; then (cover) until the
 // four corners of the view see only screen. Pure: returns new params.
-export function fitCamera(p, src, view) {
+function fitCamera(p, src, view) {
   const { keep, margin, cover } = p.fit;
   let q = { ...p, aim: [...aimOf(p, src)] };
   const points = !keep ? [] : Array.isArray(keep[0]) ? keep : [keep];
@@ -390,7 +390,7 @@ function target(gl, w, h, hdr) {
 
 // Level i is 2^(i+1) times smaller than the canvas: its weight is 1 up to the level the glow radius
 // reaches and fades over the next one, each level a little lighter than the one before.
-export function bloomWeights(radiusPx) {
+function bloomWeights(radiusPx) {
   const reach = Math.log2(Math.max(radiusPx, 2)) - 1;
   const w = Array.from({ length: LEVELS }, (_, i) => clamp(reach - i + 1, 0, 1) * 0.8 ** i);
   const sum = w.reduce((s, v) => s + v, 0) || 1;

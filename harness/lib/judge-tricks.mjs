@@ -14,7 +14,7 @@ export const TRICKS = [
   { id: 'uniform-gain', look: 'every cue shifted by the same gain so the level passes while the balance of the cues is unchanged (final stage)', axes: ['sound'] },
 ];
 
-export const OWNER_RULES = [
+const OWNER_RULES = [
   'The film\'s DESIGN.md and brief are the owner\'s decisions for this film. Judge whether the film follows its own DESIGN.md, never a house style.',
   'Do not ask for a particular typeface (no house face such as Anybody), for bigger elements, or for a camera push or drift: a camera push is never a reward and never a fix.',
   'Do not ask the author to move the spectacle second or to raise any number only to reach a score. Your verdict is read by a person; it is not a target for the author.',

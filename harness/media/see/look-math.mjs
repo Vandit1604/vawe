@@ -1,8 +1,8 @@
 // Pure parts of `vawe look`: flashes, clipped pixels, bloom spread, chromatic offset and glow colour, the table and the advice. No I/O.
 
-export const FLASH_JUMP = 25;
+const FLASH_JUMP = 25;
 export const FLASH_HALF_WINDOW = 15;
-export const CLIP_LEVEL = 250;
+const CLIP_LEVEL = 250;
 const FLASH_TAIL = 0.25;
 const EDGE_BRIGHT = 200;
 const EDGE_DROP = 3;
@@ -73,7 +73,7 @@ function crossing(v, level, from, to) {
 }
 
 /** Bloom spreads and halo colour along one line of a frame (`base` index of the first pixel, `step` between pixels, `n` pixels): the distance in px over which luma falls from 90% to 10% into the dark side of each bright edge. Pure. */
-export function bloomOnLine(P, base, step, n, out) {
+function bloomOnLine(P, base, step, n, out) {
   const L = (i) => P.L[base + i * step];
   const C = (i, c) => P.rgb[(base + i * step) * 3 + c];
   for (let x = 3; x < n - FLOOR_WINDOW - 1; x++) {
@@ -100,7 +100,7 @@ export function bloomOnLine(P, base, step, n, out) {
 }
 
 /** The signed offsets (px, blue minus red) of high-contrast edges along one line, appended to `out`. Pure. */
-export function chromaOnLine(P, base, step, n, out) {
+function chromaOnLine(P, base, step, n, out) {
   const L = (i) => P.L[base + i * step];
   const ch = (c) => (i) => P.rgb[(base + i * step) * 3 + c];
   const R = ch(0), B = ch(2);
