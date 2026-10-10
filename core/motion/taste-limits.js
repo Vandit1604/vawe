@@ -9,7 +9,12 @@ export default {
     "slowest_to_fastest_min": 3,
     "eye_speed_px_per_s": 700,
     "area_ratio": 4,
-    "duration_ratio": 2
+    "duration_ratio": 2,
+    "ceiling_fh_s": 12.6,
+    "isolated_ratio": 3,
+    "moving_floor_fh_s": 0.2,
+    "moving_min": 5,
+    "moving_steps_min": 3
   },
   "stagger": {
     "gap_min_s": 0.03,

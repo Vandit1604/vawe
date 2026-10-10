@@ -199,17 +199,15 @@
  "live-hold": {
   "still_limit_s": 0.5,
   "rest_min_s": 0.4,
-  "rest_max_s": 0.6
+  "rest_max_s": 0.6,
+  "jolt_px_per_s": 600,
+  "jolt_zoom_per_s": 0.6
  },
  "named-eases": {
   "linear_move_limit_s": 0.3,
   "eases_per_scene_min": 1,
   "eases_per_scene_max": 2,
   "lockstep_tol_s": 0.02
- },
- "no-dead-stop": {
-  "jolt_px_per_s": 600,
-  "jolt_zoom_per_s": 0.6
  },
  "one-hero-motion": {
   "movers_min": 4,
@@ -247,9 +245,7 @@
   "slowest_to_fastest_min": 3,
   "eye_speed_px_per_s": 700,
   "area_ratio": 4,
-  "duration_ratio": 2
- },
- "speed-ceiling": {
+  "duration_ratio": 2,
   "ceiling_fh_s": 12.6,
   "isolated_ratio": 3,
   "moving_floor_fh_s": 0.2,

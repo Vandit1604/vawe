@@ -42,7 +42,7 @@ test('boxMotion: the motion a parent carries is not the child\'s own speed', () 
 test('speedCeiling: the p90 of the moving elements decides, and names the fastest and the second', () => {
   const peaks = [0.5, 1, 2, 3, 4, 5, 6, 14, 15].map((speed, i) => ({ label: `el${i}`, speed, at: i }));
   const found = speedCeiling(peaks);
-  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['speed-ceiling', 'speed-ceiling', 8]]);
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['speed-ceiling', 'speed-bands', 8]]);
   assert.match(found[0].what, /9 moving elements peaks at 15\.0 frame heights/);
   assert.match(found[0].what, /Fastest: el8 15\.0 at 8\.00 s, then el7 14\.0 at 7\.00 s/);
   assert.equal(speedCeiling(peaks.slice(0, 7)).length, 0);
@@ -224,7 +224,7 @@ test('deadStop: a track that ends at speed fires; one that lands on an ease, on 
   const eased = [0, 30, 55, 75, 90, 100, 105, 107, 108, 108, 108, 108];
   const cut = [0, 30, 60, 90, 120, 150, 900, 900, 900, 900];
   const [f] = deadStop(stopsOf(abrupt));
-  assert.deepEqual([f.code, f.rule, f.at], ['dead-stop', 'no-dead-stop', 0.2]);
+  assert.deepEqual([f.code, f.rule, f.at], ['dead-stop', 'live-hold', 0.2]);
   assert.match(f.what, /1 element stops from over 600 px\/s in one step: el0 at 0\.20 s from 750 px\/s/);
   assert.deepEqual(deadStop(stopsOf(eased)), []);
   assert.deepEqual(deadStop(stopsOf(cut)), []);

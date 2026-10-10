@@ -5,7 +5,7 @@
 //   overshoot-share  the share of the arrivals whose easing goes past rest, from the animation records
 //   text-breathing   the share of the film with readable text on screen, from the text samples
 //   text-lingers     a line on screen well past its read time, from the text tracks
-//   dead-stop        an element that stops from a speed over the jolt limit within one step, from element boxes (rule no-dead-stop)
+//   dead-stop        an element that stops from a speed over the jolt limit within one step, from element boxes (rule live-hold)
 //   staging          a beat of several movers where none owns the motion, from the move runs (rule one-hero-motion)
 //   anticipation     the spectacle move arrives with no wind-up, from the move run of the hero (rule anticipation)
 //   constant-camera  the camera moves for most of the film or for several worlds in a row, from the animation records (rule constant-camera)
@@ -17,11 +17,11 @@ import { probeTracks, screenLines, MIN_TEXT_H } from './read-hold.mjs';
 import { moveScore, trackPoints } from '../media/see/velocity-math.mjs';
 import { cameraLoad } from './camera-moves.mjs';
 
-const SPEED = LIMITS['speed-ceiling'];
+const SPEED = LIMITS['speed-bands'];
 const SHOOT = LIMITS.overshoot;
 const BREATH = LIMITS['text-breathing'];
 const LINGER = LIMITS['readable-hold'];
-const JOLT = LIMITS['no-dead-stop'];
+const JOLT = LIMITS['live-hold'];
 const STAGE = LIMITS['one-hero-motion'];
 const WIND = LIMITS.anticipation;
 const CAM = LIMITS['constant-camera'];
@@ -210,7 +210,7 @@ export function spectacleWeak(peaks, spectacle, span, scales = []) {
     'push the spectacle: a longer travel, a larger scale change or a shorter duration than every other move, with quiet before it')];
 }
 
-/** Elements that stop dead: a step faster than the jolt limit (rule no-dead-stop) followed by a step that holds still. `stops` is boxMotion's; a cut is no stop. */
+/** Elements that stop dead: a step faster than the jolt limit (rule live-hold) followed by a step that holds still. `stops` is boxMotion's; a cut is no stop. */
 export function deadStop(stops) {
   const jolts = (stops ?? []).filter((s) => s.speed > JOLT.jolt_px_per_s).sort((a, b) => a.at - b.at);
   if (!jolts.length) return [];
@@ -218,7 +218,7 @@ export function deadStop(stops) {
   const n = new Set(jolts.map((s) => s.label)).size;
   return [finding('dead-stop', first.at,
     `${n} element${n === 1 ? ' stops' : 's stop'} from over ${JOLT.jolt_px_per_s} px/s in one step: ${first.label} at ${first.at.toFixed(2)} s from ${first.speed} px/s${worst === first ? '' : `, worst ${worst.label} ${worst.speed} px/s at ${worst.at.toFixed(2)} s`}`,
-    'end the move on EASE.land or a spring so the speed falls to zero; a linear or slow-start curve straight into a hold is the cause', 'no-dead-stop')];
+    'end the move on EASE.land or a spring so the speed falls to zero; a linear or slow-start curve straight into a hold is the cause', 'live-hold')];
 }
 
 /** The runs grouped into beats: runs that start within simultaneous_s of the one before compete at once. A stagger starts its items further apart. */
@@ -259,7 +259,7 @@ export function anticipation(runs, spectacle, span) {
     `${sharedDip ? 'other movers dip at the same time, so the dip winds up nothing: ' : ''}enter(el, { anticipate: 0.12 }) from core/motion/presets.js adds a counter-move; or dip the hero's own scale 2 to 4% for 4 frames before the move`)];
 }
 
-/** The fastest tenth of the moving elements over the speed ceiling (rule speed-ceiling). `all` is the peaks of boxMotion, or null when the speed was not sampled. An element slower than moving_floor_fh_s is a drift the eye does not follow (the reference films' slowest tracked elements peak near 0.2). */
+/** The fastest tenth of the moving elements over the speed ceiling (rule speed-bands). `all` is the peaks of boxMotion, or null when the speed was not sampled. An element slower than moving_floor_fh_s is a drift the eye does not follow (the reference films' slowest tracked elements peak near 0.2). */
 export function speedCeiling(all, { ceiling = SPEED.ceiling_fh_s } = {}) {
   const peaks = (all ?? []).filter((p) => p.speed >= SPEED.moving_floor_fh_s);
   if (peaks.length < SPEED.moving_min) return [];
@@ -268,7 +268,7 @@ export function speedCeiling(all, { ceiling = SPEED.ceiling_fh_s } = {}) {
   const [first, second] = [peaks.at(-1), peaks.at(-2)];
   return [finding('speed-ceiling', first.at,
     `the fastest tenth of ${peaks.length} moving elements peaks at ${s1(p90)} frame heights per second; the reference films stay under ${ceiling}. Fastest: ${first.label} ${s1(first.speed)} at ${first.at.toFixed(2)} s, then ${second.label} ${s1(second.speed)} at ${second.at.toFixed(2)} s`,
-    'give the fastest moves a longer duration (the next speed band) or a shorter distance')];
+    'give the fastest moves a longer duration (the next speed band) or a shorter distance', 'speed-bands')];
 }
 
 const curvesOf = (r) => [r.easing, ...r.kfEasings];

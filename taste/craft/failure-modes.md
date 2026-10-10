@@ -22,7 +22,7 @@ Borrowed from reference motion-design notes, with the receipts from this repo.
 - **One speed on everything.** Your default is a duration near the middle of the range. The slowest move is several times the fastest ([speed-bands](../rules/speed-bands.md)).
 - **Everything enters from one direction.** Your default is a short translateY plus a fade on every element. A 28 s film shipped with a fade on nearly every one of 31 hand-written layers. Vary the origin: from left, from right, from scale, opacity only, letter-spacing ([entrance-origin](../rules/entrance-origin.md)).
 - **One stagger everywhere.** Each scene needs its own rhythm ([stagger](../rules/stagger.md)).
-- **An ambient zoom on every scene.** Pick a different ambient motion per scene, or nothing ([ambient-restraint](../rules/ambient-restraint.md)).
+- **An ambient zoom on every scene.** Pick a different ambient motion per scene, or nothing ([live-hold](../rules/live-hold.md)).
 - **Everything starts at frame 0 into an empty frame.** Something of the subject is on screen at frame 0, and its motion may start a beat later ([first-frame](../rules/first-frame.md)).
 - **The ease direction backwards.** You get this backwards: a slow-start entrance feels sluggish, a decelerating exit feels reluctant ([entrance-ease](../rules/entrance-ease.md), [exits-shorter](../rules/exits-shorter.md)).
 - **Subtle reads as static at 30 fps.** Two films written as improvements on a third both came out slower, at 0.95 and 0.85 events per second against a library median of 1.20. Check the measured event rate before you call a draft safe.

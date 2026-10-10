@@ -61,7 +61,7 @@ effect choice is in [selection.md](selection.md). Restraint by film type is belo
 - **Primary** drives the beat: the one hero motion.
 - **Secondary** reacts to the primary and stays quieter (a shadow settles a beat after its card).
 - **Ambient** keeps a held frame alive without asking to be watched: a slow breathe or glint on a part, or the ground. Not a camera drift: the camera holds still unless the beat earns a move ([constant-camera](../rules/constant-camera.md)). It is the
-  smallest of the three by design ([ambient-restraint](../rules/ambient-restraint.md)).
+  smallest of the three by design ([live-hold](../rules/live-hold.md)).
 
 Time them by offset, not simultaneity: motions sharing a beat start at different moments, in
 hierarchy order. Material's own number ("no more than 20 ms apart") answers how long a person waits for
@@ -232,7 +232,7 @@ its place ([hard-cut-default](../rules/hard-cut-default.md), [seam-meaning](../r
 - **Kinetic type:** a plain rise is the default read. A typewriter suits terminals and timers. A scramble-decode suits tech, on hero words only. Tilt suits sporty; a pop suits playful brands only. Blur-in suits dreamy or refined brands. A gradient word at most once per film. A highlight or underline emphasises mid-sentence. A wave belongs to ambient loops only.
 - **Cuts:** fade or blur is neutral. A whip works on momentum, on the same background only. A punch or zoom focuses a product. A spin suits logos. A jitter suits alarm or glitch only.
 - **Stings:** a flash is an energy cut. Burn or light-leak suits warm brands. Ink or dissolve suits editorial. Glitch, scan or pixel suits tech. Confetti is for wins only.
-- **Ambient looks:** fields sit behind content at low intensity. Overlays (VHS, CRT, film grain, light leak) sit on top, one per film, never behind small body copy, and never two together ([ambient-restraint](../rules/ambient-restraint.md)).
+- **Ambient looks:** fields sit behind content at low intensity. Overlays (VHS, CRT, film grain, light leak) sit on top, one per film, never behind small body copy, and never two together ([live-hold](../rules/live-hold.md)).
 - **Motion blur:** a velocity-derived streak on fast moves sells speed and hides the frame stutter. Skip it on slow drifts and on small body text held mid-move, where it dissolves the text ([blur-follows-motion](../rules/blur-follows-motion.md)).
 - **Colour grades:** duotone collapses a busy photo into two brand colours. Tritone keeps a mid-tone for faces and products. Posterize wants 4 to 6 levels, and fewer gets muddy. A vignette stays light or it reads as a tunnel.
 - **Glow:** bloom belongs at a bright point (a logo, a lit number). Halation is film-warm glamour on one highlight, felt not seen. Diffusion softens a busy dark region so text floats.
@@ -254,7 +254,7 @@ dead stretch. The world keeps moving to the last frame ([live-hold](../rules/liv
 
 **A jolt** is a speed jump between frames. A linear camera station, or a decelerating stop straight into
 a hold, is the classic shape: smooth on a storyboard, jerky on screen. `page-check` reports the hard
-version as `dead-stop` ([no-dead-stop](../rules/no-dead-stop.md)).
+version as `dead-stop` ([live-hold](../rules/live-hold.md)).
 
 ## What code guarantees, and what is taste
 
