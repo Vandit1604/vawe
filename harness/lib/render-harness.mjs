@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import http from 'node:http';
+import os from 'node:os';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 export const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -57,6 +59,36 @@ export const pageArgs = (final) => (final ? [...RENDER_ARGS, '--disable-gpu-comp
 const liveBrowsers = new Set();
 let handlersInstalled = false;
 
+// A SIGKILLed node process runs no handler at all, so every launched Chrome is also written to this directory
+// (file name = Chrome pid, content = owner pid); the next render to start kills the Chromes whose owner is dead.
+const CHROME_DIR = path.join(os.tmpdir(), 'vawe-chrome');
+const CLOSE_GRACE_MS = 5000;
+const pidAlive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
+const killGroup = (pid) => { try { process.kill(-pid, 'SIGKILL'); } catch { try { process.kill(pid, 'SIGKILL'); } catch { /* already gone */ } } };
+
+export function reapOrphanBrowsers(dir = CHROME_DIR) {
+  if (!fs.existsSync(dir)) return 0;
+  let reaped = 0;
+  for (const name of fs.readdirSync(dir)) {
+    const file = path.join(dir, name);
+    const owner = Number(fs.readFileSync(file, 'utf8'));
+    if (pidAlive(owner)) continue;
+    const command = spawnSync('ps', ['-p', name, '-o', 'command='], { encoding: 'utf8' }).stdout;
+    if (/puppeteer_dev_chrome_profile/.test(command)) { killGroup(Number(name)); reaped++; }
+    fs.rmSync(file, { force: true });
+  }
+  return reaped;
+}
+
+function registerBrowser(browser, dir = CHROME_DIR) {
+  const pid = browser.process()?.pid;
+  if (!pid) return () => {};
+  fs.mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, String(pid));
+  fs.writeFileSync(file, String(process.pid));
+  return () => fs.rmSync(file, { force: true });
+}
+
 function installCleanupHandlers() {
   if (handlersInstalled) return;
   handlersInstalled = true;
@@ -64,11 +96,13 @@ function installCleanupHandlers() {
     const browsers = [...liveBrowsers];
     liveBrowsers.clear();
     for (const b of browsers) {
-      try { await b.close(); }
-      catch { try { b.process()?.kill('SIGKILL'); } catch { /* already gone */ } }
+      const closed = await Promise.race([b.close().then(() => true, () => false), new Promise((r) => setTimeout(() => r(false), CLOSE_GRACE_MS))]);
+      if (!closed) { const pid = b.process()?.pid; if (pid) killGroup(pid); }
     }
   };
-  for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130], ['SIGALRM', 143]]) {
+  process.on('exit', () => { for (const b of liveBrowsers) { const pid = b.process()?.pid; if (pid) killGroup(pid); } });
+  reapOrphanBrowsers();
+  for (const [sig, code] of [['SIGTERM', 143], ['SIGINT', 130], ['SIGALRM', 143], ['SIGHUP', 129]]) {
     process.on(sig, async () => { await closeAll(); process.exit(code); });
   }
   process.on('uncaughtException', async (e) => { await closeAll(); console.error(e); process.exit(1); });
@@ -84,8 +118,9 @@ function installCleanupHandlers() {
 export function trackBrowser(browser) {
   installCleanupHandlers();
   liveBrowsers.add(browser);
+  const unregister = registerBrowser(browser);
   const origClose = browser.close.bind(browser);
-  browser.close = async (...a) => { liveBrowsers.delete(browser); return origClose(...a); };
+  browser.close = async (...a) => { liveBrowsers.delete(browser); try { return await origClose(...a); } finally { unregister(); } };
   return browser;
 }
 
