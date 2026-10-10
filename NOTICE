@@ -73,8 +73,7 @@ optional OVERRIDE, never a replacement.
   with no credit but prohibit redistribution; this repo never fetches from
   that site, only maps files you already have on disk.
 
-See engine-doctrine/ASSET-SOURCES.md for the fuller list of stock media
-sources, with each one's own license verified.
+See resources/README.md for a list of stock media sites.
 
 Never distributed:
 

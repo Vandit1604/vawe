@@ -90,4 +90,4 @@ Framework agents: `harness/dev/AGENT-TASK.md`. Comments hold only a fact the cod
 
 Where to look: `prompts/README.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
 with clips; `prompts/moves/RECIPES.md` chains them), `core/motion/README.md` (springs, curves, noise),
-`engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script).
+`engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script), `resources/README.md` (sites for sound, music, footage and fonts).

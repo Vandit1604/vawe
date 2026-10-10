@@ -26,7 +26,7 @@ doc), or `deleted: <reason>`.
   contract), REVIEW-STOPS, LAUNCH-REFERENCE (links), and the engine and process guides ENGINE-CHANGES, SUBAGENTS,
   COMMAND-OUTPUT, ROUTING, WRITING-FOR-AGENTS, RECREATION, REFERENCE-STUDY. README is rewritten (its JSON-era text is gone).
 - Left in place, not in this phase: `engine-doctrine/DESIGN-DATABASE.md` (a catalog of techniques and numbers),
-  `JUDGE.md`, `ASSET-SOURCES.md`.
+  `JUDGE.md`.
 - AFTER-EFFECTS-TECHNIQUES stays a reference of one practitioner's dials. Its recipes are not rules; its stagger and
   overshoot lines now point to the rules.
 - Card rule 12 split: the general part is `typeface-default` and `palette-from-brand`; the vawe facts are
