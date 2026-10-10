@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { DIALS, parseSignature, readSignature } from '../../core/motion/signature.js';
-import { enterSpecs, leaveSpecs, staggerTimes, layerTiming, EASE } from '../../core/motion/presets.js';
+import { enterSpecs, windUpTranslate, leaveSpecs, staggerTimes, layerTiming, EASE } from '../../core/motion/presets.js';
 
 function withSignature(content, run) {
   const had = Object.getOwnPropertyDescriptor(globalThis, 'document');
@@ -36,4 +36,18 @@ test('enter, leave, stagger and layer take the chosen band, ease and stagger; an
     assert.ok(gaps.every((g) => g >= 0.075 && g <= 0.125), `gaps ${gaps}`);
     assert.equal(staggerTimes(2, { gap: 0.04 }).length, 2);
   });
+});
+
+test('enter anticipate: a counter-move away from rest first, then the landing; off by default, refused with no offset to move from', () => {
+  assert.equal(enterSpecs({ from: '0 20px' })[0].keyframes.length, 2);
+  const [move] = enterSpecs({ from: '0 20px', anticipate: 0.15 });
+  assert.deepEqual(move.keyframes.map((k) => k.offset), [0, 0.15, 1]);
+  assert.equal(move.keyframes[0].translate, '0 20px');
+  assert.equal(move.keyframes[1].translate, '0 calc((20px) * 1.15)');
+  assert.equal(move.keyframes[2].translate, '0 0');
+  assert.equal(move.keyframes[1].easing, EASE.land);
+  assert.equal(move.timing.easing, 'linear');
+  assert.equal(windUpTranslate('-0.8em 0', 0.1), 'calc((-0.8em) * 1.1) 0');
+  assert.throws(() => enterSpecs({ from: '0 0', anticipate: 0.1 }), /needs a from offset/);
+  assert.throws(() => enterSpecs({ anticipate: 0.5 }), /from 0 to 0.2/);
 });

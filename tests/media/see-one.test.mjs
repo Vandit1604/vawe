@@ -4,7 +4,7 @@ import test from 'node:test';
 import { findRuns, findTransitions } from '../../harness/lib/ref-measure/transition.mjs';
 import { despike, noiseOf, readMotion } from '../../harness/media/see/motion-math.mjs';
 import { burstsOfMoves, cameraWords, grainOf, layoutTilt, maskFlashes, separateFlashes, seeProblem, sharpnessMap, shotsWithoutFlashes } from '../../harness/media/see/one-math.mjs';
-import { peakSpeed } from '../../harness/media/see/one-measure.mjs';
+import { peakSpeed, arcOf } from '../../harness/media/see/one-measure.mjs';
 import { compareSides, vsLines } from '../../harness/media/see/one-vs.mjs';
 import { notMeasured, shotAccount } from '../../harness/media/see/one-report.mjs';
 
@@ -182,4 +182,12 @@ test('vs: a lens page gets lens options, a count delta says how many, silent and
   assert.match(text, /add 3 flashes/);
   assert.doesNotMatch(text, /BPM|cues|word/);
   assert.equal(rows.find((r) => r.measure === 'tempo BPM').b, 'no audio');
+});
+
+test('arcOf: the bow of a path off its chord as a share of the chord; a straight or short path has none to print', () => {
+  const rows = (pts) => pts.map(([x, y], f) => ({ f, x, y }));
+  assert.equal(arcOf(rows([[0, 0], [100, 0], [200, 0], [300, 0]])), 0);
+  assert.equal(arcOf(rows([[0, 0], [100, 30], [200, 30], [300, 0]])), 0.1);
+  assert.equal(arcOf(rows([[0, 0], [30, 5], [60, 0]])), null);
+  assert.equal(arcOf(rows([[0, 0], [300, 0]])), null);
 });

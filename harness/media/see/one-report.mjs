@@ -36,7 +36,7 @@ const moveLine = (m) => {
   const dir = m.axis === 'x' ? (m.to[0] >= m.from[0] ? 'right' : 'left') : (m.to[1] >= m.from[1] ? 'down' : 'up');
   const over = m.overshootPct == null ? '' : m.overshootPct >= 1 ? `, overshoots ${m.overshootPct}%` : ', no overshoot';
   const css = m.css && m.css !== m.ease ? ` ${m.css.length > 60 ? `${m.css.slice(0, 60)}...` : m.css}` : '';
-  return `- ${m.id}: ${m.size[0]}x${m.size[1]} px ${m.color ?? ''} from (${m.from}) to (${m.to}) px, ${dir} ${m.travelPx} px, starts ${s2(m.start)}, lands ${s2(m.settle)}, peak ${m.peakPxPerS} px/s (${m.peakHeightsPerS} frame heights/s)${over}, ${m.ease ?? 'too short to fit'}${css}${m.blur ? `, motion blur ${m.blur.dir}` : ''}${m.confidence === 'low' ? ' (low confidence: a short or crowded track)' : ''}.`;
+  return `- ${m.id}: ${m.size[0]}x${m.size[1]} px ${m.color ?? ''} from (${m.from}) to (${m.to}) px, ${dir} ${m.travelPx} px${m.arc == null ? '' : `, bowed ${Math.round(m.arc * 100)}% off the straight line`}, starts ${s2(m.start)}, lands ${s2(m.settle)}, peak ${m.peakPxPerS} px/s (${m.peakHeightsPerS} frame heights/s)${over}, ${m.ease ?? 'too short to fit'}${css}${m.blur ? `, motion blur ${m.blur.dir}` : ''}${m.confidence === 'low' ? ' (low confidence: a short or crowded track)' : ''}.`;
 };
 
 const energyLine = (e) => {

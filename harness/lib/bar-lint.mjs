@@ -1,26 +1,33 @@
 // Five advice findings from the measured bar of the reference films (harness/dev/bar-from-refs.mjs), in the shape of the motion
 // lint's: { code, rule, at, what, fix }. The code is the rule id. Each number is read from taste/build/limits.json. Pure.
 //   speed-ceiling    the fastest tenth of the moving elements, from element boxes over time
-//   spectacle-weak   the page's spectacle second moves slower than another moment, from the same boxes
+//   spectacle-weak   the page's spectacle second moves slower than another moment, or less than exaggeration_min times the median mover, from the same boxes
 //   overshoot-share  the share of the arrivals whose easing goes past rest, from the animation records
 //   text-breathing   the share of the film with readable text on screen, from the text samples
 //   text-lingers     a line on screen well past its read time, from the text tracks
+//   dead-stop        an element that stops from a speed over the jolt limit within one step, from element boxes (rule no-dead-stop)
+//   staging          a beat of several movers where none owns the motion, from the move runs (rule one-hero-motion)
+//   anticipation     the spectacle move arrives with no wind-up, from the move run of the hero (rule anticipation)
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { overshoots } from './ease-curve.mjs';
 import { CUT, moves, entering, measured, byTarget } from './motion-records.mjs';
 import { ownTrack, inFrame } from './motion-lint.mjs';
 import { probeTracks, screenLines, MIN_TEXT_H } from './read-hold.mjs';
+import { moveScore, trackPoints } from '../media/see/velocity-math.mjs';
 
 const SPEED = LIMITS['speed-ceiling'];
 const SHOOT = LIMITS['overshoot-share'];
 const BREATH = LIMITS['text-breathing'];
 const LINGER = LIMITS['text-lingers'];
+const JOLT = LIMITS['no-dead-stop'];
+const STAGE = LIMITS['one-hero-motion'];
+const WIND = LIMITS.anticipation;
 
 const STILL_PX = 0.25;
 const FULL_FRAME = 0.6;
 const s1 = (x) => x.toFixed(1);
 const pct = (x) => Math.round(x);
-const finding = (rule, at, what, fix) => ({ code: rule, rule, at, what, fix });
+const finding = (code, at, what, fix, rule = code) => ({ code, rule, at, what, fix });
 
 const cornerTravel = (a, b) => {
   const corners = ([x, y, w, h]) => [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
@@ -80,6 +87,7 @@ function peakScale(boxes, i) {
   return moving >= SPEED.moving_steps_min && peak ? { label: boxes.labels[i], ...peak } : null;
 }
 
+const n3 = (x) => +x.toFixed(3);
 const nearestRank =(sorted, q) => sorted[Math.max(0, Math.ceil(q * sorted.length) - 1)];
 
 const centre = ([x, y, w, h]) => [x + w / 2, y + h / 2];
@@ -118,7 +126,7 @@ function boxArrivals(boxes, i) {
 }
 
 /**
- * What one pass of element boxes (sampleBoxTracks 'visible') says: { peaks: [{ label, speed, at }] slowest first, arrivals: [{ at, over }] }.
+ * What one pass of element boxes (sampleBoxTracks 'visible') says: { peaks: [{ label, speed, at }] slowest first, arrivals: [{ at, over }], stops, runs }.
  * A camera or ground that covers most of the frame, and a step much longer than both its neighbours (an element replaced, a cut), are not speed.
  * An arrival is a run of motion that starts faded out and ends faded in.
  */
@@ -128,8 +136,48 @@ export function boxMotion(boxes) {
     peaks: elements.map((i) => peakSpeed(boxes, i)).filter(Boolean).sort((a, b) => a.speed - b.speed),
     scales: elements.map((i) => peakScale(boxes, i)).filter(Boolean).sort((a, b) => a.speed - b.speed),
     arrivals: elements.flatMap((i) => boxArrivals(boxes, i)),
+    stops: elements.flatMap((i) => stopsOf(boxes, i)),
+    runs: elements.flatMap((i) => runsOf(boxes, i)).sort((a, b) => a.from - b.from),
     span: [boxes.times[0], boxes.times.at(-1)],
   };
+}
+
+const REF_HEIGHT = 1080;
+
+/** The stops of one element: a step that holds still right after a step faster than the limit, in px per second of a 1080 high frame. A step much longer than its neighbours is a cut and is not a speed. */
+function stopsOf(boxes, i) {
+  const travels = stepTravels(boxes, i);
+  const k = REF_HEIGHT / boxes.height;
+  const out = [];
+  for (let s = 1; s < travels.length; s++) {
+    const [before, after] = [travels[s - 1], travels[s]];
+    if (before === null || after === null || before <= STILL_PX || after > STILL_PX || isJump(travels, s - 1)) continue;
+    out.push({ label: boxes.labels[i], at: boxes.times[s], speed: Math.round((before * k) / (boxes.times[s] - boxes.times[s - 1])) });
+  }
+  return out;
+}
+
+/** The part of a run's path against its direction, as a share of its length, and the dip of its size below the start, as a share of the start. Null when the run has no length to measure, or grows from under reveal_from_share of its size (a bloom or a ripple is revealed, not wound up), or covers atmosphere_share of the frame (a light, a ground or a camera carries no weight). */
+function windUp(points, sizes) {
+  const [from, to] = [points[0], points.at(-1)];
+  const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
+  if (length < SHOOT.min_travel_px || sizes[0] < WIND.reveal_from_share * sizes.at(-1)) return null;
+  const back = Math.max(0, ...points.map((p) => -((p[0] - from[0]) * (to[0] - from[0]) + (p[1] - from[1]) * (to[1] - from[1])) / length));
+  const grows = sizes.at(-1) > sizes[0];
+  return { counter: back / length, dip: grows ? Math.max(0, 1 - Math.min(...sizes) / sizes[0]) : 0 };
+}
+
+/** The runs of motion of one element in its parent's frame: { label, from, to, score (frame heights moved plus size change), counter, dip }. */
+function runsOf(boxes, i) {
+  const track = boxes.tracks[i];
+  const own = ownTrack(track, boxes.tracks[boxes.parent[i]]);
+  return moveRuns(stepTravels(boxes, i)).flatMap(([a, b]) => {
+    const part = own.slice(a, b + 2);
+    const score = moveScore(trackPoints(boxes.times.slice(a, b + 2), part), boxes.height);
+    const atmosphere = Math.max(...part.map((p) => p[2] * p[3])) >= WIND.atmosphere_share * boxes.area;
+    const wind = atmosphere ? null : windUp(part.map(centre), part.map((p) => Math.sqrt(Math.max(0, p[2] * p[3]))));
+    return score > STAGE.mover_floor ? [{ label: boxes.labels[i], from: boxes.times[a], to: boxes.times[b + 1], score: n3(score), counter: wind ? n3(wind.counter) : null, dip: wind ? n3(wind.dip) : null }] : [];
+  });
 }
 
 const SPECTACLE = LIMITS['spectacle-weak'];
@@ -147,10 +195,64 @@ export function spectacleWeak(peaks, spectacle, span, scales = []) {
   const fastest = (list) => list.reduce((best, p) => (!best || p.speed > best.speed ? p : best), null);
   const near = (p) => Math.abs(p.at - spectacle) <= SPECTACLE.window_s;
   const [mine, other] = [fastest(moves.filter(near)), fastest(moves.filter((p) => !near(p)))];
-  if (!other || (mine && other.speed < mine.speed * SPECTACLE.stronger_margin)) return [];
-  return [finding('spectacle-weak', spectacle,
+  if (other && (!mine || other.speed >= mine.speed * SPECTACLE.stronger_margin)) return [finding('spectacle-weak', spectacle,
     `spectacle at ${n1(spectacle)} s is weaker than ${n1(other.at)} s: ${mine ? `${mine.label} peaks at ${n1(mine.speed)} frame heights per second there` : 'no element moves there'}, ${other.label} peaks at ${n1(other.speed)} at ${n1(other.at)} s`,
     'give the spectacle the fastest or longest move of the film, or move <meta name="spectacle"> to the moment that already is strongest and put quiet before it')];
+  const moving = moves.filter((p) => p.speed >= SPEED.moving_floor_fh_s).map((p) => p.speed).sort((a, b) => a - b);
+  if (!mine || moving.length < SPEED.moving_min) return [];
+  const median = moving[Math.floor((moving.length - 1) / 2)];
+  if (mine.speed >= SPECTACLE.exaggeration_min * median) return [];
+  return [finding('spectacle-weak', spectacle,
+    `spectacle at ${n1(spectacle)} s peaks at ${n1(mine.speed)} frame heights per second (${mine.label}), only ${(mine.speed / median).toFixed(1)} times the median mover (${n1(median)}); the key moment should reach ${SPECTACLE.exaggeration_min} times`,
+    'push the spectacle: a longer travel, a larger scale change or a shorter duration than every other move, with quiet before it')];
+}
+
+/** Elements that stop dead: a step faster than the jolt limit (rule no-dead-stop) followed by a step that holds still. `stops` is boxMotion's; a cut is no stop. */
+export function deadStop(stops) {
+  const jolts = (stops ?? []).filter((s) => s.speed > JOLT.jolt_px_per_s).sort((a, b) => a.at - b.at);
+  if (!jolts.length) return [];
+  const [first, worst] = [jolts[0], jolts.reduce((m, s) => (s.speed > m.speed ? s : m), jolts[0])];
+  const n = new Set(jolts.map((s) => s.label)).size;
+  return [finding('dead-stop', first.at,
+    `${n} element${n === 1 ? ' stops' : 's stop'} from over ${JOLT.jolt_px_per_s} px/s in one step: ${first.label} at ${first.at.toFixed(2)} s from ${first.speed} px/s${worst === first ? '' : `, worst ${worst.label} ${worst.speed} px/s at ${worst.at.toFixed(2)} s`}`,
+    'end the move on EASE.land or a spring so the speed falls to zero; a linear or slow-start curve straight into a hold is the cause', 'no-dead-stop')];
+}
+
+/** The runs grouped into beats: runs that start within simultaneous_s of the one before compete at once. A stagger starts its items further apart. */
+function beatsOf(runs) {
+  const beats = [];
+  for (const r of runs) {
+    const last = beats.at(-1);
+    if (last && r.from - last.at(-1).from <= STAGE.simultaneous_s + 1e-9) last.push(r); else beats.push([r]);
+  }
+  return beats;
+}
+
+/** A beat of movers_min or more movers where the top one owns less than top_share_min of the motion (rule one-hero-motion). `runs` is boxMotion's. */
+export function staging(runs) {
+  return beatsOf(runs ?? []).filter((b) => b.length >= STAGE.movers_min).flatMap((beat) => {
+    const total = beat.reduce((sum, r) => sum + r.score, 0);
+    const top = beat.reduce((m, r) => (r.score > m.score ? r : m), beat[0]);
+    if (top.score / total >= STAGE.top_share_min) return [];
+    return [finding('staging', beat[0].from,
+      `${beat.length} elements move together at ${beat[0].from.toFixed(2)} s and none leads: the largest, ${top.label}, owns ${pct((100 * top.score) / total)}% of the motion`,
+      'pick one hero for the beat: give it the largest travel, start the others later and move them less', 'one-hero-motion')];
+  });
+}
+
+/** The spectacle move with no wind-up: the strongest run near the spectacle second has no counter-move or size dip in the ranges of rule anticipation. `runs` is boxMotion's. */
+export function anticipation(runs, spectacle, span) {
+  if (spectacle == null || !runs?.length || (span && (spectacle < span[0] || spectacle > span[1]))) return [];
+  const near = runs.filter((r) => r.from <= spectacle + SPECTACLE.window_s && r.to >= spectacle - SPECTACLE.window_s);
+  if (!near.length) return [];
+  const hero = near.reduce((m, r) => (r.score > m.score ? r : m), near[0]);
+  if (hero.counter === null) return [];
+  const counter = hero.counter >= WIND.counter_floor_pct / 100 && hero.counter <= WIND.counter_travel_pct_max / 100;
+  const dip = hero.dip >= WIND.dip_pct_min / 100;
+  if (counter || dip) return [];
+  return [finding('anticipation', spectacle,
+    `the spectacle move (${hero.label}, ${hero.from.toFixed(2)} s) starts with no wind-up: it first moves ${pct(hero.counter * 100)}% of its travel back and dips ${pct(hero.dip * 100)}% in size`,
+    'enter(el, { anticipate: 0.12 }) from core/motion/presets.js adds a counter-move; or dip the scale 2 to 4% for 4 frames before the move')];
 }
 
 /** The fastest tenth of the moving elements over the speed ceiling (rule speed-ceiling). `all` is the peaks of boxMotion, or null when the speed was not sampled. An element slower than moving_floor_fh_s is a drift the eye does not follow (the reference films' slowest tracked elements peak near 0.2). */
@@ -257,6 +359,6 @@ export function textLingers(samples, ctx) {
 
 /** Every bar finding in time order. `boxes` is boxMotion of the sampled element boxes, or null when they were not sampled; `text` is { samples, ctx } or null for a window draft. */
 export function barLint({ records, boxes, text, spectacle = null }) {
-  return [...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
+  return [...speedCeiling(boxes?.peaks), ...spectacleWeak(boxes?.peaks, spectacle, boxes?.span, boxes?.scales), ...deadStop(boxes?.stops), ...staging(boxes?.runs), ...anticipation(boxes?.runs, spectacle, boxes?.span), ...overshootShare(records, boxes?.arrivals), ...(text ? [...textBreathing(text.samples, text.ctx), ...textLingers(text.samples, text.ctx)] : [])]
     .sort((a, b) => a.at - b.at);
 }

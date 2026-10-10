@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { boxMotion, spectacleWeak, speedCeiling, overshootShare, textBreathing, textLingers, lingerCeiling, barLint } from '../../harness/lib/bar-lint.mjs';
+import { boxMotion, deadStop, staging, anticipation, spectacleWeak, speedCeiling, overshootShare, textBreathing, textLingers, lingerCeiling, barLint } from '../../harness/lib/bar-lint.mjs';
 import { unwaived } from '../../harness/lib/motion-lint.mjs';
 import { firedRules, firedLines } from '../../harness/lib/taste-steps.mjs';
 import { probeTracks, readHoldProblems, lineNeed } from '../../harness/lib/read-hold.mjs';
@@ -215,4 +215,71 @@ test('spectacleWeak: a scale move counts against the spectacle too, and a nearby
   assert.ok(quick.scales[0].speed > 3);
   assert.equal(spectacleWeak([], 0.1, quick.span, quick.scales).length, 0);
   assert.equal(spectacleWeak([{ label: 'badge', speed: 9, at: 6 }], 0.1, [0, 8], quick.scales).length, 1);
+});
+
+const stopsOf = (xs) => boxMotion(frame([at(xs)])).stops;
+
+test('deadStop: a track that ends at speed fires; one that lands on an ease, on a cut or off screen does not', () => {
+  const abrupt = [0, 30, 60, 90, 120, 150, 150, 150, 150, 150, 150];
+  const eased = [0, 30, 55, 75, 90, 100, 105, 107, 108, 108, 108, 108];
+  const cut = [0, 30, 60, 90, 120, 150, 900, 900, 900, 900];
+  const [f] = deadStop(stopsOf(abrupt));
+  assert.deepEqual([f.code, f.rule, f.at], ['dead-stop', 'no-dead-stop', 0.2]);
+  assert.match(f.what, /1 element stops from over 600 px\/s in one step: el0 at 0\.20 s from 750 px\/s/);
+  assert.deepEqual(deadStop(stopsOf(eased)), []);
+  assert.deepEqual(deadStop(stopsOf(cut)), []);
+  assert.deepEqual(deadStop(boxMotion(frame([at(abrupt, { alpha: (k) => (k < 6 ? 1 : 0) })])).stops), []);
+  assert.deepEqual(deadStop(null), []);
+});
+
+test('deadStop: a slow drift into a hold is under the jolt limit', () => {
+  assert.deepEqual(deadStop(stopsOf([0, 10, 20, 30, 40, 50, 50, 50, 50])), []);
+});
+
+test('staging: five equal movers in one beat fire; one hero among small movers, a stagger and few movers do not', () => {
+  const mover = (step, y, delay = 0) => at([...Array(delay).fill(0), ...line(11 - delay, step)], { y });
+  const equal = boxMotion(frame([0, 1, 2, 3, 4].map((i) => mover(20, 100 + i * 150)))).runs;
+  const [f] = staging(equal);
+  assert.deepEqual([f.code, f.rule, f.at], ['staging', 'one-hero-motion', 0]);
+  assert.match(f.what, /5 elements move together at 0\.00 s and none leads: the largest, el0, owns 20% of the motion/);
+  const hero = boxMotion(frame([mover(100, 100), ...[1, 2, 3, 4].map((i) => mover(8, 100 + i * 150))])).runs;
+  assert.deepEqual(staging(hero), []);
+  const staggered = boxMotion(frame([0, 1, 2, 3, 4].map((i) => mover(20, 100 + i * 150, i)))).runs;
+  assert.deepEqual(staging(staggered), []);
+  assert.deepEqual(staging(equal.slice(0, 3)), []);
+  assert.deepEqual(staging(undefined), []);
+});
+
+test('anticipation: the spectacle move needs a counter-move or a dip; a straight rise fires, other moves are not asked', () => {
+  const straight = boxMotion(frame([at([100, 115, 135, 160, 185, 200, 200, 200, 200, 200, 200])]));
+  const [f] = anticipation(straight.runs, 0.1, straight.span);
+  assert.deepEqual([f.code, f.rule, f.at], ['anticipation', 'anticipation', 0.1]);
+  assert.match(f.what, /spectacle move \(el0, 0\.00 s\) starts with no wind-up/);
+  const counter = boxMotion(frame([at([100, 97, 95, 100, 120, 150, 180, 200, 200, 200, 200])]));
+  assert.deepEqual(anticipation(counter.runs, 0.1, counter.span), []);
+  const grow = (sizes) => sizes.map((w, k) => [100 + k * 20, 300, w, w, 1, 1]);
+  const dipped = boxMotion(frame([grow([100, 97, 96, 100, 110, 125, 140, 150, 150, 150, 150])]));
+  assert.deepEqual(anticipation(dipped.runs, 0.1, dipped.span), []);
+  const bloom = boxMotion(frame([grow([10, 30, 60, 100, 140, 170, 190, 200, 200, 200, 200]), at([300, 300, 300, 305, 310, 315, 315, 315, 315, 315, 315])]));
+  assert.deepEqual(anticipation(bloom.runs, 0.1, bloom.span), [], 'a bloom that grows from nothing is revealed, not wound up');
+  const light = boxMotion(frame([at([100, 130, 160, 190, 220, 250, 250, 250, 250, 250, 250], { w: 1100, h: 1100 })]));
+  assert.deepEqual(anticipation(light.runs, 0.1, light.span), [], 'a light that covers over 40 percent of the frame carries no weight');
+  assert.deepEqual(anticipation(straight.runs, 9, straight.span), [], 'a spectacle outside the sampled seconds is not measured');
+  assert.deepEqual(anticipation(straight.runs, null, straight.span), []);
+  assert.deepEqual(anticipation(straight.runs, 5, [0, 10]), [], 'no move near the spectacle second');
+});
+
+test('spectacleWeak: the exaggeration floor wants the spectacle at 1.3 times the median mover', () => {
+  const others = [1, 1, 1, 1, 1].map((speed, i) => ({ label: `el${i}`, speed, at: 2 + i }));
+  const [f] = spectacleWeak([...others, { label: 'hero', speed: 1.2, at: 10 }], 10, [0, 20]);
+  assert.equal(f.rule, 'spectacle-weak');
+  assert.match(f.what, /spectacle at 10 s peaks at 1\.2 frame heights per second \(hero\), only 1\.2 times the median mover \(1\); the key moment should reach 1\.3 times/);
+  assert.deepEqual(spectacleWeak([...others, { label: 'hero', speed: 2, at: 10 }], 10, [0, 20]), []);
+  assert.deepEqual(spectacleWeak([...others.slice(0, 3), { label: 'hero', speed: 1.1, at: 10 }], 10, [0, 20]), [], 'fewer than moving_min movers: no median to judge');
+});
+
+test('barLint carries dead-stop, staging and anticipation beside the rest', () => {
+  const boxes = boxMotion(frame([at([100, 130, 160, 190, 220, 250, 250, 250, 250, 250, 250])]));
+  const rules = barLint({ records: [], boxes, text: null, spectacle: 0.1 }).map((x) => x.code);
+  assert.deepEqual(rules.sort(), ['anticipation', 'dead-stop']);
 });

@@ -85,8 +85,8 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 ## motion
 
 - [ambient-restraint](rules/ambient-restraint.md): Ambient motion keeps a held frame alive without asking to be watched. Check: judge.
-- [anticipation](rules/anticipation.md): A small opposite wind-up readies the eye before a hero move. Check: none.
-- [arrival-rhythm](rules/arrival-rhythm.md): Motion order is reading order. Check: judge.
+- [anticipation](rules/anticipation.md): A small opposite wind-up readies the eye before a hero move. Check: anticipation.
+- [arrival-rhythm](rules/arrival-rhythm.md): Motion order is reading order. Check: no-overlap.
 - [blur-follows-motion](rules/blur-follows-motion.md): Blur follows motion: a still thing never blurs. Check: judge.
 - [blur-out-dense](rules/blur-out-dense.md): Faces, cards and dense grids leave through focus, not through space. Check: judge.
 - [counter-no-overshoot](rules/counter-no-overshoot.md): A counting number never overshoots. Check: judge.
@@ -94,16 +94,16 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [entrance-ease](rules/entrance-ease.md): An entrance is a landing: it decelerates on EASE.land and shows most of its move by frame 1. Check: judge.
 - [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge, entrance-direction.
 - [exits-shorter](rules/exits-shorter.md): An exit is a launch: it runs shorter than its entrance and accelerates. Check: exit-length.
-- [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: judge.
+- [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: follow-through.
 - [live-hold](rules/live-hold.md): A hold keeps life. Check: static-window, sheet-tiles.
 - [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease.
 - [no-bounce](rules/no-bounce.md): No bounce or overshoot on type or UI by default. Check: judge.
 - [no-dead-stop](rules/no-dead-stop.md): A move never jumps speed from one frame to the next. Check: dead-stop.
-- [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: judge.
+- [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: staging.
 - [overshoot-share](rules/overshoot-share.md): Some arrivals land with a spring: the value goes past rest and returns. Check: overshoot-share.
 - [real-physics](rules/real-physics.md): Real physics, not an imitation: a spring or an exponential as sampled keyframes or linear() with 8 or more stops, and a named effect that looks like its real-world thing. Check: judge.
 - [spectacle-weak](rules/spectacle-weak.md): The spectacle second carries the strongest move of the film. Check: spectacle-weak.
-- [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band.
+- [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band,duration-size.
 - [speed-ceiling](rules/speed-ceiling.md): Elements move at a speed the eye can follow. Check: speed-ceiling.
 - [stagger](rules/stagger.md): A group reads as one beat with an inner rhythm: not a chord on one frame and not a queue. Check: group-landing.
 
