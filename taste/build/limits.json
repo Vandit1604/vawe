@@ -25,7 +25,8 @@
   "punchy_min_s": 0.8,
   "punchy_max_s": 1.5,
   "breathing_min_s": 2,
-  "breathing_max_s": 3
+  "breathing_max_s": 3,
+  "clip_dwell_min_s": 1.2
  },
  "show-real-thing": {
   "screen_text_px_min_1920": 28

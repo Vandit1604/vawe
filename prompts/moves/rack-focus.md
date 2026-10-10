@@ -1,5 +1,7 @@
 # Rack focus
 
+**Status: a layer swap, not a lens.** Two `filter: blur()` layers are a uniform blur with no depth ([lens](lens.md), rejected approximations). Use this only to move the viewer's attention between two flat layers; for a real depth of field and focus pull on a screen, use the lens `dof` option with a `focus` that follows the target (`core/surfaces/lens.js`).
+
 **Use when** two things at different depths share a frame and the story passes from one to the other:
 the draft in front, the shipped result behind. The near layer is sharp and the far layer soft; the
 focus pulls, the near layer melts and the far one resolves. Pinpoint lights behind grow into soft discs

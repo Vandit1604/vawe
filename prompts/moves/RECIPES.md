@@ -51,7 +51,7 @@ One pulse every 0.48 s (125 bpm): 0.48, 0.96, 1.44, 1.92 and on. Every landing a
 | 2.40 | [word-swap-slot](word-swap-slot.md) (segs 480/480/480) | "Kiln fires [cups / tiles / yours]": the values land on 2.88, 3.36 and 3.84 | pluck 3.84 |
 | 3.54 | [outline-fill](outline-fill.md), fill only | "yours" is an outline; the accent floods it from the baseline on the pulse at 4.32 | bloom 4.24 |
 | 4.15 | invent: the film's own moment | one rhythm event that belongs to the name's own letters or product, on the pulse | none |
-| 4.40 | [drift-hold](drift-hold.md) | the line drifts to 5.00 | none |
+| 4.40 | a still hold | the line holds still to 5.00; a caret blinks after the full stop (the last part that moves) | none |
 
 Why it works: the pulse is the thread, so the eye expects each change a beat before it comes. The
 name returns as the line's subject, not as a lockup after a tagline. Seams change axis: the tear
@@ -74,7 +74,7 @@ Traps:
 | 2.10 | [grid-tile-flip](grid-tile-flip.md) | the frame is a wall of tiles the size of the zoomed mark; it turns to the name's ground | none |
 | 3.00 | [wordmark-cascade](wordmark-cascade.md) | "tessera" falls onto the rail; the full stop is the mark tile and lands last | droplet 3.55 |
 | 3.95 | invent: the film's own moment | one thing the brand's real work does to the lockup tile that no other studio's work would | none |
-| 4.20 | [drift-hold](drift-hold.md) | the rail run ends at 4.85; the lockup drifts to 5.00 | none |
+| 4.20 | a still hold | the rail run ends at 4.85; the lockup holds still to 5.00 and the mark tile pulses once on its full stop | none |
 
 Why it works: one tile carries the film. It is the source of the wave, the target of the zoom, the
 unit of the wall and the full stop. Seams change axis: a scale in, then a turn on y, then a fall.
@@ -115,7 +115,7 @@ Traps:
 | 2.37 | [mask-rise](mask-rise.md) | "Ledger reports: 3 hours" rises on the new ground | none |
 | 2.80 | [strikethrough-replace](strikethrough-replace.md) | "3 hours" is struck at 3.06; "3 min" rises from 3.30 and reads by 3.90 | pluck 3.30 |
 | 3.55 | invent: the film's own moment | one change the viewer sees made in the product's own data, not in the claim text | none |
-| 3.90 | [drift-hold](drift-hold.md) | the line drifts to 5.00 | none |
+| 3.90 | a still hold | the line holds still to 5.00; a caret blinks after the changed figure | none |
 
 Why it works: one word carries the film. "report" is the typed query, the chosen row, the letter
 the camera enters and the first word of the claim. The claim is a change the viewer sees made, not
@@ -138,7 +138,7 @@ Traps:
 | 2.00 | [count-up](count-up.md) | on the accent ground, "1.8 s to paid" settles at 2.80 | chime 2.80 |
 | 3.20 | [liquid-wipe](liquid-wipe.md) | the dark ground floods in from the left from 3.45; the name waits in the left third | none |
 | 4.05 | invent: the film's own moment | one moment where the accent does something only this product's checkout can do | none |
-| 4.40 | [drift-hold](drift-hold.md) | the name, its full stop in the accent, drifts to 5.00 | none |
+| 4.40 | a still hold | the name holds still to 5.00; its accent full stop is the last part that moves (a caret blink) | none |
 
 Why it works: the accent is the thread. It is the button, then the check circle, then the ground,
 then the name's full stop. The frame shows the real checkout from frame 0. Seams change axis: a
@@ -165,7 +165,7 @@ Traps:
 | 10.60 | invent: the film's own moment | the one proof moment specific to this product, built from its own number or capture | none |
 | 10.90 | [exit-fast](exit-fast.md) | the number leaves up in 0.22 s | none |
 | 11.10 | [wordmark-cascade](wordmark-cascade.md) | the name falls onto the rail; the accent full stop | none |
-| 12.80 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) from 13.50 | the button pops at 13.10, the arrow leans at 14.00 and 14.40 | droplet 13.25 |
+| 12.80 | [cta-pop](cta-pop.md), then a still hold from 13.50 | the button pops at 13.10, the arrow leans at 14.00 and 14.40; the lockup holds still after it | droplet 13.25 |
 
 Why it works: the accent point carries the film: caret, then the expand point, then the pressed state,
 then the status dot, then the proof ground and the full stop. Seams run x (typing), radial, diagonal,
@@ -189,7 +189,7 @@ Traps:
 | 2.45 | [scale-punch](scale-punch.md) | "One film out" hits; the ball lands as its full stop at 2.67 | pluck 2.65 |
 | 4.00 | [weight-morph](weight-morph.md) (1.1 s) | "out" thickens from 200 to 900 | bloom 4.00 |
 | 4.70 | invent: the film's own moment | one event on the line's own dot or words that follows from what the sentence says | none |
-| 5.10 | [drift-hold](drift-hold.md) | the line holds still; only the ground drifts to 6.00 | none |
+| 5.10 | a still hold | the line holds still to 6.00 with no transform on it; the last dot is the part that moves | none |
 
 Why it works: one dot carries the line (a full stop, then a ball across the cut, then a full stop).
 The cut changes the ground and the axis (letters rise in y, the ball runs in x, the punch is a scale).
@@ -200,7 +200,7 @@ Traps:
 - Drop cut-on-motion's `flip`: the dot stays accent on both grounds, so check its contrast on each.
 - The punch starts at 1.4x, so read the dot's slot with `offsetLeft`/`offsetTop` (they ignore transforms).
 - After the ball lands, swap it for the inline dot. The morph reflows the line, and only an inline dot rides it.
-- The drift goes on the ground behind the line, never on the h1: a drifting line reads as a move, not a hold.
+- Put no transform on the h1: a drifting line reads as a move, not a hold. A closing hold is declared in the page (`static-window@a-b` with its reason) and keeps one small part moving (rule moving-tail).
 
 Swaps for the first beat (same 1.9 s slot): [vertical-cut-reveal](vertical-cut-reveal.md) with `staggerFrom: 'last'` for a harder
 edge, or [letter-3d-swap](letter-3d-swap.md) for a line that turns over before it settles. Keep the accent full stop out of the
@@ -210,7 +210,7 @@ reveal and land it last, as the beat table says. [letter-swap](letter-swap.md) s
 
 Same rules as above, at film length. Each film shows the product or the idea working in its middle,
 holds every read at 1.2 s or more, and has one spectacle second with about 1.5 s of quiet before it
-(no sound, no travel, only a drift). Exits run 0.22 s; entrances run 0.6 s or more. Adjacent seams
+(no sound, no travel, nothing arriving). Exits run 0.22 s; entrances run 0.6 s or more. Adjacent seams
 change axis or direction. Stock devices (accent bar, sheen band, drifting lights) appear once per
 film. The beat times are a plan: re-time them to the copy's reading time (words x 0.6 s from 4 words up, else 1.2 s; `harness/lib/read-hold.mjs`).
 
@@ -226,7 +226,7 @@ film. The beat times are a plan: re-time them to the copy's reading time (words 
 | 11.40 | invent: the film's own moment | the one moment where the fix changes something only this product's users would recognise | none |
 | 11.80 | [logo-wall](logo-wall.md) | lanes land under the settled number from 11.80; the wall drifts to 15.00 | none |
 | 15.00 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | wall and number leave up; the name falls onto the rail at 15.30, full stop at 15.85 | droplet 15.85 |
-| 16.90 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) | the button pops at 17.20, the arrow leans at 18.00 and 18.40; the line drifts to 21.00 | droplet 17.35 |
+| 16.90 | [cta-pop](cta-pop.md), then a still hold | the button pops at 17.20, the arrow leans at 18.00 and 18.40; the line holds still to 21.00 | droplet 17.35 |
 
 Why it works: the problem is the flood and the fix is one card, so the contrast is the story and the
 card is the thread (clean element, shell, pressed state). Seams change axis: radial in, then x and y
@@ -253,7 +253,7 @@ Traps:
 | 14.10 | [success-check](success-check.md) | the press on "Send to team" at 14.30; the circle lands at 15.04 (spectacle); done reads to 16.40 | chime 15.04 |
 | 16.40 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | the window leaves left; the name falls onto the rail at 16.70, its full stop at 17.25 | droplet 17.25 |
 | 17.80 | invent: the film's own moment | one moment in the round trip that uses the product's own data, figure or wording | none |
-| 18.20 | [drift-hold](drift-hold.md) | the lockup drifts to 22.00 | none |
+| 18.20 | a still hold | the lockup holds still to 22.00; a caret blinks after the full stop | none |
 
 Why it works: a prompt becomes an answer, the answer becomes a deliverable and the deliverable is
 sent, so the film is the whole round trip. The accent figure is the thread (answer, chip, the report's
@@ -265,7 +265,7 @@ Traps:
 - ai-stream-response streams in chunks from `rng`; keep the answer to 5 words (3 s to read, words x 0.6). The figure is the only accent.
 - Measure the "2.1%" chip's rect after the stream settles and set `--x`/`--y` from it. Use `inset()`, since a report is a window, not a burst.
 - The report is a real capture or the product's DOM, never a drawn chart. A capture cannot morph: rebuild only the button as live DOM for success-check, and select it by its button (`.pay path`).
-- Keep the report still for 2 s before the press. That is the quiet before the spectacle; nothing but a drift runs there.
+- Keep the report still for 2 s before the press. That is the quiet before the spectacle; nothing arrives there.
 - The rail bar runs in ink. The circle's accent is already the film's last bright thing.
 
 ## 11. Feature tour, 20 s (thread: the camera's one canvas)
@@ -281,7 +281,7 @@ Traps:
 | 13.40 | [ui-focus-zoom](ui-focus-zoom.md) | the cursor lands on the status at 13.40; the camera scales from 13.45 (spectacle); the status holds to 16.30 | none |
 | 16.40 | [exit-fast](exit-fast.md), [calm-lockup](calm-lockup.md) | the world leaves up in 0.22 s; the brand settles from 16.70, the line at 16.84 | bloom 16.76 |
 | 17.40 | invent: the film's own moment | one moment on the canvas that belongs to the product's own extra feature or surface | none |
-| 18.00 | [drift-hold](drift-hold.md) | the lockup floats to 20.00 | none |
+| 18.00 | a still hold | the lockup holds still to 20.00; a caret blinks after the full stop | none |
 
 Why it works: one canvas, so four features read as one product and not four slides. The rail and the
 lit nodes say where the camera has been. Seams change direction on every pan (right, up-right, down),
@@ -306,7 +306,7 @@ Traps:
 | 8.85 | [logo-wall](logo-wall.md) | lanes land under "212 studios" by 9.90; the wall drifts to 13.60 | none |
 | 13.60 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | wall and line leave up; the name falls at 13.85, its full stop at 14.40 | droplet 14.40 |
 | 14.80 | invent: the film's own moment | one proof detail only this product can show: a real customer figure or a real chart event | none |
-| 16.20 | [cta-pop](cta-pop.md), then [drift-hold](drift-hold.md) | the button pops at 16.50, the arrow leans at 17.30 and 17.70; the line drifts to 20.00 | droplet 16.65 |
+| 16.20 | [cta-pop](cta-pop.md), then a still hold | the button pops at 16.50, the arrow leans at 17.30 and 17.70; the line holds still to 20.00 | droplet 16.65 |
 
 Why it works: the number is the claim, the chart is its proof and the wall says who counts it. The
 same figure (26.8k) is the roll, the last bar and the sparkline's end point, so each beat confirms the
@@ -331,7 +331,7 @@ Traps:
 | 11.60 | [scale-punch](scale-punch.md) | "One page in." is already on the ground; "film" of "One film out." hits at 12.30 (spectacle), full stop at 12.52; it reads to 15.40 | pluck 12.50 |
 | 15.40 | [exit-fast](exit-fast.md), [wordmark-cascade](wordmark-cascade.md) | the line leaves up; the name falls at 15.70, its full stop at 16.25 | droplet 16.25 |
 | 17.20 | invent: the film's own moment | one moment where the words of the manifesto do what they say | none |
-| 17.60 | [drift-hold](drift-hold.md) | the lockup drifts to 20.00 | none |
+| 17.60 | a still hold | the lockup holds still to 20.00; a caret blinks after the full stop | none |
 
 Why it works: one argument in four beats (the problem, the values, the claim, the name), and each beat
 has its own engine, so the type never repeats a trick. The soft open is the quiet before the hit. The
@@ -366,7 +366,7 @@ exit, a y roll, a y exit, a draw in place, an x opening word, a y rise.
 Traps:
 - Three moves make 9 s, not 20, so cursor-click, count-up and blur-word-cascade are added to give the reveal a real middle. Cut them and the film is a sting.
 - mark-trace draws the mark and logo-sting lands one. Take only logo-sting's word opening and its push. Drop its sheen band: mark-trace's accent bar is the film's one stock device.
-- The ground is never empty: the drift runs under the exits, and mark-trace's line is on screen within 0.3 s of the number leaving.
+- The ground is never empty (a ground field sits under the exits), and mark-trace's line is on screen within 0.3 s of the number leaving.
 - Put the tagline inside logo-sting's `.drift`, so it rides the push. Set the push duration to the time left (7.1 s), or the tail freezes.
 - The capture is pixels: cut in a second capture of the done state at the press. Never draw a button over it.
 - The mark at frame 0 and the traced mark are the same path at the same size, so the thread reads.
@@ -378,7 +378,7 @@ The one big moment of a film, in three parts: quiet before, the moment, the rele
 
 | time | move | what carries into the next beat | sound |
 |---|---|---|---|
-| 0.00 | [drift-hold](drift-hold.md) the ground only, the camera rests | quiet: one line, fewer moves, the slow band (cinematic), nothing else arrives; it reads for 1.0 s | none |
+| 0.00 | a still hold, the camera rests | quiet: one line, fewer moves, the slow band (cinematic), nothing else arrives; it reads for 1.0 s | none |
 | 1.00 | [camera-moves](camera-moves.md) `push` with [parallax-dive](parallax-dive.md) | the camera starts leaning 0.2 s before the word lands; ground 0.3, mid 1, front 1.8; it runs to 2.40 | whoosh 0.80 |
 | 1.20 | [arrival-spring](arrival-spring.md) `pop` | the hero word lands on `EASE.pop`, the one deep overshoot of the beat | hit 1.20 |
 | 1.40 | [chain-beats](chain-beats.md) overlap | the front-layer chips arrive 0.2 s after the word, one in four on `EASE.nudge`, a ring bursts on the ground; four layers move at once | tick 1.60 |
@@ -392,7 +392,7 @@ and one small element move keeps the hold alive. The camera starts before the wo
 under way.
 
 Traps:
-- The quiet is not a freeze: the ground drifts under it (taste rule live-hold).
+- The quiet is a hold, not a freeze: nothing arrives and one small part keeps moving (a caret, a glint; taste rule live-hold). A ground drift does not count.
 - Spend `pop` once. The rest of the beat lands on `land` and `nudge`; three eases in one scene is advice from `dev`.
 - Chain the camera moves by `from`: a drift that starts at scale 1 after a push to 1.16 jumps.
 - A front layer at depth 1.8 leaves the frame at the end of the push: set its things 12 percent inside the edge.

@@ -3,7 +3,7 @@ id: image-treatment
 step: look
 principle: Treat every image by what it must do. A raw flat image reads as a dropped screenshot.
 limit: none
-range: edges faded with a mask-image gradient; a slow Ken Burns push 3 to 8 percent; a rounded clip with a device or card frame; a scrim of 40 to 60 percent dark under text; one grading recipe for the whole piece
+range: edges faded with a mask-image gradient; the picture arrives and settles (a mask reveal, a crop that tightens) and then holds, with no slow Ken Burns push (a camera drift); a rounded clip with a device or card frame; a scrim of 40 to 60 percent dark under text; one grading recipe for the whole piece
 break-when: a held still is right when the pattern is "hold the picture, move the type"
 instead: use the lightest treatment that does the job; an over-graded image is as off as a raw one.
 check: judge

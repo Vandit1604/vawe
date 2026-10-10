@@ -55,8 +55,7 @@ follow-through: stagger delays siblings, follow-through makes a child lag a pare
 **Arcs.** Bow a straight travel 10 to 20 % of its length. Wrong for UI motion and for travel under about
 100 px.
 
-**Moving hold.** Never freeze a settled pose. Add a second key at the end of the hold: 1 to 3 % scale or
-6 to 14 px position, slow ease both ends. Wrong on precise data: a chart whose bars drift lies.
+**Hold.** Never freeze a settled pose, and never fill it with a slow scale or position drift on the pose or the stage: that is a camera drift, the check leaves it out and it teaches the wrong habit (rule [live-hold](../rules/live-hold.md)). Give the hold an element motion on a part (type a line, tick a counter, pass a glint, blink a caret). Wrong on precise data: a chart whose bars drift lies.
 
 **Animate on twos.** Step the clock at 12 fps in a 24 fps film (15 fps on twos and 10 fps on threes at
 30 fps). Works on line work and character-ish motion, wrong on camera moves. The stepped thing must be
@@ -70,25 +69,21 @@ Wrong on synchronised material: the picture drifts from the sound.
 **Motion blur.** Shutter 180 degrees is half the frame time; 360 doubles the smear, 90 halves it. Drop it
 on a fast headline that must be read. Blur follows motion: a still thing never blurs.
 
-**Camera shake.** Handheld: wiggle frequency 1, amplitude 25 px; frequency 5 reads as agitation. Impact:
-a hard offset ringing down over 6 to 10 frames. Scale the layer up 102 to 110 % or the frame edge shows.
-One shake per film.
+**Camera shake.** Rejected as a default: the camera holds still unless the beat earns a move (rule [constant-camera](../rules/constant-camera.md)), and a CSS offset of the frame is a fake of a camera. When a brief asks for an impact shake: a hard offset ringing down over 6 to 10 frames, the layer scaled up 102 to 110 % so the frame edge hides, one per film.
 
 **Whip pan.** A 10-frame window across the cut: directional blur peaking at the midpoint, tile
 mirrored. The outgoing half accelerates, the incoming half decelerates, so the halves are not mirrors.
 Wrong across different backgrounds: the smear shows the seam.
 
-**Rack focus.** Blur one plane 0 to 12 px and the other 12 to 0 over 12 to 20 frames, and dim the receding
-one 15 to 25 %: a real lens loses contrast too. Wrong with one subject.
+**Rack focus.** Two CSS blurs and a dim are a uniform blur with no depth: the rejected fake. A real focus pull is lens work, the `dof` option with a `focus` that follows the target ([lens](../../prompts/moves/lens.md), `core/surfaces/lens.js`). Wrong with one subject.
 
 **2.5D parallax.** Three to five planes over Z -500 to +1500 with a 40 to 120 px truck. Move the camera,
 not the layers, and rescale each plane by `1 + z / cameraZ` so its size holds. Wrong under three planes
 and on small type.
 
-**Light sweep.** A thin diagonal bar on `screen`, about 1 s, clipped to the mark's own alpha, eased.
-Once per film, on a mark, never on a paragraph.
+**Light sweep.** A bar of CSS gradient on `screen` is a fake of light and a stock device (rule [no-tells](../rules/no-tells.md)). If the brief wants a sheen, make it once per film, on a mark, never on a paragraph; for bloom or a lit surface use the lens ([lens](../../prompts/moves/lens.md)).
 
-**Light rig.** One light that directs the eye and doubles as the matte: the text is revealed by the light,
+**Light rig.** Light is lens work, not a CSS gradient. One light that directs the eye and doubles as the matte: the text is revealed by the light,
 so where to look and what is legible are one decision. Two blur centres offset in Y give the glow volume.
 One null owns the light position: never write it in two places. Dim to zero across the word change.
 

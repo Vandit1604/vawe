@@ -17,8 +17,7 @@ The rules are [hero-plus-proof](../rules/hero-plus-proof.md) and [theme-source](
   it: a captured screen, a stat, a chart, a diff, a live demo. One focal point stays dominant
   ([one-focal-point](../rules/one-focal-point.md)); the proof is subordinate in size, contrast and motion.
 - **The background is not empty.** A pure solid `#000` reads as "nothing loaded". Use a radial glow,
-  oversized ghost type bleeding off the frame, a hairline rule, a subtle panel, a few decoratives per beat,
-  sharing one ambient motion.
+  oversized ghost type bleeding off the frame, a hairline rule, a subtle panel, a few decoratives per beat.
 - **Decoratives are seasoning.** A decorative that moves does so with the beat's own element motion; a drifting ground is one option for a held frame (rule living-ground), never the fill and never the hold's life. The background
   never carries information and never becomes new content or an unrequested claim.
 - **A deliberate held hook or end card may run lean.** The world keeps moving ([moving-tail](../rules/moving-tail.md)).

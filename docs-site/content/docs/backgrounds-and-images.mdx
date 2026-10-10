@@ -10,7 +10,7 @@ A page has no built-in backgrounds. The ground is whatever you can draw on a web
 
 - A flat ground from the brand kit beats a random gradient. The banned defaults are gradient text, a cyan to purple gradient, and pure `#000` or `#fff` the brief did not ask for (`taste/rules/no-tells.md`).
 - A gradient the brief asks for is fine. Keep it clean: no banding rings, no straight edge inside a glow.
-- Keep a quiet frame alive. The move `drift-hold` (`prompts/moves/`) drifts a held frame so it does not freeze.
+- Keep a held frame alive with a part that moves (a caret, a counter, a glint). A drifting ground (`drift-hold` in `prompts/moves/`) is an option behind it, not the hold's life.
 - Compose off-centre on a real surface, not a centred title on a gradient. `taste/craft/surfaces.md` covers surfaces and the visual styles.
 
 Animate a ground the same way as anything else: from the seek. See [The page](/docs/the-page).
@@ -44,7 +44,7 @@ A raw flat image reads as a dropped screenshot.
 | The image needs to | Treatment |
 |---|---|
 | sit in the frame without a hard edge | fade the edges with a `mask-image` gradient |
-| not be static | a slow push, 3 to 8 percent |
+| not be static | the picture arrives and settles (a mask reveal, a crop that tightens), then holds. A slow push is a camera drift |
 | read as a UI card or product | clip to a rounded shape, add a card or device frame |
 | carry text and stay legible | a 40 to 60 percent dark scrim under the type |
 | belong to the brand | a duotone or grade to the palette |
