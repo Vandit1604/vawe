@@ -94,7 +94,7 @@ export const VERBS = [
       { name: 'no-ocr', type: 'bool', help: 'skip reading the words (OCR runs by default when tesseract is installed)' },
       { name: 'no-cache', type: 'bool', help: 'measure again even if this film and the code were measured before (the result is cached by content hash)' },
     ],
-    example: 'vawe see out/my-launch.mp4   |   vawe see films/my-launch/page.html --vs mnowak   |   vawe see mnowak --at 2.4',
+    example: 'vawe see out/my-launch.mp4   |   vawe see films/my-launch/page.html --vs <ref-id>   |   vawe see <ref-id> --at 2.4',
     build: (v, [film]) => {
       const problem = seeProblem({ at: v.at, atB: v['at-b'], from: v.from, to: v.to, vs: v.vs });
       if (problem) throw new UsageError(problem);
@@ -270,7 +270,7 @@ export const VERBS = [
       { name: 'at-b', type: 'string', help: 'with --vs: the second of the second film (default: --at)' },
       { name: 'out', type: 'path', default: 'out/zoom/<film>', help: 'folder for the PNG' },
     ],
-    example: 'vawe zoom out/my-launch.mp4 --vs mnowak --at 2.4 --box 800,400,240,135   |   vawe zoom films/my-launch/page.html --auto --at 3',
+    example: 'vawe zoom out/my-launch.mp4 --vs <ref-id> --at 2.4 --box 800,400,240,135   |   vawe zoom films/my-launch/page.html --auto --at 3',
     build: (v, [film]) => {
       const scale = v.scale ?? ZOOM_SCALE;
       const problem = zoomProblem({ at: v.at, box: v.box, auto: v.auto, scale, vs: v.vs, atB: v['at-b'] });
@@ -287,7 +287,7 @@ export const VERBS = [
       { name: 'from', type: 'string', help: 'start second of the window (default: 0)' },
       { name: 'to', type: 'string', help: 'end second of the window (default: the end)' },
     ],
-    example: 'vawe look out/my-launch.mp4 --vs mnowak   |   vawe look films/my-launch/page.html --from 2 --to 6',
+    example: 'vawe look out/my-launch.mp4 --vs <ref-id>   |   vawe look films/my-launch/page.html --from 2 --to 6',
     build: (v, [film]) => {
       const problem = lookProblem({ from: v.from, to: v.to });
       if (problem) throw new UsageError(problem);

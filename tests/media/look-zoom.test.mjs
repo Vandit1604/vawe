@@ -148,10 +148,10 @@ test('commonBox: picks the region bright in both films, not the densest one of f
 
 test('verbs: zoom and look are registered and build a step', () => {
   const zoom = VERBS.find((v) => v.name === 'zoom'), look = VERBS.find((v) => v.name === 'look');
-  const [zs] = zoom.build({ at: '2', box: '0,0,240,135', scale: 3, vs: 'mnowak' }, ['a.mp4']);
+  const [zs] = zoom.build({ at: '2', box: '0,0,240,135', scale: 3, vs: 'ref-a' }, ['a.mp4']);
   assert.deepEqual(zs.args.slice(0, 3), ['a.mp4', '--at', '2']);
   assert.ok(zs.args.includes('--vs'));
   assert.throws(() => zoom.build({ scale: 3 }, ['a.mp4']), /--at/);
-  const [ls] = look.build({ vs: 'mnowak' }, ['a.mp4']);
-  assert.deepEqual(ls.args, ['a.mp4', '--vs', 'mnowak']);
+  const [ls] = look.build({ vs: 'ref-a' }, ['a.mp4']);
+  assert.deepEqual(ls.args, ['a.mp4', '--vs', 'ref-a']);
 });

@@ -104,7 +104,7 @@ test('listLines gives one aligned line per film', () => {
 });
 
 test('the yt-dlp argv ends with the url, for a YouTube and an X url', () => {
-  for (const url of ['https://www.youtube.com/watch?v=abc123', 'https://x.com/mnowakdesign/status/2108253918086176899']) {
+  for (const url of ['https://www.youtube.com/watch?v=abc123', 'https://x.com/refauthor/status/2108253918086176899']) {
     const args = ytDlpArgs(url, '/r');
     assert.equal(args.at(-1), url);
     assert.equal(args.filter((a) => a === url).length, 1);
@@ -112,23 +112,23 @@ test('the yt-dlp argv ends with the url, for a YouTube and an X url', () => {
   }
 });
 
-const NAMING_BRIEF = `- Reference: private style reference \`mnowak\` (\`~/.vawe/refs/mnowak.mp4\`)
+const NAMING_BRIEF = `- Reference: private style reference \`ref-a\` (\`~/.vawe/refs/ref-a.mp4\`)
 
 ## Taken from
 
 | frame | take |
 |---|---|
-| /h/.vawe/refs/frames/mnowak/key-1.png | glow |
+| /h/.vawe/refs/frames/ref-a/key-1.png | glow |
 | /h/.vawe/refs/frames/other/key-2.png | grid |
 
 | move taken | ref id | cut s |
 |---|---|---|
-| flash-cut | mnowak | 0.17 |
+| flash-cut | ref-a | 0.17 |
 | [move name] | [ref id] | [s] |
 `;
 
 test('briefRefIds ranks the ids a brief names: frame paths, the move table, the Reference line, --ref', () => {
-  assert.deepEqual(briefRefIds(NAMING_BRIEF), ['mnowak', 'other']);
+  assert.deepEqual(briefRefIds(NAMING_BRIEF), ['ref-a', 'other']);
   assert.deepEqual(briefRefIds('run bin/vawe compare --ref abc123 --at 2'), ['abc123']);
   assert.deepEqual(briefRefIds('--ref refs/x.mp4 and Reference: quality/refs/<ref>/source.mp4'), []);
   assert.deepEqual(briefRefIds(''), []);
@@ -136,12 +136,12 @@ test('briefRefIds ranks the ids a brief names: frame paths, the move table, the 
 
 test('namedRef finds the first named id that has a video; chooseRefs puts it first and needs no film type', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'refs-named-'));
-  fs.writeFileSync(path.join(dir, 'mnowak.mp4'), '');
-  assert.deepEqual(namedRef({ dir, briefText: NAMING_BRIEF }), { id: 'mnowak', file: path.join(dir, 'mnowak.mp4') });
+  fs.writeFileSync(path.join(dir, 'ref-a.mp4'), '');
+  assert.deepEqual(namedRef({ dir, briefText: NAMING_BRIEF }), { id: 'ref-a', file: path.join(dir, 'ref-a.mp4') });
   assert.equal(namedRef({ dir, briefText: 'nothing' }), null);
-  writeRegistry(dir, [...registry, { id: 'mnowak', title: 'M', studio: null, type: 'brand', seconds: 5, inScope: true, why: null, sheet: 's/mnowak.png' }]);
+  writeRegistry(dir, [...registry, { id: 'ref-a', title: 'M', studio: null, type: 'brand', seconds: 5, inScope: true, why: null, sheet: 's/ref-a.png' }]);
   const got = chooseRefs({ dir, briefText: NAMING_BRIEF, seconds: 5 });
   assert.equal(got.skipped, null);
-  assert.equal(got.named, 'mnowak');
-  assert.deepEqual(got.refs.map((r) => r.id), ['mnowak']);
+  assert.equal(got.named, 'ref-a');
+  assert.deepEqual(got.refs.map((r) => r.id), ['ref-a']);
 });

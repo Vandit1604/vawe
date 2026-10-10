@@ -1,6 +1,6 @@
 {
  "media": {
-  "file": "/Users/vandit/Developer/code/shortwave/.claude/worktrees/agent-a40d1548cccb48abf/tests/fixtures/recreation-worked/round-trip/page-render.mp4",
+  "file": "tests/fixtures/recreation-worked/round-trip/page-render.mp4",
   "width": 640,
   "height": 360,
   "nativeFps": 30

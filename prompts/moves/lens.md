@@ -51,7 +51,7 @@ Sound: a short noise tick at each tear, and a low thud on a lock (aberration pea
 
 ## The numbers
 
-The demo was measured against the mnowak reference, 1080p: bloom 90 to 10 percent width
+The demo was measured against a reference, 1080p: bloom 90 to 10 percent width
 24.9 px (reference 20.7), panel period 6.9 px (reference 7.1), colour fringe 35 percent of edges off by 1
 px or more (reference 20 to 28). At 1080p a frame costs about 17 ms on the GPU (12 ms in a draft), and a
 6 s final (360 frames) captures in about 20 s.

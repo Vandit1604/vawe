@@ -10,7 +10,7 @@ test('filmOfCall names the film from the page or mp4, a new film from its name, 
   assert.equal(filmOfCall('dev', ['films/hud/page.html']), 'hud');
   assert.equal(filmOfCall('strip', ['out/hud-draft.mp4']), 'hud');
   assert.equal(filmOfCall('new', ['hud']), 'hud');
-  assert.equal(filmOfCall('strip', ['mnowak']), UNFILED);
+  assert.equal(filmOfCall('strip', ['ref-a']), UNFILED);
   assert.equal(filmOfCall('doctor', []), UNFILED);
 });
 
