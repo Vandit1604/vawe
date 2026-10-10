@@ -24,7 +24,7 @@ into the session and load its skill. Every template stops before code at least o
 | 8 | showreel | no brief: a taste probe, or learn the agent's defaults and then ban them | `showreel-one-liner.md` | `vawe-page` |
 | 9 | sting | a short unnarrated motion unit under 10 s: a logo reveal, a stat hit, a moving title | `beat-sheet.md` (one row per beat) | `vawe-page` |
 
-Every type then goes through the same loop: stills, draft, a fresh critique (`vawe-critique`,
+A request with no `brief.md` yet starts with `vawe-brief`. Every type then goes through the same loop: stills, draft, a fresh critique (`vawe-critique`,
 `critique-pass.md`), fix the named seconds, final. Under 15 s most types are one continuous action.
 A client brief with rights and claims to check takes
 `production-brief-acceptance.md` before any row. A sprite loop takes `pixel-art-sprite.md`. A still

@@ -34,7 +34,7 @@ Vendored code and skills:
 
 Fonts:
 
-No font binary is committed to this repository. `make fonts` downloads the
+No font binary is committed to this repository. `node generators/media/fonts.mjs` downloads the
 free, openly-licensed faces (OFL 1.1 / Apache) from Fontsource at build time,
 into the gitignored assets/fonts/: Inter, Geist, Geist Mono, JetBrains Mono,
 Plus Jakarta Sans, Hanken Grotesk, Archivo, Caveat, Space Grotesk, Instrument
@@ -58,20 +58,10 @@ Icon and photo sources:
 
 Sound effects:
 
-Every cue is synthesized from parameters by `make audio` (core/audio/kit.mjs):
-no download, no license, byte-identical on every machine. A real sample is an
-optional OVERRIDE, never a replacement.
-
-- `make sfx-pack` fetches Kenney's "Interface Sounds" pack, Creative Commons
-  Zero (CC0, public domain): "free to use in personal, educational and
-  commercial projects", https://kenney.nl/assets/interface-sounds. Fetched on
-  demand into the gitignored assets/sfx/, not committed.
-
-- `make sfx-local DIR=<path>` maps sound files YOU already downloaded onto
-  the engine's cue names, via harness/media/sfx-local-map.json. The owner's
-  preferred source is soundeffect-lab.info, whose terms permit commercial use
-  with no credit but prohibit redistribution; this repo never fetches from
-  that site, only maps files you already have on disk.
+Every cue is synthesized from parameters by `node generators/media/audio-bake.mjs`
+(core/audio/kit.mjs): no download, no third-party license, byte-identical on
+every machine. All 28 wav files under assets/sfx/ are committed. They are our
+own output and ship under the repository license.
 
 See resources/README.md for a list of stock media sites.
 
@@ -81,4 +71,4 @@ Never distributed:
 
 - Resource Boy gradient pack (assets/gradients/) and the Ransom letter
   sprites (assets/ransom/, assets/ransom-src/): no-redistribute license.
-  Kept local-only and gitignored; rebuild with `make ransom-sprites`.
+  Kept local-only and gitignored; the bake recipe is not in this repository.
