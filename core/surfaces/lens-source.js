@@ -68,45 +68,78 @@ async function inlineFonts() {
   return fontCss;
 }
 
-function copyStyle(src, dst, pseudo) {
-  const cs = getComputedStyle(src, pseudo);
+// The SVG image sees none of the page's stylesheets, only the UA defaults of an empty document: so a property is left
+// out of the inline style only when the element has the value of a bare element of its tag in such a document AND the
+// value of its parent clone, which is what it falls back to whether the property inherits or not.
+let bareFrame = null;
+const bareStyles = new Map();
+
+function bareStyle(src) {
+  const key = `${src.namespaceURI} ${src.localName}`;
+  if (!bareStyles.has(key)) {
+    if (!bareFrame) {
+      bareFrame = document.createElement('iframe');
+      bareFrame.style.cssText = 'position:fixed;left:-9999px;top:0;width:10px;height:10px;border:0;visibility:hidden';
+    }
+    document.body.appendChild(bareFrame);
+    const doc = bareFrame.contentDocument;
+    const el = doc.createElementNS(src.namespaceURI, src.localName);
+    doc.body.appendChild(el);
+    bareStyles.set(key, computedValues(el));
+    bareFrame.remove();
+  }
+  return bareStyles.get(key);
+}
+
+function computedValues(src, pseudo) {
+  const cs = (src.ownerDocument.defaultView || window).getComputedStyle(src, pseudo);
+  const values = new Map();
+  for (let i = 0; i < cs.length; i++) values.set(cs[i], cs.getPropertyValue(cs[i]));
+  return values;
+}
+
+function copyStyle(src, dst, pseudo, parent = null) {
+  const values = computedValues(src, pseudo);
+  const bare = parent ? bareStyle(dst) : null;
   let css = '';
-  for (let i = 0; i < cs.length; i++) css += `${cs[i]}:${cs.getPropertyValue(cs[i])};`;
+  for (const [name, value] of values) if (!parent || parent.get(name) !== value || bare.get(name) !== value) css += `${name}:${value};`;
   dst.setAttribute('style', css);
+  return values;
 }
 
 const textOf = (content) => (content === 'none' || content === 'normal' ? null : content.replace(/^["']|["']$/g, ''));
 
-function pseudoSpan(src, which) {
+function pseudoSpan(src, which, parent) {
   const content = textOf(getComputedStyle(src, which).content);
   if (content === null) return null;
   const span = document.createElementNS(NS, 'span');
-  copyStyle(src, span, which);
+  copyStyle(src, span, which, parent);
   span.textContent = content;
   return span;
 }
 
-async function cloneInlined(src) {
+async function cloneInlined(src, parent = null) {
   if (src instanceof HTMLCanvasElement) {
     const img = document.createElementNS(NS, 'img');
-    copyStyle(src, img);
+    copyStyle(src, img, undefined, parent);
     img.setAttribute('src', src.toDataURL());
     return img;
   }
   const dst = src.cloneNode(false);
+  let values = null;
   if (src.nodeType === 1) {
-    copyStyle(src, dst);
+    values = copyStyle(src, dst, undefined, parent);
     if (src instanceof HTMLImageElement) dst.setAttribute('src', await toDataUrl(src.currentSrc || src.src));
     const bg = /url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(src).backgroundImage);
     if (bg && !bg[1].startsWith('data:')) dst.style.backgroundImage = `url(${await toDataUrl(new URL(bg[1], location.href).href)})`;
   }
-  const before = src.nodeType === 1 ? pseudoSpan(src, '::before') : null;
+  const before = src.nodeType === 1 ? pseudoSpan(src, '::before', values) : null;
   if (before) dst.appendChild(before);
   for (const child of src.childNodes) {
     if (child.nodeType === 1 && /^(SCRIPT|STYLE)$/i.test(child.tagName)) continue;
-    dst.appendChild(await cloneInlined(child));
+    dst.appendChild(await cloneInlined(child, values));
   }
-  const after = src.nodeType === 1 ? pseudoSpan(src, '::after') : null;
+  const after = src.nodeType === 1 ? pseudoSpan(src, '::after', values) : null;
   if (after) dst.appendChild(after);
   return dst;
 }
