@@ -3,19 +3,10 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { REPO_URL } from "./Header";
 
-// THE LANDING HERO: three example films, one player, beside the pitch. The remix page is not published,
+// THE LANDING HERO: two example films, one player, beside the pitch. The remix page is not published,
 // so it has no source link.
 
 const FILMS = [
-  {
-    id: "three-star",
-    tab: "three.js",
-    title: "three.js, one page",
-    line: "A three.js star turning, rendered from one page.",
-    label: "A three.js star turning, a page film rendered by vawe",
-    dir: "/hero",
-    source: `${REPO_URL}/blob/main/films/examples/three-star/page.html`,
-  },
   {
     id: "tracking-hud",
     tab: "Tracking HUD",
