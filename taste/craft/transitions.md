@@ -1,6 +1,6 @@
 ---
 when: "choosing the cut between two beats (you cannot say why a transition is there)"
-answers: "the transition taxonomy (type, meaning), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles, where the eye is at a cut"
+answers: "the transition taxonomy (type, meaning), the twelve handoff families (what carries the eye across a cut, when each fits, its cost, moves to copy), Murch's Rule of Six, continuity versus montage, the per-seam decision procedure, durations and speed profiles, where the eye is at a cut"
 group: story
 ---
 
@@ -11,6 +11,7 @@ Contents:
 - [Emotion first: Walter Murch's Rule of Six](#emotion-first-walter-murchs-rule-of-six)
 - [Invisible or expressive](#invisible-or-expressive)
 - [The taxonomy: type, meaning, when](#the-taxonomy-type-meaning-when)
+- [The twelve handoff families](#the-twelve-handoff-families)
 - [The decision procedure: run it at every seam](#the-decision-procedure-run-it-at-every-seam)
 - [Restraint: the invisible cut dominates](#restraint-the-invisible-cut-dominates)
 - [Speed is the anti-repetition lever](#speed-is-the-anti-repetition-lever)
@@ -83,6 +84,31 @@ against). Dissolve, graphic match, smash cut. Ask: should this seam disappear or
 | shared-element morph | magic, same identity | a thing becomes its next role (highest craft) | one persistent element repositions and resizes across the cut |
 | camera travel | one world, beats are places | the content has a spatial logic worth walking | the transition is the flight; no cut (below) |
 | jump cut | urgency, restlessness | compress time on purpose | hard cut in the same framing; sparingly |
+
+## The twelve handoff families
+
+The taxonomy above names the seam; a family names what carries the viewer across it. Every cut has a handoff: the one thing that
+leaves beat A and starts beat B (its screen position, scale, direction and speed on both sides), or nothing, which is a deliberate
+cut. Choose per cut with the skill `skills/vawe-transitions/SKILL.md`; this table is the grammar it chooses from. Moves are in
+[prompts/moves](../../prompts/moves/README.md).
+
+| family | what it is | fits when the story at the cut is | cost or risk | moves to copy |
+|---|---|---|---|---|
+| graphic match | two shots share a shape, colour or line, so the eye does not reset | a rhyme between two ideas | needs the same framing in both; an anchor that drifts a few pixels breaks it | `match-cut`, `type-match-cut`, `underline-road` |
+| action match | motion continues across the cut at the same direction and speed | one action finishing in a new place | a speed or ease mismatch is the most visible failure | `cut-on-motion`, `swipe-continues`, `drop-and-land` |
+| object to object | one thing becomes another and the change carries the meaning | a change of state or role | the two objects must differ in meaning, not only in shape | `shape-trace-morph`, `cta-morph-press`, `avatar-world` |
+| position lock | an anchor stays at one screen spot while the world changes around it | a change of place with one constant (a user, a cursor, a control) | the anchor must be the subject, else it reads as a glitch | `toggle-horizon`, `progress-timeline`, `highlight-sweep` |
+| container transform | an element grows into the next beat's container | zooming from a thumbnail or card into its content, a change of scale | z-order: the container must sit above both beats until it fills | `clip-expand`, `thumbnail-grid`, `command-palette-summon` |
+| shared axis | both beats move along one axis, so the cut reads as travel | a sequence of related steps, a change of place | repeating the axis on adjacent cuts is a stutter ([seam-variety](../rules/seam-variety.md)) | `chain-beats`, `pan-stations`, `direction-wipe` |
+| colour or light flood | a full-frame colour or glow fills the screen and the next beat is revealed from it | a change of time or mood, a reveal, a payoff | a flood with no reveal point just cuts; it must reach the farthest corner | `light-leak-transition`, `exposure-flash`, `glow-record` |
+| type-driven | a letter, word or glyph is the mask, the wipe or the object that becomes the next beat | a claim that names the next beat, a payoff | the type must stay readable until it turns into the ground | `type-fill-transition`, `text-as-mask`, `word-portal` |
+| camera through | the camera pushes into a hole, screen or letter and exits in another world | a change of scale or place, a reveal | strongest device: one per film; reversing direction across the cut breaks it | `zoom-through`, `parallax-dive`, `caret-door` |
+| invisible cut | the join hides behind a wipe-out object or a motion-blur peak | a change of place that must not call attention | needs a real blur or occluder, else it reads as a hard cut | `push-blur`, `whip-pan`, `smear-stretch` |
+| sound bridge | audio leads (J-cut) or trails (L-cut) the picture so the ear carries the join | any cut where the picture alone is plain | picture and sound must agree on the handoff frame | the Board sound row ([sound.md](sound.md)); pairs with any move |
+| deliberate cut | a hard cut chosen on purpose, on a beat or for shock | a tonal flip, a time jump, a smash, a payoff that needs no help | none, but it needs a stated reason like any other ([hard-cut-default](../rules/hard-cut-default.md)) | `exit-fast`, `speed-ramp-freeze`, `cut-on-motion` |
+
+Ledger limits (no family on adjacent cuts, none more than twice) and the choice procedure are in the skill, not here. A deliberate cut is exempt from both limits:
+hard cuts are most seams.
 
 ## The decision procedure: run it at every seam
 

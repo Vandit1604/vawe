@@ -6,7 +6,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { verbRanSince } from '../lib/verb-log.mjs';
-import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf } from '../lib/board.mjs';
+import { movesTaken, boardFilled, motionFilled, boardChecks, spectacleOf, moveRows } from '../lib/board.mjs';
+import { handoffAdvice } from '../lib/handoffs.mjs';
 
 export { boardFilled };
 
@@ -66,7 +67,7 @@ export const SAY = {
   skills: (name, rungs) => `add to films/${name}/DESIGN.md one line per rung (${rungs.join(', ')}): "Skill <rung>: <slug>: what it decided", or "Skipped <rung>: <reason>"; list the skills with command npx -y ui-skills list`,
   states: (name, rel) => `build one static state per world in ${rel} from the kit, no motion yet (layout: taste/craft/layout.md), then bin/vawe frames ${rel}; ask: where is the eye in each frame, and what does it see first?`,
   frames: (name, rel) => `bin/vawe frames ${rel}`,
-  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut (feeling: taste/craft/selection.md, seams: taste/craft/transitions.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md); ask: what carries the eye across each cut, what is the rhythm, where is the one big moment, what sound sits on each action?`,
+  board: (name) => `fill "Board" in films/${name}/brief.md: rhythm, spectacle, a move per cut and its handoff (load skills/vawe-transitions/SKILL.md: 4 ideas from 3 families per cut, the less typical pick, the ledger; families: taste/craft/transitions.md; feeling: taste/craft/selection.md), sound (effects on actions, a real recording first, no bed: taste/craft/sound.md); ask: what carries the eye across each cut, what is the rhythm, where is the one big moment, what sound sits on each action?`,
   dev: (name, rel) => `bin/vawe dev ${rel}`,
   motion: (name, rel) => `bin/vawe strip ${rel} --cuts and Read every cut at full size; for the spectacle second also bin/vawe onion ${rel} --at <s> and bin/vawe velocity ${rel} --at <s>; check each cut against taste/craft/motion-craft.md and the principles in core/motion/README.md: anticipation on the hero, follow-through and overlap, eased spacing, arcs on travelling elements, secondary action, exits faster than entrances, holds alive through element motion, camera still unless the spectacle; fix what reads flat`,
   motionRows: (name) => `write one row per cut in "Motion pass" in films/${name}/brief.md: each principle checked, what read flat, what you fixed`,
@@ -124,7 +125,7 @@ export function nextStep(page, root = process.cwd()) {
   if (!draft && !final && boardFilled(brief) === false) {
     return { name, stage: 'board', next: SAY.board(name), why: 'the board is a plan for time and comes after the states, before the motion' };
   }
-  const boardAdvice = !draft && !final && boardFilled(brief) ? boardChecks(brief, spectacleOf(read(page))) : [];
+  const boardAdvice = !draft && !final && boardFilled(brief) ? [...boardChecks(brief, spectacleOf(read(page))), ...handoffAdvice(moveRows(brief))] : [];
   if (boardAdvice.length) {
     return { name, stage: 'board', next: `check "Board" in films/${name}/brief.md (advice; a plan you keep on purpose needs no change), then ${SAY.dev(name, rel)}`, why: boardAdvice.map((l) => l.replace(/^board: /, '')).join('; ') };
   }

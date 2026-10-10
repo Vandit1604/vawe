@@ -308,11 +308,15 @@ Rhythm: cut lengths and holds are NOT all equal. At least one cut under 0.4 s, o
 
 Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Quiet before it: [1 to 2 s of fewer, slower moves, what stays]. Release after: [what drifts, what stops arriving]. Build it from recipe 15 in prompts/moves/RECIPES.md.
 
-| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) |
-|---|---|---|---|---|---|---|---|
-| [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] |
+| cut | move (prompts/moves) | what carries the eye | what leaves first | overlap s | camera (push, drift, whip, none) | depth | overshoots (EASE.nudge, one EASE.pop) | handoff (family: object) |
+|---|---|---|---|---|---|---|---|---|
+| [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] | [family: the one thing that carries over] |
 
-Pick each cut by the feeling it must give (taste/craft/selection.md) and the seam type it is (taste/craft/transitions.md).
+Pick each cut by the feeling it must give (taste/craft/selection.md). Plan its handoff with the skill \`vawe-transitions\` (skills/vawe-transitions/SKILL.md): the family is one of the twelve in taste/craft/transitions.md, the object is the one thing that carries over, and "deliberate cut: <reason>" is a family. Fill the ledger from the handoff column.
+
+| family | cuts |
+|---|---|
+| [family] | [s1 to s2] |
 
 Sound is part of every film, subtle: small effects on actions, only on the cuts and actions that earn one, plus one for the spectacle. A real recorded effect first (the film's assets, or the sites in resources/README.md); a synth voice from \`bin/vawe sound\` is the fallback. No synth bed, pad or chord. A music track only from a file the user gives. Why and how: taste/craft/sound.md.
 
