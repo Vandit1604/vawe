@@ -189,8 +189,27 @@ function subThump(_, seed) {
 // 2^19 samples, 11.89 s. Every partial and every slow modulation has a whole number of cycles in the loop,
 // and the air is built in the frequency domain, so the loop is periodic by construction: no seam to hide.
 export const BED_LOOP_SAMPLES = 1 << 19;
+export const BED_DEFAULT_BPM = 96;
+const BED_PULSE_AMP = 0.9;
 
-function bed(_, seed) {
+/** Beats in one bed loop for `bpm`: a whole number, so the pulse is as seamless as the pad. */
+export const bedBeats = (bpm) => Math.max(1, Math.round((BED_LOOP_SAMPLES / SR) * bpm / 60));
+
+function addPulse(out, beats, seed) {
+  const N = out[0].length, d = dice(seed + 31);
+  const f = 52 + d.between(0, 4), decay = 0.11, attack = 0.006;
+  const life = sec(decay * 6);
+  for (let b = 0; b < beats; b++) {
+    const start = Math.round(b * N / beats), accent = b % 4 === 0 ? 1 : 0.7;
+    for (let i = 0; i < life; i++) {
+      const t = i / SR, v = BED_PULSE_AMP * accent * Math.sin(TAU * f * t) * Math.exp(-t / decay) * Math.min(1, t / attack);
+      const k = (start + i) % N;
+      out[0][k] += v; out[1][k] += v;
+    }
+  }
+}
+
+function bed({ bpm = BED_DEFAULT_BPM } = {}, seed) {
   const N = BED_LOOP_SAMPLES, d = dice(seed), bin = SR / N;
   const snap = (f) => Math.round(f / bin) * bin;
   const chord = [[98, 1], [147, 0.8], [196, 0.6], [220.5, 0.35], [294, 0.25]];
@@ -213,6 +232,7 @@ function bed(_, seed) {
   }
   const air = [0, 1].map(() => periodicAir(N, d, bin));
   for (let ch = 0; ch < 2; ch++) for (let i = 0; i < N; i++) out[ch][i] += air[ch][i] * 0.9;
+  addPulse(out, bedBeats(bpm), seed);
   return out;
 }
 
