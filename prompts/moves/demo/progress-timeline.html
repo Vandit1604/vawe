@@ -1,0 +1,81 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<title>move: progress timeline</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .shot { position: absolute; inset: 0; }
+  .a { z-index: 1; }
+  .a .card { position: absolute; left: 8vw; top: calc(var(--u) * 24); width: 46vw; height: calc(var(--u) * 52); }
+  .a .card .title { position: absolute; left: var(--s5); top: var(--s5); }
+  .a .card .lead { position: absolute; left: var(--s5); top: calc(var(--u) * 20); color: var(--muted); }
+  .a .pct { position: absolute; right: var(--s5); top: var(--s5); font: 600 var(--t-lead)/1 var(--mono); color: var(--muted); }
+  .a .track { position: absolute; left: 10vw; width: 40vw; top: calc(var(--u) * 64.3); height: calc(var(--u) * 1.4); border-radius: 999px; background: var(--dot); }
+  .a .thumb { position: absolute; right: 8vw; top: calc(var(--u) * 24); width: 32vw; height: calc(var(--u) * 52); border-radius: var(--r-card); background: linear-gradient(140deg, #23222a 0%, #2f3a57 100%); box-shadow: var(--shadow-card); }
+  .b { z-index: 2; background: #0d0c11; }
+  .b .mon { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 8); height: calc(var(--u) * 30); border-radius: var(--r-card); background: linear-gradient(120deg, #101a3a, #1c2f66 60%, #0a87ff); box-shadow: var(--shadow-card); }
+  .b .mon span { position: absolute; left: var(--s4); bottom: var(--s3); font: 500 var(--t-small)/1 var(--mono); color: #cfe3ff; }
+  .b .ruler { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 42); height: calc(var(--u) * 2.2); background: repeating-linear-gradient(90deg, var(--faint) 0 1px, transparent 1px calc(var(--u) * 4.2)); opacity: 0.8; }
+  .lane { position: absolute; left: 8vw; right: 8vw; height: calc(var(--u) * 10); }
+  .lane i { position: absolute; top: 0; bottom: 0; border-radius: var(--r2); background: var(--raised); box-shadow: var(--ring); }
+  .lane i.hot { background: #1d4f99; }
+  .tc { position: absolute; z-index: 9; padding: var(--s1) var(--s2); border-radius: var(--r2); background: var(--raised); box-shadow: var(--ring); font: 600 var(--t-small)/1 var(--mono); color: var(--ink); }
+  .head { position: absolute; z-index: 8; background: var(--accent); border-radius: 999px; }
+</style>
+</head>
+<body>
+<section class="shot b" id="b">
+  <div class="mon"><span>launch.mp4</span></div>
+  <div class="ruler"></div>
+  <div class="lane" style="top: calc(var(--u) * 47)"><i style="left: 0; width: 22%"></i><i class="hot" style="left: 23%; width: 31%"></i><i style="left: 55%; width: 18%"></i><i style="left: 74%; width: 26%"></i></div>
+  <div class="lane" style="top: calc(var(--u) * 59)"><i style="left: 6%; width: 38%"></i><i class="hot" style="left: 45%; width: 14%"></i><i style="left: 60%; width: 40%"></i></div>
+  <div class="lane" style="top: calc(var(--u) * 71)"><i class="hot" style="left: 0; width: 60%"></i><i style="left: 61%; width: 39%"></i></div>
+</section>
+<section class="shot a" id="a">
+  <div class="card card"><div class="title">Exporting</div><div class="lead">launch.mp4, 3 ratios</div><div class="pct" id="pct">0%</div></div>
+  <div class="track"></div>
+  <div class="thumb"></div>
+</section>
+<div class="head" id="head"></div><div class="tc" id="tc"></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100, vw = W / 100;
+const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, k) => p + (q - p) * k;
+const land = easeFn('land'), swap = easeFn('swap'), launch = easeFn('launch');
+const $ = (id) => document.getElementById(id);
+const head = $('head'), a = $('a'), b = $('b'), tc = $('tc'), pct = $('pct');
+// one speed curve carries the whole move: the fill head accelerates, runs at V past the end of the track, becomes the scrubber, then brakes
+const X0 = 10 * vw, END = 50 * vw, REST = 92 * vw, V = 44 * vw, T0 = 0.4, ACC = 0.5, BRAKE = 0.6;
+const Xd = REST - 0.5 * V * BRAKE, Td = T0 + ACC + (Xd - (X0 + 0.5 * V * ACC)) / V;
+function xAt(t) {
+  if (t <= T0) return X0;
+  if (t < T0 + ACC) { const s = (t - T0) / ACC; return X0 + V * ACC * (s * s / 2); }
+  if (t < Td) return X0 + 0.5 * V * ACC + V * (t - T0 - ACC);
+  const s = clamp((t - Td) / BRAKE);
+  return Xd + V * BRAKE * (s - s * s / 2);
+}
+const CY = 65 * u, BAR_H = 1.4 * u, LINE_H = 50 * u, LINE_W = 0.55 * u;
+const tEnd = (() => { let t = T0; while (xAt(t) < END) t += 0.001; return t; })();   // the second the head leaves the track
+const STAND = 0.7;                                                                     // seconds to stand up
+vawe.onFrame((t) => {
+  const x = xAt(t), past = clamp((t - tEnd) / STAND);
+  const tailX = lerp(X0, x - LINE_W, swap(clamp(past / 0.55)));    // the tail catches up with the head, then the head stands up
+  const h = lerp(BAR_H, LINE_H, land(clamp((past - 0.4) / 0.6)));
+  head.style.left = `${tailX}px`; head.style.width = `${Math.max(x - tailX, LINE_W)}px`;
+  head.style.top = `${CY - h / 2}px`; head.style.height = `${h}px`;
+  head.style.visibility = t < T0 ? 'hidden' : 'visible';
+  pct.textContent = `${Math.round(100 * clamp((x - X0) / (END - X0)))}%`;
+  // B sits to the left of the scrubber; its left edge flies off the frame fast once the line is up
+  const edge = lerp(x, 0, launch(clamp((past - 0.75) / 0.25)));
+  b.style.clipPath = past > 0.75 ? `inset(0 ${W - x - LINE_W}px 0 ${edge}px)` : 'inset(0 100% 0 100%)';
+  const sec = Math.max(0, ((x - 8 * vw) / (84 * vw)) * 41);
+  tc.textContent = `0:${String(Math.floor(sec)).padStart(2, '0')}:${String(Math.floor((sec % 1) * 30)).padStart(2, '0')}`;
+  tc.style.left = `${x + 1.2 * u}px`; tc.style.top = `${CY - LINE_H / 2 - 4 * u}px`; tc.style.opacity = past > 0.9 ? 1 : 0;
+});
+</script>
+</body>
+</html>

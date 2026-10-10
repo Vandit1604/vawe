@@ -1,0 +1,82 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="daylight">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<title>move: cursor spotlight</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; position: relative; }
+  .shot { position: absolute; inset: 0; }
+  .a .card { position: absolute; left: 12vw; top: calc(var(--u) * 24); width: 76vw; height: calc(var(--u) * 52); display: grid; grid-template-columns: 1fr auto; align-items: end; padding: var(--s5); }
+  .a h1 { margin: 0 0 var(--s2); }
+  .a .rows { display: grid; gap: var(--s2); margin-top: var(--s4); width: 40vw; }
+  .a .row { display: flex; justify-content: space-between; padding-bottom: var(--s2); border-bottom: 1px solid var(--line); }
+  .a .btn { padding-block: calc(var(--u) * 3.2); padding-inline: calc(var(--u) * 7); font-size: var(--t-lead); }
+  .a { z-index: 1; }
+  .b { z-index: 5; background: #0f2033; color: #eef3fb; }
+  .b .wrap { position: absolute; inset: 0; }
+  .b .big { position: absolute; left: 10vw; top: calc(var(--u) * 24); margin: 0; font: 600 calc(var(--u) * 22)/1 var(--sans); letter-spacing: -0.05em; }
+  .b .big small { font-size: 0.4em; letter-spacing: -0.02em; color: #8fb3ff; margin-left: 0.2em; }
+  .b .lab { position: absolute; left: 10.4vw; top: calc(var(--u) * 52); margin: 0; font: 500 var(--t-lead)/1 var(--sans); color: #8b9bb3; }
+  .bars { position: absolute; left: 52vw; right: 10vw; top: calc(var(--u) * 24); height: calc(var(--u) * 52); display: flex; align-items: flex-end; gap: calc(var(--u) * 2.2); }
+  .bars i { flex: 1; height: 100%; background: #3a4d6b; border-radius: var(--r2) var(--r2) 0 0; transform-origin: 50% 100%; }
+  .bars i:last-child { background: #6a8dff; }
+  .cursor { position: absolute; left: 0; top: 0; z-index: 10; width: calc(var(--u) * 5.2); height: calc(var(--u) * 5.2); overflow: visible; transform-origin: 0 0; }
+  .cursor path { fill: #fff; stroke: #0f2033; stroke-width: 1.4; stroke-linejoin: round; }
+  .cur { position: absolute; left: 0; top: 0; z-index: 10; }
+</style>
+</head>
+<body>
+<section class="shot b"><div class="wrap">
+  <h2 class="big" id="num">31<small>%</small></h2><p class="lab">week over week</p>
+  <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+</div></section>
+<section class="shot a" id="a">
+  <div class="card">
+    <div><h1 class="title">Weekly report</h1><span class="lead muted">Ready to open</span>
+      <div class="rows"><div class="row body"><span>Signups</span><b>4,210</b></div><div class="row body"><span>Activation</span><b>61%</b></div></div></div>
+    <div class="btn primary" id="btn">Open report</div>
+  </div>
+</section>
+<div class="cur" id="cur"><svg class="cursor" id="arrow" viewBox="0 0 24 24"><path transform="translate(-2 -2)" d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100;
+const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, k) => p + (q - p) * k;
+const land = easeFn('land'), settle = easeFn('settle'), launch = easeFn('launch');
+const a = document.getElementById('a'), b = document.querySelector('.b'), btn = document.getElementById('btn');
+const cur = document.getElementById('cur'), arrow = document.getElementById('arrow');
+const bars = [...document.querySelectorAll('.bars i')], num = document.getElementById('num');
+const r = btn.getBoundingClientRect();
+const P = { x: r.left + r.width * 0.78, y: r.top + r.height * 0.7 };       // the point that clicks: the tip
+const FROM = { x: 0.2 * W, y: 0.88 * H };
+const T = { travel: [0.3, 1.1], press: 1.4, grow: 1.5, growDur: 0.8, leave: 2.9 };
+const R0 = 0.9 * u, FEATHER = 0.14;                                         // the circle is born as a tip-sized spot
+const FAR = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(P.x + 0.02 * W - x, P.y + 0.012 * H - y)));
+const RMAX = (FAR / (1 - FEATHER)) * 1.02;                                  // the opaque core, R minus the feather, must reach the farthest corner
+const BAR = [0.34, 0.5, 0.42, 0.62, 0.55, 0.78, 1];
+vawe.onFrame((t) => {
+  const tr = clamp((t - T.travel[0]) / (T.travel[1] - T.travel[0]));
+  const k = clamp((t - T.grow) / T.growDur);
+  const drift = settle(clamp((t - T.press) / 1.0));                         // the hand keeps going a little after the click, so the tip is never frozen under the circle
+  let x = lerp(FROM.x, P.x, land(tr)) + 0.02 * W * drift, y = lerp(FROM.y, P.y, settle(tr)) + 0.012 * H * drift;
+  const lv = clamp((t - T.leave) / 0.35);
+  cur.style.transform = `translate(${x + 0.3 * W * launch(lv)}px, ${y + 0.4 * H * launch(lv)}px)`;
+  const dip = Math.sin(Math.PI * clamp((t - T.press) / 0.22));
+  arrow.style.transform = `scale(${1 - 0.14 * dip})`;
+  btn.style.transform = `scale(${1 - 0.035 * dip})`;
+  // the mask is a radial gradient: opaque inside, a soft shoulder of FEATHER x radius to clear at the edge
+  const g = k * k * (3 - 2 * k) * 0.35 + settle(k) * 0.65;
+  const R = lerp(R0, RMAX, g), f = Math.max(R * FEATHER, 1.5);
+  const m = `radial-gradient(circle at ${x}px ${y}px, #000 ${Math.max(R - f, 0)}px, transparent ${R}px)`;
+  b.style.visibility = t < T.grow ? 'hidden' : 'visible';
+  b.style.webkitMaskImage = m; b.style.maskImage = m;
+  b.firstElementChild.style.transform = `scale(${lerp(1.06, 1, land(k))})`;
+  bars.forEach((el, i) => { el.style.transform = `scaleY(${BAR[i] * (0.7 + 0.3 * land(clamp((t - T.grow - 0.5 - i * 0.05) / 0.8)))})`; });
+  num.firstChild.nodeValue = String(Math.round(lerp(31, 48, land(clamp((t - T.grow - 0.5) / 1.1)))));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="vawe">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.8">
+<title>move: glow record</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  :root { --red: #ff2d3a; }
+  body { display: block; position: relative; }
+  #host { position: absolute; inset: 0; }
+  .shot { position: absolute; inset: 0; }
+  .a .bar { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 6); display: flex; justify-content: space-between; align-items: center; }
+  .a .bell { position: relative; width: calc(var(--u) * 6); height: calc(var(--u) * 6); color: var(--ink); }
+  .a .bell svg { width: 100%; height: 100%; }
+  .badge { position: absolute; right: calc(var(--u) * -1.2); top: calc(var(--u) * -1.2); width: calc(var(--u) * 3.4); height: calc(var(--u) * 3.4); border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font: 700 calc(var(--u) * 2) / 1 var(--sans); overflow: hidden; }
+  .badge span { position: absolute; }
+  .a .list { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 22); display: grid; gap: var(--s2); }
+  .row { display: flex; align-items: center; gap: var(--s3); padding: var(--s3) var(--s4); border-radius: var(--r-card); background: var(--surface); box-shadow: var(--shadow-card); }
+  .row .dotc { width: calc(var(--u) * 6); height: calc(var(--u) * 6); border-radius: 50%; background: var(--raised); flex: none; }
+  .row b { display: block; font-size: var(--t-body); margin-bottom: calc(var(--u) * 0.6); }
+  .row span { color: var(--muted); font-size: var(--t-small); }
+  .b { background: #0c0b10; visibility: hidden; }
+  .b .rec { position: absolute; left: 8vw; top: calc(var(--u) * 6); height: calc(var(--u) * 5); display: flex; align-items: center; gap: var(--s2); padding-left: calc(var(--u) * 5.2); font: 600 var(--t-lead)/1 var(--mono); letter-spacing: 0.02em; }
+  .b .rec small { font: 500 var(--t-body)/1 var(--mono); color: var(--muted); }
+  .b .view { position: absolute; left: 8vw; right: 8vw; top: calc(var(--u) * 16); height: calc(var(--u) * 60); border-radius: var(--r-card); background: linear-gradient(135deg, #1a2447 0%, #2c3b73 50%, #1a1f3a 100%); box-shadow: var(--shadow-hero); overflow: hidden; }
+  .b .view i { position: absolute; border: 2px solid rgba(255, 255, 255, 0.5); width: calc(var(--u) * 5); height: calc(var(--u) * 5); }
+  .b .wave { position: absolute; left: 8vw; right: 8vw; bottom: calc(var(--u) * 8); height: calc(var(--u) * 8); display: flex; align-items: center; gap: calc(var(--u) * 0.7); }
+  .b .wave i { flex: 1; border-radius: 999px; background: var(--faint); height: 100%; transform-origin: 50% 50%; }
+  #flood { position: absolute; inset: 0; z-index: 5; mix-blend-mode: screen; pointer-events: none; }
+  #dot { position: absolute; z-index: 6; border-radius: 50%; background: var(--red); }
+</style>
+</head>
+<body>
+<div id="host">
+  <section class="shot a" id="a">
+    <div class="bar"><div class="title">Inbox</div><div class="bell"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17h12l-1.5-2V10a4.5 4.5 0 0 0-9 0v5z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><div class="badge" id="badge"><span id="n2">2</span><span id="n3">3</span></div></div></div>
+    <div class="list">
+      <div class="row"><div class="dotc"></div><div><b>Ravi, design</b><span>New cut is ready for review</span></div></div>
+      <div class="row"><div class="dotc"></div><div><b>Studio</b><span>Your export finished</span></div></div>
+      <div class="row"><div class="dotc"></div><div><b>Billing</b><span>Invoice 0412 was paid</span></div></div>
+    </div>
+  </section>
+  <section class="shot b" id="b">
+    <div class="rec">REC <small id="tc">00:00</small></div>
+    <div class="view" id="view"><i style="left: 4vw; top: calc(var(--u) * 4)"></i><i style="right: 4vw; top: calc(var(--u) * 4)"></i><i style="left: 4vw; bottom: calc(var(--u) * 4)"></i><i style="right: 4vw; bottom: calc(var(--u) * 4)"></i></div>
+    <div class="wave" id="wave"></div>
+  </section>
+</div>
+<div id="flood"></div><div id="dot"></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, u = H / 100;
+const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (p, q, k) => p + (q - p) * k;
+const land = easeFn('land'), settle = easeFn('settle');
+const $ = (id) => document.getElementById(id);
+const host = $('host'), a = $('a'), b = $('b'), flood = $('flood'), dot = $('dot'), badge = $('badge');
+const wave = $('wave');
+for (let i = 0; i < 48; i++) wave.appendChild(document.createElement('i'));
+const bars = [...wave.children];
+const bb = badge.getBoundingClientRect();
+const SRC = { x: bb.left + bb.width / 2, y: bb.top + bb.height / 2, r: bb.width / 2 };   // the badge
+const DST = { x: 8 * (W / 100) + 2.5 * u, y: 6 * u + 2.5 * u, r: 1.25 * u };            // the recording light
+const FAR = Math.max(...[[0, 0], [W, 0], [0, H], [W, H]].map(([x, y]) => Math.hypot(SRC.x - x, SRC.y - y)));
+const T = { pop: 0.55, wind: 1.2, flood: 1.35, floodDur: 0.35, hold: 0.08, gather: 0.85 };
+const T_FULL = T.flood + T.floodDur, T_GATHER = T_FULL + T.hold, T_END = T_GATHER + T.gather;
+const A = 0.92, FEATHER = 0.3, RED = '255, 45, 58';
+const R_FULL = (FAR * 1.02) / (1 - FEATHER);                  // the opaque core, R minus the feather, must reach the farthest corner
+dot.style.width = dot.style.height = `${2 * DST.r}px`;
+vawe.onFrame((t) => {
+  // the badge: the count rolls 2 to 3, then it swells just before the light leaves it
+  const roll = land(clamp((t - T.pop) / 0.2));
+  $('n2').style.transform = `translateY(${-100 * roll}%)`;
+  $('n3').style.transform = `translateY(${100 * (1 - roll)}%)`;
+  const swell = 1 + 0.35 * Math.sin(Math.PI * 0.5 * clamp((t - T.wind) / (T.flood - T.wind)));
+  badge.style.transform = `scale(${swell})`;
+  // the light: a disc that leaves the badge, reaches the farthest corner in floodDur, holds a moment, then gathers into the recording light
+  const e = land(clamp((t - T.flood) / T.floodDur)), g = settle(clamp((t - T_GATHER) / T.gather));
+  const cx = lerp(SRC.x, DST.x, g), cy = lerp(SRC.y, DST.y, g);
+  const R = t < T_GATHER ? lerp(SRC.r, R_FULL, e) : lerp(R_FULL, DST.r, g);
+  const f = Math.max(R * FEATHER, 0.25 * u);
+  const live = t >= T.flood && t < T_END;
+  flood.style.background = live ? `radial-gradient(circle at ${cx}px ${cy}px, rgba(${RED}, ${A}) 0, rgba(${RED}, ${A}) ${Math.max(R - f, 0)}px, rgba(${RED}, 0) ${R}px)` : 'none';
+  const lit = t >= T_GATHER ? 1 - g : (t >= T_FULL ? 1 : e);
+  host.style.filter = `brightness(${(1 + 0.45 * lit).toFixed(3)})`;   // the frame over-exposes while the light is on it
+  const swapped = t >= T_FULL;
+  a.style.visibility = swapped ? 'hidden' : 'visible';
+  b.style.visibility = swapped ? 'visible' : 'hidden';
+  // the light ends as the recording dot: the same colour and size as the disc that gathered into it
+  const beat = t > T_END ? 0.5 + 0.5 * Math.cos(2 * Math.PI * (t - T_END)) : 1;
+  dot.style.left = `${DST.x - DST.r}px`; dot.style.top = `${DST.y - DST.r}px`;
+  dot.style.opacity = t >= T_END - 0.05 ? (0.55 + 0.45 * beat).toFixed(3) : 0;
+  const sec = Math.max(0, t - T_END);
+  $('tc').textContent = `00:${String(Math.floor(sec)).padStart(2, '0')}`;
+  const on = clamp((t - T_GATHER - 0.2) / 0.6);
+  bars.forEach((el, i) => { el.style.transform = `scaleY(${(0.15 + 0.85 * Math.abs(Math.sin(i * 0.9 + t * 7) * Math.cos(i * 0.37 - t * 3))) * land(on)})`; });
+});
+</script>
+</body>
+</html>
