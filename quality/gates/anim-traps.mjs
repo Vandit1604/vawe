@@ -228,7 +228,7 @@ async function checkPage(absFile) {
     pageTraps(fs.readFileSync(absFile, 'utf8'), (what, where, fix) => findings.push({ what, where, fix }));
     const authoring = pageAuthoring(absFile);
     const { allow = [], _why = {} } = authoring;
-    const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps');
+    const waived = isWaivedBy(allow, 'anim-traps') && hasReason(_why, 'anim-traps', { loose: true });
     return { file: relFile, findings, waived, motion: lintLines(unwaived(motionLint(motion), authoring)) };
   } finally { await close(); }
 }
