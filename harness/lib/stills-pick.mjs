@@ -16,13 +16,11 @@ export function stillsAction({ brief, html, cached }) {
   return cached?.key === stillsKey(html, brief) ? 'cached' : 'run';
 }
 
-/** Three lines: the pick with each direction's score, the reason, and the fix to make first. */
+/** Three lines: the pick, the reason, and the fix to look at first. The scores stay in out/<name>.stills.json: printed, they become a target. */
 export function stillsLines(r, { cached = false } = {}) {
-  const scores = (r.directions || []).map((d) => `${d.id} ${d.score}`).join(', ');
-  const axes = Object.entries(r.scores || {}).map(([k, v]) => `${k} ${v}`).join(', ');
   return [
-    `stills judge${cached ? ' (unchanged since the last run)' : ''}: pick ${r.strongest ?? '?'} (${scores || 'no scores'}; ${axes})`,
+    `stills judge${cached ? ' (unchanged since the last run)' : ''}, advice and not a target: pick ${r.strongest ?? '?'}`,
     `  why: ${r.reason ?? 'no reason given'}`,
-    `  fix first: ${r.fixFirst ?? 'nothing under 8'}`,
+    `  fix first: ${r.fixFirst ?? 'nothing to fix'}`,
   ];
 }

@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { scratchBase } from '../../harness/lib/scratch.mjs';
 import { structuredCriteria } from '../../harness/lib/judge-axes.mjs';
+import { tricksPrompt } from '../../harness/lib/judge-tricks.mjs';
 
 export function houseStyleFor(brand) {
   const p = brand && path.join('assets', 'brands', brand, 'house-style.md');
@@ -322,10 +323,12 @@ The reader must be able to check every score, so name the moment you looked at.
 Axes:
 ${list}
 
+${tricksPrompt({ stage })}
+
 Return ONLY one JSON object, no prose around it:
 {"scores":{${axes.map(([k]) => `"${k}":n`).join(',')}},
  "worlds":n or null,
  "fixes":[{"axis":"...","score":n,"at":"seconds like 1.4, or the frame name for stills","fix":"ONE concrete change an author can make in one edit","what":"the one thing it changes, 2 to 4 words","now":"its measured value on the frames now","want":"the value to reach"}],
- "fixFirst":"the one fix with the most effect"}
+ "fixFirst":"the one fix with the most effect"${stage === 'stills' ? '' : ',\n "tricks":[{"trick":"a known trick id","at":seconds like 1.4,"evidence":"what you saw at that second"}]'}}
 Add one entry to "fixes" for every axis scored under 8, and none for the others.`;
 }

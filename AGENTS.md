@@ -45,7 +45,7 @@ next command for the film you edited last.
 | 7 | motion pass | clean or waived with a reason: overshoot-share, live-hold (a hold lives through an element motion, never a camera drift), constant-camera, seam-variety; `bin/vawe strip <page> --cuts`, Read every cut (for the spectacle also `vawe onion`, `vawe velocity`), fix what reads flat, one row per cut in the brief's "Motion pass" |
 | 8 | critique | `bin/vawe critique <page> [--ref mp4]` in a session that did not write the page (`vawe-critique`) |
 | 9 | fix | re-render only the seconds the critique named: `bin/vawe dev <page> --from s --to s` |
-| 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; iterate on drafts until PASS; poll once per call and work on the last draft between polls |
+| 10 | final | `bin/vawe ship <page>`, then `bin/vawe ship --status <page> --wait` for the verdict; fix what the final check and the acceptance rows name on drafts; the judge is read once and never tuned to (its score is not a target); poll once per call and work on the last draft between polls |
 
 Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe see <mp4 | page | ref-id> [--vs <ref>]`, the one command that reads a film completely (shots, motion, light, type, sound, every image with its numbers; `--vs` adds deltas and advice naming the page literal), or with its parts: `vawe refs frames` (reference stills),
 `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),

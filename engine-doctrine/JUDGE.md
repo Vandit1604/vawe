@@ -44,6 +44,20 @@ can make in one edit.
 Stills axes: concept, focal, colour, type, template (distance from a generic template). The rubric
 text is `FRESH_AXES` in `quality/gates/rubric.mjs`. Keep this table and that text in step.
 
+### Tricks and owner decisions
+
+The rubric lists the tricks that turn a check green without improving the film (`TRICKS` in
+`harness/lib/judge-tricks.mjs`): camera drift through a hold, a drifting ground, a grain or faint
+gradient laid over a flat ground, a drone bed, hidden or faint copy, padded or split worlds, a moved
+spectacle, motion on a formula, and a uniform gain shift. The judge names a trick only with the second
+it saw it at and what it saw there; an entry with no second is dropped. A cited trick caps the axes it
+games at 7, and the report prints it as `trick <id> at <s> s: <evidence>`.
+
+The judge respects the film's own `DESIGN.md` and the owner decisions: it asks for no house face
+(no forced Anybody), no bigger elements to reach a number, no camera push as a reward or a fix, and no
+move of the spectacle. Its verdict is read by a person. It is not printed back to the author as a target:
+the stills line in `bin/vawe dev` shows the pick, the reason and the first fix, never the scores.
+
 ## Side by side with real films
 
 When `~/.vawe/refs` exists (`bin/vawe refs list`; `$VAWE_REFS_DIR` moves it), the judge also reads the sheets of two in-scope reference films of the film's type (product or brand, the closest length, then id order) and says per dial (text, colour, motion) which is better, ours or the reference. Without the folder, one line says the comparison was skipped.
