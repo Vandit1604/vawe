@@ -34,7 +34,6 @@ prompt from scratch is [ANATOMY.md](ANATOMY.md). Every template targets the vawe
 | [ui-morph-loop](ui-morph-loop.md) | one element becomes 8 to 12 UI states and loops, on a beat grid | 12 to 16 s |
 | [reference-rebuild](reference-rebuild.md) | a reference mp4 must be matched: SPEC.md, KEEP/CHANGE, rebuild, `bin/vawe critique --ref` | the reference's |
 | [directors-brief-long-form](directors-brief-long-form.md) | over 60 s, or more than one session or agent: BRIEF, STORYBOARD, GUIDE, chapters | 1 to 6 min |
-| [critique-pass](critique-pass.md) | a draft exists; fresh critic, default reject, four views, frame-locked if a reference exists | one pass |
 | [story-explainer](story-explainer.md) | explain a topic with invented visuals: facts list first, narration timeline | 30 s to 3 min |
 | [music-video-beat-synced](music-video-beat-synced.md) | a song exists; every cut on a downbeat, one spectacle at the drop | the song's |
 | [pixel-art-sprite](pixel-art-sprite.md) | a 16-bit sprite loop: logical resolution, palette, state machine, quantised pose | 2 to 8 s |
@@ -61,5 +60,5 @@ only: the templates are our own text in the same shape.
    reads `ANATOMY.md`).
 3. Fill the brief's Spec tables before the page (the shape is in [ANATOMY.md](ANATOMY.md)). After the details are in, never wait for
    a reply: take the guess marked `(guess: change me)` and go on.
-4. Draft with `bin/vawe dev <page>` until every Acceptance row is green, then run `critique-pass.md` as a
+4. Draft with `bin/vawe dev <page>` until every Acceptance row is green, then run the `vawe-critique` skill as a
    fresh agent. The taste rules are in `taste/build/DIGEST.md` and in the lines `dev` prints.

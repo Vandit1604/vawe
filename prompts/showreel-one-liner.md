@@ -73,7 +73,7 @@ The plain line needs none. Ask these only to choose the second run; a skipped qu
 ## After the first draft
 
 `bin/vawe dev films/<name>/page.html`, look at the sheet, then run
-`prompts/critique-pass.md` with no reference.
+the `vawe-critique` skill with no reference.
 
 source: https://github.com/guanmo-ai/awesome-ai-motion (cases 2103315922098470926 by @stephanlivera,
 2103449416325890146 by @ajith_io, 2103918792845963545 by @achxvi, 2103381720410333314 by

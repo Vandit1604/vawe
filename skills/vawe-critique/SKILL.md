@@ -69,13 +69,26 @@ decides.
 
 ## After the critique (the author)
 
-- Fix the top five. Re-render only the seconds they name:
+- Fix the top five (the top three for a short film). Re-render only the seconds they name:
   `bin/vawe dev films/<name>/page.html --from <s> --to <s>`.
 - Then a fresh critique again. Stop when it passes, or when two rounds in a row fix nothing the
   critic scores higher. Hand back with the last critique attached.
 - Findings are fixed, not moved: the next critic gets the previous report and checks.
 
-Template with the full prompt text: `prompts/critique-pass.md`. Judge dimensions:
-`engine-doctrine/JUDGE.md`.
+## The critic prompt, and the panel
+
+Hand a fresh agent this and nothing else about the authoring: "You are the critic. You have not seen how this film was made. Film: <page>, rendered at <mp4>. Reference: <ref or none>. Brief: <brief.md>. Default verdict is REJECT; do not fill in what the film meant. Look at the four views in order, one line per finding; frame-locked against the reference at five shared timestamps if there is one; score the seven dimensions; name every default you recognise; end with the REJECT or PASS line." Ask the author five things first, each with a default: the mp4 (the last draft), the brief (`brief.md`), the reference (none), the previous critique (none; the critic checks findings were fixed, not moved), the judges (two, A and B).
+
+A fresh critic matters because the thread that wrote the page has anchored on its own easing, crop and headline. Its value is independent evidence: judge by what artifact it sees that the author did not (a render, a strip, a reference), not by a fresh pair of eyes. For a panel, hand each critic one artifact and demand a fixed verdict shape:
+
+| critic | input | verdict per item |
+|---|---|---|
+| beat | the phone sheet and strip of `bin/vawe critique` | `{beat, reads, flaw, fix}` |
+| bg-motion | a strip of 4 or more frames, reference and render at matched times (a still says nothing about speed) | `{axis, ours, reference, delta, fix}` |
+| reveal | a dense strip of the entrance and exit windows | `{beat, enter, exit, paired, flaw, fix}` |
+| fidelity (recreations) | `bin/vawe compare` frames | `{beat, score 0-10, gaps}` (gaps, not agreement) |
+| seam | the seam frames and the loop seam | `{seam, flash, evidence, fix}` |
+
+Launch the panel in one message so the critics run at once. Critics report, the main thread fixes. A critic is evidence, not a ruling: if you look and the flaw is not there, it is wrong. A panel suits a full authoring pass, a recreation and any render you ship; a colour swap is not worth it. The fan-out cost and the brief lines for any subagent: `engine-doctrine/CRAFT/SUBAGENTS.md`. Judge dimensions: `engine-doctrine/JUDGE.md`.
 
 <!-- doc-refs-allow: films/x/page.html · an example path in a sample judge line -->

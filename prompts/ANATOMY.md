@@ -156,4 +156,3 @@ pass them. Write the tables after the first draft, from what the draft does.
 | ui-morph-loop, pixel-art-sprite, production-brief-acceptance | measured: the numbers exist |
 | music-video-beat-synced, story-explainer, interactive-lab-capture | mixed |
 | showreel-one-liner, directors-brief-long-form | director's |
-| critique-pass | tool: the fresh critic |
