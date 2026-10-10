@@ -139,7 +139,7 @@ export function htmlSource(element, { scale = 1 } = {}) {
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(size[0] * scale);
   canvas.height = Math.round(size[1] * scale);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
   return {
     size,
     async upload(gl) {
