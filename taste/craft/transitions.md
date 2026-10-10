@@ -172,7 +172,7 @@ zeroes velocity and breaks one flight into N hops ([camera-path-linear](../rules
   to its next mark. It is the highest-craft continuity we have.
 - Easing by role: an entrance lands (EASE.land), an exit launches (EASE.launch), a move or morph between
   seen positions travels (EASE.carry), constant motion is linear. Springs suit interruptible motion because
-  they keep velocity. App UI timing budgets do not transfer to film ([motion-standards.md](motion-standards.md)).
+  they keep velocity. App UI timing budgets do not transfer to film ([motion-craft.md](motion-craft.md#which-ui-motion-standards-transfer)).
 - Diegetic beats non-diegetic. Motion that emerges from a real trigger (a whip, a touch point, a shared
   element) reads honest. A generic fade laid on top reads as stock. Prefer the transition that arises
   from the content.

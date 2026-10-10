@@ -179,15 +179,6 @@
   "move_min_s": 0.6,
   "still_min_s": 0.3
  },
- "counter-no-overshoot": {
-  "count_min_s": 0.8,
-  "count_max_s": 1.4
- },
- "ease-variety": {
-  "eases_per_scene_min": 1,
-  "eases_per_scene_max": 2,
-  "lockstep_tol_s": 0.02
- },
  "entrance-ease": {
   "scale_start_min": 0.9,
   "scale_start_max": 0.97
@@ -211,10 +202,10 @@
   "rest_max_s": 0.6
  },
  "named-eases": {
-  "linear_move_limit_s": 0.3
- },
- "no-bounce": {
-  "pop_overshoot_pct": 15
+  "linear_move_limit_s": 0.3,
+  "eases_per_scene_min": 1,
+  "eases_per_scene_max": 2,
+  "lockstep_tol_s": 0.02
  },
  "no-dead-stop": {
   "jolt_px_per_s": 600,
@@ -226,7 +217,10 @@
   "simultaneous_s": 0.03,
   "mover_floor": 0.05
  },
- "overshoot-share": {
+ "overshoot": {
+  "pop_overshoot_pct": 15,
+  "count_min_s": 0.8,
+  "count_max_s": 1.4,
   "share_min_pct": 21,
   "share_max_pct": 61,
   "arrivals_min": 6,

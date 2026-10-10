@@ -1,4 +1,4 @@
-// Five advice lines on how the moves of a scene differ, from the motion records (rules entrance-origin, ease-variety, follow-through and arrival-rhythm):
+// Five advice lines on how the moves of a scene differ, from the motion records (rules entrance-origin, named-eases, follow-through and arrival-rhythm):
 // entrances all from one direction, too many eases in a scene, two layers that move in lockstep, an element whose properties all stop on one frame,
 // and entrances that never overlap. Pure. Each number is read
 // from taste/build/limits.json; a scene is a run of entrances with no gap over scene-budget.scene_gap_s between two of them.
@@ -52,12 +52,12 @@ const curveOf = (r) => {
   return curve === undefined || curve === 'inferred' ? null : (easeName({ easing: curve }) ?? curve);
 };
 
-/** A scene whose entrances use more distinct eases than the limit (rule ease-variety). */
-export function easeCount(records, { max = LIMITS['ease-variety'].eases_per_scene_max } = {}) {
+/** A scene whose entrances use more distinct eases than the limit (rule named-eases). */
+export function easeCount(records, { max = LIMITS['named-eases'].eases_per_scene_max } = {}) {
   const out = [];
   for (const { at, records: rs } of scenesOf(records)) {
     const names = [...new Set(rs.filter((r) => moves(r) && entering(r) && measured(r)).map(curveOf).filter(Boolean))];
-    if (names.length > max) out.push({ code: 'ease-count', rule: 'ease-variety', at,
+    if (names.length > max) out.push({ code: 'ease-count', rule: 'named-eases', at,
       what: `the scene at ${s2(at)} s uses ${names.length} eases (${names.slice(0, 4).join(', ')}); the rule allows ${max}`,
       fix: 'pick the scene ease from the signature and reuse it; keep a second only for a drift or a settle' });
   }
@@ -66,8 +66,8 @@ export function easeCount(records, { max = LIMITS['ease-variety'].eases_per_scen
 
 const spread = (xs) => Math.max(...xs) - Math.min(...xs);
 
-/** Beats are runs of entrances that start within stagger.total_max_s of the one before; a beat of two or more elements that start and last alike is lockstep (rule ease-variety). */
-export function lockstep(records, { tol = LIMITS['ease-variety'].lockstep_tol_s, window = LIMITS.stagger.total_max_s } = {}) {
+/** Beats are runs of entrances that start within stagger.total_max_s of the one before; a beat of two or more elements that start and last alike is lockstep (rule named-eases). */
+export function lockstep(records, { tol = LIMITS['named-eases'].lockstep_tol_s, window = LIMITS.stagger.total_max_s } = {}) {
   const moving = own(records).filter((r) => moves(r) && entering(r) && measured(r)).sort((a, b) => a.delay - b.delay);
   const beats = [];
   for (const r of moving) {
@@ -75,7 +75,7 @@ export function lockstep(records, { tol = LIMITS['ease-variety'].lockstep_tol_s,
     if (last && r.delay - last.at.at(-1) <= window) { last.at.push(r.delay); last.rs.push(r); } else beats.push({ at: [r.delay], rs: [r] });
   }
   return beats.filter(({ rs }) => new Set(rs.map((r) => r.target)).size >= 2 && spread(rs.map((r) => r.delay)) <= tol && spread(rs.map((r) => r.duration)) <= tol)
-    .map(({ rs }) => ({ code: 'lockstep', rule: 'ease-variety', at: rs[0].delay,
+    .map(({ rs }) => ({ code: 'lockstep', rule: 'named-eases', at: rs[0].delay,
       what: `${new Set(rs.map((r) => r.target)).size} elements move in lockstep (all start at ${s2(rs[0].delay)} s and last ${s2(rs[0].duration)} s): ${[...new Set(rs.map((r) => r.label))].slice(0, 3).join(', ')}`,
       fix: 'offset the second layer by 60 to 100 ms, or give it a different duration' }));
 }

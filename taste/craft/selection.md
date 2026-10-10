@@ -46,7 +46,7 @@ quirky script. Details: [typography.md](typography.md).
 ## Easing
 
 EASE.land for arrivals, EASE.launch for departures, never linear on a visible move, and EASE.pop only for a press
-or a pop the page names. A novice reads bounce as emphasis. It reads as cheap ([no-bounce](../rules/no-bounce.md),
+or a pop the page names. A novice reads bounce as emphasis. It reads as cheap ([overshoot](../rules/overshoot.md),
 [named-eases](../rules/named-eases.md)).
 
 ## Reference profiles: name the target, get the whole look

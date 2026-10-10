@@ -86,7 +86,7 @@ test('overshootShare: a third of the arrivals on a spring is inside the range', 
 
 test('overshootShare: no spring among six arrivals fires, with the first arrival second and the fix named', () => {
   const found = overshootShare(arrivals(Array(6).fill(EASE.land)));
-  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['overshoot-share', 'overshoot-share', 0]]);
+  assert.deepEqual(found.map((f) => [f.code, f.rule, f.at]), [['overshoot-share', 'overshoot', 0]]);
   assert.match(found[0].what, /0 of 6 arrivals overshoot \(0%\); the reference films overshoot 21% to 41%/);
   assert.match(found[0].fix, /EASE\.pop/);
 });
@@ -94,7 +94,7 @@ test('overshootShare: no spring among six arrivals fires, with the first arrival
 test('overshootShare: far over the range fires, the limit being 1.5 times the reference p90', () => {
   const found = overshootShare(arrivals(Array(6).fill(EASE.pop)));
   assert.match(found[0].what, /6 of 6 arrivals overshoot \(100%\)/);
-  assert.ok(LIMITS['overshoot-share'].share_max_pct > 41);
+  assert.ok(LIMITS.overshoot.share_max_pct > 41);
   assert.equal(overshootShare(arrivals([EASE.pop, EASE.pop, EASE.pop, EASE.pop, EASE.land, EASE.land, EASE.land, EASE.land, EASE.land, EASE.land])).length, 0);
 });
 
@@ -192,9 +192,9 @@ test('a bar finding is waived by its code, and fires its rule id into rules_fire
   assert.deepEqual(unwaived(found, { allow: ['overshoot-share'], _why: { 'overshoot-share': 'the film is a typewriter: 6 arrivals in 2 s of world s1, all on EASE.land' }, _worlds: ['s1'] }), []);
   assert.equal(unwaived(found, {}).length, 1);
   const fired = firedRules(found, []);
-  assert.deepEqual(fired.map((f) => f.id), ['overshoot-share']);
+  assert.deepEqual(fired.map((f) => f.id), ['overshoot']);
   const [printed] = firedLines(fired);
-  assert.match(printed, /\(rule overshoot-share, taste\/rules\/overshoot-share\.md\); instead: give about 1 in 3 arrivals/);
+  assert.match(printed, /\(rule overshoot, taste\/rules\/overshoot\.md\); instead: arrive fast, land soft/);
 });
 
 const tideRamp = JSON.parse(fs.readFileSync(new URL('../fixtures/spectacle-tide-v-ramp-boxes.json', import.meta.url), 'utf8'));

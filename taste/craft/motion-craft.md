@@ -13,6 +13,8 @@ Contents:
 - [Arrival rhythm](#arrival-rhythm)
 - [Snap: overshoot and settle](#snap-overshoot-and-settle)
 - [Easing: which curve, and what it feels like](#easing-which-curve-and-what-it-feels-like)
+- [Registers: restraint depends on the film](#registers-restraint-depends-on-the-film)
+- [Which UI-motion standards transfer](#which-ui-motion-standards-transfer)
 - [Genre pacing](#genre-pacing)
 - [DO / DON'T](#do--dont)
 - [Cut, or transition?](#cut-or-transition)
@@ -23,8 +25,7 @@ Contents:
 Distilled from motion-design literature and from measured films. The numbers live in the rules
 (`taste/rules/`); this page keeps the reasons and the examples. Failure smells are in
 [failure-modes.md](failure-modes.md). The direction spine is in [direction.md](direction.md). Intent-first
-effect choice is in [selection.md](selection.md). Restraint by film type is in
-[motion-registers.md](motion-registers.md). Springs and keyframe helpers are in `core/motion/springs.js`.
+effect choice is in [selection.md](selection.md). Restraint by film type is below. Springs and keyframe helpers are in `core/motion/springs.js`.
 
 ## The ten ideas, and the rule behind each
 
@@ -123,12 +124,12 @@ Both hold because they measure different scopes ([arrival-rhythm](../rules/arriv
 
 The most recognisable "this was directed" tell is a move that lands soft: a curve that only
 decelerates reads floaty, and one that lands decisively reads alive. The default way to land soft is
-EASE.land, not a bounce ([no-bounce](../rules/no-bounce.md)).
+EASE.land, not a bounce ([overshoot](../rules/overshoot.md)).
 
-- **Land fast.** A move that takes half a second reads floaty, a third of a second reads confident.
+- **Land fast, hold long.** A curve that decelerates for most of half a second reads floaty; a short, decisive landing reads alive. Keep the move quick (speed bands), and give the readable time to the hold after it, never to a slower move.
 - **Overshoot is a claim about mass.** Use EASE.pop only where the point of the move is a press or a pop, and only on things that then hold still. Overshoot on text held for reading wobbles and looks like shaking.
-- **A counter must never overshoot.** A number has no mass, and a count that springs flies past its true figure and falls back, so for a few frames the film shows a number that is not true. A film that says 1,822 and paints 1,900 on the way breaks the rule to use real figures ([counter-no-overshoot](../rules/counter-no-overshoot.md)).
-- **Let the brand own the personality.** A punchy brand tightens durations and stagger, a calm one stretches them. Set it once per film as `:root` custom properties, not per element ([ease-variety](../rules/ease-variety.md)).
+- **A counter must never overshoot.** A number has no mass, and a count that springs flies past its true figure and falls back, so for a few frames the film shows a number that is not true. A film that says 1,822 and paints 1,900 on the way breaks the rule to use real figures ([overshoot](../rules/overshoot.md)).
+- **Let the brand own the personality.** A punchy brand tightens durations and stagger, a calm one stretches them. Set it once per film as `:root` custom properties, not per element ([named-eases](../rules/named-eases.md)).
 
 ## Easing: which curve, and what it feels like
 
@@ -173,6 +174,25 @@ call it overlapping action ([follow-through](../rules/follow-through.md)).
 | Overshoot only on things that then hold still | Overshoot on text held for reading: it wobbles |
 | Curve and duration varied by intent | One curve and one duration on everything |
 | An exit that accelerates away | An exit on the entrance's own ease: it arrives while leaving |
+
+## Registers: restraint depends on the film
+
+Restraint has two answers. In a UI-adjacent or quiet explainer film, motion is a cost the viewer pays for legibility (NN/g treats animation duration as time taken from the task; Apple HIG: "avoid gratuitous motion"): one loud moment, everything else quiet. In kinetic type, hype, a launch promo or a continuous title sequence, motion is the content: sustained motion across the runtime is correct and a still beat is the cost (Saul Bass, Kyle Cooper). Pick the register before the restraint level. The register changes the restraint target, not the variety requirement: a hype film with every beat moving the same way is still monotone.
+
+Seven devices, each right in one place and wrong in another: continuous ambient (a backdrop, a held beat that would be dead; wrong when it pulls the eye off the content); entrance and exit (almost every element); emphasis (the one hero reveal, a stat, a CTA; wrong when it fires every beat); transformation (a headline shrinking into a label; wrong between two objects with no shared logic); camera (real depth, a capture pan; wrong when camera and element double-count travel); physics (a spring on something with a rigid identity; wrong on a counter); time remapping (a speed ramp inside one move; wrong with no reason, it reads as a glitch).
+
+What can be measured: cut rate has an accepted metric (average shot length, Cinemetrics). "Is this motion good" has none. Frame difference finds a dead frame; it cannot judge whether motion serves the beat. Keep the fresh judge (`bin/vawe judge`) as an eye-first step, and never let a proxy count stand in for a judgement. The Material Design 3 curves are an outside reference only: film pages use the EASE names, not a pasted bezier.
+
+## Which UI-motion standards transfer
+
+From Emil Kowalski ([animations.dev](https://animations.dev), review-animations STANDARDS): about half do not apply to film. No transfer: a 300 ms UI budget (nobody waits on a film; product UI shown in a film follows the film speed bands), frequency of use (a film is watched once), interruptibility, `prefers-reduced-motion`, hover, press and drag, and "animate only transform and opacity for 60 fps" (we render offline; keep it for determinism). Transfer:
+
+- **Easing order.** An entrance lands (EASE.land), an exit launches (EASE.launch), a move between two seen positions travels (EASE.carry), constant motion is linear only for a pan, a progress ring or an ambient drift. Never a slow-start curve on an entrance ([entrance-ease](../rules/entrance-ease.md)).
+- **Strong curves.** The CSS keywords are too weak and a hand-fitted bezier starts too hard and stops too early: use the EASE names ([named-eases](../rules/named-eases.md)).
+- **Asymmetric timing.** An entrance is an introduction and deserves its time, an exit is over: exits run faster and shorter ([exits-shorter](../rules/exits-shorter.md)). Never start from scale 0: start slightly smaller with opacity 0.
+- **Springs** are duration plus bounce (`springLinear`, `springDuration` in `core/motion/springs.js`). Origin-aware motion is the strongest single technique: a popover scales from the button that opened it ([entrance-origin](../rules/entrance-origin.md)).
+
+Motion is not decoration. It explains what just happened: a held frame says the last thing mattered.
 
 ## Genre pacing
 

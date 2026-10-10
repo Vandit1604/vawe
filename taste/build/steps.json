@@ -90,8 +90,8 @@
     "text": "take curves from EASE names (or a sampled spring), not a CSS keyword or a hand-fitted cubic-bezier"
    },
    {
-    "rule": "overshoot-share",
-    "text": "land about 1 in 3 arrivals with a spring (EASE.pop), not every arrival on one soft stop"
+    "rule": "overshoot",
+    "text": "land about 1 in 3 arrivals with a spring (EASE.pop), not every arrival on one soft stop, and never a spring on a count"
    },
    {
     "rule": "speed-bands",

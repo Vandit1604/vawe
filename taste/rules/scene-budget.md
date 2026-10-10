@@ -21,4 +21,4 @@ A 30 s film with six scenes of 3, 4, 5, 6, 5 and 7 s, the longest holding the pa
 
 Why and sources: [story](../craft/story.md).
 
-Draft check: a gap of more than 1 s between two entrances starts a new scene, for the checks of ease-variety and entrance-origin.
+Draft check: a gap of more than 1 s between two entrances starts a new scene, for the checks of named-eases and entrance-origin.

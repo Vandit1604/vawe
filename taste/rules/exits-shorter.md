@@ -14,11 +14,11 @@ scored: yes
 numbers: {"exit_share_min":0.35,"exit_share_max":0.6,"preset_leave_share":0.6}
 print-motion: exit shorter than the entrance on EASE.launch, not an exit as long as its entrance
 digest: Exits run shorter than the entrance on EASE.launch (EASE.leave only for a settle or hand-off the page names).
-craft: motion-standards
+craft: motion-craft
 ---
 
 ## Example
 
 Entrance 0.5 s on EASE.land, exit 0.3 s on EASE.launch.
 
-Why and sources: [motion-standards](../craft/motion-standards.md).
+Why and sources: [motion-craft](../craft/motion-craft.md).

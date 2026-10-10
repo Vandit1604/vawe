@@ -12,11 +12,11 @@ prevents: doc MOTION-REGISTERS.md: restraint stated as one law is wrong for kine
 status: active
 scored: no
 numbers: {}
-craft: motion-registers
+craft: motion-craft
 ---
 
 ## Example
 
 Explainer: one loud move at the payoff. Hype promo: type moves on the beat for the whole runtime.
 
-Why and sources: [motion-registers](../craft/motion-registers.md).
+Why and sources: [motion-craft](../craft/motion-craft.md).

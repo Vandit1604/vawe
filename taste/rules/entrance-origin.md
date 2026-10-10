@@ -13,13 +13,13 @@ status: active
 scored: yes
 numbers: {"same_direction_min":3}
 print-motion: make each entrance a move with an origin, not everything fading in
-craft: motion-standards
+craft: motion-craft
 ---
 
 ## Example
 
 A popover scales from the button that opened it.
 
-Why and sources: [motion-standards](../craft/motion-standards.md).
+Why and sources: [motion-craft](../craft/motion-craft.md).
 
 Draft check: The draft check counts a stagger as one entrance and fires on three or more entrances in a scene that all start from one side.

@@ -247,14 +247,6 @@
   "file": "taste/rules/constant-camera.md",
   "instead": "hold the camera still and give the hold an element motion: a line typing, a counter, a glint, a secondary action. Keep camera() for the spectacle or a reveal."
  },
- "counter-no-overshoot": {
-  "file": "taste/rules/counter-no-overshoot.md",
-  "instead": "ease the count with expo-out or quart-out: the deceleration is the weight. Counting to a small number is a stunt: cut it."
- },
- "ease-variety": {
-  "file": "taste/rules/ease-variety.md",
-  "instead": "pick the scene ease from the signature (a punchy brand tightens durations and stagger, a calm one stretches them; set it once as :root custom properties)."
- },
  "entrance-ease": {
   "file": "taste/rules/entrance-ease.md",
   "instead": "enter(el) from core/motion/presets.js. EASE.land on a handover decelerates through the whole travel and reads as two objects, not one that moved."
@@ -277,13 +269,9 @@
  },
  "named-eases": {
   "file": "taste/rules/named-eases.md",
-  "instead": "EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only.",
+  "instead": "EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only. Pick the scene ease from the signature (a punchy brand tightens durations and stagger, a calm one stretches them; set it once as :root custom properties).",
   "dial": "ease",
-  "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops"
- },
- "no-bounce": {
-  "file": "taste/rules/no-bounce.md",
-  "instead": "arrive fast, land soft: EASE.land, or approach(k 0.12 to 0.19). Overshoot only on things that then hold still; never on text held for reading (it wobbles)."
+  "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops; vary eases like font weights, and two layers moving in one beat differ in duration or offset"
  },
  "no-dead-stop": {
   "file": "taste/rules/no-dead-stop.md",
@@ -293,9 +281,9 @@
   "file": "taste/rules/one-hero-motion.md",
   "instead": "key the hero first at its start and end pose, check the read with nothing else moving, then add secondary and ambient in decreasing loudness. Slide up plus fade is one claim \"arriving\"; rise plus rotate is two claims about one object: drop one."
  },
- "overshoot-share": {
-  "file": "taste/rules/overshoot-share.md",
-  "instead": "give about 1 in 3 arrivals a spring: EASE.pop, or curveToLinear(CURVES.overshoot) from core/motion/springs.js. Land the rest on EASE.land."
+ "overshoot": {
+  "file": "taste/rules/overshoot.md",
+  "instead": "arrive fast, land soft: EASE.land, or approach(k 0.12 to 0.19). Give about 1 in 3 arrivals a spring: EASE.pop, or curveToLinear(CURVES.overshoot) from core/motion/springs.js. Never on text held for reading (it wobbles). Ease a count with expo-out or quart-out: the deceleration is the weight; counting to a small number is a stunt, cut it."
  },
  "real-physics": {
   "file": "taste/rules/real-physics.md",

@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-104 rules, 34 scored by the judge.
+101 rules, 34 scored by the judge.
 
 ## concept
 
@@ -89,18 +89,15 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [blur-follows-motion](rules/blur-follows-motion.md): Blur follows motion: a still thing never blurs. Check: judge.
 - [blur-out-dense](rules/blur-out-dense.md): Faces, cards and dense grids leave through focus, not through space. Check: judge.
 - [constant-camera](rules/constant-camera.md): The camera holds still by default and moves only with a reason: the spectacle, a reveal. Check: constant-camera.
-- [counter-no-overshoot](rules/counter-no-overshoot.md): A counting number never overshoots. Check: judge.
-- [ease-variety](rules/ease-variety.md): Vary eases like you vary font weights, and offset layers that move together. Check: judge, ease-count, lockstep.
 - [entrance-ease](rules/entrance-ease.md): An entrance is a landing: it decelerates on EASE.land and shows most of its move by frame 1. Check: judge.
 - [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge, entrance-direction.
 - [exits-shorter](rules/exits-shorter.md): An exit is a launch: it runs shorter than its entrance and accelerates. Check: exit-length.
 - [follow-through](rules/follow-through.md): A trailing property finishes after the main one: scale after position, a shadow after its card. Check: follow-through.
 - [live-hold](rules/live-hold.md): A hold keeps life through a part that moves inside the frame: a line typing, a counter, a glint, a secondary action. Check: static-window, sheet-tiles.
-- [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease.
-- [no-bounce](rules/no-bounce.md): No bounce or overshoot on type or UI by default. Check: judge.
+- [named-eases](rules/named-eases.md): Take every curve from the EASE names (exact linear()), not from a CSS keyword and not from a hand-fitted cubic-bezier. Check: linear-move, default-ease, ease-count, lockstep.
 - [no-dead-stop](rules/no-dead-stop.md): A move never jumps speed from one frame to the next. Check: dead-stop.
 - [one-hero-motion](rules/one-hero-motion.md): One element owns the motion in a beat; the rest support quietly. Check: staging.
-- [overshoot-share](rules/overshoot-share.md): Some arrivals land with a spring: the value goes past rest and returns. Check: overshoot-share.
+- [overshoot](rules/overshoot.md): Overshoot is a claim about mass. Check: judge, overshoot-share.
 - [real-physics](rules/real-physics.md): Real physics, not an imitation: a spring or an exponential as sampled keyframes or linear() with 8 or more stops, and a named effect that looks like its real-world thing. Check: judge.
 - [spectacle-weak](rules/spectacle-weak.md): The spectacle second carries the strongest move of the film. Check: spectacle-weak.
 - [speed-bands](rules/speed-bands.md): Speed is a voice. Check: one-band,duration-size.
@@ -157,8 +154,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [law.md](craft/law.md)
 - [layout.md](craft/layout.md)
 - [motion-craft.md](craft/motion-craft.md)
-- [motion-registers.md](craft/motion-registers.md)
-- [motion-standards.md](craft/motion-standards.md)
 - [screens.md](craft/screens.md)
 - [selection.md](craft/selection.md)
 - [show-dont-tell.md](craft/show-dont-tell.md)
