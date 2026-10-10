@@ -6,7 +6,7 @@ a bar, the bar closes to the rule under the headline, and the headline rises out
 object carries the film, so the beats read as one gesture, not a list. Clip:
 [chain-beats.mp4](chain-beats.mp4). Demo: [demo/chain-beats.html](demo/chain-beats.html).
 
-Use once per film: the bar and the rule is a stock device (rule stock-device-once), never the idea.
+Use once per film: the bar and the rule is a stock device (rule no-tells), never the idea.
 
 ```html
 <div class="stack">                         <!-- position: absolute, so it shrinks to the headline's width -->

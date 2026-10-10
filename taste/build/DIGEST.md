@@ -19,7 +19,7 @@ Every command prints the lines of its step again. All rules: `taste/README.md`. 
 - Stagger a group 30 to 80 ms; never a group that lands on one frame. (stagger)
 - Each moving seam changes axis or direction; a hard cut is exempt. (seam-variety)
 - Nothing static in the last 1 s: a part of the lockup moves (not the camera). (moving-tail)
-- No tells unless the brief asks: gradient text, corner labels, borders, glow on UI, bursts, RGB split, shake, flares. (no-tells)
+- No tells unless the brief asks: gradient text, corner labels, borders, glow on UI, bursts, RGB split, shake, flares, template chrome. (no-tells)
 
 ## Attractors
 

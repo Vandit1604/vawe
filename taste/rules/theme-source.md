@@ -12,11 +12,11 @@ prevents: owner ruling (CONTENT.md): every design decision traces to the brand's
 status: active
 scored: no
 numbers: {}
-craft: content
+craft: density
 ---
 
 ## Example
 
 URL given: take colours and faces from its CSS.
 
-Why and sources: [content](../craft/content.md).
+Why and sources: [density](../craft/density.md).

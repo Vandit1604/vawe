@@ -152,7 +152,7 @@ const MARKER = /^\(?0\d\)?(\s*[/.]\s*0\d)*\.?$/;
 const SLASHED = /[/]/;
 
 function eyebrows(s) {
-  const { eyebrow_tracking_em_min: track, eyebrow_size_share_max: share } = L['template-chrome'];
+  const { eyebrow_tracking_em_min: track, eyebrow_size_share_max: share } = L['no-tells'];
   const texts = copy(s);
   const title = texts.reduce((a, t) => (a && a.fontPx >= t.fontPx ? a : t), null);
   if (!title) return [];
@@ -164,17 +164,17 @@ function eyebrows(s) {
 function markers(s) {
   const found = copy(s).filter((t) => MARKER.test(t.text));
   const plain = new Set(found.filter((t) => !SLASHED.test(t.text)).map((t) => t.text));
-  return found.some((t) => SLASHED.test(t.text)) || plain.size >= L['template-chrome'].markers_min ? found : [];
+  return found.some((t) => SLASHED.test(t.text)) || plain.size >= L['no-tells'].markers_min ? found : [];
 }
 
 const isCard = (b, i, s) => {
-  const { card_radius_px_min_1920: radius, card_area_pct_min: pct } = L['template-chrome'];
+  const { card_radius_px_min_1920: radius, card_area_pct_min: pct } = L['no-tells'];
   const share = (100 * area(b.box, s)) / (s.w * s.h);
   return !b.decorative && surface(b) && b.radius >= scaled(radius, s) && share >= pct && share <= 80 && s.boxes.filter((c) => c.p === i).length >= 2;
 };
 
 function stripes(s) {
-  const min = scaled(L['template-chrome'].stripe_px_min, s);
+  const min = scaled(L['no-tells'].stripe_px_min, s);
   return s.boxes.filter((b) => {
     const [l, r, t, bt] = [b.border.l, b.border.r, b.border.t, b.border.b];
     const side = [l, r].find(([w, c]) => w >= min && c && c[3] > 0);
@@ -189,12 +189,12 @@ function cardTells(s) {
   const nested = cards.filter(({ b }) => { for (let p = b.p; p >= 0; p = s.boxes[p].p) if (ids.has(p)) return true; return false; });
   const sibs = new Map();
   for (const { b } of cards) (sibs.get(b.p) || sibs.set(b.p, []).get(b.p)).push(b);
-  const { identical_cards_min: min, card_size_tolerance: tol } = L['template-chrome'];
+  const { identical_cards_min: min, card_size_tolerance: tol } = L['no-tells'];
   const same = [...sibs.values()].find((g) => g.filter((x) => g.filter((y) => sameSize(x.box, y.box, tol)).length >= min).length >= min);
   return { nested, same };
 }
 
-/** Template chrome in one frame: eyebrow above a title, step markers, a side stripe, nested or identical cards (rule template-chrome). */
+/** Template chrome in one frame: eyebrow above a title, step markers, a side stripe, nested or identical cards (rule no-tells). */
 export function templateChrome(samples) {
   const out = [];
   for (const s of samples) {
@@ -204,9 +204,9 @@ export function templateChrome(samples) {
       [markers(s), (x) => `step markers (${x.slice(0, 3).map((t) => `"${t.text}"`).join(', ')})`],
       [stripes(s), () => 'a coloured side-stripe border on a card'],
       [nested, () => 'a card inside a card'],
-      [same ? [same] : [], () => `${L['template-chrome'].identical_cards_min} or more identical sibling cards`],
+      [same ? [same] : [], () => `${L['no-tells'].identical_cards_min} or more identical sibling cards`],
     ].filter(([found]) => found.length).map(([found, say]) => say(found));
-    if (tells.length) out.push(finding('template-chrome', 'template-chrome', s.t, tells.join('; '), 'drop the label, number only a true sequence, replace the stripe with space, vary the cards'));
+    if (tells.length) out.push(finding('template-chrome', 'no-tells', s.t, tells.join('; '), 'drop the label, number only a true sequence, replace the stripe with space, vary the cards'));
   }
   return out.slice(0, 1);
 }

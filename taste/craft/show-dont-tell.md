@@ -1,6 +1,6 @@
 ---
-when: the film is all type in boxes
-answers: "decoration versus explanation, what each claim shape wants, why the graphic must be the subject, three questions to ask by hand"
+when: the film is all type in boxes, or you are about to author a product screen (an editor, a results grid, a dashboard, a chat, a card)
+answers: "decoration versus explanation, what each claim shape wants, why the graphic must be the subject, three questions to ask by hand, how a product screen is designed for the video"
 group: density
 ---
 
@@ -27,7 +27,7 @@ does not excuse an unillustrated claim.
 
 ## Find the thing in your content that wants a picture
 
-Go through the script line by line ([claim-shape-graphic](../rules/claim-shape-graphic.md)). Five claim shapes want a graphic, each a specific one. A line that is
+Go through the script line by line ([graphic-is-subject](../rules/graphic-is-subject.md)). Five claim shapes want a graphic, each a specific one. A line that is
 none of them is fine as type.
 
 | the claim is | it wants | because |
@@ -72,3 +72,15 @@ answer to "I could not think of one".
 Density ([density.md](density.md)) is the neighbouring rule: is the frame full enough to look produced. This one asks
 whether anything in it does the explaining. A frame can pass density on three text elements and still
 show nothing.
+
+## A product screen is designed for the video, not a plain mock
+
+A capture of the real product beats a mock ([show-real-thing](../rules/show-real-thing.md): no fake product UI). This part is for the screen you must build. A hand-written mock defaults to a grey window, small type and a sparse grid, because that is what "a UI" looks like in training data; the reference films do the opposite (large type, few elements, real imagery, the subject filling the frame; numbers in [density.md](density.md)).
+
+- One focal element per screen (the prompt in an editor, the hero tile in a grid). A named domain signature beats a generic dashboard template.
+- Fill most of the frame. Display-size type, never web-size.
+- Real images shown whole. Set each cell to the source's own aspect ratio so `object-fit: cover` neither crops nor letterboxes. A crop that cuts the stills' own on-screen text reads as a bug.
+- Colour from theme tokens (`var(--...)`), one accent. A dark capture goes on a dark surface. A relative `<img src>` resolves against the page that loads it, not the fragment.
+- "You choose" a theme means invent one (`skills/impeccable/scripts/palette.mjs` seeds a colour and a mood). Take principles from the smallest useful ui-skills set, never its font or colour defaults: the local theme's tokens win.
+- Every claim in on-screen copy must be true. A results title that said "six films shipped this week" when nobody had was replaced with the storyboard's own copy.
+- Check the laid-out page, not the source. Fill and detail statistics cannot see composition: a title cut in half and a title fully on screen can score the same. A percentage width, a grid track and an `object-fit` crop resolve only after layout, so render the fragment and read each element's real box against the frame and the safe margin ([safe-margin](../rules/safe-margin.md)). Outside the frame is a defect, inside the margin a warning.

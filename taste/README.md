@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-97 rules, 34 scored by the judge.
+92 rules, 33 scored by the judge.
 
 ## concept
 
@@ -44,8 +44,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [accent-share](rules/accent-share.md): One accent hue per film, scarce and visible. Check: judge, accent-flood.
 - [archetype-rotation](rules/archetype-rotation.md): Pick the layout by what the beat does, then rotate: never the same archetype twice in a row. Check: judge.
 - [asymmetry](rules/asymmetry.md): Compose asymmetric with one hero, anchored to edges and thirds. Check: judge.
-- [claim-shape-graphic](rules/claim-shape-graphic.md): A claim that is a quantity, a proportion, a change over time, a flow or a real thing wants its own graphic, not a number set in type. Check: judge.
-- [dense-where-dense](rules/dense-where-dense.md): Match the reference per act: dense where the reference is dense, quiet where it is quiet. Check: none.
 - [first-frame](rules/first-frame.md): Something of the subject (the subject, its ground or its first mark) is on screen at frame 0 and reads as an image by 0.1 s. Check: judge.
 - [gradient-or-flat](rules/gradient-or-flat.md): Gradients on low-copy beats, flat on high-copy and payoff beats. Check: judge.
 - [graphic-is-subject](rules/graphic-is-subject.md): If a graphic is the point of the beat, it owns the frame: hero scale, type demoted to a caption. Check: judge.
@@ -63,7 +61,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [readable-hold](rules/readable-hold.md): A line the viewer must read holds fully legible long enough to be read. Check: read-hold, text-lingers.
 - [readable-text-size](rules/readable-text-size.md): A line the viewer must read has a cap height of at least 6 percent of the frame height (about 65 px at 1080p). Check: text-cap-height.
 - [safe-margin](rules/safe-margin.md): Keep essential content inside the title-safe area and out of the caption bands of the destination. Check: text-margin.
-- [screen-designed](rules/screen-designed.md): A product screen in a film is designed for the video, never a plain mock. Check: none.
 - [shared-edges](rules/shared-edges.md): Text blocks in one frame share a few left edges. Check: left-edges.
 - [surface-spec](rules/surface-spec.md): Lock a bespoke surface in one page of tokens before authoring, then check the frame against it. Check: judge.
 - [text-breathing](rules/text-breathing.md): Words need rests. Check: text-breathing.
@@ -122,10 +119,8 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [gradient-grain](rules/gradient-grain.md): A gradient the brief asks for is clean. Check: judge.
 - [mark-rides-parent](rules/mark-rides-parent.md): Every mark rides the thing it belongs to. Check: judge.
 - [moving-tail](rules/moving-tail.md): The film keeps moving to the last frame: the last second carries a move on a part of the held lockup (a caret, a value that ticks, a highlight that moves on) or one last arrival. Check: sheet-tiles.
-- [no-tells](rules/no-tells.md): No generated tells. Check: judge.
+- [no-tells](rules/no-tells.md): No generated tells. Check: judge, template-chrome.
 - [reveal-mask-pad](rules/reveal-mask-pad.md): A reveal mask clears the glyphs. Check: judge.
-- [stock-device-once](rules/stock-device-once.md): A stock device is seasoning, never the idea. Check: judge.
-- [template-chrome](rules/template-chrome.md): No template chrome. Check: template-chrome.
 
 ## sound
 
@@ -139,7 +134,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 
 - [after-effects-techniques.md](craft/after-effects-techniques.md)
 - [color.md](craft/color.md)
-- [content.md](craft/content.md)
 - [density.md](craft/density.md)
 - [direction.md](craft/direction.md)
 - [failure-modes.md](craft/failure-modes.md)
@@ -149,7 +143,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [law.md](craft/law.md)
 - [layout.md](craft/layout.md)
 - [motion-craft.md](craft/motion-craft.md)
-- [screens.md](craft/screens.md)
 - [selection.md](craft/selection.md)
 - [show-dont-tell.md](craft/show-dont-tell.md)
 - [sound.md](craft/sound.md)

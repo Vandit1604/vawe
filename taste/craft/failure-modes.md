@@ -30,7 +30,7 @@ Borrowed from reference motion-design notes, with the receipts from this repo.
 
 ## The failure-modes catalog: name the smell, then the fix
 
-- **Effect soup** (the primary failure): a different look, shader or 3D toy every beat, so the film is a demo reel and the eye never rests. Effects are seasoning ([stock-device-once](../rules/stock-device-once.md)). Reserve them for the hero reveal, an act break, the CTA. Bolding every word is bolding none.
+- **Effect soup** (the primary failure): a different look, shader or 3D toy every beat, so the film is a demo reel and the eye never rests. Effects are seasoning ([no-tells](../rules/no-tells.md)). Reserve them for the hero reveal, an act break, the CTA. Bolding every word is bolding none.
 - **Slideshow**: every beat is a card that animates once and freezes, cut and replace. Carry one or two elements across the cut (a headline shrinks into the next label, a card moves and is not replaced) ([thread](../rules/thread.md)).
 - **The white flash**: a moving cut or a fading background reveals a light page behind dark content. Match the ground to the content, and never fade a full-bleed background out ([ground-jump-cover](../rules/ground-jump-cover.md)).
 - **The monotone**: every entrance is the same duration. It reads as a machine narrating. Timing is a voice ([speed-bands](../rules/speed-bands.md)).

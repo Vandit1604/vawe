@@ -27,6 +27,9 @@
   "breathing_min_s": 2,
   "breathing_max_s": 3
  },
+ "show-real-thing": {
+  "screen_text_px_min_1920": 28
+ },
  "three-materials": {
   "directions": 3,
   "light_directions_max": 1
@@ -103,9 +106,6 @@
   "margin_pct_min": 6,
   "margin_pct_max": 8,
   "social_margin_pct": 10
- },
- "screen-designed": {
-  "screen_text_px_min_1920": 28
  },
  "shared-edges": {
   "left_edges_max": 3,
@@ -299,13 +299,8 @@
   "tail_seconds": 1,
   "tail_tiles_max": 4
  },
- "reveal-mask-pad": {
-  "mask_pad_em": 0.3
- },
- "stock-device-once": {
-  "stock_devices_max": 1
- },
- "template-chrome": {
+ "no-tells": {
+  "stock_devices_max": 1,
   "stripe_px_min": 3,
   "identical_cards_min": 3,
   "markers_min": 2,
@@ -314,6 +309,9 @@
   "card_radius_px_min_1920": 6,
   "card_size_tolerance": 0.05,
   "card_area_pct_min": 3
+ },
+ "reveal-mask-pad": {
+  "mask_pad_em": 0.3
  },
  "sound-bridge": {
   "j_cut_lead_min_s": 0.4,

@@ -123,4 +123,4 @@ Each line is a rule; run the ones the film touches.
 7. A resting state exists and the copy is on screen long enough to read ([readable-hold](../rules/readable-hold.md)).
 8. Exits are faster than entrances ([exits-shorter](../rules/exits-shorter.md)).
 9. Dense content leaves through blur ([blur-out-dense](../rules/blur-out-dense.md)).
-10. One motion idea per beat, a few earned effects per film ([one-hero-motion](../rules/one-hero-motion.md), [stock-device-once](../rules/stock-device-once.md)).
+10. One motion idea per beat, a few earned effects per film ([one-hero-motion](../rules/one-hero-motion.md), [no-tells](../rules/no-tells.md)).
