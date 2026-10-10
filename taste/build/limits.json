@@ -70,7 +70,8 @@
  },
  "living-ground": {
   "ground_layer_area_pct_min": 15,
-  "flat_samples_share_max_pct": 50
+  "flat_samples_share_max_pct": 50,
+  "ground_layer_strength_min": 0.06
  },
  "logo-prominence": {
   "logo_height_pct_min": 5,
@@ -151,7 +152,9 @@
   "sheet_fps": 5,
   "near_identical_diff": 4.5,
   "blank_run_s": 0.3,
-  "blank_edge_s": 0.5
+  "blank_edge_s": 0.5,
+  "blank_grid_span_max": 0.06,
+  "blank_grain_spread": 0.06
  },
  "anticipation": {
   "dip_pct_min": 2,
