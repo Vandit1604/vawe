@@ -5,7 +5,7 @@
 // SPEC.md and every delta knows how far to trust each number, and marks "check by eye" where the p90 error
 // is larger than the difference the measure has to detect.
 //
-//   node harness/media/ref-calibrate.mjs [--only move-linear,text-stagger] [--dry]
+//   bin/vawe ref-calibrate [--only move-linear,text-stagger] [--dry]
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

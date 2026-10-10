@@ -16,7 +16,7 @@ suite, not like a SaaS site.
 1. **The films are the brand, and the site shows how they are made.** The page opens on a film that is
    already playing, with its real layer timeline under it and its real scene file one tab away.
 2. **The studio's dark.** The site stands on the same ground as the vawe studio: `#16151a`, a near-black
-   with a faint violet cast (`studio/ui/studio.css:9`). The site and the tool read as one place.
+   with a faint violet cast (`studio/ui/page-studio.html`). The site and the tool read as one place.
 3. **Three faces, three jobs.** Archivo for headings and body, Unbounded only for titles (wordmark,
    film titles, sub-heads, section clips), JetBrains Mono for every number and label.
 4. **Everything sits in studio panels.** Flat `#212025` panels with 12px corners on the `#16151a`

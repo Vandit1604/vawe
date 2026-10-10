@@ -8,7 +8,7 @@
 // scene-score reader `make study` already uses), so this is only the beats.md-shaped output around
 // an existing measurement, not a second detector.
 //
-// Usage: node harness/dev/ref-cutlist.mjs REF=<ref-name> [THRESHOLD=0.3]
+// Usage: bin/vawe ref-cutlist REF=<ref-name> [THRESHOLD=0.3]
 //   Writes quality/refs/<ref-name>/study/stills/ (one PNG per cut + one per second, gitignored) and
 //   OVERWRITES quality/refs/<ref-name>/beats.md with one heading per cut-to-cut window, each pointing
 //   at its stills. Heading label and technique are left "TODO": look at the stills, then fill them in.
@@ -28,7 +28,7 @@ const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
 const REF = KV.REF || process.env.REF;
 const THRESHOLD = Number(KV.THRESHOLD || process.env.THRESHOLD || 0.3);
-if (!REF) die('usage: node harness/dev/ref-cutlist.mjs REF=<ref-name> [THRESHOLD=0.3]');
+if (!REF) die('usage: bin/vawe ref-cutlist REF=<ref-name> [THRESHOLD=0.3]');
 
 const refDir = path.join(ROOT, 'quality/refs', REF);
 const sourceMp4 = path.join(refDir, 'source.mp4');

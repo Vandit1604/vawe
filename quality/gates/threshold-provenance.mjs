@@ -4,20 +4,18 @@
 //   node quality/gates/threshold-provenance.mjs --list     ·   every sourceless constant found
 //   node quality/gates/threshold-provenance.mjs --stamp    ·   record today's sourceless count as the new ceiling
 //
-// WHY THIS EXISTS. `quality/gates/read-check.mjs` names its source for every constant, converts its
-// units, and argues a choice when two sources disagree. That is not decoration: it is the only thing
-// that tells a reader whether a number is a measured fact or a guess wearing a threshold's clothes.
-// `harness/lib/genre-pacing.mjs` used to hold a second, undocumented owner for the same question
-// read-check already answers ("how long may one thing hold"), sourced from one film doubled. Nothing
-// stopped that from happening again in a different gate, on a different Tuesday. This does.
+// WHY THIS EXISTS. A constant that names its source, converts its units and argues a choice when two
+// sources disagree tells a reader whether a number is a measured fact or a guess wearing a threshold's
+// clothes. A second, undocumented owner of a number (a pacing table sourced from one film doubled) once
+// grew beside a documented one. Nothing stopped that from happening again in a different gate, on a
+// different Tuesday. This does.
 //
 // THE RULE. A `const SCREAMING_SNAKE = <number>;` that this file can see being COMPARED (`<`, `>`,
 // `<=`, `>=`, `===`, `!==`) or handed to a `.fail`/`.warn`/`.push` call is a verdict-deciding constant.
 // It is SOURCED when a `//` comment anywhere in the file mentions its name inside a short window that
 // also carries a citation: a URL, or one of the four legitimate categories this repo's threshold plan
 // names (human perception, the medium, a published or cited craft source, a measured EXTERNAL
-// reference). `read-check.mjs`'s whole constant block, written years before this gate, already passes
-// with no changes, which is the point: the rule is read off real, already-good code, not invented here.
+// reference). The rule is read off real, already-good code, not invented here.
 //
 // THE LINE BETWEEN A THRESHOLD AND A FORMULA CONSTANT. A unit conversion, a grid or tile size, a loop
 // bound, a display cap, a decode sample rate for an analysis pipeline: none of these decide whether a

@@ -18,7 +18,7 @@ const okOf = (err, key) => !err || !err[key] || err[key].ok;
 // The calibrated error of every measure (ref-calibrate.mjs). A measure that cannot see the difference it
 // exists to find says so here, so a rebuild does not chase noise.
 export function errorLines(err, generated) {
-  if (!err || !Object.keys(err).length) return ['## Measurement error', '', 'Not calibrated: run `node harness/media/ref-calibrate.mjs`. Treat every number as plus or minus 1 frame.', ''];
+  if (!err || !Object.keys(err).length) return ['## Measurement error', '', 'Not calibrated: run `bin/vawe ref-calibrate`. Treat every number as plus or minus 1 frame.', ''];
   const rows = Object.entries(err).map(([k, v]) => `| ${k} | ${v.p50} | ${v.p90} | ${v.bias} | ${v.mustDetect} | ${v.ok ? 'trust' : 'check by eye'} |`);
   return ['## Measurement error', '', `Calibrated ${generated} against pages with known truth (tests/fixtures/ref-measure). Ms is milliseconds, Frac a share of the frame or size, DE a colour distance. bias is the median signed error.`, '',
     '| measure | p50 | p90 | bias | must detect | verdict |', '|---|---|---|---|---|---|', ...rows, ''];

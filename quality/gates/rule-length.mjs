@@ -5,9 +5,8 @@
 //   node quality/gates/rule-length.mjs --list     ·   every over-length rule found
 //   node quality/gates/rule-length.mjs --stamp    ·   record today's count as the new ceiling
 //
-// WHY THIS EXISTS. `harness/live/craft-live.mjs` nudges an author at the keystroke when a rule in
-// AGENTS.md, a skill, or an guides doc runs long, but a nudge only fires on a file that
-// gets SAVED again; nothing counted the standing total so the library could drift back up unnoticed.
+// WHY THIS EXISTS. A rule in AGENTS.md, a skill, or a guides doc grows one line at a time, and
+// nothing counted the standing total, so the library could drift back up unnoticed.
 // This is that count, ratcheted the same way `threshold-provenance.mjs` ratchets its own worklist: a
 // FAIL tier gate is a wall, and Task 2 of the rules-agents-can-read plan did not, and was never meant
 // to, fix every long rule in one pass.

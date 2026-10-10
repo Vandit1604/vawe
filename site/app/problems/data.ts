@@ -156,6 +156,6 @@ export const VISUALS: Record<number, Visual> = {
   8: { kind: "poster", move: "light-pool", alt: "A frame from the light-pool move: a glowing pool of light, the shape that many agent films reach for." },
   9: { kind: "poster", move: "before-after-wipe", alt: "A frame from the before-after-wipe move, two versions side by side." },
   10: { kind: "poster", move: "chart-build", alt: "A frame from the chart-build move." },
-  11: { kind: "poster", move: "flash-cut", alt: "A frame from the flash-cut move." },
+  11: { kind: "poster", move: "exposure-flash", alt: "A frame from the exposure-flash move." },
   12: { kind: "poster", move: "success-check", alt: "A frame from the success-check move." },
 };

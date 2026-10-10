@@ -47,7 +47,7 @@ next command for the film you edited last.
 
 Use `bin/vawe` before any raw `ffmpeg`, Chrome or script: run `bin/vawe <verb> --help` first. Look with `vawe see <mp4 | page | ref-id> [--vs <ref>]`, the one command that reads a film completely (shots, motion, light, type, sound, every image with its numbers; `--vs` adds deltas and advice naming the page literal), or with its parts: `vawe refs frames` (reference stills),
 `vawe frames` (your page), `vawe strip` (motion through a moment or every cut, a reference or your draft), `vawe spec` (a film measured),
-`vawe compare` (side by side). If a verb is missing what you need, say so in your report; do not hand-roll it.
+`vawe compare` (side by side), `vawe sheet` (a labelled storyboard of seconds and worlds). If a verb is missing what you need, say so in your report; do not hand-roll it.
 
 `bin/vawe` names the next stage after each step; `ship` warns, never refuses, while the Board or Motion pass is unfilled. A page over about 25k tokens cannot be Read in one call: Read it with offset and limit.
 

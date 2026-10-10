@@ -2,7 +2,7 @@
 // harness/media/match.mjs: REFERENCE MATCHING for a recreation. Where content-check.mjs asks "is this
 // act as RICH as the reference's", this asks "does this beat MOVE the way the reference moves": a
 // dense frame-by-frame strip (reference row over render row), a difference overlay and a mean SSIM,
-// per beat, ranked worst-to-best in match.md. `node harness/media/match.mjs <ref.mp4> <render.mp4>`.
+// per beat, ranked worst-to-best in match.md. `bin/vawe match <ref.mp4> <render.mp4>`.
 // D may be a rendered mp4 (a page render): beats are then the shots in spec.json next to REF (`bin/vawe spec`).
 //
 // `LIGHT=1` adds one more column: a per-beat light-map ΔE (harness/lib/light-map.mjs), the LOW-
@@ -32,7 +32,7 @@ const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
 const REF = KV.REF || positional[0] || process.env.REF;
 const FILM = KV.D || positional[1] || process.env.D;
-if (!REF || !FILM) die('usage: node harness/media/match.mjs <ref.mp4> <render.mp4> [--step s] [--light]');
+if (!REF || !FILM) die('usage: bin/vawe match <ref.mp4> <render.mp4> [--step s] [--light]');
 if (!fs.existsSync(REF)) die(`no such reference video: ${REF}`);
 
 const STEP = Number(flag('--step', 'STEP', 0.1));   // dense strip: one sample every 0.1s, per the spec

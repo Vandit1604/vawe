@@ -2,7 +2,7 @@
 // harness/media/track.mjs: track ONE element in a reference video over a time range and print
 // motion[]-ready keyframes, so an agent measures a move instead of guessing it from sparse frames.
 //
-//   node harness/media/track.mjs <video> --box x,y,w,h --from t0 --to t1 [--fps 10] [--thresh 128] [--dark]
+//   bin/vawe track <video> --box x,y,w,h --from t0 --to t1 [--fps 10] [--thresh 128] [--dark]
 //
 // METHOD: crop the box, sample it at --fps, threshold each frame's luma (brighter than --thresh is
 // foreground; --dark flips that for a dark subject on a light ground) and take the thresholded pixels'
@@ -21,7 +21,7 @@ const flag = (n, d) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] 
 const die = (msg) => { console.error(`✗ ${msg}`); process.exit(2); };
 
 const VIDEO = argv[0];
-if (!VIDEO || VIDEO.startsWith('--')) die('usage: node harness/media/track.mjs <video> --box x,y,w,h --from t0 --to t1');
+if (!VIDEO || VIDEO.startsWith('--')) die('usage: bin/vawe track <video> --box x,y,w,h --from t0 --to t1');
 
 const box = String(flag('--box', '')).split(',').map(Number);
 if (box.length !== 4 || box.some((v) => !Number.isFinite(v))) die('--box x,y,w,h is required, four numbers.');

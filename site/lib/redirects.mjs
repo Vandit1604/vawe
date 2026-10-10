@@ -18,7 +18,7 @@ export const FAMILY_DESTINATIONS = {
   backgrounds: move("gradient-mesh-field"),
   "gradient-recipes": move("gradient-mesh-field"),
   "camera-dials": move("rack-focus"),
-  "camera-moves": move("push-in"),
+  "camera-moves": move("camera-moves"),
   "destinations-platform-safe-area": "/docs/aspect-ratios",
   "output-targets": "/docs/aspect-ratios",
   "caption-styles": move("caption-karaoke"),
@@ -109,7 +109,7 @@ export const BLOCK_DESTINATIONS = {
   codeBlock: move("caret-typing"), terminal: move("caret-typing"), terminalPro: move("caret-typing"),
   terminalHtml: move("caret-typing"), codeTyping: move("caret-typing"), codeHighlight: move("ui-focus-zoom"),
   codeScroll: move("caret-follow"), codeDiff: move("before-after-wipe"), codeMorph: move("shape-morph-wipe"),
-  codeFlight: move("push-in"), textCursor: move("caret-typing"),
+  codeFlight: move("camera-moves"), textCursor: move("caret-typing"),
   loadingBar: move("agent-progress"), deploySuccess: move("success-check"), spinner: move("agent-progress"),
   fileTree: move("agent-progress"), logLines: move("agent-progress"), commitRow: move("agent-progress"),
   statBig: move("count-up"), kpiRow: move("count-up"), gauge: move("count-up"), progressRing: move("count-up"),
@@ -129,7 +129,7 @@ export const BLOCK_DESTINATIONS = {
   lowerThird: move("lower-third"), videoLowerThird: move("lower-third"), searchEngine: move("command-palette-summon"),
   splitScreen: move("split-reveal"), screenSwap: move("split-reveal"), splitFlapBoard: move("flap-resolve"),
   pointer: move("cursor-click"), tapRipple: move("cursor-click"), keyboard: move("cursor-click"), pressButton: move("cursor-click"),
-  scanGate: move("push-in"), parallaxZoom: move("parallax-dive"), parallaxUnzoom: move("pull-back-reveal"),
+  scanGate: move("camera-moves"), parallaxZoom: move("parallax-dive"), parallaxUnzoom: move("pull-back-reveal"),
   morphText: move("weight-morph"),
   flowchart: move("integration-hub"), nodeGraph: move("integration-hub"), usMapHex: move("integration-hub"),
   usMap: move("integration-hub"), worldMap: move("integration-hub"), usMapBubble: move("integration-hub"),
@@ -139,7 +139,7 @@ export const BLOCK_DESTINATIONS = {
 const CATEGORY_DESTINATIONS = {
   code: move("caret-typing"), interface: move("card-assemble"), data: move("chart-build"), core: move("lower-third"),
   type: move("letter-stagger"), social: move("notification-pop"), app: move("card-assemble"),
-  interaction: move("cursor-click"), surfaces: move("card-assemble"), camera: move("push-in"),
+  interaction: move("cursor-click"), surfaces: move("card-assemble"), camera: move("camera-moves"),
   diagrams: move("integration-hub"), maps: move("integration-hub"), effects: MOVES,
 };
 
