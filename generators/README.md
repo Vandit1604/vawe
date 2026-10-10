@@ -6,7 +6,7 @@ group: engine
 
 # generators/
 
-Everything here bakes an asset a film later loads: fonts (`fonts/glyphs.mjs`, `media/fonts.mjs`) and
+Everything here bakes an asset a film later loads: fonts (`fonts/glyphs.mjs`, `media/fonts.mjs`; `fonts/verify-render.mjs` draws a baked glyph file beside the original font so a person can look at it) and
 the audio bake (`media/audio-bake.mjs`). Run one, get a file in `assets/`, and no render touches the
 generator again until the source changes.
 

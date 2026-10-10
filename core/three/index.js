@@ -239,7 +239,6 @@ const OBJECT_MATERIAL_BUILDERS = {
     iridescenceThicknessRange: m.iridescenceThicknessRange ?? [100, 400] }),
 };
 const OBJECT_MATERIAL_PRESETS = Object.keys(OBJECT_MATERIAL_BUILDERS);
-export const GLASS_PRESETS = ['glass', 'frostedGlass'];
 export function materialFor(m, colors) {
   m = m || {};
   const preset = m.preset ?? 'matte';

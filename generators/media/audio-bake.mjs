@@ -2,9 +2,8 @@
 //
 //   node generators/media/audio-bake.mjs            bake the cues
 //   node generators/media/audio-bake.mjs --list     print the cue table
-//   make gen X=audio
 //
-// Synthesis lives in core/audio-kit.mjs. This file is the CATALOGUE: which cues exist, which
+// Synthesis lives in core/audio/kit.mjs. This file is the CATALOGUE: which cues exist, which
 // engine role each fills. Deterministic, same input, same bytes, so
 // re-baking never changes a shipped mix.
 import fs from 'node:fs';
@@ -30,7 +29,7 @@ fs.mkdirSync(SFX, { recursive: true });
 // EXPORTED so quality/gates/sfx-audit.mjs can ask what this bake actually writes. It diffed the
 // baked .wav files against core/audio/kit.mjs's CUES and called the 15 aliases below orphans, which
 // is a false positive: they are deliberate redirects for scenes that already name a retired cue, and
-// `make gen X=audio` writes a file for every one of them on every run. The bake's own name set is the only
+// the bake writes a file for every one of them on every run. The bake's own name set is the only
 // honest answer to "should this file exist".
 export const ROLES = {
   // auto sound-design roles the scene builder emits
@@ -59,8 +58,8 @@ let n = 0, total = 0, kept = 0;
 for (const [role, cue] of Object.entries(ROLES)) {
   const spec = CUES[cue];
   if (!spec) { console.error(`✗ role "${role}" points at unknown cue "${cue}"`); process.exit(1); }
-  // `make gen X=audio` and `make sfx` write the SAME directory, so baking used to silently replace every
-  // recorded sample with a synthesized one. Additive by default; --force to re-bake everything.
+  // A recorded sample may sit in this directory, so the bake is additive by default;
+  // --force re-bakes everything.
   if (!FORCE && fs.existsSync(path.join(SFX, `${role}.wav`))) { kept++; continue; }
   // seed from the ROLE name so each file is stable and independent of table order
   const seed = [...role].reduce((h, c) => (Math.imul(h, 31) + c.charCodeAt(0)) >>> 0, 7);

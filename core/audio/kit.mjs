@@ -14,7 +14,7 @@
 // envelope -> feedback delay) is reimplemented here as offline DSP. The parameter tables are its
 // design work; the DSP below is our implementation of the same signal path.
 //
-// Used by harness/media/gen-audio.mjs (`make gen X=audio`) to bake assets/sfx/*.wav.
+// Used by generators/media/audio-bake.mjs to bake assets/sfx/*.wav.
 
 import { SR, TAU, sec, clamp, rng, osc, biquad } from './dsp.mjs';
 import { renderVoice } from './palette.mjs';

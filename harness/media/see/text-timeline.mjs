@@ -193,8 +193,6 @@ export function textRuns(samples) {
   return runs;
 }
 
-export const wordAppearances = (samples, sampleFps) => trackWords(samples, sampleFps);
-
 export async function textTimeline(video, workDir, sampleFps = 4) {
   return textRuns(await sampleText(video, workDir, { sampleFps }));
 }

@@ -29,10 +29,3 @@ export function readWav(p) {
   }
   return { sampleRate, channels, bits, frames, mono };
 }
-
-/** peakEnvelope(mono) → the last index whose |sample| is at or above `floor` (for duration checks). */
-export function lastAudible(mono, floor = 10 ** (-45 / 20)) {
-  let last = 0;
-  for (let i = 0; i < mono.length; i++) if (Math.abs(mono[i]) >= floor) last = i;
-  return last;
-}

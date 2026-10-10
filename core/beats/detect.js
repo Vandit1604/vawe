@@ -89,20 +89,6 @@ export function beatGrid(periodFrames, phaseFrames, hopSeconds, duration) {
   return out;
 }
 
-/**
- * Snap a time to the nearest beat, but only if a beat is close enough to be the SAME moment.
- * Beyond `maxShift` the intended edit point matters more than the grid: silently dragging a cut a
- * third of a second to hit a beat destroys the timing the author actually wrote.
- */
-export function snapToBeat(t, beats, maxShift = 0.12) {
-  if (!beats || !beats.length) return t;
-  let best = beats[0];
-  for (const b of beats) if (Math.abs(b - t) < Math.abs(best - t)) best = b;
-  return Math.abs(best - t) <= maxShift ? +best.toFixed(3) : t;
-}
-
-/** Every Nth beat: the bar line. Cuts on a downbeat read as intentional; off-bar reads as drift. */
-export const downbeats = (beats, per = 4, offset = 0) => beats.filter((_, i) => (i - offset) % per === 0);
 
 /**
  * Refine a coarse grid against measured onset times (attack times, not envelope frames). The envelope gives the period in whole hops,

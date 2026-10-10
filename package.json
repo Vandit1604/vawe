@@ -7,7 +7,7 @@
     "vawe": "bin/vawe"
   },
   "scripts": {
-    "setup:audio": "node harness/media/gen-audio.mjs",
+    "setup:audio": "node generators/media/audio-bake.mjs",
     "postinstall": "node scripts/vendor-gsap.mjs && (node harness/dev/doctor.mjs --quiet || exit 0)"
   },
   "//gsap-note": "Pinned exact (not ^): scripts/vendor-gsap.mjs copies node_modules/gsap/dist/gsap.min.js to assets/vendor/gsap.min.js on every install (postinstall above), because GSAP's Standard license does not clearly allow redistributing the built file, so it is never committed (assets/vendor/README.md, .gitignore).",
