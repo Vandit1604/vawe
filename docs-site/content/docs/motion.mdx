@@ -53,7 +53,7 @@ const [r, g, b] = kf(f, TINT);
 - Exits run faster and shorter than entrances.
 - Stagger siblings 30 to 80 ms. Never let a group land on one frame.
 - Blur follows motion. A moving thing may blur. A still thing never does.
-- Text holds `words x 0.6 s`, with a floor of 1.2 s. Fix a fast read with a hold, never with a slower move.
+- Text holds long enough to read (rule `readable-hold`). Fix a fast read with a hold, never with a slower move.
 - The slowest beat is at least 3 times the fastest.
 - Cut on the beat, or two frames early.
 - Adjacent transitions change axis or direction.

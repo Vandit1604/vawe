@@ -13,7 +13,7 @@ status: active
 scored: no
 numbers: {"text_share_max_pct":84,"film_min_s":10}
 print-storyboard: leave beats with no words, not text in every frame
-craft: reading
+craft: typography
 ---
 
 ## Example

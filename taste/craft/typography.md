@@ -1,10 +1,20 @@
 ---
 when: "picking a font or type face, or sizing headlines"
-answers: "which face signals which personality, pairing, the size scale, weight, tracking and leading, the overused-face list"
+answers: "which face signals which personality, pairing, the size scale, weight, tracking and leading, the overused-face list, hold by word count and its sources"
 group: look
 ---
 
 # TYPOGRAPHY: choosing and setting type
+
+Contents:
+- [Measure first, never guess the weight](#measure-first-never-guess-the-weight)
+- [Guardrails: you know these rules and you break them](#guardrails-you-know-these-rules-and-you-break-them)
+- [The font system: one to three faces, with roles](#the-font-system-one-to-three-faces-with-roles)
+- [Choose the face by the signal you want](#choose-the-face-by-the-signal-you-want)
+- [Size from a scale](#size-from-a-scale)
+- [Weight, tracking, leading, measure](#weight-tracking-leading-measure)
+- [Reading: can a viewer take the words in?](#reading-can-a-viewer-take-the-words-in)
+- [Motion-graphics specifics](#motion-graphics-specifics)
 
 A good face does about 90% of the work: spend the effort before styling (Butterick). When you reflect a
 brand, the face is decided for you: use the site's real font, at the weight its CSS sets. This page is
@@ -84,6 +94,17 @@ first hierarchy tool ([hierarchy](../rules/hierarchy.md), [layout.md](layout.md)
 - Measure applies to body and captions only. The measure protects the return sweep of the eye, and a line
   nobody returns from has none. Display type is exempt: a hook, headline, stat or payoff line fills the
   frame width instead. The two rules never bind one layer ([type-setting](../rules/type-setting.md)).
+
+## Reading: can a viewer take the words in?
+
+The rule is [readable-hold](../rules/readable-hold.md); the numbers live there (prose is read twice at 200 wpm: `words x 0.6 s`). Sources:
+Netflix timed-text guide (20 characters per second wall, 42 characters per line, a gap of 2 frames or 0.5 s between two texts, text after a cut snaps to the cut inside 0.5 s),
+BBC via samtext.com (a 5 s ceiling on one line; Netflix allows 7 s, we take 5), ssw.com.au (read it twice). A 30 s film that parks one card for 7 s spends a quarter of itself on one line.
+Past 8 words the hold breaks the ceiling: cut the line.
+
+- The hold is the still part. The clock starts when the last character settles; words are not readable while they assemble. Motion belongs to the entrance and the exit.
+- Not all text is read. A counting number, an axis label, a chip of 1 to 3 words, a credit, a watermark: viewers look at these. Hold rules apply to prose, 4 or more words at a real size (about 28 px at 1080p or more). A word that swaps inside one fixed box is one element. A gap that holds a cut is the transition, not a flicker.
+- No rule sees whether the words are worth reading, text inside a captured surface, or contrast. Look at the frames (`bin/vawe critique`).
 
 ## Motion-graphics specifics
 

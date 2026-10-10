@@ -38,7 +38,7 @@ The worst failures are silent. The browser accepts your input, does something el
 
 **A capture has lost its type.** A capture scaled below 0.6 loses its type. Crop instead.
 
-**Text leaves before it can be read.** Text holds `words x 0.6 s`, with a floor of 1.2 s. Add a hold. Do not slow the move.
+**Text leaves before it can be read.** Add a hold: the read time is in rule `readable-hold`. Do not slow the move.
 
 **A reveal cuts the glyphs.** `page-check` reports `text-clipped`. Pad the clip box below the baseline and above the cap height.
 

@@ -20,7 +20,7 @@ import { cameraLoad } from './camera-moves.mjs';
 const SPEED = LIMITS['speed-ceiling'];
 const SHOOT = LIMITS['overshoot-share'];
 const BREATH = LIMITS['text-breathing'];
-const LINGER = LIMITS['text-lingers'];
+const LINGER = LIMITS['readable-hold'];
 const JOLT = LIMITS['no-dead-stop'];
 const STAGE = LIMITS['one-hero-motion'];
 const WIND = LIMITS.anticipation;
@@ -352,7 +352,7 @@ export function textBreathing(samples, { step, frameH }) {
 /** The most seconds a line may stay on screen: the reference hold, or its read time plus the margin when that is longer. Pure. */
 export const lingerCeiling = (need) => Math.max(LINGER.hold_ref_p90_s, need + LINGER.read_margin_s);
 
-/** The line that stays on screen longest past its ceiling (rule text-lingers). A line still on screen at the last sample is the end card (rule cta-last-short) and is not measured. */
+/** The line that stays on screen longest past its ceiling (rule readable-hold). A line still on screen at the last sample is the end card (rule cta-last-short) and is not measured. */
 export function textLingers(samples, ctx) {
   if (!samples.length) return [];
   const end = samples.at(-1).t + ctx.step / 2;
@@ -364,7 +364,7 @@ export function textLingers(samples, ctx) {
   if (!over.length) return [];
   const w = over[0];
   return [finding('text-lingers', w.tIn, `"${w.text.slice(0, 30)}" stays on screen ${s1(w.onScreen)} s; it needs ${s1(w.need)} s to read, so it may stay ${s1(w.ceiling)} s${over.length > 1 ? ` (${over.length} lines)` : ''}`,
-    'take the line off at its read time plus 1.5 s, or give the held seconds a second thing to look at')];
+    'take the line off at its read time plus 1.5 s, or give the held seconds a second thing to look at', 'readable-hold')];
 }
 
 /**

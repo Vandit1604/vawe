@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-105 rules, 34 scored by the judge.
+104 rules, 34 scored by the judge.
 
 ## concept
 
@@ -61,7 +61,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [logo-prominence](rules/logo-prominence.md): A mark reads as the brand, not as punctuation, next to the title and on the end card. Check: none.
 - [one-focal-point](rules/one-focal-point.md): One focal point per frame and one accent colour per frame. Check: judge.
 - [palette-from-brand](rules/palette-from-brand.md): Colours come from the brand or the brief: take them from the real pixels and the real CSS, and declare the palette once as :root custom properties. Check: judge, pure-black-white.
-- [readable-hold](rules/readable-hold.md): A line the viewer must read holds fully legible long enough to be read. Check: read-hold.
+- [readable-hold](rules/readable-hold.md): A line the viewer must read holds fully legible long enough to be read. Check: read-hold, text-lingers.
 - [readable-text-size](rules/readable-text-size.md): A line the viewer must read has a cap height of at least 6 percent of the frame height (about 65 px at 1080p). Check: text-cap-height.
 - [safe-margin](rules/safe-margin.md): Keep essential content inside the title-safe area and out of the caption bands of the destination. Check: text-margin.
 - [screen-designed](rules/screen-designed.md): A product screen in a film is designed for the video, never a plain mock. Check: none.
@@ -69,7 +69,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [surface-spec](rules/surface-spec.md): Lock a bespoke surface in one page of tokens before authoring, then check the frame against it. Check: judge.
 - [text-breathing](rules/text-breathing.md): Words need rests. Check: text-breathing.
 - [text-contrast](rules/text-contrast.md): A headline sits on a flat patch, not a moving blob or a gradient hot spot. Check: text-contrast.
-- [text-lingers](rules/text-lingers.md): A line stays long enough to read and no longer. Check: text-lingers.
 - [theme-source](rules/theme-source.md): The theme comes from the brand site; with a bare prompt, ask; with "you choose", invent one on purpose. Check: none.
 - [type-scale](rules/type-scale.md): A frame uses few text sizes, and each size step is visible. Check: type-sizes.
 - [type-setting](rules/type-setting.md): Set display type tight and body type open. Check: display-tracking.
@@ -160,7 +159,6 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [motion-craft.md](craft/motion-craft.md)
 - [motion-registers.md](craft/motion-registers.md)
 - [motion-standards.md](craft/motion-standards.md)
-- [reading.md](craft/reading.md)
 - [screens.md](craft/screens.md)
 - [selection.md](craft/selection.md)
 - [show-dont-tell.md](craft/show-dont-tell.md)

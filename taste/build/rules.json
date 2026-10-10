@@ -149,7 +149,7 @@
  },
  "readable-hold": {
   "file": "taste/rules/readable-hold.md",
-  "instead": "add seconds before the exit, or give the beat a second thing to look at. The clock starts when the last character settles. Motion stays quick; exits still run shorter than entrances."
+  "instead": "add seconds before the exit, or give the beat a second thing to look at; take the line off when its read time plus 1.5 s has passed. The clock starts when the last character settles. Motion stays quick; exits still run shorter than entrances."
  },
  "readable-text-size": {
   "file": "taste/rules/readable-text-size.md",
@@ -178,10 +178,6 @@
  "text-contrast": {
   "file": "taste/rules/text-contrast.md",
   "instead": "keep drifting background elements off any text during its hold, or park the text over a flat part of the field."
- },
- "text-lingers": {
-  "file": "taste/rules/text-lingers.md",
-  "instead": "cut the line when its read time plus 1.5 s has passed, or give the held seconds a second thing to look at."
  },
  "theme-source": {
   "file": "taste/rules/theme-source.md",
