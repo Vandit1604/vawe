@@ -1,72 +1,12 @@
 ---
-when: "judging your own render (a full pass, a recreation, anything you will ship), or about to fan work out to subagents"
-answers: "why a self-grading agent grades kindly; the critics and the one artifact each is handed; how to run them; what a fan-out costs; the brief lines and worktree contract every subagent brief needs"
+when: "about to fan work out to subagents"
+answers: "what a fan-out costs; the brief lines and worktree contract every subagent brief needs (the critics are in skills/vawe-critique)"
 group: crosscutting
 ---
 
-# SUBAGENTS: one critic, one job, one artifact
+# SUBAGENTS: the cost of a fan-out and the subagent brief
 
-Authoring a film takes several kinds of judgement: does this beat read, does the background move at the
-right speed, does the copy earn the hook, does a seam flash. One agent doing all of them in one context
-does all of them worse. Run separate critics, one job each, in parallel, each returning a verdict in a
-fixed shape.
-
-## Why a fresh critic
-
-You look at your own render and decide it is fine, because you picked every part of it. The thread that
-wrote the page has anchored on its own easing, crop and headline. Ask it "is beat 4 good?" and it
-answers "yes, because I chose it." A fresh agent handed one path and one question has no stake.
-
-A critic's value is independent evidence, not a fresh pair of eyes. Several instances of one model with
-similar context do not vote independently (18 of 30 agents chose the same branch name without
-conferring). The admission test for any critic is about its input: what artifact does it see that the
-author did not? A render, a frame strip or a reference passes. The page source you just wrote fails.
-
-Context is the other half: a critic spends thousands of tokens on a sheet of frames and returns twenty
-lines. Those tokens stay in its context, not yours.
-
-## The critics
-
-| critic | job | input | verdict shape |
-|---|---|---|---|
-| beat | does each beat read at a glance | the phone sheet and strip from `bin/vawe critique <page>` | per beat: `{beat, reads, flaw, fix}` |
-| bg-motion | speed, scale and direction of anything moving continuously | a strip of 4 or more frames, reference and render at matched times | per axis: `{axis, ours, reference, delta, fix}` |
-| reveal | how each beat enters and exits, never the settled frame | a dense strip of the entrance and exit windows (`bin/vawe dev --from --to`) | per beat: `{beat, enter, exit, paired, flaw, fix}` |
-| fidelity | recreations only: how close each beat is to its source | `bin/vawe compare` frames, side by side | per beat: `{beat, score 0-10, gaps}` |
-| seam | flash or collision at cuts and the loop seam | the seam frames and loop seam in the critique | per seam: `{seam, flash, evidence, fix}` |
-| copy | on-screen writing only | the strings in beat order | per line: `{beat, line, tell, rewrite}` |
-
-`copy` fails the admission test (it reads the strings the author already wrote). Run it when you want
-the writing re-read by something that is not you, and know that is what you buy. For a whole-film score
-use `bin/vawe judge --fresh` (`engine-doctrine/JUDGE.md`); a pass is never self-recorded.
-
-Notes that matter per critic:
-
-- bg-motion exists because of a real failure. A lime-on-black liquid field was matched against one
-  still, and in motion ran about 2.5x too fast with folds half the size. A still carries composition
-  and colour and nothing about time. Hand this critic a strip or do not ask.
-- fidelity must report gaps, not verdicts. Force a score per beat plus what is missing, or you get
-  agreement instead of information. See `RECREATION.md`.
-- reveal is not beat. A beat's middle frame hides the entrance: a dolly direction, a colour wave and a
-  paired exit all got missed that way.
-
-## How to run them
-
-One message, several `Agent` calls, so they run at once. One at a time turns a 30 s panel into five
-minutes and tempts you to skip four.
-
-1. Hand over the path, not a description of the sheet. "The sheet shows a clean grid" replaces its eye
-   with yours.
-2. Demand the verdict shape in the prompt. Reject a reply that arrives as prose.
-3. Critics report, the main thread fixes. No critic edits the page. A critic that can fix will fix
-   instead of finding.
-4. A critic is evidence, not a ruling. If it flags something you can look at and the flaw is not there,
-   it is wrong. If your eye confirms it, that is a fix, not a rationalisation.
-5. After the fixes, re-run the check and the sheet commands, then re-panel only the critics whose input
-   changed.
-
-Run the panel for a full authoring pass, any recreation, and any render you intend to ship. A one-line
-copy tweak or a colour swap is not worth six agents.
+The critics, their inputs and their verdict shapes are in `skills/vawe-critique/SKILL.md`: one critic, one job, one artifact the author did not see. This page keeps what a fan-out costs and the brief every subagent needs.
 
 ## What a fan-out costs
 

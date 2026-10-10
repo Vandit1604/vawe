@@ -103,7 +103,7 @@ bug you saw in a shared file.
 ```
 Render each chapter with bin/vawe ship films/<name>/ch/NN-<slug>.html, join the mp4s in STORYBOARD
 order with ffmpeg (concat), and lay the music and captions over the joined film. Then read every
-chapter boundary: both sides of each cut, and the motif hand-off. Then prompts/critique-pass.md.
+chapter boundary: both sides of each cut, and the motif hand-off. Then the `vawe-critique` skill.
 ```
 
 ## Questions
