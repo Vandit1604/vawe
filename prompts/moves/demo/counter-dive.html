@@ -12,13 +12,17 @@
   .a, .b { position: absolute; inset: 0; transform-origin: 0 0; }
   .a { background: var(--ground); z-index: 1; display: grid; place-items: center; align-content: center; gap: var(--s3); }
   .word { margin: 0; font: 800 calc(var(--u) * 40)/1 var(--head); letter-spacing: var(--head-track); white-space: nowrap; }
-  .word .o { display: inline-block; width: calc(var(--u) * 24); height: calc(var(--u) * 24); margin: 0 calc(var(--u) * 0.6); border-radius: 50%; background: var(--ink); }
+  .word .o { display: inline-block; width: calc(var(--u) * 21.5); height: calc(var(--u) * 21.5); margin: 0 calc(var(--u) * 0.6); vertical-align: calc(var(--u) * -0.4); border-radius: 50%; background: var(--ink); }
   .tag { font: 500 var(--t-lead)/1 var(--sans); color: var(--muted); }
   .b { background: var(--accent); color: var(--on-accent); display: grid; place-items: center; }
-  .b .panel { width: calc(var(--u) * 120); display: flex; flex-direction: column; gap: var(--s3); }
+  .b .panel { width: calc(var(--u) * 110); display: flex; flex-direction: column; align-items: center; text-align: center; gap: var(--s2); }
+  .b .pill { background: color-mix(in srgb, var(--on-accent) 12%, transparent); box-shadow: none; color: var(--on-accent); }
+  .b .bars { width: 100%; margin-top: var(--s2); }
+  .b .days { display: flex; width: 100%; gap: var(--s2); font: 600 var(--t-small)/1 var(--sans); opacity: 0.7; }
+  .b .days span { flex: 1; }
   .b .eyebrow { color: var(--on-accent); opacity: 0.7; }
-  .b b { font: 800 calc(var(--u) * 22)/1 var(--head); letter-spacing: var(--head-track); }
-  .b .bars { display: flex; align-items: flex-end; gap: var(--s2); height: calc(var(--u) * 26); }
+  .b b { font: 800 calc(var(--u) * 20)/1 var(--head); letter-spacing: var(--head-track); }
+  .b .bars { display: flex; align-items: flex-end; gap: var(--s2); height: calc(var(--u) * 24); }
   .b .bars i { flex: 1; display: block; border-radius: var(--r2) var(--r2) 0 0; background: var(--ground); transform-origin: 50% 100%; }
   .b .bars i:last-child { background: var(--on-accent); }
 </style>
@@ -26,7 +30,7 @@
 <body>
 <template id="scene">
   <div class="layer">
-    <div class="b"><div class="panel"><span class="eyebrow">Views this week</span><b>128,400</b><div class="bars"><i style="height: 38%"></i><i style="height: 52%"></i><i style="height: 47%"></i><i style="height: 74%"></i><i style="height: 100%"></i></div></div></div>
+    <div class="b"><div class="panel"><span class="eyebrow">Views this week</span><b>128,400</b><span class="pill">+38% on last week</span><div class="bars"><i style="height: 38%"></i><i style="height: 52%"></i><i style="height: 47%"></i><i style="height: 74%"></i><i style="height: 100%"></i></div><div class="days"><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span></div></div></div>
     <div class="a"><h1 class="word">Fl<span class="o"></span>w</h1><span class="tag">One page in, one film out</span></div>
   </div>
 </template>

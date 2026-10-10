@@ -10,18 +10,21 @@
   #layers { position: absolute; inset: 0; overflow: hidden; }
   .layer { position: absolute; inset: 0; background: var(--ground); }
   .belt { position: absolute; left: 0; top: 0; width: 100%; height: 200vh; }
-  .panel { position: absolute; left: 50%; margin-left: calc(var(--u) * -35); width: calc(var(--u) * 70); }
-  .shop { top: calc(var(--u) * 22); height: calc(var(--u) * 56); }
-  .cart { top: calc(var(--u) * 122); height: calc(var(--u) * 70); }
+  .panel { position: absolute; left: 50%; margin-left: calc(var(--u) * -42); width: calc(var(--u) * 84); }
+  .shop { top: calc(var(--u) * 19); height: calc(var(--u) * 62); }
+  .cart { top: calc(var(--u) * 112); height: calc(var(--u) * 76); }
   .pic { position: absolute; right: var(--s4); top: var(--s4); width: calc(var(--u) * 24); height: calc(var(--u) * 24); }
   .shop h2, .cart h2 { margin: 0; font: 400 var(--t-head)/1.1 var(--head); letter-spacing: var(--head-track); }
-    .buy { position: absolute; left: var(--s4); right: var(--s4); bottom: var(--s4); text-align: center; padding: calc(var(--u) * 2.2) 0; }
-  .cart .top { display: flex; align-items: center; justify-content: space-between; }
+    .buy { position: absolute; left: var(--s4); width: calc(var(--u) * 46); bottom: var(--s4); text-align: center; padding: calc(var(--u) * 2.2) 0; }
+  .cart .top { display: flex; align-items: center; gap: var(--s2); margin-bottom: var(--s2); }
+  .sub { margin-top: var(--s1); color: var(--muted); font: 500 var(--t-body)/1.2 var(--sans); }
   .badge { display: inline-grid; place-items: center; min-width: calc(var(--u) * 6.4); height: calc(var(--u) * 6.4); padding: 0 var(--s1); border-radius: 999px; background: var(--accent); color: var(--on-accent); font: 600 var(--t-small)/1 var(--sans); }
-  .line { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 16); font: 500 var(--t-body)/1 var(--sans); }
+  .line { display: flex; align-items: center; gap: var(--s2); height: calc(var(--u) * 18); font: 500 var(--t-body)/1 var(--sans); }
   .line .thumb, .slot { flex: none; width: calc(var(--u) * 14); height: calc(var(--u) * 14); border-radius: var(--r-chip); overflow: hidden; }
   .line .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .line .muted { margin-left: auto; font-size: var(--t-small); }
+  .line .muted { font-size: var(--t-body); }
+  .line .nm { flex: 1; }
+  .line .muted:not(.nm) { font-size: var(--t-small); }
   .slot { border: calc(var(--u) * 0.3) dashed var(--faint); margin-left: 0; }
   .item { position: absolute; z-index: 2; left: 0; top: 0; width: calc(var(--u) * 24); height: calc(var(--u) * 24); margin: calc(var(--u) * -12); border-radius: var(--r-card); overflow: hidden; box-shadow: var(--ring), var(--stack); }
   .item img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -33,12 +36,12 @@
 <body>
 <template id="scene">
   <div class="belt">
-    <div class="card panel shop"><h2>Aero lamp</h2><div class="pic"></div><div class="btn primary buy">Add to cart</div></div>
+    <div class="card panel shop"><div><h2>Aero lamp</h2><div class="sub">$52, brushed brass</div></div><div class="pic"></div><div class="btn primary buy">Add to cart</div></div>
     <div class="card panel cart">
       <div class="top"><h2>Your cart</h2><span class="badge"><span class="n">2</span></span></div>
-      <div class="line"><span class="thumb"><img src="/prompts/moves/demo/assets/photos/desk.jpg" alt=""></span>Desk mat<span class="muted">$24</span></div>
-      <div class="line"><span class="thumb"><img src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></span>Shelf light<span class="muted">$38</span></div>
-      <div class="line"><span class="slot"></span><span class="muted">Aero lamp</span></div>
+      <div class="line"><span class="nm muted">Aero lamp</span><span class="muted">$52</span><span class="slot"></span></div>
+      <div class="line"><span class="nm">Desk mat</span><span class="muted">$24</span><span class="thumb"><img src="/prompts/moves/demo/assets/photos/desk.jpg" alt=""></span></div>
+      <div class="line"><span class="nm">Shelf light</span><span class="muted">$38</span><span class="thumb"><img src="/prompts/moves/demo/assets/photos/loft.jpg" alt=""></span></div>
     </div>
     <div class="cur"><svg viewBox="0 0 24 24"><path d="M2 2 L2 19 L6.6 14.8 L9.6 21.6 L12.6 20.3 L9.6 13.6 L15.8 13.4 Z"/></svg></div>
   </div>
@@ -64,7 +67,7 @@ const layers = Array.from({ length: N }, (_, j) => {
 });
 const centre = (sel) => { const r = layers[0].el.querySelector(sel).getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; };   // world coordinates: the belt starts untransformed
 const SLOT = centre('.slot'), START = centre('.pic'), BUY = centre('.buy');
-BUY.x += 12 * u;
+BUY.x += 8 * u;
 // the item is free in the frame: gravity from the apex of its lift to the tray's place at LAND, so its speed never steps; x eases so it starts and lands without a sideways step
 const itemAt = (t) => {
   const lift = 1.8 * u * land(clamp((t - LIFT) / (FALL - LIFT)));
