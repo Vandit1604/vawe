@@ -13,7 +13,6 @@ status: active
 scored: yes
 numbers: {"tail_seconds":1,"tail_tiles_max":4}
 print-check: end on motion in the last 1 s, not a frozen lockup
-digest: Nothing static in the last 1 s: a part of the lockup moves (not the camera).
 craft: failure-modes
 ---
 

@@ -13,6 +13,7 @@ status: active
 scored: yes
 numbers: {}
 print-check: take a recorded effect first (resources/README.md), not a synth bed or a tick on every cut
+digest: Sound is real recorded effects on the action's frame; no synth bed, pad or drone.
 craft: sound
 ---
 

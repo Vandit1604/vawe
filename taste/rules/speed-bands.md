@@ -14,7 +14,6 @@ status: active
 scored: yes
 numbers: {"energy_min_s":0.15,"energy_max_s":0.3,"professional_max_s":0.5,"gravity_max_s":0.8,"cinematic_max_s":2,"slowest_to_fastest_min":3,"eye_speed_px_per_s":700,"area_ratio":4,"duration_ratio":2,"ceiling_fh_s":12.6,"isolated_ratio":3,"moving_floor_fh_s":0.2,"moving_min":5,"moving_steps_min":3}
 print-motion: put each move in a speed band with the slowest move 3x the fastest and the fastest under 12 frame heights a second, not every move at one duration
-digest: Speed bands: 0.15 to 0.3 s, 0.3 to 0.5 s, 0.5 to 0.8 s; the slowest move runs 3 times the fastest.
 craft: motion-craft
 ---
 

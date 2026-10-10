@@ -18,7 +18,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.
 - Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.
 
-87 rules, 33 scored by the judge.
+91 rules, 33 scored by the judge.
 
 ## concept
 
@@ -33,9 +33,11 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [name-three-reject-first](rules/name-three-reject-first.md): Before you pick a technique for a beat, name three ways to do it and reject the first: it is the median. Check: judge.
 - [no-emdash-on-screen](rules/no-emdash-on-screen.md): No em dash in on-screen text. Check: no-emdash.
 - [no-inventory](rules/no-inventory.md): Map product material to beats; material that maps to no beat does not go in. Check: none.
+- [owner-decides](rules/owner-decides.md): The film's own DESIGN.md and the owner's decisions outrank house defaults: the font, the type size, the UI scale and the camera policy the film declares are followed, not argued. Check: judge.
 - [scene-budget](rules/scene-budget.md): Size the scene count to the runtime and vary the scene length. Check: none.
 - [shot-length-varies](rules/shot-length-varies.md): Alternate short punchy shots with breathing shots. Check: none.
 - [show-real-thing](rules/show-real-thing.md): Each beat shows a real artifact working: the real UI for a real product, the brand's own mark and world for an invented one. Check: judge.
+- [style-not-content](rules/style-not-content.md): Take a reference's style (its grammar, light, type behaviour and moves), never its content: no text, logos, brand words or copied photos. Check: judge.
 - [thread](rules/thread.md): One thread carries through the film: an object, a type line, a colour or a rhythm. Check: judge.
 - [three-materials](rules/three-materials.md): Three directions use three different materials. Check: range.
 
@@ -58,6 +60,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [palette-from-brand](rules/palette-from-brand.md): Colours come from the brand or the brief: take them from the real pixels and the real CSS, and declare the palette once as :root custom properties. Check: judge, pure-black-white.
 - [readable-hold](rules/readable-hold.md): A line the viewer must read holds fully legible long enough to be read. Check: read-hold, text-lingers.
 - [readable-text-size](rules/readable-text-size.md): A line the viewer must read has a cap height of at least 6 percent of the frame height (about 65 px at 1080p). Check: text-cap-height.
+- [real-optics](rules/real-optics.md): Lens, blur, bloom, fringe and depth of field are real optics the renderer draws (the lens surface), never a CSS filter or a gradient that imitates one. Check: judge.
 - [safe-margin](rules/safe-margin.md): Keep essential content inside the title-safe area and out of the caption bands of the destination. Check: text-margin.
 - [shared-edges](rules/shared-edges.md): Text blocks in one frame share a few left edges. Check: left-edges.
 - [surface-spec](rules/surface-spec.md): Lock a bespoke surface in one page of tokens before authoring, then check the frame against it. Check: judge.
@@ -81,6 +84,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 - [arrival-rhythm](rules/arrival-rhythm.md): Motion order is reading order. Check: no-overlap.
 - [blur-follows-motion](rules/blur-follows-motion.md): Blur follows motion: a still thing never blurs. Check: judge.
 - [blur-out-dense](rules/blur-out-dense.md): Faces, cards and dense grids leave through focus, not through space. Check: judge.
+- [cause-first](rules/cause-first.md): Feedback follows its cause: a click burst after the press, a pop after the window starts, a sound on its own action, never before it. Check: judge.
 - [constant-camera](rules/constant-camera.md): The camera holds still by default and moves only with a reason: the spectacle, a reveal. Check: constant-camera.
 - [entrance-ease](rules/entrance-ease.md): An entrance is a landing: it decelerates on EASE.land and shows most of its move by frame 1. Check: judge.
 - [entrance-origin](rules/entrance-origin.md): Motion explains: one entrance per beat, and it says where the thing came from (origin at its trigger, a wipe on the motion, a match on a shape). Check: judge, entrance-direction.

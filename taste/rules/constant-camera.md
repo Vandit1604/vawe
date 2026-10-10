@@ -12,6 +12,7 @@ prevents: agents satisfied live-hold the lazy way, with a slow camera drift on e
 status: active
 scored: no
 numbers: {"share_max_pct":60,"worlds_max":4,"move_min_s":0.6,"still_min_s":0.3}
+digest: The camera holds still; one move at the spectacle at most. A part moving inside the frame keeps a hold alive.
 craft: motion-craft
 ---
 

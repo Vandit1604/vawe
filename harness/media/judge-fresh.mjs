@@ -31,6 +31,8 @@ import { waiverVerdicts } from '../lib/waivers.mjs';
 import { parseBriefTables } from '../lib/brief-tables.mjs';
 import { probeSize } from './scene-stats.mjs';
 import { lastCaps } from './acceptance-run.mjs';
+import { RULES } from '../lib/draft-check.mjs';
+import { judgeLines, parseDecls, readDecls } from '../lib/design-decls.mjs';
 import { freshRubric, FRESH_AXES } from '../../quality/gates/rubric.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '../..');
@@ -179,9 +181,9 @@ Add three more keys to that object: "directions":[{"id":"A","score":n,"note":"on
 
 const findingsBlock = (ev) => findingsPrompt({ card: fs.readFileSync(path.resolve(process.env.VAWE_TASTE_CARD || TASTE_CARD), 'utf8'), declared: ev.declared, siblings: ev.siblings });
 
-function checkBlock(ev) {
+function checkBlock(ev, decls) {
   if (ev.stage === 'stills') return '';
-  const parts = [sizeLines(ev.images || []), capLines(ev.caps), holdLines(), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : [], ev.refs?.length ? barLines(ev.refs) : []].filter((p) => p.length);
+  const parts = [sizeLines(ev.images || []), capLines(ev.caps, { copy: decls.typeScale ?? RULES.capFrac * 100, ui: decls.uiScale ?? RULES.uiCapFrac * 100 }), holdLines(), ev.keys?.length ? anchorLines(ev.anchor, ev.keys) : [], ev.refs?.length ? barLines(ev.refs) : []].filter((p) => p.length);
   return parts.map((p) => `${p.join('\n')}\n\n`).join('');
 }
 
@@ -191,6 +193,8 @@ function designOf(brief) {
 }
 
 function buildPrompt(ev, brief, ledger = '') {
+  const decls = brief ? readDecls(brief) : parseDecls('');
+  const declared = judgeLines(decls);
   const optional = [
     brief && `The brief (Read it): ${path.resolve(brief)}`,
     designOf(brief) && `The film's DESIGN.md (the owner's decisions for this film; Read it and judge the film against it): ${designOf(brief)}`,
@@ -204,7 +208,7 @@ ${ev.stage === 'stills' ? STILLS_TASK : 'Open the sheet first, then every key fr
 Evidence:
 ${ev.notes.map((n) => `- ${n}`).join('\n')}
 ${optional.length ? `\n${optional.map((o) => `- ${o}`).join('\n')}\n` : ''}
-${checkBlock(ev)}${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : `\n\n${findingsBlock(ev)}`}${ledger ? `\n\n${ledger}` : ''}`;
+${declared.length ? `${declared.join('\n')}\n\n` : ''}${checkBlock(ev, decls)}${freshRubric({ stage: ev.stage })}${ev.stage === 'stills' ? STILLS_JSON : `\n\n${findingsBlock(ev)}`}${ledger ? `\n\n${ledger}` : ''}`;
 }
 
 function extractJson(text) {

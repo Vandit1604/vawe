@@ -6,20 +6,19 @@ Every command prints the lines of its step again. All rules: `taste/README.md`. 
 ## Every film
 
 - Choose the hero from the direction, never from the attractor list below. (attractors)
+- The film's DESIGN.md and the owner's decisions (font, size, camera) outrank house defaults. (owner-decides)
 - Show real things working, not slogans in boxes; an invented product gets a UI designed as a real interface, never functionless chrome. (show-real-thing)
+- Take a reference's style (grammar, light, moves), never its text, logos or photos. (style-not-content)
 - One thread carries through (object, type line, colour or rhythm), not separate reveals one after another. (thread)
-- One accent hue, on one thing; never a full-frame flood. (accent-share)
 - A ground is never one flat fill: soft blobs or a real field behind the content. (living-ground)
-- Read lines: cap height 6 percent of the frame or more, held max(1.2 s, words / 3); prose words x 0.6 s. Add hold, never slow the move. (readable-hold)
+- Read lines: cap height 6 percent of the frame or more (UI that is the subject, in data-ui: 3 percent), held max(1.2 s, words / 3); prose words x 0.6 s. Readable, not rushed: add hold, never slow the move. (readable-hold)
+- Lens, blur, bloom and fringe are real optics (the lens surface), never a CSS fake. (real-optics)
 - Use the kit's face and ground, or a face the direction chose; not Inter or Space Grotesk by habit. (typeface-default)
-- Turn the world at least every 2 s or at each beat; no one lockup held. (world-turns)
-- Exits run shorter than the entrance on EASE.launch (EASE.leave only for a settle or hand-off the page names). (exits-shorter)
-- Curves come from EASE names or sampled springs, not CSS keywords or a hand-fitted cubic-bezier. (named-eases)
-- Speed bands: 0.15 to 0.3 s, 0.3 to 0.5 s, 0.5 to 0.8 s; the slowest move runs 3 times the fastest. (speed-bands)
-- Stagger a group 30 to 80 ms; never a group that lands on one frame. (stagger)
-- Each moving seam changes axis or direction; a hard cut is exempt. (seam-variety)
-- Nothing static in the last 1 s: a part of the lockup moves (not the camera). (moving-tail)
+- Feedback follows its cause (burst after the press, pop after the window starts); a sound lands on its action. (cause-first)
+- The camera holds still; one move at the spectacle at most. A part moving inside the frame keeps a hold alive. (constant-camera)
+- Exits are faster than entrances: shorter, on EASE.launch (EASE.leave only for a settle or hand-off the page names). (exits-shorter)
 - No tells unless the brief asks: gradient text, corner labels, borders, glow on UI, bursts, RGB split, shake, flares, template chrome. (no-tells)
+- Sound is real recorded effects on the action's frame; no synth bed, pad or drone. (sound-voices)
 
 ## Attractors
 

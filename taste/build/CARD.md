@@ -88,9 +88,9 @@ A line the viewer must read holds fully legible long enough to be read. When a h
 
 ### readable-text-size
 
-A line the viewer must read has a cap height of at least 6 percent of the frame height (about 65 px at 1080p).
+A line the viewer must read has a cap height of at least 6 percent of the frame height (about 65 px at 1080p). UI that is the subject of the film (a desktop or app mock) is sized like a real screen: its own floor is 3 percent.
 
-- Limit: cap height at least 6 percent of frame height; product UI labels shown as texture (data-chrome) at least 2.5 percent
+- Limit: cap height at least 6 percent of frame height; UI that is the subject (inside data-ui) at least 3 percent; product UI labels shown as texture (data-chrome) at least 2.5 percent. A DESIGN.md `type-scale` or `ui-scale` line replaces the matching floor
 - Judge: Measure the cap-height band in one full frame: is it at least 6 percent?
 
 ### typeface-default

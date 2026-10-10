@@ -14,7 +14,6 @@ status: active
 scored: yes
 numbers: {"linear_move_limit_s":0.3,"eases_per_scene_min":1,"eases_per_scene_max":2,"lockstep_tol_s":0.02}
 print-motion: take curves from EASE names (or a sampled spring), not a CSS keyword or a hand-fitted cubic-bezier
-digest: Curves come from EASE names or sampled springs, not CSS keywords or a hand-fitted cubic-bezier.
 craft: motion-craft
 ---
 

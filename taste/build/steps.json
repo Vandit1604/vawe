@@ -41,7 +41,7 @@
    },
    {
     "rule": "readable-text-size",
-    "text": "set a read line at a 6% cap height and hold it max(1.2 s, words/3), not a small tagline that flashes by"
+    "text": "set a read line at a 6% cap height (UI that is the subject, in data-ui: 3%) and hold it max(1.2 s, words/3), not a small tagline that flashes by"
    },
    {
     "rule": "typeface-default",

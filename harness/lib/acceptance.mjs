@@ -12,6 +12,7 @@ export const HISTORY_KEEP = 10;
 const SHOW = 3;
 const { lufsLow: LUFS_LOW, lufsHigh: LUFS_HIGH } = RULES;
 const CHROME_CAP_PCT = RULES.chromeCapFrac * 100;
+const UI_CAP_PCT = RULES.uiCapFrac * 100;
 
 export const DEFAULT_ROWS = [
   ['frozen runs of 3+ frames inside a shot', '0'],
@@ -77,13 +78,16 @@ const ROWS = {
   'text cap height': (m, pass) => {
     if (!m.caps) return skip('no text probe');
     if (!m.caps.length) return done(true, 'no held text');
-    const ok = (c) => (c.chrome ? c.cap >= CHROME_CAP_PCT : pass(c.cap));
+    const uiFloor = m.decls?.uiScale ?? UI_CAP_PCT;
+    const floorOf = (c) => (c.chrome ? CHROME_CAP_PCT : c.ui ? uiFloor : null);
+    const ok = (c) => (floorOf(c) == null ? pass(c.cap) : c.cap >= floorOf(c));
     const short = m.caps.filter((c) => !ok(c));
     const lowest = (list) => list.reduce((a, c) => (c.cap < a.cap ? c : a));
-    const plain = m.caps.filter((c) => !c.chrome);
-    const chrome = m.caps.filter((c) => c.chrome);
-    const measured = [...(plain.length ? [`${lowest(plain).cap.toFixed(1)}%`] : []), ...(chrome.length ? [`data-chrome ${lowest(chrome).cap.toFixed(1)}% (floor ${CHROME_CAP_PCT}%)`] : [])].join(', ');
-    return done(!short.length, measured,short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : ''}`).concat(short.length ? 'raise the font size until the cap height reaches the target' : []));
+    const group = (test) => m.caps.filter(test);
+    const plain = group((c) => !c.chrome && !c.ui), ui = group((c) => c.ui && !c.chrome), chrome = group((c) => c.chrome);
+    const measured = [...(plain.length ? [`${lowest(plain).cap.toFixed(1)}%`] : []), ...(ui.length ? [`data-ui ${lowest(ui).cap.toFixed(1)}% (floor ${uiFloor}%)`] : []), ...(chrome.length ? [`data-chrome ${lowest(chrome).cap.toFixed(1)}% (floor ${CHROME_CAP_PCT}%)`] : [])].join(', ');
+    const note = (c) => (c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : c.ui ? ` (data-ui floor ${uiFloor}%)` : '');
+    return done(!short.length, measured, short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${note(c)}`).concat(short.length ? 'raise the font size until the cap height reaches the target' : []));
   },
   'text contrast': (m, pass) => {
     if (!m.contrast) return skip('no pixels sampled behind the text');
@@ -103,6 +107,18 @@ const ROWS = {
   peak: (m, pass) => (m.peak == null ? skip('no audio in the video') : done(pass(m.peak), `${m.peak.toFixed(1)} dBFS`, pass(m.peak) ? [] : [`lower data-gain on ${loudestCue(m.cues)} by ${Math.ceil(m.peak - PEAK_DBFS)} dB`])),
   'judge: each storyboard frame as beautiful as the anchor, full size': (m) => (m.judge ? done(m.judge.yes === m.judge.total, `${m.judge.yes} of ${m.judge.total} YES`, m.judge.fixes.slice(0, SHOW)) : skip('not run')),
 };
+
+/**
+ * A row whose target is still the house default follows the film's DESIGN.md declaration (harness/lib/design-decls.mjs); the target then
+ * names the line it followed. A target the brief changed is the owner's own and stays. Pure.
+ */
+export function followDecls(row, decls) {
+  const house = DEFAULT_ROWS.find((r) => r.metric === row.metric);
+  if (!decls || !house || row.target !== house.target) return row;
+  if (row.metric === 'text cap height' && decls.typeScale != null) return { ...row, target: `${decls.typeScale}% or more (followed DESIGN.md type-scale: ${decls.typeScale}%${decls.uiScale != null ? `; data-ui ${decls.uiScale}%` : ''})` };
+  if (row.metric === 'text cap height' && decls.uiScale != null) return { ...row, target: `${house.target} (data-ui ${decls.uiScale}%, followed DESIGN.md ui-scale)` };
+  return row;
+}
 
 const JUDGE_ROW = 'judge: each storyboard frame as beautiful as the anchor, full size';
 const DEFAULT_TEST = new Map(DEFAULT_ROWS.map((r) => [r.metric, targetTest(r.target)]));
@@ -125,7 +141,7 @@ const read = (row, m, carried, mode, stage) => {
  * run could not measure a row. Pure.
  */
 export function buildRows(brief, m, { carry = [], mode = 'full', stage = 'final' } = {}) {
-  const rows = brief.length ? brief.filter((r) => !RETIRED_ROWS.has(r.metric)) : DEFAULT_ROWS;
+  const rows = (brief.length ? brief.filter((r) => !RETIRED_ROWS.has(r.metric)) : DEFAULT_ROWS).map((r) => followDecls(r, m.decls));
   return rows.map((row) => {
     const out = read(row, m, carry.find((c) => c.metric === row.metric), mode, stage);
     if (out.skip) return { metric: row.metric, target: row.target, status: 'not measured', measured: out.atShip ? out.skip : `${out.label}: ${out.skip}`, detail: [], ...(out.atShip ? { atShip: true } : {}) };

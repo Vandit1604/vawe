@@ -113,3 +113,12 @@ test('hidden text: copy under aria-hidden is named with its count, a page that h
   assert.deepEqual(hiddenTextLines(null), []);
   assert.equal(TEXTURE.repeatsMin, 3);
 });
+
+test('textProblems: UI that is the subject is held to 3%, and a film\'s declared rules replace the floors', () => {
+  const ui = (t) => ({ t, lines: [{ text: 'Start', fontPx: 40, ui: true }] });
+  assert.deepEqual(textProblems([ui(1), ui(1.5)], dim), []);
+  const small = (t) => ({ t, lines: [{ text: 'Start', fontPx: 20, ui: true }] });
+  assert.match(textProblems([small(1), small(1.5)], dim)[0], /cap height 2\.6% .* asks 3%/);
+  const declared = { ...dim, rules: { capFrac: 0.04, uiCapFrac: 0.05, chromeCapFrac: 0.025, capOfFont: 0.7, holdSec: 0.5 } };
+  assert.match(textProblems([ui(1), ui(1.5)].map((x) => ({ ...x, lines: [{ ...x.lines[0], fontPx: 30 }] })), declared)[0], /asks 5%/);
+});
