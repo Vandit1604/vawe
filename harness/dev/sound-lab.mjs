@@ -1,3 +1,4 @@
+// harness/dev/sound-lab.mjs: render every synth cue to out/sound-lab/ and open the listening lab: bin/vawe sound-lab
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

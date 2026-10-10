@@ -26,6 +26,8 @@ such as soundeffect-lab or Kenney); the short synth voices below are the fallbac
 used only when the user provides one (`<audio loop src=...>`). A page that writes `data-synth="bed"`
 is refused: "synth beds are banned: use a real music file (<audio loop src=...>) or no bed".
 
+Fit a recorded effect with `bin/vawe sfx <file> --film <page> [--trim a,b] [--fade-out s] [--pitch st] [--peak dB]`: it writes `assets/sfx/<name>.mp3` and prints the `<audio>` line.
+
 Sound is the default, not silence. A film must still read with the sound off (feed autoplay is muted),
 but a film that works silent and has sound beats the same film mute. Silence is a device: say why in the
 brief. Mute by habit closes a quarter of the ways a short film can hold together: the sound bridge and

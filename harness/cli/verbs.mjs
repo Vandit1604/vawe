@@ -259,6 +259,19 @@ export const VERBS = [
     next: () => 'Read the PNG at full size: evenly spaced ghosts mean a linear move, ghosts bunched at one end mean an ease, a ghost past the final position means an overshoot; vawe velocity gives the numbers for a page',
   },
   {
+    name: 'sheet', summary: 'a storyboard sheet of a page or mp4: one tile per second with the second on it, and with --labels the world id; default seconds are the middle of each world change',
+    positional: [{ name: 'page|mp4', required: true, kind: 'file', help: 'films/<name>/page.html or an mp4' }],
+    flags: [
+      { name: 'at', type: 'string', help: 'comma-separated film seconds, for example 0.5,1.2,3 (default: the middle of each world change, else 12 evenly spaced)' },
+      { name: 'labels', type: 'bool', help: 'print the data-world id of the world on top at each second (a page only)' },
+      { name: 'cols', type: 'number', default: 4, help: 'tiles per row' },
+      { name: 'out', type: 'path', default: 'out/sheet-<name>.png', help: 'the PNG path' },
+    ],
+    example: 'vawe sheet films/my-launch/page.html --at 0.5,1.2,3 --labels',
+    build: (v, [input]) => [{ script: 'harness/media/sheet.mjs', args: [input, ...opt('--at', v.at), ...(v.labels ? ['--labels'] : []), ...opt('--cols', v.cols), ...opt('--out', v.out)] }],
+    next: () => 'Read the PNG at full size; vawe strip <page> --at <s> shows the frames through one moment',
+  },
+  {
     name: 'zoom', summary: 'one region of a frame enlarged with no smoothing (every pixel a square), beside the same region of a second film: fringes, masks and glow',
     positional: [{ name: 'film', required: true, help: 'a rendered mp4, a page (uses its last draft: run vawe dev first), or a reference id from vawe refs list' }],
     flags: [
@@ -384,6 +397,54 @@ export const VERBS = [
     build: (v, args) => [{ script: 'harness/lib/check-gate.mjs', args }],
   },
   {
+    name: 'track', summary: 'track one element in a reference video over a time range and print motion keyframes',
+    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
+    flags: [], raw: true,
+    example: 'vawe track ref.mp4 --box 800,400,300,120 --from 1 --to 2.5 [--fps 10] [--thresh 128] [--dark]',
+    build: (v, args) => [{ script: 'harness/media/track.mjs', args }],
+    next: () => "read the keyframes into the page's animation, then vawe compare --page to check the move against the reference",
+  },
+  {
+    name: 'match', summary: 'score a render against its reference beat by beat: strips, difference overlay, SSIM, worst first',
+    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
+    flags: [], raw: true,
+    example: 'vawe match ref.mp4 out/my-launch.mp4 [--step s] [--light]',
+    build: (v, args) => [{ script: 'harness/media/match.mjs', args }],
+    next: () => 'open match.md, fix the worst beat, then vawe match again',
+  },
+  {
+    name: 'ref-cutlist', summary: "measure a reference clip's cuts and write quality/refs/<name>/beats.md from them",
+    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
+    flags: [], raw: true,
+    example: 'vawe ref-cutlist REF=kinetic-promo [THRESHOLD=0.3]',
+    build: (v, args) => [{ script: 'harness/dev/ref-cutlist.mjs', args }],
+    next: () => "look at the stills it wrote and fill each beat's label and technique",
+  },
+  {
+    name: 'ref-calibrate', summary: 'render the measure fixtures and write how wrong each ref-spec measure is to quality/baselines/ref-spec-error.json',
+    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
+    flags: [], raw: true,
+    example: 'vawe ref-calibrate [--only move-linear,text-stagger] [--dry]',
+    build: (v, args) => [{ script: 'harness/media/ref-calibrate.mjs', args }],
+    next: () => 'vawe spec now marks the measures it cannot trust',
+  },
+  {
+    name: 'sound-lab', summary: 'render every synth cue to out/sound-lab/*.wav and open the lab to listen and mark verdicts',
+    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
+    flags: [], raw: true,
+    example: 'vawe sound-lab',
+    build: (v, args) => [{ script: 'harness/dev/sound-lab.mjs', args }],
+    next: () => 'verdicts are kept in quality/baselines/sound-verdicts.json',
+  },
+  {
+    name: 'claim', summary: 'declare or release the scope a worktree works in: add <name> [branch] [scope ...] | rm <name>',
+    positional: [{ name: 'args', help: 'the arguments of the script, as in the example' }],
+    flags: [], raw: true,
+    example: 'vawe claim add my-fix wt-my-fix harness/media',
+    build: (v, args) => [{ script: 'harness/dev/worktree-claim.mjs', args }],
+    next: () => 'vawe claim rm <name> when the work lands',
+  },
+  {
     name: 'doctor', summary: 'check node, ffmpeg, Chrome and the other tools; print the install line for each missing one',
     positional: [],
     flags: [
@@ -438,6 +499,26 @@ export const VERBS = [
     next: (v, [input]) => (!input ? 'a voice goes in <audio data-synth="name" data-at="s">; vawe sound <track> gives the beat grid and hits of a music file the user gave'
       : v.at || v.waveform ? (v.waveform ? 'Read the PNG: each orange tick must sit on the dashed world line of its visual event; move a cue with data-at or data-on' : 'a cue 0 s into itself starts at that second; move one that is off its event with data-at')
         : 'Read sound.md and sound.png; put each cut on a hit or a beat line at the frame the cut table names, then vawe sound <track> --cuts <page> again'),
+  },
+  {
+    name: 'sfx', summary: 'trim, pitch, fade and level one sound effect into the film\'s assets/sfx/ as mp3, and print the <audio> line to paste',
+    positional: [{ name: 'file', required: true, kind: 'file', help: 'the sound effect to start from (mp3, wav, m4a)' }],
+    flags: [
+      { name: 'film', type: 'string', help: 'the page or film name that gets the file in its assets/sfx/' },
+      { name: 'trim', type: 'string', help: 'a,b in seconds of the source, for example 0.1,0.6' },
+      { name: 'fade-in', type: 'number', help: 'seconds of fade in' },
+      { name: 'fade-out', type: 'number', help: 'seconds of fade out' },
+      { name: 'pitch', type: 'number', help: 'semitones, 12 is an octave up; the speed moves with the pitch' },
+      { name: 'gain', type: 'number', help: 'dB added to the level' },
+      { name: 'peak', type: 'number', help: 'set the loudest sample to this dBFS, for example -6 (not with --gain)' },
+      { name: 'name', type: 'string', help: 'the output name (default: the input name)' },
+    ],
+    example: 'vawe sfx ~/Downloads/click.wav --film films/my-launch/page.html --trim 0.05,0.4 --fade-out 0.08 --pitch 3 --peak -6 --name click-high',
+    build: (v, [file]) => {
+      if (!v.film) throw new UsageError('missing --film <page|name>; usage: vawe sfx <file> --film films/my-launch/page.html [--trim a,b] [--fade-in s] [--fade-out s] [--pitch st] [--gain dB | --peak dB]');
+      return [{ script: 'harness/media/sfx.mjs', args: [file, '--film', v.film, ...opt('--trim', v.trim), ...opt('--fade-in', v['fade-in']), ...opt('--fade-out', v['fade-out']), ...opt('--pitch', v.pitch), ...opt('--gain', v.gain), ...opt('--peak', v.peak), ...opt('--name', v.name)] }];
+    },
+    next: () => 'set data-at on the <audio> line, then bin/vawe sound <page> --at <s> to check the cue sounds on its event',
   },
   {
     name: 'sounds', summary: 'alias of vawe sound with no argument: the synth voices for <audio data-synth>, one line each, with default gain and length',

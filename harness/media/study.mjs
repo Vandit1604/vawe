@@ -611,7 +611,7 @@ and the contact sheet is now cut AT those peaks rather than at each shot's midpo
 
 **The film's own motion, for comparison with ours.** The studied reference corpus measures 1.06 to
 5.01 motion (median 2.84) and 11% to 77% still (median 29%), not the 1.7-2.0 / 13-24% this doc quoted
-before checking it against the corpus (\`node harness/author/claims.mjs\`, grammar/_claims.json). \`./bin/vawe
+before checking it against the corpus (measured by \`bin/vawe spec\` over the corpus). \`./bin/vawe
 <scene>\` prints the same still-share for our attempt, but on JPEG-captured frames against this figure's
 H.264-decoded ones: read the codec it prints beside the number before comparing the two directly.
 
