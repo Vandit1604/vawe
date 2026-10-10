@@ -1,0 +1,15 @@
+<!DOCTYPE html><html data-aspect="16:9"><head><meta charset="utf-8">
+<meta name="duration" content="1.2">
+<style>
+*{margin:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#161821;color:#f3efe6;font-family:system-ui,sans-serif}
+.world{position:absolute;inset:0;opacity:0}
+.copy{position:absolute;left:8vw;top:36vh;font:700 11vh/1 system-ui;letter-spacing:-0.03em}
+.bar{position:absolute;left:8vw;top:70vh;width:12vw;height:2vh;background:#f3efe6}
+.flat{position:absolute;inset:0;background:#b8392b}.veil{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.04),rgba(0,0,0,0) 70%)}</style></head><body>
+<section class="world" data-world="a"><div class="flat"></div><div class="veil" aria-hidden="true"></div><p class="copy">Ship it</p><div class="bar"></div></section>
+<script>
+const show = (el, a, b) => el.animate([{ opacity: 0, offset: 0 }, { opacity: 1, offset: 0.001 }, { opacity: 1, offset: 0.999 }, { opacity: 0, offset: 1 }], { delay: a * 1000, duration: (b - a) * 1000, fill: 'both' });
+const move = (el, a, b) => el.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(30vw)' }], { delay: a * 1000, duration: (b - a) * 1000, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'both' });
+const [a] = document.querySelectorAll(".world"); show(a, 0, 1.2); move(document.querySelector(".bar"), 0, 1.2);
+</script></body></html>
