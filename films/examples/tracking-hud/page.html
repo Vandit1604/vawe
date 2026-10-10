@@ -1,0 +1,314 @@
+<!doctype html>
+<html data-aspect="16:9">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="8">
+<meta name="aspect" content="16:9">
+<meta name="message" content="every frame, computed">
+<meta name="spectacle" content="5.18">
+<meta name="signature" content="band=energy; ease=land; stagger=45; seam=motion; palette=mono plus accent; thread=the tracking box and its label">
+<title>every frame, computed</title>
+<link rel="stylesheet" href="kit/kit.css">
+<script type="application/json" id="authoring">{"allow": ["group-landing", "pure-black-white"], "_why": {"group-landing": "a tracker stamps its box, label and connector together on the glyph it locks; the dither word draws three copies of each glyph", "pure-black-white": "the mono world is a black CRT screen; the lens bloom and grid lift it off pure black"}}</script>
+</head>
+<body>
+<!-- Bed: the synth bed. For your own music add <audio loop src="assets/your-track.m4a" data-at="0" data-fade-out="0.4"></audio>, then check the cuts against its beat with `bin/vawe see`. -->
+<audio data-synth="bed" data-at="0" data-gain="-10" data-fade-out="0.4" loop></audio>
+<audio data-synth="tick" data-gain="-17" data-at="0.017"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="0.350"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="0.550"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="0.750"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="1.167"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="1.567"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="1.767"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="1.967"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="2.784"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="3.200"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="3.584"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="3.967"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="4.417"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="4.784"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="5.200"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="5.600"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="6.037"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="6.817"></audio>
+<audio data-synth="tick" data-gain="-17" data-at="7.207"></audio>
+<div id="screen"></div>
+<div id="white"></div>
+<script type="module">
+import '../../../core/engine/page-api.js';
+import { lens, htmlSource, PALETTES } from '../../../core/surfaces/lens.js';
+import { flashAt } from '../../../core/motion/exposure.js';
+
+const W = 1920, H = 1080, FPS = 30;
+
+// start and end in seconds; pal is the lens palette; rx ry rz are the camera tilt in deg; zoom [from, to];
+// aim [from, to] are box indices the camera centres on; size is in frame heights, x y are frame fractions;
+// hit lists the glyph indices that get a tracking box ('all' for every glyph); hot is the yellow glyph
+const SHOTS = [
+  { id: 's1', start: 0, end: 0.3333, pal: 'mono', rx: 8, ry: -14, rz: -3, zoom: [2.2, 2.5], aim: [0, 2], light: [30, 40],
+    blocks: [{ text: '001', size: 0.34, x: 0.09, y: 0.52, hit: 'all' }] },
+  { id: 's2', start: 0.3333, end: 0.5333, pal: 'phosphor', rx: -6, ry: 12, rz: 2, zoom: [2.4, 2.8], aim: [0, 1], light: [65, 55],
+    blocks: [{ text: 'seek', size: 0.3, x: 0.09, y: 0.55, hit: [1, 2] }] },
+  { id: 's3', start: 0.5333, end: 0.7333, pal: 'paper', rx: 4, ry: -8, rz: 0, zoom: [2.0, 2.6], aim: [0, 1], light: [50, 50],
+    blocks: [{ text: '16.6', size: 0.44, x: 0.1, y: 0.5, hit: [0, 3] }] },
+  { id: 's4', start: 0.7333, end: 1.15, pal: 'mono', rx: 4, ry: 10, rz: 4, zoom: [2.0, 2.6], aim: [0, 4], light: [70, 35],
+    blocks: [{ text: 'every', size: 0.3, x: 0.08, y: 0.5, hit: 'all', labelEvery: 2 }] },
+  { id: 's5', start: 1.15, end: 1.55, pal: 'phosphor', rx: -3, ry: -10, rz: -2, zoom: [2.2, 2.7], aim: [0, 1], light: [40, 60],
+    blocks: [{ text: 'frame', size: 0.34, x: 0.06, y: 0.5, hit: [0, 3, 4], hot: 3 }] },
+  { id: 's6', start: 1.55, end: 1.75, pal: 'thermal', rx: 0, ry: 16, rz: 3, zoom: [2.2, 2.9], aim: [0, 2], light: [20, 50],
+    blocks: [{ text: 'pixel', size: 0.5, x: 0.2, y: 0.55, hit: [0, 2, 4] }] },
+  { id: 's7', start: 1.75, end: 1.95, pal: 'navy', rx: 6, ry: 6, rz: -2, zoom: [1.8, 2.3], aim: [0, 1], light: [50, 50],
+    blocks: [{ text: '60', size: 0.62, x: 0.14, y: 0.52, hit: [0, 1] }] },
+  { id: 's8', start: 1.95, end: 2.7667, pal: 'mono', rx: 5, ry: -8, rz: -2, zoom: [2.2, 1.7], aim: [0, 3], light: [35, 45],
+    blocks: [{ text: 't = 3.20\nx = f(t)\npaint(x)', size: 0.115, x: 0.12, y: 0.5, mono: true, hit: [0, 6, 8, 10], unlabeled: [8], caret: true }],
+    typing: { from: 0.03, per: 0.055 } },
+  { id: 's9', start: 2.7667, end: 3.1833, pal: 'phosphor', rx: -5, ry: 8, rz: 1, zoom: [2.2, 2.7], aim: [0, 1], light: [60, 40],
+    blocks: [{ text: 'no\nstate', size: 0.26, x: 0.1, y: 0.5, hit: [0, 4], unlabeled: [4] }] },
+  { id: 's10', start: 3.1833, end: 3.5667, pal: 'paper', rx: -4, ry: 10, rz: 2, zoom: [2.2, 2.6], aim: [0, 1], light: [50, 50],
+    blocks: [{ text: 'seed 7', size: 0.3, x: 0.08, y: 0.5, hit: [0, 4] }] },
+  { id: 's11', start: 3.5667, end: 3.95, pal: 'thermal', rx: 3, ry: -12, rz: 0, zoom: [2.2, 2.8], aim: [0, 1], light: [55, 55],
+    blocks: [{ text: 'pure', size: 0.38, x: 0.12, y: 0.5, hit: [0, 3] }] },
+  { id: 's12', start: 3.95, end: 4.4, pal: 'mono', rx: 0, ry: 14, rz: -5, zoom: [2.0, 2.5], aim: [0, 6], light: [30, 50],
+    blocks: [{ text: 'tracked', size: 0.22, x: 0.08, y: 0.5, hit: 'all', labelEvery: 2 }] },
+  { id: 's13', start: 4.4, end: 4.7667, pal: 'navy', rx: 8, ry: -6, rz: 3, zoom: [2.2, 2.7], aim: [0, 1], light: [50, 50],
+    blocks: [{ text: '0.016', size: 0.3, x: 0.06, y: 0.5, hit: [0, 4] }] },
+  { id: 's14', start: 4.7667, end: 5.1833, pal: 'thermal', rx: 10, ry: -16, rz: -4, zoom: [1.8, 2.2], aim: [0, 4], light: [60, 45],
+    blocks: [{ text: 'computed', size: 0.22, x: 0.08, y: 0.5, hit: 'all', labelEvery: 2 }] },
+  { id: 's14b', start: 5.1833, end: 5.5833, pal: 'thermal', rx: 10, ry: -16, rz: -4, zoom: [2.3, 1.4], aim: [3, 9], light: [60, 45], held: true,
+    blocks: [{ text: 'computed', size: 0.22, x: 0.08, y: 0.5, hit: 'all', labelEvery: 2 }],
+    nodes: [[0.86, 0.18], [0.9, 0.84], [0.55, 0.12]] },
+  { id: 's15', start: 5.5833, end: 6.8, pal: 'phosphor', rx: -4, ry: 6, rz: 2, zoom: [2.2, 1.7], aim: [0, 1], light: [50, 50],
+    blocks: [{ text: 'every\nframe,', size: 0.24, x: 0.08, y: 0.5, hit: [0, 5], unlabeled: [5] }], lockLate: [{ box: 1, at: 0.4367 }] },
+  { id: 's16', start: 6.8, end: 8, pal: 'mono', rx: 3, ry: -6, rz: -1, zoom: [2.4, 1.0], aim: [0, 'c'], light: [40, 45],
+    blocks: [{ text: 'every frame,\ncomputed.', size: 0.2, x: 0.1, y: 0.46, hit: [0, 5] }], mark: 'vawe', lockLate: [{ box: 1, at: 0.39 }] },
+];
+const FLASH_CUTS = [2.7667, 3.95, 5.1833, 6.8];
+const FLASH = { peak: 0.72, over: 2 };
+const HEAD_START = 0.06, BOX_GAP = 0.04, STAMP = 0.15, LOCK_FRAMES = 2;
+
+const screen = document.getElementById('screen');
+const white = document.getElementById('white');
+
+const el = (tag, cls, parent) => { const n = document.createElement(tag); if (cls) n.className = cls; if (parent) parent.append(n); return n; };
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, u) => a + (b - a) * u;
+const easeOut = (u) => 1 - (1 - u) ** 3;
+const hash = (a, b) => { let h = Math.imul(a * 374761393 + b * 668265263 + 1274126177, 1103515245); h ^= h >>> 15; return (h >>> 0) / 4294967296; };
+const num = (s) => parseInt(s.id.slice(1), 10);
+
+function buildBackground(shot, s) {
+  const bg = el('div', 'bg', shot);
+  bg.setAttribute('aria-hidden', 'true');
+  bg.setAttribute('data-chrome', '');
+  const rows = [];
+  for (let r = 0; r < 34; r++) {
+    const cols = [];
+    for (let c = 0; c < 5; c++) cols.push('x: ' + String(Math.floor(hash(num(s) * 31 + r, c) * 1920)).padStart(4, '0') + ' y: ' + String(Math.floor(hash(r, c + num(s)) * 1080)).padStart(4, '0'));
+    rows.push(cols.join('      '));
+  }
+  bg.textContent = rows.join('\n');
+  bg.style.left = (-hash(num(s), 1) * 160) + 'px';
+  bg.style.top = (-hash(num(s), 2) * 40) + 'px';
+}
+
+function placeBlock(shot, b) {
+  const t = el('div', 'type' + (b.mono ? ' mono' : ''), shot);
+  t.style.fontSize = (b.size * H) + 'px';
+  t.style.left = (b.x * W) + 'px';
+  const spans = [];
+  for (const ch of b.text) {
+    if (ch === ' ' || ch === '\n') { t.append(ch); continue; }
+    const g = el('span', 'g', t);
+    g.textContent = ch;
+    spans.push(g);
+  }
+  t.style.top = (b.y * H - t.offsetHeight / 2) + 'px';
+  return { b, t, spans };
+}
+
+// glyph reveal second (shot-relative) per glyph and the box arrival that follows it
+function revealTime(s, placedIdx, i, count) {
+  if (s.held) return -1;
+  if (s.typing) return s.typing.from + i * s.typing.per;
+  const quick = s.end - s.start < 0.5;
+  const gap = quick || s.id === 's14' ? 0.03 : 0.045;
+  return -HEAD_START + (placedIdx + i) * gap;
+}
+
+function build(s) {
+  const shot = el('section', 'shot', screen);
+  shot.dataset.world = s.id;
+  shot.style.setProperty('--lx', s.light[0] + '%'); shot.style.setProperty('--ly', s.light[1] + '%');
+  el('div', 'ground', shot);
+  buildBackground(shot, s);
+  shot.style.display = 'block';
+  const placed = s.blocks.map((b) => placeBlock(shot, b));
+  const boxes = [];
+  let glyphCount = 0;
+  const labelRows = { n: 0 };
+  placed.forEach(({ b, t, spans }) => {
+    const hits = b.hit === 'all' ? spans.map((_, i) => i) : b.hit;
+    hits.forEach((i) => {
+      const g = spans[i];
+      const gw = g.offsetWidth, gh = g.offsetHeight;
+      const x = t.offsetLeft + g.offsetLeft - gw * 0.02, y = t.offsetTop + g.offsetTop + gh * 0.1, w = gw * 1.04, h = gh * 0.78;
+      const reveal = revealTime(s, glyphCount, i, spans.length);
+      const at = reveal + (s.typing ? 0.03 : 0.08) + (s.typing ? 0 : 0);
+      const labeled = !((b.labelEvery && i % b.labelEvery) || (b.unlabeled || []).includes(i));
+      boxes.push({ x, y, w, h, cx: x + w / 2, cy: y + h / 2, at, glyph: g, labeled, node: false });
+      if (b.hot === i) g.classList.add('hot');
+    });
+    spans.forEach((g, i) => { g.dataset.reveal = revealTime(s, glyphCount, i, spans.length); });
+    glyphCount += spans.length;
+  });
+  (s.nodes || []).forEach(([fx, fy], k) => {
+    const sz = 64, cx = fx * W, cy = fy * H;
+    boxes.push({ x: cx - sz / 2, y: cy - sz / 2, w: sz, h: sz, cx, cy, at: s.held ? 0.05 + k * 0.08 : 0.07 + k * 0.025 + 0.35, glyph: null, labeled: true, node: true });
+  });
+  boxes.forEach((bx) => {
+    bx.el = el('div', 'box', shot);
+    Object.assign(bx.el.style, { left: bx.x + 'px', top: bx.y + 'px', width: bx.w + 'px', height: bx.h + 'px' });
+    if (bx.labeled) { bx.lab = el('p', 'lab', shot); bx.lab.setAttribute('aria-hidden', 'true'); bx.lab.setAttribute('data-chrome', ''); }
+  });
+  boxes.forEach((bx, i) => {
+    if (!i) return;
+    const a = boxes[i - 1];
+    bx.link = { line: el('div', 'link', shot), arrow: el('div', 'arrow', shot), dot: el('div', 'dot', shot), a };
+  });
+  if (s.typing) {
+    const [t0] = placed;
+    const last = t0.spans[t0.spans.length - 1];
+    shot._caret = { el: el('div', 'caret', shot), spans: t0.spans, t: t0.t, h: last.offsetHeight };
+  }
+  if (s.mark) { const m = el('div', 'mark', shot); m.textContent = s.mark; }
+  const firstIdx = boxes.reduce((m, bx, i) => (bx.at < boxes[m].at ? i : m), 0);
+  const locks = [{ at: Math.max(0, boxes[firstIdx].at), box: firstIdx }];
+  (s.lockLate || []).forEach(({ box, at }) => { boxes[box].at = at; locks.push({ at, box }); });
+  const t0 = placed[0].t;
+  const center = [t0.offsetLeft + t0.offsetWidth / 2, t0.offsetTop + t0.offsetHeight / 2];
+  shot.style.display = 'none';
+  return { ...s, shot, placed, boxes, locks, center };
+}
+
+await document.fonts.ready;
+const shots = SHOTS.map(build);
+const shotAt = (t) => shots.find((s) => t >= s.start && t < s.end) || shots[shots.length - 1];
+const local = (s, t) => t - s.start;
+const progress = (s, t) => easeOut(clamp(local(s, t) / (s.end - s.start)));
+const arrived = (s, t) => s.boxes.filter((bx) => local(s, t) >= bx.at);
+
+function focusPoint(s, t) {
+  const lt = local(s, t);
+  const done = s.boxes.map((bx, i) => [bx, i]).filter(([bx]) => lt >= bx.at).sort((a, b) => a[0].at - b[0].at);
+  const cur = (done.length ? done[done.length - 1][0] : s.boxes[0]);
+  const prev = done.length > 1 ? done[done.length - 2][0] : cur;
+  const u = clamp((lt - cur.at) / 0.1);
+  return [lerp(prev.cx, cur.cx, u), lerp(prev.cy, cur.cy, u)];
+}
+
+const lastLock = (s, t) => s.locks.filter((e) => local(s, t) >= e.at).sort((x, y) => y.at - x.at)[0];
+const since = (s, t) => { const e = lastLock(s, t); return e ? local(s, t) - e.at : -1; };
+const lockDecay = (s, t) => { const d = since(s, t); return d >= 0 ? Math.exp(-d / 0.12) : 0; };
+const tearOn = (s, t) => { const d = since(s, t); return d >= 0 && d < 3 / FPS; };
+
+const aimPoint = (s, v) => {
+  if (v === 'c') return s.center;
+  const bx = s.boxes[Math.min(v, s.boxes.length - 1)];
+  return [bx.cx, bx.cy];
+};
+
+const cam = lens(htmlSource(screen, { scale: 2 }), {
+  seed: 7, fps: FPS,
+  aim: (t) => { const s = shotAt(t), u = progress(s, t); const a = aimPoint(s, s.aim[0]), b = aimPoint(s, s.aim[1]); return [lerp(a[0], b[0], u), lerp(a[1], b[1], u)]; },
+  zoom: (t) => { const s = shotAt(t); return lerp(s.zoom[0], s.zoom[1], progress(s, t)); },
+  tiltX: (t) => shotAt(t).rx * 0.015, tiltY: (t) => shotAt(t).ry * 0.022, roll: (t) => shotAt(t).rz * 0.012,
+  dof: { blur: 0.6, focus: (t) => focusPoint(shotAt(t), t), bokeh: 7 },
+  palette: { stops: (t) => PALETTES[shotAt(t).pal], amount: 1, keepColor: 0.9 },
+  bloom: { strength: 0.9, radius: 42 },
+  grid: { amount: 0.9, cell: 2.5 },
+  aberration: { amount: (t) => 3 + 12 * lockDecay(shotAt(t), t) },
+  tear: { amount: (t) => (tearOn(shotAt(t), t) ? 70 : 0), prob: 0.3, band: 14 },
+  exposure: (t) => flashAt(t, FLASH_CUTS, FLASH).brightness,
+});
+
+function paintScreen(s, t) {
+  const lt = local(s, t);
+  s.placed.forEach(({ spans }) => spans.forEach((g) => {
+    const u = clamp((lt - Number(g.dataset.reveal)) / 0.14);
+    g.style.opacity = u > 0 ? 1 : 0;
+    g.style.transform = 'translateY(' + ((1 - easeOut(u)) * 0.2) + 'em)';
+  }));
+  s.boxes.forEach((bx, i) => {
+    const u = clamp((lt - bx.at) / STAMP);
+    bx.el.style.opacity = lt >= bx.at ? 1 : 0;
+    bx.el.style.transform = 'scale(' + (1 + 0.35 * (1 - easeOut(u))) + ')';
+    const e = lastLock(s, t);
+    const locked = !!e && e.box === i && since(s, t) < LOCK_FRAMES / FPS;
+    bx.el.classList.toggle('lock', locked);
+  });
+  const c = s.shot._caret;
+  if (c) {
+    const typed = c.spans.filter((g) => lt >= Number(g.dataset.reveal));
+    const g = typed.length ? typed[typed.length - 1] : c.spans[0];
+    c.el.style.left = (c.t.offsetLeft + g.offsetLeft + (typed.length ? g.offsetWidth : 0)) + 'px';
+    c.el.style.top = (c.t.offsetTop + g.offsetTop + c.h * 0.19) + 'px';
+    c.el.style.height = (c.h * 0.62) + 'px';
+    c.el.style.opacity = (typed.length < c.spans.length || Math.floor(lt / 0.24) % 2 === 0) ? 1 : 0;
+  }
+}
+
+let visible = null;
+const sc = W / innerWidth;
+
+function paintLabels(s, t) {
+  const lt = local(s, t);
+  s.boxes.forEach((bx, i) => {
+    if (!bx.lab) return;
+    const f = Math.floor((lt - bx.at - 0.06) * FPS);
+    bx.lab.style.display = f >= 0 ? 'block' : 'none';
+    if (f < 0) return;
+    const p = cam.project(bx.x, bx.y, t);
+    const flick = f < 6 ? 90 * (1 - f / 6) : 0;
+    const jx = Math.round(p.x * sc + (flick ? (hash(num(s) * 100 + i, f) - 0.5) * flick : 0));
+    const jy = Math.round(p.y * sc + (flick ? (hash(i + 7, f + num(s)) - 0.5) * flick : 0));
+    bx.lab.textContent = 'x: ' + jx + ' y: ' + jy;
+    bx.lab.style.left = bx.x + 'px';
+    bx.lab.style.top = (bx.y - 34 - (i % 2 ? 36 : 0)) + 'px';
+  });
+}
+
+function paintLinks(s, t) {
+  const lt = local(s, t);
+  s.boxes.forEach((bx) => {
+    if (!bx.link) return;
+    const { line, arrow, dot, a } = bx.link;
+    const u = easeOut(clamp((lt - (Math.max(bx.at, a.at) + STAMP * 0.6)) / 0.18));
+    const dx = bx.cx - a.cx, dy = bx.cy - a.cy, len = Math.hypot(dx, dy), ang = Math.atan2(dy, dx);
+    line.style.display = u > 0 ? 'block' : 'none';
+    line.style.left = a.cx + 'px'; line.style.top = (a.cy - 2) + 'px';
+    line.style.width = (len * u) + 'px'; line.style.transform = 'rotate(' + ang + 'rad)';
+    const done = u >= 1;
+    arrow.style.display = done ? 'block' : 'none';
+    dot.style.display = done ? 'block' : 'none';
+    arrow.style.left = (a.cx + dx * 0.55 - 12) + 'px'; arrow.style.top = (a.cy + dy * 0.55 - 12) + 'px';
+    arrow.style.transform = 'rotate(' + ang + 'rad)';
+    dot.style.left = (bx.cx - 8) + 'px'; dot.style.top = (bx.cy - 8) + 'px';
+  });
+}
+
+vawe.onFrame(async (t) => {
+  const s = shotAt(t);
+  if (visible !== s) {
+    shots.forEach((o) => { o.shot.style.display = o === s ? 'block' : 'none'; });
+    visible = s;
+  }
+  paintScreen(s, t);
+  paintLinks(s, t);
+  paintLabels(s, t);
+  await cam.draw(t);
+  white.style.opacity = flashAt(t, FLASH_CUTS, FLASH).white;
+});
+</script>
+</body>
+</html>
