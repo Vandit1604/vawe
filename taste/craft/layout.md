@@ -23,7 +23,7 @@ Video frames are not pages. Compose asymmetric with one hero, anchored to edges 
 
 - **The eye needs somewhere to travel.** Never a single text block floating in empty space
   ([density.md](density.md)). One hero stays dominant, with proof and structure subordinate.
-- **Fill the frame** ([hero-scale](../rules/hero-scale.md)). You will try web-sized elements. Do not.
+- **Fill the frame** ([hierarchy](../rules/hierarchy.md)). You will try web-sized elements. Do not.
   In an old measurement of this library, landscape hero ink sat at a 40 % median. The declared boxes were
   near right and the glyphs filled only two thirds of them: the fix is bigger type, not a wider box.
   The body measure ([type-setting](../rules/type-setting.md)) does not apply to display type.
@@ -31,7 +31,7 @@ Video frames are not pages. Compose asymmetric with one hero, anchored to edges 
 - **Split frames, not centred stacks.** Data on the left and content on the right. A metadata bar on top and
   full width below.
 - **Use structure.** Rules, dividers and border panels give the eye paths and animate well.
-- **Web sizes are invisible on video.** Type sizes are in [hero-scale](../rules/hero-scale.md). Decoratives, borders and
+- **Web sizes are invisible on video.** Type sizes are in [hierarchy](../rules/hierarchy.md). Decoratives, borders and
   padding scale up too. A decorative at a few percent opacity is invisible. An effect nobody can see is not
   restraint ([legible-effect](../rules/legible-effect.md)).
 - **Three planes:** background treatment, midground content, foreground accents. Most films have one.

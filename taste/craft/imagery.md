@@ -50,7 +50,7 @@ A raw flat image reads as a dropped screenshot. Pick the treatment by what the i
 
 Other treatments: a perspective tilt, a floating extracted element at another depth, a scroll reveal. Use
 the lightest treatment that does the job ([image-treatment](../rules/image-treatment.md)). An over-graded image is as off as a raw one. A held still is right
-when the pattern is "hold the picture, move the type" ([grammar.md](grammar.md)).
+when the pattern is "hold the picture, move the type" ([film-structure.md](film-structure.md#the-motion-grammar-ten-patterns-that-recur)).
 
 ## 4. Licensing
 

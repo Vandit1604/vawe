@@ -32,7 +32,7 @@ read Creed's accent as the sky photo's blue when the CSS says `#2563eb`.
 Borrowed from reference design notes, with our measurements. The banned-face list and the numbers are in
 the rules: [typeface-default](../rules/typeface-default.md), [typeface-system](../rules/typeface-system.md),
 [weight-contrast](../rules/weight-contrast.md), [type-setting](../rules/type-setting.md) and
-[hero-scale](../rules/hero-scale.md).
+[hierarchy](../rules/hierarchy.md).
 
 - **Look at the bundled faces before you pick a pairing** (`assets/fonts/`). Otherwise you reach for the
   same eight fonts every time, and that is your training default, not a choice. Syne is the most
@@ -81,7 +81,7 @@ Name the signal out loud and commit. Pair with contrast, not conflict: two simil
 Pick a ratio, hand-pick about five sizes, reuse them. Editorial or display drama takes a bigger ratio, a dense
 or dashboard layout a smaller one. The gap between hero and caption should be obvious: scale contrast is the
 first hierarchy tool ([hierarchy](../rules/hierarchy.md), [layout.md](layout.md)). Sizes in px are in
-[hero-scale](../rules/hero-scale.md); read lines in [readable-text-size](../rules/readable-text-size.md).
+[hierarchy](../rules/hierarchy.md); read lines in [readable-text-size](../rules/readable-text-size.md).
 
 ## Weight, tracking, leading, measure
 

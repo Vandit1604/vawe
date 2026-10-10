@@ -196,7 +196,7 @@ Motion is not decoration. It explains what just happened: a held frame says the 
 
 ## Genre pacing
 
-Beat length and cut rate by genre are in [story.md](story.md) and [grammar.md](grammar.md). A launch film
+Beat length and cut rate by genre are in [story.md](story.md) and [film-structure.md](film-structure.md#the-motion-grammar-ten-patterns-that-recur). A launch film
 runs one transition family plus one accent; a product walkthrough is calm and uses UI-mechanism motion
 only; shorts (games, facts) are snappy throughout.
 
