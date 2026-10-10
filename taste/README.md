@@ -129,7 +129,7 @@ One rule per file in `taste/rules/<id>.md`. Ids never change. Everything else he
 
 - [gradient-grain](rules/gradient-grain.md): A gradient the brief asks for is clean. Check: judge.
 - [mark-rides-parent](rules/mark-rides-parent.md): Every mark rides the thing it belongs to. Check: judge.
-- [moving-tail](rules/moving-tail.md): The world keeps moving to the last frame: the last second carries a small move on a part or the ground. Check: sheet-tiles.
+- [moving-tail](rules/moving-tail.md): The film keeps moving to the last frame: the last second carries a move on a part of the held lockup (a caret, a value that ticks, a highlight that moves on) or one last arrival. Check: sheet-tiles.
 - [no-tells](rules/no-tells.md): No generated tells. Check: judge.
 - [reveal-mask-pad](rules/reveal-mask-pad.md): A reveal mask clears the glyphs. Check: judge.
 - [stock-device-once](rules/stock-device-once.md): A stock device is seasoning, never the idea. Check: judge.

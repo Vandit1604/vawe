@@ -226,10 +226,10 @@ Every mark rides the thing it belongs to. A mark that sits still while its paren
 
 ### moving-tail
 
-The world keeps moving to the last frame: the last second carries a small move on a part or the ground. A wordmark may land and hold, but something still moves.
+The film keeps moving to the last frame: the last second carries a move on a part of the held lockup (a caret, a value that ticks, a highlight that moves on) or one last arrival. A wordmark may land and hold, but something on it still moves.
 
-- Limit: no static frame in the last 1 s; at most 4 near-identical tail tiles, unless an animation runs on a visible element through the last 1 s on the sheet
-- Range: a slow part or ground move through the last second
+- Limit: no static frame in the last 1 s; at most 4 near-identical tail tiles, unless an animation runs on a visible part (not the camera or a whole-frame transform) through the last 1 s on the sheet
+- Range: a move on a part through the last second, or one last arrival in it
 - Judge: Does anything move in the last second?
 
 ### no-tells

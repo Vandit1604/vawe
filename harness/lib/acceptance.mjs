@@ -83,7 +83,7 @@ const ROWS = {
     const plain = m.caps.filter((c) => !c.chrome);
     const chrome = m.caps.filter((c) => c.chrome);
     const measured = [...(plain.length ? [`${lowest(plain).cap.toFixed(1)}%`] : []), ...(chrome.length ? [`data-chrome ${lowest(chrome).cap.toFixed(1)}% (floor ${CHROME_CAP_PCT}%)`] : [])].join(', ');
-    return done(!short.length, measured,short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : ''}`).concat(short.length ? 'raise the font size until the cap height reaches the target, or mark UI texture data-chrome, or aria-hidden="true"' : []));
+    return done(!short.length, measured,short.slice(0, SHOW).map((c) => `"${c.text}" at ${c.t.toFixed(1)} s: ${c.cap.toFixed(1)}%${c.chrome ? ` (data-chrome floor ${CHROME_CAP_PCT}%)` : ''}`).concat(short.length ? 'raise the font size until the cap height reaches the target' : []));
   },
   'text contrast': (m, pass) => {
     if (!m.contrast) return skip('no pixels sampled behind the text');
