@@ -1,0 +1,74 @@
+<!doctype html>
+<html data-aspect="16:9" data-look="signal">
+<head>
+<meta charset="utf-8">
+<meta name="duration" content="3.6">
+<title>move: highlight sweep</title>
+<link rel="stylesheet" href="/prompts/moves/demo/demo.css">
+<style>
+  body { display: block; }
+  .shot { position: absolute; inset: 0; }
+  .line { position: absolute; left: 9vw; top: calc(var(--u) * 40); margin: 0; white-space: nowrap; font: 800 calc(var(--u) * 10.5)/1.1 var(--head); letter-spacing: var(--head-track); text-transform: var(--head-case); }
+  .cw { display: inline-block; }
+  .eyebrow { position: absolute; left: 9.2vw; top: calc(var(--u) * 28); margin: 0; }
+  .sub { position: absolute; left: 9.2vw; top: calc(var(--u) * 62); margin: 0; font: 500 var(--t-lead)/1 var(--mono); color: var(--muted); }
+
+  .b { background: var(--accent); color: var(--on-accent); visibility: hidden; }
+  .b .carry { color: transparent; clip-path: inset(0 -20vw); }
+  .b .carry .cw { color: var(--on-accent); }
+  .b .head { position: absolute; left: 9vw; top: calc(var(--u) * 40); overflow: hidden; clip-path: inset(0 -20vw); }
+  .b .head > div { margin: 0; white-space: nowrap; font: 800 calc(var(--u) * 10.5)/1.1 var(--head); letter-spacing: var(--head-track); text-transform: var(--head-case); will-change: translate; }
+  .b .sub { color: var(--on-accent); opacity: 0.78; top: calc(var(--u) * 58); }
+</style>
+</head>
+<body>
+<section class="shot a" id="a">
+  <p class="eyebrow">vawe ship</p>
+  <h1 class="line"><span class="plain">Ship films in </span><span class="cw" id="word">one command</span></h1>
+  <p class="sub">16:9  9:16  1:1</p>
+</section>
+<section class="shot b" id="b">
+  <h1 class="line carry"><span class="plain">Ship films in </span><span class="cw" id="carry">one command</span></h1>
+  <div class="head"><div id="head">Live in 41 seconds</div></div>
+  <p class="sub" id="bsub">vawe.dev/launch</p>
+</section>
+<script type="module">
+import '/core/engine/page-api.js';
+import { easeFn } from '/core/motion/presets.js';
+const W = innerWidth, H = innerHeight, clamp = (u) => Math.min(1, Math.max(0, u)), lerp = (p, q, u) => p + (q - p) * u;
+const a = document.getElementById('a'), b = document.getElementById('b');
+const word = document.getElementById('word'), carry = document.getElementById('carry');
+const head = document.getElementById('head'), bsub = document.getElementById('bsub');
+const lines = [...a.querySelectorAll('.line, .eyebrow, .sub')];
+const PAD = 0.06 * H, SLANT = 0.012 * W;
+const T0 = 0.95, DUR = 1.05, EXP = 0.6;                       // the bar sweeps for DUR s; it opens to the frame once its edge is past the word
+const sweep = easeFn('swap'), open = easeFn('carry'), land = easeFn('land'), launch = easeFn('launch');
+// 0.5 of the distance is linear, so the speed through the word is the speed past it
+const reach = (u) => 0.5 * u + 0.5 * sweep(u);
+const edge = (t, L) => lerp(L, W + PAD + SLANT, reach(clamp((t - T0) / DUR)));
+vawe.onFrame((t) => {
+  const r = word.getBoundingClientRect();                      // measured per frame: the face may load after the first paint
+  const L = r.left, R0 = r.right, T = r.top + 0.12 * r.height, B = r.bottom - 0.04 * r.height;
+  let tE = T0;
+  while (tE < T0 + DUR && edge(tE, L) < R0 + 0.05 * W) tE += 0.005;   // the first frame at which the edge is past the word
+  const tC = tE + EXP + 0.1;                                    // the carried word leaves once the panel is whole
+  lines.forEach((el, i) => {
+    el.style.translate = `0 ${(1 - land(clamp((t - 0.05 - i * 0.08) / 0.55))) * 4 * H / 100}px`;
+    el.style.opacity = clamp((t - 0.05 - i * 0.08) / 0.2);
+  });
+  const q = open(clamp((t - tE) / EXP));
+  const x = edge(t, L), top = lerp(T, -PAD, q), bot = lerp(B, H + PAD, q), left = lerp(L, -PAD, q);
+  const s = SLANT * (1 - q);
+  b.style.visibility = t < T0 ? 'hidden' : 'visible';
+  b.style.clipPath = `polygon(${left}px ${top}px, ${x + s}px ${top}px, ${x}px ${bot}px, ${left}px ${bot}px)`;
+  const uc = clamp((t - tC) / 0.28);
+  carry.style.translate = `0 ${-120 * launch(uc)}%`;
+  const uh = clamp((t - tC - 0.06) / 0.8);
+  head.style.translate = `0 ${(1 - land(uh)) * 110}%`;
+  const us = clamp((t - tC - 0.2) / 0.7);
+  bsub.style.translate = `0 ${(1 - land(us)) * 2 * H / 100}px`;
+  bsub.style.opacity = clamp(us * 3) * 0.78;
+});
+</script>
+</body>
+</html>
