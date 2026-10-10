@@ -11,21 +11,21 @@ tiles over to shot B.
 ```js
 import { easeFn } from '../../core/motion/presets.js';
 const settle = easeFn('settle');
-const AT = 0.7, DUR = 1.5, S_END = 0.24, GAP = 6 * u;               // 3 x 3 cells, each one frame (W x H) in the world
+const AT = 0.7, DUR = 1.5, S_END = 0.22, GAP = 6 * u;               // 3 x 3 cells, each one frame (W x H) in the world
 // cell (c, r) sits at ((c - 1) * (W + GAP), (r - 1) * (H + GAP)) from the centre; the middle one is shot A
 vawe.onFrame((t) => {
   const p = settle(clamp((t - AT) / DUR)), s = Math.exp(Math.log(S_END) * p);   // one scale, about the centre: A is the middle cell
   world.style.transform = `scale(${s})`;                                       // .world is a 0 x 0 box at the frame centre
   cells.forEach((c) => { c.style.borderRadius = `${7 * u * p}px`; });          // A starts square: it is the full frame
 });
-// after the pull back: the title and a ring round A enter on EASE.land; A's own bar was moving before it started
+// after the pull back: the title and a ring round A enter on EASE.land; A's own bar was moving before it started, and the neighbours' bars fill in during the hold
 ```
 
 Sound: none; the pull back is felt, and the title takes the one cue.
 
-The scale ends at 0.24: the grid fills about 74 percent of the frame, which leaves room for a title
+The scale ends at 0.22: the grid fills about 68 percent of the frame, which leaves room for a title
 above it. Pull back to 0.35 or more and the neighbours read as clipped; under 0.2 the cell text is
-too small to read. Put the shot you leave in the middle cell: the camera then needs only a scale about
+too small to read, so set the labels at 8 to 9 percent of frame height in world units. Put the shot you leave in the middle cell: the camera then needs only a scale about
 the frame centre, with no pan, and the move reads as one gesture. If it must sit in a corner, scale
 about the pivot `P = (C - s_end * G) / (1 - s_end)` (C the frame centre, G the grid centre) so the scale
 and the pan are one motion, never two.

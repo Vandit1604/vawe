@@ -5,14 +5,14 @@ grows until its circle is larger than the frame, and its picture becomes the gro
 illustration or a gradient), so it stays sharp at 12 times its size. Clip: [avatar-world.mp4](avatar-world.mp4). Demo: [demo/avatar-world.html](demo/avatar-world.html).
 
 ```js
-const D = 22 * u;                                                          // the avatar in the card
+const D = 24 * u;                                                          // the avatar in the card
 const SMAX = (Math.hypot(W, H) / 2 / (D / 2)) * 1.03;                      // its radius reaches the farthest corner from the frame centre
 avatar.style.cssText = `width:${D}px; height:${D}px; border-radius:50%; overflow:hidden`;   // the svg inside is the art
 vawe.onFrame((t) => {
   const k = clamp((t - T.grow) / 0.95), g = 0.3 * k * k * (3 - 2 * k) + 0.7 * easeFn('swap')(k);
   const cx = lerp(START.x, W / 2, g), cy = lerp(START.y, H / 2, g);        // the circle travels to the middle while it grows
   avatar.style.transform = `translate(${cx - D / 2}px, ${cy - D / 2}px) scale(${lerp(1, SMAX, g)})`;
-  card.style.opacity = lerp(1, 0.55, g);
+  card.style.opacity = 1 - swap(clamp(g / 0.8));                           // the card leaves under the circle
 });
 ```
 
@@ -25,8 +25,9 @@ Sound: one soft pluck on the press; a rising swell under the growth that stops w
   vector is drawn again at each scale and stays crisp.
 - The press has a cause: a cursor lands on the avatar, the avatar dips to 95 percent, and the growth starts 0.12 s later. The cursor
   leaves faster than it came (0.3 s, `EASE.launch`).
-- Growth takes 0.95 s: 30 percent smoothstep and 70 percent `EASE.swap`, so it starts slow and is fastest in the middle. The card dims to 55
-  percent under it. Scene B text arrives 0.83 s after the growth starts, 0.15 s apart (name, count, button), each rising from 4 to 6 u on `EASE.land`.
+- Growth takes 0.95 s: 30 percent smoothstep and 70 percent `EASE.swap`, so it starts slow and is fastest in the middle. The card fades out
+  by 80 percent of the growth. Scene B text arrives 0.83 s after the growth starts, 0.15 s apart (name, role and count on one line, button), each rising
+  from 4 to 6 u on `EASE.land`. A scrim over the lower 36 percent keeps it readable; keep text off the bright horizon band.
 - The ground keeps living after the handoff: the sun climbs 3.5 percent of the art height over 2.6 s. It is the same element that
   was in the avatar, so the ground is the avatar, not a copy.
 - Z-order: card z 1, avatar z 3, scene B text z 4, cursor z 10. Use an illustration or a generated gradient, never a photo of a real person.

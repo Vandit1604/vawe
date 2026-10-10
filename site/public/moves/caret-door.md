@@ -26,6 +26,7 @@ Sound: none; a key tick per typed character is the film's, and the door adds no 
 - The caret is solid while typing, blinks every 0.28 s, and grows on a lit phase after a short dip (8 percent over 0.12 s) that gathers it before it rises from its middle. It grows to 1.04 frame heights, the height of the door.
 - Perspective is 1.7 frame widths. Less makes the far side collapse to a point; more flattens the swing into a plain wipe.
 - The new screen is on the door's face, so it is foreshortened while the door turns and flat when it lands. Its small accent (the live pill) pops on `EASE.pop` after the door has landed.
+- The door is 1.4 frames tall (its face is clipped to the frame), so the far edge still covers the frame top and bottom while the angle is small. A door of one frame height leaves black wedges in the corners until the leaf is nearly flat.
 - What goes wrong: a door narrower than two frames leaves a strip of scene A on one side when it lands. Hinging at the door's left edge instead of its middle puts the caret on the edge, not in the middle of the opening. A caret bar that is wider than the door's first sliver reads as a swap.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

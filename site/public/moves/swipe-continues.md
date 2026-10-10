@@ -10,7 +10,7 @@ is the same on both sides of the seam (a peak of about 6 frame heights a second,
 ```js
 import { easeFn } from '../../core/motion/presets.js';
 const carry = easeFn('carry'), land = easeFn('land');            // fast at its end / fast at its start
-const TRAVEL = 0.74 * W, EXIT_SHARE = 0.4;                       // card A sits 0.74 W left of card B: B starts off screen
+const TRAVEL = 0.80 * W, EXIT_SHARE = 0.4;                       // card A sits 0.80 W left of card B: B starts off screen
 const T0 = 0.55, D_OUT = 0.4, D_IN = 0.6, T1 = T0 + D_OUT;       // belt starts, the throw, the brake
 // both curves meet at 4.8 x their average speed: share * TRAVEL / D_OUT = (1 - share) * TRAVEL / D_IN
 const belt = (t) => (t < T1
@@ -33,7 +33,7 @@ is not free: the two curves only meet at the same speed when `EXIT_SHARE * TRAVE
 `(1 - EXIT_SHARE) * TRAVEL / D_IN`. Change a duration and change the share with it, then read the
 speed graph: the peak must be one point, not a step.
 
-What goes wrong: a gap under 0.74 W (cards 0.45 W wide) shows card B at the frame edge at rest, so
+What goes wrong: a gap under 0.80 W (cards 0.54 W wide) shows card B at the frame edge at rest, so
 keep card B's left edge past the frame; two separate tweens, one per card, each with its own ease, step at the
 seam and read as two swipes; a swipe longer than 0.5 s of throw reads as a slide, not a flick. The
 camera does not move: the belt is the only motion, and the ground stays still behind it.

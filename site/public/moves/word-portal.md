@@ -31,7 +31,7 @@ Sound: none; the typed characters are the film's keys, and the growth needs no e
 - Z-order: scene A (ground, label, caret) under, scene B over it, clipped by the glyphs. A is never faded: it is whatever the letters do not cover.
 - Scene B's ground is the colour of the typed word, so the typed word is B's ground seen through the letters. At the first frame of the growth nothing changes on screen. B's own elements then arrive inside the glyphs, and that is when the viewer sees a scene in the type.
 - Aim at the stem of a letter with a plain vertical stem (l, I, T). A round letter has no stem to fill the frame. The scale is `1.15 * W / (STEM * F)`, about 41 for a 26 u word, which is why the growth runs on a log path and ends with the stem opening as a tall window across the frame.
-- B's elements sit away from the typed word's first position, or they show inside the letters before the move starts.
+- B's elements sit away from the typed word's first position, or they show inside the letters before the move starts. B is graphic, not a line of text: three format tiles sit in the middle of the frame, so the letters show whole tiles while they grow, and the headline and URL arrive after them. The word is centred on the frame, so the stem has a short way to the middle.
 - The word types at 0.14 s a letter and the portal opens on a lit caret after two blinks.
 - What goes wrong: a thin face leaves no window, so use weight 800 or more. Leaving the `clip-path` on after the stem is wider than the frame costs a huge path for nothing. A caret in a layer that does not take the same matrix stays behind and reads as a cut.
 
