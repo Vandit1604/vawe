@@ -993,7 +993,7 @@ export async function videoChecks(mp4, pagePath, checks, probe = {}, cameraOnly 
   } catch (e) { console.error(`  video not read: ${e.message}`); return null; }
 }
 
-const NOTE_LINES = /^(waive: |motion lint read element boxes|checks skipped: )/;
+export const NOTE_LINES = /^(waive: |motion lint read element boxes|checks skipped: )/;
 
 /**
  * What a draft says about itself: { red, notes, rows, was, sync }. `red` is what the terminal shows (the red acceptance

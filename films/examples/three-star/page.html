@@ -50,10 +50,9 @@ scene.add(star);
 
 // One HTML word, entering on a plain Web Animations entrance (element.animate()), seeked by the same
 // clock that drives the star: no second timing system for the one word on screen.
-document.getElementById('word').animate(
-  [{ opacity: 0, transform: 'translateY(18px)' }, { opacity: 1, transform: 'translateY(0px)' }],
-  { duration: 500, delay: 200, fill: 'both', easing: EASE.land },
-);
+const word = document.getElementById('word');
+word.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 350, delay: 200, fill: 'both', easing: EASE.land });
+word.animate([{ transform: 'translateY(18px)' }, { transform: 'translateY(0px)' }], { duration: 500, delay: 200, fill: 'both', easing: EASE.land });
 
 // SPIN_RATE: a half-turn (PI rad) every 0.3s, so the star's flat face is EDGE-ON (rotation.y == PI/2
 // mod PI) at every multiple of 0.3s, in particular the two times this page is judged against: 0.6s and
