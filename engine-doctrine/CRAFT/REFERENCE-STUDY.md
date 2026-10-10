@@ -1,6 +1,6 @@
 ---
-when: a real video looks better than ours and you want to learn and copy why
-answers: "how to sample a reference, what a dense read shows, and the premium-feel habits to reach for on purpose"
+when: a real video looks better than ours and you want to learn and copy why, or you recreate a specific reference end to end, or reflect a real website section by section
+answers: "how to sample a reference, what a dense read shows, the premium-feel habits, the ordered recreation loop (measure, capture, light first, verify), reflecting a site, and the honest 1:1 ceiling"
 group: story
 ---
 
@@ -9,7 +9,7 @@ group: story
 When a real piece looks better than ours, the gap is rarely one effect. It is a handful of habits we
 skipped. Study a reference like an editor: measure it, name what it does, reproduce the intent.
 `bin/vawe spec <ref.mp4>` gives the cut list, light map, text timeline and curves.
-For the ordered recreation loop see `RECREATION.md`.
+The commands and stops of a recreation are in `skills/vawe-reference/SKILL.md` and `prompts/reference-rebuild.md`; this page holds the judgement behind them.
 
 ## Sampling rate decides what you learn
 
@@ -41,8 +41,7 @@ had to be replanned. So when the question is how something moves, take a contigu
 
 A good reference does these and our defaults do not. Reach for them on purpose, and name the target of each.
 
-1. Never static. A slow continuous push or drift on every beat is the biggest alive-versus-slideshow
-   lever. Scale with `transform`, never font-size (reflow jitters). One monotonic move, linear ease.
+1. Never dead. A part of every beat is in motion (a line typing, a counter, a glint, a secondary action): that is the alive-versus-slideshow lever. The camera holds still unless the beat earns a move; scale with `transform`, never font-size (reflow jitters).
 2. Motion carries through the seam: the outgoing beat zooms out as the incoming zooms in, not a
    background swap.
 3. Massive scale and frame bleed. One huge word, tiny everything else, reads as confident. A timid
@@ -64,3 +63,25 @@ A good reference does these and our defaults do not. Reach for them on purpose, 
 Evidence: the Brew launch v1 had static holds, hard cuts, a small centred headline and fade-in words.
 Fixing exactly those (a push per beat, zoom seams, hero size up and left, scale-settle entrances, a
 darker accent ink for text at 2.4:1) moved it from "inspired by" to "reads like the same film".
+
+## Recreating a reference end to end
+
+A reference is pixels, not a page. The loop turns those pixels into a page that reads as the same film.
+
+1. Measure: `bin/vawe spec <ref.mp4>` writes SPEC.md (cut list, light map, text timeline, curves). Mark every line KEEP or CHANGE before you write code.
+2. Get the real material: capture real UI, never redraw it.
+3. Build light first, then camera and depth of field, then type, then detail. A recreation can score well on SSIM and still be wrong in the way a viewer sees first: one measured reference read 4 to 8x brighter with a diagonal field of light and the render was mostly black with a small glow bolted on. Match the light map first (`harness/lib/light-map.mjs`, a 16x9 low-frequency map in linear light) and check it with `compare` before you touch type.
+4. Verify: `bin/vawe compare --page <page> --ref <ref.mp4> --at t1,t2` while you build, `bin/vawe coverage <ours.mp4> --ref <ref.mp4>` and `bin/vawe critique --ref` as the done check.
+
+- A tight measured fit (`MEASURE.md`) is a number you can author. A loose fit means the move is not one tween (typing, two stacked tweens, a mask): rebuild it by intent. Track one element with `node harness/media/track.mjs <ref.mp4> --box x,y,w,h --from t0 --to t1`.
+- Dominance is by looking, and a brand's site is not its film. A dark-first site can launch with a cream film. Match the film you recreate, not the homepage.
+- A recreated camera is one monotonic move with no reversal and a linear interior ease: an eased chain zeroes velocity at every key and pulses. Cut to the track: a cut a few frames off the beat reads sloppy. Copy the reference audio when you have it (`taste/craft/sound.md`).
+- "Ours shows so little" is rarely too few cuts. It is frame emptiness, telling instead of showing, and under-using the surfaces you captured: back every claim with the surface that proves it (`taste/craft/show-dont-tell.md`).
+
+## Reflecting a live site
+
+Never rewrite a site's sections by hand: you lose its taste and half its assets. Screenshot each section, plan one beat per section in the site's order, capture the real block (logos, gradients and copy come free), and animate it your way. A dark capture goes on a dark surface, or you keep its assets and set the copy again in your own type. A true `<canvas>` or WebGL section cannot be captured as DOM: use its screenshot with a slow move. Hand-write HTML only for connective tissue: hook, CTA, counters.
+
+## The honest ceiling
+
+Two things bound 1:1: the display font (match it with the closest bundled face, do not pretend) and proprietary source assets (a capture of the live UI closes most of the gap). Everything else is reproducible. When the reference does something no primitive covers, that is a framework finding: report it, do not approximate it.

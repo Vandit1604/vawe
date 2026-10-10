@@ -184,7 +184,7 @@ build/
 
 # reference films: third-party marketing videos downloaded for LOCAL STUDY ONLY (measure timings,
 # easing, beat structure). Never committed, never shipped, never reproduced pixel-for-pixel: a
-# recreation reproduces INTENT with our own assets (engine-doctrine/CRAFT/RECREATION.md).
+# recreation reproduces INTENT with our own assets (engine-doctrine/CRAFT/REFERENCE-STUDY.md).
 # Root-anchored: quality/refs/ (quality/refs/LOOP.md) is a different, tracked directory and gets its
 # own narrower rule below, not this one.
 /refs/
