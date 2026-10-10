@@ -61,3 +61,14 @@ A static field is a choice, never a default ([world-turns](../rules/world-turns.
 never on one still: a still hides speed, scale and direction. A ruled line grid is a design tool's
 canvas, not a film's. If you want one, write it on purpose and be able to say in one clause what the
 grid is doing.
+
+## Period UI looks (a late-90s or early-2000s desktop and the like)
+
+A period screen reads from a few structural facts, not from a logo. Draw these from the reference frames (`vawe refs frames`), and measure them with `vawe see <ref>` before you draw from memory:
+
+- The taskbar is a full-width strip on one edge, about 4% of the frame height at a 4:3 desktop (30 px of 768), with a button at the left, running-window buttons in the middle and a small tray with a clock at the right.
+- A window has a title bar with a gradient or flat bar, the title at the left, three small square buttons at the right (minimise, maximise, close) and a thin frame. The 90s look is flat grey with a two-pixel raised or sunken bevel; the early-2000s look has rounded top corners, a blue bar and a body of light cream.
+- The type is one small system sans (a Tahoma or Verdana class face; a bold humanist face for the title bar), set tight and left-aligned, never tracked out. UI that is the subject is sized like a real screen: put it in `data-ui` (3% cap height or the film's `ui-scale`).
+- The desktop is a flat colour or a plain gradient with a column of icons on a grid: a 32 px icon over a one or two word label.
+- Leave out: the vendor logo and flag, product and company names, the stock wallpaper photograph and any copied icon art. Draw your own hill, sky or pattern, and give the labels your own words ([style-not-content](../rules/style-not-content.md)). A judge that calls a result "a stock clone" is naming a copied wallpaper or a copied mark.
+- Faces: `vawe fonts --system` lists the installed faces usable through `local("...")`. Render your own film with one, and never commit the font file. Declare the choice as `- font: <name>` under `## Declared` in DESIGN.md so the judge stops asking for the house face.
