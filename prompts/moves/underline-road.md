@@ -17,17 +17,17 @@ vawe.onFrame((t) => {
   const s = t < T_GO ? under * land(clamp((t - T_UL) / D_UL)) : under + (total - under) * (0.5 * go + 0.5 * swap(go));
   route.style.strokeDasharray = `${total} ${total}`; route.style.strokeDashoffset = total - s;
   const head = route.getPointAtLength(Math.min(s, total));
-  const x = head.y - 0.55 * H;
-  world.style.translate = `0 ${-(sp(x) - sp(x - 1.1 * H))}px`;       // follow the head from 55 percent of the frame, stop at 1.1 frames
+  const x = head.y - 0.62 * H;
+  world.style.translate = `0 ${-(sp(x) - sp(x - 1.2 * H))}px`;       // follow the head from 62 percent of the frame, stop at 1.2 frames
 });
 ```
 
 Sound: none; the pin landing at the end is the one point a cue could use.
 
-- One world, 2.5 frames tall: scene A at the top, the map below, one stroke over both. Z-order: map under, headline copy, route, pin, ETA card. The map blocks fade in over the first 28 vh of their own height with a static gradient mask, so the map has no top edge.
+- One world, 2.5 frames tall: scene A at the top, the map below, one stroke over both. Z-order: map under, headline copy, route, pin, ETA card. The map has no top edge: a static gradient mask keeps it clear for 105 vh and fades it in over the next 28 vh, and the map layer is 2.5 frames tall so no row is cut when the camera stops. A few blocks are parks.
 - The route follows street centres, and the streets are gaps of 3.4 u between blocks, so the line runs inside a road. The stroke is 1.1 u for the whole length: an underline and a route are the same line.
-- The head runs half linear, half `EASE.swap`: no stop at the bend, a soft arrival at the pin. The camera velocity equals the head's down the vertical run, which keeps the head at 55 percent of the frame height.
-- Cause before effect: the underline draws under the word and holds 0.3 s so the word is read, then the line runs. The pin pops on `EASE.pop` when the head arrives and one ring leaves it; the ETA card rises 0.15 s later.
+- The head runs half linear, half `EASE.swap`: no stop at the bend, a soft arrival at the pin. The camera velocity equals the head's down the vertical run, which keeps the head at 62 percent of the frame height.
+- Cause before effect: the underline draws under the word and holds 0.3 s so the word is read, then the line runs. The pin pops on `EASE.pop` when the head arrives and one ring leaves it; the ETA card rises 0.15 s later in free space left of the route, never on top of the line.
 - What goes wrong: a camera that eases on its own curve falls behind the head or passes it, and the line looks like it is sliding on the page. Measuring the word while the world is translated shifts the underline by the camera offset, so measure first. A map drawn with a visible first row below scene A reads as a second slide, not the same place.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.
