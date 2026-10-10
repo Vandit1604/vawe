@@ -84,8 +84,9 @@ and `y %` are the text box's left and top edges. Every cell is a number you can 
 ```
 
 `vawe new` writes one example row per table, marked `(guess: change me)` in its first cell. Replace it.
-Text that is texture, not copy, is outside the text rows: `aria-hidden="true"` skips every text check, and
-`data-chrome` (a real product's UI labels) is held to a 2.5% cap floor and has no read hold.
+Text that is texture, not copy, is outside the text rows: `aria-hidden="true"` skips the text checks only for text under 2% cap
+height, the same words 3 or more times, or a `data-texture="why"` of 12 characters or more; any other hidden text is checked as copy.
+`data-chrome` (a real product's UI labels) follows the same test and is then held to a 2.5% cap floor with no read hold.
 The page owns the times: after each full draft `bin/vawe dev` writes the measured times into the Words,
 Objects and Shots cells (a changed cell ends in `*`), and never a target (cap, x, y). It also writes the page's
 `:root` colours and typeface into each Look line still marked as a guess. `bin/vawe spec-sync <page>` does the
