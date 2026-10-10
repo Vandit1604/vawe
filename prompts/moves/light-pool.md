@@ -1,5 +1,7 @@
 # Light pool
 
+**Status: a ground tint, not light.** A CSS gradient on a div is not an optical effect (owner rule: optical effects are real, never CSS fakes). Use this only as a matte ground colour field; a bloom, glow or lit surface is lens work: [lens](lens.md), `core/surfaces/lens.js`. A wandering pool is a ground drift and never keeps a hold alive (rule live-hold).
+
 **Use when** a held, matte frame needs one slow event behind the type: a single soft pool of light that
 wanders over a flat dark ground. It is plain CSS (one radial gradient on one element) and a seeded
 path, so any page can use it without a shader. Clip: [light-pool.mp4](light-pool.mp4). Demo:

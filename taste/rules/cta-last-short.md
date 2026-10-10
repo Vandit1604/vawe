@@ -17,6 +17,6 @@ craft: story
 
 ## Example
 
-A 4 s end card: one button label, the ground still drifting.
+A 4 s end card: one button label, a part of the lockup still moving.
 
 Why and sources: [story](../craft/story.md).

@@ -1,5 +1,7 @@
 # Spotlight dim
 
+**Status: a UI scrim, not a light.** The hole is a dim over a screen that points the eye (its `box-shadow` is a veil, not light). For a real lit-screen look (bloom, depth of field on a tilted screen) use the lens: [lens](lens.md), `core/surfaces/lens.js`.
+
 **Use when** a screen with several parts is on and one of them is the point. A rounded hole starts
 as the whole frame and closes onto the target; its own `box-shadow` is the dim, so everything
 outside the hole falls to 20 percent and the target is the only thing lit. The target leans in 4

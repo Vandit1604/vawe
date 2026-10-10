@@ -1,5 +1,7 @@
 # Light leak transition
 
+**Status: rejected as an optical effect.** Three CSS radial gradients on `screen` are a fake of a lens flare and an exposure change (owner rule: optical effects are real, never CSS fakes). For a bright cut use the real exposure change, [exposure-flash](exposure-flash.md) (`core/motion/exposure.js`); for bloom or flare on a screen use the lens, [lens](lens.md) (`core/surfaces/lens.js`). The snippet below stays only as a graphic warm wipe when a brief names a graphic flare, and only once per film.
+
 **Use when** two dark UI shots should meet through warmth instead of a wipe: a change of day or mood, a
 soft end of a beat. Three warm layers swell over the frame on their own clocks (about 0.4 s up), the cut
 lands on the peak where nothing else is visible, and the layers die faster than they rose while the new

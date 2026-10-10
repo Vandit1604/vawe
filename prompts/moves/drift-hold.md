@@ -1,8 +1,6 @@
 # Drift hold
 
-**Use when** one line must sit still on screen long enough to read, and a frozen frame would look
-dead. The line never moves; only the ground behind it drifts, slowly, like a breath. The contrast
-between the still type and the living ground is the whole move. Clip:
+**Use when** one line must sit still on screen long enough to read and you want a living ground behind it as a deliberate option. The line never moves; only the ground behind it drifts, slowly, like a breath. This is a ground option, not the hold's life: a ground drift does not keep a hold alive (rule live-hold), so the held seconds still need an element motion on a part of the frame. Clip:
 [drift-hold.mp4](drift-hold.mp4). Demo: [demo/drift-hold.html](demo/drift-hold.html).
 
 ```html

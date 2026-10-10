@@ -58,7 +58,7 @@ One row per job, best move first. Every built move is in this table.
 | enter the next world by flying into an element | [scale-through](scale-through.md), [zoom-through](zoom-through.md) |
 | wipe in the next beat along the last move's direction | [direction-wipe](direction-wipe.md) |
 | overlap beats so the next starts before the last ends | [chain-beats](chain-beats.md) |
-| hold a line still to read, the ground alive | [drift-hold](drift-hold.md), [gradient-mesh-field](gradient-mesh-field.md) |
+| hold a line still to read, with a ground option behind it (the hold itself keeps a part moving, rule live-hold) | [drift-hold](drift-hold.md), [gradient-mesh-field](gradient-mesh-field.md) |
 | give a held frame a living ground | [aurora-drift](aurora-drift.md), [grain-field](grain-field.md), [halftone-field](halftone-field.md), [ink-warp](ink-warp.md), [dot-grid-wave](dot-grid-wave.md), [light-pool](light-pool.md), [gradient-mesh-field](gradient-mesh-field.md) |
 | show a click doing its job | [cursor-click](cursor-click.md), [notification-pop](notification-pop.md), [success-check](success-check.md), [command-palette-summon](command-palette-summon.md) |
 | show a real UI arriving | [card-assemble](card-assemble.md), [skeleton-reveal](skeleton-reveal.md), [clip-expand](clip-expand.md), [device-tilt-stage](device-tilt-stage.md) |

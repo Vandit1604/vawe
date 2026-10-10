@@ -49,7 +49,7 @@
  },
  "shot-length-varies": {
   "file": "taste/rules/shot-length-varies.md",
-  "instead": "tighten cutting through the build, release on the payoff."
+  "instead": "tighten cutting through the build, release on the payoff. Pacing is readable, not rushed: a quick cut is a hard cut between held beats, never a shorter read. A captured clip or a UI screen dwells at least 1.2 s, and held text keeps its read time (rule readable-hold)."
  },
  "show-real-thing": {
   "file": "taste/rules/show-real-thing.md",

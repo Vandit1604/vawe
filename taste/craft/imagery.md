@@ -42,7 +42,7 @@ A raw flat image reads as a dropped screenshot. Pick the treatment by what the i
 | The image needs to | Treatment |
 |---|---|
 | sit in the frame without a hard rectangle edge | fade the edges into the ground (a `mask-image` gradient) |
-| not be static | a slow Ken Burns push |
+| not be static | the picture arrives and settles (a mask reveal, a crop that tightens), then holds; a slow push on it is a camera drift (rule live-hold) |
 | read as a UI card or product, not a photo | clip to a rounded shape, give it a device or card frame |
 | carry text on top and stay legible | a scrim: a dark overlay under the type |
 | belong to the brand's colours | duotone or a grade to the palette |
