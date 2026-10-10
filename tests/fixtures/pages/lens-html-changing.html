@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="duration" content="2">
+<style>
+@font-face { font-family: "Anybody"; src: url("../../../assets/fonts/Anybody.woff2") format("woff2"); font-weight: 100 900; }
+html, body { margin: 0; background: #000; overflow: hidden; }
+#screen { width: 1920px; height: 1080px; background: #06080c; color: #fff; font-family: Anybody, sans-serif; overflow: hidden; }
+#word { position: absolute; left: 120px; top: 300px; font-size: 220px; font-weight: 800; white-space: pre; }
+#ground { position: absolute; inset: 0; background: radial-gradient(circle at 40% 50%, #2c2c2c 0, #0c0c0c 46%, #040404 100%); }
+.box { position: absolute; left: 700px; top: 250px; width: 360px; height: 300px; box-sizing: border-box; border: 5px solid #f4f4f0; mix-blend-mode: difference;
+  background: repeating-linear-gradient(45deg, #f4f4f0 0 4px, transparent 4px 11px); }
+.g { display: inline-block; }
+#mark { position: absolute; right: 120px; bottom: 90px; font: 700 104px/1 monospace; }
+</style></head>
+<body><div id="screen"><div id="ground"></div><div id="word"></div><div class="box" id="box"></div><div id="mark">vawe</div></div>
+<script type="module">
+import '/core/engine/page-api.js';
+import { lens, htmlSource, merge, OFF } from '/core/surfaces/lens.js';
+await document.fonts.ready;
+const box = document.getElementById('box');
+const word = document.getElementById('word');
+const cam = lens(htmlSource(document.getElementById('screen'), { scale: 2 }), merge(OFF, { zoom: (t) => 1 + 0.3 * t, tiltY: (t) => 0.2 * Math.sin(t * 3), bloom: { strength: 0.9, radius: 42 } }));
+vawe.onFrame((t) => { word.innerHTML = `t=${t.toFixed(3)}\n` + [...'vawe'].map((c, i) => `<span class="g" style="transform:translateY(${(0.2 * Math.sin(t * 9 + i)).toFixed(3)}em)">${c}</span>`).join(''); box.style.transform = `scale(${(1 + 0.2 * Math.sin(t * 7)).toFixed(3)})`; return cam.draw(t); });
+</script></body></html>
