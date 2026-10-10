@@ -6,9 +6,9 @@ import { execFileSync } from 'node:child_process';
 const PROCESS_ID = randomBytes(2).toString('hex');
 const RUNS_SUFFIX = '.runs.jsonl';
 
-function gitInfo() {
+function gitInfo(cwd) {
   try {
-    const opts = { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] };
+    const opts = { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], cwd };
     const sha = execFileSync('git', ['rev-parse', '--short', 'HEAD'], opts).trim();
     const dirty = execFileSync('git', ['status', '--porcelain'], opts).trim().length > 0;
     return { git: sha || null, dirty };
@@ -23,8 +23,8 @@ export function filmKeyOf(film) {
 }
 
 /** out/<film-key>.runs.jsonl for a scene path, a page path or a bare film name. */
-export function runsPathFor(film) {
-  return path.join('out', `${filmKeyOf(film)}${RUNS_SUFFIX}`);
+export function runsPathFor(film, root = '.') {
+  return path.join(root, 'out', `${filmKeyOf(film)}${RUNS_SUFFIX}`);
 }
 
 // An Agent-tool subagent shares the session id and CLAUDE_PID with its parent (measured 2026-09-27), so
@@ -39,9 +39,9 @@ export function agentId() {
 /** The agent id when a person or a brief chose it (VAWE_AGENT), else null. Old records hold a CLAUDE_PID, which counts as a name. */
 export const namedAgent = (agent) => (agent && !String(agent).includes('#') ? String(agent) : null);
 
-/** appendRun(film, event): write one JSON line, the event's own fields after the common ones (harness/lib/run-events.mjs builds them). */
-export function appendRun(film, event = {}) {
-  const { git, dirty } = gitInfo();
+/** appendRun(film, event, { root }): write one JSON line to <root>/out, the event's own fields after the common ones (harness/lib/run-events.mjs builds them). `root` is also the repo the git stamp reads. */
+export function appendRun(film, event = {}, { root } = {}) {
+  const { git, dirty } = gitInfo(root);
   const line = {
     at: new Date().toISOString(),
     cmd: event.cmd || 'unknown',
@@ -53,7 +53,7 @@ export function appendRun(film, event = {}) {
     dirty,
     ...event,
   };
-  const out = runsPathFor(film);
+  const out = runsPathFor(film, root);
   fs.mkdirSync(path.dirname(out) || '.', { recursive: true });
   fs.appendFileSync(out, JSON.stringify(line) + '\n');
   return line;

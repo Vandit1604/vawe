@@ -168,3 +168,15 @@ test('filmKeyOf: a draft, a windowed draft, a final and its web copy all key to 
   const { filmKeyOf } = await import('../../harness/lib/runlog.mjs');
   for (const f of ['out/x-draft.mp4', 'out/x-draft-2-6.5.mp4', 'out/x.mp4', 'out/x.web.mp4', 'films/x/page.html', 'x-draft']) assert.equal(filmKeyOf(f), 'x', f);
 });
+
+test('appendRun with a root writes under <root>/out and leaves the working directory alone', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'vawe-runlog-root-'));
+  inTempDir({}, () => {
+    const before = process.cwd();
+    appendRun('films/demo/page.html', { cmd: 'dev' }, { root });
+    assert.equal(process.cwd(), before);
+    assert.equal(fs.existsSync('out'), false);
+  });
+  assert.equal(readAllRuns(path.join(root, 'out'))[0].runs[0].film, 'demo');
+  fs.rmSync(root, { recursive: true, force: true });
+});
