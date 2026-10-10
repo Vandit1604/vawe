@@ -129,11 +129,11 @@
  },
  "readable-hold": {
   "file": "taste/rules/readable-hold.md",
-  "instead": "add seconds before the exit, or give the beat a second thing to look at; take the line off when its read time plus 1.5 s has passed. The clock starts when the last character settles. Motion stays quick; exits still run shorter than entrances."
+  "instead": "hold each line max(1.2 s, words / 3), prose words x 0.6 s, from its last settled character, and cut past 8 words; keep the move quick (taste/craft/typography.md). The clock starts when the last character settles. Motion stays quick; exits still run shorter than entrances."
  },
  "readable-text-size": {
   "file": "taste/rules/readable-text-size.md",
-  "instead": "raise the font size until the cap height passes; do not shrink the line to fit more words, and do not hide a line from the check with aria-hidden or data-chrome: a hidden text that reads as copy is checked as copy."
+  "instead": "raise the font until the cap height is 6 percent of the frame (about 93 px at 1080p), never shrink the line (taste/craft/typography.md)."
  },
  "safe-margin": {
   "file": "taste/rules/safe-margin.md",
@@ -197,7 +197,7 @@
  },
  "world-turns": {
   "file": "taste/rules/world-turns.md",
-  "instead": "cut the world where the content changes (a new ground, a new object, new words); a second data-world with the same content, or padding words, does not turn the world. Change the ground at a cut the film already has; carry the change across the join (a colour that follows the content), never a cold flash. Judge a moving backdrop at 4 or more timestamps, never one still. A ruled grid is a design tool's canvas: use it only if you can say what it does in one clause."
+  "instead": "start a new data-world with a new ground, object and words at least every 2 s; a held 7 s world needs cuts near 2 s (taste/craft/film-structure.md). Change the ground at a cut the film already has; carry the change across the join (a colour that follows the content), never a cold flash. Judge a moving backdrop at 4 or more timestamps, never one still. A ruled grid is a design tool's canvas: use it only if you can say what it does in one clause."
  },
  "anticipation": {
   "file": "taste/rules/anticipation.md",
@@ -237,11 +237,11 @@
  },
  "live-hold": {
   "file": "taste/rules/live-hold.md",
-  "instead": "give the hold an element motion: type a line, tick a counter, pass a glint, start a secondary action, add a second key at the end of the hold. Do not fill the hold with a camera drift, push or pan, a scale or translate on a world or stage root, or parallax on the whole ground: the check leaves those out and constant-camera names a camera that never rests. Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion. Do not put the same ambient on every scene, do not loop anything near text being read, and do not pad a scene with ambient motion to look busy: it raises global motion and costs the film. Fix a jolt at the curve that produced it: end the move on a spring or EASE.land, never smooth the number after the fact; a linear camera station or a slow-start curve straight into a hold is the classic shape."
+  "instead": "put one element move in every span that sits still over 0.5 s (type a line, tick a counter, pass a glint), never a camera drift (taste/craft/motion-craft.md). Do not fill the hold with a camera drift, push or pan, a scale or translate on a world or stage root, or parallax on the whole ground: the check leaves those out and constant-camera names a camera that never rests. Do not drift data: a chart whose bars drift lies. Judge local motion (something arrives in a small region), not global motion. Do not put the same ambient on every scene, do not loop anything near text being read, and do not pad a scene with ambient motion to look busy: it raises global motion and costs the film. Fix a jolt at the curve that produced it: end the move on a spring or EASE.land, never smooth the number after the fact; a linear camera station or a slow-start curve straight into a hold is the classic shape."
  },
  "named-eases": {
   "file": "taste/rules/named-eases.md",
-  "instead": "EASE.* in element.animate; easeFn(name) inside window.seek and vawe.onFrame. The /easing pages may show the nearest bezier as a reference only. Pick the scene ease from the signature (a punchy brand tightens durations and stagger, a calm one stretches them; set it once as :root custom properties).",
+  "instead": "swap the keyword or bezier for EASE.land (entrance), EASE.launch (exit) or EASE.carry (move), at most 2 eases per scene (taste/craft/motion-craft.md). The /easing pages may show the nearest bezier as a reference only. Pick the scene ease from the signature (a punchy brand tightens durations and stagger, a calm one stretches them; set it once as :root custom properties).",
   "dial": "ease",
   "range": "EASE.land, landSoft, settle, swap, glide, carry, leave, launch, pop, nudge; sampled springs with 8 or more stops; vary eases like font weights, and two layers moving in one beat differ in duration or offset"
  },

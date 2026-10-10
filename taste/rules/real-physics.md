@@ -12,6 +12,7 @@ prevents: feedback: "a flap must look like a flap" (commit f67c43549).
 status: active
 scored: yes
 numbers: {"linear_stops_min":8}
+print-motion: sample a spring or exponential with 8 or more stops, not one cubic-bezier sold as physics
 craft: motion-craft
 ---
 

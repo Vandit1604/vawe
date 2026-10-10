@@ -70,6 +70,7 @@ import { directionsLines } from '../lib/directions.mjs';
 import { recipeEchoLines } from '../lib/recipe-echo.mjs';
 import { metaOf } from '../lib/page-meta.mjs';
 import { boardChecks, spectacleOf, lockedSpectacle } from '../lib/board.mjs';
+import { moveDocLines } from '../lib/move-docs.mjs';
 import { referenceFor, motionStampFresh, pageAuthoring } from '../lib/motion-stamp.mjs';
 import { isWaivedBy, hasReason, isWaived, waiverHint, waiverProblems } from '../lib/waivers.mjs';
 import { beatAdvice } from '../lib/sound-read.mjs';
@@ -956,7 +957,7 @@ export function pageAdvice(pagePath, { probe, motion }) {
     text: textProblems(probe.samples, probe),
     brief: isWaived(authoring, 'no-brief') ? null : briefLine(brief),
     lines: [...waiverProblems(authoring), ...frameUnitLines(probe.samples, probe), ...hiddenTextLines(probe.hidden), ...textCollisionLines(probe.samples, probe.motionText), ...contrast, ...motionAdvice(pagePath, motion), ...barAdvice(pagePath, motion, probe), ...lintLines(layoutFindings(pagePath, probe)), ...directions, ...recipeEchoLines(brief),
-      ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))),
+      ...boardChecks(brief, spectacleOf(fs.readFileSync(pagePath, 'utf8'))), ...moveDocLines(brief),
       ...beatLines(pagePath, probe.worlds, authoring),
       ...(isWaived(authoring, 'signature-unchosen') ? [] : unchosenAdvice(chosenSignature(pagePath)))],
   };

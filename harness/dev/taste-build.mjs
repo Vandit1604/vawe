@@ -78,6 +78,7 @@ function printProblems(r) {
     if (!PRINT_STEPS[s]) out.push(`${r.file}: print-${s} is not a printed step (${Object.keys(PRINT_STEPS).join(' ')})`);
     if (!/, not /.test(text)) out.push(`${r.file}: print-${s} is not a "do X, not Y" pair`);
   }
+  if (r.scored === 'yes' && !r.digest && !Object.keys(r.prints).length) out.push(`${r.file}: a scored rule needs a digest or a print-<step> line, or the author never sees what the judge scores`);
   if (!/^## Example\n\n\S/m.test(r.body)) out.push(`${r.file}: the body has no "## Example" section`);
   return out;
 }

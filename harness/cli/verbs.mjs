@@ -237,7 +237,7 @@ export const VERBS = [
       if (problem) throw new UsageError(problem);
       return [{ script: 'harness/media/see.mjs', args: [film, ...(v.cuts ? ['--cuts'] : ['--moment', v.at]), '--span', String(span), '--fps', String(fps), ...opt('--out', v.out)] }];
     },
-    next: (v, [film]) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}${v.cuts ? (film.endsWith('.html') ? `; ${SAY.motionRows(pageName(film))}, then ${SAY.critique(pageName(film), film)}` : '; then name 3 moves in "Taken from" (ref id, cut second)') : ''}`,
+    next: (v, [film]) => `Read each grid path above at full size: frames run left to right, top to bottom, and the motion line gives the seconds the move starts and settles; ${v.cuts ? 'compare how the outgoing and incoming parts overlap at each cut' : 'then bin/vawe compare --at <s> to put the reference beside yours'}${v.cuts ? (film.endsWith('.html') ? `; ${SAY.motionRows(pageName(film))}, then ${SAY.critique(pageName(film), film)}` : '; then name 3 moves in "Taken from" (ref id, cut second) and the pattern of taste/craft/film-structure.md (The motion grammar) the ref uses') : ''}`,
   },
   {
     name: 'onion', summary: 'several frames of one move blended into ONE image, newest strongest, older ones fainter and tinted cool to warm: the spacing, path and overshoot of the move',

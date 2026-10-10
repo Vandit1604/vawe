@@ -38,6 +38,22 @@ test('a rule with a missing field, a bad id, an unknown check or a printed line 
   assert.match(ruleProblems(parseRule(good.replace(/^print-motion: .*$/m, 'print-motion: stagger everything'), 'stagger.md')).join('\n'), /do X, not Y/);
 });
 
+test('a scored rule with neither a digest line nor a print line is reported, and none exists', () => {
+  const good = fs.readFileSync(taste('rules', 'stagger.md'), 'utf8');
+  const bare = good.replace(/^print-motion: .*\n/m, '').replace(/^digest: .*\n/m, '');
+  assert.match(ruleProblems(parseRule(bare, 'stagger.md')).join('\n'), /scored rule needs a digest or a print-<step> line/);
+  assert.deepEqual(rules.filter((r) => r.scored === 'yes' && !r.digest && !Object.keys(r.prints).length).map((r) => r.id), []);
+});
+
+test('the five most-fired checks print one fix sentence with a number and the craft doc to read', () => {
+  for (const id of ['live-hold', 'readable-hold', 'world-turns', 'readable-text-size', 'named-eases']) {
+    const first = rules.find((r) => r.id === id).instead.split(/(?<=\.) /)[0];
+    assert.match(first, /\d/, id);
+    const doc = /\((taste\/craft\/[a-z-]+\.md)\)/.exec(first)?.[1];
+    assert.ok(doc && fs.existsSync(path.join(ROOT, doc)), `${id} names a real craft doc`);
+  }
+});
+
 test('every rule file is reachable from the index and every rule link in taste/ points at a real rule', () => {
   const readme = fs.readFileSync(taste('README.md'), 'utf8');
   for (const id of ids) assert.ok(readme.includes(`(rules/${id}.md)`), id);

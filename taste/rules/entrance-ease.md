@@ -12,6 +12,7 @@ prevents: doc MOTION-STANDARDS and ease-direction: a slow-start entrance delays 
 status: active
 scored: yes
 numbers: {"scale_start_min":0.9,"scale_start_max":0.97}
+print-motion: land an entrance on EASE.land with most of the move shown by frame 1, not a slow-start ease-in or a scale(0) start
 craft: motion-craft
 ---
 

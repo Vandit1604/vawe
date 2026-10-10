@@ -171,6 +171,7 @@ Each slot: one sentence; the key frame (what is on screen at the one big moment)
 the typeface; the one signature move (a verb: fold, pour, slice, stamp); the thread (the one thing that
 carries through the film). No two slots share a hue family, a typeface or a move, and at most one is
 carried by a circle, orb, sun, ring or glow. Budget: 2 colours, 1 typeface, 1 signature move, 1 sound.
+Story and structure: the spine is taste/craft/story.md (hook, build, proof, payoff, CTA); what carries across each cut is taste/craft/film-structure.md; reject the median first (guides/PITCH.md).
 
 films/${name}/directions.html holds one working still per family: rewrite each into its slot's key frame.
 Score the three (about 30 s): bin/vawe judge films/${name}/directions.html --fresh --stage stills --brief films/${name}/brief.md
@@ -283,7 +284,7 @@ Then study how the references MOVE, since stills do not show it: run \`bin/vawe 
 const systemText = (name) => `## Design system and kit
 
 Phase 3. Write films/${name}/DESIGN.md: the palette as roles, the type, the ground and light devices, the text treatment. Write films/${name}/kit/: the ground layers, and every moving part as its own element (words, marks, bars, cards, icons, the wordmark).
-Start from a PROVEN combo in prompts/skill-combos.md and record \`Combo: <name>\` in DESIGN.md. Skill ladder: apply one skill per rung, in this order, fetched with \`command npx -y ui-skills get <slug>\`. DESIGN.md records each rung as \`Skill <rung>: <slug>: what it decided\`, or \`Skipped <rung>: <reason>\`; \`bin/vawe\` advises on a missing rung.
+Type is chosen from taste/craft/typography.md and colour from taste/craft/color.md. Start from a PROVEN combo in prompts/skill-combos.md and record \`Combo: <name>\` in DESIGN.md. Skill ladder: apply one skill per rung, in this order, fetched with \`command npx -y ui-skills get <slug>\`. DESIGN.md records each rung as \`Skill <rung>: <slug>: what it decided\`, or \`Skipped <rung>: <reason>\`; \`bin/vawe\` advises on a missing rung.
 1. builder: build the product UI and the kit parts as a real, beautiful interface (leonxlnx/soft-skill or emilkowalski/emil-design-eng). Real-looking data; never placeholder bars.
 2. type: scale, weight, tracking (jakubkrehel/better-typography or pbakaus/typeset).
 3. colour: roles and one accent (pbakaus/colorize or jakubkrehel/better-colors).
@@ -293,7 +294,7 @@ Product UI inside the film (app screens, cards, panels) is a designed interface 
 
 const statesText = () => `## States
 
-Phase 4: one static key frame per world, built from the kit, before any motion. Budget: the reference frames show a median of 1 text line, 1 word and 2 objects. A state shows about 1 line and 2 or 3 things. Its ground is never flat: one light, grain or depth device per film, named from a Taken from frame, and the ground changes at each world turn.`;
+Phase 4: one static key frame per world, built from the kit, before any motion. Budget: the reference frames show a median of 1 text line, 1 word and 2 objects. A state shows about 1 line and 2 or 3 things; layout: taste/craft/layout.md. Its ground is never flat: one light, grain or depth device per film, named from a Taken from frame, and the ground changes at each world turn.`;
 
 const boardText = () => `## Board
 
@@ -311,7 +312,9 @@ Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Qu
 |---|---|---|---|---|---|---|---|
 | [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] |
 
-Sound is part of every film, subtle: small effects on actions, only on the cuts and actions that earn one, plus one for the spectacle. A real recorded effect first (the film's assets, or the sites in resources/README.md); a synth voice from \`bin/vawe sound\` is the fallback. No synth bed, pad or chord. A music track only from a file the user gives.
+Pick each cut by the feeling it must give (taste/craft/selection.md) and the seam type it is (taste/craft/transitions.md).
+
+Sound is part of every film, subtle: small effects on actions, only on the cuts and actions that earn one, plus one for the spectacle. A real recorded effect first (the film's assets, or the sites in resources/README.md); a synth voice from \`bin/vawe sound\` is the fallback. No synth bed, pad or chord. A music track only from a file the user gives. Why and how: taste/craft/sound.md.
 
 Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
 
