@@ -35,7 +35,7 @@ Consequences to know:
   and the mixer falls back to silence with only a warning. Run `node generators/media/audio-bake.mjs` and
   `node harness/media/music.mjs --pack` before rendering anything with a bed.
 - **`assets/music/credits.json` is tracked** (it is provenance, not audio). Every downloaded entry carries
-  `licenceVerified: false`; the synthesized beds carry `true`. The Mixkit terms above are recorded here.
+  `licenceVerified: false`; the entries for the retired synthesized beds carry `true`. The Mixkit terms above are recorded here.
 - **Beds with no credits entry exist** (`launch`, `tense`, `warm` on at least one machine). A track
   nobody recorded the source of cannot be defended if it is ever claimed. No gate checks this yet.
 
