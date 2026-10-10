@@ -18,11 +18,11 @@ export function shotEvents(shot, fps) {
   return [...appear, ...bursts].sort((a, b) => a.t - b.t).map((e) => ({ ...e, t: round(e.t) }));
 }
 
-const verdictOf = (frames) => (frames == null ? 'no sound' : Math.abs(frames) <= WITHIN_FRAMES + 1e-6 ? 'sound on the frame' : Math.abs(frames) <= NEAR_FRAMES + 1e-6 ? 'sound near' : 'sound off');
+const verdictOf = (frames) => (frames == null ? 'no sound' : Math.abs(frames) <= WITHIN_FRAMES + 1e-6 ? 'sound on the frame' : frames < 0 ? 'sound before its action' : frames <= NEAR_FRAMES + 1e-6 ? 'sound near' : 'sound off');
 
 /**
  * Each event with the nearest sound mark `{ t, label }` within REACH_S: `frames` is the sound minus the event (positive: the sound comes after
- * the action), `verdict` is `sound on the frame` within 1 frame, `sound near` within 3, `sound off` beyond, `no sound` when no mark is in reach. Pure.
+ * the action), `verdict` is `sound on the frame` within 1 frame, `sound before its action` when the sound comes more than a frame early (the cause-first rule), `sound near` within 3 frames after, `sound off` beyond, `no sound` when no mark is in reach. Pure.
  */
 export function pairEvents(events, marks, fps) {
   return events.map((e) => {
