@@ -146,8 +146,10 @@ a pill is 999px. Some older routes still use 6px and 10px.
   filled action. The current page is a `<span aria-current="page">` on `raised`, never a link.
 - **Footer:** one panel with the generated link groups (`lib/site-pages.json`) and the Apache 2.0
   line. Pages that end a journey add a closing panel above it (`<Footer bookend />`).
-- **Landing hero:** the three.js example film (`films/examples/three-star`, 1.2 s, looped) at
-  1280 px: a VP9 WebM, an H.264 fallback and a WebP poster in `public/hero/`, about 100 KB each.
+- **Landing hero:** one player, three example films, switched by a row of tabs under the caption: the
+  three.js star (`films/examples/three-star`, `public/hero/`), the tracking HUD and the retro desktop
+  remix (`public/examples/`). Each is 1280 px: a VP9 WebM, an H.264 fallback and a WebP poster, muted and
+  looped, paused on load with reduced motion. Audio is stripped from the web copies.
 - **Move card** (`app/moves/`): the clip's 640 px poster at rest; its 640 px WebM plays while at
   least half on screen, six at most, and with reduced motion only on a tap. The move page shows the
   1280 px poster as an image and fades the 1280 px clip in over it once it plays. Hover rings sit
@@ -193,6 +195,7 @@ was tried.
 | `/showcase`, `/launch-video`, `/product-tour-video` film cards | brand | `pbakaus/colorize` | Idle face is the film's own layer timeline; only a hovered card boots an engine. |
 | `site/app/components/ogCard.tsx`, `site/og/card.html` | brand | local tokens only | Studio ground and Archivo. Satori reads woff, so the font lock carries `Archivo-400/800.woff`. |
 | `/moves`, `/moves/[name]` filters and fluff pass | product | ui-skills `jakubkrehel/better-accessibility`, `pbakaus/distill`, `leonxlnx/minimalist-skill` | Taken: native checkboxes and fieldsets, visible focus, a polite status count, 44 px targets on touch (accessibility); remove what carries no information, show less until asked (distill); no emoji, no gradient, no stacked shadow, plain copy (minimalist). Rejected from minimalist: its serif and warm palette, pastel pill tags, staggered scroll entry, drifting background blob, card lift on hover. Local tokens and Archivo win. |
+| `/` hero film switcher (tracking HUD, retro remix) | brand | ui-skills `pbakaus/layout`, `ibelick/fixing-motion-performance` | Taken: group by meaning with proximity (tabs sit with the caption they switch, no new card), `gap` for rhythm, collapse at 640 to 44 px targets; one video element mounted at a time, no layout-affecting animation. Rejected: layout's 4-unit spacing scale and density param (no scale here), a separate gallery section (the hero already owns the film slot), motion-performance's will-change and scroll-linked advice (nothing scroll-linked). Local tokens and Archivo win. |
 | `/arsenal` | product | `ibelick/improve-ui` (ui-skills), rail pass only | Its PROOF GATE taken: a hierarchy finding needs rendered or user evidence, never a source read, so the rail was screenshotted before and after rather than argued about. That gate is what turned "the two levels look alike" into the actual cause: `.rail a` in globals.css is (0,1,1) and `.ar-ax-kind` was (0,1,0), so the leader's `--ink` never applied and it rendered in its children's grey. Its READ-ONLY boundary rejected, because a fix was asked for. The rest of the page predates this convention: hairlines for structure, one elevation step and only on hover, mono for anything literal, sources lost. Re-derive from the code, do not guess. |
 | `/editor` | product | **UNRECORDED** | Same. |
 | `/showcase`, `/`, `/features` | brand | **UNRECORDED** | Same. |
