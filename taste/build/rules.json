@@ -411,36 +411,24 @@
   "file": "taste/rules/template-chrome.md",
   "instead": "drop the eyebrow and let the title carry the beat; number only a true sequence; mark a card with space or a surface step, not a stripe; vary the cards in size and weight."
  },
- "cue-has-event": {
-  "file": "taste/rules/cue-has-event.md",
-  "instead": "time each cue to the page's own beat number (the literal the CSS or seek uses), so a retimed beat moves both. A pluck with nothing landing on screen is a lie: cut it."
- },
- "cue-sparse": {
-  "file": "taste/rules/cue-sparse.md",
-  "instead": "spend the sync points on the moments you want believed. Wall-to-wall hits turn into noise and the audience stops noticing them."
- },
  "music-licence": {
   "file": "taste/rules/music-licence.md",
-  "instead": "read the contract of a subscription library before buying; add the destination channel to the safelist before posting; use AI-generated music (not copyrightable when purely prompt-made) for internal animatics only. assets/music/ is gitignored; record every bed in assets/music/credits.json."
+  "instead": "read the contract of a subscription library before buying; add the destination channel to the safelist before posting; use AI-generated music (not copyrightable when purely prompt-made) for internal animatics only. assets/music/ is gitignored; record every track in assets/music/credits.json."
  },
  "sound-bridge": {
   "file": "taste/rules/sound-bridge.md",
   "instead": "never butt two sounds; use an equal-power crossfade."
  },
- "sound-default-on": {
-  "file": "taste/rules/sound-default-on.md",
-  "instead": "before an impact, stop the effects and land the hit into the quiet. Do not add a held tone or a synth bed."
+ "sound-cues": {
+  "file": "taste/rules/sound-cues.md",
+  "instead": "name the visible event behind each cue and cut a cue with none. Time each cue to the page's own beat number (the literal the CSS or seek uses), so a retimed beat moves both. A swell stops dead on the cut it introduces (no tail); a riser ends on the beat and leaves the frame after it quiet. Wall-to-wall hits turn into noise."
  },
  "sound-level": {
   "file": "taste/rules/sound-level.md",
-  "instead": "leave data-gain off. Cue levels are read against each other: a cue that peaks more than 6 dB above or below the median cue draws a warning naming that cue, and the same data-gain shift on every cue moves the loudness without changing the balance, so it is named and is not a fix. A music bed must change over time: one spectrum for the whole film is a drone (the reference films change at least 0.177 on the scale of harness/lib/bed-motion.mjs, a drone 0.002). Measure with `ffmpeg -af ebur128=peak=true`."
- },
- "sound-swell": {
-  "file": "taste/rules/sound-swell.md",
-  "instead": "a swell stops dead on the cut it introduces (no tail); a riser ends on the beat and leaves the frame after it quiet."
+  "instead": "leave data-gain off. Cue levels are read against each other: a cue that peaks more than 6 dB above or below the median cue draws a warning naming that cue, and the same data-gain shift on every cue moves the loudness without changing the balance, so it is named and is not a fix. A music track the user gave must change over time: one spectrum for the whole film is a drone (the reference films change at least 0.177 on the scale of harness/lib/bed-motion.mjs, a drone 0.002). Measure with `ffmpeg -af ebur128=peak=true`."
  },
  "sound-voices": {
   "file": "taste/rules/sound-voices.md",
-  "instead": "use a quiet tick. Voices are synthesized, so they carry no licence question: keep it that way. To audition: `node harness/dev/sound-lab.mjs`."
+  "instead": "take a recorded effect first (the user's file, or the sites in resources/README.md); use a quiet synth tick only when none fits. Before an impact, stop the effects and land the hit into the quiet. To audition the synth voices: `node harness/dev/sound-lab.mjs`."
  }
 }

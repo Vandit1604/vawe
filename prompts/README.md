@@ -16,10 +16,10 @@ prompt from scratch is [ANATOMY.md](ANATOMY.md). Every template targets the vawe
 - time is the seek: CSS `@keyframes` and `element.animate()` (the renderer seeks them), or
   `window.seek(t)` in seconds as a pure function of `t`;
 - `<audio src data-at data-gain data-fade-out>` for files, `<audio data-synth="<voice>" data-at>`
-  for the synth voices in `core/audio/kit.mjs` (pluck, chime, sparkle, droplet, bloom, success,
+  for the fallback synth voices in `core/audio/kit.mjs` (pluck, chime, sparkle, droplet, bloom, success,
   ready, whoosh, riser, drop, impact, swell); no synth bed (`taste/craft/sound.md`); never played live, mixed offline as written
   (`<meta name="loudness">` opts in to a target). No `data-gain` takes the voice's soft default
-  (`DEFAULT_GAIN_DB`); a few soft ticks and one swell beat many hits;
+  (`DEFAULT_GAIN_DB`). Real recorded effects come first (`resources/README.md`); a few soft ticks and at most one swell beat many hits;
 - moves to copy, each with a 1 s clip: [moves/README.md](moves/README.md);
 - `bin/vawe dev <page>` (draft), `bin/vawe ship <page>` (final), `bin/vawe critique <page> --ref <mp4>`
   (match a reference), `bin/vawe judge` (two fresh runs; it passes only when every axis is 8 or more);

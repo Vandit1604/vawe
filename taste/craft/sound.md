@@ -16,7 +16,7 @@ Contents:
 - [How well evidenced is this?](#how-well-evidenced-is-this)
 - [Licensing: what may go under a film](#licensing-what-may-go-under-a-film)
 
-The rules are [sound-level](../rules/sound-level.md), [sound-voices](../rules/sound-voices.md), [sound-swell](../rules/sound-swell.md), [cue-has-event](../rules/cue-has-event.md), [cue-sparse](../rules/cue-sparse.md), [sound-bridge](../rules/sound-bridge.md), [sound-default-on](../rules/sound-default-on.md) and [music-licence](../rules/music-licence.md). This page keeps the mechanism and the reasons.
+The rules are [sound-level](../rules/sound-level.md), [sound-voices](../rules/sound-voices.md), [sound-cues](../rules/sound-cues.md), [sound-bridge](../rules/sound-bridge.md) and [music-licence](../rules/music-licence.md). This page keeps the mechanism and the reasons.
 
 **The rule (one owner, other docs point here).** No bed of any kind by default: no synth bed, pad, drone,
 hum or chord, and no constant texture. Sound is small sound effects on actions, like UI button sounds
@@ -57,7 +57,7 @@ Audio is `<audio>` tags in the page, never played live, mixed offline by `harnes
 
 ## The 12 voices (`CUES` in `core/audio/kit.mjs`)
 
-All synthesized from parameters, seeded and deterministic: no files, no licence, nothing to 404.
+The fallback when no recorded effect fits. All synthesized from parameters, seeded and deterministic: no files, no licence, nothing to 404.
 Every kept voice has zero noise layers. Ten noise-based UI cues were cut after a listening pass because
 filtered white noise reads as cheap.
 
@@ -114,7 +114,7 @@ picture nothing. A film whose beats are visually unrelated stays whole if one re
 of them and changes at the junctions.
 
 - J-cut: the next scene's audio starts before its picture. The cut arrives as confirmation, not surprise.
-  In the page: start the next scene's `<audio data-at>` ahead of the cut, with `data-fade-in` (lead and fade in [sound-bridge](../rules/sound-bridge.md)).
+  In the page: start the next scene's `<audio data-at>` ahead of the cut, with `data-fade-in` (lead and fade in: rule sound-bridge).
 - L-cut: the previous scene's audio runs under the new picture, so two shots read as one beat. Set the
   old sound's length past the cut with `data-fade-out`.
 - Fade both ends (an equal-power crossfade of about 0.35 s). A bridge never butts.
@@ -144,7 +144,7 @@ Mostly craft doctrine, not measurement. Do not cite it as science.
 Music is the one asset class with automated global enforcement. A wrong image gets a takedown if someone
 notices. A wrong track gets a Content ID claim on upload.
 
-- Our voices are synthesized, so they have no licence question. Keep it that way.
+- A recorded effect needs its source and licence noted like a track. The synth voices need none, but they are the fallback, not the aim.
 - Only CC0 and CC BY are safe from Creative Commons. CC BY needs the credit kept in the description.
 - Never use CC ND: syncing music to moving image is always Adapted Material in the licence text
   itself, so no ND track can go in any film. CC NC is unsafe for client or paid work.

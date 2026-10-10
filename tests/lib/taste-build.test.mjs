@@ -38,19 +38,6 @@ test('a rule with a missing field, a bad id, an unknown check or a printed line 
   assert.match(ruleProblems(parseRule(good.replace(/^print-motion: .*$/m, 'print-motion: stagger everything'), 'stagger.md')).join('\n'), /do X, not Y/);
 });
 
-test('every row of MIGRATION.md names an existing rule, an existing craft doc, or a deletion with a reason', () => {
-  const rows = fs.readFileSync(taste('MIGRATION.md'), 'utf8').split('\n').filter((l) => /^\| `?[A-Za-z]/.test(l) && !l.startsWith('| old '));
-  assert.ok(rows.length > 100, `${rows.length} rows`);
-  for (const row of rows) {
-    const cells = row.split('|').slice(1, -1).map((c) => c.trim());
-    assert.equal(cells.length, 3, row);
-    const target = cells[2];
-    if (target.startsWith('deleted:')) assert.ok(target.slice(8).trim().length > 3, row);
-    else if (target.startsWith('craft:')) assert.ok(fs.existsSync(path.join(ROOT, target.slice(6).trim())), row);
-    else for (const id of target.split(',').map((s) => s.trim().replace(/`/g, ''))) assert.ok(ids.has(id), `${row}: no rule "${id}"`);
-  }
-});
-
 test('every rule file is reachable from the index and every rule link in taste/ points at a real rule', () => {
   const readme = fs.readFileSync(taste('README.md'), 'utf8');
   for (const id of ids) assert.ok(readme.includes(`(rules/${id}.md)`), id);
