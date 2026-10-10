@@ -42,3 +42,12 @@ that "looks AI" or a product UI surface takes `impeccable` (`skills/impeccable/S
 - A song plus a product is a music video: the song owns the cuts, the product fills the frames.
 - Two rows fit: the shorter film wins.
 - Nothing fits: `beat-sheet.md`, then `vawe-page`, and say in the brief which row it almost was.
+
+## How to use a template
+
+Each file in `prompts/` has: when to use it, the template (XML-sectioned where the original was), a question bank (at most five questions, ordered by how much they change the film, each with its reason and its default), the gotchas and a `source:` line. Text is copied only where the licence allows it (MIT, Apache 2.0, CC BY 4.0 with attribution); third-party prompts and owner-shared articles are patterns only. How to build a prompt from scratch: `prompts/ANATOMY.md`. Every template targets the page contract in `AGENTS.md`. Typical lengths: showreel 15 s, brand launch 15 to 40 s, UI morph 12 to 16 s, story 30 s to 3 min, sprite 2 to 8 s, lab 20 to 60 s, long form 1 to 6 min, production brief one page, beat sheet one table.
+
+1. Pick the row. If two fit, the shorter film wins.
+2. `bin/vawe new <name> --request "<the ask>"` first prints the details it needs (subject, message, show, look, then format, family, assets, ending) and writes nothing; rerun it with `--answers <file>` or `--detail key=value`, or add `--defaults` to guess. Then it prints the template's questions with their defaults and writes `films/<name>/brief.md` with the defaults filled in, each marked `[unanswered: default taken]`, and the measured-brief sections (Task, Look, Spec, Acceptance, Gates, Pitfalls, Deliver) with every field it could not answer marked `(guess: change me)`. Ask the bank in one message; a skipped answer keeps its default. The agent side is the `vawe-brief` skill (`skills/vawe-brief/SKILL.md`).
+3. Fill the brief's Spec tables before the page (the shape is in `prompts/ANATOMY.md`). After the details are in, never wait for a reply: take the guess marked `(guess: change me)` and go on.
+4. Draft with `bin/vawe dev <page>` until every Acceptance row is green, then run the `vawe-critique` skill as a fresh agent. The taste rules are in `taste/build/DIGEST.md` and in the lines `dev` prints.

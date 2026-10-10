@@ -91,6 +91,6 @@ do not count, and nor does one reason copied to 3 or more waivers. The draft lis
 Every effect composes; none is a special case. Run `bin/vawe e2e` (about 4 s) before and after.
 Framework agents: `harness/dev/AGENT-TASK.md`. Comments hold only a fact the code cannot show.
 
-Where to look: `prompts/README.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
+Where to look: `engine-doctrine/CRAFT/ROUTING.md` (a template per film type), `prompts/moves/README.md` (moves to copy,
 with clips; `prompts/moves/RECIPES.md` chains them), `core/motion/README.md` (springs, curves, noise),
 `engine-doctrine/JUDGE.md` (scoring), `harness/README.md` (every script), `resources/README.md` (sites for sound, music, footage and fonts).
