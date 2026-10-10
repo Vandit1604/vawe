@@ -86,6 +86,8 @@ import { edgeTravelDeltas } from '../lib/edge-travel.mjs';
 import { textCollisionLines } from '../lib/text-collision.mjs';
 import { contrastLines } from '../lib/text-contrast.mjs';
 import { peakLine } from '../lib/peak-limit.mjs';
+import { balanceLines } from '../lib/cue-balance.mjs';
+import { bedLine } from '../lib/bed-motion.mjs';
 import { watchPageErrors, pageErrorLines } from '../lib/page-errors.mjs';
 import { takeRenderSlot, slotsInUse } from '../lib/render-slots.mjs';
 import { noteVerb } from '../lib/verb-log.mjs';
@@ -984,7 +986,8 @@ async function draftReport(mp4, pagePath, { probe, level, motion, advice: blanks
   const problems = mergeProblems(video?.problems ?? [], page.text);
   const sound = soundLine(level?.I ?? null, undefined, level);
   const peak = peakLine(level?.TP ?? null, level?.cues);
-  const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...page.lines];
+  const bedAdvice = [...(level?.beds ?? []).map(bedLine), ...balanceLines((level?.cues ?? []).filter((c) => c.role === 'sfx'))].filter(Boolean);
+  const advice = [...blanks, ...draftAdvice(problems, sound, page.brief), ...[peak].filter(Boolean), ...bedAdvice, ...page.lines];
   const table = whole ? await checks.time('acceptance', async () => draftAcceptance({ mp4, pagePath, probe, level, findings: motionFindings(pagePath, motion), video: video?.measures, mode: checks.mode, cameraOnly })) : null;
   const inRows = new Set(whole ? [...problems, sound, peak, ...textCollisionLines(probe.samples, probe.motionText), ...contrastLines(probe.contrast)] : []);
   const loose = advice.filter((l) => !inRows.has(l) && !NOTE_LINES.test(l)).map((l) => `advice: ${l}`);

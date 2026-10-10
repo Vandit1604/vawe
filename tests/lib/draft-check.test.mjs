@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { outlierCues, uniformShift, balanceLines } from '../../harness/lib/cue-balance.mjs';
 import { hiddenTextLines, TEXTURE, sampleTimes, frameUnitLines, textProblems, soundLine, mergeProblems, draftCheckLines, draftAdvice, briefLine } from '../../harness/lib/draft-check.mjs';
 
 const at = (t, ...lines) => ({ t, lines: lines.map(([text, fontPx]) => ({ text, fontPx })) });
@@ -40,15 +41,26 @@ test('textProblems: a text that leaves and returns is two runs, the long one cou
 test('soundLine: silent inside -24 to -16, a fix outside', () => {
   assert.equal(soundLine(null), null);
   assert.equal(soundLine(-20), null);
-  assert.equal(soundLine(-27.4), 'sound: -27 LUFS integrated (subtle target about -20; raise data-gain on the quiet cues)');
-  assert.match(soundLine(-12), /lower data-gain on the loud cues/);
+  assert.equal(soundLine(-27.4), 'sound: -27 LUFS integrated (subtle target about -20; add the cue the picture lacks, or raise the one cue that carries the moment)');
+  assert.match(soundLine(-12), /lower the loudest cue/);
 });
 
-test('soundLine with a level names the dB for every data-gain, and the loudest cue when the peak then passes the limit', () => {
-  assert.match(soundLine(-25.7, undefined, { I: -25.7, TP: -12 }), /^sound: -26 LUFS integrated \(subtle target about -20; change every data-gain by \+6 dB, or remove the gains to use the voice defaults \(they land near -20 LUFS\)\)$/);
-  const cues = [{ name: 'tap', at: 1, peakDb: -9 }, { name: 'impact', at: 2.4, peakDb: -5 }];
-  assert.match(soundLine(-27.4, undefined, { I: -27.4, TP: -8, cues }), /by \+7 dB.*peak then reaches -1\.0 dBTP \(limit -3\), so lower the loudest cue "impact" at 2\.4 s by 2 dB more/);
-  assert.match(soundLine(-12, undefined, { I: -12, TP: -5 }), /by -8 dB/);
+test('soundLine with a level reads the cues against each other: a shift of every data-gain is never the fix', () => {
+  assert.match(soundLine(-25.7, undefined, { I: -25.7, TP: -12 }), /^sound: -26 LUFS integrated \(subtle target about -20; the mix is 6 dB under the target; add the cue the picture lacks.*Moving every data-gain by the same dB changes the loudness and fixes nothing\)$/);
+  const cues = [{ name: 'tap', at: 1, peakDb: -9, role: 'sfx' }, { name: 'impact', at: 2.4, peakDb: -1, role: 'sfx' }, { name: 'tick', at: 3, peakDb: -10, role: 'sfx' }];
+  assert.match(soundLine(-14, undefined, { I: -14, TP: -1, cues }), /the mix is 6 dB over the target; cue "impact" at 2\.4 s peaks 8 dB above the rest \(-1 vs -9 dB\): lower its data-gain by 8/);
+  assert.match(soundLine(-12, undefined, { I: -12, TP: -5 }), /8 dB over the target; lower the loudest cue/);
+});
+
+test('cue balance: a uniform data-gain shift is named, one cue out of balance is named by its distance', () => {
+  const cue = (name, gain, defaultGain, peakDb) => ({ name, at: 1, peakDb, gain, gainSet: true, defaultGain });
+  const shifted = [cue('tap', 0, -3, -12), cue('tick', 0, -5, -14), cue('air', -2, -5, -14)];
+  assert.deepEqual(outlierCues(shifted), []);
+  assert.equal(uniformShift([cue('tap', -3, -3, -12), cue('tick', 3, -5, -14)]), null);
+  assert.match(balanceLines([cue('tap', 3, 0, -12), cue('tick', 3, 0, -14), cue('air', 3, 0, -14)]).at(-1), /^all 3 cues carry data-gain \+3 dB from their voice defaults/);
+  assert.equal(uniformShift([{ ...cue('a', 0, 0, -12), gainSet: false }, cue('b', 4, 0, -12)]), null);
+  assert.equal(uniformShift([cue('a', 2, 0, -12), cue('b', 2, 0, -12)]), null, 'under the minimum shift');
+  assert.match(balanceLines([cue('a', -3, -3, -12), cue('b', -3, -3, -12), cue('c', -3, -3, -22)])[0], /cue "c" at 1 s peaks 10 dB below the rest \(-22 vs -12 dB\): raise its data-gain by 10/);
 });
 
 test('mergeProblems: alternates the two lists and stops at 4', () => {

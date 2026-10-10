@@ -433,7 +433,7 @@
  },
  "sound-level": {
   "file": "taste/rules/sound-level.md",
-  "instead": "leave data-gain off or lower the loudest cue; a cue that peaks more than 6 dB above the median cue draws a warning with the change that fixes it. Measure with `ffmpeg -af ebur128=peak=true`."
+  "instead": "leave data-gain off. Cue levels are read against each other: a cue that peaks more than 6 dB above or below the median cue draws a warning naming that cue, and the same data-gain shift on every cue moves the loudness without changing the balance, so it is named and is not a fix. A music bed must change over time: one spectrum for the whole film is a drone (the reference films change at least 0.177 on the scale of harness/lib/bed-motion.mjs, a drone 0.002). Measure with `ffmpeg -af ebur128=peak=true`."
  },
  "sound-swell": {
   "file": "taste/rules/sound-swell.md",

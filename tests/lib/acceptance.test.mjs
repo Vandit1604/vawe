@@ -89,7 +89,7 @@ test('the draft and the ship use the same 15 rows: the draft names the rows only
 test('the loudness row names the dB to change; the peak row names the loudest cue', () => {
   const cues = [{ name: 'impact', at: 2.4, peakDb: -5 }];
   const rows = byMetric(buildRows([], { ...clean, lufs: -28.8, peak: -2, cues }));
-  assert.match(rows.loudness.detail[0], /change every data-gain by \+9 dB/);
+  assert.match(rows.loudness.detail[0], /the mix is 9 dB under the target/);
   assert.match(rows.peak.detail[0], /on the loudest cue "impact" at 2\.4 s by 1 dB/);
 });
 

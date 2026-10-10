@@ -71,19 +71,18 @@ test('<meta name="loudness"> opts in: the mix is normalised to that target', () 
   assert.ok(Math.abs(ebur(path.join(dir, 'loud.mp4')).I - normalised.measured.I) <= 0.2);
 }));
 
-test('a page with low explicit gains gets a dB change that brings the mix into the band', async () => {
+test('a page with low explicit gains is told the shift is uniform, and the voice defaults bring the mix into the band', async () => {
   const { measureMixLevel } = await import('../../harness/media/page-audio.mjs');
   const { soundLine, RULES } = await import('../../harness/lib/draft-check.mjs');
-  const at = (shift) => ['pluck', 'chime', 'droplet', 'bloom', 'swell'].map((s, i) => cue(s, 0.4 + i, DEFAULT_GAIN_DB[s] + shift));
+  const { balanceLines } = await import('../../harness/lib/cue-balance.mjs');
+  const at = (shift) => ['pluck', 'chime', 'droplet', 'bloom', 'swell'].map((s, i) => ({ ...cue(s, 0.4 + i, DEFAULT_GAIN_DB[s] + shift), gainSet: shift !== 0, defaultGain: DEFAULT_GAIN_DB[s] }));
   const before = measureMixLevel({ specs: at(-7), duration: 6 });
   assert.ok(before.I < RULES.lufsLow, `fixture level ${before.I} LUFS is not under the band`);
-  const line = soundLine(before.I, undefined, before);
-  console.log(`before ${before.I} LUFS: ${line}`);
-  const change = Number(/change every data-gain by ([+-]\d+) dB/.exec(line)[1]);
-  const after = measureMixLevel({ specs: at(-7 + change), duration: 6 });
-  console.log(`after ${after.I} LUFS`);
-  assert.ok(after.I >= RULES.lufsLow && after.I <= RULES.lufsHigh, `after ${change} dB: ${after.I} LUFS`);
-  assert.ok(Math.abs(after.I - RULES.lufsTarget) <= 1, `after ${change} dB: ${after.I} LUFS, wanted about ${RULES.lufsTarget}`);
+  assert.doesNotMatch(soundLine(before.I, undefined, before), /change every data-gain/);
+  assert.match(balanceLines(before.cues).at(-1), /^all 5 cues carry data-gain -7 dB from their voice defaults/);
+  const after = measureMixLevel({ specs: at(0), duration: 6 });
+  assert.ok(after.I >= RULES.lufsLow && after.I <= RULES.lufsHigh, `defaults: ${after.I} LUFS`);
+  assert.deepEqual(balanceLines(after.cues), []);
 });
 
 test('data-trim and data-trim-end play only that part of a file, with a fade at each cut', () => withFilm(3, async ({ dir, video }) => {
