@@ -14,7 +14,7 @@ list below. A script none of those reaches is dead: delete it.
 | `cli/` | the `vawe` verb table, argument parser and `new` starter |
 | `media/` | the renderer (`render-page.mjs`, `page-audio.mjs`), the views (`see.mjs`, `see/`, `see-views.mjs`), the reference measures (`ref-spec.mjs`, `render-spec.mjs`) |
 | `lib/` | shared helpers: the gate table (`check-gate.mjs`), the render harness, run logs, judge codes |
-| `dev/` | git hooks' helpers (`no-emdash.mjs`, `push-guard.mjs`), `e2e.mjs`, `bench.mjs`, worktree tools, `AGENT-TASK.md` |
+| `dev/` | git hooks' helpers (`no-emdash.mjs`, `push-guard.mjs`), `e2e.mjs`, `bench.mjs`, worktree tools |
 | `live/` | Claude Code hooks: `stage-say.mjs` (next command), `code-quality.mjs`, `no-emdash-live.mjs`, `no-blanket-git.mjs`, `log-read.mjs` (see Hooks below) |
 
 ## Hooks

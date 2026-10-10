@@ -111,7 +111,7 @@
  },
  "living-ground": {
   "file": "taste/rules/living-ground.md",
-  "instead": "put two or three large soft blobs, clearly lighter or more saturated than the ground, behind the content: the Grounds moves in prompts/moves/README.md (gradient-mesh-field, aurora-drift, light-pool, grain-field). Keep the text on a calm part of the blob. The ground is a field behind the content: it does not need to move, and a ground drift is never what keeps a hold alive (rule live-hold). Light that should read as a lens effect (bloom, flare, a pool of light on a screen) is real lens work (prompts/moves/lens.md), not a CSS gradient."
+  "instead": "put two or three large soft blobs, clearly lighter or more saturated than the ground, behind the content: the Grounds moves in prompts/moves/README.md (gradient-mesh-field, aurora-drift, light-pool, grain-field). Keep the text on a calm part of the blob. Shader and noise sources and their licences: resources/README.md. The ground is a field behind the content: it does not need to move, and a ground drift is never what keeps a hold alive (rule live-hold). Light that should read as a lens effect (bloom, flare, a pool of light on a screen) is real lens work (prompts/moves/lens.md), not a CSS gradient."
  },
  "logo-prominence": {
   "file": "taste/rules/logo-prominence.md",
