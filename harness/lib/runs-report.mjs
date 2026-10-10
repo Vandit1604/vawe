@@ -118,6 +118,20 @@ export function draftSeries(events) {
   return ['quality per draft:', ...table([['#', 'time', 'accept', 'rules', 'red rows'], ...rows]).map((l) => `  ${l}`), ...(hidden ? [`  (${hidden} earlier drafts not shown)`] : []), ...(judged.length ? [`  judge totals in order: ${judged.join(', ')}`] : [])];
 }
 
+/** One compact line per draft that logged its rules: the rules it fired, and against the draft before it which were fixed (fired then, not now) and which are still firing. */
+export function draftRuleLines(events) {
+  const drafts = events.filter((e) => e.cmd === 'dev' && e.fired);
+  return drafts.map((e, i) => {
+    const before = i ? drafts[i - 1].fired : null;
+    const parts = [`fired ${e.fired.join(', ') || 'none'}`];
+    if (before?.length) {
+      const [fixed, still] = [before.filter((id) => !e.fired.includes(id)), before.filter((id) => e.fired.includes(id))];
+      parts.push(`fixed ${fixed.join(', ') || 'none'}`, `still ${still.join(', ') || 'none'}`);
+    }
+    return `draft ${i + 1} ${String(e.at).slice(5, 16).replace('T', ' ')}: ${parts.join(' · ')}`;
+  });
+}
+
 /** The lines of `vawe runs <film>`: time by stage and verb, failures by cause, the draft series, then one summary line. */
 export function filmLines(film, records) {
   const events = records.map(normalize).sort((a, b) => String(a.at).localeCompare(String(b.at)));
@@ -127,7 +141,7 @@ export function filmLines(film, records) {
   const pass = s.passed ? `PASS after ${s.roundsToPass} judge round${s.roundsToPass > 1 ? 's' : ''}` : 'no PASS yet';
   return [
     ...(calls.length ? timeLines(calls) : [`${film}: no verb calls logged (a log from before every verb was logged)`]),
-    ...failedLines(events), ...draftSeries(events),
+    ...failedLines(events), ...draftSeries(events), ...draftRuleLines(events),
     `drafts ${s.drafts} · median draft ${num(s.medianDraftS)} s · ${pass} · first judged total ${num(s.firstTotal, 0)}`,
   ];
 }

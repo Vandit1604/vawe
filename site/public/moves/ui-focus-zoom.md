@@ -27,7 +27,7 @@ The individual `translate` and `scale` properties apply as translate then scale 
 never per frame. Start the camera 50 ms after the cursor lands, so the eye is on the target when the
 move begins. A scale of 2.5 to 4 reads as a zoom; past 5 the capture goes soft. `EASE.landSoft`
 gives a firm start and a long soft arrival; use `EASE.settle` for a calmer film. Cut back out on the next
-beat, never zoom back on a mirror curve.
+beat, never zoom back on a mirror curve. A snap zoom (a punch) runs 150 to 250 ms; a zoom to focus takes 400 to 800 ms. A zoom earns its place only when it directs attention, shows hierarchy or bridges a cut.
 If a pan-stations camera owns the `.world`, fold the zoom into that camera's one `translate` and `scale`: two transforms on one world stack, and the target lands off centre.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

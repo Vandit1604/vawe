@@ -1,12 +1,14 @@
 # Rack focus
 
+**Status: a layer swap, not a lens.** Two `filter: blur()` layers are a uniform blur with no depth ([lens](lens.md), rejected approximations). Use this only to move the viewer's attention between two flat layers; for a real depth of field and focus pull on a screen, use the lens `dof` option with a `focus` that follows the target (`core/surfaces/lens.js`).
+
 **Use when** two things at different depths share a frame and the story passes from one to the other:
 the draft in front, the shipped result behind. The near layer is sharp and the far layer soft; the
 focus pulls, the near layer melts and the far one resolves. Pinpoint lights behind grow into soft discs
 when out of focus and snap to points when in it, which is what sells a lens. Clip:
 [rack-focus.mp4](rack-focus.mp4). Demo: [demo/rack-focus.html](demo/rack-focus.html).
 
-Use once per film: the lights that swell into discs is a stock device (rule stock-device-once), never the idea.
+Use once per film: the lights that swell into discs is a stock device (rule no-tells), never the idea.
 
 ```js
 import { EASE } from '../../core/motion/presets.js';

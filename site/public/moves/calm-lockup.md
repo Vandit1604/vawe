@@ -2,10 +2,9 @@
 
 **Use when** the film ends quietly: the logo and one line settle slowly while the world under them
 keeps moving. Nothing lands hard. The brand settles over 1 s with a blur that clears, the line
-follows 140 ms later, and two soft lights drift behind a lockup that floats 2 percent larger over
-the clip. Clip: [calm-lockup.mp4](calm-lockup.mp4). Demo: [demo/calm-lockup.html](demo/calm-lockup.html).
+follows 140 ms later, and two soft lights drift behind the lockup. The lockup itself holds still: the clip's 2 percent float is a camera drift and is left out of the snippet. Clip: [calm-lockup.mp4](calm-lockup.mp4). Demo: [demo/calm-lockup.html](demo/calm-lockup.html).
 
-Use once per film: the drifting lights is a stock device (rule stock-device-once), never the idea.
+Use once per film: the drifting lights is a stock device (rule no-tells), never the idea.
 
 ```html
 <div class="light l1"></div><div class="light l2"></div>
@@ -25,7 +24,6 @@ import { EASE } from '../../core/motion/presets.js';
 });
 q('.l1').animate([{ translate: '0 0' }, { translate: '14vw 9vh' }], { duration: 2000, easing: EASE.glide, fill: 'both' });
 q('.l2').animate([{ translate: '0 0' }, { translate: '-12vw -8vh' }], { duration: 2000, easing: EASE.glide, fill: 'both' });
-q('.lockup').animate([{ scale: 1 }, { scale: 1.02 }], { duration: 2000, easing: EASE.glide, fill: 'both' });
 </script>
 ```
 
@@ -34,7 +32,6 @@ Sound: bloom at 0.06 s into the move, with the brand entrance; its 0.14 s attack
 This is the gravity band (0.5 to 0.8 s and up): the entrance is long and small, 2.2vh of travel,
 so it settles and does not arrive. Opposite drifts on the two lights read as depth. The lights are
 radial gradients that end at zero alpha, so there is no edge to band; the 5 percent grain hides
-the steps in the dark. The line is 7.6vh, cap height above 5 percent. Never freeze the lockup: the
-drift is what separates this from a held logo.
+the steps in the dark. The line is 7.6vh, cap height above 5 percent. The lights are ground tint, not lens light: for bloom or a lit surface use the lens ([lens](lens.md), `core/surfaces/lens.js`). Do not float the lockup larger to keep it alive: give one part of it a last move (a caret, a highlight) and declare the hold.
 
 Looks (ground, type, radius, accent) live in `demo/demo.css`; this snippet keeps neutral tokens.

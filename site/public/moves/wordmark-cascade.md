@@ -5,7 +5,7 @@ gap shorter than the last, so the word speeds up as it lands; the full stop is t
 last. After the landing a short accent bar runs along the rail, so the tail is never still. Clip:
 [wordmark-cascade.mp4](wordmark-cascade.mp4). Demo: [demo/wordmark-cascade.html](demo/wordmark-cascade.html).
 
-Use once per film: the accent bar is a stock device (rule stock-device-once), never the idea.
+Use once per film: the accent bar is a stock device (rule no-tells), never the idea.
 
 ```html
 <div class="stage">

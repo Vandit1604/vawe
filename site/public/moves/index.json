@@ -52,8 +52,8 @@
    "label": "open on the brand in under 2 s"
   },
   {
-   "id": "arrive-by-flying-into-a-scene",
-   "label": "arrive by flying into a scene"
+   "id": "arrive-by-flying-into-a-scene-or-give-a-push-depth",
+   "label": "arrive by flying into a scene, or give a push depth"
   },
   {
    "id": "land-a-title-or-wordmark-soft",
@@ -66,6 +66,18 @@
   {
    "id": "land-one-hero-word-on-the-beat",
    "label": "land one hero word on the beat"
+  },
+  {
+   "id": "cut-a-line-in-under-hard-edges-per-character-word-or-line",
+   "label": "cut a line in under hard edges, per character, word or line"
+  },
+  {
+   "id": "roll-a-word-or-label-letter-by-letter-forward-back-or-in-random-order",
+   "label": "roll a word or label letter by letter, forward, back, or in random order"
+  },
+  {
+   "id": "turn-each-character-over-as-a-small-cube",
+   "label": "turn each character over as a small cube"
   },
   {
    "id": "put-a-picture-inside-the-name",
@@ -88,8 +100,8 @@
    "label": "point at one part of a UI"
   },
   {
-   "id": "change-between-shots-hard-and-fast",
-   "label": "change between shots, hard and fast"
+   "id": "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure",
+   "label": "change between shots, hard and fast (exposure-flash reads as camera over-exposure)"
   },
   {
    "id": "change-between-shots-soft",
@@ -112,8 +124,40 @@
    "label": "lean the camera toward a subject"
   },
   {
-   "id": "hold-a-line-still-to-read-the-ground-alive",
-   "label": "hold a line still to read, the ground alive"
+   "id": "film-a-screen-as-a-real-object-tilt-depth-bloom-led-grid-fringes",
+   "label": "film a screen as a real object: tilt, depth, bloom, LED grid, fringes"
+  },
+  {
+   "id": "move-the-camera-over-a-whole-world-push-pull-whip",
+   "label": "move the camera over a whole world: push, pull, whip"
+  },
+  {
+   "id": "give-a-camera-move-depth-ground-mid-and-front-layers-move-by-different-amounts",
+   "label": "give a camera move depth: ground, mid and front layers move by different amounts"
+  },
+  {
+   "id": "two-depths-of-words-that-resolve-as-the-camera-arrives-a-focus-pull",
+   "label": "two depths of words that resolve as the camera arrives; a focus pull"
+  },
+  {
+   "id": "make-some-arrivals-overshoot-21-to-41-percent-of-them",
+   "label": "make some arrivals overshoot (21 to 41 percent of them)"
+  },
+  {
+   "id": "enter-the-next-world-by-flying-into-an-element",
+   "label": "enter the next world by flying into an element"
+  },
+  {
+   "id": "wipe-in-the-next-beat-along-the-last-move-s-direction",
+   "label": "wipe in the next beat along the last move's direction"
+  },
+  {
+   "id": "overlap-beats-so-the-next-starts-before-the-last-ends",
+   "label": "overlap beats so the next starts before the last ends"
+  },
+  {
+   "id": "hold-a-line-still-to-read-with-a-ground-option-behind-it-the-hold-itself-keeps-a-part-moving-rule-live-hold",
+   "label": "hold a line still to read, with a ground option behind it (the hold itself keeps a part moving, rule live-hold)"
   },
   {
    "id": "give-a-held-frame-a-living-ground",
@@ -202,6 +246,30 @@
   {
    "id": "carry-a-line-along-a-curve",
    "label": "carry a line along a curve"
+  },
+  {
+   "id": "melt-a-tab-or-panel-into-the-next",
+   "label": "melt a tab or panel into the next"
+  },
+  {
+   "id": "ride-tiles-along-a-curve-or-slide-rows-of-them",
+   "label": "ride tiles along a curve, or slide rows of them"
+  },
+  {
+   "id": "orbit-tiles-around-one-point",
+   "label": "orbit tiles around one point"
+  },
+  {
+   "id": "turn-a-cube-to-show-another-face",
+   "label": "turn a cube to show another face"
+  },
+  {
+   "id": "break-a-picture-into-blocks-and-clear-it",
+   "label": "break a picture into blocks and clear it"
+  },
+  {
+   "id": "open-a-picture-inside-a-line-of-type",
+   "label": "open a picture inside a line of type"
   },
   {
    "id": "run-a-spoken-line-as-captions",
@@ -518,12 +586,54 @@
    "duration": 3
   },
   {
+   "name": "vertical-cut-reveal",
+   "title": "Vertical cut reveal",
+   "group": "reveal-a-title",
+   "look": "swiss",
+   "jobs": [
+    "cut-a-line-in-under-hard-edges-per-character-word-or-line"
+   ],
+   "use": "a line arrives hard-edged: every character, word or line rises from under its own clip edge, staggered from the first, last, middle or any item on the motion library's spring (port of fancy)",
+   "clip": "https://vawe.dev/moves/vertical-cut-reveal.mp4",
+   "md": "https://vawe.dev/moves/vertical-cut-reveal.md",
+   "page": "https://vawe.dev/moves/vertical-cut-reveal",
+   "duration": 2.4
+  },
+  {
+   "name": "letter-swap",
+   "title": "Letter swap",
+   "group": "reveal-a-title",
+   "look": "swiss",
+   "jobs": [
+    "roll-a-word-or-label-letter-by-letter-forward-back-or-in-random-order"
+   ],
+   "use": "a word or label rolls letter by letter: each letter slides out of its clip box and the same letter slides in; forward or pingpong, stagger or seeded random order (port of fancy)",
+   "clip": "https://vawe.dev/moves/letter-swap.mp4",
+   "md": "https://vawe.dev/moves/letter-swap.md",
+   "page": "https://vawe.dev/moves/letter-swap",
+   "duration": 3.8
+  },
+  {
+   "name": "letter-3d-swap",
+   "title": "Letter 3D swap",
+   "group": "reveal-a-title",
+   "look": "swiss",
+   "jobs": [
+    "turn-each-character-over-as-a-small-cube"
+   ],
+   "use": "a lowercase line turns over as boxes: each character is a cube that rolls 90 degrees about its centre to the same character on the next face (port of fancy)",
+   "clip": "https://vawe.dev/moves/letter-3d-swap.mp4",
+   "md": "https://vawe.dev/moves/letter-3d-swap.md",
+   "page": "https://vawe.dev/moves/letter-3d-swap",
+   "duration": 1.8
+  },
+  {
    "name": "cut-on-motion",
    "title": "Cut on motion",
    "group": "change-between-shots",
    "look": "brutal",
    "jobs": [
-    "change-between-shots-hard-and-fast"
+    "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
    ],
    "use": "a moving shape carries the eye across a hard cut into a new scene",
    "clip": "https://vawe.dev/moves/cut-on-motion.mp4",
@@ -565,7 +675,8 @@
    "group": "change-between-shots",
    "look": "terminal",
    "jobs": [
-    "run-every-beat-in-and-out"
+    "run-every-beat-in-and-out",
+    "overlap-beats-so-the-next-starts-before-the-last-ends"
    ],
    "use": "beats overlap: the next starts at 65% of the last and one element hands off (dot, bar, rule); use once per film",
    "clip": "https://vawe.dev/moves/chain-beats.mp4",
@@ -616,20 +727,6 @@
    "duration": 1.6
   },
   {
-   "name": "flash-cut",
-   "title": "Flash cut",
-   "group": "change-between-shots",
-   "look": "signal",
-   "jobs": [
-    "change-between-shots-hard-and-fast"
-   ],
-   "use": "a hard cut on a beat: a three-frame white peak hides the cut and the new shot settles from overexposed",
-   "clip": "https://vawe.dev/moves/flash-cut.mp4",
-   "md": "https://vawe.dev/moves/flash-cut.md",
-   "page": "https://vawe.dev/moves/flash-cut",
-   "duration": 1
-  },
-  {
    "name": "stack-cover",
    "title": "Stack cover",
    "group": "change-between-shots",
@@ -663,7 +760,7 @@
    "group": "change-between-shots",
    "look": "signal",
    "jobs": [
-    "change-between-shots-hard-and-fast"
+    "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
    ],
    "use": "horizontal bands slide off in alternation, staggered with seeded jitter and speed blur, and uncover the next shot",
    "clip": "https://vawe.dev/moves/slice-shift.mp4",
@@ -705,7 +802,8 @@
    "group": "change-between-shots",
    "look": "vawe",
    "jobs": [
-    "change-between-shots-spatial"
+    "change-between-shots-spatial",
+    "enter-the-next-world-by-flying-into-an-element"
    ],
    "use": "the camera dives into a UI part until it fills the frame and the next shot comes out of it, with real zoom blur from stacked exposures",
    "clip": "https://vawe.dev/moves/zoom-through.mp4",
@@ -719,13 +817,27 @@
    "group": "change-between-shots",
    "look": "chrome",
    "jobs": [
-    "change-between-shots-hard-and-fast"
+    "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
    ],
    "use": "a beat needs weight before a change: story time is an integral of a speed curve, so the ball, its squash and the camera slow to a sharp near-hold on the hit frame, then snap on at 3.5x with blur",
    "clip": "https://vawe.dev/moves/speed-ramp-freeze.mp4",
    "md": "https://vawe.dev/moves/speed-ramp-freeze.md",
    "page": "https://vawe.dev/moves/speed-ramp-freeze",
    "duration": 1.5
+  },
+  {
+   "name": "speed-ramp",
+   "title": "Speed ramp",
+   "group": "change-between-shots",
+   "look": "vawe",
+   "jobs": [
+    "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
+   ],
+   "use": "both sides of a cut move the same way: the outgoing accelerates into the cut and the incoming leaves it at the same speed and slows, so the cut lands at peak speed",
+   "clip": "https://vawe.dev/moves/speed-ramp.mp4",
+   "md": "https://vawe.dev/moves/speed-ramp.md",
+   "page": "https://vawe.dev/moves/speed-ramp",
+   "duration": null
   },
   {
    "name": "liquid-wipe",
@@ -775,7 +887,7 @@
    "group": "change-between-shots",
    "look": "daylight",
    "jobs": [
-    "change-between-shots-hard-and-fast"
+    "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
    ],
    "use": "an elastic cut: shot A's content stretches into streaks on an ease-in, the cut lands at the peak, and shot B snaps back from the streak on an under-damped spring, thinning and bulging like rubber",
    "clip": "https://vawe.dev/moves/smear-stretch.mp4",
@@ -938,20 +1050,6 @@
    "duration": 2.8
   },
   {
-   "name": "push-in",
-   "title": "Push in",
-   "group": "move-the-camera",
-   "look": "swiss",
-   "jobs": [
-    "lean-the-camera-toward-a-subject"
-   ],
-   "use": "a slow scale toward the subject over a beat; the ground scales less so the layers separate",
-   "clip": "https://vawe.dev/moves/push-in.mp4",
-   "md": "https://vawe.dev/moves/push-in.md",
-   "page": "https://vawe.dev/moves/push-in",
-   "duration": 2
-  },
-  {
    "name": "ui-focus-zoom",
    "title": "UI focus zoom",
    "group": "move-the-camera",
@@ -999,13 +1097,114 @@
    "group": "move-the-camera",
    "look": "field",
    "jobs": [
-    "arrive-by-flying-into-a-scene"
+    "arrive-by-flying-into-a-scene-or-give-a-push-depth",
+    "give-a-camera-move-depth-ground-mid-and-front-layers-move-by-different-amounts"
    ],
-   "use": "the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves",
+   "use": "the camera flies forward through layers at real depths: near layers rush past, the far ground barely moves; also one camera move on ground, mid and front layers by depth (parallax())",
    "clip": "https://vawe.dev/moves/parallax-dive.mp4",
    "md": "https://vawe.dev/moves/parallax-dive.md",
    "page": "https://vawe.dev/moves/parallax-dive",
    "duration": 2
+  },
+  {
+   "name": "exposure-flash",
+   "title": "Exposure flash",
+   "group": "move-the-camera",
+   "look": "terminal",
+   "jobs": [
+    "change-between-shots-hard-and-fast-exposure-flash-reads-as-camera-over-exposure"
+   ],
+   "use": "a cut on a screen film reads as over-exposure: 3 frames of white, the swap inside the peak, the new shot starts at 2x brightness and settles in 0.15 s; at most 3 flashes a second",
+   "clip": "https://vawe.dev/moves/exposure-flash.mp4",
+   "md": "https://vawe.dev/moves/exposure-flash.md",
+   "page": "https://vawe.dev/moves/exposure-flash",
+   "duration": 2
+  },
+  {
+   "name": "lens",
+   "title": "Lens",
+   "group": "move-the-camera",
+   "look": "vawe",
+   "jobs": [
+    "film-a-screen-as-a-real-object-tilt-depth-bloom-led-grid-fringes"
+   ],
+   "use": "a screen filmed as a real object: tilt, depth, bloom, LED grid, fringes, done as lens work and never faked with CSS layers",
+   "clip": "https://vawe.dev/moves/lens.mp4",
+   "md": "https://vawe.dev/moves/lens.md",
+   "page": "https://vawe.dev/moves/lens",
+   "duration": 6
+  },
+  {
+   "name": "camera-moves",
+   "title": "Camera moves",
+   "group": "move-the-camera",
+   "look": "swiss",
+   "jobs": [
+    "lean-the-camera-toward-a-subject",
+    "move-the-camera-over-a-whole-world-push-pull-whip"
+   ],
+   "use": "a whole world as one wrapper: push toward a subject (the ground scales less so the layers separate), pull, whip between worlds (camera()); the camera holds still by default",
+   "clip": "https://vawe.dev/moves/camera-moves.mp4",
+   "md": "https://vawe.dev/moves/camera-moves.md",
+   "page": "https://vawe.dev/moves/camera-moves",
+   "duration": 2
+  },
+  {
+   "name": "depth-resolve",
+   "title": "Depth resolve",
+   "group": "move-the-camera",
+   "look": "vawe",
+   "jobs": [
+    "two-depths-of-words-that-resolve-as-the-camera-arrives-a-focus-pull"
+   ],
+   "use": "far words small and soft resolve as the camera arrives; a focus pull (focus())",
+   "clip": "https://vawe.dev/moves/depth-resolve.mp4",
+   "md": "https://vawe.dev/moves/depth-resolve.md",
+   "page": "https://vawe.dev/moves/depth-resolve",
+   "duration": null
+  },
+  {
+   "name": "scale-through",
+   "title": "Scale through",
+   "group": "move-the-camera",
+   "look": "vawe",
+   "jobs": [
+    "enter-the-next-world-by-flying-into-an-element"
+   ],
+   "use": "fly into a plain element and its colour is the next world, in Web Animations only",
+   "clip": "https://vawe.dev/moves/scale-through.mp4",
+   "md": "https://vawe.dev/moves/scale-through.md",
+   "page": "https://vawe.dev/moves/scale-through",
+   "duration": null
+  },
+  {
+   "name": "direction-wipe",
+   "title": "Direction wipe",
+   "group": "move-the-camera",
+   "look": "vawe",
+   "jobs": [
+    "change-between-shots-graphic",
+    "wipe-in-the-next-beat-along-the-last-move-s-direction"
+   ],
+   "use": "a mask edge moves the way the last move went and reveals the next beat",
+   "clip": "https://vawe.dev/moves/direction-wipe.mp4",
+   "md": "https://vawe.dev/moves/direction-wipe.md",
+   "page": "https://vawe.dev/moves/direction-wipe",
+   "duration": null
+  },
+  {
+   "name": "arrival-spring",
+   "title": "Arrival spring",
+   "group": "move-the-camera",
+   "look": "vawe",
+   "jobs": [
+    "make-some-arrivals-overshoot-21-to-41-percent-of-them"
+   ],
+   "use": "EASE.nudge on one arrival in three, EASE.pop on the one that matters (nudgeEvery)",
+   "clip": "https://vawe.dev/moves/arrival-spring.mp4",
+   "md": "https://vawe.dev/moves/arrival-spring.md",
+   "page": "https://vawe.dev/moves/arrival-spring",
+   "duration": null
   },
   {
    "name": "rack-focus",
@@ -1027,7 +1226,7 @@
    "group": "move-the-camera",
    "look": "paper",
    "jobs": [
-    "hold-a-line-still-to-read-the-ground-alive"
+    "hold-a-line-still-to-read-with-a-ground-option-behind-it-the-hold-itself-keeps-a-part-moving-rule-live-hold"
    ],
    "use": "the line holds still while only the ground drifts, so a held frame never sits dead",
    "clip": "https://vawe.dev/moves/drift-hold.mp4",
@@ -1041,7 +1240,7 @@
    "group": "move-the-camera",
    "look": "signal",
    "jobs": [
-    "hold-a-line-still-to-read-the-ground-alive",
+    "hold-a-line-still-to-read-with-a-ground-option-behind-it-the-hold-itself-keeps-a-part-moving-rule-live-hold",
     "give-a-held-frame-a-living-ground"
    ],
    "use": "a title sits on a living ground: four soft colour pools drift on seeded paths in one fragment shader, with grain against banding; the copy keeps 4.5:1",
@@ -1416,6 +1615,20 @@
    "duration": 2
   },
   {
+   "name": "gooey-filter",
+   "title": "Gooey filter",
+   "group": "product-moments",
+   "look": "vawe",
+   "jobs": [
+    "melt-a-tab-or-panel-into-the-next"
+   ],
+   "use": "a tab, pill or panel must melt into the next: shapes that touch merge into one soft outline through the SVG gooey filter (blur 15, alpha matrix 19 and -9), the active tab box slides on a critically damped spring and the page swaps in 0.2 s",
+   "clip": "https://vawe.dev/moves/gooey-filter.mp4",
+   "md": "https://vawe.dev/moves/gooey-filter.md",
+   "page": "https://vawe.dev/moves/gooey-filter",
+   "duration": 3.6
+  },
+  {
    "name": "agent-progress",
    "title": "Agent progress",
    "group": "product-moments",
@@ -1526,6 +1739,90 @@
    "md": "https://vawe.dev/moves/light-pool.md",
    "page": "https://vawe.dev/moves/light-pool",
    "duration": 4
+  },
+  {
+   "name": "marquee-along-path",
+   "title": "Marquee along path",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "ride-tiles-along-a-curve-or-slide-rows-of-them"
+   ],
+   "use": "tiles ride one SVG path forever at an even gap, turned with the curve, rolling z-index, 8 percent of the path per second; one element along the path is an option",
+   "clip": "https://vawe.dev/moves/marquee-along-path.mp4",
+   "md": "https://vawe.dev/moves/marquee-along-path.md",
+   "page": "https://vawe.dev/moves/marquee-along-path",
+   "duration": 5
+  },
+  {
+   "name": "simple-marquee",
+   "title": "Simple marquee",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "ride-tiles-along-a-curve-or-slide-rows-of-them"
+   ],
+   "use": "three rows of tiles slide for a whole beat, left, right, left, each row four copies that wrap by one set width at 8 percent per second",
+   "clip": "https://vawe.dev/moves/simple-marquee.mp4",
+   "md": "https://vawe.dev/moves/simple-marquee.md",
+   "page": "https://vawe.dev/moves/simple-marquee",
+   "duration": 4
+  },
+  {
+   "name": "circling-elements",
+   "title": "Circling elements",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "orbit-tiles-around-one-point"
+   ],
+   "use": "eight upright tiles orbit one point on a 120 px radius, one linear turn in 10 s",
+   "clip": "https://vawe.dev/moves/circling-elements.mp4",
+   "md": "https://vawe.dev/moves/circling-elements.md",
+   "page": "https://vawe.dev/moves/circling-elements",
+   "duration": 5
+  },
+  {
+   "name": "css-box",
+   "title": "CSS box",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "turn-a-cube-to-show-another-face"
+   ],
+   "use": "a 200 px cube of bold type turns to another face on a stiff overdamped spring (stiffness 100, damping 30, no overshoot) under perspective 600",
+   "clip": "https://vawe.dev/moves/css-box.mp4",
+   "md": "https://vawe.dev/moves/css-box.md",
+   "page": "https://vawe.dev/moves/css-box",
+   "duration": 4.6
+  },
+  {
+   "name": "pixelate-svg-filter",
+   "title": "Pixelate SVG filter",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "break-a-picture-into-blocks-and-clear-it"
+   ],
+   "use": "a photo breaks into square blocks that grow and shrink with one number, size = x / 30 through a convolve, tile and dilate SVG filter",
+   "clip": "https://vawe.dev/moves/pixelate-svg-filter.mp4",
+   "md": "https://vawe.dev/moves/pixelate-svg-filter.md",
+   "page": "https://vawe.dev/moves/pixelate-svg-filter",
+   "duration": 4.8
+  },
+  {
+   "name": "media-between-text",
+   "title": "Media between text",
+   "group": "grounds",
+   "look": "vawe",
+   "jobs": [
+    "open-a-picture-inside-a-line-of-type"
+   ],
+   "use": "a picture grows from zero width inside a line of type on a 0.4 s critical spring and closes on a 0.3 s tween, the words part and wrap",
+   "clip": "https://vawe.dev/moves/media-between-text.mp4",
+   "md": "https://vawe.dev/moves/media-between-text.md",
+   "page": "https://vawe.dev/moves/media-between-text",
+   "duration": 4.2
   }
  ]
 }
