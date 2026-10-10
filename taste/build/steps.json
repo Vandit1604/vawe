@@ -131,12 +131,8 @@
     "text": "use a stock device (sheen band, lens streak, light beam, accent bar, rule line) once, not as the idea"
    },
    {
-    "rule": "cue-has-event",
-    "text": "tie each cue to one visible event, not sound for its own sake"
-   },
-   {
-    "rule": "cue-sparse",
-    "text": "cue the first and the last key word, not a tick on every word"
+    "rule": "sound-cues",
+    "text": "tie each cue to one visible event and cue the first and the last key word, not a tick on every word"
    },
    {
     "rule": "sound-level",

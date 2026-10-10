@@ -92,7 +92,7 @@ export function boardChecks(brief, pageSpectacle = null) {
   else if (pageSpectacle !== null && Math.abs(spectacle - pageSpectacle) > SPECTACLE_TOLERANCE_S) {
     lines.push(`board: the Spectacle is at ${s1(spectacle)} s but <meta name="spectacle"> says ${s1(pageSpectacle)} s; the spectacle checks read ${s1(spectacle)} s, the Board's. Put the big move at ${s1(spectacle)} s, or change the Board's Spectacle line with the reason`);
   }
-  if (!sound.length) lines.push('board: no sound rows; add one voice per cut, or one row with "none" for a silent film');
+  if (!sound.length) lines.push('board: no sound rows; add a real effect for each action or cut that earns one, or one row with "none" for a silent film');
   moves.forEach((m, i) => { if (!m || /\bfade\b/i.test(m)) lines.push(`board: cut ${i + 1} names ${m ? `"${m}"` : 'no move'}; name a move from prompts/moves`); });
   return lines;
 }

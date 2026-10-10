@@ -327,13 +327,14 @@
   "card_size_tolerance": 0.05,
   "card_area_pct_min": 3
  },
- "cue-sparse": {
-  "sync_points_max": 2
- },
  "sound-bridge": {
   "j_cut_lead_min_s": 0.4,
   "j_cut_lead_max_s": 0.8,
   "crossfade_s": 0.35
+ },
+ "sound-cues": {
+  "sync_points_max": 2,
+  "swells_max": 1
  },
  "sound-level": {
   "peak_dbfs": -3,
@@ -344,8 +345,5 @@
   "cue_shift_min_db": 3,
   "cue_shift_tol_db": 1,
   "bed_change_min": 0.1
- },
- "sound-swell": {
-  "swells_max": 1
  }
 }

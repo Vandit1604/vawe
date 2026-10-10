@@ -256,6 +256,14 @@ A stock device is seasoning, never the idea. Use it at most once per film.
 
 ## sound
 
+### sound-cues
+
+Sync points are scarce. Tie each cue to one visible event, spend one or two hard syncs on the moments you want believed, and keep at most one soft swell that ends on a cut. A whoosh on every transition makes every transition equally important, so none is.
+
+- Limit: at most 1 swell per film; 1 to 2 hard sync points per short film
+- Range: impact on a hard stop, never on a soft EASE.land settle; UI tick on an operated interface; whoosh only on a layer that really crosses the frame; riser for the one thing about to come; for a 10 to 40 s film with a user-given track, lock the track first and cut on its grid
+- Judge: Name the visible event behind each cue. Is there a tick on every word, a whoosh on every cut, or more than one swell?
+
 ### sound-level
 
 Sound is subtle: low peak, quiet mix. What you write is what you hear: no normalising, default gains.
@@ -264,20 +272,12 @@ Sound is subtle: low peak, quiet mix. What you write is what you hear: no normal
 - Range: integrated loudness about -20 LUFS (the draft check warns outside -24 to -16); default gains: palette tap -3 dB, tick, air, swoosh-long and sub-thump -5; the old voices soft -6 dB, whoosh, riser and swell -4, impact and drop -2; one palette cue per beat lands near -20 LUFS
 - Judge: Read the measured peak and loudness: are they at or below -3 dBFS and near -20 LUFS?
 
-### sound-swell
-
-At most one soft swell, and it ends on a cut. A whoosh on every transition makes every transition equally important, so none is.
-
-- Limit: at most 1 swell per film
-- Range: a whoosh only on a layer that really crosses the frame, its length matching the move; score the 2 to 3 seams that earn it
-- Judge: How many swells? Is there a whoosh on every cut?
-
 ### sound-voices
 
-Small effects on actions carry the film, with no synth bed, pad or chord. Prefer real recorded effects; the quiet synth ticks are the fallback. Weight voices are for a brief that asks for weight.
+Sound is small effects on actions, never a synth bed, pad or chord. Real recorded effects come first; the quiet synth ticks are the fallback. Silence between effects is normal, and the film still reads with the sound off, since feeds autoplay muted. Weight voices are for a brief that asks for weight.
 
 - Range: accent: pluck, chime, sparkle, droplet; confirm: bloom, success, ready; weight (impact, drop, riser) only when the brief asks
-- Judge: Is there a synth bed, pad or chord, or an impact, drop or riser the brief did not ask for?
+- Judge: Is there a synth bed, pad or chord, or an impact, drop or riser the brief did not ask for? Does the film work muted, and does silence have a reason?
 
 ## attractors
 

@@ -212,7 +212,7 @@ export function readmeText(rules, craft) {
     '- Author first read: `taste/build/DIGEST.md` (at most ' + DIGEST_WORDS_MAX + ' words: the build fails above it; a rule without a `digest:` line stays in this index). Judge: `taste/build/CARD.md` (the rules marked scored). Commands print `taste/build/steps.json` lines.',
     '- A rule that owns a signature dial has `dial: <name>` (core/motion/signature.js): `vawe new` offers its `range`, `vawe dev` names the dial while the page leaves it unchosen. `taste/build/rules.json` holds each rule file and its `instead` text.',
     '- Every threshold a check reads: `taste/build/limits.json`. Page code that cannot import it (the motion presets) reads `core/motion/taste-limits.js`, generated from the same numbers. Long reasons, sources and examples: `taste/craft/`.',
-    '- Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`. Where each old rule went: `taste/MIGRATION.md`.',
+    '- Data: `taste/attractors.json`, `taste/anti-patterns/`, `taste/brand/`.',
     '', `${rules.length} rules, ${rules.filter((r) => r.scored === 'yes').length} scored by the judge.`, ''];
   for (const step of STEPS) {
     const rs = rules.filter((r) => r.step === step);

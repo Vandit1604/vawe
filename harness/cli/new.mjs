@@ -37,7 +37,7 @@ const STARTER_TEMPLATE = `<!doctype html>
   typefaces: 1, {{family}} (assets/{{font}}), a stand-in; bundle the face the direction needs
   signature move: one, named here, used once
   thread: the one object, type line, colour or rhythm that carries through (rule thread)
-  sound cues: quiet ticks at default gains, at most one soft swell (rule sound-swell)
+  sound cues: small effects at default gains, a real recorded one first, at most one soft swell (rule sound-cues)
   world turns: a new element, cut or ground every 1 to 2 s (rule world-turns) -->
 <style>
   @font-face { font-family: "{{family}}"; src: url("assets/{{font}}") format("woff2"); font-weight: 100 900; }
@@ -311,7 +311,7 @@ Spectacle: the one big moment at [second] (also \`<meta name="spectacle">\`). Qu
 |---|---|---|---|---|---|---|---|
 | [s1 to s2] | [move] | [object] | [object] | [0.2] | [kind] | [layers] | [which arrivals] |
 
-Sound is part of every film, subtle: sparse effects on actions: one voice per cut and one for the spectacle (names from \`bin/vawe sound\`, never a fixed list). No synth bed, pad or chord. A music bed only from a file the user gives.
+Sound is part of every film, subtle: small effects on actions, only on the cuts and actions that earn one, plus one for the spectacle. A real recorded effect first (the film's assets, or the sites in resources/README.md); a synth voice from \`bin/vawe sound\` is the fallback. No synth bed, pad or chord. A music track only from a file the user gives.
 
 Gain: leave the column empty to take the voice's default (\`bin/vawe sound\` lists it). Write a number only to move one cue on purpose: \`data-gain\` is absolute dB and replaces the default.
 
