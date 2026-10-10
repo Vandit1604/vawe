@@ -60,8 +60,7 @@ The rule is [licensed-assets](../rules/licensed-assets.md).
 - **Never embed copyrighted material in a published video** (it triggers Content ID claims): posters, album
   covers, film stills, news photos, paid stock without a licence, copyrighted music. Capture the real
   product UI instead.
-- Check a new stock source against `../ASSET-SOURCES.md`: shippable sources may be committed, local-only
-  sources may only be fetched onto disk, never redistributed inside the repo.
+- Read a new stock source's own licence before use. Sites are listed in `../../resources/README.md`.
 
 ## 5. Icons
 
