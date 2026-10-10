@@ -74,8 +74,8 @@ or CHANGE, rebuild, then loop `bin/vawe critique <page> --ref <ref.mp4>` until i
 - macOS has no `timeout`, and `sed -i` needs `''`: `sed -i '' 's/a/b/' f`, or use the Edit tool.
 
 Over 60 seconds or more than one session: one chapter file per agent
-(`prompts/directors-brief-long-form.md`). Skills: `vawe-page` (write), `vawe-critique` (look),
-`vawe-reference` (match). A PASS is never self-recorded: score with `bin/vawe judge` in a fresh session.
+(`prompts/directors-brief-long-form.md`). Skills: `vawe-brief` (no `brief.md` yet), `vawe-page` (write),
+`vawe-critique` (look), `vawe-reference` (match). A PASS is never self-recorded: score with `bin/vawe judge` in a fresh session.
 
 ## Waivers  `[live: harness/media/render-page.mjs]`
 
