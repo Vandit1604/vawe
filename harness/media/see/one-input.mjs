@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { refsDir } from '../../lib/refs.mjs';
 import { probeVideo, ROOT } from './core.mjs';
-import { resolveInput } from './strip.mjs';
+import { resolveInput } from './input.mjs';
 
 export class SourceError extends Error {}
 

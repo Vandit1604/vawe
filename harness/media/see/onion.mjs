@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { ffmpegOrDie } from '../../lib/scratch.mjs';
 import { die, probeVideo } from './core.mjs';
 import { ONION_FRAMES, ONION_SPAN, isLightGround, onionGraph, onionProblem, onionTimes } from './onion-math.mjs';
-import { resolveInput } from './strip.mjs';
+import { resolveInput } from './input.mjs';
 import { stripWindow } from './strip-math.mjs';
 
 const FRAME_GAP_S = 0.03;

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { drawtext, ffmpegOrDie } from '../../lib/scratch.mjs';
 import { die, probeVideo, stackImages } from './core.mjs';
 import { frameRgb, lumaOf } from './frame.mjs';
-import { resolveInput } from './strip.mjs';
+import { resolveInput } from './input.mjs';
 import { autoBox, commonBox, FRAME_H, FRAME_W, parseBox, ZOOM_SCALE, zoomProblem } from './zoom-math.mjs';
 
 async function film(input, label) {

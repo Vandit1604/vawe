@@ -10,7 +10,7 @@ import { onsetEnvelope, estimateTempo, estimatePhase, beatGrid, fitGrid } from '
 import { attackTimes } from './ref-measure/audio-attack.mjs';
 import { decodeMono } from './audio-onsets.mjs';
 import { classifyHit } from './sound-class.mjs';
-import { measureFile } from '../media/page-audio.mjs';
+import { measureFile } from './loudness.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const RATE = 22050;
