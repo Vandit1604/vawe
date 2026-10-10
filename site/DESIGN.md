@@ -147,8 +147,10 @@ a pill is 999px. Some older routes still use 6px and 10px.
 - **Footer:** one panel with the generated link groups (`lib/site-pages.json`) and the Apache 2.0
   line. Pages that end a journey add a closing panel above it (`<Footer bookend />`).
 - **Landing hero:** one player, two example films, switched by a row of tabs under the caption: the
-  tracking HUD and the retro desktop remix (`public/examples/`). Each is 1280 px: a VP9 WebM, an H.264 fallback and a WebP poster, muted and
-  looped, paused on load with reduced motion. Audio is stripped from the web copies.
+  tracking HUD and the retro desktop remix (`public/examples/`). Each is 1280 px: a VP9 WebM, an H.264 fallback and a WebP poster, looped,
+  paused on load with reduced motion. The HUD and remix keep their audio (Opus and AAC, about -16 LUFS,
+  true peak under -1.5 dBTP). Videos start muted; a round sound toggle (`aria-pressed`, 44 px on phones)
+  in the now-playing row unmutes the current film, the choice survives a tab switch, never auto-on.
 - **Move card** (`app/moves/`): the clip's 640 px poster at rest; its 640 px WebM plays while at
   least half on screen, six at most, and with reduced motion only on a tap. The move page shows the
   1280 px poster as an image and fades the 1280 px clip in over it once it plays. Hover rings sit
