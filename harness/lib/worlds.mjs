@@ -3,7 +3,7 @@
 import LIMITS from '../../taste/build/limits.json' with { type: 'json' };
 import { insideHold } from './still-limit.mjs';
 import { waiverHint } from './waivers.mjs';
-import { lineNeed, rowsNeed } from './read-hold.mjs';
+import { lineNeed, rowsNeed, HOLD_RULE } from './read-hold.mjs';
 
 export const TURN_SECONDS_MAX = LIMITS['world-turns'].turn_seconds_max;
 // A span is measured on the draft's 30 fps frame grid and a cut shows its world a frame or two early (the starter's does), so a world of exactly the limit measures up to about 0.1 s longer.
@@ -11,9 +11,6 @@ export const SPAN_SLACK_S = 0.1;
 
 // A world must outlast its text's read time by an entrance settling and an exit clearing (each about 0.4 s in the house presets).
 export const READ_MARGIN_S = 0.8;
-
-// A world needing longer than this to read holds more text than the reference films do (a word stays 2.8 s at p90): padding words cannot buy more time than this.
-export const READ_WORLD_MAX_S = LIMITS['world-turns'].read_world_s_max;
 
 const WORDLESS_EVERY = 4;
 
@@ -23,8 +20,8 @@ const wordCount = (text) => text.split(/\s+/).filter(Boolean).length;
 /** Seconds to read the texts one world shows (rows read together: harness/lib/read-hold.mjs rowsNeed), 0 for none. Pure. */
 export const readNeed = (texts) => (texts.length ? round(rowsNeed(texts.map((t) => lineNeed(wordCount(t))))) : 0);
 
-/** The longest a world may stay: the world-turns limit, or longer when its own text needs more time to read. Pure. */
-export const worldLimit = (span, max = TURN_SECONDS_MAX) => Math.max(max, Math.min(READ_WORLD_MAX_S, (span.readNeed ?? 0) + READ_MARGIN_S));
+/** The longest a world may stay: the world-turns limit, or longer when its own text needs more time to read. The text counts for at most the readable-hold ceiling (one line holds about 5 s): padding words buy no more. Pure. */
+export const worldLimit = (span, max = TURN_SECONDS_MAX) => Math.max(max, Math.min(span.readNeed ?? 0, HOLD_RULE.ceiling) + READ_MARGIN_S);
 
 /** Every world id in page order. Pure. */
 export const worldIds = (samples) => [...new Set(samples.flatMap((s) => s.worlds.map((w) => w.id)))];

@@ -163,8 +163,8 @@ test('textLingers: words of one element that arrive one after another are one li
   assert.match(textLingers(slow, CTX)[0].what, /stays on screen 9\.\d s; it needs 6\.0 s to read, so it may stay 7\.5 s/);
 });
 
-test('text-lingers, readable-hold and the world limit agree for lines of 1, 4, 10 and 20 words', () => {
-  for (const n of [1, 4, 10, 20]) {
+test('text-lingers, readable-hold and the world limit agree for lines of 1, 4 and 8 words (past 8 the rule says cut the line)', () => {
+  for (const n of [1, 4, 8]) {
     const text = Array.from({ length: n }, (_, i) => `w${i}`).join(' ');
     const need = lineNeed(n);
     const cap = worldLimit({ readNeed: readNeed([text]) });
@@ -189,7 +189,7 @@ test('barLint: the findings sit in time order, and a window draft has no text fi
 
 test('a bar finding is waived by its code, and fires its rule id into rules_fired and the printed line', () => {
   const found = barLint({ records: arrivals(Array(6).fill(EASE.land)), boxes: null, text: null });
-  assert.deepEqual(unwaived(found, { allow: ['overshoot-share'], _why: { 'overshoot-share': 'the film is a typewriter' } }), []);
+  assert.deepEqual(unwaived(found, { allow: ['overshoot-share'], _why: { 'overshoot-share': 'the film is a typewriter: 6 arrivals in 2 s of world s1, all on EASE.land' }, _worlds: ['s1'] }), []);
   assert.equal(unwaived(found, {}).length, 1);
   const fired = firedRules(found, []);
   assert.deepEqual(fired.map((f) => f.id), ['overshoot-share']);

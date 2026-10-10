@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { waiverHint } from '../../harness/lib/waivers.mjs';
-import { worldIds, worldSpans, stillTime, heldWorlds, mergeSameContent, worldLimit, READ_WORLD_MAX_S, TURN_SECONDS_MAX } from '../../harness/lib/worlds.mjs';
+import { HOLD_RULE } from '../../harness/lib/read-hold.mjs';
+import { worldIds, worldSpans, stillTime, heldWorlds, mergeSameContent, worldLimit, readNeed, READ_MARGIN_S, TURN_SECONDS_MAX } from '../../harness/lib/worlds.mjs';
 
 const at = (t, ...shown) => ({ t, worlds: [['a', '#111111'], ['b', '#eeeeee'], ['c', null]].map(([id, ground]) => ({ id, visible: shown.includes(id), ground })) });
 const samples = [at(0.5, 'a'), at(1.5, 'a'), at(2.5, 'a', 'b'), at(3.5, 'b'), at(4.5, 'b')];
@@ -124,11 +125,13 @@ test('worlds whose words or ground differ are separate turns, and a span with no
   assert.deepEqual(heldWorlds([span('s1', 0, 2), span('s2', 2, 4)]), []);
 });
 
-test('padding words cannot buy a world more than the read cap', () => {
-  assert.equal(worldLimit({ readNeed: 20 }), READ_WORLD_MAX_S);
-  assert.equal(worldLimit({ readNeed: 1 }), TURN_SECONDS_MAX);
-  assert.equal(heldWorlds([content('s1', 0, 6, '["#111",["many words"]]', 20)]).length, 1);
-  assert.equal(heldWorlds([content('s1', 0, 3.5, '["#111",["real line"]]', 2.6)]).length, 0);
+test('padding words cannot buy a world more time than the readable-hold ceiling', () => {
+  const words = (n) => Array.from({ length: n }, (_, i) => `w${i}`).join(' ');
+  assert.ok(readNeed([words(40)]) > 20);
+  assert.equal(worldLimit({ readNeed: readNeed([words(40)]) }), HOLD_RULE.ceiling + READ_MARGIN_S);
+  assert.equal(worldLimit({ readNeed: readNeed([words(4)]) }), readNeed([words(4)]) + READ_MARGIN_S);
+  assert.equal(heldWorlds([content('s1', 0, 8, '["#111",["many words"]]', readNeed([words(40)]))]).length, 1);
+  assert.equal(heldWorlds([content('s1', 0, 5.6, '["#111",["real line"]]', readNeed([words(8)]))]).length, 0);
 });
 
 test('worldSpans signs a world by its ground and its lower-cased words in any order', () => {

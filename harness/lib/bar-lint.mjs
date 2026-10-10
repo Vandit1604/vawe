@@ -289,6 +289,12 @@ function recordArrivals(records) {
     .filter((a) => a.over !== null);
 }
 
+/** The timed arrivals of a page, [{ at, over }]: the animation records when they have any, else the sampled boxes'. No minimum count. */
+export const timedArrivals = (records, boxArrivals = []) => {
+  const fromRecords = recordArrivals(records);
+  return fromRecords.length ? fromRecords : boxArrivals;
+};
+
 const countedArrivals = (records, boxArrivals) => {
   const fromRecords = recordArrivals(records);
   const arrivals = fromRecords.length >= SHOOT.arrivals_min ? fromRecords : boxArrivals;
